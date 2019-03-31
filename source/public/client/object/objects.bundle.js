@@ -272,7 +272,6 @@ var MovementResolver = function () {
         if (commit) {
           this.movementService.replaceTurnMovement(this.ship, newMovement);
           this.movementService.shipMovementChanged(this.ship);
-          console.log("BILL", bill);
         }
         return {
           result: true,
@@ -554,6 +553,17 @@ var MovementService = function () {
       return ship.movement[ship.movement.length - 1];
     }
   }, {
+    key: "isMoved",
+    value: function isMoved(ship, turn) {
+      var end = this.getLastEndMove(ship);
+
+      if (!end || !end.isEnd()) {
+        return false;
+      }
+
+      return end.turn === turn;
+    }
+  }, {
     key: "getLastEndMove",
     value: function getLastEndMove(ship) {
       var end = ship.movement.slice().reverse().find(function (move) {
@@ -581,6 +591,10 @@ var MovementService = function () {
 
       if (!end) {
         end = this.getDeployMove(ship);
+      }
+
+      if (!end) {
+        end = ship.movement[0];
       }
 
       return end;
@@ -1724,6 +1738,180 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _MovementService = require("../movement/MovementService");
+
+var _MovementService2 = _interopRequireDefault(_MovementService);
+
+var _PhaseState = require("./PhaseState");
+
+var _PhaseState2 = _interopRequireDefault(_PhaseState);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var PhaseDirector = function () {
+  function PhaseDirector() {
+    _classCallCheck(this, PhaseDirector);
+
+    this.shipIconContainer = null;
+    this.ewIconContainer = null;
+    this.ballisticIconContainer = null;
+    this.timeline = [];
+
+    this.animationStrategy = null;
+    this.phaseStrategy = null;
+    this.coordinateConverter = null;
+    this.shipWindowManager = null;
+    this.movementService = new _MovementService2.default();
+    this.phaseState = new _PhaseState2.default();
+  }
+
+  _createClass(PhaseDirector, [{
+    key: "init",
+    value: function init(coordinateConverter, scene) {
+      this.coordinateConverter = coordinateConverter;
+      this.shipIconContainer = new ShipIconContainer(this.coordinateConverter, scene, this.movementService);
+      this.ewIconContainer = new EWIconContainer(this.coordinateConverter, scene, this.shipIconContainer);
+      this.ballisticIconContainer = new BallisticIconContainer(this.coordinateConverter, scene);
+      this.shipWindowManager = new ShipWindowManager(new window.UIManager($("body")[0]), this.movementService);
+    }
+  }, {
+    key: "receiveGamedata",
+    value: function receiveGamedata(gamedata, webglScene) {
+      this.resolvePhaseStrategy(gamedata, webglScene);
+    }
+  }, {
+    key: "relayEvent",
+    value: function relayEvent(name, payload) {
+      if (!this.phaseStrategy || this.phaseStrategy.inactive) {
+        return;
+      }
+
+      this.phaseStrategy.onEvent(name, payload);
+      this.shipIconContainer.onEvent(name, payload);
+      this.ewIconContainer.onEvent(name, payload);
+    }
+  }, {
+    key: "render",
+    value: function render(scene, coordinateConverter, zoom) {
+      if (!this.phaseStrategy || this.phaseStrategy.inactive) {
+        return;
+      }
+
+      this.phaseStrategy.render(coordinateConverter, scene, zoom);
+    }
+  }, {
+    key: "resolvePhaseStrategy",
+    value: function resolvePhaseStrategy(gamedata, scene) {
+      if (!gamedata.isPlayerInGame() || gamedata.replay || gamedata.status === "SURRENDERED" || gamedata.status === "FINISHED") {
+        return this.activatePhaseStrategy(window.ReplayPhaseStrategy, gamedata, scene);
+      }
+
+      if (gamedata.waiting) {
+        return this.activatePhaseStrategy(window.WaitingPhaseStrategy, gamedata, scene);
+      }
+
+      switch (gamedata.gamephase) {
+        case -1:
+          return this.activatePhaseStrategy(window.DeploymentPhaseStrategy, gamedata, scene);
+        case 1:
+          return this.activatePhaseStrategy(window.InitialPhaseStrategy, gamedata, scene);
+        case 2:
+          return this.activatePhaseStrategy(window.MovementPhaseStrategy, gamedata, scene);
+        case 3:
+          return this.activatePhaseStrategy(window.FirePhaseStrategy, gamedata, scene);
+        default:
+          return this.activatePhaseStrategy(window.WaitingPhaseStrategy, gamedata, scene);
+      }
+    }
+  }, {
+    key: "activatePhaseStrategy",
+    value: function activatePhaseStrategy(phaseStrategy, gamedata, scene) {
+      if (this.phaseStrategy && this.phaseStrategy instanceof phaseStrategy) {
+        this.phaseStrategy.update(gamedata);
+        return;
+      }
+
+      if (this.phaseStrategy) {
+        this.phaseStrategy.deactivate();
+      }
+
+      this.phaseStrategy = new phaseStrategy(this.coordinateConverter, this.phaseState).activate(this.shipIconContainer, this.ewIconContainer, this.ballisticIconContainer, gamedata, scene, this.shipWindowManager, this.movementService);
+    }
+  }]);
+
+  return PhaseDirector;
+}();
+
+exports.default = PhaseDirector;
+
+},{"../movement/MovementService":14,"./PhaseState":22}],22:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var PhaseState = function () {
+  function PhaseState() {
+    _classCallCheck(this, PhaseState);
+
+    this.state = {};
+  }
+
+  _createClass(PhaseState, [{
+    key: "set",
+    value: function set(key, payload) {
+      this.state[key] = payload;
+    }
+  }, {
+    key: "get",
+    value: function get(key) {
+      return this.state[key];
+    }
+  }]);
+
+  return PhaseState;
+}();
+
+exports.default = PhaseState;
+
+},{}],23:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.PhaseState = exports.PhaseDirector = undefined;
+
+var _PhaseDirector = require("./PhaseDirector");
+
+var _PhaseDirector2 = _interopRequireDefault(_PhaseDirector);
+
+var _PhaseState = require("./PhaseState");
+
+var _PhaseState2 = _interopRequireDefault(_PhaseState);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+window.PhaseDirector = _PhaseDirector2.default;
+exports.PhaseDirector = _PhaseDirector2.default;
+exports.PhaseState = _PhaseState2.default;
+
+},{"./PhaseDirector":21,"./PhaseState":22}],24:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _SystemFactory = require("./SystemFactory");
 
 var _SystemFactory2 = _interopRequireDefault(_SystemFactory);
@@ -1859,7 +2047,7 @@ var Ship = function () {
 window.Ship = Ship;
 exports.default = Ship;
 
-},{"../handler/movement":20,"./SystemFactory":22}],22:[function(require,module,exports){
+},{"../handler/movement":20,"./SystemFactory":25}],25:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1947,7 +2135,7 @@ window.SystemFactory = SystemFactory;
 
 exports.default = new SystemFactory();
 
-},{"./":29}],23:[function(require,module,exports){
+},{"./":41}],26:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1963,6 +2151,8 @@ var Animation = function () {
     _classCallCheck(this, Animation);
 
     this.active = false;
+    this.started = false;
+    this.done = false;
   }
 
   _createClass(Animation, [{
@@ -1974,6 +2164,40 @@ var Animation = function () {
     key: "stop",
     value: function stop() {
       this.active = false;
+    }
+  }, {
+    key: "setIsDone",
+    value: function setIsDone(done) {
+      this.done = done;
+      return this;
+    }
+  }, {
+    key: "setStartCallback",
+    value: function setStartCallback(callback) {
+      this.startCallback = callback;
+      return this;
+    }
+  }, {
+    key: "setDoneCallback",
+    value: function setDoneCallback(callback) {
+      this.doneCallback = callback;
+      return this;
+    }
+  }, {
+    key: "callStartCallback",
+    value: function callStartCallback(total) {
+      if (!this.started && total > this.time) {
+        this.startCallback && this.startCallback();
+        this.started = true;
+      }
+    }
+  }, {
+    key: "callDoneCallback",
+    value: function callDoneCallback(total) {
+      if (total > this.time + this.duration && !this.done) {
+        this.doneCallback && this.doneCallback();
+        this.done = true;
+      }
     }
   }, {
     key: "reset",
@@ -1996,7 +2220,7 @@ window.Animation = Animation;
 
 exports.default = Animation;
 
-},{}],24:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2019,36 +2243,123 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var ShipMovementAnimationNew = function (_Animation) {
-  _inherits(ShipMovementAnimationNew, _Animation);
+var ShipIdleMovementAnimation = function (_Animation) {
+  _inherits(ShipIdleMovementAnimation, _Animation);
 
-  function ShipMovementAnimationNew(shipIcon, movementService, coordinateConverter) {
+  function ShipIdleMovementAnimation(shipIcon, movementService, coordinateConverter) {
+    _classCallCheck(this, ShipIdleMovementAnimation);
+
+    var _this = _possibleConstructorReturn(this, (ShipIdleMovementAnimation.__proto__ || Object.getPrototypeOf(ShipIdleMovementAnimation)).call(this));
+
+    _this.shipIcon = shipIcon;
+    _this.ship = shipIcon.ship;
+    _this.movementService = movementService;
+    _this.coordinateConverter = coordinateConverter;
+
+    _this.duration = 0;
+
+    _this.position = _this.getPosition();
+    _this.facing = _this.getFacing();
+    return _this;
+  }
+
+  _createClass(ShipIdleMovementAnimation, [{
+    key: "update",
+    value: function update(gameData) {
+      this.position = this.getPosition();
+      this.facing = this.getFacing();
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      _get(ShipIdleMovementAnimation.prototype.__proto__ || Object.getPrototypeOf(ShipIdleMovementAnimation.prototype), "stop", this).call(this);
+    }
+  }, {
+    key: "cleanUp",
+    value: function cleanUp() {}
+  }, {
+    key: "render",
+    value: function render(now, total, last, delta, zoom, back, paused) {
+      this.shipIcon.setPosition(this.position);
+      this.shipIcon.setFacing(-this.facing);
+    }
+  }, {
+    key: "getPosition",
+    value: function getPosition() {
+      var end = this.movementService.getLastEndMove(this.ship);
+      return this.coordinateConverter.fromHexToGame(end.position);
+    }
+  }, {
+    key: "getFacing",
+    value: function getFacing() {
+      return mathlib.hexFacingToAngle(this.movementService.getLastEndMove(this.ship).facing);
+    }
+  }]);
+
+  return ShipIdleMovementAnimation;
+}(_Animation3.default);
+
+window.ShipIdleMovementAnimation = ShipIdleMovementAnimation;
+
+exports.default = ShipIdleMovementAnimation;
+
+},{"./Animation":26}],28:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _Animation2 = require("./Animation");
+
+var _Animation3 = _interopRequireDefault(_Animation2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ShipMovementAnimation = function (_Animation) {
+  _inherits(ShipMovementAnimation, _Animation);
+
+  function ShipMovementAnimation(shipIcon, movementService, coordinateConverter) {
     var time = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
     var continious = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
 
-    _classCallCheck(this, ShipMovementAnimationNew);
+    _classCallCheck(this, ShipMovementAnimation);
 
-    var _this = _possibleConstructorReturn(this, (ShipMovementAnimationNew.__proto__ || Object.getPrototypeOf(ShipMovementAnimationNew)).call(this));
+    var _this = _possibleConstructorReturn(this, (ShipMovementAnimation.__proto__ || Object.getPrototypeOf(ShipMovementAnimation)).call(this));
 
     _this.shipIcon = shipIcon;
     _this.ship = shipIcon.ship;
     _this.movementService = movementService;
     _this.coordinateConverter = coordinateConverter;
     _this.continious = continious;
-
-    _this.duration = 5000;
     _this.time = time;
 
+    _this.doneCallback = null;
+
+    if (!_this.movementService) {
+      throw new Error("movement service undefined");
+    }
+
+    _this.duration = 5000;
+    _this.time = _this.time;
+
     _this.positionCurve = _this.buildPositionCurve();
+    _this.rotations = _this.buildRotations();
+
+    _this.easeInOut = new THREE.CubicBezierCurve(new THREE.Vector2(0, 0), new THREE.Vector2(0.75, 0), new THREE.Vector2(0.25, 1), new THREE.Vector2(1, 1));
 
     /*
     this.turnCurve = new THREE.CubicBezierCurve(
-      new THREE.Vector2(0, 0),
-      new THREE.Vector2(0.75, 0),
-      new THREE.Vector2(0, 0.75),
-      new THREE.Vector2(1, 1)
-    );
-      this.turnCurve = new THREE.CubicBezierCurve(
       new THREE.Vector2(0, 0),
       new THREE.Vector2(0.25, 0.25),
       new THREE.Vector2(0.75, 0.75),
@@ -2068,13 +2379,13 @@ var ShipMovementAnimationNew = function (_Animation) {
     return _this;
   }
 
-  _createClass(ShipMovementAnimationNew, [{
+  _createClass(ShipMovementAnimation, [{
     key: "update",
     value: function update(gameData) {}
   }, {
     key: "stop",
     value: function stop() {
-      _get(ShipMovementAnimationNew.prototype.__proto__ || Object.getPrototypeOf(ShipMovementAnimationNew.prototype), "stop", this).call(this);
+      _get(ShipMovementAnimation.prototype.__proto__ || Object.getPrototypeOf(ShipMovementAnimation.prototype), "stop", this).call(this);
     }
   }, {
     key: "cleanUp",
@@ -2082,12 +2393,16 @@ var ShipMovementAnimationNew = function (_Animation) {
   }, {
     key: "render",
     value: function render(now, total, last, delta, zoom, back, paused) {
-      var _getPositionAndFacing = this.getPositionAndFacingAtTime(total),
-          position = _getPositionAndFacing.position,
-          facing = _getPositionAndFacing.facing;
+      this.callStartCallback(total);
+
+      var _ref = !this.done ? this.getPositionAndFacingAtTime(total) : this.getPositionAndFacingAtTime(this.time + this.duration),
+          position = _ref.position,
+          facing = _ref.facing;
 
       this.shipIcon.setPosition(position);
-      //this.shipIcon.setFacing(-positionAndFacing.facing);
+      this.shipIcon.setFacing(-facing);
+
+      this.callDoneCallback(total);
 
       /*
       if (
@@ -2112,17 +2427,152 @@ var ShipMovementAnimationNew = function (_Animation) {
 
       return {
         position: this.positionCurve.getPoint(totalDone),
-        facing: 0
+        facing: this.getFacing(time)
       };
+    }
+  }, {
+    key: "getFacing",
+    value: function getFacing(time) {
+      var _this2 = this;
+
+      if (time < this.time) {
+        return this.rotations[0].start;
+      }
+
+      if (time > this.time + this.duration) {
+        return this.rotations[this.rotations.length - 1].end;
+      }
+
+      var rotation = this.rotations.find(function (rotation) {
+        return time >= rotation.startTime + _this2.time && time < rotation.endTime + _this2.time;
+      });
+
+      if (!rotation) {
+        rotation = this.rotations[this.rotations.length - 1];
+      }
+
+      var totalDone = rotation.duration === 0 ? 1 : (time - (rotation.startTime + this.time)) / rotation.duration;
+
+      if (totalDone > 1) {
+        totalDone = 1;
+      }
+
+      return mathlib.addToDirection(rotation.start, rotation.amount * this.easeInOut.getPoint(totalDone).y);
+    }
+  }, {
+    key: "buildRotations",
+    value: function buildRotations() {
+      var pivots = this.buildPivotList();
+
+      var startTime = 0;
+
+      pivots.forEach(function (pivot) {
+        pivot.startTime = startTime;
+        startTime = pivot.endTime;
+      });
+
+      pivots[pivots.length - 1].endTime = this.duration;
+
+      if (pivots.length === 0) {
+        var facing = mathlib.hexFacingToAngle(this.movementService.getLastTurnEndMove(this.ship).facing);
+
+        pivots = [{
+          amount: 0,
+          start: facing,
+          end: facing,
+          startTime: 0,
+          endTime: this.duration
+        }];
+      }
+
+      pivots.forEach(function (pivot) {
+        pivot.duration = pivot.endTime - pivot.startTime;
+      });
+
+      console.log(pivots);
+
+      return pivots;
+    }
+  }, {
+    key: "buildPivotList",
+    value: function buildPivotList() {
+      var startTime = 0;
+      var facings = [];
+      var lastTurnEndMove = this.movementService.getLastTurnEndMove(this.ship);
+      var lastFacing = lastTurnEndMove.facing;
+
+      var pivots = [];
+
+      var pivotStarted = false;
+
+      var totalMovementLength = this.movementService.getThisTurnMovement(this.ship).filter(function (move) {
+        return move.isPivot() || move.isSpeed();
+      }).length;
+
+      var moveStep = this.duration / totalMovementLength;
+      var pivotStep = moveStep > 1000 ? 1000 : moveStep;
+
+      var moves = this.movementService.getThisTurnMovement(this.ship).filter(function (move) {
+        return move.isPivot() || move.isSpeed();
+      }).map(function (move) {
+        if (move.isPivot()) {
+          return move.facing;
+        } else if (move.isSpeed()) {
+          return null;
+        }
+      });
+
+      moves.push(null);
+
+      moves.forEach(function (pivot) {
+        if (pivot === null && pivotStarted) {
+          var direction = facings[0] - lastFacing;
+          if (direction === -5) {
+            direction = 1;
+          } else if (direction === 5) {
+            direction = -1;
+          }
+
+          var start = mathlib.hexFacingToAngle(lastFacing);
+          var end = mathlib.hexFacingToAngle(facings[facings.length - 1]);
+          pivots.push({
+            start: start,
+            end: end,
+            amount: mathlib.getDistanceBetweenDirections(start, end, direction) * direction,
+            endTime: startTime * pivotStep
+          });
+
+          lastFacing = facings[facings.length - 1];
+          facings = [];
+          pivotStarted = false;
+        } else if (pivot && !pivotStarted) {
+          pivotStarted = true;
+          facings.push(pivot);
+        } else if (pivot) {
+          facings.push(pivot);
+        }
+
+        startTime++;
+      });
+
+      /*
+      if (pivotStarted) {
+        pivots.push({
+          facings: facings,
+          startTime: startTime
+        });
+      }
+      */
+
+      return pivots;
     }
   }, {
     key: "buildPositionCurve",
     value: function buildPositionCurve() {
-      var start = this.movementService.getLastTurnEndMove(this.ship);
       var end = this.movementService.getLastEndMove(this.ship);
+      var start = this.movementService.getLastTurnEndMove(this.ship) || end;
 
       if (!end || end === start) {
-        console.log("Should not have end!");
         var position = this.coordinateConverter.fromHexToGame(start.position);
         return new THREE.CubicBezierCurve3(new THREE.Vector3(position.x, position.y, position.z), new THREE.Vector3(position.x, position.y, position.z), new THREE.Vector3(position.x, position.y, position.z), new THREE.Vector3(position.x, position.y, position.z));
       }
@@ -2135,41 +2585,978 @@ var ShipMovementAnimationNew = function (_Animation) {
 
       var point2 = this.coordinateConverter.fromHexToGame(end.position);
 
-      console.log(point1, control1, control2, point2);
-
       return new THREE.CubicBezierCurve3(new THREE.Vector3(point1.x, point1.y, point1.z), new THREE.Vector3(control1.x, control1.y, control1.z), new THREE.Vector3(control2.x, control2.y, control2.z), new THREE.Vector3(point2.x, point2.y, point2.z));
     }
   }]);
 
-  return ShipMovementAnimationNew;
+  return ShipMovementAnimation;
 }(_Animation3.default);
 
-window.ShipMovementAnimationNew = ShipMovementAnimationNew;
+window.ShipMovementAnimation = ShipMovementAnimation;
 
-exports.default = ShipMovementAnimationNew;
+exports.default = ShipMovementAnimation;
 
-},{"./Animation":23}],25:[function(require,module,exports){
+},{"./Animation":26}],29:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Animation = exports.ShipMovementAnimationNew = undefined;
 
-var _ShipMovementAnimationNew = require("./ShipMovementAnimationNew");
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _ShipMovementAnimationNew2 = _interopRequireDefault(_ShipMovementAnimationNew);
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var AnimationStrategy = function () {
+  function AnimationStrategy(shipIcons, turn) {
+    _classCallCheck(this, AnimationStrategy);
+
+    this.shipIconContainer = null;
+    this.turn = 0;
+    this.lastAnimationTime = 0;
+    this.totalAnimationTime = 0;
+    this.currentDeltaTime = 0;
+    this.animations = [];
+    this.paused = true;
+    this.shipIconContainer = shipIcons;
+    this.turn = turn;
+    this.goingBack = false;
+  }
+
+  _createClass(AnimationStrategy, [{
+    key: "activate",
+    value: function activate() {
+      this.play();
+
+      return this;
+    }
+  }, {
+    key: "update",
+    value: function update(gameData) {
+      this.animations.forEach(function (animation) {
+        animation.update(gameData);
+      });
+
+      return this;
+    }
+  }, {
+    key: "stop",
+    value: function stop(gameData) {
+      this.lastAnimationTime = 0;
+      this.totalAnimationTime = 0;
+      this.currentDeltaTime = 0;
+      this.pause();
+    }
+  }, {
+    key: "back",
+    value: function back() {
+      this.goingBack = true;
+      this.paused = false;
+    }
+  }, {
+    key: "play",
+    value: function play() {
+      this.paused = false;
+      this.goingBack = false;
+    }
+  }, {
+    key: "pause",
+    value: function pause() {
+      this.paused = true;
+      this.goingBack = false;
+    }
+  }, {
+    key: "isPaused",
+    value: function isPaused() {
+      return this.paused;
+    }
+  }, {
+    key: "deactivate",
+    value: function deactivate() {
+      return this;
+    }
+  }, {
+    key: "goToTime",
+    value: function goToTime(time) {
+      this.totalAnimationTime = time;
+      return this;
+    }
+  }, {
+    key: "render",
+    value: function render(coordinateConverter, scene, zoom) {
+      this.updateDeltaTime.call(this, this.paused);
+      this.updateTotalAnimationTime.call(this, this.paused);
+      this.animations.forEach(function (animation) {
+        animation.render(new Date().getTime(), this.totalAnimationTime, this.lastAnimationTime, this.currentDeltaTime, zoom, this.goingBack, this.paused);
+      }, this);
+    }
+  }, {
+    key: "positionAndFaceAllIcons",
+    value: function positionAndFaceAllIcons() {
+      this.shipIconContainer.positionAndFaceAllIcons();
+    }
+  }, {
+    key: "positionAndFaceIcon",
+    value: function positionAndFaceIcon(icon) {
+      icon.positionAndFaceIcon();
+    }
+
+    /*
+      AnimationStrategy.prototype.initializeAnimations = function() {
+          this.animations.forEach(function (animation) {
+              animation.initialize();
+          })
+      };
+      */
+
+  }, {
+    key: "removeAllAnimations",
+    value: function removeAllAnimations() {
+      this.animations.forEach(function (animation) {
+        return animation.deactivate();
+      });
+      this.animations = [];
+    }
+  }, {
+    key: "removeAnimation",
+    value: function removeAnimation(toRemove) {
+      this.animations = this.animations.filter(function (animation) {
+        return animation !== animation;
+      });
+
+      toRemove.deactivate();
+    }
+  }, {
+    key: "shipMovementChanged",
+    value: function shipMovementChanged() {}
+  }, {
+    key: "updateTotalAnimationTime",
+    value: function updateTotalAnimationTime(paused) {
+      if (paused) {
+        return;
+      }
+
+      if (this.goingBack) {
+        this.totalAnimationTime -= this.currentDeltaTime;
+      } else {
+        this.totalAnimationTime += this.currentDeltaTime;
+      }
+    }
+  }, {
+    key: "updateDeltaTime",
+    value: function updateDeltaTime(paused) {
+      var now = new Date().getTime();
+
+      if (!this.lastAnimationTime) {
+        this.lastAnimationTime = now;
+        this.currentDeltaTime = 0;
+      }
+
+      if (!paused) {
+        this.currentDeltaTime = now - this.lastAnimationTime;
+      }
+
+      this.lastAnimationTime = now;
+    }
+  }]);
+
+  return AnimationStrategy;
+}();
+
+window.AnimationStrategy = AnimationStrategy;
+
+exports.default = AnimationStrategy;
+
+},{}],30:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _AnimationStrategy2 = require("./AnimationStrategy");
+
+var _AnimationStrategy3 = _interopRequireDefault(_AnimationStrategy2);
+
+var _ = require("..");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var IdleAnimationStrategy = function (_AnimationStrategy) {
+  _inherits(IdleAnimationStrategy, _AnimationStrategy);
+
+  function IdleAnimationStrategy(shipIcons, turn, movementService, coordinateConverter) {
+    _classCallCheck(this, IdleAnimationStrategy);
+
+    var _this = _possibleConstructorReturn(this, (IdleAnimationStrategy.__proto__ || Object.getPrototypeOf(IdleAnimationStrategy)).call(this, shipIcons, turn));
+
+    _this.movementService = movementService;
+    _this.coordinateConverter = coordinateConverter;
+    return _this;
+  }
+
+  _createClass(IdleAnimationStrategy, [{
+    key: "update",
+    value: function update(gamedata) {
+      _get(IdleAnimationStrategy.prototype.__proto__ || Object.getPrototypeOf(IdleAnimationStrategy.prototype), "update", this).call(this, gamedata);
+
+      this.shipIconContainer.getArray().forEach(function (icon) {
+        var ship = icon.ship;
+
+        var turnDestroyed = shipManager.getTurnDestroyed(ship);
+        var destroyed = shipManager.isDestroyed(ship);
+
+        if (turnDestroyed !== null && turnDestroyed < this.turn) {
+          icon.hide();
+        } else if (turnDestroyed === null && destroyed) {
+          icon.hide();
+        } else {
+          icon.show();
+          this.animations.push(new _.ShipIdleMovementAnimation(icon, this.movementService, this.coordinateConverter, this.animations.length * 5000));
+        }
+
+        if (icon instanceof FlightIcon) {
+          icon.hideDestroyedFighters();
+        }
+      }, this);
+      return this;
+    }
+  }, {
+    key: "shipMovementChanged",
+    value: function shipMovementChanged(ship) {
+      var animation = this.animations.find(function (animation) {
+        return animation.ship === ship;
+      });
+
+      animation.update();
+    }
+  }, {
+    key: "deactivate",
+    value: function deactivate() {
+      if (this.shipIconContainer) {
+        this.shipIconContainer.getArray().forEach(function (icon) {
+          icon.show();
+        }, this);
+      }
+
+      return _get(IdleAnimationStrategy.prototype.__proto__ || Object.getPrototypeOf(IdleAnimationStrategy.prototype), "deactivate", this).call(this);
+    }
+  }]);
+
+  return IdleAnimationStrategy;
+}(_AnimationStrategy3.default);
+
+window.IdleAnimationStrategy = IdleAnimationStrategy;
+exports.default = IdleAnimationStrategy;
+
+},{"..":33,"./AnimationStrategy":29}],31:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _AnimationStrategy2 = require("./AnimationStrategy");
+
+var _AnimationStrategy3 = _interopRequireDefault(_AnimationStrategy2);
+
+var _ = require("..");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var MOVEMENT_TIME = 5000;
+
+var isReplayed = function isReplayed(phaseState, turn, ship) {
+  var state = phaseState.get("MovementShownTurn" + turn);
+  if (!state) {
+    return false;
+  }
+
+  return state[ship.id];
+};
+
+var setReplayed = function setReplayed(phaseState, turn, ship) {
+  return function () {
+    var state = phaseState.get("MovementShownTurn" + turn) || {};
+
+    state[ship.id] = true;
+    phaseState.set("MovementShownTurn" + turn, state);
+    console.log("set replayed");
+  };
+};
+
+var MovementAnimationStrategy = function (_AnimationStrategy) {
+  _inherits(MovementAnimationStrategy, _AnimationStrategy);
+
+  function MovementAnimationStrategy(shipIcons, turn, movementService, coordinateConverter, phaseState) {
+    _classCallCheck(this, MovementAnimationStrategy);
+
+    var _this = _possibleConstructorReturn(this, (MovementAnimationStrategy.__proto__ || Object.getPrototypeOf(MovementAnimationStrategy)).call(this, shipIcons, turn));
+
+    _this.movementService = movementService;
+    _this.coordinateConverter = coordinateConverter;
+    _this.phaseState = phaseState;
+    return _this;
+  }
+
+  _createClass(MovementAnimationStrategy, [{
+    key: "update",
+    value: function update(gamedata) {
+      _get(MovementAnimationStrategy.prototype.__proto__ || Object.getPrototypeOf(MovementAnimationStrategy.prototype), "update", this).call(this, gamedata);
+      this.buildAnimations();
+    }
+  }, {
+    key: "buildAnimations",
+    value: function buildAnimations() {
+      this.shipIconContainer.getArray().forEach(function (icon) {
+        var ship = icon.ship;
+
+        var turnDestroyed = shipManager.getTurnDestroyed(ship);
+        var destroyed = shipManager.isDestroyed(ship);
+
+        if (turnDestroyed !== null && turnDestroyed < this.turn) {
+          icon.hide();
+        } else if (turnDestroyed === null && destroyed) {
+          icon.hide();
+        } else {
+          icon.show();
+
+          if (this.movementService.isMoved(ship, this.turn)) {
+            this.animations.push(new _.ShipMovementAnimation(icon, this.movementService, this.coordinateConverter).setIsDone(isReplayed(this.phaseState, this.turn, ship)).setStartCallback(setReplayed(this.phaseState, this.turn, ship)));
+          } else {
+            this.animations.push(new ShipIdleMovementAnimation(icon, this.movementService, this.coordinateConverter));
+          }
+        }
+
+        if (icon instanceof FlightIcon) {
+          icon.hideDestroyedFighters();
+        }
+      }, this);
+      this.timeAnimations();
+      return this;
+    }
+  }, {
+    key: "timeAnimations",
+    value: function timeAnimations() {
+      var time = 0;
+      this.animations.forEach(function (animation) {
+        if (!animation.done) {
+          animation.time = time;
+          time += MOVEMENT_TIME;
+        }
+      });
+    }
+  }, {
+    key: "shipMovementChanged",
+    value: function shipMovementChanged(ship) {}
+  }, {
+    key: "deactivate",
+    value: function deactivate() {
+      if (this.shipIconContainer) {
+        this.shipIconContainer.getArray().forEach(function (icon) {
+          icon.show();
+        }, this);
+      }
+
+      return _get(MovementAnimationStrategy.prototype.__proto__ || Object.getPrototypeOf(MovementAnimationStrategy.prototype), "deactivate", this).call(this);
+    }
+  }]);
+
+  return MovementAnimationStrategy;
+}(_AnimationStrategy3.default);
+
+window.MovementAnimationStrategy = MovementAnimationStrategy;
+exports.default = MovementAnimationStrategy;
+
+},{"..":33,"./AnimationStrategy":29}],32:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.MovementAnimationStrategy = exports.IdleAnimationStrategy = exports.AnimationStrategy = undefined;
+
+var _AnimationStrategy = require("./AnimationStrategy");
+
+var _AnimationStrategy2 = _interopRequireDefault(_AnimationStrategy);
+
+var _IdleAnimationStrategy = require("./IdleAnimationStrategy");
+
+var _IdleAnimationStrategy2 = _interopRequireDefault(_IdleAnimationStrategy);
+
+var _MovementAnimationStrategy = require("./MovementAnimationStrategy");
+
+var _MovementAnimationStrategy2 = _interopRequireDefault(_MovementAnimationStrategy);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.AnimationStrategy = _AnimationStrategy2.default;
+exports.IdleAnimationStrategy = _IdleAnimationStrategy2.default;
+exports.MovementAnimationStrategy = _MovementAnimationStrategy2.default;
+
+},{"./AnimationStrategy":29,"./IdleAnimationStrategy":30,"./MovementAnimationStrategy":31}],33:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.particle = exports.animationStrategy = exports.Animation = exports.ShipIdleMovementAnimation = exports.ShipMovementAnimation = undefined;
+
+var _ShipMovementAnimation = require("./ShipMovementAnimation");
+
+var _ShipMovementAnimation2 = _interopRequireDefault(_ShipMovementAnimation);
+
+var _ShipIdleMovementAnimation = require("./ShipIdleMovementAnimation");
+
+var _ShipIdleMovementAnimation2 = _interopRequireDefault(_ShipIdleMovementAnimation);
 
 var _Animation = require("./Animation");
 
 var _Animation2 = _interopRequireDefault(_Animation);
 
+var _animationStrategy = require("./animationStrategy");
+
+var animationStrategy = _interopRequireWildcard(_animationStrategy);
+
+var _particle = require("./particle");
+
+var particle = _interopRequireWildcard(_particle);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.ShipMovementAnimationNew = _ShipMovementAnimationNew2.default;
+exports.ShipMovementAnimation = _ShipMovementAnimation2.default;
+exports.ShipIdleMovementAnimation = _ShipIdleMovementAnimation2.default;
 exports.Animation = _Animation2.default;
+exports.animationStrategy = animationStrategy;
+exports.particle = particle;
 
-},{"./Animation":23,"./ShipMovementAnimationNew":24}],26:[function(require,module,exports){
+},{"./Animation":26,"./ShipIdleMovementAnimation":27,"./ShipMovementAnimation":28,"./animationStrategy":32,"./particle":37}],34:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Animation2 = require("../Animation");
+
+var _Animation3 = _interopRequireDefault(_Animation2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ParticleEmitterContainer = function (_Animation) {
+  _inherits(ParticleEmitterContainer, _Animation);
+
+  function ParticleEmitterContainer(scene, defaultParticleAmount, emitterClass, emitterArgs) {
+    _classCallCheck(this, ParticleEmitterContainer);
+
+    var _this = _possibleConstructorReturn(this, (ParticleEmitterContainer.__proto__ || Object.getPrototypeOf(ParticleEmitterContainer)).call(this));
+
+    _this.emitters = [];
+    _this.scene = scene;
+    _this.defaultParticleAmount = defaultParticleAmount;
+    _this.emitterClass = emitterClass || ParticleEmitter;
+    _this.emitterArgs = emitterArgs || {};
+    return _this;
+  }
+
+  _createClass(ParticleEmitterContainer, [{
+    key: "getParticle",
+    value: function getParticle(animation) {
+      var particle;
+      var emitter = null;
+
+      for (var i in this.emitters) {
+        particle = this.emitters[i].emitter.getParticle();
+        if (particle) {
+          emitter = this.emitters[i];
+        }
+      }
+
+      if (!particle) {
+        this.emitters.push({
+          emitter: new this.emitterClass(this.scene, this.defaultParticleAmount, this.emitterArgs),
+          reservations: []
+        });
+        return this.getParticle(animation);
+      }
+
+      var reservation = this.getReservation(emitter.reservations, animation, true);
+      reservation.indexes.push(particle.index);
+      return particle;
+    }
+  }, {
+    key: "cleanUp",
+    value: function cleanUp() {
+      this.emitters.forEach(function (emitter) {
+        emitter.emitter.cleanUp();
+      });
+      this.emitters = [];
+    }
+
+    /*
+      ParticleEmitterContainer.prototype.cleanUpAnimation = function (animation) {
+          this.emitters.forEach(function (emitter) {
+             cleanUpAnimationFromEmitter(animation, emitter);
+          });
+      };
+      */
+
+  }, {
+    key: "setRotation",
+    value: function setRotation(rotation) {
+      this.emitters.forEach(function (emitter) {
+        emitter.emitter.mesh.rotation.y = rotation * Math.PI / 180;
+      });
+    }
+  }, {
+    key: "setPosition",
+    value: function setPosition(pos) {
+      this.emitters.forEach(function (emitter) {
+        emitter.emitter.mesh.position.x = pos.x;
+        emitter.emitter.mesh.position.y = pos.y;
+        emitter.emitter.mesh.position.z = pos.z;
+      });
+    }
+  }, {
+    key: "lookAt",
+    value: function lookAt(thing) {
+      this.emitters.forEach(function (emitter) {
+        emitter.emitter.mesh.quaternion.copy(thing.quaternion);
+      });
+    }
+  }, {
+    key: "render",
+    value: function render(now, total, last, delta, zoom) {
+      this.emitters.forEach(function (emitter) {
+        emitter.emitter.render(now, total, last, delta, zoom);
+      });
+    }
+
+    /*
+      function cleanUpAnimationFromEmitter(animation, emitter) {
+          var reservation = getReservation(emitter.reservations);
+           emitter.reservations = emitter.reservations.filter(function (res) {
+              return res !== reservation;
+          });
+           emitter.emitter.freeParticles(reservation.indexes);
+      }
+      */
+
+  }, {
+    key: "getReservation",
+    value: function getReservation(reservations, animation, create) {
+      var reservation = reservations.find(function (reservation) {
+        return reservation.animation === animation;
+      });
+
+      if (!reservation && create) {
+        reservation = { animation: animation, indexes: [] };
+        reservations.push(reservation);
+      }
+
+      return reservation;
+    }
+  }]);
+
+  return ParticleEmitterContainer;
+}(_Animation3.default);
+
+exports.default = ParticleEmitterContainer;
+
+},{"../Animation":26}],35:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var changeAttribute = function changeAttribute(geometry, index, key, values) {
+  values = [].concat(values);
+
+  var target = geometry.attributes[key].array;
+
+  values.forEach(function (value, i) {
+    target[index * values.length + i] = value;
+  });
+
+  geometry.attributes[key].needsUpdate = true;
+};
+
+var StarParticle = function () {
+  function StarParticle(material, geometry) {
+    _classCallCheck(this, StarParticle);
+
+    this.material = material;
+    this.geometry = geometry;
+    this.index = 0;
+
+    this.texture = {
+      gas: 0,
+      bolt: 1,
+      glow: 2,
+      ring: 3,
+      starLine: 4
+    };
+  }
+
+  _createClass(StarParticle, [{
+    key: "create",
+    value: function create(index) {
+      this.index = index;
+      return this;
+    }
+  }, {
+    key: "setInitialValues",
+    value: function setInitialValues() {
+      this.setPosition({ x: 0, y: 0 });
+      this.setColor(new THREE.Color(0, 0, 0));
+      this.setOpacity(0.0);
+      this.setSize(0.0);
+      this.setSizeChange(0.0);
+      this.setAngle(0.0);
+      this.setAngleChange(0.0);
+      this.setActivationTime(0.0);
+      this.setTexture(this.texture.glow);
+      this.setParallaxFactor(0.0);
+      this.setSineFrequency(0.0);
+      this.setSineAmplitude(1);
+
+      return this;
+    }
+  }, {
+    key: "setTexture",
+    value: function setTexture(tex) {
+      changeAttribute(this.geometry, this.index, "textureNumber", tex);
+
+      return this;
+    }
+  }, {
+    key: "setParallaxFactor",
+    value: function setParallaxFactor(parallaxFactor) {
+      changeAttribute(this.geometry, this.index, "parallaxFactor", -1.0 + parallaxFactor);
+      return this;
+    }
+  }, {
+    key: "setSineFrequency",
+    value: function setSineFrequency(sineFrequency) {
+      changeAttribute(this.geometry, this.index, "sineFrequency", sineFrequency);
+      return this;
+    }
+  }, {
+    key: "setSineAmplitude",
+    value: function setSineAmplitude(sineAmplitude) {
+      changeAttribute(this.geometry, this.index, "sineAmplitude", sineAmplitude);
+      return this;
+    }
+  }, {
+    key: "setSize",
+    value: function setSize(size) {
+      changeAttribute(this.geometry, this.index, "size", size);
+      return this;
+    }
+  }, {
+    key: "setSizeChange",
+    value: function setSizeChange(size) {
+      changeAttribute(this.geometry, this.index, "sizeChange", size);
+      return this;
+    }
+  }, {
+    key: "setColor",
+    value: function setColor(color) {
+      changeAttribute(this.geometry, this.index, "color", [color.r, color.g, color.b]);
+      return this;
+    }
+  }, {
+    key: "setOpacity",
+    value: function setOpacity(opacity) {
+      changeAttribute(this.geometry, this.index, "opacity", opacity);
+      return this;
+    }
+  }, {
+    key: "setPosition",
+    value: function setPosition(pos) {
+      changeAttribute(this.geometry, this.index, "position", [pos.x, pos.y, pos.z || 0], true);
+      return this;
+    }
+  }, {
+    key: "setAngle",
+    value: function setAngle(angle) {
+      changeAttribute(this.geometry, this.index, "angle", mathlib.degreeToRadian(angle));
+      return this;
+    }
+  }, {
+    key: "setAngleChange",
+    value: function setAngleChange(angle) {
+      changeAttribute(this.geometry, this.index, "angleChange", mathlib.degreeToRadian(angle));
+      return this;
+    }
+  }, {
+    key: "deactivate",
+    value: function deactivate() {
+      this.setInitialValues();
+      return this;
+    }
+  }, {
+    key: "setActivationTime",
+    value: function setActivationTime(gameTime) {
+      changeAttribute(this.geometry, this.index, "activationGameTime", gameTime);
+      return this;
+    }
+  }]);
+
+  return StarParticle;
+}();
+
+exports.default = StarParticle;
+
+},{}],36:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Animation2 = require("../Animation");
+
+var _Animation3 = _interopRequireDefault(_Animation2);
+
+var _StarParticle = require("./StarParticle");
+
+var _StarParticle2 = _interopRequireDefault(_StarParticle);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var SHADER_VERTEX = null;
+var SHADER_FRAGMENT = null;
+
+var texture = new THREE.TextureLoader().load("img/effect/effectTextures1024.png");
+
+var getShaders = function getShaders() {
+  if (!SHADER_VERTEX) SHADER_VERTEX = document.getElementById("starVertexShader").innerHTML;
+
+  if (!SHADER_FRAGMENT) SHADER_FRAGMENT = document.getElementById("starFragmentShader").innerHTML;
+
+  return { vertex: SHADER_VERTEX, fragment: SHADER_FRAGMENT };
+};
+
+var StarParticleEmitter = function (_Animation) {
+  _inherits(StarParticleEmitter, _Animation);
+
+  function StarParticleEmitter(scene, particleCount, args) {
+    _classCallCheck(this, StarParticleEmitter);
+
+    var _this = _possibleConstructorReturn(this, (StarParticleEmitter.__proto__ || Object.getPrototypeOf(StarParticleEmitter)).call(this));
+
+    if (!args) {
+      args = {};
+    }
+
+    var blending = args.blending || THREE.AdditiveBlending;
+
+    if (!particleCount) {
+      particleCount = 1000;
+    }
+
+    _this.scene = scene;
+
+    _this.free = [];
+    for (var i = 0; i < particleCount; i++) {
+      _this.free.push(i);
+    }
+
+    _this.effects = 0;
+
+    var uniforms = {
+      gameTime: { type: "f", value: 0.0 },
+      texture: { type: "t", value: texture }
+    };
+
+    _this.particleGeometry = new THREE.BufferGeometry();
+
+    _this.particleGeometry.addAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
+    _this.particleGeometry.addAttribute("size", new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
+    _this.particleGeometry.addAttribute("sizeChange", new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
+    _this.particleGeometry.addAttribute("color", new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
+    _this.particleGeometry.addAttribute("opacity", new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
+    _this.particleGeometry.addAttribute("activationGameTime", new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
+    _this.particleGeometry.addAttribute("textureNumber", new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
+    _this.particleGeometry.addAttribute("angle", new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
+    _this.particleGeometry.addAttribute("angleChange", new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
+    _this.particleGeometry.addAttribute("parallaxFactor", new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
+    _this.particleGeometry.addAttribute("sineFrequency", new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
+    _this.particleGeometry.addAttribute("sineAmplitude", new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
+
+    _this.particleGeometry.dynamic = true;
+
+    _this.particleGeometry.setDrawRange(0, particleCount);
+
+    var shaders = getShaders();
+
+    _this.particleMaterial = new THREE.ShaderMaterial({
+      uniforms: uniforms,
+      vertexShader: shaders.vertex,
+      fragmentShader: shaders.fragment,
+      transparent: true,
+      blending: blending,
+      depthWrite: false //Try removing this if problems with transparency
+    });
+
+    /*
+        THREE.NormalBlending = 0;
+        THREE.AdditiveBlending = 1;
+        THREE.SubtractiveBlending = 2;
+        THREE.MultiplyBlending = 3;
+        THREE.AdditiveAlphaBlending = 4;
+        */
+
+    _this.flyParticle = new _StarParticle2.default(_this.particleMaterial, _this.particleGeometry);
+
+    while (particleCount--) {
+      _this.flyParticle.create(particleCount).setInitialValues();
+    }
+
+    _this.mesh = new THREE.Points(_this.particleGeometry, _this.particleMaterial);
+    _this.mesh.frustumCulled = false;
+    //this.mesh.matrixAutoUpdate = false;
+    _this.mesh.position.set(0, 0, args.z || -10);
+
+    _this.needsUpdate = false;
+
+    _this.scene.add(_this.mesh);
+    return _this;
+  }
+
+  _createClass(StarParticleEmitter, [{
+    key: "start",
+    value: function start() {
+      this.active = true;
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      this.active = false;
+    }
+  }, {
+    key: "reset",
+    value: function reset() {}
+  }, {
+    key: "cleanUp",
+    value: function cleanUp() {
+      this.mesh.material.dispose();
+      this.scene.remove(this.mesh);
+    }
+  }, {
+    key: "update",
+    value: function update(gameData) {}
+  }, {
+    key: "render",
+    value: function render(now, total, last, delta, zoom) {
+      this.particleMaterial.uniforms.gameTime.value = total;
+      this.mesh.material.needsUpdate = true;
+    }
+  }, {
+    key: "done",
+    value: function done() {
+      if (this.onDoneCallback) {
+        this.onDoneCallback();
+      }
+    }
+  }, {
+    key: "getParticle",
+    value: function getParticle() {
+      if (this.free.length === 0) {
+        return false;
+      }
+
+      var i = this.free.pop();
+
+      return this.flyParticle.create(i);
+    }
+  }, {
+    key: "freeParticles",
+    value: function freeParticles(particleIndices) {
+      particleIndices.forEach(function (i) {
+        this.flyParticle.create(i).setInitialValues();
+      }, this);
+      this.free = this.free.concat(particleIndices);
+    }
+  }]);
+
+  return StarParticleEmitter;
+}(_Animation3.default);
+
+exports.default = StarParticleEmitter;
+
+},{"../Animation":26,"./StarParticle":35}],37:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.StarParticle = exports.StarParticleEmitter = exports.ParticleEmitterContainer = undefined;
+
+var _ParticleEmitterContainer = require("./ParticleEmitterContainer");
+
+var _ParticleEmitterContainer2 = _interopRequireDefault(_ParticleEmitterContainer);
+
+var _StarParticleEmitter = require("./StarParticleEmitter");
+
+var _StarParticleEmitter2 = _interopRequireDefault(_StarParticleEmitter);
+
+var _StarParticle = require("./StarParticle");
+
+var _StarParticle2 = _interopRequireDefault(_StarParticle);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+window.ParticleEmitterContainer = _ParticleEmitterContainer2.default;
+exports.ParticleEmitterContainer = _ParticleEmitterContainer2.default;
+exports.StarParticleEmitter = _StarParticleEmitter2.default;
+exports.StarParticle = _StarParticle2.default;
+
+},{"./ParticleEmitterContainer":34,"./StarParticle":35,"./StarParticleEmitter":36}],38:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2336,7 +3723,7 @@ window.hexagon.Cube = Cube;
 
 exports.default = window.hexagon.Cube;
 
-},{"./Offset":27}],27:[function(require,module,exports){
+},{"./Offset":39}],39:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2452,7 +3839,7 @@ window.hexagon.Offset = Offset;
 
 exports.default = Offset;
 
-},{"./Cube":26}],28:[function(require,module,exports){
+},{"./Cube":38}],40:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2473,13 +3860,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 exports.Cube = _Cube2.default;
 exports.Offset = _Offset2.default;
 
-},{"./Cube":26,"./Offset":27}],29:[function(require,module,exports){
+},{"./Cube":38,"./Offset":39}],41:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.animation = exports.hexagon = exports.SystemFactory = exports.ShipSystem = exports.Ship = undefined;
+exports.terrain = exports.animation = exports.hexagon = exports.SystemFactory = exports.ShipSystem = exports.Ship = undefined;
 
 var _Ship = require("./Ship");
 
@@ -2501,6 +3888,10 @@ var _animation = require("./animation");
 
 var animation = _interopRequireWildcard(_animation);
 
+var _terrain = require("./terrain");
+
+var terrain = _interopRequireWildcard(_terrain);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -2510,8 +3901,9 @@ exports.ShipSystem = _ShipSystem2.default;
 exports.SystemFactory = _SystemFactory2.default;
 exports.hexagon = hexagon;
 exports.animation = animation;
+exports.terrain = terrain;
 
-},{"./Ship":21,"./SystemFactory":22,"./animation":25,"./hexagon/":28,"./system/ShipSystem":30}],30:[function(require,module,exports){
+},{"./Ship":24,"./SystemFactory":25,"./animation":33,"./hexagon/":40,"./system/ShipSystem":42,"./terrain":44}],42:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2740,7 +4132,223 @@ Ballistic.prototype = Object.create(Weapon.prototype);
 Ballistic.prototype.constructor = Ballistic;
 */
 
-},{}],31:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _particle = require("../animation/particle");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var StarField = function () {
+  function StarField(scene) {
+    _classCallCheck(this, StarField);
+
+    this.starCount = 5000;
+    this.emitterContainer = null;
+    this.scene = scene;
+    this.lastAnimationTime = null;
+    this.totalAnimationTime = 0;
+    this.zoomChanged = 0;
+
+    this.getRandom = null;
+
+    this.create();
+  }
+
+  _createClass(StarField, [{
+    key: "create",
+    value: function create() {
+      //this.scene.background = new THREE.Color(10 / 255, 10 / 255, 30 / 255);
+
+      this.cleanUp();
+
+      this.emitterContainer = new _particle.ParticleEmitterContainer(this.scene, this.starCount, _particle.StarParticleEmitter);
+
+      //this.webglScene.scene.background = new THREE.Color(10/255, 10/255, 30/255);
+      var width = 3000; //this.webglScene.width * 1.5;
+      var height = 2000; // this.webglScene.height * 1.5;
+
+      this.getRandom = mathlib.getSeededRandomGenerator(gamedata.gameid);
+
+      //var stars = Math.floor(this.starCount * (width / 4000));
+      var stars = this.starCount;
+      while (stars--) {
+        this.createStar(width, height);
+
+        if (this.getRandom() > 0.98) {
+          this.createShiningStar(width, height);
+        }
+      }
+
+      var gas = Math.floor(this.getRandom() * 5) + 8;
+
+      /*
+          while(gas--){
+              this.createGasCloud(width, height)
+          }
+          */
+
+      this.emitterContainer.start();
+      this.lastAnimationTime = new Date().getTime();
+      this.totalAnimationTime = 0;
+      this.zoomChanged = 1;
+      return this;
+    }
+  }, {
+    key: "cleanUp",
+    value: function cleanUp() {
+      if (this.emitterContainer) {
+        this.emitterContainer.cleanUp();
+        this.emitterContainer = null;
+      }
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      if (!this.emitterContainer) {
+        this.create();
+      }
+
+      var deltaTime = new Date().getTime() - this.lastAnimationTime;
+      this.totalAnimationTime += deltaTime;
+      this.emitterContainer.render(0, this.totalAnimationTime, 0, 0, this.zoomChanged);
+
+      if (this.zoomChanged === 1) {
+        this.zoomChanged = 0;
+      }
+
+      this.lastAnimationTime = new Date().getTime();
+    }
+  }, {
+    key: "createStar",
+    value: function createStar(width, height) {
+      var particle = this.emitterContainer.getParticle(this);
+
+      var x = (this.getRandom() - 0.5) * width * 1.5;
+      var y = (this.getRandom() - 0.5) * height * 1.5;
+
+      particle.setActivationTime(0).setSize(2 + this.getRandom() * 2).setOpacity(this.getRandom() * 0.2 + 0.9).setPosition({ x: x, y: y }).setColor(new THREE.Color(1, 1, 1)).setParallaxFactor(0.1 + this.getRandom() * 0.1);
+
+      if (this.getRandom() > 0.9) {
+        particle.setSineFrequency(this.getRandom() * 200 + 50).setSineAmplitude(this.getRandom());
+      }
+    }
+  }, {
+    key: "createShiningStar",
+    value: function createShiningStar(width, height) {
+      var particle = this.emitterContainer.getParticle(this);
+
+      var x = (this.getRandom() - 0.5) * width * 1.5;
+      var y = (this.getRandom() - 0.5) * height * 1.5;
+
+      var size = 6 + this.getRandom() * 6;
+      var parallaxFactor = 0.1 + this.getRandom() * 0.1;
+      var color = new THREE.Color(this.getRandom() * 0.4 + 0.6, this.getRandom() * 0.2 + 0.8, this.getRandom() * 0.4 + 0.6);
+
+      particle.setActivationTime(0).setSize(size * 0.5).setOpacity(this.getRandom() * 0.2 + 0.9).setPosition({ x: x, y: y }).setColor(new THREE.Color(1, 1, 1)).setParallaxFactor(parallaxFactor);
+
+      particle = this.emitterContainer.getParticle(this);
+      particle.setActivationTime(0).setSize(size).setOpacity(this.getRandom() * 0.1 + 0.1).setPosition({ x: x, y: y }).setColor(color).setParallaxFactor(parallaxFactor).setSineFrequency(this.getRandom() * 200 + 100).setSineAmplitude(this.getRandom() * 0.4);
+
+      var shines = Math.round(this.getRandom() * 8) - 3;
+
+      if (shines <= 2) {
+        return;
+      }
+
+      var angle = this.getRandom() * 360;
+      var angleChange = (this.getRandom() - 0.5) * 0.01;
+
+      while (shines--) {
+        angle += this.getRandom() * 60 + 40;
+        particle = this.emitterContainer.getParticle(this);
+        particle.setActivationTime(0).setSize(size * this.getRandom() * 10 + 10).setOpacity(this.getRandom() * 0.1 + 0.1).setPosition({ x: x, y: y }).setColor(color).setParallaxFactor(parallaxFactor).setSineFrequency(this.getRandom() * 200 + 100).setSineAmplitude(0.1).setAngle(angle).setAngleChange(angleChange).setTexture(particle.texture.starLine);
+      }
+    }
+  }, {
+    key: "createGasCloud",
+    value: function createGasCloud(width, height) {
+      var gas = Math.floor(this.getRandom() * 10 + 10);
+
+      var position = {
+        x: (this.getRandom() - 0.5) * width,
+        y: (this.getRandom() - 0.5) * height
+      };
+
+      var vector = {
+        x: this.getRandomBand(0.5, 1) * width / 100,
+        y: this.getRandomBand(0.5, 1) * width / 100
+      };
+
+      var iterations = Math.floor(this.getRandom() * 3) + 5;
+
+      while (iterations--) {
+        this.createGasCloudPart({ x: position.x, y: position.y }, width);
+        position.x += this.getRandomBand(0, 1) * 50 + vector.x;
+        position.y += this.getRandomBand(0, 1) * 50 + vector.y;
+      }
+    }
+  }, {
+    key: "getRandomBand",
+    value: function getRandomBand(min, max) {
+      var random = this.getRandom() * (max - min) + min;
+      return this.getRandom() > 0.5 ? random * -1 : random;
+    }
+  }, {
+    key: "createGasCloudPart",
+    value: function createGasCloudPart(position, width) {
+      var gas = Math.floor(this.getRandom() * 5 + 5);
+      var baseRotation = (this.getRandom() - 0.5) * 0.002;
+
+      while (gas--) {
+        this.createGas(position, baseRotation, this.getRandom() * width * 0.4 + width * 0.4);
+      }
+    }
+  }, {
+    key: "createGas",
+    value: function createGas(position, baseRotation, size) {
+      var particle = this.emitterContainer.getParticle(this);
+
+      position.x += (this.getRandom() - 0.5) * 100;
+      position.y += (this.getRandom() - 0.5) * 100;
+
+      particle.setActivationTime(0).setSize(this.getRandom() * size * 0.5 + size * 0.5).setOpacity(this.getRandom() * 0.005 + 0.005).setPosition({ x: position.x, y: position.y }).setColor(new THREE.Color(104 / 255, 204 / 255, 249 / 255)).setTexture(particle.texture.gas).setAngle(this.getRandom() * 360).setAngleChange(baseRotation + (this.getRandom() - 0.5) * 0.001).setParallaxFactor(0.1 + this.getRandom() * 0.1);
+
+      if (this.getRandom() > 0.9) {
+        particle.setActivationTime(0).setSize(this.getRandom() * size * 0.25 + size * 0.25).setOpacity(0).setPosition({ x: position.x, y: position.y }).setColor(new THREE.Color(1, 1, 1)).setTexture(particle.texture.gas).setAngle(this.getRandom() * 360).setAngleChange(baseRotation + (this.getRandom() - 0.5) * 0.01).setParallaxFactor(0.1 + this.getRandom() * 0.1).setSineFrequency(this.getRandom() * 200 + 200).setSineAmplitude(this.getRandom() * 0.02);
+      }
+    }
+  }]);
+
+  return StarField;
+}();
+
+exports.default = StarField;
+
+},{"../animation/particle":37}],44:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.StarField = undefined;
+
+var _StarField = require("./StarField");
+
+var _StarField2 = _interopRequireDefault(_StarField);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+window.StarField = _StarField2.default;
+exports.StarField = _StarField2.default;
+
+},{"./StarField":43}],45:[function(require,module,exports){
 "use strict";
 
 var _ships = require("./ships");
@@ -2750,6 +4358,10 @@ var _ships2 = _interopRequireDefault(_ships);
 var _movement = require("./handler/movement");
 
 var Movement = _interopRequireWildcard(_movement);
+
+var _phase = require("./handler/phase");
+
+var Phase = _interopRequireWildcard(_phase);
 
 var _uiStrategy = require("./uiStrategy");
 
@@ -2765,7 +4377,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 window.shipObjects = _ships2.default;
 
-},{"./handler/movement":20,"./model/":29,"./ships":36,"./uiStrategy":42}],32:[function(require,module,exports){
+},{"./handler/movement":20,"./handler/phase":23,"./model/":41,"./ships":50,"./uiStrategy":56}],46:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2831,7 +4443,7 @@ var Capital = function (_ShipObject) {
 
 exports.default = Capital;
 
-},{"./ShipObject":35}],33:[function(require,module,exports){
+},{"./ShipObject":49}],47:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2901,7 +4513,7 @@ var Gunship = function (_ShipObject) {
 
 exports.default = Gunship;
 
-},{"./ShipObject":35}],34:[function(require,module,exports){
+},{"./ShipObject":49}],48:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2969,7 +4581,7 @@ var Rhino = function (_ShipObject) {
 
 exports.default = Rhino;
 
-},{"./ShipObject":35}],35:[function(require,module,exports){
+},{"./ShipObject":49}],49:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3305,7 +4917,7 @@ window.ShipObject = ShipObject;
 
 exports.default = ShipObject;
 
-},{"../handler/Movement":10}],36:[function(require,module,exports){
+},{"../handler/Movement":10}],50:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3328,7 +4940,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = { Gunship: _Gunship2.default, Rhino: _Rhino2.default, Capital: _Capital2.default };
 
-},{"./Capital":32,"./Gunship":33,"./Rhino":34}],37:[function(require,module,exports){
+},{"./Capital":46,"./Gunship":47,"./Rhino":48}],51:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3422,7 +5034,7 @@ var HighlightSelectedShip = function (_UiStrategy) {
 
 exports.default = HighlightSelectedShip;
 
-},{"./UiStrategy":41}],38:[function(require,module,exports){
+},{"./UiStrategy":55}],52:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3484,7 +5096,7 @@ var MovementPathMouseOver = function (_UiStrategy) {
 
 exports.default = MovementPathMouseOver;
 
-},{"./UiStrategy":41}],39:[function(require,module,exports){
+},{"./UiStrategy":55}],53:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3559,7 +5171,7 @@ var MovementPathSelectedShip = function (_UiStrategy) {
 
 exports.default = MovementPathSelectedShip;
 
-},{"./UiStrategy":41}],40:[function(require,module,exports){
+},{"./UiStrategy":55}],54:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3657,7 +5269,7 @@ var reposition = function reposition(ship, shipIconContainer, uiManager) {
 
 exports.default = SelectedShipMovementUi;
 
-},{"./UiStrategy":41}],41:[function(require,module,exports){
+},{"./UiStrategy":55}],55:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3773,7 +5385,7 @@ var UiStrategy = function () {
 
 exports.default = UiStrategy;
 
-},{}],42:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3809,4 +5421,4 @@ window.uiStrategy = {
 exports.MovementPathSelectedShip = _MovementPathSelectedShip2.default;
 exports.MovementPathMouseOver = _MovementPathMouseOver2.default;
 
-},{"./HighlightSelectedShip":37,"./MovementPathMouseOver":38,"./MovementPathSelectedShip":39,"./SelectedShipMovementUi":40}]},{},[31]);
+},{"./HighlightSelectedShip":51,"./MovementPathMouseOver":52,"./MovementPathSelectedShip":53,"./SelectedShipMovementUi":54}]},{},[45]);

@@ -75,10 +75,12 @@ class Movement extends React.Component {
             ship
           )} / ${movementService.getTotalProducedThrust(ship)}`}
         </EnginePower>
+        {/*
         <Stats>
           <div>{`Acceleration cost: ${ship.accelcost}`}</div>
           <div>{`Pivot cost: ${ship.pivotcost}`}</div>
         </Stats>
+       */}
         <Evasion>
           <div>{`Over: ${movementService.getOverChannel(ship)}`}</div>
           <div>{`Evasion: ${movementService.getEvasion(ship)}`}</div>
@@ -86,10 +88,12 @@ class Movement extends React.Component {
             movementService.getRollMove(ship) ? "yes" : "no"
           }`}</div>
         </Evasion>
+        {/* 
         <OverChannel>
           <div>{`Evasion cost: ${ship.evasioncost}`}</div>
           <div>{`Roll cost: ${ship.rollcost}`}</div>
         </OverChannel>
+        */}
         <ThrustButton
           ship={ship}
           movementService={movementService}

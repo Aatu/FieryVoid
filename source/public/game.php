@@ -1,29 +1,29 @@
-<?php 
-    ob_start("ob_gzhandler"); 
-    include_once 'global.php';
-    
-	$gameid = 1;
-	$thisplayer = -1;
+<?php
+ob_start("ob_gzhandler");
+include_once 'global.php';
 
-	if (isset($_GET["gameid"])){
-		$gameid = $_GET["gameid"];
-	}else{
-		//header('Location: games.php');
-	}
-	
-	if (isset($_SESSION["user"])){
-		$thisplayer = $_SESSION["user"];
-	}
-	
-	$serverdata = Manager::getTacGamedata($gameid, $thisplayer, null, 0, -1);
-    $serverdataJSON = '{}';
-    $error = 'null';
+$gameid = 1;
+$thisplayer = -1;
 
-    if ($serverdata instanceof TacGameData) {
-        $serverdataJSON = json_encode($serverdata->stripForJson(), JSON_NUMERIC_CHECK);
-    } else {
-        $error = json_encode($serverdata, JSON_NUMERIC_CHECK);
-    }
+if (isset($_GET["gameid"])) {
+    $gameid = $_GET["gameid"];
+} else {
+    //header('Location: games.php');
+}
+
+if (isset($_SESSION["user"])) {
+    $thisplayer = $_SESSION["user"];
+}
+
+$serverdata = Manager::getTacGamedata($gameid, $thisplayer, null, 0, -1);
+$serverdataJSON = '{}';
+$error = 'null';
+
+if ($serverdata instanceof TacGameData) {
+    $serverdataJSON = json_encode($serverdata->stripForJson(), JSON_NUMERIC_CHECK);
+} else {
+    $error = json_encode($serverdata, JSON_NUMERIC_CHECK);
+}
 ?>
 
 
@@ -58,17 +58,17 @@
         };
     </script>
 
-    <?php include_once 'shaders.php'; ?>
+    <?php include_once 'shaders.php';?>
     <script>
         $(window).load(function(){
-            
-            if (<?php print($error); ?>) {
-                alert(<?php print($error); ?>);
+
+            if (<?php print($error);?>) {
+                alert(<?php print($error);?>);
             }
-            
-            gamedata.parseServerData(<?php print($serverdataJSON); ?>);
+
+            gamedata.parseServerData(<?php print($serverdataJSON);?>);
             //shipWindowManager.createShipWindow(gamedata.getActiveShip());
-            
+
 			if (gamedata.thisplayer == -1){
 				$(".notlogged").show();
 				$(".waiting").hide();
@@ -78,8 +78,8 @@
             webglScene.init(
                 '#webgl',
                 jQuery('#pagecontainer'),
-                new window.webglHexGridRenderer(graphics),
-                new window.phaseDirector(graphics),
+                new window.webglHexGridRenderer(),
+                new window.PhaseDirector(),
                 gamedata,
                 window.coordinateConverter
             );
@@ -90,8 +90,8 @@
             window.UIManagerInstance.EwButtons();
             $("#pagecontainer").show();
         });
-        
-            
+
+
     </script>
 <!--	<script src="client/helper.js"></script>-->
     <script src="client/lib/graphics.js"></script>
@@ -104,8 +104,6 @@
     <script src="client/renderer/webglScene.js"></script>
     <script src="client/renderer/webglScrolling.js"></script>
     <script src="client/renderer/webglZooming.js"></script>
-    <script src="client/renderer/PhaseDirector.js"></script>
-    <script src="client/renderer/Animation.js"></script>
 
     <script src="client/renderer/shipWindowManager.js"></script>
 
@@ -119,7 +117,7 @@
     <script src="client/renderer/sprite/LineSprite.js"></script>
     <script src="client/renderer/sprite/BallisticSprite.js"></script>
     <script src="client/renderer/sprite/TextSprite.js"></script>
-    
+
     <script src="client/object/objects.bundle.js"></script>
     <script src="client/renderer/icon/ShipIcon.js"></script>
     <script src="client/renderer/icon/FlightIcon.js"></script>
@@ -130,32 +128,6 @@
     <script src="client/renderer/icon/EWIconContainer.js"></script>
     <script src="client/renderer/icon/BallisticIconContainer.js"></script>
 
-    <script src="client/renderer/animationStrategy/AnimationStrategy.js"></script>
-    <script src="client/renderer/animationStrategy/IdleAnimationStrategy.js"></script>
-    <script src="client/renderer/animationStrategy/ReplayAnimationStrategy.js"></script>
-    <script src="client/renderer/animationStrategy/animation/Animation.js"></script>
-    <script src="client/renderer/animationStrategy/animation/ShipMovementAnimation.js"></script>
-    <script src="client/renderer/animationStrategy/animation/LogAnimation.js"></script>
-    <script src="client/renderer/animationStrategy/animation/CameraPositionAnimation.js"></script>
-    <script src="client/renderer/animationStrategy/animation/ShipDestroyedAnimation.js"></script>
-
-    <script src="client/renderer/animationStrategy/animation/FireAnimationHelper.js"></script>
-    <script src="client/renderer/animationStrategy/animation/AllWeaponFireAgainstShipAnimation.js"></script>
-    <script src="client/renderer/animationStrategy/animation/HexTargetedWeaponFireAnimation.js"></script>
-    <script src="client/renderer/animationStrategy/animation/ParticleEmitterContainer.js"></script>
-    <script src="client/renderer/animationStrategy/animation/BaseParticle.js"></script>
-    <script src="client/renderer/animationStrategy/animation/StarParticle.js"></script>
-    <script src="client/renderer/animationStrategy/animation/ParticleEmitter.js"></script>
-    <script src="client/renderer/animationStrategy/animation/StarParticleEmitter.js"></script>
-    <script src="client/renderer/animationStrategy/animation/ParticleAnimation.js"></script>
-    <script src="client/renderer/animationStrategy/animation/ParticleEmitter.js"></script>
-    <script src="client/renderer/animationStrategy/animation/effects/Explosion.js"></script>
-    <script src="client/renderer/animationStrategy/animation/effects/LaserEffect.js"></script>
-    <script src="client/renderer/animationStrategy/animation/effects/BoltEffect.js"></script>
-    <script src="client/renderer/animationStrategy/animation/effects/TorpedoEffect.js"></script>
-    <script src="client/renderer/animationStrategy/animation/effects/ShipExplosion.js"></script>
-    <script src="client/renderer/animationStrategy/animation/effects/SystemDestroyedEffect.js"></script>
-
     <script src="client/renderer/phaseStrategy/PhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/WaitingPhaseStrategy.js"></script>
@@ -163,7 +135,6 @@
     <script src="client/renderer/phaseStrategy/MovementPhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/FirePhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/ReplayPhaseStrategy.js"></script>
-    <script src="client/renderer/terrain/StarField.js"></script>
 
 
     <script src="client/renderer/texture/HexagonTexture.js"></script>
@@ -231,7 +202,7 @@
 </div>
 
 <div id="systemtemplatecontainer" style="display:none;">
-    
+
 	<div class="structure system">
         <div class="name"><span class="namevalue">STRUCTURE</span></div>
         <div class="systemcontainer">
@@ -242,7 +213,7 @@
             </div>
         </div>
     </div>
-	
+
 	<div class="fightersystem">
 		<div class="icon">
 			<span class="efficiency value"></span>
@@ -272,11 +243,11 @@
             <div class="critical systembarcontainer">
                 <div class="valuecontainer"><span class="criticalvalue value">CRITICAL<span></div>
             </div>
-            
+
         </div>
     </div>
-    
-    
+
+
     <div class="iconduo">
         <span class="efficiency value"></span>
             <div class="duoIconmask"></div>
@@ -284,7 +255,7 @@
             <div class="button holdfire"></div>
         </div>-->
     </div>
-    
+
     <div class="fighter">
 		<div class="destroyedtext"><span>DESTROYED</span></div>
 		<div class="disengagedtext"><span>DISENGAGED</span></div>
@@ -294,7 +265,7 @@
 				<div style="height:60px;"></div>
 				<table class="fightersystemcontainer 2"><tr></tr></table>
             </div>
-			
+
             <div class="health systembarcontainer">
                 <div class="healthbar bar" style="width:90px;"></div>
                 <div class="valuecontainer"><span class="healthvalue value"></span></div>
@@ -305,8 +276,8 @@
                 <div class="valuecontainer"><span class="efficiencyvalue value">5/3<span></div>
             </div>
             -->
-            
-            
+
+
         </div>
     </div>
 
@@ -324,24 +295,24 @@
                 </div>
             </div>
         </div>
-    
+
 </div>
 
 <div id="shipwindowtemplatecontainer" style="display:none;">
-    
+
     <div class="shipwindow ship">
         <div class="topbar">
             <span class="valueheader name">Name:</span><span class="value name">name here</span>
             <span class="valueheader shipclass">Class:</span><span class="value shipclass">ship type class here</span>
             <div class="close"></div>
         </div>
-      
-               
+
+
         <div id="shipSection_3" class="shipSection">
             <table></table>
-        </div>    
-                        
-            
+        </div>
+
+
 		<table class="divider">
 			<tr>
                 <td class="col1">
@@ -383,9 +354,9 @@
     				</div>
     			</td>
             </tr>
-		</table>   
+		</table>
         <div class="hitChartDiv">
-        </div>     
+        </div>
     </div>
 
 
@@ -405,7 +376,7 @@
             <tr>
                 <td class="col1" style="width: 33%">
                     <div class="icon" style="margin:auto;"><img src="" alt="" border="" width="120" height="120"></div>
-                </td>                
+                </td>
                 <td class="col2" style="width: 33%; border-left: 6px solid #7e9dc7; border-right: 6px solid #7e9dc7;">
                     <div id="shipSection_1" class="shipSection" style="margin-top: 20px;">
                         <table></table>
@@ -436,12 +407,12 @@
                 </td>
             </tr>
         </table>
-        <div class="hitChartDiv"></div>     
+        <div class="hitChartDiv"></div>
     </div>
 
     <table id="hitChartTable">
     </table>
-    
+
     <div class="shipwindow flight">
         <div class="topbar">
             <span class="valueheader name">Name:</span><span class="value name">name here</span>
@@ -486,7 +457,7 @@
                         </tr>
                 </table>
     </div>
-    
+
 </div>
 
 
@@ -509,19 +480,19 @@
 		<div class="fire" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:#b34119;"><span>TARGETING</span></div>
 		<div class="fire targeting"></div>
     </div>
-	
+
     <div id="weaponTargetingContainer">
         <div class="infolist">
-        
+
         </div>
     </div>
-    
+
 <!--        <div id="globalhelp" class="ingamehelppanel">
         <?php
-        	$messagelocation='hex.php';
-        	$ingame=true;
-        	include('helper.php');
-        ?>
+$messagelocation = 'hex.php';
+$ingame = true;
+include 'helper.php';
+?>
         </div>-->
 </div>
 <!--
@@ -534,16 +505,16 @@
 <div id="templatecontainer">
 
     <div class="hexship">
-        
+
         <canvas id="shipcanvas" width="0" height="0" class="hexshipcanvas"></canvas>
-      
-    
+
+
     </div>
-    
+
     <div class="ewentry deletable"><span class="valueheader"></span><span class="value"></span><div class="button1"></div><div class="button2" ></div></div>
 
 </div>
-<div id="logcontainer">    
+<div id="logcontainer">
     <div id="logUI">
         <div id="logTab" data-select="#log" class="logUiEntry selected">
             <span>LOG</span>
@@ -553,7 +524,7 @@
         </div>
         <div id="declarationsTab" data-select="#declarations" class="logUiEntry" style = "overflow-y: auto;"> <!-- fire and EW declarations review -->
             <span>DECLARATIONS</span>
-        </div>	    
+        </div>
         <div id="chatTab" data-select="#chat" class="logUiEntry">
             <span>GAME CHAT</span>
         </div>
@@ -575,41 +546,41 @@
     </div>
     <div id="declarations" class="logPanelEntry" style="display:none;"> <!-- fire and EW declarations review -->
 	<?php
-	    include("declarations.php");
-	?>
+include "declarations.php";
+?>
     </div>
-    
+
     <div id="chat" class="logPanelEntry" style="display:none;">
-        <?php 
-            $chatgameid = $gameid;
-            $chatelement = "#chat";
-            include("chat.php")
-        ?>
+        <?php
+$chatgameid = $gameid;
+$chatelement = "#chat";
+include "chat.php"
+?>
     </div>
-    
+
     <div id="globalchat" class="logPanelEntry" style="display:none;">
-        <?php 
-            $chatgameid = 0;
-            $chatelement = "#globalchat";
-            include("chat.php")
-        ?>
+        <?php
+$chatgameid = 0;
+$chatelement = "#globalchat";
+include "chat.php"
+?>
     </div>
- 
+
 <!--    <div id="settings" class="logPanelEntry" style="display:none;">
         <div id="helphide" class="helphide">
         <span title="Show or Hide Vir to help you">
-        <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
+        <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">
         HELP
         </span>
         </div>
         <span title="Disable or Enable the extra Commit check to end a turn">
         <div id="autocommit" class="autocommit">
-        <img id="autocommitimg" src="img/ok.png" height="30" width="30">	
+        <img id="autocommitimg" src="img/ok.png" height="30" width="30">
         <span id="autocommittext" class="autocommittext">COMMIT</span>
         </span>
         </div>
     </div>-->
-        
+
     <div class="fleetlistentry">
         <div class="fleetheader">
         </div>
@@ -617,13 +588,13 @@
                 <div class="fleetlistline">
                 </div>
     </div>
-    
+
 </div>
 
 </body>
 
 </html>
 
-<?php 
-    ob_end_flush();
+<?php
+ob_end_flush();
 ?>

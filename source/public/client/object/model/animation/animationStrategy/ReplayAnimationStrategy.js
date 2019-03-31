@@ -1,5 +1,17 @@
 "use strict";
 
+import { AnimationStrategy } from ".";
+
+class ReplayAnimationStrategy extends AnimationStrategy {
+  constructor(gamedata, shipIcons, scene, type) {
+    super();
+  }
+}
+
+window.ReplayAnimationStrategy = ReplayAnimationStrategy;
+export default ReplayAnimationStrategy;
+
+/*
 window.ReplayAnimationStrategy = function () {
 
     ReplayAnimationStrategy.type = {
@@ -193,3 +205,4 @@ window.ReplayAnimationStrategy = function () {
 
     return ReplayAnimationStrategy;
 }();
+*/

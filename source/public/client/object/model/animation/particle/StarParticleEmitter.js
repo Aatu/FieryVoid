@@ -1,15 +1,26 @@
-"use strict";
+import Animation from "../Animation";
+import StarParticle from "./StarParticle";
 
-window.StarParticleEmitter = (function() {
-  var SHADER_VERTEX = null;
-  var SHADER_FRAGMENT = null;
+let SHADER_VERTEX = null;
+let SHADER_FRAGMENT = null;
 
-  var texture = new THREE.TextureLoader().load(
-    "img/effect/effectTextures1024.png"
-  );
+const texture = new THREE.TextureLoader().load(
+  "img/effect/effectTextures1024.png"
+);
 
-  function StarParticleEmitter(scene, particleCount, args) {
-    Animation.call(this);
+const getShaders = () => {
+  if (!SHADER_VERTEX)
+    SHADER_VERTEX = document.getElementById("starVertexShader").innerHTML;
+
+  if (!SHADER_FRAGMENT)
+    SHADER_FRAGMENT = document.getElementById("starFragmentShader").innerHTML;
+
+  return { vertex: SHADER_VERTEX, fragment: SHADER_FRAGMENT };
+};
+
+class StarParticleEmitter extends Animation {
+  constructor(scene, particleCount, args) {
+    super();
 
     if (!args) {
       args = {};
@@ -164,43 +175,35 @@ window.StarParticleEmitter = (function() {
     this.scene.add(this.mesh);
   }
 
-  StarParticleEmitter.prototype = Object.create(Animation.prototype);
-
-  StarParticleEmitter.prototype.start = function() {
+  start() {
     this.active = true;
-  };
+  }
 
-  StarParticleEmitter.prototype.stop = function() {
+  stop() {
     this.active = false;
-  };
+  }
 
-  StarParticleEmitter.prototype.reset = function() {};
+  reset() {}
 
-  StarParticleEmitter.prototype.cleanUp = function() {
+  cleanUp() {
     this.mesh.material.dispose();
     this.scene.remove(this.mesh);
-  };
+  }
 
-  StarParticleEmitter.prototype.update = function(gameData) {};
+  update(gameData) {}
 
-  StarParticleEmitter.prototype.render = function(
-    now,
-    total,
-    last,
-    delta,
-    zoom
-  ) {
+  render(now, total, last, delta, zoom) {
     this.particleMaterial.uniforms.gameTime.value = total;
     this.mesh.material.needsUpdate = true;
-  };
+  }
 
-  StarParticleEmitter.prototype.done = function() {
+  done() {
     if (this.onDoneCallback) {
       this.onDoneCallback();
     }
-  };
+  }
 
-  StarParticleEmitter.prototype.getParticle = function() {
+  getParticle() {
     if (this.free.length === 0) {
       return false;
     }
@@ -208,25 +211,14 @@ window.StarParticleEmitter = (function() {
     var i = this.free.pop();
 
     return this.flyParticle.create(i);
-  };
+  }
 
-  StarParticleEmitter.prototype.freeParticles = function(particleIndices) {
+  freeParticles(particleIndices) {
     particleIndices.forEach(function(i) {
       this.flyParticle.create(i).setInitialValues();
     }, this);
     this.free = this.free.concat(particleIndices);
-  };
-
-  function getShaders() {
-    if (!SHADER_VERTEX)
-      var SHADER_VERTEX = document.getElementById("starVertexShader").innerHTML;
-
-    if (!SHADER_FRAGMENT)
-      var SHADER_FRAGMENT = document.getElementById("starFragmentShader")
-        .innerHTML;
-
-    return { vertex: SHADER_VERTEX, fragment: SHADER_FRAGMENT };
   }
+}
 
-  return StarParticleEmitter;
-})();
+export default StarParticleEmitter;

@@ -1,22 +1,17 @@
 "use strict";
 
-window.IdleAnimationStrategy = (function() {
-  function IdleAnimationStrategy(
-    shipIcons,
-    turn,
-    movementService,
-    coordinateConverter
-  ) {
-    AnimationStrategy.call(this, shipIcons, turn);
+import AnimationStrategy from "./AnimationStrategy";
+import { ShipIdleMovementAnimation } from "..";
+
+class IdleAnimationStrategy extends AnimationStrategy {
+  constructor(shipIcons, turn, movementService, coordinateConverter) {
+    super(shipIcons, turn);
     this.movementService = movementService;
     this.coordinateConverter = coordinateConverter;
   }
 
-  IdleAnimationStrategy.prototype = Object.create(AnimationStrategy.prototype);
-
-  IdleAnimationStrategy.prototype.update = function(gamedata) {
-    AnimationStrategy.prototype.update.call(this, gamedata);
-    //this.positionAndFaceAllIcons();
+  update(gamedata) {
+    super.update(gamedata);
 
     this.shipIconContainer.getArray().forEach(function(icon) {
       var ship = icon.ship;
@@ -31,7 +26,7 @@ window.IdleAnimationStrategy = (function() {
       } else {
         icon.show();
         this.animations.push(
-          new ShipMovementAnimationNew(
+          new ShipIdleMovementAnimation(
             icon,
             this.movementService,
             this.coordinateConverter,
@@ -45,23 +40,26 @@ window.IdleAnimationStrategy = (function() {
       }
     }, this);
     return this;
-  };
+  }
 
-  /*
-  IdleAnimationStrategy.prototype.shipMovementChanged = function(ship) {
-    this.shipIconContainer.positionAndFaceShip(ship);
-  };
-  */
+  shipMovementChanged(ship) {
+    const animation = this.animations.find(
+      animation => animation.ship === ship
+    );
 
-  IdleAnimationStrategy.prototype.deactivate = function() {
+    animation.update();
+  }
+
+  deactivate() {
     if (this.shipIconContainer) {
       this.shipIconContainer.getArray().forEach(function(icon) {
         icon.show();
       }, this);
     }
 
-    return AnimationStrategy.prototype.deactivate.call(this);
-  };
+    return super.deactivate();
+  }
+}
 
-  return IdleAnimationStrategy;
-})();
+window.IdleAnimationStrategy = IdleAnimationStrategy;
+export default IdleAnimationStrategy;

@@ -73,6 +73,26 @@ window.mathlib = {
     return ret;
   },
 
+  getDistanceBetweenDirections: function(start, end, direction = 1) {
+    if (end === start) {
+      return 0;
+    }
+
+    if (direction > 0) {
+      if (end < start) {
+        return 360 - start + end;
+      } else {
+        return end - start;
+      }
+    } else {
+      if (end > start) {
+        return 360 - end + start;
+      } else {
+        return start - end;
+      }
+    }
+  },
+
   getPointBetween: function getPointBetween(start, end, percentage, noRound) {
     var x = start.x + percentage * (end.x - start.x);
     var y = start.y + percentage * (end.y - start.y);

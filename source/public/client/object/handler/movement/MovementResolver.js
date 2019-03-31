@@ -38,7 +38,6 @@ class MovementResolver {
       if (commit) {
         this.movementService.replaceTurnMovement(this.ship, newMovement);
         this.movementService.shipMovementChanged(this.ship);
-        console.log("BILL", bill);
       }
       return {
         result: true,

@@ -53,6 +53,16 @@ class MovementService {
     return ship.movement[ship.movement.length - 1];
   }
 
+  isMoved(ship, turn) {
+    const end = this.getLastEndMove(ship);
+
+    if (!end || !end.isEnd()) {
+      return false;
+    }
+
+    return end.turn === turn;
+  }
+
   getLastEndMove(ship) {
     let end = ship.movement
       .slice()
@@ -78,6 +88,10 @@ class MovementService {
 
     if (!end) {
       end = this.getDeployMove(ship);
+    }
+
+    if (!end) {
+      end = ship.movement[0];
     }
 
     return end;

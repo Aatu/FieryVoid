@@ -1,5 +1,10 @@
-window.StarField = (function() {
-  function StarField(scene) {
+import {
+  ParticleEmitterContainer,
+  StarParticleEmitter
+} from "../animation/particle";
+
+class StarField {
+  constructor(scene) {
     this.starCount = 5000;
     this.emitterContainer = null;
     this.scene = scene;
@@ -12,7 +17,7 @@ window.StarField = (function() {
     this.create();
   }
 
-  StarField.prototype.create = function() {
+  create() {
     //this.scene.background = new THREE.Color(10 / 255, 10 / 255, 30 / 255);
 
     this.cleanUp();
@@ -32,10 +37,10 @@ window.StarField = (function() {
     //var stars = Math.floor(this.starCount * (width / 4000));
     var stars = this.starCount;
     while (stars--) {
-      createStar.call(this, width, height);
+      this.createStar(width, height);
 
       if (this.getRandom() > 0.98) {
-        createShiningStar.call(this, width, height);
+        this.createShiningStar(width, height);
       }
     }
 
@@ -43,7 +48,7 @@ window.StarField = (function() {
 
     /*
         while(gas--){
-            createGasCloud.call(this, width, height)
+            this.createGasCloud(width, height)
         }
         */
 
@@ -52,16 +57,16 @@ window.StarField = (function() {
     this.totalAnimationTime = 0;
     this.zoomChanged = 1;
     return this;
-  };
+  }
 
-  StarField.prototype.cleanUp = function() {
+  cleanUp() {
     if (this.emitterContainer) {
       this.emitterContainer.cleanUp();
       this.emitterContainer = null;
     }
-  };
+  }
 
-  StarField.prototype.render = function() {
+  render() {
     if (!this.emitterContainer) {
       this.create();
     }
@@ -81,9 +86,9 @@ window.StarField = (function() {
     }
 
     this.lastAnimationTime = new Date().getTime();
-  };
+  }
 
-  function createStar(width, height) {
+  createStar(width, height) {
     var particle = this.emitterContainer.getParticle(this);
 
     var x = (this.getRandom() - 0.5) * width * 1.5;
@@ -104,7 +109,7 @@ window.StarField = (function() {
     }
   }
 
-  function createShiningStar(width, height) {
+  createShiningStar(width, height) {
     var particle = this.emitterContainer.getParticle(this);
 
     var x = (this.getRandom() - 0.5) * width * 1.5;
@@ -164,7 +169,7 @@ window.StarField = (function() {
     }
   }
 
-  function createGasCloud(width, height) {
+  createGasCloud(width, height) {
     var gas = Math.floor(this.getRandom() * 10 + 10);
 
     var position = {
@@ -173,31 +178,30 @@ window.StarField = (function() {
     };
 
     var vector = {
-      x: (getRandomBand.call(this, 0.5, 1) * width) / 100,
-      y: (getRandomBand.call(this, 0.5, 1) * width) / 100
+      x: (this.getRandomBand(0.5, 1) * width) / 100,
+      y: (this.getRandomBand(0.5, 1) * width) / 100
     };
 
     var iterations = Math.floor(this.getRandom() * 3) + 5;
 
     while (iterations--) {
-      createGasCloudPart.call(this, { x: position.x, y: position.y }, width);
-      position.x += getRandomBand.call(this, 0, 1) * 50 + vector.x;
-      position.y += getRandomBand.call(this, 0, 1) * 50 + vector.y;
+      this.createGasCloudPart({ x: position.x, y: position.y }, width);
+      position.x += this.getRandomBand(0, 1) * 50 + vector.x;
+      position.y += this.getRandomBand(0, 1) * 50 + vector.y;
     }
   }
 
-  function getRandomBand(min, max) {
+  getRandomBand(min, max) {
     var random = this.getRandom() * (max - min) + min;
     return this.getRandom() > 0.5 ? random * -1 : random;
   }
 
-  function createGasCloudPart(position, width) {
+  createGasCloudPart(position, width) {
     var gas = Math.floor(this.getRandom() * 5 + 5);
     var baseRotation = (this.getRandom() - 0.5) * 0.002;
 
     while (gas--) {
-      createGas.call(
-        this,
+      this.createGas(
         position,
         baseRotation,
         this.getRandom() * width * 0.4 + width * 0.4
@@ -205,7 +209,7 @@ window.StarField = (function() {
     }
   }
 
-  function createGas(position, baseRotation, size) {
+  createGas(position, baseRotation, size) {
     var particle = this.emitterContainer.getParticle(this);
 
     position.x += (this.getRandom() - 0.5) * 100;
@@ -237,6 +241,6 @@ window.StarField = (function() {
         .setSineAmplitude(this.getRandom() * 0.02);
     }
   }
+}
 
-  return StarField;
-})();
+export default StarField;

@@ -97,8 +97,6 @@ window.ajaxInterface = {
           .filter(move => move.turn === gamedata.turn)
           .map(move => move.serialize());
 
-        console.log(newShip.movement);
-
         for (var a = ship.EW.length - 1; a >= 0; a--) {
           var ew = ship.EW[a];
           if (ew.turn == gamedata.turn) {

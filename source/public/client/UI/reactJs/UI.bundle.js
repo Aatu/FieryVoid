@@ -34245,20 +34245,6 @@ var Movement = function (_React$Component) {
           "Engine power: " + movementService.getRemainingEngineThrust(ship) + " / " + movementService.getTotalProducedThrust(ship)
         ),
         React.createElement(
-          Stats,
-          null,
-          React.createElement(
-            "div",
-            null,
-            "Acceleration cost: " + ship.accelcost
-          ),
-          React.createElement(
-            "div",
-            null,
-            "Pivot cost: " + ship.pivotcost
-          )
-        ),
-        React.createElement(
           Evasion,
           null,
           React.createElement(
@@ -34275,20 +34261,6 @@ var Movement = function (_React$Component) {
             "div",
             null,
             "Rolling: " + (movementService.getRollMove(ship) ? "yes" : "no")
-          )
-        ),
-        React.createElement(
-          OverChannel,
-          null,
-          React.createElement(
-            "div",
-            null,
-            "Evasion cost: " + ship.evasioncost
-          ),
-          React.createElement(
-            "div",
-            null,
-            "Roll cost: " + ship.rollcost
           )
         ),
         React.createElement(_ThrustButton2.default, {

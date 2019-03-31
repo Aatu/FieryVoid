@@ -1,8 +1,8 @@
 "use strict";
 
 window.MovementPhaseStrategy = (function() {
-  function MovementPhaseStrategy(coordinateConverter) {
-    PhaseStrategy.call(this, coordinateConverter);
+  function MovementPhaseStrategy(coordinateConverter, phaseState) {
+    PhaseStrategy.call(this, coordinateConverter, phaseState);
 
     this.strategies = [
       new uiStrategy.MovementPathMouseOver(),
@@ -32,11 +32,12 @@ window.MovementPhaseStrategy = (function() {
     movementService
   ) {
     this.changeAnimationStrategy(
-      new window.IdleAnimationStrategy(
+      new window.MovementAnimationStrategy(
         shipIcons,
         gamedata.turn,
         movementService,
-        this.coordinateConverter
+        this.coordinateConverter,
+        this.phaseState
       )
     );
 

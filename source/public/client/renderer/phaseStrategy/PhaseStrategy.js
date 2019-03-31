@@ -1,7 +1,8 @@
 "use strict";
 
 window.PhaseStrategy = (function() {
-  function PhaseStrategy(coordinateConverter) {
+  function PhaseStrategy(coordinateConverter, phaseState) {
+    this.phaseState = phaseState;
     this.inactive = true;
     this.gamedata = null;
     this.shipIconContainer = null;

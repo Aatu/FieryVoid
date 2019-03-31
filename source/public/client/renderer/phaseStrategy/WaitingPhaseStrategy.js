@@ -1,8 +1,8 @@
 "use strict";
 
 window.WaitingPhaseStrategy = (function() {
-  function WaitingPhaseStrategy(coordinateConverter) {
-    PhaseStrategy.call(this, coordinateConverter);
+  function WaitingPhaseStrategy(coordinateConverter, phaseState) {
+    PhaseStrategy.call(this, coordinateConverter, phaseState);
     this.strategies = [new uiStrategy.MovementPathMouseOver("movement")];
   }
 
@@ -20,11 +20,12 @@ window.WaitingPhaseStrategy = (function() {
     movementService
   ) {
     this.changeAnimationStrategy(
-      new window.IdleAnimationStrategy(
+      new window.MovementAnimationStrategy(
         shipIcons,
         gamedata.turn,
         movementService,
-        this.coordinateConverter
+        this.coordinateConverter,
+        this.phaseState
       )
     );
 
@@ -38,7 +39,7 @@ window.WaitingPhaseStrategy = (function() {
       shipWindowManager,
       movementService
     );
-    console.log("enabled waiting phase strategy");
+
     gamedata.hideCommitButton();
 
     ajaxInterface.startPollingGamedata();
