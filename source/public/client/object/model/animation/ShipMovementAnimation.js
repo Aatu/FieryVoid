@@ -147,8 +147,6 @@ class ShipMovementAnimation extends Animation {
       startTime = pivot.endTime;
     });
 
-    pivots[pivots.length - 1].endTime = this.duration;
-
     if (pivots.length === 0) {
       const facing = mathlib.hexFacingToAngle(
         this.movementService.getLastTurnEndMove(this.ship).facing
@@ -164,6 +162,8 @@ class ShipMovementAnimation extends Animation {
         }
       ];
     }
+
+    pivots[pivots.length - 1].endTime = this.duration;
 
     pivots.forEach(pivot => {
       pivot.duration = pivot.endTime - pivot.startTime;

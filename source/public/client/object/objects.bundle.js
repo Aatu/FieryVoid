@@ -2365,7 +2365,7 @@ var ShipMovementAnimation = function (_Animation) {
       new THREE.Vector2(0.75, 0.75),
       new THREE.Vector2(1, 1)
     );
-      */
+     */
 
     /*
     this.hexAnimations.forEach(function (animation) {
@@ -2471,8 +2471,6 @@ var ShipMovementAnimation = function (_Animation) {
         startTime = pivot.endTime;
       });
 
-      pivots[pivots.length - 1].endTime = this.duration;
-
       if (pivots.length === 0) {
         var facing = mathlib.hexFacingToAngle(this.movementService.getLastTurnEndMove(this.ship).facing);
 
@@ -2484,6 +2482,8 @@ var ShipMovementAnimation = function (_Animation) {
           endTime: this.duration
         }];
       }
+
+      pivots[pivots.length - 1].endTime = this.duration;
 
       pivots.forEach(function (pivot) {
         pivot.duration = pivot.endTime - pivot.startTime;
