@@ -1,3 +1,5 @@
+import "@babel/polyfill";
+
 import * as React from "react";
 import ReactDom from "react-dom";
 import PlayerSettings from "./playerSettings/PlayerSettings";

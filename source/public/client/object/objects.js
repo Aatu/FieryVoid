@@ -1,3 +1,5 @@
+import "@babel/polyfill";
+
 import ships from "./ships";
 import * as Movement from "./handler/movement";
 import * as Phase from "./handler/phase";

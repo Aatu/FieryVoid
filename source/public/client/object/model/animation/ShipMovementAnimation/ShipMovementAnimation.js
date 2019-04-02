@@ -1,10 +1,12 @@
-import Animation from "./Animation";
+import Animation from "../Animation";
+import ShipEvasionMovementPath from "./ShipEvasionMovementPath";
 
 class ShipMovementAnimation extends Animation {
   constructor(
     shipIcon,
     movementService,
     coordinateConverter,
+    turn,
     time = 0,
     continious = false
   ) {
@@ -16,6 +18,7 @@ class ShipMovementAnimation extends Animation {
     this.coordinateConverter = coordinateConverter;
     this.continious = continious;
     this.time = time;
+    this.turn = turn;
 
     this.doneCallback = null;
 
@@ -28,6 +31,10 @@ class ShipMovementAnimation extends Animation {
 
     this.positionCurve = this.buildPositionCurve();
     this.rotations = this.buildRotations();
+    this.evasionOffset = new ShipEvasionMovementPath(
+      this.turn * this.ship.id,
+      this.movementService.getEvasion(this.ship)
+    );
 
     this.easeInOut = new THREE.CubicBezierCurve(
       new THREE.Vector2(0, 0),
@@ -98,8 +105,18 @@ class ShipMovementAnimation extends Animation {
     }
 
     return {
-      position: this.positionCurve.getPoint(totalDone),
+      position: this.applyOffset(
+        this.positionCurve.getPoint(totalDone),
+        totalDone
+      ),
       facing: this.getFacing(time)
+    };
+  }
+
+  applyOffset(position, totalDone) {
+    return {
+      x: position.x + this.evasionOffset.getOffset(totalDone).x,
+      y: position.y + this.evasionOffset.getOffset(totalDone).y
     };
   }
 

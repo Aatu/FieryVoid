@@ -60,7 +60,8 @@ class MovementAnimationStrategy extends AnimationStrategy {
             new ShipMovementAnimation(
               icon,
               this.movementService,
-              this.coordinateConverter
+              this.coordinateConverter,
+              this.turn
             )
               .setIsDone(isReplayed(this.phaseState, this.turn, ship))
               .setStartCallback(setReplayed(this.phaseState, this.turn, ship))

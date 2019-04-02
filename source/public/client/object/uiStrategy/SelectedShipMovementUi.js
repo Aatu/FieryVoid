@@ -6,8 +6,16 @@ class SelectedShipMovementUi extends UiStrategy {
     this.ship = null;
   }
 
-  setShipSelected({ ship }) {
+  async setShipSelected({ ship }) {
     this.ship = ship;
+    await this.shipIconContainer.getByShip(ship).getLoadedPromise();
+
+    if (this.ship !== ship) {
+      // ship was changed when waiting
+      return;
+    }
+
+    console.log("SHOW 1");
     this.uiManager.showMovementUi({
       ship,
       movementService: this.movementService
@@ -34,6 +42,7 @@ class SelectedShipMovementUi extends UiStrategy {
       return;
     }
 
+    console.log("SHOW 2");
     this.uiManager.showMovementUi({
       ship,
       movementService: this.movementService
@@ -45,6 +54,7 @@ class SelectedShipMovementUi extends UiStrategy {
 
 const reposition = (ship, shipIconContainer, uiManager) => {
   if (!ship) {
+    console.log("no ship");
     return;
   }
 

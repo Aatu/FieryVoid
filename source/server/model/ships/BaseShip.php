@@ -1,62 +1,33 @@
 <?php
 class BaseShip
 {
-
-    public $shipSizeClass = 3; //0:Light, 1:Medium, 2:Heavy, 3:Capital, 4:Enormous
-    public $Enormous = false; //size class 4 is NOT implemented!!! for semi-Enormous unit, set this variable to True
-    public $imagePath, $shipClass;
+    public $shipClass;
+    public $phpclass;
     public $systems = array();
     public $EW = array();
     public $fighters = array();
     public $hitChart = array();
-    public $notes = ''; //notes to be displayed on fleet selection screen
+    public $movement = array();
 
+    public $notes = ''; //notes to be displayed on fleet selection screen
     public $occurence = "common";
     public $variantOf = ''; //variant of what? - MUST be the same as $shipClass of base unit, or this unit will not be displayed on fleet selection screen!
     public $limited = 0;
-    public $agile = false;
+
     public $accelcost, $rollcost, $pivotcost, $evasioncost;
-    public $currentturndelay = 0;
-    public $iniative = "N/A";
+    public $iniative = null;
     public $unmodifiedIniative = null;
     public $iniativebonus = 0;
-    public $iniativeadded = 0; //Initiative bonus difference - compared to base bonus! Just for display to player.
-    public $gravitic = false;
-    public $phpclass;
     public $forwardDefense, $sideDefense;
-    public $destroyed = false;
+
     public $pointCost = 0;
     public $faction = null;
-    public $slot;
     public $unavailable = false;
-    public $minesweeperbonus = 0;
-    public $base = false;
-    public $smallBase = false;
-    public $critRollMod = 0; //penalty to critical damage roll: positive means crit is more likely, negative less likely (for all systems)
 
-    public $jinkinglimit = 0; //just in case there will be a ship actually able to jink; NOT SUPPORTED!
-
-    public $enabledSpecialAbilities = array();
-
-    public $canvasSize = 200;
-
-    public $outerSections = array(); //for determining hit locations in GUI: loc, min, max, call (loc is location id, min/max is for arc, call is true if location systems can be called)
-
-    protected $activeHitLocations = array(); //$shooterID->targetSection ; no need for this to go public! just making sure that firing from one unit is assigned to one section
-    //following values from DB
     public $id, $userid, $name, $campaignX, $campaignY;
-    public $rolled = false;
-    public $rolling = false;
-    public $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
-
+    public $destroyed = false;
+    public $slot;
     public $team;
-    private $expectedDamage = array(); //loc=>dam; damage the unit is expected to take this turn (at outer locations), to decide where to take ambiguous shots
-
-    public $slotid;
-
-    public $movement = array();
-
-    protected $advancedArmor = false; //set to true if ship is equipped with advanced armor!
 
     public function __construct($id, $userid, $name, $slot)
     {
@@ -64,16 +35,10 @@ class BaseShip
         $this->userid = (int) $userid;
         $this->name = $name;
         $this->slot = $slot;
-        $this->fillLocationsGUI(); //so called shots work properly
-    }
-
-    public function getAdvancedArmor()
-    {
-        return $this->advancedArmor;
     }
 
     public function getCommonIniModifiers($gamedata)
-    { //common Initiative modifiers: speed, criticals
+    {
         $mod = 0;
 
         if (!($this instanceof OSAT)) {
@@ -124,76 +89,6 @@ class BaseShip
 
     public function getInitiativebonus($gamedata)
     {
-        if ($this->faction == "Centauri") {
-            return $this->doCentauriInitiativeBonus($gamedata);
-        }
-        if ($this->faction == "Yolu") {
-            return $this->doYoluInitiativeBonus($gamedata);
-        }
-        if ($this->faction == "Dilgar") {
-            return $this->doDilgarInitiativeBonus($gamedata);
-        }
-        return $this->iniativebonus;
-    }
-
-    private function doCentauriInitiativeBonus($gamedata)
-    {
-        foreach ($gamedata->ships as $ship) {
-            if (!$ship->isDestroyed()
-                && ($ship->faction == "Centauri")
-                && ($this->userid == $ship->userid)
-                && ($ship instanceof PrimusMaximus)
-                && ($this->id != $ship->id)) {
-                return ($this->iniativebonus + 5);
-            }
-        }
-        return $this->iniativebonus;
-    }
-
-    private function doDilgarInitiativeBonus($gamedata)
-    {
-
-        $mod = 0;
-
-        if ($gamedata->turn > 0 && $gamedata->phase >= 0) {
-            $pixPos = $this->getCoPos();
-            //TODO: Better distance calculation
-            $ships = $gamedata->getShipsInDistance($this, 9);
-
-            foreach ($ships as $ship) {
-                if (!$ship->isDestroyed()
-                    && ($ship->faction == "Dilgar")
-                    && ($this->userid == $ship->userid)
-                    && ($ship->shipSizeClass == 3)
-                    && ($this->id != $ship->id)) {
-                    $cnc = $ship->getSystemByName("CnC");
-                    $bonus = $cnc->output;
-                    if ($bonus > $mod) {
-                        $mod = $bonus;
-                    } else {
-                        continue;
-                    }
-
-                }
-            }
-        }
-        //    debug::log($this->phpclass."- bonus: ".$mod);
-        return $this->iniativebonus + $mod * 5;
-    }
-
-    private function doYoluInitiativeBonus($gamedata)
-    {
-        foreach ($gamedata->ships as $ship) {
-            if (!$ship->isDestroyed()
-                && ($ship->faction == "Yolu")
-                && ($this->userid == $ship->userid)
-                && ($ship instanceof Udran)
-                && ($this->id != $ship->id)) {
-                $cnc = $ship->getSystemByName("CnC");
-                $bonus = $cnc->output;
-                return ($this->iniativebonus + $bonus * 5);
-            }
-        }
         return $this->iniativebonus;
     }
 

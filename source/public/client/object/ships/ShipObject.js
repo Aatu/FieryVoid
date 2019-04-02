@@ -34,7 +34,16 @@ class ShipObject {
     this.startRotation = { x: 0, y: 0, z: 0 };
     this.rotation = { x: 0, y: 0, z: 0 };
 
+    this.loadedResolve = null;
+    this.loaded = new Promise((resolve, reject) => {
+      this.loadedResolve = resolve;
+    });
+
     this.consumeShipdata(this.ship);
+  }
+
+  getLoadedPromise() {
+    return this.loaded;
   }
 
   consumeShipdata(ship) {
@@ -82,6 +91,7 @@ class ShipObject {
 
   create() {
     this.createMesh();
+    this.loadedResolve(true);
   }
 
   setPosition(x, y) {
@@ -288,6 +298,7 @@ class ShipObject {
     this.BDEWSprite = null;
   }
 
+  /*
   positionAndFaceIcon(offset, movementService) {
     var movement = movementService.getLastEndMove(this.ship);
     var gamePosition = window.coordinateConverter.fromHexToGame(
@@ -305,6 +316,7 @@ class ShipObject {
     this.setPosition(gamePosition);
     this.setFacing(-facing);
   }
+  */
 
   hideMovementPath(ship) {
     if (this.movementPath) {
