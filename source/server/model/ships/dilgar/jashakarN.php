@@ -51,6 +51,32 @@ class JashakarN extends MediumShip{
         $this->addAftSystem(new LightBolter(1, 6, 2, 0, 120));
 		
         $this->addPrimarySystem(new Structure( 4, 48));
+	
+	$this->hitChart = array(
+		0=> array(
+			8 => "Thruster",
+			10 => "Port/Stb Light Bolter",
+			13 => "Scanner",
+			15 => "Engine",
+			16 => "Hangar",
+			19 => "Reactor",
+			20 => "C&C",
+		),
+		1=> array(
+			4 => "Thruster",
+			8 => "Medium Bolter",
+			17 => "Structure",
+			20 => "Primary",
+		),
+		2=> array(
+			6 => "Thruster",
+			8 => "Light Bolter",
+			10 => "Plasma Torch",
+			11 => "Engine",
+			17 => "Structure",
+			20 => "Primary",
+		),
+	);
     }
 }
 ?>
