@@ -54,7 +54,7 @@ class JashakarE extends MediumShip{
 	$this->hitChart = array(
 		0=> array(
 			8 => "Thruster",
-			10 => "Port/Stb Scatter-Pulsar",
+			10 => "Scatter Pulsar",
 			13 => "Scanner",
 			15 => "Engine",
 			16 => "Hangar",
