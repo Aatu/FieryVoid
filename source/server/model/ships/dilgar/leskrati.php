@@ -62,8 +62,47 @@ class Leskrati extends BaseShip{
         $this->addLeftSystem(new Structure( 4, 51));
         $this->addRightSystem(new Structure( 4, 51));
         $this->addPrimarySystem(new Structure( 5, 52));
-
-
+        
+        $this->hitChart = array(
+                0=> array(
+                    10 => "Structure",
+                    12 => "Jump Engine",
+                    14 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+                ),
+                1=> array(
+                    4 => "Thruster",
+                    6 => "Scatter Pulsar",
+                    8 => "Medium Laser",
+                    9 => "Energy Pulsar",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+                2=> array(
+                    6 => "Thruster",
+                    8 => "Scatter Pulsar",
+                    10 => "Engine",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+                3=> array(
+                    4 => "Thruster",
+                    6 => "Energy Pulsar",
+                    9 => "Scatter Pulsar",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+                4=> array(
+                    4 => "Thruster",
+                    6 => "Energy Pulsar",
+                    9 => "Scatter Pulsar",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+         );
     }
 
 }
