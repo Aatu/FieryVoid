@@ -75,12 +75,12 @@
         
         public static function getSupportedOEW($gamedata, $ship, $target)
         {
-            $jammer = $target->getSystemByName("jammer");
-
-            if($jammer != null && $jammer->getOutput()> 0 ){
-                // Jammer protected ships cannot be targetten for SOEW
-                            return 0;
-            }
+	    if ( ($ship->faction != $target->faction) && (!$ship->hasSpecialAbility("AdvancedSensors")) ){
+            	$jammer = $target->getSystemByName("jammer");
+		    if($jammer != null && $jammer->getOutput()> 0 ){ // Jammer protected ships cannot be targetten for SOEW
+			return 0;
+		    }
+	    }
             
             if (Mathlib::getDistanceHex( $target, $ship ) > 30)
                 return 0;
@@ -153,23 +153,18 @@
 
             foreach ($gamedata->ships as $elint)
             {
-                if ($elint->id === $ship->id)
-                    continue;
+                if ($elint->id === $ship->id) continue;
                 
-                if (!$elint->isElint())
-                    continue;
+                if (!$elint->isElint()) continue;
                 
-                if (Mathlib::getDistanceHex( $ship, $elint ) > 50)
-                    continue;
+                if (Mathlib::getDistanceHex( $ship, $elint ) > 50) continue;
 
                 $fdew = $elint->getEWByType("DIST", $gamedata->turn, $ship)*0.25;
 
                 //if (fdew > amount)
                 $amount += $fdew;
             }
-
-            if ($num > 0)
-                return $amount/$num;
-            return $amount;
+            if ($num > 0) return $amount/$num;
+            return 0; //NOT $amount;
         }
 	}
