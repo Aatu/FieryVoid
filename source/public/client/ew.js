@@ -479,7 +479,7 @@ window.ew = {
         }
         drawEntities();
     },
-
+ 
     resetEW: function resetEW(shipID) {
         var ship = gamedata.ships[shipID];
         ship.EW = new Array();        
