@@ -60,7 +60,7 @@ class Nitratha extends BaseShip{
         $this->addRightSystem(new Structure( 4, 45));
         $this->addPrimarySystem(new Structure( 4, 52));
         
-        this->hitChart = array(
+        $this->hitChart = array(
                 0=> array(
                     10 => "Structure",
                     12 => "Jump Engine",
@@ -98,7 +98,7 @@ class Nitratha extends BaseShip{
                     18 => "Structure",
                     20 => "Primary",
                 ),
-            );
+         );
     }
 }
 ?>
