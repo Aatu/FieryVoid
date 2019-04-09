@@ -70,6 +70,50 @@ class MishakurB extends BaseShip{
         $this->addLeftSystem(new Structure( 5, 60));
         $this->addRightSystem(new Structure( 5, 60));
         $this->addPrimarySystem(new Structure( 6, 64));
+        
+        $this->hitChart = array(
+                0=> array(
+                    10 => "Structure",
+                    12 => "Jump Engine",
+                    14 => "Scanner",
+                    16 => "Engine",
+                    17 => "Primary Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+                ),
+                1=> array(
+                    4 => "Thruster",
+                    6 => "Heavy Bolter",
+                    8 => "Scatter Pulsar",
+                    10 => "Medium Laser",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+                2=> array(
+                    6 => "Thruster",
+                    8 => "Aft Hangar",
+                    10 => "Scatter Pulsar",
+                    12 => "Engine",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+                3=> array(
+                    4 => "Thruster",
+                    6 => "Heavy Bolter",
+                    8 => "Port/Stb Hangar",
+                    10 => "Scatter Pulsar",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+                4=> array(
+                    4 => "Thruster",
+                    6 => "Heavy Bolter",
+                    8 => "Port/Stb Hangar",
+                    10 => "Scatter Pulsar",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+          );
     }
 }
 
