@@ -731,13 +731,6 @@ window.weaponManager = {
 
             if (shipManager.movement.hasCombatPivoted(shooter)) mod--;
         } else {
-            /* no longer needed, Piercing mode stats will be included in FC itself
-            if (weapon.piercing && weapon.firingMode == 2 && weapon.firingModes[1] !== "Piercing"){
-                mod -= 4;
-            }
-            */
-
-            //			if (shipManager.movement.hasRolled(shooter)){
             if (shipManager.movement.isRolling(shooter)) {
                 //		console.log("is rolling -3");
                 mod -= 3;
@@ -766,20 +759,29 @@ window.weaponManager = {
         if (ammo) mod += ammo.hitChanceMod;
 
         var jammermod = 0;
-
-        //		if (target.flight && distance > 10){
-        //			oew = 0;
-        //		}
-
+	    /*replac ed by lock penalty to allow half lock...
         if (oew < 1 && !shooter.flight) {
             rangePenalty = rangePenalty * 2;
-        } else if (shooter.faction != target.faction) {
+        } else*/
+	var noLockPenalty = 0;
+	var noLockMod = 0;
+	if (oew < 0.5){
+		noLockPenalty = 1;
+	}else if (oew < 1){ //OEW beteen 0.5 and 1 is achievable for targets of Distortion EW
+		noLockPenalty = 0.5;
+	}
+	noLockMod =  rangePenalty * noLockPenalty;    
+	    
+	if (shooter.faction != target.faction) {
             var jammer = shipManager.systems.getSystemByName(target, "jammer");
             var stealth = shipManager.systems.getSystemByName(target, "stealth");
 
             if (jammer && !shipManager.power.isOffline(target, jammer)) jammermod = rangePenalty * shipManager.systems.getOutput(target, jammer);
 		
             if (stealth && mathlib.getDistanceBetweenShipsInHex(shooter, target) > 5) jammermod = rangePenalty;
+		
+	    jammermod = jammermod - noLockMod; //noLock does the same thing as Jammer, but cannot be overcame by sensors
+	    if (jammermod < 0) jammermod = 0; //cannot reduce below 0
 
 	   if (jammermod > 0){	 //else Improved Sensors do nothing
 		/*Improved/Advanced Sensors bonus*/	/*hasSpecialAbility isn't working correctly on fighter, ability is not propagated beyond system level - possibly needs correction*/
