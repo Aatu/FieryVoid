@@ -311,6 +311,17 @@ class Weapon extends ShipSystem
         }
         return false;
     }
+	
+    public function firedOffensivelyOnTurn($turn)
+    {
+        //if ($this instanceof DualWeapon && isset($this->turnsFired[$turn])) return true;
+        foreach ($this->fireOrders as $fire) {
+            if ( (strpos($fire->type, 'ntercept') == false) && $fire->weaponid == $this->id && $fire->turn == $turn) {
+                return true;
+            } 
+        }
+        return false;
+    }
 
     private function formatFCValue($fc)
     {
