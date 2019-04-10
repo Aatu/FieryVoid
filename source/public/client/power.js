@@ -277,10 +277,10 @@ shipManager.power = {
 			/*standard: add power for every system powered off
 			  fixed: subtract power for every system powered on (instead!)
 			*/
-			if (!system.destroyed){ //destroyed system gets no power either way...
+			if ( (!system.destroyed) && (!shipManager.power.isOfflineOnTurn(ship,system,gamedata.turn) ) ){ //destroyed system gets no power either way... and so does disabled system!
 				if (fixedPower==true){ //for Mag-Grav reactor: all systems draw power, unless off or destroyed (accounted for in a moment)
 					output -= system.powerReq;
-				}
+				}					
 				var isOff = false;
 				var boostValue; //Power spent on boosting system
 				boostValue = 0;
