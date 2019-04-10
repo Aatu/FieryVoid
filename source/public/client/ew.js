@@ -83,25 +83,24 @@ window.ew = {
     },
 
     getTargetingEW: function getTargetingEW(ship, target) {
-
+        var amountOEW = 0;
         if (target.flight) {
-            return ew.getCCEW(ship);
-        } else {
+            amountOEW += ew.getCCEW(ship);
+            //return ew.getCCEW(ship);
+        } /*else {
             return ew.getOffensiveEW(ship, target);
-        }
+        }*/
+        amountOEW += ew.getOffensiveEW(ship, target);
+        return amountOEW;
     },
 
     getOffensiveEW: function getOffensiveEW(ship, target, type) {
-
         type = type || "OEW";
-
         for (var i in ship.EW) {
             var entry = ship.EW[i];
             if (entry.turn !== gamedata.turn) continue;
-
             if (entry.type === type && entry.targetid === target.id) return entry.amount;
         }
-
         return 0;
     },
 
@@ -110,10 +109,8 @@ window.ew = {
         for (var i in ship.EW) {
             var entry = ship.EW[i];
             if (entry.turn != gamedata.turn) continue;
-
             if (entry.type == "OEW") amount += entry.amount;
         }
-
         return amount;
     },
 
@@ -122,10 +119,8 @@ window.ew = {
         for (var i in ship.EW) {
             var entry = ship.EW[i];
             if (entry.turn != gamedata.turn) continue;
-
-            if (entry.type == "OEW") amount++;
+            if ((entry.type == "OEW") || (entry.type == "CCEW" && entry.amount > 0)) amount++;
         }
-
         return amount;
     },
 
@@ -133,25 +128,17 @@ window.ew = {
         for (var i in ship.EW) {
             var entry = ship.EW[i];
             if (entry.turn != gamedata.turn) continue;
-
             if (target && entry.targetid != target.id) continue;
-
             if (entry.type == type) {
                 return entry.amount;
             }
         }
-
         return 0;
     },
 
     convertUnusedToDEW: function convertUnusedToDEW(ship) {
-        /*
-        var listed = ew.getListedDEW(ship);
-        if (listed > 0) return;
-        */
         var dew = ew.getScannerOutput(ship) - ew.getUsedEW(ship);
-        if (dew < 0) {
-            //DEW should be negative - reset EW in this case! (most probably Sensors disabled after setting EW)
+        if (dew < 0) { //DEW should NOT be negative - reset EW in this case! (most probably Sensors disabled after setting EW)
             this.removeEW(ship);
             dew = ew.getScannerOutput(ship) - ew.getUsedEW(ship);
         }
@@ -159,14 +146,12 @@ window.ew = {
     },
 
     getListedDEW: function getListedDEW(ship) {
-
         for (var i in ship.EW) {
             var entry = ship.EW[i];
             if (entry.turn != gamedata.turn) continue;
 
             if (entry.type == "DEW") return entry.amount;
         }
-
         return null;
     },
 
@@ -479,7 +464,7 @@ window.ew = {
         }
         drawEntities();
     },
-
+ 
     resetEW: function resetEW(shipID) {
         var ship = gamedata.ships[shipID];
         ship.EW = new Array();        

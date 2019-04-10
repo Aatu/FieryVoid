@@ -17,9 +17,11 @@ GravitonPulsar.prototype.initBoostableInfo = function () {
     // because of adding extra power.   
 
     if (window.weaponManager.isLoaded(this)) {
+        /*no longer needed
         this.loadingtime = 1 + shipManager.power.getBoost(this);
         this.turnsloaded = 1 + shipManager.power.getBoost(this);
         this.normalload = 1 + shipManager.power.getBoost(this);
+        */
     } else {
         var count = shipManager.power.getBoost(this);
 
@@ -68,9 +70,11 @@ GraviticBolt.prototype.initBoostableInfo = function () {
     // because of adding extra power.
 
     if (window.weaponManager.isLoaded(this)) {
+        /*no longer needed!
         this.loadingtime = 1 + shipManager.power.getBoost(this);
         this.turnsloaded = 1 + shipManager.power.getBoost(this);
         this.normalload = 1 + shipManager.power.getBoost(this);
+        */
     } else {
         var count = shipManager.power.getBoost(this);
 

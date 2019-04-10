@@ -616,29 +616,28 @@ class BaseShip {
     }
 
     public function getOEW($target, $turn){
-
+	$totalAmount = 0;
         if ($target instanceof FighterFlight){
             foreach ($this->EW as $EW){
                 if ($EW->type == "CCEW" && $EW->turn == $turn)
-                    return $EW->amount;
-            }
-        }else{
-            foreach ($this->EW as $EW){
-                if ($EW->type == "OEW" && $EW->targetid == $target->id && $EW->turn == $turn)
-                    return $EW->amount;
+                    //return $EW->amount;
+			$totalAmount += $EW->amount;
             }
         }
-
-
-
-        return 0;
+	    //OEW vs fighters is now possible too! else{
+            foreach ($this->EW as $EW){
+                if ($EW->type == "OEW" && $EW->targetid == $target->id && $EW->turn == $turn)
+                    //return $EW->amount;
+			$totalAmount += $EW->amount;
+            }
+        //}
+        return $totalAmount;
     }
 
     public function getOEWTargetNum($turn){
-
         $amount = 0;
         foreach ($this->EW as $EW){
-            if ($EW->type == "OEW" && $EW->turn == $turn)
+            if ( ($EW->type == "OEW" || ($EW->type == "CCEW" && $EW->amount>0)) && $EW->turn == $turn)
                 $amount++;
         }
 

@@ -458,7 +458,7 @@ class ElintScanner extends Scanner implements SpecialAbility{
         $this->data["Special"] .= "<br> - SOEW: indicated friendly ship gets half of ElInt ships' OEW bonus.";		     
         $this->data["Special"] .= "<br> - SDEW: boosts target's DEW (by 1 for 2 points allocated).";		     
         $this->data["Special"] .= "<br> - Blanket Protection: all friendly units within 20 hexes (incl. fighters) get +1 DEW per 4 points allocated.";		     
-        $this->data["Special"] .= "<br> - Disruption: Reduces target enemy ships' OEW by 1 per 3 points allocated (split evenly between enemy locks). If all locks are broken, CCEW lock is also broken.";	
+        $this->data["Special"] .= "<br> - Disruption: Reduces target enemy ships' OEW and CCEW by 1 per 3 points allocated (split evenly between targets, CCEW being counted as one target; cannot bring OEW on a target below 0). ";	
     }
 	/*
 	public function markImproved(){	parent::markImproved();   }
