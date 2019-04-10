@@ -65,7 +65,9 @@ const getEW = ship => {
     let list = [];
 
     list.push(<Entry key={`dew-scs-${ship.id}`}><EntryHeader>DEW:</EntryHeader>{ew.getDefensiveEW(ship)}</Entry>);
-    list.push(<Entry key={`ccew-scs-${ship.id}`}><EntryHeader>CCEW:</EntryHeader>{ew.getCCEW(ship)}</Entry>);
+    var CCEWamount = ew.getCCEW(ship) - ew.getDistruptionEW(ship);
+    list.push(<Entry key={`ccew-scs-${ship.id}`}><EntryHeader>CCEW:</EntryHeader>{CCEWamount}</Entry>);
+
 
     const bdew = ew.getBDEW(ship) * 0.25;
     
