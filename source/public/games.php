@@ -62,6 +62,8 @@ if (isset($_SESSION["user"])) {
         -->
         The latest update includes:
         <br><br>
+        - <b>Fighter pilots missile guidance even when firing defensively</b> - as it's out of player control
+        <br>
         - <b>Distortion EW overhaul</b> - detailed changes include:
         <br> -- CCEW is now treated as just another OEW channel
         <br> -- Partial lock introduced: if EW on target is less than 1 but still at least 0.5, range penalty is multiplied by 1.5 instead of being doubled
