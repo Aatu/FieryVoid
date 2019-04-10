@@ -53,7 +53,7 @@ if (isset($_SESSION["user"])) {
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
 <div class="panel news">
-    <div id="newsHeader">Latest News - March 2019</div>
+    <div id="newsHeader">Latest News - April 2019</div>
     <div id="newsEntry">
         <!--
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
@@ -62,11 +62,14 @@ if (isset($_SESSION["user"])) {
         -->
         The latest update includes:
         <br><br>
-        - <b>System description on fleet selection</b> - FIXED, shows up again.
-        <br>
+        - <b>Distortion EW overhaul</b> - detailed changes include:
+        <br> -- CCEW is now treated as just another OEW channel
+        <br> -- Partial lock introduced: if EW on target is less than 1 but still at least 0.5, range penalty is multiplied by 1.5 instead of being doubled
+        <!--<br>
         - <b>Power usage</b> - shown in system data.
         <br>
         - <b>Game description</b> modified to include rules options used.
+        -->
         
         <br><br>
         - last but not least - brand new collection of BUGS!;
