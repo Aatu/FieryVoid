@@ -159,7 +159,7 @@
                 
                 if (Mathlib::getDistanceHex( $ship, $elint ) > 50) continue;
 
-                $fdew = $elint->getEWByType("DIST", $gamedata->turn, $ship)*0.25;
+                $fdew = $elint->getEWByType("DIST", $gamedata->turn, $ship) / 3 ;//NOT *0.25;
 
                 //if (fdew > amount)
                 $amount += $fdew;

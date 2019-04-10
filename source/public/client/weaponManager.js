@@ -804,7 +804,7 @@ window.weaponManager = {
 
         var firecontrol = weaponManager.getFireControl(target, weapon);
 
-        var goal = baseDef - jammermod - rangePenalty + oew + soew + firecontrol + mod;
+        var goal = baseDef - jammermod - noLockMod - rangePenalty + oew + soew + firecontrol + mod;
 
         var change = Math.round(goal / 20 * 100);
         //	console.log("rangePenalty: " + rangePenalty + "jammermod: "+jammermod+" baseDef: " + baseDef + " oew: " + oew + " soew: "+soew+" firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);

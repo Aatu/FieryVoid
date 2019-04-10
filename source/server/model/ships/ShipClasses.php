@@ -637,7 +637,7 @@ class BaseShip {
     public function getOEWTargetNum($turn){
         $amount = 0;
         foreach ($this->EW as $EW){
-            if ( ($EW->type == "OEW" || $EW->type == "CCEW") && $EW->turn == $turn)
+            if ( ($EW->type == "OEW" || ($EW->type == "CCEW" && $EW->amount>0)) && $EW->turn == $turn)
                 $amount++;
         }
 

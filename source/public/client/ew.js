@@ -119,7 +119,7 @@ window.ew = {
         for (var i in ship.EW) {
             var entry = ship.EW[i];
             if (entry.turn != gamedata.turn) continue;
-            if ((entry.type == "OEW") || (entry.type == "CCEW")) amount++;
+            if ((entry.type == "OEW") || (entry.type == "CCEW" && entry.amount > 0)) amount++;
         }
         return amount;
     },
