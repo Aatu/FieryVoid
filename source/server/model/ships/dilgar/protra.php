@@ -55,6 +55,44 @@ class Protra extends BaseShip{
         $this->addLeftSystem(new Structure( 4, 36));
         $this->addRightSystem(new Structure( 4, 36));
         $this->addPrimarySystem(new Structure( 4, 32));
+        
+        $this->hitChart = array(
+                0=> array(
+                    9 => "Structure",
+                    11 => "Jump Engine",
+                    14 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+                ),
+                1=> array(
+                    4 => "Thruster",
+                    5 => "Heavy Plasma Cannon",
+                    7 => "Plasma Torch",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+                2=> array(
+                    6 => "Thruster",
+                    8 => "Plasma Torch",
+                    9 => "Engine",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+                3=> array(
+                    5 => "Thruster",
+                    7 => "Light Laser",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+                4=> array(
+                    5 => "Thruster",
+                    7 => "Light Laser",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+         );
     }
 }
 
