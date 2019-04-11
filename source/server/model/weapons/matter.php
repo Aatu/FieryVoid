@@ -206,41 +206,7 @@
 		if ($system == null || $system->isDestroyed()) return; //PRIMARY Structure nonexistent also
 		$this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, $tmpLocation);
 	}	    
-	    
-	    /* Marcin Sawicki, October 2017 - fire() and calculateHit() functions changed (new versions above)
-	public function damage($target, $shooter, $fireOrder, $gamedata, $damage){ //always hit Structure...
-		if ($target->isDestroyed()) return;
-		$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
-
-		$system = $target->getStructureSystem($tmpLocation);
-		if ($system == null || $system->isDestroyed()) $system = $target->getStructureSystem(0);//facing Structure nonexistent, go to PRIMARY
-		if ($system == null || $system->isDestroyed()) return; //PRIMARY Structure nonexistent also
-		$this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, $tmpLocation);
-	}
-	    
-	public function calculateHit($gamedata, $fireOrder){ //auto-miss if restrictions not met
-		$canHit = true;
-		$pubnotes = '';
-		
-		$shooter = $gamedata->getShipById($fireOrder->shooterid);
-		$target = $gamedata->getShipById($fireOrder->targetid);
-		
-		if(!$target->Enormous){	$canHit=false; $pubnotes.= ' Target is not Enormous. '; }
-		if($target->getSpeed()>0){ $canHit=false; $pubnotes.= ' Target speed >0. '; }
-		if($shooter->getSpeed()>0){ $canHit=false; $pubnotes.= ' Shooter speed >0. '; }
-			
-		if($canHit){
-			parent::calculateHit($gamedata, $fireOrder);
-		}else{ //accurate targeting with this weapon not possible!
-			$fireOrder->needed = 0;
-        		$fireOrder->notes = 'ACCURATE FIRING CRITERIA NOT MET';
-			$fireOrder->pubnotes .= $pubnotes;   
-        		$fireOrder->updated = true;
-		}
-	}
-	    */
-	    
-	    
+	    	    
 	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
@@ -331,7 +297,17 @@
         {
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-
+	    
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+            $this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
+        }
+	    
         public function getDamage($fireOrder){        return Dice::d(6, 2);   }
         public function setMinDamage(){     $this->minDamage = 2 ;      }
         public function setMaxDamage(){     $this->maxDamage = 12 ;      }
@@ -346,6 +322,7 @@
         {
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
+
         public function getDamage($fireOrder){        return Dice::d(6, 2);   }
         public function setMinDamage(){     $this->minDamage = 2 ;      }
         public function setMaxDamage(){     $this->maxDamage = 12 ;      }
@@ -400,6 +377,7 @@
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Special"] = "Ignores armor.";
+            $this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
             $this->data["Ammunition"] = $this->ammunition;
         }
 
