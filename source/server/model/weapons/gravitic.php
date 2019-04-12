@@ -761,6 +761,120 @@ class GraviticLanceOld extends DualWeapon{
     }
 */
 
+/*new version*/
+    class GraviticCutter extends Raking
+    {
+        public $name = "graviticCutter";
+        public $displayName = "Gravitic Cutter";
+        public $animation = "laser";
+        public $animationColor = array(99, 255, 00);
+        public $animationWidth = 2;
+        public $animationWidth2 = 0.2;
+        public $priority = 8;
+        
+        public $raking = 6;
+
+        public $boostable = true;
+        public $boostEfficiency = 5;
+        public $maxBoostLevel = 1;
+        public $loadingtime = 2;
+		
+        public $rangePenalty = 0.5;
+        public $fireControl = array(-4, 2, 4); // fighters, <mediums, <capitals 
+        
+	public $damageType = 'Raking'; 
+    	public $weaponClass = "Gravitic"; 
+	    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){            
+            if($this->getBoostLevel($turn)==0){
+                $this->raking = 6;
+            }
+            else{
+                $this->raking = 8;
+            }            
+            parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= 'Can be boosted for increased raw damage (13-40) and rake size (8). Requires a turn of cooldown if fired boosted.';		
+        }
+        
+        
+        public function fire($gamedata, $fireOrder){
+	    $currBoostlevel = $this->getBoostLevel($gamedata->turn);
+            if($this->getBoostLevel($fireOrder->turn)==0){
+                $this->raking = 6;
+            }
+            else{
+                $this->raking = 8;
+            }		
+                        
+            parent::fire($gamedata, $fireOrder);
+	    //if boosted, cooldown (1 turn)
+	     if($currBoostlevel > 0){ //1 turn forced shutdown
+		$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
+                $crit->updated = true;
+                $this->criticals[] =  $crit;
+	     }
+        }
+
+        public function getNormalLoad(){
+            return $this->loadingtime + $this->maxBoostLevel;
+        }
+        
+        private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn)
+                            continue;
+
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
+            }
+            return $boostLevel;
+        }
+
+        public function getDamage($fireOrder){
+            if($this->getBoostLevel($fireOrder->turn)==0){
+                $this->raking = 6;
+                return (Dice::d(10, 2)+8);
+            }
+            else{
+                $this->raking = 8;
+                return (Dice::d(10, 3)+10);
+            }
+        }
+        
+        public function setMinDamage(){
+            if($this->getBoostLevel(TacGameData::$currentTurn)==0){
+                $this->minDamage = 10 ;
+            }
+            else{
+                $this->minDamage = 13 ;
+            }
+        }
+        
+        public function setMaxDamage(){
+            if($this->getBoostLevel(TacGameData::$currentTurn)==0){
+                $this->maxDamage = 28 ;
+            }
+            else{
+                $this->maxDamage = 40 ;
+            }
+        }
+    } //endof GraviticCutter
+
+
+
+/*Marcin Sawicki: old version
     class GraviticCutter extends Raking
     {
         public $name = "graviticCutter";
@@ -790,7 +904,7 @@ class GraviticLanceOld extends DualWeapon{
         }
 
         public function setSystemDataWindow($turn){
-           // $this->setTimes(); //I THINK it's not needed any more
+            $this->setTimes(); //I THINK it's not needed any more
 //            $this->normalload = $this->loadingtime;
             
             if($this->getBoostLevel($turn)==0){
@@ -891,5 +1005,5 @@ class GraviticLanceOld extends DualWeapon{
             }
         }
     }
-    
+*/    
 ?>
