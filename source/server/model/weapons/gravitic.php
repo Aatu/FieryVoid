@@ -656,6 +656,7 @@ class GraviticLance extends Raking{
 
 
 /*old GraviticLance, no longer used!*/
+/* commenting out...
 class GraviticLanceOld extends DualWeapon{
     public $priority = 7;
 
@@ -758,7 +759,7 @@ class GraviticLanceOld extends DualWeapon{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons);
         }
     }
-
+*/
 
     class GraviticCutter extends Raking
     {
@@ -789,10 +790,7 @@ class GraviticLanceOld extends DualWeapon{
         }
 
         public function setSystemDataWindow($turn){
-            // Keep this consistent with the gravitic.js implementation.
-            // Yeah, I know: dirty.
-            $this->data["REMARK"] = "This weapon is always in<br>sustained mode.";
-            $this->setTimes();
+           // $this->setTimes(); //I THINK it's not needed any more
 //            $this->normalload = $this->loadingtime;
             
             if($this->getBoostLevel($turn)==0){
