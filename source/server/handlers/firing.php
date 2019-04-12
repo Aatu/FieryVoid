@@ -16,13 +16,13 @@ class Firing
     public static function compareInterceptAbility($weaponA, $weaponB)
     {
         if ($weaponA->intercept > $weaponB->intercept) {
-            return 1;
+            return -1;
         } else if ($weaponA->intercept < $weaponB->intercept) {
-            return -1;
-        } else if ($weaponA->loadingtime < $weaponB->loadingtime) {
             return 1;
-        } else if ($weaponA->loadingtime > $weaponB->loadingtime) {
+        } else if ($weaponA->loadingtime < $weaponB->loadingtime) {
             return -1;
+        } else if ($weaponA->loadingtime > $weaponB->loadingtime) {
+            return 1;
         } else {
             return 0;
         }

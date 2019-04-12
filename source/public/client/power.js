@@ -277,11 +277,29 @@ shipManager.power = {
 			/*standard: add power for every system powered off
 			  fixed: subtract power for every system powered on (instead!)
 			*/
-			if ( (!system.destroyed) && (!shipManager.power.isOfflineOnTurn(ship,system,gamedata.turn) ) ){ //destroyed system gets no power either way... and so does disabled system!
+			if ( (!system.destroyed)   ){ //destroyed system gets no power either way
 				if (fixedPower==true){ //for Mag-Grav reactor: all systems draw power, unless off or destroyed (accounted for in a moment)
 					output -= system.powerReq;
 				}					
-				var isOff = false;
+				var isOff = shipManager.power.isOfflineOnTurn(ship,system,gamedata.turn) ;
+
+				if (isOff == true){
+					output += system.powerReq; //power off => base power is available after all; ignore boosts, if any
+				} else {
+					for (var i in system.power){
+						var power = system.power[i];
+						if (power.turn != gamedata.turn) continue;
+						//types: 1:offline 2:boost, 3:overload
+						if (power.type == 1) isOff = true; //should not happen as it was accounted for earlier
+						if (power.type == 2){
+							var currBoost = shipManager.power.countBoostPowerUsed(ship, system);
+							output -= currBoost;
+						}
+						if (power.type == 3) output -= system.powerReq;
+					}
+				}
+				
+				/* 
 				var boostValue; //Power spent on boosting system
 				boostValue = 0;
 				for (var i in system.power){
@@ -300,6 +318,7 @@ shipManager.power = {
 					output += system.powerReq; //power off => base power is available after all
 					output += boostValue; //power off => power used to boost is available after all
 				}
+				*/
 			}
 		}
 
@@ -311,9 +330,23 @@ shipManager.power = {
 
 		if (shipManager.systems.isReactorDestroyed(ship) || shipManager.criticals.hasCritical(reactor, "ForcedOfflineOneTurn")) return true;
 
+		
 		var power = shipManager.power.getReactorPower(ship, reactor);
 
-		if (this.countPossiblePower(ship) + power > 0) return false;
+		if (this.countPossiblePower(ship) + power > 0) {
+			return false;			
+		}
+		
+		/*check if all power-using systems are offline - if not, then it's not powerless*/
+		for (var i in ship.systems) {
+			var system = ship.systems[i];
+			if (system.powerReq > 0) {
+				//system is neither destroyed nor offline
+				if ( (!shipManager.systems.isDestroyed(ship, system)) && (!shipManager.power.isOfflineOnTurn(ship,system,gamedata.turn)) )	{
+					return false;
+				}
+			}
+		}
 
 		return true;
 	},
@@ -332,6 +365,8 @@ shipManager.power = {
 	
 	},
 	
+
+	
 	isOfflineOnTurn: function(ship, system, turn){
 		
 		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
@@ -341,9 +376,11 @@ shipManager.power = {
 			return true;
 		}
 
-		if ((system.powerReq > 0 || system.name == "reactor") && this.isPowerless(ship)){
+		/* Marcin Sawicki - I _think_ this condition may be skipped
+		if ((system.powerReq > 0 || system.name == "reactor") && this.isPowerless(ship)){ 
 			return true;
 		}
+		*/
 
 		for (var i in system.power){
 			var power = system.power[i];
@@ -357,31 +394,6 @@ shipManager.power = {
 
 	isOffline: function(ship, system){
 		return shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn);
-		/*
-		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
-			return true;		
-		}
-
-		if (shipManager.criticals.hasCritical(system, "ForcedOfflineForTurns")) {
-			//		var crit = shipManager.criticals.getCritical(system, "ForcedOfflineForTurns");
-
-			//		if (gamedata.turn >= crit.turn && gamedata.turn <= crit.turn + crit.param){
-			return true;
-		}
-		//	}
-
-
-		if ((system.powerReq > 0 || system.name == "reactor") && this.isPowerless(ship)) return true;
-
-		for (var i in system.power) {
-			var power = system.power[i];
-			if (power.turn != gamedata.turn) continue;
-
-			if (power.type == 1) return true;
-		}
-
-		return false;
-		*/
 	},
 
 	setOnline: function setOnline(ship, system) {
@@ -435,8 +447,7 @@ shipManager.power = {
 
 		for (var i = 0; i < ship.systems.length; i++) {
 			var sys = ship.systems[i];
-
-			//if (sys.name == "scanner" || sys.name == "elintScanner"){
+			
 			if (sys.isScanner()) {
 				var online = true;
 				for (var j in sys.power) {
