@@ -102,7 +102,7 @@ class GarasochD extends BaseShip{
                     7 => "Heavy Bolter",                    
                     8 => "Scatter Pulsar",
                     18 => "Structure",
-                    20 => "Primary",,
+                    20 => "Primary",
                 ),
         );
     }
