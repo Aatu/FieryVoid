@@ -1954,7 +1954,7 @@ shipManager.movement = {
                         orientationRequired = 1;
                         break;
                 }
-            }else if (shipManager.movement.isPivotedStbd(ship)){//pivoted to Stbd means: Stbd if Main, Main is Port, Port is Retro, Retro is Stbd
+            }else if (shipManager.movement.isPivotedStbd(ship)){//pivoted to Stbd means: Stbd is Main, Main is Port, Port is Retro, Retro is Stbd
                 switch(orientationRequired) {
                     case 1: 
                         orientationRequired = 4;
