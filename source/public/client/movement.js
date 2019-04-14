@@ -1996,8 +1996,8 @@ shipManager.movement = {
     /*is pivoted to Stbd == goes Port-forward*/
     isPivotedStbd: function isPivotedStbd(ship) {
         if (!shipManager.movement.isOutOfAlignment(ship)) return false; //ship in alignment is certainly not pivoted anywhere
-        if (!shipManager.movement.isPivotedPort(ship)) return false; //ship pivoted to Port is not pivoted to Starboard
-        return false;
+        if (shipManager.movement.isPivotedPort(ship)) return false; //ship pivoted to Port is not pivoted to Starboard
+        return true;
     },
     
     
