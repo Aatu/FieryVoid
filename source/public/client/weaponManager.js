@@ -691,6 +691,9 @@ window.weaponManager = {
     }, //endof calculateRamChance
 
     calculateHitChange: function calculateHitChange(shooter, target, weapon, calledid) {
+	if (weapon.isRammingAttack) {
+		return weaponManager.calculateRamChance(shooter, target, weapon, calledid);
+	}
         var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
         var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
         var sPosHex = shipManager.getShipPosition(shooter);
