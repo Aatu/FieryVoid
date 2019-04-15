@@ -70,9 +70,9 @@ if (isset($_SESSION["user"])) {
         <br>
             <b>Gravitic Drive fix</b> - thruster allocation while pivoted
         <br>
-            <b>Ramming fix</b> - hit chance display corrcted, and long-range ramming disabled :)
+            <b>Ramming fix</b> - hit chance display corrected, and long-range ramming disabled :)
         <br>
-            <b>New hit chars</b> - Dilgar got new hit charts, courtesu of Jonathan (yes I know these charts are not displayed in game... working on that!)
+            <b>New hit chars</b> - Dilgar got new hit charts, courtesy of Jonathan (yes I know these charts are not displayed in game... working on that!)
         <!--<br>
         - <b>Power usage</b> - shown in system data.
         <br>
