@@ -1942,31 +1942,31 @@ shipManager.movement = {
             if(shipManager.movement.isPivotedPort(ship)){ //pivoted to Port means: Stbd is Retro, Main is Stbd, Port is Main, Retro is Port
                 switch(orientationRequired) {
                     case 1: 
-                        orientationRequired = 3;
-                        break;
-                    case 2: 
                         orientationRequired = 4;
                         break;
+                    case 2: 
+                        orientationRequired = 3;
+                        break;
                     case 3: 
-                        orientationRequired = 2;
+                        orientationRequired = 1;
                         break;
                     case 4: 
-                        orientationRequired = 1;
+                        orientationRequired = 2;
                         break;
                 }
-            }else if (shipManager.movement.isPivotedStbd(ship)){//pivoted to Stbd means: Stbd if Main, Main is Port, Port is Retro, Retro is Stbd
+            }else if (shipManager.movement.isPivotedStbd(ship)){//pivoted to Stbd means: Stbd is Main, Main is Port, Port is Retro, Retro is Stbd
                 switch(orientationRequired) {
                     case 1: 
-                        orientationRequired = 4;
-                        break;
-                    case 2: 
                         orientationRequired = 3;
                         break;
+                    case 2: 
+                        orientationRequired = 4;
+                        break;
                     case 3: 
-                        orientationRequired = 1;
+                        orientationRequired = 2;
                         break;
                     case 4: 
-                        orientationRequired = 2;
+                        orientationRequired = 1;
                         break;
                 }
             }
