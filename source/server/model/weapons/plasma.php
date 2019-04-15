@@ -294,7 +294,12 @@ class PlasmaTorch extends Plasma{
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-			$this->data["Remark"] .= "<br>If fired, Plasma Torch may overheat.";
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}			
+			$this->data["Special"] .= "If fired, Plasma Torch may overheat.";
 		}
 	
         public function fire($gamedata, $fireOrder){

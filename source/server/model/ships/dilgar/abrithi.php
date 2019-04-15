@@ -56,7 +56,7 @@ class Abrithi extends BaseShip{
         $this->addLeftSystem(new Structure( 4, 39));
         $this->addRightSystem(new Structure( 4, 39));
         $this->addPrimarySystem(new Structure( 5, 36));
-        
+/*        
         $this->hitChart = array(
                 0=> array(
                     10 => "Structure",
@@ -93,6 +93,7 @@ class Abrithi extends BaseShip{
                     20 => "Primary",
                 ),
         );
+		*/
     }
 
 }
