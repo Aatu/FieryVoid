@@ -57,6 +57,44 @@ class Tratharti extends BaseShip{
         $this->addLeftSystem(new Structure( 5, 48));
         $this->addRightSystem(new Structure( 5, 48));
         $this->addPrimarySystem(new Structure( 5, 52));
+        
+        $this->hitChart = array(
+                0=> array(
+                    13 => "Structure",
+                    15 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+                ),
+                1=> array(
+                    4 => "Thruster",
+                    6 => "Medium Laser",
+                    9 => "Mass Driver",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+                2=> array(
+                    6 => "Thruster",
+                    8 => "Heavy Bolter",
+                    10 => "Scatter Pulsar",
+                    11 => "Engine",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+                3=> array(
+                    6 => "Thruster",
+                    10 => "Heavy Bolter",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+                4=> array(
+                    6 => "Thruster",
+                    10 => "Heavy Bolter",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+         );
     }
 }
 ?>

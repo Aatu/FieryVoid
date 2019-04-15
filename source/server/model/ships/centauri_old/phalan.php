@@ -38,13 +38,14 @@ class Phalan extends FighterFlight{
 			
 			
 			$fighter->addFrontSystem(new PairedPlasmaBlaster(330, 30, 0));
-			$fighter->addFrontSystem(new PlasmaGun(330, 30, 0));
-			
+			//$fighter->addFrontSystem(new PlasmaGun(330, 30, 0));  
+		        $largeGun = new PlasmaGun(330, 30, 0); 
+            		$largeGun->exclusive = true; 
+            		$fighter->addFrontSystem($largeGun);			
 			
 			$this->addSystem($fighter);
 			
-		}
-		
+		}	
 		
     }
 

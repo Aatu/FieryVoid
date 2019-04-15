@@ -55,6 +55,33 @@ class OchlavitaM extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure(5, 40));
         $this->addAftSystem(new Structure(5, 40));
         $this->addPrimarySystem(new Structure(5, 52));
+	    
+	$this->hitChart = array(
+		0=> array(
+			10 => "Structure",
+			13 => "Thruster",
+			15 => "Scanner",
+			16 => "Engine",
+			17 => "Hangar",
+			19 => "Reactor",
+			20 => "C&C",
+		),
+		1=> array(
+			4 => "Thruster",
+			8 => "Class-S Missile Rack",
+			11 => "Scatter Pulsar",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		2=> array(
+			6 => "Thruster",
+			8 => "Class-S Missile Rack",
+			10 => "Scatter Pulsar",
+			11 => "Engine",
+			18 => "Structure",
+			20 => "Primary",
+		),
+	 );
     }
 }
 ?>

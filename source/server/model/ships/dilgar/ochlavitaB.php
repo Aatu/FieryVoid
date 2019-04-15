@@ -56,6 +56,33 @@ class OchlavitaB extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure(5, 40));
         $this->addAftSystem(new Structure(5, 40));
         $this->addPrimarySystem(new Structure(5, 52));
+	$this->hitChart = array(
+		0=> array(
+			9 => "Structure",
+			12 => "Thruster",
+			14 => "Scanner",
+			15 => "Engine",
+			17 => "Hangar",
+			19 => "Reactor",
+			20 => "C&C",
+		),
+		1=> array(
+			4 => "Thruster",
+			6 => "Light Bolter",
+			8 => "Medium Bolter",
+			10 => "Point Pulsar",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		2=> array(
+			6 => "Thruster",
+			8 => "Medium Bolter",
+			10 => "Scatter Pulsar",
+			11 => "Engine",
+			18 => "Structure",
+			20 => "Primary",
+		),
+	 );
     }
 }
 ?>

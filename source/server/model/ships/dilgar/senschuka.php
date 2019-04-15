@@ -45,6 +45,32 @@ class Senschuka extends MediumShip{
         $this->addAftSystem(new LightBolter(1, 6, 2, 60, 240));
 
         $this->addPrimarySystem(new Structure( 3, 44));
+        
+        $this->hitChart = array(
+                0=> array(
+                    8 => "Thruster",
+                    12 => "Plasma Torch",
+                    14 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+                ),
+                1=> array(
+                    4 => "Thruster",
+                    6 => "Light Bolter",
+                    8 => "Medium Bolter",
+                    17 => "Structure",
+                    20 => "Primary",
+                ),
+                2=> array(
+                    6 => "Thruster",
+                    8 => "Light Bolter",
+                    10 => "Engine",
+                    17 => "Structure",
+                    20 => "Primary",
+                ),
+          );
     }
 }
 ?>

@@ -12,6 +12,12 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			if ($this->raking != 10) {//inform about non-standard rake size
+				$this->data["Special"] = "Does ".$this->raking." damage per rake.";
+			}
+		}	    
         
         
     } //endof class Raking

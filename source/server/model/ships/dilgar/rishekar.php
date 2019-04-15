@@ -44,6 +44,33 @@ class Rishekar extends MediumShip{
         $this->addAftSystem(new LightPlasma(1, 4, 2, 60, 180));
 
         $this->addPrimarySystem(new Structure( 4, 40));
+	
+	$this->hitChart = array(
+		0=> array(
+			8 => "Thruster",
+			10 => "Light Laser",
+			13 => "Scanner",
+			15 => "Engine",
+			16 => "Hangar",
+			19 => "Reactor",
+			20 => "C&C",
+		),
+		1=> array(
+			4 => "Thruster",
+			8 => "Medium Plasma Cannon",
+			17 => "Structure",
+			20 => "Primary",
+		),
+		2=> array(
+			7 => "Thruster",
+			9 => "Light Plasma Cannon",
+			10 => "Engine",
+			17 => "Structure",
+			20 => "Primary",
+		),
+	 );
+	    
+    
     }
 }
 ?>

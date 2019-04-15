@@ -58,6 +58,45 @@ class Targath extends BaseShip{
         $this->addLeftSystem(new Structure( 4, 39));
         $this->addRightSystem(new Structure( 4, 39));
         $this->addPrimarySystem(new Structure( 5, 40));
+        
+        $this->hitChart = array(
+                0=> array(
+                    10 => "Structure",
+                    12 => "Scanner",
+                    14 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+                ),
+                1=> array(
+                    4 => "Thruster",
+                    6 => "Heavy Bolter",
+                    8 => "Scatter Pulsar",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+                2=> array(
+                    6 => "Thruster",
+                    8 => "Energy Pulsar",
+                    9 => "Engine",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+                3=> array(
+                    5 => "Thruster",
+                    7 => "Quad Pulsar",
+                    9 => "Scatter Pulsar",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+                4=> array(
+                    5 => "Thruster",
+                    7 => "Quad Pulsar",
+                    9 => "Scatter Pulsar",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+         );
     }
 
 }
