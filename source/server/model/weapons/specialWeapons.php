@@ -1832,7 +1832,7 @@ class RammingAttack extends Weapon{
 	public $intercept = 0;
         
         public $rangePenalty = 0; //no range penalty
-	public $range = 0; //attacks units on same hex only
+	public $range = 0.1; //attacks units on same hex only; range = 0 is treated as unlimited
 	
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
 	public $raking = 10; //size of rake
