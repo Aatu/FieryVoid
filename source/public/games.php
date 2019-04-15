@@ -62,11 +62,17 @@ if (isset($_SESSION["user"])) {
         -->
         The latest update includes:
         <br><br>
-        - <b>Fighter pilots missile guidance even when firing defensively</b> - as it's out of player control
+            <b>Fighter pilots missile guidance even when firing defensively</b> - as it's out of player control
         <br>
-        - <b>Distortion EW overhaul</b> - detailed changes include:
-        <br> -- CCEW is now treated as just another OEW channel
-        <br> -- Partial lock introduced: if EW on target is less than 1 but still at least 0.5, range penalty is multiplied by 1.5 instead of being doubled
+            <b>Distortion EW overhaul</b> - detailed changes include:
+            <br> -- CCEW is now treated as just another OEW channel
+            <br> -- Partial lock introduced: if EW on target is less than 1 but still at least 0.5, range penalty is multiplied by 1.5 instead of being doubled
+        <br>
+            <b>Gravitic Drive fix</b> - thruster allocation while pivoted
+        <br>
+            <b>Ramming fix</b> - hit chance display corrcted, and long-range ramming disabled :)
+        <br>
+            <b>New hit chars</b> - Dilgar got new hit charts, courtesu of Jonathan (yes I know these charts are not displayed in game... working on that!)
         <!--<br>
         - <b>Power usage</b> - shown in system data.
         <br>
