@@ -686,7 +686,7 @@ window.weaponManager = {
 	var rangePenalty = weapon.rangePenalty * ownSpeed;
 	hitChance -= rangePenalty;
 	
-        hitChance = hitChance * 5; //convert d20->d100
+        hitChance = Math.round(hitChance * 5); //convert d20->d100
         return hitChance;
     }, //endof calculateRamChance
 
