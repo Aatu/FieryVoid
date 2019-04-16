@@ -192,7 +192,6 @@ window.weaponManager = {
     },
 
     checkConflictingFireOrder: function checkConflictingFireOrder(ship, weapon, alert) {
-
         var p = ship;
         if (ship.flight) {
             p = shipManager.systems.getFighterBySystem(ship, weapon.id);
@@ -313,16 +312,12 @@ window.weaponManager = {
         return false;
     },
 
-    selectAllWeapons: function selectAllWeapons(ship, system) {
-        
+    selectAllWeapons: function selectAllWeapons(ship, system) {        
 		if (!gamedata.isMyShip(ship)) {
 			return;
-		}
-        
+		}        
         var array = [];
-
         var systems = [];
-
         if (ship.flight) {
             systems = ship.systems
                 .map(fighter => fighter.systems)
@@ -685,7 +680,12 @@ window.weaponManager = {
 
         //fire control: usually 0, but units specifically designed for ramming may have some bonus!
         hitChance += weaponManager.getFireControl(target, weapon);
-
+	    
+	//range penalty - based on ramming units' speed (typical ramming has no range penalty, but HKs do!
+	var ownSpeed = Math.abs(shipManager.movement.getSpeed(shooter));    
+	var rangePenalty = weapon.rangePenalty * ownSpeed;
+	hitChance -= rangePenalty;
+	
         hitChance = hitChance * 5; //convert d20->d100
         return hitChance;
     }, //endof calculateRamChance
