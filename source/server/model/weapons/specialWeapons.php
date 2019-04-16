@@ -2000,7 +2000,7 @@ class LtEMWaveDisruptor extends LinkedWeapon{
 	public $shots = 2;
 	public $defaultShots = 2;
 	public $rangePenalty = 2;
-	public $fireControl = array(0, 0, 0); //no offensive mode
+	public $fireControl = array(null, null, null); // no offensive mode
 	public $priority = 4; 
 
 	
