@@ -870,7 +870,7 @@ class BaseShip {
 
 
     public function pickLocationForHit($locs){   //return array! ONLY OUTER LOCATIONS!!! (unless PRIMARY can be hit directly and is on hit table)
-        $pick = array("loc"=>0, "profile"=>80, "remHealth"=>0, "armour"=>0);
+        $pick = array("loc"=>0, "profile"=>1000, "remHealth"=>0, "armour"=>0);
         foreach ($locs as $loc){
             //compare current best pick with current loop iteration, change if new pick is better
             $toughnessPick = $pick["remHealth"]+round($pick["remHealth"]*$pick["armour"]*0.15);//toughness: remaining structure toughened by armor
@@ -893,7 +893,7 @@ class BaseShip {
 
             if($toughnessLoc>$toughnessPick){ //if new toughness is better, it wins (already takes profile into account)
                 $pick = $loc;
-            }elseif(($toughnessLoc==$toughnessPick) && ($loc["profile"]<$pick["profile"])){ //if toughness is equal, better profile wins
+            }elseif(($toughnessLoc==$toughnessPick) && ($loc["profile"]<=$pick["profile"])){ //if toughness is equal, better profile wins
                 $pick = $loc;
             }//else old choice stays
         }
@@ -958,7 +958,7 @@ class BaseShip {
         if(isset($this->activeHitLocations[$shooter->id]) ){
             $foundProfile = $this->activeHitLocations[$shooter->id]["profile"];
         }else{
-            $loc = $this->doGetHitSection($shooter, $preGoal); //finds array with relevant data!
+            $loc = $this->doGetHitSection($shooter); //finds array with relevant data!
             $this->activeHitLocations[$shooter->id] = $loc; //save location for further hits from same unit
             $foundProfile = $loc["profile"];
         }
@@ -1319,10 +1319,11 @@ class BaseShip {
     public function getLocations(){
         //debug::log("getLocations");         
         $locs = array();
-
         $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
-        $locs[] = array("loc" => 3, "min" => 180, "max" => 330, "profile" => $this->sideDefense);
-        $locs[] = array("loc" => 4, "min" => 30, "max" => 180, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 3, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 4, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 3, "min" => 180, "max" => 210, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 4, "min" => 150, "max" => 180, "profile" => $this->forwardDefense);
 
         return $locs;
     }
