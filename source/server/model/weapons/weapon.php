@@ -682,6 +682,11 @@ class Weapon extends ShipSystem
 		//fire control: usually 0, but units specifically designed for ramming may have some bonus!
 		$hitChance += $this->fireControl[$target->getFireControlIndex()];
 
+		//range penalty - based on ramming units' speed (typical ramming has no range penalty, but HKs do!
+		$ownSpeed = abs($target->getSpeed()); 
+		$speedPenalty = $this->rangePenalty * ownSpeed;
+		$hitChance -= $speedPenalty;
+		
 		$hitChance = $hitChance * 5; //convert d20->d100
 
 		$hitLoc = null;
