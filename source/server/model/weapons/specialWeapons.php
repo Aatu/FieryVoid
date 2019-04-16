@@ -1831,7 +1831,7 @@ class RammingAttack extends Weapon{
         public $loadingtime = 1;
 	public $intercept = 0;
         
-        public $rangePenalty = 0; //no range penalty
+        public $rangePenalty = 0; //no range penalty... HKs will add it though!
 	public $range = 0.1; //attacks units on same hex only; range = 0 is treated as unlimited
 	
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
@@ -1874,6 +1874,7 @@ class RammingAttack extends Weapon{
 		      }
 		      $this->data["Special"] .= "<br>Profiles and EW do not matter for hit chance - but unit size and target speed does.";  
 		      $this->data["Special"] .= "<br>	(it's generally easier to ram slow targets and targets larger than ramming units itself)";  
+		      $this->data["Special"] .= "<br>	Hunter-Killers have speed penalty as well.";  
 		      $this->data["Special"] .= "<br>Ramming damage is also influenced by conditions - moving head on with initiative slightly increases chance of high damage.";
 		      $this->data["Special"] .= "<br>Ramming attacks will be done in ship firing phase (even attacks by fighters) and cannot be intercepted.";
 	    }	
