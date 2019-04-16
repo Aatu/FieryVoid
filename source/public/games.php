@@ -72,6 +72,8 @@ if (isset($_SESSION["user"])) {
         <br>
             <b>Ramming fix</b> - hit chance display corrected, and long-range ramming disabled :)
         <br>
+            <b>Ramming update</b> - Hunter Killers received their full ramming bonus, but also speed penalty. Which means they'r less accurate when flying fast, and more when slow.
+        <br>
             <b>New hit chars</b> - Dilgar got new hit charts, courtesy of Jonathan (yes I know these charts are not displayed in game... working on that!)
         <!--<br>
         - <b>Power usage</b> - shown in system data.
