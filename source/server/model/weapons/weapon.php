@@ -687,7 +687,7 @@ class Weapon extends ShipSystem
 		$speedPenalty = $this->rangePenalty * ownSpeed;
 		$hitChance -= $speedPenalty;
 		
-		$hitChance = $hitChance * 5; //convert d20->d100
+		$hitChance = round($hitChance * 5); //convert d20->d100
 
 		$hitLoc = null;
 		$hitLoc = $target->getHitSection($shooter, $fireOrder->turn);
