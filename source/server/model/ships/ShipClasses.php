@@ -958,7 +958,7 @@ class BaseShip {
         if(isset($this->activeHitLocations[$shooter->id]) ){
             $foundProfile = $this->activeHitLocations[$shooter->id]["profile"];
         }else{
-            $loc = $this->doGetHitSection($shooter, $preGoal); //finds array with relevant data!
+            $loc = $this->doGetHitSection($shooter); //finds array with relevant data!
             $this->activeHitLocations[$shooter->id] = $loc; //save location for further hits from same unit
             $foundProfile = $loc["profile"];
         }
