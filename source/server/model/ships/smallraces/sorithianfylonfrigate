@@ -12,6 +12,8 @@ class SorithianFylonFrigate extends MediumShip{
         $this->occurence = "common";
         $this->isd = 2209;
 	$this->canvasSize = 100;
+	
+	$this->unofficial = true;
         
         $this->forwardDefense = 11;
         $this->sideDefense = 11;
