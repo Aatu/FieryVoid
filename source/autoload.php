@@ -467,6 +467,7 @@ spl_autoload_register(
                 'manager' => '/server/controller/Manager.php',
                 'mantaka' => '/server/model/ships/markab/mantaka.php',
                 'marata' => '/server/model/ships/abbai/marata.php',
+		'marcanos' => '/server/model/ships/centauri/marcanos.php',
                 'marie' => '/server/model/ships/raiders/marie.php',
                 'mariu' => '/server/model/ships/raiders/mariu.php',
                 'markabliner' => '/server/model/ships/markab/markabliner.php',
