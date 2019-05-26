@@ -13,6 +13,8 @@ class SorithianSylusCutter extends MediumShip{
         $this->isd = 2207;
 	$this->canvasSize = 100;
 	$this->agile = true;
+	
+	$this->unofficial = true;
         
         $this->forwardDefense = 9;
         $this->sideDefense = 9;
