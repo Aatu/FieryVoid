@@ -743,7 +743,15 @@ spl_autoload_register(
                 'solarcannon' => '/server/model/weapons/particle.php',
                 'solarhawk' => '/server/model/ships/drazi/solarhawk.php',
                 'somissilerack' => '/server/model/weapons/missile.php',
-                'sparkfield' => '/server/model/weapons/specialWeapons.php',
+                
+		'sorithianfylonfrigate' => '/server/model/ships/smallraces/sorithianfylonfrigate.php',
+		'sorithiansyluscutter' => '/server/model/ships/smallraces/sorithiansyluscutter.php',
+		'sorithiantyancarrier' => '/server/model/ships/smallraces/sorithiantyancarrier.php',
+		'sorithianzolori' => '/server/model/ships/smallraces/sorithianzolori.php',
+		'sorithianzolorii' => '/server/model/ships/smallraces/sorithianzolorii.php',
+		'sorithianzoloriii' => '/server/model/ships/smallraces/sorithianzoloriii.php',
+		    
+		'sparkfield' => '/server/model/weapons/specialWeapons.php',
                 'sparkfieldhandler' => '/server/model/weapons/specialWeapons.php',
                 'specialability' => '/server/model/systems/baseSystems.php',
                 'starbase' => '/server/model/ships/ShipClasses.php',
