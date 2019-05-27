@@ -28,7 +28,7 @@ class SorithianZolorII extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){   
             $armour = array(1, 0, 1, 1);
             $fighter = new Fighter("SorithianZolorII", $armour, 7, $this->id);
-            $fighter->displayName = "Sorithian Zolor II";
+            $fighter->displayName = "Zolor II";
             $fighter->imagePath = "img/ships/BAStarFox.png";
             $fighter->iconPath = "img/ships/BAStarFox_large.png";
 
