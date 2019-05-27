@@ -28,11 +28,10 @@ class SorithianZolorIII extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){   
             $armour = array(1, 0, 1, 1);
             $fighter = new Fighter("SorithianZolorIII", $armour, 7, $this->id);
-            $fighter->displayName = "Sorithian Zolor III";
+            $fighter->displayName = "Zolor III";
             $fighter->imagePath = "img/ships/BAStarFox.png";
             $fighter->iconPath = "img/ships/BAStarFox_large.png";
 
-            );
             $frontGun = new LightFusionCannon(330, 30, 1, 4);
             $frontGun->displayName = "Ultralight Particle Beam";
             $fighter->addFrontSystem($frontGun);
