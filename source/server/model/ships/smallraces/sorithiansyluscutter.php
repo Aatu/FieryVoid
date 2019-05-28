@@ -40,6 +40,10 @@ class SorithianSylusCutter extends MediumShip{
 	$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 330, 30));
 	$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 330, 30));
 	$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 60));  
+	    
+	    
+        $this->addPrimarySystem(new Structure(3, 24));
+	    
         $this->hitChart = array(
         		0=> array( //should never happen
         				20 => "Structure",
