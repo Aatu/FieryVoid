@@ -31,8 +31,8 @@ class wlcChlonasTraVoraCL2240 extends BaseShipNoAft{
         $this->addPrimarySystem(new Thruster(4, 19, 0, 9, 2));
 
         $this->addFrontSystem(new AssaultLaser(3, 6, 4, 240, 0));
-        $this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 60));
         $this->addFrontSystem(new AssaultLaser(3, 6, 4, 0, 120));
+        $this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 60));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
 
