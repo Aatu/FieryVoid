@@ -28,18 +28,22 @@ class Brathon extends BaseShip{
 	$t3l = new GraviticThruster(3, 13, 0, 3, 3);
     	$t2l = new GraviticThruster(3, 10, 0, 3, 2);
 	
+	    /* I am commenting this out - makes thruster recognition in game impossible
 	$t1l->displayName = "Retro Thrust";
 	$t3l->displayName = "Port/Stb Thrust";
 	$t2l->displayName = "Main Thrust";
+	*/
 	    
 	$t1r = new GraviticThruster(4, 10, 0, 3, 1);
 	$t4r = new GraviticThruster(3, 13, 0, 3, 4);
    	$t2r = new GraviticThruster(3, 10, 0, 3, 2);
 	
+	    /* I am commenting this out - makes thruster recognition in game impossible
 	$t1r->displayName = "Retro Thrust";
 	$t4r->displayName = "Port/Stb Thrust";
 	$t2r->displayName = "Main Thrust";
-	
+	*/
+	    
 	$this->addLeftSystem($t1l);
    	$this->addLeftSystem($t3l);
    	$this->addLeftSystem($t2l);
@@ -90,6 +94,19 @@ class Brathon extends BaseShip{
                         20 => "Primary",
                 ),
                 3=> array(
+                        9 => "Thruster",
+			12 => "Gravitic Cutter",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+                4=> array(
+                        9 => "Thruster",
+			12 => "Gravitic Cutter",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+		/*sadly thrusters need to be combined into one location...
+                3=> array(
                         3 => "Retro Thrust",
 			7 => "Port/Stb Thrust",
                         9 => "Main Thrust",
@@ -105,6 +122,7 @@ class Brathon extends BaseShip{
                         18 => "Structure",
                         20 => "Primary",
                 ),
+		*/
         );
 	    
     }
