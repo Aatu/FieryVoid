@@ -13,6 +13,7 @@ class Apollo extends BaseShip{
         $this->shipSizeClass = 3;
         $this->canvasSize = 200;
         $this->limited = 33;
+	    $this->unofficial = true;
 
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
