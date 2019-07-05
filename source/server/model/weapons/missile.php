@@ -528,7 +528,7 @@ class MultiMissileLauncher extends Weapon{
         {
 		switch($launcherType){ //modifications dependent on launcher type...
 			case 'SO': //standard old: lesser FC, holds less missiles (= lesser crit potential!)
-				$this->displayName = "Class-S Missile Rack";
+				$this->displayName = "Class-SO Missile Rack";
 				$maxhealth = 6;
 				foreach $this->fireControlArray as $key=>$FCarray{
 					$this->fireControlArray[$key,0] -= 1; //fighter
@@ -654,7 +654,7 @@ class MultiMissileLauncher extends Weapon{
 	}
     
 	public function setSystemDataWindow($turn){
-		$this->data["Special"] = 'Multiple munitions available! This weapon may explode when damaged. ';
+		$this->data["Special"] = 'Multiple munitions available! No ammo limits. This weapon may explode when damaged. ';
 		parent::setSystemDataWindow($turn);
         }
     
