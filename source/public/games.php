@@ -53,7 +53,7 @@ if (isset($_SESSION["user"])) {
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
 <div class="panel news">
-    <div id="newsHeader">Latest News - April 2019</div>
+    <div id="newsHeader">Latest News - July 2019</div>
     <div id="newsEntry">
         <!--
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
@@ -62,24 +62,8 @@ if (isset($_SESSION["user"])) {
         -->
         The latest update includes:
         <br><br>
-            <b>Fighter pilots missile guidance even when firing defensively</b> - as it's out of player control
+            <b>Scattergun remade</b> - as it's interception was too powerful 
         <br>
-            <b>Distortion EW overhaul</b> - detailed changes include:
-            <br> -- CCEW is now treated as just another OEW channel
-            <br> -- Partial lock introduced: if EW on target is less than 1 but still at least 0.5, range penalty is multiplied by 1.5 instead of being doubled
-        <br>
-            <b>Gravitic Drive fix</b> - thruster allocation while pivoted
-        <br>
-            <b>Ramming fix</b> - hit chance display corrected, and long-range ramming disabled :)
-        <br>
-            <b>Ramming update</b> - Hunter Killers received their full ramming bonus, but also speed penalty. Which means they'r less accurate when flying fast, and more when slow.
-        <br>
-            <b>New hit chars</b> - Dilgar got new hit charts, courtesy of Jonathan (yes I know these charts are not displayed in game... working on that!)
-        <!--<br>
-        - <b>Power usage</b> - shown in system data.
-        <br>
-        - <b>Game description</b> modified to include rules options used.
-        -->
         
         <br><br>
         - last but not least - brand new collection of BUGS!;
