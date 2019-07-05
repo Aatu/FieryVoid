@@ -542,7 +542,7 @@ class MultiMissileLauncher extends Weapon{
 				$this->displayName = "Class-L Missile Rack";
 				$maxhealth = 6;
 				$this->iconPath = "missile1.png";
-				foreach ($this->rangeArray as $key->$rng) {
+				foreach ($this->rangeArray as $key=>$rng) {
 					$this->rangeArray[$key] += 10; 
 				}     
 				break;				
