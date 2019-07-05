@@ -531,9 +531,9 @@ class MultiMissileLauncher extends Weapon{
 				$this->displayName = "Class-SO Missile Rack";
 				$maxhealth = 6;
 				foreach ($this->fireControlArray as $key=>$FCarray){
-					$this->fireControlArray[$key,0] -= 1; //fighter
-					$this->fireControlArray[$key,1] -= 1; //medium
-					$this->fireControlArray[$key,2] -= 1; //Cap
+					$this->fireControlArray[$key][0] -= 1; //fighter
+					$this->fireControlArray[$key][1] -= 1; //medium
+					$this->fireControlArray[$key][2] -= 1; //Cap
 				}
 				$this->iconPath = "missile1.png";  
 				$this->rackExplosionDamage = 40;
@@ -554,9 +554,9 @@ class MultiMissileLauncher extends Weapon{
 					$this->rangeArray[$key] += 10; 
 				}     
 				foreach ($this->fireControlArray as $key=>$FCarray){
-					$this->fireControlArray[$key,0] += 1; //fighter
-					$this->fireControlArray[$key,1] += 1; //medium
-					$this->fireControlArray[$key,2] += 1; //Cap
+					$this->fireControlArray[$key][0] += 1; //fighter
+					$this->fireControlArray[$key][1] += 1; //medium
+					$this->fireControlArray[$key][2] += 1; //Cap
 				}    
 				$this->loadingtime = 1; //fires every turn
 				$this->rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
