@@ -491,6 +491,8 @@ class ReloadRack extends MissileLauncher//ShipSystem
 
 /*weapon with unlimited ammo, able to use multiple munitions (modes of fire), simulating many missile launchers in game on demand (at constructor)*/
 class MultiMissileLauncher extends Weapon{
+	public $name = "multiMissileLauncher";
+        public $displayName = "ToBeSetInConstructor";
     public $useOEW = false;
     public $ballistic = true;
     public $trailColor = array(141, 240, 255);
