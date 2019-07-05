@@ -176,8 +176,8 @@ class SystemInfoButtons extends React.Component {
                 {canOffline(ship, system) && <Button onClick={this.offline.bind(this)} onContextMenu={this.allOffline.bind(this)} img="./img/off.png"></Button>}
                 {canOverload(ship, system) && <Button onClick={this.overload.bind(this)} img="./img/overload.png"></Button>}
                 {canStopOverload(ship, system) && <Button onClick={this.stopOverload.bind(this)} img="./img/overloading.png"></Button>}
-                {canBoost(ship, system) && <Button onClick={this.boost.bind(this)} img="./img/plussquare.png"></Button>}
                 {canDeBoost(ship, system) && <Button onClick={this.deboost.bind(this)} img="./img/minussquare.png"></Button>}
+                {canBoost(ship, system) && <Button onClick={this.boost.bind(this)} img="./img/plussquare.png"></Button>}
                 {canAddShots(ship, system) && <Button onClick={this.addShots.bind(this)} img="./img/plussquare.png"></Button>}
                 {canReduceShots(ship, system) && <Button onClick={this.reduceShots.bind(this)} img="./img/minussquare.png"></Button>}
 		{canRemoveFireOrder(ship, system) && <Button onClick={this.removeFireOrder.bind(this)} img="./img/firing.png"></Button>}
