@@ -510,7 +510,7 @@ class MultiMissileLauncher extends Weapon{
     public $iconPath = "missile1.png";    
 
     private $rackExplosionDamage = 70; //how much damage will this weapon do in case of catastrophic explosion
-    private $rackExplosionThreshold = 19; //how high roll is needed for rack explosion    
+    private $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
     
     public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     public $weaponClass = "Ballistic"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
@@ -521,9 +521,140 @@ class MultiMissileLauncher extends Weapon{
     public $rangeArray = array(1=>20, 2=>30, 3=>10, 4=>20, 5=>20, 6=>15); //distanceRange remains fixed, as it's improbable that anyone gets out of missile range and this would need more coding
     //typical (class-S) launcher is FC 3/3/3 and warhead +3 - which would mean 6/6/6!
     
+    /*ATYPICAL constructor: doesn't take health and power usage, but takes desired launcher type - and does appropriate modifications*/
+        function __construct($armour, $launcherType, $startArc, $endArc, $base=false)
+        {
+		switch($launcherType){ //modifications dependent on launcher type...
+			case 'SO': //standard old: lesser FC, holds less missiles (= lesser crit potential!)
+				$this->displayName = "Class-S Missile Rack";
+				$maxhealth = 6;
+				foreach $this->fireControlArray as $key=>$FCarray{
+					$this->fireControlArray[$key,0] -= 1; //fighter
+					$this->fireControlArray[$key,1] -= 1; //medium
+					$this->fireControlArray[$key,2] -= 1; //Cap
+				}
+				$this->iconPath = "missile1.png";  
+				$this->rackExplosionDamage = 40;
+				break;
+			case 'L': //Long range: +10 launch range
+				$this->displayName = "Class-L Missile Rack";
+				$maxhealth = 6;
+				$this->iconPath = "missile1.png";
+				foreach ($this->rangeArray as $key->$rng) {
+					$this->rangeArray[$key] += 10; 
+				}     
+				break;				
+			case 'LH': //Long range, Hardened: +10 launch range, RoF 1/turn, does not explode, better FC
+				$this->displayName = "Class-LH Missile Rack";
+				$maxhealth = 8;
+				$this->iconPath = "missile2.png";
+				foreach ($this->rangeArray as $key->$rng) {
+					$this->rangeArray[$key] += 10; 
+				}     
+				foreach $this->fireControlArray as $key=>$FCarray{
+					$this->fireControlArray[$key,0] += 1; //fighter
+					$this->fireControlArray[$key,1] += 1; //medium
+					$this->fireControlArray[$key,2] += 1; //Cap
+				}    
+				$this->loadingtime = 1; //fires every turn
+				$this->rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
+				$this->rackExplosionThreshold = 21; //how high roll is needed for rack explosion   
+				break;	
+			case 'R': //Rapid fire: RoF 1/turn, increased explosion chance
+				$this->displayName = "Class-R Missile Rack";
+				$maxhealth = 6;
+				$this->iconPath = "missile2.png";
+				foreach ($this->rangeArray as $key->$rng) {
+					$this->rangeArray[$key] += 10; 
+				}     
+				$this->loadingtime = 1; //fires every turn
+				$this->rackExplosionThreshold = 19; //how high roll is needed for rack explosion 
+				break;	
+				
+			default: //this includes class-S, which is pretty default :)
+				$this->displayName = "Class-S Missile Rack";
+				$maxhealth = 6;
+				$this->iconPath = "missile1.png";  
+				//range, rangeArray, distanceRange, loadingtime, fireControlArray, rackExplosionDamage, rackExplosionThreshold - standard
+				break;
+		}
+		
+		if ($base){ //mounted on base - +20 launch range
+			foreach ($this->rangeArray as $key->$rng) {
+		    		$this->rangeArray[$key] += 20; 
+			}         
+		}
+		
+		$this->range = $this->rangeArray[1]; //podstawowy zasięg = pierwszy zasięg
+		
+		parent::__construct($armour, $maxhealth, 0, $startArc, $endArc);
+        }
+	
+	
+        public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 2: //Long-Range
+				return 15; 
+				break;
+			case 3: //Heavy
+				return 30; 
+				break;
+			case 5: //Piercing
+				return 30; 
+				break;
+			case 6: //Anti-Fighter
+				return 15; 
+				break;
+			default: //most missiles do the same damage
+				return 20; 
+				break;	
+		}
+	}
+        public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 2: //Long-Range
+				return 15; 
+				break;
+			case 3: //Heavy
+				return 30; 
+				break;
+			case 5: //Piercing
+				return 30; 
+				break;
+			case 6: //Anti-Fighter
+				return 15; 
+				break;
+			default: //most missiles do the same damage
+				return 20; 
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 2: //Long-Range
+				return 15; 
+				break;
+			case 3: //Heavy
+				return 30; 
+				break;
+			case 5: //Piercing
+				return 30; 
+				break;
+			case 6: //Anti-Fighter
+				return 15; 
+				break;
+			default: //most missiles do the same damage
+				return 20; 
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
     
-    
-    
+	public function setSystemDataWindow($turn){
+		$this->data["Special"] = 'Multiple munitions available! This weapon may explode when damaged. ';
+		parent::setSystemDataWindow($turn);
+        }
     
     public function isInDistanceRange($shooter, $target, $fireOrder){
         $movement = $shooter->getLastTurnMovement($fireOrder->turn);    
