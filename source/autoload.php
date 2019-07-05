@@ -34,6 +34,7 @@ spl_autoload_register(
                 'antoph' => '/server/model/ships/brakiri/antoph.php',
                 'aoe' => '/server/model/weapons/AoE.php',
                 'apollo' => '/server/model/ships/EA/apollo.php',
+                'apollofull' => '/server/model/ships/EA/apolloFull.php',
                 'armorreduced' => '/server/model/cricialClasses.php',
                 'artemisalpha' => '/server/model/ships/EA/artemisAlpha.php',
                 'artemisbeta' => '/server/model/ships/EA/artemisBeta.php',
