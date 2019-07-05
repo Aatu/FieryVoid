@@ -530,10 +530,10 @@ class MultiMissileLauncher extends Weapon{
 			case 'SO': //standard old: lesser FC, holds less missiles (= lesser crit potential!)
 				$this->displayName = "Class-SO Missile Rack";
 				$maxhealth = 6;
-				foreach $this->fireControlArray as $key=>$FCarray{
-					$this->fireControlArray[$key,0] -= 1; //fighter
-					$this->fireControlArray[$key,1] -= 1; //medium
-					$this->fireControlArray[$key,2] -= 1; //Cap
+				foreach ($this->fireControlArray as $key=>$FCarray){
+					$this->fireControlArray[$key][0] -= 1; //fighter
+					$this->fireControlArray[$key][1] -= 1; //medium
+					$this->fireControlArray[$key][2] -= 1; //Cap
 				}
 				$this->iconPath = "missile1.png";  
 				$this->rackExplosionDamage = 40;
@@ -542,7 +542,7 @@ class MultiMissileLauncher extends Weapon{
 				$this->displayName = "Class-L Missile Rack";
 				$maxhealth = 6;
 				$this->iconPath = "missile1.png";
-				foreach ($this->rangeArray as $key->$rng) {
+				foreach ($this->rangeArray as $key=>$rng) {
 					$this->rangeArray[$key] += 10; 
 				}     
 				break;				
@@ -550,13 +550,13 @@ class MultiMissileLauncher extends Weapon{
 				$this->displayName = "Class-LH Missile Rack";
 				$maxhealth = 8;
 				$this->iconPath = "missile2.png";
-				foreach ($this->rangeArray as $key->$rng) {
+				foreach ($this->rangeArray as $key=>$rng) {
 					$this->rangeArray[$key] += 10; 
 				}     
-				foreach $this->fireControlArray as $key=>$FCarray{
-					$this->fireControlArray[$key,0] += 1; //fighter
-					$this->fireControlArray[$key,1] += 1; //medium
-					$this->fireControlArray[$key,2] += 1; //Cap
+				foreach ($this->fireControlArray as $key=>$FCarray){
+					$this->fireControlArray[$key][0] += 1; //fighter
+					$this->fireControlArray[$key][1] += 1; //medium
+					$this->fireControlArray[$key][2] += 1; //Cap
 				}    
 				$this->loadingtime = 1; //fires every turn
 				$this->rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
@@ -566,7 +566,7 @@ class MultiMissileLauncher extends Weapon{
 				$this->displayName = "Class-R Missile Rack";
 				$maxhealth = 6;
 				$this->iconPath = "missile2.png";
-				foreach ($this->rangeArray as $key->$rng) {
+				foreach ($this->rangeArray as $key=>$rng) {
 					$this->rangeArray[$key] += 10; 
 				}     
 				$this->loadingtime = 1; //fires every turn
@@ -582,7 +582,7 @@ class MultiMissileLauncher extends Weapon{
 		}
 		
 		if ($base){ //mounted on base - +20 launch range
-			foreach ($this->rangeArray as $key->$rng) {
+			foreach ($this->rangeArray as $key=>$rng) {
 		    		$this->rangeArray[$key] += 20; 
 			}         
 		}

@@ -67,6 +67,8 @@ if (isset($_SESSION["user"])) {
             <b>boost/deboost buttons re-ordered</b> - so multiple boosts do not require mouse movement ;)
         <br>
             <b>rearrangements</b> - weapon layout modified so arcs seem more natural (where I noted problems - this means particularly Ipsha ;) ).
+        <br>
+            <b>Brathon thrusters fixed</b> - Brakiri Brathon Auxilliary Cruiser (and variant) is usable again!
         
         <br><br>
         - last but not least - brand new collection of BUGS!;

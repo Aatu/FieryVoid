@@ -1,5 +1,5 @@
 <?php
-class Apollo extends BaseShip{
+class ApolloFull extends BaseShip{
 /*Apollo with fully decked out Multi-Missile Launchers!*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);

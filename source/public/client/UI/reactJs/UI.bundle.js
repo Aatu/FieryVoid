@@ -38792,8 +38792,8 @@ var getText = function getText(ship, system) {
             /*
             if (system.duoWeapon) {
                 var UI_active = systemwindow.find(".UI").hasClass("active");
-                 shipWindowManager.addDuoSystem(ship, system, systemwindow);
-                 if (UI_active) {
+                  shipWindowManager.addDuoSystem(ship, system, systemwindow);
+                  if (UI_active) {
                     systemwindow.find(".UI").addClass("active");
                 }
             }*/
@@ -38892,41 +38892,47 @@ if (shipManager.systems.isDestroyed(ship, system)) {
             parentWindow.find(".iconmask").remove();
             parentWindow.find(".icon").append(iconmask_element);
         }
-         parentWindow.addClass("destroyed");
+          parentWindow.addClass("destroyed");
     } else {
         systemwindow.addClass("destroyed");
     }
     return;
 }
- if (shipManager.criticals.hasCriticals(system)) {
+  if (shipManager.criticals.hasCriticals(system)) {
     if (system.parentId > 0) {
         parentWindow.addClass("critical");
     } else {
         systemwindow.addClass("critical");
     }
 }
- */
+  */
 /*
    if (shipManager.power.setPowerClasses(ship, system, systemwindow)) return;
-    if (system.weapon) {
+
+   if (system.weapon) {
        var firing = weaponManager.hasFiringOrder(ship, system);
-        // To avoid double overlay of loading icon mask in case of a
+
+       // To avoid double overlay of loading icon mask in case of a
        // duoWeapon in a dualWeapon
        if (!weaponManager.isLoaded(system) && !(system.duoWeapon && system.parentId > 0)) {
            systemwindow.addClass("loading");
        } else {
            systemwindow.removeClass("loading");
        }
-        if (weaponManager.isSelectedWeapon(system)) {
+
+       if (weaponManager.isSelectedWeapon(system)) {
            systemwindow.addClass("selected");
        } else {
            systemwindow.removeClass("selected");
        }
-        if (firing && firing != "self" && !system.duoWeapon && !systemwindow.hasClass("loading")) {
+
+       if (firing && firing != "self" && !system.duoWeapon && !systemwindow.hasClass("loading")) {
            systemwindow.addClass("firing");
-            if (system.parentId > -1) {
+
+           if (system.parentId > -1) {
                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
-                if (parentSystem.duoWeapon) {
+
+               if (parentSystem.duoWeapon) {
                    $(".system_" + system.parentId).addClass("duofiring");
                }
            }
@@ -38938,15 +38944,18 @@ if (shipManager.systems.isDestroyed(ship, system)) {
            systemwindow.removeClass("firing");
            systemwindow.removeClass("selfIntercept");
        }
-        if (system.ballistic) {
+
+       if (system.ballistic) {
            systemwindow.addClass("ballistic");
        } else {
            systemwindow.removeClass("ballistic");
        }
-        if (!firing && (Object.keys(system.firingModes).length > 1 || system.dualWeapon)) {
+
+       if (!firing && (Object.keys(system.firingModes).length > 1 || system.dualWeapon)) {
            if (system.parentId >= 0) {
                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
-                if (parentSystem.parentId >= 0) {
+
+               if (parentSystem.parentId >= 0) {
                    parentSystem = shipManager.systems.getSystem(ship, parentSystem.parentId);
                    $(".parentsystem_" + parentSystem.id).addClass("modes");
                    var modebutton = $(".mode", $(".parentsystem_" + parentSystem.id));
@@ -38954,73 +38963,92 @@ if (shipManager.systems.isDestroyed(ship, system)) {
                    $(".parentsystem_" + parentSystem.id).addClass("modes");
                    var modebutton = $(".mode", systemwindow);
                }
-                modebutton.html("<span>" + parentSystem.firingModes[parentSystem.firingMode].substring(0, 1) + "</span>");
+
+               modebutton.html("<span>" + parentSystem.firingModes[parentSystem.firingMode].substring(0, 1) + "</span>");
            } else {
                systemwindow.addClass("modes");
-                var modebutton = $(".mode", systemwindow);
+
+               var modebutton = $(".mode", systemwindow);
                modebutton.html("<span>" + system.firingModes[system.firingMode].substring(0, 1) + "</span>");
            }
        }
-        if (firing && system.canChangeShots) {
+
+       if (firing && system.canChangeShots) {
            var fire = weaponManager.getFiringOrder(ship, system);
-            if (fire.shots < system.shots) {
+
+           if (fire.shots < system.shots) {
                systemwindow.addClass("canAddShots");
            } else {
                systemwindow.removeClass("canAddShots");
            }
-            if (fire.shots > 1) {
+
+           if (fire.shots > 1) {
                systemwindow.addClass("canReduceShots");
            } else {
                systemwindow.removeClass("canReduceShots");
            }
-            field.html(fire.shots + "/" + system.shots);
+
+           field.html(fire.shots + "/" + system.shots);
        } else if (!firing) {
            if (system.duoWeapon) {
                var UI_active = systemwindow.find(".UI").hasClass("active");
-                shipWindowManager.addDuoSystem(ship, system, systemwindow);
-                if (UI_active) {
+
+               shipWindowManager.addDuoSystem(ship, system, systemwindow);
+
+               if (UI_active) {
                    systemwindow.find(".UI").addClass("active");
                }
            } else {
                if (system.dualWeapon && system.weapons) {
                    system = system.weapons[system.firingMode];
                }
-                var load = weaponManager.getWeaponCurrentLoading(system);
+
+               var load = weaponManager.getWeaponCurrentLoading(system);
                var loadingtime = system.loadingtime;
-                if (system.normalload > 0) {
+
+               if (system.normalload > 0) {
                    loadingtime = system.normalload;
                }
-                if (load > loadingtime) {
+
+               if (load > loadingtime) {
                    load = loadingtime;
                }
-                var overloadturns = "";
-                if (system.overloadturns > 0 && shipManager.power.isOverloading(ship, system)) {
+
+               var overloadturns = "";
+
+               if (system.overloadturns > 0 && shipManager.power.isOverloading(ship, system)) {
                    overloadturns = "(" + system.overloadturns + ")";
                }
-                if (system.overloadshots > 0) {
+
+               if (system.overloadshots > 0) {
                    field.html("S" + system.overloadshots);
                } else {
                    field.html(load + overloadturns + "/" + loadingtime);
                }
            }
-            
+
+           
        }
    } else if (system.name == "thruster") {
        systemwindow.data("direction", system.direction);
        systemwindow.find(".icon").css("background-image", "url(./img/systemicons/thruster" + system.direction + ".png)");
-        var channeled = shipManager.movement.getAmountChanneled(ship, system);
+
+       var channeled = shipManager.movement.getAmountChanneled(ship, system);
        if (channeled > output) {
            field.addClass("darkred");
        } else {
            field.removeClass("darkred");
        }
-        if (channeled < 0) {
+
+       if (channeled < 0) {
            channeled = 0;
        }
-        field.html(channeled + "/" + output);
+
+       field.html(channeled + "/" + output);
    } else if (system.name == "engine") {
        var rem = shipManager.movement.getRemainingEngineThrust(ship);
-        field.html(rem + "/" + output);
+
+       field.html(rem + "/" + output);
    } else if (system.name == "reactor") {
        field.html(shipManager.power.getReactorPower(ship, system));
    } else if (system.output > 0) {
@@ -39569,8 +39597,8 @@ var SystemInfoButtons = function (_React$Component) {
 				canOffline(ship, system) && React.createElement(Button, { onClick: this.offline.bind(this), onContextMenu: this.allOffline.bind(this), img: "./img/off.png" }),
 				canOverload(ship, system) && React.createElement(Button, { onClick: this.overload.bind(this), img: "./img/overload.png" }),
 				canStopOverload(ship, system) && React.createElement(Button, { onClick: this.stopOverload.bind(this), img: "./img/overloading.png" }),
-				canBoost(ship, system) && React.createElement(Button, { onClick: this.boost.bind(this), img: "./img/plussquare.png" }),
 				canDeBoost(ship, system) && React.createElement(Button, { onClick: this.deboost.bind(this), img: "./img/minussquare.png" }),
+				canBoost(ship, system) && React.createElement(Button, { onClick: this.boost.bind(this), img: "./img/plussquare.png" }),
 				canAddShots(ship, system) && React.createElement(Button, { onClick: this.addShots.bind(this), img: "./img/plussquare.png" }),
 				canReduceShots(ship, system) && React.createElement(Button, { onClick: this.reduceShots.bind(this), img: "./img/minussquare.png" }),
 				canRemoveFireOrder(ship, system) && React.createElement(Button, { onClick: this.removeFireOrder.bind(this), img: "./img/firing.png" }),
