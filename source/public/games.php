@@ -64,6 +64,7 @@ if (isset($_SESSION["user"])) {
         <br><br>
             <b>Scattergun remade</b> - as it's interception was too powerful 
         <br>
+        <b>boost/deboost buttons re-ordered</b> - so multiple boosts do not require mouse movement ;)
         
         <br><br>
         - last but not least - brand new collection of BUGS!;
