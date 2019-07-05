@@ -64,7 +64,9 @@ if (isset($_SESSION["user"])) {
         <br><br>
             <b>Scattergun remade</b> - as it's interception was too powerful 
         <br>
-        <b>boost/deboost buttons re-ordered</b> - so multiple boosts do not require mouse movement ;)
+            <b>boost/deboost buttons re-ordered</b> - so multiple boosts do not require mouse movement ;)
+        <br>
+            <b>rearrangements</b> - weapon layout modified so arcs seem more natural (where I noted problems - this means particularly Ipsha ;) ).
         
         <br><br>
         - last but not least - brand new collection of BUGS!;
