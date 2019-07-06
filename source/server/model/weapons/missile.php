@@ -519,7 +519,7 @@ class MultiMissileLauncher extends Weapon{
 	
 	public $firingModes = array(1=>'Basic', 2=>'LongRange', 3=>'Heavy', 4=>'Flash', 5=>'Piercing', 6=>'AntiFighter'); //equals to available missiles; data is basic - if launcher is special, constructor will modify it
 	public $damageTypeArray = array(1=>'Standard', 2=>'Standard', 3=>'Standard', 4=>'Flash', 5=>'Piercing', 1=>'Standard'); //indicates that this weapon does damage in Pulse mode
-    public $fireControlArray = array( 1=>array(6, 6, 6), 2=>array(6,6,6), 3=>array(3,6,6), 4=>array(6,6,6), 5=>array(6,6,6), 6=>array(9,3,3) ); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
+    public $fireControlArray = array( 1=>array(6, 6, 6), 2=>array(6,6,6), 3=>array(3,6,6), 4=>array(6,6,6), 5=>array(3,6,6), 6=>array(9,6,6) ); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
     public $rangeArray = array(1=>20, 2=>30, 3=>10, 4=>20, 5=>20, 6=>15); //distanceRange remains fixed, as it's improbable that anyone gets out of missile range and this would need more coding
     //typical (class-S) launcher is FC 3/3/3 and warhead +3 - which would mean 6/6/6!
     
@@ -545,6 +545,7 @@ class MultiMissileLauncher extends Weapon{
 				foreach ($this->rangeArray as $key=>$rng) {
 					$this->rangeArray[$key] += 10; 
 				}     
+				$this->distanceRange += 10;
 				break;				
 			case 'LH': //Long range, Hardened: +10 launch range, RoF 1/turn, does not explode, better FC
 				$this->displayName = "Class-LH Missile Rack";
@@ -558,6 +559,7 @@ class MultiMissileLauncher extends Weapon{
 					$this->fireControlArray[$key][1] += 1; //medium
 					$this->fireControlArray[$key][2] += 1; //Cap
 				}    
+				$this->distanceRange += 10;
 				$this->loadingtime = 1; //fires every turn
 				$this->rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
 				$this->rackExplosionThreshold = 21; //how high roll is needed for rack explosion   
@@ -587,7 +589,7 @@ class MultiMissileLauncher extends Weapon{
 			}         
 		}
 		
-		$this->range = $this->rangeArray[1]; //podstawowy zasięg = pierwszy zasięg
+		$this->range = $this->rangeArray[1]; //base range = first range
 		
 		parent::__construct($armour, $maxhealth, 0, $startArc, $endArc);
         }
@@ -615,19 +617,19 @@ class MultiMissileLauncher extends Weapon{
         public function setMinDamage(){ 
 		switch($this->firingMode){
 			case 2: //Long-Range
-				return 15; 
+				$this->minDamage = 15; 
 				break;
 			case 3: //Heavy
-				return 30; 
+				$this->minDamage = 30; 
 				break;
 			case 5: //Piercing
-				return 30; 
+				$this->minDamage = 30; 
 				break;
 			case 6: //Anti-Fighter
-				return 15; 
+				$this->minDamage = 15; 
 				break;
 			default: //most missiles do the same damage
-				return 20; 
+				$this->minDamage = 20; 
 				break;	
 		}
 		$this->minDamageArray[$this->firingMode] = $this->minDamage;
@@ -635,26 +637,35 @@ class MultiMissileLauncher extends Weapon{
         public function setMaxDamage(){
 		switch($this->firingMode){
 			case 2: //Long-Range
-				return 15; 
+				$this->maxDamage = 15; 
 				break;
 			case 3: //Heavy
-				return 30; 
+				$this->maxDamage = 30; 
 				break;
 			case 5: //Piercing
-				return 30; 
+				$this->maxDamage = 30; 
 				break;
 			case 6: //Anti-Fighter
-				return 15; 
+				$this->maxDamage = 15; 
 				break;
 			default: //most missiles do the same damage
-				return 20; 
+				$this->maxDamage = 20; 
 				break;	
 		}
 		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 	}
     
 	public function setSystemDataWindow($turn){
-		$this->data["Special"] = 'Multiple munitions available! No ammo limits. This weapon may explode when damaged. ';
+		$this->data["Range"] = $this->range . '/' . $this->distanceRange;
+		$this->data["Special"] = 'Multiple munitions available! No ammo limits. This weapon may explode when damaged.';
+		$this->data["Special"] .= '<br>Available munitions (besides Basic):';
+		$this->data["Special"] .= '<br> - Long Range: +10 range, dmg 15';
+		$this->data["Special"] .= '<br> - Heavy: -10 range, -3 FC vs fighters, dmg 30';
+		$this->data["Special"] .= '<br> - Flash: does damage in Flash mode';
+		$this->data["Special"] .= '<br> - Piercing: Piercing mode, -3 FC vs fighters, dmg 30';
+		$this->data["Special"] .= '<br> - Anti-Fighter: rng 15, +3 FC vs fighters, dmg 15';
+		$this->data["Special"] .= '<br>Note that in a regular game You do not have unlimited access to all these munitions. Use them at Your (and Your opponents) discretion';
+		$this->data["Special"] .= ' - although I tried to make the ship pricy enough that special missile spam is justified ;)';
 		parent::setSystemDataWindow($turn);
         }
     
