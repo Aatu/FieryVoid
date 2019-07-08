@@ -8,6 +8,7 @@ class AthraskalaFull extends BaseShip{
         $this->phpclass = "AthraskalaFull";
         $this->imagePath = "img/ships/athraskala.png";
         $this->shipClass = "Athraskala Heavy Bomber (full)";
+	    $this->unofficial = true;
         $this->variantOf = "Athraskala Heavy Bomber";
         $this->shipSizeClass = 3;
         $this->isd = 2229;
