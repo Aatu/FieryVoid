@@ -566,6 +566,18 @@ class MultiMissileLauncher extends Weapon{
 				$this->rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
 				$this->rackExplosionThreshold = 21; //how high roll is needed for rack explosion   
 				break;	
+			case 'B': //just like LH, really, just a bit tougher and with more ammo (irrelevant here) - though without FC bonus; stable but constructor takes care of that
+				$this->displayName = "Class-B Missile Rack";
+				$maxhealth = 9;
+				$this->iconPath = "missile3.png";
+				foreach ($this->rangeArray as $key=>$rng) {
+					$this->rangeArray[$key] += 10; 
+				}     
+				$this->distanceRange += 10;
+				$this->loadingtime = 1; //fires every turn
+				$this->rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
+				$this->rackExplosionThreshold = 21; //how high roll is needed for rack explosion   
+				break;			
 			case 'R': //Rapid fire: RoF 1/turn, increased explosion chance
 				$this->displayName = "Class-R Missile Rack";
 				$maxhealth = 6;
