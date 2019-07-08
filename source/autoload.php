@@ -6,9 +6,7 @@ spl_autoload_register(
     function($class) {
         static $classes = null;
         if ($classes === null) {
-            $classes = array(
-                
-                  
+            $classes = array(              
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
                 'abrithib' => '/server/model/ships/dilgar/abrithiB.php',
                 'absorbtionshield' => '/server/model/weapons/customs.php',
@@ -993,6 +991,12 @@ spl_autoload_register(
                 'zzunofftshon' => '/server/model/ships/narn/zzunoffTshon.php',
                 'zzunofftshonstealth' => '/server/model/ships/narn/zzunoffTshonStealth.php',
                 'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php'
+		    
+		 
+                'ochlavitafull' => '/server/model/ships/dilgar/ochlavitaFull.php',   
+                'ochlavitamfull' => '/server/model/ships/dilgar/ochlavitaMFull.php',   
+                'athraskalafull' => '/server/model/ships/dilgar/athraskalaFull.php',   
+                'athraskalacfull' => '/server/model/ships/dilgar/athraskalaCFull.php',   
             );
         }
         $cn = strtolower($class);
