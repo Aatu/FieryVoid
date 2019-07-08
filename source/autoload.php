@@ -6,7 +6,10 @@ spl_autoload_register(
     function($class) {
         static $classes = null;
         if ($classes === null) {
-            $classes = array(              
+            $classes = array(             
+		    
+                'multibombrack' => '/server/model/weapons/missile.php',
+		    
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
                 'abrithib' => '/server/model/ships/dilgar/abrithiB.php',
                 'absorbtionshield' => '/server/model/weapons/customs.php',
@@ -996,7 +999,14 @@ spl_autoload_register(
                 'ochlavitafull' => '/server/model/ships/dilgar/ochlavitaFull.php',   
                 'ochlavitamfull' => '/server/model/ships/dilgar/ochlavitaMFull.php',   
                 'athraskalafull' => '/server/model/ships/dilgar/athraskalaFull.php',   
-                'athraskalacfull' => '/server/model/ships/dilgar/athraskalaCFull.php',   
+                'athraskalacfull' => '/server/model/ships/dilgar/athraskalaCFull.php',  
+		    
+                'warlockmlpafull' => '/server/model/ships/EA/warlockMlpaFull.php',  
+                'sagittariusfull' => '/server/model/ships/EA/sagittariusFull.php',   
+                'godalphafull' => '/server/model/ships/EA/godAlphaFull.php',   
+                'godbetafull' => '/server/model/ships/EA/godBetaFull.php',  
+		    
+		    
             );
         }
         $cn = strtolower($class);
