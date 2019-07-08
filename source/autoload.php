@@ -6,9 +6,10 @@ spl_autoload_register(
     function($class) {
         static $classes = null;
         if ($classes === null) {
-            $classes = array(
-                
-                  
+            $classes = array(             
+		    
+                'multibombrack' => '/server/model/weapons/missile.php',
+		    
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
                 'abrithib' => '/server/model/ships/dilgar/abrithiB.php',
                 'absorbtionshield' => '/server/model/weapons/customs.php',
@@ -88,7 +89,6 @@ spl_autoload_register(
                 'blastcannonfamily' => '/server/model/weapons/pulse.php',
                 'bmissilerack' => '/server/model/weapons/missile.php',
                 'multimissilelauncher' => '/server/model/weapons/missile.php',
-                'multibombrack' => '/server/model/weapons/missile.php',
                 'bochi' => '/server/model/ships/abbai_old/bochi.php',
                 'bombrack' => '/server/model/weapons/missile.php',
                 'boroca' => '/server/model/ships/hurr/boroca.php',
@@ -994,6 +994,19 @@ spl_autoload_register(
                 'zzunofftshon' => '/server/model/ships/narn/zzunoffTshon.php',
                 'zzunofftshonstealth' => '/server/model/ships/narn/zzunoffTshonStealth.php',
                 'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php'
+		    
+		 
+                'ochlavitafull' => '/server/model/ships/dilgar/ochlavitaFull.php',   
+                'ochlavitamfull' => '/server/model/ships/dilgar/ochlavitaMFull.php',   
+                'athraskalafull' => '/server/model/ships/dilgar/athraskalaFull.php',   
+                'athraskalacfull' => '/server/model/ships/dilgar/athraskalaCFull.php',  
+		    
+                'warlockmlpafull' => '/server/model/ships/EA/warlockMlpaFull.php',  
+                'sagittariusfull' => '/server/model/ships/EA/sagittariusFull.php',   
+                'godalphafull' => '/server/model/ships/EA/godAlphaFull.php',   
+                'godbetafull' => '/server/model/ships/EA/godBetaFull.php',  
+		    
+		    
             );
         }
         $cn = strtolower($class);
