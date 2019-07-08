@@ -116,7 +116,7 @@ const getEntry = (header, value, key) => {
     //therefore I'm making this an exception
     //if (header != 'Special'){ 
         if (value.replace) {
-            ///or maybe just replacing \n with \a would work?...
+            ///or maybe just replacing \n with \A would work?...
             //value = value.replace(/<br>/gm , "\n");
             value = value.replace(/<br>/gm , "\A");
         }
