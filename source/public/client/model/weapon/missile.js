@@ -119,3 +119,9 @@ var MultiMissileLauncher = function MultiMissileLauncher(json, ship) {
 };
 MultiMissileLauncher.prototype = Object.create(Ballistic.prototype);
 MultiMissileLauncher.prototype.constructor = MultiMissileLauncher;
+
+var MultiBombRack = function MultiBombRack(json, ship) {
+    Ballistic.call(this, json, ship);
+};
+MultiBombRack.prototype = Object.create(Ballistic.prototype);
+MultiBombRack.prototype.constructor = MultiBombRack;
