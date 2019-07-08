@@ -98,3 +98,5 @@ class Sagittarius extends BaseShip{
         );
     }
 }
+
+?>
