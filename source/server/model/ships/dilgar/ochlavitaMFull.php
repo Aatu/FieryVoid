@@ -9,6 +9,7 @@ class OchlavitaMFull extends HeavyCombatVessel{
         $this->phpclass = "OchlavitaMFull";
         $this->imagePath = "img/ships/ochlavita_m.png";
         $this->shipClass = "Ochlavita-M Missile Destroyer (full)";
+	    $this->unofficial = true;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
@@ -22,6 +23,7 @@ class OchlavitaMFull extends HeavyCombatVessel{
         
         $this->occurence = "rare";
         $this->variantOf = "Ochlavita Destroyer";
+	    
 	$this->addPrimarySystem(new Reactor(4, 20, 0, 0));
 	$this->addPrimarySystem(new CnC(5, 15, 0, 0));
 	$this->addPrimarySystem(new Scanner(5, 12, 4, 8));
