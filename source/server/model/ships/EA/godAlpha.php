@@ -61,3 +61,5 @@ class GODALpha extends OSAT{
         );
     }
 }
+
+?>
