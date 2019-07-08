@@ -88,6 +88,7 @@ spl_autoload_register(
                 'blastcannonfamily' => '/server/model/weapons/pulse.php',
                 'bmissilerack' => '/server/model/weapons/missile.php',
                 'multimissilelauncher' => '/server/model/weapons/missile.php',
+                'multibombrack' => '/server/model/weapons/missile.php',
                 'bochi' => '/server/model/ships/abbai_old/bochi.php',
                 'bombrack' => '/server/model/weapons/missile.php',
                 'boroca' => '/server/model/ships/hurr/boroca.php',
