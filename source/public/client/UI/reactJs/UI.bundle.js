@@ -39289,10 +39289,16 @@ var getCriticals = function getCriticals(system) {
 };
 
 var getEntry = function getEntry(header, value, key) {
-
+    //Marcin Sawicki, 08.07.2019:
+    //'Special' entry often consists of multiple lines, and is not correctly displayed without all necessary 'BR's. 
+    //therefore I'm making this an exception
+    //if (header != 'Special'){ 
     if (value.replace) {
-        value = value.replace(/<br>/gm, "\n");
+        ///or maybe just replacing \n with \A would work?...
+        //value = value.replace(/<br>/gm , "\n");
+        value = value.replace(/<br>/gm, "\A");
     }
+    //}
 
     return React.createElement(
         Entry,

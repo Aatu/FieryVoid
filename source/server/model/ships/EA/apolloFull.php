@@ -4,7 +4,7 @@ class ApolloFull extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 //pricing proposal: standard launchers + 25/launcher, improved range additional +10, improved fire rate: double these numbers (so class-S +25, class-L +35, class-R +50, class-LH +70)
-        $this->pointCost = 1250; //900 Apollo, added 35 per L-launcher, plus 70 per LH-/turn launcher
+        $this->pointCost = 900+6*35+2*70; //900 Apollo, added 35 per L-launcher, plus 70 per LH-/turn launcher
         $this->faction = "EA";
         $this->phpclass = "ApolloFull";
         $this->variantOf = "Apollo Bombardment Cruiser";
