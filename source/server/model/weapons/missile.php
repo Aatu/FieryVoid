@@ -769,7 +769,7 @@ class MultiBombRack extends Weapon{
     public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     public $weaponClass = "Ballistic"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
 	
-	public $firingModes = array(1=>'Basic', 2=>=>'Flash'); //equals to available missiles; data is basic - if launcher is special, constructor will modify it
+	public $firingModes = array(1=>'Basic', 2=>'Flash'); //equals to available missiles; data is basic - if launcher is special, constructor will modify it
 	public $damageTypeArray = array(1=>'Standard', 2=>'Flash'); //indicates that this weapon does damage in Pulse mode
     public $fireControlArray = array( 1=>array(4, 5, 6), 2=>array(4, 5, 6) ); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
     public $rangeArray = array(1=>20, 2=>20); //distanceRange remains fixed, as it's improbable that anyone gets out of missile range and this would need more coding

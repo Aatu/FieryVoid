@@ -35,20 +35,20 @@ class OchlavitaMFull extends HeavyCombatVessel{
 	$this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	$this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	$this->addFrontSystem(new ScatterPulsar(1, 4, 2, 240, 60));
-	$this->addFrontSystem(new MultiMissileRack(3, 'S', 240, 60));
-	$this->addFrontSystem(new MultiMissileRack(3, 'S', 270, 90));
+	$this->addFrontSystem(new MultiMissileLauncher(3, 'S', 240, 60));
+	$this->addFrontSystem(new MultiMissileLauncher(3, 'S', 270, 90));
 	$this->addFrontSystem(new ScatterPulsar(1, 4, 2, 270, 90));
-	$this->addFrontSystem(new MultiMissileRack(3, 'S', 270, 90));
-	$this->addFrontSystem(new MultiMissileRack(3, 'S', 300, 120));
+	$this->addFrontSystem(new MultiMissileLauncher(3, 'S', 270, 90));
+	$this->addFrontSystem(new MultiMissileLauncher(3, 'S', 300, 120));
 	$this->addFrontSystem(new ScatterPulsar(1, 4, 2, 300, 120));
 	$this->addAftSystem(new ScatterPulsar(1, 4, 2, 120, 300));
-	$this->addAftSystem(new MultiMissileRack(3, 'S', 90, 270));
+	$this->addAftSystem(new MultiMissileLauncher(3, 'S', 90, 270));
 	$this->addAftSystem(new Thruster(2, 4, 0, 2, 2));
 	$this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
 	$this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
 	$this->addAftSystem(new Thruster(2, 4, 0, 2, 2));
 	$this->addAftSystem(new Engine(3, 9, 0, 4, 2));
-	$this->addAftSystem(new MultiMissileRack(3, 'S', 90, 270));
+	$this->addAftSystem(new MultiMissileLauncher(3, 'S', 90, 270));
 	$this->addAftSystem(new ScatterPulsar(1, 4, 2, 60, 240));
  
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

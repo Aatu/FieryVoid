@@ -24,10 +24,10 @@ class GODBetaFull extends OSAT{
         $this->iniativebonus = 60;
 
 
-        $this->addPrimarySystem(new MultiMissileRack(3, 'B', 270, 90, true));
-        $this->addPrimarySystem(new MultiMissileRack(3, 'B', 270, 90, true));
-        $this->addPrimarySystem(new MultiMissileRack(3, 'B', 270, 90, true));
-        $this->addPrimarySystem(new MultiMissileRack(3, 'B', 270, 90, true));
+        $this->addPrimarySystem(new MultiMissileLauncher(3, 'B', 270, 90, true));
+        $this->addPrimarySystem(new MultiMissileLauncher(3, 'B', 270, 90, true));
+        $this->addPrimarySystem(new MultiMissileLauncher(3, 'B', 270, 90, true));
+        $this->addPrimarySystem(new MultiMissileLauncher(3, 'B', 270, 90, true));
         $this->addPrimarySystem(new HvyParticleCannon(5, 12, 9, 300, 60));
         $this->addPrimarySystem(new LightPulse(2, 4, 2, 180, 360));
         $this->addPrimarySystem(new LightPulse(2, 4, 2, 180, 360));

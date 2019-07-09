@@ -10,7 +10,7 @@ class SagittariusFull extends BaseShip{
         $this->imagePath = "img/ships/sagittarius.png";
         $this->shipClass = "Sagittarius Missile Cruiser (Beta Model, full)";
 	        $this->unofficial = true;
-        $this->variantOf = "Sagittarius Missile Cruiser (Beta Model)");
+        $this->variantOf = "Sagittarius Missile Cruiser (Beta Model)";
         $this->shipSizeClass = 3;
         $this->limited = 33;
 
@@ -34,10 +34,10 @@ class SagittariusFull extends BaseShip{
 
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-        $this->addFrontSystem(new MultiMissileRack(3, 'L', 240, 120));
-        $this->addFrontSystem(new MultiMissileRack(3, 'L', 240, 120));
-        $this->addFrontSystem(new MultiMissileRack(3, 'L', 180, 60));
-        $this->addFrontSystem(new MultiMissileRack(3, 'L', 300, 180));
+        $this->addFrontSystem(new MultiMissileLauncher(3, 'L', 240, 120));
+        $this->addFrontSystem(new MultiMissileLauncher(3, 'L', 240, 120));
+        $this->addFrontSystem(new MultiMissileLauncher(3, 'L', 180, 60));
+        $this->addFrontSystem(new MultiMissileLauncher(3, 'L', 300, 180));
         $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 270, 90));
 		
         $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
@@ -45,12 +45,12 @@ class SagittariusFull extends BaseShip{
         $this->addAftSystem(new InterceptorMkI(2, 4, 1, 90, 270));
 
         $this->addLeftSystem(new Thruster(3, 13, 0, 4, 3));
-        $this->addLeftSystem(new MultiMissileRack(3, 'L', 180, 60));
-        $this->addLeftSystem(new MultiMissileRack(3, 'L', 60, 300));
+        $this->addLeftSystem(new MultiMissileLauncher(3, 'L', 180, 60));
+        $this->addLeftSystem(new MultiMissileLauncher(3, 'L', 60, 300));
 
         $this->addRightSystem(new Thruster(3, 13, 0, 4, 4));
-        $this->addRightSystem(new MultiMissileRack(3, 'L', 300,180));
-        $this->addRightSystem(new MultiMissileRack(3, 'L', 60, 300 ));
+        $this->addRightSystem(new MultiMissileLauncher(3, 'L', 300,180));
+        $this->addRightSystem(new MultiMissileLauncher(3, 'L', 60, 300 ));
 
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

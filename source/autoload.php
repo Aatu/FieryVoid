@@ -993,7 +993,7 @@ spl_autoload_register(
                 'zzunofftashkaton' => '/server/model/ships/brakiri/zzunoffTashkaton.php',
                 'zzunofftshon' => '/server/model/ships/narn/zzunoffTshon.php',
                 'zzunofftshonstealth' => '/server/model/ships/narn/zzunoffTshonStealth.php',
-                'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php'
+                'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
 		    
 		 
                 'ochlavitafull' => '/server/model/ships/dilgar/ochlavitaFull.php',   
@@ -1004,7 +1004,7 @@ spl_autoload_register(
                 'warlockmlpafull' => '/server/model/ships/EA/warlockMlpaFull.php',  
                 'sagittariusfull' => '/server/model/ships/EA/sagittariusFull.php',   
                 'godalphafull' => '/server/model/ships/EA/godAlphaFull.php',   
-                'godbetafull' => '/server/model/ships/EA/godBetaFull.php',  
+                'godbetafull' => '/server/model/ships/EA/godBetaFull.php'  
 		    
 		    
             );

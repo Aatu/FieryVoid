@@ -26,8 +26,8 @@ class AthraskalaFull extends BaseShip{
         $this->addPrimarySystem(new Scanner(4, 12, 3, 7));
         $this->addPrimarySystem(new Engine(4, 11, 0, 6, 4));
         $this->addPrimarySystem(new Hangar(4, 2));
-        $this->addFrontSystem(new MultiMissileRack(3, 'S', 300, 60));
-        $this->addFrontSystem(new MultiMissileRack(3, 'S', 300, 60));
+        $this->addFrontSystem(new MultiMissileLauncher(3, 'S', 300, 60));
+        $this->addFrontSystem(new MultiMissileLauncher(3, 'S', 300, 60));
         $this->addFrontSystem(new MassDriver(4, 18, 9, 330, 30));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
@@ -35,8 +35,8 @@ class AthraskalaFull extends BaseShip{
         $this->addFrontSystem($bombrack1);
         $bombrack2 = new MultiBombRack(1, 'B', 300, 60);
         $this->addFrontSystem($bombrack2);
-        $this->addAftSystem(new MultiMissileRack(1, 'S', 120, 240));
-        $this->addAftSystem(new MultiMissileRack(1, 'S', 120, 240));
+        $this->addAftSystem(new MultiMissileLauncher(1, 'S', 120, 240));
+        $this->addAftSystem(new MultiMissileLauncher(1, 'S', 120, 240));
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));

@@ -51,8 +51,8 @@ class WarlockMlpaFull extends BaseShip{
 		$this->addAftSystem(new Thruster(4, 12, 0, 2, 2));
 		$this->addAftSystem(new Thruster(3, 6, 0, 1, 2));
 		$this->addAftSystem(new Thruster(3, 6, 0, 1, 2));
-		$this->addLeftSystem(new MultiMissileRack(3, 'L', 240, 0));
-		$this->addLeftSystem(new MultiMissileRack(3, 'LH', 240, 0));
+		$this->addLeftSystem(new MultiMissileLauncher(3, 'L', 240, 0));
+		$this->addLeftSystem(new MultiMissileLauncher(3, 'LH', 240, 0));
 		$this->addLeftSystem(new MLPA(4, 9, 5, 240, 0));
 		$this->addLeftSystem(new MLPA(4, 9, 5, 240, 0));
 		$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 360));
@@ -61,8 +61,8 @@ class WarlockMlpaFull extends BaseShip{
 		$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 360));
 		$this->addLeftSystem(new InterceptorMkII(2, 4, 2, 180, 360));
 		$this->addLeftSystem(new Thruster(4, 20, 0, 6, 3));
-		$this->addRightSystem(new MultiMissileRack(3, 'L', 0, 120));
-		$this->addRightSystem(new MultiMissileRack(3, 'LH, 0, 120));
+		$this->addRightSystem(new MultiMissileLauncher(3, 'L', 0, 120));
+		$this->addRightSystem(new MultiMissileLauncher(3, 'LH', 0, 120));
 		$this->addRightSystem(new MLPA(4, 9, 5, 0, 120));
 		$this->addRightSystem(new MLPA(4, 9, 5, 0, 120));
 		$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
