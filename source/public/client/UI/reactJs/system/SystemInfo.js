@@ -46,20 +46,27 @@ class SystemInfo extends React.Component {
                 </SystemInfoTooltip>
             );
         }
-
+//special treatment for 'Special' entry (due to probable multiline)
+    /*
+        var specialEntry = [""];
+        if (system.data.Special != null){
+             specialEntry = system.data.Special.split('<br>');
+        }
+        var specialName = 'Special';
+*/
         return (
             <SystemInfoTooltip position={getPosition(boundingBox)}>
                 <InfoHeader>{system.displayName}</InfoHeader>
                 {!ship.flight && getEntry('Structure', system.maxhealth - damageManager.getDamage(ship, system) + '/' + system.maxhealth)}
                 {!ship.flight && getEntry('Armor', shipManager.systems.getArmour(ship, system))}
                 {ship.flight && getEntry('Offensive bonus', ship.offensivebonus * 5)}
-
                 
                 {system.firingModes && getEntry('Firing mode', system.firingModes[system.firingMode])}
                 
                 {system.missileArray && Object.keys(system.missileArray).length > 0 && getEntry('Ammo Amount', system.missileArray[system.firingMode].amount)}
 
                 {Object.keys(system.data).map((key, i) => getEntry(key, system.data[key], 'data'+ i))}
+
 
                 {Object.keys(system.critData).length > 0 && getCriticals(system)}
 
@@ -111,16 +118,9 @@ const getCriticals = (system) => [<InfoHeader key="criticalHeader">Damage</InfoH
     );
 
 const getEntry = (header, value, key) => {
-    //Marcin Sawicki, 08.07.2019:
-    //'Special' entry often consists of multiple lines, and is not correctly displayed without all necessary 'BR's. 
-    //therefore I'm making this an exception
-    //if (header != 'Special'){ 
         if (value.replace) {
-            ///or maybe just replacing \n with \A would work?...
-            //value = value.replace(/<br>/gm , "\n");
-            value = value.replace(/<br>/gm , "\A");
+            value = value.replace(/<br>/gm , "\n");
         }
-    //}
 
     return (
         <Entry key={key} ><Header>{header}: </Header>{value}</Entry>
