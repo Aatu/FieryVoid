@@ -341,6 +341,7 @@ spl_autoload_register(
                 'heavythentus' => '/server/model/ships/narn/HeavyThentus.php',
                 'hecatealpha' => '/server/model/ships/EA/hecateAlpha.php',
                 'hector' => '/server/model/ships/EA/hector.php',
+                'hectorfull' => '/server/model/ships/EA/hectorFull.php',
                 'helpmanager' => '/server/controller/HelpManager.php',
                 'hermes' => '/server/model/ships/EA/hermes.php',
                 'heron' => '/server/model/ships/drazi_old/heron.php',
