@@ -69,6 +69,11 @@ if (isset($_SESSION["user"])) {
             <b>rearrangements</b> - weapon layout modified so arcs seem more natural (where I noted problems - this means particularly Ipsha ;) ).
         <br>
             <b>Brathon thrusters fixed</b> - Brakiri Brathon Auxilliary Cruiser (and variant) is usable again!
+        <br><br>
+            <b>Missiles ahoy</b> - with many requests incoming now and then, capability to throw multiple types of missiles at Your opponent has arrived! 
+            <br>It came at a price, however. Ammo (including special ammo) is not limited, so 'as is' You'll always be throwing out something powerful.
+            <br>You can either do it (I have increased price of ships so modified... I hope it's high enough!), or agree with Your opponent which missiles (and perhaps how many) You can actually use (and give Yourself point limit increase, as the ships would be overpriced in such case).
+        <br>For starters I have modified some EA and Dilgar ships (primarily dedicated missile carriers), but further ones will come in the future as well.
         
         <br><br>
         - last but not least - brand new collection of BUGS!;
