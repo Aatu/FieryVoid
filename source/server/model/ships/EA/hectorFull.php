@@ -6,7 +6,7 @@ class HectorFull extends OSAT{
         
 		$this->pointCost = 250+2*100;
 		$this->faction = 'EA';//"EA defenses";
-        $this->phpclass = "Hector";
+        $this->phpclass = "HectorFull";
         $this->imagePath = "img/ships/hector.png";
         $this->shipClass = 'Hector Satellite (full)';
         $this->variantOf = 'Hector Satellite';
