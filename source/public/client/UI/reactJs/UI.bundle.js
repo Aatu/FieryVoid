@@ -39159,7 +39159,14 @@ var SystemInfo = function (_React$Component) {
                     React.createElement(_ShipInfo2.default, { ship: ship })
                 );
             }
-
+            //special treatment for 'Special' entry (due to probable multiline)
+            /*
+                var specialEntry = [""];
+                if (system.data.Special != null){
+                     specialEntry = system.data.Special.split('<br>');
+                }
+                var specialName = 'Special';
+            */
             return React.createElement(
                 SystemInfoTooltip,
                 { position: getPosition(boundingBox) },
@@ -39289,16 +39296,9 @@ var getCriticals = function getCriticals(system) {
 };
 
 var getEntry = function getEntry(header, value, key) {
-    //Marcin Sawicki, 08.07.2019:
-    //'Special' entry often consists of multiple lines, and is not correctly displayed without all necessary 'BR's. 
-    //therefore I'm making this an exception
-    //if (header != 'Special'){ 
     if (value.replace) {
-        ///or maybe just replacing \n with \A would work?...
-        //value = value.replace(/<br>/gm , "\n");
-        value = value.replace(/<br>/gm, "\A");
+        value = value.replace(/<br>/gm, "\n");
     }
-    //}
 
     return React.createElement(
         Entry,
