@@ -57,3 +57,4 @@ class Hector extends OSAT{
         );
     }
 }
+?>

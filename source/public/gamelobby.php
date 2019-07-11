@@ -220,9 +220,9 @@
 				<span class="panelsubheader">points</span>
 				</div>
 			<table class="store" style="width:100%;">
-				<tr><td style="width:50%;vertical-align:top;">
+				<tr><td style="width:40%;vertical-align:top;">
 					<div id="fleet" class="subpanel">
-				</td><td style="width:50%;">
+				</td><td style="width:60%;">
 					<div id="store" class="subpanel">
 				</td></tr>
 			</table>
