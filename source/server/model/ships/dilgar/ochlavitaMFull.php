@@ -37,10 +37,11 @@ class OchlavitaMFull extends HeavyCombatVessel{
 	$this->addFrontSystem(new ScatterPulsar(1, 4, 2, 240, 60));
 	$this->addFrontSystem(new MultiMissileLauncher(3, 'S', 240, 60));
 	$this->addFrontSystem(new MultiMissileLauncher(3, 'S', 270, 90));
-	$this->addFrontSystem(new ScatterPulsar(1, 4, 2, 270, 90));
+	$this->addFrontSystem(new ScatterPulsar(1, 4, 2, 300, 120));
 	$this->addFrontSystem(new MultiMissileLauncher(3, 'S', 270, 90));
 	$this->addFrontSystem(new MultiMissileLauncher(3, 'S', 300, 120));
-	$this->addFrontSystem(new ScatterPulsar(1, 4, 2, 300, 120));
+	$this->addFrontSystem(new ScatterPulsar(1, 4, 2, 270, 90));
+	    
 	$this->addAftSystem(new ScatterPulsar(1, 4, 2, 120, 300));
 	$this->addAftSystem(new MultiMissileLauncher(3, 'S', 90, 270));
 	$this->addAftSystem(new Thruster(2, 4, 0, 2, 2));
