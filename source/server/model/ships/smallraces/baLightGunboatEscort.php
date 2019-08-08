@@ -38,8 +38,8 @@ class BALightGunboatEscort extends MediumShip{
 	$this->addPrimarySystem(new Scanner(4, 12, 3, 5));
 	$this->addPrimarySystem(new Engine(4, 11, 0, 4, 1));
 	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 180, 60));
+	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 300, 180));
 	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 270, 90));
-	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 240, 180));
 	$this->addPrimarySystem(new BAInterceptorMkI(2, 0, 0, 0, 360));
 	$this->addPrimarySystem(new Structure( 5, 30));
   
