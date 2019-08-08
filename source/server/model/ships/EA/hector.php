@@ -26,7 +26,7 @@ class Hector extends OSAT{
         $this->addPrimarySystem(new LightPulse(2, 4, 2, 180, 360));
         $this->addPrimarySystem(new LightPulse(2, 4, 2, 0, 180));
         $this->addPrimarySystem(new InterceptorMkI(2, 4, 1, 0, 360));
-        $this->addPrimarySystem(new InterceptorMkI(2, 4, 1, 0, 360));
+        //$this->addPrimarySystem(new InterceptorMkI(2, 4, 1, 0, 360));
 
 
         $this->addPrimarySystem(new Reactor(4, 7, 0, 0));
