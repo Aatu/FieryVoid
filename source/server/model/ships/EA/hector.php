@@ -44,7 +44,7 @@ class Hector extends OSAT{
 				11 => "Thruster",
 				14 => "Class-B Missile Rack",
 				16 => "Light Pulse Cannon",
-				19 => "Scanner",
+				18 => "Scanner",
 				19 => "Reactor",
 				20 => "Interceptor I",
 			),
