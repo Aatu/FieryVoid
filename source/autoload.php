@@ -207,6 +207,7 @@ spl_autoload_register(
                 'drakhsupportship' => '/server/model/ships/drakh/drakhSupportShip.php',
                 'drakhtanker' => '/server/model/ships/drakh/drakhTanker.php',
                 'drakhtender' => '/server/model/ships/drakh/drakhTender.php',
+                'drakhmothership' => '/server/model/ships/drakh/drakhMothership.php',
                 'drikorta' => '/server/model/ships/brakiri/drikorta.php',
                 'droftae' => '/server/model/ships/markab/droftaE.php',
                 'droftan' => '/server/model/ships/markab/droftaN.php',
