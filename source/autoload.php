@@ -147,6 +147,7 @@ spl_autoload_register(
                 'crusader' => '/server/model/ships/orieni/crusader.php',
                 'crusader2003' => '/server/model/ships/orieni/crusader2003.php',
                 'cubecoordinate' => '/server/model/CubeCoordinate.php',
+                'customerlightpbeam' => '/server/model/weapons/customs.php',
                 'customheavymattercannon' => '/server/model/weapons/customs.php',
                 'customheavypolaritypulsar' => '/server/model/weapons/customs.php',
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
