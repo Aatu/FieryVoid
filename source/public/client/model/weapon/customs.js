@@ -48,6 +48,7 @@ var CustomPhaseDisruptor = function CustomPhaseDisruptor(json, ship) {
 CustomPhaseDisruptor.prototype = Object.create(Weapon.prototype);
 CustomPhaseDisruptor.prototype.constructor = CustomPhaseDisruptor;
 
+
 var CustomLtPhaseDisruptorShip = function CustomLtPhaseDisruptorShip(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -89,3 +90,10 @@ var LightScattergun = function LightScattergun(json, ship) {
 };
 LightScattergun.prototype = Object.create(Weapon.prototype);
 LightScattergun.prototype.constructor = LightScattergun;
+
+
+var CustomERLightPBeam = function CustomERLightPBeam(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CustomERLightPBeam.prototype = Object.create(Weapon.prototype);
+CustomERLightPBeam.prototype.constructor = CustomERLightPBeam;
