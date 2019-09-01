@@ -1,6 +1,40 @@
 <?php
 
 
+ class CustomERLightPBeam extends Particle{
+        public $trailColor = array(30, 170, 255);
+        public $name = "CustomERLightPBeam";
+        public $displayName = "Extended Range Light Particle Beam";
+	public $iconPath = "lightParticleBeamShip.png";
+        public $animation = "beam";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.15;
+        public $projectilespeed = 12;
+        public $animationWidth = 3;
+        public $trailLength = 10;
+        
+        public $intercept = 2;
+        public $loadingtime = 1;
+      
+        
+        public $rangePenalty = 1;
+        public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals 
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 3;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 - $this->dp;      }
+
+} //endof CustomERLightPBeam
+
+
 class CustomLightMatterCannon extends Matter {
     /*Light Matter Cannon, as used on Ch'Lonas ships*/
         public $name = "customLightMatterCannon";
