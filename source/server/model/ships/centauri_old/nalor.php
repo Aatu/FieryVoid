@@ -6,7 +6,7 @@ class Nalor extends BaseShip{
         
 		$this->pointCost = 600;
         $this->faction = "Centauri (WotCR)";
-        $this->phpclass = "Celerian";
+        $this->phpclass = "Nalor";
         $this->imagePath = "img/ships/celerian.png";
         $this->shipClass = "Nalor Armored Cruiser";
         $this->shipSizeClass = 3;

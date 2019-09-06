@@ -14,6 +14,7 @@ class LeskratiD extends BaseShip{
 
         $this->occurence = "uncommon";
         $this->variantOf = "Leskrati Jumpcruiser";
+        $this->limited = 33;
 
         $this->forwardDefense = 15;
         $this->sideDefense = 15;

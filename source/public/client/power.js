@@ -333,9 +333,15 @@ shipManager.power = {
 		
 		var power = shipManager.power.getReactorPower(ship, reactor);
 
+		if (power >= 0){
+			return false;	
+		}
+		
+		/* if all power-using systems are offline and still power <0, then it's powerless and that's it!
 		if (this.countPossiblePower(ship) + power > 0) {
 			return false;			
 		}
+		*/
 		
 		/*check if all power-using systems are offline - if not, then it's not powerless*/
 		for (var i in ship.systems) {

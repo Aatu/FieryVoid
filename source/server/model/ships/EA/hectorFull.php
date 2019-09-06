@@ -28,7 +28,7 @@ class HectorFull extends OSAT{
         $this->addPrimarySystem(new LightPulse(2, 4, 2, 180, 360));
         $this->addPrimarySystem(new LightPulse(2, 4, 2, 0, 180));
         $this->addPrimarySystem(new InterceptorMkI(2, 4, 1, 0, 360));
-        $this->addPrimarySystem(new InterceptorMkI(2, 4, 1, 0, 360));
+        //$this->addPrimarySystem(new InterceptorMkI(2, 4, 1, 0, 360));
 
 
         $this->addPrimarySystem(new Reactor(4, 7, 0, 0));
@@ -46,7 +46,7 @@ class HectorFull extends OSAT{
 				11 => "Thruster",
 				14 => "Class-B Missile Rack",
 				16 => "Light Pulse Cannon",
-				19 => "Scanner",
+				18 => "Scanner",
 				19 => "Reactor",
 				20 => "Interceptor I",
 			),

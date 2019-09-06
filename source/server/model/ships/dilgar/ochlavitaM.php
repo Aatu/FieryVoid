@@ -36,10 +36,10 @@ class OchlavitaM extends HeavyCombatVessel{
 	$this->addFrontSystem(new ScatterPulsar(1, 4, 2, 240, 60));
 	$this->addFrontSystem(new SMissileRack(3, 6, 0, 240, 60));
 	$this->addFrontSystem(new SMissileRack(3, 6, 0, 270, 90));
-	$this->addFrontSystem(new ScatterPulsar(1, 4, 2, 270, 90));
+	$this->addFrontSystem(new ScatterPulsar(1, 4, 2, 300, 120));
 	$this->addFrontSystem(new SMissileRack(3, 6, 0, 270, 90));
 	$this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 120));
-	$this->addFrontSystem(new ScatterPulsar(1, 4, 2, 300, 120));
+	$this->addFrontSystem(new ScatterPulsar(1, 4, 2, 270, 90));
 
 	$this->addAftSystem(new ScatterPulsar(1, 4, 2, 120, 300));
 	$this->addAftSystem(new SMissileRack(3, 6, 0, 90, 270));

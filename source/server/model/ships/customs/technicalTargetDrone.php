@@ -54,12 +54,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
 		*/
 		
-		$this->addFrontSystem(new QuadArray(3, 0, 0, 0, 360));
-		$this->addFrontSystem(new QuadArray(3, 0, 0, 0, 360));
-		$this->addFrontSystem(new QuadArray(3, 0, 0, 0, 360));
-		$this->addFrontSystem(new QuadArray(3, 0, 0, 0, 360));
-		$this->addFrontSystem(new QuadArray(3, 0, 0, 0, 360));
-		$this->addFrontSystem(new QuadArray(3, 0, 0, 0, 360));
+		$this->addFrontSystem(new CustomERLightPBeam(3, 0, 0, 240, 120));
 		
 		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));
 		$this->addAftSystem(new CommJammer(3, 0, 0, 0, 360));		

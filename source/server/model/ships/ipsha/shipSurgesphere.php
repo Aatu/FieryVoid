@@ -74,24 +74,24 @@ class ShipSurgesphere extends BaseShip{
         $this->addAftSystem(new MagGraviticThruster(4, 15, 0, 99, 2));
         $this->addAftSystem(new MagGraviticThruster(4, 15, 0, 99, 2));
 	    
-	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 240, 360));
-	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 240, 360));
-	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 240, 360));
-	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 240, 360));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 180, 300));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 180, 300));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 180, 300));
-	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 180, 300));	    
+	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 180, 300));
+	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 240, 360));
+	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 240, 360));
+	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 240, 360));
+	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 240, 360));	    
 	$this->addLeftSystem(new MagGraviticThruster(4, 20, 0, 99, 3));
 		
-	$this->addRightSystem(new SurgeCannon(3, 0, 0, 0, 120));
-	$this->addRightSystem(new SurgeCannon(3, 0, 0, 0, 120));
-	$this->addRightSystem(new SurgeCannon(3, 0, 0, 0, 120));
-	$this->addRightSystem(new SurgeCannon(3, 0, 0, 0, 120));
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 60, 180));
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 60, 180));
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 60, 180));
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 60, 180));
+	$this->addRightSystem(new SurgeCannon(3, 0, 0, 0, 120));
+	$this->addRightSystem(new SurgeCannon(3, 0, 0, 0, 120));
+	$this->addRightSystem(new SurgeCannon(3, 0, 0, 0, 120));
+	$this->addRightSystem(new SurgeCannon(3, 0, 0, 0, 120));
         $this->addRightSystem(new MagGraviticThruster(4, 20, 0, 99, 4));
 		
 		
