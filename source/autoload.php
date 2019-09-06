@@ -192,7 +192,7 @@ spl_autoload_register(
                 'doublev' => '/server/model/ships/raiders/doubleV.php',
                 'doublev_nav' => '/server/model/ships/raiders/doubleV_nav.php',
                 'dragon' => '/server/model/ships/drazi_old/dragon.php',
-                'dragonship' => '/server/model/ships/raiders/dragonshipphp',
+                'dragonship' => '/server/model/ships/raiders/dragonship.php',
                 'drakhattackship' => '/server/model/ships/drakh/drakhAttackShip.php',
                 'drakhcommandship' => '/server/model/ships/drakh/drakhCommandShip.php',
                 'drakhdreadnought' => '/server/model/ships/drakh/drakhDreadnought.php',

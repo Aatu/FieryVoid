@@ -4,7 +4,7 @@ class govallFull extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 700+4*35+50;  "4x class-L, 1x class-R
+        $this->pointCost = 700+4*35+50;  //4x class-L, 1x class-R
         $this->faction = "Llort";
         $this->phpclass = "govallFull";
         $this->imagePath = "img/ships/LlortGovall.png";
