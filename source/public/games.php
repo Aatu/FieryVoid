@@ -53,7 +53,7 @@ if (isset($_SESSION["user"])) {
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
 <div class="panel news">
-    <div id="newsHeader">Latest News - July 2019</div>
+    <div id="newsHeader">Latest News - September 2019</div>
     <div id="newsEntry">
         <!--
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
@@ -62,19 +62,9 @@ if (isset($_SESSION["user"])) {
         -->
         The latest update includes:
         <br><br>
-            <b>Scattergun remade</b> - as it's interception was too powerful 
+            <b>Minor fixes</b> - layout fixes mostly
         <br>
-            <b>boost/deboost buttons re-ordered</b> - so multiple boosts do not require mouse movement ;)
-        <br>
-            <b>rearrangements</b> - weapon layout modified so arcs seem more natural (where I noted problems - this means particularly Ipsha ;) ).
-        <br>
-            <b>Brathon thrusters fixed</b> - Brakiri Brathon Auxilliary Cruiser (and variant) is usable again!
-        <br><br>
-            <b>Missiles ahoy</b> - with many requests incoming now and then, capability to throw multiple types of missiles at Your opponent has arrived! 
-            <br>It came at a price, however. Ammo (including special ammo) is not limited, so 'as is' You'll always be throwing out something powerful.
-            <br>You can either do it (I have increased price of ships so modified... I hope it's high enough!), or agree with Your opponent which missiles (and perhaps how many) You can actually use (and give Yourself point limit increase, as the ships would be overpriced in such case).
-        <br>For starters I have modified some EA and Dilgar ships (primarily dedicated missile carriers), but further ones will come in the future as well.
-        
+            <b>New missile ships</b> - primarily Govall with full special missile load :)
         <br><br>
         - last but not least - brand new collection of BUGS!;
         <br><br>
