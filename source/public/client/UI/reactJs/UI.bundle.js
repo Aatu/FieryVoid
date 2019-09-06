@@ -38416,7 +38416,7 @@ Object.defineProperty(exports, "Clickable", {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+	value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -38446,63 +38446,170 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
 var InfoContainer = _styledComponents2.default.div.withConfig({
-    displayName: "ShipInfo__InfoContainer",
-    componentId: "sc-1igk9xu-0"
+	displayName: "ShipInfo__InfoContainer",
+	componentId: "sc-1igk9xu-0"
 })(_templateObject);
 
 var ShipInfo = function (_React$Component) {
-    _inherits(ShipInfo, _React$Component);
+	_inherits(ShipInfo, _React$Component);
 
-    function ShipInfo() {
-        _classCallCheck(this, ShipInfo);
+	function ShipInfo() {
+		_classCallCheck(this, ShipInfo);
 
-        return _possibleConstructorReturn(this, (ShipInfo.__proto__ || Object.getPrototypeOf(ShipInfo)).apply(this, arguments));
-    }
+		return _possibleConstructorReturn(this, (ShipInfo.__proto__ || Object.getPrototypeOf(ShipInfo)).apply(this, arguments));
+	}
 
-    _createClass(ShipInfo, [{
-        key: "render",
-        value: function render() {
-            var ship = this.props.ship;
+	_createClass(ShipInfo, [{
+		key: "render",
+		value: function render() {
+			var ship = this.props.ship;
 
+			var notes = new Array();
+			var hitChart = new Array();
 
-            return React.createElement(
-                InfoContainer,
-                null,
-                ship.flight && React.createElement(
-                    _SystemInfo.Entry,
-                    null,
-                    React.createElement(
-                        _SystemInfo.Header,
-                        null,
-                        "Offensive bonus: "
-                    ),
-                    ship.offensivebonus * 5
-                ),
-                ship.flight && React.createElement(
-                    _SystemInfo.Entry,
-                    null,
-                    React.createElement(
-                        _SystemInfo.Header,
-                        null,
-                        "Armor (F/S/A): "
-                    ),
-                    shipManager.systems.getFlightArmour(ship)
-                ),
-                ship.flight && React.createElement(
-                    _SystemInfo.Entry,
-                    null,
-                    React.createElement(
-                        _SystemInfo.Header,
-                        null,
-                        "Thrust per turn: "
-                    ),
-                    ship.freethrust
-                )
-            );
-        }
-    }]);
+			if (ship.notes) {
+				notes = ship.notes.split("<br>");
+			}
 
-    return ShipInfo;
+			if (ship.hitChart) {
+				var names = ["Primary", "Front", "Aft", "Port", "Starboard"];
+				var hitChartLine = "";
+				var name = "";
+				var current = 0;
+				var hitChance = 0;
+
+				var toDo = 5;
+				if (ship.base && !ship.smallBase) {
+					names[1] = "Sections";
+					toDo = 2;
+				} else {
+					toDo = 5; //(almost) always try to show all 5 sections, there may be holes
+				}
+				for (var i = 0; i < toDo; i++) {
+					if (ship.hitChart[i] === undefined) {
+						continue; //no appropriate entry, skip it
+					}
+					hitChartLine = "";
+					current = 0;
+					for (var entryKey in ship.hitChart[i]) {
+						hitChance = Math.floor((entryKey - current) / 20 * 100);
+						current = entryKey;
+						name = ship.hitChart[i][entryKey];
+						var n = name.indexOf(":");
+						if (n > 0) {
+							//hide retargeting to different section
+							name = name.substring(n + 1);
+						}
+						if (hitChartLine != "") hitChartLine = hitChartLine + ', ';
+						hitChartLine = hitChartLine + name + " " + hitChance + '%';
+					}
+					hitChart[names[i]] = hitChartLine;
+				}
+			}
+
+			return React.createElement(
+				InfoContainer,
+				null,
+				ship.flight && React.createElement(
+					_SystemInfo.Entry,
+					null,
+					React.createElement(
+						_SystemInfo.Header,
+						null,
+						"Offensive bonus: "
+					),
+					ship.offensivebonus * 5
+				),
+				ship.flight && React.createElement(
+					_SystemInfo.Entry,
+					null,
+					React.createElement(
+						_SystemInfo.Header,
+						null,
+						"Armor (F/S/A): "
+					),
+					shipManager.systems.getFlightArmour(ship)
+				),
+				ship.flight && React.createElement(
+					_SystemInfo.Entry,
+					null,
+					React.createElement(
+						_SystemInfo.Header,
+						null,
+						"Thrust per turn: "
+					),
+					ship.freethrust
+				),
+				ship.flight && React.createElement(
+					_SystemInfo.Entry,
+					null,
+					"-"
+				),
+				Object.keys(notes).length > 0 && React.createElement(
+					_SystemInfo.Entry,
+					null,
+					React.createElement(
+						_SystemInfo.Header,
+						null,
+						"NOTES: "
+					),
+					"-"
+				),
+				Object.keys(notes).length > 0 && Object.keys(notes).map(function (i) {
+					return React.createElement(
+						_SystemInfo.Entry,
+						null,
+						notes[i]
+					);
+				}),
+				Object.keys(notes).length > 0 && React.createElement(
+					_SystemInfo.Entry,
+					null,
+					"-"
+				),
+				Object.keys(hitChart).length > 0 && React.createElement(
+					_SystemInfo.Entry,
+					null,
+					React.createElement(
+						_SystemInfo.Header,
+						null,
+						"HIT CHART: "
+					),
+					"-"
+				),
+				Object.keys(hitChart).length > 0 && Object.keys(hitChart).map(function (i) {
+					return React.createElement(
+						_SystemInfo.Entry,
+						null,
+						React.createElement(
+							_SystemInfo.Header,
+							null,
+							i,
+							": "
+						),
+						hitChart[i]
+					);
+				}),
+				Object.keys(hitChart).length > 0 && React.createElement(
+					_SystemInfo.Entry,
+					null,
+					"-"
+				)
+			);
+
+			/* above is the same... among other things.
+    return (
+       <InfoContainer>
+           {ship.flight && <Entry><Header>Offensive bonus: </Header>{ship.offensivebonus * 5}</Entry>}
+           {ship.flight && <Entry><Header>Armor (F/S/A): </Header>{shipManager.systems.getFlightArmour(ship)}</Entry>}
+           {ship.flight && <Entry><Header>Thrust per turn: </Header>{ship.freethrust}</Entry>}
+       </InfoContainer>
+    );
+    */
+		}
+	}]);
+
+	return ShipInfo;
 }(React.Component);
 
 exports.default = ShipInfo;
@@ -39159,14 +39266,13 @@ var SystemInfo = function (_React$Component) {
                     React.createElement(_ShipInfo2.default, { ship: ship })
                 );
             }
-            //special treatment for 'Special' entry (due to probable multiline)
-            /*
-                var specialEntry = [""];
-                if (system.data.Special != null){
-                     specialEntry = system.data.Special.split('<br>');
-                }
-                var specialName = 'Special';
-            */
+            //special treatment for 'Special' entry (due to probable multiline)    
+            var specialEntry = new Array();
+            if (system.data.Special && system.data.Special != "") {
+                specialEntry = system.data.Special.split('<br>');
+            }
+            var specialName = 'Special';
+
             return React.createElement(
                 SystemInfoTooltip,
                 { position: getPosition(boundingBox) },
@@ -39181,7 +39287,24 @@ var SystemInfo = function (_React$Component) {
                 system.firingModes && getEntry('Firing mode', system.firingModes[system.firingMode]),
                 system.missileArray && Object.keys(system.missileArray).length > 0 && getEntry('Ammo Amount', system.missileArray[system.firingMode].amount),
                 Object.keys(system.data).map(function (key, i) {
-                    return getEntry(key, system.data[key], 'data' + i);
+                    return key != specialName && getEntry(key, system.data[key], 'data' + i);
+                }),
+                Object.keys(specialEntry).length > 0 && React.createElement(
+                    Entry,
+                    null,
+                    React.createElement(
+                        Header,
+                        null,
+                        "Special: "
+                    ),
+                    "-"
+                ),
+                Object.keys(specialEntry).length > 0 && Object.keys(specialEntry).map(function (i) {
+                    return React.createElement(
+                        Entry,
+                        null,
+                        specialEntry[i]
+                    );
                 }),
                 Object.keys(system.critData).length > 0 && getCriticals(system),
                 !gamedata.isMyShip(ship) && gamedata.gamephase == 3 && gamedata.waiting == false && gamedata.selectedSystems.length > 0 && selectedShip && getCalledShot(ship, selectedShip, system)

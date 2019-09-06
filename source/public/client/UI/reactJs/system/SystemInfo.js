@@ -46,14 +46,13 @@ class SystemInfo extends React.Component {
                 </SystemInfoTooltip>
             );
         }
-//special treatment for 'Special' entry (due to probable multiline)
-    /*
-        var specialEntry = [""];
-        if (system.data.Special != null){
+//special treatment for 'Special' entry (due to probable multiline)    
+        var specialEntry = new Array;
+        if (system.data.Special && system.data.Special != ""){
              specialEntry = system.data.Special.split('<br>');
         }
         var specialName = 'Special';
-*/
+
         return (
             <SystemInfoTooltip position={getPosition(boundingBox)}>
                 <InfoHeader>{system.displayName}</InfoHeader>
@@ -65,8 +64,12 @@ class SystemInfo extends React.Component {
                 
                 {system.missileArray && Object.keys(system.missileArray).length > 0 && getEntry('Ammo Amount', system.missileArray[system.firingMode].amount)}
 
-                {Object.keys(system.data).map((key, i) => getEntry(key, system.data[key], 'data'+ i))}
+                {Object.keys(system.data).map((key, i) => (key != specialName && getEntry(key, system.data[key], 'data'+ i)))}
 
+				{Object.keys(specialEntry).length > 0 && <Entry><Header>Special: </Header>-</Entry>}
+				{Object.keys(specialEntry).length > 0 && 
+					Object.keys(specialEntry).map(i => <Entry>{specialEntry[i]}</Entry> )
+				}
 
                 {Object.keys(system.critData).length > 0 && getCriticals(system)}
 
