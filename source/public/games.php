@@ -65,6 +65,10 @@ if (isset($_SESSION["user"])) {
             <b>Minor fixes</b> - layout fixes mostly
         <br>
             <b>New missile ships</b> - primarily Govall with full special missile load :)
+        <br>
+            <b>Hit charts</b> - hit charts returned! mouseover ship image :) . You'll see ship notes there as well.
+        <br>
+            <b>Special comments</b> - are properly displayed as multiline again
         <br><br>
         - last but not least - brand new collection of BUGS!;
         <br><br>
