@@ -51,8 +51,10 @@ a.link:hover
 
 .panel.news {
 	/*width:400px; let's increase it some... no need to keep it so narow!*/
-	width:720px;
-	margin:0px auto 50px auto;
+	/*later 720 px, also increased to match the rest*/
+	width:1000px;
+	/*was: margin:0px auto 50px auto;*/
+	margin:0px auto 10px auto;
 }
 
 .panel.large{
