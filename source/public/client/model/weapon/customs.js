@@ -97,3 +97,26 @@ var CustomERLightPBeam = function CustomERLightPBeam(json, ship) {
 };
 CustomERLightPBeam.prototype = Object.create(Weapon.prototype);
 CustomERLightPBeam.prototype.constructor = CustomERLightPBeam;
+
+
+
+var CustomCustomBPALight = function  CustomCustomBPALight(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CustomCustomBPALight.prototype = Object.create(Weapon.prototype);
+CustomCustomBPALight.prototype.constructor =  CustomCustomBPALight;
+
+
+var CustomCustomBPAMedium = function  CustomCustomBPAMedium(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CustomCustomBPAMedium.prototype = Object.create(Weapon.prototype);
+CustomCustomBPAMedium.prototype.constructor =  CustomCustomBPAMedium;
+
+
+var CustomCustomBPAHeavy = function  CustomCustomBPAHeavy(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CustomCustomBPAHeavy.prototype = Object.create(Weapon.prototype);
+CustomCustomBPAHeavy.prototype.constructor =  CustomCustomBPAHeavy;
+
