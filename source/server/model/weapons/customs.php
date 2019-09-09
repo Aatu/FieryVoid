@@ -1059,16 +1059,334 @@ class LightScattergun extends Pulse{
 		$pulses = $this->getPulses($turn); //$this->useDie usually
 		//$pulses+= $this->getExtraPulses($needed, $rolled); //no grouping bonus for this weapon
 		return $pulses;
-	}
-	
+	}	
 	
 	public function getDamage($fireOrder){        return Dice::d(6,2);   }
 	public function setMinDamage(){     $this->minDamage = 2 ;      }
 	public function setMaxDamage(){     $this->maxDamage = 12 ;      }
-	
-
-
 } //end of class LightScattergun
+
+
+class CustomBPALight extends Weapon{ 
+/*Light Bolt-Pulse Array - custom weapon, combining Light Bolter and Pulse Cannon*/	
+        public $name = "CustomBPALight";
+        public $displayName = "Light Bolt-Pulse Array";
+	    public $iconPath = "CustomBPALight.png";
+	
+	//visual display
+	public $animationArray = array(1=>'trail', 2=>'trail');
+        public $animationColorArray = array(1=>array(255, 11, 11), 2=>array(255, 250, 230));
+        public $animationWidthArray = array(1=>3, 2=>3);
+        public $animationWidth2 = 0.2; //not used for Trail animation?...
+	public $trailColor = array(190, 75, 20); //not used for Laser animation?...
+        public $trailLength = 5;//not used for Laser animation?...
+        public $projectilespeed = 15;//not used for Laser animation?...
+        public $animationExplosionScale = 0.30;//not used for Laser animation?...
+		
+	//actual weapons data
+        public $groupingArray = array(1=>0, 2=>20);
+        public $maxpulses = 6; //only useful for Pulse mode
+        public $priorityArray = array(1=>5, 2=>3);
+	public $uninterceptableArray = array(1=>false, 2=>false);
+	public $defaultShotsArray = array(1=>1, 2=>6); //for Pulse mode it should be equal to maxpulses
+	
+        public $loadingtimeArray = array(1=>1, 2=>1); //mode 1 should be the one with longest loading time
+        public $rangePenaltyArray = array(1=>1, 2=>2); //-1/hex and -1/2hex, for Bolt and Pulse respectably
+        public $fireControlArray = array( 1=>array(4, 3, 3), 2=>array(4,3,3) ); // fighters, <mediums, <capitals ; this weapons uses Pulse FC for both weapons
+	
+	public $firingModes = array(1=>'Bolt', 2=>'Pulse');
+	public $damageTypeArray = array(1=>'Standard', 2=>'Pulse'); 
+    	public $weaponClassArray = array(1=>'Particle', 2=>'Particle'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+	
+	public $intercept = 2; 
+ 
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 6;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 2;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+        public function setSystemDataWindow($turn){
+		$this->data["Special"] = 'Can fire as either Light Bolter or Light Pulse Cannon. ';
+		parent::setSystemDataWindow($turn);
+        }
+
+	
+        public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1:
+				return 12; //Light Bolter
+				break;
+			case 2:
+				return 8; //Light Pulse
+				break;	
+		}
+	}
+        public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 12; //Light Bolter
+				break;
+			case 2:
+				$this->minDamage = 8; //Light Pulse
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 12; //Light Bolter
+				break;
+			case 2:
+				$this->maxDamage = 8; //Light Pulse
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
+	
+	
+	
+	//necessary for Pulse mode
+        protected function getPulses($turn)
+        {
+            return Dice::d(5);
+        }
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return floor(($needed - $rolled) / ($this->grouping));
+        }
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn);
+		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses);
+		return $pulses;
+	}
+	
+} //endof class CustomBPALight
+
+
+class CustomBPAMedium extends Weapon{ 
+/*Medium Bolt-Pulse Array - custom weapon, combining Medium Bolter and Pulse Cannon*/	
+        public $name = "CustomBPAMedium";
+        public $displayName = "Medium Bolt-Pulse Array";
+	    public $iconPath = "CustomBPAMedium.png";
+	
+	//visual display
+	public $animationArray = array(1=>'trail', 2=>'trail');
+        public $animationColorArray = array(1=>array(255, 11, 11), 2=>array(255, 250, 230));
+        public $animationWidthArray = array(1=>4, 2=>4);
+        public $animationWidth2 = 0.2; //not used for Trail animation?...
+	public $trailColor = array(190, 75, 20); //not used for Laser animation?...
+        public $trailLength = 10;//not used for Laser animation?...
+        public $projectilespeed = 20;//not used for Laser animation?...
+        public $animationExplosionScale = 0.20;//not used for Laser animation?...
+	
+	
+	//actual weapons data
+        public $groupingArray = array(1=>0, 2=>20);
+        public $maxpulses = 6; //only useful for Pulse mode
+        public $priorityArray = array(1=>6, 2=>4);
+	public $uninterceptableArray = array(1=>false, 2=>false);
+	public $defaultShotsArray = array(1=>1, 2=>6); //for Pulse mode it should be equal to maxpulses
+	
+        public $loadingtimeArray = array(1=>2, 2=>2); //mode 1 should be the one with longest loading time
+        public $rangePenaltyArray = array(1=>0.5, 2=>1); //-1/2 hexes and -1/hex, for Bolt and Pulse respectably
+        public $fireControlArray = array( 1=>array(1, 3, 4), 2=>array(1,3,4) ); // fighters, <mediums, <capitals ; this weapons uses Pulse FC for both weapons
+	
+	public $firingModes = array(1=>'Bolt', 2=>'Pulse');
+	public $damageTypeArray = array(1=>'Standard', 2=>'Pulse'); 
+    	public $weaponClassArray = array(1=>'Particle', 2=>'Particle'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+	
+	public $intercept = 1; 
+ 
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 8;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 4;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+        public function setSystemDataWindow($turn){
+		$this->data["Special"] = 'Can fire as either Medium Bolter or Medium Pulse Cannon. ';
+		parent::setSystemDataWindow($turn);
+        }
+
+	
+        public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1:
+				return 18; //Medium Bolter
+				break;
+			case 2:
+				return 10; //Medium Pulse
+				break;	
+		}
+	}
+        public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 18; //Medium Bolter
+				break;
+			case 2:
+				$this->minDamage = 10; //Medium Pulse
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 18; //Medium Bolter
+				break;
+			case 2:
+				$this->maxDamage = 10; //Medium Pulse
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
+	
+	
+	
+	//necessary for Pulse mode
+        protected function getPulses($turn)
+        {
+            return Dice::d(5);
+        }
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return floor(($needed - $rolled) / ($this->grouping));
+        }
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn);
+		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses);
+		return $pulses;
+	}
+	
+} //endof class CustomBPAMedium
+
+
+
+class CustomBPAHeavy extends Weapon{ 
+/*Heavy Bolt-Pulse Array - custom weapon, combining Heavy Bolter and Pulse Cannon*/	
+        public $name = "CustomBPAHeavy";
+        public $displayName = "Heavy Bolt-Pulse Array";
+	    public $iconPath = "CustomBPAHeavy.png";
+	
+	//visual display
+	public $animationArray = array(1=>'trail', 2=>'trail');
+        public $animationColorArray = array(1=>array(255, 11, 11), 2=>array(255, 250, 230));
+        public $animationWidthArray = array(1=>6, 2=>5);
+        public $animationWidth2 = 0.2; //not used for Trail animation?...
+	public $trailColor = array(190, 75, 20); //not used for Laser animation?...
+        public $trailLength = 20;//not used for Laser animation?...
+        public $projectilespeed = 20;//not used for Laser animation?...
+        public $animationExplosionScale = 0.50;//not used for Laser animation?...
+	
+	
+	//actual weapons data
+        public $groupingArray = array(1=>0, 2=>20);
+        public $maxpulses = 6; //only useful for Pulse mode
+        public $priorityArray = array(1=>6, 2=>4);
+	public $uninterceptableArray = array(1=>false, 2=>false);
+	public $defaultShotsArray = array(1=>6, 2=>6); //for Pulse mode it should be equal to maxpulses
+	
+        public $loadingtimeArray = array(1=>3, 2=>3); //mode 1 should be the one with longest loading time
+        public $rangePenaltyArray = array(1=>0.33, 2=>0.5); //-1/3 hexes and -1/2hexes, for Bolt and Pulse respectably
+        public $fireControlArray = array( 1=>array(-1, 3, 4), 2=>array(-1,3,4) ); // fighters, <mediums, <capitals ; this weapons uses Pulse FC for both weapons
+	
+	public $firingModes = array(1=>'Bolt', 2=>'Pulse');
+	public $damageTypeArray = array(1=>'Standard', 2=>'Pulse'); 
+    	public $weaponClassArray = array(1=>'Particle', 2=>'Particle'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+	
+	public $intercept = 1; 
+ 
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 10;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 6;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+        public function setSystemDataWindow($turn){
+		$this->data["Special"] = 'Can fire as either Heavy Bolter or Heavy Pulse Cannon. ';
+		parent::setSystemDataWindow($turn);
+        }
+
+	
+        public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1:
+				return 24; //Heavy Bolter
+				break;
+			case 2:
+				return 15; //Heavy Pulse
+				break;	
+		}
+	}
+        public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 24; //Heavy Bolter
+				break;
+			case 2:
+				$this->minDamage = 15; //Heavy Pulse
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 24; //Heavy Bolter
+				break;
+			case 2:
+				$this->maxDamage = 15; //Heavy Pulse
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
+	
+	
+	
+	//necessary for Pulse mode
+        protected function getPulses($turn)
+        {
+            return Dice::d(5);
+        }
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return floor(($needed - $rolled) / ($this->grouping));
+        }
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn);
+		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses);
+		return $pulses;
+	}
+	
+} //endof class CustomBPAHeavy
+
 
 
 ?>
