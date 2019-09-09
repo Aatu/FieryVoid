@@ -55,6 +55,9 @@ class technicalTargetDrone extends BaseShip{
 		*/
 		
 		$this->addFrontSystem(new CustomERLightPBeam(3, 0, 0, 240, 120));
+		$this->addFrontSystem(new CustomBPALight(3, 0, 0, 240, 120));
+		$this->addFrontSystem(new CustomBPAMedium(3, 0, 0, 240, 120));
+		$this->addFrontSystem(new CustomBPAHeavy(3, 0, 0, 240, 120));
 		
 		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));
 		$this->addAftSystem(new CommJammer(3, 0, 0, 0, 360));		

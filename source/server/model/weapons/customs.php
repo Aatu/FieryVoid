@@ -2,16 +2,16 @@
 
 
  class CustomERLightPBeam extends Particle{
-        public $trailColor = array(30, 170, 255);
         public $name = "CustomERLightPBeam";
         public $displayName = "Extended Range Light Particle Beam";
-	public $iconPath = "lightParticleBeamShip.png";
+		public $iconPath = "lightParticleBeamShip.png";
         public $animation = "beam";
         public $animationColor = array(255, 250, 230);
         public $animationExplosionScale = 0.15;
         public $projectilespeed = 12;
         public $animationWidth = 3;
         public $trailLength = 10;
+        public $trailColor = array(30, 170, 255);
         
         public $intercept = 2;
         public $loadingtime = 1;
@@ -1101,8 +1101,7 @@ class CustomBPALight extends Weapon{
 	public $intercept = 2; 
  
 	
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
 		if ( $maxhealth == 0 ){
 		    $maxhealth = 6;
@@ -1111,15 +1110,15 @@ class CustomBPALight extends Weapon{
 		    $powerReq = 2;
 		}
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
+    }
 	
-        public function setSystemDataWindow($turn){
+    public function setSystemDataWindow($turn){
 		$this->data["Special"] = 'Can fire as either Light Bolter or Light Pulse Cannon. ';
 		parent::setSystemDataWindow($turn);
-        }
+    }
 
 	
-        public function getDamage($fireOrder){ 
+    public function getDamage($fireOrder){ 
 		switch($this->firingMode){
 			case 1:
 				return 12; //Light Bolter
@@ -1129,7 +1128,8 @@ class CustomBPALight extends Weapon{
 				break;	
 		}
 	}
-        public function setMinDamage(){ 
+    
+	public function setMinDamage(){ 
 		switch($this->firingMode){
 			case 1:
 				$this->minDamage = 12; //Light Bolter
@@ -1140,7 +1140,8 @@ class CustomBPALight extends Weapon{
 		}
 		$this->minDamageArray[$this->firingMode] = $this->minDamage;
 	}
-        public function setMaxDamage(){
+    
+	public function setMaxDamage(){
 		switch($this->firingMode){
 			case 1:
 				$this->maxDamage = 12; //Light Bolter
