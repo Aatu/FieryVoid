@@ -378,10 +378,7 @@ shipManager.movement = {
 
         var slipcost = Math.ceil(shipManager.movement.getSpeed(ship) / 5);
         if (ship.flight) slipcost = 1;
-/*
-        var reversed = shipManager.movement.hasSidesReversedForMovement(ship);
-        if (reversed) right = !right;
-*/
+
         var requiredThrust = Array(null, null, null, null, null);
 
         var commit = false;
@@ -398,42 +395,6 @@ shipManager.movement = {
             }
             var requiredThruster = shipManager.movement.thrusterDirectionRequired(ship,reqThrusterName);
             requiredThrust[requiredThruster] = slipcost;
-            /*
-            var facing = ship.movement[ship.movement.length - 1].facing;
-            var heading = ship.movement[ship.movement.length - 1].heading;
-            var pivot = isPivoting;
-            angle = angle / 60;
-
-            if (facing === heading) {
-                if (heading - 1 === angle || heading + 5 === angle) {
-                    requiredThrust[4] = slipcost;
-                } else if (heading + 1 === angle || heading - 5 === angle) {
-                    requiredThrust[3] = slipcost;
-                }
-            } else if (facing + 3 === heading || facing - 3 === heading) {
-                if (heading - 1 === angle || heading + 5 === angle) {
-                    requiredThrust[3] = slipcost;
-                } else if (heading + 1 === angle || heading - 5 === angle) {
-                    requiredThrust[4] = slipcost;
-                }
-            } else if (!ship.gravitic) {
-                if (heading + 1 === angle || heading - 5 === angle) {
-                    requiredThrust[3] = slipcost;
-                } else if (heading - 1 === angle || heading + 5 === angle) {
-                    requiredThrust[4] = slipcost;
-                }
-            } else if (ship.gravitic) {
-                if (facing === angle) {
-                    requiredThrust[2] = slipcost;
-                } else if (facing + 3 === angle || facing - 3 === angle) {
-                    requiredThrust[1] = slipcost;
-                } else if (facing + 1 === angle || facing + 2 === angle || facing - 4 === angle || facing - 5 === angle) {
-                    requiredThrust[3] = slipcost;
-                } else if (facing - 1 === angle || facing - 2 === angle || facing + 4 === angle || facing + 5 === angle) {
-                    requiredThrust[4] = slipcost;
-                }
-            }
-            */
         }
 
         ship.movement[ship.movement.length] = {
@@ -738,17 +699,6 @@ shipManager.movement = {
         return false;
     },
     
-/*no longer needed
-    isTurningIntoBackwardsPivot: function isTurningIntoBackwardsPivot(ship) {
-        //if ship is moving backwards, it's turning into pivot backwards; else, it's not.
-        return shipManager.movement.isGoingBackwards(ship);
-               
-        var heading = shipManager.movement.getLastCommitedMove(ship).heading;
-        var facing = shipManager.movement.getLastCommitedMove(ship).facing;
-        var reverseheading = mathlib.addToHexFacing(heading, 3);
-        return mathlib.addToHexFacing(1, facing) === reverseheading || mathlib.addToHexFacing(-1, facing) === reverseheading;
-    },
-*/
     
     doIntoPivotTurn: function doIntoPivotTurn(ship, right) {
         var requiredThrust = shipManager.movement.calculateRequiredThrust(ship, right);
@@ -874,48 +824,12 @@ shipManager.movement = {
             if (movement.turn != gamedata.turn) continue;
             if (movement.preturn == false && movement.forced == false && movement.type != "speedchange" && movement.type != "deploy") return false;
         }
-        
-        
+                
         //gravitic ship with enough thrust can accelerate, no matter her alignment
         if (ship.gravitic) return true;
-
-        /* old version
-        var heading = shipManager.movement.getLastCommitedMove(ship).heading;
-        var facing = shipManager.movement.getLastCommitedMove(ship).facing;
-        if (!ship.gravitic) {
-            if (heading !== facing) {
-                if (heading < 3) {
-                    if (heading + 3 !== facing) {
-                        return false;
-                    }
-                } else if (heading > 3) {
-                    if (heading - 3 !== facing) {
-                        return false;
-                    }
-                } else {
-                    if (heading - 3 !== 0) {
-                        return false;
-                    }
-                }
-            }
-        }
-        */
         
         //ship cannot accelerate if it's not aligned OR pivoting    
         if (shipManager.movement.isOutOfAlignment(ship) || shipManager.movement.isPivoting(ship) != "no") return false;
-
-        /* not necessary any longer, checked above
-        var curheading = shipManager.movement.getLastCommitedMove(ship).heading;
-        for (var i in ship.movement) {
-            var movement = ship.movement[i];
-
-            if (movement.turn != gamedata.turn || movement.type != "speedchange") continue;
-
-            if (movement.value != accel && movement.heading == curheading || movement.value == accel && movement.heading != curheading) {
-                return true;
-            }
-        }
-        */
 
         return true;
     },
@@ -951,12 +865,6 @@ shipManager.movement = {
 
         ship.currentturndelay = shipManager.movement.calculateCurrentTurndelay(ship);
 
-        //        if(oldturndelay == 0){
-        //            ship.currentturndelay = curTurnDelay;
-        //        }else{
-        //            ship.currentturndelay = adjustTurnDelay;
-        //        }
-        //        
         if (ship.currentturndelay < 0) {
             ship.currentturndelay = 0;
         }
@@ -1013,58 +921,6 @@ shipManager.movement = {
             }
             var requiredThruster = shipManager.movement.thrusterDirectionRequired(ship,reqThrusterName);
             requiredThrust[requiredThruster] = ship.accelcost;
-            
-            /*no longer needed
-            if (facing === heading) {
-                requiredThrust[direction] = ship.accelcost;
-            } else if (facing - 3 === heading) {
-                requiredThrust[direction] = ship.accelcost;
-            } else if (facing + 3 === heading) {
-                requiredThrust[direction] = ship.accelcost;
-            } else if (ship.gravitic) {
-                if (facing + 5 === heading) {
-                    if (accel) {
-                        requiredThrust[4] = ship.accelcost;
-                    } else requiredThrust[3] = ship.accelcost;
-                } else if (facing - 5 === heading) {
-                    if (accel) {
-                        requiredThrust[3] = ship.accelcost;
-                    } else requiredThrust[4] = ship.accelcost;
-                } else if (facing + 4 === heading) {
-                    if (accel) {
-                        requiredThrust[4] = ship.accelcost;
-                    } else requiredThrust[3] = ship.accelcost;
-                } else if (facing - 4 === heading) {
-                    if (accel) {
-                        requiredThrust[3] = ship.accelcost;
-                    } else requiredThrust[4] = ship.accelcost;
-                } else if (facing + 3 === heading) {
-                    if (accel) {
-                        requiredThrust[2] = ship.accelcost;
-                    } else requiredThrust[1] = ship.accelcost;
-                } else if (facing - 3 === heading) {
-                    if (accel) {
-                        requiredThrust[1] = ship.accelcost;
-                    } else requiredThrust[2] = ship.accelcost;
-                } else if (facing + 2 === heading) {
-                    if (accel) {
-                        requiredThrust[3] = ship.accelcost;
-                    } else requiredThrust[4] = ship.accelcost;
-                } else if (facing - 2 === heading) {
-                    if (accel) {
-                        requiredThrust[4] = ship.accelcost;
-                    } else requiredThrust[3] = ship.accelcost;
-                } else if (facing + 1 === heading) {
-                    if (accel) {
-                        requiredThrust[3] = ship.accelcost;
-                    } else requiredThrust[4] = ship.accelcost;
-                } else if (facing - 1 === heading) {
-                    if (accel) {
-                        requiredThrust[4] = ship.accelcost;
-                    } else requiredThrust[3] = ship.accelcost;
-                }
-            }
-            */
         }
 
         var lm = shipManager.movement.getLastCommitedMove(ship);
@@ -1200,16 +1056,7 @@ shipManager.movement = {
         if (currentTurn === undefined) {
             currentTurn = gamedata.turn;
         }
-        
-        /* this gives position after current turn move, NOT good
-        var move = ship.movement.find(function(move) {
-            return move.turn === currentTurn;
-        });
-        if (!move) {
-            move = ship.movement[ship.movement.length - 1];
-        }
-        */
-        //replacement:
+       
         for (var i = ship.movement.length - 1; i >= 0; i--) {
             var move = ship.movement[i];
             if (move.turn < currentTurn) { //first move from earlier turn! this is what we need!
@@ -1264,18 +1111,6 @@ shipManager.movement = {
     /*Marcin Sawicki: this seems to be a legacy function, returning directly countAmountChanneled instead of original result...*/
     getAmountChanneled: function getAmountChanneled(ship, system) {
         var used = shipManager.movement.countAmountChanneled(ship, system);
-
-        /*
-        if (shipManager.criticals.hasCritical(system, "FirstThrustIgnored")){
-            used--;
-        }
-        
-        var crits = shipManager.criticals.hasCritical(system, "HalfEfficiency");
-        if (crits > 0){
-            used = used/(crits+1);
-        }
-        */
-
         return used;
     },
 
@@ -1423,12 +1258,7 @@ shipManager.movement = {
 
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
-        
-        /*no longer needed
-        var heading = shipManager.movement.getLastCommitedMove(ship).heading;
-        var facing = shipManager.movement.getLastCommitedMove(ship).facing;
-        */
-        
+                
         if (shipManager.movement.isRolling(ship) && !ship.gravitic) return false;
         if (shipManager.movement.checkHasUncommitted(ship)) return false;
         var turndelay = shipManager.movement.calculateCurrentTurndelay(ship);
@@ -1457,11 +1287,6 @@ shipManager.movement = {
         if (!ship.gravitic && shipManager.movement.isOutOfAlignment(ship) ){
             return false;
         }
-        /* replaced by code above
-        if (heading !== facing && mathlib.addToHexFacing(heading, 3) !== facing && !ship.gravitic) {
-            return false;
-        }
-        */
 
         return true;
     },
@@ -1477,28 +1302,6 @@ shipManager.movement = {
             return;
         }
         shipManager.movement.doNormalTurn(ship, right);
-
-        /*
-        if (ship.flight) {
-            if (shipManager.movement.canTurnIntoPivot(ship, right)) {
-                shipManager.movement.askForIntoPivotTurn(ship, right, "Do you wish to turn or turn into the pivot?");
-            } else {
-                shipManager.movement.doNormalTurn(ship, right);
-            }
-        } else if (ship.osat) {
-            if (shipManager.movement.canTurn(ship, right)) {
-                shipManager.movement.doNormalTurn(ship, right);
-            }
-        } else {
-            if (shipManager.movement.canTurnIntoPivot(ship, right) && !ship.gravitic) {
-                shipManager.movement.doIntoPivotTurn(ship, right);
-            } else if (shipManager.movement.canTurnIntoPivot(ship, right) && ship.gravitic) {
-                shipManager.movement.askForIntoPivotTurn(ship, right, "This ship has gravitic engines. Do you wish to turn or turn into the pivot?");
-            } else {
-                shipManager.movement.doNormalTurn(ship, right);
-            }
-        }
-        */
     },
 
     doNormalTurn: function doNormalTurn(ship, right) {
@@ -1751,13 +1554,6 @@ shipManager.movement = {
         stillReq[0] -= any;
 
         if (movement.type == "pivotright" || movement.type == "pivotleft") {
-            /*
-              pivot clockwise (right) requires main/stbd or retro/port combo;
-              pivot counterclockwise (left) - main/port or retro/stbd
-              so when first point of thrust is allocated (to any thruster), some other thrusters become unavailable
-              and generic requirement transforms into specific one
-              below determination which one!
-            */
             var portDirection = shipManager.movement.thrusterDirectionRequired(ship,"port");
             var stbdDirection = shipManager.movement.thrusterDirectionRequired(ship,"stbd");
             var mainDirection = shipManager.movement.thrusterDirectionRequired(ship,"main");
@@ -1779,34 +1575,6 @@ shipManager.movement = {
                     stillReq[stbdDirection] = null;
                 }
             }
-            
-            /*replaced by above
-            var reversed = shipManager.movement.hasSidesReversedForMovement(ship);
-            var right = movement.type == "pivotright";
-            if (reversed) {
-                right = !right;
-            }
-
-            if (right) {
-                if (assignedarray[1] > 0 || assignedarray[3] > 0) {
-                    stillReq[2] = null;
-                    stillReq[4] = null;
-                }
-                if (assignedarray[2] > 0 || assignedarray[4] > 0) {
-                    stillReq[1] = null;
-                    stillReq[3] = null;
-                }
-            } else {
-                if (assignedarray[1] > 0 || assignedarray[4] > 0) {
-                    stillReq[2] = null;
-                    stillReq[3] = null;
-                }
-                if (assignedarray[2] > 0 || assignedarray[3] > 0) {
-                    stillReq[1] = null;
-                    stillReq[4] = null;
-                }
-            }
-            */
         }
 
         return stillReq;
@@ -1868,13 +1636,6 @@ shipManager.movement = {
         return movement.type == "turnright" || movement.type == "turnleft";
     },
 
-    /*Marcin Sawicki - actually this should no longer be needed! as new thruster allocation takes care of such things
-    hasSidesReversedForMovement: function hasSidesReversedForMovement(ship) {
-        var back = shipManager.movement.isGoingBackwards(ship);
-        var reversed = (back || shipManager.movement.isRolled(ship)) && !(back && shipManager.movement.isRolled(ship));
-        return reversed;
-    },
-    */
     
     
     /*return thruster direction required from text input - for readability*/
@@ -1999,34 +1760,5 @@ shipManager.movement = {
         if (shipManager.movement.isPivotedPort(ship)) return false; //ship pivoted to Port is not pivoted to Starboard
         return true;
     },
-    
-    
-    /*
-    addMove: function(ship, name, x, y, facing, heading, speed, animated, requiredThrust, commit, preturn, forced){
-        
-        ship.movement[ship.movement.length] = {
-            id:-1,
-            type:name,
-            x:lm.x,
-            y:lm.y,
-            xOffset:0,
-            yOffset:0,
-            facing:facing,
-            heading:heading,
-            speed:speed,
-            animating:false,
-            animated:animated,
-            animationtics:0,
-            requiredThrust:requiredThrust,
-            assignedThrust:Array(),
-            commit:commit,
-            preturn:preturn,
-            at_initiative:shipManager.getIniativeOrder(ship),
-            turn:gamedata.turn,
-            forced:forced,
-            value:0
-        }
-    },
-    */
 
 };

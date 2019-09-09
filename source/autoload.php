@@ -1009,7 +1009,11 @@ spl_autoload_register(
                 'warlockmlpafull' => '/server/model/ships/EA/warlockMlpaFull.php',  
                 'sagittariusfull' => '/server/model/ships/EA/sagittariusFull.php',   
                 'godalphafull' => '/server/model/ships/EA/godAlphaFull.php',   
-                'godbetafull' => '/server/model/ships/EA/godBetaFull.php'  
+                'godbetafull' => '/server/model/ships/EA/godBetaFull.php',
+		    
+		'custombpalight' => '/server/model/weapons/customs.php',   
+		'custombpamedium' => '/server/model/weapons/customs.php', 
+		'custombpaheavy' => '/server/model/weapons/customs.php' 
 		    
 		    
             );
