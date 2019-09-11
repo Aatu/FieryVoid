@@ -1013,7 +1013,7 @@ spl_autoload_register(
 		    
 		'custombpalight' => '/server/model/weapons/customs.php',   
 		'custombpamedium' => '/server/model/weapons/customs.php', 
-		'custombpaheavy' => '/server/model/weapons/customs.php' 
+		'custombpaheavy' => '/server/model/weapons/customs.php', 
 		    
 		'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php' 
 		    
