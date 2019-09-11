@@ -34,7 +34,8 @@ class SkySerpent extends SuperHeavyFighter{
         $fighter->addFrontSystem(new FighterMissileRack(6, 330, 30));
         
         $particleBlaster = new ParticleBlaster(0, 0, 0, 330, 30); 
-$particleBlaster->rangepenalty = 1 ;         $particleBlaster->fireControl = array(-4, 0, 0);
+	$particleBlaster->rangepenalty = 1 ; //this is fighter-borne version, not full-blown ship weapon!
+	$particleBlaster->fireControl = array(-4, 0, 0); 
         $particleBlaster->loadingtime = 3;
         $fighter->addFrontSystem($particleBlaster);
         
