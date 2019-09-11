@@ -107,8 +107,11 @@
         public $fireControl = array(-4, 0, 0); // fighters, <mediums, <capitals
 
 
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	function __construct($startArc, $endArc, $nrOfShots = 1){
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 
         public function getDamage($fireOrder){        return Dice::d(10)+12;   }
