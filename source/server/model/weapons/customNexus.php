@@ -89,7 +89,7 @@ If weapon is left to its own devices it will simply provide a single interceptio
 class NexusChaffLauncher extends Weapon{
         public $name = "nexusChaffLauncher";
         public $displayName = "Chaff Launcher";
-	public $iconPath = "NexusChaffLauncher.png";
+		public $iconPath = "NexusChaffLauncher.png";
 	
         public $trailColor = array(192,192,192);
         public $animation = "ball";
@@ -102,23 +102,23 @@ class NexusChaffLauncher extends Weapon{
         public $trailLength = 10;
 
         public $ballistic = false;
-        public $hextarget = true;
+        public $hextarget = false; //for technical reasons this proved hard to do
         public $hidetarget = false;
         public $priority = 1; //to show effect quickly
         public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
         public $doNotIntercept = true; //do not intercept this weapon, period
-	public $canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
+		public $canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
 	
         public $useOEW = false; //not important, really	    
         
         public $loadingtime = 2; // 1/2 turns
-	public $range = 100; //let's put maximum range here, but generous one
+		public $range = 100; //let's put maximum range here, but generous one
         public $rangePenalty = 0;
-        public $fireControl = array(null, null, null); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
-	public $intercept = 2; //intercept rating -2	    
+        public $fireControl = array(100, 100, 100); // fighters, <mediums, <capitals; just so the weapon is targetable
+		public $intercept = 2; //intercept rating -2	    
 	    
-	public $firingMode = 'Intercept'; //firing mode - just a name essentially
-	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+		public $firingMode = 'Intercept'; //firing mode - just a name essentially
+		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     	public $weaponClass = "Particle"; //not important really
 	 
 
@@ -128,27 +128,24 @@ class NexusChaffLauncher extends Weapon{
             if ( $powerReq == 0 ) $powerReq = 1;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
+		
+		public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Fired at hex (although You technically have to pick an unit). Will apply interception to all fire from target hex to Chaff-protected ship.";
+            $this->data["Special"] .= "<br>Will affect uninterceptable weapons.";
+        }
         
 	//hit chance always 0 - just so it never actually hits anything, or draws interception
 	public function calculateHitBase($gamedata, $fireOrder)
 	{
-		$fireOrder->needed = 0; 
+		$fireOrder->needed = 100; //auto hit!
 		$fireOrder->updated = true;
 		
 		//while we're at it - we may add appropriate interception orders!
 		
-		//sometimes player does manage to target ship after all..
-		if ($fireOrder->targetid != -1) {
-		    $targetship = $gamedata->getShipById($fireOrder->targetid);
-		    //insert correct target coordinates: last turns' target position
-		    $movement = $targetship->getLastTurnMovement($fireOrder->turn);
-		    $fireOrder->x = $movement->position->q;
-		    $fireOrder->y = $movement->position->r;
-		    $fireOrder->targetid = -1; //correct the error
-		}
-		$targetHex = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+		$targetShip = $gamedata->getShipById($fireOrder->targetid);
 		
-		$shipsInRange = $gamedata->getShipsInDistance($targetHex); //all units on target hex
+		$shipsInRange = $gamedata->getShipsInDistance($targetShip); //all units on target hex
 		foreach ($shipsInRange as $affectedShip) {
 			$allOrders = $affectedShip->getAllFireOrders($gamedata->turn);
 			foreach($allOrders as $subOrder) {
@@ -158,8 +155,8 @@ class NexusChaffLauncher extends Weapon{
 					if( $subWeapon->doNotIntercept != true ){
 						//apply interception! Note that this weapon is technically not marked as firing defensively - it is marked as firing offensively though! (already)
 						//like firing.php addToInterceptionTotal
-						$subOrder->totalIntercept += $this->getInterceptionMod($gamedata, $intercepted);
-        					$subOrder->numInterceptors++;
+						$subOrder->totalIntercept += $this->getInterceptionMod($gamedata, $subOrder);
+        				$subOrder->numInterceptors++;
 					}
 				}
 			}
@@ -168,7 +165,7 @@ class NexusChaffLauncher extends Weapon{
 	   
 	
 	public function fire($gamedata, $fireOrder)
-	    { //sadly here it really has to be completely redefined... or at least I see no option to avoid this
+	{ //sadly here it really has to be completely redefined... or at least I see no option to avoid this
 		$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 		/** @var MovementOrder $movement */
@@ -176,11 +173,13 @@ class NexusChaffLauncher extends Weapon{
 		$posLaunch = $movement->position;//at moment of launch!!!		
 		//$this->calculateHit($gamedata, $fireOrder); //already calculated!
 		$rolled = Dice::d(100);
-		$fireOrder->rolled = $rolled; ///and auto-missed ;)
+		$fireOrder->rolled = $rolled; ///and auto-hit ;)
+		$fireOrder->shotshit++;
 		$fireOrder->pubnotes .= "Interception applied to all weapons at target hex that are firing at Chaff-launching ship. "; //just information for player, actual applying was done in calculateHitBase method
+		
 
 		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
-	    } //endof function fire
+	} //endof function fire
 	
 	
         public function getDamage($fireOrder){
