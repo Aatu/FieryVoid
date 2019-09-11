@@ -106,7 +106,7 @@ class NexusChaffLauncher extends Weapon{
         public $hextarget = true;
         public $hidetarget = false;
         public $priority = 1; //to show effect quickly
-        public $uninterceptable = true;
+        public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
 	
         public $useOEW = false; //not important, really	    
         
@@ -128,8 +128,37 @@ class NexusChaffLauncher extends Weapon{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        
-	            
+	//hit chance always 0 - just so it never actually hits anything, or draws interception
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		$fireOrder->needed = 0; 
+		$fireOrder->updated = true;
+	}
+	   
+	public function fire($gamedata, $fireOrder)
+    { //sadly here it really has to be completely redefined... or at least I see no option to avoid this
+        $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+        /** @var MovementOrder $movement */
+        $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+        $posLaunch = $movement->position;//at moment of launch!!!
+        //sometimes player does manage to target ship after all..
+        if ($fireOrder->targetid != -1) {
+            $targetship = $gamedata->getShipById($fireOrder->targetid);
+            //insert correct target coordinates: last turns' target position
+            $movement = $targetship->getLastTurnMovement($fireOrder->turn);
+            $fireOrder->x = $movement->position->q;
+            $fireOrder->y = $movement->position->r;
+            $fireOrder->targetid = -1; //correct the error
+        }
+        $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+        //$this->calculateHit($gamedata, $fireOrder); //already calculated!
+        $rolled = Dice::d(100);
+        $fireOrder->rolled = $rolled; ///and auto-missed ;)
+        $fireOrder->pubnotes .= "Interception applied to all weapons at target hex that are firing at Chaff-launching ship. ";
+		
+        $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+    } //endof function fire
 	
     
         public function getDamage($fireOrder){
