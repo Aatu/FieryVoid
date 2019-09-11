@@ -23,7 +23,7 @@ class technicalTargetDrone extends BaseShip{
 		
 		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 180, 360));
 		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 0, 180));
-		$this->addPrimarySystem(new Reactor(6, 35, 0, -200));
+		$this->addPrimarySystem(new Reactor(6, 35, 0, 0));
 		$this->addFrontSystem(new CnC(1, 1, 0, 0));
 		$sensors = new Scanner(6, 23, 4, 20);
 		$sensors->markAdvanced();
@@ -58,6 +58,8 @@ class technicalTargetDrone extends BaseShip{
 		$this->addFrontSystem(new CustomBPALight(3, 0, 0, 240, 120));
 		$this->addFrontSystem(new CustomBPAMedium(3, 0, 0, 240, 120));
 		$this->addFrontSystem(new CustomBPAHeavy(3, 0, 0, 240, 120));
+		$this->addFrontSystem(new NexusKineticBoxLauncher(1, 0, 0, 270, 180));
+		$this->addFrontSystem(new NexusKineticBoxLauncher(1, 0, 0, 270, 180));
 		
 		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));
 		$this->addAftSystem(new CommJammer(3, 0, 0, 0, 360));		

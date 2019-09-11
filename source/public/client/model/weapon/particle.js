@@ -66,6 +66,12 @@ var ParticleBlaster = function ParticleBlaster(json, ship) {
 ParticleBlaster.prototype = Object.create(Particle.prototype);
 ParticleBlaster.prototype.constructor = ParticleBlaster;
 
+var ParticleBlasterFtr = function ParticleBlasterFtr(json, ship) {
+    Particle.call(this, json, ship);
+};
+ParticleBlasterFtr.prototype = Object.create(Particle.prototype);
+ParticleBlasterFtr.prototype.constructor = ParticleBlasterFtr;
+
 var HvyParticleCannon = function HvyParticleCannon(json, ship) {
     Particle.call(this, json, ship);
 };

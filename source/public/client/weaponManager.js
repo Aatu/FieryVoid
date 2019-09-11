@@ -237,7 +237,8 @@ window.weaponManager = {
             if (weapon.ammunition > 0) {
                 return false;
             } else {
-                confirm.error("This fighter gun is out of ammunition.");
+                //confirm.error("This fighter gun is out of ammunition.");
+                confirm.error("This weapon is out of ammunition.");
                 return true;
             }
         }

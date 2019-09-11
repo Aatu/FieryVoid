@@ -138,6 +138,11 @@ class BuyingGamePhase implements Phase
                                     $dbManager->submitAmmo($id, $system->id, $gameData->id, $firingMode, $ammo->amount, 0);
                                 }
                             }
+                            else if($system instanceof Weapon) { //count ammo for other weapons as well!
+                                if(isset($system->ammunition) && ($system->ammunition > 0)){
+                                    $dbManager->submitAmmo($id, $system->id, $gameData->id, $system->firingMode, $system->ammunition, 0);
+                                }
+                            }
                         }
                     }
                 }

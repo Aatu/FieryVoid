@@ -88,7 +88,8 @@
         <script src="client/model/weapon/missile.js"></script>
         <script src="client/model/weapon/ion.js"></script>
     	<script src="client/model/weapon/customs.js"></script>
-	    <script src="client/model/weapon/customSW.js"></script>
+	<script src="client/model/weapon/customSW.js"></script>
+        <script src="client/model/weapon/customNexus.js"></script>
 		<script>
 			
             window.weaponManager = 

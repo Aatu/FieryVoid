@@ -150,22 +150,29 @@ class Weapon extends ShipSystem
     public function stripForJson() {
         $strippedSystem = parent::stripForJson();
 
-        $strippedSystem->turnsloaded = $this->turnsloaded;
-        $strippedSystem->turnsloadedArray = $this->turnsloadedArray;
-        $strippedSystem->overloadturns = $this->overloadturns;
-        $strippedSystem->overloadshots = $this->overloadshots;
-        $strippedSystem->extraoverloadshots = $this->extraoverloadshots;
-        $strippedSystem->extraoverloadshotsArray = $this->extraoverloadshotsArray;
-        $strippedSystem->fireOrders = $this->fireOrders;
-/*this needs to be sent only if weapon suffered crits!*/
-	if (count($this->criticals)>0) { //if there was a critical, send all potentially changed data; otherwise, they should be standard and don't need to be sent extra!
-		$strippedSystem->range = $this->range;
-		$strippedSystem->rangeArray = $this->rangeArray;	    
-		$strippedSystem->minDamage = $this->minDamage;
-		$strippedSystem->maxDamage = $this->maxDamage;
-		$strippedSystem->minDamageArray = $this->minDamageArray;
-		$strippedSystem->maxDamageArray = $this->maxDamageArray;
-	}
+		if ($this instanceof Weapon) {
+			$strippedSystem->turnsloaded = $this->turnsloaded;
+			$strippedSystem->turnsloadedArray = $this->turnsloadedArray;
+			$strippedSystem->overloadturns = $this->overloadturns;
+			$strippedSystem->overloadshots = $this->overloadshots;
+			$strippedSystem->extraoverloadshots = $this->extraoverloadshots;
+			$strippedSystem->extraoverloadshotsArray = $this->extraoverloadshotsArray;
+			$strippedSystem->fireOrders = $this->fireOrders;
+			if(isset($this->ammunition)){
+				$strippedSystem->ammunition = $this->ammunition;
+				$strippedSystem->data = $this->data;
+			}
+			/*this needs to be sent only if weapon suffered crits!*/
+			if (count($this->criticals)>0) { //if there was a critical, send all potentially changed data; otherwise, they should be standard and don't need to be sent extra!
+				$strippedSystem->range = $this->range;
+				$strippedSystem->rangeArray = $this->rangeArray;	    
+				$strippedSystem->minDamage = $this->minDamage;
+				$strippedSystem->maxDamage = $this->maxDamage;
+				$strippedSystem->minDamageArray = $this->minDamageArray;
+				$strippedSystem->maxDamageArray = $this->maxDamageArray;
+				$strippedSystem->data = $this->data;
+			}
+		}
         return $strippedSystem;
     }
 
@@ -1322,6 +1329,13 @@ class Weapon extends ShipSystem
     {
         return;
     }
+
+	/*allow limited ammo */
+	public function setAmmo($firingMode, $amount){
+		if (isset($this->ammunition)){
+			$this->ammunition = $amount;
+		}
+	}
 
 
     /*allow changing of basic parameters for different firing modes...
