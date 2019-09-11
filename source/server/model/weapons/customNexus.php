@@ -1,3 +1,4 @@
+<?php
 /*file for Nexus universe weapons*/
 
 
@@ -80,3 +81,4 @@ class NexusKineticBoxLauncher extends Weapon{
 
 
 
+?>
