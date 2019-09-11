@@ -80,6 +80,64 @@ class NexusKineticBoxLauncher extends Weapon{
 }//endof NexusKineticBoxLauncher
 
 
+/*Chaff Launcher
+intercepts all weapon fire (directed at self) from HEX (including uninterceptable weapons).
+Done as: kind of offensive mode - player needs to pick hex to fire at. Animated as kind of EMine. 
+All appropriate fire orders will get an interception set up before other intercepts are declared.
+If weapon is left to its own devices it will simply provide a single interception (...if game allows non-1-per-turn weapon to be intercepting in the first place!)
+*/
+class NexusChaffLauncher extends Weapon{
+        public $name = "nexusChaffLauncher";
+        public $displayName = "Chaff Launcher";
+	public $iconPath = "NexusChaffLauncher.png";
+	
+        public $trailColor = array(192,192,192);
+        public $animation = "ball";
+        public $animationColor = array(192,192,192);
+        public $animationExplosionScale = 0.5;
+        public $animationExplosionType = "AoE";
+        public $explosionColor = array(235,235,235);
+        public $projectilespeed = 12;
+        public $animationWidth = 10;
+        public $trailLength = 10;
+
+
+        public $ballistic = false;
+        public $hextarget = true;
+        public $hidetarget = false;
+        public $priority = 1; //to show effect quickly
+        public $uninterceptable = true;
+	
+        public $useOEW = false; //not important, really	    
+        
+        public $loadingtime = 2; // 1/2 turns
+	public $range = 100; //let's put maximum range here, but generous one
+        public $rangePenalty = 0;
+        public $fireControl = array(null, null, null); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+	    
+	    
+	public $firingMode = 'Intercept'; //firing mode - just a name essentially
+	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Particle"; //not important really
+	 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 2;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        
+	            
+	
+    
+        public function getDamage($fireOrder){
+            return 0; //this weapon does no damage, in case it actually hits something!
+        }
+        public function setMinDamage(){     $this->minDamage = 0;      }
+        public function setMaxDamage(){     $this->maxDamage = 0;      }
+}//endof NexusChaffLauncher
 
 
 ?>
