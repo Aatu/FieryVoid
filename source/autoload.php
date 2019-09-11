@@ -1015,6 +1015,9 @@ spl_autoload_register(
 		'custombpamedium' => '/server/model/weapons/customs.php', 
 		'custombpaheavy' => '/server/model/weapons/customs.php' 
 		    
+		'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php' 
+		    
+		    
 		    
             );
         }
