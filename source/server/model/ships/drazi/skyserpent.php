@@ -33,7 +33,7 @@ class SkySerpent extends SuperHeavyFighter{
         $fighter->addFrontSystem(new FighterMissileRack(6, 330, 30));
         $fighter->addFrontSystem(new FighterMissileRack(6, 330, 30));
         
-        $particleBlaster = new ParticleBlasterFtr(0, 0, 0, 330, 30); 
+        $particleBlaster = new ParticleBlasterFtr(0, 330, 30); 
         $fighter->addFrontSystem($particleBlaster);
         
         $this->addSystem($fighter);
