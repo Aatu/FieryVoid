@@ -741,7 +741,7 @@ class MultiMissileLauncher extends Weapon{
 
 
 /*weapon with unlimited ammo, able to use multiple munitions (modes of fire), simulating many missile launchers in game on demand (at constructor)
-pricing proposal: standard launchers + 25/launcher
+pricing proposal: standard launchers + 25/launcher, long range +10, rapid fire double that, class-B (unlimited range) 100
 */
 class MultiBombRack extends Weapon{
 	public $name = "multiBombRack";
