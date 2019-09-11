@@ -55,7 +55,6 @@
     }
 
     class ParticleBlaster extends Particle{
-
         public $trailColor = array(30, 170, 255);
 
         public $name = "particleBlaster";
@@ -85,6 +84,37 @@
 
     }
     
+
+/*fighter-mounted variant*/
+    class ParticleBlasterFtr extends Particle{
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "particleBlasterFtr";
+        public $displayName = "Particle Blaster";
+        public $animation = "trail";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.25;
+        public $projectilespeed = 12;
+        public $animationWidth = 5;
+        public $trailLength = 10;
+        public $priority = 6;
+
+        public $loadingtime = 3;
+
+
+        public $rangePenalty = 1;
+        public $fireControl = array(-4, 0, 0); // fighters, <mediums, <capitals
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10)+12;   }
+        public function setMinDamage(){     $this->minDamage = 13 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
+
+    }
 
 
     class AdvParticleBeam extends Particle{
