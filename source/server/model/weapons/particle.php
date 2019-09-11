@@ -108,7 +108,6 @@
 
 
 	function __construct($startArc, $endArc, $nrOfShots = 1){
-            $this->damagebonus = $damagebonus;
             $this->defaultShots = $nrOfShots;
             $this->shots = $nrOfShots;
             parent::__construct(0, 1, 0, $startArc, $endArc);
