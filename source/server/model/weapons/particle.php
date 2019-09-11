@@ -91,7 +91,7 @@
 
         public $name = "particleBlasterFtr";
         public $displayName = "Particle Blaster";
-        public $iconPath = "ParticleBlaster.png";
+        public $iconPath = "particleBlaster.png";
         public $animation = "trail";
         public $animationColor = array(255, 250, 230);
         public $animationExplosionScale = 0.25;
