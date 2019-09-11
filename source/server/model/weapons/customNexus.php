@@ -106,6 +106,8 @@ class NexusChaffLauncher extends Weapon{
         public $hidetarget = false;
         public $priority = 1; //to show effect quickly
         public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
+        public $doNotIntercept = true; //do not intercept this weapon, period
+	public $canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
 	
         public $useOEW = false; //not important, really	    
         
@@ -154,9 +156,10 @@ class NexusChaffLauncher extends Weapon{
 					//uninterceptable are affected all right, just those that outright cannot be intercepted - like ramming or mass driver - will not be affected
 					$subWeapon = $affectedShip->getSystemById($subOrder->weaponid);
 					if( $subWeapon->doNotIntercept != true ){
-						//apply interception!
-						
-						
+						//apply interception! Note that this weapon is technically not marked as firing defensively - it is marked as firing offensively though! (already)
+						//like firing.php addToInterceptionTotal
+						$subOrder->totalIntercept += $this->getInterceptionMod($gamedata, $intercepted);
+        					$subOrder->numInterceptors++;
 					}
 				}
 			}
