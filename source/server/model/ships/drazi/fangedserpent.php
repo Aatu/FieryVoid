@@ -35,12 +35,7 @@ class FangedSerpent extends SuperHeavyFighter{
         $fighter->addFrontSystem(new FighterMissileRack(6, 330, 30));
         $fighter->addFrontSystem(new FighterMissileRack(6, 330, 30));
 
-        $particleBlaster = new ParticleBlaster(0, 0, 0, 330, 30);
-
-
-        $particleBlaster->rangepenalty = 1 ; 
- $particleBlaster->fireControl = array(-4, 0, 0);
-        $particleBlaster->loadingtime = 3;
+        $particleBlaster = new ParticleBlasterFtr(0, 330, 30);
         $fighter->addFrontSystem($particleBlaster);
         
         $this->addSystem($fighter);
