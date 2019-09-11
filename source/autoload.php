@@ -589,6 +589,7 @@ spl_autoload_register(
                 'partialburnout' => '/server/model/cricialClasses.php',
                 'particle' => '/server/model/weapons/particle.php',
                 'particleblaster' => '/server/model/weapons/particle.php',
+                'particleblasterftr' => '/server/model/weapons/particle.php',
                 'particlecannon' => '/server/model/weapons/particle.php',
                 'particlecutter' => '/server/model/weapons/particle.php',
                 'particleimpeder' => '/server/model/weapons/defensive.php',
