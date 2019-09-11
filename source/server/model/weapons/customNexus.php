@@ -25,12 +25,12 @@ class NexusKineticBoxLauncher extends Weapon{
         public $rangePenalty = 0;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
-	      public $noOverkill = true; //Matter weapon
-	      public $priority = 9; //Matter weapon
+	public $noOverkill = true; //Matter weapon
+	public $priority = 9; //Matter weapon
 	    
-		  public $firingMode = 'Kinetic'; //firing mode - just a name essentially
-	      public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-    	  public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+	public $firingMode = 'Kinetic'; //firing mode - just a name essentially
+	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
 	 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -101,7 +101,6 @@ class NexusChaffLauncher extends Weapon{
         public $animationWidth = 10;
         public $trailLength = 10;
 
-
         public $ballistic = false;
         public $hextarget = true;
         public $hidetarget = false;
@@ -114,7 +113,7 @@ class NexusChaffLauncher extends Weapon{
 	public $range = 100; //let's put maximum range here, but generous one
         public $rangePenalty = 0;
         public $fireControl = array(null, null, null); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
-	    
+	public $intercept = 2; //intercept rating -2	    
 	    
 	public $firingMode = 'Intercept'; //firing mode - just a name essentially
 	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
@@ -133,34 +132,54 @@ class NexusChaffLauncher extends Weapon{
 	{
 		$fireOrder->needed = 0; 
 		$fireOrder->updated = true;
-	}
-	   
-	public function fire($gamedata, $fireOrder)
-    { //sadly here it really has to be completely redefined... or at least I see no option to avoid this
-        $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
-        $shooter = $gamedata->getShipById($fireOrder->shooterid);
-        /** @var MovementOrder $movement */
-        $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-        $posLaunch = $movement->position;//at moment of launch!!!
-        //sometimes player does manage to target ship after all..
-        if ($fireOrder->targetid != -1) {
-            $targetship = $gamedata->getShipById($fireOrder->targetid);
-            //insert correct target coordinates: last turns' target position
-            $movement = $targetship->getLastTurnMovement($fireOrder->turn);
-            $fireOrder->x = $movement->position->q;
-            $fireOrder->y = $movement->position->r;
-            $fireOrder->targetid = -1; //correct the error
-        }
-        $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
-        //$this->calculateHit($gamedata, $fireOrder); //already calculated!
-        $rolled = Dice::d(100);
-        $fireOrder->rolled = $rolled; ///and auto-missed ;)
-        $fireOrder->pubnotes .= "Interception applied to all weapons at target hex that are firing at Chaff-launching ship. ";
 		
-        $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
-    } //endof function fire
+		//while we're at it - we may add appropriate interception orders!
+		
+		//sometimes player does manage to target ship after all..
+		if ($fireOrder->targetid != -1) {
+		    $targetship = $gamedata->getShipById($fireOrder->targetid);
+		    //insert correct target coordinates: last turns' target position
+		    $movement = $targetship->getLastTurnMovement($fireOrder->turn);
+		    $fireOrder->x = $movement->position->q;
+		    $fireOrder->y = $movement->position->r;
+		    $fireOrder->targetid = -1; //correct the error
+		}
+		$targetHex = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+		
+		$shipsInRange = $gamedata->getShipsInDistance($targetHex); //all units on target hex
+		foreach ($shipsInRange as $affectedShip) {
+			$allOrders = $affectedShip->getAllFireOrders($gamedata->turn);
+			foreach($allOrders as $subOrder) {
+				if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->shooterid) ){ //something is firing at protected unit - and is affected!
+					//uninterceptable are affected all right, just those that outright cannot be intercepted - like ramming or mass driver - will not be affected
+					$subWeapon = $affectedShip->getSystemById($subOrder->weaponid);
+					if( $subWeapon->doNotIntercept != true ){
+						//apply interception!
+						
+						
+					}
+				}
+			}
+		}
+	}//endof function calculateHitBase
+	   
 	
-    
+	public function fire($gamedata, $fireOrder)
+	    { //sadly here it really has to be completely redefined... or at least I see no option to avoid this
+		$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		/** @var MovementOrder $movement */
+		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+		$posLaunch = $movement->position;//at moment of launch!!!		
+		//$this->calculateHit($gamedata, $fireOrder); //already calculated!
+		$rolled = Dice::d(100);
+		$fireOrder->rolled = $rolled; ///and auto-missed ;)
+		$fireOrder->pubnotes .= "Interception applied to all weapons at target hex that are firing at Chaff-launching ship. "; //just information for player, actual applying was done in calculateHitBase method
+
+		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+	    } //endof function fire
+	
+	
         public function getDamage($fireOrder){
             return 0; //this weapon does no damage, in case it actually hits something!
         }
