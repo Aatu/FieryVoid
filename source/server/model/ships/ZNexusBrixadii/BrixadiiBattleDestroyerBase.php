@@ -1,11 +1,11 @@
 <?php
-class BattleDestroyerBase extends HeavyCombatVessel{
+class BrixadiiBattleDestroyerBase extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 330;
-        $this->faction = "Nexus Brixadii";
+        $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiBattleDestroyerBase";
         $this->imagePath = "img/ships/Nexus/BrixadiiBattleDestroyer.png";
         $this->shipClass = "Battle Destroyer";
@@ -45,6 +45,7 @@ class BattleDestroyerBase extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure( 3, 35));
         $this->addAftSystem(new Structure( 3, 32));
         $this->addPrimarySystem(new Structure( 4, 40));
+		
         $this->hitChart = array(
             0=> array(
                     7 => "Structure",

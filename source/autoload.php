@@ -1012,17 +1012,30 @@ spl_autoload_register(
                 'godalphafull' => '/server/model/ships/EA/godAlphaFull.php',   
                 'godbetafull' => '/server/model/ships/EA/godBetaFull.php',
 		    
-		'custombpalight' => '/server/model/weapons/customs.php',   
-		'custombpamedium' => '/server/model/weapons/customs.php', 
-		'custombpaheavy' => '/server/model/weapons/customs.php', 
 		    
 		'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php', 
 		'nexusparticleprojectorheavy' => '/server/model/weapons/customNexus.php', 
 		'nexusparticleprojectorlight' => '/server/model/weapons/customNexus.php', 
 		'nexusparticleagitator' => '/server/model/weapons/customNexus.php', 
-		'nexuschafflauncher' => '/server/model/weapons/customNexus.php' 
+		'nexuschafflauncher' => '/server/model/weapons/customNexus.php',
+
+
+                'brixadiibattledestroyerbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerBase.php',	
+				
+                'brixadiibattledestroyer2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyer2057.php',		
+                'brixadiibattledestroyer2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyer2108.php',		
 		    
+	
+                'brixadiipursuitfrigatebase' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigateBase.php',
+                'brixadiipursuitfrigate2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigate2057.php',
+                'brixadiipursuitfrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigate2108.php',
 		  		    
+					
+					
+		'custombpalight' => '/server/model/weapons/customs.php',   
+		'custombpamedium' => '/server/model/weapons/customs.php', 
+		'custombpaheavy' => '/server/model/weapons/customs.php' 
+		
             );
         }
         $cn = strtolower($class);
