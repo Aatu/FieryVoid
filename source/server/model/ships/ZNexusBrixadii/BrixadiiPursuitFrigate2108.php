@@ -1,5 +1,5 @@
 <?php
-class BrixadiiPursuitFrigate2108 extends HeavyCombatVessel{
+class BrixadiiPursuitFrigate2108 extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
