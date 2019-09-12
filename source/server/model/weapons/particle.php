@@ -939,7 +939,7 @@
     }
 
 
-
+/*AoG did only Particle Projector. Nexus custom ships use other weights of this line as well.*/
     class ParticleProjector extends Particle{
         public $trailColor = array(30, 170, 255);
 
