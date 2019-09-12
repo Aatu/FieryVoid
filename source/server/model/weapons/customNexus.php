@@ -242,7 +242,7 @@ class NexusChaffLauncher extends Weapon{
 
         public $intercept = 0;
         public $loadingtime = 4;
-        public $priority = 8;
+        public $priority = 8; //light Raking
 
         public $rangePenalty = 2; //-2/hex
         public $fireControl = array(-2, 2, 3); // fighters, <mediums, <capitals
@@ -259,6 +259,46 @@ class NexusChaffLauncher extends Weapon{
         }
 
         public function getDamage($fireOrder){ return Dice::d(10, 3)+6;   }
+        public function setMinDamage(){     $this->minDamage = 9 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 36 ;      }
+    }
+
+
+
+
+    class NexusParticleAgitator extends Particle{
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "nexusParticleAgitator";
+        public $displayName = "Particle Agitator";
+	public $iconPath = "NexusParticleAgitator.png";
+	    
+        public $animation = "beam";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.25;
+        public $projectilespeed = 12;
+        public $animationWidth = 4;
+        public $trailLength = 10;
+
+        public $intercept = 1;
+        public $loadingtime = 2;
+        public $priority = 6; //heavy Standard
+
+        public $rangePenalty = 1; //-1/hex
+        public $fireControl = array(0, 2, 2); // fighters, <mediums, <capitals
+
+	public $firingMode = 'Standard'; //firing mode - just a name essentially
+	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Particle"; //not important really
+	    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 8;
+            if ( $powerReq == 0 ) $powerReq = 3;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 2)+6;   }
         public function setMinDamage(){     $this->minDamage = 9 ;      }
         public function setMaxDamage(){     $this->maxDamage = 36 ;      }
     }
