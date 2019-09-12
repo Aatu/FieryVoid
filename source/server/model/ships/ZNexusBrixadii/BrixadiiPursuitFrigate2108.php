@@ -39,7 +39,7 @@ class BrixadiiPursuitFrigate2108 extends MediumShip{
 	$this->addFrontSystem(new ParticleProjector(2, 6, 1, 270, 90));
 	$this->addFrontSystem(new ParticleProjector(2, 6, 1, 270, 90));
 	$this->addFrontSystem(new ParticleProjector(2, 6, 1, 300, 180));
-	$this->addFrontSystem(new NexusKineticBoxLauncher(2, 4, 0, 300, 60));
+	$this->addFrontSystem(new NexusKineticBoxLauncher(2, 0, 0, 300, 60));
                 
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));
