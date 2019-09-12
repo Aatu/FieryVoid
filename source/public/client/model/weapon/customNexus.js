@@ -10,3 +10,17 @@ var NexusChaffLauncher = function NexusChaffLauncher(json, ship) {
 };
 NexusChaffLauncher.prototype = Object.create(Weapon.prototype);
 NexusChaffLauncher.prototype.constructor = NexusChaffLauncher;
+
+
+
+var NexusParticleProjectorLight = function NexusParticleProjectorLight(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusParticleProjectorLight.prototype = Object.create(Weapon.prototype);
+NexusParticleProjectorLight.prototype.constructor = NexusParticleProjectorLight;
+
+var NexusParticleProjectorLight = function NexusParticleProjectorLight(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusParticleProjectorLight.prototype = Object.create(Weapon.prototype);
+NexusParticleProjectorLight.prototype.constructor = NexusParticleProjectorLight;
