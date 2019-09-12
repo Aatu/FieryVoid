@@ -1019,6 +1019,7 @@ spl_autoload_register(
 		'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php', 
 		'nexusparticleprojectorheavy' => '/server/model/weapons/customNexus.php', 
 		'nexusparticleprojectorlight' => '/server/model/weapons/customNexus.php', 
+		'nexusparticleagitator' => '/server/model/weapons/customNexus.php', 
 		'nexuschafflauncher' => '/server/model/weapons/customNexus.php' 
 		    
 		  		    
