@@ -91,7 +91,7 @@
 
         public $name = "particleBlasterFtr";
         public $displayName = "Particle Blaster";
-        public $iconPath = "ParticleBlaster.png";
+        public $iconPath = "particleBlaster.png";
         public $animation = "trail";
         public $animationColor = array(255, 250, 230);
         public $animationExplosionScale = 0.25;
@@ -939,7 +939,7 @@
     }
 
 
-
+/*AoG did only Particle Projector. Nexus custom ships use other weights of this line as well.*/
     class ParticleProjector extends Particle{
         public $trailColor = array(30, 170, 255);
 

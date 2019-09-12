@@ -25,12 +25,12 @@ class NexusKineticBoxLauncher extends Weapon{
         public $rangePenalty = 0;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
-	      public $noOverkill = true; //Matter weapon
-	      public $priority = 9; //Matter weapon
+	public $noOverkill = true; //Matter weapon
+	public $priority = 9; //Matter weapon
 	    
-		  public $firingMode = 'Kinetic'; //firing mode - just a name essentially
-	      public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-    	  public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+	public $firingMode = 'Kinetic'; //firing mode - just a name essentially
+	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
 	 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -80,6 +80,228 @@ class NexusKineticBoxLauncher extends Weapon{
 }//endof NexusKineticBoxLauncher
 
 
+/*Chaff Launcher
+intercepts all weapon fire (directed at self) from HEX (including uninterceptable weapons).
+Done as: kind of offensive mode - player needs to pick hex to fire at. Animated as kind of EMine. 
+All appropriate fire orders will get an interception set up before other intercepts are declared.
+If weapon is left to its own devices it will simply provide a single interception (...if game allows non-1-per-turn weapon to be intercepting in the first place!)
+*/
+class NexusChaffLauncher extends Weapon{
+        public $name = "nexusChaffLauncher";
+        public $displayName = "Chaff Launcher";
+		public $iconPath = "NexusChaffLauncher.png";
+	
+        public $trailColor = array(192,192,192);
+        public $animation = "ball";
+        public $animationColor = array(192,192,192);
+        public $animationExplosionScale = 0.5;
+        public $animationExplosionType = "AoE";
+        public $explosionColor = array(235,235,235);
+        public $projectilespeed = 12;
+        public $animationWidth = 10;
+        public $trailLength = 10;
+
+        public $ballistic = false;
+        public $hextarget = false; //for technical reasons this proved hard to do
+        public $hidetarget = false;
+        public $priority = 1; //to show effect quickly
+        public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
+        public $doNotIntercept = true; //do not intercept this weapon, period
+		public $canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
+	
+        public $useOEW = false; //not important, really	    
+        
+        public $loadingtime = 2; // 1/2 turns
+		public $range = 100; //let's put maximum range here, but generous one
+        public $rangePenalty = 0;
+        public $fireControl = array(100, 100, 100); // fighters, <mediums, <capitals; just so the weapon is targetable
+		public $intercept = 2; //intercept rating -2	    
+	    
+		public $firingMode = 'Intercept'; //firing mode - just a name essentially
+		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Particle"; //not important really
+	 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 2;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Fired at hex (although You technically have to pick an unit). Will apply interception to all fire from target hex to Chaff-protected ship.";
+            $this->data["Special"] .= "<br>Will affect uninterceptable weapons.";
+        }
+        
+	//hit chance always 0 - just so it never actually hits anything, or draws interception
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		$fireOrder->needed = 100; //auto hit!
+		$fireOrder->updated = true;
+		
+		//while we're at it - we may add appropriate interception orders!
+		
+		$targetShip = $gamedata->getShipById($fireOrder->targetid);
+		
+		$shipsInRange = $gamedata->getShipsInDistance($targetShip); //all units on target hex
+		foreach ($shipsInRange as $affectedShip) {
+			$allOrders = $affectedShip->getAllFireOrders($gamedata->turn);
+			foreach($allOrders as $subOrder) {
+				if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->shooterid) ){ //something is firing at protected unit - and is affected!
+					//uninterceptable are affected all right, just those that outright cannot be intercepted - like ramming or mass driver - will not be affected
+					$subWeapon = $affectedShip->getSystemById($subOrder->weaponid);
+					if( $subWeapon->doNotIntercept != true ){
+						//apply interception! Note that this weapon is technically not marked as firing defensively - it is marked as firing offensively though! (already)
+						//like firing.php addToInterceptionTotal
+						$subOrder->totalIntercept += $this->getInterceptionMod($gamedata, $subOrder);
+        				$subOrder->numInterceptors++;
+					}
+				}
+			}
+		}
+	}//endof function calculateHitBase
+	   
+	
+	public function fire($gamedata, $fireOrder)
+	{ //sadly here it really has to be completely redefined... or at least I see no option to avoid this
+		$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		/** @var MovementOrder $movement */
+		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+		$posLaunch = $movement->position;//at moment of launch!!!		
+		//$this->calculateHit($gamedata, $fireOrder); //already calculated!
+		$rolled = Dice::d(100);
+		$fireOrder->rolled = $rolled; ///and auto-hit ;)
+		$fireOrder->shotshit++;
+		$fireOrder->pubnotes .= "Interception applied to all weapons at target hex that are firing at Chaff-launching ship. "; //just information for player, actual applying was done in calculateHitBase method
+		
+
+		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+	} //endof function fire
+	
+	
+        public function getDamage($fireOrder){
+            return 0; //this weapon does no damage, in case it actually hits something!
+        }
+        public function setMinDamage(){     $this->minDamage = 0;      }
+        public function setMaxDamage(){     $this->maxDamage = 0;      }
+}//endof NexusChaffLauncher
+
+
+/*custom extension of standard Particle Projector line*/
+    class NexusParticleProjectorLight extends Particle{
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "nexusParticleProjectorLight";
+        public $displayName = "Light Particle Projector";
+	public $iconPath = "NexusParticleProjectorLight.png";
+	    
+        public $animation = "beam";
+        public $animationColor = array(205, 200, 200);
+        public $animationExplosionScale = 0.15;
+        public $projectilespeed = 10;
+        public $animationWidth = 3;
+        public $trailLength = 10;
+
+        public $intercept = 2;
+        public $loadingtime = 1;
+        public $priority = 3;
+
+        public $rangePenalty = 2; //-2/hex
+        public $fireControl = array(3, 2, 2); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 3;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(6, 1)+2;   }
+        public function setMinDamage(){     $this->minDamage = 3 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 8 ;      }
+    }
+
+
+/*custom extension of standard Particle Projector line*/
+    class NexusParticleProjectorHeavy extends Particle{
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "nexusParticleProjectorHeavy";
+        public $displayName = "Heavy Particle Projector";
+	public $iconPath = "NexusParticleProjectorHeavy.png";
+	    
+        public $animation = "beam";
+        public $animationColor = array(205, 200, 200);
+        public $animationExplosionScale = 0.35;
+        public $projectilespeed = 17;
+        public $animationWidth = 6;
+        public $trailLength = 30;
+
+        public $intercept = 0;
+        public $loadingtime = 4;
+        public $priority = 8; //light Raking
+
+        public $rangePenalty = 2; //-2/hex
+        public $fireControl = array(-2, 2, 3); // fighters, <mediums, <capitals
+
+	public $firingMode = 'Raking'; //firing mode - just a name essentially
+	public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Particle"; //not important really
+	    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 3;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 3)+6;   }
+        public function setMinDamage(){     $this->minDamage = 9 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 36 ;      }
+    }
+
+
+
+
+    class NexusParticleAgitator extends Particle{
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "nexusParticleAgitator";
+        public $displayName = "Particle Agitator";
+	public $iconPath = "NexusParticleAgitator.png";
+	    
+        public $animation = "beam";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.25;
+        public $projectilespeed = 12;
+        public $animationWidth = 4;
+        public $trailLength = 10;
+
+        public $intercept = 1;
+        public $loadingtime = 2;
+        public $priority = 6; //heavy Standard
+
+        public $rangePenalty = 1; //-1/hex
+        public $fireControl = array(0, 2, 2); // fighters, <mediums, <capitals
+
+	public $firingMode = 'Standard'; //firing mode - just a name essentially
+	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Particle"; //not important really
+	    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 8;
+            if ( $powerReq == 0 ) $powerReq = 3;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 2)+6;   }
+        public function setMinDamage(){     $this->minDamage = 9 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 36 ;      }
+    }
 
 
 ?>
