@@ -7,7 +7,7 @@ class BrixadiiPursuitFrigateBase extends MediumShip{
         $this->pointCost = 240;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiPursuitFrigateBase";
-        $this->imagePath = "img/ships/Nexus/PursuitFrigate.png";
+        $this->imagePath = "img/ships/Nexus/BrixadiiPursuitFrigate.png";
         $this->shipClass = "Pursuit Frigate";
 		//$this->variantOf = "Pursuit Frigate";
 		$this->occurence = "common";
