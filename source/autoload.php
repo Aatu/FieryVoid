@@ -1017,10 +1017,11 @@ spl_autoload_register(
 		'custombpaheavy' => '/server/model/weapons/customs.php', 
 		    
 		'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php', 
+		'nexusparticleprojectorheavy' => '/server/model/weapons/customNexus.php', 
+		'nexusparticleprojectorlight' => '/server/model/weapons/customNexus.php', 
 		'nexuschafflauncher' => '/server/model/weapons/customNexus.php' 
 		    
-		    
-		    
+		  		    
             );
         }
         $cn = strtolower($class);
