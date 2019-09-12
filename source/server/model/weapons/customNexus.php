@@ -190,4 +190,78 @@ class NexusChaffLauncher extends Weapon{
 }//endof NexusChaffLauncher
 
 
+/*custom extension of standard Particle Projector line*/
+    class NexusParticleProjectorLight extends Particle{
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "nexusParticleProjectorLight";
+        public $displayName = "Light Particle Projector";
+	public $iconPath = "NexusParticleProjectorLight.png";
+	    
+        public $animation = "beam";
+        public $animationColor = array(205, 200, 200);
+        public $animationExplosionScale = 0.15;
+        public $projectilespeed = 10;
+        public $animationWidth = 3;
+        public $trailLength = 10;
+
+        public $intercept = 2;
+        public $loadingtime = 1;
+        public $priority = 3;
+
+        public $rangePenalty = 2; //-2/hex
+        public $fireControl = array(3, 2, 2); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 3;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(6, 1)+2;   }
+        public function setMinDamage(){     $this->minDamage = 3 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 8 ;      }
+    }
+
+
+/*custom extension of standard Particle Projector line*/
+    class NexusParticleProjectorHeavy extends Particle{
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "nexusParticleProjectorHeavy";
+        public $displayName = "Heavy Particle Projector";
+	public $iconPath = "NexusParticleProjectorHeavy.png";
+	    
+        public $animation = "beam";
+        public $animationColor = array(205, 200, 200);
+        public $animationExplosionScale = 0.35;
+        public $projectilespeed = 17;
+        public $animationWidth = 6;
+        public $trailLength = 30;
+
+        public $intercept = 0;
+        public $loadingtime = 4;
+        public $priority = 8;
+
+        public $rangePenalty = 2; //-2/hex
+        public $fireControl = array(-2, 2, 3); // fighters, <mediums, <capitals
+
+	public $firingMode = 'Raking'; //firing mode - just a name essentially
+	public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Particle"; //not important really
+	    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 3;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 3)+6;   }
+        public function setMinDamage(){     $this->minDamage = 9 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 36 ;      }
+    }
+
+
 ?>
