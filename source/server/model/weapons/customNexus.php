@@ -49,7 +49,7 @@ class NexusKineticBoxLauncher extends Weapon{
 	    
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "Ignores armor (Ballistic+Matter weapon).";
+            $this->data["Special"] = "Ignores armor, no overkill (Ballistic+Matter weapon).";
             $this->data["Ammunition"] = $this->ammunition;
         }
         protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
