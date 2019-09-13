@@ -73,6 +73,8 @@ if (isset($_SESSION["user"])) {
             <b>CCEW modified</b> - now CCEW reaches out only 10 hexes, as it should. If You want to reach further, You need proper OEW (now usable on fighters).
         <br>
             <b>Drazi Serpent guns</b> - fixed
+        <br>
+            <b>Damage allocation improved</b> - better splitting fire incoming at section split. Base owners should be particularly happy :) .
         <!--
         <br><br>
         - last but not least - brand new collection of BUGS!;
