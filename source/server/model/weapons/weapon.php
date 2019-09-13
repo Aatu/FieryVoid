@@ -628,7 +628,7 @@ class Weapon extends ShipSystem
         $target = $gamedata->getShipById($fireOrder->targetid);
 
 
-        if ($target == null) return true; //target is a hex rather than unit, probability of ambigousness is relatively high
+        if ($target == null) return true; //target is a hex rather than unit, probability of ambiguosness is relatively high
         if ($target instanceof FighterFlight) return false; //shot at fighter may be ambiguous, but there's no point in poostponing the decision!
 
         $pos = $shooter->getCoPos();
@@ -889,7 +889,7 @@ class Weapon extends ShipSystem
 
 		
         $change = round($goal * 5); //d20 to d100: ($goal/20)*100
-        $target->setExpectedDamage($hitLoc, $change, $this);
+		$target->setExpectedDamage($hitLoc, $change, $this);
 
         //range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty,
         //interception penalty not yet calculated, will be logged later

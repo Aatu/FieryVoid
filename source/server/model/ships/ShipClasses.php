@@ -619,16 +619,22 @@ class BaseShip {
 	$totalAmount = 0;
         if ($target instanceof FighterFlight){
             foreach ($this->EW as $EW){
-                if ($EW->type == "CCEW" && $EW->turn == $turn)
-                    //return $EW->amount;
-			$totalAmount += $EW->amount;
+                if ($EW->type == "CCEW" && $EW->turn == $turn){
+					//check range - CCEW works up to 10 hexes away!
+					$targetPos = $target->getHexPos();
+					$ownPos = $this->getHexPos();
+					$dis = mathlib::getDistanceHex($ownPos, $targetPos);
+					if ($dis <=10){					
+						$totalAmount += $EW->amount;
+					}
+				}
             }
         }
 	    //OEW vs fighters is now possible too! else{
             foreach ($this->EW as $EW){
                 if ($EW->type == "OEW" && $EW->targetid == $target->id && $EW->turn == $turn)
                     //return $EW->amount;
-			$totalAmount += $EW->amount;
+					$totalAmount += $EW->amount;
             }
         //}
         return $totalAmount;
@@ -799,7 +805,7 @@ class BaseShip {
         }
     }
 
-    public function isHitSectionAmbiguousPos($pos, $turn){ //for a shot from indicated unit - would there be choice of target section?
+    public function isHitSectionAmbiguousPos($pos, $turn){ //for a shot from indicated position - would there be choice of target section?
         $locs = $this->getLocations();
         $relativeBearing =  $this->getBearingOnPos($pos);
         $valid = array();
@@ -854,10 +860,16 @@ class BaseShip {
             if ($structure){
                 $locs[$key]["remHealth"] = $structure->getRemainingHealth();
                 if($locs[$key]["remHealth"]>0){ //else section is destroyed anyway!
+				    if(isset($this->expectedDamage[$locs[$key]["loc"]])){
+                        $locs[$key]["remHealth"] -= round($this->expectedDamage[$locs[$key]["loc"]]);
+                        $locs[$key]["remHealth"] = max(1,$locs[$key]["remHealth"]);
+                    }
+				/*
                     if(isset($expectedDamage[$locs[$key]["loc"]])){
                         $locs[$key]["remHealth"] -= round($expectedDamage[$locs[$key]["loc"]]);
                         $locs[$key]["remHealth"] = max(1,$locs[$key]["remHealth"]);
                     }
+					*/
                 }
                 $locs[$key]["armour"] = $structure->armour;
             }

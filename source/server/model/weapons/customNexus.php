@@ -49,7 +49,7 @@ class NexusKineticBoxLauncher extends Weapon{
 	    
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "Ignores armor (Ballistic+Matter weapon).";
+            $this->data["Special"] = "Ignores armor, no overkill (Ballistic+Matter weapon).";
             $this->data["Ammunition"] = $this->ammunition;
         }
         protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
@@ -240,27 +240,27 @@ class NexusChaffLauncher extends Weapon{
         public $animationWidth = 6;
         public $trailLength = 30;
 
-        public $intercept = 0;
-        public $loadingtime = 4;
-        public $priority = 8; //light Raking
+        public $intercept = 1;
+        public $loadingtime = 3;
+        public $priority = 6; //heavy Standard
 
-        public $rangePenalty = 2; //-2/hex
-        public $fireControl = array(-2, 2, 3); // fighters, <mediums, <capitals
+        public $rangePenalty = 0.5; //-1/2hexes
+        public $fireControl = array(0, 2, 3); // fighters, <mediums, <capitals
 
-	public $firingMode = 'Raking'; //firing mode - just a name essentially
-	public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $firingMode = 'Standard'; //firing mode - just a name essentially
+	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     	public $weaponClass = "Particle"; //not important really
 	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 3;
-            if ( $powerReq == 0 ) $powerReq = 1;
+            if ( $maxhealth == 0 ) $maxhealth = 8;
+            if ( $powerReq == 0 ) $powerReq = 4;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return Dice::d(10, 3)+6;   }
-        public function setMinDamage(){     $this->minDamage = 9 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 36 ;      }
+        public function getDamage($fireOrder){ return Dice::d(10, 2)+8;   }
+        public function setMinDamage(){     $this->minDamage = 10 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 28 ;      }
     }
 
 

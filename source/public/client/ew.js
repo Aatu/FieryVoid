@@ -84,8 +84,12 @@ window.ew = {
 
     getTargetingEW: function getTargetingEW(ship, target) {
         var amountOEW = 0;
-        if (target.flight) {
-            amountOEW += ew.getCCEW(ship);
+        if (target.flight) {            
+			//check range - CCEW works up to 10 hexes!
+			var distance = mathlib.getDistanceBetweenShipsInHex(ship, target);
+			if (distance <= 10){
+				amountOEW += ew.getCCEW(ship);
+			}
             //return ew.getCCEW(ship);
         } /*else {
             return ew.getOffensiveEW(ship, target);
