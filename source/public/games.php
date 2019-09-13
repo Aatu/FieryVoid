@@ -69,8 +69,14 @@ if (isset($_SESSION["user"])) {
             <b>Hit charts</b> - hit charts returned! mouseover ship image :) . You'll see ship notes there as well.
         <br>
             <b>Special comments</b> - are properly displayed as multiline again
+        <br>
+            <b>CCEW modified</b> - now CCEW reaches out only 10 hexes, as it should. If You want to reach further, You need proper OEW (now usable on fighters).
+        <br>
+            <b>Drazi Serpent guns</b> - fixed
+        <!--
         <br><br>
         - last but not least - brand new collection of BUGS!;
+        -->
         <br><br>
         Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.
 
