@@ -154,7 +154,8 @@ window.mathlib = {
 
 		if (oPos.equals(tPos)) {
 			//if Target has speed 0, consider Observer to have better Init! that would be better for firing arcs...
-			if (shipManager.hasBetterInitive(observer, target) || (shipManager.movement.getSpeed(target)==0) ) {
+			//if Observer has speed 0 consider Target to have better Ini!
+			if ( (shipManager.hasBetterInitive(observer, target) && (shipManager.movement.getSpeed(observer)!=0) ) || (shipManager.movement.getSpeed(target)==0) ) {
 				oPos = shipManager.movement.getPreviousLocation(observer);
 			} else {
 				tPos = shipManager.movement.getPreviousLocation(target);

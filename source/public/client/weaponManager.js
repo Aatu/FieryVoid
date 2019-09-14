@@ -511,7 +511,7 @@ window.weaponManager = {
     },
 
     isOnWeaponArc: function isOnWeaponArc(shooter, target, weapon) {
-        console.log("is on arc");
+        //console.log("is on arc");
         var shooterFacing = shipManager.getShipHeadingAngle(shooter);
         var targetCompassHeading = mathlib.getCompassHeadingOfShip(shooter, target);
 
@@ -521,8 +521,13 @@ window.weaponManager = {
         var oPos = shipManager.getShipPosition(shooter);
         var tPos = shipManager.getShipPosition(target);
 
+		/*if two ships are at same hex, then their relative position depends on THIS TURN Ini;
+		and it should on PREVIOUS turn Ini... this may affect ability to launch missiles. 
+		Hence at range 0 missile launch is always allowed, no matter the arc.
+		*/
         if (weapon.ballistic && oPos.equals(tPos)) return true;
-
+		
+		
         return mathlib.isInArc(targetCompassHeading, arcs.start, arcs.end);
     },
 
