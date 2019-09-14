@@ -76,7 +76,9 @@ class Mathlib{
         $tPos = $target->getCoPos();
         
         if ($oPos["x"] == $tPos["x"] && $oPos["y"] == $tPos["y"]){
-            if (BaseShip::hasBetterIniative( $observer, $target)){
+            //target speed 0 is always considered to lose Ini for relative position purposes			
+			//if Observer has speed 0 consider Target to have better Ini!
+            if ( (BaseShip::hasBetterIniative($observer, $target) && ($observer->getSpeed()!=0)) || ($target->getSpeed()==0) ){
                 $oPos =  $observer->getPreviousCoPos();
             }else{
                 $tPos =  $target->getPreviousCoPos();
