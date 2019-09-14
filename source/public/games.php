@@ -75,6 +75,8 @@ if (isset($_SESSION["user"])) {
             <b>Drazi Serpent guns</b> - fixed
         <br>
             <b>Damage allocation improved</b> - better splitting fire incoming at section split. Base owners should be particularly happy :) .
+        <br>
+            <b>Range 0 speed 0 firing arcs fixed</b> - as long as only one of units involved is speed 0!
         <!--
         <br><br>
         - last but not least - brand new collection of BUGS!;
