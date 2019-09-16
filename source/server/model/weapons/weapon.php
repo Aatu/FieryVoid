@@ -127,6 +127,7 @@ class Weapon extends ShipSystem
 
     public $possibleCriticals = array(14 => "ReducedRange", 19 => "ReducedDamage", 25 => array("ReducedRange", "ReducedDamage"));
 
+    protected $firedDefensivelyAlready = 0; //marker used for weapons capable of firing multiple defensive shots, but suffering backlash once
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $output = 0)
     {
@@ -973,7 +974,15 @@ class Weapon extends ShipSystem
         return $mod;
     }
 
-
+    /*Marcin Sawicki - September 2019 - method called when weapon is firing defensively;
+    	basically doing nothing, but some weapon may need to put some special effects here
+    */
+    public function fireDefensively($gamedata, $fireOrder)
+    {
+    	$this->firedDefensivelyAlready++; //may be used to check if weapon was already fired, in case of multiple defensive shots but only single backlash effect
+    }
+	
+	
     /*Marcin Sawicki - October 2017 - new version of firing procedure - assuming all data is already prepared*/
     public function fire($gamedata, $fireOrder)
     {
