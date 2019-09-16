@@ -114,24 +114,27 @@ var LightParticleBeamShip = function LightParticleBeamShip(json, ship) {
 LightParticleBeamShip.prototype = Object.create(Particle.prototype);
 LightParticleBeamShip.prototype.constructor = LightParticleBeamShip;
 
+
 var ParticleRepeater = function ParticleRepeater(json, ship) {
     Particle.call(this, json, ship);
 };
 ParticleRepeater.prototype = Object.create(Particle.prototype);
 ParticleRepeater.prototype.constructor = ParticleRepeater;
-
 ParticleRepeater.prototype.initBoostableInfo = function () {
     // Needed because it can chance during initial phase
     // because of adding extra power.
-
+/*
     this.data["Weapon type"] = "Particle";
     this.data["Damage type"] = "Standard";
+*/
     this.data["Number of shots"] = shipManager.power.getBoost(this) + 1;
 
     if (window.weaponManager.isLoaded(this)) {
+        /*
         this.loadingtime = this.getLoadingTime();
         this.turnsloaded = this.getLoadingTime();
         this.normalload = this.getLoadingTime();
+        */
     } else {
         var count = shipManager.power.getBoost(this);
 
@@ -140,9 +143,11 @@ ParticleRepeater.prototype.initBoostableInfo = function () {
         }
     }
 
+    this.intercept = 1 + shipManager.power.getBoost(this);
+    this.data.Intercept = this.intercept * -5;
+    
     return this;
 };
-
 ParticleRepeater.prototype.clearBoost = function () {
     for (var i in system.power) {
         var power = system.power[i];
@@ -156,22 +161,51 @@ ParticleRepeater.prototype.clearBoost = function () {
     }
 };
 
-ParticleRepeater.prototype.getLoadingTime = function () {
-    var boostAmount = shipManager.power.getBoost(this);
-
-    return 1 + Math.floor(boostAmount / 2);
-};
 
 var RepeaterGun = function RepeaterGun(json, ship) {
-    ParticleRepeater.call(this, json, ship);
+    Particle.call(this, json, ship);
 };
-RepeaterGun.prototype = Object.create(ParticleRepeater.prototype);
+RepeaterGun.prototype = Object.create(Particle.prototype);
 RepeaterGun.prototype.constructor = RepeaterGun;
+RepeaterGun.prototype.initBoostableInfo = function () {
+    // Needed because it can chance during initial phase
+    // because of adding extra power.
+/*
+    this.data["Weapon type"] = "Particle";
+    this.data["Damage type"] = "Standard";
+*/
+    this.data["Number of shots"] = shipManager.power.getBoost(this) + 1;
 
-RepeaterGun.prototype.getLoadingTime = function () {
-    var boostAmount = shipManager.power.getBoost(this);
+    if (window.weaponManager.isLoaded(this)) {
+        /*
+        this.loadingtime = this.getLoadingTime();
+        this.turnsloaded = this.getLoadingTime();
+        this.normalload = this.getLoadingTime();
+        */
+    } else {
+        var count = shipManager.power.getBoost(this);
 
-    return 1 + boostAmount;
+        for (var i = 0; i < count; i++) {
+            shipManager.power.unsetBoost(null, this);
+        }
+    }
+
+    this.intercept = 1 + shipManager.power.getBoost(this);
+    this.data.Intercept = this.intercept * -5;
+    
+    return this;
+};
+RepeaterGun.prototype.clearBoost = function () {
+    for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
+
+        if (power.type == 2) {
+            system.power.splice(i, 1);
+
+            return;
+        }
+    }
 };
 
 var HeavyBolter = function HeavyBolter(json, ship) {

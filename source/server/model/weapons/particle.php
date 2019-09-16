@@ -396,7 +396,6 @@
 
     class ParticleRepeater extends Particle{
         public $trailColor = array(252, 252, 252);
-
         public $name = "particleRepeater";
         public $displayName = "Particle Repeater";
         public $animation = "trail";
@@ -410,7 +409,7 @@
         public $boostable = true;
         public $boostEfficiency = 1;
         public $priority = 5;
-
+	public $intercept = 1;
         public $rangePenalty = 1;
         public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals
         
@@ -422,65 +421,36 @@
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-
         
         public function setSystemDataWindow($turn){
-            // Keep this consistent with the gravitic.js implementation.
-            // Yeah, I know: dirty.
-            //$this->data["Weapon type"] = "Particle";
-            //$this->data["Damage type"] = "Standard";
-            $this->normalload = $this->loadingtime;
-        
-            $this->setTimes();
+            parent::setSystemDataWindow($turn);
+	    $this->data["Special"] = "Standard power: 1 shot, intercept -5.";
+	    $this->data["Special"] .= "<br>Each additional +1 Power adds -5 intercept or 1 shot in offensive mode.";
+	    $this->data["Special"] .= "<br>Each pair of shots above 2 forces a turn of cooldown.";
+	    $this->data["Special"] .= "<br>All shots hit the same target. If a shot misses, further ones miss automatically. Otherwise they have cumulative to hit penalty.";
+            //$this->defaultShots = 1+$this->getBoostLevel(TacGamedata::$currentTurn); //default shots is 1, so interception is correct!
             
             parent::setSystemDataWindow($turn);
+        } 
+        
+        public function fire($gamedata, $fireOrder){ 
+			$currBoostlevel = $this->getBoostLevel($gamedata->turn);
+				$this->hitChanceMod = 0;
+				$fireOrder->shots = 1 + $currBoostlevel;
+				parent::fire($gamedata, $fireOrder);
+			
+			//if boosted, cooldown (1 per 2 extra shots above first 2)
+			 $turnToAdd = 0;
+			 $currBoostlevel = ceil(($currBoostlevel-2)/2);//actually numbers of turns of cooldown, at this point
+			 while($currBoostlevel > 0){ 		     
+				$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+$turnToAdd);
+				$crit->updated = true;
+				$crit->newCrit = true; //force save even if crit is not for current turn
+				$this->criticals[] =  $crit;
+				$turnToAdd++;    
+				$currBoostlevel--;
+			 }
         }
-        
-        
-        public function getLoadingTime(){
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                return 1 + floor($this->getBoostLevel(TacGamedata::$currentTurn)/2);
-            }
-            else{
-                return $this->loadingtime;
-            }
-        }
-
-        public function getTurnsloaded(){
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                return 1 + floor($this->getBoostLevel(TacGamedata::$currentTurn)/2);
-            }
-            else{
-                return $this->turnsloaded;
-            }
-        }
-        
-        public function setTimes(){
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                $this->loadingtime = 1 + floor($this->getBoostLevel(TacGamedata::$currentTurn)/2);
-                $this->turnsloaded = 1 + floor($this->getBoostLevel(TacGamedata::$currentTurn)/2);
-                $this->normalload = 1 + floor($this->getBoostLevel(TacGamedata::$currentTurn)/2);
-            }
-        }
-        
-//        public function getIntercept($gamedata, $fireOrder){
-//            $this->intercept = $this->getInterceptRating($gamedata->turn);
-//            
-//            parent::getIntercept($gamedata, $fireOrder);
-//        }
-        
-        
-        public function fire($gamedata, $fireOrder){ //new, minimalistic redefinition, relying on  getShotHitChanceMod()
-            $this->hitChanceMod = 0;
-            $this->setTimes();
-            $fireOrder->shots = $this->getMaxShots($gamedata->turn);
-            parent::fire($gamedata, $fireOrder);
-        }
-               
-        
         
         /*if previous shot missed, next one misses automatically*/
         /*so if current mod is not equal to one of previous shot, then it's clearly a miss - return suitably high mod*/
@@ -499,14 +469,11 @@
             if($shotInSequence ==1) return 5;
             $mod= 5+10*($shotInSequence-2);
             return $mod;
-        }
-    
-                
+        }                
         
         protected function getWeaponHitChanceMod($turn){
             return $this->hitChanceMod;
         }
-
         
         protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){ 
             //if target is fighter flight, ensure that the same fighter is hit every time!
@@ -514,39 +481,140 @@
                 $fireOrder->linkedHit = $system;
             }            
             parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
-        }
-        
+        }        
         
         protected function getBoostLevel($turn){
             $boostLevel = 0;
             foreach ($this->power as $i){
                     if ($i->turn != $turn)
                             continue;
-
                     if ($i->type == 2){
                             $boostLevel += $i->amount;
                     }
             }
-
             return $boostLevel;
         }
-
         protected function getMaxShots($turn){
             return 1 + $this->getBoostLevel($turn);
         }
-
         public function getInterceptRating($turn){
             return 1 + $this->getBoostLevel($turn);            
         }
-
         public function getDamage($fireOrder){ return Dice::d(10, 2);   }
         public function setMinDamage(){     $this->minDamage = 2 ;      }
         public function setMaxDamage(){     $this->maxDamage = 20 ;      }
     } //endof class ParticleRepeater
     
-
-
-    
+    class RepeaterGun extends Particle{
+        public $trailColor = array(252, 252, 252);
+        public $name = "repeaterGun";
+        public $displayName = "Repeater Gun";
+        public $animation = "trail";
+        public $animationColor = array(252, 252, 252);
+        public $animationExplosionScale = 0.30;
+        public $projectilespeed = 20;
+        public $animationWidth = 4;
+        public $trailLength = 30;
+        
+        public $loadingtime = 1;
+        public $boostable = true;
+        public $boostEfficiency = 2;
+        public $priority = 4;
+	public $intercept = 1;
+        public $rangePenalty = 0.5; //-1/2 hexes
+        public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals
+        
+        private $hitChanceMod = 0;
+        private $previousHit = true;
+        
+       
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+	    $this->data["Special"] = "Standard power: 1 shot, intercept -5.";
+	    $this->data["Special"] .= "<br>Each additional +2 Power adds -5 intercept or 1 shot in offensive mode.";
+	    $this->data["Special"] .= "<br>Each additional shot forces a turn of cooldown.";
+	    $this->data["Special"] .= "<br>All shots hit the same target. If a shot misses, further ones miss automatically. Otherwise they have cumulative to hit penalty.";
+            //$this->defaultShots = 1+$this->getBoostLevel(TacGamedata::$currentTurn); //default shots is 1, so interception is correct!
+            
+            parent::setSystemDataWindow($turn);
+        } 
+        
+        public function fire($gamedata, $fireOrder){ 
+	    $currBoostlevel = $this->getBoostLevel($gamedata->turn);
+            $this->hitChanceMod = 0;
+            $fireOrder->shots = 1 + $currBoostlevel;
+            parent::fire($gamedata, $fireOrder);
+		
+	    //if boosted, cooldown (1 per extra shot)
+	     $turnToAdd = 0;
+	     while($currBoostlevel > 0){ 		     
+		$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+$turnToAdd);
+                $crit->updated = true;
+		$crit->newCrit = true; //force save even if crit is not for current turn
+                $this->criticals[] =  $crit;
+		$turnToAdd++;    
+		$currBoostlevel--;
+	     }
+        }
+        
+        /*if previous shot missed, next one misses automatically*/
+        /*so if current mod is not equal to one of previous shot, then it's clearly a miss - return suitably high mod*/
+        public function getShotHitChanceMod($shotInSequence){ 
+            $prevExpectedChance = $this->getPrevShotHitChanceMod($shotInSequence-1);
+            if($prevExpectedChance != $this->hitChanceMod){ //something missed in between
+                $this->hitChanceMod = 10000; //clear miss!!!
+            }else{
+                $this->hitChanceMod = $this->getPrevShotHitChanceMod($shotInSequence);
+            }
+            return $this->hitChanceMod;
+        }
+        
+        public function getPrevShotHitChanceMod($shotInSequence){ //just finds hit chance for a given shot - what it should be
+            if($shotInSequence <=0) return 0;
+            if($shotInSequence ==1) return 5;
+            $mod= 5+10*($shotInSequence-2);
+            return $mod;
+        }                
+        
+        protected function getWeaponHitChanceMod($turn){
+            return $this->hitChanceMod;
+        }
+        
+        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){ 
+            //if target is fighter flight, ensure that the same fighter is hit every time!
+            if($target instanceof FighterFlight){
+                $fireOrder->linkedHit = $system;
+            }            
+            parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+        }        
+        
+        protected function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn)
+                            continue;
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
+            }
+            return $boostLevel;
+        }
+        protected function getMaxShots($turn){
+            return 1 + $this->getBoostLevel($turn);
+        }
+        public function getInterceptRating($turn){
+            return 1 + $this->getBoostLevel($turn);            
+        }
+        public function getDamage($fireOrder){ return Dice::d(10, 1)+3;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 13 ;      }
+    } //endof class RepeaterGun
+    /*old Repeater Gun
     class RepeaterGun extends ParticleRepeater{
         public $name = "repeaterGun";
         public $displayName = "Repeater Gun";
@@ -557,21 +625,20 @@
         public $trailLength = 25;
         
         public $boostEfficiency = 2;
-
-        public $rangePenalty = 0.5;
+        public $rangePenalty = 0.5; //-1/2 hexes
         public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals
         public $priority = 4;
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-
         //appropriate redefinitions mostly done in ParticleRepeater class!
         
         public function getDamage($fireOrder){ return Dice::d(10)+3;   }
         public function setMinDamage(){     $this->minDamage = 4 ;      }
         public function setMaxDamage(){     $this->maxDamage = 13 ;      }
     }
+*/
 
 
 

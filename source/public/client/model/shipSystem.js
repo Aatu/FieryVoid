@@ -61,7 +61,7 @@ SuperHeavyFighter.prototype.constructor = SuperHeavyFighter;
 
 var Weapon = function Weapon(json, ship) {
 				ShipSystem.call(this, json, ship);
-				this.targetsShips = true;
+				//this.targetsShips = true;
 };
 
 Weapon.prototype = Object.create(ShipSystem.prototype);

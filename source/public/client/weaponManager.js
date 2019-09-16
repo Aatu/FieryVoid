@@ -1241,7 +1241,7 @@ window.weaponManager = {
                 continue;
             }
 
-            if (!weapon.targetsShips) {
+            if (weapon.hextarget) {
                 debug && console.log("This weapon targets only hexagons");
                 continue;
             }
@@ -1402,7 +1402,7 @@ window.weaponManager = {
                 continue;
             }
 
-            if (weapon.targetsShips) {
+            if (!weapon.hextarget) {
                 continue;
             }
 
@@ -1412,8 +1412,6 @@ window.weaponManager = {
             if (!weapon.ballistic && gamedata.gamephase != 3) {
                 continue;
             }
-
-            if (!weapon.hextarget) continue;
 
             if (weaponManager.checkConflictingFireOrder(selectedShip, weapon)) {
                 continue;

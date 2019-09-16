@@ -37,13 +37,15 @@ window.ShipTooltipInitialOrdersMenu = function () {
 
     function hasShipWeaponsSelected() {
         return gamedata.selectedSystems.some(function (system) {
-            return system instanceof Weapon && system.targetsShips === true;
+            //return system instanceof Weapon && system.targetsShips === true;
+            return system instanceof Weapon && system.hextarget !== true;
         });
     }
 
     function hasHexWeaponsSelected() {
         return gamedata.selectedSystems.some(function (system) {
-            return system instanceof Weapon && system.targetsShips === false;
+            //return system instanceof Weapon && system.targetsShips === false;
+            return system instanceof Weapon && system.hextarget === true;
         });
     }
 

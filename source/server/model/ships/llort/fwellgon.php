@@ -9,6 +9,7 @@ class fwellgon extends HeavyCombatVessel{
         $this->phpclass = "fwellgon";
         $this->imagePath = "img/ships/LlortGovall.png";
         $this->shipClass = "Fwellgon Raiding Scout";
+        $this->limited = 33; 
  
         $this->isd = 2227;
         
