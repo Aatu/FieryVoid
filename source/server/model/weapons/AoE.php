@@ -4,6 +4,7 @@ class AoE extends Weapon
 { //directly tailored for EMine, really - not a generic base class
     public $damageType = "Flash";
     public $weaponClass = "Ballistic";
+	public $hextarget = true;
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
     {
