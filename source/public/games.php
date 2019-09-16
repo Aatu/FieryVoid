@@ -77,6 +77,8 @@ if (isset($_SESSION["user"])) {
             <b>Damage allocation improved</b> - better splitting fire incoming at section split. Base owners should be particularly happy :) .
         <br>
             <b>Range 0 speed 0 firing arcs fixed</b> - as long as only one of units involved is speed 0!
+        <br>
+            <b>Particle Repeater now reacts properly to boosting</b> - Particle Gun too!
         <!--
         <br><br>
         - last but not least - brand new collection of BUGS!;
