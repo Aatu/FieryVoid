@@ -10,6 +10,7 @@ class govallFull extends HeavyCombatVessel{
         $this->imagePath = "img/ships/LlortGovall.png";
         $this->shipClass = "Govall Bombardment Destroyer (full)";
  
+        $this->limited = 33; 
         $this->isd = 2241;
         $this->variantOf = "Govall Bombardment Destroyer";
         

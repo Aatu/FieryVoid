@@ -12,6 +12,7 @@ class PalaceShip extends BaseShip{
         $this->phpclass = "palaceship";
         $this->shipClass = "Mi'Ma'Tau Palace Ship";
         $this->fighters = array("heavy"=>24); 
+        $this->occurence = "unique";
 		$this->unofficial = true;
 		$this->isd = 2255;
         $this->shipSizeClass = 3; //Enormous is not implemented
