@@ -79,6 +79,8 @@ if (isset($_SESSION["user"])) {
             <b>Range 0 speed 0 firing arcs fixed</b> - as long as only one of units involved is speed 0!
         <br>
             <b>Particle Repeater now reacts properly to boosting</b> - Particle Gun too!
+        <br>
+            <b>Defensive fire side effects handled properly</b> - which means Grav Pulsars and Particle Repeaters now shutdown if boosted and fired defensively!
         <!--
         <br><br>
         - last but not least - brand new collection of BUGS!;
