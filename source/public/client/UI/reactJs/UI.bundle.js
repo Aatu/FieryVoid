@@ -38676,7 +38676,9 @@ var System = _styledComponents2.default.div.withConfig({
     if (props.selected) {
         return '#4e6c91';
     } else if (props.firing) {
-        return '#e06f01';
+        return '#e06f01'; //orange
+    } else if (props.boosted) {
+        return '#cca300'; //darkyellow
     } else {
         return 'black';
     }
@@ -38834,7 +38836,8 @@ var SystemIcon = function (_React$Component) {
                     offline: isOffline(ship, system),
                     loading: isLoading(system),
                     selected: isSelected(system),
-                    firing: isFiring(ship, system)
+                    firing: isFiring(ship, system),
+                    boosted: isBoosted(ship, system)
                 },
                 React.createElement(
                     SystemText,
@@ -38859,6 +38862,10 @@ var isLoading = function isLoading(system) {
 
 var isOffline = function isOffline(ship, system) {
     return shipManager.power.isOffline(ship, system);
+};
+
+var isBoosted = function isBoosted(ship, system) {
+    return shipManager.power.isBoosted(ship, system);
 };
 
 var getStructureLeft = function getStructureLeft(ship, system) {
@@ -38896,15 +38903,6 @@ var getText = function getText(ship, system) {
             var fire = weaponManager.getFiringOrder(ship, system);
             return fire.shots + "/" + system.shots;
         } else if (!firing) {
-            /*
-            if (system.duoWeapon) {
-                var UI_active = systemwindow.find(".UI").hasClass("active");
-                  shipWindowManager.addDuoSystem(ship, system, systemwindow);
-                  if (UI_active) {
-                    systemwindow.find(".UI").addClass("active");
-                }
-            }*/
-
             var load = weaponManager.getWeaponCurrentLoading(system);
             var loadingtime = system.loadingtime;
 

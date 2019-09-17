@@ -120,7 +120,7 @@ shipManager.power = {
 			} else {
 				systemwindow.addClass("canboost");
 			}
-		} else if (boost) {
+		} else if (boost) {		
 			systemwindow.addClass("boosted");
 		}
 
@@ -358,7 +358,6 @@ shipManager.power = {
 	},
 
 	countPossiblePower: function countPossiblePower(ship) {
-
 		var power = 0;
 
 		for (var i in ship.systems) {
@@ -373,8 +372,7 @@ shipManager.power = {
 	
 
 	
-	isOfflineOnTurn: function(ship, system, turn){
-		
+	isOfflineOnTurn: function(ship, system, turn){		
 		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
 			return true;
 		}
@@ -446,6 +444,10 @@ shipManager.power = {
 		}
 
 		return boost;
+	},
+	
+	isBoosted: function(ship, system){
+		return (shipManager.power.getBoost(system)!==0); //is boosted if boost > 0
 	},
 
 	countTotalEffectiveEW: function countTotalEffectiveEW(ship) {
