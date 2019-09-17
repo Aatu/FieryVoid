@@ -432,25 +432,39 @@
             
             parent::setSystemDataWindow($turn);
         } 
+	    
+	protected function applyCooldown(){
+		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
+		//if boosted, cooldown (1 per 2 extra shots above first 2)
+		$turnToAdd = 0;
+		 $cooldownLength = ceil(($currBoostlevel-2)/2);//actual numbers of turns of cooldown
+		 while($cooldownLength > 0){ 		     
+			$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+$turnToAdd);
+			$crit->updated = true;
+			$crit->newCrit = true; //force save even if crit is not for current turn
+			$this->criticals[] =  $crit;
+			$turnToAdd++;    
+			$cooldownLength--;
+		 }
+	}
         
         public function fire($gamedata, $fireOrder){ 
 			$currBoostlevel = $this->getBoostLevel($gamedata->turn);
 				$this->hitChanceMod = 0;
 				$fireOrder->shots = 1 + $currBoostlevel;
 				parent::fire($gamedata, $fireOrder);
-			
-			//if boosted, cooldown (1 per 2 extra shots above first 2)
-			 $turnToAdd = 0;
-			 $currBoostlevel = ceil(($currBoostlevel-2)/2);//actually numbers of turns of cooldown, at this point
-			 while($currBoostlevel > 0){ 		     
-				$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+$turnToAdd);
-				$crit->updated = true;
-				$crit->newCrit = true; //force save even if crit is not for current turn
-				$this->criticals[] =  $crit;
-				$turnToAdd++;    
-				$currBoostlevel--;
-			 }
+			$this->applyCooldown();			
         }
+	    
+    /* applying cooldown when firing defensively, too
+    */
+    public function fireDefensively($gamedata, $interceptedWeapon)
+    {
+    	if ($this->firedDefensivelyAlready==0){ //in case of multiple interceptions during one turn - suffer backlash only once
+		$this->applyCooldown();	
+	}
+	parent::fireDefensively($gamedata, $interceptedWeapon);
+    }
         
         /*if previous shot missed, next one misses automatically*/
         /*so if current mod is not equal to one of previous shot, then it's clearly a miss - return suitably high mod*/
@@ -544,24 +558,40 @@
             parent::setSystemDataWindow($turn);
         } 
         
+	protected function applyCooldown(){
+		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
+		//if boosted, cooldown (1 per extra shot)
+		$turnToAdd = 0;
+		 $cooldownLength = $currBoostlevel;//actual numbers of turns of cooldown
+		 while($cooldownLength > 0){ 		     
+			$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+$turnToAdd);
+			$crit->updated = true;
+			$crit->newCrit = true; //force save even if crit is not for current turn
+			$this->criticals[] =  $crit;
+			$turnToAdd++;    
+			$cooldownLength--;
+		 }
+	}
+	    
         public function fire($gamedata, $fireOrder){ 
 	    $currBoostlevel = $this->getBoostLevel($gamedata->turn);
             $this->hitChanceMod = 0;
             $fireOrder->shots = 1 + $currBoostlevel;
             parent::fire($gamedata, $fireOrder);
 		
-	    //if boosted, cooldown (1 per extra shot)
-	     $turnToAdd = 0;
-	     while($currBoostlevel > 0){ 		     
-		$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+$turnToAdd);
-                $crit->updated = true;
-		$crit->newCrit = true; //force save even if crit is not for current turn
-                $this->criticals[] =  $crit;
-		$turnToAdd++;    
-		$currBoostlevel--;
-	     }
+	    $this->applyCooldown();
         }
         
+    /* applying cooldown when firing defensively, too
+    */
+    public function fireDefensively($gamedata, $interceptedWeapon)
+    {
+    	if ($this->firedDefensivelyAlready==0){ //in case of multiple interceptions during one turn - suffer backlash only once
+		$this->applyCooldown();	
+	}
+	parent::fireDefensively($gamedata, $interceptedWeapon);
+    }
+	    
         /*if previous shot missed, next one misses automatically*/
         /*so if current mod is not equal to one of previous shot, then it's clearly a miss - return suitably high mod*/
         public function getShotHitChanceMod($shotInSequence){ 
