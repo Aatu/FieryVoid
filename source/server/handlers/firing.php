@@ -165,6 +165,9 @@ class Firing
             $interceptFire->addToDB = true;
             $interceptor->fireOrders[] = $interceptFire;
         }
+	    
+	//fireDefensivaly call is needed for weapons that suffer some side effect when firing defensively
+	$interceptor->fireDefensively($gamedata, $intercepted);
     } //endof function addToInterceptionTotal
 
 
