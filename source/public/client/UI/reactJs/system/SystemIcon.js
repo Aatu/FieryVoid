@@ -52,9 +52,9 @@ const System = styled.div`
         if (props.selected) {
             return '#4e6c91';
         } else if (props.firing) {
-            return '#e06f01';
+            return '#e06f01'; //orange
         } else if (props.boosted) {
-            return '#e06f01';
+            return '#ffcc66'; //yellow
         } else {
             return 'black';
         }
