@@ -52,7 +52,9 @@ const System = styled.div`
         if (props.selected) {
             return '#4e6c91';
         } else if (props.firing) {
-            return '#e06f01';
+            return '#e06f01'; //orange
+        } else if (props.boosted) {
+            return '#cca300'; //darkyellow
         } else {
             return 'black';
         }
@@ -202,6 +204,7 @@ class SystemIcon extends React.Component{
                 loading={isLoading(system)}
                 selected={isSelected(system)}
                 firing={isFiring(ship, system)}
+                boosted={isBoosted(ship, system)}
             >
             <SystemText>{getText(ship, system)}</SystemText>
             {!fighter && <HealthBar scs={scs} health={getStructureLeft(ship, system)} criticals={hasCriticals(system)}/>}
@@ -215,6 +218,8 @@ const isFiring = (ship, system) => weaponManager.hasFiringOrder(ship, system);
 const isLoading = (system) => system.weapon && !weaponManager.isLoaded(system);
 
 const isOffline = (ship, system) => shipManager.power.isOffline(ship, system);
+
+const isBoosted = (ship, system) => shipManager.power.isBoosted(ship, system);
 
 const getStructureLeft = (ship, system) => (system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth * 100;
 
@@ -243,17 +248,6 @@ const getText = (ship, system) => {
             const fire = weaponManager.getFiringOrder(ship, system);
             return fire.shots + "/" + system.shots;
         } else if (!firing) {
-            /*
-            if (system.duoWeapon) {
-                var UI_active = systemwindow.find(".UI").hasClass("active");
-
-                shipWindowManager.addDuoSystem(ship, system, systemwindow);
-
-                if (UI_active) {
-                    systemwindow.find(".UI").addClass("active");
-                }
-            }*/
-
            let load = weaponManager.getWeaponCurrentLoading(system);
            let loadingtime = system.loadingtime;
 
