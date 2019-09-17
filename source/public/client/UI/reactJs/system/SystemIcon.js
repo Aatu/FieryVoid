@@ -53,6 +53,8 @@ const System = styled.div`
             return '#4e6c91';
         } else if (props.firing) {
             return '#e06f01';
+        } else if (props.boosted) {
+            return '#e06f01';
         } else {
             return 'black';
         }
