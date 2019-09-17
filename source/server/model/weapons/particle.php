@@ -433,13 +433,13 @@
             parent::setSystemDataWindow($turn);
         } 
 	    
-	protected function applyCooldown(){
+	protected function applyCooldown($gamedata){
 		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
 		//if boosted, cooldown (1 per 2 extra shots above first 2)
 		$turnToAdd = 0;
 		 $cooldownLength = ceil(($currBoostlevel-2)/2);//actual numbers of turns of cooldown
 		 while($cooldownLength > 0){ 		     
-			$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+$turnToAdd);
+			$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+$turnToAdd);
 			$crit->updated = true;
 			$crit->newCrit = true; //force save even if crit is not for current turn
 			$this->criticals[] =  $crit;
@@ -453,7 +453,7 @@
 				$this->hitChanceMod = 0;
 				$fireOrder->shots = 1 + $currBoostlevel;
 				parent::fire($gamedata, $fireOrder);
-			$this->applyCooldown();			
+			$this->applyCooldown($gamedata);			
         }
 	    
     /* applying cooldown when firing defensively, too
@@ -461,7 +461,7 @@
     public function fireDefensively($gamedata, $interceptedWeapon)
     {
     	if ($this->firedDefensivelyAlready==0){ //in case of multiple interceptions during one turn - suffer backlash only once
-		$this->applyCooldown();	
+		$this->applyCooldown($gamedata);	
 	}
 	parent::fireDefensively($gamedata, $interceptedWeapon);
     }
@@ -519,6 +519,7 @@
         public function setMaxDamage(){     $this->maxDamage = 20 ;      }
     } //endof class ParticleRepeater
     
+	
     class RepeaterGun extends Particle{
         public $trailColor = array(252, 252, 252);
         public $name = "repeaterGun";
@@ -558,13 +559,13 @@
             parent::setSystemDataWindow($turn);
         } 
         
-	protected function applyCooldown(){
+	protected function applyCooldown($gamedata){
 		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
 		//if boosted, cooldown (1 per extra shot)
 		$turnToAdd = 0;
 		 $cooldownLength = $currBoostlevel;//actual numbers of turns of cooldown
 		 while($cooldownLength > 0){ 		     
-			$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+$turnToAdd);
+			$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+$turnToAdd);
 			$crit->updated = true;
 			$crit->newCrit = true; //force save even if crit is not for current turn
 			$this->criticals[] =  $crit;
@@ -579,7 +580,7 @@
             $fireOrder->shots = 1 + $currBoostlevel;
             parent::fire($gamedata, $fireOrder);
 		
-	    $this->applyCooldown();
+			$this->applyCooldown($gamedata);
         }
         
     /* applying cooldown when firing defensively, too
@@ -587,8 +588,8 @@
     public function fireDefensively($gamedata, $interceptedWeapon)
     {
     	if ($this->firedDefensivelyAlready==0){ //in case of multiple interceptions during one turn - suffer backlash only once
-		$this->applyCooldown();	
-	}
+			$this->applyCooldown($gamedata);	
+		}
 	parent::fireDefensively($gamedata, $interceptedWeapon);
     }
 	    

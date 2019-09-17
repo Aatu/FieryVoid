@@ -57,7 +57,7 @@
         public function setSystemDataWindow($turn){
             //$this->data["Weapon type"] = "Particle";
             //$this->data["Damage type"] = "Standard";
-            $this->data["DEFENSIVE BONUS:"] = "-15 to hit on arc";
+            $this->data["Special"] = "Energy Web: -15 to hit on arc with active Interceptor.";
             parent::setSystemDataWindow($turn);
         }
 
@@ -82,7 +82,7 @@
                 
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["DEFENSIVE BONUS:"] = "-20 to hit on arc";
+            $this->data["Special"] = "Energy Web: -20 to hit on arc with active Interceptor.";
         }
     }
     
@@ -96,8 +96,8 @@
         public $intercept = 2;
                 
         public function setSystemDataWindow($turn){
-            $this->data["DEFENSIVE BONUS:"] = "-10 to hit on arc";
             parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Energy Web: -10 to hit on arc with active Interceptor.";
         }
 
         public function getDamage($fireOrder){        return Dice::d(10)+3;   }
@@ -137,7 +137,10 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Can intercept fire directed at other ships, as long as Guardian is between firing unit and target and has firing unit in arc.";
+        }
         
         public function getDamage($fireOrder){        return Dice::d(10)+5;   }
         public function setMinDamage(){     $this->minDamage = 6 ;      }
@@ -168,6 +171,10 @@
         public $rangePenalty = 6;
         public $fireControl = array(null, null, null); // fighters, <mediums, <capitals 
 
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Can intercept fire directed at other ships, as long as Guardian is between firing unit and target and has firing unit in arc.";
+        }
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -388,7 +395,7 @@ class FtrShield extends Shield implements DefensiveSystem{
 		$this->damagePenalty = $this->getOutput();
     }
 	
-    private function checkIsFighterUnderShield($target, $shooter){ //no flying underfighter shield
+    private function checkIsFighterUnderShield($target, $shooter){ //no flying under fighter shield
         return false;
     }
 	

@@ -130,20 +130,20 @@
             }            
         }
 
-	protected function applyCooldown(){
+	protected function applyCooldown($gamedata){
 		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
 		//if boosted, cooldown (2 or 3 tuns)
 	     if($currBoostlevel > 0){ //2 turns forced shutdown
-		$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
+		$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
                 $crit->updated = true;
                 $this->criticals[] =  $crit;
-                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+1);
+                $crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+1);
                 $crit->updated = true;
 		$crit->newCrit = true; //force save even if crit is not for current turn
                 $this->criticals[] =  $crit;
 	     }
 	     if($currBoostlevel > 1){ //additional turn forced shutdown
-                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+2);
+                $crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+2);
                 $crit->updated = true;
 		$crit->newCrit = true; //force save even if crit is not for current turn
                 $this->criticals[] =  $crit;
@@ -162,7 +162,7 @@
                 $shooter = $gamedata->getShipById($fireOrder->shooterid);
                 $crits = $this->testCritical($shooter, $gamedata, $crits);
             }
-	    $this->applyCooldown();
+	    $this->applyCooldown($gamedata);
         }
 	    
 	    /* applying cooldown when firing defensively, too
@@ -170,7 +170,7 @@
 	    public function fireDefensively($gamedata, $interceptedWeapon)
 	    {
 		if ($this->firedDefensivelyAlready==0){ //in case of multiple interceptions during one turn - suffer backlash only once
-			$this->applyCooldown();	
+			$this->applyCooldown($gamedata);	
 		}
 		parent::fireDefensively($gamedata, $interceptedWeapon);
 	    }
@@ -328,20 +328,20 @@ class GraviticBolt extends Gravitic
 	    */
         }        
 
-	protected function applyCooldown(){
+	protected function applyCooldown($gamedata){
 		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
 		//if boosted, cooldown (2 or 3 tuns)
 	     if($currBoostlevel > 0){ //2 turns forced shutdown
-		$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
+		$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
                 $crit->updated = true;
                 $this->criticals[] =  $crit;
-                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+1);
+                $crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+1);
                 $crit->updated = true;
 		$crit->newCrit = true; //force save even if crit is not for current turn
                 $this->criticals[] =  $crit;
 	     }
 	     if($currBoostlevel > 1){ //additional turn forced shutdown
-                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+2);
+                $crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+2);
                 $crit->updated = true;
 		$crit->newCrit = true; //force save even if crit is not for current turn
                 $this->criticals[] =  $crit;
@@ -359,7 +359,7 @@ class GraviticBolt extends Gravitic
             	$this->forceCriticalRoll = true;
             }
 		
-		$this->applyCooldown();
+		$this->applyCooldown($gamedata);
         }
 	    
 	    /* applying cooldown when firing defensively, too
@@ -367,7 +367,7 @@ class GraviticBolt extends Gravitic
 	    public function fireDefensively($gamedata, $interceptedWeapon)
 	    {
 		if ($this->firedDefensivelyAlready==0){ //in case of multiple interceptions during one turn - suffer backlash only once
-			$this->applyCooldown();	
+			$this->applyCooldown($gamedata);	
 		}
 		parent::fireDefensively($gamedata, $interceptedWeapon);
 	    }
