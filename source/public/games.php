@@ -81,6 +81,9 @@ if (isset($_SESSION["user"])) {
             <b>Particle Repeater now reacts properly to boosting</b> - Particle Gun too!
         <br>
             <b>Defensive fire side effects handled properly</b> - which means Grav Pulsars and Particle Repeaters now shutdown if boosted and fired defensively!
+        <br>
+            <b>Boosted systems</b> now are highlighted so they can be identified on a glance
+        
         <!--
         <br><br>
         - last but not least - brand new collection of BUGS!;
