@@ -979,7 +979,7 @@ class Weapon extends ShipSystem
 	called in firing.php addToInterceptionTotal - if a weapon is for some reason NOT automatically assigned to intercept, 
 		does not use this method and needs a backlash - it should call fireDefensively on its own (or devise own method of adding said backlash)
     */
-    public function fireDefensively($gamedata, $fireOrder)
+    public function fireDefensively($gamedata, $interceptedWeapon)
     {
     	$this->firedDefensivelyAlready++; //may be used to check if weapon was already fired, in case of multiple defensive shots but only single backlash effect
     }
