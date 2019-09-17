@@ -976,6 +976,8 @@ class Weapon extends ShipSystem
 
     /*Marcin Sawicki - September 2019 - method called when weapon is firing defensively;
     	basically doing nothing, but some weapon may need to put some special effects here
+	called in firing.php addToInterceptionTotal - if a weapon is for some reason NOT automatically assigned to intercept, 
+		does not use this method and needs a backlash - it should call fireDefensively on its own (or devise own method of adding said backlash)
     */
     public function fireDefensively($gamedata, $fireOrder)
     {
