@@ -1020,11 +1020,12 @@ spl_autoload_register(
 		'nexuschafflauncher' => '/server/model/weapons/customNexus.php',
 
 
-                'brixadiibattledestroyerbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerBase.php',	
-				
+                'brixadiibattledestroyerbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerBase.php',					
                 'brixadiibattledestroyer2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyer2057.php',		
-                'brixadiibattledestroyer2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyer2108.php',		
-		    
+                'brixadiibattledestroyer2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyer2108.php',	
+				
+                'brixadiiwarshipbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiWarshipBase.php',		
+                'brixadiiwarship2094' => '/server/model/ships/ZNexusBrixadii/BrixadiiWarship2094.php',	
 	
                 'brixadiipursuitfrigatebase' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigateBase.php',
                 'brixadiipursuitfrigate2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigate2057.php',

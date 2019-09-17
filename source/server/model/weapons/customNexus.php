@@ -233,20 +233,32 @@ class NexusChaffLauncher extends Weapon{
         public $displayName = "Heavy Particle Projector";
 	public $iconPath = "NexusParticleProjectorHeavy.png";
 	    
-        public $animation = "beam";
+
+		public $animation = "beam";
         public $animationColor = array(205, 200, 200);
         public $animationExplosionScale = 0.35;
         public $projectilespeed = 17;
-        public $animationWidth = 6;
+        public $animationWidth = 5;
         public $trailLength = 30;
 
         public $intercept = 1;
         public $loadingtime = 3;
-        public $priority = 6; //heavy Standard
+        public $priority = 6;
 
         public $rangePenalty = 0.5; //-1/2hexes
         public $fireControl = array(0, 2, 3); // fighters, <mediums, <capitals
 
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 8;
+            if ( $powerReq == 0 ) $powerReq = 4;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 2)+8;   }
+        public function setMinDamage(){     $this->minDamage = 10 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 28 ;      }
+/*
 	public $firingMode = 'Standard'; //firing mode - just a name essentially
 	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     	public $weaponClass = "Particle"; //not important really
@@ -261,6 +273,7 @@ class NexusChaffLauncher extends Weapon{
         public function getDamage($fireOrder){ return Dice::d(10, 2)+8;   }
         public function setMinDamage(){     $this->minDamage = 10 ;      }
         public function setMaxDamage(){     $this->maxDamage = 28 ;      }
+		*/
     }
 
 

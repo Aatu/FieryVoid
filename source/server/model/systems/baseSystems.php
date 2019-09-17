@@ -602,49 +602,9 @@ class GraviticThruster extends Thruster{
     
     public $firstCriticalIgnored = false; //not needed any more
     
-	/* Marcin Sawicki - no longer needed? new crit added immediately... */
-	/*
-    public function onAdvancingGamedata($ship, $gamedata)
-    {
-        SystemData::addDataForSystem(
-            $this->id, 0, $ship->id,
-            '"firstCriticalIgnored":{"1":"'.$this->firstCriticalIgnored.'"}');
-        
-        parent::onAdvancingGamedata($ship, $gamedata);
-    }
-	*/
-    
-	/* Marcin Sawicki - no longer necessary
-    public function setSystemData($data, $subsystem)
-    {
-        $array = json_decode($data, true);
-        if (!is_array($array))
-            return;
-        
-        foreach ($array as $i=>$entry)
-        {
-            if ($i == "firstCriticalIgnored"){
-                $this->firstCriticalIgnored = $entry[1];
-            }
-        }
-        
-        parent::setSystemData($data, $subsystem);
-    }
-    */
     
     public function addCritical($shipid, $phpclass, $gamedata)
-    {
-	    /*approach changed
-        if (! $this->firstCriticalIgnored)
-        {
-            $this->firstCriticalIgnored = true;
-            //Debug::log("Gravitic thruster ignored first critical (shipid: $shipid systemid: $this->id");
-		
-            return null;
-        }
-	    */
-	    
-	    
+    {	    
 	    //new approach: does GravThrusterCritIgnored exist? if yes, go ahead. If not, ignore critical and add GravThrusterCritIgnored instead.
 	    //should affect only HalfEfficiency crit!
 	    if ($phpclass == 'HalfEfficiency') { //such crit can be ignored - should it?!
@@ -711,15 +671,12 @@ class Hangar extends ShipSystem{
     public $primary = true;
     
     function __construct($armour, $maxhealth, $output = 6){
-        parent::__construct($armour, $maxhealth, 0, $output );
- 
+        parent::__construct($armour, $maxhealth, 0, $output ); 
     }
 }
 
 
-
 class Catapult extends ShipSystem{
-
     public $name = "catapult";
     public $displayName = "Catapult";
     public $squadrons = Array();
@@ -730,6 +687,7 @@ class Catapult extends ShipSystem{
  
     }
 }
+
 
 class JumpEngine extends ShipSystem{
     public $name = "jumpEngine";
@@ -744,7 +702,7 @@ class JumpEngine extends ShipSystem{
     }
 	
      public function setSystemDataWindow($turn){
-        $this->data["Remark"] = "SHOULD NOT be shut down for power (unless damaged >50% or in desperate circumstances).";
+        $this->data["Special"] = "SHOULD NOT be shut down for power (unless damaged >50% or in desperate circumstances).";
 	parent::setSystemDataWindow($turn);     
     }
 }
@@ -926,9 +884,7 @@ class HkControlNode extends ShipSystem{
 		$iniModifier = floor($iniModifier);
 		return $iniModifier;
 	}//endof function getIniMod
-	
-	
-	
+		
      public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);     
 	$this->data["Special"] = "Controls up to 6 Hunter-Killer craft per point of output.";	     
