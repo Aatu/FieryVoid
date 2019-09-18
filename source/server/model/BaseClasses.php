@@ -201,6 +201,7 @@ class FireOrder{
     public $chosenLocation = null; //convenient place to store info about section chosen to be hit when determining hit chance
     public $totalIntercept = 0; //total interception assigned
     public $numInterceptors = 0; //number of intercepting weapons assigned
+    public $resolutionOrder = -1; //actual order in which shot was resolved
     
     function __construct(
         $id,
