@@ -444,7 +444,7 @@ class DBManager
         if ($stmt) {
             foreach ($fireOrders as $fire) {
                 $stmt->bind_param(
-                    'iiissiiiiii',
+                    'iiiissiiiiiii',
                     $fire->targetid,
                     $fire->firingMode,
                     $fire->needed,
