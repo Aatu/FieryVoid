@@ -219,7 +219,8 @@ class FireOrder{
         $intercepted = 0, 
         $x, 
         $y,
-        $damageclass = null
+        $damageclass = null,
+        $resolutionOrder = -1
     ){
         $this->id = $id;
         $this->type = $type;
@@ -237,6 +238,7 @@ class FireOrder{
         $this->x = $x;
         $this->y = $y;
         $this->damageclass = $damageclass;
+        $this->resolutionOrder = $resolutionOrder;
     }
 
 }
