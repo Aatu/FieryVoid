@@ -689,9 +689,6 @@ shipManager.movement = {
         var heading = shipManager.movement.getLastCommitedMove(ship).heading;
         var facing = shipManager.movement.getLastCommitedMove(ship).facing;        
         var reverseheading = mathlib.addToHexFacing(heading, 3);
-        /*
-        if (heading === facing) returnVal = false;
-        */
         
         var step = right ? -1 : 1;
         //if (mathlib.addToHexFacing(step, facing) === heading || mathlib.addToHexFacing(step, facing) === reverseheading) returnVal = true;
@@ -749,7 +746,7 @@ shipManager.movement = {
             turn: gamedata.turn,
             forced: false,
             value: 0
-        };
+        };        
 
         if (!ship.flight) {
             shipWindowManager.assignThrust(ship);
@@ -1056,13 +1053,17 @@ shipManager.movement = {
         if (currentTurn === undefined) {
             currentTurn = gamedata.turn;
         }
-       
+        var moveNo = -1;
         for (var i = ship.movement.length - 1; i >= 0; i--) {
             var move = ship.movement[i];
-            if (move.turn < currentTurn) { //first move from earlier turn! this is what we need!
+            moveNo = i;
+            if (move.turn < currentTurn) { //first move from earlier turn! this is what we need! 
                 break; //get out of loop
             } //if such a move is not found, first move of current turn would do - should be turn 1 and deployment move
         }        
+        if ( (move.type == 'start') && ((moveNo+1) < ship.movement.length) ){ //start move is not suitable! pick next one if at all possible
+            move = ship.movement[moveNo+1];
+        }
         
         return new hexagon.Offset(move.position);
     },
