@@ -537,6 +537,14 @@ window.weaponManager = {
         return rangePenalty;
     },
 
+	/*Marcin Sawicki, September 2019: simplified to using calculateHitChange instead*/
+	calculataBallisticHitChange: function calculataBallisticHitChange(ball, calledid) {
+		var shooter = gamedata.getShip(ball.shooterid);
+        	var weapon = shipManager.systems.getSystem(shooter, ball.weaponid);
+        	var target = gamedata.getShip(ball.targetid);
+		return calculateHitChange(shooter, target, weapon, calledid);
+	}//endof calculataBallisticHitChange
+	/*old version
     calculataBallisticHitChange: function calculataBallisticHitChange(ball, calledid) {
         var shooter = gamedata.getShip(ball.shooterid);
         var weapon = shipManager.systems.getSystem(shooter, ball.weaponid);
@@ -597,6 +605,7 @@ window.weaponManager = {
 
         return change;
     },
+    */
 
     getInterception: function getInterception(ball) {
 
@@ -704,13 +713,21 @@ window.weaponManager = {
 	if (weapon.isRammingAttack) {
 		return weaponManager.calculateRamChance(shooter, target, weapon, calledid);
 	}
-        var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
         var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
-        var sPosHex = shipManager.getShipPosition(shooter);
         //var defence = weaponManager.getShipDefenceValuePos(sPosHex, target);
         /*Marcin Sawicki: I _think_ getShipDefenceValue should be used instead*/
-        var defence = weaponManager.getShipDefenceValue(shooter, target);
-
+	    var defence = 0;
+	    var distance = 0;
+	    if (weapon.ballistic){		    
+		var sPosLaunch = shipManager.getShipPosition(shooter);		    
+		var sPosTarget = shipManager.getShipPosition(target);
+		defence = weaponManager.getShipDefenceValuePos(sPosLaunch, target);
+	        distance = sPosLaunch.distanceTo(sPosTarget).toFixed(2); 
+	    }else{    
+        	defence = weaponManager.getShipDefenceValue(shooter, target);
+		distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
+	    } 
+	    
         //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
 
         var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter, weapon);
@@ -826,6 +843,8 @@ window.weaponManager = {
         return change;
     },
 
+	/*Marcin Sawicki, September 2019: switched to using calculateHitChange instead*/
+	/*
     calculateFighterBallisticHitChange: function calculateFighterBallisticHitChange(shooter, target, weapon, calledid) {
         var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
         var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
@@ -901,6 +920,7 @@ window.weaponManager = {
         if (change > 100) change = 100;
         return change;
     },
+    */
 
     getFireControl: function getFireControl(target, weapon) {
         if (target.shipSizeClass > 1) {
