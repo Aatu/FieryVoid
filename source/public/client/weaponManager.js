@@ -542,7 +542,7 @@ window.weaponManager = {
 		var shooter = gamedata.getShip(ball.shooterid);
         	var weapon = shipManager.systems.getSystem(shooter, ball.weaponid);
         	var target = gamedata.getShip(ball.targetid);
-		return calculateHitChange(shooter, target, weapon, calledid);
+		return weaponManager.calculateHitChange(shooter, target, weapon, calledid);
 	}//endof calculataBallisticHitChange
 	/*old version
     calculataBallisticHitChange: function calculataBallisticHitChange(ball, calledid) {
@@ -719,7 +719,7 @@ window.weaponManager = {
 	    var defence = 0;
 	    var distance = 0;
 	    if (weapon.ballistic){		    
-		var sPosLaunch = shipManager.getShipPosition(shooter);		    
+		var sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, true); //use this turn's position only, NOT deployment position!		    
 		var sPosTarget = shipManager.getShipPosition(target);
 		defence = weaponManager.getShipDefenceValuePos(sPosLaunch, target);
 	        distance = sPosLaunch.distanceTo(sPosTarget).toFixed(2); 
