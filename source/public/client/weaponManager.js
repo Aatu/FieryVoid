@@ -547,12 +547,16 @@ window.weaponManager = {
         }
 
         if (!ball.targetid) return false;
-
-        var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
+	    
+	    var posShooter = shipManager.movement.getPositionAtStartOfTurn(shooter);
+	    var posTarget = shipManager.getShipPosition(target);
+	    var distance = posShooter.distanceTo(posTarget); 
+        //var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
 
         var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
 
-        var defence = weaponManager.getShipDefenceValuePos(ball.position, target);
+        //var defence = weaponManager.getShipDefenceValuePos(ball.position, target);
+	    var defence = weaponManager.getShipDefenceValuePos(posShooter, target);
         var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter, weapon);
 
         var soew = ew.getSupportedOEW(shooter, target);
