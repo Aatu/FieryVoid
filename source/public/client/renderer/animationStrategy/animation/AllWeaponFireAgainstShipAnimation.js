@@ -77,7 +77,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         var grouped = {};        
         
         incomingFire.forEach(function (fire) {
-            var key = fire.shooter.id + "-" + fire.weapon.constructor.name + "-" + fire.firingMode;
+            var key = fire.shooter.id + "-" + fire.weapon.constructor.name + "-" + fire.firingMode + '-' + fire.calledid; //split called shots as well!
             if (grouped[key]) {
                 grouped[key].push(fire);
             } else {
@@ -91,7 +91,13 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             //compare first object in both groups - every group should contain only fire by one shooter from one weapon, and by default at one target
             var obj1 = grouped[a][0];
             var obj2 = grouped[b][0];
-            if(obj1.shooter.flight && !obj2.shooter.flight){ //fighters after ships
+			//Marcin Sawicki September 2019: use actual firing resolution order if possible! Same weapons firing at same target should have consecutive resolution more or less	
+	      if (obj1.fireOrder.resolutionOrder > obj2.fireOrder.resolutionOrder){ //shots resolved earlier displayed earlier
+		      return 1;
+	      }else if (obj1.fireOrder.resolutionOrder < obj2.fireOrder.resolutionOrder){ 
+		      return -1;
+	      }		  
+            else if(obj1.shooter.flight && !obj2.shooter.flight){ //fighters after ships
                 return 1;                   
             }else if(!obj1.shooter.flight && obj2.shooter.flight){ //fighters after ships
                 return -1;                   
