@@ -1051,8 +1051,8 @@ class Weapon extends ShipSystem
         }
 
         $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
-	$gamedata->lastFiringResolutionNo++;    //note for further shots
-	$fireOrder->resolutionOrder = $gamedata->lastFiringResolutionNo;//mark order in which firing was handled!
+	TacGamedata::$lastFiringResolutionNo++;    //note for further shots
+	$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
 	    
     } //endof fire
 
