@@ -829,7 +829,8 @@ window.weaponManager = {
     calculateFighterBallisticHitChange: function calculateFighterBallisticHitChange(shooter, target, weapon, calledid) {
         var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
         var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
-        var sPosHex = shipManager.getShipPosition(shooter);
+        //var sPosHex = shipManager.getShipPosition(shooter);
+	    var posHex = shipManager.movement.getPositionAtStartOfTurn(shooter);
         var tPosHex = shipManager.getShipPosition(target);
         var defence = weaponManager.getShipDefenceValuePos(sPosHex, target);
         //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
