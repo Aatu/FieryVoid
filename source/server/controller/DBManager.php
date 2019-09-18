@@ -456,8 +456,8 @@ class DBManager
                     $fire->intercepted,
                     $fire->x,
                     $fire->y,
-                    $fire->id,
-		    $fire->resolutionOrder
+		    $fire->resolutionOrder,
+                    $fire->id
                 );
                 $stmt->execute();
             }
