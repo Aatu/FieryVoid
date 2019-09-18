@@ -713,9 +713,6 @@ window.weaponManager = {
 	if (weapon.isRammingAttack) {
 		return weaponManager.calculateRamChance(shooter, target, weapon, calledid);
 	}
-        var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
-        //var defence = weaponManager.getShipDefenceValuePos(sPosHex, target);
-        /*Marcin Sawicki: I _think_ getShipDefenceValue should be used instead*/
 	    var defence = 0;
 	    var distance = 0;
 	    if (weapon.ballistic){		    
@@ -726,7 +723,8 @@ window.weaponManager = {
 	    }else{    
         	defence = weaponManager.getShipDefenceValue(shooter, target);
 		distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
-	    } 
+	    } 	    
+        var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
 	    
         //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
 
