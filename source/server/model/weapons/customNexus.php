@@ -178,8 +178,8 @@ class NexusChaffLauncher extends Weapon{
 		$fireOrder->pubnotes .= "Interception applied to all weapons at target hex that are firing at Chaff-launching ship. "; //just information for player, actual applying was done in calculateHitBase method
 
 		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
-		$gamedata->lastFiringResolutionNo++;    //note for further shots
-		$fireOrder->resolutionOrder = $gamedata->lastFiringResolutionNo;//mark order in which firing was handled!
+		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
+		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
 	} //endof function fire
 	
 	
