@@ -169,7 +169,9 @@ window.ReplayAnimationStrategy = function () {
               }
               else return 0;
         });
-
+	    
+	    
+	    
         //this.gamedata.ships.forEach(function (ship, i) 
         shipList.forEach(function (ship, i) {
             var animation = new AllWeaponFireAgainstShipAnimation(ship, this.shipIconContainer, this.emitterContainer, this.gamedata, time, this.scene, this.movementAnimations, logAnimation);

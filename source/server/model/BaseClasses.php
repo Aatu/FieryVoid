@@ -201,6 +201,7 @@ class FireOrder{
     public $chosenLocation = null; //convenient place to store info about section chosen to be hit when determining hit chance
     public $totalIntercept = 0; //total interception assigned
     public $numInterceptors = 0; //number of intercepting weapons assigned
+    public $resolutionOrder = -1; //actual order in which shot was resolved
     
     function __construct(
         $id,
@@ -218,7 +219,8 @@ class FireOrder{
         $intercepted = 0, 
         $x, 
         $y,
-        $damageclass = null
+        $damageclass = null,
+        $resolutionOrder = -1
     ){
         $this->id = $id;
         $this->type = $type;
@@ -236,6 +238,7 @@ class FireOrder{
         $this->x = $x;
         $this->y = $y;
         $this->damageclass = $damageclass;
+        $this->resolutionOrder = $resolutionOrder;
     }
 
 }

@@ -1119,6 +1119,8 @@ class SparkField extends Weapon{
 		}
         	$notes = "this weapon simply causes damage, hit is automatic"; //replace usual note
 		$fireOrder->notes = $notes;
+		$gamedata->lastFiringResolutionNo++;    //note for further shots
+		$fireOrder->resolutionOrder = $gamedata->lastFiringResolutionNo;//mark order in which firing was handled!
 	}
 	
 	public function calculateBoostLevel($turn){

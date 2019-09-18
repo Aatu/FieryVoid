@@ -424,7 +424,8 @@ class DBManager
             "UPDATE 
                 tac_fireorder  
             SET 
-	    	    firingmode = ?,
+	        targetid = ?,
+	    	firingmode = ?,
                 needed = ?,
                 rolled = ?,
                 notes = ?,
@@ -433,7 +434,8 @@ class DBManager
                 shotshit = ?,
                 intercepted = ?,
                 x = ?,
-                y = ?
+                y = ?,
+		resolutionorder = ?
             WHERE
                 id = ?
             "
@@ -442,7 +444,8 @@ class DBManager
         if ($stmt) {
             foreach ($fireOrders as $fire) {
                 $stmt->bind_param(
-                    'iiissiiiiii',
+                    'iiiissiiiiiii',
+                    $fire->targetid,
                     $fire->firingMode,
                     $fire->needed,
                     $fire->rolled,
@@ -453,6 +456,7 @@ class DBManager
                     $fire->intercepted,
                     $fire->x,
                     $fire->y,
+		    $fire->resolutionOrder,
                     $fire->id
                 );
                 $stmt->execute();
@@ -477,7 +481,7 @@ class DBManager
                 continue;
 
             $sql = "INSERT INTO `B5CGM`.`tac_fireorder` VALUES (null, '" . $fire->type . "', " . $fire->shooterid . ", " . $fire->targetid . ", " . $fire->weaponid . ", " . $fire->calledid . ", " . $fire->turn . ", "
-                . $fire->firingMode . ", " . $fire->needed . ", " . $fire->rolled . ", $gameid, '" . $fire->notes . "', " . $fire->shotshit . ", " . $fire->shots . ", '" . $fire->pubnotes . "', 0, '" . $fire->x . "', '" . $fire->y . "', '" . $fire->damageclass . "')";
+                . $fire->firingMode . ", " . $fire->needed . ", " . $fire->rolled . ", $gameid, '" . $fire->notes . "', " . $fire->shotshit . ", " . $fire->shots . ", '" . $fire->pubnotes . "', 0, '" . $fire->x . "', '" . $fire->y . "', '" . $fire->damageclass . "', '" . $fire->resolutionOrder . "')";
 
             $this->update($sql);
         }
@@ -602,12 +606,8 @@ class DBManager
 
     public function submitDamages($gameid, $turn, $damages)
     {
-
         try {
-
-
             foreach ($damages as $damage) {
-
                 $des = ($damage->destroyed) ? 1 : 0;
                 $fireID = $damage->fireorderid;
 
@@ -1674,14 +1674,15 @@ class DBManager
                 $intercepted,
                 $x,
                 $y,
-                $damageclass
+                $damageclass,
+		$resolutionOrder
             );
 
             while ($stmt->fetch()) {
                 $entry = new FireOrder(
                     $id, $type, $shooterid, $targetid,
                     $weaponid, $calledid, $turn, $firingMode, $needed,
-                    $rolled, $shots, $shotshit, $intercepted, $x, $y, $damageclass
+                    $rolled, $shots, $shotshit, $intercepted, $x, $y, $damageclass, $resolutionOrder
                 );
 
                 $entry->notes = $notes;
