@@ -689,9 +689,6 @@ shipManager.movement = {
         var heading = shipManager.movement.getLastCommitedMove(ship).heading;
         var facing = shipManager.movement.getLastCommitedMove(ship).facing;        
         var reverseheading = mathlib.addToHexFacing(heading, 3);
-        /*
-        if (heading === facing) returnVal = false;
-        */
         
         var step = right ? -1 : 1;
         //if (mathlib.addToHexFacing(step, facing) === heading || mathlib.addToHexFacing(step, facing) === reverseheading) returnVal = true;
@@ -749,7 +746,7 @@ shipManager.movement = {
             turn: gamedata.turn,
             forced: false,
             value: 0
-        };
+        };        
 
         if (!ship.flight) {
             shipWindowManager.assignThrust(ship);
