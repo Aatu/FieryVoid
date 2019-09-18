@@ -85,6 +85,8 @@ if (isset($_SESSION["user"])) {
             <b>Boosted systems</b> now are highlighted so they can be identified on a glance
         <br>
             <b>Missile hit chance fixed</b> - onscreen, as actual firing was already being resolved correctly
+        <br>
+            <b>Firing log improved</b> - now order of entries is closer to actual firing resolution
         
         <!--
         <br><br>
