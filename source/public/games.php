@@ -83,6 +83,8 @@ if (isset($_SESSION["user"])) {
             <b>Defensive fire side effects handled properly</b> - which means Grav Pulsars and Particle Repeaters now shutdown if boosted and fired defensively!
         <br>
             <b>Boosted systems</b> now are highlighted so they can be identified on a glance
+        <br>
+            <b>Missile hit chance fixed</b> - onscreen, as actual firing was already being resolved correctly
         
         <!--
         <br><br>
