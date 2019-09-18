@@ -435,7 +435,7 @@ class DBManager
                 intercepted = ?,
                 x = ?,
                 y = ?,
-		resolutionorder = ?,
+		resolutionorder = ?
             WHERE
                 id = ?
             "
