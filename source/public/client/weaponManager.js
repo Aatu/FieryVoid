@@ -543,7 +543,7 @@ window.weaponManager = {
         	var weapon = shipManager.systems.getSystem(shooter, ball.weaponid);
         	var target = gamedata.getShip(ball.targetid);
 		return weaponManager.calculateHitChange(shooter, target, weapon, calledid);
-	}//endof calculataBallisticHitChange
+	},//endof calculataBallisticHitChange
 	/*old version
     calculataBallisticHitChange: function calculataBallisticHitChange(ball, calledid) {
         var shooter = gamedata.getShip(ball.shooterid);
