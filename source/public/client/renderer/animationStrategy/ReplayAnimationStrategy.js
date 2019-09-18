@@ -167,9 +167,17 @@ window.ReplayAnimationStrategy = function () {
               }else if (a.pointCost < b.pointCost){
                 return -1;
               }
+	      //Marcin Sawicki September 2019: actual order of resolving firing is saved, use it! (displaying fighters first, less valuable ships first has merid besides)
+	      else if (a.resolutionOrder > b.resolutionOrder){ //shots resolved earlier displayed earlier
+		      return 1;
+	      }else if (a.resolutionOrder < b.resolutionOrder){ 
+		      return -1;
+	      }
               else return 0;
         });
-
+	    
+	    
+	    
         //this.gamedata.ships.forEach(function (ship, i) 
         shipList.forEach(function (ship, i) {
             var animation = new AllWeaponFireAgainstShipAnimation(ship, this.shipIconContainer, this.emitterContainer, this.gamedata, time, this.scene, this.movementAnimations, logAnimation);
