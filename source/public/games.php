@@ -87,7 +87,12 @@ if (isset($_SESSION["user"])) {
             <b>Missile hit chance fixed</b> - onscreen, as actual firing was already being resolved correctly
         <br>
             <b>Firing log improved</b> - now order of entries is closer to actual firing resolution
-        
+        <br>
+            <b>Flash weapons fixed</b> - there was a bug when firing at fighter flight
+        <!--
+        <br>
+            <b>Missile replay fixed</b> - now source hex should be launch hex instead of current position!
+        -->
         <!--
         <br><br>
         - last but not least - brand new collection of BUGS!;
