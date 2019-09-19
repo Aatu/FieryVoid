@@ -135,14 +135,13 @@ class NexusChaffLauncher extends Weapon{
             $this->data["Special"] .= "<br>Will affect uninterceptable weapons.";
         }
         
-	//hit chance always 0 - just so it never actually hits anything, or draws interception
+	//hit chance always 100 - so it always hits and is correctly animated
 	public function calculateHitBase($gamedata, $fireOrder)
 	{
 		$fireOrder->needed = 100; //auto hit!
 		$fireOrder->updated = true;
 		
-		//while we're at it - we may add appropriate interception orders!
-		
+		//while we're at it - we may add appropriate interception orders!		
 		$targetShip = $gamedata->getShipById($fireOrder->targetid);
 		
 		$shipsInRange = $gamedata->getShipsInDistance($targetShip); //all units on target hex
@@ -161,6 +160,14 @@ class NexusChaffLauncher extends Weapon{
 				}
 			}
 		}
+		
+		//retarget at hex - this will affect how the weapon is animated/displayed in firing log!
+		    //insert correct target coordinates: CURRENT target position
+		    $pos = $targetShip->getHexPos();
+		    $fireOrder->x = $pos->q;
+		    $fireOrder->y = $pos->r;
+		    $fireOrder->targetid = -1; //correct the error
+
 	}//endof function calculateHitBase
 	   
 	
