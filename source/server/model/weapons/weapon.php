@@ -1204,12 +1204,11 @@ class Weapon extends ShipSystem
 	    //Flash weapon will cause collateral damage to other fighters in flight hit (collateral damage to other units was already handled) 
 	    if( ($this->damageType=='Flash') && ($target instanceof FighterFlight) ){ 
 		    foreach ($target->systems as $otherFighter) {
-                    if ($fighter == null || $fighter->isDestroyed() || $otherFighter->id==$system->id) {//do not damage destroyed fighter, or fighter hit directly
+                    if ($fighter == null || $otherFighter->isDestroyed() || $otherFighter->id==$system->id) {//do not damage destroyed fighter, or fighter hit directly
                         continue;
                     }
-		    $this->doDamage($target, $shooter, $otherFighter, $damage, $fireOrder, $launchPos, $gamedata, false, $tmpLocation);
+		    $this->doDamage($target, $shooter, $otherFighter, $flashDamageAmount, $fireOrder, $launchPos, $gamedata, false, $tmpLocation);
                 }		    
-		$this->doDamage($target, $shooter, $system, $flashDamageAmount, $fireOrder, $launchPos, $gamedata, false, $tmpLocation);
 	    }
         }
     }//endof function damage
