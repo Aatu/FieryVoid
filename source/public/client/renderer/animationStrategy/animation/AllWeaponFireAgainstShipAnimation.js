@@ -225,7 +225,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                 return new TorpedoEffect(this.particleEmitterContainer, {
                     size: 200 * weapon.animationExplosionScale,
                     //origin: getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startTime),
-		    origin: getShipPositionForFiring.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startTime, weapon, TacGamedata::$currentTurn),	
+		    origin: FireAnimationHelper.getShipPositionForFiring(this, this.shipIconContainer.getByShip(incomingFire.shooter), startTime, weapon, TacGamedata::$currentTurn),	
                     target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
                     color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     hit: hit,
