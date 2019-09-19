@@ -1201,15 +1201,15 @@ class Weapon extends ShipSystem
                 $fireOrder->linkedHit = $system;
             }
             $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $launchPos, $gamedata, false, $tmpLocation);
-	    //Flash weapon will cause collateral damage to other fighters in flight hit (collateral damage to other units was already handled) 
-	    if( ($this->damageType=='Flash') && ($target instanceof FighterFlight) ){ 
-		    foreach ($target->systems as $otherFighter) {
-                    if ($fighter == null || $otherFighter->isDestroyed() || $otherFighter->id==$system->id) {//do not damage destroyed fighter, or fighter hit directly
-                        continue;
-                    }
-		    $this->doDamage($target, $shooter, $otherFighter, $flashDamageAmount, $fireOrder, $launchPos, $gamedata, false, $tmpLocation);
-                }		    
-	    }
+			//Flash weapon will cause collateral damage to other fighters in flight hit (collateral damage to other units was already handled) 
+			if( ($this->damageType=='Flash') && ($target instanceof FighterFlight) ){ 
+				foreach ($target->systems as $otherFighter) {
+					if ($otherFighter == null || $otherFighter->isDestroyed() || $otherFighter->id==$system->id) {//do not damage destroyed fighter, or fighter hit directly
+						continue;
+					}
+					$this->doDamage($target, $shooter, $otherFighter, $flashDamageAmount, $fireOrder, $launchPos, $gamedata, false, $tmpLocation);
+				}		    
+			}
         }
     }//endof function damage
 
@@ -1306,7 +1306,6 @@ class Weapon extends ShipSystem
         /*$pos ONLY relevant for FIGHTER armor if damage source position is different than one from weapon itself*/
         /*otherwise best leave null BUT fill $location!*/
         /*damageWasDealt indicates whether this hit already caused damage - important for overkill for some damage modes*/
-
         if (!$system->isDestroyed()) { //else system was already destroyed, proceed to overkill
             $damageWasDealt = true; //actual damage was done! might be relevant for overkill allocation
             $systemHealth = $system->getRemainingHealth();
