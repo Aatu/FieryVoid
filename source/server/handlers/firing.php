@@ -425,8 +425,6 @@ class Firing
             }
         }
 
-
-            //$currFireOrders  = array();
         $ambiguousFireOrders  = array();
         foreach ($gamedata->ships as $ship){
             foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
@@ -434,11 +432,6 @@ class Firing
                     continue;
                 }
                 $weapon = $ship->getSystemById($fire->weaponid);
-                /*
-                if ($weapon instanceof Thruster || $weapon instanceof Structure){
-                    continue;
-                }
-                */
                 if (!($weapon instanceof Weapon)){ //this isn't a weapon after all...
                     continue;
                 }
@@ -449,8 +442,6 @@ class Firing
                 }else{
                     $weapon->calculateHitBase($gamedata, $fire);
                 }
-
-                //$currFireOrders[] = $fire;
             }
         }
 
@@ -470,7 +461,7 @@ class Firing
         if ($a->targetid !== $b->targetid){
             return $a->targetid - $b->targetid;
         }else if($a->calledid!==$b->calledid){ //called shots first!
-            return $a->targetid - $b->targetid;
+            return $a->calledid - $b->calledid;
         }else if ($a->priority !== $b->priority){
                 return $a->priority - $b->priority;
         }
@@ -526,22 +517,6 @@ class Firing
             }
         }
         usort($fireOrders, "self::compareFiringOrders");
-	      /* moved to separate function
-            function($a, $b) use ($gamedata){
-		if ($a->targetid !== $b->targetid){
-                    return $a->targetid - $b->targetid;
-                }else if($a->calledid!==$b->calledid){ //called shots first!
-                    return $a->targetid - $b->targetid;
-                }else if ($a->priority !== $b->priority){
-                    return $a->priority - $b->priority;
-                }
-                else {
-			$val = $a->shooterid - $b->shooterid;
-			if ($val == 0) $val = $a->id - $b->id; //let's use database ID as final sorting element!
-			return $val;
-                }
-            }
-        );*/
 	    
         foreach ($fireOrders as $fire){
                 $ship = $gamedata->getShipById($fire->shooterid);
