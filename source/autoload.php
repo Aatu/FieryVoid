@@ -1010,6 +1010,7 @@ spl_autoload_register(
 		    
                 'alacanatrimis' => '/server/model/ships/smallraces/AlacanAtrimis.php',  
                 'alacanrotiaflight' => '/server/model/ships/smallraces/AlacanRotiaFlight.php',  
+                'arcticAlpha' => '/server/model/ships/EA/arcticAlpha.php',  
 		    
                 'warlockmlpafull' => '/server/model/ships/EA/warlockMlpaFull.php',  
                 'sagittariusfull' => '/server/model/ships/EA/sagittariusFull.php',   
