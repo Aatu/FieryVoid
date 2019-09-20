@@ -8,9 +8,11 @@ class HecateAlpha extends BaseShip{
         $this->faction = "EA";
         $this->phpclass = "HecateAlpha";
         $this->imagePath = "img/ships/hyperion.png";
-        $this->shipClass = "Hecate Testbed Cruiser";
+        $this->shipClass = "Hecate Testbed Cruiser (Alpha)";
         $this->shipSizeClass = 3; 
-        $this->fighters = array("normal"=>6);
+        $this->fighters = array("heavy"=>6);
+        $this->isd = 2228;
+        $this->limited = 10; //Restricted deployment
 
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
