@@ -89,6 +89,8 @@ if (isset($_SESSION["user"])) {
             <b>Firing log improved</b> - now order of entries is closer to actual firing resolution
         <br>
             <b>Flash weapons fixed</b> - there was a bug when firing at fighter flight
+        <br>
+            <b>Ballistics animation fixed</b> - now missiles start their flight at launch point, not current firing ship location
         <!--
         <br>
             <b>Missile replay fixed</b> - now source hex should be launch hex instead of current position!
