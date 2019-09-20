@@ -1007,7 +1007,9 @@ spl_autoload_register(
                 'ochlavitamfull' => '/server/model/ships/dilgar/ochlavitaMFull.php',   
                 'athraskalafull' => '/server/model/ships/dilgar/athraskalaFull.php',   
                 'athraskalacfull' => '/server/model/ships/dilgar/athraskalaCFull.php',  
+		    
                 'alacanatrimis' => '/server/model/ships/smallraces/AlacanAtrimis.php',  
+                'alacanrotiaflight' => '/server/model/ships/smallraces/AlacanRotiaFlight.php',  
 		    
                 'warlockmlpafull' => '/server/model/ships/EA/warlockMlpaFull.php',  
                 'sagittariusfull' => '/server/model/ships/EA/sagittariusFull.php',   
