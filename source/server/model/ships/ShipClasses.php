@@ -1320,10 +1320,8 @@ class BaseShip {
 
     } //endof class BaseShip
     
-    class BaseShipNoAft extends BaseShip{
-
-    public $draziCap = true;
-
+class BaseShipNoAft extends BaseShip{
+    //public $draziCap = true;//no longer used
     function __construct($id, $userid, $name, $slot){
         parent::__construct($id, $userid, $name,$slot);
     }
@@ -1336,6 +1334,24 @@ class BaseShip {
         $locs[] = array("loc" => 4, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
         $locs[] = array("loc" => 3, "min" => 180, "max" => 210, "profile" => $this->forwardDefense);
         $locs[] = array("loc" => 4, "min" => 150, "max" => 180, "profile" => $this->forwardDefense);
+
+        return $locs;
+    }
+}
+
+/*reversed Drazi capital ship - used in some scustom designs*/
+class BaseShipNoFwd extends BaseShip{
+    function __construct($id, $userid, $name, $slot){
+        parent::__construct($id, $userid, $name,$slot);
+    }
+
+    public function getLocations(){      
+        $locs = array();
+        $locs[] = array("loc" => 2, "min" => 150, "max" => 210, "profile" => $this->forwardDefense); //Aft
+        $locs[] = array("loc" => 3, "min" => 210, "max" => 330, "profile" => $this->sideDefense); //Port actual
+        $locs[] = array("loc" => 4, "min" => 30, "max" => 150, "profile" => $this->sideDefense); //Stbd actual
+        $locs[] = array("loc" => 3, "min" => 330, "max" => 0, "profile" => $this->forwardDefense); //Port - from front
+        $locs[] = array("loc" => 4, "min" => 0, "max" => 30, "profile" => $this->forwardDefense); //Stbd - from Front
 
         return $locs;
     }
@@ -1366,7 +1382,7 @@ class HeavyCombatVessel extends BaseShip{
 
 class HeavyCombatVesselLeftRight extends BaseShip{
 
-    public $draziHCV = true;
+    //public $draziHCV = true; //no longer used
     public $shipSizeClass = 2;
 
     function __construct($id, $userid, $name, $slot){
