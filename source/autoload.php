@@ -75,6 +75,7 @@ spl_autoload_register(
                 'bascoutcarrier' => '/server/model/ships/smallraces/baScoutCarrier.php',
                 'baseship' => '/server/model/ships/ShipClasses.php',
                 'baseshipnoaft' => '/server/model/ships/ShipClasses.php',
+                'baseshipnofwd' => '/server/model/ships/ShipClasses.php',
                 'bashnar' => '/server/model/ships/brakiri/bashnar.php',
                 'bastarfoxftr' => '/server/model/ships/smallraces/baStarfoxFtr.php',
                 'basurveyship' => '/server/model/ships/smallraces/baSurveyShip.php',
