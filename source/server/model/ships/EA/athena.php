@@ -34,10 +34,10 @@ class Athena extends BaseShip{
 		$this->addPrimarySystem(new Hangar(5, 26));
 		$this->addPrimarySystem(new Jumpengine(6, 20, 4, 16));
 
-		$this->addFrontSystem(new ParticleCannon(4, 8, 7, 300, 60));
-		$this->addFrontSystem(new ParticleCannon(4, 8, 7, 300, 60));
 		$this->addFrontSystem(new HvyParticleCannon(5, 12, 9, 330, 30));
 		$this->addFrontSystem(new HvyParticleCannon(5, 12, 9, 330, 30));
+		$this->addFrontSystem(new ParticleCannon(4, 8, 7, 300, 60));
+		$this->addFrontSystem(new ParticleCannon(4, 8, 7, 300, 60));
 		$this->addFrontSystem(new CustomBPAMedium(4, 0, 0, 300, 60));
 		$this->addFrontSystem(new CustomBPAMedium(4, 0, 0, 300, 60));
 		$this->addFrontSystem(new InterceptorMkII(2, 4, 2, 240, 60));
@@ -58,26 +58,26 @@ class Athena extends BaseShip{
 		$this->addAftSystem(new Thruster(3, 6, 0, 1, 2));
 		$this->addAftSystem(new Thruster(3, 6, 0, 1, 2));
 
-		$this->addLeftSystem(new MultiMissileLauncher(3, 'L', 240, 0));
-		$this->addLeftSystem(new MultiMissileLauncher(3, 'L', 240, 0));
 		$this->addLeftSystem(new CustomBPAMedium(4, 0, 0, 240, 0));
 		$this->addLeftSystem(new CustomBPAMedium(4, 0, 0, 240, 0));
 		$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 360));
 		$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 360));
 		$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 360));
 		$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 360));
+		$this->addLeftSystem(new MultiMissileLauncher(3, 'L', 240, 0));
+		$this->addLeftSystem(new MultiMissileLauncher(3, 'L', 240, 0));
 		$this->addLeftSystem(new InterceptorMkII(2, 4, 2, 180, 360));
 		$this->addLeftSystem(new Hangar(4, 6));
 		$this->addLeftSystem(new Thruster(4, 20, 0, 6, 3));
 
-		$this->addRightSystem(new MultiMissileLauncher(3, 'L', 0, 120));
-		$this->addRightSystem(new MultiMissileLauncher(3, 'L', 0, 120));
 		$this->addRightSystem(new CustomBPAMedium(4, 0, 0, 0, 120));
 		$this->addRightSystem(new CustomBPAMedium(4, 0, 0, 0, 120));
 		$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
 		$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
 		$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
 		$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
+		$this->addRightSystem(new MultiMissileLauncher(3, 'L', 0, 120));
+		$this->addRightSystem(new MultiMissileLauncher(3, 'L', 0, 120));
 		$this->addRightSystem(new InterceptorMkII(2, 4, 2, 0, 180));
 		$this->addRightSystem(new Hangar(4, 6));
 		$this->addRightSystem(new Thruster(4, 20, 0, 6, 4));

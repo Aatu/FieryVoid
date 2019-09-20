@@ -13,9 +13,9 @@ class HecateWar extends BaseShip{
 
         $this->occurence = "common";
         $this->limited = 33;
-	$this->variantOf = 'Hyperion Heavy Cruiser (Theta)';
+	$this->variantOf = 'Hecate Testbed Cruiser (Alpha)';
 	$this->unofficial = true;
-        $this->fighters = array("normal"=>6);
+        $this->fighters = array("heavy"=>6);
 
 	$this->isd = 2257;
         $this->forwardDefense = 14;
