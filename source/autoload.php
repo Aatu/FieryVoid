@@ -75,6 +75,7 @@ spl_autoload_register(
                 'bascoutcarrier' => '/server/model/ships/smallraces/baScoutCarrier.php',
                 'baseship' => '/server/model/ships/ShipClasses.php',
                 'baseshipnoaft' => '/server/model/ships/ShipClasses.php',
+                'baseshipnofwd' => '/server/model/ships/ShipClasses.php',
                 'bashnar' => '/server/model/ships/brakiri/bashnar.php',
                 'bastarfoxftr' => '/server/model/ships/smallraces/baStarfoxFtr.php',
                 'basurveyship' => '/server/model/ships/smallraces/baSurveyShip.php',
@@ -1006,6 +1007,7 @@ spl_autoload_register(
                 'ochlavitamfull' => '/server/model/ships/dilgar/ochlavitaMFull.php',   
                 'athraskalafull' => '/server/model/ships/dilgar/athraskalaFull.php',   
                 'athraskalacfull' => '/server/model/ships/dilgar/athraskalaCFull.php',  
+                'alacanatrimis' => '/server/model/ships/smallraces/AlacanAtrimis.php',  
 		    
                 'warlockmlpafull' => '/server/model/ships/EA/warlockMlpaFull.php',  
                 'sagittariusfull' => '/server/model/ships/EA/sagittariusFull.php',   

@@ -210,10 +210,16 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         var weapon = incomingFire.weapon;
         var animationType = weapon.animationArray[incomingFire.firingMode] || weapon.animation;
         var animationColor = weapon.animationColorArray[incomingFire.firingMode] || weapon.animationColor;
-
+        //for ballistic weapons - make start location different!
+	var startLocationTime = startTime;
+	if (weapon.ballistic) {
+		startLocationTime = 0;
+	}
+	    
+	    
         switch (animationType) {
             case "laser":
-                return new LaserEffect(this.shipIconContainer.getByShip(incomingFire.shooter), getShipPositionAtTime.call(this, this.shipIcon, startTime), this.scene, {
+                return new LaserEffect(this.shipIconContainer.getByShip(incomingFire.shooter), getShipPositionAtTime.call(this, this.shipIcon, startLocationTime), this.scene, {
                     color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     hit: hit,
                     time: startTime,
@@ -224,9 +230,8 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             case "torpedo":
                 return new TorpedoEffect(this.particleEmitterContainer, {
                     size: 200 * weapon.animationExplosionScale,
-                    origin: getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startTime),
-		    //origin: FireAnimationHelper.getShipPositionForFiring(this, this.shipIconContainer.getByShip(incomingFire.shooter), startTime, weapon, 0), //last parameter is current turn, but AFAIK it's not used	
-                    target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
+                    origin: getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startLocationTime),
+		    target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
                     color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     hit: hit,
                     damage: damage,
@@ -239,7 +244,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             default:
                 return new BoltEffect(this.particleEmitterContainer, {
                     size: 300 * weapon.animationExplosionScale,
-                    origin: getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startTime),
+                    origin: getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startLocationTime),
                     target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
                     color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     hit: hit,
