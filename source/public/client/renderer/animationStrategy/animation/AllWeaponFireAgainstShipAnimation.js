@@ -224,8 +224,8 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             case "torpedo":
                 return new TorpedoEffect(this.particleEmitterContainer, {
                     size: 200 * weapon.animationExplosionScale,
-                    origin: getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startTime),
-		    //origin: FireAnimationHelper.getShipPositionForFiring(this, this.shipIconContainer.getByShip(incomingFire.shooter), startTime, weapon, 0), //last parameter is current turn, but AFAIK it's not used	
+                    //origin: getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startTime),
+		    origin: getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), 0), //startTime set at 0 = beginning of turn!	
                     target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
                     color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     hit: hit,
