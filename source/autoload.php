@@ -1048,7 +1048,11 @@ spl_autoload_register(
 					
 		'custombpalight' => '/server/model/weapons/customs.php',   
 		'custombpamedium' => '/server/model/weapons/customs.php', 
-		'custombpaheavy' => '/server/model/weapons/customs.php' 
+		'custombpaheavy' => '/server/model/weapons/customs.php' ,
+		    
+		    //TEMPORARY campaign-related designs - essentially upgrades of existing ships
+		    
+                'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php'
 		
             );
         }
