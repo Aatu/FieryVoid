@@ -753,6 +753,11 @@ window.weaponManager = {
             var firstFighter = shooter.systems[1];
             var OBcrit = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
             oew = shooter.offensivebonus - OBcrit;
+	    if (weapon.ballistic && (!shooter.hasNavigator) ){ //for ballistice, if there is no Navigator, use OB only if target is in weapon arc!
+		if (!weaponManager.isOnWeaponArc(shooter, target, weapon) {
+		    oew = 0;
+		}
+	    }		
             oew = Math.max(0, oew); //OBCrit cannot bring Offensive Bonus below 0
 
             mod -= shipManager.movement.getJinking(shooter);
@@ -1219,7 +1224,6 @@ window.weaponManager = {
     },
 
     setSelfIntercept: function setSelfIntercept(ship, valid) {
-
         for (var weapon in valid) {
             var weapon = valid[weapon];
 
@@ -1377,8 +1381,8 @@ window.weaponManager = {
         webglScene.customEvent('ShipTargeted', {shooter: selectedShip, target: ship, weapons: toUnselect})
     },
 
+	    
     checkIsInRange: function checkIsInRange(shooter, target, weapon) {
-
         var range = weapon.range;
         var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
 
@@ -1410,8 +1414,8 @@ window.weaponManager = {
         return distance <= range;
     },
 
+	    
     targetHex: function targetHex(selectedShip, hexpos) {
-
         if (shipManager.isDestroyed(selectedShip)) return;
 
         var toUnselect = Array();
@@ -1492,8 +1496,8 @@ window.weaponManager = {
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
     },
 
+	    
     hasFiringOrder: function hasFiringOrder(ship, system) {
-
         for (var i in system.fireOrders) {
             var fire = system.fireOrders[i];
             if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled) {
@@ -1516,12 +1520,13 @@ window.weaponManager = {
         return false;
     },
 
+	    
     shipHasFiringOrder: function shipHasFiringOrder(ship) {
         //TODO:implement
     },
 
+	    
     canCombatTurn: function canCombatTurn(ship) {
-
         var fires = weaponManager.getAllFireOrders(ship);
         for (var i in fires) {
             var fire = fires[i];
@@ -1534,8 +1539,8 @@ window.weaponManager = {
         return true;
     },
 
+	    
     getFiringOrder: function getFiringOrder(ship, system) {
-
         var fires = weaponManager.getAllFireOrders(ship);
         for (var i in fires) {
             var fire = fires[i];
@@ -1545,6 +1550,7 @@ window.weaponManager = {
         return false;
     },
 
+	    
     getAllFireOrders: function getAllFireOrders(ship) {
         var fires = new Array();
         for (var i in ship.systems) {
@@ -1564,6 +1570,7 @@ window.weaponManager = {
         return fires;
     },
 
+	    
     getAllBallisticsAgainst: function getAllBallisticsAgainst(ships, hex) {
         ships = [].concat(ships);
 
