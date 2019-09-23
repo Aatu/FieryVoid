@@ -27,7 +27,7 @@
             //$this->data["Weapon type"] = "Matter";
             //$this->data["Damage type"] = "Standard";
             parent::setSystemDataWindow($turn);
-	    $this->data["Special"] = "Ignores armor.";
+	    $this->data["Special"] = "Ignores armor, does not overkill.";
         }
 
         public $priority = 9;
