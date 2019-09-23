@@ -45,6 +45,7 @@ class CustomLightMatterCannon extends Matter {
         public $animationWidth = 3;
         public $animationExplosionScale = 0.15;
         public $priority = 6;
+	public $iconPath = "customLightMatterCannon.png";
 
         public $loadingtime = 2;
         
@@ -63,6 +64,34 @@ class CustomLightMatterCannon extends Matter {
         public function setMaxDamage(){     $this->maxDamage = 14 ;      }
 } //customLightMatterCannon
 
+class CustomHeavyMatterCannon extends Matter {
+    /*Heavy Matter Cannon, as used on Ch'Lonas ships*/
+        public $name = "customLightMatterCannon";
+        public $displayName = "Heavy Matter Cannon";
+        public $animation = "trail";
+        public $animationColor = array(250, 250, 190);
+        public $projectilespeed = 35;
+        public $animationWidth = 5;
+        public $animationExplosionScale = 0.55;
+        public $priority = 9; //Matter weapon
+	public $iconPath = "customHeavyMatterCannon.png";
+
+        public $loadingtime = 3;
+        
+        public $rangePenalty = 0.33; //-1/3 hexes
+        public $fireControl = array(-3, 3, 4); // fighters, <mediums, <capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 10;
+            if ( $powerReq == 0 ) $powerReq = 6;
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10, 3)+5;   }
+        public function setMinDamage(){     $this->minDamage = 8 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 35 ;      }
+} //customHeavyMatterCannon
 
 
 class CustomLightMatterCannonF extends Matter {
