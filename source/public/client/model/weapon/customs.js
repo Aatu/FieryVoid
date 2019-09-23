@@ -1,5 +1,12 @@
 "use strict";
 
+
+var CustomHeavyMatterCannon = function CustomHeavyMatterCannon(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CustomHeavyMatterCannon.prototype = Object.create(Weapon.prototype);
+CustomHeavyMatterCannon.prototype.constructor = CustomHeavyMatterCannon;
+
 var CustomLightMatterCannon = function CustomLightMatterCannon(json, ship) {
     Weapon.call(this, json, ship);
 };
