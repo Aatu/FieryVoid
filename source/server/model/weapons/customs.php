@@ -162,6 +162,61 @@ class CustomHeavyMatterCannon extends Matter{
 
 
 
+class CustomMatterStream extends Matter {
+    /*Light Matter Cannon, as used on Ch'Lonas ships*/
+        public $name = "customMatterStream";
+        public $displayName = "Matter Stream";
+        public $animation = "laser";
+        public $animationColor = array(250, 250, 190);
+        public $projectilespeed = 25;
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.3;
+        public $animationExplosionScale = 0.15;
+        public $priority = 7; //Matter Raking mode, but with low damage per rake so before other Matter weapons - together with heavy Raking weapons (I assume this weapon will be relatively lightly mitigated by multiple systems)
+	public $iconPath = "customMatterStream.png";
+
+        public $loadingtime = 3;
+        
+        public $rangePenalty = 0.66; //-2 per 3 hexes
+		
+        public $raking = 6;
+	
+        // Set to make the weapon start already overloaded.
+        public $alwaysoverloading = true;
+        public $overloadturns = 3;
+        public $extraoverloadshots = 2;
+        public $overloadshots = 2;
+	
+        public $fireControl = array(-3, 2, 2); // fighters, <mediums, <capitals 
+
+        public $firingModes = array( 1 => "Sustained");	
+        public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+        		
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = "Does ".$this->raking." damage per rake.";
+		$this->data["Special"] .= "<br>This weapon is always in Sustained mode";
+	    	$this->data["Special"] .= "<br>Ignores armor, does not overkill.";		
+	}	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 7;
+            if ( $powerReq == 0 ) $powerReq = 6;
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+        public function isOverloadingOnTurn($turn = null){
+            return true;
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+8;   }
+        public function setMinDamage(){     $this->minDamage = 10 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 28 ;      }
+} //customMatterStream
+
+
 class CustomPulsarLaser extends Pulse{
     /*Pulsar Laser, as used on Ch'Lonas ships*/
         public $name = "customPulsarLaser";
