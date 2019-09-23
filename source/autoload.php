@@ -1021,6 +1021,7 @@ spl_autoload_register(
                 'godalphafull' => '/server/model/ships/EA/godAlphaFull.php',   
                 'godbetafull' => '/server/model/ships/EA/godBetaFull.php',
 		    
+                'custommatterstream' => '/server/model/weapons/customs.php',
 		    
 		'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php', 
 		'nexusparticleprojectorheavy' => '/server/model/weapons/customNexus.php', 
