@@ -19,6 +19,13 @@ var CustomLightMatterCannonF = function CustomLightMatterCannonF(json, ship) {
 CustomLightMatterCannonF.prototype = Object.create(Weapon.prototype);
 CustomLightMatterCannonF.prototype.constructor = CustomLightMatterCannonF;
 
+
+var CustomMatterStream = function CustomMatterStream(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CustomMatterStream.prototype = Object.create(Weapon.prototype);
+CustomMatterStream.prototype.constructor = CustomMatterStream;
+
 var CustomStrikeLaser = function CustomStrikeLaser(json, ship) {
     Weapon.call(this, json, ship);
 };
