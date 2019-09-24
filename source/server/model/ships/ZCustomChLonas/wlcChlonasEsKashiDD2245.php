@@ -7,12 +7,12 @@ class wlcChlonasEsKashiDD2245 extends HeavyCombatVesselLeftRight{
         $this->pointCost = 450;
         $this->phpclass = "wlcChlonasEsKashiDD2245";
         $this->imagePath = "img/ships/kraasus.png";
-        $this->shipClass = "Es'Kashi Destroyer";
+        $this->shipClass = "Es'Kashi Destroyer (2245)";
         //$this->fighters = array("medium"=>6);
 	    
 	    
         $this->faction = "Ch'Lonas";
-        //$this->variantOf = "Es'Kashi Destroyer";
+        $this->variantOf = "Es'Kashi Destroyer";
 	$this->isd = 2245;
 	$this->unofficial = true;
         
