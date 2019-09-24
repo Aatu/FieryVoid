@@ -5,9 +5,10 @@ class wlcChlonasTraVoraCL2169 extends BaseShipNoAft{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         $this->pointCost = 440;
+	$this->faction = "Ch'Lonas";
         $this->phpclass = "wlcChlonasTraVoraCL2169";
         $this->imagePath = "img/ships/brahassa.png";
-        $this->shipClass = "Tra'Vora Light Cruiser (2169)";
+        $this->shipClass = "Tra'Vora Light Cruiser";
         $this->fighters = array("heavy" => 12);
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
@@ -17,8 +18,7 @@ class wlcChlonasTraVoraCL2169 extends BaseShipNoAft{
         $this->rollcost = 3;
         $this->pivotcost = 3;
 	    
-	$this->faction = "Ch'Lonas";
-        $this->variantOf = "Tra'Vora Light Cruiser";
+        //$this->variantOf = "Tra'Vora Light Cruiser";
 	$this->isd = 2169;
 	$this->unofficial = true;
         
