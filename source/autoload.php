@@ -968,6 +968,8 @@ spl_autoload_register(
                 'wlcchlonasvestek' => '/server/model/ships/ZCustomChLonas/wlcChlonasVesTek.php',
                 'wlcchlonaswyleraa' => '/server/model/ships/ZCustomChLonas/wlcChlonasWyLeraA.php',
                 'wlcchlonaswylerab' => '/server/model/ships/ZCustomChLonas/wlcChlonasWyLeraB.php',
+                'wlcchlonasontharicva' => '/server/model/ships/ZCustomChLonas/wlcChlonasOnThariCVA.php',
+		    
                 'wlcemperordn2090' => '/server/model/ships/customs/wlcEmperorDN2090.php',
                 'wlcgarut2006' => '/server/model/ships/customs/wlcGarut2006.php',
                 'wlcoptinehc' => '/server/model/ships/customs/wlcOptineHC.php',
