@@ -163,11 +163,11 @@ class CustomHeavyMatterCannon extends Matter{
 
 
 class CustomMatterStream extends Matter {
-    /*Light Matter Cannon, as used on Ch'Lonas ships*/
+    /*Matter Stream, as used on Ch'Lonas ships*/
         public $name = "customMatterStream";
         public $displayName = "Matter Stream";
         public $animation = "laser";
-        public $animationColor = array(250, 250, 190);
+        public $animationColor = array(120, 120, 90);
         public $projectilespeed = 25;
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
