@@ -30,7 +30,7 @@ class wlcChlonasForVoraScout extends BaseShipNoAft{
         $this->addPrimarySystem(new Engine(4, 13, 0, 9, 4));
         $this->addPrimarySystem(new Hangar(4, 2));
         $this->addPrimarySystem(new Thruster(4, 19, 0, 9, 2));
-	$this->addPrimarySystem(new JumpEngine(5, 32, 6, 20));
+	$this->addPrimarySystem(new JumpEngine(5, 10, 6, 48));
 
         $this->addFrontSystem(new ElintScanner(4, 9, 6, 4));
 	$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
