@@ -376,9 +376,12 @@
         }
 
         public function setSystemDataWindow($turn){
-            //$this->data["Weapon type"] = "Particle";
-            //$this->data["Damage type"] = "Raking";
-            $this->data["REMARK"] = "This weapon is always in sustained mode.";
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+            $this->data["Special"] .= "This weapon is always in sustained mode.";
 
             parent::setSystemDataWindow($turn);
         }
