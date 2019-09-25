@@ -4,13 +4,14 @@ class wlcChlonasSaTrevanFlight extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	      $this->pointCost = 34 *6;
+	$this->pointCost = 34 *6;
         $this->phpclass = "wlcChlonasSaTrevanFlight";
         $this->shipClass = "Sa'Trevan Light flight";
-	      $this->imagePath = "img/ships/shasi.png";
+	$this->imagePath = "img/ships/shasi.png";
 	    
         $this->faction = "Ch'Lonas";
 	$this->unofficial = true;
+	    $this>isd = 2235;
         
         $this->forwardDefense = 6;
         $this->sideDefense = 7;
