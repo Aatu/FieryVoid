@@ -197,10 +197,10 @@
     	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-		if($this->data["Special"]){
-			$this->data["Special"] .= '<br>'.	
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
 		}else{
-			$this->data["Special"] = ''.
+			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
