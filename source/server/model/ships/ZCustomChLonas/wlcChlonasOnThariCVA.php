@@ -1,13 +1,13 @@
 <?php
 class wlcChlonasOnThariCVA extends BaseShipNoFwd{
-    /*Ch'Lonas For'Vora scout*/
+    /*Ch'Lonas On'Thari Attack Carrier*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         $this->pointCost = 735;
         $this->phpclass = "wlcChlonasOnThariCVA";
         $this->imagePath = "img/ships/thosalsi.png";
         $this->shipClass = "On'Thari Attack Carrier";
-        $this->fighters = array("heavy" => 12, "light"->12);
+        $this->fighters = array("heavy" => 12, "light"=>12);
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
         $this->turncost = 0.75;
@@ -33,24 +33,30 @@ class wlcChlonasOnThariCVA extends BaseShipNoFwd{
         $this->addLeftSystem(new Thruster(3, 10, 0, 3, 1)); //Retro
         $this->addLeftSystem(new Thruster(3, 15, 0, 5, 3)); //Port
         $this->addLeftSystem(new Hangar(4, 6));//hangar for a flight of heavy fighters
-	      $this->addLeftSystem(new CustomMatterStream(4, 0, 0, 300, 60));
-	      $this->addLeftSystem(new CustomHeavyMatterCannon(4, 0, 0, 240, 0));
-	      $this->addLeftSystem(new CustomPulsarLaser(4, 0, 0, 240, 0));
+	    $this->addLeftSystem(new CustomGatlingMattergunLight(2, 0, 0, 240, 60));
+	    $this->addLeftSystem(new CustomGatlingMattergunLight(2, 0, 0, 180, 0));
+	    $this->addLeftSystem(new CustomPulsarLaser(4, 0, 0, 240, 0));
+	    $this->addLeftSystem(new CustomMatterStream(4, 0, 0, 300, 60));
+	    $this->addLeftSystem(new CustomHeavyMatterCannon(4, 0, 0, 240, 0));
       
 
         $this->addRightSystem(new Thruster(3, 10, 0, 3, 1)); //Retro
         $this->addRightSystem(new Thruster(3, 15, 0, 5, 4)); //Stbd
         $this->addRightSystem(new Hangar(4, 6));//hangar for a flight of heavy fighters
-	      $this->addRightSystem(new CustomMatterStream(4, 0, 0, 300, 60));
-	      $this->addRightSystem(new CustomHeavyMatterCannon(4, 0, 0, 0, 120));
-	      $this->addRightSystem(new CustomPulsarLaser(4, 0, 0, 0, 120));
+	    $this->addRightSystem(new CustomGatlingMattergunLight(2, 0, 0, 300, 120));
+	    $this->addRightSystem(new CustomGatlingMattergunLight(2, 0, 0, 0, 180));
+	    $this->addRightSystem(new CustomPulsarLaser(4, 0, 0, 0, 120));
+	    $this->addRightSystem(new CustomMatterStream(4, 0, 0, 300, 60));
+	    $this->addRightSystem(new CustomHeavyMatterCannon(4, 0, 0, 0, 120));
             
       
+	      $this->addAftSystem(new CustomGatlingMattergunLight(2, 0, 0, 180, 0));
+	      $this->addAftSystem(new CustomGatlingMattergunLight(2, 0, 0, 0, 180));
+	      $this->addAftSystem(new CustomHeavyMatterCannon(4, 0, 0, 120, 240));
+	      $this->addAftSystem(new CustomHeavyMatterCannon(4, 0, 0, 120, 240));
 	      $this->addAftSystem(new JumpEngine(5, 10, 6, 40));
         $this->addAftSystem(new Thruster(3, 14, 0, 5, 2)); //Main
         $this->addAftSystem(new Thruster(3, 14, 0, 5, 2)); //Main
-	      $this->addAftSystem(new CustomHeavyMatterCannon(4, 0, 0, 120, 240));
-	      $this->addAftSystem(new CustomHeavyMatterCannon(4, 0, 0, 120, 240));
       
       
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

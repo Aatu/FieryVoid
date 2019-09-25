@@ -26,6 +26,8 @@ class wlcChlonasLoFahraFFA extends MediumShipLeftRight{
         $this->pivotcost = 2;
 	$this->iniativebonus = 65;
          
+		 
+		 
         $this->addPrimarySystem(new Reactor(5, 10, 0, 0));
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 3, 5));

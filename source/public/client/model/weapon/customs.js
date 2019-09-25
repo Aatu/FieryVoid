@@ -26,6 +26,26 @@ var CustomMatterStream = function CustomMatterStream(json, ship) {
 CustomMatterStream.prototype = Object.create(Weapon.prototype);
 CustomMatterStream.prototype.constructor = CustomMatterStream;
 
+
+var CustomGatlingMattergunLight = function CustomGatlingMattergunLight(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CustomGatlingMattergunLight.prototype = Object.create(Weapon.prototype);
+CustomGatlingMattergunLight.prototype.constructor = CustomGatlingMattergunLight;
+
+var CustomGatlingMattergunMedium = function CustomGatlingMattergunMedium(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CustomGatlingMattergunMedium.prototype = Object.create(Weapon.prototype);
+CustomGatlingMattergunMedium.prototype.constructor = CustomGatlingMattergunMedium;
+
+var CustomGatlingMattergunHeavy = function CustomGatlingMattergunHeavy(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CustomGatlingMattergunHeavy.prototype = Object.create(Weapon.prototype);
+CustomGatlingMattergunHeavy.prototype.constructor = CustomGatlingMattergunHeavy;
+
+
 var CustomStrikeLaser = function CustomStrikeLaser(json, ship) {
     Weapon.call(this, json, ship);
 };

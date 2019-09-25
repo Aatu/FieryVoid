@@ -150,6 +150,11 @@ spl_autoload_register(
                 'cubecoordinate' => '/server/model/CubeCoordinate.php',
                 'customerlightpbeam' => '/server/model/weapons/customs.php',
                 'customheavymattercannon' => '/server/model/weapons/customs.php',
+				
+                'customgatlingmattergunlight' => '/server/model/weapons/customs.php',				
+                'customgatlingmattergunmedium' => '/server/model/weapons/customs.php',				
+                'customgatlingmattergunheavy' => '/server/model/weapons/customs.php',
+				
                 'customheavypolaritypulsar' => '/server/model/weapons/customs.php',		    
                 'customheavymattercannon' => '/server/model/weapons/customs.php',
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
@@ -956,9 +961,12 @@ spl_autoload_register(
                 'wlccelerian' => '/server/model/ships/centauri_old/wlcCelerian.php',
                 'wlcchlonaseskashidd2198' => '/server/model/ships/ZCustomChLonas/wlcChlonasEsKashiDD2198.php',
                 'wlcchlonaseskashidd2245' => '/server/model/ships/ZCustomChLonas/wlcChlonasEsKashiDD2245.php',
+                'wlcchlonasonkashidd' => '/server/model/ships/ZCustomChLonas/wlcChlonasOnKashiDD.php',
                 'wlcchlonasforvorascout' => '/server/model/ships/ZCustomChLonas/wlcChlonasForVoraScout.php',
                 'wlcchlonaslertarflight' => '/server/model/ships/ZCustomChLonas/wlcChlonasLerTarFlight.php',
                 'wlcchlonaslofahraffa' => '/server/model/ships/ZCustomChLonas/wlcChlonasLoFahraFFA.php',
+                'wlcchlonasfenfahraffe' => '/server/model/ships/ZCustomChLonas/wlcChlonasFenFahraFFE.php',
+				
                 'wlcchlonasmertancrv2161' => '/server/model/ships/ZCustomChLonas/wlcChlonasMerTanCRV2161.php',
                 'wlcchlonasmertancrv2230' => '/server/model/ships/ZCustomChLonas/wlcChlonasMerTanCRV2230.php',
                 'wlcchlonasnakashidda' => '/server/model/ships/ZCustomChLonas/wlcChlonasNaKashiDDA.php',
@@ -969,6 +977,8 @@ spl_autoload_register(
                 'wlcchlonaswyleraa' => '/server/model/ships/ZCustomChLonas/wlcChlonasWyLeraA.php',
                 'wlcchlonaswylerab' => '/server/model/ships/ZCustomChLonas/wlcChlonasWyLeraB.php',
                 'wlcchlonasontharicva' => '/server/model/ships/ZCustomChLonas/wlcChlonasOnThariCVA.php',
+                'wlcchlonasontharicva2253' => '/server/model/ships/ZCustomChLonas/wlcChlonasOnThariCVA2253.php',
+                'wlcchlonasontaincvh' => '/server/model/ships/ZCustomChLonas/wlcChlonasOnTainCVH.php',
 		    
                 'wlcemperordn2090' => '/server/model/ships/customs/wlcEmperorDN2090.php',
                 'wlcgarut2006' => '/server/model/ships/customs/wlcGarut2006.php',
