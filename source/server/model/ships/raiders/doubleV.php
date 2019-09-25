@@ -16,6 +16,8 @@ class DoubleV extends FighterFlight{
 		$this->offensivebonus = 4;
 		$this->jinkinglimit = 8;
 		$this->turncost = 0.33;
+		
+        $this->notes = 'Needs 2 rail slots.';
 
 		$this->iniativebonus = 90;
         $this->populate();

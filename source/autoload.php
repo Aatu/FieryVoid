@@ -150,7 +150,13 @@ spl_autoload_register(
                 'cubecoordinate' => '/server/model/CubeCoordinate.php',
                 'customerlightpbeam' => '/server/model/weapons/customs.php',
                 'customheavymattercannon' => '/server/model/weapons/customs.php',
-                'customheavypolaritypulsar' => '/server/model/weapons/customs.php',
+				
+                'customgatlingmattergunlight' => '/server/model/weapons/customs.php',				
+                'customgatlingmattergunmedium' => '/server/model/weapons/customs.php',				
+                'customgatlingmattergunheavy' => '/server/model/weapons/customs.php',
+				
+                'customheavypolaritypulsar' => '/server/model/weapons/customs.php',		    
+                'customheavymattercannon' => '/server/model/weapons/customs.php',
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
                 'customlightmattercannonf' => '/server/model/weapons/customs.php',
                 'customltphasedisruptor' => '/server/model/weapons/customs.php',
@@ -953,20 +959,27 @@ spl_autoload_register(
                 'wimuk' => '/server/model/ships/abbai_old/wimuk.php',
                 'wlcashinar' => '/server/model/ships/minbari/wlcAshinar.php',
                 'wlccelerian' => '/server/model/ships/centauri_old/wlcCelerian.php',
-                'wlcchlonaseskashidd2198' => '/server/model/ships/customs/wlcChlonasEsKashiDD2198.php',
-                'wlcchlonaseskashidd2245' => '/server/model/ships/customs/wlcChlonasEsKashiDD2245.php',
-                'wlcchlonasforvorascout' => '/server/model/ships/customs/wlcChlonasForVoraScout.php',
-                'wlcchlonaslertarflight' => '/server/model/ships/customs/wlcChlonasLerTarFlight.php',
-                'wlcchlonaslofahraffa' => '/server/model/ships/customs/wlcChlonasLoFahraFFA.php',
-                'wlcchlonasmertancrv2161' => '/server/model/ships/customs/wlcChlonasMerTanCRV2161.php',
-                'wlcchlonasmertancrv2230' => '/server/model/ships/customs/wlcChlonasMerTanCRV2230.php',
-                'wlcchlonasnakashidda' => '/server/model/ships/customs/wlcChlonasNaKashiDDA.php',
-                'wlcchlonassatrevanflight' => '/server/model/ships/customs/wlcChlonasSaTrevanFlight.php',
-                'wlcchlonastravoracl2169' => '/server/model/ships/customs/wlcChlonasTraVoraCL2169.php',
-                'wlcchlonastravoracl2240' => '/server/model/ships/customs/wlcChlonasTraVoraCL2240.php',
-                'wlcchlonasvestek' => '/server/model/ships/customs/wlcChlonasVesTek.php',
-                'wlcchlonaswyleraa' => '/server/model/ships/customs/wlcChlonasWyLeraA.php',
-                'wlcchlonaswylerab' => '/server/model/ships/customs/wlcChlonasWyLeraB.php',
+                'wlcchlonaseskashidd2198' => '/server/model/ships/ZCustomChLonas/wlcChlonasEsKashiDD2198.php',
+                'wlcchlonaseskashidd2245' => '/server/model/ships/ZCustomChLonas/wlcChlonasEsKashiDD2245.php',
+                'wlcchlonasonkashidd' => '/server/model/ships/ZCustomChLonas/wlcChlonasOnKashiDD.php',
+                'wlcchlonasforvorascout' => '/server/model/ships/ZCustomChLonas/wlcChlonasForVoraScout.php',
+                'wlcchlonaslertarflight' => '/server/model/ships/ZCustomChLonas/wlcChlonasLerTarFlight.php',
+                'wlcchlonaslofahraffa' => '/server/model/ships/ZCustomChLonas/wlcChlonasLoFahraFFA.php',
+                'wlcchlonasfenfahraffe' => '/server/model/ships/ZCustomChLonas/wlcChlonasFenFahraFFE.php',
+				
+                'wlcchlonasmertancrv2161' => '/server/model/ships/ZCustomChLonas/wlcChlonasMerTanCRV2161.php',
+                'wlcchlonasmertancrv2230' => '/server/model/ships/ZCustomChLonas/wlcChlonasMerTanCRV2230.php',
+                'wlcchlonasnakashidda' => '/server/model/ships/ZCustomChLonas/wlcChlonasNaKashiDDA.php',
+                'wlcchlonassatrevanflight' => '/server/model/ships/ZCustomChLonas/wlcChlonasSaTrevanFlight.php',
+                'wlcchlonastravoracl2169' => '/server/model/ships/ZCustomChLonas/wlcChlonasTraVoraCL2169.php',
+                'wlcchlonastravoracl2240' => '/server/model/ships/ZCustomChLonas/wlcChlonasTraVoraCL2240.php',
+                'wlcchlonasvestek' => '/server/model/ships/ZCustomChLonas/wlcChlonasVesTek.php',
+                'wlcchlonaswyleraa' => '/server/model/ships/ZCustomChLonas/wlcChlonasWyLeraA.php',
+                'wlcchlonaswylerab' => '/server/model/ships/ZCustomChLonas/wlcChlonasWyLeraB.php',
+                'wlcchlonasontharicva' => '/server/model/ships/ZCustomChLonas/wlcChlonasOnThariCVA.php',
+                'wlcchlonasontharicva2253' => '/server/model/ships/ZCustomChLonas/wlcChlonasOnThariCVA2253.php',
+                'wlcchlonasontaincvh' => '/server/model/ships/ZCustomChLonas/wlcChlonasOnTainCVH.php',
+		    
                 'wlcemperordn2090' => '/server/model/ships/customs/wlcEmperorDN2090.php',
                 'wlcgarut2006' => '/server/model/ships/customs/wlcGarut2006.php',
                 'wlcoptinehc' => '/server/model/ships/customs/wlcOptineHC.php',
@@ -1020,6 +1033,7 @@ spl_autoload_register(
                 'godalphafull' => '/server/model/ships/EA/godAlphaFull.php',   
                 'godbetafull' => '/server/model/ships/EA/godBetaFull.php',
 		    
+                'custommatterstream' => '/server/model/weapons/customs.php',
 		    
 		'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php', 
 		'nexusparticleprojectorheavy' => '/server/model/weapons/customNexus.php', 
@@ -1038,12 +1052,21 @@ spl_autoload_register(
                 'brixadiipursuitfrigatebase' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigateBase.php',
                 'brixadiipursuitfrigate2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigate2057.php',
                 'brixadiipursuitfrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigate2108.php',
+		    
+		    
+                'brixadiisurveyorbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyorBase.php',
+                'brixadiisurveyor2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyor2057.php',
+                'brixadiisurveyor2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyor2108.php',
 		  		    
 					
 					
 		'custombpalight' => '/server/model/weapons/customs.php',   
 		'custombpamedium' => '/server/model/weapons/customs.php', 
-		'custombpaheavy' => '/server/model/weapons/customs.php' 
+		'custombpaheavy' => '/server/model/weapons/customs.php' ,
+		    
+		    //TEMPORARY campaign-related designs - essentially upgrades of existing ships
+		    
+                'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php'
 		
             );
         }

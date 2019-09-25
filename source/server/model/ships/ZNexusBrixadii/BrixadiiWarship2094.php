@@ -8,10 +8,11 @@ class BrixadiiWarship2094 extends BaseShipNoAft{
 		$this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiWarship2094";
         $this->imagePath = "img/ships/Nexus/BrixadiiWarship.png";
+			$this->canvasSize = 200; //img has 200px per side
         $this->shipClass = "Warship (2094)";
-			$this->variantOf = "Warship";
-			$this->occurence = "common";
-			$this->unofficial = true;
+		$this->variantOf = "Warship";
+		$this->occurence = "common";
+		$this->unofficial = true;
 		$this->isd = 2094;
          
 	    $this->notes = 'Crude Jump Drive.';

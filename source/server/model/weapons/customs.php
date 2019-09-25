@@ -45,6 +45,7 @@ class CustomLightMatterCannon extends Matter {
         public $animationWidth = 3;
         public $animationExplosionScale = 0.15;
         public $priority = 6;
+	public $iconPath = "customLightMatterCannon.png";
 
         public $loadingtime = 2;
         
@@ -76,7 +77,7 @@ class CustomLightMatterCannonF extends Matter {
         public $animationWidth = 2;
         public $animationExplosionScale = 0.10;
         public $priority = 9;
-	public $iconPath = "customLightMatterCannon.png";
+		public $iconPath = "customLightMatterCannon.png";
         
         public $loadingtime = 3;
         public $exclusive = false; //this is not an exclusive weapon!
@@ -106,7 +107,7 @@ class CustomHeavyMatterCannon extends Matter{
         public $animationWidth = 4;
         public $animationExplosionScale = 0.25;
         public $priority = 9;
-      
+		public $iconPath = "customHeavyMatterCannon.png";      
 
         public $loadingtime = 3;
         
@@ -130,6 +131,249 @@ class CustomHeavyMatterCannon extends Matter{
         public function setMaxDamage(){     $this->maxDamage = 35 ;      }
 } //CustomHeavyMatterCannon
 
+
+
+
+class CustomMatterStream extends Matter {
+    /*Matter Stream, as used on Ch'Lonas ships*/
+        public $name = "customMatterStream";
+        public $displayName = "Matter Stream";
+        public $animation = "laser";
+        public $animationColor = array(60, 60, 45);
+        public $projectilespeed = 25;
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.3;
+        public $animationExplosionScale = 0.15;
+        public $priority = 7; //Matter Raking mode, but with low damage per rake so before other Matter weapons - together with heavy Raking weapons (I assume this weapon will be relatively lightly mitigated by multiple systems)
+	public $iconPath = "customMatterStream.png";
+
+        public $loadingtime = 3;
+        
+        public $rangePenalty = 0.66; //-2 per 3 hexes
+		
+        public $raking = 6;
+	
+        // Set to make the weapon start already overloaded.
+        public $alwaysoverloading = true;
+        public $overloadturns = 3;
+        public $extraoverloadshots = 2;
+        public $overloadshots = 2;
+	
+        public $fireControl = array(-3, 2, 2); // fighters, <mediums, <capitals 
+
+        public $firingModes = array( 1 => "Sustained");	
+        public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+        		
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = "Does ".$this->raking." damage per rake.";
+		$this->data["Special"] .= "<br>This weapon is always in Sustained mode";
+	    	$this->data["Special"] .= "<br>Ignores armor, does not overkill.";		
+	}	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 7;
+            if ( $powerReq == 0 ) $powerReq = 6;
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+        public function isOverloadingOnTurn($turn = null){
+            return true;
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+8;   }
+        public function setMinDamage(){     $this->minDamage = 10 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 28 ;      }
+} //customMatterStream
+
+
+
+class CustomGatlingMattergunLight extends Pulse{
+    /*Light Gatling Mattergun, as used on Ch'Lonas ships*/
+        public $name = "customGatlingMattergunLight";
+        public $displayName = "Light Gatling Mattergun";
+		public $iconPath = "customGatlingMattergunLight.png";
+        public $animation = "trail";
+        public $trailColor = array(225, 255, 150);
+        public $animationColor = array(225, 225, 150);
+        public $projectilespeed = 16;
+        public $animationWidth = 2;
+        public $trailLength = 40;
+        public $animationExplosionScale = 0.15;
+        public $priority = 3; //very light weapons; at this damage output there's no point worrying about overkill lost, and this weapon should be great system sweeper
+
+        public $grouping = 25; //+1 per 5
+        public $maxpulses = 4;
+        protected $useDie = 3; //die used for base number of hits
+        public $loadingtime = 1;
+        
+        public $rangePenalty = 2; //-2/hex
+        public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals 
+		
+        public $noOverkill = true;//Matter weapons do not overkill
+        public $ballisticIntercept = true; //can intercept ballistic weapons only
+        public $intercept = 2;
+        
+		public $firingMode = 'Standard'; //firing mode - just a name essentially
+		public $damageType = "Pulse"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Matter"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+	 
+   
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 4;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 2;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn)
+        {
+            parent::setSystemDataWindow($turn);
+			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
+			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
+        }
+        
+        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+            return 0; //Matter ignores armor!
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(6, 1);   }
+        public function setMinDamage(){     $this->minDamage = 1 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 6 ;      }
+} //CustomGatlingMattergunLight
+
+
+
+
+class CustomGatlingMattergunMedium extends Pulse{
+    /*Gatling Mattergun, as used on Ch'Lonas ships*/
+        public $name = "customGatlingMattergunMedium";
+        public $displayName = "Gatling Mattergun";
+		public $iconPath = "customGatlingMattergunMedium.png";
+        public $animation = "trail";
+        public $trailColor = array(225, 255, 150);
+        public $animationColor = array(225, 225, 150);
+        public $projectilespeed = 19;
+        public $animationWidth = 4;
+        public $trailLength = 50;
+        public $animationExplosionScale = 0.25;
+        public $priority = 5; //medium STandard weapons; their low and random damage output per shot doesn't qualify them for Matter damage step
+
+        public $grouping = 20; //+1 per 4
+        public $maxpulses = 4;
+        protected $useDie = 2; //die used for base number of hits
+        protected $fixedBonusPulses = 1; //d2+1 hits
+        public $loadingtime = 2;
+        
+        public $rangePenalty = 1; //-1/hex
+        public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
+		
+        public $noOverkill = true;//Matter weapons do not overkill
+        public $ballisticIntercept = true; //can intercept ballistic weapons only
+        public $intercept = 1;
+        
+		public $firingMode = 'Standard'; //firing mode - just a name essentially
+		public $damageType = "Pulse"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Matter"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+	 
+   
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 6;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 5;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn)
+        {
+            parent::setSystemDataWindow($turn);
+			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
+			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
+        }
+        
+        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+            return 0; //Matter ignores armor!
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 1);   }
+        public function setMinDamage(){     $this->minDamage = 1 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 10 ;      }
+} //CustomGatlingMattergunMedium
+
+
+
+
+class CustomGatlingMattergunHeavy extends Pulse{
+    /*Heavy Gatling Mattergun, as used on Ch'Lonas ships*/
+        public $name = "customGatlingMattergunHeavy";
+        public $displayName = "Heavy Gatling Mattergun";
+		public $iconPath = "customGatlingMattergunHeavy.png";
+        public $animation = "trail";
+        public $trailColor = array(225, 255, 150);
+        public $animationColor = array(225, 225, 150);
+        public $projectilespeed = 25;
+        public $animationWidth = 5;
+        public $trailLength = 60;
+        public $animationExplosionScale = 0.5;
+        public $priority = 9; //Matter weapons
+
+        public $grouping = 20; //+1 per 4
+        public $maxpulses = 4;
+        protected $useDie = 2; //die used for base number of hits
+        protected $fixedBonusPulses = 1; //d2+1 hits
+        public $loadingtime = 3;
+        
+        public $rangePenalty = 0.5; //-1/2hexes
+        public $fireControl = array(-2, 3, 4); // fighters, <mediums, <capitals 
+		
+        public $noOverkill = true;//Matter weapons do not overkill
+        public $ballisticIntercept = true; //can intercept ballistic weapons only
+        public $intercept = 1;
+        
+		public $firingMode = 'Standard'; //firing mode - just a name essentially
+		public $damageType = "Pulse"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Matter"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+	 
+   
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 8;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 7;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn)
+        {
+            parent::setSystemDataWindow($turn);
+			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
+			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
+        }		
+        
+        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+            return 0; //Matter ignores armor!
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 2);   }
+        public function setMinDamage(){     $this->minDamage = 2 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 20 ;      }
+} //CustomGatlingMattergunHeavy
 
 
 

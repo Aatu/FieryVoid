@@ -10,7 +10,7 @@ class Brokados extends BaseShip{
         $this->imagePath = "img/ships/brokados.png";
         $this->shipClass = "Brokados Battle Carrier";
         $this->shipSizeClass = 3;
-        $this->fighters = array("normal"=>24);
+        $this->fighters = array("heavy"=>24);
         
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
