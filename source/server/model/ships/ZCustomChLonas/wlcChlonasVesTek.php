@@ -11,6 +11,7 @@ class wlcChlonasVesTek extends FighterFlight{
         
         $this->faction = "Ch'Lonas";
 	    $this->unofficial = true;
+	    $this>isd = 2247;
 
         $this->forwardDefense = 8;
         $this->sideDefense = 10;
