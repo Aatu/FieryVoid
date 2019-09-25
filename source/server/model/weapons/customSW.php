@@ -59,10 +59,15 @@ class SWRayShield extends Shield implements DefensiveSystem{
     public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);
 	//$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
-	$this->data["Basic Strength"] = $this->baseOutput;      
-	$this->data["<font color='red'>Remark</font>"] = "<br>Does not decrease profile."; 
-	$this->data["<font color='red'>Remark</font>"] .= "<br>Does not protect from Ballistic, Matter and StarWars Ion damage."; 
-	$this->data["<font color='red'>Remark</font>"] .= "<br>Doubly effective vs Raking weapons."; 
+	$this->data["Basic Strength"] = $this->baseOutput;      	    
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+	$this->data["Special"] .= "Does not decrease profile."; 
+	$this->data["Special"] .= "<br>Does not protect from Ballistic, Matter and StarWars Ion damage."; 
+	$this->data["Special"] .= "<br>Doubly effective vs Raking weapons."; 
     }
 	  
         private function getBoostLevel($turn){
@@ -312,8 +317,7 @@ class SWBallisticWeapon extends Torpedo{
         public $animationExplosionScale = 0.3;
         public $projectilespeed = 10;
         public $animationWidth = 5;
-        public $trailLength = 12;
-	
+        public $trailLength = 12;	
 		
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $nrOfShots){
@@ -405,8 +409,13 @@ class SWIon extends SWDirectWeapon{
 	
     public function setSystemDataWindow($turn){
       parent::setSystemDataWindow($turn);
-      $this->data["<font color='red'>Remark</font>"] = "Damage may cause power shortages.";      
-      $this->data["<font color='red'>Remark</font>"] .= "<br>Increased chance of critical on systems damaged."; 
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+      $this->data["Special"] = ".Damage may cause power shortages.";      
+      $this->data["Special"] .= "<br>Increased chance of critical on systems damaged."; 
     }
 	
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //make vulnerable to next critical
@@ -1216,9 +1225,14 @@ class SWTractorBeam extends SWDirectWeapon{
 	
     public function setSystemDataWindow($turn){
       parent::setSystemDataWindow($turn);
-      $this->data["<font color='red'>Remark</font>"] = "Does no damage, but holds target next turn";      
-      $this->data["<font color='red'>Remark</font>"] .= "<br>limiting its maneuvering options"; 
-      $this->data["<font color='red'>Remark</font>"] .= "<br>(-1 thrust and -20 Initiative next turn).";  
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+      $this->data["Special"] .= "Does no damage, but holds target next turn";      
+      $this->data["Special"] .= "<br>limiting its maneuvering options"; 
+      $this->data["Special"] .= "<br>(-1 thrust and -20 Initiative next turn).";  
     }	
     
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
