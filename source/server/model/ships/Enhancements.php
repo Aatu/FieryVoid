@@ -84,7 +84,7 @@ class Enhancements{
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 	  }
 	  
-	  //Navigator (official): +1 OB, cost: old rating *5, limit: 1
+	  //Navigator (official): +1 OB, cost: 10, limit: 1
 	  $enhID = 'NAVIGATOR';	  
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
 		  $enhName = 'Navigator (missile guidance, +5 Initiative)';
