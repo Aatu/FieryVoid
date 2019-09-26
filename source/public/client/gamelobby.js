@@ -918,6 +918,20 @@ window.gamedata = {
             }
             ship.flightSize = Math.floor(flightSize);
         }
+	    
+		//do note enhancements bought (if any)
+		var enhNo = 0;
+		var noTaken = 0;
+		var target = $(".selectAmount.shpenh" + enhNo);
+		while(typeof target.data("enhPrice") != 'undefined'){ //as long as there are enhancements defined...
+			noTaken = target.data("count");
+			if(noTaken > 0){ //enhancement picked - note!
+				ship.enhancementOptions[enhNo][2] = noTaken;
+			}
+			//go to next enhancement
+			enhNo++;
+			target = $(".selectAmount.shpenh" + enhNo);
+		}	    
 
         if ($(".confirm .selectAmount").length > 0) {
             if (ship.flight) {
