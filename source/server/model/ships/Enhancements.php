@@ -64,7 +64,7 @@ class Enhancements{
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Poor Crew';
 		  $enhLimit = 2;	
-		  $enhPrice = -ceil(ship.pointCost*0.15); //-15%	  
+		  $enhPrice = -ceil($ship->pointCost*0.15); //-15%	  
 		  $enhPriceStep = -ceil($enhPrice/3); //+5%, for total price of -10% for second level
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 	  }

@@ -88,7 +88,7 @@ class BuyingGamePhase implements Phase
                         $enhName = $enhancementEntry[1];
                         $enhNo = $enhancementEntry[2];
                         if ($enhNo > 0){ //actually taken
-                            self::$dbManager->submitEnhancement($gamedata->id, $id, $enhID, $enhNo, $enhName);
+                            $dbManager->submitEnhancement($gameData->id, $id, $enhID, $enhNo, $enhName);
                         }
                     }
                     
