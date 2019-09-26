@@ -11,7 +11,7 @@ class wlcChlonasSaTrevanFlight extends FighterFlight{
 	    
         $this->faction = "Ch'Lonas";
 	$this->unofficial = true;
-	    $this>isd = 2235;
+	    $this->isd = 2235;
         
         $this->forwardDefense = 6;
         $this->sideDefense = 7;
