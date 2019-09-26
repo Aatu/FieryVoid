@@ -54,7 +54,13 @@ class BaseShip {
     public $slotid;
 
     public $movement = array();
-    
+    	    
+		//unit enhancements
+		public $enhancementOptions = array(); //ID,readableName,numberTaken,limit,price,priceStep
+		public $enhancementOptionsEnabled = array(); //enabled non-standard options - just IDs
+		public $enhancementOptionsDisabled = array(); //disabled standard options - jsut IDs
+		public $enhancementTooltip = ""; //to be displayed with ship name / class	
+	
     protected $advancedArmor = false; //set to true if ship is equipped with advanced armor!
 	    
 	    public function getAdvancedArmor(){
@@ -207,7 +213,10 @@ class BaseShip {
 
 
     public function onConstructed($turn, $phase, $gamedata)
-    {
+    {	    
+		//enhancements (in game, NOT fleet selection!)
+		Enhancements::setEnhancements($this);
+	    
         foreach ($this->systems as $system){
             $system->onConstructed($this, $turn, $phase);
             $this->enabledSpecialAbilities = $system->getSpecialAbilityList($this->enabledSpecialAbilities);
