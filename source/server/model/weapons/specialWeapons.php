@@ -1991,7 +1991,6 @@ class LtEMWaveDisruptor extends LinkedWeapon{
 	public $trailColor = array(50, 50, 200);
 	public $name = "LtEMWaveDisruptor";
 	public $displayName = "Light EM Wave Disruptor";
-	public $iconPath = "lightParticleBeam.png";
 	public $animation = "trail";
 	public $animationColor =  array(145, 145, 245);
 	public $animationExplosionScale = 0.10;
@@ -2005,6 +2004,7 @@ class LtEMWaveDisruptor extends LinkedWeapon{
 	public $rangePenalty = 2;
 	public $fireControl = array(null, null, null); // no offensive mode
 	public $priority = 4; 
+	public $iconPath = "emWaveDisruptor.png";
 
 	
 	public $damageType = "Standard"; 

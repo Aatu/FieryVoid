@@ -979,6 +979,7 @@ spl_autoload_register(
                 'wlcchlonasontharicva' => '/server/model/ships/ZCustomChLonas/wlcChlonasOnThariCVA.php',
                 'wlcchlonasontharicva2253' => '/server/model/ships/ZCustomChLonas/wlcChlonasOnThariCVA2253.php',
                 'wlcchlonasontaincvh' => '/server/model/ships/ZCustomChLonas/wlcChlonasOnTainCVH.php',
+                'wlcchlonasxertharica' => '/server/model/ships/ZCustomChLonas/wlcChlonasXerThariCA.php',
 		    
                 'wlcemperordn2090' => '/server/model/ships/customs/wlcEmperorDN2090.php',
                 'wlcgarut2006' => '/server/model/ships/customs/wlcGarut2006.php',
@@ -1053,6 +1054,9 @@ spl_autoload_register(
                 'brixadiipursuitfrigate2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigate2057.php',
                 'brixadiipursuitfrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigate2108.php',
 		    
+                'brixadiipolicefrigatebase' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigateBase.php',
+                'brixadiipolicefrigate2047' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2047.php',
+                'brixadiiscreenfrigate' => '/server/model/ships/ZNexusBrixadii/BrixadiiScreenFrigate.php',
 		    
                 'brixadiisurveyorbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyorBase.php',
                 'brixadiisurveyor2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyor2057.php',

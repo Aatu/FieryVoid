@@ -312,6 +312,7 @@
         public $intercept = 3;
         public $loadingtime = 1;
         public $charges = 2;
+	public $iconPath = "emWaveDisruptor.png";
         
         public $rangePenalty = 2;
         public $fireControl = array(4, null, null); // fighters, <mediums, <capitals 

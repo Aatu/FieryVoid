@@ -11,6 +11,7 @@ class wlcChlonasLerTarFlight extends FighterFlight{
 	    
         $this->faction = "Ch'Lonas";
 	$this->unofficial = true;
+	    $this->isd = 2165;
         
         $this->forwardDefense = 5;
         $this->sideDefense = 7;
