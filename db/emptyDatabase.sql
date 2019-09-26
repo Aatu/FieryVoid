@@ -157,7 +157,7 @@ CREATE TABLE `tac_ammo` (
 DROP TABLE IF EXISTS `tac_enhancements`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `tac_ammo` (
+CREATE TABLE `tac_enhancements` (
   `gameid` int(11) NOT NULL,
   `shipid` int(11) NOT NULL,
   `enhid` varchar(10) NOT NULL,
