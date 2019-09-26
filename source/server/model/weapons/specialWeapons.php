@@ -2005,6 +2005,7 @@ class LtEMWaveDisruptor extends LinkedWeapon{
 	public $rangePenalty = 2;
 	public $fireControl = array(null, null, null); // no offensive mode
 	public $priority = 4; 
+	public $iconPath = "emWaveDisruptor.png";
 
 	
 	public $damageType = "Standard"; 
