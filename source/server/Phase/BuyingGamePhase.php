@@ -81,6 +81,17 @@ class BuyingGamePhase implements Phase
                 if ($ship->userid == $gameData->forPlayer){
                     $id = $dbManager->submitShip($gameData->id, $ship, $gameData->forPlayer);
 
+                    
+                    //unit enhancements
+                    foreach($ship->enhancementOptions as $enhancementEntry){ //ID,readableName,numberTaken,limit,price,priceStep
+                        $enhID = $enhancementEntry[0];
+                        $enhName = $enhancementEntry[1];
+                        $enhNo = $enhancementEntry[2];
+                        if ($enhNo > 0){ //actually taken
+                            self::$dbManager->submitEnhancement($gamedata->id, $id, $enhID, $enhNo, $enhName);
+                        }
+                    }
+                    
                     // Check if ship uses variable flight size
                     if($ship instanceof FighterFlight){
                         $dbManager->submitFlightSize($gameData->id, $id, $ship->flightSize);
