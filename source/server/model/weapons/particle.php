@@ -648,7 +648,7 @@
         public function setMinDamage(){     $this->minDamage = 4 ;      }
         public function setMaxDamage(){     $this->maxDamage = 13 ;      }
     } //endof class RepeaterGun
-    /*old Repeater Gun
+/*old Repeater Gun
     class RepeaterGun extends ParticleRepeater{
         public $name = "repeaterGun";
         public $displayName = "Repeater Gun";
@@ -676,9 +676,7 @@
 
 
 
-
     class PairedParticleGun extends LinkedWeapon{
-
         public $trailColor = array(30, 170, 255);
 
         public $name = "pairedParticleGun";
@@ -689,59 +687,49 @@
         public $projectilespeed = 12;
         public $animationWidth = 2;
         public $trailLength = 10;
-        public $intercept;
-
+        public $intercept = 2;
 
         public $loadingtime = 1;
         public $shots = 2;
         public $defaultShots = 2;
-	public $priority = 2;
+	public $priority = 3;
 
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         private $damagebonus = 0;
-
         
         public $damageType = "Standard"; 
-        public $weaponClass = "Particle"; 
-        
+        public $weaponClass = "Particle";         
 
         function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
             $this->damagebonus = $damagebonus;
             $this->defaultShots = $nrOfShots;
             $this->shots = $nrOfShots;
-            $this->intercept = $nrOfShots;
-		
+            $this->intercept = $nrOfShots;		
 
-            if ($damagebonus > 2) $this->priority++;            
-            if ($damagebonus > 4) $this->priority++;                      
+            if ($damagebonus > 2) $this->priority++; //heavier varieties fire later in the queue
+            if ($damagebonus > 4) $this->priority++;
             if ($damagebonus > 6) $this->priority++;
 
             if($nrOfShots === 1){
                 $this->iconPath = "particleGun.png";
             }
 
-            if($nrOfShots === 3){
+            if($nrOfShots >2){//no special icon for more than 3 linked weapons
                 $this->iconPath = "pairedParticleGun3.png";
             }
 
             parent::__construct(0, 1, 0, $startArc, $endArc);
-
         }
 
         public function setSystemDataWindow($turn){
-
-            //$this->data["Weapon type"] = "Particle";
-            //$this->data["Damage type"] = "Standard";
-
             parent::setSystemDataWindow($turn);
         }
 
         public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
         public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
         public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
-
-    }
+    } //endof PairedParticleGun
 
 
 
