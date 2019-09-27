@@ -22,6 +22,7 @@ class TarzaNav extends FighterFlight{
         
         $this->occurence = 'rare';
 	$this->variantOf = "Gorith Medium Fighters";
+	$this->variantOf = 'DISABLED'; //disabled because basic fighter will get Navigator as option, no need for separate hull now!
         $this->populate();
     }
 

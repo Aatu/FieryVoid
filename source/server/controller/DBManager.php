@@ -722,7 +722,9 @@ class DBManager
         try {
 
             foreach ($ships as $ship) {
-                $unmodified = $ship->unmodifiedIniative === null ? 'NULL' : $ship->unmodifiedIniative;
+                //$unmodified = $ship->unmodifiedIniative === null ? 'NULL' : $ship->unmodifiedIniative;
+				//I THINK unmodified ini should mean INI bonus...
+				$unmodified = $ship->unmodifiedIniative === null ? $ship->iniativebonus : $ship->unmodifiedIniative;				
                 $sql = "INSERT INTO `B5CGM`.`tac_iniative` VALUES($gameid, " . $ship->id . ", $turn, " . $ship->iniative . ", " . $unmodified .")";
                 $this->update($sql);
             }

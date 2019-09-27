@@ -21,7 +21,11 @@
                         throw new Exception("Validation of EW failed: DIST ew not divisable by 3");
                 }
 			}
-
+			
+			/* Marcin Sawicki, 27.09.2019: apparently at this point ship enhancements are NOT taken into account (and scanner output can be affected by them)
+			hence I disable this check! judging it not to be necessary.
+			*/
+			/*
 			$available = self::getScannerOutput($ship, $gamedata->turn);
 
 			if ($available >= $used){
@@ -29,7 +33,9 @@
 			}
 
             throw new Exception("EW validation failed: used more than available (shipId: $ship->id). Used $used available $available");
-
+			*/
+			return true;
+			
 		}
 		
 		public static function getScannerOutput($ship, $turn){

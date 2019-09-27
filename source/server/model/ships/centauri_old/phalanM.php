@@ -19,6 +19,9 @@ class PhalanM extends FighterFlight{
         $this->turncost = 0.33;
         
 		$this->iniativebonus = 80;
+		
+		$this->enhancementOptionsEnabled[] = 'NAVIGATOR'; //this flight can take Navigator enhancement option	
+		
         $this->populate();
     }
     public function populate(){

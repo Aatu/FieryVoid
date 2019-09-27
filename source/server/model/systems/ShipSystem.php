@@ -59,6 +59,9 @@ class ShipSystem {
         $strippedSystem->outputMod = $this->outputMod;
         $strippedSystem->destroyed = $this->destroyed;
 
+		//ship enhancements - check if this system is affected...
+		$strippedSystem = Enhancements::addSystemEnhancementsForJSON($this->unit, $this, $strippedSystem);//modifies $strippedSystem object
+
         return $strippedSystem;
     }
 
@@ -175,14 +178,12 @@ class ShipSystem {
     }
     
     public function setCritical($critical, $turn){
-
         if ($critical->param){            
             $currentTurn = TacGamedata::$currentTurn;
             if ($currentTurn > $critical->turn + $critical->param){
                 return;
             }
-        }
-        
+        }        
         if (!$critical->oneturn || ($critical->oneturn && $critical->turn >= $turn-1))
             $this->criticals[] = $critical; 
     }
@@ -272,7 +273,6 @@ class ShipSystem {
                 
             $this->critData[$crit->phpclass] = $crit->description .$forturn;
         }
-        
     }
     
     public function testCritical($ship, $gamedata, $crits, $add = 0){

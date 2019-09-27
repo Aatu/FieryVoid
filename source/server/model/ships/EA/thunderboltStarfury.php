@@ -4,7 +4,7 @@ class ThunderboltStarfury extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 480;
+        $this->pointCost = 80*6;
         $this->faction = "EA";
         $this->phpclass = "ThunderboltStarfury";
         $this->shipClass = "Starfury: Thunderbolt Heavy flight";
@@ -21,7 +21,9 @@ class ThunderboltStarfury extends FighterFlight{
         $this->turncost = 0.33;
         
         $this->iniativebonus = 80;
-        $this->populate();        
+        $this->populate();       
+
+		$this->enhancementOptionsEnabled[] = 'NAVIGATOR'; //this flight can have Navigator enhancement option	
     }
 
     public function populate(){

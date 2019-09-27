@@ -52,6 +52,7 @@ class SystemInfo extends React.Component {
              specialEntry = system.data.Special.split('<br>');
         }
         var specialName = 'Special';
+		var reactKey=0; //needed for react so each line has unique key!
 
         return (
             <SystemInfoTooltip position={getPosition(boundingBox)}>
@@ -66,9 +67,9 @@ class SystemInfo extends React.Component {
 
                 {Object.keys(system.data).map((key, i) => (key != specialName && getEntry(key, system.data[key], 'data'+ i)))}
 
-				{Object.keys(specialEntry).length > 0 && <Entry><Header>Special: </Header>-</Entry>}
+				{Object.keys(specialEntry).length > 0 && <Entry key={`special-${reactKey++}`}><Header>Special: </Header>&nbsp;</Entry>}
 				{Object.keys(specialEntry).length > 0 && 
-					Object.keys(specialEntry).map(i => <Entry>{specialEntry[i]}</Entry> )
+					Object.keys(specialEntry).map(i => <Entry key={`special-${reactKey++}`}>{specialEntry[i]}</Entry> )
 				}
 
                 {Object.keys(system.critData).length > 0 && getCriticals(system)}

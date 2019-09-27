@@ -9,6 +9,7 @@ class PhalanMNav extends FighterFlight{
         $this->phpclass = "PhalanMNav";
         $this->shipClass = "Phalan-M Missile Fighters (with navigator)";
 	    $this->variantOf = "Phalan Assault Fighters";
+	$this->variantOf = 'DISABLED'; //disabled because basic fighter will get Navigator as option, no need for separate hull now!
 		$this->imagePath = "img/ships/phalan.png";
         
         $this->forwardDefense = 9;

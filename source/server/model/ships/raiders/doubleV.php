@@ -18,6 +18,7 @@ class DoubleV extends FighterFlight{
 		$this->turncost = 0.33;
 		
         $this->notes = 'Needs 2 rail slots.';
+		$this->enhancementOptionsEnabled[] = 'NAVIGATOR'; //this flight can take Navigator enhancement option	
 
 		$this->iniativebonus = 90;
         $this->populate();
@@ -44,3 +45,4 @@ class DoubleV extends FighterFlight{
 				}
 }
 
+?>

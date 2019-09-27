@@ -38466,6 +38466,7 @@ var ShipInfo = function (_React$Component) {
 
 			var notes = new Array();
 			var hitChart = new Array();
+			var enhArray = new Array();
 
 			if (ship.notes) {
 				notes = ship.notes.split("<br>");
@@ -38507,12 +38508,17 @@ var ShipInfo = function (_React$Component) {
 				}
 			}
 
+			if (ship.enhancementTooltip != '') {
+				enhArray = ship.enhancementTooltip.split("<br>");
+			}
+			var reactKey = 0; //needed for react so each line has unique key!
+
 			return React.createElement(
 				InfoContainer,
 				null,
 				ship.flight && React.createElement(
 					_SystemInfo.Entry,
-					null,
+					{ key: reactKey++ },
 					React.createElement(
 						_SystemInfo.Header,
 						null,
@@ -38522,7 +38528,7 @@ var ShipInfo = function (_React$Component) {
 				),
 				ship.flight && React.createElement(
 					_SystemInfo.Entry,
-					null,
+					{ key: reactKey++ },
 					React.createElement(
 						_SystemInfo.Header,
 						null,
@@ -38532,7 +38538,7 @@ var ShipInfo = function (_React$Component) {
 				),
 				ship.flight && React.createElement(
 					_SystemInfo.Entry,
-					null,
+					{ key: reactKey++ },
 					React.createElement(
 						_SystemInfo.Header,
 						null,
@@ -38542,45 +38548,45 @@ var ShipInfo = function (_React$Component) {
 				),
 				ship.flight && React.createElement(
 					_SystemInfo.Entry,
-					null,
-					"-"
+					{ key: reactKey++ },
+					"\xA0"
 				),
 				Object.keys(notes).length > 0 && React.createElement(
 					_SystemInfo.Entry,
-					null,
+					{ key: reactKey++ },
 					React.createElement(
 						_SystemInfo.Header,
 						null,
-						"NOTES: "
+						"NOTES:"
 					),
-					"-"
+					"\xA0"
 				),
 				Object.keys(notes).length > 0 && Object.keys(notes).map(function (i) {
 					return React.createElement(
 						_SystemInfo.Entry,
-						null,
+						{ key: reactKey++ },
 						notes[i]
 					);
 				}),
 				Object.keys(notes).length > 0 && React.createElement(
 					_SystemInfo.Entry,
-					null,
-					"-"
+					{ key: reactKey++ },
+					"\xA0"
 				),
 				Object.keys(hitChart).length > 0 && React.createElement(
 					_SystemInfo.Entry,
-					null,
+					{ key: reactKey++ },
 					React.createElement(
 						_SystemInfo.Header,
 						null,
-						"HIT CHART: "
+						"HIT CHART:"
 					),
-					"-"
+					"\xA0"
 				),
 				Object.keys(hitChart).length > 0 && Object.keys(hitChart).map(function (i) {
 					return React.createElement(
 						_SystemInfo.Entry,
-						null,
+						{ key: reactKey++ },
 						React.createElement(
 							_SystemInfo.Header,
 							null,
@@ -38592,8 +38598,30 @@ var ShipInfo = function (_React$Component) {
 				}),
 				Object.keys(hitChart).length > 0 && React.createElement(
 					_SystemInfo.Entry,
-					null,
-					"-"
+					{ key: reactKey++ },
+					"\xA0"
+				),
+				ship.enhancementTooltip != '' && React.createElement(
+					_SystemInfo.Entry,
+					{ key: reactKey++ },
+					React.createElement(
+						_SystemInfo.Header,
+						null,
+						"ENHANCEMENTS:"
+					),
+					"\xA0"
+				),
+				ship.enhancementTooltip != '' && Object.keys(enhArray).map(function (i) {
+					return React.createElement(
+						_SystemInfo.Entry,
+						{ key: reactKey++ },
+						enhArray[i]
+					);
+				}),
+				ship.enhancementTooltip != '' && React.createElement(
+					_SystemInfo.Entry,
+					{ key: reactKey++ },
+					"\xA0"
 				)
 			);
 
@@ -39270,6 +39298,7 @@ var SystemInfo = function (_React$Component) {
                 specialEntry = system.data.Special.split('<br>');
             }
             var specialName = 'Special';
+            var reactKey = 0; //needed for react so each line has unique key!
 
             return React.createElement(
                 SystemInfoTooltip,
@@ -39289,18 +39318,18 @@ var SystemInfo = function (_React$Component) {
                 }),
                 Object.keys(specialEntry).length > 0 && React.createElement(
                     Entry,
-                    null,
+                    { key: "special-" + reactKey++ },
                     React.createElement(
                         Header,
                         null,
                         "Special: "
                     ),
-                    "-"
+                    "\xA0"
                 ),
                 Object.keys(specialEntry).length > 0 && Object.keys(specialEntry).map(function (i) {
                     return React.createElement(
                         Entry,
-                        null,
+                        { key: "special-" + reactKey++ },
                         specialEntry[i]
                     );
                 }),

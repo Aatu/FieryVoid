@@ -124,6 +124,15 @@ class BaseShip {
         $strippedShip->faction = $this->faction; 
         $strippedShip->phpclass = $this->phpclass; 
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
+		
+		//unit enhancements
+		if($this->enhancementTooltip !== ''){ //enhancements exist!			
+			$strippedShip->enhancementTooltip = $this->enhancementTooltip; 
+			$strippedShip = Enhancements::addUnitEnhancementsForJSON($this, $strippedShip);//modifies $strippedShip  object
+		}
+		
+		$strippedShip->enhancementOptions = array(); //no point in sending options information...
+			
         return $strippedShip;
     }
 	    
