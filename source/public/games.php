@@ -53,7 +53,7 @@ if (isset($_SESSION["user"])) {
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
 <div class="panel news">
-    <div id="newsHeader">Latest News - September 2019</div>
+    <div id="newsHeader">Latest News - October 2019</div>
     <div id="newsEntry">
         <!--
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
@@ -62,35 +62,8 @@ if (isset($_SESSION["user"])) {
         -->
         The latest update includes:
         <br><br>
-            <b>Minor fixes</b> - layout fixes mostly
-        <br>
-            <b>New missile ships</b> - primarily Govall with full special missile load :)
-        <br>
-            <b>Hit charts</b> - hit charts returned! mouseover ship image :) . You'll see ship notes there as well.
-        <br>
-            <b>Special comments</b> - are properly displayed as multiline again
-        <br>
-            <b>CCEW modified</b> - now CCEW reaches out only 10 hexes, as it should. If You want to reach further, You need proper OEW (now usable on fighters).
-        <br>
-            <b>Drazi Serpent guns</b> - fixed
-        <br>
-            <b>Damage allocation improved</b> - better splitting fire incoming at section split. Base owners should be particularly happy :) .
-        <br>
-            <b>Range 0 speed 0 firing arcs fixed</b> - as long as only one of units involved is speed 0!
-        <br>
-            <b>Particle Repeater now reacts properly to boosting</b> - and Repeater Gun too!
-        <br>
-            <b>Defensive fire side effects handled properly</b> - which means Grav Pulsars and Particle Repeaters now shutdown if boosted and fired defensively!
-        <br>
-            <b>Boosted systems</b> now are highlighted so they can be identified on a glance
-        <br>
-            <b>Missile hit chance fixed</b> - onscreen, as actual firing was already being resolved correctly
-        <br>
-            <b>Firing log improved</b> - now order of entries is closer to actual firing resolution
-        <br>
-            <b>Flash weapons fixed</b> - there was a bug when firing at fighter flight
-        <br>
-            <b>Ballistics animation fixed</b> - now missiles start their flight at launch point, not current firing ship location
+            <b>Unit enhancements</b> - did You ever have a few dozen points You don't know what to do with, or change entire list not to be left with a couple hundred? Now You can spend them on boosting Your units' performance! Detailed list of available upgrades (and their effects) is available in FB group, Files section.
+        
         <!--
         <br>
             <b>Missile replay fixed</b> - now source hex should be launch hex instead of current position!
