@@ -88,7 +88,7 @@ class Enhancements{
 			}
 		  }  
 		  if($strongestValue > 0){ //Sensors actually exist to be enhanced!
-			  $enhPrice = max(1,$strongestValue*5);	  
+			  $enhPrice = max(1,($strongestValue+1)*5);	  
 			  $enhPriceStep = 0;
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
