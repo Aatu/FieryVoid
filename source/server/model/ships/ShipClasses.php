@@ -54,7 +54,13 @@ class BaseShip {
     public $slotid;
 
     public $movement = array();
-    
+    	    
+		//unit enhancements
+		public $enhancementOptions = array(); //ID,readableName,numberTaken,limit,price,priceStep
+		public $enhancementOptionsEnabled = array(); //enabled non-standard options - just IDs
+		public $enhancementOptionsDisabled = array(); //disabled standard options - jsut IDs
+		public $enhancementTooltip = ""; //to be displayed with ship name / class	
+	
     protected $advancedArmor = false; //set to true if ship is equipped with advanced armor!
 	    
 	    public function getAdvancedArmor(){
@@ -118,6 +124,15 @@ class BaseShip {
         $strippedShip->faction = $this->faction; 
         $strippedShip->phpclass = $this->phpclass; 
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
+		
+		//unit enhancements
+		if($this->enhancementTooltip !== ''){ //enhancements exist!			
+			$strippedShip->enhancementTooltip = $this->enhancementTooltip; 
+			$strippedShip = Enhancements::addUnitEnhancementsForJSON($this, $strippedShip);//modifies $strippedShip  object
+		}
+		
+		$strippedShip->enhancementOptions = array(); //no point in sending options information...
+			
         return $strippedShip;
     }
 	    
@@ -207,7 +222,10 @@ class BaseShip {
 
 
     public function onConstructed($turn, $phase, $gamedata)
-    {
+    {	    
+		//enhancements (in game, NOT fleet selection!)
+		Enhancements::setEnhancements($this);
+	    
         foreach ($this->systems as $system){
             $system->onConstructed($this, $turn, $phase);
             $this->enabledSpecialAbilities = $system->getSpecialAbilityList($this->enabledSpecialAbilities);

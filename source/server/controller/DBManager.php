@@ -158,6 +158,19 @@ class DBManager
         return $id;
     }
 
+	
+
+	public function submitEnhancement($gameid, $shipid, $enhid, $numbertaken, $enhname){	
+		try{
+			$sql = "INSERT INTO `B5CGM`.`tac_enhancements` (gameid, shipid, enhid, numbertaken,enhname) 
+				VALUES($gameid, $shipid, '$enhid', $numbertaken, '".$this->DBEscape($enhname)."' )";
+			$this->insert($sql);
+		}catch(Exception $e) {
+			$this->endTransaction(true);
+			throw $e;
+		}
+	} //endof function submitEnhancement
+	
 
     public function submitAdaptiveArmour($gameid, $shipid)
     {
@@ -709,7 +722,9 @@ class DBManager
         try {
 
             foreach ($ships as $ship) {
-                $unmodified = $ship->unmodifiedIniative === null ? 'NULL' : $ship->unmodifiedIniative;
+                //$unmodified = $ship->unmodifiedIniative === null ? 'NULL' : $ship->unmodifiedIniative;
+				//I THINK unmodified ini should mean INI bonus...
+				$unmodified = $ship->unmodifiedIniative === null ? $ship->iniativebonus : $ship->unmodifiedIniative;				
                 $sql = "INSERT INTO `B5CGM`.`tac_iniative` VALUES($gameid, " . $ship->id . ", $turn, " . $ship->iniative . ", " . $unmodified .")";
                 $this->update($sql);
             }
@@ -1388,6 +1403,32 @@ class DBManager
         }
     }
 
+
+    private function getEnhencementsForShip($shipID){
+	$toReturn = array();
+	$stmt = $this->connection->prepare( //enhname will be used for info tooltip!
+            "SELECT 
+                enhid, numbertaken, enhname
+            FROM 
+                tac_enhancements 
+            WHERE 
+                shipid = ?
+            "
+        );
+        if ($stmt)
+        {
+            $stmt->bind_param('i', $shipID);
+            $stmt->bind_result($enhID, $numbertaken, $description);
+            $stmt->execute();
+            while ($stmt->fetch())
+            {
+		    $toReturn[] = array($enhID,$numbertaken,$description);
+            }
+        }
+	return $toReturn;
+    } //endof function getEnhencementsForShip
+	
+	
     private function getEWForShips(TacGamedata $gamedata, $fetchTurn)
     {
 
@@ -1620,8 +1661,6 @@ class DBManager
         );
 
         //select shipid, systemid, firingmode, (select ammo from tac_ammo where shipid = t.shipid and systemid = t.systemid and firingmode = t.firingmode and turn <= 1 order by turn desc limit 1) as ammo from tac_ammo t group by shipid, systemid, firingmode;
-
-
         if ($stmt) {
             $stmt->bind_param('iii', $gamedata->id, $fetchTurn, $gamedata->id);
             $stmt->execute();
@@ -1637,7 +1676,18 @@ class DBManager
                 $gamedata->getShipById($shipid)->getSystemById($systemid)->setAmmo($firingmode, $ammo);
             }
             $stmt->close();
-        }
+        }	    
+
+	//get enhancement info   
+	foreach ($gamedata->ships as $ship){
+		$enhArray = $this->getEnhencementsForShip($ship->id);//result: array($enhID,$numbertaken,$readablename);
+		if( count($enhArray) == 0 ){ //no enhancements! add empty one just to show it's been read
+			$ship->enhancementOptions[] = array('NONE','-', 0,0,0,0); //[ID,readableName,numberTaken,limit,price,priceStep]
+		}
+		foreach($enhArray as $entry){
+			$ship->enhancementOptions[] = array($entry[0],$entry[2], $entry[1],0,0,0);
+		}
+	}
     }
 
     public function getFireOrdersForShips($gamedata, $fetchTurn)
@@ -2148,6 +2198,16 @@ class DBManager
                     gameid = ?"
             );
             $this->executeGameDeleteStatement($stmt, $ids);
+		
+		//unit enhancements
+            $stmt = $this->connection->prepare(
+                "DELETE FROM 
+                    tac_enhancements
+                WHERE
+                    gameid = ?"
+            );
+            $this->executeGameDeleteStatement($stmt, $ids);
+		
         } catch (Exception $e) {
             throw $e;
         }

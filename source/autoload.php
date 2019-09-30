@@ -1068,10 +1068,16 @@ spl_autoload_register(
 		'custombpamedium' => '/server/model/weapons/customs.php', 
 		'custombpaheavy' => '/server/model/weapons/customs.php' ,
 		    
+		    
+		    
 		    //TEMPORARY campaign-related designs - essentially upgrades of existing ships
 		    
-                'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php'
+                'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
 		
+		    
+		    
+		//let's end this with unit enhancement class...		    
+		'enhancements' => '/server/model/ships/Enhancements.php'
             );
         }
         $cn = strtolower($class);

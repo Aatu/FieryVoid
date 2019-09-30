@@ -38,6 +38,10 @@
 						$system->beforeTurn($ship, 0, 0);
 					    }
         
+
+					//enhancements (for fleet selection)
+					Enhancements::setEnhancementOptions($ship);
+					
 					if (!isset($ships[$ship->faction])){
 						$ships[$ship->faction] = array();
 					}

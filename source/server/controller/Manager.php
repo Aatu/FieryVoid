@@ -584,6 +584,10 @@ class Manager{
                 $ship->armourSettings = $value["armourSettings"];
             }
 
+
+	    //unit enhancements
+		$ship->enhancementOptions = $value["enhancementOptions"];
+		
             $systems = isset($value["systems"]) ? $value["systems"] : [];
             foreach($systems as $i=>$system){
                 //$sys = $ship->getSystemById($system['id']);

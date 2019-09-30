@@ -11,6 +11,7 @@ class ShipInfo extends React.Component {
         const {ship} = this.props;
 		var notes = new Array;
 		var hitChart = new Array;
+		var enhArray = new Array;
 		
 		if(ship.notes){
 			notes = ship.notes.split("<br>");
@@ -51,25 +52,35 @@ class ShipInfo extends React.Component {
 			}
 		}		
 		
+		if(ship.enhancementTooltip != ''){
+			enhArray = ship.enhancementTooltip.split("<br>");			
+		}		
+		var reactKey=0; //needed for react so each line has unique key!
 		
 		return(
 		    <InfoContainer>
-                {ship.flight && <Entry><Header>Offensive bonus: </Header>{ship.offensivebonus * 5}</Entry>}
-                {ship.flight && <Entry><Header>Armor (F/S/A): </Header>{shipManager.systems.getFlightArmour(ship)}</Entry>}
-                {ship.flight && <Entry><Header>Thrust per turn: </Header>{ship.freethrust}</Entry>}
-				{ship.flight && <Entry>-</Entry>}
+                {ship.flight && <Entry key={reactKey++}><Header>Offensive bonus: </Header>{ship.offensivebonus * 5}</Entry>}
+                {ship.flight && <Entry key={reactKey++}><Header>Armor (F/S/A): </Header>{shipManager.systems.getFlightArmour(ship)}</Entry>}
+                {ship.flight && <Entry key={reactKey++}><Header>Thrust per turn: </Header>{ship.freethrust}</Entry>}
+				{ship.flight && <Entry key={reactKey++}>&nbsp;</Entry>}
 				
-				{Object.keys(notes).length > 0 && <Entry><Header>NOTES: </Header>-</Entry>}
+				{Object.keys(notes).length > 0 && <Entry key={reactKey++}><Header>NOTES:</Header>&nbsp;</Entry>}
 				{Object.keys(notes).length > 0 && 
-					Object.keys(notes).map(i => <Entry>{notes[i]}</Entry> )
+					Object.keys(notes).map(i => <Entry key={reactKey++}>{notes[i]}</Entry> )
 				}
-				{Object.keys(notes).length > 0 && <Entry>-</Entry>}
+				{Object.keys(notes).length > 0 && <Entry key={reactKey++}>&nbsp;</Entry>}
 
-				{Object.keys(hitChart).length > 0 && <Entry><Header>HIT CHART: </Header>-</Entry>}
+				{Object.keys(hitChart).length > 0 && <Entry key={reactKey++}><Header>HIT CHART:</Header>&nbsp;</Entry>}
 				{Object.keys(hitChart).length > 0 && 
-					Object.keys(hitChart).map(i => <Entry><Header>{i}: </Header>{hitChart[i]}</Entry> )
+					Object.keys(hitChart).map(i => <Entry key={reactKey++}><Header>{i}: </Header>{hitChart[i]}</Entry> )
 				}
-				{Object.keys(hitChart).length > 0 && <Entry>-</Entry>}
+				{Object.keys(hitChart).length > 0 && <Entry key={reactKey++}>&nbsp;</Entry>}
+				
+				{ship.enhancementTooltip != '' && <Entry key={reactKey++}><Header>ENHANCEMENTS:</Header>&nbsp;</Entry>}
+				{ship.enhancementTooltip != '' && 
+					Object.keys(enhArray).map(i => <Entry key={reactKey++}>{enhArray[i]}</Entry> )
+				}
+				{ship.enhancementTooltip != '' && <Entry key={reactKey++}>&nbsp;</Entry>}
 				
             </InfoContainer>
 		);	

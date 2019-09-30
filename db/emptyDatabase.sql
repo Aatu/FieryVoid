@@ -149,6 +149,25 @@ CREATE TABLE `tac_ammo` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+
+--
+-- Table structure for table `tac_enhancements`
+--
+
+DROP TABLE IF EXISTS `tac_enhancements`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tac_enhancements` (
+  `gameid` int(11) NOT NULL,
+  `shipid` int(11) NOT NULL,
+  `enhid` varchar(10) NOT NULL,
+  `numbertaken` int(11) NOT NULL,
+  `enhname` text(50) NOT NULL,
+  PRIMARY KEY (`gameid`,`shipid`,`enhid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
 --
 -- Table structure for table `tac_critical`
 --

@@ -22,6 +22,8 @@ class Tarza extends FighterFlight{
         $this->occurence = 'rare';
 	$this->variantOf = "Gorith Medium Fighters";
 	    
+		$this->enhancementOptionsEnabled[] = 'NAVIGATOR'; //this flight can take Navigator enhancement option	
+		
         $this->populate();
     }
 

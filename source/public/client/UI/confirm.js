@@ -144,6 +144,18 @@ window.confirm = {
 
         var totalCost = flightSize * (fighterCost + launchers * missileAmount * missileCost);
 
+        //add enhancement cost	   
+        var enhCost = 0;
+        var enhNo = 0;
+        var target = $(".selectAmount.shpenh" + enhNo);
+        while(typeof target.data("enhPrice") != 'undefined'){ //as long as there are enhancements defined...
+            enhCost += target.data("enhCost");		
+            //go to next enhancement
+            enhNo++;
+            target = $(".selectAmount.shpenh" + enhNo);
+        }
+        totalCost += flightSize * enhCost;
+
         var totalCostSpan = $(".confirm .totalUnitCostAmount");
         totalCostSpan.data("value", totalCost);
 
@@ -178,6 +190,57 @@ window.confirm = {
         confirm.getTotalCost();
     },
 
+    
+
+    doOnPlusEnhancement: function(e){
+	e.stopPropagation();  
+
+	var button = $(this);
+	var enhNo = button.data("enhNo");
+	var target = $(".selectAmount.shpenh" + enhNo);
+	    
+	var noTaken = target.data("count");
+	var enhLimit = target.data("max");	
+	var enhPrice = target.data("enhPrice");	
+	var enhPriceStep = target.data("enhPriceStep");	
+
+	if(noTaken < enhLimit){ //increase possible
+		var newCount = noTaken+1;
+		target.data("count", newCount);
+		target.html(newCount);
+		var cost = enhPrice + (noTaken*enhPriceStep); //base value, plus additional price charged for further levels
+		var newCost = target.data("enhCost")+cost;		
+		target.data("enhCost", newCost);
+		confirm.getTotalCost();
+	}
+    },
+
+    doOnMinusEnhancement: function(e){
+	e.stopPropagation();  
+
+	var button = $(this);
+	var enhNo = button.data("enhNo");
+	var target = $(".selectAmount.shpenh" + enhNo);
+	    
+	var noTaken = target.data("count");
+	var enhLimit = target.data("max");	
+	var enhPrice = target.data("enhPrice");	
+	var enhPriceStep = target.data("enhPriceStep");	
+
+	if(noTaken > 0){ //decrease possible
+		var newCount = noTaken-1;
+		target.data("count", newCount);
+		target.html(newCount);
+		var cost = enhPrice + (newCount*enhPriceStep); //base value, plus additional price charged for further levels
+		var newCost = target.data("enhCost")-cost;		
+		target.data("enhCost", newCost);
+		confirm.getTotalCost();
+	}
+    },
+	
+    
+    
+    
     showShipBuy: function showShipBuy(ship, callback) {
 
         var e = $(this.whtml);
@@ -186,7 +249,7 @@ window.confirm = {
         var variableSize = confirm.getVariableSize(ship);
         var missileOptions = confirm.getMissileOptions(ship);
 
-        if (variableSize || missileOptions.length > 0 || ship.superheavy) {
+        //if (variableSize || missileOptions.length > 0 || ship.superheavy) {
             var totalTemplate = $(".totalUnitCost");
             var totalItem = totalTemplate.clone(true).prependTo(e);
 
@@ -201,7 +264,55 @@ window.confirm = {
             if (ship.jinkinglimit > 9) {
                 $(".totalUnitCostAmount").data("maxSize", 12);
             } else $(".totalUnitCostAmount").data("maxSize", 9);
+        //}
+        
+    //ship enhancements
+        for(var i in ship.enhancementOptions){
+            //enhancementOption: ID,readableName,numberTaken,limit,price,priceStep	
+            var enhancement = ship.enhancementOptions[i];
+            var enhID = enhancement[0];
+            var enhName = enhancement[1];
+            var enhLimit = enhancement[3];		
+            var enhPrice = enhancement[4];
+            var enhPriceStep = enhancement[5];
+
+            var template = $(".missileSelectItem");
+                    var item = template.clone(true).prependTo(e);
+
+                    var selectAmountItem = $(".selectAmount", item);
+
+                    selectAmountItem.html("0");
+                    selectAmountItem.addClass("shpenh"+i);
+            selectAmountItem.data('enhID', enhID);
+                    selectAmountItem.data('count', 0);
+                    selectAmountItem.data('enhCost', 0);
+                    selectAmountItem.data('min', 0);
+            selectAmountItem.data('max', enhLimit);
+                selectAmountItem.data('enhPrice', enhPrice);
+                selectAmountItem.data('enhPriceStep', enhPriceStep);
+                //selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
+                //selectAmountItem.data("firingMode", i);
+
+            var nameExpanded = enhName + ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
+            if(enhPriceStep!=0){
+                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'PV per level';		
+            }
+            nameExpanded = nameExpanded + ')';
+
+            $(".selectText", item).html(nameExpanded);
+            $(item).show();
+
+                    var plusButton = $(".plusButton", item);
+                    plusButton.data("enhNo", i); 
+            var minusButton = $(".minusButton", item);
+                    minusButton.data("enhNo", i);
+
+
+            $(".plusButton", item).on("click",confirm.doOnPlusEnhancement);
+            $(".minusButton", item).on("click",confirm.doOnMinusEnhancement);
         }
+        $('<div class="missileselect"><label>You may select optional enhancements. Please be sensible.<br></label>').prependTo(e);
+        
 
         // Do lots of stuff to account for possible buying of missiles.
         var missileOptions = confirm.getMissileOptions(ship);
@@ -250,8 +361,11 @@ window.confirm = {
             $('<div class="missileselect"><label>This fighter type can carry fighter missiles.<br>\
                     Please select the amount you wish to purchase PER MISSILE LAUNCHER.<br></label>').prependTo(e);
 
-            $(".missileSelectItem .selectButtons .plusButton", e).on("click", confirm.doOnPlusMissile);
-            $(".missileSelectItem .selectButtons .minusButton", e).on("click", confirm.doOnMinusMissile);
+            //$(".missileSelectItem .selectButtons .plusButton", e).on("click", confirm.doOnPlusMissile);
+            //$(".missileSelectItem .selectButtons .minusButton", e).on("click", confirm.doOnMinusMissile);
+            //change for enhancements:
+            $(".plusButton", item).on("click",confirm.doOnPlusMissile);
+            $(".minusButton", item).on("click",confirm.doOnMinusMissile);
         }
 
         if (variableSize) {

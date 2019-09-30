@@ -139,6 +139,7 @@ window.shipWindowManager = {
 		if (gamedata.turn != 0) {
 			shipwindow.find(".topbar .value.name").html("");
 			shipwindow.find(".topbar .valueheader.name").html(ship.name);
+			//shipwindow.find(".topbar .valueheader.name").attr('title',ship.enhancementTooltip); //unit enhancements
 			shipwindow.find(".topbar .value.shipclass").html(ship.shipClass); // + " (" + ship.occurence + ")");
 		} else {
 			shipwindow.find(".topbar .value.name").html("");

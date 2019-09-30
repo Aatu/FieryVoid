@@ -8,6 +8,8 @@ class DoubleV_Nav extends FighterFlight{
 		$this->faction = "Raiders";
 		$this->phpclass = "DoubleV_Nav";
 		$this->shipClass = "Double-V Medium Flight (with navigator)";
+		$this->variantOf = "Double-V Medium Flight";
+		$this->variantOf = 'DISABLED'; //disabled because basic fighter will get Navigator as option, no need for separate hull now!
 		$this->imagePath = "img/ships/doubleV.png";
 
 		$this->forwardDefense = 5;
@@ -44,4 +46,4 @@ class DoubleV_Nav extends FighterFlight{
 	}
 				}
 }
-
+?>

@@ -10,7 +10,8 @@ class ThunderboltStarfuryNav extends FighterFlight{
     $this->shipClass = "Starfury: Thunderbolt Heavy flight (with navigator)";
     $this->imagePath = "img/ships/thunderboltStarfury.png";
 	    
-    $this->variantOf = 'Starfury: Thunderbolt Heavy flight';
+    //$this->variantOf = 'Starfury: Thunderbolt Heavy flight';
+	$this->variantOf = 'DISABLED'; //disabled because basic TBolt will get Navigator as option, no need for separate hull now!
 	$this->isd = 2259;
 	$this->notes = 'Needs updated hangars to handle.';
 
