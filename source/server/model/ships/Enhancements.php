@@ -20,7 +20,7 @@ class Enhancements{
 	/* all ship enhancement options - availability and cost calculation
 	*/
   public static function setEnhancementOptionsShip($ship){ 	  
-	  //Improved Engine (official): +1 Thrust, cost: new rating *5, limit: up to +50%
+	  //Improved Engine (official): +1 Thrust, cost: (3+1/turn cost)*4, round up, limit: up to +50%
 	  $enhID = 'IMPR_ENG';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Improved Engine';
@@ -34,8 +34,8 @@ class Enhancements{
 			}
 		  }  
 		  if($strongestValue > 0){ //Engine actually exists to be enhanced!
-			  $enhPrice = max(1,$strongestValue*5);	  
-			  $enhPriceStep = 5; 
+			  $enhPrice = ceil((3+(1/($ship->turncost)))*4);	  
+			  $enhPriceStep = 0; 
 			  $enhLimit = ceil($strongestValue/2);	  
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
@@ -88,7 +88,7 @@ class Enhancements{
 			}
 		  }  
 		  if($strongestValue > 0){ //Sensors actually exist to be enhanced!
-			  $enhPrice = max(1,$strongestValue*5);	  
+			  $enhPrice = max(1,($strongestValue+1)*5);	  
 			  $enhPriceStep = 0;
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
@@ -105,8 +105,8 @@ class Enhancements{
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 	  }
 	  
-	  //Elite Crew (official but modified): +5 Initiative, +1 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results
-	  //cost: +30% of ship cost (second time: +45%)
+	  //Elite Crew (official but modified): +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results
+	  //cost: +40% of ship cost (second time: +60%)
 	  //all Hangar-related advantages of original Elite Crew are skipped, and so is turn shortening
 	  //what's more important, weapons-related advantages are gone
 	  //Initiative bonus is added, critical bonus is increased
@@ -114,8 +114,8 @@ class Enhancements{
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Elite Crew';
 		  $enhLimit = 2;	
-		  $enhPrice = ceil($ship->pointCost*0.3); //+30%	  
-		  $enhPriceStep = ceil($ship->pointCost*0.15); //+15% of base, for total price of 60% for second level
+		  $enhPrice = ceil($ship->pointCost*0.4); //+40%	  
+		  $enhPriceStep = ceil($ship->pointCost*0.2); //+20% of base, for total price of 60% for second level
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 	  }	  
 	  
@@ -361,7 +361,7 @@ class Enhancements{
 							}
 						}  
 						if($strongestValue > 0){ //Engine actually exists to be enhanced!
-							$strongestSystem->output -= $enhCount;
+							$strongestSystem->output -= $enhCount*2;
 						}
 						//system mods: Reactor (here I assume main reactor is the biggest one! - ot the strongest, as eg. any malus would be on main reactor as well)
 						$strongestSystem = null;
