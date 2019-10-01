@@ -20,7 +20,7 @@ class Enhancements{
 	/* all ship enhancement options - availability and cost calculation
 	*/
   public static function setEnhancementOptionsShip($ship){ 	  
-	  //Improved Engine (official): +1 Thrust, cost: (3+1/turn cost)*4, round up, limit: up to +50%
+	  //Improved Engine (official): +1 Thrust, cost: 12+4/turn cost, round up, limit: up to +50%
 	  $enhID = 'IMPR_ENG';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Improved Engine';
@@ -34,7 +34,7 @@ class Enhancements{
 			}
 		  }  
 		  if($strongestValue > 0){ //Engine actually exists to be enhanced!
-			  $enhPrice = ceil((3+(1/($ship->turncost)))*4);	  
+			  $enhPrice = ceil(12+(4/($ship->turncost)));	  
 			  $enhPriceStep = 0; 
 			  $enhLimit = ceil($strongestValue/2);	  
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
