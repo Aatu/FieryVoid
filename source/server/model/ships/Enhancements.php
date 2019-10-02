@@ -128,7 +128,7 @@ class Enhancements{
   public static function setEnhancementOptionsFighter($flight){
 		//Expert Motivator: -2 dropout modifier, cost: 10% craft price (round up), limit: 1
 	  $enhID = 'EXP_MOTIV';	  
-	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+	  if(!in_array($enhID, $flight->enhancementOptionsDisabled)){ //option needs to be specifically enabled
 		  $enhName = 'Expert Motivator';
 		  $enhLimit = 1;	
 		  if($flight instanceof SuperHeavyFighter){//single-craft flight! 
