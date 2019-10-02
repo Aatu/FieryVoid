@@ -3,7 +3,6 @@ require_once("ShipClasses.php");
 
 class FighterFlight extends BaseShip
 {
-
     public $shipSizeClass = -1; //0:Light, 1:Medium, 2:Heavy, 3:Capital, 4:Enormous
     public $imagePath = "img/ships/null.png";
     public $iconPath, $shipClass;
@@ -27,6 +26,13 @@ class FighterFlight extends BaseShip
     public $hasNavigator = false;
     public $superheavy = false;
     public $flightSize = 1;
+    public $maxFlightSize = 0; //maximum size of flight; for single fighter that should be 1 (set in SUperHeavyFighter class)
+	//for regular flight of fighters that should be 0 (auto-choose, 12 for light fighters and 9 for others)
+	//or set explicitly; guidelines:
+	//light fighters: 12
+	//medium/heavy: 9
+	//particularly tough heavy (Pikitos, Tzymm): 6
+	//superheavy (implemented as flight): 3
     protected $flightLeader = null;
 
     public $offensivebonus, $freethrust;
@@ -384,6 +390,7 @@ class FighterFlight extends BaseShip
 class SuperHeavyFighter extends FighterFlight
 {
     public $superheavy = true;
+	public $maxFlightSize = 1;
 
     function __construct($id, $userid, $name, $slot)
     {
