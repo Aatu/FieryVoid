@@ -401,7 +401,8 @@ window.confirm = {
     },
 
     getVariableSize: function getVariableSize(ship) {
-        if (ship.flight && !ship.superheavy) {
+        //if (ship.flight && !ship.superheavy) { //superheavy is no longer a good marker
+	if (ship.flight && ship.maxFlightSize!=1) { //max flight size = 1 indicates single superheavy fighter
             return true;
         } else return false;
     },
