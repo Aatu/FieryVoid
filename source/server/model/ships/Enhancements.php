@@ -145,8 +145,8 @@ class Enhancements{
 	  if(!in_array($enhID, $flight->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Improved Targeting Computer';
 		  $enhLimit = 1;	
-		  $enhPrice = max(1,''($flight->offensivebonus+1)*3);	  
-		  $enhPriceStep = 0;
+		  $enhPrice = max(1,($flight->offensivebonus+1)*3);	  
+		  $enhPriceStep = 3; //limit is 1 but if anyone increases it - step is ready
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 	  }
 
