@@ -17,6 +17,7 @@ class Pikitos extends FighterFlight{
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
         $this->iniativebonus = 80;
+        $this->maxFlightSize = 6;//this fighter is partcularly large/tough even for Heavy fighter, limit flight size
         
         $this->gravitic = true;
         
