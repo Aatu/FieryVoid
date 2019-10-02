@@ -261,9 +261,14 @@ window.confirm = {
 
             $(".totalUnitCostAmount").data("value", ship.pointCost);
 
-            if (ship.jinkinglimit > 9) {
-                $(".totalUnitCostAmount").data("maxSize", 12);
-            } else $(".totalUnitCostAmount").data("maxSize", 9);
+	    //allow maximum flight size pre-set in design...
+	    if (ship.maxFlightSize!=0){
+		    $(".totalUnitCostAmount").data("maxSize", ship.maxFlightSize);
+	    }else{
+		    if (ship.jinkinglimit > 9) {
+			$(".totalUnitCostAmount").data("maxSize", 12);
+		    } else $(".totalUnitCostAmount").data("maxSize", 9);
+	    }
         //}
         
     //ship enhancements
