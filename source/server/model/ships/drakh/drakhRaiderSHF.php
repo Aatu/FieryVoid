@@ -22,6 +22,7 @@ class DrakhRaiderSHF extends SuperHeavyFighter{
         $this->offensivebonus = 7;
         $this->jinkinglimit = 4;
         $this->turncost = 0.33;
+    	$this->superheavy = true;
 		
 		$this->hangarRequired = 'Raiders'; //for fleet check
         $this->iniativebonus = 14 *5;

@@ -350,7 +350,7 @@
 		$crit = null;
 		
 		if (!$system->advancedArmor){
-			if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
+			if ($system instanceof Fighter && !($ship->superheavy)){
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
 				$crit->inEffect = true;

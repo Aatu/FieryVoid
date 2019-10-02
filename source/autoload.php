@@ -1007,7 +1007,7 @@ spl_autoload_register(
                 'zzunoffronvar' => '/server/model/ships/narn/zzunoffRonvar.php',
                 'zzunoffshakaraton' => '/server/model/ships/brakiri/zzunoffShakaraton.php',
                 'zzunoffshokan' => '/server/model/ships/narn/zzunoffShokan.php',
-                'zzunoffshokanelite' => '/server/model/ships/narn/zzunoffShokanElite.php',
+                //'zzunoffshokanelite' => '/server/model/ships/narn/zzunoffShokanElite.php',
                 'zzunoffshovok' => '/server/model/ships/narn/zzunoffShovok.php',
                 'zzunoffshovor' => '/server/model/ships/narn/zzunoffShovor.php',
                 'zzunoffshovorbolt' => '/server/model/ships/narn/zzunoffShovorBolt.php',

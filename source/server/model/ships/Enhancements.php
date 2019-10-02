@@ -1,5 +1,6 @@
 <?php
 /*class responsible for unit enhancements
+Most enhancements made are based on official ones, but they're changed and/or repointed
 */
 class Enhancements{
   /*sets enhancement options for a given ship
@@ -20,7 +21,7 @@ class Enhancements{
 	/* all ship enhancement options - availability and cost calculation
 	*/
   public static function setEnhancementOptionsShip($ship){ 	  
-	  //Improved Engine (official): +1 Thrust, cost: (3+1/turn cost)*4, round up, limit: up to +50%
+	  //Improved Engine: +1 Thrust, cost: 12+4/turn cost, round up, limit: up to +50%
 	  $enhID = 'IMPR_ENG';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Improved Engine';
@@ -34,14 +35,14 @@ class Enhancements{
 			}
 		  }  
 		  if($strongestValue > 0){ //Engine actually exists to be enhanced!
-			  $enhPrice = ceil((3+(1/($ship->turncost)))*4);	  
+			  $enhPrice = ceil(12+(4/($ship->turncost)));	  
 			  $enhPriceStep = 0; 
 			  $enhLimit = ceil($strongestValue/2);	  
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
 	  }
 	  
-		//Improved Reactor (official but modified): +1/2/3/4 Power (depending on unit size), cost: 10 *Power added (double if ship has power deficit to begin with), limit: o1
+		//Improved Reactor: +1/2/3/4 Power (depending on unit size), cost: 10 *Power added (double if ship has power deficit to begin with), limit: o1
 	  $enhID = 'IMPR_REA';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Improved Reactor';
@@ -73,7 +74,7 @@ class Enhancements{
 		  }		  
 	  }	  
 	  
-	  //Improved Sensors (official): +1 Sensors, cost: new rating *5, limit: 1
+	  //Improved Sensors : +1 Sensors, cost: new rating *5, limit: 1
 	  $enhID = 'IMPR_SENS';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Improved Sensor Array';
@@ -105,7 +106,7 @@ class Enhancements{
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 	  }
 	  
-	  //Elite Crew (official but modified): +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results
+	  //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results
 	  //cost: +40% of ship cost (second time: +60%)
 	  //all Hangar-related advantages of original Elite Crew are skipped, and so is turn shortening
 	  //what's more important, weapons-related advantages are gone
@@ -125,17 +126,31 @@ class Enhancements{
 	/* all fighter enhancement options - availability and cost calculation
 	*/
   public static function setEnhancementOptionsFighter($flight){
-	  //Improved Targeting Computer (official): +1 OB, cost: old rating *5, limit: 1
+		//Expert Motivator: -2 dropout modifier, cost: 10% craft price (round up), limit: 1
+	  $enhID = 'EXP_MOTIV';	  
+	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Expert Motivator';
+		  $enhLimit = 1;	
+		  if($flight instanceof SuperHeavyFighter){//single-craft flight! 
+			$enhPrice = ceil($flight->pointCost/10);
+		  }else{
+		  	$enhPrice = ceil($flight->pointCost/60); //price per craft, while flight price is per 6-craft flight	  
+		  }
+		  $enhPriceStep = 0;
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+	  }
+	  
+	  //Improved Targeting Computer: +1 OB, cost: new rating *3, limit: 1
 	  $enhID = 'IMPR_OB';	  
 	  if(!in_array($enhID, $flight->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Improved Targeting Computer';
 		  $enhLimit = 1;	
-		  $enhPrice = max(1,$flight->offensivebonus*5);	  
-		  $enhPriceStep = 0;
+		  $enhPrice = max(1,($flight->offensivebonus+1)*3);	  
+		  $enhPriceStep = 3; //limit is 1 but if anyone increases it - step is ready
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 	  }
 
-	  //Improved Thrust (official): +1 free thrust, cost: new rating, limit: 1
+	  //Improved Thrust: +1 free thrust, cost: new rating, limit: 1
 	  $enhID = 'IMPR_THR';	  
 	  if(!in_array($enhID, $flight->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Improved Thrust';
@@ -145,7 +160,7 @@ class Enhancements{
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 	  }
 
-	  //Navigator (official): missile guidance, +1(5) Ini, cost: 10, limit: 1
+	  //Navigator: missile guidance, +1(5) Ini, cost: 10, limit: 1
 	  $enhID = 'NAVIGATOR';	  
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
 		  $enhName = 'Navigator';
@@ -153,7 +168,7 @@ class Enhancements{
 		  $enhPrice = 10;	  
 		  $enhPriceStep = 0;
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
-	  }
+	  }  
   } //endof function setEnhancementOptionsFighter
 	    
     
@@ -188,6 +203,9 @@ class Enhancements{
 				$flight->enhancementTooltip .= "$enhDescription";
 				if ($enhCount>1) $ship->enhancementTooltip .= " (x$enhCount)";
 				switch ($enhID) { 
+					case 'EXP_MOTIV': //Expert Motivator: -2 on dropout rolls
+						$flight->critRollMod -= $enhCount*2;
+						break;
 					case 'IMPR_OB': //Improved Targeting Computer: +1 OB
 						$flight->offensivebonus += $enhCount;
 						break;
@@ -217,7 +235,7 @@ class Enhancements{
 				if ($enhCount>1) $ship->enhancementTooltip .= " (x$enhCount)";
 			        switch ($enhID) {
 
-					case 'ELITE_CREW': //Elite Crew: +5 Initiative, +1 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results
+					case 'ELITE_CREW': //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results
 						//fixed values
 						$ship->forwardDefense -= $enhCount;
 						$ship->sideDefense -= $enhCount;
@@ -250,7 +268,7 @@ class Enhancements{
 							}
 						}  
 						if($strongestValue > 0){ //Engine actually exists to be enhanced!
-							$strongestSystem->output += $enhCount;
+							$strongestSystem->output += $enhCount*2;
 						}
 						//system mods: Reactor (here I assume main reactor is the biggest one! - ot the strongest, as eg. any malus would be on main reactor as well)
 						$strongestSystem = null;
@@ -396,7 +414,15 @@ class Enhancements{
 				$enhCount = $entry[2];
 				$enhDescription = $entry[1];
 				if($enhCount > 0) {
-					switch ($enhID) {						
+					switch ($enhID) {							
+						case 'EXP_MOTIV': //Expert Motivator: modify dropout modifier
+							/* actually irrelevant for front end
+							if($ship instanceof FighterFlight){
+								$strippedShip->critRollMod = $ship->critRollMod;
+							}
+							*/
+							break;
+							
 						case 'IMPR_OB': //Improved Targeting Computer: modify offensive bonus 
 							if($ship instanceof FighterFlight){
 								$strippedShip->offensivebonus = $ship->offensivebonus;

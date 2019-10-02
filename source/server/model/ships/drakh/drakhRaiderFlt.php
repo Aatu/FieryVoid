@@ -25,6 +25,7 @@ class DrakhRaiderFlt extends FighterFlight{
 		$this->hangarRequired = 'Raiders'; //for fleet check
     	$this->iniativebonus = 14 *5; 
 	    $this->advancedArmor = true; 
+    	$this->superheavy = true;
 		
 		
         $this->populate();

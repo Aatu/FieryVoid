@@ -108,7 +108,7 @@ class ShockCannon extends Weapon{
 		if (!$system->advancedArmor){
 		    $crit = null;
 
-		    if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
+		    if ($system instanceof Fighter && !($ship->superheavy)){
 			$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 			$crit->updated = true;
 			$crit->inEffect = true;
@@ -168,7 +168,7 @@ class BurstBeam extends Weapon{
 		$crit = null;
 		
 		if (!$system->advancedArmor){
-			if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
+			if ($system instanceof Fighter && !($ship->superheavy)){
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
 				$crit->inEffect = true;
@@ -242,7 +242,7 @@ class BurstPulseCannon extends Pulse {
 			
 			if ($system->advancedArmor) return;
 			
-		    if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
+		    if ($system instanceof Fighter && !($ship->superheavy)){
 					$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 					$crit->updated = true;
 					$crit->inEffect = true;
@@ -303,7 +303,7 @@ class BurstPulseCannon extends Pulse {
 		if ($system->advancedArmor) return;
 
             if ($system instanceof Fighter){
-                if (!$ship instanceof SuperHeavyFighter){
+                if (!$ship->superheavy){
                     $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
                     $crit->updated = true;
                     $crit->inEffect = true;
@@ -367,7 +367,7 @@ class BurstPulseCannon extends Pulse {
             $crit = null;
             if ($system->advancedArmor) return;
             if ($system instanceof Fighter){
-                if (!$ship instanceof SuperHeavyFighter){
+                if (!$ship->superheavy){
                     $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
                     $crit->updated = true;
                     $crit->inEffect = true;
@@ -461,7 +461,7 @@ class BurstPulseCannon extends Pulse {
 			}
 		    }
 
-		    if ( ($system instanceof Fighter) && (!($ship instanceof SuperHeavyFighter)) && ($affect > 0)){
+		    if ( ($system instanceof Fighter) && (!($ship->superheavy)) && ($affect > 0)){
 			$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 			$crit->updated = true;
 			$crit->inEffect = true;
@@ -524,7 +524,7 @@ class StunBeam extends Weapon{
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 			$crit = null;
             		if ($system->advancedArmor) return;
-			if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
+			if ($system instanceof Fighter && !($ship->superheavy)){
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
                 		$crit->inEffect = true;
