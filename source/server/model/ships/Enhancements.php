@@ -126,6 +126,20 @@ class Enhancements{
 	/* all fighter enhancement options - availability and cost calculation
 	*/
   public static function setEnhancementOptionsFighter($flight){
+		//Expert Motivator: -2 dropout modifier, cost: 10% craft price (round up), limit: 1
+	  $enhID = 'EXP_MOTIV';	  
+	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Expert Motivator';
+		  $enhLimit = 1;	
+		  if($flight instanceof SuperHeavyFighter){//single-craft flight! 
+			$enhPrice = ceil($flight->pointCost/10);
+		  }else{
+		  	$enhPrice = ceil($flight->pointCost/60); //price per craft, while flight price is per 6-craft flight	  
+		  }
+		  $enhPriceStep = 0;
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+	  }
+	  
 	  //Improved Targeting Computer: +1 OB, cost: new rating *3, limit: 1
 	  $enhID = 'IMPR_OB';	  
 	  if(!in_array($enhID, $flight->enhancementOptionsDisabled)){ //option is not disabled
@@ -154,7 +168,7 @@ class Enhancements{
 		  $enhPrice = 10;	  
 		  $enhPriceStep = 0;
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
-	  }
+	  }  
   } //endof function setEnhancementOptionsFighter
 	    
     
@@ -189,6 +203,9 @@ class Enhancements{
 				$flight->enhancementTooltip .= "$enhDescription";
 				if ($enhCount>1) $ship->enhancementTooltip .= " (x$enhCount)";
 				switch ($enhID) { 
+					case 'EXP_MOTIV': //Expert Motivator: -2 on dropout rolls
+						$flight->critRollMod -= $enhCount*2;
+						break;
 					case 'IMPR_OB': //Improved Targeting Computer: +1 OB
 						$flight->offensivebonus += $enhCount;
 						break;
@@ -397,7 +414,15 @@ class Enhancements{
 				$enhCount = $entry[2];
 				$enhDescription = $entry[1];
 				if($enhCount > 0) {
-					switch ($enhID) {						
+					switch ($enhID) {							
+						case 'EXP_MOTIV': //Expert Motivator: modify dropout modifier
+							/* actually irrelevant for front end
+							if($ship instanceof FighterFlight){
+								$strippedShip->critRollMod = $ship->critRollMod;
+							}
+							*/
+							break;
+							
 						case 'IMPR_OB': //Improved Targeting Computer: modify offensive bonus 
 							if($ship instanceof FighterFlight){
 								$strippedShip->offensivebonus = $ship->offensivebonus;
