@@ -23,6 +23,7 @@ class DrakhRaiderSHF extends SuperHeavyFighter{
         $this->jinkinglimit = 4;
         $this->turncost = 0.33;
     	$this->superheavy = true;
+        $this->maxFlightSize = 3;//this is a superheavy fighter originally intended as single unit, limit flight size to 3
 		
 		$this->hangarRequired = 'Raiders'; //for fleet check
         $this->iniativebonus = 14 *5;
