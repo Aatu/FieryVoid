@@ -20,7 +20,21 @@ class Enhancements{
 	
 	/* all ship enhancement options - availability and cost calculation
 	*/
-  public static function setEnhancementOptionsShip($ship){ 	  
+  public static function setEnhancementOptionsShip($ship){
+	  //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results
+	  //cost: +40% of ship cost (second time: +60%)
+	  //all Hangar-related advantages of original Elite Crew are skipped, and so is turn shortening
+	  //what's more important, weapons-related advantages are gone
+	  //Initiative bonus is added, critical bonus is increased
+	  $enhID = 'ELITE_CREW';
+	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
+		  $enhName = 'Elite Crew';
+		  $enhLimit = 2;	
+		  $enhPrice = ceil($ship->pointCost*0.4); //+40%	  
+		  $enhPriceStep = ceil($ship->pointCost*0.2); //+20% of base, for total price of 60% for second level
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+	  }	  
+	  
 	  //Improved Engine: +1 Thrust, cost: 12+4/turn cost, round up, limit: up to +50%
 	  $enhID = 'IMPR_ENG';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
@@ -106,20 +120,24 @@ class Enhancements{
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 	  }
 	  
-	  //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results
-	  //cost: +40% of ship cost (second time: +60%)
-	  //all Hangar-related advantages of original Elite Crew are skipped, and so is turn shortening
-	  //what's more important, weapons-related advantages are gone
-	  //Initiative bonus is added, critical bonus is increased
-	  $enhID = 'ELITE_CREW';
+		//Spark Curtain: CUSTOM/CAMPAIGN ballistic defense (2+boost) for Spark Field, cost: 40 + 10/Spark Field present, limit: 1
+	  $enhID = 'SPARK_CURT';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
-		  $enhName = 'Elite Crew';
-		  $enhLimit = 2;	
-		  $enhPrice = ceil($ship->pointCost*0.4); //+40%	  
-		  $enhPriceStep = ceil($ship->pointCost*0.2); //+20% of base, for total price of 60% for second level
-		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
-	  }	  
-	  
+		  $enhName = 'Spark Curtain';
+		  //count Spark Fields
+		  $count = 0;	 
+		  foreach ($ship->systems as $system){
+			if ($system instanceof SparkField){
+				$count++
+			}
+		  }  
+		  if($count > 0){ //ship is actually equipped with Spark Field(s)	  
+			  $enhPrice = 40+$count*10;	
+			  $enhPriceStep = 0; 
+			  $enhLimit = 1;	  
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }		  
+	  }	  	  
 	  
   } //endof function setEnhancementOptionsShip
 	
@@ -394,10 +412,17 @@ class Enhancements{
 						}  
 						if($strongestSystem != null){ //Reactor actually exists to be enhanced! although it has to ;)
 							$strongestSystem->output -= $enhCount;
-						}
-						
+						}						
 						break;
 						
+						
+					case 'SPARK_CURT': //Spark Curtain - direct effect is setting $output=$baseOutput for every Spark Field on board
+						foreach ($ship->systems as $system){
+							if ($system instanceof SparkField){
+								$system->output = $system->baseOutput;
+							}
+						}  
+						break;
 				}
 			}
 			
@@ -504,6 +529,11 @@ class Enhancements{
 							}
 							break;
 					
+						case 'SPARK_CURT': //Spark Curtain - affects output of Spark Field
+							if($system instanceof SparkField){
+								$strippedSystem->output = $system->output;
+							}
+							break;
 					}					
 				}
 		    }			
