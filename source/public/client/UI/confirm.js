@@ -239,10 +239,8 @@ window.confirm = {
     },
 	
     
-    
-    
+        
     showShipBuy: function showShipBuy(ship, callback) {
-
         var e = $(this.whtml);
 
         //variable flightsize
@@ -253,18 +251,31 @@ window.confirm = {
             var totalTemplate = $(".totalUnitCost");
             var totalItem = totalTemplate.clone(true).prependTo(e);
 
+	    //allow maximum flight size pre-set in design...
+	    if (ship.maxFlightSize!=0){
+		    $(".totalUnitCostAmount").data("maxSize", ship.maxFlightSize);
+	    }else{
+		    if (ship.jinkinglimit > 9) {
+			$(".totalUnitCostAmount").data("maxSize", 12);
+		    } else $(".totalUnitCostAmount").data("maxSize", 9);
+	    }
+	    
+		var pointCost = ship.pointCost;
+		if (ship.maxFlightSize==3){ //for single-unit flight cost is for a fighter; for usual 6+ flight, for 6 craft (and 6 craft will be set)
+			//but for 3-strong flight cost is still set for 6-strong flight...
+			pointCost = pointCost/2;
+		}
+			
+		ship.pointCost
             $(".totalUnitCostText", totalItem).html("Total unit cost");
-            $(".totalUnitCostAmount", totalItem).html(ship.pointCost);
-            $(".totalUnitCostAmount", totalItem).data("value", ship.pointCost);
+            $(".totalUnitCostAmount", totalItem).html(pointCost);
+            $(".totalUnitCostAmount", totalItem).data("value", pointCost);
 
             $(totalItem).show();
-
-            $(".totalUnitCostAmount").data("value", ship.pointCost);
-
-            if (ship.jinkinglimit > 9) {
-                $(".totalUnitCostAmount").data("maxSize", 12);
-            } else $(".totalUnitCostAmount").data("maxSize", 9);
+		
+            $(".totalUnitCostAmount").data("value", pointCost);	    
         //}
+	    
         
     //ship enhancements
         for(var i in ship.enhancementOptions){
@@ -379,7 +390,12 @@ window.confirm = {
             var selectAmountItem = $(".selectAmount", item);
             selectAmountItem.removeClass("selectAmount").addClass("fighterAmount");
 
-            selectAmountItem.html("6");
+	    //special treatment for flight size 3 - as it's less than default 6...
+	    if (ship.maxFlightSize==3){
+            	selectAmountItem.html("3");
+	    }else{//default 
+            	selectAmountItem.html("6");
+	    }
             selectAmountItem.data('pV', Math.floor(ship.pointCost / 6));
 
             $(".fighterSelectItem .selectButtons .plusButton", e).on("click", confirm.increaseFlightSize);
@@ -401,7 +417,8 @@ window.confirm = {
     },
 
     getVariableSize: function getVariableSize(ship) {
-        if (ship.flight && !ship.superheavy) {
+        //if (ship.flight && !ship.superheavy) { //superheavy is no longer a good marker
+	if (ship.flight && ship.maxFlightSize!=1) { //max flight size = 1 indicates single superheavy fighter
             return true;
         } else return false;
     },
