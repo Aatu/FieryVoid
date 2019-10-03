@@ -65,7 +65,8 @@ if (isset($_SESSION["user"])) {
             <b>Unit enhancements</b> - did You ever have a few dozen points You don't know what to do with, or change entire list not to be left with a couple hundred? Now You can spend them on boosting Your units' performance! Detailed list of available upgrades (and their effects) is available in FB group, Files section.
         <br>
             <b>FAQ/differences from tabletop updated</b> - a lot of things placed there changed recently!
-        
+        <br>
+            <b>Flight sizes limited</b> - particularly nasty fighters (Brakiri Pikitos, Drakh Raider) got additional limitations on maximum flight size.
         
         <!--
         <br>
