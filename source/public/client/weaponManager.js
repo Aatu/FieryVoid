@@ -743,7 +743,7 @@ window.weaponManager = {
 
         var mod = 0;
 
-        mod -= target.getHitChangeMod(shooter);
+        mod -= target.getHitChangeMod(shooter, weapon);
 
         if (shooter.flight) {
             //oew = shooter.offensivebonus;
