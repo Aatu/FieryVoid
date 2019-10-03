@@ -60,9 +60,6 @@ SparkField.prototype.initBoostableInfo = function(){
         this.minDamage = Math.max(0,this.minDamage);
         this.maxDamage =  7 - shipManager.power.getBoost(this);
         this.data["Damage"] = "" + this.minDamage + "-" + this.maxDamage;
-        if(this.output > 0){ //Spark Curtain enhancement present
-            this.output = this.baseOutput+shipManager.power.getBoost(this);
-        }
     }
     else{
         var count = shipManager.power.getBoost(this);
@@ -93,7 +90,6 @@ SparkField.prototype.getDefensiveHitChangeMod = function (target, shooter, weapo
     if (!weapon.ballistic) return 0;//only ballistic weapons are affected
     return shipManager.systems.getOutput(target, this);
 };
-
 
 
 

@@ -1046,7 +1046,7 @@ class SparkField extends Weapon implements DefensiveSystem{
 	
 	public $output = 0;//affected by Spark Curtain
 	public $baseOutput = 2;//base output WITH Spark Curtain
-	
+	public $defensiveType = "SparkCurtain"; //needs to be set to recognize as defensive system
       
         public $priority = 2; //should attack very early
 	
@@ -1199,10 +1199,13 @@ class SparkField extends Weapon implements DefensiveSystem{
         }
         public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
             if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn)) return 0;
-		if($weapon->weaponClass != 'Ballistic') return 0;//only Ballistic is affected!
+			if($weapon->weaponClass != 'Ballistic') return 0;//only Ballistic is affected!
 		
+		/*
             $output = $this->output;
             $output -= $this->outputMod;
+			*/
+			$output = $this->getOutput();
             return $output;
         }
         public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
@@ -1213,13 +1216,14 @@ class SparkField extends Weapon implements DefensiveSystem{
 		return "SparkCurtain";
 	}    
 	public function getOutput(){
+		$output = 0;
 		if($this->output == 0) return 0; //if base output is not enhanced this means there is no effect
 		foreach ($this->power as $power){
 		    if ($power->turn == TacGamedata::$currentTurn && $power->type == 2){
-			$output += $power->amount;
+				$output += $power->amount;
 		    }        
 		}        
-		$output = $output + $baseOutput; //strength = 2+boostlevel
+		$output = $output + $this->baseOutput; //strength = 2+boostlevel
 		return $output;        
 	}    
 	

@@ -128,7 +128,7 @@ class Enhancements{
 		  $count = 0;	 
 		  foreach ($ship->systems as $system){
 			if ($system instanceof SparkField){
-				$count++
+				$count++;
 			}
 		  }  
 		  if($count > 0){ //ship is actually equipped with Spark Field(s)	  
