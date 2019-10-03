@@ -26,6 +26,7 @@ class DrakhRaiderFlt extends FighterFlight{
     	$this->iniativebonus = 14 *5; 
 	    $this->advancedArmor = true; 
     	$this->superheavy = true;
+        $this->maxFlightSize = 3;//this is a superheavy fighter originally intended as single unit, limit flight size to 3
 		
 		
         $this->populate();
