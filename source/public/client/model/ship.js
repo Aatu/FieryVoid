@@ -23,7 +23,7 @@ var Ship = function Ship(json) {
 Ship.prototype = {
     constructor: Ship,
 
-    getHitChangeMod: function getHitChangeMod(shooter) {
+    getHitChangeMod: function getHitChangeMod(shooter, weapon) {
         var affectingSystems = Array();
         for (var i in this.systems) {
             var system = this.systems[i];
@@ -37,7 +37,7 @@ Ship.prototype = {
                 continue;
             }
 
-            var mod = system.getDefensiveHitChangeMod(this, shooter);
+            var mod = system.getDefensiveHitChangeMod(this, shooter, weapon);
 
             if ( ! (affectingSystems[system.defensiveType])
                 || affectingSystems[system.defensiveType] < mod)

@@ -85,6 +85,12 @@ SparkField.prototype.hasMaxBoost = function(){
 SparkField.prototype.getMaxBoost = function(){
     return this.maxBoostLevel;
 }
+//needed for Spark Curtain upgrade
+SparkField.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
+    if (!weapon.ballistic) return 0;//only ballistic weapons are affected
+    return shipManager.systems.getOutput(target, this);
+};
+
 
 
 var SurgeCannon = function(json, ship)

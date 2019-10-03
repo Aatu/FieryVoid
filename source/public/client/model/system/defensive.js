@@ -7,7 +7,7 @@ var InterceptorMkI = function InterceptorMkI(json, ship) {
 InterceptorMkI.prototype = Object.create(Weapon.prototype);
 InterceptorMkI.prototype.constructor = InterceptorMkI;
 
-InterceptorMkI.prototype.getDefensiveHitChangeMod = function (target, shooter, pos) {
+InterceptorMkI.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
     return shipManager.systems.getOutput(target, this);
 };
 
@@ -31,7 +31,7 @@ var Shield = function Shield(json, ship) {
 Shield.prototype = Object.create(ShipSystem.prototype);
 Shield.prototype.constructor = Shield;
 
-Shield.prototype.getDefensiveHitChangeMod = function (target, shooter, pos) {
+Shield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
     if (shooter.flight && mathlib.getDistanceBetweenShipsInHex(target, shooter) == 0) return 0;
 
     return shipManager.systems.getOutput(target, this);
@@ -95,7 +95,7 @@ var Swrayshield = function Swrayshield(json, ship) {
 };
 Swrayshield.prototype = Object.create(ShipSystem.prototype);
 Swrayshield.prototype.constructor = Swrayshield;
-Swrayshield.prototype.getDefensiveHitChangeMod = function (target, shooter, pos) {
+Swrayshield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
     return 0; //Ray shield does not affect hit chance
 };
 Swrayshield.prototype.hasMaxBoost = function () {
@@ -111,7 +111,7 @@ var Absorbtionshield = function Absorbtionshield(json, ship) {
 };
 Absorbtionshield.prototype = Object.create(ShipSystem.prototype);
 Absorbtionshield.prototype.constructor = Absorbtionshield;
-Absorbtionshield.prototype.getDefensiveHitChangeMod = function (target, shooter, pos) {
+Absorbtionshield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
     return 0; //absorbtion shield does not affect hit chance
 };
 Absorbtionshield.prototype.hasMaxBoost = function () {
@@ -127,7 +127,7 @@ var Particleimpeder = function Particleimpeder(json, ship) {
 };
 Particleimpeder.prototype = Object.create(Weapon.prototype);
 Particleimpeder.prototype.constructor = Particleimpeder;
-Particleimpeder.prototype.getDefensiveHitChangeMod = function (target, shooter, pos) {
+Particleimpeder.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
     if (shooter.flight) {
         //only affects fighters
         return shipManager.systems.getOutput(target, this);
@@ -168,7 +168,7 @@ var FtrShield = function(json, ship)
 }
 FtrShield.prototype = Object.create( ShipSystem.prototype );
 FtrShield.prototype.constructor = FtrShield;
-FtrShield.prototype.getDefensiveHitChangeMod = function(target, shooter, pos)
+FtrShield.prototype.getDefensiveHitChangeMod = function(target, shooter, weapon)
 {
     return shipManager.systems.getOutput(target, this);
 }

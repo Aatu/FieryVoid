@@ -1021,8 +1021,10 @@ class SparkFieldHandler{
 
 
 
-class SparkField extends Weapon{
-    /*Spark Field - Ipsha weapon*/
+class SparkField extends Weapon implements DefensiveSystem{
+    /*Spark Field - Ipsha weapon
+    	with custom enhancement (Spark Curtain) - anti-ballistic EWeb :)
+    */
         public $name = "SparkField";
         public $displayName = "Spark Field";
 	public $iconPath = "SparkField.png";
@@ -1042,6 +1044,9 @@ class SparkField extends Weapon{
         public $boostEfficiency = 2;
         public $maxBoostLevel = 4;
 	
+	public $output = 0;//affected by Spark Curtain
+	public $baseOutput = 2;//base output WITH Spark Curtain
+	public $defensiveType = "SparkCurtain"; //needs to be set to recognize as defensive system
       
         public $priority = 2; //should attack very early
 	
@@ -1088,6 +1093,7 @@ class SparkField extends Weapon{
 		      $this->data["Special"] .= "<br>Base damage is 1d6+1, range 2 hexes.";  
 		      $this->data["Special"] .= "<br>Can be boosted, for +2 AoE and -1 damage per level."; 
 		      $this->data["Special"] .= "<br>Multiple overlapping Spark Fields will only cause 1 (strongest) attack on a particular target."; 
+		      $this->data["Special"] .= "<br>With CUSTOM Spark Curtain enhancement acts as anti-Ballistic shield (reducing hit chance only, by 2+boost)."; 
 	    }	//endof function setSystemDataWindow
 	
 	
@@ -1184,6 +1190,43 @@ class SparkField extends Weapon{
         protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
             return 0; //ignores armor!
         }
+	
+	
+        public function onConstructed($ship, $turn, $phase){
+            parent::onConstructed($ship, $turn, $phase);
+	    $this->tohitPenalty = $this->getOutput();
+            $this->damagePenalty = 0;
+        }
+        public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
+            if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn)) return 0;
+			if($weapon->weaponClass != 'Ballistic') return 0;//only Ballistic is affected!
+		
+		/*
+            $output = $this->output;
+            $output -= $this->outputMod;
+			*/
+			$output = $this->getOutput();
+            return $output;
+        }
+        public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
+            return 0; //does not reduce damage
+        }
+	public function getDefensiveType()
+	{
+		return "SparkCurtain";
+	}    
+	public function getOutput(){
+		$output = 0;
+		if($this->output == 0) return 0; //if base output is not enhanced this means there is no effect
+		foreach ($this->power as $power){
+		    if ($power->turn == TacGamedata::$currentTurn && $power->type == 2){
+				$output += $power->amount;
+		    }        
+		}        
+		$output = $output + $this->baseOutput; //strength = 2+boostlevel
+		return $output;        
+	}    
+	
 	
         public function getDamage($fireOrder){        
 		$damageRolled = Dice::d(6, 1)+1;
