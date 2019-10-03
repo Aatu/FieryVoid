@@ -1199,13 +1199,8 @@ class SparkField extends Weapon implements DefensiveSystem{
         }
         public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
             if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn)) return 0;
-			if($weapon->weaponClass != 'Ballistic') return 0;//only Ballistic is affected!
-		
-		/*
-            $output = $this->output;
-            $output -= $this->outputMod;
-			*/
-			$output = $this->getOutput();
+		if(!$weapon->ballistic) return 0;//only ballistic weapons are affected!
+		$output = $this->getOutput();
             return $output;
         }
         public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
