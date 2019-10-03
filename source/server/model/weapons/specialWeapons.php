@@ -1045,7 +1045,7 @@ class SparkField extends Weapon implements DefensiveSystem{
         public $maxBoostLevel = 4;
 	
 	public $output = 0;//affected by Spark Curtain
-	protected $baseOutput = 2;//base output WITH Spark Curtain
+	public $baseOutput = 2;//base output WITH Spark Curtain
 	
       
         public $priority = 2; //should attack very early
