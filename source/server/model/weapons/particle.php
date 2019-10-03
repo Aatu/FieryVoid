@@ -714,7 +714,6 @@
             if($nrOfShots === 1){
                 $this->iconPath = "particleGun.png";
             }
-
             if($nrOfShots >2){//no special icon for more than 3 linked weapons
                 $this->iconPath = "pairedParticleGun3.png";
             }
@@ -864,6 +863,7 @@
         public $trailColor = array(30, 170, 255);
 
         public $name = "lightParticleBeam";
+        public $iconPath = "lightParticleBeam.png";
         public $displayName = "Light Particle Beam";
         public $animation = "trail";
         public $animationColor = array(30, 170, 255);
@@ -892,6 +892,13 @@
             $this->shots = $nrOfShots;
             $this->intercept = $nrOfShots;
 
+            if($nrOfShots === 1){
+                $this->iconPath = "lightParticleBeam1.png";
+            }
+            if($nrOfShots >2){//no special icon for more than 3 linked weapons
+                $this->iconPath = "lightParticleBeam3.png";
+            }
+			
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 
