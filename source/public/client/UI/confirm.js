@@ -239,10 +239,8 @@ window.confirm = {
     },
 	
     
-    
-    
+        
     showShipBuy: function showShipBuy(ship, callback) {
-
         var e = $(this.whtml);
 
         //variable flightsize
@@ -253,14 +251,6 @@ window.confirm = {
             var totalTemplate = $(".totalUnitCost");
             var totalItem = totalTemplate.clone(true).prependTo(e);
 
-            $(".totalUnitCostText", totalItem).html("Total unit cost");
-            $(".totalUnitCostAmount", totalItem).html(ship.pointCost);
-            $(".totalUnitCostAmount", totalItem).data("value", ship.pointCost);
-
-            $(totalItem).show();
-
-            $(".totalUnitCostAmount").data("value", ship.pointCost);
-
 	    //allow maximum flight size pre-set in design...
 	    if (ship.maxFlightSize!=0){
 		    $(".totalUnitCostAmount").data("maxSize", ship.maxFlightSize);
@@ -269,7 +259,16 @@ window.confirm = {
 			$(".totalUnitCostAmount").data("maxSize", 12);
 		    } else $(".totalUnitCostAmount").data("maxSize", 9);
 	    }
+	    
+            $(".totalUnitCostText", totalItem).html("Total unit cost");
+            $(".totalUnitCostAmount", totalItem).html(ship.pointCost);
+            $(".totalUnitCostAmount", totalItem).data("value", ship.pointCost);
+
+            $(totalItem).show();
+
+            $(".totalUnitCostAmount").data("value", ship.pointCost);	    
         //}
+	    
         
     //ship enhancements
         for(var i in ship.enhancementOptions){
@@ -384,7 +383,12 @@ window.confirm = {
             var selectAmountItem = $(".selectAmount", item);
             selectAmountItem.removeClass("selectAmount").addClass("fighterAmount");
 
-            selectAmountItem.html("6");
+	    //special treatment for flight size 3 - as it's less than default 6...
+	    if (ship.maxFlightSize==3){
+            	selectAmountItem.html("3");
+	    }else{//default 
+            	selectAmountItem.html("6");
+	    }
             selectAmountItem.data('pV', Math.floor(ship.pointCost / 6));
 
             $(".fighterSelectItem .selectButtons .plusButton", e).on("click", confirm.increaseFlightSize);
