@@ -159,9 +159,10 @@ class BuyingGamePhase implements Phase
                 }
             }
 
+            /* Marcin Sawicki - this check needs to be removed as it prevents taking negative-value enhancements
             if ($points > $slot->points)
                 throw new Exception("Fleet too expensive.");
-
+            */
                 
             $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);
         }
