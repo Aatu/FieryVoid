@@ -20,7 +20,7 @@ class BrixadiiPoliceFrigateBaseSHF extends FighterFlight{
         $this->offensivebonus = 3;
         $this->jinkinglimit = 4; //deliberately low jinking limit and Init, they're SHFs grouped for convenience!
         $this->turncost = 0.33;
-        $this->turndelay = 0.25;
+        $this->turndelaycost = 0.25;
         
 		$this->hangarRequired = 'LCVs'; //for fleet check
     //these are patrol LCVs and don't really require hangars...
