@@ -7,9 +7,9 @@ class BrixadiiPoliceFrigateBaseSHF extends FighterFlight{
         $this->pointCost = 60*6;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiPoliceFrigateBaseSHF";
-        $this->shipClass = "Raider Assault Fighters";
-	    $this->variantOf = "Police Frigate squadron"; 
-        $this->imagePath = "img/ships/BrixadiiDrakhRaider.png";
+        $this->shipClass = "Police Frigate squadron";
+	    //$this->variantOf = "Police Frigate squadron"; 
+        $this->imagePath = "img/ships/BrixadiiPoliceFrigateSHF.png";
         
         $this->isd = 1842;
         $this->unofficial = true;
@@ -20,6 +20,7 @@ class BrixadiiPoliceFrigateBaseSHF extends FighterFlight{
         $this->offensivebonus = 3;
         $this->jinkinglimit = 4; //deliberately low jinking limit and Init, they're SHFs grouped for convenience!
         $this->turncost = 0.33;
+        $this->turndelay = 0.25;
         
 		$this->hangarRequired = 'LCVs'; //for fleet check
     //these are patrol LCVs and don't really require hangars...
