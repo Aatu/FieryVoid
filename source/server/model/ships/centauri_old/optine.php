@@ -58,7 +58,7 @@ class Optine extends BaseShip{
 		
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 5, 38));
-        $this->addAftSystem(new Structure( 5, 35));
+        $this->addAftSystem(new Structure( 4, 35));
         $this->addLeftSystem(new Structure( 4, 48));
         $this->addRightSystem(new Structure( 4, 48));
         $this->addPrimarySystem(new Structure( 6, 55));
