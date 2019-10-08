@@ -41,8 +41,8 @@ class Optine extends BaseShip{
 		$this->addAftSystem(new JumpEngine(5, 25, 3, 20));
 		$this->addAftSystem(new AssaultLaser(3, 6, 4, 180, 300));
 		$this->addAftSystem(new AssaultLaser(3, 6, 4, 60, 180));
-		$this->addAftSystem(new LightParticleBeamShip(3, 2, 1, 60, 240));
 		$this->addAftSystem(new LightParticleBeamShip(3, 2, 1, 120, 300));
+		$this->addAftSystem(new LightParticleBeamShip(3, 2, 1, 60, 240));
 		
 		$this->addLeftSystem(new Thruster(4, 14, 0, 5, 3));
         $this->addLeftSystem(new AssaultLaser(3, 6, 4, 300, 360));
