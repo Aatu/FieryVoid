@@ -9,6 +9,7 @@ class BrixadiiScreenFrigateSHF extends FighterFlight{
         $this->phpclass = "BrixadiiScreenFrigateSHF";
         $this->shipClass = "Screen Frigate squadron";
 	    $this->variantOf = "Police Frigate squadron"; 
+	    $this->occurence = "uncommon";
         $this->imagePath = "img/ships//Nexus/BrixadiiPoliceFrigateSHF.png";
         
         $this->isd = 2107;
@@ -20,7 +21,7 @@ class BrixadiiScreenFrigateSHF extends FighterFlight{
         $this->offensivebonus = 4;
         $this->jinkinglimit = 4; //deliberately low jinking limit and Init, they're SHFs grouped for convenience!
         $this->turncost = 0.33;
-        $this->turndelay = 0.25;
+        $this->turndelaycost = 0.25;
         
 		$this->hangarRequired = 'LCVs'; //for fleet check
     //these are patrol LCVs and don't really require hangars...
