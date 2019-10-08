@@ -41,7 +41,7 @@ class BrixadiiPoliceFrigateBase2047SHF extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 2, 2, 2);
             $fighter = new Fighter("BrixadiiPoliceFrigateBase2047SHF", $armour, 24, $this->id);
-            $fighter->displayName = "Police Frigate";
+            $fighter->displayName = "Police Frigate (2047)";
             $fighter->imagePath = "img/ships/Nexus/BrixadiiPoliceFrigateSHF.png";
             $fighter->iconPath = "img/ships/Nexus/BrixadiiPoliceFrigateSHF_large.png"; 
             
