@@ -26,7 +26,7 @@ shipManager.systems = {
         })
     },
 
-    isDestroyed: function isDestroyed(ship, system) {
+    isDestroyed: function isDestroyed(ship, system) {		
         if (system.parentId > 0) {
             var parentSystem = system;
 

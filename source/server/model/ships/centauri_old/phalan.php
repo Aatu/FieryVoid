@@ -32,7 +32,7 @@ class Phalan extends FighterFlight{
 			
 			$armour = array(2, 1, 1, 1);
 			$fighter = new Fighter("phalan", $armour, 12, $this->id);
-			$fighter->displayName = "Centauri Phalan Assault Fighter";
+			$fighter->displayName = "Phalan";
 			$fighter->imagePath = "img/ships/phalan.png";
 			$fighter->iconPath = "img/ships/phalan_large.png";
 			

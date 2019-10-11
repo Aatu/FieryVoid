@@ -896,6 +896,77 @@ class HkControlNode extends ShipSystem{
 } //endof class HkControlNode
 
 
+/* Connection Strut, as present on units too large for their designers tech level
+	in FV damage is reflected on Structure in Critical phase (not immediately), which means:
+	 - incoming fire will affect less damaged Structure (rather than potentially spill over to PRIMARY Structure)
+	 - Strut damage will be reflected on PRIMARY if appropriate structure is gone
+	 - Strut should have the same armor as section itself (so reflection is accurate)
+	 - damage will be attributed to ORIGINAL fire order - potentially creating strange order of events in log
+	 - damage in the log will include damage on Connection Strut itself (so effectively a third of it will be non-damage ;) )
+	 - any effect that trigger on hitting Structure will NOT work on Strut (like Burst Beam's power drain)
+	 - any armor-affecting effects (Plasma Stream...) will work separately on Struct and Structure itself, leading to further discrepancies
+*/
+class ConnectionStrut extends ShipSystem{
+    public $name = "connectionStrut";
+    public $displayName = "Connection Strut";
+    public $iconPath = "connectionStrut.png";
+    
+    function __construct($armour){
+        parent::__construct($armour, 999, 0, 0);    
+    }
+	
+    public function setSystemDataWindow($turn){
+        $this->data["Special"] = "This is not a system - rather a weak point in ships' Structure.";
+        $this->data["Special"] .= "It has no Structure of its own (in FV - has infinite structure ;) ).";
+        $this->data["Special"] .= "<br>Any damage scored on Connection Strut will be scored DOUBLE on appropriate Structure.";
+        $this->data["Special"] .= "<br>This damage may not be displayed in log (like missile launcher magazine explosion).";
+		parent::setSystemDataWindow($turn);    
+	}		
+
+
+    public function testCritical($ship, $gamedata, $crits, $add = 0){ //reflect any damage taken this turn on appropriate Structure!
+        foreach ($this->damage as $damage){
+            if ($damage->turn == $gamedata->turn || $damage->turn == -1){
+                if ($damage->damage > $damage->armour){
+                    $dmgTaken = $damage->damage - $damage->armour;
+					$dmgTaken = $dmgTaken *2;//double damage DONE, not raw damage coming!
+					//reflect on appropriate Structure, and failing that on PRIMARY
+					$trgtStructure = $this->structureSystem;
+					$healthRem = $trgtStructure->getRemainingHealth();
+					$toDeal = min($dmgTaken, $healthRem);
+					$destroyed = false;
+					if ($toDeal == $healthRem){
+						$destroyed = true;
+					}
+					if ($toDeal > 0){						
+						$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $trgtStructure->id, $toDeal, 0, 0, $damage->fireorderid, $destroyed, "Connection Strut!", $damage->damageclass);
+						$damageEntry->updated = true;
+						$trgtStructure->damage[] = $damageEntry;
+					}
+					$toDeal = $dmgTaken - $healthRem;
+					if ($toDeal > 0){ //any remaining damage - score on PRIMARY Structure
+						$primary = $ship->getStructureSystem(0);
+						$healthRem = $primary->getRemainingHealth();
+						$toDeal = min($toDeal, $healthRem);
+						$destroyed= false;
+						if ($toDeal == $healthRem){
+							$destroyed = true;
+						}
+						if ($toDeal > 0){
+							$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $primary->id, $toDeal, 0, 0, $damage->fireorderid, $destroyed, "Connection Strut!", $damage->damageclass);
+							$damageEntry->updated = true;
+							$primary->damage[] = $damageEntry;
+						}
+					}
+		
+				}
+            }
+        }
+        
+        return $crits; //unmodified - this system suffers no criticals
+    } //endof function testCritical	
+	
+}//endof class ConnectionStrut
 
 
 ?>

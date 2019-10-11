@@ -284,7 +284,35 @@ class NexusChaffLauncher extends Weapon{
 		*/
     }
 
+	class NexusParticleProjectorFtr extends Particle{
+		/*fighter-mounted version of medium Particle Projector*/
+        public $trailColor = array(30, 170, 255);
 
+        public $name = "nexusParticleProjectorFtr";
+        public $displayName = "Particle Projector";
+        public $animation = "beam";
+        public $animationColor = array(205, 200, 200);
+        public $animationExplosionScale = 0.25;
+        public $projectilespeed = 15;
+        public $animationWidth = 4;
+        public $trailLength = 20;
+		public $iconPath = "particleProjector.png";
+
+        public $intercept = 2;
+        public $loadingtime = 2;
+        public $priority = 4;
+
+        public $rangePenalty = 1;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+
+        function __construct($startArc, $endArc){
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 1)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+    }//endof NexusParticleProjectorFtr
 
 
     class NexusParticleAgitator extends Particle{

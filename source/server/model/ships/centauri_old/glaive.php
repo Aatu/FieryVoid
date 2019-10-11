@@ -32,7 +32,7 @@ class Glaive extends FighterFlight{
 			
 			$armour = array(1, 1, 1, 1);
 			$fighter = new Fighter("glaive", $armour, 8, $this->id);
-			$fighter->displayName = "Centauri Glaive Light Fighter";
+			$fighter->displayName = "Glaive";
 			$fighter->imagePath = "img/ships/glaive.png";
 			$fighter->iconPath = "img/ships/glaive_large.png";
 			
