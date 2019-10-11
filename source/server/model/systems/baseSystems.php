@@ -917,9 +917,9 @@ class ConnectionStrut extends ShipSystem{
 	
     public function setSystemDataWindow($turn){
         $this->data["Special"] = "This is not a system - rather a weak point in ships' Structure.";
-        $this->data["Special"] .= "It has no Structure of its own (in FV - has infinite structure ;) ).";
+        $this->data["Special"] .= " It has no Structure of its own (in FV - has infinite structure ;) ).";
         $this->data["Special"] .= "<br>Any damage scored on Connection Strut will be scored DOUBLE on appropriate Structure.";
-        $this->data["Special"] .= "<br>This damage may not be displayed in log (like missile launcher magazine explosion).";
+        $this->data["Special"] .= "<br>It will appear in log as coming from appropriate hit, despite actually being marked in Critical phase (which may lead to strange order of events).";
 		parent::setSystemDataWindow($turn);    
 	}		
 
