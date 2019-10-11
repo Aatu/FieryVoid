@@ -1035,12 +1035,16 @@ spl_autoload_register(
                 'godbetafull' => '/server/model/ships/EA/godBetaFull.php',
 		    
                 'custommatterstream' => '/server/model/weapons/customs.php',
+				
+				'connectionstrut' => '/server/model/systems/baseSystems.php',
+				'explorer' => '/server/model/ships/EA/explorer.php',
 		    
-		'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php', 
-		'nexusparticleprojectorheavy' => '/server/model/weapons/customNexus.php', 
-		'nexusparticleprojectorlight' => '/server/model/weapons/customNexus.php', 
-		'nexusparticleagitator' => '/server/model/weapons/customNexus.php', 
-		'nexuschafflauncher' => '/server/model/weapons/customNexus.php',
+				'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php', 
+				'nexusparticleprojectorftr' => '/server/model/weapons/customNexus.php', 
+				'nexusparticleprojectorheavy' => '/server/model/weapons/customNexus.php', 
+				'nexusparticleprojectorlight' => '/server/model/weapons/customNexus.php', 
+				'nexusparticleagitator' => '/server/model/weapons/customNexus.php', 
+				'nexuschafflauncher' => '/server/model/weapons/customNexus.php',
 
 
                 'brixadiibattledestroyerbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerBase.php',					
@@ -1069,20 +1073,19 @@ spl_autoload_register(
 		  		    
 					
 					
-		'custombpalight' => '/server/model/weapons/customs.php',   
-		'custombpamedium' => '/server/model/weapons/customs.php', 
-		'custombpaheavy' => '/server/model/weapons/customs.php' ,
+				'custombpalight' => '/server/model/weapons/customs.php',   
+				'custombpamedium' => '/server/model/weapons/customs.php', 
+				'custombpaheavy' => '/server/model/weapons/customs.php' ,
 		    
 		    
 		    
-		    //TEMPORARY campaign-related designs - essentially upgrades of existing ships
-		    
+				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
                 'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
 		
 		    
 		    
-		//let's end this with unit enhancement class...		    
-		'enhancements' => '/server/model/ships/Enhancements.php'
+				//let's end this with unit enhancement class...		    
+				'enhancements' => '/server/model/ships/Enhancements.php'
             );
         }
         $cn = strtolower($class);

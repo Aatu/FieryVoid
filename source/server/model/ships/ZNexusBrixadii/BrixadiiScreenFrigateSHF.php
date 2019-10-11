@@ -46,11 +46,17 @@ class BrixadiiScreenFrigateSHF extends FighterFlight{
             $fighter->imagePath = "img/ships/Nexus/BrixadiiPoliceFrigateSHF.png";
             $fighter->iconPath = "img/ships/Nexus/BrixadiiPoliceFrigateSHF_large.png"; 
             
-            $weapon = new NexusParticleProjectorLight(0, 0, 0, 270, 30); //weapon designed for ship but should work all right
+            $weapon = new  PairedParticleGun(270, 30, 2, 1);
+			$weapon->displayName = 'Light Particle Projector';
+			$weapon->iconPath = "NexusParticleProjectorLight.png";
             $fighter->addFrontSystem($weapon);		
-            $weapon = new NexusParticleProjectorLight(0, 0, 0, 300, 60); //weapon designed for ship but should work all right
+            $weapon = new  PairedParticleGun(300, 60, 2, 1);
+			$weapon->displayName = 'Light Particle Projector';
+			$weapon->iconPath = "NexusParticleProjectorLight.png";
             $fighter->addFrontSystem($weapon);		
-            $weapon = new NexusParticleProjectorLight(0, 0, 0, 330, 90); //weapon designed for ship but should work all right
+            $weapon = new  PairedParticleGun(330, 90, 2, 1);
+			$weapon->displayName = 'Light Particle Projector';
+			$weapon->iconPath = "NexusParticleProjectorLight.png";	
             $fighter->addFrontSystem($weapon);		
 			
         	  $this->addSystem($fighter);

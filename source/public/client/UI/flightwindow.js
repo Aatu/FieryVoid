@@ -50,7 +50,8 @@ window.flightWindowManager = {
 	createShipWindow: function createShipWindow(ship) {
 		var template;
 
-		if (!ship.superheavy) {
+		//if (!ship.superheavy) {//not appropriate here
+		if (ship.maxFlightSize != 1) { 
 			template = $("#shipwindowtemplatecontainer .shipwindow.flight");
 		} else {
 			template = $("#shipwindowtemplatecontainer .shipwindow.heavyfighter");
@@ -97,7 +98,8 @@ window.flightWindowManager = {
 			shipwindow.find(".topbar .value.shipclass").html(ship.shipClass); // + " (" + ship.occurence + ")");
 		}
 
-		if (!ship.superheavy) {
+		//if (!ship.superheavy) { //not appropriate here
+		if (ship.maxFlightSize != 1) { 
 			flightWindowManager.addSystems(ship, shipwindow);
 		} else {
 			flightWindowManager.addHeavyFighter(ship, shipwindow);
@@ -187,7 +189,8 @@ window.flightWindowManager = {
 	},
 
 	getDestinationForSystem: function getDestinationForSystem(flight, fighter, location) {
-		if (flight.superheavy) {
+		//if (flight.superheavy) { //not appropriate here
+		if (flight.maxFlightSize == 1) { 
 			return $(".shipwindow.ship_" + flight.id + " .heavyfighter_" + fighter.id + " .fightersystemcontainer." + location + " tr");
 		} else {
 			return $(".shipwindow.ship_" + flight.id + " .fighter_" + fighter.id + " .fightersystemcontainer." + location + " tr");
@@ -211,7 +214,8 @@ window.flightWindowManager = {
 	},
 
 	setFighterData: function setFighterData(flight, fighter, shipwindow) {
-		if (flight.superheavy) {
+		//if (flight.superheavy) { //not appropriate here
+		if (flight.maxFlightSize == 1) { 
 			var systemwindow = shipwindow.find(".heavyfighter_" + fighter.id);
 			var healtWidth = 120;
 		} else {

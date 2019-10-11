@@ -266,7 +266,7 @@ window.confirm = {
 			pointCost = pointCost/2;
 		}
 			
-		ship.pointCost
+		//ship.pointCost
             $(".totalUnitCostText", totalItem).html("Total unit cost");
             $(".totalUnitCostAmount", totalItem).html(pointCost);
             $(".totalUnitCostAmount", totalItem).data("value", pointCost);

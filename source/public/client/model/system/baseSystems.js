@@ -150,3 +150,10 @@ DrakhRaiderController.prototype.constructor = DrakhRaiderController;
 DrakhRaiderController.prototype.hasMaxBoost = function () {
     return true;
 };
+
+var ConnectionStrut = function(json, ship)
+{
+    ShipSystem.call( this, json, ship);
+}
+ConnectionStrut.prototype = Object.create( ShipSystem.prototype );
+ConnectionStrut.prototype.constructor = ConnectionStrut;

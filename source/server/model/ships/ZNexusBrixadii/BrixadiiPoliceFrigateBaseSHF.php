@@ -9,7 +9,7 @@ class BrixadiiPoliceFrigateBaseSHF extends FighterFlight{
         $this->phpclass = "BrixadiiPoliceFrigateBaseSHF";
         $this->shipClass = "Police Frigate squadron";
 	    //$this->variantOf = "Police Frigate squadron"; 
-        $this->imagePath = "img/ships/BrixadiiPoliceFrigateSHF.png";
+        $this->imagePath = "img/ships/Nexus/BrixadiiPoliceFrigateSHF.png";
         
         $this->isd = 1842;
         $this->unofficial = true;
@@ -45,7 +45,7 @@ class BrixadiiPoliceFrigateBaseSHF extends FighterFlight{
             $fighter->imagePath = "img/ships/Nexus/BrixadiiPoliceFrigateSHF.png";
             $fighter->iconPath = "img/ships/Nexus/BrixadiiPoliceFrigateSHF_large.png"; 
             
-            $weapon = new ParticleProjector(0, 0, 0, 300, 60); //weapon designed for ship but should work all right
+            $weapon = new NexusParticleProjectorFtr(300, 60); 
             $fighter->addFrontSystem($weapon);		
 			
         	  $this->addSystem($fighter);
