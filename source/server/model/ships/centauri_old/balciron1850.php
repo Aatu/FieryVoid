@@ -40,8 +40,8 @@ class Balciron1850 extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));
         $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));
-        $this->addAftSystem(new ParticleProjector(2, 2, 1, 180, 360));
-        $this->addAftSystem(new ParticleProjector(2, 2, 1, 0, 180));
+        $this->addAftSystem(new ParticleProjector(2, 6, 1, 180, 360));
+        $this->addAftSystem(new ParticleProjector(2, 6, 1, 0, 180));
         $this->addAftSystem(new LightPlasma(2, 4, 2, 120, 300));
         $this->addAftSystem(new LightPlasma(2, 4, 2, 60, 240));
         
