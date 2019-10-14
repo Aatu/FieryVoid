@@ -8,8 +8,9 @@ class Balciron extends HeavyCombatVessel{
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Balciron";
         $this->imagePath = "img/ships/balciron.png";
-        $this->shipClass = "Balciron Destroyer";
+        $this->shipClass = "Balciron Destroyer (2005)";
         $this->isd = 2005;
+            $this->variantOf = "Balciron Destroyer";
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
@@ -52,6 +53,34 @@ class Balciron extends HeavyCombatVessel{
         $this->addAftSystem(new Structure( 4, 60));
         $this->addPrimarySystem(new Structure( 4, 40));
         
+        
+
+        $this->hitChart = array(
+            0=> array(
+                    9 => "Structure",
+                    12 => "Thruster",
+                    14 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    6 => "Thruster",
+                    8 => "Medium Plasma Cannon",
+                    9 => "Tactical Laser",
+                    10 => "Light Particle Beam",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    6 => "Thruster",
+                    10 => "Light Particle Beam",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+        );
+                
         
     }
 
