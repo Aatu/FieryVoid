@@ -61,6 +61,7 @@ spl_autoload_register(
                 'bainterceptormki' => '/server/model/weapons/particle.php',
                 'balcirax' => '/server/model/ships/centauri_old/balcirax.php',
                 'balciron' => '/server/model/ships/centauri_old/balciron.php',
+                'balciron1850' => '/server/model/ships/centauri_old/balciron1850.php',
                 'balightgunboat' => '/server/model/ships/smallraces/baLightGunboat.php',
                 'balightgunboatescort' => '/server/model/ships/smallraces/baLightGunboatEscort.php',
                 'balightgunboatpulse' => '/server/model/ships/smallraces/baLightGunboatPulse.php',
