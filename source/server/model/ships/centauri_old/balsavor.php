@@ -11,7 +11,7 @@ class Balsavor extends HeavyCombatVessel{
         $this->shipClass = "Balsavor Gunship";
         $this->occurence = "rare";
         $this->variantOf = "Balciron Destroyer";
-        $this->isd = 1985;
+        $this->isd = 1985; //2005 refit adds just a point of armor on a few thrusters - not worth a separate design IMO
         
         
         $this->forwardDefense = 13;
