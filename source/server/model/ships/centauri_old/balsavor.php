@@ -4,7 +4,7 @@ class Balsavor extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 430;
+        $this->pointCost = 435;
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Balsavor";
         $this->imagePath = "img/ships/balciron.png";
@@ -50,6 +50,31 @@ class Balsavor extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure( 4, 52));
         $this->addAftSystem(new Structure( 4, 60));
         $this->addPrimarySystem(new Structure( 4, 40));
+        
+        
+        $this->hitChart = array(
+            0=> array(
+                    9 => "Structure",
+                    12 => "Thruster",
+                    14 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    6 => "Thruster",
+                    10 => "Tactical Laser",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    7 => "Thruster",
+                    9 => "Light Particle Beam",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+        );
         
         
     }
