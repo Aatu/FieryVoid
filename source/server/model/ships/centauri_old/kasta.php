@@ -42,13 +42,15 @@ class Kasta extends BaseShip{
         $this->addAftSystem(new Thruster(2, 10, 0, 3, 2));
         $this->addAftSystem(new JumpEngine(5, 25, 3, 20));
         
-		$this->addLeftSystem(new Thruster(4, 14, 0, 5, 3));
+	$this->addLeftSystem(new Thruster(4, 14, 0, 5, 3));
         $this->addLeftSystem(new AssaultLaser(3, 6, 4, 300, 360));
-		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));   
-        $this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));	        
+	$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
+        $this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
+        $this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
         		
-		$this->addRightSystem(new Thruster(4, 14, 0, 5, 4));
+	$this->addRightSystem(new Thruster(4, 14, 0, 5, 4));
         $this->addRightSystem(new AssaultLaser(3, 6, 4, 0, 60));
+        $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
 	
