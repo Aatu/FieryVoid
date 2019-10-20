@@ -265,7 +265,7 @@ window.gamedata = {
 	    
 	    checkResult += "Capital ships: " + capitalShips + ": "; //Capital Ship present?
 	    //var capsRequired = Math.floor(selectedSlot.points/3000);//1 per 3000, round down; so 1 at 3000, 2 at 6000, 3 at 9000, 10 at 30000
-	    //let's decrease the requirement at larger battles: 1 per 4000, round up, with first 2499 not counted; so 1 at 3000, 2 at 6500, 3 at 10500, 10 at 42500
+	    //let's decrease the requirement at larger battles: 1 per 4000, round up, with first 2499 not counted; so 1 at 2500, 2 at 6500, 3 at 10500, 10 at 42500
 	    var capsRequired = 0;
 	    if (selectedSlot.points >= 3000){
 		    capsRequired = Math.ceil((selectedSlot.points-2499)/4000);
