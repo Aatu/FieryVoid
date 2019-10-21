@@ -1056,6 +1056,8 @@
         public $fireControl = array(1, 2, 2); // fighters, <mediums, <capitals
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 1;		
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
