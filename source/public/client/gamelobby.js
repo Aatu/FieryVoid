@@ -381,16 +381,27 @@ window.gamedata = {
 	    
 	    //total Uncommon/Rare units in fleet	    
 	    var limitUTotal =  0;
+	    var limitRTotal =  0;
 	    if((selectedSlot.points-1500) > 0){
 	    	limitUTotal = Math.floor((selectedSlot.points-1500)/1000); //limit Uncommon units per fleet; turnament rules: 2, but it's for 3500 points
 	    }
 	    limitUTotal = Math.max(limitUTotal,2); //always allow at least 2! 
+	    limitRTotal = Math.floor(limitUTotal/2); //limit Rare units per fleet; turnament rules: 1, but it's for 3500 points    
+	    if (totalU>limitUTotal){
+		checkResult += "FAILED: You have " + totalU + " Uncommon units , out of " + limitUTotal + " allowed for fleet.<br><br>" ;
+		problemFound = true;
+	    }
+	    if (totalR>limitRTotal){
+		checkResult += "FAILED: You have " + totalR + " Rare/Unique units , out of " + limitRTotal + " allowed for fleet.<br><br>" ;
+		problemFound = true;
+	    }
+	    
+		    /*old version
 	    var totalCombined = totalU + 2*totalR; //Rares take 2 slots
 	    if (totalCombined>limitUTotal){
 		    checkResult += "FAILED: You have " + totalU + " Uncommon and " + totalR + " Rare units , out of total " + limitUTotal + " Uncommon allowed (Rare units count double).<br><br>" ;
 		    problemFound = true;
-	    }	    
-	    
+	    }	    */
 	    
 	    //fighters!
 	    var totalHangarAvailable = totalHangarH+totalHangarM+totalHangarL;
