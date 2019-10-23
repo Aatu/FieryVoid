@@ -400,6 +400,7 @@ spl_autoload_register(
                 'kabrik' => '/server/model/ships/brakiri/kabrik.php',
                 'kaliva' => '/server/model/ships/brakiri/kaliva.php',
                 'kasta' => '/server/model/ships/centauri_old/kasta.php',
+                'kasta1973' => '/server/model/ships/centauri_old/kasta1973.php',
                 'kastona' => '/server/model/ships/abbai_old/kastona.php',
                 'katanpulsedestroyer' => '/server/model/ships/narn/KatanPulseDestroyer.php',
                 'katoc' => '/server/model/ships/narn/Katoc.php',
