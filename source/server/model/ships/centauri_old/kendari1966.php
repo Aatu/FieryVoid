@@ -8,7 +8,8 @@ class Kendari1966 extends BaseShip{
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Kendari1966";
         $this->imagePath = "img/ships/kendari.png";
-        $this->shipClass = "Kendari Fleet Scout (1966)";
+        $this->shipClass = "Kendari Fleet Scout (1966)";	    
+        	$this->variantOf = "Kendari Fleet Scout";
         $this->shipSizeClass = 3;
         $this->fighters = array("heavy"=>6);
         $this->limited = 33;
