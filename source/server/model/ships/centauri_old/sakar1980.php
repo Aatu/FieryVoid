@@ -8,7 +8,8 @@ class Sakar1980 extends BaseShip{
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Sakar1980";
         $this->imagePath = "img/ships/sakar.png"; 
-        $this->shipClass = "Sakar Carrier";
+        $this->shipClass = "Sakar Carrier (1980)";
+        $this->variantOf = "Sakar Carrier";
         $this->shipSizeClass = 3;
         $this->limited = 33;
         $this->fighters = array("normal"=>48);
@@ -61,6 +62,48 @@ class Sakar1980 extends BaseShip{
         $this->addLeftSystem(new Structure( 4, 48));
         $this->addRightSystem(new Structure( 4, 48));
         $this->addPrimarySystem(new Structure( 5, 48));
+	    
+	    
+	//d20 hit chart
+	$this->hitChart = array(
+		
+		0=> array(
+			11 => "Structure",
+			14 => "Scanner",
+			16 => "Engine",
+			17 => "Hangar",
+			19 => "Reactor",
+			20 => "C&C",
+		),
+		1=> array(
+			5 => "Thruster",
+			8 => "Light Particle Beam",
+			12 => "Hangar",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		2=> array(
+			6 => "Thruster",
+			8 => "Light Particle Beam",
+			12 => "Hangar",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		3=> array(
+			6 => "Thruster",
+			8 => "Light Particle Beam",
+			12 => "Hangar",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		4=> array(
+			4 => "Thruster",
+			10 => "Particle Projector",
+			18 => "Structure",
+			20 => "Primary",
+		),
+	);
+	    
     }
 }
 ?>
