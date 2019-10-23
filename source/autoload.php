@@ -689,6 +689,7 @@ spl_autoload_register(
                 'rutarian' => '/server/model/ships/centauri/rutarian.php',
                 'sagittarius' => '/server/model/ships/EA/sagittarius.php',
                 'sakar' => '/server/model/ships/centauri_old/sakar.php',
+                'sakar1980' => '/server/model/ships/centauri_old/sakar1980.php',
                 'sanctuarybase' => '/server/model/ships/raiders/sanctuarybase.php',
                 'scanner' => '/server/model/systems/baseSystems.php',
                 'scattergun' => '/server/model/weapons/pulse.php',
