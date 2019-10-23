@@ -84,8 +84,8 @@ class Sakar1980 extends BaseShip{
 		),
 		2=> array(
 			6 => "Thruster",
-			8 => "Light Particle Beam",
-			12 => "Hangar",
+			9 => "Jump Engine",
+			11 => "Light Particle Beam",
 			18 => "Structure",
 			20 => "Primary",
 		),
@@ -97,8 +97,9 @@ class Sakar1980 extends BaseShip{
 			20 => "Primary",
 		),
 		4=> array(
-			4 => "Thruster",
-			10 => "Particle Projector",
+			6 => "Thruster",
+			8 => "Light Particle Beam",
+			12 => "Hangar",
 			18 => "Structure",
 			20 => "Primary",
 		),
