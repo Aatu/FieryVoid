@@ -941,6 +941,7 @@ spl_autoload_register(
                 'vengeful' => '/server/model/ships/orieni/vengeful.php',
                 'vengeful1780' => '/server/model/ships/orieni/vengeful1780.php',
                 'ventrus' => '/server/model/ships/centauri_old/ventrus.php',
+                'ventrus2007' => '/server/model/ships/centauri_old/ventrus2007.php',
                 'vigilant' => '/server/model/ships/orieni/vigilant.php',
                 'vigilant1704' => '/server/model/ships/orieni/vigilant1704.php',
                 'vindicatorca' => '/server/model/ships/deneth/vindicatorCA.php',
