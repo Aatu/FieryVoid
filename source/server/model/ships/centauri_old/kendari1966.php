@@ -39,7 +39,7 @@ class Kendari1966 extends BaseShip{
 	    
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
-        $this->addAftSystem(new JumpEngine(5, 25, 3, 20));
+        $this->addAftSystem(new JumpEngine(5, 20, 3, 20));
         $this->addAftSystem(new SentinelPointDefense(1, 4, 1, 120, 240));
         
 	$this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
