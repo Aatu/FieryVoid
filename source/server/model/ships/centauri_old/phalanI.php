@@ -18,10 +18,13 @@ class PhalanI extends FighterFlight{
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
                 $this->occurence = "uncommon";
+	    $this->isd = 2001;
         
 		$this->iniativebonus = 80;
         $this->populate();
     }
+	
+	
     public function populate(){
         $current = count($this->systems);
         $new = $this->flightSize;
