@@ -17,6 +17,7 @@ class PhalanM extends FighterFlight{
         $this->offensivebonus = 3;
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
+	    $this->isd = 1870;
         
 		$this->iniativebonus = 80;
 		
