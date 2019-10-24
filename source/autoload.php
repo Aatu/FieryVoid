@@ -568,6 +568,7 @@ spl_autoload_register(
                 'omegabeta' => '/server/model/ships/EA/omegaBeta.php',
                 'omegagamma' => '/server/model/ships/EA/omegaGamma.php',
                 'optine' => '/server/model/ships/centauri_old/optine.php',
+                'optine2005' => '/server/model/ships/centauri_old/optine2005.php',
                 'oracle' => '/server/model/ships/EA/oracle.php',
                 'oraclescout' => '/server/model/ships/EA/oracleScout.php',
                 'orak' => '/server/model/ships/hurr/orak.php',
