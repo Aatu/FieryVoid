@@ -13,7 +13,7 @@ class Valtor1870 extends BaseShip{
 	    
         $this->variantOf = "Optine Battlecruiser";
         $this->occurence = "rare";
-	    $this->isd = 1966;
+	    $this->isd = 1870;
         $this->forwardDefense = 16;
         $this->sideDefense = 18;
         
@@ -25,37 +25,36 @@ class Valtor1870 extends BaseShip{
          
         $this->addPrimarySystem(new Reactor(6, 25, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(6, 23, 4, 8));
+        $this->addPrimarySystem(new Scanner(6, 23, 4, 7));
         $this->addPrimarySystem(new Engine(5, 20, 0, 10, 3));
 		$this->addPrimarySystem(new Hangar(4, 2));
         
-		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
-        $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
+	$this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addFrontSystem(new TacLaser(3, 5, 4, 240, 360));
         $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));
         $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));
         $this->addFrontSystem(new TacLaser(3, 5, 4, 0, 120));
         $this->addFrontSystem(new ParticleProjector(3, 6, 1, 270, 90));
 		
-        $this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
-        $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
-        $this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
-		$this->addAftSystem(new JumpEngine(5, 25, 3, 20));
-		$this->addAftSystem(new TacLaser(3, 5, 4, 60, 180));
-		$this->addAftSystem(new TacLaser(3, 5, 4, 180, 300));
-		$this->addAftSystem(new ParticleProjector(3, 6, 1, 60, 240));
-		$this->addAftSystem(new ParticleProjector(3, 6, 1, 120, 300));
+        $this->addAftSystem(new Thruster(2, 10, 0, 3, 2));
+        $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
+        $this->addAftSystem(new Thruster(2, 10, 0, 3, 2));
+	$this->addAftSystem(new JumpEngine(5, 25, 3, 20));
+	$this->addAftSystem(new TacLaser(3, 5, 4, 60, 180));
+	$this->addAftSystem(new TacLaser(3, 5, 4, 180, 300));
+	$this->addAftSystem(new ParticleProjector(3, 6, 1, 60, 240));
+	$this->addAftSystem(new ParticleProjector(3, 6, 1, 120, 300));
         
         $this->addLeftSystem(new Thruster(4, 14, 0, 5, 3));
         $this->addLeftSystem(new HeavyPlasma(3, 8, 5, 300, 360));
-		  $this->addAftSystem(new ParticleProjector(3, 6, 1, 60, 240));
-		  $this->addAftSystem(new ParticleProjector(3, 6, 1, 120, 300));
+	  $this->addLeftSystem(new ParticleProjector(3, 6, 1, 240, 0));
+	  $this->addLeftSystem(new ParticleProjector(3, 6, 1, 180, 300));
     
         $this->addRightSystem(new Thruster(4, 14, 0, 5, 4));
         $this->addRightSystem(new HeavyPlasma(3, 8, 5, 0, 60));
-        $this->addRightSystem(new LightParticleBeamShip(3, 2, 1, 0, 180));
-        $this->addRightSystem(new LightParticleBeamShip(3, 2, 1, 0, 180));
-        $this->addRightSystem(new LightParticleBeamShip(3, 2, 1, 0, 180));
+	  $this->addLeftSystem(new ParticleProjector(3, 6, 1, 0, 120));
+	  $this->addLeftSystem(new ParticleProjector(3, 6, 1, 60, 180));
         
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -95,14 +94,14 @@ class Valtor1870 extends BaseShip{
 		3=> array(
 			4 => "Thruster",
 			6 => "Heavy Plasma Cannon",
-			9 => "Light Particle Beam",
+			9 => "Particle Projector",
 			18 => "Structure",
 			20 => "Primary",
 		),
 		4=> array(
 			4 => "Thruster",
 			6 => "Heavy Plasma Cannon",
-			9 => "Light Particle Beam",
+			9 => "Particle Projector",
 			18 => "Structure",
 			20 => "Primary",
 		),
