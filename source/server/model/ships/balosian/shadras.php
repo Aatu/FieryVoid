@@ -8,7 +8,7 @@ class Shadras extends FighterFlight{
         $this->pointCost = 300;
         $this->faction = "Balosian";
         $this->phpclass = "shadras";
-        $this->shipClass = "Shadras Heavy flight";
+        $this->shipClass = "Shadras Heavy Fighters";
         $this->imagePath = "img/ships/shadras.png";
 
         $this->forwardDefense = 8;
