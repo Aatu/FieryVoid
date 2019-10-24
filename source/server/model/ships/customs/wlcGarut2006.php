@@ -15,7 +15,8 @@ class wlcGarut2006 extends BaseShip{
         //$this->occurence = "rare"; 
         $this->fighters = array("heavy"=>18); 
 		$this->isd = 2006;
-		$this->unofficial = true; 
+		//$this->unofficial = true; //this is an official ship after all, just Enormous - no reason to call it unofficial!
+		$this->notes = "Not a combat ship (->not eligible for pickup battles)";
 
         $this->shipSizeClass = 3; //Enormous is not implemented
         $this->forwardDefense = 19;
