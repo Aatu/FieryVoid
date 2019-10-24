@@ -1,5 +1,5 @@
 <?php
-class Optine extends BaseShip{
+class Optine2005 extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -8,7 +8,7 @@ class Optine extends BaseShip{
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Optine";
         $this->imagePath = "img/ships/optine.png";
-        $this->shipClass = "Optine Battlecruiser";
+        $this->shipClass = "Optine Battlecruiser (2005)";
         $this->shipSizeClass = 3;
 	    $this->isd = 2005;
         $this->forwardDefense = 16;
@@ -61,6 +61,50 @@ class Optine extends BaseShip{
         $this->addLeftSystem(new Structure( 4, 48));
         $this->addRightSystem(new Structure( 4, 48));
         $this->addPrimarySystem(new Structure( 6, 55));
+	    
+	    
+	//d20 hit chart
+	$this->hitChart = array(
+		
+		0=> array(
+			10 => "Structure",
+			13 => "Scanner",
+			16 => "Engine",
+			17 => "Hangar",
+			19 => "Reactor",
+			20 => "C&C",
+		),
+		1=> array(
+			5 => "Thruster",
+			10 => "Assault Laser",
+			11 => "Light Particle Beam",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		2=> array(
+			5 => "Thruster",
+			8 => "Jump Engine",
+			10 => "Assault Laser",
+			12 => "Light Particle Beam",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		3=> array(
+			4 => "Thruster",
+			6 => "Assault Laser",
+			8 => "Light Particle Beam",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		4=> array(
+			4 => "Thruster",
+			6 => "Assault Laser",
+			8 => "Light Particle Beam",
+			18 => "Structure",
+			20 => "Primary",
+		),
+	);
+	    
     }
 }
 
