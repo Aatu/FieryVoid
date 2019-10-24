@@ -1,34 +1,36 @@
 <?php
-class Centaurum2005 extends BaseShip{
+/*NOT FINISHED YET*/
+class Talvan extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 850;
+		$this->pointCost = 600;
         $this->faction = "Centauri (WotCR)";
-        $this->phpclass = "Centaurum2005";
-        $this->imagePath = "img/ships/octurion.png";
-        $this->shipClass = "Centaurum Battleship (2005)";
-        $this->variantOf = "Centaurum Battleship";
+        $this->phpclass = "Talvan";
+        $this->imagePath = "img/ships/centurion.png";
+        $this->shipClass = "Talvan Attack Cruiser";
+        //$this->variantOf = "Talvan Attack Cruiser";
         $this->shipSizeClass = 3;
-        $this->limited = 33; //limited deployment
-        $this->fighters = array("heavy"=>12);
-	    $this->isd = 2005;
-        $this->forwardDefense = 17;
-        $this->sideDefense = 19;
+        //$this->limited = 33; //limited deployment
+        //$this->fighters = array("heavy"=>12);
+	    $this->isd = 1860;
+        $this->forwardDefense = 15;
+        $this->sideDefense = 17;
         
         $this->turncost = 1;
-        $this->turndelaycost = 1.33;
-        $this->accelcost = 5;
-        $this->rollcost = 4;
-        $this->pivotcost = 4;
+        $this->turndelaycost = 0.66;
+        $this->accelcost = 3;
+        $this->rollcost = 3;
+        $this->pivotcost = 3;
+        $this->iniativebonus = 1*5;  
         
          
-        $this->addPrimarySystem(new Reactor(6, 30, 0, 0));
-        $this->addPrimarySystem(new CnC(6, 25, 0, 0));
-        $this->addPrimarySystem(new Scanner(6, 25, 4, 8));
-        $this->addPrimarySystem(new Engine(6, 25, 0, 10, 3));
-		$this->addPrimarySystem(new Hangar(5, 16));
+        $this->addPrimarySystem(new Reactor(6, 22, 0, 0));
+        $this->addPrimarySystem(new CnC(6, 18, 0, 0));
+        $this->addPrimarySystem(new Scanner(6, 20, 4, 7));
+        $this->addPrimarySystem(new Engine(5, 20, 0, 10, 3));
+		$this->addPrimarySystem(new Hangar(5, 2));
         
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
