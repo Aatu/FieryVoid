@@ -936,6 +936,7 @@ spl_autoload_register(
                 'utan' => '/server/model/ships/yolu/utan.php',
                 'vakar' => '/server/model/ships/narn/vakar.php',
                 'valtor' => '/server/model/ships/centauri_old/valtor.php',
+                'valtor1870' => '/server/model/ships/centauri_old/valtor1870.php',
                 'varilon' => '/server/model/ships/centauri_old/varilon.php',
                 'varloth' => '/server/model/ships/narn/varloth.php',
                 'varnic' => '/server/model/ships/narn/varnic.php',
