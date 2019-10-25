@@ -118,6 +118,8 @@ spl_autoload_register(
                 'celerian1850' => '/server/model/ships/centauri_old/celerian1850.php',
                 'centaurum' => '/server/model/ships/centauri_old/centaurum.php',
                 'centaurum2005' => '/server/model/ships/centauri_old/centaurum2005.php',
+                'talvan' => '/server/model/ships/centauri_old/talvan.php',
+                'talvan2006' => '/server/model/ships/centauri_old/talvan2006.php',
                 'centurion' => '/server/model/ships/centauri/centurion.php',
                 'chatmanager' => '/server/controller/ChatManager.php',
                 'chatmessage' => '/server/model/ChatMessage.php',
