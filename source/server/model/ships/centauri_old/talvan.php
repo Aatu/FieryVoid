@@ -81,10 +81,8 @@ class Talvan extends BaseShip{
 			20 => "Primary",
 		),
 		2=> array(
-			5 => "Thruster",
-			8 => "Jump Engine",
-			13 => "Assault Laser",
-			14 => "Light Particle Beam",
+			7 => "Thruster",
+			12 => "Jump Engine",
 			18 => "Structure",
 			20 => "Primary",
 		),
