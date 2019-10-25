@@ -414,7 +414,7 @@ class SWIon extends SWDirectWeapon{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-      $this->data["Special"] = ".Damage may cause power shortages.";      
+      $this->data["Special"] .= "Damage may cause power shortages.";      
       $this->data["Special"] .= "<br>Increased chance of critical on systems damaged."; 
     }
 	
