@@ -4,7 +4,7 @@ class swSkipray extends SuperHeavyFighter{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 120;
+        $this->pointCost = 100;
         $this->faction = "StarWars Galactic Empire";
         $this->phpclass = "swSkipray";
         $this->shipClass = "Skipray Blastboat";
@@ -20,6 +20,7 @@ class swSkipray extends SuperHeavyFighter{
         $this->jinkinglimit = 4;
         $this->turncost = 0.33;
         $this->iniativebonus = 70;
+    	$this->hasNavigator = true;
         
         $armour = array(3, 3, 3, 2);
         $fighter = new Fighter("swSkipray", $armour, 25, $this->id);
@@ -36,13 +37,6 @@ class swSkipray extends SuperHeavyFighter{
             //1 forward Proton Torpedo Launcher, 5 shots
             $torpedoLauncher = new SWFtrProtonTorpedoLauncher(5, 300, 60, 2);//single launcher! like for direct fire
             $fighter->addFrontSystem($torpedoLauncher);
-
-
-            //2 forward Concussion Missile Launchers, 4 shots each - TWO SEPARATE MISSILE SYSTEMS DON"T WORK ON FIGHTER!
-	    /*
-            $ConcussionMissileLauncher = new SWFtrConcMissileLauncher(4, 300, 60, 2);//single dual launcher! like for direct fire
-            $fighter->addFrontSystem($ConcussionMissileLauncher);    
-	    */
 
 
         //Ray Shield, 2 points
