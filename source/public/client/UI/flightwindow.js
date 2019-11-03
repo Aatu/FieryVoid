@@ -311,7 +311,6 @@ window.flightWindowManager = {
 		if (shipManager.isDestroyed(flight) || shipManager.isDestroyed(flight, system) || shipManager.isDestroyed(flight, fighter)) return;
 
 		//Macin Sawicki, October 2017 - allow called shots vs fighters!
-		//TODO: called shot against fighters
 		/*
   var selectedShip = gamedata.getSelectedShip();
   if (gamedata.isEnemy(flight, selectedShip) 

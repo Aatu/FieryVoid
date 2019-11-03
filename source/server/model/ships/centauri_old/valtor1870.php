@@ -53,8 +53,8 @@ class Valtor1870 extends BaseShip{
     
         $this->addRightSystem(new Thruster(4, 14, 0, 5, 4));
         $this->addRightSystem(new HeavyPlasma(3, 8, 5, 0, 60));
-	  $this->addLeftSystem(new ParticleProjector(3, 6, 1, 0, 120));
-	  $this->addLeftSystem(new ParticleProjector(3, 6, 1, 60, 180));
+	  $this->addRightSystem(new ParticleProjector(3, 6, 1, 0, 120));
+	  $this->addRightSystem(new ParticleProjector(3, 6, 1, 60, 180));
         
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

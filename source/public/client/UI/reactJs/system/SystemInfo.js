@@ -39,9 +39,13 @@ class SystemInfo extends React.Component {
         const {ship, selectedShip, system, boundingBox} = this.props;
 
         if (system instanceof Ship) {
+			var unitName = ship.shipClass;
+			if (system.flight){ //display fighter name instead of flight name!
+				unitName = system.systems[1].displayName;
+			}
             return (
                 <SystemInfoTooltip ship position={getPosition(boundingBox)}>
-                    <InfoHeader><ShipNameHeader>{ship.name}</ShipNameHeader> - {ship.shipClass}</InfoHeader>
+                    <InfoHeader><ShipNameHeader>{ship.name}</ShipNameHeader> - {unitName}</InfoHeader>
                     <ShipInfo ship={ship}/>
                 </SystemInfoTooltip>
             );

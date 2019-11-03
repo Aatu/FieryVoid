@@ -227,7 +227,6 @@ class MediumPlasma extends Plasma{
     	public function getDamage($fireOrder){        return Dice::d(10,3)+4;   }
         public function setMinDamage(){     $this->minDamage = 7 /*- $this->dp*/;      }
         public function setMaxDamage(){     $this->maxDamage = 34 /*- $this->dp*/;      }
-
 }
 
 
@@ -250,11 +249,9 @@ class LightPlasma extends Plasma{
         public $rangePenalty = 1;
         public $fireControl = array(-5, 1, 3); // fighters, <=mediums, <=capitals 
 
-
     	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-		
+        }		
 		
     	public function getDamage($fireOrder){        return Dice::d(10,2)+2;   }
         public function setMinDamage(){     $this->minDamage = 4 /*- $this->dp*/;      }
@@ -327,7 +324,7 @@ class PlasmaTorch extends Plasma{
 
 class PairedPlasmaBlaster extends LinkedWeapon{
         public $name = "pairedPlasmaBlaster";
-        public $displayName = "Paired Plasma Blaster";
+        public $displayName = "Plasma Blaster"; //it's not 'paired' in any way, except being usually mounted twin linked - like most fighter weapons...
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
         public $trailColor = array(75, 250, 90);
@@ -350,11 +347,18 @@ class PairedPlasmaBlaster extends LinkedWeapon{
     	public $damageType = "Standard"; 
     	public $weaponClass = "Plasma"; 
 
-        function __construct($startArc, $endArc, $damagebonus, $shots = 2){ //damage bonus NOT accounted for!
-            $this->shots = $shots;
-            $this->defaultShots = $shots;
- 	    $this->intercept = $shots;
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){ //damage bonus NOT accounted for!
+            $this->shots = $nrOfShots;
+            $this->defaultShots = $nrOfShots;
+			$this->intercept = $nrOfShots;
             
+            if($nrOfShots === 1){
+                $this->iconPath = "pairedPlasmaBlaster1.png";
+            }
+            if($nrOfShots >2){//no special icon for more than 3 linked weapons
+                $this->iconPath = "pairedPlasmaBlaster3.png";
+            }
+			
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 

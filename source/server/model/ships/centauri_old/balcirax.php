@@ -77,7 +77,7 @@ class Balcirax extends HeavyCombatVessel{
             ),
             2=> array(
                     6 => "Thruster",
-                    8 => "Particle Projector"
+                    8 => "Particle Projector",
                     10 => "Light Particle Beam",
                     18 => "Structure",
                     20 => "Primary",

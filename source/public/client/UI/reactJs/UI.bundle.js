@@ -39275,6 +39275,11 @@ var SystemInfo = function (_React$Component) {
 
 
             if (system instanceof Ship) {
+                var unitName = ship.shipClass;
+                if (system.flight) {
+                    //display fighter name instead of flight name!
+                    unitName = system.systems[1].displayName;
+                }
                 return React.createElement(
                     SystemInfoTooltip,
                     { ship: true, position: getPosition(boundingBox) },
@@ -39287,7 +39292,7 @@ var SystemInfo = function (_React$Component) {
                             ship.name
                         ),
                         " - ",
-                        ship.shipClass
+                        unitName
                     ),
                     React.createElement(_ShipInfo2.default, { ship: ship })
                 );

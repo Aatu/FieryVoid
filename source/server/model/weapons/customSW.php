@@ -229,8 +229,9 @@ class SWDirectWeapon extends Pulse{
 	
         public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-		 $this->data["Special"] = 'Burst mode: -1..1 +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
-		$this->data["Special"] .= '<br>Minimum of 1 pulse.';
+			$this->data["Special"] = 'Burst mode: -1..1 +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
+			$this->data["Special"] .= '<br>Minimum of 1 pulse.';
+			$this->data["Special"] .= '<br>ATTENTION CALL: Pulse mode means hits will be individually allocated, even for fighter weapons!';
         }
 	
     

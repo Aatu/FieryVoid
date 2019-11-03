@@ -31,8 +31,8 @@ class Kendari extends BaseShip{
 		
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1)); 
-        $this->addFrontSystem(new Particle Projector(2, 6, 1, 270, 90));
-        $this->addFrontSystem(new Particle Projector(2, 6, 1, 270, 90));
+        $this->addFrontSystem(new ParticleProjector(2, 6, 1, 270, 90));
+        $this->addFrontSystem(new ParticleProjector(2, 6, 1, 270, 90));
         $this->addFrontSystem(new SentinelPointDefense(1, 4, 1, 240, 60));
         $this->addFrontSystem(new SentinelPointDefense(1, 4, 1, 300, 120));
 
@@ -42,10 +42,10 @@ class Kendari extends BaseShip{
         $this->addAftSystem(new SentinelPointDefense(1, 4, 1, 120, 240));
         
 	$this->addLeftSystem(new Thruster(3, 15, 0, 5, 3));
-        $this->addLeftSystem(new Particle Projector(2, 6, 1, 180, 360));
+        $this->addLeftSystem(new ParticleProjector(2, 6, 1, 180, 360));
         
 	$this->addRightSystem(new Thruster(3, 15, 0, 5, 4));
-        $this->addRightSystem(new Particle Projector(2, 6, 1, 0 , 180));     
+        $this->addRightSystem(new ParticleProjector(2, 6, 1, 0 , 180));     
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 40));

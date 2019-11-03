@@ -680,7 +680,7 @@
         public $trailColor = array(30, 170, 255);
 
         public $name = "pairedParticleGun";
-        public $displayName = "Paired Particle guns";
+        public $displayName = "Particle Gun"; //it's not 'paired' in any way, except being usually mounted twin linked - like most fighter weapons...
         public $animation = "trail";
         public $animationColor = array(30, 170, 255);
         public $animationExplosionScale = 0.10;

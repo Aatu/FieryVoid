@@ -8,20 +8,24 @@ class Tatros extends MediumShip{
     $this->faction = "Centauri (WotCR)";
     $this->phpclass = "Tatros";
     $this->imagePath = "img/ships/jenas.png";
-    $this->shipClass = "Tatros Escort Frigate";
-    $this->agile = true;
     $this->canvasSize = 100;
+    $this->shipClass = "Tatros Escort Frigate";
     $this->variantOf = "Jenas Attack Frigate";
+	$this->isd = 2007;
 
     $this->forwardDefense = 11;
     $this->sideDefense = 12;
 
+    $this->agile = true;
     $this->turncost = 0.5;
     $this->turndelaycost = 0.5;
     $this->accelcost = 2;
     $this->rollcost = 2;
     $this->pivotcost = 2;
     $this->iniativebonus = 60;
+	
+	$this->notes = "Atmospheric capable";
+	
         
     $this->addPrimarySystem(new Reactor(4, 8, 0, 0));
     $this->addPrimarySystem(new CnC(4, 9, 0, 0));
@@ -33,8 +37,8 @@ class Tatros extends MediumShip{
     $this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
 
     $this->addFrontSystem(new Thruster(3, 12, 0, 3, 1));
-    $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 180, 60));
-    $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 180));
+    $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
+    $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
     $this->addFrontSystem(new SentinelPointDefense(1, 4, 2, 180, 60));
     $this->addFrontSystem(new SentinelPointDefense(1, 4, 2, 300, 180));
 
@@ -42,6 +46,33 @@ class Tatros extends MediumShip{
     $this->addAftSystem(new Thruster(1, 10, 0, 4, 2));
 
     $this->addPrimarySystem(new Structure( 4, 40));
+	
+	
+	
+		$this->hitChart = array(
+			0=> array(
+					8 => "Thruster",
+					9 => "Light Particle Beam",
+					12 => "Scanner",
+					15 => "Engine",
+					17 => "Hangar",
+					18 => "Reactor",
+					20 => "C&C",
+			),
+			1=> array(
+					6 => "Thruster",
+					8 => "Sentinel Point Defense",
+					10 => "Light Particle Beam",
+					17 => "Structure",
+					20 => "Primary",
+			),
+			2=> array(
+					7 => "Thruster",
+					17 => "Structure",
+					20 => "Primary",
+			),
+		);
+	
     }
 
 }

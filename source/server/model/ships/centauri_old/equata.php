@@ -14,8 +14,9 @@ class Equata extends HeavyCombatVessel{
         $this->variantOf = "Strela Light Jump Ship";
 	    $this->isd = 2008;
         $this->occurence = "rare";
-
         $this->limited = 10;
+		
+		
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
@@ -41,9 +42,9 @@ class Equata extends HeavyCombatVessel{
         $this->addFrontSystem(new AssaultLaser(4, 6, 4, 300, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
         
-        $this->addAftSystem(new Thruster(4, 16, 0, 4, 2));
-        $this->addAftSystem(new Thruster(4, 16, 0, 4, 2));
-        $this->addAftSystem(new JumpEngine(3, 15, 3, 20));
+        $this->addAftSystem(new Thruster(4, 14, 0, 4, 2));
+        $this->addAftSystem(new Thruster(4, 14, 0, 4, 2));
+        $this->addAftSystem(new JumpEngine(3, 15, 3, 25));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
@@ -54,6 +55,34 @@ class Equata extends HeavyCombatVessel{
         $this->addAftSystem(new Structure( 4, 50));
         $this->addPrimarySystem(new Structure( 5, 40 ));
         
+		
+		
+
+        $this->hitChart = array(
+            0=> array(
+                    6 => "Structure",
+                    9 => "Thruster",
+                    12 => "ELINT Scanner",
+                    15 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    5 => "Thruster",
+                    7 => "Assault Laser",
+                    9 => "Light Particle Beam",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    5 => "Thruster",
+                    7 => "Light Particle Beam",
+					9 => "Jump Engine",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+        );
         
     }
 

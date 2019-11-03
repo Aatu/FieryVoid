@@ -10,6 +10,7 @@ class Alzara extends HeavyCombatVessel{
         $this->imagePath = "img/ships/altarian.png";
         $this->shipClass = "Alzara Destroyer";
         $this->fighters = array("medium"=>6);
+		$this->isd = 2167;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

@@ -11,6 +11,7 @@ class Mogortha extends MediumShip{
 		$this->shipClass = "Mogortha Frigate";
 		$this->agile = true;
 		$this->canvasSize = 100;
+		$this->isd = 2198;
 
 		$this->forwardDefense = 12;
 		$this->sideDefense = 12;
