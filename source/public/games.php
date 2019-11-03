@@ -53,7 +53,7 @@ if (isset($_SESSION["user"])) {
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
 <div class="panel news">
-    <div id="newsHeader">Latest News - October 2019</div>
+    <div id="newsHeader">Latest News - November 2019</div>
     <div id="newsEntry">
         <!--
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
@@ -62,16 +62,14 @@ if (isset($_SESSION["user"])) {
         -->
         The latest update includes:
         <br><br>
-            <b>Unit enhancements</b> - did You ever have a few dozen points You don't know what to do with, or change entire list not to be left with a couple hundred? Now You can spend them on boosting Your units' performance! Detailed list of available upgrades (and their effects) is available in FB group, Files section.
+            <b>Fleet check update</b> - Rare and Uncommon fleetwide restrictions now checked separately.
         <br>
-            <b>FAQ/differences from tabletop updated</b> - a lot of things placed there changed recently!
+            <b>Fleet check update part 2</b> - units that require special attention (custom, special, unique...) are more exposed.
         <br>
-            <b>Flight sizes limited</b> - particularly nasty fighters (Brakiri Pikitos, Drakh Raider) got additional limitations on maximum flight size.
-        
-        <!--
+            <b>Flight sizes</b> - Flight size of 1 or 2 fighters are now allowed (useful for superheavies or for filling out remaining points); now Minbari standard tournament fleet (utilizing 5 Tishats) is possible!
         <br>
-            <b>Missile replay fixed</b> - now source hex should be launch hex instead of current position!
-        -->
+            <b>WotCR Centauri overhaul</b> - for those who want to try slightly less advanced factions. Deficiences fixed where found, hit charts added, old variants filled - as well as some new hulls.
+                
         <!--
         <br><br>
         - last but not least - brand new collection of BUGS!;
