@@ -66,6 +66,7 @@ class SWRayShield extends Shield implements DefensiveSystem{
 			$this->data["Special"] .= '<br>';
 		}
 	$this->data["Special"] .= "Does not decrease profile."; 
+	$this->data["Special"] .= "<br>Cannot be flown under."; 
 	$this->data["Special"] .= "<br>Does not protect from Ballistic, Matter and StarWars Ion damage."; 
 	$this->data["Special"] .= "<br>Doubly effective vs Raking weapons."; 
     }
