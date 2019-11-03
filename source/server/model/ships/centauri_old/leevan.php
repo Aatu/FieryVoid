@@ -9,6 +9,7 @@ class Leevan extends HeavyCombatVessel{
         $this->phpclass = "Leevan";
         $this->imagePath = "img/ships/navask.png";
         $this->shipClass = "Leevan Mine Sweeper";        
+		$this->isd = 1970;
 
         $this->forwardDefense = 13;
         $this->sideDefense = 13;
@@ -53,6 +54,31 @@ class Leevan extends HeavyCombatVessel{
         $this->addAftSystem(new Structure( 4, 60));
         $this->addPrimarySystem(new Structure( 6, 40));
         
+		
+        $this->hitChart = array(
+            0=> array(
+                    9 => "Structure",
+                    12 => "Thruster",
+                    14 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    5 => "Thruster",
+                    8 => "Particle Projector",
+                    10 => "Light Particle Beam",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    7 => "Thruster",
+                    9 => "Light Particle Beam",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+        );
         
     }
 

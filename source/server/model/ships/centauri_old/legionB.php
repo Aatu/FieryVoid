@@ -10,6 +10,7 @@ class LegionB extends OSAT{
         $this->imagePath = "img/ships/legion.png";
         $this->shipClass = 'Legion B Satellite';
         $this->variantOf = 'Legion A Satellite';
+	    $this->isd = 1966;
         
         $this->forwardDefense = 10;
         $this->sideDefense = 10;
@@ -33,5 +34,20 @@ class LegionB extends OSAT{
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         
         $this->addPrimarySystem(new Structure(4, 24));
+	    
+
+	//d20 hit chart
+	$this->hitChart = array(		
+		0=> array(
+			9 => "Structure",
+			11 => "Thruster",
+			14 => "Imperial Laser",
+			16 => "Light Particle Beam",
+			18 => "Scanner",
+			30 => "Reactor",
+		),
+	);	    
+	    
+	    
     }
 }

@@ -32,8 +32,8 @@ class Balcirax extends HeavyCombatVessel{
         $this->addPrimarySystem(new Thruster(4, 10, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(4, 10, 0, 5, 4));
         
-        $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));       
+        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));       
         $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));
         $this->addFrontSystem(new TacLaser(3, 5, 3, 300, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
@@ -54,6 +54,35 @@ class Balcirax extends HeavyCombatVessel{
         $this->addAftSystem(new Structure( 4, 60));
         $this->addPrimarySystem(new Structure( 4, 40));
         
+        
+        
+        
+        $this->hitChart = array(
+            0=> array(
+                    9 => "Structure",
+                    12 => "Thruster",
+                    14 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    6 => "Thruster",
+                    8 => "Heavy Plasma Cannon",
+                    9 => "Tactical Laser",
+                    10 => "Light Particle Beam",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    6 => "Thruster",
+                    8 => "Particle Projector",
+                    10 => "Light Particle Beam",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+        );
         
     }
 

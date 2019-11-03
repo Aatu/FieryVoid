@@ -1236,7 +1236,7 @@ class DBManager
 
         if ($allData) {
             $this->getFlightSize($gamedata);
-            $this->flightSizeFix($ships);
+            //$this->flightSizeFix($ships); //Marcin Sawicki, October 2019: perhaps once there was a reason for "fixing" flight size, but I do not see it any more
             $this->getAdaptiveArmourSettings($gamedata);
             $this->getIniativeForShips($gamedata, $turn);
             $this->getMovesForShips($gamedata, $turn);
@@ -1324,6 +1324,7 @@ class DBManager
         }
     }
 
+/* no longer needed - I'm leaving it commented out just in case
     public function flightSizeFix($ships)
     {
         foreach ($ships as $ship) {
@@ -1335,6 +1336,7 @@ class DBManager
             }
         }
     }
+*/	
 
 
     private function getIniativeForShips($gamedata, $fetchTurn)

@@ -170,7 +170,11 @@ window.confirm = {
         var max = $(".totalUnitCostAmount").data("maxSize");
 
         if (current < max) {
-            flightSize.html(Math.floor(current) + 3);
+			if (current < 3){ //allow 1 or 2 fighters in flight, then by 3s!				
+				flightSize.html(Math.floor(current) + 1);
+			}else{
+				flightSize.html(Math.floor(current) + 3);
+			}
         } else return;
 
         confirm.getTotalCost();
@@ -182,10 +186,12 @@ window.confirm = {
         var flightSize = $(".fighterAmount");
         var current = flightSize.html();
         var max = $(".totalUnitCostAmount").data("maxSize");
-
+		
         if (current > 3) {
             flightSize.html(Math.floor(current) - 3);
-        } else return;
+        } else if (current > 1){ //allow 1 or 2 fighters in flight, then by 3s!		
+			flightSize.html(Math.floor(current) - 1);
+		} else return;
 
         confirm.getTotalCost();
     },

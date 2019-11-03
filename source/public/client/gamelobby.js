@@ -77,6 +77,7 @@ window.gamedata = {
 	
 	/*checks fleet composition and displays alert with result*/
     checkChoices: function(){
+		var warningText = ""
 	    var checkResult = "";
 	    var problemFound = false;
 	    var warningFound = false;
@@ -93,6 +94,9 @@ window.gamedata = {
 	    var capitalShips = 0;
 	    var totalShips = 0;
 	    var customShipPresent = false;
+	    var enhancementPresent = false;
+	    var uniqueShipPresent = false;
+		var specialVariantPresent = false;
 	    var staticPresent = false;
 	    var shipTable = []; 
 	    
@@ -131,6 +135,7 @@ window.gamedata = {
 				    case 'Q':
 					oHull.Q++;
 					totalR++;
+					uniqueShipPresent = true;
 					break;
 				    case 'R':
 					oHull.R++;
@@ -157,6 +162,7 @@ window.gamedata = {
 			    case 'Q':
 				nHull.Q++;
 				totalR++; //Unique is treated more or less the same as Rare
+				uniqueShipPresent = true;
 				break;
 			    case 'R':
 				nHull.R++;
@@ -171,6 +177,7 @@ window.gamedata = {
 				break;
 			    default:
 				nHull.X++;
+				specialVariantPresent = true;
 		     }
 		     shipTable.push(nHull);
 		}
@@ -245,6 +252,15 @@ window.gamedata = {
 			warningFound = true;
 		}
 		if ((lship.base == true) || (lship.osat == true)) staticPresent = true;
+		
+			//check for presence of enhancements
+			if (!enhancementPresent){ //if already found - no point in checking
+				for (var enhNo in lship.enhancementOptions){
+					if (lship.enhancementOptions[enhNo][2] > 0){
+							enhancementPresent = true;
+					}						
+				}
+			}
 		    
 		    
 	    } //end of loop at ships preparing data
@@ -265,7 +281,7 @@ window.gamedata = {
 	    
 	    checkResult += "Capital ships: " + capitalShips + ": "; //Capital Ship present?
 	    //var capsRequired = Math.floor(selectedSlot.points/3000);//1 per 3000, round down; so 1 at 3000, 2 at 6000, 3 at 9000, 10 at 30000
-	    //let's decrease the requirement at larger battles: 1 per 4000, round up, with first 2499 not counted; so 1 at 3000, 2 at 6500, 3 at 10500, 10 at 42500
+	    //let's decrease the requirement at larger battles: 1 per 4000, round up, with first 2499 not counted; so 1 at 2500, 2 at 6500, 3 at 10500, 10 at 42500
 	    var capsRequired = 0;
 	    if (selectedSlot.points >= 3000){
 		    capsRequired = Math.ceil((selectedSlot.points-2499)/4000);
@@ -282,8 +298,23 @@ window.gamedata = {
 	    
 	    //Custom units present?
 	    if (customShipPresent){
-		checkResult += "Custom unit(s) present! Opponent's permission required.<br>"; 	
-		warningFound = true;
+			warningText += "<br> - Custom unit(s) present! Seek opponent's permission first."; 	
+			warningFound = true;
+	    }
+	    //enhanced units present?
+	    if (enhancementPresent){
+			warningText += "<br> - Enhancement(s) present! Seek opponent's permission first."; 	
+			warningFound = true;
+	    }
+	    //unique units present?
+	    if (uniqueShipPresent){
+			warningText += "<br> - Unique unit(s) present! Seek opponent's permission first."; 	
+			warningFound = true;
+	    }
+	    //unchecked variant present?
+	    if (specialVariantPresent){
+			warningText += "<br> - Special deployment unit(s) present! See particular unit description."; 	
+			warningFound = true;
 	    }
 	    
 	    //Static structures present?
@@ -381,16 +412,27 @@ window.gamedata = {
 	    
 	    //total Uncommon/Rare units in fleet	    
 	    var limitUTotal =  0;
+	    var limitRTotal =  0;
 	    if((selectedSlot.points-1500) > 0){
 	    	limitUTotal = Math.floor((selectedSlot.points-1500)/1000); //limit Uncommon units per fleet; turnament rules: 2, but it's for 3500 points
 	    }
 	    limitUTotal = Math.max(limitUTotal,2); //always allow at least 2! 
+	    limitRTotal = Math.floor(limitUTotal/2); //limit Rare units per fleet; turnament rules: 1, but it's for 3500 points    
+	    if (totalU>limitUTotal){
+		checkResult += "FAILED: You have " + totalU + " Uncommon units, out of " + limitUTotal + " allowed for fleet.<br><br>" ;
+		problemFound = true;
+	    }
+	    if (totalR>limitRTotal){
+		checkResult += "FAILED: You have " + totalR + " Rare/Unique units, out of " + limitRTotal + " allowed for fleet.<br><br>" ;
+		problemFound = true;
+	    }
+	    
+		    /*old version
 	    var totalCombined = totalU + 2*totalR; //Rares take 2 slots
 	    if (totalCombined>limitUTotal){
 		    checkResult += "FAILED: You have " + totalU + " Uncommon and " + totalR + " Rare units , out of total " + limitUTotal + " Uncommon allowed (Rare units count double).<br><br>" ;
 		    problemFound = true;
-	    }	    
-	    
+	    }	    */
 	    
 	    //fighters!
 	    var totalHangarAvailable = totalHangarH+totalHangarM+totalHangarL;
@@ -467,7 +509,7 @@ window.gamedata = {
 			
 	    
 	    if (warningFound){
-		    checkResult = "Unchecked or non-canon elements found - check text for details.<br><br>"+checkResult;
+		    checkResult = "<u>Unchecked or non-canon elements found - check text for details.</u>"+warningText+"<br><br>"+checkResult;
 	    }
 	    
 	    if (problemFound){

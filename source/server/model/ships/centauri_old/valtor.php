@@ -8,12 +8,12 @@ class Valtor extends BaseShip{
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Valtor";
         $this->imagePath = "img/ships/optine.png";
-        $this->shipClass = "Valtor Strike Cruiser";
+        $this->shipClass = "Valtor Strike Cruiser (1966)";
         $this->shipSizeClass = 3;
 	    
         $this->variantOf = "Optine Battlecruiser";
-	    $this->isd = 1966;
         $this->occurence = "rare";
+	    $this->isd = 1966;
 
         $this->forwardDefense = 16;
         $this->sideDefense = 18;
@@ -66,5 +66,51 @@ class Valtor extends BaseShip{
         $this->addLeftSystem(new Structure( 4, 48));
         $this->addRightSystem(new Structure( 4, 48));
         $this->addPrimarySystem(new Structure( 6, 55));
+	    
+	    
+	$this->hitChart = array(
+		
+		0=> array(
+			10 => "Structure",
+			13 => "Scanner",
+			16 => "Engine",
+			17 => "Hangar",
+			19 => "Reactor",
+			20 => "C&C",
+		),
+		1=> array(
+			5 => "Thruster",
+			8 => "Heavy Plasma Cannon",
+			9 => "Particle Projector",
+			11 => "Tactical Laser",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		2=> array(
+			5 => "Thruster",
+			8 => "Jump Engine",
+			10 => "Tactical Laser",
+			12 => "Particle Projector",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		3=> array(
+			4 => "Thruster",
+			6 => "Heavy Plasma Cannon",
+			9 => "Light Particle Beam",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		4=> array(
+			4 => "Thruster",
+			6 => "Heavy Plasma Cannon",
+			9 => "Light Particle Beam",
+			18 => "Structure",
+			20 => "Primary",
+		),
+	);
+	    
+	    
     }
 }
+?>

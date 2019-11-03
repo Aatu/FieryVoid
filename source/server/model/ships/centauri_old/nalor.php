@@ -91,6 +91,7 @@ class Nalor extends BaseShip{
 		3=> array(
 			4 => "Thruster",
 			6 => "Medium Plasma Cannon",
+			8 => "Particle Projector",
 			10 => "Light Particle Beam",
 			18 => "Structure",
 			20 => "Primary",
@@ -99,6 +100,7 @@ class Nalor extends BaseShip{
 		4=> array(
 			4 => "Thruster",
 			6 => "Medium Plasma Cannon",
+			8 => "Particle Projector",
 			10 => "Light Particle Beam",
 			18 => "Structure",
 			20 => "Primary",

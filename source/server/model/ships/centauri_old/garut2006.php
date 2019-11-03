@@ -1,5 +1,5 @@
 <?php
-class wlcGarut2006 extends BaseShip{
+class Garut2006 extends BaseShip{
 /*Wolfgang Lackner's ongoing campaign*/
 /*Centauri Garut Survey Ship, refit ISD 2006*/
 /*OFFICIAL (WoCR) enormous ship implemented as a capital*/
@@ -9,22 +9,24 @@ class wlcGarut2006 extends BaseShip{
         
 	$this->pointCost = 800;
         $this->faction = "Centauri (WotCR)";
-        $this->phpclass = "wlcGarut2006";
-        $this->shipClass = "Garut Survey Ship";
+        $this->phpclass = "Garut2006";
+        $this->shipClass = "Garut Survey Ship (2006)";
+        $this->variantOf = "Garut Survey Ship";
 	$this->limited = 10;   
         //$this->occurence = "rare"; 
         $this->fighters = array("heavy"=>18); 
 		$this->isd = 2006;
-		$this->unofficial = true; 
+		//$this->unofficial = true; //this is an official ship, just Enormous - no reason to call it unofficial!
+		$this->notes = "Not a combat ship (->not eligible for pickup battles)";
 
         $this->shipSizeClass = 3; //Enormous is not implemented
+        $this->Enormous = true;
         $this->forwardDefense = 19;
         $this->sideDefense = 20;
 	$this->iniativebonus = 0;
 
         $this->imagePath = "img/ships/sakar.png";
 	
-        $this->Enormous = true;
 
 
         $this->turncost = 2;
@@ -38,7 +40,7 @@ class wlcGarut2006 extends BaseShip{
         $this->addPrimarySystem(new ElintScanner(5, 30, 6, 10));
         $this->addPrimarySystem(new Engine(5, 36, 0, 12, 3));
 	$this->addPrimarySystem(new Hangar(5, 8));
-	$this->addPrimarySystem(new AssaultLaser(4, 6, 5, 0, 360));
+	$this->addPrimarySystem(new AssaultLaser(4, 6, 4, 0, 360));
 	$this->addPrimarySystem(new LightParticleBeamShip(3, 2, 1, 0, 360));
         
 	$this->addFrontSystem(new Thruster(3, 20, 0, 5, 1));

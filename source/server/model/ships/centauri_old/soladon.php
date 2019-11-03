@@ -13,6 +13,8 @@ class Soladon extends BaseShip{
         $this->occurence = "uncommon";
         $this->variantOf = "Celerian Warcruiser";
 	    $this->isd = 2002;
+	    
+	    $this->notes = "Availability dropped to Rare during late stages of the war.";
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;

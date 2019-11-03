@@ -34,15 +34,15 @@ class Falassa extends HeavyCombatVessel{
         $this->addPrimarySystem(new Thruster(4, 10, 0, 5, 4));
         
         $this->addFrontSystem(new Thruster(4, 10, 0, 5, 1));
-        $this->addFrontSystem(new Hangar(4, 14, 6));
         $this->addFrontSystem(new Thruster(4, 10, 0, 5, 1));
+        $this->addFrontSystem(new Hangar(4, 14, 6));
         $this->addFrontSystem(new TacLaser(3, 5, 4, 300, 60));
         $this->addFrontSystem(new TacLaser(3, 5, 4, 300, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
 
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));
@@ -57,11 +57,33 @@ class Falassa extends HeavyCombatVessel{
         $this->addPrimarySystem(new Structure( 4, 46));
         
         
+        $this->hitChart = array(
+            0=> array(
+                    11 => "Structure",
+                    13 => "Thruster",
+                    15 => "Scanner",
+                    17 => "Engine",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    5 => "Thruster",
+                    7 => "Tactical Laser",
+                    9 => "Hangar",
+                    12 => "Light Particle Beam",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    6 => "Thruster",
+                    10 => "Light Particle Beam",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+        );
         
     }
 
 }
-
-
 
 ?>
