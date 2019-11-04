@@ -309,12 +309,25 @@ class Weapon extends ShipSystem
 
     public function firedOnTurn($turn)
     {
-        if ($this instanceof DualWeapon && isset($this->turnsFired[$turn])) return true;
+        //if ($this instanceof DualWeapon && isset($this->turnsFired[$turn])) return true; //DualWeapon obsolete
         foreach ($this->fireOrders as $fire) {
             if ($fire->type != "selfIntercept" && $fire->weaponid == $this->id && $fire->turn == $turn) {
                 return true;
             } else if ($fire->type == "selfIntercept" && checkForSelfInterceptFire::checkFired($this->id, $turn)) {
                 return true;
+            }
+        }
+        return false;
+    }
+	
+	/*mode of fire used - needed to determine whether fire can be sustained*/
+    public function firedUsingMode($turn)
+    {
+        foreach ($this->fireOrders as $fire) {
+            if ($fire->type != "selfIntercept" && $fire->weaponid == $this->id && $fire->turn == $turn) {
+                return $fire->firingMode;
+            } else { //should not happen
+                return 0;
             }
         }
         return false;
@@ -539,22 +552,31 @@ class Weapon extends ShipSystem
 
 
         if ($this->firedOnTurn($gamedata->turn -1)) {
-
-            if ($this->overloadshots > 0) {
-                $newExtraShots = $this->overloadshots - 1;
-                //if you have extra shots use them
-                if ($newExtraShots === 0) {
-                    //if extra shots are reduced to zero, go to cooldown
-                    return new WeaponLoading(0, -1, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
-                } else {
-                    //if you didn't use the last extra shot, keep on going.
-                    return new WeaponLoading($this->getTurnsloaded(), $newExtraShots, $this->getLoadedAmmo(), $this->overloadturns, $this->getLoadingTime(), $this->firingMode);
-                }
-            } else {
-                //Situation normal, no overloading -> lose loading
-                return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
-            }
-
+		if ($this->firedUsingMode($gamedata->turn -1)==1) {//only basic mode counts for sustaining! otherwise shot was just not sustained 
+		     if ($this->overloadshots > 0) {
+			$newExtraShots = $this->overloadshots - 1;
+			//if you have extra shots use them
+			if ($newExtraShots === 0) {
+			    //if extra shots are reduced to zero, go to cooldown
+			    //return new WeaponLoading(0, -1, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
+				//...which SHOULD mean - go to normal loading and throw a crit forcing shutdown (for PREVIOUS turn ;) )! 				
+				$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn-1);
+				$crit->updated = true;
+				$crit->newCrit = true; //force save even if crit is not for current turn
+				$this->criticals[] =  $crit;
+				return new WeaponLoading($this->getTurnsloaded(), $newExtraShots, $this->getLoadedAmmo(), $this->overloadturns, $this->getLoadingTime(), $this->firingMode);
+			} else {
+			    //if you didn't use the last extra shot, keep on going.
+			    return new WeaponLoading($this->getTurnsloaded(), $newExtraShots, $this->getLoadedAmmo(), $this->overloadturns, $this->getLoadingTime(), $this->firingMode);
+			}
+		    } else {
+			//Situation normal, no overloading -> lose loading
+			return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
+		    }
+		} else {
+		    //Situation normal, no overloading -> lose loading
+		    return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
+		}
         } else {
             //cannot save the extra shots from everload -> lose loading and cooldown
             if ($this->overloadshots > 0 && $this->overloadshots < $this->extraoverloadshots) {
