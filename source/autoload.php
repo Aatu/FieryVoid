@@ -1103,6 +1103,9 @@ spl_autoload_register(
                 'lightparticleprojector' => '/server/model/weapons/particle.php',
                 'particlehammer' => '/server/model/weapons/particle.php',
                 
+                //Usuuth Ships
+                
+                
 					
 				'custombpalight' => '/server/model/weapons/customs.php',   
 				'custombpamedium' => '/server/model/weapons/customs.php', 

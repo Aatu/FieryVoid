@@ -1192,6 +1192,7 @@
         
         public $name = "particleHammer";
         public $displayName = "Particle Hammer";
+        public $iconPath = "NexusParticleProjectorHeavy.png";
         public $animation = "beam";
         public $animationColor = array(255, 250, 230);
         public $animationExplosionScale = 0.5;
@@ -1206,6 +1207,8 @@
         public $priority = 6;
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            if ( $maxhealth == 0 ) $maxhealth = 12;
+            if ( $powerReq == 0 ) $powerReq = 5;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
@@ -1213,7 +1216,7 @@
         public function setMinDamage(){     $this->minDamage = 17 ;      }
         public function setMaxDamage(){     $this->maxDamage = 35 ;      }
         
-    }
+    }//End of Particle Hammer
 
     class HvyParticleProjector extends Particle{
         
@@ -1221,6 +1224,7 @@
         
         public $name = "hvyParticleProjector";
         public $displayName = "Heavy Particle Projector";
+        public $iconPath = "NexusParticleProjectorHeavy.png";
         public $animation = "beam";
         public $animationColor = array(255, 250, 230);
         public $animationExplosionScale = 0.30;
@@ -1235,6 +1239,8 @@
         public $priority = 6;
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            if ( $maxhealth == 0 ) $maxhealth = 8;
+            if ( $powerReq == 0 ) $powerReq = 3;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
@@ -1242,7 +1248,7 @@
         public function setMinDamage(){     $this->minDamage = 10 ;      }
         public function setMaxDamage(){     $this->maxDamage = 28 ;      }
         
-    }
+    }//End of Heavy Particle Projector
     
     class LightParticleProjector extends Particle{
         
@@ -1250,6 +1256,7 @@
         
         public $name = "lightParticleProjector";
         public $displayName = "Light Particle Projector";
+        public $iconPath = "NexusParticleProjectorLight.png";
         public $animation = "trail";
         public $animationColor = array(255, 250, 230);
         public $animationExplosionScale = 0.30;
@@ -1264,6 +1271,8 @@
         public $priority = 4;
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            if ( $maxhealth == 0 ) $maxhealth = 3;
+            if ( $powerReq == 0 ) $powerReq = 1;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
@@ -1271,6 +1280,7 @@
         public function setMinDamage(){     $this->minDamage = 5 ;      }
         public function setMaxDamage(){     $this->maxDamage = 10 ;      }
         
-    }
+    }//End of Light Particle Projector
+    
 ?>
 
