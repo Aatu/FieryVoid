@@ -1097,8 +1097,12 @@ spl_autoload_register(
                 'brixadiisurveyorbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyorBase.php',
                 'brixadiisurveyor2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyor2057.php',
                 'brixadiisurveyor2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyor2108.php',
-		  		    
-					
+		  		
+                //Usuuth Weapons
+                'hvyparticleprojector' => '/server/model/weapons/particle.php',
+                'lightparticleprojector' => '/server/model/weapons/particle.php',
+                'particlehammer' => '/server/model/weapons/particle.php',
+                
 					
 				'custombpalight' => '/server/model/weapons/customs.php',   
 				'custombpamedium' => '/server/model/weapons/customs.php', 
