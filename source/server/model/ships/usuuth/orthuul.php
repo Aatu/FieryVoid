@@ -13,7 +13,7 @@ class Orthuul  extends BaseShip{
         $this->canvasSize = 280;
         $this->fighters = array("normal"=>24);
         $this->occurence = "unique";
-        $this->variantOf = "Orthuus";
+        $this->variantOf = "Orthuus Battle Leader";
         $this->iniativebonus = 5;
         $this->isd = 1995;
         

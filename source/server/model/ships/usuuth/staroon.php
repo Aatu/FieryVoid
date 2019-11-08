@@ -18,7 +18,7 @@ class Staroon extends MediumShip{
         
         $this->occurence = "rare";
         $this->isd = 2000;
-        $this->variantOf = "Baroon";
+        $this->variantOf = "Baroon Escort Cutter";
         
         $this->turncost = 0.33;
         $this->turndelaycost = 0.33;

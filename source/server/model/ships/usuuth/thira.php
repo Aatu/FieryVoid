@@ -18,7 +18,7 @@ class Thira extends MediumShip{
         
         $this->occurence = "common";
         $this->isd = 1955;
-        $this->variantOf = "Baroon";
+        $this->variantOf = "Baroon Escort Cutter";
         
         $this->turncost = 0.5;
         $this->turndelaycost = 0.5;

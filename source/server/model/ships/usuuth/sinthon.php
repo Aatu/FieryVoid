@@ -12,7 +12,7 @@ class Sinthon extends HeavyCombatVessel{
         $this->isd = 1954;
         $this->canvasSize = 150;
         $this->occurence = "uncommon";
-        $this->variantOf = "serron";
+        $this->variantOf = "Serron Attack Ship";
         $this->fighters = array("normal"=>12);
         
         $this->forwardDefense = 14;

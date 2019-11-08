@@ -12,7 +12,7 @@ class Sethrus extends HeavyCombatVessel{
         $this->isd = 2000;
         $this->canvasSize = 150;
         $this->occurence = "rare";
-        $this->variantOf = "serron";
+        $this->variantOf = "Serron Attack Ship";
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
