@@ -6,7 +6,7 @@ class Baroon extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 190;
-        $this->faction = "usuuth";
+        $this->faction = "Usuuth";
         $this->phpclass = "Baroon";
         $this->shipClass = "Baroon Escort Cutter";
         $this->imagePath = "img/ships/jenas.png";

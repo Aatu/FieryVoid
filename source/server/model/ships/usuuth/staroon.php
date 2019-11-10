@@ -6,7 +6,7 @@ class Staroon extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 200;
-        $this->faction = "usuuth";
+        $this->faction = "Usuuth";
         $this->phpclass = "Staroon";
         $this->shipClass = "Staroon Strike Boat";
         $this->imagePath = "img/ships/jenas.png";

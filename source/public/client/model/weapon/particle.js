@@ -270,7 +270,7 @@ BAInterceptorMkI.prototype.constructor = BAInterceptorMkI;
 var ParticleHammer = function ParticleHammer(json, ship) {
     Particle.call(this, json, ship);
 };
-PartilceHammer.prototype = Object.create(Particle.prototype);
+ParticleHammer.prototype = Object.create(Particle.prototype);
 ParticleHammer.prototype.constructor = ParticleHammer;
 
 var HvyParticleProjector = function HvyParticleProjector(json, ship) {

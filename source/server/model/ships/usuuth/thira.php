@@ -6,7 +6,7 @@ class Thira extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 90;
-        $this->faction = "usuuth";
+        $this->faction = "Usuuth";
         $this->phpclass = "Thira";
         $this->shipClass = "Thira Freighter";
         $this->imagePath = "img/ships/jenas.png";
