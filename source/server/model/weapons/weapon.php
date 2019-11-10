@@ -564,7 +564,7 @@ class Weapon extends ShipSystem
 				$crit->updated = true;
 				$crit->newCrit = true; //force save even if crit is not for current turn
 				$this->criticals[] =  $crit;
-				return new WeaponLoading(0, 0, $this->getLoadedAmmo(), $this->overloadturns, $this->getLoadingTime(), $this->firingMode);
+				return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
 			} else {
 			    //if you didn't use the last extra shot, keep on going.
 			    return new WeaponLoading($this->getTurnsloaded(), $newExtraShots, $this->getLoadedAmmo(), $this->overloadturns, $this->getLoadingTime(), $this->firingMode);
