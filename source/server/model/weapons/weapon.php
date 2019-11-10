@@ -1068,6 +1068,15 @@ class Weapon extends ShipSystem
                 }
             }
         }
+	    
+	//for last segment of Sustained shot - force shutdown!
+	$newExtraShots = $this->overloadshots - 1; 	
+	if( $newExtraShots == 0 ) {
+	    $crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
+	    $crit->updated = true;
+	    $crit->newCrit = true; //force save even if crit is not for current turn
+	    $this->criticals[] =  $crit;
+	}
 
         $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
 	TacGamedata::$lastFiringResolutionNo++;    //note for further shots
