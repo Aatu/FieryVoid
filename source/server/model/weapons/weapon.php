@@ -559,11 +559,8 @@ class Weapon extends ShipSystem
 			if ($newExtraShots === 0) {
 			    //if extra shots are reduced to zero, go to cooldown
 			    //return new WeaponLoading(0, -1, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
-				//...which SHOULD mean - go to normal loading and throw a crit forcing shutdown (for PREVIOUS turn ;) )! 				
-				$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
-				$crit->updated = true;
-				$crit->newCrit = true; //force save even if crit is not for current turn
-				$this->criticals[] =  $crit;
+				//...which SHOULD mean - go to normal loading and throw a crit forcing shutdown ! 	
+				//proper loading calculation below, critical here would not be saved - it needs to be thrown right after firing
 				return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
 			} else {
 			    //if you didn't use the last extra shot, keep on going.
