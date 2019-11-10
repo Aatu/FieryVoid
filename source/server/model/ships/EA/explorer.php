@@ -7,7 +7,6 @@ class Explorer extends BaseShip{
 		$this->pointCost = 1000;
 		$this->faction = "EA";
         $this->phpclass = "Explorer";
-        $this->enormous = true;
         $this->imagePath = "img/ships/explorer.png";
 			$this->canvasSize = 300; //img has 300px per side
         $this->shipClass = "Explorer Survey Ship (Alpha)";
@@ -15,6 +14,9 @@ class Explorer extends BaseShip{
 			$this->occurence = "common";
 			$this->limited = 10;
 		$this->isd = 2253;
+	    
+	    
+        $this->Enormous = true;
         $this->forwardDefense = 18;
         $this->sideDefense = 20;
 		

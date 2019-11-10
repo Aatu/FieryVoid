@@ -30,11 +30,10 @@ class PlasmaStream extends Raking{
 	}
         
 	
-	public function setSystemDataWindow($turn){
-	    $this->data["Special"] = "Reduces armor of hit systems.";
-	    $this->data["Special"] .= "5-point rakes.";
-	    $this->data["Special"] .= "Damage reduced by 1 point per hex.";			
+	public function setSystemDataWindow($turn){		
 		parent::setSystemDataWindow($turn);
+	    $this->data["Special"] .= "Damage reduced by 1 point per hex.";
+	    $this->data["Special"] .= "Reduces armor of systems hit.";	
 	}
 		 
 	

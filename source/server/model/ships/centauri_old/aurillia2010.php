@@ -14,7 +14,7 @@ class Aurillia2010 extends BaseShip{
         $this->variantOf = "Astur Assault Ship";   
 		$this->occurence = "uncommon";
         //$this->limited = 33;
-	    $this->isd = 1872;
+	    $this->isd = 2010;
 		
 
         $this->fighters = array("heavy"=>6); 

@@ -11,6 +11,7 @@ class swImperialSD extends BaseShip{
         $this->imagePath = "img/starwars/imperator.png";
         $this->shipClass = "Imperial Star Destroyer";
         $this->shipSizeClass = 3;
+	$this->Enormous = true;
 	    
 	$this->fighters = array("fighter flights"=>12, "assault flights"=>12);
 	    

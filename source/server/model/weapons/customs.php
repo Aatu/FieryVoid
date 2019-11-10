@@ -733,6 +733,7 @@ class AbsorbtionShield extends Shield implements DefensiveSystem{
 			$this->data["Special"] .= '<br>';
 		}	    
 	$this->data["Special"] .= "Does not decrease profile.";  
+	$this->data["Special"] .= "<br>Cannot be flown under."; 
 	$this->data["Special"] .= "<br>Doubly effective vs Raking weapons."; 
     }
 	  

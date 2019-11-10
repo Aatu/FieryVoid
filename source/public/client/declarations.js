@@ -27,7 +27,7 @@ window.declarations = {
 		this.targetClass = "";
 		this.value = 0;
 	}
-	  
+	
     var dispShips = new Array(); 
     var dispShip = new dispShipNew();
     var dispEWEntry = new dispEWNew();
@@ -246,6 +246,13 @@ window.declarations = {
 		    }
 	            dispFireEntry.count++;
 	            if(dispFireEntry.oppId > -1){ //fire at actual target
+			var modeIteration = 0;
+			modeIteration = order.firingMode; //change weapons data to reflect mode actually used
+			    if(modeIteration != weapon.firingMode){
+				while(modeIteration != weapon.firingMode){ //will loop until correct mode is found
+				weapon.changeFiringMode();
+				}
+			    }
 		      var toHit = weaponManager.calculateHitChange(ship, targetUnit, weapon, order.calledid);
 		      if (toHit < dispFireEntry.chanceMin) dispFireEntry.chanceMin = toHit;
 		      if (toHit > dispFireEntry.chanceMax) dispFireEntry.chanceMax = toHit;
@@ -304,7 +311,14 @@ window.declarations = {
 			      dispFireEntry.calledid = order.calledid;
 			      dispShip.fire.push(dispFireEntry);
 			    }
-			    dispFireEntry.count++;
+			    dispFireEntry.count++;		
+				var modeIteration = 0;		  
+				modeIteration = order.firingMode; //change weapons data to reflect mode actually used
+				    if(modeIteration != weapon.firingMode){
+					while(modeIteration != weapon.firingMode){ //will loop until correct mode is found
+					weapon.changeFiringMode();
+					}
+				    }
 			      var toHit = weaponManager.calculateHitChange(srcShip, ship, weapon, order.calledid);
 			      if (toHit < dispFireEntry.chanceMin) dispFireEntry.chanceMin = toHit;
 			      if (toHit > dispFireEntry.chanceMax) dispFireEntry.chanceMax = toHit;
