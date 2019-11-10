@@ -69,7 +69,9 @@ if (isset($_SESSION["user"])) {
             <b>Flight sizes</b> - Flight size of 1 or 2 fighters are now allowed (useful for superheavies or for filling out remaining points); now Minbari standard tournament fleet (utilizing 5 Tishats) is possible!
         <br>
             <b>WotCR Centauri overhaul</b> - for those who want to try slightly less advanced factions. Deficiences fixed where found, hit charts added, old variants filled - as well as some new hulls.
-                
+        <br>
+            <b>Sustained fire fixed</b> - now only default mode shots will be sustained! (and weapon will be shut down at the end of sustain cycle, too)
+               
         <!--
         <br><br>
         - last but not least - brand new collection of BUGS!;
