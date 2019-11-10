@@ -755,7 +755,14 @@
         
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);   	    
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "No overkill.<br>Reduce armor by 2.";
+		$this->data["Special"] .= "<br>Damage scored is repeated on appropriate Structure";
         }
 
         
