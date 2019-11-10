@@ -755,7 +755,14 @@
         
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);   	    
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "No overkill.<br>Reduce armor by 2.";
+		$this->data["Special"] .= "<br>Damage scored is repeated on appropriate Structure";
         }
 
         
@@ -1186,8 +1193,101 @@
 
     } //endof class QuadArray
 
+    class ParticleHammer extends Particle{
+        
+        public $trailColor = array(30, 170, 255);
+        
+        public $name = "particleHammer";
+        public $displayName = "Particle Hammer";
+        public $iconPath = "NexusParticleProjectorHeavy.png";
+        public $animation = "beam";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.5;
+        public $projectilespeed = 15;
+        public $animationWidth = 10;
+        public $trailLength = 20;
+        
+        public $loadingtime = 4;        
+        
+        public $rangePenalty = 0.33;
+        public $fireControl = array(-2, 1, 3); // fighters, <mediums, <capitals
+        public $priority = 6;
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            if ( $maxhealth == 0 ) $maxhealth = 12;
+            if ( $powerReq == 0 ) $powerReq = 5;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+15;   }
+        public function setMinDamage(){     $this->minDamage = 17 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 35 ;      }
+        
+    }//End of Particle Hammer
 
-
-
+    class HvyParticleProjector extends Particle{
+        
+        public $trailColor = array(30, 170, 255);
+        
+        public $name = "hvyParticleProjector";
+        public $displayName = "Heavy Particle Projector";
+        public $iconPath = "NexusParticleProjectorHeavy.png";
+        public $animation = "beam";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.30;
+        public $projectilespeed = 15;
+        public $animationWidth = 7;
+        public $trailLength = 10;
+        
+        public $loadingtime = 3;
+        
+        public $rangePenalty = 0.5;
+        public $fireControl = array(-1, 2, 3); // fighters, <mediums, <capitals
+        public $priority = 6;
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            if ( $maxhealth == 0 ) $maxhealth = 8;
+            if ( $powerReq == 0 ) $powerReq = 3;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+8;   }
+        public function setMinDamage(){     $this->minDamage = 10 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 28 ;      }
+        
+    }//End of Heavy Particle Projector
+    
+    class LightParticleProjector extends Particle{
+        
+        public $trailColor = array(30, 170, 255);
+        
+        public $name = "lightParticleProjector";
+        public $displayName = "Light Particle Projector";
+        public $iconPath = "NexusParticleProjectorLight.png";
+        public $animation = "trail";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.30;
+        public $projectilespeed = 15;
+        public $animationWidth = 3;
+        public $trailLength = 10;
+        
+        public $loadingtime = 1;
+        
+        public $rangePenalty = 2;
+        public $fireControl = array(3, 2, 2); // fighters, <mediums, <capitals
+        public $priority = 4;
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            if ( $maxhealth == 0 ) $maxhealth = 3;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(6)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 10 ;      }
+        
+    }//End of Light Particle Projector
+    
 ?>
 

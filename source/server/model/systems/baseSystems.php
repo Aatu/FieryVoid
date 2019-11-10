@@ -772,8 +772,8 @@ class DrakhRaiderController extends ShipSystem {
     public function setSystemDataWindow($turn){
         parent::setSystemDataWindow($turn);     
         $this->data["Special"] = "Gives indicated Initiative bonus to all friendly Raiders and Heavy Raiders.";	     
-        $this->data["Special"] .= "<BR>Only strongest bonus applies.";	     	     
-        $this->data["Special"] .= "<BR>Any changes are effective on NEXT TURN.";	
+        $this->data["Special"] .= "<br>Only strongest bonus applies.";	     	     
+        $this->data["Special"] .= "<br>Any changes are effective on NEXT TURN.";	
     }
 } //end of DrakhRaiderController
 	
@@ -888,9 +888,9 @@ class HkControlNode extends ShipSystem{
      public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);     
 	$this->data["Special"] = "Controls up to 6 Hunter-Killer craft per point of output.";	     
-	$this->data["Special"] .= "<BR>If there are not enough nodes to control all deployed Hunter-Killers,<br>their Initiative will be reduced by up to " . HkControlNode::$fullIniPenalty . " due to (semi-)autonomous operation.";	     	     
-	$this->data["Special"] .= "<BR>On turns 1 and 2, there will be additional Ini penalty on top of that, as HKs orient themselves.";	  	     
-	$this->data["Special"] .= "<BR>Any Initiative changes are effective on NEXT TURN.";
+	$this->data["Special"] .= "<br>If there are not enough nodes to control all deployed Hunter-Killers,<br>their Initiative will be reduced by up to " . HkControlNode::$fullIniPenalty . " due to (semi-)autonomous operation.";	     	     
+	$this->data["Special"] .= "<br>On turns 1 and 2, there will be additional Ini penalty on top of that, as HKs orient themselves.";	  	     
+	$this->data["Special"] .= "<br>Any Initiative changes are effective on NEXT TURN.";
     }	    
 		    
 } //endof class HkControlNode

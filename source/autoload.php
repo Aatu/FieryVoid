@@ -1097,9 +1097,24 @@ spl_autoload_register(
                 'brixadiisurveyorbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyorBase.php',
                 'brixadiisurveyor2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyor2057.php',
                 'brixadiisurveyor2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyor2108.php',
-		  		    
-					
-					
+		  		
+                //Usuuth Weapons
+                'hvyparticleprojector' => '/server/model/weapons/particle.php',
+                'lightparticleprojector' => '/server/model/weapons/particle.php',
+                'particlehammer' => '/server/model/weapons/particle.php',
+                
+                //Usuuth Ships
+                'orthuus' => '/server/model/ships/usuuth/orthuus.php',
+                'orthuul' => '/server/model/ships/usuuth/orthuul.php',
+                'serron' => '/server/model/ships/usuuth/serron.php',
+                'sarlon' => '/server/model/ships/usuuth/sarlon.php',
+                'sethrus' => '/server/model/ships/usuuth/sethrus.php',
+                'sinthon' => '/server/model/ships/usuuth/sinthon.php',
+                'baroon' => '/server/model/ships/usuuth/baroon.php',
+                'thira' => '/server/model/ships/usuuth/thira.php',
+                'staroon' => '/server/model/ships/usuuth/staroon.php',
+                'rowlon' => '/server/model/ships/usuuth/rowlon.php',
+                
 				'custombpalight' => '/server/model/weapons/customs.php',   
 				'custombpamedium' => '/server/model/weapons/customs.php', 
 				'custombpaheavy' => '/server/model/weapons/customs.php' ,
