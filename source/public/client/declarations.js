@@ -28,7 +28,6 @@ window.declarations = {
 		this.value = 0;
 	}
 	
-	var modeIteration = 0;
     var dispShips = new Array(); 
     var dispShip = new dispShipNew();
     var dispEWEntry = new dispEWNew();
@@ -247,6 +246,7 @@ window.declarations = {
 		    }
 	            dispFireEntry.count++;
 	            if(dispFireEntry.oppId > -1){ //fire at actual target
+			var modeIteration = 0;
 			modeIteration = order.firingMode; //change weapons data to reflect mode actually used
 			    if(modeIteration != weapon.firingMode){
 				while(modeIteration != weapon.firingMode){ //will loop until correct mode is found
@@ -311,7 +311,8 @@ window.declarations = {
 			      dispFireEntry.calledid = order.calledid;
 			      dispShip.fire.push(dispFireEntry);
 			    }
-			    dispFireEntry.count++;				  
+			    dispFireEntry.count++;		
+				var modeIteration = 0;		  
 				modeIteration = order.firingMode; //change weapons data to reflect mode actually used
 				    if(modeIteration != weapon.firingMode){
 					while(modeIteration != weapon.firingMode){ //will loop until correct mode is found
