@@ -11,7 +11,7 @@ class DrakhRaiderSweeperFlt extends FighterFlight{
 	        $this->occurence = 'rare';
         $this->imagePath = "img/ships/DrakhRaider.png";
         
-        $this->isd = 2260;
+        $this->isd = 2255;
         $this->unofficial = true;
         $this->gravitic = true;
         
