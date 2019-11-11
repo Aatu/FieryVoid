@@ -33,10 +33,10 @@ class DrakhMobileDefensePlatform extends MediumShip{
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
 	    
-	$this->addPrimarySystem(new Reactor(4, 14, 0, 7));
+	$this->addPrimarySystem(new Reactor(4, 14, 0, 4));
 	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
 	$this->addPrimarySystem(new Scanner(4, 12, 4, 6));
-	$this->addPrimarySystem(new Engine(4, 9, 0, 5, 3));
+	$this->addPrimarySystem(new Engine(4, 9, 0, 4, 3));
 	$this->addPrimarySystem(new customPhaseDisruptorShip(3, 0, 0, 240, 30));
 	$this->addPrimarySystem(new customPhaseDisruptorShip(3, 0, 0, 330, 120));
 	$this->addPrimarySystem(new customLtPolarityPulsar(2, 0, 0, 0,360));  
