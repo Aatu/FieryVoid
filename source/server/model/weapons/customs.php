@@ -1215,7 +1215,7 @@ class customHeavyPolarityPulsar extends Pulse{
 
 
 
-/*Drakh fighter weapon*/
+/*Drakh fighter weapon - intended to have concentrated antifighter mode!*/
     class customLtPhaseDisruptor extends Weapon{
         public $trailColor = array(255, 170, 10);
         public $name = "customLtPhaseDisruptor";
@@ -1256,6 +1256,51 @@ class customHeavyPolarityPulsar extends Pulse{
         public function setMinDamage(){     $this->minDamage = 2 ;      }
         public function setMaxDamage(){     $this->maxDamage = 12 ;      }
     } //endof class customLtPhaseDisruptor
+
+
+
+
+/*Drakh fighter weapon - interception and dogfight oriented*/
+    class customPhaseSweeper extends Weapon{
+        public $trailColor = array(255, 170, 10);
+        public $name = "customPhaseSweeper";
+        public $displayName = "Phase Sweeper";
+	   public  $iconPath = "LtPhaseDisruptor.png";
+        public $animation = "trail";
+        public $animationColor = array(255, 170, 10);
+        public $animationExplosionScale = 0.10;
+        public $projectilespeed = 10;
+        public $animationWidth = 2;
+        public $trailLength = 10;
+        public $intercept = 2;
+        public $loadingtime = 1;
+        public $shots = 1;
+	    public $guns = 4;
+        public $defaultShots = 1;
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+	    public $priority = 3;
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Molecular"; 
+	    
+        
+        function __construct($startArc, $endArc){
+	    $this->isLinked = false; //shots are separate, not linked! 
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+	
+	
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Shots are NOT linked";
+        }
+	
+	    
+        public function getDamage($fireOrder){        return Dice::d(6,2);   }
+        public function setMinDamage(){     $this->minDamage = 2 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+    } //endof class customPhaseSweeper
 
 
 
