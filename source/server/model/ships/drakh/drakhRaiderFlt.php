@@ -8,7 +8,6 @@ class DrakhRaiderFlt extends FighterFlight{
         $this->faction = "Drakh";
         $this->phpclass = "DrakhRaiderFlt";
         $this->shipClass = "Raider Assault Fighters";
-	    $this->variantOf = "Raider Assault Fighter"; //just so they're displayed together!
         $this->imagePath = "img/ships/DrakhRaider.png";
         
         $this->isd = 2210;
