@@ -8,7 +8,7 @@ class scionbp extends SuperHeavyFighter{
         $this->faction = "Centauri";
         $this->phpclass = "scionbp";
         $this->shipClass = "Scion Breaching Pod";
-        $this->imagePath = "img/ships/skyserpent.png";
+        $this->imagePath = "img/ships/phalan.png";
 	    //$this->isd = 2220;
 
         $this->forwardDefense = 9;
@@ -24,9 +24,8 @@ class scionbp extends SuperHeavyFighter{
         $armour = array(2, 2, 2, 2);
         $fighter = new Fighter("scionbp", $armour, 16, $this->id);
         $fighter->displayName = "Scion Breaching Pod";
-        $fighter->imagePath = "img/ships/phalan.png";
-        $fighter->iconPath = "img/ships/phalan_large.png";
-
+	$fighter->imagePath = "img/ships/phalan.png";
+	$fighter->iconPath = "img/ships/phalan_large.png";
 	/* no weapons!
         $fighter->addFrontSystem(new PairedParticleGun(330, 30, 5));
         $fighter->addFrontSystem(new FighterMissileRack(6, 330, 30));
