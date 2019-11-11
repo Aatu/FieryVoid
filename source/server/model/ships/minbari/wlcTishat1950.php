@@ -19,7 +19,7 @@ class wlcTishat1950 extends FighterFlight{
         $this->iniativebonus = 95;
         $this->gravitic = true;
         $this->populate();
-        $this->isd = 1950;
+        $this->isd = 1750; //base Tishat is 1880, early cannot be 70 years later than regular...
         $this->unofficial = true;
         $this->variantOf = "Tishat flight";
         
