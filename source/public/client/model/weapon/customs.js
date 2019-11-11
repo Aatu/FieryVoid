@@ -119,6 +119,12 @@ var CustomLtPhaseDisruptor = function CustomLtPhaseDisruptor(json, ship) {
 CustomLtPhaseDisruptor.prototype = Object.create(Weapon.prototype);
 CustomLtPhaseDisruptor.prototype.constructor = CustomLtPhaseDisruptor;
 
+var CustomPhaseSweeper = function CustomLtPhaseDisruptor(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CustomPhaseSweeper.prototype = Object.create(Weapon.prototype);
+CustomPhaseSweeper.prototype.constructor = CustomPhaseSweeper;
+
 var LightScattergun = function LightScattergun(json, ship) {
     Weapon.call(this, json, ship);
 };
