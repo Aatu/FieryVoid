@@ -1,6 +1,5 @@
 <?php
 class DrakhMobileDefensePlatform extends MediumShip{
-	/*Drakh Heavy Raider LCV*/
 	/*approximated as MCV, no EW restrictions*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -9,12 +8,13 @@ class DrakhMobileDefensePlatform extends MediumShip{
         $this->faction = "Drakh";
 	$this->phpclass = "DrakhMobileDefensePlatform";
 	$this->shipClass = "Mobile Defense Platform";
-	$this->imagePath = "img/ships/DrakhMobileDefensePlatform.png";
+	$this->imagePath = "img/ships/DrakhHeavyRaider.png";
 	    $this->canvasSize = 100;
 	$this->unofficial = true;
         $this->gravitic = true;
 	$this->advancedArmor = true;
         $this->occurence = "common";
+        $this->limited = 10; //Restricted Deployment
 	$this->isd = 2255;
    
 	$this->agile = true;
@@ -47,8 +47,8 @@ class DrakhMobileDefensePlatform extends MediumShip{
         		0=> array( 
         				10 => "Structure",
         				12 => "Phase Disruptor",
-		    			  13 => "Light Polarity Pulsar",
-        				15 => "Absorbtion Shield",
+		    			13 => "Light Polarity Pulsar",
+        				14 => "Absorbtion Shield",
         				16 => "Engine",
         				18 => "Reactor",
         				20 => "Scanner",
@@ -57,7 +57,7 @@ class DrakhMobileDefensePlatform extends MediumShip{
         				10 => "Structure",
         				12 => "0:Phase Disruptor",
 		    			13 => "0:Light Polarity Pulsar",
-        				15 => "0:Absorbtion Shield",
+        				14 => "0:Absorbtion Shield",
         				16 => "0:Engine",
         				18 => "0:Reactor",
         				20 => "0:Scanner",
@@ -66,7 +66,7 @@ class DrakhMobileDefensePlatform extends MediumShip{
         				10 => "Structure",
         				12 => "0:Phase Disruptor",
 		    			13 => "0:Light Polarity Pulsar",
-        				15 => "0:Absorbtion Shield",
+        				14 => "0:Absorbtion Shield",
         				16 => "0:Engine",
         				18 => "0:Reactor",
         				20 => "0:Scanner",
