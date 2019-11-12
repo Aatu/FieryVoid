@@ -50,9 +50,9 @@ class DrakhMobileBeamPlatform extends MediumShip{
         $this->hitChart = array(
         		0=> array( //should never happen
         				8 => "Structure",
-        				11 => "Multiphased Beam Accelerator",
-		    			12 => "Light Phase Disruptor",
-		    			13 => "Light Polarity Pulsar",
+        				10 => "Multiphased Beam Accelerator",
+		    			11 => "Light Phase Disruptor",
+		    			12 => "Light Polarity Pulsar",
 		    			14 => "Absorbtion Shield",
         				16 => "Engine",
         				18 => "Reactor",
@@ -60,9 +60,9 @@ class DrakhMobileBeamPlatform extends MediumShip{
         		),
         		1=> array( //PRIMARY hit table, effectively
         				8 => "Structure",
-        				11 => "0:Multiphased Beam Accelerator",
-		    			12 => "0:Light Phase Disruptor",
-		    			13 => "0:Light Polarity Pulsar",
+        				10 => "0:Multiphased Beam Accelerator",
+		    			11 => "0:Light Phase Disruptor",
+		    			12 => "0:Light Polarity Pulsar",
 		    			14 => "0:Absorbtion Shield",
         				16 => "0:Engine",
         				18 => "0:Reactor",
@@ -70,9 +70,9 @@ class DrakhMobileBeamPlatform extends MediumShip{
         		),
         		2=> array( //PRIMARY hit table, effectively
         				8 => "Structure",
-        				11 => "0:Multiphased Beam Accelerator",
-		    			12 => "0:Light Phase Disruptor",
-		    			13 => "0:Light Polarity Pulsar",
+        				10 => "0:Multiphased Beam Accelerator",
+		    			11 => "0:Light Phase Disruptor",
+		    			12 => "0:Light Polarity Pulsar",
 		    			14 => "0:Absorbtion Shield",
         				16 => "0:Engine",
         				18 => "0:Reactor",
