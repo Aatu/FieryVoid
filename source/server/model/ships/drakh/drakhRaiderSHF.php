@@ -9,6 +9,7 @@ class DrakhRaiderSHF extends SuperHeavyFighter{
         $this->faction = "Drakh";
         $this->phpclass = "DrakhRaiderSHF";
         $this->shipClass = "Raider Assault Fighter";
+	    $this->variantOf = "OBSOLETE"; //now that flight of size 1 can be taken - a single SHF is obsolete
         $this->imagePath = "img/ships/DrakhRaider.png";
 	
 	$this->isd = 2210;

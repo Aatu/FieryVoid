@@ -45,7 +45,12 @@ class DrakhHeavyRaider extends MediumShip{
 	    
         $this->hitChart = array(
         		0=> array( //should never happen
-        				20 => "Structure",
+        				10 => "Structure",
+        				12 => "Phase Disruptor",
+        				14 => "Absorbtion Shield",
+        				16 => "Engine",
+        				18 => "Reactor",
+        				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				10 => "Structure",
