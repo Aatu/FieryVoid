@@ -42,7 +42,7 @@ class DrakhMobileBeamPlatform extends MediumShip{
 	$this->addPrimarySystem(new Scanner(4, 12, 4, 6));
 	$this->addPrimarySystem(new Engine(4, 9, 0, 4, 3));
 	$this->addPrimarySystem(new customMphasedBeamAcc(3, 0, 0, 300, 60)); 
-	$this->addPrimarySystem(new customPhaseLtDisruptorShip(3, 0, 0, 240, 120));
+	$this->addPrimarySystem(new customLtPhaseDisruptorShip(3, 0, 0, 240, 120));
 	$this->addPrimarySystem(new customLtPolarityPulsar(2, 0, 0, 0,360));
 	$this->addPrimarySystem(new AbsorbtionShield(2,6,4,1,0,360));
 	$this->addPrimarySystem(new Structure( 4, 30));
