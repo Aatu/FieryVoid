@@ -9,7 +9,7 @@ class DrakhMobileBeamPlatform extends MediumShip{
         $this->faction = "Drakh";
 	$this->phpclass = "DrakhMobileBeamPlatform";
 	$this->shipClass = "Mobile Beam Platform";
-	$this->imagePath = "img/ships/DrakhMobileDefensePlatform.png";
+	$this->imagePath = "img/ships/DrakhDefensePlatform.png";
 	    $this->canvasSize = 100;
 	$this->unofficial = true;
         $this->gravitic = true;
