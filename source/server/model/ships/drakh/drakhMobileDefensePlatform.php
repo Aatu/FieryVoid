@@ -16,6 +16,8 @@ class DrakhMobileDefensePlatform extends MediumShip{
         $this->occurence = "common";
         $this->limited = 10; //Restricted Deployment
 	$this->isd = 2255;
+	    
+	    $this->notes = "Boosted by Raider Controller";
    
 	$this->agile = true;
 	$this->forwardDefense = 11;
@@ -75,14 +77,14 @@ class DrakhMobileDefensePlatform extends MediumShip{
         ); //end of hit chart
     }
 	
-	/*
+	
         public function getInitiativebonus($gamedata){
 	    $iniBonus = parent::getInitiativebonus($gamedata);
             //may be boosted by  Raider Controller...
 	    $iniBonus += DrakhRaiderController::getIniBonus($this);
             return $iniBonus;
         }
-	*/
+	
 	
 }
 ?>
