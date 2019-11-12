@@ -1120,6 +1120,13 @@ spl_autoload_register(
 				'custombpaheavy' => '/server/model/weapons/customs.php' ,
 		    
 		    
+		//new Drakh toys
+		'customphasesweeper' => '/server/model/weapons/customs.php',   
+                'drakhraidersweeperflt' => '/server/model/ships/drakh/drakhRaiderSweeperFlt.php',
+                'drakhmobiledefenseplatform' => '/server/model/ships/drakh/drakhMobileDefensePlatform.php',
+                'drakhmobilebeamplatform' => '/server/model/ships/drakh/drakhMobileBeamPlatform.php',
+		    
+		    
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
                 'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
