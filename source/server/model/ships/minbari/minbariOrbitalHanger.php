@@ -10,7 +10,9 @@ class MinbariOrbitalHanger extends SmallStarBaseFourSections{
 		$this->faction = "Minbari";
 		$this->phpclass = "minbariorbitalhanger";
 		$this->shipClass = "Minbari Orbital Hanger";
-		$this->imagePath = "img/ships/orion.png";
+		$this->variantOf = "Minbari Civilian Base";
+		$this->imagePath = "img/ships/MinbariCivBase.png";
+		$this->canvasSize = 200;
 		$this->fighters = array("heavy"=>30); 
 
 		$this->shipSizeClass = 3; 
