@@ -1,6 +1,4 @@
 <?php
-/*NOT FINISHED YET*/
-
 class CustomMiningVessel extends MediumShip{
     /*LCV, approximated as MCV*/
     function __construct($id, $userid, $name,  $slot){
@@ -32,31 +30,42 @@ class CustomMiningVessel extends MediumShip{
       $this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
       $this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
 
-      $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
+      $this->addPrimarySystem(new Reactor(3, 6, 0, 0));
       $this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-      $this->addPrimarySystem(new Scanner(4, 12, 3, 4));
-      $this->addPrimarySystem(new Engine(4, 13, 0, 6, 1));
-      $this->addPrimarySystem(new TwinArray(2, 6, 2, 180, 0));
-      $this->addPrimarySystem(new ParticleCannon(3, 8, 7, 300, 60));
-      $this->addPrimarySystem(new TwinArray(2, 6, 2, 0, 180));
-      $this->addPrimarySystem(new Structure( 5, 31));
+      $this->addPrimarySystem(new Scanner(3, 6, 1, 1));
+      $this->addPrimarySystem(new Engine(2, 11, 0, 4, 4));
+	$this->addPrimarySystem(new CargoBay(0, 5));
+	$this->addPrimarySystem(new CargoBay(0, 5));
+      $this->addPrimarySystem(new CustomMiningCutter(1, 0, 0, 240, 120));
+      $this->addPrimarySystem(new CustomIndustrialGrappler(2, 0, 0, 330, 30));
+      $this->addPrimarySystem(new CustomIndustrialGrappler(2, 0, 0, 330, 30));
+	    
+      $this->addPrimarySystem(new Structure( 2, 25));
         
         $this->hitChart = array(
         		0=> array( //should never happen
-        				20 => "Structure",
+        				10 => "Structure",
+        				11 => "Mining Cutter",
+        				13 => "Industrial Grappler",
+        				16 => "Cargo Bay",
+        				18 => "Engine",
+        				19 => "Reactor",
+        				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
-        				11 => "Structure",
-        				13 => "0:Particle Cannon",
-        				16 => "0:Twin Array",
+        				10 => "Structure",
+        				11 => "0:Mining Cutter",
+        				13 => "0:Industrial Grappler",
+        				16 => "0:Cargo Bay",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		2=> array( //same as Fwd
-        				11 => "Structure",
-        				13 => "0:Particle Cannon",
-        				16 => "0:Twin Array",
+        				10 => "Structure",
+        				11 => "0:Mining Cutter",
+        				13 => "0:Industrial Grappler",
+        				16 => "0:Cargo Bay",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
