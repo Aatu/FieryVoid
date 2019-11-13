@@ -1733,12 +1733,13 @@ class CustomIndustrialGrappler extends Weapon {
         public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClass = "Particle"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
         		
+        public $uninterceptable = false;
         
         public $loadingtime = 3;
         public $priority = 8; //light Raking weapon
         
         public $raking = 6;
-        public $rangePenalty = 1;
+        public $rangePenalty = 1; //-1 per hex
         public $fireControl = array(0, 1, 2); // fighters, <mediums, <capitals 
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
