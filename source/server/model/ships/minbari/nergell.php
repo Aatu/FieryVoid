@@ -10,7 +10,8 @@ class Nergell extends SmallStarBaseFourSections{
 		$this->faction = "Minbari";
 		$this->phpclass = "nergell";
 		$this->shipClass = "Nergell Military Guardpost";
-		$this->imagePath = "img/ships/orion.png";
+		$this->imagePath = "img/ships/MinbariGuardpost.png";
+		$this->canvasSize = 200;
 		$this->fighters = array("heavy"=>12); 
 
 		$this->shipSizeClass = 3; 
