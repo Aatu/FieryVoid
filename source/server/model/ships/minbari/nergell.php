@@ -106,3 +106,5 @@ class Nergell extends SmallStarBaseFourSections{
 		$this->addLeftSystem(new FusionCannon(3, 8, 1, 120, 300));
 		}
     }
+
+?>
