@@ -1408,8 +1408,8 @@ class CustomBPALight extends Weapon{
     }
 	
     public function setSystemDataWindow($turn){
-		$this->data["Special"] = 'Can fire as either Light Bolter or Light Pulse Cannon. ';
 		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = 'Can fire as either Light Bolter or Light Pulse Cannon. ';
     }
 
 	
@@ -1682,6 +1682,71 @@ class CustomBPAHeavy extends Weapon{
 	}
 	
 } //endof class CustomBPAHeavy
+
+
+
+class CustomIndustrialGrappler extends Weapon {
+    /*Industrial Grappler - fluff feature on mining units*/
+        public $name = "customIndustrialGrappler";
+        public $displayName = "Industrial Grappler";
+	public $iconPath = "grapplingClaw.png";
+
+        public $loadingtime = 1;        
+        public $rangePenalty = 0; //no range penalty to speak about
+        public $fireControl = array(null, null, null); // fighters, <mediums, <capitals //no in game effect!
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 5;
+            if ( $powerReq == 0 ) $powerReq = 0;
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+	
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);
+	$this->data["Basic Strength"] = $this->baseOutput; 
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}	    
+	$this->data["Special"] .= "Has no actual in-game effect."; 
+    }
+
+        public function getDamage($fireOrder){        return 0;   }
+        public function setMinDamage(){     $this->minDamage = 0 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+} //CustomIndustrialGrappler
+
+
+    class CustomMiningCutter extends Laser{
+        public $name = "customMiningCutter";
+        public $displayName = "Mining Cutter";
+        public $animation = "laser";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.15;
+        public $animationWidth = 2;
+        public $animationWidth2 = 0.2;
+	public $iconPath = "miningCutter.png";
+        
+        public $loadingtime = 3;
+        public $priority = 8; //light Raking weapon
+        
+        public $raking = 6;
+        public $rangePenalty = 1;
+        public $fireControl = array(0, 1, 2); // fighters, <mediums, <capitals 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	    if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+5;   }
+        public function setMinDamage(){     $this->minDamage = 7 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 25 ;      }
+    } //CustomMiningCutter
 
 
 
