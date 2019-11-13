@@ -1711,7 +1711,7 @@ class CustomIndustrialGrappler extends Weapon {
 		}else{
 			$this->data["Special"] .= '<br>';
 		}	    
-	$this->data["Special"] .= "Has no actual in-game effect."; 
+	$this->data["Special"] .= "Has no actual in-game effect. Used to attach unit to asteroid."; 
     }
 
         public function getDamage($fireOrder){        return 0;   }
