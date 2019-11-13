@@ -45,8 +45,12 @@ class LiberatorEscort extends MediumShip{
 	$this->addPrimarySystem(new Structure( 5, 31));
   
         $this->hitChart = array(
-        		0=> array( //should never be actually used, but must be present
-        				20 => "Structure",
+        		0=> array( 
+        				11 => "Structure",
+        				16 => "Twin Array",
+        				18 => "Engine",
+        				19 => "Reactor",
+        				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				11 => "Structure",
