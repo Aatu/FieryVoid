@@ -7,7 +7,7 @@ class Brigand extends HeavyCombatVesselLeftRight{
     	$this->pointCost = 375;
         $this->faction = "Raiders";
         $this->phpclass = "Brigand";
-        $this->imagePath = "img/ships/warbird.png"; //need to change
+        $this->imagePath = "img/ships/drazi/warbird.png"; 
         $this->shipClass = "Brigand Attack Cruiser";
 
         $this->forwardDefense = 13;
