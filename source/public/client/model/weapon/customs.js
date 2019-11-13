@@ -160,3 +160,16 @@ var CustomBPAHeavy = function  CustomBPAHeavy(json, ship) {
 CustomBPAHeavy.prototype = Object.create(Weapon.prototype);
 CustomBPAHeavy.prototype.constructor =  CustomBPAHeavy;
 
+
+var CustomIndustrialGrappler = function  CustomIndustrialGrappler(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CustomIndustrialGrappler.prototype = Object.create(Weapon.prototype);
+CustomIndustrialGrappler.prototype.constructor =  CustomIndustrialGrappler;
+
+var CustomMiningCutter = function  CustomMiningCutter(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CustomMiningCutter.prototype = Object.create(Weapon.prototype);
+CustomMiningCutter.prototype.constructor =  CustomMiningCutter;
+
