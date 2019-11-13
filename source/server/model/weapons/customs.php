@@ -1729,6 +1729,10 @@ class CustomIndustrialGrappler extends Weapon {
         public $animationWidth = 2;
         public $animationWidth2 = 0.2;
 	public $iconPath = "miningCutter.png";
+	    
+        public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        public $weaponClass = "Particle"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+        		
         
         public $loadingtime = 3;
         public $priority = 8; //light Raking weapon
