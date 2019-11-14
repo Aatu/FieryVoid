@@ -1704,14 +1704,13 @@ class CustomIndustrialGrappler extends Weapon {
 	
 	
     public function setSystemDataWindow($turn){
-	parent::setSystemDataWindow($turn);
-	$this->data["Basic Strength"] = $this->baseOutput; 
+		parent::setSystemDataWindow($turn);
 		if (!isset($this->data["Special"])) {
 			$this->data["Special"] = '';
 		}else{
 			$this->data["Special"] .= '<br>';
 		}	    
-	$this->data["Special"] .= "Has no actual in-game effect. Used to attach unit to asteroid."; 
+		$this->data["Special"] .= "Has no actual in-game effect. Used to attach unit to asteroid."; 
     }
 
         public function getDamage($fireOrder){        return 0;   }
