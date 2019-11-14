@@ -14,6 +14,7 @@ class DrakhMothership extends BaseShip{
         $this->gravitic = true;	    
 	$this->unofficial = true;
 	$this->advancedArmor = true;   
+        $this->Enormous = true;
        
 	$this->isd = 2200;
         
@@ -32,6 +33,7 @@ class DrakhMothership extends BaseShip{
 	$this->addPrimarySystem(new CnC(6, 35, 0, 0));
         $this->addPrimarySystem(new Reactor(5, 40, 0, 12));
         $this->addPrimarySystem(new ElintScanner(5, 24, 6, 10));
+	$this->addPrimarySystem(new DrakhRaiderController(5, 10, 5, 1));
         $this->addPrimarySystem(new Engine(5, 33, 0, 16, 12));
         $this->addPrimarySystem(new SWTractorBeam(5, 0, 360, 1));
         $this->addPrimarySystem(new JumpEngine(6, 30, 8, 18));
@@ -41,7 +43,7 @@ class DrakhMothership extends BaseShip{
         $this->addFrontSystem(new GraviticThruster(3, 25, 0, 8, 1));
         $this->addFrontSystem(new GraviticThruster(3, 25, 0, 8, 1));
 	$this->addFrontSystem(new AbsorbtionShield(3,8,8,3,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-        $this->addFrontSystem(new ElintScanner(4, 20, 6, 10));	
+        $this->addFrontSystem(new ElintScanner(4, 18, 5, 8));	
 	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 240, 120));
 	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 240, 120));
 	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 240, 120));
@@ -98,7 +100,8 @@ class DrakhMothership extends BaseShip{
         $this->hitChart = array(
             0=> array(
                     5 => "Structure",
-                    7 => "Cargo Bay",
+                    6 => "Cargo Bay",
+                    7 => "Raider Controller",
                     9 => "Engine",
                     11 => "Jump Engine",
                     13 => "Tractor Beam",

@@ -1126,6 +1126,12 @@ spl_autoload_register(
                 'drakhmobiledefenseplatform' => '/server/model/ships/drakh/drakhMobileDefensePlatform.php',
                 'drakhmobilebeamplatform' => '/server/model/ships/drakh/drakhMobileBeamPlatform.php',
 		    
+		 //mining equipment
+		'customminingcutter' => '/server/model/weapons/customs.php',   
+		'customindustrialgrappler' => '/server/model/weapons/customs.php', 
+                'customminingbase' => '/server/model/ships/civilians/CustomMiningBase.php',
+                'customminingvessel' => '/server/model/ships/civilians/CustomMiningVessel.php',
+		    
 		    
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    

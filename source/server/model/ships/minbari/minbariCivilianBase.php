@@ -10,7 +10,8 @@ class MinbariCivilianBase extends SmallStarBaseFourSections{
 		$this->faction = "Minbari";
 		$this->phpclass = "minbaricivilianbase";
 		$this->shipClass = "Minbari Civilian Base";
-		$this->imagePath = "img/ships/orion.png";
+		$this->imagePath = "img/ships/MinbariCivBase.png";
+		$this->canvasSize = 200;
 		$this->fighters = array("heavy"=>6); 
 
 		$this->shipSizeClass = 3; 

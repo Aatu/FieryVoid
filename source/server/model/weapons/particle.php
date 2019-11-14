@@ -1199,7 +1199,7 @@
         
         public $name = "particleHammer";
         public $displayName = "Particle Hammer";
-        public $iconPath = "NexusParticleProjectorHeavy.png";
+        public $iconPath = "ParticleHammer.png";
         public $animation = "beam";
         public $animationColor = array(255, 250, 230);
         public $animationExplosionScale = 0.5;

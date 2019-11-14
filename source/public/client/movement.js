@@ -426,7 +426,7 @@ shipManager.movement = {
     },
 
     canRotate: function canRotate(ship) {
-        if (ship.base) {
+        if (ship.base && (!ship.nonRotating)) {
             if (gamedata.gamephase == -1 && gamedata.turn == 1 && ship.deploymove) {
                 return true;
             }

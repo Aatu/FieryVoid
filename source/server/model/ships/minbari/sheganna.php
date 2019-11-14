@@ -8,7 +8,7 @@ class Sheganna extends OSAT{
 		$this->faction = "Minbari";
         $this->phpclass = "Sheganna";
         $this->imagePath = "img/ships/sheganna.png";
-        $this->shipClass = 'Sheganna Sattelite';        
+        $this->shipClass = 'Sheganna OSAT';        
         $this->forwardDefense = 9;
         $this->sideDefense = 9;
         $this->turncost = 0;
@@ -21,6 +21,7 @@ class Sheganna extends OSAT{
 
         $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 7, 2, 8)); 
+        $this->addPrimarySystem(new Jammer(3, 6, 3));
         $this->addPrimarySystem(new Thruster(4, 7, 0, 0, 2));
         
         $this->addPrimarySystem(new NeutronLaser(2, 5, 4, 270, 90));

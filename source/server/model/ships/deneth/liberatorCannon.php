@@ -55,8 +55,13 @@ class LiberatorCannon extends MediumShip{
 
 
         $this->hitChart = array(
-        		0=> array( //should never happen
-        				20 => "Structure",
+        		0=> array( 
+        				11 => "Structure",
+        				13 => "Particle Cannon",
+        				16 => "Twin Array",
+        				18 => "Engine",
+        				19 => "Reactor",
+        				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				11 => "Structure",
