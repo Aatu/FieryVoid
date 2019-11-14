@@ -31,6 +31,7 @@ class BaseShip {
     public $minesweeperbonus = 0;
     public $base = false;
     public $smallBase = false;
+	public $nonRotating = false; //some bases do not rotate - this attribute is used in combination with $base or $smallBase
     public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for all systems)
 
     public $jinkinglimit = 0; //just in case there will be a ship actually able to jink; NOT SUPPORTED!
