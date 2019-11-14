@@ -1129,6 +1129,8 @@ spl_autoload_register(
 		 //mining equipment
 		'customminingcutter' => '/server/model/weapons/customs.php',   
 		'customindustrialgrappler' => '/server/model/weapons/customs.php', 
+                'customminingvessel' => '/server/model/ships/civilians/CustomMiningVessel.php',
+		    
 		    
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
