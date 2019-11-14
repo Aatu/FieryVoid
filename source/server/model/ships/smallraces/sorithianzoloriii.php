@@ -32,7 +32,7 @@ class SorithianZolorIII extends FighterFlight{
             $fighter->imagePath = "img/ships/BAStarFox.png";
             $fighter->iconPath = "img/ships/BAStarFox_large.png";
 
-            $frontGun = new LightFusionCannon(330, 30, 1, 4);
+            $frontGun = new LightParticleBeam(330, 30, 1, 4);
             $frontGun->displayName = "Ultralight Particle Beam";
             $fighter->addFrontSystem($frontGun);
             $this->addSystem($fighter);
