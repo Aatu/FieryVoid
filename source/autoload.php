@@ -1129,6 +1129,7 @@ spl_autoload_register(
 		 //mining equipment
 		'customminingcutter' => '/server/model/weapons/customs.php',   
 		'customindustrialgrappler' => '/server/model/weapons/customs.php', 
+                'customminingbase' => '/server/model/ships/civilians/CustomMiningBase.php',
                 'customminingvessel' => '/server/model/ships/civilians/CustomMiningVessel.php',
 		    
 		    
