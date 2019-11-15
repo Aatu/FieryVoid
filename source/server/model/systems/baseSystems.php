@@ -129,9 +129,6 @@ class Shield extends ShipSystem implements DefensiveSystem{
     public $displayName = "Shield";
     public $startArc = 0;
     public $endArc = 0;
-	
-    //mark as shield for RadCannon and the like
-    protected $isShield = true;
     
     //defensive system
     public $defensiveSystem = true;
