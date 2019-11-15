@@ -81,6 +81,7 @@ class CustomLightMatterCannonF extends Matter {
 		public $iconPath = "customLightMatterCannon.png";
         
         public $loadingtime = 3;
+        public $ammunition = 6; //limited ammo!
         public $exclusive = false; //this is not an exclusive weapon!
         
         public $rangePenalty = 1;
