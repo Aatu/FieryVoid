@@ -1131,6 +1131,10 @@ spl_autoload_register(
                 'customminingbase' => '/server/model/ships/civilians/CustomMiningBase.php',
                 'customminingvessel' => '/server/model/ships/civilians/CustomMiningVessel.php',
 		    
+		 //Cascor weapons		    
+                'radcannon' => '/server/model/weapons/specialWeapons.php',
+		    
+		    
 		    
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
