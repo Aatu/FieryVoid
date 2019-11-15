@@ -7,10 +7,10 @@ class Serron extends HeavyCombatVessel{
         $this->pointCost = 375;
         $this->faction = "Usuuth";
         $this->phpclass = "Serron";
-        $this->imagePath = "img/ships/avenger.png";
+        $this->imagePath = "img/ships/UsuuthSerron.png";
+		$this->canvasSize = 200;
         $this->shipClass = "Serron Attack Ship";
         $this->isd = 1952;
-        $this->canvasSize = 150;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;

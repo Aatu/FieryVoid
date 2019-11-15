@@ -7,10 +7,10 @@ class Sethrus extends HeavyCombatVessel{
         $this->pointCost = 400;
         $this->faction = "Usuuth";
         $this->phpclass = "Sethrus";
-        $this->imagePath = "img/ships/avenger.png";
+        $this->imagePath = "img/ships/UsuuthSerron.png";
+		$this->canvasSize = 200;
         $this->shipClass = "Sethrus Beam Cruiser";
         $this->isd = 2000;
-        $this->canvasSize = 150;
         $this->occurence = "rare";
         $this->variantOf = "Serron Attack Ship";
         

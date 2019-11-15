@@ -2130,7 +2130,7 @@ class RadCannon extends Weapon{
 		      $this->data["Special"] .= "<br> - Scanner: output reduced by 1."; 
 		      $this->data["Special"] .= "<br> - Engine: output reduced by 2."; 
 		      //and disable a tendril on diffuser, but there's no diffuser in game to disable at the moment
-		      $this->data["Special"] .= "<br>No effect on any other system. Note that armor does not affect above effects.";
+		      $this->data["Special"] .= "<br>No effect on any other system. Note that armor and shields do not affect above effects.";
 		      $this->data["Special"] .= "<br>Does not affect ships of advanced species (eg. Middle-born or older).";  		    
 	    }	
 	
@@ -2150,7 +2150,7 @@ class RadCannon extends Weapon{
 		//hit shield if active in arc and not destroyed (proceed to onDamagedSystem directly) (use instanceof Shield to determine!)
 		
 		//no effect on advanced ships!
-		if($ship->factionAge > 1) return;
+		if($target->factionAge > 1) return;
 		
 		//first - find bearing from target to firing ship (needed to determine whether shield interacts with incoming shot)
 		$relativeBearing = $target->getBearingOnUnit($shooter);
@@ -2161,7 +2161,7 @@ class RadCannon extends Weapon{
 			if( ($shield instanceOf Shield)  //this is an actual shield!
 				&& (!$shield->isDestroyed()) //not destroyed
 				&& (!$shield->isOfflineOnTurn($gamedata->turn)) //powered up
-			   	&& (mathlib::isInArc($relativeBearing, $$shield->startArc, $shield->endArc)) //actually in arc to affect
+			   	&& (mathlib::isInArc($relativeBearing, $shield->startArc, $shield->endArc)) //actually in arc to affect
 			) {
 				$affectingShields[] = $shield;
 			}
@@ -2181,16 +2181,19 @@ class RadCannon extends Weapon{
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		if ($ship->isDestroyed()) return; //no point allocating
 		if ($system->isDestroyed()) return; //no point allocating
-		$shooterId = $this->getUnit()->id;
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$shooterID = $shooter->id;
 		$remHealth = $system->getRemainingHealth();
 		
 		if($system instanceOf Structure) { //Structure: mark 10 damage (but no more than Structure actually possesses!)
-            		$destroyed = false;
+            $destroyed = false;
 			$dmgToDo = min(10,$remHealth);			
-			if($dmgToDo>=$remHealth) $destroyed = true;			
-			$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, 0, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $shooterID, $this->id);
-			$damageEntry->updated = true;
-			$system->damage[] = $damageEntry;
+			if($dmgToDo >= $remHealth) $destroyed = true;	
+			if($dmgToDo > 0 ) {			
+				$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, 0, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $shooterID, $this->id);
+				$damageEntry->updated = true;
+				$system->damage[] = $damageEntry;
+			}
 		} else if($system instanceOf Shield) { //Shield: destroy; if Gravitic Shield - find generator and apply -1 output 
 			$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $remHealth, 0, 0, $fireOrder->id, true, "", $this->weaponClass, $shooterID, $this->id);
 			$damageEntry->updated = true;
@@ -2200,10 +2203,10 @@ class RadCannon extends Weapon{
 					if( ($generator instanceOf ShieldGenerator)
 					  && (!$generator->isDestroyed())
 					){
-						$crit = new OutputReduced1(-1, $ship->id, $system->id, "OutputReduced1", $gamedata->turn);
+						$crit = new OutputReduced1(-1, $ship->id, $generator->id, "OutputReduced1", $gamedata->turn);
 						$crit->updated = true;
-			    			$crit->inEffect = false;
-			    			$generator->criticals[] =  $crit;
+						$crit->inEffect = false;
+						$generator->criticals[] =  $crit;
 						break; //don't look for further Generators
 					}
 				}

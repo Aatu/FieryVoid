@@ -7,10 +7,10 @@ class Orthuus  extends BaseShip{
         $this->pointCost = 600;
         $this->faction = "Usuuth";
         $this->phpclass = "Orthuus";
-        $this->imagePath = "img/ships/omega.png";
+        $this->imagePath = "img/ships/UsuuthOrthuus.png";
+		$this->canvasSize = 200;
         $this->shipClass = "Orthuus Battle Leader";
         $this->shipSizeClass = 3;
-        $this->canvasSize = 280;
         $this->fighters = array("normal"=>24);
         $this->limited = 33;
         $this->iniativebonus = 5;
