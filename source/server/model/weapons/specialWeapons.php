@@ -2120,8 +2120,7 @@ class RadCannon extends Weapon{
 	
 	    public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Does not affect advanced ships (eg. non-Young race).";  
-		      $this->data["Special"] .= "<br>Automatically hits shields if interposed.";      
+		      $this->data["Special"] = "Automatically hits shields if interposed.";      
 		      $this->data["Special"] .= "<br>Effect depends on system hit:";    
 		      $this->data["Special"] .= "<br> - Structure: 10 boxes marked destroyed."; 
 		      $this->data["Special"] .= "<br> - Shield: system destroyed."; 
@@ -2131,7 +2130,8 @@ class RadCannon extends Weapon{
 		      $this->data["Special"] .= "<br> - Scanner: output reduced by 1."; 
 		      $this->data["Special"] .= "<br> - Engine: output reduced by 2."; 
 		      //and disable a tendril on diffuser, but there's no diffuser in game to disable at the moment
-		      $this->data["Special"] .= "<br>No effect on any other system. Note that armor does not affect above effects.";		    
+		      $this->data["Special"] .= "<br>No effect on any other system. Note that armor does not affect above effects.";
+		      $this->data["Special"] .= "<br>Does not affect ships of advanced species (eg. Middle-born or older).";  		    
 	    }	
 	
 	
