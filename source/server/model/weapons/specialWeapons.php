@@ -2149,6 +2149,9 @@ class RadCannon extends Weapon{
 		//fighters are untargetable, so we know it's a ship
 		//hit shield if active in arc and not destroyed (proceed to onDamagedSystem directly) (use instanceof Shield to determine!)
 		
+		//no effect on advanced ships!
+		if($ship->factionAge > 1) return;
+		
 		//first - find bearing from target to firing ship (needed to determine whether shield interacts with incoming shot)
 		$relativeBearing = $target->getBearingOnUnit($shooter);
 
@@ -2172,15 +2175,41 @@ class RadCannon extends Weapon{
 		} else { //otherwise hit normally (parent beforeDamage) (...for 0 damage...) , actual effect handled in onDamagedSystem 
 			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
 		}
-		
-		
-		
 	}//endof function beforeDamage
 	
 	//weapon formally always does 0 damage; now apply appropriate effect depending on system hit!
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		if ($ship->isDestroyed()) return; //no point allocating
 		if ($system->isDestroyed()) return; //no point allocating
+		$shooterId = $this->getUnit()->id;
+		$remHealth = $system->getRemainingHealth();
+		
+		if($system instanceOf Structure) { //Structure: mark 10 damage (but no more than Structure actually possesses!)
+            		$destroyed = false;
+			$dmgToDo = min(10,$remHealth);			
+			if($dmgToDo>=$remHealth) $destroyed = true;			
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, 0, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $shooterID, $this->id);
+			$damageEntry->updated = true;
+			$system->damage[] = $damageEntry;
+		} else if($system instanceOf Shield) { //Shield: destroy; if Gravitic Shield - find generator and apply -1 output 
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $remHealth, 0, 0, $fireOrder->id, true, "", $this->weaponClass, $shooterID, $this->id);
+			$damageEntry->updated = true;
+			$system->damage[] = $damageEntry;
+			if($system instanceOf GraviticShield){ //if Gravitic Shield - find generator and apply -1 output 
+				foreach( $ship->systems as $generator){
+					if( ($generator instanceOf ShieldGenerator)
+					  && (!$generator->isDestroyed())
+					){
+						$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
+						$crit->updated = true;
+			    $crit->inEffect = false;
+			    $system->criticals[] =  $crit;
+						break; //don't look for further Generators
+					}
+				}
+			}
+		}
+		
 		
 		
 		
