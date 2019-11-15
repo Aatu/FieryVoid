@@ -6,6 +6,7 @@ class DrakhSupportShip extends HeavyCombatVessel{
         
 	$this->pointCost = 950;
 	$this->faction = "Drakh";
+	$this->factionAge = 2; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
         $this->phpclass = "DrakhSupportShip";
         $this->imagePath = "img/ships/DrakhCruiser.png";
         $this->shipClass = "Support Ship";
