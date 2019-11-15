@@ -150,7 +150,7 @@ class BurstBeam extends Weapon{
 			
         public $rangePenalty = 2;
         public $fireControl = array(4, 2, 2); // fighters, <=mediums, <=capitals 
-
+	
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
@@ -2075,6 +2075,97 @@ class LtEMWaveDisruptor extends LinkedWeapon{
 	public function setMaxDamage(){     $this->maxDamage = 0 ;      }
 } //endof class LtEMWaveDisruptor
 
+
+
+/* WORK IN PROGRESS!*/
+class RadCannon extends Weapon{
+    /*Radiation Cannon - Cascor weapon*/
+        public $name = "RadCannon";
+        public $displayName = "Rad Cannon";
+	public $iconPath = "RadCannon.png";
+	
+	public $animation = "beam";//behaves like a bolt, I think beam animation is fitting
+        public $animationColor = array(150, 10, 10); //make it deep red...
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 15;
+        public $animationWidth = 8;
+        public $trailLength = 20;
+      
+        public $loadingtime = 2;
+	public $noOverkill = true; //does not overkill
+        
+        public $rangePenalty = 0.5; //-1/2hexes
+        public $fireControl = array(null, 2, 3); // fighters, <mediums, <capitals 
+	
+	public $intercept = 0;
+	public $priority = 2;// should go first/very early due to ignoring actual durability of system hit
+		
+	public $firingModes = array(1=>'Irradiate'); //just a convenient name
+	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Ion"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 8;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 6;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+	
+	    public function setSystemDataWindow($turn){
+		      parent::setSystemDataWindow($turn);  
+		      $this->data["Special"] = "Does not affect advanced ships (eg. non-Young race).";  
+		      $this->data["Special"] .= "<br>Automatically hits shields if interposed.";      
+		      $this->data["Special"] .= "<br>Effect depends on system hit:";    
+		      $this->data["Special"] .= "<br> - Structure: 10 boxes marked destroyed."; 
+		      $this->data["Special"] .= "<br> - Weapon or shield: system destroyed."; 
+		      $this->data["Special"] .= "<br> - Thruster or Jump Engine: system destroyed."; 
+		      $this->data["Special"] .= "<br> - C&C: critical roll forced (at +2)."; 
+		      $this->data["Special"] .= "<br> - Scanner: output reduced by 1."; 
+		      $this->data["Special"] .= "<br> - Engine: output reduced by 2."; 
+		      //and disable a tendril on diffuser, but there's no diffuser in game to disable at the moment
+		      $this->data["Special"] .= "<br>No effect on any other system. Note that armor does not affect above effects.";		    
+	    }	
+	
+	
+	
+	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+		return 0; //standard armor is ignored
+        }	
+	protected function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos=null){		
+		return 0; //advanced armor is ignored
+        }//endof function getSystemArmourInvulnerable
+	
+	
+	/*attacks every not destroyed (as of NOW!) ship section*/
+	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
+		//fighters are untargetable, so we know it's a ship
+		//hit shield if active in arc and not destroyed (proceed to onDamagedSystem directly)
+		
+		//otherwise hit normally (parent beforeDamage) (...for 0 damage...) , actual effect handled in onDamagedSystem 
+		
+		/*		
+		if ($target->isDestroyed()) return; //no point allocating
+		$activeStructures = $target->getSystemsByName("Structure",false);//list of non-destroyed Structure blocks
+		foreach($activeStructures as $struct){
+			$fireOrder->chosenLocation = $struct->location;			
+			$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
+			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage, true);//force PRIMARY location!
+		}
+		*/
+	}//endof function beforeDamage
+	
+		
+        public function getDamage($fireOrder){       return 0; /*no actual damage, just various effects*/  }
+        public function setMinDamage(){     $this->minDamage = 10 ; /*mark as 10 damage for display and interception purposes, it actually does as much on Structure...*/     }
+        public function setMaxDamage(){     $this->maxDamage = 10 ;      }
+} //endof class RadCannon
 
 	
 
