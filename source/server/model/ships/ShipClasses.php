@@ -66,7 +66,7 @@ class BaseShip {
 		public $enhancementTooltip = ""; //to be displayed with ship name / class	
 	
     public $advancedArmor = false; //set to true if ship is equipped with advanced armor!
-	public $factionAge = 'Young'; //Young, Middle, Ancient, Primordial
+	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	    
 	    public function getAdvancedArmor(){
 		return $this->advancedArmor;    
