@@ -278,14 +278,7 @@ class ShipSystem {
     public function testCritical($ship, $gamedata, $crits, $add = 0){
 	//use additional value to critical!
 	$bonusCrit = $this->critRollMod + $ship->critRollMod;	
-	foreach($crits as $key=>$value) {
-	  if($value instanceof NastierCrit){
-		$bonusCrit+= 1;
-		  //unset($crits[$key]); //no need, it'll go out on its own
-	  }
-	}
-	$crits = array_values($crits); //in case some criticals were deleted!
-		
+	$crits = array_values($crits); //in case some criticals were deleted!		
 	    
         $damageMulti = 1;
 
