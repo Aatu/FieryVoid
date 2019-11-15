@@ -34,8 +34,7 @@ class ShipSystem {
 	protected $advancedArmor = false; //indicates that system has advanced armor
     
     protected $structureSystem;
-    protected $isShield = false; //indicates that this system is a shield - for effects that affect specifically shields (at the moment - Radiation Cannon)
-    
+	
     protected $parentSystem = null;
     protected $unit = null; //unit on which system is mounted
 	
