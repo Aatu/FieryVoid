@@ -5,6 +5,7 @@ class DrakhRaiderSweeperFlt extends FighterFlight{
         
         $this->pointCost = 150*6;
         $this->faction = "Drakh";
+	$this->factionAge = 2; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
         $this->phpclass = "DrakhRaiderSweeperFlt";
         $this->shipClass = "Raider Sweeper Interceptors";
         $this->variantOf = "Raider Assault Fighters";
