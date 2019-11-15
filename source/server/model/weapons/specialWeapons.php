@@ -2077,9 +2077,9 @@ class LtEMWaveDisruptor extends LinkedWeapon{
 
 
 
-/* WORK IN PROGRESS!*/
+
 class RadCannon extends Weapon{
-    /*Radiation Cannon - Cascor weapon*/
+    /*Radiation Cannon - Cascor weapon (with LOTS of specials; essentially it's all special, with no base damage effect whatsover*/
         public $name = "RadCannon";
         public $displayName = "Rad Cannon";
 	public $iconPath = "RadCannon.png";
@@ -2200,38 +2200,35 @@ class RadCannon extends Weapon{
 					if( ($generator instanceOf ShieldGenerator)
 					  && (!$generator->isDestroyed())
 					){
-						$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
+						$crit = new OutputReduced1(-1, $ship->id, $system->id, "OutputReduced1", $gamedata->turn);
 						$crit->updated = true;
-			    $crit->inEffect = false;
-			    $system->criticals[] =  $crit;
+			    			$crit->inEffect = false;
+			    			$generator->criticals[] =  $crit;
 						break; //don't look for further Generators
 					}
 				}
 			}
-		}
-		
-		
-		
-		
-		/*		
-		if ($target->isDestroyed()) return; //no point allocating
-		$activeStructures = $target->getSystemsByName("Structure",false);//list of non-destroyed Structure blocks
-		foreach($activeStructures as $struct){
-			$fireOrder->chosenLocation = $struct->location;			
-			$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
-			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage, true);//force PRIMARY location!
-		}
-		*/
-		/*
-		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
-		if (!$system->advancedArmor){
-			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
+		} else if( ($system instanceOf Weapon)    //weapon, thruster, jump drive - destroy outright
+			or ($system instanceOf Thruster)
+			or ($system instanceOf JumpEngine)
+		) {
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $remHealth, 0, 0, $fireOrder->id, true, "", $this->weaponClass, $shooterID, $this->id);
+			$damageEntry->updated = true;
+			$system->damage[] = $damageEntry;
+		} else if($system instanceOf CnC) { //C&C: critical roll forced (at +2).
+			$system->forceCriticalRoll = true;
+			$system->critRollMod += 2;
+		} else if($system instanceOf Scanner) { //Scanner: output reduced by 1.
+			$crit = new OutputReduced1(-1, $ship->id, $system->id, "OutputReduced1", $gamedata->turn);
 			$crit->updated = true;
-			    $crit->inEffect = false;
-			    $system->criticals[] =  $crit;
-		}
-		*/
-		
+			$crit->inEffect = false;
+			$system->criticals[] =  $crit;
+		} else if($system instanceOf Scanner) { //Engine: output reduced by 2.
+			$crit = new OutputReduced2(-1, $ship->id, $system->id, "OutputReduced2", $gamedata->turn);
+			$crit->updated = true;
+			$crit->inEffect = false;
+			$system->criticals[] =  $crit;
+		} //other systems: no effect!			 
 	}//endof function onDamagedSystem
 	
 		
