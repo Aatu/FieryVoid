@@ -2156,8 +2156,9 @@ class RadCannon extends Weapon{
 		$affectingShields = array();
 		foreach($target->systems as $shield){
 			if( ($shield instanceOf Shield)  //this is an actual shield!
-				&& (!$system->isDestroyed()) //not destroyed
-				&& (!$system->isOfflineOnTurn($gamedata->turn)) //powered up
+				&& (!$shield->isDestroyed()) //not destroyed
+				&& (!$shield->isOfflineOnTurn($gamedata->turn)) //powered up
+			   	&& (mathlib::isInArc($relativeBearing, $$shield->startArc, $shield->endArc)) //actually in arc to affect
 			) {
 				$affectingShields[] = $shield;
 			}
