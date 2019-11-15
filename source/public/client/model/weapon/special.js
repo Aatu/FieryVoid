@@ -152,3 +152,10 @@ var LtEMWaveDisruptor = function(json, ship)
 }
 LtEMWaveDisruptor.prototype = Object.create( Weapon.prototype );
 LtEMWaveDisruptor.prototype.constructor = LtEMWaveDisruptor;
+
+var RadCannon = function(json, ship)
+{
+    Weapon.call( this, json, ship);
+}
+RadCannon.prototype = Object.create( Weapon.prototype );
+RadCannon.prototype.constructor = RadCannon;
