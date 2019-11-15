@@ -2147,7 +2147,7 @@ class RadCannon extends Weapon{
 	/*attacks every not destroyed (as of NOW!) ship section*/
 	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
 		//fighters are untargetable, so we know it's a ship
-		//hit shield if active in arc and not destroyed (proceed to onDamagedSystem directly)
+		//hit shield if active in arc and not destroyed (proceed to onDamagedSystem directly) (use instanceof Shield to determine!)
 		
 		//otherwise hit normally (parent beforeDamage) (...for 0 damage...) , actual effect handled in onDamagedSystem 
 		
