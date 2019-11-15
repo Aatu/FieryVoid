@@ -6,6 +6,7 @@ class DrakhMobileDefensePlatform extends MediumShip{
         
 	$this->pointCost = 300;
         $this->faction = "Drakh";
+	$this->factionAge = 2; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	$this->phpclass = "DrakhMobileDefensePlatform";
 	$this->shipClass = "Mobile Defense Platform";
 	$this->imagePath = "img/ships/DrakhDefensePlatform.png";
