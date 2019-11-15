@@ -6,6 +6,7 @@ class DrakhScoutShip extends MediumShip{
         
 	$this->pointCost = 750;
 	$this->faction = "Drakh";
+	$this->factionAge = 2; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
         $this->phpclass = "DrakhScoutShip";
         $this->imagePath = "img/ships/DrakhPatrolShip.png";
 	    $this->canvasSize = 100;
