@@ -6,6 +6,7 @@ class DrakhTender extends BaseShip{
         
 	$this->pointCost = 500;
 	$this->faction = "Drakh";
+	$this->factionAge = 2; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
         $this->phpclass = "DrakhTender";
         $this->imagePath = "img/ships/DrakhTanker.png";
         $this->shipClass = "Tender";
