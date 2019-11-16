@@ -25,7 +25,7 @@
         
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "Damage is dependent on how good a hit is - it's not randomized. There is no actual maximum, with exceptional hit chance damage may be exceptional as well.";
+            $this->data["Special"] = "Damage is dependent on how good a hit is - it's not randomized (actual damage done is 4X+2).<br>There is no actual maximum, with exceptional hit chance damage may be exceptional as well.";
         }
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
