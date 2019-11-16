@@ -102,7 +102,7 @@ class ShockCannon extends Weapon{
 			      $this->data["Special"] = ''.
 		      }
 		      $this->data["Special"] .= "Ignores armor. Forces dropout on fighters.";  
-		      $this->data["Special"] .= "<br>Structure hits reduce power output by 1 per 4 dmg done.";  
+		      $this->data["Special"] .= "<br>Structure hits reduce power output by 1 per 4 dmg rolled (but do no actual damage).";  
         }
 
         // Shock Cannons ignore armor.
@@ -126,6 +126,14 @@ class ShockCannon extends Weapon{
 			$crit = new OutputReduced(-1, $ship->id, $reactor->id, "OutputReduced", $gamedata->turn, $outputMod);
 			$crit->updated = true;
 			$reactor->criticals[] =  $crit;
+			//this weapon does no structural damage (and it was already done) - so undo it! (find appropriate damage entry, mark it as 0 damage and no desctruction)
+			foreach($system->damage as $dmgEntry){ //find and "clear" entry done by this weapon
+				if ($dmgEntry->fireorderid == $fireOrder->id){
+					$dmgEntry->destroyed = false;
+					$dmgEntry->damage = 0;
+					$dmgEntry->armour = 0;
+				}
+			}
 		    }
 		}
 
