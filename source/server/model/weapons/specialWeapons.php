@@ -95,7 +95,14 @@ class ShockCannon extends Weapon{
         }
 
         public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
+            parent::setSystemDataWindow($turn);  
+		      if ($this->data["Special"]) {
+			      $this->data["Special"] .= '<br>'.
+		      }else{
+			      $this->data["Special"] = ''.
+		      }
+		      $this->data["Special"] .= "Ignores armor. Forces dropout on fighters.";  
+		      $this->data["Special"] .= "<br>Structure hits reduce power output by 1 per 4 dmg done.";  
         }
 
         // Shock Cannons ignore armor.
@@ -406,6 +413,16 @@ class BurstPulseCannon extends Pulse {
     class TractorBeam extends ShipSystem{
         public $name = "tractorBeam";
         public $displayName = "Tractor Beam";
+	    
+	    public function setSystemDataWindow($turn){
+		      parent::setSystemDataWindow($turn);    
+		      if ($this->data["Special"]) {
+			      $this->data["Special"] .= '<br>'.
+		      }else{
+			      $this->data["Special"] = ''.
+		      }
+		      $this->data["Special"] .= "No in-game effect. Used to move or drag objects without physical contact.";  
+	    }	
       
         function __construct($armour, $maxhealth, $powerReq, $output ){
             parent::__construct($armour, $maxhealth, $powerReq, $output );
@@ -439,10 +456,13 @@ class BurstPulseCannon extends Pulse {
         }
 
         public function setSystemDataWindow($turn){
-            //$this->data["Weapon type"] = "Electromagnetic";
-
-            parent::setSystemDataWindow($turn);
-		$this->data["Special"] = 'Forces dropout on fighters. ';
+		parent::setSystemDataWindow($turn);  
+		if ($this->data["Special"]) {
+		      $this->data["Special"] .= '<br>'.
+		}else{
+		      $this->data["Special"] = ''.
+		}
+		$this->data["Special"] .= 'Forces dropout on fighters. Can pick particular fighter at no penalty.';
         }
 
         protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
@@ -573,8 +593,13 @@ class CommDisruptor extends Weapon{
 	);
 	
     public function setSystemDataWindow($turn){
-	      $this->data["Special"] = "Does no damage, but weakens target's Initiative (-1d6) and Sensors (-1d6) rating next turn";  
 	      parent::setSystemDataWindow($turn);    
+	      if ($this->data["Special"]) {
+		      $this->data["Special"] .= '<br>'.
+	      }else{
+		      $this->data["Special"] = ''.
+	      }
+	      $this->data["Special"] .= "Does no damage, but weakens target's Initiative (-1d6) and Sensors (-1d6) rating next turn";  
     }	
     
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
