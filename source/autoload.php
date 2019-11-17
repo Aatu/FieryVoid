@@ -1132,7 +1132,10 @@ spl_autoload_register(
                 'customminingvessel' => '/server/model/ships/civilians/CustomMiningVessel.php',
 		    
 		 //Cascor weapons		    
-                'radcannon' => '/server/model/weapons/specialWeapons.php',
+                'radcannon' => '/server/model/weapons/specialWeapons.php',  
+                'ionizer' => '/server/model/weapons/ion.php',
+                'ioniclaser' => '/server/model/weapons/ion.php',
+                'dualionbolter' => '/server/model/weapons/ion.php',
 		    
 		    
 		    
