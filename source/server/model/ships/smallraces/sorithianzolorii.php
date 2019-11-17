@@ -39,7 +39,7 @@ class SorithianZolorII extends FighterFlight{
             $missileRack->missileArray = array(
                 1 => new MissileFY(330, 30)
             );
-            $frontGun = new LightFusionCannon(330, 30, 1, 2);
+            $frontGun = new LightParticleBeam(330, 30, 1, 2);
             $frontGun->displayName = "Ultralight Particle Beam";
             $fighter->addFrontSystem($missileRack);
             $fighter->addFrontSystem($frontGun);

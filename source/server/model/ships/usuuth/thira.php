@@ -9,12 +9,14 @@ class Thira extends MediumShip{
         $this->faction = "Usuuth";
         $this->phpclass = "Thira";
         $this->shipClass = "Thira Freighter";
-        $this->imagePath = "img/ships/jenas.png";
+        $this->imagePath = "img/ships/UsuuthBaroon.png";
         $this->canvasSize = 100;
         $this->agile = true;
         
         $this->forwardDefense = 11;
         $this->sideDefense = 12;
+		
+		$this->notes = "Civilian unit";
         
         $this->occurence = "common";
         $this->isd = 1955;
@@ -45,7 +47,12 @@ class Thira extends MediumShip{
         
         $this->hitChart = array(
             0=> array( //should never happen
-                20 => "Structure",
+                11 => "Structure",
+                13 => "Cargo",
+                15 => "Particle Projector",
+                17 => "Engine",
+                19 => "Reactor",
+                20 => "Scanner",
             ),
             1=> array( //PRIMARY hit table, effectively
                 11 => "Structure",

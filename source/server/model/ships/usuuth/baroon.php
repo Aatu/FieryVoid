@@ -9,7 +9,7 @@ class Baroon extends MediumShip{
         $this->faction = "Usuuth";
         $this->phpclass = "Baroon";
         $this->shipClass = "Baroon Escort Cutter";
-        $this->imagePath = "img/ships/jenas.png";
+        $this->imagePath = "img/ships/UsuuthBaroon.png";
         $this->canvasSize = 100;
         $this->agile = true;
         
@@ -43,7 +43,12 @@ class Baroon extends MediumShip{
         
         $this->hitChart = array(
             0=> array( //should never happen
-                20 => "Structure",
+                11 => "Structure",
+                13 => "Light Particle Projector",
+                16 => "Particle Projector",
+                18 => "Engine",
+                19 => "Reactor",
+                20 => "Scanner",
             ),
             1=> array( //PRIMARY hit table, effectively
                 11 => "Structure",

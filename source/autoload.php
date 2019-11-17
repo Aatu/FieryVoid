@@ -548,7 +548,6 @@ spl_autoload_register(
                 'nakarsa' => '/server/model/ships/abbai/nakarsa.php',
                 'nalor' => '/server/model/ships/centauri_old/nalor.php',
                 'nashana' => '/server/model/ships/yolu/nashana.php',
-                'nastiercrit' => '/server/model/cricialClasses.php',
                 'worthus' => '/server/model/ships/centauri_old/worthus.php',
                 'navask' => '/server/model/ships/centauri_old/navask.php',
                 'navask2002' => '/server/model/ships/centauri_old/navask2002.php',
@@ -1131,6 +1130,10 @@ spl_autoload_register(
 		'customindustrialgrappler' => '/server/model/weapons/customs.php', 
                 'customminingbase' => '/server/model/ships/civilians/CustomMiningBase.php',
                 'customminingvessel' => '/server/model/ships/civilians/CustomMiningVessel.php',
+		    
+		 //Cascor weapons		    
+                'radcannon' => '/server/model/weapons/specialWeapons.php',
+		    
 		    
 		    
 		    

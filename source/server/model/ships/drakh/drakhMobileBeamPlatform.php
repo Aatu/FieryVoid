@@ -7,6 +7,7 @@ class DrakhMobileBeamPlatform extends MediumShip{
         
 	$this->pointCost = 350;
         $this->faction = "Drakh";
+	$this->factionAge = 2; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	$this->phpclass = "DrakhMobileBeamPlatform";
 	$this->shipClass = "Mobile Beam Platform";
 	$this->imagePath = "img/ships/DrakhDefensePlatform.png";

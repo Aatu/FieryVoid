@@ -26,6 +26,7 @@ class BaseShip {
     public $destroyed = false;
     public $pointCost = 0;
     public $faction = null;
+	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
     public $slot;
     public $unavailable = false;
     public $minesweeperbonus = 0;
@@ -33,6 +34,9 @@ class BaseShip {
     public $smallBase = false;
 	public $nonRotating = false; //some bases do not rotate - this attribute is used in combination with $base or $smallBase
     public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for all systems)
+
+	
+    
 
     public $jinkinglimit = 0; //just in case there will be a ship actually able to jink; NOT SUPPORTED!
 
@@ -62,7 +66,7 @@ class BaseShip {
 		public $enhancementOptionsDisabled = array(); //disabled standard options - jsut IDs
 		public $enhancementTooltip = ""; //to be displayed with ship name / class	
 	
-    protected $advancedArmor = false; //set to true if ship is equipped with advanced armor!
+    public $advancedArmor = false; //set to true if ship is equipped with advanced armor!
 	    
 	    public function getAdvancedArmor(){
 		return $this->advancedArmor;    

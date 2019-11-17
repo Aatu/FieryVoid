@@ -36,11 +36,11 @@ class EarlyWartalon extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 1));
         $this->addPrimarySystem(new Thruster(5, 19, 0, 7, 2));
 
-        $this->addLeftSystem(new ParticleRepeater(4, 6, 4, 240, 0));
+        $this->addLeftSystem(new RepeaterGun(4, 6, 4, 240, 0));
         $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 240, 60));
         $this->addLeftSystem(new Thruster(4, 13, 0, 4, 3));
 
-        $this->addRightSystem(new ParticleRepeater(4, 6, 4, 0, 120));
+        $this->addRightSystem(new RepeaterGun(4, 6, 4, 0, 120));
         $this->addRightSystem(new StdParticleBeam(3, 4, 1, 300, 120));
         $this->addRightSystem(new Thruster(4, 13, 0, 4, 4));
 

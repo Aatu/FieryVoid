@@ -95,7 +95,14 @@ class ShockCannon extends Weapon{
         }
 
         public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
+            parent::setSystemDataWindow($turn); 
+				if (!isset($this->data["Special"])) {
+					$this->data["Special"] = '';
+				}else{
+					$this->data["Special"] .= '<br>';
+				}	    
+		      $this->data["Special"] .= "Ignores armor. Forces dropout on fighters.";  
+		      $this->data["Special"] .= "<br>Structure hits reduce power output by 1 per 4 dmg rolled (but do no actual damage).";  
         }
 
         // Shock Cannons ignore armor.
@@ -119,6 +126,14 @@ class ShockCannon extends Weapon{
 			$crit = new OutputReduced(-1, $ship->id, $reactor->id, "OutputReduced", $gamedata->turn, $outputMod);
 			$crit->updated = true;
 			$reactor->criticals[] =  $crit;
+			//this weapon does no structural damage (and it was already done) - so undo it! (find appropriate damage entry, mark it as 0 damage and no desctruction)
+			foreach($system->damage as $dmgEntry){ //find and "clear" entry done by this weapon
+				if ($dmgEntry->fireorderid == $fireOrder->id){
+					$dmgEntry->destroyed = false;
+					$dmgEntry->damage = 0;
+					$dmgEntry->armour = 0;
+				}
+			}
 		    }
 		}
 
@@ -150,7 +165,7 @@ class BurstBeam extends Weapon{
 			
         public $rangePenalty = 2;
         public $fireControl = array(4, 2, 2); // fighters, <=mediums, <=capitals 
-
+	
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
@@ -406,6 +421,16 @@ class BurstPulseCannon extends Pulse {
     class TractorBeam extends ShipSystem{
         public $name = "tractorBeam";
         public $displayName = "Tractor Beam";
+	    
+	    public function setSystemDataWindow($turn){
+		      parent::setSystemDataWindow($turn); 
+				if (!isset($this->data["Special"])) {
+					$this->data["Special"] = '';
+				}else{
+					$this->data["Special"] .= '<br>';
+				}	    
+		      $this->data["Special"] .= "No in-game effect. Used to move or drag objects without physical contact.";  
+	    }	
       
         function __construct($armour, $maxhealth, $powerReq, $output ){
             parent::__construct($armour, $maxhealth, $powerReq, $output );
@@ -439,10 +464,13 @@ class BurstPulseCannon extends Pulse {
         }
 
         public function setSystemDataWindow($turn){
-            //$this->data["Weapon type"] = "Electromagnetic";
-
-            parent::setSystemDataWindow($turn);
-		$this->data["Special"] = 'Forces dropout on fighters. ';
+			parent::setSystemDataWindow($turn);  
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}	    
+			$this->data["Special"] .= 'Forces dropout on fighters. Can pick particular fighter at no penalty.';
         }
 
         protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
@@ -573,8 +601,13 @@ class CommDisruptor extends Weapon{
 	);
 	
     public function setSystemDataWindow($turn){
-	      $this->data["Special"] = "Does no damage, but weakens target's Initiative (-1d6) and Sensors (-1d6) rating next turn";  
 	      parent::setSystemDataWindow($turn);    
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}	    
+	      $this->data["Special"] .= "Does no damage, but weakens target's Initiative (-1d6) and Sensors (-1d6) rating next turn";  
     }	
     
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -664,8 +697,8 @@ class CommJammer extends Weapon{
 	);
 	
     public function setSystemDataWindow($turn){
-	      $this->data["Special"] = "Does no damage, but weakens target's Initiative (-1d6) rating next turn";  
 	      parent::setSystemDataWindow($turn);    
+	      $this->data["Special"] = "Does no damage, but weakens target's Initiative (-1d6) rating next turn";  
     }	
     
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -756,8 +789,8 @@ class SensorSpear extends Weapon{
 	);
 	
     public function setSystemDataWindow($turn){
-	      $this->data["Special"] = "Does no damage, but weakens target's Sensors (-1d3) rating next turn";  
 	      parent::setSystemDataWindow($turn);    
+	      $this->data["Special"] = "Does no damage, but weakens target's Sensors (-1d3) rating next turn";  
     }	
     
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -2075,6 +2108,170 @@ class LtEMWaveDisruptor extends LinkedWeapon{
 	public function setMaxDamage(){     $this->maxDamage = 0 ;      }
 } //endof class LtEMWaveDisruptor
 
+
+
+
+class RadCannon extends Weapon{
+    /*Radiation Cannon - Cascor weapon (with LOTS of specials; essentially it's all special, with no base damage effect whatsover*/
+        public $name = "RadCannon";
+        public $displayName = "Rad Cannon";
+	public $iconPath = "RadCannon.png";
+	
+	public $animation = "beam";//behaves like a bolt, I think beam animation is fitting
+        public $animationColor = array(150, 10, 10); //make it deep red...
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 15;
+        public $animationWidth = 8;
+        public $trailLength = 20;
+      
+        public $loadingtime = 2;
+	public $noOverkill = true; //does not overkill
+        
+        public $rangePenalty = 0.5; //-1/2hexes
+        public $fireControl = array(null, 2, 3); // fighters, <mediums, <capitals 
+	
+	public $intercept = 0;
+	public $priority = 2;// should go first/very early due to ignoring actual durability of system hit
+		
+	public $firingModes = array(1=>'Irradiate'); //just a convenient name
+	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Ion"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 8;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 6;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+	
+	    public function setSystemDataWindow($turn){
+		      parent::setSystemDataWindow($turn);  
+		      $this->data["Special"] = "Automatically hits shields if interposed.";      
+		      $this->data["Special"] .= "<br>Effect depends on system hit:";    
+		      $this->data["Special"] .= "<br> - Structure: 10 boxes marked destroyed."; 
+		      $this->data["Special"] .= "<br> - Shield: system destroyed."; 
+		      $this->data["Special"] .= "<br>  -- Gravitic Shield reduces generator output by 1, too."; 
+		      $this->data["Special"] .= "<br> - Weapon, Thruster or Jump Engine: system destroyed."; 
+		      $this->data["Special"] .= "<br> - C&C: critical roll forced (at +2)."; 
+		      $this->data["Special"] .= "<br> - Scanner: output reduced by 1."; 
+		      $this->data["Special"] .= "<br> - Engine: output reduced by 2."; 
+		      //and disable a tendril on diffuser, but there's no diffuser in game to disable at the moment
+		      $this->data["Special"] .= "<br>No effect on any other system. Note that armor and shields do not affect above effects.";
+		      $this->data["Special"] .= "<br>Does not affect ships of advanced species (eg. Middle-born or older).";  		    
+	    }	
+	
+	
+	
+	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+		return 0; //standard armor is ignored
+        }	
+	protected function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos=null){		
+		return 0; //advanced armor is ignored
+        }//endof function getSystemArmourInvulnerable
+	
+	
+	/*attacks every not destroyed (as of NOW!) ship section*/
+	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
+		//fighters are untargetable, so we know it's a ship
+		//hit shield if active in arc and not destroyed (proceed to onDamagedSystem directly) (use instanceof Shield to determine!)
+		
+		//no effect on advanced ships!
+		if($target->factionAge > 1) return;
+		
+		//first - find bearing from target to firing ship (needed to determine whether shield interacts with incoming shot)
+		$relativeBearing = $target->getBearingOnUnit($shooter);
+
+		//are there any active shields affecting shot?
+		$affectingShields = array();
+		foreach($target->systems as $shield){
+			if( ($shield instanceOf Shield)  //this is an actual shield!
+				&& (!$shield->isDestroyed()) //not destroyed
+				&& (!$shield->isOfflineOnTurn($gamedata->turn)) //powered up
+			   	&& (mathlib::isInArc($relativeBearing, $shield->startArc, $shield->endArc)) //actually in arc to affect
+			) {
+				$affectingShields[] = $shield;
+			}
+		}
+		$countShields = count($affectingShields);
+		if($countShields > 0){ //hit shield if active in arc and not destroyed (proceed to onDamagedSystem directly)
+			//choose randomly from relevant shields
+			$chosenID = Dice::d($countShields,1)-1; //array elements numeration starts at 0
+			$shield = $affectingShields[$chosenID];			
+			$this->onDamagedSystem($target, $shield, 0, 0, $gamedata, $fireOrder);
+		} else { //otherwise hit normally (parent beforeDamage) (...for 0 damage...) , actual effect handled in onDamagedSystem 
+			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+		}
+	}//endof function beforeDamage
+	
+	//weapon formally always does 0 damage; now apply appropriate effect depending on system hit!
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		if ($ship->isDestroyed()) return; //no point allocating
+		if ($system->isDestroyed()) return; //no point allocating
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$shooterID = $shooter->id;
+		$remHealth = $system->getRemainingHealth();
+		
+		if($system instanceOf Structure) { //Structure: mark 10 damage (but no more than Structure actually possesses!)
+            $destroyed = false;
+			$dmgToDo = min(10,$remHealth);			
+			if($dmgToDo >= $remHealth) $destroyed = true;	
+			if($dmgToDo > 0 ) {			
+				$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, 0, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $shooterID, $this->id);
+				$damageEntry->updated = true;
+				$system->damage[] = $damageEntry;
+			}
+		} else if($system instanceOf Shield) { //Shield: destroy; if Gravitic Shield - find generator and apply -1 output 
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $remHealth, 0, 0, $fireOrder->id, true, "", $this->weaponClass, $shooterID, $this->id);
+			$damageEntry->updated = true;
+			$system->damage[] = $damageEntry;
+			if($system instanceOf GraviticShield){ //if Gravitic Shield - find generator and apply -1 output 
+				foreach( $ship->systems as $generator){
+					if( ($generator instanceOf ShieldGenerator)
+					  && (!$generator->isDestroyed())
+					){
+						$crit = new OutputReduced1(-1, $ship->id, $generator->id, "OutputReduced1", $gamedata->turn);
+						$crit->updated = true;
+						$crit->inEffect = false;
+						$generator->criticals[] =  $crit;
+						break; //don't look for further Generators
+					}
+				}
+			}
+		} else if( ($system instanceOf Weapon)    //weapon, thruster, jump drive - destroy outright
+			or ($system instanceOf Thruster)
+			or ($system instanceOf JumpEngine)
+		) {
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $remHealth, 0, 0, $fireOrder->id, true, "", $this->weaponClass, $shooterID, $this->id);
+			$damageEntry->updated = true;
+			$system->damage[] = $damageEntry;
+		} else if($system instanceOf CnC) { //C&C: critical roll forced (at +2).
+			$system->forceCriticalRoll = true;
+			$system->critRollMod += 2;
+		} else if($system instanceOf Scanner) { //Scanner: output reduced by 1.
+			$crit = new OutputReduced1(-1, $ship->id, $system->id, "OutputReduced1", $gamedata->turn);
+			$crit->updated = true;
+			$crit->inEffect = false;
+			$system->criticals[] =  $crit;
+		} else if($system instanceOf Scanner) { //Engine: output reduced by 2.
+			$crit = new OutputReduced2(-1, $ship->id, $system->id, "OutputReduced2", $gamedata->turn);
+			$crit->updated = true;
+			$crit->inEffect = false;
+			$system->criticals[] =  $crit;
+		} //other systems: no effect!			 
+	}//endof function onDamagedSystem
+	
+		
+        public function getDamage($fireOrder){       return 0; /*no actual damage, just various effects*/  }
+        public function setMinDamage(){     $this->minDamage = 10 ; /*mark as 10 damage for display and interception purposes, it actually does as much on Structure...*/     }
+        public function setMaxDamage(){     $this->maxDamage = 10 ;      }
+} //endof class RadCannon
 
 	
 

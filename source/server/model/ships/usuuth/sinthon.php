@@ -7,10 +7,10 @@ class Sinthon extends HeavyCombatVessel{
         $this->pointCost = 350;
         $this->faction = "Usuuth";
         $this->phpclass = "Sinthon";
-        $this->imagePath = "img/ships/avenger.png";
+        $this->imagePath = "img/ships/UsuuthSerron.png";
+		$this->canvasSize = 200;
         $this->shipClass = "Sinthon Light Carrier";
         $this->isd = 1954;
-        $this->canvasSize = 150;
         $this->occurence = "uncommon";
         $this->variantOf = "Serron Attack Ship";
         $this->fighters = array("normal"=>12);

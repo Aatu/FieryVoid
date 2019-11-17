@@ -6,6 +6,7 @@ class DrakhMothership extends BaseShip{
         
 	$this->pointCost = 5000;
 	$this->faction = "Drakh";
+	$this->factionAge = 2; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
         $this->phpclass = "DrakhMothership";
         $this->imagePath = "img/ships/DrakhMothership.png";
         $this->shipClass = "Mothership";

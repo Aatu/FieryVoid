@@ -113,12 +113,6 @@
 		$d = Dice::d(10);
 		
 		$bonusCrit = $this->critRollMod + $ship->critRollMod;	//one-time penalty to dropout roll
-		foreach($crits as $key=>$value) {
-		  if($value instanceof NastierCrit){
-			$bonusCrit+= 1;
-			  //unset($crits[$key]); //no need, it'll go out on its own
-		  }
-		}
 		$crits = array_values($crits); //in case some criticals were deleted!
 		
 		$dropOutBonus = $gamedata->getShipById($this->flightid)->getDropOutBonus();

@@ -292,16 +292,6 @@ class ArmorReduced extends Critical{
     }
 }
 
-class NastierCrit extends Critical{ /*next critical (or dropout!) roll will be nastier*/
-    public $description = "Vulnerable to criticals.";
-    public $oneturn = true;	
-    //public $outputMod = 1; //can't use otputMod as it has effects regardless of a particular crit!
-
-    function __construct($id, $shipid, $systemid, $phpclass, $turn, $param=null){
-            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $param);
-    }
-}
-
 
 class FieldFluctuations extends Critical{ /*reduced power output for MagGrav Reactor*/
     public $description = "Field Fluctuations (-10% Power).";

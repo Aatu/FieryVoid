@@ -6,6 +6,7 @@ class DrakhShuttle extends FighterFlight{
         
 	$this->pointCost = 80*6;
 	$this->faction = "Drakh";
+	$this->factionAge = 2; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
         $this->phpclass = "DrakhShuttle";
         $this->shipClass = "Armed Shuttles";
 	 $this->imagePath = "img/ships/DrakhShuttle.png";

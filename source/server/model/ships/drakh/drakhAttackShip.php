@@ -3,9 +3,10 @@ class DrakhAttackShip extends HeavyCombatVessel{
 	
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
-        
+	            
 	$this->pointCost = 900;
 	$this->faction = "Drakh";
+	$this->factionAge = 2; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
         $this->phpclass = "DrakhAttackShip";
         $this->imagePath = "img/ships/DrakhCruiser.png";
         $this->shipClass = "Attack Ship";

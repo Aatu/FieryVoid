@@ -7,6 +7,7 @@ class DrakhHeavyRaider extends MediumShip{
         
 	$this->pointCost = 340;
         $this->faction = "Drakh";
+	$this->factionAge = 2; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	$this->phpclass = "DrakhHeavyRaider";
 	$this->shipClass = "Heavy Raider";
 	$this->imagePath = "img/ships/DrakhHeavyRaider.png";

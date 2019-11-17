@@ -29,6 +29,7 @@
         public $projectilespeed = 15;
         public $animationWidth = 4;
         public $trailLength = 10;
+	   public  $iconPath = "stdParticleBeam.png";
 
         public $intercept = 2;
         public $loadingtime = 1;
@@ -39,20 +40,31 @@
         public $priority = 5;
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	    if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
         public function getDamage($fireOrder){        return Dice::d(10)+6;   }
         public function setMinDamage(){     $this->minDamage = 7 ;      }
         public function setMaxDamage(){     $this->maxDamage = 16 ;      }
-
     }
+
 
     class QuadParticleBeam extends StdParticleBeam {
         public $name = "quadParticleBeam";
         public $displayName = "Quad Particle Beam";
         public $guns = 4;
+	   public  $iconPath = "quadParticleBeam.png";
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	    if ( $maxhealth == 0 ) $maxhealth = 8;
+            if ( $powerReq == 0 ) $powerReq = 4;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
     }
+
 
     class ParticleBlaster extends Particle{
         public $trailColor = array(30, 170, 255);
@@ -225,12 +237,11 @@
 
         public $name = "particleCannon";
         public $displayName = "Particle Cannon";
-        public $animation = "beam";
+	public $animation = "laser";
         public $animationColor = array(255, 250, 230);
-        public $animationExplosionScale = 0.35;
-        public $projectilespeed = 15;
-        public $animationWidth = 8;
-        public $trailLength = 24;
+        public $animationExplosionScale = 0.25;
+        public $animationWidth = 4;
+        public $animationWidth2 = 0.3;
 
         public $intercept = 1;
         public $loadingtime = 2;
@@ -268,12 +279,11 @@
 
         public $name = "lightParticleCannon";
         public $displayName = "Light Particle Cannon";
-        public $animation = "beam";
+	public $animation = "laser";
         public $animationColor = array(255, 250, 230);
-        public $animationExplosionScale = 0.25;
-        public $projectilespeed = 13;
-        public $animationWidth = 5;
-        public $trailLength = 24;
+        public $animationExplosionScale = 0.2;
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.3;
 
         public $intercept = 2;
         public $loadingtime = 2;
@@ -314,7 +324,7 @@
         public $animationColor = array(255, 230, 100);
         public $animationColor2 = array(255, 255, 255);
         public $animationExplosionScale = 0.45;
-        public $animationWidth = 5;
+        public $animationWidth = 7;
         public $priority = 7;
 
         public $loadingtime = 6;
@@ -349,12 +359,12 @@
 
         public $name = "particleCutter";
         public $displayName = "Particle Cutter";
-        public $animation = "beam";
-        public $animationColor = array(252, 252, 252);
-        public $animationExplosionScale = 0.35;
-        public $projectilespeed = 30;
-        public $animationWidth = 5;
-        public $trailLength = 1500;
+	public $animation = "laser";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.25;
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.3;
+	    
         public $firingModes = array( 1 => "Sustained");
         
         public $damageType = "Raking"; 

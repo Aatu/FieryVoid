@@ -81,29 +81,29 @@ class Nergell extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Jammer(6, 8, 4));
 		$this->addPrimarySystem(new NeutronLaser(7, 10, 6, 0, 360));
 
-		$this->addFrontSystem(new NeutronLaser(4, 10, 6, 300, 60));
-		$this->addFrontSystem(new ShockCannon(4, 6, 4, 300, 60));
-		$this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
-		$this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
-		$this->addFrontSystem(new FusionCannon(3, 8, 1, 240, 60));
+		$this->addFrontSystem(new NeutronLaser(4, 10, 6, 315, 45));
+		$this->addFrontSystem(new ShockCannon(4, 6, 4, 270, 90));
+		$this->addFrontSystem(new FusionCannon(3, 8, 1, 270, 90));
+		$this->addFrontSystem(new FusionCannon(3, 8, 1, 270, 90));
+		$this->addFrontSystem(new FusionCannon(3, 8, 1, 270, 90));
 
-		$this->addAftSystem(new NeutronLaser(4, 10, 6, 120, 240));
-		$this->addAftSystem(new ShockCannon(4, 6, 4, 120, 240));
-		$this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
-		$this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
-		$this->addAftSystem(new FusionCannon(3, 8, 1, 60, 240));
+		$this->addAftSystem(new NeutronLaser(4, 10, 6, 135, 225));
+		$this->addAftSystem(new ShockCannon(4, 6, 4, 90, 270));
+		$this->addAftSystem(new FusionCannon(3, 8, 1, 90, 270));
+		$this->addAftSystem(new FusionCannon(3, 8, 1, 90, 270));
+		$this->addAftSystem(new FusionCannon(3, 8, 1, 90, 270));
 		
-		$this->addRightSystem(new NeutronLaser(4, 10, 6, 60, 120));
-		$this->addRightSystem(new ShockCannon(4, 6, 4, 60, 120));
-		$this->addRightSystem(new FusionCannon(3, 8, 1, 60, 120));
-		$this->addRightSystem(new FusionCannon(3, 8, 1, 60, 120));
-		$this->addRightSystem(new FusionCannon(3, 8, 1, 300, 120));
+		$this->addRightSystem(new NeutronLaser(4, 10, 6, 45, 135));
+		$this->addRightSystem(new ShockCannon(4, 6, 4, 0, 180));
+		$this->addRightSystem(new FusionCannon(3, 8, 1, 0, 180));
+		$this->addRightSystem(new FusionCannon(3, 8, 1, 0, 180));
+		$this->addRightSystem(new FusionCannon(3, 8, 1, 0, 180));
 		
-		$this->addLeftSystem(new NeutronLaser(4, 10, 6, 240, 300));
-		$this->addLeftSystem(new ShockCannon(4, 6, 4, 240, 300));
-		$this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 300));
-		$this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 300));
-		$this->addLeftSystem(new FusionCannon(3, 8, 1, 120, 300));
+		$this->addLeftSystem(new NeutronLaser(4, 10, 6, 225, 315));
+		$this->addLeftSystem(new ShockCannon(4, 6, 4, 180, 360));
+		$this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 360));
+		$this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 360));
+		$this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 360));
 		}
     }
 

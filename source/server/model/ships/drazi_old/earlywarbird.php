@@ -23,7 +23,7 @@ class EarlyWarbird extends HeavyCombatVesselLeftRight{
 
         $this->addPrimarySystem(new Reactor(5, 12, 0, 0));
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 13, 4, 8));
+        $this->addPrimarySystem(new Scanner(4, 13, 4, 7));
         $this->addPrimarySystem(new Engine(5, 11, 0, 7, 2));
         $this->addPrimarySystem(new Hangar(4, 1));
         $this->addPrimarySystem(new StdParticleBeam(3, 4, 1, 240, 60));

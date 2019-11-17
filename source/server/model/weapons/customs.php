@@ -69,6 +69,7 @@ class CustomLightMatterCannon extends Matter {
 class CustomLightMatterCannonF extends Matter {
     /*fighter version of Light Matter Cannon, as used on Ch'Lonas fighters*/
     /*NOT done as linked weapon!*/
+    /*limited ammo*/
         public $name = "customLightMatterCannonF";
         public $displayName = "Light Matter Cannon";
         public $animation = "trail";
@@ -80,6 +81,7 @@ class CustomLightMatterCannonF extends Matter {
 		public $iconPath = "customLightMatterCannon.png";
         
         public $loadingtime = 3;
+        public $ammunition = 6; //limited ammo!
         public $exclusive = false; //this is not an exclusive weapon!
         
         public $rangePenalty = 1;
@@ -88,7 +90,29 @@ class CustomLightMatterCannonF extends Matter {
         function __construct($startArc, $endArc){
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
-        
+	
+	
+	
+	public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Ammunition"] = $this->ammunition;
+        }
+	
+	
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->ammunition = $this->ammunition;           
+            return $strippedSystem;
+        }
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+        public function fire($gamedata, $fireOrder){ //note ammo usage
+        	//debug::log("fire function");
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }        
         
         public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
         public function setMinDamage(){   return  $this->minDamage = 5 ;      }
@@ -612,8 +636,8 @@ class MLPA extends Weapon{
         }
 	
         public function setSystemDataWindow($turn){
-		$this->data["Special"] = 'Can fire as either Medium Laser or Medium Pulse Cannon. ';
-		parent::setSystemDataWindow($turn);
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Can fire as either Medium Laser or Medium Pulse Cannon. ';
         }
 
 	

@@ -431,12 +431,6 @@ class SWIon extends SWDirectWeapon{
       while($dmg>0){
 	      $dmg--;
 	      $system->critRollMod++;
-	      /* October 2017: instead of critical effect, let's just increase crit penalty! That will not be saved, but will work on any crits rolled this turn
-	      $crit = new NastierCrit(-1, $ship->id, $system->id, 'NastierCrit', $gamedata->turn); //for ship system and fighter alike
-		$crit->updated = true;
-		$crit->inEffect = true;
-	      $system->criticals[] =  $crit;
-	      */
       }
     }
 
