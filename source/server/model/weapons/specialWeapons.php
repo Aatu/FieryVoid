@@ -95,12 +95,12 @@ class ShockCannon extends Weapon{
         }
 
         public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);  
-		      if ($this->data["Special"]) {
-			      $this->data["Special"] .= '<br>'.
-		      }else{
-			      $this->data["Special"] = ''.
-		      }
+            parent::setSystemDataWindow($turn); 
+				if (!isset($this->data["Special"])) {
+					$this->data["Special"] = '';
+				}else{
+					$this->data["Special"] .= '<br>';
+				}	    
 		      $this->data["Special"] .= "Ignores armor. Forces dropout on fighters.";  
 		      $this->data["Special"] .= "<br>Structure hits reduce power output by 1 per 4 dmg rolled (but do no actual damage).";  
         }
@@ -423,12 +423,12 @@ class BurstPulseCannon extends Pulse {
         public $displayName = "Tractor Beam";
 	    
 	    public function setSystemDataWindow($turn){
-		      parent::setSystemDataWindow($turn);    
-		      if ($this->data["Special"]) {
-			      $this->data["Special"] .= '<br>'.
-		      }else{
-			      $this->data["Special"] = ''.
-		      }
+		      parent::setSystemDataWindow($turn); 
+				if (!isset($this->data["Special"])) {
+					$this->data["Special"] = '';
+				}else{
+					$this->data["Special"] .= '<br>';
+				}	    
 		      $this->data["Special"] .= "No in-game effect. Used to move or drag objects without physical contact.";  
 	    }	
       
@@ -464,13 +464,13 @@ class BurstPulseCannon extends Pulse {
         }
 
         public function setSystemDataWindow($turn){
-		parent::setSystemDataWindow($turn);  
-		if ($this->data["Special"]) {
-		      $this->data["Special"] .= '<br>'.
-		}else{
-		      $this->data["Special"] = ''.
-		}
-		$this->data["Special"] .= 'Forces dropout on fighters. Can pick particular fighter at no penalty.';
+			parent::setSystemDataWindow($turn);  
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}	    
+			$this->data["Special"] .= 'Forces dropout on fighters. Can pick particular fighter at no penalty.';
         }
 
         protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
@@ -602,11 +602,11 @@ class CommDisruptor extends Weapon{
 	
     public function setSystemDataWindow($turn){
 	      parent::setSystemDataWindow($turn);    
-	      if ($this->data["Special"]) {
-		      $this->data["Special"] .= '<br>'.
-	      }else{
-		      $this->data["Special"] = ''.
-	      }
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}	    
 	      $this->data["Special"] .= "Does no damage, but weakens target's Initiative (-1d6) and Sensors (-1d6) rating next turn";  
     }	
     
@@ -697,8 +697,8 @@ class CommJammer extends Weapon{
 	);
 	
     public function setSystemDataWindow($turn){
-	      $this->data["Special"] = "Does no damage, but weakens target's Initiative (-1d6) rating next turn";  
 	      parent::setSystemDataWindow($turn);    
+	      $this->data["Special"] = "Does no damage, but weakens target's Initiative (-1d6) rating next turn";  
     }	
     
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -789,8 +789,8 @@ class SensorSpear extends Weapon{
 	);
 	
     public function setSystemDataWindow($turn){
-	      $this->data["Special"] = "Does no damage, but weakens target's Sensors (-1d3) rating next turn";  
 	      parent::setSystemDataWindow($turn);    
+	      $this->data["Special"] = "Does no damage, but weakens target's Sensors (-1d3) rating next turn";  
     }	
     
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){

@@ -1,5 +1,5 @@
 <?php
-class swVindicator extends BaseShipNoFront{
+class swVindicator extends BaseShipNoFwd{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);

@@ -636,8 +636,8 @@ class MLPA extends Weapon{
         }
 	
         public function setSystemDataWindow($turn){
-		$this->data["Special"] = 'Can fire as either Medium Laser or Medium Pulse Cannon. ';
-		parent::setSystemDataWindow($turn);
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Can fire as either Medium Laser or Medium Pulse Cannon. ';
         }
 
 	
