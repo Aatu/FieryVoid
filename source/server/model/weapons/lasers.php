@@ -25,6 +25,12 @@
 
     class Laser extends Raking{
         public $uninterceptable = true;
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            }	    
+            $this->data["Special"] .= "Uninterceptable."; 
     }
 
 
