@@ -617,6 +617,11 @@ window.shipManager = {
         if (shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "cnC"))) {
             return true;
         }
+        
+        /*ship without power (power deficit or Reactor shutdown critical) is adrift as well*/
+        //isPowerless already checks for appropriate critical, actually
+        if (shipManager.power.isPowerless(ship)) return true;
+        
         return false;
     },
 
