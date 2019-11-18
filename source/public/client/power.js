@@ -278,7 +278,7 @@ shipManager.power = {
 			*/
 			
 			/*temporary power down critical - may happen on C&C*/	
-			if(system.name=="C&C"){ //no point checking other systems
+			if(system.displayName=="C&C"){ //no point checking other systems
                			output -= shipManager.criticals.hasCritical(system, "tmppowerdown"); //Power output reduced
 			}
                         

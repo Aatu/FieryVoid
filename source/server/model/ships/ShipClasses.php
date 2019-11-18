@@ -33,6 +33,8 @@ class BaseShip {
     public $base = false;
     public $smallBase = false;
 	public $nonRotating = false; //some bases do not rotate - this attribute is used in combination with $base or $smallBase
+	public $osat = false; //true if object is OSAT (this includes MicroSATs and mines)
+	
     public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for all systems)
 
 	

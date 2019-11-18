@@ -2316,7 +2316,7 @@ class IonFieldGenerator extends Weapon{
 		$this->data["Special"] = "Every unit in affected area is subject to effects:";      
 		$this->data["Special"] .= "<br> - Roll one location, as per regular attack. If weapon is hit, it's forced to shut down."; //originally just charging cycle resets - but I opted for simpler (if stronger) effect. 
 		$this->data["Special"] .= "<br> - -2 Sensor rating (ships) or -1 OB (fighters) for a turn.";    
-		$this->data["Special"] .= "<br> - -3 Initiative for a turn."; 
+		$this->data["Special"] .= "<br> - -15 Initiative for a turn."; 
 		$this->data["Special"] .= "<br> - Lose 1 (MCVs/LCVs) or 2 (larger ships) points of power for a turn."; 
 		$this->data["Special"] .= "<br>Does not affect bases, mines and OSATs. Overlapping Fields are not cumulative.";
 	}	
@@ -2354,38 +2354,37 @@ class IonFieldGenerator extends Weapon{
         $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
         $rolled = Dice::d(100);
         $fireOrder->rolled = $rolled; //...and hit, regardless of value rolled
-            $fireOrder->pubnotes .= "Ion Storm created, nearby units are handicapped for one turn. ";
-            $fireOrder->shotshit++;            
-            //do affect ships in range...
-            $ships1 = $gamedata->getShipsInDistance($target); //directly on target hex - important for direction of impact
-            $affectedUnits = $gamedata->getShipsInDistance($target, 2);
-            foreach ($affectedUnits as $targetShip) {	
-		if (!$targetShip->isDestroyed()) { //no point allocating to destroyed ship
-			//check for overlap - return if this unit was already affected
-			foreach (IonFieldGenerator::$alreadyAffected as $affectedID){
-				if ($affectedID == $targetShip->id) return;	
-			}
-			IonFieldGenerator::$alreadyAffected[] = $targetShip->id;//add new ID to affected list			
-			
-			if ( (!$targetShip->base) && (!$targetShip->osat) ) {//does not affect bases, OSATs and mines
-				if (isset($ships1[$targetShip->id])) { //ship on target hex!
-				    $sourceHex = $posLaunch;
-				} else { //ship at range 1!
-				    $sourceHex = $target;
+		$fireOrder->pubnotes .= "Ion Storm created, nearby units are handicapped for one turn. ";
+		$fireOrder->shotshit++;            
+		//do affect ships in range...
+		$ships1 = $gamedata->getShipsInDistance($target); //directly on target hex - important for direction of impact
+		$affectedUnits = $gamedata->getShipsInDistance($target, 2);
+		foreach ($affectedUnits as $targetShip) {	
+			if (!$targetShip->isDestroyed()) { //no point allocating to destroyed ship
+				//check for overlap - return if this unit was already affected
+				foreach (IonFieldGenerator::$alreadyAffected as $affectedID){
+					if ($affectedID == $targetShip->id) return;	
 				}
-				$this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
+				IonFieldGenerator::$alreadyAffected[] = $targetShip->id;//add new ID to affected list			
+				
+				if ( (!$targetShip->base) && (!$targetShip->osat) ) {//does not affect bases, OSATs and mines
+					if (isset($ships1[$targetShip->id])) { //units on target hex! direction damage is coming from: launch hex
+						$sourceHex = $posLaunch;
+					} else { //other units in range! direction damage is coming from: impact hex
+						$sourceHex = $target;
+					}
+					$this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, 0, $gamedata);
+				}
 			}
 		}
-            }
-        }
         $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
     } //endof function fire	
 	
 
 	public function AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata)
 	{
-		if ($target instanceof FighterFlight) {
-		    $firstFighter = $ship->getSampleFighter(); //place effect on the first fighter, even if ti's already destroyed - entire flight will be affected!
+		if ($target instanceOf FighterFlight) {
+		    $firstFighter = $target->getSampleFighter(); //place effect on the first fighter, even if ti's already destroyed - entire flight will be affected!
 		    $this->onDamagedSystem($target, $firstFighter, 0, 0, $gamedata, $fireOrder);//no actual damage, proceed to apply effects
 		} else {
 		    $tmpLocation = $target->getHitSectionPos(Mathlib::hexCoToPixel($sourceHex), $fireOrder->turn);
@@ -2427,8 +2426,7 @@ class IonFieldGenerator extends Weapon{
 					$crit->updated = true;
 			        	$CnC->criticals[] =  $crit;
 				}
-				$powerLoss = min(2,$ship->size); //-1 for LCVs and smaller, -2 for larger ships
-				if($ship->size > 1) $powerLoss = 2; else $powerLoss = 1;
+				$powerLoss = min(2,$ship->shipSizeClass); //1 for LCVs and smaller, 2 for larger ships
 				for($i=1; $i<=$powerLoss;$i++){ //-3 Initiative
 					$crit = new tmppowerdown(-1, $ship->id, $CnC->id, 'tmppowerdown', $gamedata->turn); 
 					$crit->updated = true;

@@ -25,12 +25,16 @@
 
     class Laser extends Raking{
         public $uninterceptable = true;
+				
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
             if (!isset($this->data["Special"])) {
                 $this->data["Special"] = '';
             }else{
                 $this->data["Special"] .= '<br>';
             }	    
             $this->data["Special"] .= "Uninterceptable."; 
+		}
     }
 
 
