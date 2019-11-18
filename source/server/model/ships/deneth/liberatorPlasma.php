@@ -1,5 +1,5 @@
 <?php
-class LiberatorPlasma extends MediumShip{
+class LiberatorPlasma extends LCV{
 	/*Deneth Liberator LCV, from Raiders-2*/
 	/*approximated as MCV, no EW restrictions*/
 
