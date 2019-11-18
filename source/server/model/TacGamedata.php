@@ -8,7 +8,7 @@ class TacGamedata {
     public static $safeGameID = 4086; //gameID that is safe for adding new features
     public static $lastFiringResolutionNo = 0; //firing resolution to be used
 
-    public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator, $gamespace;
+    public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator, $gamespace, $description;
     public $ships = array();
     public $slots = array();
     public $waiting = false;
@@ -21,7 +21,7 @@ class TacGamedata {
     
     
     
-    function __construct($id, $turn, $phase, $activeship, $forPlayer, $name, $status, $points, $background, $creator, $gamespace = null, $rules = null){
+    function __construct($id, $turn, $phase, $activeship, $forPlayer, $name, $status, $points, $background, $creator, $description='', $gamespace = null, $rules = null){
         $this->setId($id);
         $this->setTurn($turn);
         $this->setPhase($phase);
@@ -31,6 +31,7 @@ class TacGamedata {
         $this->status = $status;
         $this->points = (int)$points;
         $this->background = $background;
+        $this->description = $description;
         $this->creator = $creator;
         $this->gamespace = $gamespace;
         $this->rules = new GameRules($rules);
@@ -80,6 +81,7 @@ class TacGamedata {
         $strippedGamedata->status = $this->status;
         $strippedGamedata->points = $this->points;
         $strippedGamedata->background = $this->background;
+        $strippedGamedata->description = $this->description;
         $strippedGamedata->creator = $this->creator;
         $strippedGamedata->gamespace = $this->gamespace;
         $strippedGamedata->slots = $this->slots;
