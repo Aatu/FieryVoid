@@ -2383,13 +2383,8 @@ class IonFieldGenerator extends Weapon{
 	public function AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata)
 	{
 		if ($target instanceof FighterFlight) {
-		    foreach ($target->systems as $fighter) {
-			if ($fighter == null || $fighter->isDestroyed()) {
-			    continue;
-			}
-			$this->onDamagedSystem($target, $fighter, 0, 0, $gamedata, $fireOrder);//no actual damage, proceed to apply effects
-			    return; //affect only first undestroyed fighter - entire flight is affected anyway!
-		    }
+		    $firstFighter = $ship->getSampleFighter(); //place effect on the first fighter, even if ti's already destroyed - entire flight will be affected!
+		    $this->onDamagedSystem($target, $firstFighter, 0, 0, $gamedata, $fireOrder);//no actual damage, proceed to apply effects
 		} else {
 		    $tmpLocation = $target->getHitSectionPos(Mathlib::hexCoToPixel($sourceHex), $fireOrder->turn);
 		    $system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
@@ -2400,8 +2395,8 @@ class IonFieldGenerator extends Weapon{
 	
 	/*actual applying of effect*/ 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-		$shooter = $gamedata->getShipById($fireOrder->shooterid);
-		$shooterID = $shooter->id;
+		//$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		//$shooterID = $shooter->id;
 		
 		
 		
