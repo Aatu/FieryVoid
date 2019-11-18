@@ -269,9 +269,17 @@ shipManager.power = {
 
 		for (var s in ship.systems) {
 			var system = ship.systems[s];
+			
+			/* Dual/Duo weapons no longer present
 			if (system.parentId > 0) {
 				// This is a subsystem of a dual/duo weapon. Ignore
 				continue;
+			}
+			*/
+			
+			/*temporary power down critical - may happen on C&C*/	
+			if(system.name=="C&C"){ //no point checking other systems
+               			output -= shipManager.criticals.hasCritical(system, "tmppowerdown"); //Power output reduced
 			}
                         
 			/*standard: add power for every system powered off
@@ -297,28 +305,7 @@ shipManager.power = {
 						}
 						if (power.type == 3) output -= system.powerReq;
 					}
-				}
-				
-				/* 
-				var boostValue; //Power spent on boosting system
-				boostValue = 0;
-				for (var i in system.power){
-					var power = system.power[i];
-					if (power.turn != gamedata.turn) continue;
-					//types: 1:offline 2:boost, 3:overload
-					if (power.type == 1) isOff = true; //just note the fact, so multiple disables do not count multiple times!
-					if (power.type == 2){
-						var currBoost = shipManager.power.countBoostPowerUsed(ship, system);
-						boostValue += currBoost;
-						output -= currBoost;
-					}
-					if (power.type == 3) output -= system.powerReq;
-				}
-				if (isOff == true){
-					output += system.powerReq; //power off => base power is available after all
-					output += boostValue; //power off => power used to boost is available after all
-				}
-				*/
+				}				
 			}
 		}
 
