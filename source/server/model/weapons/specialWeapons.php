@@ -2277,8 +2277,8 @@ class IonFieldGenerator extends Weapon{
         public $displayName = "Ion Field Generator";
 	public $iconPath = "ionFieldGenerator.png";
 	
-	public $damageType = "Flash";
-    	public $weaponClass = "Ballistic";
+	public $damageType = "Standard"; //irrelevant, really
+    	public $weaponClass = "Ion";
 	public $hextarget = true;
         public $hidetarget = true;
 	public $ballistic = true;
@@ -2300,7 +2300,7 @@ class IonFieldGenerator extends Weapon{
         public $trailLength = 10;
 	    
 	public $firingModes = array(
-		1 => "AoE"
+		1 => "IonStorm"
 	);
 	
 	
@@ -2316,18 +2316,14 @@ class IonFieldGenerator extends Weapon{
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);  
 		//some effects should originally work for current turn, but it won't work with FV handling of ballistics. Moving everything to next turn.
-		$this->data["Special"] = "Automatically hits shields if interposed.";      
-		$this->data["Special"] .= "<br>Effect depends on system hit:";    
-		$this->data["Special"] .= "<br> - Structure: 10 boxes marked destroyed."; 
-		$this->data["Special"] .= "<br> - Shield: system destroyed."; 
-		$this->data["Special"] .= "<br>  -- Gravitic Shield reduces generator output by 1, too."; 
-		$this->data["Special"] .= "<br> - Weapon, Thruster or Jump Engine: system destroyed."; 
-		$this->data["Special"] .= "<br> - C&C: critical roll forced (at +2)."; 
-		$this->data["Special"] .= "<br> - Scanner: output reduced by 1."; 
-		$this->data["Special"] .= "<br> - Engine: output reduced by 2."; 
-		//and disable a tendril on diffuser, but there's no diffuser in game to disable at the moment
+		//it's Ion (not EM) weapon with no special remarks regarding advanced races and system - so works normally on AdvArmor/Ancients etc
+		$this->data["Special"] = "Every unit in affected area is subject to effects:";      
+		$this->data["Special"] .= "<br> - -2 Sensor rating (ships) or -1 OB (fighters) for a turn.";    
+		$this->data["Special"] .= "<br> - Roll one location, as per regular attack. If weapon is hit, it's forced to shut down."; //originally just charging cycle resets - but I opted for simpler (if stronger) effect. 
+		$this->data["Special"] .= "<br> - -3 Initiative for a turn."; 
+		$this->data["Special"] .= "<br> - Lose 1 (MCVs/LCVs) or 2 (larger ships) points of power."; 
 		$this->data["Special"] .= "<br>No effect on any other system. Note that armor and shields do not affect above effects.";
-		$this->data["Special"] .= "<br>Does not affect ships of advanced species (eg. Middle-born or older).";  		    
+		$this->data["Special"] .= "<br>Does not affect bases, mines and OSATs. Overlapping Fields are not cumulative.";
 	}	
 	
 }//endof class IonFIeldGenerator
