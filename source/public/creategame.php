@@ -53,14 +53,16 @@
 					<!--<option id="default_option" value="default">select ...</option>-->
 					<?php
 						
-						foreach ($maps as $name){
-							
+						foreach ($maps as $name){							
 							print("<option value=\"".$name."\">".$name."</option>");
 						}
 					
 					?>
 				</select>
-		
+				<div><span>Scenario description:</span></div>
+				<textarea id="description" name="description" rows="7" cols="100">Your special requirements for this battle.</textarea>
+				
+				
                 <div style="margin-top:20px;"><h3>GAME SPACE</h3></div>
                 <div id="gamespace" class="subpanel gamespacecontainer">
                     <div class="slot" >

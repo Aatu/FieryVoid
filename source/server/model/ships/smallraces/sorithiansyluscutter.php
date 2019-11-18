@@ -1,5 +1,5 @@
 <?php
-class SorithianSylusCutter extends MediumShip{
+class SorithianSylusCutter extends LCV{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -46,7 +46,11 @@ class SorithianSylusCutter extends MediumShip{
 	    
         $this->hitChart = array(
         		0=> array( //should never happen
-        				20 => "Structure",
+        				11 => "Structure",
+        				14 => "Light Particle Beam",
+        				16 => "Engine",
+        				18 => "Reactor",
+        				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				11 => "Structure",

@@ -1,5 +1,5 @@
 <?php
-class Daggaden extends MediumShip{
+class Daggaden extends LCV{
 	/*Llort Daggaden LCV*/
 	/*approximated as MCV, no EW restrictions*/
     function __construct($id, $userid, $name,  $slot){

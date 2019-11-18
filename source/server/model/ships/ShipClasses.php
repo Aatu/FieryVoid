@@ -69,6 +69,10 @@ class BaseShip {
 		public $enhancementTooltip = ""; //to be displayed with ship name / class	
 	
     public $advancedArmor = false; //set to true if ship is equipped with advanced armor!
+	
+	
+	public $hangarRequired = ''; //usually empty, but some ships (LCVs primarily) do require hangar space!	
+	public $unitSize = 1; //typically ships are berthed in dedicated space, 1 per slot - but other arrangements are certainly possible.
 	    
 	    public function getAdvancedArmor(){
 		return $this->advancedArmor;    
@@ -1432,7 +1436,6 @@ class HeavyCombatVesselLeftRight extends BaseShip{
 
 
 class MediumShip extends BaseShip{
-
     public $shipSizeClass = 1;
 
     function __construct($id, $userid, $name, $slot){
@@ -1442,7 +1445,6 @@ class MediumShip extends BaseShip{
     public function getFireControlIndex(){
         return 1;
     }
-
 
     public function getLocations(){
         $locs = array();
@@ -1457,15 +1459,18 @@ class MediumShip extends BaseShip{
         $locs[] = array("loc" => 2, "min" => 210, "max" => 270, "profile" => $this->sideDefense);
         $locs[] = array("loc" => 1, "min" => 270, "max" => 330, "profile" => $this->sideDefense);
 
-
         return $locs;
     }
 
-
-
 } //end of class MediumShip
 
-
+/* essentially treated as medium ship, except all 3 hit charts should be the same and point to PRIMARY systems. 
+A lot of systems are technically present on LCV but not really there by rules, hence are made unhittable.
+LCVs typically require hagar space, too.
+*/
+class LCV extends MediumShip{
+	public $hangarRequired = 'LCVs';
+}
 
 
 

@@ -1,5 +1,5 @@
 <?php
-class BALightGunboatEscort extends MediumShip{
+class BALightGunboatEscort extends LCV{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -45,7 +45,12 @@ class BALightGunboatEscort extends MediumShip{
   
         $this->hitChart = array(
         		0=> array( //should never happen
-        				20 => "Structure",
+        				11 => "Structure",
+        				15 => "Standard Particle Beam",
+        				17 => "BA Interceptor I",
+        				18 => "Engine",
+        				19 => "Reactor",
+        				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				11 => "Structure",

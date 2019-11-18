@@ -1,5 +1,5 @@
 <?php
-class LiberatorEscort extends MediumShip{
+class LiberatorEscort extends LCV{
 	/*Deneth Liberator LCV, from Raiders-2*/
 	/*approximated as MCV, no EW restrictions*/
     function __construct($id, $userid, $name,  $slot){

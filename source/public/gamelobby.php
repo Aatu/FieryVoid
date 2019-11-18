@@ -171,21 +171,19 @@
             }
             
             
-            window.shipWindowManager.addEW = function(){};
+            window.shipWindowManager.addEW = function(){};            
             
-            
-			jQuery(function($){
-            
-				gamedata.parseServerData(<?php print($gamelobbydataJSON); ?>);
-				gamedata.parseFactions(<?php print($factions); ?>);
-				$('.readybutton').on("click", gamedata.onReadyClicked);		
-				$('.checkbutton').on("click", gamedata.checkChoices); //fleet correctness check
-                $('.leave').on("click", gamedata.onLeaveClicked);
-                $('.leaveslot').on("click", gamedata.onLeaveSlotClicked);
-                $('.selectslot').on("click", gamedata.onSelectSlotClicked);
-                $('.takeslot').on("click", gamedata.clickTakeslot);
-				ajaxInterface.startPollingGamedata();
-			});
+		jQuery(function($){            
+			gamedata.parseServerData(<?php print($gamelobbydataJSON); ?>);
+			gamedata.parseFactions(<?php print($factions); ?>);
+			$('.readybutton').on("click", gamedata.onReadyClicked);		
+			$('.checkbutton').on("click", gamedata.checkChoices); //fleet correctness check
+			$('.leave').on("click", gamedata.onLeaveClicked);
+			$('.leaveslot').on("click", gamedata.onLeaveSlotClicked);
+			$('.selectslot').on("click", gamedata.onSelectSlotClicked);
+			$('.takeslot').on("click", gamedata.clickTakeslot);
+			ajaxInterface.startPollingGamedata();
+		});
 		
 		</script>
 	</head>
@@ -198,7 +196,8 @@
 		<div class="panel large">
 			<div class="logout"><a href="logout.php">LOGOUT</a></div>
 			<div class="">	<span class="panelheader">GAME:</span><span class="panelsubheader"><?php print($gamelobbydata->name); ?></span>	</div>
-
+			<div><span> <?php print($gamelobbydata->description); ?> </span></div>
+			
 			<div><span>TEAM 1</span></div>
 			<div id="team1" class="subpanel slotcontainer">
 			</div>

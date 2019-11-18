@@ -1,5 +1,5 @@
 <?php
-class Staroon extends MediumShip{
+class Staroon extends LCV{
     /*approximated as MCV, no EW restrictions*/
     
     function __construct($id, $userid, $name,  $slot){
