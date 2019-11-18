@@ -206,6 +206,20 @@ window.gamedata = {
 					}
 			    }
 		    }
+		    //ship may actually require hangar, too! but this must be specified directly
+			if (lship.hangarRequired != '') { //classify based on explicit info from craft
+				var found = false;
+				for(var nh in totalFtrOther){ 					
+					if (totalFtrOther[nh][0] == smallCraftSize){//this is small craft type we're looking for!
+						found = true;
+						totalFtrOther[nh][1] += lship.flightSize;
+					}
+				}
+				if (found != true){ //such craft wasn't encountered yet
+					totalFtrOther.push(new Array(smallCraftSize,lship.flightSize));
+					smallCraftUsed.push(smallCraftSize);
+				}
+			}
 		}else{//note presence of fighters
 			var smallCraftSize = 'not recognized';			
 			if (lship.hangarRequired != '') { //classify based on explicit info from craft
