@@ -1131,8 +1131,13 @@ spl_autoload_register(
                 'customminingbase' => '/server/model/ships/civilians/CustomMiningBase.php',
                 'customminingvessel' => '/server/model/ships/civilians/CustomMiningVessel.php',
 		    
-		 //Cascor weapons		    
-                'radcannon' => '/server/model/weapons/specialWeapons.php',
+		 //Cascor weapons	
+                'tmppowerdown' => '/server/model/cricialClasses.php', //critical necessary for Ion Field Generator    
+                'radcannon' => '/server/model/weapons/specialWeapons.php',  
+                'ionfieldgenerator' => '/server/model/weapons/specialWeapons.php',  
+                'ionizer' => '/server/model/weapons/ion.php',
+                'ioniclaser' => '/server/model/weapons/ion.php',
+                'dualionbolter' => '/server/model/weapons/ion.php',
 		    
 		    
 		    

@@ -2141,19 +2141,15 @@ class RadCannon extends Weapon{
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ){
-                $maxhealth = 8;
-            }
-            if ( $powerReq == 0 ){
-                $powerReq = 6;
-            }
+            if ( $maxhealth == 0 ) $maxhealth = 8;
+            if ( $powerReq == 0 ) $powerReq = 6;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 	
 	
 	    public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Automatically hits shields if interposed.";      
+		      $this->data["Special"] = "Doesn't actually deal damage except as noted below. Automatically hits shields if interposed.";      
 		      $this->data["Special"] .= "<br>Effect depends on system hit:";    
 		      $this->data["Special"] .= "<br> - Structure: 10 boxes marked destroyed."; 
 		      $this->data["Special"] .= "<br> - Shield: system destroyed."; 
@@ -2274,5 +2270,177 @@ class RadCannon extends Weapon{
 } //endof class RadCannon
 
 	
+
+class IonFieldGenerator extends Weapon{
+	/*Cascor weapon - area debuff, no direct damage
+	I don't like the official icon (looks like triple Ion Bolter really...) so will create a different one, more suggestive of ballistic nature
+	*/
+	public $name = "IonFieldGenerator";
+        public $displayName = "Ion Field Generator";
+	public $iconPath = "ionFieldGenerator.png";
+	
+	public $damageType = "Standard"; //irrelevant, really
+    	public $weaponClass = "Ion";
+	public $hextarget = true;
+        public $hidetarget = true;
+	public $ballistic = true;
+	public $uninterceptable = true;
+	public $doNotIntercept = true; //just in case
+	public $priority = 1;
+	
+        public $range = 35;
+        public $loadingtime = 2;
+	
+	public $trailColor = array(30, 170, 255);
+        public $animation = "ball";
+        public $animationColor = array(30, 170, 255);
+        public $animationExplosionScale = 2; //covers 2 hexes away from explosion center
+        public $animationExplosionType = "AoE";
+        public $explosionColor = array(30, 170, 255);
+        public $projectilespeed = 12;
+        public $animationWidth = 14;
+        public $trailLength = 10;
+	    
+	public $firingModes = array(
+		1 => "IonStorm"
+	);
+		
+	private static $alreadyAffected = array(); //list of IDs of units already affected in this firing phase - to avoid multiplying effects on overlap
+	
+	
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);  
+		//some effects should originally work for current turn, but it won't work with FV handling of ballistics. Moving everything to next turn.
+		//it's Ion (not EM) weapon with no special remarks regarding advanced races and system - so works normally on AdvArmor/Ancients etc
+		$this->data["Special"] = "Every unit in affected area is subject to effects:";      
+		$this->data["Special"] .= "<br> - Roll one location, as per regular attack. If weapon is hit, it's forced to shut down."; //originally just charging cycle resets - but I opted for simpler (if stronger) effect. 
+		$this->data["Special"] .= "<br> - -2 Sensor rating (ships) or -1 OB (fighters) for a turn.";    
+		$this->data["Special"] .= "<br> - -15 Initiative for a turn."; 
+		$this->data["Special"] .= "<br> - Lose 1 (MCVs/LCVs) or 2 (larger ships) points of power for a turn."; 
+		$this->data["Special"] .= "<br>Does not affect bases, mines and OSATs. Overlapping Fields are not cumulative.";
+	}	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 8;
+            if ( $powerReq == 0 ) $powerReq = 4;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		$fireOrder->needed = 100; //always true
+		$fireOrder->updated = true;
+	}
+	
+    public function fire($gamedata, $fireOrder)
+    { //sadly here it really has to be completely redefined... or at least I see no option to avoid this
+        $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+        /** @var MovementOrder $movement */
+        $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+        $posLaunch = $movement->position;//at moment of launch!!!
+        //sometimes player does manage to target ship after all..
+        if ($fireOrder->targetid != -1) {
+            $targetship = $gamedata->getShipById($fireOrder->targetid);
+            //insert correct target coordinates: last turns' target position
+            $movement = $targetship->getLastTurnMovement($fireOrder->turn);
+            $fireOrder->x = $movement->position->q;
+            $fireOrder->y = $movement->position->r;
+            $fireOrder->targetid = -1; //correct the error
+        }
+        $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+        $rolled = Dice::d(100);
+        $fireOrder->rolled = $rolled; //...and hit, regardless of value rolled
+		$fireOrder->pubnotes .= "Ion Storm created, nearby units are handicapped for one turn. ";
+		$fireOrder->shotshit++;            
+		//do affect ships in range...
+		$ships1 = $gamedata->getShipsInDistance($target); //directly on target hex - important for direction of impact
+		$affectedUnits = $gamedata->getShipsInDistance($target, 2);
+		foreach ($affectedUnits as $targetShip) {	
+			if (!$targetShip->isDestroyed()) { //no point allocating to destroyed ship
+				//check for overlap - return if this unit was already affected
+				foreach (IonFieldGenerator::$alreadyAffected as $affectedID){
+					if ($affectedID == $targetShip->id) return;	
+				}
+				IonFieldGenerator::$alreadyAffected[] = $targetShip->id;//add new ID to affected list			
+				
+				if ( (!$targetShip->base) && (!$targetShip->osat) ) {//does not affect bases, OSATs and mines
+					if (isset($ships1[$targetShip->id])) { //units on target hex! direction damage is coming from: launch hex
+						$sourceHex = $posLaunch;
+					} else { //other units in range! direction damage is coming from: impact hex
+						$sourceHex = $target;
+					}
+					$this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, 0, $gamedata);
+				}
+			}
+		}
+        $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+    } //endof function fire	
+	
+
+	public function AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata)
+	{
+		if ($target instanceOf FighterFlight) {
+		    $firstFighter = $target->getSampleFighter(); //place effect on the first fighter, even if ti's already destroyed - entire flight will be affected!
+		    $this->onDamagedSystem($target, $firstFighter, 0, 0, $gamedata, $fireOrder);//no actual damage, proceed to apply effects
+		} else {
+		    $tmpLocation = $target->getHitSectionPos(Mathlib::hexCoToPixel($sourceHex), $fireOrder->turn);
+		    $system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
+		    $this->onDamagedSystem($target, $system, 0, 0, $gamedata, $fireOrder);//no actual damage, proceed to apply effects
+		}
+	}
+	
+	
+	/*actual applying of effect*/ 
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		//$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		//$shooterID = $shooter->id;
+		if ($system instanceOf Weapon) {//weapon "hit" is forced to shut down for a turn - on top of regular mandatory effects
+			$crit = new ForcedOfflineOneTurn(-1, $ship->id, $system->id, "ForcedOfflineOneTurn", $gamedata->turn);
+			$crit->updated = true;
+			$crit->newCrit = true; //force save even if crit is not for current turn
+			$system->criticals[] =  $crit;
+		}
+		if($ship instanceOf FighterFlight){ //effects on fighters - applying to first fighter (already found), will affect entire flight
+			$crit = new tmpsensordown(-1, $ship->id, $system->id, 'tmpsensordown', $gamedata->turn);  //-1 OB
+			$crit->updated = true;
+			$system->criticals[] =  $crit;
+			for($i=1; $i<=3;$i++){ //-3 Initiative
+				$crit = new tmpinidown(-1, $ship->id, $system->id, 'tmpinidown', $gamedata->turn);  
+				$crit->updated = true;
+				$system->criticals[] =  $crit;
+			}
+		}else{ //effects on ships
+			$CnC = $ship->getSystemByName("CnC"); //temporary effects are applied to C&C 
+			if($CnC){
+				for($i=1; $i<=2;$i++){ //-2 Sensor rating
+					$crit = new tmpsensordown(-1, $ship->id, $CnC->id, 'tmpsensordown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+				}
+				for($i=1; $i<=3;$i++){ //-3 Initiative
+					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+				}
+				$powerLoss = min(2,$ship->shipSizeClass); //1 for LCVs and smaller, 2 for larger ships
+				for($i=1; $i<=$powerLoss;$i++){ //-3 Initiative
+					$crit = new tmppowerdown(-1, $ship->id, $CnC->id, 'tmppowerdown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+				}
+			}
+		}			 
+	}//endof function onDamagedSystem
+	
+	
+        public function getDamage($fireOrder){       return 0; /*no actual damage, just various effects*/  }
+        public function setMinDamage(){     $this->minDamage = 0 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+	
+}//endof class IonFIeldGenerator
 
 ?>
