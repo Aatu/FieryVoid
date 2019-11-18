@@ -2270,7 +2270,7 @@ class RadCannon extends Weapon{
 } //endof class RadCannon
 
 	
-/*WORK IN PROGRESS*/
+
 class IonFieldGenerator extends Weapon{
 	/*Cascor weapon - area debuff, no direct damage
 	I don't like the official icon (looks like triple Ion Bolter really...) so will create a different one, more suggestive of ballistic nature
@@ -2314,10 +2314,10 @@ class IonFieldGenerator extends Weapon{
 		//some effects should originally work for current turn, but it won't work with FV handling of ballistics. Moving everything to next turn.
 		//it's Ion (not EM) weapon with no special remarks regarding advanced races and system - so works normally on AdvArmor/Ancients etc
 		$this->data["Special"] = "Every unit in affected area is subject to effects:";      
-		$this->data["Special"] .= "<br> - -2 Sensor rating (ships) or -1 OB (fighters) for a turn.";    
 		$this->data["Special"] .= "<br> - Roll one location, as per regular attack. If weapon is hit, it's forced to shut down."; //originally just charging cycle resets - but I opted for simpler (if stronger) effect. 
+		$this->data["Special"] .= "<br> - -2 Sensor rating (ships) or -1 OB (fighters) for a turn.";    
 		$this->data["Special"] .= "<br> - -3 Initiative for a turn."; 
-		$this->data["Special"] .= "<br> - Lose 1 (MCVs/LCVs) or 2 (larger ships) points of power."; 
+		$this->data["Special"] .= "<br> - Lose 1 (MCVs/LCVs) or 2 (larger ships) points of power for a turn."; 
 		$this->data["Special"] .= "<br>Does not affect bases, mines and OSATs. Overlapping Fields are not cumulative.";
 	}	
 	
@@ -2365,14 +2365,16 @@ class IonFieldGenerator extends Weapon{
 			foreach (IonFieldGenerator::$alreadyAffected as $affectedID){
 				if ($affectedID == $targetShip->id) return;	
 			}
-			IonFieldGenerator::$alreadyAffected[] = $targetShip->id;//add new ID to affected list
-
-			if (isset($ships1[$targetShip->id])) { //ship on target hex!
-			    $sourceHex = $posLaunch;
-			} else { //ship at range 1!
-			    $sourceHex = $target;
+			IonFieldGenerator::$alreadyAffected[] = $targetShip->id;//add new ID to affected list			
+			
+			if ( (!$targetShip->base) && (!$targetShip->osat) ) {//does not affect bases, OSATs and mines
+				if (isset($ships1[$targetShip->id])) { //ship on target hex!
+				    $sourceHex = $posLaunch;
+				} else { //ship at range 1!
+				    $sourceHex = $target;
+				}
+				$this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
 			}
-			$this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
 		}
             }
         }
@@ -2397,62 +2399,43 @@ class IonFieldGenerator extends Weapon{
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		//$shooter = $gamedata->getShipById($fireOrder->shooterid);
 		//$shooterID = $shooter->id;
-		
-		
-		
-		/*
-		if ($system->isDestroyed()) return; //no point allocating
-
-		$remHealth = $system->getRemainingHealth();
-		
-		if($system instanceOf Structure) { //Structure: mark 10 damage (but no more than Structure actually possesses!)
-            $destroyed = false;
-			$dmgToDo = min(10,$remHealth);			
-			if($dmgToDo >= $remHealth) $destroyed = true;	
-			if($dmgToDo > 0 ) {			
-				$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, 0, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $shooterID, $this->id);
-				$damageEntry->updated = true;
-				$system->damage[] = $damageEntry;
+		if ($system instanceOf Weapon) {//weapon "hit" is forced to shut down for a turn - on top of regular mandatory effects
+			$crit = new ForcedOfflineOneTurn(-1, $ship->id, $system->id, "ForcedOfflineOneTurn", $gamedata->turn);
+			$crit->updated = true;
+			$crit->newCrit = true; //force save even if crit is not for current turn
+			$system->criticals[] =  $crit;
+		}
+		if($ship instanceOf FighterFlight){ //effects on fighters - applying to first fighter (already found), will affect entire flight
+			$crit = new tmpsensordown(-1, $ship->id, $system->id, 'tmpsensordown', $gamedata->turn);  //-1 OB
+			$crit->updated = true;
+			$system->criticals[] =  $crit;
+			for($i=1; $i<=3;$i++){ //-3 Initiative
+				$crit = new tmpinidown(-1, $ship->id, $system->id, 'tmpinidown', $gamedata->turn);  
+				$crit->updated = true;
+				$system->criticals[] =  $crit;
 			}
-		} else if($system instanceOf Shield) { //Shield: destroy; if Gravitic Shield - find generator and apply -1 output 
-			$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $remHealth, 0, 0, $fireOrder->id, true, "", $this->weaponClass, $shooterID, $this->id);
-			$damageEntry->updated = true;
-			$system->damage[] = $damageEntry;
-			if($system instanceOf GraviticShield){ //if Gravitic Shield - find generator and apply -1 output 
-				foreach( $ship->systems as $generator){
-					if( ($generator instanceOf ShieldGenerator)
-					  && (!$generator->isDestroyed())
-					){
-						$crit = new OutputReduced1(-1, $ship->id, $generator->id, "OutputReduced1", $gamedata->turn);
-						$crit->updated = true;
-						$crit->inEffect = false;
-						$generator->criticals[] =  $crit;
-						break; //don't look for further Generators
-					}
+		}else{ //effects on ships
+			$CnC = $ship->getSystemByName("CnC"); //temporary effects are applied to C&C 
+			if($CnC){
+				for($i=1; $i<=2;$i++){ //-2 Sensor rating
+					$crit = new tmpsensordown(-1, $ship->id, $CnC->id, 'tmpsensordown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+				}
+				for($i=1; $i<=3;$i++){ //-3 Initiative
+					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+				}
+				$powerLoss = min(2,$ship->size); //-1 for LCVs and smaller, -2 for larger ships
+				if($ship->size > 1) $powerLoss = 2; else $powerLoss = 1;
+				for($i=1; $i<=$powerLoss;$i++){ //-3 Initiative
+					$crit = new tmppowerdown(-1, $ship->id, $CnC->id, 'tmppowerdown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
 				}
 			}
-		} else if( ($system instanceOf Weapon)    //weapon, thruster, jump drive - destroy outright
-			or ($system instanceOf Thruster)
-			or ($system instanceOf JumpEngine)
-		) {
-			$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $remHealth, 0, 0, $fireOrder->id, true, "", $this->weaponClass, $shooterID, $this->id);
-			$damageEntry->updated = true;
-			$system->damage[] = $damageEntry;
-		} else if($system instanceOf CnC) { //C&C: critical roll forced (at +2).
-			$system->forceCriticalRoll = true;
-			$system->critRollMod += 2;
-		} else if($system instanceOf Scanner) { //Scanner: output reduced by 1.
-			$crit = new OutputReduced1(-1, $ship->id, $system->id, "OutputReduced1", $gamedata->turn);
-			$crit->updated = true;
-			$crit->inEffect = false;
-			$system->criticals[] =  $crit;
-		} else if($system instanceOf Scanner) { //Engine: output reduced by 2.
-			$crit = new OutputReduced2(-1, $ship->id, $system->id, "OutputReduced2", $gamedata->turn);
-			$crit->updated = true;
-			$crit->inEffect = false;
-			$system->criticals[] =  $crit;
-		} //other systems: no effect!	
-		*/
+		}			 
 	}//endof function onDamagedSystem
 	
 	
