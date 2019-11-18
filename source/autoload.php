@@ -520,6 +520,7 @@ spl_autoload_register(
                 'mediumpulse' => '/server/model/weapons/pulse.php',
                 'mediumship' => '/server/model/ships/ShipClasses.php',
                 'mediumshipleftright' => '/server/model/ships/ShipClasses.php',
+		'lcv' => '/server/model/ships/ShipClasses.php',
                 'merlin' => '/server/model/ships/drazi_old/merlin.php',
                 'milani' => '/server/model/ships/abbai/milani.php',
                 'minbaricivilianbase' => '/server/model/ships/minbari/minbariCivilianBase.php',
@@ -1138,6 +1139,8 @@ spl_autoload_register(
                 'ionizer' => '/server/model/weapons/ion.php',
                 'ioniclaser' => '/server/model/weapons/ion.php',
                 'dualionbolter' => '/server/model/weapons/ion.php',
+		    
+		    
 		    
 		    
 		    
