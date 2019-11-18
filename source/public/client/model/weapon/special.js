@@ -159,3 +159,10 @@ var RadCannon = function(json, ship)
 }
 RadCannon.prototype = Object.create( Weapon.prototype );
 RadCannon.prototype.constructor = RadCannon;
+
+var IonFieldGenerator = function(json, ship)
+{
+    Weapon.call( this, json, ship);
+}
+IonFieldGenerator.prototype = Object.create( Weapon.prototype );
+IonFieldGenerator.prototype.constructor = IonFieldGenerator;
