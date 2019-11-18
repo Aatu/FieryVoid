@@ -20,7 +20,8 @@ class DrakhMobileBeamPlatform extends MediumShip{
         $this->limited = 10; //Restricted Deployment
 	$this->isd = 2255;
 	    
-	    $this->notes = "Boosted by Raider Controller";
+	    $this->notes = "Boosted by Raider Controller.";
+	    $this->notes .= "<br>Not eligible for pickup games (equivalent of OSAT).";
    
 	$this->agile = true;
 	$this->forwardDefense = 11;
