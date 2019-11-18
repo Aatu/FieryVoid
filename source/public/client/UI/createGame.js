@@ -213,6 +213,7 @@ window.createGame = {
     setData: function setData() {
         var gamename = $("#gamename").val();
         var background = $("#mapselect").val();
+        var description = $("#description").val();
         var gamespace = "-1x-1";
         var flight = "";
 
@@ -224,7 +225,7 @@ window.createGame = {
             flight = 1;
         }
 
-        var data = { gamename: gamename, background: background, slots: createGame.slots, gamespace: gamespace, flight: flight, rules: createGame.rules };
+        var data = { gamename: gamename, background: background, slots: createGame.slots, gamespace: gamespace, flight: flight, rules: createGame.rules, description: description };
         data = JSON.stringify(data);
         $("#createGameData").val(data);
     }
