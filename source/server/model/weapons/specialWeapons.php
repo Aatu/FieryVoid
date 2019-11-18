@@ -2141,12 +2141,8 @@ class RadCannon extends Weapon{
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ){
-                $maxhealth = 8;
-            }
-            if ( $powerReq == 0 ){
-                $powerReq = 6;
-            }
+            if ( $maxhealth == 0 ) $maxhealth = 8;
+            if ( $powerReq == 0 ) $powerReq = 6;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 	
@@ -2274,5 +2270,66 @@ class RadCannon extends Weapon{
 } //endof class RadCannon
 
 	
+/*WORK IN PROGRESS*/
+class IonFieldGenerator extends Weapon{
+	/*Cascor weapon - area debuff, no direct damage*/
+	public $name = "IonFieldGenerator";
+        public $displayName = "Ion Field Generator";
+	public $iconPath = "ionFieldGenerator.png";
+	
+	public $damageType = "Flash";
+    	public $weaponClass = "Ballistic";
+	public $hextarget = true;
+        public $hidetarget = true;
+	public $ballistic = true;
+	public $uninterceptable = true;
+	public $doNotIntercept = true; //just in case
+	public $priority = 1;
+	
+        public $range = 35;
+        public $loadingtime = 2;
+	
+	public $trailColor = array(30, 170, 255);
+        public $animation = "ball";
+        public $animationColor = array(30, 170, 255);
+        public $animationExplosionScale = 2; //covers 2 hexes away from explosion center
+        public $animationExplosionType = "AoE";
+        public $explosionColor = array(30, 170, 255);
+        public $projectilespeed = 12;
+        public $animationWidth = 14;
+        public $trailLength = 10;
+	    
+	public $firingModes = array(
+		1 => "AoE"
+	);
+	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 8;
+            if ( $powerReq == 0 ) $powerReq = 4;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);  
+		//some effects should originally work for current turn, but it won't work with FV handling of ballistics. Moving everything to next turn.
+		$this->data["Special"] = "Automatically hits shields if interposed.";      
+		$this->data["Special"] .= "<br>Effect depends on system hit:";    
+		$this->data["Special"] .= "<br> - Structure: 10 boxes marked destroyed."; 
+		$this->data["Special"] .= "<br> - Shield: system destroyed."; 
+		$this->data["Special"] .= "<br>  -- Gravitic Shield reduces generator output by 1, too."; 
+		$this->data["Special"] .= "<br> - Weapon, Thruster or Jump Engine: system destroyed."; 
+		$this->data["Special"] .= "<br> - C&C: critical roll forced (at +2)."; 
+		$this->data["Special"] .= "<br> - Scanner: output reduced by 1."; 
+		$this->data["Special"] .= "<br> - Engine: output reduced by 2."; 
+		//and disable a tendril on diffuser, but there's no diffuser in game to disable at the moment
+		$this->data["Special"] .= "<br>No effect on any other system. Note that armor and shields do not affect above effects.";
+		$this->data["Special"] .= "<br>Does not affect ships of advanced species (eg. Middle-born or older).";  		    
+	}	
+	
+}//endof class IonFIeldGenerator
 
 ?>
