@@ -2149,7 +2149,7 @@ class RadCannon extends Weapon{
 	
 	    public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Automatically hits shields if interposed.";      
+		      $this->data["Special"] = "Doesn't actually deal damage except as noted below. Automatically hits shields if interposed.";      
 		      $this->data["Special"] .= "<br>Effect depends on system hit:";    
 		      $this->data["Special"] .= "<br> - Structure: 10 boxes marked destroyed."; 
 		      $this->data["Special"] .= "<br> - Shield: system destroyed."; 
@@ -2272,7 +2272,9 @@ class RadCannon extends Weapon{
 	
 /*WORK IN PROGRESS*/
 class IonFieldGenerator extends Weapon{
-	/*Cascor weapon - area debuff, no direct damage*/
+	/*Cascor weapon - area debuff, no direct damage
+	I don't like the official icon (looks like triple Ion Bolter really...) so will create a different one, more suggestive of ballistic nature
+	*/
 	public $name = "IonFieldGenerator";
         public $displayName = "Ion Field Generator";
 	public $iconPath = "ionFieldGenerator.png";
@@ -2322,9 +2324,13 @@ class IonFieldGenerator extends Weapon{
 		$this->data["Special"] .= "<br> - Roll one location, as per regular attack. If weapon is hit, it's forced to shut down."; //originally just charging cycle resets - but I opted for simpler (if stronger) effect. 
 		$this->data["Special"] .= "<br> - -3 Initiative for a turn."; 
 		$this->data["Special"] .= "<br> - Lose 1 (MCVs/LCVs) or 2 (larger ships) points of power."; 
-		$this->data["Special"] .= "<br>No effect on any other system. Note that armor and shields do not affect above effects.";
 		$this->data["Special"] .= "<br>Does not affect bases, mines and OSATs. Overlapping Fields are not cumulative.";
 	}	
+	
+	
+        public function getDamage($fireOrder){       return 0; /*no actual damage, just various effects*/  }
+        public function setMinDamage(){     $this->minDamage = 0 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 0 ;      }
 	
 }//endof class IonFIeldGenerator
 
