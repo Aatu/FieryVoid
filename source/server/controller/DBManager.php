@@ -361,7 +361,7 @@ class DBManager
         }
     }
 
-    public function createGame($gamename, $background, $slots, $userid, $gamespace, $rules = '{}')
+    public function createGame($gamename, $background, $slots, $userid, $gamespace, $rules = '{}', $description)
     {
         $stmt = $this->connection->prepare("
             INSERT INTO 
@@ -380,7 +380,8 @@ class DBManager
                 ?,
                 null,
                 ?,
-                ?
+                ?,
+		?
             )
         ");
 
@@ -390,13 +391,14 @@ class DBManager
             $slotnum = count($slots);
             $gamespace = $this->DBEscape($gamespace);
             $stmt->bind_param(
-                'ssiiss',
+                'ssiisss',
                 $gamename,
                 $background,
                 $slotnum,
                 $userid,
                 $gamespace,
-                $rules
+                $rules,
+		$description
             );
             $stmt->execute();
             $stmt->close();
@@ -981,7 +983,7 @@ class DBManager
             return null;
 
         foreach ($result as $value) {
-            $game = new TacGamedata($value->id, $value->turn, $value->phase, json_decode($value->activeship), $playerid, $value->name, $value->status, $value->points, $value->background, $value->creator, $value->gamespace);
+            $game = new TacGamedata($value->id, $value->turn, $value->phase, json_decode($value->activeship), $playerid, $value->name, $value->status, $value->points, $value->background, $value->creator, $value->description, $value->gamespace);
             $games[] = $game;
         }
 
@@ -1096,7 +1098,7 @@ class DBManager
                 return null;
 
             foreach ($result as $value) {
-                $game = new TacGamedata($value->id, $value->turn, $value->phase, json_decode($value->activeship), $playerid, $value->name, $value->status, $value->points, $value->background, $value->creator, $value->gamespace, json_decode($value->rules, true));
+                $game = new TacGamedata($value->id, $value->turn, $value->phase, json_decode($value->activeship), $playerid, $value->name, $value->status, $value->points, $value->background, $value->creator, $value->description, $value->gamespace, json_decode($value->rules, true));
                 $games[] = $game;
             }
 
