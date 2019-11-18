@@ -53,14 +53,17 @@
 					<!--<option id="default_option" value="default">select ...</option>-->
 					<?php
 						
-						foreach ($maps as $name){
-							
+						foreach ($maps as $name){							
 							print("<option value=\"".$name."\">".$name."</option>");
 						}
 					
 					?>
 				</select>
-		
+				<textarea id="description" name="description" rows="7" cols="50">
+					SCENARIO DESCRIPTION (required/banned fleets or ships, other preferences, perhaps scenario description if You have something more complicated in mind).
+				</textarea>
+				
+				
                 <div style="margin-top:20px;"><h3>GAME SPACE</h3></div>
                 <div id="gamespace" class="subpanel gamespacecontainer">
                     <div class="slot" >
