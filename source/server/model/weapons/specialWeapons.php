@@ -2304,15 +2304,9 @@ class IonFieldGenerator extends Weapon{
 	public $firingModes = array(
 		1 => "IonStorm"
 	);
+		
+	private static $alreadyAffected = array(); //list of IDs of units already affected in this firing phase - to avoid multiplying effects on overlap
 	
-	
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
-            //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 8;
-            if ( $powerReq == 0 ) $powerReq = 4;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
 	
 	
 	public function setSystemDataWindow($turn){
@@ -2326,6 +2320,145 @@ class IonFieldGenerator extends Weapon{
 		$this->data["Special"] .= "<br> - Lose 1 (MCVs/LCVs) or 2 (larger ships) points of power."; 
 		$this->data["Special"] .= "<br>Does not affect bases, mines and OSATs. Overlapping Fields are not cumulative.";
 	}	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 8;
+            if ( $powerReq == 0 ) $powerReq = 4;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		$fireOrder->needed = 100; //always true
+		$fireOrder->updated = true;
+	}
+	
+    public function fire($gamedata, $fireOrder)
+    { //sadly here it really has to be completely redefined... or at least I see no option to avoid this
+        $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+        /** @var MovementOrder $movement */
+        $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+        $posLaunch = $movement->position;//at moment of launch!!!
+        //sometimes player does manage to target ship after all..
+        if ($fireOrder->targetid != -1) {
+            $targetship = $gamedata->getShipById($fireOrder->targetid);
+            //insert correct target coordinates: last turns' target position
+            $movement = $targetship->getLastTurnMovement($fireOrder->turn);
+            $fireOrder->x = $movement->position->q;
+            $fireOrder->y = $movement->position->r;
+            $fireOrder->targetid = -1; //correct the error
+        }
+        $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+        $rolled = Dice::d(100);
+        $fireOrder->rolled = $rolled; //...and hit, regardless of value rolled
+            $fireOrder->pubnotes .= "Ion Storm created, nearby units are handicapped for one turn. ";
+            $fireOrder->shotshit++;            
+            //do affect ships in range...
+            $ships1 = $gamedata->getShipsInDistance($target); //directly on target hex - important for direction of impact
+            $affectedUnits = $gamedata->getShipsInDistance($target, 2);
+            foreach ($affectedUnits as $targetShip) {	
+		if (!$targetShip->isDestroyed()) { //no point allocating to destroyed ship
+			//check for overlap - return if this unit was already affected
+			foreach (IonFieldGenerator::$alreadyAffected as $affectedID){
+				if ($affectedID == $targetShip->id) return;	
+			}
+			IonFieldGenerator::$alreadyAffected[] = $targetShip->id;//add new ID to affected list
+
+			if (isset($ships1[$targetShip->id])) { //ship on target hex!
+			    $sourceHex = $posLaunch;
+			} else { //ship at range 1!
+			    $sourceHex = $target;
+			}
+			$this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
+		}
+            }
+        }
+        $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+    } //endof function fire	
+	
+
+	public function AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata)
+	{
+		if ($target instanceof FighterFlight) {
+		    foreach ($target->systems as $fighter) {
+			if ($fighter == null || $fighter->isDestroyed()) {
+			    continue;
+			}
+			$this->onDamagedSystem($target, $fighter, 0, 0, $gamedata, $fireOrder);//no actual damage, proceed to apply effects
+			    return; //affect only first undestroyed fighter - entire flight is affected anyway!
+		    }
+		} else {
+		    $tmpLocation = $target->getHitSectionPos(Mathlib::hexCoToPixel($sourceHex), $fireOrder->turn);
+		    $system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
+		    $this->onDamagedSystem($target, $system, 0, 0, $gamedata, $fireOrder);//no actual damage, proceed to apply effects
+		}
+	}
+	
+	
+	/*actual applying of effect*/ 
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$shooterID = $shooter->id;
+		
+		
+		
+		/*
+		if ($system->isDestroyed()) return; //no point allocating
+
+		$remHealth = $system->getRemainingHealth();
+		
+		if($system instanceOf Structure) { //Structure: mark 10 damage (but no more than Structure actually possesses!)
+            $destroyed = false;
+			$dmgToDo = min(10,$remHealth);			
+			if($dmgToDo >= $remHealth) $destroyed = true;	
+			if($dmgToDo > 0 ) {			
+				$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, 0, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $shooterID, $this->id);
+				$damageEntry->updated = true;
+				$system->damage[] = $damageEntry;
+			}
+		} else if($system instanceOf Shield) { //Shield: destroy; if Gravitic Shield - find generator and apply -1 output 
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $remHealth, 0, 0, $fireOrder->id, true, "", $this->weaponClass, $shooterID, $this->id);
+			$damageEntry->updated = true;
+			$system->damage[] = $damageEntry;
+			if($system instanceOf GraviticShield){ //if Gravitic Shield - find generator and apply -1 output 
+				foreach( $ship->systems as $generator){
+					if( ($generator instanceOf ShieldGenerator)
+					  && (!$generator->isDestroyed())
+					){
+						$crit = new OutputReduced1(-1, $ship->id, $generator->id, "OutputReduced1", $gamedata->turn);
+						$crit->updated = true;
+						$crit->inEffect = false;
+						$generator->criticals[] =  $crit;
+						break; //don't look for further Generators
+					}
+				}
+			}
+		} else if( ($system instanceOf Weapon)    //weapon, thruster, jump drive - destroy outright
+			or ($system instanceOf Thruster)
+			or ($system instanceOf JumpEngine)
+		) {
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $remHealth, 0, 0, $fireOrder->id, true, "", $this->weaponClass, $shooterID, $this->id);
+			$damageEntry->updated = true;
+			$system->damage[] = $damageEntry;
+		} else if($system instanceOf CnC) { //C&C: critical roll forced (at +2).
+			$system->forceCriticalRoll = true;
+			$system->critRollMod += 2;
+		} else if($system instanceOf Scanner) { //Scanner: output reduced by 1.
+			$crit = new OutputReduced1(-1, $ship->id, $system->id, "OutputReduced1", $gamedata->turn);
+			$crit->updated = true;
+			$crit->inEffect = false;
+			$system->criticals[] =  $crit;
+		} else if($system instanceOf Scanner) { //Engine: output reduced by 2.
+			$crit = new OutputReduced2(-1, $ship->id, $system->id, "OutputReduced2", $gamedata->turn);
+			$crit->updated = true;
+			$crit->inEffect = false;
+			$system->criticals[] =  $crit;
+		} //other systems: no effect!	
+		*/
+	}//endof function onDamagedSystem
 	
 	
         public function getDamage($fireOrder){       return 0; /*no actual damage, just various effects*/  }
