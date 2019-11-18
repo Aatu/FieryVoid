@@ -31,6 +31,8 @@ class TacGamedata {
         $this->status = $status;
         $this->points = (int)$points;
         $this->background = $background;
+		//description: replace \n with <br> to correctly display multiline!
+        $description = preg_replace("/\r\n\r\n|\r\r|\n\n|\n/", "<br>", $description);
         $this->description = $description;
         $this->creator = $creator;
         $this->gamespace = $gamespace;
@@ -69,8 +71,7 @@ class TacGamedata {
         usort ( $this->ships , "self::sortShips" );
     }
    
-    public function stripForJson() {
-        
+    public function stripForJson() {        
         $strippedGamedata = new stdClass();
         $strippedGamedata->ships = array_map( function($ship) {return $ship->stripForJson();}, $this->ships);
         $strippedGamedata->id = $this->id;
@@ -81,7 +82,7 @@ class TacGamedata {
         $strippedGamedata->status = $this->status;
         $strippedGamedata->points = $this->points;
         $strippedGamedata->background = $this->background;
-        $strippedGamedata->description = $this->description;
+		$strippedGamedata->description = $this->description;
         $strippedGamedata->creator = $this->creator;
         $strippedGamedata->gamespace = $this->gamespace;
         $strippedGamedata->slots = $this->slots;
@@ -89,7 +90,6 @@ class TacGamedata {
         $strippedGamedata->changed = $this->changed;
         $strippedGamedata->rules = $this->rules;
         $strippedGamedata->forPlayer = $this->forPlayer;
-
 
         return $strippedGamedata;
     }

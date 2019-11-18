@@ -59,9 +59,8 @@
 					
 					?>
 				</select>
-				<textarea id="description" name="description" rows="7" cols="50">
-					SCENARIO DESCRIPTION (required/banned fleets or ships, other preferences, perhaps scenario description if You have something more complicated in mind).
-				</textarea>
+				<div><span>Scenario description:</span></div>
+				<textarea id="description" name="description" rows="7" cols="100">Your special requirements for this battle.</textarea>
 				
 				
                 <div style="margin-top:20px;"><h3>GAME SPACE</h3></div>

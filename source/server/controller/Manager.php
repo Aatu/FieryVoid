@@ -134,6 +134,7 @@ class Manager{
         $gamename = $data["gamename"];
         $background = $data["background"];
         $gamespace = $data["gamespace"];
+        $description = $data["description"];
         $slots = array();
         $pointsA = $data["slots"][0]["points"];
         $poinstB = $data["slots"][1]["points"];
@@ -146,7 +147,7 @@ class Manager{
         try {
             self::initDBManager();
             self::$dbManager->startTransaction();
-            $gameid = self::$dbManager->createGame($gamename, $background, $slots, $userid, $gamespace, json_encode($rules));
+            $gameid = self::$dbManager->createGame($gamename, $background, $slots, $userid, $gamespace, json_encode($rules), $description);
             //SystemData::initSystemData(0, $gameid);
             self::takeSlot($userid, $gameid, 1);
             self::$dbManager->endTransaction(false);
