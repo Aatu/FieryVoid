@@ -307,6 +307,7 @@ CREATE TABLE `tac_game` (
   `creator` int(11) DEFAULT NULL,
   `submitLock` datetime DEFAULT NULL,
   `gamespace` varchar(45) DEFAULT NULL,
+  `description` text DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3670 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
