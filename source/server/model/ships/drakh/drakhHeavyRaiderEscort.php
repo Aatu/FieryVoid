@@ -28,6 +28,10 @@ class DrakhHeavyRaiderEscort extends MediumShip{
 	$this->rollcost = 1;
 	$this->pivotcost = 2;
 	$this->iniativebonus = 14 *5;
+	
+	
+		$this->hangarRequired = "Raiders"; //Heavy Raiders can use regular Raider catapults
+		$this->unitSize = 0.5; //they require twice as much space, though!
 	    
 	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 	    

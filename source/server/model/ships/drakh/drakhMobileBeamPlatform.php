@@ -22,6 +22,10 @@ class DrakhMobileBeamPlatform extends MediumShip{
 	    
 	    $this->notes = "Boosted by Raider Controller.";
 	    $this->notes .= "<br>Not eligible for pickup games (equivalent of OSAT).";
+		
+		
+		$this->hangarRequired = "Raiders"; //Heavy Raiders can use regular Raider catapults
+		$this->unitSize = 0.5; //they require twice as much space, though!
    
 	$this->agile = true;
 	$this->forwardDefense = 11;

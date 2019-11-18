@@ -1,5 +1,5 @@
 <?php
-class DrakhHeavyRaider extends MediumShip{
+class DrakhHeavyRaider extends LCV{
 	/*Drakh Heavy Raider LCV*/
 	/*approximated as MCV, no EW restrictions*/
     function __construct($id, $userid, $name,  $slot){
@@ -26,6 +26,9 @@ class DrakhHeavyRaider extends MediumShip{
 	$this->rollcost = 1;
 	$this->pivotcost = 2;
 	$this->iniativebonus = 14 *5;
+		
+		$this->hangarRequired = "Raiders"; //Heavy Raiders can use regular Raider catapults
+		$this->unitSize = 0.5; //they require twice as much space, though!
 	    
 	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 	    

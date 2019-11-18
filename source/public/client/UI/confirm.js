@@ -310,8 +310,11 @@ window.confirm = {
                 //selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
                 //selectAmountItem.data("firingMode", i);
 
-            var nameExpanded = enhName + ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
-            if(enhPriceStep!=0){
+            var nameExpanded = enhName + ' (';
+			if(enhLimit>1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
+			nameExpanded += enhPrice + 'PV ';
+			//+ ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
+            if((enhPriceStep!=0) && (enhLimit>1)){
                 nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'PV per level';		
             }
             nameExpanded = nameExpanded + ')';
@@ -350,11 +353,13 @@ window.confirm = {
                 selectAmountItem.data('value', 0);
                 selectAmountItem.data('min', 0);
 
-                if (ship.superheavy) {
+				
+                //if (ship.superheavy) {
+				if (ship.maxFlightSize<3) { //here it's question of single vs multiple craft per flight, not of being superheavy
                     $(".selectText", item).html(missileOption[0] + ' (maximum amount: ' + missileOption[1] / 6 / (missileOption[3] / 6) + ', cost: ' + missileOption[2] + ')');
                     $(item).show();
 
-                    selectAmountItem.data('max', missileOption[1] / 6 / (missileOption[3] / 6));
+                    selectAmountItem.data('max', Math.round( missileOption[1] / 6 / (missileOption[3] / 6) ));
                     selectAmountItem.data('cost', missileOption[2]);
                     selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
                     selectAmountItem.data("firingMode", i);
@@ -362,7 +367,7 @@ window.confirm = {
                     $(".selectText", item).html(missileOption[0] + ' (maximum amount: ' + missileOption[1] / 6 / (missileOption[3] / 6) + ', cost: ' + missileOption[2] + ')');
                     $(item).show();
 
-                    selectAmountItem.data('max', missileOption[1] / 6 / (missileOption[3] / 6));
+                    selectAmountItem.data('max', Math.round(missileOption[1] / 6 / (missileOption[3] / 6)));
                     selectAmountItem.data('cost', missileOption[2]);
                     selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
                     selectAmountItem.data("firingMode", i);

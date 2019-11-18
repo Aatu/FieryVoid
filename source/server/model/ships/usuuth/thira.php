@@ -1,5 +1,5 @@
 <?php
-class Thira extends MediumShip{
+class Thira extends LCV{
     /*approximated as MCV, no EW restrictions*/
     
     function __construct($id, $userid, $name,  $slot){
@@ -16,11 +16,12 @@ class Thira extends MediumShip{
         $this->forwardDefense = 11;
         $this->sideDefense = 12;
 		
-		$this->notes = "Civilian unit";
+		$this->notes = "Civilian unit.";
         
         $this->occurence = "common";
         $this->isd = 1955;
         $this->variantOf = "Baroon Escort Cutter";
+        $this->hangarRequired = ''; //LCV-sized, but designed as cargo ship for interstellar trade - with less raw power, more independence
         
         $this->turncost = 0.5;
         $this->turndelaycost = 0.5;

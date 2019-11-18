@@ -71,8 +71,8 @@ class BaseShip {
     public $advancedArmor = false; //set to true if ship is equipped with advanced armor!
 	
 	
-	public $hangarRequired = ''; //usually empty, but some ships (LCVs primarily) do require hangar space!
-	
+	public $hangarRequired = ''; //usually empty, but some ships (LCVs primarily) do require hangar space!	
+	public $unitSize = 1; //typically ships are berthed in dedicated space, 1 per slot - but other arrangements are certainly possible.
 	    
 	    public function getAdvancedArmor(){
 		return $this->advancedArmor;    

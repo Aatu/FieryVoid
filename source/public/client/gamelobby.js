@@ -210,14 +210,14 @@ window.gamedata = {
 			if (lship.hangarRequired != '') { //classify based on explicit info from craft
 				var found = false;
 				for(var nh in totalFtrOther){ 					
-					if (totalFtrOther[nh][0] == smallCraftSize){//this is small craft type we're looking for!
+					if (totalFtrOther[nh][0] == lship.hangarRequired){//this is small craft type we're looking for!
 						found = true;
-						totalFtrOther[nh][1] += lship.flightSize;
+						totalFtrOther[nh][1] += 1/lship.unitSize; //always 1 craft in this case!
 					}
 				}
 				if (found != true){ //such craft wasn't encountered yet
-					totalFtrOther.push(new Array(smallCraftSize,lship.flightSize));
-					smallCraftUsed.push(smallCraftSize);
+					totalFtrOther.push(new Array(lship.hangarRequired,1/lship.unitSize));
+					smallCraftUsed.push(lship.hangarRequired);
 				}
 			}
 		}else{//note presence of fighters
@@ -245,11 +245,11 @@ window.gamedata = {
 				for(var nh in totalFtrOther){ 					
 					if (totalFtrOther[nh][0] == smallCraftSize){//this is small craft type we're looking for!
 						found = true;
-						totalFtrOther[nh][1] += lship.flightSize;
+						totalFtrOther[nh][1] += lship.flightSize/lship.unitSize;
 					}
 				}
 				if (found != true){ //such craft wasn't encountered yet
-					totalFtrOther.push(new Array(smallCraftSize,lship.flightSize));
+					totalFtrOther.push(new Array(smallCraftSize,lship.flightSize/lship.unitSize));
 					smallCraftUsed.push(smallCraftSize);
 				}
 			}

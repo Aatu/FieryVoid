@@ -1,5 +1,5 @@
 <?php
-class Baroon extends MediumShip{
+class Baroon extends LCV{
     /*approximated as MCV, no EW restrictions*/
     
     function __construct($id, $userid, $name,  $slot){
