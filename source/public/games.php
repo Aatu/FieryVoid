@@ -71,7 +71,14 @@ if (isset($_SESSION["user"])) {
             <b>WotCR Centauri overhaul</b> - for those who want to try slightly less advanced factions. Deficiences fixed where found, hit charts added, old variants filled - as well as some new hulls.
         <br>
             <b>Sustained fire fixed</b> - now only default mode shots will be sustained! (and weapon will be shut down at the end of sustain cycle, too)
-               
+        <br>
+            <b>Fleet check update part 3</b> - ship hangar requirements are checked! (LCVs typically do require appropriate berthing space).
+        <br>
+            <b>Drifting ship minor fix</b> - now a shutdown ship cannot maneuver any more.
+        <br>
+            <b>Game description</b> - now You can put Your wishes and scenario condition right in the game!
+        
+        
         <!--
         <br><br>
         - last but not least - brand new collection of BUGS!;
