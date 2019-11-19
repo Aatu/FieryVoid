@@ -14,6 +14,10 @@ class swVictory2SD extends BaseShip{
 	    $this->occurence = "rare";
         $this->shipSizeClass = 3;
 	    
+	    
+		$this->isd = "19 BBY";
+		$this->notes = "Primary users: Galactic Republic, Galactic Empire, New Republic.";
+	    
 	$this->fighters = array("Fighter Squadrons"=>2, "Assault Squadrons"=>2);
 
 	    
