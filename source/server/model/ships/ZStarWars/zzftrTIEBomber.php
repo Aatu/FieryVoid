@@ -9,8 +9,10 @@ class zzftrTIEBomber extends FighterFlight{
         $this->phpclass = "zzftrtiebomber";
         $this->shipClass =  "TIE Bombers";
         $this->imagePath = "img/starwars/tieBomber.png";
-        
-        //$this->isd = 2214;
+
+		$this->isd = "Galactic Civil War";
+		$this->notes = "Primary users: Galactic Empire.";
+	    
         $this->unofficial = true;
         
         $this->forwardDefense = 7;
