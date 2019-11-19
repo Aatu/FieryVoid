@@ -299,7 +299,7 @@ CREATE TABLE `tac_game` (
   `name` text,
   `turn` int(11) DEFAULT NULL,
   `phase` int(11) DEFAULT NULL,
-  `activeship` int(11) DEFAULT NULL,
+  `activeship` varchar(4000) default '-1',
   `background` varchar(200) DEFAULT NULL,
   `points` int(6) DEFAULT '1000',
   `status` varchar(45) NOT NULL DEFAULT 'LOBBY',
