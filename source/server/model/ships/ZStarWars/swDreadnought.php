@@ -9,10 +9,13 @@ class swDreadnought extends HeavyCombatVessel{
         $this->phpclass = "swDreadnought";
         $this->imagePath = "img/starwars/dreadnaught.png";
 	    //$this->canvasSize = 100;
-        $this->shipClass = "Dreadnought";
-	
+        $this->shipClass = "Dreadnought";	
 	    
 	$this->fighters = array("Fighter Squadrons"=>1);
+	    
+	    
+		$this->isd = "100 BBY";
+		$this->notes = "Primary users: common";
     
 	$this->unofficial = true;
         
