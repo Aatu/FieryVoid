@@ -14,6 +14,8 @@ class swNebulonBFrigate extends HeavyCombatVessel{
 	    //$this->variantOf = "Corellian Corvette";
 	    //$this->occurence = 'uncommon';
 	    
+		$this->isd = "14 BBY";
+		$this->notes = "Primary users: common";
 	    
 	$this->fighters = array("Fighter Squadrons"=>2);
 	    
