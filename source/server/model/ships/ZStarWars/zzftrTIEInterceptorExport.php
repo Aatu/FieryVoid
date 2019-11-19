@@ -11,6 +11,9 @@ class zzftrTIEInterceptorExport extends FighterFlight{
         $this->variantOf = "TIE Interceptors";
         $this->imagePath = "img/starwars/tieInterceptor.png";
         
+		$this->isd = "Galactic Civil War";
+		$this->notes = "Primary users: common.";
+	    
         //$this->isd = 2214;
         $this->unofficial = true;
         
