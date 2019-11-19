@@ -11,6 +11,10 @@ class swLancer extends MediumShip{
 	    $this->canvasSize = 100;
         $this->shipClass = "Lancer Frigate";
 	    
+	    
+		$this->isd = "2 ABY";
+		$this->notes = "Primary users: Galactic Empire, New Republic";
+	    
 	$this->unofficial = true;
         // $this->agile = true;
         
