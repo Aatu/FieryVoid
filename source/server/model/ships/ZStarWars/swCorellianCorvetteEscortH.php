@@ -14,6 +14,9 @@ class swCorellianCorvetteEscortH extends MediumShip{
 	    $this->variantOf = "Corellian Corvette";
 	    $this->occurence = 'common';
 	    
+		$this->isd = "early Galactic Empire";
+		$this->notes = "Primary users: common";
+	    
 	    
 	$this->unofficial = true;
         // $this->agile = true;
