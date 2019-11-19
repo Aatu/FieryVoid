@@ -43,7 +43,9 @@ class DrakhMobileDefensePlatform extends MediumShip{
 	    
 	$this->addPrimarySystem(new Reactor(4, 14, 0, 4));
 	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-	$this->addPrimarySystem(new Scanner(4, 12, 4, 6));
+	    $sensors = new Scanner(4, 12, 4, 6);
+		$sensors->markImproved();
+		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(4, 9, 0, 4, 3));
 	$this->addPrimarySystem(new customPhaseDisruptor(3, 0, 0, 240, 30));
 	$this->addPrimarySystem(new customPhaseDisruptor(3, 0, 0, 330, 120));
