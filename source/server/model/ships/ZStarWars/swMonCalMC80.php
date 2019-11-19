@@ -12,6 +12,8 @@ class swMonCalMC80 extends BaseShip{
         $this->shipClass = "Mon Calamari MC80 Battlecruiser";
         $this->shipSizeClass = 3;
 	    
+		$this->isd = "Galactic Civil War";
+		$this->notes = "Primary users: Rebel Alliance, New Republic";
 	    
 	$this->fighters = array("Fighter Squadrons"=>3);
 	    
