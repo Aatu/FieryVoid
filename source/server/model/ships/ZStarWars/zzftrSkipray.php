@@ -9,6 +9,10 @@ class zzftrSkipray extends FighterFlight{
         $this->shipClass = "Skipray Blastboats";
         $this->imagePath = "img/starwars/skipray.png";
         
+		$this->isd = "Galactic Civil War";
+		$this->notes = "Primary users: Galactic Empire, New Republic.";
+		$this->notes .= "Hyperdrive";
+	    
         $this->isd = 2255;
         $this->unofficial = true;
         $this->gravitic = true;
