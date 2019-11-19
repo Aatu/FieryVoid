@@ -12,7 +12,7 @@ class swVindicator extends BaseShipNoFwd{
         $this->shipClass = "Vindicator Patrol Ship";
 	    
 	    
-		$this->isd = "early Galactic Empire";
+		$this->isd = "early Galactic Civil War";
 		$this->notes = "Primary users: Galactic Empire";
 
 	$this->fighters = array("Fighter Squadrons"=>2);
