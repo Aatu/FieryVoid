@@ -13,9 +13,7 @@ class zzftrSkipray extends FighterFlight{
 		$this->notes = "Primary users: Galactic Empire, New Republic.";
 		$this->notes .= "Hyperdrive";
 	    
-        $this->isd = 2255;
         $this->unofficial = true;
-        $this->gravitic = true;
         
         $this->forwardDefense = 9;
         $this->sideDefense = 10;
