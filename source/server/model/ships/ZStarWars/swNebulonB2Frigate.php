@@ -11,8 +11,9 @@ class swNebulonB2Frigate extends HeavyCombatVessel{
 	$this->canvasSize = 200;
         $this->shipClass = "Nebulon-B2 Frigate";
         
-	    //$this->variantOf = "Corellian Corvette";
-	    //$this->occurence = 'uncommon';
+
+		$this->isd = "Galactic Civil War";
+		$this->notes = "Primary users: Galactic Empire";
 	    
 	$this->fighters = array("Fighter Squadrons"=>2);
 	    
