@@ -7,9 +7,13 @@ class zzftrawing extends FighterFlight{
         $this->pointCost = 36*6;
         $this->faction = "ZStarWars";
         $this->phpclass = "zzftrawing";
-        $this->shipClass = "A-Wing Light Fighters";
+        $this->shipClass = "A-Wing Interceptors";
         $this->imagePath = "img/starwars/aWing.png";
         
+		$this->isd = "18 BBY";
+		$this->notes = "Primary users: Rebel Alliance, New Republic.";
+		$this->notes .= "Hyperdrive";
+	    
         //$this->isd = 2214;
         $this->unofficial = true;
         
