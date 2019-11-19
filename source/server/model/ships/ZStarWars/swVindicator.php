@@ -10,6 +10,10 @@ class swVindicator extends BaseShipNoFwd{
         $this->imagePath = "img/starwars/vindicator.png";
 	    //$this->canvasSize = 100;
         $this->shipClass = "Vindicator Patrol Ship";
+	    
+	    
+		$this->isd = "early Galactic Empire";
+		$this->notes = "Primary users: Galactic Empire";
 
 	$this->fighters = array("Fighter Squadrons"=>2);
 	
