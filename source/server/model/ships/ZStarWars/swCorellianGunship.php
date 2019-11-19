@@ -9,7 +9,11 @@ class swCorellianGunship extends MediumShip{
         $this->phpclass = "swcorelliangunship";
         $this->imagePath = "img/starwars/dp20.png";
 	    $this->canvasSize = 100;
-        $this->shipClass = "Corellian Gunship";
+        $this->shipClass = "DP20 Corellian Gunship";
+	    
+	    
+		$this->isd = "early Galactic Empire";
+		$this->notes = "Primary users: common";
 	    
 	$this->unofficial = true;
         // $this->agile = true;
