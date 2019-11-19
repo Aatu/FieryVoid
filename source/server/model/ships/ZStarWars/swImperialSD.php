@@ -13,6 +13,8 @@ class swImperialSD extends BaseShip{
         $this->shipSizeClass = 3;
 	$this->Enormous = true;
 	    
+		$this->isd = "22 BBY";
+		$this->notes = "Primary users: Galactic Empire";
 	    
 	$this->fighters = array("Fighter Squadrons"=>6, "Assault Squadrons"=>6);
 	    
