@@ -10,7 +10,10 @@ class zzftrtiedef extends FighterFlight{
         $this->shipClass = "TIE Defender Superiority Fighters";
         $this->imagePath = "img/starwars/tieDefender.png";
         
-        //$this->isd = 2214;
+		$this->isd = "2 ABY";
+		$this->notes = "Primary users: Galactic Empire.";
+	    
+
         $this->unofficial = true;
         
         $this->forwardDefense = 8;
