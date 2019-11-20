@@ -1,21 +1,25 @@
 <?php
 class swGallofreeMTransport extends LCV{
-	/*approximated as MCV, no EW restrictions*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 80;
         $this->faction = "ZStarWars";
 	$this->phpclass = "swGallofreeMTransport";
-	$this->shipClass = "Gallofree Medium Transport";
-        $this->imagePath = "img/starwars/gallofreemediumtransport.png";
+	$this->shipClass = "GR-75 Gallofree Medium Transport";
+        $this->imagePath = "img/starwars/GallofreeMediumTransport.png";
   
 	$this->forwardDefense = 9;
 	$this->sideDefense = 11;
   
 	$this->unofficial = true;
-	//$this->occurence = "rare";
-	//$this->variantOf = "Gallofree Medium Transport";
+	    
+	    
+		$this->isd = "Galactic Republic";
+		$this->notes = "Primary users: common (civilian)";
+	    
+	    
+        $this->hangarRequired = ''; //StarWars unit independence is much larger than B5, LCV-sized units in general do not need hangars
   
 	$this->turncost = 0.5;
 	$this->turndelaycost = 0.5;
