@@ -1129,6 +1129,8 @@ spl_autoload_register(
 		 //new SW toys		    
                 'swnebulonb2frigate' => '/server/model/ships/ZStarWars/swNebulonB2Frigate.php',
                 'swgallofreemtransport' => '/server/model/ships/ZStarWars/swGallofreeMTransport.php',
+                'swgallofreeescort' => '/server/model/ships/ZStarWars/swGallofreeEscort.php',
+                'swgallofreecomm' => '/server/model/ships/ZStarWars/swGallofreeComm.php',
 		    
 		 //mining equipment
 		'customminingcutter' => '/server/model/weapons/customs.php',   
