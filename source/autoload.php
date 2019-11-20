@@ -1126,6 +1126,9 @@ spl_autoload_register(
                 'drakhmobiledefenseplatform' => '/server/model/ships/drakh/drakhMobileDefensePlatform.php',
                 'drakhmobilebeamplatform' => '/server/model/ships/drakh/drakhMobileBeamPlatform.php',
 		    
+		 //new SW toys		    
+                'swnebulonb2frigate' => '/server/model/ships/ZStarWars/swNebulonB2Frigate.php',
+		    
 		 //mining equipment
 		'customminingcutter' => '/server/model/weapons/customs.php',   
 		'customindustrialgrappler' => '/server/model/weapons/customs.php', 
