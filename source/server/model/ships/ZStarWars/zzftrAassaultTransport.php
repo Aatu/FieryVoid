@@ -7,9 +7,12 @@ class zzftrAassaultTransport extends FighterFlight{
         $this->pointCost = 52*6;
         $this->faction = "ZStarWars";
         $this->phpclass = "zzftrAassaultTransport";
-        $this->shipClass = "Assault Transport";
+        $this->shipClass = "ATR-6 Assault Transports";
         $this->imagePath = "img/starwars/AssaultTransport.png";
         
+		$this->isd = "Galactic Civil War";
+		$this->notes = "Primary users: Galactic Empire.";
+	    
         $this->unofficial = true;
         
         $this->forwardDefense = 9;
@@ -22,6 +25,11 @@ class zzftrAassaultTransport extends FighterFlight{
         
     	$this->iniativebonus = 9 *5; 
         
+		
+		$this->hangarRequired = "Assault Squadrons"; //SW small craft are handled on squadron basis
+		$this->unitSize = 6; //number of craft in squadron
+        $this->maxFlightSize = 6; 
+        
         $this->populate();
     }
     
@@ -32,7 +40,7 @@ class zzftrAassaultTransport extends FighterFlight{
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 2, 2, 2);
-            $fighter = new Fighter("zzassaulttransport", $armour, 15, $this->id);
+            $fighter = new Fighter("zzftrAassaultTransport", $armour, 15, $this->id);
             $fighter->displayName = "Assault Transport";
             $fighter->imagePath = "img/starwars/AssaultTransport.png";
             $fighter->iconPath = "img/starwars/AssaultTransport_Large.png"; 
