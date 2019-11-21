@@ -5,7 +5,7 @@ class swStarGalleon extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 450;
-	$this->faction = "StarWars Galactic Empire";
+	$this->faction = "ZStarWars";
         $this->phpclass = "swStarGalleon";
         $this->imagePath = "img/starwars/StarGalleon.png";
 	    //$this->canvasSize = 100;
