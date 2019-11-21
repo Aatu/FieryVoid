@@ -11,7 +11,8 @@ class swStarGalleon extends HeavyCombatVessel{
 	    //$this->canvasSize = 100;
         $this->shipClass = "Star Galleon";
 	
-	//$this->fighters = array("Fighter Squadrons"=>1);
+		$this->isd = "Galactic Civil War";
+		$this->notes = "Primary users: Galactic Empire.";
     
 	$this->unofficial = true;
         
