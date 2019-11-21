@@ -11,6 +11,7 @@ class swMonCalMC30c extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/starwars/mc30.png";
 	    //$this->canvasSize = 100;
         $this->shipClass = "MonCal MC 30c Torpedo Frigate";
+        $this->limited = 33; //limited deployment
 
 		$this->isd = "Galactic Civil War";
 		$this->notes = "Primary users: Rebel Alliance, New Republic";
