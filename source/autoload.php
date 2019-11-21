@@ -1131,6 +1131,7 @@ spl_autoload_register(
                 'swgallofreemtransport' => '/server/model/ships/ZStarWars/swGallofreeMTransport.php',
                 'swgallofreeescort' => '/server/model/ships/ZStarWars/swGallofreeEscort.php',
                 'swgallofreecomm' => '/server/model/ships/ZStarWars/swGallofreeComm.php',
+                'swstargalleon' => '/server/model/ships/ZStarWars/swStarGalleon.php',
                 'zzftraassaulttransport' => '/server/model/ships/ZStarWars/zzftrAassaultTransport.php',
 		    
 		 //mining equipment
