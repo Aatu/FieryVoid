@@ -211,9 +211,9 @@ class SWDirectWeapon extends Pulse{
 		$this->grouping = max(10,$this->grouping); //but no better than +1 per 10!
 		
 		//maxhealth and powerReq affected by number of barrels - received is for single -gun mount!
-		//size: +40% for each additional gun
+		//size: +25% for each additional gun (was 40% originally, but triple/quad mounts were a bit too large then)
 		//power: +65% for each additional gun 
-		$maxhealth += $maxhealth*0.4*($nrOfShots-1);
+		$maxhealth += $maxhealth*0.25*($nrOfShots-1);
 		$powerReq += $powerReq*0.65*($nrOfShots-1);
 		$maxhealth = ceil($maxhealth);
 		$powerReq = ceil($powerReq);
@@ -330,10 +330,10 @@ class SWBallisticWeapon extends Torpedo{
 		$this->grouping = max(10,$this->grouping); //but no better than +1 per 8!
 		
 		//maxhealth and powerReq affected by number of barrels - received is for single -gun mount!
-		//let size advance quicker than for energy weapons, and powe rlower
-		//size: +55% for each additional gun
+		//let size advance quicker than for energy weapons (on account of magazines), and power lower
+		//size: +40% for each additional gun (was 55% originally, but this was reduced when direct fire weapons size was reduced)
 		//power: +35% for each additional gun 
-		$maxhealth += $maxhealth*0.55*($nrOfShots-1);
+		$maxhealth += $maxhealth*0.40*($nrOfShots-1);
 		$powerReq += $powerReq*0.35*($nrOfShots-1);
 		$maxhealth = ceil($maxhealth);
 		$powerReq = ceil($powerReq);
