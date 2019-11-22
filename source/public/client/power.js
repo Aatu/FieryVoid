@@ -640,10 +640,12 @@ shipManager.power = {
 		if (gamedata.gamephase !== 1) return;
 
 		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+		/*no longer needed - EW allocation is checked before commit, so You can't attain illegal effects by boosting/deboosting with EW set
 		if (system.isScanner() && ew.getUsedEW(ship) > 0) {
 			confirm.error("You need to unassign all electronic warfare before changing scanner power management.");
 			return;
 		}
+		*/
 
 		if (system.hasMaxBoost()) {
 			if (system.maxBoostLevel <= shipManager.power.getBoost(system)) {
@@ -663,12 +665,13 @@ shipManager.power = {
 		if (gamedata.gamephase !== 1) return;
 		
 		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+
+		/*no longer needed - EW allocation is checked before commit, so You can't attain illegal effects by boosting/deboosting with EW set
 		if (system.isScanner() && ew.getUsedEW(ship) > 0) {
-
 			confirm.error("You need to unassign all electronic warfare before changing scanner power management.");
-
 			return;
 		}
+		*/
 
 		shipManager.power.unsetBoost(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
