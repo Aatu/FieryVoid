@@ -34,6 +34,11 @@
     background-image: url("../img/removeCCEW.png");
 }
 
+
+.removeAllEW {
+    background-image: url("../img/removeAllEW.png");
+}
+
 .shipNameContainer .buttons .addOEW {
     background-image: url("../img/addOEW.png");
 }
