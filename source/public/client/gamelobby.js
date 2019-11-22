@@ -236,7 +236,7 @@ window.gamedata = {
 				}
 			}
 			//now translate size into hangar space used...
-			if(SmallCraftSize !=''){
+			if(smallCraftSize !=''){
 				if(smallCraftSize =="heavy"){
 					totalFtrH += lship.flightSize;
 				}else if(smallCraftSize=="medium"){ 

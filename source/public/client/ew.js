@@ -351,11 +351,11 @@ window.ew = {
     },
 
     removeEW: function removeEW(ship) {
-
         for (var i = ship.EW.length - 1; i >= 0; i--) {
             var ew = ship.EW[i];
             if (ew.turn == gamedata.turn) ship.EW.splice(i, 1);
-        }
+        }		
+		webglScene.customEvent("ShipEwChanged", { ship: ship });
     },
     checkInELINTDistance: function checkInELINTDistance(ship, target, distance) {
         if (!distance) distance = 30;
