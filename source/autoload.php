@@ -1133,6 +1133,8 @@ spl_autoload_register(
                 'swgallofreecomm' => '/server/model/ships/ZStarWars/swGallofreeComm.php',
                 'swstargalleon' => '/server/model/ships/ZStarWars/swStarGalleon.php',
                 'swbulktransport' => '/server/model/ships/ZStarWars/swBulkTransport.php',
+                'swbulkcruiser' => '/server/model/ships/ZStarWars/swBulkCruiser.php',
+                'swbulkcarrier' => '/server/model/ships/ZStarWars/swBulkCarrier.php',
                 'zzftraassaulttransport' => '/server/model/ships/ZStarWars/zzftrAassaultTransport.php',
 		    
 		 //mining equipment
