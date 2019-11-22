@@ -11,7 +11,9 @@ class swBulkCruiser extends HeavyCombatVessel{
 	    //$this->canvasSize = 100;
         $this->shipClass = "Neutron Star Bulk Cruiser";
 	
-	//$this->fighters = array("Fighter Squadrons"=>2);
+		$this->isd = "Galactic Civil War";
+		$this->notes = "Primary users: Galactic Empire, Rebel Alliance.";
+	    
     
 	$this->unofficial = true;
         
