@@ -22,7 +22,7 @@ class swGallofreeMTransport extends LCV{
         $this->hangarRequired = ''; //StarWars unit independence is much larger than B5, LCV-sized units in general do not need hangars
   
 	$this->turncost = 0.5;
-	$this->turndelaycost = 0.5;
+	$this->turndelaycost = 1;
 	$this->accelcost = 2;
 	$this->rollcost = 1;
 	$this->pivotcost = 1;
@@ -35,8 +35,8 @@ class swGallofreeMTransport extends LCV{
   
 	$this->addPrimarySystem(new Reactor(3, 9, 0, 0));
 	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-        $this->addPrimarySystem(new SWScanner(2, 8, 2, 2));
-	$this->addPrimarySystem(new Engine(3, 8, 0, 6, 1));
+        $this->addPrimarySystem(new SWScanner(2, 5, 1, 1));
+	$this->addPrimarySystem(new Engine(3, 8, 0, 5, 1));
 	$this->addPrimarySystem(new CargoBay(1, 60));
 	$hyperdrive = new JumpEngine(2, 6, 3, 12);
 	$hyperdrive->displayName = 'Hyperdrive';
