@@ -27,7 +27,7 @@ class swGallofreeComm extends LCV{
 	$this->accelcost = 2;
 	$this->rollcost = 1;
 	$this->pivotcost = 1;
-	$this->iniativebonus = 4 *5;
+	$this->iniativebonus = 8 *5;
   
 	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
