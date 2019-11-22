@@ -6,8 +6,9 @@ class zzftrYT2400Raider extends FighterFlight{
         $this->pointCost = 80*6;
         $this->faction = "ZStarWars";
         $this->phpclass = "zzftrYT2400Raider";
-        $this->shipClass = "YT-2400 Light Freighters";
+        $this->shipClass = "YT-2400 Raiders";
         $this->imagePath = "img/starwars/YT2400.png";
+        $this->variantOf = "YT-2400 Light Freighters";
         
 		$this->isd = "late Galactic Republic";
 		$this->notes = "Primary users: Common (Civilian/Pirate).";
@@ -21,6 +22,8 @@ class zzftrYT2400Raider extends FighterFlight{
         $this->offensivebonus = 5;
         $this->jinkinglimit = 4;
         $this->turncost = 0.33;
+	
+	$this->enhancementOptionsEnabled[] = 'NAVIGATOR'; //this flight can have Navigator enhancement option
         
         
 		$this->hangarRequired = "Fighter Squadrons"; //SW small craft are handled on squadron basis
