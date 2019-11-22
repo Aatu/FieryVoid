@@ -37,7 +37,7 @@ class FighterFlight extends BaseShip
 
     public $offensivebonus, $freethrust;
     public $jinkinglimit = 0;
-	public $hangarRequired = ''; //if left empty, will be classified based on Ini; fleet check only
+	public $hangarRequired = 'fighters'; //if left 'fighters', will be classified based on Ini; fleet check only
 	public $unitSize = 1; //most fighters are taken one per slot - but some are not
 	//B5Wars example are some ultralight fighters, that can be carried two per hangar slot
 	//and some superheavies that can use hangars (eg. Vorlon SHF) but take more slots
