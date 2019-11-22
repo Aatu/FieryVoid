@@ -26,7 +26,6 @@ class zzftrYT2400Raider extends FighterFlight{
 	$this->enhancementOptionsEnabled[] = 'NAVIGATOR'; //this flight can have Navigator enhancement option
         
         
-		$this->hangarRequired = "Fighter Squadrons"; //SW small craft are handled on squadron basis
 		$this->unitSize = 3; //number of craft in squadron
 		
     	$this->iniativebonus = 8 *5; //essentially a civilian unit, Ini lowered
@@ -48,7 +47,7 @@ class zzftrYT2400Raider extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 3, 3, 2);
             $fighter = new Fighter("zzftrYT2400Raider", $armour, 30, $this->id);
-            $fighter->displayName = "YT-2400";
+            $fighter->displayName = "YT-2400 Raider";
             $fighter->imagePath = "img/starwars/YT2400.png";
             $fighter->iconPath = "img/starwars/YT2400_Large.png"; 
 		            
@@ -62,9 +61,9 @@ class zzftrYT2400Raider extends FighterFlight{
             $torpedoLauncher = new SWFtrProtonTorpedoLauncher(4, 330, 30, 2);//single dual launcher! like for direct fire
             $fighter->addFrontSystem($torpedoLauncher);
             
-          //Ray Shield, 1 points
-          $fighter->addAftSystem(new SWRayShield(0, 1, 0, 1, 0, 360));
-          $this->addSystem($fighter);
+			//Ray Shield, 1 points
+			$fighter->addAftSystem(new SWRayShield(0, 1, 0, 1, 0, 360));
+		  
 			
         	$this->addSystem($fighter);
        }

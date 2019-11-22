@@ -142,11 +142,16 @@ window.ew = {
 
     convertUnusedToDEW: function convertUnusedToDEW(ship) {
         var dew = ew.getScannerOutput(ship) - ew.getUsedEW(ship);
-        if (dew < 0) { //DEW should NOT be negative - reset EW in this case! (most probably Sensors disabled after setting EW)
+        if (dew < 0) { 
+			//return flag that something is wrong with EW
+			return false;
+		/*//DEW should NOT be negative - reset EW in this case! (most probably Sensors disabled after setting EW)
             this.removeEW(ship);
             dew = ew.getScannerOutput(ship) - ew.getUsedEW(ship);
+			*/
         }
         ship.EW.push({ shipid: ship.id, type: "DEW", amount: dew, targetid: -1, turn: gamedata.turn });
+		return true;
     },
 
     getListedDEW: function getListedDEW(ship) {
@@ -469,11 +474,5 @@ window.ew = {
         drawEntities();
     },
  
-    resetEW: function resetEW(shipID) {
-        var ship = gamedata.ships[shipID];
-        ship.EW = new Array();        
-        var toInform = "EW is reset for " + ship.name;
-        alert(toInform);
-    }
     
 };

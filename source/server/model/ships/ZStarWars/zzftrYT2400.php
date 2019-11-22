@@ -10,7 +10,7 @@ class zzftrYT2400 extends FighterFlight{
         $this->imagePath = "img/starwars/YT2400.png";
         
 		$this->isd = "late Galactic Republic";
-		$this->notes = "Primary users: common.";
+		$this->notes = "Primary users: common (civilian).";
 		$this->notes .= "Hyperdrive";
 	    
         $this->unofficial = true;
@@ -23,7 +23,6 @@ class zzftrYT2400 extends FighterFlight{
         $this->turncost = 0.33;
         
         
-		$this->hangarRequired = "Fighter Squadrons"; //SW small craft are handled on squadron basis
 		$this->unitSize = 3; //number of craft in squadron
 		
     	$this->iniativebonus = 8 *5; //essentially a civilian unit, Ini lowered
@@ -48,18 +47,17 @@ class zzftrYT2400 extends FighterFlight{
             $fighter->displayName = "YT-2400";
             $fighter->imagePath = "img/starwars/YT2400.png";
             $fighter->iconPath = "img/starwars/YT2400_Large.png"; 
-		            
+            
             $roundGun = new SWFighterLaser(0, 360, 2, 2); //all-around dual Laser Cannons
             $fighter->addFrontSystem($roundGun);
             
             $roundGun = new SWFighterLaser(0, 360, 2, 2); //all-around dual Laser Cannons
             $fighter->addFrontSystem($roundGun);
 
-          //Ray Shield, 1 points
-          $fighter->addAftSystem(new SWRayShield(0, 1, 0, 1, 0, 360));
+			//Ray Shield, 1 points
+			$fighter->addAftSystem(new SWRayShield(0, 1, 0, 1, 0, 360));
 
-          $this->addSystem($fighter);
-			
+
         	$this->addSystem($fighter);
        }
     }

@@ -1137,8 +1137,8 @@ spl_autoload_register(
                 'swbulkcruiser' => '/server/model/ships/ZStarWars/swBulkCruiser.php',
                 'swbulkcarrier' => '/server/model/ships/ZStarWars/swBulkCarrier.php',
                 'zzftraassaulttransport' => '/server/model/ships/ZStarWars/zzftrAassaultTransport.php',
-                'zzftrzzftryt2400' => '/server/model/ships/ZStarWars/zzftrYT2400.php',
-                'zzftrzzftryt2400raider' => '/server/model/ships/ZStarWars/zzftrYT2400Raider.php',
+                'zzftryt2400' => '/server/model/ships/ZStarWars/zzftrYT2400.php',
+                'zzftryt2400raider' => '/server/model/ships/ZStarWars/zzftrYT2400Raider.php',
 		    
 		 //mining equipment
 		'customminingcutter' => '/server/model/weapons/customs.php',   

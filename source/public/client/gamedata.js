@@ -448,10 +448,18 @@ window.gamedata = {
                 return false;
             }
 
+			var EWIncorrect = '';
             for (var i in gamedata.ships) {
                 var ship = gamedata.ships[i];
-                ew.convertUnusedToDEW(ship);
+                if (ew.convertUnusedToDEW(ship) != true){
+					EWIncorrect += "- " + gamedata.ships[i].name + "<br>";					
+				}
             }
+			if (EWIncorrect != ''){
+				EWIncorrect = "Following ships have too many EW points set:<br>" + EWIncorrect;
+				window.confirm.error(EWIncorrect, function () {});
+                return false;
+			}
 
             ajaxInterface.submitGamedata();
         } else if (gamedata.gamephase == 2) {

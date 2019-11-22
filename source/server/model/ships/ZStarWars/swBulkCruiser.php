@@ -5,7 +5,7 @@ class swBulkCruiser extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 360;
-	$this->faction = "StarWars Galactic Empire";
+	$this->faction = "ZStarWars";
         $this->phpclass = "swBulkCruiser";
         $this->imagePath = "img/starwars/BulkCarrier.png";
 	    //$this->canvasSize = 100;

@@ -45,10 +45,10 @@ class swGallofreeEscort extends LCV{
 	$this->addPrimarySystem(new SWRayShield(2,6,1,1,0,360)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addPrimarySystem(new SWMediumLaser(1, 180, 360, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addPrimarySystem(new SWMediumLaser(1, 0, 180, 2));
-	$this->addPPrimarySystem(new SWLightLaser(0, 0, 360, 2));
-	$this->addPPrimarySystem(new SWLightLaser(0, 0, 360, 2));
-	$this->addPPrimarySystem(new SWLightLaser(0, 0, 360, 2));
-	$this->addPPrimarySystem(new SWLightLaser(0, 0, 360, 2));
+	$this->addPrimarySystem(new SWLightLaser(0, 0, 360, 2));
+	$this->addPrimarySystem(new SWLightLaser(0, 0, 360, 2));
+	$this->addPrimarySystem(new SWLightLaser(0, 0, 360, 2));
+	$this->addPrimarySystem(new SWLightLaser(0, 0, 360, 2));
 
  
 	$this->addPrimarySystem(new Structure( 2, 28));
