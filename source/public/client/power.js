@@ -493,7 +493,6 @@ shipManager.power = {
 	},
 
 	countBoostReqPower: function countBoostReqPower(ship, system) {
-
 		if (system.boostEfficiency.toString().search(/^[0-9]+$/) == 0) {
 			return system.boostEfficiency;
 		} else if (system.boostEfficiency == "output+1") {
@@ -535,7 +534,8 @@ shipManager.power = {
 	},
 
 	canBoost: function canBoost(ship, system) {
-
+		return true;
+		/* no longer needed, I'm leaving the code in case in the future ideas change again
 		//can always boost reactor (to overload)!
 		if (system.name == 'reactor') {
 			return shipManager.power.getBoost(system) === 0;
@@ -549,6 +549,7 @@ shipManager.power = {
 		} else {
 			return false;
 		}
+		*/
 	},
 
 	canOverload: function canOverload(ship, system) {
