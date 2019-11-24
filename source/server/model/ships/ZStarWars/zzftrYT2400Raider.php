@@ -28,7 +28,7 @@ class zzftrYT2400Raider extends FighterFlight{
         
 		$this->unitSize = 3; //number of craft in squadron
 		
-    	$this->iniativebonus = 8 *5; //essentially a civilian unit, Ini lowered
+    	$this->iniativebonus = 11 *5; //Pirate unit - Ini better than civilian, but worse than military
     	$this->superheavy = true;
         $this->maxFlightSize = 3;//this is a superheavy fighter originally intended as single unit, limit flight size to 3
 		
