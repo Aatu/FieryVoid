@@ -10,9 +10,9 @@ class Weapon extends ShipSystem
 
     public $name = null;
     public $displayName = "";
-    public $priority = 1;
+    public $priority = 1; //array may be skipped, in which case this variable value will be used for all modes
     public $priorityArray = array();
-    public $priorityAF = 0;
+    public $priorityAF = 0; //array must be set explicitly - otherwise it will be generated, ignoring this variable! 
     public $priorityAFArray = array();
 
     public $animation = "none";
@@ -145,9 +145,9 @@ class Weapon extends ShipSystem
             $this->minDamageArray[$i] = $this->minDamage;
             $this->setMaxDamage();
             $this->maxDamageArray[$i] = $this->maxDamage;
-	    //set AF priority, too!
-	    $this->setPriorityAF();
-	    $this->priorityAFArray[$i] = $this->priorityAF;
+			//set AF priority, too!
+			$this->setPriorityAF(); 
+			$this->priorityAFArray[$i] = $this->priorityAF;
         }
         $this->changeFiringMode(1); //reset mode to basic
     }
@@ -403,7 +403,7 @@ class Weapon extends ShipSystem
     public function setSystemDataWindow($turn)
     {
 
-        $this->data["Resolution Priority (ship/fighter)"] = $this->priority . '/' $this->priorityAF;
+        $this->data["Resolution Priority (ship/fighter)"] = $this->priority . '/' . $this->priorityAF;
         $this->data["Loading"] = $this->getTurnsloaded() . "/" . $this->getNormalLoad();
 
         $dam = $this->minDamage . "-" . $this->maxDamage;
@@ -1445,7 +1445,11 @@ class Weapon extends ShipSystem
         $this->firingMode = $newMode;
         $i = $newMode;
         if (isset($this->priorityArray[$i])) $this->priority = $this->priorityArray[$i];
-        if (isset($this->priorityAFArray[$i])) $this->priorityAF = $this->priorityAFArray[$i];
+        if (isset($this->priorityAFArray[$i])){
+			$this->priorityAF = $this->priorityAFArray[$i];
+		}else{ //this means appropriate AF priority is not set yet - it is generated ans so must always be set! 
+			$this->priorityAF = 0;
+		}
 
         if (isset($this->animationArray[$i])) $this->animation = $this->animationArray[$i];
         if (isset($this->animationImgArray[$i])) $this->animationImg = $this->animationImgArray[$i];

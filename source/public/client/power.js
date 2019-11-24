@@ -738,12 +738,11 @@ shipManager.power = {
 		system.power.push({ id: null, shipid: ship.id, systemid: system.id, type: 1, turn: gamedata.turn, amount: 0 });
 
 		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+		/*no longer needed
 		if (system.isScanner() && ew.getUsedEW(ship) > 0) {
-
 			confirm.error("You need to unassign all electronic warfare before changing scanner power management.");
-
 			return;
-		}
+		}*/
 
 		if (system.name == "shieldGenerator") {
 			system.onTurnOff(ship);
