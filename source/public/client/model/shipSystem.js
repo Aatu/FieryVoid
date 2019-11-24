@@ -108,7 +108,8 @@ Weapon.prototype.changeFiringMode = function () {
 	}
 	if (!mathlib.arrayIsEmpty(this.priorityArray)) {
 		this.priority = this.priorityArray[this.firingMode];
-		this.data["Resolution Priority"] = this.priority;
+		this.priorityAF = this.priorityAFArray[this.firingMode]; //this should not be empty, is set automatically
+		this.data["Resolution Priority (ship/fighter)"] = this.priority +'/'+this.priorityAF;
 	}
 	if (!mathlib.arrayIsEmpty(this.rangeDamagePenaltyArray)) this.rangeDamagePenalty = this.rangeDamagePenaltyArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.rangePenaltyArray)) {
