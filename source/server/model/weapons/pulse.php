@@ -604,7 +604,7 @@ class QuadPulsar extends Pulse{
     	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     	public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
 	         
-	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+	public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
             return 0; //Matter ignores armor!
         }
 	    

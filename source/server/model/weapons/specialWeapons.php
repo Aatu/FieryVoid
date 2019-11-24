@@ -37,7 +37,7 @@ class PlasmaStream extends Raking{
 	}
 		 
 	
-	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+	public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
 		$armour = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
 		    if (is_numeric($armour)){
 			$toIgnore = ceil($armour /2);
@@ -106,11 +106,11 @@ class ShockCannon extends Weapon{
         }
 
         // Shock Cannons ignore armor.
-        protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
+        public function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
             return 0;
 	}
 
-        protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+        public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		if (!$system->advancedArmor){
 		    $crit = null;
 
@@ -1219,7 +1219,7 @@ class SparkField extends Weapon implements DefensiveSystem{
 	    SparkFieldHandler::addSparkField($this);//so all Spark Fields are accessible together, and firing orders can be uniformly created
         }
 	
-        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
             return 0; //ignores armor!
         }
 	
@@ -1773,11 +1773,11 @@ class ResonanceGenerator extends Weapon{
         } //endof function fire
 	
 	
-	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+	public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
 		return 0; //standard armor is ignored
         }
 	
-	protected function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos=null){
+	public function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos=null){
 		//half of advanced armor is ignored
 		$armour = parent::getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos);
 		    if (is_numeric($armour)){
@@ -2165,10 +2165,10 @@ class RadCannon extends Weapon{
 	
 	
 	
-	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+	public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
 		return 0; //standard armor is ignored
         }	
-	protected function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos=null){		
+	public function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos=null){		
 		return 0; //advanced armor is ignored
         }//endof function getSystemArmourInvulnerable
 	

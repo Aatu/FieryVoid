@@ -1255,7 +1255,7 @@ class Weapon extends ShipSystem
         return true;
     }
 
-    protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos = null)
+    public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos = null)
     { //standard part of armor
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         //$target = $gamedata->getShipById($fireOrder->targetid);
@@ -1276,7 +1276,7 @@ class Weapon extends ShipSystem
     }//endof function getSystemArmourStandard
 
 
-    protected function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos = null)
+    public function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos = null)
     { //only invulnerable portion of armor (one that can't be reduced by, say, damage type)
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         //$target = $gamedata->getShipById($fireOrder->targetid);

@@ -10,7 +10,7 @@ class Plasma extends Weapon{
         }
 		
 		
-	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+	public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
 		$armour = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
 		    if (is_numeric($armour)){
 			$toIgnore = ceil($armour /2);
@@ -363,7 +363,7 @@ class PairedPlasmaBlaster extends LinkedWeapon{
         }
 
 
-        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
             $armor = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
 
             if (is_numeric($armor)){
@@ -469,7 +469,7 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
         }
 
 	/*Plasma - armor ignoring*/
-        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
             $armor = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
             if (is_numeric($armor)){
                 $toIgnore = ceil($armor /2);
@@ -530,7 +530,7 @@ class RogolonLtPlasmaCannon extends LinkedWeapon{
         }
 
 	/*Plasma - armor ignoring*/
-        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
             $armor = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
             if (is_numeric($armor)){
                 $toIgnore = ceil($armor /2);

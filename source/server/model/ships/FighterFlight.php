@@ -363,7 +363,7 @@ class FighterFlight extends BaseShip
 	//fill data about eligible craft...
 	$craftWithData = array();
 	foreach ($systems as $craft){
-		$dmgPotential = 0
+		$dmgPotential = 0;
 		if ($weapon->damageType == "Raking"){
 			$dmgPotential = $weapon->raking; //potential = rake size	
 		}else{

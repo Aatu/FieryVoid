@@ -183,7 +183,7 @@
         }
         
 	    //ignores half armor (as a Plasma weapon should!)
-	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+	public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
 		$armour = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
 		if (is_numeric($armour)){
 		$toIgnore = ceil($armour /2);
