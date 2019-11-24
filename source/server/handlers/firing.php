@@ -435,7 +435,14 @@ class Firing
                 if (!($weapon instanceof Weapon)){ //this isn't a weapon after all...
                     continue;
                 }
+		$target = null;
+		if($fire->targetid >= 0){ //actually directed at an unit!
+			$target = $gamedata->getShipById($fire->targetid); 
+		}
+		    
                 $fire->priority = $weapon->priority;
+		//take different AF priority into account!
+		if (($target != null) && ($target instanceof FighterFlight)) $fire->priority = $weapon->priorityAF;
 
                 if($weapon->isTargetAmbiguous($gamedata, $fire)){
                     $ambiguousFireOrders[] = $fire;
