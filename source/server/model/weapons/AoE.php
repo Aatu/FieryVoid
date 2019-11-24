@@ -106,7 +106,7 @@ public function calculateHit($gamedata, $fireOrder){
             }
         } else {
             $tmpLocation = $target->getHitSectionPos(Mathlib::hexCoToPixel($sourceHex), $fireOrder->turn);
-            $system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
+            $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $tmpLocation);
             $this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, false, $tmpLocation);
         }
     }
