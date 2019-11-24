@@ -1106,7 +1106,7 @@ class Weapon extends ShipSystem
         }
 
         if ($this->damageType == 'Flash') {// If overkill comes from flash damage, pick a new target in default way instead of typicaloverkill!
-            $okSystem = $target->getHitSystem($shooter, $fireOrder, $this, $location); //for Flash it won't return destroyed system other than PRIMARY Structure
+            $okSystem = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $location); //for Flash it won't return destroyed system other than PRIMARY Structure
         }
 
         if ($okSystem == null || $okSystem->isDestroyed()) { //overkill to Structure system is mounted on
@@ -1151,7 +1151,7 @@ class Weapon extends ShipSystem
             } else {
                 $loc = $ship->doGetHitSectionBearing($relativeBearing); //full array
                 $tmpLocation = $loc["loc"];
-                $system = $ship->getHitSystem($target, $fireOrder, $this, $tmpLocation);
+                $system = $ship->getHitSystem($target, $fireOrder, $this, $gamedata, $tmpLocation);
                 $this->doDamage($ship, $shooter, $system, $flashDamageAmount, $fireOrder, null, $gamedata, false, $tmpLocation);
             }
         }
@@ -1202,26 +1202,26 @@ class Weapon extends ShipSystem
                 $damageOut = $damage - $damageEntry - $damagePRIMARY;
             }
             //first part: facing structure
-            $system = $target->getHitSystem($shooter, $fireOrder, $this, $facingLocation);
+            $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $facingLocation);
             $this->doDamage($target, $shooter, $system, $damageEntry, $fireOrder, $launchPos, $gamedata, false, $facingLocation);
             //second part: PRIMARY Structure
-            $system = $target->getHitSystem($shooter, $fireOrder, $this, 0);
+            $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, 0);
             $this->doDamage($target, $shooter, $system, $damagePRIMARY, $fireOrder, $launchPos, $gamedata, false, 0);
             //last part: opposite Structure
-            $system = $target->getHitSystem($shooter, $fireOrder, $this, $outLocation);
+            $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $outLocation);
             $this->doDamage($target, $shooter, $system, $damageOut, $fireOrder, $launchPos, $gamedata, false, $outLocation);
         } elseif (($this->damageType == 'Raking') && (!($target instanceof FighterFlight))) { //Raking hit... but not at fighters - that's effectively Standard shot!
             //split into rakes; armor will not need to be penetrated twice!
             $fireOrder->armorIgnored = array();//reset info about pierced armor
             while ($damage > 0) {
                 $rake = min($damage, $this->getRakeSize());
-                $system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
+                $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $tmpLocation);
                 $this->doDamage($target, $shooter, $system, $rake, $fireOrder, $launchPos, $gamedata, false, $tmpLocation);
                 $damage = $damage - $rake;
             }
         } else { //standard mode of dealing damage
             if ($fireOrder->linkedHit == null) {
-                $system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
+                $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $tmpLocation);
             } else {
                 $system = $fireOrder->linkedHit;
             }
