@@ -361,7 +361,7 @@ class FighterFlight extends BaseShip
 	 4. having higher ID (last craft in flight first - if any craft is special, it'll be the first one)
 	*/
 	//fill data about eligible craft...
-	$craftWithData = new array();
+	$craftWithData = array();
 	foreach ($systems as $craft){
 		$dmgPotential = 0
 		if ($weapon->damageType == "Raking"){
@@ -388,7 +388,7 @@ class FighterFlight extends BaseShip
 		if (($minRemainingHP<10) && ($alreadyDropoutSubject==false)) $canBeDroppedOut = true;
 		$canBeKilled = false;
 		if ($minRemainingHP<1) $canBeKilled = true;
-		$singleCraft = new array("id"=>$craft->id, "hp"=>$remainingHP, "canDrop"=>$canBeDroppedOut, "canDie"=>$canBeKilled, "fighter"=>$craft);
+		$singleCraft = array("id"=>$craft->id, "hp"=>$remainingHP, "canDrop"=>$canBeDroppedOut, "canDie"=>$canBeKilled, "fighter"=>$craft);
 		$craftWithData[] = $singleCraft;
 	}
 	    
