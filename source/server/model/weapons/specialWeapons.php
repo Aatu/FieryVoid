@@ -2388,7 +2388,7 @@ class IonFieldGenerator extends Weapon{
 		    $this->onDamagedSystem($target, $firstFighter, 0, 0, $gamedata, $fireOrder);//no actual damage, proceed to apply effects
 		} else {
 		    $tmpLocation = $target->getHitSectionPos(Mathlib::hexCoToPixel($sourceHex), $fireOrder->turn);
-		    $system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
+		    $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $tmpLocation);
 		    $this->onDamagedSystem($target, $system, 0, 0, $gamedata, $fireOrder);//no actual damage, proceed to apply effects
 		}
 	}
