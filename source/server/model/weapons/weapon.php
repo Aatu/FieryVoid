@@ -12,6 +12,8 @@ class Weapon extends ShipSystem
     public $displayName = "";
     public $priority = 1;
     public $priorityArray = array();
+    public $priorityAF = 0;
+    public $priorityAFArray = array();
 
     public $animation = "none";
     public $animationArray = array();
@@ -143,6 +145,9 @@ class Weapon extends ShipSystem
             $this->minDamageArray[$i] = $this->minDamage;
             $this->setMaxDamage();
             $this->maxDamageArray[$i] = $this->maxDamage;
+	    //set AF priority, too!
+	    $this->setPriorityAF();
+	    $this->priorityAFArray[$i] = $this->priorityAF;
         }
         $this->changeFiringMode(1); //reset mode to basic
     }
@@ -208,6 +213,49 @@ class Weapon extends ShipSystem
         $max = $this->maxDamage;
         $avg = round(($min + $max) / 2);
         return $avg;
+    }
+	
+    protected function setPriorityAF(){
+	//sets AF priority if not set explicitly by weapon creator
+	//attempt to put high-damage weapons first, to attempt to kill fighters outright or cause heavy damage (so light guns can concentrate on smaller number of craft or finish off damaged one)
+	//priorities:
+	// 1,2,10 - no change, those are kind of special
+	//then Raking, they tend to have high damage output and against fighters they become effectively Standard
+	//then heavy Standard weapons
+	//then everything else in reverse order (note there's no need to put Matter at the end!)
+	if ($this->priorityAF > 0) return;
+	switch($this->priority){
+		case 7: //heavy Raking
+			$this->priorityAF = 3;
+			break;
+			
+		case 8: //light Raking
+			$this->priorityAF = 4;
+			break;
+			
+		case 6: //heavy Standard 
+			$this->priorityAF = 5;
+			break;
+			
+		case 9: //Matter and such
+			$this->priorityAF = 6;
+			break;			
+			
+		case 5: 
+			$this->priorityAF = 7;
+			break;
+			
+		case 4: 
+			$this->priorityAF = 8;
+			break;
+			
+		case 3: 
+			$this->priorityAF = 9;
+			break;
+			
+		default: //no change needed, go for $priority (1,2,10)
+			$this->priorityAF = $this->priority;
+	}	    
     }
 
 
@@ -355,7 +403,7 @@ class Weapon extends ShipSystem
     public function setSystemDataWindow($turn)
     {
 
-        $this->data["Resolution Priority"] = $this->priority;
+        $this->data["Resolution Priority (ship/fighter)"] = $this->priority . '/' $this->priorityAF;
         $this->data["Loading"] = $this->getTurnsloaded() . "/" . $this->getNormalLoad();
 
         $dam = $this->minDamage . "-" . $this->maxDamage;
@@ -1397,6 +1445,7 @@ class Weapon extends ShipSystem
         $this->firingMode = $newMode;
         $i = $newMode;
         if (isset($this->priorityArray[$i])) $this->priority = $this->priorityArray[$i];
+        if (isset($this->priorityAFArray[$i])) $this->priorityAF = $this->priorityAFArray[$i];
 
         if (isset($this->animationArray[$i])) $this->animation = $this->animationArray[$i];
         if (isset($this->animationImgArray[$i])) $this->animationImg = $this->animationImgArray[$i];
