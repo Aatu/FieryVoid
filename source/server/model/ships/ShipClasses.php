@@ -1014,17 +1014,17 @@ class BaseShip {
 
 
 
-    public function getHitSystemPos($pos, $shooter, $fireOrder, $weapon, $location = null){
+    public function getHitSystemPos($pos, $shooter, $fireOrder, $weapon, $gamedata, $location = null){
         /*find target section (based on indicated position) before finding location*/
         if($location==null){
             $location = $this->getHitSectionPos($pos, $fireOrder->turn);
         }
-        $foundSystem = $this->getHitSystem($shooter, $fireOrder, $weapon, $location);
+        $foundSystem = $this->getHitSystem($shooter, $fireOrder, $weapon, $gamedata, $location);
         return $foundSystem;
     }
 
 
-    public function getHitSystem($shooter, $fireOrder, $weapon, $location = null){
+    public function getHitSystem($shooter, $fireOrder, $weapon, $gamedata, $location = null){
         /*if something has to choose system by firing position, use getHitSystemPos instead*/
         if (isset($this->hitChart[0])){
             $system = $this->getHitSystemByTable($shooter, $fireOrder, $weapon, $location);
