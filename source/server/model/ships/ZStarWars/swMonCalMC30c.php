@@ -5,7 +5,7 @@ class swMonCalMC30c extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 575; //tenative barring destruction tests
+	$this->pointCost = 650; //tenative barring destruction tests
 	$this->faction = "ZStarWars";
         $this->phpclass = "swMonCalMC30c";
         $this->imagePath = "img/starwars/mc30.png";
@@ -49,9 +49,9 @@ class swMonCalMC30c extends HeavyCombatVesselLeftRight{
 	$this->addLeftSystem(new SWRayShield(2,12,8,3,180,360)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addLeftSystem(new SWMediumTLaser(2, 210, 360, 2));
 	$this->addLeftSystem(new SWMediumTLaser(2, 210, 360, 2));
-	$this->addLeftSystem(new SWCapitalConcussion(2, 210, 360, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addLeftSystem(new SWCapitalConcussion(2, 210, 360, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addLeftSystem(new SWCapitalConcussion(2, 180, 330, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addLeftSystem(new SWCapitalProton(2, 210, 360, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addLeftSystem(new SWCapitalProton(2, 210, 360, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addLeftSystem(new SWCapitalProton(2, 180, 330, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addLeftSystem(new SWMediumLaser(2, 180, 0, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addLeftSystem(new SWMediumLaser(2, 180, 0, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	    
@@ -60,9 +60,9 @@ class swMonCalMC30c extends HeavyCombatVesselLeftRight{
 	$this->addRightSystem(new SWRayShield(2,12,8,3,0,180)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addRightSystem(new SWMediumTLaser(2, 0, 150, 2));
 	$this->addRightSystem(new SWMediumTLaser(2, 0, 150, 2));
-	$this->addRightSystem(new SWCapitalConcussion(2, 0, 150, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addRightSystem(new SWCapitalConcussion(2, 0, 150, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addRightSystem(new SWCapitalConcussion(2, 30, 180, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addRightSystem(new SWCapitalProton(2, 0, 150, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addRightSystem(new SWCapitalProton(2, 0, 150, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addRightSystem(new SWCapitalProton(2, 30, 180, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addRightSystem(new SWMediumLaser(2, 0, 180, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addRightSystem(new SWMediumLaser(2, 0, 180, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	    
@@ -88,7 +88,7 @@ class swMonCalMC30c extends HeavyCombatVesselLeftRight{
         		3=> array(
         				2 => "Thruster",
         				3 => "Ray Shield",
-        				7 => "Capital Concussion Missile",	
+        				7 => "Capital Proton Torpedo",	
 					10 => "Medium Turbolaser",
 		        		13 => "Medium Laser",
         				18 => "Structure",
@@ -98,7 +98,7 @@ class swMonCalMC30c extends HeavyCombatVesselLeftRight{
         		4=> array(
         				2 => "Thruster",
         				3 => "Ray Shield",
-        				7 => "Capital Concussion Missile",	
+        				7 => "Capital Proton Torpedo",	
 					10 => "Medium Turbolaser",
 		        		13 => "Medium Laser",
         				18 => "Structure",
