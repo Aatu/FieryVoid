@@ -232,7 +232,7 @@ class SWDirectWeapon extends Pulse{
 		parent::setSystemDataWindow($turn);
 			$this->data["Special"] = 'Burst mode: -1..1 +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
 			$this->data["Special"] .= '<br>Minimum of 1 pulse.';
-			$this->data["Special"] .= '<br>ATTENTION CALL: Pulse mode means hits will be individually allocated, even for fighter weapons!';
+			$this->data["Special"] .= '<br>(ships only) Alternate firing mode: Salvo: single shot with increased damage (all weapons in turret fire together instead of sequentially).';
         }
 	
     
@@ -1190,6 +1190,39 @@ class SWCapitalProton extends SWBallisticWeapon{
     
 }//endof class SWCapitalProton
 
+
+/*shipborne concussion missile launcher (fighter-sized) - implemented as torpedo
+   can use EW, no seeking head
+*/
+class SWAntifighterConcussion extends SWBallisticWeapon{
+        public $name = "SWAntifighterConcussion";
+        public $displayName = "Antifighter Missile";
+        public $range = 9; //better than fighter-launched version - assume shipborne sensors can hand-off to the missile at greater range
+	public $distanceRange = 18;
+        public $loadingtime = 3;
+	public $priority = 3;
+	
+	//color etc from base ballistic class
+        public $animationExplosionScale = 0.15;
+        public $projectilespeed = 12;
+        public $animationWidth = 3;
+        public $trailLength = 7;	
+        
+        public $fireControl = array(2, 1, 0); // fighters, <mediums, <capitals 
+
+	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
+		//appropriate icon (number of barrels)...
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsLightConcussion".$nr.".png";
+		
+		parent::__construct($armor, 3, 0.1, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+	}    
+        
+        public function getDamage($fireOrder){        return 6;   }
+        public function setMinDamage(){     $this->minDamage = 6;      }
+        public function setMaxDamage(){     $this->maxDamage = 6 ;     }
+    
+}//endof class SWCapitalConcussion
 
 
 
