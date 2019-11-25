@@ -5,12 +5,13 @@ class swMonCalMC80 extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 1700;
+	$this->pointCost = 1500;
 	$this->faction = "ZStarWars";
         $this->phpclass = "swMonCalMC80";
         $this->imagePath = "img/starwars/mc80.png";
         $this->shipClass = "Mon Calamari MC80 Battlecruiser";
         $this->shipSizeClass = 3;
+        $this->limited = 10; //Restricted Deployment
 	    
 		$this->isd = "Galactic Civil War";
 		$this->notes = "Primary users: Rebel Alliance, New Republic";
@@ -18,7 +19,6 @@ class swMonCalMC80 extends BaseShip{
 	$this->fighters = array("Fighter Squadrons"=>3);
 	    
 	$this->unofficial = true;
-	    //$this->isd = 2246;
         
         $this->forwardDefense = 16;
         $this->sideDefense = 18;
@@ -35,7 +35,7 @@ class swMonCalMC80 extends BaseShip{
 	$this->addPrimarySystem(new CnC(5, 36, 0, 0));
         $this->addPrimarySystem(new Reactor(5, 45, 0, 0));
         $this->addPrimarySystem(new SWScanner(4, 30, 8, 8));
-        $this->addPrimarySystem(new Engine(5, 32, 0, 14, 4));
+        $this->addPrimarySystem(new Engine(5, 28, 0, 12, 4));
 	$this->addPrimarySystem(new SWRayShield(3,10,5,2,180,0)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addPrimarySystem(new SWRayShield(3,10,5,2,0,180)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$hyperdrive = new JumpEngine(5, 24, 8, 20);
@@ -66,7 +66,7 @@ class swMonCalMC80 extends BaseShip{
         
 	$this->addLeftSystem(new Thruster(3, 16, 0, 3, 3));
 	$this->addLeftSystem(new Thruster(3, 16, 0, 3, 3));
-	$this->addLeftSystem(new SWRayShield(3,24,12,5,210,330)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addLeftSystem(new SWRayShield(3,18,8,4,210,330)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addLeftSystem(new SWHeavyTLaser(3, 210, 330, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addLeftSystem(new SWHeavyTLaser(3, 210, 330, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addLeftSystem(new SWHeavyTLaser(3, 210, 330, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
@@ -77,7 +77,7 @@ class swMonCalMC80 extends BaseShip{
 	    
 	$this->addRightSystem(new Thruster(3, 16, 0, 3, 4));
 	$this->addRightSystem(new Thruster(3, 16, 0, 3, 4));
-	$this->addRightSystem(new SWRayShield(3,24,12,5,30,150)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addRightSystem(new SWRayShield(3,18,8,4,30,150)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addRightSystem(new SWHeavyTLaser(3, 30, 150, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addRightSystem(new SWHeavyTLaser(3, 30, 150, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addRightSystem(new SWHeavyTLaser(3, 30, 150, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
@@ -87,10 +87,10 @@ class swMonCalMC80 extends BaseShip{
 	$this->addRightSystem(new SWTractorBeam(2,30,150,1));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 4, 68));
-        $this->addAftSystem(new Structure( 4, 68));
-        $this->addLeftSystem(new Structure( 4, 90));
-        $this->addRightSystem(new Structure( 4, 90));
+        $this->addFrontSystem(new Structure( 4, 60));
+        $this->addAftSystem(new Structure( 4, 60));
+        $this->addLeftSystem(new Structure( 4, 75));
+        $this->addRightSystem(new Structure( 4, 75));
         $this->addPrimarySystem(new Structure( 5, 70));
 	    
 	    
@@ -108,33 +108,33 @@ class swMonCalMC80 extends BaseShip{
             1=> array(
                     2 => "Thruster",
 		    3 => "Ray Shield",
-                    8 => "Heavy Turbolaser",
-                    12 => "Medium Ion Cannon",
+                    7 => "Heavy Turbolaser",
+                    10 => "Medium Ion Cannon",
                     18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     3 => "Thruster",
 		    4 => "Ray Shield",
-                    9 => "Heavy Turbolaser",
-                    13 => "Medium Ion Cannon",
+                    8 => "Heavy Turbolaser",
+                    11 => "Medium Ion Cannon",
                     18 => "Structure",
                     20 => "Primary",
             ),
             3=> array(
-                    2 => "Thruster",
-		    3 => "Ray Shield",
+                    3 => "Thruster",
+		    4 => "Ray Shield",
                     8 => "Heavy Turbolaser",
-                    12 => "Medium Ion Cannon",
+                    11 => "Medium Ion Cannon",
 		    13 => "Tractor Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array(
-                    2 => "Thruster",
-		    3 => "Ray Shield",
+                    3 => "Thruster",
+		    4 => "Ray Shield",
                     8 => "Heavy Turbolaser",
-                    12 => "Medium Ion Cannon",
+                    11 => "Medium Ion Cannon",
 		    13 => "Tractor Beam",
                     18 => "Structure",
                     20 => "Primary",
