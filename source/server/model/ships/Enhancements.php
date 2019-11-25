@@ -141,6 +141,7 @@ class Enhancements{
 	  
   } //endof function setEnhancementOptionsShip
 	
+	
 	/* all fighter enhancement options - availability and cost calculation
 	*/
   public static function setEnhancementOptionsFighter($flight){
@@ -187,6 +188,25 @@ class Enhancements{
 		  $enhPriceStep = 0;
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 	  }  
+	  
+	  
+	  //Poor Training (equivalent of Poor Crew for ships):
+	  //Effect: -5 Initiative, -1 Free Thrust, -1 OB, +1 Profile, +2 to dropout rolls
+	  //Cost: -10% of craft price (round up)
+	  //Limit: 1 
+	  $enhID = 'POOR_TRAIN';	  
+	  if(!in_array($enhID, $flight->enhancementOptionsDisabled)){ //option is not disabled
+		  $enhName = 'Poor Training';
+		  $enhLimit = 1;	
+		  if($flight instanceof SuperHeavyFighter){//single-craft flight! 
+			$enhPrice = -ceil($flight->pointCost/10);
+		  }else{
+		  	$enhPrice = -ceil($flight->pointCost/60); //price per craft, while flight price is per 6-craft flight	  
+		  } 	  
+		  $enhPriceStep = 0;
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+	  }
+	  
   } //endof function setEnhancementOptionsFighter
 	    
     
@@ -230,8 +250,16 @@ class Enhancements{
 					case 'IMPR_THR': //Improved Thrust: +1 free thrust
 						$flight->freethrust += $enhCount;
 						break;
-					case 'NAVIGATOR': //navigator: navigator flag - it activates appropriate segments of code
+					case 'NAVIGATOR': //Navigator: navigator flag - it activates appropriate segments of code
 						$flight->hasNavigator = true;
+						break;
+					case 'POOR_TRAIN': //Poor Training: -5 Initiative, -1 Free Thrust, -1 OB, +1 Profile, +2 to dropout rolls
+						$flight->critRollMod += $enhCount*2;
+						$flight->offensivebonus -= $enhCount;
+						$flight->freethrust -= $enhCount;
+						$flight->iniativebonus -= $enhCount*5;
+						$flight->forwardDefense += $enhCount;
+						$flight->sideDefense += $enhCount;
 						break;
 				}
 			}			
@@ -465,7 +493,16 @@ class Enhancements{
 								$strippedShip->hasNavigator = $ship->hasNavigator;
 							}
 							break;		
-					
+									
+						case 'POOR_TRAIN': //Poor Training: modify Initiative, Free Thrust, OB, Profile
+							if($ship instanceof FighterFlight){
+								$strippedShip->freethrust = $ship->freethrust;
+								$strippedShip->offensivebonus = $ship->offensivebonus;
+								$strippedShip->iniativebonus = $ship->iniativebonus;
+								$strippedShip->forwardDefense = $ship->forwardDefense;
+								$strippedShip->sideDefense = $ship->sideDefense;
+							}
+							break;
 					}					
 				}
 		    }
