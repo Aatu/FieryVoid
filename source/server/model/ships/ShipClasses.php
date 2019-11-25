@@ -249,7 +249,7 @@ class BaseShip {
 			break;
 	}
 	//unit size
-	switch($this->size){
+	switch($this->shipSizeClass){
 		case 0: //fighters
 			if($this->osat){				
 				$this->notes .= 'MicroSAT';
