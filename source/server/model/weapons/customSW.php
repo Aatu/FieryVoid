@@ -1176,12 +1176,12 @@ class SWCapitalProton extends SWBallisticWeapon{
         public $animationWidth = 6;
         public $trailLength = 12;
 	
-	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	function __construct($armor, $startArc, $endArc, $noOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		//appropriate icon (number of barrels)...
 		$nr = min(4, $noOfShots); //images are not unlimited
 		$this->iconPath = "starwars/mjsCapProton".$nr.".png";
 		
-		parent::__construct($armor, 7, 0.4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+		parent::__construct($armor, 7, 0.4, $startArc, $endArc, $noOfShots); //maxhealth and powerReq for single gun mount!
 	}    
         
         public function getDamage($fireOrder){        return 18;   }
