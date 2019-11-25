@@ -13,6 +13,7 @@ class swVictory2SD extends BaseShip{
         $this->variantOf = "Victory Star Destroyer";
 	    $this->occurence = "rare";
         $this->shipSizeClass = 3;
+        $this->limited = 33; //Limited Deployment
 	    
 	    
 		$this->isd = "19 BBY";
