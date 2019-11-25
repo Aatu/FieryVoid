@@ -11,6 +11,7 @@ class swVictorySD extends BaseShip{
         $this->imagePath = "img/starwars/victory1.png";
         $this->shipClass = "Victory Star Destroyer";
         $this->shipSizeClass = 3;
+        $this->limited = 33; //Limited Deployment
 	    
 	$this->fighters = array("Fighter Squadrons"=>2, "Assault Squadrons"=>2);
 
