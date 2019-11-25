@@ -171,12 +171,14 @@ class Weapon extends ShipSystem
 			/*this needs to be sent only if weapon suffered crits!*/
 			if (count($this->criticals)>0) { //if there was a critical, send all potentially changed data; otherwise, they should be standard and don't need to be sent extra!
 				$strippedSystem->range = $this->range;
-				$strippedSystem->rangeArray = $this->rangeArray;	    
+				$strippedSystem->rangeArray = $this->rangeArray;	
+				$strippedSystem->rangePenalty = $this->rangePenalty;
+   				$strippedSystem->rangePenaltyArray = $this->rangePenaltyArray;    
 				$strippedSystem->minDamage = $this->minDamage;
 				$strippedSystem->maxDamage = $this->maxDamage;
 				$strippedSystem->minDamageArray = $this->minDamageArray;
 				$strippedSystem->maxDamageArray = $this->maxDamageArray;
-				$strippedSystem->data = $this->data;
+				$strippedSystem->data = $this->data;    
 			}
 		}
         return $strippedSystem;
