@@ -11,6 +11,7 @@ class swImperialSD extends BaseShip{
         $this->imagePath = "img/starwars/imperator.png";
         $this->shipClass = "Imperial Star Destroyer";
         $this->shipSizeClass = 3;
+        $this->limited = 33; //Limited Deployment
 	    
 		$this->isd = "22 BBY";
 		$this->notes = "Primary users: Galactic Empire";
