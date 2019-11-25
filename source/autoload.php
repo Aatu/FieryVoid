@@ -1126,7 +1126,8 @@ spl_autoload_register(
                 'drakhmobiledefenseplatform' => '/server/model/ships/drakh/drakhMobileDefensePlatform.php',
                 'drakhmobilebeamplatform' => '/server/model/ships/drakh/drakhMobileBeamPlatform.php',
 		    
-		 //new SW toys		    
+		 //new SW toys		  
+                'swantifighterconcussion' => '/server/model/weapons/customSW.php',  
                 'swnebulonb2frigate' => '/server/model/ships/ZStarWars/swNebulonB2Frigate.php',
                 'swgallofreemtransport' => '/server/model/ships/ZStarWars/swGallofreeMTransport.php',
                 'swgallofreeescort' => '/server/model/ships/ZStarWars/swGallofreeEscort.php',
