@@ -278,6 +278,7 @@ class BaseShip {
 				$this->notes .= 'Capital ';
 			}
 			if($this->base){
+				if ($this->nonRotating) $this->notes .= 'non-rotating ';
 				$this->notes .= 'Base';
 			}else{
 				$this->notes .= 'Ship';
@@ -290,7 +291,19 @@ class BaseShip {
 	//Agile status
 	if($this->agile) $this->notes .= '<br>Agile';	    
 	//Gravitic Drive
-	if($this->gravitic) $this->notes .= '<br>Gravitic Drive';	 
+	if($this->gravitic) $this->notes .= '<br>Gravitic Drive';	
+	//Minesweeper
+	if($this->minesweeperbonus > 0) $this->notes .= '<br>Minesweeper: ' . $this->minesweeperbonus;	
+	//Advanced Armor
+	if($this->advancedArmor > 0) $this->notes .= '<br>Advanced Armor';
+	//Improved/Advanced Sensors
+	if($this->hasSpecialAbility("ImprovedSensors")) $this->notes .= '<br>Improved Sensors';
+	if($this->hasSpecialAbility("AdvancedSensors")) $this->notes .= '<br>Advanced Sensors';
+	    
+	//fighter-specific
+	if($this instanceof FighterFlight){
+		if($this->navigator) $this->notes .= '<br>Navigator'; //Navigator		    
+	}
 	    
 	    
 			
