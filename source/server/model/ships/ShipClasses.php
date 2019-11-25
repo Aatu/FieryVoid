@@ -26,7 +26,7 @@ class BaseShip {
     public $destroyed = false;
     public $pointCost = 0;
     public $faction = null;
-	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial 
     public $slot;
     public $unavailable = false;
     public $minesweeperbonus = 0;
@@ -234,8 +234,72 @@ class BaseShip {
 
     public function onConstructed($turn, $phase, $gamedata)
     {	    
-		//enhancements (in game, NOT fleet selection!)
-		Enhancements::setEnhancements($this);
+	//add to Notes information about miscellanous attributes
+	if($this->notes!='')$this->notes .= '<br>';
+	//faction age - if older than Young
+	switch($this->factionAge){
+		case 2:
+			$this->notes .= 'Middleborn ';
+			break;
+		case 3:
+			$this->notes .= 'Ancient ';
+			break;
+		case 4:
+			$this->notes .= 'Primordial ';
+			break;
+	}
+	//unit size
+	switch($this->size){
+		case 0: //fighters
+			if($this->osat){				
+				$this->notes .= 'MicroSAT';
+			} else if(($this instanceof SuperHeavyFighter) || ($this->superheavy)){
+				$this->notes .= 'Superheavy Fighter';
+			}else{
+				$this->notes .= 'Fighter';
+			}
+			break;			
+		case 1: //MCV/LCV
+			if($this->osat){				
+				$this->notes .= 'OSAT';
+			}else if($this instanceof LCV){
+				$this->notes .= 'Light Ship';
+			}else{
+				$this->notes .= 'Medium Ship';
+			}
+			break;				  
+		case 2: //HCV
+			$this->notes .= 'Heavy Ship';
+			break;       
+		case 3: //Capital/Enormous
+			if($this->Enormous){
+				$this->notes .= 'Enormous ';
+			}else{
+				$this->notes .= 'Capital ';
+			}
+			if($this->base){
+				$this->notes .= 'Base';
+			}else{
+				$this->notes .= 'Ship';
+			}
+			break;
+		default: //should not happen!
+			$this->notes .= 'Unit size not identified!';	
+			break;
+	}//unit size described, which also guarantees existence of previous entries!
+	//Agile status
+	if($this->agile) $this->notes .= '<br>Agile';	    
+	//Gravitic Drive
+	if($this->gravitic) $this->notes .= '<br>Gravitic Drive';	 
+	    
+	    
+			
+						       
+	    
+	    
+	    
+	//enhancements (in game, NOT fleet selection!)
+	Enhancements::setEnhancements($this);
 	    
         foreach ($this->systems as $system){
             $system->onConstructed($this, $turn, $phase);
