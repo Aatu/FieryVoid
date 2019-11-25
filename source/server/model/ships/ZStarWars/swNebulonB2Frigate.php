@@ -60,6 +60,7 @@ class swNebulonB2Frigate extends HeavyCombatVessel{
 	$this->addAftSystem(new SWMediumLaser(2, 120, 300, 2)); //armor, arc and number of weapon in common housing!
 	$this->addAftSystem(new SWMediumLaser(2, 60, 240, 2)); //armor, arc and number of weapon in common housing!
 	$this->addAftSystem(new SWMediumLaser(2, 0, 180, 2)); //armor, arc and number of weapon in common housing!
+	$this->addAftSystem(new SWAntifighterConcussion(2, 240, 120, 2)); //armor, arc and number of weapon in common housing!
 	    
         $this->addFrontSystem(new Structure( 4, 50));
         $this->addAftSystem(new Structure( 4, 36));
@@ -90,7 +91,8 @@ class swNebulonB2Frigate extends HeavyCombatVessel{
 					6 => "Engine",		
 		        		8 => "Hyperdrive",
 					9 => "Ray Shield",
-					13 => 'Medium Laser',
+					12 => 'Medium Laser',
+					13 => 'Antifighter Missile',
         				18 => "Structure",
         				20 => "Primary",
         		),
