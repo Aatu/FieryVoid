@@ -52,9 +52,9 @@ class swVindicator extends BaseShipNoFwd{
 	$this->addRightSystem(new SWRayShield(3,15,9,3,0,150)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addRightSystem(new SWLightLaser(2, 300, 120, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addRightSystem(new SWLightTLaser(3, 0, 120, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addRightSystem(new SWMediumTLaser(3, 0, 120, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addRightSystem(new SWMediumTLaser(3, 300, 60, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addRightSystem(new SWMediumTLaser(3, 330, 90, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addRightSystem(new SWMediumTLaser(3, 0, 120, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
