@@ -5,7 +5,7 @@ class TacGamedata {
     public static $currentTurn;
     public static $currentPhase;
     public static $currentGameID;
-    public static $safeGameID = 4086; //gameID that is safe for adding new features
+    public static $safeGameID = 2000; //gameID that is safe for adding new features
     public static $lastFiringResolutionNo = 0; //firing resolution to be used
 
     public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator, $gamespace, $description;
