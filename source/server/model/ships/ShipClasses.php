@@ -234,83 +234,6 @@ class BaseShip {
 
     public function onConstructed($turn, $phase, $gamedata)
     {	    
-	//add to Notes information about miscellanous attributes
-	if($this->notes!='')$this->notes .= '<br>';
-	//faction age - if older than Young
-	switch($this->factionAge){
-		case 2:
-			$this->notes .= 'Middleborn ';
-			break;
-		case 3:
-			$this->notes .= 'Ancient ';
-			break;
-		case 4:
-			$this->notes .= 'Primordial ';
-			break;
-	}
-	//unit size
-	switch($this->shipSizeClass){
-		case 0: //fighters
-			if($this->osat){				
-				$this->notes .= 'MicroSAT';
-			} else if(($this instanceof SuperHeavyFighter) || ($this->superheavy)){
-				$this->notes .= 'Superheavy Fighter';
-			}else{
-				$this->notes .= 'Fighter';
-			}
-			break;			
-		case 1: //MCV/LCV
-			if($this->osat){				
-				$this->notes .= 'OSAT';
-			}else if($this instanceof LCV){
-				$this->notes .= 'Light Ship';
-			}else{
-				$this->notes .= 'Medium Ship';
-			}
-			break;				  
-		case 2: //HCV
-			$this->notes .= 'Heavy Ship';
-			break;       
-		case 3: //Capital/Enormous
-			if($this->Enormous){
-				$this->notes .= 'Enormous ';
-			}else{
-				$this->notes .= 'Capital ';
-			}
-			if($this->base){
-				if ($this->nonRotating) $this->notes .= 'non-rotating ';
-				$this->notes .= 'Base';
-			}else{
-				$this->notes .= 'Ship';
-			}
-			break;
-		default: //should not happen!
-			$this->notes .= 'Unit size not identified!';	
-			break;
-	}//unit size described, which also guarantees existence of previous entries!
-	//Agile status
-	if($this->agile) $this->notes .= '<br>Agile';	    
-	//Gravitic Drive
-	if($this->gravitic) $this->notes .= '<br>Gravitic Drive';	
-	//Minesweeper
-	if($this->minesweeperbonus > 0) $this->notes .= '<br>Minesweeper: ' . $this->minesweeperbonus;	
-	//Advanced Armor
-	if($this->advancedArmor > 0) $this->notes .= '<br>Advanced Armor';
-	//Improved/Advanced Sensors
-	if($this->hasSpecialAbility("ImprovedSensors")) $this->notes .= '<br>Improved Sensors';
-	if($this->hasSpecialAbility("AdvancedSensors")) $this->notes .= '<br>Advanced Sensors';
-	    
-	//fighter-specific
-	if($this instanceof FighterFlight){
-		if($this->navigator) $this->notes .= '<br>Navigator'; //Navigator		    
-	}
-	    
-	    
-			
-						       
-	    
-	    
-	    
 	//enhancements (in game, NOT fleet selection!)
 	Enhancements::setEnhancements($this);
 	    
@@ -392,17 +315,128 @@ class BaseShip {
 				}
 			//}
 		}
-	   }
+
+			$this->notesFill(); //add miscellanous info to notes!
+	   }//endof adding PRIMARY Structure (with specials attached)
+	   
             $this->addSystem($system, 0);
+		}//endof addPrimarySystem
 
-
-        }
         protected function addLeftSystem($system){
             $this->addSystem($system, 3);
         }
         protected function addRightSystem($system){
             $this->addSystem($system, 4);
         }
+		
+		/* fill notes with information contained in various attributes, not so readily accessible to player*/
+		protected function notesFill($sampleFighter = null){
+			if (TacGamedata::$currentTurn >= 1){ //in later turns notes will be displayed from pre-compiled cache! no point generating them every time
+				return;
+			}
+			//add to Notes information about miscellanous attributes
+			if($this->notes!='')$this->notes .= '<br>';
+				//faction age - if older than Young
+				switch($this->factionAge){
+				case 2:
+					$this->notes .= 'Middleborn ';
+					break;
+				case 3:
+					$this->notes .= 'Ancient ';
+					break;
+				case 4:
+					$this->notes .= 'Primordial ';
+					break;
+			}
+			//unit size
+			switch($this->shipSizeClass){
+				case 0: //fighters
+				case -1:
+					if($this->osat){				
+						$this->notes .= 'MicroSAT';
+					} else if(($this instanceof SuperHeavyFighter) || ($this->superheavy)){
+						$this->notes .= 'Superheavy Fighter';
+					}else{
+						$this->notes .= 'Fighter';
+					}
+					break;			
+				case 1: //MCV/LCV
+					if($this->osat){				
+						$this->notes .= 'OSAT';
+					}else if($this instanceof LCV){
+						$this->notes .= 'Light Ship';
+					}else{
+						$this->notes .= 'Medium Ship';
+					}
+					break;				  
+				case 2: //HCV
+					$this->notes .= 'Heavy Ship';
+					break;       
+				case 3: //Capital/Enormous
+					if($this->Enormous){
+						$this->notes .= 'Enormous ';
+					}else{
+						$this->notes .= 'Capital ';
+					}
+					if($this->base){
+						if ($this->nonRotating) $this->notes .= 'non-rotating ';
+						$this->notes .= 'Base';
+					}else{
+						$this->notes .= 'Ship';
+					}
+					break;
+				default: //should not happen!
+					$this->notes .= 'Unit size not identified!';	
+					break;
+			}//unit size described, which also guarantees existence of previous entries!
+			//required hangar
+			if($this->hangarRequired!='') { 
+				$this->notes .= '<br>Requires hangar space: ' . $this->hangarRequired;			
+				if($this->unitSize!=1) $this->notes .= ' (' . $this->unitSize . ' per slot)';
+			}
+			//Agile status
+			if($this->agile) $this->notes .= '<br>Agile';	    
+			//Gravitic Drive
+			if($this->gravitic) $this->notes .= '<br>Gravitic Drive';	
+			//Minesweeper
+			if($this->minesweeperbonus > 0) $this->notes .= '<br>Minesweeper: ' . $this->minesweeperbonus;	
+			//Advanced Armor
+			if($this->advancedArmor > 0) $this->notes .= '<br>Advanced Armor';
+			//Improved/Advanced Sensors
+			/*hasSpecialAbility relies on data created in system->onConstructed, so not available here. Need to manually look for Sensors...
+			if($this->hasSpecialAbility("ImprovedSensors")) $this->notes .= '<br>Improved Sensors';
+			if($this->hasSpecialAbility("AdvancedSensors")) $this->notes .= '<br>Advanced Sensors';
+			*/
+			if(!($this instanceof FighterFlight)) foreach($this->systems as $sensor) if ($sensor instanceof Scanner){
+				foreach($sensor->specialAbilities as $ability){
+					if ($ability=='AdvancedSensors'){
+						$this->notes .= '<br>Advanced Sensors';
+					}else if ($ability=='ImprovedSensors'){
+						$this->notes .= '<br>Improved Sensors';
+					}
+				}
+				break; //checking one Scanner is enough
+			}
+
+
+			//fighter-specific
+			if($this instanceof FighterFlight){
+				if($this->hasNavigator) $this->notes .= '<br>Navigator'; //Navigator		
+				if($sampleFighter !== null){
+					foreach($sampleFighter->systems as $ftrSys){
+						foreach($ftrSys->specialAbilities as $ability){
+							if ($ability=='AdvancedSensors'){
+								$this->notes .= '<br>Advanced Sensors';
+							}else if ($ability=='ImprovedSensors'){
+								$this->notes .= '<br>Improved Sensors';
+							}
+						}
+					}
+				}
+			}
+			
+		}//endof function notesFill
+		
         
         public function addDamageEntry($damage){
         

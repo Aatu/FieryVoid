@@ -204,7 +204,7 @@ class FighterFlight extends BaseShip
     {
         $fighter->setUnit($this);
         $fighter->id = $this->autoid;
-        $fighter->location = sizeof($this->systems);
+        $fighter->location = sizeof($this->systems);		
 
         $this->autoid++;
         $fighterSys = array();
@@ -216,6 +216,12 @@ class FighterFlight extends BaseShip
         }
         $fighter->systems = $fighterSys;
         $this->systems[$fighter->id] = $fighter;
+		
+		
+		//add to Notes information about miscellanous attributes - with first fighter being added
+		if($fighter->id == 1){
+			$this->notesFill($fighter);
+		}
     } //endof function addSystem
 
 
