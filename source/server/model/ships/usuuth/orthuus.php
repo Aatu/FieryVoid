@@ -54,7 +54,7 @@ class Orthuus  extends BaseShip{
         $this->addLeftSystem(new LightParticleProjector(2, 3, 1, 180, 0));
         $this->addLeftSystem(new LightParticleProjector(2, 3, 1, 180, 0));
         
-        $this->addRightSystem(new Thruster(4, 12, 0, 4, 3));
+        $this->addRightSystem(new Thruster(4, 12, 0, 4, 4));
         $this->addRightSystem(new HvyParticleProjector(4, 8, 3, 0, 180));
         $this->addRightSystem(new LightParticleProjector(2, 3, 1, 0, 180));
         $this->addRightSystem(new LightParticleProjector(2, 3, 1, 0, 180));
@@ -108,3 +108,5 @@ class Orthuus  extends BaseShip{
         );
     }
 }
+
+?>
