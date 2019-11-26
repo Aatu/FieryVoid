@@ -217,7 +217,7 @@ class ImprovedIonCannon extends Raking{
     /*Cascor weapon*/
     class DualIonBolter extends Weapon{
         public $name = "DualIonBolter";
-        public $displayName = "Light Bolter";
+        public $displayName = "Dual Ion Bolter";
         public $iconPath = "dualIonBolter.png";
         
         public $animation = "trail";

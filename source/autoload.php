@@ -1139,11 +1139,27 @@ spl_autoload_register(
                 'ionizer' => '/server/model/weapons/ion.php',
                 'ioniclaser' => '/server/model/weapons/ion.php',
                 'dualionbolter' => '/server/model/weapons/ion.php',
-		    
-		    
-		    
-		    
-		    
+                
+                //Cascor Ships
+                'caracti' => '/server/model/ships/cascor/caracti.php',
+                'calacca' => '/server/model/ships/cascor/calacca.php',
+                'coqari' => '/server/model/ships/cascor/coqari.php',
+                'crocti' => '/server/model/ships/cascor/crocti.php',
+                'qoricc' => '/server/model/ships/cascor/qoricc.php',
+                'drocca' => '/server/model/ships/cascor/drocca.php',
+                'norsca' => '/server/model/ships/cascor/norsca.php',
+                'nesacc' => '/server/model/ships/cascor/nesacc.php',
+                'norscator' => '/server/model/ships/cascor/norscator.php',
+                'qoccata' => '/server/model/ships/cascor/qoccata.php',
+                'talacca' => '/server/model/ships/cascor/talacca.php',
+                'tacacci' => '/server/model/ships/cascor/tacacci.php',
+                'ruqacc' => '/server/model/ships/cascor/ruqacc.php',
+                'traqintor' => '/server/model/ships/cascor/traqintor.php',
+                'caccar' => '/server/model/ships/cascor/caccar.php',
+                'calaq' => '/server/model/ships/cascor/calaq.php',
+                'caltus' => '/server/model/ships/cascor/caltus.php',
+                'tiqincc' => '/server/model/ships/cascor/tiqincc.php',
+               		    
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
                 'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
