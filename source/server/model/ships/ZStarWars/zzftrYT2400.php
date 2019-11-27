@@ -3,7 +3,7 @@ class zzftrYT2400 extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 80*6;
+        $this->pointCost = 75*6;
         $this->faction = "ZStarWars";
         $this->phpclass = "zzftrYT2400";
         $this->shipClass = "YT-2400 Light Freighters";
