@@ -38,9 +38,9 @@ class Tiqincc extends FighterFlight{
             $fighter->iconPath = "img/ships/CascorTiqincc_Large.png";
 
             $frontGun = new Ionizer(330, 30, 2);
-            $frontGun->displayName = "Ionizer";
+            //$frontGun->displayName = "Ionizer";
             $rearGun = new Ionizer(330, 30, 1);
-            $rearGun->displayName = "Ionizer";
+            //$rearGun->displayName = "Ionizer";
             
             $fighter->addFrontSystem($frontGun);
             $fighter->addFrontSystem($rearGun);
