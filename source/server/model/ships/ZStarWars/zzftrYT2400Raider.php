@@ -3,7 +3,7 @@ class zzftrYT2400Raider extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 80*6;
+        $this->pointCost = 84*6;
         $this->faction = "ZStarWars";
         $this->phpclass = "zzftrYT2400Raider";
         $this->shipClass = "YT-2400 Raiders";
@@ -51,10 +51,10 @@ class zzftrYT2400Raider extends FighterFlight{
             $fighter->imagePath = "img/starwars/YT2400.png";
             $fighter->iconPath = "img/starwars/YT2400_Large.png"; 
 		            
-            $roundGun = new SWFighterLaser(0, 360, 2, 2); //all-around dual Laser Cannons
+            $roundGun = new SWFighterLaser(0, 360, 2, 4); //all-around quad Laser Cannons
             $fighter->addFrontSystem($roundGun);
             
-            $roundGun = new SWFighterLaser(0, 360, 2, 2); //all-around dual Laser Cannons
+            $roundGun = new SWFighterIon(0, 360, 2, 2); //all-around dual Ion Cannons
             $fighter->addFrontSystem($roundGun);
             
             //2 forward Proton Torpedo Launchers, 4 shots each
