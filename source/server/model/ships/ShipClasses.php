@@ -412,6 +412,11 @@ class BaseShip {
 						$this->notes .= '<br>Advanced Sensors';
 					}else if ($ability=='ImprovedSensors'){
 						$this->notes .= '<br>Improved Sensors';
+					}else if ($ability=='StarWarsSensors'){
+						$this->notes .= '<br>Star Wars Sensors';
+					}
+					if ($ability=='LCVSensors'){ //not "else" as it's possible to have LCV Sensors that are also StarWars (or, however unlikely, Advanced ;) )
+						$this->notes .= '<br>LCV Sensors';
 					}
 				}
 				break; //checking one Scanner is enough
