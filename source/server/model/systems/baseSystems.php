@@ -434,6 +434,19 @@ class Scanner extends ShipSystem{
 		}
 		$this->data["Special"] .= 'Advanced Sensors - negate Jammer, flat 14 boost cost.';
 	}	
+	/*note: StarWarsSensors mark in itself doesn't do anything beyond being recognizable for ship description function
+		all actual effects are contained in attribute changes
+	*/
+	public function markStarWars(){		
+    		$this->specialAbilities[] = "StarWarsSensors";
+		$this->maxBoostLevel = 2;
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= 'Star Wars Sensors - boostability limited to +2.';
+	}	
 } //endof Scanner
 
 class ElintScanner extends Scanner implements SpecialAbility{
@@ -475,6 +488,13 @@ class ElintScanner extends Scanner implements SpecialAbility{
 class SWScanner extends Scanner {
     public $name = "SWScanner";
     public $iconPath = "scanner.png";
+	
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+	$this->markStarWars();
+    }
+	
+	/* moved to markStarWars function!
     public $maxBoostLevel = 2;
 
      public function setSystemDataWindow($turn){
@@ -487,6 +507,7 @@ class SWScanner extends Scanner {
 	}
 	$this->data["Special"] .= "Boostability limited to +".$boostability.".";	     
     }
+    */
 } //end of SWScanner
 
 
