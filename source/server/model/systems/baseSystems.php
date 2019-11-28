@@ -447,6 +447,17 @@ class Scanner extends ShipSystem{
 		}
 		$this->data["Special"] .= 'Star Wars Sensors - boostability limited to +2.';
 	}	
+	/*note: LCV Sensors are (or will be) checked at committing Initial Orders, in front end. All but 2 EW points need to be OEW. 
+	*/
+	public function markLCV(){		
+    		$this->specialAbilities[] = "LCVSensors";
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= 'LCV Sensors - up to 2 EW points may be allocated freely. All surplus can be allocated ONLY as OEW.';
+	}	
 } //endof Scanner
 
 class ElintScanner extends Scanner implements SpecialAbility{
