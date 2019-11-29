@@ -1,5 +1,5 @@
 <?php
-class BrixadiiPoliceFrigateBase extends MediumShip{
+class BrixadiiPoliceFrigateBase extends LCV{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -34,7 +34,9 @@ class BrixadiiPoliceFrigateBase extends MediumShip{
   
 		$this->addPrimarySystem(new Reactor(4, 7, 0, 0));
 		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-		$this->addPrimarySystem(new Scanner(4, 9, 2, 3));
+	    	$sensors = new Scanner(4, 9, 2, 3);
+		$sensors->markLCV();
+		$this->addPrimarySystem($sensors);
 		$this->addPrimarySystem(new Engine(3, 10, 0, 4, 3));
 		$this->addPrimarySystem(new ParticleProjector(2, 0, 0, 240, 120));
 	    
