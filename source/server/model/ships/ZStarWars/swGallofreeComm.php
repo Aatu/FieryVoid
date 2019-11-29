@@ -36,7 +36,7 @@ class swGallofreeComm extends LCV{
   
 	$this->addPrimarySystem(new Reactor(3, 9, 0, 0));
 	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-        $this->addPrimarySystem(new ElintScanner(3, 14, 4, 4));
+        $this->addPrimarySystem(new ElintScanner(3, 14, 4, 4)); //full ElInt Scanner, no typical SW limitation for ElInt!
 	$this->addPrimarySystem(new Engine(3, 8, 0, 6, 1));
 	$this->addPrimarySystem(new CargoBay(1, 40));
 	$hyperdrive = new JumpEngine(2, 6, 3, 12);
