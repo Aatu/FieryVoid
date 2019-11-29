@@ -154,6 +154,23 @@ window.ew = {
 		return true;
     },
 
+    /*Ship with LCVSensors trait must have all but 2 EW points set to OEW
+    	returns false if this is not met
+    */
+    checkLCVSensors: function convertUnusedToDEW(ship) {
+	var toReturn = true;
+	if(shipManager.hasSpecialAbility(ship, "LCVSensors")){ //otherwise no check
+		var totalEW = ew.getScannerOutput(ship);
+		if (totalEW > 2){
+			var offensiveEW = getAllOffensiveEW(ship);
+			if ( totalEW > (offensiveEW+2) ){
+				toReturn = false;
+			}
+		}
+	}
+	return toReturn;
+    },
+	
     getListedDEW: function getListedDEW(ship) {
         for (var i in ship.EW) {
             var entry = ship.EW[i];
