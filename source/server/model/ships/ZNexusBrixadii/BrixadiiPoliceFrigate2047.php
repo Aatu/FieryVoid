@@ -1,5 +1,5 @@
 <?php
-class BrixadiiPoliceFrigate2047 extends MediumShip{
+class BrixadiiPoliceFrigate2047 extends LCV{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
