@@ -448,6 +448,8 @@ class Scanner extends ShipSystem{
 		$this->data["Special"] .= 'Star Wars Sensors - boostability limited to +2.';
 	}	
 	/*note: LCV Sensors are (or will be) checked at committing Initial Orders, in front end. All but 2 EW points need to be OEW. 
+	This is Sensor trait rather than being strictly tied to hull size - while no larger units have it, of LCVs themselves only Young ones have it more or less universally.
+	More advanced factions usually do not, and for custom factions it's up to their creator.
 	*/
 	public function markLCV(){		
     		$this->specialAbilities[] = "LCVSensors";
