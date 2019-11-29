@@ -34,7 +34,9 @@ class BrixadiiPoliceFrigate2047 extends MediumShip{
   
 		$this->addPrimarySystem(new Reactor(4, 7, 0, 0));
 		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-		$this->addPrimarySystem(new Scanner(4, 9, 2, 4));
+	    	$sensors = new Scanner(4, 9, 2, 4);
+		$sensors->markLCV();
+		$this->addPrimarySystem($sensors);
 		$this->addPrimarySystem(new Engine(3, 10, 0, 5, 3));
 		$this->addPrimarySystem(new ParticleProjector(2, 0, 0, 240, 120));
 		$this->addPrimarySystem(new ParticleProjector(2, 0, 0, 240, 120));
