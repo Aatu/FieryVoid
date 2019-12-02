@@ -197,6 +197,29 @@
 			<div class="logout"><a href="logout.php">LOGOUT</a></div>
 			<div class="">	<span class="panelheader">GAME:</span><span class="panelsubheader"><?php print($gamelobbydata->name); ?></span>	</div>
 			<div><span> <?php print($gamelobbydata->description); ?> </span></div>
+<?php
+//define options list
+$optionsUsed = '';
+
+if ($gamelobbydata->gamespace == '-1x-1'){ //open map
+	$optionsUsed .= 'Open Map';
+}else{ //fixed map
+	$optionsUsed .= 'Map ' . $gamelobbydata->gamespace;
+}
+
+$simMv = false;
+foreach($gamelobbydata->rules as $hasRule){
+	if($hasRule->getRuleName()=='initiativeCategories'){
+		$simMv = true;
+	}
+}
+if ($simMv==true){//simultaneous movement
+	$optionsUsed  .= ', Simultaneous Movement';
+}else{//standard movement
+	$optionsUsed  .= ', Standard Movement';
+}
+?>		
+			<div><span> <b>Options:</b> <?php print($optionsUsed); ?> </span></div>
 			
 			<div><span>TEAM 1</span></div>
 			<div id="team1" class="subpanel slotcontainer">

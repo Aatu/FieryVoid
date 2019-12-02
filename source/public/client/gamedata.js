@@ -448,7 +448,7 @@ window.gamedata = {
                 return false;
             }
 
-	    var EWIncorrect = '';
+	    var EWIncorrect = ''; //too many EW points set
             for (var i in gamedata.ships) {
                 var ship = gamedata.ships[i];
                 if (ew.convertUnusedToDEW(ship) != true){
@@ -461,7 +461,20 @@ window.gamedata = {
                 return false;
 	    }
 		
-		var EWLCVIncorrect = '';		
+		var EWRestrictedIncorrect = '';//RestrictedEW critical circumvented
+            for (var i in gamedata.ships) {
+                var ship = gamedata.ships[i];
+                if (ew.checkRestrictedEW(ship) != true){
+				EWRestrictedIncorrect += "- " + gamedata.ships[i].name + "<br>";					
+			}
+		}
+	    if (EWRestrictedIncorrect != ''){
+			EWRestrictedIncorrect = "Following ships have Restricted EW critical, need to reduce non-DEW:<br>" + EWRestrictedIncorrect;
+			window.confirm.error(EWRestrictedIncorrect, function () {});
+			return false;
+	    }
+		
+		var EWLCVIncorrect = '';//LCV set too many EW to tasks other than OEW
             for (var i in gamedata.ships) {
                 var ship = gamedata.ships[i];
                 if (ew.checkLCVSensors(ship) != true){
