@@ -1,5 +1,5 @@
 <?php
-class BrixadiiPursuitFrigate2057 extends MediumShip{
+class BrixadiiPursuitFrigate2057 extends LCV{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -29,7 +29,9 @@ class BrixadiiPursuitFrigate2057 extends MediumShip{
          
         $this->addPrimarySystem(new Reactor(3, 8, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 10, 4, 4));
+	    	$sensors = new Scanner(3, 10, 4, 4);
+		$sensors->markLCV();
+		$this->addPrimarySystem($sensors);
         $this->addPrimarySystem(new Engine(3, 9, 0, 9, 4));
         $this->addPrimarySystem(new Hangar(1, 2));
         $this->addPrimarySystem(new Thruster(2, 14, 0, 4, 3));

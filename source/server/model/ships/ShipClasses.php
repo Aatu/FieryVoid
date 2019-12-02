@@ -26,7 +26,7 @@ class BaseShip {
     public $destroyed = false;
     public $pointCost = 0;
     public $faction = null;
-	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial 
     public $slot;
     public $unavailable = false;
     public $minesweeperbonus = 0;
@@ -234,8 +234,8 @@ class BaseShip {
 
     public function onConstructed($turn, $phase, $gamedata)
     {	    
-		//enhancements (in game, NOT fleet selection!)
-		Enhancements::setEnhancements($this);
+	//enhancements (in game, NOT fleet selection!)
+	Enhancements::setEnhancements($this);
 	    
         foreach ($this->systems as $system){
             $system->onConstructed($this, $turn, $phase);
@@ -309,23 +309,138 @@ class BaseShip {
 			//check whether game id is safe (can be safely be deleted lin May 2018 or so)
 			///already safe enough, commenting out!
 			//if ((TacGamedata::$currentGameID >= TacGamedata::$safeGameID) || (TacGamedata::$currentGameID<1)){
-				//if ship is specifically designed to ram, so be it - there will be two ramming attacks... this isn't necessary, but easiest.
-				if((!($this instanceof FighterFlight)) && (!($this instanceof OSAT)) && (!$this->base) && (!$this->smallBase) ){
+				if((!($this instanceof FighterFlight)) && (!($this->osat)) && (!$this->base) && (!$this->smallBase) ){
 					$this->addPrimarySystem(new RammingAttack(0, 0, 360, 0, 0));
 				}
 			//}
 		}
-	   }
+
+			$this->notesFill(); //add miscellanous info to notes!
+	   }//endof adding PRIMARY Structure (with specials attached)
+	   
             $this->addSystem($system, 0);
+		}//endof addPrimarySystem
 
-
-        }
         protected function addLeftSystem($system){
             $this->addSystem($system, 3);
         }
         protected function addRightSystem($system){
             $this->addSystem($system, 4);
         }
+		
+		/* fill notes with information contained in various attributes, not so readily accessible to player*/
+		protected function notesFill($sampleFighter = null){
+			if (TacGamedata::$currentTurn >= 1){ //in later turns notes will be displayed from pre-compiled cache! no point generating them every time
+				return;
+			}
+			//add to Notes information about miscellanous attributes
+			if($this->notes!='')$this->notes .= '<br>';
+				//faction age - if older than Young
+				switch($this->factionAge){
+				case 2:
+					$this->notes .= 'Middleborn ';
+					break;
+				case 3:
+					$this->notes .= 'Ancient ';
+					break;
+				case 4:
+					$this->notes .= 'Primordial ';
+					break;
+			}
+			//unit size
+			switch($this->shipSizeClass){
+				case 0: //fighters
+				case -1:
+					if($this->osat){				
+						$this->notes .= 'MicroSAT';
+					} else if(($this instanceof SuperHeavyFighter) || ($this->superheavy)){
+						$this->notes .= 'Superheavy Fighter';
+					}else{
+						$this->notes .= 'Fighter';
+					}
+					break;			
+				case 1: //MCV/LCV
+					if($this->osat){				
+						$this->notes .= 'OSAT';
+					}else if($this instanceof LCV){
+						$this->notes .= 'Light Ship';
+					}else{
+						$this->notes .= 'Medium Ship';
+					}
+					break;				  
+				case 2: //HCV
+					$this->notes .= 'Heavy Ship';
+					break;       
+				case 3: //Capital/Enormous
+					if($this->Enormous){
+						$this->notes .= 'Enormous ';
+					}else{
+						$this->notes .= 'Capital ';
+					}
+					if($this->base){
+						if ($this->nonRotating) $this->notes .= 'non-rotating ';
+						$this->notes .= 'Base';
+					}else{
+						$this->notes .= 'Ship';
+					}
+					break;
+				default: //should not happen!
+					$this->notes .= 'Unit size not identified!';	
+					break;
+			}//unit size described, which also guarantees existence of previous entries!
+			//required hangar
+			if($this->hangarRequired!='') { 
+				$this->notes .= '<br>Requires hangar space: ' . $this->hangarRequired;			
+				if($this->unitSize!=1) $this->notes .= ' (' . $this->unitSize . ' per slot)';
+			}
+			//Agile status
+			if($this->agile) $this->notes .= '<br>Agile';	    
+			//Gravitic Drive
+			if($this->gravitic) $this->notes .= '<br>Gravitic Drive';	
+			//Minesweeper
+			if($this->minesweeperbonus > 0) $this->notes .= '<br>Minesweeper: ' . $this->minesweeperbonus;	
+			//Advanced Armor
+			if($this->advancedArmor > 0) $this->notes .= '<br>Advanced Armor';
+			//Improved/Advanced Sensors
+			/*hasSpecialAbility relies on data created in system->onConstructed, so not available here. Need to manually look for Sensors...
+			if($this->hasSpecialAbility("ImprovedSensors")) $this->notes .= '<br>Improved Sensors';
+			if($this->hasSpecialAbility("AdvancedSensors")) $this->notes .= '<br>Advanced Sensors';
+			*/
+			if(!($this instanceof FighterFlight)) foreach($this->systems as $sensor) if ($sensor instanceof Scanner){
+				foreach($sensor->specialAbilities as $ability){
+					if ($ability=='AdvancedSensors'){
+						$this->notes .= '<br>Advanced Sensors';
+					}else if ($ability=='ImprovedSensors'){
+						$this->notes .= '<br>Improved Sensors';
+					}else if ($ability=='StarWarsSensors'){
+						$this->notes .= '<br>Star Wars Sensors';
+					}
+					if ($ability=='LCVSensors'){ //not "else" as it's possible to have LCV Sensors that are also StarWars (or, however unlikely, Advanced ;) )
+						$this->notes .= '<br>LCV Sensors';
+					}
+				}
+				break; //checking one Scanner is enough
+			}
+
+
+			//fighter-specific
+			if($this instanceof FighterFlight){
+				if($this->hasNavigator) $this->notes .= '<br>Navigator'; //Navigator		
+				if($sampleFighter !== null){
+					foreach($sampleFighter->systems as $ftrSys){
+						foreach($ftrSys->specialAbilities as $ability){
+							if ($ability=='AdvancedSensors'){
+								$this->notes .= '<br>Advanced Sensors';
+							}else if ($ability=='ImprovedSensors'){
+								$this->notes .= '<br>Improved Sensors';
+							}
+						}
+					}
+				}
+			}
+			
+		}//endof function notesFill
+		
         
         public function addDamageEntry($damage){
         
@@ -1014,17 +1129,17 @@ class BaseShip {
 
 
 
-    public function getHitSystemPos($pos, $shooter, $fireOrder, $weapon, $location = null){
+    public function getHitSystemPos($pos, $shooter, $fireOrder, $weapon, $gamedata, $location = null){
         /*find target section (based on indicated position) before finding location*/
         if($location==null){
             $location = $this->getHitSectionPos($pos, $fireOrder->turn);
         }
-        $foundSystem = $this->getHitSystem($shooter, $fireOrder, $weapon, $location);
+        $foundSystem = $this->getHitSystem($shooter, $fireOrder, $weapon, $gamedata, $location);
         return $foundSystem;
     }
 
 
-    public function getHitSystem($shooter, $fireOrder, $weapon, $location = null){
+    public function getHitSystem($shooter, $fireOrder, $weapon, $gamedata, $location = null){
         /*if something has to choose system by firing position, use getHitSystemPos instead*/
         if (isset($this->hitChart[0])){
             $system = $this->getHitSystemByTable($shooter, $fireOrder, $weapon, $location);

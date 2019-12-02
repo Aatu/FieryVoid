@@ -22,6 +22,7 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "removeSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getRemoveOEW('SDEW'), info: "Remove SDEW" }, 
         { className: "addBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW], action: addBDEW, info: "add BDEW" }, 
         { className: "removeBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW], action: removeBDEW, info: "remove BDEW" }, 
+        { className: "removeAllEW", condition: [isSelf, notFlight], action: removeAllEW, info: "Remove All EW" }, 
         { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" }, 
         { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" }
     ];
@@ -87,6 +88,11 @@ window.ShipTooltipInitialOrdersMenu = function () {
         var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "BDEW", this.turn);
         if (!entry) return;
         ew.deassignEW(this.selectedShip, entry);
+    }
+    
+    
+    function removeAllEW() {
+        ew.removeEW(this.selectedShip);
     }
 
     function getAddOEW(type) {

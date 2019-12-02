@@ -10,6 +10,10 @@ class zzftrxwing extends FighterFlight{
         $this->shipClass = "X-Wing Superiority Fighters";
         $this->imagePath = "img/starwars/xWing.png";
         
+		$this->isd = "early Galactic Civil War";
+		$this->notes = "Primary users: Rebel Alliance, New Republic.";
+		$this->notes .= "Hyperdrive";
+	    
         //$this->isd = 2214;
         $this->unofficial = true;
         

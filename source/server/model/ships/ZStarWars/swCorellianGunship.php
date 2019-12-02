@@ -4,12 +4,16 @@ class swCorellianGunship extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 450;
+	$this->pointCost = 500;
 	$this->faction = "ZStarWars";
         $this->phpclass = "swcorelliangunship";
         $this->imagePath = "img/starwars/dp20.png";
 	    $this->canvasSize = 100;
-        $this->shipClass = "Corellian Gunship";
+        $this->shipClass = "DP20 Corellian Gunship";
+	    
+	    
+		$this->isd = "early Galactic Empire";
+		$this->notes = "Primary users: common";
 	    
 	$this->unofficial = true;
         // $this->agile = true;

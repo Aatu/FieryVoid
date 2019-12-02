@@ -37,7 +37,7 @@ class PlasmaStream extends Raking{
 	}
 		 
 	
-	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+	public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
 		$armour = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
 		    if (is_numeric($armour)){
 			$toIgnore = ceil($armour /2);
@@ -106,11 +106,11 @@ class ShockCannon extends Weapon{
         }
 
         // Shock Cannons ignore armor.
-        protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
+        public function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
             return 0;
 	}
 
-        protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+        public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		if (!$system->advancedArmor){
 		    $crit = null;
 
@@ -1219,7 +1219,7 @@ class SparkField extends Weapon implements DefensiveSystem{
 	    SparkFieldHandler::addSparkField($this);//so all Spark Fields are accessible together, and firing orders can be uniformly created
         }
 	
-        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
             return 0; //ignores armor!
         }
 	
@@ -1773,11 +1773,11 @@ class ResonanceGenerator extends Weapon{
         } //endof function fire
 	
 	
-	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+	public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
 		return 0; //standard armor is ignored
         }
 	
-	protected function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos=null){
+	public function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos=null){
 		//half of advanced armor is ignored
 		$armour = parent::getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos);
 		    if (is_numeric($armour)){
@@ -1946,7 +1946,7 @@ class RammingAttack extends Weapon{
 			$this->setMinDamage(); //just in case it's not set correctly in the beginning!
         		$this->setMaxDamage();
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Ramming attack - if cucccessful, ramming unit itself will take damage too (determined by targets' ramming factor).";  
+		      $this->data["Special"] = "Ramming attack - if succcessful, ramming unit itself will take damage too (determined by targets' ramming factor).";  
 		      if($this->designedToRam) {
 			      $this->data["Special"] .= "<br>This unit is specifically designed for ramming and may do so in any scenario.";
 		      }else{
@@ -2165,10 +2165,10 @@ class RadCannon extends Weapon{
 	
 	
 	
-	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+	public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
 		return 0; //standard armor is ignored
         }	
-	protected function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos=null){		
+	public function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos=null){		
 		return 0; //advanced armor is ignored
         }//endof function getSystemArmourInvulnerable
 	
@@ -2388,7 +2388,7 @@ class IonFieldGenerator extends Weapon{
 		    $this->onDamagedSystem($target, $firstFighter, 0, 0, $gamedata, $fireOrder);//no actual damage, proceed to apply effects
 		} else {
 		    $tmpLocation = $target->getHitSectionPos(Mathlib::hexCoToPixel($sourceHex), $fireOrder->turn);
-		    $system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
+		    $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $tmpLocation);
 		    $this->onDamagedSystem($target, $system, 0, 0, $gamedata, $fireOrder);//no actual damage, proceed to apply effects
 		}
 	}

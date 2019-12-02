@@ -37,7 +37,7 @@ class FighterFlight extends BaseShip
 
     public $offensivebonus, $freethrust;
     public $jinkinglimit = 0;
-	public $hangarRequired = ''; //if left empty, will be classified based on Ini; fleet check only
+	public $hangarRequired = 'fighters'; //if left 'fighters', will be classified based on Ini; fleet check only
 	public $unitSize = 1; //most fighters are taken one per slot - but some are not
 	//B5Wars example are some ultralight fighters, that can be carried two per hangar slot
 	//and some superheavies that can use hangars (eg. Vorlon SHF) but take more slots
@@ -204,7 +204,7 @@ class FighterFlight extends BaseShip
     {
         $fighter->setUnit($this);
         $fighter->id = $this->autoid;
-        $fighter->location = sizeof($this->systems);
+        $fighter->location = sizeof($this->systems);		
 
         $this->autoid++;
         $fighterSys = array();
@@ -216,6 +216,26 @@ class FighterFlight extends BaseShip
         }
         $fighter->systems = $fighterSys;
         $this->systems[$fighter->id] = $fighter;
+		
+		
+		//add to Notes information about miscellanous attributes - with first fighter being added
+		if($fighter->id == 1){
+			$this->notesFill($fighter);
+		}
+		//add ramming attack if not equipped already$rammingExists = false;
+		$rammingExists = false;
+		foreach($fighter->systems as $sys)  if ($sys instanceof RammingAttack){
+			$rammingExists = true;
+		}
+		if(!$rammingExists){
+			//add ramming attack
+			//check whether game id is safe (can be safely be deleted in March 2020 or so)
+			if ((TacGamedata::$currentGameID >= TacGamedata::$safeGameID) || (TacGamedata::$currentGameID<1)){
+				if((($this instanceof FighterFlight)) && (!($this instanceof OSAT))  ){
+					$fighter->addAftSystem(new RammingAttack(0, 0, 360, $this->getRammingFactor(), 0));
+				}
+			}
+		}
     } //endof function addSystem
 
 
@@ -329,7 +349,7 @@ class FighterFlight extends BaseShip
     }
 
 
-    public function getHitSystem($shooter, $fire, $weapon, $location = null)
+    public function getHitSystem($shooter, $fire, $weapon, $gamedata, $location = null)
     {
         $skipStandard = false;
         $systems = array();
@@ -350,8 +370,73 @@ class FighterFlight extends BaseShip
         }
 
         if (sizeof($systems) == 0) return null;
+	    
+	/* AF fire is normally allocated by player, and it's very important for fighter toughness
+	in FV there is no information about actual amount of incoming damage
+	but let's try to make an algorithm based on damage _potential_ of incoming shot - won't be as good, but far better than random allocation
+	priority of allocation:
+	 1. no chance of forcing dropout (prefer destroyed fighter to two fighters dropping out)
+	 2. no chance of being destroyed
+	 3. being more damaged already
+	 4. having higher ID (last craft in flight first - if any craft is special, it'll be the first one)
+	*/
+	//fill data about eligible craft...
+	$craftWithData = array();
+	foreach ($systems as $craft){
+		$dmgPotential = 0;
+		if ($weapon->damageType == "Raking"){
+			$dmgPotential = $weapon->raking; //potential = rake size	
+		}else{
+			$dmgPotential = $weapon->maxDamage; //potential = maximum damage weapon can do	
+		}
+		//modify by armor properties
+		$armor = $weapon->getSystemArmourStandard($this, $craft, $gamedata, $fire)+$weapon->getSystemArmourInvulnerable($this, $craft, $gamedata, $fire);
+		$dmgPotential = max(0, $dmgPotential-$armor);//never negative damage ;)
+		$remainingHP = $craft->getRemainingHealth();
+		$damagedThisTurn = false;
+		foreach($craft->damage as $dmgEntry){
+			if($dmgEntry->turn ==$gamedata->turn){
+				$damagedThisTurn = true;	
+			}
+		}
+		$alreadyDropoutSubject = false;
+		//subject to dropout if damaged this turn and brought below 10 points
+		if (($damagedThisTurn==true) && ($remainingHP<10)) $alreadyDropoutSubject = true;
+		//can be dropped out if can be brought below 10 hp by this shot and NOT subject to dropout already
+		$minRemainingHP = $remainingHP-$dmgPotential;
+		$canBeDroppedOut = false;
+		if (($minRemainingHP<10) && ($alreadyDropoutSubject==false)) $canBeDroppedOut = true;
+		$canBeKilled = false;
+		if ($minRemainingHP<1) $canBeKilled = true;
+		$singleCraft = array("id"=>$craft->id, "hp"=>$remainingHP, "canDrop"=>$canBeDroppedOut, "canDie"=>$canBeKilled, "fighter"=>$craft);
+		$craftWithData[] = $singleCraft;
+	}
+	    
+	//sort by priorities, return first one on list!
+	usort($craftWithData, function($a, $b){
+		if (($a["canDrop"] == true) && ($b["canDrop"] == false)){ //prefer craft with no dropout chance
+		    return 1;
+		}else if (($b["canDrop"] == true) && ($a["canDrop"] == false)){
+		    return -1;	
+		} else if (($a["canDie"] == true) && ($b["canDie"] == false)){ //prefer craft with no death chance
+		    return 1;	
+		} else if (($b["canDie"] == true) && ($a["canDie"] == false)){ 
+		    return -1;	
+		} else if ($a["hp"] < $b["hp"]){ //prefer already damaged craft
+		    return 1;
+		} else if ($b["hp"] < $a["hp"]){ 
+		    return -1;	
+		} else if ($a["id"] < $b["id"]){ //lastly - prefer one that's further in order of IDs
+		    return 1;
+		} else if ($b["id"] < $a["id"]){ 
+		    return -1;	
+		}	
+		else return 0; //should never happen, IDs are different!
+	});
+	    
+	return $craftWithData[0]["fighter"];
 
-        return $systems[(Dice::d(sizeof($systems)) - 1)];
+        //return $systems[(Dice::d(sizeof($systems)) - 1)];
     }
 
 

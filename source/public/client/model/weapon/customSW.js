@@ -153,3 +153,10 @@ var SWTractorBeam = function SWTractorBeam(json, ship) {
 };
 SWTractorBeam.prototype = Object.create(Weapon.prototype);
 SWTractorBeam.prototype.constructor = SWTractorBeam;
+
+
+var SWAntifighterConcussion = function SWAntifighterConcussion(json, ship) {
+    Torpedo.call(this, json, ship);
+};
+SWAntifighterConcussion.prototype = Object.create(Torpedo.prototype);
+SWAntifighterConcussion.prototype.constructor = SWAntifighterConcussion;

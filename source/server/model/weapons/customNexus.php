@@ -52,10 +52,10 @@ class NexusKineticBoxLauncher extends Weapon{
             $this->data["Special"] = "Ignores armor, no overkill (Ballistic+Matter weapon).";
             $this->data["Ammunition"] = $this->ammunition;
         }
-        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
             return 0; //Matter ignores armor!
         }
-        protected function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos=null){
+        public function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos=null){
             $value = parent::getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos);
             $value = $value - 2; //account for Matter, as standard mettod will account for Ballistic
             if($value < 0) $value = 0;

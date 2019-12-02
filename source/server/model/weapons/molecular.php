@@ -325,9 +325,16 @@
 
 
         public function setSystemDataWindow($turn){
-            $boost = $this->getExtraDicebyBoostlevel($turn);
-            $this->data["Special"] = 'Raking(6). Treats armor as if it was 1 point lower.';
-            $this->data["<font color='red'>Boostlevel</font>"] = $boost;
+            $boost = $this->getExtraDicebyBoostlevel($turn);            
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            } 
+            //Raking(6) is already described in Raking class
+            $this->data["Special"] .= 'Treats armor as if it was 1 point lower.';
+            $this->data["Special"] .= '<br>Can be boosted for increased dmg output (+1d10 per 4 power added, up to 4 times).';
+            $this->data["Boostlevel"] = $boost;
             parent::setSystemDataWindow($turn);
         }
 
@@ -367,8 +374,9 @@
             return $boostLevel;
         }
 
-        
-        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){ //standard part of armor - reduce by 1!
+        //actually this shouldn't be restricted to standard armor, advanced has no special protection against this effect. 
+        //to be modified after AdaptiveArmor is redone 
+        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){ //standard part of armor - reduce by 1!
             $armour = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
             $armour = $armour - 1;
             $armour = max(0,$armour);

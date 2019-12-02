@@ -72,14 +72,17 @@ window.ew = {
     },
 
     getDefensiveEW: function getDefensiveEW(ship) {
-
+		return ew.getEWLeft(ship);//turns out to be an alias now, effectively
+		/* defensive == everything not allocated for other functions!
         var listed = ew.getListedDEW(ship);
 
         if (listed === null) {
+			
             return ew.getScannerOutput(ship) - ew.getUsedEW(ship);
+			
         }
 
-        return listed;
+        return listed;*/
     },
 
     getTargetingEW: function getTargetingEW(ship, target) {
@@ -141,14 +144,63 @@ window.ew = {
     },
 
     convertUnusedToDEW: function convertUnusedToDEW(ship) {
-        var dew = ew.getScannerOutput(ship) - ew.getUsedEW(ship);
-        if (dew < 0) { //DEW should NOT be negative - reset EW in this case! (most probably Sensors disabled after setting EW)
+        //var dew = ew.getScannerOutput(ship) - ew.getUsedEW(ship);
+		var dew = ew.getEWLeft(ship);
+        if (dew < 0) { 
+			//return flag that something is wrong with EW
+			return false;
+		/*//DEW should NOT be negative - reset EW in this case! (most probably Sensors disabled after setting EW)
             this.removeEW(ship);
             dew = ew.getScannerOutput(ship) - ew.getUsedEW(ship);
+			*/
         }
+		/*game does not react well to more than one DEW entry, hence condition*/
+		for (var i in ship.EW) {
+            var EWentry = ship.EW[i];
+            if (EWentry.turn !== gamedata.turn) continue;
+            if (EWentry.type === 'DEW') {
+				EWentry.amount = dew;
+				return true; //found, changed, nothing more to do
+			}
+        }
+		//else: not found: create DEW entry!
         ship.EW.push({ shipid: ship.id, type: "DEW", amount: dew, targetid: -1, turn: gamedata.turn });
+		return true;
     },
 
+    /*Ship with LCVSensors trait must have all but 2 EW points set to OEW
+    	returns false if this is not met
+    */
+    checkLCVSensors: function checkLCVSensors(ship) {
+		var toReturn = true;
+		if(shipManager.hasSpecialAbility(ship, "LCVSensors")){ //otherwise no check
+			var totalEW = ew.getScannerOutput(ship);
+			if (totalEW > 2){
+				var offensiveEW = ew.getAllOffensiveEW(ship);
+				if ( totalEW > (offensiveEW+2) ){
+					toReturn = false;
+				}
+			}
+		}
+		return toReturn;
+    },
+	
+    /*checks whether RestrictedEW crit is conformed to (can get around setting lock by clever boosting and deboosting)
+	obviously LCV Sensors cannot ever get this critical! relying oc C&C being unhittable in this case
+    */
+    checkRestrictedEW: function checkRestrictedEW(ship) {
+		var toReturn = true;
+        if (!ship.osat) {
+            if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "cnC"), "RestrictedEW")) {
+                var def = ew.getDefensiveEW(ship);
+                var all = ew.getScannerOutput(ship);
+
+                if (def - 1 < all * 0.5) toReturn = false;
+            }
+        }
+		return toReturn;
+    },
+	
     getListedDEW: function getListedDEW(ship) {
         for (var i in ship.EW) {
             var entry = ship.EW[i];
@@ -158,6 +210,22 @@ window.ew = {
         }
         return null;
     },
+	
+	
+	/*returns real amount of EW points free to allocate - by free to allocate DEW or unallocated are understood*/
+	getEWLeft: function getEWLeft(ship) {
+		var usedEW = 0;
+		for (var i in ship.EW) {
+            var entry = ship.EW[i];
+            if (entry.turn != gamedata.turn) continue;
+            if (entry.type != "DEW"){
+				usedEW += entry.amount;
+			}
+        }
+		var totalAvailable = ew.getScannerOutput(ship);
+		var leftEW = totalAvailable-usedEW;
+		return leftEW;
+	},
 
     getBDEW: function getBDEW(ship) {
         for (var i in ship.EW) {
@@ -219,9 +287,9 @@ window.ew = {
             return entry.shipid === ship.id && (target === null || entry.targetid === target.id) && entry.type === type && entry.turn === turn;
         }).pop();
     },
+	
 
     AssignOEW: function AssignOEW(selected, ship, type) {
-
         if (!type) type = "OEW";
 
         for (var i in selected.EW) {
@@ -231,7 +299,8 @@ window.ew = {
 
             if (EWentry.type === type && EWentry.targetid === ship.id) return;
         }
-        var left = ew.getDefensiveEW(selected);
+		//var left = ew.getDefensiveEW(selected);
+		var left = ew.getEWLeft(selected);
 
         if (left < 1 || type === "DIST" && left < 3) {
             return;
@@ -266,7 +335,6 @@ window.ew = {
     },
 
     buttonAssignEW: function buttonAssignEW(e) {
-
         var e = $(this).parent();
         var ship = e.data("ship");
         var entry = e.data("EW");
@@ -274,9 +342,8 @@ window.ew = {
     },
 
     assignEW: function assignEW(ship, entry) {
-
-        var left = ew.getDefensiveEW(ship);
-
+        //var left = ew.getDefensiveEW(ship);		
+		var left = ew.getEWLeft(ship);
         if (left < 1) return;
 
         if (!ship.osat) {
@@ -346,11 +413,11 @@ window.ew = {
     },
 
     removeEW: function removeEW(ship) {
-
         for (var i = ship.EW.length - 1; i >= 0; i--) {
             var ew = ship.EW[i];
             if (ew.turn == gamedata.turn) ship.EW.splice(i, 1);
-        }
+        }		
+		webglScene.customEvent("ShipEwChanged", { ship: ship });
     },
     checkInELINTDistance: function checkInELINTDistance(ship, target, distance) {
         if (!distance) distance = 30;
@@ -469,11 +536,5 @@ window.ew = {
         drawEntities();
     },
  
-    resetEW: function resetEW(shipID) {
-        var ship = gamedata.ships[shipID];
-        ship.EW = new Array();        
-        var toInform = "EW is reset for " + ship.name;
-        alert(toInform);
-    }
     
 };

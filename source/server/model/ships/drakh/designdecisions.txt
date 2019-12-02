@@ -1,0 +1,9 @@
+custom Drakh fleet created by Wolfgang Lackner and Marcin Sawicki, based heavily upon BabCom-published designs by Roman Perner.
+
+Notable design decisions, to check in case of future changes/updates:
+ - Drakh are Middleborn, giving them access to some goodies not available to Young Races
+ - Their units are tough for their size, but they rely on LCVs to be their main strike element. SHFs escort and support them.
+ - They have powerful and boostable shields (that count doubly against Raking weapons, too), but they do not reduce profile.
+ - They have following traits: Advanced Armor, Gravitic Drive, Improved Sensors (closer to basc than Advanced ones, but reducing effectiveness of Jammer).
+ - Their LCVs do require berthing space (which they can share with SHFs), but do have regular (Improved) Sensors, without typical LCV limitation of Young Races.
+ 

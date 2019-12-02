@@ -264,7 +264,7 @@ class CustomGatlingMattergunLight extends Pulse{
 			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
         }
         
-        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
             return 0; //Matter ignores armor!
         }
         
@@ -327,7 +327,7 @@ class CustomGatlingMattergunMedium extends Pulse{
 			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
         }
         
-        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
             return 0; //Matter ignores armor!
         }
         
@@ -390,7 +390,7 @@ class CustomGatlingMattergunHeavy extends Pulse{
 			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
         }		
         
-        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
             return 0; //Matter ignores armor!
         }
         
@@ -1221,7 +1221,7 @@ class customHeavyPolarityPulsar extends Pulse{
         }
 	
 	    //Multiphased Beam ignores half armor!
-	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+	public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
 		$armour = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
 		    if (is_numeric($armour)){
 			$toIgnore = ceil($armour /2);

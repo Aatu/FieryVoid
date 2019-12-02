@@ -10,8 +10,12 @@ class swAssaultFrigateSmallCap extends BaseShipNoAft{
         $this->imagePath = "img/starwars/assaultfrigate.png";
 	    //$this->canvasSize = 100;
         $this->shipClass = "Rebel Assault Frigate";
+	    
+	    
+		$this->isd = "1 BBY";
+		$this->notes = "Primary users: Rebel Alliance, New Republic";
 	
-	$this->fighters = array("superheavy" => 1);
+	$this->fighters = array("Assault Squadrons" => 0.5); //Wookiepedia: "at least one assault transport". Dreadnought (on which Assult Frigate is loosely based) could house a squadron.
 
 	$this->unofficial = true;
         

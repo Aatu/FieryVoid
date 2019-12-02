@@ -448,10 +448,44 @@ window.gamedata = {
                 return false;
             }
 
+	    var EWIncorrect = ''; //too many EW points set
             for (var i in gamedata.ships) {
                 var ship = gamedata.ships[i];
-                ew.convertUnusedToDEW(ship);
+                if (ew.convertUnusedToDEW(ship) != true){
+			EWIncorrect += "- " + gamedata.ships[i].name + "<br>";					
+		}
             }
+	    if (EWIncorrect != ''){
+		EWIncorrect = "Following ships have too many EW points set:<br>" + EWIncorrect;
+		window.confirm.error(EWIncorrect, function () {});
+                return false;
+	    }
+		
+		var EWRestrictedIncorrect = '';//RestrictedEW critical circumvented
+            for (var i in gamedata.ships) {
+                var ship = gamedata.ships[i];
+                if (ew.checkRestrictedEW(ship) != true){
+				EWRestrictedIncorrect += "- " + gamedata.ships[i].name + "<br>";					
+			}
+		}
+	    if (EWRestrictedIncorrect != ''){
+			EWRestrictedIncorrect = "Following ships have Restricted EW critical, need to reduce non-DEW:<br>" + EWRestrictedIncorrect;
+			window.confirm.error(EWRestrictedIncorrect, function () {});
+			return false;
+	    }
+		
+		var EWLCVIncorrect = '';//LCV set too many EW to tasks other than OEW
+            for (var i in gamedata.ships) {
+                var ship = gamedata.ships[i];
+                if (ew.checkLCVSensors(ship) != true){
+			EWLCVIncorrect += "- " + gamedata.ships[i].name + "<br>";					
+		}
+            }
+	    if (EWLCVIncorrect != ''){
+		EWLCVIncorrect = "Following LCVs have too many EW points set on non-OEW:<br>" + EWLCVIncorrect;
+		window.confirm.error(EWLCVIncorrect, function () {});
+                return false;
+	    }
 
             ajaxInterface.submitGamedata();
         } else if (gamedata.gamephase == 2) {

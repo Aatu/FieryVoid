@@ -13,6 +13,11 @@ class swVictory2SD extends BaseShip{
         $this->variantOf = "Victory Star Destroyer";
 	    $this->occurence = "rare";
         $this->shipSizeClass = 3;
+        $this->limited = 33; //Limited Deployment
+	    
+	    
+		$this->isd = "19 BBY";
+		$this->notes = "Primary users: Galactic Republic, Galactic Empire, New Republic.";
 	    
 	$this->fighters = array("Fighter Squadrons"=>2, "Assault Squadrons"=>2);
 
@@ -89,38 +94,38 @@ class swVictory2SD extends BaseShip{
 	    
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 4, 55));
-        $this->addAftSystem(new Structure( 3, 70));
-        $this->addLeftSystem(new Structure( 4, 65));
-        $this->addRightSystem(new Structure( 4, 65));
-        $this->addPrimarySystem(new Structure( 5, 70));
+        $this->addFrontSystem(new Structure( 4, 60));
+        $this->addAftSystem(new Structure( 3, 60));
+        $this->addLeftSystem(new Structure( 4, 60));
+        $this->addRightSystem(new Structure( 4, 60));
+        $this->addPrimarySystem(new Structure( 5, 60));
 	    
 	    
             $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-                    10 => "Hyperdrive",
-                    12 => "Scanner",
-                    13 => "Engine",
-                    17 => "Hangar",
+                    7 => "Structure",
+                    9 => "Hyperdrive",
+                    10 => "Scanner",
+                    12 => "Engine",
+                    16 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",
             ),
             1=> array(
                     2 => "Thruster",
 		    3 => "Ray Shield",
-                    7 => "Heavy Turbolaser",
-                    9 => "Heavy Laser",
-                    11 => "Heavy Ion Cannon",
+                    6 => "Heavy Turbolaser",
+                    8 => "Heavy Laser",
+                    10 => "Heavy Ion Cannon",
                     18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     4 => "Thruster",
 		    5 => "Ray Shield",
-                    7 => "Heavy Laser",
-		    9 => "Heavy Ion Cannon",
-                    11 => "Scanner",
+                    8 => "Heavy Laser",
+                    9 => "Heavy Ion Cannon",
+                    12 => "Scanner",
                     13 => "Engine",
                     17 => "Structure",
                     20 => "Primary",
@@ -128,18 +133,18 @@ class swVictory2SD extends BaseShip{
             3=> array(
                     2 => "Thruster",
 		    3 => "Ray Shield",
-                    9 => "Heavy Turbolaser",
-                    11 => "Heavy Laser",
-                    13 => "Heavy Ion Cannon",
+                    7 => "Heavy Turbolaser",
+                    8 => "Heavy Laser",
+                    9 => "Heavy Ion Cannon",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array(
                     2 => "Thruster",
 		    3 => "Ray Shield",
-                    9 => "Heavy Turbolaser",
-                    11 => "Heavy Laser",
-                    13 => "Heavy Ion Cannon",
+                    7 => "Heavy Turbolaser",
+                    8 => "Heavy Laser",
+                    9 => "Heavy Ion Cannon",
                     18 => "Structure",
                     20 => "Primary",
             ),

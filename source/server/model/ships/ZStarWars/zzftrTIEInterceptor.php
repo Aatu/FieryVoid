@@ -10,6 +10,9 @@ class zzftrTIEInterceptor extends FighterFlight{
         $this->shipClass = "TIE Interceptors";
         $this->imagePath = "img/starwars/tieInterceptor.png";
         
+		$this->isd = "Galactic Civil War";
+		$this->notes = "Primary users: Galactic Empire.";
+	    
         //$this->isd = 2214;
         $this->unofficial = true;
         

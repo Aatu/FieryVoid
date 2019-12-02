@@ -10,8 +10,10 @@ class Weapon extends ShipSystem
 
     public $name = null;
     public $displayName = "";
-    public $priority = 1;
+    public $priority = 1; //array may be skipped, in which case this variable value will be used for all modes
     public $priorityArray = array();
+    public $priorityAF = 0; //array must be set explicitly - otherwise it will be generated, ignoring this variable! 
+    public $priorityAFArray = array();
 
     public $animation = "none";
     public $animationArray = array();
@@ -143,6 +145,9 @@ class Weapon extends ShipSystem
             $this->minDamageArray[$i] = $this->minDamage;
             $this->setMaxDamage();
             $this->maxDamageArray[$i] = $this->maxDamage;
+			//set AF priority, too!
+			$this->setPriorityAF(); 
+			$this->priorityAFArray[$i] = $this->priorityAF;
         }
         $this->changeFiringMode(1); //reset mode to basic
     }
@@ -166,12 +171,14 @@ class Weapon extends ShipSystem
 			/*this needs to be sent only if weapon suffered crits!*/
 			if (count($this->criticals)>0) { //if there was a critical, send all potentially changed data; otherwise, they should be standard and don't need to be sent extra!
 				$strippedSystem->range = $this->range;
-				$strippedSystem->rangeArray = $this->rangeArray;	    
+				$strippedSystem->rangeArray = $this->rangeArray;	
+				$strippedSystem->rangePenalty = $this->rangePenalty;
+   				$strippedSystem->rangePenaltyArray = $this->rangePenaltyArray;    
 				$strippedSystem->minDamage = $this->minDamage;
 				$strippedSystem->maxDamage = $this->maxDamage;
 				$strippedSystem->minDamageArray = $this->minDamageArray;
 				$strippedSystem->maxDamageArray = $this->maxDamageArray;
-				$strippedSystem->data = $this->data;
+				$strippedSystem->data = $this->data;    
 			}
 		}
         return $strippedSystem;
@@ -208,6 +215,49 @@ class Weapon extends ShipSystem
         $max = $this->maxDamage;
         $avg = round(($min + $max) / 2);
         return $avg;
+    }
+	
+    protected function setPriorityAF(){
+	//sets AF priority if not set explicitly by weapon creator
+	//attempt to put high-damage weapons first, to attempt to kill fighters outright or cause heavy damage (so light guns can concentrate on smaller number of craft or finish off damaged one)
+	//priorities:
+	// 1,2,10 - no change, those are kind of special
+	//then Raking, they tend to have high damage output and against fighters they become effectively Standard
+	//then heavy Standard weapons
+	//then everything else in reverse order (note there's no need to put Matter at the end!)
+	if ($this->priorityAF > 0) return;
+	switch($this->priority){
+		case 7: //heavy Raking
+			$this->priorityAF = 3;
+			break;
+			
+		case 8: //light Raking
+			$this->priorityAF = 4;
+			break;
+			
+		case 6: //heavy Standard 
+			$this->priorityAF = 5;
+			break;
+			
+		case 9: //Matter and such
+			$this->priorityAF = 6;
+			break;			
+			
+		case 5: 
+			$this->priorityAF = 7;
+			break;
+			
+		case 4: 
+			$this->priorityAF = 8;
+			break;
+			
+		case 3: 
+			$this->priorityAF = 9;
+			break;
+			
+		default: //no change needed, go for $priority (1,2,10)
+			$this->priorityAF = $this->priority;
+	}	    
     }
 
 
@@ -355,7 +405,7 @@ class Weapon extends ShipSystem
     public function setSystemDataWindow($turn)
     {
 
-        $this->data["Resolution Priority"] = $this->priority;
+        $this->data["Resolution Priority (ship/fighter)"] = $this->priority . '/' . $this->priorityAF;
         $this->data["Loading"] = $this->getTurnsloaded() . "/" . $this->getNormalLoad();
 
         $dam = $this->minDamage . "-" . $this->maxDamage;
@@ -1106,7 +1156,7 @@ class Weapon extends ShipSystem
         }
 
         if ($this->damageType == 'Flash') {// If overkill comes from flash damage, pick a new target in default way instead of typicaloverkill!
-            $okSystem = $target->getHitSystem($shooter, $fireOrder, $this, $location); //for Flash it won't return destroyed system other than PRIMARY Structure
+            $okSystem = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $location); //for Flash it won't return destroyed system other than PRIMARY Structure
         }
 
         if ($okSystem == null || $okSystem->isDestroyed()) { //overkill to Structure system is mounted on
@@ -1151,7 +1201,7 @@ class Weapon extends ShipSystem
             } else {
                 $loc = $ship->doGetHitSectionBearing($relativeBearing); //full array
                 $tmpLocation = $loc["loc"];
-                $system = $ship->getHitSystem($target, $fireOrder, $this, $tmpLocation);
+                $system = $ship->getHitSystem($target, $fireOrder, $this, $gamedata, $tmpLocation);
                 $this->doDamage($ship, $shooter, $system, $flashDamageAmount, $fireOrder, null, $gamedata, false, $tmpLocation);
             }
         }
@@ -1202,26 +1252,26 @@ class Weapon extends ShipSystem
                 $damageOut = $damage - $damageEntry - $damagePRIMARY;
             }
             //first part: facing structure
-            $system = $target->getHitSystem($shooter, $fireOrder, $this, $facingLocation);
+            $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $facingLocation);
             $this->doDamage($target, $shooter, $system, $damageEntry, $fireOrder, $launchPos, $gamedata, false, $facingLocation);
             //second part: PRIMARY Structure
-            $system = $target->getHitSystem($shooter, $fireOrder, $this, 0);
+            $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, 0);
             $this->doDamage($target, $shooter, $system, $damagePRIMARY, $fireOrder, $launchPos, $gamedata, false, 0);
             //last part: opposite Structure
-            $system = $target->getHitSystem($shooter, $fireOrder, $this, $outLocation);
+            $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $outLocation);
             $this->doDamage($target, $shooter, $system, $damageOut, $fireOrder, $launchPos, $gamedata, false, $outLocation);
         } elseif (($this->damageType == 'Raking') && (!($target instanceof FighterFlight))) { //Raking hit... but not at fighters - that's effectively Standard shot!
             //split into rakes; armor will not need to be penetrated twice!
             $fireOrder->armorIgnored = array();//reset info about pierced armor
             while ($damage > 0) {
                 $rake = min($damage, $this->getRakeSize());
-                $system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
+                $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $tmpLocation);
                 $this->doDamage($target, $shooter, $system, $rake, $fireOrder, $launchPos, $gamedata, false, $tmpLocation);
                 $damage = $damage - $rake;
             }
         } else { //standard mode of dealing damage
             if ($fireOrder->linkedHit == null) {
-                $system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
+                $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $tmpLocation);
             } else {
                 $system = $fireOrder->linkedHit;
             }
@@ -1255,7 +1305,7 @@ class Weapon extends ShipSystem
         return true;
     }
 
-    protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos = null)
+    public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos = null)
     { //standard part of armor
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         //$target = $gamedata->getShipById($fireOrder->targetid);
@@ -1276,7 +1326,7 @@ class Weapon extends ShipSystem
     }//endof function getSystemArmourStandard
 
 
-    protected function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos = null)
+    public function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos = null)
     { //only invulnerable portion of armor (one that can't be reduced by, say, damage type)
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         //$target = $gamedata->getShipById($fireOrder->targetid);
@@ -1397,6 +1447,11 @@ class Weapon extends ShipSystem
         $this->firingMode = $newMode;
         $i = $newMode;
         if (isset($this->priorityArray[$i])) $this->priority = $this->priorityArray[$i];
+        if (isset($this->priorityAFArray[$i])){
+			$this->priorityAF = $this->priorityAFArray[$i];
+		}else{ //this means appropriate AF priority is not set yet - it is generated ans so must always be set! 
+			$this->priorityAF = 0;
+		}
 
         if (isset($this->animationArray[$i])) $this->animation = $this->animationArray[$i];
         if (isset($this->animationImgArray[$i])) $this->animationImg = $this->animationImgArray[$i];

@@ -1,0 +1,14 @@
+StarWars created by Wolfgang Lackner and Marcin Sawicki.
+
+Notable design decisions, to check in case of future changes/updates:
+ - based on SW universe as we imagine it. As StarWars universe integrity between sources is nonexistent, this obviously means giving some sources priority over others (and even discarding some, in fact. Choice is based on personal preferences.
+ - we assume that SW fighters do require hangars in case of standard tournament/pickup battles, even if some of them are hyper-capable. 
+ - we assume that any fighter may use any hangar (notable exceptions in ship notes), but differentiate between fighter and assault craft
+ - hangar requirements are based on squadrons, not single craft. This allows craft of different sizes to use same hangar sensibly (eg. hangar can accept both small T/Fs and large Skiprays, but vastly more of the former ;) )
+ - SW unit independence/operational range is much greater than B5. This means some craft classified as superheavy fighters (notably small freighters) do not require hangars, as do all LCV-sized craft.
+ - Units (up to and including Star Destroyers) can be operated and maintained by various users, they're not as strictly bound to factions as in B5 universe. Therefore they're all in one directory, with Primary User(s) indicated in notes. Likewise, some craft that are usually civilian may be sometimes found in battlefleets (unthinkable in B5 pickup battles).
+ - we portrayed weapons to allow long range of fire, but for the fire to be wildly inaccurate. Hence Pulse mode with extremely low (often negative) base number of hits. This allowed to keep very high weapon count of SW units manageable (they're grouped into batteries that are firing as single weapons in FV)
+ - based on visuals and effects in movies - we call SW Laser/Turbolaser weapons to be Particle class, with all consequences.
+ - we portrayed SW units as quite durable for their size, and that durability is boosted by shields. Shields are difficult to take out, too (projectors have high HP count and low hit table profile). SHields have a number of exceptions to their protection based on how we see them to work (notably increased effectiveness vs Raking weapons, while SWIon, Ballistic and Matter weapons just bypass them; this is fluff-related decision rather than balance-related one, although of course was taken into consideration when setting point values (especially vulnerability to ballistic weapons))
+ - StarWars Sensors we assume to be generally of a bit lower tech than B5 ones. This is portrayed by generally low output and limited boostability (notably ElInt boostability is not reduced though). However, LCV do have full-blown sensors (just typically poor ones ;) ). 
+ 

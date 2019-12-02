@@ -5,29 +5,31 @@ class swImperialSD extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 2500;
+	$this->pointCost = 2300;
 	$this->faction = "ZStarWars";
         $this->phpclass = "swImperialSD";
         $this->imagePath = "img/starwars/imperator.png";
         $this->shipClass = "Imperial Star Destroyer";
         $this->shipSizeClass = 3;
-	$this->Enormous = true;
+        $this->limited = 33; //Limited Deployment
 	    
+		$this->isd = "22 BBY";
+		$this->notes = "Primary users: Galactic Empire";
 	    
 	$this->fighters = array("Fighter Squadrons"=>6, "Assault Squadrons"=>6);
 	    
 	$this->unofficial = true;
-	    //$this->isd = 2246;
+	    
         
         $this->forwardDefense = 19;
         $this->sideDefense = 20;
         
-        $this->turncost = 2;
-        $this->turndelaycost = 2;
-        $this->accelcost = 8;
-        $this->rollcost = 6;
+        $this->turncost = 1.75;
+        $this->turndelaycost = 1.75;
+        $this->accelcost = 6;
+        $this->rollcost = 5;
         $this->pivotcost = 8;
-	$this->iniativebonus = -4 *5; 
+	$this->iniativebonus = -2 *5; //really large Cap, but not Enormous unit
 		
 	    
      
@@ -99,10 +101,10 @@ class swImperialSD extends BaseShip{
 	    
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 5, 100));
-        $this->addAftSystem(new Structure( 4, 80));
-        $this->addLeftSystem(new Structure( 5, 100));
-        $this->addRightSystem(new Structure( 5, 100));
+        $this->addFrontSystem(new Structure( 5, 80));
+        $this->addAftSystem(new Structure( 3, 80));
+        $this->addLeftSystem(new Structure( 4, 80));
+        $this->addRightSystem(new Structure( 4, 80));
         $this->addPrimarySystem(new Structure( 5, 80));
 	    
 	    

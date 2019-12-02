@@ -29,3 +29,6 @@ Fighter weapon priority:
 5: very large fighter weapons (Ion Bolt, Light Graviton Beam)
 9: fighter Matter weapons
 10: mostly special weapons that should be fired late
+
+
+Anti-fighter priority: can be set by creator if desired. Default algorithm will leave 1,2,10 in place (as weapons that should have special position in firing order), and will try to order others with heavy hitters going first: so first Raking, then heavy Standard, then Matter, then remaining ones in reverse order.

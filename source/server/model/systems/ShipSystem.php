@@ -249,10 +249,11 @@ class ShipSystem {
 		$this->data["Power used"] = 'none';
 	}
 	    
-	    
+	    /* no longer needed, info available in Notes
 	if($this->advancedArmor == true){
 		$this->data["Others"] = "Advanced Armor";
 	}
+	*/
 	    
         $counts = array();
         

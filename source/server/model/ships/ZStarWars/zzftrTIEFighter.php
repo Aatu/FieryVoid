@@ -10,6 +10,9 @@ class zzftrTIEFighter extends FighterFlight{
         $this->shipClass =  "TIE Fighters";
         $this->imagePath = "img/starwars/tieFighter.png";
         
+		$this->isd = "18 BBY";
+		$this->notes = "Primary users: Galactic Empire.";
+	    
         //$this->isd = 2214;
         $this->unofficial = true;
         

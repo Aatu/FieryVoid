@@ -33,7 +33,9 @@ class DrakhMothership extends BaseShip{
 	    
 	$this->addPrimarySystem(new CnC(6, 35, 0, 0));
         $this->addPrimarySystem(new Reactor(5, 40, 0, 12));
-        $this->addPrimarySystem(new ElintScanner(5, 24, 6, 10));
+	$sensors = new ElintScanner(5, 24, 6, 10);
+	$sensors->markImproved();
+	$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new DrakhRaiderController(5, 10, 5, 1));
         $this->addPrimarySystem(new Engine(5, 33, 0, 16, 12));
         $this->addPrimarySystem(new SWTractorBeam(5, 0, 360, 1));
@@ -44,7 +46,9 @@ class DrakhMothership extends BaseShip{
         $this->addFrontSystem(new GraviticThruster(3, 25, 0, 8, 1));
         $this->addFrontSystem(new GraviticThruster(3, 25, 0, 8, 1));
 	$this->addFrontSystem(new AbsorbtionShield(3,8,8,3,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-        $this->addFrontSystem(new ElintScanner(4, 18, 5, 8));	
+	$sensors = new ElintScanner(4, 18, 5, 8);
+	$sensors->markImproved();
+	$this->addFrontSystem($sensors);
 	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 240, 120));
 	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 240, 120));
 	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 240, 120));

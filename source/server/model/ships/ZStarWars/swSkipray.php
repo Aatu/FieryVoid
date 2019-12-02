@@ -11,6 +11,11 @@ class swSkipray extends SuperHeavyFighter{
         $this->variantOf = "OBSOLETE";
         $this->imagePath = "img/starwars/skipray.png";
 	
+	    
+		$this->isd = "Galactic Civil War";
+		$this->notes = "Primary users: Galactic Empire, New Republic.";
+		$this->notes .= "Hyperdrive";
+	    
 	//$this->isd = 2218;
         $this->unofficial = true;
 

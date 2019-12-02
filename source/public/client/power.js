@@ -493,7 +493,6 @@ shipManager.power = {
 	},
 
 	countBoostReqPower: function countBoostReqPower(ship, system) {
-
 		if (system.boostEfficiency.toString().search(/^[0-9]+$/) == 0) {
 			return system.boostEfficiency;
 		} else if (system.boostEfficiency == "output+1") {
@@ -535,7 +534,8 @@ shipManager.power = {
 	},
 
 	canBoost: function canBoost(ship, system) {
-
+		return true;
+		/* no longer needed, I'm leaving the code in case in the future ideas change again
 		//can always boost reactor (to overload)!
 		if (system.name == 'reactor') {
 			return shipManager.power.getBoost(system) === 0;
@@ -549,6 +549,7 @@ shipManager.power = {
 		} else {
 			return false;
 		}
+		*/
 	},
 
 	canOverload: function canOverload(ship, system) {
@@ -639,10 +640,12 @@ shipManager.power = {
 		if (gamedata.gamephase !== 1) return;
 
 		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+		/*no longer needed - EW allocation is checked before commit, so You can't attain illegal effects by boosting/deboosting with EW set
 		if (system.isScanner() && ew.getUsedEW(ship) > 0) {
 			confirm.error("You need to unassign all electronic warfare before changing scanner power management.");
 			return;
 		}
+		*/
 
 		if (system.hasMaxBoost()) {
 			if (system.maxBoostLevel <= shipManager.power.getBoost(system)) {
@@ -662,12 +665,13 @@ shipManager.power = {
 		if (gamedata.gamephase !== 1) return;
 		
 		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+
+		/*no longer needed - EW allocation is checked before commit, so You can't attain illegal effects by boosting/deboosting with EW set
 		if (system.isScanner() && ew.getUsedEW(ship) > 0) {
-
 			confirm.error("You need to unassign all electronic warfare before changing scanner power management.");
-
 			return;
 		}
+		*/
 
 		shipManager.power.unsetBoost(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
@@ -734,12 +738,11 @@ shipManager.power = {
 		system.power.push({ id: null, shipid: ship.id, systemid: system.id, type: 1, turn: gamedata.turn, amount: 0 });
 
 		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+		/*no longer needed
 		if (system.isScanner() && ew.getUsedEW(ship) > 0) {
-
 			confirm.error("You need to unassign all electronic warfare before changing scanner power management.");
-
 			return;
-		}
+		}*/
 
 		if (system.name == "shieldGenerator") {
 			system.onTurnOff(ship);

@@ -1,6 +1,6 @@
 <?php
 class zzftrywing extends FighterFlight{
-    /*StarWars Y-Wing... once all systems are in place, at least!*/
+    /*StarWars Y-Wing*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
@@ -10,6 +10,10 @@ class zzftrywing extends FighterFlight{
         $this->shipClass = "Y-Wing Assault Fighters";
         $this->imagePath = "img/starwars/yWing.png";
         
+		$this->isd = "Galactic Republic";
+		$this->notes = "Primary users: Galactic Republic, Rebel Alliance, New Republic.";
+		$this->notes .= "Hyperdrive";
+	    
         //$this->isd = 2214;
         $this->unofficial = true;
         

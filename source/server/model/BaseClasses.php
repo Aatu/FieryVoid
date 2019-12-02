@@ -202,6 +202,7 @@ class FireOrder{
     public $totalIntercept = 0; //total interception assigned
     public $numInterceptors = 0; //number of intercepting weapons assigned
     public $resolutionOrder = -1; //actual order in which shot was resolved
+	public $priority = 0; //fire order priority, temporary only during fire resolution
     
     function __construct(
         $id,
