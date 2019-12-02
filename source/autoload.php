@@ -1072,8 +1072,6 @@ spl_autoload_register(
 				'nexusparticleprojectorlight' => '/server/model/weapons/customNexus.php', 
 				'nexusparticleagitator' => '/server/model/weapons/customNexus.php', 
 				'nexuschafflauncher' => '/server/model/weapons/customNexus.php',
-
-
                 'brixadiibattledestroyerbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerBase.php',					
                 'brixadiibattledestroyer2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyer2057.php',		
                 'brixadiibattledestroyer2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyer2108.php',	
@@ -1126,6 +1124,21 @@ spl_autoload_register(
                 'drakhmobiledefenseplatform' => '/server/model/ships/drakh/drakhMobileDefensePlatform.php',
                 'drakhmobilebeamplatform' => '/server/model/ships/drakh/drakhMobileBeamPlatform.php',
 		    
+		 //new SW toys		  
+                'swantifighterconcussion' => '/server/model/weapons/customSW.php',  
+                'swnebulonb2frigate' => '/server/model/ships/ZStarWars/swNebulonB2Frigate.php',
+                'swgallofreemtransport' => '/server/model/ships/ZStarWars/swGallofreeMTransport.php',
+                'swgallofreeescort' => '/server/model/ships/ZStarWars/swGallofreeEscort.php',
+                'swgallofreecomm' => '/server/model/ships/ZStarWars/swGallofreeComm.php',
+                'swstargalleon' => '/server/model/ships/ZStarWars/swStarGalleon.php',
+                'swbulktransport' => '/server/model/ships/ZStarWars/swBulkTransport.php',
+                'swbulktrraider' => '/server/model/ships/ZStarWars/swBulkTrRaider.php',
+                'swbulkcruiser' => '/server/model/ships/ZStarWars/swBulkCruiser.php',
+                'swbulkcarrier' => '/server/model/ships/ZStarWars/swBulkCarrier.php',
+                'zzftraassaulttransport' => '/server/model/ships/ZStarWars/zzftrAassaultTransport.php',
+                'zzftryt2400' => '/server/model/ships/ZStarWars/zzftrYT2400.php',
+                'zzftryt2400raider' => '/server/model/ships/ZStarWars/zzftrYT2400Raider.php',
+		    
 		 //mining equipment
 		'customminingcutter' => '/server/model/weapons/customs.php',   
 		'customindustrialgrappler' => '/server/model/weapons/customs.php', 
@@ -1139,7 +1152,7 @@ spl_autoload_register(
                 'ionizer' => '/server/model/weapons/ion.php',
                 'ioniclaser' => '/server/model/weapons/ion.php',
                 'dualionbolter' => '/server/model/weapons/ion.php',
-                
+		    
                 //Cascor Ships
                 'caracti' => '/server/model/ships/cascor/caracti.php',
                 'calacca' => '/server/model/ships/cascor/calacca.php',
@@ -1158,16 +1171,18 @@ spl_autoload_register(
                 'caccar' => '/server/model/ships/cascor/caccar.php',
                 'calaq' => '/server/model/ships/cascor/calaq.php',
                 'caltus' => '/server/model/ships/cascor/caltus.php',
-                'tiqincc' => '/server/model/ships/cascor/tiqincc.php',
-               		    
+                'tiqincc' => '/server/model/ships/cascor/tiqincc.php',    
 		    
-				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
+		    
+		    
+		    
+		//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
                 'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
 		
 		    
 		    
-				//let's end this with unit enhancement class...		    
-				'enhancements' => '/server/model/ships/Enhancements.php'
+			//let's end this with unit enhancement class...		    
+			'enhancements' => '/server/model/ships/Enhancements.php'
             );
         }
         $cn = strtolower($class);
