@@ -1248,6 +1248,7 @@
         public $projectilespeed = 15;
         public $animationWidth = 7;
         public $trailLength = 10;
+        public $intercept = 1;
         
         public $loadingtime = 3;
         
@@ -1280,6 +1281,7 @@
         public $projectilespeed = 15;
         public $animationWidth = 3;
         public $trailLength = 10;
+        public $intercept = 2;
         
         public $loadingtime = 1;
         
