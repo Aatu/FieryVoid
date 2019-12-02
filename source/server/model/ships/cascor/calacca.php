@@ -11,6 +11,8 @@ class Calacca extends HeavyCombatVessel{
         $this->imagePath = "img/ships/artemis.png";
         $this->shipClass = "Calacca Freighter";
         $this->isd = 2225;
+		
+		$this->notes = "Civilian ship (not eligible for pickup battles)";
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;

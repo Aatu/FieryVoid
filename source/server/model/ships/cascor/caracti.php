@@ -12,6 +12,8 @@ class Caracti extends HeavyCombatVessel{
         $this->shipClass = "Caracti Q-Ship";
         $this->isd = 2229;
         
+		$this->notes = "Not a combat ship (not eligible for pickup battles)";
+		
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
         

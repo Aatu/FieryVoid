@@ -23,3 +23,21 @@ var ImprovedIonCannon = function ImprovedIonCannon(json, ship) {
 };
 ImprovedIonCannon.prototype = Object.create(Ion.prototype);
 ImprovedIonCannon.prototype.constructor = ImprovedIonCannon;
+
+var Ionizer = function Ionizer(json, ship) {
+    Ion.call(this, json, ship);
+};
+Ionizer.prototype = Object.create(Ion.prototype);
+Ionizer.prototype.constructor = Ionizer;
+
+var DualIonBolter = function DualIonBolter(json, ship) {
+    Ion.call(this, json, ship);
+};
+DualIonBolter.prototype = Object.create(Ion.prototype);
+DualIonBolter.prototype.constructor = DualIonBolter;
+
+var IonicLaser = function IonicLaser(json, ship) {
+    Ion.call(this, json, ship);
+};
+IonicLaser.prototype = Object.create(Ion.prototype);
+IonicLaser.prototype.constructor = IonicLaser;

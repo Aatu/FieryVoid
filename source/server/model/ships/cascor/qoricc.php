@@ -6,7 +6,7 @@ class Qoricc extends BaseShip{
         
 		$this->pointCost = 500;
 		$this->faction = "Cascor";
-        $this->phpclass = "Qorric";
+        $this->phpclass = "Qoricc";
         $this->imagePath = "img/ships/CascorQorric.png";
         $this->shipClass = "Qoricc Destroyer";
         $this->shipSizeClass = 3;
