@@ -34,7 +34,9 @@ class SorithianSylusCutter extends LCV{
   
 	$this->addPrimarySystem(new Reactor(2, 6, 0, 0));
 	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-	$this->addPrimarySystem(new Scanner(2, 6, 3, 2));
+	    	$sensors = new Scanner(2, 6, 3, 2);
+		    $sensors->markLCV();
+		    $this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(2, 6, 0, 4, 1));
 	$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 300, 360));
 	$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 330, 30));
