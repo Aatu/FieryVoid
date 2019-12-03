@@ -2255,7 +2255,7 @@ class RadCannon extends Weapon{
 			$crit->updated = true;
 			$crit->inEffect = false;
 			$system->criticals[] =  $crit;
-		} else if($system instanceOf Scanner) { //Engine: output reduced by 2.
+		} else if($system instanceOf Engine) { //Engine: output reduced by 2.
 			$crit = new OutputReduced2(-1, $ship->id, $system->id, "OutputReduced2", $gamedata->turn);
 			$crit->updated = true;
 			$crit->inEffect = false;
