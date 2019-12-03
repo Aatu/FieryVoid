@@ -10,7 +10,7 @@ class Tiqincc extends FighterFlight{
         $this->shipClass = "Tiqincc Medium Fighters";
         $this->imagePath = "img/ships/CascorTiqincc.png";
         $this->isd = 2210;
-	    $this->notes = 'Non-atmospheric.';
+	    //$this->notes = 'Non-atmospheric.';
         
         $this->forwardDefense = 8;
         $this->sideDefense = 7;
