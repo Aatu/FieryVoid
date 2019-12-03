@@ -10,7 +10,7 @@ class Caccar extends FighterFlight{
         $this->shipClass = "Caccar Ultralight Fighters";
         $this->imagePath = "img/ships/CascorCaccar.png";
         $this->isd = 2209;
-	    $this->notes = 'Non-atmospheric.';
+	    //$this->notes = 'Non-atmospheric.';
         
         $this->forwardDefense = 7;
         $this->sideDefense = 5;
