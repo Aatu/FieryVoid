@@ -10,7 +10,7 @@ class Calaq extends FighterFlight{
         $this->shipClass = "Calaq Assault Fighters";
         $this->imagePath = "img/ships/CascorCalaq.png";
         $this->isd = 2224;
-	    $this->notes = 'Non-atmospheric.';
+	    //$this->notes = 'Non-atmospheric.';
         
         $this->forwardDefense = 9;
         $this->sideDefense = 8;
