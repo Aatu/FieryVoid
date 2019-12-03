@@ -61,7 +61,7 @@ if (isset($_SESSION["user"])) {
         <br>
         -->
         <u>The <b>Cascor</b> have arrived - entire new official faction, courtesy of <b>Thomas Solway</b>!</u>
-
+<br><br>
 <b>StarWars overhauled</b> - for those who want to use alternate universe ships. After playtesting the large Star Wars units slight changes were made to make them more interesting in engagements. Also, new units were added (mostly not so iconic).
 <br><br>
         <b><u>Rule changes</u></b>
