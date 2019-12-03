@@ -67,6 +67,8 @@ if (isset($_SESSION["user"])) {
         <b><u>Rule changes</u></b>
         <br><b>Fighter damage allocation</b> - now attempting to actively minimize damage to flight. Not as good as tabletop player would do (in fact, doesn't even have access to informatio player would have), but should be far better than random allocation. Expect heavy fighter flights to (re-)gain a lot of their toughness.
         <br><b>Antifighter firing order optimized</b> - as fighters allocate damage to minimize it, weapons firing at them get arranged for maximum effect.
+        <br><b>LCV Sensors</b> - now standard Young Races' LCVs have properly limited Sensors. 
+
 
 <br>
 <br><b><u>Gameplay streamlining</b></u>
