@@ -11,12 +11,15 @@ class marcanos extends SmallStarBaseFourSections{
 		$this->imagePath = "img/ships/marcanos.png";
 		$this->fighters = array("light"=>24); 
 		$this->shipSizeClass = 3; 
+		$this->Enormous = true;
 		$this->iniativebonus = -200; //no voluntary movement anyway
 		$this->turncost = 0;
 		$this->turndelaycost = 0;
 		$this->forwardDefense = 18;
 		$this->sideDefense = 18;
 		$this->canvasSize = 200; 
+		
+		
 		$this->addFrontSystem(new Structure( 4, 90));
 		$this->addAftSystem(new Structure( 4, 90));
 		$this->addLeftSystem(new Structure( 4, 90));
