@@ -190,7 +190,7 @@ window.ew = {
     */
     checkRestrictedEW: function checkRestrictedEW(ship) {
 		var toReturn = true;
-        if (!ship.osat) {
+        if ((!ship.flight) && (!ship.osat)) {
             if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "cnC"), "RestrictedEW")) {
                 var def = ew.getDefensiveEW(ship);
                 var all = ew.getScannerOutput(ship);
