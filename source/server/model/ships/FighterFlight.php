@@ -228,13 +228,15 @@ class FighterFlight extends BaseShip
 			$rammingExists = true;
 		}
 		if(!$rammingExists){
+			/* breaks games :(
 			//add ramming attack
 			//check whether game id is safe (can be safely be deleted in March 2020 or so)
 			if ((TacGamedata::$currentGameID >= TacGamedata::$safeGameID) || (TacGamedata::$currentGameID<1)){
-				if((($this instanceof FighterFlight)) && (!($this instanceof OSAT))  ){
+				if((($this instanceof FighterFlight)) && (!$this.osat)  ){
 					$fighter->addAftSystem(new RammingAttack(0, 0, 360, $this->getRammingFactor(), 0));
 				}
 			}
+			*/
 		}
     } //endof function addSystem
 
