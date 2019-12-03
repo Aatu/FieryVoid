@@ -60,6 +60,25 @@ if (isset($_SESSION["user"])) {
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
         -->
+        <u>The <b>Cascor</b> have arrived - entire new official faction, courtesy of <b>Thomas Solway</b>!</u>
+
+<b>StarWars overhauled</b> - for those who want to use alternate universe ships. After playtesting the large Star Wars units slight changes were made to make them more interesting in engagements. Also, new units were added (mostly not so iconic).
+<br><br>
+        <b><u>Rule changes</u></b>
+        <br><b>Fighter damage allocation</b> - now attempting to actively minimize damage to flight. Not as good as tabletop player would do (in fact, doesn't even have access to informatio player would have), but should be far better than random allocation. Expect heavy fighter flights to (re-)gain a lot of their toughness.
+        <br><b>Antifighter firing order optimized</b> - as fighters allocate damage to minimize it, weapons firing at them get arranged for maximum effect.
+
+<br>
+<br><b><u>Gameplay streamlining</b></u>
+ <br>       <b>Boost streamlined</b> - You can boost even if You don't have power for it (although You'll have to find power for it before commit, of course ;) )
+ <br>       <b>EW boost streamlined</b> - You can change Sensor output even if You already started to assign EW. It'll be made legal at commit.
+<br><b><i>Remove All EW</i> function added</b> - now You can reset Your EW without finding every target You allocated it to!
+<br><b>Trait information exposed</b> - various unit traits are now shown as notes. You don't have to remember whether a given ship is supposed to be Gravitic or what kind of hangar small craft requires!
+<br>
+<br><b><u>General reminder</b></u>
+<br>You can look inside the game, see details, and THEN decide whether to pick it up. You're not forced to take or leave the game based on name alone.
+<br>
+<!--        
         The latest update includes:
         <br><br>
             <b>Fleet check update</b> - Rare and Uncommon fleetwide restrictions now checked separately.
@@ -77,6 +96,7 @@ if (isset($_SESSION["user"])) {
             <b>Drifting ship minor fix</b> - now a shutdown ship cannot maneuver any more.
         <br>
             <b>Game description</b> - now You can put Your wishes and scenario condition right in the game!
+-->
         
         
         <!--
