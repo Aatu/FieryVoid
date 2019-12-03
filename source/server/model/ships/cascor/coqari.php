@@ -39,7 +39,7 @@ class Coqari extends BaseShip{
         $this->addFrontSystem(new IonFieldGenerator(3, 8, 4, 300, 60));
         
         $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
-		$this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
+	$this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
         $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
         $this->addAftSystem(new DualIonBolter(2, 4, 4, 120, 300));
         $this->addAftSystem(new DualIonBolter(2, 4, 4, 60, 240));
@@ -49,8 +49,8 @@ class Coqari extends BaseShip{
 		$this->addLeftSystem(new IonFieldGenerator(3, 8, 4, 300, 60));
 		
 		$this->addRightSystem(new Thruster(4, 15, 0, 6, 4));
-		$this->addRightSystem(new IonFieldGenerator(3, 8, 4, 300, 60));
 		$this->addRightSystem(new DualIonBolter(2, 4, 4, 300, 120));
+		$this->addRightSystem(new IonFieldGenerator(3, 8, 4, 300, 60));
 		
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 50));
@@ -101,3 +101,4 @@ class Coqari extends BaseShip{
     }
 
 }
+?>

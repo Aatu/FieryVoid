@@ -42,7 +42,9 @@ class LiberatorCannon extends LCV{
 
 	$this->addPrimarySystem(new Reactor(4, 9, 0, 0));
 	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-	$this->addPrimarySystem(new Scanner(4, 12, 3, 4));
+	    	$sensors = new Scanner(4, 12, 3, 4);
+		$sensors->markLCV();
+		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(4, 13, 0, 6, 1));
 
 	$this->addPrimarySystem(new TwinArray(2, 6, 2, 180, 0));

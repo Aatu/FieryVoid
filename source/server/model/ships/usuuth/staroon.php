@@ -1,6 +1,5 @@
 <?php
 class Staroon extends LCV{
-    /*approximated as MCV, no EW restrictions*/
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -34,7 +33,9 @@ class Staroon extends LCV{
         
         $this->addPrimarySystem(new Reactor(4, 7, 0, 0));
         $this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-        $this->addPrimarySystem(new Scanner(4, 12, 2, 3));
+	    	$sensors = new Scanner(4, 12, 2, 3);
+		    $sensors->markLCV();
+		    $this->addPrimarySystem($sensors);
         $this->addPrimarySystem(new Engine(4, 12, 0, 6, 1));
         $this->addPrimarySystem(new ParticleProjector(2, 6, 1, 180, 360));
         $this->addPrimarySystem(new HvyParticleProjector(3, 8, 3, 300, 60));

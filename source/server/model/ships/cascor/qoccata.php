@@ -51,18 +51,18 @@ class Qoccata extends BaseShip{
         $this->addAftSystem(new DualIonBolter(2, 4, 4, 120, 300));
         $this->addAftSystem(new DualIonBolter(2, 4, 4, 60, 240));
                 
-		$this->addLeftSystem(new Thruster(4, 20, 0, 8, 3));
-		$this->addLeftSystem(new Hangar(4, 6));
+        $this->addLeftSystem(new IonCannon(3, 6, 4, 240, 360));
+        $this->addLeftSystem(new IonCannon(3, 6, 4, 240, 360));
 		$this->addLeftSystem(new IonTorpedo(3, 5, 4, 240, 360));
         $this->addLeftSystem(new DualIonBolter(2, 4, 4, 180, 360));
-        $this->addLeftSystem(new IonCannon(3, 6, 4, 240, 360));
-        $this->addLeftSystem(new IonCannon(3, 6, 4, 240, 360));
+		$this->addLeftSystem(new Thruster(4, 20, 0, 8, 3));
+		$this->addLeftSystem(new Hangar(4, 6));
         
-		$this->addRightSystem(new Thruster(4, 20, 0, 8, 4));
 		$this->addRightSystem(new IonCannon(3, 6, 4, 0, 120));
 		$this->addRightSystem(new IonCannon(3, 6, 4, 0, 120));
-		$this->addRightSystem(new DualIonBolter(2, 4, 4, 0, 180));
 		$this->addRightSystem(new IonTorpedo(3, 5, 4, 0, 120));
+		$this->addRightSystem(new DualIonBolter(2, 4, 4, 0, 180));
+		$this->addRightSystem(new Thruster(4, 20, 0, 8, 4));
 		$this->addRightSystem(new Hangar(4, 6));
 		
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

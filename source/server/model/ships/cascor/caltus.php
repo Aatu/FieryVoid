@@ -10,7 +10,7 @@ class Caltus extends FighterFlight{
         $this->shipClass = "Caltus Torpedo Fighters";
         $this->imagePath = "img/ships/CascorCalaq.png";
         $this->isd = 2259;
-	    $this->notes = 'Non-atmospheric.';
+	    //$this->notes = 'Non-atmospheric.';
 	    $this->occurence ="uncommon";
 	    $this->variantOf ="Calaq Assault Fighters";
         

@@ -1,6 +1,5 @@
 <?php
 class Thira extends LCV{
-    /*approximated as MCV, no EW restrictions*/
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -37,7 +36,9 @@ class Thira extends LCV{
         
         $this->addPrimarySystem(new Reactor(3, 6, 0, 0));
         $this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-        $this->addPrimarySystem(new Scanner(3, 6, 1, 2));
+	    	$sensors = new Scanner(3, 6, 1, 2);
+		    $sensors->markLCV();
+		    $this->addPrimarySystem($sensors);
         $this->addPrimarySystem(new Engine(3, 12, 0, 6, 1));
         $this->addPrimarySystem(new CargoBay(2, 8));
         $this->addPrimarySystem(new CargoBay(2, 8));

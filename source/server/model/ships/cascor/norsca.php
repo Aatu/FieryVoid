@@ -48,13 +48,13 @@ class Norsca extends BaseShip{
                 
 		$this->addLeftSystem(new Thruster(4, 15, 0, 6, 3));
         $this->addLeftSystem(new IonicLaser(3, 6, 4, 240, 360));
-        $this->addLeftSystem(new DualIonBolter(2, 4, 4, 240, 60));
         $this->addLeftSystem(new IonCannon(3, 6, 4, 240, 360));
+        $this->addLeftSystem(new DualIonBolter(2, 4, 4, 240, 60));
         
 		$this->addRightSystem(new Thruster(4, 15, 0, 6, 4));
+		$this->addRightSystem(new IonicLaser(3, 6, 4, 0, 120));
 		$this->addRightSystem(new IonCannon(3, 6, 4, 0, 120));
 		$this->addRightSystem(new DualIonBolter(2, 4, 4, 300, 120));
-		$this->addRightSystem(new IonicLaser(3, 6, 4, 0, 120));
 		
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 40));

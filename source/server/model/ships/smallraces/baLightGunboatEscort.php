@@ -35,7 +35,9 @@ class BALightGunboatEscort extends LCV{
   
 	$this->addPrimarySystem(new Reactor(4, 11, 0, 0));
 	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-	$this->addPrimarySystem(new Scanner(4, 12, 3, 5));
+	    	$sensors = new Scanner(4, 12, 3, 5);
+		    $sensors->markLCV();
+		    $this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(4, 11, 0, 4, 1));
 	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 180, 60));
 	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 300, 180));
