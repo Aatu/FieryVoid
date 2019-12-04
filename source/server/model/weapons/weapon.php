@@ -1316,8 +1316,23 @@ class Weapon extends ShipSystem
 	 */
     /* returns complete armor protection of system 
     	(already modified due to weapon class interaction with AdvArmor (if any, accounting for weapon age))
+	plus Adaptive Armor part
     */
     public function getSystemArmourComplete($target, $system, $gamedata, $fireOrder, $pos = null)
+    { 
+	$armor = 0;
+        $armor+=getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null);
+        $armor+=getSystemArmourAdaptive($target, $system, $gamedata, $fireOrder, $pos = null);
+
+        $armor = max(0, $armor); //at least 0
+
+        return $armor;
+    }//endof function getSystemArmourComplete
+    /* returns armor protection of system 
+    	(already modified due to weapon class interaction with AdvArmor (if any, accounting for weapon age))
+	not accounting for Adaptive part
+    */
+    public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null)
     { 
 	$armor = 0;
         $armor+=getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos = null);
@@ -1326,8 +1341,15 @@ class Weapon extends ShipSystem
         $armor = max(0, $armor); //at least 0
 
         return $armor;
-    }//endof function getSystemArmourComplete
-	
+    }//endof function getSystemArmourBase
+    /* returns Adaptive armor protection of system 
+    	at the moment it's PLACEHOLDER ONLY
+    */
+    public function getSystemArmourAdaptive($target, $system, $gamedata, $fireOrder, $pos = null)
+    { 
+	$armor = 0;
+        return $armor;
+    }//endof function getSystemArmourAdaptive
 	
     public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos = null)
     { //standard part of armor
