@@ -307,7 +307,7 @@
         public $animationExplosionScale = 0.15;
         public $animationWidth = 1;
         public $animationWidth2 = 0;
-        public $boostable = true;
+        public $boostable = true; //no limit to number of boosts; +1 shot ber boost. Originally can combine 2 shots for -6 interception (and no further than that), in FV there are no special rules regarding this (eg. may use as many as desired but is affected by degradation as normal)
         public $boostEfficiency = 4;            
         public $intercept = 3;
         public $loadingtime = 1;
