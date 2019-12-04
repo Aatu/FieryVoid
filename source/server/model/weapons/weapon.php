@@ -1321,8 +1321,8 @@ class Weapon extends ShipSystem
     public function getSystemArmourComplete($target, $system, $gamedata, $fireOrder, $pos = null)
     { 
 	$armor = 0;
-        $armor+=getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null);
-        $armor+=getSystemArmourAdaptive($target, $system, $gamedata, $fireOrder, $pos = null);
+        $armor+=$this->getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null);
+        $armor+=$this->getSystemArmourAdaptive($target, $system, $gamedata, $fireOrder, $pos = null);
 
         $armor = max(0, $armor); //at least 0
 
@@ -1335,8 +1335,8 @@ class Weapon extends ShipSystem
     public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null)
     { 
 	$armor = 0;
-        $armor+=getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos = null);
-        $armor+=getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos = null);
+        $armor+=$this->getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos = null);
+        $armor+=$this->getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos = null);
 
         $armor = max(0, $armor); //at least 0
 
@@ -1350,6 +1350,7 @@ class Weapon extends ShipSystem
 	$armor = 0;
         return $armor;
     }//endof function getSystemArmourAdaptive
+	
 	
     public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos = null)
     { //standard part of armor
