@@ -453,10 +453,11 @@ class BurstPulseCannon extends Pulse {
 		$dmgDice = 1;
 		if($roll<=3) $dmgDice+=2;
 		$dmgToDo=Dice::d(6,$dmgDice);
+$dmgToDo = 10; //TEST		    
 		//ignore armor, but only half of advanced armor
 		$armor = $this->getSystemArmourBase($ship, $system, $gamedata, $fireOrder, null);
 		if($system->advancedArmor) { //ignore half of AdvArmor
-			$armor = floor($armor/2);
+//			$armor = floor($armor/2);
 		}else{//ignore regular armor entirely
 			$armor = 0;
 		}
