@@ -252,7 +252,7 @@ EMWaveDisruptor.prototype.initBoostableInfo = function () {
     var count = shipManager.power.getBoost(this);
 
     this.data["Number of guns"] = count + 2;
-    this.data.guns = count + 2;
+    this.guns = count + 2;
 
     return this;
 };
