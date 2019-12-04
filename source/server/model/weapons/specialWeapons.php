@@ -160,7 +160,8 @@ class BurstBeam extends Weapon{
 	public $trailLength = 30;
 		        
 	public $loadingtime = 1;
-        public $priority = 9; //as antiship weapon; as antifighter should go first...
+        public $priority = 10; //as antiship weapon, going last
+	public $priorityAFArray = array(1=>3); //as antifighter weapon, going early
         
 			
         public $rangePenalty = 2;
@@ -175,13 +176,54 @@ class BurstBeam extends Weapon{
        
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-		$this->data["Special"] = 'Forces dropout on fighters, turns off powered systems, causes extra criticals, can cause power shortages. ';
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}	      
+		      $this->data["Special"] .= "Effect depends on system hit:";    
+		      $this->data["Special"] .= "<br> - Structure: Reactor output reduced by 1."; 
+		      $this->data["Special"] .= "<br> - Powered system: forced shutdown next turn."; 
+		      $this->data["Special"] .= "<br> - Other system: critical roll forced (at +4)."; 
+		      $this->data["Special"] .= "<br> - Fighter: immediate dropout (excluding superheavy)."; 
+		      $this->data["Special"] .= "<br>Automatically hits EM shield if interposed.";
+		      $this->data["Special"] .= "<br>Does not affect units protected by Advanced Armor.";  	
 	}
+	
+	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){ //if target is protected by EM shield, that shield is hit automatically
+		if($target instanceof FighterFlight){ //for fighters - regular effect
+			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+			return;
+		}
+		
+		//first - find bearing from target to firing ship (needed to determine whether shield interacts with incoming shot)
+		$relativeBearing = $target->getBearingOnUnit($shooter);
+		//are there any active shields affecting shot?
+		$affectingShields = array();
+		foreach($target->systems as $shield){
+			if( ($shield instanceOf EMShield)  //this is an actual shield!
+				&& (!$shield->isDestroyed()) //not destroyed
+				&& (!$shield->isOfflineOnTurn($gamedata->turn)) //powered up
+			   	&& (mathlib::isInArc($relativeBearing, $shield->startArc, $shield->endArc)) //actually in arc to affect
+			) {
+				$affectingShields[] = $shield;
+			}
+		}
+		$countShields = count($affectingShields);
+		if($countShields > 0){ //hit shield if active in arc and not destroyed (proceed to onDamagedSystem directly)
+			//choose randomly from relevant shields
+			$chosenID = Dice::d($countShields,1)-1; //array elements numeration starts at 0
+			$shield = $affectingShields[$chosenID];			
+			$this->onDamagedSystem($target, $shield, 0, 0, $gamedata, $fireOrder);
+		} else { //otherwise hit normally (parent beforeDamage) (...for 0 damage...) , actual effect handled in onDamagedSystem 
+			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+		}
+	}//endof function beforeDamage
 		
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		$crit = null;
 		
-		if (!$system->advancedArmor){
+		if (!$system->advancedArmor){ //no effect at all vs Advanced Armor
 			if ($system instanceof Fighter && !($ship->superheavy)){
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
@@ -245,11 +287,52 @@ class BurstPulseCannon extends Pulse {
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
        
-		public function setSystemDataWindow($turn){
-			//$this->data["Weapon type"] = "Electromagnetic";
-			parent::setSystemDataWindow($turn);
-		}
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}	      
+		      $this->data["Special"] .= "Effect depends on system hit:";    
+		      $this->data["Special"] .= "<br> - Structure: Reactor output reduced by 1."; 
+		      $this->data["Special"] .= "<br> - Powered system: forced shutdown next turn."; 
+		      $this->data["Special"] .= "<br> - Other system: critical roll forced (at +4)."; 
+		      $this->data["Special"] .= "<br> - Fighter: immediate dropout (excluding superheavy)."; 
+		      $this->data["Special"] .= "<br>Automatically hits EM shield if interposed.";
+		      $this->data["Special"] .= "<br>Does not affect units protected by Advanced Armor.";  	
+	}
+	
 
+	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){ //if target is protected by EM shield, that shield is hit automatically
+		if($target instanceof FighterFlight){ //for fighters - regular effect
+			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+			return;
+		}
+		
+		//first - find bearing from target to firing ship (needed to determine whether shield interacts with incoming shot)
+		$relativeBearing = $target->getBearingOnUnit($shooter);
+		//are there any active shields affecting shot?
+		$affectingShields = array();
+		foreach($target->systems as $shield){
+			if( ($shield instanceOf EMShield)  //this is an actual shield!
+				&& (!$shield->isDestroyed()) //not destroyed
+				&& (!$shield->isOfflineOnTurn($gamedata->turn)) //powered up
+			   	&& (mathlib::isInArc($relativeBearing, $shield->startArc, $shield->endArc)) //actually in arc to affect
+			) {
+				$affectingShields[] = $shield;
+			}
+		}
+		$countShields = count($affectingShields);
+		if($countShields > 0){ //hit shield if active in arc and not destroyed (proceed to onDamagedSystem directly)
+			//choose randomly from relevant shields
+			$chosenID = Dice::d($countShields,1)-1; //array elements numeration starts at 0
+			$shield = $affectingShields[$chosenID];			
+			$this->onDamagedSystem($target, $shield, 0, 0, $gamedata, $fireOrder);
+		} else { //otherwise hit normally (parent beforeDamage) (...for 0 damage...) , actual effect handled in onDamagedSystem 
+			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+		}
+	}//endof function beforeDamage
 		
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 			$crit = null;
@@ -286,6 +369,8 @@ class BurstPulseCannon extends Pulse {
 
 
 
+
+
     class MediumBurstBeam extends BurstBeam{
         public $name = "mediumBurstBeam";
         public $displayName = "Medium Burst Beam";
@@ -311,12 +396,83 @@ class BurstPulseCannon extends Pulse {
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-            $crit = null;
-		
-		if ($system->advancedArmor) return;
+	    
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		//specifically override inherited Special - it has a bit different (stronger) effect:
+		      $this->data["Special"] = "Effect depends on system hit:";    
+		      $this->data["Special"] .= "<br> - Structure: Reactor output reduced by 2."; 
+		      $this->data["Special"] .= "<br> - Powered system: forced shutdown for 2 turns."; 
+		      $this->data["Special"] .= "<br> - Other system: critical roll forced (at +6)."; 
+		      $this->data["Special"] .= "<br> - Superheavy fighter: 1/6 chance of immediate dropout."; 
+		      $this->data["Special"] .= "<br> - Other fighter: immediate dropout."; 
+		      $this->data["Special"] .= "<br> - Any fighter: 1d6 to 3d6 damage (ignoring armor)."; 
+		      $this->data["Special"] .= "<br>Automatically hits EM shield if interposed.";
+		      $this->data["Special"] .= "<br>Does not affect units protected by Advanced Armor (other than fighter damage).";  	
+	}
+	    
+	    
 
-            if ($system instanceof Fighter){
+	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){ //if target is protected by EM shield, that shield is hit automatically
+		if($target instanceof FighterFlight){ //for fighters - regular effect
+			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+			return;
+		}
+		
+		//first - find bearing from target to firing ship (needed to determine whether shield interacts with incoming shot)
+		$relativeBearing = $target->getBearingOnUnit($shooter);
+		//are there any active shields affecting shot?
+		$affectingShields = array();
+		foreach($target->systems as $shield){
+			if( ($shield instanceOf EMShield)  //this is an actual shield!
+				&& (!$shield->isDestroyed()) //not destroyed
+				&& (!$shield->isOfflineOnTurn($gamedata->turn)) //powered up
+			   	&& (mathlib::isInArc($relativeBearing, $shield->startArc, $shield->endArc)) //actually in arc to affect
+			) {
+				$affectingShields[] = $shield;
+			}
+		}
+		$countShields = count($affectingShields);
+		if($countShields > 0){ //hit shield if active in arc and not destroyed (proceed to onDamagedSystem directly)
+			//choose randomly from relevant shields
+			$chosenID = Dice::d($countShields,1)-1; //array elements numeration starts at 0
+			$shield = $affectingShields[$chosenID];			
+			$this->onDamagedSystem($target, $shield, 0, 0, $gamedata, $fireOrder);
+		} else { //otherwise hit normally (parent beforeDamage) (...for 0 damage...) , actual effect handled in onDamagedSystem 
+			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+		}
+	}//endof function beforeDamage
+	    
+        protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+            $crit = null;		
+
+            if ($system instanceof Fighter){ //fighters may suffer damage even with Advanced Armor
+		//deal 1d6 damage; on roll <=3 additional 2d6
+		//regular fighter drops out automatically, superheavy on a roll of 1
+		$roll = Dice::d(6);
+		$dmgDice = 1;
+		if($roll<=3) $dmgDice+=2;
+		$dmgToDo=Dice::d(6,$dmgDice);   
+		//ignore armor, but only half of advanced armor
+		$armor = $this->getSystemArmourBase($ship, $system, $gamedata, $fireOrder, null);
+		if($system->advancedArmor) { //ignore half of AdvArmor
+			$armor = floor($armor/2);
+		}else{//ignore regular armor entirely
+			$armor = 0;
+		}
+		$armor += $this->getSystemArmourAdaptive($ship, $system, $gamedata, $fireOrder, null);
+		//immediately deal damage to fighter hit
+		$destroyed = false;
+		$systemHealth = $system->getRemainingHealth();
+		if ($dmgToDo - $armor >= $systemHealth) { //target will be destroyed
+			$destroyed = true;
+			$dmgToDo = $systemHealth + $armor;
+		}
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, $armor, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $fireOrder->shooterid, $this->id);
+		$damageEntry->updated = true;
+		$system->damage[] = $damageEntry;
+		if($destroyed==true) return; //no point doing anything else if target is destroyed outright
+		if($system->advancedArmor) return;//Advanced Armor will protect the fighter from forced dropout
                 if (!$ship->superheavy){
                     $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
                     $crit->updated = true;
@@ -325,8 +481,7 @@ class BurstPulseCannon extends Pulse {
 			$fireOrder->pubnotes .= " DROPOUT! ";
                 }
                 else {
-                    $roll = Dice::d(6);
-                    if ($roll < 2){
+                    if ($roll < 2){ //1/6 chance to outright dropout even superheavy fighter
                         $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
                         $crit->updated = true;
                         $crit->inEffect = true;
@@ -335,6 +490,9 @@ class BurstPulseCannon extends Pulse {
                     }
                 }
             }
+	    else if ($system->advancedArmor){ //no actual effect on AA-protected ship!
+		    return;
+	    }
             else if ($system instanceof Structure){
                 $reactor = $ship->getSystemByName("Reactor");
                 $crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced2", $gamedata->turn);
@@ -376,11 +534,77 @@ class BurstPulseCannon extends Pulse {
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-
+	    
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		//specifically override inherited Special - it has a bit different (stronger) effect:
+		      $this->data["Special"] = "Effect depends on system hit:";    
+		      $this->data["Special"] .= "<br> - Structure: Reactor output reduced by 4."; 
+		      $this->data["Special"] .= "<br> - Powered system: forced shutdown for 3 turns."; 
+		      $this->data["Special"] .= "<br> - Other system: critical roll forced (at +8)."; //no mention of it but it's a logical scale-up - I consider lack of appropriate fragment to be an omission 
+		      $this->data["Special"] .= "<br> - Superheavy fighter: 1/3 chance of immediate dropout."; 
+		      $this->data["Special"] .= "<br> - Other fighter: immediate dropout."; 
+		      $this->data["Special"] .= "<br> - Any fighter: 5d6 damage (ignoring armor).";
+		      $this->data["Special"] .= "<br>Automatically hits EM shield if interposed.";
+		      $this->data["Special"] .= "<br>Effects other than direct damage do not affect units protected by Advanced Armor.";  	
+	}
+	    
+	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){ //if target is protected by EM shield, that shield is hit automatically
+		if($target instanceof FighterFlight){ //for fighters - regular effect
+			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+			return;
+		}
+		
+		//first - find bearing from target to firing ship (needed to determine whether shield interacts with incoming shot)
+		$relativeBearing = $target->getBearingOnUnit($shooter);
+		//are there any active shields affecting shot?
+		$affectingShields = array();
+		foreach($target->systems as $shield){
+			if( ($shield instanceOf EMShield)  //this is an actual shield!
+				&& (!$shield->isDestroyed()) //not destroyed
+				&& (!$shield->isOfflineOnTurn($gamedata->turn)) //powered up
+			   	&& (mathlib::isInArc($relativeBearing, $shield->startArc, $shield->endArc)) //actually in arc to affect
+			) {
+				$affectingShields[] = $shield;
+			}
+		}
+		$countShields = count($affectingShields);
+		if($countShields > 0){ //hit shield if active in arc and not destroyed (proceed to onDamagedSystem directly)
+			//choose randomly from relevant shields
+			$chosenID = Dice::d($countShields,1)-1; //array elements numeration starts at 0
+			$shield = $affectingShields[$chosenID];			
+			$this->onDamagedSystem($target, $shield, 0, 0, $gamedata, $fireOrder);
+		} else { //otherwise hit normally (parent beforeDamage) (...for 0 damage...) , actual effect handled in onDamagedSystem 
+			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+		}
+	}//endof function beforeDamage
+	    
         protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-            $crit = null;
-            if ($system->advancedArmor) return;
-            if ($system instanceof Fighter){
+            if ($system instanceof Fighter){ //fighters may suffer damage even with Advanced Armor
+		//deal 5d6 damage; on roll <=3 additional 2d6
+		//regular fighter drops out automatically, superheavy on a roll of 1-2
+		$roll = Dice::d(6);
+		$dmgToDo=Dice::d(6,5); //2d6 plus 3d6 on a roll of 1-6...
+		//ignore armor, but only half of advanced armor
+		$armor = $this->getSystemArmourBase($ship, $system, $gamedata, $fireOrder, null);
+		if($system->advancedArmor) { //ignore half of AdvArmor
+			$armor = floor($armor/2);
+		}else{//ignore regular armor entirely
+			$armor = 0;
+		}
+		$armor += $this->getSystemArmourAdaptive($ship, $system, $gamedata, $fireOrder, null);
+		//immediately deal damage to fighter hit
+		$destroyed = false;
+		$systemHealth = $system->getRemainingHealth();
+		if ($dmgToDo - $armor >= $systemHealth) { //target will be destroyed
+			$destroyed = true;
+			$dmgToDo = $systemHealth + $armor;
+		}
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, $armor, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $fireOrder->shooterid, $this->id);
+		$damageEntry->updated = true;
+		$system->damage[] = $damageEntry;
+		if($destroyed==true) return; //no point doing anything else if target is destroyed outright
+		if($system->advancedArmor) return;//Advanced Armor will protect the fighter from forced dropout
                 if (!$ship->superheavy){
                     $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
                     $crit->updated = true;
@@ -389,8 +613,7 @@ class BurstPulseCannon extends Pulse {
 			$fireOrder->pubnotes .= " DROPOUT! ";
                 }
                 else {
-                    $roll = Dice::d(6);
-                    if ($roll < 3){
+                    if ($roll < 3){//1/3 chance to outright dropout even superheavy fighter
                         $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
                         $crit->updated = true;
                         $crit->inEffect = true;
@@ -399,6 +622,9 @@ class BurstPulseCannon extends Pulse {
                     }
                 }
             }
+	    else if ($system->advancedArmor){ //no actual effect on AA-protected ship!
+		    return;
+	    }
             else if ($system instanceof Structure){
                 $reactor = $ship->getSystemByName("Reactor");
                 $crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced4", $gamedata->turn);
@@ -470,7 +696,7 @@ class BurstPulseCannon extends Pulse {
 			}else{
 				$this->data["Special"] .= '<br>';
 			}	    
-			$this->data["Special"] .= 'Forces dropout on fighters. Can pick particular fighter at no penalty.';
+			$this->data["Special"] .= 'Forces dropout on fighters (except superheaby). Can pick particular fighter at no penalty.';
         }
 
         protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
@@ -545,7 +771,7 @@ class StunBeam extends Weapon{
        
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-			$this->data["Special"] = 'Forces dropout on fighters, turns off powered systems. ';
+			$this->data["Special"] = 'Forces dropout on fighters (except superheavy), turns off powered systems. ';
 		}
 		
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
@@ -2172,8 +2398,6 @@ class RadCannon extends Weapon{
 		return 0; //advanced armor is ignored
         }//endof function getSystemArmourInvulnerable
 	
-	
-	/*attacks every not destroyed (as of NOW!) ship section*/
 	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
 		//fighters are untargetable, so we know it's a ship
 		//hit shield if active in arc and not destroyed (proceed to onDamagedSystem directly) (use instanceof Shield to determine!)

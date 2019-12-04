@@ -247,16 +247,12 @@ EMWaveDisruptor.prototype.constructor = EMWaveDisruptor;
 EMWaveDisruptor.prototype.initBoostableInfo = function () {
     // Needed because it can chance during initial phase
     // because of adding extra power.
-
-    this.data["Weapon type"] = "Electromagnetic";
-    this.data["Damage type"] = "Intercept / Dropout";
+    //in this case: increase number of "guns" (that is, separate shots)
 
     var count = shipManager.power.getBoost(this);
 
-    this.data["Charges"] = count + 2;
-
-    this.intercept = this.getInterceptRating();
-    this.data.Intercept = this.getInterceptRating() * -5;
+    this.data["Number of guns"] = count + 2;
+    this.guns = count + 2;
 
     return this;
 };

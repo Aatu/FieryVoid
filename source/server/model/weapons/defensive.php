@@ -307,11 +307,11 @@
         public $animationExplosionScale = 0.15;
         public $animationWidth = 1;
         public $animationWidth2 = 0;
-        public $boostable = true;
+        public $boostable = true; //no limit to number of boosts; +1 shot ber boost. Originally can combine 2 shots for -6 interception (and no further than that), in FV there are no special rules regarding this (eg. may use as many as desired but is affected by degradation as normal)
         public $boostEfficiency = 4;            
         public $intercept = 3;
         public $loadingtime = 1;
-        public $charges = 2;
+        public $guns = 2; //2 separate shots; can be boosted
 	public $iconPath = "emWaveDisruptor.png";
         
         public $rangePenalty = 2;
@@ -322,9 +322,19 @@
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-            //$this->data["Weapon type"] = "Electromagnetic";
-            //$this->data["Damage type"] = "Intercept / Dropout";
+        }
+	    
+	    /*
+ 	public function stripForJson() {
+        	$strippedSystem = parent::stripForJson();	
+		$strippedSystem->guns = $this->guns;
+	}*/
+
+        public function setSystemDataWindow($turn){
+	    $this->guns = 2+$this->getBoostLevel($turn);
+            parent::setSystemDataWindow($turn);
             $this->data["Special"] = "Intercept / Dropout";
+            $this->data["Special"] .= "<br>Can be boosted to increase number of shots.";
         }
         
         public function getDamage($fireOrder){        return 0;   }

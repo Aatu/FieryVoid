@@ -1305,6 +1305,53 @@ class Weapon extends ShipSystem
         return true;
     }
 
+	/*NEED TO UPDATE ARMOR_AFFENCTING EFFECTS OF WEAPONS
+	desired effect: 
+	 - getSystemArmourComplete returns total armor (getSystemArmour+getSystemArmourAdaptive)
+	 - getSystemArmourBase returns total armor except Adaptive part, already modified due to weapon class interaction with AdvArmor (if any, accounting for weapon age))
+	 - getSystemArmourAdaptive returns AdaptiveArmor as appropriate for weapon class
+	 - all other getSystemArmour functions currently existing will be delted
+	 weapons that may reduce armor values depenting on presence of AdvancedArmor will do so looking for appropriate flag
+	 requires doing AdaptiveArmor first :) and redoing all weapons with special armor interaction
+	 */
+    /* returns complete armor protection of system 
+    	(already modified due to weapon class interaction with AdvArmor (if any, accounting for weapon age))
+	plus Adaptive Armor part
+    */
+    public function getSystemArmourComplete($target, $system, $gamedata, $fireOrder, $pos = null)
+    { 
+	$armor = 0;
+        $armor+=$this->getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null);
+        $armor+=$this->getSystemArmourAdaptive($target, $system, $gamedata, $fireOrder, $pos = null);
+
+        $armor = max(0, $armor); //at least 0
+
+        return $armor;
+    }//endof function getSystemArmourComplete
+    /* returns armor protection of system 
+    	(already modified due to weapon class interaction with AdvArmor (if any, accounting for weapon age))
+	not accounting for Adaptive part
+    */
+    public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null)
+    { 
+	$armor = 0;
+        $armor+=$this->getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos = null);
+        $armor+=$this->getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos = null);
+
+        $armor = max(0, $armor); //at least 0
+
+        return $armor;
+    }//endof function getSystemArmourBase
+    /* returns Adaptive armor protection of system 
+    	at the moment it's PLACEHOLDER ONLY
+    */
+    public function getSystemArmourAdaptive($target, $system, $gamedata, $fireOrder, $pos = null)
+    { 
+	$armor = 0;
+        return $armor;
+    }//endof function getSystemArmourAdaptive
+	
+	
     public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos = null)
     { //standard part of armor
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
