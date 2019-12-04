@@ -454,13 +454,13 @@ class BurstPulseCannon extends Pulse {
 		if($roll<=3) $dmgDice+=2;
 		$dmgToDo=Dice::d(6,$dmgDice);
 		//ignore armor, but only half of advanced armor
-		$armor = getSystemArmourBase($ship, $system, $gamedata, $fireOrder, null);
+		$armor = $this->getSystemArmourBase($ship, $system, $gamedata, $fireOrder, null);
 		if($system->advancedArmor) { //ignore half of AdvArmor
 			$armor = floor($armor/2);
 		}else{//ignore regular armor entirely
 			$armor = 0;
 		}
-		$armor += getSystemArmourAdaptive($ship, $system, $gamedata, $fireOrder, null);
+		$armor += $this->getSystemArmourAdaptive($ship, $system, $gamedata, $fireOrder, null);
 		//immediately deal damage to fighter hit
 		$destroyed = false;
 		$systemHealth = $system->getRemainingHealth();
@@ -587,13 +587,13 @@ class BurstPulseCannon extends Pulse {
 		$roll = Dice::d(6);
 		$dmgToDo=Dice::d(6,5); //2d6 plus 3d6 on a roll of 1-6...
 		//ignore armor, but only half of advanced armor
-		$armor = getSystemArmourBase($ship, $system, $gamedata, $fireOrder, null);
+		$armor = $this->getSystemArmourBase($ship, $system, $gamedata, $fireOrder, null);
 		if($system->advancedArmor) { //ignore half of AdvArmor
 			$armor = floor($armor/2);
 		}else{//ignore regular armor entirely
 			$armor = 0;
 		}
-		$armor += getSystemArmourAdaptive($ship, $system, $gamedata, $fireOrder, null);
+		$armor += $this->getSystemArmourAdaptive($ship, $system, $gamedata, $fireOrder, null);
 		//immediately deal damage to fighter hit
 		$destroyed = false;
 		$systemHealth = $system->getRemainingHealth();
