@@ -37316,19 +37316,28 @@ var FighterIcon = function (_React$Component) {
 
             var destroyed = shipManager.systems.isDestroyed(ship, fighter);
             var disengaged = shipManager.criticals.isDisengagedFighter(fighter);
-
+            /* old version - weapons and notWeapons
+                    return (
+                        <FighterIconContainer destroyed={destroyed} img={fighter.iconPath} onMouseOver={this.onSystemMouseOver.bind(this)} onMouseOut={this.onSystemMouseOut}>
+                            <Container>{toIcons(ship, fighter, getWeapons(fighter), destroyed)}</Container>
+                            <ContainerSystems>{toIcons(ship, fighter, getNotWeapons(fighter), destroyed)}</ContainerSystems>
+                            <HealthBar health={getStructureLeft(ship, fighter)} criticals={hasCriticals(fighter)}><HealthText>{fighter.maxhealth - damageManager.getDamage(ship, fighter)} / {fighter.maxhealth}</HealthText></HealthBar>
+                        </FighterIconContainer>
+                    );
+            */
+            //new version - fwd and aft systems (unit creator decides the layout)
             return React.createElement(
                 FighterIconContainer,
                 { destroyed: destroyed, img: fighter.iconPath, onMouseOver: this.onSystemMouseOver.bind(this), onMouseOut: this.onSystemMouseOut },
                 React.createElement(
                     Container,
                     null,
-                    toIcons(ship, fighter, getWeapons(fighter), destroyed)
+                    toIcons(ship, fighter, getFwdSystems(fighter), destroyed)
                 ),
                 React.createElement(
                     ContainerSystems,
                     null,
-                    toIcons(ship, fighter, getNotWeapons(fighter), destroyed)
+                    toIcons(ship, fighter, getAftSystems(fighter), destroyed)
                 ),
                 React.createElement(
                     HealthBar,
@@ -37365,6 +37374,17 @@ var getWeapons = function getWeapons(fighter) {
 var getNotWeapons = function getNotWeapons(fighter) {
     return fighter.systems.filter(function (system) {
         return !system.weapon;
+    });
+};
+
+var getFwdSystems = function getFwdSystems(fighter) {
+    return fighter.systems.filter(function (system) {
+        return system.location == 1;
+    });
+};
+var getAftSystems = function getAftSystems(fighter) {
+    return fighter.systems.filter(function (system) {
+        return system.location != 1;
     });
 };
 
