@@ -23,9 +23,10 @@ class SimultaneousMovementRule implements JsonSerializable {
         foreach ($gameData->ships as $key=>$ship){
 
             $mod = 0;
-            if ($gameData->turn > 1) { //TODO: can't have criticals before turn 1
+            //Marcin Sawicki: cannot have criticals, but can have Ini modifiers all right!
+            //if ($gameData->turn > 1) { //TODO: can't have criticals before turn 1
                 $mod = $ship->getCommonIniModifiers( $gameData );
-            }
+            //}
 
             $iniBonus =  $ship->getInitiativebonus($gameData);
 
