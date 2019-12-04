@@ -465,16 +465,16 @@ window.gamedata = {
 	    var EWRestrictedIncorrect = [];//RestrictedEW critical circumvented
 	    var EWLCVIncorrect = [];//LCV set too many EW to tasks other than OEW
 
-            for (var ship in myShips) {
-                if (!myShips[ship].flight) {			
-			if (ew.convertUnusedToDEW(ship) != true){
-				EWIncorrect.push(myShips[ship]);
+            for (var shipID in myShips) {
+                if (!myShips[shipID].flight) {			
+			if (ew.convertUnusedToDEW(myShips[shipID]) != true){
+				EWIncorrect.push(myShips[shipID]);
 			}
-			if (ew.checkRestrictedEW(ship) != true){
-				EWRestrictedIncorrect.push(myShips[ship]);
+			if (ew.checkRestrictedEW(myShips[shipID]) != true){
+				EWRestrictedIncorrect.push(myShips[shipID]);
 			}
-			if (ew.checkLCVSensors(ship) != true){
-				EWLCVIncorrect.push(myShips[ship]);
+			if (ew.checkLCVSensors(myShips[shipID]) != true){
+				EWLCVIncorrect.push(myShips[shipID]);
 			}			
 		}
 	    }
@@ -482,24 +482,24 @@ window.gamedata = {
 	    var errorText = '';
             if (EWIncorrect.length > 0) {
                 errorText += "Following ships have too many EW points set:<br>";
-                for (var ship in EWIncorrect) {
-                    errorText += EWIncorrect[ship].name + " (" + EWIncorrect[ship].shipClass + ")";
+                for (var shipID in EWIncorrect) {
+                    errorText += EWIncorrect[shipID].name + " (" + EWIncorrect[shipID].shipClass + ")";
                     errorText += "<br>";
                 }
                 errorText += "<br>";
             }
             if (EWRestrictedIncorrect.length > 0) {
                 errorText += "Following ships have too many EW points set:<br>";
-                for (var ship in EWRestrictedIncorrect) {
-                    errorText += EWRestrictedIncorrect[ship].name + " (" + EWRestrictedIncorrect[ship].shipClass + ")";
+                for (var shipID in EWRestrictedIncorrect) {
+                    errorText += EWRestrictedIncorrect[shipID].name + " (" + EWRestrictedIncorrect[shipID].shipClass + ")";
                     errorText += "<br>";
                 }
                 errorText += "<br>";
             }
             if (EWLCVIncorrect.length > 0) {
                 errorText += "Following LCVs have too many EW points set on non-OEW:<br>";
-                for (var ship in EWLCVIncorrect) {
-                    errorText += EWLCVIncorrect[ship].name + " (" + EWLCVIncorrect[ship].shipClass + ")";
+                for (var shipID in EWLCVIncorrect) {
+                    errorText += EWLCVIncorrect[shipID].name + " (" + EWLCVIncorrect[shipID].shipClass + ")";
                     errorText += "<br>";
                 }
                 errorText += "<br>";
