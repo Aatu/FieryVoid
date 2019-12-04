@@ -468,7 +468,7 @@ class BurstPulseCannon extends Pulse {
 			$destroyed = true;
 			$dmgToDo = $systemHealth + $armor;
 		}
-		$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, $armor, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $shooter->id, $this->id);
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, $armor, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $fireOrder->shooterid, $this->id);
 		$damageEntry->updated = true;
 		$system->damage[] = $damageEntry;
 		$this->onDamagedSystem($ship, $system, $dmgToDo, $armor, $gamedata, $fireOrder);
@@ -601,7 +601,7 @@ class BurstPulseCannon extends Pulse {
 			$destroyed = true;
 			$dmgToDo = $systemHealth + $armor;
 		}
-		$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, $armor, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $shooter->id, $this->id);
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, $armor, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $fireOrder->shooterid, $this->id);
 		$damageEntry->updated = true;
 		$system->damage[] = $damageEntry;
 		$this->onDamagedSystem($ship, $system, $dmgToDo, $armor, $gamedata, $fireOrder);
