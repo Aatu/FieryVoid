@@ -290,8 +290,9 @@ window.gamedata = {
                         }
                         if (hasEW == 0) {
                             hasNoEW.push(myShips[ship]);
-                        } else continue;
+                        };
                     }
+			
                 }
             }
 
@@ -447,45 +448,69 @@ window.gamedata = {
                 window.confirm.error(tooManyShieldsError, function () {});
                 return false;
             }
+		
+		
+		
+            var myShips = [];
 
-	    var EWIncorrect = ''; //too many EW points set
-            for (var i in gamedata.ships) {
-                var ship = gamedata.ships[i];
-                if (ew.convertUnusedToDEW(ship) != true){
-			EWIncorrect += "- " + gamedata.ships[i].name + "<br>";					
-		}
+            for (var ship in gamedata.ships) {
+                if (gamedata.ships[ship].userid == gamedata.thisplayer) {
+                    if (!shipManager.isDestroyed(gamedata.ships[ship])) {
+                        myShips.push(gamedata.ships[ship]);
+                    }
+                }
             }
-	    if (EWIncorrect != ''){
-		EWIncorrect = "Following ships have too many EW points set:<br>" + EWIncorrect;
-		window.confirm.error(EWIncorrect, function () {});
-                return false;
-	    }
-		
-		var EWRestrictedIncorrect = '';//RestrictedEW critical circumvented
-            for (var i in gamedata.ships) {
-                var ship = gamedata.ships[i];
-                if (ew.checkRestrictedEW(ship) != true){
-				EWRestrictedIncorrect += "- " + gamedata.ships[i].name + "<br>";					
+
+	    var EWIncorrect = []; //too many EW points set
+	    var EWRestrictedIncorrect = [];//RestrictedEW critical circumvented
+	    var EWLCVIncorrect = [];//LCV set too many EW to tasks other than OEW
+
+            for (var ship in myShips) {
+                if (!myShips[ship].flight) {			
+			if (ew.convertUnusedToDEW(ship) != true){
+				EWIncorrect.push(myShips[ship]);
 			}
+			if (ew.checkRestrictedEW(ship) != true){
+				EWRestrictedIncorrect.push(myShips[ship]);
+			}
+			if (ew.checkLCVSensors(ship) != true){
+				EWLCVIncorrect.push(myShips[ship]);
+			}			
 		}
-	    if (EWRestrictedIncorrect != ''){
-			EWRestrictedIncorrect = "Following ships have Restricted EW critical, need to reduce non-DEW:<br>" + EWRestrictedIncorrect;
-			window.confirm.error(EWRestrictedIncorrect, function () {});
-			return false;
 	    }
 		
-		var EWLCVIncorrect = '';//LCV set too many EW to tasks other than OEW
-            for (var i in gamedata.ships) {
-                var ship = gamedata.ships[i];
-                if (ew.checkLCVSensors(ship) != true){
-			EWLCVIncorrect += "- " + gamedata.ships[i].name + "<br>";					
-		}
+	    var errorText = '';
+            if (EWIncorrect.length > 0) {
+                errorText += "Following ships have too many EW points set:<br>";
+                for (var ship in EWIncorrect) {
+                    errorText += EWIncorrect[ship].name + " (" + EWIncorrect[ship].shipClass + ")";
+                    errorText += "<br>";
+                }
+                errorText += "<br>";
             }
-	    if (EWLCVIncorrect != ''){
-		EWLCVIncorrect = "Following LCVs have too many EW points set on non-OEW:<br>" + EWLCVIncorrect;
-		window.confirm.error(EWLCVIncorrect, function () {});
-                return false;
+            if (EWRestrictedIncorrect.length > 0) {
+                errorText += "Following ships have too many EW points set:<br>";
+                for (var ship in EWRestrictedIncorrect) {
+                    errorText += EWRestrictedIncorrect[ship].name + " (" + EWRestrictedIncorrect[ship].shipClass + ")";
+                    errorText += "<br>";
+                }
+                errorText += "<br>";
+            }
+            if (EWLCVIncorrect.length > 0) {
+                errorText += "Following LCVs have too many EW points set on non-OEW:<br>";
+                for (var ship in EWLCVIncorrect) {
+                    errorText += EWLCVIncorrect[ship].name + " (" + EWLCVIncorrect[ship].shipClass + ")";
+                    errorText += "<br>";
+                }
+                errorText += "<br>";
+            }
+		
+	    if (errorText != ''){
+            	window.confirm.error(errorText, function () {});
+		return false;
 	    }
+		
+		
 
             ajaxInterface.submitGamedata();
         } else if (gamedata.gamephase == 2) {
