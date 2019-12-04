@@ -257,9 +257,6 @@ window.gamedata = {
 
             var hasNoEW = [];
             var selfDestructing = [];
-	    var EWIncorrect = []; //too many EW points set
-	    var EWRestrictedIncorrect = [];//RestrictedEW critical circumvented
-	    var EWLCVIncorrect = [];//LCV set too many EW to tasks other than OEW
 
             for (var ship in myShips) {
                 if (!myShips[ship].flight) {
@@ -295,16 +292,6 @@ window.gamedata = {
                             hasNoEW.push(myShips[ship]);
                         };
                     }
-			
-			if (ew.convertUnusedToDEW(ship) != true){
-				EWIncorrect.push(myShips[ship]);
-			}
-			if (ew.checkRestrictedEW(ship) != true){
-				EWRestrictedIncorrect.push(myShips[ship]);
-			}
-			if (ew.checkLCVSensors(ship) != true){
-				EWLCVIncorrect.push(myShips[ship]);
-			}
 			
                 }
             }
@@ -461,7 +448,69 @@ window.gamedata = {
                 window.confirm.error(tooManyShieldsError, function () {});
                 return false;
             }
+		
+		
+		
+            var myShips = [];
 
+            for (var ship in gamedata.ships) {
+                if (gamedata.ships[ship].userid == gamedata.thisplayer) {
+                    if (!shipManager.isDestroyed(gamedata.ships[ship])) {
+                        myShips.push(gamedata.ships[ship]);
+                    }
+                }
+            }
+
+	    var EWIncorrect = []; //too many EW points set
+	    var EWRestrictedIncorrect = [];//RestrictedEW critical circumvented
+	    var EWLCVIncorrect = [];//LCV set too many EW to tasks other than OEW
+
+            for (var ship in myShips) {
+                if (!myShips[ship].flight) {			
+			if (ew.convertUnusedToDEW(ship) != true){
+				EWIncorrect.push(myShips[ship]);
+			}
+			if (ew.checkRestrictedEW(ship) != true){
+				EWRestrictedIncorrect.push(myShips[ship]);
+			}
+			if (ew.checkLCVSensors(ship) != true){
+				EWLCVIncorrect.push(myShips[ship]);
+			}			
+		}
+	    }
+		
+	    var errorText = '';
+            if (EWIncorrect.length > 0) {
+                errorText += "Following ships have too many EW points set:<br>";
+                for (var ship in EWIncorrect) {
+                    errorText += EWIncorrect[ship].name + " (" + EWIncorrect[ship].shipClass + ")";
+                    errorText += "<br>";
+                }
+                errorText += "<br>";
+            }
+            if (EWRestrictedIncorrect.length > 0) {
+                errorText += "Following ships have too many EW points set:<br>";
+                for (var ship in EWRestrictedIncorrect) {
+                    errorText += EWRestrictedIncorrect[ship].name + " (" + EWRestrictedIncorrect[ship].shipClass + ")";
+                    errorText += "<br>";
+                }
+                errorText += "<br>";
+            }
+            if (EWLCVIncorrect.length > 0) {
+                errorText += "Following LCVs have too many EW points set on non-OEW:<br>";
+                for (var ship in EWLCVIncorrect) {
+                    errorText += EWLCVIncorrect[ship].name + " (" + EWLCVIncorrect[ship].shipClass + ")";
+                    errorText += "<br>";
+                }
+                errorText += "<br>";
+            }
+		
+	    if (errorText != ''){
+            	window.confirm.error(errorText, function () {});
+		return false;
+	    }
+		
+		
 
             ajaxInterface.submitGamedata();
         } else if (gamedata.gamephase == 2) {
