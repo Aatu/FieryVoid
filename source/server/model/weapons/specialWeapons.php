@@ -468,10 +468,10 @@ class BurstPulseCannon extends Pulse {
 			$destroyed = true;
 			$dmgToDo = $systemHealth + $armor;
 		}
-		$damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $dmgToDo, $armor, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $shooter->id, $this->id);
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, $armor, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $shooter->id, $this->id);
 		$damageEntry->updated = true;
 		$system->damage[] = $damageEntry;
-		$this->onDamagedSystem($target, $system, $dmgToDo, $armor, $gamedata, $fireOrder);
+		$this->onDamagedSystem($ship, $system, $dmgToDo, $armor, $gamedata, $fireOrder);
 		if($destroyed==true) return; //no point doing anything else if target is destroyed outright
 		if($system->advancedArmor) return;//Advanced Armor will protect the fighter from forced dropout
                 if (!$ship->superheavy){
@@ -601,10 +601,10 @@ class BurstPulseCannon extends Pulse {
 			$destroyed = true;
 			$dmgToDo = $systemHealth + $armor;
 		}
-		$damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $dmgToDo, $armor, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $shooter->id, $this->id);
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, $armor, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $shooter->id, $this->id);
 		$damageEntry->updated = true;
 		$system->damage[] = $damageEntry;
-		$this->onDamagedSystem($target, $system, $dmgToDo, $armor, $gamedata, $fireOrder);
+		$this->onDamagedSystem($ship, $system, $dmgToDo, $armor, $gamedata, $fireOrder);
 		if($destroyed==true) return; //no point doing anything else if target is destroyed outright
 		if($system->advancedArmor) return;//Advanced Armor will protect the fighter from forced dropout
                 if (!$ship->superheavy){
