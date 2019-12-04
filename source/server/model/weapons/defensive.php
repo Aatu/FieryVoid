@@ -311,7 +311,7 @@
         public $boostEfficiency = 4;            
         public $intercept = 3;
         public $loadingtime = 1;
-        public $charges = 2;
+        public $guns = 2; //2 separate shots; can be boosted
 	public $iconPath = "emWaveDisruptor.png";
         
         public $rangePenalty = 2;
@@ -322,9 +322,18 @@
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-            //$this->data["Weapon type"] = "Electromagnetic";
-            //$this->data["Damage type"] = "Intercept / Dropout";
+        }
+	    
+ 	public function stripForJson() {
+        	$strippedSystem = parent::stripForJson();	
+		$strippedSystem->guns = $this->guns;
+	}
+
+        public function setSystemDataWindow($turn){
+	    $this->guns = 2+$this->getBoostLevel($turn);
+            parent::setSystemDataWindow($turn);
             $this->data["Special"] = "Intercept / Dropout";
+            $this->data["Special"] .= "<br>Can be boosted to increase number of shots.";
         }
         
         public function getDamage($fireOrder){        return 0;   }
