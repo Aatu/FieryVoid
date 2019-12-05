@@ -1359,52 +1359,15 @@ class DBManager
             $stmt->bind_param('ii', $gamedata->id, $fetchTurn);
             $stmt->bind_result($iniative, $unmodified, $shipid);
             $stmt->execute();
-
             while ($stmt->fetch()) {
                 $ship = $gamedata->getShipById($shipid);
                 $ship->iniative = $iniative;
                 $ship->unmodifiedIniative = $unmodified;
             }
-
-            $stmt->close();
-		
-            //didn't work
-            //$this->forceTiebreak($gamedata);//force tiebreaker for standard movement games
+            $stmt->close();		
         }
     }//endof function getIniativeForShips
 	
-    /*
-    for standard movement games only - force tiebreak by adding a fraction of Ini point to ships; 
-    otherwise they're displayed as tied for movement.
-    Actual movement order works correctly, but "simultaneous" move is not shown to opponent...
-    */
-	/*did not work - caused actual problems
-    private function forceTiebreak($gamedata){
-	//check if the game is standard movement
-	foreach($gamedata->rules as $hasRule){
-		if($hasRule->getRuleName()=='initiativeCategories') return;//simultaneous movement
-	}
-	//make sure ships are sorted in proper order
-        $gamedata->doSortShips();
-	//actual adding of tiebreaker
-	$breakerStep = 0.01; //should be enough grain by far!
-	$prevIni=null;
-	$currStep = 1;
-	foreach ($gamedata->ships as $sh){
-		$currShip = $gamedata->ships[$sh];
-		if($prevIni===null){//first iteration
-			$prevIni = $currShip->iniative;
-			continue;
-		}
-		if($currShip->iniative == $prevIni){ //tie!!!
-			$currShip->iniative += $currStep*$breakerStep;
-			$currStep++; //next ship tying at the same Ini will get a bit larger bonus
-		}else{ //no tie, reset counter and set $prevIni
-			$prevIni = $currShip->iniative;
-			$currStep = 1;
-		}
-	}
-    }*/
 
     private function getMovesForShips($gamedata, $fetchTurn)
     {
