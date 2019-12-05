@@ -4,7 +4,7 @@ class Caltus extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 390;
+        $this->pointCost = 65*6;
         $this->faction = "Cascor";
         $this->phpclass = "Caltus";
         $this->shipClass = "Caltus Torpedo Fighters";
@@ -23,7 +23,7 @@ class Caltus extends FighterFlight{
         $this->turncost = 0.33;
         $this->hasNavigator = true;
         
-    	$this->iniativebonus = 17*5;
+    	$this->iniativebonus = 16*5; //+1 from Navigator, but that's added automatically as a modifier
         $this->populate();
     }
 
@@ -41,16 +41,23 @@ class Caltus extends FighterFlight{
             $fighter->iconPath = "img/ships/CascorCalaq_Large.png";
 
             $frontGun = new Ionizer(330, 30, 1);
-            $frontGun->displayName = "Ionizer";
+            //$frontGun->displayName = "Ionizer"; //not needed
+            $fighter->addFrontSystem($frontGun);	
             
             $torpedoLauncher = new FighterTorpedoLauncher(3, 330, 30);
             $torpedoLauncher->firingModes = array( 1 => "LIT" );
             $torpedoLauncher->iconPath = "lightIonTorpedo.png";
+            $torpedoLauncher->displayName = "Light Ion Torpedo"; //needed
+            $torpedoLauncher->missileArray = array(1 => new LightIonTorpedo(330, 30));            	
+            $fighter->addFrontSystem($torpedoLauncher);
+		
+            $torpedoLauncher = new FighterTorpedoLauncher(3, 330, 30);
+            $torpedoLauncher->firingModes = array( 1 => "LIT" );
+            $torpedoLauncher->iconPath = "lightIonTorpedo.png";
+            $torpedoLauncher->displayName = "Light Ion Torpedo"; //needed
             $torpedoLauncher->missileArray = array(1 => new LightIonTorpedo(330, 30));
-            
-            $fighter->addFrontSystem($frontGun);
             $fighter->addFrontSystem($torpedoLauncher);
-            $fighter->addFrontSystem($torpedoLauncher);
+		
             $this->addSystem($fighter);
        }
     }
