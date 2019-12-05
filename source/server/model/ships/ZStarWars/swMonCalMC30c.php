@@ -10,7 +10,7 @@ class swMonCalMC30c extends HeavyCombatVesselLeftRight{
         $this->phpclass = "swMonCalMC30c";
         $this->imagePath = "img/starwars/mc30.png";
 	    //$this->canvasSize = 100;
-        $this->shipClass = "MonCal MC 30c Torpedo Frigate";
+        $this->shipClass = "Mon Calamari MC 30c Torpedo Frigate";
         $this->limited = 33; //limited deployment
 
 		$this->isd = "Galactic Civil War";
