@@ -44,6 +44,7 @@ class Tarza extends FighterFlight{
             $torpedoLauncher->firingModes = array( 1 => "LIT" );
             $torpedoLauncher->iconPath = "lightIonTorpedo.png";
             $torpedoLauncher->missileArray = array(1 => new LightIonTorpedo(330, 30));
+            $torpedoLauncher->displayName = "Light Ion Torpedo"; //needed
             
             $fighter->addFrontSystem($torpedoLauncher);
             $fighter->addFrontSystem(new PairedParticleGun(330, 30, 3));
