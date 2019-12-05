@@ -518,14 +518,29 @@ class Manager{
             $gamedata->rules->callRule("generateIniative", $gamedata);
         } else {
             foreach ($gamedata->ships as $key=>$ship){
-
                 $mod =  $ship->getCommonIniModifiers( $gamedata );
                 $iniBonus =  $ship->getInitiativebonus($gamedata);
-
                 $ship->iniative = Dice::d(100) + $iniBonus + $mod;
-
+//TEST
+$ship->iniative = 1;		    
             }
+	    //Initiative ties are displayed wron in the interface due to changes intended for simultaneous movement.
+	    //to prevent this from happening, forcefully break ties here - sort ships appropriately and make their Ini different by adding appropriate value
+	    //side effect would be that displayed Ini rolled would be wrong (possibly out of bounds), but then absolute Ini has little meaning
+	    $gamedata->doSortShips(); //make sure they're in proper order
+            $addIni = 0;
+	    $prevIni = null;
+	    foreach ($gamedata->ships as $key=>$ship){
+		    $ship->iniative += $addIni;
+		    if ($ship->iniative == $prevIni){ //actual tie! increase Ini of tied unit (and all further ones) by 1
+			$ship->iniative++;	
+			$addIni++;
+		    }
+		    $prevIni = $ship->iniative;
+            }
+		
         }
+	    
         self::$dbManager->submitIniative($gamedata->id, $gamedata->turn, $gamedata->ships);
     }
     
