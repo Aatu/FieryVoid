@@ -29,14 +29,14 @@ class RaiderGunboat extends LCV{
   
 	$this->addPrimarySystem(new Reactor(4, 9, 0, 0));
 	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-	    	$sensors = new Scanner(4, 12, 3, 4);
+	    	$sensors = new Scanner(4, 12, 2, 3);
 		$sensors->markLCV();
 		$this->addPrimarySystem($sensors);
-	$this->addPrimarySystem(new Engine(4, 13, 0, 6, 1));
+	$this->addPrimarySystem(new Engine(4, 11, 0, 6, 1));
 	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 180, 0));
 	$this->addPrimarySystem(new ParticleCannon(3, 8, 7, 300, 60));
 	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 180));
-	$this->addPrimarySystem(new Structure( 5, 31));
+	$this->addPrimarySystem(new Structure( 5, 30));
   
         $this->hitChart = array(
         		0=> array( //should never happen (...but actually sometimes does!)
