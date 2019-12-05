@@ -1368,7 +1368,8 @@ class DBManager
 
             $stmt->close();
 		
-            $this->forceTiebreak($gamedata);//force tiebreaker for standard movement games
+            //didn't work
+            //$this->forceTiebreak($gamedata);//force tiebreaker for standard movement games
         }
     }//endof function getIniativeForShips
 	
@@ -1377,6 +1378,7 @@ class DBManager
     otherwise they're displayed as tied for movement.
     Actual movement order works correctly, but "simultaneous" move is not shown to opponent...
     */
+	/*did not work - caused actual problems
     private function forceTiebreak($gamedata){
 	//check if the game is standard movement
 	foreach($gamedata->rules as $hasRule){
@@ -1402,7 +1404,7 @@ class DBManager
 			$currStep = 1;
 		}
 	}
-    }
+    }*/
 
     private function getMovesForShips($gamedata, $fetchTurn)
     {
