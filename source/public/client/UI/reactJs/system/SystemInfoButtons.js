@@ -169,7 +169,7 @@ class SystemInfoButtons extends React.Component {
 		if (!canSelfIntercept(ship, system)) {
             		return;
 		}		
-		weaponManager.declareSelfInterceptSingle(ship, system);
+		weaponManager.onDeclareSelfInterceptSingle(ship, system);
 		webglScene.customEvent('CloseSystemInfo');
 	}	
 	
