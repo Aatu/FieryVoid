@@ -39758,13 +39758,30 @@ var SystemInfoButtons = function (_React$Component) {
 			weaponManager.onModeClicked(ship, system);
 			webglScene.customEvent('CloseSystemInfo');
 		}
+
+		/*declare this weapon to be eligible for defensive fire this turn*/
+
+	}, {
+		key: "declareSelfIntercept",
+		value: function declareSelfIntercept(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props14 = this.props,
+			    ship = _props14.ship,
+			    system = _props14.system;
+
+			if (!canSelfIntercept(ship, system)) {
+				return;
+			}
+			weaponManager.onDeclareSelfInterceptSingle(ship, system);
+			webglScene.customEvent('CloseSystemInfo');
+		}
 	}, {
 		key: "render",
 		value: function render() {
-			var _props14 = this.props,
-			    ship = _props14.ship,
-			    selectedShip = _props14.selectedShip,
-			    system = _props14.system;
+			var _props15 = this.props,
+			    ship = _props15.ship,
+			    selectedShip = _props15.selectedShip,
+			    system = _props15.system;
 
 
 			if (!canDoAnything) {
@@ -39783,7 +39800,8 @@ var SystemInfoButtons = function (_React$Component) {
 				canAddShots(ship, system) && React.createElement(Button, { onClick: this.addShots.bind(this), img: "./img/plussquare.png" }),
 				canReduceShots(ship, system) && React.createElement(Button, { onClick: this.reduceShots.bind(this), img: "./img/minussquare.png" }),
 				canRemoveFireOrder(ship, system) && React.createElement(Button, { onClick: this.removeFireOrder.bind(this), img: "./img/firing.png" }),
-				canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this))
+				canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this)),
+				canSelfIntercept(ship, system) && React.createElement(Button, { onClick: this.declareSelfIntercept.bind(this), img: "./img/selfIntercept.png" })
 			);
 		}
 	}]);
@@ -39833,6 +39851,11 @@ var canRemoveFireOrder = function canRemoveFireOrder(ship, system) {
 
 var canChangeFiringMode = function canChangeFiringMode(ship, system) {
 	return system.weapon && (gamedata.gamephase === 1 && system.ballistic || gamedata.gamephase === 3 && !system.ballistic) && !weaponManager.hasFiringOrder(ship, system) && (Object.keys(system.firingModes).length > 1 || system.dualWeapon);
+};
+
+//can declare eligibility for interception: charged, recharge time >1 turn, intercept rating >0, no firing order
+var canSelfIntercept = function canSelfIntercept(ship, system) {
+	return system.weapon && system.intercept > 0 && system.loadingtime > 1 && weaponManager.isLoaded(system) && !weaponManager.hasFiringOrder(ship, system);
 };
 
 var getFiringModes = function getFiringModes(ship, system, changeFiringMode, allChangeFiringMode) {
