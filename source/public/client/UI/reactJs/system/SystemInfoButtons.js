@@ -161,7 +161,17 @@ class SystemInfoButtons extends React.Component {
 		webglScene.customEvent('CloseSystemInfo');
 	}
 	
-		
+	
+	/*declare this weapon to be eligible for defensive fire this turn*/
+	declareSelfIntercept(e) {
+        	e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		if (!canSelfIntercept(ship, system)) {
+            		return;
+		}		
+		weaponManager.declareSelfInterceptSingle(ship, system);
+		webglScene.customEvent('CloseSystemInfo');
+	}	
 	
     render() {
 		const {ship, selectedShip, system} = this.props;
@@ -182,6 +192,7 @@ class SystemInfoButtons extends React.Component {
                 {canReduceShots(ship, system) && <Button onClick={this.reduceShots.bind(this)} img="./img/minussquare.png"></Button>}
 		{canRemoveFireOrder(ship, system) && <Button onClick={this.removeFireOrder.bind(this)} img="./img/firing.png"></Button>}
 		{canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this))}
+		{canSelfIntercept(ship, system) && <Button onClick={this.declareSelfIntercept.bind(this)} img="./img/selfIntercept.png"></Button>}
             </Container>
         )
     }
@@ -212,6 +223,8 @@ const canRemoveFireOrder = (ship, system) => system.weapon && weaponManager.hasF
 
 const canChangeFiringMode = (ship, system) => system.weapon  && ((gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 3 && !system.ballistic)) && !weaponManager.hasFiringOrder(ship, system) && (Object.keys(system.firingModes).length > 1 || system.dualWeapon);
 
+//can declare eligibility for interception: charged, recharge time >1 turn, intercept rating >0, no firing order
+const canSelfIntercept = (ship, system) => system.weapon && (system.intercept>0)&&(system.loadingtime>1)&&(weaponManager.isLoaded(system))    && (!weaponManager.hasFiringOrder(ship, system));
 
 const getFiringModes = (ship, system, changeFiringMode, allChangeFiringMode) => {
 	if (system.parentId >= 0) {
