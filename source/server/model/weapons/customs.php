@@ -620,7 +620,7 @@ class MLPA extends Weapon{
 	public $damageTypeArray = array(1=>'Raking', 2=>'Pulse'); //indicates that this weapon does damage in Pulse mode
     	public $weaponClassArray = array(1=>'Laser', 2=>'Particle'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
 	
-	public $intercept = 1; //technically only Pulse Cannon can intercept, but entire weapon is fired anyway - so it affects visuals only, and mode 1 should be the one with interception for technical reasons
+	public $intercept = 2; //technically only Pulse Cannon can intercept, but entire weapon is fired anyway - so it affects visuals only, and mode 1 should be the one with interception for technical reasons
  
 	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
@@ -1525,7 +1525,7 @@ class CustomBPAMedium extends Weapon{
 	public $damageTypeArray = array(1=>'Standard', 2=>'Pulse'); 
     	public $weaponClassArray = array(1=>'Particle', 2=>'Particle'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
 	
-	public $intercept = 1; 
+	public $intercept = 2; 
  
 	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
