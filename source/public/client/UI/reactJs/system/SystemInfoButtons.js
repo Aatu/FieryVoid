@@ -172,11 +172,11 @@ class SystemInfoButtons extends React.Component {
 		weaponManager.onDeclareSelfInterceptSingle(ship, system);
 		webglScene.customEvent('CloseSystemInfo');
 	}	
-	/*declare all selected weapons for defensive fire this turn*/
+	/*declare all similar undeclared weapons for defensive fire this turn*/
 	declareSelfInterceptAll(e) {
         	e.stopPropagation(); e.preventDefault();
 		const {ship, system} = this.props;
-		weaponManager.onDeclareSelfInterceptSingleAll(ship);
+		weaponManager.onDeclareSelfInterceptSingleAll(ship,weapon);
 		webglScene.customEvent('CloseSystemInfo');
 	}	
 	
