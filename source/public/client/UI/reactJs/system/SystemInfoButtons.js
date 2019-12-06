@@ -176,10 +176,7 @@ class SystemInfoButtons extends React.Component {
 	declareSelfInterceptAll(e) {
         	e.stopPropagation(); e.preventDefault();
 		const {ship, system} = this.props;
-		if (!canSelfIntercept(ship, system)) {
-            		return;
-		}		
-		weaponManager.onDeclareSelfInterceptSingleAll(ship, system);
+		weaponManager.onDeclareSelfInterceptSingleAll(ship);
 		webglScene.customEvent('CloseSystemInfo');
 	}	
 	
