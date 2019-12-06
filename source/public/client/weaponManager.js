@@ -35,23 +35,6 @@ window.weaponManager = {
                 var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
                 parentSystem.changeFiringMode();
                 shipWindowManager.setDataForSystem(ship, parentSystem);
-                /*
-                var newSystem = parentSystem.weapons[parentSystem.firingMode];                
-                var parentwindow = shipwindow.find(".parentsystem_" + newSystem.parentId);
-                parentwindow.removeClass("system_" + system.id);
-                parentwindow.addClass("modes");
-                parentwindow.removeClass(system.name);
-                shipWindowManager.addDualSystem(ship, parentSystem, parentwindow);
-                shipWindowManager.setDataForSystem(ship, newSystem);
-                parentwindow.find(".UI").addClass("active");
-                parentwindow.find(".UI").focus();
-                weaponManager.mouseoverSystem = parentwindow;
-                clearTimeout(weaponManager.mouseOutTimer);
-                clearTimeout(weaponManager.mouseoverTimer);
-                weaponManager.mouseOutTimer = null;
-                weaponManager.mouseoverTimer = null;
-                systemInfo.showSystemInfo(parentwindow, newSystem, ship );
-                */
             } else {
                 system.changeFiringMode();
                 shipWindowManager.setDataForSystem(ship, system);
@@ -129,15 +112,12 @@ window.weaponManager = {
     },
 
     onWeaponMouseOut: function onWeaponMouseOut(e) {
-        //if($(this).is(weaponManager.mouseoverSystem) || $(this).is($(".UI"))){
-
         if (weaponManager.mouseoverTimer != null) {
             clearTimeout(weaponManager.mouseoverTimer);
             weaponManager.mouseoverTimer = null;
         }
 
         weaponManager.mouseOutTimer = setTimeout(weaponManager.doWeaponMouseout, 50);
-        //}
     },
 
     doWeaponMouseOver: function doWeaponMouseOver(e) {
@@ -207,17 +187,6 @@ window.weaponManager = {
                     if (alert) confirm.error("You cannot fire <b>" + weapon.displayName + "</b> and <b>" + system.displayName + "</b> together!");
                     return true;
                 }
-                /* compressed into a single statement above
-                if ( weapon.exclusive && (weapon.ballistic==system.ballistic)){
-                    if (alert)
-                        confirm.error("You cannot fire another weapon at the same time as " +weapon.displayName + ".");
-                    return true;
-                }
-                  if (system.exclusive && (weapon.ballistic==system.ballistic)){
-                    if (alert)
-                        confirm.error("You cannot fire another weapon at the same time as " +system.displayName + ".");
-                    return true;
-                }*/
             }
         }
 
@@ -544,68 +513,6 @@ window.weaponManager = {
         	var target = gamedata.getShip(ball.targetid);
 		return weaponManager.calculateHitChange(shooter, target, weapon, calledid);
 	},//endof calculataBallisticHitChange
-	/*old version
-    calculataBallisticHitChange: function calculataBallisticHitChange(ball, calledid) {
-        var shooter = gamedata.getShip(ball.shooterid);
-        var weapon = shipManager.systems.getSystem(shooter, ball.weaponid);
-        var target = gamedata.getShip(ball.targetid);
-
-        if (shooter.flight) {
-            return weaponManager.calculateFighterBallisticHitChange(shooter, target, weapon, calledid);
-        }
-
-        if (!ball.targetid) return false;
-	    
-	    var posShooter = shipManager.movement.getPositionAtStartOfTurn(shooter);
-	    var posTarget = shipManager.getShipPosition(target);
-	    var distance = posShooter.distanceTo(posTarget); 
-        //var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
-
-        var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
-
-        //var defence = weaponManager.getShipDefenceValuePos(ball.position, target);
-	    var defence = weaponManager.getShipDefenceValuePos(posShooter, target);
-        var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter, weapon);
-
-        var soew = ew.getSupportedOEW(shooter, target);
-        var dist = ew.getDistruptionEW(shooter);
-
-        var oew = 0;
-
-        if (weapon.useOEW) {
-            oew = ew.getTargetingEW(shooter, target);
-            oew -= dist;
-
-            if (oew < 0) oew = 0;
-        }
-
-        var firecontrol = weaponManager.getFireControl(target, weapon);
-
-        var intercept = weaponManager.getInterception(ball);
-
-        var mod = 0;
-
-        mod -= target.getHitChangeMod(shooter, ball.position);
-
-        if (!shooter.flight && !shooter.osat) mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "cnC"), "PenaltyToHit");
-
-        if (shooter.osat && shipManager.movement.hasTurned(shooter)) {
-            mod -= 1;
-        }
-
-        if (calledid) mod -= 8;
-
-        var ammo = weapon.getAmmo(weaponManager.getFireOrderById(ball.fireOrderId));
-        if (ammo) mod += ammo.hitChanceMod;
-
-        var goal = baseDef - rangePenalty - intercept + oew + soew + firecontrol + mod;
-
-        var change = Math.round(goal / 20 * 100);
-        //	console.log("rangePenalty: " + rangePenalty + "intercept: " + intercept + " baseDef: " + baseDef + " oew: " + oew + " defence: " + defence + " firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
-
-        return change;
-    },
-    */
 
     getInterception: function getInterception(ball) {
 
@@ -846,84 +753,6 @@ window.weaponManager = {
         return change;
     },
 
-	/*Marcin Sawicki, September 2019: switched to using calculateHitChange instead*/
-	/*
-    calculateFighterBallisticHitChange: function calculateFighterBallisticHitChange(shooter, target, weapon, calledid) {
-        var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
-        var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
-        //var sPosHex = shipManager.getShipPosition(shooter);
-	    var posHex = shipManager.movement.getPositionAtStartOfTurn(shooter);
-        var tPosHex = shipManager.getShipPosition(target);
-        var defence = weaponManager.getShipDefenceValuePos(sPosHex, target);
-        //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
-        var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter, weapon);
-
-        var soew = ew.getSupportedOEW(shooter, target);
-        var dist = ew.getDistruptionEW(shooter);
-
-        var oew = 0;
-
-        if (weapon.useOEW) {
-            oew = ew.getTargetingEW(shooter, target);
-            oew -= dist;
-
-            if (oew < 0) oew = 0;
-        }
-
-        var mod = 0;
-
-        mod -= target.getHitChangeMod(shooter);
-
-        if (shooter.hasNavigator || weaponManager.isPosOnWeaponArc(shooter, tPosHex, weapon)) {
-            oew = shooter.offensivebonus;
-        }
-
-        mod -= shipManager.movement.getJinking(shooter);
-
-        if (shipManager.movement.hasCombatPivoted(shooter)) {
-            mod--;
-        }
-
-        if (calledid) {
-            //hmm... ballistics shouldn't be able to do called shots...
-            mod += weapon.calledShotMod;
-        }
-
-        var ammo = weapon.getAmmo(null);
-        if (ammo) {
-            mod += ammo.hitChanceMod;
-        }
-
-        var jammermod = 0;
-        if (shooter.faction !== target.faction) {
-            var jammer = shipManager.systems.getSystemByName(target, "jammer");
-            var stealth = shipManager.systems.getSystemByName(target, "stealth");
-
-            if (jammer && !shipManager.power.isOffline(target, jammer)) jammermod = rangePenalty * shipManager.systems.getOutput(target, jammer);
-
-            if (stealth && mathlib.getDistanceBetweenShipsInHex(shooter, target) > 5) jammermod = rangePenalty;
-
-            if (target.flight) {
-                var jinking = shipManager.movement.getJinking(target);
-                if (jinking > jammermod) {
-                    jammermod = 0;
-                } else {
-                    jammermod = jammermod - jinking;
-                }
-            }
-        }
-
-        var firecontrol = weaponManager.getFireControl(target, weapon);
-
-        var goal = baseDef - jammermod - rangePenalty + oew + soew + firecontrol + mod;
-
-        var change = Math.round(goal / 20 * 100);
-        //console.log("rangePenalty: " + rangePenalty + "jammermod: "+jammermod+" baseDef: " + baseDef + " oew: " + oew + " soew: "+soew+" firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
-
-        if (change > 100) change = 100;
-        return change;
-    },
-    */
 
     getFireControl: function getFireControl(target, weapon) {
         if (target.shipSizeClass > 1) {
@@ -980,93 +809,6 @@ window.weaponManager = {
         return toReturn;
     },
 
-    /* Marcin Sawicki - no longer needed, but leaving just in case!
-    getShipHittingSideOld: function(shooter, target){ //Marcin Sawicki, October 2017: change that to new approach!
-        var targetFacing = (shipManager.getShipHeadingAngle(target));
-        var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target,shooter);
-          if (target.base){
-            return [1, 41, 42, 2, 31, 32];
-        }
-           else if (target.draziCap){
-             if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(330, targetFacing), mathlib.addToDirection(30, targetFacing))){
-                if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(210, targetFacing), mathlib.addToDirection(330, targetFacing))){
-                    return [1, 3]
-                }
-                if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(30, targetFacing), mathlib.addToDirection(150, targetFacing))){
-                    return [1, 4]
-                }
-                return [1];
-            }
-            if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(150, targetFacing), mathlib.addToDirection(210, targetFacing))){
-                if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(210, targetFacing), mathlib.addToDirection(330, targetFacing))){
-                    return [2, 3]
-                }
-                if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(30, targetFacing), mathlib.addToDirection(150, targetFacing))){
-                    return [2, 4]
-                }
-                return [2];
-            }
-            if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(210, targetFacing), mathlib.addToDirection(330, targetFacing))){
-                return [3];
-            }
-            if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(30, targetFacing), mathlib.addToDirection(150, targetFacing))){
-                return [4];
-            }
-              else return [0]
-        }
-          else if (target.draziHCV){
-            if 	(mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(180, targetFacing), mathlib.addToDirection(360, targetFacing)) &&
-                (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(0, targetFacing), mathlib.addToDirection(180, targetFacing)))){
-                return [3, 4];
-                }
-            if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(180, targetFacing), mathlib.addToDirection(360, targetFacing))){
-                return [3];
-            }
-            if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(0, targetFacing), mathlib.addToDirection(180, targetFacing))){
-                return [4];
-            }
-        }
-          else if (target.shipSizeClass > 0 && target.shipSizeClass < 3){
-            if  (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(90, targetFacing), mathlib.addToDirection(270, targetFacing)) &&
-                (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(270, targetFacing), mathlib.addToDirection(90, targetFacing)))){
-                return [1, 2];
-            }
-            if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(270, targetFacing), mathlib.addToDirection(90, targetFacing))){
-                return [1];
-            }
-            if ( mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(90, targetFacing), mathlib.addToDirection(270, targetFacing))){
-                return [2];
-            }
-        }
-          else if (target.shipSizeClass == 3){
-             if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(330, targetFacing), mathlib.addToDirection(30, targetFacing))){
-                if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(210, targetFacing), mathlib.addToDirection(330, targetFacing))){
-                    return [1, 3]
-                }
-                if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(30, targetFacing), mathlib.addToDirection(150, targetFacing))){
-                    return [1, 4]
-                }
-                return [1];
-            }
-            if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(150, targetFacing), mathlib.addToDirection(210, targetFacing))){
-                if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(210, targetFacing), mathlib.addToDirection(330, targetFacing))){
-                    return [2, 3]
-                }
-                if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(30, targetFacing), mathlib.addToDirection(150, targetFacing))){
-                    return [2, 4]
-                }
-                return [2];
-            }
-            if ( mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(210, targetFacing), mathlib.addToDirection(330, targetFacing))){
-                return [3];
-            }
-            if ( mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(30, targetFacing), mathlib.addToDirection(150, targetFacing))){
-                return [4];
-            }
-        }
-          return 0;
-    },
-    */
 
     getShipDefenceValue: function getShipDefenceValue(shooter, target) {
         var targetFacing = shipManager.getShipHeadingAngle(target);
@@ -1095,24 +837,7 @@ window.weaponManager = {
 
         return target.sideDefense;
     },
-    /*
-    canIntercept: function(ball){
-        var selectedShip = gamedata.getSelectedShip();
-        if (shipManager.isDestroyed(selectedShip))
-            return false;
-          if (!ball.targetid || ball.targetid != selectedShip.id)
-            return false;
-          for (var i in gamedata.selectedSystems){
-            var weapon = gamedata.selectedSystems[i];
-              if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon))
-                continue;
-              if (weaponManager.isPosOnWeaponArc(selectedShip, ball.position, weapon)){
-                return true;
-            }
-        }
-          return false;
-    },
-    */
+	
     targetBallistic: function targetBallistic(ship, ball) {
         console.log("target Ballistics", ship, ball);
 
@@ -1191,7 +916,6 @@ window.weaponManager = {
     },
 
     checkSelfIntercept: function checkSelfIntercept(ship) {
-
         var invalid = [];
         var valid = [];
 
@@ -1223,7 +947,18 @@ window.weaponManager = {
         });
     },
 
+	/*check whether a long-recharge weapon is eligible for interception*/
+    canSelfInterceptSingle: function checkSelfIntercept(ship, weapon) {
+	if (!system.weapon) return false;//only weapons can intercept ;)
+	if ( (weapon.intercept < 1) || (weapon.loadingtime <= 1) ) return false;//cannot intercept or quick to recharge anyway and will be auto-assigned
+	if (weapon.ballistic) return false;//no interception using ballistic weapons    
+	if (weaponManager.hasFiringOrder(ship, weapon)) return false;//already declared
+	if (!weaponManager.isLoaded(weapon)) return false;//not ready to fire
+	return true;.confirmSelfIntercept(ship, valid, invalid, "Do you want to order the selected weapons to intercept incoming fire ?");
+    },	
+	
     onDeclareSelfInterceptSingle: function onDeclareSelfInterceptSingle(ship, weapon) {
+	    if(!weaponManager.canSelfInterceptSingle(ship, weapon)) return; //last check whether weapon is eligible for that!
 	    var fireid = ship.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
 	    var fire = {
 		id: fireid,
@@ -1243,6 +978,22 @@ window.weaponManager = {
 	    weapon.fireOrders.push(fire);
 	    weaponManager.unSelectWeapon(ship, weapon);
     },
+	
+	/*declare self-intercept for all similar undeclared weapons*/
+    onDeclareSelfInterceptSingleAll: function onDeclareSelfInterceptSingleAll(ship, weapon) {
+	var similarWeapons = new Array();
+	for (var i = 0; i < ship.systems.length; i++) {
+		if (system.displayName === ship.systems[i].displayName) {
+			if (system.weapon) {
+				similarWeapons.push(ship.systems[i]);
+			}
+		}
+	}
+	for (var i = 0; i < similarWeapons.length; i++) {
+		var weapon = similarWeapons[i];
+		weaponManager.onDeclareSelfInterceptSingle(ship, weapon); //will check whether weapon is actually eligible for such declaration
+	}
+    },	
 
 
     setSelfIntercept: function setSelfIntercept(ship, valid) {
