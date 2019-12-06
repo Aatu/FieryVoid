@@ -359,7 +359,6 @@ class Weapon extends ShipSystem
 
     public function firedOnTurn($turn)
     {
-        //if ($this instanceof DualWeapon && isset($this->turnsFired[$turn])) return true; //DualWeapon obsolete
         foreach ($this->fireOrders as $fire) {
             if ($fire->type != "selfIntercept" && $fire->weaponid == $this->id && $fire->turn == $turn) {
                 return true;
@@ -367,6 +366,23 @@ class Weapon extends ShipSystem
                 return true;
             }
         }
+		
+		/*JUST A TEST - because for some reason 'intercept' orders are not seen here...
+		$fo = $this->getFireOrders(-1);
+		foreach ($fo as $fire) {
+            if ($fire->type != "selfIntercept" && $fire->weaponid == $this->id && $fire->turn == $turn) {
+                return true;
+            }
+        }
+		return false;
+		*/
+		/*
+		//new version, simply relying on 'intercept' orders to determine whether weapon was fired on a given turn
+		foreach ($this->fireOrders as $fire) {
+            if ($fire->type != "selfIntercept" && $fire->weaponid == $this->id && $fire->turn == $turn) {
+                return true;
+            }
+        }*/
         return false;
     }
 	

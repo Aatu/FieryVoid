@@ -1701,7 +1701,7 @@ class DBManager
         );
 
         if ($stmt) {
-            $lastTurn = $fetchTurn;
+            $lastTurn = $fetchTurn; 	
             $stmt->bind_param('iii', $gamedata->id, $fetchTurn, $lastTurn);
             $stmt->execute();
             $stmt->bind_result(
@@ -1736,7 +1736,6 @@ class DBManager
 
                 $entry->notes = $notes;
                 $entry->pubnotes = $pubnotes;
-
                 $gamedata->getShipById($shooterid)->getSystemById($weaponid)->setFireOrder($entry);
             }
             $stmt->close();

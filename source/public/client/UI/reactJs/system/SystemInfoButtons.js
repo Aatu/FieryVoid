@@ -176,7 +176,7 @@ class SystemInfoButtons extends React.Component {
 	declareSelfInterceptAll(e) {
         	e.stopPropagation(); e.preventDefault();
 		const {ship, system} = this.props;
-		weaponManager.onDeclareSelfInterceptSingleAll(ship,weapon);
+		weaponManager.onDeclareSelfInterceptSingleAll(ship,system);
 		webglScene.customEvent('CloseSystemInfo');
 	}	
 	
@@ -208,7 +208,8 @@ class SystemInfoButtons extends React.Component {
 export const canDoAnything = (ship, system) => canOffline(ship, system) || canOnline(ship, system) 
 	|| canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) 
 	|| canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system)
-	|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system);
+	|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system)
+	|| canSelfIntercept(ship, system);
 
 const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
 

@@ -947,12 +947,13 @@ window.weaponManager = {
 
 	/*check whether a long-recharge weapon is eligible for interception*/
     canSelfInterceptSingle: function checkSelfIntercept(ship, weapon) {
-	if (!system.weapon) return false;//only weapons can intercept ;)
+	if (gamedata.gamephase != 3 ) return false;//declaration in firing phase only
+	if (!weapon.weapon) return false;//only weapons can intercept ;)
 	if ( (weapon.intercept < 1) || (weapon.loadingtime <= 1) ) return false;//cannot intercept or quick to recharge anyway and will be auto-assigned
 	if (weapon.ballistic) return false;//no interception using ballistic weapons    
 	if (weaponManager.hasFiringOrder(ship, weapon)) return false;//already declared
 	if (!weaponManager.isLoaded(weapon)) return false;//not ready to fire
-	return true;.confirmSelfIntercept(ship, valid, invalid, "Do you want to order the selected weapons to intercept incoming fire ?");
+	return true;
     },	
 	
     onDeclareSelfInterceptSingle: function onDeclareSelfInterceptSingle(ship, weapon) {
@@ -981,15 +982,13 @@ window.weaponManager = {
     onDeclareSelfInterceptSingleAll: function onDeclareSelfInterceptSingleAll(ship, weapon) {
 	var similarWeapons = new Array();
 	for (var i = 0; i < ship.systems.length; i++) {
-		if (system.displayName === ship.systems[i].displayName) {
-			if (system.weapon) {
-				similarWeapons.push(ship.systems[i]);
-			}
+		if (weapon.displayName === ship.systems[i].displayName) { //this will include this particular system too, of course
+			similarWeapons.push(ship.systems[i]);
 		}
 	}
 	for (var i = 0; i < similarWeapons.length; i++) {
-		var weapon = similarWeapons[i];
-		weaponManager.onDeclareSelfInterceptSingle(ship, weapon); //will check whether weapon is actually eligible for such declaration
+		var otherWeapon = similarWeapons[i];
+		weaponManager.onDeclareSelfInterceptSingle(ship, otherWeapon); //will check whether weapon is actually eligible for such declaration
 	}
     },	
 

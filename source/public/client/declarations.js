@@ -66,7 +66,7 @@ window.declarations = {
             for (var e in ship.EW) {
               var EWentry = ship.EW[e];
 		if (EWentry.turn != gamedata.turn) continue;
-	      if (EWentry.type != 'DEW'){ //DEW already listed
+		  if (EWentry.type != 'DEW'){ //DEW already listed
 		      dispEWEntry = new dispEWNew();		    
 		      dispEWEntry.name = EWentry.type;
 		      dispEWEntry.value = EWentry.amount;
@@ -125,14 +125,6 @@ window.declarations = {
     for (var i in dispShips){
       var shpEntry = dispShips[i];
       txt += '<big><b>' + shpEntry.name + ' <i>(' + shpEntry.class + ')</i> ' + '</b></big>';
-      //reset EW button - for own ships
-	/* ...maybe that won't be necessary...
-      if ( gamedata.gamephase == 1 && declarations.GlobalSide=='Own' && declarations.GlobalDisplay=='Source') {//Initial phase, displaying own ships
-        if (shpEntry.EW.count > 1 ){ //has something besides DEW!
-          txt += '<input type="button" value="Reset EW" onclick="declarations.doResetEW(' + shpEntry.id + ');">';
-        }
-      }
-      */
       txt += '<br>';
       //now actual entries
       for(var e in shpEntry.EW){
@@ -215,7 +207,7 @@ window.declarations = {
 		  var weapon = actSys;
 		  var order = actSys.fireOrders[fireNo]; 
 		  if (order.turn != gamedata.turn) continue;
-		  if (order.type.indexOf('intercept') == -1){ //this is actual offensive fire!
+		  if (order.type.indexOf('ntercept') == -1){ //this is actual offensive fire! skip 'intercept' and 'selfIntercept' orders
 		    var dispFireEntry = new dispFireNew();
 		    dispFireEntry.wpnName = weapon.displayName + ' ('+ weapon.firingModes[order.firingMode] +')';
 	            if (order.calledid > -1 ){
@@ -288,7 +280,7 @@ window.declarations = {
 			  var weapon = actSys;
 			  var order = actSys.fireOrders[fireNo]; 
 		  	  if (order.turn != gamedata.turn) continue;
-			  if (order.type.indexOf('intercept') == -1 && order.targetid == ship.id){ //fire at self!
+			  if (order.type.indexOf('ntercept') == -1 && order.targetid == ship.id){ //fire at self! skip 'intercept' and 'selfIntercept' orders
 			    var dispFireEntry = new dispFireNew();
 			    dispFireEntry.wpnName = weapon.displayName + ' ('+ weapon.firingModes[order.firingMode] +')';
 			    if (order.calledid > -1 ){
