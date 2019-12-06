@@ -444,8 +444,6 @@ window.weaponManager = {
         return false;
     }, //endof function canCalledshot
 
-	
-/*old version of canCalledshot deleted! - Marcin Sawicki, 12.2018*/
 
 	
     getTargetableThruster: function getTargetableThruster(shooter, target) {
@@ -1062,16 +1060,12 @@ window.weaponManager = {
             }
 
             if (weaponManager.checkConflictingFireOrder(selectedShip, weapon, true)) {
-
                 debug && console.log("has conflicting fire orders");
-
                 for (var j = gamedata.selectedSystems.length - 1; j >= 0; j--) {
                     var sel_weapon = gamedata.selectedSystems[j];
-
                     weaponManager.removeFiringOrder(selectedShip, sel_weapon);
                     weaponManager.unSelectWeapon(selectedShip, sel_weapon);
                 }
-
                 return;
             }
 
@@ -1141,9 +1135,11 @@ window.weaponManager = {
                             chance: chance
                         };
                         weapon.fireOrders.push(fire);
+			toUnselect.push(weapon);
                     }
 
-                    toUnselect.push(weapon);
+		    //Marcin Sawicki: moving this statement so only weapons actually declared are unselected
+                    //toUnselect.push(weapon);
                 }
             }
         }
