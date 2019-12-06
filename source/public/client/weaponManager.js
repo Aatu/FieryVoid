@@ -1223,6 +1223,28 @@ window.weaponManager = {
         });
     },
 
+    onDeclareSelfInterceptSingle: function onDeclareSelfInterceptSingle(ship, weapon) {
+	    var fireid = ship.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
+	    var fire = {
+		id: fireid,
+		type: "selfIntercept",
+		shooterid: ship.id,
+		targetid: ship.id,
+		weaponid: weapon.id,
+		calledid: -1,
+		turn: gamedata.turn,
+		firingMode: weapon.firingMode,
+		shots: weapon.defaultShots,
+		x: "null",
+		y: "null",
+		addToDB: true,
+		damageclass: weapon.data["Weapon type"].toLowerCase()
+	    };
+	    weapon.fireOrders.push(fire);
+	    weaponManager.unSelectWeapon(ship, weapon);
+    },
+
+
     setSelfIntercept: function setSelfIntercept(ship, valid) {
         for (var weapon in valid) {
             var weapon = valid[weapon];
@@ -1250,7 +1272,8 @@ window.weaponManager = {
         }
         //	gamedata.shipStatusChanged(ship);
     },
-
+	
+	
     //system is for called shot!
     targetShip: function targetShip(selectedShip, ship, system) {
         var debug = false;
