@@ -529,6 +529,9 @@ class Manager{
             $addIni = 0;
 	    $prevIni = null;
 	    foreach ($gamedata->ships as $key=>$ship){
+		    if(($prevIni !== null) && ($ship->iniative > $prevIni)){ //ship initiative is greater than previous even without modifier - modifier no longer needed, reset
+			$addIni = 0;    
+		    }
 		    $ship->iniative += $addIni;
 		    if ($ship->iniative == $prevIni){ //actual tie! increase Ini of tied unit (and all further ones) by 1
 			$ship->iniative++;	
