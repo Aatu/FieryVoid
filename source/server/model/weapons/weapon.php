@@ -3,7 +3,6 @@
 
 class Weapon extends ShipSystem
 {
-
     /*all (or almost all) variables will come in array form too - so they can change with mode changes*/
     /*array should be either empty (attribute does not change) or filled for all firing modes*/
     public $weapon = true;
@@ -851,7 +850,7 @@ class Weapon extends ShipSystem
             if ($target->base) $mod += $this->getCalledShotMod();//called shots vs bases suffer double penalty!
         }
 
-        if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)) {
+        if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)) { //leaving instanceof OSAT here - assuming MicroSATs will not suffer this penalty (DOarum seems to be able to turn/pivot like a superheavy fighter it's based on)
             $mod -= 1;
         }
 
@@ -937,7 +936,7 @@ class Weapon extends ShipSystem
 	$jammermod = $rangePenalty * max(0,($jammerValue-$noLockMod));//no lock and jammer work on the same thing, but they still need to be separated (for jinking).
 	    
 
-        if (!($shooter instanceof FighterFlight) && !($shooter instanceof OSAT)) {
+        if (!($shooter instanceof FighterFlight) && !($shooter instanceof OSAT)) {//leaving instanceof OSAT here - MicroSATs will be omitted as they're SHFs
             $CnC = $shooter->getSystemByName("CnC");
             $mod -= ($CnC->hasCritical("PenaltyToHit", $gamedata->turn - 1));
         }

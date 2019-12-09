@@ -509,7 +509,7 @@ shipManager.movement = {
     canPivot: function canPivot(ship, right) {
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
-        if (ship.osat) return false;
+        if (ship.osat && (!ship.flight)) return false;
         var name = right ? "pivotright" : "pivotleft";
         var othername = right ? "pivotleft" : "pivotright";
         if (shipManager.movement.isRolling(ship) && !ship.gravitic) return false;
@@ -1241,7 +1241,7 @@ shipManager.movement = {
     canTurn: function canTurn(ship, right) {
         if (gamedata.gamephase == -1 && ship.deploymove) return true;
         if (gamedata.gamephase != 2) return false;
-        if (ship.osat) {
+        if (ship.osat && (!ship.flight)) { //OSAT but not MicroSAT
             for (var i = 0; i < ship.systems.length; i++) {
                 var system = ship.systems[i];
                 if (system.name === "thruster") {
@@ -1293,7 +1293,7 @@ shipManager.movement = {
     },
 
     doTurn: function doTurn(ship, right) {
-        if (!ship.osat) {
+        if ((!ship.osat) || (ship.flight)) {
             if (!shipManager.movement.canTurn(ship, right)) {
                 return false;
             }
@@ -1307,7 +1307,7 @@ shipManager.movement = {
 
     doNormalTurn: function doNormalTurn(ship, right) {
         var requiredThrust = shipManager.movement.calculateRequiredThrust(ship, right);
-        if (ship.osat) {
+        if (ship.osat && (!ship.flight)) {
             requiredThrust = 0;
         }
 
