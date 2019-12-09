@@ -283,7 +283,7 @@ class ShipSystem {
 	    
         $damageMulti = 1;
 
-        if ($ship instanceof OSAT){
+        if ($ship instanceof OSAT){ //leaving instanceof OSAT here - MicroSATs will have crits appropriate for their size (eg. dropout tests)
             if ($this->displayName == "Thruster" && sizeof($this->criticals) == 0){
                 if ($this->getTotalDamage()+$bonusCrit > ($this->maxhealth/2)){
                     $crit = $this->addCritical($ship->id, "OSatThrusterCrit", $gamedata);
@@ -299,7 +299,7 @@ class ShipSystem {
         }
         else */
 	if ($this instanceof SubReactor){
-            //debug::log("subreactor, multi damage 0.5");
+            //debug::log("subreactor, multiple damage by 0.5");
             $damageMulti = 0.5;
         }
 

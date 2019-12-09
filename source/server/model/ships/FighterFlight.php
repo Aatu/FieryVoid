@@ -483,8 +483,20 @@ class SuperHeavyFighter extends FighterFlight
 {
     public $superheavy = true;
 	public $maxFlightSize = 1;
+    public $jinkinglimit = 4; //SHF standard
 
     function __construct($id, $userid, $name, $slot)
+    {
+        parent::__construct($id, $userid, $name, $slot);
+    }
+}
+
+class MicroSAT extends SuperHeavyFighter{
+	public $osat = true;
+	public $accelcost = 100; //not supposed to actually move anywhere, may move/pivot normally
+    public $jinkinglimit = 4; //they are actually allowed to jink!!! Can't imagine how (without being able to seriously accelerate away), but sure useful in game
+	
+	function __construct($id, $userid, $name, $slot)
     {
         parent::__construct($id, $userid, $name, $slot);
     }
