@@ -874,7 +874,7 @@ spl_autoload_register(
                 'swnebulonbfrigate' => '/server/model/ships/ZStarWars/swNebulonBFrigate.php',
                 'swrayshield' => '/server/model/weapons/customSW.php',
                 'swscanner' => '/server/model/systems/baseSystems.php',
-                'swskipray' => '/server/model/ships/ZStarWars/swSkipray.php',
+                'swskipray' => '/server/model/ships/ZStarWars/swSkipray.php', //backward compatibility, to be deleted soon
                 'zzftrskipray' => '/server/model/ships/ZStarWars/zzftrSkipray.php',
                 'swtargetheld' => '/server/model/cricialClasses.php',
                 'swtractorbeam' => '/server/model/weapons/customSW.php',
@@ -1165,6 +1165,7 @@ spl_autoload_register(
                 'norsca' => '/server/model/ships/cascor/norsca.php',
                 'nesacc' => '/server/model/ships/cascor/nesacc.php',
                 'norscator' => '/server/model/ships/cascor/norscator.php',
+                'norscatorold' => '/server/model/ships/cascor/norscatorOld.php', //deployed so games using old version aren't broken - to be deleted
                 'qoccata' => '/server/model/ships/cascor/qoccata.php',
                 'talacca' => '/server/model/ships/cascor/talacca.php',
                 'tacacci' => '/server/model/ships/cascor/tacacci.php',

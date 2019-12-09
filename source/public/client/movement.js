@@ -1597,7 +1597,7 @@ shipManager.movement = {
 			if ((movement.type == "move" || movement.type == "slipright" || movement.type == "slipleft") ) movesDone++;
 			if (movement.type == "speedchange"){//speed change - check if delay was satisfied at that point (which means a single move back)!
 				var turndelayThen = shipManager.movement.calculateTurndelayAtMove(ship, moveNo-1);
-				if(turndelayThen==0){ //if then was 0, it can't be more
+				if(turndelayThen==0){ //if then was 0, it can't be more now as there were no turns between!
 					turndelay=0;
 					break;
 				}//if it was not 0, then that speed change was irrelevant, go on counting
@@ -1608,6 +1608,14 @@ shipManager.movement = {
 			}
 			if (shipManager.movement.isTurn(movement)){ //this is last turn - no point looking any further!
 				didTurn = true;
+				//when multiple turns are done one after another, it's a snap turn by agile ship (with turn shortening happening at FIRST step) 
+				//(or speed 0 when it doesn't matter)
+				//so go back to first turn made in sequence and calculate extra thrust spent for it instead of actual turn found
+				var prevNo = moveNo-1;
+				while((prevNo>=0) && (shipManager.movement.isTurn(ship.movement[prevNo]))){
+					movement = shipManager.movement.isTurn(ship.movement[prevNo]);
+					prevNo--;
+				}
 				movesDone += shipManager.movement.calculateExtraThrustSpent(ship, movement); //calculate turn shortening as moves done
 				break;//while
 			}
