@@ -1613,7 +1613,7 @@ shipManager.movement = {
 				//so go back to first turn made in sequence and calculate extra thrust spent for it instead of actual turn found
 				var prevNo = moveNo-1;
 				while((prevNo>=0) && (shipManager.movement.isTurn(ship.movement[prevNo]))){
-					movement = shipManager.movement.isTurn(ship.movement[prevNo]);
+					movement = ship.movement[prevNo];
 					prevNo--;
 				}
 				movesDone += shipManager.movement.calculateExtraThrustSpent(ship, movement); //calculate turn shortening as moves done
