@@ -53,7 +53,7 @@ if (isset($_SESSION["user"])) {
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
 <div class="panel news">
-    <div id="newsHeader">Latest News - November 2019</div>
+    <div id="newsHeader">Latest News - December 2019</div>
     <div id="newsEntry">
         <!--
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
@@ -62,7 +62,7 @@ if (isset($_SESSION["user"])) {
         -->
         <u>The <b>Cascor</b> have arrived - entire new official faction, courtesy of <b>Thomas Solway</b>!</u>
 <br><br>
-<b>StarWars overhauled</b> - for those who want to use alternate universe ships. After playtesting the large Star Wars units slight changes were made to make them more interesting in engagements. Also, new units were added (mostly not so iconic).
+<b>StarWars overhauled</b> - for those who want to use alternate universe ships. After playtesting the large Star Wars units slight changes were made to make them more interesting in engagements. Also, new units were added (mostly not so iconic). Also, fighters finally got (intended but unavailable earlier) option to switch gunfire to concentrated salvoes.
 <br><br>
         <b><u>Rule changes</u></b>
         <br><b>Fighter damage allocation</b> - now attempting to actively minimize damage to flight. Not as good as tabletop player would do (in fact, doesn't even have access to informatio player would have), but should be far better than random allocation. Expect heavy fighter flights to (re-)gain a lot of their toughness.
@@ -77,8 +77,12 @@ if (isset($_SESSION["user"])) {
 <br><b><i>Remove All EW</i> function added</b> - now You can reset Your EW without finding every target You allocated it to!
 <br><b>Trait information exposed</b> - various unit traits are now shown as notes. You don't have to remember whether a given ship is supposed to be Gravitic or what kind of hangar small craft requires!
 <br>
-<br><b><u>General reminder</b></u>
-<br>You can look inside the game, see details, and THEN decide whether to pick it up. You're not forced to take or leave the game based on name alone.
+<br><b><u>Second installment</b></u>
+<br><b>Streib weapons overhauled</b> - Burst Beam line, EM Wave Disruptor and Improved Blast Laser now behave as they should.
+<br><b>Tiebreaker added</b> - no more ties for standard movement games (they are now being resolved immediately after rolling Initiative).
+<br><b>Long-recharge weapons can be enabled for interception</b> - because defensive Medium Pulses might make a difference!
+<br><b>Turn delay calculation reworked</b> - this should solve problems with turn delay appearing out of the blue after accelerating.
+
 <br>
 <!--        
         The latest update includes:
