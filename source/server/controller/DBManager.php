@@ -1343,8 +1343,6 @@ class DBManager
 
     private function getIniativeForShips($gamedata, $fetchTurn)
     {
-
-
         $stmt = $this->connection->prepare(
             "SELECT
                 iniative, unmodified_iniative as unmodified, shipid
@@ -1361,18 +1359,15 @@ class DBManager
             $stmt->bind_param('ii', $gamedata->id, $fetchTurn);
             $stmt->bind_result($iniative, $unmodified, $shipid);
             $stmt->execute();
-
             while ($stmt->fetch()) {
                 $ship = $gamedata->getShipById($shipid);
                 $ship->iniative = $iniative;
                 $ship->unmodifiedIniative = $unmodified;
             }
-
-            $stmt->close();
+            $stmt->close();		
         }
-
-
-    }
+    }//endof function getIniativeForShips
+	
 
     private function getMovesForShips($gamedata, $fetchTurn)
     {
@@ -1706,7 +1701,7 @@ class DBManager
         );
 
         if ($stmt) {
-            $lastTurn = $fetchTurn;
+            $lastTurn = $fetchTurn; 	
             $stmt->bind_param('iii', $gamedata->id, $fetchTurn, $lastTurn);
             $stmt->execute();
             $stmt->bind_result(
@@ -1741,7 +1736,6 @@ class DBManager
 
                 $entry->notes = $notes;
                 $entry->pubnotes = $pubnotes;
-
                 $gamedata->getShipById($shooterid)->getSystemById($weaponid)->setFireOrder($entry);
             }
             $stmt->close();

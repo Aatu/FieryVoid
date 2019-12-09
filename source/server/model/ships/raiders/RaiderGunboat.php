@@ -1,7 +1,6 @@
 <?php
-class RaiderGunboat extends MediumShip{
+class RaiderGunboat extends LCV{
 	/*Raider Gunboat LCV, from Raiders*/
-	/*approximated as MCV, no EW restrictions*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
@@ -30,16 +29,23 @@ class RaiderGunboat extends MediumShip{
   
 	$this->addPrimarySystem(new Reactor(4, 9, 0, 0));
 	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-	$this->addPrimarySystem(new Scanner(4, 12, 3, 4));
-	$this->addPrimarySystem(new Engine(4, 13, 0, 6, 1));
+	    	$sensors = new Scanner(4, 12, 2, 3);
+		$sensors->markLCV();
+		$this->addPrimarySystem($sensors);
+	$this->addPrimarySystem(new Engine(4, 11, 0, 6, 1));
 	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 180, 0));
 	$this->addPrimarySystem(new ParticleCannon(3, 8, 7, 300, 60));
 	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 180));
-	$this->addPrimarySystem(new Structure( 5, 31));
+	$this->addPrimarySystem(new Structure( 5, 30));
   
         $this->hitChart = array(
-        		0=> array( //should never happen
-        				20 => "Structure",
+        		0=> array( //should never happen (...but actually sometimes does!)
+        				11 => "Structure",
+        				13 => "Particle Cannon",
+        				16 => "Standard Particle Beam",
+        				18 => "Engine",
+        				19 => "Reactor",
+        				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				11 => "Structure",

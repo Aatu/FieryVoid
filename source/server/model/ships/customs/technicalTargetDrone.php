@@ -20,6 +20,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->pivotcost = 4;
 
 		
+		$this->notes = "DO NOT USE, prone to change!";
 		
 		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 180, 360));
 		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 0, 180));

@@ -359,7 +359,6 @@ class Weapon extends ShipSystem
 
     public function firedOnTurn($turn)
     {
-        //if ($this instanceof DualWeapon && isset($this->turnsFired[$turn])) return true; //DualWeapon obsolete
         foreach ($this->fireOrders as $fire) {
             if ($fire->type != "selfIntercept" && $fire->weaponid == $this->id && $fire->turn == $turn) {
                 return true;

@@ -195,7 +195,7 @@ window.ew = {
                 var def = ew.getDefensiveEW(ship);
                 var all = ew.getScannerOutput(ship);
 
-                if (def - 1 < all * 0.5) toReturn = false;
+                if (def < all * 0.5) toReturn = false;
             }
         }
 		return toReturn;

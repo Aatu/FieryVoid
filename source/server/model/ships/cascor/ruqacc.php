@@ -9,6 +9,7 @@ class Ruqacc extends OSAT{
         $this->phpclass = "Ruqacc";
         $this->imagePath = "img/ships/god.png";
         $this->shipClass = "Ruqacc Ion Satellite";
+	    $this->isd = 2231;
         
         $this->forwardDefense = 7;
         $this->sideDefense = 7;
@@ -20,11 +21,11 @@ class Ruqacc extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
-        $this->addPrimarySystem(new IonicLaser(2, 6, 4, 270, 90));
-        $this->addPrimarySystem(new IonicLaser(2, 6, 4, 270, 90));
-        $this->addPrimarySystem(new IonTorpedo(2, 5, 4, 270, 120));
-        $this->addPrimarySystem(new IonTorpedo(2, 5, 4, 270, 120));
-        $this->addPrimarySystem(new DualIonBolter(1, 4, 4, 0, 360));
+        $this->addPrimarySystem(new IonicLaser(2, 0, 0, 270, 90));
+        $this->addPrimarySystem(new IonicLaser(2, 0, 0, 270, 90));
+        $this->addPrimarySystem(new IonTorpedo(2, 5, 4, 270, 90));
+        $this->addPrimarySystem(new IonTorpedo(2, 5, 4, 270, 90));
+        $this->addPrimarySystem(new DualIonBolter(1, 0, 0, 0, 360));
         $this->addPrimarySystem(new Reactor(3, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 4, 2, 4));   
         $this->addPrimarySystem(new Thruster(2, 4, 0, 0, 2));

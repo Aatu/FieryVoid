@@ -95,11 +95,20 @@ class FighterIcon extends React.Component{
 
         const destroyed =  shipManager.systems.isDestroyed(ship, fighter);
         const disengaged = shipManager.criticals.isDisengagedFighter(fighter);
-
+/* old version - weapons and notWeapons
         return (
             <FighterIconContainer destroyed={destroyed} img={fighter.iconPath} onMouseOver={this.onSystemMouseOver.bind(this)} onMouseOut={this.onSystemMouseOut}>
                 <Container>{toIcons(ship, fighter, getWeapons(fighter), destroyed)}</Container>
                 <ContainerSystems>{toIcons(ship, fighter, getNotWeapons(fighter), destroyed)}</ContainerSystems>
+                <HealthBar health={getStructureLeft(ship, fighter)} criticals={hasCriticals(fighter)}><HealthText>{fighter.maxhealth - damageManager.getDamage(ship, fighter)} / {fighter.maxhealth}</HealthText></HealthBar>
+            </FighterIconContainer>
+        );
+*/     
+        //new version - fwd and aft systems (unit creator decides the layout)
+        return (
+            <FighterIconContainer destroyed={destroyed} img={fighter.iconPath} onMouseOver={this.onSystemMouseOver.bind(this)} onMouseOut={this.onSystemMouseOut}>
+                <Container>{toIcons(ship, fighter, getFwdSystems(fighter), destroyed)}</Container>
+                <ContainerSystems>{toIcons(ship, fighter, getAftSystems(fighter), destroyed)}</ContainerSystems>
                 <HealthBar health={getStructureLeft(ship, fighter)} criticals={hasCriticals(fighter)}><HealthText>{fighter.maxhealth - damageManager.getDamage(ship, fighter)} / {fighter.maxhealth}</HealthText></HealthBar>
             </FighterIconContainer>
         );
@@ -113,6 +122,9 @@ const hasCriticals = (system) => shipManager.criticals.hasCriticals(system)
 const getWeapons = fighter => fighter.systems.filter(system => system.weapon);
 
 const getNotWeapons = fighter => fighter.systems.filter(system => !system.weapon);
+
+const getFwdSystems = fighter => fighter.systems.filter(system => (system.location==1));
+const getAftSystems = fighter => fighter.systems.filter(system => (system.location!=1));
 
 const toIcons = (ship, fighter, systems, destroyed) => {
     return systems.map((system, i) => {

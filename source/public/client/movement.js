@@ -1581,8 +1581,61 @@ shipManager.movement = {
         return stillReq;
     }, //endof function calculateThrustStillReq
 
+
+    calculateTurndelayAtMove: function calculateTurndelayAtMove(ship, setMoveNo) { //array of moves, ID of move for which delay should be counted
+		var didTurn = false;
+		var turndelay = 0;
+		if (setMoveNo >= 0){
+			turndelay = Math.ceil(ship.movement[setMoveNo].speed * ship.turndelaycost); //delay at current speed - at least as many moves are required for turn delay to be satisfied
+		}else{//before unit started to move there was no delay for certain
+			turndelay = 0;
+		}
+		var movesDone = 0;
+		var moveNo = setMoveNo; //number of last move to be checked
+		while (moveNo >= 0){			
+            var movement = ship.movement[moveNo];
+			if ((movement.type == "move" || movement.type == "slipright" || movement.type == "slipleft") ) movesDone++;
+			if (movement.type == "speedchange"){//speed change - check if delay was satisfied at that point (which means a single move back)!
+				var turndelayThen = shipManager.movement.calculateTurndelayAtMove(ship, moveNo-1);
+				if(turndelayThen==0){ //if then was 0, it can't be more now as there were no turns between!
+					turndelay=0;
+					break;
+				}//if it was not 0, then that speed change was irrelevant, go on counting
+			}
+			if (movement.speed == 0){//if at any point speed is actually 0 - then delay is 0 as well and that's the answer
+				turndelay = 0;
+				break;//while
+			}
+			if (shipManager.movement.isTurn(movement)){ //this is last turn - no point looking any further!
+				didTurn = true;
+				//when multiple turns are done one after another, it's a snap turn by agile ship (with turn shortening happening at FIRST step) 
+				//(or speed 0 when it doesn't matter)
+				//so go back to first turn made in sequence and calculate extra thrust spent for it instead of actual turn found
+				var prevNo = moveNo-1;
+				while((prevNo>=0) && (shipManager.movement.isTurn(ship.movement[prevNo]))){
+					movement = ship.movement[prevNo];
+					prevNo--;
+				}
+				movesDone += shipManager.movement.calculateExtraThrustSpent(ship, movement); //calculate turn shortening as moves done
+				break;//while
+			}
+			if(movesDone>=turndelay){ //at this point turn delay is satisfied, no need to look further!
+				break;//while
+			}
+			moveNo--;
+		}
+		if (!didTurn){//did not turn - which means there is no delay!
+			turndelay = 0;
+		}else{
+			turndelay = turndelay - movesDone;//required delay minus satisfied delay
+		}
+		turndelay = Math.max(0,turndelay);//cannot be <0		
+		return turndelay;
+    }, //endof calculateTurndelayAtMove
+
     
     calculateCurrentTurndelay: function calculateCurrentTurndelay(ship) {
+		/* Marcin Sawicki, December 2019: this is having trouble when delay is reduced to 0 (by exactly satisfying or by slowing down to 0), and then acceleration happens
         var turndelay = Math.ceil(ship.movement[ship.movement.length - 1].speed * ship.turndelaycost);
         var last = null;
         var didTurn = false;
@@ -1610,6 +1663,10 @@ shipManager.movement = {
             }
         }
         return turndelay;
+		*/
+		/*Marcin Sawicki, December 2019: new version, calculating backwards from current status*/
+		var turndelay = shipManager.movement.calculateTurndelayAtMove(ship, ship.movement.length - 1);
+		return turndelay;
     }, //endof calculateCurrentTurndelay
 
     

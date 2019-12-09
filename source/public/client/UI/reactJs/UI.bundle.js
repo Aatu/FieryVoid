@@ -37316,19 +37316,28 @@ var FighterIcon = function (_React$Component) {
 
             var destroyed = shipManager.systems.isDestroyed(ship, fighter);
             var disengaged = shipManager.criticals.isDisengagedFighter(fighter);
-
+            /* old version - weapons and notWeapons
+                    return (
+                        <FighterIconContainer destroyed={destroyed} img={fighter.iconPath} onMouseOver={this.onSystemMouseOver.bind(this)} onMouseOut={this.onSystemMouseOut}>
+                            <Container>{toIcons(ship, fighter, getWeapons(fighter), destroyed)}</Container>
+                            <ContainerSystems>{toIcons(ship, fighter, getNotWeapons(fighter), destroyed)}</ContainerSystems>
+                            <HealthBar health={getStructureLeft(ship, fighter)} criticals={hasCriticals(fighter)}><HealthText>{fighter.maxhealth - damageManager.getDamage(ship, fighter)} / {fighter.maxhealth}</HealthText></HealthBar>
+                        </FighterIconContainer>
+                    );
+            */
+            //new version - fwd and aft systems (unit creator decides the layout)
             return React.createElement(
                 FighterIconContainer,
                 { destroyed: destroyed, img: fighter.iconPath, onMouseOver: this.onSystemMouseOver.bind(this), onMouseOut: this.onSystemMouseOut },
                 React.createElement(
                     Container,
                     null,
-                    toIcons(ship, fighter, getWeapons(fighter), destroyed)
+                    toIcons(ship, fighter, getFwdSystems(fighter), destroyed)
                 ),
                 React.createElement(
                     ContainerSystems,
                     null,
-                    toIcons(ship, fighter, getNotWeapons(fighter), destroyed)
+                    toIcons(ship, fighter, getAftSystems(fighter), destroyed)
                 ),
                 React.createElement(
                     HealthBar,
@@ -37365,6 +37374,17 @@ var getWeapons = function getWeapons(fighter) {
 var getNotWeapons = function getNotWeapons(fighter) {
     return fighter.systems.filter(function (system) {
         return !system.weapon;
+    });
+};
+
+var getFwdSystems = function getFwdSystems(fighter) {
+    return fighter.systems.filter(function (system) {
+        return system.location == 1;
+    });
+};
+var getAftSystems = function getAftSystems(fighter) {
+    return fighter.systems.filter(function (system) {
+        return system.location != 1;
     });
 };
 
@@ -39697,11 +39717,25 @@ var SystemInfoButtons = function (_React$Component) {
 			//check which mode was set
 			var modeSet = system.firingMode;
 			//set this mode on ALL similar weapons that aren't declared and can change firing mode
+			var allWeapons = [];
+			if (ship.flight) {
+				allWeapons = ship.systems.map(function (fighter) {
+					return fighter.systems;
+				}).reduce(function (all, weapons) {
+					return all.concat(weapons);
+				}, []).filter(function (system) {
+					return system.weapon;
+				});
+			} else {
+				allWeapons = ship.systems.filter(function (system) {
+					return system.weapon;
+				});
+			}
 			var similarWeapons = new Array();
-			for (var i = 0; i < ship.systems.length; i++) {
-				if (system.displayName === ship.systems[i].displayName) {
+			for (var i = 0; i < allWeapons.length; i++) {
+				if (system.displayName === allWeapons[i].displayName) {
 					if (system.weapon) {
-						similarWeapons.push(ship.systems[i]);
+						similarWeapons.push(allWeapons[i]);
 					}
 				}
 			}
@@ -39714,7 +39748,7 @@ var SystemInfoButtons = function (_React$Component) {
 				while (weapon.firingMode != modeSet && iterations < 2) {
 					weaponManager.onModeClicked(ship, weapon);
 					if (weapon.firingMode == 1) {
-						iterations++; //if an entire iteration oassed and mode wasn't found, then mode cannot be reached	
+						iterations++; //if an entire iteration passed and mode wasn't found, then mode cannot be reached	
 					}
 				}
 				//reset mode back if necessary! (this one is guaranteed to be available)
@@ -39738,13 +39772,43 @@ var SystemInfoButtons = function (_React$Component) {
 			weaponManager.onModeClicked(ship, system);
 			webglScene.customEvent('CloseSystemInfo');
 		}
+
+		/*declare this weapon to be eligible for defensive fire this turn*/
+
+	}, {
+		key: "declareSelfIntercept",
+		value: function declareSelfIntercept(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props14 = this.props,
+			    ship = _props14.ship,
+			    system = _props14.system;
+
+			if (!canSelfIntercept(ship, system)) {
+				return;
+			}
+			weaponManager.onDeclareSelfInterceptSingle(ship, system);
+			webglScene.customEvent('CloseSystemInfo');
+		}
+		/*declare all similar undeclared weapons for defensive fire this turn*/
+
+	}, {
+		key: "declareSelfInterceptAll",
+		value: function declareSelfInterceptAll(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props15 = this.props,
+			    ship = _props15.ship,
+			    system = _props15.system;
+
+			weaponManager.onDeclareSelfInterceptSingleAll(ship, system);
+			webglScene.customEvent('CloseSystemInfo');
+		}
 	}, {
 		key: "render",
 		value: function render() {
-			var _props14 = this.props,
-			    ship = _props14.ship,
-			    selectedShip = _props14.selectedShip,
-			    system = _props14.system;
+			var _props16 = this.props,
+			    ship = _props16.ship,
+			    selectedShip = _props16.selectedShip,
+			    system = _props16.system;
 
 
 			if (!canDoAnything) {
@@ -39763,7 +39827,8 @@ var SystemInfoButtons = function (_React$Component) {
 				canAddShots(ship, system) && React.createElement(Button, { onClick: this.addShots.bind(this), img: "./img/plussquare.png" }),
 				canReduceShots(ship, system) && React.createElement(Button, { onClick: this.reduceShots.bind(this), img: "./img/minussquare.png" }),
 				canRemoveFireOrder(ship, system) && React.createElement(Button, { onClick: this.removeFireOrder.bind(this), img: "./img/firing.png" }),
-				canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this))
+				canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this)),
+				canSelfIntercept(ship, system) && React.createElement(Button, { onClick: this.declareSelfIntercept.bind(this), onContextMenu: this.declareSelfInterceptAll.bind(this), img: "./img/selfIntercept.png" })
 			);
 		}
 	}]);
@@ -39772,7 +39837,7 @@ var SystemInfoButtons = function (_React$Component) {
 }(React.Component);
 
 var canDoAnything = exports.canDoAnything = function canDoAnything(ship, system) {
-	return canOffline(ship, system) || canOnline(ship, system) || canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) || canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system);
+	return canOffline(ship, system) || canOnline(ship, system) || canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) || canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system) || canSelfIntercept(ship, system);
 };
 
 var canOffline = function canOffline(ship, system) {
@@ -39813,6 +39878,11 @@ var canRemoveFireOrder = function canRemoveFireOrder(ship, system) {
 
 var canChangeFiringMode = function canChangeFiringMode(ship, system) {
 	return system.weapon && (gamedata.gamephase === 1 && system.ballistic || gamedata.gamephase === 3 && !system.ballistic) && !weaponManager.hasFiringOrder(ship, system) && (Object.keys(system.firingModes).length > 1 || system.dualWeapon);
+};
+
+//can declare eligibility for interception: charged, recharge time >1 turn, intercept rating >0, no firing order
+var canSelfIntercept = function canSelfIntercept(ship, system) {
+	return system.weapon && weaponManager.canSelfInterceptSingle(ship, system);
 };
 
 var getFiringModes = function getFiringModes(ship, system, changeFiringMode, allChangeFiringMode) {

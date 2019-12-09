@@ -417,16 +417,60 @@
 
 
 
+
+    class BlastLaser extends Weapon{
+        public $name = "BlastLaser";
+        public $displayName = "Blast Laser";
+        public $iconPath = "improvedBlastLaser.png"; //can have the same icon all right
+        public $animationColor = array(130, 25, 200);
+        public $animation = "beam"; //a bolt, not beam
+        public $animationExplosionScale = 0.45;
+        public $projectilespeed = 17;
+        public $animationWidth = 25;
+        public $trailLength = 25;
+        public $priority = 6; //heavy Standard weapons
+
+        public $loadingtime = 3;
+
+
+        public $rangePenalty = 0.33;
+        public $fireControl = array(0, 2, 4); // fighters, <mediums, <capitals
+
+        public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        public $weaponClass = "Laser";
+        
+        
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            if ( $maxhealth == 0 ) $maxhealth = 10;
+            if ( $powerReq == 0 ) $powerReq = 5;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Uninterceptable.';
+			$this->data["Special"] .= '<br>Cannot penetrate to PRIMARY when hitting outer section.';
+		}
+
+        public function getDamage($fireOrder){ return Dice::d(10, 2)+14; }
+        public function setMinDamage(){ $this->minDamage = 16 ; }
+        public function setMaxDamage(){ $this->maxDamage = 34 ; }
+
+    } //endof class BlastLaser
+
+
     class ImprovedBlastLaser extends Weapon{
         public $name = "improvedBlastLaser";
         public $displayName = "Improved Blast Laser";
-        public $animation = "laser";
+        public $iconPath = "improvedBlastLaser.png";
         public $animationColor = array(130, 25, 200);
-        public $animationWidth = 5;
-        public $animationWidth2 = 0.5;
-        public $uninterceptable = true;
-        public $noPrimaryHits = true;
-        public $priority = 6;
+        public $animation = "beam"; //a bolt, not beam
+        public $animationExplosionScale = 0.5;
+        public $projectilespeed = 17;
+        public $animationWidth = 30;
+        public $trailLength = 30;
+        public $priority = 6; //heavy Standard weapons
 
         public $loadingtime = 3;
 
@@ -435,12 +479,21 @@
         public $fireControl = array(-1, 3, 5); // fighters, <mediums, <capitals
 
         public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-        public $weaponClass = "Raking";
+        public $weaponClass = "Laser";
         
         
+
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            if ( $maxhealth == 0 ) $maxhealth = 10;
+            if ( $powerReq == 0 ) $powerReq = 8;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
+		
+		public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Uninterceptable.';
+			$this->data["Special"] .= '<br>Cannot penetrate to PRIMARY when hitting outer section.';
+		}
 
         public function getDamage($fireOrder){ return Dice::d(10, 3)+14; }
         public function setMinDamage(){ $this->minDamage = 17 ; }

@@ -226,6 +226,7 @@ class QuadPulsar extends Pulse{
         public $animationExplosionScale = 0.20;
         public $rof = 2;
         public $priority = 6;
+        public $intercept = 1;
         
         public $loadingtime = 3;
         
@@ -293,6 +294,7 @@ class QuadPulsar extends Pulse{
         public $maxpulses = 7;
         public $grouping = 15;
         public $priority = 4;
+        public $intercept = 2;
 
         public $loadingtime = 1;
     	public $normalload = 2;

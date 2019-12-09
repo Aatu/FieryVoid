@@ -89,25 +89,26 @@ class MinbariCivilianBase extends SmallStarBaseFourSections{
 		$this->addFrontSystem(new FusionCannon(3, 8, 1, 270, 90));
 		$this->addFrontSystem(new Hangar(3, 1));
 		$this->addFrontSystem(new CargoBay(3, 36));
-		$this->addFrontSystem(new Reactor(3, 6, 0, 0));
+		$this->addFrontSystem(new SubReactor(3, 6, 0, 0));
 
 		$this->addAftSystem(new FusionCannon(3, 8, 1, 90, 270));
 		$this->addAftSystem(new FusionCannon(3, 8, 1, 90, 270));
 		$this->addAftSystem(new Hangar(3, 1));
 		$this->addAftSystem(new CargoBay(3, 36));
-		$this->addAftSystem(new Reactor(3, 6, 0, 0));
+		$this->addAftSystem(new SubReactor(3, 6, 0, 0));
 		
 		$this->addRightSystem(new FusionCannon(3, 8, 1, 0, 180));
 		$this->addRightSystem(new FusionCannon(3, 8, 1, 0, 180));
 		$this->addRightSystem(new Hangar(3, 1));
 		$this->addRightSystem(new CargoBay(3, 36));
-		$this->addRightSystem(new Reactor(3, 6, 0, 0));
+		$this->addRightSystem(new SubReactor(3, 6, 0, 0));
 		
 		$this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 0));
 		$this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 0));
 		$this->addLeftSystem(new Hangar(3, 1));
 		$this->addLeftSystem(new CargoBay(3, 36));
-		$this->addLeftSystem(new Reactor(3, 6, 0, 0));
+		$this->addLeftSystem(new SubReactor(3, 6, 0, 0));
 		
 		}
     }
+?>

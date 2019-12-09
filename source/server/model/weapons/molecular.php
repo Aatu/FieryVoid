@@ -107,7 +107,7 @@
             if ($damagebonus > 4) $this->priority++;                      
             if ($damagebonus > 6) $this->priority++;
             
-            $ns = max(3,$shots); //no graphics for more than 3 weapons
+            $ns = min(3,$shots); //no graphics for more than 3 weapons
             $this->iconPath = "lightfusionCannon$ns.png";
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }

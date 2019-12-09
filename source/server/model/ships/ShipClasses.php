@@ -400,12 +400,21 @@ class BaseShip {
 			//Minesweeper
 			if($this->minesweeperbonus > 0) $this->notes .= '<br>Minesweeper: ' . $this->minesweeperbonus;	
 			//Advanced Armor
-			if($this->advancedArmor > 0) $this->notes .= '<br>Advanced Armor';
+			if($this->advancedArmor) $this->notes .= '<br>Advanced Armor';
 			//Improved/Advanced Sensors
 			/*hasSpecialAbility relies on data created in system->onConstructed, so not available here. Need to manually look for Sensors...
 			if($this->hasSpecialAbility("ImprovedSensors")) $this->notes .= '<br>Improved Sensors';
 			if($this->hasSpecialAbility("AdvancedSensors")) $this->notes .= '<br>Advanced Sensors';
 			*/
+			if($this->critRollMod != 0){
+				$plus = '';
+				if($this->critRollMod > 0) $plus = '+';
+				if($this instanceof FighterFlight){					
+					$this->notes .= '<br>Dropout roll modifier: ' . $plus . $this->critRollMod;
+				}else{
+					$this->notes .= '<br>Critical roll modifier: ' . $plus . $this->critRollMod;
+				}
+			}
 			if(!($this instanceof FighterFlight)) foreach($this->systems as $sensor) if ($sensor instanceof Scanner){
 				foreach($sensor->specialAbilities as $ability){
 					if ($ability=='AdvancedSensors'){

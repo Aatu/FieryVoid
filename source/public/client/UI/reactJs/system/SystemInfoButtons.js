@@ -112,7 +112,7 @@ class SystemInfoButtons extends React.Component {
         webglScene.customEvent('CloseSystemInfo');
 	}
 
-	    allChangeFiringMode(e) {
+	allChangeFiringMode(e) {
 		e.stopPropagation(); e.preventDefault();
 		const {ship, system} = this.props;
 		if (!canChangeFiringMode(ship, system)) {
@@ -123,11 +123,20 @@ class SystemInfoButtons extends React.Component {
 		//check which mode was set
 		var modeSet = system.firingMode;		    
 		//set this mode on ALL similar weapons that aren't declared and can change firing mode
+		var allWeapons = [];
+        if (ship.flight) {
+            allWeapons = ship.systems
+                .map(fighter => fighter.systems)
+                .reduce((all, weapons) => all.concat(weapons), [])
+                .filter(system => system.weapon);
+        } else {
+            allWeapons = ship.systems.filter(system => system.weapon);
+        }		
 		var similarWeapons = new Array();
-		for (var i = 0; i < ship.systems.length; i++) {
-			if (system.displayName === ship.systems[i].displayName) {
+		for (var i = 0; i < allWeapons.length; i++) {
+			if (system.displayName === allWeapons[i].displayName) {
 				if (system.weapon) {
-					similarWeapons.push(ship.systems[i]);
+					similarWeapons.push(allWeapons[i]);
 				}
 			}
 		}
@@ -140,7 +149,7 @@ class SystemInfoButtons extends React.Component {
 			while (weapon.firingMode!=modeSet && iterations < 2){
 				weaponManager.onModeClicked(ship, weapon);
 				if(weapon.firingMode == 1){
-					iterations++; //if an entire iteration oassed and mode wasn't found, then mode cannot be reached	
+					iterations++; //if an entire iteration passed and mode wasn't found, then mode cannot be reached	
 				}
 			}
 			//reset mode back if necessary! (this one is guaranteed to be available)
@@ -149,7 +158,7 @@ class SystemInfoButtons extends React.Component {
 			}
 		}
 		webglScene.customEvent('CloseSystemInfo');
-	    }
+	}
 	
 	changeFiringMode(e) {
         	e.stopPropagation(); e.preventDefault();
@@ -161,7 +170,24 @@ class SystemInfoButtons extends React.Component {
 		webglScene.customEvent('CloseSystemInfo');
 	}
 	
-		
+	
+	/*declare this weapon to be eligible for defensive fire this turn*/
+	declareSelfIntercept(e) {
+        	e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		if (!canSelfIntercept(ship, system)) {
+            		return;
+		}		
+		weaponManager.onDeclareSelfInterceptSingle(ship, system);
+		webglScene.customEvent('CloseSystemInfo');
+	}	
+	/*declare all similar undeclared weapons for defensive fire this turn*/
+	declareSelfInterceptAll(e) {
+        	e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		weaponManager.onDeclareSelfInterceptSingleAll(ship,system);
+		webglScene.customEvent('CloseSystemInfo');
+	}	
 	
     render() {
 		const {ship, selectedShip, system} = this.props;
@@ -182,6 +208,7 @@ class SystemInfoButtons extends React.Component {
                 {canReduceShots(ship, system) && <Button onClick={this.reduceShots.bind(this)} img="./img/minussquare.png"></Button>}
 		{canRemoveFireOrder(ship, system) && <Button onClick={this.removeFireOrder.bind(this)} img="./img/firing.png"></Button>}
 		{canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this))}
+		{canSelfIntercept(ship, system) && <Button onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/selfIntercept.png"></Button>}
             </Container>
         )
     }
@@ -190,7 +217,8 @@ class SystemInfoButtons extends React.Component {
 export const canDoAnything = (ship, system) => canOffline(ship, system) || canOnline(ship, system) 
 	|| canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) 
 	|| canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system)
-	|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system);
+	|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system)
+	|| canSelfIntercept(ship, system);
 
 const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
 
@@ -212,6 +240,8 @@ const canRemoveFireOrder = (ship, system) => system.weapon && weaponManager.hasF
 
 const canChangeFiringMode = (ship, system) => system.weapon  && ((gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 3 && !system.ballistic)) && !weaponManager.hasFiringOrder(ship, system) && (Object.keys(system.firingModes).length > 1 || system.dualWeapon);
 
+//can declare eligibility for interception: charged, recharge time >1 turn, intercept rating >0, no firing order
+const canSelfIntercept = (ship, system) => system.weapon && weaponManager.canSelfInterceptSingle(ship, system);
 
 const getFiringModes = (ship, system, changeFiringMode, allChangeFiringMode) => {
 	if (system.parentId >= 0) {
