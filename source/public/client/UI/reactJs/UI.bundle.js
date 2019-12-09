@@ -39717,11 +39717,25 @@ var SystemInfoButtons = function (_React$Component) {
 			//check which mode was set
 			var modeSet = system.firingMode;
 			//set this mode on ALL similar weapons that aren't declared and can change firing mode
+			var allWeapons = [];
+			if (ship.flight) {
+				allWeapons = ship.systems.map(function (fighter) {
+					return fighter.systems;
+				}).reduce(function (all, weapons) {
+					return all.concat(weapons);
+				}, []).filter(function (system) {
+					return system.weapon;
+				});
+			} else {
+				allWeapons = ship.systems.filter(function (system) {
+					return system.weapon;
+				});
+			}
 			var similarWeapons = new Array();
-			for (var i = 0; i < ship.systems.length; i++) {
-				if (system.displayName === ship.systems[i].displayName) {
+			for (var i = 0; i < allWeapons.length; i++) {
+				if (system.displayName === allWeapons[i].displayName) {
 					if (system.weapon) {
-						similarWeapons.push(ship.systems[i]);
+						similarWeapons.push(allWeapons[i]);
 					}
 				}
 			}
@@ -39734,7 +39748,7 @@ var SystemInfoButtons = function (_React$Component) {
 				while (weapon.firingMode != modeSet && iterations < 2) {
 					weaponManager.onModeClicked(ship, weapon);
 					if (weapon.firingMode == 1) {
-						iterations++; //if an entire iteration oassed and mode wasn't found, then mode cannot be reached	
+						iterations++; //if an entire iteration passed and mode wasn't found, then mode cannot be reached	
 					}
 				}
 				//reset mode back if necessary! (this one is guaranteed to be available)

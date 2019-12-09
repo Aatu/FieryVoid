@@ -232,7 +232,7 @@ class SWDirectWeapon extends Pulse{
 		parent::setSystemDataWindow($turn);
 			$this->data["Special"] = 'Burst mode: -1..1 +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
 			$this->data["Special"] .= '<br>Minimum of 1 pulse.';
-			$this->data["Special"] .= '<br>(ships only) Alternate firing mode: Salvo: single shot with increased damage (all weapons in turret fire together instead of sequentially).';
+			$this->data["Special"] .= '<br>Alternate firing mode: Salvo: single shot with increased damage (all weapons in battery fire together instead of sequentially).';
         }
 	
     
@@ -511,6 +511,7 @@ class SWFighterLaser extends SWDirectWeapon{
 		
 		
 		parent::__construct(0, 1, 0, $startArc, $endArc, $nrOfShots);
+		$this->addSalvoMode();
 	}    
 	
 	public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
@@ -550,6 +551,7 @@ class SWFighterIon extends SWIon{
 		if($damagebonus > 4) $this->priority++;	
 
 		parent::__construct(0, 1, 0, $startArc, $endArc, $nrOfShots);
+		$this->addSalvoMode();
 	}    
 
 			  

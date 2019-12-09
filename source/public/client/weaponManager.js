@@ -980,16 +980,25 @@ window.weaponManager = {
 	
 	/*declare self-intercept for all similar undeclared weapons*/
     onDeclareSelfInterceptSingleAll: function onDeclareSelfInterceptSingleAll(ship, weapon) {
-	var similarWeapons = new Array();
-	for (var i = 0; i < ship.systems.length; i++) {
-		if (weapon.displayName === ship.systems[i].displayName) { //this will include this particular system too, of course
-			similarWeapons.push(ship.systems[i]);
+		var allWeapons = [];
+        if (ship.flight) {
+            allWeapons = ship.systems
+                .map(fighter => fighter.systems)
+                .reduce((all, weapons) => all.concat(weapons), [])
+                .filter(system => system.weapon);
+        } else {
+            allWeapons = ship.systems.filter(system => system.weapon);
+        }
+		var similarWeapons = new Array();
+		for (var i = 0; i < allWeapons.length; i++) {
+			if (weapon.displayName === allWeapons[i].displayName) { //this will include this particular system too, of course
+				similarWeapons.push(allWeapons[i]);
+			}
 		}
-	}
-	for (var i = 0; i < similarWeapons.length; i++) {
-		var otherWeapon = similarWeapons[i];
-		weaponManager.onDeclareSelfInterceptSingle(ship, otherWeapon); //will check whether weapon is actually eligible for such declaration
-	}
+		for (var i = 0; i < similarWeapons.length; i++) {
+			var otherWeapon = similarWeapons[i];
+			weaponManager.onDeclareSelfInterceptSingle(ship, otherWeapon); //will check whether weapon is actually eligible for such declaration
+		}
     },	
 
 
