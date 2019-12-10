@@ -509,16 +509,24 @@ class QuadPulsar extends Pulse{
 	//if fired offensively - make d6 attacks (copies of 1 existing); 
 	//if defensively - make weapon have d6 GUNS (would be temporary, but enough to assign multiple shots for interception)
 	public function beforeFiringOrderResolution($gamedata){
-		if($multiplied==true) return;//shots of this weapon are already multiplied
+		if($this->multiplied==true) return;//shots of this weapon are already multiplied
+		$this->multiplied = true;//shots WILL be multiplied in a moment, mark this
 		//is offensive fire declared?...
 		$offensiveShot = null;
+		$noOfShots = Dice::d(6,1); //actual number of shots for this turn
 		foreach($this->fireOrders as $fireOrder){
-			if($fireOrder->type =='normal') $offensiveShot = $fireOrder;
+			if(($fireOrder->type =='normal') && ($fireOrder->turn == $gamedata->turn)) $offensiveShot = $fireOrder;
 		}
-		if($fireOrder!==null){ //offensive fire declared, multiply!
-			
+		if($offensiveShot!==null){ //offensive fire declared, multiply!
+			while($noOfShots > 1){ //first shot is already declared!
+				$multipliedFireOrder = new FireOrder( -1, $offensiveShot->type, $offensiveShot->shooterid, $offensiveShot->targetid,
+					$offensiveShot->weaponid, $offensiveShot->calledid, $offensiveShot->turn, $offensiveShot->firingmode,
+					0, 0, 1, 0, 0, null, null
+				);
+				$noOfShots--;	      
+			}
 		}else{//offensive fire NOT declared, multiply guns for interception!
-			$this->guns = Dice::d(6,1); //d6 intercept shots
+			$this->guns = $noOfShots; //d6 intercept shots
 		}
 	}
         
