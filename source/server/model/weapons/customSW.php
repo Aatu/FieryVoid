@@ -494,7 +494,7 @@ class SWFighterLaser extends SWDirectWeapon{
     public $name = "SWFighterLaser";
     public $displayName = "Fighter Laser";
 	
-    public $priority = 2;
+    public $priority = 3;
     public $loadingtime = 1;
     public $rangePenalty = 2;
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
