@@ -459,7 +459,9 @@ class QuadPulsar extends Pulse{
     }
 
 
-/* new Scatter Pulsar incarnation - alike to Point Pulsar; drops random number of shots for a fixed 3 shots, drops 'cannot intercept same shot'*/
+/* new Scatter Pulsar - it was initially made as Pulse weapon, only later brought to correctness
+	number of shots is rolled after firing declaration (eg. after declaring offensive fire but before assigning interceptions)
+*/
     class ScatterGun extends Weapon //this is NOT a Pulse weapon, disregard Pulse-specific settings...
     {
 	public $name = "scatterGun";
@@ -472,7 +474,7 @@ class QuadPulsar extends Pulse{
         public $animationExplosionScale = 0.15;
         public $animationColor =  array(175, 225, 175);
         public $trailColor = array(110, 225, 110);
-	public $guns = 3; //always 3, completely separate (not Pulse!) shots
+	public $guns = 1; //multiplied to d6 at firing
 	     
         public $loadingtime = 1;
         public $normalload = 1;	    
@@ -486,23 +488,39 @@ class QuadPulsar extends Pulse{
 	    public $damageType = "Standard"; 
 	    public $weaponClass = "Particle"; 
 	    
+	    //temporary private variables
+	    private $multiplied = false;
+	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-		if ( $maxhealth == 0 ){
-		    $maxhealth = 8;
-		}
-		if ( $powerReq == 0 ){
-		    $powerReq = 3;
-		}	
+		if ( $maxhealth == 0 ) $maxhealth = 8;
+		if ( $powerReq == 0 ) $powerReq = 3;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
 	    
         public function setSystemDataWindow($turn){            
             parent::setSystemDataWindow($turn);		
-		$this->data["Special"] = "Fires fixed 3 shots (not d6), no special restrictions on interception.";
+		$this->data["Special"] = "Fires d6 separate shots (actual number rolled at firing resolution).";
+		$this->data["Special"] .= "<br>When fired defensively, a single Scattergun cannot engage the same incoming shot twice (even ballistic one).";
         }
+	    
+	//if fired offensively - make d6 attacks (copies of 1 existing); 
+	//if defensively - make weapon have d6 GUNS (would be temporary, but enough to assign multiple shots for interception)
+	public function beforeFiringOrderResolution($gamedata){
+		if($multiplied==true) return;//shots of this weapon are already multiplied
+		//is offensive fire declared?...
+		$offensiveShot = null;
+		foreach($this->fireOrders as $fireOrder){
+			if($fireOrder->type =='normal') $offensiveShot = $fireOrder;
+		}
+		if($fireOrder!==null){ //offensive fire declared, multiply!
+			
+		}else{//offensive fire NOT declared, multiply guns for interception!
+			$this->guns = Dice::d(6,1); //d6 intercept shots
+		}
+	}
         
         
         public function getDamage($fireOrder){
