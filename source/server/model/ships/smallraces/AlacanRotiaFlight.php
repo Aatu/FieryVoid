@@ -8,7 +8,7 @@ class AlacanRotiaFlight extends FighterFlight{
         $this->faction = "Small Races";
         $this->phpclass = "AlacanRotiaFlight";
         $this->shipClass = "Alacan Rotia flight";
-        $this->imagePath = "img/ships/RogolonChelek.png";
+        $this->imagePath = "img/ships/AlacanRotia.png";
         $this->forwardDefense = 6;
         $this->sideDefense = 6;
         $this->freethrust = 8;
@@ -27,9 +27,9 @@ class AlacanRotiaFlight extends FighterFlight{
             $armour = array(1, 1, 1, 1);
             $fighter = new Fighter("AlacanRotiaFlight", $armour, 6, $this->id);
             $fighter->displayName = "Rotia";
-            $fighter->imagePath = "img/ships/RogolonChelek.png";
-            $fighter->iconPath = "img/ships/RogolonChelek_Large.png";
-            $frontGun = new LightFusionCannon(330, 30, 2, 1);
+            $fighter->imagePath = "img/ships/AlacanRotia.png";
+            $fighter->iconPath = "img/ships/AlacanRotia_Large.png";
+            $frontGun = new LightParticleBeam(330, 30, 2, 1);
             $frontGun->displayName = "Light Particle Gun";
             $fighter->addFrontSystem($frontGun);
             $this->addSystem($fighter);

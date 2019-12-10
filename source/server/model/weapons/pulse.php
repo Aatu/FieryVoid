@@ -515,34 +515,37 @@ class QuadPulsar extends Pulse{
 		//is offensive fire declared?...
 		$offensiveShot = null;
 		$noOfShots = Dice::d(6,1); //actual number of shots for this turn
-		foreach($this->fireOrders as $fireOrder){
-			if(($fireOrder->type =='normal') && ($fireOrder->turn == $gamedata->turn)) $offensiveShot = $fireOrder;
+
+		foreach($this->fireOrders as $fire){
+			if(($fire->type =='normal') && ($fire->turn == $gamedata->turn)) $offensiveShot = $fire;
 		}
 		if($offensiveShot!==null){ //offensive fire declared, multiply!
 			while($noOfShots > 1){ //first shot is already declared!
 				$multipliedFireOrder = new FireOrder( -1, $offensiveShot->type, $offensiveShot->shooterid, $offensiveShot->targetid,
-					$offensiveShot->weaponid, $offensiveShot->calledid, $offensiveShot->turn, $offensiveShot->firingmode,
+					$offensiveShot->weaponid, $offensiveShot->calledid, $offensiveShot->turn, $offensiveShot->firingMode,
 					0, 0, 1, 0, 0, null, null
 				);
+				$multipliedFireOrder->addToDB = true;
+				$this->fireOrders[] = $multipliedFireOrder;
 				$noOfShots--;	      
 			}
 		}else{//offensive fire NOT declared, multiply guns for interception!
 			$this->guns = $noOfShots; //d6 intercept shots
 		}
-	}
+	} //endof function beforeFiringOrderResolution
         
 	    /*return 0 if given fire order was already intercepted by this weapon - this should prevent such assignment*/
 	public function getInterceptionMod($gamedata, $intercepted)
 	{
-		$alreadyIntercepted = false;
+		$wasIntercepted = false;
 		$interceptMod = 0;
-		foreach($alreadyIntercepted as $alreadyAssignedAgainst){
+		foreach($this->alreadyIntercepted as $alreadyAssignedAgainst){
 			if ($alreadyAssignedAgainst->id == $intercepted->id){ //this fire order was already intercepted by this weapon, this Scattergun cannot do so again
-				$alreadyIntercepted = true;
+				$wasIntercepted = true;
 				break;//foreach
 			}
 		}
-		if(!$alreadyIntercepted) $interceptMod = parent::getInterceptionMod($gamedata, $intercepted);
+		if(!$wasIntercepted) $interceptMod = parent::getInterceptionMod($gamedata, $intercepted);
 		return $interceptMod;
 	}//endof  getInterceptionMod
         

@@ -126,7 +126,7 @@ class ImprovedIonCannon extends Raking{
         public $animationWidth2 = 0.2;
         
         public $priority = 4;
-        public $intercept = 2;
+        public $intercept = 0; //Lasers cannot intercept!
         public $loadingtime = 1;
         public $shots = 2;
         public $defaultShots = 2;
@@ -139,7 +139,7 @@ class ImprovedIonCannon extends Raking{
         function __construct($startArc, $endArc, $nrOfShots = 2){
             $this->defaultShots = $nrOfShots;
             $this->shots = $nrOfShots;
-            $this->intercept = $nrOfShots;
+            //$this->intercept = $nrOfShots; //Lasers cannot intercept!
             if($nrOfShots === 1){
                 $this->iconPath = "ionizer1.png";
             }
