@@ -250,6 +250,7 @@ class SWDirectWeapon extends Pulse{
 	  AFTER calling parent::__construct! (else variables like maxpulses may be not yet filled correctly
 	*/
 	public function addSalvoMode(){
+		
 		if($this->defaultShots <2) return; //no point
 		$this->firingModes[2] = 'Salvo';
 		$new = ceil($this->animationExplosionScale*1.25);
@@ -279,7 +280,12 @@ class SWDirectWeapon extends Pulse{
 		foreach($this->firingModes as $i=>$modeName){ //recalculating min and max damage - taking into account new firing mode!	    
 			$this->changeFiringMode($i);
 			$this->setMinDamage(); $this->minDamageArray[$i] = $this->minDamage;
-			$this->setMaxDamage(); $this->maxDamageArray[$i] = $this->maxDamage;
+			$this->setMaxDamage(); $this->maxDamageArray[$i] = $this->maxDamage;	
+			if (!isset($this->priorityAFArray[$i]){ //if AF priority for this mode is not set - do set it!
+				$this->priorityAF = 0; //so setPriorityAF works correctly
+				$this->setPriorityAF(); 
+				$this->priorityAFArray[$i] = $this->priorityAF;
+			}
 		}
 		$this->changeFiringMode(1); //reset mode to basic
 		
