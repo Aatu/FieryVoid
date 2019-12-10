@@ -22,11 +22,12 @@ Ship weapon priority:
 
 
 Fighter weapon priority:
-1: mostly special weapons that should be fired ASAP
-2: light weapons (d6+2 and smaller)
-3: typical fighter weapons (d6+3 - d6+4)
-4: large fighter weapons (d6+5, d6+6)
-5: very large fighter weapons (Ion Bolt, Light Graviton Beam)
+1-2: mostly special weapons that should be fired ASAP
+3: light weapons (d6+2 and smaller)
+4: typical fighter weapons (d6+3 - d6+4)
+5: large fighter weapons (d6+5, d6+6)
+6: very large fighter weapons (Ion Bolt, Light Graviton Beam)
+7: Raking fighter weapons
 9: fighter Matter weapons
 10: mostly special weapons that should be fired late
 
