@@ -232,7 +232,7 @@ class SWDirectWeapon extends Pulse{
 		parent::setSystemDataWindow($turn);
 			$this->data["Special"] = 'Burst mode: -1..1 +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
 			$this->data["Special"] .= '<br>Minimum of 1 pulse.';
-			$this->data["Special"] .= '<br>Alternate firing mode: Salvo: single shot with increased damage (all weapons in battery fire together instead of sequentially).';
+			$this->data["Special"] .= '<br>Alternate firing mode: Salvo: single shot with increased damage but lowered FC (all weapons in battery fire together instead of sequentially).';
         }
 	
     
