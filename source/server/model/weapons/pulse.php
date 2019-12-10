@@ -490,6 +490,7 @@ class QuadPulsar extends Pulse{
 	    
 	    //temporary private variables
 	    private $multiplied = false;
+	    private $alreadyIntercepted = array();
 	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
@@ -530,7 +531,28 @@ class QuadPulsar extends Pulse{
 		}
 	}
         
+	    /*return 0 if given fire order was already intercepted by this weapon - this should prevent such assignment*/
+	public function getInterceptionMod($gamedata, $intercepted)
+	{
+		$alreadyIntercepted = false;
+		$interceptMod = 0;
+		foreach($alreadyIntercepted as $alreadyAssignedAgainst){
+			if ($alreadyAssignedAgainst->id == $intercepted->id){ //this fire order was already intercepted by this weapon, this Scattergun cannot do so again
+				$alreadyIntercepted = true;
+				break;//foreach
+			}
+		}
+		if(!$alreadyIntercepted) $interceptMod = parent::getInterceptionMod($gamedata, $intercepted);
+		return $interceptMod;
+	}//endof  getInterceptionMod
         
+	//on weapon being ordered to intercept - note which shot (fireorder, actually) was intercepted!
+	public function fireDefensively($gamedata, $interceptedWeapon)
+	{
+		parent::fireDefensively($gamedata, $interceptedWeapon);
+		$this->alreadyIntercepted[] = $interceptedWeapon;
+	}	    
+	    
         public function getDamage($fireOrder){
             return Dice::d(6,2)+1; //2d6+1
         }
@@ -545,71 +567,7 @@ class QuadPulsar extends Pulse{
         }
     }
 
-/* original incarnation - turned out to be way too potent
-    class ScatterGun extends Pulse
-    {
-	    //should do d6 SEPARATE shots, each of which may only intercept different incoming shot
-	    //due to technical reasons I simplify this - just Pulse shot with d6 pulses
-        public $name = "scatterGun";
-        public $displayName = "Scattergun";
-        public $iconPath = "scatterGun.png";
-        public $animation = "trail";
-        public $trailLength = 13;
-        public $animationWidth = 4;
-        public $projectilespeed = 20;
-        public $animationExplosionScale = 0.15;
-        public $animationColor =  array(175, 225, 175);
-        public $trailColor = array(110, 225, 110);
-        public $rof = 2;
-	    
-        public $loadingtime = 1;
-        public $normalload = 1;
-	    
-        public $priority = 3; //very light weapon
-	    
-        public $intercept = 4; //should be 2 per shot, I change this to flat 4 - much weaker but can strongly combine vs one shot!
-	    
-        public $rangePenalty = 2;
-        public $fireControl = array(5, 2, 0); // fighters, <mediums, <capitals
-	    
-	    public $damageType = "Pulse"; 
-	    public $weaponClass = "Particle"; 
-	
-	//for Pulse mode
-	public $grouping = 2500; //NO GROUPING BONUS
-	public $maxpulses = 6;	
-	protected $useDie = 6; //die used for base number of hits
-	    
-	    
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
-		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-		if ( $maxhealth == 0 ){
-		    $maxhealth = 8;
-		}
-		if ( $powerReq == 0 ){
-		    $powerReq = 3;
-		}		
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-        
-	    
-        
-        public function getDamage($fireOrder){
-            return Dice::d(6,2)+1; //2d6+1
-        }
- 
-        public function setMinDamage()
-        {
-            $this->minDamage = 3;
-        }
-        public function setMaxDamage()
-        {
-            $this->maxDamage = 13 ;
-        }
- 
-    }
-*/
+
 
     class BlastCannonFamily extends Pulse{
 	/*core for all Blast Cannon family weapons*/
