@@ -281,7 +281,7 @@ class SWDirectWeapon extends Pulse{
 			$this->changeFiringMode($i);
 			$this->setMinDamage(); $this->minDamageArray[$i] = $this->minDamage;
 			$this->setMaxDamage(); $this->maxDamageArray[$i] = $this->maxDamage;	
-			if (!isset($this->priorityAFArray[$i]){ //if AF priority for this mode is not set - do set it!
+			if (!isset($this->priorityAFArray[$i])){ //if AF priority for this mode is not set - do set it!
 				$this->priorityAF = 0; //so setPriorityAF works correctly
 				$this->setPriorityAF(); 
 				$this->priorityAFArray[$i] = $this->priorityAF;
