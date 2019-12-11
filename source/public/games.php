@@ -82,7 +82,12 @@ if (isset($_SESSION["user"])) {
 <br><b>Tiebreaker added</b> - no more ties for standard movement games (they are now being resolved immediately after rolling Initiative).
 <br><b>Long-recharge weapons can be enabled for interception</b> - because defensive Medium Pulses might make a difference!
 <br><b>Turn delay calculation reworked</b> - this should solve problems with turn delay appearing out of the blue after accelerating.
-
+<br><b>Scattergun - it's now scattering properly, with bells and whistles :)
+<br><b>Fleet checker</b> - now recognizing ultralight fighters and their hangar requirements
+<br><b>Fleet checker again</b> - ships requiring hangar berthing now are not restricted by "total ships on a hull" limit
+<br><b>Fleet selection screen</b> - fighter price is now displayed per craft, in addition to per 6 craft 
+        
+        
 <br>
 <!--        
         The latest update includes:
