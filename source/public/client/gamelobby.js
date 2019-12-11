@@ -810,7 +810,7 @@ window.gamedata = {
 					//ok, display...
 					shipDisplayName = this.prepareClassName(ship);
 					pointCostFull = ship.pointCost;
-					if (ship.flight) pointCostFull = pointCostFull + ' (' + pointCostFull/6 + ' ea.)';//for fighters: display price per craft, too!
+					if (ship.flight && (ship.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull/6 + ' ea.)';//for fighters: display price per craft, too!
 					h = $('<div oncontextmenu="return false;" class="ship"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+pointCostFull+'</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
                     $(".addship", h).on("click", this.buyShip.bind(this, ship.phpclass));
                     $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, ship.phpclass, faction));
@@ -822,7 +822,7 @@ window.gamedata = {
 						if(shipV.variantOf != ship.shipClass) continue;//that's not a variant of current base ship
 						shipDisplayName = this.prepareClassName(shipV);
 						pointCostFull = shipV.pointCost;
-						if (shipV.flight) pointCostFull = pointCostFull + ' (' + pointCostFull/6 + ' ea.)';//for fighters: display price per craft, too!
+						if (shipV.flight && (shipV.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull/6 + ' ea.)';//for fighters: display price per craft, too!
 						h = $('<div oncontextmenu="return false;" class="ship"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+pointCostFull+'</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
                         $(".addship", h).on("click",  this.buyShip.bind(this, shipV.phpclass));
                         $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, shipV.phpclass, faction));
