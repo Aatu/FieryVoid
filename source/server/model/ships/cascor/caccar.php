@@ -4,7 +4,7 @@ class Caccar extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 198;
+        $this->pointCost = 33 *6;
         $this->faction = "Cascor";
         $this->phpclass = "Caccar";
         $this->shipClass = "Caccar Ultralight Fighters";
@@ -16,11 +16,14 @@ class Caccar extends FighterFlight{
         $this->sideDefense = 5;
         $this->freethrust = 18;
         $this->offensivebonus = 6;
-        $this->jinkinglimit = 99;
+        $this->jinkinglimit = 99; //ultralight fighters no jinking limit technically
         $this->accelcost = 2;
         $this->turncost = 0.33;
         
-    	$this->iniativebonus = 100;
+		//$this->unitSize = 2;//Unlike larger fighters, ultralights are small enough to be packed into hangars at twice the normal rates.
+		///...but this is general rule, not Caccar-specific. Fleet checker itself will cover it.
+
+    	$this->iniativebonus = 20 *5;//ultralight fighter base should be 22, but apparently Caccar designer decided otherwise (or forgot ;) )
         $this->populate();
     }
 

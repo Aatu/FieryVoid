@@ -12,8 +12,8 @@ window.ShipTooltipInitialOrdersMenu = function () {
     ShipTooltipInitialOrdersMenu.buttons = [
         { className: "addCCEW", condition: [isSelf, notFlight], action: addCCEW, info: "Add CCEW" }, 
         { className: "removeCCEW", condition: [isSelf, notFlight], action: removeCCEW, info: "Remove CCEW" }, 
-        { className: "addOEW", condition: [isEnemy], action: addOEW, info: "Add OEW" }, 
-        { className: "removeOEW", condition: [isEnemy], action: removeOEW, info: "Remove OEW" }, 
+        { className: "addOEW", condition: [isEnemy, sourceNotFlight], action: addOEW, info: "Add OEW" }, 
+        { className: "removeOEW", condition: [isEnemy, sourceNotFlight], action: removeOEW, info: "Remove OEW" }, 
         { className: "addDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(50), doesNotHaveBDEW], action: getAddOEW('DIST'), info: "Add DIST" }, 
         { className: "removeDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(50), doesNotHaveBDEW], action: getRemoveOEW('DIST'), info: "Remove DIST" }, 
         { className: "addSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SOEW'), info: "Add SOEW" }, 
@@ -155,6 +155,14 @@ window.ShipTooltipInitialOrdersMenu = function () {
 
     function notFlight() {
         return (!this.selectedShip || !this.selectedShip.flight) && (!this.targetedShip || !this.targetedShip.flight);
+    }
+	
+    function sourceNotFlight() {
+        return (!this.selectedShip || !this.selectedShip.flight);
+    }
+	
+    function targetNotFlight() {
+        return (!this.targetedShip || !this.targetedShip.flight);
     }
 
     function isInElintDistance(distance) {

@@ -7,7 +7,7 @@ class AlacanAtrimis extends BaseShip{
 	$this->pointCost = 525;
 	$this->faction = "Small Races";
         $this->phpclass = "AlacanAtrimis";
-        $this->imagePath = "img/ships/AbbaiKastona.png";
+        $this->imagePath = "img/ships/AlacanAtrimis.png";
         $this->shipClass = "Alacan Atrimis Cruiser";
         $this->shipSizeClass = 3;
 
