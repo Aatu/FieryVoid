@@ -214,6 +214,7 @@ spl_autoload_register(
                 'drakhpatrolship' => '/server/model/ships/drakh/drakhPatrolShip.php',
                 'drakhraidercontroller' => '/server/model/systems/baseSystems.php',
                 'drakhraiderflt' => '/server/model/ships/drakh/drakhRaiderFlt.php',
+                'drakhraideroldflt' => '/server/model/ships/drakh/drakhRaiderOldFlt.php', //to be deleted when games are finished
                 'drakhraidershf' => '/server/model/ships/drakh/drakhRaiderSHF.php',
                 'drakhscoutship' => '/server/model/ships/drakh/drakhScoutShip.php',
                 'drakhshuttle' => '/server/model/ships/drakh/drakhShuttle.php',

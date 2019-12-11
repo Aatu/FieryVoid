@@ -103,10 +103,12 @@ window.gamedata = {
 	    var totalHangarH = 0; //hangarspace for heavy fighters
 	    var totalHangarM = 0; //hangarspace for medium fighters
 	    var totalHangarL = 0; //hangarspace for light fighters
+	    var totalHangarXL = 0; //hangarspace for ultralight fighters
 	    var totalHangarOther = new Array( ); //other hangarspace
 	    var totalFtrH = 0;//total heavy fighters
 	    var totalFtrM = 0;//total medium fighters
 	    var totalFtrL = 0;//total light fighters
+	    var totalFtrXL = 0;//total ultralight fighters
 	    var totalFtrOther = new Array( );//total other small craft
 		var smallCraftUsed = new Array( );//small craft sizes that happen to be present, whether as hangar space or actual craft
 
@@ -131,6 +133,9 @@ window.gamedata = {
 			if (oHull.name == hull){
 				hullFound = true;
 				oHull.Total++;
+				if(lship.hangarRequired!=''){ //let's require sticking to hull limit if ANY ship of this hull requires it
+	            	oHull.hangarRequired = true;
+				}
 				switch(vLetter) {
 				    case 'Q':
 					oHull.Q++;
@@ -154,10 +159,13 @@ window.gamedata = {
 			}
 		}
 		if (hullFound == false){
-		    var nHull = {name:hull, Total: 1, Q:0, R: 0, U: 0, C: 0, X: 0, isFtr:false};
+		    var nHull = {name:hull, Total: 1, Q:0, R: 0, U: 0, C: 0, X: 0, isFtr:false, hangarRequired:false };
 	            if(lship.flight){
 	            	nHull.isFtr = lship.flight;
-		    }
+				}
+				if(lship.hangarRequired!=''){
+	            	nHull.hangarRequired = true;
+				}
 		    switch(vLetter) {
 			    case 'Q':
 				nHull.Q++;
@@ -190,8 +198,10 @@ window.gamedata = {
 					totalHangarH += amount;
 			    }else if(h=="medium"){ 
 					totalHangarM += amount;
-			    }else if(h=="light" || h=="ultralight"){ 
+			    }else if(h=="light"){ 
 					totalHangarL += amount;
+			    }else if(h=="ultralight"){ 
+					totalHangarXL += amount;
 			    }else{ //something other than fighters
 					var found = false;
 					for(var nh in totalHangarOther){ 					
@@ -225,7 +235,9 @@ window.gamedata = {
 			if (lship.hangarRequired != 'fighters' ) { //classify based on explicit info from craft
 				smallCraftSize = lship.hangarRequired;
 			}else{//classify depending on jinking limit...
-				if (lship.jinkinglimit>=10){
+				if (lship.jinkinglimit>=99){ //ultralight jinking limit is unlimited
+					smallCraftSize = 'ultralight';
+				}else if (lship.jinkinglimit>=10){
 					smallCraftSize = 'light';
 				}else if (lship.jinkinglimit>=8){
 					smallCraftSize = 'medium';
@@ -241,9 +253,11 @@ window.gamedata = {
 					totalFtrH += lship.flightSize;
 				}else if(smallCraftSize=="medium"){ 
 					totalFtrM += lship.flightSize;
-				}else if(smallCraftSize=="light" || smallCraftSize=="ultralight"){ 
+				}else if(smallCraftSize=="light"){ 
 					totalFtrL += lship.flightSize;
-				}else{ //something other than fighters
+				}else if(smallCraftSize=="ultralight"){ 
+					totalFtrXL += lship.flightSize;
+				}else{ //something other than standard fighters
 					var found = false;
 					for(var nh in totalFtrOther){ 					
 						if (totalFtrOther[nh][0] == smallCraftSize){//this is small craft type we're looking for!
@@ -389,7 +403,7 @@ window.gamedata = {
 		var currHull = shipTable[j];
 		checkResult += " <i>" + currHull.name + "</i><br>";			
 		checkResult +=  " - Total: " + currHull.Total;
-		if (!currHull.isFtr){ //fighter total is not limited
+		if ((!currHull.isFtr) && (!currHull.hangarRequired)){ //fighter total is not limited; also, let's not limit units requiring hangar slots! (this isn't in the rules but I think LCV logic demands it)
 		    	checkResult +=  " (allowed " +limitPerHull+ ")";
 			if (currHull.Total>limitPerHull ){
 				checkResult += " TOO MANY!";
@@ -453,45 +467,67 @@ window.gamedata = {
 	    }	    */
 	    
 	    //fighters!
-	    var totalHangarAvailable = totalHangarH+totalHangarM+totalHangarL;
+		//ultralights count as half a fighter when accounting for hangar space used - IF packed into something other than ultralight hangars...
+	    var totalHangarAvailable = totalHangarH+totalHangarM+totalHangarL+(totalHangarXL/2);
 	    var minFtrRequired = Math.ceil(totalHangarAvailable/2);
-	    var totalFtrPresent = totalFtrH+totalFtrM+totalFtrL;
+	    var totalFtrPresent = totalFtrH+totalFtrM+totalFtrL+(totalFtrXL/2);
 	    var totalFtrCurr = 0;
 	    var totalHangarCurr = 0;
 	    checkResult += "<br><b><u>Fighters:</u></b><br>";
 		checkResult +=  " - Total fighters: " + totalFtrPresent;
 	    checkResult +=  " (allowed between " +minFtrRequired+ " and " + totalHangarAvailable + ")";
+		if((totalFtrXL>0) || (totalHangarXL>0)){ //add disclaimer because sums will not add up straight
+			checkResult += " <i>(ultralights counted as half)</i>";
+		}
 		if (totalFtrPresent > totalHangarAvailable || totalFtrPresent < minFtrRequired){ //fighter total is not within limits
 			checkResult += " FAILURE!";
 			problemFound = true;
 		}else{
 			checkResult += " OK";
 		}
-		checkResult += "<br>";
-	    
-		totalFtrCurr = totalFtrH+totalFtrM;
-		totalHangarCurr = totalHangarH+totalHangarM;
-		checkResult +=  " - Medium/Heavy Fighters: " + totalFtrCurr;
-		checkResult +=  " (allowed up to " + totalHangarCurr + ")";
-		if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
-			checkResult += " TOO MANY!";
-			problemFound = true;
-		}else{
-			checkResult += " OK";
+		checkResult += "<br>";	    
+				
+		totalFtrCurr = totalFtrL+totalFtrM+totalFtrH;
+		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
+			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL;
+			checkResult +=  " - Light/Medium/Heavy Fighters: " + totalFtrCurr;
+			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
+			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
+				checkResult += " TOO MANY!";
+				problemFound = true;
+			}else{
+				checkResult += " OK";
+			}
+			checkResult += "<br>";
 		}
-		checkResult += "<br>";
+		
+		totalFtrCurr = totalFtrM+totalFtrH;
+		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
+			totalHangarCurr = totalHangarH+totalHangarM;
+			checkResult +=  " - Medium/Heavy Fighters: " + totalFtrCurr;
+			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
+			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
+				checkResult += " TOO MANY!";
+				problemFound = true;
+			}else{
+				checkResult += " OK";
+			}
+			checkResult += "<br>";
+		}
 	    
 		totalFtrCurr = totalFtrH;
-		totalHangarCurr = totalHangarH;
-		checkResult +=  " - Heavy Fighters: " + totalFtrCurr;
-	    	checkResult +=  " (allowed up to " + totalHangarCurr + ")";
-		if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
-			checkResult += " TOO MANY!";
-			problemFound = true;
-		}else{
-			checkResult += " OK";
+		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
+			totalHangarCurr = totalHangarH;
+			checkResult +=  " - Heavy Fighters: " + totalFtrCurr;
+				checkResult +=  " (allowed up to " + totalHangarCurr + ")";
+			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
+				checkResult += " TOO MANY!";
+				problemFound = true;
+			}else{
+				checkResult += " OK";
+			}
+			checkResult += "<br>";
 		}
-		checkResult += "<br>";
 	    
 		//make list of small craft in fleet contain only unique values...
 		var smallCraftUsedUnique = smallCraftUsed.filter(function(item, pos) {
@@ -746,6 +782,7 @@ window.gamedata = {
 			var shipV;
 			var shipDisplayName;
 			var shipList = jsonShips[faction];
+			var pointCostFull = '';
 			
 			//this.orderShipListOnName(shipList); //alphabetical sort
 			this.orderShipListOnPV(shipList); //perhaps more appropriate here, as alphabetical order will be shot to hell anyway
@@ -772,7 +809,9 @@ window.gamedata = {
 					if(ship.variantOf!='') continue;//check if it's not a variant, we're looking only for base designs here...
 					//ok, display...
 					shipDisplayName = this.prepareClassName(ship);
-					h = $('<div oncontextmenu="return false;" class="ship"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+ship.pointCost+'p</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
+					pointCostFull = ship.pointCost;
+					if (ship.flight) pointCostFull = pointCostFull + ' (' + pointCostFull/6 + ' ea.)';//for fighters: display price per craft, too!
+					h = $('<div oncontextmenu="return false;" class="ship"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+pointCostFull+'</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
                     $(".addship", h).on("click", this.buyShip.bind(this, ship.phpclass));
                     $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, ship.phpclass, faction));
                         
@@ -782,7 +821,9 @@ window.gamedata = {
 						shipV = shipList[indexV];
 						if(shipV.variantOf != ship.shipClass) continue;//that's not a variant of current base ship
 						shipDisplayName = this.prepareClassName(shipV);
-						h = $('<div oncontextmenu="return false;" class="ship"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+shipV.pointCost+'p</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
+						pointCostFull = shipV.pointCost;
+						if (shipV.flight) pointCostFull = pointCostFull + ' (' + pointCostFull/6 + ' ea.)';//for fighters: display price per craft, too!
+						h = $('<div oncontextmenu="return false;" class="ship"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+pointCostFull+'</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
                         $(".addship", h).on("click",  this.buyShip.bind(this, shipV.phpclass));
                         $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, shipV.phpclass, faction));
                         

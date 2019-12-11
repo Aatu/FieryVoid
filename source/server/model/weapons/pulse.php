@@ -459,7 +459,9 @@ class QuadPulsar extends Pulse{
     }
 
 
-/* new Scatter Pulsar incarnation - alike to Point Pulsar; drops random number of shots for a fixed 3 shots, drops 'cannot intercept same shot'*/
+/* new Scatter Pulsar - it was initially made as Pulse weapon, only later brought to correctness
+	number of shots is rolled after firing declaration (eg. after declaring offensive fire but before assigning interceptions)
+*/
     class ScatterGun extends Weapon //this is NOT a Pulse weapon, disregard Pulse-specific settings...
     {
 	public $name = "scatterGun";
@@ -472,7 +474,7 @@ class QuadPulsar extends Pulse{
         public $animationExplosionScale = 0.15;
         public $animationColor =  array(175, 225, 175);
         public $trailColor = array(110, 225, 110);
-	public $guns = 3; //always 3, completely separate (not Pulse!) shots
+	public $guns = 1; //multiplied to d6 at firing
 	     
         public $loadingtime = 1;
         public $normalload = 1;	    
@@ -486,25 +488,74 @@ class QuadPulsar extends Pulse{
 	    public $damageType = "Standard"; 
 	    public $weaponClass = "Particle"; 
 	    
+	    //temporary private variables
+	    private $multiplied = false;
+	    private $alreadyIntercepted = array();
+	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-		if ( $maxhealth == 0 ){
-		    $maxhealth = 8;
-		}
-		if ( $powerReq == 0 ){
-		    $powerReq = 3;
-		}	
+		if ( $maxhealth == 0 ) $maxhealth = 8;
+		if ( $powerReq == 0 ) $powerReq = 3;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
 	    
         public function setSystemDataWindow($turn){            
             parent::setSystemDataWindow($turn);		
-		$this->data["Special"] = "Fires fixed 3 shots (not d6), no special restrictions on interception.";
+		$this->data["Special"] = "Fires d6 separate shots (actual number rolled at firing resolution).";
+		$this->data["Special"] .= "<br>When fired defensively, a single Scattergun cannot engage the same incoming shot twice (even ballistic one).";
         }
+	    
+	//if fired offensively - make d6 attacks (copies of 1 existing); 
+	//if defensively - make weapon have d6 GUNS (would be temporary, but enough to assign multiple shots for interception)
+	public function beforeFiringOrderResolution($gamedata){
+		if($this->multiplied==true) return;//shots of this weapon are already multiplied
+		$this->multiplied = true;//shots WILL be multiplied in a moment, mark this
+		//is offensive fire declared?...
+		$offensiveShot = null;
+		$noOfShots = Dice::d(6,1); //actual number of shots for this turn
+
+		foreach($this->fireOrders as $fire){
+			if(($fire->type =='normal') && ($fire->turn == $gamedata->turn)) $offensiveShot = $fire;
+		}
+		if($offensiveShot!==null){ //offensive fire declared, multiply!
+			while($noOfShots > 1){ //first shot is already declared!
+				$multipliedFireOrder = new FireOrder( -1, $offensiveShot->type, $offensiveShot->shooterid, $offensiveShot->targetid,
+					$offensiveShot->weaponid, $offensiveShot->calledid, $offensiveShot->turn, $offensiveShot->firingMode,
+					0, 0, 1, 0, 0, null, null
+				);
+				$multipliedFireOrder->addToDB = true;
+				$this->fireOrders[] = $multipliedFireOrder;
+				$noOfShots--;	      
+			}
+		}else{//offensive fire NOT declared, multiply guns for interception!
+			$this->guns = $noOfShots; //d6 intercept shots
+		}
+	} //endof function beforeFiringOrderResolution
         
+	    /*return 0 if given fire order was already intercepted by this weapon - this should prevent such assignment*/
+	public function getInterceptionMod($gamedata, $intercepted)
+	{
+		$wasIntercepted = false;
+		$interceptMod = 0;
+		foreach($this->alreadyIntercepted as $alreadyAssignedAgainst){
+			if ($alreadyAssignedAgainst->id == $intercepted->id){ //this fire order was already intercepted by this weapon, this Scattergun cannot do so again
+				$wasIntercepted = true;
+				break;//foreach
+			}
+		}
+		if(!$wasIntercepted) $interceptMod = parent::getInterceptionMod($gamedata, $intercepted);
+		return $interceptMod;
+	}//endof  getInterceptionMod
         
+	//on weapon being ordered to intercept - note which shot (fireorder, actually) was intercepted!
+	public function fireDefensively($gamedata, $interceptedWeapon)
+	{
+		parent::fireDefensively($gamedata, $interceptedWeapon);
+		$this->alreadyIntercepted[] = $interceptedWeapon;
+	}	    
+	    
         public function getDamage($fireOrder){
             return Dice::d(6,2)+1; //2d6+1
         }
@@ -519,71 +570,7 @@ class QuadPulsar extends Pulse{
         }
     }
 
-/* original incarnation - turned out to be way too potent
-    class ScatterGun extends Pulse
-    {
-	    //should do d6 SEPARATE shots, each of which may only intercept different incoming shot
-	    //due to technical reasons I simplify this - just Pulse shot with d6 pulses
-        public $name = "scatterGun";
-        public $displayName = "Scattergun";
-        public $iconPath = "scatterGun.png";
-        public $animation = "trail";
-        public $trailLength = 13;
-        public $animationWidth = 4;
-        public $projectilespeed = 20;
-        public $animationExplosionScale = 0.15;
-        public $animationColor =  array(175, 225, 175);
-        public $trailColor = array(110, 225, 110);
-        public $rof = 2;
-	    
-        public $loadingtime = 1;
-        public $normalload = 1;
-	    
-        public $priority = 3; //very light weapon
-	    
-        public $intercept = 4; //should be 2 per shot, I change this to flat 4 - much weaker but can strongly combine vs one shot!
-	    
-        public $rangePenalty = 2;
-        public $fireControl = array(5, 2, 0); // fighters, <mediums, <capitals
-	    
-	    public $damageType = "Pulse"; 
-	    public $weaponClass = "Particle"; 
-	
-	//for Pulse mode
-	public $grouping = 2500; //NO GROUPING BONUS
-	public $maxpulses = 6;	
-	protected $useDie = 6; //die used for base number of hits
-	    
-	    
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
-		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-		if ( $maxhealth == 0 ){
-		    $maxhealth = 8;
-		}
-		if ( $powerReq == 0 ){
-		    $powerReq = 3;
-		}		
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-        
-	    
-        
-        public function getDamage($fireOrder){
-            return Dice::d(6,2)+1; //2d6+1
-        }
- 
-        public function setMinDamage()
-        {
-            $this->minDamage = 3;
-        }
-        public function setMaxDamage()
-        {
-            $this->maxDamage = 13 ;
-        }
- 
-    }
-*/
+
 
     class BlastCannonFamily extends Pulse{
 	/*core for all Blast Cannon family weapons*/

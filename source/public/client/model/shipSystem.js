@@ -114,7 +114,7 @@ Weapon.prototype.changeFiringMode = function () {
 	if (!mathlib.arrayIsEmpty(this.rangeDamagePenaltyArray)) this.rangeDamagePenalty = this.rangeDamagePenaltyArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.rangePenaltyArray)) {
 		this.rangePenalty = this.rangePenaltyArray[this.firingMode];
-		this.data["Range penalty"] = this.rangePenalty + " per hex";
+		this.data["Range penalty"] = this.rangePenalty*5 + " per hex"; //converted to percentage system
 	}
 	if (!mathlib.arrayIsEmpty(this.rangeArray)) {
 		this.range = this.rangeArray[this.firingMode];
@@ -142,7 +142,10 @@ Weapon.prototype.changeFiringMode = function () {
 	}
 	if (!mathlib.arrayIsEmpty(this.defaultShotsArray)) this.defaultShots = this.defaultShotsArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.groupingArray)) this.grouping = this.groupingArray[this.firingMode];
-	if (!mathlib.arrayIsEmpty(this.gunsArray)) this.guns = this.gunsArray[this.firingMode];
+	if (!mathlib.arrayIsEmpty(this.gunsArray)){
+		this.guns = this.gunsArray[this.firingMode];
+		this.data["Number of guns"] = this.guns;
+	}
 
 	//firing animation related...
 	if (!mathlib.arrayIsEmpty(this.animationArray)) this.animation = this.animationArray[this.firingMode];
