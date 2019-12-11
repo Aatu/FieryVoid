@@ -1239,7 +1239,7 @@ class customHeavyPolarityPulsar extends Pulse{
 
 
 
-/*Drakh fighter weapon - intended to have concentrated antifighter mode!*/
+/*Drakh fighter weapon - basic mode fast-firing antifigher, alternate concentrated antiship!*/
     class customLtPhaseDisruptor extends Weapon{
         public $trailColor = array(255, 170, 10);
         public $name = "customLtPhaseDisruptor";
@@ -1262,23 +1262,61 @@ class customHeavyPolarityPulsar extends Pulse{
         
         public $damageType = "Standard"; 
         public $weaponClass = "Molecular"; 
+		
+		public $firingModes = array(1=>'Split', 2=>'Concentrated');
+		public $damageTypeArray = array(1=>'Standard', 2=>'Standard'); 
+		public $gunsArray = array(1=>3, 2=>1);
+        public $fireControlArray = array( 1=>array(0, 0, 0), 2=>array(-3,0,0) ); // fighters, <mediums, <capitals 
+        public $rangePenaltyArray = array(1=>2, 2=>1.5); //-2/hex and -3/2 hexes
+	    public $priorityArray = array(1=>4, 2=>6);
+		
 	    
         
         function __construct($startArc, $endArc){
-	    $this->isLinked = false; //shots are separate, not linked! 
+			$this->isLinked = false; //shots are separate, not linked! 
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 	
 	
         public function setSystemDataWindow($turn){
-            $this->data["Special"] = "Shots are NOT linked";
             parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Primary mode of fire: 3 shots, 2d6 damage, -10/hex (antifighter)";
+            $this->data["Special"] .= "<br> alternate: 1 shot, 3d6+2 damage, -7.5/hex (antiship)";
         }
 	
 	    
-        public function getDamage($fireOrder){        return Dice::d(6,2);   }
-        public function setMinDamage(){     $this->minDamage = 2 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+        public function getDamage($fireOrder){
+			switch($this->firingMode){
+				case 1:
+					return Dice::d(6, 2); //Antifighter
+					break;
+				case 2:
+					return Dice::d(6, 3)+2; //Antiship
+					break;
+			}
+		}
+        public function setMinDamage(){ 
+			switch($this->firingMode){
+				case 1:
+					$this->minDamage = 2; //Antifighter
+					break;
+				case 2:
+					$this->minDamage = 5; //Antiship
+					break;	
+			}
+			$this->minDamageArray[$this->firingMode] = $this->minDamage;
+		}
+        public function setMaxDamage(){
+			switch($this->firingMode){
+				case 1:
+					$this->maxDamage = 12; //Antifighter
+					break;
+				case 2:
+					$this->maxDamage = 20; //Antiship
+					break;	
+			}
+			$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+		}
     } //endof class customLtPhaseDisruptor
 
 
@@ -1317,7 +1355,7 @@ class customHeavyPolarityPulsar extends Pulse{
 	
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "Shots are NOT linked";
+            //$this->data["Special"] = "Shots are NOT linked"; //not needed
         }
 	
 	    

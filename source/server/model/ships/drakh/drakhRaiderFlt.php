@@ -49,13 +49,6 @@ class DrakhRaiderFlt extends FighterFlight{
 		$ltDistuptor = new customLtPhaseDisruptor(330, 30);
 		$fighter->addFrontSystem($ltDistuptor);
 		
-		$CombPhaseDisruptor = new LightGravitonBeam(330, 30, 0); //intended as Combined mode for LtPhaseDisruptor main weapon
-		$CombPhaseDisruptor->displayName = "Combined Phase Disruptor";
- 		$CombPhaseDisruptor->exclusive = true;
-		//and switch icon too...
-		$CombPhaseDisruptor->iconPath = "LtPhaseDisruptor.png";
-		$CombPhaseDisruptor->weaponClass = 'Molecular';
-        	$fighter->addFrontSystem($CombPhaseDisruptor);
             
        		//Absorbtion Shield, 1 points
         	$fighter->addAftSystem(new AbsorbtionShield(0, 1, 0, 1, 0, 360));
