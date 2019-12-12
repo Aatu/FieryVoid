@@ -312,7 +312,7 @@ window.shipWindowManager = {
 
 		$(input).click(function () {
 			if (document.getElementById("outerArmourDiv" + ship.id) == null) {
-				shipWindowManager.createAdaptiveArmourGUI(ship);
+				//shipWindowManager.createAdaptiveArmourGUI(ship);
 			} else if (document.getElementById("outerArmourDiv" + ship.id).style.display == "none") {
 				document.getElementById("outerArmourDiv" + ship.id).style.display = "block";
 			}
@@ -320,12 +320,6 @@ window.shipWindowManager = {
 
 		$(belowIcon).append(input);
 
-		if (ship.adaptiveArmour) {
-			if (gamedata.gamephase == 1 && ship.userid == gamedata.thisplayer) {
-				input.className = "interceptButton";
-				input.className += " interceptEnabled";
-			}
-		}
 	    
         if(!ship.fighter){
             abilities.push("&nbsp;TC: " + ship.turncost + " TD: " + ship.turndelaycost  );
