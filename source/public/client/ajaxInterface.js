@@ -19,26 +19,6 @@ window.ajaxInterface = {
         });
     },
 
-    getAdaptiveArmour: function getAdaptiveArmour(id) {
-
-        var obj = {
-            gameid: gamedata.gameid,
-            shipid: id,
-            turn: gamedata.turn
-        };
-
-        $.ajax({
-            type: 'GET',
-            url: 'adaptiveArmour.php',
-            dataType: 'json',
-            data: obj,
-            success: ajaxInterface.postAdaptiveArmour,
-            error: ajaxInterface.errorAjax
-        });
-    },
-
-    postAdaptiveArmour: function postAdaptiveArmour(data) {
-    },
 
     react: function react() {
         alert("callback");
@@ -214,10 +194,6 @@ window.ajaxInterface = {
 
                 if (ship.flight) {
                     newShip.flightSize = ship.flightSize;
-                }
-
-                if (ship.adaptiveArmour) {
-                    newShip.armourSettings = ship.armourSettings;
                 }
                 
                 //unit enhancements
