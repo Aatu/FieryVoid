@@ -172,16 +172,6 @@ class DBManager
 	} //endof function submitEnhancement
 	
 
-    public function submitAdaptiveArmour($gameid, $shipid)
-    {
-
-        $sql = "INSERT INTO `B5CGM`.`tac_adaptivearmour` (gameid, shipid, particlepoints, particlealloc, laserpoints, laseralloc, molecularpoints, molecularalloc, matterpoints, matteralloc, plasmapoints, plasmaalloc, electromagneticpoints, electromagneticalloc, antimatterpoints, antimatteralloc, ionpoints, ionalloc, graviticpoints, graviticalloc, ballisticpoints, ballisticalloc)
-            VALUES ($gameid, $shipid, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)";
-
-        $id = $this->insert($sql);
-
-    }
-
     public function submitFlightSize($gameid, $shipid, $flightSize)
     {
         $sql = "INSERT INTO `B5CGM`.`tac_flightsize` (gameid, shipid, flightsize)
@@ -656,67 +646,6 @@ class DBManager
     }
 
 
-    public function submitDamagesForAdaptiveArmour($gameid, $turn, $damages)
-    {
-        //debug::log("___submitDamagesForAdaptiveArmour___");
-        $obj = array();
-        $id;
-
-
-        usort($damages,
-            function ($a, $b) {
-                if ($a->fireorderid !== $b->fireorderid) {
-                    return $a->fireorderid - $b->fireorderid;
-                }
-            }
-        );
-
-
-        foreach ($damages as $damage) {
-            if (isset($id)) {
-                if ($id == $damage->fireorderid) {
-                    //debug::log("fireorder id ".$damage->fireorderid." == id ".$id.", continue ");
-                    continue;
-                }
-            }
-
-            if (isset($obj[$damage->damageclass])) {
-                $obj[$damage->damageclass] += 1;
-                //debug::log($obj[$damage->damageclass]." + 1");
-            } else {
-                $obj[$damage->damageclass] = 1;
-                //debug::log("INIT: ".$obj[$damage->damageclass]." = 1");
-            }
-
-            $id = $damage->fireorderid;
-            //debug::log("setting id to ".$id);
-        }
-
-
-        foreach ($obj as $key => $value) {
-            if ($key != "pulse") {
-                if (is_string($key) && strlen($key) > 2) {
-                    //debug::log($key." => ".$value);
-
-                    try {
-                        $sql = "
-                        UPDATE `B5CGM`.`tac_adaptivearmour` 
-                        SET `" . $key . "points` = `" . $key . "points` + $value 
-                        WHERE gameid = '" . $gameid . "' 
-                        AND shipid ='" . $shipid = $damage->shipid . "'";
-
-                        //debug::log($sql);
-
-                        $this->update($sql);
-                    } catch (Exception $e) {
-                        throw $e;
-                    }
-                }
-            } else {
-                //debug::log("PULSE");
-            }
-        }
-    }
 
     public function submitIniative($gameid, $turn, $ships)
     {
