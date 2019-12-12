@@ -22,15 +22,6 @@ class FireGamePhase implements Phase
 
         $dbManager->submitDamages($servergamedata->id, $servergamedata->turn, $servergamedata->getNewDamages());
 
-        // check if adaptive Armour events did happen and submit
-        $damagesAA = $servergamedata->getNewDamagesForAA();
-
-        if ($damagesAA){
-            foreach ($damagesAA as $entry){
-                $dbManager->submitDamagesForAdaptiveArmour($servergamedata->id, $servergamedata->turn, $entry);
-            }
-        }
-
         // submit criticals
         $dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
         $dbManager->setPlayersWaitingStatusInGame($servergamedata->id, false);
