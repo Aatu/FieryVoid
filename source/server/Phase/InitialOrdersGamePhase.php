@@ -53,12 +53,6 @@ class InitialOrdersGamePhase implements Phase
         }
 
 
-        foreach ($ships as $ship){
-            if ($ship instanceof WhiteStar){
-                $dbManager->updateAdaptiveArmour($gameData->id, $ship->id, $ship->armourSettings);
-            }
-        }
-
         $gd = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id); //MJS: is it really necessary? $gd is created a few lines above in the same manner... leaving for now
 
 
