@@ -1177,10 +1177,13 @@ spl_autoload_register(
                 'caltus' => '/server/model/ships/cascor/caltus.php',
                 'tiqincc' => '/server/model/ships/cascor/tiqincc.php',    
 		    
-				//new batch				
+		//new batch				
                 'microsat' => '/server/model/ships/FighterFlight.php',
                 'dovarum' => '/server/model/ships/usuuth/dovarum.php',
                 'genericmicrosat' => '/server/model/ships/civilians/genericMicroSat.php',
+		    
+		//AdaptiveArmor rework		    
+                'whitestarold' => '/server/model/ships/minbari/whitestarOld.php',
 		    
 		    
 		    
