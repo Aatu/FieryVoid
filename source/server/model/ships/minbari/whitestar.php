@@ -13,9 +13,6 @@ class WhiteStar extends MediumShip{
         $this->canvasSize = 100;
         $this->gravitic = true;
         $this->limited = 33;
-        $this->adaptiveArmour = true;
-        $this->adaptiveArmourLimits = array(3, 1);
-        $this->armourSettings = array();
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
         $this->turncost = 0.33;
