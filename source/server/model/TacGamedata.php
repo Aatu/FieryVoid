@@ -286,28 +286,7 @@ class TacGamedata {
     
     }
 
-    public function getNewDamagesForAA(){
-        $list = array();
-        
-        foreach ($this->ships as $ship){
-            if (isset($ship->adaptiveArmour)){
-                $entry = array();
-
-                foreach($ship->systems as $system){
-                    foreach($system->damage as $damage){
-                        if ($damage->updated == true){
-                            $entry[] = $damage;
-                        }
-                    }
-                }  
-
-                $list[] = $entry;                     
-            }
-        }
-        
-        return $list;    
-    }
-    
+	
 
 
     public function addDamageEntry($damage){
