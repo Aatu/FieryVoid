@@ -76,7 +76,7 @@ class Deliverer extends BaseShip{
         $this->hitChart = array(
         		0=> array(
         				8 => "Structure",
-					9 => "Cargo",
+					9 => "Cargo Bay",
         				11 => "Jump Engine",
         				14 => "Scanner",
         				16 => "Engine",
