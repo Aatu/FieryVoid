@@ -552,14 +552,16 @@ window.gamedata = {
 			checkResult +=  " - " + scSize + ": " + totalFtrCurr;
 			if (scSize != 'Fighter Squadrons' ){ //standard
 				checkResult +=  " (allowed up to " + totalHangarCurr + ")";
-			}else{ //Fighter Squadrons get treated as fighter - eg. half are required
-				checkResult +=  " (allowed between " + totalHangarCurr/2 + " and " + totalHangarCurr + ")";
+			}else{ //Fighter Squadrons get treated as fighters - eg. half are required
+				var halfH = totalHangarCurr/2;
+				checkResult +=  " (allowed between " + halfH + " and " + totalHangarCurr + ")";
 			}
 			if (totalFtrCurr > totalHangarCurr){ //small craft total is not within limits
 				checkResult += " TOO MANY!";
 				problemFound = true;
 			}else if ((scSize == 'Fighter Squadrons') && (totalFtrCurr < totalHangarCurr/2)){
-				
+				checkResult += " FAILURE!";
+				problemFound = true;
 			}else{
 				checkResult += " OK";
 			}
