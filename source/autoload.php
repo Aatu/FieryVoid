@@ -1014,6 +1014,7 @@ spl_autoload_register(
 		    
                 'wlcemperordn2090' => '/server/model/ships/customs/wlcEmperorDN2090.php',
                 'wlcoptinehc' => '/server/model/ships/customs/wlcOptineHC.php',
+                'wlcoptinehcu' => '/server/model/ships/customs/wlcOptineHCU.php',
                 'wlctigata' => '/server/model/ships/minbari/wlcTigata.php',
                 'wlctinshara' => '/server/model/ships/minbari/wlcTinshara.php',
                 'wlctishat1950' => '/server/model/ships/minbari/wlcTishat1950.php',
