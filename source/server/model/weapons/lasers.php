@@ -429,6 +429,7 @@
         public $animationWidth = 25;
         public $trailLength = 25;
         public $priority = 6; //heavy Standard weapons
+	public $noPrimaryHits = true;//cannot penetrate to PRIMARY on outer hits
 
         public $loadingtime = 3;
 
@@ -471,6 +472,7 @@
         public $animationWidth = 30;
         public $trailLength = 30;
         public $priority = 6; //heavy Standard weapons
+	public $noPrimaryHits = true;//cannot penetrate to PRIMARY on outer hits
 
         public $loadingtime = 3;
 
