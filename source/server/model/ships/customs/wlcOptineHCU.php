@@ -3,7 +3,7 @@ class wlcOptineHCU extends BaseShip{
     
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
-		$this->pointCost = 785;
+		$this->pointCost = 850;
 		$this->faction = "Centauri (WotCR)";
 		$this->phpclass = "wlcOptineHCU";
 		$this->imagePath = "img/ships/optine.png";
