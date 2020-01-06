@@ -408,7 +408,7 @@ CREATE TABLE `tac_shipmovement` (
 DROP TABLE IF EXISTS `tac_individual_notes`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `tac_shipmovement` (
+CREATE TABLE `tac_individual_notes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `gameid` int(11) NOT NULL DEFAULT '0',
   `turn` int(11) NOT NULL DEFAULT '1',
@@ -416,7 +416,7 @@ CREATE TABLE `tac_shipmovement` (
   `shipid` int(11) NOT NULL,
   `systemid` int(11) NOT NULL,  
   `notekey` varchar(40) DEFAULT '',
-  `notekey2` varchar(40) DEFAULT '',
+  `notekey_human` varchar(40) DEFAULT '',
   `notevalue` varchar(100) DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `gameid` (`gameid`)

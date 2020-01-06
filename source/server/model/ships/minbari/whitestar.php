@@ -34,6 +34,10 @@ class WhiteStar extends MediumShip{
         $this->addPrimarySystem(new EMShield(3, 6, 0, 2, 0, 180));
         $this->addPrimarySystem(new TractorBeam(4, 4, 0, 0));
         $this->addPrimarySystem(new Jammer(4, 8, 7));
+		
+		$AAC = $this->createAdaptiveArmorController(6, 4, 2); //$AAtotal, $AApertype, $AApreallocated
+		$this->addPrimarySystem( $AAC );
+		
 
         $this->addFrontSystem(new MolecularPulsar(4, 8, 2, 300, 60));
         $this->addFrontSystem(new MolecularPulsar(4, 8, 2, 300, 60));

@@ -13,6 +13,14 @@ class DeploymentGamePhase implements Phase
     public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
     {
         $moves = $this->validateDeployment($gameData, $ships);
+		
+		foreach ($gameData->ships as $currShip){ //generate system-specific information if necessary
+			$currShip->generateIndividualNotes($gameData);
+		}		
+		foreach ($gameData->ships as $currShip){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!
+			$currShip->saveIndividualNotes($dbManager);
+		}
+		
         foreach ($moves as $shipid=>$move)
         {
             $dbManager->insertMovement($gameData->id, $shipid, $move);

@@ -597,10 +597,6 @@ class Manager{
                 $ship->populate();
             }
 
-            if ($ship instanceof WhiteStar){
-                $ship->armourSettings = $value["armourSettings"];
-            }
-
 
 	    //unit enhancements
 		$ship->enhancementOptions = $value["enhancementOptions"];

@@ -73,10 +73,9 @@ class BaseShip {
 	
 	public $hangarRequired = ''; //usually empty, but some ships (LCVs primarily) do require hangar space!	
 	public $unitSize = 1; //typically ships are berthed in dedicated space, 1 per slot - but other arrangements are certainly possible.
+	
+	protected $adaptiveArmorController = null; //Adaptive Armor Controller object (if present)
 	    
-	    public function getAdvancedArmor(){
-		return $this->advancedArmor;    
-	    }
 	    
         function __construct($id, $userid, $name, $slot){
             $this->id = (int)$id;
@@ -85,6 +84,18 @@ class BaseShip {
             $this->slot = $slot;
 			$this->fillLocationsGUI();//so called shots work properly
         }
+		
+		public function getAdvancedArmor(){
+			return $this->advancedArmor;    
+	    }
+		
+		public function getAdaptiveArmorController(){
+			return $this->adaptiveArmorController;    
+		}
+		public function createAdaptiveArmorController($AAtotal, $AApertype, $AApreallocated){ //$AAtotal, $AApertype, $AApreallocated
+			$this->adaptiveArmorController = new AdaptiveArmorController($AAtotal, $AApertype, $AApreallocated); 
+			return $this->getAdaptiveArmorController();
+		}
         
         public function getCommonIniModifiers( $gamedata ){ //common Initiative modifiers: speed, criticals
             $mod = 0;
@@ -199,6 +210,28 @@ class BaseShip {
         //    debug::log($this->phpclass."- bonus: ".$mod);
         return $this->iniativebonus + $mod*5;
     }
+	
+	/*saves individual notes systems might have generated*/
+	public function saveIndividualNotes(DBManager $dbManager) {
+		foreach ($this->systems as $system){
+            $system->saveIndividualNotes($dbManager);
+        }
+	}
+	
+	/*calls systems to generate notes if necessary*/
+	public function generateIndividualNotes($gamedata) {
+		foreach ($this->systems as $system){
+            $system->generateIndividualNotes($gamedata);
+        }
+	}
+	
+	
+	/*calls systems to act on notes just loaded if necessary*/
+	public function onIndividualNotesLoaded($gamedata) {
+		foreach ($this->systems as $system){
+            $system->onIndividualNotesLoaded($gamedata);
+        }
+	}
 
     private function doYoluInitiativeBonus($gamedata){
         foreach($gamedata->ships as $ship){
@@ -234,8 +267,8 @@ class BaseShip {
 
     public function onConstructed($turn, $phase, $gamedata)
     {	    
-	//enhancements (in game, NOT fleet selection!)
-	Enhancements::setEnhancements($this);
+		//enhancements (in game, NOT fleet selection!)
+		Enhancements::setEnhancements($this);
 	    
         foreach ($this->systems as $system){
             $system->onConstructed($this, $turn, $phase);

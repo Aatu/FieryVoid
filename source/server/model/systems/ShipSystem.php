@@ -38,6 +38,8 @@ class ShipSystem {
     protected $parentSystem = null;
     protected $unit = null; //unit on which system is mounted
 	
+	protected $individualNotes = array();
+	
     
     function __construct($armour, $maxhealth, $powerReq, $output){
         $this->armour = $armour;
@@ -66,7 +68,6 @@ class ShipSystem {
     }
 
     public function onConstructed($ship, $turn, $phase){
-
         if($ship->getAdvancedArmor()==true){
             $this->advancedArmor = true;
         }
@@ -74,6 +75,26 @@ class ShipSystem {
         $this->effectCriticals();
         $this->destroyed = $this->isDestroyed();
     }
+	
+	/*saves individual notes (if any new ones exist) to database*/
+	public function saveIndividualNotes(DBManager $dbManager){ //loading exisiting notes is done in dbmanager->getSystemDataForShips()
+		foreach ($this->individualNotes as $currNote){
+			$dbManager->insertIndividualNote($currNote);//function itself will decide whether this note really needs saving
+		}
+	}
+	
+	/*generates individual notes (if necessary)
+	base version is empty, to be redefined by systems as necessary
+	*/
+	public function generateIndividualNotes($gamedata){	}	
+	
+	public function addIndividualNote($noteObject){
+		$this->individualNotes[] = $noteObject;
+	}
+	
+	/*act on notes just loaded - to be redefined by systems as necessary*/
+	public function onIndividualNotesLoaded($gamedata){}
+		
 	
     public function setUnit($unit){
 	$this->unit = $unit;    
@@ -115,27 +136,6 @@ class ShipSystem {
     }
     
     public function setDamage($damage){ //$damage object 
-	//let's try to reduce amount of data transferred - don't note every hit, just total damage and Destroyed status... at least for past turns!
-	    /* WORKS BUT NOT WITHOUT ISSUES< REVERTING TO ORIGINAL
-	$count = count($this->damage); 
-	$currTurn = TacGamedata::$currentTurn -1; //let's say current AND PREVIOUS turn damage will be fully transferred...
-	$currPhase = TacGamedata::$currentPhase;
-	if (($count == 0) || ($damage->turn >= $currTurn) || ($currPhase ==3) ) { //no entries yet, or damage is current, or phase = 3 (we're dealing damage atm)
-		$this->damage[] = $damage;
-	}else{ //modify existing entry... unless damage is from current turn!
-		foreach( $this->damage as $key=>$oldDmg ){
-			if($oldDmg->turn < $currTurn){
-				$oldDmg->damage += $damage->damage; //shields and armour absorbtion irrelevant
-				$oldDmg->armour += $damage->armour;
-				$oldDmg->shields += $damage->shields;
-				if ($damage->destroyed == true) $oldDmg->destroyed = true;
-				return; //nothing else to do
-			}	
-		}
-		$this->damage[] = $damage; //no eligible entry found! behave as usual
-	}
-	*/
-	//original code was just this:
         $this->damage[] = $damage;
     }
     
@@ -226,7 +226,7 @@ class ShipSystem {
 	}
 	    
 	$armour = max(0,$armour); //no less than 0, BEFORE adaptive armor kicks in!
-	    
+	    /* redone in a different way!
 	$activeAA = 0;
 	if (isset($target->adaptiveArmour)){
             if (isset($target->armourSettings[$dmgClass][1])){
@@ -234,6 +234,7 @@ class ShipSystem {
                 $armour += $activeAA;
             }
         }    
+		*/
 	return $armour;
     }
 	

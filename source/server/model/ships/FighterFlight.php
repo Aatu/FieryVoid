@@ -386,14 +386,21 @@ class FighterFlight extends BaseShip
 	$craftWithData = array();
 	foreach ($systems as $craft){
 		$dmgPotential = 0;
+		//actually vs fighters Raking degenerates into Standard, rake size is irrelevant!
+		/*
 		if ($weapon->damageType == "Raking"){
 			$dmgPotential = $weapon->raking; //potential = rake size	
 		}else{
+		*/
 			$dmgPotential = $weapon->maxDamage; //potential = maximum damage weapon can do	
-		}
+		//}
 		//modify by armor properties
 		$armor = $weapon->getSystemArmourStandard($this, $craft, $gamedata, $fire)+$weapon->getSystemArmourInvulnerable($this, $craft, $gamedata, $fire);
 		$dmgPotential = max(0, $dmgPotential-$armor);//never negative damage ;)
+		/*for linked weapons - multiply by number of shots!*/
+		if ($weapon->linked){
+			$dmgPotential = $dmgPotential*$weapon->shots;
+		}
 		$remainingHP = $craft->getRemainingHealth();
 		$damagedThisTurn = false;
 		foreach($craft->damage as $dmgEntry){

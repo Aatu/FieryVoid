@@ -33,7 +33,7 @@ class InitialOrdersGamePhase implements Phase
             foreach ($ship->systems as $system){
                 $powers = array_merge($powers, $system->power);
             }
-
+		
             $dbManager->submitPower($gameData->id, $gameData->turn, $powers);
         }
 
@@ -65,6 +65,13 @@ class InitialOrdersGamePhase implements Phase
                 throw new Exception("Failed to validate Ballistic firing orders");
             }
         }
+		
+		foreach ($gameData->ships as $currShip){ //generate system-specific information if necessary
+			$currShip->generateIndividualNotes($gameData);
+		}		
+		foreach ($gameData->ships as $currShip){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!
+			$currShip->saveIndividualNotes($dbManager);
+		}
 
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn);
         $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);

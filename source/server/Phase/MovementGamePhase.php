@@ -33,7 +33,6 @@ class MovementGamePhase implements Phase
 
         $activeShips = $gameData->getMyActiveShips();
         foreach ($ships as $ship) {
-
             $found = false;
             foreach ($activeShips as $activeShip) {
                 if ($ship->id === $activeShip->id) {
@@ -47,7 +46,6 @@ class MovementGamePhase implements Phase
             
             //TODO: Validate movement: Make sure that all ships of current player have moved and the moves are legal
             $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, $ship->movement);
-
         }
 
         if ($gameData->rules->hasRule("processMovement")) {

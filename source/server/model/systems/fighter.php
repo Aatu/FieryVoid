@@ -175,12 +175,13 @@
 	}
 	    
 	$armour = max(0,$armour); //no less than 0, BEFORE adaptive armor kicks in!
-	    
+	    /*redone in a different way
 	$activeAA = 0;
 	if (isset($target->adaptiveArmour)){
             if (isset($target->armourSettings[$dmgClass][1])) $activeAA = $target->armourSettings[$dmgClass][1];
         } 
 	$armour += $activeAA;
+	*/
 	return $armour;
     }
 

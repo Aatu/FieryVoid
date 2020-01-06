@@ -157,3 +157,10 @@ var ConnectionStrut = function(json, ship)
 }
 ConnectionStrut.prototype = Object.create( ShipSystem.prototype );
 ConnectionStrut.prototype.constructor = ConnectionStrut;
+
+var AdaptiveArmorController = function AdaptiveArmorController(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+AdaptiveArmorController.prototype = Object.create(ShipSystem.prototype);
+AdaptiveArmorController.prototype.constructor = AdaptiveArmorController;
+

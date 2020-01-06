@@ -1183,8 +1183,9 @@ spl_autoload_register(
                 'genericmicrosat' => '/server/model/ships/civilians/genericMicroSat.php',
 		    
 		//AdaptiveArmor rework		    
-                'whitestarold' => '/server/model/ships/minbari/whitestarOld.php',
-		    
+                'adaptivearmorcontroller' => '/server/model/systems/baseSystems.php',
+                'whitestarold' => '/server/model/ships/minbari/whitestarOld.php',		    
+                'individualnote' => '/server/model/BaseClasses.php',
 		    
 		    
 		//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
