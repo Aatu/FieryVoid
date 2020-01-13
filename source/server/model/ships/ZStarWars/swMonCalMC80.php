@@ -47,7 +47,7 @@ class swMonCalMC80 extends BaseShip{
 		
         $this->addFrontSystem(new Thruster(3, 20, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 20, 0, 4, 1));
-	$this->addFrontSystem(new SWRayShield(3,18,8,4,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addFrontSystem(new SWRayShield(3,18,8,4,300,60)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addFrontSystem(new SWMediumIon(3, 240, 120, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWMediumIon(3, 240, 120, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWHeavyTLaser(3, 270, 30, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
@@ -57,7 +57,7 @@ class swMonCalMC80 extends BaseShip{
         $this->addAftSystem(new Thruster(3, 20, 0, 4, 2));
 	$this->addAftSystem(new Thruster(3, 20, 0, 4, 2));
 	$this->addAftSystem(new Thruster(3, 20, 0, 4, 2));
- 	$this->addAftSystem(new SWRayShield(3,18,8,4,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+ 	$this->addAftSystem(new SWRayShield(3,18,8,4,120,240)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addAftSystem(new SWMediumIon(3, 60, 300, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWMediumIon(3, 60, 300, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWHeavyTLaser(3, 150, 270, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
