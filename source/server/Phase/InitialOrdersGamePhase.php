@@ -53,8 +53,8 @@ class InitialOrdersGamePhase implements Phase
         }
 
 
-        $gd = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id); //MJS: is it really necessary? $gd is created a few lines above in the same manner... leaving for now
-
+        $gd = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id); 
+		
 
         foreach ($ships as $ship){
             if ($ship->userid != $gameData->forPlayer) continue;
@@ -67,7 +67,7 @@ class InitialOrdersGamePhase implements Phase
         }
 		
 		foreach ($gameData->ships as $currShip){ //generate system-specific information if necessary
-			$currShip->generateIndividualNotes($gameData);
+			$currShip->generateIndividualNotes($gd);
 		}		
 		foreach ($gameData->ships as $currShip){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!
 			$currShip->saveIndividualNotes($dbManager);

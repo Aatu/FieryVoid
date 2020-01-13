@@ -878,7 +878,7 @@ class DBManager
 	*/
     public function insertIndividualNote($noteObject)
     {
-		if ($note->id > -1) return; //old note, do not insert
+		if ($noteObject->id > -1) return; //old note, do not insert
 
         try {
             $stmt = $this->connection->prepare(
@@ -893,14 +893,14 @@ class DBManager
             if ($stmt) {
 				$stmt->bind_param(
 					'iiiiisss',
-					$note->gameid,
-					$note->turn,
-					$note->phase,
-					$note->shipid,
-					$note->systemid,
-					$note->notekey,
-					$note->notekey_human,
-					$note->notevalue
+					$noteObject->gameid,
+					$noteObject->turn,
+					$noteObject->phase,
+					$noteObject->shipid,
+					$noteObject->systemid,
+					$noteObject->notekey,
+					$noteObject->notekey_human,
+					$noteObject->notevalue
 				);
 				$stmt->execute();
 			}

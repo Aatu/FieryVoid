@@ -1037,13 +1037,16 @@ class AdaptiveArmorController extends ShipSystem{
 
 	//marks damage class(-es) of weapon as existing in $allocatedAA and $availableAA tables
 	private function markWpnDmgClass(Weapon $weapon){
-		$dmgTypeArray = $weapon::getArrayCopy();
-		$dmgTypeArray[] = $weapon->damageType;
-		foreach($dmgTypeArray as $i=>$dmgType){
+		$weaponClassArray = array();
+		foreach($weapon->weaponClassArray as $weaponClass){
+			$weaponClassArray[] = $weaponClass;
+		}
+		$weaponClassArray[] = $weapon->weaponClass;
+		foreach($weaponClassArray as $weaponClass){
 			//check if already defined, if not - add to both tables
-			if (!isset($this->allocatedAA[$dmgType])){
-				$this->availableAA[$dmgType] = 0;
-				$this->allocatedAA[$dmgType] = 0;
+			if (!isset($this->allocatedAA[$weaponClass])){
+				$this->availableAA[$weaponClass] = 0;
+				$this->allocatedAA[$weaponClass] = 0;
 			}
 		}
 	}
@@ -1057,7 +1060,7 @@ class AdaptiveArmorController extends ShipSystem{
     public function generateIndividualNotes($gameData){
 		$ship = $this->getUnit();
 		switch($gameData->phase){
-				case 1: //deployment phase
+				case 0: //deployment phase
 					foreach($gameData->ships as $enemyUnit) if($enemyUnit->team != $ship->team){
 						foreach($enemyUnit->systems as $sys){
 							if($sys instanceOf Fighter){
@@ -1068,37 +1071,37 @@ class AdaptiveArmorController extends ShipSystem{
 									$this->markWpnDmgClass($sys);
 							}							
 						}				
-					}					
+					}
 					//AND PREPARE APPROPRIATE NOTES!						
 					//	'available;dmgType' public $availableAA = array(); //AA points available for allocation for given damage type
 					//	'set;dmgType' public $allocatedAA = array(); //AA points allocated for given damage type
-					foreach($this->availableAA as $dmgType=>$ptsAvailable){
+					foreach($this->availableAA as $weaponClass=>$ptsAvailable){
 						//	'available;dmgType' public $availableAA = array(); //AA points available for allocation for given damage type
 						//	'set;dmgType' public $allocatedAA = array(); //AA points allocated for given damage type
-						if (isset($this->allocatedAA[$dmgType])){
-							$ptsSet = $this->allocatedAA[$dmgType];
+						if (isset($this->allocatedAA[$weaponClass])){
+							$ptsSet = $this->allocatedAA[$weaponClass];
 						} else $ptsSet = 0;
-						$notekey = 'available' . $dmgType;
-						$noteHuman = 'Adaptive Armor points available (for dmg type)';
+						$notekey = 'available;' . $weaponClass;
+						$noteHuman = 'Adaptive Armor available';
 						$noteValue = $ptsAvailable;
 						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
-						$notekey = 'set' . $dmgType;
-						$noteHuman = 'Adaptive Armor points set (for dmg type)';
+						$notekey = 'set;' . $weaponClass;
+						$noteHuman = 'Adaptive Armor set';
 						$noteValue = $ptsSet;
 						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
 					}
-					break;
+				break;
 			
-				case 4: //firing phase
-					foreach($ship->systems as $system) foreach($system->damage as $dmg) if($dmg->turn==$gameData->turn){//damage suffered this turn
+				case 3: //firing phase
+					foreach($ship->systems as $system) foreach($system->damage as $dmg) if($dmg->updated == true)/*if($dmg->turn==$gameData->turn)*/{//damage suffered this turn
 						if($dmg->damage > $dmg->armour){ //actual damage was caused!
-							$dmgType = $dmg->damageclass;
-							if(!isset($this->availableAA[$dmgType])){ //this type of damage wasn't encountered yet!
-								$this->availableAA[$dmgType] = 0;
-								$this->allocatedAA[$dmgType] = 0;
+							$weaponClass = $dmg->damageclass;
+							if(!isset($this->availableAA[$weaponClass])){ //this type of damage wasn't encountered yet!
+								$this->availableAA[$weaponClass] = 0;
+								$this->allocatedAA[$weaponClass] = 0;
 							}
-							if($this->availableAA[$dmgType] < $this->AApertype){ //maximum not yet unlocked!
-								$this->availableAA[$dmgType]+=1;
+							if($this->availableAA[$weaponClass] < $this->AApertype){ //maximum not yet unlocked!
+								$this->availableAA[$weaponClass]+=1;
 							}
 						}
 					}
@@ -1106,23 +1109,25 @@ class AdaptiveArmorController extends ShipSystem{
 					//	'preallocatedUsed' public $AApreallocated_used = 0;	
 					$notekey = 'preallocatedUsed';
 					$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,'Adaptive Armor: preallocated points used',$this->AApreallocated_used);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
-					foreach($this->availableAA as $dmgType=>$ptsAvailable){
+					foreach($this->availableAA as $weaponClass=>$ptsAvailable){
 						//	'available;dmgType' public $availableAA = array(); //AA points available for allocation for given damage type
 						//	'set;dmgType' public $allocatedAA = array(); //AA points allocated for given damage type
-						if (isset($this->allocatedAA[$dmgType])){
-							$ptsSet = $this->allocatedAA[$dmgType];
+						if (isset($this->allocatedAA[$weaponClass])){
+							$ptsSet = $this->allocatedAA[$weaponClass];
 						} else $ptsSet = 0;
-						$notekey = 'available' . $dmgType;
-						$noteHuman = 'Adaptive Armor points available (for dmg type)';
+						$notekey = 'available;' . $weaponClass;
+						$noteHuman = 'Adaptive Armor available';
 						$noteValue = $ptsAvailable;
 						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+						/* AA is not SET here, so no need to mark it!
 						$notekey = 'set' . $dmgType;
-						$noteHuman = 'Adaptive Armor points set (for dmg type)';
+						$noteHuman = 'Adaptive Armor set (for dmg type)';
 						$noteValue = $ptsSet;
 						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+						*/
 					}
 					break;
-		}		
+		}
 	} //endof function generateIndividualNotes
 	
 	/*act on notes just loaded - to be redefined by systems as necessary
@@ -1133,13 +1138,13 @@ class AdaptiveArmorController extends ShipSystem{
 			$explodedKey = explode ( ';' , $currNote->notekey ) ;//split into array: [area;value] where area denotes action, value - damage type (typically) 
 			switch($explodedKey[0]){
 				case 'preallocatedUsed': //total number of preallocatable points that were actually preallocated
-					$this->AApreallocated_used = $currNote->value;
+					$this->AApreallocated_used = $currNote->notevalue;
 					break;
 				case 'available': //total number of points available for assignment for a given damage type
-					$this->availableAA[$explodedKey[1]] = $currNote->value;
+					$this->availableAA[$explodedKey[1]] = $currNote->notevalue;
 					break;
 				case 'set': //total number of points assigned for a given damage type
-					$this->allocatedAA[$explodedKey[1]] = $currNote->value;
+					$this->allocatedAA[$explodedKey[1]] = $currNote->notevalue;
 					break;				
 			}
 		}
@@ -1172,6 +1177,7 @@ class AdaptiveArmorController extends ShipSystem{
 	public function stripForJson(){
         $strippedSystem = parent::stripForJson();
         $strippedSystem->data = $this->data;
+		
         return $strippedSystem;
     }
 	

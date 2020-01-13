@@ -81,6 +81,8 @@ class ShipSystem {
 		foreach ($this->individualNotes as $currNote){
 			$dbManager->insertIndividualNote($currNote);//function itself will decide whether this note really needs saving
 		}
+		//...and delete them, after saving they serve no more function
+		$this->individualNotes = array();
 	}
 	
 	/*generates individual notes (if necessary)
@@ -93,7 +95,9 @@ class ShipSystem {
 	}
 	
 	/*act on notes just loaded - to be redefined by systems as necessary*/
-	public function onIndividualNotesLoaded($gamedata){}
+	public function onIndividualNotesLoaded($gamedata){
+		$this->individualNotes = array();//delete notes, after reaction on their load they serve no further purpose
+	}
 		
 	
     public function setUnit($unit){
