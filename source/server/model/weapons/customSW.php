@@ -1207,7 +1207,7 @@ class SWAntifighterConcussion extends SWBallisticWeapon{
         public $displayName = "Antifighter Missile";
         public $range = 9; //better than fighter-launched version - assume shipborne sensors can hand-off to the missile at greater range
 	public $distanceRange = 18;
-        public $loadingtime = 3;
+        public $loadingtime = 1;
 	public $priority = 3;
 	
 	//color etc from base ballistic class
