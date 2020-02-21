@@ -2174,7 +2174,7 @@ class DBManager
             );
             $this->executeGameDeleteStatement($stmt, $ids);
 		
-		//unit enhancements
+			//unit enhancements
             $stmt = $this->connection->prepare(
                 "DELETE FROM 
                     tac_enhancements

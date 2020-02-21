@@ -355,7 +355,8 @@
 	    
 	    public $noOverkill = true;
 	    
-	    public $priority = 8; 
+	    public $priority = 4;//equivalent of d6+4, due to Matter properties 
+		
 	    
 	    public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     	public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!  
@@ -387,10 +388,6 @@
         }
 
 
-        public function getDamage($fireOrder){
-            $dmg = Dice::d(6, 1);
-            return $dmg;
-       }
 
         public function setAmmo($firingMode, $amount){
             $this->ammunition = $amount;
@@ -404,6 +401,10 @@
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
         }
     
+        public function getDamage($fireOrder){
+            $dmg = Dice::d(6, 1);
+            return $dmg;
+        }
         public function setMinDamage(){     $this->minDamage = 1;      }
         public function setMaxDamage(){     $this->maxDamage = 6;      }
 
@@ -416,14 +417,14 @@
         public $displayName = "Matter Gun";  
 	    public $iconPath = 'pairedGatlingGun.png';
 	   
-	   public $priority = 8;
+		public $priority = 3; //equivalent of d6+2, due to Matter properties
 	  
         public function getDamage($fireOrder){ //d6-1, minimum 1
             $dmg = Dice::d(6, 1) -1;
-	    $dmg = max(1,$dmg);
+			$dmg = max(1,$dmg);
             return $dmg;
-       }
-	public function setMinDamage(){     $this->minDamage = 1;      }
+        }
+		public function setMinDamage(){     $this->minDamage = 1;      }
         public function setMaxDamage(){     $this->maxDamage = 5;      }
     }
 

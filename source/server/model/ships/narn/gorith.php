@@ -31,7 +31,7 @@ class Gorith extends FighterFlight{
 			
 			$armour = array(2, 2, 2, 2);
 			$fighter = new Fighter("gorith", $armour, 10, $this->id);
-			$fighter->displayName = "Gorith Medium Fighter";
+			$fighter->displayName = "Gorith";
 			$fighter->imagePath = "img/ships/gorith.png";
 			$fighter->iconPath = "img/ships/gorith_large.png";
 			

@@ -11,6 +11,7 @@
 		public $critData = array();
 		public $fighter = true;
 		public $systems = array();
+		protected $adaptiveArmorController = null; //Adaptive Armor Controller object (if present) - would be individual one for every fighter
 		
 		public $possibleCriticals = array();
 		
@@ -59,6 +60,15 @@
             return $list;
         }
         
+		
+		public function getAdaptiveArmorController(){
+			return $this->adaptiveArmorController;    
+		}
+		public function createAdaptiveArmorController($AAtotal, $AApertype, $AApreallocated){ //$AAtotal, $AApertype, $AApreallocated
+			$this->adaptiveArmorController = new AdaptiveArmorController($AAtotal, $AApertype, $AApreallocated); 
+			return $this->getAdaptiveArmorController();
+		}
+		
         public function getSystemById($id){
             foreach ($this->systems as $system){
                 if ($system->id == $id){

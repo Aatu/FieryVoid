@@ -1825,7 +1825,7 @@ class SurgeLaser extends Raking{
         public $defaultShots = 2;
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
-	    public $priority = 4; 
+	    public $priority = 4; //average output ftr weapon
         
         public $damageType = "Standard"; 
         public $weaponClass = "Electromagnetic"; 
@@ -2307,7 +2307,7 @@ class LtEMWaveDisruptor extends LinkedWeapon{
 	public $defaultShots = 2;
 	public $rangePenalty = 2;
 	public $fireControl = array(null, null, null); // no offensive mode
-	public $priority = 4; 
+	public $priority = 4; //irrelevant with no offensive mode
 	public $iconPath = "emWaveDisruptor.png";
 
 	

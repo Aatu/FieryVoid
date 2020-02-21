@@ -300,7 +300,7 @@ class NexusChaffLauncher extends Weapon{
 
         public $intercept = 2;
         public $loadingtime = 2;
-        public $priority = 4;
+        public $priority = 5;
 
         public $rangePenalty = 1;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals

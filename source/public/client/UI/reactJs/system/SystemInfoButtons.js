@@ -189,6 +189,86 @@ class SystemInfoButtons extends React.Component {
 		webglScene.customEvent('CloseSystemInfo');
 	}	
 	
+	
+	/*switch Adaptive Armor display to next damage class*/
+	nextCurrClass(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.nextCurrClass();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}	
+	
+	/*Adaptive Armor increase rating for current class*/
+	AAincrease(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.doIncrease();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}		
+	/*Adaptive Armor decrease rating for current class*/
+	AAdecrease(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.doDecrease();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}
+	/*Adaptive Armor propagate setting for current damage type*/
+	AApropagate(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		var dmgType = system.getCurrDmgType();
+		var allocated = system.getCurrAllocated();
+		//loop through all own units and increase setting for this dmg type until this level is achieved (or as high as possible otherwise)
+		var allOwnAA = [];
+		for (var i in gamedata.ships) {
+            var otherUnit = gamedata.ships[i];
+			if (otherUnit.userid != ship.userid) continue; //ignore other players' units
+            if (shipManager.isDestroyed(otherUnit)) continue; //ignore destroyed units
+			//now find AA controllers, if any...
+			if (otherUnit.flight) {
+				for (var iFtr=0;iFtr<otherUnit.systems.length;iFtr++){
+					var ftr = otherUnit.systems[iFtr];
+					if (ftr) for (var iSys=0;iSys<ftr.systems.length;iSys++){
+						var ctrl = ftr.systems[iSys];
+						if (ctrl) if (ctrl.displayName == "Adaptive Armor Controller"){
+							allOwnAA.push(ctrl);
+							break;//no point looking for SECOND AA Controller on a fighter
+						}
+					}
+				}				
+				/*
+				
+				
+				allOwnAA = ship.systems
+					.map(fighter => fighter.systems)
+					.filter(system => system.displayName = "Adaptive Armor Controller");
+					*/
+			} else {
+				for (var iSys=0;iSys<otherUnit.systems.length;iSys++){
+					var ctrl = otherUnit.systems[iSys];
+					if (ctrl.displayName == "Adaptive Armor Controller"){
+						allOwnAA.push(ctrl);
+						break;//no point looking for SECOND AA Controller on a ship
+					}
+				}
+			}
+        }
+		
+		//for each Controller: set allocated level to desired if possible
+		for (var c = 0; c < allOwnAA.length; c++) {
+			var ctrl = allOwnAA[c];
+			ctrl.setCurrDmgType(dmgType); //set damage type to desired (or none)
+			while(
+				ctrl.getCurrAllocated() < allocated // level lower than desired
+				&& ctrl.canIncrease() //level can be increased
+			){
+				ctrl.doIncrease();
+			}
+		}
+		
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}		
+	
     render() {
 		const {ship, selectedShip, system} = this.props;
 		
@@ -198,7 +278,7 @@ class SystemInfoButtons extends React.Component {
 		
         return (
             <Container>
-		{canOnline(ship, system) && <Button onClick={this.online.bind(this)} onContextMenu={this.allOnline.bind(this)} img="./img/on.png"></Button>}
+				{canOnline(ship, system) && <Button onClick={this.online.bind(this)} onContextMenu={this.allOnline.bind(this)} img="./img/on.png"></Button>}
                 {canOffline(ship, system) && <Button onClick={this.offline.bind(this)} onContextMenu={this.allOffline.bind(this)} img="./img/off.png"></Button>}
                 {canOverload(ship, system) && <Button onClick={this.overload.bind(this)} img="./img/overload.png"></Button>}
                 {canStopOverload(ship, system) && <Button onClick={this.stopOverload.bind(this)} img="./img/overloading.png"></Button>}
@@ -206,19 +286,37 @@ class SystemInfoButtons extends React.Component {
                 {canBoost(ship, system) && <Button onClick={this.boost.bind(this)} img="./img/plussquare.png"></Button>}
                 {canAddShots(ship, system) && <Button onClick={this.addShots.bind(this)} img="./img/plussquare.png"></Button>}
                 {canReduceShots(ship, system) && <Button onClick={this.reduceShots.bind(this)} img="./img/minussquare.png"></Button>}
-		{canRemoveFireOrder(ship, system) && <Button onClick={this.removeFireOrder.bind(this)} img="./img/firing.png"></Button>}
-		{canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this))}
-		{canSelfIntercept(ship, system) && <Button onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/selfIntercept.png"></Button>}
+				{canRemoveFireOrder(ship, system) && <Button onClick={this.removeFireOrder.bind(this)} img="./img/firing.png"></Button>}
+				{canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this))}
+				{canSelfIntercept(ship, system) && <Button onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/selfIntercept.png"></Button>}
+				
+				{canAAdisplayCurrClass(ship, system) && <Button title={getAAcurrClassName(ship,system)} img={getAAcurrClassImg(ship,system)}></Button>}
+				{canAAdisplayCurrClass(ship, system) && <Button title="next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/AAclasses/iconNext.png"></Button>}
+				{canAAincrease(ship, system) && <Button onClick={this.AAincrease.bind(this)} img="./img/systemicons/AAclasses/iconPlus.png"></Button>}
+				{canAAdecrease(ship, system) && <Button onClick={this.AAdecrease.bind(this)} img="./img/systemicons/AAclasses/iconMinus.png"></Button>}
+				{canAApropagate(ship, system) && <Button title="propagate setting" onClick={this.AApropagate.bind(this)} img="./img/systemicons/AAclasses/iconPropagate.png"></Button>}
+				
+					
+				
             </Container>
         )
     }
 }
 
+//can do something with Adaptive Armor Controller
+const canAA = (ship,system) => (gamedata.gamephase === 1) && (system.name == 'adaptiveArmorController'); 
+const canAAdisplayCurrClass = (ship,system) => canAA(ship,system) && system.getCurrClass()!='';
+const getAAcurrClassImg = (ship,system) => './img/systemicons/AAclasses/'+system.getCurrClass()+'.png'; 
+const getAAcurrClassName = (ship,system) => system.getCurrClass(); 
+const canAAincrease = (ship,system) => canAA(ship,system) && system.canIncrease()!='';
+const canAAdecrease = (ship,system) => canAA(ship,system) && system.canDecrease()!='';
+const canAApropagate = (ship,system) => canAA(ship,system) && system.canPropagate()!='';
+
 export const canDoAnything = (ship, system) => canOffline(ship, system) || canOnline(ship, system) 
 	|| canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) 
 	|| canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system)
 	|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system)
-	|| canSelfIntercept(ship, system);
+	|| canSelfIntercept(ship, system) || canAA(ship,system);
 
 const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
 
@@ -228,9 +326,9 @@ const canOverload = (ship, system) => !shipManager.power.isOffline(ship, system)
 
 const canStopOverload = (ship, system) => system.weapon && system.overloadable && shipManager.power.isOverloading(ship, system);
 
-const canBoost = (ship, system) => system.boostable && shipManager.power.canBoost(ship, system) && (!system.isScanner() || system.id == shipManager.power.getHighestSensorsId(ship));
+const canBoost = (ship, system) => system.boostable && gamedata.gamephase === 1 && shipManager.power.canBoost(ship, system) && (!system.isScanner() || system.id == shipManager.power.getHighestSensorsId(ship));
 
-const canDeBoost = (ship, system) => Boolean(shipManager.power.getBoost(system));
+const canDeBoost = (ship, system) => gamedata.gamephase === 1 && Boolean(shipManager.power.getBoost(system));
 
 const canAddShots = (ship, system) => system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots < system.shots;
 

@@ -118,7 +118,6 @@ window.shipWindowManager = {
 	},
 
 	bindEvents: function bindEvents(shipwindow) {
-
 		$(".close", shipwindow).on("click", shipWindowManager.close);
 		$(".system .plus", shipwindow).on("click", shipWindowManager.clickPlus);
 		$(".system .minus", shipwindow).on("click", shipWindowManager.clickMinus);
@@ -135,7 +134,6 @@ window.shipWindowManager = {
 	},
 
 	populateShipWindow: function populateShipWindow(ship, shipwindow) {
-
 		shipwindow.find(".icon img").attr("src", "./" + ship.imagePath);
 
 		if (gamedata.turn != 0) {
@@ -164,8 +162,8 @@ window.shipWindowManager = {
 		}
 	},
 
+/*old!*/
 	hitChartSetup: function hitChartSetup(ship, shipwindow) {
-
 		var names = [];
 		var parentDiv = shipwindow.find(".buttons")[0];
 		var toDo = ship.hitChart.length; //not always works correctly!

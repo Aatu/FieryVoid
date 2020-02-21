@@ -219,9 +219,9 @@ class BaseShip {
 	}
 	
 	/*calls systems to generate notes if necessary*/
-	public function generateIndividualNotes($gamedata) {
+	public function generateIndividualNotes($gamedata, $dbManager) {
 		foreach ($this->systems as $system){
-            $system->generateIndividualNotes($gamedata);
+            $system->generateIndividualNotes($gamedata, $dbManager);
         }
 	}
 	

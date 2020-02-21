@@ -12,7 +12,7 @@ class IonBolt extends Weapon{
     public $projectilespeed = 12;
     public $animationWidth = 3;
     public $trailLength = 20;
-    public $priority = 8;
+    public $priority = 6; //very heavy fighter weapon... even if borderline!
 
     public $loadingtime = 2;
     public $shots = 1;
@@ -125,7 +125,7 @@ class ImprovedIonCannon extends Raking{
         public $animationWidth = 2;
         public $animationWidth2 = 0.2;
         
-        public $priority = 4;
+        public $priority = 3; //rather light weapons!
         public $intercept = 0; //Lasers cannot intercept!
         public $loadingtime = 1;
         public $shots = 2;

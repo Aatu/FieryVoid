@@ -655,12 +655,21 @@ class Manager{
                                     }
                                 }
                             }
+							
+							if ($fig instanceOf AdaptiveArmorController) if(isset($fightersys["currchangedAA"])){
+								$fig->currchangedAA = $fightersys["currchangedAA"];
+							}
 
                             $fig->setFireOrders($fires);
                         }                        
                     }
                     
                 }
+				
+				//adaptive armor, if set
+				if ($sys instanceOf AdaptiveArmorController) if(isset($system["currchangedAA"])){
+					$sys->currchangedAA = $system["currchangedAA"];
+				}
             }
 
 

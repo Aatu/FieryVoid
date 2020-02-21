@@ -322,7 +322,7 @@ class FighterMissileRack extends MissileLauncher
     public $animationWidth = 2;
     public $trailLength = 60;
     //protected $distanceRangeMod = 0;
-    public $priority = 4;
+    public $priority = 5; //large fighter weapon
 
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
     
@@ -443,7 +443,7 @@ class FighterTorpedoLauncher extends FighterMissileRack
     public $firingMode = 1;
     public $maxAmount = 0;
     protected $distanceRangeMod = 0;
-    public $priority = 4;
+    public $priority = 4; //priority: typical fighter weapon (correct for Light Ballistic Torpedo's 2d6)
 
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
     
@@ -583,9 +583,6 @@ class MultiMissileLauncher extends Weapon{
 				$this->displayName = "Class-R Missile Rack";
 				$maxhealth = 6;
 				$this->iconPath = "missile2.png";
-				foreach ($this->rangeArray as $key=>$rng) {
-					$this->rangeArray[$key] += 10; 
-				}     
 				$this->loadingtime = 1; //fires every turn
 				$this->rackExplosionThreshold = 19; //how high roll is needed for rack explosion 
 				break;	

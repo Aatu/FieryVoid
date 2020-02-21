@@ -163,4 +163,143 @@ var AdaptiveArmorController = function AdaptiveArmorController(json, ship) {
 };
 AdaptiveArmorController.prototype = Object.create(ShipSystem.prototype);
 AdaptiveArmorController.prototype.constructor = AdaptiveArmorController;
-
+AdaptiveArmorController.prototype.getCurrClass = function () { //get current damage class for display; if none, find first!
+    if (this.currClass == ''){
+		var classes = Object.keys(this.availableAA);
+		if (classes.length>0){
+			this.currClass = classes[0];
+		}
+	}
+	return this.currClass;
+};
+AdaptiveArmorController.prototype.nextCurrClass = function () { //get next damage class for display
+	this.getCurrClass();
+    if (this.currClass == '') return ''; //this would mean there are no damage classes whatsover!
+	var classes = Object.keys(this.availableAA);
+	var currId = -1;
+	for (var i = 0; i < classes.length; i++) {
+		if (this.currClass == classes[i]){
+			currId = i+1;
+			break; //loop
+		}
+	}
+	if (currId >= classes.length) currId = 0;
+	this.currClass = classes[currId];
+	return this.currClass;
+};
+AdaptiveArmorController.prototype.canIncrease = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
+	//always needs to check that allocated are less than maximum and allocated total is less than total maximum
+	this.getCurrClass();
+    if (this.currClass == '') return false; //this would mean there are no damage classes whatsover!
+	
+	//total pool of AA points filled?
+	if (this.AAtotal_used >= this.AAtotal) return false;
+	
+	//how many are allocated?
+	var allocated = this.allocatedAA[this.currClass];	
+	//how many are allowed?
+	var allowed = this.AApertype;	
+	if (allocated >= allowed) return false; //full allowance for this damage type filled
+	
+	//availability for this dmg type remaining - or preallocated points remaining? (eg. false if both are full)
+	var available = this.availableAA[this.currClass];	
+	if ( (this.AApreallocated <= this.AApreallocated_used) //preallocated pool filled
+	  && (available <= allocated) //pool for this damage type filled
+	) {
+		return false;
+	}
+	
+	return true;
+};
+AdaptiveArmorController.prototype.canDecrease = function () { //can decrease if something was increased
+	this.getCurrClass();
+	if (this.currClass == '') return false; //this would mean there are no damage classes whatsover!
+	if (this.currchangedAA[this.currClass]>0) return true;
+	return false;
+};
+AdaptiveArmorController.prototype.doIncrease = function () { //increase AA usage
+	this.getCurrClass();
+	if (this.currClass == '') return false; //this would mean there are no damage classes whatsover!
+	//if preallocated are available - use them
+	if (this.AApreallocated > this.AApreallocated_used){
+		this.AApreallocated_used++;
+		this.allocatedAA[this.currClass]++;
+		this.availableAA[this.currClass]++; //preallocated assignment increases availability as well
+		if (this.currchangedAA[this.currClass]>0){
+			this.currchangedAA[this.currClass]++;
+		}else{
+			this.currchangedAA[this.currClass] = 1;
+		}
+		this.AAtotal_used++;
+	}else if (this.allocatedAA[this.currClass] < this.availableAA[this.currClass]) { //else use regular pool 
+		this.allocatedAA[this.currClass]++;
+		if (this.currchangedAA[this.currClass]>0){
+			this.currchangedAA[this.currClass]++;
+		}else{
+			this.currchangedAA[this.currClass] = 1;
+		}
+		this.AAtotal_used++;
+	}
+	this.refreshData();
+};
+AdaptiveArmorController.prototype.doDecrease = function () { //decrease AA usage
+	this.getCurrClass();
+	if (this.currClass == '') return false; //this would mean there are no damage classes whatsover!
+	//in first turn use preallocated points, later regular pool
+	if (this.currchangedAA[this.currClass]>0){
+		if (gamedata.turn == 1){
+			if (this.AApreallocated_used > 0){
+				this.AApreallocated_used--;
+				this.currchangedAA[this.currClass]--;
+				this.allocatedAA[this.currClass]--;
+				this.availableAA[this.currClass]--;
+				this.AAtotal_used--;
+			}
+		}else{
+			this.currchangedAA[this.currClass]--;
+			this.allocatedAA[this.currClass]--;
+			this.AAtotal_used--;
+		}
+	}
+	this.refreshData();
+};
+AdaptiveArmorController.prototype.refreshData = function () { //refresh description to show correct values
+	var classes = Object.keys(this.availableAA);
+	var entryName = '';
+	var currType = '';
+	for (var i = 0; i < classes.length; i++) {
+		currType = classes[i];
+		//entry should exist, just change it to show current values
+		entryName = ' - ' + currType;
+		this.data[entryName] = this.allocatedAA[currType] + '/' + this.availableAA[currType];
+	}
+	//fix pre-allocated data, too!
+	this.data[" - preassigned"] =  this.AApreallocated_used + '/' + this.AApreallocated;
+	this.data["Adaptive Armor"] =  this.AAtotal_used + '/' + this.AAtotal;
+	
+	//this.preallocated_used =  this.AApreallocated_used;
+};
+AdaptiveArmorController.prototype.canPropagate = function () { //can propagate if set to >0
+	if (this.currClass == '') return false; //this would mean there are no damage classes whatsover!
+	if (this.allocatedAA[this.currClass]>0) return true;
+	return false;
+};
+AdaptiveArmorController.prototype.getCurrDmgType = function () { //returns current damage type
+	return this.currClass;
+};
+AdaptiveArmorController.prototype.getCurrAllocated = function () { //returns setting for current damage type
+	if (this.currClass == '') return 0;
+	return this.allocatedAA[this.currClass];
+};
+AdaptiveArmorController.prototype.setCurrDmgType= function (dmgTypeToSet) { //sets indicated damage type as current (or sets empty as current)
+	this.currClass = ''; //will do if desired type does not exist here, which is rare but possible
+	var classes = Object.keys(this.availableAA);
+	var currType = '';
+	for (var i = 0; i < classes.length; i++) {
+		currType = classes[i];
+		if (currType == dmgTypeToSet){ //exists!
+			this.currClass = currType;
+			return; //no need to loop further
+		}
+	}	
+};

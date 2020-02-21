@@ -513,7 +513,7 @@ class SWFighterLaser extends SWDirectWeapon{
 		
 		if($damagebonus > 2) $this->priority++;
 		if($damagebonus > 4) $this->priority++;		
-		if($damagebonus > 6) $this->priority = 8;
+		if($damagebonus > 6) $this->priority++;
 		
 		
 		parent::__construct(0, 1, 0, $startArc, $endArc, $nrOfShots);
@@ -541,7 +541,7 @@ class SWFighterIon extends SWIon{
 
     public $exclusive = false; //can be always overridden in particular fighter!
     public $isLinked = true; //indicates that this is linked weapon
-    public $priority = 8;	
+    public $priority = 10;	//always at the end of the queue, due to extra dropot effect
     protected $damagebonus = 0;     	
 	
 	function __construct($startArc, $endArc, $damagebonus, $nrOfShots){
@@ -551,10 +551,7 @@ class SWFighterIon extends SWIon{
 		//appropriate icon (number of barrels)...
 		$nr = min(4, $nrOfShots); //images are not unlimited
 		$this->iconPath = "starwars/mjsIonFtr".$nr.".png";
-		
-		
-		if($damagebonus > 2) $this->priority++;
-		if($damagebonus > 4) $this->priority++;	
+			
 
 		parent::__construct(0, 1, 0, $startArc, $endArc, $nrOfShots);
 		$this->addSalvoMode();
@@ -582,7 +579,7 @@ class SWFtrProtonTorpedoLauncher extends SWFtrBallisticLauncher //this is launch
     public $rangeMod = 0;
     public $firingMode = 1;
     public $maxAmount = 0;
-    public $priority = 4;
+    public $priority = 5;
     public $fireControl = array(-4, -1, 0); // fighters, <mediums, <capitals 
 	
     function __construct($maxAmount, $startArc, $endArc, $noOfShots){
@@ -636,7 +633,7 @@ class SWFtrConcMissileLauncher extends SWFtrBallisticLauncher //this is launcher
     public $rangeMod = 0;
     public $firingMode = 1;
     public $maxAmount = 0;
-    public $priority = 4;
+    public $priority = 3; //that's really light missile
     public $fireControl = array(2, 1, 0); // fighters, <mediums, <capitals 
 	
     function __construct($maxAmount, $startArc, $endArc, $noOfShots){

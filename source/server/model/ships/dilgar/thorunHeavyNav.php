@@ -12,7 +12,7 @@ class ThorunHeavyNav extends FighterFlight{
         $this->hasNavigator = true;
 
         $this->occurence = "rare";
-        $this->variantOf = "Thorun Dartfighters";
+        $this->variantOf = "OBSOLETE";
 
         $this->forwardDefense = 8;
         $this->sideDefense = 7;

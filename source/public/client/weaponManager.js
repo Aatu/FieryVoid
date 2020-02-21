@@ -658,7 +658,7 @@ window.weaponManager = {
             var firstFighter = shooter.systems[1];
             var OBcrit = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
             oew = shooter.offensivebonus - OBcrit;
-	    if (weapon.ballistic && (!shooter.hasNavigator) ){ //for ballistice, if there is no Navigator, use OB only if target is in weapon arc!
+	    if (weapon.ballistic && (!shooter.hasNavigator) ){ //for ballistics, if there is no Navigator, use OB only if target is in weapon arc!
 		if (!weaponManager.isOnWeaponArc(shooter, target, weapon)) {
 		    oew = 0;
 		}

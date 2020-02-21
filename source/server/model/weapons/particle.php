@@ -473,10 +473,10 @@
     */
     public function fireDefensively($gamedata, $interceptedWeapon)
     {
-    	if ($this->firedDefensivelyAlready==0){ //in case of multiple interceptions during one turn - suffer backlash only once
-		$this->applyCooldown($gamedata);	
-	}
-	parent::fireDefensively($gamedata, $interceptedWeapon);
+		if ($this->firedDefensivelyAlready==0){ //in case of multiple interceptions during one turn - suffer backlash only once
+			$this->applyCooldown($gamedata);	
+		}
+		parent::fireDefensively($gamedata, $interceptedWeapon);
     }
         
         /*if previous shot missed, next one misses automatically*/
@@ -702,7 +702,7 @@
         public $loadingtime = 1;
         public $shots = 2;
         public $defaultShots = 2;
-	public $priority = 3;
+	public $priority = 3; //correct for d6+2 and lighter
 
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
@@ -717,9 +717,9 @@
             $this->shots = $nrOfShots;
             $this->intercept = $nrOfShots;		
 
-            if ($damagebonus > 2) $this->priority++; //heavier varieties fire later in the queue
-            if ($damagebonus > 4) $this->priority++;
-            if ($damagebonus > 6) $this->priority++;
+            if ($damagebonus >= 3) $this->priority++; //heavier varieties fire later in the queue
+            if ($damagebonus >= 5) $this->priority++;
+            if ($damagebonus >= 7) $this->priority++;
 
             if($nrOfShots === 1){
                 $this->iconPath = "particleGun.png";
@@ -826,12 +826,12 @@
         public $animationWidth = 2;
         public $trailLength = 10;
 
-        public $intercept = 2;
+        public $intercept = 3;
 
         public $loadingtime = 1;
         public $shots = 2;
         public $defaultShots = 2;
-	public $priority = 2;
+	public $priority = 3;
 
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
@@ -847,9 +847,10 @@
             $this->shots = $nrOfShots;
             $this->intercept = $nrOfShots;		
 
-            if ($damagebonus > 4) $this->priority++;            
-            if ($damagebonus > 6) $this->priority++;                      
-            if ($damagebonus > 7) $this->priority++;
+
+            if ($damagebonus >= 4) $this->priority++; //heavier varieties fire later in the queue
+            if ($damagebonus >= 6) $this->priority++;
+            if ($damagebonus >= 8) $this->priority++;
 
             if($nrOfShots === 3){
                 $this->iconPath = "pairedParticleGun3.png";
@@ -888,7 +889,7 @@
         public $projectilespeed = 12;
         public $animationWidth = 2;
         public $trailLength = 10;
-        public $priority = 4;
+        public $priority = 3;
 
         public $intercept = 2;
 
@@ -909,6 +910,10 @@
             $this->shots = $nrOfShots;
             $this->intercept = $nrOfShots;
 
+            if ($damagebonus >= 3) $this->priority++; //heavier varieties fire later in the queue
+            if ($damagebonus >= 5) $this->priority++;
+            if ($damagebonus >= 7) $this->priority++;
+			
             if($nrOfShots === 1){
                 $this->iconPath = "lightParticleBeam1.png";
             }

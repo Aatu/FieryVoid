@@ -34,7 +34,7 @@ class tkharas extends FighterFlight{
 			
 			$armour = array(2, 2, 2, 2);
 			$fighter = new Fighter("tkharas", $armour, 8, $this->id);
-			$fighter->displayName = "T'Khar Assault Shuttle";
+			$fighter->displayName = "T'Khar";
 			$fighter->imagePath = "img/ships/gorith.png";
 			$fighter->iconPath = "img/ships/gorith_large.png";
 			

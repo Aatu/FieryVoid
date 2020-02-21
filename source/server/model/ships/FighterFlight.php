@@ -241,6 +241,39 @@ class FighterFlight extends BaseShip
     } //endof function addSystem
 
 
+	/*for fighter flights - notes must be saved for fighters themselves as well as their subsystems!*/
+	/*saves individual notes systems might have generated*/
+	public function saveIndividualNotes(DBManager $dbManager) {
+		foreach ($this->systems as $fighter) if ($fighter->fighter){ //only for actual fighters - and then handle the rest as subsystems!
+            $fighter->saveIndividualNotes($dbManager);
+				foreach ($fighter->systems as $subsystem){
+					$subsystem->saveIndividualNotes($dbManager);
+				}
+        }
+	}
+	
+	/*calls systems to generate notes if necessary*/
+	public function generateIndividualNotes($gamedata, $dbManager) {
+		foreach ($this->systems as $fighter) if ($fighter->fighter){ //only for actual fighters - and then handle the rest as subsystems!
+            $fighter->generateIndividualNotes($gamedata, $dbManager);
+				foreach ($fighter->systems as $subsystem){
+					$subsystem->generateIndividualNotes($gamedata, $dbManager);
+				}
+        }		
+	}
+	
+	
+	/*calls systems to act on notes just loaded if necessary*/
+	public function onIndividualNotesLoaded($gamedata) {
+		foreach ($this->systems as $fighter) if ($fighter->fighter){ //only for actual fighters - and then handle the rest as subsystems!
+            $fighter->onIndividualNotesLoaded($gamedata);
+			foreach ($fighter->systems as $subsystem){
+				$subsystem->onIndividualNotesLoaded($gamedata);
+			}
+        }	
+	}
+
+
     public function getPreviousCoPos()
     {
         $pos = $this->getCoPos();
@@ -398,7 +431,7 @@ class FighterFlight extends BaseShip
 		$armor = $weapon->getSystemArmourStandard($this, $craft, $gamedata, $fire)+$weapon->getSystemArmourInvulnerable($this, $craft, $gamedata, $fire);
 		$dmgPotential = max(0, $dmgPotential-$armor);//never negative damage ;)
 		/*for linked weapons - multiply by number of shots!*/
-		if ($weapon->linked){
+		if ($weapon->isLinked){
 			$dmgPotential = $dmgPotential*$weapon->shots;
 		}
 		$remainingHP = $craft->getRemainingHealth();

@@ -15,7 +15,7 @@ class DeploymentGamePhase implements Phase
         $moves = $this->validateDeployment($gameData, $ships);
 		
 		foreach ($gameData->ships as $currShip){ //generate system-specific information if necessary
-			$currShip->generateIndividualNotes($gameData);
+			$currShip->generateIndividualNotes($gameData, $dbManager);
 		}		
 		foreach ($gameData->ships as $currShip){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!
 			$currShip->saveIndividualNotes($dbManager);

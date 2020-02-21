@@ -39802,13 +39802,115 @@ var SystemInfoButtons = function (_React$Component) {
 			weaponManager.onDeclareSelfInterceptSingleAll(ship, system);
 			webglScene.customEvent('CloseSystemInfo');
 		}
+
+		/*switch Adaptive Armor display to next damage class*/
+
+	}, {
+		key: "nextCurrClass",
+		value: function nextCurrClass(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props16 = this.props,
+			    ship = _props16.ship,
+			    system = _props16.system;
+
+			system.nextCurrClass();
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
+
+		/*Adaptive Armor increase rating for current class*/
+
+	}, {
+		key: "AAincrease",
+		value: function AAincrease(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props17 = this.props,
+			    ship = _props17.ship,
+			    system = _props17.system;
+
+			system.doIncrease();
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
+		/*Adaptive Armor decrease rating for current class*/
+
+	}, {
+		key: "AAdecrease",
+		value: function AAdecrease(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props18 = this.props,
+			    ship = _props18.ship,
+			    system = _props18.system;
+
+			system.doDecrease();
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
+		/*Adaptive Armor propagate setting for current damage type*/
+
+	}, {
+		key: "AApropagate",
+		value: function AApropagate(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props19 = this.props,
+			    ship = _props19.ship,
+			    system = _props19.system;
+
+			var dmgType = system.getCurrDmgType();
+			var allocated = system.getCurrAllocated();
+			//loop through all own units and increase setting for this dmg type until this level is achieved (or as high as possible otherwise)
+			var allOwnAA = [];
+			for (var i in gamedata.ships) {
+				var otherUnit = gamedata.ships[i];
+				if (otherUnit.userid != ship.userid) continue; //ignore other players' units
+				if (shipManager.isDestroyed(otherUnit)) continue; //ignore destroyed units
+				//now find AA controllers, if any...
+				if (otherUnit.flight) {
+					for (var iFtr = 0; iFtr < otherUnit.systems.length; iFtr++) {
+						var ftr = otherUnit.systems[iFtr];
+						if (ftr) for (var iSys = 0; iSys < ftr.systems.length; iSys++) {
+							var ctrl = ftr.systems[iSys];
+							if (ctrl) if (ctrl.displayName == "Adaptive Armor Controller") {
+								allOwnAA.push(ctrl);
+								break; //no point looking for SECOND AA Controller on a fighter
+							}
+						}
+					}
+					/*
+     
+     
+     allOwnAA = ship.systems
+     	.map(fighter => fighter.systems)
+     	.filter(system => system.displayName = "Adaptive Armor Controller");
+     	*/
+				} else {
+					for (var iSys = 0; iSys < otherUnit.systems.length; iSys++) {
+						var ctrl = otherUnit.systems[iSys];
+						if (ctrl.displayName == "Adaptive Armor Controller") {
+							allOwnAA.push(ctrl);
+							break; //no point looking for SECOND AA Controller on a ship
+						}
+					}
+				}
+			}
+
+			//for each Controller: set allocated level to desired if possible
+			for (var c = 0; c < allOwnAA.length; c++) {
+				var ctrl = allOwnAA[c];
+				ctrl.setCurrDmgType(dmgType); //set damage type to desired (or none)
+				while (ctrl.getCurrAllocated() < allocated // level lower than desired
+				&& ctrl.canIncrease() //level can be increased
+				) {
+					ctrl.doIncrease();
+				}
+			}
+
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
 	}, {
 		key: "render",
 		value: function render() {
-			var _props16 = this.props,
-			    ship = _props16.ship,
-			    selectedShip = _props16.selectedShip,
-			    system = _props16.system;
+			var _props20 = this.props,
+			    ship = _props20.ship,
+			    selectedShip = _props20.selectedShip,
+			    system = _props20.system;
 
 
 			if (!canDoAnything) {
@@ -39828,7 +39930,12 @@ var SystemInfoButtons = function (_React$Component) {
 				canReduceShots(ship, system) && React.createElement(Button, { onClick: this.reduceShots.bind(this), img: "./img/minussquare.png" }),
 				canRemoveFireOrder(ship, system) && React.createElement(Button, { onClick: this.removeFireOrder.bind(this), img: "./img/firing.png" }),
 				canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this)),
-				canSelfIntercept(ship, system) && React.createElement(Button, { onClick: this.declareSelfIntercept.bind(this), onContextMenu: this.declareSelfInterceptAll.bind(this), img: "./img/selfIntercept.png" })
+				canSelfIntercept(ship, system) && React.createElement(Button, { onClick: this.declareSelfIntercept.bind(this), onContextMenu: this.declareSelfInterceptAll.bind(this), img: "./img/selfIntercept.png" }),
+				canAAdisplayCurrClass(ship, system) && React.createElement(Button, { title: getAAcurrClassName(ship, system), img: getAAcurrClassImg(ship, system) }),
+				canAAdisplayCurrClass(ship, system) && React.createElement(Button, { title: "next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/AAclasses/iconNext.png" }),
+				canAAincrease(ship, system) && React.createElement(Button, { onClick: this.AAincrease.bind(this), img: "./img/systemicons/AAclasses/iconPlus.png" }),
+				canAAdecrease(ship, system) && React.createElement(Button, { onClick: this.AAdecrease.bind(this), img: "./img/systemicons/AAclasses/iconMinus.png" }),
+				canAApropagate(ship, system) && React.createElement(Button, { title: "propagate setting", onClick: this.AApropagate.bind(this), img: "./img/systemicons/AAclasses/iconPropagate.png" })
 			);
 		}
 	}]);
@@ -39836,8 +39943,33 @@ var SystemInfoButtons = function (_React$Component) {
 	return SystemInfoButtons;
 }(React.Component);
 
+//can do something with Adaptive Armor Controller
+
+
+var canAA = function canAA(ship, system) {
+	return gamedata.gamephase === 1 && system.name == 'adaptiveArmorController';
+};
+var canAAdisplayCurrClass = function canAAdisplayCurrClass(ship, system) {
+	return canAA(ship, system) && system.getCurrClass() != '';
+};
+var getAAcurrClassImg = function getAAcurrClassImg(ship, system) {
+	return './img/systemicons/AAclasses/' + system.getCurrClass() + '.png';
+};
+var getAAcurrClassName = function getAAcurrClassName(ship, system) {
+	return system.getCurrClass();
+};
+var canAAincrease = function canAAincrease(ship, system) {
+	return canAA(ship, system) && system.canIncrease() != '';
+};
+var canAAdecrease = function canAAdecrease(ship, system) {
+	return canAA(ship, system) && system.canDecrease() != '';
+};
+var canAApropagate = function canAApropagate(ship, system) {
+	return canAA(ship, system) && system.canPropagate() != '';
+};
+
 var canDoAnything = exports.canDoAnything = function canDoAnything(ship, system) {
-	return canOffline(ship, system) || canOnline(ship, system) || canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) || canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system) || canSelfIntercept(ship, system);
+	return canOffline(ship, system) || canOnline(ship, system) || canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) || canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system) || canSelfIntercept(ship, system) || canAA(ship, system);
 };
 
 var canOffline = function canOffline(ship, system) {
@@ -39857,11 +39989,11 @@ var canStopOverload = function canStopOverload(ship, system) {
 };
 
 var canBoost = function canBoost(ship, system) {
-	return system.boostable && shipManager.power.canBoost(ship, system) && (!system.isScanner() || system.id == shipManager.power.getHighestSensorsId(ship));
+	return system.boostable && gamedata.gamephase === 1 && shipManager.power.canBoost(ship, system) && (!system.isScanner() || system.id == shipManager.power.getHighestSensorsId(ship));
 };
 
 var canDeBoost = function canDeBoost(ship, system) {
-	return Boolean(shipManager.power.getBoost(system));
+	return gamedata.gamephase === 1 && Boolean(shipManager.power.getBoost(system));
 };
 
 var canAddShots = function canAddShots(ship, system) {

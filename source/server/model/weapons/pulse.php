@@ -242,7 +242,6 @@ class QuadPulsar extends Pulse{
     
     
     class GatlingPulseCannon extends Weapon{  //this is NOT a Pulse weapon at all...
-
         public $name = "gatlingPulseCannon";
         public $displayName = "Gatling Pulse Cannon";
         public $animation = "beam";
@@ -256,7 +255,7 @@ class QuadPulsar extends Pulse{
         public $intercept = 2;
         
         public $loadingtime = 1;
-	public $priority = 5;//this has firepower of a heavy weapon
+	public $priority = 6;//VERY large fighter weapon
         
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
@@ -369,6 +368,7 @@ class QuadPulsar extends Pulse{
         public $projectilespeed = 12;
         public $animationWidth = 2;
         public $trailLength = 10;
+		public $priority = 3;
 
         public $intercept = 2;
 
@@ -388,6 +388,10 @@ class QuadPulsar extends Pulse{
             $this->defaultShots = $nrOfShots;
             $this->shots = $nrOfShots;
 
+            if ($damagebonus >= 3) $this->priority++; //heavier varieties fire later in the queue
+            if ($damagebonus >= 5) $this->priority++;
+            if ($damagebonus >= 7) $this->priority++;
+			
             parent::__construct(0, 1, 0, $startArc, $endArc);
 
         }

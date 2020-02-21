@@ -334,7 +334,7 @@ class PairedPlasmaBlaster extends LinkedWeapon{
         public $animationExplosionScale = 0.1;
 
         public $intercept = 2;
-	public $priority = 4;//late priority due to being Plasma and able to ignore armor partially
+	public $priority = 4; //eqivalend of d6+3, on account of armor piercing properties of Plasma
 
         public $loadingtime = 1;
         public $shots = 2;
@@ -347,11 +347,12 @@ class PairedPlasmaBlaster extends LinkedWeapon{
     	public $damageType = "Standard"; 
     	public $weaponClass = "Plasma"; 
 
-        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){ //damage bonus NOT accounted for!
+        function __construct($startArc, $endArc, $nrOfShots = 2){ 
             $this->shots = $nrOfShots;
             $this->defaultShots = $nrOfShots;
-			$this->intercept = $nrOfShots;
-            
+			$this->intercept = $nrOfShots;            
+			
+			
             if($nrOfShots === 1){
                 $this->iconPath = "pairedPlasmaBlaster1.png";
             }
@@ -416,7 +417,7 @@ class PlasmaGun extends Plasma{
         public $fireControl = array(-6, 4, 4); // fighters, <=mediums, <=capitals 
 
 
-        function __construct($startArc, $endArc, $damagebonus, $shots = 1){
+        function __construct($startArc, $endArc, $shots = 1){
             $this->shots = $shots;
             $this->defaultShots = $shots;
             
@@ -496,7 +497,7 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
 
 
 class RogolonLtPlasmaCannon extends LinkedWeapon{
-	/*dedicated anti-ship weapon of Rogolon fighters - very nasty!*/
+	/*dedicated anti-ship weapon of advanced Rogolon fighters - very nasty! (and custom, thankfully)*/
         public $name = "RogolonLtPlasmaCannon";
         public $displayName = "Light Plasma Cannon";
 	public $iconPath = "mediumPlasma.png";
@@ -517,7 +518,7 @@ class RogolonLtPlasmaCannon extends LinkedWeapon{
         public $rangePenalty = 1;
         public $fireControl = array(-5, 0, 0); // fighters, <mediums, <capitals
         public $rangeDamagePenalty = 0.5; //-1/2 hexes!
-	public $priority = 5;
+	public $priority = 6;
 
     	public $damageType = "Standard"; 
     	public $weaponClass = "Plasma"; 

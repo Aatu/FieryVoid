@@ -117,6 +117,19 @@ window.ajaxInterface = {
                             }
 
                             fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray };
+							
+
+							if (fightersystem.name == 'adaptiveArmorController'){
+								var currchangedArray = Array();
+								//every point is denoted as single entry with damage class name
+								var dmgClasses = Object.keys(fightersystem.currchangedAA);
+								var currType = '';
+								for (var i = 0; i < dmgClasses.length; i++) {
+									currType = dmgClasses[i];
+									for (var j = 0; j< fightersystem.currchangedAA[currType];j++) currchangedArray.push(currType);
+								}
+								fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray, 'currchangedAA': currchangedArray };
+							}							
                         }
 
                         systems[a] = { 'id': system.id, 'systems': fighterSystems };
@@ -124,43 +137,6 @@ window.ajaxInterface = {
                         var fires = Array();
                         var ammoArray = Array();
 
-                        /*
-                        if (system.dualWeapon || system.duoWeapon) {
-                            for (var c in system.weapons) {
-                                var weapon = system.weapons[c];
-                                if (weapon.duoWeapon) {
-                                    for (var d in weapon.weapons) {
-                                        var subweapon = weapon.weapons[d];
-                                        for (var index = subweapon.fireOrders.length - 1; index >= 0; index--) {
-                                            var subfire = subweapon.fireOrders[index];
-                                            if (subfire.turn < gamedata.turn) {
-                                                subweapon.fireOrders.splice(index, 1);
-                                            }
-                                        }
-                                        fires = fires.concat(subweapon.fireOrders);
-                                    }
-                                } else {
-                                    //var weapon = system.weapons[c];
-                                    for (var b = weapon.fireOrders.length - 1; b >= 0; b--) {
-                                        var fire = weapon.fireOrders[b];
-                                        if (fire.turn < gamedata.turn) {
-                                            weapon.fireOrders.splice(b, 1);
-                                        }
-                                    }
-                                    fires = fires.concat(weapon.fireOrders);
-                                }
-
-                                for (var b = weapon.power.length - 1; b >= 0; b--) {
-                                    var power = weapon.power[b];
-
-                                    if (power.turn < gamedata.turn) {
-                                        weapon.power.splice(b, 1);
-                                    }
-                                }
-                                systems[a] = { 'id': weapon.id, 'power': weapon.power, 'fireOrders': fires };
-                            }
-                        } else {
-                            */
                         for (var b = system.fireOrders.length - 1; b >= 0; b--) {
                             var fire = system.fireOrders[b];
                             if (fire.turn < gamedata.turn) {
@@ -187,6 +163,18 @@ window.ajaxInterface = {
                         }
 
                         systems[a] = { 'id': system.id, 'power': system.power, 'fireOrders': fires, 'ammo': ammoArray };
+						
+						if (system.name == 'adaptiveArmorController'){
+							var currchangedArray = Array();
+							//every point is denoted as single entry with damage class name
+							var dmgClasses = Object.keys(system.currchangedAA);
+							var currType = '';
+							for (var i = 0; i < dmgClasses.length; i++) {
+								currType = dmgClasses[i];
+								for (var j = 0; j< system.currchangedAA[currType];j++) currchangedArray.push(currType);
+							}
+							systems[a] = { 'id': system.id, 'power': system.power, 'fireOrders': fires, 'ammo': ammoArray, 'currchangedAA': currchangedArray };
+						}
                     }
                 }
 

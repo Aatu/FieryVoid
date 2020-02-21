@@ -75,7 +75,6 @@
 
 
     class LightFusionCannon extends LinkedWeapon{
-        // take a look
         public $trailColor = array(30, 170, 255);
 
         public $name = "lightfusionCannon";
@@ -93,7 +92,7 @@
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         private $damagebonus = 0;
-        public $priority = 2;
+        public $priority = 3;
 
         public $damageType = "Standard"; 
         public $weaponClass = "Molecular"; 
@@ -103,9 +102,10 @@
             $this->shots = $shots;
             $this->defaultShots = $shots;
             $this->intercept = $shots;
-            if ($damagebonus > 2) $this->priority++;            
-            if ($damagebonus > 4) $this->priority++;                      
-            if ($damagebonus > 6) $this->priority++;
+
+            if ($damagebonus >= 3) $this->priority++; //heavier varieties fire later in the queue
+            if ($damagebonus >= 5) $this->priority++;
+            if ($damagebonus >= 7) $this->priority++;
             
             $ns = min(3,$shots); //no graphics for more than 3 weapons
             $this->iconPath = "lightfusionCannon$ns.png";
@@ -431,7 +431,7 @@
         public $loadingtime = 3;
         public $raking = 10;
         public $exclusive = true;
-        public $priority = 5;
+        public $priority = 8;//fighter Raking weapon
         
         public $rangePenalty = 1;
         public $fireControl = array(-4, 0, 3); // fighters, <mediums, <capitals 
@@ -512,3 +512,4 @@
 
 
 
+?>

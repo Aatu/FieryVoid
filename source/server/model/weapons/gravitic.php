@@ -485,7 +485,7 @@ class GraviticBolt extends Gravitic
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         private $damagebonus = 0;
         
-        public $priority = 3;
+        public $priority = 4; //fixed 7 damage is more or less equivalent of standard d6+4
 
 	public $damageType = 'Standard'; 
     	public $weaponClass = "Gravitic"; 
@@ -530,7 +530,7 @@ class GraviticBolt extends Gravitic
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         private $damagebonus = 0;
         
-        public $priority = 2;
+        public $priority = 3; //definitely light!
 
 	public $damageType = 'Standard'; 
     	public $weaponClass = "Gravitic"; 
@@ -563,7 +563,7 @@ class GraviticBolt extends Gravitic
         public $loadingtime = 3;
         public $raking = 10;
         public $exclusive = true;
-        public $priority = 5;
+        public $priority = 8; //Raking weapon
         
         public $rangePenalty = 1;
         public $fireControl = array(-5, 0, 0); // fighters, <mediums, <capitals 
@@ -679,111 +679,7 @@ class GraviticLance extends Raking{
 } //endof GraviticLance
 
 
-/*old GraviticLance, no longer used!*/
-/* commenting out...
-class GraviticLanceOld extends DualWeapon{
-    public $priority = 7;
 
-	public $firingModes = array( 
-		1 => "Lance",
-		2 => "Beams"
-	);
-	
-        public $loadingtime = 4;
-        public $name = "GraviticLance";
-	public $displayName = "Gravitic Lance";
-	
-	public $damageType = 'Raking'; 
-    	public $weaponClass = "Gravitic"; 
-        	
-	public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
-            $lance = new GravLance($armour, $maxhealth, 8, $startArc, $endArc);
-            $lance->dualWeapon = true;
-            $lance->parentSystem = $this;
-            $beams = new DuoGravitonBeam($armour, $maxhealth, 8, $startArc, $endArc);
-            $beams->dualWeapon = true;
-            $beams->parentSystem = $this;
-            $weapons = array(
-                1 => $lance,
-                2 => $beams
-            );
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons);
-        }
-    }
-    
-
-    // Don't use the GravLance. It's only here for the GraviticLance class!!
-    class GravLance extends Raking{
-        public $name = "graviticLance";
-        public $displayName = "Gravitic Lance";
-        public $animation = "laser";
-        public $animationColor = array(99, 255, 00);
-        public $animationWidth = 5;
-        public $animationWidth2 = 0.5;
-
-        public $firingModes = array( 1 => "Sustained");
-
-	public $damageType = 'Raking'; 
-    	public $weaponClass = "Gravitic"; 
-        
-        public $loadingtime = 4;
-        // Set overloading and overloadturns to have GravLance ready for
-        // sustained fire in turn 1
-        public $overloadable = true;
-        public $alwaysoverloading = true;
-        public $extraoverloadshots = 2;
-        public $raking = 10;
-        
-        public $rangePenalty = 0.2;
-        public $fireControl = array(-5, 2, 3); // fighters, <mediums, <capitals 
-    
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-
-        public function setSystemDataWindow($turn){
-            $this->data["REMARK"] = "This weapon is always in sustained mode.";
-            parent::setSystemDataWindow($turn);
-        }
-        
-        public function isOverloadingOnTurn($turn = null){
-            return true;
-        }
-        
-        public function getDamage($fireOrder){        return Dice::d(10, 6)+24;   }
-        public function setMinDamage(){   return  $this->minDamage = 30 ;      }
-        public function setMaxDamage(){   return  $this->maxDamage = 84 ;      }
-    }
-    
-
-    class DuoGravitonBeam extends DuoWeapon{
-    
-        public $name = "duoGravitonBeam";
-	public $displayName = "Graviton Beams";
-        
-	public $damageType = 'Raking'; 
-    	public $weaponClass = "Gravitic"; 
-	    
-        // Just for testing!
-        public $loadingtime = 4;
-	
-	public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
-            $beam1 = new GravitonBeam($armour, $maxhealth, 0, $startArc, $endArc);
-            //$beam1->duoWeapon = true;
-            $beam1->parentSystem = $this;
-            $beam2 = new GravitonBeam($armour, $maxhealth, 0, $startArc, $endArc);
-            //$beam2->duoWeapon = true;
-            $beam2->parentSystem = $this;
-            
-            $weapons = array(
-                1 => $beam1,
-                2 => $beam2
-            );
- 
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons);
-        }
-    }
-*/
 
 /*new version*/
     class GraviticCutter extends Raking
@@ -898,136 +794,4 @@ class GraviticLanceOld extends DualWeapon{
 
 
 
-/*Marcin Sawicki: old version
-    class GraviticCutter extends Raking
-    {
-        public $name = "graviticCutter";
-        public $displayName = "Gravitic Cutter";
-        public $animation = "laser";
-        public $animationColor = array(99, 255, 00);
-        public $animationWidth = 2;
-        public $animationWidth2 = 0.2;
-        public $priority = 8;
-        
-        public $raking = 6;
-
-        public $boostable = true;
-        public $boostEfficiency = 5;
-        public $maxBoostLevel = 1;
-        public $loadingtime = 2;
-		
-        public $rangePenalty = 0.5;
-        public $fireControl = array(-4, 2, 4); // fighters, <mediums, <capitals 
-        
-	public $damageType = 'Raking'; 
-    	public $weaponClass = "Gravitic"; 
-	    
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-
-        public function setSystemDataWindow($turn){
-            $this->setTimes(); //I THINK it's not needed any more
-//            $this->normalload = $this->loadingtime;
-            
-            if($this->getBoostLevel($turn)==0){
-                $this->raking = 6;
-            }
-            else{
-                $this->raking = 8;
-            }
-            
-            parent::setSystemDataWindow($turn);
-        }
-        
-        public function getLoadingTime(){
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                return 2 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-            else{
-                return $this->loadingtime;
-            }
-        }
-
-        public function getTurnsloaded(){
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                return 2 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-            else{
-                return $this->turnsloaded;
-            }
-        }
-        
-        public function setTimes(){
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                $this->loadingtime = 2 + $this->getBoostLevel(TacGamedata::$currentTurn);
-                $this->turnsloaded = 2 + $this->getBoostLevel(TacGamedata::$currentTurn);
-                $this->normalload = 2 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-        }
-        
-        public function fire($gamedata, $fireOrder){
-            $this->setTimes();
-            if($this->getBoostLevel($fireOrder->turn)==0){
-                $this->raking = 6;
-            }
-            else{
-                $this->raking = 8;
-            }
-            
-            parent::fire($gamedata, $fireOrder);
-        }
-
-        public function getNormalLoad(){
-            return $this->loadingtime + $this->maxBoostLevel;
-        }
-        
-        private function getBoostLevel($turn){
-            $boostLevel = 0;
-            foreach ($this->power as $i){
-                    if ($i->turn != $turn)
-                            continue;
-
-                    if ($i->type == 2){
-                            $boostLevel += $i->amount;
-                    }
-            }
-
-            return $boostLevel;
-        }
-
-        public function getDamage($fireOrder){
-            if($this->getBoostLevel($fireOrder->turn)==0){
-                $this->raking = 6;
-                return (Dice::d(10, 2)+8);
-            }
-            else{
-                $this->raking = 8;
-                return (Dice::d(10, 3)+10);
-            }
-        }
-        
-        public function setMinDamage(){
-            if($this->getBoostLevel(TacGameData::$currentTurn)==0){
-                $this->minDamage = 10 ;
-            }
-            else{
-                $this->minDamage = 13 ;
-            }
-        }
-        
-        public function setMaxDamage(){
-            if($this->getBoostLevel(TacGameData::$currentTurn)==0){
-                $this->maxDamage = 28 ;
-            }
-            else{
-                $this->maxDamage = 40 ;
-            }
-        }
-    }
-*/    
 ?>

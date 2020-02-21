@@ -34,7 +34,7 @@ class trakhabp extends FighterFlight{
 			
 			$armour = array(4, 4, 4, 4);
 			$fighter = new Fighter("trakhabp", $armour, 19, $this->id);
-			$fighter->displayName = "T'Rakh Armed Breaching Pod";
+			$fighter->displayName = "T'Rakh";
 			$fighter->imagePath = "img/ships/NarnTRakh.png";
 			$fighter->iconPath = "img/ships/NarnTRakh_Large.png";
 			

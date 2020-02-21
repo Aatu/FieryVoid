@@ -77,7 +77,7 @@ class CustomLightMatterCannonF extends Matter {
         public $projectilespeed = 18;
         public $animationWidth = 2;
         public $animationExplosionScale = 0.10;
-        public $priority = 9;
+        public $priority = 9; //Matter weapon
 		public $iconPath = "customLightMatterCannon.png";
         
         public $loadingtime = 3;
@@ -1109,7 +1109,7 @@ class customHeavyPolarityPulsar extends Pulse{
 
 
 
-    class customMphasedBeamAcc extends Weapon{
+class customMphasedBeamAcc extends Weapon{
 	public $name = "customMphasedBeamAcc";
         public $displayName = "Multiphased Beam Accelerator";
 	public $animation = "laser";
@@ -1258,7 +1258,8 @@ class customHeavyPolarityPulsar extends Pulse{
         public $defaultShots = 1;
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
-	    public $priority = 3;
+	    public $priority = 4;
+	    public $priorityArray = array(1=>4, 2=>6); //alternate mode is far stronger
         
         public $damageType = "Standard"; 
         public $weaponClass = "Molecular"; 
@@ -1268,7 +1269,6 @@ class customHeavyPolarityPulsar extends Pulse{
 		public $gunsArray = array(1=>3, 2=>1);
         public $fireControlArray = array( 1=>array(0, 0, 0), 2=>array(-3,0,0) ); // fighters, <mediums, <capitals 
         public $rangePenaltyArray = array(1=>2, 2=>1.5); //-2/hex and -3/2 hexes
-	    public $priorityArray = array(1=>4, 2=>6);
 		
 	    
         
@@ -1341,7 +1341,7 @@ class customHeavyPolarityPulsar extends Pulse{
         public $defaultShots = 1;
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
-	    public $priority = 3;
+	    public $priority = 4;
         
         public $damageType = "Standard"; 
         public $weaponClass = "Molecular"; 
@@ -1394,7 +1394,7 @@ class LightScattergun extends Pulse{
 	
         public $rangePenalty = 2;
 	
-	public $priority = 3;
+	public $priority = 4;
 
 	
     

@@ -402,7 +402,6 @@ class Weapon extends ShipSystem
 
     public function setSystemDataWindow($turn)
     {
-
         $this->data["Resolution Priority (ship/fighter)"] = $this->priority . '/' . $this->priorityAF;
         $this->data["Loading"] = $this->getTurnsloaded() . "/" . $this->getNormalLoad();
 
@@ -1345,7 +1344,7 @@ class Weapon extends ShipSystem
     */
     public function getSystemArmourAdaptive($target, $system, $gamedata, $fireOrder, $pos = null)
     { 
-	$armor = 0;
+		$armor = 0;
         return $armor;
     }//endof function getSystemArmourAdaptive
 	

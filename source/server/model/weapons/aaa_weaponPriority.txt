@@ -23,12 +23,13 @@ Ship weapon priority:
 
 Fighter weapon priority:
 1-2: mostly special weapons that should be fired ASAP
-3: light weapons (d6+2 and smaller)
-4: typical fighter weapons (d6+3 - d6+4)
-5: large fighter weapons (d6+5, d6+6)
-6: very large fighter weapons (Ion Bolt, Light Graviton Beam)
-7: Raking fighter weapons
-9: fighter Matter weapons
+3: light fighterweapons (d6+2 and weaker)
+4: typical fighter weapons (d6+3 - d6+4, also 2d6 and d3+5)
+5: large fighter weapons (d6+5, d6+6, fighter missiles)
+6: very large fighter weapons - Standard mode (Ion Bolt, Gatling Pulse Cannon)
+7: skipped due to antiship->antifighter translation peculiarities!
+8: (heavy) Raking fighter weapons
+9: fighter Matter weapons (heavy ones!)
 10: mostly special weapons that should be fired late
 
 

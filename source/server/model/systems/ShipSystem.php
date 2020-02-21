@@ -17,6 +17,7 @@ class ShipSystem {
     public $power = array();
     public $fireOrders = array();
     public $canOffLine = false;
+	public $fighter = false; //important for actual fighters
 
     public $data = array();
     public $critData = array();
@@ -88,7 +89,7 @@ class ShipSystem {
 	/*generates individual notes (if necessary)
 	base version is empty, to be redefined by systems as necessary
 	*/
-	public function generateIndividualNotes($gamedata){	}	
+	public function generateIndividualNotes($gamedata, $dbManager){	}	
 	
 	public function addIndividualNote($noteObject){
 		$this->individualNotes[] = $noteObject;

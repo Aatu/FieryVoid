@@ -101,6 +101,9 @@ class Firing
             $expectedDamage = max(0.5, $expectedDamage); //assume some damage is always possible!
             //reduce damage for non-Standard modes...
             switch ($firingWeapon->damageType) {
+                case 'Flash': //increase expected damage on account of collateral!
+                    $expectedDamage = $expectedDamage * 1.2;
+                    break;
                 case 'Raking': //Raking damage gets reduced multiple times, account for that a bit! - another armour down!
                     if ($expectedDamage > 10) { ///simplified, assuming Raking will be in 10-strong rakes
                         $expectedDamage = $expectedDamage - $armour; //from second rake - let's simplify that two full weights of armor will be deduced from damage
