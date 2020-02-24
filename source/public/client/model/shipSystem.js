@@ -23,6 +23,10 @@ ShipSystem.prototype.hasMaxBoost = function () {
 ShipSystem.prototype.isScanner = function () {
 				return false;
 };
+ShipSystem.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+				this.individualNotesTransfer = "";
+				return false;
+};
 
 var Fighter = function Fighter(json, staticFighter, ship) {
 

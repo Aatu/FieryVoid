@@ -231,6 +231,7 @@ window.gamedata = {
 				}
 			}
 		}else{//note presence of fighters
+	            totalShips++; //well, total units anyway... rules say "one other unit present" and indicate that unit may be a fighter flight as well
 			var smallCraftSize = '';			
 			if (lship.hangarRequired != 'fighters' ) { //classify based on explicit info from craft
 				smallCraftSize = lship.hangarRequired;
@@ -366,7 +367,7 @@ window.gamedata = {
 		    checkResult += "OK";
 	    }else{		
 		    if(units10==1 && oneOverAllowed == false){ //only 1 unit, and this exception wasn't used yet
-			oneOverAllowed = true;
+			//oneOverAllowed = true; //re-checked rules, Restricted and Limited pools should be checked separately
 			checkResult += "OK (one single ship is allowed to break limit)";
 		    }else{
 			checkResult += "FAILED! (too many points in this deployment bracket)";
@@ -379,7 +380,7 @@ window.gamedata = {
 		    checkResult += "OK";
 	    }else{		
 		    if(units33==1 && oneOverAllowed == false){ //only 1 unit, and this exception wasn't used yet
-			oneOverAllowed = true;
+			//oneOverAllowed = true;//re-checked rules, Restricted and Limited pools should be checked separately
 			checkResult += "OK (one single ship is allowed to break limit)";
 		    }else{
 			checkResult += "FAILED! (too many points in this deployment bracket)";
@@ -387,7 +388,7 @@ window.gamedata = {
 		    }
 	    }
 	    if(points10>0 && totalShips<2){
-		checkResult += "<br>Restricted (10%) ship present without escort! Such a rare ship needs to be accompanied by at least one other ship, unless it's Dargan or a Minbari ship.";
+		checkResult += "<br>Restricted (10%) ship present without escort! Such a rare ship needs to be accompanied by at least one other unit, unless it's Dargan or a Minbari ship.";
 		problemFound = true;
 	    }	    
 	    checkResult += "<br><br>";

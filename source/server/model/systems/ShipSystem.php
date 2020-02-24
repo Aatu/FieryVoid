@@ -40,6 +40,7 @@ class ShipSystem {
     protected $unit = null; //unit on which system is mounted
 	
 	protected $individualNotes = array();
+	public $individualNotesTransfer = "";//variable for transferring individual notes from interface to servr layer
 	
     
     function __construct($armour, $maxhealth, $powerReq, $output){
@@ -61,12 +62,16 @@ class ShipSystem {
         $strippedSystem->output = $this->output;
         $strippedSystem->outputMod = $this->outputMod;
         $strippedSystem->destroyed = $this->destroyed;
+		$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer; //necessary 
 
 		//ship enhancements - check if this system is affected...
 		$strippedSystem = Enhancements::addSystemEnhancementsForJSON($this->unit, $this, $strippedSystem);//modifies $strippedSystem object
 
         return $strippedSystem;
     }
+	
+	public function doIndividualNotesTransfer(){//optionally to be redefined if system can receive any private data from front endthat need immediate attention		
+	}
 
     public function onConstructed($ship, $turn, $phase){
         if($ship->getAdvancedArmor()==true){

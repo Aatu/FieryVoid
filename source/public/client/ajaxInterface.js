@@ -115,24 +115,16 @@ window.ajaxInterface = {
                                     ammoArray[index] = amount;
                                 }
                             }
-
-                            fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray };
 							
-
-							if (fightersystem.name == 'adaptiveArmorController'){
-								var currchangedArray = Array();
-								//every point is denoted as single entry with damage class name
-								var dmgClasses = Object.keys(fightersystem.currchangedAA);
-								var currType = '';
-								for (var i = 0; i < dmgClasses.length; i++) {
-									currType = dmgClasses[i];
-									for (var j = 0; j< fightersystem.currchangedAA[currType];j++) currchangedArray.push(currType);
-								}
-								fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray, 'currchangedAA': currchangedArray };
-							}							
+							//changed to accomodate new variable for individual data transfer to server - in a generic way
+                            //fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray };
+							fightersystem.doIndividualNotesTransfer();
+							fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray, "individualNotesTransfer": fightersystem.individualNotesTransfer };
                         }
-
-                        systems[a] = { 'id': system.id, 'systems': fighterSystems };
+						//changed to accomodate new variable for individual data transfer to server - in a generic way
+                        //systems[a] = { 'id': system.id, 'systems': fighterSystems };
+						system.doIndividualNotesTransfer();
+						systems[a] = { 'id': system.id, 'systems': fighterSystems, "individualNotesTransfer": system.individualNotesTransfer };
                     } else {
                         var fires = Array();
                         var ammoArray = Array();
@@ -161,20 +153,10 @@ window.ajaxInterface = {
                                 ammoArray[index] = amount;
                             }
                         }
-
-                        systems[a] = { 'id': system.id, 'power': system.power, 'fireOrders': fires, 'ammo': ammoArray };
-						
-						if (system.name == 'adaptiveArmorController'){
-							var currchangedArray = Array();
-							//every point is denoted as single entry with damage class name
-							var dmgClasses = Object.keys(system.currchangedAA);
-							var currType = '';
-							for (var i = 0; i < dmgClasses.length; i++) {
-								currType = dmgClasses[i];
-								for (var j = 0; j< system.currchangedAA[currType];j++) currchangedArray.push(currType);
-							}
-							systems[a] = { 'id': system.id, 'power': system.power, 'fireOrders': fires, 'ammo': ammoArray, 'currchangedAA': currchangedArray };
-						}
+						//changed to accomodate new variable for individual data transfer to server - in a generic way
+                        //systems[a] = { 'id': system.id, 'power': system.power, 'fireOrders': fires, 'ammo': ammoArray };
+						system.doIndividualNotesTransfer();
+						systems[a] = { 'id': system.id, 'power': system.power, 'fireOrders': fires, 'ammo': ammoArray, "individualNotesTransfer": system.individualNotesTransfer };
                     }
                 }
 

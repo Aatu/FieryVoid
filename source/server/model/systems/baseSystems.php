@@ -1248,6 +1248,12 @@ class AdaptiveArmorController extends ShipSystem{
         return $strippedSystem;
     }
 	
+	public function doIndividualNotesTransfer(){
+		//data received in variable individualNotesTransfer, further functions will look for it in currchangedAA
+		if(is_array($this->individualNotesTransfer))	$this->currchangedAA = $this->individualNotesTransfer; //else there's nothing relevant there
+		$this->individualNotesTransfer = array(); //empty, just in case
+	}		
+							
 } //endof AdaptiveArmorController
 
 ?>

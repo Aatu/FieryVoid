@@ -303,3 +303,14 @@ AdaptiveArmorController.prototype.setCurrDmgType= function (dmgTypeToSet) { //se
 		}
 	}	
 };
+AdaptiveArmorController.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+	this.individualNotesTransfer = Array();
+	//every point is denoted as single entry with damage class name
+	var dmgClasses = Object.keys(this.currchangedAA);
+	var currType = '';
+	for (var i = 0; i < dmgClasses.length; i++) {
+		currType = dmgClasses[i];
+		for (var j = 0; j< this.currchangedAA[currType];j++) this.individualNotesTransfer.push(currType);
+	}
+	return true;
+};

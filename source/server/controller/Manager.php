@@ -654,21 +654,24 @@ class Manager{
                                         $fig->setAmmo($i, $ammo);
                                     }
                                 }
-                            }
-							
-							if ($fig instanceOf AdaptiveArmorController) if(isset($fightersys["currchangedAA"])){
-								$fig->currchangedAA = $fightersys["currchangedAA"];
-							}
+                            }							
 
                             $fig->setFireOrders($fires);
-                        }                        
+                        }               
+
+
+						//receive individually transferred fighter system data, if any								
+						if(isset($fightersys["individualNotesTransfer"])){ //may be not set if game is being created - in this case only data for 1 fighter is transferred
+							$fig->individualNotesTransfer = $fightersys["individualNotesTransfer"];
+							$fig->doIndividualNotesTransfer();	
+						}				
+						
                     }
-                    
                 }
-				
-				//adaptive armor, if set
-				if ($sys instanceOf AdaptiveArmorController) if(isset($system["currchangedAA"])){
-					$sys->currchangedAA = $system["currchangedAA"];
+				//receive individually transferred system data, if any
+				if(isset($system["individualNotesTransfer"])){ //may be not set if game is being created - in this case only data for 1 fighter is transferred
+					$sys->individualNotesTransfer = $system["individualNotesTransfer"];
+					$sys->doIndividualNotesTransfer();
 				}
             }
 
