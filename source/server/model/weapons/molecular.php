@@ -12,9 +12,7 @@
     }
 
 
-
     class FusionCannon extends Molecular{
-
         public $name = "fusionCannon";
         public $displayName = "Fusion Cannon";
         public $animation = "beam";
@@ -48,9 +46,6 @@
 
 
     class HeavyFusionCannon extends FusionCannon{
-
-   //     public $name = "hvyFusionCannon";
-        
         public $name = "heavyFusionCannon";
         public $displayName = "Heavy Fusion Cannon";
         public $animation = "beam";
@@ -113,8 +108,6 @@
         }
         
         public function setSystemDataWindow($turn){
-            //$this->data["Weapon type"] = "Molecular";
-            //$this->data["Damage type"] = "Standard";
             parent::setSystemDataWindow($turn);
         }
 
@@ -128,12 +121,11 @@
     // mhhh... extended from Raking as that involves less code duplication
     class MolecularDisruptor extends Raking
     {
-        public $trailColor = array(30, 170, 255);
-
         public $name = "molecularDisruptor";
         public $displayName = "Molecular Disruptor";
         public $animation = "trail";
         public $animationColor = array(30, 170, 255);
+        public $trailColor = array(30, 170, 255);
         public $animationExplosionScale = 0.35;
         public $projectilespeed = 12;
         public $animationWidth = 10;
@@ -168,17 +160,20 @@
         }
 
         public function setSystemDataWindow($turn){
-            //$this->data["Weapon type"] = "Molecular";
-            //$this->data["Damage type"] = "Raking";
-            $this->data["Special"] = "Reduces armor of facing structure.";
             parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+            $this->data["Special"] .= "Reduces armor of facing structure.";
         }
 
         protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
             parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
             if(!$this->alreadyReduced){ 
                 $struct = $target->getStructureSystem($location);
-                if ($struct->advancedArmor) return;
+                if ($struct->advancedArmor) return; //advanced armor prevents effect 
                 if(!$struct->isDestroyed($fireOrder->turn-1)){ //last turn Structure was still there...
                     $this->alreadyReduced = true; //do this only for first part of shot that actually connects
                     $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
@@ -198,7 +193,6 @@
 
 
     class DestabilizerBeam extends Molecular{
-
         public $trailColor = array(30, 170, 255);
 
         public $name = "destabilizerBeam";
@@ -374,10 +368,9 @@
             return $boostLevel;
         }
 
-        //actually this shouldn't be restricted to standard armor, advanced has no special protection against this effect. 
-        //to be modified after AdaptiveArmor is redone 
-        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){ //standard part of armor - reduce by 1!
-            $armour = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
+ 
+        public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos=null){ //standard part of armor - reduce by 1!
+            $armour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
             $armour = $armour - 1;
             $armour = max(0,$armour);
             return $armour;
@@ -413,7 +406,6 @@
             $boost = $this->getBoostLevel($turn);
             $this->maxDamage = 50 + ($boost * 10) + 10;
         }  
-
    }
 
         

@@ -159,18 +159,38 @@ class BaseShip {
     }
 	    
         public function getInitiativebonus($gamedata){
+            if($this->faction == "Abbai"){
+                return $this->doAbbaiInitiativeBonus($gamedata);
+            }
             if($this->faction == "Centauri"){
                 return $this->doCentauriInitiativeBonus($gamedata);
-            }
-            if($this->faction == "Yolu"){
-                return $this->doYoluInitiativeBonus($gamedata);
             }
             if($this->faction == "Dilgar"){
                 return $this->doDilgarInitiativeBonus($gamedata);
             }
+            if($this->faction == "Narn"){
+                return $this->doNarnInitiativeBonus($gamedata);
+            }
+            if($this->faction == "Yolu"){
+                return $this->doYoluInitiativeBonus($gamedata);
+            }
             return $this->iniativebonus;
         }
         
+		
+        private function doAbbaiInitiativeBonus($gamedata){
+            foreach($gamedata->ships as $ship){
+                if(!$ship->isDestroyed()
+                        && ($ship->faction == "Abbai")
+                        && ($this->userid == $ship->userid)
+                        && ($ship instanceof Nakarsa)
+                        && ($this->id != $ship->id)){
+                    return ($this->iniativebonus+5);
+                }
+            }
+			return $this->iniativebonus;
+        }
+		
         private function doCentauriInitiativeBonus($gamedata){
             foreach($gamedata->ships as $ship){
                 if(!$ship->isDestroyed()
@@ -181,7 +201,21 @@ class BaseShip {
                     return ($this->iniativebonus+5);
                 }
             }
-		return $this->iniativebonus;
+			return $this->iniativebonus;
+        }
+		
+		
+        private function doNarnInitiativeBonus($gamedata){
+            foreach($gamedata->ships as $ship){
+                if(!$ship->isDestroyed()
+                        && ($ship->faction == "Narn")
+                        && ($this->userid == $ship->userid)
+                        && ($ship instanceof Gtal)
+                        && ($this->id != $ship->id)){
+                    return ($this->iniativebonus+5);
+                }
+            }
+			return $this->iniativebonus;
         }
                 
         private function doDilgarInitiativeBonus($gamedata){
@@ -1455,14 +1489,14 @@ class BaseShip {
         } 
         
 	/*note expected damage - important for deciding ambiguous shots!*/
-	public function setExpectedDamage($hitLoc, $hitChance, $weapon){
+	public function setExpectedDamage($hitLoc, $hitChance, $weapon, $shooter){
 		//add to table private $expectedDamage = array(); //loc => dam; damage the unit is expected to take this turn
 		if(($hitLoc==0) || ($hitChance<=0)) return; //no point checking, PRIMARY damage not relevant for this decision; same when hit chance is less than 0
 		if(!isset($this->expectedDamage[$hitLoc])){
 			$this->expectedDamage[$hitLoc] = 0;
 		}		
 		$structureSystem = $this->getStructureSystem($hitLoc);
-		$armour = $structureSystem->getArmour($this, null, $weapon->damageType); //shooter relevant only for fighters - and they don't care about calculating ambiguous damage!
+		$armour = $structureSystem->getArmourComplete($this, $shooter, $weapon->weaponClass); 
 		$expectedDamageMax = $weapon->maxDamage-$armour;
 		$expectedDamageMin = $weapon->minDamage-$armour;
 		$expectedDamageMax = max(0,$expectedDamageMax);

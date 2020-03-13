@@ -7,9 +7,9 @@ class Kirva extends OSAT{
 	$this->pointCost = 225;
 	$this->faction = "Abbai (WotCR)";
         $this->phpclass = "Kirva";
-        $this->imagePath = "img/ships/AbbaiKirva.png";
+        $this->imagePath = "img/ships/AbbaiBochi.png";
         $this->shipClass = 'Kirva Jammer Satellite';
-        $this->canvasSize = 100;
+        $this->canvasSize = 200;
         
         $this->occurence = "rare";
         $this->variantOf = 'Bochi Defense Satellite';

@@ -62,7 +62,12 @@
         
 		
 		public function getAdaptiveArmorController(){
-			return $this->adaptiveArmorController;    
+			/*this doesn't work for some reason; need to look for AA controller among systems... OTOH a particular fighter doesn't have all that many systems!
+			return $this->adaptiveArmorController;*/
+			foreach ($this->systems as $fs) {
+                if ($fs instanceof AdaptiveArmorController) return $fs;
+            }
+			return null;
 		}
 		public function createAdaptiveArmorController($AAtotal, $AApertype, $AApreallocated){ //$AAtotal, $AApertype, $AApreallocated
 			$this->adaptiveArmorController = new AdaptiveArmorController($AAtotal, $AApertype, $AApreallocated); 
@@ -145,55 +150,29 @@
 		}
 		
 
-        public function getArmour($target, $shooter, $dmgType, $pos=null){ //gets total armour
-		$armour = $this->getArmourStandard($target, $shooter, $dmgType, $pos) + $this->getArmourInvulnerable($target, $shooter, $dmgType, $pos);
-		return $armour;
-        }
-		
-		
-    public  function getArmourStandard($target, $shooter, $dmgClass, $pos=null){ //gets standard armor - from indicated direction if necessary direction 
-	//$pos is to be included if launch position is different than firing unit position
-	if($this->advancedArmor != true){	    
+    public  function getArmourBase($target, $shooter, $dmgClass, $pos=null){ //gets armor value - from indicated direction if necessary direction 
+		//$pos is to be included if launch position is different than firing unit position
 		if($pos==null){
 			$loc = $target->doGetHitSection($shooter); //finds array with relevant data!
 		}else{ //firing position indicated!
 			$loc = $target->doGetHitSectionPos($pos); //finds array with relevant data!
 		}
 		return $loc["armour"];
-	}else{
-		return 0;
-	}
     }
 	
-    public function getArmourInvulnerable($target, $shooter, $dmgClass, $pos=null){ //gets invulnerable part of armour (Adaptive Armor, at the moment)
-	//$pos is to be included if launch position is different than firing unit position
-	$armour = 0;
-	if($this->advancedArmor == true){
-	    if($pos==null){
-		$loc = $target->doGetHitSection($shooter); //finds array with relevant data!
-	    }else{ //firing position indicated!
-		$loc = $target->doGetHitSectionPos($pos); //finds array with relevant data!
-	    }
-	    $armour += $loc["armour"];
-		
-		if($dmgClass == 'Ballistic'){ //extra protection against ballistics
-			$armour += 2;
+	public function getArmourAdaptive($target, $shooter, $dmgClass, $pos=null){ //gets adaptive part of armour
+		$armour = 0;
+		$AAController = $this->getAdaptiveArmorController(); //AA subsystem of fighter, not of fighter flight
+		if($AAController){
+			$armour = $AAController->getArmourValue($dmgClass);		
+/*$ss = $AAController->getArmourValue($dmgClass);
+throw new Exception("getArmourAdaptive (fighter)! $dmgClass $armour");		
+*/
 		}
-		if($dmgClass == 'Matter'){ //slight vulnerability vs Matter
-			$armour += -2;
-		}
+		return $armour;
 	}
 	    
-	$armour = max(0,$armour); //no less than 0, BEFORE adaptive armor kicks in!
-	    /*redone in a different way
-	$activeAA = 0;
-	if (isset($target->adaptiveArmour)){
-            if (isset($target->armourSettings[$dmgClass][1])) $activeAA = $target->armourSettings[$dmgClass][1];
-        } 
-	$armour += $activeAA;
-	*/
-	return $armour;
-    }
+		
 
     public function onAdvancingGamedata($ship, $gamedata)
     {

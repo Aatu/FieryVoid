@@ -10,7 +10,8 @@ class Shadrak extends SmallStarBaseFourSections{
 		$this->faction = "Markab";
 		$this->phpclass = "Shadrak";
 		$this->shipClass = "Shadrak Shrine";
-		$this->imagePath = "img/ships/orion.png";
+		$this->imagePath = "img/ships/MarkabShadrakShrine.png";
+		$this->canvasSize = 200; 
 		$this->fighters = array("normal"=>6); 
 
 		$this->shipSizeClass = 3; 
@@ -21,7 +22,6 @@ class Shadrak extends SmallStarBaseFourSections{
 		$this->forwardDefense = 16;
 		$this->sideDefense = 16;
 
-		$this->canvasSize = 280; 
 
 		$this->addFrontSystem(new Structure( 4, 60));
 		$this->addAftSystem(new Structure( 4, 60));

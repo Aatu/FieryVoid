@@ -76,43 +76,17 @@
         }
         
         public function getLoadingTime(){
-		 return $this->loadingtime;
-	    /* original
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-            else{
-                return $this->loadingtime;
-            }
-	    */
+			return $this->loadingtime;
         }
 
         public function getTurnsloaded(){
-		return $this->turnsloaded;
-		/*original
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-            else{
-                return $this->turnsloaded;
-            }
-	    */
+			return $this->turnsloaded;
         }
         
         public function setTimes(){
-                $this->loadingtime = 1;
-                $this->turnsloaded = 1;
-                $this->normalload = 1;
-		/*original
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                $this->loadingtime = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-                $this->turnsloaded = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-                $this->normalload = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-	    */
+			$this->loadingtime = 1;
+			$this->turnsloaded = 1;
+			$this->normalload = 1;
         }
         
         protected function getPulses($turn)
@@ -150,61 +124,61 @@
 	     }
 	}
     
-        public function fire($gamedata, $fireOrder){
+	public function fire($gamedata, $fireOrder){
 	    $currBoostlevel = $this->getBoostLevel($gamedata->turn);
-            $this->maxpulses = $this->getMaxPulses($gamedata->turn);
-            $this->setTimes();
-                        
-            parent::fire($gamedata, $fireOrder);
-            // If fully boosted: test for possible crit.
-            if($currBoostlevel === $this->maxBoostLevel){
-            	$crits = array();
-                $shooter = $gamedata->getShipById($fireOrder->shooterid);
-                $crits = $this->testCritical($shooter, $gamedata, $crits);
-            }
+		$this->maxpulses = $this->getMaxPulses($gamedata->turn);
+		$this->setTimes();
+					
+		parent::fire($gamedata, $fireOrder);
+		// If fully boosted: test for possible crit.
+		if($currBoostlevel === $this->maxBoostLevel){
+			$crits = array();
+			$shooter = $gamedata->getShipById($fireOrder->shooterid);
+			$crits = $this->testCritical($shooter, $gamedata, $crits);
+		}
 	    $this->applyCooldown($gamedata);
-        }
+	}
 	    
-	    /* applying cooldown when firing defensively, too
-	    */
-	    public function fireDefensively($gamedata, $interceptedWeapon)
-	    {
+	/* applying cooldown when firing defensively, too
+	*/
+	public function fireDefensively($gamedata, $interceptedWeapon)
+	{
 		if ($this->firedDefensivelyAlready==0){ //in case of multiple interceptions during one turn - suffer backlash only once
 			$this->applyCooldown($gamedata);	
 		}
 		parent::fireDefensively($gamedata, $interceptedWeapon);
-	    }
+	}
 
-        public function getNormalLoad(){
-            return $this->loadingtime + $this->maxBoostLevel;
-        }
-        
-        private function getBoostLevel($turn){
-            $boostLevel = 0;
-            foreach ($this->power as $i){
-                    if ($i->turn != $turn)
-                            continue;
+	public function getNormalLoad(){
+		return $this->loadingtime + $this->maxBoostLevel;
+	}
+	
+	private function getBoostLevel($turn){
+		$boostLevel = 0;
+		foreach ($this->power as $i){
+				if ($i->turn != $turn)
+						continue;
 
-                    if ($i->type == 2){
-                            $boostLevel += $i->amount;
-                    }
-            }
+				if ($i->type == 2){
+						$boostLevel += $i->amount;
+				}
+		}
 
-            return $boostLevel;
-        }
+		return $boostLevel;
+	}
 
-        private function getMaxPulses($turn){
-            return 3 + $this->getBoostLevel($turn);
-        }
+	private function getMaxPulses($turn){
+		return 3 + $this->getBoostLevel($turn);
+	}
 
-        public function getInterceptRating($turn){
-            return 1 + $this->getBoostLevel($turn);            
-        }
-        
-        public function getDamage($fireOrder){        return 10;   }
-        public function setMinDamage(){     $this->minDamage = 10 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 10 ;      }
-    } //endof class GravitonPulsar
+	public function getInterceptRating($turn){
+		return 1 + $this->getBoostLevel($turn);            
+	}
+	
+	public function getDamage($fireOrder){        return 10;   }
+	public function setMinDamage(){     $this->minDamage = 10 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 10 ;      }
+} //endof class GravitonPulsar
 
 
 /*Marcin Sawicki: as longer recharge time was highly troublesome, I have thrown in cooldown periods instead (but +1 turn)*/
@@ -303,29 +277,11 @@ class GraviticBolt extends Gravitic
         }
         
         public function getLoadingTime(){
-		return $this->loadingtime;
-		/* original
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-            else{
-                return $this->loadingtime;
-            }
-	    */
+			return $this->loadingtime;
         }
 
         public function getTurnsloaded(){
-		return $this->turnsloaded;
-		/*original
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-            else{
-                return $this->turnsloaded;
-            }
-	    */
+			return $this->turnsloaded;
         }        
 
 	protected function applyCooldown($gamedata){
@@ -376,14 +332,6 @@ class GraviticBolt extends Gravitic
                 $this->loadingtime = 1;
                 $this->turnsloaded = 1;
                 $this->normalload = 1;
-		/*original
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                $this->loadingtime = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-                $this->turnsloaded = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-                $this->normalload = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-	    */
         }
         
         public function getDamage($fireOrder){        return $this->getCurDamage($fireOrder->turn);   }
@@ -416,8 +364,6 @@ class GraviticBolt extends Gravitic
         }
 
         public function setSystemDataWindow($turn){
-
-            
             parent::setSystemDataWindow($turn);
         }
         
@@ -532,13 +478,13 @@ class GraviticBolt extends Gravitic
         
         public $priority = 3; //definitely light!
 
-	public $damageType = 'Standard'; 
+		public $damageType = 'Standard'; 
     	public $weaponClass = "Gravitic"; 
 
         function __construct($startArc, $endArc, $damagebonus, $shots = 2){
             $this->shots = $shots;
             $this->defaultShots = $shots;
-		$this->intercept = $shots;
+			$this->intercept = $shots;
             
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
@@ -568,8 +514,8 @@ class GraviticBolt extends Gravitic
         public $rangePenalty = 1;
         public $fireControl = array(-5, 0, 0); // fighters, <mediums, <capitals 
  
-	public $damageType = 'Raking'; 
-    	public $weaponClass = "Gravitic"; 
+		public $damageType = 'Raking'; 
+		public $weaponClass = "Gravitic"; 
 	    
 	    
         function __construct($startArc, $endArc, $damagebonus){
@@ -623,19 +569,19 @@ class GraviticLance extends Raking{
 	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
-		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-		if ( $maxhealth == 0 ){
-		    $maxhealth = 12;
-		}
-		if ( $powerReq == 0 ){
-		    $powerReq = 16;
-		}
-		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ){
+				$maxhealth = 12;
+			}
+			if ( $powerReq == 0 ){
+				$powerReq = 16;
+			}
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 	
         public function setSystemDataWindow($turn){
-		$this->data["Special"] = 'Can fire as either a Gravitic Lance (Sustained) or two Graviton Beams. ';
-		parent::setSystemDataWindow($turn);
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Can fire as either a Gravitic Lance (Sustained) or two Graviton Beams. ';
         }
 	
 

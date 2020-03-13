@@ -7,7 +7,7 @@ class sentryFF extends MediumShip{
 	$this->pointCost = 420;
 	$this->faction = "Deneth";
         $this->phpclass = "sentryFF";
-        $this->imagePath = "img/ships/pinnace.png";
+        $this->imagePath = "img/ships/DenethSentry.png";
         $this->shipClass = "Sentry Frigate";
         $this->canvasSize = 100;
 	    

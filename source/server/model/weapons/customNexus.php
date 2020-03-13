@@ -52,15 +52,6 @@ class NexusKineticBoxLauncher extends Weapon{
             $this->data["Special"] = "Ignores armor, no overkill (Ballistic+Matter weapon).";
             $this->data["Ammunition"] = $this->ammunition;
         }
-        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
-            return 0; //Matter ignores armor!
-        }
-        public function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos=null){
-            $value = parent::getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos);
-            $value = $value - 2; //account for Matter, as standard mettod will account for Ballistic
-            if($value < 0) $value = 0;
-            return $value;
-        }
         
         public function getDamage($fireOrder){
             $dmg = 8;
@@ -239,9 +230,8 @@ class NexusChaffLauncher extends Weapon{
 
         public $name = "nexusParticleProjectorHeavy";
         public $displayName = "Heavy Particle Projector";
-	public $iconPath = "NexusParticleProjectorHeavy.png";
-	    
-
+		public $iconPath = "NexusParticleProjectorHeavy.png";
+	
 		public $animation = "beam";
         public $animationColor = array(205, 200, 200);
         public $animationExplosionScale = 0.35;
@@ -266,22 +256,6 @@ class NexusChaffLauncher extends Weapon{
         public function getDamage($fireOrder){ return Dice::d(10, 2)+8;   }
         public function setMinDamage(){     $this->minDamage = 10 ;      }
         public function setMaxDamage(){     $this->maxDamage = 28 ;      }
-/*
-	public $firingMode = 'Standard'; //firing mode - just a name essentially
-	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-    	public $weaponClass = "Particle"; //not important really
-	    
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 8;
-            if ( $powerReq == 0 ) $powerReq = 4;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-
-        public function getDamage($fireOrder){ return Dice::d(10, 2)+8;   }
-        public function setMinDamage(){     $this->minDamage = 10 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 28 ;      }
-		*/
     }
 
 	class NexusParticleProjectorFtr extends Particle{
@@ -320,7 +294,7 @@ class NexusChaffLauncher extends Weapon{
 
         public $name = "nexusParticleAgitator";
         public $displayName = "Particle Agitator";
-	public $iconPath = "NexusParticleAgitator.png";
+		public $iconPath = "NexusParticleAgitator.png";
 	    
         public $animation = "beam";
         public $animationColor = array(255, 250, 230);
@@ -336,8 +310,8 @@ class NexusChaffLauncher extends Weapon{
         public $rangePenalty = 1; //-1/hex
         public $fireControl = array(0, 2, 2); // fighters, <mediums, <capitals
 
-	public $firingMode = 'Standard'; //firing mode - just a name essentially
-	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+		public $firingMode = 'Standard'; //firing mode - just a name essentially
+		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     	public $weaponClass = "Particle"; //not important really
 	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){

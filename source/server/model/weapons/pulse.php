@@ -324,9 +324,9 @@ class QuadPulsar extends Pulse{
 	}
         
         public function setSystemDataWindow($turn){
-                parent::setSystemDataWindow($turn);
-		$this->data["Special"] = 'Pulse mode fully armed: D 5 +1/15 %, max. 7 pulses';
-		$this->data["Special"] .= 'Pulse mode 1 turn: D 3 pulses';
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Pulse mode fully armed: d5 +1/15 %, max. 7 pulses';
+			$this->data["Special"] .= 'Pulse mode 1 turn: d3 pulses, no volley count bonus';
         }
         
 
@@ -596,11 +596,7 @@ class QuadPulsar extends Pulse{
 	public $noOverkill = true;//Matter weapons do not overkill
     	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     	public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
-	         
-	public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
-            return 0; //Matter ignores armor!
-        }
-	    
+	         //Matter ignores armor - now handled by standard routines
 
     } //end of class BlastCannonFamily
 
@@ -619,7 +615,7 @@ class QuadPulsar extends Pulse{
 	    
         public $grouping = 25; //+1/5
         public $maxpulses = 4;
-	protected $useDie = 3; //die used for base number of hits
+		protected $useDie = 3; //die used for base number of hits
         
         public $loadingtime = 1;
         
@@ -627,14 +623,14 @@ class QuadPulsar extends Pulse{
         public $fireControl = array(0, 1, 2); // fighters, <mediums, <capitals 
 	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-		if ( $maxhealth == 0 ){
-		    $maxhealth = 4;
-		}
-		if ( $powerReq == 0 ){
-		    $powerReq = 1;
-		}		
-                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ){
+				$maxhealth = 4;
+			}
+			if ( $powerReq == 0 ){
+				$powerReq = 1;
+			}		
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 	    
         public function getDamage($fireOrder){        return 3;   }

@@ -5,7 +5,8 @@ class wlcChlonasOnTainCVH extends BaseShipNoFwd{
         parent::__construct($id, $userid, $name,  $slot);
         $this->pointCost = 565;
         $this->phpclass = "wlcChlonasOnTainCVH";
-        $this->imagePath = "img/ships/thosalsi.png";
+        $this->imagePath = "img/ships/ChlonasOntain.png";
+        $this->canvasSize = 200;
         $this->shipClass = "On'Tain Heavy Carrier";
         $this->fighters = array("heavy" => 24, "light"=>12);
         $this->forwardDefense = 15;

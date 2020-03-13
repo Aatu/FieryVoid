@@ -133,7 +133,6 @@
 
 
     class AdvParticleBeam extends Particle{
-
         public $trailColor = array(30, 170, 255);
 
         public $name = "advParticleBeam";
@@ -197,7 +196,6 @@
     }
 
     class HeavyArray extends Particle{
-
         public $trailColor = array(30, 170, 255);
 
         public $name = "heavyArray";
@@ -232,7 +230,6 @@
 
 
     class ParticleCannon extends Raking{
-
         public $trailColor = array(30, 170, 255);
 
         public $name = "particleCannon";
@@ -260,9 +257,6 @@
         }
 
         public function setSystemDataWindow($turn){
-            //$this->data["Weapon type"] = "Particle";
-            //$this->data["Damage type"] = "Raking";
-
             parent::setSystemDataWindow($turn);
         }
 
@@ -274,7 +268,6 @@
 
 
     class LightParticleCannon extends Raking{
-
         public $trailColor = array(30, 170, 255);
 
         public $name = "lightParticleCannon";
@@ -301,9 +294,6 @@
         }
 
         public function setSystemDataWindow($turn){
-           // $this->data["Weapon type"] = "Particle";
-            //$this->data["Damage type"] = "Raking";
-
             parent::setSystemDataWindow($turn);
         }
 
@@ -315,7 +305,6 @@
 
 
     class HvyParticleCannon extends Raking{
-
         public $trailColor = array(252, 252, 252);
 
         public $name = "hvyParticleCannon";
@@ -341,9 +330,6 @@
         }
 
         public function setSystemDataWindow($turn){
-            //$this->data["Weapon type"] = "Particle";
-            //$this->data["Damage type"] = "Raking";
-
             parent::setSystemDataWindow($turn);
         }
 
@@ -385,16 +371,16 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function setSystemDataWindow($turn){
-		if (!isset($this->data["Special"])) {
-			$this->data["Special"] = '';
-		}else{
-			$this->data["Special"] .= '<br>';
-		}
+        public function setSystemDataWindow($turn){			
+            parent::setSystemDataWindow($turn);        
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
             $this->data["Special"] .= "This weapon is always in sustained mode.";
+		}
 
-            parent::setSystemDataWindow($turn);
-        }
 
         public function isOverloadingOnTurn($turn = null){
             return true;
@@ -658,32 +644,6 @@
         public function setMinDamage(){     $this->minDamage = 4 ;      }
         public function setMaxDamage(){     $this->maxDamage = 13 ;      }
     } //endof class RepeaterGun
-/*old Repeater Gun
-    class RepeaterGun extends ParticleRepeater{
-        public $name = "repeaterGun";
-        public $displayName = "Repeater Gun";
-        public $animation = "trail";
-        public $animationExplosionScale = 0.30;
-        public $projectilespeed = 30;
-        public $animationWidth = 4;
-        public $trailLength = 25;
-        
-        public $boostEfficiency = 2;
-        public $rangePenalty = 0.5; //-1/2 hexes
-        public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals
-        public $priority = 4;
-        
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-        //appropriate redefinitions mostly done in ParticleRepeater class!
-        
-        public function getDamage($fireOrder){ return Dice::d(10)+3;   }
-        public function setMinDamage(){     $this->minDamage = 4 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 13 ;      }
-    }
-*/
-
 
 
     class PairedParticleGun extends LinkedWeapon{
@@ -766,13 +726,13 @@
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);   	    
-		if (!isset($this->data["Special"])) {
-			$this->data["Special"] = '';
-		}else{
-			$this->data["Special"] .= '<br>';
-		}
-		$this->data["Special"] .= "No overkill.<br>Reduce armor by 2.";
-		$this->data["Special"] .= "<br>Damage scored is repeated on appropriate Structure";
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "No overkill.<br>Reduce armor by 2.";
+			$this->data["Special"] .= "<br>Damage scored is repeated on appropriate Structure";
         }
 
         
@@ -781,29 +741,30 @@
               system hit will have its armor reduced by 2
               for non-fighter targets
               */
-
             parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
-            if(!$target instanceof FighterFlight){
-                $damageWasDealt=true; //if structure is already destroyed, no further overkill will happen
-                $struct = $target->getStructureSystem($system->location);
-                //reduce damage by armor of system hit - as it would be (was!) during actual damage-dealing procedure
-                $damage = $damage - $this->getSystemArmourStandard($target, $system, $gamedata, $fireOrder) - $this->getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder);
-                //reduce armor of system hit
-                $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
-                $crit->updated = true;
-                $crit->inEffect = false;
-                if ( $system != null ){
-                    $system->criticals[] = $crit;
-                    $system->criticals[] = $crit;
-                }
-                //repeat damage on structure this system is mounted to; instead of ignoring armor, damage is increased by armor of struture
-                //increase damage by armor of structure - to simulate armor-ignoring effect
-                $damage = $damage + $this->getSystemArmourStandard($target, $struct, $gamedata, $fireOrder) + $this->getSystemArmourInvulnerable($target, $struct, $gamedata, $fireOrder);
-                parent::doDamage($target, $shooter, $struct, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location); 
-            }
-        } //endof function doDamage
-        
-        
+			if(!$target instanceof FighterFlight){
+				$damageWasDealt=true; //if structure is already destroyed, no further overkill will happen
+				$struct = $target->getStructureSystem($system->location);
+				//reduce damage by armor of system hit - as it would be (was!) during actual damage-dealing procedure
+				//do NOT acount for special defensive systems (Energy Diffuser, Bulkheads...) - they will kick in (or not) separately on Structure
+				$damage = $damage - $this->getSystemArmourComplete($target, $system, $gamedata, $fireOrder);
+				//reduce armor of system hit
+				$crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
+				$crit->updated = true;
+				$crit->inEffect = false;
+				if ( $system != null ){
+					$system->criticals[] = $crit;
+					$system->criticals[] = $crit;
+				}
+				//repeat damage on structure this system is mounted to
+				/* disabled, instead new approach to damage dealing - with assignDamageReturnOverkill!
+				$damage = $damage + $this->getSystemArmourStandard($target, $struct, $gamedata, $fireOrder) + $this->getSystemArmourInvulnerable($target, $struct, $gamedata, $fireOrder);
+				parent::doDamage($target, $shooter, $struct, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location); 
+				*/
+				//effective armor of 0
+				$effects = $system->assignDamageReturnOverkill($target, $shooter, $this, $gamedata, $fireOrder, $damage, 0, $pos); //here $effects are irrelevant, no overkill of any kind happens
+			}
+		} //endof function doDamage
         
         public function getDamage($fireOrder){        return Dice::d(5)+12;   }
         public function setMinDamage(){     $this->minDamage = 13 ;      }
@@ -814,7 +775,6 @@
 
 
     class LightParticleBlaster extends LinkedWeapon{
-
         public $trailColor = array(30, 170, 255);
 
         public $name = "lightParticleBlaster";
@@ -831,7 +791,7 @@
         public $loadingtime = 1;
         public $shots = 2;
         public $defaultShots = 2;
-	public $priority = 3;
+		public $priority = 3;
 
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
@@ -877,7 +837,6 @@
 
 
     class LightParticleBeam extends LinkedWeapon{
-
         public $trailColor = array(30, 170, 255);
 
         public $name = "lightParticleBeam";
@@ -925,10 +884,6 @@
         }
 
         public function setSystemDataWindow($turn){
-
-            //$this->data["Weapon type"] = "Particle";
-            //$this->data["Damage type"] = "Standard";
-
             parent::setSystemDataWindow($turn);
         }
 
@@ -998,7 +953,6 @@
     }
     
     class LightBolter extends Particle{
-
         public $name = "lightBolter";
         public $displayName = "Light Bolter";
         public $animation = "trail";
@@ -1028,7 +982,6 @@
     
 
     class LightParticleBeamShip extends StdParticleBeam{
-
         public $trailColor = array(30, 170, 255);
 
         public $name = "lightParticleBeamShip";
@@ -1057,7 +1010,10 @@
     }
 
 
-/*AoG did only Particle Projector. Nexus custom ships use other weights of this line as well.*/
+/*AoG did only Particle Projector. Nexus custom ships use other weights of this line as well.
+EDIT: other weapons in the line do indeed exist, on Usuuth ships.
+Nonetheless two copies of Particle Projector lines now exist in FV, in customNexus and particle files. They should be have the same properties.
+*/
     class ParticleProjector extends Particle{
         public $trailColor = array(30, 170, 255);
 
@@ -1184,7 +1140,7 @@
             parent::fire($gamedata, $fireOrder);
             
 	    if ($this->firedThisTurn) return; //crit already accounted for (if necessary)
-	    $this->firedThisTurn = true; //to avoid rolling crit for every shot!
+			$this->firedThisTurn = true; //to avoid rolling crit for every shot!
 		
             $chance = 0;
             if ($this->firingMode==1){//quad
@@ -1207,9 +1163,9 @@
         public function setMaxDamage(){     $this->maxDamage = 14 ;      }
 
     } //endof class QuadArray
+	
 
-    class ParticleHammer extends Particle{
-        
+    class ParticleHammer extends Particle{        
         public $trailColor = array(30, 170, 255);
         
         public $name = "particleHammer";
@@ -1239,9 +1195,9 @@
         public function setMaxDamage(){     $this->maxDamage = 35 ;      }
         
     }//End of Particle Hammer
+	
 
-    class HvyParticleProjector extends Particle{
-        
+    class HvyParticleProjector extends Particle{        
         public $trailColor = array(30, 170, 255);
         
         public $name = "hvyParticleProjector";
@@ -1273,8 +1229,8 @@
         
     }//End of Heavy Particle Projector
     
-    class LightParticleProjector extends Particle{
-        
+	
+    class LightParticleProjector extends Particle{        
         public $trailColor = array(30, 170, 255);
         
         public $name = "lightParticleProjector";

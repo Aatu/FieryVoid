@@ -22,6 +22,8 @@ class Gtal extends BaseShip{
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 2;
+        $this->iniativebonus = 1 *5; //base Ini of 1
+	    $this->notes = "Provides +5 Initiative for all friendly Narn units";
         
         $this->addPrimarySystem(new Reactor(6, 25, 0, 2));
         $this->addPrimarySystem(new CnC(7, 24, 0, 0));

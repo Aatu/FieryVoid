@@ -125,6 +125,7 @@ class Weapon extends ShipSystem
 
     public $useOEW = true;
     public $calledShotMod = -8;
+	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 
     public $possibleCriticals = array(14 => "ReducedRange", 19 => "ReducedDamage", 25 => array("ReducedRange", "ReducedDamage"));
 
@@ -765,7 +766,7 @@ class Weapon extends ShipSystem
 
 		$hitLoc = null;
 		$hitLoc = $target->getHitSection($shooter, $fireOrder->turn);
-	    	$target->setExpectedDamage($hitLoc, $hitChance, $this);
+	    	$target->setExpectedDamage($hitLoc, $hitChance, $this, $shooter);
 
 
 		$notes = $fireOrder->notes . "RAMMING, final hit chance: $hitChance";
@@ -956,7 +957,7 @@ class Weapon extends ShipSystem
 
 		
         $change = round($goal * 5); //d20 to d100: ($goal/20)*100
-		$target->setExpectedDamage($hitLoc, $change, $this);
+		$target->setExpectedDamage($hitLoc, $change, $this, $shooter);
 
         //range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty,
         //interception penalty not yet calculated, will be logged later
@@ -1302,64 +1303,37 @@ class Weapon extends ShipSystem
         return true;
     }
 
-	/*NEED TO UPDATE ARMOR_AFFENCTING EFFECTS OF WEAPONS
-	desired effect: 
-	 - getSystemArmourComplete returns total armor (getSystemArmour+getSystemArmourAdaptive)
-	 - getSystemArmourBase returns total armor except Adaptive part, already modified due to weapon class interaction with AdvArmor (if any, accounting for weapon age))
-	 - getSystemArmourAdaptive returns AdaptiveArmor as appropriate for weapon class
-	 - all other getSystemArmour functions currently existing will be delted
-	 weapons that may reduce armor values depenting on presence of AdvancedArmor will do so looking for appropriate flag
-	 requires doing AdaptiveArmor first :) and redoing all weapons with special armor interaction
-	 */
-    /* returns complete armor protection of system 
-    	(already modified due to weapon class interaction with AdvArmor (if any, accounting for weapon age))
-	plus Adaptive Armor part
+	
+    /* returns armor protection of system 
     */
     public function getSystemArmourComplete($target, $system, $gamedata, $fireOrder, $pos = null)
     { 
-	$armor = 0;
-        $armor+=$this->getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null);
-        $armor+=$this->getSystemArmourAdaptive($target, $system, $gamedata, $fireOrder, $pos = null);
-
-        $armor = max(0, $armor); //at least 0
-
+		$armor = $this->getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
+		//modify by AdvancedArmor if relevant
+		$armor = $this->applyAdvancedArmor($system, $armor);
+		$armor += $this->getSystemArmourAdaptive($target, $system, $gamedata, $fireOrder, $pos);
         return $armor;
     }//endof function getSystemArmourComplete
-    /* returns armor protection of system 
-    	(already modified due to weapon class interaction with AdvArmor (if any, accounting for weapon age))
-	not accounting for Adaptive part
-    */
-    public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null)
-    { 
-	$armor = 0;
-        $armor+=$this->getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos = null);
-        $armor+=$this->getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos = null);
-
-        $armor = max(0, $armor); //at least 0
-
-        return $armor;
-    }//endof function getSystemArmourBase
-    /* returns Adaptive armor protection of system 
-    	at the moment it's PLACEHOLDER ONLY
-    */
+		
     public function getSystemArmourAdaptive($target, $system, $gamedata, $fireOrder, $pos = null)
     { 
-		$armor = 0;
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+/*$ss = $this->weaponClass;
+throw new Exception("getSystemArmourAdaptive! $ss");	*/			
+		$armor = $system->getArmourAdaptive($target, $shooter, $this->weaponClass, $pos);
         return $armor;
     }//endof function getSystemArmourAdaptive
 	
 	
-    public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos = null)
-    { //standard part of armor
+    public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null)
+    { 
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
-        //$target = $gamedata->getShipById($fireOrder->targetid);
-
         $armor = 0;
         if (($pos == null) && ($this->ballistic)) { //source of attack not explicitly defined, and weapon is ballistic
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $pos = mathlib::hexCoToPixel($movement->position);
         }
-        $armor = $system->getArmourStandard($target, $shooter, $this->weaponClass, $pos);
+        $armor = $system->getArmourBase($target, $shooter, $this->weaponClass, $pos);
 
         $mod = $system->hasCritical("ArmorReduced", $gamedata->turn - 1);
         $armor -= $mod;
@@ -1367,25 +1341,7 @@ class Weapon extends ShipSystem
         $armor = max(0, $armor); //at least 0
 
         return $armor;
-    }//endof function getSystemArmourStandard
-
-
-    public function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos = null)
-    { //only invulnerable portion of armor (one that can't be reduced by, say, damage type)
-        $shooter = $gamedata->getShipById($fireOrder->shooterid);
-        //$target = $gamedata->getShipById($fireOrder->targetid);
-
-        $armor = 0;
-        if (($pos == null) && ($this->ballistic)) { //source of attack not explicitly defined, and weapon is ballistic
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $pos = mathlib::hexCoToPixel($movement->position);
-        }
-        $armor = $system->getArmourInvulnerable($target, $shooter, $this->weaponClass, $pos);
-
-        $armor = max(0, $armor); //at least 0
-
-        return $armor;
-    }//endof function getSystemArmourInvulnerable
+    }//endof function getSystemArmourBase
 
 
     /*returns modified damage, NOT damage modifier*/
@@ -1422,6 +1378,42 @@ class Weapon extends ShipSystem
         return $damage;
     }
 
+/*
+full Advanced Armor effects (by rules) for reference:
+ - !!!Weapons fired by other advanced races ignore all of these advantages. 
+ - !!!effective armor cannot get lower than 0 (before applying Adaptive part, if any)
+ - Plasma weapons do not ignore half the value of advanced armor.
+ - Matter weapons treat advanced armor as though it were two points less than listed. 
+ - Armor-damaging weapons (e.g., molecular disruptors) do not use these abilities against advanced armor.
+ - Electromagnetic weapons that cause effects other than damage do not affect a ship or fighter protected by advanced armor. 
+ - EM weapons that cause damage still score this damage normally, but if they are listed as ignoring armor, they ignore only half of advanced armor (rounded up).
+ - Breaching pods and docking clamps cannot attach to advanced armor. 
+ - Tractor beams, gravitic shifters and the like will still function normally.
+ - Ballistic weapons are anticipated by advanced armor due to their slower rate of approach. The armor’s value is considered 2 points higher versus any ballistic device (missile, torpedo, energy mine, etc.).
+*/
+	protected function applyAdvancedArmor($system, $armour){
+		$returnArmour = $armour;
+		//only do this if target is actually protected by advanced armor
+		//and firing WEAPON age is not very advanced (<3 - less than Ancient)
+		//Ancients themselves do not care!
+		if( ($this->factionAge < 3) && ($system->advancedArmor)){
+			if($this.ballistic){ //extra protection against ballistics
+				$returnArmour += 2;
+			}
+			if($this->weaponClass == 'Matter'){ //slight vulnerability vs Matter
+				$returnArmour += -2;
+			}
+		}else{ //NO ADVANCED ARMOR (effectively) - apply effect explicitly tied to damage type
+			if($this->weaponClass == 'Matter'){ //Matter weapons ignore armor
+				$returnArmour = 0;
+			}
+			if($this->weaponClass == 'Plasma'){ //Plasma weapons ignore (better) half of armor
+				$returnArmour = floor($returnArmour/2);
+			}
+		}
+		$returnArmour = max(0,$returnArmour);
+		return $returnArmour;
+	}
 
     protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
     {
@@ -1430,14 +1422,13 @@ class Weapon extends ShipSystem
         /*damageWasDealt indicates whether this hit already caused damage - important for overkill for some damage modes*/
         if (!$system->isDestroyed()) { //else system was already destroyed, proceed to overkill
             $damageWasDealt = true; //actual damage was done! might be relevant for overkill allocation
-            $systemHealth = $system->getRemainingHealth();
             $damage = floor($damage);//make sure damage is a whole number, without fractions!
-            $armour = $this->getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos); //standard part of armor (potentially ignored by weapon)
-            $armour += $this->getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos); //this can't be ignored
-            $modifiedDamage = $damage;
-            $destroyed = false;
+            $armour = $this->getSystemArmourComplete($target, $system, $gamedata, $fireOrder, $pos); //handles standard and Adaptive armor, as well as Advanced armor and weapon class modifiers
+			// ...if armor-related modifications are needed, they should extend appropriate method (Complete or Base, as Adaptive should not be affected)
+			// ...and doDamage should always call Complete
 
-            //armor may be ignored for some reason...
+
+            //armor may be ignored for some reason... usually because of Raking mode :)
             $armourIgnored = 0;
             if (isset($fireOrder->armorIgnored[$system->id])) {
                 $armourIgnored = $fireOrder->armorIgnored[$system->id];
@@ -1445,20 +1436,15 @@ class Weapon extends ShipSystem
             }
             $armour = max($armour, 0);
 
-            if ($modifiedDamage - $armour >= $systemHealth) { //target will be destroyed
-                $destroyed = true;
-                $modifiedDamage = $systemHealth + $armour;
-            } elseif ($this->damageType == 'Raking') { //note that armour was already pierced for this shot...
-                $armourIgnored = $armourIgnored + $modifiedDamage;
-                $fireOrder->armorIgnored[$system->id] = $armourIgnored;
-            }
-
-		$damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $shooter->id, $this->id);
-		$damageEntry->updated = true;
-		$system->damage[] = $damageEntry;
-		$this->onDamagedSystem($target, $system, $modifiedDamage, $armour, $gamedata, $fireOrder);
-
-            $damage = $damage - $modifiedDamage;//reduce remaining damage by what was just dealt...
+			//returned array: dmgDealt, dmgRemaining, armorPierced	
+			$damage = $this->beforeDamagedSystem($target, $system, $damage, $armour, $gamedata, $fireOrder);
+			$effects = $system->assignDamageReturnOverkill($target, $shooter, $this, $gamedata, $fireOrder, $damage, $armour, $pos);
+			$this->onDamagedSystem($target, $system, $effects["dmgDealt"], $effects["armorPierced"], $gamedata, $fireOrder);//weapons that do effects on hitting something
+			$damage = $effects["dmgRemaining"];
+			if ($this->damageType == 'Raking'){ //note armor already pierced so further rakes have it easier
+				$armourIgnored = $armourIgnored + $effects["armorPierced"];
+				$fireOrder->armorIgnored[$system->id] = $armourIgnored;
+			}
         }
 
         if (($damage > 0) || (!$damageWasDealt)) {//overkilling!
@@ -1469,6 +1455,13 @@ class Weapon extends ShipSystem
 
     }
 
+	/*weapons with special effects affecting damage done to system will redefine this - if effect should happen just before actual damage dealing*/
+    protected function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder)
+    {
+        return $damage;
+    }
+
+	/*weapons with special effects affecting system hit will redefine this*/
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder)
     {
         return;
@@ -1487,7 +1480,7 @@ class Weapon extends ShipSystem
     */
     public function changeFiringMode($newMode)
     { //change parameters with mode change
-        //to display in GUI, shipSystem.js changeFiringMode function also needs to be redefined
+        //to display correctly in GUI, shipSystem.js changeFiringMode function also needs to be redefined
         $this->firingMode = $newMode;
         $i = $newMode;
         if (isset($this->priorityArray[$i])) $this->priority = $this->priorityArray[$i];

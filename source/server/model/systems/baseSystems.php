@@ -204,6 +204,7 @@ class EMShield extends Shield implements DefensiveSystem{
     public $name = "eMShield";
     public $displayName = "EM Shield";
     public $iconPath = "shield.png";
+    public $canOffLine = true; //usually You don't want to, but Burst Beam can force it...
 
     function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
         // shieldfactor is handled as output.
@@ -1253,6 +1254,13 @@ class AdaptiveArmorController extends ShipSystem{
 		if(is_array($this->individualNotesTransfer))	$this->currchangedAA = $this->individualNotesTransfer; //else there's nothing relevant there
 		$this->individualNotesTransfer = array(); //empty, just in case
 	}		
+	
+	//returns protection allocated for a given dmg class
+	public function getArmourValue($weaponClass){
+		$armour = 0;
+		if (isset($this->allocatedAA[$weaponClass])) $armour = $this->allocatedAA[$weaponClass];
+		return $armour;
+	}
 							
 } //endof AdaptiveArmorController
 

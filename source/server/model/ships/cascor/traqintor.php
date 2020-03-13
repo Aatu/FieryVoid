@@ -10,7 +10,8 @@ class Traqintor extends SmallStarBaseFourSections{
 		$this->faction = "Cascor";
 		$this->phpclass = "Traqintor";
 		$this->shipClass = "Traqintor Waystation";
-		$this->imagePath = "img/ships/orion.png";
+		$this->imagePath = "img/ships/CascorTaqintorWaystation.png";
+		$this->canvasSize = 200; 
 		$this->fighters = array("normal"=>48); 
 		$this->isd = 2219;
 
@@ -24,7 +25,6 @@ class Traqintor extends SmallStarBaseFourSections{
 		$this->sideDefense = 20;
 
 
-		$this->canvasSize = 280; 
 
 		$this->addFrontSystem(new Structure( 4, 120));
 		$this->addAftSystem(new Structure( 4, 120));

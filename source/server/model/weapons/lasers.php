@@ -190,8 +190,7 @@
     }
     
 
-    class AdvancedAssaultLaser extends Laser{
-        
+    class AdvancedAssaultLaser extends Laser{        
         public $name = "advancedAssaultLaser";
         public $displayName = "Adv. Assault Laser";
         public $animation = "laser";
@@ -213,7 +212,7 @@
         public function setMaxDamage(){     $this->maxDamage = 40 ;      }
     }
     
-    // Jasper
+
     class NeutronLaser extends Laser{
             public $name = "neutronLaser";
             public $displayName = "Neutron Laser";
@@ -328,7 +327,6 @@
 
 
     class HeavyLaserLance extends LaserLance{
-
         public $name = "heavyLaserLance";
         public $displayName = "Heavy Laser Lance";
         public $animationWidth = 4;
@@ -362,7 +360,6 @@
 
 
     class TacLaser extends Laser{
-
         public $name = "tacLaser";
         public $displayName = "Tactical Laser";
         public $animation = "laser";
@@ -390,7 +387,6 @@
 
 
     class ImperialLaser extends Laser{
-
         public $name = "imperialLaser";
         public $displayName = "Imperial Laser";
         public $animation = "laser";
@@ -450,7 +446,7 @@
 		
 		public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-			$this->data["Special"] = 'Uninterceptable.';
+			$this->data["Special"] = 'Uninterceptable.'; 
 			$this->data["Special"] .= '<br>Cannot penetrate to PRIMARY when hitting outer section.';
 		}
 

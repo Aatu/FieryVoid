@@ -7,7 +7,8 @@ class Watcher extends HeavyCombatVessel{
         $this->pointCost = 500;
         $this->faction = "Deneth";
         $this->phpclass = "watcher";
-        $this->imagePath = "img/ships/brigantine.png"; //need to change
+        $this->imagePath = "img/ships/DenethWatcherScout.png"; 
+	$this->canvasSize = 100;
         $this->shipClass = "Watcher Scout";
 	    
         $this->occurence = "rare";

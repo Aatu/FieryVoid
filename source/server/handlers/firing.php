@@ -88,12 +88,12 @@ class Firing
             $chosenLoc = $firingOrder->chosenLocation;
             if (!($chosenLoc > 0)) $chosenLoc = 0; //just in case it's not set/not a number!
             if ($target instanceof FighterFlight) {
-                $exampleFighter = $target->getSampleFighter();
-                $armour = $exampleFighter->getArmour($target, $shooter, $firingWeapon->damageType);
+                $exampleFighter = $target->getSampleFighter(); //not necessarily correct for adaptive armor, but have to base on something...
+                $armour = $exampleFighter->getArmourComplete($target, $shooter, $firingWeapon->weaponClass);
                 //$armour = 0; //let's simplify here...
             } else {
                 $structureSystem = $target->getStructureSystem($chosenLoc);
-                $armour = $structureSystem->getArmour($target, $shooter, $firingWeapon->damageType); //shooter relevant only for fighters - and they don't care about calculating ambiguous damage!
+                $armour = $structureSystem->getArmourComplete($target, $shooter, $firingWeapon->weaponClass); //shooter relevant only for fighters - and they don't care about calculating ambiguous damage!
             }
             $expectedDamageMax = $firingWeapon->maxDamage;
             $expectedDamageMin = $firingWeapon->minDamage;

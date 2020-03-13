@@ -443,7 +443,7 @@ spl_autoload_register(
                 'laser' => '/server/model/weapons/lasers.php',
                 'lasercutter' => '/server/model/weapons/lasers.php',
                 'laserlance' => '/server/model/weapons/lasers.php',
-                'laserpulsearray' => '/server/model/weapons/dualWeapon.php',
+                //'laserpulsearray' => '/server/model/weapons/dualWeapon.php', //no longer used
                 'leevan' => '/server/model/ships/centauri_old/leevan.php',
                 'legiona' => '/server/model/ships/centauri_old/legionA.php',
                 'legionb' => '/server/model/ships/centauri_old/legionB.php',

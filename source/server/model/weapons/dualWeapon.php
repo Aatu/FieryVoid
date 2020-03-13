@@ -200,7 +200,7 @@ class DualWeapon extends Weapon{
 }
 
 
-
+/*no longer used
 class LaserPulseArray extends DualWeapon{
     
 	public $firingModes = array( 
@@ -231,5 +231,5 @@ class LaserPulseArray extends DualWeapon{
         
     }
 }
-
+*/
 

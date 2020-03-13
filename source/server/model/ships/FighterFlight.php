@@ -390,6 +390,11 @@ class FighterFlight extends BaseShip
         $systems = array();
         if ($fire->calledid != -1) {
             $system = $this->getSystemById($fire->calledid);
+			//if system is not actual fighter - redirect to fighter it's mounted on!
+			if(!$system instanceof Fighter){
+				$system = $this->getFighterBySystem($system->id);
+			}
+			
             if (!$system->isDestroyed()) { //called shot at particular fighter, which is still living
                 $systems[] = $system;
                 $skipStandard = true;
@@ -428,7 +433,7 @@ class FighterFlight extends BaseShip
 			$dmgPotential = $weapon->maxDamage; //potential = maximum damage weapon can do	
 		//}
 		//modify by armor properties
-		$armor = $weapon->getSystemArmourStandard($this, $craft, $gamedata, $fire)+$weapon->getSystemArmourInvulnerable($this, $craft, $gamedata, $fire);
+		$armor = $weapon->getSystemArmourComplete($this, $craft, $gamedata, $fire);
 		$dmgPotential = max(0, $dmgPotential-$armor);//never negative damage ;)
 		/*for linked weapons - multiply by number of shots!*/
 		if ($weapon->isLinked){
@@ -498,7 +503,7 @@ class FighterFlight extends BaseShip
 
 
     /*always nothing to do for fighters*/
-    public function setExpectedDamage($hitLoc, $hitChance, $weapon)
+    public function setExpectedDamage($hitLoc, $hitChance, $weapon, $shooter)
     {
         return;
     }

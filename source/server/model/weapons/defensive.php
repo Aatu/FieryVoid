@@ -325,11 +325,6 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 	    
-	    /*
- 	public function stripForJson() {
-        	$strippedSystem = parent::stripForJson();	
-		$strippedSystem->guns = $this->guns;
-	}*/
 
         public function setSystemDataWindow($turn){
 	    $this->guns = 2+$this->getBoostLevel($turn);

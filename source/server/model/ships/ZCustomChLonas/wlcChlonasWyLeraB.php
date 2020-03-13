@@ -9,7 +9,8 @@ class wlcChlonasWyLeraB extends OSAT{
         $this->variantOf = "Wy'Lera A OSAT";
 	$this->unofficial = true;
         $this->phpclass = "wlcChlonasWyLeraB";
-        $this->imagePath = "img/ships/legion.png";
+        $this->imagePath = "img/ships/ChlonasWyLera.png";
+        $this->canvasSize = 70;
         $this->shipClass = "Wy'Lera B OSAT";
         
         $this->forwardDefense = 10;

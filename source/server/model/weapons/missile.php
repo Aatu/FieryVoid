@@ -607,7 +607,7 @@ class MultiMissileLauncher extends Weapon{
         }
 	
 	
-        public function getDamage($fireOrder){ 
+	public function getDamage($fireOrder){ 
 		switch($this->firingMode){
 			case 2: //Long-Range
 				return 15; 
@@ -626,7 +626,7 @@ class MultiMissileLauncher extends Weapon{
 				break;	
 		}
 	}
-        public function setMinDamage(){ 
+	public function setMinDamage(){ 
 		switch($this->firingMode){
 			case 2: //Long-Range
 				$this->minDamage = 15; 
@@ -646,7 +646,7 @@ class MultiMissileLauncher extends Weapon{
 		}
 		$this->minDamageArray[$this->firingMode] = $this->minDamage;
 	}
-        public function setMaxDamage(){
+	public function setMaxDamage(){
 		switch($this->firingMode){
 			case 2: //Long-Range
 				$this->maxDamage = 15; 

@@ -11,9 +11,7 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
-            return 0; //Matter ignores armor!
-        }
+		//Matter ignores armor! - now this is hadled by default routines, $weaponClass= 'Matter' is enough
 
 	/*no need due to noOverkill trait
         protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata)
@@ -27,7 +25,7 @@
             //$this->data["Weapon type"] = "Matter";
             //$this->data["Damage type"] = "Standard";
             parent::setSystemDataWindow($turn);
-	    $this->data["Special"] = "Ignores armor, does not overkill.";
+			$this->data["Special"] = "Ignores armor, does not overkill.";
         }
 
         public $priority = 9;
@@ -154,7 +152,7 @@
         public $projectilespeed = 10;
         public $animationWidth = 6;
         public $animationExplosionScale = 0.90;
-	public $noInterceptDegradation = true;
+		public $noInterceptDegradation = true;
         //public $targetImmobile = true;
         
         public $loadingtime = 4;
@@ -170,9 +168,9 @@
 			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= "Weapon misses automatically except vs speed 0 Enormous units. "     
-		."<br>Weapon misses automatically if launching unit speed is > 0. "  
-		."<br>Weapon always hits Structure. "; 
-	    }	    
+			."<br>Weapon misses automatically if launching unit speed is > 0. "  
+			."<br>Weapon always hits Structure. "; 
+	}	    
 
 	    
 	public function calculateHitBase($gamedata, $fireOrder){ //auto-miss if restrictions not met
@@ -247,7 +245,6 @@
 
 
     class HeavyGaussCannon extends GaussCannon{
-
         public $name = "heavyGaussCannon";
         public $displayName = "Heavy Gauss Cannon";
         public $animation = "trail";
@@ -270,8 +267,7 @@
         public function getDamage($fireOrder){        return Dice::d(10, 3)+10;   }
         public function setMinDamage(){     $this->minDamage = 13;      }
         public function setMaxDamage(){     $this->maxDamage = 40 ;      }
-
-        }
+	}
 
 
     class RapidGatling extends Matter{
@@ -300,12 +296,12 @@
 	    
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-		if (!isset($this->data["Special"])) {
-			$this->data["Special"] = '';
-		}else{
-			$this->data["Special"] .= '<br>';
-		}
-            $this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+            $this->data["Special"] .= "Can intercept ballistic weapons only.";
         }
 	    
         public function getDamage($fireOrder){        return Dice::d(6, 2);   }
@@ -377,7 +373,7 @@
 	    
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "Ignores armor.";
+            $this->data["Special"] = "Ignores armor, does not overkill.";
             $this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
             $this->data["Ammunition"] = $this->ammunition;
         }

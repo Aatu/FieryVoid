@@ -264,9 +264,6 @@ class CustomGatlingMattergunLight extends Pulse{
 			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
         }
         
-        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
-            return 0; //Matter ignores armor!
-        }
         
         public function getDamage($fireOrder){        return Dice::d(6, 1);   }
         public function setMinDamage(){     $this->minDamage = 1 ;      }
@@ -327,10 +324,6 @@ class CustomGatlingMattergunMedium extends Pulse{
 			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
         }
         
-        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
-            return 0; //Matter ignores armor!
-        }
-        
         public function getDamage($fireOrder){        return Dice::d(10, 1);   }
         public function setMinDamage(){     $this->minDamage = 1 ;      }
         public function setMaxDamage(){     $this->maxDamage = 10 ;      }
@@ -389,10 +382,6 @@ class CustomGatlingMattergunHeavy extends Pulse{
 			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
 			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
         }		
-        
-        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
-            return 0; //Matter ignores armor!
-        }
         
         public function getDamage($fireOrder){        return Dice::d(10, 2);   }
         public function setMinDamage(){     $this->minDamage = 2 ;      }
@@ -456,7 +445,6 @@ class CustomStrikeLaser extends Weapon{
     
 	    public $damageType = 'Standard'; 
     	public $weaponClass = "Laser"; 
-
 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
@@ -526,8 +514,8 @@ class HLPA extends Weapon{
         }
 	
         public function setSystemDataWindow($turn){
-		$this->data["Special"] = 'Can fire as either Heavy Laser or Heavy Pulse Cannon. ';
-		parent::setSystemDataWindow($turn);
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Can fire as either Heavy Laser or Heavy Pulse Cannon. ';
         }
 
 	
@@ -748,17 +736,17 @@ class AbsorbtionShield extends Shield implements DefensiveSystem{
     }
 	
     public function setSystemDataWindow($turn){
-	parent::setSystemDataWindow($turn);
-	//$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
-	$this->data["Basic Strength"] = $this->baseOutput; 
+		parent::setSystemDataWindow($turn);
+		//$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
+		$this->data["Basic Strength"] = $this->baseOutput; 
 		if (!isset($this->data["Special"])) {
 			$this->data["Special"] = '';
 		}else{
 			$this->data["Special"] .= '<br>';
 		}	    
-	$this->data["Special"] .= "Does not decrease profile.";  
-	$this->data["Special"] .= "<br>Cannot be flown under."; 
-	$this->data["Special"] .= "<br>Doubly effective vs Raking weapons."; 
+		$this->data["Special"] .= "Does not decrease profile.";  
+		$this->data["Special"] .= "<br>Cannot be flown under."; 
+		$this->data["Special"] .= "<br>Doubly effective vs Raking weapons."; 
     }
 	  
         private function getBoostLevel($turn){
@@ -794,6 +782,8 @@ class customPhaseDisruptor extends Raking{
 	public $firingModes = array(1=>'Concentrated', 2=>'Split');
 	public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); 
 	public $gunsArray = array(1=>1,2=>3);
+	
+		public $factionAge = 2; //Middle-born
 	
 	public $damageType = 'Raking'; 
     	public $weaponClass = "Molecular"; 
@@ -898,6 +888,7 @@ class customLtPhaseDisruptorShip extends Raking{
 	
     	public $weaponClass = "Molecular"; 
 
+		public $factionAge = 2; //Middle-born
 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
@@ -987,7 +978,6 @@ class customLtPolarityPulsar extends Pulse{
 	public $iconPath = "LightPolarityPulsar.png";
         public $trailColor = array(255,140,0); //let's make Polarity Pulsars orange...
         public $animationColor = array(255,140,0);
-
 		
         public $loadingtime = 1;
         public $priority = 4;
@@ -999,6 +989,9 @@ class customLtPolarityPulsar extends Pulse{
 	public $maxpulses = 6;
 	protected $useDie = 5; //die used for base number of hits;
         public $intercept = 2;
+		
+		public $factionAge = 2; //Middle-born
+		
 	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
@@ -1044,6 +1037,8 @@ class customMedPolarityPulsar extends Pulse{
 	protected $useDie = 4; //die used for base number of hits;
         public $intercept = 2;
 	
+		public $factionAge = 2; //Middle-born
+		
 	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
@@ -1089,6 +1084,8 @@ class customHeavyPolarityPulsar extends Pulse{
 	protected $useDie = 3; //die used for base number of hits;
         public $intercept = 1;
 	
+		public $factionAge = 2; //Middle-born
+		
 	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
@@ -1121,7 +1118,7 @@ class customMphasedBeamAcc extends Weapon{
         public $raking = 10;
 	    
 	    public $damageType = 'Raking'; 
-	   public $weaponClass = "Molecular"; 
+	public $weaponClass = "Molecular"; 
         public $priority = 7;
         public $priorityArray = array(1=>7, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
         public $firingModes = array(
@@ -1137,6 +1134,8 @@ class customMphasedBeamAcc extends Weapon{
         public $rangePenalty = 0.33; //-1/3 hexes
         public $fireControl = array(3, 4, 5); // fighters, <=mediums, <=capitals 
 	    public $fireControlArray = array( 1=>array(3, 4, 5), 2=>array(null,0,1) ); //Raking and Piercing mode
+		
+		public $factionAge = 2; //Middle-born
 		
 	    
 	public function setSystemDataWindow($turn){
@@ -1168,7 +1167,6 @@ class customMphasedBeamAcc extends Weapon{
 	}
         
         public function setMinDamage(){
-	    /* sadly this does not work correctly... seting always full load, and leaving comment about accelerated fire!
             switch($this->turnsloaded){
                 case 0:
                 case 1:
@@ -1182,12 +1180,10 @@ class customMphasedBeamAcc extends Weapon{
                     $this->minDamage = 16 ;  
                     break;
             }
-	    */
-		 $this->minDamage = 16 ;  
+		 //$this->minDamage = 16 ;  
 	}
                 
         public function setMaxDamage(){
-	    /* sadly this does not work correctly... seting always full load, and leaving comment about accelerated fire!
             switch($this->turnsloaded){
                 case 0:
                 case 1:
@@ -1203,8 +1199,7 @@ class customMphasedBeamAcc extends Weapon{
                     $this->maxDamage = 88 ;  
                     break;
             }
-	    */
-		$this->maxDamage = 88 ;  
+		//$this->maxDamage = 88 ;  
 	}
 	    
 	    
@@ -1221,20 +1216,26 @@ class customMphasedBeamAcc extends Weapon{
         }
 	
 	    //Multiphased Beam ignores half armor!
-	public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
-		$armour = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
-		    if (is_numeric($armour)){
-			$toIgnore = ceil($armour /2);
-			$new = $armour - $toIgnore;
-			return $new;
-		    }
-		    else {
-			return 0;
-		    }
-        }	    
+		public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos=null){
+			$armour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
+			if (is_numeric($armour)){
+				$toIgnore = ceil($armour /2);
+				$new = $armour - $toIgnore;
+				return $new;
+			}
+			else {
+				return 0;
+			}
+		}
 	    	    
+		/*allow accelerated changes (damage output) to be displayed*/
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->minDamage = $this->minDamage;			
+			return $strippedSystem;
+		}
     }//endof class customMphasedBeamAcc
-
 
 
 
@@ -1270,6 +1271,7 @@ class customMphasedBeamAcc extends Weapon{
         public $fireControlArray = array( 1=>array(0, 0, 0), 2=>array(-3,0,0) ); // fighters, <mediums, <capitals 
         public $rangePenaltyArray = array(1=>2, 2=>1.5); //-2/hex and -3/2 hexes
 		
+		public $factionAge = 2; //Middle-born
 	    
         
         function __construct($startArc, $endArc){
@@ -1317,6 +1319,7 @@ class customMphasedBeamAcc extends Weapon{
 			}
 			$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 		}
+		
     } //endof class customLtPhaseDisruptor
 
 
@@ -1346,6 +1349,7 @@ class customMphasedBeamAcc extends Weapon{
         public $damageType = "Standard"; 
         public $weaponClass = "Molecular"; 
 	    
+		public $factionAge = 2; //Middle-born
         
         function __construct($startArc, $endArc){
 	    $this->isLinked = false; //shots are separate, not linked! 
@@ -1382,17 +1386,17 @@ class LightScattergun extends Pulse{
    
 	//animation for fighter laser - bigger guns need to change size and speed attributes :)
 	public $name = "LightScattergun";
-        public $displayName = "Light Scattergun";
-        public $animation = "trail";
-        public $animationColor = array(30, 170, 255);
-        public $animationExplosionScale = 0.10;
-        public $projectilespeed = 12;
-        public $animationWidth = 2;
-        public $trailLength = 10;
+	public $displayName = "Light Scattergun";
+	public $animation = "trail";
+	public $animationColor = array(30, 170, 255);
+	public $animationExplosionScale = 0.10;
+	public $projectilespeed = 12;
+	public $animationWidth = 2;
+	public $trailLength = 10;
 	
 	public $intercept = 2;
 	
-        public $rangePenalty = 2;
+	public $rangePenalty = 2;
 	
 	public $priority = 4;
 
@@ -1406,10 +1410,10 @@ class LightScattergun extends Pulse{
 	}    
 	
 	
-        public function setSystemDataWindow($turn){
+	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-		 $this->data["Special"] = 'does always d3 pulses, no grouping bonus';
-        }
+		$this->data["Special"] = 'does always d3 pulses, no grouping bonus';
+	}
 	
     
 	public function rollPulses($turn, $needed, $rolled){
@@ -1566,22 +1570,22 @@ class CustomBPAMedium extends Weapon{
 	public $intercept = 2; 
  
 	
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+	{
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
 		if ( $maxhealth == 0 ){
-		    $maxhealth = 8;
+			$maxhealth = 8;
 		}
 		if ( $powerReq == 0 ){
-		    $powerReq = 4;
+			$powerReq = 4;
 		}
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-	
-        public function setSystemDataWindow($turn){
+	}
+
+	public function setSystemDataWindow($turn){
 		$this->data["Special"] = 'Can fire as either Medium Bolter or Medium Pulse Cannon. ';
 		parent::setSystemDataWindow($turn);
-        }
+	}
 
 	
         public function getDamage($fireOrder){ 
@@ -1686,13 +1690,13 @@ class CustomBPAHeavy extends Weapon{
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 	
-        public function setSystemDataWindow($turn){
+	public function setSystemDataWindow($turn){
 		$this->data["Special"] = 'Can fire as either Heavy Bolter or Heavy Pulse Cannon. ';
 		parent::setSystemDataWindow($turn);
-        }
+	}
 
-	
-        public function getDamage($fireOrder){ 
+
+	public function getDamage($fireOrder){ 
 		switch($this->firingMode){
 			case 1:
 				return 24; //Heavy Bolter
@@ -1724,8 +1728,6 @@ class CustomBPAHeavy extends Weapon{
 		}
 		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 	}
-	
-	
 	
 	//necessary for Pulse mode
         protected function getPulses($turn)

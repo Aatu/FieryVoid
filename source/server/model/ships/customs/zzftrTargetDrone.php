@@ -13,8 +13,8 @@ class zzftrTargetDrone extends FighterFlight{
 	    
         $this->unofficial = true;
         
-        $this->forwardDefense = 10;
-        $this->sideDefense = 10;
+        $this->forwardDefense = 100;
+        $this->sideDefense = 100;
         $this->freethrust = 15;
         $this->offensivebonus = 8;
         $this->jinkinglimit = 4;
@@ -38,7 +38,7 @@ class zzftrTargetDrone extends FighterFlight{
         $new = $this->flightSize;
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
-            $armour = array(4, 3, 3, 2);
+            $armour = array(4, 2, 3, 3);
             $fighter = new Fighter("zzftrTargetDrone", $armour, 25, $this->id);
             $fighter->displayName = "Target Drone";
             $fighter->imagePath = "img/starwars/skipray.png";
@@ -52,10 +52,8 @@ class zzftrTargetDrone extends FighterFlight{
             $fighter->addFrontSystem($roundGun);
            
 
-
-
-		$AAC = $this->createAdaptiveArmorController(4, 3, 1); //$AAtotal, $AApertype, $AApreallocated
-		$fighter->addAftSystem( $AAC );
+			$AAC = $this->createAdaptiveArmorController(4, 3, 1); //$AAtotal, $AApertype, $AApreallocated
+			$fighter->addAftSystem( $AAC );
 
 			
         	$this->addSystem($fighter);

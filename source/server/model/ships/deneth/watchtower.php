@@ -20,8 +20,8 @@ class Watchtower extends SmallStarBaseFourSections{
 		$this->isd = 2231;
 		
 		
-		$this->imagePath = "img/ships/orion.png";
-		$this->canvasSize = 280; 
+		$this->imagePath = "img/ships/DenethWatchtower.png";
+		$this->canvasSize = 200; 
 		
 		$this->locations = array(1, 4, 2, 3);
 		

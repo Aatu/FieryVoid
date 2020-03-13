@@ -7,7 +7,7 @@ class wlcChlonasSaTrevanFlight extends FighterFlight{
 	$this->pointCost = 34 *6;
         $this->phpclass = "wlcChlonasSaTrevanFlight";
         $this->shipClass = "Sa'Trevan Light flight";
-	$this->imagePath = "img/ships/shasi.png";
+	$this->imagePath = "img/ships/ChlonasSaTrevan.png";
 	    
         $this->faction = "Ch'Lonas";
 	$this->unofficial = true;
@@ -31,8 +31,8 @@ class wlcChlonasSaTrevanFlight extends FighterFlight{
             	$armour = array(2, 1, 1, 1);
             	$fighter = new Fighter("wlcChlonasSaTrevanFlight", $armour, 7, $this->id);
             	$fighter->displayName = "Sa'Trevan";
-		$fighter->imagePath = "img/ships/shasi.png";
-	        $fighter->iconPath = "img/ships/shasi_large.png";
+		$fighter->imagePath = "img/ships/ChlonasSaTrevan.png";
+	        $fighter->iconPath = "img/ships/ChlonasSaTrevanLARGE.png";
 		
 		$fighter->addFrontSystem(new PairedParticleGun(330, 30, 3));
             	$this->addSystem($fighter);
