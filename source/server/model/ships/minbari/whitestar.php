@@ -35,7 +35,7 @@ class WhiteStar extends MediumShip{
         $this->addPrimarySystem(new TractorBeam(4, 4, 0, 0));
         $this->addPrimarySystem(new Jammer(4, 8, 7));
 		
-		$AAC = $this->createAdaptiveArmorController(6, 4, 2); //$AAtotal, $AApertype, $AApreallocated
+		$AAC = $this->createAdaptiveArmorController(3, 1, 0); //$AAtotal, $AApertype, $AApreallocated
 		$this->addPrimarySystem( $AAC );
 		
 
