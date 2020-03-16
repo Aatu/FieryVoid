@@ -61,7 +61,7 @@ if (isset($_SESSION["user"])) {
         <br>
         -->
         
-        <br><br><b>Firing log modified</b> - now number of firing orders displayed as well as number of shots, like 1(5)/2(12) shots hit for Pulse weapon.
+        <br><b>Firing log modified</b> - now number of firing orders displayed as well as number of shots, like 1(5)/2(12) shots hit for Pulse weapon.
         <br><br><b>Fleet checker modified</b> - corrections were made to the way Restricted/Limited units are handled.
         <br><br><b>New command ships</b> - Abbai Nakarsa and Narn G'Tal now give fleet command bonus.
         <br><br><b>New graphics</b> - a number of minor factions got their own ship icons, courtesy of Douglas!
