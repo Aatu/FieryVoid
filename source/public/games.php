@@ -53,40 +53,21 @@ if (isset($_SESSION["user"])) {
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
 <div class="panel news">
-    <div id="newsHeader">Latest News - December 2019</div>
+    <div id="newsHeader">Latest News - March 2020</div>
     <div id="newsEntry">
         <!--
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
         -->
-        <u>The <b>Cascor</b> have arrived - entire new official faction, courtesy of <b>Thomas Solway</b>!</u>
-<br><br>
-<b>StarWars overhauled</b> - for those who want to use alternate universe ships. After playtesting the large Star Wars units slight changes were made to make them more interesting in engagements. Also, new units were added (mostly not so iconic). Also, fighters finally got (intended but unavailable earlier) option to switch gunfire to concentrated salvoes.
-<br><br>
-        <b><u>Rule changes</u></b>
-        <br><b>Fighter damage allocation</b> - now attempting to actively minimize damage to flight. Not as good as tabletop player would do (in fact, doesn't even have access to informatio player would have), but should be far better than random allocation. Expect heavy fighter flights to (re-)gain a lot of their toughness.
-        <br><b>Antifighter firing order optimized</b> - as fighters allocate damage to minimize it, weapons firing at them get arranged for maximum effect.
-        <br><b>LCV Sensors</b> - now standard Young Races' LCVs have properly limited Sensors. 
-
-
-<br>
-<br><b><u>Gameplay streamlining</b></u>
- <br>       <b>Boost streamlined</b> - You can boost even if You don't have power for it (although You'll have to find power for it before commit, of course ;) )
- <br>       <b>EW boost streamlined</b> - You can change Sensor output even if You already started to assign EW. It'll be made legal at commit.
-<br><b><i>Remove All EW</i> function added</b> - now You can reset Your EW without finding every target You allocated it to!
-<br><b>Trait information exposed</b> - various unit traits are now shown as notes. You don't have to remember whether a given ship is supposed to be Gravitic or what kind of hangar small craft requires!
-<br>
-<br><b><u>Second installment</b></u>
-<br><b>Streib weapons overhauled</b> - Burst Beam line, EM Wave Disruptor and Improved Blast Laser now behave as they should.
-<br><b>Tiebreaker added</b> - no more ties for standard movement games (they are now being resolved immediately after rolling Initiative).
-<br><b>Long-recharge weapons can be enabled for interception</b> - because defensive Medium Pulses might make a difference!
-<br><b>Turn delay calculation reworked</b> - this should solve problems with turn delay appearing out of the blue after accelerating.
-<br><b>Scattergun</b> - it's now scattering properly, with bells and whistles :)
-<br><b>Fleet checker</b> - now recognizing ultralight fighters and their hangar requirements
-<br><b>Fleet checker again</b> - ships requiring hangar berthing now are not restricted by "total ships on a hull" limit
-<br><b>Fleet selection screen</b> - fighter price is now displayed per craft, in addition to per 6 craft 
         
+        <br><br><b>Firing log modified</b> - now number of firing orders displayed as well as number of shots, like 1(5)/2(12) shots hit for Pulse weapon.
+        <br><br><b>Fleet checker modified</b> - corrections were made to the way Restricted/Limited units are handled.
+        <br><br><b>New command ships</b> - Abbai Nakarsa and Narn G'Tal now give fleet command bonus.
+        <br><br><b>New graphics</b> - a number of minor factions got their own ship icons, courtesy of Douglas!
+        <br><br><b>Adaptive Armor is back</b> - that was in major demand, yes? :)
+        <br><br><b>New firing routines</b> - damage dealing routines were modified (...do not ask). So if shot's effect looks doubtful to You, please report - <b><u>bugs in damage dealing area are more probable than usually</u></b>. 
+
         
 <br>
 <!--        
