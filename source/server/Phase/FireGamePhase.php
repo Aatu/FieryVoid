@@ -17,22 +17,23 @@ class FireGamePhase implements Phase
         Firing::fireWeapons($servergamedata);
         Criticals::setCriticals($servergamedata);
 
+
+		foreach ($servergamedata->ships as $currShip){ //generate system-specific information if necessary
+			$currShip->generateIndividualNotes($servergamedata, $dbManager);
+		}		
+		foreach ($servergamedata->ships as $currShip){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!
+			$currShip->saveIndividualNotes($dbManager);
+		}
+		
+
         $dbManager->submitFireorders($servergamedata->id, $servergamedata->getNewFireOrders(), $servergamedata->turn, 3);
         $dbManager->updateFireOrders($servergamedata->getUpdatedFireOrders());
 
         $dbManager->submitDamages($servergamedata->id, $servergamedata->turn, $servergamedata->getNewDamages());
 
-        // check if adaptive Armour events did happen and submit
-        $damagesAA = $servergamedata->getNewDamagesForAA();
-
-        if ($damagesAA){
-            foreach ($damagesAA as $entry){
-                $dbManager->submitDamagesForAdaptiveArmour($servergamedata->id, $servergamedata->turn, $entry);
-            }
-        }
-
         // submit criticals
         $dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
+		
         $dbManager->setPlayersWaitingStatusInGame($servergamedata->id, false);
     }
 
@@ -55,6 +56,8 @@ class FireGamePhase implements Phase
             }
 
         }
+		
+		
 
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn);
         $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);

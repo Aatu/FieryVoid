@@ -204,6 +204,7 @@ class EMShield extends Shield implements DefensiveSystem{
     public $name = "eMShield";
     public $displayName = "EM Shield";
     public $iconPath = "shield.png";
+    public $canOffLine = true; //usually You don't want to, but Burst Beam can force it...
 
     function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
         // shieldfactor is handled as output.
@@ -1002,5 +1003,265 @@ class ConnectionStrut extends ShipSystem{
 	
 }//endof class ConnectionStrut
 
+
+/*this system contains entirety of Adaptive Armor management*/
+class AdaptiveArmorController extends ShipSystem{
+    public $name = "adaptiveArmorController";
+    public $displayName = "Adaptive Armor Controller";
+    public $primary = true; 
+	public $isPrimaryTargetable = false;
+    public $iconPath = "adaptiveArmorController.png";
+	
+	public $AAtotal = 0;
+	public $AAtotal_used = 0;
+	public $AApertype = 0;
+	public $AApreallocated = 0;
+	public $AApreallocated_used = 0;
+	public $currClass = '';//for front end
+	
+	public $allocatedAA = array(); //AA points allocated for given damage type
+	public $availableAA = array(); //AA points available for allocation for given damage type
+	public $currchangedAA = array(); //AA points allocated in front end
+	
+	
+    
+    public $possibleCriticals = array(); //no available criticals - in fact, this system is a technicality and should never be hit
+    
+	/*as this is a technical system, armor/health/power are always pre-set
+		settings defined by ship creator are: maxiumum total AA points, maximum AA points per weapon type, AA points pre-allocated		
+		NOTE: this system should be asigned to adaptiveArmorController attribute (in addition to regular placement) to work properly!
+	*/
+    function __construct( $AAtotal, $AApertype, $AApreallocated  ){ //technical object, does not need typical system attributes (armor, structure...)
+        parent::__construct( 0, 1, 0, $AAtotal ); //$armour, $maxhealth, $powerReq, $output
+		$this->AAtotal = $AAtotal;
+		$this->AApertype = $AApertype;
+		$this->AApreallocated = $AApreallocated;
+		if (TacGamedata::$currentTurn > 1){
+			$this->AApreallocated_used = $AApreallocated; //for further turns player cannot allocate "pre-battle" points any more
+		}
+		
+    }
+
+	//marks damage class(-es) of weapon as existing in $allocatedAA and $availableAA tables
+	private function markWpnDmgClass(Weapon $weapon){
+		$weaponClassArray = array();
+		foreach($weapon->weaponClassArray as $weaponClass){
+			$weaponClassArray[] = $weaponClass;
+		}
+		$weaponClassArray[] = $weapon->weaponClass;
+		foreach($weaponClassArray as $weaponClass){
+			//check if already defined, if not - add to both tables
+			if (!isset($this->allocatedAA[$weaponClass])){
+				$this->availableAA[$weaponClass] = 0;
+				$this->allocatedAA[$weaponClass] = 0;
+			}
+		}
+	}
+
+	/* this method generates additional non-standard informaction in the form of individual system notes
+	in this case: 
+	 - Deployment phase: check existing (enemy!) weapons and weapon types, note them for allocation
+	 - Initial phase: check setting changes made by user, convert to notes
+	 - Firing phase: check damage suffered by ship, convert to notes if it increases allowance of particular weapon type
+	*/
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+		switch($gameData->phase){
+				case -1: //deployment phase 
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise two copies of initial data are written
+						foreach($gameData->ships as $enemyUnit) if($enemyUnit->team != $ship->team){
+							foreach($enemyUnit->systems as $sys){
+								if($sys instanceOf Fighter){
+										foreach($sys->systems as $wpn) if($wpn instanceOf Weapon){
+											$this->markWpnDmgClass($wpn);
+										}
+								}else if($sys instanceOf Weapon){
+										$this->markWpnDmgClass($sys);
+								}							
+							}				
+						}
+						//AND PREPARE APPROPRIATE NOTES!						
+						//	'available;dmgType' public $availableAA = array(); //AA points available for allocation for given damage type
+						//	'set;dmgType' public $allocatedAA = array(); //AA points allocated for given damage type
+						foreach($this->availableAA as $weaponClass=>$ptsAvailable){
+							//	'available;dmgType' public $availableAA = array(); //AA points available for allocation for given damage type
+							//	'set;dmgType' public $allocatedAA = array(); //AA points allocated for given damage type
+							if (isset($this->allocatedAA[$weaponClass])){
+								$ptsSet = $this->allocatedAA[$weaponClass];
+							} else $ptsSet = 0;
+							$notekey = 'available;' . $weaponClass;
+							$noteHuman = 'Adaptive Armor available';
+							$noteValue = $ptsAvailable;
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+							$notekey = 'set;' . $weaponClass;
+							$noteHuman = 'Adaptive Armor set';
+							$noteValue = $ptsSet;
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+						}
+					}
+				break;
+								
+				case 1: //Initial phase
+					//data returned as currchangedAA table, with ONLY information about what was changed )one entry means +1)
+					//in turn 1 increase availability as well (this goes from pre-allocated pool), in further turns do not!
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+						//load existing data first - at this point ship is rudimentary, without data from database!
+						$listNotes = $dbManager->getIndividualNotesForShip($gameData, $gameData->turn, $ship->id);	
+						foreach ($listNotes as $currNote){
+							if($currNote->systemid==$this->id){//note is intended for this system!
+								$this->addIndividualNote($currNote);
+							}
+						}
+						$this->onIndividualNotesLoaded($gameData);		
+					
+						foreach($this->currchangedAA as $weaponClass){
+							$this->allocatedAA[$weaponClass]++;
+							if ($gameData->turn==1) $this->availableAA[$weaponClass]++;
+						}
+
+						foreach($this->availableAA as $weaponClass=>$ptsAvailable){
+							if (isset($this->allocatedAA[$weaponClass])){
+								$ptsSet = $this->allocatedAA[$weaponClass];
+							} else $ptsSet = 0;
+							if ($gameData->turn==1){ //availability is changed here in turn 1 only
+								$notekey = 'available;' . $weaponClass;
+								$noteHuman = 'Adaptive Armor available';
+								$noteValue = $ptsAvailable;
+								$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+							}
+							$notekey = 'set;' . $weaponClass;
+							$noteHuman = 'Adaptive Armor set';
+							$noteValue = $ptsSet;
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+						}
+						
+						
+					}
+					
+				break;
+				
+				case 4: //firing phase
+					if(!($ship instanceOf FighterFlight)){ 
+						foreach($ship->systems as $system) foreach($system->damage as $dmg) if($dmg->turn==$gameData->turn){//damage suffered this turn
+							if($dmg->damage > $dmg->armour){ //actual damage was caused!
+								$weaponClass = $dmg->damageclass;
+								if(!isset($this->availableAA[$weaponClass])){ //this type of damage wasn't encountered yet!
+									$this->availableAA[$weaponClass] = 0;
+									$this->allocatedAA[$weaponClass] = 0;
+								}
+								if($this->availableAA[$weaponClass] < $this->AApertype){ //maximum not yet unlocked!
+									$this->availableAA[$weaponClass]+=1;
+								}
+							}
+						}
+					}else{ //for fighter flight - only damage of a particular fighter counts!
+						$relevantFtr = $ship->getFighterBySystem($this->id);
+						foreach($relevantFtr->damage as $dmg) if($dmg->turn==$gameData->turn){//damage suffered this turn
+							if($dmg->damage > $dmg->armour){ //actual damage was caused!
+								$weaponClass = $dmg->damageclass;
+								if(!isset($this->availableAA[$weaponClass])){ //this type of damage wasn't encountered yet!
+									$this->availableAA[$weaponClass] = 0;
+									$this->allocatedAA[$weaponClass] = 0;
+								}
+								if($this->availableAA[$weaponClass] < $this->AApertype){ //maximum not yet unlocked!
+									$this->availableAA[$weaponClass]+=1;
+								}
+							}
+						}
+					}
+					//AND PREPARE APPROPRIATE NOTES!
+					//	'preallocatedUsed' public $AApreallocated_used = 0;	
+					//$notekey = 'preallocatedUsed';
+					//$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,'Adaptive Armor: preallocated points used',$this->AApreallocated_used);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					foreach($this->availableAA as $weaponClass=>$ptsAvailable){
+						//	'available;dmgType' public $availableAA = array(); //AA points available for allocation for given damage type
+						//	'set;dmgType' public $allocatedAA = array(); //AA points allocated for given damage type
+						if (isset($this->allocatedAA[$weaponClass])){
+							$ptsSet = $this->allocatedAA[$weaponClass];
+						} else $ptsSet = 0;
+						$notekey = 'available;' . $weaponClass;
+						$noteHuman = 'Adaptive Armor available';
+						$noteValue = $ptsAvailable;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+						$notekey = 'set;' . $weaponClass;
+						$noteHuman = 'Adaptive Armor set';
+						$noteValue = $ptsSet;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					}
+					break;
+		}
+	} //endof function generateIndividualNotes
+	
+	/*act on notes just loaded - to be redefined by systems as necessary
+	 - fill $allocation table
+	*/
+	public function onIndividualNotesLoaded($gamedata){
+		foreach ($this->individualNotes as $currNote){ //assume ASCENDING sorting - so enact all changes as is
+			$explodedKey = explode ( ';' , $currNote->notekey ) ;//split into array: [area;value] where area denotes action, value - damage type (typically) 
+			switch($explodedKey[0]){
+				/* always 0 for starters and max for further turns - no need to save or read this information
+				case 'preallocatedUsed': //total number of preallocatable points that were actually preallocated
+					$this->AApreallocated_used = $currNote->notevalue;
+					break;
+				*/
+				case 'available': //total number of points available for assignment for a given damage type
+					$this->availableAA[$explodedKey[1]] = $currNote->notevalue;
+					break;
+				case 'set': //total number of points assigned for a given damage type
+					$this->allocatedAA[$explodedKey[1]] = $currNote->notevalue;
+					break;				
+			}
+		}
+		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+		$this->individualNotes = array();
+		//calculate $this->AAtotal_used, too!
+		$this->AAtotal_used = 0;
+		foreach($this->allocatedAA as $dmgType=>$countAllocated){
+			$this->AAtotal_used += $countAllocated;
+		}
+	} //endof function onIndividualNotesLoaded
+	
+	
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn); 
+		$this->data["Adaptive Armor"] =  $this->AAtotal_used . '/' . $this->AAtotal;
+		$this->data[" - per weapon type"] =  $this->AApertype;
+		$this->data[" - preassigned"] =  $this->AApreallocated_used . '/' . $this->AApreallocated;
+		foreach($this->allocatedAA as $dmgType=>$AAallocated){
+			$AAavailable = $this->availableAA[$dmgType];
+			$this->data[' - '.$dmgType] =  $AAallocated . '/' . $AAavailable;
+		}
+        $this->data["Special"] = "This system is responsible for Adaptive Armor settings management.";	   
+        $this->data["Special"] .= "<br>You may assign AA points in Initial phase.";
+        $this->data["Special"] .= "<br>Pre-set AA points may be used in turn 1 only.";
+        $this->data["Special"] .= "<br>AA points set in previous turns cannot be unassigned.";
+    }
+	
+	/*always redefine $this->data for AA controller! A lot of variable information goes there...*/
+	public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->data = $this->data;
+        $strippedSystem->allocatedAA = $this->allocatedAA;
+        $strippedSystem->availableAA = $this->availableAA;
+        $strippedSystem->currchangedAA = $this->currchangedAA;
+        $strippedSystem->AApreallocated_used = $this->AApreallocated_used;
+		
+        return $strippedSystem;
+    }
+	
+	public function doIndividualNotesTransfer(){
+		//data received in variable individualNotesTransfer, further functions will look for it in currchangedAA
+		if(is_array($this->individualNotesTransfer))	$this->currchangedAA = $this->individualNotesTransfer; //else there's nothing relevant there
+		$this->individualNotesTransfer = array(); //empty, just in case
+	}		
+	
+	//returns protection allocated for a given dmg class
+	public function getArmourValue($weaponClass){
+		$armour = 0;
+		if (isset($this->allocatedAA[$weaponClass])) $armour = $this->allocatedAA[$weaponClass];
+		return $armour;
+	}
+							
+} //endof AdaptiveArmorController
 
 ?>

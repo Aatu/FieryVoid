@@ -24,7 +24,7 @@ class Plasma extends Weapon{
     	
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-            		$this->data["Special"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex).";
+			$this->data["Special"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex).";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
 		}
 		
@@ -39,7 +39,6 @@ class Plasma extends Weapon{
 
 
     class PlasmaAccelerator extends Plasma{
-
 		public $name = "plasmaAccelerator";
         public $displayName = "Plasma Accelerator";
         public $animation = "trail";
@@ -65,7 +64,12 @@ class Plasma extends Weapon{
 	    
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);   
-		$this->data["Special"] = "Can fire accelerated for less damage";  
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}	    		
+		$this->data["Special"] .= "Can fire accelerated for less damage";  
 		$this->data["Special"] .= "<br> - 1 turn: 1d10+4"; 
 		$this->data["Special"] .= "<br> - 2 turns: 2d10+8"; 
 		$this->data["Special"] .= "<br> - 3 turns (full): 4d10+12"; 
@@ -334,7 +338,7 @@ class PairedPlasmaBlaster extends LinkedWeapon{
         public $animationExplosionScale = 0.1;
 
         public $intercept = 2;
-	public $priority = 4;//late priority due to being Plasma and able to ignore armor partially
+	public $priority = 4; //eqivalend of d6+3, on account of armor piercing properties of Plasma
 
         public $loadingtime = 1;
         public $shots = 2;
@@ -347,11 +351,12 @@ class PairedPlasmaBlaster extends LinkedWeapon{
     	public $damageType = "Standard"; 
     	public $weaponClass = "Plasma"; 
 
-        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){ //damage bonus NOT accounted for!
+        function __construct($startArc, $endArc, $nrOfShots = 2){ 
             $this->shots = $nrOfShots;
             $this->defaultShots = $nrOfShots;
-			$this->intercept = $nrOfShots;
-            
+			$this->intercept = $nrOfShots;            
+			
+			
             if($nrOfShots === 1){
                 $this->iconPath = "pairedPlasmaBlaster1.png";
             }
@@ -362,30 +367,17 @@ class PairedPlasmaBlaster extends LinkedWeapon{
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 
-
-        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
-            $armor = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
-
-            if (is_numeric($armor)){
-                $toIgnore = ceil($armor /2);
-                $new = $armor - $toIgnore;
-                return $new;
-            }
-            else {
-                return 0;
-            }
-        }
         
     
         public function setSystemDataWindow($turn){    
             parent::setSystemDataWindow($turn);
-		if (!isset($this->data["Special"])) {
-			$this->data["Special"] = '';
-		}else{
-			$this->data["Special"] .= '<br>';
-		}
-		$this->data["Special"] .= "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
-		$this->data["Special"] .= "<br>Ignores half of armor.";
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
+			$this->data["Special"] .= "<br>Ignores half of armor."; //handled by standard routines for Plasma weapons now
         }
 
 
@@ -416,7 +408,7 @@ class PlasmaGun extends Plasma{
         public $fireControl = array(-6, 4, 4); // fighters, <=mediums, <=capitals 
 
 
-        function __construct($startArc, $endArc, $damagebonus, $shots = 1){
+        function __construct($startArc, $endArc, $shots = 1){
             $this->shots = $shots;
             $this->defaultShots = $shots;
             
@@ -446,7 +438,6 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
         public $trailLength = 12;
         public $animationExplosionScale = 0.25;
 
-
         public $intercept = 0; //no interception for this weapon!
         public $loadingtime = 1;
         public $shots = 2;
@@ -454,8 +445,8 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         public $rangeDamagePenalty = 1;
-	public $damageBonus = 5;
-	public $priority = 5;
+		public $damageBonus = 5;
+		public $priority = 5;
 
     	public $damageType = "Standard"; 
     	public $weaponClass = "Plasma"; 
@@ -466,26 +457,17 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
 	    $this->damageBonus = $damageBonus;
             
             parent::__construct(0, 1, 0, $startArc, $endArc);
-        }
+        }      
 
-	/*Plasma - armor ignoring*/
-        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
-            $armor = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
-            if (is_numeric($armor)){
-                $toIgnore = ceil($armor /2);
-                $new = $armor - $toIgnore;
-                return $new;
-            }
-            else {
-                return 0;
-            }
-        }
-        
-    
-        public function setSystemDataWindow($turn){
+        public function setSystemDataWindow($turn){    
             parent::setSystemDataWindow($turn);
-            		$this->data["Remark"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
-			$this->data["Remark"] .= "<br>Ignores half of armor.";
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
+			$this->data["Special"] .= "<br>Ignores half of armor."; //handled by standard routines for Plasma weapons now
         }
 
 
@@ -496,7 +478,7 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
 
 
 class RogolonLtPlasmaCannon extends LinkedWeapon{
-	/*dedicated anti-ship weapon of Rogolon fighters - very nasty!*/
+	/*dedicated anti-ship weapon of advanced Rogolon fighters - very nasty! (and custom, thankfully)*/
         public $name = "RogolonLtPlasmaCannon";
         public $displayName = "Light Plasma Cannon";
 	public $iconPath = "mediumPlasma.png";
@@ -517,7 +499,7 @@ class RogolonLtPlasmaCannon extends LinkedWeapon{
         public $rangePenalty = 1;
         public $fireControl = array(-5, 0, 0); // fighters, <mediums, <capitals
         public $rangeDamagePenalty = 0.5; //-1/2 hexes!
-	public $priority = 5;
+	public $priority = 6;
 
     	public $damageType = "Standard"; 
     	public $weaponClass = "Plasma"; 
@@ -529,24 +511,15 @@ class RogolonLtPlasmaCannon extends LinkedWeapon{
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 
-	/*Plasma - armor ignoring*/
-        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
-            $armor = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
-            if (is_numeric($armor)){
-                $toIgnore = ceil($armor /2);
-                $new = $armor - $toIgnore;
-                return $new;
-            }
-            else {
-                return 0;
-            }
-        }
-        
-    
-        public function setSystemDataWindow($turn){
+        public function setSystemDataWindow($turn){    
             parent::setSystemDataWindow($turn);
-            		$this->data["Remark"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
-			$this->data["Remark"] .= "<br>Ignores half of armor.";
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
+			$this->data["Special"] .= "<br>Ignores half of armor."; //handled by standard routines for Plasma weapons now
         }
 
 

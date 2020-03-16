@@ -33,9 +33,18 @@ class InitialOrdersGamePhase implements Phase
             foreach ($ship->systems as $system){
                 $powers = array_merge($powers, $system->power);
             }
-
+		
             $dbManager->submitPower($gameData->id, $gameData->turn, $powers);
         }
+		
+
+
+		foreach ($ships as $currShip){ //generate system-specific information if necessary
+			$currShip->generateIndividualNotes($gameData, $dbManager);
+		}		
+		foreach ($ships as $currShip){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!
+			$currShip->saveIndividualNotes($dbManager);
+		}
 
 
         $gd = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id);
@@ -49,18 +58,12 @@ class InitialOrdersGamePhase implements Phase
                 $dbManager->submitEW($gameData->id, $ship->id, $ship->EW, $gameData->turn);
             }else{
                 throw new Exception("Failed to validate EW");
-            }
+            }	
         }
 
 
-        foreach ($ships as $ship){
-            if ($ship instanceof WhiteStar){
-                $dbManager->updateAdaptiveArmour($gameData->id, $ship->id, $ship->armourSettings);
-            }
-        }
-
-        $gd = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id); //MJS: is it really necessary? $gd is created a few lines above in the same manner... leaving for now
-
+        $gd = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id); 
+		
 
         foreach ($ships as $ship){
             if ($ship->userid != $gameData->forPlayer) continue;
@@ -71,8 +74,11 @@ class InitialOrdersGamePhase implements Phase
                 throw new Exception("Failed to validate Ballistic firing orders");
             }
         }
+		
 
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn);
         $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);
     }
 }
+
+?>

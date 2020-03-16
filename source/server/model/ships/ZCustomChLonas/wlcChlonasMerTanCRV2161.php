@@ -7,7 +7,7 @@ class wlcChlonasMerTanCRV2161 extends MediumShip{
 	$this->pointCost = 240;
 	$this->faction = "Ch'Lonas";
         $this->phpclass = "wlcChlonasMerTanCRV2161";
-        $this->imagePath = "img/ships/essusu.png";
+        $this->imagePath = "img/ships/ChlonasMerTan.png";
         $this->shipClass = "Mer'Tan Corvette";
         $this->agile = true;
         $this->canvasSize = 100;

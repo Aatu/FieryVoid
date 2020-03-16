@@ -172,16 +172,6 @@ class DBManager
 	} //endof function submitEnhancement
 	
 
-    public function submitAdaptiveArmour($gameid, $shipid)
-    {
-
-        $sql = "INSERT INTO `B5CGM`.`tac_adaptivearmour` (gameid, shipid, particlepoints, particlealloc, laserpoints, laseralloc, molecularpoints, molecularalloc, matterpoints, matteralloc, plasmapoints, plasmaalloc, electromagneticpoints, electromagneticalloc, antimatterpoints, antimatteralloc, ionpoints, ionalloc, graviticpoints, graviticalloc, ballisticpoints, ballisticalloc)
-            VALUES ($gameid, $shipid, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)";
-
-        $id = $this->insert($sql);
-
-    }
-
     public function submitFlightSize($gameid, $shipid, $flightSize)
     {
         $sql = "INSERT INTO `B5CGM`.`tac_flightsize` (gameid, shipid, flightsize)
@@ -656,67 +646,6 @@ class DBManager
     }
 
 
-    public function submitDamagesForAdaptiveArmour($gameid, $turn, $damages)
-    {
-        //debug::log("___submitDamagesForAdaptiveArmour___");
-        $obj = array();
-        $id;
-
-
-        usort($damages,
-            function ($a, $b) {
-                if ($a->fireorderid !== $b->fireorderid) {
-                    return $a->fireorderid - $b->fireorderid;
-                }
-            }
-        );
-
-
-        foreach ($damages as $damage) {
-            if (isset($id)) {
-                if ($id == $damage->fireorderid) {
-                    //debug::log("fireorder id ".$damage->fireorderid." == id ".$id.", continue ");
-                    continue;
-                }
-            }
-
-            if (isset($obj[$damage->damageclass])) {
-                $obj[$damage->damageclass] += 1;
-                //debug::log($obj[$damage->damageclass]." + 1");
-            } else {
-                $obj[$damage->damageclass] = 1;
-                //debug::log("INIT: ".$obj[$damage->damageclass]." = 1");
-            }
-
-            $id = $damage->fireorderid;
-            //debug::log("setting id to ".$id);
-        }
-
-
-        foreach ($obj as $key => $value) {
-            if ($key != "pulse") {
-                if (is_string($key) && strlen($key) > 2) {
-                    //debug::log($key." => ".$value);
-
-                    try {
-                        $sql = "
-                        UPDATE `B5CGM`.`tac_adaptivearmour` 
-                        SET `" . $key . "points` = `" . $key . "points` + $value 
-                        WHERE gameid = '" . $gameid . "' 
-                        AND shipid ='" . $shipid = $damage->shipid . "'";
-
-                        //debug::log($sql);
-
-                        $this->update($sql);
-                    } catch (Exception $e) {
-                        throw $e;
-                    }
-                }
-            } else {
-                //debug::log("PULSE");
-            }
-        }
-    }
 
     public function submitIniative($gameid, $turn, $ships)
     {
@@ -846,7 +775,7 @@ class DBManager
         }
     }
 
-
+/* no longer needed, Adaptive Armor redone
     public function updateAdaptiveArmour($gameid, $shipid, $settings)
     {
 
@@ -879,7 +808,7 @@ class DBManager
             throw $e;
         }
     }
-
+*/
 
     public function insertShips($gameid, $ships)
     {
@@ -942,6 +871,45 @@ class DBManager
             throw $e;
         }
     }
+
+
+	/*acepts IndividualNote OBJECT
+		inserts it if it doesn't yet have ID, does NOT update old ones
+	*/
+    public function insertIndividualNote($noteObject)
+    {
+		if ($noteObject->id > -1) return; //old note, do not insert
+
+        try {
+            $stmt = $this->connection->prepare(
+                "INSERT INTO  
+                    tac_individual_notes
+                VALUES 
+                ( 
+                    null,?,?,?,?,?,?,?,?
+                )"
+            );
+
+            if ($stmt) {
+				$stmt->bind_param(
+					'iiiiisss',
+					$noteObject->gameid,
+					$noteObject->turn,
+					$noteObject->phase,
+					$noteObject->shipid,
+					$noteObject->systemid,
+					$noteObject->notekey,
+					$noteObject->notekey_human,
+					$noteObject->notevalue
+				);
+				$stmt->execute();
+			}
+			$stmt->close();
+        } catch (Exception $e) {
+            throw $e;
+		}
+    }//endof function insertIndividualNote
+	
 
     public function submitMovement($gameid, $shipid, $turn, $movements, $acceptPreturn = false)
     {
@@ -1239,7 +1207,7 @@ class DBManager
         if ($allData) {
             $this->getFlightSize($gamedata);
             //$this->flightSizeFix($ships); //Marcin Sawicki, October 2019: perhaps once there was a reason for "fixing" flight size, but I do not see it any more
-            $this->getAdaptiveArmourSettings($gamedata);
+            //$this->getAdaptiveArmourSettings($gamedata); //Adaptive Armor redone in a different way
             $this->getIniativeForShips($gamedata, $turn);
             $this->getMovesForShips($gamedata, $turn);
             $this->getEWForShips($gamedata, $turn);
@@ -1256,6 +1224,7 @@ class DBManager
 
     }
 
+/* no longer needed, Adaptive Armor redone
     public function getAdaptiveArmourSettings($gamedata)
     {
         $stmt = $this->connection->prepare(
@@ -1291,7 +1260,7 @@ class DBManager
             $stmt->close();
         }
     }
-
+*/
 
     public function getFlightSize($gamedata)
     {
@@ -1461,7 +1430,8 @@ class DBManager
 
     }
 
-    /* original version */
+ 
+ 
     private function getDamageForShips($gamedata, $fetchTurn)
     {
         $damageStmt = $this->connection->prepare(
@@ -1487,73 +1457,6 @@ class DBManager
         }
     }
 
-    /*modified version - still with problems*/ /*
-    private function getDamageForShips($gamedata)
-    {
-	    //Marcin Sawicki: combine old damages into one damage entry; ignore damage entries if primary structure is destroyed
-        $damageStmt = $this->connection->prepare(
-            "SELECT 
-                id, shipid, gameid, turn, systemid, damage, armour, shields, fireorderid, destroyed, pubnotes, damageclass 
-            FROM
-                tac_damage
-            WHERE 
-                gameid = ? 
-		ORDER BY destroyed DESC, shipid ASC, systemid DESC, turn DESC
-            "
-        );
-        
-        if ($damageStmt)
-        {
-            $damageStmt->bind_param('i', $gamedata->id);
-            $damageStmt->bind_result($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes, $damageclass );
-            $damageStmt->execute();
-		$waitingEntry = false;
-		    $combinedDamage = 0;
-		    $combinedArmour = 0;
-		    $combinedShields = 0;
-		$prevShip = -1;
-		$prevSystem = -1;
-            while ($damageStmt->fetch())
-            {
-		    $ship = $gamedata->getShipById($shipid);
-		    if($ship->isDestroyed($gamedata->turn-2) ){
-			    continue; //don't load further data for a ship that's already determined to be destroyed (that's why killing blows go first)
-		    }
-		       
-		    if( ($turn >= $gamedata->turn -1) || ($destroyed == true)){ //recent turn OR killing blow - always load full damage! do not touch Combined data though
-			   $ship->getSystemById($systemid)->setDamage(
-			      new DamageEntry($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes, $damageclass )
-			   ); 
-			    continue;
-		    }
-		    
-		    if( ( ($prevShip!=$shipid) || ($prevSystem!=$systemid)  )
-		       && ($prevShip != -1) ) { //current damage is for different system than previous, and previous data exists!
-				$gamedata->getShipById($prevShip)->getSystemById($prevSystem)->setDamage(
-				    new DamageEntry($id, $prevShip, $gameid, $turn, $prevSystem, $combinedDamage, $combinedArmour, $combinedShields, $fireorderid, $destroyed, $pubnotes, $damageclass )
-				);
-			    	//reset sums
-				    $combinedDamage = 0;
-				    $combinedArmour = 0;
-				    $combinedShields = 0;
-		    }
-		    //accumulate damage data with current entry
-		    $prevShip = $shipid;
-		    $prevSystem =  $systemid;
-		    $waitingEntry = true;
-		    $combinedDamage += $damage;
-		    $combinedArmour += $armour;
-		    $combinedShields += $shields;
-            }
-	       if($waitingEntry == true ){ //create any entry that got out of loop - if any!
-			$gamedata->getShipById($prevShip)->getSystemById($prevSystem)->setDamage(
-			    new DamageEntry($id, $prevShip, $gameid, $turn, $prevSystem, $combinedDamage, $combinedArmour, $combinedShields, $fireorderid, $destroyed, $pubnotes, $damageclass )
-			);
-	       }
-            $damageStmt->close();
-        }
-    }
-    */
 
     private function getCriticalsForShips($gamedata, $fetchTurn)
     {
@@ -1677,17 +1580,91 @@ class DBManager
             $stmt->close();
         }	    
 
-	//get enhancement info   
-	foreach ($gamedata->ships as $ship){
-		$enhArray = $this->getEnhencementsForShip($ship->id);//result: array($enhID,$numbertaken,$readablename);
-		if( count($enhArray) == 0 ){ //no enhancements! add empty one just to show it's been read
-			$ship->enhancementOptions[] = array('NONE','-', 0,0,0,0); //[ID,readableName,numberTaken,limit,price,priceStep]
+		//get enhancement info   
+		foreach ($gamedata->ships as $ship){
+			$enhArray = $this->getEnhencementsForShip($ship->id);//result: array($enhID,$numbertaken,$readablename);
+			if( count($enhArray) == 0 ){ //no enhancements! add empty one just to show it's been read
+				$ship->enhancementOptions[] = array('NONE','-', 0,0,0,0); //[ID,readableName,numberTaken,limit,price,priceStep]
+			}
+			foreach($enhArray as $entry){
+				$ship->enhancementOptions[] = array($entry[0],$entry[2], $entry[1],0,0,0);
+			}
 		}
-		foreach($enhArray as $entry){
-			$ship->enhancementOptions[] = array($entry[0],$entry[2], $entry[1],0,0,0);
+		
+		//get individual notes for systems
+		foreach ($gamedata->ships as $ship){
+			$listNotes = $this->getIndividualNotesForShip($gamedata, $fetchTurn, $ship->id);	
+			foreach ($listNotes as $currNote){
+				$system = $ship->getSystemById($currNote->systemid);
+				$system->addIndividualNote($currNote);
+			}
+			$ship->onIndividualNotesLoaded($gamedata);
 		}
-	}
-    }
+		
+    } //endof function getSystemDataForShips
+	
+	
+	
+	
+	
+	/*
+		individual system data
+		ASCENDING order for easiest update
+	*/
+	public function getIndividualNotesForShip($gamedata, $turn, $shipID)
+	{
+		$toReturn = array();
+		$stmt = $this->connection->prepare(
+            "SELECT *
+				FROM 
+					tac_individual_notes
+				WHERE 
+					gameid = ? AND turn <= ? 
+					and shipid = ? 
+				ORDER BY turn ASC, phase ASC
+			"
+        );
+		
+		if ($stmt) {
+            $stmt->bind_param('iii', $gamedata->id, $turn, $shipID);
+            $stmt->execute();
+            $stmt->bind_result(
+                $id,
+                $gameid,
+                $turn,
+                $phase,
+                $shipid_db,
+                $systemid_db,
+                $notekey,
+                $notekey_human,
+                $notevalue
+            );
+
+            while ($stmt->fetch()) {
+                $entry = new IndividualNote(
+					$id,
+					$gameid,
+					$turn,
+					$phase,
+					$shipid_db,
+					$systemid_db,
+					$notekey,
+					$notekey_human,
+					$notevalue
+                );
+				$toReturn[] = $entry;
+            }
+            $stmt->close();
+        }
+		
+		return $toReturn;
+		
+	} //endof function getIndividualNotesForSystem
+
+
+
+
+
 
     public function getFireOrdersForShips($gamedata, $fetchTurn)
     {
@@ -2197,10 +2174,19 @@ class DBManager
             );
             $this->executeGameDeleteStatement($stmt, $ids);
 		
-		//unit enhancements
+			//unit enhancements
             $stmt = $this->connection->prepare(
                 "DELETE FROM 
                     tac_enhancements
+                WHERE
+                    gameid = ?"
+            );
+            $this->executeGameDeleteStatement($stmt, $ids);
+			
+			//individual system notes
+            $stmt = $this->connection->prepare(
+                "DELETE FROM 
+                    tac_individual_notes
                 WHERE
                     gameid = ?"
             );

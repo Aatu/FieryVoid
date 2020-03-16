@@ -5,7 +5,8 @@ class wlcChlonasXerThariCA extends BaseShipNoFwd{
         parent::__construct($id, $userid, $name,  $slot);
         $this->pointCost = 900;
         $this->phpclass = "wlcChlonasXerThariCA";
-        $this->imagePath = "img/ships/thosalsi.png";
+        $this->imagePath = "img/ships/ChlonasOnthari.png";
+        $this->canvasSize = 200;
         $this->shipClass = "Xer'Thari Strike Cruiser";
         $this->fighters = array("heavy" => 6, "light"=>6);
         $this->forwardDefense = 15;

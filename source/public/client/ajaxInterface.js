@@ -19,26 +19,6 @@ window.ajaxInterface = {
         });
     },
 
-    getAdaptiveArmour: function getAdaptiveArmour(id) {
-
-        var obj = {
-            gameid: gamedata.gameid,
-            shipid: id,
-            turn: gamedata.turn
-        };
-
-        $.ajax({
-            type: 'GET',
-            url: 'adaptiveArmour.php',
-            dataType: 'json',
-            data: obj,
-            success: ajaxInterface.postAdaptiveArmour,
-            error: ajaxInterface.errorAjax
-        });
-    },
-
-    postAdaptiveArmour: function postAdaptiveArmour(data) {
-    },
 
     react: function react() {
         alert("callback");
@@ -135,52 +115,20 @@ window.ajaxInterface = {
                                     ammoArray[index] = amount;
                                 }
                             }
-
-                            fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray };
+							
+							//changed to accomodate new variable for individual data transfer to server - in a generic way
+                            //fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray };
+							fightersystem.doIndividualNotesTransfer();
+							fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray, "individualNotesTransfer": fightersystem.individualNotesTransfer };
                         }
-
-                        systems[a] = { 'id': system.id, 'systems': fighterSystems };
+						//changed to accomodate new variable for individual data transfer to server - in a generic way
+                        //systems[a] = { 'id': system.id, 'systems': fighterSystems };
+						system.doIndividualNotesTransfer();
+						systems[a] = { 'id': system.id, 'systems': fighterSystems, "individualNotesTransfer": system.individualNotesTransfer };
                     } else {
                         var fires = Array();
                         var ammoArray = Array();
 
-                        /*
-                        if (system.dualWeapon || system.duoWeapon) {
-                            for (var c in system.weapons) {
-                                var weapon = system.weapons[c];
-                                if (weapon.duoWeapon) {
-                                    for (var d in weapon.weapons) {
-                                        var subweapon = weapon.weapons[d];
-                                        for (var index = subweapon.fireOrders.length - 1; index >= 0; index--) {
-                                            var subfire = subweapon.fireOrders[index];
-                                            if (subfire.turn < gamedata.turn) {
-                                                subweapon.fireOrders.splice(index, 1);
-                                            }
-                                        }
-                                        fires = fires.concat(subweapon.fireOrders);
-                                    }
-                                } else {
-                                    //var weapon = system.weapons[c];
-                                    for (var b = weapon.fireOrders.length - 1; b >= 0; b--) {
-                                        var fire = weapon.fireOrders[b];
-                                        if (fire.turn < gamedata.turn) {
-                                            weapon.fireOrders.splice(b, 1);
-                                        }
-                                    }
-                                    fires = fires.concat(weapon.fireOrders);
-                                }
-
-                                for (var b = weapon.power.length - 1; b >= 0; b--) {
-                                    var power = weapon.power[b];
-
-                                    if (power.turn < gamedata.turn) {
-                                        weapon.power.splice(b, 1);
-                                    }
-                                }
-                                systems[a] = { 'id': weapon.id, 'power': weapon.power, 'fireOrders': fires };
-                            }
-                        } else {
-                            */
                         for (var b = system.fireOrders.length - 1; b >= 0; b--) {
                             var fire = system.fireOrders[b];
                             if (fire.turn < gamedata.turn) {
@@ -205,8 +153,10 @@ window.ajaxInterface = {
                                 ammoArray[index] = amount;
                             }
                         }
-
-                        systems[a] = { 'id': system.id, 'power': system.power, 'fireOrders': fires, 'ammo': ammoArray };
+						//changed to accomodate new variable for individual data transfer to server - in a generic way
+                        //systems[a] = { 'id': system.id, 'power': system.power, 'fireOrders': fires, 'ammo': ammoArray };
+						system.doIndividualNotesTransfer();
+						systems[a] = { 'id': system.id, 'power': system.power, 'fireOrders': fires, 'ammo': ammoArray, "individualNotesTransfer": system.individualNotesTransfer };
                     }
                 }
 
@@ -214,10 +164,6 @@ window.ajaxInterface = {
 
                 if (ship.flight) {
                     newShip.flightSize = ship.flightSize;
-                }
-
-                if (ship.adaptiveArmour) {
-                    newShip.armourSettings = ship.armourSettings;
                 }
                 
                 //unit enhancements

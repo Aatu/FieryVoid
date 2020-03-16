@@ -1,0 +1,35 @@
+
+/* Marcin Sawicki, 12.2019 - I am completely reworking Adaptive Armor, and deleting this table*/
+--
+-- Table structure for table `tac_adaptivearmour`
+--
+DROP TABLE IF EXISTS `tac_adaptivearmour`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tac_adaptivearmour` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `gameid` int(11) DEFAULT NULL,
+  `shipid` int(11) DEFAULT NULL,
+  `particlepoints` int(11) DEFAULT NULL,
+  `particlealloc` int(11) DEFAULT NULL,
+  `laserpoints` int(11) DEFAULT NULL,
+  `laseralloc` int(11) DEFAULT NULL,
+  `molecularpoints` int(11) DEFAULT NULL,
+  `molecularalloc` int(11) DEFAULT NULL,
+  `matterpoints` int(11) DEFAULT NULL,
+  `matteralloc` int(11) DEFAULT NULL,
+  `plasmapoints` int(11) DEFAULT NULL,
+  `plasmaalloc` int(11) DEFAULT NULL,
+  `electromagneticpoints` int(11) DEFAULT NULL,
+  `electromagneticalloc` int(11) DEFAULT NULL,
+  `antimatterpoints` int(11) DEFAULT NULL,
+  `antimatteralloc` int(11) DEFAULT NULL,
+  `ionpoints` int(11) DEFAULT NULL,
+  `ionalloc` int(11) DEFAULT NULL,
+  `graviticpoints` int(11) DEFAULT NULL,
+  `graviticalloc` int(11) DEFAULT NULL,
+  `ballisticpoints` int(11) DEFAULT NULL,
+  `ballisticalloc` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=66 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;

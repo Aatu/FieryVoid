@@ -7,7 +7,8 @@ class Deliverer extends BaseShip{
         $this->pointCost = 480;
         $this->faction = "Deneth";
         $this->phpclass = "deliverer";
-        $this->imagePath = "img/ships/dragonship.png";
+        $this->imagePath = "img/ships/DenethDeliverer.png";
+	$this->canvasSize = 200;
         $this->shipClass = "Deliverer Strike Carrier";
         $this->shipSizeClass = 3;
 	$this->fighters = array("LCVs" => 4);        
@@ -76,7 +77,7 @@ class Deliverer extends BaseShip{
         $this->hitChart = array(
         		0=> array(
         				8 => "Structure",
-					9 => "Cargo",
+					9 => "Cargo Bay",
         				11 => "Jump Engine",
         				14 => "Scanner",
         				16 => "Engine",

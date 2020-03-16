@@ -13,9 +13,6 @@ class WhiteStar extends MediumShip{
         $this->canvasSize = 100;
         $this->gravitic = true;
         $this->limited = 33;
-        $this->adaptiveArmour = true;
-        $this->adaptiveArmourLimits = array(3, 1);
-        $this->armourSettings = array();
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
         $this->turncost = 0.33;
@@ -37,6 +34,10 @@ class WhiteStar extends MediumShip{
         $this->addPrimarySystem(new EMShield(3, 6, 0, 2, 0, 180));
         $this->addPrimarySystem(new TractorBeam(4, 4, 0, 0));
         $this->addPrimarySystem(new Jammer(4, 8, 7));
+		
+		$AAC = $this->createAdaptiveArmorController(3, 1, 0); //$AAtotal, $AApertype, $AApreallocated
+		$this->addPrimarySystem( $AAC );
+		
 
         $this->addFrontSystem(new MolecularPulsar(4, 8, 2, 300, 60));
         $this->addFrontSystem(new MolecularPulsar(4, 8, 2, 300, 60));

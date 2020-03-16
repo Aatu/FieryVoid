@@ -25,7 +25,7 @@ class zzftrywing extends FighterFlight{
         $this->turncost = 0.33;
         
         $this->hasNavigator = true;
-    	$this->iniativebonus = 17 *5; //includes Navigator bonus
+    	$this->iniativebonus = 16 *5; //Navigator bonus is automatically added on top of that
         
 		
 		$this->hangarRequired = "Fighter Squadrons"; //SW small craft are handled on squadron basis

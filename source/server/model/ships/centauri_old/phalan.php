@@ -37,9 +37,9 @@ class Phalan extends FighterFlight{
 			$fighter->iconPath = "img/ships/phalan_large.png";
 			
 			
-			$fighter->addFrontSystem(new PairedPlasmaBlaster(330, 30, 0));
+			$fighter->addFrontSystem(new PairedPlasmaBlaster(330, 30));
 			//$fighter->addFrontSystem(new PlasmaGun(330, 30, 0));  
-		        $largeGun = new PlasmaGun(330, 30, 0); 
+		        $largeGun = new PlasmaGun(330, 30); 
             		$largeGun->exclusive = true; 
             		$fighter->addFrontSystem($largeGun);			
 			

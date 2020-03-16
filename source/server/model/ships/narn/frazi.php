@@ -31,7 +31,7 @@ class Frazi extends FighterFlight{
 			
 			$armour = array(2, 2, 3, 3);
 			$frazi = new Fighter("frazi", $armour, 12, $this->id);
-			$frazi->displayName = "Frazi Heavy Fighter";
+			$frazi->displayName = "Frazi";
 			$frazi->imagePath = "img/ships/frazi.png";
 			$frazi->iconPath = "img/ships/frazi_large.png";
 			

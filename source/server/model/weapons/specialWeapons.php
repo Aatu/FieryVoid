@@ -32,27 +32,22 @@ class PlasmaStream extends Raking{
 	
 	public function setSystemDataWindow($turn){		
 		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
 	    $this->data["Special"] .= "Damage reduced by 1 point per hex.";
-	    $this->data["Special"] .= "Reduces armor of systems hit.";	
+	    $this->data["Special"] .= "<br>Reduces armor of systems hit.";	
+	    $this->data["Special"] .= "<br>Ignores half of armor.";	 //now handled by standard routines
 	}
 		 
 	
-	public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
-		$armour = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
-		    if (is_numeric($armour)){
-			$toIgnore = ceil($armour /2);
-			$new = $armour - $toIgnore;
-			return $new;
-		    }
-		    else {
-			return 0;
-		    }
-        }
 	
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
-		if (!$system->advancedArmor){
+		if (!$system->advancedArmor){//advanced armor prevents effect 
 			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
 			$crit->updated = true;
 			    $crit->inEffect = false;
@@ -105,67 +100,75 @@ class ShockCannon extends Weapon{
 		      $this->data["Special"] .= "<br>Structure hits reduce power output by 1 per 4 dmg rolled (but do no actual damage).";  
         }
 
-        // Shock Cannons ignore armor.
-        public function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
-            return 0;
-	}
-
-        public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-		if (!$system->advancedArmor){
-		    $crit = null;
-
-		    if ($system instanceof Fighter && !($ship->superheavy)){
-			$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-			$crit->updated = true;
-			$crit->inEffect = true;
-			$system->criticals[] =  $crit;
-			$fireOrder->pubnotes .= " DROPOUT! ";
-		    }else if ($system instanceof Structure){
-			$reactor = $ship->getSystemByName("Reactor");
-			$outputMod = -round($damage/4);
-			$crit = new OutputReduced(-1, $ship->id, $reactor->id, "OutputReduced", $gamedata->turn, $outputMod);
-			$crit->updated = true;
-			$reactor->criticals[] =  $crit;
-			//this weapon does no structural damage (and it was already done) - so undo it! (find appropriate damage entry, mark it as 0 damage and no desctruction)
-			foreach($system->damage as $dmgEntry){ //find and "clear" entry done by this weapon
-				if ($dmgEntry->fireorderid == $fireOrder->id){
-					$dmgEntry->destroyed = false;
-					$dmgEntry->damage = 0;
-					$dmgEntry->armour = 0;
-				}
+        //ignore armor; advanced armor halves effect (due to this weapon being Electromagnetic)
+        public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
+			if ($system->advancedArmor){
+				$returnArmour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
+				$returnArmour = floor($returnArmour/2);
+				return $returnArmour;
+			}else{
+				return 0;
 			}
-		    }
 		}
 
+		public function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+			$dmgToReturn = $damage;
+			if ($system instanceof Structure){
+				$dmgToReturn = 0; //no Structure damage
+				if (!$system->advancedArmor){ //advanced armor prevents non-damaging EM effects
+					$reactor = $ship->getSystemByName("Reactor");
+					$outputMod = -floor($damage/4);
+					if($outputMod < 0){
+						$crit = new OutputReduced(-1, $ship->id, $reactor->id, "OutputReduced", $gamedata->turn, $outputMod);
+						$crit->updated = true;
+						$reactor->criticals[] =  $crit;
+					}
+				}
+			}
+			return $dmgToReturn;
+		}
+
+        public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+			//effects on Structure hits already handled by beforeDamagedSystem
+			if (!$system->advancedArmor){ //advanced armor prevents non-damaging EM effects
+				$crit = null;
+				if ($system instanceof Fighter && !($ship->superheavy)){
+					$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = true;
+					$system->criticals[] =  $crit;
+					$fireOrder->pubnotes .= " DROPOUT! ";
+				}
+			}
             parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 	}//endof function onDamagedSystem
 
-        public function getDamage($fireOrder){        return Dice::d(10)+4;   }
-        public function setMinDamage(){     $this->minDamage = 5 /*- $this->dp*/;      }
-        public function setMaxDamage(){     $this->maxDamage = 14 /*- $this->dp*/;      }
+	public function getDamage($fireOrder){        return Dice::d(10)+4;   }
+	public function setMinDamage(){     $this->minDamage = 5 /*- $this->dp*/;      }
+	public function setMaxDamage(){     $this->maxDamage = 14 /*- $this->dp*/;      }
 }//endof class ShockCannon
 
 
 
 class BurstBeam extends Weapon{
 	public $name = "burstBeam";
-        public $displayName = "Burst Beam";
-        public $animation = "laser";
-        public $animationColor = array(158, 240, 255);
+	public $displayName = "Burst Beam";
+	public $animation = "laser";
+	public $animationColor = array(158, 240, 255);
 	public $trailColor = array(158, 240, 255);
 	public $projectilespeed = 15;
-        public $animationWidth = 2;
-        public $animationWidth2 = 0.2;
-        public $animationExplosionScale = 0.10;
+	public $animationWidth = 2;
+	public $animationWidth2 = 0.2;
+	public $animationExplosionScale = 0.10;
 	public $trailLength = 30;
+	public $noOverkill = true;
 		        
 	public $loadingtime = 1;
-        public $priority = 10; //as antiship weapon, going last
+	public $priority = 10; //as antiship weapon, going last
 	public $priorityAFArray = array(1=>3); //as antifighter weapon, going early
-        
 			
-        public $rangePenalty = 2;
-        public $fireControl = array(4, 2, 2); // fighters, <=mediums, <=capitals 
+	public $rangePenalty = 2;
+	public $fireControl = array(4, 2, 2); // fighters, <=mediums, <=capitals 
 	
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
@@ -181,24 +184,36 @@ class BurstBeam extends Weapon{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}	      
-		      $this->data["Special"] .= "Effect depends on system hit:";    
-		      $this->data["Special"] .= "<br> - Structure: Reactor output reduced by 1."; 
-		      $this->data["Special"] .= "<br> - Powered system: forced shutdown next turn."; 
-		      $this->data["Special"] .= "<br> - Other system: critical roll forced (at +4)."; 
-		      $this->data["Special"] .= "<br> - Fighter: immediate dropout (excluding superheavy)."; 
-		      $this->data["Special"] .= "<br>Automatically hits EM shield if interposed.";
-		      $this->data["Special"] .= "<br>Does not affect units protected by Advanced Armor.";  	
+		$this->data["Special"] .= "Effect depends on system hit:";    
+		$this->data["Special"] .= "<br> - Structure: Reactor output reduced by 1."; 
+		$this->data["Special"] .= "<br> - Powered system: forced shutdown next turn."; 
+		$this->data["Special"] .= "<br> - Other system: critical roll forced (at +4)."; 
+		$this->data["Special"] .= "<br> - Fighter: immediate dropout (excluding superheavy)."; 
+		$this->data["Special"] .= "<br>Automatically hits EM shield if interposed.";
+		$this->data["Special"] .= "<br>Does not affect units protected by Advanced Armor.";  	
+	}
+	
+	
+	//Burst Beams ignore armor; advanced armor halves effect (due to weapon being Electromagnetic)
+	public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
+		if ($system->advancedArmor){
+			$returnArmour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
+			$returnArmour = floor($returnArmour/2);
+			return $returnArmour;
+		}else{
+			return 0;
+		}
 	}
 	
 	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){ //if target is protected by EM shield, that shield is hit automatically
-		if($target instanceof FighterFlight){ //for fighters - regular effect
+		if($target instanceof FighterFlight){ //for fighters - regular allocation
 			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
 			return;
 		}
 		
 		//first - find bearing from target to firing ship (needed to determine whether shield interacts with incoming shot)
 		$relativeBearing = $target->getBearingOnUnit($shooter);
-		//are there any active shields affecting shot?
+		//are there any active EM shields affecting shot?
 		$affectingShields = array();
 		foreach($target->systems as $shield){
 			if( ($shield instanceOf EMShield)  //this is an actual shield!
@@ -217,6 +232,7 @@ class BurstBeam extends Weapon{
 			$this->onDamagedSystem($target, $shield, 0, 0, $gamedata, $fireOrder);
 		} else { //otherwise hit normally (parent beforeDamage) (...for 0 damage...) , actual effect handled in onDamagedSystem 
 			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+			return;
 		}
 	}//endof function beforeDamage
 		
@@ -240,13 +256,13 @@ class BurstBeam extends Weapon{
 			} else { //force critical roll at +4
 				$system->forceCriticalRoll = true;
 				$system->critRollMod += 4;
-			    }
+			}
 		}
 	}		
 		
-		public function getDamage($fireOrder){        return 0;   }
-		public function setMinDamage(){     $this->minDamage = 0;      }
-		public function setMaxDamage(){     $this->maxDamage = 0;      }
+	public function getDamage($fireOrder){        return 0;   }
+	public function setMinDamage(){     $this->minDamage = 0;      }
+	public function setMaxDamage(){     $this->maxDamage = 0;      }
 }//endof class BurstBeam
 
 
@@ -312,7 +328,7 @@ class BurstPulseCannon extends Pulse {
 		
 		//first - find bearing from target to firing ship (needed to determine whether shield interacts with incoming shot)
 		$relativeBearing = $target->getBearingOnUnit($shooter);
-		//are there any active shields affecting shot?
+		//are there any active EM shields affecting shot?
 		$affectingShields = array();
 		foreach($target->systems as $shield){
 			if( ($shield instanceOf EMShield)  //this is an actual shield!
@@ -334,67 +350,61 @@ class BurstPulseCannon extends Pulse {
 		}
 	}//endof function beforeDamage
 		
-		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-			$crit = null;
-			
-			if ($system->advancedArmor) return;
-			
-		    if ($system instanceof Fighter && !($ship->superheavy)){
-					$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-					$crit->updated = true;
-					$crit->inEffect = true;
-					$system->criticals[] =  $crit;
-					$fireOrder->pubnotes .= " DROPOUT! ";
-		    }else if ($system instanceof Structure){
-					$reactor = $ship->getSystemByName("Reactor");
-					$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
-					$crit->updated = true;
-					$reactor->criticals[] =  $crit;
-				}else if ($system->powerReq > 0 || $system->canOffLine ){
-				$crit = new ForcedOfflineOneTurn (-1, $ship->id, $system->id, "ForcedOfflineOneTurn", $gamedata->turn);
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		$crit = null;			
+		
+		if (!$system->advancedArmor){ //no effect at all vs Advanced Armor
+			if ($system instanceof Fighter && !($ship->superheavy)){
+				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
-				$system->criticals[] = $crit;
-					}
-			    else {//force critical roll at +4
-					$system->forceCriticalRoll = true;
-					$system->critRollMod += 4;
+				$crit->inEffect = true;
+				$system->criticals[] =  $crit;
+				$fireOrder->pubnotes .= " DROPOUT! ";
+			}else if ($system instanceof Structure){
+				$reactor = $ship->getSystemByName("Reactor");
+				$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
+				$crit->updated = true;
+				$reactor->criticals[] =  $crit;
+			}else if ($system->powerReq > 0 || $system->canOffLine ){
+				$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+			} else { //force critical roll at +4
+				$system->forceCriticalRoll = true;
+				$system->critRollMod += 4;
 			}
 		}
-		
-		
-		public function getDamage($fireOrder){        return 0;   }
-		public function setMinDamage(){     $this->minDamage = 0;      }
-		public function setMaxDamage(){     $this->maxDamage = 0;      }
+	}		
+	
+	public function getDamage($fireOrder){        return 0;   }
+	public function setMinDamage(){     $this->minDamage = 0;      }
+	public function setMaxDamage(){     $this->maxDamage = 0;      }
+}//endof class BurstPulseCannon
+
+
+
+class MediumBurstBeam extends BurstBeam{
+	public $name = "mediumBurstBeam";
+	public $displayName = "Medium Burst Beam";
+
+	public $animationColor = array(158, 240, 255);
+	public $trailColor = array(158, 240, 255);
+	public $projectilespeed = 12;
+	public $animationWidth = 3;
+	public $animationWidth2 = 0.4;
+	public $animationExplosionScale = 0.20;
+	public $trailLength = 40;
+
+	public $loadingtime = 2;
+	public $priority = 9;
+
+	public $rangePenalty = 0.5;
+	public $fireControl = array(0, 3, 4); // fighters, <=mediums, <=capitals 
+
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	}
-
-
-
-
-
-    class MediumBurstBeam extends BurstBeam{
-        public $name = "mediumBurstBeam";
-        public $displayName = "Medium Burst Beam";
-
-        public $animationColor = array(158, 240, 255);
-		public $trailColor = array(158, 240, 255);
-		public $projectilespeed = 12;
-        public $animationWidth = 3;
-        public $animationWidth2 = 0.4;
-        public $animationExplosionScale = 0.20;
-		public $trailLength = 40;
-
-        public $loadingtime = 2;
-        public $priority = 9;
-
-        public $rangePenalty = 0.5;
-        public $fireControl = array(0, 3, 4); // fighters, <=mediums, <=capitals 
-
-	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
-	    
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
 
 	    
 	public function setSystemDataWindow($turn){
@@ -409,131 +419,78 @@ class BurstPulseCannon extends Pulse {
 		      $this->data["Special"] .= "<br> - Any fighter: 1d6 to 3d6 damage (ignoring armor)."; 
 		      $this->data["Special"] .= "<br>Automatically hits EM shield if interposed.";
 		      $this->data["Special"] .= "<br>Does not affect units protected by Advanced Armor (other than fighter damage).";  	
-	}
-	    
-	    
+	} //a lot of the above is handled by methods inherited from BurstBeam class
 
-	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){ //if target is protected by EM shield, that shield is hit automatically
-		if($target instanceof FighterFlight){ //for fighters - regular effect
-			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
-			return;
+
+	public function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		$dmgToReturn = $damage;
+		if ($ship instanceof FighterFlight){ //dealing 1d6 to 3d6 damage
+			$roll = Dice::d(6);
+			$dmgDice = 1;
+			if($roll<=3) $dmgDice+=2; //50% chance for additional 2 dice of damage
+			$dmgToReturn += Dice::d(6,$dmgDice);
 		}
+		return $dmgToReturn;
+	}
 		
-		//first - find bearing from target to firing ship (needed to determine whether shield interacts with incoming shot)
-		$relativeBearing = $target->getBearingOnUnit($shooter);
-		//are there any active shields affecting shot?
-		$affectingShields = array();
-		foreach($target->systems as $shield){
-			if( ($shield instanceOf EMShield)  //this is an actual shield!
-				&& (!$shield->isDestroyed()) //not destroyed
-				&& (!$shield->isOfflineOnTurn($gamedata->turn)) //powered up
-			   	&& (mathlib::isInArc($relativeBearing, $shield->startArc, $shield->endArc)) //actually in arc to affect
-			) {
-				$affectingShields[] = $shield;
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		$crit = null;	
+
+		if ($system->advancedArmor){ //no actual effect on AA-protected ship! - damage itself is already dealt (if any)
+		    return;
+	    }		
+
+		if ($system instanceof Fighter){ //regular fighter drops out automatically, superheavy on a roll of 1 on d6
+			$roll = Dice::d(6);
+			if ((!$ship->superheavy) || ($roll < 2)){
+				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+				$crit->updated = true;
+				$crit->inEffect = true;
+				$system->criticals[] =  $crit;
+				$fireOrder->pubnotes .= " DROPOUT! ";
 			}
 		}
-		$countShields = count($affectingShields);
-		if($countShields > 0){ //hit shield if active in arc and not destroyed (proceed to onDamagedSystem directly)
-			//choose randomly from relevant shields
-			$chosenID = Dice::d($countShields,1)-1; //array elements numeration starts at 0
-			$shield = $affectingShields[$chosenID];			
-			$this->onDamagedSystem($target, $shield, 0, 0, $gamedata, $fireOrder);
-		} else { //otherwise hit normally (parent beforeDamage) (...for 0 damage...) , actual effect handled in onDamagedSystem 
-			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+		else if ($system instanceof Structure){
+			$reactor = $ship->getSystemByName("Reactor");
+			$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced2", $gamedata->turn);
+			$crit->updated = true;
+			$reactor->criticals[] =  $crit;
 		}
-	}//endof function beforeDamage
-	    
-        protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-            $crit = null;		
-
-            if ($system instanceof Fighter){ //fighters may suffer damage even with Advanced Armor
-		//deal 1d6 damage; on roll <=3 additional 2d6
-		//regular fighter drops out automatically, superheavy on a roll of 1
-		$roll = Dice::d(6);
-		$dmgDice = 1;
-		if($roll<=3) $dmgDice+=2;
-		$dmgToDo=Dice::d(6,$dmgDice);   
-		//ignore armor, but only half of advanced armor
-		$armor = $this->getSystemArmourBase($ship, $system, $gamedata, $fireOrder, null);
-		if($system->advancedArmor) { //ignore half of AdvArmor
-			$armor = floor($armor/2);
-		}else{//ignore regular armor entirely
-			$armor = 0;
+		else if ($system->powerReq > 0 || $system->canOffLine ){
+			$crit = new ForcedOfflineForTurns (-1, $ship->id, $system->id, "ForcedOfflineForTurns", $gamedata->turn, 2);
+			$crit->updated = true;
+			$system->criticals[] = $crit;
 		}
-		$armor += $this->getSystemArmourAdaptive($ship, $system, $gamedata, $fireOrder, null);
-		//immediately deal damage to fighter hit
-		$destroyed = false;
-		$systemHealth = $system->getRemainingHealth();
-		if ($dmgToDo - $armor >= $systemHealth) { //target will be destroyed
-			$destroyed = true;
-			$dmgToDo = $systemHealth + $armor;
+		else {//force critical roll at +6
+			$system->forceCriticalRoll = true;
+			$system->critRollMod += 6;
 		}
-		$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, $armor, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $fireOrder->shooterid, $this->id);
-		$damageEntry->updated = true;
-		$system->damage[] = $damageEntry;
-		if($destroyed==true) return; //no point doing anything else if target is destroyed outright
-		if($system->advancedArmor) return;//Advanced Armor will protect the fighter from forced dropout
-                if (!$ship->superheavy){
-                    $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-                    $crit->updated = true;
-                    $crit->inEffect = true;
-                    $system->criticals[] =  $crit;
-			$fireOrder->pubnotes .= " DROPOUT! ";
-                }
-                else {
-                    if ($roll < 2){ //1/6 chance to outright dropout even superheavy fighter
-                        $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-                        $crit->updated = true;
-                        $crit->inEffect = true;
-                        $system->criticals[] =  $crit;
-			$fireOrder->pubnotes .= " DROPOUT! ";
-                    }
-                }
-            }
-	    else if ($system->advancedArmor){ //no actual effect on AA-protected ship!
-		    return;
-	    }
-            else if ($system instanceof Structure){
-                $reactor = $ship->getSystemByName("Reactor");
-                $crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced2", $gamedata->turn);
-                $crit->updated = true;
-                $reactor->criticals[] =  $crit;
-            }
-            else if ($system->powerReq > 0 || $system->canOffLine ){
-                $crit = new ForcedOfflineForTurns (-1, $ship->id, $system->id, "ForcedOfflineForTurns", $gamedata->turn, 2);
-                $crit->updated = true;
-                $system->criticals[] = $crit;
-            }
-            else {//force critical roll at +6
-		$system->forceCriticalRoll = true;
-		$system->critRollMod += 6;
-            }
-        }    
-    }
+	}    
+}//endof class MediumBurstBeam
 
 
 
-    class HeavyBurstBeam extends BurstBeam{
-        public $name = "heavyBurstBeam";
-        public $displayName = "Heavy Burst Beam";
+class HeavyBurstBeam extends BurstBeam{
+	public $name = "heavyBurstBeam";
+	public $displayName = "Heavy Burst Beam";
 
-        public $animationColor = array(158, 240, 255);
-		public $trailColor = array(158, 240, 255);
-		public $projectilespeed = 10;
-        public $animationWidth = 4;
-        public $animationWidth2 = 0.5;
-        public $animationExplosionScale = 0.30;
-		public $trailLength = 50;
+	public $animationColor = array(158, 240, 255);
+	public $trailColor = array(158, 240, 255);
+	public $projectilespeed = 10;
+	public $animationWidth = 4;
+	public $animationWidth2 = 0.5;
+	public $animationExplosionScale = 0.30;
+	public $trailLength = 50;
 
-        public $loadingtime = 3;
-        public $priority = 9;
+	public $loadingtime = 3;
+	public $priority = 9;
 
-        public $rangePenalty = 0.33;
-        public $fireControl = array(2, 4, 5); // fighters, <=mediums, <=capitals 
+	public $rangePenalty = 0.33;
+	public $fireControl = array(2, 4, 5); // fighters, <=mediums, <=capitals 
 
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
 	    
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
@@ -547,212 +504,162 @@ class BurstPulseCannon extends Pulse {
 		      $this->data["Special"] .= "<br> - Any fighter: 5d6 damage (ignoring armor).";
 		      $this->data["Special"] .= "<br>Automatically hits EM shield if interposed.";
 		      $this->data["Special"] .= "<br>Effects other than direct damage do not affect units protected by Advanced Armor.";  	
-	}
+	}//a lot of the above handled by methods inherited from BurstBeam
 	    
-	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){ //if target is protected by EM shield, that shield is hit automatically
-		if($target instanceof FighterFlight){ //for fighters - regular effect
-			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
-			return;
-		}
 		
-		//first - find bearing from target to firing ship (needed to determine whether shield interacts with incoming shot)
-		$relativeBearing = $target->getBearingOnUnit($shooter);
-		//are there any active shields affecting shot?
-		$affectingShields = array();
-		foreach($target->systems as $shield){
-			if( ($shield instanceOf EMShield)  //this is an actual shield!
-				&& (!$shield->isDestroyed()) //not destroyed
-				&& (!$shield->isOfflineOnTurn($gamedata->turn)) //powered up
-			   	&& (mathlib::isInArc($relativeBearing, $shield->startArc, $shield->endArc)) //actually in arc to affect
-			) {
-				$affectingShields[] = $shield;
+	public function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		$dmgToReturn = $damage;
+		if ($ship instanceof FighterFlight){ //dealing 5d6 damage
+			$dmgToReturn += Dice::d(6,5);
+		}
+		return $dmgToReturn;
+	}
+		
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		$crit = null;	
+
+		if ($system->advancedArmor){ //no actual effect on AA-protected ship! - damage itself is already dealt (if any)
+		    return;
+	    }		
+
+		if ($system instanceof Fighter){ //regular fighter drops out automatically, superheavy on a roll of 1 on d3
+			$roll = Dice::d(3);
+			if ((!$ship->superheavy) || ($roll < 2)){
+				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+				$crit->updated = true;
+				$crit->inEffect = true;
+				$system->criticals[] =  $crit;
+				$fireOrder->pubnotes .= " DROPOUT! ";
 			}
 		}
-		$countShields = count($affectingShields);
-		if($countShields > 0){ //hit shield if active in arc and not destroyed (proceed to onDamagedSystem directly)
-			//choose randomly from relevant shields
-			$chosenID = Dice::d($countShields,1)-1; //array elements numeration starts at 0
-			$shield = $affectingShields[$chosenID];			
-			$this->onDamagedSystem($target, $shield, 0, 0, $gamedata, $fireOrder);
-		} else { //otherwise hit normally (parent beforeDamage) (...for 0 damage...) , actual effect handled in onDamagedSystem 
-			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+		else if ($system instanceof Structure){
+			$reactor = $ship->getSystemByName("Reactor");
+			$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced4", $gamedata->turn);
+			$crit->updated = true;
+			$reactor->criticals[] =  $crit;
 		}
-	}//endof function beforeDamage
-	    
-        protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-            if ($system instanceof Fighter){ //fighters may suffer damage even with Advanced Armor
-		//deal 5d6 damage; on roll <=3 additional 2d6
-		//regular fighter drops out automatically, superheavy on a roll of 1-2
-		$roll = Dice::d(6);
-		$dmgToDo=Dice::d(6,5); //2d6 plus 3d6 on a roll of 1-6...
-		//ignore armor, but only half of advanced armor
-		$armor = $this->getSystemArmourBase($ship, $system, $gamedata, $fireOrder, null);
-		if($system->advancedArmor) { //ignore half of AdvArmor
-			$armor = floor($armor/2);
-		}else{//ignore regular armor entirely
-			$armor = 0;
+		else if ($system->powerReq > 0 || $system->canOffLine ){
+			$crit = new ForcedOfflineForTurns (-1, $ship->id, $system->id, "ForcedOfflineForTurns", $gamedata->turn, 3);
+			$crit->updated = true;
+			$system->criticals[] = $crit;
 		}
-		$armor += $this->getSystemArmourAdaptive($ship, $system, $gamedata, $fireOrder, null);
-		//immediately deal damage to fighter hit
-		$destroyed = false;
-		$systemHealth = $system->getRemainingHealth();
-		if ($dmgToDo - $armor >= $systemHealth) { //target will be destroyed
-			$destroyed = true;
-			$dmgToDo = $systemHealth + $armor;
-		}
-		$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, $armor, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $fireOrder->shooterid, $this->id);
-		$damageEntry->updated = true;
-		$system->damage[] = $damageEntry;
-		if($destroyed==true) return; //no point doing anything else if target is destroyed outright
-		if($system->advancedArmor) return;//Advanced Armor will protect the fighter from forced dropout
-                if (!$ship->superheavy){
-                    $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-                    $crit->updated = true;
-                    $crit->inEffect = true;
-                    $system->criticals[] =  $crit;
-			$fireOrder->pubnotes .= " DROPOUT! ";
-                }
-                else {
-                    if ($roll < 3){//1/3 chance to outright dropout even superheavy fighter
-                        $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-                        $crit->updated = true;
-                        $crit->inEffect = true;
-                        $system->criticals[] =  $crit;
-			$fireOrder->pubnotes .= " DROPOUT! ";
-                    }
-                }
-            }
-	    else if ($system->advancedArmor){ //no actual effect on AA-protected ship!
-		    return;
-	    }
-            else if ($system instanceof Structure){
-                $reactor = $ship->getSystemByName("Reactor");
-                $crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced4", $gamedata->turn);
-                $crit->updated = true;
-                $reactor->criticals[] =  $crit;
-            }
-            else if ($system->powerReq > 0 || $system->canOffLine ){
-                $crit = new ForcedOfflineForTurns (-1, $ship->id, $system->id, "ForcedOfflineForTurns", $gamedata->turn, 3);
-                $crit->updated = true;
-            	$system->criticals[] = $crit;
-            }
-            else {//force critical roll at +6
+		else {//force critical roll at +8
 			$system->forceCriticalRoll = true;
-			$system->critRollMod += 6;
-            }
-        }    
-    }
+			$system->critRollMod += 8;
+		}
+	}    
+	    
+}//endof class HeavyBurstBeam
 
     
-    class TractorBeam extends ShipSystem{
-        public $name = "tractorBeam";
-        public $displayName = "Tractor Beam";
-	    
-	    public function setSystemDataWindow($turn){
-		      parent::setSystemDataWindow($turn); 
-				if (!isset($this->data["Special"])) {
-					$this->data["Special"] = '';
-				}else{
-					$this->data["Special"] .= '<br>';
-				}	    
-		      $this->data["Special"] .= "No in-game effect. Used to move or drag objects without physical contact.";  
-	    }	
-      
-        function __construct($armour, $maxhealth, $powerReq, $output ){
-            parent::__construct($armour, $maxhealth, $powerReq, $output );
-        }
-    }
-
-
-    class ElectroPulseGun extends Weapon{
-        public $name = "electroPulseGun";
-        public $displayName = "Electro-Pulse Gun";
-        public $animation = "laser";
-        public $animationColor = array(158, 240, 255);
-        public $trailColor = array(158, 240, 255);
-        public $projectilespeed = 15;
-        public $animationWidth = 2;
-        public $animationWidth2 = 0.2;
-        public $animationExplosionScale = 0.10;
-        public $trailLength = 30;
-        public $priority = 1;
-
-        public $loadingtime = 2;
-        public $rangePenalty = 3;
-        public $fireControl = array(3, null, null); // fighters, <=mediums, <=capitals
-	    public $calledShotMod = 0; //can call shot at no penalty! (eg. pick off undamaged fighter)
-
-	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-
-        public function setSystemDataWindow($turn){
-			parent::setSystemDataWindow($turn);  
+class TractorBeam extends ShipSystem{
+	public $name = "tractorBeam";
+	public $displayName = "Tractor Beam";
+	
+	public function setSystemDataWindow($turn){
+		  parent::setSystemDataWindow($turn); 
 			if (!isset($this->data["Special"])) {
 				$this->data["Special"] = '';
 			}else{
 				$this->data["Special"] .= '<br>';
 			}	    
-			$this->data["Special"] .= 'Forces dropout on fighters (except superheaby). Can pick particular fighter at no penalty.';
-        }
+		  $this->data["Special"] .= "No in-game effect. Used to move or drag objects without physical contact.";  
+	}	
+  
+	function __construct($armour, $maxhealth, $powerReq, $output ){
+		parent::__construct($armour, $maxhealth, $powerReq, $output );
+	}
+}
 
-        protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-            // On a hit, make fighters drop out, but if this weapon had
-            // a ReducedDamage crit, roll a d6 and substract 2 for each
-            // ReducedDamage crit. If the result is less than 1, the hit
-            // has no effect on the fighter.
+
+class ElectroPulseGun extends Weapon{
+	public $name = "electroPulseGun";
+	public $displayName = "Electro-Pulse Gun";
+	public $animation = "laser";
+	public $animationColor = array(158, 240, 255);
+	public $trailColor = array(158, 240, 255);
+	public $projectilespeed = 15;
+	public $animationWidth = 2;
+	public $animationWidth2 = 0.2;
+	public $animationExplosionScale = 0.10;
+	public $trailLength = 30;
+	public $priority = 1;
+
+	public $loadingtime = 2;
+	public $rangePenalty = 3;
+	public $fireControl = array(3, null, null); // fighters, <=mediums, <=capitals
+	public $calledShotMod = 0; //can call shot at no penalty! (eg. pick off undamaged fighter)
+
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);  
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}	    
+		$this->data["Special"] .= 'Forces dropout on fighters (except superheavy). Can pick particular fighter at no penalty.';
+	}
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		// On a hit, make fighters drop out, but if this weapon had
+		// a ReducedDamage crit, roll a d6 and substract 2 for each
+		// ReducedDamage crit. If the result is less than 1, the hit
+		// has no effect on the fighter.
 		if (!$system->advancedArmor){
-		    $crit = null;
-		    $affect = Dice::d(6);
+			$crit = null;
+			$affect = Dice::d(6);
 
-		    foreach ($this->criticals as $crit){
+			foreach ($this->criticals as $crit){
 			if ($crit instanceof ReducedDamage){
-			    $affect = $affect - 2;
+				$affect = $affect - 2;
 			}
-		    }
+			}
 
-		    if ( ($system instanceof Fighter) && (!($ship->superheavy)) && ($affect > 0)){
+			if ( ($system instanceof Fighter) && (!($ship->superheavy)) && ($affect > 0)){
 			$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 			$crit->updated = true;
 			$crit->inEffect = true;
 			$system->criticals[] =  $crit;
 			$fireOrder->pubnotes .= " DROPOUT! ";
-		    }
+			}
 		}
-            
-            parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
-        }
+		
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+	}
 
 
-        public function getDamage($fireOrder){        return 0;   }
-        public function setMinDamage(){     $this->minDamage = 0;      }
-        public function setMaxDamage(){     $this->maxDamage = 0;      }
-    }
+	public function getDamage($fireOrder){        return 0;   }
+	public function setMinDamage(){     $this->minDamage = 0;      }
+	public function setMaxDamage(){     $this->maxDamage = 0;      }
+}//endof class ElectroPulseGun
 
 
 
 class StunBeam extends Weapon{
 	public $name = "StunBeam";
-        public $displayName = "Stun Beam";
-	   public  $iconPath = "stunBeam.png";
-        public $animation = "laser";
-        public $animationColor = array(158, 240, 255);
+	public $displayName = "Stun Beam";
+	public  $iconPath = "stunBeam.png";
+	public $animation = "laser";
+	public $animationColor = array(158, 240, 255);
 	public $trailColor = array(158, 240, 255);
 	public $projectilespeed = 15;
-        public $animationWidth = 2;
-        public $animationWidth2 = 0.2;
-        public $animationExplosionScale = 0.10;
+	public $animationWidth = 2;
+	public $animationWidth2 = 0.2;
+	public $animationExplosionScale = 0.10;
 	public $trailLength = 30;
 		        
 	public $loadingtime = 2;
-        public $priority = 9; //as antiship weapon; as antifighter should go first...
-        
-			
-        public $rangePenalty = 1;
-        public $fireControl = array(0, 2, 4); // fighters, <=mediums, <=capitals 
+	public $priority = 9; //as antiship weapon; as antifighter should go first...
+
+	public $rangePenalty = 1;
+	public $fireControl = array(0, 2, 4); // fighters, <=mediums, <=capitals 
 		    
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
@@ -760,38 +667,37 @@ class StunBeam extends Weapon{
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ){
-                $maxhealth = 6;
-            }
-            if ( $powerReq == 0 ){
-                $powerReq = 5;
-            }
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
+		if ( $maxhealth == 0 ){
+			$maxhealth = 6;
+		}
+		if ( $powerReq == 0 ){
+			$powerReq = 5;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
        
-		public function setSystemDataWindow($turn){
-			parent::setSystemDataWindow($turn);
-			$this->data["Special"] = 'Forces dropout on fighters (except superheavy), turns off powered systems. ';
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = 'Forces dropout on fighters (except superheavy), turns off powered systems. ';
+	}
+		
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		$crit = null;
+		if ($system->advancedArmor) return;
+		if ($system instanceof Fighter && !($ship->superheavy)){
+			$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+			$crit->updated = true;
+					$crit->inEffect = true;
+			$system->criticals[] =  $crit;
+			$fireOrder->pubnotes .= " DROPOUT! ";
+				}else if ($system->powerReq > 0 || $system->canOffLine ){
+			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
 		}
-		
-		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-			$crit = null;
-            		if ($system->advancedArmor) return;
-			if ($system instanceof Fighter && !($ship->superheavy)){
-				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-				$crit->updated = true;
-                		$crit->inEffect = true;
-				$system->criticals[] =  $crit;
-				$fireOrder->pubnotes .= " DROPOUT! ";
-            		}else if ($system->powerReq > 0 || $system->canOffLine ){
-				$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
-			}
-		}
-		
-		
-		public function getDamage($fireOrder){        return 0;   }
-		public function setMinDamage(){     $this->minDamage = 0;      }
-		public function setMaxDamage(){     $this->maxDamage = 0;      }
+	}
+	
+	public function getDamage($fireOrder){        return 0;   }
+	public function setMinDamage(){     $this->minDamage = 0;      }
+	public function setMaxDamage(){     $this->maxDamage = 0;      }
 }//endof class StunBeam
 
 
@@ -1425,45 +1331,53 @@ class SparkField extends Weapon implements DefensiveSystem{
 		}
 	}	
 
-	
-	protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){ 
-		if ($system instanceof Structure) $damage = 0; //will not harm Structure!
-		parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
-	}	
 
+	public function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		$dmgToReturn = $damage;
+		if ($system instanceof Structure) $dmgToReturn = 0; //will not harm Structure!
+		return $dmgToReturn;
+	}
 	
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
-            //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ){
-                $maxhealth = 8;
-            }
-            if ( $powerReq == 0 ){
-                $powerReq = 2;
-            }
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-	    SparkFieldHandler::addSparkField($this);//so all Spark Fields are accessible together, and firing orders can be uniformly created
-        }
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+	{
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+			$maxhealth = 8;
+		}
+		if ( $powerReq == 0 ){
+			$powerReq = 2;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		SparkFieldHandler::addSparkField($this);//so all Spark Fields are accessible together, and firing orders can be uniformly created
+	}
 	
-        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
-            return 0; //ignores armor!
-        }
+	// ignore armor; advanced armor halves effect (due to weapon being Electromagnetic)
+	public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
+		if ($system->advancedArmor){
+			$returnArmour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
+			$returnArmour = floor($returnArmour/2);
+			return $returnArmour;
+		}else{
+			return 0;
+		}
+	}
 	
-	
-        public function onConstructed($ship, $turn, $phase){
-            parent::onConstructed($ship, $turn, $phase);
-	    $this->tohitPenalty = $this->getOutput();
-            $this->damagePenalty = 0;
-        }
-        public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
-            if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn)) return 0;
-		if(!$weapon->ballistic) return 0;//only ballistic weapons are affected!
-		$output = $this->getOutput();
-            return $output;
-        }
-        public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
-            return 0; //does not reduce damage
-        }
+
+	public function onConstructed($ship, $turn, $phase){
+		parent::onConstructed($ship, $turn, $phase);
+	$this->tohitPenalty = $this->getOutput();
+		$this->damagePenalty = 0;
+	}
+	public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
+		if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn)) return 0;
+	if(!$weapon->ballistic) return 0;//only ballistic weapons are affected!
+	$output = $this->getOutput();
+		return $output;
+	}
+	public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
+		return 0; //does not reduce damage
+	}
 	public function getDefensiveType()
 	{
 		return "SparkCurtain";
@@ -1481,7 +1395,7 @@ class SparkField extends Weapon implements DefensiveSystem{
 	}    
 	
 	
-        public function getDamage($fireOrder){        
+	public function getDamage($fireOrder){        
 		$damageRolled = Dice::d(6, 1)+1;
 		$boostlevel = $this->getBoostLevel($fireOrder->turn);
 		$damageRolled -= $boostlevel; //-1 per level of boost
@@ -1504,8 +1418,8 @@ class SparkField extends Weapon implements DefensiveSystem{
 
 class SurgeCannon extends Raking{
     /*Surge Cannon - Ipsha weapon*/
-        public $name = "SurgeCannon";
-        public $displayName = "Surge Cannon";
+	public $name = "SurgeCannon";
+	public $displayName = "Surge Cannon";
 	public $iconPath = "SurgeCannon.png";
 	
 	public $animation = "laser";
@@ -1567,18 +1481,18 @@ class SurgeCannon extends Raking{
 	} //endof function onDamagedSystem
 	
 	
-        public function fire($gamedata, $fireOrder){
-            // If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
+	public function fire($gamedata, $fireOrder){
+		// If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
 	    if ($this->isCombined) $fireOrder->shots = 0; //no actual shots from weapon that's firing as part of combined shot!
-            parent::fire($gamedata, $fireOrder);
+		parent::fire($gamedata, $fireOrder);
 	    for($i = 1; $i<$this->firingMode;$i++){
-		$trgtTurn = $gamedata->turn+$i-1;
-                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
-                $crit->updated = true;
-		$crit->newCrit = true; //force save even if crit is not for current turn
-                $this->criticals[] =  $crit;
+			$trgtTurn = $gamedata->turn+$i-1;
+			$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
+			$crit->updated = true;
+			$crit->newCrit = true; //force save even if crit is not for current turn
+			$this->criticals[] =  $crit;
 	    }
-        } //endof function fire
+	} //endof function fire
 	
 	
 	
@@ -1708,8 +1622,8 @@ class SurgeCannon extends Raking{
 
 class SurgeLaser extends Raking{
     /*Surge Laser - Streib weapon*/
-        public $name = "SurgeLaser";
-        public $displayName = "Surge Laser";
+	public $name = "SurgeLaser";
+	public $displayName = "Surge Laser";
 	public $iconPath = "SurgeCannon.png";
 	
 	public $animation = "laser";
@@ -1718,36 +1632,33 @@ class SurgeLaser extends Raking{
 	public $animationWidthArray = array(1=>2, 2=>3);
 	public $animationWidth2 = 0.4;
 	public $animationExplosionScaleArray = array(1=>0.1, 2=>0.2);
-
       
-        public $loadingtime = 1;
+	public $loadingtime = 1;
 	public $intercept = 1; //intercept rating -1
         
-	
-	
-        public $priority = 3; //technically it's Raking weapon, but so light it's essentially light Standard
+	public $priority = 3; //technically it's Raking weapon, but so light it's essentially light Standard
+	public $priorityArray = array(1=>3, 2=>8); //...but Combined shot is much nastier, light Raking all right
 	public $firingMode = 1;	
-            public $firingModes = array(
-                1 => "Rapid",
-                2 => "Combined",
-            );
-        public $rangePenalty = 1; //-1 hex in single mode
-            public $rangePenaltyArray = array( 1=>1, 2=>1); //-1/hex in both modes
-        public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals 
-            public $fireControlArray = array( 1=>array(4, 2, 2), 2=>array(2,2,4) ); 
-			public $guns = 2;
-			public $gunsArray = array(1=>2,2=>1);//basic 2 shots, combined 1 shot
-			
-	    public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	public $firingModes = array(
+		1 => "Rapid",
+		2 => "Combined",
+	);
+	public $rangePenalty = 1; //-1 hex in single mode
+	public $rangePenaltyArray = array( 1=>1, 2=>1); //-1/hex in both modes
+	public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals 
+	public $fireControlArray = array( 1=>array(4, 2, 2), 2=>array(2,2,4) ); 
+	public $guns = 2;
+	public $gunsArray = array(1=>2,2=>1);//basic 2 shots, combined 1 shot
+		
+	public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 	
 	
-	
-	    public function setSystemDataWindow($turn){
-		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "+2 per rake to critical/dropout rolls on system(s) hit this turn.";  //original rule is more fancy
-			  $this->data["Special"] .= "Basic firing mode is 2 shots with FC 20/10/10, combined 1 shot with FC 10/10/20.";  //original rule is more fancy
-	    }	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);  
+		$this->data["Special"] = "+2 per rake to critical/dropout rolls on system(s) hit this turn.";  //original rule is more fancy
+		$this->data["Special"] .= "Basic firing mode is 2 shots with FC 20/10/10, combined 1 shot with FC 10/10/20.";  //original rule is more fancy
+	}	
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
@@ -1757,20 +1668,20 @@ class SurgeLaser extends Raking{
 	} //endof function onDamagedSystem
 	
 	
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
-            //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ){
-                $maxhealth = 6;
-            }
-            if ( $powerReq == 0 ){
-                $powerReq = 3;
-            }
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+	{
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+			$maxhealth = 6;
+		}
+		if ( $powerReq == 0 ){
+			$powerReq = 3;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
 	
 	
-        public function getDamage($fireOrder){
+	public function getDamage($fireOrder){
 		switch($this->firingMode){
 			case 1:
 				return Dice::d(10, 1)+2; //rapid fire
@@ -1780,7 +1691,7 @@ class SurgeLaser extends Raking{
 				break;
 		}
 	}
-        public function setMinDamage(){    
+	public function setMinDamage(){    
 		switch($this->firingMode){
 			case 1:
 				$this->minDamage = 2;
@@ -1791,7 +1702,7 @@ class SurgeLaser extends Raking{
 		}
 		$this->minDamageArray[$this->firingMode] = $this->minDamage;
 	}
-        public function setMaxDamage(){
+	public function setMaxDamage(){
 		switch($this->firingMode){
 			case 1:
 				$this->maxDamage = 12;
@@ -1807,105 +1718,101 @@ class SurgeLaser extends Raking{
 
 
 
-   class LtSurgeBlaster extends LinkedWeapon{
-	   /*Ipsha fighter weapon*/
-        public $trailColor = array(50, 50, 200);
-        public $name = "LtSurgeBlaster";
-        public $displayName = "Light Surge Blaster";
-	   public  $iconPath = "lightParticleBeam.png";
-        public $animation = "trail";
-        public $animationColor =  array(145, 145, 245);
-        public $animationExplosionScale = 0.10;
-        public $projectilespeed = 10;
-        public $animationWidth = 2;
-        public $trailLength = 10;
-        public $intercept = 2;
-        public $loadingtime = 1;
-        public $shots = 2;
-        public $defaultShots = 2;
-        public $rangePenalty = 2;
-        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
-	    public $priority = 4; 
-        
-        public $damageType = "Standard"; 
-        public $weaponClass = "Electromagnetic"; 
-	    
-        
-     function __construct($startArc, $endArc, $nrOfShots = 2){
-            $this->defaultShots = $nrOfShots;
-            $this->shots = $nrOfShots;
-            $this->intercept = $nrOfShots;
-			
-			if($nrOfShots === 1){
-                $this->iconPath = "lightParticleBeam1.png";
-            }
-            if($nrOfShots >2){//no special icon for more than 3 linked weapons
-                $this->iconPath = "lightParticleBeam3.png";
-            }
-			
-            parent::__construct(0, 1, 0, $startArc, $endArc);
-        }
+class LtSurgeBlaster extends LinkedWeapon{
+   /*Ipsha fighter weapon*/
+	public $trailColor = array(50, 50, 200);
+	public $name = "LtSurgeBlaster";
+	public $displayName = "Light Surge Blaster";
+	public  $iconPath = "lightParticleBeam.png";
+	public $animation = "trail";
+	public $animationColor =  array(145, 145, 245);
+	public $animationExplosionScale = 0.10;
+	public $projectilespeed = 10;
+	public $animationWidth = 2;
+	public $trailLength = 10;
+	public $intercept = 2;
+	public $loadingtime = 1;
+	public $shots = 2;
+	public $defaultShots = 2;
+	public $rangePenalty = 2;
+	public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+	public $priority = 4; //average output ftr weapon
+
+	public $damageType = "Standard"; 
+	public $weaponClass = "Electromagnetic"; 
 	
 	
-        public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "+1 to Crit/Dropout rolls per hit.";
-        }
-	   
+	function __construct($startArc, $endArc, $nrOfShots = 2){
+		$this->defaultShots = $nrOfShots;
+		$this->shots = $nrOfShots;
+		$this->intercept = $nrOfShots;
+		if($nrOfShots === 1){
+			$this->iconPath = "lightParticleBeam1.png";
+		}
+		if($nrOfShots >2){//no special icon for more than 3 linked weapons
+			$this->iconPath = "lightParticleBeam3.png";
+		}
+		parent::__construct(0, 1, 0, $startArc, $endArc);
+	}
+
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = "+1 to Crit/Dropout rolls per hit.";
+	}
+   
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 		//each hit causes +1 mod on critical roll for hit system! 
 		if ($system->advancedArmor) return; //no effect on Advanced Armor
 		$system->critRollMod+=1; 
 	} //endof function onDamagedSystem
-	    
-        public function getDamage($fireOrder){        return Dice::d(6,2)-1;   }
-        public function setMinDamage(){     $this->minDamage = 1 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 11 ;      }
-    } //endof class LtSurgeBlaster
+	
+	public function getDamage($fireOrder){        return Dice::d(6,2)-1;   }
+	public function setMinDamage(){     $this->minDamage = 1 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 11 ;      }
+} //endof class LtSurgeBlaster
 
 
 
- class EmPulsar extends Pulse{
-	 /*Ipsha weapon*/
-        public $name = "EmPulsar";
-        public $displayName = "EM Pulsar";
+class EmPulsar extends Pulse{
+	/*Ipsha weapon*/
+	public $name = "EmPulsar";
+	public $displayName = "EM Pulsar";
 	public $iconPath = "EmPulsar.png";
-        public $animationColor = array(100, 100, 255);
-        public $animation = "trail";
-        public $animationWidth = 3;
-        public $projectilespeed = 10;
-        public $animationExplosionScale = 0.15;
-        public $trailLength = 10;
-        
-        public $loadingtime = 1;
-        public $priority = 3;
-        
+	public $animationColor = array(100, 100, 255);
+	public $animation = "trail";
+	public $animationWidth = 3;
+	public $projectilespeed = 10;
+	public $animationExplosionScale = 0.15;
+	public $trailLength = 10;
+
+	public $loadingtime = 1;
+	public $priority = 3;
+
 	public $intercept = 2;
-        public $rangePenalty = 1; //-1/hex
-        public $grouping = 25; //+1 pulse hit per 1 below target number on d20
-        public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
+	public $rangePenalty = 1; //-1/hex
+	public $grouping = 25; //+1 pulse hit per 1 below target number on d20
+	public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
+
+	public $weaponClass = "Electromagnetic";
 	 
-	 public $weaponClass = "Electromagnetic"; 
-        
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+			$maxhealth = 6;
+		}
+		if ( $powerReq == 0 ){
+			$powerReq = 3;
+		}		
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
 	 
-	 
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ){
-                $maxhealth = 6;
-            }
-            if ( $powerReq == 0 ){
-                $powerReq = 3;
-            }		
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-	 
-        public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-	    $this->data["Special"] .= "<br>-1 per hit to crit rolls, -2 on dropout rolls.";
-            $this->data["Special"] .= "<br>Cooldown period: 1 turn.";  
-        }
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] .= "<br>-1 per hit to crit rolls, -2 on dropout rolls.";
+		$this->data["Special"] .= "<br>Cooldown period: 1 turn.";  
+	}
 	 
 	 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
@@ -1919,15 +1826,15 @@ class SurgeLaser extends Raking{
 	} //endof function onDamagedSystem
 	
 	
-        public function fire($gamedata, $fireOrder){
-            // If fired, this weapon needs 1 turn cooldown period (=forced shutdown)
-            parent::fire($gamedata, $fireOrder);		
+	public function fire($gamedata, $fireOrder){
+		// If fired, this weapon needs 1 turn cooldown period (=forced shutdown)
+		parent::fire($gamedata, $fireOrder);		
 		$trgtTurn = $gamedata->turn;
-                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
-                $crit->updated = true;
+		$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
+		$crit->updated = true;
 		$crit->newCrit = true; //force save even if crit is not for current turn
-                $this->criticals[] =  $crit;	
-        } //endof function fire
+		$this->criticals[] =  $crit;	
+	} //endof function fire
 	 
         
         public function getDamage($fireOrder){        return 9;   }
@@ -1937,8 +1844,8 @@ class SurgeLaser extends Raking{
 
 class ResonanceGenerator extends Weapon{
     /*Resonance Generator - Ipsha weapon*/
-        public $name = "ResonanceGenerator";
-        public $displayName = "Resonance Generator";
+	public $name = "ResonanceGenerator";
+	public $displayName = "Resonance Generator";
 	public $iconPath = "ResonanceGenerator.png";
 	
 	public $animation = "laser"; //described as beam in nature, standard damage is resonance effect and not direct
@@ -1947,10 +1854,10 @@ class ResonanceGenerator extends Weapon{
 	public $animationWidth2 = 0.4;
 	public $animationExplosionScaleArray = array(1=>0.25);
       
-        public $loadingtime = 1;
-        
-        public $rangePenalty = 1; //-1/hex
-        public $fireControl = array(null, 2, 2); // fighters, <mediums, <capitals 
+	public $loadingtime = 1;
+	
+	public $rangePenalty = 1; //-1/hex
+	public $fireControl = array(null, 2, 2); // fighters, <mediums, <capitals 
 	
 	public $intercept = 0;
 	public $priority = 1;// as it attacks every section, should go first!
@@ -1959,36 +1866,36 @@ class ResonanceGenerator extends Weapon{
 	
 	private $cooldown = 2;
 	
-	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
 	
-	
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
-            //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ){
-                $maxhealth = 8;
-            }
-            if ( $powerReq == 0 ){
-                $powerReq = 6;
-            }
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-	
-	
-	    public function setSystemDataWindow($turn){
-		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Cooldown period: 2 turns.";  
-		      $this->data["Special"] .= "<br>Attacks all sections (so a capital ship will sufer 5 attacks, while MCV only 1).";  //MCV should suffer 2, but for technical reasons I opted for going for Section = Structure block		    
-		      $this->data["Special"] .= "<br>Ignores all standard and half advanced armor."; //should take full Adaptive armor, but it's easier to treat Adaptive as Advanced here
-	    }	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+	{
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+			$maxhealth = 8;
+		}
+		if ( $powerReq == 0 ){
+			$powerReq = 6;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
 	
 	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);  
+		$this->data["Special"] = "Cooldown period: 2 turns.";  
+		$this->data["Special"] .= "<br>Attacks all sections (so a capital ship will sufer 5 attacks, while MCV only 1).";  //MCV should suffer 2, but for technical reasons I opted for going for Section = Structure block		    
+		$this->data["Special"] .= "<br>Ignores armor."; 
+	}
+		
 	
-        public function fire($gamedata, $fireOrder){
-            // If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
-            parent::fire($gamedata, $fireOrder);
+	
+	
+	public function fire($gamedata, $fireOrder){
+		// If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
+		parent::fire($gamedata, $fireOrder);
 		for($i = 1; $i<=$this->cooldown;$i++){		
 			$trgtTurn = $gamedata->turn+$i-1;//start on current turn rather than next!
 			$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
@@ -1996,31 +1903,23 @@ class ResonanceGenerator extends Weapon{
 			$crit->newCrit = true; //force save even if crit is not for current turn
 			$this->criticals[] =  $crit;
 		}
-        } //endof function fire
+	} //endof function fire
 	
 	
-	public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
-		return 0; //standard armor is ignored
-        }
-	
-	public function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos=null){
-		//half of advanced armor is ignored
-		$armour = parent::getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos);
-		    if (is_numeric($armour)){
-			$toIgnore = ceil($armour /2);
-			$new = $armour - $toIgnore;
-			return $new;
-		    }
-		    else {
+	//ignore armor; advanced armor halves effect (due to this weapon being Electromagnetic)
+	public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
+		if ($system->advancedArmor){
+			$returnArmour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
+			$returnArmour = floor($returnArmour/2);
+			return $returnArmour;
+		}else{
 			return 0;
-		    }
-        }//endof function getSystemArmourInvulnerable
-	
+		}
+	}
 	
 	public function isTargetAmbiguous($gamedata, $fireOrder){//targat always ambiguous - just so enveloping weapon is not used to decide target section!
 		return true;
 	}
-	
 	
 	/*attacks every not destroyed (as of NOW!) ship section*/
 	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
@@ -2033,11 +1932,10 @@ class ResonanceGenerator extends Weapon{
 			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage, true);//force PRIMARY location!
 		}
 	}//endof function beforeDamage
-	
 		
-        public function getDamage($fireOrder){       return Dice::d(10,1);   }
-        public function setMinDamage(){     $this->minDamage = 1 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 10 ;      }
+	public function getDamage($fireOrder){       return Dice::d(10,1);   }
+	public function setMinDamage(){     $this->minDamage = 1 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 10 ;      }
 } //endof class ResonanceGenerator
 
 
@@ -2046,37 +1944,39 @@ class ResonanceGenerator extends Weapon{
 
 class SurgeBlaster extends Weapon{
     /*Surge Blaster - Ipsha weapon*/
-        public $name = "SurgeBlaster";
-        public $displayName = "Surge Blaster";
+	public $name = "SurgeBlaster";
+	public $displayName = "Surge Blaster";
 	public $iconPath = "SurgeBlaster.png";
 	
-        public $animation = "trail";
-        public $animationColor =  array(165, 165, 255);
-        public $projectilespeed = 14;
-        public $animationWidth = 4;
-        public $animationExplosionScale = 0.4;
-        public $priority = 6;
-      
-        public $loadingtime = 1;
+	public $animation = "trail";
+	public $animationColor =  array(165, 165, 255);
+	public $projectilespeed = 14;
+	public $animationWidth = 4;
+	public $animationExplosionScale = 0.4;
+	public $priority = 6;
+  
+	public $loadingtime = 1;
 	public $intercept = 1;
         
-        public $rangePenalty = 0.5; //-1/2 hexes
-        public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
-	
-	
-	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	public $rangePenalty = 0.5; //-1/2 hexes
+	public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
 
-	
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
 	private $cooldown = 1;
+		
 	
-	
-	
-	    public function setSystemDataWindow($turn){
-		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Cooldown period: " . $this->cooldown . " turns.";  
-		      $this->data["Special"] .= "<br>+4 to all critical/dropout rolls made by system hit this turn.";  
-	    }	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);  
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}	  		
+		$this->data["Special"] .= "Cooldown period: " . $this->cooldown . " turns.";  
+		$this->data["Special"] .= "<br>+4 to all critical/dropout rolls made by system hit this turn.";  
+	}	
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
@@ -2087,9 +1987,9 @@ class SurgeBlaster extends Weapon{
 	} //endof function onDamagedSystem
 	
 	
-        public function fire($gamedata, $fireOrder){
-            // If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
-            parent::fire($gamedata, $fireOrder);
+	public function fire($gamedata, $fireOrder){
+		// If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
+		parent::fire($gamedata, $fireOrder);
 		for($i = 1; $i<=$this->cooldown;$i++){		
 			$trgtTurn = $gamedata->turn+$i-1;//start on current turn rather than next!
 			$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
@@ -2097,67 +1997,64 @@ class SurgeBlaster extends Weapon{
 			$crit->newCrit = true; //force save even if crit is not for current turn
 			$this->criticals[] =  $crit;
 		}
-        } //endof function fire
+	} //endof function fire
 	
 	
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
-            //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ){
-                $maxhealth = 6;
-            }
-            if ( $powerReq == 0 ){
-                $powerReq = 6;
-            }
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+	{
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+			$maxhealth = 6;
+		}
+		if ( $powerReq == 0 ){
+			$powerReq = 6;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
 	
-        public function getDamage($fireOrder){        return Dice::d(10,4);   }
-        public function setMinDamage(){     $this->minDamage = 4 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 40 ;      }
+	public function getDamage($fireOrder){        return Dice::d(10,4);   }
+	public function setMinDamage(){     $this->minDamage = 4 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 40 ;      }
 } //endof class SurgeBlaster
 
 
 class RammingAttack extends Weapon{
     /*option to ram target will be implemented as an actual weapon*/
-        public $name = "RammingAttack";
-        public $displayName = "Ramming Attack";
+	public $name = "RammingAttack";
+	public $displayName = "Ramming Attack";
 	public $iconPath = "RammingAttack.png";
 	
 	//animation irrelevant really (range 0), but needs to be fast!
-        public $animation = "trail";
-        public $animationColor =  array(1, 1, 1);
-        public $projectilespeed = 24;
-        public $animationWidth = 1;
-        public $animationExplosionScale = 0.4;
-        public $priority = 1;
+	public $animation = "trail";
+	public $animationColor =  array(1, 1, 1);
+	public $projectilespeed = 24;
+	public $animationWidth = 1;
+	public $animationExplosionScale = 0.4;
+	public $priority = 1;
 	
 	public $doNotIntercept = true; //unit hurls itself at the enemy - this cannot be intercepted!
       
-        public $loadingtime = 1;
+	public $loadingtime = 1;
 	public $intercept = 0;
         
-        public $rangePenalty = 0; //no range penalty... HKs will add it though!
+	public $rangePenalty = 0; //no range penalty... HKs will add it though!
 	public $range = 0.1; //attacks units on same hex only; range = 0 is treated as unlimited
 	
-        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+	public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
 	public $raking = 10; //size of rake
 	
-	
-            public $firingModes = array(
-                1 => "Ramming"
-            );	
-	    public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-	    public $weaponClass = "Ramming"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
-
+	public $firingModes = array(
+		1 => "Ramming"
+	);	
+	public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Ramming"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
 	public $isRammingAttack = true;	
 	private $designedToRam = false;
 	private $selfDestroy = 0; //will successful attack destroy the ramming ship? Additional damage modifier
 	private $designDamage = 0;
 	private $damageModRolled = 0;
-	
-	
+
 	private $gamedata = null; //gamedata is needed in places normally unavailable - this variable will be filled before any calculations happen!
 	
 	 public $possibleCriticals = array(); //shouldn't be hit ever, but if it is, should not suffer any criticals
@@ -2168,22 +2065,22 @@ class RammingAttack extends Weapon{
 		$this->gamedata = $gamedata;
 	}
 	
-	    public function setSystemDataWindow($turn){
-			$this->setMinDamage(); //just in case it's not set correctly in the beginning!
-        		$this->setMaxDamage();
-		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Ramming attack - if succcessful, ramming unit itself will take damage too (determined by targets' ramming factor).";  
-		      if($this->designedToRam) {
-			      $this->data["Special"] .= "<br>This unit is specifically designed for ramming and may do so in any scenario.";
-		      }else{
-			      $this->data["Special"] .= "<br>ALLOWED ONLY IN SPECIAL CIRCUMSTANCES, LIKE HOMEWORLD DEFENSE!";
-		      }
-		      $this->data["Special"] .= "<br>Profiles and EW do not matter for hit chance - but unit size and target speed does.";  
-		      $this->data["Special"] .= "<br>	(it's generally easier to ram slow targets and targets larger than ramming units itself)";  
-		      $this->data["Special"] .= "<br>	Hunter-Killers have speed penalty as well.";  
-		      $this->data["Special"] .= "<br>Ramming damage is also influenced by conditions - moving head on with initiative slightly increases chance of high damage.";
-		      $this->data["Special"] .= "<br>Ramming attacks will be done in ship firing phase (even attacks by fighters) and cannot be intercepted.";
-	    }	
+	public function setSystemDataWindow($turn){
+		$this->setMinDamage(); //just in case it's not set correctly in the beginning!
+			$this->setMaxDamage();
+		  parent::setSystemDataWindow($turn);  
+		  $this->data["Special"] = "Ramming attack - if succcessful, ramming unit itself will take damage too (determined by targets' ramming factor).";  
+		  if($this->designedToRam) {
+			  $this->data["Special"] .= "<br>This unit is specifically designed for ramming and may do so in any scenario.";
+		  }else{
+			  $this->data["Special"] .= "<br>ALLOWED ONLY IN SPECIAL CIRCUMSTANCES, LIKE HOMEWORLD DEFENSE!";
+		  }
+		  $this->data["Special"] .= "<br>Profiles and EW do not matter for hit chance - but unit size and target speed does.";  
+		  $this->data["Special"] .= "<br>	(it's generally easier to ram slow targets and targets larger than ramming units itself)";  
+		  $this->data["Special"] .= "<br>	Hunter-Killers have speed penalty as well.";  
+		  $this->data["Special"] .= "<br>Ramming damage is also influenced by conditions - moving head on with initiative slightly increases chance of high damage.";
+		  $this->data["Special"] .= "<br>Ramming attacks will be done in ship firing phase (even attacks by fighters) and cannot be intercepted.";
+	}	
 	
 	
 	public function fire($gamedata, $fireOrder){
@@ -2206,23 +2103,23 @@ class RammingAttack extends Weapon{
 			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
 			$fireOrder->calledid = -1; //just in case!
 		}
-        } //endof function fire
+	} //endof function fire
 
 	
-        function __construct($armour, $startArc, $endArc, $designDamage = 0, $fcbonus = 0, $designedToRam = false, $selfDestroy = 0){
-            //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            $maxhealth = 1;
-            $powerReq = 0;
+	function __construct($armour, $startArc, $endArc, $designDamage = 0, $fcbonus = 0, $designedToRam = false, $selfDestroy = 0){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		$maxhealth = 1;
+		$powerReq = 0;
 		if ($fcbonus != 0){
 			$this->fireControl = array($fcbonus, $fcbonus, $fcbonus);
 		}
 		if ($designDamage > 0){ //most units calculate ramming factor on the fly, but some are specifically designed to ram and carry explosives to do so effectively - they have fixed ramming factor
 			$this->designDamage = 	$designDamage;
 		}
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 		$this->designedToRam = $designedToRam;
 		$this->selfDestroy = $selfDestroy;
-        }
+	}
 	
 
 	
@@ -2307,9 +2204,8 @@ class LtEMWaveDisruptor extends LinkedWeapon{
 	public $defaultShots = 2;
 	public $rangePenalty = 2;
 	public $fireControl = array(null, null, null); // no offensive mode
-	public $priority = 4; 
+	public $priority = 4; //irrelevant with no offensive mode
 	public $iconPath = "emWaveDisruptor.png";
-
 	
 	public $damageType = "Standard"; 
 	public $weaponClass = "Electromagnetic"; 
@@ -2327,7 +2223,6 @@ class LtEMWaveDisruptor extends LinkedWeapon{
 		parent::setSystemDataWindow($turn);
 		$this->data["Special"] = "No offensive mode.";
 	}
-   
 	
 	public function getDamage($fireOrder){        return 0;   }
 	public function setMinDamage(){     $this->minDamage = 0 ;      }
@@ -2339,71 +2234,67 @@ class LtEMWaveDisruptor extends LinkedWeapon{
 
 class RadCannon extends Weapon{
     /*Radiation Cannon - Cascor weapon (with LOTS of specials; essentially it's all special, with no base damage effect whatsover*/
-        public $name = "RadCannon";
-        public $displayName = "Rad Cannon";
+	public $name = "RadCannon";
+	public $displayName = "Rad Cannon";
 	public $iconPath = "RadCannon.png";
 	
 	public $animation = "beam";//behaves like a bolt, I think beam animation is fitting
-        public $animationColor = array(150, 10, 10); //make it deep red...
-        public $animationExplosionScale = 0.3;
-        public $projectilespeed = 15;
-        public $animationWidth = 8;
-        public $trailLength = 20;
-      
-        public $loadingtime = 2;
+	public $animationColor = array(150, 10, 10); //make it deep red...
+	public $animationExplosionScale = 0.3;
+	public $projectilespeed = 15;
+	public $animationWidth = 8;
+	public $trailLength = 20;
+  
+	public $loadingtime = 2;
 	public $noOverkill = true; //does not overkill
         
-        public $rangePenalty = 0.5; //-1/2hexes
-        public $fireControl = array(null, 2, 3); // fighters, <mediums, <capitals 
+	public $rangePenalty = 0.5; //-1/2hexes
+	public $fireControl = array(null, 2, 3); // fighters, <mediums, <capitals 
 	
 	public $intercept = 0;
 	public $priority = 2;// should go first/very early due to ignoring actual durability of system hit
 		
 	public $firingModes = array(1=>'Irradiate'); //just a convenient name
-	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-	    public $weaponClass = "Ion"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Ion"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+		
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+	{
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ) $maxhealth = 8;
+		if ( $powerReq == 0 ) $powerReq = 6;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
 	
 	
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
-            //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 8;
-            if ( $powerReq == 0 ) $powerReq = 6;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);  
+		$this->data["Special"] = "Doesn't actually deal damage except as noted below. Automatically hits shields if interposed.";      
+		$this->data["Special"] .= "<br>Effect depends on system hit:";    
+		$this->data["Special"] .= "<br> - Structure: 10 boxes marked destroyed (regardless of armor."; 
+		$this->data["Special"] .= "<br> - Shield: system destroyed."; 
+		$this->data["Special"] .= "<br>  -- Gravitic Shield reduces generator output by 1, too."; 
+		$this->data["Special"] .= "<br> - Weapon, Thruster or Jump Engine: system destroyed."; 
+		$this->data["Special"] .= "<br> - C&C: critical roll forced (at +2)."; 
+		$this->data["Special"] .= "<br> - Scanner: output reduced by 1."; 
+		$this->data["Special"] .= "<br> - Engine: output reduced by 2."; 
+		//and disable a tendril on diffuser, but there's no diffuser in game to disable at the moment
+		$this->data["Special"] .= "<br>No effect on any other system. Note that armor and shields do not affect above effects.";
+		$this->data["Special"] .= "<br>Does not affect ships of advanced species (eg. Ancient-born or older).";  		    
+	}	
 	
-	
-	    public function setSystemDataWindow($turn){
-		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Doesn't actually deal damage except as noted below. Automatically hits shields if interposed.";      
-		      $this->data["Special"] .= "<br>Effect depends on system hit:";    
-		      $this->data["Special"] .= "<br> - Structure: 10 boxes marked destroyed."; 
-		      $this->data["Special"] .= "<br> - Shield: system destroyed."; 
-		      $this->data["Special"] .= "<br>  -- Gravitic Shield reduces generator output by 1, too."; 
-		      $this->data["Special"] .= "<br> - Weapon, Thruster or Jump Engine: system destroyed."; 
-		      $this->data["Special"] .= "<br> - C&C: critical roll forced (at +2)."; 
-		      $this->data["Special"] .= "<br> - Scanner: output reduced by 1."; 
-		      $this->data["Special"] .= "<br> - Engine: output reduced by 2."; 
-		      //and disable a tendril on diffuser, but there's no diffuser in game to disable at the moment
-		      $this->data["Special"] .= "<br>No effect on any other system. Note that armor and shields do not affect above effects.";
-		      $this->data["Special"] .= "<br>Does not affect ships of advanced species (eg. Middle-born or older).";  		    
-	    }	
-	
-	
-	
-	public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
-		return 0; //standard armor is ignored
-        }	
-	public function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos=null){		
-		return 0; //advanced armor is ignored
-        }//endof function getSystemArmourInvulnerable
+	//don't care about armor whatsover - due to "marking damage boxes destroyed" rather than dealing true damage
+	//due to that ignore Adaptive Armor as well effectively
+	public function getSystemArmourComplete($target, $system, $gamedata, $fireOrder, $pos = null){
+		return 0;
+	}
 	
 	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
 		//fighters are untargetable, so we know it's a ship
 		//hit shield if active in arc and not destroyed (proceed to onDamagedSystem directly) (use instanceof Shield to determine!)
 		
 		//no effect on advanced ships!
-		if($target->factionAge > 1) return;
+		if($target->factionAge > 2) return;
 		
 		//first - find bearing from target to firing ship (needed to determine whether shield interacts with incoming shot)
 		$relativeBearing = $target->getBearingOnUnit($shooter);
@@ -2486,11 +2377,10 @@ class RadCannon extends Weapon{
 			$system->criticals[] =  $crit;
 		} //other systems: no effect!			 
 	}//endof function onDamagedSystem
-	
-		
-        public function getDamage($fireOrder){       return 0; /*no actual damage, just various effects*/  }
-        public function setMinDamage(){     $this->minDamage = 10 ; /*mark as 10 damage for display and interception purposes, it actually does as much on Structure...*/     }
-        public function setMaxDamage(){     $this->maxDamage = 10 ;      }
+			
+	public function getDamage($fireOrder){       return 0; /*no actual damage, just various effects*/  }
+	public function setMinDamage(){     $this->minDamage = 10 ; /*mark as 10 damage for display and interception purposes, it actually does as much on Structure...*/     }
+	public function setMaxDamage(){     $this->maxDamage = 10 ;      }
 } //endof class RadCannon
 
 	
@@ -2500,30 +2390,30 @@ class IonFieldGenerator extends Weapon{
 	I don't like the official icon (looks like triple Ion Bolter really...) so will create a different one, more suggestive of ballistic nature
 	*/
 	public $name = "IonFieldGenerator";
-        public $displayName = "Ion Field Generator";
+	public $displayName = "Ion Field Generator";
 	public $iconPath = "ionFieldGenerator.png";
 	
 	public $damageType = "Standard"; //irrelevant, really
-    	public $weaponClass = "Ion";
+	public $weaponClass = "Ion";
 	public $hextarget = true;
-        public $hidetarget = true;
+	public $hidetarget = true;
 	public $ballistic = true;
 	public $uninterceptable = true;
 	public $doNotIntercept = true; //just in case
 	public $priority = 1;
 	
-        public $range = 35;
-        public $loadingtime = 2;
+	public $range = 35;
+	public $loadingtime = 2;
 	
 	public $trailColor = array(30, 170, 255);
-        public $animation = "ball";
-        public $animationColor = array(30, 170, 255);
-        public $animationExplosionScale = 2; //covers 2 hexes away from explosion center
-        public $animationExplosionType = "AoE";
-        public $explosionColor = array(30, 170, 255);
-        public $projectilespeed = 12;
-        public $animationWidth = 14;
-        public $trailLength = 10;
+	public $animation = "ball";
+	public $animationColor = array(30, 170, 255);
+	public $animationExplosionScale = 2; //covers 2 hexes away from explosion center
+	public $animationExplosionType = "AoE";
+	public $explosionColor = array(30, 170, 255);
+	public $projectilespeed = 12;
+	public $animationWidth = 14;
+	public $trailLength = 10;
 	    
 	public $firingModes = array(
 		1 => "IonStorm"
@@ -2531,8 +2421,7 @@ class IonFieldGenerator extends Weapon{
 		
 	private static $alreadyAffected = array(); //list of IDs of units already affected in this firing phase - to avoid multiplying effects on overlap
 	
-	
-	
+		
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);  
 		//some effects should originally work for current turn, but it won't work with FV handling of ballistics. Moving everything to next turn.
@@ -2545,13 +2434,13 @@ class IonFieldGenerator extends Weapon{
 		$this->data["Special"] .= "<br>Does not affect bases, mines and OSATs. Overlapping Fields are not cumulative.";
 	}	
 	
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
-            //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 8;
-            if ( $powerReq == 0 ) $powerReq = 4;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+	{
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ) $maxhealth = 8;
+		if ( $powerReq == 0 ) $powerReq = 4;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
 	
 	public function calculateHitBase($gamedata, $fireOrder)
 	{

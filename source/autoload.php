@@ -443,7 +443,7 @@ spl_autoload_register(
                 'laser' => '/server/model/weapons/lasers.php',
                 'lasercutter' => '/server/model/weapons/lasers.php',
                 'laserlance' => '/server/model/weapons/lasers.php',
-                'laserpulsearray' => '/server/model/weapons/dualWeapon.php',
+                //'laserpulsearray' => '/server/model/weapons/dualWeapon.php', //no longer used
                 'leevan' => '/server/model/ships/centauri_old/leevan.php',
                 'legiona' => '/server/model/ships/centauri_old/legionA.php',
                 'legionb' => '/server/model/ships/centauri_old/legionB.php',
@@ -1178,11 +1178,15 @@ spl_autoload_register(
                 'caltus' => '/server/model/ships/cascor/caltus.php',
                 'tiqincc' => '/server/model/ships/cascor/tiqincc.php',    
 		    
-				//new batch				
+		//new batch				
                 'microsat' => '/server/model/ships/FighterFlight.php',
                 'dovarum' => '/server/model/ships/usuuth/dovarum.php',
                 'genericmicrosat' => '/server/model/ships/civilians/genericMicroSat.php',
 		    
+		//AdaptiveArmor rework		    
+                'adaptivearmorcontroller' => '/server/model/systems/baseSystems.php',
+                'whitestarold' => '/server/model/ships/minbari/whitestarOld.php',		    
+                'individualnote' => '/server/model/BaseClasses.php',
 		    
 		    
 		//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    

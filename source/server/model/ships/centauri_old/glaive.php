@@ -37,7 +37,7 @@ class Glaive extends FighterFlight{
 			$fighter->iconPath = "img/ships/glaive_large.png";
 			
 			
-			$fighter->addFrontSystem(new PairedPlasmaBlaster(330, 30, 0));
+			$fighter->addFrontSystem(new PairedPlasmaBlaster(330, 30));
 			
 			
 			$this->addSystem($fighter);

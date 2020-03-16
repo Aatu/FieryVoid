@@ -7,7 +7,8 @@ class wardsat extends OSAT{
 	$this->pointCost = 210;
 	$this->faction = "Deneth";
         $this->phpclass = "wardsat";
-        $this->imagePath = "img/ships/phalanx.png";
+        $this->imagePath = "img/ships/DenethWardOSAT.png";
+        $this->canvasSize = 80;
         $this->shipClass = 'Ward Satellite';
         
         //$this->limited = 10;

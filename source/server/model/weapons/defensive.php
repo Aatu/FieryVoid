@@ -312,7 +312,8 @@
         public $intercept = 3;
         public $loadingtime = 1;
         public $guns = 2; //2 separate shots; can be boosted
-	public $iconPath = "emWaveDisruptor.png";
+		public $iconPath = "emWaveDisruptor.png";
+		public $priority = 2; //important for AF fire only, but priority 2 stays 2
         
         public $rangePenalty = 2;
         public $fireControl = array(4, null, null); // fighters, <mediums, <capitals 
@@ -324,11 +325,6 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 	    
-	    /*
- 	public function stripForJson() {
-        	$strippedSystem = parent::stripForJson();	
-		$strippedSystem->guns = $this->guns;
-	}*/
 
         public function setSystemDataWindow($turn){
 	    $this->guns = 2+$this->getBoostLevel($turn);

@@ -7,7 +7,8 @@ class DenComCarrier extends BaseShip{
 	$this->pointCost = 550;
         $this->faction = "Deneth";
         $this->phpclass = "DenComCarrier";
-        $this->imagePath = "img/ships/sakar.png"; 
+        $this->imagePath = "img/ships/DenethDeliverer.png";
+	$this->canvasSize = 200;
         $this->shipClass = "Command Carrier";
         $this->shipSizeClass = 3;
 	    

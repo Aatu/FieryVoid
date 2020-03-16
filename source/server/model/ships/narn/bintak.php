@@ -97,7 +97,7 @@ class Bintak extends BaseShip{
 			1=> array(
 				3 => "Thruster",
 				5 => "Heavy Laser",
-				6 => "Mag gun",
+				6 => "Mag Gun",
 				8 => "Energy Mine",
 				9 => "Light Pulse Cannon",
 				18 => "Structure",

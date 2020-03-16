@@ -24,7 +24,8 @@ class Nakarsa extends BaseShip{
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 3;
-        $this->iniativebonus = +5;   //+5 Ini for all Abbai ship ... how?
+        $this->iniativebonus = +5;   
+	    $this->notes = "Provides +5 Initiative for all friendly Abbai units";
         
         $this->addPrimarySystem(new Reactor(5, 20, 0, 10));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));

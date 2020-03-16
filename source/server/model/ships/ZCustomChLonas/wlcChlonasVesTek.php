@@ -7,7 +7,7 @@ class wlcChlonasVesTek extends FighterFlight{
         $this->pointCost = 70*6;
         $this->phpclass = "wlcChlonasVesTek";
         $this->shipClass = "Ves'Tek Assault flight";
-        $this->imagePath = "img/ships/shadras.png";
+        $this->imagePath = "img/ships/ChlonasVesTek.png";
         
         $this->faction = "Ch'Lonas";
 	    $this->unofficial = true;
@@ -34,8 +34,8 @@ class wlcChlonasVesTek extends FighterFlight{
             $armour = array(3, 3, 3, 3);
             $fighter = new Fighter("wlcChlonasVesTek", $armour, 13, $this->id);
             $fighter->displayName = "Ves'Tek";
-            $fighter->imagePath = "img/ships/shadras.png";
-            $fighter->iconPath = "img/ships/shadras_large.png";
+            $fighter->imagePath = "img/ships/ChlonasVesTek.png";
+            $fighter->iconPath = "img/ships/ChlonasVesTekLARGE.png";
             $fighter->addFrontSystem(new PairedParticleGun(330, 30, 3));
             $fighter->addFrontSystem(new CustomLightMatterCannonF(345, 15));
             $this->addSystem($fighter);

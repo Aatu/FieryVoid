@@ -5,7 +5,8 @@ class wlcChlonasOnThariCVA2253 extends BaseShipNoFwd{
         parent::__construct($id, $userid, $name,  $slot);
         $this->pointCost = 770; //estimated by me, as value on SCS was clearly based on different pricing of base ship!
         $this->phpclass = "wlcChlonasOnThariCVA2253";
-        $this->imagePath = "img/ships/thosalsi.png";
+        $this->imagePath = "img/ships/ChlonasOnthari.png";
+        $this->canvasSize = 200;
         $this->shipClass = "On'Thari Attack Carrier (2253)";
         $this->fighters = array("heavy" => 12, "light"=>12);
         $this->forwardDefense = 15;

@@ -8,8 +8,8 @@ class LiberatorEscort extends LCV{
         $this->faction = "Deneth";
 	$this->phpclass = "LiberatorEscort";
 	$this->shipClass = "Liberator Escort Gunboat";
-	$this->imagePath = "img/ships/jenas.png";
-	$this->canvasSize = 100;
+	$this->imagePath = "img/ships/DenethLiberator.png";
+	$this->canvasSize = 80;
 	$this->agile = true;
   
 	$this->forwardDefense = 10;

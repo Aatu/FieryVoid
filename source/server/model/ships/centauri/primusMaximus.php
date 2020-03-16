@@ -16,7 +16,7 @@ class PrimusMaximus extends BaseShip{
         $this->isd = 2260;
         $this->variantOf = "Primus Battlecruiser";
 	    
-	    $this->notes = "Provides +1 Initiative for all friendly Centauri units";
+	    $this->notes = "Provides +5 Initiative for all friendly Centauri units";
         
         $this->forwardDefense = 16;
         $this->sideDefense = 17;

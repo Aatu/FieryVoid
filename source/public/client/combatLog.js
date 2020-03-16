@@ -33,6 +33,11 @@ window.combatLog = {
         var shots = 0;
         var shotshit = 0;
         var shotsintercepted = 0;
+		/*let's count orders as well!*/
+		var ordersC = 0;
+        var ordersChit = 0;
+        var ordersCintercepted = 0;
+		
         var damages = Array();
         var lowC = 100000;
         var highC = 0;
@@ -56,13 +61,16 @@ window.combatLog = {
             shots += fire.shots;
             shotshit += fire.shotshit;
             shotsintercepted += fire.intercepted;
+            if (fire.shots > 0) ordersC += 1;
+			if (fire.shotshit>0) ordersChit += 1;
+			if (fire.intercepted>0) ordersCintercepted += 1;
             weaponManager.getDamagesCausedBy(fire, damages);
             var needed = fire.needed;
             //if (needed < 0) needed = 0; //I skip this - if intercepted below 0, let's show it.
             if (fire.shots > 0){ //otherwise shot is purely technical
                 if (needed < lowC)
                 lowC = needed;
-                if (needed >highC)
+                if (needed > highC)
                 highC = needed;
 
                 if (fire.pubnotes)
@@ -81,13 +89,15 @@ window.combatLog = {
         if (!target) chancetext = "";
 
         var intertext = "";
-        if (shotsintercepted > 0) intertext = ", " + shotsintercepted + " intercepted";
+        //if (shotsintercepted > 0) intertext = ", " + shotsintercepted + " intercepted";
+		if (shotsintercepted > 0) intertext = ", " + ordersCintercepted + '(' + shotsintercepted + ") intercepted";
 
         var targettext = "";
         if (target) targettext = '<span> at </span><span class="shiplink target" data-id="' + target.id + '" >' + target.name + '</span>';
 
         var shottext = "";
-        if (target) shottext = ', ' + shotshit + '/' + shots + ' shots hit' + intertext + '.';
+        //if (target) shottext = ', ' + shotshit + '/' + shots + ' shots hit' + intertext + '.';
+		if (target) shottext = ', ' + ordersChit + '(' +shotshit + ')/' + ordersC + '(' +shots + ') shots hit' + intertext + '.';
 
         var notestext = "";
         if (notes) notestext = '<span class="pubotes">' + notes + '</span>';

@@ -125,23 +125,8 @@ class BuyingGamePhase implements Phase
                                 }
                             }
                         }
-                        /*Marcin Sawicki: let's generalize this, not limit to Templar!
-                                    else if ($ship instanceof Templar){
-                                        foreach($ship->systems as $fighter){
-                                           foreach($fighter->systems as $weapon){
-                                               if($weapon instanceof PairedGatlingGun){
-                                                   $dbManager->submitAmmo($id, $weapon->id, $gamedata->id, $weapon->firingMode, $weapon->ammunition);
-                                               }
-                                           }
-                                       }
-                                    }
-                        */
                     }
                     else{
-                        if (isset($ship->adaptiveArmour)){
-                            $dbManager->submitAdaptiveArmour($gameData->id, $id);
-                        }
-
                         foreach($ship->systems as $systemIndex=>$system){
                             if(isset($system->missileArray)){
                                 // this system has a missileArray. It uses ammo

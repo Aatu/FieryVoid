@@ -241,6 +241,39 @@ class FighterFlight extends BaseShip
     } //endof function addSystem
 
 
+	/*for fighter flights - notes must be saved for fighters themselves as well as their subsystems!*/
+	/*saves individual notes systems might have generated*/
+	public function saveIndividualNotes(DBManager $dbManager) {
+		foreach ($this->systems as $fighter) if ($fighter->fighter){ //only for actual fighters - and then handle the rest as subsystems!
+            $fighter->saveIndividualNotes($dbManager);
+				foreach ($fighter->systems as $subsystem){
+					$subsystem->saveIndividualNotes($dbManager);
+				}
+        }
+	}
+	
+	/*calls systems to generate notes if necessary*/
+	public function generateIndividualNotes($gamedata, $dbManager) {
+		foreach ($this->systems as $fighter) if ($fighter->fighter){ //only for actual fighters - and then handle the rest as subsystems!
+            $fighter->generateIndividualNotes($gamedata, $dbManager);
+				foreach ($fighter->systems as $subsystem){
+					$subsystem->generateIndividualNotes($gamedata, $dbManager);
+				}
+        }		
+	}
+	
+	
+	/*calls systems to act on notes just loaded if necessary*/
+	public function onIndividualNotesLoaded($gamedata) {
+		foreach ($this->systems as $fighter) if ($fighter->fighter){ //only for actual fighters - and then handle the rest as subsystems!
+            $fighter->onIndividualNotesLoaded($gamedata);
+			foreach ($fighter->systems as $subsystem){
+				$subsystem->onIndividualNotesLoaded($gamedata);
+			}
+        }	
+	}
+
+
     public function getPreviousCoPos()
     {
         $pos = $this->getCoPos();
@@ -357,6 +390,11 @@ class FighterFlight extends BaseShip
         $systems = array();
         if ($fire->calledid != -1) {
             $system = $this->getSystemById($fire->calledid);
+			//if system is not actual fighter - redirect to fighter it's mounted on!
+			if(!$system instanceof Fighter){
+				$system = $this->getFighterBySystem($system->id);
+			}
+			
             if (!$system->isDestroyed()) { //called shot at particular fighter, which is still living
                 $systems[] = $system;
                 $skipStandard = true;
@@ -386,14 +424,21 @@ class FighterFlight extends BaseShip
 	$craftWithData = array();
 	foreach ($systems as $craft){
 		$dmgPotential = 0;
+		//actually vs fighters Raking degenerates into Standard, rake size is irrelevant!
+		/*
 		if ($weapon->damageType == "Raking"){
 			$dmgPotential = $weapon->raking; //potential = rake size	
 		}else{
+		*/
 			$dmgPotential = $weapon->maxDamage; //potential = maximum damage weapon can do	
-		}
+		//}
 		//modify by armor properties
-		$armor = $weapon->getSystemArmourStandard($this, $craft, $gamedata, $fire)+$weapon->getSystemArmourInvulnerable($this, $craft, $gamedata, $fire);
+		$armor = $weapon->getSystemArmourComplete($this, $craft, $gamedata, $fire);
 		$dmgPotential = max(0, $dmgPotential-$armor);//never negative damage ;)
+		/*for linked weapons - multiply by number of shots!*/
+		if ($weapon->isLinked){
+			$dmgPotential = $dmgPotential*$weapon->shots;
+		}
 		$remainingHP = $craft->getRemainingHealth();
 		$damagedThisTurn = false;
 		foreach($craft->damage as $dmgEntry){
@@ -458,7 +503,7 @@ class FighterFlight extends BaseShip
 
 
     /*always nothing to do for fighters*/
-    public function setExpectedDamage($hitLoc, $hitChance, $weapon)
+    public function setExpectedDamage($hitLoc, $hitChance, $weapon, $shooter)
     {
         return;
     }

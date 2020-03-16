@@ -6,10 +6,10 @@ class wlcChlonasFenFahraFFE extends MediumShipLeftRight{
         
 		$this->pointCost = 350;
         $this->phpclass = "wlcChlonasFenFahraFFE";
-        $this->imagePath = "img/ships/sussha.png";
+        $this->imagePath = "img/ships/ChlonasFenFahra.png";
         $this->shipClass = "Fen'Fahra Escort Frigate";
-        $this->agile = true;
         $this->canvasSize = 100;
+        $this->agile = true;
 	    
 		$this->faction = "Ch'Lonas";
 		$this->variantOf = "Lo'Fahra Attack Frigate";

@@ -597,10 +597,6 @@ class Manager{
                 $ship->populate();
             }
 
-            if ($ship instanceof WhiteStar){
-                $ship->armourSettings = $value["armourSettings"];
-            }
-
 
 	    //unit enhancements
 		$ship->enhancementOptions = $value["enhancementOptions"];
@@ -658,13 +654,25 @@ class Manager{
                                         $fig->setAmmo($i, $ammo);
                                     }
                                 }
-                            }
+                            }							
 
                             $fig->setFireOrders($fires);
-                        }                        
+                        }               
+
+
+						//receive individually transferred fighter system data, if any								
+						if(isset($fightersys["individualNotesTransfer"])){ //may be not set if game is being created - in this case only data for 1 fighter is transferred
+							$fig->individualNotesTransfer = $fightersys["individualNotesTransfer"];
+							$fig->doIndividualNotesTransfer();	
+						}				
+						
                     }
-                    
                 }
+				//receive individually transferred system data, if any
+				if(isset($system["individualNotesTransfer"])){ //may be not set if game is being created - in this case only data for 1 fighter is transferred
+					$sys->individualNotesTransfer = $system["individualNotesTransfer"];
+					$sys->doIndividualNotesTransfer();
+				}
             }
 
 

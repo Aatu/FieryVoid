@@ -18,6 +18,9 @@ class Talafat extends BaseShip{
         $this->rollcost = 3;
         $this->pivotcost = 3;
         $this->fighters = array("normal"=>6);
+        $this->limited = 33;
+		
+		
         
         $this->addPrimarySystem(new Reactor(4, 18, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));

@@ -513,7 +513,7 @@ class SWFighterLaser extends SWDirectWeapon{
 		
 		if($damagebonus > 2) $this->priority++;
 		if($damagebonus > 4) $this->priority++;		
-		if($damagebonus > 6) $this->priority = 8;
+		if($damagebonus > 6) $this->priority++;
 		
 		
 		parent::__construct(0, 1, 0, $startArc, $endArc, $nrOfShots);
@@ -541,7 +541,7 @@ class SWFighterIon extends SWIon{
 
     public $exclusive = false; //can be always overridden in particular fighter!
     public $isLinked = true; //indicates that this is linked weapon
-    public $priority = 8;	
+    public $priority = 10;	//always at the end of the queue, due to extra dropot effect
     protected $damagebonus = 0;     	
 	
 	function __construct($startArc, $endArc, $damagebonus, $nrOfShots){
@@ -551,10 +551,7 @@ class SWFighterIon extends SWIon{
 		//appropriate icon (number of barrels)...
 		$nr = min(4, $nrOfShots); //images are not unlimited
 		$this->iconPath = "starwars/mjsIonFtr".$nr.".png";
-		
-		
-		if($damagebonus > 2) $this->priority++;
-		if($damagebonus > 4) $this->priority++;	
+			
 
 		parent::__construct(0, 1, 0, $startArc, $endArc, $nrOfShots);
 		$this->addSalvoMode();
@@ -582,7 +579,7 @@ class SWFtrProtonTorpedoLauncher extends SWFtrBallisticLauncher //this is launch
     public $rangeMod = 0;
     public $firingMode = 1;
     public $maxAmount = 0;
-    public $priority = 4;
+    public $priority = 5;
     public $fireControl = array(-4, -1, 0); // fighters, <mediums, <capitals 
 	
     function __construct($maxAmount, $startArc, $endArc, $noOfShots){
@@ -636,7 +633,7 @@ class SWFtrConcMissileLauncher extends SWFtrBallisticLauncher //this is launcher
     public $rangeMod = 0;
     public $firingMode = 1;
     public $maxAmount = 0;
-    public $priority = 4;
+    public $priority = 3; //that's really light missile
     public $fireControl = array(2, 1, 0); // fighters, <mediums, <capitals 
 	
     function __construct($maxAmount, $startArc, $endArc, $noOfShots){
@@ -651,7 +648,7 @@ class SWFtrConcMissileLauncher extends SWFtrBallisticLauncher //this is launcher
     }
 	
 } //end of SWFtrConcMissileLauncher
-class SWFtrConcMissile extends SWFtrMissile //this is AMMO for SWFtrProtonTorpedoLauncher
+class SWFtrConcMissile extends SWFtrMissile //this is AMMO for SWFtrConcMissileLauncher
 {
     public $name = "SWFtrConcMissile";
     public $missileClass = "FtrMissile";
@@ -1024,10 +1021,6 @@ class SWHeavyTLaserE extends SWHeavyTLaser{
 } //end of class SWHeavyTLaserE
 
 
-
-
-
-
 																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																											
 
 
@@ -1281,23 +1274,13 @@ class SWTractorBeam extends SWDirectWeapon{
 	}    
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //target is held critical on PRIMARY Structure!
-	      /*
-		$primaryStruct = $ship->getStructureSystem(0); //primary Structure is where the crit will reside - it has to be there! (weapon does not target fighters)
-	      if($primaryStruct->isDestroyed()) return; //destroyed system - critical is irrelevant
-		$crit = new swtargetheld(-1, $ship->id, $primaryStruct->id, $gamedata->turn); 
-		$crit->updated = true;
-                //$crit->inEffect = true;
-	      $primaryStruct->criticals[] =  $crit;*/
-		
-		//to C&C, NOT Structure - on Structure it couldn't be shown to player
+		//marked to C&C
 		$CnC = $ship->getSystemByName("CnC");
 		if($CnC){
 			$crit = new swtargetheld(-1, $ship->id, $CnC->id, 'swtargetheld', $gamedata->turn); 
 			$crit->updated = true;
 		      $CnC->criticals[] =  $crit;
 		}
-		
-
 	}
 	
 	public function getDamage($fireOrder){ return  0;   }

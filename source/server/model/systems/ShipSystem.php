@@ -17,6 +17,7 @@ class ShipSystem {
     public $power = array();
     public $fireOrders = array();
     public $canOffLine = false;
+	public $fighter = false; //important for actual fighters
 
     public $data = array();
     public $critData = array();
@@ -38,6 +39,9 @@ class ShipSystem {
     protected $parentSystem = null;
     protected $unit = null; //unit on which system is mounted
 	
+	protected $individualNotes = array();
+	public $individualNotesTransfer = "";//variable for transferring individual notes from interface to servr layer
+	
     
     function __construct($armour, $maxhealth, $powerReq, $output){
         $this->armour = $armour;
@@ -58,15 +62,18 @@ class ShipSystem {
         $strippedSystem->output = $this->output;
         $strippedSystem->outputMod = $this->outputMod;
         $strippedSystem->destroyed = $this->destroyed;
+		$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer; //necessary 
 
 		//ship enhancements - check if this system is affected...
 		$strippedSystem = Enhancements::addSystemEnhancementsForJSON($this->unit, $this, $strippedSystem);//modifies $strippedSystem object
 
         return $strippedSystem;
     }
+	
+	public function doIndividualNotesTransfer(){//optionally to be redefined if system can receive any private data from front endthat need immediate attention		
+	}
 
     public function onConstructed($ship, $turn, $phase){
-
         if($ship->getAdvancedArmor()==true){
             $this->advancedArmor = true;
         }
@@ -75,12 +82,36 @@ class ShipSystem {
         $this->destroyed = $this->isDestroyed();
     }
 	
+	/*saves individual notes (if any new ones exist) to database*/
+	public function saveIndividualNotes(DBManager $dbManager){ //loading exisiting notes is done in dbmanager->getSystemDataForShips()
+		foreach ($this->individualNotes as $currNote){
+			$dbManager->insertIndividualNote($currNote);//function itself will decide whether this note really needs saving
+		}
+		//...and delete them, after saving they serve no more function
+		$this->individualNotes = array();
+	}
+	
+	/*generates individual notes (if necessary)
+	base version is empty, to be redefined by systems as necessary
+	*/
+	public function generateIndividualNotes($gamedata, $dbManager){	}	
+	
+	public function addIndividualNote($noteObject){
+		$this->individualNotes[] = $noteObject;
+	}
+	
+	/*act on notes just loaded - to be redefined by systems as necessary*/
+	public function onIndividualNotesLoaded($gamedata){
+		$this->individualNotes = array();//delete notes, after reaction on their load they serve no further purpose
+	}
+		
+	
     public function setUnit($unit){
-	$this->unit = $unit;    
+		$this->unit = $unit;    
     }
 	
     public function getUnit(){
-	return $this->unit;    
+		return $this->unit;    
     }
     
     public function getSpecialAbilityList($list)
@@ -115,27 +146,6 @@ class ShipSystem {
     }
     
     public function setDamage($damage){ //$damage object 
-	//let's try to reduce amount of data transferred - don't note every hit, just total damage and Destroyed status... at least for past turns!
-	    /* WORKS BUT NOT WITHOUT ISSUES< REVERTING TO ORIGINAL
-	$count = count($this->damage); 
-	$currTurn = TacGamedata::$currentTurn -1; //let's say current AND PREVIOUS turn damage will be fully transferred...
-	$currPhase = TacGamedata::$currentPhase;
-	if (($count == 0) || ($damage->turn >= $currTurn) || ($currPhase ==3) ) { //no entries yet, or damage is current, or phase = 3 (we're dealing damage atm)
-		$this->damage[] = $damage;
-	}else{ //modify existing entry... unless damage is from current turn!
-		foreach( $this->damage as $key=>$oldDmg ){
-			if($oldDmg->turn < $currTurn){
-				$oldDmg->damage += $damage->damage; //shields and armour absorbtion irrelevant
-				$oldDmg->armour += $damage->armour;
-				$oldDmg->shields += $damage->shields;
-				if ($damage->destroyed == true) $oldDmg->destroyed = true;
-				return; //nothing else to do
-			}	
-		}
-		$this->damage[] = $damage; //no eligible entry found! behave as usual
-	}
-	*/
-	//original code was just this:
         $this->damage[] = $damage;
     }
     
@@ -194,48 +204,29 @@ class ShipSystem {
         }
     }
     
-	
-	public function getArmour($target, $shooter, $dmgType, $pos=null){ //gets total armour
-		$armour = $this->getArmourStandard($target, $shooter, $dmgType, $pos) + $this->getArmourInvulnerable($target, $shooter, $dmgType, $pos);
+	/*used by estiamtions only, doesn't take all things into account - do not use in actual damage dealing routines!*/
+    public  function getArmourComplete($target, $shooter, $dmgClass, $pos=null){ //gets armour - from indicated direction if necessary direction 
+		//$pos is to be included if launch position is different than firing unit position
+		$armour = $this->getArmourBase($target, $shooter, $dmgClass, $pos);    
+		$armour += $this->getArmourAdaptive($target, $shooter, $dmgClass, $pos);    
 		return $armour;
-        }
-
-	
-    public  function getArmourStandard($target, $shooter, $dmgClass, $pos=null){ //gets standard armor - from indicated direction if necessary direction 
-	//$pos is to be included if launch position is different than firing unit position
-	if($this->advancedArmor != true){
-		return $this->armour;
-	}else{
-		return 0;
-	}
+    }
+		
+    public  function getArmourBase($target, $shooter, $dmgClass, $pos=null){ //gets armour - from indicated direction if necessary direction 
+		//$pos is to be included if launch position is different than firing unit position
+		$armour = $this->armour;    
+		return $armour;
     }
 	
-    public function getArmourInvulnerable($target, $shooter, $dmgClass, $pos=null){ //gets invulnerable part of armour (Adaptive Armor, at the moment)
-	//special reductions are habndled here - technically weapons ay do that, but it began otherwise (as truly invulnerable for weapons)   
-	//$pos is to be included if launch position is different than firing unit position
-	$armour = 0;
-    
-	if($this->advancedArmor == true){
-		$armour += $this->armour;
-		if($dmgClass == 'Ballistic'){ //extra protection against ballistics
-			$armour += 2;
+    public function getArmourAdaptive($target, $shooter, $dmgClass, $pos=null){ //gets adaptive part of armour
+		$armour = 0;
+		$AAController = $this->unit->getAdaptiveArmorController(); 
+		if($AAController){
+			$armour = $AAController->getArmourValue($dmgClass);			
 		}
-		if($dmgClass == 'Matter'){ //slight vulnerability vs Matter
-			$armour += -2;
-		}
+		return $armour;
 	}
 	    
-	$armour = max(0,$armour); //no less than 0, BEFORE adaptive armor kicks in!
-	    
-	$activeAA = 0;
-	if (isset($target->adaptiveArmour)){
-            if (isset($target->armourSettings[$dmgClass][1])){
-                $activeAA = $target->armourSettings[$dmgClass][1];
-                $armour += $activeAA;
-            }
-        }    
-	return $armour;
-    }
 	
     
     public function setSystemDataWindow($turn){
@@ -501,5 +492,40 @@ class ShipSystem {
     public function setInitialSystemData($ship)
     {
     }
+	
+	/*assigns damage, returns remaining (overkilling) damage and how much armor was actually pierced
+	all extra data needed for defensive modifying damage as it's being dealt - like Shadow Energy Diffusers and Gaim Bulkheads
+	returns array: dmgDealt, dmgRemaining, armorPierced
+	*/
+	public function assignDamageReturnOverkill($target, $shooter, $weapon, $gamedata, $fireOrder, $damage, $armour, $pos=null){
+		$returnArray = array("dmgDealt"=>0, "dmgRemaining"=>0, "armorPierced"=>0);
+		$effectiveDamage = $damage;
+		$remainingDamage = 0;
+		$effectiveArmor = $armour;
+		$systemHealth = $this->getRemainingHealth();
+		$systemDestroyed = false;
+		
+		//CALL DEFENSIVE SYSTEMS HERE! - once I get around to actually doing them
+		
+		//if damage is more than system has structure left - mark rest as overkilling
+		if ($effectiveDamage-$effectiveArmor >= $systemHealth){
+			$systemDestroyed = true;
+			$remainingDamage = $effectiveDamage-$effectiveArmor - $systemHealth;
+			$effectiveDamage = $effectiveDamage-$remainingDamage;
+		}
+				
+		//if damage remaining is less than affecting armor - decrease armor appropriately
+		if ($effectiveDamage < $effectiveArmor) $effectiveArmor = $effectiveDamage;
+		
+		//mark damage done
+		$damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $this->id, $effectiveDamage, $effectiveArmor, 0, $fireOrder->id, $systemDestroyed, "", $weapon->weaponClass, $shooter->id, $weapon->id);
+		$damageEntry->updated = true;
+		$this->damage[] = $damageEntry;
+		
+		$returnArray["dmgDealt"] = $effectiveDamage;
+		$returnArray["dmgRemaining"] = $remainingDamage;
+		$returnArray["armorPierced"] = $effectiveArmor;
+		return $returnArray;
+	}
 
 }

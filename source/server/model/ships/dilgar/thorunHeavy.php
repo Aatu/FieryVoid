@@ -12,6 +12,8 @@ class ThorunHeavy extends FighterFlight{
 
         $this->occurence = "rare";
         $this->variantOf = "Thorun Dartfighters";
+		
+		$this->enhancementOptionsEnabled[] = 'NAVIGATOR'; //this flight can take Navigator enhancement option	
         
         $this->forwardDefense = 8;
         $this->sideDefense = 7;

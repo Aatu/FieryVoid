@@ -13,7 +13,7 @@ class Selatra extends StarBaseSixSections{
 		$this->forwardDefense = 20;
 		$this->sideDefense = 20;
 		$this->imagePath = "img/ships/AbbaiSelatra.png";
-		$this->canvasSize = 250; //Enormous Starbase
+		$this->canvasSize = 200; 
 		$this->locations = array(41, 42, 2, 32, 31, 1);
 		$this->hitChart = array(			
 			0=> array(

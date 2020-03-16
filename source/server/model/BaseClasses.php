@@ -285,5 +285,33 @@ class Ballistic{
 }
 
 
+/* additional non-standard information a particular system might need
+*/
+class IndividualNote{
+	public $id,
+		$gameid,
+		$turn,
+		$phase,
+		$shipid,
+		$systemid,
+		$notekey,
+		$notekey_human,
+		$notevalue
+	;
+    
+    function __construct($id, $gameid, $turn, $phase, $shipid, $systemid, $notekey, $notekey_human, $notevalue){
+        $this->id = $id;
+        $this->gameid = $gameid;
+        $this->turn = $turn;
+        $this->phase = $phase;
+        $this->shipid = $shipid;
+        $this->systemid = $systemid;
+        $this->notekey = $notekey;
+        $this->notekey_human = $notekey_human;
+        $this->notevalue = $notevalue;
+    }
+
+}
+
 
 ?>

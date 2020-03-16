@@ -8,7 +8,7 @@ class DefenderFtr extends FighterFlight{
         $this->faction = "Deneth";
         $this->phpclass = "defenderftr";
         $this->shipClass = "Defender Medium Fighters";
-        $this->imagePath = "img/ships/dragon.png";
+        $this->imagePath = "img/ships/DenethDefender.png";
         $this->isd = 2222;
         
         $this->forwardDefense = 6;
@@ -30,8 +30,8 @@ class DefenderFtr extends FighterFlight{
             $armour = array(2, 1, 2, 2);
             $fighter = new Fighter("defenderftr", $armour, 9, $this->id);
             $fighter->displayName = "Defender";
-            $fighter->imagePath = "img/ships/dragon.png";
-            $fighter->iconPath = "img/ships/dragon_large.png";
+            $fighter->imagePath = "img/ships/DenethDefender.png";
+            $fighter->iconPath = "img/ships/DenethDefenderLARGE.png";
             
             $frontGun = new PairedParticleGun(330, 30, 1);
             $fighter->addFrontSystem($frontGun);

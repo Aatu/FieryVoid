@@ -96,40 +96,7 @@ CREATE TABLE `player_chat` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Table structure for table `tac_adaptivearmour`
---
 
-DROP TABLE IF EXISTS `tac_adaptivearmour`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `tac_adaptivearmour` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `gameid` int(11) DEFAULT NULL,
-  `shipid` int(11) DEFAULT NULL,
-  `particlepoints` int(11) DEFAULT NULL,
-  `particlealloc` int(11) DEFAULT NULL,
-  `laserpoints` int(11) DEFAULT NULL,
-  `laseralloc` int(11) DEFAULT NULL,
-  `molecularpoints` int(11) DEFAULT NULL,
-  `molecularalloc` int(11) DEFAULT NULL,
-  `matterpoints` int(11) DEFAULT NULL,
-  `matteralloc` int(11) DEFAULT NULL,
-  `plasmapoints` int(11) DEFAULT NULL,
-  `plasmaalloc` int(11) DEFAULT NULL,
-  `electromagneticpoints` int(11) DEFAULT NULL,
-  `electromagneticalloc` int(11) DEFAULT NULL,
-  `antimatterpoints` int(11) DEFAULT NULL,
-  `antimatteralloc` int(11) DEFAULT NULL,
-  `ionpoints` int(11) DEFAULT NULL,
-  `ionalloc` int(11) DEFAULT NULL,
-  `graviticpoints` int(11) DEFAULT NULL,
-  `graviticalloc` int(11) DEFAULT NULL,
-  `ballisticpoints` int(11) DEFAULT NULL,
-  `ballisticalloc` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=66 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `tac_ammo`
@@ -432,6 +399,31 @@ CREATE TABLE `tac_shipmovement` (
   KEY `gameid` (`gameid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1336799 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+
+--
+-- Table structure for table `tac_individual_notes`
+--
+
+DROP TABLE IF EXISTS `tac_individual_notes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tac_individual_notes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `gameid` int(11) NOT NULL DEFAULT '0',
+  `turn` int(11) NOT NULL DEFAULT '1',
+  `phase` int(11) NOT NULL DEFAULT '1',
+  `shipid` int(11) NOT NULL,
+  `systemid` int(11) NOT NULL,  
+  `notekey` varchar(40) DEFAULT '',
+  `notekey_human` varchar(40) DEFAULT '',
+  `notevalue` varchar(100) DEFAULT '',
+  PRIMARY KEY (`id`),
+  KEY `gameid` (`gameid`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
 
 --
 -- Table structure for table `tac_systemdata`

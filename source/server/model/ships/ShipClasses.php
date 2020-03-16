@@ -73,10 +73,9 @@ class BaseShip {
 	
 	public $hangarRequired = ''; //usually empty, but some ships (LCVs primarily) do require hangar space!	
 	public $unitSize = 1; //typically ships are berthed in dedicated space, 1 per slot - but other arrangements are certainly possible.
+	
+	protected $adaptiveArmorController = null; //Adaptive Armor Controller object (if present)
 	    
-	    public function getAdvancedArmor(){
-		return $this->advancedArmor;    
-	    }
 	    
         function __construct($id, $userid, $name, $slot){
             $this->id = (int)$id;
@@ -85,6 +84,18 @@ class BaseShip {
             $this->slot = $slot;
 			$this->fillLocationsGUI();//so called shots work properly
         }
+		
+		public function getAdvancedArmor(){
+			return $this->advancedArmor;    
+	    }
+		
+		public function getAdaptiveArmorController(){
+			return $this->adaptiveArmorController;    
+		}
+		public function createAdaptiveArmorController($AAtotal, $AApertype, $AApreallocated){ //$AAtotal, $AApertype, $AApreallocated
+			$this->adaptiveArmorController = new AdaptiveArmorController($AAtotal, $AApertype, $AApreallocated); 
+			return $this->getAdaptiveArmorController();
+		}
         
         public function getCommonIniModifiers( $gamedata ){ //common Initiative modifiers: speed, criticals
             $mod = 0;
@@ -148,18 +159,38 @@ class BaseShip {
     }
 	    
         public function getInitiativebonus($gamedata){
+            if($this->faction == "Abbai"){
+                return $this->doAbbaiInitiativeBonus($gamedata);
+            }
             if($this->faction == "Centauri"){
                 return $this->doCentauriInitiativeBonus($gamedata);
-            }
-            if($this->faction == "Yolu"){
-                return $this->doYoluInitiativeBonus($gamedata);
             }
             if($this->faction == "Dilgar"){
                 return $this->doDilgarInitiativeBonus($gamedata);
             }
+            if($this->faction == "Narn"){
+                return $this->doNarnInitiativeBonus($gamedata);
+            }
+            if($this->faction == "Yolu"){
+                return $this->doYoluInitiativeBonus($gamedata);
+            }
             return $this->iniativebonus;
         }
         
+		
+        private function doAbbaiInitiativeBonus($gamedata){
+            foreach($gamedata->ships as $ship){
+                if(!$ship->isDestroyed()
+                        && ($ship->faction == "Abbai")
+                        && ($this->userid == $ship->userid)
+                        && ($ship instanceof Nakarsa)
+                        && ($this->id != $ship->id)){
+                    return ($this->iniativebonus+5);
+                }
+            }
+			return $this->iniativebonus;
+        }
+		
         private function doCentauriInitiativeBonus($gamedata){
             foreach($gamedata->ships as $ship){
                 if(!$ship->isDestroyed()
@@ -170,7 +201,21 @@ class BaseShip {
                     return ($this->iniativebonus+5);
                 }
             }
-		return $this->iniativebonus;
+			return $this->iniativebonus;
+        }
+		
+		
+        private function doNarnInitiativeBonus($gamedata){
+            foreach($gamedata->ships as $ship){
+                if(!$ship->isDestroyed()
+                        && ($ship->faction == "Narn")
+                        && ($this->userid == $ship->userid)
+                        && ($ship instanceof Gtal)
+                        && ($this->id != $ship->id)){
+                    return ($this->iniativebonus+5);
+                }
+            }
+			return $this->iniativebonus;
         }
                 
         private function doDilgarInitiativeBonus($gamedata){
@@ -199,6 +244,28 @@ class BaseShip {
         //    debug::log($this->phpclass."- bonus: ".$mod);
         return $this->iniativebonus + $mod*5;
     }
+	
+	/*saves individual notes systems might have generated*/
+	public function saveIndividualNotes(DBManager $dbManager) {
+		foreach ($this->systems as $system){
+            $system->saveIndividualNotes($dbManager);
+        }
+	}
+	
+	/*calls systems to generate notes if necessary*/
+	public function generateIndividualNotes($gamedata, $dbManager) {
+		foreach ($this->systems as $system){
+            $system->generateIndividualNotes($gamedata, $dbManager);
+        }
+	}
+	
+	
+	/*calls systems to act on notes just loaded if necessary*/
+	public function onIndividualNotesLoaded($gamedata) {
+		foreach ($this->systems as $system){
+            $system->onIndividualNotesLoaded($gamedata);
+        }
+	}
 
     private function doYoluInitiativeBonus($gamedata){
         foreach($gamedata->ships as $ship){
@@ -234,8 +301,8 @@ class BaseShip {
 
     public function onConstructed($turn, $phase, $gamedata)
     {	    
-	//enhancements (in game, NOT fleet selection!)
-	Enhancements::setEnhancements($this);
+		//enhancements (in game, NOT fleet selection!)
+		Enhancements::setEnhancements($this);
 	    
         foreach ($this->systems as $system){
             $system->onConstructed($this, $turn, $phase);
@@ -1422,14 +1489,14 @@ class BaseShip {
         } 
         
 	/*note expected damage - important for deciding ambiguous shots!*/
-	public function setExpectedDamage($hitLoc, $hitChance, $weapon){
+	public function setExpectedDamage($hitLoc, $hitChance, $weapon, $shooter){
 		//add to table private $expectedDamage = array(); //loc => dam; damage the unit is expected to take this turn
 		if(($hitLoc==0) || ($hitChance<=0)) return; //no point checking, PRIMARY damage not relevant for this decision; same when hit chance is less than 0
 		if(!isset($this->expectedDamage[$hitLoc])){
 			$this->expectedDamage[$hitLoc] = 0;
 		}		
 		$structureSystem = $this->getStructureSystem($hitLoc);
-		$armour = $structureSystem->getArmour($this, null, $weapon->damageType); //shooter relevant only for fighters - and they don't care about calculating ambiguous damage!
+		$armour = $structureSystem->getArmourComplete($this, $shooter, $weapon->weaponClass); 
 		$expectedDamageMax = $weapon->maxDamage-$armour;
 		$expectedDamageMin = $weapon->minDamage-$armour;
 		$expectedDamageMax = max(0,$expectedDamageMax);

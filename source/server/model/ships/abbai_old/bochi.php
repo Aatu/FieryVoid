@@ -9,7 +9,7 @@ class Bochi extends OSAT{
         $this->phpclass = "Bochi";
         $this->imagePath = "img/ships/AbbaiBochi.png";
         $this->shipClass = 'Bochi Defense Satellite';
-        $this->canvasSize = 100;
+        $this->canvasSize = 200;
 
         $this->isd = 1865;
 

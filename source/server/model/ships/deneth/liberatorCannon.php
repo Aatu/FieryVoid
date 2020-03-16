@@ -11,8 +11,8 @@ class LiberatorCannon extends LCV{
 	$this->phpclass = "LiberatorCannon";
 	$this->shipClass = "Liberator Cannon Gunboat";
 
-	$this->imagePath = "img/ships/jenas.png";
-	$this->canvasSize = 100;
+	$this->imagePath = "img/ships/DenethLiberator.png";
+	$this->canvasSize = 80;
 
 	$this->agile = true;
 

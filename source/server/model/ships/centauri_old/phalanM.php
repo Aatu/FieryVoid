@@ -38,7 +38,7 @@ class PhalanM extends FighterFlight{
 			$fighter->iconPath = "img/ships/phalan_large.png";
 			
 			
-			$fighter->addFrontSystem(new PairedPlasmaBlaster(330, 30, 0)); 
+			$fighter->addFrontSystem(new PairedPlasmaBlaster(330, 30)); 
 			$fighter->addFrontSystem(new FighterMissileRack(4, 330, 30));
 			
 			

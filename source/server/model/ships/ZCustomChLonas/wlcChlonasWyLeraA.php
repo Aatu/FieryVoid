@@ -7,7 +7,8 @@ class wlcChlonasWyLeraA extends OSAT{
 	$this->pointCost = 190;
         $this->faction = "Ch'Lonas";
         $this->phpclass = "wlcChlonasWyLeraA";
-        $this->imagePath = "img/ships/legion.png";
+        $this->imagePath = "img/ships/ChlonasWyLera.png";
+        $this->canvasSize = 70;
         $this->shipClass = "Wy'Lera A OSAT";
         
         $this->forwardDefense = 10;
