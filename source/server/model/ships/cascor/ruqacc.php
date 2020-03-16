@@ -7,7 +7,8 @@ class Ruqacc extends OSAT{
 		$this->pointCost = 175;
 		$this->faction = 'Cascor';
         $this->phpclass = "Ruqacc";
-        $this->imagePath = "img/ships/CascorRuqacc.png";
+        $this->imagePath = "img/ships/CascorRuqaccOSAT.png";
+		$this->canvasSize = 200;
         $this->shipClass = "Ruqacc Ion Satellite";
 	    $this->isd = 2231;
         

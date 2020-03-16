@@ -9,6 +9,7 @@ class Calacca extends HeavyCombatVessel{
         $this->faction = "Cascor";
         $this->phpclass = "Calacca";
         $this->imagePath = "img/ships/CascorCalacca.png";
+		$this->canvasSize = 200;
         $this->shipClass = "Calacca Freighter";
         $this->isd = 2225;
 		

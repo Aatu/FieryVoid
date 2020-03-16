@@ -8,7 +8,8 @@ class Caracti extends HeavyCombatVessel{
         $this->pointCost = 340;
         $this->faction = "Cascor";
         $this->phpclass = "Caracti";
-        $this->imagePath = "img/ships/CascorCalaccaQShip.png";
+        $this->imagePath = "img/ships/CascorCalacca.png";
+		$this->canvasSize = 200;
         $this->shipClass = "Caracti Q-Ship";
         $this->isd = 2229;
         
