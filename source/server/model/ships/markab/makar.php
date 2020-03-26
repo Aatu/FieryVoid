@@ -7,7 +7,7 @@ class Makar extends OSAT{
 		$this->pointCost = 225;
 		$this->faction = "Markab";
         $this->phpclass = "Makar";
-        $this->imagePath = "img/ships/dudroma.png";
+        $this->imagePath = "img/ships/MarkabOSAT.png";
         $this->shipClass = "Makar Defense Satellite";
         
         $this->forwardDefense = 11;

@@ -71,3 +71,9 @@ var RogolonLtPlasmaCannon = function RogolonLtPlasmaCannon(json, ship) {
 };
 RogolonLtPlasmaCannon.prototype = Object.create(Plasma.prototype);
 RogolonLtPlasmaCannon.prototype.constructor = RogolonLtPlasmaCannon;
+
+var LightPlasmaAccelerator = function LightPlasmaAccelerator(json, ship) {
+    Weapon.call(this, json, ship);
+};
+LightPlasmaAccelerator.prototype = Object.create(Weapon.prototype);
+LightPlasmaAccelerator.prototype.constructor = LightPlasmaAccelerator;

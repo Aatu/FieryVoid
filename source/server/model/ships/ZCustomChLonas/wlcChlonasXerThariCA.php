@@ -43,7 +43,6 @@ class wlcChlonasXerThariCA extends BaseShipNoFwd{
 
         $this->addRightSystem(new Thruster(3, 10, 0, 3, 1)); //Retro
         $this->addRightSystem(new Thruster(3, 15, 0, 5, 4)); //Stbd
-        $this->addRightSystem(new Hangar(4, 6));//hangar for a flight of heavy fighters
 	    $this->addRightSystem(new CustomGatlingMattergunLight(2, 0, 0, 300, 120));
 	    $this->addRightSystem(new CustomGatlingMattergunLight(2, 0, 0, 0, 180));
 	    $this->addRightSystem(new CustomPulsarLaser(4, 0, 0, 0, 120));
@@ -60,9 +59,9 @@ class wlcChlonasXerThariCA extends BaseShipNoFwd{
       
       
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addLeftSystem(new Structure( 4, 64));
-        $this->addRightSystem(new Structure( 4, 64));
-        $this->addAftSystem(new Structure( 4, 45));
+        $this->addLeftSystem(new Structure( 5, 64));
+        $this->addRightSystem(new Structure( 5, 64));
+        $this->addAftSystem(new Structure( 5, 45));
         $this->addPrimarySystem(new Structure( 5, 50));
       
       

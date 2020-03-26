@@ -585,4 +585,65 @@
     } //endof class LaserCutter
 
 
+/*Torata weapon*/
+class LaserAccelerator extends Laser{
+		public $name = "LaserAccelerator";
+        public $displayName = "Laser Accelerator";
+        public $iconPath = "LaserAccelerator.png";
+        public $animation = "laser";
+        public $animationColor = array(255, 79, 15);
+		public $animationWidth = 4;
+		public $animationWidth2 = 0.2;
+        
+        public $loadingtime = 2;
+		public $normalload = 4;
+		public $raking = 10;
+		public $priority = 7; //heavy Raking	
+		
+        public $rangePenalty = 0.33; //-1 per 3 hexes
+        public $fireControl = array(0, 2, 2);
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 7;
+			if ( $powerReq == 0 ) $powerReq = 6;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	    
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn); 
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}	    		  
+			$this->data["Special"] .= "Can fire at accelerated RoF for less damage:";  
+			$this->data["Special"] .= "<br> - 1 per 2 turns: 2d10+6"; 
+			$this->data["Special"] .= "<br> - 1 per 3 turns: 3d10+10"; 
+			$this->data["Special"] .= "<br> - 1 per 4 turns: 4d10+16"; 
+		}
+	
+		public function getDamage($fireOrder){
+        	switch($this->turnsloaded){
+            	case 0:
+            	case 1: 
+            	case 2:
+                	return Dice::d(10,2)+6;
+					break;
+            	case 3:
+            	   	return Dice::d(10,3)+10;
+					break;
+			    case 4:
+			    default:
+			    	return Dice::d(10,4)+16;
+					break;			
+        	}
+		}
+
+		public function setMinDamage(){		$this->minDamage = 20;		}
+		public function setMaxDamage(){		$this->maxDamage = 56;		}
+
+} // End of class Laser Accelerator
+
+
+
 ?>

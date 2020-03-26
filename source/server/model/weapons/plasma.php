@@ -327,65 +327,65 @@ class PlasmaTorch extends Plasma{
 
 
 class PairedPlasmaBlaster extends LinkedWeapon{
-        public $name = "pairedPlasmaBlaster";
-        public $displayName = "Plasma Blaster"; //it's not 'paired' in any way, except being usually mounted twin linked - like most fighter weapons...
-        public $animation = "trail";
-        public $animationColor = array(75, 250, 90);
-        public $trailColor = array(75, 250, 90);
-        public $projectilespeed = 12;
-        public $animationWidth = 2;
-        public $trailLength = 10;
-        public $animationExplosionScale = 0.1;
+	public $name = "pairedPlasmaBlaster";
+	public $displayName = "Plasma Blaster"; //it's not 'paired' in any way, except being usually mounted twin linked - like most fighter weapons...
+	public $animation = "trail";
+	public $animationColor = array(75, 250, 90);
+	public $trailColor = array(75, 250, 90);
+	public $projectilespeed = 12;
+	public $animationWidth = 2;
+	public $trailLength = 10;
+	public $animationExplosionScale = 0.1;
 
-        public $intercept = 2;
+	public $intercept = 2;
 	public $priority = 4; //eqivalend of d6+3, on account of armor piercing properties of Plasma
 
-        public $loadingtime = 1;
-        public $shots = 2;
-        public $defaultShots = 2;
+	public $loadingtime = 1;
+	public $shots = 2;
+	public $defaultShots = 2;
 
-        public $rangePenalty = 2;
-        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
-        public $rangeDamagePenalty = 1;
+	public $rangePenalty = 2;
+	public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+	public $rangeDamagePenalty = 1;
 
-    	public $damageType = "Standard"; 
-    	public $weaponClass = "Plasma"; 
+	public $damageType = "Standard"; 
+	public $weaponClass = "Plasma"; 
 
-        function __construct($startArc, $endArc, $nrOfShots = 2){ 
-            $this->shots = $nrOfShots;
-            $this->defaultShots = $nrOfShots;
-			$this->intercept = $nrOfShots;            
-			
-			
-            if($nrOfShots === 1){
-                $this->iconPath = "pairedPlasmaBlaster1.png";
-            }
-            if($nrOfShots >2){//no special icon for more than 3 linked weapons
-                $this->iconPath = "pairedPlasmaBlaster3.png";
-            }
-			
-            parent::__construct(0, 1, 0, $startArc, $endArc);
-        }
+	function __construct($startArc, $endArc, $nrOfShots = 2){ 
+		$this->shots = $nrOfShots;
+		$this->defaultShots = $nrOfShots;
+		$this->intercept = $nrOfShots;            
+		
+		
+		if($nrOfShots === 1){
+			$this->iconPath = "pairedPlasmaBlaster1.png";
+		}
+		if($nrOfShots >2){//no special icon for more than 3 linked weapons
+			$this->iconPath = "pairedPlasmaBlaster3.png";
+		}
+		
+		parent::__construct(0, 1, 0, $startArc, $endArc);
+	}
 
-        
-    
-        public function setSystemDataWindow($turn){    
-            parent::setSystemDataWindow($turn);
-			if (!isset($this->data["Special"])) {
-				$this->data["Special"] = '';
-			}else{
-				$this->data["Special"] .= '<br>';
-			}
-			$this->data["Special"] .= "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
-			$this->data["Special"] .= "<br>Ignores half of armor."; //handled by standard routines for Plasma weapons now
-        }
+	
+
+	public function setSystemDataWindow($turn){    
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
+		$this->data["Special"] .= "<br>Ignores half of armor."; //handled by standard routines for Plasma weapons now
+	}
 
 
-        public function getDamage($fireOrder){        return Dice::d(3)+2;   }
-        public function setMinDamage(){     $this->minDamage = 3 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 5 ;      }
+	public function getDamage($fireOrder){        return Dice::d(3)+2;   }
+	public function setMinDamage(){     $this->minDamage = 3 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 5 ;      }
 
-    }
+}
 
 
 class PlasmaGun extends Plasma{
@@ -499,7 +499,7 @@ class RogolonLtPlasmaCannon extends LinkedWeapon{
         public $rangePenalty = 1;
         public $fireControl = array(-5, 0, 0); // fighters, <mediums, <capitals
         public $rangeDamagePenalty = 0.5; //-1/2 hexes!
-	public $priority = 6;
+		public $priority = 6;
 
     	public $damageType = "Standard"; 
     	public $weaponClass = "Plasma"; 
@@ -528,6 +528,91 @@ class RogolonLtPlasmaCannon extends LinkedWeapon{
         public function setMaxDamage(){     $this->maxDamage = 22 ;      }
     }
 
+
+
+
+class LightPlasmaAccelerator extends LinkedWeapon{		
+		public $name = "LightPlasmaAccelerator";
+		public $displayName = "Light Plasma Accelerator";
+		public $iconPath = "LightPlasmaAccelerator.png";
+		public $animation = "trail";
+		public $trailColor = array(75, 250, 90);
+		public $animationColor = array(75, 250, 90);
+		public $projectilespeed = 12;
+		public $animationExplosionScalearray = array(1=>0.10, 2=>0.20);
+		public $animationWidtharray = array(1=>2, 2=>3);
+		public $trailLengtharray = array(1=>10, 2=>15);
+        
+        public $intercept = 2;
+		public $priority = 5;
+        public $priorityArray = array(1=>5, 2=>6); //even standard shot can deal high damage due to being Plasma; charged shot is devastating
+        
+        public $loadingtime = 1;
+		public $normalload = 2;
+        public $loadingtimeArray = array(1=>1, 2=>2);
+		public $shots = 2;
+		public $defaultShots = 2;
+		
+		public $firingModes = array(1 =>'Standard', 2=>'Charged');
+		public $rangePenalty = 2; //-2/hex in both modes
+        public $fireControlArray = array(1=>array(0, 0, 0), 2=>array(null, 0, 0) );
+		public $rangeDamagePenalty = 1; //-1/hex damage penalty
+		        
+		public $damageType = "Standard";
+		public $weaponClass = "Plasma";  
+
+		function __construct($startArc, $endArc, $nrOfShots = 2){
+			$this->defaultShots = $nrOfShots;
+			$this->shots = $nrOfShots;
+			$this->intercept = $nrOfShots;
+			parent::__construct(0, 1, 0, $startArc, $endArc);
+		}	
+
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);   
+			$this->data["Special"] = "If not fired for one turn, can fire a charged shot:";  
+			$this->data["Special"] .= "<br> - Standard: 1d6+3"; 
+			$this->data["Special"] .= "<br> - Charged: 2d6+6, cannot target fighters"; 
+			$this->data["Special"] .= "Damage penalty: -1/hex.";  
+		}
+		
+	
+		public function getDamage($fireOrder){
+        	switch($this->firingMode){ 
+            	case 1:
+                	return Dice::d(6)+3;
+			    			break;
+            	case 2:
+            	   	return Dice::d(6,2)+6;
+			    			break;
+        	}
+		}
+
+		public function setMinDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->minDamage = 4;
+								break;
+						case 2:
+								$this->minDamage = 8;
+								break;
+				}
+				$this->minDamageArray[$this->firingMode] = $this->minDamage;
+		}							
+		
+		public function setMaxDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->maxDamage = 9;
+								break;
+						case 2:
+								$this->maxDamage = 18;
+								break;
+				}
+				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+		}	
+}//end of class LightPlasmaAccelerator
 
 
 ?>

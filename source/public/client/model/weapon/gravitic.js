@@ -202,11 +202,9 @@ GraviticCutter.prototype.clearBoost = function () {
         }
     }
 };
-
 GraviticCutter.prototype.hasMaxBoost = function () {
     return true;
 };
-
 GraviticCutter.prototype.getMaxBoost = function () {
     return this.maxBoostLevel;
 };

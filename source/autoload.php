@@ -1167,8 +1167,7 @@ spl_autoload_register(
                 'norsca' => '/server/model/ships/cascor/norsca.php',
                 'nesacc' => '/server/model/ships/cascor/nesacc.php',
                 'norscator' => '/server/model/ships/cascor/norscator.php',
-                'norscatorold' => '/server/model/ships/cascor/norscatorOld.php', //deployed so games using old version aren't broken - to be deleted
-                'qoccata' => '/server/model/ships/cascor/qoccata.php',
+				'qoccata' => '/server/model/ships/cascor/qoccata.php',
                 'talacca' => '/server/model/ships/cascor/talacca.php',
                 'tacacci' => '/server/model/ships/cascor/tacacci.php',
                 'ruqacc' => '/server/model/ships/cascor/ruqacc.php',
@@ -1178,16 +1177,47 @@ spl_autoload_register(
                 'caltus' => '/server/model/ships/cascor/caltus.php',
                 'tiqincc' => '/server/model/ships/cascor/tiqincc.php',    
 		    
-		//new batch				
+				//new batch				
                 'microsat' => '/server/model/ships/FighterFlight.php',
                 'dovarum' => '/server/model/ships/usuuth/dovarum.php',
                 'genericmicrosat' => '/server/model/ships/civilians/genericMicroSat.php',
 		    
-		//AdaptiveArmor rework		    
+				//AdaptiveArmor rework		    
                 'adaptivearmorcontroller' => '/server/model/systems/baseSystems.php',
                 'whitestarold' => '/server/model/ships/minbari/whitestarOld.php',		    
                 'individualnote' => '/server/model/BaseClasses.php',
 		    
+			
+				//Torata weapons
+                'pentagonarray' => '/server/model/weapons/particle.php',  
+                'laseraccelerator' => '/server/model/weapons/lasers.php',   
+                'lightparticleaccelerator' => '/server/model/weapons/particle.php',  
+                'lightplasmaaccelerator' => '/server/model/weapons/plasma.php',  
+                'particleaccelerator' => '/server/model/weapons/particle.php',  
+                'pulseaccelerator' => '/server/model/weapons/pulse.php',  
+				
+				
+				//Torata ships
+                'toratacolotnarbase' => '/server/model/ships/torata/torataColotnarBase.php',
+					'toratacolotnarbase2220' => '/server/model/ships/torata/torataColotnarBase2220.php',
+					'toratacolotnarbase2242' => '/server/model/ships/torata/torataColotnarBase2242.php',
+                'toratatumalosat' => '/server/model/ships/torata/torataTumalOSAT.php',
+				
+                'torataatlaccrv' => '/server/model/ships/torata/torataAtlacCRV.php',
+					'toratatacloncrv' => '/server/model/ships/torata/torataTaclonCRV.php',
+                'torataclovantscout' => '/server/model/ships/torata/torataClovantScout.php',				
+					'torataalovarscoutcv' => '/server/model/ships/torata/torataAlovarScoutCV.php',
+                'toratagoltharcc' => '/server/model/ships/torata/torataGoltharCC.php',
+					'toratadartocca' => '/server/model/ships/torata/torataDartocCA.php',
+					'toratalatracce' => '/server/model/ships/torata/torataLatracCE.php',
+                'toratagoltharcc' => '/server/model/ships/torata/torataGoltharCC.php',
+                'torataheltakaclog' => '/server/model/ships/torata/TorataHeltakaCLog.php',
+					'torataheltakaclogpods' => '/server/model/ships/torata/TorataHeltakaCLogPods.php',		
+                'toratatoglatmonitor' => '/server/model/ships/torata/TorataToglatMonitor.php',			
+                'toratazftrtuka' => '/server/model/ships/torata/torataZFtrTuka.php',
+					'toratazftrtralka' => '/server/model/ships/torata/torataZFtrTralka.php',
+			
+			
 		    
 		//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
                 'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',

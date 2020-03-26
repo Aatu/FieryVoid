@@ -100,6 +100,9 @@ class BaseShip {
         public function getCommonIniModifiers( $gamedata ){ //common Initiative modifiers: speed, criticals
             $mod = 0;
             $speed = $this->getSpeed();
+			
+			/*first turn, on deployment - use always speed 5 (without this modification speed 0 is used)*/
+			if(($gamedata->turn <= 1) && ($gamedata->phase <= 1)) $speed = 5;
         
             if ( !($this instanceof OSAT) ){
                 if ($speed < 5){

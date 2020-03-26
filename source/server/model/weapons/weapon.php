@@ -402,9 +402,12 @@ class Weapon extends ShipSystem
     }
 
     public function setSystemDataWindow($turn)
-    {
-        $this->data["Resolution Priority (ship/fighter)"] = $this->priority . '/' . $this->priorityAF;
-        $this->data["Loading"] = $this->getTurnsloaded() . "/" . $this->getNormalLoad();
+    {		
+        if ($this->damageType != '') $this->data["Damage type"] = $this->damageType;
+        if ($this->weaponClass != '') $this->data["Weapon type"] = $this->weaponClass;
+		
+		//this is shown visually, and showing current values would require overriding cache - I'll disable it
+        //$this->data["Loading"] = $this->getTurnsloaded() . "/" . $this->getNormalLoad();
 
         $dam = $this->minDamage . "-" . $this->maxDamage;
         if ($this->minDamage == $this->maxDamage)
@@ -419,12 +422,9 @@ class Weapon extends ShipSystem
             if ($this->distanceRange > $this->range) $this->data["Range"] .= '/' . $this->distanceRange;
         }
 
-        //public $fireControl =  array(0, 0, 0); // fighters, <mediums, <capitals
-
         $fcfight = $this->formatFCValue($this->fireControl[0]);
         $fcmed = $this->formatFCValue($this->fireControl[1]);
         $fccap = $this->formatFCValue($this->fireControl[2]);
-
         $this->data["Fire control (fighter/med/cap)"] = "$fcfight/$fcmed/$fccap";
 
         if ($this->guns > 1) {
@@ -438,11 +438,11 @@ class Weapon extends ShipSystem
         if ($this->intercept > 0) {
             $this->data["Intercept"] = "-" . $this->intercept * 5;
         }
+		
+		
+        $this->data["Resolution Priority (ship/fighter)"] = $this->priority . '/' . $this->priorityAF;
 
-        if ($this->damageType != '') $this->data["Damage type"] = $this->damageType;
-        if ($this->weaponClass != '') $this->data["Weapon type"] = $this->weaponClass;
-
-
+/*no longer used
         $misc = array();
 
         if ($this->overloadturns > 0) {
@@ -453,6 +453,7 @@ class Weapon extends ShipSystem
 
         //if (sizeof($misc)>0)
         //$this->data["Misc"] = $misc;
+*/		
 
         parent::setSystemDataWindow($turn);
     }
@@ -1072,6 +1073,7 @@ class Weapon extends ShipSystem
         $shotsFired = $fireOrder->shots; //number of actual shots fired
         if ($this->damageType == 'Pulse') {//Pulse mode always fires one shot of weapon - while 	$fireOrder->shots marks number of pulses for display purposes
             $shotsFired = 1;
+			$fireOrder->shots = $this->maxpulses;
         }
         for ($i = 0; $i < $shotsFired; $i++) {
             $needed = $fireOrder->needed;
@@ -1117,18 +1119,18 @@ class Weapon extends ShipSystem
             }
         }
 	    
-	//for last segment of Sustained shot - force shutdown!
-	$newExtraShots = $this->overloadshots - 1; 	
-	if( $newExtraShots == 0 ) {
-	    $crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
-	    $crit->updated = true;
-	    $crit->newCrit = true; //force save even if crit is not for current turn
-	    $this->criticals[] =  $crit;
-	}
+		//for last segment of Sustained shot - force shutdown!
+		$newExtraShots = $this->overloadshots - 1; 	
+		if( $newExtraShots == 0 ) {
+			$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
+			$crit->updated = true;
+			$crit->newCrit = true; //force save even if crit is not for current turn
+			$this->criticals[] =  $crit;
+		}
 
         $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
-	TacGamedata::$lastFiringResolutionNo++;    //note for further shots
-	$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
+		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
+		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
 	    
     } //endof fire
 
@@ -1146,7 +1148,7 @@ class Weapon extends ShipSystem
         $noOverkill = ($this->noOverkill || ($this->damageType == 'Piercing'));//either explicitly stated or Piercing mode shot
 
         if ($target instanceof FighterFlight) {
-            return null;
+			return null;
         }
 
         if ($noOverkill && $damageWasDealt) {  //weapon trait: no overkill (if this is true overkill only!)
@@ -1218,20 +1220,21 @@ class Weapon extends ShipSystem
 	    
         if ($target->isDestroyed()) return;
 	    
-	$tmpLocation = $fireOrder->chosenLocation;
-	$launchPos = null;
-        if ($this->ballistic){
-		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
-		$launchPos = mathlib::hexCoToPixel($movement->position);
-		if((!($tmpLocation > 0)) && (!$forcePrimary)){ //location not yet found or PRIMARY (reassignment causes no problem)
-			$tmpLocation = $target->getHitSectionPos($launchPos, $fireOrder->turn);
+		$tmpLocation = $fireOrder->chosenLocation;
+		$launchPos = null;
+			if ($this->ballistic){
+			$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+			$launchPos = mathlib::hexCoToPixel($movement->position);
+			if((!($tmpLocation > 0)) && (!$forcePrimary)){ //location not yet found or PRIMARY (reassignment causes no problem)
+				$tmpLocation = $target->getHitSectionPos($launchPos, $fireOrder->turn);
+			}
+		}else{
+			if((!($tmpLocation > 0)) && (!$forcePrimary)){ //location not yet found or PRIMARY (reassignment causes no problem)
+				$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
+			}
 		}
-	}else{
-		if((!($tmpLocation > 0)) && (!$forcePrimary)){ //location not yet found or PRIMARY (reassignment causes no problem)
- 			$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
-		}
-	}
 
+        
         if (($target->shipSizeClass > 1) && ($this->damageType == 'Piercing')) { //Piercing damage will be split into 3 parts vs units larger thgan MCVs
             $facingLocation = $target->getHitSection($shooter, $fireOrder->turn, true); //do accept destroyed section as location
             //find out opposite section...
@@ -1260,7 +1263,7 @@ class Weapon extends ShipSystem
             $this->doDamage($target, $shooter, $system, $damageOut, $fireOrder, $launchPos, $gamedata, false, $outLocation);
         } elseif (($this->damageType == 'Raking') && (!($target instanceof FighterFlight))) { //Raking hit... but not at fighters - that's effectively Standard shot!
             //split into rakes; armor will not need to be penetrated twice!
-            $fireOrder->armorIgnored = array();//reset info about pierced armor
+			$fireOrder->armorIgnored = array();//reset info about pierced armor 
             while ($damage > 0) {
                 $rake = min($damage, $this->getRakeSize());
                 $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $tmpLocation);

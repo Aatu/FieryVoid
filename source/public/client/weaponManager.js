@@ -415,17 +415,33 @@ window.weaponManager = {
         var sectionEligible = false; //section that system is mounted on is eligible for caled shots
         if (!shooter) return false;
 
-        if (target.flight) return true; //experiment - allow called shots at fighters?...
+        if (target.flight) return true; //allow called shots at fighters (in effect it will affect particular fighter, not fighter system)
 
         var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target, shooter);
         var targetFacing = shipManager.getShipHeadingAngle(target);
 
         for (var i = 0; i < target.outerSections.length; i++) {
             var currSectionData = target.outerSections[i];
+			var arcFrom = 0;
+			var arcTo = 0;
             if (system.location == currSectionData.loc) {
+				
+				if (shipManager.movement.isRolled(target)) {
+					arcTo = mathlib.addToDirection(currSectionData.min, currSectionData.min * -2);
+					arcFrom = mathlib.addToDirection(currSectionData.max, currSectionData.max * -2);
+				} else { //ship NOT rolled
+					arcFrom = currSectionData.min;
+					arcTo = currSectionData.max;
+				}
+                if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(arcFrom, targetFacing), mathlib.addToDirection(arcTo, targetFacing))) {
+                    if (currSectionData.call == true) return true;
+                }
+
+				/*old version - not taking Rolled state into account
                 if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(currSectionData.min, targetFacing), mathlib.addToDirection(currSectionData.max, targetFacing))) {
                     if (currSectionData.call == true) return true;
                 }
+				*/
                 sectionEligible = currSectionData.call;
             }
             //"loc" => $curr['loc'], "min" => $curr['min'], "max" => $curr['max'], "call" => $call

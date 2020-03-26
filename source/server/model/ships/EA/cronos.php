@@ -78,7 +78,7 @@ class Cronos extends HeavyCombatVessel{
                 5 => "Thruster",
                 7 => "Heavy Pulse Cannon",
                 9 => "Railgun",
-                11 => "Interceptor I",
+                11 => "Interceptor II",
                 18 => "Structure",
                 20 => "Primary",
         ),
