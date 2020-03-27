@@ -19,9 +19,9 @@ class Firing
             return -1;
         } else if ($weaponA->intercept < $weaponB->intercept) {
             return 1;
-        } else if ($weaponA->loadingtime < $weaponB->loadingtime) {
+        } else if ( max($weaponA->loadingtime, $weaponA->normalload) < max($weaponB->loadingtime, $weaponB->normalload) ) {
             return -1;
-        } else if ($weaponA->loadingtime > $weaponB->loadingtime) {
+        } else if ( max($weaponA->loadingtime, $weaponA->normalload) > max($weaponB->loadingtime, $weaponB->normalload) ) {
             return 1;
         } else {
             return 0;
