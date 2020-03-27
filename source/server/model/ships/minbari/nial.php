@@ -31,7 +31,7 @@ class Nial extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(4, 4, 4, 4);
-            $nial = new Fighter("nial", $armour, 14, $this->id);
+            $nial = new Fighter("Nial", $armour, 14, $this->id);
             $nial->displayName = "Nial";
         // need picture
             $nial->imagePath = "img/ships/nial.png";
@@ -39,6 +39,11 @@ class Nial extends FighterFlight{
             $nial->iconPath = "img/ships/nial-large.png";
             $nial->addFrontSystem(new LightFusionCannon(330, 30, 4, 3));
             $nial->addAftSystem(new Jammer(0, 1, 0));
+		
+		
+		$nial->addAftSystem(new RammingAttack(0, 0, 360, $this->getRammingFactor(), 0)); //ramming attack
+			
+		
             $this->addSystem($nial);
         }
     }
