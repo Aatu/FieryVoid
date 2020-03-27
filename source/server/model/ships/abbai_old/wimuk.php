@@ -33,7 +33,7 @@ class Wimuk extends FighterFlight{
             $fighter->iconPath = "img/ships/AbbaiWimuk_Large.png";
             $fighter->addFrontSystem(new PairedParticleGun(330, 30, 1));
   		
-		$fighter->addAftSystem(new RammingAttack(0, 0, 360, $this->getRammingFactor(), 0)); //ramming attack
+		$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
 		$this->addSystem($fighter);
         }

@@ -100,9 +100,9 @@ class Enhancements{
 			if ($system instanceof Scanner){
 				if($system->output > $strongestValue) {
 					$strongestValue = $system->output;
+					if ($system instanceof ElintScanner) $multiplier = 2;
 				}
 			}
-			if ($sensor instanceof ElintScanner) $multiplier = 2;
 		  }  
 		  if($strongestValue > 0){ //Sensors actually exist to be enhanced!
 			  $enhPrice = max(1,($strongestValue+1)*5) * $multiplier;	  

@@ -39,7 +39,7 @@ class wlcTishat1950 extends FighterFlight{
             $tishat->iconPath = "img/ships/tishat-large.png";
             $tishat->addFrontSystem(new LightFusionCannon(330, 30, 4, 2));
 		
-			$tishat->addAftSystem(new RammingAttack(0, 0, 360, $this->getRammingFactor(), 0)); //ramming attack
+			$tishat->addAftSystem(new RammingAttack(0, 0, 360, $tishat->getRammingFactor(), 0)); //ramming attack
 			
             $this->addSystem($tishat);
         }

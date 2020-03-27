@@ -37,7 +37,7 @@ class Kotha extends FighterFlight{
        	    //Grav Shield Level 1
             $fighter->addAftSystem(new FtrShield(1, 0, 360));
 			
-			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $this->getRammingFactor(), 0)); //ramming attack
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
             $this->addSystem($fighter);
         }

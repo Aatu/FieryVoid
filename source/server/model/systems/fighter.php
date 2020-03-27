@@ -191,6 +191,16 @@ throw new Exception("getArmourAdaptive (fighter)! $dmgClass $armour");
         }
     }
 
+    public function getRammingFactor()
+    {
+        $dmg = 0;
+        $dmg += $this->maxhealth;
+        foreach ($this->armour as $armorvalue) {
+            $dmg += $armorvalue;
+        }
+        return $dmg;
+    } //endof function getRammingFactor
+
 
 }
 

@@ -40,7 +40,7 @@ class Templar extends FighterFlight{
             $fighter->addFrontSystem(new PairedGatlingGun(330, 30));
 
 			
-			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $this->getRammingFactor(), 0)); //ramming attack
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
 
             $this->addSystem($fighter);

@@ -41,7 +41,7 @@ class Nial extends FighterFlight{
             $nial->addAftSystem(new Jammer(0, 1, 0));
 		
 		
-		$nial->addAftSystem(new RammingAttack(0, 0, 360, $this->getRammingFactor(), 0)); //ramming attack
+		$nial->addAftSystem(new RammingAttack(0, 0, 360, $nial->getRammingFactor(), 0)); //ramming attack
 			
 		
             $this->addSystem($nial);
