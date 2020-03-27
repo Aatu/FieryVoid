@@ -42,6 +42,11 @@ class TorataZFtrTuka extends FighterFlight
 
 			$frontGun = new LightParticleAccelerator(330, 30);
 			$fighter->addFrontSystem($frontGun);
+			
+			
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $this->getRammingFactor(), 0)); //ramming attack
+			
+			
 			$this->addSystem($fighter);
 
 		}

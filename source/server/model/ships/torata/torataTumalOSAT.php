@@ -38,3 +38,5 @@ class TorataTumalOSAT extends OSAT
 		$this->addPrimarySystem(new Structure(4, 30));
 	}
 }
+
+?>
