@@ -921,8 +921,8 @@ window.weaponManager = {
     canSelfIntercept: function canSelfIntercept(ship) {
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
-
-            if (weaponManager.isLoaded(weapon) && weapon.intercept >= 1 && weapon.loadingtime > 1) {
+		var loadingTimeActual = Math.max(weapon.loadingtime,weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging 
+            if (weaponManager.isLoaded(weapon) && weapon.intercept >= 1 && loadingTimeActual > 1) {
                 return true;
             }
         }
@@ -939,8 +939,9 @@ window.weaponManager = {
             if (weaponManager.hasFiringOrder(ship, weapon)) {
                 weaponManager.removeFiringOrder(ship, weapon);
             }
-
-            if (weaponManager.isLoaded(weapon) && weapon.intercept >= 1 && weapon.loadingtime > 1) {
+		
+		var loadingTimeActual = Math.max(weapon.loadingtime,weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging
+            if (weaponManager.isLoaded(weapon) && weapon.intercept >= 1 && loadingTimeActual > 1) {
                 valid.push(weapon);
             } else invalid.push(weapon);
         }
@@ -965,7 +966,8 @@ window.weaponManager = {
     canSelfInterceptSingle: function checkSelfIntercept(ship, weapon) {
 	if (gamedata.gamephase != 3 ) return false;//declaration in firing phase only
 	if (!weapon.weapon) return false;//only weapons can intercept ;)
-	if ( (weapon.intercept < 1) || (weapon.loadingtime <= 1) ) return false;//cannot intercept or quick to recharge anyway and will be auto-assigned
+		var loadingTimeActual = Math.max(weapon.loadingtime,weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging
+	if ( (weapon.intercept < 1) || (loadingTimeActual <= 1) ) return false;//cannot intercept or quick to recharge anyway and will be auto-assigned
 	if (weapon.ballistic) return false;//no interception using ballistic weapons    
 	if (weaponManager.hasFiringOrder(ship, weapon)) return false;//already declared
 	if (!weaponManager.isLoaded(weapon)) return false;//not ready to fire
