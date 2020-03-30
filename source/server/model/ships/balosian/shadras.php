@@ -10,6 +10,7 @@ class Shadras extends FighterFlight{
         $this->phpclass = "shadras";
         $this->shipClass = "Shadras Heavy Fighters";
         $this->imagePath = "img/ships/shadras.png";
+		$this->isd = 2250;
 
         $this->forwardDefense = 8;
         $this->sideDefense = 7;
@@ -36,8 +37,12 @@ class Shadras extends FighterFlight{
             $fighter->imagePath = "img/ships/shadras.png";
             $fighter->iconPath = "img/ships/shadras_large.png";
 
-            $fighter->addFrontSystem(new PairedParticleGun(330, 30, 2, 3));
-
+			$gun = new LightParticleBeam(330, 30, 2,3);
+			$gun->displayName = "Light Particle Gun";
+			$fighter->addFrontSystem($gun);
+            
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+            
             $this->addSystem($fighter);
 	}
     }

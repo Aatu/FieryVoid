@@ -9,8 +9,10 @@ class Athasa extends HeavyCombatVessel{
         $this->phpclass = "Athasa";
         $this->imagePath = "img/ships/esthasa.png";
         $this->shipClass = "Athasa Scout";
+        $this->variantOf = "Esthasa Destroyer";
         $this->occurence = "rare";
         $this->fighters = array("medium"=>6);
+		$this->isd = 2218;
                 
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

@@ -68,11 +68,11 @@ class swBulkCarrier extends HeavyCombatVessel{
 	    
         $this->hitChart = array(
         		0=> array(
-					8 => "Structure",
-        				10 => "Thruster",
-		        		11 => "Hyperdrive",
-					15=> "Hangar",
-        				17 => "Scanner",
+					7 => "Structure",
+        				9 => "Thruster",
+		        		10 => "Hyperdrive",
+					14=> "Hangar",
+        				16 => "Scanner",
         				18 => "Engine",
         				19 => "Reactor",
 					20 => "C&C",
@@ -80,7 +80,7 @@ class swBulkCarrier extends HeavyCombatVessel{
         		1=> array(
         				4 => "Thruster",
         				6 => "Ray Shield",
-        				9 => "Medium Llaser",
+        				9 => "Medium Laser",
 					13 => "Cargo Bay",
         				18 => "Structure",
         				20 => "Primary",

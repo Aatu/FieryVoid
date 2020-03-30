@@ -1440,7 +1440,7 @@ window.weaponManager = {
                         damage: damage.damage,
                         damageclass: damage.damageclass,
                         destroyed: damage.destroyed,
-                        system: shipManager.systems.getSystem(target, damage.systemid)
+                        system: shipManager.systems.getSystem( gamedata.getShip(damage.shipid), damage.systemid)
                     };
                 }),
                 intercepts: weaponManager.getInterceptingFiringOrders(fireOrder.id).map(function (intercept) {

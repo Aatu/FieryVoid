@@ -214,8 +214,6 @@ spl_autoload_register(
                 'drakhpatrolship' => '/server/model/ships/drakh/drakhPatrolShip.php',
                 'drakhraidercontroller' => '/server/model/systems/baseSystems.php',
                 'drakhraiderflt' => '/server/model/ships/drakh/drakhRaiderFlt.php',
-                'drakhraideroldflt' => '/server/model/ships/drakh/drakhRaiderOldFlt.php', //to be deleted when games are finished
-                'drakhraidershf' => '/server/model/ships/drakh/drakhRaiderSHF.php',
                 'drakhscoutship' => '/server/model/ships/drakh/drakhScoutShip.php',
                 'drakhshuttle' => '/server/model/ships/drakh/drakhShuttle.php',
                 'drakhsupportship' => '/server/model/ships/drakh/drakhSupportShip.php',
@@ -875,7 +873,6 @@ spl_autoload_register(
                 'swnebulonbfrigate' => '/server/model/ships/ZStarWars/swNebulonBFrigate.php',
                 'swrayshield' => '/server/model/weapons/customSW.php',
                 'swscanner' => '/server/model/systems/baseSystems.php',
-                'swskipray' => '/server/model/ships/ZStarWars/swSkipray.php', //backward compatibility, to be deleted soon
                 'zzftrskipray' => '/server/model/ships/ZStarWars/zzftrSkipray.php',
                 'swtargetheld' => '/server/model/cricialClasses.php',
                 'swtractorbeam' => '/server/model/weapons/customSW.php',
@@ -913,7 +910,7 @@ spl_autoload_register(
                 'thorun' => '/server/model/ships/dilgar/thorun.php',
                 'thorunearly' => '/server/model/ships/dilgar/thorunEarly.php',
                 'thorunheavy' => '/server/model/ships/dilgar/thorunHeavy.php',
-                'thorunheavynav' => '/server/model/ships/dilgar/thorunHeavyNav.php',
+                'torushka' => '/server/model/ships/dilgar/torushka.php',
                 'thosalsi' => '/server/model/ships/balosian/thosalsi.php',
                 'throkan' => '/server/model/ships/drazi_raiders/throkan.php',
                 'thruster' => '/server/model/systems/baseSystems.php',

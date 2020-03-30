@@ -3,7 +3,7 @@ class zzftrSkipray extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 100*6;
+        $this->pointCost = 90*6;
         $this->faction = "ZStarWars";
         $this->phpclass = "zzftrSkipray";
         $this->shipClass = "Skipray Blastboats";
@@ -11,7 +11,7 @@ class zzftrSkipray extends FighterFlight{
         
 		$this->isd = "Galactic Civil War";
 		$this->notes = "Primary users: Galactic Empire, New Republic.";
-		$this->notes .= "Hyperdrive";
+		$this->notes .= "<br>Hyperdrive";
 	    
         $this->unofficial = true;
         
@@ -30,7 +30,9 @@ class zzftrSkipray extends FighterFlight{
     	$this->superheavy = true;
         $this->maxFlightSize = 3;//this is a superheavy fighter originally intended as single unit, limit flight size to 3
 		
-		
+        $this->pivotcost = 2; //SW fighters have higher pivot cost - only elite pilots perform such maneuvers on screen!
+		$this->enhancementOptionsEnabled[] = 'ELITE_SW'; //this flight can have Elite Pilot (SW) enhancement option	
+        
         $this->populate();
 		
     }
@@ -61,6 +63,8 @@ class zzftrSkipray extends FighterFlight{
 
 			//Ray Shield, 2 points
 			$fighter->addAftSystem(new SWRayShield(0, 1, 0, 2, 0, 360));
+			
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
         	$this->addSystem($fighter);
        }

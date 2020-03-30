@@ -11,6 +11,7 @@ class Brahassa extends BaseShip{
         $this->shipClass = "Brahassa Cruiser";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>24);
+		$this->isd = 2249;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 17;

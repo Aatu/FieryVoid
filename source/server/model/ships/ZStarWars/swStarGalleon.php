@@ -74,8 +74,8 @@ class swStarGalleon extends HeavyCombatVessel{
         		1=> array(
         				3 => "Thruster",
         				4 => "Ray Shield",
-        				6 => "Capital Concussion Missile",	
-        				8 => "Medium Turbolaser",
+        				5 => "Capital Concussion Missile",	
+        				7 => "Medium Turbolaser",
 					11 => "0:Cargo Bay",
         				18 => "Structure",
         				20 => "Primary",
@@ -83,7 +83,7 @@ class swStarGalleon extends HeavyCombatVessel{
         		2=> array(
         				4 => "Thruster",
         				5 => "Ray Shield",
-        				8 => "Medium Turbolaser",	
+        				7 => "Medium Turbolaser",	
 					11 => "0:Cargo Bay",
         				18 => "Structure",
         				20 => "Primary",

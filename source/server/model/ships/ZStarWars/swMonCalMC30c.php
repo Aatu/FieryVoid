@@ -5,7 +5,7 @@ class swMonCalMC30c extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 650; //tenative barring destruction tests
+	$this->pointCost = 650; 
 	$this->faction = "ZStarWars";
         $this->phpclass = "swMonCalMC30c";
         $this->imagePath = "img/starwars/mc30.png";
@@ -88,9 +88,9 @@ class swMonCalMC30c extends HeavyCombatVesselLeftRight{
         		3=> array(
         				2 => "Thruster",
         				3 => "Ray Shield",
-        				7 => "Capital Proton Torpedo",	
-					10 => "Medium Turbolaser",
-		        		13 => "Medium Laser",
+        				6 => "Capital Proton Torpedo",	
+						8 => "Medium Turbolaser",
+		        		10 => "Medium Laser",
         				18 => "Structure",
         				20 => "Primary",
         		),
@@ -98,9 +98,9 @@ class swMonCalMC30c extends HeavyCombatVesselLeftRight{
         		4=> array(
         				2 => "Thruster",
         				3 => "Ray Shield",
-        				7 => "Capital Proton Torpedo",	
-					10 => "Medium Turbolaser",
-		        		13 => "Medium Laser",
+        				6 => "Capital Proton Torpedo",	
+						8 => "Medium Turbolaser",
+		        		10 => "Medium Laser",
         				18 => "Structure",
         				20 => "Primary",
         		),

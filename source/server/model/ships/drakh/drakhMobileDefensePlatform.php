@@ -1,5 +1,6 @@
 <?php
 class DrakhMobileDefensePlatform extends MediumShip{
+	/*Drakh OSAT-equivalent*/
 	/*approximated as MCV, no EW restrictions*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);

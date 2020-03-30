@@ -61,7 +61,7 @@ class swCorellianCorvette extends MediumShip{
 
         $this->hitChart = array(
         		0=> array(
-        				2 => "Thruster",
+        				7 => "Thruster",
         				13 => "Cargo Bay",
         				15 => "Scanner",
         				17 => "Engine",
@@ -78,8 +78,8 @@ class swCorellianCorvette extends MediumShip{
         				20 => "Primary",
         		),
         		2=> array(
-        				4 => "Thruster",
-        				5 => "Ray Shield",
+        				5 => "Thruster",
+        				6 => "Ray Shield",
         				9 => "0:Medium Turbolaser",
         				17 => "Structure",
         				20 => "Primary",

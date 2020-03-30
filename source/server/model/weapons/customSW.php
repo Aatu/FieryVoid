@@ -100,12 +100,12 @@ class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launch
     	public $weaponClass = "Ballistic"; 
 	public $noPrimaryHits = true; //cannot hit PRIMARY from outer table
 	
-	protected $useDie = 3; //die used for base number of hits
+	protected $useDie = 2; //die used for base number of hits
 	
     
     public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);
-	    $this->data["Special"] = 'Spread mode: -1..1 +1/'. $this->grouping."%, max. ".$this->maxpulses." missiles";
+	    $this->data["Special"] = 'Spread mode: 0..1 +1/'. $this->grouping."%, max. ".$this->maxpulses." missiles.";
 		$this->data["Special"] .= '<br>Minimum of 1 missile.';
 		$this->data["Special"] .= '<br>Cannot penetrate to PRIMARY when hitting outer section.';
     }
@@ -145,7 +145,7 @@ class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launch
     
 	public function rollPulses($turn, $needed, $rolled){
 		$pulses = $this->getPulses($turn); //$this->useDie usually
-		$pulses -= 2;
+		$pulses -= 1;
 		$pulses+= $this->getExtraPulses($needed, $rolled);
 		$pulses=min($pulses,$this->maxpulses); //no more than maxpulses
 		$pulses=max($pulses,1); //no less than 1
@@ -166,7 +166,7 @@ class SWFtrMissile extends MissileFB //generic class; this is AMMO for SWFtrProt
 	
     function __construct($startArc, $endArc, $noOfLaunchers, $fireControl = null){
 	//number of linked launchers affects price!
-	$this->cost = $this->cost * $noOfLaunchers;
+		$this->cost = ceil($this->cost * ($noOfLaunchers+1) *0.5); //first missile at full price, further ones at 50%! - equals to adding one launcher and discounting them all at 50%
         parent::__construct($startArc, $endArc, $fireControl);
     }
 	
@@ -184,9 +184,7 @@ class SWDirectWeapon extends Pulse{
     public $firingModes = array( 1 => "Burst");  
 	
 	//for Pulse mode
-	//public $grouping = 25;
-	//public $maxpulses = 1;	
-	protected $useDie = 3; //die used for base number of hits
+	protected $useDie = 2; //die used for base number of hits
  
     public $damageType = "Pulse"; //and this should remain!
     public $weaponClass = "Particle"; //and may be easily overridden
@@ -230,7 +228,7 @@ class SWDirectWeapon extends Pulse{
 	
         public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-			$this->data["Special"] = 'Burst mode: -1..1 +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
+			$this->data["Special"] = 'Burst mode: 0..1 +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
 			$this->data["Special"] .= '<br>Minimum of 1 pulse.';
 			$this->data["Special"] .= '<br>Alternate firing mode: Salvo: single shot with increased damage but lowered FC (all weapons in battery fire together instead of sequentially).';
         }
@@ -238,7 +236,7 @@ class SWDirectWeapon extends Pulse{
     
 	public function rollPulses($turn, $needed, $rolled){
 		$pulses = $this->getPulses($turn); //$this->useDie usually
-		$pulses -= 2;
+		$pulses -= 1;
 		$pulses+= $this->getExtraPulses($needed, $rolled);
 		$pulses=min($pulses,$this->maxpulses); //no more than maxpulses
 		$pulses=max($pulses,1); //no less than 1
@@ -312,7 +310,7 @@ class SWBallisticWeapon extends Torpedo{
 	
 	public $iconPath = "starwars/photonTorpedo.png"; //to be changed!
 
-    protected $useDie = 3; //die used for base number of hits
+    protected $useDie = 2; //die used for base number of hits
  
     public $damageType = "Pulse"; //and this should remain!
     public $weaponClass = "Ballistic"; //and may be easily overridden
@@ -353,7 +351,7 @@ class SWBallisticWeapon extends Torpedo{
 	
 	
         public function setSystemDataWindow($turn){
-	    $this->data["Special"] = 'Spread mode: -1..1 +1/'. $this->grouping."%, max. ".$this->maxpulses." missiles";
+	    $this->data["Special"] = 'Spread mode: 0..1 +1/'. $this->grouping."%, max. ".$this->maxpulses." missiles";
 		$this->data["Special"] .= '<br>Minimum of 1 missile.';
 		$this->data["Special"] .= '<br>Cannot penetrate to PRIMARY when hitting outer section.';
             parent::setSystemDataWindow($turn);
@@ -375,7 +373,7 @@ class SWBallisticWeapon extends Torpedo{
     
 	public function rollPulses($turn, $needed, $rolled){
 		$pulses = $this->getPulses($turn); //$this->useDie usually
-		$pulses -= 2;
+		$pulses -= 1;
 		$pulses+= $this->getExtraPulses($needed, $rolled);
 		$pulses=min($pulses,$this->maxpulses); //no more than maxpulses
 		$pulses=max($pulses,1); //no less than 1
@@ -448,20 +446,22 @@ class SWIon extends SWDirectWeapon{
 class SWIonHandler{
 	private static $accumulatedIonDmg = array();
 	//private static $power = 1.4; //effect magnitude from hit: damage ^power
-	private static $free = 3; //this much damage doesn't cause anything
-	private static $threshold = 7; //this much damage (after $free) causes power shortage
+	private static $free = 2; //this much damage doesn't cause anything
+	private static $threshold = 6; //this much damage (after $free) causes power shortage
 	private static $turn = 0; //turn for which data is held
 
 	
 	public static function addDamage($targetUnit, $targetSystem, $dmgInflicted){
 		if($dmgInflicted<1) return;//no point if no damage was actually done
+		if($system->advancedArmor) return;//Advanced Armor prevents additional effects
 		if($targetUnit instanceof FighterFlight) return;//no effect on fighters
 		if ($targetUnit->isDestroyed()) return; //no point in doing anything
 		$baseDmg = $dmgInflicted;//$baseDmg = $dmgInflicted+1; //boost light damage a bit (..or not)
+		/* this reduction proved to be too much!
 		if(($targetSystem->displayName != 'Structure') && (!($targetSystem instanceof Reactor)) ){ //half damage counts 
 			$baseDmg = ceil($dmgInflicted/2);
 		}
-		//effect is stronger than raw damage inflicted, and bigger hits do more damage: //after all, skip that - paper-frienfdliness
+		*/
 		$effect = $baseDmg;//$effect = pow($baseDmg,SWIonHandler::$power);
 		$targetID = $targetUnit->id;
 		$currentTurn = TacGamedata::$currentTurn;
@@ -603,7 +603,7 @@ class SWFtrProtonTorpedo extends SWFtrMissile //this is AMMO for SWFtrProtonTorp
     public $name = "SWFtrProtonTorpedo";
     public $missileClass = "FtrTorpedo";
     public $displayName = "Fighter Proton Torpedo";
-    public $cost = 8;
+    public $cost = 6;
     public $damage = 11;
     public $amount = 0;
     public $range = 8;

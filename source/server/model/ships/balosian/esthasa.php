@@ -10,6 +10,7 @@ class Esthasa extends HeavyCombatVessel{
         $this->imagePath = "img/ships/esthasa.png";
         $this->shipClass = "Esthasa Destroyer";
         $this->fighters = array("medium"=>6);
+		$this->isd = 2222;
                 
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

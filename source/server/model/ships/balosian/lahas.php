@@ -10,9 +10,11 @@ class Lahas extends BaseShip{
         $this->imagePath = "img/ships/brahassa.png";
         $this->shipClass = "Lahas Command Cruiser";
         $this->shipSizeClass = 3;
+        $this->variantOf = "Brahassa Cruiser";
         $this->occurence = "uncommon";
         $this->limited = 33;
         $this->fighters = array("normal"=>12);
+		$this->isd = 2250;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
@@ -28,7 +30,7 @@ class Lahas extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 12, 4, 7));
 		$this->addPrimarySystem(new Engine (5, 15, 0, 10, 3));
 		$this->addPrimarySystem(new Hangar(5, 14));
-		$this->addPrimarySystem(new Hangar(5, 14));
+		//$this->addPrimarySystem(new Hangar(5, 14)); SCS shows two hangars, but capacity is listed as for one - it seems that Jump Drive was intended to take place of the second hangar
         $this->addPrimarySystem(new JumpEngine(5, 10, 3, 36));
 
        	$this->addFrontSystem(new StdParticleBeam(3, 4, 1, 240, 60));

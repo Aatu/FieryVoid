@@ -11,6 +11,7 @@ class Orion extends StarBaseSixSections{
 		$this->fighters = array("heavy"=>36); 
 
 		$this->shipSizeClass = 3; //Enormous is not implemented
+        $this->Enormous = true;
 		$this->iniativebonus = -200; //no voluntary movement anyway
 		$this->turncost = 0;
 		$this->turndelaycost = 0;
