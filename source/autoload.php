@@ -1203,7 +1203,7 @@ spl_autoload_register(
 					'toratacolotnarbase2242' => '/server/model/ships/torata/torataColotnarBase2242.php',
                 'toratatumalosat' => '/server/model/ships/torata/torataTumalOSAT.php',
 				
-		    /*
+		    
                 'torataatlaccrv' => '/server/model/ships/torata/torataAtlacCRV.php',
 					'toratatacloncrv' => '/server/model/ships/torata/torataTaclonCRV.php',
                 'torataclovantscout' => '/server/model/ships/torata/torataClovantScout.php',				
@@ -1212,6 +1212,7 @@ spl_autoload_register(
 					'toratadartocca' => '/server/model/ships/torata/torataDartocCA.php',
 					'toratalatracce' => '/server/model/ships/torata/torataLatracCE.php',
                 'toratagoltharcc' => '/server/model/ships/torata/torataGoltharCC.php',
+		    /*
                 'torataheltakaclog' => '/server/model/ships/torata/TorataHeltakaCLog.php',
 					'torataheltakaclogpods' => '/server/model/ships/torata/TorataHeltakaCLogPods.php',		
                 'toratatoglatmonitor' => '/server/model/ships/torata/TorataToglatMonitor.php',			
