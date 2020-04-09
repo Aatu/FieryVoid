@@ -1197,6 +1197,7 @@ spl_autoload_register(
 				
 				
 				//Torata ships
+		    /*
                 'toratacolotnarbase' => '/server/model/ships/torata/torataColotnarBase.php',
 					'toratacolotnarbase2220' => '/server/model/ships/torata/torataColotnarBase2220.php',
 					'toratacolotnarbase2242' => '/server/model/ships/torata/torataColotnarBase2242.php',
@@ -1210,12 +1211,12 @@ spl_autoload_register(
 					'toratadartocca' => '/server/model/ships/torata/torataDartocCA.php',
 					'toratalatracce' => '/server/model/ships/torata/torataLatracCE.php',
                 'toratagoltharcc' => '/server/model/ships/torata/torataGoltharCC.php',
-                //'torataheltakaclog' => '/server/model/ships/torata/TorataHeltakaCLog.php',
-					//'torataheltakaclogpods' => '/server/model/ships/torata/TorataHeltakaCLogPods.php',		
+                'torataheltakaclog' => '/server/model/ships/torata/TorataHeltakaCLog.php',
+					'torataheltakaclogpods' => '/server/model/ships/torata/TorataHeltakaCLogPods.php',		
                 'toratatoglatmonitor' => '/server/model/ships/torata/TorataToglatMonitor.php',			
                 'toratazftrtuka' => '/server/model/ships/torata/torataZFtrTuka.php',
 					'toratazftrtralka' => '/server/model/ships/torata/torataZFtrTralka.php',
-			
+			*/
 			
 		    
 		//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
