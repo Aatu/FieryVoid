@@ -5,7 +5,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     header('Location: index.php');
 //      return;
 }
-
+ 
 $games = "[]";
 if (isset($_SESSION["user"])) {
     $games = Manager::getTacGames($_SESSION["user"]);
