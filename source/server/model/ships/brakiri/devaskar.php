@@ -15,6 +15,9 @@ class Devaskar extends BaseShip{
         $this->forwardDefense = 16;
         $this->sideDefense = 16;
         
+		$this->notes = 'Ly-Nakir Industries';//Corporation producing the design
+		$this->isd = 2228;
+        
         $this->turncost = 1;
         $this->turndelaycost = 0.75;
         $this->accelcost = 4;

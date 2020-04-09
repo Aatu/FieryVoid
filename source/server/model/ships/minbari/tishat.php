@@ -31,7 +31,7 @@ class Tishat extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 3, 3, 3);
-            $tishat = new Fighter("tishat", $armour, 9, $this->id);
+            $tishat = new Fighter("Tishat", $armour, 9, $this->id);
             $tishat->displayName = "Tishat";
         // need picture
             $tishat->imagePath = "img/ships/tishat.png";
@@ -39,6 +39,10 @@ class Tishat extends FighterFlight{
             $tishat->iconPath = "img/ships/tishat-large.png";
             $tishat->addFrontSystem(new LightFusionCannon(330, 30, 4, 2));
             $tishat->addAftSystem(new Jammer(0, 1, 0));
+		
+		$tishat->addAftSystem(new RammingAttack(0, 0, 360, $tishat->getRammingFactor(), 0)); //ramming attack
+			
+		
             $this->addSystem($tishat);
         }
     }

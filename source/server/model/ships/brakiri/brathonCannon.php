@@ -13,6 +13,8 @@ class BrathonCannon extends BaseShip{
         $this->variantOf = "Brathon Auxiliary Cruiser";
 	$this->isd=2230;
         
+		$this->notes = 'available all Corporations except Kam-Lassit';//Corporation producing the design
+		
         $this->forwardDefense = 15;
         $this->sideDefense = 13;
         

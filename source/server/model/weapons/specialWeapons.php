@@ -1,4 +1,23 @@
 <?php
+/*
+********************************
+*all EM weapons should look for EMHardened trait, and treat is as they would AdvancedArmor.
+* this is rough simplification of how this trait should affect them (see Ipsha for details, Militaries of the League 2)
+********************************
+*/
+
+class WeaponEM  {	
+	public static function isTargetEMResistant($ship,$system = null){ //returns true if target has either AdvancedArmor or EM Hardening (which, for simplicity, in FV is treated as AA would be for EM weapons)
+		if($ship){
+			if($ship->advancedArmor) return true;
+			if($ship->EMHardened) return true;
+		}else if ($system){
+			if($system->advancedArmor) return true;
+		}
+		return false;
+	}
+}
+
 
 class PlasmaStream extends Raking{
 	public $name = "plasmaStream";
@@ -102,7 +121,7 @@ class ShockCannon extends Weapon{
 
         //ignore armor; advanced armor halves effect (due to this weapon being Electromagnetic)
         public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
-			if ($system->advancedArmor){
+			if (WeaponEM::isTargetEMResistant($ship,$system)){
 				$returnArmour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
 				$returnArmour = floor($returnArmour/2);
 				return $returnArmour;
@@ -196,7 +215,7 @@ class BurstBeam extends Weapon{
 	
 	//Burst Beams ignore armor; advanced armor halves effect (due to weapon being Electromagnetic)
 	public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
-		if ($system->advancedArmor){
+		if (WeaponEM::isTargetEMResistant($ship,$system)){
 			$returnArmour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
 			$returnArmour = floor($returnArmour/2);
 			return $returnArmour;
@@ -239,7 +258,7 @@ class BurstBeam extends Weapon{
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		$crit = null;
 		
-		if (!$system->advancedArmor){ //no effect at all vs Advanced Armor
+		if (!WeaponEM::isTargetEMResistant($ship,$system)){ //no effect at all vs Advanced Armor
 			if ($system instanceof Fighter && !($ship->superheavy)){
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
@@ -319,7 +338,6 @@ class BurstPulseCannon extends Pulse {
 		      $this->data["Special"] .= "<br>Does not affect units protected by Advanced Armor.";  	
 	}
 	
-
 	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){ //if target is protected by EM shield, that shield is hit automatically
 		if($target instanceof FighterFlight){ //for fighters - regular effect
 			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
@@ -353,7 +371,7 @@ class BurstPulseCannon extends Pulse {
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		$crit = null;			
 		
-		if (!$system->advancedArmor){ //no effect at all vs Advanced Armor
+		if (!WeaponEM::isTargetEMResistant($ship,$system)){ //no effect at all vs Advanced Armor
 			if ($system instanceof Fighter && !($ship->superheavy)){
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
@@ -436,7 +454,7 @@ class MediumBurstBeam extends BurstBeam{
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		$crit = null;	
 
-		if ($system->advancedArmor){ //no actual effect on AA-protected ship! - damage itself is already dealt (if any)
+		if (WeaponEM::isTargetEMResistant($ship,$system)){ //no actual effect on AA-protected ship! - damage itself is already dealt (if any)
 		    return;
 	    }		
 
@@ -518,7 +536,7 @@ class HeavyBurstBeam extends BurstBeam{
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		$crit = null;	
 
-		if ($system->advancedArmor){ //no actual effect on AA-protected ship! - damage itself is already dealt (if any)
+		if (WeaponEM::isTargetEMResistant($ship,$system)){ //no actual effect on AA-protected ship! - damage itself is already dealt (if any)
 		    return;
 	    }		
 
@@ -612,7 +630,7 @@ class ElectroPulseGun extends Weapon{
 		// a ReducedDamage crit, roll a d6 and substract 2 for each
 		// ReducedDamage crit. If the result is less than 1, the hit
 		// has no effect on the fighter.
-		if (!$system->advancedArmor){
+		if (!WeaponEM::isTargetEMResistant($ship,$system)){
 			$crit = null;
 			$affect = Dice::d(6);
 
@@ -683,7 +701,7 @@ class StunBeam extends Weapon{
 		
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		$crit = null;
-		if ($system->advancedArmor) return;
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return;
 		if ($system instanceof Fighter && !($ship->superheavy)){
 			$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 			$crit->updated = true;
@@ -754,7 +772,7 @@ class CommDisruptor extends Weapon{
         }
 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
-		if ($system->advancedArmor) return; //no effect on Advanced Armor
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
 		
 		$effectIni = Dice::d(6,1);//strength of effect: 1d6
 		$effectSensors = Dice::d(6,1);//strength of effect: 1d6
@@ -845,7 +863,7 @@ class CommJammer extends Weapon{
         }
 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
-		if ($system->advancedArmor) return; //no effect on Advanced Armor
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
 		
 		$effectIni = Dice::d(6,1);//strength of effect: 1d6
 		$effectIni5 = $effectIni * 5;
@@ -937,7 +955,7 @@ class SensorSpear extends Weapon{
         }
 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
-		if ($system->advancedArmor) return; //no effect on Advanced Armor
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
 
 		$effectSensors = Dice::d(3,1);//strength of effect: 1d3
 		$fireOrder->pubnotes .= "<br> Sensors reduced by $effectSensors.";
@@ -987,7 +1005,7 @@ class SensorSpike extends SensorSpear{
     
 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
-		if ($system->advancedArmor) return; //no effect on Advanced Armor
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
 
 		$effectSensors = Dice::d(6,1);//strength of effect: 1d6
 		$fireOrder->pubnotes .= "<br> Sensors reduced by $effectSensors.";
@@ -1056,7 +1074,7 @@ class EmBolter extends Weapon{
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 		
-		if ($system->advancedArmor) return; //no effect on Advanced Armor
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no special effect on Advanced Armor
 		if ($this->alreadyResolved) return; //effect already applied this turn
 		
 		$this->alreadyResolved = true;
@@ -1067,9 +1085,9 @@ class EmBolter extends Weapon{
 	} //endof function onDamagedSystem
 	
 	
-        public function fire($gamedata, $fireOrder){
-            // If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
-            parent::fire($gamedata, $fireOrder);
+	public function fire($gamedata, $fireOrder){
+		// If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
+		parent::fire($gamedata, $fireOrder);
 		for($i = 1; $i<=$this->cooldown;$i++){		
 			$trgtTurn = $gamedata->turn+$i-1;//start on current turn rather than next!
 			$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
@@ -1077,7 +1095,7 @@ class EmBolter extends Weapon{
 			$crit->newCrit = true; //force save even if crit is not for current turn
 			$this->criticals[] =  $crit;
 		}	
-        } //endof function fire
+	} //endof function fire
 	
 	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
@@ -1354,7 +1372,7 @@ class SparkField extends Weapon implements DefensiveSystem{
 	
 	// ignore armor; advanced armor halves effect (due to weapon being Electromagnetic)
 	public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
-		if ($system->advancedArmor){
+		if (WeaponEM::isTargetEMResistant($ship,$system)){
 			$returnArmour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
 			$returnArmour = floor($returnArmour/2);
 			return $returnArmour;
@@ -1473,10 +1491,11 @@ class SurgeCannon extends Raking{
 		      $this->data["Special"] .= "<br>+2 per rake to critical/dropout rolls on system(s) hit this turn.";  //original rule is more fancy
 	    }	
 	
+	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 		//each rake causes +2 mod on critical roll for hit system! 
-		if ($system->advancedArmor) return; //no effect on Advanced Armor
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
 		$system->critRollMod+=2; 
 	} //endof function onDamagedSystem
 	
@@ -1663,7 +1682,7 @@ class SurgeLaser extends Raking{
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 		//each rake causes +2 mod on critical roll for hit system! 
-		if ($system->advancedArmor) return; //no effect on Advanced Armor
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
 		$system->critRollMod+=2; 
 	} //endof function onDamagedSystem
 	
@@ -1764,7 +1783,7 @@ class LtSurgeBlaster extends LinkedWeapon{
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 		//each hit causes +1 mod on critical roll for hit system! 
-		if ($system->advancedArmor) return; //no effect on Advanced Armor
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
 		$system->critRollMod+=1; 
 	} //endof function onDamagedSystem
 	
@@ -1817,7 +1836,7 @@ class EmPulsar extends Pulse{
 	 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
-		if ($system->advancedArmor) return; //no effect on Advanced Armor
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
 		
 		//+1 to crit roll, +2 to dropout roll
 		$mod = 1;
@@ -1908,7 +1927,7 @@ class ResonanceGenerator extends Weapon{
 	
 	//ignore armor; advanced armor halves effect (due to this weapon being Electromagnetic)
 	public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
-		if ($system->advancedArmor){
+		if (WeaponEM::isTargetEMResistant($ship,$system)){
 			$returnArmour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
 			$returnArmour = floor($returnArmour/2);
 			return $returnArmour;
@@ -1980,10 +1999,8 @@ class SurgeBlaster extends Weapon{
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
-		if ($system->advancedArmor) return; //no effect on Advanced Armor
-
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
 		$system->critRollMod+=4; //+4 to all critical/dropout rolls on system hit this turn
-
 	} //endof function onDamagedSystem
 	
 	
@@ -2271,7 +2288,7 @@ class RadCannon extends Weapon{
 		parent::setSystemDataWindow($turn);  
 		$this->data["Special"] = "Doesn't actually deal damage except as noted below. Automatically hits shields if interposed.";      
 		$this->data["Special"] .= "<br>Effect depends on system hit:";    
-		$this->data["Special"] .= "<br> - Structure: 10 boxes marked destroyed (regardless of armor."; 
+		$this->data["Special"] .= "<br> - Structure: 10 boxes marked destroyed (regardless of armor)."; 
 		$this->data["Special"] .= "<br> - Shield: system destroyed."; 
 		$this->data["Special"] .= "<br>  -- Gravitic Shield reduces generator output by 1, too."; 
 		$this->data["Special"] .= "<br> - Weapon, Thruster or Jump Engine: system destroyed."; 
@@ -2509,6 +2526,8 @@ class IonFieldGenerator extends Weapon{
 	
 	/*actual applying of effect*/ 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		//not affecting units protected by Advanced Armor!
+		if(WeaponEM::isTargetEMResistant($ship,$system)) return;
 		//$shooter = $gamedata->getShipById($fireOrder->shooterid);
 		//$shooterID = $shooter->id;
 		if ($system instanceOf Weapon) {//weapon "hit" is forced to shut down for a turn - on top of regular mandatory effects

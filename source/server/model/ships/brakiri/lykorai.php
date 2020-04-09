@@ -13,7 +13,10 @@ class Lykorai extends BaseShip{
         $this->fighters = array("light"=>12, "normal"=>48);
         $this->occurence = "unique"; 
         $this->variantOf = "Corumai Dreadnought";
-	$this->isd = 2237;
+		
+        
+		$this->notes = 'Ly-Nakir Industries';//Corporation producing the design
+		$this->isd = 2237;
         
         $this->forwardDefense = 18;
         $this->sideDefense = 20;
@@ -36,29 +39,29 @@ class Lykorai extends BaseShip{
    
         $this->addFrontSystem(new GraviticBolt(3, 5, 2, 240, 60));
         $this->addFrontSystem(new GraviticBolt(3, 5, 2, 240, 60));
+        $this->addFrontSystem(new GraviticBolt(3, 5, 2, 300, 120));
+        $this->addFrontSystem(new GraviticBolt(3, 5, 2, 300, 120));
         $this->addFrontSystem(new Hangar(5, 12));
-        $this->addFrontSystem(new GraviticBolt(3, 5, 2, 300, 120));
-        $this->addFrontSystem(new GraviticBolt(3, 5, 2, 300, 120));
         $this->addFrontSystem(new GraviticThruster(5, 15, 0, 4, 1));
         $this->addFrontSystem(new GraviticThruster(5, 15, 0, 4, 1));
 
         $this->addAftSystem(new GraviticBolt(3, 5, 2, 180, 0));
-        $this->addAftSystem(new GraviticThruster(5, 10, 0, 4, 2));
-        $this->addAftSystem(new GraviticThruster(5, 10, 0, 4, 2));
         $this->addAftSystem(new GraviticBolt(3, 5, 2, 90, 270));
-        $this->addAftSystem(new GraviticThruster(5, 10, 0, 4, 2));
-        $this->addAftSystem(new GraviticThruster(5, 10, 0, 4, 2));
         $this->addAftSystem(new GraviticBolt(3, 5, 2, 0, 180));
+        $this->addAftSystem(new GraviticThruster(5, 10, 0, 4, 2));
+        $this->addAftSystem(new GraviticThruster(5, 10, 0, 4, 2));
+        $this->addAftSystem(new GraviticThruster(5, 10, 0, 4, 2));
+        $this->addAftSystem(new GraviticThruster(5, 10, 0, 4, 2));
 
-        $this->addLeftSystem(new GraviticBolt(3, 5, 2, 180, 0));
-        $this->addLeftSystem(new GraviticBolt(3, 5, 2, 180, 0));
-        $this->addLeftSystem(new GraviticThruster(5, 20, 0, 6, 3));
         $this->addLeftSystem(new Hangar(5, 24));
+        $this->addLeftSystem(new GraviticThruster(5, 20, 0, 6, 3));
+        $this->addLeftSystem(new GraviticBolt(3, 5, 2, 180, 0));
+        $this->addLeftSystem(new GraviticBolt(3, 5, 2, 180, 0));
 
-        $this->addRightSystem(new GraviticBolt(3, 5, 2, 0, 180));
-        $this->addRightSystem(new GraviticBolt(3, 5, 2, 0, 180));
-        $this->addRightSystem(new GraviticThruster(5, 20, 0, 6, 4));
         $this->addRightSystem(new Hangar(5, 24));
+        $this->addRightSystem(new GraviticThruster(5, 20, 0, 6, 4));
+        $this->addRightSystem(new GraviticBolt(3, 5, 2, 0, 180));
+        $this->addRightSystem(new GraviticBolt(3, 5, 2, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(5, 54));

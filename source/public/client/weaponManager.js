@@ -27,20 +27,21 @@ window.weaponManager = {
         if (weaponManager.hasFiringOrder(ship, system)) return;
 
         if (gamedata.isMyShip(ship)) {
-            weaponManager.unSelectWeapon(ship, system);
+            //weaponManager.unSelectWeapon(ship, system); //do NOT do so - that would be much better for next mode change!
 
+			/* no dual weapons around any more!
             if (system.dualWeapon) {
-
                 console.log("changing dual weapon?")
                 var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
                 parentSystem.changeFiringMode();
                 shipWindowManager.setDataForSystem(ship, parentSystem);
-            } else {
+            } else */{
                 system.changeFiringMode();
                 shipWindowManager.setDataForSystem(ship, system);
             }
             
             webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+			
         }
     },
 
@@ -152,7 +153,6 @@ window.weaponManager = {
     },
 
     unSelectWeapon: function unSelectWeapon(ship, weapon) {
-
         for (var i = gamedata.selectedSystems.length - 1; i >= 0; i--) {
             if (gamedata.selectedSystems[i] == weapon) {
                 gamedata.selectedSystems.splice(i, 1);
@@ -298,6 +298,8 @@ window.weaponManager = {
         }
         
         array = systems.filter(function(weapon) {return weapon.displayName === system.displayName});
+		
+		var currentWasSelected = weaponManager.isSelectedWeapon(system); //all others affected weapons will have state set the same as current! 
 
 		for (var i = 0; i < array.length; i++) {
 			var system = array[i];
@@ -312,24 +314,19 @@ window.weaponManager = {
 				continue;
 			}
 
+
 			if (system.weapon) {
-
-				if (gamedata.gamephase != 3 && !system.ballistic) return;
-
-				if (gamedata.gamephase != 1 && system.ballistic) return;
-
-				if (weaponManager.isSelectedWeapon(system)) {
-					weaponManager.unSelectWeapon(ship, system);
-				} else {
-					weaponManager.selectWeapon(ship, system);
+				if (gamedata.gamephase != 3 && !system.ballistic) continue; //improper at this moment
+				if (gamedata.gamephase != 1 && system.ballistic) continue;	//improper at this moment
+				if (weaponManager.hasFiringOrder(ship, system)) continue;//already declared, do not touch it!
+				
+				if (currentWasSelected){//unselect
+					if (weaponManager.isSelectedWeapon(system)) weaponManager.unSelectWeapon(ship, system);
+				} else {//select
+					if (!weaponManager.isSelectedWeapon(system)) weaponManager.selectWeapon(ship, system);
 				}
 			}
 
-			/*
-			if (gamedata.isEnemy(ship, selectedShip) && gamedata.gamephase == 3 && gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system)) {
-				weaponManager.targetShip(ship, system);
-			}
-			*/
 		}
     },
 
@@ -415,17 +412,33 @@ window.weaponManager = {
         var sectionEligible = false; //section that system is mounted on is eligible for caled shots
         if (!shooter) return false;
 
-        if (target.flight) return true; //experiment - allow called shots at fighters?...
+        if (target.flight) return true; //allow called shots at fighters (in effect it will affect particular fighter, not fighter system)
 
         var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target, shooter);
         var targetFacing = shipManager.getShipHeadingAngle(target);
 
         for (var i = 0; i < target.outerSections.length; i++) {
             var currSectionData = target.outerSections[i];
+			var arcFrom = 0;
+			var arcTo = 0;
             if (system.location == currSectionData.loc) {
+				
+				if (shipManager.movement.isRolled(target)) {
+					arcTo = mathlib.addToDirection(currSectionData.min, currSectionData.min * -2);
+					arcFrom = mathlib.addToDirection(currSectionData.max, currSectionData.max * -2);
+				} else { //ship NOT rolled
+					arcFrom = currSectionData.min;
+					arcTo = currSectionData.max;
+				}
+                if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(arcFrom, targetFacing), mathlib.addToDirection(arcTo, targetFacing))) {
+                    if (currSectionData.call == true) return true;
+                }
+
+				/*old version - not taking Rolled state into account
                 if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(currSectionData.min, targetFacing), mathlib.addToDirection(currSectionData.max, targetFacing))) {
                     if (currSectionData.call == true) return true;
                 }
+				*/
                 sectionEligible = currSectionData.call;
             }
             //"loc" => $curr['loc'], "min" => $curr['min'], "max" => $curr['max'], "call" => $call
@@ -905,8 +918,8 @@ window.weaponManager = {
     canSelfIntercept: function canSelfIntercept(ship) {
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
-
-            if (weaponManager.isLoaded(weapon) && weapon.intercept >= 1 && weapon.loadingtime > 1) {
+		var loadingTimeActual = Math.max(weapon.loadingtime,weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging 
+            if (weaponManager.isLoaded(weapon) && weapon.intercept >= 1 && loadingTimeActual > 1) {
                 return true;
             }
         }
@@ -923,8 +936,9 @@ window.weaponManager = {
             if (weaponManager.hasFiringOrder(ship, weapon)) {
                 weaponManager.removeFiringOrder(ship, weapon);
             }
-
-            if (weaponManager.isLoaded(weapon) && weapon.intercept >= 1 && weapon.loadingtime > 1) {
+		
+		var loadingTimeActual = Math.max(weapon.loadingtime,weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging
+            if (weaponManager.isLoaded(weapon) && weapon.intercept >= 1 && loadingTimeActual > 1) {
                 valid.push(weapon);
             } else invalid.push(weapon);
         }
@@ -949,7 +963,8 @@ window.weaponManager = {
     canSelfInterceptSingle: function checkSelfIntercept(ship, weapon) {
 	if (gamedata.gamephase != 3 ) return false;//declaration in firing phase only
 	if (!weapon.weapon) return false;//only weapons can intercept ;)
-	if ( (weapon.intercept < 1) || (weapon.loadingtime <= 1) ) return false;//cannot intercept or quick to recharge anyway and will be auto-assigned
+		var loadingTimeActual = Math.max(weapon.loadingtime,weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging
+	if ( (weapon.intercept < 1) || (loadingTimeActual <= 1) ) return false;//cannot intercept or quick to recharge anyway and will be auto-assigned
 	if (weapon.ballistic) return false;//no interception using ballistic weapons    
 	if (weaponManager.hasFiringOrder(ship, weapon)) return false;//already declared
 	if (!weaponManager.isLoaded(weapon)) return false;//not ready to fire
@@ -1422,7 +1437,7 @@ window.weaponManager = {
                         damage: damage.damage,
                         damageclass: damage.damageclass,
                         destroyed: damage.destroyed,
-                        system: shipManager.systems.getSystem(target, damage.systemid)
+                        system: shipManager.systems.getSystem( gamedata.getShip(damage.shipid), damage.systemid)
                     };
                 }),
                 intercepts: weaponManager.getInterceptingFiringOrders(fireOrder.id).map(function (intercept) {

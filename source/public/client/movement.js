@@ -690,6 +690,14 @@ shipManager.movement = {
         var facing = shipManager.movement.getLastCommitedMove(ship).facing;        
         var reverseheading = mathlib.addToHexFacing(heading, 3);
         
+		//is turning affordable in the first place?
+		var speed = shipManager.movement.getSpeed(ship);
+        var turncost = Math.ceil(speed * ship.turncost);		
+        turncost = Math.max(1,turncost);//turn cost may never be less than 1!
+        if (shipManager.movement.getRemainingEngineThrust(ship) < turncost) {
+            return false;
+        }
+		
         var step = right ? -1 : 1;
         //if (mathlib.addToHexFacing(step, facing) === heading || mathlib.addToHexFacing(step, facing) === reverseheading) returnVal = true;
         if (mathlib.addToHexFacing(step, facing) === heading || mathlib.addToHexFacing(step, facing) === reverseheading) return true;

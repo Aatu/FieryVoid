@@ -13,6 +13,7 @@ class zzunoffTashkaton extends BaseShip{
 
         $this->limited = 33;
 	      //$this->occurence = "rare";
+		$this->notes = 'Im-Rehsa Technologies';//Corporation producing the design
 	      $this->isd = 2252;
 	      $this->unofficial = true;
         
@@ -39,14 +40,14 @@ class zzunoffTashkaton extends BaseShip{
    
 
 	$this->addFrontSystem(new GraviticShield(0, 6, 0, 3, 240, 0));
-        $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 240, 60));
-        $this->addFrontSystem(new GravitonBeam(4, 8, 8, 300, 60));
+	$this->addFrontSystem(new GravitonPulsar(3, 5, 2, 240, 60));
+	$this->addFrontSystem(new GravitonBeam(4, 8, 8, 300, 60));
 	$this->addFrontSystem(new GraviticCannon(3, 6, 5, 270, 90));
-        $this->addFrontSystem(new GravitonBeam(4, 8, 8, 300, 60));
-        $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 300, 120));
+	$this->addFrontSystem(new GravitonBeam(4, 8, 8, 300, 60));
+	$this->addFrontSystem(new GravitonPulsar(3, 5, 2, 300, 120));
 	$this->addFrontSystem(new GraviticShield(0, 6, 0, 3, 0, 120));
-        $this->addFrontSystem(new GraviticThruster(5, 10, 0, 6, 1));
-        $this->addFrontSystem(new GraviticThruster(5, 10, 0, 6, 1));
+	$this->addFrontSystem(new GraviticThruster(5, 10, 0, 6, 1));
+	$this->addFrontSystem(new GraviticThruster(5, 10, 0, 6, 1));
    
 	$this->addAftSystem(new GraviticShield(0, 6, 0, 3, 180, 240));
         $this->addAftSystem(new GravitonPulsar(3, 5, 2, 120, 300));
@@ -57,13 +58,13 @@ class zzunoffTashkaton extends BaseShip{
         $this->addAftSystem(new GraviticThruster(5, 15, 0, 8, 2));
 
 
+        $this->addLeftSystem(new GraviticThruster(5, 13, 0, 8, 3));
 	$this->addLeftSystem(new GraviticCannon(3, 6, 5, 240, 0));
         $this->addLeftSystem(new GravitonBeam(4, 8, 8, 300, 0));
-        $this->addLeftSystem(new GraviticThruster(5, 13, 0, 8, 3));
         
+        $this->addRightSystem(new GraviticThruster(5, 13, 0, 8, 4));
         $this->addRightSystem(new GraviticCannon(3, 6, 5, 0, 120));
 	$this->addRightSystem(new GravitonBeam(4, 8, 8, 0, 60));
-        $this->addRightSystem(new GraviticThruster(5, 13, 0, 8, 4));
 
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

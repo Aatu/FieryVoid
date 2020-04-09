@@ -16,7 +16,8 @@ class FtrAnemone extends FighterFlight{
         $this->unofficial = true;
         
         $this->notes = 'EM hardened';	  
-        $this->notes .= '<br>-2 critical roll bonus'; //Anemone should have -1, and additional -1 replaces bonus vs EM weapons for all Ipsha
+		//no need to make a note, this is commented in standard now
+        //$this->notes .= '<br>-2 critical roll bonus'; //Anemone should have -1, and additional -1 replaces bonus vs EM weapons for all Ipsha
         $this->EMHardened = true; //EM Hardening - some weapons would check for this value!
         $this->critRollMod = -2; //generalbonus to critical/dropout rolls!
         
@@ -49,6 +50,10 @@ class FtrAnemone extends FighterFlight{
             $fighter->iconPath = "img/ships/IpshaBorgUrchin_large.png";
             $frontGun = new LtSurgeBlaster(330, 30, 1); //1 gun - dmg bonus not selectable
             $fighter->addFrontSystem($frontGun);
+			
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+			
+			
             $this->addSystem($fighter);
        }
     }

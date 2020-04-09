@@ -88,22 +88,24 @@ class Enhancements{
 		  }		  
 	  }	  
 	  
-	  //Improved Sensors : +1 Sensors, cost: new rating *5, limit: 1
+	  //Improved Sensors : +1 Sensors, cost: new rating *5 (double for ElInt), limit: 1
 	  $enhID = 'IMPR_SENS';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Improved Sensor Array';
 		  $enhLimit = 1;	  
 		  //find strongest sensors... which don't need to be called Sensors!
 		  $strongestValue = -1;	  
+		  $multiplier = 1;
 		  foreach ($ship->systems as $system){
 			if ($system instanceof Scanner){
 				if($system->output > $strongestValue) {
 					$strongestValue = $system->output;
+					if ($system instanceof ElintScanner) $multiplier = 2;
 				}
 			}
 		  }  
 		  if($strongestValue > 0){ //Sensors actually exist to be enhanced!
-			  $enhPrice = max(1,($strongestValue+1)*5);	  
+			  $enhPrice = max(1,($strongestValue+1)*5) * $multiplier;	  
 			  $enhPriceStep = 0;
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
@@ -145,6 +147,20 @@ class Enhancements{
 	/* all fighter enhancement options - availability and cost calculation
 	*/
   public static function setEnhancementOptionsFighter($flight){
+	  //Elite Pilot: StarWars only, sets pivot cost to 1, cost: 20% craft price (round up), limit: 1
+	  $enhID = 'ELITE_SW';	  
+	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Elite Pilot';
+		  $enhLimit = 1;		  
+		  if($flight instanceof SuperHeavyFighter){//single-craft flight! 
+			$enhPrice = ceil($flight->pointCost/5);
+		  }else{
+		  	$enhPrice = ceil($flight->pointCost/(5*6)); //price per craft, while flight price is per 6-craft flight	  
+		  }  
+		  $enhPriceStep = 0;
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+	  }  	  
+	  
 		//Expert Motivator: -2 dropout modifier, cost: 10% craft price (round up), limit: 1
 	  $enhID = 'EXP_MOTIV';	  
 	  if(!in_array($enhID, $flight->enhancementOptionsDisabled)){ //option needs to be specifically enabled
@@ -241,6 +257,9 @@ class Enhancements{
 				$flight->enhancementTooltip .= "$enhDescription";
 				if ($enhCount>1) $ship->enhancementTooltip .= " (x$enhCount)";
 				switch ($enhID) { 
+					case 'ELITE_SW': //Elite Pilot (SW): pivot cost 1
+						$flight->pivotcost = 1;
+						break;
 					case 'EXP_MOTIV': //Expert Motivator: -2 on dropout rolls
 						$flight->critRollMod -= $enhCount*2;
 						break;
@@ -467,7 +486,13 @@ class Enhancements{
 				$enhCount = $entry[2];
 				$enhDescription = $entry[1];
 				if($enhCount > 0) {
-					switch ($enhID) {							
+					switch ($enhID) {									
+						case 'ELITE_SW': //Elite Pilot: modify pivot cost
+							if($ship instanceof FighterFlight){
+								$strippedShip->pivotcost = $ship->pivotcost;
+							}
+							break;
+							
 						case 'EXP_MOTIV': //Expert Motivator: modify dropout modifier
 							/* actually irrelevant for front end
 							if($ship instanceof FighterFlight){

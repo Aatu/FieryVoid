@@ -89,3 +89,10 @@ var HvyBlastCannon = function HvyBlastCannon(json, ship) {
 };
 HvyBlastCannon.prototype = Object.create(Pulse.prototype);
 HvyBlastCannon.prototype.constructor = HvyBlastCannon;
+
+
+var PulseAccelerator = function PulseAccelerator(json, ship) {
+    Pulse.call(this, json, ship);
+};
+PulseAccelerator.prototype = Object.create(Pulse.prototype);
+PulseAccelerator.prototype.constructor = PulseAccelerator;

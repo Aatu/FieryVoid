@@ -13,6 +13,9 @@ class Kaliva extends BaseShip{
         $this->occurence = "rare";
 	    $this->variantOf = "Avioki Heavy Cruiser";
         
+		$this->notes = 'Ak-Habil Conglomerate';//Corporation producing the design
+		$this->isd = 2260;
+        
         $this->forwardDefense = 14;
         $this->sideDefense = 18;
         

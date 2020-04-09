@@ -12,6 +12,7 @@ class Essusu extends MediumShip{
         $this->shipClass = "Essusu Patrol Boat";
         $this->agile = true;
         $this->canvasSize = 100;
+		$this->isd = 2228;
         
         $this->forwardDefense = 11;
         $this->sideDefense = 12;

@@ -12,6 +12,9 @@ class Drikorta extends HeavyCombatVesselLeftRight{
         $this->occurence = "uncommon";
         $this->variantOf = "Ikorta Light Assault Cruiser";
         
+		$this->notes = 'Pri-Wakat Concepts & Solutions';//Corporation producing the design
+		$this->isd = 2230;
+		
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
         

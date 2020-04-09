@@ -12,6 +12,9 @@ class RakartaLaser extends MediumShip{
 		$this->canvasSize = 100;
 		$this->variantOf = "Rakarta Frigate";
 
+		$this->notes = 'Ly-Nakir Industries';//Corporation producing the design
+		$this->isd = 2206;
+        
 		$this->forwardDefense = 11;
 		$this->sideDefense = 13;
 

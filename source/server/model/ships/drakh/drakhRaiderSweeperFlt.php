@@ -54,6 +54,8 @@ class DrakhRaiderSweeperFlt extends FighterFlight{
 			//Improved Sensors
             $fighter->addAftSystem(new Fighterimprsensors(0, 1, 0));
 			
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+            
         	$this->addSystem($fighter);
        }
     }

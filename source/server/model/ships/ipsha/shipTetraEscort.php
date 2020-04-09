@@ -25,8 +25,7 @@ class ShipTetraEscort extends MediumShipLeftRight{
 	$this->isd = 2235;
 	    
 	$this->notes = 'Eethan Barony only!';
-	$this->notes .= '<br>EM hardened';	  
-	$this->notes .= '<br>-1 critical roll bonus';
+	$this->notes .= '<br>EM hardened';	 
 	$this->EMHardened = true; //EM Hardening - some weapons would check for this value!
 	$this->critRollMod = -1; //generalbonus to critical rolls!
 		

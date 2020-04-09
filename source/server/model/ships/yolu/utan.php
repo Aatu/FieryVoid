@@ -38,6 +38,7 @@ class Utan extends FighterFlight{
 
             $fighter->addFrontSystem(new LightFusionCannon(330, 30, 4, 2));
             $fighter->addFrontSystem(new LightMolecularDisruptor(330, 30, 0));
+		
 
             $this->addSystem($fighter);
 

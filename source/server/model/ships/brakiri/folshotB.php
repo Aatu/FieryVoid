@@ -9,6 +9,9 @@ class FolshotB extends FighterFlight{
         $this->phpclass = "FolshotB";
         $this->shipClass = "Folshot B Light Fighters";
 	$this->imagePath = "img/ships/falkosi.png";
+	$this->isd = 2195;
+        
+		$this->notes = 'Ly-Nakir Industries';//Corporation producing the design
         
         $this->forwardDefense = 6;
         $this->sideDefense = 7;
@@ -39,6 +42,8 @@ class FolshotB extends FighterFlight{
 
             $fighter->addFrontSystem(new UltraLightGraviticBolt(330, 30, 0));
 
+			//$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+			
 
             $this->addSystem($fighter);
 

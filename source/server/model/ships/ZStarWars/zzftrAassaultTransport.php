@@ -4,7 +4,7 @@ class zzftrAassaultTransport extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 52*6;
+        $this->pointCost = 47*6;
         $this->faction = "ZStarWars";
         $this->phpclass = "zzftrAassaultTransport";
         $this->shipClass = "ATR-6 Assault Transports";
@@ -20,7 +20,7 @@ class zzftrAassaultTransport extends FighterFlight{
         $this->freethrust = 8;
         $this->offensivebonus = 3;
         $this->jinkinglimit = 0;
-        $this->pivotcost = 2; //shuttles have pivot cost higher
+        $this->pivotcost = 3; //shuttles have pivot cost higher
         $this->turncost = 0.33;
         
     	$this->iniativebonus = 9 *5; 
@@ -55,6 +55,7 @@ class zzftrAassaultTransport extends FighterFlight{
             $fighter->addAftSystem(new SWRayShield(0, 1, 0, 2, 0, 360));
             
             
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
             
             $this->addSystem($fighter);
        }

@@ -1,0 +1,69 @@
+FIERY VOID
+This is browser game intended to be as close as possible to Babylon 5 Wars tabletop game, by Agents of Gaming (bowing heads to You, AoG!). 
+Therefore, there is no game manual for FV itself - as all rules are readily available under the name Advent of Galactic Wars, available at B5Wars Vault (see Links section!). If You know these rules, You should essentially be able to play Fiery Void (after coming to grips with the interface :) ).
+For new players - the game is quite large (as manual size can attest), but don't worry. A lot of that size is just a list of available weapons and other ship systems for the game, and in FV computer handles mechanical side of things - You can start with only the basics and go deeper step by step, at Your speed. If You don't know the game, I suggest simply asking for a tutorial from more experienced players - if You post such request on Facebook group I'm sure You'll find a volunteer to explains basics to You. 
+If You have any doubts, ask there as well.
+
+
+Below is list of differences from B5Wars mechanics and known bugs that aren't expected to be fixed soon.
+
+
+USEFUL TRIVIA
+ - W - show EW in graphical form
+ - If You have ship that shouldn't be there any longer (jumped out, left map...) or just crippled and useless, You may simply get rid of it so it doesn't bog down Your game. In Initial phase You may set its Reactor to overload - it will explode in firing resolution phase!
+ - r-click on weapon - select all similar weapons on this unit (eg. to fire all guns in fighter flight, or all Twin Arrays on a Centauri cruiser...)
+ - r-click on power button - power on/off on all similar weapons on this ship
+ - r-click mode change - change firing mode on all similar UNDECLARED weapons
+ - r-click on defensive fire - enable defensive fire on all similar UNDECLARED weapons
+
+
+GAMEPLAY GENERAL IDEAS
+ - As much as possible was automated. This means that player has somewhat less control over things he does, but things are way streamlined for computer game. This is especially visible in firing (You'll see in details).
+ - There is no separate Power and EW phase. They're combined into a single Init phase, which happens after Initiative roll.
+ - Deployment: player may deploy anywhere in pre-designated DZ, with any direction  of movement and speed between 3 and 7. WARNING: game will crash if deployment zones overlap, remember that when manually changing DZ!
+ - Fixed map: the game allows displaying the boundaries of a fixed, rectangular map. It does not, however, enforce anything about it. It's up to the player for the ships leaving the map to actually behave as disengaged. 
+ - Game does not enforce fleet design rules. We try to include necessary information into ship window, however, so player may do it without using outside source.
+ - Fleet design rules may be checked automatically using appropriate button at design stage. Note that the check is not perfect, especially faction- or unit-specific rules are not taken into account. Rules were modified to allow scalability, too. 
+ - Game was changed from d20 to d100 (displayed as percentages usually). Most values are now displayed as percentages (1 point on d20 equals 5%).
+ - Rounding is done for d100 now, too, not d20. So -1/3 weapon (-1.65/hex, by FV numbers) at 1 hex range would get 2% penalty (4% with no lock on), instead of B5Wars' 1 and 2 respectively (which would have translated to 5 and 10 %)
+
+
+MOVEMENT
+ - Snap turn: it's implemented as consecutive but still separate turns. Turn delay is taken from first one only (so if You wan to shorten snap turn, shorten its first segment). This means even thrust allocation is checked for each hexside separately, not for combined turn.
+ - Fighters don't get auto-return from pivot.
+ - Sideslips into different directions in one movement phase are allowed.
+ - Turn into pivot does not stop pivoting itself.
+
+
+ELECTRONIC WARFARE
+ - CCEW: affects ALL nearby enemy fighters, at full power.
+ - Most activities requiring multiple EW points can be done with fractions. Eg. Blanket DEW (1 per 4 points allocated): You may allocate , say, 3 points and get 0.75 points of blanked DEW (around 4%).
+ - Disruption EW: ALL target locks are affected equally, by appropriate fraction of power used. Eg. if You use 1 point of DIST and target has 3 locks up, each one of these would be reduced by 0.33 points.
+ - Disruption EW: CCEW is treated as one OEW target and affected appropriately
+ - Disruption EW: target locks weaker than 1 point but worth at least half a point provide half-lock (eg. range penalties multiplied by 1.5 instead of being doubled).
+
+
+FIRING AND WEAPONS
+ - Firing order of weapons: each weapon has initiative number which determines order of firing. Player cannot influence it. It was tried to optimize effectiveness of weapons, but as in B5Wars every player prefers different firing pattern (and also it's influenced by a particular target) - usually it won't be as good as You could achieve manually.
+ - Choosing target section: it's done automatically, based on algorithm that takes into account target section profile and remaining boxes of structure. Weapons from the same ship CAN be split between multiple sections if firing happens on dividing line. 
+ - Choosing target system: it's done randomly out of eligible targets if there are multiple ones. 
+ - Choosing target fighter: there is algorithm that tries to minimize damage done. However, it operates on expected damage instead of actual, and won't take into account most special effects.
+ - You can target individual fighters (just target any of its systems). This will be treated as a called shot.
+ - Fighter dropouts are done together with critical hits (so AFTER firing at ships, not before)
+ - Interception is handled automatically (with algorithm that tries to intercept most powerful shots first). 
+ - Weapons firing every turn are automatically in interception mode if not declared otherwise. 
+ - Slower-firing weapons You need to manually put in that mode if You want them used for interception. 
+ - There is no Ballistics firing subphase. Instead ballistic weapon impact is done in other subphases as appropriate (ship fire, fighters fire at fighters, fighters fire at ships).
+ - Fighters can intercept ballistics fired at ship, but they must start and end their movement in that unit's hex except in turn 1 (where they can't start on the same hex).
+ - Continuous firing mode: You don't get auto-hits or ignoring pierced armor on second turn of shooting. As a compensation, You're free to choose another target. In effect, what You get is a completely independent second shot.
+ - Multi-shot weapons can choose only one target when firing offensively (Twin/Quad Arrays, Heavy Arrays, Ballistic Torpedoes...)
+ - Power and missile launches are simultaneous in FV - so disabling Jammer cannot affect missile launch on current turn. Instead, it will affect missile launch on NEXT turn!
+ - Multi-mode weapons, switched at power on in B5Wars: simplified and can use any mode at will (Interceptor, Guardian Array).
+ - Ramming takes place in ship fire step (even if ramming ship is fighter). So ship fire from guns destroyed in ramming will still happen.
+ - all ramming attacks are resolved separately. So if two units try to ram each other, and they both hit, ramming damage is effectively applied twice!
+
+
+OTHERS
+ - Jump Drive: usually it can't be turned off for power unless seriously damaged, but there are scenarios that allow just that. So the game does not force it and it's up to the player to decide whether or not it's allowed.
+ - Enormous units: some units in game are Enormous. They are recognized as such, but most appropriate rules are NOT implemented. They're essentially capital ships as far as FV is concerned, except where a particular system specifically checks for it.
+This means that different damage dealing from EMine, targeting from Mass Driver or power from Improved Reactor do take Enormous size into account, but general rules (automatic ramming, preventing line of sight...) are NOT implemented.

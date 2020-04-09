@@ -23,7 +23,6 @@ class ShipCarrierCube extends BaseShip{
 	    //$this->limited = 33;
 	    $this->isd = 2230;
 	    $this->notes = 'EM hardened';	  
-	    $this->notes .= '<br>-1 critical roll bonus';
 	    $this->EMHardened = true; //EM Hardening - some weapons would check for this value!
 	    $this->critRollMod = -1; //generalbonus to critical rolls!
 		

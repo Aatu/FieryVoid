@@ -10,6 +10,9 @@ class Antoph extends HeavyCombatVessel{
         $this->imagePath = "img/ships/antoph.png";
         $this->shipClass = "Antoph Light Cruiser";
                 
+		$this->notes = 'Ak-Habil Conglomerate';//Corporation producing the design
+		$this->isd = 2220;
+		
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
         
@@ -18,7 +21,7 @@ class Antoph extends HeavyCombatVessel{
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-        $this->iniativebonus = 30;
+        $this->iniativebonus = 6 *5;
 
         $this->gravitic = true;
 

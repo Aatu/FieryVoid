@@ -11,6 +11,9 @@ class TobrakiAS extends FighterFlight{
         $this->shipClass = "Tobraki Assault Shuttles";
     	$this->imagePath = "img/ships/falkosi.png";
         
+		$this->notes = 'Pri-Wakat Concepts & Solutions';//Corporation producing the design
+		$this->isd = 2198;
+		
         $this->forwardDefense = 7;
         $this->sideDefense = 10;
         $this->freethrust = 7;

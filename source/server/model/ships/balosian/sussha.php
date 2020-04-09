@@ -12,6 +12,7 @@ class Sussha extends MediumShip{
         $this->shipClass = "Sussha frigate";
         $this->agile = true;
         $this->canvasSize = 100;
+		$this->isd = 2221;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

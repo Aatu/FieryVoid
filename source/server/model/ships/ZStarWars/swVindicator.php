@@ -4,7 +4,7 @@ class swVindicator extends BaseShipNoFwd{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 625;
+	$this->pointCost = 600;
 	$this->faction = "ZStarWars";
         $this->phpclass = "swVindicator";
         $this->imagePath = "img/starwars/vindicator.png";
@@ -85,28 +85,28 @@ class swVindicator extends BaseShipNoFwd{
 					20 => "C&C",
         		),
         		2=> array(
-        				6 => "Thruster",
-        				7 => "Ray Shield",
-					11 => "Light Turbolaser",
-		        		13 => "Light Laser",
+        				4 => "Thruster",
+        				5 => "Ray Shield",
+						7 => "Light Turbolaser",
+		        		9 => "Light Laser",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		3=> array(
-        				4 => "Thruster",
-        				5 => "Ray Shield",
-        				9 => "Medium Turbolaser",
- 					11 => "Light Turbolaser",
-					12 => "Light Laser",
+        				2 => "Thruster",
+        				3 => "Ray Shield",
+        				5 => "Medium Turbolaser",
+						7 => "Light Turbolaser",
+						8 => "Light Laser",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		4=> array(
-        				4 => "Thruster",
-        				5 => "Ray Shield",
-        				9 => "Medium Turbolaser",
- 					11 => "Light Turbolaser",
-					12 => "Light Laser",
+        				2 => "Thruster",
+        				3 => "Ray Shield",
+        				5 => "Medium Turbolaser",
+						7 => "Light Turbolaser",
+						8 => "Light Laser",
         				18 => "Structure",
         				20 => "Primary",
         		),

@@ -1261,6 +1261,270 @@ Nonetheless two copies of Particle Projector lines now exist in FV, in customNex
         public function setMaxDamage(){     $this->maxDamage = 10 ;      }
         
     }//End of Light Particle Projector
-    
+	
+	
+	
+class PentagonArray extends Raking{
+	public $name = "PentagonArray";
+	public $displayName = "Pentagon Array";
+	public $iconPath = "PentagonArray.png";
+	public $animation = "laser";
+	public $animationColor = array(255, 250, 230);
+	public $animationWidth = 4;	
+	public $animationWidth2 = 0.2;
+	public $animationExplosionScale = 0.2;
+
+	public $rakes = array();
+	public $priority = 8; //light Raking weapon, effectively
+	public $loadingtime = 1;
+	public $rangePenalty = 1; //-1 per hex
+	public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals
+	public $intercept = 5; //interception of -5
+		
+	public $firingModes = array(1=>'Raking');
+
+	public $damageType = "Raking"; 
+	public $weaponClass = "Particle";
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		if ( $maxhealth == 0 ) $maxhealth = 8;
+		if ( $powerReq == 0 ) $powerReq = 5;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+
+	public function getRakeSize(){
+			$rakesize = array_shift($this->rakes);
+			$rakesize = max(1,$rakesize);//return 1 if no rakes remain
+			return $rakesize;
+	}
+
+	public function getDamage($fireOrder){
+		$this->rakes = array();
+		$damage = 0;
+		$rake = Dice::d(10);
+		$damage+=$rake;
+		$this->rakes[] = $rake;
+		$rake = Dice::d(10);
+		$damage+=$rake;
+		$this->rakes[] = $rake;
+		$rake = Dice::d(10);
+		$damage+=$rake;
+		$this->rakes[] = $rake;
+		$rake = Dice::d(10);
+		$damage+=$rake;
+		$this->rakes[] = $rake;
+		$rake = Dice::d(10);
+		$damage+=$rake;
+		$this->rakes[] = $rake;
+		return $damage;
+	}			
+		
+	public function setMinDamage(){
+		$this->minDamage = 5;
+	}
+
+	public function setMaxDamage(){
+		$this->maxDamage = 50;
+	}
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = "Causes always 5 rakes, each 1d10 strong.";
+		$this->data["Special"] .= "<br>Can sweep multiple fighters, but single rake will not overkill into another fighter."; //simplification, every rake should be assigned separately - but FV wouldn't actually recognize benefit of spreading damage among multiple fighters unless toughness+armor>=10 (eg. Tzymm and larger)
+	}
+
+	//if target is fighter and damage was already dealt (eg. it's overkill):
+	// - account for rake size (single rake cannot overkill)
+	// - account for shields (again - separate fighter is NOT same shield pierced)
+	protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
+    {
+		if ($damageWasDealt && ($target instanceof FighterFlight)) {
+			//account for proper rake size
+			$acceptedDamage = 0;
+			$tryingDamage = 0;
+			for($i=4;$i>=0;$i--){//starting with last possible rake and going backwards 
+				if (isset($this->rakes[$i])){
+					$tryingDamage += $this->rakes[$i];
+					if ($tryingDamage <= $damage){ //damage fits remaining rakes
+						$acceptedDamage = $tryingDamage;
+					} else {//too much!
+						$tryingDamage = 1000; //just in case
+						break; //don't check further rakes, obviously
+					}
+				}
+			}			
+			$damage = $acceptedDamage; //this much damage fits remaining rake sizes! any more was part of rake already allocated to previous fighter
+			//account for target fighter's shields (and similar damage-reducing mechanisms that affect entire shot)
+			$damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
+			$damage = max(0,$damage);
+		}
+		//then standard :)
+		parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location );
+    } //function doDamage
+
+	//this weapon CAN overkill into another fighter in flight!
+	protected function getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location = null){
+		if ($target instanceof FighterFlight){//if target is fighter flight (usually no overkill), overkill into another fighter instead
+			$newTarget = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $location);
+			return $newTarget;
+		}else{ //standard
+			parent::getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location);
+		}
+	}
+
+} //end of class PentagonArray
+	
+	
+	
+	
+class ParticleAccelerator extends Raking{
+		public $name = "ParticleAccelerator";
+        public $displayName = "Particle Accelerator";
+        public $iconPath = "ParticleAccelerator.png";
+        public $animation = "laser";
+        public $animationColor = array(255, 250, 230);
+		public $animationExplosionScale = 0.25;
+		public $animationWidth = 4;
+		public $animationWidth2 = 0.3;
+        
+        public $intercept = 2;
+		public $priority = 8; //light Raking		
+		
+        public $loadingtime = 1;
+		public $normalload = 2;
+		
+        public $rangePenalty = 0.5;
+        public $fireControl = array(2, 4, 4);
+
+        public $damageType = "Raking";
+		public $weaponClass = "Particle";
+		public $firingModes = array( 1 => "Raking");
+
+	 	public function getInterceptRating($turn){
+			if ($this->turnsloaded == 1)
+			{
+				return 2;
+			}
+			else
+			{
+				return 1;
+			}
+		}
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 8;
+			if ( $powerReq == 0 ) $powerReq = 8;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);   
+			$this->data["Special"] = "Can fire accelerated ROF for less damage:";  
+			$this->data["Special"] .= "<br> - 1 turn: 1d10+6, intercept -10"; 
+			$this->data["Special"] .= "<br> - 2 turns: 2d10+14, intercept -5"; 
+		}
+	
+		public function getDamage($fireOrder){
+        	switch($this->turnsloaded){
+            	case 0: 
+            	case 1:
+                	return Dice::d(10)+6;
+			    	break;
+            	case 2:
+            	default:
+                	return Dice::d(10,2)+14;
+			    	break;
+        	}
+		}
+
+		public function setMinDamage(){		$this->minDamage = 16;		}
+		public function setMaxDamage(){		$this->maxDamage = 34;		}
+
+}//end of class Particle Accelerator
+	
+	
+	
+//Torata fighter weapon - with OPTIONAL ability of a powerful antiship shot if armed for two turns.	
+class LightParticleAccelerator extends LinkedWeapon{		
+		public $name = "LightParticleAccelerator";
+		public $displayName = "Light Particle Accelerator";
+		public $iconPath = "LightParticleAccelerator.png";
+		public $animation = "trail";
+		public $trailColor = array(30, 170, 255);
+		public $animationColor = array(255, 250, 230);
+		public $animationExplosionScaleArray = array(1=>0.10, 2=>0.15);
+		public $animationWidthArray = array(1=>2, 2=>3);
+		public $trailLengthArray = array(1=>10, 2=>15);
+        
+		
+        public $loadingtime = 1;
+		public $normalload = 2;
+		
+        public $loadingtimeArray = array(1=>1, 2=>2);
+		public $shots = 2;
+		public $defaultShots = 2;
+		public $intercept = 2;
+		public $firingMode = 1;
+		public $firingModes = array(1 =>'Standard', 2=>'Charged');
+		
+		public $priorityArray = array(1=>3, 2=>6); //standard shot is very light, but charged almost equals Gatling Pulse Cannon (and LPA is twin-linked...)
+	    public $rangePenalty = 2;
+        public $fireControlArray = array(1=>array(0, 0, 0), 2=>array(-4, 0, 2) );
+		
+		public $damageType = "Standard";
+		public $weaponClass = "Particle";  
+
+		function __construct($startArc, $endArc, $nrOfShots = 2){
+			$this->defaultShots = $nrOfShots;
+			$this->shots = $nrOfShots;
+			$this->intercept = $nrOfShots;
+			parent::__construct(0, 1, 0, $startArc, $endArc);
+		}	
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);   
+			$this->data["Special"] = "If not fired for one turn, can fire a charged shot:";  
+			$this->data["Special"] .= "<br> - Standard: 1d6+2"; 
+			$this->data["Special"] .= "<br> - Charged: 2d6+4, with antiship-optimized fire control"; 
+		}
+		
+	
+		public function getDamage($fireOrder){
+        	switch($this->firingMode){ 
+            	case 1:
+                	return Dice::d(6)+2;
+			    			break;
+            	case 2:
+            	   	return Dice::d(6,2)+4;
+			    			break;
+        	}
+		}
+
+		public function setMinDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->minDamage = 3;
+								break;
+						case 2:
+								$this->minDamage = 6;
+								break;
+				}
+				$this->minDamageArray[$this->firingMode] = $this->minDamage;
+		}							
+		
+		public function setMaxDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->maxDamage = 8;
+								break;
+						case 2:
+								$this->maxDamage = 16;
+								break;
+				}
+				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+		}	
+}//end of class Light Particle Accelerator	
+	
+	
 ?>
 

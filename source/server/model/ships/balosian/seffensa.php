@@ -8,9 +8,10 @@ class Seffensa extends BaseShip{
         $this->faction = "Balosian";
         $this->phpclass = "Seffensa";
         $this->imagePath = "img/ships/seffensa.png";
-        $this->shipClass = "Seffensa";
+        $this->shipClass = "Seffensa Attack Cruiser";
         $this->shipSizeClass = 3;
         $this->limited = 33;
+		$this->isd = 2223;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 17;

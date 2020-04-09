@@ -14,6 +14,9 @@ class Torsha extends BaseShip{
         $this->occurence = "rare";
         $this->variantOf = "Devaskar Carrier";
         
+		$this->notes = 'Ly-Nakir Industries';//Corporation producing the design
+		$this->isd = 2251;
+        
         $this->forwardDefense = 16;
         $this->sideDefense = 16;
         

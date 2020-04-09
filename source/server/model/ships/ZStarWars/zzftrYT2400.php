@@ -3,7 +3,7 @@ class zzftrYT2400 extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 75*6;
+        $this->pointCost = 71*6;
         $this->faction = "ZStarWars";
         $this->phpclass = "zzftrYT2400";
         $this->shipClass = "YT-2400 Light Freighters";
@@ -11,7 +11,7 @@ class zzftrYT2400 extends FighterFlight{
         
 		$this->isd = "late Galactic Republic";
 		$this->notes = "Primary users: common (civilian).";
-		$this->notes .= "Hyperdrive";
+		$this->notes .= "<br>Hyperdrive";
 	    
         $this->unofficial = true;
         
@@ -21,6 +21,9 @@ class zzftrYT2400 extends FighterFlight{
         $this->offensivebonus = 4;
         $this->jinkinglimit = 4;
         $this->turncost = 0.33;
+        
+        $this->pivotcost = 2; //SW fighters have higher pivot cost - only elite pilots perform such maneuvers on screen!
+		$this->enhancementOptionsEnabled[] = 'ELITE_SW'; //this flight can have Elite Pilot (SW) enhancement option	
         
         
 		$this->unitSize = 3; //number of craft in squadron
@@ -57,6 +60,7 @@ class zzftrYT2400 extends FighterFlight{
 			//Ray Shield, 1 points
 			$fighter->addAftSystem(new SWRayShield(0, 1, 0, 1, 0, 360));
 
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 
         	$this->addSystem($fighter);
        }

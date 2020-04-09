@@ -1,6 +1,6 @@
 <?php
 class DrakhMobileBeamPlatform extends MediumShip{
-	/*Drakh Heavy Raider LCV*/
+	/*Drakh OSAT-equivalent*/
 	/*approximated as MCV, no EW restrictions*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);

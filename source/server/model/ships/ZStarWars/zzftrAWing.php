@@ -4,7 +4,7 @@ class zzftrawing extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 39*6;
+        $this->pointCost = 35*6;
         $this->faction = "ZStarWars";
         $this->phpclass = "zzftrawing";
         $this->shipClass = "A-Wing Interceptors";
@@ -12,7 +12,7 @@ class zzftrawing extends FighterFlight{
         
 		$this->isd = "18 BBY";
 		$this->notes = "Primary users: Rebel Alliance, New Republic.";
-		$this->notes .= "Hyperdrive";
+		$this->notes .= "<br>Hyperdrive";
 	    
         //$this->isd = 2214;
         $this->unofficial = true;
@@ -22,9 +22,11 @@ class zzftrawing extends FighterFlight{
         $this->freethrust = 14;
         $this->offensivebonus = 5;
         $this->jinkinglimit = 10;
+        $this->pivotcost = 2; //SW fighters have higher pivot cost - only elite pilots perform such maneuvers on screen!
+		$this->enhancementOptionsEnabled[] = 'ELITE_SW'; //this flight can have Elite Pilot (SW) enhancement option	
         $this->turncost = 0.33;
         
-    	$this->iniativebonus = 100;
+    	$this->iniativebonus = 20 *5;
 		
 		
 		$this->hangarRequired = "Fighter Squadrons"; //SW small craft are handled on squadron basis
@@ -57,6 +59,7 @@ class zzftrawing extends FighterFlight{
             	$fighter->addAftSystem(new SWRayShield(0, 1, 0, 1, 0, 360));
             
             
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
             
             $this->addSystem($fighter);
        }

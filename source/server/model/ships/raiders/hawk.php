@@ -34,7 +34,7 @@ class Hawk extends MediumShipLeftRight{
 		$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 240, 360));
 		$this->addLeftSystem(new CargoBay(3, 10));
 		
-		$this->addRightSystem(new Thruster(3, 8, 0, 2, 3));
+		$this->addRightSystem(new Thruster(3, 8, 0, 2, 4));
 		$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 120));
 		$this->addRightSystem(new CargoBay(3, 10));
 		

@@ -3,7 +3,7 @@ class swGallofreeEscort extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 140;
+	$this->pointCost = 100;
         $this->faction = "ZStarWars";
 	$this->phpclass = "swGallofreeEscort";
 	$this->shipClass = "GR-75 Gallofree Escort";
@@ -13,8 +13,8 @@ class swGallofreeEscort extends LCV{
 	$this->sideDefense = 11;
   
 	$this->unofficial = true;
-	$this->occurence = "uncommon";
 	$this->variantOf = "GR-75 Gallofree Medium Transport";
+	$this->occurence = "uncommon";
   
 		$this->isd = "Galactic Civil War";
 		$this->notes = "Primary users: Rebel Alliance";
@@ -57,8 +57,8 @@ class swGallofreeEscort extends LCV{
         		0=> array( //should never be actually used, but must be present
         				6 => "Structure",
         				7 => "Ray Shield",
-	        			9 => "Medium Laser",
-	        			11 => "Light Laser",
+	        			8 => "Medium Laser",
+	        			10 => "Light Laser",
         				15 => "Cargo Bay",
         				16 => "Hyperdrive",
         				18 => "Engine",
@@ -68,8 +68,8 @@ class swGallofreeEscort extends LCV{
         		1=> array( //PRIMARY hit table, effectively
         				6 => "Structure",
         				7 => "0:Ray Shield",
-	        			9 => "0:Medium Laser",
-	        			11 => "0:Light Laser",
+	        			8 => "0:Medium Laser",
+	        			10 => "0:Light Laser",
         				15 => "0:Cargo Bay",
         				16 => "0:Hyperdrive",
         				18 => "0:Engine",
@@ -79,8 +79,8 @@ class swGallofreeEscort extends LCV{
         		2=> array( //same as Fwd
         				6 => "Structure",
         				7 => "0:Ray Shield",
-	        			9 => "0:Medium Laser",
-	        			11 => "0:Light Laser",
+	        			8 => "0:Medium Laser",
+	        			10 => "0:Light Laser",
         				15 => "0:Cargo Bay",
         				16 => "0:Hyperdrive",
         				18 => "0:Engine",

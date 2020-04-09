@@ -5,7 +5,7 @@ class swMonCalMC80 extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 1500;
+	$this->pointCost = 1600;
 	$this->faction = "ZStarWars";
         $this->phpclass = "swMonCalMC80";
         $this->imagePath = "img/starwars/mc80.png";

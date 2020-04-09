@@ -157,7 +157,7 @@ class SystemInfoButtons extends React.Component {
 				weaponManager.onModeClicked(ship, weapon);
 			}
 		}
-		webglScene.customEvent('CloseSystemInfo');
+		//webglScene.customEvent('CloseSystemInfo');
 	}
 	
 	changeFiringMode(e) {
@@ -167,7 +167,7 @@ class SystemInfoButtons extends React.Component {
             		return;
 		}		
 		weaponManager.onModeClicked(ship, system);
-		webglScene.customEvent('CloseSystemInfo');
+		//webglScene.customEvent('CloseSystemInfo');
 	}
 	
 	
@@ -278,17 +278,17 @@ class SystemInfoButtons extends React.Component {
 		
         return (
             <Container>
-				{canOnline(ship, system) && <Button onClick={this.online.bind(this)} onContextMenu={this.allOnline.bind(this)} img="./img/on.png"></Button>}
-                {canOffline(ship, system) && <Button onClick={this.offline.bind(this)} onContextMenu={this.allOffline.bind(this)} img="./img/off.png"></Button>}
-                {canOverload(ship, system) && <Button onClick={this.overload.bind(this)} img="./img/overload.png"></Button>}
-                {canStopOverload(ship, system) && <Button onClick={this.stopOverload.bind(this)} img="./img/overloading.png"></Button>}
-                {canDeBoost(ship, system) && <Button onClick={this.deboost.bind(this)} img="./img/minussquare.png"></Button>}
-                {canBoost(ship, system) && <Button onClick={this.boost.bind(this)} img="./img/plussquare.png"></Button>}
-                {canAddShots(ship, system) && <Button onClick={this.addShots.bind(this)} img="./img/plussquare.png"></Button>}
-                {canReduceShots(ship, system) && <Button onClick={this.reduceShots.bind(this)} img="./img/minussquare.png"></Button>}
-				{canRemoveFireOrder(ship, system) && <Button onClick={this.removeFireOrder.bind(this)} img="./img/firing.png"></Button>}
+				{canOnline(ship, system) && <Button title="power on" onClick={this.online.bind(this)} onContextMenu={this.allOnline.bind(this)} img="./img/on.png"></Button>}
+                {canOffline(ship, system) && <Button title="power off" onClick={this.offline.bind(this)} onContextMenu={this.allOffline.bind(this)} img="./img/off.png"></Button>}
+                {canOverload(ship, system) && <Button title="overload" onClick={this.overload.bind(this)} img="./img/overload.png"></Button>}
+                {canStopOverload(ship, system) && <Button title="stop overload" nClick={this.stopOverload.bind(this)} img="./img/overloading.png"></Button>}
+                {canDeBoost(ship, system) && <Button title="deboost"onClick={this.deboost.bind(this)} img="./img/minussquare.png"></Button>}
+                {canBoost(ship, system) && <Button title="boost" onClick={this.boost.bind(this)} img="./img/plussquare.png"></Button>}
+                {canAddShots(ship, system) && <Button title="more shots"onClick={this.addShots.bind(this)} img="./img/plussquare.png"></Button>}
+                {canReduceShots(ship, system) && <Button title="less shots" onClick={this.reduceShots.bind(this)} img="./img/minussquare.png"></Button>}
+				{canRemoveFireOrder(ship, system) && <Button title="cancel fire order" onClick={this.removeFireOrder.bind(this)} img="./img/firing.png"></Button>}
 				{canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this))}
-				{canSelfIntercept(ship, system) && <Button onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/selfIntercept.png"></Button>}
+				{canSelfIntercept(ship, system) && <Button title="allow interception (R = mass)" onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/selfIntercept.png"></Button>}
 				
 				{canAAdisplayCurrClass(ship, system) && <Button title={getAAcurrClassName(ship,system)} img={getAAcurrClassImg(ship,system)}></Button>}
 				{canAAdisplayCurrClass(ship, system) && <Button title="next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/AAclasses/iconNext.png"></Button>}
@@ -296,7 +296,6 @@ class SystemInfoButtons extends React.Component {
 				{canAAdecrease(ship, system) && <Button onClick={this.AAdecrease.bind(this)} img="./img/systemicons/AAclasses/iconMinus.png"></Button>}
 				{canAApropagate(ship, system) && <Button title="propagate setting" onClick={this.AApropagate.bind(this)} img="./img/systemicons/AAclasses/iconPropagate.png"></Button>}
 				
-					
 				
             </Container>
         )
@@ -369,8 +368,9 @@ const getFiringModes = (ship, system, changeFiringMode, allChangeFiringMode) => 
 		} else {
 			img = `./img/systemicons/${system.name}.png`;
 		}
-
-		 return <Button onClick={changeFiringMode} onContextMenu={allChangeFiringMode}  img={img}>{firingMode.substring(0, 1)}</Button>
+		
+		var textTitle = "set mode " + firingMode + " (R = mass)"; 
+		return <Button title={textTitle} onClick={changeFiringMode} onContextMenu={allChangeFiringMode}  img={img}>{firingMode.substring(0, 1)}</Button>
 	}
 }
 

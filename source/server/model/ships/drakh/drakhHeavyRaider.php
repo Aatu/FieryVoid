@@ -48,7 +48,7 @@ class DrakhHeavyRaider extends LCV{
 	$this->addPrimarySystem(new Structure( 4, 30));
 	    
         $this->hitChart = array(
-        		0=> array( //should never happen
+        		0=> array( //should never happen (but it will!)
         				10 => "Structure",
         				12 => "Phase Disruptor",
         				14 => "Absorbtion Shield",

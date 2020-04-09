@@ -16,6 +16,9 @@ class DrakhMothership extends BaseShip{
 	$this->unofficial = true;
 	$this->advancedArmor = true;   
         $this->Enormous = true;
+        $this->limited = 10;
+		
+		$this->notes = "Not a military ship, not eligible for pickup battles."; //more akin to worldship
        
 	$this->isd = 2200;
         
@@ -105,8 +108,8 @@ class DrakhMothership extends BaseShip{
         $this->hitChart = array(
             0=> array(
                     5 => "Structure",
-                    6 => "Cargo Bay",
-                    7 => "Raider Controller",
+                    7 => "Cargo Bay",
+                    8 => "Raider Controller",
                     9 => "Engine",
                     11 => "Jump Engine",
                     13 => "Tractor Beam",
@@ -118,9 +121,9 @@ class DrakhMothership extends BaseShip{
             1=> array(
                     5 => "Thruster",
                     7 => "Multiphased Beam Accelerator",
-                    9 => "Light Polarity Pulsar",
-		    11 => "Absorbtion Shield",
-                    13 => "ElintScanner",
+                    8 => "Light Polarity Pulsar",
+					10 => "Absorbtion Shield",
+                    12 => "ElintScanner",
                     18 => "Structure",
                     20 => "Primary",
             ),
@@ -128,7 +131,7 @@ class DrakhMothership extends BaseShip{
                     6 => "Thruster",
                     7 => "Heavy Polarity Pulsar",
                     9 => "Light Polarity Pulsar",
-		    11 => "Absorbtion Shield",
+					11 => "Absorbtion Shield",
                     13 => "Cargo Bay",
                     18 => "Structure",
                     20 => "Primary",
@@ -136,20 +139,20 @@ class DrakhMothership extends BaseShip{
             3=> array(
                     4 => "Thruster",
                     6 => "Medium Polarity Pulsar",
-                    8 => "Light Polarity Pulsar",
-		    10 => "Absorbtion Shield",
-                    13 => "Catapult",
-                    15 => "Cargo Bay",
+                    7 => "Light Polarity Pulsar",
+					9 => "Absorbtion Shield",
+                    12 => "Catapult",
+                    14 => "Cargo Bay",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array(
                     4 => "Thruster",
                     6 => "Medium Polarity Pulsar",
-                    8 => "Light Polarity Pulsar",
-		    10 => "Absorbtion Shield",
-                    13 => "Catapult",
-                    15 => "Cargo Bay",
+                    7 => "Light Polarity Pulsar",
+					9 => "Absorbtion Shield",
+                    12 => "Catapult",
+                    14 => "Cargo Bay",
                     18 => "Structure",
                     20 => "Primary",
             ),

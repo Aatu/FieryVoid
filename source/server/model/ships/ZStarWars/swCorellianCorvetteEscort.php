@@ -6,7 +6,7 @@ class swCorellianCorvetteEscort extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 250;
+	$this->pointCost = 225;
 	$this->faction = "ZStarWars";
         $this->phpclass = "swcorelliancorvetteescort";
         $this->imagePath = "img/starwars/cr90.png";
@@ -73,7 +73,7 @@ class swCorellianCorvetteEscort extends MediumShip{
 	    
         $this->hitChart = array(
         		0=> array(
-        				2 => "Thruster",
+        				7 => "Thruster",
         				10 => "Cargo Bay",
         				12 => "Scanner",
         				14 => "Engine",
@@ -83,18 +83,18 @@ class swCorellianCorvetteEscort extends MediumShip{
         		),
         		1=> array(
         				2 => "Thruster",
-					3 => "Ray Shield",
-					6 => 'Light Laser',
-        				9 => "0:Medium Turbolaser",
+						3 => "Ray Shield",
+						5 => 'Light Laser',
+        				8 => "0:Medium Turbolaser",
         				16 => "Structure",
         				17 => "C&C",
         				20 => "Primary",
         		),
         		2=> array(
         				4 => "Thruster",
-					5 => "Ray Shield",
-					9 => 'Light Laser',
-        				12 => "0:Medium Turbolaser",
+						5 => "Ray Shield",
+						6 => 'Light Laser',
+        				9 => "0:Medium Turbolaser",
         				17 => "Structure",
         				20 => "Primary",
         		),

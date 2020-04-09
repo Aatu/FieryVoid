@@ -7,16 +7,17 @@ class cidikar extends BaseShip{
 	$this->pointCost = 800;
 	$this->faction = "Brakiri";
         $this->phpclass = "cidikar";
-        $this->imagePath = "img/ships/brokados.png"; //to be replaced with Cidikar image once available
+        $this->imagePath = "img/ships/brokados.png"; //waiting for proper hull
         $this->shipClass = "Cidikar Heavy Carrier";
         $this->shipSizeClass = 3;
         $this->fighters = array("heavy"=>24, "light"=>24);
 
         $this->limited = 10; //only 3 exist
-	//$this->occurence = "rare";
-	$this->isd = 2246;
-	//$this->unofficial = true;
+
         
+		$this->notes = 'Ly-Nakir Industries';//Corporation producing the design
+		$this->isd = 2246;
+		
         $this->forwardDefense = 17;
         $this->sideDefense = 19;
         

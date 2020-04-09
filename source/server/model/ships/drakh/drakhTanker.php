@@ -1,6 +1,6 @@
 <?php
 class DrakhTanker extends BaseShip{
-    /*Drakh Tanker or Supply Transport*/
+    /*Drakh Tanker or Supply Transport (semi-civilian ship)*/
 	
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -12,6 +12,8 @@ class DrakhTanker extends BaseShip{
         $this->imagePath = "img/ships/DrakhTanker.png";
         $this->shipClass = "Tanker";
         $this->shipSizeClass = 3;
+		
+		$this->notes = "Not a military ship, not eligible for pickup battles.";
 
         $this->fighters = array("Shuttles" => 6);
 	    
@@ -83,26 +85,26 @@ class DrakhTanker extends BaseShip{
             ),
             1=> array(
                     6 => "Thruster",
-                    9 => "Light Polarity Pulsar",
+                    8 => "Light Polarity Pulsar",
                     18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     8 => "Thruster",
-		    11 => "Light Polarity Pulsar",
+					10 => "Light Polarity Pulsar",
                     18 => "Structure",
                     20 => "Primary",
             ),
             3=> array(
                     4 => "Thruster",
-		    6 => "Absorbtion Shield",
+					6 => "Absorbtion Shield",
                     10 => "Cargo Bay",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array(
                     4 => "Thruster",
-		    6 => "Absorbtion Shield",
+					6 => "Absorbtion Shield",
                     10 => "Cargo Bay",
                     18 => "Structure",
                     20 => "Primary",

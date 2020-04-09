@@ -29,7 +29,7 @@ class swLancer extends MediumShip{
 	$this->iniativebonus = 12 *5; //true warship
         
         $this->addPrimarySystem(new Reactor(3, 15, 0, 3));
-        $this->addPrimarySystem(new SWScanner(3, 8, 4, 3));
+        $this->addPrimarySystem(new SWScanner(3, 8, 4, 4));
         $this->addPrimarySystem(new Engine(3, 12, 0, 7, 2));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
 	$this->addPrimarySystem(new Thruster(2, 8, 0, 4, 3));
@@ -63,26 +63,26 @@ class swLancer extends MediumShip{
 	    
         $this->hitChart = array(
         		0=> array(
-        				3 => "Thruster",
-					9 => "AF Medium Laser", 
-        				11 => "Hyperdrive",
-					13 => "Scanner",
-        				15 => "Engine",
-        				16 => "Hangar",
+        				7 => "Thruster",
+						10 => "AF Medium Laser", 
+        				12 => "Hyperdrive",
+						14 => "Scanner",
+        				16 => "Engine",
+        				17 => "Hangar",
        					19 => "Reactor",
         				20 => "C&C",
         		),
         		1=> array(
-        				2 => "Thruster",
-        				3 => "Ray Shield",
-        				11 => "AF Medium Laser",
+        				3 => "Thruster",
+        				4 => "Ray Shield",
+        				9 => "AF Medium Laser",
         				17 => "Structure",
            				20 => "Primary",
         		),
         		2=> array(
-        				3 => "Thruster",
-        				4 => "Ray Shield",
-        				12 => "AF Medium Laser",
+        				4 => "Thruster",
+        				5 => "Ray Shield",
+        				10 => "AF Medium Laser",
         				17 => "Structure",
         				20 => "Primary",
         		),

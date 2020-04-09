@@ -18,14 +18,14 @@ class Pulse extends Weapon{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function setSystemDataWindow($turn){
-	    $this->data["Special"] = 'Pulse mode: D'.$this->useDie;
-		if($this->fixedBonusPulses > 0){
-			$this->data["Special"] .= '+'.$this->fixedBonusPulses;
-		}
-		$this->data["Special"] .= ', +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
-            $this->defaultShots = $this->maxpulses;            
+        public function setSystemDataWindow($turn){     
             parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Pulse mode: D'.$this->useDie;
+			if($this->fixedBonusPulses > 0){
+				$this->data["Special"] .= '+'.$this->fixedBonusPulses;
+			}
+			$this->data["Special"] .= ', +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
+            $this->defaultShots = $this->maxpulses;       
         }
         
         protected function getPulses($turn)
@@ -311,7 +311,7 @@ class QuadPulsar extends Pulse{
 
         
         public function setSystemData($data, $subsystem){
-	    parent::setSystemData($data, $subsystem);
+			parent::setSystemData($data, $subsystem);
             if ($this->turnsloaded == 1)
             {
                 $this->maxpulses = 3;
@@ -319,14 +319,13 @@ class QuadPulsar extends Pulse{
             else
             {
                 $this->maxpulses = 7;
-            }
-		
-	}
+            }		
+		}
         
         public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-			$this->data["Special"] = 'Pulse mode fully armed: d5 +1/15 %, max. 7 pulses';
-			$this->data["Special"] .= 'Pulse mode 1 turn: d3 pulses, no volley count bonus';
+			$this->data["Special"] = 'Fully armed: d5 +1/15 %, max. 7 pulses';
+			$this->data["Special"] .= '<br>1 turn: d3 pulses, no volley count bonus';
         }
         
 
@@ -507,8 +506,8 @@ class QuadPulsar extends Pulse{
 	    
         public function setSystemDataWindow($turn){            
             parent::setSystemDataWindow($turn);		
-		$this->data["Special"] = "Fires d6 separate shots (actual number rolled at firing resolution).";
-		$this->data["Special"] .= "<br>When fired defensively, a single Scattergun cannot engage the same incoming shot twice (even ballistic one).";
+			$this->data["Special"] = "Fires d6 separate shots (actual number rolled at firing resolution).";
+			$this->data["Special"] .= "<br>When fired defensively, a single Scattergun cannot engage the same incoming shot twice (even ballistic one).";
         }
 	    
 	//if fired offensively - make d6 attacks (copies of 1 existing); 
@@ -704,7 +703,82 @@ class QuadPulsar extends Pulse{
         }
 	    
         public function getDamage($fireOrder){        return 8;   }
-    }
+    } //endof class HvyBlastCannon
+	
+	
+
+/*Torata weapon*/
+class PulseAccelerator extends Pulse{
+	public $name = "PulseAccelerator";
+	public $displayName = "Pulse Accelerator";
+	public $iconPath = "PulseAccelerator.png";
+	public $animation = "trail";
+	public $trailLength = 18;
+	public $animationWidth = 5;
+	public $projectilespeed = 20;
+	public $animationExplosionScale = 0.20;
+	public $rof = 2;
+	public $maxpulses = 4;
+	public $grouping = 25;
+	public $priority = 5; 
+
+	public $loadingtime = 1;
+	public $normalload = 3;
+
+	public $rangePenalty = 0.33; //-1/3 hexes
+	public $fireControl = array(1, 3, 4);
+
+	public $damageType = "Pulse";
+	public $weaponClass = "Particle";
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+	{ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ) $maxhealth = 9;
+		if ( $powerReq == 0 ) $powerReq = 4;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+	
+	protected function getPulses($turn){
+		switch($this->turnsloaded){
+			Case 0:
+			case 1:
+				return 1;
+				break;
+			case 2:
+				return Dice::d(2,1);
+				break;
+			Case 3:
+				return Dice::d(3,1);	
+			}
+	}
+	
+	public function setSystemData($data, $subsystem){
+		parent::setSystemData($data, $subsystem);
+		if ($this->turnsloaded == 1){
+			$this->maxpulses = 2;
+		}else if ($this->turnsloaded == 2){
+			$this->maxpulses == 3;
+		}else{		
+			$this->maxpulses = 4;
+		}
+	}
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = 'Volley count bonus: +1/25% . Number of pulses varies with loading time:';
+		$this->data["Special"] .= '<br>1 turn: 1 base hit, max. 2 hits';
+		$this->data["Special"] .= '<br>2 turns: d2 base hits, max. 3 hits';		
+		$this->data["Special"] .= '<br>3 turns: d3 base hits, max. 4 hits';			
+	}
+
+	public function getDamage($fireOrder){	 	return 12;	 }
+	
+	
+	
+	
+} //End of class PulseAccelerator
+
+
 
 
 ?>

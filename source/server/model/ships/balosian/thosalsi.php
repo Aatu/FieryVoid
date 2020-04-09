@@ -13,6 +13,7 @@ class Thosalsi extends BaseShip{
         $this->shipSizeClass = 3;
         $this->limited = 10;
         $this->fighters = array("medium"=>36);
+		$this->isd = 2223;
         
         $this->forwardDefense = 16;
         $this->sideDefense = 16;

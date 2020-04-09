@@ -5,7 +5,7 @@ class swNebulonBFrigate extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 450;
+	$this->pointCost = 400;
 	$this->faction = "ZStarWars";
         $this->phpclass = "swNebulonBFrigate";
         $this->imagePath = "img/starwars/nebulonb.png";
@@ -85,8 +85,8 @@ class swNebulonBFrigate extends HeavyCombatVessel{
         				2 => "Thruster",
         				3 => "Ray Shield",
 					7 => "Hangar",
-        				11 => "Medium Turbolaser",
-        				14 => "Medium Laser",
+        				10 => "Medium Turbolaser",
+        				12 => "Medium Laser",
         				18 => "Structure",
         				20 => "Primary",
         		),
@@ -95,7 +95,7 @@ class swNebulonBFrigate extends HeavyCombatVessel{
 					6 => "Engine",		
 		        		8 => "Hyperdrive",
 					9 => "Ray Shield",
-					13 => 'Medium Laser',
+					11 => 'Medium Laser',
         				18 => "Structure",
         				20 => "Primary",
         		),

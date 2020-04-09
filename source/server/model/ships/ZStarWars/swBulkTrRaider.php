@@ -4,7 +4,7 @@ class swBulkTrRaider extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 240;
+	$this->pointCost = 220;
 	$this->faction = "ZStarWars";
         $this->phpclass = "swBulkTrRaider";
         $this->imagePath = "img/starwars/BulkTransport.png";
@@ -67,7 +67,7 @@ class swBulkTrRaider extends MediumShip{
 	    
         $this->hitChart = array(
         		0=> array(
-        				2 => "Thruster",
+        				7 => "Thruster",
         				13 => "Cargo Bay",
         				15 => "Scanner",
         				17 => "Engine",
@@ -81,7 +81,7 @@ class swBulkTrRaider extends MediumShip{
         				5 => "Hangar",
         				7 => "0:Medium Turbolaser",
         				10 => "0:Cargo Bay",
-                   			12 => "Light Ion Cannon",
+						11 => "Light Ion Cannon",
         				17 => "Structure",
         				20 => "Primary",
         		),
@@ -90,7 +90,7 @@ class swBulkTrRaider extends MediumShip{
         				5 => "Ray Shield",
         				7 => "0:Medium Turbolaser",
         				10 => "0:Cargo Bay",
-					11 => 'Light Laser',
+						11 => 'Light Laser',
         				17 => "Structure",
         				20 => "Primary",
         		),

@@ -280,3 +280,23 @@ var LightParticleProjector = function LightParticleProjector(json, ship) {
 };
 LightParticleProjector.prototype = Object.create(Particle.prototype);
 LightParticleProjector.prototype.constructor = LightParticleProjector;
+
+var PentagonArray = function PentagonArray(json, ship) {
+    Weapon.call(this, json, ship);
+};
+PentagonArray.prototype = Object.create(Weapon.prototype);
+PentagonArray.prototype.constructor = PentagonArray;
+
+
+var ParticleAccelerator = function ParticleAccelerator(json, ship) {
+    Weapon.call(this, json, ship);
+};
+ParticleAccelerator.prototype = Object.create(Weapon.prototype);
+ParticleAccelerator.prototype.constructor = ParticleAccelerator;
+
+
+var LightParticleAccelerator = function LightParticleAccelerator(json, ship) {
+    Weapon.call(this, json, ship);
+};
+LightParticleAccelerator.prototype = Object.create(Weapon.prototype);
+LightParticleAccelerator.prototype.constructor = LightParticleAccelerator;

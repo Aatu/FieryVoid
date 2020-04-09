@@ -54,7 +54,7 @@ class swGallofreeComm extends LCV{
         		0=> array( //should never be actually used, but must be present
         				6 => "Structure",
         				7 => "Ray Shield",
-	        			10 => "Medium Laser",
+	        			9 => "Medium Laser",
         				14 => "Cargo Bay",
         				15 => "Hyperdrive",
         				17 => "Engine",
@@ -64,7 +64,7 @@ class swGallofreeComm extends LCV{
         		1=> array( //PRIMARY hit table, effectively
         				6 => "Structure",
         				7 => "0:Ray Shield",
-	        			10 => "0:Medium Laser",
+	        			9 => "0:Medium Laser",
         				14 => "0:Cargo Bay",
         				15 => "0:Hyperdrive",
         				17 => "0:Engine",

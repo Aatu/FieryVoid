@@ -57,7 +57,7 @@ class swBulkTransport extends MediumShip{
 	    
         $this->hitChart = array(
         		0=> array(
-        				2 => "Thruster",
+        				7 => "Thruster",
         				13 => "Cargo Bay",
         				15 => "Scanner",
         				17 => "Engine",

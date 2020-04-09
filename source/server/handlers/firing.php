@@ -19,9 +19,9 @@ class Firing
             return -1;
         } else if ($weaponA->intercept < $weaponB->intercept) {
             return 1;
-        } else if ($weaponA->loadingtime < $weaponB->loadingtime) {
+        } else if ( max($weaponA->loadingtime, $weaponA->normalload) < max($weaponB->loadingtime, $weaponB->normalload) ) {
             return -1;
-        } else if ($weaponA->loadingtime > $weaponB->loadingtime) {
+        } else if ( max($weaponA->loadingtime, $weaponA->normalload) > max($weaponB->loadingtime, $weaponB->normalload) ) {
             return 1;
         } else {
             return 0;
@@ -262,8 +262,10 @@ class Firing
         if ($weapon->getTurnsloaded() < $weapon->getLoadingTime()) {
             return false;
         }
+	
+	$loadingTimeActual = max($weapon->getLoadingTime(),$weapon->normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging 
 
-        if ($weapon->getLoadingTime() > 1) {
+	if ($loadingTimeActual > 1) { 
             if (isset($weapon->fireOrders[0])) {
                 if ($weapon->fireOrders[0]->type != "selfIntercept") {
                     return false;
@@ -273,7 +275,7 @@ class Firing
             }
         }
 
-        if ($weapon->getLoadingTime() == 1 && $weapon->firedOnTurn($gd->turn)) {
+        if ($loadingTimeActual == 1 && $weapon->firedOnTurn($gd->turn)) {
             return false;
         }
 

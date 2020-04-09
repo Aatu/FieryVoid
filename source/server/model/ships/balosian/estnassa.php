@@ -9,7 +9,9 @@ class Estnassa extends HeavyCombatVessel{
         $this->phpclass = "Estnassa";
         $this->imagePath = "img/ships/esthasa.png";
         $this->shipClass = "Estnassa Destroyer";
+        $this->variantOf = "Esthasa Destroyer";
         $this->fighters = array("medium"=>6);
+		$this->isd = 2232;
                 
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
