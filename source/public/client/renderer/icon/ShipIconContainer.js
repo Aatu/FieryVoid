@@ -178,8 +178,21 @@ window.ShipIconContainer = function () {
             return null;
         }
 
+		/*if offset is too large, unit is displayed on adjacent hex! I am limiting maximum offset, if dogpile is sufficiently large so be it*/
+		var stepSize = 6; //original step: always 7
+		var currStep = 0;
+		var totalOffset = 0;
+		for (var i=1;i<=steps;i++){
+			currStep = stepSize - i;
+			currStep = Math.max(currStep,2);//do add SOME offset!
+			//this way the more units are present, the worse stacking becomes!)
+			totalOffset += currStep;
+		}			
+		
+		totalOffset = Math.min(totalOffset,35);//don't go too far!
+
         var angle = mathlib.getCompassHeadingOfPoint(hex, previousHex);
-        return mathlib.getPointInDirection(steps * 7, angle, 0, 0);
+        return mathlib.getPointInDirection(totalOffset, angle, 0, 0);
     };
 
     return ShipIconContainer;

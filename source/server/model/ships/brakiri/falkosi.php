@@ -10,6 +10,9 @@ class Falkosi extends FighterFlight{
         $this->shipClass = "Falkosi Light Fighters";
     	$this->imagePath = "img/ships/falkosi.png";
         
+		$this->notes = 'Ly-Nakir Industries';//Corporation producing the design
+		$this->isd = 2228;
+        
         $this->forwardDefense = 7;
         $this->sideDefense = 8;
         $this->freethrust = 12;
@@ -38,6 +41,8 @@ class Falkosi extends FighterFlight{
 
             $fighter->addFrontSystem(new LightGraviticBolt(330, 30, 0));
 
+			//$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+			
 
             $this->addSystem($fighter);
 

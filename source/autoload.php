@@ -1040,6 +1040,7 @@ spl_autoload_register(
                 'zzunoffshovor' => '/server/model/ships/narn/zzunoffShovor.php',
                 'zzunoffshovorbolt' => '/server/model/ships/narn/zzunoffShovorBolt.php',
                 'zzunofftashkaton' => '/server/model/ships/brakiri/zzunoffTashkaton.php',
+                'zzunofftashkavaton' => '/server/model/ships/brakiri/zzunoffTashkavaton.php',
                 'zzunofftshon' => '/server/model/ships/narn/zzunoffTshon.php',
                 'zzunofftshonstealth' => '/server/model/ships/narn/zzunoffTshonStealth.php',
                 'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
@@ -1184,6 +1185,7 @@ spl_autoload_register(
                 'whitestarold' => '/server/model/ships/minbari/whitestarOld.php',		    
                 'individualnote' => '/server/model/BaseClasses.php',
 		    
+                'weaponem' => '/server/model/weapons/specialWeapons.php',
 			
 				//Torata weapons
                 'pentagonarray' => '/server/model/weapons/particle.php',  

@@ -5,7 +5,7 @@ class swMonCalMC30c extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 650; 
+	$this->pointCost = 600; 
 	$this->faction = "ZStarWars";
         $this->phpclass = "swMonCalMC30c";
         $this->imagePath = "img/starwars/mc30.png";

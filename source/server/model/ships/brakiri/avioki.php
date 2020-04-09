@@ -10,6 +10,9 @@ class Avioki extends BaseShip{
         $this->imagePath = "img/ships/avioki.png";
         $this->shipClass = "Avioki Heavy Cruiser";
         $this->shipSizeClass = 3;
+		
+		$this->notes = 'Ak-Habil Conglomerate';//Corporation producing the design
+		$this->isd = 2204;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 18;

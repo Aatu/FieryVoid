@@ -1,0 +1,87 @@
+UNIT ENHANCEMENTS AVAILABLE IN FIERY VOID
+Unit enhancements are in general pointed quite high - but it's not always the case. Sometimes they can be a bargain - eg. Sensor boost for low-tech battleship.
+For pickup battles - I suggest remembering they're optional, and using them requires opponent agreement. A single enhancement to round out points is probably fine, but if You want to seriously enhance Your fleet - check with opponent if that's acceptable.
+Their main intent is to be scenario option, or a campaign tool where they can represent units accumulating experience.
+
+NOTE: some FV enhancements represent regular unit options rather than proper enhancements. Fighter Navigator is good example.
+
+
+SHIP ENHANCEMENTS:
+
+Elite Crew (entire ship):
+	Effect: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results
+	Cost: +40% of ship cost (second time: +60%)
+	Limit: 2
+
+Improved Engine (strongest engine): 
+	Effect: +1 Thrust
+	Cost: 12+4/turn cost, round up
+	Limit: up to +50% of base value
+
+Improved Reactor (biggest Reactor):
+	Effect: +1/2/3/4 Power (depending on unit size, from MCV to Enormous)
+	Cost: 10 *Power added (double if ship has power deficit to begin with)
+	Limit: 1
+
+Improved Sensor Array (strongest Sensors):
+	Effect: +1 Sensor rating
+	Cost: new rating *5
+	Limit: 1
+
+Poor Crew (entire ship):
+	Effect: -5 Initiative, -1 Engine, -1 Sensors, -1 Reactor power, +1 Profile, +2 to critical results
+	Cost: -15% of ship cost (second time -10%)
+	Limit: 2 
+
+
+
+
+FIGHTER ENHANCEMENTS (all costs per craft):
+
+Expert Motivator (this is a skill one of pilots possesses, rather than a aseparate person):
+	Effect: -2 modifier to dropout rolls
+	Cost: 10% of craft price (round up)
+	Limit: 1
+
+Improved Targeting Computer:
+	Effect: +1 Offensive Bonus
+	Cost: new rating *3
+	Limit: 1
+
+Improved Thrust:
+	Effect: +1 Free Thrust
+	Cost: new rating
+	Limit: 1
+
+Navigator (selected fighters only - those with optional second seat ;) ; regular option rather than enhancement):
+	Effect: Navigator trait (all-around missile guidance, +5 Initiative)
+	Cost: 10
+	Limit: 1
+
+Poor Training (equivalent of Poor Crew for ships):
+	Effect: -5 Initiative, -1 Free Thrust, -1 OB, +1 Profile, +2 to dropout rolls
+	Cost: -10% of craft price (round up)
+	Limit: 1 
+
+
+
+
+FACTION SPECIFIC ENHANCEMENTS:
+
+
+
+IPSHA:
+
+Spark Curtain (completely unofficial, ALTERNATE TIMELINE):
+	Effect: ballistic defense (2+boost) for Spark Field; affects hit chance only
+	Cost: 40 + 10/Spark Field
+	Limit: 1 
+
+
+
+STAR WARS:
+
+Elite Pilot (fighter):
+	Effect: Pivot Cost is 1 (2 for combat pivot) rather than regular 2. 
+	Cost: 15% of craft price (round up)
+	Limit: 1

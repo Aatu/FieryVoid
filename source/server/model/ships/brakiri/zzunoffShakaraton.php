@@ -12,9 +12,12 @@ class zzunoffShakaraton extends BaseShip{
         $this->shipSizeClass = 3;
 
         $this->limited = 10;
-	//$this->occurence = "rare";
-	$this->isd = 2251;
 	$this->unofficial = true;
+	
+	
+		$this->notes = 'Im-Rehsa Technologies';//Corporation producing the design
+		$this->isd = 2251;
+        
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

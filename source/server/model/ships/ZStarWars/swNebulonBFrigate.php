@@ -5,7 +5,7 @@ class swNebulonBFrigate extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 450;
+	$this->pointCost = 400;
 	$this->faction = "ZStarWars";
         $this->phpclass = "swNebulonBFrigate";
         $this->imagePath = "img/starwars/nebulonb.png";

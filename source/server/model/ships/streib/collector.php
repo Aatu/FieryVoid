@@ -22,7 +22,7 @@ class Collector extends BaseShip{
         $this->pivotcost = 3;
         $this->gravitic = true;	
 		
-		$this->unofficial = true;
+		//$this->unofficial = true; //actrually this is an official ship
         
          
         $this->addPrimarySystem(new Reactor(9, 16, 0, 0));

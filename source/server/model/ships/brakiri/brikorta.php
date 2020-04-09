@@ -9,10 +9,13 @@ class Brikorta extends HeavyCombatVesselLeftRight{
         $this->phpclass = "Brikorta";
         $this->imagePath = "img/ships/ikorta.png";
         $this->shipClass = "Brikorta Light Carrier";
-        $this->fighters = array("light"=>12);
         $this->variantOf = "Ikorta Light Assault Cruiser";
-
         $this->occurence = "uncommon";
+        $this->fighters = array("light"=>12);
+
+		$this->notes = 'Ly-Nakir Industries';//Corporation producing the design
+        $this->isd = 2232;
+		
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
         

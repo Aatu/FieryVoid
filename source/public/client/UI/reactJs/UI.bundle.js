@@ -39756,7 +39756,7 @@ var SystemInfoButtons = function (_React$Component) {
 					weaponManager.onModeClicked(ship, weapon);
 				}
 			}
-			webglScene.customEvent('CloseSystemInfo');
+			//webglScene.customEvent('CloseSystemInfo');
 		}
 	}, {
 		key: "changeFiringMode",
@@ -39770,7 +39770,7 @@ var SystemInfoButtons = function (_React$Component) {
 				return;
 			}
 			weaponManager.onModeClicked(ship, system);
-			webglScene.customEvent('CloseSystemInfo');
+			//webglScene.customEvent('CloseSystemInfo');
 		}
 
 		/*declare this weapon to be eligible for defensive fire this turn*/
@@ -39920,17 +39920,17 @@ var SystemInfoButtons = function (_React$Component) {
 			return React.createElement(
 				Container,
 				null,
-				canOnline(ship, system) && React.createElement(Button, { onClick: this.online.bind(this), onContextMenu: this.allOnline.bind(this), img: "./img/on.png" }),
-				canOffline(ship, system) && React.createElement(Button, { onClick: this.offline.bind(this), onContextMenu: this.allOffline.bind(this), img: "./img/off.png" }),
-				canOverload(ship, system) && React.createElement(Button, { onClick: this.overload.bind(this), img: "./img/overload.png" }),
-				canStopOverload(ship, system) && React.createElement(Button, { onClick: this.stopOverload.bind(this), img: "./img/overloading.png" }),
-				canDeBoost(ship, system) && React.createElement(Button, { onClick: this.deboost.bind(this), img: "./img/minussquare.png" }),
-				canBoost(ship, system) && React.createElement(Button, { onClick: this.boost.bind(this), img: "./img/plussquare.png" }),
-				canAddShots(ship, system) && React.createElement(Button, { onClick: this.addShots.bind(this), img: "./img/plussquare.png" }),
-				canReduceShots(ship, system) && React.createElement(Button, { onClick: this.reduceShots.bind(this), img: "./img/minussquare.png" }),
-				canRemoveFireOrder(ship, system) && React.createElement(Button, { onClick: this.removeFireOrder.bind(this), img: "./img/firing.png" }),
+				canOnline(ship, system) && React.createElement(Button, { title: "power on", onClick: this.online.bind(this), onContextMenu: this.allOnline.bind(this), img: "./img/on.png" }),
+				canOffline(ship, system) && React.createElement(Button, { title: "power off", onClick: this.offline.bind(this), onContextMenu: this.allOffline.bind(this), img: "./img/off.png" }),
+				canOverload(ship, system) && React.createElement(Button, { title: "overload", onClick: this.overload.bind(this), img: "./img/overload.png" }),
+				canStopOverload(ship, system) && React.createElement(Button, { title: "stop overload", nClick: this.stopOverload.bind(this), img: "./img/overloading.png" }),
+				canDeBoost(ship, system) && React.createElement(Button, { title: "deboost", onClick: this.deboost.bind(this), img: "./img/minussquare.png" }),
+				canBoost(ship, system) && React.createElement(Button, { title: "boost", onClick: this.boost.bind(this), img: "./img/plussquare.png" }),
+				canAddShots(ship, system) && React.createElement(Button, { title: "more shots", onClick: this.addShots.bind(this), img: "./img/plussquare.png" }),
+				canReduceShots(ship, system) && React.createElement(Button, { title: "less shots", onClick: this.reduceShots.bind(this), img: "./img/minussquare.png" }),
+				canRemoveFireOrder(ship, system) && React.createElement(Button, { title: "cancel fire order", onClick: this.removeFireOrder.bind(this), img: "./img/firing.png" }),
 				canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this)),
-				canSelfIntercept(ship, system) && React.createElement(Button, { onClick: this.declareSelfIntercept.bind(this), onContextMenu: this.declareSelfInterceptAll.bind(this), img: "./img/selfIntercept.png" }),
+				canSelfIntercept(ship, system) && React.createElement(Button, { title: "allow interception (R = mass)", onClick: this.declareSelfIntercept.bind(this), onContextMenu: this.declareSelfInterceptAll.bind(this), img: "./img/selfIntercept.png" }),
 				canAAdisplayCurrClass(ship, system) && React.createElement(Button, { title: getAAcurrClassName(ship, system), img: getAAcurrClassImg(ship, system) }),
 				canAAdisplayCurrClass(ship, system) && React.createElement(Button, { title: "next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/AAclasses/iconNext.png" }),
 				canAAincrease(ship, system) && React.createElement(Button, { onClick: this.AAincrease.bind(this), img: "./img/systemicons/AAclasses/iconPlus.png" }),
@@ -40046,9 +40046,10 @@ var getFiringModes = function getFiringModes(ship, system, changeFiringMode, all
 			img = "./img/systemicons/" + system.name + ".png";
 		}
 
+		var textTitle = "set mode " + firingMode + " (R = mass)";
 		return React.createElement(
 			Button,
-			{ onClick: changeFiringMode, onContextMenu: allChangeFiringMode, img: img },
+			{ title: textTitle, onClick: changeFiringMode, onContextMenu: allChangeFiringMode, img: img },
 			firingMode.substring(0, 1)
 		);
 	}

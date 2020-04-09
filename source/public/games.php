@@ -53,75 +53,51 @@ if (isset($_SESSION["user"])) {
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
 <div class="panel news">
-    <div id="newsHeader">Latest News - December 2019</div>
+    <!-- <div id="newsHeader">Latest News - April 2020</div> -->
     <div id="newsEntry">
         <!--
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
         -->
-        <u>The <b>Cascor</b> have arrived - entire new official faction, courtesy of <b>Thomas Solway</b>!</u>
-<br><br>
-<b>StarWars overhauled</b> - for those who want to use alternate universe ships. After playtesting the large Star Wars units slight changes were made to make them more interesting in engagements. Also, new units were added (mostly not so iconic). Also, fighters finally got (intended but unavailable earlier) option to switch gunfire to concentrated salvoes.
-<br><br>
-        <b><u>Rule changes</u></b>
-        <br><b>Fighter damage allocation</b> - now attempting to actively minimize damage to flight. Not as good as tabletop player would do (in fact, doesn't even have access to informatio player would have), but should be far better than random allocation. Expect heavy fighter flights to (re-)gain a lot of their toughness.
-        <br><b>Antifighter firing order optimized</b> - as fighters allocate damage to minimize it, weapons firing at them get arranged for maximum effect.
-        <br><b>LCV Sensors</b> - now standard Young Races' LCVs have properly limited Sensors. 
+		----------<b>Latest News - April 2020</b>----------
+		
+		<br><b><u>Torata</u> have arrived</b> - entire new official faction, prepared by Douglas!
+        <br>
+		
+		<br><b>FV-related support files</b> - moved from Facebook group to here (FAQ, enhancements list...)! Also, faction list was added.
+        <br><b>Stacks spilling to adjacent hex fixed</b> - if many units entered one hex, they appeared to be on nearby hexes (which might easily lead to incorrect positioning by player). This is now fixed.
+        <br><b>StarWars units rebalanced</b> - generally boosted.
+        <br><b>Called shots fixed</b> - now properly taking Rolled state into account.        
+        <br><b>Turn into pivot fixed</b> - now fighters actually need to have necessary thrust available :) .
+        <br><b>Initial Initiative changed</b> - now it assumes speed of 5 (does affect turn 1 movement order, especially for simultaneous Ini battles).
+        <br><b>Accelerator interception fixed</b> - now Accelerator weapons (Molecular Pulsar, Particle Accelerator...) are properly recognized as long-recharge for purposes of interception.
+        <br><b>Firing log fixed</b> - weapons that destroy systems on units other than target (Flash, Ramming...) now don't cause firing log to crash!
+        <br><b>Fighter ramming is being added</b> - I'm trying to check current games to make sure where it's safe to do so, but if I do break a game... sorry!!!
+        <br><b>Ipsha fix</b> - EM Hardened trait now actually doing something :)
+        <br><b>Interface changes</b> - weapon order of entries changed, onmouseover help for some icons...
+        <br><b>Interface more changes</b> - select all weapons now skips already declared ones, mode change no longer closes weapon menu.
 
+        
+	
+        <br><br>
+        Enjoy and report BUGS on FB. Also force reload (<b><u>ctrl+F5</u></b>) whenever something weird happens.
 
-<br>
-<br><b><u>Gameplay streamlining</b></u>
- <br>       <b>Boost streamlined</b> - You can boost even if You don't have power for it (although You'll have to find power for it before commit, of course ;) )
- <br>       <b>EW boost streamlined</b> - You can change Sensor output even if You already started to assign EW. It'll be made legal at commit.
-<br><b><i>Remove All EW</i> function added</b> - now You can reset Your EW without finding every target You allocated it to!
-<br><b>Trait information exposed</b> - various unit traits are now shown as notes. You don't have to remember whether a given ship is supposed to be Gravitic or what kind of hangar small craft requires!
-<br>
-<br><b><u>Second installment</b></u>
-<br><b>Streib weapons overhauled</b> - Burst Beam line, EM Wave Disruptor and Improved Blast Laser now behave as they should.
-<br><b>Tiebreaker added</b> - no more ties for standard movement games (they are now being resolved immediately after rolling Initiative).
-<br><b>Long-recharge weapons can be enabled for interception</b> - because defensive Medium Pulses might make a difference!
-<br><b>Turn delay calculation reworked</b> - this should solve problems with turn delay appearing out of the blue after accelerating.
-<br><b>Scattergun</b> - it's now scattering properly, with bells and whistles :)
-<br><b>Fleet checker</b> - now recognizing ultralight fighters and their hangar requirements
-<br><b>Fleet checker again</b> - ships requiring hangar berthing now are not restricted by "total ships on a hull" limit
-<br><b>Fleet selection screen</b> - fighter price is now displayed per craft, in addition to per 6 craft 
         
-        
-<br>
-<!--        
-        The latest update includes:
-        <br><br>
-            <b>Fleet check update</b> - Rare and Uncommon fleetwide restrictions now checked separately.
-        <br>
-            <b>Fleet check update part 2</b> - units that require special attention (custom, special, unique...) are more exposed.
-        <br>
-            <b>Flight sizes</b> - Flight size of 1 or 2 fighters are now allowed (useful for superheavies or for filling out remaining points); now Minbari standard tournament fleet (utilizing 5 Tishats) is possible!
-        <br>
-            <b>WotCR Centauri overhaul</b> - for those who want to try slightly less advanced factions. Deficiences fixed where found, hit charts added, old variants filled - as well as some new hulls.
-        <br>
-            <b>Sustained fire fixed</b> - now only default mode shots will be sustained! (and weapon will be shut down at the end of sustain cycle, too)
-        <br>
-            <b>Fleet check update part 3</b> - ship hangar requirements are checked! (LCVs typically do require appropriate berthing space).
-        <br>
-            <b>Drifting ship minor fix</b> - now a shutdown ship cannot maneuver any more.
-        <br>
-            <b>Game description</b> - now You can put Your wishes and scenario condition right in the game!
--->
-        
-        
-        <!--
-        <br><br>
-        - last but not least - brand new collection of BUGS!;
-        -->
-        <br><br>
-        Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.
-
+		
         <br><br>----------<b>LINKS</b>----------
-        <br><a href="https://www.facebook.com/groups/218482691602941/files/" target=\"_blank\">FV FAQ</a> - differences from B5Wars and known bugs
-        <br><a href="http://b5warsvault.wikidot.com/" target="_blank">B5Wars Vault</a> - B5Wars rules and LOTS of related stuff
-        <br><a href="reg.php">Register</a> new player account
+		<br><a href="http://b5warsvault.wikidot.com/" target="_blank">B5Wars Vault</a> - B5Wars rules and LOTS of related stuff
+        <br><a href="https://www.facebook.com/groups/218482691602941/" target=\"_blank\">Fiery Void Facebook group</a> - if You want to discuss, ask for help or report a bug!
+		<br><a href="files/FV_FAQ.txt">Fiery Void FAQ</a> - differences from B5 Wars, known bugs... look here if something works contrary to how You expect it to!
+		<br><a href="files/enhancements_list.txt">Fiery Void Enhancement list</a> - unit enhancements available, with short explanations.
+		<br><a href="files/FV_factions.txt">Fiery Void Factions list</a> - short info on more exotic rules and systems of fleets available.
+				
+		<br><br>----------<b>PLAYER ACCOUNT</b>----------
         <br><a href="chpass.php">Change password</a> of Your account
+		or <a href="reg.php">Register</a> new player account
+		
+		
+		
     </div>
 </div>
 <div class="panel large">

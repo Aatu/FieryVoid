@@ -11,6 +11,9 @@ class Rakarta extends MediumShip{
 		$this->shipClass = "Rakarta Frigate";
 		$this->canvasSize = 100;
 
+		$this->notes = 'Kam-Lassit';//Corporation producing the design
+		$this->isd = 2206;
+		
 		$this->forwardDefense = 11;
 		$this->sideDefense = 13;
 

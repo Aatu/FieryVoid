@@ -12,6 +12,9 @@ class Brokados extends BaseShip{
         $this->shipSizeClass = 3;
         $this->fighters = array("heavy"=>24);
         
+		$this->notes = 'Ly-Nakir Industries';//Corporation producing the design
+        $this->isd = 2254;
+		
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
         

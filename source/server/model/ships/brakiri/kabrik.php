@@ -12,7 +12,11 @@ class Kabrik extends MediumShip{
         $this->agile = true;
         $this->gravitic = true;
         $this->canvasSize = 100;
+	    $this->fighters = array("assault shuttles"=>6); //4 Assault Shuttles and 2 Breaching Pods, by design
         
+		$this->notes = 'Pri-Wakat Concepts & Solutions';//Corporation producing the design
+		$this->isd = 2241;
+		
         $this->forwardDefense = 12;
         $this->sideDefense = 13;
         

@@ -29,7 +29,7 @@ class swLancer extends MediumShip{
 	$this->iniativebonus = 12 *5; //true warship
         
         $this->addPrimarySystem(new Reactor(3, 15, 0, 3));
-        $this->addPrimarySystem(new SWScanner(3, 8, 4, 3));
+        $this->addPrimarySystem(new SWScanner(3, 8, 4, 4));
         $this->addPrimarySystem(new Engine(3, 12, 0, 7, 2));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
 	$this->addPrimarySystem(new Thruster(2, 8, 0, 4, 3));

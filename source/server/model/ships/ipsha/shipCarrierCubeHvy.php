@@ -25,8 +25,7 @@ class ShipCarrierCubeHvy extends BaseShip{
 	    //$this->limited = 33;
 	    $this->isd = 2230;
 	    $this->notes = 'Oer Barony Only!';	  
-	    $this->notes .= '<br>EM hardened';	  
-	    $this->notes .= '<br>-1 critical roll bonus';
+	    $this->notes .= '<br>EM hardened';	 
 	    $this->EMHardened = true; //EM Hardening - some weapons would check for this value!
 	    $this->critRollMod = -1; //generalbonus to critical rolls!
 		

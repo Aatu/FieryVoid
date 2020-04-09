@@ -15,6 +15,9 @@ class Haltona extends MediumShip{
         $this->occurence = "rare";
         $this->variantOf = "Halik Fighter-Killer";
         
+		$this->notes = 'Ak-Habil Conglomerate';//Corporation producing the design
+		$this->isd = 2257;
+        
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
         

@@ -12,6 +12,8 @@ class Brathon extends BaseShip{
         $this->shipSizeClass = 3;
 	$this->isd = 2230;
         
+		$this->notes = 'Kam-Lassit';//Corporation producing the design
+		
         $this->forwardDefense = 15;
         $this->sideDefense = 13;
         

@@ -1236,7 +1236,7 @@ class SWTractorBeam extends SWDirectWeapon{
     public $displayName = "Tractor Beam";
 	
     public $priority = 10; //let's fire last
-    public $loadingtime = 2;
+    public $loadingtime = 1;
     public $rangePenalty = 1;
     public $intercept = 0;
     public $fireControl = array(null, 2, 4); // can't fire at fighters, incompatible with crit behavior!

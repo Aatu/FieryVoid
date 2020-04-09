@@ -13,6 +13,9 @@ class Halik extends MediumShip{
         $this->gravitic = true;
         $this->canvasSize = 100;
         
+		$this->notes = 'Ak-Habil Conglomerate';//Corporation producing the design
+		$this->isd = 2250;
+        
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
         

@@ -3,7 +3,7 @@ class swGallofreeEscort extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 140;
+	$this->pointCost = 100;
         $this->faction = "ZStarWars";
 	$this->phpclass = "swGallofreeEscort";
 	$this->shipClass = "GR-75 Gallofree Escort";
@@ -13,8 +13,8 @@ class swGallofreeEscort extends LCV{
 	$this->sideDefense = 11;
   
 	$this->unofficial = true;
-	$this->occurence = "uncommon";
 	$this->variantOf = "GR-75 Gallofree Medium Transport";
+	$this->occurence = "uncommon";
   
 		$this->isd = "Galactic Civil War";
 		$this->notes = "Primary users: Rebel Alliance";

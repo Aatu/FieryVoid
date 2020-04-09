@@ -476,13 +476,17 @@ class BaseShip {
 			if($this->hasSpecialAbility("ImprovedSensors")) $this->notes .= '<br>Improved Sensors';
 			if($this->hasSpecialAbility("AdvancedSensors")) $this->notes .= '<br>Advanced Sensors';
 			*/
-			if($this->critRollMod != 0){
-				$plus = '';
-				if($this->critRollMod > 0) $plus = '+';
+			$totalMod = $this->critRollMod;
+			if($this instanceof FighterFlight){		//another variable with the same meaning exists for fighters, too! Both are used
+				$totalMod += $this->dropOutBonus;
+			}
+			if($totalMod != 0){
+				$plus = '';				
+				if($totalMod > 0) $plus = '+';
 				if($this instanceof FighterFlight){					
-					$this->notes .= '<br>Dropout roll modifier: ' . $plus . $this->critRollMod;
+					$this->notes .= '<br>Dropout roll modifier: ' . $plus . $totalMod;
 				}else{
-					$this->notes .= '<br>Critical roll modifier: ' . $plus . $this->critRollMod;
+					$this->notes .= '<br>Critical roll modifier: ' . $plus . $totalMod;
 				}
 			}
 			if(!($this instanceof FighterFlight)) foreach($this->systems as $sensor) if ($sensor instanceof Scanner){

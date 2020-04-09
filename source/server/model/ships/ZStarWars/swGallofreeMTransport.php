@@ -3,7 +3,7 @@ class swGallofreeMTransport extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 110;
+	$this->pointCost = 100;
         $this->faction = "ZStarWars";
 	$this->phpclass = "swGallofreeMTransport";
 	$this->shipClass = "GR-75 Gallofree Medium Transport";

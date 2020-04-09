@@ -27,20 +27,21 @@ window.weaponManager = {
         if (weaponManager.hasFiringOrder(ship, system)) return;
 
         if (gamedata.isMyShip(ship)) {
-            weaponManager.unSelectWeapon(ship, system);
+            //weaponManager.unSelectWeapon(ship, system); //do NOT do so - that would be much better for next mode change!
 
+			/* no dual weapons around any more!
             if (system.dualWeapon) {
-
                 console.log("changing dual weapon?")
                 var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
                 parentSystem.changeFiringMode();
                 shipWindowManager.setDataForSystem(ship, parentSystem);
-            } else {
+            } else */{
                 system.changeFiringMode();
                 shipWindowManager.setDataForSystem(ship, system);
             }
             
             webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+			
         }
     },
 
@@ -152,7 +153,6 @@ window.weaponManager = {
     },
 
     unSelectWeapon: function unSelectWeapon(ship, weapon) {
-
         for (var i = gamedata.selectedSystems.length - 1; i >= 0; i--) {
             if (gamedata.selectedSystems[i] == weapon) {
                 gamedata.selectedSystems.splice(i, 1);
@@ -298,6 +298,8 @@ window.weaponManager = {
         }
         
         array = systems.filter(function(weapon) {return weapon.displayName === system.displayName});
+		
+		var currentWasSelected = weaponManager.isSelectedWeapon(system); //all others affected weapons will have state set the same as current! 
 
 		for (var i = 0; i < array.length; i++) {
 			var system = array[i];
@@ -312,24 +314,19 @@ window.weaponManager = {
 				continue;
 			}
 
+
 			if (system.weapon) {
-
-				if (gamedata.gamephase != 3 && !system.ballistic) return;
-
-				if (gamedata.gamephase != 1 && system.ballistic) return;
-
-				if (weaponManager.isSelectedWeapon(system)) {
-					weaponManager.unSelectWeapon(ship, system);
-				} else {
-					weaponManager.selectWeapon(ship, system);
+				if (gamedata.gamephase != 3 && !system.ballistic) continue; //improper at this moment
+				if (gamedata.gamephase != 1 && system.ballistic) continue;	//improper at this moment
+				if (weaponManager.hasFiringOrder(ship, system)) continue;//already declared, do not touch it!
+				
+				if (currentWasSelected){//unselect
+					if (weaponManager.isSelectedWeapon(system)) weaponManager.unSelectWeapon(ship, system);
+				} else {//select
+					if (!weaponManager.isSelectedWeapon(system)) weaponManager.selectWeapon(ship, system);
 				}
 			}
 
-			/*
-			if (gamedata.isEnemy(ship, selectedShip) && gamedata.gamephase == 3 && gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system)) {
-				weaponManager.targetShip(ship, system);
-			}
-			*/
 		}
     },
 

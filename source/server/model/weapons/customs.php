@@ -722,7 +722,7 @@ class AbsorbtionShield extends Shield implements DefensiveSystem{
     public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
             return 0;
     }
-    private function checkIsFighterUnderShield($target, $shooter){ //no flying under SW shield
+    private function checkIsFighterUnderShield($target, $shooter){ //no flying under absorbtion shield
         return false;
     }
 	
