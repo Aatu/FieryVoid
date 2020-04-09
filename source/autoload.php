@@ -1215,10 +1215,11 @@ spl_autoload_register(
 		    /*
                 'torataheltakaclog' => '/server/model/ships/torata/TorataHeltakaCLog.php',
 					'torataheltakaclogpods' => '/server/model/ships/torata/TorataHeltakaCLogPods.php',		
-                'toratatoglatmonitor' => '/server/model/ships/torata/TorataToglatMonitor.php',			
+                'toratatoglatmonitor' => '/server/model/ships/torata/TorataToglatMonitor.php',	
+		*/
                 'toratazftrtuka' => '/server/model/ships/torata/torataZFtrTuka.php',
 					'toratazftrtralka' => '/server/model/ships/torata/torataZFtrTralka.php',
-			*/
+			
 			
 		    
 		//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
