@@ -60,7 +60,7 @@ if (isset($_SESSION["user"])) {
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
         -->
-		----------<b>Latest News - April 2020</b>----------
+		----------<b>LATEST NEWS - APRIL 2020</b>----------
 		
 		<br><b><u>Torata</u> have arrived</b> - entire new official faction, prepared by Douglas!
         <br>
