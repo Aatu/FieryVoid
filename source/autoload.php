@@ -1197,8 +1197,9 @@ spl_autoload_register(
 				
 				
 				//Torata ships
-		    /*
+		    
                 'toratacolotnarbase' => '/server/model/ships/torata/torataColotnarBase.php',
+		    /*
 					'toratacolotnarbase2220' => '/server/model/ships/torata/torataColotnarBase2220.php',
 					'toratacolotnarbase2242' => '/server/model/ships/torata/torataColotnarBase2242.php',
                 'toratatumalosat' => '/server/model/ships/torata/torataTumalOSAT.php',
