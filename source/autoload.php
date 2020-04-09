@@ -1198,12 +1198,12 @@ spl_autoload_register(
 				
 				//Torata ships
 		    
-                'toratacolotnarbase' => '/server/model/ships/torata/torataColotnarBase.php',
-		    /*
+                'toratacolotnarbase' => '/server/model/ships/torata/torataColotnarBase.php',		    
 					'toratacolotnarbase2220' => '/server/model/ships/torata/torataColotnarBase2220.php',
 					'toratacolotnarbase2242' => '/server/model/ships/torata/torataColotnarBase2242.php',
                 'toratatumalosat' => '/server/model/ships/torata/torataTumalOSAT.php',
 				
+		    /*
                 'torataatlaccrv' => '/server/model/ships/torata/torataAtlacCRV.php',
 					'toratatacloncrv' => '/server/model/ships/torata/torataTaclonCRV.php',
                 'torataclovantscout' => '/server/model/ships/torata/torataClovantScout.php',				
