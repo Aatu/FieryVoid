@@ -1212,11 +1212,9 @@ spl_autoload_register(
 					'toratadartocca' => '/server/model/ships/torata/torataDartocCA.php',
 					'toratalatracce' => '/server/model/ships/torata/torataLatracCE.php',
                 'toratagoltharcc' => '/server/model/ships/torata/torataGoltharCC.php',
-		    /*
-                'torataheltakaclog' => '/server/model/ships/torata/TorataHeltakaCLog.php',
-					'torataheltakaclogpods' => '/server/model/ships/torata/TorataHeltakaCLogPods.php',		
-                'toratatoglatmonitor' => '/server/model/ships/torata/TorataToglatMonitor.php',	
-		*/
+                'torataheltakaclog' => '/server/model/ships/torata/torataHeltakaCLog.php',
+					'torataheltakaclogpods' => '/server/model/ships/torata/torataHeltakaCLogPods.php',		
+                'toratatoglatmonitor' => '/server/model/ships/torata/torataToglatMonitor.php',	
                 'toratazftrtuka' => '/server/model/ships/torata/torataZFtrTuka.php',
 					'toratazftrtralka' => '/server/model/ships/torata/torataZFtrTralka.php',
 			
