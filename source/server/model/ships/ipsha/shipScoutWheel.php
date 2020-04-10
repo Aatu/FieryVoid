@@ -38,6 +38,9 @@ class ShipScoutWheel extends BaseShip{
         $this->pivotcost = 1;
 	$this->gravitic = true;
         
+		$this->enhancementOptionsEnabled[] = 'IPSH_EETH'; //can be refitted as Eethan Barony ship
+		$this->enhancementOptionsEnabled[] = 'IPSH_ESSAN'; //can be refitted as Essan Barony ship
+        
 	    
 	    
 	$this->addPrimarySystem(new MagGravReactor(5, 25, 0, 42+9+4));//+Sensor+Jump Drive power

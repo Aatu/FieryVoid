@@ -22,6 +22,9 @@ class wlcAshinar extends HeavyCombatVessel{
         $this->isd = 1994;
         $this->unofficial = true;
         $this->variantOf = "Tinashi";
+		
+		$this->notes = 'ALTERNATE UNIVERSE - unit designed for "In ancient times" campaign';
+
 
         $this->addPrimarySystem(new Reactor(5, 25, 0, 8));
         $this->addPrimarySystem(new CnC(6, 20, 0, 0));

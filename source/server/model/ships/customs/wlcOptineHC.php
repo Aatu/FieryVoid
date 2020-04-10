@@ -17,6 +17,8 @@ class wlcOptineHC extends BaseShip{
 		$this->unofficial = true;
 		$this->fighters = array("light"=>12);        
 
+		$this->notes = 'ALTERNATE UNIVERSE - unit designed for "In ancient times" campaign';
+
 		$this->turncost = 1;
 		$this->turndelaycost = 1;
 		$this->accelcost = 4;

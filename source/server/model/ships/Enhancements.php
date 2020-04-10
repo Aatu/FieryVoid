@@ -109,7 +109,27 @@ class Enhancements{
 			  $enhPriceStep = 0;
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
-	  }
+	  }	  
+
+	  //Ipsha-specific - Eethan Barony refit (available for generic Ipsha designs only, Eethan-specific may have it already incorporated in some form)
+	  $enhID = 'IPSH_EETH';	  
+	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Eethan Barony refit';
+		  $enhLimit = 1;	
+		  $enhPrice = ceil($ship->pointCost*0.1); //+10%	
+		  $enhPriceStep = 0;
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+	  }  	
+	  
+	  //Ipsha-specific - Essan Barony refit (available for generic Ipsha designs only, Essan-specific ones may have it already incorporated in some form)
+	  $enhID = 'IPSH_ESSAN';	  
+	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Essan Barony refit';
+		  $enhLimit = 1;	
+		  $enhPrice = 0;
+		  $enhPriceStep = 0;
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+	  }  	
 	  
 	  //Poor Crew (official but modified): -5 Initiative, -1 Engine, -1 Sensors, -1 Reactor power, +1 Profile, +2 to critical results
 	  //cost: -15% of ship cost (second time: -10%)
@@ -147,15 +167,15 @@ class Enhancements{
 	/* all fighter enhancement options - availability and cost calculation
 	*/
   public static function setEnhancementOptionsFighter($flight){
-	  //Elite Pilot: StarWars only, sets pivot cost to 1, cost: 20% craft price (round up), limit: 1
+	  //Elite Pilot: StarWars only, sets pivot cost to 1, Initiative +1(5),  OB +1, profile -1, cost: 40% craft price (round up), limit: 1
 	  $enhID = 'ELITE_SW';	  
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
 		  $enhName = 'Elite Pilot';
 		  $enhLimit = 1;		  
 		  if($flight instanceof SuperHeavyFighter){//single-craft flight! 
-			$enhPrice = ceil($flight->pointCost/5);
+			$enhPrice = ceil($flight->pointCost*0.4);
 		  }else{
-		  	$enhPrice = ceil($flight->pointCost/(5*6)); //price per craft, while flight price is per 6-craft flight	  
+		  	$enhPrice = ceil(0.4*$flight->pointCost/6); //price per craft, while flight price is per 6-craft flight	  
 		  }  
 		  $enhPriceStep = 0;
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
@@ -257,8 +277,12 @@ class Enhancements{
 				$flight->enhancementTooltip .= "$enhDescription";
 				if ($enhCount>1) $ship->enhancementTooltip .= " (x$enhCount)";
 				switch ($enhID) { 
-					case 'ELITE_SW': //Elite Pilot (SW): pivot cost 1
+					case 'ELITE_SW': //Elite Pilot (SW): pivot cost 1, Ini +1, OB +1, Profiles -1
 						$flight->pivotcost = 1;
+						$flight->offensivebonus += $enhCount;
+						$flight->iniativebonus += $enhCount*5;
+						$flight->forwardDefense -= $enhCount;
+						$flight->sideDefense -= $enhCount;
 						break;
 					case 'EXP_MOTIV': //Expert Motivator: -2 on dropout rolls
 						$flight->critRollMod -= $enhCount*2;
@@ -299,7 +323,7 @@ class Enhancements{
 				$ship->enhancementTooltip .= "$enhDescription";
 				if ($enhCount>1) $ship->enhancementTooltip .= " (x$enhCount)";
 			        switch ($enhID) {
-
+						
 					case 'ELITE_CREW': //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results
 						//fixed values
 						$ship->forwardDefense -= $enhCount;
@@ -411,6 +435,38 @@ class Enhancements{
 						}
 						break;
 						
+					case 'IPSH_EETH': //Ipsha Eethan Barony refit: +2 free thrust, +25% available power (round arithmetically), +0.1 turn delay, -5 Initiative, +4 critical roll modifier for Reactor and Engine
+						//fixed values:
+						$ship->iniativebonus -= $enhCount*5;
+						$ship->turndelaycost += 0.1;
+						//system mods: 
+						foreach ($ship->systems as $system){
+							if ($system instanceof MagGravReactor){ //Reactor - tailored for Mag-Gravitic
+								$system->output = round($system->output*1.25);//+25%
+								$system->critRollMod += 4;
+							}else if ($system instanceof Engine){ //Engine
+								$system->output = $system->output +2;
+								$system->critRollMod += 4;
+							}
+						}  	
+						break;			
+						
+						
+					case 'IPSH_ESSAN': //Ipsha Essan Barony refit: +1 Engine (and +2 boxes), -1 Sensors (and -2 boxes), +1 structural armor (no higher than 5)
+						//system mods: 
+						foreach ($ship->systems as $system){
+							if ($system instanceof Scanner){ //Scanner
+								$system->output = $system->output -1;
+								$system->maxhealth = $system->maxhealth -2;
+							}else if ($system instanceof Engine){ //Engine
+								$system->output = $system->output +1;
+								$system->maxhealth = $system->maxhealth +2;
+							}else if ($system instanceof Structure){ //Structure block
+								if ($system->armour<5) $system->armour = $system->armour + 1;
+							}
+						}  	
+						break;			
+						
 					case 'POOR_CREW': //Poor Crew: -1 Engine, -1 Sensors, -1 Reactor power, +1 Profile, +2 to critical results, -5 Initiative
 						//fixed values
 						$ship->forwardDefense += $enhCount;
@@ -487,9 +543,13 @@ class Enhancements{
 				$enhDescription = $entry[1];
 				if($enhCount > 0) {
 					switch ($enhID) {									
-						case 'ELITE_SW': //Elite Pilot: modify pivot cost
+						case 'ELITE_SW': //Elite Pilot: modify pivot cost, OB, profile and Initiative
 							if($ship instanceof FighterFlight){
 								$strippedShip->pivotcost = $ship->pivotcost;
+								$strippedShip->offensivebonus = $ship->offensivebonus;
+								$strippedShip->iniativebonus = $ship->iniativebonus;
+								$strippedShip->forwardDefense = $ship->forwardDefense;
+								$strippedShip->sideDefense = $ship->sideDefense;
 							}
 							break;
 							
@@ -551,6 +611,12 @@ class Enhancements{
 							$strippedShip->sideDefense = $ship->sideDefense;
 							$strippedShip->iniativebonus = $ship->iniativebonus;
 							break;
+							
+						case 'IPSH_EETH': //Ipsha Eethan Barony refit: +2 free thrust, +25% available power (round up), +0.1 turn delay, -5 Initiative, +4 critical roll modifier for Reactor and Engine
+							$strippedShip->iniativebonus = $ship->iniativebonus;
+							$strippedShip->turndelaycost = $ship->turndelaycost;
+							break;			
+							
 						case 'POOR_CREW': //Poor crew: Initiative and Profiles modified
 							$strippedShip->forwardDefense = $ship->forwardDefense;
 							$strippedShip->sideDefense = $ship->sideDefense;
@@ -589,7 +655,40 @@ class Enhancements{
 							if($system instanceof Thruster){
 								$strippedSystem->output = $system->output;
 							}
-							break;
+							break;							
+
+						case 'IPSH_EETH': //modifies output and crit mod of Engine and Reactor
+							if ($system instanceof MagGravReactor){ //Reactor
+								$strippedSystem->output = $system->output ;
+								$strippedSystem->critRollMod = $system->critRollMod ;
+							}else if ($system instanceof Engine){ //Engine
+								$strippedSystem->output = $system->output ;
+								$strippedSystem->critRollMod = $system->critRollMod ;
+							}
+							break;		
+							
+							
+						foreach ($ship->systems as $system){
+							if ($system instanceof MagGravReactor){ //Reactor - tailored for Mag-Gravitic
+								$system->output = ceil($system->output*1.25);//+25%
+								$system->critRollMod += 4;
+							}else if ($system instanceof Engine){ //Engine
+								$system->output = $system->output +2;
+								$system->critRollMod += 4;
+							}
+						}  	
+
+						case 'IPSH_ESSAN': //modifies output and structure of Engine and Sensor, and armor of Structure
+							if ($system instanceof Scanner){ //Scanner
+								$strippedSystem->output = $system->output ;
+								$strippedSystem->maxhealth = $system->maxhealth ;
+							}else if ($system instanceof Engine){ //Engine
+								$strippedSystem->output = $system->output ;
+								$strippedSystem->maxhealth = $system->maxhealth ;
+							}else if ($system instanceof Structure){ //Structure block
+								$strippedSystem->armour = $system->armour ;
+							}
+							break;							
 					
 						case 'SPARK_CURT': //Spark Curtain - affects output of Spark Field
 							if($system instanceof SparkField){

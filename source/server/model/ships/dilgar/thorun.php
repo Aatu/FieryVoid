@@ -48,6 +48,8 @@ class Thorun extends FighterFlight{
             
             $fighter->addFrontSystem(new PairedLightBoltCannon(330, 30, 4));
             
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+            
             $this->addSystem($fighter);
         }
     }

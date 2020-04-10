@@ -9,7 +9,7 @@ class wlcChlonasMerTanCRV2230 extends MediumShip{
         $this->imagePath = "img/ships/ChlonasMerTan.png";
         $this->shipClass = "Mer'Tan Corvette (2230)";
         $this->agile = true;
-        $this->canvasSize = 100;
+        $this->canvasSize = 200;
 	    
 	$this->faction = "Ch'Lonas";
         $this->variantOf = "Mer'Tan Corvette";

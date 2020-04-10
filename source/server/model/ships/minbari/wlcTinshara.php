@@ -21,6 +21,9 @@ class wlcTinshara extends HeavyCombatVessel{
         $this->isd = 1869;
         $this->variantOf = "Tinashi";
         $this->unofficial = true;
+		
+		$this->notes = 'ALTERNATE UNIVERSE - unit designed for "In ancient times" campaign';
+
 
         $this->addPrimarySystem(new Reactor(5, 21, 0, 0));
         $this->addPrimarySystem(new CnC(6, 20, 0, 0));

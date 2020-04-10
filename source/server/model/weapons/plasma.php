@@ -574,7 +574,7 @@ class LightPlasmaAccelerator extends LinkedWeapon{
 			$this->data["Special"] = "If not fired for one turn, can fire a charged shot:";  
 			$this->data["Special"] .= "<br> - Standard: 1d6+3"; 
 			$this->data["Special"] .= "<br> - Charged: 2d6+6, cannot target fighters"; 
-			$this->data["Special"] .= "Damage penalty: -1/hex.";  
+			$this->data["Special"] .= "<br>Damage penalty: -1/hex.";  
 		}
 		
 	

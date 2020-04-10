@@ -12,7 +12,8 @@ class zzunoffTShonStealth extends BaseShip{
         $this->shipClass = "T'Shon Explorer (Stealth)";
         //$this->fighters = array("normal"=>12); //12 Assault Shuttles in standared configuration
 
-	$this->variantOf = "T'Loth Assault Cruiser";
+	//$this->variantOf = "T'Loth Assault Cruiser";
+	$this->variantOf = "OBSOLETE"; //let's drop stealthed variant, ship enhancements now exist in game
 	$this->occurence = "rare";
 	$this->isd = 2214;
 	$this->unofficial = true;

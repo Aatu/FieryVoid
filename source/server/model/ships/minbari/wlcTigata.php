@@ -23,6 +23,9 @@ class wlcTigata extends BaseShip{
         $this->unofficial = true;
         $this->isd = 1870;
         $this->variantOf ="Tigara";
+		
+		$this->notes = 'ALTERNATE UNIVERSE - unit designed for "In ancient times" campaign';
+
 
         // Ship system arguments: armor, health, power req, output
         $this->addPrimarySystem(new Reactor(6, 25, 0, 0));

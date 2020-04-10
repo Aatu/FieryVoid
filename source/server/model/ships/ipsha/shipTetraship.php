@@ -40,6 +40,9 @@ class ShipTetraship extends MediumShipLeftRight{
 	$this->iniativebonus = 12 *5;
 	    
 	    
+		$this->enhancementOptionsEnabled[] = 'IPSH_EETH'; //can be refitted as Eethan Barony ship
+		$this->enhancementOptionsEnabled[] = 'IPSH_ESSAN'; //can be refitted as Essan Barony ship
+        
         
 
 	$this->addPrimarySystem(new MagGravReactor(3, 15, 0, 12+4));

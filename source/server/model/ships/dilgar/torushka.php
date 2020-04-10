@@ -9,7 +9,7 @@ class Torushka extends FighterFlight{
         $this->faction = "Dilgar";
         $this->phpclass = "Torushka";
         $this->shipClass = "Torushka Stingfighters";
-        $this->imagePath = "img/ships/thorun.png";
+        $this->imagePath = "img/ships/Torushka.png";
 
 
         $this->forwardDefense = 7;
@@ -36,8 +36,8 @@ class Torushka extends FighterFlight{
             
             $fighter = new Fighter("Torushka", $armour, 8, $this->id);
             
-            $fighter->imagePath = "img/ships/thorun.png";
-            $fighter->iconPath = "img/ships/thorun_large.png";
+            $fighter->imagePath = "img/ships/Torushka.png";
+            $fighter->iconPath = "img/ships/Torushka_large.png";
             
             if(count($this->systems) == 0 ){
                 $this->flightLeader = $fighter;

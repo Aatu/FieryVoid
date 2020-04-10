@@ -20,6 +20,8 @@ class wlcOptineHCU extends BaseShip{
 		$this->rollcost = 3;
 		$this->pivotcost = 4;
     
+		$this->notes = 'ALTERNATE UNIVERSE - unit designed for "In ancient times" campaign';
+
 		$this->addPrimarySystem(new Reactor(6, 25, 0, 0));
 		$this->addPrimarySystem(new CnC(6, 16, 0, 0));
 		$this->addPrimarySystem(new Scanner(6, 23, 4, 8));

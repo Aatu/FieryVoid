@@ -1008,7 +1008,11 @@ spl_autoload_register(
                 'wlcchlonasontharicva2253' => '/server/model/ships/ZCustomChLonas/wlcChlonasOnThariCVA2253.php',
                 'wlcchlonasontaincvh' => '/server/model/ships/ZCustomChLonas/wlcChlonasOnTainCVH.php',
                 'wlcchlonasxertharica' => '/server/model/ships/ZCustomChLonas/wlcChlonasXerThariCA.php',
-		    
+                'wlcchlonasanvothi' => '/server/model/ships/ZCustomChLonas/wlcChlonasAnVothi.php',
+                'wlcchlonasxerenthain' => '/server/model/ships/ZCustomChLonas/wlcChlonasXerEnthain.php',
+                'wlcchlonasvakan' => '/server/model/ships/ZCustomChLonas/wlcChlonasVaKan.php',
+                'wlcchlonastekkashi' => '/server/model/ships/ZCustomChLonas/wlcChlonasTekKashi.php',		    
+			
                 'wlcemperordn2090' => '/server/model/ships/customs/wlcEmperorDN2090.php',
                 'wlcoptinehc' => '/server/model/ships/customs/wlcOptineHC.php',
                 'wlcoptinehcu' => '/server/model/ships/customs/wlcOptineHCU.php',
@@ -1042,7 +1046,7 @@ spl_autoload_register(
                 'zzunofftashkaton' => '/server/model/ships/brakiri/zzunoffTashkaton.php',
                 'zzunofftashkavaton' => '/server/model/ships/brakiri/zzunoffTashkavaton.php',
                 'zzunofftshon' => '/server/model/ships/narn/zzunoffTshon.php',
-                'zzunofftshonstealth' => '/server/model/ships/narn/zzunoffTshonStealth.php',
+                //'zzunofftshonstealth' => '/server/model/ships/narn/zzunoffTshonStealth.php',
                 'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
 		    
 		 

@@ -45,8 +45,8 @@ class ShipSurgesphere extends BaseShip{
         //$this->addPrimarySystem(new MagGravReactor(4, 28, 0, 60));
 	$this->addPrimarySystem(new MagGravReactor(4, 28, 0, 60+6));
 	$this->addPrimarySystem(new CnC(5, 20, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 20, 6, 8));
-        $this->addPrimarySystem(new Engine(4, 33, 0, 8, 6));
+        $this->addPrimarySystem(new Scanner(4, 18, 6, 7));
+        $this->addPrimarySystem(new Engine(4, 35, 0, 10, 6));
         $this->addPrimarySystem(new Hangar(4, 6));
 	$this->addPrimarySystem(new SparkField(4, 0, 0, 0, 360));	
 	$this->addPrimarySystem(new SparkField(4, 0, 0, 0, 360));
@@ -94,10 +94,10 @@ class ShipSurgesphere extends BaseShip{
         $this->addRightSystem(new MagGraviticThruster(4, 20, 0, 99, 4));
 		
 		
-        $this->addFrontSystem(new Structure(4, 60));
-        $this->addAftSystem(new Structure(4, 60));
-        $this->addLeftSystem(new Structure(4, 72));
-        $this->addRightSystem(new Structure(4, 72));
+        $this->addFrontSystem(new Structure(5, 60));
+        $this->addAftSystem(new Structure(5, 60));
+        $this->addLeftSystem(new Structure(5, 72));
+        $this->addRightSystem(new Structure(5, 72));
         $this->addPrimarySystem(new Structure(5, 56));
 		
 		

@@ -7,7 +7,7 @@ class wlcChlonasTraVoraCL2240 extends BaseShipNoAft{
         $this->pointCost = 545;
         $this->phpclass = "wlcChlonasTraVoraCL2240";
         $this->imagePath = "img/ships/ChlonasTraVora.png";
-        $this->canvasSize = 120;
+        $this->canvasSize = 200;
         $this->shipClass = "Tra'Vora Light Cruiser (2240)";
         $this->fighters = array("heavy" => 12);
         $this->forwardDefense = 14;

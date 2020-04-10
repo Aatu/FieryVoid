@@ -38,6 +38,9 @@ class ShipBattlehex extends HeavyCombatVesselLeftRight{
         
 	$this->iniativebonus = 6 *5; 
 	    
+		$this->enhancementOptionsEnabled[] = 'IPSH_EETH'; //can be refitted as Eethan Barony ship
+		$this->enhancementOptionsEnabled[] = 'IPSH_ESSAN'; //can be refitted as Essan Barony ship
+        
 	    
         
 	$this->addPrimarySystem(new MagGravReactor(4, 19, 0, 30+4));
