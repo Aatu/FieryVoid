@@ -7,7 +7,7 @@ class wlcChlonasForVoraScout extends BaseShipNoAft{
         $this->pointCost = 500;
         $this->phpclass = "wlcChlonasForVoraScout";
         $this->imagePath = "img/ships/ChlonasForVora.png";
-        $this->canvasSize = 120;
+        $this->canvasSize = 200;
         $this->shipClass = "For'Vora Scout";
         $this->fighters = array("heavy" => 12);
         $this->forwardDefense = 14;

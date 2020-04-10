@@ -17,6 +17,8 @@ class wlcEmperorDN2090 extends BaseShip{
         $this->fighters = array("heavy"=>24); 
 		$this->unofficial = true;
 		$this->isd = 2090;
+		
+		$this->notes = 'ALTERNATE UNIVERSE - unit designed for "In ancient times" campaign';
 
         $this->shipSizeClass = 3; //Enormousis not implemented
         $this->Enormous = true;		

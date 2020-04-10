@@ -8,7 +8,10 @@ Custom designs - some units are marked as "custom". This means they're not offic
 Unit enhancements - Fiery Void allows players to add enhancements to their ships (full list is available in separate file). Keep in mind that unit enhancements are originally optional rule, and enhancements may not be evaluated as well as base hulls (although they're generally pricy compared to their effect!). 
 	Before using enhancements for more than rounding out remaining points it's good practice to make sure that Your opponent agrees with that (and if You create a game with enhancements allowed - say so explicitly in game description!).
 	Note that some options listed as "Enhancements" are such only technically, as they're regularly available unit options (eg. fighter navigator). This is noted in enhancements list as well.
-
+Fleet checker - tool that performs automatic check of fleet composition (using standard tournament rules). Game does not enforce its use, but these restrictions are aimed at creation of balanced and interesting fleets so it's encouraged :) . There are a few caveats to its workings:
+	- non-standard restrictions are not checked (unit- or faction- specific requirements, allowances and restrictions - they're usually present in unit notes, for player to check (or not))
+	- fighter variant restrictions are at flight level. This means that flight size does not matter, please do not abuse this. Secondly, official rules says fighter variant restrictions are of FLIGHTS per SQUADRONS (eg. uncommon - one flight per three squadrons). FV goes for straight one per three flights (this is a deliberate change). 
+	- Fiery Void scales restrictions with fleet size (base rules have some restrictions flat aimed at 3500 level, eg. up to 3 ships on a given hull - this would have been ridiculous in 10000 points battle and hardly a limit at 2000)
 
 
 ABBAI
@@ -136,8 +139,10 @@ No very specific rules/technologies.
 IPSHA
 Baronies - there is no Ipsha "national fleet". Ipsha species is split into "Baronies" (separate feudal-like states), and fielded fleet belongs to one of them. Player may use only generic designs in use by all Baronies and designs specific to one chosen Barony (it's indicated in unit notes). Similarly, some enhancements are Barony-specific.
 	In-game fleet checker does not take this rule into account.
+	Some "baronization" of ships is available through unit enhancements (eg. You can apply typical Essan changes to basic Ipsha design).
 Gravitic Drive - see Abbai.
 Mag-Gravitic Reactor - Ipsha power source has fixed power output, rather than default relative (eg. "Power rating of 40" rather than "enough to enable all systems on ship"). This implies that destruction of systems does NOT cut into power produced (Reactor outpus stays the same) - so even though Power is usually negative for a fresh ship (eg. can't power everything), number of possible enabled systems does NOT go down with damage.
+Singularity Engine - Ipsha drive system is closely tied to Mag-Gravitic Reactor, which produces some quirks (notably Engine destructions destroyes the ship outright). This is not implemented in FV.
 EM Hardened - Ipsha units are especially resistant to Electromagnetic damage. This is cumulative with dropout bonus their fighters possess. 
 	Tabletop: Critical/drouputrolls caused by EM weapons are made with -2 bonus. In addition, this trait reduces effects of many EM weapons.
 	Fiery Void: ALL critical/dropout rolls are made with -1 bonus. In addition, EM weapons treat EM Hardened units as they would ones with Advanced Armor.
@@ -209,7 +214,7 @@ No very specific technologies (or technologies specific to base faction).
 
 
 SMALL RACES
-A few separate factions, connected only by the fact that they don't have many ship designs - as is fitting for such small organizations.
+A few separate factions (both official and custom), connected only by the fact that they don't have many ship designs - as is fitting for such small organizations.
 Belt Alliance is somewhat notable for extensive use of Matter weapons (including as fighter guns - see Orieni) and EA Interceptors (although with no integrated Energy Web).
 Otherwise no very specific technologies.
 

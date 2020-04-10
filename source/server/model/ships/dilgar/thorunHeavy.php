@@ -53,6 +53,8 @@ class ThorunHeavy extends FighterFlight{
             $fighter->addFrontSystem(new PairedLightBoltCannon(330, 30, 4));
             $fighter->addFrontSystem(new FighterMissileRack(4, 330, 30));
             
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+            
             $this->addSystem($fighter);
         }
     }

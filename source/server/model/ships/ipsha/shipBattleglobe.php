@@ -39,6 +39,9 @@ class ShipBattleglobe extends HeavyCombatVesselLeftRight{ //technically a Capita
 	$this->iniativebonus = 0 *5; //THIS IS A CAPITAL SHIP, despite HCV arrangement!
 	    
 	    
+		$this->enhancementOptionsEnabled[] = 'IPSH_EETH'; //can be refitted as Eethan Barony ship
+		$this->enhancementOptionsEnabled[] = 'IPSH_ESSAN'; //can be refitted as Essan Barony ship
+        
         
         //$this->addPrimarySystem(new MagGravReactor(4, 28, 0, 60));
 	$this->addPrimarySystem(new MagGravReactor(4, 25, 0, 42+5));

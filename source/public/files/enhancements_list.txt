@@ -77,11 +77,21 @@ Spark Curtain (completely unofficial, ALTERNATE TIMELINE):
 	Cost: 40 + 10/Spark Field
 	Limit: 1 
 
+Essan Barony refit (Barony-specific variant rather than enhancement)
+	Effect: Engine +1 output and +2 structure boxes, Sensors -1 output and -2 structure boxes, Structure armor +1 on all sections (no higher than 5) 
+	Cost: 0
+	Limit: 1 
 
+Eethan Barony refit (Barony-specific variant rather than enhancement; this represents Power Pod upgrade, changed to be distributed ship upgrade rather than add-on system)
+	Effect: +2 free thrust, +25% available power, +0.1 turn delay, -5 Initiative, +4 critical roll modifier for Reactor and Engine
+	Cost: 10% of ship cost
+	Limit: 1
+	
+	
 
 STAR WARS:
 
 Elite Pilot (fighter):
-	Effect: Pivot Cost is 1 (2 for combat pivot) rather than regular 2. 
-	Cost: 15% of craft price (round up)
+	Effect: Pivot Cost is 1 (2 for combat pivot) rather than regular 2. Initiative +5. OB +1. Profile -1.
+	Cost: 40% of craft price (round up)
 	Limit: 1

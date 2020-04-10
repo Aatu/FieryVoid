@@ -22,6 +22,9 @@ class wlcTishat1950 extends FighterFlight{
         $this->isd = 1750; //base Tishat is 1880, early cannot be 70 years later than regular...
         $this->unofficial = true;
         $this->variantOf = "Tishat flight";
+		
+		$this->notes = 'ALTERNATE UNIVERSE - unit designed for "In ancient times" campaign';
+
         
     }
 

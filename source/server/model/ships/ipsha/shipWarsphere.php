@@ -37,6 +37,9 @@ class ShipWarsphere extends BaseShip{
 	$this->gravitic = true;
         
 	    
+		$this->enhancementOptionsEnabled[] = 'IPSH_EETH'; //can be refitted as Eethan Barony ship
+		$this->enhancementOptionsEnabled[] = 'IPSH_ESSAN'; //can be refitted as Essan Barony ship
+        
 	    
         
         //$this->addPrimarySystem(new MagGravReactor(4, 28, 0, 60));

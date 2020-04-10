@@ -6,8 +6,8 @@ class wlcChlonasOnKashiDD extends HeavyCombatVesselLeftRight{
         
         $this->pointCost = 450;
         $this->phpclass = "wlcChlonasOnKashiDD";
-        $this->imagePath = "img/ships/ChlonasOnKashi.png";
-        $this->canvasSize = 128;
+        $this->imagePath = "img/ships/ChlonasEsKashi.png";
+        $this->canvasSize = 200;
         $this->shipClass = "On'Kashi Support Destroyer";
         $this->fighters = array("light"=>6);
 	    
