@@ -77,6 +77,8 @@ if (isset($_SESSION["user"])) {
         <br><b>Ipsha fix</b> - EM Hardened trait now actually doing something :)
         <br><b>Interface changes</b> - weapon order of entries changed, onmouseover help for some icons...
         <br><b>Interface more changes</b> - select all weapons now skips already declared ones, mode change no longer closes weapon menu.
+        <br><b>Ch'Lonas expanded</b> - further Ch'Lonas ships, courtesy of Douglas
+        <br><b>Ipsha enhanced</b> - Essan and Eethan Barony-specific refits are available
 
         
 	
