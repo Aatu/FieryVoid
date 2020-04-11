@@ -220,7 +220,7 @@ Otherwise no very specific technologies.
 
 
 STREIB
-A faction that has only one offically released ship (Collector), it was expanded a bit in BabCom by PBROWN to create a playable faction.
+A faction that has only one offically released ship (Collector), it was expanded a bit in BabCom by Paul Brown to create a playable faction.
 Streib are notable for their extremely tough armor (without any special properties though) and extensive use of energy draining/dropout causing weapons. 
 Layout of their ships is atypical as well - highly assymetrical, with many core systems placed on outer sections.
 
