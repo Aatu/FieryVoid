@@ -48,8 +48,8 @@ class Looter extends BaseShip{
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
 		
 		$this->addRightSystem(new Thruster(3, 15, 0, 4, 4));
-        $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         $this->addRightSystem(new LightParticleCannon(2, 6, 5, 0, 180));
+        $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 32));
