@@ -447,6 +447,9 @@ window.ew = {
 
             var foew = ew.getEWByType("OEW", elint, target) * 0.5;
 
+			var dist = ew.getDistruptionEW(elint); //account for ElInt being disrupted
+			foew = foew-dist;
+				
             if (foew > amount) amount = foew;
         }
 

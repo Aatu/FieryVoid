@@ -87,10 +87,7 @@
 			return 0;
 		    }
 	    }
-            
-            if (Mathlib::getDistanceHex( $target, $ship ) > 30)
-                return 0;
-            
+                        
             $amount = 0;
             foreach ($gamedata->ships as $elint)
             {
@@ -110,6 +107,10 @@
                     continue;
 
                 $foew = $elint->getEWByType("OEW", $gamedata->turn, $target) * 0.5;
+								
+				$dist = EW::getDistruptionEW($gamedata, $elint); //account for ElInt being disrupted
+				$foew = $foew-$dist;
+				
                 if ($foew > $amount)
                     $amount = $foew;
             }
