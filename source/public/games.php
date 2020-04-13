@@ -79,7 +79,8 @@ if (isset($_SESSION["user"])) {
         <br><b>Interface more changes</b> - select all weapons now skips already declared ones, mode change no longer closes weapon menu.
         <br><b>Ch'Lonas expanded</b> - further Ch'Lonas ships, courtesy of Douglas
         <br><b>Ipsha enhanced</b> - Essan and Eethan Barony-specific refits are available
-
+	<br><b>SOEW fixed</b> - there actually were a few bugs in this area (all of them very rare due to interactions needed)
+	<br><b>Pentagon Array fixed</b> - first Torata fix ;)
         
 	
         <br><br>
