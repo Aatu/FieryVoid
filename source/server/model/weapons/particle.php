@@ -1316,6 +1316,10 @@ class PentagonArray extends Raking{
 		$rake = Dice::d(10);
 		$damage+=$rake;
 		$this->rakes[] = $rake;
+/*just a test with forced rake size		
+$this->rakes = array(6,6,6,6,6);
+$damage = 30;		
+*/
 		return $damage;
 	}			
 		
@@ -1368,7 +1372,7 @@ class PentagonArray extends Raking{
 			$newTarget = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $location);
 			return $newTarget;
 		}else{ //standard
-			parent::getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location);
+			return parent::getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location);
 		}
 	}
 
