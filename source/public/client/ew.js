@@ -424,8 +424,42 @@ window.ew = {
 
         return mathlib.getDistanceBetweenShipsInHex(ship, target) <= distance;
     },
+	
+	getJammerValueFromTo: function getJammerValueFromTo(shooter, target) {
+		if (shooter.faction === target.faction) return 0;
+		
+		var jammerSystem = shipManager.systems.getSystemByName(target, "jammer");
+		var jammerValue = 0;		
+		if(jammerSystem != null) {
+			jammerValue = shipManager.systems.getOutput(target, jammerSystem);
+		}
+		var stealthSystem = shipManager.systems.getSystemByName(target, "stealth");
+		var stealthValue = 0;		
+		if( (stealthSystem != null) && (mathlib.getDistanceBetweenShipsInHex(shooter, target) > 5) ) { //stealth-protected target at range >5 hexes gains STealth properties
+			stealthValue = shipManager.systems.getOutput(target, stealthSystem);
+		}
+		if(stealthValue > jammerValue) jammerValue = stealthValue;//larger value is used
+		
+		if (jammerValue > 0){ //else no point
+			//Advanced Sensors negate Jammer, Improved Sensors halve Jammer
+			if (shipManager.hasSpecialAbility(shooter, "AdvancedSensors")) {
+				jammerValue = 0; //negated
+			} else if (shipManager.hasSpecialAbility(shooter, "ImprovedSensors")) {
+				jammerValue = jammerValue * 0.5; //halved
+			}
+		} else {
+			jammerValue = 0; //never negative
+		}
+			
+        return jammerValue;		
+	},
 
     getSupportedOEW: function getSupportedOEW(ship, target) {
+		var jammerValue = ew.getJammerValueFromTo(ship,target);
+		if (jammerValue>0) {
+			return 0; //no lock-on on supported ship negates SOEW, if any
+		}
+		/*replaced by code above
         if(!shipManager.hasSpecialAbility(ship, "AdvancedSensors")){ //Advanced Sensors negate Jammer
             var jammer = shipManager.systems.getSystemByName(target, "jammer");
 
@@ -434,6 +468,7 @@ window.ew = {
                 return 0;
             }
         }
+		*/
 
         var amount = 0;
 
@@ -445,6 +480,9 @@ window.ew = {
 
             if (!ew.getEWByType("SOEW", elint, ship)) continue;
 
+			jammerValue = ew.getJammerValueFromTo(elint,target);
+			if (jammerValue>0) continue; //no lock-on negates SOEW, if any
+			
             var foew = ew.getEWByType("OEW", elint, target) * 0.5;
 
 			var dist = ew.getDistruptionEW(elint); //account for ElInt being disrupted
@@ -455,7 +493,7 @@ window.ew = {
 
         if (ship.flight) {
             // fighters only receive half the amount of SOEW
-            return amount * 0.5;
+            amount = amount * 0.5;
         }
 
         return amount;

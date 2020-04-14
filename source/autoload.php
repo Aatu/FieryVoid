@@ -16,7 +16,7 @@ spl_autoload_register(
                 'acceleratorprimus' => '/server/model/ships/centauri/AcceleratorPrimus.php',
                 'adder' => '/server/model/ships/raiders/adder.php',
                 'advancedassaultlaser' => '/server/model/weapons/lasers.php',
-                'advancedseffensa' => '/server/model/ships/balosian/advancedSeffensa.php',
+                'advancedseffensa' => '/server/model/ships/balosian/advancedSeffensa.php',				
                 'advparticlebeam' => '/server/model/weapons/particle.php',
                 'aldrith' => '/server/model/ships/abbai/aldrith.php',
                 'aldrithupgr' => '/server/model/ships/abbai/aldrithupgr.php',
@@ -1186,7 +1186,7 @@ spl_autoload_register(
 		    
 				//AdaptiveArmor rework		    
                 'adaptivearmorcontroller' => '/server/model/systems/baseSystems.php',
-                'whitestarold' => '/server/model/ships/minbari/whitestarOld.php',		    
+                //'whitestarold' => '/server/model/ships/minbari/whitestarOld.php',		    
                 'individualnote' => '/server/model/BaseClasses.php',
 		    
                 'weaponem' => '/server/model/weapons/specialWeapons.php',
@@ -1222,6 +1222,13 @@ spl_autoload_register(
                 'toratazftrtuka' => '/server/model/ships/torata/torataZFtrTuka.php',
 					'toratazftrtralka' => '/server/model/ships/torata/torataZFtrTralka.php',
 			
+				//new batch for Balosians		
+                'moesarbase' => '/server/model/ships/balosian/moesarBase.php',
+                'lessaosat' => '/server/model/ships/balosian/lessaOSAT.php',
+                'talasi' => '/server/model/ships/balosian/talasi.php',
+                'fessa' => '/server/model/ships/balosian/fessa.php',
+                'hassa' => '/server/model/ships/balosian/hassa.php',
+				
 			
 		    
 		//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    

@@ -577,8 +577,15 @@ window.weaponManager = {
             sdew = 0;
         }
 
+		//advanced sensors: negates BDEW and SDEW, unless target is unit of advanced race
+		if ( (target.factionAge < 3) && (shipManager.hasSpecialAbility(shooter, "AdvancedSensors")) ){
+			bdew = 0;
+			sdew = 0;
+		}	
+
         return base - dew - jink - bdew - sdew;
     },
+
 
     /*calculate hit chance for ramming attack - different procedure*/
     /*also, it would be a bit different (simplified) from B5Wars original*/
@@ -618,19 +625,20 @@ window.weaponManager = {
         //fire control: usually 0, but units specifically designed for ramming may have some bonus!
         hitChance += weaponManager.getFireControl(target, weapon);
 	    
-	//range penalty - based on ramming units' speed (typical ramming has no range penalty, but HKs do!
-	var ownSpeed = Math.abs(shipManager.movement.getSpeed(shooter));    
-	var rangePenalty = weapon.rangePenalty * ownSpeed;
-	hitChance -= rangePenalty;
+		//range penalty - based on ramming units' speed (typical ramming has no range penalty, but HKs do!
+		var ownSpeed = Math.abs(shipManager.movement.getSpeed(shooter));    
+		var rangePenalty = weapon.rangePenalty * ownSpeed;
+		hitChance -= rangePenalty;
 	
         hitChance = Math.round(hitChance * 5); //convert d20->d100
         return hitChance;
     }, //endof calculateRamChance
 
+
     calculateHitChange: function calculateHitChange(shooter, target, weapon, calledid) {
-	if (weapon.isRammingAttack) {
-		return weaponManager.calculateRamChance(shooter, target, weapon, calledid);
-	}
+		if (weapon.isRammingAttack) {
+			return weaponManager.calculateRamChance(shooter, target, weapon, calledid);
+		}
 	    var defence = 0;
 	    var distance = 0;
 	    if (weapon.ballistic){		    
@@ -640,7 +648,7 @@ window.weaponManager = {
 	        distance = sPosLaunch.distanceTo(sPosTarget).toFixed(2); 
 	    }else{    
         	defence = weaponManager.getShipDefenceValue(shooter, target);
-		distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
+			distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
 	    } 	    
         var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
 	    
@@ -656,7 +664,10 @@ window.weaponManager = {
         if (weapon.useOEW) {
             oew = ew.getTargetingEW(shooter, target);
             oew -= dist;
-            if (oew < 0) oew = 0;
+            if (oew <= 0) {
+				oew = 0;
+				soew = 0;//no lock-on negates SOEW!
+			}
         }
 
         var mod = 0;
@@ -671,12 +682,13 @@ window.weaponManager = {
             var firstFighter = shooter.systems[1];
             var OBcrit = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
             oew = shooter.offensivebonus - OBcrit;
-	    if (weapon.ballistic && (!shooter.hasNavigator) ){ //for ballistics, if there is no Navigator, use OB only if target is in weapon arc!
-		if (!weaponManager.isOnWeaponArc(shooter, target, weapon)) {
-		    oew = 0;
-		}
-	    }		
+			if (weapon.ballistic && (!shooter.hasNavigator) ){ //for ballistics, if there is no Navigator, use OB only if target is in weapon arc!
+				if (!weaponManager.isOnWeaponArc(shooter, target, weapon)) {
+					oew = 0;
+				}
+			}		
             oew = Math.max(0, oew); //OBCrit cannot bring Offensive Bonus below 0
+			if(oew == 0) soew = 0;
 
             mod -= shipManager.movement.getJinking(shooter);
 
@@ -709,40 +721,48 @@ window.weaponManager = {
         var ammo = weapon.getAmmo(null);
         if (ammo) mod += ammo.hitChanceMod;
 
-        var jammermod = 0;
 	    /*replac ed by lock penalty to allow half lock...
         if (oew < 1 && !shooter.flight) {
             rangePenalty = rangePenalty * 2;
         } else*/
-	var noLockPenalty = 0;
-	var noLockMod = 0;
-	if (oew < 0.5){
-		noLockPenalty = 1;
-	}else if (oew < 1){ //OEW beteen 0.5 and 1 is achievable for targets of Distortion EW
-		noLockPenalty = 0.5;
-	}
-	noLockMod =  rangePenalty * noLockPenalty;    
+		var noLockPenalty = 0;
+		var noLockMod = 0;
+		if (oew < 0.5){
+			noLockPenalty = 1;
+		}else if (oew < 1){ //OEW beteen 0.5 and 1 is achievable for targets of Distortion EW
+			noLockPenalty = 0.5;
+		}
+		noLockMod =  rangePenalty * noLockPenalty;    
+        var jammermod = 0;
 	    
-	if (shooter.faction != target.faction) {
+		if (shooter.faction != target.faction) {
+			jammermod = ew.getJammerValueFromTo(shooter,target); //accounts for both jammer and stealth!
+			/* replaced by code above
             var jammer = shipManager.systems.getSystemByName(target, "jammer");
             var stealth = shipManager.systems.getSystemByName(target, "stealth");
-
-            if (jammer && !shipManager.power.isOffline(target, jammer)) jammermod = rangePenalty * shipManager.systems.getOutput(target, jammer);
-		
+            if (jammer && !shipManager.power.isOffline(target, jammer)) jammermod = rangePenalty * shipManager.systems.getOutput(target, jammer);		
             if (stealth && mathlib.getDistanceBetweenShipsInHex(shooter, target) > 5) jammermod = rangePenalty;
+			*/
+			if (jammermod > 0){
+				soew = 0;//jammer negates SOEW
+			}
+			jammermod = jammermod * rangePenalty; //actual reduction
 		
-	    jammermod = jammermod - noLockMod; //noLock does the same thing as Jammer, but cannot be overcame by sensors
-	    if (jammermod < 0) jammermod = 0; //cannot reduce below 0
-
+			jammermod = jammermod - noLockMod; //noLock does the same thing as Jammer, but cannot be overcame by sensors
+			if (jammermod < 0) jammermod = 0; //cannot reduce below 0
+	
+	/*already taken care of by ew.getJammerValueFromTo
 	   if (jammermod > 0){	 //else Improved Sensors do nothing
-		/*Improved/Advanced Sensors bonus*/	/*hasSpecialAbility isn't working correctly on fighter, ability is not propagated beyond system level - possibly needs correction*/
+		//Improved/Advanced Sensors bonus; hasSpecialAbility isn't working correctly on fighter, ability is not propagated beyond system level - possibly needs correction
 		if (shipManager.hasSpecialAbility(shooter, "AdvancedSensors") || shipManager.systems.getSystemByName(shooter, "fighteradvsensors")){
 			jammermod = 0; //Advanced Sensors negate Jammer
 		} else if (shipManager.hasSpecialAbility(shooter, "ImprovedSensors") || shipManager.systems.getSystemByName(shooter, "fighterimprsensors")){
 			jammermod = jammermod / 2; //Improved Sensors halve Jammer effect
 		}
 	   }
+	   */
 		
+			//jammer and jinking do not stack
             if (target.flight) {
                 var jinking = shipManager.movement.getJinking(target);
                 if (jinking > jammermod) {
@@ -756,12 +776,8 @@ window.weaponManager = {
         var firecontrol = weaponManager.getFireControl(target, weapon);
 
         var goal = baseDef - jammermod - noLockMod - rangePenalty + oew + soew + firecontrol + mod;
-
-        var change = Math.round(goal / 20 * 100);
-        //	console.log("rangePenalty: " + rangePenalty + "jammermod: "+jammermod+" baseDef: " + baseDef + " oew: " + oew + " soew: "+soew+" firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
-        //	console.log(change);
-
-        return change;
+        var hitChance = Math.round(goal / 20 * 100);
+        return hitChance;
     },
 
 

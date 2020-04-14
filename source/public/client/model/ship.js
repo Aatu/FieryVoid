@@ -38,12 +38,17 @@ Ship.prototype = {
             }
 
             var mod = system.getDefensiveHitChangeMod(this, shooter, weapon);
+			
+			if (mod > 0){
+				//Advanced Sensors negate positive (eg. reducing profile) defensive systems' effects operated by less advanced races
+				if ( (target.factionAge < 3) && (shipManager.hasSpecialAbility(shooter, "AdvancedSensors")) ){
+					mod = 0;
+				}	
+			}
 
             if ( ! (affectingSystems[system.defensiveType])
                 || affectingSystems[system.defensiveType] < mod)
             {
-      //          console.log("getting defensive: " + system.name + " mod: " + mod);
-      //          affectingSystems[system.getDefensiveType] = mod;
                 affectingSystems[system.defensiveType] = mod;
             }
         }
