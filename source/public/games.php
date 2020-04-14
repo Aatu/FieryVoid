@@ -82,7 +82,11 @@ if (isset($_SESSION["user"])) {
 	<br><b>SOEW fixed</b> - there actually were a few bugs in this area (all of them very rare due to interactions needed)
 	<br><b>Pentagon Array fixed</b> - first Torata fix ;)
         <br><b>"Fighters did not fire" bug fixed</b> - ...hopefully. Look at this phase carefully anyway - it underwent extensive changes.
-	
+	<br><b>EW rehearsed</b> - expanding from earlier SOEW fix, Jammer/Stealth interactions were corrected. Which of course means new bugs might have crept in!
+	<br><b>new Balosian ships</b> - to sweeten the above, You get a few new Balosian units, rounding out the faction (courtesy of Douglas).  
+	    
+	    
+	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload (<b><u>ctrl+F5</u></b>) whenever something weird happens.
 
