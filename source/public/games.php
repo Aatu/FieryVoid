@@ -81,7 +81,7 @@ if (isset($_SESSION["user"])) {
         <br><b>Ipsha enhanced</b> - Essan and Eethan Barony-specific refits are available
 	<br><b>SOEW fixed</b> - there actually were a few bugs in this area (all of them very rare due to interactions needed)
 	<br><b>Pentagon Array fixed</b> - first Torata fix ;)
-        
+        <br><b>"Fighters did not fire" bug fixed</b> - ...hopefully. Look at this phase carefully anyway - it underwent extensive changes.
 	
         <br><br>
         Enjoy and report BUGS on FB. Also force reload (<b><u>ctrl+F5</u></b>) whenever something weird happens.
