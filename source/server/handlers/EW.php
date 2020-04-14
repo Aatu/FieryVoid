@@ -81,12 +81,18 @@
         
         public static function getSupportedOEW($gamedata, $ship, $target)
         {
-	    if ( ($ship->faction != $target->faction) && (!$ship->hasSpecialAbility("AdvancedSensors")) ){
-            	$jammer = $target->getSystemByName("jammer");
-		    if($jammer != null && $jammer->getOutput()> 0 ){ // Jammer protected ships cannot be targetten for SOEW
-			return 0;
-		    }
-	    }
+			$jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter" => $ship, "target" => $target));
+			if ($jammerValue>0) {
+				return 0; //no lock-on on supported ship negates SOEW, if any
+			}
+			/*replaced by code above
+			if ( ($ship->faction != $target->faction) && (!$ship->hasSpecialAbility("AdvancedSensors")) ){
+					$jammer = $target->getSystemByName("jammer");
+				if($jammer != null && $jammer->getOutput()> 0 ){ // Jammer protected ships cannot be targetten for SOEW
+				return 0;
+				}
+			}
+			*/
                         
             $amount = 0;
             foreach ($gamedata->ships as $elint)
@@ -106,13 +112,17 @@
                 if (!$elint->getEWbyType("SOEW", $gamedata->turn, $ship))
                     continue;
 
+				$jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter" => $elint, "target" => $target));
+				if ($jammerValue>0) {
+					continue; //no lock-on negates SOEW, if any
+				}		
+
                 $foew = $elint->getEWByType("OEW", $gamedata->turn, $target) * 0.5;
 								
 				$dist = EW::getDistruptionEW($gamedata, $elint); //account for ElInt being disrupted
-				$foew = $foew-$dist;
+				$foew = $foew-$dist;		
 				
-                if ($foew > $amount)
-                    $amount = $foew;
+                if ($foew > $amount) $amount = $foew;
             }
 
             if($ship instanceof FighterFlight){
@@ -132,7 +142,7 @@
                 if ($elint->id === $ship->id)
                     continue;
                 
-		    /* faction should not affect it!
+				/* faction should not affect it!
                 if($elint->faction != $ship->faction)
                     continue;
                 */

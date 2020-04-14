@@ -1676,7 +1676,7 @@ class SurgeLaser extends Raking{
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);  
 		$this->data["Special"] = "+2 per rake to critical/dropout rolls on system(s) hit this turn.";  //original rule is more fancy
-		$this->data["Special"] .= "Basic firing mode is 2 shots with FC 20/10/10, combined 1 shot with FC 10/10/20.";  //original rule is more fancy
+		$this->data["Special"] .= "Basic firing mode is 2 shots with FC 20/10/10 (d10+2 dmg), combined 1 shot with FC 10/10/20 (2d10+3 dmg).";  //original rule is more fancy
 	}	
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 

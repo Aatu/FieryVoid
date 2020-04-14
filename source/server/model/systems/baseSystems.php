@@ -21,13 +21,27 @@ class Jammer extends ShipSystem implements SpecialAbility{
         $shooter = $args["shooter"];
         $target = $args["target"];
         
-        if (! ($shooter instanceof BaseShip) || ! ($target instanceof BaseShip))
+        if ($shooter->faction === $target->faction) return 0;
+		
+        if (! ($shooter instanceof BaseShip) || ! ($target instanceof BaseShip)) 
             throw new InvalidArgumentException("Wrong argument type for Jammer getSpecialAbilityValue");
-        
-        if ($shooter->team === $target->team)
-            return 0;
-        
-        return $this->getOutput();
+        		
+		$jammerValue = $this->getOutput();
+		
+		if ($jammerValue > 0){ //else no point
+			//Advanced Sensors negate Jammer, Improved Sensors halve Jammer
+			if ($shooter->hasSpecialAbility("AdvancedSensors")) {
+				$jammerValue = 0; //negated
+			} else if ($shooter->hasSpecialAbility("ImprovedSensors")) {
+				$jammerValue = $jammerValue * 0.5; //halved
+			}
+		} else {
+			$jammerValue = 0; //never negative
+		}
+			
+        return $jammerValue;
+		
+        //return $this->getOutput();
     }
 
     public function setSystemDataWindow($turn){
@@ -62,13 +76,19 @@ class Stealth extends ShipSystem implements SpecialAbility{
         
         if (! ($shooter instanceof BaseShip) || ! ($target instanceof BaseShip))
             throw new InvalidArgumentException("Wrong argument type for Stealth getSpecialAbilityValue");
-        
+		
+        $jammerValue = 1; //it's fighter system, so no need to check for crits or power
         if (Mathlib::getDistanceOfShipInHex($shooter, $target) > 5)
         {
-            return 1;
-        }            
-        
-        return 0;        
+            //return 1;			
+			//Advanced Sensors negate Jammer, Improved Sensors halve Jammer
+			if ($shooter->hasSpecialAbility("AdvancedSensors")) {
+				$jammerValue = 0; //negated
+			} else if ($shooter->hasSpecialAbility("ImprovedSensors")) {
+				$jammerValue = $jammerValue * 0.5; //halved
+			}
+        }
+        return $jammerValue;        
     }     
 } //endof Stealth
 
@@ -84,7 +104,7 @@ class Fighterimprsensors extends ShipSystem implements SpecialAbility{
     }
     
     public function setSystemDataWindow($turn){
-            $this->data["Special"] = "Halves effectiveness of enemy Jammer.";
+            $this->data["Special"] = "Halves effectiveness of enemy Jammer (not that of advanced races)."; //not that of advanced races
         }
     
     public function getSpecialAbilityValue($args)
@@ -105,8 +125,11 @@ class Fighteradvsensors extends ShipSystem implements SpecialAbility{
     }
     
     public function setSystemDataWindow($turn){
-            $this->data["Special"] = "Negates enemy Jammer.";
-        }
+		$this->data["Special"] = "Ignores enemy Jammer."; //not that of advanced races
+		$this->data["Special"] .= "<br>Ignores enemy BDEW and SDEW."; //not that of advanced races
+		$this->data["Special"] .= "<br>Ignores any defensive systems lowering enemy profile (shields, EWeb...)."; //not that of advanced races
+		$this->data["Special"] .= "<br>All of the above work as usual if operated by advanced races."; 
+	}
     
     public function getSpecialAbilityValue($args)
     {     
@@ -419,7 +442,7 @@ class Scanner extends ShipSystem{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= 'Improved Sensors - halve Jammer effectiveness (to hit penalty and launch range penalty).';
+		$this->data["Special"] .= 'Improved Sensors - halve Jammer effectiveness (to hit penalty and launch range penalty)(not that of advanced races).'; //not that of advanced races
 		
 	}
 	/*note: as there are no actual Advanced Sensors unit yet, this feature is not complete;
@@ -433,7 +456,10 @@ class Scanner extends ShipSystem{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= 'Advanced Sensors - negate Jammer, flat 14 boost cost.';
+		$this->data["Special"] .= 'Advanced Sensors - ignores Jammer, flat 14 boost cost.';//not that of advanced races
+		$this->data["Special"] .= "<br>Ignores enemy BDEW and SDEW."; //not that of advanced races
+		$this->data["Special"] .= "<br>Ignores any defensive systems lowering enemy profile (shields, EWeb...)."; //not that of advanced races
+		$this->data["Special"] .= "<br>All of the above work as usual if operated by advanced races."; 
 	}	
 	/*note: StarWarsSensors mark in itself doesn't do anything beyond being recognizable for ship description function
 		all actual effects are contained in attribute changes

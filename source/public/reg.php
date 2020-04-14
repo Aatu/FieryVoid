@@ -66,7 +66,7 @@ include_once 'global.php';
 			<form method="post">
                 <div class="error"><span><?php print($error); ?></span></div>
 				<table>
-                <tr><td><label>Secret phrase:</label></td><td><input type="text" name="secret"></input></td></tr>
+                <tr><td><label>Secret phrase <i>(ask on FieryVoid Facebook group!)</i>:</label></td><td><input type="text" name="secret"></input></td></tr>
 				<tr><td><label>Username:</label></td><td><input type="text" name="user"></input></td></tr>
 				<tr><td><label>Password:</label></td><td><input type="password" name="pass"></input></td></tr>
                 <tr><td><label>Retype password:</label></td><td><input type="password" name="pass2"></input></td></tr>

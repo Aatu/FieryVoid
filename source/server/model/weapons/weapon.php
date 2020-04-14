@@ -792,6 +792,7 @@ class Weapon extends ShipSystem
         $defence = 0;
         $mod = 0;
         $oew = 0;
+		
 
         if ($this->ballistic) {
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
@@ -831,7 +832,10 @@ class Weapon extends ShipSystem
             $soew = EW::getSupportedOEW($gamedata, $shooter, $target);
             $oew = $shooter->getOEW($target, $gamedata->turn);
             $oew -= $dist;
-            if ($oew < 0) $oew = 0;
+            if ($oew <= 0) {
+				$oew = 0; //OEW cannot be negative
+				$soew = 0; //no lock-on negates SOEW, if any
+			}
         } else {
             $soew = 0;
             $oew = 0;
@@ -888,10 +892,10 @@ class Weapon extends ShipSystem
                 $bdew = 0;
                 $sdew = 0;
                 $oew = $effectiveOB;
-                $soew = 0;
+                //$soew = 0; //fighters CAN receive SOEW (fractional, SOEW calculation takes this into account)
             } else { //ballistics use of OB is more complicated
                 $oew = 0;
-                $soew = 0;
+                //$soew = 0; //fighters CAN receive SOEW (fractional, SOEW calculation takes this into account)
                 if (!($shooter->isDestroyed() || $shooter->getFighterBySystem($fireOrder->weaponid)->isDestroyed())) {
                     if ($shooter->hasNavigator) {// Fighter has navigator. Flight always benefits from offensive bonus.
                         $oew = $effectiveOB;
@@ -900,48 +904,65 @@ class Weapon extends ShipSystem
                         if (mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc)) {
                             // Target is in current launcher arc. Flight benefits from offensive bonus.
                             // Now check if the fighter is not firing any non-ballistic weapons
-                            if (!$this->isFtrFiringNonBallisticWeapons($shooter, $fireOrder)) $oew = $effectiveOB;
+                            if (!$this->isFtrFiringNonBallisticWeapons($shooter, $fireOrder)) {
+								$oew = $effectiveOB;
+							}
                         }
                     }
                 }
             }
+			if($oew == 0) $soew = 0;//if OEW is negated, so is SOEW
         }
 	
-	/* replaced by code allowing partial locks
-        if (($oew < 1) && (!($shooter instanceof FighterFlight))) {
-            $rangePenalty = $rangePenalty * 2;
-        } elseif ($shooter->faction != $target->faction) {
-	*/
-	$noLockPenalty = 0;
-	$noLockMod = 0;
-	if ($oew < 0.5){
-		$noLockPenalty = 1;
-	}else if ($oew < 1){ //OEW beteen 0.5 and 1 is achievable for targets of Distortion EW
-		$noLockPenalty = 0.5;
-	}
-	$noLockMod =  $rangePenalty * $noLockPenalty;
-	    
-	$jammerValue = 0;
-	if ($shooter->faction != $target->faction) {
-            $jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter" => $shooter, "target" => $target));
-			/*Improved/Advanced Sensors*/
+		/* replaced by code allowing partial locks
+			if (($oew < 1) && (!($shooter instanceof FighterFlight))) {
+				$rangePenalty = $rangePenalty * 2;
+			} elseif ($shooter->faction != $target->faction) {
+		*/
+		$noLockPenalty = 0;
+		$noLockMod = 0;
+		if ($oew < 0.5){
+			$noLockPenalty = 1;
+		}else if ($oew < 1){ //OEW beteen 0.5 and 1 is achievable for targets of Distortion EW
+			$noLockPenalty = 0.5;
+		}
+		$noLockMod =  $rangePenalty * $noLockPenalty;
+			
+		$jammerValue = 0;
+		if ($shooter->faction != $target->faction) {
+			//jammerValue takes Jammer state, criticals, Advanced and Improved sensors into account
+			$jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter" => $shooter, "target" => $target));
+			
+			if ($jammerValue>0) {
+				$soew = 0; //no lock-on negates SOEW, if any
+			}
+			
+			/*no longer needed, Advanced/Improved Sensors moved to Jammer special ability itself
+			$jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter" => $shooter, "target" => $target));
+			//Improved/Advanced Sensors
 			if ($jammerValue > 0){ //else no point
 				if ($shooter->hasSpecialAbility("AdvancedSensors")) {
 					$jammerValue = 0; //negated
 				} else if ($shooter->hasSpecialAbility("ImprovedSensors")) {
 					$jammerValue = $jammerValue * 0.5; //halved
 				}
-			}              
-        }
-	    
-	$jammermod = $rangePenalty * max(0,($jammerValue-$noLockMod));//no lock and jammer work on the same thing, but they still need to be separated (for jinking).
-	    
+			}
+			*/		
+		}
+			
+		$jammermod = $rangePenalty * max(0,($jammerValue-$noLockMod));//no lock and jammer work on the same thing, but they still need to be separated (for jinking).
 
         if (!($shooter instanceof FighterFlight) && !($shooter instanceof OSAT)) {//leaving instanceof OSAT here - MicroSATs will be omitted as they're SHFs
             $CnC = $shooter->getSystemByName("CnC");
             $mod -= ($CnC->hasCritical("PenaltyToHit", $gamedata->turn - 1));
         }
         $firecontrol = $this->fireControl[$target->getFireControlIndex()];
+		
+		//advanced sensors: negates BDEW and SDEW, unless target is unit of advanced race
+		if ( ($target->factionAge < 3) && ($shooter->hasSpecialAbility("AdvancedSensors")) ){
+			$bdew = 0;
+			$sdew = 0;
+		}			
 
         $hitPenalties = $dew + $bdew + $sdew + $rangePenalty + $jinkSelf + max($jammermod, $jinkTarget) + $noLockMod;
         $hitBonuses = $oew + $soew + $firecontrol + $mod;
