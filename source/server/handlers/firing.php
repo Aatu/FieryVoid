@@ -586,7 +586,7 @@ class Firing
 	foreach ($chosenfires as $fire){
 		$shooter = $gamedata->getShipById($fire->shooterid);
 		$target = $gamedata->getShipById($fire->targetid);
-		if ($target == null || ($target instanceof FighterFlight)) {
+		if ( ($target == null) || ($target instanceof FighterFlight) ) {
 			self::fire($shooter, $fire, $gamedata);
 		}
 	}
@@ -612,13 +612,13 @@ class Firing
 
 			//ballistic weapons will still reach their targets, but direct fire from fighters previously destroyed will not happen
 			if ( (!$weapon->ballistic) && ($ship->getFighterBySystem($weapon->id)->isDestroyed()) ) continue;
-				
+			/*simplified above	
 			$weapon = $ship->getSystemById($fire->weaponid);
 			if (($ship->getFighterBySystem($weapon->id)->isDestroyed() || $ship->isDestroyed())
 				&& !$weapon->ballistic) {
 				continue;
 			}
-
+			*/
 			//$fire->priority = $weapon->priority; //fire order priority already declared!
 			$chosenfires[] = $fire;
 		}
@@ -628,7 +628,7 @@ class Firing
 	foreach ($chosenfires as $fire){
 		$shooter = $gamedata->getShipById($fire->shooterid);
 		$target = $gamedata->getShipById($fire->targetid);
-		if (!($target instanceof FighterFlight)) {
+		if  ( ($target != null) && (!($target instanceof FighterFlight)) ) {
 			self::fire($shooter, $fire, $gamedata);
 		}
         }
