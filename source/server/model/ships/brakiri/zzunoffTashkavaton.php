@@ -44,8 +44,8 @@ class zzunoffTashkavaton extends BaseShip{
 	$this->addFrontSystem(new GravitonPulsar(3, 5, 2, 240, 60));
 	$this->addFrontSystem(new GravitonPulsar(3, 5, 2, 300, 120));
 	$this->addFrontSystem(new GraviticCannon(4, 6, 5, 300, 60));
-	$this->addFrontSystem(new GraviticCannon(3, 6, 5, 270, 90));
 	$this->addFrontSystem(new GraviticCannon(4, 6, 5, 300, 60));
+	$this->addFrontSystem(new GraviticCannon(3, 6, 5, 270, 90));
 	$this->addFrontSystem(new GraviticShield(0, 6, 0, 3, 0, 120));
 	$this->addFrontSystem(new GraviticThruster(5, 10, 0, 6, 1));
 	$this->addFrontSystem(new GraviticThruster(5, 10, 0, 6, 1));
