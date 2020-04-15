@@ -578,7 +578,7 @@ window.weaponManager = {
         }
 
 		//advanced sensors: negates BDEW and SDEW, unless target is unit of advanced race
-		if ( (target.factionAge < 3) && (shipManager.hasSpecialAbility(shooter, "AdvancedSensors")) ){
+		if ( shooter && (target.factionAge < 3) && (shipManager.hasSpecialAbility(shooter, "AdvancedSensors")) ){
 			bdew = 0;
 			sdew = 0;
 		}	
