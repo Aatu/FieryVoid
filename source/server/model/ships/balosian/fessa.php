@@ -47,7 +47,7 @@ class Fessa extends MediumShip{
 		$this->addAftSystem(new Thruster(2, 8, 0, 2, 2));
 		$this->addAftSystem(new Thruster(2, 8, 0, 2, 2));
   
-        $this->addPrimarySystem(new Structure(3, 59+6)); //6 for external racks
+        $this->addPrimarySystem(new Structure(3, 53+6)); //6 for external racks
 		
         $this->hitChart = array(
             0 => array(
