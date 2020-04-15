@@ -1489,7 +1489,7 @@ class LightParticleAccelerator extends LinkedWeapon{
 			parent::setSystemDataWindow($turn);   
 			$this->data["Special"] = "If not fired for one turn, can fire a charged shot:";  
 			$this->data["Special"] .= "<br> - Standard: 1d6+2"; 
-			$this->data["Special"] .= "<br> - Charged: 2d6+4, with antiship-optimized fire control"; 
+			$this->data["Special"] .= "<br> - Charged (alternate mode!): 2d6+4, with antiship-optimized fire control"; 
 		}
 		
 	
