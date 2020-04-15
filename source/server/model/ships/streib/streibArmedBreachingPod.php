@@ -10,6 +10,8 @@ class StreibArmedBreachingPod extends FighterFlight{
         $this->shipClass = "Armed Breaching Pods";
 	 $this->imagePath = "img/ships/streibbreachingpod.png";
         
+		$this->unofficial = true;
+	    
         $this->forwardDefense = 8;
         $this->sideDefense = 8;
         $this->freethrust = 8;
