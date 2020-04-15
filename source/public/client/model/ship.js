@@ -41,7 +41,7 @@ Ship.prototype = {
 			
 			if (mod > 0){
 				//Advanced Sensors negate positive (eg. reducing profile) defensive systems' effects operated by less advanced races
-				if ( (target.factionAge < 3) && (shipManager.hasSpecialAbility(shooter, "AdvancedSensors")) ){
+				if ( (this.factionAge < 3) && (shipManager.hasSpecialAbility(shooter, "AdvancedSensors")) ){
 					mod = 0;
 				}	
 			}
