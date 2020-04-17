@@ -453,7 +453,7 @@ class SWIonHandler{
 	
 	public static function addDamage($targetUnit, $targetSystem, $dmgInflicted){
 		if($dmgInflicted<1) return;//no point if no damage was actually done
-		if($system->advancedArmor) return;//Advanced Armor prevents additional effects
+		if($targetSystem->advancedArmor) return;//Advanced Armor prevents additional effects
 		if($targetUnit instanceof FighterFlight) return;//no effect on fighters
 		if ($targetUnit->isDestroyed()) return; //no point in doing anything
 		$baseDmg = $dmgInflicted;//$baseDmg = $dmgInflicted+1; //boost light damage a bit (..or not)
