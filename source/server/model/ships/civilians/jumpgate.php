@@ -40,8 +40,8 @@ class Jumpgate  extends BaseShip{
 		$supportSystem = new CargoBay(2,10);
 		$supportSystem->displayName = 'Support System';
         $this->addAftSystem($supportSystem);
-		$supportSystem->displayName = 'Support System';
 		$supportSystem = new CargoBay(2,10);
+		$supportSystem->displayName = 'Support System';
         $this->addLeftSystem($supportSystem);
 		$supportSystem = new CargoBay(2,10);
 		$supportSystem->displayName = 'Support System';
