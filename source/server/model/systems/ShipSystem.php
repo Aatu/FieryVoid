@@ -32,7 +32,7 @@ class ShipSystem {
     public $forceCriticalRoll = false; //true forces critical roll even if no damage was done
 	
     public $criticals = array();
-	protected $advancedArmor = false; //indicates that system has advanced armor
+	public $advancedArmor = false; //indicates that system has advanced armor
     
     protected $structureSystem;
 	
