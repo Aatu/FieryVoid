@@ -668,7 +668,7 @@ class Weapon extends ShipSystem
     }
 
 
-    protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
+protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
     {
         // first get the fighter that is armed with this weapon
         // We have to go looking for it because the shooter is a flight,
@@ -678,10 +678,12 @@ class Weapon extends ShipSystem
         // now recheck all the fighter's weapons
 	///but do NOT count defensive fire!
         foreach ($fighterSys->systems as $weapon) {
-            //if (!$weapon->ballistic && $weapon->firedOnTurn(TacGamedata::$currentTurn)) {
-	    if (!$weapon->ballistic && $weapon->firedOffensivelyOnTurn(TacGamedata::$currentTurn)) { //defensive fire is out of player control, mostly, so should not be penalized
-                return true;
-            }
+			if ($weapon instanceOf Weapon){
+				//if (!$weapon->ballistic && $weapon->firedOnTurn(TacGamedata::$currentTurn)) {
+				if (!$weapon->ballistic && $weapon->firedOffensivelyOnTurn(TacGamedata::$currentTurn)) { //defensive fire is out of player control, mostly, so should not be penalized
+					return true;
+				}
+			}
         }
 
         return false;
