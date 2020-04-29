@@ -1423,7 +1423,7 @@ full Advanced Armor effects (by rules) for reference:
 		//and firing WEAPON age is not very advanced (<3 - less than Ancient)
 		//Ancients themselves do not care!
 		if( ($this->factionAge < 3) && ($system->advancedArmor)){
-			if($this.ballistic){ //extra protection against ballistics
+			if($this->ballistic){ //extra protection against ballistics
 				$returnArmour += 2;
 			}
 			if($this->weaponClass == 'Matter'){ //slight vulnerability vs Matter
