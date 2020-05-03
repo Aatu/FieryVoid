@@ -6,10 +6,13 @@ class Motenai extends BaseShip{
         
 	$this->pointCost = 625;
 	$this->faction = "Abbai (WotCR)";
-        $this->phpclass = "Motenai";
+        $this->phpclass = "Motenaion";
         $this->imagePath = "img/ships/AbbaiMotenai.png";
-        $this->shipClass = "Motenai Mine Layer";
+        $this->shipClass = "Motenaion Missile Cruiser";
         $this->shipSizeClass = 3;
+		
+	    $this->unofficial = true;
+		$this->notes = "official Motenai Mine Layer with Class-SO racks replacing Mine Launchers";
 
         $this->limited = 33;
         $this->isd = 2025;
@@ -36,10 +39,10 @@ class Motenai extends BaseShip{
         $this->addFrontSystem(new GraviticShield(0, 6, 0, 1, 0, 60));
         $this->addFrontSystem(new GraviticShield(0, 6, 0, 1, 300, 360));
         $this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 60));
-        $this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 60));
-        $this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 60));
-        $this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 60));
-        $this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 60));
+        $this->addFrontSystem(new SoMissileRack(3, 6, 0, 300, 60));
+        $this->addFrontSystem(new SoMissileRack(3, 6, 0, 300, 60));
+        $this->addFrontSystem(new SoMissileRack(3, 6, 0, 300, 60));
+        $this->addFrontSystem(new SoMissileRack(3, 6, 0, 300, 60));
 
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
@@ -53,7 +56,7 @@ class Motenai extends BaseShip{
         $this->addLeftSystem(new GraviticShield(0, 6, 0, 1, 240, 300));
         $this->addLeftSystem(new Thruster(3, 15, 0, 5, 3));
 
-        $this->addRightSystem(new SMissileRack(3, 6, 0, 0, 120));
+        $this->addRightSystem(new SoMissileRack(3, 6, 0, 0, 120));
         $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         $this->addRightSystem(new GraviticShield(0, 6, 0, 1, 60, 120));

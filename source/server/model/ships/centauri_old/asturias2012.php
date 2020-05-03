@@ -14,7 +14,7 @@ class Asturias2012 extends BaseShip{
         $this->variantOf = "Astur Assault Ship";   
 		$this->occurence = "uncommon";
         //$this->limited = 33;
-	    $this->isd = 2008;
+	    $this->isd = 2012;
 		
 
         $this->fighters = array("heavy"=>30); //12 per side hangar, 6 in PRIMARY hangar
@@ -52,7 +52,7 @@ class Asturias2012 extends BaseShip{
         $this->addLeftSystem(new LightParticleBeamShip(3, 2, 1, 240, 60));
         $this->addLeftSystem(new LightParticleBeamShip(3, 2, 1, 180, 360));
         
-		$this->addRightSystem(new Thruster(3, 12, 0, 4, 3));
+		$this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 		$this->addRightSystem(new Hangar(5, 12));
         $this->addRightSystem(new LightParticleBeamShip(3, 2, 1, 300, 120));
         $this->addRightSystem(new LightParticleBeamShip(3, 2, 1, 0, 180));

@@ -149,6 +149,7 @@ CREATE TABLE `tac_critical` (
   `systemid` int(11) NOT NULL,
   `type` varchar(100) NOT NULL,
   `turn` int(11) NOT NULL,
+  `turnend` int(11) NOT NULL DEFAULT 0,
   `param` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `gameid` (`gameid`),

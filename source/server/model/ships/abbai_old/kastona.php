@@ -11,7 +11,7 @@ class Kastona extends BaseShip{
         $this->shipClass = "Kastona Cruiser";
         $this->shipSizeClass = 3;
 
-	$this->isd = 2240;
+	$this->isd = 2040;
         
         $this->forwardDefense = 16;
         $this->sideDefense = 16;

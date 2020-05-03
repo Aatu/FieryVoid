@@ -39448,9 +39448,30 @@ var getCriticals = function getCriticals(system) {
         "Damage"
     )].concat(Object.keys(system.critData).map(function (i) {
         var noOfCrits = 0;
+        var endEffectMin = 0;
+        var endEffectMax = 0;
+        var infinitePresent = true;
         for (var j in system.criticals) {
             if (system.criticals[j].phpclass == i) noOfCrits++;
+            if (noOfCrits == 1) {
+                endEffectMin = system.criticals[j].turnend;
+                endEffectMax = system.criticals[j].turnend;
+                infinitePresent = system.criticals[j].turnend == 0; //0 means infinite
+            }
+            if (system.criticals[j].turnend > 0) {
+                if (system.criticals[j].turnend > endEffectMax) endEffectMax = system.criticals[j].turnend;
+                if (system.criticals[j].turnend < endEffectMin || endEffectMin == 0) endEffectMin = system.criticals[j].turnend;
+            } else infinitePresent = true;
         }
+
+        var wearsOffText = "";
+        if (endEffectMin > 0) {
+            wearsOffText = "until turn " + endEffectMin;
+            if (infinitePresent || endEffectMax > endEffectMin) {
+                wearsOffText = wearsOffText + "+";
+            }
+        }
+
         if (noOfCrits > 1) {
             return React.createElement(
                 Entry,
@@ -39458,13 +39479,17 @@ var getCriticals = function getCriticals(system) {
                 "(",
                 noOfCrits,
                 " x) ",
-                system.critData[i]
+                system.critData[i],
+                " ",
+                wearsOffText
             );
         } else {
             return React.createElement(
                 Entry,
                 { key: "critical-" + i },
-                system.critData[i]
+                system.critData[i],
+                " ",
+                wearsOffText
             );
         }
     }));

@@ -12,11 +12,12 @@ class zzunoffShakaraton extends BaseShip{
         $this->shipSizeClass = 3;
 
         $this->limited = 10;
-	$this->unofficial = true;
 	
 	
 		$this->notes = 'Im-Rehsa Technologies';//Corporation producing the design
+		$this->notes .= "<br>official Shakara Scout Cruiser with Grav Shifters replaced by Grav Cannons"; 
 		$this->isd = 2251;
+	      $this->unofficial = true;
         
         
         $this->forwardDefense = 14;

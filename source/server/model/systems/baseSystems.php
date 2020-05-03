@@ -557,7 +557,7 @@ class CnC extends ShipSystem{
     public $primary = true;
     
     public $possibleCriticals = array(
-    	//1=>"SensorsDisrupted", //not implemented! so I take it out for now
+    	//1=>"SensorsDisrupted", //not implemented! so I take it out 
 	1=>"CommunicationsDisrupted",   //this instead of SensorsDisrupted
 	9=>"CommunicationsDisrupted", 
 	12=>"PenaltyToHit", 

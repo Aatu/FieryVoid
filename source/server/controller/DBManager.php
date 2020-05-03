@@ -87,16 +87,12 @@ class DBManager
 
     public function update($sql)
     {
-
-
         if (!$this->connection)
             throw new exception("DBManager:update, connection failed");
 
         if (!$answer = mysqli_query($this->connection, $sql)) {
             throw new exception("DBManager:update, SQL error: " . mysqli_error($this->connection) . "\n sql: $sql", mysqli_errno($this->connection));
         }
-
-
     }
 
     private function found($sql)
@@ -403,9 +399,24 @@ class DBManager
     public function submitCriticals($gameid, $criticals, $turn)
     {
         try {
-
             //print(var_dump($criticals));
             foreach ($criticals as $critical) {
+				if($critical->id < 1) $critical->forceModify = false;//cannot modify a critical that's not in the database yet!
+                //if ((!$critical->newCrit) && (!$critical->forceModify) && ($critical->turn != $turn)  ) continue; //replaced by conditions below
+				if ($critical->forceModify){ //modification of critical that already exists in database - modifying turn end! (the only thing modifiable)
+					$turnend = $critical->turnend;
+					$critid = $critical->id;
+					$sql = "UPDATE tac_critical SET turnend = " . $turnend . " where id = " . $critid . "";
+				} else if ( $critical->id < 1 ){ //actual new critical
+					//important to use $critical->turn: critical does NOT need to have turn equal to current! 
+					//this is importnat for criticals that need to have limited time window yet last longer than 1 turn (go out 1 turn after issuing - so issue must be later)
+					$sql = "INSERT INTO `B5CGM`.`tac_critical` VALUES(null, $gameid, " . $critical->shipid . ", " . $critical->systemid . ",'" . $critical->phpclass . "'," . $critical->turn . ", " . $critical->turnend . ",'" . $critical->param . "')";
+				} else continue;
+                $this->update($sql);
+            }
+			
+			/*previous version:
+			foreach ($criticals as $critical) {
                 if ((!$critical->newCrit) && ($critical->turn != $turn))
                     continue;
 				//important to use $critical->turn: critical does NOT need to have turn equal to current! 
@@ -414,17 +425,16 @@ class DBManager
 
                 $this->update($sql);
             }
+			*/
 
 
         } catch (Exception $e) {
             throw $e;
         }
-
     }
 
     public function updateFireOrders($fireOrders)
     {
-
         $stmt = $this->connection->prepare(
             "UPDATE 
                 tac_fireorder  
@@ -1462,6 +1472,30 @@ class DBManager
     {
         $criticalStmt = $this->connection->prepare(
             "SELECT 
+                id, shipid, systemid, type, turn, turnend, param 
+            FROM 
+                tac_critical
+            WHERE 
+                gameid = ? AND turn <= ? AND (turnend = 0 OR turnend >= ? )
+            "
+        );
+
+        if ($criticalStmt) {
+            $criticalStmt->bind_param('iii', $gamedata->id, $fetchTurn, $fetchTurn);
+            $criticalStmt->bind_result($id, $shipid, $systemid, $type, $turn, $turnend, $param);
+            $criticalStmt->execute();
+            while ($criticalStmt->fetch()) {
+                $gamedata->getShipById($shipid)->getSystemById($systemid)->setCritical(
+                    new $type($id, $shipid, $systemid, $type, $turn, $turnend, $param),
+                    $gamedata->turn
+                );
+            }
+            $criticalStmt->close();
+        }
+		
+		/*old version - expanded wwhen turnend was added!
+        $criticalStmt = $this->connection->prepare(
+            "SELECT 
                 id, shipid, systemid, type, turn, param 
             FROM 
                 tac_critical
@@ -1482,7 +1516,7 @@ class DBManager
             }
             $criticalStmt->close();
         }
-
+		*/
 
     }
 

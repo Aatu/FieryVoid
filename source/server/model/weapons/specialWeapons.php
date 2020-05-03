@@ -475,7 +475,7 @@ class MediumBurstBeam extends BurstBeam{
 			$reactor->criticals[] =  $crit;
 		}
 		else if ($system->powerReq > 0 || $system->canOffLine ){
-			$crit = new ForcedOfflineForTurns (-1, $ship->id, $system->id, "ForcedOfflineForTurns", $gamedata->turn, 2);
+			$crit = new ForcedOfflineForTurns (-1, $ship->id, $system->id, "ForcedOfflineForTurns", $gamedata->turn, $gamedata->turn+2);
 			$crit->updated = true;
 			$system->criticals[] = $crit;
 		}
@@ -557,7 +557,7 @@ class HeavyBurstBeam extends BurstBeam{
 			$reactor->criticals[] =  $crit;
 		}
 		else if ($system->powerReq > 0 || $system->canOffLine ){
-			$crit = new ForcedOfflineForTurns (-1, $ship->id, $system->id, "ForcedOfflineForTurns", $gamedata->turn, 3);
+			$crit = new ForcedOfflineForTurns (-1, $ship->id, $system->id, "ForcedOfflineForTurns", $gamedata->turn, $gamedata->turn+3);
 			$crit->updated = true;
 			$system->criticals[] = $crit;
 		}

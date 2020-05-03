@@ -114,13 +114,36 @@ const getCalledShot = (ship, selectedShip, system) => {
 const getCriticals = (system) => [<InfoHeader key="criticalHeader">Damage</InfoHeader>].concat(
         Object.keys(system.critData).map(i => {
             let noOfCrits = 0;
+			var endEffectMin = 0;
+			var endEffectMax = 0;
+			var infinitePresent = true;
             for (const j in system.criticals) {
-                if (system.criticals[j].phpclass == i) noOfCrits++;
+                if (system.criticals[j].phpclass == i) noOfCrits++;				
+				if(noOfCrits == 1){
+					endEffectMin = system.criticals[j].turnend;
+					endEffectMax = system.criticals[j].turnend;
+					infinitePresent = (system.criticals[j].turnend == 0); //0 means infinite
+				}
+				if (system.criticals[j].turnend > 0){ 
+				if (system.criticals[j].turnend > endEffectMax) endEffectMax = system.criticals[j].turnend;
+					if ((system.criticals[j].turnend < endEffectMin) || (endEffectMin == 0)) endEffectMin = system.criticals[j].turnend;
+				} else infinitePresent = true;
             }
+			
+			var wearsOffText = "";			
+			if (endEffectMin>0){
+				wearsOffText = "until turn " + endEffectMin;
+				if(infinitePresent){
+					wearsOffText = wearsOffText+"+";
+				} else if (endEffectMax > endEffectMin){
+					wearsOffText = wearsOffText+"-"+endEffectMax;
+				}
+			}
+			
             if (noOfCrits > 1) {
-                return (<Entry key={`critical-${i}`}>({noOfCrits} x) {system.critData[i]}</Entry>);
+                return (<Entry key={`critical-${i}`}>({noOfCrits} x) {system.critData[i]} {wearsOffText}</Entry>);
             } else {
-                return (<Entry key={`critical-${i}`}>{system.critData[i]}</Entry>);
+                return (<Entry key={`critical-${i}`}>{system.critData[i]} {wearsOffText}</Entry>);
             }
         })
     );
