@@ -60,31 +60,12 @@ if (isset($_SESSION["user"])) {
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
         -->
-		---------- <b>LATEST NEWS - APRIL 2020</b> ----------
+		---------- <b>LATEST NEWS - MAY 2020</b> ----------
 		
-		<br><b><u>Torata</u> have arrived</b> - entire new official faction, prepared by Douglas!
-        <br>
 		
-		<br><b>FV-related support files</b> - moved from Facebook group to here (FAQ, enhancements list...)! Also, faction list was added.
-        <br><b>Stacks spilling to adjacent hex fixed</b> - if many units entered one hex, they appeared to be on nearby hexes (which might easily lead to incorrect positioning by player). This is now fixed.
-        <br><b>StarWars units rebalanced</b> - generally boosted.
-        <br><b>Called shots fixed</b> - now properly taking Rolled state into account.        
-        <br><b>Turn into pivot fixed</b> - now fighters actually need to have necessary thrust available :) .
-        <br><b>Initial Initiative changed</b> - now it assumes speed of 5 (does affect turn 1 movement order, especially for simultaneous Ini battles).
-        <br><b>Accelerator interception fixed</b> - now Accelerator weapons (Molecular Pulsar, Particle Accelerator...) are properly recognized as long-recharge for purposes of interception.
-        <br><b>Firing log fixed</b> - weapons that destroy systems on units other than target (Flash, Ramming...) now don't cause firing log to crash!
-        <br><b>Fighter ramming is being added</b> - I'm trying to check current games to make sure where it's safe to do so, but if I do break a game... sorry!!!
-        <br><b>Ipsha fix</b> - EM Hardened trait now actually doing something :)
-        <br><b>Interface changes</b> - weapon order of entries changed, onmouseover help for some icons...
-        <br><b>Interface more changes</b> - select all weapons now skips already declared ones, mode change no longer closes weapon menu.
-        <br><b>Ch'Lonas expanded</b> - further Ch'Lonas ships, courtesy of Douglas
-        <br><b>Ipsha enhanced</b> - Essan and Eethan Barony-specific refits are available
-	<br><b>SOEW fixed</b> - there actually were a few bugs in this area (all of them very rare due to interactions needed)
-	<br><b>Pentagon Array fixed</b> - first Torata fix ;)
-        <br><b>"Fighters did not fire" bug fixed</b> - ...hopefully. Look at this phase carefully anyway - it underwent extensive changes.
-	<br><b>EW rehearsed</b> - expanding from earlier SOEW fix, Jammer/Stealth interactions were corrected. Which of course means new bugs might have crept in!
-	<br><b>new Balosian ships</b> - to sweeten the above, You get a few new Balosian units, rounding out the faction (courtesy of Douglas).  
-	    
+	<br><b>Criticals reqorked</b> - no major immediate impact, although I hope temporary criticals will be easier to read now (Ipsha cooldowns!).
+	<br><b>Shipyard mistakes corrected</b> - quite a few minor layout errors (like wrong firing arcs or incorrect thrusters installed) were corrected.
+        
 	    
 	    
         <br><br>
@@ -94,7 +75,8 @@ if (isset($_SESSION["user"])) {
 		
         <br><br>---------- <b>LINKS</b> ----------
 		<br><a href="http://b5warsvault.wikidot.com/" target="_blank">B5Wars Vault</a> - B5Wars <a href="http://www.tesarta.com/b5wars/aogwarskitchensink.pdf" target="_blank">rules</a> (under the name of AoG Wars) and LOTS of related stuff
-        <br><a href="https://www.facebook.com/groups/218482691602941/" target=\"_blank\">Fiery Void Facebook group</a> - if You want to discuss, ask for help or report a bug!
+        	<br><a href="https://www.facebook.com/groups/218482691602941/" target=\"_blank\">Fiery Void Facebook group</a> - if You want to discuss, ask for help or report a bug!
+		<br><a href="https://www.youtube.com/channel/UCpzERJTeVoFVon_QqWQxesw/playlists" target=\"_blank\">Video tutorials</a> - Fiery Void video tutorials are available on YouTube!
 		<br><a href="files/FV_FAQ.txt">Fiery Void FAQ</a> - differences from B5 Wars, known bugs... look here if something works contrary to how You expect it to!
 		<br><a href="files/enhancements_list.txt">Fiery Void Enhancement list</a> - unit enhancements available, with short explanations.
 		<br><a href="files/FV_factions.txt">Fiery Void Factions list</a> - short info on more exotic rules and systems of fleets available.
