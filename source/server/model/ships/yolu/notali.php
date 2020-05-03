@@ -41,13 +41,13 @@ class Notali extends BaseShip{
         $this->addAftSystem(new FusionCannon(3, 8, 1, 60, 240));
 
         $this->addLeftSystem(new GraviticThruster(5, 21, 0, 5, 3));
-        $this->addLeftSystem(new MolecularDisruptor(4, 8, 6, 240, 60));
+        $this->addLeftSystem(new MolecularDisruptor(4, 8, 6, 300, 60));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 360));
         $this->addLeftSystem(new MolecularDisruptor(4, 8, 6, 120, 240));
         $this->addLeftSystem(new Hangar(5, 12));
 
         $this->addRightSystem(new GraviticThruster(5, 21, 0, 5, 4));
-        $this->addRightSystem(new MolecularDisruptor(4, 8, 6, 240, 60));
+        $this->addRightSystem(new MolecularDisruptor(4, 8, 6, 300, 60));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 180));
         $this->addRightSystem(new MolecularDisruptor(4, 8, 6, 120, 240));
         $this->addRightSystem(new Hangar(5, 12));

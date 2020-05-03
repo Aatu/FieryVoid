@@ -723,7 +723,6 @@ spl_autoload_register(
                 'sellac' => '/server/model/ships/abbai_old/sellac.php',
                 'seltat' => '/server/model/ships/centauri/seltat.php',
                 'senschuka' => '/server/model/ships/dilgar/senschuka.php',
-                'sensorsdisrupted' => '/server/model/cricialClasses.php',
                 'sensorspear' => '/server/model/weapons/specialWeapons.php',
                 'sensorspike' => '/server/model/weapons/specialWeapons.php',
                 'sentinelpointdefense' => '/server/model/weapons/defensive.php',

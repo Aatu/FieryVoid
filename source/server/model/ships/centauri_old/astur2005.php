@@ -50,7 +50,7 @@ class Astur2005 extends BaseShip{
         $this->addLeftSystem(new HeavyPlasma(3, 8, 5, 240, 360));
         $this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
         
-		$this->addRightSystem(new Thruster(4, 12, 0, 4, 3));
+		$this->addRightSystem(new Thruster(4, 12, 0, 4, 4));
 		$this->addRightSystem(new Hangar(5, 12));
         $this->addRightSystem(new HeavyPlasma(3, 8, 5, 0, 120));
         $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));

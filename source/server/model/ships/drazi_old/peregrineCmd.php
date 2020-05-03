@@ -15,6 +15,7 @@ class PeregrineCmd extends BaseShipNoAft{
         $this->variantOf = 'Peregrine Jump Ship';
 	$this->isd = 2065;
 	    $this->unofficial = true;
+		$this->notes = 'ALTERNATE UNIVERSE - unit designed for "In ancient times" campaign';
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;

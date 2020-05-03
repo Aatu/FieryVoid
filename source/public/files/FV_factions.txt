@@ -28,8 +28,8 @@ Particle Impeder - purely defensive weapon, capable of intercepting weapons with
 
 ABBAI (WotCR)
 Abbai fleet a few hundred years before the show era, representing Wars of the Centauri Republic period.
-They have Gravitic Drive and Gravitic Shielding much like modern Abbai, and weapons being precursors to modern Comm Disruptor (Comm Jammer and Sensor Spike).
-Mine Launcher - weapon that can deploy mines during combat. Not implemented in FV, units that have it are in game but equipped with missile launchers instead.
+They have Gravitic Shielding much like modern Abbai (but not Gravitic Drive!), and weapons being precursors to modern Comm Disruptor (Comm Jammer and Sensor Spike).
+Mine Launcher - weapon that can deploy mines during combat. Not implemented in FV, unit that has it (Motenai Mine Layer) is present in game but equipped with missile launchers instead.
 
 BALOSIAN
 No notable special systems/rules.
@@ -216,6 +216,7 @@ No very specific technologies (or technologies specific to base faction).
 SMALL RACES
 A few separate factions (both official and custom), connected only by the fact that they don't have many ship designs - as is fitting for such small organizations.
 Belt Alliance is somewhat notable for extensive use of Matter weapons (including as fighter guns - see Orieni) and EA Interceptors (although with no integrated Energy Web).
+BA also makes use of LCVs without a carrier for them, which they do not need being mostly intra-system force. This challenges their fleet when deploy under standard tournament/pickup battle limitations, unless rules are changed or allowances for Usuuth are made. 
 Otherwise no very specific technologies.
 
 
@@ -231,8 +232,8 @@ Torata extensively use Accelerator weapons, either allowing them to fire faster 
 
 USUUTH
 No very specific rules or technologies.
-Usuuth designs are official, but the fleet lacks a jump ship (they never expanded beyond their home system, and Usuuth Navy is defensive in nature) and rely on LCVs but doesn't have a carrier for them (it's not needed when they operate within home system).
-	This means a legal Usuuth fleet is simply not possible (with standard restrictions), unless rules are changed or allowances for Usuuth are made. 
+Their fleet relies on LCVs but doesn't have a carrier for them (it's not needed when they operate within home system).
+	This challenges Usuuth fleets when deploy under standard tournament/pickup battle limitations, unless rules are changed or allowances for Usuuth are made. 
 	
 	
 YOLU

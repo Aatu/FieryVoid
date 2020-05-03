@@ -107,6 +107,15 @@
 	protected function applyCooldown($gamedata){
 		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
 		//if boosted, cooldown (2 or 3 tuns)
+		if($currBoostlevel > 0){
+			$cooldownLength = $currBoostlevel + 1;
+			$finalTurn = $gamedata->turn + $cooldownLength;
+			$crit = new ForcedOfflineForTurns(-1, $this->unit->id, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $finalTurn);
+			$crit->updated = true;
+			$this->criticals[] =  $crit;
+		}
+		
+		/* cooldown remake 
 	     if($currBoostlevel > 0){ //2 turns forced shutdown
 		$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
                 $crit->updated = true;
@@ -122,6 +131,8 @@
 		$crit->newCrit = true; //force save even if crit is not for current turn
                 $this->criticals[] =  $crit;
 	     }
+		 */
+		 
 	}
     
 	public function fire($gamedata, $fireOrder){
@@ -286,6 +297,16 @@ class GraviticBolt extends Gravitic
 
 	protected function applyCooldown($gamedata){
 		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
+		
+		if($currBoostlevel > 0){
+			$cooldownLength = $currBoostlevel + 1;
+			$finalTurn = $gamedata->turn + $cooldownLength;
+			$crit = new ForcedOfflineForTurns(-1, $this->unit->id, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $finalTurn);
+			$crit->updated = true;
+			$this->criticals[] =  $crit;
+		}
+		
+		/* cooldown remake
 		//if boosted, cooldown (2 or 3 tuns)
 	     if($currBoostlevel > 0){ //2 turns forced shutdown
 		$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
@@ -302,6 +323,7 @@ class GraviticBolt extends Gravitic
 		$crit->newCrit = true; //force save even if crit is not for current turn
                 $this->criticals[] =  $crit;
 	     }
+		 */
 	}	
 	    
         public function fire($gamedata, $fireOrder){

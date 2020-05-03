@@ -14,6 +14,7 @@ class NightowlUpgr extends BaseShipNoAft{
 	$this->unofficial = true;
         $this->occurence = "uncommon";
 	$this->variantOf = 'Nightowl Hyperspace Probe'; 
+		$this->notes = 'ALTERNATE UNIVERSE - unit designed for "In ancient times" campaign';
 
         $this->forwardDefense = 18;
         $this->sideDefense = 18;

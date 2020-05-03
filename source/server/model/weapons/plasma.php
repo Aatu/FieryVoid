@@ -311,6 +311,11 @@ class PlasmaTorch extends Plasma{
             $roll = Dice::d(20) + $this->getTotalDamage();
             
             if($roll >= 16){ // It has overheated.
+				$finalTurn = $gamedata->turn + 2;
+				$crit = new ForcedOfflineForTurns(-1, $this->unit->id, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $finalTurn);
+				$crit->updated = true;
+				$this->criticals[] =  $crit;
+			/*remake!
                 $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
                 $crit->updated = true;
                 $this->criticals[] =  $crit;
@@ -318,6 +323,7 @@ class PlasmaTorch extends Plasma{
                 $crit->updated = true;
 		$crit->newCrit = true; //force save even if crit is not for current turn
                 $this->criticals[] =  $crit;
+				*/
             }
 		
         }
@@ -338,7 +344,7 @@ class PairedPlasmaBlaster extends LinkedWeapon{
 	public $animationExplosionScale = 0.1;
 
 	public $intercept = 2;
-	public $priority = 4; //eqivalend of d6+3, on account of armor piercing properties of Plasma
+	public $priority = 4; //eqivalent of d6+3, on account of armor piercing properties of Plasma
 
 	public $loadingtime = 1;
 	public $shots = 2;

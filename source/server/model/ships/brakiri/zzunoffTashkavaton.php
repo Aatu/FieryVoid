@@ -15,6 +15,7 @@ class zzunoffTashkavaton extends BaseShip{
 
         $this->limited = 33;
 		$this->notes = 'Im-Rehsa Technologies';//Corporation producing the design
+		$this->notes .= "<br>official Tashkava Advanced Lance Cruiser with Grav Shifters replaced by Grav Cannons"; 
 	      $this->isd = 2252;
 	      $this->unofficial = true;
         

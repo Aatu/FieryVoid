@@ -50,7 +50,7 @@ class Asturias extends BaseShip{
         $this->addLeftSystem(new ParticleProjector(3, 6, 1, 240, 60));
         $this->addLeftSystem(new ParticleProjector(2, 6, 1, 180, 360));
         
-		$this->addRightSystem(new Thruster(3, 12, 0, 4, 3));
+		$this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 		$this->addRightSystem(new Hangar(5, 12));
         $this->addRightSystem(new ParticleProjector(3, 6, 1, 300, 120));
         $this->addRightSystem(new ParticleProjector(2, 6, 1, 0, 180));

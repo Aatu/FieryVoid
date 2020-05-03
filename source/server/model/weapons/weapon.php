@@ -678,10 +678,12 @@ class Weapon extends ShipSystem
         // now recheck all the fighter's weapons
 	///but do NOT count defensive fire!
         foreach ($fighterSys->systems as $weapon) {
-            //if (!$weapon->ballistic && $weapon->firedOnTurn(TacGamedata::$currentTurn)) {
-	    if (!$weapon->ballistic && $weapon->firedOffensivelyOnTurn(TacGamedata::$currentTurn)) { //defensive fire is out of player control, mostly, so should not be penalized
-                return true;
-            }
+			if ($weapon instanceOf Weapon){
+				//if (!$weapon->ballistic && $weapon->firedOnTurn(TacGamedata::$currentTurn)) {
+				if (!$weapon->ballistic && $weapon->firedOffensivelyOnTurn(TacGamedata::$currentTurn)) { //defensive fire is out of player control, mostly, so should not be penalized
+					return true;
+				}
+			}
         }
 
         return false;
@@ -1421,7 +1423,7 @@ full Advanced Armor effects (by rules) for reference:
 		//and firing WEAPON age is not very advanced (<3 - less than Ancient)
 		//Ancients themselves do not care!
 		if( ($this->factionAge < 3) && ($system->advancedArmor)){
-			if($this.ballistic){ //extra protection against ballistics
+			if($this->ballistic){ //extra protection against ballistics
 				$returnArmour += 2;
 			}
 			if($this->weaponClass == 'Matter'){ //slight vulnerability vs Matter
