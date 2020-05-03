@@ -63,7 +63,7 @@ if (isset($_SESSION["user"])) {
 		---------- <b>LATEST NEWS - MAY 2020</b> ----------
 		
 		
-	<br><b>Criticals reqorked</b> - no major immediate impact, although I hope temporary criticals will be easier to read now (Ipsha cooldowns!).
+	<br><b>Criticals reworked</b> - no major immediate impact, although I hope temporary criticals will be easier to read now (Ipsha cooldowns!).
 	<br><b>Shipyard mistakes corrected</b> - quite a few minor layout errors (like wrong firing arcs or incorrect thrusters installed) were corrected.
         
 	    
