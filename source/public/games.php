@@ -66,7 +66,12 @@ if (isset($_SESSION["user"])) {
 	<br><b>Criticals reworked</b> - no major immediate impact, although I hope temporary criticals will be easier to read now (Ipsha cooldowns!).
 	<br><b>Shipyard mistakes corrected</b> - quite a few minor layout errors (like wrong firing arcs or incorrect thrusters installed) were corrected.
         
+	<br><b>Discord channel</b> - added to links below.
 	    
+	<br><b>Recently active games</b> - now skipping games during creation (turn 0)
+	<br><b>BA order of battle</b> - Belt Alliance ships now can officially carry fighters instead of mysterious "externals" :) . Deployment restrictions were added where appropriate, too.
+	<br><b>Mode change extended</b> - now current mode is shown besides change button, for (hopefully) clearer information
+	<br><b>Thruster allocation while pivoted fixed</b> - ...again ;)    
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload (<b><u>ctrl+F5</u></b>) whenever something weird happens.

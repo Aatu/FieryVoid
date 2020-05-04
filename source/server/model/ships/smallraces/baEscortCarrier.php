@@ -10,7 +10,7 @@ class BAEscortCarrier extends HeavyCombatVessel{
         $this->imagePath = "img/ships/BAEscortCarrier.png";
         $this->shipClass = "BA Escort Carrier";
         $this->occurence = "common";
-        $this->fighters = array("normal"=>12, "external"=>12); 
+        $this->fighters = array("normal"=>12, "heavy"=>12); //"heavy" are external racks
 
         $this->isd = 2185;
         

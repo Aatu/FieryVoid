@@ -49,7 +49,7 @@ class SWRayShield extends Shield implements DefensiveSystem{
         if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn()) return 0; //destroyed shield gives no protection
         $output = $this->output + $this->getBoostLevel($turn);
 	//Ballistic, Matter, SWIon - passes through!
-	if($weapon->weaponClass == 'Ballistic' || $weapon->weaponClass == 'Matter' || $weapon->weaponClass == 'SWIon' ) $output = 0;
+	if($weapon->weaponClass == 'Ballistic' || $weapon->weaponClass == 'Matter' || $weapon->weaponClass == 'SWIon' || $weapon->weaponClass == 'Ramming') $output = 0;
         $output += $this->outputMod; //outputMod itself is negative!
 	if($weapon->damageType == 'Raking') $output = 2*$output;//Raking - double effect!
 	$output=max(0,$output); //no less than 0!
@@ -67,7 +67,7 @@ class SWRayShield extends Shield implements DefensiveSystem{
 		}
 	$this->data["Special"] .= "Does not decrease profile."; 
 	$this->data["Special"] .= "<br>Cannot be flown under."; 
-	$this->data["Special"] .= "<br>Does not protect from Ballistic, Matter and StarWars Ion damage."; 
+	$this->data["Special"] .= "<br>Does not protect from Ballistic, Matter and StarWars Ion damage (and Ramming!)."; 
 	$this->data["Special"] .= "<br>Doubly effective vs Raking weapons."; 
     }
 	  
