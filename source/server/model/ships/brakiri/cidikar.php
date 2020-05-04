@@ -7,7 +7,7 @@ class cidikar extends BaseShip{
 	$this->pointCost = 800;
 	$this->faction = "Brakiri";
         $this->phpclass = "cidikar";
-        $this->imagePath = "img/ships/brokados.png"; //waiting for proper hull
+        $this->imagePath = "img/ships/Cidikar.png";
         $this->shipClass = "Cidikar Heavy Carrier";
         $this->shipSizeClass = 3;
         $this->fighters = array("heavy"=>24, "light"=>24);
