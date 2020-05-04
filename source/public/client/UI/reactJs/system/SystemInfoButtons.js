@@ -297,8 +297,6 @@ class SystemInfoButtons extends React.Component {
 				{canAAincrease(ship, system) && <Button onClick={this.AAincrease.bind(this)} img="./img/systemicons/AAclasses/iconPlus.png"></Button>}
 				{canAAdecrease(ship, system) && <Button onClick={this.AAdecrease.bind(this)} img="./img/systemicons/AAclasses/iconMinus.png"></Button>}
 				{canAApropagate(ship, system) && <Button title="propagate setting" onClick={this.AApropagate.bind(this)} img="./img/systemicons/AAclasses/iconPropagate.png"></Button>}
-				
-				
             </Container>
         )
     }
