@@ -8,7 +8,7 @@ class TorataDartocCA extends BaseShip{
 		$this->pointCost = 650;
 		$this->faction = "Torata";
 		$this->phpclass = "TorataDartocCA";
-		$this->imagePath = "img/ships/TorataDartoc.png";
+		$this->imagePath = "img/ships/TorataGolthar.png";
 		$this->canvasSize = 200;
 		$this->shipClass = "Dartoc Strike Cruiser";
 		$this->shipSizeClass = 3;
