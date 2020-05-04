@@ -39467,8 +39467,10 @@ var getCriticals = function getCriticals(system) {
         var wearsOffText = "";
         if (endEffectMin > 0) {
             wearsOffText = "until turn " + endEffectMin;
-            if (infinitePresent || endEffectMax > endEffectMin) {
+            if (infinitePresent) {
                 wearsOffText = wearsOffText + "+";
+            } else if (endEffectMax > endEffectMin) {
+                wearsOffText = wearsOffText + "-" + endEffectMax;
             }
         }
 
@@ -39945,8 +39947,8 @@ var SystemInfoButtons = function (_React$Component) {
 			return React.createElement(
 				Container,
 				null,
-				canOnline(ship, system) && React.createElement(Button, { title: "power on", onClick: this.online.bind(this), onContextMenu: this.allOnline.bind(this), img: "./img/on.png" }),
-				canOffline(ship, system) && React.createElement(Button, { title: "power off", onClick: this.offline.bind(this), onContextMenu: this.allOffline.bind(this), img: "./img/off.png" }),
+				canOnline(ship, system) && React.createElement(Button, { title: "power on (R = mass for weapons)", onClick: this.online.bind(this), onContextMenu: this.allOnline.bind(this), img: "./img/on.png" }),
+				canOffline(ship, system) && React.createElement(Button, { title: "power off (R = mass for weapons)", onClick: this.offline.bind(this), onContextMenu: this.allOffline.bind(this), img: "./img/off.png" }),
 				canOverload(ship, system) && React.createElement(Button, { title: "overload", onClick: this.overload.bind(this), img: "./img/overload.png" }),
 				canStopOverload(ship, system) && React.createElement(Button, { title: "stop overload", nClick: this.stopOverload.bind(this), img: "./img/overloading.png" }),
 				canDeBoost(ship, system) && React.createElement(Button, { title: "deboost", onClick: this.deboost.bind(this), img: "./img/minussquare.png" }),
@@ -39954,6 +39956,7 @@ var SystemInfoButtons = function (_React$Component) {
 				canAddShots(ship, system) && React.createElement(Button, { title: "more shots", onClick: this.addShots.bind(this), img: "./img/plussquare.png" }),
 				canReduceShots(ship, system) && React.createElement(Button, { title: "less shots", onClick: this.reduceShots.bind(this), img: "./img/minussquare.png" }),
 				canRemoveFireOrder(ship, system) && React.createElement(Button, { title: "cancel fire order", onClick: this.removeFireOrder.bind(this), img: "./img/firing.png" }),
+				canChangeFiringMode(ship, system) && getFiringModesCurr(ship, system),
 				canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this)),
 				canSelfIntercept(ship, system) && React.createElement(Button, { title: "allow interception (R = mass)", onClick: this.declareSelfIntercept.bind(this), onContextMenu: this.declareSelfInterceptAll.bind(this), img: "./img/selfIntercept.png" }),
 				canAAdisplayCurrClass(ship, system) && React.createElement(Button, { title: getAAcurrClassName(ship, system), img: getAAcurrClassImg(ship, system) }),
@@ -40079,6 +40082,34 @@ var getFiringModes = function getFiringModes(ship, system, changeFiringMode, all
 		);
 	}
 };
+
+/*getFiringModesCurr - display current firing mode (no effect on click)*/
+var getFiringModesCurr = function getFiringModesCurr(ship, system) {
+	if (system.parentId >= 0) {//...obsolete...
+		/*
+  let parentSystem = shipManager.systems.getSystem(ship, system.parentId);	
+  if (parentSystem.parentId >= 0) {
+  	parentSystem = shipManager.systems.getSystem(ship, parentSystem.parentId);
+  } else {
+  }
+  */
+	} else {
+		var firingMode = system.firingModes[system.firingMode] ? system.firingModes[system.firingMode] : system.firingModes[1];
+		var img = '';
+		if (system.iconPath) {
+			img = "./img/systemicons/" + system.iconPath;
+		} else {
+			img = "./img/systemicons/" + system.name + ".png";
+		}
+
+		var textTitle = "current mode: " + firingMode;
+		return React.createElement(
+			Button,
+			{ title: textTitle, img: img },
+			firingMode.substring(0, 1)
+		);
+	}
+}; //endof getFiringModesCurr
 
 exports.default = SystemInfoButtons;
 
