@@ -36,8 +36,8 @@ class Motenai extends BaseShip{
    
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-        $this->addFrontSystem(new GraviticShield(0, 6, 0, 1, 0, 60));
         $this->addFrontSystem(new GraviticShield(0, 6, 0, 1, 300, 360));
+	$this->addFrontSystem(new GraviticShield(0, 6, 0, 1, 0, 60));
         $this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 60));
         $this->addFrontSystem(new SoMissileRack(3, 6, 0, 300, 60));
         $this->addFrontSystem(new SoMissileRack(3, 6, 0, 300, 60));
