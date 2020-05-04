@@ -7,7 +7,7 @@ class ProviderFreighter extends MediumShip{
 	$this->pointCost = 110;
 	$this->faction = "Civilians";
         $this->phpclass = "providerfreighter";
-        $this->imagePath = "img/ships/civilianFreighter.png";
+        $this->imagePath = "img/ships/DenethProvider.png";
         $this->shipClass = "Deneth Provider Freighter";
         $this->canvasSize = 100;
 	    
