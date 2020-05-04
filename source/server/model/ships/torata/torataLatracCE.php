@@ -8,7 +8,7 @@ class TorataLatracCE extends BaseShip{
 		$this->pointCost = 700;
 		$this->faction = "Torata";
 		$this->phpclass = "TorataLatracCE";
-		$this->imagePath = "img/ships/TorataLatrac.png";
+		$this->imagePath = "img/ships/TorataGolthar.png";
 		$this->canvasSize = 200;
 		$this->shipClass = "Latrac Defender";
 		$this->variantOf = "Golthar Fast Cruiser";
