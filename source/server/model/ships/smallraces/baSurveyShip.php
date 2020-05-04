@@ -12,6 +12,7 @@ class BASurveyShip extends BaseShip{
         $this->shipSizeClass = 3;
 
         $this->isd = 2234;        
+        $this->limited = 33;
 
         $this->forwardDefense = 15;
         $this->sideDefense = 18;

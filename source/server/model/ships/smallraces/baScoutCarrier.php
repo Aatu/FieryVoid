@@ -12,8 +12,9 @@ class BAScoutCarrier extends BaseShip{
         $this->shipSizeClass = 3;
         $this->fighters = array("medium"=>12);
 	    
-	$this->variantOf = 'BA Survey Ship';
+		$this->variantOf = 'BA Survey Ship';
         $this->isd = 2234;
+        $this->limited = 33;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 18;

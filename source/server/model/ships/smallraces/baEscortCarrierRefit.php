@@ -9,7 +9,7 @@ class BAEscortCarrierRefit extends HeavyCombatVessel{
         $this->phpclass = "BAEscortCarrierRefit";
         $this->imagePath = "img/ships/BAEscortCarrier.png";
         $this->shipClass = "BA Escort Carrier (refit)";
-        $this->fighters = array("normal"=>12, "external"=>12); 
+        $this->fighters = array("normal"=>12, "heavy"=>12); //"heavy" are external racks
 
         $this->occurence = "uncommon";
         $this->variantOf = 'BA Escort Carrier';

@@ -1747,7 +1747,7 @@ shipManager.movement = {
                 orientationRequired=3;
             }
         }
-        if (shipManager.movement.isGoingBackwards(ship)){ //moving backwards reverses all requirements
+        if (shipManager.movement.isGoingBackwards(ship) && (!shipManager.movement.isOutOfAlignment(ship))){ //moving STRICTLY backwards reverses all requirements
             switch(orientationRequired) {
                 case 1: 
                     orientationRequired = 2;

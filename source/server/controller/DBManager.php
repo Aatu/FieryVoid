@@ -952,7 +952,7 @@ class DBManager
 	*/
 	//replacement: games recently active (including closed ones! - recent conclusion qualifies)
 	$sql = "SELECT DISTINCT g.* FROM tac_game g JOIN tac_playeringame p ON p.gameid = g.id
-		WHERE DATE_ADD(p.lastactivity, INTERVAL 2 day) >= NOW() ";
+		WHERE turn > 0 and DATE_ADD(p.lastactivity, INTERVAL 2 day) >= NOW() "; //skip games in creation phase
         //    debug::log($sql);
 
         $result = $this->query($sql);

@@ -9,11 +9,12 @@ class BAHeavyGunboatPulse extends HeavyCombatVessel{
         $this->phpclass = "BAHeavyGunboatPulse";
         $this->imagePath = "img/ships/BAHeavyGunboat.png";
         $this->shipClass = "BA Heavy Gunboat (Pulse)";
-        $this->fighters = array("external"=>6); 
+        $this->fighters = array("heavy"=>6); //external racks 
 
         $this->occurence = "uncommon";
         $this->variantOf = 'BA Heavy Gunboat';
         $this->isd = 2251;
+        $this->limited = 33;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 14;
