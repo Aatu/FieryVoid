@@ -9,7 +9,7 @@ class ProviderFreighter extends MediumShip{
         $this->phpclass = "providerfreighter";
         $this->imagePath = "img/ships/DenethProvider.png";
         $this->shipClass = "Deneth Provider Freighter";
-        $this->canvasSize = 100;
+        $this->canvasSize = 200;
 	    
 	$this->isd = 2210;
         
