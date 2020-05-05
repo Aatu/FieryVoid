@@ -56,7 +56,31 @@ class Sulust extends HeavyCombatVessel{
         $this->addAftSystem(new Structure( 4, 60));
         $this->addPrimarySystem(new Structure( 6, 40));
         
-        
+        $this->hitChart = array(
+                0=> array(
+                    6 => "Structure",
+                    10 => "Thruster",
+                    13 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+                ),
+                1=> array(
+                    3 => "Thruster",
+                    5 => "Battle Laser",
+                    7 => "Guardian Array",
+                    11 => "Twin Array",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+                2=> array(
+                    6 => "Thruster",
+                    9 => "Guardian Array",
+                    18 => "Structure",
+                    20 => "Primary",
+			),
+		); 
     }
 
 }
