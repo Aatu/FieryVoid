@@ -57,7 +57,7 @@ class Darmoti extends HeavyCombatVessel{
         $this->addPrimarySystem(new Structure( 6, 30));
         
         
-                		$this->hitChart = array(
+                $this->hitChart = array(
 			0=> array(
 				7 => "Structure",
 				10 => "Thruster",
@@ -70,7 +70,7 @@ class Darmoti extends HeavyCombatVessel{
 			1=> array(
 				3 => "Thruster",
 				4 => "Tractor Beam",
-                5 => "Plasma Accelerator",
+                		5 => "Plasma Accelerator",
 				9 => "Heavy Array",
 				18 => "Structure",
 				20 => "Primary",
