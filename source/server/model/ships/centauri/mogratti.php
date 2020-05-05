@@ -45,6 +45,32 @@ class Mogratti extends MediumShip{
         $this->addAftSystem(new Thruster(3, 12, 0, 5, 2));
        
         $this->addPrimarySystem(new Structure( 5, 50));
+    
+    	$this->hitChart = array(
+                0=> array(
+                        7 => "Thruster",
+                        9 => "Twin Array",
+                        12 => "Scanner",
+			15 => "Engine",
+                        16 => "Hangar",
+                        19 => "Reactor",
+                        20 => "C&C",
+                ),
+                1=> array(
+                        3 => "Thruster",
+                        5 => "Plasma Accelerator",
+			8 => "Matter Cannon",			
+			11 => "Twin Array",
+                        17 => "Structure",
+                        20 => "Primary",
+                ),
+                2=> array(
+                        8 => "Thruster",
+                        17 => "Structure",
+                        20 => "Primary",
+                ),
+        );    
+    
     }
 
 }
