@@ -54,7 +54,7 @@ class Demos extends HeavyCombatVessel{
         $this->addAftSystem(new Structure( 4, 46));
         $this->addPrimarySystem(new Structure( 6, 30));
         
-        		$this->hitChart = array(
+        $this->hitChart = array(
                 0=> array(
                     7 => "Structure",
                     10 => "Thruster",
