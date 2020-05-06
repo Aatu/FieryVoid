@@ -46,5 +46,33 @@ class Darkhawk extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Structure(6, 36));
         $this->addLeftSystem(new Structure(5, 44));
         $this->addRightSystem(new Structure(5, 44));
+    
+                $this->hitChart = array(
+        		0=> array(
+        				8 => "Structure",
+        				11 => "Thruster",
+					12 => "Particle Cutter",
+        				14 => "Scanner",
+        				16 => "Engine",
+        				17 => "Hangar",
+        				19 => "Reactor",
+        				20 => "C&C",
+        		),
+        		3=> array(
+        				3 => "Thruster",
+        				5 => "Class-S Missile Rack",
+        				7 => "Standard Particle Beam",
+					18 => "Structure",
+        				20 => "Primary",
+        		),
+        		4=> array(
+        				3 => "Thruster",
+        				5 => "Class-S Missile Rack",
+        				7 => "Standard Particle Beam",
+					18 => "Structure",
+        				20 => "Primary",
+        		),
+        );
+    
     }
 }
