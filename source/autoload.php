@@ -1011,7 +1011,7 @@ spl_autoload_register(
                 'wlcchlonasxerenthain' => '/server/model/ships/ZCustomChLonas/wlcChlonasXerEnthain.php',
                 'wlcchlonasvakan' => '/server/model/ships/ZCustomChLonas/wlcChlonasVaKan.php',
                 'wlcchlonastekkashi' => '/server/model/ships/ZCustomChLonas/wlcChlonasTekKashi.php',
-		'wlcChlonasHeArpa' => '/server/model/ships/ZCustomChLonas/wlcChlonasHeArpa.php',     
+		'wlcchlonashearpa' => '/server/model/ships/ZCustomChLonas/wlcChlonasHeArpa.php',     
 			
                 'wlcemperordn2090' => '/server/model/ships/customs/wlcEmperorDN2090.php',
                 'wlcoptinehc' => '/server/model/ships/customs/wlcOptineHC.php',
