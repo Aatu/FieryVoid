@@ -36,8 +36,8 @@ class BAHeavyGunboat extends HeavyCombatVessel{
 
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-	$this->addFrontSystem(new MedBlastCannon(3, 5, 2, 270, 90));
 	$this->addFrontSystem(new HvyBlastCannon(3, 6, 4, 300, 60));
+	$this->addFrontSystem(new MedBlastCannon(3, 5, 2, 270, 90));
         $this->addFrontSystem(new BAInterceptorMkI(3, 4, 1, 270, 90));    
 	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 180, 60));
 	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 180)); 
