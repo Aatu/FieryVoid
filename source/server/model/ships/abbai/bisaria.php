@@ -37,8 +37,8 @@ class Bisaria extends MediumShip{
 		
         $this->addFrontSystem(new CommDisruptor(3, 0, 0, 300, 60));
         $this->addFrontSystem(new QuadArray(2, 0, 0, 180, 60));
+        $this->addFrontSystem(new QuadArray(2, 0, 0, 300, 60));
         $this->addFrontSystem(new QuadArray(2, 0, 0, 300, 180));
-	$this->addFrontSystem(new QuadArray(2, 0, 0, 300, 60));
         $this->addFrontSystem(new GraviticShield(0, 6, 0, 3, 240, 360));
         $this->addFrontSystem(new GraviticShield(0, 6, 0, 3, 0, 120));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
