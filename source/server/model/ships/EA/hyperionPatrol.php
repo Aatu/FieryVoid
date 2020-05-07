@@ -36,8 +36,8 @@ class HyperionPatrol extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	$this->addFrontSystem(new MediumPulse(3, 6, 3, 300, 60));
-        $this->addFrontSystem(new MediumPulse(3, 6, 3, 300, 60));
-	$this->addFrontSystem(new MediumPulse(3, 6, 3, 240, 120));
+        $this->addFrontSystem(new MediumPulse(3, 6, 3, 240, 120));
+	$this->addFrontSystem(new MediumPulse(3, 6, 3, 300, 60));
         $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 240, 60));
         $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 300, 120));
 
