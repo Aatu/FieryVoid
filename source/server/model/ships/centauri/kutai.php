@@ -50,5 +50,32 @@ class Kutai extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure( 5, 52));
         $this->addAftSystem(new Structure( 5, 48));
         $this->addPrimarySystem(new Structure( 6, 36 ));
+    
+        $this->hitChart = array(
+                0=> array(
+                    8 => "Structure",
+                    10 => "Thruster",
+                    13 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+                ),
+                1=> array(
+                    4 => "Thruster",
+                    9 => "Matter Cannon",
+                    11 => "Twin Array",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+                2=> array(
+                    4 => "Thruster",
+                    7 => "Matter Cannon",
+                    9 => "Twin array",
+		    18 => "Structure",
+                    20 => "Primary",
+		),
+	); 
+    
     }
 }
