@@ -1228,7 +1228,7 @@ spl_autoload_register(
                 'fessa' => '/server/model/ships/balosian/fessa.php',
                 'hassa' => '/server/model/ships/balosian/hassa.php',
 				
-					'wlcchlonashearpa' => '/server/model/ships/ZCustomChLonas/wlcChlonasHeArpa.php',    
+		'wlcchlonashearpa' => '/server/model/ships/ZCustomChLonas/wlcChlonasHeArpa.php',    
 		    
 		//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
                 'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
