@@ -56,6 +56,30 @@ class Amar extends HeavyCombatVessel{
         $this->addAftSystem(new Structure( 4, 40));
         $this->addPrimarySystem(new Structure( 5, 32));
 
+        $this->hitChart = array(
+                0=> array(
+                    7 => "Structure",
+                    10 => "Thruster",
+                    13 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+                ),
+                1=> array(
+                    4 => "Thruster",
+                    7 => "Twin Array",
+                    10 => "Hangar",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+                2=> array(
+                    6 => "Thruster",
+                    10 => "Jump Engine",
+                    18 => "Structure",
+                    20 => "Primary",
+			),
+		);     
 
     }
 

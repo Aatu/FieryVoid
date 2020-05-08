@@ -47,6 +47,36 @@ class Strikehawk extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Structure(5, 32));
         $this->addLeftSystem(new Structure(4, 40));
         $this->addRightSystem(new Structure(4, 40));
+    
+            $this->hitChart = array(
+        		0=> array(
+        				8 => "Structure",
+        				11 => "Thruster",
+					12 => "Catapult",
+        				14 => "Scanner",
+        				16 => "Engine",
+        				17 => "Hangar",
+        				19 => "Reactor",
+        				20 => "C&C",
+        		),
+        		3=> array(
+        				3 => "Thruster",
+        				5 => "Particle Blaster",
+        				7 => "Particle Cannon",
+					9 => "Standard Particle Beam",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        		4=> array(
+        				3 => "Thruster",
+        				5 => "Particle Blaster",
+        				7 => "Particle Cannon",
+					9 => "Standard Particle Beam",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        );
+    
     }
 }
 ?>

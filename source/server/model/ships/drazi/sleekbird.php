@@ -45,6 +45,31 @@ class Sleekbird extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Structure(5, 32));
         $this->addLeftSystem(new Structure(4, 40));
         $this->addRightSystem(new Structure(4, 40));
+    
+                $this->hitChart = array(
+        		0=> array(
+        				8 => "Structure",
+        				11 => "Thruster",
+					13 => "Scanner",
+        				15 => "Engine",
+        				17 => "Hangar",
+        				19 => "Reactor",
+        				20 => "C&C",
+        		),
+        		3=> array(
+        				4 => "Thruster",
+        				8 => "Standard Particle Beam",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        		4=> array(
+        				4 => "Thruster",
+        				8 => "Standard Particle Beam",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        );
+    
     }
 }
 ?>

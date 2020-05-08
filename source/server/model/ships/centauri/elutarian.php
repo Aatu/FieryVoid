@@ -8,7 +8,7 @@ class Elutarian extends HeavyCombatVessel{
         $this->faction = "Centauri";
         $this->phpclass = "Elutarian";
         $this->imagePath = "img/ships/altarian.png";
-        $this->shipClass = "Elutarian Torpedo Destroyer";
+        $this->shipClass = "Elutarian Bombardment Destroyer";
         $this->variantOf = "Altarian Destroyer";
         $this->occurence = "rare";
         $this->fighters = array("medium"=>6);
@@ -59,6 +59,32 @@ class Elutarian extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure( 4, 60));
         $this->addAftSystem(new Structure( 4, 60));
         $this->addPrimarySystem(new Structure( 6, 46 ));
+        
+            $this->hitChart = array(
+                0=> array(
+                    6 => "Structure",
+                    9 => "Thruster",
+                    12 => "Scanner",
+                    15 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+                ),
+                1=> array(
+                    3 => "Thruster",
+                    6 => "Ballistic Torpedo",
+                    9 => "Twin Array",
+                    18 => "Structure",
+                    20 => "Primary",
+                ),
+                2=> array(
+                    4 => "Thruster",
+                    8 => "Twin Array",
+                    9 => "Jump Engine",
+                    18 => "Structure",
+                    20 => "Primary",
+			),
+		);   
         
         
     }

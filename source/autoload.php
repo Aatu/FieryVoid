@@ -1010,8 +1010,8 @@ spl_autoload_register(
                 'wlcchlonasanvothi' => '/server/model/ships/ZCustomChLonas/wlcChlonasAnVothi.php',
                 'wlcchlonasxerenthain' => '/server/model/ships/ZCustomChLonas/wlcChlonasXerEnthain.php',
                 'wlcchlonasvakan' => '/server/model/ships/ZCustomChLonas/wlcChlonasVaKan.php',
-                'wlcchlonastekkashi' => '/server/model/ships/ZCustomChLonas/wlcChlonasTekKashi.php',		    
-			
+                'wlcchlonastekkashi' => '/server/model/ships/ZCustomChLonas/wlcChlonasTekKashi.php',
+
                 'wlcemperordn2090' => '/server/model/ships/customs/wlcEmperorDN2090.php',
                 'wlcoptinehc' => '/server/model/ships/customs/wlcOptineHC.php',
                 'wlcoptinehcu' => '/server/model/ships/customs/wlcOptineHCU.php',
@@ -1228,7 +1228,7 @@ spl_autoload_register(
                 'fessa' => '/server/model/ships/balosian/fessa.php',
                 'hassa' => '/server/model/ships/balosian/hassa.php',
 				
-			
+		'wlcchlonashearpa' => '/server/model/ships/ZCustomChLonas/wlcChlonasHeArpa.php',    
 		    
 		//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
                 'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',

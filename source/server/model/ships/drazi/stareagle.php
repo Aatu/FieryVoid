@@ -41,6 +41,30 @@ class Stareagle extends MediumShipLeftRight{
         $this->addRightSystem(new StdParticleBeam(4, 4, 1, 300, 120));
 		
         $this->addPrimarySystem(new Structure( 5, 36));
+    
+            $this->hitChart = array(
+        		0=> array(
+        				8=> "Structure",
+					10 => "Thruster",
+        				12 => "Particle Blaster",
+					14 => "Scanner",
+        				16 => "Engine",
+        				17 => "Hangar",
+        				19 => "Reactor",
+        				20 => "C&C",
+        		),
+        		3=> array(
+        				5 => "Thruster",
+        				9 => "Standard Particle Beam",
+        				20 => "Primary",
+        		),
+        		4=> array(
+        				5 => "Thruster",
+        				9 => "Standard Particle Beam",
+        				20 => "Primary",
+        		),
+        );
+    
     }
 
 }
