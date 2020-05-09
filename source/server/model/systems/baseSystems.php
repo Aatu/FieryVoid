@@ -1000,7 +1000,7 @@ class ConnectionStrut extends ShipSystem{
 						$destroyed = true;
 					}
 					if ($toDeal > 0){						
-						$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $trgtStructure->id, $toDeal, 0, 0, $damage->fireorderid, $destroyed, "Connection Strut!", $damage->damageclass);
+						$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $trgtStructure->id, $toDeal, 0, 0, $damage->fireorderid, $destroyed, false, "Connection Strut!", $damage->damageclass);
 						$damageEntry->updated = true;
 						$trgtStructure->damage[] = $damageEntry;
 					}
@@ -1014,7 +1014,7 @@ class ConnectionStrut extends ShipSystem{
 							$destroyed = true;
 						}
 						if ($toDeal > 0){
-							$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $primary->id, $toDeal, 0, 0, $damage->fireorderid, $destroyed, "Connection Strut!", $damage->damageclass);
+							$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $primary->id, $toDeal, 0, 0, $damage->fireorderid, $destroyed, false, "Connection Strut!", $damage->damageclass);
 							$damageEntry->updated = true;
 							$primary->damage[] = $damageEntry;
 						}

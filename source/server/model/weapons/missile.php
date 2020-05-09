@@ -109,21 +109,30 @@ class MissileLauncher extends Weapon{
 
 
     public function ammoExplosion($ship, $gamedata, $damage){
+		$fireOrder = new FireOrder(
+			-1, "normal", $ship->id, $ship->id,
+			$this->id, -1, $gamedata->turn, 1, 
+			100, 100, 1, 1, 0,
+			0,0,'Ballistic',10000
+		);					
+		$fireOrder->pubnotes = "Magazine explosion";
+		$fireOrder->addToDB = true;
+		$this->fireOrders[] = $fireOrder;
+					
         //first, destroy self if not yet done...
         if (!$this->isDestroyed()){
-            $this->noOverkill = true;
-            $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
-                    $gamedata->turn, 'standard', 100, 1, 1, 1, 0, null, null, 'ballistic');
-            $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
-            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, $pos, $gamedata, true, $this->location);
+			$remaining =  $this->getRemainingHealth();
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $remaining, 0, 0, -1, true, false, "", "Ballistic");
+			$damageEntry->updated = true;
+			$damageEntry->shooterid = $ship->id; //additional field
+			$damageEntry->weaponid = $this->id; //additional field
+			$this->damage[] = $damageEntry;
         }
         
         //then apply damage potential as a hit...
         if($damage>0){
             $this->noOverkill = false;
             $this->damageType = 'Flash'; //should be Raking by the rules, but Flash is much easier to do - and very fitting for explosion!
-            $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
-                    $gamedata->turn, 'flash', 100, 1, 1, 1, 0, null, null, 'ballistic');
             $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->location); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
         }
     }

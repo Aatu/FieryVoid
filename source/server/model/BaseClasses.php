@@ -154,8 +154,9 @@ class DamageEntry{
     public $updated = false;
     
     public $shooterid, $weaponid;//Marcin Sawicki: additional variables, usually useless, but needed to identify fire order whose ID is not known at the moment of dealing damage
+	public $undestroyed;//for self-repair - add ability to restore sdestroyed system to function
     
-    function __construct($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes, $damageclass = null, $shooterid = null, $weaponid = null){
+    function __construct($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $undestroyed, $pubnotes, $damageclass = null, $shooterid = null, $weaponid = null){
         $this->id = $id;
         $this->shipid = $shipid;
         $this->gameid = $gameid;
@@ -166,11 +167,14 @@ class DamageEntry{
         $this->shields = $shields;
         $this->fireorderid = $fireorderid;
         $this->destroyed = $destroyed;
+        $this->undestroyed = $undestroyed;
         $this->pubnotes = $pubnotes;
-        $this->damageclass = $damageclass;
-        
+        $this->damageclass = $damageclass;        
         $this->shooterid = $shooterid;
-        $this->weaponid = $weaponid;        
+        $this->weaponid = $weaponid;    
+
+		/*do not allow negative effective values unless they're really healing!*/
+		if (($damage>=0) && ($damage<$armour)) $armour=$damage; //otherwise interface will show that as negative effective damage!	
     }
 
 }

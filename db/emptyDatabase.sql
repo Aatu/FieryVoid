@@ -175,6 +175,7 @@ CREATE TABLE `tac_damage` (
   `shields` int(11) DEFAULT '0',
   `fireorderid` int(11) NOT NULL,
   `destroyed` tinyint(1) NOT NULL DEFAULT '0',
+  `undestroyed` tinyint(1) NOT NULL DEFAULT '0',
   `pubnotes` text,
   `damageclass` tinytext,
   PRIMARY KEY (`id`),
