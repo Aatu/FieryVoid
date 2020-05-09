@@ -48,6 +48,36 @@ class Jumphawk extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Structure(6, 36));
         $this->addLeftSystem(new Structure(5, 44));
         $this->addRightSystem(new Structure(5, 44));
+    
+         	 $this->hitChart = array(
+        		0=> array(
+        				6 => "Structure",
+        				9 => "Thruster",
+					11 => "Jump Engine",
+        				14 => "Scanner",
+        				16 => "Engine",
+        				17 => "Hangar",
+        				19 => "Reactor",
+        				20 => "C&C",
+        		),
+        		3=> array(
+        				3 => "Thruster",
+        				4 => "Particle Blaster",
+				        5 => "Particle Cannon",
+				        7 => "Standard Particle Beam",
+					18 => "Structure",
+        				20 => "Primary",
+        		),
+        		4=> array(
+        				3 => "Thruster",
+        				4 => "Particle Blaster",
+				        5 => "Particle Cannon",
+				        7 => "Standard Particle Beam",
+					18 => "Structure",
+        				20 => "Primary",
+        		),
+        );
+    
     }
 }
 ?>

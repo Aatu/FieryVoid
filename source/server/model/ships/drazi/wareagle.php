@@ -44,6 +44,31 @@ class Wareagle extends MediumShipLeftRight{
         $this->addRightSystem(new StdParticleBeam(4, 4, 1, 300, 120));
 		
         $this->addPrimarySystem(new Structure( 5, 36));
+    
+                $this->hitChart = array(
+        		0=> array(
+        				8 => "Thruster",
+        				10 => "Particle Cutter",
+					13 => "Scanner",
+        				15 => "Engine",
+        				17 => "Hangar",
+        				19 => "Reactor",
+        				20 => "C&C",
+        		),
+        		3=> array(
+        				5 => "Thruster",
+        				9 => "Standard Particle Beam",
+					17 => "Structure",
+        				20 => "Primary",
+        		),
+        		4=> array(
+        				5 => "Thruster",
+        				9 => "Standard Particle Beam",
+					17 => "Structure",
+        				20 => "Primary",
+        		),
+        );
+    
     }
 }
 ?>
