@@ -268,9 +268,9 @@ class ShipSystem {
     }
     
     public function testCritical($ship, $gamedata, $crits, $add = 0){
-	//use additional value to critical!
-	$bonusCrit = $this->critRollMod + $ship->critRollMod;	
-	$crits = array_values($crits); //in case some criticals were deleted!		
+		//use additional value to critical!
+		$bonusCrit = $this->critRollMod + $ship->critRollMod;	
+		$crits = array_values($crits); //in case some criticals were deleted!		
 	    
         $damageMulti = 1;
 
@@ -289,7 +289,7 @@ class ShipSystem {
             $crits[] = $crit;
         }
         else */
-	if ($this instanceof SubReactor){
+		if ($this instanceof SubReactor){
             //debug::log("subreactor, multiple damage by 0.5");
             $damageMulti = 0.5;
         }
@@ -373,15 +373,13 @@ class ShipSystem {
         $totalDamage = 0;
         
         foreach ($this->damage as $damage){
-            $d = ($damage->damage - $damage->armour);
-            if ( $d < 0 && ($damage->turn <=$turn || $turn === false))
-                $d = 0;
+			if($turn && $damage->turn > $turn) continue; //if damage is from turn further than called for - skip it!
+            $d = ($damage->damage - $damage->armour); //procedure of creating DamageEntry objects guarantees that this is non-negative unless actual healing happened!
+            //if ( $d < 0 && ($damage->turn <=$turn || $turn === false)) $d = 0;
                 
             $totalDamage += $d;
-        }
-        
-        return $totalDamage;
-    
+        }        
+        return $totalDamage;    
     }
     
 	
@@ -391,16 +389,18 @@ class ShipSystem {
 	    $currTurn = TacGamedata::$currentTurn;
 	    if($turn !== false) $currTurn = $turn;
 	    $prevTurn = $currTurn-1;
-
-        foreach ($this->damage as $damage){ //was actually destroyed up to indicated turn
-            if (($damage->turn <= $currTurn) && $damage->destroyed) return true;
-        }
         
         if ( ! ($this instanceof Structure) && $this->structureSystem && $this->structureSystem->isDestroyed($prevTurn))
             return true;
   
-        return false;
-        
+		$isDestroyed=false;
+        foreach ($this->damage as $damage){ //was actually destroyed up to indicated turn
+			//allow undestroying, too!
+            if (($damage->turn <= $currTurn) && $damage->destroyed) $isDestroyed=true;
+            if (($damage->turn <= $currTurn) && $damage->undestroyed) $isDestroyed=false;			
+        }
+  
+        return $isDestroyed;        
     }
 
 
@@ -415,26 +415,22 @@ class ShipSystem {
 
     
     public function isDamagedOnTurn($turn){
-	if($this->forceCriticalRoll) return true; //allow forced crit roll
-        
+		if($this->forceCriticalRoll) return true; //allow forced crit roll        
         foreach ($this->damage as $damage){
             if ($damage->turn == $turn || $damage->turn == -1){
                 if ($damage->damage > $damage->armour)
                     return true;
             }
-        }
-        
-        return false;
-        
-    
+        }        
+        return false;    
     }
+	
     
     public function getRemainingHealth(){
         $damage = $this->getTotalDamage();
         
         $rem = $this->maxhealth - $damage;
-        if ($rem < 0 )
-            $rem = 0;
+        if ($rem < 0 ) $rem = 0;
             
         return $rem;
     }
@@ -518,7 +514,7 @@ class ShipSystem {
 		if ($effectiveDamage < $effectiveArmor) $effectiveArmor = $effectiveDamage;
 		
 		//mark damage done
-		$damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $this->id, $effectiveDamage, $effectiveArmor, 0, $fireOrder->id, $systemDestroyed, "", $weapon->weaponClass, $shooter->id, $weapon->id);
+		$damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $this->id, $effectiveDamage, $effectiveArmor, 0, $fireOrder->id, $systemDestroyed, false, "", $weapon->weaponClass, $shooter->id, $weapon->id);
 		$damageEntry->updated = true;
 		$this->damage[] = $damageEntry;
 		
