@@ -510,10 +510,33 @@ class Firing
 			//is it overloading?...
 			if( $reactorCurr->isOverloading($gamedata->turn) ){ //primed for self destruct!
 				$remaining =  $reactorCurr->getRemainingHealth();
-				$armour =  $reactorCurr->armour;
-				$toDo = $remaining + $armour;
-				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $reactorCurr->id, $toDo, $armour, 0, -1, true, "", "plasma");
+				//$armour =  $reactorCurr->armour; //just mark 0 armour
+				$toDo = $remaining;// + $armour;
+				
+				//try to make actual attack to show in log - use Ramming Attack system!				
+				$rammingSystem = $ship->getSystemByName("RammingAttack");
+				if($rammingSystem){ //actually exists! - it should on every ship!				
+					$newFireOrder = new FireOrder(
+						-1, "normal", $ship->id, $ship->id,
+						$rammingSystem->id, -1, $gamedata->turn, 1, 
+						100, 100, 1, 1, 0,
+						0,0,'Plasma',10000
+					);
+					/*new FireOrder(
+						$id, $type, $shooterid, $targetid,
+						$weaponid, $calledid, $turn, $firingMode, $needed,
+						$rolled, $shots, $shotshit, $intercepted, $x, $y, $damageclass, $resolutionOrder
+					);*/
+					$newFireOrder->pubnotes = "Self-destruct";
+					$newFireOrder->addToDB = true;
+					$rammingSystem->fireOrders[] = $newFireOrder;
+				}
+				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $reactorCurr->id, $toDo, 0, 0, -1, true, false, "", "Plasma");
 				$damageEntry->updated = true;
+				if($rammingSystem){ //add extra data to damage entry - so firing order can be identified!
+                        $damageEntry->shooterid = $ship->id; //additional field
+                        $damageEntry->weaponid = $rammingSystem->id; //additional field
+				}
 				$reactorCurr->damage[] = $damageEntry;
 			}
 		}

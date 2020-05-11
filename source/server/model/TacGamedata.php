@@ -289,22 +289,16 @@ class TacGamedata {
 	
 
 
-    public function addDamageEntry($damage){
-    
+    public function addDamageEntry($damage){    
         $ship = $this->getShipById($damage->shipid);
-        $ship->addDamageEntry($damage);
-    
+        $ship->addDamageEntry($damage);    
     }
     
-    public function getFirstShip(){
-    
+    public function getFirstShip(){    
         foreach ($this->ships as $ship){
-            if ($ship->isDestroyed())
-                continue;
-                
+            if ($ship->isDestroyed()) continue;                
             return $ship;
-        }
-        
+        }        
         return null;
     }
     

@@ -624,6 +624,7 @@ class DBManager
         try {
             foreach ($damages as $damage) {
                 $des = ($damage->destroyed) ? 1 : 0;
+                $undes = ($damage->undestroyed) ? 1 : 0;
                 $fireID = $damage->fireorderid;
 
                 if ($fireID < 0){ //Marcin Sawicki: fire order ID not known at the moment of dealing damage!
@@ -645,7 +646,7 @@ class DBManager
 
                 //$id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields;
                 $sql = "INSERT INTO `B5CGM`.`tac_damage` VALUES( null, ".$damage->shipid.", ".$gameid.", ".$damage->systemid.", ".$turn.", ".$damage->damage.
-                    ", ".$damage->armour. ", ".$damage->shields.", ".$fireID .", ".$des.", '".$damage->pubnotes."', '".$damage->damageclass."')";
+                    ", ".$damage->armour. ", ".$damage->shields.", ".$fireID .", ".$des.", ".$undes.", '".$damage->pubnotes."', '".$damage->damageclass."')";
 
 
                 $this->update($sql);
@@ -1446,21 +1447,23 @@ class DBManager
     {
         $damageStmt = $this->connection->prepare(
             "SELECT 
-                id, shipid, gameid, turn, systemid, damage, armour, shields, fireorderid, destroyed, pubnotes, damageclass 
+                id, shipid, gameid, turn, systemid, damage, armour, shields, fireorderid, destroyed, undestroyed, pubnotes, damageclass 
             FROM
                 tac_damage
             WHERE 
                 gameid = ? AND turn <= ?
-            "
+			ORDER BY 
+				id ASC
+            " //sorting guarantees that entries come in proper order - important for destroyed/undestroyed business!
         );
 
         if ($damageStmt) {
             $damageStmt->bind_param('ii', $gamedata->id, $fetchTurn);
-            $damageStmt->bind_result($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes, $damageclass);
+            $damageStmt->bind_result($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $undestroyed, $pubnotes, $damageclass);
             $damageStmt->execute();
             while ($damageStmt->fetch()) {
                 $gamedata->getShipById($shipid)->getSystemById($systemid)->setDamage(
-                    new DamageEntry($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes, $damageclass)
+                    new DamageEntry($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $undestroyed, $pubnotes, $damageclass)
                 );
             }
             $damageStmt->close();

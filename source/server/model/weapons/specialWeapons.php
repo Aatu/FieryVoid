@@ -2351,12 +2351,12 @@ class RadCannon extends Weapon{
 			$dmgToDo = min(10,$remHealth);			
 			if($dmgToDo >= $remHealth) $destroyed = true;	
 			if($dmgToDo > 0 ) {			
-				$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, 0, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $shooterID, $this->id);
+				$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, 0, 0, $fireOrder->id, $destroyed, false, "", $this->weaponClass, $shooterID, $this->id);
 				$damageEntry->updated = true;
 				$system->damage[] = $damageEntry;
 			}
 		} else if($system instanceOf Shield) { //Shield: destroy; if Gravitic Shield - find generator and apply -1 output 
-			$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $remHealth, 0, 0, $fireOrder->id, true, "", $this->weaponClass, $shooterID, $this->id);
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $remHealth, 0, 0, $fireOrder->id, true, false, "", $this->weaponClass, $shooterID, $this->id);
 			$damageEntry->updated = true;
 			$system->damage[] = $damageEntry;
 			if($system instanceOf GraviticShield){ //if Gravitic Shield - find generator and apply -1 output 
@@ -2376,7 +2376,7 @@ class RadCannon extends Weapon{
 			or ($system instanceOf Thruster)
 			or ($system instanceOf JumpEngine)
 		) {
-			$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $remHealth, 0, 0, $fireOrder->id, true, "", $this->weaponClass, $shooterID, $this->id);
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $remHealth, 0, 0, $fireOrder->id, true, false, "", $this->weaponClass, $shooterID, $this->id);
 			$damageEntry->updated = true;
 			$system->damage[] = $damageEntry;
 		} else if($system instanceOf CnC) { //C&C: critical roll forced (at +2).

@@ -527,11 +527,9 @@ class BaseShip {
 		}//endof function notesFill
 		
         
-        public function addDamageEntry($damage){
-        
+        public function addDamageEntry($damage){        
             $system = $this->getSystemById($damage->systemid);
-            $system->damage[] = $damage;
-        
+            $system->damage[] = $damage;        
         }
         
         public function getLastTurnMoved(){
@@ -1850,14 +1848,11 @@ class StarBase extends BaseShip{
         }
 
         foreach ($sysArray as $system){
-
             $remaining = $system->getRemainingHealth();
             $armour = $system->armour;
             $toDo = $remaining + $armour;
-
-            $damageEntry = new DamageEntry(-1, $this->id, -1, $gamedata->turn, $system->id, $toDo, $armour, 0, -1, true, "", "plasma");
+            $damageEntry = new DamageEntry(-1, $this->id, -1, $gamedata->turn, $system->id, $toDo, $armour, 0, -1, true, false, "", "plasma");
             $damageEntry->updated = true;
-
             $system->damage[] = $damageEntry;
         }
     }
