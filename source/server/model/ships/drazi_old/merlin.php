@@ -40,6 +40,30 @@ class Merlin extends MediumShip{
         $this->addAftSystem(new Thruster(4, 12, 0, 6, 2));
 		
         $this->addPrimarySystem(new Structure( 4, 33));
+              
+        $this->hitChart = array(
+        		0=> array(
+        				8=> "Thruster",
+        				11=> "Scanner",
+        				14=> "Engine",
+        				16=> "Hangar",
+        				18=> "Reactor",
+        				20=> "C&C",
+        		),
+        		1=> array(
+        				5=> "Thruster",
+        				7=> "Light Particle Cannon",
+        				10=> "Standard Particle Beam",
+        				17=> "Structure",
+        				20=> "Primary",
+        		),
+        		2=> array(
+        				8=> "Thruster",
+        				17=> "Structure",
+        				20=> "Primary",
+        		),
+        );
+	    
     }
 }
 ?>
