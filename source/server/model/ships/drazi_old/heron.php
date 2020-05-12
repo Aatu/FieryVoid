@@ -56,7 +56,7 @@ class Heron extends HeavyCombatVesselLeftRight{
         		0=> array(
         				8 => "Structure",
         				11 => "Thruster",
-					    12 => "Repeater Gun",
+					12 => "Repeater Gun",
         				14 => "Scanner",
         				16 => "Engine",
         				17 => "Hangar",
@@ -65,14 +65,14 @@ class Heron extends HeavyCombatVesselLeftRight{
         		),
         		3=> array(
         				5 => "Thruster",
-                    	7 => "Standard Particle Beam",
+                    			7 => "Standard Particle Beam",
         				9 => "Hangar",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		4=> array(
         				5 => "Thruster",
-                    	7 => "Standard Particle Beam",
+                    			7 => "Standard Particle Beam",
         				9 => "Hangar",
         				18 => "Structure",
         				20 => "Primary",
