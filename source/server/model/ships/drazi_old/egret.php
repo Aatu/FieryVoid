@@ -43,6 +43,32 @@ class Egret extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Structure(4, 24));
         $this->addLeftSystem(new Structure(4, 36));
         $this->addRightSystem(new Structure(4, 36));
+    
+            
+        $this->hitChart = array(
+        		0=> array(
+        				8 => "Structure",
+        				11 => "Thruster",
+					    12 => "Repeater Gun",
+        				14 => "Scanner",
+        				16 => "Engine",
+        				17 => "Hangar",
+        				19 => "Reactor",
+        				20 => "C&C",
+        		),
+        		3=> array(
+        				6 => "Thruster",
+                    	8 => "Standard Particle Beam",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        		4=> array(
+        				6 => "Thruster",
+                    	8 => "Standard Particle Beam",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        );
     }
 }
 ?>
