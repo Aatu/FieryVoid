@@ -124,10 +124,12 @@ window.combatLog = {
                     var d = damages[i].damages[a];
                     var damageDone = d.damage - d.armour;
                     var damageStopped = d.armour;
+					/*healing is up, so negative values are just fine
                     if (damageDone < 0) {
                         damageStopped = d.damage;
                         damageDone = 0;
                     }
+					*/
                     /*if (d.damage-d.armour<=0) continue;*/
 
                     totaldam += damageDone; //d.damage-d.armour;

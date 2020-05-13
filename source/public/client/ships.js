@@ -644,6 +644,7 @@ window.shipManager = {
 
     getTurnDestroyed: function getTurnDestroyed(ship) {
         var turn = null;
+		if (!shipManager.isDestroyed(ship)) return null; //if ship is not destroyed then it's not destroyed :)
         if (ship.flight) {
 
             var fightersSurviving = ship.systems.some(function (fighter) {

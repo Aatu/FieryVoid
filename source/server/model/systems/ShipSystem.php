@@ -40,7 +40,9 @@ class ShipSystem {
     protected $unit = null; //unit on which system is mounted
 	
 	protected $individualNotes = array();
-	public $individualNotesTransfer = "";//variable for transferring individual notes from interface to servr layer
+	public $individualNotesTransfer = "";//variable for transferring individual notes from interface to server layer
+	
+	public $repairPriority = 4;//priority at which system is repaired (by self repair system); higher = sooner; 0 indicates that system cannot be repaired
 	
     
     function __construct($armour, $maxhealth, $powerReq, $output){
@@ -341,8 +343,7 @@ class ShipSystem {
         return $count;
     }
     
-    public function getOutput(){
-        
+    public function getOutput(){        
         if ($this->isOfflineOnTurn())
             return 0;
         
@@ -351,7 +352,7 @@ class ShipSystem {
         
         $output = $this->output;
         $output -= $this->outputMod;
-	$output = max(0,$output); //don't let output be negative!
+		$output = max(0,$output); //don't let output be negative!
         return $output;
     }
     
@@ -360,7 +361,7 @@ class ShipSystem {
         $percentageMod = 0;
         foreach ($this->criticals as $crit){
             $this->outputMod += $crit->outputMod;
-        $percentageMod += $crit->outputModPercentage;
+			$percentageMod += $crit->outputModPercentage;
         }
         //convert percentage mod to absolute value...
         if($percentageMod != 0){

@@ -46,6 +46,16 @@ class DisengagedFighter extends Critical{
     }
 }
 	
+	
+
+class OutputHalved extends Critical{
+    public $description = "Output halved.";
+    public $outputModPercentage = -50; //output modified by -50%
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
+    }
+}
+	
 class OutputReduced extends Critical{
     public $description = "Output reduced.";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
@@ -128,7 +138,7 @@ class PartialBurnout extends Critical{
 }
 
 class SevereBurnout extends Critical{
-    public $description = "System non functional";
+    public $description = "System non functional.";
     public $outputMod = -1;
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
@@ -136,7 +146,7 @@ class SevereBurnout extends Critical{
 }
 
 class DamageReductionRemoved extends Critical{
-    public $description = "Damage reduction disabled";
+    public $description = "Damage reduction disabled.";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
