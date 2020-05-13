@@ -11,8 +11,6 @@ class WhiteStarCmd extends MediumShip{
         $this->shipClass = "Command White Star";
         $this->variantOf = "White Star";
         $this->occurence = "rare";
-//"TEST ONLY: make it EXTREMELY vulnerable to criticals!
-$this->critRollMod = 12;		
 		
         $this->agile = true;
         $this->canvasSize = 100;
