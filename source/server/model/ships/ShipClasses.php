@@ -1838,7 +1838,7 @@ class StarBase extends BaseShip{
         $locToDestroy = $reactor->location;
         $sysArray = array();
 
-        debug::log("killing section: ".$locToDestroy);
+        //debug::log("killing section: ".$locToDestroy);
         foreach ($this->systems as $system){
             if ($system->location == $reactor->location){
                 if (! $system->destroyed){
@@ -1846,14 +1846,32 @@ class StarBase extends BaseShip{
                 }
             }
         }
+		
+		//try to make actual attack to show in log - use Ramming Attack system!				
+		$rammingSystem = $this->getSystemByName("RammingAttack");
+		if($rammingSystem){ //actually exists! - it should on every ship!				
+			$newFireOrder = new FireOrder(
+				-1, "normal", $this->id, $this->id,
+				$rammingSystem->id, -1, $gamedata->turn, 1, 
+				100, 100, 1, 1, 0,
+				0,0,'Plasma',10000
+			);
+			$newFireOrder->pubnotes = "Sub-reactor explosion - section destroyed.";
+			$newFireOrder->addToDB = true;
+			$rammingSystem->fireOrders[] = $newFireOrder;
+		}else{
+			$newFireOrder=null;
+		}
 
         foreach ($sysArray as $system){
             $remaining = $system->getRemainingHealth();
-            $armour = $system->armour;
-            $toDo = $remaining + $armour;
-            $damageEntry = new DamageEntry(-1, $this->id, -1, $gamedata->turn, $system->id, $toDo, $armour, 0, -1, true, false, "", "plasma");
+            $damageEntry = new DamageEntry(-1, $this->id, -1, $gamedata->turn, $system->id, $remaining, 0, 0, -1, true, false, "", "Plasma");
             $damageEntry->updated = true;
-            $system->damage[] = $damageEntry;
+            $system->damage[] = $damageEntry;			
+			if($rammingSystem){ //add extra data to damage entry - so firing order can be identified!
+					$damageEntry->shooterid = $this->id; //additional field
+					$damageEntry->weaponid = $rammingSystem->id; //additional field
+			}
         }
     }
 }

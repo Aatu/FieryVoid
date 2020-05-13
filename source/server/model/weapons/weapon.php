@@ -131,6 +131,12 @@ class Weapon extends ShipSystem
 
     protected $firedDefensivelyAlready = 0; //marker used for weapons capable of firing multiple defensive shots, but suffering backlash once
 
+
+
+	//Weapons are repaired before "avarage system", but after really important things! 
+	public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
+
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $output = 0)
     {
         parent::__construct($armour, $maxhealth, $powerReq, $output);

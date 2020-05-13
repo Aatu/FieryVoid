@@ -11,7 +11,7 @@ window.damageManager = {
             var damageEntry = system.damage[i];
 
             var d = damageEntry.damage - damageEntry.armour;
-            if (d < 0) d = 0;
+            //if (d < 0) d = 0; //healing is possible!
 
             damage += d;
         }
@@ -23,12 +23,16 @@ window.damageManager = {
 
     getTurnDestroyed: function getTurnDestroyed(ship, system) {
         if (!system) return null;
+		var turnDestroyed = null;
 
         for (var i in system.damage) {
             var damageEntry = system.damage[i];
 
-            if (damageEntry.destroyed) return damageEntry.turn;
+            //if (damageEntry.destroyed) return damageEntry.turn;
+			//can undestroy - so return LAST destroyed...
+			turnDestroyed = damageEntry.turn;
         }
+		if(turnDestroyed!==null) return turnDestroyed;
 
         if (system.fighter) {
             var crit = shipManager.criticals.getCritical(system, "DisengagedFighter");
@@ -37,10 +41,10 @@ window.damageManager = {
             return null;
         }
 
-        var stru = shipManager.systems.getStructureSystem(ship, system.location);
-        if (stru && stru != system) {
-            return damageManager.getTurnDestroyed(ship, stru);
-        }
+		var stru = shipManager.systems.getStructureSystem(ship, system.location);
+		if (stru && stru != system) {
+			return damageManager.getTurnDestroyed(ship, stru);
+		}
 
         return null;
     }
