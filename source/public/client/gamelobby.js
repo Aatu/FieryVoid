@@ -100,12 +100,14 @@ window.gamedata = {
 	    var staticPresent = false;
 	    var shipTable = []; 
 	    
+		var totalHangarC = 0; //hangars for custom fighters (rutarian, thunderbolt, etc)
 	    var totalHangarH = 0; //hangarspace for heavy fighters
 	    var totalHangarM = 0; //hangarspace for medium fighters
 	    var totalHangarL = 0; //hangarspace for light fighters
 	    var totalHangarXL = 0; //hangarspace for ultralight fighters
 	    var totalHangarOther = new Array( ); //other hangarspace
-	    var totalFtrH = 0;//total heavy fighters
+	    var totalFtrC = 0;//total custom fighters
+		var totalFtrH = 0;//total heavy fighters
 	    var totalFtrM = 0;//total medium fighters
 	    var totalFtrL = 0;//total light fighters
 	    var totalFtrXL = 0;//total ultralight fighters
@@ -194,6 +196,14 @@ window.gamedata = {
 	            //check hangar space available...
 		    for(var h in lship.fighters){
 				var amount = lship.fighters[h];
+
+				if(h.includes("."){
+					var arrayh = h.split(".");
+					h = arrayh[0];
+					var CustomFighter = arrayh[1];
+					totalHangarC += amount;
+				}
+				
 			    if(h == "normal" || h =="heavy"){
 					totalHangarH += amount;
 			    }else if(h=="medium"){ 
@@ -250,6 +260,11 @@ window.gamedata = {
 			}
 			//now translate size into hangar space used...
 			if(smallCraftSize !=''){
+				
+				if(CustomFighter == lship.phpclass || TotalHangarC > 0){
+					totalFtrC += lship.flightsize;
+				}
+				
 				if(smallCraftSize =="heavy"){
 					totalFtrH += lship.flightSize;
 				}else if(smallCraftSize=="medium"){ 
@@ -522,6 +537,18 @@ window.gamedata = {
 			checkResult +=  " - Heavy Fighters: " + totalFtrCurr;
 				checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
+				checkResult += " FAILURE!";
+				problemFound = true;
+			}else{
+				checkResult += " OK";
+			}
+			checkResult += "<br>";
+		}
+
+		if (CustomFighter.length > 0 || TotalHangarC > 0){ //do not show if there are no fighters in this segment
+			checkResult +=  " - Custom Fighters: " + totalFtrC;
+				checkResult +=  " (allowed up to " + totalHangarC + ")";
+			if (totalFtrC > totalHangarC){ //fighter total is not within limits
 				checkResult += " FAILURE!";
 				problemFound = true;
 			}else{

@@ -13,7 +13,7 @@ class Balvarix extends BaseShip{
         $this->imagePath = "img/ships/balvarix.png";
         $this->shipSizeClass = 3;
         $this->fighters = array("medium"=>24,
-            "normal"=>12); //12 medium in side hangars (each), 12 Rutarian-capable in PRIMARY hangar
+            "medium.Rutarian"=>12); //12 medium in side hangars (each), 12 Rutarian-capable in PRIMARY hangar
         $this->occurence = "rare";
 	    $this->notes = 'Rutarian capable (12 fighters).';
 	    $this->isd = 2262;
