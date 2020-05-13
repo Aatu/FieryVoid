@@ -1228,6 +1228,9 @@ spl_autoload_register(
                 'hassa' => '/server/model/ships/balosian/hassa.php',
 				
 			'wlcchlonashearpa' => '/server/model/ships/ZCustomChLonas/wlcChlonasHeArpa.php',    
+                'smallstarbasethreesections' => '/server/model/ships/ShipClasses.php', 
+
+		'wlcchlonasvalothar' => '/server/model/ships/ZCustomChLonas/wlcChlonasValothar.php',   
 		    
 			//self-repair
             'outputhalved' => '/server/model/cricialClasses.php',
