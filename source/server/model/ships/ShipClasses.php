@@ -2020,4 +2020,17 @@ class SmallStarBaseFourSections extends BaseShip{ //just change arcs of sections
 } //end of SmallStarBaseFourSections
 
 
+class SmallStarBaseThreeSections extends SmallStarBaseFourSections{
+
+    public function getLocations(){
+        $locs = array();
+
+        $locs[] = array("loc" => 1, "min" => 300, "max" => 60, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 2, "min" => 60, "max" => 180, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 3, "min" => 180, "max" => 360, "profile" => $this->forwardDefense);
+
+        return $locs;
+    }
+} //end of StarBaseThreeSections
+
 ?>
