@@ -1184,8 +1184,7 @@ spl_autoload_register(
                 'genericmicrosat' => '/server/model/ships/civilians/genericMicroSat.php',
 		    
 				//AdaptiveArmor rework		    
-                'adaptivearmorcontroller' => '/server/model/systems/baseSystems.php',
-                //'whitestarold' => '/server/model/ships/minbari/whitestarOld.php',		    
+                'adaptivearmorcontroller' => '/server/model/systems/baseSystems.php',    
                 'individualnote' => '/server/model/BaseClasses.php',
 		    
                 'weaponem' => '/server/model/weapons/specialWeapons.php',
@@ -1228,10 +1227,14 @@ spl_autoload_register(
                 'fessa' => '/server/model/ships/balosian/fessa.php',
                 'hassa' => '/server/model/ships/balosian/hassa.php',
 				
-		'wlcchlonashearpa' => '/server/model/ships/ZCustomChLonas/wlcChlonasHeArpa.php',
+			'wlcchlonashearpa' => '/server/model/ships/ZCustomChLonas/wlcChlonasHeArpa.php',    
 		    
-		'wlcchlonasvalothar' => '/server/model/ships/ZCustomChLonas/wlcChlonasValothar.php',     
-		    
+			//self-repair
+            'outputhalved' => '/server/model/cricialClasses.php',
+			'whitestarcmd' => '/server/model/ships/minbari/whitestarCmd.php',
+			
+			
+			
 		//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
                 'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
 		
