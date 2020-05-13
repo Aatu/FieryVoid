@@ -406,7 +406,7 @@ class DBManager
 				if ($critical->forceModify){ //modification of critical that already exists in database - modifying turn end! (the only thing modifiable)
 					$turnend = $critical->turnend;
 					$critid = $critical->id;
-					$sql = "UPDATE tac_critical SET turnend = " . $turnend . " where id = " . $critid . "";
+					$sql = "UPDATE `B5CGM`.`tac_critical` SET turnend = " . $turnend . " where id = " . $critid . "";
 				} else if ( $critical->id < 1 ){ //actual new critical
 					//important to use $critical->turn: critical does NOT need to have turn equal to current! 
 					//this is importnat for criticals that need to have limited time window yet last longer than 1 turn (go out 1 turn after issuing - so issue must be later)

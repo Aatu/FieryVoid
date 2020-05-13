@@ -5,6 +5,9 @@ class Jammer extends ShipSystem implements SpecialAbility{
     public $displayName = "Jammer";
     public $specialAbilities = array("Jammer");
     public $primary = true;
+	
+	//Jammer is very important, being the primary defensive system!
+	public $repairPriority = 10;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
     public $possibleCriticals = array(16=>"PartialBurnout", 23=>"SevereBurnout");
     
@@ -248,6 +251,9 @@ class GraviticShield extends Shield implements DefensiveSystem{
 }
 
 class ShieldGenerator extends ShipSystem{
+	//Shield Generator repair priority is above average!
+	public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
     public $name = "shieldGenerator";
     public $displayName = "Shield Generator";
     public $primary = true;    
@@ -266,6 +272,10 @@ class Reactor extends ShipSystem{
     public $primary = true;
     public $fixedPower = false; //important for MagGrav reactors, but defined here!
     public $outputType = "power";
+	
+	//Reactor is very important, being the ship heart!
+	public $repairPriority = 10;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
 	
     public $boostable = true; //for reactor overload feature!
     public $maxBoostLevel = 1;
@@ -353,6 +363,11 @@ class MagGravReactor extends Reactor{
 
 
 class SubReactor extends ShipSystem{
+	
+	//SubReactor is very important, though not as much as primary reactor itself!
+	public $repairPriority = 8;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
+	
     public $name = "reactor";
     public $displayName = "Reactor";
     public $outputType = "power";
@@ -386,6 +401,10 @@ class Engine extends ShipSystem{
     public $primary = true;
     public $boostable = true;
     public $outputType = "thrust";
+	
+	//Engine  is fairly important, being a core system!
+	public $repairPriority = 7;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
     
     public $possibleCriticals = array(
         15=>"OutputReduced2",
@@ -407,6 +426,9 @@ class Scanner extends ShipSystem{
     public $primary = true;
     public $boostable = true;
     public $outputType = "EW";
+	//Scanner  is fairly important, being a core system!
+	public $repairPriority = 7;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
     
     public $possibleCriticals = array(
         15=>"OutputReduced1",
@@ -555,6 +577,10 @@ class CnC extends ShipSystem{
     public $name = "cnC";
     public $displayName = "C&C";
     public $primary = true;
+	
+	//C&C  is VERY important, although not as much as the reactor!
+	public $repairPriority = 9;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
     
     public $possibleCriticals = array(
     	//1=>"SensorsDisrupted", //not implemented! so I take it out 
@@ -576,6 +602,9 @@ class CnC extends ShipSystem{
 class CargoBay extends ShipSystem{
     public $name = "cargoBay";
     public $displayName = "Cargo Bay";
+    
+	//Cargo Bay is not important at all!
+	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
     function __construct($armour, $maxhealth){
         parent::__construct($armour, $maxhealth, 0, 0);
@@ -731,6 +760,9 @@ class Hangar extends ShipSystem{
     public $squadrons = Array();
     public $primary = true;
     
+	//Hangar is not important at all!
+	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
     function __construct($armour, $maxhealth, $output = 6){
         parent::__construct($armour, $maxhealth, 0, $output ); 
     }
@@ -742,6 +774,9 @@ class Catapult extends ShipSystem{
     public $displayName = "Catapult";
     public $squadrons = Array();
     public $primary = true;
+    
+	//Catapult is not impotant at all!
+	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
     function __construct($armour, $maxhealth, $output = 6){
         parent::__construct($armour, $maxhealth, 0, $output );
@@ -755,6 +790,9 @@ class JumpEngine extends ShipSystem{
     public $displayName = "Jump Engine";
     public $delay = 0;
     public $primary = true;
+    
+	//JumpEngine tactically  is not important at all!
+	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
     function __construct($armour, $maxhealth, $powerReq, $delay){
         parent::__construct($armour, $maxhealth, $powerReq, 0);
@@ -772,6 +810,9 @@ class JumpEngine extends ShipSystem{
 class Structure extends ShipSystem{
     public $name = "structure";
     public $displayName = "Structure";
+    
+	//Structure is last to be repaired, except purely cosmetic systems like Hanngars  
+	public $repairPriority = 2;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
     function __construct($armour, $maxhealth){
         parent::__construct($armour, $maxhealth, 0, 0);
@@ -971,6 +1012,9 @@ class ConnectionStrut extends ShipSystem{
     public $name = "connectionStrut";
     public $displayName = "Connection Strut";
     public $iconPath = "connectionStrut.png";
+    
+	//Connection Strut cannot be repaired!
+	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
     function __construct($armour){
         parent::__construct($armour, 999, 0, 0);    

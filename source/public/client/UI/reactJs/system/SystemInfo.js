@@ -116,28 +116,36 @@ const getCriticals = (system) => [<InfoHeader key="criticalHeader">Damage</InfoH
             let noOfCrits = 0;
 			var endEffectMin = 0;
 			var endEffectMax = 0;
-			var infinitePresent = true;
+			var infinitePresent = false;
+			var wearsOffText = "";	
+			endEffectMin = 0;
+			endEffectMax = 0;
+			infinitePresent = false;
+			wearsOffText = "";	
+						
             for (const j in system.criticals) {
-                if (system.criticals[j].phpclass == i) noOfCrits++;				
-				if(noOfCrits == 1){
-					endEffectMin = system.criticals[j].turnend;
-					endEffectMax = system.criticals[j].turnend;
-					infinitePresent = (system.criticals[j].turnend == 0); //0 means infinite
+                if (system.criticals[j].phpclass == i) {
+					noOfCrits++;				
+					if(noOfCrits == 1){
+						endEffectMin = system.criticals[j].turnend;
+						endEffectMax = system.criticals[j].turnend;
+						infinitePresent = (system.criticals[j].turnend == 0); //0 means infinite
+					}
+					if (system.criticals[j].turnend > 0){ 
+						if (system.criticals[j].turnend > endEffectMax) endEffectMax = system.criticals[j].turnend;
+						if ((system.criticals[j].turnend < endEffectMin) || (endEffectMin == 0)) endEffectMin = system.criticals[j].turnend;
+					} else infinitePresent = true;
 				}
-				if (system.criticals[j].turnend > 0){ 
-				if (system.criticals[j].turnend > endEffectMax) endEffectMax = system.criticals[j].turnend;
-					if ((system.criticals[j].turnend < endEffectMin) || (endEffectMin == 0)) endEffectMin = system.criticals[j].turnend;
-				} else infinitePresent = true;
             }
-			
-			var wearsOffText = "";			
+					
 			if (endEffectMin>0){
-				wearsOffText = "until turn " + endEffectMin;
+				wearsOffText = " (until turn " + endEffectMin;
 				if(infinitePresent){
 					wearsOffText = wearsOffText+"+";
 				} else if (endEffectMax > endEffectMin){
 					wearsOffText = wearsOffText+"-"+endEffectMax;
 				}
+				wearsOffText = wearsOffText+")";
 			}
 			
             if (noOfCrits > 1) {
