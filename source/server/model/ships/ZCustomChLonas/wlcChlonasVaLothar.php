@@ -1,11 +1,11 @@
 <?php
-class VaLothar extends StarBaseThreeSections{
+class wlcChlonasVaLothar extends SmallStarBaseThreeSections{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 3250;
-		$this->faction = 'Chlonas';
+		$this->faction = "Ch'Lonas";
 		$this->phpclass = "wlcChlonasVaLothar";
 		$this->shipClass = "Va'Lothar Battlestation";
 		$this->fighters = array("heavy"=>36); 
@@ -20,7 +20,7 @@ class VaLothar extends StarBaseThreeSections{
 		$this->imagePath = "img/ships/ChlonasVaLothar.png";
 		$this->canvasSize = 200;
 
-		$this->locations = array(1, 32, 42);
+		$this->locations = array(1, 4, 3);
 		
 		$this->hitChart = array(			
 			0=> array(
@@ -58,12 +58,12 @@ class VaLothar extends StarBaseThreeSections{
 				new AssaultLaser(4, 6, 4, $min, $max),
 				new MatterCannon(4, 7, 4, $min, $max),
 				new MatterCannon(4, 7, 4, $min, $max),
-				new LightParticleBeamShip(4, 2, 1, $min, $max)
-				new LightParticleBeamShip(4, 2, 1, $min, $max)
-				new LightParticleBeamShip(4, 2, 1, $min, $max)
+				new LightParticleBeamShip(4, 2, 1, $min, $max),
+				new LightParticleBeamShip(4, 2, 1, $min, $max),
+				new LightParticleBeamShip(4, 2, 1, $min, $max),
 				new Hangar(4, 14),
-				new Cargo Bay(4, 24),
-				new Cargo Bay(4, 24),
+				new CargoBay(4, 24),
+				new CargoBay(4, 24),
 				new SubReactor(4, 20, 0, 0),
 				new Structure( 4, 154)
 			);
@@ -89,3 +89,5 @@ class VaLothar extends StarBaseThreeSections{
 		}
     }
 }
+
+?>

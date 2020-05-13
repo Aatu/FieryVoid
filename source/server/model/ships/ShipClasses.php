@@ -2024,10 +2024,10 @@ class SmallStarBaseThreeSections extends SmallStarBaseFourSections{
 
     public function getLocations(){
         $locs = array();
-
-        $locs[] = array("loc" => 1, "min" => 300, "max" => 60, "profile" => $this->forwardDefense);
-        $locs[] = array("loc" => 2, "min" => 60, "max" => 180, "profile" => $this->forwardDefense);
-        $locs[] = array("loc" => 3, "min" => 180, "max" => 360, "profile" => $this->forwardDefense);
+		//I settled for exactly 120 degrees between sections, accepting arc going through half-hex
+        $locs[] = array("loc" => 1, "min" => 270, "max" => 90, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 3, "min" => 150, "max" => 330, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 4, "min" => 30, "max" => 210, "profile" => $this->forwardDefense);
 
         return $locs;
     }

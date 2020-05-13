@@ -12,7 +12,6 @@ class WhiteStar extends MediumShip{
         $this->agile = true;
         $this->canvasSize = 100;
         $this->gravitic = true;
-        $this->limited = 33;
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
         $this->turncost = 0.33;
@@ -22,6 +21,9 @@ class WhiteStar extends MediumShip{
         $this->pivotcost = 1;
         $this->iniativebonus = 65;
         $this->isd = 2260;
+		
+        $this->limited = 33;
+		$this->notes = "Unlimited deployment in IA service.";
 
         $this->addPrimarySystem(new Reactor(5, 20, 0, -7));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));

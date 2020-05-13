@@ -12,10 +12,12 @@ class WhiteStarCmd extends MediumShip{
         $this->variantOf = "White Star";
         $this->occurence = "rare";
 		
+        $this->limited = 33;
+		$this->notes = "Unlimited deployment in IA service.";
+		
         $this->agile = true;
         $this->canvasSize = 100;
         $this->gravitic = true;
-        $this->limited = 33;
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
         $this->turncost = 0.33;
