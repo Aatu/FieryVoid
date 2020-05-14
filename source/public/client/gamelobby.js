@@ -196,6 +196,8 @@ window.gamedata = {
 	        //check for custom hangars
 			if(lship.customFighter){
 				for(var j in lship.customFighter){
+					var customHangarName = j;
+					//console.log("customHangarName : ", customHangarName);
 					var customAmount = lship.customFighter[j];					
 					totalHangarC += customAmount;
 					//console.log('Custom Hangar : ',totalHangarC);
@@ -262,8 +264,11 @@ window.gamedata = {
 			//now translate size into hangar space used...
 			if(smallCraftSize !=''){
 				
-				if(lship.customFtr){
+				if(lship.customFtrName){
 					totalFtrC += lship.flightSize;
+					var customFtrName = lship.customFtrName;
+					//console.log('lship.customFtrName = ', lship.customFtrName);
+					//console.log('customFtrName = ', customFtrName);
 					//console.log('Custom Fighters : ',totalFtrC);
 				}
 				
@@ -548,7 +553,7 @@ window.gamedata = {
 		}
 
 		if (totalFtrC > 0 || totalHangarC > 0){ //do not show if there are no fighters in this segment
-			checkResult +=  " - Custom Fighters: " + totalFtrC;
+			checkResult +=  " - " + customFtrName + " Fighters: " + totalFtrC;
 				checkResult +=  " (allowed up to " + totalHangarC + ")";
 			if (totalFtrC > totalHangarC){ //fighter total is not within limits
 				checkResult += " FAILURE!";
