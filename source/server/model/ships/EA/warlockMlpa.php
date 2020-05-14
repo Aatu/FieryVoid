@@ -13,6 +13,7 @@ class WarlockMlpa extends BaseShip{
 		$this->canvasSize= 400;
 		$this->limited = 10;
 		$this->fighters = array("normal"=>24);
+		$this->customFighter = array("Thunderbolt"=>24);
 	        $this->isd = 2261;
 	        $this->notes = 'Thunderbolt capable';
 

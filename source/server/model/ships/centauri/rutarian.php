@@ -9,6 +9,7 @@ class Rutarian extends FighterFlight{
 	$this->phpclass = "Rutarian";
 	$this->shipClass = "Rutarian Strike Fighters";
 	$this->imagePath = "img/ships/rutarian.png";
+	$this->customFtr = true;
 
 	$this->forwardDefense = 6;
 	$this->sideDefense = 4;

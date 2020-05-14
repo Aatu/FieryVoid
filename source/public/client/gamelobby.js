@@ -193,17 +193,18 @@ window.gamedata = {
 		}
 		if(!lship.flight){
 	            totalShips++;
-	            //check hangar space available...
-		    for(var h in lship.fighters){
-				var amount = lship.fighters[h];
-
-				if(h.includes("."){
-					var arrayh = h.split(".");
-					h = arrayh[0];
-					var CustomFighter = arrayh[1];
-					totalHangarC += amount;
+	        //check for custom hangars
+			if(lship.customFighter){
+				for(var j in lship.customFighter){
+					var customAmount = lship.customFighter[j];					
+					totalHangarC += customAmount;
+					//console.log('Custom Hangar : ',totalHangarC);
 				}
-				
+			}
+			
+			//check hangar space available...	
+			for(var h in lship.fighters){
+				var amount = lship.fighters[h];
 			    if(h == "normal" || h =="heavy"){
 					totalHangarH += amount;
 			    }else if(h=="medium"){ 
@@ -261,8 +262,9 @@ window.gamedata = {
 			//now translate size into hangar space used...
 			if(smallCraftSize !=''){
 				
-				if(CustomFighter == lship.phpclass || TotalHangarC > 0){
-					totalFtrC += lship.flightsize;
+				if(lship.customFtr){
+					totalFtrC += lship.flightSize;
+					//console.log('Custom Fighters : ',totalFtrC);
 				}
 				
 				if(smallCraftSize =="heavy"){
@@ -545,7 +547,7 @@ window.gamedata = {
 			checkResult += "<br>";
 		}
 
-		if (CustomFighter.length > 0 || TotalHangarC > 0){ //do not show if there are no fighters in this segment
+		if (totalFtrC > 0 || totalHangarC > 0){ //do not show if there are no fighters in this segment
 			checkResult +=  " - Custom Fighters: " + totalFtrC;
 				checkResult +=  " (allowed up to " + totalHangarC + ")";
 			if (totalFtrC > totalHangarC){ //fighter total is not within limits
