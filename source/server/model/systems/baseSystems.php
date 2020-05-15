@@ -1334,4 +1334,201 @@ class AdaptiveArmorController extends ShipSystem{
 							
 } //endof AdaptiveArmorController
 
+
+
+class DiffuserTendril extends ShipSystem{
+    public $name = "DiffuserTendril";
+    public $displayName = "Diffuser Tendril";
+	public $isPrimaryTargetable = false; //shouldn't be targetable at all, in fact!
+    public $iconPath = "EnergyDiffuserTendril.png";
+    
+	//Diffuser Tendrils cannot be repaired at all!
+	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
+    function __construct($maxhealth){ //everything is done in the diffuser, Tendrils basically just are!
+        parent::__construct(0, $maxhealth, 0, 0);
+    }
+	
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "Used to store absorbed energy from hits.<br>This system is here for technical purposes only. It's part of Energy Diffuser system.";
+	}	
+}
+
+/*Shadow damage absorbtion system; remember to add Tendrils - largest first!*/
+class EnergyDiffuser extends ShipSystem{
+    public $name = "EnergyDiffuser";
+    public $displayName = "Energy Diffuser";
+    public $iconPath = "EnergyDiffuser.png";
+	public $isPrimaryTargetable = false; //like other core systems
+	public $tendrils = array();//tendrils belonging to this Diffuser
+	
+    
+	//EnergyDiffuser has very high repair priority, being the core defensive system!
+	public $repairPriority = 9;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
+    public $possibleCriticals = array(
+		11=>"TendrilDestroyed",
+		16=>array("TendrilDestroyed", "OutputReduced1"),
+		20=>array("TendrilDestroyed", "OutputReduced2", "TendrilCapacityReduced"),
+		25=>array("TendrilDestroyed", "TendrilDestroyed", "OutputReduced3", "TendrilCapacityReduced", "TendrilCapacityReduced")
+	);
+/* below list of critical effects:	
+11-15: No effect to the diffuser. However, one of the
+attached segments is destroyed (player’s choice). Mark
+an X in its box to indicate this. The pilot suffers “pain” (see
+10.18.10) on the next turn equal to the segment’s absorption
+capacity (treated as damage, even though no damage points
+are actually marked off anywhere in the ship).
+16-19: Lose a segment as described under 11-15, and
+reduce the diffuser’s discharge rate by 1.
+20-24: Lose a segment, reduce the discharge rating by
+2 and lower the absorption ratings of all remaining segments
+by 2.
+25+: Lose two segments, reduce the discharge rating by
+3 and lower the absorption ratings of all remaining segments
+by 4.
+*/
+	
+	
+	function __construct($armour, $maxhealth, $dissipation, $startArc, $endArc){
+        // dissipation is handled as output.
+        parent::__construct($armour, $maxhealth, 0, $dissipation);
+        
+        $this->startArc = (int)$startArc;
+        $this->endArc = (int)$endArc;
+    }
+	
+	function addTendril($tendril){
+		if($tendril) $this->tendrils[] = $tendril;
+	}
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "Absorbs energy from hits as long as there is storage capacity available (Diffuser Tendrils).";
+		$this->data["Special"] .= "<br>Dissipates " . $this->getOutput() . " stored points each turn.";
+	}	
+	
+	//actual effect during receiving damage
+	
+	
+	
+	//effects that happen in Critical phase (after criticals are rolled) - dissipation and actual loss of tendrils due to critical received
+	public function criticalPhaseEffects($ship, $gamedata){
+		//1. if THIS TURN TendrilDestroyed critical was added - mark last tendril destroyed
+		foreach ($this->criticals as $crit) if(($crit instanceof TendrilDestroyed) && ($crit->turn==$gamedata->turn)) {
+			$lastTendril = null;
+			foreach($this->tendrils as $tendril) if(!$tendril->isDestroyed()){
+				$lastTendril = $tendril;
+			}
+			if($lastTendril){
+				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $lastTendril->id, 0, 0, 0, -1, true, false, "DestroyTendril!", "Destruction");
+				$damageEntry->updated = true;
+				$lastTendril->damage[] = $damageEntry;
+			}
+		}
+		
+		//2. dissipate stored energy (in order of tendrils - largest are first, and usually freeing up largest ones is best)
+		$dissipationAvailable = $this->getOutput();
+		foreach($this->tendrils as $tendril) if(!$tendril->isDestroyed()){
+
+$noteT="";
+$t=$tendril->getTotalDamage();
+$noteT="T/Av " . $t . "/" . $dissipationAvailable . "/" . $this->getOutput();
+						
+			$toDissipate = min($dissipationAvailable, $tendril->getTotalDamage());
+			if($toDissipate > 0){
+				$dissipationAvailable -= $toDissipate;
+				//dissipation == undamage
+				//$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $tendril->id, -$toDissipate, 0, 0, -1, false, false, "Dissipate!", "Dissipate");
+					
+$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $tendril->id, -$toDissipate, 0, 0, -1, false, false, $noteT, "Dissipate");
+						
+				
+				$damageEntry->updated = true;
+				$tendril->damage[] = $damageEntry;
+			}
+		}
+		
+		
+	} //endof function criticalPhaseEffects
+	
+	
+	//function estimating how good this Diffuser is at stopping damage;
+	//in case of diffuser, its effectiveness equals largest shot it can stop, with tiebreaker equal to remaining total capacity
+	//this is for recognizing it as system capable of affecting damage resolution and choosing best one if multiple Diffusers can protect
+	public function doesProtectFromDamage() {
+		$totalCapacity = 0;
+		$largestCapacity = 0;
+		
+		//check capacity reduction due to criticals...
+		$reduction = $this->hasCritical('TendrilCapacityReduced')*2;
+
+		foreach($this->tendrils as $tendril) if(!$tendril->isDestroyed()){
+			$tendrilCapacity = $tendril->getRemainingHealth()-$reduction;
+			if($tendrilCapacity>0){
+				$totalCapacity += $tendrilCapacity;
+				$largestCapacity = max($tendrilCapacity,$largestCapacity);
+			}
+		}		
+		
+		$protectionValue = $largestCapacity+($totalCapacity/1000);
+		return $protectionValue;
+	}
+	//actual protection
+	public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
+		$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
+		$damageToAbsorb=$effectiveDamage-$effectiveArmor;
+		$damageAbsorbed=0;
+		
+		if($damageToAbsorb<=0) return $returnValues; //nothing to absorb
+		
+		$mostSuitableAbsorbtion=0;
+		$mostSuitableTendril=null;		
+		//check capacity reduction due to criticals...
+		$reduction = $this->hasCritical('TendrilCapacityReduced')*2;
+
+		foreach($this->tendrils as $tendril) if(!$tendril->isDestroyed()){
+			$tendrilCapacity = $tendril->getRemainingHealth() - $reduction;
+			if($tendrilCapacity>0){ //else it's useless ATM
+				if ($mostSuitableAbsorbtion < $damageToAbsorb){ //not found a tendril able to accept entire damage yet, looking for something larger
+					if ($tendrilCapacity >= $mostSuitableAbsorbtion) { //new one is more suitable (all other things equal later tendril is more suitable)
+						$mostSuitableAbsorbtion = $tendrilCapacity;
+						$mostSuitableTendril = $tendril;
+					}
+				}else{ //appropriate tendril already found, looking for something better suited - eg. smaller but still able to accept entire damage
+					if (($tendrilCapacity <= $mostSuitableAbsorbtion) && ($tendrilCapacity >= $damageToAbsorb)) { //new one is more suitable (all other things equal later tendril is more suitable)
+						$mostSuitableAbsorbtion = $tendrilCapacity;
+						$mostSuitableTendril = $tendril;
+					}
+				}
+			}
+		}	
+		
+		if($mostSuitableAbsorbtion>0){ //appropriate tendril found!
+			$damageAbsorbed=min($damageToAbsorb,$mostSuitableAbsorbtion);
+			$returnValues['dmg']=$effectiveDamage-$damageAbsorbed;
+			$damageEntry = new DamageEntry(-1, $target->id, -1, $gamedata->turn, $mostSuitableTendril->id, $damageAbsorbed, 0, 0, $fireOrder->id, false, false, "Absorb!", "Absorb");
+			$damageEntry->updated = true;
+			$mostSuitableTendril->damage[] = $damageEntry;
+		}
+		
+		return $returnValues;
+	}
+	
+	
+	
+} //endof EnergyDiffuser
+
 ?>
