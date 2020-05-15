@@ -15,6 +15,7 @@ class ArcticAlpha extends BaseShip{
 		$this->limited = 33;
 
         	$this->fighters = array("heavy" => 12);
+			$this->customFighter = array("Thunderbolt"=>12);
 	        $this->isd = 2258;
 
 		$this->forwardDefense = 15;

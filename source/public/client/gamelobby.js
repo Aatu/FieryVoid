@@ -100,12 +100,14 @@ window.gamedata = {
 	    var staticPresent = false;
 	    var shipTable = []; 
 	    
+		var totalHangarC = 0; //hangars for custom fighters (rutarian, thunderbolt, etc)
 	    var totalHangarH = 0; //hangarspace for heavy fighters
 	    var totalHangarM = 0; //hangarspace for medium fighters
 	    var totalHangarL = 0; //hangarspace for light fighters
 	    var totalHangarXL = 0; //hangarspace for ultralight fighters
 	    var totalHangarOther = new Array( ); //other hangarspace
-	    var totalFtrH = 0;//total heavy fighters
+	    var totalFtrC = 0;//total custom fighters
+		var totalFtrH = 0;//total heavy fighters
 	    var totalFtrM = 0;//total medium fighters
 	    var totalFtrL = 0;//total light fighters
 	    var totalFtrXL = 0;//total ultralight fighters
@@ -191,8 +193,19 @@ window.gamedata = {
 		}
 		if(!lship.flight){
 	            totalShips++;
-	            //check hangar space available...
-		    for(var h in lship.fighters){
+	        //check for custom hangars
+			if(lship.customFighter){
+				for(var j in lship.customFighter){
+					var customHangarName = j;
+					//console.log("customHangarName : ", customHangarName);
+					var customAmount = lship.customFighter[j];					
+					totalHangarC += customAmount;
+					//console.log('Custom Hangar : ',totalHangarC);
+				}
+			}
+			
+			//check hangar space available...	
+			for(var h in lship.fighters){
 				var amount = lship.fighters[h];
 			    if(h == "normal" || h =="heavy"){
 					totalHangarH += amount;
@@ -250,6 +263,15 @@ window.gamedata = {
 			}
 			//now translate size into hangar space used...
 			if(smallCraftSize !=''){
+				
+				if(lship.customFtrName){
+					totalFtrC += lship.flightSize;
+					var customFtrName = lship.customFtrName;
+					//console.log('lship.customFtrName = ', lship.customFtrName);
+					//console.log('customFtrName = ', customFtrName);
+					//console.log('Custom Fighters : ',totalFtrC);
+				}
+				
 				if(smallCraftSize =="heavy"){
 					totalFtrH += lship.flightSize;
 				}else if(smallCraftSize=="medium"){ 
@@ -522,6 +544,18 @@ window.gamedata = {
 			checkResult +=  " - Heavy Fighters: " + totalFtrCurr;
 				checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
+				checkResult += " FAILURE!";
+				problemFound = true;
+			}else{
+				checkResult += " OK";
+			}
+			checkResult += "<br>";
+		}
+
+		if (totalFtrC > 0 || totalHangarC > 0){ //do not show if there are no fighters in this segment
+			checkResult +=  " - " + customFtrName + " Fighters: " + totalFtrC;
+				checkResult +=  " (allowed up to " + totalHangarC + ")";
+			if (totalFtrC > totalHangarC){ //fighter total is not within limits
 				checkResult += " FAILURE!";
 				problemFound = true;
 			}else{
