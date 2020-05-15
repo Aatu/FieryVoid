@@ -1339,6 +1339,7 @@ class AdaptiveArmorController extends ShipSystem{
 class DiffuserTendril extends ShipSystem{
     public $name = "DiffuserTendril";
     public $displayName = "Diffuser Tendril";
+    public $primary = true;
 	public $isPrimaryTargetable = false; //shouldn't be targetable at all, in fact!
     public $iconPath = "EnergyDiffuserTendril.png";
     
@@ -1357,15 +1358,16 @@ class DiffuserTendril extends ShipSystem{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= "Used to store absorbed energy from hits.<br>This system is here for technical purposes only. It's part of Energy Diffuser system.";
+		$this->data["Special"] .= "Used to store absorbed energy from hits.<br>It is here for technical purposes only. It's part of Energy Diffuser system.";
 	}	
-}
+}//endof class DiffuserTendril
 
 /*Shadow damage absorbtion system; remember to add Tendrils - largest first!*/
 class EnergyDiffuser extends ShipSystem{
     public $name = "EnergyDiffuser";
     public $displayName = "Energy Diffuser";
     public $iconPath = "EnergyDiffuser.png";
+    public $primary = true;
 	public $isPrimaryTargetable = false; //like other core systems
 	public $tendrils = array();//tendrils belonging to this Diffuser
 	
@@ -1441,21 +1443,12 @@ by 4.
 		
 		//2. dissipate stored energy (in order of tendrils - largest are first, and usually freeing up largest ones is best)
 		$dissipationAvailable = $this->getOutput();
-		foreach($this->tendrils as $tendril) if(!$tendril->isDestroyed()){
-
-$noteT="";
-$t=$tendril->getTotalDamage();
-$noteT="T/Av " . $t . "/" . $dissipationAvailable . "/" . $this->getOutput();
-						
+		foreach($this->tendrils as $tendril) if(!$tendril->isDestroyed()){				
 			$toDissipate = min($dissipationAvailable, $tendril->getTotalDamage());
 			if($toDissipate > 0){
 				$dissipationAvailable -= $toDissipate;
 				//dissipation == undamage
-				//$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $tendril->id, -$toDissipate, 0, 0, -1, false, false, "Dissipate!", "Dissipate");
-					
-$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $tendril->id, -$toDissipate, 0, 0, -1, false, false, $noteT, "Dissipate");
-						
-				
+				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $tendril->id, -$toDissipate, 0, 0, -1, false, false, "Dissipate!", "Dissipate");
 				$damageEntry->updated = true;
 				$tendril->damage[] = $damageEntry;
 			}
@@ -1526,9 +1519,212 @@ $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $tendril->id,
 		
 		return $returnValues;
 	}
-	
-	
-	
 } //endof EnergyDiffuser
+
+
+
+
+
+
+//self repair system - implemented as weapon for simplicity; does repair damage caused in current turn, too (but only earlier crits)
+//othrwise it's close to the original
+class SelfRepair extends ShipSystem{
+	public $name = "SelfRepair";
+	public $displayName = "Self Repair";
+	public $iconPath = "SelfRepair.png";
+    public $primary = true;
+	
+		
+	public $output = 0;
+	public $maxRepairPoints=0;//maximum points that can be repaired during battle
+	public $usedRepairPoints=0;//repair points already used
+	public $usedThisTurn=0;
+      
+	
+	//SelfRepair itself is most important to be repaired - as it's the condition of further repairs being effected!
+	public $repairPriority = 10;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
+	
+ 	public $possibleCriticals = array( 
+            19=>"OutputHalved"
+	);
+
+	function __construct($armour, $maxhealth, $output)
+	{
+		//power requirement is 0, health is always defined by constructor, as is output - but they cannot be <1!
+		if ( $maxhealth <1 ) $maxhealth = 1;
+		if ( $output <1 ) $output = 1; //base output cannot be <1
+		parent::__construct($armour, $maxhealth, 0, 0, 0);
+		$this->output = $output; //after parent - weapon has no output and passes 0 to system creation
+		$this->maxRepairPoints = $maxhealth*10;
+	}
+	
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);  
+		//some effects should originally work for current turn, but it won't work with FV handling of ballistics. Moving everything to next turn.
+		//it's Ion (not EM) weapon with no special remarks regarding advanced races and system - so works normally on AdvArmor/Ancients etc
+		$this->data["Repair points (used/max)"] = $this->usedRepairPoints . "/" . $this->maxRepairPoints;
+		$this->data["Special"] = "At end of turn phase automatically repairs damage to vessel. Cannot repair destroyed structure blocks.";      
+		$this->data["Special"] .= "<br>Priority: first fix criticals, then damaged systems, finally restore destroyed systems.";  
+		$this->data["Special"] .= "<br>Core (and other particularly important) systems are repaired first, then weapons, then other systems.";     
+		$this->data["Special"] .= "<br>Will not fix criticals that are caused in current turn.";    
+	}
+
+	
+	/* sorts system for repair priority*/
+    public static function sortSystemsByRepairPriority($a, $b){
+		//priority, then size (smaller first, as easier to repair), then ID!
+		if($a->repairPriority!==$b->repairPriority){ 
+            return $b->repairPriority - $a->repairPriority; //higher priority first!
+        }else if($a->maxhealth!==$b->maxhealth){ 
+            return $a->maxhealth - $b->maxhealth; //smaller first!
+        }else return $a->id - $b->id;
+    } //endof function sortSystemsByRepairPriority
+	/* sorts critical hits for repair priority*/
+    public static function sortCriticalsByRepairPriority($a, $b){
+		//priority, then size (smaller first, as easier to repair), then ID!
+		if($a->repairPriority!==$b->repairPriority){ 
+            return $b->repairPriority - $a->repairPriority; //higher priority first!
+        }else if($a->repairCost!==$b->repairCost){ ///costlier first!
+            return $b->repairCost - $a->repairCost; //costlier first!
+        }else return $a->id - $b->id;
+    } //endof function sortSystemsByRepairPriority
+	
+	
+	public function criticalPhaseEffects($ship, $gamedata)
+    { 
+		//how many points are available?
+		$availableRepairPoints = $this->maxRepairPoints - $this->usedRepairPoints;
+		$availableRepairPoints = min($availableRepairPoints,$this->getOutput()); //no more than remaining points, no more than actual system repair capability	
+		
+		//sort all systems by priority
+		$ship=$this->getUnit();
+		$systemList = array();
+		foreach($ship->systems as $system){
+			//skip systems attached to destroyed structure blocks...
+			if($system->repairPriority<1) continue;//skip systems that cannot be repaired
+			if(!($system instanceOf Structure)){
+				$strBlock = $ship->getStructureSystem($system->location);
+				if($strBlock->isDestroyed($gamedata->turn)) continue;
+			}
+			$systemList[] = $system;			
+		}
+		usort($systemList, "self::sortSystemsByRepairPriority");
+		
+		//repair criticals (on non-destroyed systems only; also, skip criticals generated this turn!)
+		foreach ($systemList as $systemToRepair){
+			if ($availableRepairPoints<1) continue;//cannot repair anything
+			if ($systemToRepair->isDestroyed($gamedata->turn)) continue;//don't repair criticals on destroyed system...
+			$critList = array();
+			foreach($systemToRepair->criticals as $critDmg) {
+				if($critDmg->repairPriority<1) continue;//if critical cannot be repaired
+				if($critDmg->turn >= $gamedata->turn) continue;//don't repair criticals caused in current (or future!) turn
+				if ($critDmg->oneturn || ($critDmg->turnend > 0)) continue;//temporary criticals (or those already repaired) also cannot be repaired
+				$critList[] = $critDmg;				
+			}			
+			$noOfCrits = count($critList);
+			if($noOfCrits>0){
+				usort($critList, "self::sortCriticalsByRepairPriority");
+				foreach ($critList as $critDmg){ //repairable criticals of current system
+					if ($critDmg->repairCost <= $availableRepairPoints){//execute repair!
+						$critDmg->turnend = $gamedata->turn;//actual repair ;)
+						$critDmg->forceModify = true; //actually save the repair...
+						$critDmg->updated = true; //actually save the repair cd!...
+						$availableRepairPoints -= $critDmg->repairCost;
+						$this->usedThisTurn += $critDmg->repairCost;
+					}
+				}
+			}
+		}		
+		
+		//repair damaged systems
+		foreach ($systemList as $systemToRepair){
+			if ($availableRepairPoints<1) continue;//cannot repair anything any longer
+			if ($systemToRepair->isDestroyed($gamedata->turn)) continue;//don't repair damage on destroyed system... yet!
+			$currentDamage = $systemToRepair->maxhealth - $systemToRepair->getRemainingHealth( );
+			if($currentDamage > 0){ //do repair!
+				$toBeFixed = min($currentDamage, $availableRepairPoints);
+				//actual healing entry
+				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $systemToRepair->id, -$toBeFixed, 0, 0, -1, false, false, 'SelfRepair', 'SelfRepair');
+				$damageEntry->updated = true;
+				$systemToRepair->damage[] = $damageEntry;
+				//meark repair points used
+				$availableRepairPoints -= $toBeFixed;
+				$this->usedThisTurn += $toBeFixed;
+			}
+		}	
+		
+		
+		//repair destroyed systems, possibly undestroying them in the process (cannot repair destroyed Structure)
+		foreach ($systemList as $systemToRepair){
+			if ($availableRepairPoints<1) continue;//cannot repair anything any longer
+			$currentDamage = $systemToRepair->maxhealth - $systemToRepair->getRemainingHealth( );
+			if($currentDamage > 0){ //do repair!
+				$toBeFixed = min($currentDamage, $availableRepairPoints);
+				$undestroy = false;
+				if ($toBeFixed==$currentDamage){ //full health restored!
+					$undestroy=true;
+				}
+				//actual healing entry
+				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $systemToRepair->id, -$toBeFixed, 0, 0, -1, false, $undestroy, 'SelfRepair', 'SelfRepair');
+				$damageEntry->updated = true;
+				$systemToRepair->damage[] = $damageEntry;
+				//meark repair points used
+				$availableRepairPoints -= $toBeFixed;
+				$this->usedThisTurn += $toBeFixed;
+			}
+		}		
+		
+    } //endof function criticalPhaseEffects	
+	
+	
+
+	/* this method generates additional non-standard informaction in the form of individual system notes
+	in this case: 
+	 - Firing phase: add repair points used to notes (current entry, not total)
+	*/
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+		switch($gameData->phase){
+				case 4: //firing phase
+					if($this->usedThisTurn>0){ //self-repair was actually used this turn!						
+						$notekey = 'used';
+						$noteHuman = 'Self-repair used';
+						$noteValue = $this->usedThisTurn;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					}
+					break;
+		}
+	} //endof function generateIndividualNotes
+	
+	/*act on notes just loaded - to be redefined by systems as necessary
+	here:
+	 - fill $usedRepairPoints value
+	*/
+	public function onIndividualNotesLoaded($gamedata){
+		foreach ($this->individualNotes as $currNote){ //assume ASCENDING sorting 
+			$explodedKey = explode ( ';' , $currNote->notekey ) ;//split into array: [area;value] where area denotes action, value - damage type (typically) 
+			switch($currNote->notekey){
+				case 'used': //self-repair points used in a given turn
+					$this->usedRepairPoints += $currNote->notevalue;
+					break;		
+			}
+		}
+		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+		$this->individualNotes = array();
+	} //endof function onIndividualNotesLoaded
+
+/*always redefine $this->data for AA controller! A lot of variable information goes there...*/
+	public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->data = $this->data;		
+        $strippedSystem->output = $this->getOutput();		
+        return $strippedSystem;
+    }
+
+}//endof class SelfRepair
+
+
 
 ?>

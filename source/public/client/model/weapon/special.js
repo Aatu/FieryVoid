@@ -167,10 +167,11 @@ var IonFieldGenerator = function(json, ship)
 IonFieldGenerator.prototype = Object.create( Weapon.prototype );
 IonFieldGenerator.prototype.constructor = IonFieldGenerator;
 
-
+/* moved to systems!
 var SelfRepair = function(json, ship)
 {
     Weapon.call( this, json, ship);
 }
 SelfRepair.prototype = Object.create( Weapon.prototype );
 SelfRepair.prototype.constructor = SelfRepair;
+*/

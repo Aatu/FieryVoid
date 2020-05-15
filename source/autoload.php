@@ -1234,6 +1234,7 @@ spl_autoload_register(
 				
 				//energy diffuser
                 'technicaltestbed' => '/server/model/ships/customs/technicalTestbed.php',
+				'selfrepair' => '/server/model/systems/baseSystems.php',
 				'energydiffuser' => '/server/model/systems/baseSystems.php',
 				'diffusertendril' => '/server/model/systems/baseSystems.php',
                 'tendrildestroyed' => '/server/model/cricialClasses.php',

@@ -328,3 +328,10 @@ var EnergyDiffuser = function EnergyDiffuser(json, ship) {
 };
 EnergyDiffuser.prototype = Object.create(ShipSystem.prototype);
 EnergyDiffuser.prototype.constructor = EnergyDiffuser;
+
+
+var SelfRepair = function SelfRepair(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+SelfRepair.prototype = Object.create(ShipSystem.prototype);
+SelfRepair.prototype.constructor = SelfRepair;

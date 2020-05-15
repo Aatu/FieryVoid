@@ -33,6 +33,7 @@ class TechnicalTestbed extends MediumShip{
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 5, 4));	
         $this->addPrimarySystem(new Thruster(3, 8, 0, 6, 1));		
         $this->addPrimarySystem(new Thruster(3, 10, 0, 12, 2));	
+        $this->addPrimarySystem(new SelfRepair(5, 6, 3)); //armor, structure, output
 		
 		$diffuserPort = new EnergyDiffuser(2, 20, 4, 180, 0);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
 		$tendril=new DiffuserTendril(12);//just absorbtion capacity
@@ -60,9 +61,9 @@ class TechnicalTestbed extends MediumShip{
 		
 		
 		//weapons - Forward for visual reasons!
-        $this->addPrimarySystem(new BurstBeam(3, 6, 3, 240, 60));
-        $this->addPrimarySystem(new BurstBeam(3, 6, 3, 300, 120));
-		$this->addPrimarySystem(new mediumPulse(3, 6, 3, 240, 120));	
+        $this->addFrontSystem(new BurstBeam(3, 6, 3, 240, 60));
+        $this->addFrontSystem(new BurstBeam(3, 6, 3, 300, 120));
+		$this->addFrontSystem(new mediumPulse(3, 6, 3, 240, 120));	
         
 		//technical thrusters - unlimited, like for MCVs
 		
@@ -73,8 +74,8 @@ class TechnicalTestbed extends MediumShip{
 		$this->hitChart = array(
 			0=> array(
 				3 => "Thruster",
-				5 => "Burst Beam",
-				7 => "Medium Pulse Cannon",
+				5 => "1:Burst Beam",
+				7 => "1:Medium Pulse Cannon",
 				14 => "Energy Diffuser",
 				15 => "Scanner",
 				16 => "Engine",
@@ -84,8 +85,8 @@ class TechnicalTestbed extends MediumShip{
 			),
 			1=> array(
 				3 => "0:Thruster",
-				5 => "0:Burst Beam",
-				7 => "0:Medium Pulse Cannon",
+				5 => "1:Burst Beam",
+				7 => "1:Medium Pulse Cannon",
 				14 => "0:Energy Diffuser",
 				15 => "0:Scanner",
 				16 => "0:Engine",
@@ -95,8 +96,8 @@ class TechnicalTestbed extends MediumShip{
 			),
 			2=> array(
 				3 => "0:Thruster",
-				5 => "0:Burst Beam",
-				7 => "0:Medium Pulse Cannon",
+				5 => "1:Burst Beam",
+				7 => "1:Medium Pulse Cannon",
 				14 => "0:Energy Diffuser",
 				15 => "0:Scanner",
 				16 => "0:Engine",
