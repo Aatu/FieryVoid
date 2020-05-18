@@ -1224,9 +1224,10 @@ spl_autoload_register(
                 'fessa' => '/server/model/ships/balosian/fessa.php',
                 'hassa' => '/server/model/ships/balosian/hassa.php',
 				
-				//'wlcchlonashearpa' => '/server/model/ships/ZCustomChLonas/wlcChlonasHeArpa.php',    
+				'wlcchlonashearpa' => '/server/model/ships/ZCustomChLonas/wlcChlonasHeArpa.php',    
 				'smallstarbasethreesections' => '/server/model/ships/ShipClasses.php', 
-				'wlcchlonasvalothar' => '/server/model/ships/ZCustomChLonas/wlcChlonasValothar.php',   
+				'wlcchlonasvalothar' => '/server/model/ships/ZCustomChLonas/wlcChlonasValothar.php',   		    
+				'oriondelta' => '/server/model/ships/EA/OrionDelta.php',
 		    
 				//self-repair
 				'outputhalved' => '/server/model/cricialClasses.php',
