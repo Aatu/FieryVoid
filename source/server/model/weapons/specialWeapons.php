@@ -2576,6 +2576,7 @@ class IonFieldGenerator extends Weapon{
 }//endof class IonFIeldGenerator
 
 
+/*re-implementing as Critical phase system...
 //self repair system - implemented as weapon for simplicity; does repair damage caused in current turn, too
 //othrwise it's close to the original
 class SelfRepair extends Weapon{
@@ -2649,7 +2650,7 @@ class SelfRepair extends Weapon{
 		$fireOrder->needed = 100; //hit is automatic
 	}
 	
-	/* sorts system for repair priority*/
+	// sorts system for repair priority
     public static function sortSystemsByRepairPriority($a, $b){
 		//priority, then size (smaller first, as easier to repair), then ID!
 		if($a->repairPriority!==$b->repairPriority){ 
@@ -2658,7 +2659,7 @@ class SelfRepair extends Weapon{
             return $a->maxhealth - $b->maxhealth; //smaller first!
         }else return $a->id - $b->id;
     } //endof function sortSystemsByRepairPriority
-	/* sorts critical hits for repair priority*/
+	.. sorts critical hits for repair priority
     public static function sortCriticalsByRepairPriority($a, $b){
 		//priority, then size (smaller first, as easier to repair), then ID!
 		if($a->repairPriority!==$b->repairPriority){ 
@@ -2788,17 +2789,19 @@ class SelfRepair extends Weapon{
 
 
 
-        public function getDamage($fireOrder){       return $this->getOutput(); /*"damage" = output*/  }
+        public function getDamage($fireOrder){       
+		  return $this->getOutput(); //"damage" = output* 
+		}
         public function setMinDamage(){     $this->minDamage = $this->getOutput();      }
         public function setMaxDamage(){     $this->maxDamage = $this->getOutput();      }
 
 
 
 
-	/* this method generates additional non-standard informaction in the form of individual system notes
-	in this case: 
-	 - Firing phase: add repair points used to notes (current entry, not total)
-	*/
+	// this method generates additional non-standard informaction in the form of individual system notes
+	//in this case: 
+	// - Firing phase: add repair points used to notes (current entry, not total)
+	
     public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
 		$ship = $this->getUnit();
 		switch($gameData->phase){
@@ -2813,10 +2816,9 @@ class SelfRepair extends Weapon{
 		}
 	} //endof function generateIndividualNotes
 	
-	/*act on notes just loaded - to be redefined by systems as necessary
-	here:
-	 - fill $usedRepairPoints value
-	*/
+	//act on notes just loaded - to be redefined by systems as necessary
+	//here:
+	// - fill $usedRepairPoints value
 	public function onIndividualNotesLoaded($gamedata){
 		foreach ($this->individualNotes as $currNote){ //assume ASCENDING sorting 
 			$explodedKey = explode ( ';' , $currNote->notekey ) ;//split into array: [area;value] where area denotes action, value - damage type (typically) 
@@ -2830,7 +2832,7 @@ class SelfRepair extends Weapon{
 		$this->individualNotes = array();
 	} //endof function onIndividualNotesLoaded
 
-/*always redefine $this->data for AA controller! A lot of variable information goes there...*/
+//always redefine $this->data for AA controller! A lot of variable information goes there...
 	public function stripForJson(){
         $strippedSystem = parent::stripForJson();
         $strippedSystem->data = $this->data;		
@@ -2839,6 +2841,6 @@ class SelfRepair extends Weapon{
     }
 
 }//endof class SelfRepair
-
+*/
 
 ?>

@@ -8,10 +8,11 @@ class Criticals{
         $crits = array();
 		//print("criticals");
         foreach ($gamedata->ships as $ship){
-            if ($ship->isDestroyed())
-                continue;
-                
+						
+            if ($ship->isDestroyed()) continue;
+			               
             foreach ($ship->systems as $system){
+				
 
 		    /*no longer needed?...
     		if ($system instanceof MissileLauncher){
@@ -49,6 +50,9 @@ class Criticals{
 				if ($system->isDamagedOnTurn($gamedata->turn)){       
 					$crits = $system->testCritical($ship, $gamedata, $crits);
 				}
+				
+				$system->criticalPhaseEffects($ship, $gamedata); //hook for Critical phase effects
+				
             }
         }
         
