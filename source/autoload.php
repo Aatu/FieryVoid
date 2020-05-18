@@ -1230,7 +1230,8 @@ spl_autoload_register(
 			'wlcchlonashearpa' => '/server/model/ships/ZCustomChLonas/wlcChlonasHeArpa.php',    
                 'smallstarbasethreesections' => '/server/model/ships/ShipClasses.php', 
 
-		'wlcchlonasvalothar' => '/server/model/ships/ZCustomChLonas/wlcChlonasValothar.php',   
+		'wlcchlonasvalothar' => '/server/model/ships/ZCustomChLonas/wlcChlonasValothar.php',
+		'oriondelta' => '/server/model/ships/EA/OrionDelta.php',
 		    
 			//self-repair
             'outputhalved' => '/server/model/cricialClasses.php',
