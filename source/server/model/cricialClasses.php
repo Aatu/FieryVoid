@@ -313,8 +313,25 @@ class tmpinidown extends Critical{ /*next turn target Initiative is down by 1, t
 
 
 class tmppowerdown extends Critical{ /*next turn target Power is down by 1 - place on C&C (may be destroyed)!*/
-    public $description = "-1 Power."; //-1 in d20 system
+    public $description = "-1 Power."; 
     public $oneturn = true;		
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
+
+
+class TendrilDestroyed extends Critical{
+    public $description = "Tendril destroyed.";
+	public $priority = 0; //cannot be fixed
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
+class TendrilCapacityReduced extends Critical{
+    public $description = "Capacity of all tendrils reduced by 2.";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }

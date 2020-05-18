@@ -314,3 +314,24 @@ AdaptiveArmorController.prototype.doIndividualNotesTransfer = function () { //pr
 	}
 	return true;
 };
+
+
+
+
+var DiffuserTendril = function DiffuserTendril(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+DiffuserTendril.prototype = Object.create(ShipSystem.prototype);
+DiffuserTendril.prototype.constructor = DiffuserTendril;
+var EnergyDiffuser = function EnergyDiffuser(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+EnergyDiffuser.prototype = Object.create(ShipSystem.prototype);
+EnergyDiffuser.prototype.constructor = EnergyDiffuser;
+
+
+var SelfRepair = function SelfRepair(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+SelfRepair.prototype = Object.create(ShipSystem.prototype);
+SelfRepair.prototype.constructor = SelfRepair;

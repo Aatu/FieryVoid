@@ -1196,29 +1196,26 @@ spl_autoload_register(
                 'lightplasmaaccelerator' => '/server/model/weapons/plasma.php',  
                 'particleaccelerator' => '/server/model/weapons/particle.php',  
                 'pulseaccelerator' => '/server/model/weapons/pulse.php',  
-				
-				
-				//Torata ships
-		    
+								
+				//Torata ships		    
                 'toratacolotnarbase' => '/server/model/ships/torata/torataColotnarBase.php',		    
-					'toratacolotnarbase2220' => '/server/model/ships/torata/torataColotnarBase2220.php',
-					'toratacolotnarbase2242' => '/server/model/ships/torata/torataColotnarBase2242.php',
-                'toratatumalosat' => '/server/model/ships/torata/torataTumalOSAT.php',
-				
+				'toratacolotnarbase2220' => '/server/model/ships/torata/torataColotnarBase2220.php',
+				'toratacolotnarbase2242' => '/server/model/ships/torata/torataColotnarBase2242.php',
+                'toratatumalosat' => '/server/model/ships/torata/torataTumalOSAT.php',				
 		    
                 'torataatlaccrv' => '/server/model/ships/torata/torataAtlacCRV.php',
-					'toratatacloncrv' => '/server/model/ships/torata/torataTaclonCRV.php',
+				'toratatacloncrv' => '/server/model/ships/torata/torataTaclonCRV.php',
                 'torataclovantscout' => '/server/model/ships/torata/torataClovantScout.php',				
-					'torataalovarscoutcv' => '/server/model/ships/torata/torataAlovarScoutCV.php',
+				'torataalovarscoutcv' => '/server/model/ships/torata/torataAlovarScoutCV.php',
                 'toratagoltharcc' => '/server/model/ships/torata/torataGoltharCC.php',
-					'toratadartocca' => '/server/model/ships/torata/torataDartocCA.php',
-					'toratalatracce' => '/server/model/ships/torata/torataLatracCE.php',
+				'toratadartocca' => '/server/model/ships/torata/torataDartocCA.php',
+				'toratalatracce' => '/server/model/ships/torata/torataLatracCE.php',
                 'toratagoltharcc' => '/server/model/ships/torata/torataGoltharCC.php',
                 'torataheltakaclog' => '/server/model/ships/torata/torataHeltakaCLog.php',
-					'torataheltakaclogpods' => '/server/model/ships/torata/torataHeltakaCLogPods.php',		
+				'torataheltakaclogpods' => '/server/model/ships/torata/torataHeltakaCLogPods.php',		
                 'toratatoglatmonitor' => '/server/model/ships/torata/torataToglatMonitor.php',	
                 'toratazftrtuka' => '/server/model/ships/torata/torataZFtrTuka.php',
-					'toratazftrtralka' => '/server/model/ships/torata/torataZFtrTralka.php',
+				'toratazftrtralka' => '/server/model/ships/torata/torataZFtrTralka.php',
 			
 				//new batch for Balosians		
                 'moesarbase' => '/server/model/ships/balosian/moesarBase.php',
@@ -1227,24 +1224,32 @@ spl_autoload_register(
                 'fessa' => '/server/model/ships/balosian/fessa.php',
                 'hassa' => '/server/model/ships/balosian/hassa.php',
 				
-			'wlcchlonashearpa' => '/server/model/ships/ZCustomChLonas/wlcChlonasHeArpa.php',    
-                'smallstarbasethreesections' => '/server/model/ships/ShipClasses.php', 
-
-		'wlcchlonasvalothar' => '/server/model/ships/ZCustomChLonas/wlcChlonasValothar.php',   
+				'wlcchlonashearpa' => '/server/model/ships/ZCustomChLonas/wlcChlonasHeArpa.php',    
+				'smallstarbasethreesections' => '/server/model/ships/ShipClasses.php', 
+				'wlcchlonasvalothar' => '/server/model/ships/ZCustomChLonas/wlcChlonasValothar.php',   		    
+				'oriondelta' => '/server/model/ships/EA/OrionDelta.php',
 		    
-			//self-repair
-            'outputhalved' => '/server/model/cricialClasses.php',
-			'whitestarcmd' => '/server/model/ships/minbari/whitestarCmd.php',
-			
-			
-			
-		//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
-                'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
-		
-		    
-		    
-			//let's end this with unit enhancement class...		    
-			'enhancements' => '/server/model/ships/Enhancements.php'
+				//self-repair
+				'outputhalved' => '/server/model/cricialClasses.php',
+				'whitestarcmd' => '/server/model/ships/minbari/whitestarCmd.php',
+				
+				//energy diffuser
+                'technicaltestbed' => '/server/model/ships/customs/technicalTestbed.php',
+				'selfrepair' => '/server/model/systems/baseSystems.php',
+				'energydiffuser' => '/server/model/systems/baseSystems.php',
+				'diffusertendril' => '/server/model/systems/baseSystems.php',
+                'tendrildestroyed' => '/server/model/cricialClasses.php',
+                'tendrilcapacityreduced' => '/server/model/cricialClasses.php',
+				
+				
+				
+				
+				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
+				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
+						
+				
+				//let's end this with unit enhancement class...		    
+				'enhancements' => '/server/model/ships/Enhancements.php'
             );
         }
         $cn = strtolower($class);

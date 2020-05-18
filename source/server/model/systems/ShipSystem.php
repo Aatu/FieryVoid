@@ -43,8 +43,7 @@ class ShipSystem {
 	public $individualNotesTransfer = "";//variable for transferring individual notes from interface to server layer
 	
 	public $repairPriority = 4;//priority at which system is repaired (by self repair system); higher = sooner; 0 indicates that system cannot be repaired
-	
-    
+
     function __construct($armour, $maxhealth, $powerReq, $output){
         $this->armour = $armour;
         $this->maxhealth = (int)$maxhealth;
@@ -83,6 +82,8 @@ class ShipSystem {
         $this->effectCriticals();
         $this->destroyed = $this->isDestroyed();
     }
+	
+	public function criticalPhaseEffects($ship, $gamedata){} //hook for special effects that should happen in Critical phase/end of turn
 	
 	/*saves individual notes (if any new ones exist) to database*/
 	public function saveIndividualNotes(DBManager $dbManager){ //loading exisiting notes is done in dbmanager->getSystemDataForShips()
@@ -331,12 +332,18 @@ class ShipSystem {
     
     public function hasCritical($type, $turn = false){
         $count = 0;
+		if($turn===false){ //this only means it should be checked for CURRENT turn, not ANY turn!
+			$turn=TacGamedata::$currentTurn;
+		}
         foreach ($this->criticals as $critical){
             if (strcmp($critical->phpclass, $type) == 0 && $critical->inEffect){				
-                if ($turn === false){
+                if ($turn === false){ //now should never go here...
                     $count++;
                 }else if ((($critical->oneturn && $critical->turn+1 == $turn) || !$critical->oneturn) && $critical->turn<= $turn){
-                    $count++;
+					//additional test for turn of ending effect!
+					if(($critical->turnend==0) || ($critical->turnend>=$turn)){
+						$count++;
+					}
                 }
             }
         }
@@ -351,7 +358,7 @@ class ShipSystem {
             return 0;
         
         $output = $this->output;
-        $output -= $this->outputMod;
+        $output += $this->outputMod; //outputMod negative is negative in itself!
 		$output = max(0,$output); //don't let output be negative!
         return $output;
     }
@@ -365,7 +372,8 @@ class ShipSystem {
         }
         //convert percentage mod to absolute value...
         if($percentageMod != 0){
-            $this->outputMod += round($percentageMod * $this->output /100 );
+            //$this->outputMod += round($percentageMod * $this->output /100 );
+			$this->outputMod += round($percentageMod * $this->output /100 );
         }    
     }
 	
@@ -490,6 +498,15 @@ class ShipSystem {
     {
     }
 	
+	
+	public function doesProtectFromDamage(){ //hook - systems that can affect damage dealing will return positive value; strongest one will be chosen to interact
+		return 0;
+	}
+	public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
+		$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
+		return $returnValues;
+	}
+	
 	/*assigns damage, returns remaining (overkilling) damage and how much armor was actually pierced
 	all extra data needed for defensive modifying damage as it's being dealt - like Shadow Energy Diffusers and Gaim Bulkheads
 	returns array: dmgDealt, dmgRemaining, armorPierced
@@ -502,7 +519,14 @@ class ShipSystem {
 		$systemHealth = $this->getRemainingHealth();
 		$systemDestroyed = false;
 		
-		//CALL DEFENSIVE SYSTEMS HERE! - once I get around to actually doing them
+		//CALL SYSTEMS PROTECTING FROM DAMAGE HERE! 
+		$systemProtectingDmg = $target->getSystemProtectingFromDamage($shooter, $pos, $gamedata->turn, $weapon);
+		if($systemProtectingDmg){
+			$effectOfProtection = $systemProtectingDmg->doProtect($gamedata, $fireOrder, $target, $shooter,$weapon,$effectiveDamage,$effectiveArmor);
+			$effectiveDamage = $effectOfProtection['dmg'];
+			$effectiveArmor = $effectOfProtection['armor'];
+		}
+		
 		
 		//if damage is more than system has structure left - mark rest as overkilling
 		if ($effectiveDamage-$effectiveArmor >= $systemHealth){
