@@ -1345,14 +1345,27 @@ class DiffuserTendril extends ShipSystem{
     
 	//Diffuser Tendrils cannot be repaired at all!
 	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+
     
-    function __construct($maxhealth){ //everything is done in the diffuser, Tendrils basically just are!
-        parent::__construct(0, $maxhealth, 0, 0);
-    }
+    function __construct($maxhealth, $side = 'R'){ //everything is done in the diffuser, Tendrils basically just are! - L/R suggests whether to use left or right graphics
+		$this->iconPath = 'EnergyDiffuserTendril' . $side;
+		if($maxhealth < 15){ //small
+			$this->iconPath .= "1";
+		}
+		else if($maxhealth < 30){//medium
+			$this->iconPath .= "2";
+		} else{//large!
+			$this->iconPath .= "3";
+		}
+		$this->iconPath .= ".png";
+		parent::__construct(0, $maxhealth, 0, 0);
+		
+		$this->output=$maxhealth;//output is displayed anyway, make it show something useful...
+	}
 	
 
 	public function setSystemDataWindow($turn){
-		parent::setSystemDataWindow($turn);     
+		parent::setSystemDataWindow($turn);   
 		if (!isset($this->data["Special"])) {
 			$this->data["Special"] = '';
 		}else{
@@ -1360,7 +1373,103 @@ class DiffuserTendril extends ShipSystem{
 		}
 		$this->data["Special"] .= "Used to store absorbed energy from hits.<br>It is here for technical purposes only. It's part of Energy Diffuser system.";
 	}	
+	
+	public function getRemainingCapacity(){
+		return $this->getRemainingHealth();
+	}
+	
+	public function getUsedCapacity(){
+		return $this->getTotalDamage();
+	}
+	
+	public function absorbDamage($ship,$gamedata,$value){ //or dissipate, with negative value
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, -1, false, false, "Absorb/Dissipate!", "Tendril");
+		$damageEntry->updated = true;
+		$this->damage[] = $damageEntry;
+	}
 }//endof class DiffuserTendril
+
+
+//fighter systems don't get damaged - so fighter tendrils need to store damage by way of notes
+class DiffuserTendrilFtr extends DiffuserTendril{
+    public $name = "DiffuserTendrilFtr";
+    public $displayName = "Diffuser Tendril";
+	
+	private $usedCapacityTotal=0;
+	private $thisTurnEntries=array();
+    
+	//Diffuser Tendrils cannot be repaired at all!
+	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+
+    
+	public function setSystemDataWindow($turn){
+		//add information about damage stored - ships do have visual reminder about it, but fighters do not!
+		parent::setSystemDataWindow($turn); 
+		$this->data["Capacity"] = $this->getUsedCapacity() . '/' . $this->maxhealth;
+		$this->data["Special"] .= "<br>Damage absorbed by Tendrils will NOT get displayed as damage in log! (unlike on ships)";
+	}	
+	
+	/*always redefine $this->data due to current capacity info*/
+	public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->data = $this->data;		
+        return $strippedSystem;
+    }
+	
+	
+	public function getRemainingCapacity(){
+		return $this->maxhealth - $this->usedCapacityTotal;
+	}
+	
+	public function getUsedCapacity(){
+		return $this->usedCapacityTotal;
+	}
+	
+	public function absorbDamage($ship,$gamedata,$value){ //or dissipate, with negative value
+		$this->usedCapacityTotal += $value; //running count
+		$this->thisTurnEntries[] = $value; //mark for database
+	}
+	
+	
+	/* this method generates additional non-standard informaction in the form of individual system notes
+	in this case: 
+	 - Firing phase: add information on stored/dissipated energy (every entry separately)
+	*/
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+		switch($gameData->phase){
+				case 4: //firing phase
+					foreach($this->thisTurnEntries as $tte){					
+						$notekey = 'absorb';
+						$noteHuman = 'Tendril absorbed or dissipated';
+						$noteValue = $tte;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					}
+					break;
+		}
+	} //endof function generateIndividualNotes
+	
+	/*act on notes just loaded - to be redefined by systems as necessary
+	here:
+	 - fill $usedCapacityTotal value
+	*/
+	public function onIndividualNotesLoaded($gamedata){
+		$this->usedCapacityTotal = 0;
+		foreach ($this->individualNotes as $currNote){ //assume ASCENDING sorting 
+			$explodedKey = explode ( ';' , $currNote->notekey ) ;//split into array: [area;value] where area denotes action, value - damage type (typically) 
+			switch($currNote->notekey){
+				case 'absorb': //absorbtion or dissipation of energy
+					$this->usedCapacityTotal += $currNote->notevalue;
+					break;		
+			}
+		}
+		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+		$this->individualNotes = array();
+	} //endof function onIndividualNotesLoaded
+
+}//endof class DiffuserTendrilFtr
+
+
 
 /*Shadow damage absorbtion system; remember to add Tendrils - largest first!*/
 class EnergyDiffuser extends ShipSystem{
@@ -1405,6 +1514,10 @@ by 4.
         
         $this->startArc = (int)$startArc;
         $this->endArc = (int)$endArc;
+		
+		if ($this->getUnit() instanceOf FighterFlight){ //for fighters - no criticals of course ;)
+			$this->possibleCriticals = array();
+		}
     }
 	
 	function addTendril($tendril){
@@ -1434,7 +1547,7 @@ by 4.
 			foreach($this->tendrils as $tendril) if(!$tendril->isDestroyed()){
 				$lastTendril = $tendril;
 			}
-			if($lastTendril){
+			if($lastTendril){ ///no need to redefine for fighter - there criticals just won't happen
 				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $lastTendril->id, 0, 0, 0, -1, true, false, "DestroyTendril!", "Destruction");
 				$damageEntry->updated = true;
 				$lastTendril->damage[] = $damageEntry;
@@ -1444,13 +1557,16 @@ by 4.
 		//2. dissipate stored energy (in order of tendrils - largest are first, and usually freeing up largest ones is best)
 		$dissipationAvailable = $this->getOutput();
 		foreach($this->tendrils as $tendril) if(!$tendril->isDestroyed()){				
-			$toDissipate = min($dissipationAvailable, $tendril->getTotalDamage());
+			$toDissipate = min($dissipationAvailable, $tendril->getUsedCapacity());
 			if($toDissipate > 0){
 				$dissipationAvailable -= $toDissipate;
 				//dissipation == undamage
+				$tendril->absorbDamage($ship,$gamedata,-$toDissipate);
+				/*
 				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $tendril->id, -$toDissipate, 0, 0, -1, false, false, "Dissipate!", "Dissipate");
 				$damageEntry->updated = true;
 				$tendril->damage[] = $damageEntry;
+				*/
 			}
 		}
 		
@@ -1464,12 +1580,12 @@ by 4.
 	public function doesProtectFromDamage() {
 		$totalCapacity = 0;
 		$largestCapacity = 0;
-		
+				
 		//check capacity reduction due to criticals...
 		$reduction = $this->hasCritical('TendrilCapacityReduced')*2;
 
 		foreach($this->tendrils as $tendril) if(!$tendril->isDestroyed()){
-			$tendrilCapacity = $tendril->getRemainingHealth()-$reduction;
+			$tendrilCapacity = $tendril->getRemainingCapacity()-$reduction;
 			if($tendrilCapacity>0){
 				$totalCapacity += $tendrilCapacity;
 				$largestCapacity = max($tendrilCapacity,$largestCapacity);
@@ -1493,7 +1609,7 @@ by 4.
 		$reduction = $this->hasCritical('TendrilCapacityReduced')*2;
 
 		foreach($this->tendrils as $tendril) if(!$tendril->isDestroyed()){
-			$tendrilCapacity = $tendril->getRemainingHealth() - $reduction;
+			$tendrilCapacity = $tendril->getRemainingCapacity() - $reduction;
 			if($tendrilCapacity>0){ //else it's useless ATM
 				if ($mostSuitableAbsorbtion < $damageToAbsorb){ //not found a tendril able to accept entire damage yet, looking for something larger
 					if ($tendrilCapacity >= $mostSuitableAbsorbtion) { //new one is more suitable (all other things equal later tendril is more suitable)
@@ -1511,10 +1627,13 @@ by 4.
 		
 		if($mostSuitableAbsorbtion>0){ //appropriate tendril found!
 			$damageAbsorbed=min($damageToAbsorb,$mostSuitableAbsorbtion);
-			$returnValues['dmg']=$effectiveDamage-$damageAbsorbed;
+			$returnValues['dmg']=$effectiveDamage-$damageAbsorbed;			
+			$mostSuitableTendril->absorbDamage($target,$gamedata,$damageAbsorbed);
+			/*
 			$damageEntry = new DamageEntry(-1, $target->id, -1, $gamedata->turn, $mostSuitableTendril->id, $damageAbsorbed, 0, 0, $fireOrder->id, false, false, "Absorb!", "Absorb");
 			$damageEntry->updated = true;
 			$mostSuitableTendril->damage[] = $damageEntry;
+			*/
 		}
 		
 		return $returnValues;

@@ -323,6 +323,11 @@ var DiffuserTendril = function DiffuserTendril(json, ship) {
 };
 DiffuserTendril.prototype = Object.create(ShipSystem.prototype);
 DiffuserTendril.prototype.constructor = DiffuserTendril;
+var DiffuserTendrilFtr = function DiffuserTendrilFtr(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+DiffuserTendrilFtr.prototype = Object.create(ShipSystem.prototype);
+DiffuserTendrilFtr.prototype.constructor = DiffuserTendrilFtr;
 var EnergyDiffuser = function EnergyDiffuser(json, ship) {
     ShipSystem.call(this, json, ship);
 };
