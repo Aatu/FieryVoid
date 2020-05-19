@@ -12,15 +12,16 @@ class TechnicalTestbed extends MediumShip{
         $this->canvasSize = 100;
 	    $this->isd = 2240;
         $this->shipSizeClass = 2; //it's actually a HCV using MCV layout
+        $this->agile = true;
         
         $this->forwardDefense = 110;
         $this->sideDefense = 112;
         
         $this->turncost = 0.50;
         $this->turndelaycost = 0.33;
-        $this->accelcost = 2;
-        $this->rollcost = 1;
-        $this->pivotcost = 2;
+        $this->accelcost = 3;
+        $this->rollcost = 3;
+        $this->pivotcost = 3;
 		$this->iniativebonus = 6 *5;
         
          
@@ -36,25 +37,25 @@ class TechnicalTestbed extends MediumShip{
         $this->addPrimarySystem(new SelfRepair(5, 6, 3)); //armor, structure, output
 		
 		$diffuserPort = new EnergyDiffuser(2, 20, 4, 180, 0);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
-		$tendril=new DiffuserTendril(12);//just absorbtion capacity
+		$tendril=new DiffuserTendril(30,'L');//absorbtion capacity,side
 		$diffuserPort->addTendril($tendril);
 		$this->addLeftSystem($tendril);
-		$tendril=new DiffuserTendril(10);//just absorbtion capacity
+		$tendril=new DiffuserTendril(20,'L');//absorbtion capacity,side
 		$diffuserPort->addTendril($tendril);
 		$this->addLeftSystem($tendril);		
-		$tendril=new DiffuserTendril(5);//just absorbtion capacity
+		$tendril=new DiffuserTendril(10,'L');//absorbtion capacity,side
 		$diffuserPort->addTendril($tendril);
 		$this->addLeftSystem($tendril);
         $this->addPrimarySystem($diffuserPort);
 		
 		$diffuserStbd = new EnergyDiffuser(2, 20, 4, 0, 180);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
-		$tendril=new DiffuserTendril(12);//just absorbtion capacity
+		$tendril=new DiffuserTendril(30,'R');//absorbtion capacity,side
 		$diffuserStbd->addTendril($tendril);
 		$this->addRightSystem($tendril);
-		$tendril=new DiffuserTendril(10);//just absorbtion capacity
+		$tendril=new DiffuserTendril(20,'R');//absorbtion capacity,side
 		$diffuserStbd->addTendril($tendril);
 		$this->addRightSystem($tendril);
-		$tendril=new DiffuserTendril(5);//just absorbtion capacity
+		$tendril=new DiffuserTendril(10,'R');//absorbtion capacity,side
 		$diffuserStbd->addTendril($tendril);
 		$this->addRightSystem($tendril);
         $this->addPrimarySystem($diffuserStbd);

@@ -158,6 +158,7 @@ class FighterFlight extends BaseShip
         return (-array_sum($affectingSystems));
     }
 
+
     /*redefinition; for fighter, don't check whether system is destroyed - it doesn't matter as long as entire flight isn't!*/
     /*also, fighter systems don't get disabled :)*/
     private function checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon)

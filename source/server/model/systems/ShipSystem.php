@@ -520,7 +520,7 @@ class ShipSystem {
 		$systemDestroyed = false;
 		
 		//CALL SYSTEMS PROTECTING FROM DAMAGE HERE! 
-		$systemProtectingDmg = $target->getSystemProtectingFromDamage($shooter, $pos, $gamedata->turn, $weapon);
+		$systemProtectingDmg = $target->getSystemProtectingFromDamage($shooter, $pos, $gamedata->turn, $weapon, $this);
 		if($systemProtectingDmg){
 			$effectOfProtection = $systemProtectingDmg->doProtect($gamedata, $fireOrder, $target, $shooter,$weapon,$effectiveDamage,$effectiveArmor);
 			$effectiveDamage = $effectOfProtection['dmg'];

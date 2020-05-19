@@ -1747,57 +1747,78 @@ shipManager.movement = {
                 orientationRequired=3;
             }
         }
-        if (shipManager.movement.isGoingBackwards(ship) && (!shipManager.movement.isOutOfAlignment(ship))){ //moving STRICTLY backwards reverses all requirements
-            switch(orientationRequired) {
-                case 1: 
-                    orientationRequired = 2;
-                    break;
-                case 2: 
-                    orientationRequired = 1;
-                    break;
-                case 3: 
-                    orientationRequired = 4;
-                    break;
-                case 4: 
-                    orientationRequired = 3;
-                    break;
-            }
-        }
-        
-        //Gravitic allowsfurther rotations if pivoted (eg. not moving exactly forward or backwards)...
-        if(ship.gravitic){
-            if(shipManager.movement.isPivotedPort(ship)){ //pivoted to Port means: Stbd is Retro, Main is Stbd, Port is Main, Retro is Port
-                switch(orientationRequired) {
-                    case 1: 
-                        orientationRequired = 4;
-                        break;
-                    case 2: 
-                        orientationRequired = 3;
-                        break;
-                    case 3: 
-                        orientationRequired = 1;
-                        break;
-                    case 4: 
-                        orientationRequired = 2;
-                        break;
-                }
-            }else if (shipManager.movement.isPivotedStbd(ship)){//pivoted to Stbd means: Stbd is Main, Main is Port, Port is Retro, Retro is Stbd
-                switch(orientationRequired) {
-                    case 1: 
-                        orientationRequired = 3;
-                        break;
-                    case 2: 
-                        orientationRequired = 4;
-                        break;
-                    case 3: 
-                        orientationRequired = 2;
-                        break;
-                    case 4: 
-                        orientationRequired = 1;
-                        break;
-                }
-            }
-        }        
+		/*here is a difference - for gravitic ship out of alignment reversing requirements will not fit with thruster change! so it needs to be done separately for gravitic ship...*/
+		if(!ship.gravitic){ ///non-gravitic - reverse requiremets if going backwards
+			if ( shipManager.movement.isGoingBackwards(ship) ){ 
+				switch(orientationRequired) {
+					case 1: 
+						orientationRequired = 2;
+						break;
+					case 2: 
+						orientationRequired = 1;
+						break;
+					case 3: 
+						orientationRequired = 4;
+						break;
+					case 4: 
+						orientationRequired = 3;
+						break;
+				}
+			}
+		}else{ //ship is gravitic! reverse only if going _strictly_ backwards
+			if (shipManager.movement.isGoingBackwards(ship) && (!shipManager.movement.isOutOfAlignment(ship))){ //moving STRICTLY backwards reverses all requirements
+				switch(orientationRequired) {
+					case 1: 
+						orientationRequired = 2;
+						break;
+					case 2: 
+						orientationRequired = 1;
+						break;
+					case 3: 
+						orientationRequired = 4;
+						break;
+					case 4: 
+						orientationRequired = 3;
+						break;
+				}
+			}
+		}
+		
+		//Gravitic allowsfurther rotations if pivoted (eg. not moving exactly forward or backwards)...
+		if(ship.gravitic){ 
+			if(shipManager.movement.isPivotedPort(ship)){ //pivoted to Port means: Stbd is Retro, Main is Stbd, Port is Main, Retro is Port
+				switch(orientationRequired) {
+					case 1: 
+						orientationRequired = 4;
+						break;
+					case 2: 
+						orientationRequired = 3;
+						break;
+					case 3: 
+						orientationRequired = 1;
+						break;
+					case 4: 
+						orientationRequired = 2;
+						break;
+				}
+			}else if (shipManager.movement.isPivotedStbd(ship)){//pivoted to Stbd means: Stbd is Main, Main is Port, Port is Retro, Retro is Stbd
+				switch(orientationRequired) {
+					case 1: 
+						orientationRequired = 3;
+						break;
+					case 2: 
+						orientationRequired = 4;
+						break;
+					case 3: 
+						orientationRequired = 2;
+						break;
+					case 4: 
+						orientationRequired = 1;
+						break;
+				}
+			}
+		}        
+		
         return orientationRequired;
     }, //endof thrusterDirectionRequired
     
