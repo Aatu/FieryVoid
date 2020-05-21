@@ -1,19 +1,20 @@
 <?php
-class Dux extends BaseShip{
+class RaiderDux extends BaseShip{
 /*Centauri Privateer Dux Jump Cruiser, from Variants-6*/
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 480;
+	$this->pointCost = 460;
         $this->faction = "Raiders";
-        $this->phpclass = "Dux";
+        $this->phpclass = "RaiderDux";
         $this->imagePath = "img/ships/celerian.png";
-        $this->shipClass = "Centauri Privateer Dux Jump Cruiser";
+        $this->shipClass = "Raider Dux Jump Cruiser";
         $this->shipSizeClass = 3;
         $this->limited = 10; //Restricted Deployment
         $this->fighters = array("heavy"=>12);
-		$this->isd = 1910;
+		$this->isd = 2002;
+		$this->variantOf = "Centauri Privateer Dux Jump Cruiser"
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
@@ -33,8 +34,8 @@ class Dux extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addFrontSystem(new Hangar(4, 14));
-        $this->addFrontSystem(new ParticleProjector(2, 6, 1, 270, 90));
-        $this->addFrontSystem(new ParticleProjector(2, 6, 1, 270, 90));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
 		
         $this->addAftSystem(new Thruster(2, 10, 0, 3, 2));
         $this->addAftSystem(new Thruster(2, 12, 0, 3, 2));
@@ -42,14 +43,14 @@ class Dux extends BaseShip{
         $this->addAftSystem(new JumpEngine(4, 25, 3, 20));
         
 	$this->addLeftSystem(new Thruster(4, 14, 0, 5, 3));
-        $this->addLeftSystem(new TacLaser(3, 5, 4, 240, 360));
-        $this->addLeftSystem(new ParticleProjector(2, 6, 1, 180, 360));   
-        $this->addLeftSystem(new ParticleProjector(2, 6, 1, 180, 360));
+        $this->addLeftSystem(new LightParticleCannon(3, 6, 5, 240, 0));
+        $this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 0)); 
+        $this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 0));
                 		
 	$this->addRightSystem(new Thruster(4, 14, 0, 5, 4));
-        $this->addRightSystem(new TacLaser(3, 5, 4, 0, 120));
-        $this->addRightSystem(new ParticleProjector(2, 6, 1, 0, 180));
-        $this->addRightSystem(new ParticleProjector(2, 6, 1, 0, 180));        
+        $this->addRightSystem(new LightParticleCannon(3, 6, 5, 0, 120));
+        $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
+        $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));      
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 38));

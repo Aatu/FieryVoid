@@ -5,10 +5,10 @@ class Alzara extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 440;
-        $this->faction = "Centauri (Raiders)";
+        $this->faction = "Raiders";
         $this->phpclass = "Alzara";
         $this->imagePath = "img/ships/altarian.png";
-        $this->shipClass = "Alzara Destroyer";
+        $this->shipClass = "Centauri Privateer Alzara Destroyer";
         $this->fighters = array("medium"=>6);
 		$this->isd = 2167;
         

@@ -4,10 +4,10 @@ class Liuli extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 370;
-        $this->faction = "Centauri (Raiders)";
+        $this->faction = "Raiders";
         $this->phpclass = "Liuli";
         $this->imagePath = "img/ships/falenna.png"; //it's not based on Falenna hull but it's more or less similar in shape, I use it rather than create my own with meager skill
-        $this->shipClass = "Liuli Destroyer";
+        $this->shipClass = "Centauri Privateer Liuli Destroyer";
         $this->isd = 1935;
         
         $this->forwardDefense = 15;
