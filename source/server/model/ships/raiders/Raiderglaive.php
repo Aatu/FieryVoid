@@ -1,15 +1,15 @@
 <?php
-class Privateerglaive extends FighterFlight{
+class Raiderglaive extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 28*6;
         $this->faction = "Raiders";
-        $this->phpclass = "Privateerglaive";
-        $this->shipClass = "Centauri Privateer Glaive Light Fighters";
+        $this->phpclass = "Raiderglaive";
+        $this->shipClass = "Raider Glaive Light Fighters";
 	$this->imagePath = "img/ships/glaive.png";
-	$this->isd = 1995;
+	$this->isd = 2012;
         
         $this->forwardDefense = 7;
         $this->sideDefense = 7;
