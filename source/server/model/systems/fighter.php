@@ -15,8 +15,6 @@
 		
 		public $possibleCriticals = array();
 		
-       		$this->customFtrName = ""; //to be filled if fighter has special hangar requirements - see Balvarix/Rutarian for usage
-		
 			
 		public $criticals = array();
 		
