@@ -340,3 +340,15 @@ var SelfRepair = function SelfRepair(json, ship) {
 };
 SelfRepair.prototype = Object.create(ShipSystem.prototype);
 SelfRepair.prototype.constructor = SelfRepair;
+
+
+var BioDrive = function BioDrive(json, ship) {
+    Engine.call(this, json, ship);
+};
+BioDrive.prototype = Object.create(Engine.prototype);
+BioDrive.prototype.constructor = BioDrive;
+var BioThruster = function BioThruster(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+BioThruster.prototype = Object.create(ShipSystem.prototype);
+BioThruster.prototype.constructor = BioThruster;
