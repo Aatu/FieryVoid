@@ -100,6 +100,12 @@ window.gamedata = {
 	    var staticPresent = false;
 	    var shipTable = []; 
 	    
+		var specialFighters = [];
+		var specialHangars = [];
+		var specialFtrAmt = 0;
+		var specialFtrName = '';
+		var specialHgrAmt = 0;
+		var specialHgrName = '';
 	    var totalHangarH = 0; //hangarspace for heavy fighters
 	    var totalHangarM = 0; //hangarspace for medium fighters
 	    var totalHangarL = 0; //hangarspace for light fighters
@@ -191,8 +197,18 @@ window.gamedata = {
 		}
 		if(!lship.flight){
 	            totalShips++;
-	            //check hangar space available...
-		    for(var h in lship.fighters){
+	        //check for custom hangars
+			if(lship.customFighter){
+				for (var h in lship.customFighter){
+					specialHgrName = h;
+					specialHgrAmt = lship.customFighter[h];
+				}
+				specialHangars.push([specialHgrName, specialHgrAmt]);
+				//console.table(specialHangars);
+			}
+			
+			//check hangar space available...	
+			for(var h in lship.fighters){
 				var amount = lship.fighters[h];
 			    if(h == "normal" || h =="heavy"){
 					totalHangarH += amount;
@@ -250,6 +266,19 @@ window.gamedata = {
 			}
 			//now translate size into hangar space used...
 			if(smallCraftSize !=''){
+				
+				if(lship.customFtrName){
+					specialFtrAmt = lship.flightSize;
+					specialFtrName = lship.customFtrName;
+					specialFighters.push([specialFtrName,specialFtrAmt]);
+					//console.table(specialFighters);
+					//totalFtrC += lship.flightSize;
+					//var specialFtrName = lship.specialFtrName;
+					//console.log('lship.specialFtrName = ', lship.specialFtrName);
+					//console.log('specialFtrName = ', specialFtrName);
+					//console.log('Custom Fighters : ',totalFtrC);
+				}
+				
 				if(smallCraftSize =="heavy"){
 					totalFtrH += lship.flightSize;
 				}else if(smallCraftSize=="medium"){ 
@@ -529,7 +558,100 @@ window.gamedata = {
 			}
 			checkResult += "<br>";
 		}
-	    
+
+		if ( specialFighters.length > 0 ){ //do not show if there are no fighters that require special hangars
+			if (specialHangars.length == 0){
+				checkResult += "No special hangars for special fighters. FAILURE!";
+				checkResult += "<br>";
+				problemFound = true;
+			}else{ //calculate total amount and type of special fighters
+				var totalSpecialFighters = [];
+				specialFighters.sort();
+				var idx = 0;
+				while (specialFighters.length > 0) {
+					if (totalSpecialFighters.length == 0) {
+						totalSpecialFighters.push([specialFighters[0][0], specialFighters[0][1]]);
+						specialFighters.shift();
+					} else {
+						if ( totalSpecialFighters[idx][0] == specialFighters[0][0] ){
+							var totalFighterName = totalSpecialFighters[idx][0];
+							var totalAmountToAdd = totalSpecialFighters[idx][1];
+							totalAmountToAdd += specialFighters[0][1];
+							totalSpecialFighters.pop();
+							totalSpecialFighters.push([totalFighterName, totalAmountToAdd]);
+							specialFighters.shift();
+						} else {
+							totalSpecialFighters.push([specialFighters[0][0],specialFighters[0][1]]);
+							specialFighters.shift();
+							idx++;
+						}
+					}
+				}
+				//calculate total amount and type of special hangars
+				var totalSpecialHangars = [];
+				specialHangars.sort();
+				idx = 0;
+				while (specialHangars.length > 0) {
+					if (totalSpecialHangars.length == 0) {
+						totalSpecialHangars.push([specialHangars[0][0], specialHangars[0][1]]);
+						specialHangars.shift();
+					} else {
+						if ( totalSpecialHangars[idx][0] == specialHangars[0][0] ){
+							var totalFighterName = totalSpecialHangars[idx][0];
+							var totalAmountToAdd = totalSpecialHangars[idx][1];
+							totalAmountToAdd += specialHangars[0][1];
+							totalSpecialHangars.pop();
+							totalSpecialHangars.push([totalFighterName, totalAmountToAdd]);
+							specialHangars.shift();
+						} else {
+							totalSpecialHangars.push([specialHangars[0][0],specialHangars[0][1]]);
+							specialHangars.shift();
+							idx++;
+						}
+					}
+				}
+				console.log('Total Fighters');
+				console.table(totalSpecialFighters);
+				console.log('Total Hangars');
+				console.table(totalSpecialHangars);
+				//determine if there is enough special hangars for each type of special fighter
+				for (i=0;i<totalSpecialFighters.length;i++) {
+					var match = false;
+					for (j=0;j<totalSpecialHangars.length;j++) {
+						if (totalSpecialFighters[i][0] == totalSpecialHangars[j][0]) {
+							checkResult +=  " - " + totalSpecialFighters[i][0] + " Fighters: " + totalSpecialFighters[i][1];
+							checkResult +=  " (allowed up to " + totalSpecialHangars[j][1] + ")";
+							if (totalSpecialFighters[i][1] > totalSpecialHangars[j][1]){ //fighter total is not within limits
+								checkResult += " FAILURE!";
+								problemFound = true;
+							}else{
+								checkResult += " OK";
+							}
+							checkResult += "<br>";
+							match = true;
+						} 
+					}
+					if (match == false) {
+						checkResult +=  " - " + totalSpecialFighters[i][0] + " Fighters: " + totalSpecialFighters[i][1];
+						checkResult +=  " (allowed up to 0) FAILURE! <br>";
+						problemFound = true;
+					}
+				}
+			}
+
+/*			checkResult +=  " - " + specialFtrName + " Fighters: " + totalFtrC;
+				checkResult +=  " (allowed up to " + totalHangarC + ")";
+			if (totalFtrC > totalHangarC){ //fighter total is not within limits
+				checkResult += " FAILURE!";
+				problemFound = true;
+			}else{
+				checkResult += " OK";
+			}
+			checkResult += "<br>";
+*/
+			
+		}
+		
 		//make list of small craft in fleet contain only unique values...
 		var smallCraftUsedUnique = smallCraftUsed.filter(function(item, pos) {
 			return smallCraftUsed.indexOf(item) == pos;

@@ -12,6 +12,7 @@ class Omega  extends BaseShip{
         $this->shipSizeClass = 3;
         $this->canvasSize = 280;
         $this->fighters = array("normal"=>24);
+		$this->customFighter = array("Thunderbolt"=>24);
 	    
 	    $this->isd = 2250;
 	    $this->notes = 'Thunderbolt capable.';

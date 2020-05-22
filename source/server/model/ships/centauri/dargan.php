@@ -11,6 +11,7 @@ class Dargan extends BaseShip{
         $this->shipClass = "Dargan Strike Cruiser";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);
+		$this->customFighter = array("Rutarian"=>12);
         $this->limited = 10;
 	    
 	    $this->isd = 2258;
