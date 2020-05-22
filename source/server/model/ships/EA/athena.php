@@ -15,6 +15,7 @@ class Athena extends BaseShip{
 		$this->limited = 10;
 
         	$this->fighters = array("heavy" => 24, "light" => 12);
+			$this->customFighter = array("Thunderbolt"=>24);
 	        $this->isd = 2261;
 			
 			
