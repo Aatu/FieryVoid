@@ -4,12 +4,13 @@ class Raiderglaive extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 28*6;
+		$this->pointCost = 28*6;
         $this->faction = "Raiders";
         $this->phpclass = "Raiderglaive";
         $this->shipClass = "Raider Glaive Light Fighters";
-	$this->imagePath = "img/ships/glaive.png";
-	$this->isd = 2012;
+		$this->imagePath = "img/ships/glaive.png";
+		$this->isd = 2012;
+		$this->variantOf = "Delta-V Light Fighters";
         
         $this->forwardDefense = 7;
         $this->sideDefense = 7;
@@ -18,7 +19,7 @@ class Raiderglaive extends FighterFlight{
         $this->jinkinglimit = 10;
         $this->turncost = 0.33;
         
-	$this->iniativebonus = 100;
+		$this->iniativebonus = 100;
         $this->populate();
     }
 

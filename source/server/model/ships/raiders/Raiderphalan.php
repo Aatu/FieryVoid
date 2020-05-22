@@ -10,7 +10,7 @@ class Raiderphelan extends FighterFlight{
         $this->shipClass = "Raider Phalan Assault Fighters";
 		$this->imagePath = "img/ships/phalan.png";
 		$this->isd = 2012;
-
+       	$this->variantOf = "Delta-V Light Fighters";
         
         $this->forwardDefense = 9;
         $this->sideDefense = 8;
