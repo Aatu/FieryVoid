@@ -1241,7 +1241,8 @@ spl_autoload_register(
                 'tendrildestroyed' => '/server/model/cricialClasses.php',
                 'tendrilcapacityreduced' => '/server/model/cricialClasses.php',
 				
-				
+				//Raider Civilians Refresh
+				'privateerlessara' => '/server/model/ships/centauri_raiders/PrivateerLessara.php',
 				
 				
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
