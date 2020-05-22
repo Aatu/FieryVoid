@@ -7,6 +7,7 @@ class BaseShip {
     public $systems = array();
     public $EW = array();
     public $fighters = array();
+	public $customFighter = array(); //array for fighters with special hangar requirements - see Balvarix/Rutarian for usage
     public $hitChart = array();
     public $notes = '';//notes to be displayed on fleet selection screen
 
