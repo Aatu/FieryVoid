@@ -10,6 +10,7 @@ class Privateerphalan extends FighterFlight{
         $this->shipClass = "Centauri Privateer Phalan Assault Fighters";
 		$this->imagePath = "img/ships/phalan.png";
 		$this->isd = 1882;
+		$this->variantOf = "Centauri Privateer Glaive Light Fighters";
 		$this->occurence = "uncommon";
         
         $this->forwardDefense = 9;
