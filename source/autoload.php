@@ -1242,6 +1242,9 @@ spl_autoload_register(
 				'diffusertendrilFtr' => '/server/model/systems/baseSystems.php',
                 'tendrildestroyed' => '/server/model/cricialClasses.php',
                 'tendrilcapacityreduced' => '/server/model/cricialClasses.php',
+				//BioDrive
+				'biodrive' => '/server/model/systems/baseSystems.php',
+				'biothruster' => '/server/model/systems/baseSystems.php',
 				
 				
 				

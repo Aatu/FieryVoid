@@ -324,7 +324,7 @@ class tmppowerdown extends Critical{ /*next turn target Power is down by 1 - pla
 
 class TendrilDestroyed extends Critical{
     public $description = "Tendril destroyed.";
-	public $priority = 0; //cannot be fixed
+	public $repairPriority = 0; //cannot be fixed
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }

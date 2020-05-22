@@ -8,7 +8,7 @@ class TechnicalTestbedFtr extends FighterFlight{
 		$this->faction = "Custom Ships";
 		$this->phpclass = "TechnicalTestbedFtr";
 		$this->shipClass = "Testbed Medium Fighters";
-		$this->imagePath = "img/ships/sentri.png";
+		$this->imagePath = "img/ships/ShadowFighter.png";
 	    
 		$this->isd = 2202;
         
@@ -39,8 +39,8 @@ class TechnicalTestbedFtr extends FighterFlight{
 			$armour = array(3, 2, 3, 3);
 			$fighter = new Fighter("sentri", $armour, 10, $this->id);
 			$fighter->displayName = "Medium Fighter";
-			$fighter->imagePath = "img/ships/sentri.png";
-			$fighter->iconPath = "img/ships/sentri_large.png";
+			$fighter->imagePath = "img/ships/ShadowFighter.png";
+			$fighter->iconPath = "img/ships/ShadowFighter_LARGE.png";
 			
 			
 			$fighter->addFrontSystem(new PairedParticleGun(330, 30, 2));

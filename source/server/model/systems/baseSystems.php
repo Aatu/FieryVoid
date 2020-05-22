@@ -129,7 +129,7 @@ class Fighteradvsensors extends ShipSystem implements SpecialAbility{
     
     public function setSystemDataWindow($turn){
 		$this->data["Special"] = "Ignores enemy Jammer."; //not that of advanced races
-		$this->data["Special"] .= "<br>Ignores enemy BDEW and SDEW."; //not that of advanced races
+		//$this->data["Special"] .= "<br>Ignores enemy BDEW and SDEW."; //not that of advanced races (skipped as fighters ignore it anyway
 		$this->data["Special"] .= "<br>Ignores any defensive systems lowering enemy profile (shields, EWeb...)."; //not that of advanced races
 		$this->data["Special"] .= "<br>All of the above work as usual if operated by advanced races."; 
 	}
@@ -684,8 +684,7 @@ class InvulnerableThruster extends Thruster{
 
 
 
-class GraviticThruster extends Thruster{
-    
+class GraviticThruster extends Thruster{    
     function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
         parent::__construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused);
     }
@@ -1843,6 +1842,103 @@ class SelfRepair extends ShipSystem{
     }
 
 }//endof class SelfRepair
+
+
+
+//BioThruster - it's NOT seen as thruster by game; used to calculate output of BioDrive engine 
+class BioThruster extends ShipSystem{
+	public $iconPath = "thrusterOmni.png";
+    public $name = "BioThruster";
+    public $displayName = "BioThruster";
+    public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
+	//BioThrusters are fairly important!
+	public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    	    
+    public $possibleCriticals = array(15=>"OutputReduced1", 24=>array("OutputReduced1","OutputReduced1"));//different than original
+    
+    function __construct($armour, $maxhealth, $output ){
+        parent::__construct($armour, $maxhealth, 0, $output );
+		//always omnidirectional, but this need to be set AFTER default constructor
+		$this->startArc = 0;
+		$this->endArc = 360; 
+    }
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);  
+		$this->data["Special"] = "BioThruster - basically an omnidirectional thruster.";      
+		$this->data["Special"] .= "<br>For technical reasons in FV BioThrusters output is summed up in BioDrive and then channeled by regular (invulnerable) thrusters.";  
+	}	
+} //endof class BioThruster
+
+
+
+//BioDrive - basically an engine with rating calculated from ships' BioThrusters
+//technical system, should never get hit.
+//remember to plug BioThrusters to the BioDrive at design stage!
+class BioDrive extends Engine{
+	public $iconPath = "engine.png";
+    public $name = "engine";
+    public $displayName = "Engine";
+    public $primary = true;
+    public $isPrimaryTargetable = false;
+    public $boostable = true;
+    public $outputType = "thrust";
+	
+	private $bioThrusters = array();
+	
+    
+    public $possibleCriticals = array( ); //technical system, should never get damaged
+    
+    function __construct($boostEfficiency){
+        parent::__construct(0, 1, 0, 0, $boostEfficiency ); //($armour, $maxhealth, $powerReq, $output, $boostEfficiency
+        $this->boostEfficiency = (int)$boostEfficiency;
+    }
+    
+	function addThruster($thruster){
+		if($thruster) $this->bioThrusters[] = $thruster;
+	}
+	
+	
+	public function setSystemDataWindow($turn){
+		$this->output = $this->getOutput();	
+		parent::setSystemDataWindow($turn); 	
+		$this->output = $this->getOutput();	
+		$this->data["Efficiency"] = $this->boostEfficiency;
+		$this->data["Special"] = "BioDrive - basically an Engine with basic output calculated from BioThruster outputs.";      
+		$this->data["Special"] .= "<br>Will never be damaged.";  
+		$this->data["Special"] .= "<br>Extra thrust will not work if there are no working BioThrusters (eg. base output is 0).";    
+	}
+	
+	
+    public function getOutput(){
+        $output = 0;
+		//count thrust from BioThrusters
+		foreach($this->bioThrusters as $thruster){
+			$output += $thruster->getOutput();
+		}
+		if ($output === 0) return 0; //cannot buy extra thrust if there are no working thrusters!
+		
+		//add boost, if any
+        foreach ($this->power as $power){
+            if ($power->turn == TacGamedata::$currentTurn && $power->type == 2){
+                $output += $power->amount;
+            }        
+        }        
+		
+        return $output;        
+    } //endof function getOutput
+	
+	
+	public function stripForJson(){
+		//$this->output = $this->getOutput();	
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->output = $this->getOutput();	
+		$strippedSystem->data = $this->data;	
+        return $strippedSystem;
+    }
+	
+}//endof class BioDrive
+
 
 
 
