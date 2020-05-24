@@ -1235,11 +1235,19 @@ spl_autoload_register(
 				
 				//energy diffuser
                 'technicaltestbed' => '/server/model/ships/customs/technicalTestbed.php',
+                'technicaltestbedftr' => '/server/model/ships/customs/technicalTestbedFtr.php',
 				'selfrepair' => '/server/model/systems/baseSystems.php',
 				'energydiffuser' => '/server/model/systems/baseSystems.php',
 				'diffusertendril' => '/server/model/systems/baseSystems.php',
+				'diffusertendrilFtr' => '/server/model/systems/baseSystems.php',
                 'tendrildestroyed' => '/server/model/cricialClasses.php',
                 'tendrilcapacityreduced' => '/server/model/cricialClasses.php',
+				//BioDrive
+				'biodrive' => '/server/model/systems/baseSystems.php',
+				'biothruster' => '/server/model/systems/baseSystems.php',
+				//Shadow Pilot				
+				'shadowpilot' => '/server/model/systems/baseSystems.php',
+				'shadowpilotpain' => '/server/model/cricialClasses.php',
 				
 				//Raider Civilians Refresh
 				'privateerlessara' => '/server/model/ships/centauri_raiders/PrivateerLessara.php',
@@ -1249,7 +1257,9 @@ spl_autoload_register(
 				'raiderglaive' => '/server/model/ships/raiders/Raiderglaive.php',
 				'raiderphalan' => '/server/model/ships/raiders/Raiderphalan.php',
 				'raiderrowlon' => '/server/model/ships/raiders/Raiderrowlon.php',
-				
+		    
+		    
+		    
 				
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
