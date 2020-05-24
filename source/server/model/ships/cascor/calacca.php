@@ -6,14 +6,12 @@ class Calacca extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 150;
-        $this->faction = "Cascor";
+        $this->faction = "Civilians";
         $this->phpclass = "Calacca";
         $this->imagePath = "img/ships/CascorCalacca.png";
 		$this->canvasSize = 200;
-        $this->shipClass = "Calacca Freighter";
+        $this->shipClass = "Cascor Calacca Freighter";
         $this->isd = 2225;
-		
-		$this->notes = "Civilian ship (not eligible for pickup battles)";
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;

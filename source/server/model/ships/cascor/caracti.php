@@ -6,14 +6,12 @@ class Caracti extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 340;
-        $this->faction = "Cascor";
+        $this->faction = "Civilians";
         $this->phpclass = "Caracti";
         $this->imagePath = "img/ships/CascorCalacca.png";
 		$this->canvasSize = 200;
-        $this->shipClass = "Caracti Q-Ship";
+        $this->shipClass = "Cascor Caracti Q-Ship";
         $this->isd = 2229;
-        
-		$this->notes = "Not a combat ship (not eligible for pickup battles)";
 		
         $this->forwardDefense = 14;
         $this->sideDefense = 16;

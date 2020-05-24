@@ -4,11 +4,11 @@ class Cestus extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 280;
-        $this->faction = "Centauri (Raiders)";
+        $this->faction = "Raiders";
     $this->phpclass = "Cestus";
     $this->imagePath = "img/ships/tacit.png";
     $this->canvasSize = 200;
-    $this->shipClass = "Cestus Attack Ship";
+    $this->shipClass = "Centauri Privateer Cestus Attack Ship";
 	$this->isd = 1870;
 
     $this->forwardDefense = 11;

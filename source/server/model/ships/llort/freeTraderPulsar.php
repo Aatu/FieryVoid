@@ -5,9 +5,9 @@ class FreeTraderPulsar extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 65;
-    $this->faction = "Llort";
+    $this->faction = "Civilians";
 	$this->phpclass = "freetraderpulsar";
-	$this->shipClass = "Free Trader (Pulsar)";
+	$this->shipClass = "Llort Free Trader (Pulsar)";
 	$this->imagePath = "img/ships/LlortDaggaden.png";
 	$this->canvasSize = 100;
 	$this->agile = true;

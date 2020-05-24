@@ -8,8 +8,9 @@ class CestusRaider extends HeavyCombatVessel{
     $this->phpclass = "CestusRaider";
     $this->imagePath = "img/ships/tacit.png";
     $this->canvasSize = 200;
-    $this->shipClass = "Cestus Attack Ship";
+    $this->shipClass = "Raider Cestus Attack Ship";
 	$this->isd = 2002;
+	$this->variantOf = "Centauri Privateer Cestus Attack Ship";
 
     $this->forwardDefense = 11;
     $this->sideDefense = 13;

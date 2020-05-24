@@ -5,12 +5,13 @@ class Throkan extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 350;
-    	$this->faction = "Drazi (Raiders)";
+    	$this->faction = "Raiders";
         $this->phpclass = "Throkan";
         $this->imagePath = "img/ships/drazi/kestrel.png";
-        $this->shipClass = "Throkan Corvette";
+        $this->shipClass = "Drazi Throkan Corvette";
         $this->agile = true;
         $this->canvasSize = 128;
+        $this->isd = 2144;
 
         $this->forwardDefense = 12;
         $this->sideDefense = 11;
@@ -63,6 +64,8 @@ class Throkan extends MediumShip{
         		),
         );
         
+    
+    
     }
 
 }
