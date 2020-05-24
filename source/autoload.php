@@ -1249,7 +1249,17 @@ spl_autoload_register(
 				'shadowpilot' => '/server/model/systems/baseSystems.php',
 				'shadowpilotpain' => '/server/model/cricialClasses.php',
 				
-				
+				//Raider Civilians Refresh
+				'privateerlessara' => '/server/model/ships/centauri_raiders/PrivateerLessara.php',
+				'privateerglaive' => '/server/model/ships/centauri_raiders/Privateerglaive.php',
+				'privateerphalan' => '/server/model/ships/centauri_raiders/Privateerphalan.php',
+				'privateerrazik' => '/server/model/ships/centauri_raiders/Privateerrazik.php',
+				'raiderglaive' => '/server/model/ships/raiders/Raiderglaive.php',
+				'raiderphalan' => '/server/model/ships/raiders/Raiderphalan.php',
+				'raiderrowlon' => '/server/model/ships/raiders/Raiderrowlon.php',
+		    
+		    
+		    
 				
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
