@@ -11,6 +11,7 @@ class TechnicalTestbedFtr extends FighterFlight{
 		$this->imagePath = "img/ships/ShadowFighter.png";
 	    
 		$this->isd = 2202;
+		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
         
 		$this->forwardDefense = 70;
 		$this->sideDefense = 50;
@@ -60,6 +61,8 @@ class TechnicalTestbedFtr extends FighterFlight{
 			
 			//Advanced Sensors
             $fighter->addFrontSystem(new Fighteradvsensors(0, 1, 0));
+			//ramming attack - no room to show it cleanly on Aft, Diffuser and Tendrils take a lot of room...			
+			$fighter->addFrontSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
 			
 			$this->addSystem($fighter);

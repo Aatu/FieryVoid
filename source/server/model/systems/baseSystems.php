@@ -98,7 +98,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
 class Fighterimprsensors extends ShipSystem implements SpecialAbility{    
     public $name = "fighterimprsensors";
     public $displayName = "Improved Sensors";
-    public $iconPath = "scanner.png";
+    public $iconPath = "scannerTechnical.png";
     public $specialAbilities = array("ImprovedSensors");
     public $primary = true;
     
@@ -119,7 +119,7 @@ class Fighterimprsensors extends ShipSystem implements SpecialAbility{
 class Fighteradvsensors extends ShipSystem implements SpecialAbility{    
     public $name = "Fighteradvsensors";
     public $displayName = "Advanced Sensors";
-    public $iconPath = "scanner.png";
+    public $iconPath = "scannerTechnical.png";
     public $specialAbilities = array("AdvancedSensors");
     public $primary = true;
     
@@ -584,13 +584,13 @@ class CnC extends ShipSystem{
     
     public $possibleCriticals = array(
     	//1=>"SensorsDisrupted", //not implemented! so I take it out 
-	1=>"CommunicationsDisrupted",   //this instead of SensorsDisrupted
-	9=>"CommunicationsDisrupted", 
-	12=>"PenaltyToHit", 
-	15=>"RestrictedEW", 
-	18=>array("ReducedIniativeOneTurn","ReducedIniative"), 
-	21=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative"), 
-	24=>array("RestrictedEW","ReducedIniative","ShipDisabledOneTurn")
+		1=>"CommunicationsDisrupted",   //this instead of SensorsDisrupted
+		9=>"CommunicationsDisrupted", 
+		12=>"PenaltyToHit", 
+		15=>"RestrictedEW", 
+		18=>array("ReducedIniativeOneTurn","ReducedIniative"), 
+		21=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative"), 
+		24=>array("RestrictedEW","ReducedIniative","ShipDisabledOneTurn")
     );
         
     function __construct($armour, $maxhealth, $powerReq, $output ){
@@ -628,24 +628,24 @@ class Thruster extends ShipSystem{
         $this->thrustused = (int)$thrustused;
         $this->direction = (int)$direction;
         //arc depends on direction!
-	switch($this->direction){
-		case 1: //retro
-			$this->startArc = 330;
-            $this->endArc = 30;
-			break;
-		case 2: //main
-			$this->startArc = 150;
-            $this->endArc = 210;
-			break;	
-		case 3://port
-			$this->startArc = 210;
-            $this->endArc = 330;
-			break;
-		case 4://Stbd
-			$this->startArc = 30;
-            $this->endArc = 150;
-			break;
-	}
+		switch($this->direction){
+			case 1: //retro
+				$this->startArc = 330;
+				$this->endArc = 30;
+				break;
+			case 2: //main
+				$this->startArc = 150;
+				$this->endArc = 210;
+				break;	
+			case 3://port
+				$this->startArc = 210;
+				$this->endArc = 330;
+				break;
+			case 4://Stbd
+				$this->startArc = 30;
+				$this->endArc = 150;
+				break;
+		}
     }
 } //endof Thruster
 
@@ -658,11 +658,26 @@ class InvulnerableThruster extends Thruster{
 	
     function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
 	    parent::__construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused );
+		//use "technical" (grey) images instead of regular system (blue) ones
+		switch($this->direction){
+			case 1: //retro
+				$this->iconPath = "thruster1Technical.png";
+				break;
+			case 2: //main
+				$this->iconPath = "thruster2Technical.png";
+				break;	
+			case 3://Port
+				$this->iconPath = "thruster3Technical.png";
+				break;
+			case 4://Stbd
+				$this->iconPath = "thruster4Technical.png";
+				break;
+		}
     }
 	
     public function getArmourInvulnerable($target, $shooter, $dmgClass, $pos=null){ //this thruster should be invulnerable to anything...
-	$activeAA = 99;
-	return $activeAA;
+		$activeAA = 99;
+		return $activeAA;
     }
     
     public function testCritical($ship, $gamedata, $crits, $add = 0){ //this thruster won't suffer criticals ;)
@@ -1540,6 +1555,9 @@ by 4.
 	
 	//effects that happen in Critical phase (after criticals are rolled) - dissipation and actual loss of tendrils due to critical received
 	public function criticalPhaseEffects($ship, $gamedata){
+		$ship = $this->getUnit();
+		$pilot = $ship->getSystemByName("CnC");
+		
 		//1. if THIS TURN TendrilDestroyed critical was added - mark last tendril destroyed
 		foreach ($this->criticals as $crit) if(($crit instanceof TendrilDestroyed) && ($crit->turn==$gamedata->turn)) {
 			$lastTendril = null;
@@ -1550,6 +1568,21 @@ by 4.
 				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $lastTendril->id, 0, 0, 0, -1, true, false, "DestroyTendril!", "Destruction");
 				$damageEntry->updated = true;
 				$lastTendril->damage[] = $damageEntry;
+				
+				//add pain to pilot, too!				
+				if($pilot){
+					$onePainPer = 10; //1 point of pain per how many damage points?
+					if ($ship->factionAge > 3) { //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+						$onePainPer = 20;//slow-grown Primordial ships are more resistant to pain		
+					}
+					$painSuffered = ceil( $lastTendril->maxhealth/$onePainPer ); //let's round that up...
+					for($i=1;$i<=$painSuffered;$i++){
+						$crit = new ShadowPilotPain(-1, $ship->id, $pilot->id, 'ShadowPilotPain', $gamedata->turn+1, $gamedata->turn+1);
+						$crit->updated = true;
+						$pilot->criticals[] =  $crit;
+					}
+				}
+				
 			}
 		}
 		
@@ -1561,11 +1594,6 @@ by 4.
 				$dissipationAvailable -= $toDissipate;
 				//dissipation == undamage
 				$tendril->absorbDamage($ship,$gamedata,-$toDissipate);
-				/*
-				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $tendril->id, -$toDissipate, 0, 0, -1, false, false, "Dissipate!", "Dissipate");
-				$damageEntry->updated = true;
-				$tendril->damage[] = $damageEntry;
-				*/
 			}
 		}
 		
@@ -1628,11 +1656,6 @@ by 4.
 			$damageAbsorbed=min($damageToAbsorb,$mostSuitableAbsorbtion);
 			$returnValues['dmg']=$effectiveDamage-$damageAbsorbed;			
 			$mostSuitableTendril->absorbDamage($target,$gamedata,$damageAbsorbed);
-			/*
-			$damageEntry = new DamageEntry(-1, $target->id, -1, $gamedata->turn, $mostSuitableTendril->id, $damageAbsorbed, 0, 0, $fireOrder->id, false, false, "Absorb!", "Absorb");
-			$damageEntry->updated = true;
-			$mostSuitableTendril->damage[] = $damageEntry;
-			*/
 		}
 		
 		return $returnValues;
@@ -1708,6 +1731,7 @@ class SelfRepair extends ShipSystem{
             return $b->repairCost - $a->repairCost; //costlier first!
         }else return $a->id - $b->id;
     } //endof function sortSystemsByRepairPriority
+	
 	
 	
 	public function criticalPhaseEffects($ship, $gamedata)
@@ -1794,7 +1818,7 @@ class SelfRepair extends ShipSystem{
 			}
 		}		
 		
-    } //endof function criticalPhaseEffects	
+    } //endof function criticalPhaseEffects
 	
 	
 
@@ -1876,7 +1900,7 @@ class BioThruster extends ShipSystem{
 //technical system, should never get hit.
 //remember to plug BioThrusters to the BioDrive at design stage!
 class BioDrive extends Engine{
-	public $iconPath = "engine.png";
+	public $iconPath = "engineTechnical.png";
     public $name = "engine";
     public $displayName = "Engine";
     public $primary = true;
@@ -1917,6 +1941,16 @@ class BioDrive extends Engine{
 			$output += $thruster->getOutput();
 		}
 		if ($output === 0) return 0; //cannot buy extra thrust if there are no working thrusters!
+	
+		//reduce by pain
+		$ship=$this->getUnit();
+		if($ship){
+			$pilot = $ship->getSystemByName("CnC");
+			if($pilot){
+				$painLevel = $pilot->hasCritical('ShadowPilotPain',TacGamedata::$currentTurn);
+				$output -= $painLevel;
+			}
+		}
 		
 		//add boost, if any
         foreach ($this->power as $power){
@@ -1940,6 +1974,86 @@ class BioDrive extends Engine{
 }//endof class BioDrive
 
 
-
+/*Shadow Pilot - replaces C&C
+ - irrepairable!
+ - no regular criticals
+ - feels pain due to damage suffered by ship (temporary) and own wounds (permanent)
+*/
+class ShadowPilot extends CnC{
+    public $name = "cnC";
+    public $displayName = "C&C";
+    public $primary = true;
+	public $iconPath = "ShadowPilot.png";
+	
+	//irrepairable!
+	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
+    
+    public $possibleCriticals = array(
+    );
+        
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+    }
+	
+	
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+/*deliberately skip inherited description		
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+*/		
+		$this->data["Special"] = 'Ship pilot. Cannot be repaired. Damage to ship results in temporary pain, damage to pilot results in permanent pain.';
+		$this->data["Special"] .= '<br>Pain reduces Initiative, Thrust and accuracy of fire.';
+	}
+	
+	
+	public function criticalPhaseEffects($ship, $gamedata)
+    { 
+		$ship=$this->getUnit();
+		$damageSufferedThisTurn = 0;
+		$damageToSelfThisTurn = 0;
+		$onePainPer = 10; //1 point of pain per how many damage points?
+		if ($ship->factionAge > 3) { //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+			$onePainPer = 20;//slow-grown Primordial ships are more resistant to pain		
+		}
+		
+		//get all damage suffered THIS TURN - except tendrils. Ignore healing, damage dealing is painful even if it's mended afterwards!
+		//ignore tendrils, that's not true damage!
+		foreach ($ship->systems as $system) if (!($system instanceOf DiffuserTendril)){
+			foreach ($system->damage as $dmg) if ( ($dmg->turn == $gamedata->turn) && ($dmg->damage > $dmg->armour)){
+				$damageSufferedThisTurn += $dmg->damage - $dmg->armour;
+				if($system->id == $this->id){
+					$damageToSelfThisTurn += $dmg->damage - $dmg->armour;
+				}
+			}
+		}
+		
+		//let's start pain in NEXT turn; criticals in FV usually start in CURRENT turn formally, but that causes readability to suffer during replays (originally there were no replays ;) )
+		//pain can be caused by tendrils being broken - this is handled in EnergyDiffuser class, and rounded up (but doesn't sum with actual damage below)
+		
+		//temporary pain
+		$painSuffered = round( $damageSufferedThisTurn/$onePainPer );
+		for($i=1;$i<=$painSuffered;$i++){
+			$crit = new ShadowPilotPain(-1, $ship->id, $this->id, 'ShadowPilotPain', $gamedata->turn+1, $gamedata->turn+1);
+			$crit->updated = true;
+			$this->criticals[] =  $crit;
+		}
+		
+		//permanent pain
+		for($i=1;$i<=$damageToSelfThisTurn;$i++){
+			$crit = new ShadowPilotPain(-1, $ship->id, $this->id, 'ShadowPilotPain', $gamedata->turn+1);
+			$crit->updated = true;
+			$this->criticals[] =  $crit;
+		}
+		
+    } //endof function criticalPhaseEffects	
+	
+	
+} //endof class ShadowPilot
 
 ?>

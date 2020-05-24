@@ -336,3 +336,11 @@ class TendrilCapacityReduced extends Critical{
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
 }
+
+class ShadowPilotPain extends Critical{
+    public $description = "Pilot feels pain."; //-1 penalty on weapons fire, has a -1 penalty to initiative and loses 1 point of free thrust
+	public $repairPriority = 0; //cannot be fixed
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
