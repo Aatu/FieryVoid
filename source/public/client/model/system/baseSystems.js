@@ -352,3 +352,11 @@ var BioThruster = function BioThruster(json, ship) {
 };
 BioThruster.prototype = Object.create(ShipSystem.prototype);
 BioThruster.prototype.constructor = BioThruster;
+
+
+var ShadowPilot = function ShadowPilot(json, ship) {
+    CnC.call(this, json, ship);
+};
+ShadowPilot.prototype = Object.create(CnC.prototype);
+ShadowPilot.prototype.constructor = ShadowPilot;
+

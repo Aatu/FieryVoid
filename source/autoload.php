@@ -1245,7 +1245,9 @@ spl_autoload_register(
 				//BioDrive
 				'biodrive' => '/server/model/systems/baseSystems.php',
 				'biothruster' => '/server/model/systems/baseSystems.php',
-				
+				//Shadow Pilot				
+				'shadowpilot' => '/server/model/systems/baseSystems.php',
+				'shadowpilotpain' => '/server/model/cricialClasses.php',
 				
 				
 				

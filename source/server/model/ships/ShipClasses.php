@@ -118,6 +118,8 @@ class BaseShip {
 	    			$mod += -20*($CnC->hasCritical("swtargetheld", $gamedata->turn)); //-4 Ini per hit
 				//additional: tmpinidown (temporary Ini reduction - Abbai weapon scan do so!
 				$mod += -5*($CnC->hasCritical("tmpinidown", $gamedata->turn)); //-1 Ini per crit
+				//additional: ShadowPilotPain						
+			    $mod += -5*($CnC->hasCritical("ShadowPilotPain", $gamedata->turn));
 			}
 		    if ($this instanceof FighterFlight){
 			    $firstFighter = $this->getSampleFighter();
@@ -629,6 +631,7 @@ class BaseShip {
             if ($system instanceof $name){
                 return $system;
             }
+			/* no longer needed
             else{
                 if($system instanceof Weapon && $system->duoWeapon){
                     foreach($system->weapons as $weapon){
@@ -638,6 +641,7 @@ class BaseShip {
                     }
                 }
             }
+			*/
         }
 
         return null;

@@ -38925,7 +38925,8 @@ var getDestroyed = function getDestroyed(ship, system) {
 };
 
 var getBackgroundImage = function getBackgroundImage(system) {
-    if (system.name == "thruster") {
+    if (system.name == "thruster" && !system.iconPath) {
+        //technical thrusters have predefined image!
         return './img/systemicons/thruster' + system.direction + '.png';
     } else if (system.iconPath) {
         return "./img/systemicons/" + system.iconPath;

@@ -226,7 +226,7 @@ const getStructureLeft = (ship, system) => (system.maxhealth - damageManager.get
 const getDestroyed = (ship, system) => shipManager.systems.isDestroyed(ship, system)
 
 const getBackgroundImage = (system) => {
-    if (system.name == "thruster") {
+    if ( (system.name == "thruster") && (!system.iconPath)) { //technical thrusters have predefined image!
         return './img/systemicons/thruster' + system.direction + '.png';
     } else if (system.iconPath) {
         return `./img/systemicons/${system.iconPath}`;
