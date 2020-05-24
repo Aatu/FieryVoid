@@ -5,12 +5,13 @@ class Raven extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 310;
-        $this->faction = "Drazi (Raiders)";
+        $this->faction = "Raiders";
         $this->phpclass = "Raven";
         $this->imagePath = "img/ships/merlin.png";
-        $this->shipClass = "Raven Light Raider";
+        $this->shipClass = "Drazi Raven Light Raider";
         $this->agile = true;
         $this->canvasSize = 100;
+        $this->isd = 2042;
 
         $this->forwardDefense = 11;
         $this->sideDefense = 11;
@@ -39,6 +40,30 @@ class Raven extends MediumShip{
         $this->addAftSystem(new Thruster(4, 12, 0, 8, 2));
 
         $this->addPrimarySystem(new Structure( 4, 33));
+    
+            $this->hitChart = array(
+        		0=> array(
+        				8=> "Thruster",
+        				11=> "Scanner",
+        				14=> "Engine",
+        				15=> "Hangar",
+        				18=> "Reactor",
+        				20=> "C&C",
+        		),
+        		1=> array(
+        				5=> "Thruster",
+        				7=> "Standard Particle Beam",
+        				10=> "Repeater Gun",
+        				17=> "Structure",
+        				20=> "Primary",
+        		),
+        		2=> array(
+        				6=> "Thruster",
+        				17=> "Structure",
+        				20=> "Primary",
+        		),
+        );
+    
     }
 }
 ?>
