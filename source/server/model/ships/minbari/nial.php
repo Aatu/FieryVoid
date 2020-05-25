@@ -8,7 +8,6 @@ class Nial extends FighterFlight{
 		$this->faction = "Minbari";
 		$this->phpclass = "Nial";
 		$this->shipClass = "Nial flight";
-			// need picture
 		$this->imagePath = "img/ships/nial.png";
 
         $this->forwardDefense = 6;

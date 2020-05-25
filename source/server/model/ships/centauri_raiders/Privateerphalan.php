@@ -4,7 +4,7 @@ class Privateerphalan extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 22*6;
+		$this->pointCost = 22*6;
         $this->faction = "Raiders";
         $this->phpclass = "Privateerphalan";
         $this->shipClass = "Centauri Privateer Phalan Assault Fighters";
@@ -13,7 +13,7 @@ class Privateerphalan extends FighterFlight{
 		$this->variantOf = "Centauri Privateer Glaive Light Fighters";
 		$this->occurence = "uncommon";
 	    
-	$this->notes = "Since 2012 available to all Raiders as common fighter."";
+		$this->notes = "Since 2012 available to all Raiders as common fighter.";
         
         $this->forwardDefense = 9;
         $this->sideDefense = 8;

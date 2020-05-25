@@ -1257,6 +1257,9 @@ spl_autoload_register(
 				//'raiderglaive' => '/server/model/ships/raiders/Raiderglaive.php',
 				//'raiderphalan' => '/server/model/ships/raiders/Raiderphalan.php',
 				'raiderrowlon' => '/server/model/ships/raiders/Raiderrowlon.php',
+				'flyerassault' => '/server/model/ships/minbari/flyerAssault.php',
+				'flyercombat' => '/server/model/ships/minbari/flyerCombat.php',
+				'genericarmedshuttle' => '/server/model/ships/civilians/genericArmedShuttle.php',
 		    
 		    
 		    
