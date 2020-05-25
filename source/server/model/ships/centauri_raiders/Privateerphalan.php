@@ -45,7 +45,8 @@ class Privateerphalan extends FighterFlight{
 		//$fighter->addFrontSystem(new PlasmaGun(330, 30, 0));  
 		$largeGun = new PlasmaGun(330, 30); 
 		$largeGun->exclusive = true; 
-		$fighter->addFrontSystem($largeGun);			
+		$fighter->addFrontSystem($largeGun);		
+		$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack	
 
 		$this->addSystem($fighter);
 
