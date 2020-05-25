@@ -11,7 +11,7 @@ class Raiderphelan extends FighterFlight{
 		$this->imagePath = "img/ships/phalan.png";
 		$this->isd = 2012;
        	$this->variantOf = "Raider Glaive Light Fighters";
-	    $this->variantOf = "DISABLED"; //no point in having two identical Glaives in one directory
+	    $this->variantOf = "DISABLED"; //no point in having two identical Phalans in one directory
 	    
 	    $this->notes = "For Centauri Privateers - available even before 2000, as Uncommon variant of Glaive.";
         
