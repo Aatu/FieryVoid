@@ -10,6 +10,8 @@ class Privateerglaive extends FighterFlight{
         $this->shipClass = "Centauri Privateer Glaive Light Fighters";
 	$this->imagePath = "img/ships/glaive.png";
 	$this->isd = 1995;
+	    
+	$this->notes = "Since 2012 available to all Raiders.";
         
         $this->forwardDefense = 7;
         $this->sideDefense = 7;
