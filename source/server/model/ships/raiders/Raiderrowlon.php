@@ -7,10 +7,10 @@ class Raiderrowlon extends FighterFlight{
         $this->pointCost = 30 *6;
         $this->faction = "Raiders";
         $this->phpclass = "Raiderrowlon";
-        $this->shipClass = "Raider Rowlon Armored Fighter";
+        $this->shipClass = "Rowlon Armored Fighters";
         $this->imagePath = "img/ships/UsuuthRowlon.png";
        	$this->isd = 1981;
-       	$this->variantOf = "Delta-V Light Fighters";
+	    
        	
         
         $this->forwardDefense = 5;
@@ -19,9 +19,9 @@ class Raiderrowlon extends FighterFlight{
         $this->offensivebonus = 4;
         $this->jinkinglimit = 8;
         $this->turncost = 0.33;
-        $this->notes = 'Uncommon Raider variant from 2002';
-        $this->notes .= 'Rare Raider variant from 2004';
-        $this->notes .= 'Unavailable from 2007';
+        $this->notes = 'Uncommon Raider variant from 2002.';
+        $this->notes .= '<br>Rare Raider variant from 2004.';
+        $this->notes .= '<br>Unavailable from 2007.';
         
         $this->iniativebonus = 20 *5;
         $this->populate();

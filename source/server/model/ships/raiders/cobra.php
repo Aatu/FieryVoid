@@ -4,11 +4,12 @@ class Cobra extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 180;
+	$this->pointCost = 30 *6;
 	$this->faction = "Raiders";
-      $this->phpclass = "Cobra";
-       $this->shipClass = "Cobra Light Fighters";
-	$this->imagePath = "img/ships/deltaV.png"; //Need to change this
+	$this->phpclass = "Cobra";
+        $this->shipClass = "Cobra Light Fighters";
+	$this->imagePath = "img/ships/dragon.png"; 
+        $this->limited = 33; //difficult to maintain for non-Drazi, hence limitation
         
         $this->forwardDefense = 6;
         $this->sideDefense = 7;
@@ -17,7 +18,7 @@ class Cobra extends FighterFlight{
         $this->jinkinglimit = 10;
         $this->turncost = 0.33;
         
-	$this->iniativebonus = 100;
+	$this->iniativebonus = 20 *5; //Drazi design but not necessarily Drazi piloted, hence no Drazi Ini bonus
         $this->populate();
     }
 
@@ -30,11 +31,12 @@ class Cobra extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
 		$armour = array(1, 1, 1, 1);
 		$fighter = new Fighter("Cobra", $armour, 5, $this->id);
-		$fighter->displayName = "Cobra Light Fighter";
-		$fighter->imagePath = "img/ships/deltaV.png"; //Need to Change this
-		$fighter->iconPath = "img/ships/deltaV_large.png"; //Need to Change this
+		$fighter->displayName = "Cobra";
+		$fighter->imagePath = "img/ships/dragon.png"; 
+		$fighter->iconPath = "img/ships/dragon_large.png"; 
 			
 		$fighter->addFrontSystem(new PairedParticleGun(330, 30, 2));
+	    	$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
 		$this->addSystem($fighter);
 	}
