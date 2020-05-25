@@ -1254,8 +1254,8 @@ spl_autoload_register(
 				'privateerglaive' => '/server/model/ships/centauri_raiders/Privateerglaive.php',
 				'privateerphalan' => '/server/model/ships/centauri_raiders/Privateerphalan.php',
 				'privateerrazik' => '/server/model/ships/centauri_raiders/Privateerrazik.php',
-				'raiderglaive' => '/server/model/ships/raiders/Raiderglaive.php',
-				'raiderphalan' => '/server/model/ships/raiders/Raiderphalan.php',
+				//'raiderglaive' => '/server/model/ships/raiders/Raiderglaive.php',
+				//'raiderphalan' => '/server/model/ships/raiders/Raiderphalan.php',
 				'raiderrowlon' => '/server/model/ships/raiders/Raiderrowlon.php',
 		    
 		    
