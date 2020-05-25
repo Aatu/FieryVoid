@@ -42,6 +42,7 @@ class genericArmedShuttle extends FighterFlight{
 			
 			
 			$fighter->addFrontSystem(new PairedParticleGun(330, 30, 2, 1)); //1 gun d6+2
+	    		$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
 			
 			$this->addSystem($fighter);
