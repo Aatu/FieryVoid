@@ -111,6 +111,7 @@ class Weapon extends ShipSystem
     public $systemKiller = false;    //for custom weapons - increased chance to hit system and not Structure
     protected $systemKillerArray = array();
     public $noOverkill = false; //this will let simplify entire Matter line enormously!
+    public $doOverkill = false; //opposite of $noOverkill - allows Piercing shots to overkill (eg. Shadow Heavy Molecular Slicer Beam has such ability)
     protected $noOverkillArray = array();
     public $ballistic = false; //this is a ballictic weapon, not direct fire
     public $ballisticIntercept = false; //can intercept, but only ballistics
@@ -1194,7 +1195,7 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
         /*Location only relevant for Flash damage, which overkills to a new roll on hit table rather than to Structure*/
         /*$damageWasDealt=true indicates this is actual overkill, instead of just passing through previously destroyed system that nevertheless was chosen as target*/
         $okSystem = null;
-        $noOverkill = ($this->noOverkill || ($this->damageType == 'Piercing'));//either explicitly stated or Piercing mode shot
+        $noOverkill = (!$this->doOverkill) && ($this->noOverkill || ($this->damageType == 'Piercing'));//either explicitly stated or Piercing mode shot
 
         if ($target instanceof FighterFlight) {
 			return null;
@@ -1282,9 +1283,15 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
 				$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
 			}
 		}
-
+		
+		//let's recognize "MCV sized" by number of structures rather than technical target size! (important for eg. Shadows, which are laid out damaged as MCVs even if they use larger ship sizes)
+		$noOfStructures = 0;		
+		if(($this->damageType == 'Piercing') && (!$target instanceOf FighterFlight)){ //irrelevant for non-Piercing shots!
+			foreach ($target->systems as $struct) if ($struct instanceOf Structure) $noOfStructures++;
+		}
         
-        if (($target->shipSizeClass > 1) && ($this->damageType == 'Piercing')) { //Piercing damage will be split into 3 parts vs units larger thgan MCVs
+        //if (($target->shipSizeClass > 1) && ($this->damageType == 'Piercing')) { //Piercing damage will be split into 3 parts vs units larger thgan MCVs
+		if (($noOfStructures > 1) && ($this->damageType == 'Piercing')) {//special handling of Piercing on ships with 2 or more Structures - otherwise it will degenerate to Standard (no overkill)
             $facingLocation = $target->getHitSection($shooter, $fireOrder->turn, true); //do accept destroyed section as location
             //find out opposite section...
             $relativeBearing = $target->getBearingOnUnit($shooter);
@@ -1413,10 +1420,20 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
         }
 
         //for Piercing shots at small targets (MCVs and smaller) - reduce damage by ~10% (by rules: -2 per die)
-        if (($this->damageType == 'Piercing') && ($target->shipSizeClass < 2)) $damage = $damage * 0.9;
+		//actually recognize this by number of structures instead of formal ship size - SHadow HCvs and MCVs are damaged as MCVs would have!
+        //if (($this->damageType == 'Piercing') && ($target->shipSizeClass < 2)) $damage = $damage * 0.9;
+		if ($this->damageType == 'Piercing'){
+			$noOfStructures=0;
+			if(!$target instanceOf FighterFlight){
+				foreach ($target->systems as $struct) if ($struct instanceOf Structure) $noOfStructures++;
+			}
+			if($noOfStructures<2){ //damaged as MCV (or smaller)
+				$damage = $damage * 0.8; //let's make that 20%! in tabletop: -2/die, which is quite hefty penalty (although doesn't touch minimum damage)
+			}				
+		}
 
         $damage = max(0, $damage); //at least 0	    
-        $damage = floor($damage);
+        $damage = floor($damage); //drop fractions, if any were generated
         return $damage;
     } //endof function getDamageMod
 

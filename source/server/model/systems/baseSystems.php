@@ -1546,6 +1546,7 @@ by 4.
 			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= "Absorbs energy from hits as long as there is storage capacity available (Diffuser Tendrils).";
+		$this->data["Special"] .= "<br>Tries not to absorb if protected system would have been destroyed anyway without overkilling (eg. very strong Piercing or Matter fire hitting small systems).";
 		$this->data["Special"] .= "<br>Dissipates " . $this->getOutput() . " stored points each turn.";
 	}	
 	
@@ -1623,7 +1624,7 @@ by 4.
 		return $protectionValue;
 	}
 	//actual protection
-	public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
+	public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $systemProtected, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
 		$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
 		$damageToAbsorb=$effectiveDamage-$effectiveArmor;
 		$damageAbsorbed=0;
@@ -1651,6 +1652,12 @@ by 4.
 				}
 			}
 		}	
+		
+		$noOverkill = (!$weapon->doOverkill) && ($weapon->noOverkill || ($weapon->damageType == 'Piercing'));
+		if($noOverkill){//shot is incapable of overkilling - reducing it would not matter if it doesn't prevent destruction of system hit
+			$remainingHealth = $systemProtected->getRemainingHealth();
+			if ($remainingHealth+$mostSuitableAbsorbtion <= $damageToAbsorb) return $returnValues; //any absorbtion would be futile and just fill tendril
+		}
 		
 		if($mostSuitableAbsorbtion>0){ //appropriate tendril found!
 			$damageAbsorbed=min($damageToAbsorb,$mostSuitableAbsorbtion);

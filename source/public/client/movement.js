@@ -703,7 +703,7 @@ shipManager.movement = {
 		
 		//needs enabled and undamaged jump drive
 		var dmg = 0;
-		var phasedrive = shipManager.systems.getSystemByName(shooter, "jumpEngine"); //assume it's phase drive, as it's on phase-capable ship!
+		var phasedrive = shipManager.systems.getSystemByName(ship, "jumpEngine"); //assume it's phase drive, as it's on phase-capable ship!
 		if (phasedrive){
 			//full health?
 			dmg = damageManager.getDamage(ship, phasedrive);
@@ -723,7 +723,7 @@ shipManager.movement = {
 		}
 		if (countFreshBiothrusters < 2) return false;
 		
-		return true;
+		return true; //no indication to the contrary found
 	},
 	
 
