@@ -15,7 +15,6 @@ Fleet checker - tool that performs automatic check of fleet composition (using s
 
 
 ABBAI
-Gravitic Drive - adds a few perks to movement, notably being able to do all maneuvers even while pivoted/pivoting (they use thrusters appropriate for current orientation when pivoted). Also, Gravitic Thrusters ignore first "Efficiency Reduced" reduced critical, increasing their resistance to damage.
 Gravitic Shield - most Abbai units are equipped with Gravitic Shield. Active shield reduces both hit chance and damage of incoming fire. At range 0 fighters are assumed to be able to come close enough to ignore ship shields.
 	Gravitic Shields are powered by separate generator, that can power up a limited number of them (usually not allowing a ship all-around protection unless generator output is boosted).
 Quad Array - 4 separate weapons in a single housing that's prone to overheating. Using more than 2 shots can cause forced shutdown for a turn, to cool down. Number of shots is changed by using alternate firing modes. Defensive fire is always safe.
@@ -28,7 +27,7 @@ Particle Impeder - purely defensive weapon, capable of intercepting weapons with
 
 ABBAI (WotCR)
 Abbai fleet a few hundred years before the show era, representing Wars of the Centauri Republic period.
-They have Gravitic Shielding much like modern Abbai (but not Gravitic Drive!), and weapons being precursors to modern Comm Disruptor (Comm Jammer and Sensor Spike).
+They have Gravitic Shielding much like modern Abbai (although much weaker), and weapons being precursors to modern Comm Disruptor (Comm Jammer and Sensor Spike).
 Mine Launcher - weapon that can deploy mines during combat. Not implemented in FV, unit that has it (Motenai Mine Layer) is present in game but equipped with missile launchers instead.
 
 BALOSIAN
@@ -36,7 +35,7 @@ No notable special systems/rules.
 
 
 BRAKIRI
-Gravitic Drive - see Abbai.
+Gravitic Drive - adds a few perks to movement, notably being able to do all maneuvers even while pivoted/pivoting (they use thrusters appropriate for current orientation when pivoted). Also, Gravitic Thrusters ignore first "Efficiency Reduced" reduced critical, increasing their resistance to damage.
 Corporations - Brakiri are split into competing corporations. On each unit it's noted which Corporation produces a given design (if not - it's assumed that all Corporations have equal access to it). This is irrelevant when fielding national Brakiri fleet, but You have option of fielding single Corporation as well. In this case, You have access only to that Corporation's designs (and common ones), but all restrictions (deployment & variant) are eased by one level. For Variant restrictions this means Rare->Uncommon->Common, for deployment Restricted(10%)->Limited->(33%)->Unlimited.
 	Corporations have access to slightly different technologies and heave their own areas of specialisation, so their individual fleets are usually lacking in some area but have excellent access to something else.
 	In-game checker does not take this rule into account.
@@ -112,7 +111,7 @@ Custom fleet created by Wolfgang Lackner and Marcin Sawicki, based heavily upon 
 Middle-born - they're Middle-born faction, with civilization far older than even Minbari or Yolu. This has no direct impact on game, unless a particular system treats such a faction differently.
 Shields - they have powerful shields, that can be boosted to be even stronger. They count double against Raking weapons. Cannot be flown under by fighters (unlike standard gravitic/EM shields). They don't decrease unit profile, only reduce damage (also unlike standard gravitic/EM shields). 
 Advanced Armor - gives a plethora of perks, generally reducing damage taken. It reduces or limits special effects of most weapons that have them, and counts as 2 points stronger against ballistics. Ignored by weapons made by Ancients.
-Gravitic Drive - see Abbai.
+Gravitic Drive - see Brakiri.
 Improved Sensors - halve effectiveness of enemy Jammer.
 LCVs - Drakh LCVs use regular Sensors (that is, they're not bound by "all but 2 EW points need to be OEW" rule). 
 Hangar space - Drakh LCVs do require hangar space (like regular LCVs). They share it with Drakh fighters, although LCVs take twice as many slots.
@@ -140,7 +139,7 @@ IPSHA
 Baronies - there is no Ipsha "national fleet". Ipsha species is split into "Baronies" (separate feudal-like states), and fielded fleet belongs to one of them. Player may use only generic designs in use by all Baronies and designs specific to one chosen Barony (it's indicated in unit notes). Similarly, some enhancements are Barony-specific.
 	In-game fleet checker does not take this rule into account.
 	Some "baronization" of ships is available through unit enhancements (eg. You can apply typical Essan changes to basic Ipsha design).
-Gravitic Drive - see Abbai.
+Gravitic Drive - see Brakiri.
 Mag-Gravitic Reactor - Ipsha power source has fixed power output, rather than default relative (eg. "Power rating of 40" rather than "enough to enable all systems on ship"). This implies that destruction of systems does NOT cut into power produced (Reactor outpus stays the same) - so even though Power is usually negative for a fresh ship (eg. can't power everything), number of possible enabled systems does NOT go down with damage.
 Singularity Engine - Ipsha drive system is closely tied to Mag-Gravitic Reactor, which produces some quirks (notably Engine destructions destroyes the ship outright). This is not implemented in FV.
 EM Hardened - Ipsha units are especially resistant to Electromagnetic damage. This is cumulative with dropout bonus their fighters possess. 
@@ -170,7 +169,7 @@ Scattergun - light weapon that fires random number of shots. When firing defensi
 MINBARI
 Jammer - Minbari units are equipped with possibly the most powerful piece of defensive technology in game. It prevents lock-on (which means range penalties against Jammer-protected units are always doubled) and halves ballistic weapons launch range. Minbari themselves ignore Jammer.
 	Note that Jammer protection does not stack with jinking.
-Gravitic Drive - see Abbai
+Gravitic Drive - see Brakiri
 Antimatter Converter - weapon with theoretically infinite damage potential (no upper limit for damage dealt, it depends on how high can You make hit chance...). Does damage in Flash mode, so some damage is caused to other units on the same hex as target on a hit.
 White Star - the mainstay of Army of Light is available on Minbari fleet list. It's difficult to handle, but in skilled hands extremely potent unit, equipped with technologies nominally beyond reach of Young races (Adaptive Armor, EM Shields, in case of Command variant - even self repair).
 	These are not Minbari technologies (and are not available to Minbari as a whole, just this one ship).

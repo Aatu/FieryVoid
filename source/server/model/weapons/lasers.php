@@ -538,7 +538,9 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        public function getDamage($fireOrder){        return Dice::d(10, 3)+20;   }
+        public function getDamage($fireOrder){
+			return Dice::d(10, 3)+20;   
+		}
         public function setMinDamage(){     $this->minDamage = 23 ;      }
         public function setMaxDamage(){     $this->maxDamage = 50 ;      }
         

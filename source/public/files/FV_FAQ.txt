@@ -61,7 +61,10 @@ FIRING AND WEAPONS
  - Multi-mode weapons, switched at power on in B5Wars: simplified and can use any mode at will (Interceptor, Guardian Array).
  - Ramming takes place in ship fire step (even if ramming ship is fighter). So ship fire from guns destroyed in ramming will still happen.
  - all ramming attacks are resolved separately. So if two units try to ram each other, and they both hit, ramming damage is effectively applied twice!
-
+ - Piercing attacks have quirky way of finding whether damage should be split into 2 or 3 parts - essentially split to 2 if shot enters and exits through the same section.
+ - Piercing damage vs MCVs is reduced by 20% (instead of -2/die).
+ - Piercing attacks can be made without special requirements regarding EW - appropriate penalty is always included in fire control. 
+ 
 
 OTHERS
  - Jump Drive: usually it can't be turned off for power unless seriously damaged, but there are scenarios that allow just that. So the game does not force it and it's up to the player to decide whether or not it's allowed.
