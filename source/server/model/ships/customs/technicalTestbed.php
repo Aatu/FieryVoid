@@ -14,9 +14,10 @@ class TechnicalTestbed extends MediumShip{
         $this->shipSizeClass = 2; //it's actually a HCV using MCV layout
         $this->agile = true;
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+		$this->halfPhaseThrust = 6; //needed for half phasing; equal to thrust from two BioThrusters on a given ship
         
-        $this->forwardDefense = 110;
-        $this->sideDefense = 112;
+        $this->forwardDefense = 20;
+        $this->sideDefense = 20;
         
         $this->turncost = 0.50;
         $this->turndelaycost = 0.33;
@@ -28,33 +29,14 @@ class TechnicalTestbed extends MediumShip{
          
         $this->addPrimarySystem(new Reactor(3, 12, 0, 2));
         $this->addPrimarySystem(new ShadowPilot(3, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 14, 3, 6));
+        $this->addPrimarySystem(new Scanner(3, 14, 3, 6));		
+		
+		$phasingdrive = new JumpEngine(4, 16, 5, 15);
+		$phasingdrive->displayName = 'Phasing Drive';
+		$this->addPrimarySystem($phasingdrive);
+		
 		$this->addPrimarySystem(new Hangar(3, 1));
         $this->addPrimarySystem(new SelfRepair(5, 6, 3)); //armor, structure, output
-		
-		
-		
-		//BioDrive
-		$bioDrive = new BioDrive(3); //ONLY efficiency
-		
-		$bioThruster = new BioThruster(4,10,3); //armour, health, output
-		$bioDrive->addThruster($bioThruster);
-		$this->addAftSystem($bioThruster);
-		
-		$bioThruster = new BioThruster(4,10,3); //armour, health, output
-		$bioDrive->addThruster($bioThruster);
-		$this->addAftSystem($bioThruster);
-		
-		$bioThruster = new BioThruster(4,10,3); //armour, health, output
-		$bioDrive->addThruster($bioThruster);
-		$this->addAftSystem($bioThruster);
-				
-		$bioThruster = new BioThruster(4,10,3); //armour, health, output
-		$bioDrive->addThruster($bioThruster);
-		$this->addAftSystem($bioThruster);
-		
-        $this->addPrimarySystem($bioDrive);
-		
 		
 		
 		//EnergyDiffuser		
@@ -95,6 +77,26 @@ class TechnicalTestbed extends MediumShip{
         $this->addPrimarySystem($diffuserStbd);
 		
 		
+		//BioDrive
+		$bioDrive = new BioDrive(3); //ONLY efficiency
+		
+		$bioThruster = new BioThruster(4,10,3); //armour, health, output
+		$bioDrive->addThruster($bioThruster);
+		$this->addAftSystem($bioThruster);
+		
+		$bioThruster = new BioThruster(4,10,3); //armour, health, output
+		$bioDrive->addThruster($bioThruster);
+		$this->addAftSystem($bioThruster);
+		
+		$bioThruster = new BioThruster(4,10,3); //armour, health, output
+		$bioDrive->addThruster($bioThruster);
+		$this->addAftSystem($bioThruster);
+				
+		$bioThruster = new BioThruster(4,10,3); //armour, health, output
+		$bioDrive->addThruster($bioThruster);
+		$this->addAftSystem($bioThruster);
+		
+        $this->addPrimarySystem($bioDrive);
 		
 		
 		

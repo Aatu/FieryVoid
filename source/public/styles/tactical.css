@@ -121,8 +121,7 @@ body {
 #shipMovementUI{
     display:none;
     position:absolute;
-    z-index:7000;
-   
+    z-index:7000;   
 }
 
 #shipMovementUI div{

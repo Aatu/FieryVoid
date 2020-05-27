@@ -621,6 +621,12 @@
         <div id="roll">
             <canvas id="rollcanvas" width="40" height="40"></canvas>
         </div>
+		
+		
+        <div id="halfphase">
+            <canvas id="halfphasecanvas" width="40" height="40"></canvas>
+        </div>
+		
         
         <div id="jink">
 			<div class="centercontainer">

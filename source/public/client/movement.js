@@ -678,7 +678,98 @@ shipManager.movement = {
         return pivoting;
     },
 
+	isHalfPhased: function isHalfPhased(ship) {
+		var toReturn = false;
+        for (var i in ship.movement) {
+            var movement = ship.movement[i];
+            if (movement.turn != gamedata.turn) continue;
+            if (movement.commit == false) continue;
+            if (movement.type == "halfPhase") {
+				toReturn=true;
+				break;
+			}
+        }
+        return toReturn;
+	},
     
+	//Shadow ships ability! here it will rely on halfPhaseThrust attribute non-zero value to recognize the ability.
+	canHalfPhase: function canHalfPhase(ship) {
+		if (ship.halfPhaseThrust == 0) return false; //ship is not capable of half phasing
+		if (gamedata.gamephase != 2) return false;
+		if (shipManager.movement.isHalfPhased(ship)) return false;
+		
+		//needs to have appropriate thrust left 
+		if (ship.halfPhaseThrust > shipManager.movement.getRemainingEngineThrust(ship)) return false;
+		
+		//needs enabled and undamaged jump drive
+		var dmg = 0;
+		var phasedrive = shipManager.systems.getSystemByName(shooter, "jumpEngine"); //assume it's phase drive, as it's on phase-capable ship!
+		if (phasedrive){
+			//full health?
+			dmg = damageManager.getDamage(ship, phasedrive);
+			if (dmg > 0) return false;
+			//powered?
+			if (shipManager.power.isOffline(ship, phasedrive)) return false;
+		} else return false;//no phase drive!
+		
+		//needs two undamaged BioThrusters
+		var countFreshBiothrusters = 0;
+		for (var i in ship.systems) {
+			var biothruster = ship.systems[i];
+			if (biothruster.name == 'BioThruster'){
+				dmg = damageManager.getDamage(ship, biothruster);
+				if (dmg == 0) countFreshBiothrusters++;
+			}
+		}
+		if (countFreshBiothrusters < 2) return false;
+		
+		return true;
+	},
+	
+
+	doHalfPhase: function doNormalTurn(ship) {
+        var requiredThrust = Array(0, 0, ship.halfPhaseThrust, 0, 0); //all through main thrusters - irrelevant really for BioThrusters!
+        var lastMovement = ship.movement[ship.movement.length - 1];
+
+        var name;
+        var newfacing;
+        var newheading;
+        var step = 1;
+
+        var commit = false;
+        var assignedThrust = Array();
+
+        name = "halfPhase";
+
+        ship.movement[ship.movement.length] = {
+            id: -1,
+            type: name,
+            position: lastMovement.position,
+            xOffset: lastMovement.xOffset,
+            yOffset: lastMovement.yOffset,
+            facing: lastMovement.facing,
+            heading: lastMovement.heading,
+            speed: lastMovement.speed,
+            animating: false,
+            animated: false,
+            animationtics: 0,
+            requiredThrust: requiredThrust,
+            assignedThrust: assignedThrust,
+            commit: commit,
+            preturn: false,
+            at_initiative: shipManager.getIniativeOrder(ship),
+            turn: gamedata.turn,
+            forced: false,
+            value: 0
+        };
+
+        if (!ship.flight) {
+            shipManager.movement.autoAssignThrust(ship);
+            shipWindowManager.assignThrust(ship);
+        }
+    },
+	
+	
     canTurnIntoPivot: function canTurnIntoPivot(ship, right) {
         if (gamedata.gamephase != 2) return false;
         //if (ship.agile) returnVal = false; //agile ship should be able to turn into pivot all right...

@@ -147,6 +147,8 @@ window.ShipTooltip = function () {
 	if (shipManager.movement.isPivoting(ship) !== 'no') toDisplay += 'Pivoting; ';
 	if (shipManager.movement.isRolling(ship)) toDisplay += 'Rolling; ';
 	if (shipManager.movement.isRolled(ship)) toDisplay += 'Rolled; ';
+	if (shipManager.movement.isHalfPhased(ship)) toDisplay += 'Half-Phased; ';
+	if (toDisplay !='') toDisplay = '<b><i>'+toDisplay+'</i></b>';
 	this.addEntryElement(toDisplay, toDisplay != '');
 	    
 	    /*condensed to one line

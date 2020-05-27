@@ -14,6 +14,8 @@ window.UI = {
         lastUITime: null,
         currentPosition: null,
         currentHeading: null,
+		
+		halfphaseElement: null,
 
         initMoveUI: function initMoveUI() {
             if (UI.shipMovement.iniated == true) return;
@@ -42,13 +44,15 @@ window.UI = {
             UI.shipMovement.rollElement = $("#roll", ui);
             UI.shipMovement.jinkElement = $("#jink", ui);
             UI.shipMovement.jinkvalueElement = UI.shipMovement.jinkElement.find(".jinkvalue");
-
+			
             UI.shipMovement.accElement = $("#accelerate", ui);
             UI.shipMovement.deaccElement = $("#deaccelerate", ui);
 
             UI.shipMovement.morejinkElement = $("#morejink", ui);
             UI.shipMovement.lessjinkElement = $("#lessjink", ui);
             UI.shipMovement.cancelElement = $("#cancel", ui);
+			
+			UI.shipMovement.halfphaseElement = $("#halfphase", ui);
 
             UI.shipMovement.cancelElement.on("click touchstart", UI.shipMovement.cancelCallback);
             UI.shipMovement.moveElement.on("click touchstart", UI.shipMovement.moveCallback);
@@ -71,6 +75,8 @@ window.UI = {
 
             UI.shipMovement.morejinkElement.on("click touchstart", UI.shipMovement.morejinkCallback);
             UI.shipMovement.lessjinkElement.on("click touchstart", UI.shipMovement.lessjinkCallback);
+			
+            UI.shipMovement.halfphaseElement.on("click touchstart", UI.shipMovement.halfphaseCallback);
 
             UI.shipMovement.turnIntoPivotLeftElement.on("click touchstart", UI.shipMovement.turnIntoPivotLeftCallback);
             UI.shipMovement.turnIntoPivotRightElement.on("click touchstart", UI.shipMovement.turnIntoPivotRightCallback);
@@ -114,6 +120,10 @@ window.UI = {
 
         lessjinkCallback: function lessjinkCallback(e) {
             UI.shipMovement.callbackHandler.lessjinkCallback(e);
+        },
+
+        halfphaseCallback: function halfphaseCallback(e) {
+            UI.shipMovement.callbackHandler.halfphaseCallback(e);
         },
 
         accelCallback: function accelCallback(e) {
@@ -379,6 +389,15 @@ window.UI = {
                 lessjink.hide();
             }
 
+			//Shadows half phasing
+            var halfphase = UI.shipMovement.halfphaseElement;
+            if (shipManager.movement.canHalfPhase(ship)) {
+                UI.shipMovement.drawUIElement(halfphase, pos.x, pos.y, 40, 35 * 1.4, angle, "img/HalfPhase.png", "halfphasecanvas", 0);
+            } else {
+                halfphase.hide();
+            }
+
+
             var cancel = UI.shipMovement.cancelElement;
             if (shipManager.movement.hasDeletableMovements(ship) && weaponManager.canCombatTurn(ship)) {
                 dis += 26;
@@ -407,7 +426,6 @@ window.UI = {
         },
 
         drawUIimage: function drawUIimage(canvas, path, s, angle) {
-
             var img = new Image();
             img.src = path;
 
@@ -418,7 +436,6 @@ window.UI = {
         },
 
         drawUIElement: function drawUIElement(e, x, y, s, dis, angle, path, canvasid, shipHeading) {
-
             var UIpos = mathlib.getPointInDirection(dis, -angle, x, y);
             e.css("top", UIpos.y - y - s * 0.5 + "px").css("left", UIpos.x - x - s * 0.5 + "px");
             e.css("width", s + "px").css("height", s + "px");
