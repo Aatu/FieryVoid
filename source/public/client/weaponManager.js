@@ -582,8 +582,20 @@ window.weaponManager = {
 			bdew = 0;
 			sdew = 0;
 		}	
+		
+		//half-phasing target is ore difficult to hit
+		var halfphase = 0;
+		if(shooter && weapon){ //consider half-phasing in calculations for a particular shot, but not in base profile
+			if (shipManager.movement.isHalfPhased(target)){
+				halfphase = 4; //basic penalty induced by half-phasing target
+				//ballistics double the penalty
+				if (weapon && weapon.ballistic) halfphase = 8;
+			}
+			//if firing unit is itself half phasing, that's -10
+			if (shooter && shipManager.movement.isHalfPhased(shooter)) halfphase = 10;
+		}
 
-        return base - dew - jink - bdew - sdew;
+        return base - dew - jink - bdew - sdew - halfphase;
     },
 
 
@@ -593,6 +605,11 @@ window.weaponManager = {
         if (calledid > 0) return 0;//can't call ramming attack!
         if ((!shooter.flight) && (target.flight)) return 0;//ship has no chance to ram a fighter!
         var hitChance = 8; //base: 40%
+		
+		//half-phased and non-half-phased ship cannot ram each other
+		var shooterHalfphased = shipManager.movement.isHalfPhased(shooter);
+		var targetHalfphased = shipManager.movement.isHalfPhased(target);
+		if (shooterHalfphased != targetHalfphased) return 0;
 
         if (target.Enormous) hitChance+=6;//+6 vs Enormous units
         if (shooter.Enormous) hitChance+=6;//+6 if ramming unit is Enormous
@@ -655,6 +672,7 @@ window.weaponManager = {
         //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
 
         var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter, weapon);
+		
 
         var soew = ew.getSupportedOEW(shooter, target);
         var dist = ew.getDistruptionEW(shooter);
@@ -775,7 +793,7 @@ window.weaponManager = {
         }
 
         var firecontrol = weaponManager.getFireControl(target, weapon);
-
+		
         var goal = baseDef - jammermod - noLockMod - rangePenalty + oew + soew + firecontrol + mod;
         var hitChance = Math.round(goal / 20 * 100);
         return hitChance;

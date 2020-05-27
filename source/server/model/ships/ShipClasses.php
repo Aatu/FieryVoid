@@ -39,6 +39,7 @@ class BaseShip {
     public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for all systems)
 
 	
+	public $halfPhaseThrust = 0; //needed for half phasing; equal to thrust from two BioThrusters on a given ship; 0 for ships that cannot half phase, eg. vast majority
     
 
     public $jinkinglimit = 0; //just in case there will be a ship actually able to jink; NOT SUPPORTED!

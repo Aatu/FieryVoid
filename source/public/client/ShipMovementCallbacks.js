@@ -25,6 +25,12 @@ window.ShipMovementCallbacks = function () {
         this.updateCallback({ ship: this.ship });
     };
 
+    ShipMovementCallbacks.prototype.halfphaseCallback = function (e) {
+        e.stopPropagation();
+        shipManager.movement.doHalfPhase(this.ship);
+        this.updateCallback({ ship: this.ship });
+    };
+	
     ShipMovementCallbacks.prototype.accelCallback = function (e) {
         e.stopPropagation();
         shipManager.movement.changeSpeed(this.ship, true);

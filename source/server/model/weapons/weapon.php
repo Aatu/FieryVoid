@@ -734,6 +734,11 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
 		$target = $gamedata->getShipById($fireOrder->targetid);
 		if (($target instanceof FighterFlight) && (!($shooter instanceof FighterFlight))) return 0;//ship has no chance to ram a fighter!
 
+		//half-phased and non-half-phased ship cannot ram each other
+		$shooterHalfphased = Movement::isHalfPhased($shooter, $gamedata->turn);
+		$targetHalfphased = Movement::isHalfPhased($target, $gamedata->turn);
+		if ($shooterHalfphased != $targetHalfphased) return 0;
+
 		$hitChance = 8; //base: 40%
 
 		if ($target->Enormous) $hitChance+=6;//+6 vs Enormous units
@@ -789,8 +794,8 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
 
  /*calculate base chance to hit (before any interception is applied) - Marcin Sawicki*/
     public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder){
-	$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too! - certainly important for calculating hit chance...
-	if ($this->isRammingAttack) return $this->calculateHitBaseRam($gamedata, $fireOrder);
+		$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too! - certainly important for calculating hit chance...
+		if ($this->isRammingAttack) return $this->calculateHitBaseRam($gamedata, $fireOrder);
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
         $pos = $shooter->getHexPos();
@@ -972,8 +977,22 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
 			$bdew = 0;
 			$sdew = 0;
 		}			
+		
+		//half-phasing: +4 vs gunfire, +8 vs ballistics, -10 to own fire
+		$halfphasemod = 0;
+		$shooterHalfphased = Movement::isHalfPhased($shooter, $gamedata->turn);
+		$targetHalfphased = Movement::isHalfPhased($target, $gamedata->turn);
+		if ($shooterHalfphased) $halfphasemod = 10;
+		if ($targetHalfphased) {
+			if($this->ballistic){
+				$halfphasemod += 8;
+			}else{
+				$halfphasemod += 4;
+			}
+		}
+		
 
-        $hitPenalties = $dew + $bdew + $sdew + $rangePenalty + $jinkSelf + max($jammermod, $jinkTarget) + $noLockMod;
+        $hitPenalties = $dew + $bdew + $sdew + $rangePenalty + $jinkSelf + max($jammermod, $jinkTarget) + $noLockMod + $halfphasemod;
         $hitBonuses = $oew + $soew + $firecontrol + $mod;
         $hitLoc = null;
 
