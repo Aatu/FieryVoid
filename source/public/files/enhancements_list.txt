@@ -90,6 +90,11 @@ Eethan Barony refit (Barony-specific variant rather than enhancement; this repre
 	
 SHADOWS:
 
+Increased Diffuser Capability:
+	Effect: +1 Diffuser rating, for every diffuser on ship
+	Cost: new diffuser capacity times 2.5 (further steps are increased by 2.5 points for each Diffuser)
+	Limit: +5
+	
 Launched fighter (not actual enhancement - rather information that this ship has launched fighter (which cuts into ships' Structure))
 	Effect: -1 Structure
 	Cost: 0

@@ -142,6 +142,26 @@ class Enhancements{
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 	  }
 	  
+	  //Increased Diffuser Capability: +1 output for every Energy Diffuser; cost: 2.5x new capability, step: 2.5x number of diffusers
+	  $enhID = 'SHAD_DIFF';
+	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
+		  $enhName = 'Increased Diffuser Capability';
+		  //find number and output of Diffusers
+		  $count = 0;	
+		  $output = 0;
+		  foreach ($ship->systems as $system){
+			if ($system instanceof EnergyDiffuser){
+				$count++;
+				$output += $system->output+1;//count NEW output!
+			}
+		  }  
+		  if($count > 0){ //ship is actually equipped with Energy Diffuser(s)	  
+			  $enhPrice = round($output*2.5);
+			  $enhPriceStep = round($count*2.5);
+			  $enhLimit = 5;	  
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }		  
+	  }	  
 
 	  //Shadow fighter launched: -1 PRIMARY Structure, limit: hangar capacity
 	  $enhID = 'SHAD_FTRL';
@@ -176,7 +196,7 @@ class Enhancements{
 			  $enhPriceStep = 0; 
 			  $enhLimit = 1;	  
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
-		  }		  
+		  }
 	  }	  	  
 	  	  
   } //endof function setEnhancementOptionsShip
@@ -550,6 +570,14 @@ class Enhancements{
 						}						
 						break;						
 
+					case 'SHAD_DIFF': //Increased Diffuser Capability: +1 Output for each Diffuser
+						foreach ($ship->systems as $system){
+							if ($system instanceof EnergyDiffuser){
+								$system->output += $enhCount;
+							}
+						}  
+						break;
+						
 					case 'SHAD_FTRL': //Shadow fighter launched: -1 Structure point for each launched fighter
 						$struct = $ship->getStructureSystem(0);
 						if($struct){
@@ -735,11 +763,18 @@ class Enhancements{
 							}
 							break;							
 					
+						case 'SHAD_DIFF': //Increased Diffuser Capability: +1 Output for each Diffuser
+							if ($system instanceof EnergyDiffuser) { 
+								$strippedSystem->output = $system->output;
+							}
+							break;	
+							
+
 						case 'SHAD_FTRL': //Shadow fighter launched: -1 Structure point for each launched fighter
 							if ($system instanceof Structure) { //Shadows ships have only one Structure
 								$strippedSystem->maxhealth = $system->maxhealth;
 							}
-							break;	
+							break;								
 					
 						case 'SPARK_CURT': //Spark Curtain - affects output of Spark Field
 							if($system instanceof SparkField){

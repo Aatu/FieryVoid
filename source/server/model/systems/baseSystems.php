@@ -1546,7 +1546,7 @@ by 4.
 		}
 		$this->data["Special"] .= "Absorbs energy from hits as long as there is storage capacity available (Diffuser Tendrils).";
 		$this->data["Special"] .= "<br>Tries not to absorb if protected system would have been destroyed anyway without overkilling (eg. very strong Piercing or Matter fire hitting small systems).";
-		$this->data["Special"] .= "<br>Dissipates " . $this->getOutput() . " stored points each turn.";
+		$this->data["Special"] .= "<br>Dissipates energy from Tendrils in Critical phase.";
 	}	
 	
 	//actual effect during receiving damage
