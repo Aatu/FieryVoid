@@ -173,13 +173,15 @@ Gravitic Drive - see Brakiri
 Antimatter Converter - weapon with theoretically infinite damage potential (no upper limit for damage dealt, it depends on how high can You make hit chance...). Does damage in Flash mode, so some damage is caused to other units on the same hex as target on a hit.
 White Star - the mainstay of Army of Light is available on Minbari fleet list. It's difficult to handle, but in skilled hands extremely potent unit, equipped with technologies nominally beyond reach of Young races (Adaptive Armor, EM Shields, in case of Command variant - even self repair).
 	These are not Minbari technologies (and are not available to Minbari as a whole, just this one ship).
+	White Stars may be used as ISA/Army of Light/White Star Fleet as well. Such a fleet is NOT tournament legal, and for good reason - but may be interesting scenario piece (or challenge). It's way too nasty to be used in regular pickup battle! 
+	When used in this way, only White Stars (and Combat Flyers they can carry, potentially) can be deployed, counting as Unlimited Deployment. Be warned - in skilled hands such a fleet is overwhelming. Playtesting suggests that fleet consisting fleet of 4 White Stars (nominally 3000PV) can fight as equal against 3400 points non-Minbari fleet tailored against them... just so You know ;) 
 EM Shield - works exactly as Gravitic Shield does (see Abbai), but doesn't require a separate Generator. Shield emitter itself is self-sufficient.
 Adaptive Armor - additional protection (increasing all armor ratings on ship or fighter) that is applied only to specific types of damage. Some points can be set at start of scenario (if ship design allows - White Star is not advanced enough) or after receiving damage from such a weapon in battle. Protection is limited both in total value and in value assigned to a particular kind of damage (in case of WS - up to 3 points can be allocated, but no more than 1 per damage type).
 	In-game control allows easy propagation of setting among entire fleet (if other units can receive it of course). 
 	Assigned points cannot be unassigned during battle.
 	Tabletop: a single point is unlocked for every volley that actually causes damage.
 	Fiery Void: a single point is unlocked for every "bit" of damage (a single system damaged by single subvolley), which may lead to easier unlocking of available protection (especially in case of Raking, Pulse or overkilling hits).
-Self-repair - at the moment it's not implemented in game (so Command White Star is unavailable, too).
+Self-repair - see Ancients.
 Gravitic Net - weapon that moves target, fired before regular weapon declaration.
 	This weapon is not implemented in Fiery Void, and ships equipped with it are not present either.
 Electro-Pulse Gun - very short range, slow firing weapon that only affects fighters. However, it can make called shots at no penalty.

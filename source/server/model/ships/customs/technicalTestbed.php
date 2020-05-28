@@ -25,18 +25,22 @@ class TechnicalTestbed extends MediumShip{
         $this->rollcost = 3;
         $this->pivotcost = 3;
 		$this->iniativebonus = 6 *5;
+		
+		$this->fighters = array("normal"=>12);
         
+		
+		$this->enhancementOptionsEnabled[] = 'SHAD_FTRL'; //can launch Shadow fighters (IF hangar capacity allows!)
+		$this->enhancementOptionsDisabled[] = 'POOR_CREW'; //no crew ;)
+		$this->enhancementOptionsDisabled[] = 'ELITE_CREW'; //no crew ;)
+		$this->enhancementOptionsDisabled[] = 'IMPR_ENG'; //no Engine ;)
+		
          
         $this->addPrimarySystem(new Reactor(3, 12, 0, 2));
         $this->addPrimarySystem(new ShadowPilot(3, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 14, 3, 6));		
-		
-		$phasingdrive = new JumpEngine(4, 16, 5, 15);
-		$phasingdrive->displayName = 'Phasing Drive';
-		$this->addPrimarySystem($phasingdrive);
-		
+        $this->addPrimarySystem(new Scanner(3, 14, 3, 6));
+		$this->addPrimarySystem(new PhasingDrive(4, 16, 5, 15));		
 		$this->addPrimarySystem(new Hangar(3, 1));
-        $this->addPrimarySystem(new SelfRepair(5, 6, 3)); //armor, structure, output
+        $this->addPrimarySystem(new SelfRepair(5, 6, 23)); //armor, structure, output
 		
 		
 		//EnergyDiffuser		
@@ -131,6 +135,7 @@ class TechnicalTestbed extends MediumShip{
 				20 => "C&C",
 			),
 			1=> array(
+			/*
 				5 => "1:Burst Beam",
 				7 => "1:Medium Pulse Cannon",
 				14 => "0:Energy Diffuser",
@@ -139,6 +144,8 @@ class TechnicalTestbed extends MediumShip{
 				17 => "0:Hangar",
 				18 => "0:Reactor",
 				20 => "Primary",
+				*/
+				20 => "0:Phasing Drive",
 			),
 			2=> array(
 				5 => "1:Burst Beam",
