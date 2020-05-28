@@ -392,7 +392,7 @@ window.UI = {
 			//Shadows half phasing
             var halfphase = UI.shipMovement.halfphaseElement;
             if (shipManager.movement.canHalfPhase(ship)) {
-                UI.shipMovement.drawUIElement(halfphase, pos.x, pos.y, 40, 35 * 1.4, angle, "img/HalfPhase.png", "halfphasecanvas", 0);
+                UI.shipMovement.drawUIElement(halfphase, pos.x, pos.y, 50, 35 * 1.4, angle, "img/HalfPhase.png", "halfphasecanvas", 0);
             } else {
                 halfphase.hide();
             }

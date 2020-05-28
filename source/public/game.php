@@ -624,7 +624,7 @@
 		
 		
         <div id="halfphase">
-            <canvas id="halfphasecanvas" width="40" height="40"></canvas>
+            <canvas id="halfphasecanvas" width="50" height="50"></canvas>
         </div>
 		
         

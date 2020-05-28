@@ -1248,6 +1248,8 @@ spl_autoload_register(
 				//Shadow Pilot				
 				'shadowpilot' => '/server/model/systems/baseSystems.php',
 				'shadowpilotpain' => '/server/model/cricialClasses.php',
+				//other Shadows
+				'phasingdrive' => '/server/model/systems/baseSystems.php',
 				
 				//Raider Civilians Refresh
 				'privateerlessara' => '/server/model/ships/centauri_raiders/PrivateerLessara.php',

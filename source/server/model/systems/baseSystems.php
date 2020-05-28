@@ -1385,7 +1385,7 @@ class DiffuserTendril extends ShipSystem{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= "Used to store absorbed energy from hits.<br>It is here for technical purposes only. It's part of Energy Diffuser system.";
+		$this->data["Special"] .= "Used to store absorbed energy from hits.<br>It is here for visual (and technical) purposes only. It's part of Energy Diffuser system.";
 	}	
 	
 	public function getRemainingCapacity(){
@@ -1420,7 +1420,6 @@ class DiffuserTendrilFtr extends DiffuserTendril{
 		//add information about damage stored - ships do have visual reminder about it, but fighters do not!
 		parent::setSystemDataWindow($turn); 
 		$this->data["Capacity"] = $this->getUsedCapacity() . '/' . $this->maxhealth;
-		$this->data["Special"] .= "<br>Damage absorbed by Tendrils will NOT get displayed as damage in log! (unlike on ships)";
 	}	
 	
 	/*always redefine $this->data due to current capacity info*/
@@ -1556,6 +1555,8 @@ by 4.
 	
 	//effects that happen in Critical phase (after criticals are rolled) - dissipation and actual loss of tendrils due to critical received
 	public function criticalPhaseEffects($ship, $gamedata){
+		if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
+		
 		$ship = $this->getUnit();
 		$pilot = $ship->getSystemByName("CnC");
 		
@@ -1743,6 +1744,8 @@ class SelfRepair extends ShipSystem{
 	
 	public function criticalPhaseEffects($ship, $gamedata)
     { 
+		if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
+		
 		//how many points are available?
 		$availableRepairPoints = $this->maxRepairPoints - $this->usedRepairPoints;
 		$availableRepairPoints = min($availableRepairPoints,$this->getOutput()); //no more than remaining points, no more than actual system repair capability	
@@ -2021,7 +2024,8 @@ class ShadowPilot extends CnC{
 	
 	public function criticalPhaseEffects($ship, $gamedata)
     { 
-		$ship=$this->getUnit();
+		if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
+		
 		$damageSufferedThisTurn = 0;
 		$damageToSelfThisTurn = 0;
 		$onePainPer = 10; //1 point of pain per how many damage points?
@@ -2059,8 +2063,65 @@ class ShadowPilot extends CnC{
 		}
 		
     } //endof function criticalPhaseEffects	
-	
-	
+		
 } //endof class ShadowPilot
+
+
+/*Phasing Drive - essentially a jump engine that destroys ship if damaged while half-phasing*/
+class PhasingDrive extends JumpEngine{
+    public $displayName = "Phasing Drive";
+    
+	//JumpEngine enables half phasing, so I'm torn about priority... I'll increase to 2 over Jump Engine's 1
+	public $repairPriority = 2;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    	
+    public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= 'If damaged while half-phasing - entire ship is destroyed.';
+    }
+	
+	//destroy ship if damaged while half-phaseing
+	public function criticalPhaseEffects($ship, $gamedata)
+    { 
+		if (!Movement::isHalfPhased($ship, $gamedata->turn)) return;
+		if (!$this->isDamagedOnTurn($gamedata->turn)) return; 
+		
+	
+		//try to make actual attack to show in log - use Ramming Attack system!				
+		$rammingSystem = $ship->getSystemByName("RammingAttack");
+		if($rammingSystem){ //actually exists! - it should on every ship!				
+			$newFireOrder = new FireOrder(
+				-1, "normal", $ship->id, $ship->id,
+				$rammingSystem->id, -1, $gamedata->turn, 1, 
+				100, 100, 1, 1, 0,
+				0,0,'HalfPhase',10000
+			);
+			$newFireOrder->pubnotes = "Phasing drive damaged during half-phasing - ship destroyed.";
+			$newFireOrder->addToDB = true;
+			$rammingSystem->fireOrders[] = $newFireOrder;
+		}else{
+			$newFireOrder=null;
+		}
+
+		//destroy primary structure
+		$primaryStruct = $ship->getStructureSystem(0);
+		if($primaryStruct){			
+            $remaining = $primaryStruct->getRemainingHealth();
+            $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $primaryStruct->id, $remaining, 0, 0, -1, true, false, "", "HalfPhase");
+            $damageEntry->updated = true;
+            $primaryStruct->damage[] = $damageEntry;			
+			if($rammingSystem){ //add extra data to damage entry - so firing order can be identified!
+					$damageEntry->shooterid = $ship->id; //additional field
+					$damageEntry->weaponid = $rammingSystem->id; //additional field
+			}
+        }	
+    } //endof function criticalPhaseEffects	
+}//endof class PhasingDrive
+
+
 
 ?>

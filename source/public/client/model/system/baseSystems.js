@@ -360,3 +360,10 @@ var ShadowPilot = function ShadowPilot(json, ship) {
 ShadowPilot.prototype = Object.create(CnC.prototype);
 ShadowPilot.prototype.constructor = ShadowPilot;
 
+
+var PhasingDrive = function PhasingDrive(json, ship) {
+    JumpEngine.call(this, json, ship);
+};
+PhasingDrive.prototype = Object.create(JumpEngine.prototype);
+PhasingDrive.prototype.constructor = PhasingDrive;
+

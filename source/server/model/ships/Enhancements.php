@@ -142,7 +142,25 @@ class Enhancements{
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 	  }
 	  
-		//Spark Curtain: CUSTOM/CAMPAIGN ballistic defense (2+boost) for Spark Field, cost: 40 + 10/Spark Field present, limit: 1
+
+	  //Shadow fighter launched: -1 PRIMARY Structure, limit: hangar capacity
+	  $enhID = 'SHAD_FTRL';
+	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+		  $enhName = 'Fighter launched';
+		  //find total hangar capacity
+		  $capacity = 0;	  
+		  foreach ($ship->fighters as $name => $count){
+			$capacity += $count;
+		  }  
+		  if($capacity > 0){ //this ship can actually carry fighters!!
+			  $enhPrice = 0;	  
+			  $enhPriceStep = 0; 
+			  $enhLimit = ceil($capacity);	  
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+	  }	  
+	  
+	//Spark Curtain: CUSTOM/CAMPAIGN ballistic defense (2+boost) for Spark Field, cost: 40 + 10/Spark Field present, limit: 1
 	  $enhID = 'SPARK_CURT';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Spark Curtain';
@@ -160,7 +178,7 @@ class Enhancements{
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }		  
 	  }	  	  
-	  
+	  	  
   } //endof function setEnhancementOptionsShip
 	
 	
@@ -243,6 +261,16 @@ class Enhancements{
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 	  }
 	  
+	  //Shadow fighter deployed without carrier control: -2 OB, -3(15) Ini, cost: 0, limit: 1
+	  $enhID = 'SHAD_CTRL';	  
+	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Uncontrolled';
+		  $enhLimit = 1;	
+		  $enhPrice = 0;	  
+		  $enhPriceStep = 0;
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+	  }  
+	  
   } //endof function setEnhancementOptionsFighter
 	    
     
@@ -303,6 +331,10 @@ class Enhancements{
 						$flight->iniativebonus -= $enhCount*5;
 						$flight->forwardDefense += $enhCount;
 						$flight->sideDefense += $enhCount;
+						break;
+					case 'SHAD_CTRL': //Shadow fighter deployed without carrier control: -2 OB, -3(15) Ini
+						$flight->offensivebonus -= $enhCount*2;
+						$flight->iniativebonus -= $enhCount*3*5;
 						break;
 				}
 			}			
@@ -516,8 +548,14 @@ class Enhancements{
 						if($strongestSystem != null){ //Reactor actually exists to be enhanced! although it has to ;)
 							$strongestSystem->output -= $enhCount;
 						}						
-						break;
-						
+						break;						
+
+					case 'SHAD_FTRL': //Shadow fighter launched: -1 Structure point for each launched fighter
+						$struct = $ship->getStructureSystem(0);
+						if($struct){
+							$struct->maxhealth -= $enhCount;
+						}
+						break;						
 						
 					case 'SPARK_CURT': //Spark Curtain - direct effect is setting $output=$baseOutput for every Spark Field on board
 						foreach ($ship->systems as $system){
@@ -586,6 +624,13 @@ class Enhancements{
 								$strippedShip->iniativebonus = $ship->iniativebonus;
 								$strippedShip->forwardDefense = $ship->forwardDefense;
 								$strippedShip->sideDefense = $ship->sideDefense;
+							}
+							break;
+							
+						case 'SHAD_CTRL': //Uncontrolled Shadow fighter: modify Initiative and OB
+							if($ship instanceof FighterFlight){
+								$strippedShip->offensivebonus = $ship->offensivebonus;
+								$strippedShip->iniativebonus = $ship->iniativebonus;
 							}
 							break;
 					}					
@@ -689,6 +734,12 @@ class Enhancements{
 								$strippedSystem->armour = $system->armour ;
 							}
 							break;							
+					
+						case 'SHAD_FTRL': //Shadow fighter launched: -1 Structure point for each launched fighter
+							if ($system instanceof Structure) { //Shadows ships have only one Structure
+								$strippedSystem->maxhealth = $system->maxhealth;
+							}
+							break;	
 					
 						case 'SPARK_CURT': //Spark Curtain - affects output of Spark Field
 							if($system instanceof SparkField){
