@@ -1504,6 +1504,7 @@ class SurgeCannon extends Raking{
 		// If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
 	    if ($this->isCombined) $fireOrder->shots = 0; //no actual shots from weapon that's firing as part of combined shot!
 		parent::fire($gamedata, $fireOrder);
+		/*replaced by single crit ForTurns!
 	    for($i = 1; $i<$this->firingMode;$i++){
 			$trgtTurn = $gamedata->turn+$i-1;
 			$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
@@ -1511,6 +1512,13 @@ class SurgeCannon extends Raking{
 			$crit->newCrit = true; //force save even if crit is not for current turn
 			$this->criticals[] =  $crit;
 	    }
+		*/
+		if ($this->firingMode > 1){
+			$turnEndEffect = $gamedata->turn+$this->firingMode-1;//2combined for 1 turn, 3combined for 2 turns...
+			$crit = new ForcedOfflineForTurns (-1, $fireOrder->shooterid, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $turnEndEffect);
+			$crit->updated = true;
+			$system->criticals[] = $crit;
+		}
 	} //endof function fire
 	
 	
@@ -1915,6 +1923,7 @@ class ResonanceGenerator extends Weapon{
 	public function fire($gamedata, $fireOrder){
 		// If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
 		parent::fire($gamedata, $fireOrder);
+		/*replaced by straight 2 turns cooldown
 		for($i = 1; $i<=$this->cooldown;$i++){		
 			$trgtTurn = $gamedata->turn+$i-1;//start on current turn rather than next!
 			$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
@@ -1922,6 +1931,11 @@ class ResonanceGenerator extends Weapon{
 			$crit->newCrit = true; //force save even if crit is not for current turn
 			$this->criticals[] =  $crit;
 		}
+		*/		
+		$turnEndEffect = $gamedata->turn+2;//2 turns
+		$crit = new ForcedOfflineForTurns (-1, $fireOrder->shooterid, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $turnEndEffect);
+		$crit->updated = true;
+		$system->criticals[] = $crit;
 	} //endof function fire
 	
 	
@@ -2007,6 +2021,7 @@ class SurgeBlaster extends Weapon{
 	public function fire($gamedata, $fireOrder){
 		// If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
 		parent::fire($gamedata, $fireOrder);
+		/*replaced by straight 2 turn cooldown
 		for($i = 1; $i<=$this->cooldown;$i++){		
 			$trgtTurn = $gamedata->turn+$i-1;//start on current turn rather than next!
 			$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
@@ -2014,6 +2029,11 @@ class SurgeBlaster extends Weapon{
 			$crit->newCrit = true; //force save even if crit is not for current turn
 			$this->criticals[] =  $crit;
 		}
+		*/		
+		$turnEndEffect = $gamedata->turn+2;//2 turns
+		$crit = new ForcedOfflineForTurns (-1, $fireOrder->shooterid, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $turnEndEffect);
+		$crit->updated = true;
+		$system->criticals[] = $crit;
 	} //endof function fire
 	
 	
@@ -2576,271 +2596,5 @@ class IonFieldGenerator extends Weapon{
 }//endof class IonFIeldGenerator
 
 
-/*re-implementing as Critical phase system...
-//self repair system - implemented as weapon for simplicity; does repair damage caused in current turn, too
-//othrwise it's close to the original
-class SelfRepair extends Weapon{
-	public $name = "SelfRepair";
-	public $displayName = "Self Repair";
-	public $iconPath = "SelfRepair.png";
-    public $primary = true;
-	
-	//let's make animation as a beam
-	public $animation = "laser";
-	public $animationColor = array(238, 245, 38);
-	public $projectilespeed = 10;
-	public $animationWidth = 4;
-	public $animationWidth2 = 0.2;
-	public $animationExplosionScale = 1;
-	public $trailLength = 10;
-	public $priority = 1; //fires first!
-
-    public $loadingtime = 1; //called every turn
-		
-	public $output = 0;
-	public $maxRepairPoints=0;//maximum points that can be repaired during battle
-	public $usedRepairPoints=0;//repair points already used
-	public $usedThisTurn=0;
-      
-	public $autoFireOnly = true; //this weapon cannot be fired by player
-	public $doNotIntercept = true; //this weapon is an internal self-repair system, "attacks" are just for technical reason
-        
-	public $rangePenalty = 0; //no range penalty, but range itself is limited
-	public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals ; not relevant really!
-			
-	public $damageType = "Standard"; //irrelevant
-	public $weaponClass = "Electromagnetic"; //irrelevant
-    public $firingModes = array( 1 => "Self-repair"); //just a convenient name for firing mode
-	
-	
-	//SelfRepair itself is most important to be repaired - as it's the condition of further repairs being effected!
-	public $repairPriority = 10;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-    
-	
- 	public $possibleCriticals = array( 
-            19=>"OutputHalved"
-	);
-
-	function __construct($armour, $maxhealth, $output)
-	{
-		//power requirement is 0, health is always defined by constructor, as is output - but they cannot be <1!
-		if ( $maxhealth <1 ) $maxhealth = 1;
-		if ( $output <1 ) $output = 1; //base output cannot be <1
-		parent::__construct($armour, $maxhealth, 0, 0, 0);
-		$this->output = $output; //after parent - weapon has no output and passes 0 to system creation
-		$this->maxRepairPoints = $maxhealth*10;
-	}
-	
-	
-	public function setSystemDataWindow($turn){
-		parent::setSystemDataWindow($turn);  
-		//some effects should originally work for current turn, but it won't work with FV handling of ballistics. Moving everything to next turn.
-		//it's Ion (not EM) weapon with no special remarks regarding advanced races and system - so works normally on AdvArmor/Ancients etc
-		$this->data["Repair points"] = $this->usedRepairPoints . "/" . $this->maxRepairPoints;
-		$this->data["Special"] = "At start of firing phase automatically repairs damage to vessel. Cannot repair destroyed structure blocks.";      
-		$this->data["Special"] .= "<br>Priority: first fix criticals, then damaged systems, finally restore destroyed systems.";  
-		$this->data["Special"] .= "<br>Core systems are repaired first, then weapons, then other systems.";    
-	}
-
-
-
-	public function calculateHitBase($gamedata, $fireOrder){
-		$fireOrder->updated = true;
-		$fireOrder->chosenLocation = 0;//so it's recalculated later every time! - as location chosen here is completely incorrect for target 
-		$fireOrder->needed = 100; //hit is automatic
-	}
-	
-	// sorts system for repair priority
-    public static function sortSystemsByRepairPriority($a, $b){
-		//priority, then size (smaller first, as easier to repair), then ID!
-		if($a->repairPriority!==$b->repairPriority){ 
-            return $b->repairPriority - $a->repairPriority; //higher priority first!
-        }else if($a->maxhealth!==$b->maxhealth){ 
-            return $a->maxhealth - $b->maxhealth; //smaller first!
-        }else return $a->id - $b->id;
-    } //endof function sortSystemsByRepairPriority
-	.. sorts critical hits for repair priority
-    public static function sortCriticalsByRepairPriority($a, $b){
-		//priority, then size (smaller first, as easier to repair), then ID!
-		if($a->repairPriority!==$b->repairPriority){ 
-            return $b->repairPriority - $a->repairPriority; //higher priority first!
-        }else if($a->repairCost!==$b->repairCost){ ///costlier first!
-            return $b->repairCost - $a->repairCost; //costlier first!
-        }else return $a->id - $b->id;
-    } //endof function sortSystemsByRepairPriority
-	
-	
-	public function fire($gamedata, $fireOrder)
-    { //has to be completely redefined
-        $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
-        $rolled = Dice::d(100);
-        $fireOrder->rolled = $rolled; //...and hit, regardless of value rolled		
-		$fireOrder->shotshit = 1; //always hits
-
-
-		//how many points are available?
-		$availableRepairPoints = $this->maxRepairPoints - $this->usedRepairPoints;
-		$availableRepairPoints = min($availableRepairPoints,$this->getOutput()); //no more than remaining points, no more than actual system repair capability	
-		$fireOrder->pubnotes .= " Self Repair activated ($availableRepairPoints)... " ;
-	
-		
-		//sort all systems by priority
-		$ship=$this->getUnit();
-		$systemList = array();
-		foreach($ship->systems as $system){
-			//skip systems attached to destroyed structure blocks...
-			if($system->repairPriority<1) continue;//skip systems that cannot be repaired
-			if(!($system instanceOf Structure)){
-				$strBlock = $ship->getStructureSystem($system->location);
-				if($strBlock->isDestroyed($gamedata->turn)) continue;
-			}
-			$systemList[] = $system;			
-		}
-		usort($systemList, "self::sortSystemsByRepairPriority");
-		
-		//repair criticals (on non-destroyed systems only)
-		foreach ($systemList as $systemToRepair){
-			if ($availableRepairPoints<1) continue;//cannot repair anything
-			if ($systemToRepair->isDestroyed($gamedata->turn)) continue;//don't repair criticals on destroyed system...
-			$critList = array();
-			foreach($systemToRepair->criticals as $critDmg) {
-				if($critDmg->repairPriority<1) continue;//if critical cannot be repaired
-				if ($critDmg->oneturn || ($critDmg->turnend > 0)) continue;//temporary criticals (or those already repaired) also cannot be repaired
-				$critList[] = $critDmg;				
-			}			
-			$noOfCrits = count($critList);
-			if($noOfCrits>0){
-				usort($critList, "self::sortCriticalsByRepairPriority");
-				foreach ($critList as $critDmg){ //repairable criticals of current system
-					if ($critDmg->repairCost <= $availableRepairPoints){//execute repair!
-						$critDmg->turnend = $gamedata->turn;//actual repair ;)
-						$critDmg->forceModify = true; //actually save the repair...
-						$critDmg->updated = true; //actually save the repair cd!...
-						$availableRepairPoints -= $critDmg->repairCost;
-						$this->usedThisTurn += $critDmg->repairCost;
-						$fireOrder->pubnotes .= " Critical negated: " . $critDmg->description . "; ";
-					}
-				}
-			}
-		}		
-		
-		//repair damaged systems
-		foreach ($systemList as $systemToRepair){
-			if ($availableRepairPoints<1) continue;//cannot repair anything any longer
-			if ($systemToRepair->isDestroyed($gamedata->turn)) continue;//don't repair damage on destroyed system... yet!
-			$currentDamage = $systemToRepair->maxhealth - $systemToRepair->getRemainingHealth( );
-			if($currentDamage > 0){ //do repair!
-				$toBeFixed = min($currentDamage, $availableRepairPoints);
-				//actual healing entry
-				$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $systemToRepair->id, -$toBeFixed, 0, 0, $fireOrder->id, false, false, "", 'SelfRepair', $ship->id, $this->id);
-				$damageEntry->updated = true;
-				$systemToRepair->damage[] = $damageEntry;
-				//meark repair points used
-				$availableRepairPoints -= $toBeFixed;
-				$this->usedThisTurn += $toBeFixed;
-			}
-		}	
-		
-		
-		//repair destroyed systems, possibly undestroying them in the process (cannot repair destroyed Structure)
-		foreach ($systemList as $systemToRepair){
-			if ($availableRepairPoints<1) continue;//cannot repair anything any longer
-			$currentDamage = $systemToRepair->maxhealth - $systemToRepair->getRemainingHealth( );
-			if($currentDamage > 0){ //do repair!
-				$toBeFixed = min($currentDamage, $availableRepairPoints);
-				$undestroy = false;
-				if ($toBeFixed==$currentDamage){ //full health restored!
-					$undestroy=true;
-				}
-				//actual healing entry
-				$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $systemToRepair->id, -$toBeFixed, 0, 0, $fireOrder->id, false, $undestroy, "", 'SelfRepair', $ship->id, $this->id);
-				$damageEntry->updated = true;
-				$systemToRepair->damage[] = $damageEntry;
-				//meark repair points used
-				$availableRepairPoints -= $toBeFixed;
-				$this->usedThisTurn += $toBeFixed;
-				if($undestroy){
-					$fireOrder->pubnotes .= " System restored: " . $systemToRepair->displayName . "; ";
-				}
-			}
-		}	
-		
-		
-		
-		
-    } //endof function fire	
-	
-	//create "attack" vs self
-	public function beforeFiringOrderResolution($gamedata){
-		if ($this->isDestroyed($gamedata->turn-1)) return; //destroyed self repair doesn not work
-		if ($this->isOfflineOnTurn($gamedata->turn)) return; //disabled self repair doesn not work
-		$shooter = $this->getUnit();
-		//is this unit defined in current gamedata? (particular instance!)
-		$belongs = $gamedata->shipBelongs($shooter);
-		if(!$belongs) return;
-		
-		//actual creation of fire order
-		$fire = new FireOrder(-1, 'normal', $shooter->id, $shooter->id, $this->id, -1, $gamedata->turn, 
-			1, 0, 0, 1, 0, 0, 0, 0, $this->weaponClass
-		);
-		$fire->addToDB = true;
-		$this->fireOrders[] = $fire;
-	}
-
-
-
-        public function getDamage($fireOrder){       
-		  return $this->getOutput(); //"damage" = output* 
-		}
-        public function setMinDamage(){     $this->minDamage = $this->getOutput();      }
-        public function setMaxDamage(){     $this->maxDamage = $this->getOutput();      }
-
-
-
-
-	// this method generates additional non-standard informaction in the form of individual system notes
-	//in this case: 
-	// - Firing phase: add repair points used to notes (current entry, not total)
-	
-    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
-		$ship = $this->getUnit();
-		switch($gameData->phase){
-				case 4: //firing phase
-					if($this->usedThisTurn>0){ //self-repair was actually used this turn!						
-						$notekey = 'used';
-						$noteHuman = 'Self-repair used';
-						$noteValue = $this->usedThisTurn;
-						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
-					}
-					break;
-		}
-	} //endof function generateIndividualNotes
-	
-	//act on notes just loaded - to be redefined by systems as necessary
-	//here:
-	// - fill $usedRepairPoints value
-	public function onIndividualNotesLoaded($gamedata){
-		foreach ($this->individualNotes as $currNote){ //assume ASCENDING sorting 
-			$explodedKey = explode ( ';' , $currNote->notekey ) ;//split into array: [area;value] where area denotes action, value - damage type (typically) 
-			switch($currNote->notekey){
-				case 'used': //self-repair points used in a given turn
-					$this->usedRepairPoints += $currNote->notevalue;
-					break;		
-			}
-		}
-		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
-		$this->individualNotes = array();
-	} //endof function onIndividualNotesLoaded
-
-//always redefine $this->data for AA controller! A lot of variable information goes there...
-	public function stripForJson(){
-        $strippedSystem = parent::stripForJson();
-        $strippedSystem->data = $this->data;		
-        $strippedSystem->output = $this->getOutput();		
-        return $strippedSystem;
-    }
-
-}//endof class SelfRepair
-*/
 
 ?>

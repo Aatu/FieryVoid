@@ -81,6 +81,7 @@ class Weapon extends ShipSystem
     public $canChangeShots = false;
     public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
 	public $isRammingAttack = false; //true means hit chance calculations are completely different, relying on speed
+	public $raking = 10;//size of rake (for Raking weapons only)
 
     public $shots = 1;
     public $shotsArray = array();
@@ -409,7 +410,20 @@ class Weapon extends ShipSystem
     }
 
     public function setSystemDataWindow($turn)
-    {		
+    {			
+		//re-create damage arrays, so they reflect loading time...
+		foreach ($this->firingModes as $i => $modeName) {
+			$this->changeFiringMode($i);
+			$this->setMinDamage();
+			$this->minDamageArray[$i] = $this->minDamage;
+			$this->setMaxDamage();
+			$this->maxDamageArray[$i] = $this->maxDamage;
+			//set AF priority, too!
+			$this->setPriorityAF(); 
+			$this->priorityAFArray[$i] = $this->priorityAF;
+		}
+		$this->changeFiringMode(1); //reset mode to basic
+	
         if ($this->damageType != '') $this->data["Damage type"] = $this->damageType;
         if ($this->weaponClass != '') $this->data["Weapon type"] = $this->weaponClass;
 		
@@ -964,7 +978,7 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
 			*/		
 		}
 			
-		$jammermod = $rangePenalty * max(0,($jammerValue-$noLockMod));//no lock and jammer work on the same thing, but they still need to be separated (for jinking).
+		$jammermod = $rangePenalty * max(0,($jammerValue-$noLockPenalty));//no lock and jammer work on the same thing, but they still need to be separated (for jinking).
 
         if (!($shooter instanceof FighterFlight) && !($shooter instanceof OSAT)) {//leaving instanceof OSAT here - MicroSATs will be omitted as they're SHFs
             $CnC = $shooter->getSystemByName("CnC");
