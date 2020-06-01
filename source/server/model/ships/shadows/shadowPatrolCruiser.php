@@ -19,6 +19,7 @@ class ShadowPatrolCruiser extends MediumShip{
         
 		$this->halfPhaseThrust = 6; //needed for half phasing; equal to thrust from two BioThrusters on a given ship
         $this->gravitic = true;
+		$this->advancedArmor = true;   
         $this->turncost = 0.50;
         $this->turndelaycost = 0.33;
         $this->accelcost = 2;
@@ -35,7 +36,35 @@ class ShadowPatrolCruiser extends MediumShip{
 		$this->enhancementOptionsDisabled[] = 'ELITE_CREW'; //no crew ;)
 		$this->enhancementOptionsDisabled[] = 'IMPR_ENG'; //no Engine ;)
 		
-         
+		
+		
+		//BioDrive - first so javascript routines can easily find biothrusters they'll be looking for a lot!
+		$bioDrive = new BioDrive(); //BioDrive just is, all parameters needed are calculated automatically
+		
+		$bioThruster = new BioThruster(5,8,3); //armour, health, output
+		$bioDrive->addThruster($bioThruster);
+		$this->addAftSystem($bioThruster);
+		
+		$bioThruster = new BioThruster(5,8,3); //armour, health, output
+		$bioDrive->addThruster($bioThruster);
+		$this->addAftSystem($bioThruster);
+		
+		$bioThruster = new BioThruster(5,8,3); //armour, health, output
+		$bioDrive->addThruster($bioThruster);
+		$this->addAftSystem($bioThruster);
+		
+		$bioThruster = new BioThruster(5,8,3); //armour, health, output
+		$bioDrive->addThruster($bioThruster);
+		$this->addAftSystem($bioThruster);
+		
+		$bioThruster = new BioThruster(5,8,3); //armour, health, output
+		$bioDrive->addThruster($bioThruster);
+		$this->addAftSystem($bioThruster);
+		
+        $this->addPrimarySystem($bioDrive);
+		
+		
+        //Primary systems
         $this->addPrimarySystem(new Reactor(6, 16, 0, 0));
         $this->addPrimarySystem(new ShadowPilot(6, 12, 0, 0));
 		$scanner = new Scanner(6, 16, 4, 12);
@@ -90,30 +119,6 @@ class ShadowPatrolCruiser extends MediumShip{
         $this->addPrimarySystem($diffuserStbd);
 		
 		
-		//BioDrive
-		$bioDrive = new BioDrive(); //BioDrive just is, all parameters needed are calculated automatically
-		
-		$bioThruster = new BioThruster(5,8,3); //armour, health, output
-		$bioDrive->addThruster($bioThruster);
-		$this->addAftSystem($bioThruster);
-		
-		$bioThruster = new BioThruster(5,8,3); //armour, health, output
-		$bioDrive->addThruster($bioThruster);
-		$this->addAftSystem($bioThruster);
-		
-		$bioThruster = new BioThruster(5,8,3); //armour, health, output
-		$bioDrive->addThruster($bioThruster);
-		$this->addAftSystem($bioThruster);
-		
-		$bioThruster = new BioThruster(5,8,3); //armour, health, output
-		$bioDrive->addThruster($bioThruster);
-		$this->addAftSystem($bioThruster);
-		
-		$bioThruster = new BioThruster(5,8,3); //armour, health, output
-		$bioDrive->addThruster($bioThruster);
-		$this->addAftSystem($bioThruster);
-		
-        $this->addPrimarySystem($bioDrive);
 		
 		
 		
@@ -130,7 +135,7 @@ class ShadowPatrolCruiser extends MediumShip{
 
        	   
 	    //Structure
-        $this->addPrimarySystem(new Structure( 3, 80));
+        $this->addPrimarySystem(new Structure( 6, 32));
 		
 				
 	

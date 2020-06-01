@@ -426,12 +426,13 @@ window.ew = {
     },
 	
 	getJammerValueFromTo: function getJammerValueFromTo(shooter, target) {
-		if (shooter.faction === target.faction) return 0;
-		
-		var jammerSystem = shipManager.systems.getSystemByName(target, "jammer");
+		var jammerSystem = null;
 		var jammerValue = 0;		
-		if(jammerSystem != null) {
-			jammerValue = shipManager.systems.getOutput(target, jammerSystem);
+		if (shooter.faction != target.faction) { //in-faction units ignore jammer (but not stealth!)
+			jammerSystem = shipManager.systems.getSystemByName(target, "jammer");				
+			if(jammerSystem != null) {
+				jammerValue = shipManager.systems.getOutput(target, jammerSystem);
+			}
 		}
 		var stealthSystem = shipManager.systems.getSystemByName(target, "stealth");
 		var stealthValue = 0;		

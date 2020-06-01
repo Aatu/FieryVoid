@@ -842,6 +842,15 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
+		/*if charged for 3 turns and mode is Piercing - set doOverkill; otherwise unset it*/
+		public function changeFiringMode($newMode){
+			parent::changeFiringMode($newMode); 
+			if (($this->turnsloaded >=3) && ($this->firingMode==1)){
+				$this->doOverkill=true;
+			}else{
+				$this->doOverkill=false;
+			}				
+		}
 	
 	    
 		public function setSystemDataWindow($turn){			
@@ -879,7 +888,6 @@
 
 		public function getDamage($fireOrder){
 			$dmg = 0;
-			$this->doOverkill = false;//default setting, regular Piercing (at lower arming)
 			$loadedtime = $this->turnsloaded;
 			if($this->firingMode > 1){//cannot use 3-turns power for shots other than Piercing
 				$loadedtime = min(2,$loadedtime);
@@ -892,7 +900,6 @@
                     $dmg = Dice::d(10,16)+24;
 					break;
 				case 3: //if actual 3 turns - remember to set weapon to overkilling in Piercing mode!
-					$this->doOverkill = true;
 				default: //3 turns
                     $dmg = Dice::d(10,24)+36;
 					break;

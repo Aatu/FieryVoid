@@ -1253,6 +1253,7 @@ spl_autoload_register(
 				'molecularslicerbeaml' => '/server/model/weapons/molecular.php', 
 				'molecularslicerbeamm' => '/server/model/weapons/molecular.php', 
 				'molecularslicerbeamh' => '/server/model/weapons/molecular.php', 
+                'vortexdisruptor' => '/server/model/weapons/specialWeapons.php',  
 				
 				
 				//Shadow units

@@ -2593,7 +2593,110 @@ class IonFieldGenerator extends Weapon{
         public function setMinDamage(){     $this->minDamage = 0 ;      }
         public function setMaxDamage(){     $this->maxDamage = 0 ;      }
 	
-}//endof class IonFIeldGenerator
+}//endof class IonFieldGenerator
+
+
+
+
+
+class VortexDisruptor extends Weapon{
+	/*Shadow weapon - destabilizes target vortex (it will collapse, destroying any ships that are trying to use it).
+		In FV there are no actual vortexes to be destabilized, but such action may happen in a scenario, being narrated. 
+		Hence the weapon is rendered as hex-targeted - players will get information of hit or miss.
+	*/
+	public $name = "VortexDisruptor";
+	public $displayName = "Vortex Disruptor";
+	public $iconPath = "VortexDisruptor.png";
+	
+	public $damageType = "Standard"; //irrelevant, really
+	public $weaponClass = "Ion";
+	public $hextarget = true;
+	public $hidetarget = false;
+	public $ballistic = false;
+	public $uninterceptable = true; //although I don't think a weapon exists that could intercept it...
+	public $doNotIntercept = true; //although I don't think a weapon exists that could intercept it...
+	public $priority = 1;
+	
+	//Vortex Disruptor, outside of scenarios, is purely a power source - and Shadows don't have all that much use for extra power. Minimal priority for repair.
+	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    	
+	
+	public $range = 24;//no point firing at further target with base 24 to hit!
+	public $loadingtime = 3;
+    public $rangePenalty = 1;//-1/hex
+	
+	public $trailColor = array(245, 90, 90);
+	public $animation = "ball";
+	public $animationColor = array(245, 90, 90);
+	public $animationExplosionScale = 0.5; //single hex explosion
+	public $animationExplosionType = "AoE";
+	public $explosionColor = array(255, 0, 0);
+	public $projectilespeed = 10;
+	public $animationWidth = 14;
+	public $trailLength = 10;
+	    
+	public $firingModes = array(
+		1 => "Disruption"
+	);
+		
+		
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);  
+		$this->data["Special"] = "Weapon that destabilizes hyperspace vortexes, therefore preventing escape (any ships entering destabilized vortex is destroyed).";      
+		$this->data["Special"] .= "<br>There are no actual vortexes in game, but such action might be useful for a scenario - in such case, target weapon on a hex where (by scenario narration) vortex appears."; //originally just charging cycle resets - but I opted for simpler (if stronger) effect. 
+		$this->data["Special"] .= "<br>Game will calculate whether disruption was successful (base chance is 120%, -5%/hex - EW is irrelevant).";  
+	}	
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+	{
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ) $maxhealth = 4;
+		if ( $powerReq == 0 ) $powerReq = 8;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+	
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		$fireOrder->needed = 120;
+		//reduce by distance...
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$firingPos = $shooter->getHexPos();
+		if ($fireOrder->targetid != -1) { //for some reason ship was targeted!
+            $targetship = $gamedata->getShipById($fireOrder->targetid);
+            //insert correct target coordinates: target ships' position!
+            $targetPos = $targetship->getHexPos();
+            $fireOrder->x = $targetPos->q;
+            $fireOrder->y = $targetPos->r;
+            $fireOrder->targetid = -1; //correct the error
+        }
+		$targetPos = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+		$dis = mathlib::getDistanceHex($firingPos, $targetPos);
+		$rangePenalty = $this->rangePenalty * $dis;
+		$fireOrder->needed -= $rangePenalty;
+		$fireOrder->notes .=  "shooter: " . $firingPos->q . "," . $firingPos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty ";
+		$fireOrder->updated = true;
+	}
+	
+    public function fire($gamedata, $fireOrder)
+    { //sadly here it really has to be completely redefined... or at least I see no option to avoid this
+        $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);        
+        $rolled = Dice::d(100);
+        $fireOrder->rolled = $rolled; 
+		if($rolled <= $fireOrder->needed){//HIT!
+			$fireOrder->pubnotes .= " HIT - target vortex is disrupted, ships entering it are destroyed! ";
+			$fireOrder->shotshit++;
+		}else{ //MISS!
+			$fireOrder->pubnotes .= " MISSED! ";
+		}
+	} //endof function fire	
+	
+	
+	public function getDamage($fireOrder){       return 0; /*no actual damage, just disruption of vortex which is narrative only*/  }
+	public function setMinDamage(){     $this->minDamage = 0 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+	
+}//endof class VortexDisruptor
 
 
 

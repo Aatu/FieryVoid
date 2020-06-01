@@ -24,7 +24,7 @@ class Jammer extends ShipSystem implements SpecialAbility{
         $shooter = $args["shooter"];
         $target = $args["target"];
         
-        if ($shooter->faction === $target->faction) return 0;
+        if ($shooter->faction === $target->faction) return 0; //same-faction units ignore Jammer
 		
         if (! ($shooter instanceof BaseShip) || ! ($target instanceof BaseShip)) 
             throw new InvalidArgumentException("Wrong argument type for Jammer getSpecialAbilityValue");
@@ -43,12 +43,11 @@ class Jammer extends ShipSystem implements SpecialAbility{
 		}
 			
         return $jammerValue;
-		
-        //return $this->getOutput();
     }
 
     public function setSystemDataWindow($turn){
         $this->data["Special"] = "Denies a hostile OEW-lock versus this ship.";
+        $this->data["Special"] .= "<br>Doesn't work ws own faction (eg. Minbari Jammer won't work against hostile Minbari).";
 		$this->data["Special"] .= "<br>Enabling/Disabling Jammer will affect enemy missile launches on NEXT turn!";	     
     }
 } //endof Jammer
@@ -64,7 +63,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
     }
     
     public function setSystemDataWindow($turn){
-            $this->data["DEFENSIVE BONUS:"] = "Jammer ability if targeted from over 5 hexas away.";
+            $this->data["Special"] = "Jammer ability if targeted from over 5 hexes away.";
         }
     
     //args for Jammer ability are array("shooter", "target")
@@ -80,10 +79,10 @@ class Stealth extends ShipSystem implements SpecialAbility{
         if (! ($shooter instanceof BaseShip) || ! ($target instanceof BaseShip))
             throw new InvalidArgumentException("Wrong argument type for Stealth getSpecialAbilityValue");
 		
-        $jammerValue = 1; //it's fighter system, so no need to check for crits or power
-        if (Mathlib::getDistanceOfShipInHex($shooter, $target) > 5)
+        $jammerValue = 0; 
+        if (mathlib::getDistanceHex($shooter, $target) > 5) //kicks in!
         {
-            //return 1;			
+			$jammerValue = 1; 
 			//Advanced Sensors negate Jammer, Improved Sensors halve Jammer
 			if ($shooter->hasSpecialAbility("AdvancedSensors")) {
 				$jammerValue = 0; //negated
@@ -92,7 +91,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
 			}
         }
         return $jammerValue;        
-    }     
+    }
 } //endof Stealth
 
 class Fighterimprsensors extends ShipSystem implements SpecialAbility{    

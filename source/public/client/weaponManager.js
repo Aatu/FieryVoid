@@ -754,7 +754,8 @@ window.weaponManager = {
 		noLockMod =  rangePenalty * noLockPenalty;    
         var jammermod = 0;
 	    
-		if (shooter.faction != target.faction) {
+		//if (shooter.faction != target.faction){ //moved to getJammerValueFromTo!
+		
 			jammermod = ew.getJammerValueFromTo(shooter,target); //accounts for both jammer and stealth!
 			/* replaced by code above
             var jammer = shipManager.systems.getSystemByName(target, "jammer");
@@ -790,7 +791,7 @@ window.weaponManager = {
                     jammermod = jammermod - jinking;
                 }
             }
-        }
+        
 
         var firecontrol = weaponManager.getFireControl(target, weapon);
 		

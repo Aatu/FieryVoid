@@ -957,7 +957,7 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
 		$noLockMod =  $rangePenalty * $noLockPenalty;
 			
 		$jammerValue = 0;
-		if ($shooter->faction != $target->faction) {
+		//if ($shooter->faction != $target->faction) { //checked by ability itself now!
 			//jammerValue takes Jammer state, criticals, Advanced and Improved sensors into account
 			$jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter" => $shooter, "target" => $target));
 			
@@ -976,7 +976,7 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
 				}
 			}
 			*/		
-		}
+		//}
 			
 		$jammermod = $rangePenalty * max(0,($jammerValue-$noLockPenalty));//no lock and jammer work on the same thing, but they still need to be separated (for jinking).
 
@@ -1434,7 +1434,7 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
         }
 
         //for Piercing shots at small targets (MCVs and smaller) - reduce damage by ~10% (by rules: -2 per die)
-		//actually recognize this by number of structures instead of formal ship size - SHadow HCvs and MCVs are damaged as MCVs would have!
+		//actually recognize this by number of structures instead of formal ship size - Shadow HCvs and MCVs are damaged as MCVs would have!
         //if (($this->damageType == 'Piercing') && ($target->shipSizeClass < 2)) $damage = $damage * 0.9;
 		if ($this->damageType == 'Piercing'){
 			$noOfStructures=0;
@@ -1442,7 +1442,7 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
 				foreach ($target->systems as $struct) if ($struct instanceOf Structure) $noOfStructures++;
 			}
 			if($noOfStructures<2){ //damaged as MCV (or smaller)
-				$damage = $damage * 0.8; //let's make that 20%! in tabletop: -2/die, which is quite hefty penalty (although doesn't touch minimum damage)
+				$damage = $damage * 0.9; 
 			}				
 		}
 
