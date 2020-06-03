@@ -24,7 +24,7 @@ class Jammer extends ShipSystem implements SpecialAbility{
         $shooter = $args["shooter"];
         $target = $args["target"];
         
-        if ($shooter->faction === $target->faction) return 0;
+        if ($shooter->faction === $target->faction) return 0; //same-faction units ignore Jammer
 		
         if (! ($shooter instanceof BaseShip) || ! ($target instanceof BaseShip)) 
             throw new InvalidArgumentException("Wrong argument type for Jammer getSpecialAbilityValue");
@@ -43,12 +43,11 @@ class Jammer extends ShipSystem implements SpecialAbility{
 		}
 			
         return $jammerValue;
-		
-        //return $this->getOutput();
     }
 
     public function setSystemDataWindow($turn){
         $this->data["Special"] = "Denies a hostile OEW-lock versus this ship.";
+        $this->data["Special"] .= "<br>Doesn't work ws own faction (eg. Minbari Jammer won't work against hostile Minbari).";
 		$this->data["Special"] .= "<br>Enabling/Disabling Jammer will affect enemy missile launches on NEXT turn!";	     
     }
 } //endof Jammer
@@ -64,7 +63,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
     }
     
     public function setSystemDataWindow($turn){
-            $this->data["DEFENSIVE BONUS:"] = "Jammer ability if targeted from over 5 hexas away.";
+            $this->data["Special"] = "Jammer ability if targeted from over 5 hexes away.";
         }
     
     //args for Jammer ability are array("shooter", "target")
@@ -80,10 +79,10 @@ class Stealth extends ShipSystem implements SpecialAbility{
         if (! ($shooter instanceof BaseShip) || ! ($target instanceof BaseShip))
             throw new InvalidArgumentException("Wrong argument type for Stealth getSpecialAbilityValue");
 		
-        $jammerValue = 1; //it's fighter system, so no need to check for crits or power
-        if (Mathlib::getDistanceOfShipInHex($shooter, $target) > 5)
+        $jammerValue = 0; 
+        if (mathlib::getDistanceHex($shooter, $target) > 5) //kicks in!
         {
-            //return 1;			
+			$jammerValue = 1; 
 			//Advanced Sensors negate Jammer, Improved Sensors halve Jammer
 			if ($shooter->hasSpecialAbility("AdvancedSensors")) {
 				$jammerValue = 0; //negated
@@ -92,7 +91,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
 			}
         }
         return $jammerValue;        
-    }     
+    }
 } //endof Stealth
 
 class Fighterimprsensors extends ShipSystem implements SpecialAbility{    
@@ -420,7 +419,7 @@ class Engine extends ShipSystem{
     
 }
 
-class Scanner extends ShipSystem{
+class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner does not implement anything in particular, but classes ovverriding it do!
     public $name = "scanner";
     public $displayName = "Scanner";
     public $primary = true;
@@ -428,7 +427,7 @@ class Scanner extends ShipSystem{
     public $outputType = "EW";
 	//Scanner  is fairly important, being a core system!
 	public $repairPriority = 7;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-    
+    public $specialAbilityValue = false; //changed by modifications marking Improved/Advanced Sensors!
     
     public $possibleCriticals = array(
         15=>"OutputReduced1",
@@ -457,21 +456,18 @@ class Scanner extends ShipSystem{
 	
 	/*functions adding Advanced/Improved Sensors trait*/
 	public function markImproved(){		
-    		$this->specialAbilities[] = "ImprovedSensors";
-			
+		$this->specialAbilities[] = "ImprovedSensors";	
+		$this->specialAbilityValue = true; //so it is actually recognized as special ability!		
 		if (!isset($this->data["Special"])) {
 			$this->data["Special"] = '';
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= 'Improved Sensors - halve Jammer effectiveness (to hit penalty and launch range penalty)(not that of advanced races).'; //not that of advanced races
-		
 	}
-	/*note: as there are no actual Advanced Sensors unit yet, this feature is not complete;
-		at the moment Advanced Sensors do have flat boost cost and do ignore Jammer, but do NOT yet ignore SDEW/BDEW as they should
-	*/
 	public function markAdvanced(){		
-    		$this->specialAbilities[] = "AdvancedSensors";
+    	$this->specialAbilities[] = "AdvancedSensors";
+		$this->specialAbilityValue = true; //so it is actually recognized as special ability!
 		$this->boostEfficiency = 14; //Advanced Sensors are rarely lower than 13, so flat 14 boost cost is advantageous to output+1!
 		if (!isset($this->data["Special"])) {
 			$this->data["Special"] = '';
@@ -487,7 +483,8 @@ class Scanner extends ShipSystem{
 		all actual effects are contained in attribute changes
 	*/
 	public function markStarWars(){		
-    		$this->specialAbilities[] = "StarWarsSensors";
+    	$this->specialAbilities[] = "StarWarsSensors";
+		$this->specialAbilityValue = true; //so it is actually recognized as special ability!
 		$this->maxBoostLevel = 2;
 		if (!isset($this->data["Special"])) {
 			$this->data["Special"] = '';
@@ -509,6 +506,10 @@ class Scanner extends ShipSystem{
 		}
 		$this->data["Special"] .= 'LCV Sensors - up to 2 EW points may be allocated freely. All surplus can be allocated ONLY as OEW.';
 	}	
+	public function getSpecialAbilityValue($args)
+    {
+		return $specialAbilityValue;
+	}
 } //endof Scanner
 
 class ElintScanner extends Scanner implements SpecialAbility{
@@ -1549,10 +1550,6 @@ by 4.
 		$this->data["Special"] .= "<br>Dissipates energy from Tendrils in Critical phase.";
 	}	
 	
-	//actual effect during receiving damage
-	
-	
-	
 	//effects that happen in Critical phase (after criticals are rolled) - dissipation and actual loss of tendrils due to critical received
 	public function criticalPhaseEffects($ship, $gamedata){
 		if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
@@ -1915,7 +1912,7 @@ class BioDrive extends Engine{
     public $displayName = "Engine";
     public $primary = true;
     public $isPrimaryTargetable = false;
-    public $boostable = true;
+    public $boostable = false;//cannot boost BioDrive!
     public $outputType = "thrust";
 	
 	private $bioThrusters = array();
@@ -1923,9 +1920,8 @@ class BioDrive extends Engine{
     
     public $possibleCriticals = array( ); //technical system, should never get damaged
     
-    function __construct($boostEfficiency){
-        parent::__construct(0, 1, 0, 0, $boostEfficiency ); //($armour, $maxhealth, $powerReq, $output, $boostEfficiency
-        $this->boostEfficiency = (int)$boostEfficiency;
+    function __construct(){
+        parent::__construct(0, 1, 0, 0, 0 ); //($armour, $maxhealth, $powerReq, $output, $boostEfficiency
     }
     
 	function addThruster($thruster){
@@ -1940,7 +1936,7 @@ class BioDrive extends Engine{
 		$this->data["Efficiency"] = $this->boostEfficiency;
 		$this->data["Special"] = "BioDrive - basically an Engine with basic output calculated from BioThruster outputs.";      
 		$this->data["Special"] .= "<br>Will never be damaged.";  
-		$this->data["Special"] .= "<br>Extra thrust will not work if there are no working BioThrusters (eg. base output is 0).";    
+		$this->data["Special"] .= "<br>Cannot but extra thrust.";    
 	}
 	
 	

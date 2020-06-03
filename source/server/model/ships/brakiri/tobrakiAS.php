@@ -41,6 +41,7 @@ class TobrakiAS extends FighterFlight{
             $fighter->imagePath = "img/ships/falkosi.png";
             $fighter->iconPath = "img/ships/falkosi_large.png";
             $fighter->addFrontSystem(new LightGraviticBolt(330, 30, 0, 1));
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
             $this->addSystem($fighter);
         }
     }

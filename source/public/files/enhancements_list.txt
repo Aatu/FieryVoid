@@ -25,7 +25,7 @@ Improved Reactor (biggest Reactor):
 
 Improved Sensor Array (strongest Sensors):
 	Effect: +1 Sensor rating
-	Cost: new rating *5 (double for ElInt Sensors)
+	Cost: new rating *5 (double for ElInt Sensors, double for Advanced Sensors)
 	Limit: 1
 
 Poor Crew (entire ship):

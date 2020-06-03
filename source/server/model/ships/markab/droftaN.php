@@ -39,6 +39,8 @@ class DroftaN extends FighterFlight{
             $frontGun = new LightScattergun(330, 30); //always a single mount for this weapon
             $fighter->addFrontSystem($frontGun);
 		
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+			
             $this->addSystem($fighter);
 	   }
     }

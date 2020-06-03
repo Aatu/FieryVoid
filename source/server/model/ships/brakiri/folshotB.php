@@ -42,7 +42,7 @@ class FolshotB extends FighterFlight{
 
             $fighter->addFrontSystem(new UltraLightGraviticBolt(330, 30, 0));
 
-			//$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
 
             $this->addSystem($fighter);

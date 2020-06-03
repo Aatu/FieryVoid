@@ -458,7 +458,7 @@
             }
         }
         
-        public function getDamage($fireOrder){        return Dice::d(2, 10)+15;   }
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+15;   }
         public function setMinDamage(){   return  $this->minDamage = 17 ;      }
         public function setMaxDamage(){   return  $this->maxDamage = 35 ;      }
     }
@@ -499,9 +499,452 @@
 
             return false;
         }
-    }
+    }//endof class LightMolecularDisrupterHandler
 
 
+
+	/*fighter-sized Polarity Cannon - primary weapon of Shadow fighters*/
+    class FtrPolarityCannon extends LinkedWeapon{
+        public $name = "FtrPolarityCannon";
+		public $iconPath = "ftrPolarityCannon.png";
+        public $displayName = "Polarity Cannon";
+        public $animation = "trail";
+        public $animationColor = array(45, 180, 255);
+        public $trailColor = array(45, 180, 255);
+        public $animationExplosionScale = 0.15;
+        public $projectilespeed = 12;
+        public $animationWidth = 2;
+        public $trailLength = 10;
+		public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
+
+        public $intercept = 0; //it seems that this weapon cannot intercept!
+        public $loadingtime = 1;
+		public $normalload = 2; //full power (one more shot) needs longer charge
+		public $guns = 2;//3 after a turn of charging
+
+        public $rangePenalty = 2; //-2/hex
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        public $priority = 5; //2d6+2 qualifies as "large" fighter weapon, I think! 
+
+        public $damageType = "Standard"; 
+        public $weaponClass = "Molecular"; 
+
+        function __construct($startArc, $endArc, $shots=1){
+            $this->shots = $shots;
+            $this->defaultShots = $shots;
+            //$this->intercept = $shots;
+            /* ATM no special graphics for multi-barrel weapons, as they do to exist
+            $ns = min(3,$shots); //no graphics for more than 3 weapons
+            $this->iconPath = "lightfusionCannon$ns.png";
+			*/
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+        
+        public function setSystemDataWindow($turn){
+            switch($this->turnsloaded){
+                case 2:
+                    $this->guns = 3;
+                    break;
+				default:
+                    $this->guns = 2;
+                    break;
+            }            
+            parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "Can fire accelerated ROF for less shots:";  
+			$this->data["Special"] .= "<br> - 1 turn: 2 shots"; 
+			$this->data["Special"] .= "<br> - 2 turns: 3 shots"; 
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(6,2)+2;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;		
+			$strippedSystem->guns = $this->guns;		
+			return $strippedSystem;
+		}
+
+    }//endof class ftrPolarityCannon
+
+
+	/*Molecular Slicer Beam - primary weapon of large Shadow ships. Light variety.*/
+    class MolecularSlicerBeamL extends Raking{
+		public $name = "MolecularSlicerBeamL";
+        public $displayName = "Light Slicer Beam";
+		public $iconPath = "MolecularSlicerBeamL.png";
+		
+        public $animation = "laser";
+        public $animationColor = array(213, 0, 255); //thick, purple beam
+        public $animationWidth = 4.5;
+        public $animationWidth2 = 0.8;
+        
+		
+		public $firingModes = array(1 =>'Raking', 2=>'3Split', 3=>'6Split');
+		
+        public $loadingtime = 1;
+		public $normalload = 3;
+		
+        public $rangePenalty = 0.33;//-1/3 hexes
+        public $fireControl = array(2, 4, 6); // fighters, <=mediums, <=capitals 
+        public $fireControlArray = array(1=>array(2, 4, 6), 2=>array(1, 3, 5), 3=>array(0, 2, 4) );
+        public $gunsArray = array(1=>1, 2=>3, 3=>6 );
+
+		public $priority = 7;//heavy Raking weapon - with armor-ignoring 
+		public $uninterceptable = true;
+
+		public $raking = 10;
+        public $damageType = "Raking"; 
+        public $weaponClass = "Molecular"; 
+		
+		
+		//Slicers are usually THE weapons of SHadow ships - hence higher repair priority
+		public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
+		
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){			
+            if ( $maxhealth == 0 ) $maxhealth = 10;
+            if ( $powerReq == 0 ) $powerReq = 10;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		/*Slicers ignore armor...*/
+		public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos=null){
+			return 0;
+        }
+	
+	    
+		public function setSystemDataWindow($turn){			
+			parent::setSystemDataWindow($turn);   
+			$this->data["Special"] = "Uninterceptable. Ignores armor.";  
+			$this->data["Special"] .= "<br>Can fire accelerated for less damage:";  
+			$this->data["Special"] .= "<br> - 1 turn: 4d10+4"; 
+			$this->data["Special"] .= "<br> - 2 turns: 6d10+6"; 
+			$this->data["Special"] .= "<br> - 3 turns: 8d10+8"; 
+			$this->data["Special"] .= "<br>Can split fire into 3 separate shots (at -1 FC) or 6 shots (-2 FC). Each shot will do appropriate portion of regular damage (rolled separately, rounded down).";  
+		}
+		
+		
+		public function getDivider(){ //by how much damage should be divided - depends on mode
+			$divider = 1;
+			switch($this->firingMode){
+					case 2:
+							$divider = 3;
+							break;
+					case 3:
+							$divider = 6;
+							break;
+					default:
+							$divider = 1;
+							break;
+			}
+			return $divider;
+		}
+		
+
+		public function getDamage($fireOrder){
+			$dmg = 0;
+            switch($this->turnsloaded){
+                case 1:
+                    $dmg = Dice::d(10,4)+4;
+					break;
+                case 2:
+                    $dmg = Dice::d(10,6)+6;
+					break;
+				default: //3 turns
+                    $dmg = Dice::d(10,8)+8;
+					break;
+            }
+			$dmg = floor($dmg/$this->getDivider());
+			return $dmg;
+		}
+        
+        public function setMinDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->minDamage = 8 ;
+                    break;
+                case 2:
+                    $this->minDamage = 12 ;  
+                    break;
+                default:
+                    $this->minDamage = 16 ;  
+                    break;
+            }
+			$this->minDamage = floor($this->minDamage/$this->getDivider()) ;   
+		}
+             
+        public function setMaxDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->maxDamage = 44 ;
+                    break;
+                case 2:
+                    $this->maxDamage = 66 ;  
+                    break;
+                default:
+                    $this->maxDamage = 88 ;  
+                    break;
+            }
+			$this->maxDamage = floor($this->maxDamage/$this->getDivider()) ;   
+		}
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			return $strippedSystem;
+		}
+
+	}//endof class MolecularSlicerBeamL
+
+
+
+	/*Molecular Slicer Beam - primary weapon of large Shadow ships. Regular variety.*/
+    class MolecularSlicerBeamM extends MolecularSlicerBeamL{
+		public $name = "MolecularSlicerBeamM";
+        public $displayName = "Slicer Beam";
+		public $iconPath = "MolecularSlicerBeamM.png";		   
+		
+		public $firingModes = array(1 =>'Raking', 2=>'3Split', 3=>'6Split', 4=>'9Split');
+		
+        public $rangePenalty = 0.33;//-1/3 hexes
+        public $fireControl = array(4, 6, 8); // fighters, <=mediums, <=capitals 
+        public $fireControlArray = array(1=>array(4, 6, 8), 2=>array(3, 5, 7), 3=>array(2, 4, 6), 4=>array(1, 3, 5) );
+        public $gunsArray = array(1=>1, 2=>3, 3=>6, 4=>9 );
+
+		public $priority = 7;//heavy Raking weapon - with armor-ignoring 
+		public $uninterceptable = true;
+
+		public $raking = 15;
+        public $damageType = "Raking"; 
+        public $weaponClass = "Molecular"; 
+		
+		
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){			
+            if ( $maxhealth == 0 ) $maxhealth = 15;
+            if ( $powerReq == 0 ) $powerReq = 12;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+	
+	    
+		public function setSystemDataWindow($turn){			
+			parent::setSystemDataWindow($turn);   
+			$this->data["Special"] = "Uninterceptable. Ignores armor. 15-point rakes.";  
+			$this->data["Special"] .= "<br>Can fire accelerated for less damage:";  
+			$this->data["Special"] .= "<br> - 1 turn: 8d10+12"; 
+			$this->data["Special"] .= "<br> - 2 turns: 12d10+24"; 
+			$this->data["Special"] .= "<br> - 3 turns: 16d10+36"; 
+			$this->data["Special"] .= "<br>Can split fire into 3 separate shots (at -1 FC), 6 shots (-2 FC) or 9 shots (-3 FC). Each shot will do appropriate portion of regular damage (rolled separately, rounded down).";  
+		}
+		
+		
+		public function getDivider(){ //by how much damage should be divided - depends on mode
+			$divider = 1;
+			switch($this->firingMode){
+					case 2:
+							$divider = 3;
+							break;
+					case 3:
+							$divider = 6;
+							break;
+					case 4:
+							$divider = 9;
+							break;
+					default:
+							$divider = 1;
+							break;
+			}
+			return $divider;
+		}
+		
+
+		public function getDamage($fireOrder){
+			$dmg = 0;
+            switch($this->turnsloaded){
+                case 1:
+                    $dmg = Dice::d(10,8)+12;
+					break;
+                case 2:
+                    $dmg = Dice::d(10,12)+24;
+					break;
+				default: //3 turns
+                    $dmg = Dice::d(10,16)+36;
+					break;
+            }
+			$dmg = floor($dmg/$this->getDivider());
+			return $dmg;
+		}
+        
+        public function setMinDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->minDamage = 8+12 ;
+                    break;
+                case 2:
+                    $this->minDamage = 12+24 ;  
+                    break;
+                default:
+                    $this->minDamage = 16+36 ;  
+                    break;
+            }
+			$this->minDamage = floor($this->minDamage/$this->getDivider()) ;   
+		}
+             
+        public function setMaxDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->maxDamage = 80+12 ;
+                    break;
+                case 2:
+                    $this->maxDamage = 120+24 ;  
+                    break;
+                default:
+                    $this->maxDamage = 160+36 ;  
+                    break;
+            }
+			$this->maxDamage = floor($this->maxDamage/$this->getDivider()) ;   
+		}
+		
+	}//endof class MolecularSlicerBeamM
+
+
+
+
+	/*Molecular Slicer Beam - primary weapon of large Shadow ships. Heavy variety (found only on slow-grown primordial ships).*/
+    class MolecularSlicerBeamH extends MolecularSlicerBeamL{
+		public $name = "MolecularSlicerBeamH";
+        public $displayName = "Heavy Slicer Beam";
+		public $iconPath = "MolecularSlicerBeamH.png";		   
+		
+		public $firingModes = array(1=>'Piercing', 2 =>'Raking', 3=>'3Split', 4=>'6Split', 5=>'9Split');
+		
+        public $rangePenalty = 0.33;//-1/3 hexes
+        public $fireControl = array(0, 2, 4); // fighters, <=mediums, <=capitals 
+        public $fireControlArray = array(1=>array(0,2,4), 2=>array(4, 6, 8), 3=>array(3, 5, 7), 4=>array(2, 4, 6), 5=>array(1, 3, 5) );
+        public $gunsArray = array(1=>1, 2=>1, 3=>3, 4=>6, 5=>9 );
+
+		public $priority = 2;//primary mode being Piercing! otherwise heavy Raking weapon - with armor-ignoring 
+		public $priorityArray = array(1=>2, 2=>7, 3=>7, 4=>7, 5=>7 );
+		public $uninterceptable = true;
+
+		public $raking = 15;
+        public $damageType = "Piercing"; 
+        public $damageTypeArray = array(1=>"Piercing", 2=>"Raking", 3=>"Raking", 4=>"Raking", 5=>"Raking" );
+        public $weaponClass = "Molecular"; 
+		
+		
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){			
+            if ( $maxhealth == 0 ) $maxhealth = 18;
+            if ( $powerReq == 0 ) $powerReq = 16;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		/*if charged for 3 turns and mode is Piercing - set doOverkill; otherwise unset it*/
+		public function changeFiringMode($newMode){
+			parent::changeFiringMode($newMode); 
+			if (($this->turnsloaded >=3) && ($this->firingMode==1)){
+				$this->doOverkill=true;
+			}else{
+				$this->doOverkill=false;
+			}				
+		}
+	
+	    
+		public function setSystemDataWindow($turn){			
+			parent::setSystemDataWindow($turn);   
+			$this->data["Special"] = "Uninterceptable. Ignores armor. 15-point rakes.";  
+			$this->data["Special"] = "<br>Full (3 turns arming) power can be unleashed only in Piercing mode, but it will become Piercing(Standard), with ability to overkill.";  
+			$this->data["Special"] = "<br>Raking shot can still be used (at 2 turns damage output).";  
+			$this->data["Special"] .= "<br>Can fire accelerated for less damage:";  
+			$this->data["Special"] .= "<br> - 1 turn: 8d10+12"; 
+			$this->data["Special"] .= "<br> - 2 turns: 16d10+24"; 
+			$this->data["Special"] .= "<br> - 3 turns: 24d10+36"; 
+			$this->data["Special"] .= "<br>Can split Raking fire into 3 separate shots (at -1 FC), 6 shots (-2 FC) or 9 shots (-3 FC). Each shot will do appropriate portion of regular damage (rolled separately, rounded down).";  
+		}
+		
+		
+		public function getDivider(){ //by how much damage should be divided - depends on mode
+			$divider = 1;
+			switch($this->firingMode){
+					case 3:
+							$divider = 3;
+							break;
+					case 4:
+							$divider = 6;
+							break;
+					case 5:
+							$divider = 9;
+							break;
+					default:
+							$divider = 1;
+							break;
+			}
+			return $divider;
+		}
+		
+
+		public function getDamage($fireOrder){
+			$dmg = 0;
+			$loadedtime = $this->turnsloaded;
+			if($this->firingMode > 1){//cannot use 3-turns power for shots other than Piercing
+				$loadedtime = min(2,$loadedtime);
+			}
+            switch($loadedtime){
+                case 1:
+                    $dmg = Dice::d(10,8)+12;
+					break;
+                case 2:
+                    $dmg = Dice::d(10,16)+24;
+					break;
+				case 3: //if actual 3 turns - remember to set weapon to overkilling in Piercing mode!
+				default: //3 turns
+                    $dmg = Dice::d(10,24)+36;
+					break;
+            }
+			$dmg = floor($dmg/$this->getDivider());
+			return $dmg;
+		}
+        
+        public function setMinDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->minDamage = 8+12 ;
+                    break;
+                case 2:
+                    $this->minDamage = 16+24 ;  
+                    break;
+                default:
+                    $this->minDamage = 24+36 ;  
+                    break;
+            }
+			$this->minDamage = floor($this->minDamage/$this->getDivider()) ;   
+		}
+             
+        public function setMaxDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->maxDamage = 80+12 ;
+                    break;
+                case 2:
+                    $this->maxDamage = 160+24 ;  
+                    break;
+                default:
+                    $this->maxDamage = 240+36 ;  
+                    break;
+            }
+			$this->maxDamage = floor($this->maxDamage/$this->getDivider()) ;   
+		}
+		
+	}//endof class MolecularSlicerBeamH
 
 
 ?>

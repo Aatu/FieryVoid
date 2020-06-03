@@ -719,6 +719,7 @@ shipManager.movement = {
 			if (biothruster.name == 'BioThruster'){
 				dmg = damageManager.getDamage(ship, biothruster);
 				if (dmg == 0) countFreshBiothrusters++;
+				if (countFreshBiothrusters>=2) break; //no point in looping through further systems!
 			}
 		}
 		if (countFreshBiothrusters < 2) return false;

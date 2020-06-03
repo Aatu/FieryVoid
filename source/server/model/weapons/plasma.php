@@ -7,32 +7,19 @@ class Plasma extends Weapon{
 
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-		
-		
-	public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
-		$armour = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
-		    if (is_numeric($armour)){
-			$toIgnore = ceil($armour /2);
-			$new = $armour - $toIgnore;
-			return $new;
-		    }
-		    else {
-			return 0;
-		    }
-        }
-    	
-		public function setSystemDataWindow($turn){
-			parent::setSystemDataWindow($turn);
-			$this->data["Special"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex).";
-			$this->data["Special"] .= "<br>Ignores half of armor.";
-		}
-		
-		public function setSystemData($data, $subsystem){
-			parent::setSystemData($data, $subsystem);
-			$this->setMinDamage();
-			$this->setMaxDamage();
-		}
+	}
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex).";
+		$this->data["Special"] .= "<br>Ignores half of armor.";
+	}
+	
+	public function setSystemData($data, $subsystem){
+		parent::setSystemData($data, $subsystem);
+		$this->setMinDamage();
+		$this->setMaxDamage();
+	}
 		
 } //endof class Plasma
 

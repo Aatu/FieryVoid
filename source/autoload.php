@@ -1233,7 +1233,7 @@ spl_autoload_register(
 				'outputhalved' => '/server/model/cricialClasses.php',
 				'whitestarcmd' => '/server/model/ships/minbari/whitestarCmd.php',
 				
-				//energy diffuser
+				//Shadowtech
                 'technicaltestbed' => '/server/model/ships/customs/technicalTestbed.php',
                 'technicaltestbedftr' => '/server/model/ships/customs/technicalTestbedFtr.php',
 				'selfrepair' => '/server/model/systems/baseSystems.php',
@@ -1242,14 +1242,31 @@ spl_autoload_register(
 				'diffusertendrilFtr' => '/server/model/systems/baseSystems.php',
                 'tendrildestroyed' => '/server/model/cricialClasses.php',
                 'tendrilcapacityreduced' => '/server/model/cricialClasses.php',
-				//BioDrive
 				'biodrive' => '/server/model/systems/baseSystems.php',
 				'biothruster' => '/server/model/systems/baseSystems.php',
-				//Shadow Pilot				
 				'shadowpilot' => '/server/model/systems/baseSystems.php',
 				'shadowpilotpain' => '/server/model/cricialClasses.php',
-				//other Shadows
 				'phasingdrive' => '/server/model/systems/baseSystems.php',
+				
+				//Shadow weapons
+				'ftrpolaritycannon' => '/server/model/weapons/molecular.php', 
+				'molecularslicerbeaml' => '/server/model/weapons/molecular.php', 
+				'molecularslicerbeamm' => '/server/model/weapons/molecular.php', 
+				'molecularslicerbeamh' => '/server/model/weapons/molecular.php', 
+                'vortexdisruptor' => '/server/model/weapons/specialWeapons.php',  
+				
+				
+				//Shadow units
+				'shadowmediumfighterflight' => '/server/model/ships/shadows/shadowMediumFighterFlight.php',
+				'shadowpatrolcruiser' => '/server/model/ships/shadows/shadowPatrolCruiser.php',
+								
+				//just test of all images:
+				'shadowdestroyer' => '/server/model/ships/shadows/shadowDestroyer.php',
+				'shadowcruiser' => '/server/model/ships/shadows/shadowCruiser.php',
+				'shadowbattlecruiser' => '/server/model/ships/shadows/shadowBattleCruiser.php',
+				'shadowdreadnought' => '/server/model/ships/shadows/shadowDreadnought.php',
+				
+				
 				
 				//Raider Civilians Refresh
 				'privateerlessara' => '/server/model/ships/centauri_raiders/PrivateerLessara.php',

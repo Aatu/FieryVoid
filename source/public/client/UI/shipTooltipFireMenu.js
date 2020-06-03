@@ -4,11 +4,16 @@ window.ShipTooltipFireMenu = function () {
 
     function ShipTooltipFireMenu(selectedShip, targetedShip, turn) {
         ShipTooltipMenu.call(this, selectedShip, targetedShip, turn);
+		var movement = shipManager.movement.getLastCommitedMove(targetedShip);
+        this.hexagon = new hexagon.Offset(movement.position);
     }
 
     ShipTooltipFireMenu.prototype = Object.create(ShipTooltipMenu.prototype);
 
-    ShipTooltipFireMenu.buttons = [{ className: "targetWeapons", condition: [isEnemy, hasWeaponsSelected], action: targetWeapons, info: "Target selected weapons" }];
+    ShipTooltipFireMenu.buttons = [
+		{ className: "targetWeapons", condition: [isEnemy, hasWeaponsSelected], action: targetWeapons, info: "Target selected weapons" },
+        { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" }
+	];
 
     ShipTooltipFireMenu.prototype.getAllButtons = function () {
         return ShipTooltipFireMenu.buttons.concat(ShipTooltipMenu.prototype.getAllButtons.call(this));
@@ -16,6 +21,10 @@ window.ShipTooltipFireMenu = function () {
 
     function targetWeapons() {
         weaponManager.targetShip(this.selectedShip, this.targetedShip);
+    }	
+	
+    function targetHexagon() {
+        weaponManager.targetHex(this.selectedShip, this.hexagon );
     }
 
     function isEnemy() {
@@ -24,6 +33,13 @@ window.ShipTooltipFireMenu = function () {
 
     function hasWeaponsSelected() {
         return gamedata.selectedSystems.length > 0;
+    }
+	
+    function hasHexWeaponsSelected() {
+        return gamedata.selectedSystems.some(function (system) {
+            //return system instanceof Weapon && system.targetsShips === false;
+            return system instanceof Weapon && system.hextarget === true;
+        });
     }
 
     return ShipTooltipFireMenu;

@@ -62,7 +62,7 @@ FIRING AND WEAPONS
  - Ramming takes place in ship fire step (even if ramming ship is fighter). So ship fire from guns destroyed in ramming will still happen.
  - all ramming attacks are resolved separately. So if two units try to ram each other, and they both hit, ramming damage is effectively applied twice!
  - Piercing attacks have quirky way of finding whether damage should be split into 2 or 3 parts - essentially split to 2 if shot enters and exits through the same section.
- - Piercing damage vs MCVs is reduced by 20% (instead of -2/die).
+ - Piercing damage vs MCVs is reduced by 10% (instead of -2/die).
  - Piercing attacks can be made without special requirements regarding EW - appropriate penalty is always included in fire control. 
  
 

@@ -583,7 +583,7 @@ window.weaponManager = {
 			sdew = 0;
 		}	
 		
-		//half-phasing target is ore difficult to hit
+		//half-phasing target is more difficult to hit
 		var halfphase = 0;
 		if(shooter && weapon){ //consider half-phasing in calculations for a particular shot, but not in base profile
 			if (shipManager.movement.isHalfPhased(target)){
@@ -754,7 +754,8 @@ window.weaponManager = {
 		noLockMod =  rangePenalty * noLockPenalty;    
         var jammermod = 0;
 	    
-		if (shooter.faction != target.faction) {
+		//if (shooter.faction != target.faction){ //moved to getJammerValueFromTo!
+		
 			jammermod = ew.getJammerValueFromTo(shooter,target); //accounts for both jammer and stealth!
 			/* replaced by code above
             var jammer = shipManager.systems.getSystemByName(target, "jammer");
@@ -790,7 +791,7 @@ window.weaponManager = {
                     jammermod = jammermod - jinking;
                 }
             }
-        }
+        
 
         var firecontrol = weaponManager.getFireControl(target, weapon);
 		
@@ -1427,7 +1428,7 @@ window.weaponManager = {
         });
     },
 
-    getAllHexTargetedBallistics: function getAllHexTargetedBallistics() {
+    getAllHexTargetedBallistics: function getAllHexTargetedBallistics() { //that's all hex targeted weapons, not just ballistics
         return gamedata.ships.reduce(function (fires, shooter) {
             return fires.concat(weaponManager.getAllFireOrders(shooter).filter(function (fire) {
                 return fire.targetid === -1;

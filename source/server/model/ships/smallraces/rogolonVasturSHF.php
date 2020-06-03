@@ -40,6 +40,7 @@ class RogolonVasturSHF extends SuperHeavyFighter{
         $gun = new RogolonLtPlasmaGun(150, 210, 6, 1);
         $gun->displayName = 'Imp. Lt. Plasma Gun';
         $fighter->addAftSystem($gun);
+		$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
         
         $this->addSystem($fighter);
     }

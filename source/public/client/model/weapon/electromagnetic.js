@@ -53,3 +53,9 @@ var StunBeam = function StunBeam(json, ship) {
 };
 StunBeam.prototype = Object.create(Electromagnetic.prototype);
 StunBeam.prototype.constructor = StunBeam;
+
+var VortexDisruptor = function VortexDisruptor(json, ship) {
+    Electromagnetic.call(this, json, ship);
+};
+VortexDisruptor.prototype = Object.create(Electromagnetic.prototype);
+VortexDisruptor.prototype.constructor = VortexDisruptor;

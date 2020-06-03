@@ -37,6 +37,7 @@ class RogolonChelekFtr extends FighterFlight{
             $fighter->iconPath = "img/ships/RogolonChelek_Large.png"; 
 
             $fighter->addFrontSystem(new RogolonLtPlasmaGun(330, 30, 5, 2));
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
             $this->addSystem($fighter);
        }
     }

@@ -40,7 +40,7 @@ class TechnicalTestbed extends MediumShip{
         $this->addPrimarySystem(new Scanner(3, 14, 3, 6));
 		$this->addPrimarySystem(new PhasingDrive(4, 16, 5, 15));		
 		$this->addPrimarySystem(new Hangar(3, 1));
-        $this->addPrimarySystem(new SelfRepair(5, 6, 23)); //armor, structure, output
+        $this->addPrimarySystem(new SelfRepair(5, 6, 3)); //armor, structure, output
 		
 		
 		//EnergyDiffuser		
@@ -82,7 +82,7 @@ class TechnicalTestbed extends MediumShip{
 		
 		
 		//BioDrive
-		$bioDrive = new BioDrive(3); //ONLY efficiency
+		$bioDrive = new BioDrive();
 		
 		$bioThruster = new BioThruster(4,10,3); //armour, health, output
 		$bioDrive->addThruster($bioThruster);

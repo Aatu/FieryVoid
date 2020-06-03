@@ -2,7 +2,10 @@ FACTIONS available in Fiery Void
 notable technologies, special rules, differences from official version (if applicable)
 
 
+
+
 GENERAL NOTES
+-------------
 Custom designs - some units are marked as "custom". This means they're not official designs released by AoG. This means they may not be evaluated as well as official ones, as well as they may not fit into the faction as originally designed.
 	Before using custom units it's good practice to make sure that Your opponent allows that (and if You create a game with such units allowed - say so explicitly in game description!)
 Unit enhancements - Fiery Void allows players to add enhancements to their ships (full list is available in separate file). Keep in mind that unit enhancements are originally optional rule, and enhancements may not be evaluated as well as base hulls (although they're generally pricy compared to their effect!). 
@@ -13,6 +16,13 @@ Fleet checker - tool that performs automatic check of fleet composition (using s
 	- fighter variant restrictions are at flight level. This means that flight size does not matter, please do not abuse this. Secondly, official rules says fighter variant restrictions are of FLIGHTS per SQUADRONS (eg. uncommon - one flight per three squadrons). FV goes for straight one per three flights (this is a deliberate change). 
 	- Fiery Void scales restrictions with fleet size (base rules have some restrictions flat aimed at 3500 level, eg. up to 3 ships on a given hull - this would have been ridiculous in 10000 points battle and hardly a limit at 2000)
 
+
+
+
+
+
+AVAILABLE FACTIONS
+------------------
 
 ABBAI
 Gravitic Shield - most Abbai units are equipped with Gravitic Shield. Active shield reduces both hit chance and damage of incoming fire. At range 0 fighters are assumed to be able to come close enough to ignore ship shields.
@@ -65,9 +75,6 @@ Guardian Array - primarily defensive weapon that can intercept fire directed at 
 	Also, definition of "between" was changed. In FV weapon is "between" firing unit and its target if bearing difference on them is at least 120 degrees (2 hexsides).
 
 
-CENTAURI (Raiders)
-Units specific for Centauri Privateers.
-No very specific technologies.
 
 CENTAURI (WotCR)
 Centauri fleet a few hundred years before the show era, representing Wars of the Centauri Republic period.
@@ -118,11 +125,11 @@ Hangar space - Drakh LCVs do require hangar space (like regular LCVs). They shar
 
 
 DRAZI
-No very specific rules/technologies.
+No very specific rules/technologies, although using alternate HCV layout is very notable and results in surprisingly resilient ships.
 
 
-DRAZI (Raiders)
-Units specific for Drazi Privateers.
+DRAZI (WotCR)
+Centauri fleet a few hundred years before the show era, representing Wars of the Centauri Republic period.
 No very specific rules/technologies.
 
 
@@ -262,3 +269,76 @@ We portrayed SW units as quite durable for their size, and that durability is bo
 StarWars Sensors are portrayed to be generally of lower tech than B5 ones. This is portrayed by generally low output and limited boostability (notably ElInt boostability is not reduced though). However, LCV do have full-blown sensors, without B5 LCV Sensors limitations. 
 
 	
+	
+	
+
+
+
+POWER RATINGS
+-------------
+Below is totally subjective grouping of factions by power rating. Factions from the same power bracket should be suitable for well-matched competitive gaming – while matching different bracked would probably lead to one players’ advantage at nominally equal points. In a few cases I took liberty to highlight a particular build as a separate ‘faction’.
+Note that evaluation (just like point values) assumes standard conditions (default-sized fixed map, basically) – changing conditions throws it away.
+
+
+EASY AND FORGIVING
+Factions that are particularly easy to fly, and recommended for new players. Use these factions for Your first set of battles – You will fight interface and opponent, let Your ships make that a bit easier for You! When You feel that period is over and want to expand – be advised to still avoid factions marked as particularly difficult.
+Drazi (their jack-of-all-trades ships are very flexible and can unleash full power against any oponent, while their layout makes tchem surprisingly resistant to damage).
+Narn (very tough and with powerful weapons – they may not be fancy, but they get the job done and refuse to die even if put in unfavorable position; average in most other aspects, which gives good feeling of what You want from Your units and allows informed choices for expanding Your picks)
+EA (extremely tough, with awesome defenses and good firepower – balanced by difficulties with firepower concentration. Their resilience to damage makes them very forgiving to any mistakes a beginner may make)
+ 
+
+SUPERIOR
+Factions that, point for point, usually beat First League. That may be due to overall superior value or some special side effect of their rules, so simply allowing opponent extra PV might not be enough to balance things.
+Yolu
+EA using Warlock
+ISA (eg. all-White Star fleet)
+Narn using massed EMines
+ 
+
+FIRST LEAGUE
+This is default Big4 power level – what I consider to be the ‘baseline’ of competitive play. Smaller factions may fit here due to their raw power, but usually won’t allow flexibility of fleet design offered by major factions.
+Brakiri
+Centauri
+Dilgar
+Drakh (although, as they’re Middleborn rather than Young race, they exhibit some traits similar to Ancients – so be warned!)
+Drazi
+EA (barring Warlock)
+Llort
+Minbari (Jammer is very daunting, expecially to new players – it’s easy to feel overwhelmed; at the same time flying Minbari is not easy either. It’s advised to stay away from them on either side of the table until You feel You have solid command of the game)
+Narn (barring massed EMines)
+Orieni (this one is tricky – will usually feel superior against average player due to raw damage output of Hunter-Killers and massed RGRs, while remaining vulnerable against sharp handling by expert oponent; if You don’t consider Yourself an expert, be advised to treat Orieni as Superior faction)
+Torata (? – I still don’t have enough experience with them – but tenatively I am putting them here ;) )
+ 
+
+SECOND LEAGUE
+Factions that point for point will have uphill battle against First League, yet otherwise are balanced and competitive. Should be interesting to play against each other, and if given some extra PV allowance – against First League as well. Most of these factions do not offer fleet build flexibility of major factions, but may offer a very distinct handling/playstyle instead.
+Abbai
+Balosian
+Belt Alliance (Small Races)
+Cascor
+Centauri (WotCR)
+Ch’Lonas
+Deneth
+Drazi (WotCR)
+Ipsha
+Markab
+Raiders (note plethora of background-driven options – Raiders often use a hodgepodge of units and formal FV fleet selection rules don’t always do them justice!)
+Star Wars
+
+
+THE REST
+Factions that cannot seriously compete. Usually they have some deficiencies that cannot be fixed by simply increasing their PV allowance (like combination of poor maneuvrability/poor Sensors/short range weapons on low-tech ships or some glaring weakness in overall fleet layout).
+Abbai (WotCR)
+Alacan (Small Races)
+Hurr
+Rogolon (Small Races)
+Sorithian (Small Races)
+Usuuth
+
+
+ANCIENTS
+Factions that can’t really be balanced vs Young Races. Overall high power and durability and selective ignoring enemy systems (especially defensive ones – which hurts some opponents while leaving others untouched) coupled with small numer of shots and relative vulnerability to swarms are impossible to properly balance for pickup battle. For these reasons Ancients got their own category.
+Shadows
+Streib (actually an advanced Young race, but their ship design is peculiar enough for them to feel surprisingly Ancient-like when it comes to balancing: some opponents are easily overwhelmed (especially those that  rely on mass of individually light shots), while others are overwhelming themselves (especially if they’re resistant to EM weapons or have high quantity of armor-ignoring weapons) )
+
+ 
