@@ -44,6 +44,8 @@ class Raiderglaive extends FighterFlight{
 			$fighter->addFrontSystem(new PairedPlasmaBlaster(330, 30));
 			
 			
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+			
 			$this->addSystem($fighter);
 			
 		}

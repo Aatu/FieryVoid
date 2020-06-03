@@ -36,7 +36,7 @@ class Cobra extends FighterFlight{
 		$fighter->iconPath = "img/ships/dragon_large.png"; 
 			
 		$fighter->addFrontSystem(new PairedParticleGun(330, 30, 2));
-	    	$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+	    $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
 		$this->addSystem($fighter);
 	}

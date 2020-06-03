@@ -4,7 +4,7 @@ class ShadowCruiser extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 950;
+		$this->pointCost = 2750;
 		$this->faction = "Shadows";
         $this->phpclass = "ShadowCruiser";
         $this->imagePath = "img/ships/ShadowCruiser.png";
@@ -13,6 +13,8 @@ class ShadowCruiser extends MediumShip{
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 3; //it's actually a Capital ship using MCV layout
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+$this->faction = "Custom Ships";
+$this->variantOf = "Lurking unseen";        
         
         $this->forwardDefense = 16;
         $this->sideDefense = 15;

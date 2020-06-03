@@ -599,6 +599,10 @@
         public $weaponClass = "Molecular"; 
 		
 		
+		//Slicers are usually THE weapons of SHadow ships - hence higher repair priority
+		public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
+		
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){			
             if ( $maxhealth == 0 ) $maxhealth = 10;
@@ -823,22 +827,24 @@
 		public $firingModes = array(1=>'Piercing', 2 =>'Raking', 3=>'3Split', 4=>'6Split', 5=>'9Split');
 		
         public $rangePenalty = 0.33;//-1/3 hexes
-        public $fireControl = array(4, 6, 8); // fighters, <=mediums, <=capitals 
-        public $fireControlArray = array(1=>array(4, 6, 8), 2=>array(3, 5, 7), 3=>array(2, 4, 6), 4=>array(1, 3, 5) );
-        public $gunsArray = array(1=>1, 2=>3, 3=>6, 4=>9 );
+        public $fireControl = array(0, 2, 4); // fighters, <=mediums, <=capitals 
+        public $fireControlArray = array(1=>array(0,2,4), 2=>array(4, 6, 8), 3=>array(3, 5, 7), 4=>array(2, 4, 6), 5=>array(1, 3, 5) );
+        public $gunsArray = array(1=>1, 2=>1, 3=>3, 4=>6, 5=>9 );
 
-		public $priority = 7;//heavy Raking weapon - with armor-ignoring 
+		public $priority = 2;//primary mode being Piercing! otherwise heavy Raking weapon - with armor-ignoring 
+		public $priorityArray = array(1=>2, 2=>7, 3=>7, 4=>7, 5=>7 );
 		public $uninterceptable = true;
 
 		public $raking = 15;
-        public $damageType = "Raking"; 
+        public $damageType = "Piercing"; 
+        public $damageTypeArray = array(1=>"Piercing", 2=>"Raking", 3=>"Raking", 4=>"Raking", 5=>"Raking" );
         public $weaponClass = "Molecular"; 
 		
 		
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){			
-            if ( $maxhealth == 0 ) $maxhealth = 15;
-            if ( $powerReq == 0 ) $powerReq = 12;
+            if ( $maxhealth == 0 ) $maxhealth = 18;
+            if ( $powerReq == 0 ) $powerReq = 16;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		

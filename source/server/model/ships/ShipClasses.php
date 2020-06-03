@@ -604,7 +604,7 @@ class BaseShip {
             if (isset($this->systems[$id])){
                 return $this->systems[$id];
             }
-            else{/* no longer needed, dou/dual weapon is obsolete
+            else{/* no longer needed, duo/dual weapon is obsolete
                 foreach($this->systems as $system){
 					
                     if($system instanceof Weapon && ($system->duoWeapon || $system->dualWeapon)){

@@ -47,6 +47,8 @@ class Raiderphalan extends FighterFlight{
             		$largeGun->exclusive = true; 
             		$fighter->addFrontSystem($largeGun);			
 			
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+			
 			$this->addSystem($fighter);
 			
 		}	

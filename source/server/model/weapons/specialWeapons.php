@@ -134,7 +134,7 @@ class ShockCannon extends Weapon{
 			$dmgToReturn = $damage;
 			if ($system instanceof Structure){
 				$dmgToReturn = 0; //no Structure damage
-				if (!$system->advancedArmor){ //advanced armor prevents non-damaging EM effects
+				if (!WeaponEM::isTargetEMResistant($ship,$system)){ //advanced armor prevents non-damaging EM effects
 					$reactor = $ship->getSystemByName("Reactor");
 					$outputMod = -floor($damage/4);
 					if($outputMod < 0){
@@ -149,7 +149,7 @@ class ShockCannon extends Weapon{
 
         public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 			//effects on Structure hits already handled by beforeDamagedSystem
-			if (!$system->advancedArmor){ //advanced armor prevents non-damaging EM effects
+			if (!WeaponEM::isTargetEMResistant($ship,$system)){ //advanced armor prevents non-damaging EM effects
 				$crit = null;
 				if ($system instanceof Fighter && !($ship->superheavy)){
 					$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
@@ -1088,6 +1088,12 @@ class EmBolter extends Weapon{
 	public function fire($gamedata, $fireOrder){
 		// If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
 		parent::fire($gamedata, $fireOrder);
+		
+		$turnEndEffect = $gamedata->turn + $this->cooldown;
+		$crit = new ForcedOfflineForTurns(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $turnEndEffect);
+		$crit->updated = true;
+		$this->criticals[] = $crit;
+		/*replaced by ForTurns crit above
 		for($i = 1; $i<=$this->cooldown;$i++){		
 			$trgtTurn = $gamedata->turn+$i-1;//start on current turn rather than next!
 			$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
@@ -1095,6 +1101,7 @@ class EmBolter extends Weapon{
 			$crit->newCrit = true; //force save even if crit is not for current turn
 			$this->criticals[] =  $crit;
 		}	
+		*/
 	} //endof function fire
 	
 	
@@ -1514,10 +1521,11 @@ class SurgeCannon extends Raking{
 	    }
 		*/
 		if ($this->firingMode > 1){
-			$turnEndEffect = $gamedata->turn+$this->firingMode-1;//2combined for 1 turn, 3combined for 2 turns...
-			$crit = new ForcedOfflineForTurns (-1, $fireOrder->shooterid, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $turnEndEffect);
+			$turnEndEffect = $gamedata->turn + $this->firingMode - 1;//2combined for 1 turn, 3combined for 2 turns...
+			$crit = new ForcedOfflineForTurns(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $turnEndEffect);
 			$crit->updated = true;
-			$system->criticals[] = $crit;
+			$crit->newCrit = true; //force save even if crit is not for current turn
+			$this->criticals[] = $crit;
 		}
 	} //endof function fire
 	
@@ -1932,10 +1940,10 @@ class ResonanceGenerator extends Weapon{
 			$this->criticals[] =  $crit;
 		}
 		*/		
-		$turnEndEffect = $gamedata->turn+2;//2 turns
+		$turnEndEffect = $gamedata->turn+$this->cooldown;//2 turns
 		$crit = new ForcedOfflineForTurns (-1, $fireOrder->shooterid, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $turnEndEffect);
 		$crit->updated = true;
-		$system->criticals[] = $crit;
+		$this->criticals[] = $crit;
 	} //endof function fire
 	
 	
@@ -2030,10 +2038,10 @@ class SurgeBlaster extends Weapon{
 			$this->criticals[] =  $crit;
 		}
 		*/		
-		$turnEndEffect = $gamedata->turn+2;//2 turns
+		$turnEndEffect = $gamedata->turn+$this->cooldown;//2 turns
 		$crit = new ForcedOfflineForTurns (-1, $fireOrder->shooterid, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $turnEndEffect);
 		$crit->updated = true;
-		$system->criticals[] = $crit;
+		$this->criticals[] = $crit;
 	} //endof function fire
 	
 	
@@ -2617,11 +2625,7 @@ class VortexDisruptor extends Weapon{
 	public $doNotIntercept = true; //although I don't think a weapon exists that could intercept it...
 	public $priority = 1;
 	
-	//Vortex Disruptor, outside of scenarios, is purely a power source - and Shadows don't have all that much use for extra power. Minimal priority for repair.
-	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-    	
-	
-	public $range = 24;//no point firing at further target with base 24 to hit!
+	public $range = 23;//no point firing at further target with base 24 to hit!
 	public $loadingtime = 3;
     public $rangePenalty = 1;//-1/hex
 	
@@ -2640,11 +2644,18 @@ class VortexDisruptor extends Weapon{
 	);
 		
 		
+	
+	//in pickup play it's essentially a power source - and Shadows don't have all that much use for extra power. Very low repair priority,although maybe above Hangars ;)
+	public $repairPriority = 2;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    	
+		
+		
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);  
 		$this->data["Special"] = "Weapon that destabilizes hyperspace vortexes, therefore preventing escape (any ships entering destabilized vortex is destroyed).";      
 		$this->data["Special"] .= "<br>There are no actual vortexes in game, but such action might be useful for a scenario - in such case, target weapon on a hex where (by scenario narration) vortex appears."; //originally just charging cycle resets - but I opted for simpler (if stronger) effect. 
-		$this->data["Special"] .= "<br>Game will calculate whether disruption was successful (base chance is 120%, -5%/hex - EW is irrelevant).";  
+		$this->data["Special"] .= "<br>Game will calculate whether disruption was successful (base chance is 120%, -5%/hex - EW is irrelevant) - but will NOT show it during targeting.";  
+		$this->data["Special"] .= "<br>Being half-phased renders weapon ineffective (hit chance = 0)."; 
 	}	
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
@@ -2657,22 +2668,27 @@ class VortexDisruptor extends Weapon{
 	
 	public function calculateHitBase($gamedata, $fireOrder)
 	{
-		$fireOrder->needed = 120;
 		//reduce by distance...
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$shooterHalfphased = Movement::isHalfPhased($shooter, $gamedata->turn);
 		$firingPos = $shooter->getHexPos();
 		if ($fireOrder->targetid != -1) { //for some reason ship was targeted!
-            $targetship = $gamedata->getShipById($fireOrder->targetid);
-            //insert correct target coordinates: target ships' position!
-            $targetPos = $targetship->getHexPos();
-            $fireOrder->x = $targetPos->q;
-            $fireOrder->y = $targetPos->r;
-            $fireOrder->targetid = -1; //correct the error
-        }
+			$targetship = $gamedata->getShipById($fireOrder->targetid);
+			//insert correct target coordinates: target ships' position!
+			$targetPos = $targetship->getHexPos();
+			$fireOrder->x = $targetPos->q;
+			$fireOrder->y = $targetPos->r;
+			$fireOrder->targetid = -1; //correct the error
+		}
 		$targetPos = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
 		$dis = mathlib::getDistanceHex($firingPos, $targetPos);
 		$rangePenalty = $this->rangePenalty * $dis;
-		$fireOrder->needed -= $rangePenalty;
+		if($shooterHalfphased){ //this prevents Disruptor from working 
+			$fireOrder->needed = 0;
+		}else{//calculate hit chance: 24 minus range penalty
+			$fireOrder->needed = 24 - $rangePenalty;
+			$fireOrder->needed = $fireOrder->needed *5; //convert to d100
+		}
 		$fireOrder->notes .=  "shooter: " . $firingPos->q . "," . $firingPos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty ";
 		$fireOrder->updated = true;
 	}
@@ -2683,6 +2699,7 @@ class VortexDisruptor extends Weapon{
         $shooter = $gamedata->getShipById($fireOrder->shooterid);        
         $rolled = Dice::d(100);
         $fireOrder->rolled = $rolled; 
+		$fireOrder->pubnotes .= " chance " . $fireOrder->needed . "%,";
 		if($rolled <= $fireOrder->needed){//HIT!
 			$fireOrder->pubnotes .= " HIT - target vortex is disrupted, ships entering it are destroyed! ";
 			$fireOrder->shotshit++;

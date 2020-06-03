@@ -32,6 +32,7 @@ class AlacanRotiaFlight extends FighterFlight{
             $frontGun = new LightParticleBeam(330, 30, 2, 1);
             $frontGun->displayName = "Light Particle Gun";
             $fighter->addFrontSystem($frontGun);
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
             $this->addSystem($fighter);
         }
     }

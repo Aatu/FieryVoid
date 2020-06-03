@@ -88,7 +88,7 @@ class Enhancements{
 		  }		  
 	  }	  
 	  
-	  //Improved Sensors : +1 Sensors, cost: new rating *5 (double for ElInt), limit: 1
+	  //Improved Sensors : +1 Sensors, cost: new rating *5 (double for ElInt, double for Advanced Sensors), limit: 1
 	  $enhID = 'IMPR_SENS';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Improved Sensor Array';
@@ -96,14 +96,19 @@ class Enhancements{
 		  //find strongest sensors... which don't need to be called Sensors!
 		  $strongestValue = -1;	  
 		  $multiplier = 1;
+		  $elint = false;
+		  $advanced = false;
 		  foreach ($ship->systems as $system){
 			if ($system instanceof Scanner){
 				if($system->output > $strongestValue) {
 					$strongestValue = $system->output;
-					if ($system instanceof ElintScanner) $multiplier = 2;
+					if ($system instanceof ElintScanner) $elint = true;
+					if ($system->boostEfficiency == 14) $advanced = true; //advanced sensors have fixed boost cost of 14
 				}
 			}
-		  }  
+		  } 
+		  if($elint) $multiplier++;
+		  if($advanced) $multiplier++;
 		  if($strongestValue > 0){ //Sensors actually exist to be enhanced!
 			  $enhPrice = max(1,($strongestValue+1)*5) * $multiplier;	  
 			  $enhPriceStep = 0;
