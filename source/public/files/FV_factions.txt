@@ -276,7 +276,7 @@ StarWars Sensors are portrayed to be generally of lower tech than B5 ones. This 
 
 POWER RATINGS
 -------------
-Below is totally subjective grouping of factions by power rating. Factions from the same power bracket should be suitable for well-matched competitive gaming – while matching different bracked would probably lead to one players’ advantage at nominally equal points. In a few cases I took liberty to highlight a particular build as a separate ‘faction’.
+Below is totally subjective grouping of factions by power rating. Factions from the same power bracket should be suitable for well-matched (which doesn't mean perfect!) competitive gaming – while matching different bracked would usually lead to one players’ advantage at nominally equal points. In a few cases I took liberty to highlight a particular build as a separate ‘faction’.
 Note that evaluation (just like point values) assumes standard conditions (default-sized fixed map, basically) – changing conditions throws it away.
 
 
@@ -296,15 +296,15 @@ Yolu
  
 
 FIRST LEAGUE
-This is default Big4 power level – what I consider to be the ‘baseline’ of competitive play. Smaller factions may fit here due to their raw power, but usually won’t allow flexibility of fleet design offered by major factions.
+This is default Big4 power level in show era – what I consider to be the ‘baseline’ of competitive play. Smaller factions may fit here due to their raw power, but usually won’t allow flexibility of fleet design offered by major factions.
 Brakiri
 Centauri
 Dilgar
-Drakh (although, as they’re Middleborn rather than Young race, they exhibit some traits similar to Ancients – so be warned!)
+Drakh (although, being Middleborn rather than Young race, they exhibit some traits similar to Ancients – not enough to kick them to Ancients grouping though)
 Drazi
 EA (barring Warlock)
 Llort
-Minbari (Jammer is very daunting, expecially to new players – it’s easy to feel overwhelmed; at the same time flying Minbari is not easy either. It’s advised to stay away from them on either side of the table until You feel You have solid command of the game)
+Minbari (warning: Jammer is very daunting, expecially to new players – it’s easy to feel overwhelmed; at the same time flying Minbari is not easy either. It’s advised to stay away from them on either side of the table until You feel You have solid command of the game)
 Narn (barring massed EMines)
 Orieni (this one is tricky – will usually feel superior against average player due to raw damage output of Hunter-Killers and massed RGRs, while remaining vulnerable against sharp handling by expert oponent; if You don’t consider Yourself an expert, be advised to treat Orieni as Superior faction)
 Torata (? – I still don’t have enough experience with them – but tenatively I am putting them here ;) )
@@ -339,6 +339,6 @@ Usuuth
 ANCIENTS
 Factions that can’t really be balanced vs Young Races. Overall high power and durability and selective ignoring enemy systems (especially defensive ones – which hurts some opponents while leaving others untouched) coupled with small numer of shots and relative vulnerability to swarms are impossible to properly balance for pickup battle. For these reasons Ancients got their own category.
 Shadows
-Streib (actually an advanced Young race, but their ship design is peculiar enough for them to feel surprisingly Ancient-like when it comes to balancing: some opponents are easily overwhelmed (especially those that  rely on mass of individually light shots), while others are overwhelming themselves (especially if they’re resistant to EM weapons or have high quantity of armor-ignoring weapons) . They are definitely NOT up to fighting actual Ancients though! )
+Streib (actually a Young race, but their ship design and technology is peculiar enough for them to feel surprisingly Ancient-like when it comes to balancing: some opponents are easily overwhelmed (especially those that  rely on mass of individually light shots), while others are overwhelming themselves (especially if they’re resistant to EM weapons or have high quantity of armor-ignoring weapons) . They are definitely NOT up to fighting actual Ancients though! )
 
  
