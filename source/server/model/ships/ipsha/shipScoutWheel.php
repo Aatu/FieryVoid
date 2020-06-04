@@ -80,10 +80,10 @@ class ShipScoutWheel extends BaseShip{
         $this->addRightSystem(new MagGraviticThruster(4, 15, 0, 99, 4));
 		
 		
-        $this->addFrontSystem(new Structure(4, 45));
-        $this->addAftSystem(new Structure(4, 45));
-        $this->addLeftSystem(new Structure(4, 60));
-        $this->addRightSystem(new Structure(4, 60));
+        $this->addFrontSystem(new Structure(5, 45));
+        $this->addAftSystem(new Structure(5, 45));
+        $this->addLeftSystem(new Structure(5, 60));
+        $this->addRightSystem(new Structure(5, 60));
         $this->addPrimarySystem(new Structure(5, 64));
 		
 		
