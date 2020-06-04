@@ -579,6 +579,7 @@
         public $animationColor = array(213, 0, 255); //thick, purple beam
         public $animationWidth = 4.5;
         public $animationWidth2 = 0.8;
+		public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
         
 		
 		public $firingModes = array(1 =>'Raking', 2=>'3Split', 3=>'6Split');
@@ -719,7 +720,6 @@
         public $gunsArray = array(1=>1, 2=>3, 3=>6, 4=>9 );
 
 		public $priority = 7;//heavy Raking weapon - with armor-ignoring 
-		public $uninterceptable = true;
 
 		public $raking = 15;
         public $damageType = "Raking"; 
@@ -833,7 +833,6 @@
 
 		public $priority = 2;//primary mode being Piercing! otherwise heavy Raking weapon - with armor-ignoring 
 		public $priorityArray = array(1=>2, 2=>7, 3=>7, 4=>7, 5=>7 );
-		public $uninterceptable = true;
 
 		public $raking = 15;
         public $damageType = "Piercing"; 

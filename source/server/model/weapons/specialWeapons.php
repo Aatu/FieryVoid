@@ -2624,6 +2624,7 @@ class VortexDisruptor extends Weapon{
 	public $uninterceptable = true; //although I don't think a weapon exists that could intercept it...
 	public $doNotIntercept = true; //although I don't think a weapon exists that could intercept it...
 	public $priority = 1;
+	public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
 	
 	public $range = 23;//no point firing at further target with base 24 to hit!
 	public $loadingtime = 3;
