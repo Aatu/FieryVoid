@@ -7,7 +7,7 @@ class wlcChlonasHeArpa extends BaseShip{
 		$this->pointCost = 285;
 		$this->faction = "Civilians";
         $this->phpclass = "wlcChlonasHeArpa";
-        $this->imagePath = "img/ships/wlcChlonasHeArpa.png";
+        $this->imagePath = "img/ships/ChlonasHeArpa.png";
         $this->shipClass = "Chlonas He'Arpa Transport";
         $this->canvasSize = 200;
 	    
