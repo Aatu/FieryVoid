@@ -60,6 +60,11 @@
             return $list;
         }
         
+		public function criticalPhaseEffects($ship, $gamedata){ //redefinition - fighter needs to call this from its own subsystems!
+			foreach($this->systems as $ftrSubsystem){
+				$ftrSubsystem->criticalPhaseEffects($ship, $gamedata); //hook for Critical phase effects
+			}
+		}
 		
 		public function getAdaptiveArmorController(){
 			/*this doesn't work for some reason; need to look for AA controller among systems... OTOH a particular fighter doesn't have all that many systems!

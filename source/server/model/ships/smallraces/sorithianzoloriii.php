@@ -35,6 +35,7 @@ class SorithianZolorIII extends FighterFlight{
             $frontGun = new LightParticleBeam(330, 30, 1, 4);
             $frontGun->displayName = "Ultralight Particle Beam";
             $fighter->addFrontSystem($frontGun);
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
             $this->addSystem($fighter);
         }
     }

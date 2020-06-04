@@ -1226,23 +1226,62 @@ spl_autoload_register(
 				
 				'wlcchlonashearpa' => '/server/model/ships/ZCustomChLonas/wlcChlonasHeArpa.php',    
 				'smallstarbasethreesections' => '/server/model/ships/ShipClasses.php', 
-				'wlcchlonasvalothar' => '/server/model/ships/ZCustomChLonas/wlcChlonasValothar.php',   		    
+				'wlcchlonasvalothar' => '/server/model/ships/ZCustomChLonas/wlcChlonasVaLothar.php',   		    
 				'oriondelta' => '/server/model/ships/EA/OrionDelta.php',
 		    
 				//self-repair
 				'outputhalved' => '/server/model/cricialClasses.php',
 				'whitestarcmd' => '/server/model/ships/minbari/whitestarCmd.php',
 				
-				//energy diffuser
+				//Shadowtech
                 'technicaltestbed' => '/server/model/ships/customs/technicalTestbed.php',
+                'technicaltestbedftr' => '/server/model/ships/customs/technicalTestbedFtr.php',
 				'selfrepair' => '/server/model/systems/baseSystems.php',
 				'energydiffuser' => '/server/model/systems/baseSystems.php',
 				'diffusertendril' => '/server/model/systems/baseSystems.php',
+				'diffusertendrilFtr' => '/server/model/systems/baseSystems.php',
                 'tendrildestroyed' => '/server/model/cricialClasses.php',
                 'tendrilcapacityreduced' => '/server/model/cricialClasses.php',
+				'biodrive' => '/server/model/systems/baseSystems.php',
+				'biothruster' => '/server/model/systems/baseSystems.php',
+				'shadowpilot' => '/server/model/systems/baseSystems.php',
+				'shadowpilotpain' => '/server/model/cricialClasses.php',
+				'phasingdrive' => '/server/model/systems/baseSystems.php',
+				
+				//Shadow weapons
+				'ftrpolaritycannon' => '/server/model/weapons/molecular.php', 
+				'molecularslicerbeaml' => '/server/model/weapons/molecular.php', 
+				'molecularslicerbeamm' => '/server/model/weapons/molecular.php', 
+				'molecularslicerbeamh' => '/server/model/weapons/molecular.php', 
+                'vortexdisruptor' => '/server/model/weapons/specialWeapons.php',  
+				
+				
+				//Shadow units
+				'shadowmediumfighterflight' => '/server/model/ships/shadows/shadowMediumFighterFlight.php',
+				'shadowpatrolcruiser' => '/server/model/ships/shadows/shadowPatrolCruiser.php',
+								
+				//just test of all images:
+				'shadowdestroyer' => '/server/model/ships/shadows/shadowDestroyer.php',
+				'shadowcruiser' => '/server/model/ships/shadows/shadowCruiser.php',
+				'shadowbattlecruiser' => '/server/model/ships/shadows/shadowBattleCruiser.php',
+				'shadowdreadnought' => '/server/model/ships/shadows/shadowDreadnought.php',
 				
 				
 				
+				//Raider Civilians Refresh
+				'privateerlessara' => '/server/model/ships/centauri_raiders/PrivateerLessara.php',
+				'privateerglaive' => '/server/model/ships/centauri_raiders/Privateerglaive.php',
+				'privateerphalan' => '/server/model/ships/centauri_raiders/Privateerphalan.php',
+				'privateerrazik' => '/server/model/ships/centauri_raiders/Privateerrazik.php',
+				//'raiderglaive' => '/server/model/ships/raiders/Raiderglaive.php',
+				//'raiderphalan' => '/server/model/ships/raiders/Raiderphalan.php',
+				'raiderrowlon' => '/server/model/ships/raiders/Raiderrowlon.php',
+				'flyerassault' => '/server/model/ships/minbari/flyerAssault.php',
+				'flyercombat' => '/server/model/ships/minbari/flyerCombat.php',
+				'genericarmedshuttle' => '/server/model/ships/civilians/genericArmedShuttle.php',
+		    
+		    
+		    
 				
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',

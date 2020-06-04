@@ -70,7 +70,6 @@ FusionAgitator.prototype.getMaxBoost = function () {
 };
 
 FusionAgitator.prototype.initBoostableInfo = function () {
-
     switch (shipManager.power.getBoost(this)) {
         case 0:
             this.data["Damage"] = '15 - 60';
@@ -99,3 +98,30 @@ FusionAgitator.prototype.initBoostableInfo = function () {
     }
     return this;
 };
+
+
+
+var FtrPolarityCannon = function FtrPolarityCannon(json, ship) {
+    Weapon.call(this, json, ship);
+};
+FtrPolarityCannon.prototype = Object.create(Weapon.prototype);
+FtrPolarityCannon.prototype.constructor = FtrPolarityCannon;
+
+
+var MolecularSlicerBeamL = function MolecularSlicerBeamL(json, ship) {
+    Weapon.call(this, json, ship);
+};
+MolecularSlicerBeamL.prototype = Object.create(Weapon.prototype);
+MolecularSlicerBeamL.prototype.constructor = MolecularSlicerBeamL;
+
+var MolecularSlicerBeamM = function MolecularSlicerBeamM(json, ship) {
+    Weapon.call(this, json, ship);
+};
+MolecularSlicerBeamM.prototype = Object.create(Weapon.prototype);
+MolecularSlicerBeamM.prototype.constructor = MolecularSlicerBeamM;
+
+var MolecularSlicerBeamH = function MolecularSlicerBeamH(json, ship) {
+    Weapon.call(this, json, ship);
+};
+MolecularSlicerBeamH.prototype = Object.create(Weapon.prototype);
+MolecularSlicerBeamH.prototype.constructor = MolecularSlicerBeamH;

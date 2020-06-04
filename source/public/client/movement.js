@@ -678,7 +678,99 @@ shipManager.movement = {
         return pivoting;
     },
 
+	isHalfPhased: function isHalfPhased(ship) {
+		var toReturn = false;
+        for (var i in ship.movement) {
+            var movement = ship.movement[i];
+            if (movement.turn != gamedata.turn) continue;
+            if (movement.commit == false) continue;
+            if (movement.type == "halfPhase") {
+				toReturn=true;
+				break;
+			}
+        }
+        return toReturn;
+	},
     
+	//Shadow ships ability! here it will rely on halfPhaseThrust attribute non-zero value to recognize the ability.
+	canHalfPhase: function canHalfPhase(ship) {
+		if (ship.halfPhaseThrust == 0) return false; //ship is not capable of half phasing
+		if (gamedata.gamephase != 2) return false;
+		if (shipManager.movement.isHalfPhased(ship)) return false;
+		
+		//needs to have appropriate thrust left 
+		if (ship.halfPhaseThrust > shipManager.movement.getRemainingEngineThrust(ship)) return false;
+		
+		//needs enabled and undamaged jump drive
+		var dmg = 0;
+		var phasedrive = shipManager.systems.getSystemByName(ship, "jumpEngine"); //assume it's phase drive, as it's on phase-capable ship!
+		if (phasedrive){
+			//full health?
+			dmg = damageManager.getDamage(ship, phasedrive);
+			if (dmg > 0) return false;
+			//powered?
+			if (shipManager.power.isOffline(ship, phasedrive)) return false;
+		} else return false;//no phase drive!
+		
+		//needs two undamaged BioThrusters
+		var countFreshBiothrusters = 0;
+		for (var i in ship.systems) {
+			var biothruster = ship.systems[i];
+			if (biothruster.name == 'BioThruster'){
+				dmg = damageManager.getDamage(ship, biothruster);
+				if (dmg == 0) countFreshBiothrusters++;
+				if (countFreshBiothrusters>=2) break; //no point in looping through further systems!
+			}
+		}
+		if (countFreshBiothrusters < 2) return false;
+		
+		return true; //no indication to the contrary found
+	},
+	
+
+	doHalfPhase: function doNormalTurn(ship) {
+        var requiredThrust = Array(0, 0, ship.halfPhaseThrust, 0, 0); //all through main thrusters - irrelevant really for BioThrusters!
+        var lastMovement = ship.movement[ship.movement.length - 1];
+
+        var name;
+        var newfacing;
+        var newheading;
+        var step = 1;
+
+        var commit = false;
+        var assignedThrust = Array();
+
+        name = "halfPhase";
+
+        ship.movement[ship.movement.length] = {
+            id: -1,
+            type: name,
+            position: lastMovement.position,
+            xOffset: lastMovement.xOffset,
+            yOffset: lastMovement.yOffset,
+            facing: lastMovement.facing,
+            heading: lastMovement.heading,
+            speed: lastMovement.speed,
+            animating: false,
+            animated: false,
+            animationtics: 0,
+            requiredThrust: requiredThrust,
+            assignedThrust: assignedThrust,
+            commit: commit,
+            preturn: false,
+            at_initiative: shipManager.getIniativeOrder(ship),
+            turn: gamedata.turn,
+            forced: false,
+            value: 0
+        };
+
+        if (!ship.flight) {
+            shipManager.movement.autoAssignThrust(ship);
+            shipWindowManager.assignThrust(ship);
+        }
+    },
+	
+	
     canTurnIntoPivot: function canTurnIntoPivot(ship, right) {
         if (gamedata.gamephase != 2) return false;
         //if (ship.agile) returnVal = false; //agile ship should be able to turn into pivot all right...
@@ -1747,57 +1839,78 @@ shipManager.movement = {
                 orientationRequired=3;
             }
         }
-        if (shipManager.movement.isGoingBackwards(ship) && (!shipManager.movement.isOutOfAlignment(ship))){ //moving STRICTLY backwards reverses all requirements
-            switch(orientationRequired) {
-                case 1: 
-                    orientationRequired = 2;
-                    break;
-                case 2: 
-                    orientationRequired = 1;
-                    break;
-                case 3: 
-                    orientationRequired = 4;
-                    break;
-                case 4: 
-                    orientationRequired = 3;
-                    break;
-            }
-        }
-        
-        //Gravitic allowsfurther rotations if pivoted (eg. not moving exactly forward or backwards)...
-        if(ship.gravitic){
-            if(shipManager.movement.isPivotedPort(ship)){ //pivoted to Port means: Stbd is Retro, Main is Stbd, Port is Main, Retro is Port
-                switch(orientationRequired) {
-                    case 1: 
-                        orientationRequired = 4;
-                        break;
-                    case 2: 
-                        orientationRequired = 3;
-                        break;
-                    case 3: 
-                        orientationRequired = 1;
-                        break;
-                    case 4: 
-                        orientationRequired = 2;
-                        break;
-                }
-            }else if (shipManager.movement.isPivotedStbd(ship)){//pivoted to Stbd means: Stbd is Main, Main is Port, Port is Retro, Retro is Stbd
-                switch(orientationRequired) {
-                    case 1: 
-                        orientationRequired = 3;
-                        break;
-                    case 2: 
-                        orientationRequired = 4;
-                        break;
-                    case 3: 
-                        orientationRequired = 2;
-                        break;
-                    case 4: 
-                        orientationRequired = 1;
-                        break;
-                }
-            }
-        }        
+		/*here is a difference - for gravitic ship out of alignment reversing requirements will not fit with thruster change! so it needs to be done separately for gravitic ship...*/
+		if(!ship.gravitic){ ///non-gravitic - reverse requiremets if going backwards
+			if ( shipManager.movement.isGoingBackwards(ship) ){ 
+				switch(orientationRequired) {
+					case 1: 
+						orientationRequired = 2;
+						break;
+					case 2: 
+						orientationRequired = 1;
+						break;
+					case 3: 
+						orientationRequired = 4;
+						break;
+					case 4: 
+						orientationRequired = 3;
+						break;
+				}
+			}
+		}else{ //ship is gravitic! reverse only if going _strictly_ backwards
+			if (shipManager.movement.isGoingBackwards(ship) && (!shipManager.movement.isOutOfAlignment(ship))){ //moving STRICTLY backwards reverses all requirements
+				switch(orientationRequired) {
+					case 1: 
+						orientationRequired = 2;
+						break;
+					case 2: 
+						orientationRequired = 1;
+						break;
+					case 3: 
+						orientationRequired = 4;
+						break;
+					case 4: 
+						orientationRequired = 3;
+						break;
+				}
+			}
+		}
+		
+		//Gravitic allowsfurther rotations if pivoted (eg. not moving exactly forward or backwards)...
+		if(ship.gravitic){ 
+			if(shipManager.movement.isPivotedPort(ship)){ //pivoted to Port means: Stbd is Retro, Main is Stbd, Port is Main, Retro is Port
+				switch(orientationRequired) {
+					case 1: 
+						orientationRequired = 4;
+						break;
+					case 2: 
+						orientationRequired = 3;
+						break;
+					case 3: 
+						orientationRequired = 1;
+						break;
+					case 4: 
+						orientationRequired = 2;
+						break;
+				}
+			}else if (shipManager.movement.isPivotedStbd(ship)){//pivoted to Stbd means: Stbd is Main, Main is Port, Port is Retro, Retro is Stbd
+				switch(orientationRequired) {
+					case 1: 
+						orientationRequired = 3;
+						break;
+					case 2: 
+						orientationRequired = 4;
+						break;
+					case 3: 
+						orientationRequired = 2;
+						break;
+					case 4: 
+						orientationRequired = 1;
+						break;
+				}
+			}
+		}        
+		
         return orientationRequired;
     }, //endof thrusterDirectionRequired
     

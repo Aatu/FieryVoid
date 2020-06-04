@@ -24,7 +24,7 @@ class Jammer extends ShipSystem implements SpecialAbility{
         $shooter = $args["shooter"];
         $target = $args["target"];
         
-        if ($shooter->faction === $target->faction) return 0;
+        if ($shooter->faction === $target->faction) return 0; //same-faction units ignore Jammer
 		
         if (! ($shooter instanceof BaseShip) || ! ($target instanceof BaseShip)) 
             throw new InvalidArgumentException("Wrong argument type for Jammer getSpecialAbilityValue");
@@ -43,12 +43,11 @@ class Jammer extends ShipSystem implements SpecialAbility{
 		}
 			
         return $jammerValue;
-		
-        //return $this->getOutput();
     }
 
     public function setSystemDataWindow($turn){
         $this->data["Special"] = "Denies a hostile OEW-lock versus this ship.";
+        $this->data["Special"] .= "<br>Doesn't work ws own faction (eg. Minbari Jammer won't work against hostile Minbari).";
 		$this->data["Special"] .= "<br>Enabling/Disabling Jammer will affect enemy missile launches on NEXT turn!";	     
     }
 } //endof Jammer
@@ -64,7 +63,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
     }
     
     public function setSystemDataWindow($turn){
-            $this->data["DEFENSIVE BONUS:"] = "Jammer ability if targeted from over 5 hexas away.";
+            $this->data["Special"] = "Jammer ability if targeted from over 5 hexes away.";
         }
     
     //args for Jammer ability are array("shooter", "target")
@@ -80,10 +79,10 @@ class Stealth extends ShipSystem implements SpecialAbility{
         if (! ($shooter instanceof BaseShip) || ! ($target instanceof BaseShip))
             throw new InvalidArgumentException("Wrong argument type for Stealth getSpecialAbilityValue");
 		
-        $jammerValue = 1; //it's fighter system, so no need to check for crits or power
-        if (Mathlib::getDistanceOfShipInHex($shooter, $target) > 5)
+        $jammerValue = 0; 
+        if (mathlib::getDistanceHex($shooter, $target) > 5) //kicks in!
         {
-            //return 1;			
+			$jammerValue = 1; 
 			//Advanced Sensors negate Jammer, Improved Sensors halve Jammer
 			if ($shooter->hasSpecialAbility("AdvancedSensors")) {
 				$jammerValue = 0; //negated
@@ -92,13 +91,13 @@ class Stealth extends ShipSystem implements SpecialAbility{
 			}
         }
         return $jammerValue;        
-    }     
+    }
 } //endof Stealth
 
 class Fighterimprsensors extends ShipSystem implements SpecialAbility{    
     public $name = "fighterimprsensors";
     public $displayName = "Improved Sensors";
-    public $iconPath = "scanner.png";
+    public $iconPath = "scannerTechnical.png";
     public $specialAbilities = array("ImprovedSensors");
     public $primary = true;
     
@@ -119,7 +118,7 @@ class Fighterimprsensors extends ShipSystem implements SpecialAbility{
 class Fighteradvsensors extends ShipSystem implements SpecialAbility{    
     public $name = "Fighteradvsensors";
     public $displayName = "Advanced Sensors";
-    public $iconPath = "scanner.png";
+    public $iconPath = "scannerTechnical.png";
     public $specialAbilities = array("AdvancedSensors");
     public $primary = true;
     
@@ -129,7 +128,7 @@ class Fighteradvsensors extends ShipSystem implements SpecialAbility{
     
     public function setSystemDataWindow($turn){
 		$this->data["Special"] = "Ignores enemy Jammer."; //not that of advanced races
-		$this->data["Special"] .= "<br>Ignores enemy BDEW and SDEW."; //not that of advanced races
+		//$this->data["Special"] .= "<br>Ignores enemy BDEW and SDEW."; //not that of advanced races (skipped as fighters ignore it anyway
 		$this->data["Special"] .= "<br>Ignores any defensive systems lowering enemy profile (shields, EWeb...)."; //not that of advanced races
 		$this->data["Special"] .= "<br>All of the above work as usual if operated by advanced races."; 
 	}
@@ -420,7 +419,7 @@ class Engine extends ShipSystem{
     
 }
 
-class Scanner extends ShipSystem{
+class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner does not implement anything in particular, but classes ovverriding it do!
     public $name = "scanner";
     public $displayName = "Scanner";
     public $primary = true;
@@ -428,7 +427,7 @@ class Scanner extends ShipSystem{
     public $outputType = "EW";
 	//Scanner  is fairly important, being a core system!
 	public $repairPriority = 7;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-    
+    public $specialAbilityValue = false; //changed by modifications marking Improved/Advanced Sensors!
     
     public $possibleCriticals = array(
         15=>"OutputReduced1",
@@ -457,21 +456,18 @@ class Scanner extends ShipSystem{
 	
 	/*functions adding Advanced/Improved Sensors trait*/
 	public function markImproved(){		
-    		$this->specialAbilities[] = "ImprovedSensors";
-			
+		$this->specialAbilities[] = "ImprovedSensors";	
+		$this->specialAbilityValue = true; //so it is actually recognized as special ability!		
 		if (!isset($this->data["Special"])) {
 			$this->data["Special"] = '';
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= 'Improved Sensors - halve Jammer effectiveness (to hit penalty and launch range penalty)(not that of advanced races).'; //not that of advanced races
-		
 	}
-	/*note: as there are no actual Advanced Sensors unit yet, this feature is not complete;
-		at the moment Advanced Sensors do have flat boost cost and do ignore Jammer, but do NOT yet ignore SDEW/BDEW as they should
-	*/
 	public function markAdvanced(){		
-    		$this->specialAbilities[] = "AdvancedSensors";
+    	$this->specialAbilities[] = "AdvancedSensors";
+		$this->specialAbilityValue = true; //so it is actually recognized as special ability!
 		$this->boostEfficiency = 14; //Advanced Sensors are rarely lower than 13, so flat 14 boost cost is advantageous to output+1!
 		if (!isset($this->data["Special"])) {
 			$this->data["Special"] = '';
@@ -487,7 +483,8 @@ class Scanner extends ShipSystem{
 		all actual effects are contained in attribute changes
 	*/
 	public function markStarWars(){		
-    		$this->specialAbilities[] = "StarWarsSensors";
+    	$this->specialAbilities[] = "StarWarsSensors";
+		$this->specialAbilityValue = true; //so it is actually recognized as special ability!
 		$this->maxBoostLevel = 2;
 		if (!isset($this->data["Special"])) {
 			$this->data["Special"] = '';
@@ -509,6 +506,10 @@ class Scanner extends ShipSystem{
 		}
 		$this->data["Special"] .= 'LCV Sensors - up to 2 EW points may be allocated freely. All surplus can be allocated ONLY as OEW.';
 	}	
+	public function getSpecialAbilityValue($args)
+    {
+		return $specialAbilityValue;
+	}
 } //endof Scanner
 
 class ElintScanner extends Scanner implements SpecialAbility{
@@ -584,13 +585,13 @@ class CnC extends ShipSystem{
     
     public $possibleCriticals = array(
     	//1=>"SensorsDisrupted", //not implemented! so I take it out 
-	1=>"CommunicationsDisrupted",   //this instead of SensorsDisrupted
-	9=>"CommunicationsDisrupted", 
-	12=>"PenaltyToHit", 
-	15=>"RestrictedEW", 
-	18=>array("ReducedIniativeOneTurn","ReducedIniative"), 
-	21=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative"), 
-	24=>array("RestrictedEW","ReducedIniative","ShipDisabledOneTurn")
+		1=>"CommunicationsDisrupted",   //this instead of SensorsDisrupted
+		9=>"CommunicationsDisrupted", 
+		12=>"PenaltyToHit", 
+		15=>"RestrictedEW", 
+		18=>array("ReducedIniativeOneTurn","ReducedIniative"), 
+		21=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative"), 
+		24=>array("RestrictedEW","ReducedIniative","ShipDisabledOneTurn")
     );
         
     function __construct($armour, $maxhealth, $powerReq, $output ){
@@ -628,24 +629,24 @@ class Thruster extends ShipSystem{
         $this->thrustused = (int)$thrustused;
         $this->direction = (int)$direction;
         //arc depends on direction!
-	switch($this->direction){
-		case 1: //retro
-			$this->startArc = 330;
-            $this->endArc = 30;
-			break;
-		case 2: //main
-			$this->startArc = 150;
-            $this->endArc = 210;
-			break;	
-		case 3://port
-			$this->startArc = 210;
-            $this->endArc = 330;
-			break;
-		case 4://Stbd
-			$this->startArc = 30;
-            $this->endArc = 150;
-			break;
-	}
+		switch($this->direction){
+			case 1: //retro
+				$this->startArc = 330;
+				$this->endArc = 30;
+				break;
+			case 2: //main
+				$this->startArc = 150;
+				$this->endArc = 210;
+				break;	
+			case 3://port
+				$this->startArc = 210;
+				$this->endArc = 330;
+				break;
+			case 4://Stbd
+				$this->startArc = 30;
+				$this->endArc = 150;
+				break;
+		}
     }
 } //endof Thruster
 
@@ -658,11 +659,26 @@ class InvulnerableThruster extends Thruster{
 	
     function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
 	    parent::__construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused );
+		//use "technical" (grey) images instead of regular system (blue) ones
+		switch($this->direction){
+			case 1: //retro
+				$this->iconPath = "thruster1Technical.png";
+				break;
+			case 2: //main
+				$this->iconPath = "thruster2Technical.png";
+				break;	
+			case 3://Port
+				$this->iconPath = "thruster3Technical.png";
+				break;
+			case 4://Stbd
+				$this->iconPath = "thruster4Technical.png";
+				break;
+		}
     }
 	
     public function getArmourInvulnerable($target, $shooter, $dmgClass, $pos=null){ //this thruster should be invulnerable to anything...
-	$activeAA = 99;
-	return $activeAA;
+		$activeAA = 99;
+		return $activeAA;
     }
     
     public function testCritical($ship, $gamedata, $crits, $add = 0){ //this thruster won't suffer criticals ;)
@@ -684,8 +700,7 @@ class InvulnerableThruster extends Thruster{
 
 
 
-class GraviticThruster extends Thruster{
-    
+class GraviticThruster extends Thruster{    
     function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
         parent::__construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused);
     }
@@ -1345,22 +1360,130 @@ class DiffuserTendril extends ShipSystem{
     
 	//Diffuser Tendrils cannot be repaired at all!
 	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+
     
-    function __construct($maxhealth){ //everything is done in the diffuser, Tendrils basically just are!
-        parent::__construct(0, $maxhealth, 0, 0);
-    }
+    function __construct($maxhealth, $side = 'R'){ //everything is done in the diffuser, Tendrils basically just are! - L/R suggests whether to use left or right graphics
+		$this->iconPath = 'EnergyDiffuserTendril' . $side;
+		if($maxhealth < 15){ //small
+			$this->iconPath .= "1";
+		}
+		else if($maxhealth < 30){//medium
+			$this->iconPath .= "2";
+		} else{//large!
+			$this->iconPath .= "3";
+		}
+		$this->iconPath .= ".png";
+		parent::__construct(0, $maxhealth, 0, 0);
+		
+		$this->output=$maxhealth;//output is displayed anyway, make it show something useful...
+	}
 	
 
 	public function setSystemDataWindow($turn){
-		parent::setSystemDataWindow($turn);     
+		parent::setSystemDataWindow($turn);   
 		if (!isset($this->data["Special"])) {
 			$this->data["Special"] = '';
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= "Used to store absorbed energy from hits.<br>It is here for technical purposes only. It's part of Energy Diffuser system.";
+		$this->data["Special"] .= "Used to store absorbed energy from hits.<br>It is here for visual (and technical) purposes only. It's part of Energy Diffuser system.";
 	}	
+	
+	public function getRemainingCapacity(){
+		return $this->getRemainingHealth();
+	}
+	
+	public function getUsedCapacity(){
+		return $this->getTotalDamage();
+	}
+	
+	public function absorbDamage($ship,$gamedata,$value){ //or dissipate, with negative value
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, -1, false, false, "Absorb/Dissipate!", "Tendril");
+		$damageEntry->updated = true;
+		$this->damage[] = $damageEntry;
+	}
 }//endof class DiffuserTendril
+
+
+//fighter systems don't get damaged - so fighter tendrils need to store damage by way of notes
+class DiffuserTendrilFtr extends DiffuserTendril{
+    public $name = "DiffuserTendrilFtr";
+    public $displayName = "Diffuser Tendril";
+	
+	private $usedCapacityTotal=0;
+	private $thisTurnEntries=array();
+    
+	//Diffuser Tendrils cannot be repaired at all!
+	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+
+    
+	public function setSystemDataWindow($turn){
+		//add information about damage stored - ships do have visual reminder about it, but fighters do not!
+		parent::setSystemDataWindow($turn); 
+		$this->data["Capacity"] = $this->getUsedCapacity() . '/' . $this->maxhealth;
+	}	
+	
+	/*always redefine $this->data due to current capacity info*/
+	public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->data = $this->data;		
+        return $strippedSystem;
+    }
+	
+	
+	public function getRemainingCapacity(){
+		return $this->maxhealth - $this->usedCapacityTotal;
+	}
+	
+	public function getUsedCapacity(){
+		return $this->usedCapacityTotal;
+	}
+	
+	public function absorbDamage($ship,$gamedata,$value){ //or dissipate, with negative value
+		$this->usedCapacityTotal += $value; //running count
+		$this->thisTurnEntries[] = $value; //mark for database
+	}
+	
+	
+	/* this method generates additional non-standard informaction in the form of individual system notes
+	in this case: 
+	 - Firing phase: add information on stored/dissipated energy (every entry separately)
+	*/
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+		switch($gameData->phase){
+				case 4: //firing phase
+					foreach($this->thisTurnEntries as $tte){					
+						$notekey = 'absorb';
+						$noteHuman = 'Tendril absorbed or dissipated';
+						$noteValue = $tte;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					}
+					break;
+		}
+	} //endof function generateIndividualNotes
+	
+	/*act on notes just loaded - to be redefined by systems as necessary
+	here:
+	 - fill $usedCapacityTotal value
+	*/
+	public function onIndividualNotesLoaded($gamedata){
+		$this->usedCapacityTotal = 0;
+		foreach ($this->individualNotes as $currNote){ //assume ASCENDING sorting 
+			$explodedKey = explode ( ';' , $currNote->notekey ) ;//split into array: [area;value] where area denotes action, value - damage type (typically) 
+			switch($currNote->notekey){
+				case 'absorb': //absorbtion or dissipation of energy
+					$this->usedCapacityTotal += $currNote->notevalue;
+					break;		
+			}
+		}
+		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+		$this->individualNotes = array();
+	} //endof function onIndividualNotesLoaded
+
+}//endof class DiffuserTendrilFtr
+
+
 
 /*Shadow damage absorbtion system; remember to add Tendrils - largest first!*/
 class EnergyDiffuser extends ShipSystem{
@@ -1405,6 +1528,10 @@ by 4.
         
         $this->startArc = (int)$startArc;
         $this->endArc = (int)$endArc;
+		
+		if ($this->getUnit() instanceOf FighterFlight){ //for fighters - no criticals of course ;)
+			$this->possibleCriticals = array();
+		}
     }
 	
 	function addTendril($tendril){
@@ -1419,38 +1546,53 @@ by 4.
 			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= "Absorbs energy from hits as long as there is storage capacity available (Diffuser Tendrils).";
-		$this->data["Special"] .= "<br>Dissipates " . $this->getOutput() . " stored points each turn.";
+		$this->data["Special"] .= "<br>Tries not to absorb if protected system would have been destroyed anyway without overkilling (eg. very strong Piercing or Matter fire hitting small systems).";
+		$this->data["Special"] .= "<br>Dissipates energy from Tendrils in Critical phase.";
 	}	
-	
-	//actual effect during receiving damage
-	
-	
 	
 	//effects that happen in Critical phase (after criticals are rolled) - dissipation and actual loss of tendrils due to critical received
 	public function criticalPhaseEffects($ship, $gamedata){
+		if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
+		
+		$ship = $this->getUnit();
+		$pilot = $ship->getSystemByName("CnC");
+		
 		//1. if THIS TURN TendrilDestroyed critical was added - mark last tendril destroyed
 		foreach ($this->criticals as $crit) if(($crit instanceof TendrilDestroyed) && ($crit->turn==$gamedata->turn)) {
 			$lastTendril = null;
 			foreach($this->tendrils as $tendril) if(!$tendril->isDestroyed()){
 				$lastTendril = $tendril;
 			}
-			if($lastTendril){
+			if($lastTendril){ ///no need to redefine for fighter - there criticals just won't happen
 				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $lastTendril->id, 0, 0, 0, -1, true, false, "DestroyTendril!", "Destruction");
 				$damageEntry->updated = true;
 				$lastTendril->damage[] = $damageEntry;
+				
+				//add pain to pilot, too!				
+				if($pilot){
+					$onePainPer = 10; //1 point of pain per how many damage points?
+					if ($ship->factionAge > 3) { //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+						$onePainPer = 20;//slow-grown Primordial ships are more resistant to pain		
+					}
+					$painSuffered = ceil( $lastTendril->maxhealth/$onePainPer ); //let's round that up...
+					for($i=1;$i<=$painSuffered;$i++){
+						$crit = new ShadowPilotPain(-1, $ship->id, $pilot->id, 'ShadowPilotPain', $gamedata->turn+1, $gamedata->turn+1);
+						$crit->updated = true;
+						$pilot->criticals[] =  $crit;
+					}
+				}
+				
 			}
 		}
 		
 		//2. dissipate stored energy (in order of tendrils - largest are first, and usually freeing up largest ones is best)
 		$dissipationAvailable = $this->getOutput();
 		foreach($this->tendrils as $tendril) if(!$tendril->isDestroyed()){				
-			$toDissipate = min($dissipationAvailable, $tendril->getTotalDamage());
+			$toDissipate = min($dissipationAvailable, $tendril->getUsedCapacity());
 			if($toDissipate > 0){
 				$dissipationAvailable -= $toDissipate;
 				//dissipation == undamage
-				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $tendril->id, -$toDissipate, 0, 0, -1, false, false, "Dissipate!", "Dissipate");
-				$damageEntry->updated = true;
-				$tendril->damage[] = $damageEntry;
+				$tendril->absorbDamage($ship,$gamedata,-$toDissipate);
 			}
 		}
 		
@@ -1464,12 +1606,12 @@ by 4.
 	public function doesProtectFromDamage() {
 		$totalCapacity = 0;
 		$largestCapacity = 0;
-		
+				
 		//check capacity reduction due to criticals...
 		$reduction = $this->hasCritical('TendrilCapacityReduced')*2;
 
 		foreach($this->tendrils as $tendril) if(!$tendril->isDestroyed()){
-			$tendrilCapacity = $tendril->getRemainingHealth()-$reduction;
+			$tendrilCapacity = $tendril->getRemainingCapacity()-$reduction;
 			if($tendrilCapacity>0){
 				$totalCapacity += $tendrilCapacity;
 				$largestCapacity = max($tendrilCapacity,$largestCapacity);
@@ -1480,7 +1622,7 @@ by 4.
 		return $protectionValue;
 	}
 	//actual protection
-	public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
+	public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $systemProtected, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
 		$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
 		$damageToAbsorb=$effectiveDamage-$effectiveArmor;
 		$damageAbsorbed=0;
@@ -1493,7 +1635,7 @@ by 4.
 		$reduction = $this->hasCritical('TendrilCapacityReduced')*2;
 
 		foreach($this->tendrils as $tendril) if(!$tendril->isDestroyed()){
-			$tendrilCapacity = $tendril->getRemainingHealth() - $reduction;
+			$tendrilCapacity = $tendril->getRemainingCapacity() - $reduction;
 			if($tendrilCapacity>0){ //else it's useless ATM
 				if ($mostSuitableAbsorbtion < $damageToAbsorb){ //not found a tendril able to accept entire damage yet, looking for something larger
 					if ($tendrilCapacity >= $mostSuitableAbsorbtion) { //new one is more suitable (all other things equal later tendril is more suitable)
@@ -1509,12 +1651,16 @@ by 4.
 			}
 		}	
 		
+		$noOverkill = (!$weapon->doOverkill) && ($weapon->noOverkill || ($weapon->damageType == 'Piercing'));
+		if($noOverkill){//shot is incapable of overkilling - reducing it would not matter if it doesn't prevent destruction of system hit
+			$remainingHealth = $systemProtected->getRemainingHealth();
+			if ($remainingHealth+$mostSuitableAbsorbtion <= $damageToAbsorb) return $returnValues; //any absorbtion would be futile and just fill tendril
+		}
+		
 		if($mostSuitableAbsorbtion>0){ //appropriate tendril found!
 			$damageAbsorbed=min($damageToAbsorb,$mostSuitableAbsorbtion);
-			$returnValues['dmg']=$effectiveDamage-$damageAbsorbed;
-			$damageEntry = new DamageEntry(-1, $target->id, -1, $gamedata->turn, $mostSuitableTendril->id, $damageAbsorbed, 0, 0, $fireOrder->id, false, false, "Absorb!", "Absorb");
-			$damageEntry->updated = true;
-			$mostSuitableTendril->damage[] = $damageEntry;
+			$returnValues['dmg']=$effectiveDamage-$damageAbsorbed;			
+			$mostSuitableTendril->absorbDamage($target,$gamedata,$damageAbsorbed);
 		}
 		
 		return $returnValues;
@@ -1592,8 +1738,11 @@ class SelfRepair extends ShipSystem{
     } //endof function sortSystemsByRepairPriority
 	
 	
+	
 	public function criticalPhaseEffects($ship, $gamedata)
     { 
+		if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
+		
 		//how many points are available?
 		$availableRepairPoints = $this->maxRepairPoints - $this->usedRepairPoints;
 		$availableRepairPoints = min($availableRepairPoints,$this->getOutput()); //no more than remaining points, no more than actual system repair capability	
@@ -1676,7 +1825,7 @@ class SelfRepair extends ShipSystem{
 			}
 		}		
 		
-    } //endof function criticalPhaseEffects	
+    } //endof function criticalPhaseEffects
 	
 	
 
@@ -1724,6 +1873,250 @@ class SelfRepair extends ShipSystem{
     }
 
 }//endof class SelfRepair
+
+
+
+//BioThruster - it's NOT seen as thruster by game; used to calculate output of BioDrive engine 
+class BioThruster extends ShipSystem{
+	public $iconPath = "thrusterOmni.png";
+    public $name = "BioThruster";
+    public $displayName = "BioThruster";
+    public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
+	//BioThrusters are fairly important!
+	public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    	    
+    public $possibleCriticals = array(15=>"OutputReduced1", 24=>array("OutputReduced1","OutputReduced1"));//different than original
+    
+    function __construct($armour, $maxhealth, $output ){
+        parent::__construct($armour, $maxhealth, 0, $output );
+		//always omnidirectional, but this need to be set AFTER default constructor
+		$this->startArc = 0;
+		$this->endArc = 360; 
+    }
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);  
+		$this->data["Special"] = "BioThruster - basically an omnidirectional thruster.";      
+		$this->data["Special"] .= "<br>For technical reasons in FV BioThrusters output is summed up in BioDrive and then channeled by regular (invulnerable) thrusters.";  
+	}	
+} //endof class BioThruster
+
+
+
+//BioDrive - basically an engine with rating calculated from ships' BioThrusters
+//technical system, should never get hit.
+//remember to plug BioThrusters to the BioDrive at design stage!
+class BioDrive extends Engine{
+	public $iconPath = "engineTechnical.png";
+    public $name = "engine";
+    public $displayName = "Engine";
+    public $primary = true;
+    public $isPrimaryTargetable = false;
+    public $boostable = false;//cannot boost BioDrive!
+    public $outputType = "thrust";
+	
+	private $bioThrusters = array();
+	
+    
+    public $possibleCriticals = array( ); //technical system, should never get damaged
+    
+    function __construct(){
+        parent::__construct(0, 1, 0, 0, 0 ); //($armour, $maxhealth, $powerReq, $output, $boostEfficiency
+    }
+    
+	function addThruster($thruster){
+		if($thruster) $this->bioThrusters[] = $thruster;
+	}
+	
+	
+	public function setSystemDataWindow($turn){
+		$this->output = $this->getOutput();	
+		parent::setSystemDataWindow($turn); 	
+		$this->output = $this->getOutput();	
+		$this->data["Efficiency"] = $this->boostEfficiency;
+		$this->data["Special"] = "BioDrive - basically an Engine with basic output calculated from BioThruster outputs.";      
+		$this->data["Special"] .= "<br>Will never be damaged.";  
+		$this->data["Special"] .= "<br>Cannot but extra thrust.";    
+	}
+	
+	
+    public function getOutput(){
+        $output = 0;
+		//count thrust from BioThrusters
+		foreach($this->bioThrusters as $thruster){
+			$output += $thruster->getOutput();
+		}
+		if ($output === 0) return 0; //cannot buy extra thrust if there are no working thrusters!
+	
+		//reduce by pain
+		$ship=$this->getUnit();
+		if($ship){
+			$pilot = $ship->getSystemByName("CnC");
+			if($pilot){
+				$painLevel = $pilot->hasCritical('ShadowPilotPain',TacGamedata::$currentTurn);
+				$output -= $painLevel;
+			}
+		}
+		
+		//add boost, if any
+        foreach ($this->power as $power){
+            if ($power->turn == TacGamedata::$currentTurn && $power->type == 2){
+                $output += $power->amount;
+            }        
+        }        
+		
+        return $output;        
+    } //endof function getOutput
+	
+	
+	public function stripForJson(){
+		//$this->output = $this->getOutput();	
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->output = $this->getOutput();	
+		$strippedSystem->data = $this->data;	
+        return $strippedSystem;
+    }
+	
+}//endof class BioDrive
+
+
+/*Shadow Pilot - replaces C&C
+ - irrepairable!
+ - no regular criticals
+ - feels pain due to damage suffered by ship (temporary) and own wounds (permanent)
+*/
+class ShadowPilot extends CnC{
+    public $name = "cnC";
+    public $displayName = "C&C";
+    public $primary = true;
+	public $iconPath = "ShadowPilot.png";
+	
+	//irrepairable!
+	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
+    
+    public $possibleCriticals = array(
+    );
+        
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+    }
+	
+	
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+/*deliberately skip inherited description		
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+*/		
+		$this->data["Special"] = 'Ship pilot. Cannot be repaired. Damage to ship results in temporary pain, damage to pilot results in permanent pain.';
+		$this->data["Special"] .= '<br>Pain reduces Initiative, Thrust and accuracy of fire.';
+	}
+	
+	
+	public function criticalPhaseEffects($ship, $gamedata)
+    { 
+		if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
+		
+		$damageSufferedThisTurn = 0;
+		$damageToSelfThisTurn = 0;
+		$onePainPer = 10; //1 point of pain per how many damage points?
+		if ($ship->factionAge > 3) { //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+			$onePainPer = 20;//slow-grown Primordial ships are more resistant to pain		
+		}
+		
+		//get all damage suffered THIS TURN - except tendrils. Ignore healing, damage dealing is painful even if it's mended afterwards!
+		//ignore tendrils, that's not true damage!
+		foreach ($ship->systems as $system) if (!($system instanceOf DiffuserTendril)){
+			foreach ($system->damage as $dmg) if ( ($dmg->turn == $gamedata->turn) && ($dmg->damage > $dmg->armour)){
+				$damageSufferedThisTurn += $dmg->damage - $dmg->armour;
+				if($system->id == $this->id){
+					$damageToSelfThisTurn += $dmg->damage - $dmg->armour;
+				}
+			}
+		}
+		
+		//let's start pain in NEXT turn; criticals in FV usually start in CURRENT turn formally, but that causes readability to suffer during replays (originally there were no replays ;) )
+		//pain can be caused by tendrils being broken - this is handled in EnergyDiffuser class, and rounded up (but doesn't sum with actual damage below)
+		
+		//temporary pain
+		$painSuffered = round( $damageSufferedThisTurn/$onePainPer );
+		for($i=1;$i<=$painSuffered;$i++){
+			$crit = new ShadowPilotPain(-1, $ship->id, $this->id, 'ShadowPilotPain', $gamedata->turn+1, $gamedata->turn+1);
+			$crit->updated = true;
+			$this->criticals[] =  $crit;
+		}
+		
+		//permanent pain
+		for($i=1;$i<=$damageToSelfThisTurn;$i++){
+			$crit = new ShadowPilotPain(-1, $ship->id, $this->id, 'ShadowPilotPain', $gamedata->turn+1);
+			$crit->updated = true;
+			$this->criticals[] =  $crit;
+		}
+		
+    } //endof function criticalPhaseEffects	
+		
+} //endof class ShadowPilot
+
+
+/*Phasing Drive - essentially a jump engine that destroys ship if damaged while half-phasing*/
+class PhasingDrive extends JumpEngine{
+    public $displayName = "Phasing Drive";
+    
+	//JumpEngine enables half phasing, so I'm torn about priority... I'll increase to 2 over Jump Engine's 1
+	public $repairPriority = 2;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    	
+    public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= 'If damaged while half-phasing - entire ship is destroyed.';
+    }
+	
+	//destroy ship if damaged while half-phaseing
+	public function criticalPhaseEffects($ship, $gamedata)
+    { 
+		if (!Movement::isHalfPhased($ship, $gamedata->turn)) return;
+		if (!$this->isDamagedOnTurn($gamedata->turn)) return; 
+		
+	
+		//try to make actual attack to show in log - use Ramming Attack system!				
+		$rammingSystem = $ship->getSystemByName("RammingAttack");
+		if($rammingSystem){ //actually exists! - it should on every ship!				
+			$newFireOrder = new FireOrder(
+				-1, "normal", $ship->id, $ship->id,
+				$rammingSystem->id, -1, $gamedata->turn, 1, 
+				100, 100, 1, 1, 0,
+				0,0,'HalfPhase',10000
+			);
+			$newFireOrder->pubnotes = "Phasing drive damaged during half-phasing - ship destroyed.";
+			$newFireOrder->addToDB = true;
+			$rammingSystem->fireOrders[] = $newFireOrder;
+		}else{
+			$newFireOrder=null;
+		}
+
+		//destroy primary structure
+		$primaryStruct = $ship->getStructureSystem(0);
+		if($primaryStruct){			
+            $remaining = $primaryStruct->getRemainingHealth();
+            $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $primaryStruct->id, $remaining, 0, 0, -1, true, false, "", "HalfPhase");
+            $damageEntry->updated = true;
+            $primaryStruct->damage[] = $damageEntry;			
+			if($rammingSystem){ //add extra data to damage entry - so firing order can be identified!
+					$damageEntry->shooterid = $ship->id; //additional field
+					$damageEntry->weaponid = $rammingSystem->id; //additional field
+			}
+        }	
+    } //endof function criticalPhaseEffects	
+}//endof class PhasingDrive
 
 
 

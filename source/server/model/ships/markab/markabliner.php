@@ -5,7 +5,7 @@ class MarkabLiner extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 70;
-		$this->faction = "Markab";
+		$this->faction = "Civilians";
         $this->phpclass = "MarkabLiner";
         $this->imagePath = "img/ships/sloop.png"; //change
         $this->shipClass = "Markab Liner";

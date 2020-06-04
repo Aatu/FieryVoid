@@ -37,6 +37,8 @@ class FangedSerpent extends SuperHeavyFighter{
         
         $particleBlaster = new ParticleBlasterFtr(330, 30, 1); //$startArc, $endArc, $nrOfShots
         $fighter->addFrontSystem($particleBlaster);
+		
+		$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
         
         $this->addSystem($fighter);
     }

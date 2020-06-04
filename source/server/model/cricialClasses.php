@@ -324,7 +324,7 @@ class tmppowerdown extends Critical{ /*next turn target Power is down by 1 - pla
 
 class TendrilDestroyed extends Critical{
     public $description = "Tendril destroyed.";
-	public $priority = 0; //cannot be fixed
+	public $repairPriority = 0; //cannot be fixed
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
@@ -332,6 +332,14 @@ class TendrilDestroyed extends Critical{
 
 class TendrilCapacityReduced extends Critical{
     public $description = "Capacity of all tendrils reduced by 2.";
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
+class ShadowPilotPain extends Critical{
+    public $description = "Pilot feels pain."; //-1 penalty on weapons fire, has a -1 penalty to initiative and loses 1 point of free thrust
+	public $repairPriority = 0; //cannot be fixed
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }

@@ -43,6 +43,8 @@ class FighterFlight extends BaseShip
 	//and some superheavies that can use hangars (eg. Vorlon SHF) but take more slots
 	//custom StarWars fighters are carried on squadron basis - allowing different squadron sizes for diffeerent craft
 	
+	public $customFtrName = ""; //to be filled if fighter has special hangar requirements - see Balvarix/Rutarian for usage
+		
 
 
     public $canvasSize = 200;
@@ -157,6 +159,7 @@ class FighterFlight extends BaseShip
         }
         return (-array_sum($affectingSystems));
     }
+
 
     /*redefinition; for fighter, don't check whether system is destroyed - it doesn't matter as long as entire flight isn't!*/
     /*also, fighter systems don't get disabled :)*/

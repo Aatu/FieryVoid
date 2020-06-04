@@ -9,11 +9,12 @@ class DuxRaider extends BaseShip{
         $this->faction = "Raiders";
         $this->phpclass = "DuxRaider";
         $this->imagePath = "img/ships/celerian.png";
-        $this->shipClass = "Dux Jump Cruiser";
+        $this->shipClass = "Raider Dux Jump Cruiser";
         $this->shipSizeClass = 3;
         $this->limited = 10; //Restricted Deployment
         $this->fighters = array("heavy"=>12);
 		$this->isd = 2002;
+		$this->variantOf = "Centauri Privateer Dux Jump Cruiser";
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;

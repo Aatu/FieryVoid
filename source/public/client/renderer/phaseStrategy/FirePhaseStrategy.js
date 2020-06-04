@@ -38,6 +38,14 @@ window.FirePhaseStrategy = function () {
         if (!this.selectedShip) {
             return;
         }
+				
+        var hexTarget = gamedata.selectedSystems.some(function (system) {
+            return system instanceof Weapon && system.hextarget === true;
+        });
+
+        if (hexTarget) {
+            weaponManager.targetHex(this.selectedShip, payload.hex);
+        }
     };
 
     FirePhaseStrategy.prototype.selectShip = function (ship, payload) {

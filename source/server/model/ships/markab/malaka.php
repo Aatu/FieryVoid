@@ -3,11 +3,11 @@ class Malaka extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         $this->pointCost = 220;
-        $this->faction = "Markab";
+        $this->faction = "Civilians";
         $this->phpclass = "Malaka";
         $this->isd = 2000;        
         $this->imagePath = "img/ships/MarkabAssaultShip.png"; //needs to be changed
-        $this->shipClass = "Malaka Transport";
+        $this->shipClass = "Markab Malaka Transport";
         $this->shipSizeClass = 3;
         $this->canvasSize = 200;
         $this->forwardDefense = 16;

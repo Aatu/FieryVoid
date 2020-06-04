@@ -5,10 +5,10 @@ class Mogortha extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 380;
-		$this->faction = "Centauri (Raiders)";
+		$this->faction = "Raiders";
 		$this->phpclass = "Mogortha";
 		$this->imagePath = "img/ships/mograth.png";
-		$this->shipClass = "Mogortha Frigate";
+		$this->shipClass = "Centauri Privateer Mogortha Frigate";
 		$this->agile = true;
 		$this->canvasSize = 100;
 		$this->isd = 2198;

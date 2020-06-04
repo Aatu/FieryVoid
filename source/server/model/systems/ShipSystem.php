@@ -502,7 +502,7 @@ class ShipSystem {
 	public function doesProtectFromDamage(){ //hook - systems that can affect damage dealing will return positive value; strongest one will be chosen to interact
 		return 0;
 	}
-	public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
+	public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $systemProtected, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
 		$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
 		return $returnValues;
 	}
@@ -520,9 +520,9 @@ class ShipSystem {
 		$systemDestroyed = false;
 		
 		//CALL SYSTEMS PROTECTING FROM DAMAGE HERE! 
-		$systemProtectingDmg = $target->getSystemProtectingFromDamage($shooter, $pos, $gamedata->turn, $weapon);
+		$systemProtectingDmg = $target->getSystemProtectingFromDamage($shooter, $pos, $gamedata->turn, $weapon, $this);
 		if($systemProtectingDmg){
-			$effectOfProtection = $systemProtectingDmg->doProtect($gamedata, $fireOrder, $target, $shooter,$weapon,$effectiveDamage,$effectiveArmor);
+			$effectOfProtection = $systemProtectingDmg->doProtect($gamedata, $fireOrder, $target, $shooter,$weapon,$this,$effectiveDamage,$effectiveArmor);
 			$effectiveDamage = $effectOfProtection['dmg'];
 			$effectiveArmor = $effectOfProtection['armor'];
 		}
@@ -550,3 +550,6 @@ class ShipSystem {
 	}
 
 }
+
+
+?>

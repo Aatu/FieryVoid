@@ -139,7 +139,15 @@
             
             return $rolling;
         }
-        
+        		
+        public static function isHalfPhased($ship, $turn){
+            foreach ($ship->movement as $move){
+                if ($move->turn != $turn) continue;
+                if ($move->type == "halfPhase" ) return true;
+            }
+            return false;
+        }
+		
         public static function getJinking($ship, $turn){
 			$jinking = 0;
 			

@@ -7,6 +7,7 @@ class BaseShip {
     public $systems = array();
     public $EW = array();
     public $fighters = array();
+	public $customFighter = array(); //array for fighters with special hangar requirements - see Balvarix/Rutarian for usage
     public $hitChart = array();
     public $notes = '';//notes to be displayed on fleet selection screen
 
@@ -38,6 +39,7 @@ class BaseShip {
     public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for all systems)
 
 	
+	public $halfPhaseThrust = 0; //needed for half phasing; equal to thrust from two BioThrusters on a given ship; 0 for ships that cannot half phase, eg. vast majority
     
 
     public $jinkinglimit = 0; //just in case there will be a ship actually able to jink; NOT SUPPORTED!
@@ -117,6 +119,8 @@ class BaseShip {
 	    			$mod += -20*($CnC->hasCritical("swtargetheld", $gamedata->turn)); //-4 Ini per hit
 				//additional: tmpinidown (temporary Ini reduction - Abbai weapon scan do so!
 				$mod += -5*($CnC->hasCritical("tmpinidown", $gamedata->turn)); //-1 Ini per crit
+				//additional: ShadowPilotPain						
+			    $mod += -5*($CnC->hasCritical("ShadowPilotPain", $gamedata->turn));
 			}
 		    if ($this instanceof FighterFlight){
 			    $firstFighter = $this->getSampleFighter();
@@ -600,8 +604,9 @@ class BaseShip {
             if (isset($this->systems[$id])){
                 return $this->systems[$id];
             }
-            else{
+            else{/* no longer needed, duo/dual weapon is obsolete
                 foreach($this->systems as $system){
+					
                     if($system instanceof Weapon && ($system->duoWeapon || $system->dualWeapon)){
                         foreach($system->weapons as $weapon){
                             if($weapon->id == $id){
@@ -616,18 +621,20 @@ class BaseShip {
                                 }
                             }
                         }
-                    }
+                    }					
                 }
+				*/
             }
             
-        return null;
-    }
+			return null;
+		}
 
     public function getSystemByName($name){
         foreach ($this->systems as $system){
             if ($system instanceof $name){
                 return $system;
             }
+			/* no longer needed
             else{
                 if($system instanceof Weapon && $system->duoWeapon){
                     foreach($system->weapons as $weapon){
@@ -637,6 +644,7 @@ class BaseShip {
                     }
                 }
             }
+			*/
         }
 
         return null;
@@ -686,13 +694,20 @@ class BaseShip {
 
 
 	//defensive system that can affect damage dealing - only one (best) such system will be called
-	public function getSystemProtectingFromDamage($shooter, $pos, $turn, $weapon){
+	//overridden by FighterFlight to get only systems on a fighter actually hit
+	public function getSystemProtectingFromDamage($shooter, $pos, $turn, $weapon, $systemhit){ //$systemhit actually used by fighter flight
 		if ($pos !== null) {
             $pos = Mathlib::hexCoToPixel($pos);
         }
 		$chosenSystem = null;
 		$chosenValue=0;
-        foreach($this->systems as $system){
+		if($this instanceOf FighterFlight){ //only subsystems of a particular fighter
+			$listOfPotentialSystems = $systemhit->systems;
+		}else{ //all systems of a ship
+			$listOfPotentialSystems = $this->systems;
+		}		
+        //foreach($this->systems as $system){
+		foreach($listOfPotentialSystems as $system){
 			$value=$system->doesProtectFromDamage();
             if ($value<1) continue;
 			if ($system->isDestroyed($turn-1)) continue;
@@ -717,7 +732,8 @@ class BaseShip {
 			}
         }
 		return ($chosenSystem);
-	}
+	} //endof getSystemProtectingFromDamage
+	
 
     public function getHitChanceMod($shooter, $pos, $turn, $weapon){
         if ($pos !== null) {

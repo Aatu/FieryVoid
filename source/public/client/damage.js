@@ -29,16 +29,31 @@ window.damageManager = {
             var damageEntry = system.damage[i];
 
             //if (damageEntry.destroyed) return damageEntry.turn;
-			//can undestroy - so return LAST destroyed...
-			turnDestroyed = damageEntry.turn;
+			//can undestroy - so return LAST destroyed... and look for undestroyed, too!
+			if (damageEntry.destroyed){
+				turnDestroyed = damageEntry.turn;
+			}else if (damageEntry.undestroyed){
+				turnDestroyed = null;
+			}
         }
 		if(turnDestroyed!==null) return turnDestroyed;
 
+		/* I think there's a bug here, rewriting but leaving original code as well just in case!*/
+		/*
         if (system.fighter) {
             var crit = shipManager.criticals.getCritical(system, "DisengagedFighter");
             if (crit) return crit.turn;
         } else {
             return null;
+        }
+		*/
+        if (system.fighter) {
+            var crit = shipManager.criticals.getCritical(system, "DisengagedFighter");
+            if (crit) {
+				return crit.turn;
+			} else {
+				return null;
+			}
         }
 
 		var stru = shipManager.systems.getStructureSystem(ship, system.location);

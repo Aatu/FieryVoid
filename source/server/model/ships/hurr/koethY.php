@@ -38,6 +38,8 @@ class koethy extends FighterFlight{
             	$missileRack->missileArray = array( 1 => new MissileFY(330, 30) );
 		$fighter->addFrontSystem($missileRack);	
 	
+		$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+			
 		$this->addSystem($fighter);
 	}
     }

@@ -40,6 +40,8 @@ class DoubleV extends FighterFlight{
 		$fighter->addFrontSystem(new PairedParticleGun(330, 30, 3));
 		$fighter->addFrontSystem(new FighterMissileRack(2, 330, 30));
 			
+		$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+			
 		$this->addSystem($fighter);
 	}
 				}

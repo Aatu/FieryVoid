@@ -81,6 +81,7 @@ class Weapon extends ShipSystem
     public $canChangeShots = false;
     public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
 	public $isRammingAttack = false; //true means hit chance calculations are completely different, relying on speed
+	public $raking = 10;//size of rake (for Raking weapons only)
 
     public $shots = 1;
     public $shotsArray = array();
@@ -111,6 +112,7 @@ class Weapon extends ShipSystem
     public $systemKiller = false;    //for custom weapons - increased chance to hit system and not Structure
     protected $systemKillerArray = array();
     public $noOverkill = false; //this will let simplify entire Matter line enormously!
+    public $doOverkill = false; //opposite of $noOverkill - allows Piercing shots to overkill (eg. Shadow Heavy Molecular Slicer Beam has such ability)
     protected $noOverkillArray = array();
     public $ballistic = false; //this is a ballictic weapon, not direct fire
     public $ballisticIntercept = false; //can intercept, but only ballistics
@@ -408,7 +410,20 @@ class Weapon extends ShipSystem
     }
 
     public function setSystemDataWindow($turn)
-    {		
+    {			
+		//re-create damage arrays, so they reflect loading time...
+		foreach ($this->firingModes as $i => $modeName) {
+			$this->changeFiringMode($i);
+			$this->setMinDamage();
+			$this->minDamageArray[$i] = $this->minDamage;
+			$this->setMaxDamage();
+			$this->maxDamageArray[$i] = $this->maxDamage;
+			//set AF priority, too!
+			$this->setPriorityAF(); 
+			$this->priorityAFArray[$i] = $this->priorityAF;
+		}
+		$this->changeFiringMode(1); //reset mode to basic
+	
         if ($this->damageType != '') $this->data["Damage type"] = $this->damageType;
         if ($this->weaponClass != '') $this->data["Weapon type"] = $this->weaponClass;
 		
@@ -734,6 +749,11 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
 		$target = $gamedata->getShipById($fireOrder->targetid);
 		if (($target instanceof FighterFlight) && (!($shooter instanceof FighterFlight))) return 0;//ship has no chance to ram a fighter!
 
+		//half-phased and non-half-phased ship cannot ram each other
+		$shooterHalfphased = Movement::isHalfPhased($shooter, $gamedata->turn);
+		$targetHalfphased = Movement::isHalfPhased($target, $gamedata->turn);
+		if ($shooterHalfphased != $targetHalfphased) return 0;
+
 		$hitChance = 8; //base: 40%
 
 		if ($target->Enormous) $hitChance+=6;//+6 vs Enormous units
@@ -789,8 +809,8 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
 
  /*calculate base chance to hit (before any interception is applied) - Marcin Sawicki*/
     public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder){
-	$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too! - certainly important for calculating hit chance...
-	if ($this->isRammingAttack) return $this->calculateHitBaseRam($gamedata, $fireOrder);
+		$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too! - certainly important for calculating hit chance...
+		if ($this->isRammingAttack) return $this->calculateHitBaseRam($gamedata, $fireOrder);
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
         $pos = $shooter->getHexPos();
@@ -937,7 +957,7 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
 		$noLockMod =  $rangePenalty * $noLockPenalty;
 			
 		$jammerValue = 0;
-		if ($shooter->faction != $target->faction) {
+		//if ($shooter->faction != $target->faction) { //checked by ability itself now!
 			//jammerValue takes Jammer state, criticals, Advanced and Improved sensors into account
 			$jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter" => $shooter, "target" => $target));
 			
@@ -956,13 +976,14 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
 				}
 			}
 			*/		
-		}
+		//}
 			
-		$jammermod = $rangePenalty * max(0,($jammerValue-$noLockMod));//no lock and jammer work on the same thing, but they still need to be separated (for jinking).
+		$jammermod = $rangePenalty * max(0,($jammerValue-$noLockPenalty));//no lock and jammer work on the same thing, but they still need to be separated (for jinking).
 
         if (!($shooter instanceof FighterFlight) && !($shooter instanceof OSAT)) {//leaving instanceof OSAT here - MicroSATs will be omitted as they're SHFs
             $CnC = $shooter->getSystemByName("CnC");
             $mod -= ($CnC->hasCritical("PenaltyToHit", $gamedata->turn - 1));
+            $mod -= ($CnC->hasCritical("ShadowPilotPain", $gamedata->turn));
         }
         $firecontrol = $this->fireControl[$target->getFireControlIndex()];
 		
@@ -971,8 +992,22 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
 			$bdew = 0;
 			$sdew = 0;
 		}			
+		
+		//half-phasing: +4 vs gunfire, +8 vs ballistics, -10 to own fire
+		$halfphasemod = 0;
+		$shooterHalfphased = Movement::isHalfPhased($shooter, $gamedata->turn);
+		$targetHalfphased = Movement::isHalfPhased($target, $gamedata->turn);
+		if ($shooterHalfphased) $halfphasemod = 10;
+		if ($targetHalfphased) {
+			if($this->ballistic){
+				$halfphasemod += 8;
+			}else{
+				$halfphasemod += 4;
+			}
+		}
+		
 
-        $hitPenalties = $dew + $bdew + $sdew + $rangePenalty + $jinkSelf + max($jammermod, $jinkTarget) + $noLockMod;
+        $hitPenalties = $dew + $bdew + $sdew + $rangePenalty + $jinkSelf + max($jammermod, $jinkTarget) + $noLockMod + $halfphasemod;
         $hitBonuses = $oew + $soew + $firecontrol + $mod;
         $hitLoc = null;
 
@@ -1174,7 +1209,7 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
         /*Location only relevant for Flash damage, which overkills to a new roll on hit table rather than to Structure*/
         /*$damageWasDealt=true indicates this is actual overkill, instead of just passing through previously destroyed system that nevertheless was chosen as target*/
         $okSystem = null;
-        $noOverkill = ($this->noOverkill || ($this->damageType == 'Piercing'));//either explicitly stated or Piercing mode shot
+        $noOverkill = (!$this->doOverkill) && ($this->noOverkill || ($this->damageType == 'Piercing'));//either explicitly stated or Piercing mode shot
 
         if ($target instanceof FighterFlight) {
 			return null;
@@ -1262,9 +1297,15 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
 				$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
 			}
 		}
-
+		
+		//let's recognize "MCV sized" by number of structures rather than technical target size! (important for eg. Shadows, which are laid out damaged as MCVs even if they use larger ship sizes)
+		$noOfStructures = 0;		
+		if(($this->damageType == 'Piercing') && (!$target instanceOf FighterFlight)){ //irrelevant for non-Piercing shots!
+			foreach ($target->systems as $struct) if ($struct instanceOf Structure) $noOfStructures++;
+		}
         
-        if (($target->shipSizeClass > 1) && ($this->damageType == 'Piercing')) { //Piercing damage will be split into 3 parts vs units larger thgan MCVs
+        //if (($target->shipSizeClass > 1) && ($this->damageType == 'Piercing')) { //Piercing damage will be split into 3 parts vs units larger thgan MCVs
+		if (($noOfStructures > 1) && ($this->damageType == 'Piercing')) {//special handling of Piercing on ships with 2 or more Structures - otherwise it will degenerate to Standard (no overkill)
             $facingLocation = $target->getHitSection($shooter, $fireOrder->turn, true); //do accept destroyed section as location
             //find out opposite section...
             $relativeBearing = $target->getBearingOnUnit($shooter);
@@ -1393,10 +1434,20 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
         }
 
         //for Piercing shots at small targets (MCVs and smaller) - reduce damage by ~10% (by rules: -2 per die)
-        if (($this->damageType == 'Piercing') && ($target->shipSizeClass < 2)) $damage = $damage * 0.9;
+		//actually recognize this by number of structures instead of formal ship size - Shadow HCvs and MCVs are damaged as MCVs would have!
+        //if (($this->damageType == 'Piercing') && ($target->shipSizeClass < 2)) $damage = $damage * 0.9;
+		if ($this->damageType == 'Piercing'){
+			$noOfStructures=0;
+			if(!$target instanceOf FighterFlight){
+				foreach ($target->systems as $struct) if ($struct instanceOf Structure) $noOfStructures++;
+			}
+			if($noOfStructures<2){ //damaged as MCV (or smaller)
+				$damage = $damage * 0.9; 
+			}				
+		}
 
         $damage = max(0, $damage); //at least 0	    
-        $damage = floor($damage);
+        $damage = floor($damage); //drop fractions, if any were generated
         return $damage;
     } //endof function getDamageMod
 

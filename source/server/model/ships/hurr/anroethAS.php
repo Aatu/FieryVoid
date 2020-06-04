@@ -42,6 +42,9 @@ class AnroethAS extends FighterFlight{
 			$fighter->addFrontSystem(new PairedParticleGun(330, 30, 1, 1)); //1 gun d6+1
 			
 			
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack		
+			
+			
 			$this->addSystem($fighter);
 			
 		}

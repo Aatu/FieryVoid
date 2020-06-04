@@ -37,6 +37,7 @@ class Rowlon extends FighterFlight{
 			$gun = new LightParticleBeam(330, 30, 2);					   
 			$gun->displayName = "Light Particle Projector";
             $rowlon->addFrontSystem($gun); 
+			$rowlon->addAftSystem(new RammingAttack(0, 0, 360, $rowlon->getRammingFactor(), 0)); //ramming attack
                     
             $this->addSystem($rowlon);            
         }       

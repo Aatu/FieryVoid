@@ -6,10 +6,10 @@ class Dux extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 480;
-        $this->faction = "Centauri (Raiders)";
+        $this->faction = "Raiders";
         $this->phpclass = "Dux";
         $this->imagePath = "img/ships/celerian.png";
-        $this->shipClass = "Dux Jump Cruiser";
+        $this->shipClass = "Centauri Privateer Dux Jump Cruiser";
         $this->shipSizeClass = 3;
         $this->limited = 10; //Restricted Deployment
         $this->fighters = array("heavy"=>12);

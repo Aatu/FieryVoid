@@ -8,7 +8,7 @@ class Adder extends FighterFlight{
 	$this->faction = "Raiders";
       $this->phpclass = "Adder";
        $this->shipClass = "Adder Light Fighters";
-	$this->imagePath = "img/ships/deltaV.png"; //Need to change this
+	$this->imagePath = "img/ships/dragon.png"; //much earlier than Dragon, but still Drazi - closer to that silhouette than Delta-V
         
         $this->forwardDefense = 8;
         $this->sideDefense = 8;
@@ -17,7 +17,7 @@ class Adder extends FighterFlight{
         $this->jinkinglimit = 10;
         $this->turncost = 0.33;
         
-	$this->iniativebonus = 100;
+	$this->iniativebonus = 100; //Drazi design, but not Drazi pilots - no Drazi racial bonus
         $this->populate();
     }
 
@@ -30,11 +30,12 @@ class Adder extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
 		$armour = array(1, 0, 1, 1);
 		$fighter = new Fighter("deltaV", $armour, 5, $this->id);
-		$fighter->displayName = "Adder Light Fighter";
-		$fighter->imagePath = "img/ships/deltaV.png"; //Need to Change this
-		$fighter->iconPath = "img/ships/deltaV_large.png"; //Need to Change this
+		$fighter->displayName = "Adder";
+		$fighter->imagePath = "img/ships/dragon.png"; 
+		$fighter->iconPath = "img/ships/dragon_large.png"; 
 			
 		$fighter->addFrontSystem(new PairedParticleGun(330, 30, 2));
+	    	$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
 		$this->addSystem($fighter);
 	}
@@ -42,3 +43,4 @@ class Adder extends FighterFlight{
 }
 
 
+?>

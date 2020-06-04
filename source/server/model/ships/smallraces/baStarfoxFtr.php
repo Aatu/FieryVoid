@@ -41,6 +41,8 @@ class BAStarfoxFtr extends FighterFlight{
             //$frontGun->displayName = "Matter Gun";
             $fighter->addFrontSystem($missileRack);
             $fighter->addFrontSystem($frontGun);
+			
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 
             $this->addSystem($fighter);
         }

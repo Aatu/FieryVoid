@@ -60,18 +60,20 @@ if (isset($_SESSION["user"])) {
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
         -->
-		---------- <b>LATEST NEWS - MAY 2020</b> ----------
+		---------- <b>LATEST NEWS - JUNE 2020</b> ----------		
 		
-		
-	<br><b>Criticals reworked</b> - no major immediate impact, although I hope temporary criticals will be easier to read now (Ipsha cooldowns!).
-	<br><b>Shipyard mistakes corrected</b> - quite a few minor layout errors (like wrong firing arcs or incorrect thrusters installed) were corrected.
-        
-	<br><b>Discord channel</b> - added to links below.
-	    
-	<br><b>Recently active games</b> - now skipping games during creation (turn 0)
-	<br><b>BA order of battle</b> - Belt Alliance ships now can officially carry fighters instead of mysterious "externals" :) . Deployment restrictions were added where appropriate, too.
-	<br><b>Mode change extended</b> - now current mode is shown besides change button, for (hopefully) clearer information
-	<br><b>Thruster allocation while pivoted fixed</b> - ...again ;)    
+	<br><b>Pivot icons</b> - I changed them to something more suggestive (...hopefully). If You prefer old ones <b><u>please give me appropriate feedback</u></b>!
+	<br><b>Fleet check expanded</b> - fighters with special hangar requirements (Rutarian, Thunderbolt) are now checked (courtesy of Kevin)
+	<br><b>Raiders and Civilians shuffled around</b> - basically national ships in these categories were moved to general appropriate folders (courtesy of Douglas)
+	<br><b>Reactor overload</b> - at last explicitly visible in log!
+	<br><b>Magazine explosion</b> - at last explicitly visible in log!
+	<br><b>Subreactor explosion</b> - at last explicitly visible in log!
+	<br><b>Command White Star</b> - Sheridan's personal ride now at Your disposal!
+	<br><b>Maneuvering when pivoted fixed</b> - ...again...
+	<br><b>Icons fixed</b> - a few icons that were partially covered by health bar were moved so their shape is more visible
+	<br><b>Ipsha cooldowns remastered</b> - should be easier to read, especially with longer cooldowns.
+	<br><b>Improved/Advanced Sensors fixed</b> - now they should actually work ;)
+	<br><b>Rutarian Stealth fixed</b> - had some trouble, now it should work correctly.
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload (<b><u>ctrl+F5</u></b>) whenever something weird happens.
