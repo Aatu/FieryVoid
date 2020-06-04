@@ -289,10 +289,10 @@ EA (extremely tough, with awesome defenses and good firepower – balanced by di
 
 SUPERIOR
 Factions that, point for point, usually beat First League. That may be due to overall superior value or some special side effect of their rules, so simply allowing opponent extra PV might not be enough to balance things.
-Yolu
 EA using Warlock
 ISA (eg. all-White Star fleet)
 Narn using massed EMines
+Yolu
  
 
 FIRST LEAGUE
@@ -339,6 +339,6 @@ Usuuth
 ANCIENTS
 Factions that can’t really be balanced vs Young Races. Overall high power and durability and selective ignoring enemy systems (especially defensive ones – which hurts some opponents while leaving others untouched) coupled with small numer of shots and relative vulnerability to swarms are impossible to properly balance for pickup battle. For these reasons Ancients got their own category.
 Shadows
-Streib (actually an advanced Young race, but their ship design is peculiar enough for them to feel surprisingly Ancient-like when it comes to balancing: some opponents are easily overwhelmed (especially those that  rely on mass of individually light shots), while others are overwhelming themselves (especially if they’re resistant to EM weapons or have high quantity of armor-ignoring weapons) )
+Streib (actually an advanced Young race, but their ship design is peculiar enough for them to feel surprisingly Ancient-like when it comes to balancing: some opponents are easily overwhelmed (especially those that  rely on mass of individually light shots), while others are overwhelming themselves (especially if they’re resistant to EM weapons or have high quantity of armor-ignoring weapons) . They are definitely NOT up to fighting actual Ancients though! )
 
  
