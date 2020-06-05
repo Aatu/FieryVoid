@@ -12,8 +12,6 @@ class ShadowMediumFighterFlight extends FighterFlight{
 	    
 		$this->isd = 'Ancient';
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
-$this->faction = "Custom Ships";
-$this->variantOf = "Lurking unseen";        
         
 		$this->enhancementOptionsDisabled[] = 'POOR_TRAIN'; //there are no poorly trained Shadow fighters
 		$this->enhancementOptionsDisabled[] = 'EXP_MOTIV'; //no crew - and no dropouts anyway ;)
