@@ -17,7 +17,7 @@ class ShadowMediumFighterFlight extends FighterFlight{
 		$this->enhancementOptionsDisabled[] = 'EXP_MOTIV'; //no crew - and no dropouts anyway ;)
 		$this->enhancementOptionsEnabled[] = 'SHAD_CTRL'; //can be deployed as uncontrolled
 		
-		$this->notes = "Shadow fighters are integral part of their carriers. For every Shadow fighter included in fleet, appropriate carrier should take a level of Fighter Launched enhancement OR fighter should take Uncontrolled enhancement.";
+		$this->notes = "Shadow fighters are integral part of their carriers. For every Shadow fighter included in fleet, appropriate carrier should take a level of Fighter Launched enhancement OR fighter should take Uncontrolled enhancement (the latter for scenarios only).";
 		
 		$this->forwardDefense = 7;
 		$this->sideDefense = 7;
