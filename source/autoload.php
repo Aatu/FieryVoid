@@ -1259,11 +1259,11 @@ spl_autoload_register(
 				//Shadow units
 				'shadowmediumfighterflight' => '/server/model/ships/shadows/shadowMediumFighterFlight.php',
 				'shadowpatrolcruiser' => '/server/model/ships/shadows/shadowPatrolCruiser.php',
-								
-				//just test of all images:
-				'shadowdestroyer' => '/server/model/ships/shadows/shadowDestroyer.php',
+				'shadowpatrolcruiserprimordial' => '/server/model/ships/shadows/shadowPatrolCruiserPrimordial.php',
 				'shadowcruiser' => '/server/model/ships/shadows/shadowCruiser.php',
 				'shadowbattlecruiser' => '/server/model/ships/shadows/shadowBattleCruiser.php',
+								
+				'shadowdestroyer' => '/server/model/ships/shadows/shadowDestroyer.php',
 				'shadowdreadnought' => '/server/model/ships/shadows/shadowDreadnought.php',
 				
 				
