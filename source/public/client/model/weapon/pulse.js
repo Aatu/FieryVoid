@@ -106,8 +106,8 @@ PhasingPulseCannon.prototype.constructor = PhasingPulseCannon;
 PhasingPulseCannon.prototype.shieldInteractionDefense = function (target, shooter, shield, mod) {
 	//ignores non-Ancient non-EM shield and shield-like systems
 	if (target.factionAge >= 3) return mod;
-	if (shield) return mod;
-    return mod;
+	if (shield.name == 'eMShield') return mod;
+    return Math.min(0,mod);
 };
 
 var PhasingPulseCannonH = function PhasingPulseCannonH(json, ship) {
