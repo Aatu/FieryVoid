@@ -1,14 +1,16 @@
 <?php
-class ShadowDestroyer extends MediumShip{
+class ShadowDestroyerStrike extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 1250;
+		$this->pointCost = 1200;
 		$this->faction = "Shadows";
-        $this->phpclass = "ShadowDestroyer";
+        $this->phpclass = "ShadowDestroyerStrike";
         $this->imagePath = "img/ships/ShadowDestroyer.png";
-        $this->shipClass = "Destroyer";
+        $this->shipClass = "Strike Destroyer";
+        $this->variantOf = "Destroyer";
+	$this->occurence = 'uncommon';
         $this->canvasSize = 200;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 1; //it's actually an MCV :)
@@ -117,10 +119,8 @@ class ShadowDestroyer extends MediumShip{
 				
 		
 		//weapons - Forward for visual reasons!
-        	$this->addFrontSystem(new PhasingPulseCannonH(4, 0, 0, 240, 0));
-        	$this->addFrontSystem(new PhasingPulseCannonH(4, 0, 0, 0, 120));
-        	$this->addFrontSystem(new MultiphasedCutter(4, 0, 0, 180, 0));
-        	$this->addFrontSystem(new MultiphasedCutter(4, 0, 0, 0, 180));
+        	$this->addFrontSystem(new MolecularSlicerBeamL(4, 0, 0, 240, 0));
+        	$this->addFrontSystem(new MolecularSlicerBeamL(4, 0, 0, 0, 120));
         
 		
 		//technical thrusters - unlimited, like for MCVs		
@@ -137,36 +137,33 @@ class ShadowDestroyer extends MediumShip{
 	
 		$this->hitChart = array(
 			0=> array(
-				5 => "Structure",
-				8 => "0:Energy Diffuser",
-				10 => "2:BioThruster",
-				11 => "0:Self Repair",
-				13 => "1:Heavy Phasing Pulse Cannon",
-				15 => "1:MultiphasedCutter",
+				7 => "Structure",
+				10 => "0:Energy Diffuser",
+				12 => "2:BioThruster",
+				13 => "0:Self Repair",
+				15 => "1:Light Slicer Beam",
 				16 => "0:Scanner",
 				17 => "0:Reactor",
 				18 => "0:Phasing Drive",
 				20 => "C&C", //the only difference between sections - outer 19-20 hits are rerolled on Primary table, which is the only chance to hit Pilot
 			),
 			1=> array(
-				5 => "Structure",
-				8 => "0:Energy Diffuser",
-				10 => "2:BioThruster",
-				11 => "0:Self Repair",
-				13 => "1:Heavy Phasing Pulse Cannon",
-				15 => "1:MultiphasedCutter",
+				7 => "Structure",
+				10 => "0:Energy Diffuser",
+				12 => "2:BioThruster",
+				13 => "0:Self Repair",
+				15 => "1:Light Slicer Beam",
 				16 => "0:Scanner",
 				17 => "0:Reactor",
 				18 => "0:Phasing Drive",
 				20 => "Primary",
 			),
 			2=> array(
-				5 => "Structure",
-				8 => "0:Energy Diffuser",
-				10 => "2:BioThruster",
-				11 => "0:Self Repair",
-				13 => "1:Heavy Phasing Pulse Cannon",
-				15 => "1:MultiphasedCutter",
+				7 => "Structure",
+				10 => "0:Energy Diffuser",
+				12 => "2:BioThruster",
+				13 => "0:Self Repair",
+				15 => "1:Light Slicer Beam",
 				16 => "0:Scanner",
 				17 => "0:Reactor",
 				18 => "0:Phasing Drive",
