@@ -1,21 +1,24 @@
 <?php
-class ShadowDreadnought extends MediumShip{
+class ShadowDreadnoughtPrimordial extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 4250;
+		$this->pointCost = 4250*1.2+15*25;//Primordial: +20%; Additional Tendril: Tendril capacity * Diffuser output
 		$this->faction = "Shadows";
-        $this->phpclass = "ShadowDreadnought";
+        $this->phpclass = "ShadowDreadnoughtPrimordial";
         $this->imagePath = "img/ships/ShadowDreadnought.png";
-        $this->shipClass = "Dreadnought";
+        $this->shipClass = "Dreadnought (Primordial)";
+        $this->variantOf = "Dreadnought";
         $this->canvasSize = 265;
-	    $this->isd = 'Ancient';
+	    $this->isd = 'Primordial';
+		$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
         $this->shipSizeClass = 3; //it's actually a Capital ship using MCV layout
-		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+	    
+        $this->limited = 33;
        
         $this->forwardDefense = 18;
-        $this->sideDefense = 18;
+        $this->sideDefense = 17;
         
 		$this->halfPhaseThrust = 6; //needed for half phasing; equal to thrust from two BioThrusters on a given ship
         $this->gravitic = true;
@@ -25,7 +28,7 @@ class ShadowDreadnought extends MediumShip{
         $this->accelcost = 4;
         $this->rollcost = 4;
         $this->pivotcost = 4;
-		$this->iniativebonus = 2 *5;
+		$this->iniativebonus = (2+1) *5;
 		
 		$this->fighters = array("normal"=>12);
 		$this->notes = "Atmospheric capable";//even largest Shadow ships are atmospheric capable
@@ -120,6 +123,9 @@ class ShadowDreadnought extends MediumShip{
 		$tendril=new DiffuserTendril(15,'L');//absorbtion capacity,side
 		$diffuserPort->addTendril($tendril);
 		$this->addLeftSystem($tendril);
+		$tendril=new DiffuserTendril(15,'L');//absorbtion capacity,side
+		$diffuserPort->addTendril($tendril);
+		$this->addLeftSystem($tendril);
         	$this->addPrimarySystem($diffuserPort);
 		
 		$diffuserStbd = new EnergyDiffuser(6, 28, 25, 0, 180);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
@@ -153,6 +159,9 @@ class ShadowDreadnought extends MediumShip{
 		$tendril=new DiffuserTendril(15,'R');//absorbtion capacity,side
 		$diffuserStbd->addTendril($tendril);
 		$this->addRightSystem($tendril);
+		$tendril=new DiffuserTendril(15,'R');//absorbtion capacity,side
+		$diffuserStbd->addTendril($tendril);
+		$this->addRightSystem($tendril);
         $this->addPrimarySystem($diffuserStbd);
 		
 		
@@ -161,8 +170,8 @@ class ShadowDreadnought extends MediumShip{
 		
 		
 		//weapons - Forward for visual reasons!
-        $this->addFrontSystem(new MolecularSlicerBeamM(5, 0, 0, 240, 0));
-        $this->addFrontSystem(new MolecularSlicerBeamM(5, 0, 0, 0, 120));
+        $this->addFrontSystem(new MolecularSlicerBeamH(5, 0, 0, 240, 0));
+        $this->addFrontSystem(new MolecularSlicerBeamH(5, 0, 0, 0, 120));
         $this->addFrontSystem(new VortexDisruptor(5, 0, 0, 240, 0));
         $this->addFrontSystem(new VortexDisruptor(5, 0, 0, 0, 120));
         
@@ -185,7 +194,7 @@ class ShadowDreadnought extends MediumShip{
 				7 => "0:Energy Diffuser",
 				9 => "2:BioThruster",
 				10 => "0:Self Repair",
-				12 => "1:Slicer Beam",
+				12 => "1:Heavy Slicer Beam",
 				14 => "1:Vortex Disruptor",
 				15 => "0:Hangar",
 				16 => "0:Scanner",
@@ -198,7 +207,7 @@ class ShadowDreadnought extends MediumShip{
 				7 => "0:Energy Diffuser",
 				9 => "2:BioThruster",
 				10 => "0:Self Repair",
-				12 => "1:Slicer Beam",
+				12 => "1:Heavy Slicer Beam",
 				14 => "1:Vortex Disruptor",
 				15 => "0:Hangar",
 				16 => "0:Scanner",
