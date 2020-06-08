@@ -568,6 +568,7 @@ class LightPlasmaAccelerator extends LinkedWeapon{
 			$this->data["Special"] .= "<br> - Standard: 1d6+3"; 
 			$this->data["Special"] .= "<br> - Charged (alternate mode!): 2d6+6, cannot target fighters"; 
 			$this->data["Special"] .= "<br>Damage penalty: -1/hex.";  
+			$this->data["Special"] .= "<br>REMINDER: as an Accelerator weapon, it will not be used for interception unless specifically ordered to do so!"; 
 		}
 		
 	

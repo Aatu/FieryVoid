@@ -1254,6 +1254,10 @@ spl_autoload_register(
 				'molecularslicerbeamm' => '/server/model/weapons/molecular.php', 
 				'molecularslicerbeamh' => '/server/model/weapons/molecular.php', 
                 'vortexdisruptor' => '/server/model/weapons/specialWeapons.php',  
+                'multiphasedcutterl' => '/server/model/weapons/molecular.php',    
+                'multiphasedcutter' => '/server/model/weapons/molecular.php',  
+                'phasingpulsecannon' => '/server/model/weapons/pulse.php',    
+                'phasingpulsecannonh' => '/server/model/weapons/pulse.php',    
 				
 				
 				//Shadow units

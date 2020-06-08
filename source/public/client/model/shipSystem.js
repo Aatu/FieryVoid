@@ -175,6 +175,11 @@ Weapon.prototype.getInterceptRating = function () {
 				return this.intercept;
 };
 
+//weapon that has special interaction with shield - eg. Phasing Pulse Cannon - redefines this
+Weapon.prototype.shieldInteractionDefense = function (target, shooter, shield, mod) {
+    return mod;
+};
+
 var Ballistic = function Ballistic(json, ship) {
 				Weapon.call(this, json, ship);
 };

@@ -553,6 +553,7 @@
 			$this->data["Special"] = "Can fire accelerated ROF for less shots:";  
 			$this->data["Special"] .= "<br> - 1 turn: 2 shots"; 
 			$this->data["Special"] .= "<br> - 2 turns: 3 shots"; 
+			$this->data["Special"] .= "<br>REMINDER: as an Accelerator weapon, it will not be used for interception unless specifically ordered to do so!"; 
         }
 
         public function getDamage($fireOrder){        return Dice::d(6,2)+2;   }
@@ -944,6 +945,88 @@
 		}
 		
 	}//endof class MolecularSlicerBeamH
+
+
+
+
+    /*Shadow "export" light weapon*/
+    class MultiphasedCutterL extends Weapon{        
+        public $name = "MultiphasedCutterL";
+        public $iconPath = "MultiphasedCutterL.png";
+        public $displayName = "Light Multiphased Cutter";
+        public $animation = "laser";
+        public $animationColor = array(9, 0, 255); //animate as a dark blue beam, like from Shadow Omega light weapons fire in the show
+        public $animationExplosionScale = 0.18;
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.3;
+        public $priority = 6; //medium Standard, with average dmg of 13
+		public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
+        
+        public $loadingtime = 1;
+                
+        public $rangePenalty = 0.5;//-1/2 hexes
+        public $fireControl = array(6, 3, 3); // fighters, <mediums, <capitals 
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Molecular"; 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 3;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            /* 
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            }	    
+            $this->data["Special"] .= "Uninterceptable."; 
+            */
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+2;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 ;      }    
+    }//endof class MultiphasedCutterL
+
+
+
+    /*Shadow Destroyer defensive weapon - essentially triple mount of Light Multiphased Cutters (way more power efficient)*/
+    class MultiphasedCutter extends MultiphasedCutterL {        
+        public $name = "MultiphasedCutter";
+        public $iconPath = "MultiphasedCutter.png";
+        public $displayName = "Multiphased Cutter";
+        
+        public $guns = 3; 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 10;
+            if ( $powerReq == 0 ) $powerReq = 4;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            /* 
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            }	    
+            $this->data["Special"] .= "Uninterceptable."; 
+            */
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+2;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 ;      }    
+    }//endof class MultiphasedCutter
 
 
 ?>

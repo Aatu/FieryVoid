@@ -96,3 +96,25 @@ var PulseAccelerator = function PulseAccelerator(json, ship) {
 };
 PulseAccelerator.prototype = Object.create(Pulse.prototype);
 PulseAccelerator.prototype.constructor = PulseAccelerator;
+
+
+var PhasingPulseCannon = function PhasingPulseCannon(json, ship) {
+    Weapon.call(this, json, ship);
+};
+PhasingPulseCannon.prototype = Object.create(Weapon.prototype);
+PhasingPulseCannon.prototype.constructor = PhasingPulseCannon;
+PhasingPulseCannon.prototype.shieldInteractionDefense = function (target, shooter, shield, mod) {
+	//ignores non-Ancient non-EM shield and shield-like systems
+	if (target.factionAge >= 3) return mod;
+	if (shield) return mod;
+    return mod;
+};
+
+var PhasingPulseCannonH = function PhasingPulseCannonH(json, ship) {
+    PhasingPulseCannon.call(this, json, ship);
+};
+PhasingPulseCannonH.prototype = Object.create(PhasingPulseCannon.prototype);
+PhasingPulseCannonH.prototype.constructor = PhasingPulseCannonH;
+
+
+

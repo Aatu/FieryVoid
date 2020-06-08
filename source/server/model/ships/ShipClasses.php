@@ -740,6 +740,8 @@ class BaseShip {
         foreach($this->systems as $system){
             if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon)) continue;
             $mod = $system->getDefensiveHitChangeMod($this, $shooter, $pos, $turn, $weapon);
+			//weapon might have something to say about that as well...
+			$mod = $weapon->shieldInteractionDefense($this, $shooter, $pos, $turn, $system, $mod);
 			//Advanced Sensors negate positive (eg. reducing profile) defensive systems' effects operated by less advanced races
 			if ( ($mod > 0) && ($this->factionAge < 3) && ($shooter->hasSpecialAbility("AdvancedSensors")) ){
 				$mod = 0;
@@ -760,6 +762,8 @@ class BaseShip {
         foreach($this->systems as $system){
             if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon)) continue;
             $mod = $system->getDefensiveDamageMod($this, $shooter, $pos, $turn, $weapon);
+			//weapon might have something to say about that as well...
+			$mod = $weapon->shieldInteractionDamage($this, $shooter, $pos, $turn, $system, $mod);
             if ( !isset($affectingSystems[$system->getDefensiveType()])
                 || $affectingSystems[$system->getDefensiveType()] < $mod){
                 $affectingSystems[$system->getDefensiveType()] = $mod;
