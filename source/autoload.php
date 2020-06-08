@@ -1265,13 +1265,18 @@ spl_autoload_register(
 				
 				
 				'shadowbattlecruiser' => '/server/model/ships/shadows/shadowBattleCruiser.php',
+				'shadowcarrier' => '/server/model/ships/shadows/shadowCarrier.php',
+				'shadowcarrierprimordial' => '/server/model/ships/shadows/shadowCarrierPrimordial.php',
 				'shadowcruiser' => '/server/model/ships/shadows/shadowCruiser.php',
 				'shadowcruiserprimordial' => '/server/model/ships/shadows/shadowCruiserPrimordial.php',
+				'shadowdestroyer' => '/server/model/ships/shadows/shadowDestroyer.php',
+				'shadowdestroyerscout' => '/server/model/ships/shadows/shadowDestroyerScout.php',
+				'shadowdestroyerstrike' => '/server/model/ships/shadows/shadowDestroyerStrike.php',
+				'shadowdreadnought' => '/server/model/ships/shadows/shadowDreadnought.php',
+				'shadowdreadnoughtprimordial' => '/server/model/ships/shadows/shadowDreadnoughtPrimordial.php',
 				'shadowpatrolcruiser' => '/server/model/ships/shadows/shadowPatrolCruiser.php',
 				'shadowpatrolcruiserprimordial' => '/server/model/ships/shadows/shadowPatrolCruiserPrimordial.php',
 								
-				'shadowdestroyer' => '/server/model/ships/shadows/shadowDestroyer.php',
-				'shadowdreadnought' => '/server/model/ships/shadows/shadowDreadnought.php',
 				
 				
 				

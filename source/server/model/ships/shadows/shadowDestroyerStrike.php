@@ -10,7 +10,7 @@ class ShadowDestroyerStrike extends MediumShip{
         $this->imagePath = "img/ships/ShadowDestroyer.png";
         $this->shipClass = "Strike Destroyer";
         $this->variantOf = "Destroyer";
-	$this->occurence = 'uncommon';
+		$this->occurence = 'uncommon';
         $this->canvasSize = 200;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 1; //it's actually an MCV :)
@@ -27,7 +27,7 @@ class ShadowDestroyerStrike extends MediumShip{
         $this->accelcost = 2; //1.5 by AoG, but this is not possible to do in FV...
         $this->rollcost = 1;
         $this->pivotcost = 1;
-	$this->iniativebonus = 14 *5;
+		$this->iniativebonus = 14 *5;
 		
 		//$this->fighters = array("normal"=>12);
 		$this->notes = "Atmospheric capable";//even largest Shadow ships are atmospheric capable
@@ -95,7 +95,7 @@ class ShadowDestroyerStrike extends MediumShip{
 		$this->addLeftSystem($tendril);
         	$this->addPrimarySystem($diffuserPort);
 		
-		$diffuserStbd = new EnergyDiffuser(4, 12, 10, 180, 0);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+		$diffuserStbd = new EnergyDiffuser(4, 12, 10, 0, 180);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
 		$tendril=new DiffuserTendril(20,'R');//absorbtion capacity,side
 		$diffuserStbd->addTendril($tendril);
 		$this->addRightSystem($tendril);

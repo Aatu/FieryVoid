@@ -58,7 +58,7 @@ class EnergyPulsar extends Pulse{
         public $displayName = "Energy Pulsar";
         public $animation = "trail";
         public $animationWidth = 5;
-        public $projectilespeed = 13;
+        public $projectilespeed = 10;
         public $animationExplosionScale = 0.30;
         public $rof = 2;
         public $trailLength = 12;
@@ -101,7 +101,7 @@ class ScatterPulsar extends Pulse{
         public $animation = "trail";
         public $trailLength = 12;
         public $animationWidth = 4;
-        public $projectilespeed = 13;
+        public $projectilespeed = 9;
         public $animationExplosionScale = 0.10;
         public $rof = 3;
         public $grouping = 25;
@@ -131,7 +131,7 @@ class QuadPulsar extends Pulse{
         public $animation = "trail";
         public $trailLength = 20;
         public $animationWidth = 6;
-        public $projectilespeed = 20;
+        public $projectilespeed = 10;
         public $animationExplosionScale = 0.25;
         public $rof = 3;
         public $grouping = 25;
@@ -164,7 +164,7 @@ class QuadPulsar extends Pulse{
         public $displayName = "Light Pulse Cannon";
         public $animation = "trail";
         public $animationWidth = 3;
-        public $projectilespeed = 10;
+        public $projectilespeed = 8;
         public $animationExplosionScale = 0.15;
         public $rof = 2;
         public $trailLength = 10;
@@ -192,7 +192,7 @@ class QuadPulsar extends Pulse{
         public $animation = "trail";
         public $trailLength = 15;
         public $animationWidth = 4;
-        public $projectilespeed = 15;
+        public $projectilespeed = 10;
         public $animationExplosionScale = 0.17;
         public $rof = 2;
         
@@ -221,7 +221,7 @@ class QuadPulsar extends Pulse{
         public $animation = "trail";
         public $trailLength = 20;
         public $animationWidth = 5;
-        public $projectilespeed = 20;
+        public $projectilespeed = 12;
         public $animationExplosionScale = 0.20;
         public $rof = 2;
         public $priority = 6;
@@ -284,7 +284,7 @@ class QuadPulsar extends Pulse{
         public $animation = "trail";
         public $trailLength = 15;
         public $animationWidth = 4;
-        public $projectilespeed = 25;
+        public $projectilespeed = 10;
         public $animationExplosionScale = 0.17;
         public $animationColor =  array(175, 225, 175);
         public $trailColor = array(110, 225, 110);
@@ -413,7 +413,7 @@ class QuadPulsar extends Pulse{
         public $animation = "trail";
         public $trailLength = 13;
         public $animationWidth = 4;
-        public $projectilespeed = 25;
+        public $projectilespeed = 16;
         public $animationExplosionScale = 0.17;
         public $animationColor =  array(175, 225, 175);
         public $trailColor = array(110, 225, 110);
@@ -472,7 +472,7 @@ class QuadPulsar extends Pulse{
         public $animation = "trail";
         public $trailLength = 13;
         public $animationWidth = 4;
-        public $projectilespeed = 20;
+        public $projectilespeed = 10;
         public $animationExplosionScale = 0.15;
         public $animationColor =  array(175, 225, 175);
         public $trailColor = array(110, 225, 110);
@@ -714,7 +714,7 @@ class PulseAccelerator extends Pulse{
 	public $animation = "trail";
 	public $trailLength = 18;
 	public $animationWidth = 5;
-	public $projectilespeed = 20;
+	public $projectilespeed = 13;
 	public $animationExplosionScale = 0.20;
 	public $rof = 2;
 	public $maxpulses = 4;
@@ -794,12 +794,11 @@ class PulseAccelerator extends Pulse{
         public $animation = "trail";
         public $trailLength = 15;
         public $animationWidth = 4;
-        public $projectilespeed = 15;
+        public $projectilespeed = 10;
         public $animationExplosionScale = 0.2;
-        public $trailColor = array(170, 170, 170);
-        public $animationColor = array(216, 216, 216);
-		
-		
+        public $trailColor = array(170, 170, 170); //meaningless?...
+        public $animationColor = array(216, 216, 216); //let's make it silvery-grey...
+				
         public $grouping = 15; //+1 hit per 3 below trget number
         public $maxpulses = 6;
 		public $damageType = 'Pulse'; //indicates that this weapon does damage in Pulse mode
@@ -821,7 +820,9 @@ class PulseAccelerator extends Pulse{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        public function getDamage($fireOrder){        return 13;   }
+        public function getDamage($fireOrder){ 
+			return 13;   
+		}
 		
 		
 		//ignores shields, unless EM or on Ancient+ ship
@@ -840,15 +841,15 @@ class PulseAccelerator extends Pulse{
 			return $toReturn; 		
 		}	
 
-        public function setSystemDataWindow($turn){          
+        public function setSystemDataWindow($turn){    
+            parent::setSystemDataWindow($turn);      
             if (!isset($this->data["Special"])) {
                 $this->data["Special"] = '';
             }else{
                 $this->data["Special"] .= '<br>';
             } 
-            $this->data["Special"] .= 'Ignores non-Ancient shields and shield-like systems (both profile and damage reduction.';
-            $this->data["Special"] .= '<br>EXCEPT EM shields.';
-            parent::setSystemDataWindow($turn);
+            $this->data["Special"] .= 'Ignores non-Ancient shields and shield-like systems (both profile and damage reduction)';
+            $this->data["Special"] .= ', EXCEPT EM shields.';
         }
 		
     }//endof class PhasingPulseCannon
@@ -862,7 +863,7 @@ class PulseAccelerator extends Pulse{
         public $animation = "trail";
         public $trailLength = 20;
         public $animationWidth = 6;
-        public $projectilespeed = 17;
+        public $projectilespeed = 12;
         public $animationExplosionScale = 0.4;
         //public $trailColor = array(170, 170, 170);
         //public $animationColor = array(216, 216, 216);	

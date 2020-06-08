@@ -132,6 +132,8 @@ class FighterFlight extends BaseShip
         foreach ($fighter->systems as $system) {
             if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon)) continue;
             $mod = $system->getDefensiveDamageMod($this, $shooter, $pos, $turn, $weapon);
+			//weapon might have something to say about that as well...
+			$mod = $weapon->shieldInteractionDamage($this, $shooter, $pos, $turn, $system, $mod);
             if (!isset($affectingSystems[$system->getDefensiveType()])
                 || $affectingSystems[$system->getDefensiveType()] < $mod) {
                 $affectingSystems[$system->getDefensiveType()] = $mod;
@@ -152,6 +154,8 @@ class FighterFlight extends BaseShip
         foreach ($fighter->systems as $system) {
             if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon)) continue;
             $mod = $system->getDefensiveHitChangeMod($this, $shooter, $pos, $turn, $weapon);
+			//weapon might have something to say about that as well...
+			$mod = $weapon->shieldInteractionDefense($this, $shooter, $pos, $turn, $system, $mod);
             if (!isset($affectingSystems[$system->getDefensiveType()]) //no system of this kind is taken into account yet, or it is but it's weaker
                 || $affectingSystems[$system->getDefensiveType()] < $mod) {
                 $affectingSystems[$system->getDefensiveType()] = $mod;
