@@ -10,12 +10,14 @@ class ShadowDreadnought extends MediumShip{
         $this->imagePath = "img/ships/ShadowDreadnought.png";
         $this->shipClass = "Dreadnought";
         $this->canvasSize = 265;
-	    $this->isd = 'Ancient';
         $this->shipSizeClass = 3; //it's actually a Capital ship using MCV layout
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+	    $this->isd = 'Ancient';
        
         $this->forwardDefense = 18;
-        $this->sideDefense = 18;
+        $this->sideDefense = 17;
+	    
+        $this->limited = 33;
         
 		$this->halfPhaseThrust = 6; //needed for half phasing; equal to thrust from two BioThrusters on a given ship
         $this->gravitic = true;
