@@ -13,9 +13,7 @@ class ShadowCruiser extends MediumShip{
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 3; //it's actually a Capital ship using MCV layout
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
-$this->faction = "Custom Ships";
-$this->variantOf = "Lurking unseen";        
-        
+       
         $this->forwardDefense = 16;
         $this->sideDefense = 15;
         
@@ -116,7 +114,7 @@ $this->variantOf = "Lurking unseen";
 		$this->addLeftSystem($tendril);
         $this->addPrimarySystem($diffuserPort);
 		
-		$diffuserStbd = new EnergyDiffuser(5, 21, 15, 180, 0);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+		$diffuserStbd = new EnergyDiffuser(5, 21, 15, 0, 180);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
 		$tendril=new DiffuserTendril(30,'R');//absorbtion capacity,side
 		$diffuserStbd->addTendril($tendril);
 		$this->addRightSystem($tendril);
@@ -218,3 +216,4 @@ $this->variantOf = "Lurking unseen";
 
 
 ?>
+

@@ -125,3 +125,17 @@ var MolecularSlicerBeamH = function MolecularSlicerBeamH(json, ship) {
 };
 MolecularSlicerBeamH.prototype = Object.create(Weapon.prototype);
 MolecularSlicerBeamH.prototype.constructor = MolecularSlicerBeamH;
+
+
+var MultiphasedCutterL = function MultiphasedCutterL(json, ship) {
+    Weapon.call(this, json, ship);
+};
+MultiphasedCutterL.prototype = Object.create(Weapon.prototype);
+MultiphasedCutterL.prototype.constructor = MultiphasedCutterL;
+
+var MultiphasedCutter = function MultiphasedCutter(json, ship) {
+    Weapon.call(this, json, ship);
+};
+MultiphasedCutter.prototype = Object.create(Weapon.prototype);
+MultiphasedCutter.prototype.constructor = MultiphasedCutter;
+

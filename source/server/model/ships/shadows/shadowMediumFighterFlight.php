@@ -12,14 +12,12 @@ class ShadowMediumFighterFlight extends FighterFlight{
 	    
 		$this->isd = 'Ancient';
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
-$this->faction = "Custom Ships";
-$this->variantOf = "Lurking unseen";        
         
 		$this->enhancementOptionsDisabled[] = 'POOR_TRAIN'; //there are no poorly trained Shadow fighters
 		$this->enhancementOptionsDisabled[] = 'EXP_MOTIV'; //no crew - and no dropouts anyway ;)
 		$this->enhancementOptionsEnabled[] = 'SHAD_CTRL'; //can be deployed as uncontrolled
 		
-		$this->notes = "Shadow fighters are integral part of their carriers. For every Shadow fighter included in fleet, appropriate carrier should take a level of Fighter Launched enhancement OR fighter should take Uncontrolled enhancement.";
+		$this->notes = "Shadow fighters are integral part of their carriers. For every Shadow fighter included in fleet, appropriate carrier should take a level of Fighter Launched enhancement OR fighter should take Uncontrolled enhancement (the latter for scenarios only).";
 		
 		$this->forwardDefense = 7;
 		$this->sideDefense = 7;

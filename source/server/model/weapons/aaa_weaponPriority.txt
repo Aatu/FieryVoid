@@ -12,12 +12,12 @@ Ship weapon priority:
 1: mostly special weapons that should be fired ASAP (eg. area-affecting weapons) (eg. AM Converter, EMine)
 2: special weapons requiring to be fired early, but not so much as priority 1 (eg. Plasma Stream)
 3: very light weapons (average damage 8 and less) (eg. Scatter Pulsar, Ligh Pulse Cannon)
-4: light weapons (average damage 11 and less) (eg. Light/Standard Particle Beam, Medium Pulse Cannon)
+4: light weapons (average damage less than 12) (eg. Light/Standard Particle Beam, Medium Pulse Cannon)
 5: medium weapons (average damage less than 14) (eg. Light Bolter)
-6: heavy weapons (aferage damage 14 and more)(eg. Medium Bolter, Fusion Cannon, Heavy Pulse Cannon...)
+6: heavy weapons (average damage 14 and more)(eg. Medium Bolter, Fusion Cannon, Heavy Pulse Cannon...)
 7: large Raking weapons (average damage output >28) (eg. Heavy Laser, Battle Laser...)
 8: non-large Raking weapons (average damage output <=28) (eg. Medium Laser and lighter)
-9: Matter weapons (note: light matter weapons may often be treated just as right weapons instead!(GatlingRailgun)!) (example: Matter Cannon, Railgun)
+9: Matter weapons (note: light matter weapons may often be treated just as light weapons instead!(GatlingRailgun)!) (example: Matter Cannon, Railgun)
 10: mostly special weapons that affect systems hit and therefore should be fired late (as their effects are none if hit systems are later destroyed) (eg. Burst Beam)
 
 

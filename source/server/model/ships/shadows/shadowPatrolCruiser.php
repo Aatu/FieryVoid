@@ -13,8 +13,6 @@ class ShadowPatrolCruiser extends MediumShip{
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 2; //it's actually a HCV using MCV layout
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
-$this->faction = "Custom Ships";
-$this->variantOf = "Lurking unseen";        
         $this->forwardDefense = 14;
         $this->sideDefense = 13;
         
@@ -98,7 +96,7 @@ $this->variantOf = "Lurking unseen";
 		$this->addLeftSystem($tendril);
         $this->addPrimarySystem($diffuserPort);
 		
-		$diffuserStbd = new EnergyDiffuser(5, 17, 10, 180, 0);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+		$diffuserStbd = new EnergyDiffuser(5, 17, 10, 0, 180);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
 		$tendril=new DiffuserTendril(20,'R');//absorbtion capacity,side
 		$diffuserStbd->addTendril($tendril);
 		$this->addRightSystem($tendril);

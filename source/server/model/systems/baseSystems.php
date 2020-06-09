@@ -1603,7 +1603,8 @@ by 4.
 	//function estimating how good this Diffuser is at stopping damage;
 	//in case of diffuser, its effectiveness equals largest shot it can stop, with tiebreaker equal to remaining total capacity
 	//this is for recognizing it as system capable of affecting damage resolution and choosing best one if multiple Diffusers can protect
-	public function doesProtectFromDamage() {
+	public function doesProtectFromDamage($expectedDmg) {
+		$remainingCapacity = 0;
 		$totalCapacity = 0;
 		$largestCapacity = 0;
 				
@@ -1611,14 +1612,18 @@ by 4.
 		$reduction = $this->hasCritical('TendrilCapacityReduced')*2;
 
 		foreach($this->tendrils as $tendril) if(!$tendril->isDestroyed()){
+			$totalCapacity += $tendril->maxhealth;
 			$tendrilCapacity = $tendril->getRemainingCapacity()-$reduction;
 			if($tendrilCapacity>0){
-				$totalCapacity += $tendrilCapacity;
+				$remainingCapacity += $tendrilCapacity;
 				$largestCapacity = max($tendrilCapacity,$largestCapacity);
 			}
 		}		
 		
-		$protectionValue = $largestCapacity+($totalCapacity/1000);
+		//tiebreaker: less filled (proportionally), to try and split load if possible
+		$protectionValue = $largestCapacity;
+		$protectionValue = min($largestCapacity,$expectedDmg);//being able to protect over expected damage is irrelevant - while ratio of being filled is!
+		if($totalCapacity > 0) $protectionValue += $remainingCapacity/$totalCapacity;
 		return $protectionValue;
 	}
 	//actual protection

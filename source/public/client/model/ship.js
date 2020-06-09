@@ -38,6 +38,7 @@ Ship.prototype = {
             }
 
             var mod = system.getDefensiveHitChangeMod(this, shooter, weapon);
+            mod = weapon.shieldInteractionDefense(this, shooter, system,mod);
 			
 			if (mod > 0){
 				//Advanced Sensors negate positive (eg. reducing profile) defensive systems' effects operated by less advanced races

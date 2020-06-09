@@ -130,9 +130,9 @@ class MagGun extends Plasma{
         public $animation = "trail";
         public $animationColor = array(255, 105, 0);
 	public $trailColor = array(255, 140, 60);
-	public $projectilespeed = 15;
+	public $projectilespeed = 10;
         public $animationWidth = 6;
-	public $animationExplosionScale = 0.70;
+	public $animationExplosionScale = 0.90;
 	public $trailLength = 30;
         public $priority = 2;
 		        
@@ -568,6 +568,7 @@ class LightPlasmaAccelerator extends LinkedWeapon{
 			$this->data["Special"] .= "<br> - Standard: 1d6+3"; 
 			$this->data["Special"] .= "<br> - Charged (alternate mode!): 2d6+6, cannot target fighters"; 
 			$this->data["Special"] .= "<br>Damage penalty: -1/hex.";  
+			$this->data["Special"] .= "<br>REMINDER: as an Accelerator weapon, it will not be used for interception unless specifically ordered to do so!"; 
 		}
 		
 	
