@@ -128,7 +128,7 @@
         public $name = "battleLaser";
         public $displayName = "Battle Laser";
         public $animation = "laser";
-        public $animationColor = array(255, 11, 115);
+        public $animationColor = array(255, 58, 31);
         public $animationWidth = 4;
         public $animationWidth2 = 0.2;
         
@@ -170,7 +170,7 @@
         public $name = "assaultLaser";
         public $displayName = "Assault Laser";
         public $animation = "laser";
-        public $animationColor = array(255, 11, 115);
+        public $animationColor = array(255, 58, 31);
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
         public $priority = 8;
@@ -418,7 +418,7 @@
         public $name = "BlastLaser";
         public $displayName = "Blast Laser";
         public $iconPath = "improvedBlastLaser.png"; //can have the same icon all right
-        public $animationColor = array(130, 25, 200);
+        public $animationColor = array(255, 30, 30);
         public $animation = "beam"; //a bolt, not beam
         public $animationExplosionScale = 0.45;
         public $projectilespeed = 17;
@@ -461,7 +461,7 @@
         public $name = "improvedBlastLaser";
         public $displayName = "Improved Blast Laser";
         public $iconPath = "improvedBlastLaser.png";
-        public $animationColor = array(130, 25, 200);
+        public $animationColor = array(255, 30, 30);
         public $animation = "beam"; //a bolt, not beam
         public $animationExplosionScale = 0.5;
         public $projectilespeed = 17;
@@ -508,7 +508,7 @@
         public $displayName = "Combat Laser";        
 	    public $iconPath = "battleLaser.png";
         public $animation = "laser";
-        public $animationColor = array(255, 11, 115);
+        public $animationColor = array(255, 58, 31);
         public $animationWidth = 3;
         public $animationWidth2 = 0.2;
         

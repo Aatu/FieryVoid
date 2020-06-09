@@ -6,9 +6,9 @@
         public $displayName = "Antimatter Converter";
         public $animation = "beam";
         public $animationColor = array(175, 225, 175);
-        public $projectilespeed = 20;
+        public $projectilespeed = 10;
         public $animationWidth = 4;
-        public $animationExplosionScale = 0.20;
+        public $animationExplosionScale = 0.90;
         public $trailLength = 20;
         public $priority = 2;
         public $loadingtime = 3;

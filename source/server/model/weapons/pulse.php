@@ -792,14 +792,14 @@ class PulseAccelerator extends Pulse{
 		
 		
         public $animation = "trail";
-        public $trailLength = 15;
-        public $animationWidth = 4;
+        public $trailLength = 15; //meaningless?...
+        public $animationWidth = 4; //meaningless?...
         public $projectilespeed = 10;
         public $animationExplosionScale = 0.2;
         public $trailColor = array(170, 170, 170); //meaningless?...
-        public $animationColor = array(216, 216, 216); //let's make it silvery-grey...
+        public $animationColor = array(50, 125, 210); //let's make it blue-ish...
 				
-        public $grouping = 15; //+1 hit per 3 below trget number
+        public $grouping = 15; //+1 hit per 3 below target number
         public $maxpulses = 6;
 		public $damageType = 'Pulse'; //indicates that this weapon does damage in Pulse mode
     	public $weaponClass = "Molecular"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
