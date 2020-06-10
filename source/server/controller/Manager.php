@@ -186,6 +186,7 @@ class Manager{
                 $list[] = $entry;
         }
         
+	sort($list);//alphabetical sort
         return $list;
     }
     
