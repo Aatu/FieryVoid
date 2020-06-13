@@ -8,7 +8,7 @@ class LessaOSAT extends OSAT
 
 		$this->pointCost = 150;
 		$this->faction = "Balosian";
-		$this->phpclass = "BalosianLessaOSAT";
+		$this->phpclass = "LessaOSAT";
 		$this->shipClass = "Lessa Orbital Satellite";
 		$this->imagePath = "img/ships/Lessa.png";
 		$this->canvasSize = 200;

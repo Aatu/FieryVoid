@@ -91,7 +91,7 @@ class ShadowBattleCruiser extends MediumShip{
 		$scanner->markAdvanced();
         $this->addPrimarySystem($scanner);
 		$this->addPrimarySystem(new PhasingDrive(6, 20, 6, 8));
-        $this->addPrimarySystem(new Hangar(5, 24));
+        $this->addPrimarySystem(new Hangar(5, 24, 24));
         $this->addPrimarySystem(new SelfRepair(3, 6, 4)); //armor, structure, output
         $this->addPrimarySystem(new SelfRepair(3, 6, 4)); //armor, structure, output
         $this->addPrimarySystem(new SelfRepair(3, 3, 2)); //armor, structure, output

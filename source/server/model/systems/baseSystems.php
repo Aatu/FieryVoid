@@ -656,6 +656,7 @@ class InvulnerableThruster extends Thruster{
 	/*sometimes thruster is techically necessary, despite the fact that it shouldn't be there (eg. on LCVs)*/
 	/*this thruster will be almost impossible to damage :) (it should be out of hit table, too!)*/
 	public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
+	public $isTargetable = false; //cannot be targeted ever!
 	
     function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
 	    parent::__construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused );
@@ -1095,6 +1096,7 @@ class AdaptiveArmorController extends ShipSystem{
     public $displayName = "Adaptive Armor Controller";
     public $primary = true; 
 	public $isPrimaryTargetable = false;
+	public $isTargetable = false; //cannot be targeted ever!
     public $iconPath = "adaptiveArmorController.png";
 	
 	public $AAtotal = 0;
@@ -1356,6 +1358,7 @@ class DiffuserTendril extends ShipSystem{
     public $displayName = "Diffuser Tendril";
     public $primary = true;
 	public $isPrimaryTargetable = false; //shouldn't be targetable at all, in fact!
+	public $isTargetable = false; //cannot be targeted ever!
     public $iconPath = "EnergyDiffuserTendril.png";
     
 	//Diffuser Tendrils cannot be repaired at all!

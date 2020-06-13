@@ -16,7 +16,7 @@ class MoesarBase extends SmallStarBaseFourSections{
 		$this->isd = 2253;
 
 		$this->shipSizeClass = 3; 
-		$this->Enormous = true;
+		$this->Enormous = false;
 		$this->iniativebonus = -200; //no voluntary movement anyway
 		$this->turncost = 0;
 		$this->turndelaycost = 0;
@@ -28,7 +28,7 @@ class MoesarBase extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Reactor(5, 30, 0, 0));
 		$this->addPrimarySystem(new CnC(5, 24, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 16, 6, 8));
-		$this->addPrimarySystem(new Hangar(5, 22));
+		$this->addPrimarySystem(new Hangar(5, 22,18));
 		$this->addPrimarySystem(new StdParticleBeam(5, 4, 1, 0, 360));
 		$this->addPrimarySystem(new StdParticleBeam(5, 4, 1, 0, 360));
 		
