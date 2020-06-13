@@ -412,9 +412,34 @@ window.confirm = {
             $(".fighterSelectItem .selectButtons .plusButton", e).on("click", confirm.increaseFlightSize);
             $(".fighterSelectItem .selectButtons .minusButton", e).on("click", confirm.decreaseFlightSize);
         }
+	    
+	/* try to make default unit name other than nameless */
+	var nameCore = ship.shipClass;
+	var nameNumber = gamedata.lastShipNumber + 1;
+	var fullName = '';//by default: nameCore + ' #' + number ; name cannot be repeated!
+	var accepted = false;
+	var exists = false;
+	while (accepted != true){
+		fullName = nameCore + ' #' +nameNumber;
+		//check whether such a name doesn't yet exist...
+		exists = false;
+		for (var i in gamedata.ships) {
+            		var currShip = gamedata.ships[i];
+            		if (currShip.name == fullName) exists = true;
+        	}
+		if (exists == true){
+			nameNumber++;
+		}else{
+			accepted=true;
+		}
+	}	    
+	gamedata.lastShipNumber = nameNumber;
+	/*end of preparing default name*/
+	    $('<label>Name your new ' + ship.shipClass + ':</label><input type="text" style="text-align:center" name="' + fullName + '" value="Nameless"></input><br>').prependTo(e);
 
+	    /* old, with Nameless default
         $('<label>Name your new ' + ship.shipClass + ':</label><input type="text" style="text-align:center" name="shipname" value="Nameless"></input><br>').prependTo(e);
-
+		*/
         //$('<div class="message"><span>Name your new '+ship.shipClass+'</span></div>').prependTo(e);
         $(".confirmok", e).on("click", callback);
         $(".confirmcancel", e).on("click", function () {
