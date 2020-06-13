@@ -1289,6 +1289,7 @@ spl_autoload_register(
 				'shadowpatrolcruiserprimordial' => '/server/model/ships/shadows/shadowPatrolCruiserPrimordial.php',
 								
                 'omegaepsilon' => '/server/model/ships/EA/omegaEpsilon.php',
+                'omegaepsilondrakh' => '/server/model/ships/EA/omegaEpsilonDrakh.php',
 				
 				
 				
