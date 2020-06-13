@@ -1025,6 +1025,18 @@ class DBManager
         }
         return $games;
     }
+	
+    public function getPlayerName($playerid) {
+		$playerName = '';	
+		        
+		$sql = "SELECT DISTINCT username FROM player WHERE id = $playerid "; 
+        $result = $this->query($sql);
+        if ($result == null || sizeof($result) == 0) return '';
+        foreach ($result as $value) {
+			$playerName = $value->username;
+        }
+        return $playerName;
+    }
 
     public function getLobbyGames() {
         //$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, (select count(gameid) from tac_playeringame where gameid = parentGameId ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");
