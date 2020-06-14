@@ -234,12 +234,14 @@ SHADOWS
 Ancient race, by definition complicated, very specific and not really on par with younger ones - tech difference is too high for proper balance. Ancient factions were officially not tournament legal.
 But with these caveats - have fun! Ancients should be balanced against each other, and if Your opponent knows what to expect/You're playing a scenario, go ahead with other pairings as well. Note that sky-high individual cost of Ancient units makes standard requirements based on total fleet value completely inadequate (like number of units on a hull and number of required capital ships).
 Below list of systems Shadows use, with short description of effect and design differences from original tabletop.
+Called shots - systems on Shadow ships cannot be targeted by called shots.
 Enhancements - Shadow ships use no crew, so cannot use rew-related enhancements. They can use enhancements relating to special officers (that would be ship pilot's skill in such case), and mechanical enhancements of ship systems (that would represent ship grown with special emphasis on some aspect). They have their own faction-specific enhancements as well.
 	I have tried to block inappropriate enhancements, but if they show up on the list - bear in mind guidelines above :)
 Self-Repair - automated, player cannot decide what is repaired. Damage suffered in current turn can be repaired, criticals can't. Cost of critical repair has been changed in places, and there's no partial repair of crits. See system description for details.
 	If Self-Repair is destroyed or damaged, unused repair points are NOT lost.
 Energy Diffuser - absorbs damage as it's being dealt (and diffuses it over time). In FV Diffuser always kicks in if possible, there's no option to withhold its use eg. waiting for more threatening damage and conserving resources. Diffuser in FV can dissipate damage just absorbed. For visual reasons tendrils are shown as separate (untargetable) systems. Damage absorbed by ship tendrils is not shown in log.
 	Diffuser will not try to stop no-overkill damage that would kill system hit despite Diffuser interference. This is important for very strong Matter or Piercing shots.
+	There is no special procedure for Flash damage.
 Bio-Drive - Shadow ships have omnidirectional thrusters that generate their own thrust. In FV, for technical reasons, there are also usual (untargetable) thrusters (with unlimited rating) and (also untargetable) engine (with rating being sum of biothruster ratings). Due to these technicalities thrust can be freely split, even from a single surviving biothruster.
 	Biothrusters have their own set of criticals (basically output reduced) in place of regular thruster criticals.
 	Bio-Drive cannot be boosted.
