@@ -18,8 +18,8 @@ class Tnorr extends HeavyCombatVessel{
         $this->turncost = 0.33;
         $this->turndelaycost = 0.50;
         $this->accelcost = 2;
-        $this->rollcost = 1;
-        $this->pivotcost = 2;
+        $this->rollcost = 2;
+        $this->pivotcost = 1;
         $this->iniativebonus = 30;
 
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));

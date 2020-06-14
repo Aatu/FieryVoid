@@ -9,6 +9,7 @@ class Cronos extends HeavyCombatVessel{
         $this->phpclass = "Cronos";
         $this->imagePath = "img/ships/cronos.png";
         $this->shipClass = "Cronos Attack Frigate";
+	$this->isd = 2266;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
