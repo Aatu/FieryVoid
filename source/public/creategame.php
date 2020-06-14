@@ -9,9 +9,12 @@
 	}
 	
 	$maps = Manager::getMapBackgrounds();
-	
+	$defaultGameName = 'GAME NAME' . $_SESSION["user"];	
+	$playerName = Manager::getPlayerName($_SESSION["user"]);
+	//if ($playerName != '')	
+		$defaultGameName = 'Game of ' . $playerName;
+
 	if (isset($_POST["docreate"]) && isset($_POST["data"])){
-		
 		$id = Manager::createGame($_SESSION["user"], $_POST["data"]);
 		if ($id){
 			header("Location: gamelobby.php?gameid=$id");
@@ -46,7 +49,7 @@
 			<form id="createGameForm" method="post">
 			
 				<div><span>Name:</span></div>
-				<input id="gamename" type="text" name="gamename" value="GAME NAME">
+				<input id="gamename" type="text" name="gamename" value="<?php print($defaultGameName); ?>">
 						
 				<div><span>Background:</span></div>
 				<select id="mapselect" name="background">
@@ -60,7 +63,16 @@
 					?>
 				</select>
 				<div><span>Scenario description:</span></div>
-				<textarea id="description" name="description" rows="7" cols="100">Your special requirements for this battle.</textarea>
+				<textarea id="description" name="description" rows="8" cols="100">
+DEFAULT SCENARIO DESCRIPTION
+
+REQUIREMENTS: please pass the fleet checker :)
+CUSTOM FACTIONS: not allowed
+CUSTOM UNITS IN OFFICIAL FACTIONS: not allowed
+ENHANCEMENTS: only for rounding points (up to 100 points)
+EXPECTED POWER LEVEL: similar to Big 4
+FORBIDDEN FACTIONS: none 
+				</textarea>
 				
 				
                 <div style="margin-top:20px;"><h3>GAME SPACE</h3></div>

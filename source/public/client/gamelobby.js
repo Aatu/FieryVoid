@@ -15,6 +15,7 @@ window.gamedata = {
     allShips: null,
  	displayedShip: '',
  	displayedFaction: '',
+	lastShipNumber: 0,
 
     canAfford: function canAfford(ship) {
 

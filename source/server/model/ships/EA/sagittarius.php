@@ -62,7 +62,7 @@ class Sagittarius extends BaseShip{
 		$this->hitChart = array(
                 0=> array(
                         9 => "Structure",
-                        11 => "Reload Rack",
+                        10 => "Reload Rack",
                         12 => "Standard Particle Beam",
                         14 => "Scanner",
                         16 => "Engine",

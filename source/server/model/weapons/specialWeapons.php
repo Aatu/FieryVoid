@@ -2068,6 +2068,7 @@ class RammingAttack extends Weapon{
 	public $name = "RammingAttack";
 	public $displayName = "Ramming Attack";
 	public $iconPath = "RammingAttack.png";
+	public $isTargetable = false; //cannot be targeted ever!
 	
 	//animation irrelevant really (range 0), but needs to be fast!
 	public $animation = "trail";

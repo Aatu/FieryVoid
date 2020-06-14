@@ -208,16 +208,13 @@ if ($gamelobbydata->gamespace == '-1x-1'){ //open map
 }
 
 $simMv = false;
-foreach($gamelobbydata->rules as $hasRule){
-	if($hasRule->getRuleName()=='initiativeCategories'){
-		$simMv = true;
-	}
-}
+if ($gamelobbydata->rules) if ($gamelobbydata->rules->hasRuleName('initiativeCategories')) $simMv = true;
 if ($simMv==true){//simultaneous movement
 	$optionsUsed  .= ', Simultaneous Movement';
 }else{//standard movement
 	$optionsUsed  .= ', Standard Movement';
 }
+
 ?>		
 			<div><span> <b>Options:</b> <?php print($optionsUsed); ?> </span></div>
 			

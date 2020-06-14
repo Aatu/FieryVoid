@@ -52,7 +52,7 @@ class Omega  extends BaseShip{
         $this->addAftSystem(new InterceptorMkII(2, 4, 2, 120, 300));
         $this->addAftSystem(new InterceptorMkII(2, 4, 2, 60, 240));
         
-		$this->addLeftSystem(new Thruster(5, 15, 0, 5, 3));
+		$this->addLeftSystem(new Thruster(3, 15, 0, 5, 3));
 		$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
 		$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
 		$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
@@ -62,7 +62,7 @@ class Omega  extends BaseShip{
 		$this->addLeftSystem(new InterceptorMkII(2, 4, 2, 180, 0));
 
 		
-		$this->addRightSystem(new Thruster(5, 15, 0, 5, 4));
+		$this->addRightSystem(new Thruster(3, 15, 0, 5, 4));
 		$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
 		$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
 		$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));

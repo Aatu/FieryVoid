@@ -8,11 +8,11 @@ window.weaponManager = {
     currentShip: null,
 
     getWeaponCurrentLoading: function getWeaponCurrentLoading(weapon) {
+		/*obsolete
         if (weapon.duoWeapon) {
             var returnArray = new Array(weapon.weapons[1].getTurnsloaded(), weapon.weapons[2].getTurnsloaded());
             return returnArray;
-        }
-
+        }*/
         return weapon.turnsloaded;
     },
 
@@ -411,6 +411,7 @@ window.weaponManager = {
         /*Marcin Sawicki, new version $outerSections-based - October 2017*/
         var sectionEligible = false; //section that system is mounted on is eligible for caled shots
         if (!shooter) return false;
+		if (system.isTargetable != true) return false; //cannot be targeted by called shots under any conditions
 
         if (target.flight) return true; //allow called shots at fighters (in effect it will affect particular fighter, not fighter system)
 

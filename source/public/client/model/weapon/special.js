@@ -88,7 +88,11 @@ SparkField.prototype.getMaxBoost = function(){
 //needed for Spark Curtain upgrade
 SparkField.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
     if (!weapon.ballistic) return 0;//only ballistic weapons are affected
-    return shipManager.systems.getOutput(target, this);
+	var out = shipManager.systems.getOutput(target, this);
+	if (shipManager.power.getBoost(this) >= out){ //if boost is equal to output - this means base output is 0 = no Spark Curtain mod!
+		out = 0;
+	}
+	return out;
 };
 
 

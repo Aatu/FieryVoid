@@ -72,8 +72,11 @@ class ShadowMediumFighterFlight extends FighterFlight{
 
 
 	/*remaking damage allocation routine - this fighter is special enough (no dropouts, Diffuser) that it should actually have different priorities when handling damage allocation*/
+	
     public function getHitSystem($shooter, $fire, $weapon, $gamedata, $location = null)
     {
+		return parent::getHitSystem($shooter, $fire, $weapon, $gamedata, $location);/*core routines were modified to handle protected fighters!*/
+		//...and nothing below matters due to the above, but I'm leaving the code just in case
         $skipStandard = false;
         $systems = array();
         if ($fire->calledid != -1) {
@@ -115,9 +118,9 @@ class ShadowMediumFighterFlight extends FighterFlight{
 			$armor = $weapon->getSystemArmourComplete($this, $craft, $gamedata, $fire);
 			//modify by Diffuser! 
 			$protection=0;
-			$diffuser = $this->getSystemProtectingFromDamage($shooter, null, $gamedata->turn, $weapon, $craft);	
+			$diffuser = $this->getSystemProtectingFromDamage($shooter, null, $gamedata->turn, $weapon, $craft,$dmgPotential);//let's find biggest one!
 			if($diffuser){ //may be unavailable, eg. already filled
-				$protection = $diffuser->doesProtectFromDamage();
+				$protection = $diffuser->doesProtectFromDamage($dmgPotential);
 			}
 			$armor += $protection;		
 			$dmgPotential = max(0, $dmgPotential-$armor);//never negative damage ;)

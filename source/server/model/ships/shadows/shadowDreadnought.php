@@ -85,7 +85,7 @@ class ShadowDreadnought extends MediumShip{
 		$scanner->markAdvanced();
         $this->addPrimarySystem($scanner);
 		$this->addPrimarySystem(new PhasingDrive(6, 20, 5, 8));
-        $this->addPrimarySystem(new Hangar(5, 12));
+        $this->addPrimarySystem(new Hangar(5, 12,12));
         $this->addPrimarySystem(new SelfRepair(3, 6, 4)); //armor, structure, output
         $this->addPrimarySystem(new SelfRepair(3, 6, 4)); //armor, structure, output
 		
@@ -179,6 +179,12 @@ class ShadowDreadnought extends MediumShip{
 	    //Structure
         $this->addPrimarySystem(new Structure( 6, 72));
 		
+		/*systems on Shadow ships CANNOT be targeted by called shots!*/
+		$this->notes .= "<br>cannot be targeted by called shots.";
+		foreach ($this->systems as $sys){
+			$sys->isPrimaryTargetable = false; 
+			$sys->isTargetable = false; //cannot be targeted ever!
+		}
 				
 	
 		$this->hitChart = array(
