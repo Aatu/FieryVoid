@@ -1280,8 +1280,8 @@ spl_autoload_register(
 				'flyercombat' => '/server/model/ships/minbari/flyerCombat.php',
 				'genericarmedshuttle' => '/server/model/ships/civilians/genericArmedShuttle.php',
 		    
-		    
-		    
+		    	//Random Ships which don't require new mechanics to add
+		    	'tlorr' => '/server/model/ships/narn/zzunoffTlorr.php',
 				
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
