@@ -6,14 +6,14 @@ My Shadow Omega got:
  - Energy Diffusers (obviously they were there in the show :) ; I made them stronger than AoG, too, and gave them overlap to the sides - but also made room for them by removing Pulses and half of hangar capacity)
  - Drakh weapons (rather than true Shadow weapons - in the show Shadow Omega's blue beams were quite different from purple of Shadow slicers! powerful concentrated beam option on Concentrators would fit well observed reliance on light beam weapons to fight White Star fleet)
  	Concentrators aren't switched 1:1, being larger and more potent weapons than SPBs. They don't have immense range of Light Multiphased Cutters, too (but would almost match them against WS due to Improved Sensors!) . I gave them a bit more armor and reduced hit chance, too.
- - NO improvements to profile, armor or system ratings
+ - NO improvements to profile or system ratings, sied/aft armor improved on account of Shadow skin growths (but not made Advanced)
 */
 class OmegaEpsilonDrakh  extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 1300;
+        $this->pointCost = 1500;
         $this->faction = "EA";
         $this->phpclass = "OmegaEpsilonDrakh";
         $this->imagePath = "img/ships/omega.png";
@@ -138,10 +138,10 @@ class OmegaEpsilonDrakh  extends BaseShip{
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 6, 60));
-        $this->addAftSystem(new Structure( 4, 50 ));
-        $this->addLeftSystem(new Structure( 4, 70));
-        $this->addRightSystem(new Structure( 4, 70));
-        $this->addPrimarySystem(new Structure( 6,60));
+        $this->addAftSystem(new Structure( 5, 50 ));
+        $this->addLeftSystem(new Structure( 5, 70));
+        $this->addRightSystem(new Structure( 5, 70));
+        $this->addPrimarySystem(new Structure( 6, 60));
 		
 		
 		$this->hitChart = array(

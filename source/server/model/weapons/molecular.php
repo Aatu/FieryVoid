@@ -171,12 +171,15 @@
 
         protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
             parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+			if ($system->advancedArmor) return; //advanced armor prevents effect 
             if(!$this->alreadyReduced){ 
-                $struct = $target->getStructureSystem($location);
+                //$struct = $target->getStructureSystem($location); //this caused problems if first rake penetrated!
+				$sectionFacing = $target->getHitSection($shooter, $fireOrder->turn);
+				$struct = $target->getStructureSystem($sectionFacing); 
                 if ($struct->advancedArmor) return; //advanced armor prevents effect 
                 if(!$struct->isDestroyed($fireOrder->turn-1)){ //last turn Structure was still there...
                     $this->alreadyReduced = true; //do this only for first part of shot that actually connects
-                    $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
+                    $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn, $gamedata->turn+$sectionFacing+1);
                     $crit->updated = true;
                     $crit->inEffect = false;
                     $struct->criticals[] = $crit;

@@ -435,8 +435,8 @@ window.confirm = {
 	}	    
 	gamedata.lastShipNumber = nameNumber;
 	/*end of preparing default name*/
-	    $('<label>Name your new ' + ship.shipClass + ':</label><input type="text" style="text-align:center" name="' + fullName + '" value="Nameless"></input><br>').prependTo(e);
-
+	    $('<label>Name your new ' + ship.shipClass + ':</label><input type="text" style="text-align:center" name="shipname" value="' + fullName + '"></input><br>').prependTo(e);
+		
 	    /* old, with Nameless default
         $('<label>Name your new ' + ship.shipClass + ':</label><input type="text" style="text-align:center" name="shipname" value="Nameless"></input><br>').prependTo(e);
 		*/
