@@ -62,18 +62,17 @@ if (isset($_SESSION["user"])) {
         -->
 		---------- <b>LATEST NEWS - JUNE 2020</b> ----------		
 		
-	<br><b>Pivot icons</b> - I changed them to something more suggestive (...hopefully). If You prefer old ones <b><u>please give me appropriate feedback</u></b>!
-	<br><b>Fleet check expanded</b> - fighters with special hangar requirements (Rutarian, Thunderbolt) are now checked (courtesy of Kevin)
-	<br><b>Raiders and Civilians shuffled around</b> - basically national ships in these categories were moved to general appropriate folders (courtesy of Douglas)
-	<br><b>Reactor overload</b> - at last explicitly visible in log!
-	<br><b>Magazine explosion</b> - at last explicitly visible in log!
-	<br><b>Subreactor explosion</b> - at last explicitly visible in log!
-	<br><b>Command White Star</b> - Sheridan's personal ride now at Your disposal!
-	<br><b>Maneuvering when pivoted fixed</b> - ...again...
-	<br><b>Icons fixed</b> - a few icons that were partially covered by health bar were moved so their shape is more visible
-	<br><b>Ipsha cooldowns remastered</b> - should be easier to read, especially with longer cooldowns.
-	<br><b>Improved/Advanced Sensors fixed</b> - now they should actually work ;)
-	<br><b>Rutarian Stealth fixed</b> - had some trouble, now it should work correctly.
+	<br><b>The Coming of Shadows</b> - they were lurking around, now they're openly looking for prey! You might want to look at faction description first - the faction is heavily commented, including design choices and technical changes made, as well as short description of what their systems actually do :) .
+	<br><b>Power ratings</b> - I have added subjective comments on competitive strength of available factions. Feel free to disagree ;) 
+	<br><b>Balosian OSAT</b> - shipyard bug is fixed and it can actually be deployed :)
+	<br><b>Ipsha Spark Field fixed</b> - now interface doesn't show incorrect Spark Curtain bonus if You don't have the enhancement
+	<br><b>Simultaneous movement</b> - now shows up correctly on fleet selection screen
+	<br><b>Default scenario description changed</b> - now it's kind of questionnaire, initally filled with default values
+	<br><b>Default game name changed</b> - no more GAME NAMEs
+	<br><b>Default unit name changed</b> - no more Nameless ships
+	<br><b>Wide ship profiles fixed</b> - Drazi HCV/MCV-arranged ships sometimes used wrong profile for hit chance calculation.
+	<br><b>Molecular Disruptor fixed</b> - armor stipping sometimes happened on wrong location (or even non-structure system). Now should be correct.
+
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload (<b><u>ctrl+F5</u></b>) whenever something weird happens.
