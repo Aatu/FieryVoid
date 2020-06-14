@@ -1294,8 +1294,8 @@ spl_autoload_register(
 				
 				
 		    
-		    
-		    
+		    	//Random Ships which don't require new mechanics to add
+		    	'tlorr' => '/server/model/ships/narn/zzunoffTlorr.php',
 				
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',

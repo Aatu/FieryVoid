@@ -8,7 +8,7 @@ class Raven extends MediumShip{
         $this->faction = "Raiders";
         $this->phpclass = "Raven";
         $this->imagePath = "img/ships/merlin.png";
-        $this->shipClass = "Drazi Raven Light Raider";
+        $this->shipClass = "Drazi Hunter Raven Light Raider";
         $this->agile = true;
         $this->canvasSize = 100;
         $this->isd = 2042;

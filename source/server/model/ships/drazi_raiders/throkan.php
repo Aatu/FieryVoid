@@ -8,7 +8,7 @@ class Throkan extends MediumShip{
     	$this->faction = "Raiders";
         $this->phpclass = "Throkan";
         $this->imagePath = "img/ships/drazi/kestrel.png";
-        $this->shipClass = "Drazi Throkan Corvette";
+        $this->shipClass = "Drazi Hunter Throkan Corvette";
         $this->agile = true;
         $this->canvasSize = 128;
         $this->isd = 2144;

@@ -35,5 +35,18 @@ class Orgolest extends OSAT{
         
         $this->addPrimarySystem(new Structure(2, 25));
         
+        	//d20 hit chart
+        $this->hitChart = array(
+            0=> array(
+                    8 => "Structure",
+                    10 => "Thruster",
+		    		13 => "Quad Pulsar",
+		    		15 => "Light Laser",
+                    17 => "Scanner",
+                    19 => "Reactor",
+                    20 => "Scatter Pulsar",
+            )
+        );
+        
     }
 }
