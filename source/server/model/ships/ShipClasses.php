@@ -695,10 +695,7 @@ class BaseShip {
 
 	//defensive system that can affect damage dealing - only one (best) such system will be called
 	//overridden by FighterFlight to get only systems on a fighter actually hit
-	public function getSystemProtectingFromDamage($shooter, $pos, $turn, $weapon, $systemhit){ //$systemhit actually used by fighter flight
-		if ($pos !== null) {
-            $pos = Mathlib::hexCoToPixel($pos);
-        }
+	public function getSystemProtectingFromDamage($shooter, $pos, $turn, $weapon, $systemhit, $expectedDmg){ //$systemhit actually used by fighter flight
 		$chosenSystem = null;
 		$chosenValue=0;
 		if($this instanceOf FighterFlight){ //only subsystems of a particular fighter
@@ -708,7 +705,7 @@ class BaseShip {
 		}		
         //foreach($this->systems as $system){
 		foreach($listOfPotentialSystems as $system){
-			$value=$system->doesProtectFromDamage();
+			$value=$system->doesProtectFromDamage($expectedDmg);
             if ($value<1) continue;
 			if ($system->isDestroyed($turn-1)) continue;
 			if ($system->isOfflineOnTurn($turn)) continue;
@@ -743,6 +740,8 @@ class BaseShip {
         foreach($this->systems as $system){
             if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon)) continue;
             $mod = $system->getDefensiveHitChangeMod($this, $shooter, $pos, $turn, $weapon);
+			//weapon might have something to say about that as well...
+			$mod = $weapon->shieldInteractionDefense($this, $shooter, $pos, $turn, $system, $mod);
 			//Advanced Sensors negate positive (eg. reducing profile) defensive systems' effects operated by less advanced races
 			if ( ($mod > 0) && ($this->factionAge < 3) && ($shooter->hasSpecialAbility("AdvancedSensors")) ){
 				$mod = 0;
@@ -763,6 +762,8 @@ class BaseShip {
         foreach($this->systems as $system){
             if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon)) continue;
             $mod = $system->getDefensiveDamageMod($this, $shooter, $pos, $turn, $weapon);
+			//weapon might have something to say about that as well...
+			$mod = $weapon->shieldInteractionDamage($this, $shooter, $pos, $turn, $system, $mod);
             if ( !isset($affectingSystems[$system->getDefensiveType()])
                 || $affectingSystems[$system->getDefensiveType()] < $mod){
                 $affectingSystems[$system->getDefensiveType()] = $mod;
@@ -1677,8 +1678,8 @@ class HeavyCombatVesselLeftRight extends BaseShip{
         $locs[] = array("loc" => 4, "min" => 150, "max" => 180, "profile" => $this->forwardDefense);
 
         $locs[] = array("loc" => 3, "min" => 330, "max" => 360, "profile" => $this->forwardDefense);
-        $locs[] = array("loc" => 3, "min" => 180, "max" => 210, "profile" => $this->sideDefense);
-        $locs[] = array("loc" => 3, "min" => 210, "max" => 360, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 3, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 3, "min" => 180, "max" => 210, "profile" => $this->forwardDefense);
 
         return $locs;
     }
@@ -1740,9 +1741,9 @@ class MediumShipLeftRight extends MediumShip{
         $locs[] = array("loc" => 4, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
         $locs[] = array("loc" => 4, "min" => 150, "max" => 180, "profile" => $this->forwardDefense);
 
-        $locs[] = array("loc" => 3, "min" => 180, "max" => 210, "profile" => $this->forwardDefense);
-        $locs[] = array("loc" => 3, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
         $locs[] = array("loc" => 3, "min" => 330, "max" => 360, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 3, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 3, "min" => 180, "max" => 210, "profile" => $this->forwardDefense);
 
         return $locs;
     }

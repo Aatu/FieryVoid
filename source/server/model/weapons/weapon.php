@@ -225,6 +225,16 @@ class Weapon extends ShipSystem
         return $avg;
     }
 	
+	//reimplemented by weapons that have special interaction with shields - eg. SHadow Phasing Pulse Cannon line
+    public function shieldInteractionDefense($target, $shooter, $pos, $turn, $shield, $mod) {
+		return $mod; //default - just return shield value		
+	}
+	
+	//reimplemented by weapons that have special interaction with shields - eg. SHadow Phasing Pulse Cannon line
+    public function shieldInteractionDamage($target, $shooter, $pos, $turn, $shield, $mod) {
+		return $mod; //default - just return shield value		
+	}
+	
     protected function setPriorityAF(){
 	//sets AF priority if not set explicitly by weapon creator
 	//attempt to put high-damage weapons first, to attempt to kill fighters outright or cause heavy damage (so light guns can concentrate on smaller number of craft or finish off damaged one)
@@ -460,7 +470,9 @@ class Weapon extends ShipSystem
             $this->data["Intercept"] = "-" . $this->intercept * 5;
         }
 		
-		
+		if($this->exclusive){
+			$this->data["Exclusive"] = 'Yes';
+		}
         $this->data["Resolution Priority (ship/fighter)"] = $this->priority . '/' . $this->priorityAF;
 
 /*no longer used

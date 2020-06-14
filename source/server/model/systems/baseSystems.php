@@ -656,6 +656,7 @@ class InvulnerableThruster extends Thruster{
 	/*sometimes thruster is techically necessary, despite the fact that it shouldn't be there (eg. on LCVs)*/
 	/*this thruster will be almost impossible to damage :) (it should be out of hit table, too!)*/
 	public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
+	public $isTargetable = false; //cannot be targeted ever!
 	
     function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
 	    parent::__construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused );
@@ -1095,6 +1096,7 @@ class AdaptiveArmorController extends ShipSystem{
     public $displayName = "Adaptive Armor Controller";
     public $primary = true; 
 	public $isPrimaryTargetable = false;
+	public $isTargetable = false; //cannot be targeted ever!
     public $iconPath = "adaptiveArmorController.png";
 	
 	public $AAtotal = 0;
@@ -1356,6 +1358,7 @@ class DiffuserTendril extends ShipSystem{
     public $displayName = "Diffuser Tendril";
     public $primary = true;
 	public $isPrimaryTargetable = false; //shouldn't be targetable at all, in fact!
+	public $isTargetable = false; //cannot be targeted ever!
     public $iconPath = "EnergyDiffuserTendril.png";
     
 	//Diffuser Tendrils cannot be repaired at all!
@@ -1603,7 +1606,8 @@ by 4.
 	//function estimating how good this Diffuser is at stopping damage;
 	//in case of diffuser, its effectiveness equals largest shot it can stop, with tiebreaker equal to remaining total capacity
 	//this is for recognizing it as system capable of affecting damage resolution and choosing best one if multiple Diffusers can protect
-	public function doesProtectFromDamage() {
+	public function doesProtectFromDamage($expectedDmg) {
+		$remainingCapacity = 0;
 		$totalCapacity = 0;
 		$largestCapacity = 0;
 				
@@ -1611,14 +1615,18 @@ by 4.
 		$reduction = $this->hasCritical('TendrilCapacityReduced')*2;
 
 		foreach($this->tendrils as $tendril) if(!$tendril->isDestroyed()){
+			$totalCapacity += $tendril->maxhealth;
 			$tendrilCapacity = $tendril->getRemainingCapacity()-$reduction;
 			if($tendrilCapacity>0){
-				$totalCapacity += $tendrilCapacity;
+				$remainingCapacity += $tendrilCapacity;
 				$largestCapacity = max($tendrilCapacity,$largestCapacity);
 			}
 		}		
 		
-		$protectionValue = $largestCapacity+($totalCapacity/1000);
+		//tiebreaker: less filled (proportionally), to try and split load if possible
+		$protectionValue = $largestCapacity;
+		$protectionValue = min($largestCapacity,$expectedDmg);//being able to protect over expected damage is irrelevant - while ratio of being filled is!
+		if($totalCapacity > 0) $protectionValue += $remainingCapacity/$totalCapacity;
 		return $protectionValue;
 	}
 	//actual protection

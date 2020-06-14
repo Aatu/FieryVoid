@@ -12,14 +12,12 @@ class ShadowMediumFighterFlight extends FighterFlight{
 	    
 		$this->isd = 'Ancient';
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
-$this->faction = "Custom Ships";
-$this->variantOf = "Lurking unseen";        
         
 		$this->enhancementOptionsDisabled[] = 'POOR_TRAIN'; //there are no poorly trained Shadow fighters
 		$this->enhancementOptionsDisabled[] = 'EXP_MOTIV'; //no crew - and no dropouts anyway ;)
 		$this->enhancementOptionsEnabled[] = 'SHAD_CTRL'; //can be deployed as uncontrolled
 		
-		$this->notes = "Shadow fighters are integral part of their carriers. For every Shadow fighter included in fleet, appropriate carrier should take a level of Fighter Launched enhancement OR fighter should take Uncontrolled enhancement.";
+		$this->notes = "Shadow fighters are integral part of their carriers. For every Shadow fighter included in fleet, appropriate carrier should take a level of Fighter Launched enhancement OR fighter should take Uncontrolled enhancement (the latter for scenarios only).";
 		
 		$this->forwardDefense = 7;
 		$this->sideDefense = 7;
@@ -74,8 +72,11 @@ $this->variantOf = "Lurking unseen";
 
 
 	/*remaking damage allocation routine - this fighter is special enough (no dropouts, Diffuser) that it should actually have different priorities when handling damage allocation*/
+	
     public function getHitSystem($shooter, $fire, $weapon, $gamedata, $location = null)
     {
+		return parent::getHitSystem($shooter, $fire, $weapon, $gamedata, $location);/*core routines were modified to handle protected fighters!*/
+		//...and nothing below matters due to the above, but I'm leaving the code just in case
         $skipStandard = false;
         $systems = array();
         if ($fire->calledid != -1) {
@@ -117,9 +118,9 @@ $this->variantOf = "Lurking unseen";
 			$armor = $weapon->getSystemArmourComplete($this, $craft, $gamedata, $fire);
 			//modify by Diffuser! 
 			$protection=0;
-			$diffuser = $this->getSystemProtectingFromDamage($shooter, null, $gamedata->turn, $weapon, $craft);	
+			$diffuser = $this->getSystemProtectingFromDamage($shooter, null, $gamedata->turn, $weapon, $craft,$dmgPotential);//let's find biggest one!
 			if($diffuser){ //may be unavailable, eg. already filled
-				$protection = $diffuser->doesProtectFromDamage();
+				$protection = $diffuser->doesProtectFromDamage($dmgPotential);
 			}
 			$armor += $protection;		
 			$dmgPotential = max(0, $dmgPotential-$armor);//never negative damage ;)

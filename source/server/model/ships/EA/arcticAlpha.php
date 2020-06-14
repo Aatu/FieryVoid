@@ -32,7 +32,7 @@ class ArcticAlpha extends BaseShip{
 		$this->addPrimarySystem(new CnC(6, 16, 0, 0));
 		$this->addPrimarySystem(new Scanner(6, 20, 4, 8));
 		$this->addPrimarySystem(new Engine(6, 24, 0, 10, 3));
-		$this->addPrimarySystem(new Hangar(6, 16));
+		$this->addPrimarySystem(new Hangar(6, 16,12));
 		$this->addPrimarySystem(new Jumpengine(6, 20, 3, 20));
 		$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 240, 120));
 		$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 240, 120));

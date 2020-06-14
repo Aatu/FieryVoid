@@ -171,12 +171,15 @@
 
         protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
             parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+			if ($system->advancedArmor) return; //advanced armor prevents effect 
             if(!$this->alreadyReduced){ 
-                $struct = $target->getStructureSystem($location);
+                //$struct = $target->getStructureSystem($location); //this caused problems if first rake penetrated!
+				$sectionFacing = $target->getHitSection($shooter, $fireOrder->turn);
+				$struct = $target->getStructureSystem($sectionFacing); 
                 if ($struct->advancedArmor) return; //advanced armor prevents effect 
                 if(!$struct->isDestroyed($fireOrder->turn-1)){ //last turn Structure was still there...
                     $this->alreadyReduced = true; //do this only for first part of shot that actually connects
-                    $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
+                    $crit = new ArmorReduced(-1, $target->id, $struct->id, "ArmorReduced", $gamedata->turn);
                     $crit->updated = true;
                     $crit->inEffect = false;
                     $struct->criticals[] = $crit;
@@ -443,13 +446,16 @@
 
         protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
             parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+			if ($system->advancedArmor) return;
             if(!$this->alreadyReduced){ 
                 $this->alreadyReduced = true; 
                 if(LightMolecularDisrupterHandler::checkArmorReduction($target, $shooter)){ //static counting!
-                    $struct = $target->getStructureSystem($location);
+					$sectionFacing = $target->getHitSection($shooter, $fireOrder->turn);
+					$struct = $target->getStructureSystem($sectionFacing); 
+                    //$struct = $target->getStructureSystem($location);
                     if ($struct->advancedArmor) return;
                     if(!$struct->isDestroyed($fireOrder->turn-1)){ //last turn Structure was still there...
-                        $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
+                        $crit = new ArmorReduced(-1, $target->id, $struct->id, "ArmorReduced", $gamedata->turn);
                         $crit->updated = true;
                         $crit->inEffect = false;
                         $struct->criticals[] = $crit;
@@ -553,6 +559,7 @@
 			$this->data["Special"] = "Can fire accelerated ROF for less shots:";  
 			$this->data["Special"] .= "<br> - 1 turn: 2 shots"; 
 			$this->data["Special"] .= "<br> - 2 turns: 3 shots"; 
+			$this->data["Special"] .= "<br>REMINDER: as an Accelerator weapon, it will not be used for interception unless specifically ordered to do so!"; 
         }
 
         public function getDamage($fireOrder){        return Dice::d(6,2)+2;   }
@@ -579,6 +586,7 @@
         public $animationColor = array(213, 0, 255); //thick, purple beam
         public $animationWidth = 4.5;
         public $animationWidth2 = 0.8;
+		public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
         
 		
 		public $firingModes = array(1 =>'Raking', 2=>'3Split', 3=>'6Split');
@@ -719,7 +727,6 @@
         public $gunsArray = array(1=>1, 2=>3, 3=>6, 4=>9 );
 
 		public $priority = 7;//heavy Raking weapon - with armor-ignoring 
-		public $uninterceptable = true;
 
 		public $raking = 15;
         public $damageType = "Raking"; 
@@ -833,7 +840,6 @@
 
 		public $priority = 2;//primary mode being Piercing! otherwise heavy Raking weapon - with armor-ignoring 
 		public $priorityArray = array(1=>2, 2=>7, 3=>7, 4=>7, 5=>7 );
-		public $uninterceptable = true;
 
 		public $raking = 15;
         public $damageType = "Piercing"; 
@@ -945,6 +951,64 @@
 		}
 		
 	}//endof class MolecularSlicerBeamH
+
+
+
+
+    /*Shadow "export" light weapon*/
+    class MultiphasedCutterL extends Weapon{        
+        public $name = "MultiphasedCutterL";
+        public $iconPath = "MultiphasedCutterL.png";
+        public $displayName = "Light Multiphased Cutter";
+        public $animation = "laser";
+        public $animationColor = array(9, 0, 255); //animate as a dark blue beam, like from Shadow Omega light weapons fire in the show
+        public $animationExplosionScale = 0.18;
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.3;
+        public $priority = 6; //medium Standard, with average dmg of 13
+		public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
+        
+        public $loadingtime = 1;
+                
+        public $rangePenalty = 0.5;//-1/2 hexes
+        public $fireControl = array(6, 3, 3); // fighters, <mediums, <capitals 
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Molecular"; 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 3;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+                
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+2;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 ;      }    
+    }//endof class MultiphasedCutterL
+
+
+
+    /*Shadow Destroyer defensive weapon - essentially triple mount of Light Multiphased Cutters (way more power efficient)*/
+    class MultiphasedCutter extends MultiphasedCutterL {        
+        public $name = "MultiphasedCutter";
+        public $iconPath = "MultiphasedCutter.png";
+        public $displayName = "Multiphased Cutter";
+        
+        public $guns = 3; 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 10;
+            if ( $powerReq == 0 ) $powerReq = 4;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+                
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+2;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 ;      }    
+    }//endof class MultiphasedCutter
 
 
 ?>

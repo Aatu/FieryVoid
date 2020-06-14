@@ -132,6 +132,8 @@ class FighterFlight extends BaseShip
         foreach ($fighter->systems as $system) {
             if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon)) continue;
             $mod = $system->getDefensiveDamageMod($this, $shooter, $pos, $turn, $weapon);
+			//weapon might have something to say about that as well...
+			$mod = $weapon->shieldInteractionDamage($this, $shooter, $pos, $turn, $system, $mod);
             if (!isset($affectingSystems[$system->getDefensiveType()])
                 || $affectingSystems[$system->getDefensiveType()] < $mod) {
                 $affectingSystems[$system->getDefensiveType()] = $mod;
@@ -152,6 +154,8 @@ class FighterFlight extends BaseShip
         foreach ($fighter->systems as $system) {
             if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon)) continue;
             $mod = $system->getDefensiveHitChangeMod($this, $shooter, $pos, $turn, $weapon);
+			//weapon might have something to say about that as well...
+			$mod = $weapon->shieldInteractionDefense($this, $shooter, $pos, $turn, $system, $mod);
             if (!isset($affectingSystems[$system->getDefensiveType()]) //no system of this kind is taken into account yet, or it is but it's weaker
                 || $affectingSystems[$system->getDefensiveType()] < $mod) {
                 $affectingSystems[$system->getDefensiveType()] = $mod;
@@ -428,15 +432,17 @@ class FighterFlight extends BaseShip
 	foreach ($systems as $craft){
 		$dmgPotential = 0;
 		//actually vs fighters Raking degenerates into Standard, rake size is irrelevant!
-		/*
-		if ($weapon->damageType == "Raking"){
-			$dmgPotential = $weapon->raking; //potential = rake size	
-		}else{
-		*/
 			$dmgPotential = $weapon->maxDamage; //potential = maximum damage weapon can do	
-		//}
 		//modify by armor properties
-		$armor = $weapon->getSystemArmourComplete($this, $craft, $gamedata, $fire);
+		$armor = $weapon->getSystemArmourComplete($this, $craft, $gamedata, $fire);		
+		//modify by defensive system (like Diffuser)! 
+		$protection=0;
+		$protectingSystem = $this->getSystemProtectingFromDamage($shooter, null, $gamedata->turn, $weapon, $craft,$dmgPotential);//let's find biggest one!
+		if($protectingSystem){ //may be unavailable, eg. already filled
+			$protection = $protectingSystem->doesProtectFromDamage($dmgPotential);
+		}
+		$armor += $protection;		
+		
 		$dmgPotential = max(0, $dmgPotential-$armor);//never negative damage ;)
 		/*for linked weapons - multiply by number of shots!*/
 		if ($weapon->isLinked){
@@ -445,17 +451,21 @@ class FighterFlight extends BaseShip
 		$remainingHP = $craft->getRemainingHealth();
 		$damagedThisTurn = false;
 		foreach($craft->damage as $dmgEntry){
-			if($dmgEntry->turn ==$gamedata->turn){
+			if($dmgEntry->turn == $gamedata->turn){
 				$damagedThisTurn = true;	
 			}
 		}
 		$alreadyDropoutSubject = false;
+		//dropout threshold for this particular fighter - include dropout bonuses/penalties!
+		$dropoutThreshold = 10;
+		$dropoutThreshold += $this->dropOutBonus + $this->critRollMod + $craft->critRollMod;//negative values will lower the threshold, positive will increase it		
+		$dropoutThreshold = min($dropoutThreshold,10); //never higher than 10!
 		//subject to dropout if damaged this turn and brought below 10 points
-		if (($damagedThisTurn==true) && ($remainingHP<10)) $alreadyDropoutSubject = true;
+		if (($damagedThisTurn==true) && ($remainingHP<$dropoutThreshold)) $alreadyDropoutSubject = true;
 		//can be dropped out if can be brought below 10 hp by this shot and NOT subject to dropout already
 		$minRemainingHP = $remainingHP-$dmgPotential;
 		$canBeDroppedOut = false;
-		if (($minRemainingHP<10) && ($alreadyDropoutSubject==false)) $canBeDroppedOut = true;
+		if (($minRemainingHP<$dropoutThreshold) && ($alreadyDropoutSubject==false)) $canBeDroppedOut = true;
 		$canBeKilled = false;
 		if ($minRemainingHP<1) $canBeKilled = true;
 		$singleCraft = array("id"=>$craft->id, "hp"=>$remainingHP, "canDrop"=>$canBeDroppedOut, "canDie"=>$canBeKilled, "fighter"=>$craft);

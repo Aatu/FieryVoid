@@ -115,7 +115,8 @@ class Enhancements{
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
 	  }	  
-
+	    
+	  
 	  //Ipsha-specific - Eethan Barony refit (available for generic Ipsha designs only, Eethan-specific may have it already incorporated in some form)
 	  $enhID = 'IPSH_EETH';	  
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
@@ -135,6 +136,7 @@ class Enhancements{
 		  $enhPriceStep = 0;
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 	  }  	
+
 	  
 	  //Poor Crew (official but modified): -5 Initiative, -1 Engine, -1 Sensors, -1 Reactor power, +1 Profile, +2 to critical results
 	  //cost: -15% of ship cost (second time: -10%)
@@ -202,7 +204,32 @@ class Enhancements{
 			  $enhLimit = 1;	  
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
-	  }	  	  
+	  }
+
+		//Sluggish: officially -2d6 Initiative, let's make it fixed (for technical reasons) and scalable (so it's usable for many scenarios)
+		//let's make it very cheap too
+		//effect: -1 Ini, Price: -6, step 0, max count 7 (for a total of 42 points at max value)
+	  $enhID = 'SLUGGISH';
+	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
+		  $enhName = 'Sluggish';
+		  $enhLimit = 7;	
+		  $enhPrice = -6; //fixed, very low value
+		  $enhPriceStep = 0; //flat rate
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+	  }	  
+	  
+		//Vulnerable to Criticals: +1 to critical rolls, and let's make it scalable :)
+		//let's make it very cheap too
+		//effect: -1 Ini, Price: -4, step 0, max count 4 (for a total of 16 points at max value)
+	  $enhID = 'VULN_CRIT';
+	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
+		  $enhName = 'Vulnerable to Criticals';
+		  $enhLimit = 4;	
+		  $enhPrice = -4; //fixed, very low value
+		  $enhPriceStep = 0; //flat rate
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+	  }	  
+	  
 	  	  
   } //endof function setEnhancementOptionsShip
 	
@@ -597,6 +624,16 @@ class Enhancements{
 							}
 						}  
 						break;
+						
+					case 'SLUGGISH': //Sluggish: -1(5) Initiative
+						//fixed values
+						$ship->iniativebonus -= $enhCount*5;
+						break;
+						
+					case 'VULN_CRIT': //Vulnerable to Criticals: +1(5) Crit roll mod
+						//fixed values
+						$ship->critRollMod += $enhCount;
+						break;
 				}
 			}
 			
@@ -698,6 +735,11 @@ class Enhancements{
 						case 'POOR_CREW': //Poor crew: Initiative and Profiles modified
 							$strippedShip->forwardDefense = $ship->forwardDefense;
 							$strippedShip->sideDefense = $ship->sideDefense;
+							$strippedShip->iniativebonus = $ship->iniativebonus;
+							break;
+							
+						
+						case 'SLUGGISH': //Sluggish: Initiative  modified
 							$strippedShip->iniativebonus = $ship->iniativebonus;
 							break;
 					

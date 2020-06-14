@@ -27,7 +27,7 @@ AVAILABLE FACTIONS
 ABBAI
 Gravitic Shield - most Abbai units are equipped with Gravitic Shield. Active shield reduces both hit chance and damage of incoming fire. At range 0 fighters are assumed to be able to come close enough to ignore ship shields.
 	Gravitic Shields are powered by separate generator, that can power up a limited number of them (usually not allowing a ship all-around protection unless generator output is boosted).
-Quad Array - 4 separate weapons in a single housing that's prone to overheating. Using more than 2 shots can cause forced shutdown for a turn, to cool down. Number of shots is changed by using alternate firing modes. Defensive fire is always safe.
+Quad Array - 4 separate weapons in a single housing that's prone to overheating. Using more than 2 shots can cause forced shutdown for a turn, to cool down. Number of shots is changed by using alternate firing modes. Defensive fire is always safe. (this is somewhat changed from tabletop arrangement, where a regular critical is rolled instead - with defensive fire too).
 Comm Disruptor - weapon reducing target's EW and Initiative for next turn. 
 Particle Impeder - purely defensive weapon, capable of intercepting weapons with "uninterceptable" trait (typically that means Lasers :) ).
 	In tabletop, Impeder output can be boosted by channeling DEW - increasing intercept rating, acting as regular DEW (but only in Impeder arc) and reducing fighters' hit chance - effectively gaining interesting bonuses in Impeder arc as a tradeoff for leaving remaining arc with much reduced defenses.
@@ -136,6 +136,7 @@ No very specific rules/technologies.
 EARTH ALLIANCE
 Interceptor - dedicated defensive weapon. In tabletop, it needs to be shut down for a turn before switching between offensive (anti-fighter) and defensive (interception) modes. There is no such requirement in Fiery Void, weapon can intercept or fire offensively at will.
 Energy Web - defensive system integrated with Interceptor. Active Interceptor provides (in its arc) shield-like effect of reducing hit chance of all incoming fire by its Intercept Rating. EWeb cannot be flown under by fighters, and does NOT provide damage reduction.
+Shadow Omega - official Shadow Omega conversion by AoG is marked as unofficial because that's what official deployment restrictions sum up to (not tournament legal, opponent permission required). Actual fan-made conversions are present as well!
 
 
 HURR
@@ -229,14 +230,64 @@ Last but not least - Belters can use (are original designers and manufacturers, 
 Otherwise no very specific technologies.
 
 
+SHADOWS
+Ancient race, by definition complicated, very specific and not really on par with younger ones - tech difference is too high for proper balance. Ancient factions were officially not tournament legal.
+But with these caveats - have fun! Ancients should be balanced against each other, and if Your opponent knows what to expect/You're playing a scenario, go ahead with other pairings as well. Note that sky-high individual cost of Ancient units makes standard requirements based on total fleet value completely inadequate (like number of units on a hull and number of required capital ships).
+Below list of systems Shadows use, with short description of effect and design differences from original tabletop.
+Called shots - systems on Shadow ships cannot be targeted by called shots.
+Enhancements - Shadow ships use no crew, so cannot use rew-related enhancements. They can use enhancements relating to special officers (that would be ship pilot's skill in such case), and mechanical enhancements of ship systems (that would represent ship grown with special emphasis on some aspect). They have their own faction-specific enhancements as well.
+	I have tried to block inappropriate enhancements, but if they show up on the list - bear in mind guidelines above :)
+Self-Repair - automated, player cannot decide what is repaired. Damage suffered in current turn can be repaired, criticals can't. Cost of critical repair has been changed in places, and there's no partial repair of crits. See system description for details.
+	If Self-Repair is destroyed or damaged, unused repair points are NOT lost.
+Energy Diffuser - absorbs damage as it's being dealt (and diffuses it over time). In FV Diffuser always kicks in if possible, there's no option to withhold its use eg. waiting for more threatening damage and conserving resources. Diffuser in FV can dissipate damage just absorbed. For visual reasons tendrils are shown as separate (untargetable) systems. Damage absorbed by ship tendrils is not shown in log.
+	Diffuser will not try to stop no-overkill damage that would kill system hit despite Diffuser interference. This is important for very strong Matter or Piercing shots.
+	There is no special procedure for Flash damage.
+Bio-Drive - Shadow ships have omnidirectional thrusters that generate their own thrust. In FV, for technical reasons, there are also usual (untargetable) thrusters (with unlimited rating) and (also untargetable) engine (with rating being sum of biothruster ratings). Due to these technicalities thrust can be freely split, even from a single surviving biothruster.
+	Biothrusters have their own set of criticals (basically output reduced) in place of regular thruster criticals.
+	Bio-Drive cannot be boosted.
+Pilot - Shadow ships have no crew, but they do have Pilot. Pilot is shown on ship window as C&C, and main differences from regular C&C are: Pilot cannot suffer criticals, but feels pain when ship is damaged (temporary) or when (s)he's wounded (as long as wounds remain). Pilot cannot be repaired by self-repair system.
+	Telepathic attack on Shadow ships are not implemented.
+Half Phasing - during movement phase Shadow ship can become semi-immaterial (until end of turn). It becomes much more difficult to hit (-4 penalty to incoming gunfire, -8 to ballistic fire) and less accurate itself (-10 to hit). Cannot ram or get rammed at all, unless both ships are half-phasing.
+	Performing half-phasing costs full thrust from two undamaged BioThrusters (such BioThrusters must be present), as well as presence of undamaged (and enabled) Phasing Drive. Any damage to Phasing Drive during half-phasing destroys ship.
+Ship layout - even capital-sized Shadow ships use MCV ship layout.
+Shadow fighters - Shadow fighters are semi-autonomous slivers of their carriers. For this reason every Shadow fighter should take Uncontrolled enhancement (penalty for operating independently from carrier - for scenarios, really) or its carrier should take appropriate Fighter Launched enhancement (fighters are essentially part of carriers' Structure, and launch reduces that structure; this is the option to take in pickup battle). 
+	Game will not force player to do so. Also, controlled/uncontrolled status cannot change during game (so carrier destruction will not affect fighters in any way).
+	In tabletop, Shadow fighters cannot drop out. In FV they get a massive -100 dropout bonus instead - which means they'll pass all appropriate tests, but can be dropped out by weapons that explicitly cause such state without test. Note that most weapons that do so are Electromagnetic in nature, and therefore such effect is blocked by Advanced Armor. But technically some Ancient weapon causing such effect might force Shadow fighter to drop out. 
+	To take advantage of their resilience (combination of Energy Diffuser protection and dropout immunity) Shadow fighters have their own algorithm for hit allocation (preferring spreading damage among the flight). 
+	In tabletop fighters can be literally launched from their carrier - in FV that's not an option, as they have to start scenario deployed.
+	Their weapon is an accelerator, able to build up charge - for this reason it will NOT be used for interception without explicit order to do so!
+Battle Cruiser - this Primordial ship differs from modern quick-grown ones in a few ways, which mandated larger changes for FV:
+	- most important is primary weapon firing arc: in tabletop it's split into large forward arc (120 degres) and smaller aft arc (60 degrees). In FV such a split is not possible, so aft firing arc is not present - Forward arc is widened to 180 degrees as compensation.
+	- 6 separate Energy Diffusers would have been difficult to set up on PRIMARY in a clear way - therefore they've been moved to appropriate sides. This in turn affected hit table - each side's Diffusers have separate entry.
+Destroyer - by original design should have acceleration cost of 1.5, which is not possible in FV (set to 2 instead).
+Primordial variants - these are ships with Primordial and Additional Tendril enhancements added (neither of which is available in FV as actual enhancement).
+Molecular Slicer Beam - primary weapon of larger Shadow ships has quite a few traits, some of which has been simplified for Fiery Void.
+	First of all, it's uninterceptable - coupled with high FC and decent range it's quite accurate (as You'd expect from faction that uses small number of very potent weapons).
+	Second, it ignores armor. Coupled with high damage output this means immense damage - at higher arming levels literally cutting ships apart, like on the show, is fully possible.
+	Third, most powerful variety (Heavy, only found on Primordial ships - modern fast-grown ones don't get such power!) can use Piercing mode (in fact it's default mode for this weapon) - which CAN overkill (though only at full power), so its damage potential won't get wasted. Note that full power of the weapon will be appliet ONLY to Piercing shot (Raking damage is capped at 2-turns level)
+	Fourth - Raking shot can be split into multiple smaller shots, which is very useful against fighters. Here come the differences:
+	 - Tabletop: can fire at the same or different targets. FV: only one target for the weapon.
+	 - Tabletop: any number of shots. FV: preset number of shots (3/6 for Light weapon, 3/6/9 for heavier ones)
+	 - Tabletop: -1 penalty for every additional shot, cumulative. FV: ALL shots are penalized equally, at -1/-2/-3 appropriately.
+	 - Tabletop: assign dice and parts of fixed damage. FV: for every shot roll (separately) full damage and divide by number of shots taken (round down).  
+	 - Overall this means FV split fire is slightly weaker, slightly more accurate (on average; even much more accurate in case of large splits!), and less flexible (due to being unable to target multiple opponents simultaneously).
+Phasing Pulse Cannon - Pulse weapons that completely ignore any kind of shield or shield-like defense (of younger races only). Note that EM shields (like those on White Star) are treated as Ancient even when used on Young ship.
+Vortex Disruptor - weapon that destabilizes hyperspace vortexes, preventing enemy escape. As in FV there are no actual vortexes :) , weapon is purely scenario-related one - fired at hex where vortex opening is declared.
+	Game will mechanically resolve the shot (eg. calculate hit chance and report result in firing log). 
+	Hit chance will NOT be calculated when declaring.
+	Semi-trivia: Vortex Disruptor will not function properly while half-phased (will be able to fire, but not hit). 
+
+
 STREIB
 A faction that has only one offically released ship (Collector), it was expanded a bit in BabCom by Paul Brown to create a playable faction.
 Streib are notable for their extremely tough armor (without any special properties though) and extensive use of energy draining/dropout causing weapons. 
 Layout of their ships is atypical as well - highly assymetrical, with many core systems placed on outer sections.
+Their design makes them a bit Ancient-like when it comes to balancing - they are very vulnerable in some situations and unbeatable in others. In particular they are essentially shut down if their opponent is resistant to Electromagnetic weapons (eg. Advanced Armor or EM Hardening).
 
 
 TORATA
 Torata extensively use Accelerator weapons, either allowing them to fire faster at the price of decreased damage output (most ship weapons) or store double charge to be able to deal massive damage if fire is held for a turn (fighter weapons).
+Accelerator weapons will NOT be used for interception without explicit order to do so - even fighter guns! Also, full-charge mode is specifically anti-ship (cannot be used vs fighters) - for this reason it's an actual alternate mode and will NOT be used without explicit order (You'll fire in basic mode by default).
 
 
 USUUTH
@@ -276,7 +327,7 @@ StarWars Sensors are portrayed to be generally of lower tech than B5 ones. This 
 
 POWER RATINGS
 -------------
-Below is totally subjective grouping of factions by power rating. Factions from the same power bracket should be suitable for well-matched competitive gaming – while matching different bracked would probably lead to one players’ advantage at nominally equal points. In a few cases I took liberty to highlight a particular build as a separate ‘faction’.
+Below is completely subjective grouping of factions by power rating. Factions from the same power bracket should be suitable for well-matched (which doesn't mean perfect!) competitive gaming – while matching different bracked would usually lead to one players’ advantage at nominally equal points. In a few cases I took liberty to highlight a particular build as a separate ‘faction’.
 Note that evaluation (just like point values) assumes standard conditions (default-sized fixed map, basically) – changing conditions throws it away.
 
 
@@ -285,30 +336,22 @@ Factions that are particularly easy to fly, and recommended for new players. Use
 Drazi (their jack-of-all-trades ships are very flexible and can unleash full power against any oponent, while their layout makes tchem surprisingly resistant to damage).
 Narn (very tough and with powerful weapons – they may not be fancy, but they get the job done and refuse to die even if put in unfavorable position; average in most other aspects, which gives good feeling of what You want from Your units and allows informed choices for expanding Your picks)
 EA (extremely tough, with awesome defenses and good firepower – balanced by difficulties with firepower concentration. Their resilience to damage makes them very forgiving to any mistakes a beginner may make)
- 
-
-SUPERIOR
-Factions that, point for point, usually beat First League. That may be due to overall superior value or some special side effect of their rules, so simply allowing opponent extra PV might not be enough to balance things.
-Yolu
-EA using Warlock
-ISA (eg. all-White Star fleet)
-Narn using massed EMines
- 
+  
 
 FIRST LEAGUE
-This is default Big4 power level – what I consider to be the ‘baseline’ of competitive play. Smaller factions may fit here due to their raw power, but usually won’t allow flexibility of fleet design offered by major factions.
+This is default Big4 power level in show era – what I consider to be the ‘baseline’ of competitive play. Smaller factions may fit here due to their raw power, but usually won’t allow flexibility of fleet design offered by major factions.
 Brakiri
 Centauri
 Dilgar
-Drakh (although, as they’re Middleborn rather than Young race, they exhibit some traits similar to Ancients – so be warned!)
+Drakh (although, being Middleborn rather than Young race, they exhibit some traits similar to Ancients – not enough to kick them to Ancients grouping though)
 Drazi
 EA (barring Warlock)
 Llort
-Minbari (Jammer is very daunting, expecially to new players – it’s easy to feel overwhelmed; at the same time flying Minbari is not easy either. It’s advised to stay away from them on either side of the table until You feel You have solid command of the game)
+Minbari (warning: Jammer is very daunting, expecially to new players – it’s easy to feel overwhelmed; at the same time flying Minbari is not easy either. It’s advised to stay away from them on either side of the table until You feel You have solid command of the game)
 Narn (barring massed EMines)
 Orieni (this one is tricky – will usually feel superior against average player due to raw damage output of Hunter-Killers and massed RGRs, while remaining vulnerable against sharp handling by expert oponent; if You don’t consider Yourself an expert, be advised to treat Orieni as Superior faction)
-Torata (? – I still don’t have enough experience with them – but tenatively I am putting them here ;) )
- 
+Torata 
+
 
 SECOND LEAGUE
 Factions that point for point will have uphill battle against First League, yet otherwise are balanced and competitive. Should be interesting to play against each other, and if given some extra PV allowance – against First League as well. Most of these factions do not offer fleet build flexibility of major factions, but may offer a very distinct handling/playstyle instead.
@@ -323,7 +366,7 @@ Drazi (WotCR)
 Ipsha
 Markab
 Raiders (note plethora of background-driven options – Raiders often use a hodgepodge of units and formal FV fleet selection rules don’t always do them justice!)
-Star Wars
+Star Wars (custom faction with much different playstyle - consider them difficult to fly!)
 
 
 THE REST
@@ -336,9 +379,17 @@ Sorithian (Small Races)
 Usuuth
 
 
+SUPERIOR
+Factions that, point for point, usually beat First League. That may be due to overall superior value or some special side effect of their rules, so simply allowing opponent extra PV might not be enough to balance things.
+EA using Warlock
+ISA (eg. all-White Star fleet)
+Narn using massed EMines
+Yolu
+
+
 ANCIENTS
 Factions that can’t really be balanced vs Young Races. Overall high power and durability and selective ignoring enemy systems (especially defensive ones – which hurts some opponents while leaving others untouched) coupled with small numer of shots and relative vulnerability to swarms are impossible to properly balance for pickup battle. For these reasons Ancients got their own category.
 Shadows
-Streib (actually an advanced Young race, but their ship design is peculiar enough for them to feel surprisingly Ancient-like when it comes to balancing: some opponents are easily overwhelmed (especially those that  rely on mass of individually light shots), while others are overwhelming themselves (especially if they’re resistant to EM weapons or have high quantity of armor-ignoring weapons) )
+Streib (actually a Young race, but their ship design and technology is peculiar enough for them to feel surprisingly Ancient-like when it comes to balancing: some opponents are easily overwhelmed (especially those that  rely on mass of individually light shots), while others are overwhelming themselves (especially if they’re resistant to EM weapons or have high quantity of armor-ignoring weapons) . They are definitely NOT up to fighting actual Ancients though! )
 
  

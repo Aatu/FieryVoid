@@ -393,7 +393,7 @@ class FtrShield extends Shield implements DefensiveSystem{
     function __construct($shieldFactor, $startArc, $endArc){
         // shieldfactor is handled as output.
         parent::__construct(0, 1, 0, $shieldFactor, $startArc, $endArc);
-	$this->baseOutput = $shieldFactor;
+		$this->baseOutput = $shieldFactor;
     }
 	
     public function onConstructed($ship, $turn, $phase){

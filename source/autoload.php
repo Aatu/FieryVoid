@@ -1233,6 +1233,19 @@ spl_autoload_register(
 				'outputhalved' => '/server/model/cricialClasses.php',
 				'whitestarcmd' => '/server/model/ships/minbari/whitestarCmd.php',
 				
+				
+				//Raider Civilians Refresh
+				'privateerlessara' => '/server/model/ships/centauri_raiders/PrivateerLessara.php',
+				'privateerglaive' => '/server/model/ships/centauri_raiders/Privateerglaive.php',
+				'privateerphalan' => '/server/model/ships/centauri_raiders/Privateerphalan.php',
+				'privateerrazik' => '/server/model/ships/centauri_raiders/Privateerrazik.php',
+				//'raiderglaive' => '/server/model/ships/raiders/Raiderglaive.php',
+				//'raiderphalan' => '/server/model/ships/raiders/Raiderphalan.php',
+				'raiderrowlon' => '/server/model/ships/raiders/Raiderrowlon.php',
+				'flyerassault' => '/server/model/ships/minbari/flyerAssault.php',
+				'flyercombat' => '/server/model/ships/minbari/flyerCombat.php',
+				'genericarmedshuttle' => '/server/model/ships/civilians/genericArmedShuttle.php',
+				
 				//Shadowtech
                 'technicaltestbed' => '/server/model/ships/customs/technicalTestbed.php',
                 'technicaltestbedftr' => '/server/model/ships/customs/technicalTestbedFtr.php',
@@ -1254,31 +1267,32 @@ spl_autoload_register(
 				'molecularslicerbeamm' => '/server/model/weapons/molecular.php', 
 				'molecularslicerbeamh' => '/server/model/weapons/molecular.php', 
                 'vortexdisruptor' => '/server/model/weapons/specialWeapons.php',  
-				
-				
+                'multiphasedcutterl' => '/server/model/weapons/molecular.php',    
+                'multiphasedcutter' => '/server/model/weapons/molecular.php',  
+                'phasingpulsecannon' => '/server/model/weapons/pulse.php',    
+                'phasingpulsecannonh' => '/server/model/weapons/pulse.php',    
+								
 				//Shadow units
 				'shadowmediumfighterflight' => '/server/model/ships/shadows/shadowMediumFighterFlight.php',
-				'shadowpatrolcruiser' => '/server/model/ships/shadows/shadowPatrolCruiser.php',
 								
-				//just test of all images:
-				'shadowdestroyer' => '/server/model/ships/shadows/shadowDestroyer.php',
-				'shadowcruiser' => '/server/model/ships/shadows/shadowCruiser.php',
 				'shadowbattlecruiser' => '/server/model/ships/shadows/shadowBattleCruiser.php',
+				'shadowcarrier' => '/server/model/ships/shadows/shadowCarrier.php',
+				'shadowcarrierprimordial' => '/server/model/ships/shadows/shadowCarrierPrimordial.php',
+				'shadowcruiser' => '/server/model/ships/shadows/shadowCruiser.php',
+				'shadowcruiserprimordial' => '/server/model/ships/shadows/shadowCruiserPrimordial.php',
+				'shadowdestroyer' => '/server/model/ships/shadows/shadowDestroyer.php',
+				'shadowdestroyerscout' => '/server/model/ships/shadows/shadowDestroyerScout.php',
+				'shadowdestroyerstrike' => '/server/model/ships/shadows/shadowDestroyerStrike.php',
 				'shadowdreadnought' => '/server/model/ships/shadows/shadowDreadnought.php',
+				'shadowdreadnoughtprimordial' => '/server/model/ships/shadows/shadowDreadnoughtPrimordial.php',
+				'shadowpatrolcruiser' => '/server/model/ships/shadows/shadowPatrolCruiser.php',
+				'shadowpatrolcruiserprimordial' => '/server/model/ships/shadows/shadowPatrolCruiserPrimordial.php',
+								
+                'omegaepsilon' => '/server/model/ships/EA/omegaEpsilon.php',
+                'omegaepsilondrakh' => '/server/model/ships/EA/omegaEpsilonDrakh.php',
 				
 				
 				
-				//Raider Civilians Refresh
-				'privateerlessara' => '/server/model/ships/centauri_raiders/PrivateerLessara.php',
-				'privateerglaive' => '/server/model/ships/centauri_raiders/Privateerglaive.php',
-				'privateerphalan' => '/server/model/ships/centauri_raiders/Privateerphalan.php',
-				'privateerrazik' => '/server/model/ships/centauri_raiders/Privateerrazik.php',
-				//'raiderglaive' => '/server/model/ships/raiders/Raiderglaive.php',
-				//'raiderphalan' => '/server/model/ships/raiders/Raiderphalan.php',
-				'raiderrowlon' => '/server/model/ships/raiders/Raiderrowlon.php',
-				'flyerassault' => '/server/model/ships/minbari/flyerAssault.php',
-				'flyercombat' => '/server/model/ships/minbari/flyerCombat.php',
-				'genericarmedshuttle' => '/server/model/ships/civilians/genericArmedShuttle.php',
 		    
 		    	//Random Ships which don't require new mechanics to add
 		    	'tlorr' => '/server/model/ships/narn/zzunoffTlorr.php',

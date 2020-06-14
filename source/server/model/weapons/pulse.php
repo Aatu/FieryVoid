@@ -1,7 +1,6 @@
 <?php
 
-class Pulse extends Weapon{
-        
+class Pulse extends Weapon{        
         public $trailColor = array(190, 75, 20);
         public $animationColor = array(190, 75, 20);
         public $grouping = 20;
@@ -59,7 +58,7 @@ class EnergyPulsar extends Pulse{
         public $displayName = "Energy Pulsar";
         public $animation = "trail";
         public $animationWidth = 5;
-        public $projectilespeed = 13;
+        public $projectilespeed = 10;
         public $animationExplosionScale = 0.30;
         public $rof = 2;
         public $trailLength = 12;
@@ -102,7 +101,7 @@ class ScatterPulsar extends Pulse{
         public $animation = "trail";
         public $trailLength = 12;
         public $animationWidth = 4;
-        public $projectilespeed = 13;
+        public $projectilespeed = 9;
         public $animationExplosionScale = 0.10;
         public $rof = 3;
         public $grouping = 25;
@@ -132,7 +131,7 @@ class QuadPulsar extends Pulse{
         public $animation = "trail";
         public $trailLength = 20;
         public $animationWidth = 6;
-        public $projectilespeed = 20;
+        public $projectilespeed = 10;
         public $animationExplosionScale = 0.25;
         public $rof = 3;
         public $grouping = 25;
@@ -165,7 +164,7 @@ class QuadPulsar extends Pulse{
         public $displayName = "Light Pulse Cannon";
         public $animation = "trail";
         public $animationWidth = 3;
-        public $projectilespeed = 10;
+        public $projectilespeed = 8;
         public $animationExplosionScale = 0.15;
         public $rof = 2;
         public $trailLength = 10;
@@ -193,7 +192,7 @@ class QuadPulsar extends Pulse{
         public $animation = "trail";
         public $trailLength = 15;
         public $animationWidth = 4;
-        public $projectilespeed = 15;
+        public $projectilespeed = 10;
         public $animationExplosionScale = 0.17;
         public $rof = 2;
         
@@ -222,7 +221,7 @@ class QuadPulsar extends Pulse{
         public $animation = "trail";
         public $trailLength = 20;
         public $animationWidth = 5;
-        public $projectilespeed = 20;
+        public $projectilespeed = 12;
         public $animationExplosionScale = 0.20;
         public $rof = 2;
         public $priority = 6;
@@ -285,7 +284,7 @@ class QuadPulsar extends Pulse{
         public $animation = "trail";
         public $trailLength = 15;
         public $animationWidth = 4;
-        public $projectilespeed = 25;
+        public $projectilespeed = 10;
         public $animationExplosionScale = 0.17;
         public $animationColor =  array(175, 225, 175);
         public $trailColor = array(110, 225, 110);
@@ -414,7 +413,7 @@ class QuadPulsar extends Pulse{
         public $animation = "trail";
         public $trailLength = 13;
         public $animationWidth = 4;
-        public $projectilespeed = 25;
+        public $projectilespeed = 16;
         public $animationExplosionScale = 0.17;
         public $animationColor =  array(175, 225, 175);
         public $trailColor = array(110, 225, 110);
@@ -473,7 +472,7 @@ class QuadPulsar extends Pulse{
         public $animation = "trail";
         public $trailLength = 13;
         public $animationWidth = 4;
-        public $projectilespeed = 20;
+        public $projectilespeed = 10;
         public $animationExplosionScale = 0.15;
         public $animationColor =  array(175, 225, 175);
         public $trailColor = array(110, 225, 110);
@@ -715,7 +714,7 @@ class PulseAccelerator extends Pulse{
 	public $animation = "trail";
 	public $trailLength = 18;
 	public $animationWidth = 5;
-	public $projectilespeed = 20;
+	public $projectilespeed = 13;
 	public $animationExplosionScale = 0.20;
 	public $rof = 2;
 	public $maxpulses = 4;
@@ -778,6 +777,115 @@ class PulseAccelerator extends Pulse{
 	
 } //End of class PulseAccelerator
 
+
+
+
+
+	/*Shadow Pulse weapon; ignores shields and shield-like systems (except EM Shields), except those operated by advanced races
+		profile reduction interaction needs to be coded in .js, as well!
+	*/
+    class PhasingPulseCannon extends Pulse{
+        public $name = "PhasingPulseCannon";
+        public $displayName = "Phasing Pulse Cannon";
+        public $rof = 3;
+		public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
+		
+		
+        public $animation = "trail";
+        public $trailLength = 15; //meaningless?...
+        public $animationWidth = 4; //meaningless?...
+        public $projectilespeed = 10;
+        public $animationExplosionScale = 0.2;
+        public $trailColor = array(170, 170, 170); //meaningless?...
+        public $animationColor = array(50, 125, 210); //let's make it blue-ish...
+				
+        public $grouping = 15; //+1 hit per 3 below target number
+        public $maxpulses = 6;
+		public $damageType = 'Pulse'; //indicates that this weapon does damage in Pulse mode
+    	public $weaponClass = "Molecular"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+		protected $useDie = 5; //die used for base number of hits
+        
+        public $loadingtime = 2;
+        public $priority = 5;
+        
+        public $rangePenalty = 1; //-1/hex
+        public $fireControl = array(2, 4, 6); // fighters, <mediums, <capitals 
+        
+        public $intercept = 3;
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 7;
+			if ( $powerReq == 0 ) $powerReq = 4;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){ 
+			return 13;   
+		}
+		
+		
+		//ignores shields, unless EM or on Ancient+ ship
+		public function shieldInteractionDefense($target, $shooter, $pos, $turn, $shield, $mod) {
+			$toReturn = min(0,$mod);//negative "shielding" is usually a techincal system of some kind (Vorlon Petals?), do NOT ignore it
+			if ($target->factionAge>=3) $toReturn = $mod;
+			if ($shield instanceOf EMShield) $toReturn = $mod;
+			return $toReturn; 	
+		}
+		
+		//ignores shields, unless EM or on Ancient+ ship
+		public function shieldInteractionDamage($target, $shooter, $pos, $turn, $shield, $mod) {
+			$toReturn = min(0,$mod);//negative "shielding" is usually a techincal system of some kind (Vorlon Petals?), do NOT ignore it
+			if ($target->factionAge>=3) $toReturn = $mod;
+			if ($shield instanceOf EMShield) $toReturn = $mod;
+			return $toReturn; 		
+		}	
+
+        public function setSystemDataWindow($turn){    
+            parent::setSystemDataWindow($turn);      
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            } 
+            $this->data["Special"] .= 'Ignores non-Ancient shields and shield-like systems (both profile and damage reduction)';
+            $this->data["Special"] .= ', EXCEPT EM shields.';
+        }
+		
+    }//endof class PhasingPulseCannon
+	
+	class PhasingPulseCannonH extends PhasingPulseCannon{
+        public $name = "PhasingPulseCannonH";
+        public $displayName = "Heavy Phasing Pulse Cannon";
+        public $rof = 3;
+		
+		
+        public $animation = "trail";
+        public $trailLength = 20;
+        public $animationWidth = 6;
+        public $projectilespeed = 12;
+        public $animationExplosionScale = 0.4;
+        //public $trailColor = array(170, 170, 170);
+        //public $animationColor = array(216, 216, 216);	
+        
+        public $loadingtime = 3;
+        public $priority = 6;
+        
+        public $rangePenalty = 0.5; //-1/2hexes
+        public $fireControl = array(2, 4, 6); // fighters, <mediums, <capitals 
+        
+        public $intercept = 2;
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 9;
+			if ( $powerReq == 0 ) $powerReq = 5;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return 18;   }
+		
+    }//endof class PhasingPulseCannonH
 
 
 

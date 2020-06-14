@@ -7,7 +7,7 @@ class FlyerCombat extends FighterFlight{
         
     	$this->pointCost = 70*6;
     	$this->faction = "Minbari";
-        $this->phpclass = "FlyerAssault";
+        $this->phpclass = "FlyerCombat";
         $this->shipClass = "Combat Flyers";
         $this->variantOf = "Assault Flyers";
     	$this->imagePath = "img/ships/nial.png"; //need Minbari Flyer image!

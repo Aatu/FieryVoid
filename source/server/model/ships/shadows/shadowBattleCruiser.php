@@ -13,8 +13,7 @@ class ShadowBattleCruiser extends MediumShip{
 	    $this->isd = 'Primordial';
         $this->shipSizeClass = 3; //it's actually a Capital ship using MCV layout
 		$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
-$this->faction = "Custom Ships";
-$this->variantOf = "Lurking unseen";        
+
 		
         $this->limited = 33;
         
@@ -92,7 +91,7 @@ $this->variantOf = "Lurking unseen";
 		$scanner->markAdvanced();
         $this->addPrimarySystem($scanner);
 		$this->addPrimarySystem(new PhasingDrive(6, 20, 6, 8));
-        $this->addPrimarySystem(new Hangar(5, 24));
+        $this->addPrimarySystem(new Hangar(5, 24, 24));
         $this->addPrimarySystem(new SelfRepair(3, 6, 4)); //armor, structure, output
         $this->addPrimarySystem(new SelfRepair(3, 6, 4)); //armor, structure, output
         $this->addPrimarySystem(new SelfRepair(3, 3, 2)); //armor, structure, output
@@ -127,6 +126,7 @@ $this->variantOf = "Lurking unseen";
 		$this->addLeftSystem($tendril);
 		$tendril=new DiffuserTendril(15,'L');//absorbtion capacity,side
 		$diffuserPort->addTendril($tendril);
+		$this->addLeftSystem($tendril);
         $this->addLeftSystem($diffuserPort);
 		
 		$diffuserPort = new EnergyDiffuser(6, 21, 20, 180, 0);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
@@ -180,6 +180,7 @@ $this->variantOf = "Lurking unseen";
 		$this->addRightSystem($tendril);
 		$tendril=new DiffuserTendril(15,'R');//absorbtion capacity,side
 		$diffuserStbd->addTendril($tendril);
+		$this->addRightSystem($tendril);
         $this->addRightSystem($diffuserStbd);
 		
 		$diffuserStbd = new EnergyDiffuser(6, 21, 20, 0, 180);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
@@ -226,6 +227,12 @@ $this->variantOf = "Lurking unseen";
 	    //Structure
         $this->addPrimarySystem(new Structure( 6, 84));
 		
+		/*systems on Shadow ships CANNOT be targeted by called shots!*/
+		$this->notes .= "<br>cannot be targeted by called shots.";
+		foreach ($this->systems as $sys){
+			$sys->isPrimaryTargetable = false; 
+			$sys->isTargetable = false; //cannot be targeted ever!
+		}
 				
 	
 		$this->hitChart = array(

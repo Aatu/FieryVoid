@@ -89,11 +89,23 @@ class Manager{
         
         return $games;
     }
+	
+	
+	public static function getPlayerName($userid){
+		if (!is_numeric($userid)) return 'NONNUMERIC';
+		$playerName = '';
+        try {
+            self::initDBManager();        
+            $playerName = self::$dbManager->getPlayerName($userid);
+        }
+        catch(exception $e) {
+            $playerName = 'EXCEPTION';
+        }        
+        return $playerName;		
+	}
 
 
     public static function getFirePhaseGames($userid){
-
-
         try {
             self::initDBManager();
             
@@ -186,6 +198,7 @@ class Manager{
                 $list[] = $entry;
         }
         
+	sort($list);//alphabetical sort
         return $list;
     }
     
