@@ -470,7 +470,9 @@ class Weapon extends ShipSystem
             $this->data["Intercept"] = "-" . $this->intercept * 5;
         }
 		
-		
+		if($this->exclusive){
+			$this->data["Exclusive"] = 'Yes';
+		}
         $this->data["Resolution Priority (ship/fighter)"] = $this->priority . '/' . $this->priorityAF;
 
 /*no longer used

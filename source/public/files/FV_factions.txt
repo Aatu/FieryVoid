@@ -325,7 +325,7 @@ StarWars Sensors are portrayed to be generally of lower tech than B5 ones. This 
 
 POWER RATINGS
 -------------
-Below is totally subjective grouping of factions by power rating. Factions from the same power bracket should be suitable for well-matched (which doesn't mean perfect!) competitive gaming – while matching different bracked would usually lead to one players’ advantage at nominally equal points. In a few cases I took liberty to highlight a particular build as a separate ‘faction’.
+Below is completely subjective grouping of factions by power rating. Factions from the same power bracket should be suitable for well-matched (which doesn't mean perfect!) competitive gaming – while matching different bracked would usually lead to one players’ advantage at nominally equal points. In a few cases I took liberty to highlight a particular build as a separate ‘faction’.
 Note that evaluation (just like point values) assumes standard conditions (default-sized fixed map, basically) – changing conditions throws it away.
 
 
@@ -334,15 +334,7 @@ Factions that are particularly easy to fly, and recommended for new players. Use
 Drazi (their jack-of-all-trades ships are very flexible and can unleash full power against any oponent, while their layout makes tchem surprisingly resistant to damage).
 Narn (very tough and with powerful weapons – they may not be fancy, but they get the job done and refuse to die even if put in unfavorable position; average in most other aspects, which gives good feeling of what You want from Your units and allows informed choices for expanding Your picks)
 EA (extremely tough, with awesome defenses and good firepower – balanced by difficulties with firepower concentration. Their resilience to damage makes them very forgiving to any mistakes a beginner may make)
- 
-
-SUPERIOR
-Factions that, point for point, usually beat First League. That may be due to overall superior value or some special side effect of their rules, so simply allowing opponent extra PV might not be enough to balance things.
-EA using Warlock
-ISA (eg. all-White Star fleet)
-Narn using massed EMines
-Yolu
- 
+  
 
 FIRST LEAGUE
 This is default Big4 power level in show era – what I consider to be the ‘baseline’ of competitive play. Smaller factions may fit here due to their raw power, but usually won’t allow flexibility of fleet design offered by major factions.
@@ -356,8 +348,8 @@ Llort
 Minbari (warning: Jammer is very daunting, expecially to new players – it’s easy to feel overwhelmed; at the same time flying Minbari is not easy either. It’s advised to stay away from them on either side of the table until You feel You have solid command of the game)
 Narn (barring massed EMines)
 Orieni (this one is tricky – will usually feel superior against average player due to raw damage output of Hunter-Killers and massed RGRs, while remaining vulnerable against sharp handling by expert oponent; if You don’t consider Yourself an expert, be advised to treat Orieni as Superior faction)
-Torata (? – I still don’t have enough experience with them – but tenatively I am putting them here ;) )
- 
+Torata 
+
 
 SECOND LEAGUE
 Factions that point for point will have uphill battle against First League, yet otherwise are balanced and competitive. Should be interesting to play against each other, and if given some extra PV allowance – against First League as well. Most of these factions do not offer fleet build flexibility of major factions, but may offer a very distinct handling/playstyle instead.
@@ -383,6 +375,14 @@ Hurr
 Rogolon (Small Races)
 Sorithian (Small Races)
 Usuuth
+
+
+SUPERIOR
+Factions that, point for point, usually beat First League. That may be due to overall superior value or some special side effect of their rules, so simply allowing opponent extra PV might not be enough to balance things.
+EA using Warlock
+ISA (eg. all-White Star fleet)
+Narn using massed EMines
+Yolu
 
 
 ANCIENTS

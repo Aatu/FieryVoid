@@ -179,7 +179,7 @@
                 if ($struct->advancedArmor) return; //advanced armor prevents effect 
                 if(!$struct->isDestroyed($fireOrder->turn-1)){ //last turn Structure was still there...
                     $this->alreadyReduced = true; //do this only for first part of shot that actually connects
-                    $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn, $gamedata->turn+$sectionFacing+1);
+                    $crit = new ArmorReduced(-1, $target->id, $struct->id, "ArmorReduced", $gamedata->turn);
                     $crit->updated = true;
                     $crit->inEffect = false;
                     $struct->criticals[] = $crit;
@@ -446,13 +446,16 @@
 
         protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
             parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+			if ($system->advancedArmor) return;
             if(!$this->alreadyReduced){ 
                 $this->alreadyReduced = true; 
                 if(LightMolecularDisrupterHandler::checkArmorReduction($target, $shooter)){ //static counting!
-                    $struct = $target->getStructureSystem($location);
+					$sectionFacing = $target->getHitSection($shooter, $fireOrder->turn);
+					$struct = $target->getStructureSystem($sectionFacing); 
+                    //$struct = $target->getStructureSystem($location);
                     if ($struct->advancedArmor) return;
                     if(!$struct->isDestroyed($fireOrder->turn-1)){ //last turn Structure was still there...
-                        $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
+                        $crit = new ArmorReduced(-1, $target->id, $struct->id, "ArmorReduced", $gamedata->turn);
                         $crit->updated = true;
                         $crit->inEffect = false;
                         $struct->criticals[] = $crit;
