@@ -1,18 +1,17 @@
 <?php
-class PrivateerLessara extends BaseShip{
+class lias extends BaseShip{
 
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 490;
-        $this->faction = "Raiders";
-        $this->phpclass = "PrivateerLessara";
+	$this->pointCost = 375;
+        $this->faction = "Centauri";
+        $this->phpclass = "lias";
         $this->imagePath = "img/ships/PrivateerLessara.png";
-        $this->shipClass = "Centauri Privateer Lessara Carrier";
+        $this->shipClass = "Centauri Lias Supply Ship";
         $this->shipSizeClass = 3;
-        $this->fighters = array("light"=>18);
-		$this->isd = 2124;
+		$this->isd = 2053;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
@@ -23,19 +22,17 @@ class PrivateerLessara extends BaseShip{
         $this->rollcost = 4;
         $this->pivotcost = 4;       
          
-        $this->addPrimarySystem(new Reactor(5, 17, 0, 0));
+        $this->addPrimarySystem(new Reactor(5, 12, 0, 0));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 9, 3, 6));
         $this->addPrimarySystem(new Engine(5, 20, 0, 8, 4));	
-		$this->addPrimarySystem(new Hangar(5, 20));	
+		$this->addPrimarySystem(new Hangar(5, 5));	
         
-        $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-        $this->addFrontSystem(new CargoBay(4, 20));
-        $this->addFrontSystem(new CargoBay(4, 20));
-        $this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
+        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
+        $this->addFrontSystem(new CargoBay(4, 28));
+        $this->addFrontSystem(new CargoBay(4, 28));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 180, 60));
-        $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 180));
 		
         $this->addAftSystem(new Thruster(4, 13, 0, 5, 2));
@@ -45,10 +42,10 @@ class PrivateerLessara extends BaseShip{
         $this->addAftSystem(new TwinArray(3, 6, 2, 0, 240));
         
 		$this->addLeftSystem(new Thruster(4, 15, 0, 4, 3));
-        $this->addLeftSystem(new MediumPlasma(3, 5, 3, 240, 60));
+        $this->addLeftSystem(new CargoBay(4, 40));
 
     	$this->addRightSystem(new Thruster(4, 15, 0, 4, 4));
-        $this->addRightSystem(new MediumPlasma(3, 5, 3, 300, 120));     
+        $this->addRightSystem(new CargoBay(4, 40));    
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(5, 44));
@@ -73,9 +70,8 @@ class PrivateerLessara extends BaseShip{
 
 		1=> array(
 			3 => "Thruster",
-			6 => "Twin Array",
+			5 => "Twin Array",
 			9 => "Cargo Bay",
-			10 => "Medium Plasma Cannon",
 			18 => "Structure",
 			20 => "Primary",
 		),
@@ -89,15 +85,15 @@ class PrivateerLessara extends BaseShip{
 		),
 
 		3=> array(
-			6 => "Thruster",
-			8 => "Medium Plasma Cannon",
+			3 => "Thruster",
+			9 => "Cargo Bay",
 			18 => "Structure",
 			20 => "Primary",
 		),
 
 		4=> array(
-			6 => "Thruster",
-			8 => "Medium Plasma Cannon",
+			3 => "Thruster",
+			9 => "Cargo Bay",
 			18 => "Structure",
 			20 => "Primary",
 		),
