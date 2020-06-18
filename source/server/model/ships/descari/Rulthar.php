@@ -1,15 +1,15 @@
 <?php
-class Rulpa extends HeavyCombatVessel{
+class Rulthar extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 375;
+        $this->pointCost = 450;
         $this->faction = "Descari";
-        $this->phpclass = "Rulpa";
+        $this->phpclass = "Rulthar";
         $this->imagePath = "img/ships/DescariRulpa.png";
-        $this->shipClass = "Rulpa Destroyer";
-	    $this->isd = 2216;
+        $this->shipClass = "Rulthar Missile Destroyer";
+	    $this->isd = 2237;
         
         
         $this->forwardDefense = 12;
@@ -20,13 +20,13 @@ class Rulpa extends HeavyCombatVessel{
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 3;
-        $this->iniativebonus = 40;
+        $this->iniativebonus = 30;
         
          
         $this->addPrimarySystem(new Reactor(4, 13, 0, 0));
-        $this->addPrimarySystem(new CnC(4, 8, 0, 0));
+        $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 15, 3, 6));
-        $this->addPrimarySystem(new Engine(4, 16, 0, 12, 2));
+        $this->addPrimarySystem(new Engine(4, 14, 0, 10, 2));
         $this->addPrimarySystem(new Hangar(4, 2));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 4, 4));   
@@ -34,20 +34,18 @@ class Rulpa extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));        
-        $this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
-        $this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
-        $this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 60));
-        $this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 60));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));        
-		
+        $this->addFrontSystem(new SMissileRack(3, 6, 0, 240, 360));
+        $this->addFrontSystem(new SMissileRack(3, 6, 0, 0, 120));
+        $this->addFrontSystem(new SMissileRack(3, 6, 0, 180, 60));
+        $this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 180));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 60));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 60));
+	
+		$this->addAftSystem(new Thruster(4, 6, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 6, 0, 3, 2));
-        $this->addAftSystem(new Thruster(4, 6, 0, 3, 2));
-        $this->addAftSystem(new LightPlasma(2, 4, 2, 120, 300));
-        $this->addAftSystem(new LightPlasma(2, 4, 2, 60, 240));       
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 120, 300));
+        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 120, 300));       
+        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 60, 240));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 60, 240));       
         $this->addAftSystem(new Thruster(4, 6, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 6, 0, 3, 2));
@@ -59,7 +57,6 @@ class Rulpa extends HeavyCombatVessel{
         $this->addPrimarySystem(new Structure( 4, 34));
 		
 			
-		
 		$this->hitChart = array(
 			0=> array(
 				7 => "Structure",
@@ -72,16 +69,14 @@ class Rulpa extends HeavyCombatVessel{
 			),
 			1=> array(
 				5 => "Thruster",
-				8 => "Medium Plasma Cannon",
-				11 => "Light Particle Beam",
-				13 => "Light Plasma Cannon",
+				10 => "Class-S Missile Rack",
+				12 => "Light Particle Beam",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
 				7 => "Thruster",
-				9 => "Light Particle Beam",
-				11 => "Light Plasma Cannon",
+				11 => "Light Particle Beam",
 				18 => "Structure",
 				20 => "Primary",
 			),
