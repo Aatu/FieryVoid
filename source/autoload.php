@@ -1291,8 +1291,8 @@ spl_autoload_register(
                 'omegaepsilon' => '/server/model/ships/EA/omegaEpsilon.php',
                 'omegaepsilondrakh' => '/server/model/ships/EA/omegaEpsilonDrakh.php',
 				
-				
-				
+				//Descari
+				'rulpa' => '/server/model/ships/Descari/Rulpa.php',
 		    
 		    	//Random Ships which don't require new mechanics to add
 		    	'tlorr' => '/server/model/ships/narn/zzunoffTlorr.php',
