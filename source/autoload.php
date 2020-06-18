@@ -1293,6 +1293,7 @@ spl_autoload_register(
 				
 				//Descari
 				'rulpa' => '/server/model/ships/Descari/Rulpa.php',
+				'rulthar' => '/server/model/ships/Descari/Rulthar.php',
 		    
 		    	//Random Ships which don't require new mechanics to add
 		    	'tlorr' => '/server/model/ships/narn/zzunoffTlorr.php',
