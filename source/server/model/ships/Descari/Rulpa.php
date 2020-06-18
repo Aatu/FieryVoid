@@ -8,7 +8,7 @@ class Rulpa extends HeavyCombatVessel{
         $this->faction = "Descari";
         $this->phpclass = "Rulpa";
         $this->imagePath = "img/ships/DescariRulpa.png";
-        $this->shipClass = "Descari Rulpa Destroyer";
+        $this->shipClass = "Rulpa Destroyer";
 	    $this->isd = 2216;
         
         
