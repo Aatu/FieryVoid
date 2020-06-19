@@ -1291,6 +1291,13 @@ spl_autoload_register(
                 'omegaepsilon' => '/server/model/ships/EA/omegaEpsilon.php',
                 'omegaepsilondrakh' => '/server/model/ships/EA/omegaEpsilonDrakh.php',
 				
+				//Vorlons
+				'powercapacitor' => '/server/model/systems/baseSystems.php',
+                'chargehalve' => '/server/model/cricialClasses.php',
+                'chargeempty' => '/server/model/cricialClasses.php',
+				
+				
+				
 				
 				
 		    
