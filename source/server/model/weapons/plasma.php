@@ -612,7 +612,7 @@ class LightPlasmaAccelerator extends LinkedWeapon{
 
 class HeavyPlasmaBolter extends Plasma{
 
-	public $name = "HeavyPlasmaBolter";
+	public $name = "heavyPlasmaBolter";
 	public $displayName = "Heavy Plasma Bolter";
 	public $iconPath = "HeavyPlasmaBolter.png";
 	public $animation = "trail";
@@ -657,8 +657,9 @@ class HeavyPlasmaBolter extends Plasma{
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-			$this->data["Special"] = "No range damage penalty up to a distance of 15 hexes.";
-			$this->data["Special"] .= "After 15 hexes, damage reduced by 1 points per 2 hexes.";
+			$this->data["Special"] = "No range damage penalty up to a distance of 15 hexes. ";
+			$this->data["Special"] .= "After 15 hexes, damage reduced by 1 points per 2 hexes. ";
+			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
         public function getDamage($fireOrder){        return 22;   }
@@ -671,7 +672,7 @@ class HeavyPlasmaBolter extends Plasma{
 
 class MediumPlasmaBolter extends Plasma{
 
-	public $name = "MediumPlasmaBolter";
+	public $name = "mediumPlasmaBolter";
 	public $displayName = "Medium Plasma Bolter";
 	public $iconPath = "MediumPlasmaBolter.png";
 	public $animation = "trail";
@@ -716,8 +717,9 @@ class MediumPlasmaBolter extends Plasma{
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-			$this->data["Special"] = "No range damage penalty up to a distance of 10 hexes.";
-			$this->data["Special"] .= "After 10 hexes, damage reduced by 1 points per 2 hexes.";
+			$this->data["Special"] = "No range damage penalty up to a distance of 10 hexes. ";
+			$this->data["Special"] .= "After 10 hexes, damage reduced by 1 points per 2 hexes. ";
+			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
 	public function getDamage($fireOrder){        return 16;   }
@@ -729,7 +731,7 @@ class MediumPlasmaBolter extends Plasma{
 
 class LightPlasmaBolter extends Plasma{
 
-	public $name = "LightPlasmaBolter";
+	public $name = "lightPlasmaBolter";
 	public $displayName = "Light Plasma Bolter";
 	public $iconPath = "LightPlasmaBolter.png";
 	public $animation = "trail";
@@ -774,8 +776,9 @@ class LightPlasmaBolter extends Plasma{
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-			$this->data["Special"] = "No range damage penalty up to a distance of 5 hexes.";
-			$this->data["Special"] .= "After 5 hexes, damage reduced by 1 points per hex.";
+			$this->data["Special"] = "No range damage penalty up to a distance of 5 hexes. ";
+			$this->data["Special"] .= "After 5 hexes, damage reduced by 1 points per hex. ";
+			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
 	public function getDamage($fireOrder){        return 10;   }
@@ -787,7 +790,7 @@ class LightPlasmaBolter extends Plasma{
 
 class LightPlasmaBolterFighter extends LinkedWeapon{
 
-	public $name = "LightPlasmaBolterFighter";
+	public $name = "lightPlasmaBolterFighter";
 	public $displayName = "Light Plasma Bolter";
 	public $iconPath = "LightPlasmaBolterFighter.png";
 	public $animation = "trail";
@@ -843,8 +846,9 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-			$this->data["Special"] = "No range damage penalty up to a distance of 3 hexes.";
-			$this->data["Special"] .= "After 3 hexes, damage reduced by 1 points per hex.";
+			$this->data["Special"] = "No range damage penalty up to a distance of 3 hexes. ";
+			$this->data["Special"] .= "After 3 hexes, damage reduced by 1 points per hex. ";
+			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
         public function getDamage($fireOrder){        return 7;   }
