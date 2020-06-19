@@ -659,10 +659,12 @@ class HeavyPlasmaBolter extends Plasma{
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "No range damage penalty up to a distance of 15 hexes.";
 			$this->data["Special"] .= "After 15 hexes, damage reduced by 1 points per 2 hexes.";
+	}
 			
-	public function getDamage($fireOrder){        return 22;   }
-	public function setMinDamage(){     $this->minDamage = 22;      }
-	public function setMaxDamage(){     $this->maxDamage = 22;      }
+        public function getDamage($fireOrder){        return 22;   }
+        public function setMinDamage(){     $this->minDamage = 22 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
+    
 
 }// End of class HeavyPlasmaBolter		
 
@@ -716,6 +718,7 @@ class MediumPlasmaBolter extends Plasma{
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "No range damage penalty up to a distance of 10 hexes.";
 			$this->data["Special"] .= "After 10 hexes, damage reduced by 1 points per 2 hexes.";
+	}
 			
 	public function getDamage($fireOrder){        return 16;   }
 	public function setMinDamage(){     $this->minDamage = 16;      }
@@ -773,6 +776,7 @@ class LightPlasmaBolter extends Plasma{
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "No range damage penalty up to a distance of 5 hexes.";
 			$this->data["Special"] .= "After 5 hexes, damage reduced by 1 points per hex.";
+	}
 			
 	public function getDamage($fireOrder){        return 10;   }
 	public function setMinDamage(){     $this->minDamage = 10;      }
@@ -841,6 +845,7 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "No range damage penalty up to a distance of 3 hexes.";
 			$this->data["Special"] .= "After 3 hexes, damage reduced by 1 points per hex.";
+	}
 			
         public function getDamage($fireOrder){        return 7;   }
         public function setMinDamage(){     $this->minDamage = 7 ;      }
