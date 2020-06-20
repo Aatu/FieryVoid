@@ -648,12 +648,10 @@ class MediumPlasmaBolter extends Plasma{
 			if ($this->dis <= 10) {
 				$damage -= 0;
 				}
-//			if ($this->dis >= 11) {
-//				$damage -= round($dis - 10 * $this->rangeDamagePenalty);
-//			}	
-				else {
-				$damage -= round(($dis-10) * $this->rangeDamagePenalty);
-			}
+	//		else {
+			if ($this->dis >= 11) {
+				$damage -= round(($dis - 10) * $this->rangeDamagePenalty);
+			}	
 		        $damage = max(0, $damage); //at least 0	    
         		$damage = floor($damage); //drop fractions, if any were generated
       			 return $damage;
