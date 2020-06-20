@@ -634,42 +634,43 @@ class MediumPlasmaBolter extends Plasma{
 				parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 		}
 
-//	protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
-//	{
-//		$damage = $damage - $damage * $this->dp;
-//			if ($this->rangeDamagePenalty > 0) {
-//					if ($pos != null) {
-//					$sourcePos = $pos;
-//					} 
-//					else {
-//					$sourcePos = $shooter->getHexPos();
-//					}
-//			$dis = mathlib::getDistanceHex($sourcePos, $target);				
-//			if ($this->dis <= 10) {
-//				$damage -= 0;
-//				}
+	protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
+	{
+		$damage = $damage - $damage * $this->dp;
+			if ($this->rangeDamagePenalty > 0) {
+					if ($pos != null) {
+					$sourcePos = $pos;
+					} 
+					else {
+					$sourcePos = $shooter->getHexPos();
+					}
+			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			if ($this->dis <= 10) {
+				$damage -= 0;
+				}
 //			if ($this->dis >= 11) {
 //				$damage -= round($dis - 10 * $this->rangeDamagePenalty);
 //			}	
-//				else {
-//				$damage -= round($dis - 10 * $this->rangeDamagePenalty);
-//			}
-//		        $damage = max(0, $damage); //at least 0	    
-//        		$damage = floor($damage); //drop fractions, if any were generated
-//      			 return $damage;
-//   			}
-//	}		
+				else {
+				$damage -= round(($dis-10) * $this->rangeDamagePenalty);
+			}
+		        $damage = max(0, $damage); //at least 0	    
+        		$damage = floor($damage); //drop fractions, if any were generated
+      			 return $damage;
+   			}
+	}		
 	
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-			$this->data["Special"] = "No range damage penalty up to a distance of 10 hexes. ";
-			$this->data["Special"] .= "After 10 hexes, damage reduced by 1 points per 2 hexes. ";
+			$this->data["Special"] = "No range damage penalty up to a distance of 10 hexes.";
+			$this->data["Special"] .= "<br>After 10 hexes, damage reduced by 1 points per 2 hexes.";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
-	public function getDamage($fireOrder){        return 16;   }
-	public function setMinDamage(){     $this->minDamage = 16;      }
-	public function setMaxDamage(){     $this->maxDamage = 16;      }
+        public function getDamage($fireOrder){        return 16;   }
+        public function setMinDamage(){     $this->minDamage = 16 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 16 ;      }
+    
 
 }// End of class MediumPlasmaBolter	
 
