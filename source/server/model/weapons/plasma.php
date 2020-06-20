@@ -705,16 +705,22 @@ class MediumPlasmaBolter extends Plasma{
 					else {
 					$sourcePos = $shooter->getHexPos();
 					}
-			$dis = mathlib::getDistanceHex($sourcePos, $target);
-				if ($this->dis <= 10) {
-					$damage -= 0;
-					}
-					else {
-					$damage -= round(($dis - 10) * $this->rangeDamagePenalty);
-					}
+			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			if ($this->dis <= 10) {
+				$damage -= 0;
 				}
-	}
-
+			if ($this->dis >= 11) {
+				$damage -= round($dis - 10 * $this->rangeDamagePenalty);
+			}	
+//				else {
+//				$damage -= round($dis - 10 * $this->rangeDamagePenalty);
+//			}
+		        $damage = max(0, $damage); //at least 0	    
+        		$damage = floor($damage); //drop fractions, if any were generated
+       			 return $damage;
+   			}
+	}		
+	
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "No range damage penalty up to a distance of 10 hexes. ";
@@ -769,7 +775,7 @@ class LightPlasmaBolter extends Plasma{
 					$damage -= 0;
 					}
 					else {
-					$damage -= round(($dis - 5) * $this->rangeDamagePenalty);
+					$damage -= round(($dis-5)*$this->rangeDamagePenalty);
 					}
 				}
 	}
