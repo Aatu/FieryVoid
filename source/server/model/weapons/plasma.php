@@ -634,31 +634,31 @@ class MediumPlasmaBolter extends Plasma{
 				parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 		}
 
-	protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
-	{
-		$damage = $damage - $damage * $this->dp;
-			if ($this->rangeDamagePenalty > 0) {
-					if ($pos != null) {
-					$sourcePos = $pos;
-					} 
-					else {
-					$sourcePos = $shooter->getHexPos();
-					}
-			$dis = mathlib::getDistanceHex($sourcePos, $target);				
-			if ($this->dis <= 10) {
-				$damage -= 0;
-				}
-			if ($this->dis >= 11) {
-				$damage -= round($dis - 10 * $this->rangeDamagePenalty);
-			}	
+//	protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
+//	{
+//		$damage = $damage - $damage * $this->dp;
+//			if ($this->rangeDamagePenalty > 0) {
+//					if ($pos != null) {
+//					$sourcePos = $pos;
+//					} 
+//					else {
+//					$sourcePos = $shooter->getHexPos();
+//					}
+//			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+//			if ($this->dis <= 10) {
+//				$damage -= 0;
+//				}
+//			if ($this->dis >= 11) {
+//				$damage -= round($dis - 10 * $this->rangeDamagePenalty);
+//			}	
 //				else {
 //				$damage -= round($dis - 10 * $this->rangeDamagePenalty);
 //			}
-		        $damage = max(0, $damage); //at least 0	    
-        		$damage = floor($damage); //drop fractions, if any were generated
-       			 return $damage;
-   			}
-	}		
+//		        $damage = max(0, $damage); //at least 0	    
+//        		$damage = floor($damage); //drop fractions, if any were generated
+//      			 return $damage;
+//   			}
+//	}		
 	
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
