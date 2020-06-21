@@ -622,7 +622,8 @@ class MediumPlasmaBolter extends Plasma{
 	public $trailLength = 4;
 	public $priority = 6;
 	
-	public $rangeDamagePenalty = 0.5;
+	public $rangeDamagePenalty = 0;
+	public $rangeDamagePenaltyPBolter = 0.5
 	public $loadingtime = 2;
 	public $rangePenalty = 0.5;
 	public $fireControl = array(-3, 2, 3);
@@ -636,8 +637,7 @@ class MediumPlasmaBolter extends Plasma{
 
 	protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
 	{
-		$damage = $damage - $damage * $this->dp;
-	//		if ($this->rangeDamagePenalty > 0) {
+		parent::getDamageMod($damage, $shooter, $target, $pos, $gamedata);
 					if ($pos != null) {
 					$sourcePos = $pos;
 					} 
@@ -649,13 +649,11 @@ class MediumPlasmaBolter extends Plasma{
 				$damage -= 0;
 				}
 			else {
-	//		if ($this->dis >= 11) {
-				$damage -= round(($dis - 10) * $this->rangeDamagePenalty);
+				$damage -= round(($dis - 10) * $this->rangeDamagePenaltyPBolter);
 			}	
 		        $damage = max(0, $damage); //at least 0	    
         		$damage = floor($damage); //drop fractions, if any were generated
       			 return $damage;
-   	//		}
 	}		
 	
 		public function setSystemDataWindow($turn){
