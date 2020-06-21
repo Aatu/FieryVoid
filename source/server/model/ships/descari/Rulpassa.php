@@ -10,7 +10,7 @@ class Rulpassa extends HeavyCombatVessel{
         $this->imagePath = "img/ships/DescariRulpa.png";
         $this->shipClass = "Rulpassa Destroyer";
 	    $this->isd = 2242;
-		$this->variantOf = "Rulthar Missile Destroyer";	    
+		$this->variantOf = "Rulpa Destroyer";	    
         $this->occurence = "common";        
         
         $this->forwardDefense = 12;
