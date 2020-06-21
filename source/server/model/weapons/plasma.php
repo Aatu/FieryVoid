@@ -637,7 +637,7 @@ class MediumPlasmaBolter extends Plasma{
 	protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
 	{
 		$damage = $damage - $damage * $this->dp;
-			if ($this->rangeDamagePenalty > 0) {
+	//		if ($this->rangeDamagePenalty > 0) {
 					if ($pos != null) {
 					$sourcePos = $pos;
 					} 
@@ -648,14 +648,14 @@ class MediumPlasmaBolter extends Plasma{
 			if ($this->dis <= 10) {
 				$damage -= 0;
 				}
-	//		else {
-			if ($this->dis >= 11) {
+			else {
+	//		if ($this->dis >= 11) {
 				$damage -= round(($dis - 10) * $this->rangeDamagePenalty);
 			}	
 		        $damage = max(0, $damage); //at least 0	    
         		$damage = floor($damage); //drop fractions, if any were generated
       			 return $damage;
-   			}
+   	//		}
 	}		
 	
 		public function setSystemDataWindow($turn){
