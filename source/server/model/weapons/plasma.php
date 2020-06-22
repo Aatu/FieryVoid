@@ -609,6 +609,68 @@ class LightPlasmaAccelerator extends LinkedWeapon{
 }//end of class LightPlasmaAccelerator
 
 
+class HeavyPlasmaBolter extends Plasma{
+
+	public $name = "heavyPlasmaBolter";
+	public $displayName = "Heavy Plasma Bolter";
+	public $iconPath = "HeavyPlasmaBolter.png";
+	public $animation = "trail";
+	public $animationColor = array(75, 250, 90);
+	public $animationExplosionScale = 0.5;
+	public $projectilespeed = 12;
+	public $animationWidth = 4;
+	public $trailLength = 4;
+	public $priority = 6;
+	
+	public $rangeDamagePenalty = 0;
+	public $rangeDamagePenaltyPBolter = 0.33;
+	public $loadingtime = 3;
+	public $rangePenalty = 0.33;
+	public $fireControl = array(-4, 2, 3);
+
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+				if ( $maxhealth == 0 ) $maxhealth = 10;
+				if ( $powerReq == 0 ) $powerReq = 5;
+				parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		}
+
+	protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
+	{
+		parent::getDamageMod($damage, $shooter, $target, $pos, $gamedata);
+					if ($pos != null) {
+					$sourcePos = $pos;
+					} 
+					else {
+					$sourcePos = $shooter->getHexPos();
+					}
+			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			if ($dis <= 15) {
+				$damage -= 0;
+				}
+			else {
+				$damage -= round(($dis - 15) * $this->rangeDamagePenaltyPBolter);
+			}	
+		        $damage = max(0, $damage); //at least 0	    
+        		$damage = floor($damage); //drop fractions, if any were generated
+      			 return $damage;
+	}		
+	
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "No range damage penalty up to a distance of 15 hexes.";
+			$this->data["Special"] .= "<br>After 15 hexes, damage reduced by 1 points per 3 hexes.";
+			$this->data["Special"] .= "<br>Ignores half of armor.";
+	}
+			
+        public function getDamage($fireOrder){        return 22;   }
+        public function setMinDamage(){     $this->minDamage = 22 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
+    
+
+}// End of class HeavyPlasmaBolter	
+
+
 class MediumPlasmaBolter extends Plasma{
 
 	public $name = "mediumPlasmaBolter";
