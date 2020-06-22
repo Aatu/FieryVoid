@@ -645,7 +645,7 @@ class MediumPlasmaBolter extends Plasma{
 					$sourcePos = $shooter->getHexPos();
 					}
 			$dis = mathlib::getDistanceHex($sourcePos, $target);				
-			if ($this->dis <= 10) {
+			if ($dis <= 10) {
 				$damage -= 0;
 				}
 			else {
