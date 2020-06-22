@@ -39,10 +39,10 @@ class Rulpassa extends HeavyCombatVessel{
         $this->addFrontSystem(new MediumPlasmaBolter(3, 0, 0, 300, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 60));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 60));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 60));
 	
 		$this->addAftSystem(new Thruster(4, 6, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 6, 0, 3, 2));

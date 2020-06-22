@@ -618,8 +618,8 @@ class MediumPlasmaBolter extends Plasma{
 	public $animationColor = array(75, 250, 90);
 	public $animationExplosionScale = 0.4;
 	public $projectilespeed = 14;
-	public $animationWidth = 4;
-	public $trailLength = 4;
+	public $animationWidth = 2;
+	public $trailLength = 2;
 	public $priority = 6;
 	
 	public $rangeDamagePenalty = 0;
