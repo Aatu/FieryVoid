@@ -659,7 +659,7 @@ class HeavyPlasmaBolter extends Plasma{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "No range damage penalty up to a distance of 15 hexes.";
-			$this->data["Special"] .= "<br>After 15 hexes, damage reduced by 1 points per 3 hexes.";
+			$this->data["Special"] .= "<br>After 15 hexes, damage reduced by 1 point per 3 hexes.";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
@@ -721,7 +721,7 @@ class MediumPlasmaBolter extends Plasma{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "No range damage penalty up to a distance of 10 hexes.";
-			$this->data["Special"] .= "<br>After 10 hexes, damage reduced by 1 points per 2 hexes.";
+			$this->data["Special"] .= "<br>After 10 hexes, damage reduced by 1 point per 2 hexes.";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
@@ -732,5 +732,139 @@ class MediumPlasmaBolter extends Plasma{
 
 }// End of class MediumPlasmaBolter	
 
+class LightPlasmaBolter extends Plasma{
 
+	public $name = "lightPlasmaBolter";
+	public $displayName = "Light Plasma Bolter";
+	public $iconPath = "LightPlasmaBolter.png";
+	public $animation = "trail";
+	public $animationColor = array(75, 250, 90);
+	public $animationExplosionScale = 0.3;
+	public $projectilespeed = 16;
+	public $animationWidth = 1;
+	public $trailLength = 1;
+	public $priority = 5;
+	
+	public $rangeDamagePenalty = 0;
+	public $rangeDamagePenaltyPBolter = 1;
+	public $loadingtime = 1;
+	public $rangePenalty = 1;
+	public $fireControl = array(-2, 2, 3);
+
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+				if ( $maxhealth == 0 ) $maxhealth = 6;
+				if ( $powerReq == 0 ) $powerReq = 2;
+				parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		}
+
+	protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
+	{
+		parent::getDamageMod($damage, $shooter, $target, $pos, $gamedata);
+					if ($pos != null) {
+					$sourcePos = $pos;
+					} 
+					else {
+					$sourcePos = $shooter->getHexPos();
+					}
+			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			if ($dis <= 5) {
+				$damage -= 0;
+				}
+			else {
+				$damage -= round(($dis - 5) * $this->rangeDamagePenaltyPBolter);
+			}	
+		        $damage = max(0, $damage); //at least 0	    
+        		$damage = floor($damage); //drop fractions, if any were generated
+      			 return $damage;
+	}		
+	
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "No range damage penalty up to a distance of 5 hexes.";
+			$this->data["Special"] .= "<br>After 5 hexes, damage reduced by 1 point per hex.";
+			$this->data["Special"] .= "<br>Ignores half of armor.";
+	}
+			
+        public function getDamage($fireOrder){        return 10;   }
+        public function setMinDamage(){     $this->minDamage = 10 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 10 ;      }
+    
+
+}// End of class LightPlasmaBolter
+
+
+class LightPlasmaBolterFighter extends LinkedWeapon{
+
+	public $name = "LightPlasmaBolterFighter";
+	public $displayName = "Light Plasma Bolter";
+	public $iconPath = "LightPlasmaBolterFighter.png";
+	public $animation = "trail";
+	public $animationColor = array(75, 250, 90);
+	public $trailColor = array(75, 250, 90);
+    public $projectilespeed = 10;
+    public $animationWidth = 2;
+    public $trailLength = 12;
+    public $animationExplosionScale = 0.25;
+	
+    public $intercept = 0; //no interception for this weapon!
+	public $loadingtime = 1;
+	public $shots = 2;
+    public $defaultShots = 2;
+    public $rangePenalty = 2;
+    public $fireControl = array(0, 0, 0);
+    
+    public $rangeDamagePenalty = 0;
+	public $rangeDamagePenaltyPBolter = 1;    
+    public $damageBonus = 0;
+	public $priority = 5;
+	
+   	public $damageType = "Standard"; 
+   	public $weaponClass = "Plasma"; 	
+
+
+        function __construct($startArc, $endArc, $damageBonus, $shots = 2){
+            $this->shots = $shots;
+            $this->defaultShots = $shots;
+
+            
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }      
+
+	protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
+	{
+		parent::getDamageMod($damage, $shooter, $target, $pos, $gamedata);
+					if ($pos != null) {
+					$sourcePos = $pos;
+					} 
+					else {
+					$sourcePos = $shooter->getHexPos();
+					}
+			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			if ($dis <= 3) {
+				$damage -= 0;
+				}
+			else {
+				$damage -= round(($dis - 3) * $this->rangeDamagePenaltyPBolter);
+			}	
+		        $damage = max(0, $damage); //at least 0	    
+        		$damage = floor($damage); //drop fractions, if any were generated
+      			 return $damage;
+	}		
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "No range damage penalty up to a distance of 3 hexes.";
+			$this->data["Special"] .= "<br>After 3 hexes, damage reduced by 1 point per hex.";
+			$this->data["Special"] .= "<br>Ignores half of armor.";
+	}
+			
+        public function getDamage($fireOrder){        return 7;   }
+        public function setMinDamage(){     $this->minDamage = 7 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 7 ;      }
+
+}// End of class LightPlasmaBolterFighter	
+
+
+	
 ?>
