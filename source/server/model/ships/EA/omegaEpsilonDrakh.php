@@ -32,7 +32,7 @@ class OmegaEpsilonDrakh  extends BaseShip{
 	$this->occurence = 'uncommon';
 	    
 	$this->unofficial = true; 
-        $this->enhancementOptionsDisabled[] = 'SHAD_DIFF'; //no diffuser upgrades for EA ships - they don't have know how to tabper with Shadow systems to that extent!
+        $this->enhancementOptionsDisabled[] = 'SHAD_DIFF'; //no diffuser upgrades for EA ships - they don't have know how to tamper with Shadow systems to that extent!
 		
         
         $this->forwardDefense = 16;
@@ -130,10 +130,10 @@ class OmegaEpsilonDrakh  extends BaseShip{
 
 
         $this->addRightSystem(new Thruster(3, 15, 0, 5, 4));
-        $this->addLeftSystem(new customLtPhaseDisruptorShip(3, 0, 0, 0, 180));
-        $this->addLeftSystem(new customLtPhaseDisruptorShip(3, 0, 0, 0, 180));
-        $this->addLeftSystem(new customLtPhaseDisruptorShip(3, 0, 0, 0, 180));
-        $this->addLeftSystem(new customLtPhaseDisruptorShip(3, 0, 0, 0, 180));
+        $this->addRightSystem(new customLtPhaseDisruptorShip(3, 0, 0, 0, 180));
+        $this->addRightSystem(new customLtPhaseDisruptorShip(3, 0, 0, 0, 180));
+        $this->addRightSystem(new customLtPhaseDisruptorShip(3, 0, 0, 0, 180));
+        $this->addRightSystem(new customLtPhaseDisruptorShip(3, 0, 0, 0, 180));
         $this->addRightSystem(new InterceptorMkII(2, 4, 2, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
