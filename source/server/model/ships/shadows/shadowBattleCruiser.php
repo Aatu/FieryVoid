@@ -32,8 +32,6 @@ class ShadowBattleCruiser extends MediumShip{
 		
 		$this->fighters = array("normal"=>24);
 		$this->notes = "Atmospheric capable";//even largest Shadow ships are atmospheric capable
-		$this->notes .= "<br>Larger than usual changes from AoG layout - see faction description.";//firing arc, Diffuser layout, Diffuser efficiency
-        
 		
 		$this->enhancementOptionsEnabled[] = 'SHAD_FTRL'; //can launch Shadow fighters (IF hangar capacity allows!)
 		$this->enhancementOptionsDisabled[] = 'POOR_CREW'; //no crew ;)
@@ -98,7 +96,7 @@ class ShadowBattleCruiser extends MediumShip{
         $this->addPrimarySystem(new SelfRepair(3, 3, 2)); //armor, structure, output
 		
 		
-		//EnergyDiffuser - 3 on each side, moved to sides!
+		//EnergyDiffuser - 3 on each side, moved to sides so it's readable!
 		$diffuserPort = new EnergyDiffuser(6, 7, 5, 180, 0);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
 		$tendril=new DiffuserTendril(15,'L');//absorbtion capacity,side
 		$diffuserPort->addTendril($tendril);

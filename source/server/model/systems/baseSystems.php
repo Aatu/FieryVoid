@@ -2128,4 +2128,165 @@ class PhasingDrive extends JumpEngine{
 
 
 
+
+
+
+
+/*Vorlon energy generating/storing system
+it should replace Reactor, in FV I think it would be better when Reactor just coordinates with Capacitor!
+actual power shenanigans are almost entirely in front end!
+*/
+class PowerCapacitor extends ShipSystem{ /********* UNDER CONSTRUCTION *********/
+    public $name = "powerCapacitor";
+    public $displayName = "Power Capacitor";
+    public $primary = true; 
+	public $isPrimaryTargetable = false;
+    public $iconPath = "PowerCapacitor.png";
+	
+	//power held
+	public $powerCurr = 0;
+	public $powerReceivedFromFrontEnd = 0; //communication variable	
+	public $powerReceivedFromBackEnd = 0; //communication variable
+	
+	//petals opening - done as boost of Capacitor!
+    public $boostable = false; //changed to True if a given ship has Petals! 
+    public $maxBoostLevel = 1;
+    public $boostEfficiency = 0;	
+	
+/*
+	1-17: No effect.
+18-22: -1 to recharge rate.
+23-27: -2 to recharge rate and the
+capacitor loses one half (drop fractions) of
+the energy it is currently holding.
+28+: -4 to recharge rate and the
+capacitor is completely emptied.
+*/    
+    public $possibleCriticals = array(
+		18=>"OutputReduced1",
+		23=>array("OutputReduced2","ChargeHalve"), //multiple instances of OutputReduced - should scale fine with self-repair, rather than higher repair cost
+		28=>array("OutputReduced2", "OutputReduced2","ChargeEmpty")//multiple instances of OutputReduced - should scale fine with self-repair, rather than higher repair cost
+	); 
+    
+
+    function __construct( $armour, $maxhealth, $powerReq, $output, $hasPetals = true  ){ //technical object, does not need typical system attributes (armor, structure...)
+        parent::__construct( $armour, $maxhealth, $powerReq, $output ); //$armour, $maxhealth, $powerReq, $output
+		$this->boostable = $hasPetals;
+    }
+	
+	function getMaxCapacity(){ //maximum capacity = health remaining
+		return $this->getRemainingHealth();
+	}
+	
+	
+	function setPowerHeld($newValue){ //cut off by maximum capacity
+		$this->powerCurr = min($newValue, $this->getMaxCapacity() );
+	}
+
+
+	/* this method generates additional non-standard informaction in the form of individual system notes
+	in this case: 
+	 - Deployment phase: fill to full
+	 - Initial phase: may be changed in front end (boosting Capacitor and/or systems)
+	 - Firing phase: may be changed in FRONT END (firing costs power!)
+	 - Firing phase: may be changed in BACK END as well (intercepting costs power! - intercept-capable weapons will have appropriate checks in place to see they don't overextax the capacitor)
+	 Save always current stored power, not the changes that led to this value.
+	*/
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+		switch($gameData->phase){
+				case -1: //deployment phase 
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise two copies of initial data are written
+						$this->setPowerHeld($this->getMaxCapacity());
+						//AND PREPARE APPROPRIATE NOTES!		
+						$notekey = 'powerStored';
+						$noteHuman = 'Power Capacitor - stored power';
+						$noteValue = $this->powerCurr;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					}
+					break;
+								
+				case 1: //Initial phase
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+						//load existing data first - at this point ship is rudimentary, without data from database!
+						/*in this case - result from front end completely replaces current value, so it's NOT necessary to read old notes!
+						$listNotes = $dbManager->getIndividualNotesForShip($gameData, $gameData->turn, $ship->id);	
+						foreach ($listNotes as $currNote){
+							if($currNote->systemid==$this->id){//note is intended for this system!
+								$this->addIndividualNote($currNote);
+							}
+						}
+						$this->onIndividualNotesLoaded($gameData);
+						*/
+						$this->setPowerHeld($this->powerReceivedFromFrontEnd); 
+						//AND PREPARE APPROPRIATE NOTES!		
+						$notekey = 'powerStored';
+						$noteHuman = 'Power Capacitor - stored power';
+						$noteValue = $this->powerCurr;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					}
+					break;
+				
+				case 4: //firing phase
+					//take power as front end reports it
+					$this->setPowerHeld($this->powerReceivedFromFrontEnd + $this->powerReceivedFromBackEnd); 
+					//AND PREPARE APPROPRIATE NOTES!		
+					$notekey = 'powerStored';
+					$noteHuman = 'Power Capacitor - stored power';
+					$noteValue = $this->powerCurr;
+					$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					break;
+		}
+	} //endof function generateIndividualNotes
+	
+	/*act on notes just loaded - to be redefined by systems as necessary
+	 - set power held
+	*/
+	public function onIndividualNotesLoaded($gamedata){
+		foreach ($this->individualNotes as $currNote){ //assume ASCENDING sorting - so enact all changes as is
+			$explodedKey = explode ( ';' , $currNote->notekey ) ;//split into array: [area;value] where area denotes action, value - damage type (typically) 
+			switch($explodedKey[0]){
+				case 'powerStored': //power that should be stored at this moment
+					$this->setPowerHeld($currNote->notevalue);
+					break;			
+			}
+		}
+	} //endof function onIndividualNotesLoaded
+	
+	
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn); 
+		$this->data["Power stored/max"] =  $this->powerCurr . '/' . $this->getMaxCapacity();
+        $this->data["Special"] = "This system is responsible for generating and storing power (Reactor is nearby for technical purposes).";	   
+        $this->data["Special"] .= "<br>You may boost this system to increase recharge rate by 50% - at the cost of treating all armor values as 2 points lower.";
+
+    }
+	
+	public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->data = $this->data;
+        $strippedSystem->powerCurr = $this->powerCurr;
+		$strippedSystem->powerReceivedFromFrontEnd = $this->powerReceivedFromFrontEnd;
+		$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer;
+        return $strippedSystem;
+    }
+	
+	public function doIndividualNotesTransfer(){
+		//data received in variable individualNotesTransfer, further functions will look for it in powerReceivedFromFrontEnd
+		
+		//TO BE DONE
+		
+		
+		
+		
+		if(is_array($this->individualNotesTransfer))	$this->currchangedAA = $this->individualNotesTransfer; //else there's nothing relevant there
+		$this->individualNotesTransfer = array(); //empty, just in case
+	}		
+	
+							
+} //endof PowerCapacitor
+
+
+
+
 ?>

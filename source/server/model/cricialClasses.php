@@ -344,3 +344,20 @@ class ShadowPilotPain extends Critical{
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
 }
+
+
+class ChargeHalve extends Critical{ //charge halved - instant effect, to be received in appropriate crit-phase method; no lasting effect
+    public $description = "Stored power is halved.";
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+		$turnend=$turn;//ALWAYS - immediate end of effect! 
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
+class ChargeEmpty extends Critical{ //charge emptied - instant effect, to be received in appropriate crit-phase method; no lasting effect
+    public $description = "Stored power is lost.";
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+		$turnend=$turn;//ALWAYS - immediate end of effect! 
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}

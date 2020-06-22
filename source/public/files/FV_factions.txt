@@ -241,7 +241,7 @@ Self-Repair - automated, player cannot decide what is repaired. Damage suffered 
 	If Self-Repair is destroyed or damaged, unused repair points are NOT lost.
 Energy Diffuser - absorbs damage as it's being dealt (and diffuses it over time). In FV Diffuser always kicks in if possible, there's no option to withhold its use eg. waiting for more threatening damage and conserving resources. Diffuser in FV can dissipate damage just absorbed. For visual reasons tendrils are shown as separate (untargetable) systems. Damage absorbed by ship tendrils is not shown in log.
 	Diffuser will not try to stop no-overkill damage that would kill system hit despite Diffuser interference. This is important for very strong Matter or Piercing shots.
-	There is no special procedure for Flash damage.
+	Flash damage is treated in a special way - portion of damage enough to destroy system hit is treated as entire shot (which allows systems to be saved even if total damage of shot is very high).
 Bio-Drive - Shadow ships have omnidirectional thrusters that generate their own thrust. In FV, for technical reasons, there are also usual (untargetable) thrusters (with unlimited rating) and (also untargetable) engine (with rating being sum of biothruster ratings). Due to these technicalities thrust can be freely split, even from a single surviving biothruster.
 	Biothrusters have their own set of criticals (basically output reduced) in place of regular thruster criticals.
 	Bio-Drive cannot be boosted.
@@ -327,15 +327,15 @@ StarWars Sensors are portrayed to be generally of lower tech than B5 ones. This 
 
 POWER RATINGS
 -------------
-Below is completely subjective grouping of factions by power rating. Factions from the same power bracket should be suitable for well-matched (which doesn't mean perfect!) competitive gaming – while matching different bracked would usually lead to one players’ advantage at nominally equal points. In a few cases I took liberty to highlight a particular build as a separate ‘faction’.
+Below is completely subjective grouping of factions by power rating. Factions from the same bracket share some characteristics, which in most cases means they should be well-matched for a competitive pickup play (which doesn't mean perfect!). In a few cases I took liberty to highlight a particular build as a separate ‘faction’.
 Note that evaluation (just like point values) assumes standard conditions (default-sized fixed map, basically) – changing conditions throws it away.
 
 
 EASY AND FORGIVING
 Factions that are particularly easy to fly, and recommended for new players. Use these factions for Your first set of battles – You will fight interface and opponent, let Your ships make that a bit easier for You! When You feel that period is over and want to expand – be advised to still avoid factions marked as particularly difficult.
-Drazi (their jack-of-all-trades ships are very flexible and can unleash full power against any oponent, while their layout makes tchem surprisingly resistant to damage).
+Drazi (their jack-of-all-trades ships are very flexible and can unleash full power against any oponent, while their layout makes them surprisingly resistant to damage).
 Narn (very tough and with powerful weapons – they may not be fancy, but they get the job done and refuse to die even if put in unfavorable position; average in most other aspects, which gives good feeling of what You want from Your units and allows informed choices for expanding Your picks)
-EA (extremely tough, with awesome defenses and good firepower – balanced by difficulties with firepower concentration. Their resilience to damage makes them very forgiving to any mistakes a beginner may make)
+EA (extremely tough, with awesome defenses and good firepower – balanced by difficulties with firepower concentration and low maneuvrability. Their resilience makes them very forgiving to any mistakes a beginner may make)
   
 
 FIRST LEAGUE
@@ -349,7 +349,7 @@ EA (barring Warlock)
 Llort
 Minbari (warning: Jammer is very daunting, expecially to new players – it’s easy to feel overwhelmed; at the same time flying Minbari is not easy either. It’s advised to stay away from them on either side of the table until You feel You have solid command of the game)
 Narn (barring massed EMines)
-Orieni (this one is tricky – will usually feel superior against average player due to raw damage output of Hunter-Killers and massed RGRs, while remaining vulnerable against sharp handling by expert oponent; if You don’t consider Yourself an expert, be advised to treat Orieni as Superior faction)
+Orieni (this one is tricky – will usually feel superior against average player due to raw damage output of Hunter-Killers and massed RGRs, while remaining vulnerable against sharp handling by expert oponent; if You don’t consider Yourself an expert, be advised to treat Orieni as a Superior faction)
 Torata 
 
 
@@ -366,7 +366,7 @@ Drazi (WotCR)
 Ipsha
 Markab
 Raiders (note plethora of background-driven options – Raiders often use a hodgepodge of units and formal FV fleet selection rules don’t always do them justice!)
-Star Wars (custom faction with much different playstyle - consider them difficult to fly!)
+Star Wars (custom faction with VERY different playstyle - consider them difficult to fly!)
 
 
 THE REST
@@ -382,14 +382,14 @@ Usuuth
 SUPERIOR
 Factions that, point for point, usually beat First League. That may be due to overall superior value or some special side effect of their rules, so simply allowing opponent extra PV might not be enough to balance things.
 EA using Warlock
-ISA (eg. all-White Star fleet)
-Narn using massed EMines
+ISA (eg. all-White Star fleet - note that it's difficult to fly, too!)
+Narn using massed EMines 
 Yolu
 
 
 ANCIENTS
 Factions that can’t really be balanced vs Young Races. Overall high power and durability and selective ignoring enemy systems (especially defensive ones – which hurts some opponents while leaving others untouched) coupled with small numer of shots and relative vulnerability to swarms are impossible to properly balance for pickup battle. For these reasons Ancients got their own category.
 Shadows
-Streib (actually a Young race, but their ship design and technology is peculiar enough for them to feel surprisingly Ancient-like when it comes to balancing: some opponents are easily overwhelmed (especially those that  rely on mass of individually light shots), while others are overwhelming themselves (especially if they’re resistant to EM weapons or have high quantity of armor-ignoring weapons) . They are definitely NOT up to fighting actual Ancients though! )
+Streib (actually a Young race, but their ship design and technology is peculiar enough for them to feel surprisingly Ancient-like when it comes to balancing: some opponents are easily overwhelmed (especially those that rely on mass of individually light shots), while others are overwhelming themselves (especially if they’re resistant to EM weapons or have high quantity of armor-ignoring weapons). Streib are definitely NOT up to fighting actual Ancients though! )
 
  
