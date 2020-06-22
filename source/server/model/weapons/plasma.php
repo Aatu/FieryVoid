@@ -623,7 +623,7 @@ class MediumPlasmaBolter extends Plasma{
 	public $priority = 6;
 	
 	public $rangeDamagePenalty = 0;
-	public $rangeDamagePenaltyPBolter = 0.5
+	public $rangeDamagePenaltyPBolter = 0.5;
 	public $loadingtime = 2;
 	public $rangePenalty = 0.5;
 	public $fireControl = array(-3, 2, 3);
