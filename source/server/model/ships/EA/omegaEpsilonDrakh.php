@@ -16,8 +16,8 @@ class OmegaEpsilonDrakh  extends BaseShip{
         $this->pointCost = 1500;
         $this->faction = "EA";
         $this->phpclass = "OmegaEpsilonDrakh";
-        $this->imagePath = "img/ships/omega.png";
-        $this->shipClass = "Shadow Omega (Epsilon)";
+        $this->imagePath = "img/ships/omegaShadow.png";
+        $this->shipClass = "Shadow Omega Destroyer (Epsilon)";
         $this->shipSizeClass = 3;
         $this->canvasSize = 280;
         $this->fighters = array("normal"=>12);
