@@ -257,6 +257,7 @@ window.gamedata = {
 
             var hasNoEW = [];
             var selfDestructing = [];
+			var notLaunching = [];
 
             for (var ship in myShips) {
                 if (!myShips[ship].flight) {
@@ -292,8 +293,51 @@ window.gamedata = {
                             hasNoEW.push(myShips[ship]);
                         };
                     }
-			
-                }
+					
+					//check for ballistic launch
+					var fired = 0;
+					var hasReadyLaunchers = false;
+					for (var i = 0; i < myShips[ship].systems.length; i++) {
+						var currWeapon = myShips[ship].systems[i];
+						if(currWeapon.ballistic){ //only ballistic weapons are of interest now
+							if (currWeapon.fireOrders.length > 0) {
+								fired = 1;
+								break;
+							}								
+							if (weaponManager.isLoaded(currWeapon) ){ //ballistic weapon ready to fire
+								hasReadyLaunchers = true;
+							}
+						}
+					}
+					if ((fired == 0) && hasReadyLaunchers) { //no missile launch was declared, and there are ready launchers
+						notLaunching.push(myShips[ship]);
+					}	
+                } else { //fighter flight
+					//check for ballistic launch
+					var fired = 0;
+					var hasReadyLaunchers = false;
+					for (var i = 0; i < myShips[ship].systems.length; i++) {
+						if (typeof myShips[ship].systems[i] != "undefined") {
+							for (var j = 0; j < myShips[ship].systems[i].systems.length; j++) {
+								if (typeof myShips[ship].systems[i].systems[j] != "undefined") {
+									var currWeapon = myShips[ship].systems[i].systems[j];
+									if(currWeapon.ballistic){ //only ballistic weapons are of interest now
+										if (currWeapon.fireOrders.length > 0) {
+											fired = 1;
+											break;
+										}																		
+										if (weaponManager.isLoaded(currWeapon) ){ //ballistic weapon ready to fire
+											hasReadyLaunchers = true;
+										}
+									}
+								}
+							}
+						}
+					}
+					if ((fired == 0) && hasReadyLaunchers) { //no missile launch was declared, and there are ready launchers
+						notLaunching.push(myShips[ship]);
+					}
+				}
             }
 
             /*
@@ -327,11 +371,21 @@ window.gamedata = {
                     html += hasNoEW[ship].name + " (" + hasNoEW[ship].shipClass + ")";
                     html += "<br>";
                 }
+                html += "<br>";
+            }
+            if (notLaunching.length > 0) {
+                html += "You have not assigned any ballistic launch for the following ships: ";
+                html += "<br>";
+                for (var ship in notLaunching) {
+                    html += notLaunching[ship].name + " (" + notLaunching[ship].shipClass + ")";
+                    html += "<br>";
+                }
+                html += "<br>";
             }
             confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR INITIAL ORDERS?", gamedata.doCommit);
         }
 
-        // CHECK for NO FIRE
+        //CHECK for NO DIRECT FIRE
         else if (gamedata.gamephase == 3) {
                 var myShips = [];
 
@@ -347,15 +401,22 @@ window.gamedata = {
 
                 for (var ship in myShips) {
                     var fired = 0;
+					var hasReadyGuns = false;
 
                     if (!myShips[ship].flight) {
                         for (var i = 0; i < myShips[ship].systems.length; i++) {
-                            if (myShips[ship].systems[i].fireOrders.length > 0) {
-                                fired = 1;
-                                break;
-                            }
+							var currWeapon = myShips[ship].systems[i];
+							if(!currWeapon.ballistic && currWeapon.weapon && (currWeapon.displayName != "Ramming Attack")){ //ballistic weapons ore of no interest now
+								if (currWeapon.fireOrders.length > 0) {
+									fired = 1;
+									break;
+								}								
+								if (weaponManager.isLoaded(currWeapon) ){ //non-ballistic weapon ready to fire
+									hasReadyGuns = true;
+								}
+							}
                         }
-                        if (fired == 0) {
+                        if ((fired == 0) && hasReadyGuns) { //no gun was fired, and there are ready guns
                             hasNoFO.push(myShips[ship]);
                         }
                     } else if (myShips[ship].flight) {
@@ -363,15 +424,21 @@ window.gamedata = {
                             if (typeof myShips[ship].systems[i] != "undefined") {
                                 for (var j = 0; j < myShips[ship].systems[i].systems.length; j++) {
                                     if (typeof myShips[ship].systems[i].systems[j] != "undefined") {
-                                        if (myShips[ship].systems[i].systems[j].fireOrders.length > 0) {
-                                            fired = 1;
-                                            break;
-                                        }
+										var currWeapon = myShips[ship].systems[i].systems[j];
+										if(!currWeapon.ballistic && currWeapon.weapon && (currWeapon.displayName != "Ramming Attack")){ //ballistic weapons ore of no interest now
+											if (currWeapon.fireOrders.length > 0) {
+												fired = 1;
+												break;
+											}																		
+											if (weaponManager.isLoaded(currWeapon) ){ //non-ballistic weapon ready to fire
+												hasReadyGuns = true;
+											}
+										}
                                     }
                                 }
                             }
                         }
-                        if (fired == 0) {
+                        if ((fired == 0) && hasReadyGuns) { //no gun was fired, and there are ready guns
                             hasNoFO.push(myShips[ship]);
                         }
                     }

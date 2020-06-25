@@ -72,7 +72,9 @@ if (isset($_SESSION["user"])) {
 	<br><b>Default unit name changed</b> - no more Nameless ships
 	<br><b>Wide ship profiles fixed</b> - Drazi HCV/MCV-arranged ships sometimes used wrong profile for hit chance calculation.
 	<br><b>Molecular Disruptor fixed</b> - armor stipping sometimes happened on wrong location (or even non-structure system). Now should be correct.
-
+	<br><b>Ballistic launch check added</b> - now You'll be informed if You forget to declare ballistic launch.
+	<br><b>Weapon fire check modified</b> - 'No firing declared' warning will show only if You actually have ready weapons of appropriate type (other than ramming). Ammo is not checked though!
+	<br><b>New backgrounds</b> - courtesy of Douglas
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload (<b><u>ctrl+F5</u></b>) whenever something weird happens.

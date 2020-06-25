@@ -126,38 +126,40 @@ class Plasma extends Weapon{
 	
 class MagGun extends Plasma{
 	public $name = "magGun";
-        public $displayName = "Mag Gun";
-        public $animation = "trail";
-        public $animationColor = array(255, 105, 0);
+	public $displayName = "Mag Gun";
+	public $animation = "trail";
+	public $animationColor = array(255, 105, 0);
 	public $trailColor = array(255, 140, 60);
 	public $projectilespeed = 10;
-        public $animationWidth = 6;
+	public $animationWidth = 6;
 	public $animationExplosionScale = 0.90;
 	public $trailLength = 30;
-        public $priority = 2;
+	public $priority = 2;
 		        
-        public $loadingtime = 3;
+	public $loadingtime = 3;
 			
-        public $rangePenalty = 1;
-        public $fireControl = array(null, 2, 6); // fighters, <=mediums, <=capitals 
+	public $rangePenalty = 1;
+	public $fireControl = array(null, 2, 6); // fighters, <=mediums, <=capitals 
 
 	public $damageType = "Flash"; 
 	public $weaponClass = "Plasma"; 
 	public $firingModes = array( 1 => "Flash"); 
 
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-		
-		public function setSystemDataWindow($turn){
-			parent::setSystemDataWindow($turn);
-		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+	}
 	
 		
-	public function getDamage($fireOrder){        return Dice::d(10,6)+20;   }
-        public function setMinDamage(){     $this->minDamage = 26 /*- $this->dp*/;      }
-        public function setMaxDamage(){     $this->maxDamage = 80 /*- $this->dp*/;      }
-}
+	public function getDamage($fireOrder){   
+		return Dice::d(10,8)+10;   
+	}
+	public function setMinDamage(){     $this->minDamage = 18;      }
+	public function setMaxDamage(){     $this->maxDamage = 90;      }
+}//endof class MagGun
 	
 	
 	
