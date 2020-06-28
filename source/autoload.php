@@ -1304,6 +1304,12 @@ spl_autoload_register(
 		    	//Random Ships which don't require new mechanics to add
 		    	'tlorr' => '/server/model/ships/narn/zzunoffTlorr.php',
 		    	
+		    	
+		    	
+		    	
+		    	
+		    	
+		    	
 		    	//Hurr additions
 		    	'hurrmissileosat2220' => '/server/model/ships/hurr/HurrmissileOSAT2220.php',
 		    	'hurrmissileosat2240' => '/server/model/ships/hurr/HurrmissileOSAT2240.php',
