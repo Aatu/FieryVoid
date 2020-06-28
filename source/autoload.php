@@ -1303,6 +1303,12 @@ spl_autoload_register(
 		    
 		    	//Random Ships which don't require new mechanics to add
 		    	'tlorr' => '/server/model/ships/narn/zzunoffTlorr.php',
+		    	
+		    	//Hurr additions
+		    	'hurrmissileosat2220' => '/server/model/ships/hurr/HurrmissileOSAT2220.php',
+		    	'hurrmissileosat2240' => '/server/model/ships/hurr/HurrmissileOSAT2240.php',
+		    	'roskorbase2215' => '/server/model/ships/hurr/Roskorbase2215.php',
+		    	'roskorbase2240' => '/server/model/ships/hurr/Roskorbase2240.php',
 				
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
