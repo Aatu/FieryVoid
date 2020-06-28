@@ -1301,7 +1301,8 @@ spl_autoload_register(
 				'lightplasmabolter' => '/server/model/weapons/plasma.php',
 				'lightplasmabolterfighter' => '/server/model/weapons/plasma.php',
 				'scoravarefitted' => '/server/model/ships/Descari/Scoravarefitted.php',
-				'scoravalaser' => '/server/model/ships/Descari/Scoravalaser.php',		    
+				'scoravalaser' => '/server/model/ships/Descari/Scoravalaser.php',
+				'zftrnoscor' => '/server/model/ships/Descari/ZFtrNoscor.php',		    
 		    
 		    	//Random Ships which don't require new mechanics to add
 		    	'tlorr' => '/server/model/ships/narn/zzunoffTlorr.php',
