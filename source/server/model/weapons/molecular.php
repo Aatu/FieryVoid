@@ -965,10 +965,11 @@
         public $animationExplosionScale = 0.18;
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
-        public $priority = 6; //medium Standard, with average dmg of 13
+        public $priority = 5; //medium Standard, with average dmg of 13
 		public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
         
         public $loadingtime = 1;
+        public $intercept = 2;
                 
         public $rangePenalty = 0.5;//-1/2 hexes
         public $fireControl = array(6, 3, 3); // fighters, <mediums, <capitals 
