@@ -9,7 +9,7 @@ class Hermes extends HeavyCombatVessel{
         $this->phpclass = "Hermes";
         $this->imagePath = "img/ships/hermes.png";
         $this->shipClass = "Hermes Priority Transport (Beta)";
-	    $this->notes = 'Thunderbolt capable.';
+        $this->fighters = array("normal"=>6);
         $this->isd = 2168;
         
         
