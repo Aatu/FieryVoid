@@ -592,7 +592,7 @@ class QuadPulsar extends Pulse{
 	protected $useDie = 3; //die used for base number of hits
 	    
 	public $noOverkill = true;//Matter weapons do not overkill
-    	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $damageType = "Pulse"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     	public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
 	         //Matter ignores armor - now handled by standard routines
 
@@ -680,10 +680,9 @@ class QuadPulsar extends Pulse{
         public $animationExplosionScale = 0.15;
 
         public $priority = 5;
-	    
-        public $grouping = 25; //+1/5
+		public $grouping = 25; //+1/5
         public $maxpulses = 6;
-	protected $useDie = 6; //die used for base number of hits
+		protected $useDie = 6; //die used for base number of hits
         
         public $loadingtime = 3;
         
