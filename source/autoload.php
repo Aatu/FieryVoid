@@ -1303,6 +1303,7 @@ spl_autoload_register(
 				'scoravarefitted' => '/server/model/ships/Descari/Scoravarefitted.php',
 				'scoravalaser' => '/server/model/ships/Descari/Scoravalaser.php',
 				'zftrnoscor' => '/server/model/ships/Descari/ZFtrNoscor.php',
+				'zftrnoscha' => '/server/model/ships/Descari/ZFtrNoscha.php',
 				'rulnar' => '/server/model/ships/Descari/Rulnar.php',		    
 		    
 		    	//Random Ships which don't require new mechanics to add
