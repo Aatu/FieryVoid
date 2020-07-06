@@ -823,14 +823,13 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
    	public $weaponClass = "Plasma"; 	
 
 
-        function __construct($startArc, $endArc, $damageBonus, $shots = 2){
-            $this->shots = $shots;
-            $this->defaultShots = $shots;
-            $this->damageBonus = $damageBonus;
+		function __construct($startArc, $endArc, $nrOfShots = 2){
+			$this->defaultShots = $nrOfShots;
+			$this->shots = $nrOfShots;
 
-            
-            parent::__construct(0, 1, 0, $startArc, $endArc);
-        }      
+			parent::__construct(0, 1, 0, $startArc, $endArc);
+		}	
+
 
 	protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
 	{
