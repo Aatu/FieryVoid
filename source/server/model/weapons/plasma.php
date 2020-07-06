@@ -826,6 +826,7 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
         function __construct($startArc, $endArc, $damageBonus, $shots = 2){
             $this->shots = $shots;
             $this->defaultShots = $shots;
+            $this->damageBonus = $damageBonus;
 
             
             parent::__construct(0, 1, 0, $startArc, $endArc);
