@@ -10,7 +10,7 @@ class ZFtrNoscor extends FighterFlight
 		$this->faction = "Descari";
 		$this->phpclass = "ZFtrNoscor";
 		$this->shipClass = "Noscor Medium Fighters";
-		$this->imagePath = "img/ships/DescariNoscor.png";
+		$this->imagePath = "img/ships/Descarinoscor.png";
 		
 		$this->isd = 2217;
 
@@ -36,8 +36,8 @@ class ZFtrNoscor extends FighterFlight
 			$armour = array(1, 1, 2, 2);
 			$fighter = new Fighter("ZFtrNoscor", $armour, 10, $this->id);
 			$fighter->displayName = "Noscor";
-			$fighter->imagePath = "img/ships/DescariNoscor.png";
-			$fighter->iconPath = "img/ships/DescariNoscor_large.png";
+			$fighter->imagePath = "img/ships/Descarinoscor.png";
+			$fighter->iconPath = "img/ships/Descarinoscor_large.png";
 
 
 			$frontGun = new RogolonLtPlasmaGun(330, 30);
