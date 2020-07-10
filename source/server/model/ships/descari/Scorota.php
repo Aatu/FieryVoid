@@ -1,14 +1,14 @@
 <?php
-class Scorata extends BaseShip{
+class Scorota extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 900;
 	$this->faction = "Descari";
-        $this->phpclass = "Scorata";
-        $this->imagePath = "img/ships/DescariScorata.png";
-        $this->shipClass = "Scorata Battleship";
+        $this->phpclass = "Scorota";
+        $this->imagePath = "img/ships/DescariScorota.png";
+        $this->shipClass = "Scorota Battleship";
         $this->shipSizeClass = 3;
 	    $this->notes = '<br>Unreliable Ship:';
    	    $this->notes .= '<br>Vulnerable to Criticals';
