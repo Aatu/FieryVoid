@@ -37,11 +37,11 @@ class Scorota extends BaseShip{
         $this->addPrimarySystem(new Engine(5, 23, 0, 18, 3));
 		$this->addPrimarySystem(new Hangar(4, 2));
         
-        $this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
+        $this->addFrontSystem(new MediumLaser(3, 6, 5, 240, 0));
         $this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
         $this->addFrontSystem(new SMissileRack(3, 6, 0, 180, 60));
         $this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 180));        
-        $this->addFrontSystem(new MediumLaser(3, 6, 5, 240, 00));
+        $this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
         $this->addFrontSystem(new MediumLaser(3, 6, 5, 0, 120));              
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));        
