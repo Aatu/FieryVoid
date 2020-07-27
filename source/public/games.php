@@ -75,6 +75,7 @@ if (isset($_SESSION["user"])) {
 	<br><b>Ballistic launch check added</b> - now You'll be informed if You forget to declare ballistic launch.
 	<br><b>Weapon fire check modified</b> - 'No firing declared' warning will show only if You actually have ready weapons of appropriate type (other than ramming). Ammo is not checked though!
 	<br><b>New backgrounds</b> - courtesy of Douglas
+	<br><b>Blast Cannon family fixed</b> - now they actually can do more than 1 pulse per hit	    
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload (<b><u>ctrl+F5</u></b>) whenever something weird happens.
