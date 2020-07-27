@@ -511,15 +511,25 @@ class ShipSystem {
 	/*assigns damage, returns remaining (overkilling) damage and how much armor was actually pierced
 	all extra data needed for defensive modifying damage as it's being dealt - like Shadow Energy Diffusers and Gaim Bulkheads
 	returns array: dmgDealt, dmgRemaining, armorPierced
+	special treatment for Flash: assign only as much damage as necessary to destroy system and treat it as an entire shot! (important for defensive systems such as Diffusers and Bulkheads)
 	*/
 	public function assignDamageReturnOverkill($target, $shooter, $weapon, $gamedata, $fireOrder, $damage, $armour, $pos=null){
 		$returnArray = array("dmgDealt"=>0, "dmgRemaining"=>0, "armorPierced"=>0);
 		$effectiveDamage = $damage;
 		$remainingDamage = 0;
+		$overkillDamage = 0;
 		$effectiveArmor = $armour;
-		$expectedDmg = max(0,$effectiveDamage-$effectiveArmor);
 		$systemHealth = $this->getRemainingHealth();
 		$systemDestroyed = false;
+		if($weapon->damageType =='Flash'){//treat only enough damage to destroy system as entire shot! the rest is only overkill 
+			$maxDamageToDeal = $systemHealth +$effectiveArmor;
+			if ($maxDamageToDeal < $effectiveDamage){
+				$overkillDamage = $effectiveDamage - $maxDamageToDeal;
+				$effectiveDamage = $maxDamageToDeal;
+			}
+		}
+		$expectedDmg = max(0,$effectiveDamage-$effectiveArmor);
+		
 		
 		//CALL SYSTEMS PROTECTING FROM DAMAGE HERE! 
 		$systemProtectingDmg = $target->getSystemProtectingFromDamage($shooter, $pos, $gamedata->turn, $weapon, $this, $expectedDmg);
@@ -545,8 +555,24 @@ class ShipSystem {
 		$damageEntry->updated = true;
 		$this->damage[] = $damageEntry;
 		
+		//Flash vs fighters: if fighter was not destroyed and not all damage was allocated, overkill into SAME fighter immediately! (until damage pool is depleted or fighter is destroyed)
+		if( ($weapon->damageType =='Flash')
+		  && ($overkillDamage > 0)
+		  && (!$systemDestroyed)
+		  && ($this instanceOf Fighter)
+		){
+			$remainingDamage = $remainingDamage+$overkillDamage;
+			$overkillDamage = 0; //just poured into remaining damage
+			
+			$receivedArray = $this->assignDamageReturnOverkill($target, $shooter, $weapon, $gamedata, $fireOrder, $remainingDamage, $armour, $pos);
+			
+			$effectiveDamage += $receivedArray["dmgDealt"]; //sum of dealt now and in recursive call
+			$remainingDamage = $receivedArray["dmgRemaining"]; //should be 0 unless fighter was destroyed
+			//armor pierced stays the same...
+		}
+		
 		$returnArray["dmgDealt"] = $effectiveDamage;
-		$returnArray["dmgRemaining"] = $remainingDamage;
+		$returnArray["dmgRemaining"] = $remainingDamage+$overkillDamage; //add damage set aside at the start of the procedure
 		$returnArray["armorPierced"] = $effectiveArmor;
 		return $returnArray;
 	}

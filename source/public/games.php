@@ -60,19 +60,11 @@ if (isset($_SESSION["user"])) {
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
         -->
-		---------- <b>LATEST NEWS - JUNE 2020</b> ----------		
+		---------- <b>LATEST NEWS - JULY 2020</b> ----------		
 		
-	<br><b>The Coming of Shadows</b> - they were lurking around, now they're openly looking for prey! You might want to look at faction description first - the faction is heavily commented, including design choices and technical changes made, as well as short description of what their systems actually do :) .
-	<br><b>Power ratings</b> - I have added subjective comments on competitive strength of available factions. Feel free to disagree ;) 
-	<br><b>Balosian OSAT</b> - shipyard bug is fixed and it can actually be deployed :)
-	<br><b>Ipsha Spark Field fixed</b> - now interface doesn't show incorrect Spark Curtain bonus if You don't have the enhancement
-	<br><b>Simultaneous movement</b> - now shows up correctly on fleet selection screen
-	<br><b>Default scenario description changed</b> - now it's kind of questionnaire, initally filled with default values
-	<br><b>Default game name changed</b> - no more GAME NAMEs
-	<br><b>Default unit name changed</b> - no more Nameless ships
-	<br><b>Wide ship profiles fixed</b> - Drazi HCV/MCV-arranged ships sometimes used wrong profile for hit chance calculation.
-	<br><b>Molecular Disruptor fixed</b> - armor stipping sometimes happened on wrong location (or even non-structure system). Now should be correct.
-
+	<br><b>minor fixes</b> - weapon arcs corrected on some ships 
+	<br><b>new graphics</b> - some ships got new graphics (like Hurr fighters) 
+	<br><b>new units</b> - some new units are present as well (like Hurr fixed defenses)
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload (<b><u>ctrl+F5</u></b>) whenever something weird happens.

@@ -32,9 +32,9 @@ class Sagittarius extends BaseShip{
 
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-        $this->addFrontSystem(new LMissileRack(3, 6, 0, 240, 120));
-        $this->addFrontSystem(new LMissileRack(3, 6, 0, 240, 120));
         $this->addFrontSystem(new LMissileRack(3, 6, 0, 180, 60));
+        $this->addFrontSystem(new LMissileRack(3, 6, 0, 240, 120));
+        $this->addFrontSystem(new LMissileRack(3, 6, 0, 240, 120));
         $this->addFrontSystem(new LMissileRack(3, 6, 0, 300, 180));
         $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 270, 90));
 		

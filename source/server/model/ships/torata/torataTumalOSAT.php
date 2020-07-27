@@ -10,7 +10,7 @@ class TorataTumalOSAT extends OSAT
 		$this->faction = "Torata";
 		$this->phpclass = "TorataTumalOSAT";
 		$this->shipClass = "Tumal Orbital Satellite";
-		$this->imagePath = "img/ships/TorataTumalOSAT.png";
+		$this->imagePath = "img/ships/TorataTumal.png";
 		$this->canvasSize = 200;
 		$this->isd = 2240;
 

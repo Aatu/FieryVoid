@@ -39,7 +39,7 @@ class TorataZFtrTralka extends FighterFlight
 			$fighter = new Fighter("TorataZFtrTralka", $armour, 9, $this->id);
 			$fighter->displayName = "Tralka";
 			$fighter->imagePath = "img/ships/TorataTralka.png";
-			$fighter->iconPath = "img/ships/TorataTralka_large.png";
+			$fighter->iconPath = "img/ships/TorataTuka_large.png";
 
 
 			$frontGun = new LightPlasmaAccelerator(330, 30);
