@@ -7,7 +7,7 @@ class Felucca extends MediumShip{
 		$this->pointCost = 225;
 		$this->faction = "Raiders";
         $this->phpclass = "Felucca";
-        $this->imagePath = "img/ships/sloop.png"; //Needs to be changed
+        $this->imagePath = "img/ships/fastFreighter.png"; 
         $this->shipClass = "Felucca";
         $this->canvasSize = 100;
         
