@@ -1529,7 +1529,37 @@ class LightParticleAccelerator extends LinkedWeapon{
 				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 		}	
 }//end of class Light Particle Accelerator	
-	
+
+
+    class LightParticleBolt extends Particle{
+        public $name = "LightParticleBolt";
+        public $displayName = "Light Particle Bolt";
+        public $animation = "trail";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 16;
+        public $animationWidth = 2
+        public $trailLength = 2;
+        public $priority = 5;
+
+        public $loadingtime = 1;
+
+        public $intercept = 1;
+
+        public $rangePenalty = 2;
+        public $fireControl = array(2, 2, 1); // fighters, <mediums, <capitals
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+        if ( $maxhealth == 0 ) $maxhealth = 3;
+		if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10)+2;   }
+        public function setMinDamage(){     $this->minDamage = 3 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+    }	
 	
 ?>
 

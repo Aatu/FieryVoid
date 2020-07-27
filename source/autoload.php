@@ -1305,7 +1305,11 @@ spl_autoload_register(
 				'zftrnoscor' => '/server/model/ships/Descari/ZFtrNoscor.php',
 				'zftrnoscha' => '/server/model/ships/Descari/ZFtrNoscha.php',
 				'rulnar' => '/server/model/ships/Descari/Rulnar.php',
-				'scorota' => '/server/model/ships/Descari/Scorota.php',		    
+				'scorota' => '/server/model/ships/Descari/Scorota.php',
+				'croscotu' => '/server/model/ships/Descari/Croscotu.php',
+				'croscotuearly' => '/server/model/ships/Descari/CroscotuEarly.php',
+				'croscoturefit'	=> '/server/model/ships/Descari/CroscotuRefit.php',
+				'lightparticlebolt' => '/server/model/weapons/particle.php'	    
 		    
 		    	//Random Ships which don't require new mechanics to add
 		    	'tlorr' => '/server/model/ships/narn/zzunoffTlorr.php',
