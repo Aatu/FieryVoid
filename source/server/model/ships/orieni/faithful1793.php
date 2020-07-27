@@ -33,7 +33,7 @@ class Faithful1793 extends BaseShip{
         $this->addPrimarySystem(new JumpEngine(5, 35, 6, 25));
         $this->addPrimarySystem(new CargoBay(4, 25));
                
-        $this->addFrontSystem(new LaserLance(2, 6, 4, 240, 60));
+        $this->addFrontSystem(new LaserLance(2, 6, 4, 240, 120));
         $this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 240, 120));
         $this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 240, 120));
         $this->addFrontSystem(new Thruster(2, 12, 0, 2, 1));

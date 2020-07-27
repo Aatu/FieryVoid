@@ -29,8 +29,8 @@ class koeth extends FighterFlight{
 		$armour = array(2, 0, 1, 1);
 		$fighter = new Fighter("Koeth", $armour, 7, $this->id);
 		$fighter->displayName = "Koeth Light Fighter";
-		$fighter->imagePath = "img/ships/deltaV.png";
-		$fighter->iconPath = "img/ships/deltaV_large.png";
+		$fighter->imagePath = "img/ships/Hurrkoeth.png";
+		$fighter->iconPath = "img/ships/Hurrkoeth_large.png";
 			
 		$fighter->addFrontSystem(new PairedParticleGun(330, 30, 1));
 		$fighter->addFrontSystem(new FighterMissileRack(2, 330, 30));		

@@ -220,7 +220,7 @@ class Enhancements{
 	  
 		//Vulnerable to Criticals: +1 to critical rolls, and let's make it scalable :)
 		//let's make it very cheap too
-		//effect: -1 Ini, Price: -4, step 0, max count 4 (for a total of 16 points at max value)
+		//effect: +1 Critical roll modifier, Price: -4, step 0, max count 4 (for a total of 16 points at max value)
 	  $enhID = 'VULN_CRIT';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Vulnerable to Criticals';
@@ -630,7 +630,7 @@ class Enhancements{
 						$ship->iniativebonus -= $enhCount*5;
 						break;
 						
-					case 'VULN_CRIT': //Vulnerable to Criticals: +1(5) Crit roll mod
+					case 'VULN_CRIT': //Vulnerable to Criticals: +1 Crit roll mod
 						//fixed values
 						$ship->critRollMod += $enhCount;
 						break;

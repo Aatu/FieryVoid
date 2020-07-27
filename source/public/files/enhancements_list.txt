@@ -32,7 +32,16 @@ Poor Crew (entire ship):
 	Effect: -5 Initiative, -1 Engine, -1 Sensors, -1 Reactor power, +1 Profile, +2 to critical results
 	Cost: -15% of ship cost (second time -10%)
 	Limit: 2 
+	
+Sluggish (entire ship):
+		Effect: -1 Initiative
+		Cost: -6 per step
+		Limit: 7
 
+Vulnerable to criticals (entire ship):
+		Effect: +1 to Critical roll modifier
+		Cost: -4 per step
+		Limit: 4
 
 
 

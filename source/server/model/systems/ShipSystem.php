@@ -555,6 +555,22 @@ class ShipSystem {
 		$damageEntry->updated = true;
 		$this->damage[] = $damageEntry;
 		
+		//Flash vs fighters: if fighter was not destroyed and not all damage was allocated, overkill into SAME fighter immediately! (until damage pool is depleted or fighter is destroyed)
+		if( ($weapon->damageType =='Flash')
+		  && ($overkillDamage > 0)
+		  && (!$systemDestroyed)
+		  && ($this instanceOf Fighter)
+		){
+			$remainingDamage = $remainingDamage+$overkillDamage;
+			$overkillDamage = 0; //just poured into remaining damage
+			
+			$receivedArray = $this->assignDamageReturnOverkill($target, $shooter, $weapon, $gamedata, $fireOrder, $remainingDamage, $armour, $pos);
+			
+			$effectiveDamage += $receivedArray["dmgDealt"]; //sum of dealt now and in recursive call
+			$remainingDamage = $receivedArray["dmgRemaining"]; //should be 0 unless fighter was destroyed
+			//armor pierced stays the same...
+		}
+		
 		$returnArray["dmgDealt"] = $effectiveDamage;
 		$returnArray["dmgRemaining"] = $remainingDamage+$overkillDamage; //add damage set aside at the start of the procedure
 		$returnArray["armorPierced"] = $effectiveArmor;
