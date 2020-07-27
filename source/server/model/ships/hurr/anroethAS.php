@@ -35,8 +35,8 @@ class AnroethAS extends FighterFlight{
 			$armour = array(1, 1, 1, 1);
 			$fighter = new Fighter("AnroethAS", $armour, 15, $this->id);
 			$fighter->displayName = "Anroeth Assault Shuttle";
-			$fighter->imagePath = "img/ships/doubleV.png";
-			$fighter->iconPath = "img/ships/doubleV_large.png";
+			$fighter->imagePath = "img/ships/Hurranroeth.png";
+			$fighter->iconPath = "img/ships/Hurranroeth_large.png";
 			
 			
 			$fighter->addFrontSystem(new PairedParticleGun(330, 30, 1, 1)); //1 gun d6+1
