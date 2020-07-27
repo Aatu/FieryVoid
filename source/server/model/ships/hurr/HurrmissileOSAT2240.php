@@ -27,10 +27,10 @@ class HurrmissileOSAT2240 extends OSAT
 		$this->addPrimarySystem(new Reactor(3, 5, 0, 0));
 		$this->addPrimarySystem(new Scanner(3, 5, 2, 4));
 		$this->addPrimarySystem(new Thruster(3, 4, 0, 0, 2));
-		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 270, 90));
-		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 270, 90));
-		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 270, 90));
-		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 270, 90));
+		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 270, 90, true));
+		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 270, 90, true));
+		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 270, 90, true));
+		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 270, 90, true));
 		$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
 
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
