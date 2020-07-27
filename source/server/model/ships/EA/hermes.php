@@ -9,9 +9,9 @@ class Hermes extends HeavyCombatVessel{
         $this->phpclass = "Hermes";
         $this->imagePath = "img/ships/hermes.png";
         $this->shipClass = "Hermes Priority Transport (Beta)";
-	    $this->notes = 'Thunderbolt capable.';
         $this->isd = 2168;
         
+        $this->fighters = array("heavy" => 6);
         
         $this->forwardDefense = 14;
         $this->sideDefense = 14;
@@ -28,7 +28,7 @@ class Hermes extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 5));
         $this->addPrimarySystem(new Engine(4, 15, 0, 10, 2));
-        $this->addPrimarySystem(new Hangar(4, 10));
+        $this->addPrimarySystem(new Hangar(4, 10, 6));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 4));        
         $this->addPrimarySystem(new SMissileRack(3, 6, 0, 0, 360));
