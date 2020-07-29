@@ -8,7 +8,7 @@ class koethy extends FighterFlight{
         $this->faction = "Hurr";
         $this->phpclass = "koethy";
         $this->shipClass = "Koeth Light Fighters (w/FY)";
-        $this->imagePath = "img/ships/deltaV.png";
+        $this->imagePath = "img/ships/Hurrkoeth.png";
 	    $this->variantOf = "Koeth Light Fighters";
         
         $this->forwardDefense = 5;
