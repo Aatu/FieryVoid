@@ -1538,7 +1538,7 @@ class LightParticleAccelerator extends LinkedWeapon{
         public $animationColor = array(255, 250, 230);
         public $animationExplosionScale = 0.2;
         public $projectilespeed = 16;
-        public $animationWidth = 2
+        public $animationWidth = 2;
         public $trailLength = 2;
         public $priority = 5;
 
