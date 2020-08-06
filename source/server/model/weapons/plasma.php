@@ -802,10 +802,11 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
 	public $animation = "trail";
 	public $animationColor = array(75, 250, 90);
 	public $trailColor = array(75, 250, 90);
-    public $projectilespeed = 10;
+    public $animationExplosionScale = 0.10;
+    public $projectilespeed = 12;
     public $animationWidth = 2;
-    public $trailLength = 12;
-    public $animationExplosionScale = 0.25;
+    public $trailLength = 10;
+    public $priority = 3;
 	
     public $intercept = 0; //no interception for this weapon!
 	public $loadingtime = 1;

@@ -8,7 +8,7 @@ class Scoravarefitted extends BaseShip{
 		$this->faction = "Descari";
         $this->phpclass = "Scoravarefitted";
         $this->imagePath = "img/ships/DescariScorava.png";
-        $this->shipClass = "Scorava Cruiser (Refitted)";
+        $this->shipClass = "Scorava Cruiser (Refit)";
         $this->shipSizeClass = 3;
         $this->fighters = array("medium"=>24, "normal"=>6);  
 	    $this->isd = 2242;

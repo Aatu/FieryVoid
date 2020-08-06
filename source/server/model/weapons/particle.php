@@ -1534,6 +1534,7 @@ class LightParticleAccelerator extends LinkedWeapon{
     class LightParticleBolt extends Particle{
         public $name = "LightParticleBolt";
         public $displayName = "Light Particle Bolt";
+   		public $iconPath = "LightParticleBolt.png";
         public $animation = "trail";
         public $animationColor = array(255, 250, 230);
         public $animationExplosionScale = 0.2;
