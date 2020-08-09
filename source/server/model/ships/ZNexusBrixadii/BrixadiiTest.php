@@ -9,7 +9,7 @@ class BrixadiiTest extends LCV{
         $this->phpclass = "BrixadiiTest";
         $this->imagePath = "img/ships/Nexus/BrixadiiPoliceFrigate.png";
 			$this->canvasSize = 200; //img has 200px per side
-        $this->shipClass = "Screen Frigate";
+        $this->shipClass = "Brixadii Test";
 		$this->variantOf = "Police Frigate";
         $this->occurence = "uncommon";
 		$this->unofficial = true;
