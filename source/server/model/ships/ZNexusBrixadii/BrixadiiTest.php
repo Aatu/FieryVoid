@@ -6,7 +6,7 @@ class BrixadiiTest extends LCV{
         
         $this->pointCost = 70;
         $this->faction = "ZNexus Brixadii";
-        $this->phpclass = "BrixadiiTest";
+        $this->phpclass = "Brixadii Test";
         $this->imagePath = "img/ships/Nexus/BrixadiiPoliceFrigate.png";
 			$this->canvasSize = 200; //img has 200px per side
         $this->shipClass = "Brixadii Test";
