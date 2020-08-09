@@ -1,12 +1,12 @@
 <?php
-class BrixadiiScreenFrigate extends LCV{
+class BrixadiiTest extends LCV{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 70;
         $this->faction = "ZNexus Brixadii";
-        $this->phpclass = "BrixadiiScreenFrigate";
+        $this->phpclass = "BrixadiiTest";
         $this->imagePath = "img/ships/Nexus/BrixadiiPoliceFrigate.png";
 			$this->canvasSize = 200; //img has 200px per side
         $this->shipClass = "Screen Frigate";
