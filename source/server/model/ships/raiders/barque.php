@@ -7,7 +7,7 @@ class Barque extends HeavyCombatVessel{
         $this->pointCost = 525;
         $this->faction = "Raiders";
         $this->phpclass = "Barque";
-        $this->imagePath = "img/ships/brigantine.png"; //need to change
+        $this->imagePath = "img/ships/DenethProtector.png"; //need to change
         $this->shipClass = "Barque";
         $this->occurence = "common";
         $this->fighters = array("normal"=>6);
@@ -37,13 +37,13 @@ class Barque extends HeavyCombatVessel{
 		$this->addFrontSystem(new MediumPulse(3, 6, 3, 240, 0));
 		$this->addFrontSystem(new MediumPulse(3, 6, 3, 0, 120));
 		$this->addFrontSystem(new TwinArray(2, 6, 2, 240, 60));
-		$this->addFrontSystem(new TwinArray(2, 6, 2, 270, 120));
-		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 270, 60));		
+		$this->addFrontSystem(new TwinArray(2, 6, 2, 300, 120));
+		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));		
         
         $this->addAftSystem(new Thruster(3, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 9, 0, 3, 2));
-        $this->addAftSystem(new StdParticleBeam(2, 4, 1, 180, 270));
+        $this->addAftSystem(new StdParticleBeam(2, 4, 1, 180, 300));
         $this->addAftSystem(new StdParticleBeam(2, 4, 1, 60, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
