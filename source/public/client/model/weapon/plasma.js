@@ -76,7 +76,7 @@ var LightPlasmaAccelerator = function LightPlasmaAccelerator(json, ship) {
     Weapon.call(this, json, ship);
 };
 LightPlasmaAccelerator.prototype = Object.create(Weapon.prototype);
-LightPlasmaAccelerator.prototype.constructor = LightPlasmaAccelerator;
+
 
 var HeavyPlasmaBolter = function HeavyPlasmaBolter(json, ship) {
     Plasma.call(this, json, ship);
