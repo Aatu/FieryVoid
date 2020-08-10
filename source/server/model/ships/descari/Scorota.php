@@ -14,6 +14,8 @@ class Scorota extends BaseShip{
    	    $this->notes .= '<br>Vulnerable to Criticals';
  	    $this->notes .= '<br>Sluggish';
 	    $this->isd = 2250;
+        $this->limited = 33;
+	    
 	    
 		
         $this->forwardDefense = 17;
