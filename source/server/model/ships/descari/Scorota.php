@@ -37,12 +37,12 @@ class Scorota extends BaseShip{
         $this->addPrimarySystem(new Engine(5, 23, 0, 18, 3));
 		$this->addPrimarySystem(new Hangar(4, 2));
         
-        $this->addFrontSystem(new MediumLaser(3, 6, 5, 240, 0));
-        $this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
+        $this->addFrontSystem(new MediumLaser(3, 6, 5, 240, 360));
+        $this->addFrontSystem(new MediumLaser(3, 6, 5, 0, 120));
         $this->addFrontSystem(new SMissileRack(3, 6, 0, 180, 60));
         $this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 180));        
         $this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
-        $this->addFrontSystem(new MediumLaser(3, 6, 5, 0, 120));              
+        $this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));              
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));        
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
@@ -102,14 +102,14 @@ class Scorota extends BaseShip{
 			),
 			3=> array(
 				4 => "Thruster",
-				8 => "Heavy Plasma Cannon",
+				8 => "Heavy Plasma Bolter",
 				10 => "Light Particle Beam",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
 				4 => "Thruster",
-				8 => "Heavy Plasma Cannon",
+				8 => "Heavy Plasma Bolter",
 				10 => "Light Particle Beam",
 				18 => "Structure",
 				20 => "Primary",

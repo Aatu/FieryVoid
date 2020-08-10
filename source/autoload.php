@@ -1311,7 +1311,8 @@ spl_autoload_register(
 				'croscoturefit'	=> '/server/model/ships/Descari/CroscotuRefit.php',
 				'lightparticlebolt' => '/server/model/weapons/particle.php',
 				'cruscava' => '/server/model/ships/Descari/Cruscava.php',
-				'rulnata' => '/server/model/ships/Descari/Rulnata.php',	    
+				'rulnata' => '/server/model/ships/Descari/Rulnata.php',
+				'scorran' => '/server/model/ships/Descari/Scorran.php',	    
 		    
 		    	//Random Ships which don't require new mechanics to add
 		    	'tlorr' => '/server/model/ships/narn/zzunoffTlorr.php',
