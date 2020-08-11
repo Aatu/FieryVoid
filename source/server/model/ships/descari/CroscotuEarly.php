@@ -27,21 +27,22 @@ class CroscotuEarly extends MediumShip
 		$this->pivotcost = 1;
 		$this->iniativebonus = 12 *5;
 
+		$this->addPrimarySystem(new LightParticleBolt(2, 0, 0, 0, 360));
+		$this->addPrimarySystem(new LightParticleBolt(2, 0, 0, 0, 360));
+		$this->addPrimarySystem(new LightParticleBolt(2, 0, 0, 0, 360));
 		$this->addPrimarySystem(new Reactor(3, 6, 0, 0));
 		$this->addPrimarySystem(new CnC(3, 4, 0, 0));
 		$this->addPrimarySystem(new Scanner(3, 6, 3, 3));
 		$this->addPrimarySystem(new Engine(3, 6, 0, 4, 2));
 		$this->addPrimarySystem(new Thruster(3, 6, 0, 2, 3));
 		$this->addPrimarySystem(new Thruster(3, 6, 0, 2, 4));
-		$this->addPrimarySystem(new LightParticleBolt(2, 0, 0, 0, 360));
-		$this->addPrimarySystem(new LightParticleBolt(2, 0, 0, 0, 360));
-		$this->addPrimarySystem(new LightParticleBolt(2, 0, 0, 0, 360));
+
 
 		$this->addFrontSystem(new Thruster(3, 6, 0, 2, 1));
 		$this->addFrontSystem(new Thruster(3, 6, 0, 2, 1));
 		$this->addFrontSystem(new PlasmaTorch(2, 4, 2, 240, 60));
-		$this->addFrontSystem(new PlasmaTorch(2, 4, 2, 300, 60));		
-		$this->addFrontSystem(new PlasmaTorch(2, 4, 2, 300, 120));
+		$this->addFrontSystem(new PlasmaTorch(2, 4, 2, 300, 120));		
+		$this->addFrontSystem(new PlasmaTorch(2, 4, 2, 300, 60));
 		
 		$this->addAftSystem(new Thruster(3, 6, 0, 2, 2));
 		$this->addAftSystem(new Thruster(3, 6, 0, 2, 2));

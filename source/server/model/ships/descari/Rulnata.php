@@ -31,7 +31,7 @@ class Rulnata extends HeavyCombatVessel{
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 4));
         $this->addPrimarySystem(new SMissileRack(3, 6, 0, 180, 60));
-        $this->addPrimarySystem(new SMissileRack(3, 6, 0, 300, 120));   
+        $this->addPrimarySystem(new SMissileRack(3, 6, 0, 300, 180));   
         
         
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));

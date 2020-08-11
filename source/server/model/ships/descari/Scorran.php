@@ -55,7 +55,7 @@ class Scorran extends BaseShip{
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));			
 		$this->addRightSystem(new MediumLaser(4, 6, 5, 0, 120));
-		$this->addRightSystem(new MediumLaser(4, 6, 5, 60, 120));
+		$this->addRightSystem(new MediumLaser(4, 6, 5, 60, 180));
 		$this->addRightSystem(new Thruster(4, 20, 0, 5, 4));
         
 		
