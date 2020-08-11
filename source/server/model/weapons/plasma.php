@@ -820,7 +820,6 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
     public $rangeDamagePenalty = 0;
 	public $rangeDamagePenaltyPBolter = 1;    
     public $damageBonus = 0;
-	public $priority = 5;
 	
    	public $damageType = "Standard"; 
    	public $weaponClass = "Plasma"; 	
