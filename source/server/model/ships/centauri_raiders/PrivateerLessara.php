@@ -32,6 +32,7 @@ class PrivateerLessara extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new CargoBay(4, 20));
+        $this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
         $this->addFrontSystem(new CargoBay(4, 20));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 180, 60));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
