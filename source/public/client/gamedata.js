@@ -305,7 +305,7 @@ window.gamedata = {
 								break;
 							}	
 							if ( weaponManager.isLoaded(currWeapon) && (!shipManager.systems.isDestroyed(myShips[ship], currWeapon))
-							   && ( (currWeapon.ammunition > 0) || (!currWeapon.hasOwnProperty("ammunition"))) //check for ammo (if relevant
+							   && ( !weaponManager.checkOutOfAmmo(myShips[ship],currWeapon) ) //check for ammo (if relevant
 							){ //non-ballistic weapon ready to fire
 								hasReadyLaunchers = true;
 							}
@@ -333,7 +333,7 @@ window.gamedata = {
 											hasReadyLaunchers = true;
 										}*/
 										if ( weaponManager.isLoaded(currWeapon) && (!shipManager.systems.isDestroyed(myShips[ship], myShips[ship].systems[i]))
-										   && ( (currWeapon.ammunition > 0) || (!currWeapon.hasOwnProperty("ammunition"))) //check for ammo (if relevant
+										   && ( !weaponManager.checkOutOfAmmo(myShips[ship],currWeapon) ) //check for ammo (if relevant
 										){ //non-ballistic weapon ready to fire
 											hasReadyLaunchers = true;
 										}										
@@ -420,7 +420,7 @@ window.gamedata = {
 									break;
 								}
 								if ( weaponManager.isLoaded(currWeapon) && (!shipManager.systems.isDestroyed(myShips[ship], currWeapon))
-								   && ( (currWeapon.ammunition > 0) || (!currWeapon.hasOwnProperty("ammunition"))) //check for ammo (if relevant
+								   && ( !weaponManager.checkOutOfAmmo(myShips[ship],currWeapon) ) //check for ammo (if relevant
 								){ //non-ballistic weapon ready to fire
 									hasReadyGuns = true;
 								}
@@ -440,7 +440,9 @@ window.gamedata = {
 												fired = 1;
 												break;
 											}																		
-											if (weaponManager.isLoaded(currWeapon) ){ //non-ballistic weapon ready to fire
+											if (weaponManager.isLoaded(currWeapon) && (!shipManager.systems.isDestroyed(myShips[ship], myShips[ship].systems[i]))
+												&& ( !weaponManager.checkOutOfAmmo(myShips[ship],currWeapon) ) //check for ammo (if relevant											
+											){ //non-ballistic weapon ready to fire
 												hasReadyGuns = true;
 											}
 										}
