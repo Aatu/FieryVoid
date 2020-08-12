@@ -303,8 +303,10 @@ window.gamedata = {
 							if (currWeapon.fireOrders.length > 0) {
 								fired = 1;
 								break;
-							}								
-							if (weaponManager.isLoaded(currWeapon) ){ //ballistic weapon ready to fire
+							}	
+							if ( weaponManager.isLoaded(currWeapon) && (!shipManager.systems.isDestroyed(myShips[ship], currWeapon))
+							   && ( (currWeapon.ammunition > 0) || (!currWeapon.hasOwnProperty("ammunition"))) //check for ammo (if relevant
+							){ //non-ballistic weapon ready to fire
 								hasReadyLaunchers = true;
 							}
 						}
@@ -325,10 +327,16 @@ window.gamedata = {
 										if (currWeapon.fireOrders.length > 0) {
 											fired = 1;
 											break;
-										}																		
+										}	
+										/*
 										if (weaponManager.isLoaded(currWeapon) ){ //ballistic weapon ready to fire
 											hasReadyLaunchers = true;
-										}
+										}*/
+										if ( weaponManager.isLoaded(currWeapon) && (!shipManager.systems.isDestroyed(myShips[ship], myShips[ship].systems[i]))
+										   && ( (currWeapon.ammunition > 0) || (!currWeapon.hasOwnProperty("ammunition"))) //check for ammo (if relevant
+										){ //non-ballistic weapon ready to fire
+											hasReadyLaunchers = true;
+										}										
 									}
 								}
 							}
@@ -401,7 +409,7 @@ window.gamedata = {
 
                 for (var ship in myShips) {
                     var fired = 0;
-					var hasReadyGuns = false;
+			var hasReadyGuns = false;
 
                     if (!myShips[ship].flight) {
                         for (var i = 0; i < myShips[ship].systems.length; i++) {
@@ -410,8 +418,10 @@ window.gamedata = {
 								if (currWeapon.fireOrders.length > 0) {
 									fired = 1;
 									break;
-								}								
-								if (weaponManager.isLoaded(currWeapon) ){ //non-ballistic weapon ready to fire
+								}
+								if ( weaponManager.isLoaded(currWeapon) && (!shipManager.systems.isDestroyed(myShips[ship], currWeapon))
+								   && ( (currWeapon.ammunition > 0) || (!currWeapon.hasOwnProperty("ammunition"))) //check for ammo (if relevant
+								){ //non-ballistic weapon ready to fire
 									hasReadyGuns = true;
 								}
 							}
