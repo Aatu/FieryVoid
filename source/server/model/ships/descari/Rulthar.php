@@ -10,8 +10,7 @@ class Rulthar extends HeavyCombatVessel{
         $this->imagePath = "img/ships/DescariRulpa.png";
         $this->shipClass = "Rulthar Missile Destroyer";
 	    $this->isd = 2237;
-	    $this->variantOf = "Rulpa Destroyer";	    
-        $this->occurence = "common";   
+        $this->limited = 33;	
         
         
         $this->forwardDefense = 12;

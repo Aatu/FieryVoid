@@ -12,7 +12,7 @@ class Scoravarefitted extends BaseShip{
         $this->shipSizeClass = 3;
         $this->fighters = array("medium"=>24, "normal"=>6);  
 	    $this->isd = 2242;
-	    $this->variantOf = "Scorava Cruiser";	    
+	    $this->variantOf = "Scorava Cruiser";	//Listed as separate hull in Showdowns 6 but made a variant here for tidier fleet selection.        
         $this->occurence = "common";   
 		
         $this->forwardDefense = 16;
