@@ -10,7 +10,7 @@ class Aspar extends HeavyCombatVessel{
         $this->imagePath = "img/ships/brigantine.png"; //need to change
         $this->shipClass = "Aspar Corvette";
         $this->occurence = "common";
-        $this->fighters = array("normal"=>12);
+        $this->fighters = array("normal"=>6);
         
         $this->forwardDefense = 18;
         $this->sideDefense = 18;
@@ -27,10 +27,10 @@ class Aspar extends HeavyCombatVessel{
         $this->addPrimarySystem(new Scanner(3, 8, 4, 4));
         $this->addPrimarySystem(new Engine(3, 9, 0, 6, 4));
         $tempAdd = new CargoBay(2, 28);
-        $tempAdd->displayName = "cargoBayA";
+        $tempAdd->displayName = "Cargo Bay A";
         $this->addPrimarySystem($tempAdd);
         $tempAdd2 = new CargoBay(2, 28);
-        $tempAdd2->displayName = "cargoBayB";
+        $tempAdd2->displayName = "Cargo Bay B";
 		$this->addPrimarySystem($tempAdd2);       
         $this->addPrimarySystem(new Thruster(3, 11, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 11, 0, 4, 4));
@@ -51,7 +51,7 @@ class Aspar extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
         $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 180, 300));
         $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 60, 180));
-        $this->addAftSystem(new LightLaser(2, 4, 3, 9, 270));
+        $this->addAftSystem(new LightLaser(2, 4, 3, 90, 270));
         $this->addAftSystem(new Hangar(3, 3));
         $this->addAftSystem(new Hangar(3, 3));
         $this->addAftSystem(new Hangar(3, 3));
