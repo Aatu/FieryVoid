@@ -60,11 +60,10 @@ if (isset($_SESSION["user"])) {
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
         -->
-		---------- <b>LATEST NEWS - JULY 2020</b> ----------		
+		---------- <b>LATEST NEWS - AUGUST 2020</b> ----------		
 		
-	<br><b>minor fixes</b> - weapon arcs corrected on some ships 
-	<br><b>new graphics</b> - some ships got new graphics (like Hurr fighters) 
-	<br><b>new units</b> - some new units are present as well (like Hurr fixed defenses)
+	    <br><b><u>Descari</u></b> - a whole new official faction, courtesy of Douglas!
+	<br><b>Firing check improved</b> - now "no fire declared" warning shouldn't show up for destroyed or out-of-ammo weapons
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload (<b><u>ctrl+F5</u></b>) whenever something weird happens.
