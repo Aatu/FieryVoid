@@ -300,3 +300,10 @@ var LightParticleAccelerator = function LightParticleAccelerator(json, ship) {
 };
 LightParticleAccelerator.prototype = Object.create(Weapon.prototype);
 LightParticleAccelerator.prototype.constructor = LightParticleAccelerator;
+
+
+var LightParticleBolt = function LightParticleBolt(json, ship) {
+    Weapon.call(this, json, ship);
+};
+LightParticleBolt.prototype = Object.create(Weapon.prototype);
+LightParticleBolt.prototype.constructor = LightParticleBolt;
