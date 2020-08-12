@@ -100,6 +100,11 @@ DENETH
 LCV Carrier - Deneth are the only official faction that have LCV carrier available, allowing these smallest ships to be fielded while conforming standard fleet composition rules. 
 
 
+DESCARI
+The Descari possess unique Plasma Bolter weapons which combine features from both plasma and bolter weapon types.  These weapons do a set damage amount and do not suffer the damage reduction typical in plasma weapons up to a set range (which varies depending on the type of Plasma Bolter used).  
+Aside from this the Descari field a mixed of typical missile, laser, plasma and light particle weaponry.
+
+
 DILGAR
 Pentacan Formation (Inverted Wedge Formation in AoG Wars) - Dilgar ships can benefit from using Pentacan formation. In FV the rules for it have been altered (mostly simplified).
 	Tabletop: Pentacan needs to be organized before battle begins (and there are strict requirements on number and size of ships in formation). Ships need to be within 10 hexes of Pentacan command ship to receive bonuses.
@@ -129,7 +134,7 @@ No very specific rules/technologies, although using alternate HCV layout is very
 
 
 DRAZI (WotCR)
-Centauri fleet a few hundred years before the show era, representing Wars of the Centauri Republic period.
+Drazi fleet a few hundred years before the show era, representing Wars of the Centauri Republic period.
 No very specific rules/technologies.
 
 
@@ -362,6 +367,7 @@ Cascor
 Centauri (WotCR)
 Ch’Lonas
 Deneth
+Descari
 Drazi (WotCR)
 Ipsha
 Markab

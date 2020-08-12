@@ -13,7 +13,7 @@ class CroscotuRefit extends MediumShip
 		$this->shipClass = "Croscotu Frigate (Refit)";
 		$this->canvasSize = 200;
 		$this->isd = 2242;
-		$this->variantOf = "Croscotu Frigate";	    
+		$this->variantOf = "Croscotu Frigate";	 //Listed as separate hull in Showdowns 6 but made a variant here for tidier fleet selection.       
         $this->occurence = "common";  
 		
 
@@ -27,15 +27,15 @@ class CroscotuRefit extends MediumShip
 		$this->pivotcost = 1;
 		$this->iniativebonus = 12 *5;
 
-		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
-		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
-		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
 		$this->addPrimarySystem(new Reactor(3, 8, 0, 0));
 		$this->addPrimarySystem(new CnC(3, 4, 0, 0));
 		$this->addPrimarySystem(new Scanner(3, 12, 3, 5));
 		$this->addPrimarySystem(new Engine(3, 6, 0, 5, 2));
 		$this->addPrimarySystem(new Thruster(3, 6, 0, 2, 3));
 		$this->addPrimarySystem(new Thruster(3, 6, 0, 2, 4));
+		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
+		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
+		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));		
 
 
 		$this->addFrontSystem(new Thruster(3, 6, 0, 2, 1));
