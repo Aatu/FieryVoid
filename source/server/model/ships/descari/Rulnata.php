@@ -10,6 +10,7 @@ class Rulnata extends HeavyCombatVessel{
         $this->imagePath = "img/ships/DescariRulnata.png";
         $this->shipClass = "Rulnata Scout";
 	    $this->isd = 2245;
+        $this->limited = 33;	    
         
         
         $this->forwardDefense = 13;
