@@ -382,6 +382,7 @@ spl_autoload_register(
                 'hyperionalpha' => '/server/model/ships/EA/hyperionAlpha.php',
                 'hyperionassault' => '/server/model/ships/EA/hyperionAssault.php',
                 'hyperioncommand' => '/server/model/ships/EA/hyperionCommand.php',
+				'hyperioncommandpulse' => '/server/model/ships/EA/hyperionCommandPulse.php',
                 'hyperionmissile' => '/server/model/ships/EA/hyperionMissile.php',
                 'hyperionpatrol' => '/server/model/ships/EA/hyperionPatrol.php',
                 'hyperionpulse' => '/server/model/ships/EA/hyperionPulse.php',
@@ -893,7 +894,7 @@ spl_autoload_register(
                 'tarzanav' => '/server/model/ships/narn/tarzanav.php',
                 'tatros' => '/server/model/ships/centauri_old/tatros.php',
                 'technicaltargetdrone' => '/server/model/ships/customs/technicalTargetDrone.php',
-                'zzftrtargetdrone' => '/server/model/ships/customs/zzftrTargetDrone.php',
+				'zzftrtargetdrone' => '/server/model/ships/customs/zzftrTargetDrone.php',
                 'templar' => '/server/model/ships/orieni/templar.php',
                 'terillon' => '/server/model/ships/llort/terillon.php',
                 'tethys' => '/server/model/ships/EA/tethys.php',
@@ -1070,13 +1071,21 @@ spl_autoload_register(
 				
 				'connectionstrut' => '/server/model/systems/baseSystems.php',
 				'explorer' => '/server/model/ships/EA/explorer.php',
-		    
+				
+				
+				//Nexus weapons
 				'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php', 
 				'nexusparticleprojectorftr' => '/server/model/weapons/customNexus.php', 
 				'nexusparticleprojectorheavy' => '/server/model/weapons/customNexus.php', 
 				'nexusparticleprojectorlight' => '/server/model/weapons/customNexus.php', 
 				'nexusparticleagitator' => '/server/model/weapons/customNexus.php', 
 				'nexuschafflauncher' => '/server/model/weapons/customNexus.php',
+				'nexusparticleprojector' => '/server/model/weapons/customNexus.php',
+				'nexuslightparticleprojector' => '/server/model/weapons/customNexus.php',
+				'nexusprojectorarray' => '/server/model/weapons/customNexus.php',
+				'nexuslightprojectorarray' => '/server/model/weapons/customNexus.php',
+				
+				//Nexus ships - Brixadii
                 'brixadiibattledestroyerbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerBase.php',					
                 'brixadiibattledestroyer2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyer2057.php',		
                 'brixadiibattledestroyer2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyer2108.php',	
@@ -1100,6 +1109,8 @@ spl_autoload_register(
                 'brixadiisurveyorbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyorBase.php',
                 'brixadiisurveyor2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyor2057.php',
                 'brixadiisurveyor2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyor2108.php',
+				
+				'brixadiinewdestroyer' => '/server/model/ships/ZNexusBrixadii/BrixadiiNewDestroyer.php',
 		  		
                 //Usuuth Weapons
                 'hvyparticleprojector' => '/server/model/weapons/particle.php',
