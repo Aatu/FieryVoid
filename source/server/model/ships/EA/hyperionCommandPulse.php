@@ -4,7 +4,7 @@ class HyperionCommandPulse extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 750;
+		$this->pointCost = 760;
 		$this->faction = "EA";
         $this->phpclass = "HyperionCommandPulse";
         $this->imagePath = "img/ships/hyperion.png";
