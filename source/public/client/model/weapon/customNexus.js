@@ -36,3 +36,15 @@ var NexusParticleAgitator = function NexusParticleAgitator(json, ship) {
 };
 NexusParticleAgitator.prototype = Object.create(Weapon.prototype);
 NexusParticleAgitator.prototype.constructor = NexusParticleAgitator;
+
+var NexusProjectorArray = function NexusProjectorArray(json, ship) {
+	Weapon.call(this, json, ship);
+};
+NexusProjectorArray.prototype = Object.create(Weapon.prototype);
+NexusProjectorArray.prototype.constructor = NexusProjectorArray;
+
+var NexusLightProjectorArray = function NexusLightProjectorArray(json, ship) {
+	Weapon.call(this, json, ship);
+};
+NexusLightProjectorArray.prototype = Object.create(Weapon.prototype);
+NexusLightProjectorArray.prototype.constructor = NexusLightProjectorArray;

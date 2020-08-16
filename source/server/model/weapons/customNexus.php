@@ -327,4 +327,74 @@ class NexusChaffLauncher extends Weapon{
     }
 
 
+/*custom extension of standard Particle Projector line*/
+    class NexusProjectorArray extends Particle{
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "NexusProjectorArray";
+        public $displayName = "Projector Array";
+		public $iconPath = "NexusProjectorArray.png";
+	    
+        public $animation = "beam";
+        public $animationColor = array(205, 200, 200);
+        public $animationExplosionScale = 0.25;
+        public $projectilespeed = 15;
+        public $animationWidth = 4;
+        public $trailLength = 20;
+
+        public $intercept = 1;
+        public $loadingtime = 1;
+        public $priority = 4;
+
+        public $rangePenalty = 1; //-1/hex
+        public $fireControl = array(1, 2, 2); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 1)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+	}
+	
+	
+/*custom extension of standard Particle Projector line*/
+    class NexusLightProjectorArray extends Particle{
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "NexusLightProjectorArray";
+        public $displayName = "Light Projector Array";
+		public $iconPath = "NexusLightProjectorArray.png";
+	    
+        public $animation = "beam";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.30;
+        public $projectilespeed = 15;
+        public $animationWidth = 3;
+        public $trailLength = 10;
+
+        public $intercept = 2;
+        public $loadingtime = 1;
+		public $guns = 2;
+        public $priority = 4;
+
+        public $rangePenalty = 2; //-2/hex
+        public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 5;
+            if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(6, 1)+3;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 9 ;      }
+	}
+
 ?>
