@@ -13,6 +13,8 @@ class AvengerDelta extends BaseShip{
 			$this->unofficial = true;
         $this->fighters = array("normal"=>48);
 			$this->variantOf = "Avenger Heavy Carrier (Gamma)";
+		$this->fighters = array("normal"=>48);			
+			
 	    $this->isd = 2261;
         
         $this->forwardDefense = 14;

@@ -10,6 +10,7 @@ class AlacanAtrimis extends BaseShip{
         $this->imagePath = "img/ships/AlacanAtrimis.png";
         $this->shipClass = "Alacan Atrimis Cruiser";
         $this->shipSizeClass = 3;
+		$this->fighters = array("light"=>24);
 
 	$this->isd = 2230;
         

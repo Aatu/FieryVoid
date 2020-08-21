@@ -11,6 +11,7 @@ class HyperionCommandPulse extends BaseShip{
         $this->shipClass = "Hyperion Pulse Command Cruiser (Iota)";
 			$this->unofficial = true;
         $this->shipSizeClass = 3;
+		$this->fighters = array("normal"=>6);
 	    
         $this->occurence = "uncommon";
         $this->variantOf = 'Hyperion Heavy Cruiser (Theta)';

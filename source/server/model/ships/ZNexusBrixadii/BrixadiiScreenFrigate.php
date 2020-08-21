@@ -8,12 +8,12 @@ class BrixadiiScreenFrigate extends LCV{
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiScreenFrigate";
         $this->imagePath = "img/ships/Nexus/BrixadiiPoliceFrigate.png";
-			$this->canvasSize = 200; //img has 200px per side
+			$this->canvasSize = 100; //img has 100px per side
         $this->shipClass = "Screen Frigate";
 		$this->variantOf = "Police Frigate";
         $this->occurence = "uncommon";
 		$this->unofficial = true;
-			$this->isd = 2107;
+			$this->isd = 2105;
         
         $this->forwardDefense = 9;
         $this->sideDefense = 11;
@@ -34,14 +34,15 @@ class BrixadiiScreenFrigate extends LCV{
   
 		$this->addPrimarySystem(new Reactor(4, 7, 0, 0));
 		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-	    	$sensors = new Scanner(4, 9, 2, 4);
-		$sensors->markLCV();
-		$this->addPrimarySystem($sensors);
+//	    	$sensors = new Scanner(4, 9, 2, 3);
+//		$sensors->markLCV();
+		$this->addPrimarySystem(new Scanner(4, 9, 2, 4));
+//		$this->addPrimarySystem($sensors);
 		$this->addPrimarySystem(new Engine(3, 10, 0, 5, 3));
-		$this->addPrimarySystem(new NexusParticleProjectorLight(2, 0, 0, 240, 120));
-		$this->addPrimarySystem(new NexusParticleProjectorLight(2, 0, 0, 180, 360));
-		$this->addPrimarySystem(new NexusParticleProjectorLight(2, 0, 0, 0, 180));
-	    
+		$this->addPrimarySystem(new LightParticleProjector(2, 3, 1, 180, 0));
+		$this->addPrimarySystem(new LightParticleProjector(2, 3, 1, 240, 120));
+		$this->addPrimarySystem(new LightParticleProjector(2, 3, 1, 240, 120));
+		$this->addPrimarySystem(new LightParticleProjector(2, 3, 1, 0, 180));
 	    
         $this->addPrimarySystem(new Structure(4, 21));
 	    

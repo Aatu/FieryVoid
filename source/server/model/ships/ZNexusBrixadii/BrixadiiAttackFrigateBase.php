@@ -11,7 +11,7 @@ class BrixadiiAttackFrigateBase extends MediumShip{
 			$this->canvasSize = 100; //img has 100px per side
         $this->shipClass = "Attack Frigate";
 		$this->variantOf = "Pursuit Frigate";
-		$this->occurence = "common";
+		$this->occurence = "uncommon";
 		$this->unofficial = true;
        	$this->isd = 2056;
 		

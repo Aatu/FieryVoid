@@ -32,20 +32,21 @@ class BrixadiiSurveyorBase extends HeavyCombatVessel{
         $this->addPrimarySystem(new ElintScanner(4, 10, 5, 6));
         $this->addPrimarySystem(new Engine(4, 14, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(1, 2));
-        $this->addPrimarySystem(new Thruster(3, 14, 0, 6, 3));
-        $this->addPrimarySystem(new Thruster(3, 14, 0, 6, 4));
+        $this->addPrimarySystem(new Thruster(3, 14, 0, 4, 3));
+        $this->addPrimarySystem(new Thruster(3, 14, 0, 4, 4));
       
         $this->addFrontSystem(new Thruster(3, 14, 0, 6, 1));
-    	$this->addFrontSystem(new NexusParticleAgitator(3, 0, 0, 240, 360));
-        $this->addFrontSystem(new NexusParticleAgitator(3, 0, 0, 0, 120));
-        $this->addFrontSystem(new NexusParticleProjectorLight(2, 0, 0, 180, 60));
-        $this->addFrontSystem(new NexusParticleProjectorLight(2, 0, 0, 300, 180));
+    	$this->addFrontSystem(new NexusParticleAgitator(3, 8, 3, 240, 360));
+        $this->addFrontSystem(new NexusParticleAgitator(3, 8, 3, 0, 120));
+        $this->addFrontSystem(new LightParticleProjector(2, 3, 1, 180, 60));
+        $this->addFrontSystem(new LightParticleProjector(2, 3, 1, 300, 180));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
 		$this->addAftSystem(new CargoBay(1, 16));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
+		
         $this->addFrontSystem(new Structure( 3, 35));
         $this->addAftSystem(new Structure( 3, 32));
         $this->addPrimarySystem(new Structure( 4, 40));

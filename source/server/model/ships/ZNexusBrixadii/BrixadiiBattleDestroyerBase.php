@@ -29,20 +29,22 @@ class BrixadiiBattleDestroyerBase extends HeavyCombatVessel{
         $this->addPrimarySystem(new Scanner(4, 10, 5, 4));
         $this->addPrimarySystem(new Engine(4, 14, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(1, 2));
-        $this->addPrimarySystem(new Thruster(3, 14, 0, 6, 3));
-        $this->addPrimarySystem(new Thruster(3, 14, 0, 6, 4));
+        $this->addPrimarySystem(new Thruster(3, 14, 0, 4, 3));
+        $this->addPrimarySystem(new Thruster(3, 14, 0, 4, 4));
       
         $this->addFrontSystem(new Thruster(3, 14, 0, 6, 1));
-    	$this->addFrontSystem(new NexusParticleAgitator(3, 0, 0, 240, 0));
-        $this->addFrontSystem(new NexusParticleAgitator(3, 0, 0, 0, 120));
-        $this->addFrontSystem(new NexusParticleProjectorLight(2, 0, 0, 180, 60));
-        $this->addFrontSystem(new NexusParticleProjectorLight(2, 0, 0, 300, 180));
+    	$this->addFrontSystem(new NexusParticleAgitator(3, 8, 3, 240, 0));
+        $this->addFrontSystem(new NexusParticleAgitator(3, 8, 3, 0, 120));
+        $this->addFrontSystem(new ParticleProjector(2, 6, 1, 240, 60));
+        $this->addFrontSystem(new ParticleProjector(2, 6, 1, 300, 120));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
-        $this->addAftSystem(new ParticleProjector(2, 6, 1, 90, 270));
+        $this->addAftSystem(new ParticleProjector(2, 6, 1, 0, 180));
+        $this->addAftSystem(new ParticleProjector(2, 6, 1, 180, 360));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
+		
         $this->addFrontSystem(new Structure( 3, 35));
         $this->addAftSystem(new Structure( 3, 32));
         $this->addPrimarySystem(new Structure( 4, 40));
@@ -59,7 +61,7 @@ class BrixadiiBattleDestroyerBase extends HeavyCombatVessel{
             ),
             1=> array(
                     5 => "Thruster",
-                    7 => "Light Particle Projector",
+                    7 => "Particle Projector",
                     10 => "Particle Agitator",
 					18 => "Structure",
                     20 => "Primary",

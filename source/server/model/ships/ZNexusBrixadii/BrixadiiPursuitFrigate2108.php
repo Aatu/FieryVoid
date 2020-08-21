@@ -42,8 +42,8 @@ class BrixadiiPursuitFrigate2108 extends MediumShip{
 		
 		$this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
-        $this->addAftSystem(new NexusLightProjectorArray(1, 3, 1, 120, 0));
-        $this->addAftSystem(new NexusLightProjectorArray(1, 3, 1, 0, 240));
+        $this->addAftSystem(new NexusLightProjectorArray(1, 5, 2, 120, 0));
+        $this->addAftSystem(new NexusLightProjectorArray(1, 5, 2, 0, 240));
 		$this->addAftSystem(new NexusChaffLauncher(2, 2, 0, 0, 360));
 		
 		$this->addPrimarySystem(new Structure(3, 40));

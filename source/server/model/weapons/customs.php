@@ -1817,5 +1817,27 @@ class CustomIndustrialGrappler extends Weapon {
     } //CustomMiningCutter
 
 
+class AlacanSoMissileRack extends MissileLauncher {
+	
+	// The SO-Missile Rack for the Alacans that uses Light Missiles (D) only
+	
+    public $name = "AlacanSoMissileRack";
+    public $displayName = "Class-SO Missile Rack";
+    public $range = 15;
+    public $distanceRange = 45;
+    public $loadingtime = 2;
+    public $iconPath = "missile1.png";
+
+    public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals 
+    
+    public function getDamage($fireOrder)
+    {
+        return 12;
+    }
+    public function setMinDamage(){     $this->minDamage = 12 ;}
+    public function setMaxDamage(){     $this->maxDamage = 12 ;}     
+}
+
+
 
 ?>

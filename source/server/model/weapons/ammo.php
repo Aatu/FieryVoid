@@ -204,3 +204,53 @@ class LightIonTorpedo extends MissileFB
     public function setMinDamage(){     $this->minDamage = 10;      }
     public function setMaxDamage(){     $this->maxDamage = 10;      }        
 }
+
+
+class MissileD extends Ammo
+{
+    public $name = "missileD";
+    public $missileClass = "D";
+    public $displayName = "Light Missile";
+    public $cost = 0;
+    //public $surCharge = 0;
+    public $damage = 12;
+    public $amount = 0;
+    public $range = 15;
+    public $distanceRange = 45;
+    public $hitChanceMod = 3;
+    //public $ballistic = true;
+    public $priority = 6;
+
+    function __construct($startArc, $endArc, $fireControl = null){
+        parent::__construct(0, 0, 0, $startArc, $endArc, $fireControl);
+    }
+
+    public function setSystemDataWindow($turn)
+    {
+        $this->data["Weapon type"] = "Missile";
+        $this->data["Damage type"] = "Standard";
+        $this->data["Ammo"] = "Light missile";
+
+        parent::setSystemDataWindow($turn);
+    }
+    
+    /* no longer needed?
+    public function getWeaponHitChanceMod($turn)
+    {
+        return $this->hitChanceMod;
+    }
+    
+     public function getRange($fireOrder)
+    {
+        return $this->range;
+    }
+    */
+
+    public function getDamage($fireOrder)
+    {
+        return $this->damage;
+    }
+    
+    public function setMinDamage(){     $this->minDamage = $this->damage;      }
+    public function setMaxDamage(){     $this->maxDamage = $this->damage;      }    
+}

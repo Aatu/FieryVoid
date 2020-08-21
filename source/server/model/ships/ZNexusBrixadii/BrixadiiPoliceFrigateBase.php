@@ -1,23 +1,23 @@
 <?php
 class BrixadiiPoliceFrigateBase extends LCV{
-    
+    /* Note: Using the Jump War era as the base hull as
+	the original 1842 hull is more for narrative purposes */
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 60;
+        $this->pointCost = 80;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiPoliceFrigateBase";
         $this->imagePath = "img/ships/Nexus/BrixadiiPoliceFrigate.png";
-			$this->canvasSize = 200; //img has 200px per side
+			$this->canvasSize = 100; //img has 100px per side
         $this->shipClass = "Police Frigate";
-		//$this->variantOf = "Police Frigate";
-        $this->occurence = "common";
 		$this->unofficial = true;
-			$this->isd = 1842;
+			$this->isd = 2041;
         
         $this->forwardDefense = 9;
         $this->sideDefense = 11;
         
+		//$this->notes = 'May deploy independently';
 		$this->agile = true;
         $this->turncost = 0.33;
         $this->turndelaycost = 0.33;
@@ -34,11 +34,13 @@ class BrixadiiPoliceFrigateBase extends LCV{
   
 		$this->addPrimarySystem(new Reactor(4, 7, 0, 0));
 		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-	    	$sensors = new Scanner(4, 9, 2, 3);
-		$sensors->markLCV();
-		$this->addPrimarySystem($sensors);
-		$this->addPrimarySystem(new Engine(3, 10, 0, 4, 3));
-		$this->addPrimarySystem(new ParticleProjector(2, 0, 0, 240, 120));
+//	    	$sensors = new Scanner(4, 9, 2, 3);
+//		$sensors->markLCV();
+		$this->addPrimarySystem(new Scanner(3, 9, 2, 4));
+//		$this->addPrimarySystem($sensors);
+		$this->addPrimarySystem(new Engine(3, 10, 0, 5, 3));
+		$this->addPrimarySystem(new ParticleProjector(2, 6, 1, 240, 120));
+		$this->addPrimarySystem(new ParticleProjector(2, 6, 1, 240, 120));
 	    
 	    
         $this->addPrimarySystem(new Structure(4, 21));
