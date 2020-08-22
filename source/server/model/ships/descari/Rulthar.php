@@ -35,9 +35,9 @@ class Rulthar extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));        
-        $this->addFrontSystem(new SMissileRack(3, 6, 0, 240, 360));
-        $this->addFrontSystem(new SMissileRack(3, 6, 0, 0, 120));
         $this->addFrontSystem(new SMissileRack(3, 6, 0, 180, 60));
+        $this->addFrontSystem(new SMissileRack(3, 6, 0, 0, 120));
+        $this->addFrontSystem(new SMissileRack(3, 6, 0, 240, 360));
         $this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 180));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 60));
