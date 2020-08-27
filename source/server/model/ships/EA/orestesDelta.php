@@ -59,7 +59,7 @@ class OrestesDelta extends BaseShip{
         $this->addAftSystem(new Structure( 5, 40));
         $this->addLeftSystem(new Structure( 5, 60));
         $this->addRightSystem(new Structure( 5, 60));
-        $this->addPrimarySystem(new Structure( 6, 60));
+        $this->addPrimarySystem(new Structure( 5, 60));
 		
 		
 		$this->hitChart = array(
