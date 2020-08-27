@@ -808,7 +808,7 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
     public $projectilespeed = 12;
     public $animationWidth = 2;
     public $trailLength = 10;
-    public $priority = 3;
+    public $priority = 5;
 	
     public $intercept = 0; //no interception for this weapon!
 	public $loadingtime = 1;
