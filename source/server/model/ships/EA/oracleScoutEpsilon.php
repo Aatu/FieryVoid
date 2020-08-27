@@ -28,7 +28,7 @@ class OracleScoutEpsilon extends BaseShip{
 		
         $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
         $this->addPrimarySystem(new CnC(5, 20, 0, 0));
-        $this->addPrimarySystem(new ElintScanner(5, 16, 3, 6));
+        $this->addPrimarySystem(new ElintScanner(5, 16, 3, 7));
         $this->addPrimarySystem(new Engine(5, 16, 0, 8, 3));
         $this->addPrimarySystem(new JumpEngine(5, 20, 4, 24));
 		$this->addPrimarySystem(new Hangar(4, 8));
@@ -37,7 +37,7 @@ class OracleScoutEpsilon extends BaseShip{
 		$this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
 		$this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
 		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 60));
-		$this->addFrontSystem(new ElintScanner(4, 10, 3, 5));
+		$this->addFrontSystem(new ElintScanner(4, 10, 3, 4));
 		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 60));
 		$this->addFrontSystem(new InterceptorMkII(2, 4, 2, 240, 60));
 		$this->addFrontSystem(new InterceptorMkII(2, 4, 2, 300, 120));
