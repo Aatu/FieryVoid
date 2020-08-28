@@ -31,7 +31,7 @@ class HyperionCommand extends BaseShip{
         $this->addPrimarySystem(new Reactor(5, 23, 0, 2));
         $this->addPrimarySystem(new CnC(5, 24, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 18, 3, 6));
-        $this->addPrimarySystem(new Engine(5, 18, 0, 7, 4));
+        $this->addPrimarySystem(new Engine(6, 18, 0, 7, 4));
 		$this->addPrimarySystem(new Hangar(5, 8));
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
 		$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
@@ -65,7 +65,7 @@ class HyperionCommand extends BaseShip{
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 5, 52));
-        $this->addAftSystem(new Structure( 4, 42));
+        $this->addAftSystem(new Structure( 5, 42));
         $this->addLeftSystem(new Structure( 4, 60));
         $this->addRightSystem(new Structure( 4, 60));
         $this->addPrimarySystem(new Structure( 5, 54));

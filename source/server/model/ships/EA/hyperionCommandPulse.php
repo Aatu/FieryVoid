@@ -31,9 +31,9 @@ class HyperionCommandPulse extends BaseShip{
         
          
         $this->addPrimarySystem(new Reactor(5, 23, 0, 2));
-        $this->addPrimarySystem(new CnC(6, 24, 0, 0));
+        $this->addPrimarySystem(new CnC(5, 24, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 18, 3, 6));
-        $this->addPrimarySystem(new Engine(5, 18, 0, 7, 4));
+        $this->addPrimarySystem(new Engine(6, 18, 0, 7, 4));
 		$this->addPrimarySystem(new Hangar(5, 8));
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
 		$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
