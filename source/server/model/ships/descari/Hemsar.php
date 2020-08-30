@@ -27,7 +27,7 @@ class Hemsar extends OSAT
 		$this->addPrimarySystem(new Reactor(4, 7, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 7, 2, 4));
 		$this->addPrimarySystem(new Thruster(3, 6, 0, 0, 2));
-		$this->addPrimarySystem(new DualPlasmaCannon(3, 10, 6, 270, 90));
+		$this->addPrimarySystem(new DualPlasmaCannon(3, 0, 0, 270, 90));
 		$this->addPrimarySystem(new LightPlasma(3, 4, 2, 270, 90));
 		$this->addPrimarySystem(new LightPlasma(3, 4, 2, 270, 90));
 		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
