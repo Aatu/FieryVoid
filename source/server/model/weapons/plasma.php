@@ -890,7 +890,7 @@ class DualPlasmaCannon extends Plasma{
         public $rangePenaltyArray = array(1=>0.5, 2=>1);
         public $fireControlArray = array( 1=>array(-5, 1, 3), 2=>array(-5, 1, 3) ); 
 	
-		public $firingModes = array(1=>'Standard', 2=>'Standard');
+		public $firingModes = array(1=>'Dual', 2=>'Medium Plasmas');
 		public $damageTypeArray = array(1=>'Plasma', 2=>'Plasma'); 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
@@ -907,7 +907,9 @@ class DualPlasmaCannon extends Plasma{
 	
         public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-			$this->data["Special"] = 'Can fire as either a Dual Plasma Cannon or two Medium Plasma Cannons. ';
+			$this->data["Special"] = 'Can fire as either a Dual Plasma Cannon or two Medium Plasma Cannons.';
+			$this->data["Special"] = "<br>Does less damage over distance (".$this->rangeDamagePenalty." per hex).";
+			$this->data["Special"] .= "<br>Ignores half of armor.";
         }
 	
         public function getDamage($fireOrder){ 
