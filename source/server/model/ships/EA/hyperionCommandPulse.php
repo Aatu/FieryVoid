@@ -1,15 +1,17 @@
 <?php
-class HyperionCommand extends BaseShip{
+class HyperionCommandPulse extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 750;
+		$this->pointCost = 760;
 		$this->faction = "EA";
-        $this->phpclass = "HyperionCommand";
+        $this->phpclass = "HyperionCommandPulse";
         $this->imagePath = "img/ships/hyperion.png";
-        $this->shipClass = "Hyperion Command Cruiser (Epsilon)";
+        $this->shipClass = "Hyperion Pulse Command Cruiser (Iota)";
+			$this->unofficial = true;
         $this->shipSizeClass = 3;
+		$this->fighters = array("normal"=>6);
 	    
         $this->occurence = "uncommon";
         $this->variantOf = 'Hyperion Heavy Cruiser (Theta)';
@@ -56,10 +58,10 @@ class HyperionCommand extends BaseShip{
         $this->addAftSystem(new MediumPulse (4, 6, 3, 60, 300));
         
 		$this->addLeftSystem(new Thruster(5, 13, 0, 5, 3));
-		$this->addLeftSystem(new HeavyLaser(4, 8, 6, 300, 0));
+		$this->addLeftSystem(new HeavyPulse(3, 6, 4, 300, 0));
 		
 		$this->addRightSystem(new Thruster(5, 13, 0, 5, 4));
-		$this->addRightSystem(new HeavyLaser(4, 8, 6, 0, 60));
+		$this->addRightSystem(new HeavyPulse(3, 6, 4, 0, 60));
 		
         
         
@@ -99,13 +101,13 @@ class HyperionCommand extends BaseShip{
                 ),
                 3=> array(
                         6 => "Thruster",
-                        9 => "Heavy Laser",
+                        9 => "Heavy Pulse Cannon",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 4=> array(
                         6 => "Thruster",
-                        9 => "Heavy Laser",
+                        9 => "Heavy Pulse Cannon",
                         18 => "Structure",
                         20 => "Primary",
                 ),
