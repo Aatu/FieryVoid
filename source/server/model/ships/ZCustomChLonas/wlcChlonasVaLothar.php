@@ -19,6 +19,7 @@ class wlcChlonasVaLothar extends SmallStarBaseThreeSections{
 		$this->sideDefense = 20;
 		$this->imagePath = "img/ships/ChlonasVaLothar.png";
 		$this->canvasSize = 200;
+		$this->isd = 2243;
 
 		$this->locations = array(1, 4, 3);
 		
