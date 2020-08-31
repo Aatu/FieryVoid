@@ -1325,7 +1325,13 @@ spl_autoload_register(
 				'lightparticlebolt' => '/server/model/weapons/particle.php',
 				'cruscava' => '/server/model/ships/descari/Cruscava.php',
 				'rulnata' => '/server/model/ships/descari/Rulnata.php',
-				'scorran' => '/server/model/ships/descari/Scorran.php',	    
+				'scorran' => '/server/model/ships/descari/Scorran.php',
+				'norvai' => '/server/model/ships/descari/NorvaI.php',
+				'norvaii' => '/server/model/ships/descari/NorvaII.php',
+				'carrana' => '/server/model/ships/descari/Carrana.php',
+				'hemsar' => '/server/model/ships/descari/Hemsar.php',
+				'hemros' => '/server/model/ships/descari/Hemros.php',
+				'dualplasmacannon' => '/server/model/weapons/plasma.php',	    
 		    
 		    	//Random Ships which don't require new mechanics to add
 		    	'zzunofftlorr' => '/server/model/ships/narn/zzunoffTlorr.php',
