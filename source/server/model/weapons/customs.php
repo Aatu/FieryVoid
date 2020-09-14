@@ -1663,9 +1663,9 @@ class CustomBPAHeavy extends Weapon{
 	//actual weapons data
         public $groupingArray = array(1=>0, 2=>20);
         public $maxpulses = 6; //only useful for Pulse mode
-        public $priorityArray = array(1=>6, 2=>4);
+        public $priorityArray = array(1=>6, 2=>6); //both weapons fall into Heavy Standard category
 	public $uninterceptableArray = array(1=>false, 2=>false);
-	public $defaultShotsArray = array(1=>6, 2=>6); //for Pulse mode it should be equal to maxpulses
+	public $defaultShotsArray = array(1=>1, 2=>6); //for Pulse mode it should be equal to maxpulses
 	
         public $loadingtimeArray = array(1=>3, 2=>3); //mode 1 should be the one with longest loading time
         public $rangePenaltyArray = array(1=>0.33, 2=>0.5); //-1/3 hexes and -1/2hexes, for Bolt and Pulse respectably
@@ -1883,6 +1883,7 @@ class CustomLightSoMissileRack extends Weapon{
         public function setMinDamage(){     $this->minDamage = 12;      }
         public function setMaxDamage(){     $this->maxDamage = 12;      }
 }//endof CustomLightSoMissileRack
+
 
 class CustomLightSMissileRack extends Weapon{
         public $name = "CustomLightSMissileRack";
