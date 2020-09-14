@@ -383,7 +383,7 @@ spl_autoload_register(
                 'hyperionalpha' => '/server/model/ships/EA/hyperionAlpha.php',
                 'hyperionassault' => '/server/model/ships/EA/hyperionAssault.php',
                 'hyperioncommand' => '/server/model/ships/EA/hyperionCommand.php',
-		'hyperioncommandpulse' => '/server/model/ships/EA/hyperionCommandPulse.php',
+				'hyperioncommandpulse' => '/server/model/ships/EA/hyperionCommandPulse.php',
                 'hyperionmissile' => '/server/model/ships/EA/hyperionMissile.php',
                 'hyperionpatrol' => '/server/model/ships/EA/hyperionPatrol.php',
                 'hyperionpulse' => '/server/model/ships/EA/hyperionPulse.php',
@@ -522,6 +522,7 @@ spl_autoload_register(
                 'mediumpulse' => '/server/model/weapons/pulse.php',
                 'mediumship' => '/server/model/ships/ShipClasses.php',
                 'mediumshipleftright' => '/server/model/ships/ShipClasses.php',
+				'megaplasma' => '/server/model/weapons/plasma.php',
 		'lcv' => '/server/model/ships/ShipClasses.php',
                 'merlin' => '/server/model/ships/drazi_old/merlin.php',
                 'milani' => '/server/model/ships/abbai/milani.php',
@@ -535,6 +536,7 @@ spl_autoload_register(
                 'missilefb' => '/server/model/weapons/ammo.php',
                 'missilefy' => '/server/model/weapons/ammo.php',
                 'missilelauncher' => '/server/model/weapons/missile.php',
+				'mitocjomic' => '/server/model/ships/smallraces/MitocJomic.php',
                 'mlpa' => '/server/model/weapons/customs.php',
                 'mogortha' => '/server/model/ships/centauri_raiders/mogortha.php',
                 'mograth' => '/server/model/ships/centauri/mograth.php',
@@ -592,11 +594,11 @@ spl_autoload_register(
                 'oracle' => '/server/model/ships/EA/oracle.php',
                 'oraclescout' => '/server/model/ships/EA/oracleScout.php',
                 'oraclescoutepsilon' => '/server/model/ships/EA/oracleScoutEpsilon.php',
-		'orak' => '/server/model/ships/hurr/orak.php',
+                'orak' => '/server/model/ships/hurr/orak.php',
                 'orano' => '/server/model/ships/hurr/orano.php',
                 'ore' => '/server/model/ships/civilians/oreBarge.php',
                 'orestes' => '/server/model/ships/EA/orestes.php',
-		'orestesdelta' => '/server/model/ships/EA/orestesDelta.php',
+                'orestesdelta' => '/server/model/ships/EA/orestesDelta.php',
                 'orestesgamma' => '/server/model/ships/EA/orestesGamma.php',
                 'orgolest' => '/server/model/ships/dilgar/orgolest.php',
                 'orienigatlingrg' => '/server/model/weapons/matter.php',
@@ -696,6 +698,8 @@ spl_autoload_register(
                 'righteous1894' => '/server/model/ships/orieni/righteous1894.php',
                 'rishekar' => '/server/model/ships/dilgar/rishekar.php',
                 'rmissilerack' => '/server/model/weapons/missile.php',
+				
+				//Rogolon units
                 'rogolonchelekftr' => '/server/model/ships/smallraces/rogolonChelekFtr.php',
                 'rogolonltplasmacannon' => '/server/model/weapons/plasma.php',
                 'rogolonltplasmagun' => '/server/model/weapons/plasma.php',
@@ -704,6 +708,11 @@ spl_autoload_register(
                 'rogolontovin' => '/server/model/ships/smallraces/rogolonTovin.php',
                 'rogolonvasturshf' => '/server/model/ships/smallraces/rogolonVasturSHF.php',
                 'rogolonvostorshf' => '/server/model/ships/smallraces/rogolonVostorSHF.php',
+                'rogolontasco' => '/server/model/ships/smallraces/rogolonTasco.php',
+                'rogolonshogalovbase' => '/server/model/ships/smallraces/rogolonShogalovBase.php',
+				
+				
+				
                 'rolentha' => '/server/model/ships/minbari/rolentha.php',
                 'rolotha' => '/server/model/ships/minbari/rolotha.php',
                 'romak' => '/server/model/ships/markab/romak.php',
@@ -897,7 +906,7 @@ spl_autoload_register(
                 'tarzanav' => '/server/model/ships/narn/tarzanav.php',
                 'tatros' => '/server/model/ships/centauri_old/tatros.php',
                 'technicaltargetdrone' => '/server/model/ships/customs/technicalTargetDrone.php',
-                'zzftrtargetdrone' => '/server/model/ships/customs/zzftrTargetDrone.php',
+				'zzftrtargetdrone' => '/server/model/ships/customs/zzftrTargetDrone.php',
                 'templar' => '/server/model/ships/orieni/templar.php',
                 'terillon' => '/server/model/ships/llort/terillon.php',
                 'tethys' => '/server/model/ships/EA/tethys.php',
@@ -1058,8 +1067,21 @@ spl_autoload_register(
                 'athraskalafull' => '/server/model/ships/dilgar/athraskalaFull.php',   
                 'athraskalacfull' => '/server/model/ships/dilgar/athraskalaCFull.php',  
 		    
+				//Alacan units
                 'alacanatrimis' => '/server/model/ships/smallraces/AlacanAtrimis.php',  
+                'alacanatrimisearly' => '/server/model/ships/smallraces/AlacanAtrimisEarly.php',  
+                'alacanatica' => '/server/model/ships/smallraces/AlacanAtica.php',  
+                'alacanazafac' => '/server/model/ships/smallraces/AlacanAzafac.php',  
+                'alacanazan' => '/server/model/ships/smallraces/AlacanAzan.php',  
+                'alacantacomipatrolcutter' => '/server/model/ships/smallraces/AlacanTacomiPatrolCutter.php',  
                 'alacanrotiaflight' => '/server/model/ships/smallraces/AlacanRotiaFlight.php',  
+                'alacancacarasa' => '/server/model/ships/smallraces/AlacanCacarasA.php',  
+                'alacancacarasb' => '/server/model/ships/smallraces/AlacanCacarasB.php',  
+				//Alacan weapons
+                'customlightsomissilerack' => '/server/model/weapons/customs.php',
+                'customlightsmissilerack' => '/server/model/weapons/customs.php',
+
+
                 'arcticalpha' => '/server/model/ships/EA/arcticAlpha.php',  
                 'hecatebolt' => '/server/model/ships/EA/hecateBolt.php',  
                 'hecatewar' => '/server/model/ships/EA/hecateWar.php',  
@@ -1074,29 +1096,49 @@ spl_autoload_register(
 				
 				'connectionstrut' => '/server/model/systems/baseSystems.php',
 				'explorer' => '/server/model/ships/EA/explorer.php',
-		    
+				
+				
+				//Nexus weapons
 				'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php', 
 				'nexusparticleprojectorftr' => '/server/model/weapons/customNexus.php', 
 				'nexusparticleprojectorheavy' => '/server/model/weapons/customNexus.php', 
 				'nexusparticleprojectorlight' => '/server/model/weapons/customNexus.php', 
 				'nexusparticleagitator' => '/server/model/weapons/customNexus.php', 
 				'nexuschafflauncher' => '/server/model/weapons/customNexus.php',
+				'nexusparticleprojector' => '/server/model/weapons/customNexus.php',
+				'nexuslightparticleprojector' => '/server/model/weapons/customNexus.php',
+				'nexusprojectorarray' => '/server/model/weapons/customNexus.php',
+				'nexuslightprojectorarray' => '/server/model/weapons/customNexus.php',
+				
+				//Nexus ships - Brixadii
                 'brixadiibattledestroyerbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerBase.php',					
                 'brixadiibattledestroyer2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyer2057.php',		
                 'brixadiibattledestroyer2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyer2108.php',	
 				
+				'brixadiibattledestroyerleader2051' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerLeader2051.php',
+				'brixadiibattledestroyerleader2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerLeader2108.php',
+				
                 'brixadiiwarshipbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiWarshipBase.php',		
-                'brixadiiwarship2094' => '/server/model/ships/ZNexusBrixadii/BrixadiiWarship2094.php',	
+                'brixadiiwarshipprototype' => '/server/model/ships/ZNexusBrixadii/BrixadiiWarshipPrototype.php',		
+                'brixadiiwarship2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiWarship2108.php',	
+
+                'brixadiijumpscout' => '/server/model/ships/ZNexusBrixadii/BrixadiiJumpScout.php',		
+                'brixadiijumpscout2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiJumpScout2108.php',		
 	
                 'brixadiipursuitfrigatebase' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigateBase.php',
                 'brixadiipursuitfrigate2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigate2057.php',
                 'brixadiipursuitfrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigate2108.php',
 		    
+                'brixadiiattackfrigatebase' => '/server/model/ships/ZNexusBrixadii/BrixadiiAttackFrigateBase.php',
+                'brixadiiattackfrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiAttackFrigate2108.php',
+
+                'brixadiilightescortfrigate' => '/server/model/ships/ZNexusBrixadii/BrixadiiLightEscortFrigate.php',
+
                 'brixadiipolicefrigatebase' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigateBase.php',
-                'brixadiipolicefrigate2047' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2047.php',
+                'brixadiipolicefrigateearly' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigateEarly.php',
+				'brixadiipolicefrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2108.php',
                 'brixadiiscreenfrigate' => '/server/model/ships/ZNexusBrixadii/BrixadiiScreenFrigate.php',
-		    
-		    
+		    		    
                 'brixadiipolicefrigatebaseshf' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigateBaseSHF.php',
                 'brixadiipolicefrigate2047shf' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2047SHF.php',
                 'brixadiiscreenfrigateshf' => '/server/model/ships/ZNexusBrixadii/BrixadiiScreenFrigateSHF.php',
@@ -1104,7 +1146,24 @@ spl_autoload_register(
                 'brixadiisurveyorbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyorBase.php',
                 'brixadiisurveyor2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyor2057.php',
                 'brixadiisurveyor2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyor2108.php',
-		  		
+			
+				'brixadiiweaponsplatformbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiWeaponsPlatformBase.php',
+				'brixadiiweaponsplatform2107' => '/server/model/ships/ZNexusBrixadii/BrixadiiWeaponsPlatform2107.php',
+				'brixadiisentinelplatformbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiSentinelPlatformBase.php',
+				'brixadiisentinelplatform2078' => '/server/model/ships/ZNexusBrixadii/BrixadiiSentinelPlatform2078.php',
+
+				'brixadiigunsatbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiGunSatBase.php',
+				'brixadiigunsat2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiGunSat2108.php',
+				'brixadiipointdefensesatbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiPointDefenseSatBase.php',
+				'brixadiipointdefensesat2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiPointDefenseSat2108.php',
+
+				'brixadiisupportbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiSupportBase.php',
+				'brixadiisupportbase2048' => '/server/model/ships/ZNexusBrixadii/BrixadiiSupportBase2048.php',
+				'brixadiicombatbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiCombatBase.php',
+				'brixadiicombatbase2112' => '/server/model/ships/ZNexusBrixadii/BrixadiiCombatBase2112.php',
+
+				'targetblock' => '/server/model/ships/ZNexusBrixadii/targetBlock.php',
+
                 //Usuuth Weapons
                 'hvyparticleprojector' => '/server/model/weapons/particle.php',
                 'lightparticleprojector' => '/server/model/weapons/particle.php',
@@ -1304,34 +1363,6 @@ spl_autoload_register(
 				
 				
 				
-				//Descari
-				'rulpa' => '/server/model/ships/descari/Rulpa.php',
-				'rulthar' => '/server/model/ships/descari/Rulthar.php',
-				'rulpassa' => '/server/model/ships/descari/Rulpassa.php',
-				'scorava' => '/server/model/ships/descari/Scorava.php',
-				'heavyplasmabolter' => '/server/model/weapons/plasma.php',
-				'mediumplasmabolter' => '/server/model/weapons/plasma.php',
-				'lightplasmabolter' => '/server/model/weapons/plasma.php',
-				'lightplasmabolterfighter' => '/server/model/weapons/plasma.php',
-				'scoravarefitted' => '/server/model/ships/descari/Scoravarefitted.php',
-				'scoravalaser' => '/server/model/ships/descari/Scoravalaser.php',
-				'zftrnoscor' => '/server/model/ships/descari/ZFtrNoscor.php',
-				'zftrnoscha' => '/server/model/ships/descari/ZFtrNoscha.php',
-				'rulnar' => '/server/model/ships/descari/Rulnar.php',
-				'scorota' => '/server/model/ships/descari/Scorota.php',
-				'croscotu' => '/server/model/ships/descari/Croscotu.php',
-				'croscotuearly' => '/server/model/ships/descari/CroscotuEarly.php',
-				'croscoturefit'	=> '/server/model/ships/descari/CroscotuRefit.php',
-				'lightparticlebolt' => '/server/model/weapons/particle.php',
-				'cruscava' => '/server/model/ships/descari/Cruscava.php',
-				'rulnata' => '/server/model/ships/descari/Rulnata.php',
-				'scorran' => '/server/model/ships/descari/Scorran.php',
-				'norvai' => '/server/model/ships/descari/NorvaI.php',
-				'norvaii' => '/server/model/ships/descari/NorvaII.php',
-				'carrana' => '/server/model/ships/descari/Carrana.php',
-				'hemsar' => '/server/model/ships/descari/Hemsar.php',
-				'hemros' => '/server/model/ships/descari/Hemros.php',
-				'dualplasmacannon' => '/server/model/weapons/plasma.php',	    
 		    
 		    	//Random Ships which don't require new mechanics to add
 		    	'zzunofftlorr' => '/server/model/ships/narn/zzunoffTlorr.php',
