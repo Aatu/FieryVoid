@@ -53,7 +53,7 @@ if (isset($_SESSION["user"])) {
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
 <div class="panel news">
-    <!-- <div id="newsHeader">Latest News - April 2020</div> -->
+    <!-- <div id="newsHeader">Latest News - September 2020</div> -->
     <div id="newsEntry">
         <!--
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
@@ -62,8 +62,7 @@ if (isset($_SESSION["user"])) {
         -->
 		---------- <b>LATEST NEWS - AUGUST 2020</b> ----------		
 		
-	    <br><b><u>Descari</u></b> - a whole new official faction, courtesy of Douglas!
-	<br><b>Firing check improved</b> - now "no fire declared" warning shouldn't show up for destroyed or out-of-ammo weapons
+	    <br><b>Alacan missile refit</b> - courtesy of Geoffrey, Alacans got their proper Light-SO missile racks!
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload (<b><u>ctrl+F5</u></b>) whenever something weird happens.
