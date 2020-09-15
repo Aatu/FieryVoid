@@ -611,6 +611,7 @@ class LightPlasmaAccelerator extends LinkedWeapon{
 }//end of class LightPlasmaAccelerator
 
 
+
 class HeavyPlasmaBolter extends Plasma{
 
 	public $name = "heavyPlasmaBolter";
@@ -946,5 +947,41 @@ class DualPlasmaCannon extends Plasma{
 	}	
 	
 } //end of DualPlasmaCannon
-	
+
+
+class MegaPlasma extends Plasma{
+    	public $name = "MegaPlasma";
+        public $displayName = "Mega Plasma Cannon";
+		public $iconPath = "MegaPlasma.png";
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+    	public $trailColor = array(75, 250, 90);
+    	public $projectilespeed = 17;
+        public $animationWidth = 6;
+    	public $animationExplosionScale = 0.35;
+    	public $trailLength = 24;
+    	public $rangeDamagePenalty = 0.5;
+    		        
+        public $loadingtime = 4;
+			
+        public $rangePenalty = 0.50;
+        public $fireControl = array(-5, 1, 3); // fighters, <=mediums, <=capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 10;
+            if ( $powerReq == 0 ) $powerReq = 8;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+    	public function getDamage($fireOrder){        return Dice::d(10,6)+12;   }
+        public function setMinDamage(){     $this->minDamage = 18 /*- $this->dp*/;      }
+        public function setMaxDamage(){     $this->maxDamage = 72 /*- $this->dp*/;      }
+
+} //end of class MegaPlasma
+
+
+
+
+
 ?>
