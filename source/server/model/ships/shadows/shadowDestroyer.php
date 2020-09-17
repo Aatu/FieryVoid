@@ -9,7 +9,7 @@ class ShadowDestroyer extends MediumShip{
         $this->phpclass = "ShadowDestroyer";
         $this->imagePath = "img/ships/ShadowDestroyer.png";
         $this->shipClass = "Destroyer";
-        $this->canvasSize = 200;
+        $this->canvasSize = 100;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 1; //it's actually an MCV :)
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
