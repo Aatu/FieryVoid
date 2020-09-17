@@ -1362,7 +1362,34 @@ spl_autoload_register(
 				
 				
 				
-				
+				//Descari
+				'dualplasmacannon' => '/server/model/weapons/plasma.php',
+				'heavyplasmabolter' => '/server/model/weapons/plasma.php',
+				'mediumplasmabolter' => '/server/model/weapons/plasma.php',
+				'lightplasmabolter' => '/server/model/weapons/plasma.php',
+				'lightparticlebolt' => '/server/model/weapons/particle.php',
+				'rulpa' => '/server/model/ships/descari/Rulpa.php',
+				'rulthar' => '/server/model/ships/descari/Rulthar.php',
+				'rulpassa' => '/server/model/ships/descari/Rulpassa.php',
+				'scorava' => '/server/model/ships/descari/Scorava.php',
+				'lightplasmabolterfighter' => '/server/model/weapons/plasma.php',
+				'scoravarefitted' => '/server/model/ships/descari/Scoravarefitted.php',
+				'scoravalaser' => '/server/model/ships/descari/Scoravalaser.php',
+				'zftrnoscor' => '/server/model/ships/descari/ZFtrNoscor.php',
+				'zftrnoscha' => '/server/model/ships/descari/ZFtrNoscha.php',
+				'rulnar' => '/server/model/ships/descari/Rulnar.php',
+				'scorota' => '/server/model/ships/descari/Scorota.php',
+				'croscotu' => '/server/model/ships/descari/Croscotu.php',
+				'croscotuearly' => '/server/model/ships/descari/CroscotuEarly.php',
+				'croscoturefit'	=> '/server/model/ships/descari/CroscotuRefit.php',
+				'cruscava' => '/server/model/ships/descari/Cruscava.php',
+				'rulnata' => '/server/model/ships/descari/Rulnata.php',
+				'scorran' => '/server/model/ships/descari/Scorran.php',
+				'norvai' => '/server/model/ships/descari/NorvaI.php',
+				'norvaii' => '/server/model/ships/descari/NorvaII.php',
+				'carrana' => '/server/model/ships/descari/Carrana.php',
+				'hemsar' => '/server/model/ships/descari/Hemsar.php',
+				'hemros' => '/server/model/ships/descari/Hemros.php',   
 		    
 		    	//Random Ships which don't require new mechanics to add
 		    	'zzunofftlorr' => '/server/model/ships/narn/zzunoffTlorr.php',

@@ -78,6 +78,36 @@ var LightPlasmaAccelerator = function LightPlasmaAccelerator(json, ship) {
 LightPlasmaAccelerator.prototype = Object.create(Weapon.prototype);
 LightPlasmaAccelerator.prototype.constructor = LightPlasmaAccelerator;
 
+var HeavyPlasmaBolter = function HeavyPlasmaBolter(json, ship) {
+    Plasma.call(this, json, ship);
+};
+HeavyPlasmaBolter.prototype = Object.create(Plasma.prototype);
+HeavyPlasmaBolter.prototype.constructor = HeavyPlasmaBolter;
+
+var MediumPlasmaBolter = function MediumPlasmaBolter(json, ship) {
+    Plasma.call(this, json, ship);
+};
+MediumPlasmaBolter.prototype = Object.create(Plasma.prototype);
+MediumPlasmaBolter.prototype.constructor = MediumPlasmaBolter;
+
+var LightPlasmaBolter = function LightPlasmaBolter(json, ship) {
+    Plasma.call(this, json, ship);
+};
+LightPlasmaBolter.prototype = Object.create(Plasma.prototype);
+LightPlasmaBolter.prototype.constructor = LightPlasmaBolter;
+
+var LightPlasmaBolterFighter = function LightPlasmaBolterFighter(json, ship) {
+    Plasma.call(this, json, ship);
+};
+LightPlasmaBolterFighter.prototype = Object.create(Plasma.prototype);
+LightPlasmaBolterFighter.prototype.constructor = LightPlasmaBolterFighter;
+
+var DualPlasmaCannon = function DualPlasmaCannon(json, ship) {
+    Plasma.call(this, json, ship);
+};
+DualPlasmaCannon.prototype = Object.create(Plasma.prototype);
+DualPlasmaCannon.prototype.constructor = DualPlasmaCannon;
+
 var MegaPlasma = function MegaPlasma(json, ship) {
     Weapon.call(this, json, ship);
 };
