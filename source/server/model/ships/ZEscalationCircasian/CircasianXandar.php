@@ -12,7 +12,6 @@ class CircasianXandar extends HeavyCombatVessel{
         $this->shipClass = "Xandar Lancer Frigate";
 			$this->unofficial = true;
         $this->isd = 1952;
-		$this->fighters = array("light"=>6);
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
