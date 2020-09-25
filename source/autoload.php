@@ -1106,7 +1106,7 @@ spl_autoload_register(
 				'ewheavypointplasmagun' => '/server/model/weapons/customEscalation.php',
 				'ewparticlegun' => '/server/model/weapons/customEscalation.php',
 				'ewlightparticlegun' => '/server/model/weapons/customEscalation.php',
-				'ewlightparticlelance' => '/server/model/weapons/customEscalation.php',
+				'ewparticlelance' => '/server/model/weapons/customEscalation.php',
 				
 
 				//Escalation Wars - Circasian
