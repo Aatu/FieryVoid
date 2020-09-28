@@ -10,7 +10,7 @@ class NorvaII extends LCV{
 	$this->shipClass = "Norva II Gunboat";
 
 	$this->imagePath = "img/ships/DescariNorva.png";
-	$this->canvasSize = 200;
+	$this->canvasSize = 80;
 
 	$this->agile = true;
 

@@ -11,7 +11,7 @@ class Hemsar extends OSAT
 		$this->phpclass = "Hemsar";
 		$this->shipClass = "Hemsar Orbital Satellite";
 		$this->imagePath = "img/ships/DescariHemsar.png";
-		$this->canvasSize = 200;
+		$this->canvasSize = 80;
 		$this->isd = 2228;
 
 		$this->forwardDefense = 10;
