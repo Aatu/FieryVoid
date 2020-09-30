@@ -476,11 +476,13 @@ class FighterTorpedoLauncher extends FighterMissileRack
 
 
 /*implements weapon because it can do damage like one - on rack explosion*/
-class ReloadRack extends MissileLauncher//ShipSystem
+class ReloadRack extends MissileLauncher //ShipSystem
 {
     public $name = "ReloadRack";
     public $displayName = "Reload Rack";
     public $iconPath = "missileReload.png";
+	
+    public $fireControl = array(null, null, null); // this is a weapon in name only, it cannot actually fire!
     
    
     //it can explode, too...
@@ -494,7 +496,14 @@ class ReloadRack extends MissileLauncher//ShipSystem
         //parent::__construct($armour, $maxhealth, 0, 0); //that's for extending ShipSystem
         parent::__construct($armour, $maxhealth, 0, 0, 0);//that's for extending MissileLauncher
     }
-     
+	
+        public function getDamage($fireOrder){ return 0; }
+        public function setMinDamage(){ 
+		$this->minDamage = 0; 
+	}
+        public function setMaxDamage(){
+		$this->maxDamage = 0; 
+	}	
 } //endof class ReloadRack
 
 
