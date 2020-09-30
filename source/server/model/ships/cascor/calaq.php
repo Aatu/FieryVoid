@@ -43,6 +43,9 @@ class Calaq extends FighterFlight{
             $frontGun2->displayName = "Ion Bolt";
             $fighter->addFrontSystem($frontGun);
             $fighter->addFrontSystem($frontGun2);
+			
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+			
             $this->addSystem($fighter);
        }
     }

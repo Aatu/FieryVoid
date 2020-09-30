@@ -37,6 +37,8 @@ class Starsnake extends FighterFlight{
 
             $fighter->addFrontSystem(new LightParticleBlaster(330, 30, 5));
 
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+			
             $this->addSystem($fighter);
         }
     }

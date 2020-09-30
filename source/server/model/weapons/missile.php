@@ -495,6 +495,8 @@ class ReloadRack extends MissileLauncher //ShipSystem
     function __construct($armour, $maxhealth){
         //parent::__construct($armour, $maxhealth, 0, 0); //that's for extending ShipSystem
         parent::__construct($armour, $maxhealth, 0, 0, 0);//that's for extending MissileLauncher
+		
+		$this->data["Special"] = 'Additional missile magazine for actual combat launchers. No actual effect in FV, but may violently explode if damaged in battle.';
     }
 	
         public function getDamage($fireOrder){ return 0; }
