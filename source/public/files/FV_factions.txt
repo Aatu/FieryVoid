@@ -306,6 +306,16 @@ Light Molecular Disruptor - armor-stripping heavy fighter weapon.
 Fusion Agitator - Raking weapon that does damage in inefficient Raking(6) mode. However, it ignores a point of armor (which helps), its raw damage output is decent, and if extra power is thrown in to boost it - damage output can rise to extremely high. Make no mistake: this is a very dangerous weapon! 
 	Many Yolu weapons have special features, usually relating to target armor - see descriptions.
 	
+ZESCALATION CIRCASIAN (custom, alternate universe faction)
+The Circasians are one of the two central powers in the Escalation Wars milieu. These Dilgar-like humanoids started as a small minor power surrounded by other, more established empires but through political manuevering and conquest they were able to eventually carve out a major imperium of their own.
+The ships included here are low tech units the Circasians used during the Chouka War period. These vessels are principally armed with light particle, plasma, and laser weapons. Anything more powerful is beyond their level of technology at the start of the war.
+They are capable opponents against the minor B5 powers (Alacans, Hurr, Usuuth) but will be completely overwhelmed by more capable units.
+Rockets - the Circasians made use of these primitive torpedo launchers on their early ships. These weapons are treated like Torpedoes and benefit from OEW.
+Particle Lance - an avenue of advanced R&D before the war, this weapon was an attempt to develop a heavier version of the Light Particle Cannon. Like the Gravitic Lance, this weapon is capable of firing as one more powerful weapon or as two weaker Light Particle Cannons.
+Particle Gun - an even weaker version of the Light Particle Beam that was used before that weapon was developed.
+The Circasian faction was created by Tyrel Lohr for his Escalation Wars setting.
+Fiery Void encoding done in collaboration with Geoffrey Stano.
+
 
 ZNEXUS BRIXADII (custom, alternate universe faction)
 Not quite finished faction from Nexus universe, designed by Jeremy and Geoffrey Stano.
@@ -379,6 +389,7 @@ THE REST
 Factions that cannot seriously compete. Usually they have some deficiencies that cannot be fixed by simply increasing their PV allowance (like combination of poor maneuvrability/poor Sensors/short range weapons on low-tech ships or some glaring weakness in overall fleet layout).
 Abbai (WotCR)
 Alacan (Small Races)
+Circasian
 Hurr
 Rogolon (Small Races)
 Sorithian (Small Races)
