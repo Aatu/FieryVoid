@@ -50,10 +50,7 @@ Corporations - Brakiri are split into competing corporations. On each unit it's 
 	Corporations have access to slightly different technologies and heave their own areas of specialisation, so their individual fleets are usually lacking in some area but have excellent access to something else.
 	In-game checker does not take this rule into account.
 Gravitic Shield - see ABBAI entry
-Gravitic Bolt/Gravitic Pulsar - weapons that can have boosted output (damage and intercept rating), at the cost of (besides power) adverse effect if actually fired boosted.
-	In tabletop, it's increased charge time - eg. weapon needs to be armed boosted for longer than one turn to fire in such a mode.
-	In FV, we went for different approach. Weapon can be fired immediately, without extra charging time, but afterwards requires cooldown period (forced shutdown) of one turn longer than extra charging time would take.
-	If fired at maximum power, weapon can suffer critical damage (both in tabletop and FV).
+Gravitic Bolt/Gravitic Pulsar - weapons that can have boosted output (damage and intercept rating), at the cost of (besides power) adverse effect if actually fired boosted - namely a cooldown period equal to boostlevel used. Additionally, if fired at maximum power, weapon can suffer critical damage.
 Gravitic Shifter - weapon that rotates target, fired in special firing step before regular fire.
 	Due to technical difficulties this weapon is NOT AVAILABLE in Fiery Void.
 	Ships utilizing this weapon that were deemed important for faction (Tashkat, Tashkava and Shakara) are added as custom designs (Tashkaton, Tashkavaton and Shakaraton, respectively), with Gravitic Cannons in place of original Shifters.
