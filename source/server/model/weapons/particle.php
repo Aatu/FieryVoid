@@ -425,7 +425,7 @@
             parent::setSystemDataWindow($turn);
 	    $this->data["Special"] = "Standard power: 1 shot, intercept -5.";
 	    $this->data["Special"] .= "<br>Each additional +1 Power adds -5 intercept or 1 shot in offensive mode.";
-	    $this->data["Special"] .= "<br>Each pair of shots above 2 forces a turn of cooldown.";
+	    $this->data["Special"] .= "<br>Each pair of shots above 2 forces a turn of cooldown (round up).";
 	    $this->data["Special"] .= "<br>All shots hit the same target. If a shot misses, further ones miss automatically. Otherwise they have cumulative to hit penalty.";
             //$this->defaultShots = 1+$this->getBoostLevel(TacGamedata::$currentTurn); //default shots is 1, so interception is correct!
             
@@ -436,7 +436,7 @@
 		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
 		//if boosted, cooldown (1 per 2 extra shots above first 2)
 		$turnToAdd = 0;
-		 $cooldownLength = ceil(($currBoostlevel-2)/2);//actual numbers of turns of cooldown
+		 $cooldownLength = ceil(($currBoostlevel-1)/2);//actual numbers of turns of cooldown
 		 while($cooldownLength > 0){ 		     
 			$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+$turnToAdd);
 			$crit->updated = true;
@@ -749,12 +749,14 @@
 				//do NOT acount for special defensive systems (Energy Diffuser, Bulkheads...) - they will kick in (or not) separately on Structure
 				$damage = $damage - $this->getSystemArmourComplete($target, $system, $gamedata, $fireOrder);
 				//reduce armor of system hit
-				$crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
-				$crit->updated = true;
-				$crit->inEffect = false;
-				if ( $system != null ){
-					$system->criticals[] = $crit;
-					$system->criticals[] = $crit;
+				if (!$system->advancedArmor) { //Advanced Armor prevents armor reduction
+					$crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = false;
+					if ( $system != null ){
+						$system->criticals[] = $crit;
+						$system->criticals[] = $crit;
+					}
 				}
 				//repeat damage on structure this system is mounted to
 				/* disabled, instead new approach to damage dealing - with assignDamageReturnOverkill!

@@ -394,10 +394,20 @@ class CustomPulsarLaser extends Pulse{
     /*Pulsar Laser, as used on Ch'Lonas ships*/
         public $name = "customPulsarLaser";
         public $displayName = "Pulsar Laser";
+	/* maybe it'll be better as bolt animation!
         public $animation = "laser";
         public $animationColor = array(255, 58, 31);
         public $animationWidth = 3;
         public $animationWidth2 = 0.5;
+	*/
+	public $animationColor = array(255, 58, 31);
+        public $animation = "beam"; //a bolt, not beam
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 17;
+        public $animationWidth = 25;
+        public $trailLength = 25;
+	
+	
         public $uninterceptable = true;
         public $priority = 5;
 

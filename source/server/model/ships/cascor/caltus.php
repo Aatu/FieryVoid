@@ -58,6 +58,8 @@ class Caltus extends FighterFlight{
             $torpedoLauncher->missileArray = array(1 => new LightIonTorpedo(330, 30));
             $fighter->addFrontSystem($torpedoLauncher);
 		
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+			
             $this->addSystem($fighter);
        }
     }
