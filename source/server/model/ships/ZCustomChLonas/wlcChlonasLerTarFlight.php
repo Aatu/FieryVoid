@@ -34,11 +34,13 @@ class wlcChlonasLerTarFlight extends FighterFlight{
             $armour = array(1, 1, 1, 1);
             $fighter = new Fighter("wlcChlonasLerTarFlight", $armour, 7, $this->id);
             $fighter->displayName = "Ler'Tar";
-	        	$fighter->imagePath = "img/ships/ChlonasLerTar.png";
-		        $fighter->iconPath = "img/ships/ChlonasLerTarLARGE.png";
-			
-	        	$fighter->addFrontSystem(new PairedParticleGun(330, 30, 2));
+			$fighter->imagePath = "img/ships/ChlonasLerTar.png";
+			$fighter->iconPath = "img/ships/ChlonasLerTarLARGE.png";
+		
+			$fighter->addFrontSystem(new PairedParticleGun(330, 30, 2));
 
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+			
             $this->addSystem($fighter);
         }
     }
