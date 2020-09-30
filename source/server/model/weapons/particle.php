@@ -749,12 +749,14 @@
 				//do NOT acount for special defensive systems (Energy Diffuser, Bulkheads...) - they will kick in (or not) separately on Structure
 				$damage = $damage - $this->getSystemArmourComplete($target, $system, $gamedata, $fireOrder);
 				//reduce armor of system hit
-				$crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
-				$crit->updated = true;
-				$crit->inEffect = false;
-				if ( $system != null ){
-					$system->criticals[] = $crit;
-					$system->criticals[] = $crit;
+				if (!$system->advancedArmor) { //Advanced Armor prevents armor reduction
+					$crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = false;
+					if ( $system != null ){
+						$system->criticals[] = $crit;
+						$system->criticals[] = $crit;
+					}
 				}
 				//repeat damage on structure this system is mounted to
 				/* disabled, instead new approach to damage dealing - with assignDamageReturnOverkill!
