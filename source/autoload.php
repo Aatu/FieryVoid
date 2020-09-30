@@ -671,6 +671,7 @@ spl_autoload_register(
                 'qship' => '/server/model/ships/civilians/qship.php',
                 'quadarray' => '/server/model/weapons/particle.php',
                 'quadparticlebeam' => '/server/model/weapons/particle.php',
+				'quarters' => '/server/model/systems/baseSystems.php',				
                 'quadpulsar' => '/server/model/weapons/pulse.php',
                 'raidergunboat' => '/server/model/ships/raiders/RaiderGunboat.php',
                 'railgun' => '/server/model/weapons/matter.php',
@@ -1096,6 +1097,44 @@ spl_autoload_register(
 				
 				'connectionstrut' => '/server/model/systems/baseSystems.php',
 				'explorer' => '/server/model/ships/EA/explorer.php',
+				
+				
+				//Escalation Wars weapons
+				'ewrocketlauncher' => '/server/model/weapons/customEscalation.php',
+				'ewgravitictractingrod' => '/server/model/weapons/customEscalation.php',
+				'ewtwinlasercannon' => '/server/model/weapons/customEscalation.php',
+				'ewheavypointplasmagun' => '/server/model/weapons/customEscalation.php',
+				'ewparticlegun' => '/server/model/weapons/customEscalation.php',
+				'ewlightparticlegun' => '/server/model/weapons/customEscalation.php',
+				'ewparticlelance' => '/server/model/weapons/customEscalation.php',
+				
+
+				//Escalation Wars - Circasian
+				'circasiancairn' => '/server/model/ships/ZEscalationCircasian/CircasianCairn.php',
+				'circasianfeilah' => '/server/model/ships/ZEscalationCircasian/CircasianFeilah.php',
+				'circasiangallahcarrier' => '/server/model/ships/ZEscalationCircasian/CircasianGallahCarrier.php',
+				'circasiangallahtransport' => '/server/model/ships/ZEscalationCircasian/CircasianGallahTransport.php',
+				'circasianilustris' => '/server/model/ships/ZEscalationCircasian/CircasianIlustris.php',
+				'circasianilustriscommand' => '/server/model/ships/ZEscalationCircasian/CircasianIlustrisCommand.php',
+				'circasianistale' => '/server/model/ships/ZEscalationCircasian/CircasianIstale.php',
+				'circasiankolanis' => '/server/model/ships/ZEscalationCircasian/CircasianKolanis.php',
+				'circasiankolaniscarrier' => '/server/model/ships/ZEscalationCircasian/CircasianKolanisCarrier.php',
+				'circasianluscan' => '/server/model/ships/ZEscalationCircasian/CircasianLuscan.php',
+				'circasianluscanrefit' => '/server/model/ships/ZEscalationCircasian/CircasianLuscanRefit.php',
+				'circasianmoshesta' => '/server/model/ships/ZEscalationCircasian/CircasianMoshesta.php',
+				'circasianmoshestabeta' => '/server/model/ships/ZEscalationCircasian/CircasianMoshestaBeta.php',
+				'circasianolcata' => '/server/model/ships/ZEscalationCircasian/CircasianOlcata.php',
+				'circasianreglata' => '/server/model/ships/ZEscalationCircasian/CircasianReglata.php',
+				'circasianshenna' => '/server/model/ships/ZEscalationCircasian/CircasianShenna.php',
+				'circasiantoltara' => '/server/model/ships/ZEscalationCircasian/CircasianToltara.php',
+				'circasiantormin' => '/server/model/ships/ZEscalationCircasian/CircasianTormin.php',
+				'circasiantorminbeta' => '/server/model/ships/ZEscalationCircasian/CircasianTorminBeta.php',
+				'circasiantratha' => '/server/model/ships/ZEscalationCircasian/CircasianTratha.php',
+				'circasiantrathascout' => '/server/model/ships/ZEscalationCircasian/CircasianTrathaScout.php',
+				'circasianxandar' => '/server/model/ships/ZEscalationCircasian/CircasianXandar.php',
+				'circasianyollana' => '/server/model/ships/ZEscalationCircasian/CircasianYollana.php',
+				
+				
 				
 				
 				//Nexus weapons
