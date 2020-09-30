@@ -613,6 +613,21 @@ class CargoBay extends ShipSystem{
 }
 
 
+class Quarters extends ShipSystem{
+    public $name = "Quarters";
+    public $displayName = "Quarters";
+    
+	//Quarters is not important at all!
+	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
+    function __construct($armour, $maxhealth){
+        parent::__construct($armour, $maxhealth, 0, 0);
+    }
+}
+
+
+
+
 class Thruster extends ShipSystem{
     public $name = "thruster";
     public $displayName = "Thruster";

@@ -227,6 +227,7 @@
     <script src="client/model/weapon/customs.js"></script>
     <script src="client/model/weapon/customSW.js"></script>
     <script src="client/model/weapon/customNexus.js"></script>
+	<script src="client/model/weapon/customEscalation.js"></script>
 </head>
 
 
