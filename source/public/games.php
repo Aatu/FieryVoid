@@ -60,7 +60,7 @@ if (isset($_SESSION["user"])) {
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
         -->
-		---------- <b>LATEST NEWS - AUGUST 2020</b> ----------		
+		---------- <b>LATEST NEWS - SEPTEMBER 2020</b> ----------		
 		
 	    <br><b><u>Circasians</u> have arrived</b> – a whole new faction, in Tyrel Lohr’s Escalation Wars setting, implemented by Geoffrey. Great news for people looking for low-tech clashes!
 	    <br><b>Grav Pulsar/Bolt remade</b> – as I got my hands on original rules wording (courtesy of Douglas), I realized that cooldown was the original intent all along – so I removed extra turn of it. Brakiri, rejoice!
