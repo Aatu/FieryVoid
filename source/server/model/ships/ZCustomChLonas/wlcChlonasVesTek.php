@@ -38,6 +38,9 @@ class wlcChlonasVesTek extends FighterFlight{
             $fighter->iconPath = "img/ships/ChlonasVesTekLARGE.png";
             $fighter->addFrontSystem(new PairedParticleGun(330, 30, 3));
             $fighter->addFrontSystem(new CustomLightMatterCannonF(345, 15));
+			
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+			
             $this->addSystem($fighter);
         }
     }

@@ -18,6 +18,7 @@
 
     
 /*Marcin Sawicki: as longer recharge time was highly troublesome, I have thrown in cooldown periods instead (but +1 turn)*/
+/*30.09.2020: I have looked at original wording of Pulsar, and it says cooldown. So NO +1 turn! */
     class GravitonPulsar extends Pulse
     {
         public $name = "gravitonPulsar";
@@ -54,8 +55,8 @@
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
 	    $this->data["Special"] = "Standard power: D2 pulses, +1/20%, max 3; intercept 1; 1/turn";
-	    $this->data["Special"] .= "<br>Double power: D3+1 pulses, +1/20%, max 4; intercept 2; cooldown 2 turns";
-	    $this->data["Special"] .= "<br>Triple power: D3+2 pulses, +1/20%, max 5; intercept 3; cooldown 3 turns and forced critical";
+	    $this->data["Special"] .= "<br>Double power: D3+1 pulses, +1/20%, max 4; intercept 2; cooldown 1 turns";
+	    $this->data["Special"] .= "<br>Triple power: D3+2 pulses, +1/20%, max 5; intercept 3; cooldown 2 turns and forced critical";
             $this->defaultShots = $this->getMaxPulses($turn);
             $this->normalload = $this->loadingtime;
 
@@ -106,33 +107,14 @@
 
 	protected function applyCooldown($gamedata){
 		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
-		//if boosted, cooldown (2 or 3 tuns)
+		//if boosted, cooldown (1 or 2 tuns)
 		if($currBoostlevel > 0){
-			$cooldownLength = $currBoostlevel + 1;
+			$cooldownLength = $currBoostlevel ;
 			$finalTurn = $gamedata->turn + $cooldownLength;
 			$crit = new ForcedOfflineForTurns(-1, $this->unit->id, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $finalTurn);
 			$crit->updated = true;
 			$this->criticals[] =  $crit;
-		}
-		
-		/* cooldown remake 
-	     if($currBoostlevel > 0){ //2 turns forced shutdown
-		$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
-                $crit->updated = true;
-                $this->criticals[] =  $crit;
-                $crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+1);
-                $crit->updated = true;
-		$crit->newCrit = true; //force save even if crit is not for current turn
-                $this->criticals[] =  $crit;
-	     }
-	     if($currBoostlevel > 1){ //additional turn forced shutdown
-                $crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+2);
-                $crit->updated = true;
-		$crit->newCrit = true; //force save even if crit is not for current turn
-                $this->criticals[] =  $crit;
-	     }
-		 */
-		 
+		} 
 	}
     
 	public function fire($gamedata, $fireOrder){
@@ -193,6 +175,7 @@
 
 
 /*Marcin Sawicki: as longer recharge time was highly troublesome, I have thrown in cooldown periods instead (but +1 turn)*/
+/*30.09.2020: I have looked at original wording of Pulsar, and it says cooldown. So NO +1 turn! */
 class GraviticBolt extends Gravitic
     {
         public $name = "graviticBolt";
@@ -224,8 +207,8 @@ class GraviticBolt extends Gravitic
 
         public function setSystemDataWindow($turn){
 	    $this->data["Special"] = "Standard power: 9 damage, intercept 1,  no cooldown";
-	    $this->data["Special"] .= "<br>Double power: 12 damage, intercept 2, cooldown 2 turns";
-	    $this->data["Special"] .= "<br>Triple power: 15 damage, intercept 3, cooldown 3 turns and forced critical";
+	    $this->data["Special"] .= "<br>Double power: 12 damage, intercept 2, cooldown 1 turns";
+	    $this->data["Special"] .= "<br>Triple power: 15 damage, intercept 3, cooldown 2 turns and forced critical";
 
         
             switch($this->getBoostLevel($turn)){
@@ -299,31 +282,12 @@ class GraviticBolt extends Gravitic
 		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
 		
 		if($currBoostlevel > 0){
-			$cooldownLength = $currBoostlevel + 1;
+			$cooldownLength = $currBoostlevel ;
 			$finalTurn = $gamedata->turn + $cooldownLength;
 			$crit = new ForcedOfflineForTurns(-1, $this->unit->id, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $finalTurn);
 			$crit->updated = true;
 			$this->criticals[] =  $crit;
 		}
-		
-		/* cooldown remake
-		//if boosted, cooldown (2 or 3 tuns)
-	     if($currBoostlevel > 0){ //2 turns forced shutdown
-		$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
-                $crit->updated = true;
-                $this->criticals[] =  $crit;
-                $crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+1);
-                $crit->updated = true;
-		$crit->newCrit = true; //force save even if crit is not for current turn
-                $this->criticals[] =  $crit;
-	     }
-	     if($currBoostlevel > 1){ //additional turn forced shutdown
-                $crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+2);
-                $crit->updated = true;
-		$crit->newCrit = true; //force save even if crit is not for current turn
-                $this->criticals[] =  $crit;
-	     }
-		 */
 	}	
 	    
         public function fire($gamedata, $fireOrder){
