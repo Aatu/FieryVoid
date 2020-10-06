@@ -11,7 +11,7 @@ class Croscotu extends MediumShip
 		$this->phpclass = "Croscotu";
 		$this->imagePath = "img/ships/DescariCroscotu.png";
 		$this->shipClass = "Croscotu Frigate";
-		$this->canvasSize = 200;
+		$this->canvasSize = 100;
 		$this->isd = 2215;
 
 		$this->forwardDefense = 11;

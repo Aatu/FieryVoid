@@ -394,10 +394,20 @@ class CustomPulsarLaser extends Pulse{
     /*Pulsar Laser, as used on Ch'Lonas ships*/
         public $name = "customPulsarLaser";
         public $displayName = "Pulsar Laser";
+	/* maybe it'll be better as bolt animation!
         public $animation = "laser";
         public $animationColor = array(255, 58, 31);
         public $animationWidth = 3;
         public $animationWidth2 = 0.5;
+	*/
+	public $animationColor = array(255, 58, 31);
+        public $animation = "beam"; //a bolt, not beam
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 17;
+        public $animationWidth = 25;
+        public $trailLength = 25;
+	
+	
         public $uninterceptable = true;
         public $priority = 5;
 
@@ -1663,9 +1673,9 @@ class CustomBPAHeavy extends Weapon{
 	//actual weapons data
         public $groupingArray = array(1=>0, 2=>20);
         public $maxpulses = 6; //only useful for Pulse mode
-        public $priorityArray = array(1=>6, 2=>4);
+        public $priorityArray = array(1=>6, 2=>6); //both weapons fall into Heavy Standard category
 	public $uninterceptableArray = array(1=>false, 2=>false);
-	public $defaultShotsArray = array(1=>6, 2=>6); //for Pulse mode it should be equal to maxpulses
+	public $defaultShotsArray = array(1=>1, 2=>6); //for Pulse mode it should be equal to maxpulses
 	
         public $loadingtimeArray = array(1=>3, 2=>3); //mode 1 should be the one with longest loading time
         public $rangePenaltyArray = array(1=>0.33, 2=>0.5); //-1/3 hexes and -1/2hexes, for Bolt and Pulse respectably
@@ -1815,6 +1825,143 @@ class CustomIndustrialGrappler extends Weapon {
         public function setMinDamage(){     $this->minDamage = 7 ;      }
         public function setMaxDamage(){     $this->maxDamage = 25 ;      }
     } //CustomMiningCutter
+
+
+class CustomLightSoMissileRack extends Weapon{
+        public $name = "CustomLightSoMissileRack";
+        public $displayName = "Light SO-Missile Rack";
+		    public $iconPath = "missile1.png";
+        public $animation = "trail";
+        public $trailColor = array(141, 240, 255);
+        public $animationColor = array(50, 50, 50);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 10;
+        public $animationWidth = 4;
+        public $trailLength = 100;    
+
+        public $useOEW = false; //missile
+        public $ballistic = true; //missile
+        public $range = 15;
+        public $distanceRange = 45;
+        public $ammunition = 12; //limited number of shots
+	    
+        
+        public $loadingtime = 2; // 1/2 turns
+        public $rangePenalty = 0;
+        public $fireControl = array(5, 5, 5); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+	    
+		public $noOverkill = false; //Ballistic weapon
+		public $priority = 6; //Ballistic weapon
+	    
+		public $firingMode = 'Standard'; //firing mode - just a name essentially
+		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+	 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 0;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->ammunition = $this->ammunition;           
+            return $strippedSystem;
+        }
+        
+	    
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+             $this->data["Ammunition"] = $this->ammunition;
+        }
+        
+        public function getDamage($fireOrder){
+            $dmg = 12;
+            return $dmg;
+       }
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
+    
+        public function setMinDamage(){     $this->minDamage = 12;      }
+        public function setMaxDamage(){     $this->maxDamage = 12;      }
+}//endof CustomLightSoMissileRack
+
+
+class CustomLightSMissileRack extends Weapon{
+        public $name = "CustomLightSMissileRack";
+        public $displayName = "Light S-Missile Rack";
+		    public $iconPath = "missile1.png";
+        public $animation = "trail";
+        public $trailColor = array(141, 240, 255);
+        public $animationColor = array(50, 50, 50);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 10;
+        public $animationWidth = 4;
+        public $trailLength = 100;    
+
+        public $useOEW = false; //missile
+        public $ballistic = true; //missile
+        public $range = 15;
+        public $distanceRange = 45;
+        public $ammunition = 20; //limited number of shots
+	    
+        
+        public $loadingtime = 2; // 1/2 turns
+        public $rangePenalty = 0;
+        public $fireControl = array(6, 6, 6); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+	    
+		public $noOverkill = false; //Ballistic weapon
+		public $priority = 6; //Ballistic weapon
+	    
+		public $firingMode = 'Standard'; //firing mode - just a name essentially
+		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+	 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 0;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->ammunition = $this->ammunition;           
+            return $strippedSystem;
+        }
+        
+	    
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+             $this->data["Ammunition"] = $this->ammunition;
+        }
+        
+        public function getDamage($fireOrder){
+            $dmg = 12;
+            return $dmg;
+       }
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
+    
+        public function setMinDamage(){     $this->minDamage = 12;      }
+        public function setMaxDamage(){     $this->maxDamage = 12;      }
+}//endof CustomLightSMissileRack
+
 
 
 

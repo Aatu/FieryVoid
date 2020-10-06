@@ -53,17 +53,21 @@ if (isset($_SESSION["user"])) {
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
 <div class="panel news">
-    <!-- <div id="newsHeader">Latest News - April 2020</div> -->
+    <!-- <div id="newsHeader">Latest News - September 2020</div> -->
     <div id="newsEntry">
         <!--
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
         -->
-		---------- <b>LATEST NEWS - AUGUST 2020</b> ----------		
+		---------- <b>LATEST NEWS - SEPTEMBER 2020</b> ----------		
 		
-	    <br><b><u>Descari</u></b> - a whole new official faction, courtesy of Douglas!
-	<br><b>Firing check improved</b> - now "no fire declared" warning shouldn't show up for destroyed or out-of-ammo weapons
+	    <br><b><u>Circasians</u> have arrived</b> – a whole new faction, in Tyrel Lohr’s Escalation Wars setting, implemented by Geoffrey. Great news for people looking for low-tech clashes!
+	    <br><b>Grav Pulsar/Bolt remade</b> – as I got my hands on original rules wording (courtesy of Douglas), I realized that cooldown was the original intent all along – so I removed extra turn of it. Brakiri, rejoice!
+	    <br><b>Solar Cannon fixed</b> – now Advanced Armor will prevent armor from being reduced.
+	    <br><b>Pulsar Laser refitted</b> – now fires bolts rather than beams (visual effect change only).
+	    <br><b>Particle Repeater fixed</b> – cooldown length is now rounded up, not down.
+  
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload (<b><u>ctrl+F5</u></b>) whenever something weird happens.

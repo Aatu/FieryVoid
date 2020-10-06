@@ -611,6 +611,7 @@ class LightPlasmaAccelerator extends LinkedWeapon{
 }//end of class LightPlasmaAccelerator
 
 
+
 class HeavyPlasmaBolter extends Plasma{
 
 	public $name = "heavyPlasmaBolter";
@@ -808,7 +809,7 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
     public $projectilespeed = 12;
     public $animationWidth = 2;
     public $trailLength = 10;
-    public $priority = 3;
+    public $priority = 5;
 	
     public $intercept = 0; //no interception for this weapon!
 	public $loadingtime = 1;
@@ -867,6 +868,118 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
 
 }// End of class LightPlasmaBolterFighter	
 
+
+class DualPlasmaCannon extends Plasma{
+        public $name = "DualPlasmaCannon";
+        public $displayName = "Dual Plasma Cannon";
+	    public $iconPath = "dualplasmacannon.png";
+	
+	public $animationArray = array(1=>'trail', 2=>'trail');
+        public $animationColor = array(75, 250, 90);
+        public $animationWidthArray = array(1=>6, 2=>4);
+        public $animationExplosionScale = 0.30;
+    	public $projectilespeed = 14;	
+    	public $trailColor = array(75, 250, 90);
+    	public $trailLength = 18;
+   	    	      
+	//actual weapons data
+    	public $rangeDamagePenalty = 0.5;
+   		public $priorityArray = array(1=>7, 2=>5);
+    	public $gunsArray = array(1=>1, 2=>2); //one Lance, but two Beam shots!
+	
+        public $loadingtimeArray = array(1=>3, 2=>3); //mode 1 should be the one with longest loading time
+        public $rangePenaltyArray = array(1=>0.5, 2=>1);
+        public $fireControlArray = array( 1=>array(-5, 1, 3), 2=>array(-5, 1, 3) ); 
+	
+		public $firingModes = array(1=>'Dual', 2=>'Medium Plasmas');
+		public $damageTypeArray = array(1=>'Plasma', 2=>'Plasma'); 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ){
+				$maxhealth = 10;
+			}
+			if ( $powerReq == 0 ){
+				$powerReq = 6;
+			}
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Can fire as either a Dual Plasma Cannon or two Medium Plasma Cannons.';
+			$this->data["Special"] .= "<br>Does less damage over distance (".$this->rangeDamagePenalty." per hex).";
+			$this->data["Special"] .= "<br>Ignores half of armor.";
+        }
+	
+        public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1:
+				return Dice::d(10, 5)+8; //DualPlasma
+				break;
+			case 2:
+				return Dice::d(10, 3)+4; //MediumPlasma
+				break;	
+		}
+	}
+        public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 13; //Lance
+				break;
+			case 2:
+				$this->minDamage = 7; //Beam
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 58; //Gravitic Lance
+				break;
+			case 2:
+				$this->maxDamage = 34; //Graviton Beam
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}	
+	
+} //end of DualPlasmaCannon
+
+
+class MegaPlasma extends Plasma{
+    	public $name = "MegaPlasma";
+        public $displayName = "Mega Plasma Cannon";
+		public $iconPath = "MegaPlasma.png";
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+    	public $trailColor = array(75, 250, 90);
+    	public $projectilespeed = 17;
+        public $animationWidth = 6;
+    	public $animationExplosionScale = 0.35;
+    	public $trailLength = 24;
+    	public $rangeDamagePenalty = 0.5;
+    		        
+        public $loadingtime = 4;
+			
+        public $rangePenalty = 0.50;
+        public $fireControl = array(-5, 1, 3); // fighters, <=mediums, <=capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 10;
+            if ( $powerReq == 0 ) $powerReq = 8;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+    	public function getDamage($fireOrder){        return Dice::d(10,6)+12;   }
+        public function setMinDamage(){     $this->minDamage = 18 /*- $this->dp*/;      }
+        public function setMaxDamage(){     $this->maxDamage = 72 /*- $this->dp*/;      }
+
+} //end of class MegaPlasma
+
 class PlasmaProjector extends Raking{
 
 	public $name = "PlasmaProjector";
@@ -909,5 +1022,6 @@ class PlasmaProjector extends Raking{
 	public function setMaxDamage(){     $this->maxDamage = 45;      }
 
 }// End of class PlasmaProjector
-	
+
+
 ?>

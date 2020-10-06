@@ -74,7 +74,7 @@ class TorataDartocCA extends BaseShip{
 			1=> array(
 				6 => "Thruster",
 				8 => "Laser Accelerator",
-				10 => "PentagonArray",
+				10 => "Pentagon Array",
 				18 => "Structure",
 				20 => "Primary",
 			),

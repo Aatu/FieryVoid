@@ -102,8 +102,14 @@ var LightPlasmaBolterFighter = function LightPlasmaBolterFighter(json, ship) {
 LightPlasmaBolterFighter.prototype = Object.create(Plasma.prototype);
 LightPlasmaBolterFighter.prototype.constructor = LightPlasmaBolterFighter;
 
-var PlasmaProjector = function PlasmaProjector(json, ship) {
+var DualPlasmaCannon = function DualPlasmaCannon(json, ship) {
     Plasma.call(this, json, ship);
 };
-PlasmaProjector.prototype = Object.create(Plasma.prototype);
-PlasmaProjector.prototype.constructor = PlasmaProjector;
+DualPlasmaCannon.prototype = Object.create(Plasma.prototype);
+DualPlasmaCannon.prototype.constructor = DualPlasmaCannon;
+
+var MegaPlasma = function MegaPlasma(json, ship) {
+    Weapon.call(this, json, ship);
+};
+MegaPlasma.prototype = Object.create(Weapon.prototype);
+MegaPlasma.prototype.constructor = MegaPlasma;
