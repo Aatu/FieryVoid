@@ -101,3 +101,9 @@ var LightPlasmaBolterFighter = function LightPlasmaBolterFighter(json, ship) {
 };
 LightPlasmaBolterFighter.prototype = Object.create(Plasma.prototype);
 LightPlasmaBolterFighter.prototype.constructor = LightPlasmaBolterFighter;
+
+var PlasmaProjector = function PlasmaProjector(json, ship) {
+    Plasma.call(this, json, ship);
+};
+PlasmaProjector.prototype = Object.create(Plasma.prototype);
+PlasmaProjector.prototype.constructor = PlasmaProjector;

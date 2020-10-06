@@ -1332,8 +1332,14 @@ spl_autoload_register(
 				
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
-						
 				
+				
+						
+				//Corillani
+				'plasmaprojector' => '/server/model/weapons/plasma.php',
+				
+						
+								
 				//let's end this with unit enhancement class...		    
 				'enhancements' => '/server/model/ships/Enhancements.php'
             );
