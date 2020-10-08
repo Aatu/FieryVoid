@@ -10,7 +10,7 @@ class Garunda extends HeavyCombatVessel{
         $this->imagePath = "img/ships/CorillaniGarunda.png";
         $this->shipClass = "Garunda Destroyer";
 	    $this->isd = 2227;
-		$this->notes = 'Corillani People's Navy (CPN)';	    
+		$this->notes = 'Corillani Peoples Navy (CPN)';	    
         
         
         $this->forwardDefense = 13;
