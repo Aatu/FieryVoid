@@ -629,6 +629,7 @@ class BaseShip {
 			return null;
 		}
 
+	//by CLASS name
     public function getSystemByName($name){
         foreach ($this->systems as $system){
             if ($system instanceof $name){
@@ -650,7 +651,7 @@ class BaseShip {
         return null;
     }
 
-
+	//by display name
     public function getSystemsByNameLoc($name, $location, $acceptDestroyed = false){ /*get list of required systems on a particular location*/
         /*name may indicate different location?...*/
         /*'destroyed' means either destroyed as of PREVIOUS turn, OR reduced to health 0*/
@@ -666,7 +667,9 @@ class BaseShip {
                 }
             }else{
                 foreach ($this->systems as $system){
-                    if ( ($system->displayName == $name) && ($system->location == $location) ){
+			//change to case ignoring:
+                    //if ( ($system->displayName == $name) && ($system->location == $location) ){
+		    if ( (STRCASESMP($system->displayName, $name)==0) && ($system->location == $location) ){
                         if( ($acceptDestroyed == true) || (!$system->isDestroyed()) ){
                             $returnTab[] = $system;
                         }
@@ -683,7 +686,8 @@ class BaseShip {
         /*'destroyed' means either destroyed as of PREVIOUS turn, OR reduced to health 0*/
         $returnTab = array();
         foreach ($this->systems as $system){
-            if ( ($system->displayName == $name) ){
+            //if ( ($system->displayName == $name) ){
+            if ( (STRCASESMP($system->displayName, $name)==0 ) ){		
                 if( ($acceptDestroyed == true) || (!$system->isDestroyed()) ){
                     $returnTab[] = $system;
                 }
