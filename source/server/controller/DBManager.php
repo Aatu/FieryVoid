@@ -999,6 +999,7 @@ class DBManager
 		$stmt = $this->connection->prepare("select g.id, g.name, pg.waiting, g.gamespace, g.rules from tac_playeringame pg join tac_game g on pg.gameid = g.id where g.status = 'ACTIVE' AND pg.playerid = ?");
 		    	    
         $games = [];
+		
 		$nm = '';
         if ($stmt) {
             $stmt->bind_param('i', $playerid);
@@ -1019,10 +1020,24 @@ class DBManager
 					$nm  .= ', std mv';
 				}		    
 				$nm  .= ')';
+				
+				//attempt to fix "no highlight" bug - do highlight a agame if no player is listed as active
                 $games[] = ["id" => $id, "name" => $nm, "waiting" => $waiting, "status" => "ACTIVE"];
             }
             $stmt->close();
         }
+		
+		/*attempt to solve no highlight problem - do highlight the game if no player is listed as active
+		*/		
+		foreach($games as $currLineId=>$currGameData) if($games[$currLineId]["waiting"] != 0){
+			//$games[$currLineId]["waiting"] = 0;
+			$currGameId = $games[$currLineId]["id"];
+			$sql = "SELECT DISTINCT slot FROM tac_playeringame WHERE gameid = $currGameId and waiting = 0 "; //are three players that are waiting for action?
+			$result = $this->query($sql);
+			if (($result == null) || (sizeof($result) == 0)){ //no such players do exist
+				$games[$currLineId]["waiting"] = 0;				
+			}
+		}
         return $games;
     }
 	

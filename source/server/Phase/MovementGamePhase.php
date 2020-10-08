@@ -29,6 +29,7 @@ class MovementGamePhase implements Phase
                 throw new Exception("The ship has already moved");
             }
         }
+		
 
 
         $activeShips = $gameData->getMyActiveShips();
@@ -45,7 +46,7 @@ class MovementGamePhase implements Phase
             }
             
             //TODO: Validate movement: Make sure that all ships of current player have moved and the moves are legal
-            $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, $ship->movement);
+			$dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, $ship->movement);
         }
 
         if ($gameData->rules->hasRule("processMovement")) {
