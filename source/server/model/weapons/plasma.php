@@ -1015,7 +1015,7 @@ class PlasmaProjector extends Raking{
 			$this->data["Special"] = "Damage reduced by 1 points per 4 hexes.";
 			$this->data["Special"] .= "<br>Does damage in raking mode (8)";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
-	
+	}
 			
     public function getDamage($fireOrder){        return Dice::d(10,4)+5;   }
 	public function setMinDamage(){     $this->minDamage = 9;      }
