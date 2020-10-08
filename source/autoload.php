@@ -1150,6 +1150,7 @@ spl_autoload_register(
 				'nexuslightparticleprojector' => '/server/model/weapons/customNexus.php',
 				'nexusprojectorarray' => '/server/model/weapons/customNexus.php',
 				'nexuslightprojectorarray' => '/server/model/weapons/customNexus.php',
+                		'lightenergymine' => '/server/model/weapons/AoE.php',
 				
 				//Nexus ships - Brixadii
                 'brixadiibattledestroyerbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerBase.php',					
