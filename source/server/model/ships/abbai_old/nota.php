@@ -33,8 +33,8 @@ class Nota extends BaseShip{
         $this->addPrimarySystem(new CommJammer(3, 0, 0, 0, 360));
         $this->addPrimarySystem(new JumpEngine(5, 12, 4, 32));
    
-        $this->addFrontSystem(new GraviticShield(0, 6, 0, 1, 0, 60));
         $this->addFrontSystem(new GraviticShield(0, 6, 0, 1, 300, 360));
+        $this->addFrontSystem(new GraviticShield(0, 6, 0, 1, 0, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
         $this->addFrontSystem(new LaserCutter(3, 0, 0, 300, 60));
