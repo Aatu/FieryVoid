@@ -42,7 +42,7 @@ class Dargan extends BaseShip{
         $this->addFrontSystem(new TwinArray(3, 6, 2, 180, 60));
 	$this->addFrontSystem(new TwinArray(3, 6, 2, 300, 180));
 	$this->addFrontSystem(new TwinArray(3, 6, 2, 300, 180));
-        $this->addFrontSystem(new Mattercannon(4, 7, 4, 300, 60));
+        $this->addFrontSystem(new Mattercannon(3, 7, 4, 300, 60));
         $this->addFrontSystem(new Thruster(5, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(5, 10, 0, 3, 1));
 
