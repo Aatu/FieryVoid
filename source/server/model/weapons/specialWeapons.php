@@ -73,8 +73,14 @@ class PlasmaStream extends Raking{
 			    $crit->inEffect = false;
 			    $system->criticals[] =  $crit;
 		}
+	}
+	
+	protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
+    {
+		parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
 		$fireOrder->armorIgnored = array(); //clear armorIgnored array - next rake should be met with full armor value!
 	}
+	
 		
 		
 	public function getDamage($fireOrder){        return Dice::d(10,3)+4;   }

@@ -204,6 +204,7 @@ public function calculateHit($gamedata, $fireOrder){
 class LightEnergyMine extends AoE{
         public $name = "LightEnergyMine";
         public $displayName = "Light Energy Mine";
+		public $iconPath = "EnergyMine.png";
         public $range = 25;
         public $loadingtime = 2;
         public $ballistic = true;
