@@ -669,7 +669,7 @@ class BaseShip {
                 foreach ($this->systems as $system){
 			//change to case ignoring:
                     //if ( ($system->displayName == $name) && ($system->location == $location) ){
-		    if ( (STRCASESMP($system->displayName, $name)==0) && ($system->location == $location) ){
+		    if ( (STRCASECMP($system->displayName, $name)==0) && ($system->location == $location) ){
                         if( ($acceptDestroyed == true) || (!$system->isDestroyed()) ){
                             $returnTab[] = $system;
                         }
@@ -687,7 +687,7 @@ class BaseShip {
         $returnTab = array();
         foreach ($this->systems as $system){
             //if ( ($system->displayName == $name) ){
-            if ( (STRCASESMP($system->displayName, $name)==0 ) ){		
+            if ( (STRCASECMP($system->displayName, $name)==0 ) ){		
                 if( ($acceptDestroyed == true) || (!$system->isDestroyed()) ){
                     $returnTab[] = $system;
                 }
