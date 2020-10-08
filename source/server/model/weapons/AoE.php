@@ -164,10 +164,14 @@ public function calculateHit($gamedata, $fireOrder){
 		1 => "AoE"
 	);
 
-        
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-    }
+        	    
+	    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 5;
+            if ( $powerReq == 0 ) $powerReq = 4;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
 
     public function setSystemDataWindow($turn)
     {
@@ -225,9 +229,13 @@ class LightEnergyMine extends AoE{
 	);
 
         
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-    }
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 3;
+            if ( $powerReq == 0 ) $powerReq = 3;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
 
     public function setSystemDataWindow($turn)
     {
