@@ -1017,7 +1017,7 @@ class PlasmaProjector extends Raking{
 			$this->data["Special"] .= "<br>Ignores half of armor.";
 	
 			
-	public function getDamage($fireOrder){        return Dice::d(10, 4)+5;   }
+	public function getDamage($fireOrder){        return Dice::d(10,4)+5;   }
 	public function setMinDamage(){     $this->minDamage = 9;      }
 	public function setMaxDamage(){     $this->maxDamage = 45;      }
 
