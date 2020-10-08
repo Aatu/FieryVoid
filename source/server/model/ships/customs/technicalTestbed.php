@@ -110,7 +110,10 @@ class TechnicalTestbed extends MediumShip{
         $this->addFrontSystem(new LightEnergyMine(2, 0, 0, 300, 120));
         $this->addFrontSystem(new LightEnergyMine(2, 0, 0, 300, 120));
         $this->addFrontSystem(new LightEnergyMine(2, 0, 0, 300, 120));
-		$this->addFrontSystem(new mediumPulse(3, 6, 3, 240, 120));	
+        $this->addFrontSystem(new NexusInterceptorArray(2, 0, 0, 300, 60));
+        $this->addFrontSystem(new NexusInterceptorArray(2, 0, 0, 300, 60));
+        $this->addFrontSystem(new NexusInterceptorArray(2, 0, 0, 300, 60));
+        $this->addFrontSystem(new NexusInterceptorArray(2, 0, 0, 300, 60));
         
 		
 		//technical thrusters - unlimited, like for MCVs		
