@@ -36,3 +36,9 @@ var NexusParticleAgitator = function NexusParticleAgitator(json, ship) {
 };
 NexusParticleAgitator.prototype = Object.create(Weapon.prototype);
 NexusParticleAgitator.prototype.constructor = NexusParticleAgitator;
+
+var NexusInterceptorArray = function NexusInterceptorArray(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusInterceptorArray.prototype = Object.create(Weapon.prototype);
+NexusInterceptorArray.prototype.constructor = NexusInterceptorArray;
