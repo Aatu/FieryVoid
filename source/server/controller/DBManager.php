@@ -921,6 +921,20 @@ class DBManager
 		}
     }//endof function insertIndividualNote
 	
+	
+	//checks if a given ship was already moved this turn
+	public function isMovementAlreadySubmitted($gameid, $shipid, $turn)
+    {
+		$sql = "SELECT * FROM tac_shipmovement 
+			WHERE gameid = $gameid and turn = $turn and shipid = $shipid and preturn <> 1 and type <> 'deploy'"; 
+        $result = $this->query($sql);
+        if ($result == null || sizeof($result) == 0){ //no movement entries other than pre-turn and deployment
+			return false;
+		}else{ //movement for indicated ship/turn is already present!
+			return true;
+		}
+    } //endof function isMovementAlreadySubmitted
+	
 
     public function submitMovement($gameid, $shipid, $turn, $movements, $acceptPreturn = false)
     {

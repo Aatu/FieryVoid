@@ -21,7 +21,8 @@ class MovementGamePhase implements Phase
         $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);        
     }
 
-    public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
+	/*old version - before changes - in case of need of rollback*/
+    public function process_bak(TacGamedata $gameData, DBManager $dbManager, Array $ships)
     {
         foreach ($gameData->getMyActiveShips() as $ship) {
             $turn = $ship->getLastTurnMoved();
@@ -29,8 +30,6 @@ class MovementGamePhase implements Phase
                 throw new Exception("The ship has already moved");
             }
         }
-		
-
 
         $activeShips = $gameData->getMyActiveShips();
         foreach ($ships as $ship) {
@@ -46,9 +45,29 @@ class MovementGamePhase implements Phase
             }
             
             //TODO: Validate movement: Make sure that all ships of current player have moved and the moves are legal
-			$dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, $ship->movement);
-        }
+			$dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, $ship->movement);			
+		}		
 
+        if ($gameData->rules->hasRule("processMovement")) {
+            return $gameData->rules->callRule("processMovement", [$gameData, $dbManager, $ships]);
+        } else {
+            return $this->setNextActiveShip($gameData, $dbManager);
+        }
+    }
+
+    public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
+    {
+        $activeShips = $gameData->getMyActiveShips();
+		foreach ($ships as $ship) {
+			foreach ($activeShips as $activeShip) { 
+				if ($ship->id === $activeShip->id) {
+					if(!$dbManager->isMovementAlreadySubmitted($gameData->id, $ship->id, $gameData->turn)){ //in case of wrong activeship indicated - do not re-send orders! (...but proceed with other actions)
+						$dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, $ship->movement);
+					}
+				}
+			}
+		}
+		
         if ($gameData->rules->hasRule("processMovement")) {
             return $gameData->rules->callRule("processMovement", [$gameData, $dbManager, $ships]);
         } else {
