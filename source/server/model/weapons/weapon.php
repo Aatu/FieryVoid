@@ -75,6 +75,7 @@ class Weapon extends ShipSystem
     public $noInterceptDegradation = false; //if true, this weapon will be intercepted without degradation!
     public $intercept = 0; //intercept rating
     public $freeintercept = false;  //can intercept fire directed at other unit?
+    public $freeinterceptspecial = false;  //has its own routine for handling decision whether it's capable of interception - for freeintercept only?
     public $hidetarget = false;
     public $duoWeapon = false;
     public $dualWeapon = false;
@@ -191,6 +192,12 @@ class Weapon extends ShipSystem
 		}
         return $strippedSystem;
     }
+
+	//when intercepting shot directed at another ship - can the weapon do it? (called if $freeintercept == true && $freeinterceptspecial == true)
+	public function canFreeInterceptShot($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon)
+	{
+		return false;
+	}
 
     public function getRange($fireOrder)
     {
