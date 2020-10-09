@@ -60,13 +60,11 @@ if (isset($_SESSION["user"])) {
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
         -->
-		---------- <b>LATEST NEWS - SEPTEMBER 2020</b> ----------		
-		
-	    <br><b><u>Circasians</u> have arrived</b> – a whole new faction, in Tyrel Lohr’s Escalation Wars setting, implemented by Geoffrey. Great news for people looking for low-tech clashes!
-	    <br><b>Grav Pulsar/Bolt remade</b> – as I got my hands on original rules wording (courtesy of Douglas), I realized that cooldown was the original intent all along – so I removed extra turn of it. Brakiri, rejoice!
-	    <br><b>Solar Cannon fixed</b> – now Advanced Armor will prevent armor from being reduced.
-	    <br><b>Pulsar Laser refitted</b> – now fires bolts rather than beams (visual effect change only).
-	    <br><b>Particle Repeater fixed</b> – cooldown length is now rounded up, not down.
+		---------- <b>LATEST NEWS - OCTOBER 2020</b> ----------	
+	    <br><b>persistent 'unit already moved' bug fixed</b> – just confirm Your earlier movement orders and the game will proceed to next batch of units
+	    <br><b>game not highlighting for active player bug fixed</b> – game highlighting for inactive player bug introduced (happens in the same situation - hopefully this will be less troublesome!)
+	    <br><b>Plasma Stream fixed</b> – now encounters full armor for every rake, as it should.
+	    <br><b>Hit table behavior fixed</b> – now Demos' Heavy Arrays are hittable again ;).
   
 	    
         <br><br>

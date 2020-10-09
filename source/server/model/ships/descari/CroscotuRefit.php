@@ -11,7 +11,7 @@ class CroscotuRefit extends MediumShip
 		$this->phpclass = "CroscotuRefit";
 		$this->imagePath = "img/ships/DescariCroscotu.png";
 		$this->shipClass = "Croscotu Frigate (Refit)";
-		$this->canvasSize = 200;
+		$this->canvasSize = 100;
 		$this->isd = 2242;
 		$this->variantOf = "Croscotu Frigate";	 //Listed as separate hull in Showdowns 6 but made a variant here for tidier fleet selection.       
         $this->occurence = "common";  
