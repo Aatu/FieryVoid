@@ -11,7 +11,7 @@ class Cruscava extends MediumShip
 		$this->phpclass = "Cruscava";
 		$this->imagePath = "img/ships/DescariCruscava.png";
 		$this->shipClass = "Cruscava Escort Frigate";
-		$this->canvasSize = 200;
+		$this->canvasSize = 100;
 		$this->isd = 2243;
 		
 
