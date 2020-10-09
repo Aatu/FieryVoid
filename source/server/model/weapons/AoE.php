@@ -12,6 +12,21 @@ class AoE extends Weapon
     }
 
 
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn); 
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}	    
+		$dmgDirect = $this->maxDamage;
+		$dmgNear = $this->minDamage;
+		$this->data["Special"] .= "Ballistic weapon targeted on hex, not unit.";  
+		$this->data["Special"] .= "<br>All units on hex hit suffer $dmgDirect damage, all units on nearby hexes $dmgNear. Enormous units suffer half of indicated damage, while in case of flight level units every craft is damaged separately.";  
+		$this->data["Special"] .= "<br>Hit chance (of target hex): 75%. Missing mine may scatter d6 hexes (but no further than actual distance traveled) or dissipate completely (40%).";  
+        }
+	
+	
     public function calculateHitBase($gamedata, $fireOrder)
     {
         $fireOrder->needed = round(100 - (100 * 0.25 * 0.4)); //chance of not hitting target hex: 25%; chance of dissipating: 40$ of that
@@ -149,10 +164,14 @@ public function calculateHit($gamedata, $fireOrder){
 		1 => "AoE"
 	);
 
-        
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-    }
+        	    
+	    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 5;
+            if ( $powerReq == 0 ) $powerReq = 4;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
 
     public function setSystemDataWindow($turn)
     {
@@ -179,4 +198,68 @@ public function calculateHit($gamedata, $fireOrder){
 
 } //endof class EnergyMine
 
+
+
+/*non-canon weapon for Escalation Wars setting*/
+class LightEnergyMine extends AoE{
+        public $name = "LightEnergyMine";
+        public $displayName = "Light Energy Mine";
+		public $iconPath = "EnergyMine.png";
+        public $range = 25;
+        public $loadingtime = 2;
+        public $ballistic = true;
+        public $hextarget = true;
+        public $hidetarget = true;
+        
+        public $flashDamage = true;
+        public $priority = 1;
+        
+            
+        public $trailColor = array(141, 240, 255);
+        public $animation = "ball";
+        public $animationColor = array(141, 240, 255);
+        public $animationExplosionScale = 1;
+        public $animationExplosionType = "AoE";
+        public $explosionColor = array(141, 240, 255);
+        public $projectilespeed = 10;
+        public $animationWidth = 10;
+        public $trailLength = 10;
+	    
+	public $firingModes = array(
+		1 => "AoE"
+	);
+
+        
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 3;
+            if ( $powerReq == 0 ) $powerReq = 3;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+    public function setSystemDataWindow($turn)
+    {
+        parent::setSystemDataWindow($turn);
+        $this->data["Weapon type"] = "Ballistic";
+    }
+
+    //getDamage in itself depends on actually hit ship - this function is meaningless here, really!
+    public function getDamage($fireOrder)
+    {
+        return 5;
+    }
+
+    //these are important, though!*/
+    public function setMinDamage()
+    {
+        $this->minDamage = 5;
+    }
+
+    public function setMaxDamage()
+    {
+        $this->maxDamage = 10;
+    }
+
+} //endof class LightEnergyMine
 

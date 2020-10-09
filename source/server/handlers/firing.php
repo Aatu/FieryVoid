@@ -405,15 +405,19 @@ class Firing
                     return false;
                 }
 
-                //new approach: bearing to target is opposite to bearing shooter, +/- 60 degrees
-                //$oppositeBearing = mathlib::addToDirection($relativeBearing,180);//bearing exactly opposite to incoming shot
-                $oppositeBearingFrom = mathlib::addToDirection($relativeBearing, 120);//bearing exactly opposite to incoming shot, minus 60 degrees
-                $oppositeBearingTo = mathlib::addToDirection($oppositeBearingFrom, 120);//bearing exactly opposite to incoming shot, plus 60 degrees
-                $targetBearing = $interceptingShip->getBearingOnUnit($target);
-                if (mathlib::isInArc($targetBearing, $oppositeBearingFrom, $oppositeBearingTo)) {
-                    //Debug::log("VALID INTERCEPT\n");
-                    return true;
-                }
+				if($weapon->freeinterceptspecial){ //weapon has own routine that handles whether it's capable of intercepting the shot
+					return $weapon->canFreeInterceptShot($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon);					
+				}else{ //standard $freeintercept - must be between firing unit and target
+					//new approach: bearing to target is opposite to bearing shooter, +/- 60 degrees
+					//$oppositeBearing = mathlib::addToDirection($relativeBearing,180);//bearing exactly opposite to incoming shot
+					$oppositeBearingFrom = mathlib::addToDirection($relativeBearing, 120);//bearing exactly opposite to incoming shot, minus 60 degrees
+					$oppositeBearingTo = mathlib::addToDirection($oppositeBearingFrom, 120);//bearing exactly opposite to incoming shot, plus 60 degrees
+					$targetBearing = $interceptingShip->getBearingOnUnit($target);
+					if (mathlib::isInArc($targetBearing, $oppositeBearingFrom, $oppositeBearingTo)) {
+						//Debug::log("VALID INTERCEPT\n");
+						return true;
+					}
+				}
             }
         }
 
