@@ -508,6 +508,7 @@ spl_autoload_register(
                 'markabliner' => '/server/model/ships/markab/markabliner.php',
                 'martoba' => '/server/model/ships/markab/martoba.php',
                 'martus' => '/server/model/ships/hurr/martus.php',
+                'maser' => '/server/model/weapons/lasers.php',
                 'massdriver' => '/server/model/weapons/matter.php',
                 'mathlib' => '/server/lib/mathlib.php',
                 'matter' => '/server/model/weapons/matter.php',
@@ -1099,16 +1100,72 @@ spl_autoload_register(
 				'explorer' => '/server/model/ships/EA/explorer.php',
 				
 				
-				//Escalation Wars weapons
+		//Escalation Wars (EW) weapons
+			//EW plasma weapons
+				'ewpointplasmagun' => '/server/model/weapons/customEscalation.php',
+				'ewheavypointplasmagun' => '/server/model/weapons/customEscalation.php',
+				'ewheavyplasmagun' => '/server/model/weapons/customEscalation.php',
+				'ewplasmagun' => '/server/model/weapons/customEscalation.php',
+			//EW particle weapons
+				'ewparticlegun' => '/server/model/weapons/customEscalation.php',
+				'ewlightparticlegun' => '/server/model/weapons/customEscalation.php',
+				'ewparticlelance' => '/server/model/weapons/customEscalation.php',		
+			//EW ballistic weapons
 				'ewrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewdualrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewheavyrocketlauncher' => '/server/model/weapons/customEscalation.php',
-				'ewparticlegun' => '/server/model/weapons/customEscalation.php',
-				'ewlightparticlegun' => '/server/model/weapons/customEscalation.php',
-				'ewparticlelance' => '/server/model/weapons/customEscalation.php',
+				'ewomissilerack' => '/server/model/weapons/customEscalation.php',
+			//EW gravitic weapons
 				'ewgravitictractingrod' => '/server/model/weapons/customEscalation.php',
+			//EW laser weapons
 				'ewtwinlasercannon' => '/server/model/weapons/customEscalation.php',
-				'ewheavypointplasmagun' => '/server/model/weapons/customEscalation.php',
+				'ewlightlaserbeam' => '/server/model/weapons/customEscalation.php',
+				'ewgatlinglaser' => '/server/model/weapons/customEscalation.php',
+				'ewheavygatlinglaser' => '/server/model/weapons/customEscalation.php',
+			//EW AoE weapons
+				'lightenergymine' => '/server/model/weapons/AoE.php',
+
+				//Escalation Wars - Chouka
+				'choukaapostlecruiser' => '/server/model/ships/ZEscalationChouka/ChoukaApostleCruiser.php',
+				'choukaapostlewarcruiser' => '/server/model/ships/ZEscalationChouka/ChoukaApostleWarCruiser.php',
+				'choukabelieverfrigate' => '/server/model/ships/ZEscalationChouka/ChoukaBelieverFrigate.php',
+				'choukabishopwarship' => '/server/model/ships/ZEscalationChouka/ChoukaBishopWarship.php',
+				'choukabloodlustfighter' => '/server/model/ships/ZEscalationChouka/ChoukaBloodlustFighter.php',
+				'choukadevotionfreetrader' => '/server/model/ships/ZEscalationChouka/ChoukaDevotionFreeTrader.php',
+				'choukafaithbringerfighter' => '/server/model/ships/ZEscalationChouka/ChoukaFaithbringerFighter.php',
+				'choukahellfireaosat' => '/server/model/ships/ZEscalationChouka/ChoukaHellfireAOSAT.php',
+				'choukahellfirebosat' => '/server/model/ships/ZEscalationChouka/ChoukaHellfireBOSAT.php',
+				'choukaholylandassault' => '/server/model/ships/ZEscalationChouka/ChoukaHolylandAssault.php',
+				'choukainquisitorlightcruiser' => '/server/model/ships/ZEscalationChouka/ChoukaInquisitorLightCruiser.php',
+				'choukapriestdestroyer' => '/server/model/ships/ZEscalationChouka/ChoukaPriestDestroyer.php',
+				'choukapriestescort' => '/server/model/ships/ZEscalationChouka/ChoukaPriestEscort.php',
+				'choukaretributionbattlecruiser' => '/server/model/ships/ZEscalationChouka/ChoukaRetributionBattlecruiser.php',
+				'choukaretributionrefit' => '/server/model/ships/ZEscalationChouka/ChoukaRetributionRefit.php',
+				'choukarevelationfreighter' => '/server/model/ships/ZEscalationChouka/ChoukaRevelationFreighter.php',
+				'choukarevelationwarbarge' => '/server/model/ships/ZEscalationChouka/ChoukaRevelationWarBarge.php',
+				'choukarevelationminelayer' => '/server/model/ships/ZEscalationChouka/ChoukaRevelationMinelayer.php',
+				'choukarevelationauxiliarycarrier' => '/server/model/ships/ZEscalationChouka/ChoukaRevelationAuxiliaryCarrier.php',
+				'choukascripturescout' => '/server/model/ships/ZEscalationChouka/ChoukaScriptureScout.php',
+				'choukavengeancecarrier' => '/server/model/ships/ZEscalationChouka/ChoukaVengeanceCarrier.php',
+				'choukavengeancecruiser' => '/server/model/ships/ZEscalationChouka/ChoukaVengeanceCruiser.php',
+				'choukawarprayergunship' => '/server/model/ships/ZEscalationChouka/ChoukaWarPrayerGunship.php',
+				'choukawarprayerescort' => '/server/model/ships/ZEscalationChouka/ChoukaWarPrayerEscort.php',
+				'choukawraithbladefighter' => '/server/model/ships/ZEscalationChouka/ChoukaWraithbladeFighter.php',
+				
+				//Escalation Wars - Chouka Raiders
+				'choukaraidercruiser' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderCruiser.php',
+				'choukaraiderjumpcruiser' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderJumpcruiser.php',
+				'choukaraiderheresy' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderHeresy.php',
+				'choukaraiderhighwaymana' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderHighwaymanA.php',
+				'choukaraiderhighwaymana_nocargo' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderHighwaymanA_NoCargo.php',
+				'choukaraiderhighwaymanb' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderHighwaymanB.php',
+				'choukaraiderhighwaymanb_nocargo' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderHighwaymanB_NoCargo.php',
+				'choukaraideroathbreaker' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderOathbreaker.php',
+				'choukaraiderreclumafighter' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderReclumAFighter.php',
+				'choukaraiderreclumbfighter' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderReclumBFighter.php',
+				'choukaraiderreclumcfighter' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderReclumCFighter.php',
+				'choukaraiderreclumdfighter' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderReclumDFighter.php',
+				'choukaraiderwrathwarship' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderWrathWarship.php',
 				
 
 				//Escalation Wars - Circasian
@@ -1127,6 +1184,7 @@ spl_autoload_register(
 				'circasianmoshestabeta' => '/server/model/ships/ZEscalationCircasian/CircasianMoshestaBeta.php',
 				'circasianolcata' => '/server/model/ships/ZEscalationCircasian/CircasianOlcata.php',
 				'circasianreglata' => '/server/model/ships/ZEscalationCircasian/CircasianReglata.php',
+				'circasianrehkafighter' => '/server/model/ships/ZEscalationCircasian/CircasianRehkaFighter.php',
 				'circasianshenna' => '/server/model/ships/ZEscalationCircasian/CircasianShenna.php',
 				'circasiantoltara' => '/server/model/ships/ZEscalationCircasian/CircasianToltara.php',
 				'circasiantormin' => '/server/model/ships/ZEscalationCircasian/CircasianTormin.php',
@@ -1151,7 +1209,6 @@ spl_autoload_register(
 				'nexusprojectorarray' => '/server/model/weapons/customNexus.php',
 				'nexuslightprojectorarray' => '/server/model/weapons/customNexus.php',
 				'nexusinterceptorarray' => '/server/model/weapons/customNexus.php',
-				'lightenergymine' => '/server/model/weapons/AoE.php',
 				
 				//Nexus ships - Brixadii
                 'brixadiibattledestroyerbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerBase.php',					

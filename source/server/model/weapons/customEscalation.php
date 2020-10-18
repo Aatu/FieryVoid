@@ -165,76 +165,155 @@ class EWParticleLance extends Raking{
 // END PARTICLE WEAPONS
 
 
-// GRAVITIC WEAPONS
-
-
-class EWGraviticTractingRod extends SWDirectWeapon{
-    /*StarWars Tractor Beam - modified
-    */
-    /*weapon that does no damage, but limits targets' maneuvrability next turn ('target held by tractor beam')
-    */
-    public $name = "EWGraviticTractingRod";
-    public $displayName = "Gravitic Tracting Rod";
-	
-    public $priority = 10; //let's fire last
-    public $loadingtime = 3;
-    public $rangePenalty = 2;
-    public $intercept = 0;
-    public $fireControl = array(null, 2, 2); // can't fire at fighters, incompatible with crit behavior!
-   
-	//let's animate this as a very wide beam...
-	public $animation = "laser";
-        public $animationColor = array(55, 55, 55);
-        public $animationColor2 = array(100, 100, 100);
-        public $animationExplosionScale = 0.45;
-        public $animationWidth = 15;
-        public $animationWidth2 = 0.5;
-	
- 	public $possibleCriticals = array( //no point in damage reduced crit
-            14=>"ReducedRange"
-	);
-	
-    public function setSystemDataWindow($turn){
-      parent::setSystemDataWindow($turn);
-		if (!isset($this->data["Special"])) {
-			$this->data["Special"] = '';
-		}else{
-			$this->data["Special"] .= '<br>';
-		}
-      $this->data["Special"] .= "Does no damage, but holds target next turn";      
-      $this->data["Special"] .= "<br>limiting its maneuvering options"; 
-      $this->data["Special"] .= "<br>(-1 thrust and -20 Initiative next turn).";  
-    }	
-    
-	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
-		$this->intercept = 0;
-		$this->iconPath = "EWGraviticTractingRod.png";
-		
-		parent::__construct($armor, 6, 4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
-		$this->addSalvoMode();
-	}    
-	
-	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //target is held critical on PRIMARY Structure!
-		//marked to C&C
-		$CnC = $ship->getSystemByName("CnC");
-		if($CnC){
-			$crit = new swtargetheld(-1, $ship->id, $CnC->id, 'swtargetheld', $gamedata->turn); 
-			$crit->updated = true;
-		      $CnC->criticals[] =  $crit;
-		}
-	}
-	
-	public function getDamage($fireOrder){ return  0;   }
-	public function setMinDamage(){   $this->minDamage =  0 ;      }
-	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
-} //endof EWGraviticTractingRod
-
-
-// END GRAVITIC WEAPONS
-
-
-
 // LASER WEAPONS
+
+
+class EWGatlingLaser extends Pulse{
+
+        public $name = "EWGatlingLaser";
+        public $displayName = "Gatling Laser";
+		public $iconPath = "EWGatlingLaser.png"; 
+        public $animation = "bolt";
+        public $trailLength = 12;
+        public $animationWidth = 4;
+        public $projectilespeed = 9;
+        public $animationExplosionScale = 0.10;
+        public $rof = 2;
+        public $grouping = 20;
+        public $maxpulses = 5;
+        public $uninterceptable = true; // This is a laser        
+        public $loadingtime = 2;
+        public $intercept = 2; 
+		public $ballisticIntercept = true;
+        public $priority = 6; // 
+	protected $useDie = 3; //die used for base number of hits
+
+        public $rangePenalty = 1;
+        public $fireControl = array(1, 1, 2); // fighters, <mediums, <capitals
+
+		public $firingMode = "Laser";
+        public $damageType = "Pulse"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        public $weaponClass = "Pulse";
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            if ( $maxhealth == 0 ) $maxhealth = 7;
+            if ( $powerReq == 0 ) $powerReq = 4;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] .= "<br>Uninterceptable";
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 1)+4; }
+        public function setMinDamage(){ $this->minDamage = 5 ; }
+        public function setMaxDamage(){ $this->maxDamage = 14 ; }		
+		
+    } // endof EWGatlingLaser
+
+
+class EWHeavyGatlingLaser extends Pulse{
+
+        public $name = "EWHeavyGatlingLaser";
+        public $displayName = "Heavy Gatling Laser";
+		public $iconPath = "EWHeavyGatlingLaser.png"; 
+        public $animation = "bolt";
+        public $trailLength = 12;
+        public $animationWidth = 4;
+        public $projectilespeed = 9;
+        public $animationExplosionScale = 0.10;
+        public $rof = 2;
+        public $grouping = 20;
+        public $maxpulses = 5;
+        public $uninterceptable = true; // This is a laser        
+        public $loadingtime = 2;
+        public $intercept = 2; 
+		public $ballisticIntercept = true;
+        public $priority = 6; // 
+	protected $useDie = 3; //die used for base number of hits
+
+        public $rangePenalty = 0.5;
+        public $fireControl = array(1, 1, 2); // fighters, <mediums, <capitals
+
+		public $firingMode = "Laser";
+        public $damageType = "Pulse"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        public $weaponClass = "Pulse";
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            if ( $maxhealth == 0 ) $maxhealth = 8;
+            if ( $powerReq == 0 ) $powerReq = 6;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] .= "<br>Uninterceptable";
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 2)+5; }
+        public function setMinDamage(){ $this->minDamage = 7 ; }
+        public function setMaxDamage(){ $this->maxDamage = 25 ; }		
+		
+    } // endof EWHeavyGatlingLaser
+
+
+    class EWLightLaserBeam extends LinkedWeapon{
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "EWLightLaserBeam";
+        public $iconPath = "EWLightLaserBeam.png";
+        public $displayName = "Light Laser Beam";
+        public $animation = "trail";
+        public $animationColor = array(30, 170, 255);
+        public $animationExplosionScale = 0.10;
+        public $projectilespeed = 12;
+        public $animationWidth = 2;
+        public $trailLength = 10;
+        public $priority = 3;
+
+        public $intercept = 2;
+
+        public $loadingtime = 1;
+        public $shots = 2;
+        public $defaultShots = 2;
+
+        public $rangePenalty = 1.5;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        private $damagebonus = 0;
+
+        public $damageType = "Standard"; 
+        public $weaponClass = "Laser"; 
+        
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            $this->intercept = $nrOfShots;
+
+            if ($damagebonus >= 3) $this->priority++; //heavier varieties fire later in the queue
+            if ($damagebonus >= 5) $this->priority++;
+            if ($damagebonus >= 7) $this->priority++;
+			
+            if($nrOfShots === 1){
+                $this->iconPath = "EWLightLaserBeam.png";
+            }
+            if($nrOfShots >2){//no special icon for more than 3 linked weapons
+                $this->iconPath = "lightParticleBeam3.png";
+            }
+			
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
+        public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
+        public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
+
+    }  // endof EWLightLaserBeam
 
 
     class EWTwinLaserCannon extends Laser{
@@ -282,6 +361,163 @@ class EWGraviticTractingRod extends SWDirectWeapon{
 // PLASMA WEAPONS
 
 
+    class EWPlasmaGun extends LinkedWeapon{
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "EWPlasmaGun";
+        public $iconPath = "EWPlasmaGun.png";
+        public $displayName = "Plasma Gun";
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+        public $animationExplosionScale = 0.10;
+        public $projectilespeed = 15;
+        public $animationWidth = 1;
+        public $trailLength = 5;
+        public $priority = 3;
+    	public $rangeDamagePenalty = 1;
+
+        public $intercept = 1;
+
+        public $loadingtime = 1;
+        public $shots = 1;
+        public $defaultShots = 1;
+
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        private $damagebonus = 0;
+
+        public $damageType = "Standard"; 
+        public $weaponClass = "Plasma"; 
+        
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            $this->intercept = $nrOfShots;
+
+            if ($damagebonus >= 3) $this->priority++; //heavier varieties fire later in the queue
+            if ($damagebonus >= 5) $this->priority++;
+            if ($damagebonus >= 7) $this->priority++;
+			
+            if($nrOfShots === 1){
+                $this->iconPath = "EWPlasmaGun.png";
+            }
+            if($nrOfShots >2){//no special icon for more than 3 linked weapons
+                $this->iconPath = "lightParticleBeam3.png";
+            }
+			
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
+        public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
+        public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
+
+    }  // endof EWPlasmaGun
+	
+	
+	    class EWUltralightPlasmaGun extends LinkedWeapon{
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "EWUltralightPlasmaGun";
+        public $iconPath = "EWUltralightPlasmaGun.png";
+        public $displayName = "Ultralight Plasma Gun";
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+        public $animationExplosionScale = 0.10;
+        public $projectilespeed = 15;
+        public $animationWidth = 1;
+        public $trailLength = 5;
+        public $priority = 3;
+    	public $rangeDamagePenalty = 1;
+
+        public $loadingtime = 1;
+        public $shots = 2;
+        public $defaultShots = 2;
+
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        private $damagebonus = 0;
+
+        public $damageType = "Standard"; 
+        public $weaponClass = "Plasma"; 
+        
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            $this->intercept = $nrOfShots;
+
+            if ($damagebonus >= 3) $this->priority++; //heavier varieties fire later in the queue
+            if ($damagebonus >= 5) $this->priority++;
+            if ($damagebonus >= 7) $this->priority++;
+			
+            if($nrOfShots === 1){
+                $this->iconPath = "EWUltralightPlasmaGun.png";
+            }
+            if($nrOfShots >2){//no special icon for more than 3 linked weapons
+                $this->iconPath = "lightParticleBeam3.png";
+            }
+			
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(3)+$this->damagebonus;   }
+        public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
+        public function setMaxDamage(){     $this->maxDamage = 3+$this->damagebonus ;      }
+
+    }  // endof EWUltralightPlasmaGun
+
+
+class EWPointPlasmaGun extends Plasma{
+    	public $name = "EWPointPlasmaGun";
+        public $displayName = "Point Plasma Gun";
+		public $iconPath = "EWPointPlasmaGun.png";
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+    	public $trailColor = array(75, 250, 90);
+    	public $projectilespeed = 15;
+        public $animationWidth = 1;
+    	public $animationExplosionScale = 0.10;
+    	public $trailLength = 10;
+    	public $rangeDamagePenalty = 1;
+        public $guns = 1;
+
+        public $intercept = 1;
+		public $ballisticIntercept = true;
+    		        
+        public $loadingtime = 1;
+			
+        public $rangePenalty = 2;
+        public $fireControl = array(2, 1, 1); // fighters, <=mediums, <=capitals 
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 3;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 1;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		
+    	public function getDamage($fireOrder){        return Dice::d(6, 2)+0;   }
+        public function setMinDamage(){     $this->minDamage = 2 /*- $this->dp*/;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 /*- $this->dp*/;      }
+
+}  // endof EWPointPlasmaGun
+
 class EWHeavyPointPlasmaGun extends Plasma{
     	public $name = "EWHeavyPointPlasmaGun";
         public $displayName = "Heavy Point Plasma Gun";
@@ -324,11 +560,70 @@ class EWHeavyPointPlasmaGun extends Plasma{
 }  // endof EWHeavyPointPlasmaGun
 
 
+class EWHeavyPlasmaGun extends Plasma{
+    	public $name = "EWHeavyPlasmaGun";
+        public $displayName = "Heavy Plasma Gun";
+		public $iconPath = "EWHeavyPlasmaGun.png";
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+    	public $trailColor = array(75, 250, 90);
+    	public $projectilespeed = 10;
+        public $animationWidth = 3;
+    	public $animationExplosionScale = 0.20;
+    	public $trailLength = 15;
+    	public $rangeDamagePenalty = 1;
+        public $guns = 1;
+
+        public $loadingtime = 3;
+			
+        public $rangePenalty = 1;
+        public $fireControl = array(-5, 1, 2); // fighters, <=mediums, <=capitals 
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 5;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 3;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		
+    	public function getDamage($fireOrder){        return Dice::d(10, 2)+6;   }
+        public function setMinDamage(){     $this->minDamage = 8 /*- $this->dp*/;      }
+        public function setMaxDamage(){     $this->maxDamage = 26 /*- $this->dp*/;      }
+
+}  // endof EWHeavyPlasmaGun
+
 // END PLASMA WEAPONS
 
 
 
+
 // BALLISTIC WEAPONS
+
+
+class EWOMissileRack extends MissileLauncher
+{
+    public $name = "EWOMissileRack";
+    public $displayName = "Class-O Missile Rack";
+    public $range = 20;
+    public $distanceRange = 60;
+    public $loadingtime = 3;
+    public $iconPath = "missile1.png";
+
+    public $fireControl = array(1, 1, 1); // fighters, <mediums, <capitals 
+    
+    public function getDamage($fireOrder)
+    {
+        return 20;
+    }
+    public function setMinDamage(){     $this->minDamage = 20 ;}
+    public function setMaxDamage(){     $this->maxDamage = 20 ;}     
+} // end of EWOMissileRack
 
 
 class EWRocketLauncher extends Weapon{
@@ -536,6 +831,74 @@ class EWHeavyRocketLauncher extends Weapon{
 
 
 // END BALLISTIC WEAPONS
+
+
+// GRAVITIC WEAPONS
+
+
+class EWGraviticTractingRod extends SWDirectWeapon{
+    /*StarWars Tractor Beam 
+    */
+    /*weapon that does no damage, but limits targets' maneuvrability next turn ('target held by tractor beam')
+    */
+    public $name = "EWGraviticTractingRod";
+    public $displayName = "Gravitic Tracting Rod";
+	
+    public $priority = 10; //let's fire last
+    public $loadingtime = 3;
+    public $rangePenalty = 2;
+    public $intercept = 0;
+    public $fireControl = array(null, 2, 4); // can't fire at fighters, incompatible with crit behavior!
+   
+	//let's animate this as a very wide beam...
+	public $animation = "laser";
+        public $animationColor = array(55, 55, 55);
+        public $animationColor2 = array(100, 100, 100);
+        public $animationExplosionScale = 0.45;
+        public $animationWidth = 15;
+        public $animationWidth2 = 0.5;
+	
+ 	public $possibleCriticals = array( //no point in damage reduced crit
+            14=>"ReducedRange"
+	);
+	
+    public function setSystemDataWindow($turn){
+      parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+      $this->data["Special"] .= "Does no damage, but holds target next turn";      
+      $this->data["Special"] .= "<br>limiting its maneuvering options"; 
+      $this->data["Special"] .= "<br>(-1 thrust and -20 Initiative next turn).";  
+    }	
+    
+	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
+		$this->intercept = 0;
+		$this->iconPath = "EWGraviticTractingRod.png";
+		
+		parent::__construct($armor, 6, 4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+		$this->addSalvoMode();
+	}    
+	
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //target is held critical on PRIMARY Structure!
+		//marked to C&C
+		$CnC = $ship->getSystemByName("CnC");
+		if($CnC){
+			$crit = new swtargetheld(-1, $ship->id, $CnC->id, 'swtargetheld', $gamedata->turn); 
+			$crit->updated = true;
+		      $CnC->criticals[] =  $crit;
+		}
+	}
+	
+	public function getDamage($fireOrder){ return  0;   }
+	public function setMinDamage(){   $this->minDamage =  0 ;      }
+	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
+} //end of class EWGraviticTractingRod
+
+
+// END GRAVITIC WEAPONS
 
 
 ?>

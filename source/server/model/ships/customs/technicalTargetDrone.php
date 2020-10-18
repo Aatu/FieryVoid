@@ -7,7 +7,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->pointCost = 10;
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
-		$this->imagePath = "img/ships/CircasianKolanis2.png";
+		$this->imagePath = "img/ships/BACloseEscort.png";
 		$this->shipClass = "Target Drone - DO NOT USE";
 		$this->shipSizeClass = 3;
 		$this->forwardDefense = 20;
@@ -42,7 +42,10 @@ class technicalTargetDrone extends BaseShip{
 		
 		//new weapon showcase
 		
-		//$this->addFrontSystem(new PlasmaWaveTorpedo(3, 0, 0, 300, 60));
+		$this->addFrontSystem(new Maser(3, 6, 3, 270, 90));
+		$this->addFrontSystem(new Maser(3, 6, 3, 270, 90));
+		$this->addFrontSystem(new Maser(3, 6, 3, 270, 90));
+		$this->addFrontSystem(new Maser(3, 6, 3, 270, 90));
 		//$this->addFrontSystem(new PlasmaWaveTorpedo(3, 0, 0, 300, 60));
 		//$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));
 		//$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));
