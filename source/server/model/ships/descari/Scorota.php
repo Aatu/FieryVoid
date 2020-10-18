@@ -68,7 +68,7 @@ class Scorota extends BaseShip{
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));	
 		$this->addRightSystem(new HeavyPlasmaBolter(4, 0, 0, 0, 60));
 		$this->addRightSystem(new HeavyPlasmaBolter(4, 0, 0, 0, 60));
-		$this->addRightSystem(new Thruster(4, 20, 0, 5, 4));
+		$this->addRightSystem(new Thruster(4, 20, 0, 6, 4));
         
 		
 		//structures
