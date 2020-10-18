@@ -108,3 +108,9 @@ var LaserAccelerator = function LaserAccelerator(json, ship) {
 };
 LaserAccelerator.prototype = Object.create(Laser.prototype);
 LaserAccelerator.prototype.constructor = LaserAccelerator;
+
+var Maser = function Maser(json, ship) {
+    Laser.call(this, json, ship);
+};
+Maser.prototype = Object.create(Laser.prototype);
+Maser.prototype.constructor = Maser;
