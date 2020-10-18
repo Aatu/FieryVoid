@@ -325,6 +325,70 @@ class NexusChaffLauncher extends Weapon{
         public function setMinDamage(){     $this->minDamage = 9 ;      }
         public function setMaxDamage(){     $this->maxDamage = 36 ;      }
     }
+	
+	
+	
+
+    class NexusInterceptorArray extends Particle{ 
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "NexusInterceptorArray";
+        public $displayName = "Interceptor Array";
+        public $animation = "beam";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.1;
+        public $projectilespeed = 10;
+        public $animationWidth = 3;
+        public $trailLength = 8;
+	    public  $iconPath = "NexusInterceptorArray.png";
+
+        public $intercept = 3;
+        public $freeintercept = true; //can intercept fire directed at different unit
+        public $freeinterceptspecial = true; //has own custom routine for deciding whether third party interception is legal
+        public $loadingtime = 1;
+
+
+        public $rangePenalty = 2; //-2/hex
+        public $fireControl = array(4, 2, 0); // fighters, <mediums, <capitals
+        public $priority = 4; //light Standard 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 2;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 3 hexes.";
+		}
+		
+		public function canFreeInterceptShot($gamedata, $fireOrder, $shooter, $target, $interceptingShip, $firingWeapon){
+			//target must be within 3 hexes
+			$distance = mathlib::getDistanceHex($interceptingShip, $target);
+			if ($distance > 3) return false;
+			
+			//both source and target of fire must be in arc
+			//first check target
+			$targetBearing = $interceptingShip->getBearingOnUnit($target);
+			if (!mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) return false;
+			//check on source - launch hex for ballistics, current position for direct fire
+			if ($firingWeapon->ballistic){
+				$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+				$pos = mathlib::hexCoToPixel($movement->position); //launch hex
+				$sourceBearing = $interceptingShip->getBearingOnPos($pos);				
+			}else{ //direct fire
+				$sourceBearing = $interceptingShip->getBearingOnUnit($shooter);
+			}
+			if (!mathlib::isInArc($sourceBearing, $this->startArc, $this->endArc)) return false;
+						
+			return true;
+		}
+
+        public function getDamage($fireOrder){        return Dice::d(3,2)+6;   }
+        public function setMinDamage(){     $this->minDamage = 8 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+    }	//endof class NexusInterceptorArray
 
 
 ?>

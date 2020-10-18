@@ -648,4 +648,68 @@ class LaserAccelerator extends Laser{
 
 
 
+    class Maser extends Laser{
+        public $trailColor = array(140, 210, 255);
+
+        public $name = "Maser";
+        public $displayName = "Maser";
+		public $iconPath = "Maser.png";
+		
+        public $animation = "laser";
+        //public $animationColor = array(240, 90, 90);
+        public $animationColor = array(100, 30, 15);
+        public $animationExplosionScale = 0.16;
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.3;
+        public $priority = 8;
+
+        public $loadingtime = 1;
+
+        public $rangePenalty = 1;
+        public $fireControl = array(2, 3, 3); // fighters, <mediums, <capitals
+
+        public $damageType = "Standard"; 
+        public $weaponClass = "Laser";
+        public $firingModes = array( 1 => "Standard");
+
+        public $noOverkill = true;		
+
+        public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos=null){ //Maser treats armor as doubled
+            $armour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
+            $armour = $armour * 2;
+            $armour = max(0,$armour);
+            return $armour;
+        }
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 6;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 3;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            //$this->data["Special"] = '<br>Armor counts as double.';
+            $this->data["Special"] = '<br>Armor is doubled, and damage doubled for criticals.';
+            parent::setSystemDataWindow($turn);
+        }
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
+		$system->critRollMod+=max(0, ($damage-$armour)); //+twice damage to all critical/dropout rolls on system hit this turn
+		$system->forceCriticalRoll = true;
+	} //endof function onDamagedSystem
+
+        public function getDamage($fireOrder){ return Dice::d(10, 2)+2;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 ;      }  
+		
+    }  //endof Maser
+
+
 ?>

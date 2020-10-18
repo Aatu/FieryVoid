@@ -43,9 +43,9 @@ class CircasianXandar extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));
         $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 240, 60));
-        $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 300, 120));
         $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 120, 300));
         $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 60, 240));
+        $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 300, 120));
 
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
