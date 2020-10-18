@@ -65,6 +65,7 @@ if (isset($_SESSION["user"])) {
 	    <br><b>game not highlighting for active player bug fixed</b> – game highlighting for inactive player bug introduced (happens in the same situation - hopefully this will be less troublesome!)
 	    <br><b>Plasma Stream fixed</b> – now encounters full armor for every rake, as it should.
 	    <br><b>Hit table behavior fixed</b> – now Demos' Heavy Arrays are hittable again ;).
+	    <br><b><u>The Chouka have arrived</u></b> – so Circasians will have in-universe opponent :) (courtesy of Geoffrey and Tyrel) 
   
 	    
         <br><br>

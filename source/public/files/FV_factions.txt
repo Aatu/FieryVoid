@@ -303,6 +303,23 @@ Light Molecular Disruptor - armor-stripping heavy fighter weapon.
 Fusion Agitator - Raking weapon that does damage in inefficient Raking(6) mode. However, it ignores a point of armor (which helps), its raw damage output is decent, and if extra power is thrown in to boost it - damage output can rise to extremely high. Make no mistake: this is a very dangerous weapon! 
 	Many Yolu weapons have special features, usually relating to target armor - see descriptions.
 	
+
+ZESCALATION CHOUKA (custom, alternate universe faction)
+The Chouka Theocracy was a minor regional power in the Escalation Wars universe, and the Circasian's opponents in their first major interstellar war. The Chouka were more technologically advanced than the Circasians, but lacked the tactical experience and fleet assets to combat the more numerous and maneuverable Circasian fleet.
+The ships included here are the Chouka spacecraft that served during the Chouka War period. They are armed with a mix of plasma and laser weapons, with older Chouka ships relying on plasma weapons while their newer ships rely on lasers in the anti-shipping role. Plasma weapons continued to be used for anti-fighter work into the Chouka War period, however.
+As with the Circasians, the Chouka are best used against minor B5 powers (Alacans, Mitoc, Raiders), however some of their larger, more powerful units are roughly the equivalent of Dilgar-war era Earth Alliance. 
+Point Plasma Guns - These short range plasma weapons are the Chouka's primary anti-fighter weapons.
+Gravitic Tracting Rod - This rare device was only found on the Apostle Holy Cruiser. It was used to tractor on to smaller craft and draw them closer to dock with the ship for boarding. In Fiery Void, the Tracting Rod instead gives the target an initiative a thrust penalty.
+Twin Laser Cannon - This Chouka weapon is an advancement over the basic Light Laser Cannon using early gravitic technology to improve its range. 
+Light Energy Mine - This is a smaller version of the Energy Mine used by the Narn. It has shorter range (25 hexes) and does less damage (10/5) than the conventional Energy Mine. This weapon is being substituted for the Ballistic Mine Launchers these ships historically were deployed with.
+
+
+ZESCALATION CHOUKA RAIDERS (custom, alternate universe faction)
+This group of raiders operated in and around Chouka controlled territories and were directly financed by the Chouka Theocracy. They were an early threat to the Circasian Empire as it expanded its own sphere of influence. 
+These raiders operate cast-off Chouka military and civilian ships and fighters. Their weapons are sourced from the Chouka, along with limited supplies from other black market sources.
+Because of their ties to the Chouka government, these raiders are fairly well armed compared to the Circasian and Chouka fleets and are comparable to other low tech raiders in the B5 universe.
+
+
 ZESCALATION CIRCASIAN (custom, alternate universe faction)
 The Circasians are one of the two central powers in the Escalation Wars milieu. These Dilgar-like humanoids started as a small minor power surrounded by other, more established empires but through political manuevering and conquest they were able to eventually carve out a major imperium of their own.
 The ships included here are low tech units the Circasians used during the Chouka War period. These vessels are principally armed with light particle, plasma, and laser weapons. Anything more powerful is beyond their level of technology at the start of the war.
@@ -386,6 +403,8 @@ THE REST
 Factions that cannot seriously compete. Usually they have some deficiencies that cannot be fixed by simply increasing their PV allowance (like combination of poor maneuvrability/poor Sensors/short range weapons on low-tech ships or some glaring weakness in overall fleet layout).
 Abbai (WotCR)
 Alacan (Small Races)
+Chouka
+Chouka Raiders
 Circasian
 Hurr
 Rogolon (Small Races)
