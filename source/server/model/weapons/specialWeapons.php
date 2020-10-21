@@ -59,6 +59,7 @@ class PlasmaStream extends Raking{
 	    $this->data["Special"] .= "Damage reduced by 1 point per hex.";
 	    $this->data["Special"] .= "<br>Reduces armor of systems hit.";	
 	    $this->data["Special"] .= "<br>Ignores half of armor.";	 //now handled by standard routines
+	    $this->data["Special"] .= "<br>Does not ignore already pierced armor (eg. every rake needs to pierce armor anew, even to the same location).";
 	}
 		 
 	
@@ -73,6 +74,13 @@ class PlasmaStream extends Raking{
 			    $system->criticals[] =  $crit;
 		}
 	}
+	
+	protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
+    {
+		parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+		$fireOrder->armorIgnored = array(); //clear armorIgnored array - next rake should be met with full armor value!
+	}
+	
 		
 		
 	public function getDamage($fireOrder){        return Dice::d(10,3)+4;   }

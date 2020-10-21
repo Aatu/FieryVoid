@@ -106,9 +106,14 @@ class TechnicalTestbed extends MediumShip{
 		
 		
 		//weapons - Forward for visual reasons!
-        $this->addFrontSystem(new BurstBeam(3, 6, 3, 240, 60));
-        $this->addFrontSystem(new BurstBeam(3, 6, 3, 300, 120));
-		$this->addFrontSystem(new mediumPulse(3, 6, 3, 240, 120));	
+        $this->addFrontSystem(new LightEnergyMine(2, 0, 0, 300, 120));
+        $this->addFrontSystem(new LightEnergyMine(2, 0, 0, 300, 120));
+        $this->addFrontSystem(new LightEnergyMine(2, 0, 0, 300, 120));
+        $this->addFrontSystem(new LightEnergyMine(2, 0, 0, 300, 120));
+        $this->addFrontSystem(new NexusInterceptorArray(2, 0, 0, 300, 60));
+        $this->addFrontSystem(new NexusInterceptorArray(2, 0, 0, 300, 60));
+        $this->addFrontSystem(new NexusInterceptorArray(2, 0, 0, 300, 60));
+        $this->addFrontSystem(new NexusInterceptorArray(2, 0, 0, 300, 60));
         
 		
 		//technical thrusters - unlimited, like for MCVs		
