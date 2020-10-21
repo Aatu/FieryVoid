@@ -65,7 +65,7 @@ class ChoukaBishopWarship extends HeavyCombatVessel{
             ),
             1=> array(
                     4 => "Thruster",
-					6 => "Twin Laser",
+					6 => "Twin Laser Cannon",
                     8 => "Medium Plasma Cannon",
 					11 => "Light Plasma Cannon",
 					18 => "Structure",

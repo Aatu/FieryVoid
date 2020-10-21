@@ -93,7 +93,7 @@ class EWParticleLance extends Raking{
 
         public $intercept = 1;
         public $loadingtime = 2;
-        public $priority = 8;
+        public $priority = 4;
 
         public $rangePenalty = 1;
         public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals
@@ -134,7 +134,7 @@ class EWParticleLance extends Raking{
 
         public $intercept = 1;
         public $loadingtime = 1;
-        public $priority = 8;
+        public $priority = 3;
 
         public $rangePenalty = 2;
         public $fireControl = array(1, 1, 0); // fighters, <mediums, <capitals
@@ -185,7 +185,7 @@ class EWGatlingLaser extends Pulse{
         public $loadingtime = 2;
         public $intercept = 2; 
 		public $ballisticIntercept = true;
-        public $priority = 6; // 
+        public $priority = 5; // 
 	protected $useDie = 3; //die used for base number of hits
 
         public $rangePenalty = 1;
@@ -259,18 +259,18 @@ class EWHeavyGatlingLaser extends Pulse{
 
 
     class EWLightLaserBeam extends LinkedWeapon{
-        public $trailColor = array(30, 170, 255);
 
         public $name = "EWLightLaserBeam";
         public $iconPath = "EWLightLaserBeam.png";
         public $displayName = "Light Laser Beam";
-        public $animation = "trail";
-        public $animationColor = array(30, 170, 255);
-        public $animationExplosionScale = 0.10;
-        public $projectilespeed = 12;
-        public $animationWidth = 2;
-        public $trailLength = 10;
+        public $animation = "laser";
+        public $animationColor = array(220, 100, 30);
+        public $animationExplosionScale = 0.1;
+        public $animationWidth = 1;
+        public $animationWidth2 = 0.2;
         public $priority = 3;
+        public $uninterceptable = true; // This is a laser        
+		
 
         public $intercept = 2;
 
@@ -280,7 +280,6 @@ class EWHeavyGatlingLaser extends Pulse{
 
         public $rangePenalty = 1.5;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
-        private $damagebonus = 0;
 
         public $damageType = "Standard"; 
         public $weaponClass = "Laser"; 
@@ -306,7 +305,8 @@ class EWHeavyGatlingLaser extends Pulse{
         }
 
         public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Laser. Uninterceptable. Able to intercept.';
         }
 
         public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
@@ -327,7 +327,7 @@ class EWHeavyGatlingLaser extends Pulse{
         public $animationExplosionScale = 0.16;
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
-        public $priority = 8;
+        public $priority = 7;
 		public $guns = 2;
         public $loadingtime = 2;
         
@@ -410,9 +410,11 @@ class EWHeavyGatlingLaser extends Pulse{
         }
 
         public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Plasma weapon. Does less damage ';
+			$this->data["Special"] .= '<br>over distance (1 per hex). Ignores half of armor.';			
         }
-
+		
         public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
         public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
         public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
@@ -488,6 +490,7 @@ class EWPointPlasmaGun extends Plasma{
         public $animationWidth = 1;
     	public $animationExplosionScale = 0.10;
     	public $trailLength = 10;
+        public $priority = 4;
     	public $rangeDamagePenalty = 1;
         public $guns = 1;
 
@@ -529,6 +532,7 @@ class EWHeavyPointPlasmaGun extends Plasma{
         public $animationWidth = 5;
     	public $animationExplosionScale = 0.30;
     	public $trailLength = 20;
+        public $priority = 4;		
     	public $rangeDamagePenalty = 1;
         public $guns = 2;
 
@@ -571,6 +575,7 @@ class EWHeavyPlasmaGun extends Plasma{
         public $animationWidth = 3;
     	public $animationExplosionScale = 0.20;
     	public $trailLength = 15;
+        public $priority = 5;		
     	public $rangeDamagePenalty = 1;
         public $guns = 1;
 
