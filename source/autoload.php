@@ -1498,6 +1498,18 @@ spl_autoload_register(
 		    	'roskorbase2215' => '/server/model/ships/hurr/Roskorbase2215.php',
 		    	'roskorbase2240' => '/server/model/ships/hurr/Roskorbase2240.php',
 				
+				
+				//new SW - Uglies
+                'zzftruglytiex' => '/server/model/ships/ZStarWars/zzftrUglyTIEX.php',
+				
+				
+				//Gaim systems
+                'subreactoruniversal' => '/server/model/systems/baseSystems.php',
+				//Gaim ships				
+				'gaimmoor' => '/server/model/ships/gaim/gaimMoor.php',
+				
+				
+				
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
 						
