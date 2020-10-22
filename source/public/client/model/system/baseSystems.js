@@ -18,6 +18,15 @@ MagGravReactor.prototype.hasMaxBoost = function () {
     return true;
 };
 
+
+var SubReactorUniversal = function(json, ship)
+{
+    ShipSystem.call( this, json, ship);
+}
+SubReactorUniversal.prototype = Object.create( ShipSystem.prototype );
+SubReactorUniversal.prototype.constructor = SubReactorUniversal;
+
+
 var Scanner = function Scanner(json, ship) {
     ShipSystem.call(this, json, ship);
 };

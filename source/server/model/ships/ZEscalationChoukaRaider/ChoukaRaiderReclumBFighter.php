@@ -36,7 +36,7 @@ class ChoukaRaiderReclumBFighter extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){            
             $armour = array(1, 1, 1, 1);
             $fighter = new Fighter("ChoukaRaiderReclumBFighter", $armour, 7, $this->id);
-            $fighter->displayName = "Reclum-B Light Fighter";
+            $fighter->displayName = "Reclum-B";
             $fighter->imagePath = "img/ships/EscalationWars/ChoukaRaiderReclum.png";
             $fighter->iconPath = "img/ships/EscalationWars/ChoukaRaiderReclum_Large.png";
 

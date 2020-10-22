@@ -4,7 +4,7 @@ class CircasianKolanisCarrier extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 375;
+	$this->pointCost = 400;
 	$this->faction = "ZEscalation Circasian";
         $this->phpclass = "CircasianKolanisCarrier";
         $this->imagePath = "img/ships/EscalationWars/CircasianKolanis.png";
