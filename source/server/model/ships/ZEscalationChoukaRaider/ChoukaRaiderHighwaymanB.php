@@ -59,7 +59,7 @@ class ChoukaRaiderHighwaymanB extends MediumShip{
 		0=> array(
 			6 => "Thruster",
 			8 => "Point Plasma Gun",
-			11 => "Cargo",
+			11 => "Cargo Bay",
 			14 => "Scanner",
 			16 => "Engine",
 			17 => "Hangar",
