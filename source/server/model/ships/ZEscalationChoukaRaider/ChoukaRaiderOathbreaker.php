@@ -58,7 +58,7 @@ class ChoukaRaiderOathbreaker extends HeavyCombatVessel{
             0=> array(
                     7 => "Structure",
                     10 => "Thruster",
-					12 => "Cargo",
+					12 => "Cargo Bay",
 					14 => "Scanner",
                     16 => "Engine",
 					18 => "Hangar",

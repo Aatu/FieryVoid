@@ -90,14 +90,14 @@ class ChoukaHolylandAssault extends BaseShip{
 			3=> array(
 					5 => "Thruster",
 					8 => "Light Plasma Cannon",
-					9 => "Cargo",
+					9 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					5 => "Thruster",
 					8 => "Light Plasma Cannon",
-					9 => "Cargo",
+					9 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
 			),

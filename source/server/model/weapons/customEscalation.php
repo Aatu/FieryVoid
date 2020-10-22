@@ -162,6 +162,7 @@ class EWParticleLance extends Raking{
     }  //endof EWLightParticleGun
 
 
+
 // END PARTICLE WEAPONS
 
 
@@ -679,6 +680,7 @@ class EWRocketLauncher extends Weapon{
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Ammunition"] = $this->ammunition;
+			$this->data["Special"] = '<br>Benefits from offensive EW.';			
         }
         
 
@@ -749,8 +751,8 @@ class EWDualRocketLauncher extends Weapon{
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Ammunition"] = $this->ammunition;
+			$this->data["Special"] = '<br>Benefits from offensive EW.';			
         }
-        
 
         public function getDamage($fireOrder){ 
 			return Dice::d(6, 2)+2;   
@@ -815,6 +817,7 @@ class EWHeavyRocketLauncher extends Weapon{
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Ammunition"] = $this->ammunition;
+			$this->data["Special"] = '<br>Benefits from offensive EW.';			
         }
 
         public function getDamage($fireOrder){ 

@@ -1169,6 +1169,7 @@ spl_autoload_register(
 				
 
 				//Escalation Wars - Circasian
+				'circasianaschartrooptransport' => '/server/model/ships/ZEscalationCircasian/CircasianAscharTroopTransport.php',
 				'circasiancairn' => '/server/model/ships/ZEscalationCircasian/CircasianCairn.php',
 				'circasianfeilah' => '/server/model/ships/ZEscalationCircasian/CircasianFeilah.php',
 				'circasiangallahcarrier' => '/server/model/ships/ZEscalationCircasian/CircasianGallahCarrier.php',
@@ -1182,7 +1183,9 @@ spl_autoload_register(
 				'circasianluscanrefit' => '/server/model/ships/ZEscalationCircasian/CircasianLuscanRefit.php',
 				'circasianmoshesta' => '/server/model/ships/ZEscalationCircasian/CircasianMoshesta.php',
 				'circasianmoshestabeta' => '/server/model/ships/ZEscalationCircasian/CircasianMoshestaBeta.php',
+				'circasiannalessinfreighter' => '/server/model/ships/ZEscalationCircasian/CircasianNalessinFreighter.php',
 				'circasianolcata' => '/server/model/ships/ZEscalationCircasian/CircasianOlcata.php',
+				'circasianonsta' => '/server/model/ships/ZEscalationCircasian/CircasianOnsta.php',
 				'circasianreglata' => '/server/model/ships/ZEscalationCircasian/CircasianReglata.php',
 				'circasianrehkafighter' => '/server/model/ships/ZEscalationCircasian/CircasianRehkaFighter.php',
 				'circasianshenna' => '/server/model/ships/ZEscalationCircasian/CircasianShenna.php',
