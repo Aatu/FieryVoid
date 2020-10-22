@@ -361,8 +361,8 @@ class MagGravReactor extends Reactor{
 }//endof MagGravReactor		
 
 
-class SubReactor extends ShipSystem{
-	
+//warning: needs external code to function properly. Intended for starbases only.
+class SubReactor extends ShipSystem{	
 	//SubReactor is very important, though not as much as primary reactor itself!
 	public $repairPriority = 8;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
@@ -392,6 +392,99 @@ class SubReactor extends ShipSystem{
         return false;
     }	
 }
+
+
+
+/*SubReactorUniversal - Sub-Reactor that can be fitted on any ship.
+On destruction: will destroy the section it's fitted on.
+On damage: will roll critical with half the effect of usual reactor and add that critical to primary reactor.
+Official on damage: roll critical normally, it will only affect systems on the same section, maximum effect -10 (after cumulation)
+*/
+class SubReactorUniversal extends ShipSystem{
+	public $name = "SubReactorUniversal";
+    public $displayName = "Sub Reactor";
+    public $primary = true; //well, it's intended to be fitted on outer sections, but treated as core system
+    	
+    public $possibleCriticals = array(
+        11=>"OutputReduced1", 
+        14=>"OutputReduced2",
+        17=>"OutputReduced3",
+        21=>"OutputReduced4" //lower but also smoother
+    );
+		
+	/*main reactor criticals for comparision
+    public $possibleCriticals = array(
+        11=>"OutputReduced2",
+        15=>"OutputReduced4",
+        19=>"OutputReduced8",
+        27=>array("OutputReduced10", "ForcedOfflineOneTurn"));
+	*/
+	
+	function __construct($armour, $maxhealth){
+        parent::__construct($armour, $maxhealth, 0, 0 ); 
+    }
+	
+    public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= 'Critials roughly half as high as on main reactor; marked on main reactor.';
+		$this->data["Special"] .= '<br>On destruction entire section will be destroyed (but not entire ship).';
+    }
+	
+	//destroy section if destroyed
+	public function criticalPhaseEffects($ship, $gamedata)
+    { 
+		if (!$this->isDamagedOnTurn($gamedata->turn)) return; 
+		if (!$this->isDestroyed()) return;		
+	
+		//try to make actual attack to show in log - use Ramming Attack system!				
+		$rammingSystem = $ship->getSystemByName("RammingAttack");
+		if($rammingSystem){ //actually exists! - it should on every ship!				
+			$newFireOrder = new FireOrder(
+				-1, "normal", $ship->id, $ship->id,
+				$rammingSystem->id, -1, $gamedata->turn, 1, 
+				100, 100, 1, 1, 0,
+				0,0,'Reactor',10000
+			);
+			$newFireOrder->pubnotes = "Sub Reactor destroyed - section is immolated.";
+			$newFireOrder->addToDB = true;
+			$rammingSystem->fireOrders[] = $newFireOrder;
+		}else{
+			$newFireOrder=null;
+		}
+
+		//destroy primary structure
+		$ownStruct = $ship->getStructureSystem($this->location);
+		if($ownStruct){			
+            $remaining = $ownStruct->getRemainingHealth();
+            $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $ownStruct->id, $remaining, 0, 0, -1, true, false, "", "Reactor");
+            $damageEntry->updated = true;
+            $ownStruct->damage[] = $damageEntry;			
+			if($rammingSystem){ //add extra data to damage entry - so firing order can be identified!
+					$damageEntry->shooterid = $ship->id; //additional field
+					$damageEntry->weaponid = $rammingSystem->id; //additional field
+			}
+        }	
+    } //endof function criticalPhaseEffects	
+	
+	
+	//critical - add to primary reactor instead!
+    public function addCritical($shipid, $phpclass, $gamedata) {
+		//find main reactor
+		$ship = $gamedata->getShipById($shipid);
+		$mainReactor = $ship->getSystemByName("Reactor");
+		if($mainReactor){
+			$mainReactor->addCritical($shipid, $phpclass, $gamedata);
+		}
+		//do NOT call parent, as tis system will NOT actually suffer the crit!
+        //parent::addCritical($shipid, $phpclass, $gamedata);
+    }
+}//endof class SubReactorUniversal
+
 
 class Engine extends ShipSystem{
     public $name = "engine";
