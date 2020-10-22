@@ -1169,6 +1169,7 @@ spl_autoload_register(
 				
 
 				//Escalation Wars - Circasian
+				'circasianaschartrooptransport' => '/server/model/ships/ZEscalationCircasian/CircasianAscharTroopTransport.php',
 				'circasiancairn' => '/server/model/ships/ZEscalationCircasian/CircasianCairn.php',
 				'circasianfeilah' => '/server/model/ships/ZEscalationCircasian/CircasianFeilah.php',
 				'circasiangallahcarrier' => '/server/model/ships/ZEscalationCircasian/CircasianGallahCarrier.php',
@@ -1182,7 +1183,9 @@ spl_autoload_register(
 				'circasianluscanrefit' => '/server/model/ships/ZEscalationCircasian/CircasianLuscanRefit.php',
 				'circasianmoshesta' => '/server/model/ships/ZEscalationCircasian/CircasianMoshesta.php',
 				'circasianmoshestabeta' => '/server/model/ships/ZEscalationCircasian/CircasianMoshestaBeta.php',
+				'circasiannalessinfreighter' => '/server/model/ships/ZEscalationCircasian/CircasianNalessinFreighter.php',
 				'circasianolcata' => '/server/model/ships/ZEscalationCircasian/CircasianOlcata.php',
+				'circasianonsta' => '/server/model/ships/ZEscalationCircasian/CircasianOnsta.php',
 				'circasianreglata' => '/server/model/ships/ZEscalationCircasian/CircasianReglata.php',
 				'circasianrehkafighter' => '/server/model/ships/ZEscalationCircasian/CircasianRehkaFighter.php',
 				'circasianshenna' => '/server/model/ships/ZEscalationCircasian/CircasianShenna.php',
@@ -1497,6 +1500,18 @@ spl_autoload_register(
 		    	'hurrmissileosat2240' => '/server/model/ships/hurr/HurrmissileOSAT2240.php',
 		    	'roskorbase2215' => '/server/model/ships/hurr/Roskorbase2215.php',
 		    	'roskorbase2240' => '/server/model/ships/hurr/Roskorbase2240.php',
+				
+				
+				//new SW - Uglies
+                'zzftruglytiex' => '/server/model/ships/ZStarWars/zzftrUglyTIEX.php',
+				
+				
+				//Gaim systems
+                'subreactoruniversal' => '/server/model/systems/baseSystems.php',
+				//Gaim ships				
+				'gaimmoor' => '/server/model/ships/gaim/gaimMoor.php',
+				
+				
 				
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',

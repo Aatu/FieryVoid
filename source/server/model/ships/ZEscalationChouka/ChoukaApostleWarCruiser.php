@@ -79,7 +79,7 @@ class ChoukaApostleWarCruiser extends BaseShip{
 		$this->hitChart = array(
 			0=> array(
 					8 => "Structure",
-					10 => "SO-Missile Rack",
+					10 => "Class-SO Missile Rack",
 					12 => "Scanner",
 					14 => "Engine",
 					16 => "Hangar",

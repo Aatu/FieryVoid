@@ -54,7 +54,7 @@ class CircasianGallahTransport extends HeavyCombatVessel{
             0=> array(
                     6 => "Structure",
                     9 => "Thruster",
-					13 => "Cargo",
+					13 => "Cargo Bay",
                     14 => "Scanner",
                     16 => "Engine",
                     18 => "Hangar",
@@ -64,7 +64,7 @@ class CircasianGallahTransport extends HeavyCombatVessel{
             1=> array(
                     3 => "Thruster",
                     5 => "Light Particle Beam",
-					10 => "Cargo",
+					10 => "Cargo Bay",
 					17 => "Structure",
                     20 => "Primary",
             ),

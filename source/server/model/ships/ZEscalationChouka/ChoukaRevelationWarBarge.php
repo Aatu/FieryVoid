@@ -54,14 +54,14 @@ class ChoukaRevelationWarBarge extends HeavyCombatVessel{
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 40));
-        $this->addAftSystem(new Structure( 3, 52));
+        $this->addAftSystem(new Structure( 3, 40));
         $this->addPrimarySystem(new Structure( 3, 40));
 		
         $this->hitChart = array(
             0=> array(
-                    7 => "Structure",
-                    10 => "Thruster",
-					12 => "Cargo",
+                    8 => "Structure",
+                    11 => "Thruster",
+					12 => "Reload Rack",
 					14 => "Scanner",
                     16 => "Engine",
 					18 => "Hangar",
@@ -70,14 +70,14 @@ class ChoukaRevelationWarBarge extends HeavyCombatVessel{
             ),
             1=> array(
                     5 => "Thruster",
-					7 => "Medium Plasma Cannon",
-					9 => "Light Plasma Cannon",
+					9 => "Class-O Missile Rack",
 					18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     5 => "Thruster",
-					8 => "Light Plasma Cannon",
+					6 => "Light Plasma Cannon",
+					8 => "Class-O Missile Rack",
                     10 => "Point Plasma Gun",
                     18 => "Structure",
                     20 => "Primary",

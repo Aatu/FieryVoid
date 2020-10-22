@@ -35,7 +35,7 @@ class CircasianRehkaFighter extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){            
             $armour = array(2, 1, 2, 2);
             $fighter = new Fighter("ChoukaFaithbringerFighter", $armour, 11, $this->id);
-            $fighter->displayName = "Rehka Heavy Fighter";
+            $fighter->displayName = "Rehka";
             $fighter->imagePath = "img/ships/EscalationWars/CircasianRehka.png";
             $fighter->iconPath = "img/ships/EscalationWars/CircasianRehka_Large.png";
 

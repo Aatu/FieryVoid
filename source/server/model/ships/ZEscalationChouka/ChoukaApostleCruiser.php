@@ -79,7 +79,7 @@ class ChoukaApostleCruiser extends BaseShip{
 		$this->hitChart = array(
 			0=> array(
 					8 => "Structure",
-					9 => "Cargo",
+					9 => "Cargo Bay",
 					11 => "Quarters",
 					13 => "Scanner",
 					15 => "Engine",
@@ -98,21 +98,21 @@ class ChoukaApostleCruiser extends BaseShip{
 			2=> array(
 					6 => "Thruster",
 					8 => "Heavy Point Plasma Gun",
-					11 => "Cargo",
+					11 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
 					4 => "Thruster",
 					7 => "Heavy Plasma Cannon",
-					11 => "Cargo",
+					11 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					4 => "Thruster",
 					7 => "Heavy Plasma Cannon",
-					11 => "Cargo",
+					11 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
 			),

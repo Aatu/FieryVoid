@@ -61,14 +61,14 @@ class ChoukaWarPrayerGunship extends MediumShip{
 
 		1=> array(
 			4 => "Thruster",
-			7 => "Heavy Plasma Cannon",
+			6 => "Heavy Plasma Cannon",
 			10 => "Light Plasma Cannon",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
-			7 => "Thruster",
+			6 => "Thruster",
 			8 => "Light Plasma Cannon",
 			17 => "Structure",
 			20 => "Primary",
