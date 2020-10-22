@@ -7,7 +7,7 @@ class CircasianOnsta extends FighterFlight{
         $this->pointCost = 22*6;
         $this->faction = "ZEscalation Circasian";
         $this->phpclass = "CircasianOnsta";
-        $this->shipClass = "Onsta Assault Shuttle";
+        $this->shipClass = "Onsta Assault Shuttles";
         $this->imagePath = "img/ships/EscalationWars/CircasianOnsta.png";
         $this->customFtrName = "Onsta";
 		
@@ -21,6 +21,9 @@ class CircasianOnsta extends FighterFlight{
         $this->turncost = 0.33;
 		$this->turndelay = 0;
         
+        $this->pivotcost = 2; //shuttles have pivot cost higher
+		$this->hangarRequired = 'assault shuttles'; //for fleet check
+		
         $this->iniativebonus = 45;
         $this->populate();       
 
