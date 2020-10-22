@@ -63,14 +63,14 @@ class ChoukaWarPrayerEscort extends MediumShip{
 
 		1=> array(
 			4 => "Thruster",
-			7 => "Heavy Point Plasma Gun",
+			6 => "Heavy Point Plasma Gun",
 			10 => "Point Plasma Gun",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
-			7 => "Thruster",
+			6 => "Thruster",
 			8 => "Point Plasma Gun",
 			17 => "Structure",
 			20 => "Primary",
