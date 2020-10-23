@@ -1494,10 +1494,10 @@ spl_autoload_register(
 		    
 		    
 		    	//Corillani
-				'plasmaprojector' => '/server/model/weapons/plasma.php',
-				'garunda' => '/server/model/ships/corillani/Garunda.php',
-				'mollanta' => '/server/model/ships/corillani/Mollanta',
-				'llartol' => '/server/model/ships/corillani/Llartol',		
+				'plasmaprojector' =>'/server/model/weapons/plasma.php'
+				'garunda' => '/server/model/ships/Garunda.php' 
+				'mollanta' => '/server/model/ships/corillani/Mollanta.php',
+				'llartol' => '/server/model/ships/corillani/Llartol.php',		
 		    	
 		    	
 		    	
