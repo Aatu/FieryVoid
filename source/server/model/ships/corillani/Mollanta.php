@@ -12,6 +12,7 @@ class Mollanta extends BaseShip{
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);
 	    $this->isd = 2230;
+		$this->notes = 'Corillani Peoples Navy (CPN)';	    
 		
         $this->forwardDefense = 13;
         $this->sideDefense = 18;
