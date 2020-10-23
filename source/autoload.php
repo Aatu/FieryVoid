@@ -1503,7 +1503,7 @@ spl_autoload_register(
 						
 				
 				//let's end this with unit enhancement class...		    
-				'enhancements' => '/server/model/ships/Enhancements.php'
+				'enhancements' => '/server/model/ships/Enhancements.php',
 				
 				//Corillani
 				'plasmaprojector' => '/server/model/weapons/plasma.php',
