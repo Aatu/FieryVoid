@@ -1491,6 +1491,17 @@ spl_autoload_register(
 				'hemsar' => '/server/model/ships/descari/Hemsar.php',
 				'hemros' => '/server/model/ships/descari/Hemros.php',   
 		    
+		    
+		    
+		    	//Corillani
+				'plasmaprojector' => '/server/model/weapons/plasma.php',
+				'garunda' => '/server/model/ships/corillani/Garunda.php',
+				'mollanta' => '/server/model/ships/corillani/Mollanta',
+				'llartol' => '/server/model/ships/corillani/Llartol',		
+		    	
+		    	
+		    	
+		    	
 		    	//Random Ships which don't require new mechanics to add
 		    	'zzunofftlorr' => '/server/model/ships/narn/zzunoffTlorr.php',
 		    	'hurrmissileosat2220' => '/server/model/ships/hurr/HurrmissileOSAT2220.php',
@@ -1503,13 +1514,9 @@ spl_autoload_register(
 						
 				
 				//let's end this with unit enhancement class...		    
-				'enhancements' => '/server/model/ships/Enhancements.php',
+				'enhancements' => '/server/model/ships/Enhancements.php'
 				
-				//Corillani
-				'plasmaprojector' => '/server/model/weapons/plasma.php',
-				'garunda' => '/server/model/ships/corillani/Garunda.php',
-				'mollanta' => '/server/model/ships/corilani/Mollanta',
-				'llartol' => '/server/model/ships/corillani/Llartol',					
+	
 				
 				
             );
