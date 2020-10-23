@@ -709,7 +709,7 @@ class BaseShip {
 		}		
         //foreach($this->systems as $system){
 		foreach($listOfPotentialSystems as $system){
-			$value=$system->doesProtectFromDamage($expectedDmg);
+			$value=$system->doesProtectFromDamage($expectedDmg, $systemhit->getRemainingHealth());
             if ($value<1) continue;
 			if ($system->isDestroyed($turn-1)) continue;
 			if ($system->isOfflineOnTurn($turn)) continue;
