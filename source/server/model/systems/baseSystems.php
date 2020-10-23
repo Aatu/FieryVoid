@@ -1714,7 +1714,7 @@ by 4.
 	//function estimating how good this Diffuser is at stopping damage;
 	//in case of diffuser, its effectiveness equals largest shot it can stop, with tiebreaker equal to remaining total capacity
 	//this is for recognizing it as system capable of affecting damage resolution and choosing best one if multiple Diffusers can protect
-	public function doesProtectFromDamage($expectedDmg) {
+	public function doesProtectFromDamage($expectedDmg, $remainingHealth = 1) {
 		$remainingCapacity = 0;
 		$totalCapacity = 0;
 		$largestCapacity = 0;
@@ -2233,6 +2233,107 @@ class PhasingDrive extends JumpEngine{
         }	
     } //endof function criticalPhaseEffects	
 }//endof class PhasingDrive
+
+
+
+
+
+
+
+/*Gaim damage absorbtion system
+Cannot be hit directly in any way, except when absorbing damage. May protect any system on the same section (plus structure it's fitted on, even if it's primary structure - important for MCVs) 
+as Bulkhead's activation is automatic, it will kick in when:
+ - would prevent system destruction
+ - system is Structure and would be destroyed without Bulkhead (even if it doesn't prevent destruction)
+ - related Structure is under 25% (it's "use it or lose it" time)
+*/
+class Bulkhead extends ShipSystem{
+    public $name = "Bulkhead";
+    public $displayName = "Bulkhead";
+    public $iconPath = "Bulkhead.png";
+	public $isTargetable = false; //cannot be targeted by called shots
+	
+	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
+    public $possibleCriticals = array( ); //no critical effect applicable	
+	
+    function __construct($armour, $maxhealth){
+        parent::__construct($armour, $maxhealth, 0, 0);
+    }
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "Absorbs damage from hits on the same section - activation is automatic.";
+		$this->data["Special"] .= "<br>Will kick in when it can prevent system destruction or when sections' structural integrity falls below 25%.";
+	}	
+	
+	
+	//function estimating how good this Bulkhead is at stopping damage;
+	public function doesProtectFromDamage($expectedDmg, $remainingHealth = 1) {
+		//first do check whether this system can be protected! (same location or appropriate structure location)
+		
+		$ownHealth = $this->getRemainingHealth();
+		$protectionValue = 0;
+		if ( ($remainingHealth <= $expectedDmg) && ($remainingHealth + $ownHealth > $expectedDmg) ){
+			$protectionValue = $remainingHealth + $ownHealth - $expectedDmg; //I cannot prioritize smaller Bulkhead if it'd do the job, but at least I can avoid prioritizing larger one
+		} else {
+		
+			
+			$protectionValue = $ownHealth;
+		}
+		return $protectionValue;
+	}
+	//actual protection
+	public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $systemProtected, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
+		$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
+		$damageToAbsorb=$effectiveDamage-$effectiveArmor;
+		$damageAbsorbed=0;
+		
+		if($damageToAbsorb<=0) return $returnValues; //nothing to absorb
+		
+		$mostSuitableAbsorbtion=0;
+		$mostSuitableTendril=null;		
+		//check capacity reduction due to criticals...
+		$reduction = $this->hasCritical('TendrilCapacityReduced')*2;
+
+		foreach($this->tendrils as $tendril) if(!$tendril->isDestroyed()){
+			$tendrilCapacity = $tendril->getRemainingCapacity() - $reduction;
+			if($tendrilCapacity>0){ //else it's useless ATM
+				if ($mostSuitableAbsorbtion < $damageToAbsorb){ //not found a tendril able to accept entire damage yet, looking for something larger
+					if ($tendrilCapacity >= $mostSuitableAbsorbtion) { //new one is more suitable (all other things equal later tendril is more suitable)
+						$mostSuitableAbsorbtion = $tendrilCapacity;
+						$mostSuitableTendril = $tendril;
+					}
+				}else{ //appropriate tendril already found, looking for something better suited - eg. smaller but still able to accept entire damage
+					if (($tendrilCapacity <= $mostSuitableAbsorbtion) && ($tendrilCapacity >= $damageToAbsorb)) { //new one is more suitable (all other things equal later tendril is more suitable)
+						$mostSuitableAbsorbtion = $tendrilCapacity;
+						$mostSuitableTendril = $tendril;
+					}
+				}
+			}
+		}	
+		
+		$noOverkill = (!$weapon->doOverkill) && ($weapon->noOverkill || ($weapon->damageType == 'Piercing'));
+		if($noOverkill){//shot is incapable of overkilling - reducing it would not matter if it doesn't prevent destruction of system hit
+			$remainingHealth = $systemProtected->getRemainingHealth();
+			if ($remainingHealth+$mostSuitableAbsorbtion <= $damageToAbsorb) return $returnValues; //any absorbtion would be futile and just fill tendril
+		}
+		
+		if($mostSuitableAbsorbtion>0){ //appropriate tendril found!
+			$damageAbsorbed=min($damageToAbsorb,$mostSuitableAbsorbtion);
+			$returnValues['dmg']=$effectiveDamage-$damageAbsorbed;			
+			$mostSuitableTendril->absorbDamage($target,$gamedata,$damageAbsorbed);
+		}
+		
+		return $returnValues;
+	}
+} //endof Bulkhead
+
 
 
 
