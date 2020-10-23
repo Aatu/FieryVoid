@@ -64,13 +64,13 @@ class ChoukaRevelationFreighter extends HeavyCombatVessel{
             ),
             1=> array(
                     5 => "Thruster",
-					9 => "Cargo",
+					9 => "Cargo Bay",
 					18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     5 => "Thruster",
-					8 => "Cargo",
+					8 => "Cargo Bay",
                     10 => "Point Plasma Gun",
                     18 => "Structure",
                     20 => "Primary",

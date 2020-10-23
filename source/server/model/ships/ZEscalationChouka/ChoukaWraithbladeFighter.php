@@ -35,7 +35,7 @@ class ChoukaWraithbladeFighter extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){            
             $armour = array(2, 0, 1, 1);
             $fighter = new Fighter("ChoukaWraithbladeFighter", $armour, 11, $this->id);
-            $fighter->displayName = "Wraithblade Heavy Fighter";
+            $fighter->displayName = "Wraithblade";
             $fighter->imagePath = "img/ships/EscalationWars/ChoukaWraithblade.png";
             $fighter->iconPath = "img/ships/EscalationWars/ChoukaWraithblade_Large.png";
 

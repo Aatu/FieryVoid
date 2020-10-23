@@ -42,7 +42,7 @@ class technicalTargetDrone extends BaseShip{
 		
 		//new weapon showcase
 		
-		$this->addFrontSystem(new Maser(3, 6, 3, 270, 90));
+		$this->addFrontSystem(new NexusInterceptorArray(3, 4, 2, 270, 90));
 		$this->addFrontSystem(new Maser(3, 6, 3, 270, 90));
 		$this->addFrontSystem(new Maser(3, 6, 3, 270, 90));
 		$this->addFrontSystem(new Maser(3, 6, 3, 270, 90));
