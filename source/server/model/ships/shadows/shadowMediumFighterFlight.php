@@ -119,7 +119,7 @@ class ShadowMediumFighterFlight extends FighterFlight{
 			$protection=0;
 			$diffuser = $this->getSystemProtectingFromDamage($shooter, null, $gamedata->turn, $weapon, $craft,$dmgPotential);//let's find biggest one!
 			if($diffuser){ //may be unavailable, eg. already filled
-				$protection = $diffuser->doesProtectFromDamage($dmgPotential,$craft->getRemainingHealth());
+				$protection = $diffuser->doesProtectFromDamage($dmgPotential,$craft);
 			}
 			$armor += $protection;		
 			$dmgPotential = max(0, $dmgPotential-$armor);//never negative damage ;)
