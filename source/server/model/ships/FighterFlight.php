@@ -439,7 +439,7 @@ class FighterFlight extends BaseShip
 		$protection=0;
 		$protectingSystem = $this->getSystemProtectingFromDamage($shooter, null, $gamedata->turn, $weapon, $craft,$dmgPotential);//let's find biggest one!
 		if($protectingSystem){ //may be unavailable, eg. already filled
-			$protection = $protectingSystem->doesProtectFromDamage($dmgPotential);
+			$protection = $protectingSystem->doesProtectFromDamage($dmgPotential, $craft->getRemainingHealth());
 		}
 		$armor += $protection;		
 		
