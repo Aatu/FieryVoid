@@ -533,7 +533,7 @@ class EWHeavyPointPlasmaGun extends Plasma{
         public $animationWidth = 5;
     	public $animationExplosionScale = 0.30;
     	public $trailLength = 20;
-        public $priority = 4;		
+        public $priority = 5;		
     	public $rangeDamagePenalty = 1;
         public $guns = 2;
 
