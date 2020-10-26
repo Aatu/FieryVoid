@@ -403,6 +403,7 @@ Official on damage: roll critical normally, it will only affect systems on the s
 class SubReactorUniversal extends ShipSystem{
 	public $name = "SubReactorUniversal";
     public $displayName = "Sub Reactor";
+    public $iconPath = "reactor.png";
     public $primary = true; //well, it's intended to be fitted on outer sections, but treated as core system
     	
     public $possibleCriticals = array(
@@ -2250,7 +2251,7 @@ as Bulkhead's activation is automatic, it will kick in when:
 class Bulkhead extends ShipSystem{
     public $name = "Bulkhead";
     public $displayName = "Bulkhead";
-    public $iconPath = "Bulkhead.png";
+    public $iconPath = "bulkhead.png";
 	public $isTargetable = false; //cannot be targeted by called shots
 	
 	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
