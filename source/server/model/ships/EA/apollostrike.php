@@ -11,7 +11,6 @@ class apollostrike extends BaseShip{
         $this->shipClass = "Apollo Strike Cruiser";
         $this->shipSizeClass = 3;
         $this->canvasSize = 200;
-        $this->limited = 33;
         $this->occurence = "uncommon";
         $this->variantOf = "Apollo Bombardment Cruiser";
 		$this->unofficial = true;                
