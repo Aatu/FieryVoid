@@ -25,11 +25,11 @@ class WhiteStarCmd extends MediumShip{
         $this->accelcost = 2;
         $this->rollcost = 1;
         $this->pivotcost = 1;
-        $this->iniativebonus = 65;
+        $this->iniativebonus = 14 *5; //+1 compared to vanilla
         $this->isd = 2260;
 
         $this->addPrimarySystem(new Reactor(5, 20, 0, -7));
-        $this->addPrimarySystem(new CnC(5, 16, 0, 0));
+        $this->addPrimarySystem(new CnC(5, 18, 0, 0));//+2 compared to vanilla
         $this->addPrimarySystem(new Scanner(5, 15, 3, 10));
         $this->addPrimarySystem(new Engine(5, 15, 0, 12, 2));
         $this->addPrimarySystem(new Hangar(4, 2));
@@ -58,7 +58,7 @@ class WhiteStarCmd extends MediumShip{
         $this->addAftSystem(new JumpEngine(5, 20, 4, 24));
         $this->addAftSystem(new GraviticThruster(4, 10, 0, 4, 2));
 
-        $this->addPrimarySystem(new Structure( 5, 48));
+        $this->addPrimarySystem(new Structure( 5, 52));//+4 compared to vanilla
         
 		//d20 hit chart
 		$this->hitChart = array(
