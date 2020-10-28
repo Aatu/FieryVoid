@@ -4,7 +4,7 @@ class apollostrike extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
-        $this->pointCost = 950;
+        $this->pointCost = 875;
         $this->faction = "EA";
         $this->phpclass = "apollostrike";
         $this->imagePath = "img/ships/apollo.png";
@@ -12,10 +12,13 @@ class apollostrike extends BaseShip{
         $this->shipSizeClass = 3;
         $this->canvasSize = 200;
         $this->limited = 33;
+        $this->occurence = "uncommon";
+        $this->variantOf = "Apollo Bombardment Cruiser";
+		$this->unofficial = true;                
         $this->fighters = array("normal"=>6);
 		$this->customFighter = array("Thunderbolt"=>6);        
         
-  	    $this->isd = 2250;
+  	    $this->isd = 2264;
 	    $this->notes = 'Thunderbolt capable.';  	    
 
         $this->forwardDefense = 16;
