@@ -40,7 +40,7 @@ class ChoukaHellfireBOSAT extends OSAT{
 					10 => "Structure",
 					12 => "Thruster",
 					14 => "Heavy Plasma Cannon",
-          			16 => "Light Laser Cannon",
+          			16 => "Light Laser",
 					18 => "Scanner",
 					20 => "Reactor",
 			)

@@ -61,7 +61,7 @@ class ChoukaScriptureScout extends BaseShip{
 		$this->hitChart = array(
 			0=> array(
 					10 => "Structure",
-					13 => "Scanner",
+					13 => "ELINT Scanner",
 					15 => "Engine",
 					17 => "Hangar",
 					19 => "Reactor",
@@ -75,7 +75,7 @@ class ChoukaScriptureScout extends BaseShip{
 			),
 			2=> array(
 					5 => "Thruster",
-					7 => "Light Laser Cannon",
+					7 => "Light Laser",
 					11 => "Jump Engine",
 					18 => "Structure",
 					20 => "Primary",

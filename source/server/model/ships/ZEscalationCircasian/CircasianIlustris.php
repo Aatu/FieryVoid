@@ -67,7 +67,7 @@ class CircasianIlustris extends HeavyCombatVessel{
             ),
             1=> array(
                     3 => "Thruster",
-                    5 => "Light Laser Cannon",
+                    5 => "Light Laser",
 					7 => "Light Particle Cannon",
 					9 => "Rocket Launcher",
 					12 => "Light Particle Beam",
