@@ -513,7 +513,12 @@ window.weaponManager = {
     },
 
     calculateRangePenalty: function calculateRangePenalty(distance, weapon) {
-        var rangePenalty = weapon.rangePenalty * distance;
+        var rangePenalty = 0;
+	if (weapon.specialRangeCalculation){
+	    rangePenalty = weapon.calculateSpecialRangePenalty(distance);
+	}else{ //standard calculation
+	    rangePenalty = weapon.rangePenalty * distance;
+	}
 
         return rangePenalty;
     },
