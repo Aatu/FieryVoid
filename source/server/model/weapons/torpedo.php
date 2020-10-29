@@ -210,6 +210,7 @@
         public $iconPath = "packetTorpedo.png";
         public $range = 0; //unlimited range, but suffers range penalty
         public $loadingtime = 2;
+	public $specialRangeCalculation = true;
         
         public $weaponClass = "Ballistic"; 
         public $damageType = "Standard"; 
