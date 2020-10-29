@@ -77,14 +77,14 @@ class ChoukaRetributionBattlecruiser extends BaseShip{
 			1=> array(
 					4 => "Thruster",
 					6 => "Medium Plasma Cannon",
-					9 => "Light Laser Cannon",
+					9 => "Light Laser",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
 					6 => "Thruster",
 					9 => "Heavy Plasma Cannon",
-					11 => "Light Laser Cannon",
+					11 => "Light Laser",
 					18 => "Structure",
 					20 => "Primary",
 			),

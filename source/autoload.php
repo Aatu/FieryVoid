@@ -1107,14 +1107,19 @@ spl_autoload_register(
 				'ewheavyplasmagun' => '/server/model/weapons/customEscalation.php',
 				'ewplasmagun' => '/server/model/weapons/customEscalation.php',
 			//EW particle weapons
+				'ewgatlingparticlebeam' => '/server/model/weapons/customEscalation.php',		
 				'ewparticlegun' => '/server/model/weapons/customEscalation.php',
 				'ewlightparticlegun' => '/server/model/weapons/customEscalation.php',
 				'ewparticlelance' => '/server/model/weapons/customEscalation.php',		
+				'ewparticlemaul' => '/server/model/weapons/customEscalation.php',		
 			//EW ballistic weapons
 				'ewrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewdualrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewheavyrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewomissilerack' => '/server/model/weapons/customEscalation.php',
+				'ewfightertorpedolauncher' => '/server/model/weapons/customEscalation.php',
+				'ewlightplasmamine' => '/server/model/weapons/customEscalation.php',
+				'ewplasmamine' => '/server/model/weapons/customEscalation.php',
 			//EW gravitic weapons
 				'ewgravitictractingrod' => '/server/model/weapons/customEscalation.php',
 			//EW laser weapons
@@ -1124,6 +1129,8 @@ spl_autoload_register(
 				'ewheavygatlinglaser' => '/server/model/weapons/customEscalation.php',
 			//EW AoE weapons
 				'lightenergymine' => '/server/model/weapons/AoE.php',
+			//EW electromagnetic weapons
+				'ewemtorpedo' => '/server/model/weapons/customEscalation.php',
 
 				//Escalation Wars - Chouka
 				'choukaapostlecruiser' => '/server/model/ships/ZEscalationChouka/ChoukaApostleCruiser.php',
@@ -1177,18 +1184,30 @@ spl_autoload_register(
 				'circasianilustris' => '/server/model/ships/ZEscalationCircasian/CircasianIlustris.php',
 				'circasianilustriscommand' => '/server/model/ships/ZEscalationCircasian/CircasianIlustrisCommand.php',
 				'circasianistale' => '/server/model/ships/ZEscalationCircasian/CircasianIstale.php',
+				'circasianjagafighter' => '/server/model/ships/ZEscalationCircasian/CircasianJagaFighter.php',
+				'circasianjagalltorpedofighter' => '/server/model/ships/ZEscalationCircasian/CircasianJagallTorpedoFighter.php',
+				'circasiankolamfighter' => '/server/model/ships/ZEscalationCircasian/CircasianKolamFighter.php',
 				'circasiankolanis' => '/server/model/ships/ZEscalationCircasian/CircasianKolanis.php',
 				'circasiankolaniscarrier' => '/server/model/ships/ZEscalationCircasian/CircasianKolanisCarrier.php',
+				'circasiankoricminecruiser' => '/server/model/ships/ZEscalationCircasian/CircasianKoricMineCruiser.php',
+				'circasiankiralinajumpship' => '/server/model/ships/ZEscalationCircasian/CircasianKiralinaJumpship.php',
+				'circasiankiralinaupgrade' => '/server/model/ships/ZEscalationCircasian/CircasianKiralinaUpgrade.php',
 				'circasianluscan' => '/server/model/ships/ZEscalationCircasian/CircasianLuscan.php',
 				'circasianluscanrefit' => '/server/model/ships/ZEscalationCircasian/CircasianLuscanRefit.php',
+				'circasianmishajumpcarrier' => '/server/model/ships/ZEscalationCircasian/CircasianMishaJumpCarrier.php',
+				'circasianmisharefit' => '/server/model/ships/ZEscalationCircasian/CircasianMishaRefit.php',
+				'circasianmorketosat' => '/server/model/ships/ZEscalationCircasian/CircasianMorketOSAT.php',
 				'circasianmoshesta' => '/server/model/ships/ZEscalationCircasian/CircasianMoshesta.php',
 				'circasianmoshestabeta' => '/server/model/ships/ZEscalationCircasian/CircasianMoshestaBeta.php',
+				'circasianmukantasmallbase' => '/server/model/ships/ZEscalationCircasian/CircasianMukantaSmallBase.php',
 				'circasiannalessinfreighter' => '/server/model/ships/ZEscalationCircasian/CircasianNalessinFreighter.php',
 				'circasianolcata' => '/server/model/ships/ZEscalationCircasian/CircasianOlcata.php',
 				'circasianonsta' => '/server/model/ships/ZEscalationCircasian/CircasianOnsta.php',
 				'circasianreglata' => '/server/model/ships/ZEscalationCircasian/CircasianReglata.php',
+				'circasianrotarra' => '/server/model/ships/ZEscalationCircasian/CircasianRotarra.php',
 				'circasianrehkafighter' => '/server/model/ships/ZEscalationCircasian/CircasianRehkaFighter.php',
 				'circasianshenna' => '/server/model/ships/ZEscalationCircasian/CircasianShenna.php',
+				'circasianthracejumpcruiser' => '/server/model/ships/ZEscalationCircasian/CircasianThraceJumpcruiser.php',
 				'circasiantoltara' => '/server/model/ships/ZEscalationCircasian/CircasianToltara.php',
 				'circasiantormin' => '/server/model/ships/ZEscalationCircasian/CircasianTormin.php',
 				'circasiantorminbeta' => '/server/model/ships/ZEscalationCircasian/CircasianTorminBeta.php',
@@ -1200,7 +1219,7 @@ spl_autoload_register(
 				
 				
 				
-				//Nexus weapons
+/*				//Nexus weapons
 				'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php', 
 				'nexusparticleprojectorftr' => '/server/model/weapons/customNexus.php', 
 				'nexusparticleprojectorheavy' => '/server/model/weapons/customNexus.php', 
@@ -1212,7 +1231,116 @@ spl_autoload_register(
 				'nexusprojectorarray' => '/server/model/weapons/customNexus.php',
 				'nexuslightprojectorarray' => '/server/model/weapons/customNexus.php',
 				'nexusinterceptorarray' => '/server/model/weapons/customNexus.php',
-				
+*/
+
+
+		//Nexus weapons
+			//Nexus plasma weapons
+				'nexuslightplasmagun' => '/server/model/weapons/customNexus.php',
+				'nexusmediumplasmagun' => '/server/model/weapons/customNexus.php',
+				'nexusheavyplasmagun' => '/server/model/weapons/customNexus.php',
+			//Nexus matter weapons
+				'nexuslightcoilgun' => '/server/model/weapons/customNexus.php',
+				'nexuscoilgun' => '/server/model/weapons/customNexus.php',
+				'nexusmicrocannon' => '/server/model/weapons/customNexus.php',
+				'nexusdualslugcannon' => '/server/model/weapons/customNexus.php',
+				'nexusfletchlettegun' => '/server/model/weapons/customNexus.php',
+				'nexusheavyfletchlettegun' => '/server/model/weapons/customNexus.php',
+				'nexusimpactor' => '/server/model/weapons/customNexus.php',
+				'nexuslightgausscannon' => '/server/model/weapons/customNexus.php',
+				'nexuslightmattergun' => '/server/model/weapons/customNexus.php',
+				'nexusmattergun' => '/server/model/weapons/customNexus.php',
+				'nexusspiker' => '/server/model/weapons/customNexus.php',
+				'nexusultralightrailgun' => '/server/model/weapons/customNexus.php',
+			//Nexus particle weapons
+				'nexusparticleprojectorftr' => '/server/model/weapons/customNexus.php', 
+				'nexusparticleprojectorheavy' => '/server/model/weapons/customNexus.php', 
+				'nexusparticleprojectorlight' => '/server/model/weapons/customNexus.php', 
+				'nexusparticleagitator' => '/server/model/weapons/customNexus.php', 
+				'nexusparticleprojector' => '/server/model/weapons/customNexus.php',
+				'nexuslightparticleprojector' => '/server/model/weapons/customNexus.php',
+				'nexusprojectorarray' => '/server/model/weapons/customNexus.php',
+				'nexuslightprojectorarray' => '/server/model/weapons/customNexus.php',
+				'nexuslightgasgun' => '/server/model/weapons/customNexus.php',
+				'nexusgasgun' => '/server/model/weapons/customNexus.php',
+				'nexusacids' => '/server/model/weapons/customNexus.php',
+				'nexusrcids' => '/server/model/weapons/customNexus.php',
+				'nexuscids' => '/server/model/weapons/customNexus.php',
+				'nexusautocannon' => '/server/model/weapons/customNexus.php',
+				'nexusheavyautocannon' => '/server/model/weapons/customNexus.php',
+				'nexusdualparticlebeam' => '/server/model/weapons/customNexus.php',
+				'nexuslightassaultcannon' => '/server/model/weapons/customNexus.php',
+				'nexuslightassaultcannonbattery' => '/server/model/weapons/customNexus.php',
+				'nexusassaultcannon' => '/server/model/weapons/customNexus.php',
+				'nexusheavyassaultcannon' => '/server/model/weapons/customNexus.php',
+				'nexusheavyassaultcannonbattery' => '/server/model/weapons/customNexus.php',
+				'nexuslightcpgun' => '/server/model/weapons/customNexus.php',
+				'nexusstandardcpgun' => '/server/model/weapons/customNexus.php',
+				'nexusheavycpgun' => '/server/model/weapons/customNexus.php',
+				'nexuslightparticlearray' => '/server/model/weapons/customNexus.php',
+				'nexusparticlearray' => '/server/model/weapons/customNexus.php',
+				'nexusheavyparticlearray' => '/server/model/weapons/customNexus.php',
+				'nexusgatlingparticlearray' => '/server/model/weapons/customNexus.php',
+				'nexusinterceptorarray' => '/server/model/weapons/customNexus.php',
+				'nexusimprovedparticlebeam' => '/server/model/weapons/customNexus.php',
+				'nexusminigun' => '/server/model/weapons/customNexus.php',
+				'nexusparticlebolt' => '/server/model/weapons/customNexus.php',
+				'nexustwinbolt' => '/server/model/weapons/customNexus.php',
+				'nexusshattergun' => '/server/model/weapons/customNexus.php',
+				'nexustwinparticlebeam' => '/server/model/weapons/customNexus.php',
+				'nexusautocannondefender' => '/server/model/weapons/customNexus.php',
+				'nexusprotector' => '/server/model/weapons/customNexus.php',
+			//Nexus ballistic weapons
+				'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php', 
+				'nexusadvkineticboxlauncher' => '/server/model/weapons/customNexus.php', 
+				'nexuschafflauncher' => '/server/model/weapons/customNexus.php',
+				'nexusdualrocketlauncher' => '/server/model/weapons/customNexus.php',
+				'nexusheavyrocketlauncher' => '/server/model/weapons/customNexus.php',
+				'nexuslargerocket' => '/server/model/weapons/customNexus.php',
+				'nexusstandardrocket' => '/server/model/weapons/customNexus.php',
+				'nexusminirocket' => '/server/model/weapons/customNexus.php',
+				'nexusplasmabombrack' => '/server/model/weapons/customNexus.php',
+				'nexusdartinterceptor' => '/server/model/weapons/customNexus.php',
+				'nexusstreakinterceptor' => '/server/model/weapons/customNexus.php',
+				'nexussmallearlyrocket' => '/server/model/weapons/customNexus.php',
+				'nexusearlyrocket' => '/server/model/weapons/customNexus.php',
+				'nexuslargeearlyrocket' => '/server/model/weapons/customNexus.php',
+				'nexusswarmtorpedo' => '/server/model/weapons/customEscalation.php',
+				'nexusheavyswarmtorpedo' => '/server/model/weapons/customEscalation.php',
+			//Nexus EM weapons
+				'nexuslightburstbeam' => '/server/model/weapons/customNexus.php',
+				'nexuslightchargecannon' => '/server/model/weapons/customNexus.php',
+				'nexuschargecannon' => '/server/model/weapons/customNexus.php',
+			//Nexus laser weapons
+				'nexustwinxraylaser' => '/server/model/weapons/customNexus.php',
+				'nexusdualxraylaser' => '/server/model/weapons/customNexus.php',
+				'nexuslightxraylaser' => '/server/model/weapons/customNexus.php',
+				'nexusheavyxraylaser' => '/server/model/weapons/customNexus.php',
+				'nexuslightattacklaser' => '/server/model/weapons/customNexus.php',
+				'nexusstabilizedlightattacklaser' => '/server/model/weapons/customNexus.php',
+				'nexusmediumattacklaser' => '/server/model/weapons/customNexus.php',
+				'nexusstabilizedmediumattacklaser' => '/server/model/weapons/customNexus.php',
+				'nexusheavyattacklaser' => '/server/model/weapons/customNexus.php',
+				'nexusstabilizedheavyattacklaser' => '/server/model/weapons/customNexus.php',
+				'nexuslightchemicallaser' => '/server/model/weapons/customNexus.php',
+				'nexusmediumchemicallaser' => '/server/model/weapons/customNexus.php',
+				'nexusheavychemicallaser' => '/server/model/weapons/customNexus.php',
+				'nexuslightlasercutter' => '/server/model/weapons/customNexus.php',
+				'nexusheavylasercutter' => '/server/model/weapons/customNexus.php',
+				'nexuslightheplaser' => '/server/model/weapons/customNexus.php',
+				'nexusheplaser' => '/server/model/weapons/customNexus.php',
+				'nexusinterceptlaser' => '/server/model/weapons/customNexus.php',
+				'nexusdualinterceptlaser' => '/server/model/weapons/customNexus.php',
+				'nexuslightlaserlance' => '/server/model/weapons/customNexus.php',
+				'nexuspointdefenselaser' => '/server/model/weapons/customNexus.php',
+				'nexuslargedefenselaser' => '/server/model/weapons/customNexus.php',
+			//Nexus ion weapons
+				'nexusionbeam' => '/server/model/weapons/customNexus.php',
+
+
+
+
+
 				//Nexus ships - Brixadii
                 'brixadiibattledestroyerbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerBase.php',					
                 'brixadiibattledestroyer2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyer2057.php',		
@@ -1228,6 +1356,10 @@ spl_autoload_register(
                 'brixadiijumpscout' => '/server/model/ships/ZNexusBrixadii/BrixadiiJumpScout.php',		
                 'brixadiijumpscout2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiJumpScout2108.php',		
 	
+				'brixadiiassaultship' => '/server/model/ships/ZNexusBrixadii/BrixadiiAssaultShip.php',
+	
+				'brixadiifastcourier' => '/server/model/ships/ZNexusBrixadii/BrixadiiFastCourier.php',
+
                 'brixadiipursuitfrigatebase' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigateBase.php',
                 'brixadiipursuitfrigate2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigate2057.php',
                 'brixadiipursuitfrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigate2108.php',
@@ -1265,7 +1397,6 @@ spl_autoload_register(
 				'brixadiicombatbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiCombatBase.php',
 				'brixadiicombatbase2112' => '/server/model/ships/ZNexusBrixadii/BrixadiiCombatBase2112.php',
 
-				'targetblock' => '/server/model/ships/ZNexusBrixadii/targetBlock.php',
 
                 //Usuuth Weapons
                 'hvyparticleprojector' => '/server/model/weapons/particle.php',
