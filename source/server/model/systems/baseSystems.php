@@ -2273,6 +2273,11 @@ class Bulkhead extends ShipSystem{
 		$this->data["Special"] .= "<br>Will kick in when it can prevent system destruction or when sections' structural integrity falls below 25%.";
 	}	
 	
+     public function getOutput(){ //output = remaining health - just for visual purposes
+        $output = $this->getRemainingHealth();     
+        return $output;        
+    }    
+	
 	
 	//function estimating how good this Bulkhead is at stopping damage;
 	public function doesProtectFromDamage($expectedDmg, $systemProtected = null) {
