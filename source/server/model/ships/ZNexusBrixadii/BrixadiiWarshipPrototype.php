@@ -1,19 +1,21 @@
 <?php
-class BrixadiiWarshipBase extends BaseShipNoAft{
+class BrixadiiWarshipPrototype extends BaseShipNoAft{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 420;
+		$this->pointCost = 400;
 		$this->faction = "ZNexus Brixadii";
-        $this->phpclass = "BrixadiiWarshipBase";
+        $this->phpclass = "BrixadiiWarshipPrototype";
         $this->imagePath = "img/ships/Nexus/BrixadiiWarship.png";
 			$this->canvasSize = 200; //img has 200px per side
-        $this->shipClass = "Warship";
+        $this->shipClass = "Warship Prototype";
+			$this->variantOf = "Warship";
+			$this->occurence = "common";		
+			$this->limited = 10;
 		$this->unofficial = true;
-		$this->isd = 2059;
-			$this->limited = 33;
-         
+		$this->isd = 2053;
+
 	    $this->notes .= '<br>Crude Jump Drive';
 		
         $this->forwardDefense = 14;
@@ -47,15 +49,11 @@ class BrixadiiWarshipBase extends BaseShipNoAft{
 		$this->addLeftSystem(new ParticleProjector(3, 6, 1, 180, 360));
 		$this->addLeftSystem(new ParticleProjector(3, 6, 1, 180, 360));
 		$this->addLeftSystem(new NexusChaffLauncher(1, 2, 1, 180, 360));
-		$this->addLeftSystem(new NexusKineticBoxLauncher(2, 0, 0, 240, 260));
 
 		$this->addRightSystem(new Thruster(3, 14, 0, 8, 4));
 		$this->addRightSystem(new ParticleProjector(3, 6, 1, 0, 180));
 		$this->addRightSystem(new ParticleProjector(3, 6, 1, 0, 180));
 		$this->addRightSystem(new NexusChaffLauncher(1, 2, 1, 0, 180));
-		$this->addRightSystem(new NexusKineticBoxLauncher(2, 0, 0, 240, 260));
-
-        
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 40));
@@ -83,17 +81,15 @@ class BrixadiiWarshipBase extends BaseShipNoAft{
             ),
             3=> array(
                     6 => "Thruster",
-					7 => "Kinetic Box Launcher",
-					8 => "Chaff Launcher",
-                    11 => "Particle Projector",
+					7 => "Chaff Launcher",
+                    10 => "Particle Projector",
                     18 => "Structure",
                     20 => "Primary",
 			),
             4=> array(
                     6 => "Thruster",
-					7 => "Kinetic Box Launcher",
-					8 => "Chaff Launcher",
-                    11 => "Particle Projector",
+					7 => "Chaff Launcher",
+                    10 => "Particle Projector",
                     18 => "Structure",
                     20 => "Primary",
             ),

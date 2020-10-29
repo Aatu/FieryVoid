@@ -57,7 +57,7 @@ class CircasianXandar extends HeavyCombatVessel{
             0=> array(
                     8 => "Structure",
                     11 => "Thruster",
-					13 => "Light Laser Cannon",
+					13 => "Light Laser",
                     15 => "Scanner",
                     17 => "Engine",
                     19 => "Reactor",

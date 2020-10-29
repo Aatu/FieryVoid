@@ -1,31 +1,29 @@
 <?php
-class CircasianRehkaFighter extends FighterFlight{
+class CircasianJagaFighter extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 36*6;
         $this->faction = "ZEscalation Circasian";
-        $this->phpclass = "CircasianRehkaFighter";
-        $this->shipClass = "Rehka Heavy flight";
-        $this->imagePath = "img/ships/EscalationWars/CircasianRehka.png";
-        $this->customFtrName = "Rehka";
+        $this->phpclass = "CircasianJagaFighter";
+        $this->shipClass = "Jaga Medium flight";
+        $this->imagePath = "img/ships/EscalationWars/CircasianJaga.png";
+        $this->customFtrName = "Jaga";
 		$this->unofficial = true;
-
 		
-	    $this->notes = 'Non-atmospheric.';
 		
-        $this->isd = 1950;
+        $this->isd = 1963;
         
-        $this->forwardDefense = 9;
-        $this->sideDefense = 8;
-        $this->freethrust = 7;
-        $this->offensivebonus = 3;
-        $this->jinkinglimit = 6;
+        $this->forwardDefense = 7;
+        $this->sideDefense = 7;
+        $this->freethrust = 10;
+        $this->offensivebonus = 5;
+        $this->jinkinglimit = 8;
         $this->turncost = 0.33;
 		$this->turndelay = 0;
         
-        $this->iniativebonus = 80;
+        $this->iniativebonus = 90;
         $this->populate();       
 
     }
@@ -37,11 +35,11 @@ class CircasianRehkaFighter extends FighterFlight{
         $toAdd = $new - $current;
 
         for ($i = 0; $i < $toAdd; $i++){            
-            $armour = array(2, 1, 2, 2);
-            $fighter = new Fighter("CircasianRehkaFighter", $armour, 11, $this->id);
-            $fighter->displayName = "Rehka";
-            $fighter->imagePath = "img/ships/EscalationWars/CircasianRehka.png";
-            $fighter->iconPath = "img/ships/EscalationWars/CircasianRehka_Large.png";
+            $armour = array(2, 2, 1, 1);
+            $fighter = new Fighter("CircasianJagaFighter", $armour, 10, $this->id);
+            $fighter->displayName = "Jaga";
+            $fighter->imagePath = "img/ships/EscalationWars/CircasianJaga.png";
+            $fighter->iconPath = "img/ships/EscalationWars/CircasianJaga_Large.png";
 
 			$gun = new PairedParticleGun(330, 30, 2);
 			$gun->displayName = "Paired Particle Beam";

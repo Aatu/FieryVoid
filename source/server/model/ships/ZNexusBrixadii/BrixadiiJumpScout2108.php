@@ -1,19 +1,21 @@
 <?php
-class BrixadiiWarshipBase extends BaseShipNoAft{
+class BrixadiiJumpScout2108 extends BaseShipNoAft{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 420;
+		$this->pointCost = 415;
 		$this->faction = "ZNexus Brixadii";
-        $this->phpclass = "BrixadiiWarshipBase";
+        $this->phpclass = "BrixadiiJumpScout2108";
         $this->imagePath = "img/ships/Nexus/BrixadiiWarship.png";
 			$this->canvasSize = 200; //img has 200px per side
-        $this->shipClass = "Warship";
+        $this->shipClass = "Jump Scout (2108)";
+			$this->variantOf = "Jump Scout";
+			$this->occurence = "common";		
+			$this->limited = 10;
 		$this->unofficial = true;
-		$this->isd = 2059;
-			$this->limited = 33;
-         
+		$this->isd = 2108;
+
 	    $this->notes .= '<br>Crude Jump Drive';
 		
         $this->forwardDefense = 14;
@@ -29,33 +31,29 @@ class BrixadiiWarshipBase extends BaseShipNoAft{
          
         $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 16, 5, 5));
+        $this->addPrimarySystem(new ELINTScanner(4, 16, 5, 8));
         $this->addPrimarySystem(new Engine(4, 18, 0, 10, 4));
-		$this->addPrimarySystem(new Hangar(4, 4));
+		$this->addPrimarySystem(new Hangar(2, 4));
 		$this->addPrimarySystem(new JumpEngine(4, 12, 5, 40));
 		$this->addPrimarySystem(new Thruster(4, 15, 0, 5, 2));
 		$this->addPrimarySystem(new Thruster(4, 15, 0, 5, 2));
 
         $this->addFrontSystem(new Thruster(3, 14, 0, 5, 1));
         $this->addFrontSystem(new Thruster(3, 14, 0, 5, 1));
-		$this->addFrontSystem(new ParticleProjector(3, 6, 1, 240, 60));
-		$this->addFrontSystem(new ParticleProjector(3, 6, 1, 300, 120));
-		$this->addFrontSystem(new HvyParticleProjector(3, 0, 0, 240, 360));
-		$this->addFrontSystem(new HvyParticleProjector(3, 0, 0, 0, 120));
+		$this->addFrontSystem(new NexusProjectorArray(3, 6, 1, 240, 60));
+		$this->addFrontSystem(new NexusProjectorArray(3, 6, 1, 300, 120));
+		$this->addFrontSystem(new CargoBay(2, 25));
+		$this->addFrontSystem(new CargoBay(2, 25));
         
 		$this->addLeftSystem(new Thruster(3, 14, 0, 8, 3));
-		$this->addLeftSystem(new ParticleProjector(3, 6, 1, 180, 360));
-		$this->addLeftSystem(new ParticleProjector(3, 6, 1, 180, 360));
+		$this->addLeftSystem(new NexusProjectorArray(3, 6, 1, 180, 360));
+		$this->addLeftSystem(new NexusLightProjectorArray(2, 5, 2, 180, 360));
 		$this->addLeftSystem(new NexusChaffLauncher(1, 2, 1, 180, 360));
-		$this->addLeftSystem(new NexusKineticBoxLauncher(2, 0, 0, 240, 260));
 
 		$this->addRightSystem(new Thruster(3, 14, 0, 8, 4));
-		$this->addRightSystem(new ParticleProjector(3, 6, 1, 0, 180));
-		$this->addRightSystem(new ParticleProjector(3, 6, 1, 0, 180));
+		$this->addRightSystem(new NexusProjectorArray(3, 6, 1, 0, 180));
+		$this->addRightSystem(new NexusLightProjectorArray(2, 5, 2, 0, 180));
 		$this->addRightSystem(new NexusChaffLauncher(1, 2, 1, 0, 180));
-		$this->addRightSystem(new NexusKineticBoxLauncher(2, 0, 0, 240, 260));
-
-        
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 40));
@@ -76,24 +74,24 @@ class BrixadiiWarshipBase extends BaseShipNoAft{
             ),
             1=> array(
                     6 => "Thruster",
-					10 => "Heavy Particle Projector",
-					12 => "Particle Projector",
+					10 => "Cargo Bay",
+					12 => "Projector Array",
 					18 => "Structure",
                     20 => "Primary",
             ),
             3=> array(
-                    6 => "Thruster",
-					7 => "Kinetic Box Launcher",
+                    7 => "Thruster",
 					8 => "Chaff Launcher",
-                    11 => "Particle Projector",
+                    9 => "Light Projector Array",
+					11 => "Projector Array",
                     18 => "Structure",
                     20 => "Primary",
 			),
             4=> array(
-                    6 => "Thruster",
-					7 => "Kinetic Box Launcher",
+                    7 => "Thruster",
 					8 => "Chaff Launcher",
-                    11 => "Particle Projector",
+                    9 => "Light Projector Array",
+					11 => "Projector Array",
                     18 => "Structure",
                     20 => "Primary",
             ),
