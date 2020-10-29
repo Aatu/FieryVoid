@@ -514,12 +514,11 @@ window.weaponManager = {
 
     calculateRangePenalty: function calculateRangePenalty(distance, weapon) {
         var rangePenalty = 0;
-	if (weapon.specialRangeCalculation){
-	    rangePenalty = weapon.calculateSpecialRangePenalty(distance);
-	}else{ //standard calculation
-	    rangePenalty = weapon.rangePenalty * distance;
-	}
-
+		if (weapon.specialRangeCalculation){
+			rangePenalty = weapon.calculateSpecialRangePenalty(distance);
+		}else{ //standard calculation
+			rangePenalty = weapon.rangePenalty * distance;
+		}
         return rangePenalty;
     },
 
@@ -1179,8 +1178,8 @@ window.weaponManager = {
                         var damageClass = weapon.data["Weapon type"].toLowerCase();
                         var chance = weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid);
 
-                        if (chance < 1) {
-                            debug && console.log("Can't fire, change < 0");
+                        if ((chance < 1)&&(!weapon.ballistic)) {//now ballistics can be launched when hit chance is 0 or less - important for Packet Torpedo!
+                            //debug && console.log("Can't fire, change < 0");
                             continue;
                         }
 

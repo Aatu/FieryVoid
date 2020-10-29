@@ -210,7 +210,7 @@
         public $iconPath = "packetTorpedo.png";
         public $range = 0; //unlimited range, but suffers range penalty
         public $loadingtime = 2;
-	public $specialRangeCalculation = true;
+	public $specialRangeCalculation = true; //to inform front end that it should use weapon-specific range penalty calculation - such a method should be present in .js!
         
         public $weaponClass = "Ballistic"; 
         public $damageType = "Standard"; 
@@ -254,16 +254,16 @@
 	    //override standard to skip first 10 hexes when calculating range penalty
 	    public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
 	    {
-		$targetPos = $target->getHexPos();
-		$dis = mathlib::getDistanceHex($pos, $targetPos);
-		$dis = max(0,$dis-10);//first 10 hexes are "free"
+			$targetPos = $target->getHexPos();
+			$dis = mathlib::getDistanceHex($pos, $targetPos);
+			$dis = max(0,$dis-10);//first 10 hexes are "free"
 
-		$rangePenalty = ($this->rangePenalty * $dis);
-		$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
-		return Array("rp" => $rangePenalty, "notes" => $notes);
+			$rangePenalty = ($this->rangePenalty * $dis);
+			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
+			return Array("rp" => $rangePenalty, "notes" => $notes);
 	    }	    
         
-        public function getDamage($fireOrder){        return Dice::d(10, 2)+10; //2d10+10   }
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+10;    }
         public function setMinDamage(){     $this->minDamage = 12;      }
         public function setMaxDamage(){     $this->maxDamage = 30;      }
     

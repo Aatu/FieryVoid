@@ -2337,6 +2337,14 @@ class Bulkhead extends ShipSystem{
 		
 		return $returnValues;
 	}
+	
+	
+	public function stripForJson(){
+		//$this->output = $this->getOutput();	
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->output = $this->getOutput();
+        return $strippedSystem;
+    }
 } //endof Bulkhead
 
 

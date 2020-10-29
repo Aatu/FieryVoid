@@ -38,14 +38,13 @@ class gaimMoor extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new SubReactorUniversal(4, 8));
-        $this->addFrontSystem(new Bulkhead(0, 3));
-		/*
+        $this->addFrontSystem(new Bulkhead(0, 3));		
         $this->addFrontSystem(new PacketTorpedo(3, 0, 0, 240, 0));
         $this->addFrontSystem(new PacketTorpedo(3, 0, 0, 240, 0));
+        $this->addFrontSystem(new PacketTorpedo(3, 0, 0, 0, 120));
+        $this->addFrontSystem(new PacketTorpedo(3, 0, 0, 0, 120));
         $this->addFrontSystem(new PacketTorpedo(3, 0, 0, 300, 60));
-        $this->addFrontSystem(new PacketTorpedo(3, 0, 0, 0, 120));
-        $this->addFrontSystem(new PacketTorpedo(3, 0, 0, 0, 120));
-		*/
+		
         
 		
         $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
@@ -76,14 +75,11 @@ class gaimMoor extends HeavyCombatVessel{
                     20 => "C&C",
                 ),
                 1=> array(
-					20=>"Sub Reactor", //TEST
-					/*
                     3 => "Thruster",
                     7 => "Packet Torpedo",
                     9 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
-					*/
                 ),
                 2=> array(
                     5 => "Thruster",
