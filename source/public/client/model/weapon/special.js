@@ -179,3 +179,10 @@ var SelfRepair = function(json, ship)
 SelfRepair.prototype = Object.create( Weapon.prototype );
 SelfRepair.prototype.constructor = SelfRepair;
 */
+
+var ParticleConcentrator = function(json, ship)
+{
+    Weapon.call( this, json, ship);
+}
+ParticleConcentrator.prototype = Object.create( Weapon.prototype );
+ParticleConcentrator.prototype.constructor = ParticleConcentrator;
