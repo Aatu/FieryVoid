@@ -1,12 +1,12 @@
 <?php
-class gaimMoor extends HeavyCombatVessel{
+class GaimMoor extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 570;
         $this->faction = "Custom Ships"; //temporary - until Gaim fleet is ready :)
-        $this->phpclass = "gaimMoor";
+        $this->phpclass = "GaimMoor";
         $this->imagePath = "img/ships/altarian.png";
         $this->shipClass = "Moor Torpedo Destroyer";
         //$this->variantOf = "Suom Light Carrier";
