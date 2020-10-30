@@ -1147,6 +1147,7 @@ spl_autoload_register(
 				'choukainquisitorlightcruiser' => '/server/model/ships/ZEscalationChouka/ChoukaInquisitorLightCruiser.php',
 				'choukapriestdestroyer' => '/server/model/ships/ZEscalationChouka/ChoukaPriestDestroyer.php',
 				'choukapriestescort' => '/server/model/ships/ZEscalationChouka/ChoukaPriestEscort.php',
+				'choukaradianceexplorer' => '/server/model/ships/ZEscalationChouka/ChoukaRadianceExplorer.php',
 				'choukaretributionbattlecruiser' => '/server/model/ships/ZEscalationChouka/ChoukaRetributionBattlecruiser.php',
 				'choukaretributionrefit' => '/server/model/ships/ZEscalationChouka/ChoukaRetributionRefit.php',
 				'choukarevelationfreighter' => '/server/model/ships/ZEscalationChouka/ChoukaRevelationFreighter.php',
