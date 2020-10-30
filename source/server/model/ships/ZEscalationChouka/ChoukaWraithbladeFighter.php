@@ -9,7 +9,6 @@ class ChoukaWraithbladeFighter extends FighterFlight{
         $this->phpclass = "ChoukaWraithbladeFighter";
         $this->shipClass = "Wraithblade Heavy flight";
         $this->imagePath = "img/ships/EscalationWars/ChoukaWraithblade.png";
-        $this->customFtrName = "Wraithblade";
 		$this->unofficial = true;
 
 		
