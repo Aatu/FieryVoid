@@ -1536,7 +1536,9 @@ spl_autoload_register(
                 'subreactoruniversal' => '/server/model/systems/baseSystems.php',
                 'bulkhead' => '/server/model/systems/baseSystems.php',
                 'packettorpedo' => '/server/model/weapons/torpedo.php',
+                'particleconcentrator' => '/server/model/weapons/specialWeapons.php',
 				//Gaim ships				
+				'gaimmoas' => '/server/model/ships/gaim/gaimMoas.php',
 				'gaimmoor' => '/server/model/ships/gaim/gaimMoor.php',
 				
 				
