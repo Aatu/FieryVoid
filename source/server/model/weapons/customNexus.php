@@ -750,6 +750,115 @@ class NexusLargeEarlyRocket extends Weapon{
 }//endof NexusLargeEarlyRocket
 
 
+
+
+
+
+
+class NexusHeavyPlasmaCharge extends Torpedo{
+        public $name = "NexusHeavyPlasmaCharge";
+        public $displayName = "Heavy Plasma Charge";
+		public $iconPath = "NexusHeavyPlasmaCharge.png";
+        public $loadingtime = 2; // 2 turn
+	public $specialRangeCalculation = true; //to inform front end that it should use weapon-specific range penalty calculation - such a method should be present in .js!
+
+    	public $weaponClass = "Plasma"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+//		public $firingMode = 'Ballistic'; //firing mode - just a name essentially
+		public $damageType = "Plasma"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+
+        public $fireControl = array(-4, 2, 3); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+		public $rangePenalty = 1; // -1/hex - BUT ONLY AFTER 12 HEXES
+
+        public $animation = "trail";
+        public $trailColor = array(40, 199, 251);
+        public $animationColor = array(52, 249, 11);
+		public $animationWidth = 0.5;
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 12;
+        public $trailLength = 12;    
+        public $useOEW = true; //torpedo
+        public $ballistic = true; //missile
+        public $range = 0; //unlimited range, but suffers range penalty
+
+		public $rangeDamagePenaltyHPCharge = 1;  // -1/hex, but only after 10 hexes!
+	    
+	public $priority = 6; //Standard weapon
+	    
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "Launch and distance range is unlimited.";
+		$this->data["Special"] .= "<br>Plasma weapon. Armor treated as half.";
+		$this->data["Special"] .= "<br>Loses -1 damage per hex after the first 10 hexes.";
+		$this->data["Special"] .= "<br>This weapon suffers range penalty (like direct fire weapons do), but only after first 12 hexes of distance.";
+	}	 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 9;
+            if ( $powerReq == 0 ) $powerReq = 5;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+// Variable damage reduction with range from the Descari Plasma Bolter
+
+	//skip first 10 hexes when calculating the damage modifier
+	protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
+	{
+		parent::getDamageMod($damage, $shooter, $target, $pos, $gamedata);
+					if ($pos != null) {
+					$sourcePos = $pos;
+					} 
+					else {
+					$sourcePos = $shooter->getHexPos();
+					}
+			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			if ($dis <= 10) {
+				$damage -= 0;
+				}
+			else {
+				$damage -= round(($dis - 10) * $this->rangeDamagePenaltyHPCharge);
+			}	
+		        $damage = max(0, $damage); //at least 0	    
+        		$damage = floor($damage); //drop fractions, if any were generated
+      			 return $damage;
+	}		
+
+// Variable range penalty from the Gaim Packet Torpedo
+
+	    //override standard to skip first 12 hexes when calculating range penalty
+	    public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
+	    {
+			$targetPos = $target->getHexPos();
+			$dis = mathlib::getDistanceHex($pos, $targetPos);
+			$dis = max(0,$dis-12);//first 12 hexes are "free"
+
+			$rangePenalty = ($this->rangePenalty * $dis);
+			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
+			return Array("rp" => $rangePenalty, "notes" => $notes);
+	    }	    
+
+        public function getDamage($fireOrder){ 
+			return Dice::d(10, 1)+10;   
+			//return 10; To test damage and range penalty effects
+		}
+
+        public function setMinDamage(){     $this->minDamage = 11 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 20 ;      }
+		
+		
+}//endof NexusHeavyPlasmaCharge
+
+
+
+
+
+
+
 /*Chaff Launcher
 intercepts all weapon fire (directed at self) from HEX (including uninterceptable weapons).
 Done as: kind of offensive mode - player needs to pick hex to fire at. Animated as kind of EMine. 
@@ -1008,7 +1117,7 @@ class NexusChaffLauncher extends Weapon{
 
         public function getDamage($fireOrder){ return Dice::d(10, 2)+6;   }
         public function setMinDamage(){     $this->minDamage = 9 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 36 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 26 ;      }
     }// endof NexusParticleAgitator 
 
 

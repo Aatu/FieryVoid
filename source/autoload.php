@@ -1233,6 +1233,7 @@ spl_autoload_register(
 				'nexusprojectorarray' => '/server/model/weapons/customNexus.php',
 				'nexuslightprojectorarray' => '/server/model/weapons/customNexus.php',
 				'nexusinterceptorarray' => '/server/model/weapons/customNexus.php',
+				'nexusheavyplasmacharge' => '/server/model/weapons/customNexus.php',
 
 
 
@@ -1261,15 +1262,16 @@ spl_autoload_register(
                 'brixadiipursuitfrigate2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigate2057.php',
                 'brixadiipursuitfrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigate2108.php',
 		    
-                'brixadiiattackfrigatebase' => '/server/model/ships/ZNexusBrixadii/BrixadiiAttackFrigateBase.php',
+                'brixadiiattackfrigate' => '/server/model/ships/ZNexusBrixadii/BrixadiiAttackFrigate.php',
                 'brixadiiattackfrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiAttackFrigate2108.php',
 
                 'brixadiilightescortfrigate' => '/server/model/ships/ZNexusBrixadii/BrixadiiLightEscortFrigate.php',
 
                 'brixadiipolicefrigatebase' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigateBase.php',
-                'brixadiipolicefrigateearly' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigateEarly.php',
+                'brixadiipolicefrigate2047' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2047.php',
 				'brixadiipolicefrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2108.php',
                 'brixadiiscreenfrigate' => '/server/model/ships/ZNexusBrixadii/BrixadiiScreenFrigate.php',
+                'brixadiiscreenfrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiScreenFrigate2108.php',
 		    		    
                 'brixadiipolicefrigatebaseshf' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigateBaseSHF.php',
                 'brixadiipolicefrigate2047shf' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2047SHF.php',
