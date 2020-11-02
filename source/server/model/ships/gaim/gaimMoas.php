@@ -37,12 +37,12 @@ class GaimMoas extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));   
 			
 		
-        $this->addAftSystem(new Thruster(4, 13, 0, 4, 2));
-        $this->addAftSystem(new Thruster(4, 13, 0, 4, 2));
         $this->addAftSystem(new Bulkhead(0, 2));
         $this->addAftSystem(new Bulkhead(0, 2));
         $this->addAftSystem(new ScatterGun(2, 0, 0, 120, 0));
         $this->addAftSystem(new ScatterGun(2, 0, 0, 0, 240));
+        $this->addAftSystem(new Thruster(4, 13, 0, 4, 2));
+        $this->addAftSystem(new Thruster(4, 13, 0, 4, 2));
 		
         $this->addLeftSystem(new PacketTorpedo(4, 0, 0, 240, 360));
         $this->addLeftSystem(new ScatterGun(2, 0, 0, 180, 60));

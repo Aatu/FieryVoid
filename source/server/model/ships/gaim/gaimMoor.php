@@ -35,8 +35,6 @@ class GaimMoor extends HeavyCombatVessel{
         
         
         
-        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new SubReactorUniversal(4, 8));
         $this->addFrontSystem(new Bulkhead(0, 3));		
         $this->addFrontSystem(new PacketTorpedo(3, 0, 0, 240, 0));
@@ -44,16 +42,18 @@ class GaimMoor extends HeavyCombatVessel{
         $this->addFrontSystem(new PacketTorpedo(3, 0, 0, 0, 120));
         $this->addFrontSystem(new PacketTorpedo(3, 0, 0, 0, 120));
         $this->addFrontSystem(new PacketTorpedo(3, 0, 0, 300, 60));
+        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
 		
         
 		
-        $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
-        $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
         $this->addAftSystem(new JumpEngine(3, 10, 3, 20));
         $this->addAftSystem(new Bulkhead(0, 3));
         $this->addAftSystem(new Bulkhead(0, 3));
         $this->addAftSystem(new ScatterGun(3, 0, 0, 120, 0));
         $this->addAftSystem(new ScatterGun(3, 0, 0, 0, 240));
+        $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
+        $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
         
 
         

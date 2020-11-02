@@ -1530,7 +1530,12 @@ spl_autoload_register(
 				
 				//new SW - Uglies
                 'zzftruglytiex' => '/server/model/ships/ZStarWars/zzftrUglyTIEX.php',
-				
+                'zzftruglyxtie' => '/server/model/ships/ZStarWars/zzftrUglyXTIE.php',
+                'zzftruglytyewing' => '/server/model/ships/ZStarWars/zzftrUglyTYEWing.php',
+                'zzftruglychirdaki' => '/server/model/ships/ZStarWars/zzftrUglyChirdaki.php',
+                'zzftrbwing' => '/server/model/ships/ZStarWars/zzftrBWing.php',
+				'swdreadnoughtraider' => '/server/model/ships/ZStarWars/swDreadnoughtRaider.php',
+				'swnebulonbmedical' => '/server/model/ships/ZStarWars/swNebulonBMedical.php',
 				
 				//Gaim systems
                 'subreactoruniversal' => '/server/model/systems/baseSystems.php',
