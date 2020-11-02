@@ -41,6 +41,7 @@ class Weapon extends ShipSystem
 
     public $rangePenalty = 0;
     public $rangePenaltyArray = array();
+    public $specialRangeCalculation = false; //set to true if weapon should use its own range calculation IN FRONT END (server side range calculation is in weapon class anyway)
     public $rangeDamagePenalty = 0;
     public $rangeDamagePenaltyArray = array();
     private $dp = 0; //damage penalty - fraction of shot that gets wasted!

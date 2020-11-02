@@ -1,12 +1,12 @@
 <?php
-class gaimMoor extends HeavyCombatVessel{
+class GaimMoor extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 570;
         $this->faction = "Custom Ships"; //temporary - until Gaim fleet is ready :)
-        $this->phpclass = "gaimMoor";
+        $this->phpclass = "GaimMoor";
         $this->imagePath = "img/ships/altarian.png";
         $this->shipClass = "Moor Torpedo Destroyer";
         //$this->variantOf = "Suom Light Carrier";
@@ -35,30 +35,25 @@ class gaimMoor extends HeavyCombatVessel{
         
         
         
-        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new SubReactorUniversal(4, 8));
-		/*		
-        $this->addFrontSystem(new Bulkhead(0, 3));
-		*/
-		/*
+        $this->addFrontSystem(new Bulkhead(0, 3));		
         $this->addFrontSystem(new PacketTorpedo(3, 0, 0, 240, 0));
         $this->addFrontSystem(new PacketTorpedo(3, 0, 0, 240, 0));
+        $this->addFrontSystem(new PacketTorpedo(3, 0, 0, 0, 120));
+        $this->addFrontSystem(new PacketTorpedo(3, 0, 0, 0, 120));
         $this->addFrontSystem(new PacketTorpedo(3, 0, 0, 300, 60));
-        $this->addFrontSystem(new PacketTorpedo(3, 0, 0, 0, 120));
-        $this->addFrontSystem(new PacketTorpedo(3, 0, 0, 0, 120));
-		*/
+        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
+		
         
 		
-        $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
-        $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
         $this->addAftSystem(new JumpEngine(3, 10, 3, 20));
-		/*		
         $this->addAftSystem(new Bulkhead(0, 3));
         $this->addAftSystem(new Bulkhead(0, 3));
-		*/
         $this->addAftSystem(new ScatterGun(3, 0, 0, 120, 0));
         $this->addAftSystem(new ScatterGun(3, 0, 0, 0, 240));
+        $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
+        $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
         
 
         
@@ -80,14 +75,11 @@ class gaimMoor extends HeavyCombatVessel{
                     20 => "C&C",
                 ),
                 1=> array(
-					20=>"Sub Reactor", //TEST
-					/*
                     3 => "Thruster",
                     7 => "Packet Torpedo",
                     9 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
-					*/
                 ),
                 2=> array(
                     5 => "Thruster",

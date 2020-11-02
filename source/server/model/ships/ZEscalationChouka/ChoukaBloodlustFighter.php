@@ -10,6 +10,8 @@ class ChoukaBloodlustFighter extends FighterFlight{
         $this->shipClass = "Bloodlust Assault flight";
         $this->imagePath = "img/ships/EscalationWars/ChoukaBloodlust.png";
         $this->customFtrName = "Bloodlust";
+		$this->unofficial = true;
+
 		
         $this->isd = 1943;
         
