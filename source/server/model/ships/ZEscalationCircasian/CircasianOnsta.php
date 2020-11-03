@@ -9,7 +9,6 @@ class CircasianOnsta extends FighterFlight{
         $this->phpclass = "CircasianOnsta";
         $this->shipClass = "Onsta Assault Shuttles";
         $this->imagePath = "img/ships/EscalationWars/CircasianOnsta.png";
-        $this->customFtrName = "Onsta";
 		$this->unofficial = true;
 
 		
