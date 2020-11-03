@@ -48,7 +48,7 @@ class zzftrbwingmk2 extends FighterFlight{
             $fighter = new Fighter("zzftrbwingmk2", $armour, 18, $this->id);
             $fighter->displayName = "B-Wing Mk2";
             $fighter->imagePath = "img/starwars/bWing.png";
-            $fighter->iconPath = "img/starwars/bWing_Large.png"; 
+            $fighter->iconPath = "img/starwars/bWing_large.png"; 
             
             $frontGun = new SWFighterLaser(300, 60, 1, 3); //fwd triple Autoblasters
 			$frontGun->displayName = "Autoblasters";
@@ -63,7 +63,7 @@ class zzftrbwingmk2 extends FighterFlight{
             $fighter->addFrontSystem($torpedoLauncher);
             
 			//show antiship Laser on Aft, just because there's still some room there...
-            $ASGun = new SWFighterASLaser(330, 30, 2, 2); //damage of 2 dice (d6) + 4 flat - always single mount
+            $ASGun = new SWFighterASLaser(330, 30, 2, 4); //damage of 2 dice (d6) + 4 flat - always single mount
             $fighter->addAftSystem($ASGun);
 			
             //Ray Shield, 2 points
