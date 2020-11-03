@@ -13,7 +13,6 @@ class CircasianJagallTorpedoFighter extends FighterFlight{
 		$this->unofficial = true;
 
         $this->imagePath = "img/ships/EscalationWars/CircasianJagall.png";
-        $this->customFtrName = "Jagall";
 		
         $this->isd = 1992;
         

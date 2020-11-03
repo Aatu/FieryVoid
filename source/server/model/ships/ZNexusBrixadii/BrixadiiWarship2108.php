@@ -32,7 +32,7 @@ class BrixadiiWarship2108 extends BaseShipNoAft{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 5, 6));
         $this->addPrimarySystem(new Engine(4, 18, 0, 10, 4));
-		$this->addPrimarySystem(new Hangar(4, 4));
+		$this->addPrimarySystem(new Hangar(2, 4));
 		$this->addPrimarySystem(new JumpEngine(4, 12, 5, 40));
 		$this->addPrimarySystem(new Thruster(4, 15, 0, 5, 2));
 		$this->addPrimarySystem(new Thruster(4, 15, 0, 5, 2));
@@ -48,13 +48,13 @@ class BrixadiiWarship2108 extends BaseShipNoAft{
 		$this->addLeftSystem(new NexusProjectorArray(3, 6, 1, 180, 360));
 		$this->addLeftSystem(new NexusProjectorArray(3, 6, 1, 180, 360));
 		$this->addLeftSystem(new NexusChaffLauncher(1, 2, 1, 180, 360));
-		$this->addLeftSystem(new NexusKineticBoxLauncher(2, 4, 0, 240, 260));
+		$this->addLeftSystem(new NexusKineticBoxLauncher(2, 4, 0, 240, 360));
 
 		$this->addRightSystem(new Thruster(3, 14, 0, 8, 4));
 		$this->addRightSystem(new NexusProjectorArray(3, 6, 1, 0, 180));
 		$this->addRightSystem(new NexusProjectorArray(3, 6, 1, 0, 180));
 		$this->addRightSystem(new NexusChaffLauncher(1, 2, 1, 0, 180));
-		$this->addRightSystem(new NexusKineticBoxLauncher(2, 4, 0, 240, 260));
+		$this->addRightSystem(new NexusKineticBoxLauncher(2, 4, 0, 0, 120));
 
         
         

@@ -10,6 +10,8 @@ class ChoukaHellfireBOSAT extends OSAT{
         $this->imagePath = "img/ships/EscalationWars/ChoukaHellfireOSAT.png";
         $this->canvasSize = 60;
         $this->shipClass = 'Hellfire-B Defense Satellite';
+			$this->variantOf = "Hellfire-A Defense Satellite";
+			$this->occurence = "common";
         
         $this->isd = 1962;
         $this->unofficial = true;

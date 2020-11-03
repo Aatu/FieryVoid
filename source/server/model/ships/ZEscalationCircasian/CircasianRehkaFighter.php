@@ -9,7 +9,6 @@ class CircasianRehkaFighter extends FighterFlight{
         $this->phpclass = "CircasianRehkaFighter";
         $this->shipClass = "Rehka Heavy flight";
         $this->imagePath = "img/ships/EscalationWars/CircasianRehka.png";
-        $this->customFtrName = "Rehka";
 		$this->unofficial = true;
 
 		

@@ -4,7 +4,7 @@ class BrixadiiJumpScout2108 extends BaseShipNoAft{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 415;
+		$this->pointCost = 445;
 		$this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiJumpScout2108";
         $this->imagePath = "img/ships/Nexus/BrixadiiWarship.png";

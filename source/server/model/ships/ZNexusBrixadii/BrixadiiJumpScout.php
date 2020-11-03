@@ -10,7 +10,7 @@ class BrixadiiJumpScout extends BaseShipNoAft{
         $this->imagePath = "img/ships/Nexus/BrixadiiWarship.png";
 			$this->canvasSize = 200; //img has 200px per side
         $this->shipClass = "Jump Scout";
-
+			$this->limited = 10;
 		$this->unofficial = true;
 		$this->isd = 2060;
 
@@ -64,7 +64,7 @@ class BrixadiiJumpScout extends BaseShipNoAft{
                     8 => "Structure",
                     10 => "JumpEngine",
                     12 => "Thruster",
-					14 => "Scanner",
+					14 => "ELINT Scanner",
                     16 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",

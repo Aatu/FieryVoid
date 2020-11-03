@@ -4,14 +4,13 @@ class BrixadiiSurveyorBase extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 360;
+        $this->pointCost = 350;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiSurveyorBase";
         $this->imagePath = "img/ships/Nexus/BrixadiiBattleDestroyer.png";
-			$this->canvasSize = 200; //img has 200px per side
+			$this->canvasSize = 175; //img has 200px per side
         $this->shipClass = "Surveyor";
 			//$this->variantOf = "Surveyor";
-			$this->occurence = "common";
 			$this->limited = 10;
 			$this->unofficial = true;
         $this->isd = 1873;
@@ -27,19 +26,19 @@ class BrixadiiSurveyorBase extends HeavyCombatVessel{
         $this->iniativebonus = 6*5;
         
          
-        $this->addPrimarySystem(new Reactor(4, 16, 0, -2));
+        $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(5, 10, 0, 0));
         $this->addPrimarySystem(new ElintScanner(4, 10, 5, 6));
         $this->addPrimarySystem(new Engine(4, 14, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(1, 2));
-        $this->addPrimarySystem(new Thruster(3, 14, 0, 6, 3));
-        $this->addPrimarySystem(new Thruster(3, 14, 0, 6, 4));
+        $this->addPrimarySystem(new Thruster(3, 14, 0, 4, 3));
+        $this->addPrimarySystem(new Thruster(3, 14, 0, 4, 4));
       
         $this->addFrontSystem(new Thruster(3, 14, 0, 6, 1));
-    	$this->addFrontSystem(new NexusParticleAgitator(3, 0, 0, 240, 360));
-        $this->addFrontSystem(new NexusParticleAgitator(3, 0, 0, 0, 120));
-        $this->addFrontSystem(new NexusParticleProjectorLight(2, 0, 0, 180, 60));
-        $this->addFrontSystem(new NexusParticleProjectorLight(2, 0, 0, 300, 180));
+    	$this->addFrontSystem(new NexusParticleAgitator(3, 8, 3, 240, 360));
+        $this->addFrontSystem(new NexusParticleAgitator(3, 8, 3, 0, 120));
+        $this->addFrontSystem(new LightParticleProjector(2, 3, 1, 180, 60));
+        $this->addFrontSystem(new LightParticleProjector(2, 3, 1, 300, 180));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
@@ -53,7 +52,7 @@ class BrixadiiSurveyorBase extends HeavyCombatVessel{
             0=> array(
                     7 => "Structure",
                     10 => "Thruster",
-                    13 => "Scanner",
+                    13 => "ELINT Scanner",
                     16 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",

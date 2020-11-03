@@ -15,7 +15,8 @@
         public function isInDistanceRange($shooter, $target, $fireOrder)
         {
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $distanceRange = max($this->range, $this->distanceRange); //just in case distanceRange is not filled!
+            $distanceRange = max($this->range, $this->distanceRange); //just in case distanceRange is not filled! Then it's assumed to be the same as launch range
+            if($distanceRange <=0 ) return true; //0 means unlimited range
 
             if(mathlib::getDistanceHex($movement->position,  $target) > $distanceRange )
             {

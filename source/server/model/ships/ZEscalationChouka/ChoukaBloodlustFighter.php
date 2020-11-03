@@ -9,7 +9,7 @@ class ChoukaBloodlustFighter extends FighterFlight{
         $this->phpclass = "ChoukaBloodlustFighter";
         $this->shipClass = "Bloodlust Assault flight";
         $this->imagePath = "img/ships/EscalationWars/ChoukaBloodlust.png";
-        $this->customFtrName = "Bloodlust";
+ //       $this->customFtrName = "Bloodlust";  //Only used for special hangar needs like T-bolts
 		$this->unofficial = true;
 
 		
