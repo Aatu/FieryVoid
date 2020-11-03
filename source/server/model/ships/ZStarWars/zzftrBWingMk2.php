@@ -48,7 +48,7 @@ class zzftrbwingmk2 extends FighterFlight{
             $fighter = new Fighter("zzftrbwingmk2", $armour, 18, $this->id);
             $fighter->displayName = "B-Wing Mk2";
             $fighter->imagePath = "img/starwars/bWing.png";
-            $fighter->iconPath = "img/starwars/bWing_Large.png"; 
+            $fighter->iconPath = "img/starwars/bWing_large.png"; 
             
             $frontGun = new SWFighterLaser(300, 60, 1, 3); //fwd triple Autoblasters
 			$frontGun->displayName = "Autoblasters";
