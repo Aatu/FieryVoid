@@ -63,7 +63,7 @@ class zzftrbwingmk2 extends FighterFlight{
             $fighter->addFrontSystem($torpedoLauncher);
             
 			//show antiship Laser on Aft, just because there's still some room there...
-            $ASGun = new SWFighterASLaser(330, 30, 2, 2); //damage of 2 dice (d6) + 4 flat - always single mount
+            $ASGun = new SWFighterASLaser(330, 30, 2, 4); //damage of 2 dice (d6) + 4 flat - always single mount
             $fighter->addAftSystem($ASGun);
 			
             //Ray Shield, 2 points
