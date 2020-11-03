@@ -1,17 +1,19 @@
 <?php
-class zzftrbwing extends FighterFlight{
+class zzftrBWing extends FighterFlight{
     /*StarWars B-Wing*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 90*6;
         $this->faction = "ZStarWars";
-        $this->phpclass = "zzftrbwing";
+        $this->phpclass = "zzftrBWing";
         $this->shipClass = "B-Wing Assault Fighters";
+        //$this->variantOf = "B-Wing Assault Fighters";
+        $this->limited = 33; //Limited Deployment
         $this->imagePath = "img/starwars/bWing.png";
         
 		$this->isd = "2 ABY";
-		$this->notes = "Primary users: Rebel Alliance, New Republic.";
+		$this->notes = "Primary users: Rebel Alliance.";
 		$this->notes .= "<br>Hyperdrive";
 	    
 
@@ -48,7 +50,7 @@ class zzftrbwing extends FighterFlight{
             $fighter->imagePath = "img/starwars/bWing.png";
             $fighter->iconPath = "img/starwars/bWing_Large.png"; 
             
-            $frontGun = new SWFighterLaser(300, 60, 4, 3); //fwd triple Laser Cannons
+            $frontGun = new SWFighterLaser(330, 30, 4, 3); //fwd triple Laser Cannons
             $fighter->addFrontSystem($frontGun);
             
             $frontGun = new SWFighterIon(330, 30, 3, 3); //fwd triple Ion Cannons
@@ -63,7 +65,7 @@ class zzftrbwing extends FighterFlight{
             $fighter->addAftSystem(new SWRayShield(0, 1, 0, 2, 0, 360));
 
             
-		$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
             
             
             $this->addSystem($fighter);

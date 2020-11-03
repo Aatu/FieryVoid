@@ -1533,9 +1533,13 @@ spl_autoload_register(
                 'zzftruglyxtie' => '/server/model/ships/ZStarWars/zzftrUglyXTIE.php',
                 'zzftruglytyewing' => '/server/model/ships/ZStarWars/zzftrUglyTYEWing.php',
                 'zzftruglychirdaki' => '/server/model/ships/ZStarWars/zzftrUglyChirdaki.php',
-                'zzftrbwing' => '/server/model/ships/ZStarWars/zzftrBWing.php',
 				'swdreadnoughtraider' => '/server/model/ships/ZStarWars/swDreadnoughtRaider.php',
 				'swnebulonbmedical' => '/server/model/ships/ZStarWars/swNebulonBMedical.php',
+                'swfighteraslaser' => '/server/model/weapons/customSW.php',
+                'zzftrbwing' => '/server/model/ships/ZStarWars/zzftrBWing.php',
+                'zzftrbwingmk2' => '/server/model/ships/ZStarWars/zzftrBWingMk2.php', 
+                'zzftrbwingprototype' => '/server/model/ships/ZStarWars/zzftrBWingPrototype.php',
+				
 				
 				//Gaim systems
                 'subreactoruniversal' => '/server/model/systems/baseSystems.php',

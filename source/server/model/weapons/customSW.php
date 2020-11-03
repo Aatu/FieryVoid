@@ -1290,4 +1290,86 @@ class SWTractorBeam extends SWDirectWeapon{
 
 
 
+
+class SWFighterASLaserR extends SWDirectWeapon{
+    /*StarWars fighter weapon - a Particle weapon!
+		This is B-Wing Prototype's antiship weapon (Raking!)
+	*/
+    public $name = "SWFighterASLaserR";
+    public $displayName = "Antiship Laser Prototype";
+	
+    public $priority = 6; //very large fighter weapon all right!
+    public $loadingtime = 3;
+    public $rangePenalty = 1.5;//-3 per 2 hexes
+    public $fireControl = array(0, 0, -4); // fighters, <mediums, <capitals
+    public $intercept = 0;
+
+	protected $damagebonus = 0;
+	protected $damagedice = 0;
+
+   
+	public $damageType = 'Raking'; //consistent with on-screen longer burst
+    public $weaponClass = "Particle"; 
+    
+	function __construct($startArc, $endArc, $damagedice = 3, $damagebonus = 12){
+		$this->damagedice = max(1,$damagedice);
+		$this->damagebonus = $damagebonus;
+		$this->intercept = 0;
+
+		$this->iconPath = "starwars/mjsLaserMedium3.png"; //it was kind of triple/concentrated shot on the show, and weapon is large...
+		
+		
+		parent::__construct(0, 1, 0, $startArc, $endArc, 1);
+		//$this->addSalvoMode(); //no salvo mode
+	}    
+	
+	public function getDamage($fireOrder){        return Dice::d(6,$this->damagedice) + $this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = $this->damagedice + $this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 6 * $this->damagedice + $this->damagebonus ;      }
+
+} //end of class SWFighterLaserR
+
+
+
+
+class SWFighterASLaser extends SWDirectWeapon{
+    /*StarWars fighter weapon - a Particle weapon!
+		This is B-Wing's antiship weapon
+	*/
+    public $name = "SWFighterASLaser";
+    public $displayName = "Antiship Laser";
+	
+    public $priority = 6; //very large fighter weapon all right!
+    public $loadingtime = 2;
+    public $rangePenalty = 1.5;//-3 per 2 hexes
+    public $fireControl = array(0, 0, -4); // fighters, <mediums, <capitals
+    public $intercept = 0;
+
+	protected $damagebonus = 0;
+	protected $damagedice = 0;
+
+   
+	public $damageType = 'Standard'; //consistent with on-screen longer burst
+    public $weaponClass = "Particle"; 
+    
+	function __construct($startArc, $endArc, $damagedice = 2, $damagebonus = 4){
+		$this->damagedice = max(1,$damagedice);
+		$this->damagebonus = $damagebonus;
+		$this->intercept = 0;
+
+		$this->iconPath = "starwars/mjsLaserMedium1.png"; //it's a large weapon
+		
+		
+		parent::__construct(0, 1, 0, $startArc, $endArc, 1);
+		//$this->addSalvoMode(); //no salvo mode
+	}    
+	
+	public function getDamage($fireOrder){        return Dice::d(6,$this->damagedice) + $this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = $this->damagedice + $this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 6 * $this->damagedice + $this->damagebonus ;      }
+
+} //end of class SWFighterLaser
+
+
+
 ?>
