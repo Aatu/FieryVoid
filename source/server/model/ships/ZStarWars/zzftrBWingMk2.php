@@ -1,14 +1,14 @@
 <?php
-class zzftrBWing extends FighterFlight{
-    /*StarWars B-Wing*/
+class zzftrbwingmk2 extends FighterFlight{
+    /*StarWars B-Wing Mk2 (with autoblasters replacing lasers but also with heavy antiship laser*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 90*6;
         $this->faction = "ZStarWars";
-        $this->phpclass = "zzftrBWing";
-        $this->shipClass = "B-Wing Assault Fighters";
-        //$this->variantOf = "B-Wing Assault Fighters";
+        $this->phpclass = "zzftrbwingmk2";
+        $this->shipClass = "B-Wing Mk2 Assault Fighters";
+        $this->variantOf = "B-Wing Assault Fighters";
         $this->limited = 33; //Limited Deployment
         $this->imagePath = "img/starwars/bWing.png";
         
@@ -45,12 +45,13 @@ class zzftrBWing extends FighterFlight{
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 2, 3, 3);
-            $fighter = new Fighter("zzftrbwing", $armour, 18, $this->id);
-            $fighter->displayName = "B-Wing";
+            $fighter = new Fighter("zzftrbwingmk2", $armour, 18, $this->id);
+            $fighter->displayName = "B-Wing Mk2";
             $fighter->imagePath = "img/starwars/bWing.png";
             $fighter->iconPath = "img/starwars/bWing_Large.png"; 
             
-            $frontGun = new SWFighterLaser(330, 30, 4, 3); //fwd triple Laser Cannons
+            $frontGun = new SWFighterLaser(300, 60, 1, 3); //fwd triple Autoblasters
+			$frontGun->displayName = "Autoblasters";
             $fighter->addFrontSystem($frontGun);
             
             $frontGun = new SWFighterIon(330, 30, 3, 3); //fwd triple Ion Cannons
@@ -61,6 +62,10 @@ class zzftrBWing extends FighterFlight{
             $torpedoLauncher = new SWFtrProtonTorpedoLauncher(4, 330, 30, 2);//single dual launcher! like for direct fire
             $fighter->addFrontSystem($torpedoLauncher);
             
+			//show antiship Laser on Aft, just because there's still some room there...
+            $ASGun = new SWFighterASLaser(330, 30, 2, 2); //damage of 2 dice (d6) + 4 flat - always single mount
+            $fighter->addAftSystem($ASGun);
+			
             //Ray Shield, 2 points
             $fighter->addAftSystem(new SWRayShield(0, 1, 0, 2, 0, 360));
 

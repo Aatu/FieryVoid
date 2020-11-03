@@ -15,7 +15,7 @@ class swNebulonBMedical extends HeavyCombatVessel{
 	$this->occurence = 'uncommon';
 	    
 		$this->isd = "14 BBY";
-		$this->notes = "Primary users: common";
+		$this->notes = "Primary users: Rebel Alliance";
 	    
 	$this->fighters = array("Fighter Squadrons"=>2);
 	    

@@ -1,6 +1,7 @@
 <?php
 class zzftrUglyTYEWing extends FighterFlight{
     /*StarWars Tie Fighter Cockpit and Y-Wing Engine Ugly ...*/
+	/*some data match with Medium and some with Light fighter, that is intentional*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
