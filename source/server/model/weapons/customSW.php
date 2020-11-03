@@ -1316,8 +1316,7 @@ class SWFighterASLaserR extends SWDirectWeapon{
 		$this->damagebonus = $damagebonus;
 		$this->intercept = 0;
 
-		$this->iconPath = "starwars/mjsLaserMedium3.png"; //it was kind of triple/concentrated shot on the show, and weapon is large...
-		
+		$this->iconPath = "starwars/mjsLaserHvy1.png"; //it's a large weapon
 		
 		parent::__construct(0, 1, 0, $startArc, $endArc, 1);
 		//$this->addSalvoMode(); //no salvo mode
@@ -1357,7 +1356,7 @@ class SWFighterASLaser extends SWDirectWeapon{
 		$this->damagebonus = $damagebonus;
 		$this->intercept = 0;
 
-		$this->iconPath = "starwars/mjsLaserMedium1.png"; //it's a large weapon
+		$this->iconPath = "starwars/mjsLaserHvy1.png"; //it's a large weapon
 		
 		
 		parent::__construct(0, 1, 0, $startArc, $endArc, 1);
