@@ -160,3 +160,17 @@ var SWAntifighterConcussion = function SWAntifighterConcussion(json, ship) {
 };
 SWAntifighterConcussion.prototype = Object.create(Torpedo.prototype);
 SWAntifighterConcussion.prototype.constructor = SWAntifighterConcussion;
+
+
+var SWFighterASLaserR = function SWFighterASLaserR(json, ship) {
+    Weapon.call(this, json, ship);
+};
+SWFighterASLaserR.prototype = Object.create(Weapon.prototype);
+SWFighterASLaserR.prototype.constructor = SWFighterASLaserR;
+
+
+var SWFighterASLaser = function SWFighterASLaser(json, ship) {
+    Weapon.call(this, json, ship);
+};
+SWFighterASLaser.prototype = Object.create(Weapon.prototype);
+SWFighterASLaser.prototype.constructor = SWFighterASLaser;
