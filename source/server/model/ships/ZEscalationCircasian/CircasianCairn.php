@@ -67,7 +67,7 @@ class CircasianCairn extends HeavyCombatVessel{
             ),
             2=> array(
                     6 => "Thruster",
-                    9 => "Light Laser Cannon",
+                    9 => "Light Laser",
                     18 => "Structure",
                     20 => "Primary",
             ),

@@ -7,7 +7,7 @@ class zzftrUglyTIEX extends FighterFlight{
         $this->pointCost = 22*6;
         $this->faction = "ZStarWars";
         $this->phpclass = "zzftrUglyTIEX";
-        $this->shipClass = "Uglies TIE-X";
+        $this->shipClass = "Uglies TIE-X Fighters";
         $this->imagePath = "img/starwars/tieuglytiex.png";
         
 		$this->isd = "early Galactic Civil War";
