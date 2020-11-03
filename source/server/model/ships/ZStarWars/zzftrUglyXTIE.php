@@ -48,7 +48,7 @@ class zzftrUglyXTIE extends FighterFlight{
             $fighter = new Fighter("zzftrUglyXTIE", $armour, 11, $this->id);
             $fighter->displayName = "Ugly X-TIE";
             $fighter->imagePath = "img/starwars/tieuglyxtie.png";
-            $fighter->iconPath = "img/starwars/tieuglyxtie_large.png"; 
+            $fighter->iconPath = "img/starwars/tieuglyxtie_Large.png"; 
             
             $frontGun = new SWFighterLaser(330, 30, 1, 2); //front Lasers
             $fighter->addFrontSystem($frontGun);
