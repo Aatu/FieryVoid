@@ -9,7 +9,6 @@ class CircasianKolamFighter extends FighterFlight{
         $this->phpclass = "CircasianKolamFighter";
         $this->shipClass = "Kolam Long Range flight";
         $this->imagePath = "img/ships/EscalationWars/CircasianKolam.png";
-        $this->customFtrName = "Kolam";
 		$this->unofficial = true;
 
 

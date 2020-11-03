@@ -544,3 +544,14 @@ var NexusProtector = function  NexusProtector(json, ship) {
 };
 NexusProtector.prototype = Object.create(Weapon.prototype);
 NexusProtector.prototype.constructor =  NexusProtector;
+
+var NexusHeavyPlasmaCharge = function NexusHeavyPlasmaCharge(json, ship) {
+    Torpedo.call(this, json, ship);
+};
+NexusHeavyPlasmaCharge.prototype = Object.create(Torpedo.prototype);
+NexusHeavyPlasmaCharge.prototype.constructor = NexusHeavyPlasmaCharge;
+NexusHeavyPlasmaCharge.prototype.calculateSpecialRangePenalty = function (distance) {
+    var distancePenalized = Math.max(0,distance - 3); //ignore first 3 hexes
+    var rangePenalty = this.rangePenalty * distancePenalized;
+    return rangePenalty;
+};

@@ -1,18 +1,19 @@
 <?php
-class BrixadiiPursuitFrigateBase extends LCV{
+class BrixadiiAttackFrigate2108 extends LCV{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 240;
+        $this->pointCost = 295;
         $this->faction = "ZNexus Brixadii";
-        $this->phpclass = "BrixadiiPursuitFrigateBase";
+        $this->phpclass = "BrixadiiAttackFrigate2108";
         $this->imagePath = "img/ships/Nexus/BrixadiiPursuitFrigate.png";
 			$this->canvasSize = 125; //img has 200px per side
-        $this->shipClass = "Pursuit Frigate";
-		//$this->variantOf = "Pursuit Frigate";
+        $this->shipClass = "Attack Frigate (2108)";
+			$this->variantOf = "Attack Frigate";
+			$this->occurence = "common";
 		$this->unofficial = true;
-   		$this->isd = 1989;
+   		$this->isd = 2108;
         
         $this->forwardDefense = 10;
         $this->sideDefense = 12;
@@ -28,22 +29,24 @@ class BrixadiiPursuitFrigateBase extends LCV{
          
         $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 10, 4, 4));
-        $this->addPrimarySystem(new Engine(4, 9, 0, 8, 4));
+        $this->addPrimarySystem(new Scanner(3, 10, 4, 5));
+        $this->addPrimarySystem(new Engine(4, 9, 0, 9, 4));
         $this->addPrimarySystem(new Hangar(1, 2));
-        $this->addPrimarySystem(new Thruster(2, 14, 0, 4, 3));
-        $this->addPrimarySystem(new Thruster(2, 14, 0, 4, 4));
+        $this->addPrimarySystem(new Thruster(2, 14, 0, 6, 3));
+        $this->addPrimarySystem(new Thruster(2, 14, 0, 6, 4));
       
         $this->addFrontSystem(new Thruster(3, 14, 0, 6, 1));
-		$this->addFrontSystem(new ParticleProjector(2, 6, 1, 180, 60));
-		$this->addFrontSystem(new ParticleProjector(2, 6, 1, 270, 90));
-		$this->addFrontSystem(new ParticleProjector(2, 6, 1, 270, 90));
-		$this->addFrontSystem(new ParticleProjector(2, 6, 1, 300, 180));
+		$this->addFrontSystem(new NexusParticleAgitator(3, 8, 3, 240, 360));
+		$this->addFrontSystem(new NexusParticleAgitator(3, 8, 3, 0, 120));
+		$this->addFrontSystem(new NexusLightProjectorArray(1, 5, 2, 180, 60));
+		$this->addFrontSystem(new NexusLightProjectorArray(1, 5, 2, 300, 180));
+		$this->addFrontSystem(new NexusKineticBoxLauncher(0, 4, 0, 300, 60));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
-        $this->addAftSystem(new LightParticleProjector(1, 3, 1, 120, 360));
-        $this->addAftSystem(new LightParticleProjector(1, 3, 1, 0, 240));
+        $this->addAftSystem(new NexusLightProjectorArray(1, 5, 2, 120, 360));
+        $this->addAftSystem(new NexusLightProjectorArray(1, 5, 2, 0, 240));
+		$this->addAftSystem(new NexusChaffLauncher(2, 2, 1, 0, 360));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure( 3, 40));
@@ -57,18 +60,22 @@ class BrixadiiPursuitFrigateBase extends LCV{
                     20 => "C&C",
             ),
             1=> array(
-                    6 => "Thruster",
-                    10 => "Particle Projector",
+                    5 => "Thruster",
+					6 => "Kinetic Box Launcher",
+					8 => "Particle Agitator",
+                    10 => "Light Projector Array",
 					17 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
-                    8 => "Thruster",
-                    10 => "Light Particle Projector",
+                    7 => "Thruster",
+					8 => "Chaff Launcher",
+                    10 => "Light Projector Array",
                     17 => "Structure",
                     20 => "Primary",
             ),
         );
     }
 }
+
 ?>

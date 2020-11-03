@@ -33,7 +33,7 @@ class BrixadiiWarshipPrototype extends BaseShipNoAft{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 5, 5));
         $this->addPrimarySystem(new Engine(4, 18, 0, 10, 4));
-		$this->addPrimarySystem(new Hangar(4, 4));
+		$this->addPrimarySystem(new Hangar(2, 4));
 		$this->addPrimarySystem(new JumpEngine(4, 12, 5, 40));
 		$this->addPrimarySystem(new Thruster(4, 15, 0, 5, 2));
 		$this->addPrimarySystem(new Thruster(4, 15, 0, 5, 2));
@@ -42,8 +42,8 @@ class BrixadiiWarshipPrototype extends BaseShipNoAft{
         $this->addFrontSystem(new Thruster(3, 14, 0, 5, 1));
 		$this->addFrontSystem(new ParticleProjector(3, 6, 1, 240, 60));
 		$this->addFrontSystem(new ParticleProjector(3, 6, 1, 300, 120));
-		$this->addFrontSystem(new HvyParticleProjector(3, 0, 0, 240, 360));
-		$this->addFrontSystem(new HvyParticleProjector(3, 0, 0, 0, 120));
+		$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 240, 360));
+		$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 0, 120));
         
 		$this->addLeftSystem(new Thruster(3, 14, 0, 8, 3));
 		$this->addLeftSystem(new ParticleProjector(3, 6, 1, 180, 360));

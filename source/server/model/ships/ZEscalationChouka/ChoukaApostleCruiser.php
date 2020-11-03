@@ -91,7 +91,7 @@ class ChoukaApostleCruiser extends BaseShip{
 					3 => "Thruster",
 					6 => "Twin Laser Cannon",
 					7 => "Gravitic Tracting Rod",
-					9 => "Grappling Claw",
+					9 => "Industrial Grappler",
 					18 => "Structure",
 					20 => "Primary",
 			),
