@@ -403,6 +403,7 @@ Official on damage: roll critical normally, it will only affect systems on the s
 class SubReactorUniversal extends ShipSystem{
 	public $name = "SubReactorUniversal";
     public $displayName = "Sub Reactor";
+    public $iconPath = "reactor.png";
     public $primary = true; //well, it's intended to be fitted on outer sections, but treated as core system
     	
     public $possibleCriticals = array(
@@ -1714,7 +1715,7 @@ by 4.
 	//function estimating how good this Diffuser is at stopping damage;
 	//in case of diffuser, its effectiveness equals largest shot it can stop, with tiebreaker equal to remaining total capacity
 	//this is for recognizing it as system capable of affecting damage resolution and choosing best one if multiple Diffusers can protect
-	public function doesProtectFromDamage($expectedDmg) {
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null) {
 		$remainingCapacity = 0;
 		$totalCapacity = 0;
 		$largestCapacity = 0;
@@ -2233,6 +2234,119 @@ class PhasingDrive extends JumpEngine{
         }	
     } //endof function criticalPhaseEffects	
 }//endof class PhasingDrive
+
+
+
+
+
+
+
+/*Gaim damage absorbtion system
+Cannot be hit directly in any way, except when absorbing damage. May protect any system on the same section (plus structure it's fitted on, even if it's primary structure - important for MCVs) 
+as Bulkhead's activation is automatic, it will kick in when:
+ - would prevent system destruction
+ - system is Structure and would be destroyed without Bulkhead (even if it doesn't prevent destruction)
+ - related Structure is under 25% (it's "use it or lose it" time)
+*/
+class Bulkhead extends ShipSystem{
+    public $name = "Bulkhead";
+    public $displayName = "Bulkhead";
+    public $iconPath = "bulkhead.png";
+	public $isTargetable = false; //cannot be targeted by called shots
+	
+	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
+    public $possibleCriticals = array( ); //no critical effect applicable	
+	
+    function __construct($armour, $maxhealth){
+        parent::__construct($armour, $maxhealth, 0, 0);
+    }
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "Absorbs damage from hits on the same section - activation is automatic.";
+		$this->data["Special"] .= "<br>Will kick in when it can prevent system destruction or when sections' structural integrity falls below 25%.";
+	}	
+	
+     public function getOutput(){ //output = remaining health - just for visual purposes
+        $output = $this->getRemainingHealth();     
+        return $output;        
+    }    
+	
+	
+	//function estimating how good this Bulkhead is at stopping damage;
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null) {
+		//first do check whether this system can be protected! (same location or appropriate structure location)
+		if ($systemProtected) {
+			//is it on the same section?
+			if ( ($this->location != $systemProtected->location) //different location...
+			    && ($this->structureSystem !== $systemProtected ) //and this isn't appropriate structure either!
+			 ) return 0;
+		}else { //no particular system indicated = cannot protect
+			return 0;	
+		}
+		//now check whether it _should_ protect...
+		$targetHealth = 1;
+		if($systemProtected){
+			$targetHealth = $systemProtected->getRemainingHealth();
+		}
+		$ownHealth = $this->getRemainingHealth();
+		$structureHealthFraction = $this->structureSystem->getRemainingHealth() / $this->structureSystem->maxhealth;
+		$protectionValue = 0;
+		if ( ($targetHealth <= $expectedDmg) && ($targetHealth + $ownHealth > $expectedDmg) ){
+			$protectionValue = $targetHealth + $ownHealth - $expectedDmg; //I cannot prioritize smaller Bulkhead if it'd do the job, but at least I can avoid prioritizing larger one
+		} else if (($targetHealth <= $expectedDmg) && ($this->structureSystem == $systemProtected)) { //structure is in danger of being destroyed, do protect for fear of not using the bulkhead at all 
+			$protectionValue = $ownHealth;
+		} else if ($structureHealthFraction < 0.25) { //structure health is low, do protect for fear of not using the bulkhead at all 
+			$protectionValue = $ownHealth;
+		}
+		return $protectionValue;
+	}
+	//actual protection
+	public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $systemProtected, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
+		$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
+		$damageToAbsorb=$effectiveDamage-$effectiveArmor;
+		$damageAbsorbed=0;
+		
+		if($damageToAbsorb<=0) return $returnValues; //nothing to absorb
+		
+		$ownHealth = $this->getRemainingHealth();
+		$damageAbsorbed = min($damageToAbsorb,$ownHealth); 
+				
+		
+		$noOverkill = (!$weapon->doOverkill) && ($weapon->noOverkill || ($weapon->damageType == 'Piercing'));
+		if($noOverkill){//shot is incapable of overkilling - reducing it would not matter if it doesn't prevent destruction of system hit
+			$remainingHealth = $systemProtected->getRemainingHealth();
+			if ($remainingHealth+$damageAbsorbed <= $damageToAbsorb) return $returnValues; //any absorbtion would be futile and just destroy the bulkhead uselessly
+		}
+		
+		if($damageAbsorbed>0){ //can absorb something!
+			$returnValues['dmg']=$effectiveDamage-$damageAbsorbed;
+			$bulkheadDestroyed = false;
+			if ($damageAbsorbed >=$ownHealth) $bulkheadDestroyed = true;
+			//mark damage (possibly destruction) on bulkhead itself
+			$damageEntry = new DamageEntry(-1, $target->id, -1, $gamedata->turn, $this->id, $damageAbsorbed, 0, 0, -1, $bulkheadDestroyed, false, "Absorb!", "Bulkhead");
+			$damageEntry->updated = true;
+			$this->damage[] = $damageEntry;
+		}
+		
+		return $returnValues;
+	}
+	
+	
+	public function stripForJson(){
+		//$this->output = $this->getOutput();	
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->output = $this->getOutput();
+        return $strippedSystem;
+    }
+} //endof Bulkhead
+
 
 
 

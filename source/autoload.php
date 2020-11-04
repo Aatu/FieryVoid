@@ -1534,17 +1534,33 @@ spl_autoload_register(
 				
 				//new SW - Uglies
                 'zzftruglytiex' => '/server/model/ships/ZStarWars/zzftrUglyTIEX.php',
+                'zzftruglyxtie' => '/server/model/ships/ZStarWars/zzftrUglyXTIE.php',
+                'zzftruglytyewing' => '/server/model/ships/ZStarWars/zzftrUglyTYEWing.php',
+                'zzftruglychirdaki' => '/server/model/ships/ZStarWars/zzftrUglyChirdaki.php',
+				'swdreadnoughtraider' => '/server/model/ships/ZStarWars/swDreadnoughtRaider.php',
+				'swnebulonbmedical' => '/server/model/ships/ZStarWars/swNebulonBMedical.php',
+                'swfighteraslaser' => '/server/model/weapons/customSW.php',
+                'zzftrbwing' => '/server/model/ships/ZStarWars/zzftrBWing.php',
+                'zzftrbwingmk2' => '/server/model/ships/ZStarWars/zzftrBWingMk2.php', 
+                'zzftrbwingprototype' => '/server/model/ships/ZStarWars/zzftrBWingPrototype.php',
 				
 				
 				//Gaim systems
                 'subreactoruniversal' => '/server/model/systems/baseSystems.php',
+                'bulkhead' => '/server/model/systems/baseSystems.php',
+                'packettorpedo' => '/server/model/weapons/torpedo.php',
+                'particleconcentrator' => '/server/model/weapons/specialWeapons.php',
 				//Gaim ships				
+				'gaimmoas' => '/server/model/ships/gaim/gaimMoas.php',
 				'gaimmoor' => '/server/model/ships/gaim/gaimMoor.php',
 				
 				
 				
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
+				
+				
+				'apollostrike' => '/server/model/ships/EA/apollostrike.php',
 						
 				
 				//let's end this with unit enhancement class...		    

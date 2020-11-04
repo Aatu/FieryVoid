@@ -23,3 +23,14 @@ var PlasmaWaveTorpedo = function PlasmaWaveTorpedo(json, ship) {
 };
 PlasmaWaveTorpedo.prototype = Object.create(Torpedo.prototype);
 PlasmaWaveTorpedo.prototype.constructor = PlasmaWaveTorpedo;
+
+var PacketTorpedo = function PacketTorpedo(json, ship) {
+    Torpedo.call(this, json, ship);
+};
+PacketTorpedo.prototype = Object.create(Torpedo.prototype);
+PacketTorpedo.prototype.constructor = PacketTorpedo;
+PacketTorpedo.prototype.calculateSpecialRangePenalty = function (distance) {
+    var distancePenalized = Math.max(0,distance - 10); //ignore first 10 hexes
+    var rangePenalty = this.rangePenalty * distancePenalized;
+    return rangePenalty;
+};
