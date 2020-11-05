@@ -35,6 +35,7 @@ class zzftrBWingPrototype extends FighterFlight{
 		
 		$this->hangarRequired = "Fighter Squadrons"; //SW small craft are handled on squadron basis
 		$this->unitSize = 6; //number of craft in squadron
+        $this->maxFlightSize = 6;//this is very heavy and tough fighter (but not superheavy) 
 		
         $this->populate();
     }
