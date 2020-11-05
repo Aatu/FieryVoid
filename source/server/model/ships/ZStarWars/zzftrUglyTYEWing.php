@@ -33,6 +33,7 @@ class zzftrUglyTYEWing extends FighterFlight{
 		
 		$this->hangarRequired = "Fighter Squadrons"; //SW small craft are handled on squadron basis
 		$this->unitSize = 12; //number of craft in squadron
+        $this->maxFlightSize = 12;//this is a light fighter essentially
 		
         $this->populate();
     }
