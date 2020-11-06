@@ -4,12 +4,11 @@ class zzftrUglyXTIE extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 20*6;
+        $this->pointCost = 18*6; //with torpedo launcher it's supposed to be 20*6;
         $this->faction = "ZStarWars";
         $this->phpclass = "zzftrUglyXTE";
         $this->shipClass = "Uglies X-TIE Bombers";
         $this->variantOf = "Uglies TIE-X Fighters";
-        $this->variantOf = "UNEXISTING"; //disable the fighter - two different ammo-using ballistic systems just don't work :(
         $this->imagePath = "img/starwars/tieuglyxtie.png";
         
 		$this->isd = "early Galactic Civil War";
@@ -54,8 +53,10 @@ class zzftrUglyXTIE extends FighterFlight{
             $frontGun = new SWFighterLaser(330, 30, 1, 2); //front Lasers
             $fighter->addFrontSystem($frontGun);
            
+		/* as of now it is not possible to have fighter with two separate systems trying to buy ammo... disabling torpedo launcher as kind of fix
             $torpedoLauncher = new SWFtrProtonTorpedoLauncher(4, 330, 30, 1);//single launcher!
             $fighter->addFrontSystem($torpedoLauncher);
+	    */
 
             //forward Concussion Missile Launcher, 4 shots
             $ConcussionMissileLauncher = new SWFtrConcMissileLauncher(4, 300, 60, 1);//single launcher!
