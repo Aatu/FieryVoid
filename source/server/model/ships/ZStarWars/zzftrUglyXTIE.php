@@ -9,6 +9,7 @@ class zzftrUglyXTIE extends FighterFlight{
         $this->phpclass = "zzftrUglyXTE";
         $this->shipClass = "Uglies X-TIE Bombers";
         $this->variantOf = "Uglies TIE-X Fighters";
+        $this->variantOf = "UNEXISTING"; //disable the fighter - two different ammo-using ballistic systems just don't work :(
         $this->imagePath = "img/starwars/tieuglyxtie.png";
         
 		$this->isd = "early Galactic Civil War";
