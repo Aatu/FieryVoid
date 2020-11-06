@@ -9,7 +9,7 @@ class zzftrUglyTYEWing extends FighterFlight{
         $this->faction = "ZStarWars";
         $this->phpclass = "zzftrUglyTYEWing";
         $this->shipClass = "Uglies TYE-Wing Fighters";
-        $this->imagePath = "img/starwars/tieuglytiex.png";
+        $this->imagePath = "img/starwars/tieuglyTYE.png";
         $this->variantOf = "Uglies TIE-X Fighters";
         
 		$this->isd = "early Galactic Civil War";
