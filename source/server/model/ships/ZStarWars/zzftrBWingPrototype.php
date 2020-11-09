@@ -57,7 +57,7 @@ class zzftrBWingPrototype extends FighterFlight{
             
 			
             $ASGun = new SWFighterASLaserR(330, 30, 3, 12); //damage of 3 dice (d6) + 12 flat - always single mount
-            $ASGun->exclusive = true; //either this or other weapons! no separate gunner here!
+            $ASGun->exclusive = true; //either this or other weapons! 
             $fighter->addFrontSystem($ASGun);
 			
 			//prototype didn't have a launcher

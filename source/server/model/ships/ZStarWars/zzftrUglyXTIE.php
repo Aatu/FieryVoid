@@ -6,7 +6,7 @@ class zzftrUglyXTIE extends FighterFlight{
         
         $this->pointCost = 18*6; //with torpedo launcher it's supposed to be 20*6;
         $this->faction = "ZStarWars";
-        $this->phpclass = "zzftrUglyXTE";
+        $this->phpclass = "zzftrUglyXTIE";
         $this->shipClass = "Uglies X-TIE Bombers";
         $this->variantOf = "Uglies TIE-X Fighters";
         $this->imagePath = "img/starwars/tieuglyxtie.png";
@@ -58,9 +58,10 @@ class zzftrUglyXTIE extends FighterFlight{
             $fighter->addFrontSystem($torpedoLauncher);
 	    */
 
-            //forward Concussion Missile Launcher, 4 shots
-            $ConcussionMissileLauncher = new SWFtrConcMissileLauncher(4, 300, 60, 1);//single launcher!
-            $fighter->addFrontSystem($ConcussionMissileLauncher);
+            //forward SINLGLE Concussion Missile Launcher, 4 shots
+			$ConcussionMissileLauncher = new SWFtrConcMissileLauncher(4, 330, 30, 1);
+			$fighter->addFrontSystem($ConcussionMissileLauncher);
+            
 
             //Ray Shield, 1 points
             $fighter->addAftSystem(new SWRayShield(0, 1, 0, 1, 0, 360));
