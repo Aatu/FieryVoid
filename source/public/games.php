@@ -66,6 +66,8 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Plasma Stream fixed</b> – now encounters full armor for every rake, as it should.
 	    <br><b>Hit table behavior fixed</b> – now Demos' Heavy Arrays are hittable again ;).
 	    <br><b><u>The Chouka have arrived</u></b> – so Circasians will have in-universe opponent :) (courtesy of Geoffrey and Tyrel) 
+	    <br><b>Escalation Wars updates</b> – some unit fixes and tailoring, plus a batch of new units (courtesy of Geoffrey and Tyrel) 
+	    <br><b>Star Wars updates</b> – Raider motley fighters and some other designs (courtesy of Wolfgang) 
   
 	    
         <br><br>
