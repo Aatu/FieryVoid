@@ -15,6 +15,7 @@ USEFUL TRIVIA
  - r-click on power button - power on/off on all similar weapons on this ship
  - r-click mode change - change firing mode on all similar UNDECLARED weapons
  - r-click on defensive fire - enable defensive fire on all similar UNDECLARED weapons
+ - r-click on cancel move button - cancels entire current batch moves for indicated unit
 
 
 GAMEPLAY GENERAL IDEAS
