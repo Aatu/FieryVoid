@@ -5,9 +5,9 @@ class GaimMoas extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 625;
-	$this->faction = "Custom Ships";
+	$this->faction = "Gaim";
         $this->phpclass = "GaimMoas";
-        $this->imagePath = "img/ships/MarkabCruiser.png";
+        $this->imagePath = "img/ships/GaimMoas.png";
         $this->shipClass = "Moas Gunship";
         $this->shipSizeClass = 3;
 	    $this->isd = 2254;
