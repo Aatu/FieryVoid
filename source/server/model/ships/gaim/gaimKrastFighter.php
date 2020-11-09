@@ -8,6 +8,7 @@ class gaimKrastFighter extends FighterFlight{
         $this->faction = "Gaim";
         $this->phpclass = "gaimKrastFighter";
         $this->shipClass = "Krast Recon flight";
+        $this->variantOf = "Koist Medium flight";
         $this->imagePath = "img/ships/GaimKoist.png";
 		
         $this->isd = 2252;

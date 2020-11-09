@@ -60,14 +60,9 @@ if (isset($_SESSION["user"])) {
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
         -->
-		---------- <b>LATEST NEWS - OCTOBER 2020</b> ----------	
-	    <br><b>persistent 'unit already moved' bug fixed</b> – just confirm Your earlier movement orders and the game will proceed to next batch of units
-	    <br><b>game not highlighting for active player bug fixed</b> – game highlighting for inactive player bug introduced (happens in the same situation - hopefully this will be less troublesome!)
-	    <br><b>Plasma Stream fixed</b> – now encounters full armor for every rake, as it should.
-	    <br><b>Hit table behavior fixed</b> – now Demos' Heavy Arrays are hittable again ;).
-	    <br><b><u>The Chouka have arrived</u></b> – so Circasians will have in-universe opponent :) (courtesy of Geoffrey and Tyrel) 
-	    <br><b>Escalation Wars updates</b> – some unit fixes and tailoring, plus a batch of new units (courtesy of Geoffrey and Tyrel) 
-	    <br><b>Star Wars updates</b> – Raider motley fighters and some other designs (courtesy of Wolfgang) 
+		---------- <b>LATEST NEWS - November 2020</b> ----------	
+	    <br><b><u>The Gaim have arrived</u></b> – what we have here is a new Big4-level deep faction, able to duke it out with the best! (courtesy of Geoffrey and Douglas) 
+	    <br><b>Cancel all moves</b> – R-click on cancel move icon now cancels ALL moves for a given unit (so You can avoid backclicking for every step of speed-12 fighter that's jinking and pivoting ;) )
   
 	    
         <br><br>

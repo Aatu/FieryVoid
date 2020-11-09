@@ -35,6 +35,7 @@ class zzftrBWingPrototype extends FighterFlight{
 		
 		$this->hangarRequired = "Fighter Squadrons"; //SW small craft are handled on squadron basis
 		$this->unitSize = 6; //number of craft in squadron
+        $this->maxFlightSize = 6;//this is very heavy and tough fighter (but not superheavy) 
 		
         $this->populate();
     }
@@ -56,7 +57,7 @@ class zzftrBWingPrototype extends FighterFlight{
             
 			
             $ASGun = new SWFighterASLaserR(330, 30, 3, 12); //damage of 3 dice (d6) + 12 flat - always single mount
-            $ASGun->exclusive = true; //either this or other weapons! no separate gunner here!
+            $ASGun->exclusive = true; //either this or other weapons! 
             $fighter->addFrontSystem($ASGun);
 			
 			//prototype didn't have a launcher
