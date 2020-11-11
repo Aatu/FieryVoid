@@ -388,6 +388,7 @@ spl_autoload_register(
                 'hyperionpatrol' => '/server/model/ships/EA/hyperionPatrol.php',
                 'hyperionpulse' => '/server/model/ships/EA/hyperionPulse.php',
                 'hyperionrail' => '/server/model/ships/EA/hyperionRail.php',
+                'poseidon' => '/server/model/ships/EA/poseidon.php',
                 'ikorta' => '/server/model/ships/brakiri/ikorta.php',
                 'impcommjammer' => '/server/model/weapons/specialWeapons.php',
                 'imperiallaser' => '/server/model/weapons/lasers.php',
