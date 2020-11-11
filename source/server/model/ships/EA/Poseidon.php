@@ -16,121 +16,110 @@ class Poseidon extends BaseShip{
 		$this->customFighter = array("Thunderbolt"=>96);
 	        $this->isd = 2255;
 	        $this->notes = 'Thunderbolt capable';
+	        $this->notes .= '<br>Provides +5 Initiative for all friendly EA units';
 
-		$this->forwardDefense = 15;
+		$this->forwardDefense = 16;
 		$this->sideDefense = 19;
 
-		$this->turncost = 1;
-		$this->turndelaycost = 1;
+		$this->turncost = 1.5;
+		$this->turndelaycost = 1.5;
 		$this->accelcost = 4;
-		$this->rollcost = 2;
-		$this->pivotcost = 3;
-		$this->iniativebonus = 0;
+		$this->rollcost = 3;
+		$this->pivotcost = 4;
+		
+		$this->iniativebonus = 5;
 
-		$this->addPrimarySystem(new Reactor(6, 30, 0, 0));
-		$this->addPrimarySystem(new CnC(6, 20, 0, 0));
-		$this->addPrimarySystem(new Scanner(6, 20, 5, 9));
-		$this->addPrimarySystem(new Engine(6, 23, 0, 10, 3));
-		$this->addPrimarySystem(new Hangar(5, 26));
-		$this->addPrimarySystem(new Jumpengine(6, 20, 4, 16));
+		$this->addPrimarySystem(new Reactor(5, 28, 0, 0));
+		$this->addPrimarySystem(new CnC(6, 24, 0, 0));
+		$this->addPrimarySystem(new Scanner(5, 20, 3, 8));
+		$this->addPrimarySystem(new Engine(6, 25, 0, 12, 3));
+		$this->addPrimarySystem(new Hangar(5, 2));
+		$this->addPrimarySystem(new Jumpengine(5, 20, 4, 24));
 
-		$this->addFrontSystem(new Railgun(4, 9, 6, 300, 60));
-		$this->addFrontSystem(new Railgun(4, 9, 6, 300, 60));
-		$this->addFrontSystem(new HvyParticleCannon(5, 12, 9, 330, 30));
-		$this->addFrontSystem(new HvyParticleCannon(5, 12, 9, 330, 30));
-		$this->addFrontSystem(new MLPA(4, 9, 5, 300, 60));
-		$this->addFrontSystem(new MLPA(4, 9, 5, 300, 60));
-		$this->addFrontSystem(new InterceptorMkII(2, 4, 2, 240, 60));
-		$this->addFrontSystem(new InterceptorMkII(2, 4, 2, 300, 120));
-		$this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
-		$this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
+		$this->addFrontSystem(new MediumPulse(3, 6, 3, 240, 0));
+		$this->addFrontSystem(new MediumPulse(3, 6, 3, 0, 120));
+		$this->addFrontSystem(new HeavyInterceptorBattery(2, 6, 3, 240, 0));
+		$this->addFrontSystem(new HeavyInterceptorBattery(2, 6, 3, 0, 120));
+		$this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
+		$this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
+		$this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));		
 
-		$this->addAftSystem(new Railgun(4, 9, 6, 120, 240));
-		$this->addAftSystem(new Railgun(4, 9, 6, 120, 240));
-		$this->addAftSystem(new MLPA(4, 9, 5, 120, 240));
-		$this->addAftSystem(new MLPA(4, 9, 5, 120, 240));
-		$this->addAftSystem(new InterceptorMkII(2, 4, 2, 120, 300));
-		$this->addAftSystem(new InterceptorMkII(2, 4, 2, 60, 240));
-		$this->addAftSystem(new Thruster(4, 12, 0, 2, 2));
-		$this->addAftSystem(new Thruster(4, 12, 0, 2, 2));
-		$this->addAftSystem(new Thruster(4, 12, 0, 2, 2));
-		$this->addAftSystem(new Thruster(4, 12, 0, 2, 2));
-		$this->addAftSystem(new Thruster(3, 6, 0, 1, 2));
-		$this->addAftSystem(new Thruster(3, 6, 0, 1, 2));
+		$this->addAftSystem(new MediumPulse(3, 6, 3, 180, 300));
+		$this->addAftSystem(new MediumPulse(3, 6, 3, 60, 180));
+		$this->addAftSystem(new HeavyInterceptorBattery(2, 6, 3, 180, 0));
+		$this->addAftSystem(new HeavyInterceptorBattery(2, 6, 3, 60, 180));
+		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
+		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
+		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
+		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
 
-		$this->addLeftSystem(new LMissileRack(3, 6, 0, 240, 0));
-		$this->addLeftSystem(new LHMissileRack(3, 8, 0, 240, 0));
-		$this->addLeftSystem(new MLPA(4, 9, 5, 240, 0));
-		$this->addLeftSystem(new MLPA(4, 9, 5, 240, 0));
+		$this->addLeftSystem(new Thruster(3, 20, 0, 5, 3));
 		$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 360));
 		$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 360));
-		$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 360));
-		$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 360));
+		$this->addLeftSystem(new InterceptorMkII(2, 4, 2, 180, 300));
 		$this->addLeftSystem(new InterceptorMkII(2, 4, 2, 180, 360));
-		$this->addLeftSystem(new Thruster(4, 20, 0, 6, 3));
+		$this->addLeftSystem(new InterceptorMkII(2, 4, 2, 240, 360));
+		$this->addLeftSystem(new Hangar(4, 12));
+		$this->addLeftSystem(new Hangar(4, 12));	
+		$this->addLeftSystem(new Hangar(4, 12));	
+		$this->addLeftSystem(new Hangar(4, 12));											
 
-		$this->addRightSystem(new LMissileRack(3, 6, 0, 0, 120));
-		$this->addRightSystem(new LHMissileRack(3, 8, 0, 0, 120));
-		$this->addRightSystem(new MLPA(4, 9, 5, 0, 120));
-		$this->addRightSystem(new MLPA(4, 9, 5, 0, 120));
+		$this->addRightSystem(new Thruster(3, 20, 0, 5, 4));
 		$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
 		$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
-		$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
-		$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
+		$this->addRightSystem(new InterceptorMkII(2, 4, 2, 0, 120));
 		$this->addRightSystem(new InterceptorMkII(2, 4, 2, 0, 180));
-		$this->addRightSystem(new Thruster(4, 20, 0, 6, 4));
+		$this->addRightSystem(new InterceptorMkII(2, 4, 2, 60, 180));
+		$this->addRightSystem(new Hangar(4, 12));
+		$this->addRightSystem(new Hangar(4, 12));	
+		$this->addRightSystem(new Hangar(4, 12));	
+		$this->addRightSystem(new Hangar(4, 12));	
+		
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 6, 72));
-        $this->addAftSystem(new Structure( 5, 60));
-        $this->addLeftSystem(new Structure( 5, 75));
-        $this->addRightSystem(new Structure( 5, 75));
-        $this->addPrimarySystem(new Structure(6, 60));
+        $this->addFrontSystem(new Structure( 5, 70));
+        $this->addAftSystem(new Structure( 4, 70));
+        $this->addLeftSystem(new Structure( 4, 80));
+        $this->addRightSystem(new Structure( 4, 80));
+        $this->addPrimarySystem(new Structure(5, 75));
 		
 		$this->hitChart = array(
                 0=> array(
-                        9 => "Structure",
-                        11 => "Jump Drive",
-                        11 => "Scanner",
-                        15 => "Engine",
+                        10 => "Structure",
+                        12 => "Jump Drive",
+                        14 => "Scanner",
+                        16 => "Engine",
                         17 => "Hangar",
                         19 => "Reactor",
                         20 => "C&C",
                 ),
                 1=> array(
                         4 => "Thruster",
-                        6 => "Heavy Particle Cannon",
-                        8 => "Medium Laser-Pulse Array",
-                        10 => "Railgun",
-                        13 => "Interceptor II",
+                        6 => "Medium Pulse Cannon",
+                        9 => "Heavy Interceptor Battery",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 2=> array(
                         6 => "Thruster",
-                        8 => "Medium Laser-Pulse Array",
-                        10 => "Railgun",
-                        13 => "Interceptor II",
+                        9 => "Medium Pulse Cannon",
+                        12 => "Heavy Interceptor Battery",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 3=> array(
-                        4 => "Thruster",
-                        5 => "Class-L Missile Rack",
-                        6 => "Class-LH Missile Rack",
-						8 => "Medium Laser-Pulse Array",
-						11 => "Standard Particle Beam",
-                        12 => "Interceptor II",
+                        3 => "Thruster",
+                        4 => "Standard Particle Beam",
+                        7 => "Interceptor II",
+                        12 => "Hangar",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 4=> array(
-                        4 => "Thruster",
-                        5 => "Class-L Missile Rack",
-                        6 => "Class-LH Missile Rack",
-						8 => "Medium Laser-Pulse Array",
-						11 => "Standard Particle Beam",
-                        12 => "Interceptor II",
+                        3 => "Thruster",
+                        4 => "Standard Particle Beam",
+                        7 => "Interceptor II",
+                        12 => "Hangar",
                         18 => "Structure",
                         20 => "Primary",
                 ),

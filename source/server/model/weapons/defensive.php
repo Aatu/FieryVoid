@@ -427,6 +427,7 @@ class FtrShield extends Shield implements DefensiveSystem{
 class HeavyInterceptorBattery extends InterceptorMkI{
         public $name = "HeavyInterceptorBattery";
         public $displayName = "Heavy Interceptor Battery";
+        public $iconPath = "HeavyInterceptor.png";        
         public $priority = 4;
         
         public $output = 4;
