@@ -424,7 +424,24 @@ class FtrShield extends Shield implements DefensiveSystem{
 	
 } //endof class  FtrShield
 
+class HeavyInterceptorBattery extends InterceptorMkI{
+        public $name = "HeavyInterceptorBattery";
+        public $displayName = "Heavy Interceptor Battery";
+        public $priority = 4;
+        
+        public $output = 4;
+        public $intercept = 4;
+                
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Energy Web: -20 to hit on arc with active Interceptor.";
+        }
 
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+6;   }
+        public function setMinDamage(){     $this->minDamage = 8 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 26 ;      }
+   
+}  //end of class HeavyInterceptorBattery
 
 
 ?>

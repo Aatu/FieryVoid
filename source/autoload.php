@@ -399,6 +399,7 @@ spl_autoload_register(
                 'interceptormki' => '/server/model/weapons/defensive.php',
                 'interceptormkii' => '/server/model/weapons/defensive.php',
                 'interceptorprototype' => '/server/model/weapons/defensive.php',
+                'heavyinterceptorbattery' => '/server/model/weapons/defensive.php',
                 'invulnerablethruster' => '/server/model/systems/baseSystems.php',
                 'ionbolt' => '/server/model/weapons/ion.php',
                 'ioncannon' => '/server/model/weapons/ion.php',
