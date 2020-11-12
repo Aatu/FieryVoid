@@ -432,7 +432,9 @@ class HeavyInterceptorBattery extends InterceptorMkI{
         
         public $output = 4;
         public $intercept = 4;
-                
+        public $fireControl = array(10, null, null); 
+        
+                      
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Special"] = "Energy Web: -20 to hit on arc with active Interceptor.";
