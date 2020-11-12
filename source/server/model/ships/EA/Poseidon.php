@@ -8,7 +8,7 @@ class Poseidon extends BaseShip{
 		$this->faction = "EA";
 		$this->phpclass = "Poseidon";
 		$this->imagePath = "img/ships/Poseidon.png";
-		$this->shipClass = "Poseidon";
+		$this->shipClass = "Poseidon Supercarrier (Alpha)";
 		$this->shipSizeClass = 3;
 		$this->canvasSize= 400;
 		$this->limited = 10;
