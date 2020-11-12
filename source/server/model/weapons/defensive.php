@@ -435,6 +435,13 @@ class HeavyInterceptorBattery extends InterceptorMkI{
         public $intercept = 4;
         public $fireControl = array(10, null, null); 
         
+        public function onConstructed($ship, $turn, $phase){
+            parent::onConstructed($ship, $turn, $phase);
+            $this->tohitPenalty = $this->getOutput();
+            $this->damagePenalty = 0;
+     
+        }
+        
         public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
             if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn))
                 return 0;
