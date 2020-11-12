@@ -435,7 +435,15 @@ class HeavyInterceptorBattery extends InterceptorMkI{
         public $intercept = 4;
         public $fireControl = array(10, null, null); 
         
-                      
+        public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
+            if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn))
+                return 0;
+
+            $output = $this->output;
+            $output -= $this->outputMod;
+            return $output;
+        }
+                          
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Special"] = "Energy Web: -20 to hit on arc with active Interceptor.";
