@@ -180,6 +180,9 @@ class BaseShip {
             }
             if($this->faction == "Yolu"){
                 return $this->doYoluInitiativeBonus($gamedata);
+			}
+			if($this->faction == "EA"){
+                return $this->doEAInitiativeBonus($gamedata);
             }
             return $this->iniativebonus;
         }
