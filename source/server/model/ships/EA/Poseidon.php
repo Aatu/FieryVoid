@@ -46,7 +46,7 @@ class Poseidon extends BaseShip{
 
 		$this->addAftSystem(new MediumPulse(3, 6, 3, 180, 300));
 		$this->addAftSystem(new MediumPulse(3, 6, 3, 60, 180));
-		$this->addAftSystem(new HeavyInterceptorBattery(2, 6, 3, 180, 0));
+		$this->addAftSystem(new HeavyInterceptorBattery(2, 6, 3, 180, 300));
 		$this->addAftSystem(new HeavyInterceptorBattery(2, 6, 3, 60, 180));
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
@@ -67,9 +67,9 @@ class Poseidon extends BaseShip{
 		$this->addRightSystem(new Thruster(3, 20, 0, 5, 4));
 		$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
 		$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
-		$this->addRightSystem(new InterceptorMkII(2, 4, 2, 0, 120));
-		$this->addRightSystem(new InterceptorMkII(2, 4, 2, 0, 180));
 		$this->addRightSystem(new InterceptorMkII(2, 4, 2, 60, 180));
+		$this->addRightSystem(new InterceptorMkII(2, 4, 2, 0, 180));
+		$this->addRightSystem(new InterceptorMkII(2, 4, 2, 0, 120));
 		$this->addRightSystem(new Hangar(4, 12));
 		$this->addRightSystem(new Hangar(4, 12));	
 		$this->addRightSystem(new Hangar(4, 12));	
