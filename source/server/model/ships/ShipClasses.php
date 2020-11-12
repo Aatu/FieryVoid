@@ -224,7 +224,22 @@ class BaseShip {
             }
 			return $this->iniativebonus;
         }
-                
+
+        
+         private function doEAInitiativeBonus($gamedata){
+            foreach($gamedata->ships as $ship){
+                if(!$ship->isDestroyed()
+                        && ($ship->faction == "EA")
+                        && ($this->userid == $ship->userid)
+                        && ($ship instanceof Poseidon)
+                        && ($this->id != $ship->id)){
+                    return ($this->iniativebonus+5);
+                }
+            }
+			return $this->iniativebonus;
+        }               
+        
+        
         private function doDilgarInitiativeBonus($gamedata){
 
         $mod = 0;
