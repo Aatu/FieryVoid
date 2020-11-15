@@ -15,7 +15,8 @@
         public function isInDistanceRange($shooter, $target, $fireOrder)
         {
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $distanceRange = max($this->range, $this->distanceRange); //just in case distanceRange is not filled!
+            $distanceRange = max($this->range, $this->distanceRange); //just in case distanceRange is not filled! Then it's assumed to be the same as launch range
+            if($distanceRange <=0 ) return true; //0 means unlimited range
 
             if(mathlib::getDistanceHex($movement->position,  $target) > $distanceRange )
             {
@@ -191,7 +192,7 @@
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= "<br>Ignores half of armor.";
+			$this->data["Special"] .= "Ignores half of armor.";
 		}
         
         
@@ -200,6 +201,73 @@
         public function setMaxDamage(){     $this->maxDamage = 30;      }
     
     }//endof class PlasmaWaveTorpedo
+
+
+
+    class PacketTorpedo extends Torpedo{
+        public $name = "PacketTorpedo";
+        public $displayName = "Packet Torpedo";
+        public $iconPath = "packetTorpedo.png";
+        public $range = 0; //unlimited range, but suffers range penalty
+        public $loadingtime = 2;
+	public $specialRangeCalculation = true; //to inform front end that it should use weapon-specific range penalty calculation - such a method should be present in .js!
+        
+        public $weaponClass = "Ballistic"; 
+        public $damageType = "Standard"; 
+        
+        
+        public $fireControl = array(-6, 3, 3); // fighters, <mediums, <capitals 
+	public $rangePenalty = 0.5; //-1/2 hexes - BUT ONLY AFTER 10 HEXES
+        
+        public $trailColor = array(191, 200, 215);
+        public $animation = "torpedo";
+        public $animationColor = array(130, 170, 255);
+        public $animationExplosionScale = 0.25;
+        public $projectilespeed = 14;
+        public $animationWidth = 11;
+        public $trailLength = 16;
+        public $priority = 6; //heavy Standard
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 6;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 5;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+            	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "Launch and distance range is unlimited.";
+		$this->data["Special"] .= "<br>This weapon suffers range penalty (like direct fire weapons do), but only after first 10 hexes of distance.";
+		//also, target is hidden by the tabletop - but this won't be implemented in FV
+	}
+        
+	    //override standard to skip first 10 hexes when calculating range penalty
+	    public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
+	    {
+			$targetPos = $target->getHexPos();
+			$dis = mathlib::getDistanceHex($pos, $targetPos);
+			$dis = max(0,$dis-10);//first 10 hexes are "free"
+
+			$rangePenalty = ($this->rangePenalty * $dis);
+			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
+			return Array("rp" => $rangePenalty, "notes" => $notes);
+	    }	    
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+10;    }
+        public function setMinDamage(){     $this->minDamage = 12;      }
+        public function setMaxDamage(){     $this->maxDamage = 30;      }
+    
+    }//endof class PacketTorpedo
 
 
 ?>

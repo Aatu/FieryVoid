@@ -10,6 +10,8 @@ class ChoukaHellfireBOSAT extends OSAT{
         $this->imagePath = "img/ships/EscalationWars/ChoukaHellfireOSAT.png";
         $this->canvasSize = 60;
         $this->shipClass = 'Hellfire-B Defense Satellite';
+			$this->variantOf = "Hellfire-A Defense Satellite";
+			$this->occurence = "common";
         
         $this->isd = 1962;
         $this->unofficial = true;
@@ -40,7 +42,7 @@ class ChoukaHellfireBOSAT extends OSAT{
 					10 => "Structure",
 					12 => "Thruster",
 					14 => "Heavy Plasma Cannon",
-          			16 => "Light Laser Cannon",
+          			16 => "Light Laser",
 					18 => "Scanner",
 					20 => "Reactor",
 			)

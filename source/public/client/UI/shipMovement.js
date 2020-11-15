@@ -54,7 +54,7 @@ window.UI = {
 			
 			UI.shipMovement.halfphaseElement = $("#halfphase", ui);
 
-            UI.shipMovement.cancelElement.on("click touchstart", UI.shipMovement.cancelCallback);
+            UI.shipMovement.cancelElement.on("click touchstart contextmenu", UI.shipMovement.cancelCallback);
             UI.shipMovement.moveElement.on("click touchstart", UI.shipMovement.moveCallback);
 
             UI.shipMovement.turnrightElement.on("click touchstart", UI.shipMovement.turnrightCallback);

@@ -4,11 +4,11 @@ class BrixadiiPoliceFrigateBase extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 60;
+        $this->pointCost = 50;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiPoliceFrigateBase";
         $this->imagePath = "img/ships/Nexus/BrixadiiPoliceFrigate.png";
-			$this->canvasSize = 200; //img has 200px per side
+			$this->canvasSize = 100; //img has 200px per side
         $this->shipClass = "Police Frigate";
 		//$this->variantOf = "Police Frigate";
         $this->occurence = "common";
@@ -38,7 +38,7 @@ class BrixadiiPoliceFrigateBase extends LCV{
 		$sensors->markLCV();
 		$this->addPrimarySystem($sensors);
 		$this->addPrimarySystem(new Engine(3, 10, 0, 4, 3));
-		$this->addPrimarySystem(new ParticleProjector(2, 0, 0, 240, 120));
+		$this->addPrimarySystem(new ParticleProjector(2, 6, 1, 240, 120));
 	    
 	    
         $this->addPrimarySystem(new Structure(4, 21));
@@ -52,10 +52,18 @@ class BrixadiiPoliceFrigateBase extends LCV{
         				20 => "Scanner",
         		),
         		1=> array( //redirect to PRIMARY
-						20 => "Primary",
+        				11 => "0:Structure",
+        				15 => "0:Particle Projector",
+        				18 => "0:Engine",
+        				19 => "0:Reactor",
+        				20 => "0:Scanner",
         		),
         		2=> array( //redirect to PRIMARY
-						20 => "Primary",
+        				11 => "0:Structure",
+        				15 => "0:Particle Projector",
+        				18 => "0:Engine",
+        				19 => "0:Reactor",
+        				20 => "0:Scanner",
         		),        		
         ); //end of hit chart
     }

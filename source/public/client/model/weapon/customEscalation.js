@@ -99,3 +99,33 @@ var EWUltralightPlasmaGun = function  EWUltralightPlasmaGun(json, ship) {
 };
 EWUltralightPlasmaGun.prototype = Object.create(Weapon.prototype);
 EWUltralightPlasmaGun.prototype.constructor =  EWUltralightPlasmaGun;
+
+var EWParticleMaul = function  EWParticleMaul(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWParticleMaul.prototype = Object.create(Weapon.prototype);
+EWParticleMaul.prototype.constructor =  EWParticleMaul;
+
+var EWGatlingParticleBeam = function  EWGatlingParticleBeam(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWGatlingParticleBeam.prototype = Object.create(Weapon.prototype);
+EWGatlingParticleBeam.prototype.constructor =  EWGatlingParticleBeam;
+
+var EWFighterTorpedoLauncher = function  EWFighterTorpedoLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWFighterTorpedoLauncher.prototype = Object.create(Weapon.prototype);
+EWFighterTorpedoLauncher.prototype.constructor =  EWFighterTorpedoLauncher;
+
+var EWLightPlasmaMine = function  EWLightPlasmaMine(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWLightPlasmaMine.prototype = Object.create(Weapon.prototype);
+EWLightPlasmaMine.prototype.constructor =  EWLightPlasmaMine;
+
+var EWPlasmaMine = function  EWPlasmaMine(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWPlasmaMine.prototype = Object.create(Weapon.prototype);
+EWPlasmaMine.prototype.constructor =  EWPlasmaMine;

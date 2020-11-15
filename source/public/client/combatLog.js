@@ -40,7 +40,7 @@ window.combatLog = {
 		
         var damages = Array();
         var lowC = 100000;
-        var highC = 0;
+        var highC = -100000;
         var notes = "";
         
         for (var a in orders){            
@@ -67,7 +67,7 @@ window.combatLog = {
             weaponManager.getDamagesCausedBy(fire, damages);
             var needed = fire.needed;
             //if (needed < 0) needed = 0; //I skip this - if intercepted below 0, let's show it.
-            if (fire.shots > 0){ //otherwise shot is purely technical
+            //if (fire.shots > 0){ //otherwise shot is purely technical ... BUT show it too!
                 if (needed < lowC)
                 lowC = needed;
                 if (needed > highC)
@@ -75,7 +75,7 @@ window.combatLog = {
 
                 if (fire.pubnotes)
                 notes += fire.pubnotes + " ";
-            }
+            //}
                         
         }
 

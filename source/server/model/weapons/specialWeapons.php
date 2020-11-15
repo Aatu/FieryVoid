@@ -2727,4 +2727,173 @@ class VortexDisruptor extends Weapon{
 
 
 
+
+class ParticleConcentrator extends Raking{
+    /*Particle Concentrator - Gaim weapon*/
+	public $name = "ParticleConcentrator";
+	public $displayName = "Particle Concentrator";
+	public $iconPath = "ParticleConcentrator.png";
+	
+	public $animation = "laser";
+        public $animationColor = array(255, 250, 230);
+	public $trailColor = array(30, 170, 255);	
+	public $animationWidth = 4;
+	public $animationWidthArray = array(1=>4, 2=>5, 3=>6, 4=>7, 5=>8, 6=>10);
+	public $animationWidth2 = 0.3;
+        public $animationExplosionScale = 0.25;
+	public $animationExplosionScaleArray = array(1=>0.25, 2=>0.35, 3=>0.45, 4=>0.55, 5=>0.70, 6=>0.85);
+      
+        public $loadingtime = 2;
+	public $intercept = 1; //intercept rating -1     
+	
+        public $priority = 8;
+        public $priorityArray = array(1=>8, 2=>7, 3=>7, 4=>7, 5=>7); //weakest mode is light Raking weapon, heavier ones are heavy raking weapons
+	public $firingMode = 1;	
+            public $firingModes = array(
+                1 => "Single",
+                2 => "2combined",
+                3 => "3combined",
+                4 => "4combined",
+                5 => "5combined",
+                6 => "6combined"
+            );
+        public $rangePenalty = 0.5; //-1/2 hexes - and this stays constant!
+            //public $rangePenaltyArray = array( 1=>2, 2=>1, 3=>0.5, 4=>0.33, 5=>0.25 ); //Raking and Piercing mode
+        public $fireControl = array(2, 4, 5); // fighters, <mediums, <capitals 
+            public $fireControlArray = array( 1=>array(2, 4, 5), 2=>array(4, 6, 7), 3=>array(6, 8, 9), 4=>array(8, 10, 11), 5=>array(10, 12, 13), 6=>array(12, 14, 15) ); //+2 to hit per every additional combining weapon
+	
+	
+	
+	    public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Particle"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+	
+	public $isCombined = false; //is being combined with other weapon
+	public $alreadyConsidered = false; //already considered - either being fired or combined
+	public $testRun = false;//testRun = true means hit chance is calculated nominal skipping concentration issues - for subordinate weapon to calculate average hit chance
+	
+	
+	    public function setSystemDataWindow($turn){
+		      parent::setSystemDataWindow($turn);  
+		      $this->data["Special"] = "Can combine multiple Particle Concentrator into one concentrated shot - for +2 Fire Control and +1d10 damage per additional weapon (up to 5 additional weapon can be added).";  
+		      $this->data["Special"] .= "<br>If You allocate multiple Particle Concentrators in higher mode of fire at the same target, they will be combined."; 
+		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in highest actually possible mode instead.";  
+		      $this->data["Special"] .= "<br>Concentrators do not need to be on the same ship, but need to be on the same hex to combine."; //tabletop: within 1 hex  			  
+		      $this->data["Special"] .= "<br>Hit chance will be average of all weapons combining.";//tabletop: use average EW, best range, worst criticals and no lock-on if ANY weapon lacks lock-on
+	    }	
+	
+		
+	
+	public function fire($gamedata, $fireOrder){
+	    if ($this->isCombined) $fireOrder->shots = 0; //no actual shots from weapon that's firing as part of combined shot!
+	    parent::fire($gamedata, $fireOrder);
+	} //endof function fire	
+	
+	
+	//if fired in higher mode - combine with other weapons that are so fired!
+	//if already combining - do not fire at all (eg. set hit chance at 0, make self completely uninterceptable and number of shots at 0)
+	public function calculateHitBase($gamedata, $fireOrder){
+		$this->alreadyConsidered = true;
+		$combinedChance = 0;
+		if ($this->testRun){ //calculate nominal, skipping concentration issues - for subordinate weapon to calculate average hit chance
+			parent::calculateHitBase($gamedata, $fireOrder);
+			return;
+		}
+		if ($this->isCombined){  //this weapon is being used as subordinate combination weapon! 
+			$notes = "technical fire order - weapon combined into another shot";
+			$fireOrder->chosenLocation = 0; //tylko techniczne i tak
+			$fireOrder->needed = 0;
+			$fireOrder->notes = $notes;
+			$fireOrder->updated = true;
+			$this->changeFiringMode($fireOrder->firingMode);
+			return;
+		}
+		if ($fireOrder->firingMode > 1){ //for single fire there's nothing special
+			$firingShip = $gamedata->getShipById($fireOrder->shooterid);	
+			$srcPos = $firingShip->getCoPos();			
+			$shipsSameHex = $gamedata->getShipsInDistance($firingShip, 0);//all ships on the same hex can potentially combine!
+			$subordinateOrders = array();
+			$subordinateOrdersNo = 0;
+			foreach($shipsSameHex as $otherShip) {			
+				//look for firing orders from same hex at same target in same mode - and make sure it's same type of weapon
+				$allOrders = $otherShip->getAllFireOrders($gamedata->turn);
+				foreach($allOrders as $subOrder) {
+					if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->targetid) && ($subOrder->calledid == $fireOrder->calledid) && ($subOrder->firingMode == $fireOrder->firingMode) ){ 
+						//order data fits - is weapon another Particle Concentrator?...
+						$subWeapon = $otherShip->getSystemById($subOrder->weaponid);
+						if ($subWeapon instanceof ParticleConcentrator){
+							if (!$subWeapon->alreadyConsidered){ //ok, can be combined then!
+								$subordinateOrdersNo++;
+								$subordinateOrders[] = $subOrder;
+							}
+						}
+					}
+					if ($subordinateOrdersNo>=($fireOrder->firingMode-1)) break;//enough subordinate weapons found! - exit loop
+				}
+				if ($subordinateOrdersNo>=($fireOrder->firingMode-1)) break;//enough subordinate weapons found! - exit loop
+			}
+			//if not enough weapons to combine in desired mode - combine still, just in appropriately lesser mode
+			if ($subordinateOrdersNo < ($fireOrder->firingMode-1)){ 
+				$fireOrder->firingMode = $subordinateOrdersNo +1; //worst case it's single fire ;)
+			}			
+			//combining - set other combining weapons/fire orders to technical status! (and change their firing mode to the same as base weapon, also just in case ;)
+			foreach($subordinateOrders as $subOrder){
+				$otherShip = $gamedata->getShipById($subOrder->shooterid);	
+				$subWeapon = $otherShip->getSystemById($subOrder->weaponid);
+				$subWeapon->isCombined = true;
+				$subWeapon->alreadyConsidered = true;
+				$subWeapon->doNotIntercept = true;
+				$subOrder->pubnotes .= 'Combined into another shot. ';
+				$subOrder->firingMode = $fireOrder->firingMode;
+				
+				//get nominal hit chance...
+				$subWeapon->testRun = true;
+				$subWeapon->calculateHitBase($gamedata, $subOrder);
+				$combinedChance += $subOrder->needed;
+				//and now nullify  hit chance...
+				$subWeapon->testRun = false;
+				$notes = "Technical fire order - weapon combined into another shot. ";
+				$subOrder->needed = 0;
+				$subOrder->notes = $notes;
+			}
+		}
+		parent::calculateHitBase($gamedata, $fireOrder);
+		if($fireOrder->firingMode > 1){ //for concentrated shot - hit chance is average of hit chances of all weapons
+			$combinedChance += $fireOrder->needed;
+			$fireOrder->needed = round($combinedChance/$fireOrder->firingMode);
+			$fireOrder->notes .= 'Modified as average of concentrating shots! ';
+		}
+	}//endof function calculateHitBase
+	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 9;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 7;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+	
+    public function getDamage($fireOrder){
+		return Dice::d(10, 1+$this->firingMode)+15; //2d10+15 +1d10 per every additional weapon
+	}
+	public function setMinDamage(){    
+		$this->minDamage = 1+$this->firingMode+15;
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+	public function setMaxDamage(){
+		$this->maxDamage = 10*(1+$this->firingMode)+15;
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;  
+	}
+} //endof class ParticleConcentrator
+
+
+
+
+
 ?>

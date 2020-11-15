@@ -80,6 +80,8 @@ class TechnicalTestbedFtr extends FighterFlight{
 
 
 	/*remaking damage allocation routine - this fighter is special enough (no dropouts, Diffuser) that it should actually have different priorities when handling damage allocation*/
+	/*...and this routine has been genericized and remastered - code below is obsolete*/
+	/*
     public function getHitSystem($shooter, $fire, $weapon, $gamedata, $location = null)
     {
         $skipStandard = false;
@@ -107,14 +109,14 @@ class TechnicalTestbedFtr extends FighterFlight{
 
         if (sizeof($systems) == 0) return null;
 	    
-		/* AF fire is normally allocated by player, and it's very important for fighter toughness
-		in FV there is no information about actual amount of incoming damage
-		but let's try to make an algorithm based on damage _potential_ of incoming shot - won't be as good, but far better than random allocation
-		priority of allocation FOR SHADOW FIGHTER SPECIFICALLY:
-		 1. no chance of being destroyed
-		 2. being LESS damaged already (unless destruction is guaranteed)
-		 4. having higher ID (last craft in flight first - if any craft is special, it'll be the first one)
-		*/
+		// AF fire is normally allocated by player, and it's very important for fighter toughness
+		// in FV there is no information about actual amount of incoming damage
+		// but let's try to make an algorithm based on damage _potential_ of incoming shot - won't be as good, but far better than random allocation
+		// priority of allocation FOR SHADOW FIGHTER SPECIFICALLY:
+		//  1. no chance of being destroyed
+		//  2. being LESS damaged already (unless destruction is guaranteed)
+		//  4. having higher ID (last craft in flight first - if any craft is special, it'll be the first one)
+		
 		//fill data about eligible craft...
 		$craftWithData = array();
 		foreach ($systems as $craft){
@@ -130,7 +132,7 @@ class TechnicalTestbedFtr extends FighterFlight{
 			$armor += $protection;		
 			$dmgPotential = max(0, $dmgPotential-$armor);//never negative damage ;)
 		
-			/*for linked weapons - multiply by number of shots!*/
+			// for linked weapons - multiply by number of shots!
 			if ($weapon->isLinked){
 				$dmgPotential = $dmgPotential*$weapon->shots;
 			}
@@ -164,6 +166,7 @@ class TechnicalTestbedFtr extends FighterFlight{
 
         //return $systems[(Dice::d(sizeof($systems)) - 1)];
     }
+*/
 
 }
 

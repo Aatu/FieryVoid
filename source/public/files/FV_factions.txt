@@ -141,6 +141,16 @@ Energy Web - defensive system integrated with Interceptor. Active Interceptor pr
 Shadow Omega - official Shadow Omega conversion by AoG is marked as unofficial because that's what official deployment restrictions sum up to (not tournament legal, opponent permission required). Actual fan-made conversions are present as well!
 
 
+GAIM
+Gaim are minor League race, but their ships are very good and their diversity is excellent - making them (in game, tactically ) in all respects equal to Big4 factions.
+Notable technologies:
+	Bulkheads - defensive system that can take damage first (after armor) when system is hit, which greatly increases resilience of Gaim systems. Bulkhead can protect systems on the same section, and structure it's mounted to (even if it's technically on different section, like on MCV). Note that PRIMARY systems are not protected by bulkheads. In FV decision whether to use bulkhead will be made automatically - Bulkheads will be used if they can prevent system destruction, when structure would be destroyed by the hit or when integrity of relevant Structure block is under 25%. 
+	Particle Concentrator - multiple Concentrator firing from the same hex may combine into one more powerful (and more accurate!) shot, a bit similar to what Ipsha Surge Cannons do. Its hit chance is average of all weapons concentrating (as they may be fitted on different ships, with different EW, their chances may differ).
+		In tabletop it's more or less the same, except weapons within 1 hex can still participate and lock-on is denied if any participating weapon lacks lock-on.
+	Packet Torpedo - ballistic weapon with technically unlimited range (both launch and distance), just like direct fire. And just like with direct fire actual limitation is range penalty - with the twist that it kicks in only after first 10 hexes of travel.
+		In tabletop target of this weapon is not known to opponent until after firing declaration (not implemented in FV).
+
+
 HURR
 No very specific rules/technologies.
 
@@ -375,6 +385,7 @@ Dilgar
 Drakh (although, being Middleborn rather than Young race, they exhibit some traits similar to Ancients – not enough to kick them to Ancients grouping though)
 Drazi
 EA (barring Warlock)
+Gaim
 Llort
 Minbari (warning: Jammer is very daunting, expecially to new players – it’s easy to feel overwhelmed; at the same time flying Minbari is not easy either. It’s advised to stay away from them on either side of the table until You feel You have solid command of the game)
 Narn (barring massed EMines)

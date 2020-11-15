@@ -388,6 +388,7 @@ spl_autoload_register(
                 'hyperionpatrol' => '/server/model/ships/EA/hyperionPatrol.php',
                 'hyperionpulse' => '/server/model/ships/EA/hyperionPulse.php',
                 'hyperionrail' => '/server/model/ships/EA/hyperionRail.php',
+                'poseidon' => '/server/model/ships/EA/Poseidon.php',
                 'ikorta' => '/server/model/ships/brakiri/ikorta.php',
                 'impcommjammer' => '/server/model/weapons/specialWeapons.php',
                 'imperiallaser' => '/server/model/weapons/lasers.php',
@@ -399,6 +400,7 @@ spl_autoload_register(
                 'interceptormki' => '/server/model/weapons/defensive.php',
                 'interceptormkii' => '/server/model/weapons/defensive.php',
                 'interceptorprototype' => '/server/model/weapons/defensive.php',
+                'heavyinterceptorbattery' => '/server/model/weapons/defensive.php',
                 'invulnerablethruster' => '/server/model/systems/baseSystems.php',
                 'ionbolt' => '/server/model/weapons/ion.php',
                 'ioncannon' => '/server/model/weapons/ion.php',
@@ -1107,14 +1109,19 @@ spl_autoload_register(
 				'ewheavyplasmagun' => '/server/model/weapons/customEscalation.php',
 				'ewplasmagun' => '/server/model/weapons/customEscalation.php',
 			//EW particle weapons
+				'ewgatlingparticlebeam' => '/server/model/weapons/customEscalation.php',		
 				'ewparticlegun' => '/server/model/weapons/customEscalation.php',
 				'ewlightparticlegun' => '/server/model/weapons/customEscalation.php',
 				'ewparticlelance' => '/server/model/weapons/customEscalation.php',		
+				'ewparticlemaul' => '/server/model/weapons/customEscalation.php',		
 			//EW ballistic weapons
 				'ewrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewdualrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewheavyrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewomissilerack' => '/server/model/weapons/customEscalation.php',
+				'ewfightertorpedolauncher' => '/server/model/weapons/customEscalation.php',
+				'ewlightplasmamine' => '/server/model/weapons/customEscalation.php',
+				'ewplasmamine' => '/server/model/weapons/customEscalation.php',
 			//EW gravitic weapons
 				'ewgravitictractingrod' => '/server/model/weapons/customEscalation.php',
 			//EW laser weapons
@@ -1124,10 +1131,13 @@ spl_autoload_register(
 				'ewheavygatlinglaser' => '/server/model/weapons/customEscalation.php',
 			//EW AoE weapons
 				'lightenergymine' => '/server/model/weapons/AoE.php',
+			//EW electromagnetic weapons
+				'ewemtorpedo' => '/server/model/weapons/customEscalation.php',
 
 				//Escalation Wars - Chouka
 				'choukaapostlecruiser' => '/server/model/ships/ZEscalationChouka/ChoukaApostleCruiser.php',
 				'choukaapostlewarcruiser' => '/server/model/ships/ZEscalationChouka/ChoukaApostleWarCruiser.php',
+				'choukaarbitercutter' => '/server/model/ships/ZEscalationChouka/ChoukaArbiterCutter.php',
 				'choukabelieverfrigate' => '/server/model/ships/ZEscalationChouka/ChoukaBelieverFrigate.php',
 				'choukabishopwarship' => '/server/model/ships/ZEscalationChouka/ChoukaBishopWarship.php',
 				'choukabloodlustfighter' => '/server/model/ships/ZEscalationChouka/ChoukaBloodlustFighter.php',
@@ -1139,6 +1149,7 @@ spl_autoload_register(
 				'choukainquisitorlightcruiser' => '/server/model/ships/ZEscalationChouka/ChoukaInquisitorLightCruiser.php',
 				'choukapriestdestroyer' => '/server/model/ships/ZEscalationChouka/ChoukaPriestDestroyer.php',
 				'choukapriestescort' => '/server/model/ships/ZEscalationChouka/ChoukaPriestEscort.php',
+				'choukaradianceexplorer' => '/server/model/ships/ZEscalationChouka/ChoukaRadianceExplorer.php',
 				'choukaretributionbattlecruiser' => '/server/model/ships/ZEscalationChouka/ChoukaRetributionBattlecruiser.php',
 				'choukaretributionrefit' => '/server/model/ships/ZEscalationChouka/ChoukaRetributionRefit.php',
 				'choukarevelationfreighter' => '/server/model/ships/ZEscalationChouka/ChoukaRevelationFreighter.php',
@@ -1177,18 +1188,30 @@ spl_autoload_register(
 				'circasianilustris' => '/server/model/ships/ZEscalationCircasian/CircasianIlustris.php',
 				'circasianilustriscommand' => '/server/model/ships/ZEscalationCircasian/CircasianIlustrisCommand.php',
 				'circasianistale' => '/server/model/ships/ZEscalationCircasian/CircasianIstale.php',
+				'circasianjagafighter' => '/server/model/ships/ZEscalationCircasian/CircasianJagaFighter.php',
+				'circasianjagalltorpedofighter' => '/server/model/ships/ZEscalationCircasian/CircasianJagallTorpedoFighter.php',
+				'circasiankolamfighter' => '/server/model/ships/ZEscalationCircasian/CircasianKolamFighter.php',
 				'circasiankolanis' => '/server/model/ships/ZEscalationCircasian/CircasianKolanis.php',
 				'circasiankolaniscarrier' => '/server/model/ships/ZEscalationCircasian/CircasianKolanisCarrier.php',
+				'circasiankoricminecruiser' => '/server/model/ships/ZEscalationCircasian/CircasianKoricMineCruiser.php',
+				'circasiankiralinajumpship' => '/server/model/ships/ZEscalationCircasian/CircasianKiralinaJumpship.php',
+				'circasiankiralinaupgrade' => '/server/model/ships/ZEscalationCircasian/CircasianKiralinaUpgrade.php',
 				'circasianluscan' => '/server/model/ships/ZEscalationCircasian/CircasianLuscan.php',
 				'circasianluscanrefit' => '/server/model/ships/ZEscalationCircasian/CircasianLuscanRefit.php',
+				'circasianmishajumpcarrier' => '/server/model/ships/ZEscalationCircasian/CircasianMishaJumpCarrier.php',
+				'circasianmisharefit' => '/server/model/ships/ZEscalationCircasian/CircasianMishaRefit.php',
+				'circasianmorketosat' => '/server/model/ships/ZEscalationCircasian/CircasianMorketOSAT.php',
 				'circasianmoshesta' => '/server/model/ships/ZEscalationCircasian/CircasianMoshesta.php',
 				'circasianmoshestabeta' => '/server/model/ships/ZEscalationCircasian/CircasianMoshestaBeta.php',
+				'circasianmukantasmallbase' => '/server/model/ships/ZEscalationCircasian/CircasianMukantaSmallBase.php',
 				'circasiannalessinfreighter' => '/server/model/ships/ZEscalationCircasian/CircasianNalessinFreighter.php',
 				'circasianolcata' => '/server/model/ships/ZEscalationCircasian/CircasianOlcata.php',
 				'circasianonsta' => '/server/model/ships/ZEscalationCircasian/CircasianOnsta.php',
 				'circasianreglata' => '/server/model/ships/ZEscalationCircasian/CircasianReglata.php',
+				'circasianrotarra' => '/server/model/ships/ZEscalationCircasian/CircasianRotarra.php',
 				'circasianrehkafighter' => '/server/model/ships/ZEscalationCircasian/CircasianRehkaFighter.php',
 				'circasianshenna' => '/server/model/ships/ZEscalationCircasian/CircasianShenna.php',
+				'circasianthracejumpcruiser' => '/server/model/ships/ZEscalationCircasian/CircasianThraceJumpcruiser.php',
 				'circasiantoltara' => '/server/model/ships/ZEscalationCircasian/CircasianToltara.php',
 				'circasiantormin' => '/server/model/ships/ZEscalationCircasian/CircasianTormin.php',
 				'circasiantorminbeta' => '/server/model/ships/ZEscalationCircasian/CircasianTorminBeta.php',
@@ -1212,7 +1235,12 @@ spl_autoload_register(
 				'nexusprojectorarray' => '/server/model/weapons/customNexus.php',
 				'nexuslightprojectorarray' => '/server/model/weapons/customNexus.php',
 				'nexusinterceptorarray' => '/server/model/weapons/customNexus.php',
-				
+				'nexusheavyplasmacharge' => '/server/model/weapons/customNexus.php',
+
+
+
+
+
 				//Nexus ships - Brixadii
                 'brixadiibattledestroyerbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerBase.php',					
                 'brixadiibattledestroyer2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyer2057.php',		
@@ -1228,19 +1256,24 @@ spl_autoload_register(
                 'brixadiijumpscout' => '/server/model/ships/ZNexusBrixadii/BrixadiiJumpScout.php',		
                 'brixadiijumpscout2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiJumpScout2108.php',		
 	
+				'brixadiiassaultship' => '/server/model/ships/ZNexusBrixadii/BrixadiiAssaultShip.php',
+	
+				'brixadiifastcourier' => '/server/model/ships/ZNexusBrixadii/BrixadiiFastCourier.php',
+
                 'brixadiipursuitfrigatebase' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigateBase.php',
                 'brixadiipursuitfrigate2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigate2057.php',
                 'brixadiipursuitfrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiPursuitFrigate2108.php',
 		    
-                'brixadiiattackfrigatebase' => '/server/model/ships/ZNexusBrixadii/BrixadiiAttackFrigateBase.php',
+                'brixadiiattackfrigate' => '/server/model/ships/ZNexusBrixadii/BrixadiiAttackFrigate.php',
                 'brixadiiattackfrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiAttackFrigate2108.php',
 
                 'brixadiilightescortfrigate' => '/server/model/ships/ZNexusBrixadii/BrixadiiLightEscortFrigate.php',
 
                 'brixadiipolicefrigatebase' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigateBase.php',
-                'brixadiipolicefrigateearly' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigateEarly.php',
+                'brixadiipolicefrigate2047' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2047.php',
 				'brixadiipolicefrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2108.php',
                 'brixadiiscreenfrigate' => '/server/model/ships/ZNexusBrixadii/BrixadiiScreenFrigate.php',
+                'brixadiiscreenfrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiScreenFrigate2108.php',
 		    		    
                 'brixadiipolicefrigatebaseshf' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigateBaseSHF.php',
                 'brixadiipolicefrigate2047shf' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2047SHF.php',
@@ -1265,7 +1298,6 @@ spl_autoload_register(
 				'brixadiicombatbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiCombatBase.php',
 				'brixadiicombatbase2112' => '/server/model/ships/ZNexusBrixadii/BrixadiiCombatBase2112.php',
 
-				'targetblock' => '/server/model/ships/ZNexusBrixadii/targetBlock.php',
 
                 //Usuuth Weapons
                 'hvyparticleprojector' => '/server/model/weapons/particle.php',
@@ -1504,12 +1536,54 @@ spl_autoload_register(
 				
 				//new SW - Uglies
                 'zzftruglytiex' => '/server/model/ships/ZStarWars/zzftrUglyTIEX.php',
+                'zzftruglyxtie' => '/server/model/ships/ZStarWars/zzftrUglyXTIE.php',
+                'zzftruglytyewing' => '/server/model/ships/ZStarWars/zzftrUglyTYEWing.php',
+                'zzftruglychirdaki' => '/server/model/ships/ZStarWars/zzftrUglyChirdaki.php',
+				'swdreadnoughtraider' => '/server/model/ships/ZStarWars/swDreadnoughtRaider.php',
+				'swnebulonbmedical' => '/server/model/ships/ZStarWars/swNebulonBMedical.php',
+                'swfighteraslaser' => '/server/model/weapons/customSW.php',
+                'zzftrbwing' => '/server/model/ships/ZStarWars/zzftrBWing.php',
+                'zzftrbwingmk2' => '/server/model/ships/ZStarWars/zzftrBWingMk2.php', 
+                'zzftrbwingprototype' => '/server/model/ships/ZStarWars/zzftrBWingPrototype.php',
 				
 				
 				//Gaim systems
                 'subreactoruniversal' => '/server/model/systems/baseSystems.php',
+                'bulkhead' => '/server/model/systems/baseSystems.php',
+                'packettorpedo' => '/server/model/weapons/torpedo.php',
+                'particleconcentrator' => '/server/model/weapons/specialWeapons.php',
+
 				//Gaim ships				
+				'gaimdraskar' => '/server/model/ships/gaim/gaimDraskar.php',
+				'gaimgeun' => '/server/model/ships/gaim/gaimGeun.php',
+				'gaimgrast' => '/server/model/ships/gaim/gaimGrast.php',
+				'gaimgrastrefit' => '/server/model/ships/gaim/gaimGrastRefit.php',
+				'gaimhadros' => '/server/model/ships/gaim/gaimHadros.php',
+				'gaimkastafighter' => '/server/model/ships/gaim/gaimKastaFighter.php',
+				'gaimkoistfighter' => '/server/model/ships/gaim/gaimKoistFighter.php',
+				'gaimkrastfighter' => '/server/model/ships/gaim/gaimKrastFighter.php',
+				'gaimkuach' => '/server/model/ships/gaim/gaimKuach.php',
+				'gaimkuan' => '/server/model/ships/gaim/gaimKuan.php',
+				'gaimlaska' => '/server/model/ships/gaim/gaimLaska.php',
+				'gaimmadra' => '/server/model/ships/gaim/gaimMadra.php',
+				'gaimmagrassa' => '/server/model/ships/gaim/gaimMagrassa.php',
+				'gaimmoas' => '/server/model/ships/gaim/gaimMoas.php',
+				'gaimmearc' => '/server/model/ships/gaim/gaimMearc.php',
 				'gaimmoor' => '/server/model/ships/gaim/gaimMoor.php',
+				'gaimoutpost' => '/server/model/ships/gaim/gaimOutpost.php',
+				'gaimrafapulse' => '/server/model/ships/gaim/gaimRafaPulse.php',
+				'gaimrafascattergun' => '/server/model/ships/gaim/gaimRafaScattergun.php',
+				'gaimrafatorpedo' => '/server/model/ships/gaim/gaimRafaTorpedo.php',
+				'gaimrakalla' => '/server/model/ships/gaim/gaimRakalla.php',
+				'gaimreskafighter' => '/server/model/ships/gaim/gaimReskaFighter.php',
+				'gaimslyach' => '/server/model/ships/gaim/gaimSlyach.php',
+				'gaimsulo' => '/server/model/ships/gaim/gaimSulo.php',
+				'gaimsuom' => '/server/model/ships/gaim/gaimSuom.php',
+				'gaimtiac' => '/server/model/ships/gaim/gaimTiac.php',
+				'gaimtiros' => '/server/model/ships/gaim/gaimTiros.php',
+				'gaimtocrat' => '/server/model/ships/gaim/gaimTocrat.php',
+				'gaimtoraosat' => '/server/model/ships/gaim/gaimToraOSAT.php',
+				'gaimtracha' => '/server/model/ships/gaim/gaimTracha.php',
 				
 				
 				

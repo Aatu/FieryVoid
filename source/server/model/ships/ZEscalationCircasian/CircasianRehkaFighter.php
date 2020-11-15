@@ -9,7 +9,10 @@ class CircasianRehkaFighter extends FighterFlight{
         $this->phpclass = "CircasianRehkaFighter";
         $this->shipClass = "Rehka Heavy flight";
         $this->imagePath = "img/ships/EscalationWars/CircasianRehka.png";
-        $this->customFtrName = "Rehka";
+		$this->unofficial = true;
+
+		
+	    $this->notes = 'Non-atmospheric.';
 		
         $this->isd = 1950;
         
@@ -34,7 +37,7 @@ class CircasianRehkaFighter extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){            
             $armour = array(2, 1, 2, 2);
-            $fighter = new Fighter("ChoukaFaithbringerFighter", $armour, 11, $this->id);
+            $fighter = new Fighter("CircasianRehkaFighter", $armour, 11, $this->id);
             $fighter->displayName = "Rehka";
             $fighter->imagePath = "img/ships/EscalationWars/CircasianRehka.png";
             $fighter->iconPath = "img/ships/EscalationWars/CircasianRehka_Large.png";
