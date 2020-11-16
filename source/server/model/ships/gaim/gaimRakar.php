@@ -7,7 +7,7 @@ class gaimRakar extends BaseShip{
         $this->pointCost = 750;
         $this->faction = "Gaim";
         $this->phpclass = "gaimRakar";
-        $this->imagePath = "img/ships/gaimRakar.png";
+        $this->imagePath = "img/ships/GaimRakar.png";
 		$this->canvasSize = 200;
         $this->shipClass = "Rakar Strike Cruiser";
         $this->shipSizeClass = 3;
