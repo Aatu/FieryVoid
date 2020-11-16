@@ -208,7 +208,7 @@
         public $name = "PacketTorpedo";
         public $displayName = "Packet Torpedo";
         public $iconPath = "packetTorpedo.png";
-        public $range = 50; 
+        public $range = 50;  
         public $loadingtime = 2;
 	public $specialRangeCalculation = true; //to inform front end that it should use weapon-specific range penalty calculation - such a method should be present in .js!
         
