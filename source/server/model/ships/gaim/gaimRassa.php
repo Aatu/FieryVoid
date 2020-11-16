@@ -7,7 +7,7 @@ class gaimRassa extends MediumShip{
 		$this->pointCost = 350;
 		$this->faction = "Gaim";
 		$this->phpclass = "gaimRassa";
-		$this->imagePath = "img/ships/gaimRassa.png";
+		$this->imagePath = "img/ships/GaimRassa.png";
 		$this->shipClass = "Rassa Patrol Frigate";
 		$this->canvasSize = 100;
 

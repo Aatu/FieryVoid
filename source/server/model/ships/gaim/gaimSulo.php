@@ -7,7 +7,7 @@ class gaimSulo extends BaseShip{
 		$this->pointCost = 600;
 		$this->faction = 'Gaim';
 		$this->phpclass = "gaimSulo";
-		$this->imagePath = "img/ships/gaimSulo.png";
+		$this->imagePath = "img/ships/GaimSulo.png";
 		$this->shipClass = "Sulo Fleet Carrier";
 		$this->shipSizeClass = 3;
 		$this->fighters = array("medium"=>36);
