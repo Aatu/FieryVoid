@@ -988,6 +988,7 @@
 
         public $name = "lightParticleBeamShip";
         public $displayName = "Light Particle Beam";
+        public $iconPath = "lightParticleBeamShip.png";
         public $animation = "beam";
         public $animationColor = array(255, 250, 230);
         public $animationExplosionScale = 0.12;
