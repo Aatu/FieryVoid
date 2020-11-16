@@ -7,7 +7,7 @@ class gaimRoka extends MediumShip{
 		$this->pointCost = 400;
 		$this->faction = "Gaim";
         $this->phpclass = "gaimRoka";
-        $this->imagePath = "img/ships/gaimRoka.png";
+        $this->imagePath = "img/ships/GaimRoka.png";
         $this->shipClass = "Roka Auxiliary Cruiser";
         $this->canvasSize = 100;
 		
