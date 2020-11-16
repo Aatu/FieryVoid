@@ -208,7 +208,7 @@
         public $name = "PacketTorpedo";
         public $displayName = "Packet Torpedo";
         public $iconPath = "packetTorpedo.png";
-        public $range = 0; //unlimited range, but suffers range penalty
+        public $range = 50; 
         public $loadingtime = 2;
 	public $specialRangeCalculation = true; //to inform front end that it should use weapon-specific range penalty calculation - such a method should be present in .js!
         
@@ -246,8 +246,7 @@
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= "Launch and distance range is unlimited.";
-		$this->data["Special"] .= "<br>This weapon suffers range penalty (like direct fire weapons do), but only after first 10 hexes of distance.";
+		$this->data["Special"] .= "This weapon suffers range penalty (like direct fire weapons do), but only after first 10 hexes of distance.";
 		//also, target is hidden by the tabletop - but this won't be implemented in FV
 	}
         
