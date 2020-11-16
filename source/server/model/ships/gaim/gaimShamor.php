@@ -7,7 +7,7 @@ class gaimShamor extends BaseShip{
 		$this->pointCost = 750;
 		$this->faction = 'Gaim';
 		$this->phpclass = "gaimShamor";
-		$this->imagePath = "img/ships/gaimShamor.png";
+		$this->imagePath = "img/ships/GaimShamor.png";
 		$this->shipClass = "Shamor Battle Scout";
 		$this->shipSizeClass = 3;
 			$this->limited = 33;

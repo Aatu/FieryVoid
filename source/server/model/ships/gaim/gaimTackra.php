@@ -7,7 +7,7 @@ class gaimTackra extends MediumShip{
 		$this->pointCost = 350;
 		$this->faction = "Gaim";
 		$this->phpclass = "gaimTackra";
-		$this->imagePath = "img/ships/gaimTackra.png";
+		$this->imagePath = "img/ships/GaimTackra.png";
 		$this->shipClass = "Tackra Escort Cutter";
 		$this->canvasSize = 100;
         $this->isd = 2246;
