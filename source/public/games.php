@@ -63,6 +63,7 @@ if (isset($_SESSION["user"])) {
 		---------- <b>LATEST NEWS - November 2020</b> ----------	
 	    <br><b><u>The Gaim have arrived</u></b> – what we have here is a new Big4-level deep faction, able to duke it out with the best! (courtesy of Geoffrey and Douglas) 
 	    <br><b>Cancel all moves</b> – R-click on cancel move icon now cancels ALL moves for a given unit (so You can avoid backclicking for every step of speed-12 fighter that's jinking and pivoting ;) )
+  	    <br><b>More Gaim!</b> – reinforcements have arrived (courtesy of Geoffrey and Douglas). Also, Packet Torpedo was fixed (its range is limited after all!).
   
 	    
         <br><br>
