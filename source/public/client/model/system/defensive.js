@@ -172,3 +172,9 @@ FtrShield.prototype.getDefensiveHitChangeMod = function(target, shooter, weapon)
 {
     return shipManager.systems.getOutput(target, this);
 }
+
+var HeavyInterceptorBattery = function HeavyInterceptorBattery(json, ship) {
+    InterceptorMkI.call(this, json, ship);
+};
+HeavyInterceptorBattery.prototype = Object.create(InterceptorMkI.prototype);
+HeavyInterceptorBattery.prototype.constructor = HeavyInterceptorBattery;
