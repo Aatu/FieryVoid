@@ -7,7 +7,7 @@ class gaimSuma extends MediumShip{
 		$this->pointCost = 380;
 		$this->faction = "Gaim";
         $this->phpclass = "gaimSuma";
-        $this->imagePath = "img/ships/gaimSuma.png";
+        $this->imagePath = "img/ships/GaimSuma.png";
         $this->shipClass = "Suma Laser Cutter";
 			$this->limited = 10;
 

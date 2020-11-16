@@ -7,7 +7,7 @@ class gaimKruppas extends HeavyCombatVessel{
         $this->pointCost = 500;
         $this->faction = "Gaim";
         $this->phpclass = "gaimKruppas";
-        $this->imagePath = "img/ships/gaimKruppas.png";
+        $this->imagePath = "img/ships/GaimKruppas.png";
         $this->shipClass = "Kruppas Gunship";
 	    $this->isd = 2250;
         
