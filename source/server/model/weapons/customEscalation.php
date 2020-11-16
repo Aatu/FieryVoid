@@ -220,7 +220,7 @@ class EWParticleLance extends Raking{
         public $loadingtime = 1;
         public $priority = 4;
 
-        public $rangePenalty = 0.5;
+        public $rangePenalty = 2;
         public $fireControl = array(5, 2, 2); // fighters, <mediums, <capitals
 
         public $damageType = "Standard"; 
