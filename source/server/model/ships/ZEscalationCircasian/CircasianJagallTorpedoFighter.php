@@ -18,7 +18,7 @@ class CircasianJagallTorpedoFighter extends FighterFlight{
         
         $this->forwardDefense = 7;
         $this->sideDefense = 7;
-        $this->freethrust = 6;
+        $this->freethrust = 8;
         $this->offensivebonus = 4;
         $this->jinkinglimit = 8;
         $this->turncost = 0.33;

@@ -18,7 +18,8 @@ class apollostrike extends BaseShip{
 		$this->customFighter = array("Thunderbolt"=>6);        
         
   	    $this->isd = 2264;
-	    $this->notes = 'Thunderbolt capable.';  	    
+	    $this->notes = 'Thunderbolt capable.'; 
+	    $this->notes .= '<br> ACTA variant';	    
 
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
