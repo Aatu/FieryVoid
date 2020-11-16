@@ -1116,7 +1116,7 @@ class NexusChaffLauncher extends Weapon{
         }
 
         public function getDamage($fireOrder){ return Dice::d(10, 2)+6;   }
-        public function setMinDamage(){     $this->minDamage = 9 ;      }
+        public function setMinDamage(){     $this->minDamage = 8 ;      }
         public function setMaxDamage(){     $this->maxDamage = 26 ;      }
     }// endof NexusParticleAgitator 
 
