@@ -8,6 +8,8 @@ class gaimRafaPulse extends LCV{
         $this->faction = "Gaim";
 	$this->phpclass = "gaimRafaPulse";
 	$this->shipClass = "Rafa Gunboat (Pulse)";
+        $this->variantOf = "Rafa Gunboat (Scattergun)";		
+		$this->occurence = "common";	
 	$this->imagePath = "img/ships/GaimRafa.png";
 	$this->canvasSize = 75;
 

@@ -8,6 +8,8 @@ class gaimRafaTorpedo extends LCV{
         $this->faction = "Gaim";
 	$this->phpclass = "gaimRafaTorpedo";
 	$this->shipClass = "Rafa Gunboat (Torpedo)";
+        $this->variantOf = "Rafa Gunboat (Scattergun)";		
+		$this->occurence = "common";
 	$this->imagePath = "img/ships/GaimRafa.png";
 	$this->canvasSize = 75;
 
