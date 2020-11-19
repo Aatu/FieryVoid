@@ -102,7 +102,7 @@ class ErlorraEarlyPods extends BaseShip{
         		4=> array(
         				6 => "Thruster",
         				8 => "Twin Array",
-        				12 => "Cargo Bay",
+        				11 => "Cargo Bay",
         				18 => "Structure",
         				20 => "Primary",
         		),
