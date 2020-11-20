@@ -51,12 +51,12 @@ class ErlorraEarlyPods extends BaseShip{
         $this->addLeftSystem(new ScatterGun(3, 8, 3, 180, 360));
   
         $this->addRightSystem(new Thruster(4, 13, 0, 4, 4));
-        $this->addRightSystem(new CargoBay(2, 20));
-        $this->addRightSystem(new CargoBay(2, 20));
-        $this->addRightSystem(new CargoBay(2, 20));
-        $this->addRightSystem(new CargoBay(2, 20));
-        $this->addRightSystem(new CargoBay(2, 20));
-        $this->addRightSystem(new TwinArray(2, 6, 2, 90, 180));
+        $this->addRightSystem(new CargoBay(5, 20));
+        $this->addRightSystem(new CargoBay(5, 20));
+        $this->addRightSystem(new CargoBay(5, 20));
+        $this->addRightSystem(new CargoBay(5, 20));
+        $this->addRightSystem(new CargoBay(5, 20));
+        $this->addRightSystem(new TwinArray(2, 6, 2, 0, 180));
         
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

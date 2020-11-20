@@ -8,7 +8,7 @@ class gaimIttakaShuttle extends FighterFlight{
         $this->faction = "Gaim";
         $this->phpclass = "gaimIttakaShuttle";
         $this->shipClass = "It'Taka Assault Shuttles";
-        $this->imagePath = "img/ships/gaimIttaka.png";
+        $this->imagePath = "img/ships/GaimIttaka.png";
 		
         $this->isd = 2251;
         
@@ -38,8 +38,8 @@ class gaimIttakaShuttle extends FighterFlight{
             $armour = array(2, 2, 2, 2);
             $fighter = new Fighter("giamIttakaShuttle", $armour, 12, $this->id);
             $fighter->displayName = "It'Taka";
-            $fighter->imagePath = "img/ships/gaimIttaka.png";
-            $fighter->iconPath = "img/ships/gaimIttaka_large.png";
+            $fighter->imagePath = "img/ships/GaimIttaka.png";
+            $fighter->iconPath = "img/ships/GaimIttaka_large.png";
 
 			$gun = new LightParticleBeam(330, 30, 3, 1);
 			$gun->displayName = "Light Particle Beam";

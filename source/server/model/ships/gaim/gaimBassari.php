@@ -7,7 +7,7 @@ class gaimBassari extends BaseShip{
 		$this->pointCost = 650;
 		$this->faction = 'Gaim';
 		$this->phpclass = "gaimBassari";
-		$this->imagePath = "img/ships/gaimBassari.png";
+		$this->imagePath = "img/ships/GaimBassari.png";
 		$this->shipClass = "Bassari Heavy Cruiser";
 		$this->shipSizeClass = 3;
 		$this->fighters = array("normal"=>12);
