@@ -10,7 +10,7 @@ class TorataZFtrTralka extends FighterFlight
 		$this->faction = "Torata";
 		$this->phpclass = "TorataZFtrTralka";
 		$this->shipClass = "Tralka Medium Fighters";
-		$this->imagePath = "img/ships/TorataTralka.png";
+		$this->imagePath = "img/ships/TorataTuka.png";
 		$this->variantOf = "Tuka Medium Fighters";
 		$this->occurence = "rare";
 		
@@ -38,7 +38,7 @@ class TorataZFtrTralka extends FighterFlight
 			$armour = array(2, 2, 2, 2);
 			$fighter = new Fighter("TorataZFtrTralka", $armour, 9, $this->id);
 			$fighter->displayName = "Tralka";
-			$fighter->imagePath = "img/ships/TorataTralka.png";
+			$fighter->imagePath = "img/ships/TorataTuka.png";
 			$fighter->iconPath = "img/ships/TorataTuka_large.png";
 
 
