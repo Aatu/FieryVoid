@@ -4,7 +4,7 @@ class BrixadiiAttackFrigate2108 extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 295;
+        $this->pointCost = 310;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiAttackFrigate2108";
         $this->imagePath = "img/ships/Nexus/BrixadiiPursuitFrigate.png";

@@ -30,9 +30,9 @@ class NexusKineticBoxLauncher extends Weapon{
 	public $noOverkill = true; //Matter weapon
 	public $priority = 9; //Matter weapon
 	    
-	public $firingMode = 'Kinetic'; //firing mode - just a name essentially
+	public $firingMode = 'Ballistic'; //firing mode - just a name essentially
 	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+    	public $weaponClass = "Matter"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
 	 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -101,9 +101,9 @@ class NexusAdvKineticBoxLauncher extends Weapon{
 	public $noOverkill = true; //Matter weapon
 	public $priority = 9; //Matter weapon
 	    
-	public $firingMode = 'Kinetic'; //firing mode - just a name essentially
+	public $firingMode = 'Ballistic'; //firing mode - just a name essentially
 	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+    	public $weaponClass = "Matter"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
 	 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
