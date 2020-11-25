@@ -14,7 +14,7 @@ class MishakurB extends BaseShip{
         $this->variantOf = "Mishakur Dreadnought";        
         $this->limited = 33;
         
-        $this->fighters = array("normal"=>48);
+        $this->fighters = array("heavy"=>72); //12 in main hangar, 12 in aft, 24 in each side hangar
 
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
