@@ -144,16 +144,16 @@ Shadow Omega - official Shadow Omega conversion by AoG is marked as unofficial b
 GAIM
 Gaim are minor League race, but their ships are very good and their diversity is excellent - making them (in game, tactically ) in all respects equal to Big4 factions.
 Notable technologies:
-	Bulkheads - defensive system that can take damage first (after armor) when system is hit, which greatly increases resilience of Gaim systems. Bulkhead can protect systems on the same section, and structure it's mounted to (even if it's technically on different section, like on MCV). Note that PRIMARY systems are not protected by bulkheads. In FV decision whether to use bulkhead will be made automatically - Bulkheads will be used if they can prevent system destruction, when structure would be destroyed by the hit or when integrity of relevant Structure block is under 25%. 
-	Particle Concentrator - multiple Concentrator firing from the same hex may combine into one more powerful (and more accurate!) shot, a bit similar to what Ipsha Surge Cannons do. Its hit chance is average of all weapons concentrating (as they may be fitted on different ships, with different EW, their chances may differ).
+	Bulkheads - defensive system that can take damage first (after armor) when system is hit, which greatly increases resilience of Gaim systems. Bulkhead can protect systems on the same section, and structure it's mounted to (even if it's technically on different section, like on MCV). Note that PRIMARY systems are not protected by bulkheads. In FV decision whether to use bulkhead will be made automatically - Bulkheads will be used if they can prevent system destruction, when structure would be destroyed by the hit or when integrity of relevant Structure block remaining boxes fall too low. 
+	Particle Concentrator - multiple Concentrators firing from the same hex may combine into one more powerful (and more accurate!) shot, a bit similar to what Ipsha Surge Cannons do. Its hit chance is average of all weapons concentrating (as they may be fitted on different ships, with different EW, their chances may differ).
 		In tabletop it's more or less the same, except weapons within 1 hex can still participate and lock-on is denied if any participating weapon lacks lock-on.
 	Packet Torpedo - ballistic weapon that has (besides range) a range penalty, just like direct fire weapons - with a twist that it kicks in only after first 10 hexes of travel.
-		In tabletop target of this weapon is not known to opponent until after firing declaration (not implemented in FV).
+		In tabletop target of this weapon is not known to opponent until impact (not implemented in FV).
 	Scattergun - light weapon that fires random number of shots. When firing defensively (also random number of shots) those shots must be directed at separate threats.
 
 
 HURR
-No very specific rules/technologies.
+Low-tech faction. No very specific rules/technologies.
 
 
 IPSHA
