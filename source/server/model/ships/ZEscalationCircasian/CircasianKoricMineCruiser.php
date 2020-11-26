@@ -53,7 +53,7 @@ class CircasianKoricMineCruiser extends BaseShip{
 
 		$this->addRightSystem(new EWPlasmaMine(2, 7, 3, 300, 60));
 		$this->addRightSystem(new EWPlasmaMine(2, 7, 3, 0, 120));
-        $this->addRightSystem(new Thruster(2, 15, 0, 4, 3));
+        $this->addRightSystem(new Thruster(2, 15, 0, 4, 4));
 		$this->addRightSystem(new CargoBay(1, 30));
 
         

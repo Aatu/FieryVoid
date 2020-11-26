@@ -129,3 +129,15 @@ var EWPlasmaMine = function  EWPlasmaMine(json, ship) {
 };
 EWPlasmaMine.prototype = Object.create(Weapon.prototype);
 EWPlasmaMine.prototype.constructor =  EWPlasmaMine;
+
+var EWRangedRocketLauncher = function  EWRangedRocketLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWRangedRocketLauncher.prototype = Object.create(Weapon.prototype);
+EWRangedRocketLauncher.prototype.constructor =  EWRangedRocketLauncher;
+
+var EWRangedDualRocketLauncher = function  EWRangedDualRocketLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWRangedDualRocketLauncher.prototype = Object.create(Weapon.prototype);
+EWRangedDualRocketLauncher.prototype.constructor =  EWRangedDualRocketLauncher;
