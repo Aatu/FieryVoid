@@ -775,10 +775,7 @@ class EWRocketLauncher extends Weapon{
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile
         public $range = 15;
-        public $distanceRange = 30;
-        public $ammunition = 40; //limited number of shots
 		public $guns = 1;
-	    
         
         public $loadingtime = 1; // 1 turn
         public $rangePenalty = 0;
@@ -790,7 +787,6 @@ class EWRocketLauncher extends Weapon{
 	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
 	 
-
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ) $maxhealth = 4;
@@ -798,37 +794,69 @@ class EWRocketLauncher extends Weapon{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        public function stripForJson() {
-            $strippedSystem = parent::stripForJson();    
-            $strippedSystem->ammunition = $this->ammunition;           
-            return $strippedSystem;
-        }
-        
-	    
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["Ammunition"] = $this->ammunition;
-			$this->data["Special"] = '<br>Benefits from offensive EW.';			
+			$this->data["Special"] = 'Benefits from offensive EW.';			
         }
         
+        public function getDamage($fireOrder){ 
+		
+			return Dice::d(6, 2)+2;   
+		}
+
+        public function setMinDamage(){     $this->minDamage = 4;      }
+        public function setMaxDamage(){     $this->maxDamage = 14;      }
+}//endof EWRocketLauncher
+
+
+
+class EWRangedRocketLauncher extends Weapon{
+        public $name = "EWRangedRocketLauncher";
+        public $displayName = "Ranged Rocket Launcher";
+		    public $iconPath = "EWRocketLauncher.png";
+        public $animation = "trail";
+        public $trailColor = array(11, 224, 255);
+        public $animationColor = array(50, 50, 50);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 16;
+        public $animationWidth = 4;
+        public $trailLength = 100;    
+
+        public $useOEW = true; //torpedo
+        public $ballistic = true; //missile
+        public $range = 30;
+		public $guns = 1;
+        
+        public $loadingtime = 1; // 1 turn
+        public $rangePenalty = 0;
+        public $fireControl = array(1, 1, 1); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+	    
+	public $priority = 4; //Standard weapon
+	    
+	public $firingMode = 'Ballistic'; //firing mode - just a name essentially
+	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+	 
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Benefits from offensive EW.';			
+        }
 
         public function getDamage($fireOrder){ 
 		
 			return Dice::d(6, 2)+2;   
 		}
 
-        public function setAmmo($firingMode, $amount){
-            $this->ammunition = $amount;
-        }
-       public function fire($gamedata, $fireOrder){ //note ammo usage
-            parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
-        }
-    
         public function setMinDamage(){     $this->minDamage = 4;      }
         public function setMaxDamage(){     $this->maxDamage = 14;      }
-}//endof EWRocketLauncher
+}//endof EWRangedRocketLauncher
 
 
 class EWDualRocketLauncher extends Weapon{
@@ -846,10 +874,7 @@ class EWDualRocketLauncher extends Weapon{
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile
         public $range = 15;
-        public $distanceRange = 30;
-        public $ammunition = 40; //limited number of shots
 		public $guns = 2;
-	    
         
         public $loadingtime = 1; // 1 turn
         public $rangePenalty = 0;
@@ -861,7 +886,6 @@ class EWDualRocketLauncher extends Weapon{
 	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
 	 
-
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ) $maxhealth = 6;
@@ -869,35 +893,67 @@ class EWDualRocketLauncher extends Weapon{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        public function stripForJson() {
-            $strippedSystem = parent::stripForJson();    
-            $strippedSystem->ammunition = $this->ammunition;           
-            return $strippedSystem;
-        }
-        
-	    
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["Ammunition"] = $this->ammunition;
-			$this->data["Special"] = '<br>Benefits from offensive EW.';			
+			$this->data["Special"] = 'Benefits from offensive EW.';			
         }
 
         public function getDamage($fireOrder){ 
 			return Dice::d(6, 2)+2;   
 		}
 
-        public function setAmmo($firingMode, $amount){
-            $this->ammunition = $amount;
-        }
-       public function fire($gamedata, $fireOrder){ //note ammo usage
-            parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
-        }
-    
         public function setMinDamage(){     $this->minDamage = 4;      }
         public function setMaxDamage(){     $this->maxDamage = 14;      }
 }//endof EWDualRocketLauncher
+
+
+
+class EWRangedDualRocketLauncher extends Weapon{
+        public $name = "EWRangedDualRocketLauncher";
+        public $displayName = "Ranged Dual Rocket Launcher";
+		    public $iconPath = "EWDualRocketLauncher.png";
+        public $animation = "trail";
+        public $trailColor = array(11, 224, 255);
+        public $animationColor = array(50, 50, 50);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 16;
+        public $animationWidth = 4;
+        public $trailLength = 100;    
+
+        public $useOEW = true; //torpedo
+        public $ballistic = true; //missile
+        public $range = 30;
+		public $guns = 2;
+        
+        public $loadingtime = 1; // 1 turn
+        public $rangePenalty = 0;
+        public $fireControl = array(1, 1, 1); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+	    
+	public $priority = 4; //Standard weapon
+	    
+	public $firingMode = 'Ballistic'; //firing mode - just a name essentially
+	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+	 
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	    
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Benefits from offensive EW.';			
+        }
+
+        public function getDamage($fireOrder){ 
+			return Dice::d(6, 2)+2;   
+		}
+
+        public function setMinDamage(){     $this->minDamage = 4;      }
+        public function setMaxDamage(){     $this->maxDamage = 14;      }
+}//endof EWRangedDualRocketLauncher
 
 
 class EWHeavyRocketLauncher extends Weapon{
@@ -915,8 +971,6 @@ class EWHeavyRocketLauncher extends Weapon{
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile
         public $range = 25;
-        public $distanceRange = 35;
-        public $ammunition = 15; //limited number of shots
         
         public $loadingtime = 2; // 1 turn
         public $rangePenalty = 0;
@@ -936,31 +990,15 @@ class EWHeavyRocketLauncher extends Weapon{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        public function stripForJson() {
-            $strippedSystem = parent::stripForJson();    
-            $strippedSystem->ammunition = $this->ammunition;           
-            return $strippedSystem;
-        }
-	    
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["Ammunition"] = $this->ammunition;
-			$this->data["Special"] = '<br>Benefits from offensive EW.';			
+			$this->data["Special"] = 'Benefits from offensive EW.';			
         }
 
         public function getDamage($fireOrder){ 
 			return Dice::d(10, 2)+4;   
 		}
 
-        public function setAmmo($firingMode, $amount){
-            $this->ammunition = $amount;
-        }
-       public function fire($gamedata, $fireOrder){ //note ammo usage
-            parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
-        }
-    
         public function setMinDamage(){     $this->minDamage = 6;      }
         public function setMaxDamage(){     $this->maxDamage = 24;      }
 }//endof EWHeavyRocketLauncher
