@@ -1121,6 +1121,8 @@ spl_autoload_register(
 				'ewomissilerack' => '/server/model/weapons/customEscalation.php',
 				'ewfightertorpedolauncher' => '/server/model/weapons/customEscalation.php',
 				'ewlightplasmamine' => '/server/model/weapons/customEscalation.php',
+				'ewrangedrocketlauncher' => '/server/model/weapons/customEscalation.php',
+				'ewrangeddualrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewplasmamine' => '/server/model/weapons/customEscalation.php',
 			//EW gravitic weapons
 				'ewgravitictractingrod' => '/server/model/weapons/customEscalation.php',
@@ -1182,6 +1184,7 @@ spl_autoload_register(
 				//Escalation Wars - Circasian
 				'circasianaschartrooptransport' => '/server/model/ships/ZEscalationCircasian/CircasianAscharTroopTransport.php',
 				'circasiancairn' => '/server/model/ships/ZEscalationCircasian/CircasianCairn.php',
+				'circasianelaric' => '/server/model/ships/ZEscalationCircasian/CircasianElaric.php',
 				'circasianfeilah' => '/server/model/ships/ZEscalationCircasian/CircasianFeilah.php',
 				'circasiangallahcarrier' => '/server/model/ships/ZEscalationCircasian/CircasianGallahCarrier.php',
 				'circasiangallahtransport' => '/server/model/ships/ZEscalationCircasian/CircasianGallahTransport.php',
@@ -1211,6 +1214,7 @@ spl_autoload_register(
 				'circasianrotarra' => '/server/model/ships/ZEscalationCircasian/CircasianRotarra.php',
 				'circasianrehkafighter' => '/server/model/ships/ZEscalationCircasian/CircasianRehkaFighter.php',
 				'circasianshenna' => '/server/model/ships/ZEscalationCircasian/CircasianShenna.php',
+				'circasiansularascoutcarrier' => '/server/model/ships/ZEscalationCircasian/CircasianSularaScoutCarrier.php',
 				'circasianthracejumpcruiser' => '/server/model/ships/ZEscalationCircasian/CircasianThraceJumpcruiser.php',
 				'circasiantoltara' => '/server/model/ships/ZEscalationCircasian/CircasianToltara.php',
 				'circasiantormin' => '/server/model/ships/ZEscalationCircasian/CircasianTormin.php',
