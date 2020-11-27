@@ -1167,10 +1167,10 @@ class NexusChaffLauncher extends Weapon{
 	    
         public $animation = "beam";
         public $animationColor = array(255, 250, 230);
-        public $animationExplosionScale = 0.30;
+        public $animationExplosionScale = 0.15;
         public $projectilespeed = 15;
         public $animationWidth = 3;
-        public $trailLength = 10;
+        public $trailLength = 3;
 
         public $intercept = 2;
         public $loadingtime = 1;
