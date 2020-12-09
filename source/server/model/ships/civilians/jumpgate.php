@@ -12,6 +12,7 @@ class Jumpgate  extends BaseShip{
         $this->shipClass = "Fixed Jump Gate";
         $this->shipSizeClass = 3;
         $this->Enormous = true;
+		$this->iniativebonus = -200; //no voluntary movement anyway
 	            
 		$this->base = true;
 		$this->smallBase = true;
@@ -26,8 +27,6 @@ class Jumpgate  extends BaseShip{
         $this->rollcost = 99;
         $this->pivotcost = 99;	
 	    
-	$this->iniativebonus = -30 *5; //completely immobile object - minimal Initiative, essentially always goes first
-        
          
         $this->addPrimarySystem(new Reactor(6, 50, 0, 0));
         $this->addPrimarySystem(new CnC(6, 8, 0, 0));
