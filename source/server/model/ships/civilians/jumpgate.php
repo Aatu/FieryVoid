@@ -25,6 +25,8 @@ class Jumpgate  extends BaseShip{
         $this->accelcost = 99;
         $this->rollcost = 99;
         $this->pivotcost = 99;	
+	    
+	$this->iniativebonus = -30 *5; //completely immobile object - minimal Initiative, essentially always goes first
         
          
         $this->addPrimarySystem(new Reactor(6, 50, 0, 0));
