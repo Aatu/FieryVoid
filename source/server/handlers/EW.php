@@ -50,13 +50,12 @@
 					$output += $system->getOutput($turn);
 				}
 			}
-            $CnC = $ship->getSystemByName("CnC");
+            		$CnC = $ship->getSystemByName("CnC");
 			if ($CnC && $CnC->hasCritical("RestrictedEW"))
-                $output -= 2;
+				$output -= 2*$CnC->hasCritical("RestrictedEW");	
 			
-            
-            if ($output < 0)
-                $output = 0;
+			    if ($output < 0)
+				$output = 0;
             
 			return $output;
 				

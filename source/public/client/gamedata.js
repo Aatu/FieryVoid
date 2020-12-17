@@ -191,7 +191,9 @@ window.gamedata = {
 
     isMyOrTeamOneShip: function isMyOrTeamOneShip(ship) {
         if (gamedata.isPlayerInGame()) {
-            return gamedata.isMyShip(ship);
+            //return gamedata.isMyShip(ship);
+			//properly mark allies here:
+			return ship.team == gamedata.getPlayerTeam();
         } else {
             return ship.team === 1;
         }

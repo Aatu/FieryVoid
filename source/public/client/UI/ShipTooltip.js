@@ -143,11 +143,25 @@ window.ShipTooltip = function () {
         this.addEntryElement('Rolled', shipManager.movement.isRolled(ship));
 	*/
 	var toDisplay = '';
+	var rollPivotModifier = 0;
 	if (ship.flight === true && jinking > 0) toDisplay += 'Evasion: -' + jinking + ' to hit; ';
 	if (shipManager.movement.isPivoting(ship) !== 'no') toDisplay += 'Pivoting; ';
-	if (shipManager.movement.isRolling(ship)) toDisplay += 'Rolling; ';
+	if (shipManager.movement.isRolling(ship)){
+		toDisplay += 'Rolling; ';
+		rollPivotModifier -= 15;
+	}
 	if (shipManager.movement.isRolled(ship)) toDisplay += 'Rolled; ';
 	if (shipManager.movement.isHalfPhased(ship)) toDisplay += 'Half-Phased; ';
+	if (ship.flight === true){		
+		if (shipManager.movement.hasCombatPivoted(ship)) rollPivotModifier -= 5;
+	}else if (ship.osat){
+		if (shipManager.movement.hasTurned(ship)) rollPivotModifier -= 5;
+	}else{
+		if (shipManager.movement.hasPivotedForShooting(ship)) rollPivotModifier -= 15;
+	}
+	if (rollPivotModifier!=0) toDisplay += 'Firing modifier: ' + rollPivotModifier; //display firing modifier from roll/pivot/combat pivot
+	
+	
 	if (toDisplay !='') toDisplay = '<b><i>'+toDisplay+'</i></b>';
 	this.addEntryElement(toDisplay, toDisplay != '');
 	    

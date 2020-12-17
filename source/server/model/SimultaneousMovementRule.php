@@ -35,7 +35,7 @@ class SimultaneousMovementRule implements JsonSerializable {
             $newInitiative = 0;
 
             forEach ($this->categories as $category) {
-                if ($iniative > $category) {
+                if (($iniative+10) > $category) { //Ini+10 instead of just Ini - to move more units to brackets 5/6 and make Ini penalties for Cap ships more important
                     $newInitiative = $category;
                     break;
                 } 
