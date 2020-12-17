@@ -129,6 +129,7 @@ spl_autoload_register(
                 'civilianfreighter' => '/server/model/ships/civilians/civilianFreighter.php',
                 'civiliantanker' => '/server/model/ships/civilians/civilianTanker.php',
                 'cnc' => '/server/model/systems/baseSystems.php',
+                'protectedcnc' => '/server/model/systems/baseSystems.php',
                 'cobra' => '/server/model/ships/raiders/cobra.php',
                 'adjudicator' => '/server/model/ships/streib/adjudicator.php',
                 'collector' => '/server/model/ships/streib/collector.php',
@@ -836,7 +837,7 @@ spl_autoload_register(
                 'strikehawk' => '/server/model/ships/drazi/strikehawk.php',
                 'structure' => '/server/model/systems/baseSystems.php',
                 'stunbeam' => '/server/model/weapons/specialWeapons.php',
-                'subreactor' => '/server/model/systems/baseSystems.php',
+                //'subreactor' => '/server/model/systems/baseSystems.php', //obsoleted!
                 'sulust' => '/server/model/ships/centauri/sulust.php',
                 'sunhawk' => '/server/model/ships/drazi/sunhawk.php',
                 'superheavyfighter' => '/server/model/ships/FighterFlight.php',

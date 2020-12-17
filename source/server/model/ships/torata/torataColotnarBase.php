@@ -29,7 +29,7 @@ class TorataColotnarBase extends SmallStarBaseFourSections
 
 
 		$this->addPrimarySystem(new Reactor(5, 20, 0, 0));
-		$this->addPrimarySystem(new CnC(6, 32, 0, 0)); //originally 2 systems with structure 16, armor 5 each
+		$this->addPrimarySystem(new ProtectedCnC(6, 32, 0, 0)); //originally 2 systems with structure 16, armor 5 each
 		$this->addPrimarySystem(new Scanner(5, 20, 5, 7));
 		$this->addPrimarySystem(new Scanner(5, 20, 5, 7));
 		$this->addPrimarySystem(new Hangar(5, 4));
@@ -42,7 +42,7 @@ class TorataColotnarBase extends SmallStarBaseFourSections
 
 		$this->addFrontSystem(new Hangar(4, 12));
 		$this->addFrontSystem(new CargoBay(4, 30));
-		$this->addFrontSystem(new SubReactor(4, 25, 0, 0));
+		$this->addFrontSystem(new SubReactorUniversal(4, 25, 0, 0));
 		$this->addFrontSystem(new ParticleAccelerator(4, 8, 8, 270, 90));
 		$this->addFrontSystem(new ParticleAccelerator(4, 8, 8, 270, 90));
 		$this->addFrontSystem(new LaserAccelerator(4, 7, 6, 270, 90));
@@ -53,7 +53,7 @@ class TorataColotnarBase extends SmallStarBaseFourSections
 
 		$this->addAftSystem(new Hangar(4, 12));
 		$this->addAftSystem(new CargoBay(4, 30));
-		$this->addAftSystem(new SubReactor(4, 25, 0, 0));
+		$this->addAftSystem(new SubReactorUniversal(4, 25, 0, 0));
 		$this->addAftSystem(new ParticleAccelerator(4, 8, 8, 90, 270));
 		$this->addAftSystem(new ParticleAccelerator(4, 8, 8, 90, 270));
 		$this->addAftSystem(new LaserAccelerator(4, 7, 6, 90, 270));
@@ -64,7 +64,7 @@ class TorataColotnarBase extends SmallStarBaseFourSections
 
 		$this->addLeftSystem(new Hangar(4, 12));
 		$this->addLeftSystem(new CargoBay(4, 30));
-		$this->addLeftSystem(new SubReactor(4, 25, 0, 0));
+		$this->addLeftSystem(new SubReactorUniversal(4, 25, 0, 0));
 		$this->addLeftSystem(new ParticleAccelerator(4, 8, 8, 180, 0));
 		$this->addLeftSystem(new ParticleAccelerator(4, 8, 8, 180, 0));
 		$this->addLeftSystem(new LaserAccelerator(4, 7, 6, 180, 0));
@@ -75,7 +75,7 @@ class TorataColotnarBase extends SmallStarBaseFourSections
 				
 		$this->addRightSystem(new Hangar(4, 12));
 		$this->addRightSystem(new CargoBay(4, 30));
-		$this->addRightSystem(new SubReactor(4, 25, 0, 0));
+		$this->addRightSystem(new SubReactorUniversal(4, 25, 0, 0));
 		$this->addRightSystem(new ParticleAccelerator(4, 8, 8, 0, 180));
 		$this->addRightSystem(new ParticleAccelerator(4, 8, 8, 0, 180));
 		$this->addRightSystem(new LaserAccelerator(4, 7, 6, 0, 180));
@@ -108,7 +108,7 @@ class TorataColotnarBase extends SmallStarBaseFourSections
 				7 => "Pulse Accelerator",
 				8 => "Hangar",
 				10 => "Cargo Bay",
-				11 => "Reactor",
+				11 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -120,7 +120,7 @@ class TorataColotnarBase extends SmallStarBaseFourSections
 				7 => "Pulse Accelerator",
 				8 => "Hangar",
 				10 => "Cargo Bay",
-				11 => "Reactor",
+				11 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -132,7 +132,7 @@ class TorataColotnarBase extends SmallStarBaseFourSections
 				7 => "Pulse Accelerator",
 				8 => "Hangar",
 				10 => "Cargo Bay",
-				11 => "Reactor",
+				11 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -144,7 +144,7 @@ class TorataColotnarBase extends SmallStarBaseFourSections
 				7 => "Pulse Accelerator",
 				8 => "Hangar",
 				10 => "Cargo Bay",
-				11 => "Reactor",
+				11 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			),
