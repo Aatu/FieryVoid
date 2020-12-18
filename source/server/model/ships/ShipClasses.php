@@ -398,9 +398,9 @@ class BaseShip {
 		}
 		if(!$rammingExists){
 			//add ramming attack
-			//...let's add it to immobile structures as well! - it will be needed for auto-ramming and such...
+			//...let's add it to immobile structures as well! - it will be needed for Auto-ramming - but that's only for Enoormous units!
 			//if((!($this instanceof FighterFlight)) && (!($this->osat)) && (!$this->base) && (!$this->smallBase) ){
-			if(!($this instanceof FighterFlight))
+			if( ( (!($this instanceof FighterFlight)) && (!($this->osat)) && (!$this->base) && (!$this->smallBase) ) || $this->Enormous){
 				$newRamming = new RammingAttack(0, 0, 360, 0, 0);
 				if($this->osat || $this->base || $this->smallBase){ //block OSAT/base RammingAttack from being actively used by player
 					$newRamming->autoFireOnly = true;
