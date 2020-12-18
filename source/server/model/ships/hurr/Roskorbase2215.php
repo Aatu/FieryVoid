@@ -31,7 +31,7 @@ class Roskorbase2215 extends SmallStarBaseFourSections
 
 
 		$this->addPrimarySystem(new Reactor(5, 20, 0, 0));
-		$this->addPrimarySystem(new CnC(6, 36, 0, 0));
+		$this->addPrimarySystem(new ProtectedCnC(6, 36, 0, 0)); //3x 5/12
 		$this->addPrimarySystem(new Scanner(5, 16, 4, 5));
 		$this->addPrimarySystem(new Scanner(5, 16, 4, 5));
 		$this->addPrimarySystem(new Hangar(5, 2));
@@ -43,7 +43,7 @@ class Roskorbase2215 extends SmallStarBaseFourSections
 
 		$this->addFrontSystem(new Hangar(4, 12));
 		$this->addFrontSystem(new CargoBay(4, 24));
-		$this->addFrontSystem(new SubReactor(4, 20, 0, 0));
+		$this->addFrontSystem(new SubReactorUniversal(4, 20, 0, 0));
 		$this->addFrontSystem(new SoMissileRack(4, 6, 0, 270, 90, true));
 		$this->addFrontSystem(new SoMissileRack(4, 6, 0, 270, 90, true));
 		$this->addFrontSystem(new SoMissileRack(4, 6, 0, 270, 90, true));
@@ -54,7 +54,7 @@ class Roskorbase2215 extends SmallStarBaseFourSections
 
 		$this->addAftSystem(new Hangar(4, 12));
 		$this->addAftSystem(new CargoBay(4, 24));
-		$this->addAftSystem(new SubReactor(4, 20, 0, 0));
+		$this->addAftSystem(new SubReactorUniversal(4, 20, 0, 0));
 		$this->addAftSystem(new SoMissileRack(4, 6, 0, 90, 270, true));
 		$this->addAftSystem(new SoMissileRack(4, 6, 0, 90, 270, true));
 		$this->addAftSystem(new SoMissileRack(4, 6, 0, 90, 270, true));
@@ -65,7 +65,7 @@ class Roskorbase2215 extends SmallStarBaseFourSections
 
 		$this->addLeftSystem(new Hangar(4, 12));
 		$this->addLeftSystem(new CargoBay(4, 24));
-		$this->addLeftSystem(new SubReactor(4, 20, 0, 0));
+		$this->addLeftSystem(new SubReactorUniversal(4, 20, 0, 0));
 		$this->addLeftSystem(new SoMissileRack(4, 6, 0, 180, 360, true));
 		$this->addLeftSystem(new SoMissileRack(4, 6, 0, 180, 360, true));
 		$this->addLeftSystem(new SoMissileRack(4, 6, 0, 180, 360, true));
@@ -76,7 +76,7 @@ class Roskorbase2215 extends SmallStarBaseFourSections
 				
 		$this->addRightSystem(new Hangar(4, 12));
 		$this->addRightSystem(new CargoBay(4, 24));
-		$this->addRightSystem(new SubReactor(4, 20, 0, 0));
+		$this->addRightSystem(new SubReactorUniversal(4, 20, 0, 0));
 		$this->addRightSystem(new SoMissileRack(4, 6, 0, 0, 180, true));
 		$this->addRightSystem(new SoMissileRack(4, 6, 0, 0, 180, true));
 		$this->addRightSystem(new SoMissileRack(4, 6, 0, 0, 180, true));
@@ -106,7 +106,7 @@ class Roskorbase2215 extends SmallStarBaseFourSections
 				7 => "Class-SO Missile Rack",
 				8 => "Hangar",
 				10 => "Cargo Bay",
-				11 => "Reactor",
+				11 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -115,7 +115,7 @@ class Roskorbase2215 extends SmallStarBaseFourSections
 				7 => "Class-SO Missile Rack",
 				8 => "Hangar",
 				10 => "Cargo Bay",
-				11 => "Reactor",
+				11 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -124,7 +124,7 @@ class Roskorbase2215 extends SmallStarBaseFourSections
 				7 => "Class-SO Missile Rack",
 				8 => "Hangar",
 				10 => "Cargo Bay",
-				11 => "Reactor",
+				11 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -133,7 +133,7 @@ class Roskorbase2215 extends SmallStarBaseFourSections
 				7 => "Class-SO Missile Rack",
 				8 => "Hangar",
 				10 => "Cargo Bay",
-				11 => "Reactor",
+				11 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			),

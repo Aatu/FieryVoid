@@ -37,8 +37,8 @@ class Norgath extends StarBaseSixSections{
 
 
 		$this->addPrimarySystem(new Reactor(8, 25, 0, 0));
-		$this->addPrimarySystem(new CnC(8, 36, 0, 0)); 
-		$this->addPrimarySystem(new CnC(8, 36, 0, 0)); 
+		$this->addPrimarySystem(new ProtectedCnC(9, 72, 0, 0)); //2x 8/36
+		//$this->addPrimarySystem(new CnC(8, 36, 0, 0)); 
 		$this->addPrimarySystem(new Scanner(8, 36, 4, 12));
 		$this->addPrimarySystem(new Scanner(8, 36, 4, 12));
 		$this->addPrimarySystem(new Hangar(8, 6));
@@ -63,7 +63,7 @@ class Norgath extends StarBaseSixSections{
 				new FusionCannon(6, 8, 1, $min, $max),
 				new FusionCannon(6, 8, 1, $min, $max),
 				new Hangar(6, 6, 6),
-				new SubReactor(6, 30, 0, 0),
+				new SubReactorUniversal(6, 30, 0, 0),
 				new Structure(6, 180)
 			);
 
@@ -76,7 +76,7 @@ class Norgath extends StarBaseSixSections{
 				5 => "Fusion Cannon",
 				6 => "Hangar",
 				8 => "Cargo",
-				9 => "Reactor",
+				9 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			);

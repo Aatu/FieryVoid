@@ -39,7 +39,7 @@ class Kraken extends StarBaseSixSections{
 		$this->addPrimarySystem(new Hangar(7, 14, 12));
 		$this->addPrimarySystem(new Hangar(7, 14, 12));
 		$this->addPrimarySystem(new Hangar(7, 14, 12));
-		$this->addPrimarySystem(new CnC(8, 60, 0, 0)); //2x 7/30 C&C combined into one much more powerful - but still making it much easier to critically damage
+		$this->addPrimarySystem(new ProtectedCnC(8, 60, 0, 0)); //originally 2 systems with sructure 30, armor 7 each
 		//$this->addPrimarySystem(new CnC(7, 30, 0, 0)); 
 		$this->addPrimarySystem(new Scanner(7, 32, 5, 10));
 		$this->addPrimarySystem(new Scanner(7, 32, 5, 10));
@@ -67,7 +67,7 @@ class Kraken extends StarBaseSixSections{
 				new TwinArray(5, 6, 2, $min, $max),
 				new TwinArray(5, 6, 2, $min, $max),
 				new CargoBay(5, 30),
-				new SubReactor(5, 30, 0, 0),
+				new SubReactorUniversal(5, 30, 0, 0),
 				new Structure(5, 115)
 			);
 
@@ -78,7 +78,7 @@ class Kraken extends StarBaseSixSections{
 				5 => "Matter Cannon",
 				6 => "Battle Laser",
 				8 => "Cargo Bay",
-				9 => "Reactor",
+				9 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			);
