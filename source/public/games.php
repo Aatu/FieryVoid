@@ -60,10 +60,14 @@ if (isset($_SESSION["user"])) {
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
         -->
-		---------- <b>LATEST NEWS - November 2020</b> ----------	
-	    <br><b><u>The Gaim have arrived</u></b> – what we have here is a new Big4-level deep faction, able to duke it out with the best! (courtesy of Geoffrey and Douglas) 
-	    <br><b>Cancel all moves</b> – R-click on cancel move icon now cancels ALL moves for a given unit (so You can avoid backclicking for every step of speed-12 fighter that's jinking and pivoting ;) )
-  	    <br><b>More Gaim!</b> – reinforcements have arrived (courtesy of Geoffrey and Douglas). Also, Packet Torpedo was fixed (its range is limited after all!).
+		---------- <b>LATEST NEWS - December 2020</b> ----------	
+	    <br><b><u>Simultaneous movement change</u></b> – I have slightly moved Ini brackets - which should result in more units in higher brackets (especially 6th!) and less in bracket 1 (this would make Ini penalties more effective, too - especially for capital ships)  
+	    <br><b>Restricted EW crit fix</b> – now -2 penalty does stack
+  	    <br><b>Abbai Motenaion fixed</b> – now it can be deployed again
+  	    <br><b>Fighter ballistics fixed</b> - now OB is used correctly
+  	    <br><b>Onmouseover additional information</b> - firing penalty due to rolls/pivots/combat pivots is now explicitly listed onmouseover
+  	    <br><b>Multiplayer games</b> - allied units should be shown in friendly green and prevented from being fired upon
+	    <br><br><b>WARNING WARNING WARNING</b> - Soon (eg. this year ;) ) I plan to add Ramming Attack to all fighters that don't have it yet, and also to immobile constructs. This will break games that use them, so please try to avoid such units for a week or so when creating new games ;)
   
 	    
         <br><br>
