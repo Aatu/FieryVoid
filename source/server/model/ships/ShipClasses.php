@@ -398,13 +398,15 @@ class BaseShip {
 		}
 		if(!$rammingExists){
 			//add ramming attack
-			//check whether game id is safe (can be safely be deleted lin May 2018 or so)
-			///already safe enough, commenting out!
-			//if ((TacGamedata::$currentGameID >= TacGamedata::$safeGameID) || (TacGamedata::$currentGameID<1)){
-				if((!($this instanceof FighterFlight)) && (!($this->osat)) && (!$this->base) && (!$this->smallBase) ){
-					$this->addPrimarySystem(new RammingAttack(0, 0, 360, 0, 0));
+			//...let's add it to immobile structures as well! - it will be needed for auto-ramming and such...
+			//if((!($this instanceof FighterFlight)) && (!($this->osat)) && (!$this->base) && (!$this->smallBase) ){
+			if(!($this instanceof FighterFlight))
+				$newRamming = new RammingAttack(0, 0, 360, 0, 0);
+				if($this->osat || $this->base || $this->smallBase){ //block OSAT/base RammingAttack from being actively used by player
+					$newRamming->autoFireOnly = true;
 				}
-			//}
+				$this->addPrimarySystem($newRamming);
+			}
 		}
 
 			$this->notesFill(); //add miscellanous info to notes!
