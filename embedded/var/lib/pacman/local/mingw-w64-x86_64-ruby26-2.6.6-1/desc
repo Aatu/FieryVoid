@@ -1,0 +1,45 @@
+%NAME%
+mingw-w64-x86_64-ruby26
+
+%VERSION%
+2.6.6-1
+
+%BASE%
+mingw-w64-x86_64-ruby26
+
+%DESC%
+An object-oriented language for quick and easy programming (mingw-w64)
+
+%URL%
+https://www.ruby-lang.org/en
+
+%ARCH%
+any
+
+%BUILDDATE%
+1605834244
+
+%INSTALLDATE%
+1605836754
+
+%PACKAGER%
+Unknown Packager
+
+%SIZE%
+25966620
+
+%LICENSE%
+BSD, custom
+
+%VALIDATION%
+none
+
+%DEPENDS%
+mingw-w64-x86_64-gcc-libs
+mingw-w64-x86_64-gdbm>=1.17
+mingw-w64-x86_64-gmp
+mingw-w64-x86_64-libffi
+mingw-w64-x86_64-libyaml
+mingw-w64-x86_64-openssl>=1.1.1
+mingw-w64-x86_64-zlib
+
