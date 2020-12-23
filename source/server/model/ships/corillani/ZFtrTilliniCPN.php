@@ -1,5 +1,5 @@
 <?php
-class ZFtrTillini extends FighterFlight
+class ZFtrTilliniCPN extends FighterFlight
 {
 
 	function __construct($id, $userid, $name,  $slot)
@@ -8,15 +8,16 @@ class ZFtrTillini extends FighterFlight
 
 		$this->pointCost = 52 *6;
 		$this->faction = "Corillani";
-		$this->phpclass = "ZFtrTillini";
-		$this->shipClass = "Tillini Medium Fighters (CPL)";
-		$this->imagePath = "img/ships/CorillaniTillini.png";
-		
+		$this->phpclass = "ZFtrTilliniCPN";
+		$this->shipClass = "Tillini Medium Fighters (CPN)";
+		$this->imagePath = "img/ships/CorillaniTilliniCPN.png";
+		$this->notes = 'The Corillani Peoples Navy (CPN) version of the Tillini fighter';
+				
 		$this->isd = 2230;
 
 		$this->forwardDefense = 7;
 		$this->sideDefense = 8;
-		$this->freethrust = 11;
+		$this->freethrust = 9;
 		$this->offensivebonus = 4;
 		$this->jinkinglimit = 8;
 		$this->turncost = 0.33;
@@ -33,11 +34,11 @@ class ZFtrTillini extends FighterFlight
 
 		for ($i = 0; $i < $toAdd; $i++) {
 
-			$armour = array(2, 1, 2, 2);
-			$fighter = new Fighter("ZFtrTillini", $armour, 10, $this->id);
+			$armour = array(3, 2, 3, 3);
+			$fighter = new Fighter("ZFtrTilliniCPN", $armour, 10, $this->id);
 			$fighter->displayName = "Tillini";
-			$fighter->imagePath = "img/ships/CorillaniTillini.png";
-			$fighter->iconPath = "img/ships/CorillaniTillini_large.png";
+			$fighter->imagePath = "img/ships/CorillaniTilliniCPN.png";
+			$fighter->iconPath = "img/ships/CorillaniTilliniCPN_large.png";
 
 
 			$frontGun = new PairedParticleGun(330, 30, 5);

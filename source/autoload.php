@@ -1497,7 +1497,10 @@ spl_autoload_register(
 				'plasmaprojector' =>'/server/model/weapons/plasma.php',
 				'mollanta' => '/server/model/ships/corillani/Mollanta.php',
 				'llartol' => '/server/model/ships/corillani/Llartol.php',
-				'garunda' => '/server/model/ships/corillani/Garunda.php',		
+				'garunda' => '/server/model/ships/corillani/Garunda.php',
+				'zftrtillinicpn' => '/server/model/ships/corillani/ZFtrTilliniCPN.php',
+				'zftrtillinidoc' => '/server/model/ships/corillani/ZFtrTilliniDoC.php',
+				'zftrtilliniosf' => '/server/model/ships/corillani/ZFtrTilliniOSF.php',		
 		    	    	   	
 		    	
 		    	//Random Ships which don't require new mechanics to add
