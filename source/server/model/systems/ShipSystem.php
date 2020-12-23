@@ -400,9 +400,13 @@ class ShipSystem {
 	    /*or if it's Structure system is destroyed AT LEAST ONE TURN EARLIER*/
 	    $currTurn = TacGamedata::$currentTurn;
 	    if($turn !== false) $currTurn = $turn;
-	    $prevTurn = $currTurn-1;
+		if($currTurn < TacGamedata::$currentTurn){ //if we're looking for past game state, system is destroyed even if structure was destroyed on the same turn
+			$prevTurn = $currTurn;
+		}else{ //system has fallen off if structure was destroyed a turn earlier
+			$prevTurn = $currTurn-1; 
+		}
         
-        if ( ! ($this instanceof Structure) && $this->structureSystem && $this->structureSystem->isDestroyed($prevTurn))
+        if ( (!($this instanceof Structure)) && $this->structureSystem && $this->structureSystem->isDestroyed($prevTurn))
             return true;
   
 		$isDestroyed=false;

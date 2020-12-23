@@ -2134,7 +2134,6 @@ class RammingAttack extends Weapon{
 		  $this->data["Special"] .= "<br>	Hunter-Killers have speed penalty as well.";  
 		  $this->data["Special"] .= "<br>Ramming damage is also influenced by conditions - moving head on with initiative slightly increases chance of high damage.";
 		  $this->data["Special"] .= "<br>Ramming attacks will be done in ship firing phase (even attacks by fighters) and cannot be intercepted.";
-		  $this->data["Special"] .= "<br>Immobile units cannot make voluntary ramming attacks.";
 	}	
 	
 	
