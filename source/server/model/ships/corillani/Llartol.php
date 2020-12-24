@@ -8,7 +8,7 @@ class Llartol extends BaseShip{
 		$this->faction = "Corillani";
         $this->phpclass = "Llartol";
         $this->imagePath = "img/ships/CorillaniMollanta.png";
-        $this->shipClass = "Llartol Assault Cruiser";
+        $this->shipClass = "Llartol Assault Cruiser (CPN)";
         $this->shipSizeClass = 3;
         $this->fighters = array("assault shuttles"=>12);
 	    $this->isd = 2242;

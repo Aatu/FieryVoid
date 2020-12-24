@@ -1498,6 +1498,7 @@ spl_autoload_register(
 				'mollanta' => '/server/model/ships/corillani/Mollanta.php',
 				'llartol' => '/server/model/ships/corillani/Llartol.php',
 				'garunda' => '/server/model/ships/corillani/Garunda.php',
+				'conosti' => '/server/model/ships/corillani/Conosti.php'
 				'zftrtillinicpn' => '/server/model/ships/corillani/ZFtrTilliniCPN.php',
 				'zftrtillinidoc' => '/server/model/ships/corillani/ZFtrTilliniDoC.php',
 				'zftrtilliniosf' => '/server/model/ships/corillani/ZFtrTilliniOSF.php',		
