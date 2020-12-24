@@ -9,7 +9,10 @@ window.ShipMovementCallbacks = function () {
 
     ShipMovementCallbacks.prototype.cancelCallback = function (e) {
         e.stopPropagation();
-        shipManager.movement.deleteMove(this.ship);
+        shipManager.movement.deleteMove(this.ship);		
+		if (event.which == 3) while (shipManager.movement.hasDeletableMovements(this.ship)){//r-click
+			shipManager.movement.deleteMove(this.ship);	
+		}
         this.updateCallback({ ship: this.ship });
     };
 

@@ -7,9 +7,11 @@ class ChoukaBloodlustFighter extends FighterFlight{
         $this->pointCost = 50*6;
         $this->faction = "ZEscalation Chouka";
         $this->phpclass = "ChoukaBloodlustFighter";
-        $this->shipClass = "Bloodlust Assault Fighter Heavy flight";
+        $this->shipClass = "Bloodlust Assault flight";
         $this->imagePath = "img/ships/EscalationWars/ChoukaBloodlust.png";
-        $this->customFtrName = "Bloodlust";
+ //       $this->customFtrName = "Bloodlust";  //Only used for special hangar needs like T-bolts
+		$this->unofficial = true;
+
 		
         $this->isd = 1943;
         
@@ -35,7 +37,7 @@ class ChoukaBloodlustFighter extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){            
             $armour = array(3, 1, 1, 1);
             $fighter = new Fighter("ChoukaBloodlustFighter", $armour, 15, $this->id);
-            $fighter->displayName = "Bloodlust Assault Heavy Fighter";
+            $fighter->displayName = "Bloodlust";
             $fighter->imagePath = "img/ships/EscalationWars/ChoukaBloodlust.png";
             $fighter->iconPath = "img/ships/EscalationWars/ChoukaBloodlust_Large.png";
 

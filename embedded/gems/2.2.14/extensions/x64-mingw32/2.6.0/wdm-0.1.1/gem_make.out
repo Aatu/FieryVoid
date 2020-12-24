@@ -1,0 +1,32 @@
+current directory: C:/Users/vagrant/AppData/Local/Temp/kplonq0v.xbu/embedded/gems/2.2.14/gems/wdm-0.1.1/ext/wdm
+C:/Users/vagrant/AppData/Local/Temp/kplonq0v.xbu/embedded/mingw64/bin/ruby.exe -I C:/Users/vagrant/AppData/Local/Temp/kplonq0v.xbu/embedded/mingw64/lib/ruby/2.6.0 -r ./siteconf20201120-3936-ceh8m8.rb extconf.rb
+checking for -lkernel32... yes
+checking for windows.h... yes
+checking for ruby.h... yes
+checking for HAVE_RUBY_ENCODING_H... yes
+checking for rb_thread_call_without_gvl()... yes
+creating Makefile
+
+current directory: C:/Users/vagrant/AppData/Local/Temp/kplonq0v.xbu/embedded/gems/2.2.14/gems/wdm-0.1.1/ext/wdm
+make "DESTDIR=" clean
+
+current directory: C:/Users/vagrant/AppData/Local/Temp/kplonq0v.xbu/embedded/gems/2.2.14/gems/wdm-0.1.1/ext/wdm
+make "DESTDIR="
+generating wdm_ext-x64-mingw32.def
+compiling entry.c
+compiling memory.c
+compiling monitor.c
+compiling queue.c
+compiling rb_change.c
+compiling rb_monitor.c
+rb_monitor.c: In function 'rb_monitor_run_bang':
+rb_monitor.c:509:29: warning: implicit declaration of function 'rb_thread_call_without_gvl' [-Wimplicit-function-declaration]
+  509 |         waiting_succeeded = rb_thread_call_without_gvl(wait_for_changes, monitor->process_event, stop_monitoring, monitor);
+      |                             ^~~~~~~~~~~~~~~~~~~~~~~~~~
+compiling utils.c
+compiling wdm.c
+linking shared-object wdm_ext.so
+
+current directory: C:/Users/vagrant/AppData/Local/Temp/kplonq0v.xbu/embedded/gems/2.2.14/gems/wdm-0.1.1/ext/wdm
+make "DESTDIR=" install
+/usr/bin/install -c -m 0755 wdm_ext.so ./.gem.20201120-3936-p3mhe7

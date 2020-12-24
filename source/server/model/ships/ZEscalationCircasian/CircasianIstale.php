@@ -33,7 +33,7 @@ class CircasianIstale extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
 		$armour = array(1, 1, 1, 1);
 		$fighter = new Fighter("CircasianIstale", $armour, 8, $this->id);
-		$fighter->displayName = "Istale Light Fighter";
+		$fighter->displayName = "Istale";
 		$fighter->imagePath = "img/ships/EscalationWars/CircasianIstale.png";
 		$fighter->iconPath = "img/ships/EscalationWars/CircasianIstale_Large.png";
 			

@@ -361,8 +361,8 @@ class MagGravReactor extends Reactor{
 }//endof MagGravReactor		
 
 
-class SubReactor extends ShipSystem{
-	
+//warning: needs external code to function properly. Intended for starbases only.
+class SubReactor extends ShipSystem{	
 	//SubReactor is very important, though not as much as primary reactor itself!
 	public $repairPriority = 8;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
@@ -392,6 +392,100 @@ class SubReactor extends ShipSystem{
         return false;
     }	
 }
+
+
+
+/*SubReactorUniversal - Sub-Reactor that can be fitted on any ship.
+On destruction: will destroy the section it's fitted on.
+On damage: will roll critical with half the effect of usual reactor and add that critical to primary reactor.
+Official on damage: roll critical normally, it will only affect systems on the same section, maximum effect -10 (after cumulation)
+*/
+class SubReactorUniversal extends ShipSystem{
+	public $name = "SubReactorUniversal";
+    public $displayName = "Sub Reactor";
+    public $iconPath = "reactor.png";
+    public $primary = true; //well, it's intended to be fitted on outer sections, but treated as core system
+    	
+    public $possibleCriticals = array(
+        11=>"OutputReduced1", 
+        14=>"OutputReduced2",
+        17=>"OutputReduced3",
+        21=>"OutputReduced4" //lower but also smoother
+    );
+		
+	/*main reactor criticals for comparision
+    public $possibleCriticals = array(
+        11=>"OutputReduced2",
+        15=>"OutputReduced4",
+        19=>"OutputReduced8",
+        27=>array("OutputReduced10", "ForcedOfflineOneTurn"));
+	*/
+	
+	function __construct($armour, $maxhealth){
+        parent::__construct($armour, $maxhealth, 0, 0 ); 
+    }
+	
+    public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= 'Critials roughly half as high as on main reactor; marked on main reactor.';
+		$this->data["Special"] .= '<br>On destruction entire section will be destroyed (but not entire ship).';
+    }
+	
+	//destroy section if destroyed
+	public function criticalPhaseEffects($ship, $gamedata)
+    { 
+		if (!$this->isDamagedOnTurn($gamedata->turn)) return; 
+		if (!$this->isDestroyed()) return;		
+	
+		//try to make actual attack to show in log - use Ramming Attack system!				
+		$rammingSystem = $ship->getSystemByName("RammingAttack");
+		if($rammingSystem){ //actually exists! - it should on every ship!				
+			$newFireOrder = new FireOrder(
+				-1, "normal", $ship->id, $ship->id,
+				$rammingSystem->id, -1, $gamedata->turn, 1, 
+				100, 100, 1, 1, 0,
+				0,0,'Reactor',10000
+			);
+			$newFireOrder->pubnotes = "Sub Reactor destroyed - section is immolated.";
+			$newFireOrder->addToDB = true;
+			$rammingSystem->fireOrders[] = $newFireOrder;
+		}else{
+			$newFireOrder=null;
+		}
+
+		//destroy primary structure
+		$ownStruct = $ship->getStructureSystem($this->location);
+		if($ownStruct){			
+            $remaining = $ownStruct->getRemainingHealth();
+            $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $ownStruct->id, $remaining, 0, 0, -1, true, false, "", "Reactor");
+            $damageEntry->updated = true;
+            $ownStruct->damage[] = $damageEntry;			
+			if($rammingSystem){ //add extra data to damage entry - so firing order can be identified!
+					$damageEntry->shooterid = $ship->id; //additional field
+					$damageEntry->weaponid = $rammingSystem->id; //additional field
+			}
+        }	
+    } //endof function criticalPhaseEffects	
+	
+	
+	//critical - add to primary reactor instead!
+    public function addCritical($shipid, $phpclass, $gamedata) {
+		//find main reactor
+		$ship = $gamedata->getShipById($shipid);
+		$mainReactor = $ship->getSystemByName("Reactor");
+		if($mainReactor){
+			$mainReactor->addCritical($shipid, $phpclass, $gamedata);
+		}
+		//do NOT call parent, as tis system will NOT actually suffer the crit!
+        //parent::addCritical($shipid, $phpclass, $gamedata);
+    }
+}//endof class SubReactorUniversal
+
 
 class Engine extends ShipSystem{
     public $name = "engine";
@@ -1621,7 +1715,7 @@ by 4.
 	//function estimating how good this Diffuser is at stopping damage;
 	//in case of diffuser, its effectiveness equals largest shot it can stop, with tiebreaker equal to remaining total capacity
 	//this is for recognizing it as system capable of affecting damage resolution and choosing best one if multiple Diffusers can protect
-	public function doesProtectFromDamage($expectedDmg) {
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null) {
 		$remainingCapacity = 0;
 		$totalCapacity = 0;
 		$largestCapacity = 0;
@@ -2140,6 +2234,119 @@ class PhasingDrive extends JumpEngine{
         }	
     } //endof function criticalPhaseEffects	
 }//endof class PhasingDrive
+
+
+
+
+
+
+
+/*Gaim damage absorbtion system
+Cannot be hit directly in any way, except when absorbing damage. May protect any system on the same section (plus structure it's fitted on, even if it's primary structure - important for MCVs) 
+as Bulkhead's activation is automatic, it will kick in when:
+ - would prevent system destruction
+ - system is Structure and would be destroyed without Bulkhead (even if it doesn't prevent destruction)
+ - related Structure is under 34% (it's "use it or lose it" time)
+*/
+class Bulkhead extends ShipSystem{
+    public $name = "Bulkhead";
+    public $displayName = "Bulkhead";
+    public $iconPath = "bulkhead.png";
+	public $isTargetable = false; //cannot be targeted by called shots
+	
+	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
+    public $possibleCriticals = array( ); //no critical effect applicable	
+	
+    function __construct($armour, $maxhealth){
+        parent::__construct($armour, $maxhealth, 0, 0);
+    }
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "Absorbs damage from hits on the same section - activation is automatic.";
+		$this->data["Special"] .= "<br>Will kick in when it can prevent system destruction or when sections' structural integrity falls below 34%.";
+	}	
+	
+     public function getOutput(){ //output = remaining health - just for visual purposes
+        $output = $this->getRemainingHealth();     
+        return $output;        
+    }    
+	
+	
+	//function estimating how good this Bulkhead is at stopping damage;
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null) {
+		//first do check whether this system can be protected! (same location or appropriate structure location)
+		if ($systemProtected) {
+			//is it on the same section?
+			if ( ($this->location != $systemProtected->location) //different location...
+			    && ($this->structureSystem !== $systemProtected ) //and this isn't appropriate structure either!
+			 ) return 0;
+		}else { //no particular system indicated = cannot protect
+			return 0;	
+		}
+		//now check whether it _should_ protect...
+		$targetHealth = 1;
+		if($systemProtected){
+			$targetHealth = $systemProtected->getRemainingHealth();
+		}
+		$ownHealth = $this->getRemainingHealth();
+		$structureHealthFraction = $this->structureSystem->getRemainingHealth() / $this->structureSystem->maxhealth;
+		$protectionValue = 0;
+		if ( ($targetHealth <= $expectedDmg) && ($targetHealth + $ownHealth > $expectedDmg) ){
+			$protectionValue = $targetHealth + $ownHealth - $expectedDmg; //I cannot prioritize smaller Bulkhead if it'd do the job, but at least I can avoid prioritizing larger one
+		} else if (($targetHealth <= $expectedDmg) && ($this->structureSystem == $systemProtected)) { //structure is in danger of being destroyed, do protect for fear of not using the bulkhead at all 
+			$protectionValue = $ownHealth;
+		} else if ($structureHealthFraction < 0.34) { //structure health is low, do protect for fear of not using the bulkhead at all 
+			$protectionValue = $ownHealth;
+		}
+		return $protectionValue;
+	}
+	//actual protection
+	public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $systemProtected, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
+		$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
+		$damageToAbsorb=$effectiveDamage-$effectiveArmor;
+		$damageAbsorbed=0;
+		
+		if($damageToAbsorb<=0) return $returnValues; //nothing to absorb
+		
+		$ownHealth = $this->getRemainingHealth();
+		$damageAbsorbed = min($damageToAbsorb,$ownHealth); 
+				
+		
+		$noOverkill = (!$weapon->doOverkill) && ($weapon->noOverkill || ($weapon->damageType == 'Piercing'));
+		if($noOverkill){//shot is incapable of overkilling - reducing it would not matter if it doesn't prevent destruction of system hit
+			$remainingHealth = $systemProtected->getRemainingHealth();
+			if ($remainingHealth+$damageAbsorbed <= $damageToAbsorb) return $returnValues; //any absorbtion would be futile and just destroy the bulkhead uselessly
+		}
+		
+		if($damageAbsorbed>0){ //can absorb something!
+			$returnValues['dmg']=$effectiveDamage-$damageAbsorbed;
+			$bulkheadDestroyed = false;
+			if ($damageAbsorbed >=$ownHealth) $bulkheadDestroyed = true;
+			//mark damage (possibly destruction) on bulkhead itself
+			$damageEntry = new DamageEntry(-1, $target->id, -1, $gamedata->turn, $this->id, $damageAbsorbed, 0, 0, -1, $bulkheadDestroyed, false, "Absorb!", "Bulkhead");
+			$damageEntry->updated = true;
+			$this->damage[] = $damageEntry;
+		}
+		
+		return $returnValues;
+	}
+	
+	
+	public function stripForJson(){
+		//$this->output = $this->getOutput();	
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->output = $this->getOutput();
+        return $strippedSystem;
+    }
+} //endof Bulkhead
+
 
 
 

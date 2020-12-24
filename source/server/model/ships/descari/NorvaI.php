@@ -18,9 +18,9 @@ class NorvaI extends LCV{
 	$this->sideDefense = 12;
 
 
-	//$this->occurence = "rare";
+
 	$this->isd = 2220;
-	//$this->variantOf = "Liberator Plasma Gunboat";
+
 
 	$this->turncost = 0.33;
 	$this->turndelaycost = 0.33;

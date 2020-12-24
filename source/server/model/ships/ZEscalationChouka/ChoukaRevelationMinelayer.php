@@ -61,7 +61,7 @@ class ChoukaRevelationMinelayer extends HeavyCombatVessel{
             0=> array(
                     8 => "Structure",
                     11 => "Thruster",
-					12 => "Cargo",
+					12 => "Cargo Bay",
 					14 => "Scanner",
                     16 => "Engine",
 					18 => "Hangar",
@@ -77,7 +77,7 @@ class ChoukaRevelationMinelayer extends HeavyCombatVessel{
             2=> array(
                     5 => "Thruster",
 					7 => "Light Energy Mine",
-					9 => "Cargo",
+					9 => "Cargo Bay",
                     11 => "Point Plasma Gun",
                     18 => "Structure",
                     20 => "Primary",

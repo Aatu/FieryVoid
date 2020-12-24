@@ -4,7 +4,7 @@ class CircasianTratha extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 360;
+        $this->pointCost = 385;
         $this->faction = "ZEscalation Circasian";
         $this->phpclass = "CircasianTratha";
         $this->imagePath = "img/ships/EscalationWars/CircasianTratha.png";
@@ -35,6 +35,8 @@ class CircasianTratha extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
 		$this->addFrontSystem(new LightPlasma(1, 4, 2, 240, 60));
+		$this->addFrontSystem(new LightPlasma(1, 4, 2, 240, 60));
+		$this->addFrontSystem(new LightPlasma(1, 4, 2, 300, 120));
 		$this->addFrontSystem(new LightPlasma(1, 4, 2, 300, 120));
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));

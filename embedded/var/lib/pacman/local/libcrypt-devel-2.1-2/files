@@ -1,0 +1,8 @@
+%FILES%
+usr/
+usr/include/
+usr/include/crypt.h
+usr/lib/
+usr/lib/libcrypt.a
+usr/lib/libcrypt.dll.a
+

@@ -74,7 +74,7 @@ class ChoukaRaiderHeresy extends HeavyCombatVessel{
             ),
             2=> array(
                     5 => "Thruster",
-					7 => "Cargo",
+					7 => "Cargo Bay",
 					8 => "Light Plasma Cannon",
                     10 => "Point Plasma Gun",
                     18 => "Structure",

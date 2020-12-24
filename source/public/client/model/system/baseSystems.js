@@ -18,6 +18,15 @@ MagGravReactor.prototype.hasMaxBoost = function () {
     return true;
 };
 
+
+var SubReactorUniversal = function(json, ship)
+{
+    ShipSystem.call( this, json, ship);
+}
+SubReactorUniversal.prototype = Object.create( ShipSystem.prototype );
+SubReactorUniversal.prototype.constructor = SubReactorUniversal;
+
+
 var Scanner = function Scanner(json, ship) {
     ShipSystem.call(this, json, ship);
 };
@@ -373,3 +382,11 @@ var PhasingDrive = function PhasingDrive(json, ship) {
 PhasingDrive.prototype = Object.create(JumpEngine.prototype);
 PhasingDrive.prototype.constructor = PhasingDrive;
 
+
+
+var Bulkhead = function(json, ship)
+{
+    ShipSystem.call( this, json, ship);
+}
+Bulkhead.prototype = Object.create( ShipSystem.prototype );
+Bulkhead.prototype.constructor = Bulkhead;

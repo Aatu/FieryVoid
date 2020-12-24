@@ -1,0 +1,33 @@
+%NAME%
+mingw-w64-x86_64-win7appid
+
+%VERSION%
+1.1-3
+
+%DESC%
+Windows 7 (and up) shortcut application id tool
+
+%URL%
+https://code.google.com/p/win7appid
+
+%ARCH%
+any
+
+%BUILDDATE%
+1437514263
+
+%INSTALLDATE%
+1605837118
+
+%PACKAGER%
+Alexey Pavlov <alexpux@gmail.com>
+
+%SIZE%
+31744
+
+%LICENSE%
+custom
+
+%VALIDATION%
+pgp
+

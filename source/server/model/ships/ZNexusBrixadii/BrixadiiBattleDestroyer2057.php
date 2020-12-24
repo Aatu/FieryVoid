@@ -4,14 +4,15 @@ class BrixadiiBattleDestroyer2057 extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 365;
+        $this->pointCost = 380;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiBattleDestroyer2057";
         $this->imagePath = "img/ships/Nexus/BrixadiiBattleDestroyer.png";
-			$this->canvasSize = 200; //img has 200px per side
+			$this->canvasSize = 175; //img has 200px per side
         $this->shipClass = "Battle Destroyer (2057)";
-        $this->variantOf = "Battle Destroyer";
-			$this->unofficial = true;
+			$this->variantOf = "Battle Destroyer";
+			$this->occurence = "common";
+		$this->unofficial = true;
         $this->isd = 2057;
         
         $this->forwardDefense = 12;
@@ -36,14 +37,15 @@ class BrixadiiBattleDestroyer2057 extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(3, 14, 0, 6, 1));
     	$this->addFrontSystem(new NexusParticleAgitator(3, 0, 0, 240, 0));
         $this->addFrontSystem(new NexusParticleAgitator(3, 0, 0, 0, 120));
-        $this->addFrontSystem(new NexusParticleProjectorLight(2, 0, 0, 180, 60));
-        $this->addFrontSystem(new NexusParticleProjectorLight(2, 0, 0, 300, 180));
-		$this->addFrontSystem(new NexusKineticBoxLauncher(0, 0, 0, 300, 60));
+        $this->addFrontSystem(new ParticleProjector(2, 6, 1, 240, 60));
+        $this->addFrontSystem(new ParticleProjector(2, 6, 1, 300, 120));
+		$this->addFrontSystem(new NexusKineticBoxLauncher(0, 4, 0, 300, 60));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
-        $this->addAftSystem(new ParticleProjector(2, 6, 1, 90, 270));
-		$this->addAftSystem(new NexusChaffLauncher(0, 0, 0, 0, 0));
+        $this->addAftSystem(new ParticleProjector(2, 6, 1, 180, 360));
+        $this->addAftSystem(new ParticleProjector(2, 6, 1, 0, 180));
+		$this->addAftSystem(new NexusChaffLauncher(2, 2, 0, 0, 360));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 35));
@@ -62,7 +64,7 @@ class BrixadiiBattleDestroyer2057 extends HeavyCombatVessel{
             ),
             1=> array(
                     5 => "Thruster",
-                    7 => "Light Particle Projector",
+                    7 => "Particle Projector",
                     10 => "Particle Agitator",
 					12 => "Kinetic Box Launcher",
 					18 => "Structure",

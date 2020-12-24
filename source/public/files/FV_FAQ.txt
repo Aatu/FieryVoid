@@ -10,11 +10,15 @@ Below is list of differences from B5Wars mechanics and known bugs that aren't ex
 
 USEFUL TRIVIA
  - W - show EW in graphical form
+ - X - show friendly EW in graphical form
+ - Y - show enemy EW in grapical form
  - If You have ship that shouldn't be there any longer (jumped out, left map...) or just crippled and useless, You may simply get rid of it so it doesn't bog down Your game. In Initial phase You may set its Reactor to overload - it will explode in firing resolution phase!
+ - r-click on unit - select the unit (if it's Yours) and bring its control window up.
  - r-click on weapon - select all similar weapons on this unit (eg. to fire all guns in fighter flight, or all Twin Arrays on a Centauri cruiser...)
  - r-click on power button - power on/off on all similar weapons on this ship
  - r-click mode change - change firing mode on all similar UNDECLARED weapons
  - r-click on defensive fire - enable defensive fire on all similar UNDECLARED weapons
+ - r-click on cancel move button - cancels entire current batch of moves for indicated unit
 
 
 GAMEPLAY GENERAL IDEAS

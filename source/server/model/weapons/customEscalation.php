@@ -93,7 +93,7 @@ class EWParticleLance extends Raking{
 
         public $intercept = 1;
         public $loadingtime = 2;
-        public $priority = 8;
+        public $priority = 4;
 
         public $rangePenalty = 1;
         public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals
@@ -134,7 +134,7 @@ class EWParticleLance extends Raking{
 
         public $intercept = 1;
         public $loadingtime = 1;
-        public $priority = 8;
+        public $priority = 3;
 
         public $rangePenalty = 2;
         public $fireControl = array(1, 1, 0); // fighters, <mediums, <capitals
@@ -162,6 +162,91 @@ class EWParticleLance extends Raking{
     }  //endof EWLightParticleGun
 
 
+    class EWParticleMaul extends Particle{
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "EWParticleMaul";
+        public $displayName = "Particle Maul";
+	    public $iconPath = "EWParticleMaul.png";		
+		public $animation = "bolt";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.10;
+        public $animationWidth = 1.5;
+        public $animationWidth2 = 0.2;
+
+        public $loadingtime = 3;
+        public $priority = 5;
+
+        public $rangePenalty = 0.5;
+        public $fireControl = array(-1, 1, 2); // fighters, <mediums, <capitals
+
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle";
+        public $firingModes = array( 1 => "Standard");
+        
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 8;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 3;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+
+        public function getDamage($fireOrder){ return Dice::d(10, 1)+12;   }
+        public function setMinDamage(){     $this->minDamage = 13 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
+    }  //endof EWParticleMaul
+	
+	
+	    class EWGatlingParticleBeam extends Particle{
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "EWGatlingParticleBeam";
+        public $displayName = "Gatling Particle Beam";
+	    public $iconPath = "EWGatlingParticleBeam.png";		
+		public $animation = "beam";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.10;
+        public $animationWidth = 1.5;
+        public $animationWidth2 = 0.2;
+		public $guns = 3;
+
+        public $intercept = 1;
+        public $loadingtime = 1;
+        public $priority = 4;
+
+        public $rangePenalty = 2;
+        public $fireControl = array(5, 2, 2); // fighters, <mediums, <capitals
+
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle";
+        public $firingModes = array( 1 => "Standard");
+        
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 4;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 3;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+
+        public function getDamage($fireOrder){ return Dice::d(10, 1)+2;   }
+        public function setMinDamage(){     $this->minDamage = 3 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+    }  //endof EWGatlingParticleBeam
+
+
+
 // END PARTICLE WEAPONS
 
 
@@ -185,7 +270,7 @@ class EWGatlingLaser extends Pulse{
         public $loadingtime = 2;
         public $intercept = 2; 
 		public $ballisticIntercept = true;
-        public $priority = 6; // 
+        public $priority = 5; // 
 	protected $useDie = 3; //die used for base number of hits
 
         public $rangePenalty = 1;
@@ -259,18 +344,18 @@ class EWHeavyGatlingLaser extends Pulse{
 
 
     class EWLightLaserBeam extends LinkedWeapon{
-        public $trailColor = array(30, 170, 255);
 
         public $name = "EWLightLaserBeam";
         public $iconPath = "EWLightLaserBeam.png";
         public $displayName = "Light Laser Beam";
-        public $animation = "trail";
-        public $animationColor = array(30, 170, 255);
-        public $animationExplosionScale = 0.10;
-        public $projectilespeed = 12;
-        public $animationWidth = 2;
-        public $trailLength = 10;
+        public $animation = "laser";
+        public $animationColor = array(220, 100, 30);
+        public $animationExplosionScale = 0.1;
+        public $animationWidth = 1;
+        public $animationWidth2 = 0.2;
         public $priority = 3;
+        public $uninterceptable = true; // This is a laser        
+		
 
         public $intercept = 2;
 
@@ -280,7 +365,6 @@ class EWHeavyGatlingLaser extends Pulse{
 
         public $rangePenalty = 1.5;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
-        private $damagebonus = 0;
 
         public $damageType = "Standard"; 
         public $weaponClass = "Laser"; 
@@ -306,7 +390,8 @@ class EWHeavyGatlingLaser extends Pulse{
         }
 
         public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Laser. Uninterceptable. Able to intercept.';
         }
 
         public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
@@ -327,7 +412,7 @@ class EWHeavyGatlingLaser extends Pulse{
         public $animationExplosionScale = 0.16;
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
-        public $priority = 8;
+        public $priority = 7;
 		public $guns = 2;
         public $loadingtime = 2;
         
@@ -410,9 +495,11 @@ class EWHeavyGatlingLaser extends Pulse{
         }
 
         public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Plasma weapon. Does less damage ';
+			$this->data["Special"] .= '<br>over distance (1 per hex). Ignores half of armor.';			
         }
-
+		
         public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
         public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
         public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
@@ -488,6 +575,7 @@ class EWPointPlasmaGun extends Plasma{
         public $animationWidth = 1;
     	public $animationExplosionScale = 0.10;
     	public $trailLength = 10;
+        public $priority = 4;
     	public $rangeDamagePenalty = 1;
         public $guns = 1;
 
@@ -529,6 +617,7 @@ class EWHeavyPointPlasmaGun extends Plasma{
         public $animationWidth = 5;
     	public $animationExplosionScale = 0.30;
     	public $trailLength = 20;
+        public $priority = 5;		
     	public $rangeDamagePenalty = 1;
         public $guns = 2;
 
@@ -571,6 +660,7 @@ class EWHeavyPlasmaGun extends Plasma{
         public $animationWidth = 3;
     	public $animationExplosionScale = 0.20;
     	public $trailLength = 15;
+        public $priority = 5;		
     	public $rangeDamagePenalty = 1;
         public $guns = 1;
 
@@ -597,6 +687,50 @@ class EWHeavyPlasmaGun extends Plasma{
         public function setMaxDamage(){     $this->maxDamage = 26 /*- $this->dp*/;      }
 
 }  // endof EWHeavyPlasmaGun
+
+
+
+class EWPlasmaMine extends Plasma{
+        public $name = "EWPlasmaMine";
+        public $displayName = "Plasma Mine";
+		    public $iconPath = "EWPlasmaMine.png";
+        public $animation = "trail";
+        public $trailColor = array(11, 224, 255);
+        public $animationColor = array(50, 50, 50);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 12;
+        public $animationWidth = 4;
+        public $trailLength = 100;    
+        public $useOEW = false;
+
+        public $ballistic = true; //missile
+        public $range = 30;
+        public $distanceRange = 30;
+        
+        public $loadingtime = 3; // 1 turn
+        public $rangePenalty = 0;
+        public $fireControl = array(null, 0, 2); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+	    
+	public $priority = 5; 
+	    
+	public $firingMode = 'Ballistic'; //firing mode - just a name essentially
+	public $damageType = "Plasma"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Plasma"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+	 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 7;
+            if ( $powerReq == 0 ) $powerReq = 3;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+    	public function getDamage($fireOrder){        return Dice::d(10, 2)+0;   }
+        public function setMinDamage(){     $this->minDamage = 2;      }
+        public function setMaxDamage(){     $this->maxDamage = 20;      }
+}//endof EWPlasmaMine
+
+
 
 // END PLASMA WEAPONS
 
@@ -674,6 +808,7 @@ class EWRocketLauncher extends Weapon{
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Ammunition"] = $this->ammunition;
+			$this->data["Special"] = '<br>Benefits from offensive EW.';			
         }
         
 
@@ -744,8 +879,8 @@ class EWDualRocketLauncher extends Weapon{
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Ammunition"] = $this->ammunition;
+			$this->data["Special"] = '<br>Benefits from offensive EW.';			
         }
-        
 
         public function getDamage($fireOrder){ 
 			return Dice::d(6, 2)+2;   
@@ -810,6 +945,7 @@ class EWHeavyRocketLauncher extends Weapon{
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Ammunition"] = $this->ammunition;
+			$this->data["Special"] = '<br>Benefits from offensive EW.';			
         }
 
         public function getDamage($fireOrder){ 
@@ -828,6 +964,76 @@ class EWHeavyRocketLauncher extends Weapon{
         public function setMinDamage(){     $this->minDamage = 6;      }
         public function setMaxDamage(){     $this->maxDamage = 24;      }
 }//endof EWHeavyRocketLauncher
+
+
+
+
+class EWFighterTorpedoLauncher extends FighterMissileRack
+{
+    public $name = "EWFighterTorpedoLauncher";
+    public $displayName = "Fighter Torpedo Launcher";
+    public $loadingtime = 1;
+    public $iconPath = "fighterTorpedo.png";
+    public $rangeMod = 0;
+    public $firingMode = 1;
+    public $maxAmount = 0;
+    protected $distanceRangeMod = 0;
+	public $weaponClass = "Plasma";
+    public $priority = 4; //priority: typical fighter weapon (correct for Light Ballistic Torpedo's 2d6)
+
+    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+    
+    public $firingModes = array(
+        1 => "LPM"
+    );
+    
+    function __construct($maxAmount, $startArc, $endArc){
+        parent::__construct($maxAmount, $startArc, $endArc);
+        
+        $LPMine = new EWLightPlasmaMine($startArc, $endArc, $this->fireControl);
+        
+        $this->missileArray = array(
+            1 => $LPMine
+        );
+        
+        $this->maxAmount = $maxAmount;
+    }
+    
+}
+
+class EWLightPlasmaMine extends MissileFB
+{
+    public $name = "EWLightPlasmaMine";
+    public $missileClass = "LPM";
+    public $displayName = "Light Plasma Mine";
+    public $cost = 8;
+    //public $surCharge = 0;
+	public $damage = 10;
+    public $amount = 0;
+    public $range = 15;
+    public $distanceRange = 15;
+    public $hitChanceMod = 0;
+    public $priority = 3;
+	public $damageType = "Standard";
+	public $weaponClass = "Plasma";
+	
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "Plasma. Ignores half of armor.";
+		}
+    
+    function __construct($startArc, $endArc, $fireControl=null){
+        parent::__construct($startArc, $endArc, $fireControl);
+    }
+
+    public function getDamage($fireOrder){        return Dice::d(6,2);   }
+    public function setMinDamage(){     $this->minDamage = 2;      }
+    public function setMaxDamage(){     $this->maxDamage = 12;      }        
+} // end EWLightPlasmaMine
+
+
+
+
 
 
 // END BALLISTIC WEAPONS
@@ -899,6 +1105,77 @@ class EWGraviticTractingRod extends SWDirectWeapon{
 
 
 // END GRAVITIC WEAPONS
+
+
+// ELECTROMAGNETIC WEAPONS
+
+
+    class EWEMTorpedo extends Torpedo{
+        public $name = "EWEMTorpedo";
+        public $displayName = "EM Torpedo";
+        public $iconPath = "EWEMTorpedo.png";
+        public $loadingtime = 3;
+        
+        public $weaponClass = "Electromagnetic"; //deals Electromagnetic, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
+        public $damageType = "Flash"; 
+        
+        public $fireControl = array(-6, 1, 3); // fighters, <mediums, <capitals 
+        
+        public $trailColor = array(75, 230, 90);
+        public $animation = "torpedo";
+        public $animationColor = array(75, 230, 90);
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 11;
+        public $animationWidth = 10;
+        public $trailLength = 10;
+        public $priority = 1; //Flash! should strike first (?)
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 6;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 5;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "Ignores armor and deactivates power using systems.";
+			$this->data["Special"] .= "<br>+4 to criticals and +2 to dropout rolls";
+		}
+
+	//ignore armor; advanced armor halves effect (due to this weapon being Electromagnetic)
+	public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
+		if (WeaponEM::isTargetEMResistant($target,$system)){
+			$returnArmour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
+			$returnArmour = floor($returnArmour/2);
+			return $returnArmour;
+		}else{
+			return 0;
+		}
+	}
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		$crit = null;
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return;
+		if ($ship instanceof FighterFlight) 2;
+		if ($system->powerReq > 0 || $system->canOffLine){
+			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+		}
+		$system->criticalRollMod = 4;
+	}
+		
+        public function getDamage($fireOrder){        return Dice::d(10, 2);   }
+        public function setMinDamage(){     $this->minDamage = 2;      }
+        public function setMaxDamage(){     $this->maxDamage = 20;      }
+    
+    }//endof class EWEMTorpedo
+
+
+// END ELECTROMAGNETIC WEAPONS
 
 
 ?>
