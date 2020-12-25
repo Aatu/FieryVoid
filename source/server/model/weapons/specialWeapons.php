@@ -2114,11 +2114,6 @@ class RammingAttack extends Weapon{
 	 public $possibleCriticals = array(); //shouldn't be hit ever, but if it is, should not suffer any criticals
 	
 	
-	//fill gamedata variable, which might otherwise be left out!
-	public function beforeFiringOrderResolution($gamedata){
-		$this->gamedata = $gamedata;
-	}
-	
 	public function setSystemDataWindow($turn){
 		$this->setMinDamage(); //just in case it's not set correctly in the beginning!
 			$this->setMaxDamage();
@@ -2134,8 +2129,47 @@ class RammingAttack extends Weapon{
 		  $this->data["Special"] .= "<br>	Hunter-Killers have speed penalty as well.";  
 		  $this->data["Special"] .= "<br>Ramming damage is also influenced by conditions - moving head on with initiative slightly increases chance of high damage.";
 		  $this->data["Special"] .= "<br>Ramming attacks will be done in ship firing phase (even attacks by fighters) and cannot be intercepted.";
+		  $this->data["Special"] .= "<br>Unit on the same hex as Enormous unit will automatically declare ramming attack against it!";
 	}	
 	
+	
+	/*
+	//fill gamedata variable, which might otherwise be left out!
+	public function beforeFiringOrderResolution($gamedata){
+		$this->gamedata = $gamedata;
+	}
+	*/
+	
+	 //find Enormous units on the same hex (other than self), create automatic attacks vs them
+	public function beforeFiringOrderResolution($gamedata){
+		$this->gamedata = $gamedata;//fill gamedata variable, which might otherwise be left out!
+		$shooter = $this->getUnit();		
+		if($shooter->isDestroyed()) return; //destroyed unit does not ram		
+		if($shooter instanceof FighterFlight){ //check particular fighter!
+			$ftr = $shooter->getFighterBySystem($this->id);
+			if ($ftr->isDestroyed()) return;
+		}		
+		$targetList = $gamedata->getShipsInDistance($shooter);
+		$alreadyFiringAt = $this->getFireOrders($gamedata->turn);
+		Foreach($targetList as $targetID=>$target){
+			If(!$target->Enormous) continue; //auto-ram Enormous units
+			If($targetID == $shooter->id) continue; //do not ram self
+			if($target->isDestroyed()) return; //destroyed unit does not ram... and neither is rammed
+			//don’t repeat manual ramming order
+			$alreadyDeclared = false;
+			Foreach ($alreadyFiringAt as $existingFiringOrder){
+				if($existingFiringOrder->targetid == $targetID) $alreadyDeclared = false;
+			}
+			If($alreadyDeclared) continue;
+			//unit on the same hex is Enormous, not self, and not being rammed by this unit already – auto-ram it!
+			$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
+			$fire = new FireOrder(-1, 'normal', $shooter->id, $targetID, $this->id, -1, $gamedata->turn,
+				1, 0, 0, 1, 0, 0, $movementThisTurn->position->q,  $movementThisTurn->position->r, $this->weaponClass
+			);
+			$fire->addToDB = true;
+			$this->fireOrders[] = $fire;
+		}
+	} //endof public function beforeFiringOrderResolution
 	
 	public function fire($gamedata, $fireOrder){
 		// If hit, firing unit itself suffers damage, too (based on raming factor of target)!
@@ -2143,7 +2177,8 @@ class RammingAttack extends Weapon{
 		parent::fire($gamedata, $fireOrder);
 		if($fireOrder->shotshit > 0){
 			$pos = null;
-			$shooter = $gamedata->getShipById($fireOrder->targetid);
+			//$shooter = $gamedata->getShipById($fireOrder->targetid);
+			$shooter = $this->unit; //technically this unit after all
 			$target = $this->unit;
 			$fireOrder->chosenLocation = 0;//to be redetermined!
 			$damage = $this->getReturnDamage($fireOrder);
@@ -2155,6 +2190,17 @@ class RammingAttack extends Weapon{
 				$fireOrder->calledid = $ftr->id;
 			}
 			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
+			if($fireOrder->id < 0){ //for automatic firing orders return damage will not be correctly assigned; create a virtual firing order for this damage to be displayed
+				$newFireOrder = new FireOrder(
+					-1, "normal", $shooter->id, $target->id,
+					$this->id, -1, $gamedata->turn, 1, 
+					100, 100, 1, 1, 0,
+					0,0,'Reactor',10000
+				);
+				$newFireOrder->pubnotes = "Automatic ramming - return damage.";
+				$newFireOrder->addToDB = true;
+				$this->fireOrders[] = $newFireOrder;				
+			}
 			$fireOrder->calledid = -1; //just in case!
 		}
 	} //endof function fire

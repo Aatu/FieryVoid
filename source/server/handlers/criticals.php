@@ -21,13 +21,15 @@ class Criticals{
              	   }
                 }
 		*/
-                if (/*$ship instanceof StarBase && */ $system instanceof SubReactor){ //destroying any Subreactor, not just on base!
+		/*SubReactor is now obsoleted! replaced by SubReactorUniversal
+                if ($system instanceof SubReactor){ //destroying any Subreactor, not just on base!
                 	if ($system->wasDestroyedThisTurn($gamedata->turn)){
 	                	//if ($system->location != 0){ ///on any location, PRIMARY too...
 	                		$ship->destroySection($system, $gamedata);
 	                	//}		
                 	}
                 }
+		*/
 
 				/* eliminate block but NOT continue!
 				if ($system->isDestroyed() && (!($system instanceof MissileLauncher))){ //missile launchers may still explode

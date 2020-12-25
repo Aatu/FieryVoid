@@ -25,12 +25,12 @@ class technicalTargetDrone extends BaseShip{
 		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 180, 360));
 		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 0, 180));
 		$this->addPrimarySystem(new Reactor(6, 35, 0, 0));
-		$this->addFrontSystem(new CnC(1, 1, 0, 0));
+		$this->addPrimarySystem(new CnC(1, 1, 0, 0));
 		$sensors = new Scanner(6, 23, 4, 20);
 		$sensors->markAdvanced();
 		$this->addFrontSystem($sensors);
 		$this->addPrimarySystem(new Engine(5, 20, 0, 20, 3));
-		$this->addPrimarySystem(new Hangar(4, 2));
+		$this->addPrimarySystem(new Hangar(6, 100));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
@@ -93,28 +93,34 @@ class technicalTargetDrone extends BaseShip{
 		$this->addRightSystem(new TwinArray(3, 6, 2, 0, 180));
 		
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
-		$this->addFrontSystem(new Structure( 5, 98));
+		$this->addFrontSystem(new Structure( 5, 1));
 		$this->addAftSystem(new Structure( 5, 95));
 		$this->addLeftSystem(new Structure( 4, 98));
 		$this->addRightSystem(new Structure( 4, 98));
-		$this->addPrimarySystem(new Structure( 6, 95));
+		$this->addPrimarySystem(new Structure( 6, 100));
 		   
 		//d20 hit chart
 		$this->hitChart = array(
 			
 			0=> array(
+				20 => "Hangar",
+			/*
 				10 => "Structure",
 				13 => "Scanner",
 				16 => "Engine",
 				17 => "Hangar",
 				19 => "Reactor",
 				20 => "C&C",
+				*/
 			),
 			1=> array(
+				20 => "Structure",
+				/*
 				5 => "Plasma Wave",
 				10 => "Stun Beam",
 				15 => "Scattergun",
 				20 => "3:Thruster", //front targets Port Thruster - but once destroyed, Front Structure shall be next
+				*/
 			),
 			2=> array(
 				5 => "Thruster",

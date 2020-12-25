@@ -65,7 +65,8 @@ Ultralight fighters - smallest Cascor fighters are of Ultralight type, which all
 Tiqincc - medium Cascor fighters have tail gun. In tabletop, this gun has -2 penalty when fired together with main gun. In FV it does not.
 
 CENTAURI
-Ballistic Torpedo - in tabletop this weapon is able to target multiple units. In FV it's lacking this ability.
+Ballistic Torpedo - in tabletop this weapon is able to target multiple units. In FV it's lacking this ability. Also, way to fire this weapon is very peculiar (You need to fire, THEN on the weapon itself indicate number of missiles launched).
+Plasma Stream - weapon that permanently reduces armor of systems hit (in FV - every system hit, in tabletop - only those hit by full rakes). Also, counts full armor for every rake, despite Raking mode. 
 Guardian Array - primarily defensive weapon that can intercept fire directed at third party, provided the weapon is between firing unit and it's target.
 	In tabletop, it needs to be shut down to switch between offensive (antifighter) and defensive modes.
 	There is no such requirement in Fiery Void, weapon can intercept or fire offensively at will.

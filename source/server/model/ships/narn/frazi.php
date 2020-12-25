@@ -39,6 +39,8 @@ class Frazi extends FighterFlight{
 			$frazi->addFrontSystem(new PairedParticleGun(330, 30, 5));
 			
 			
+			$frazi->addAftSystem(new RammingAttack(0, 0, 360, $frazi->getRammingFactor(), 0)); //ramming attack
+			
 			$this->addSystem($frazi);
 			
 		}

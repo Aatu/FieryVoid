@@ -398,13 +398,10 @@ class BaseShip {
 		}
 		if(!$rammingExists){
 			//add ramming attack
-			//check whether game id is safe (can be safely be deleted lin May 2018 or so)
-			///already safe enough, commenting out!
-			//if ((TacGamedata::$currentGameID >= TacGamedata::$safeGameID) || (TacGamedata::$currentGameID<1)){
-				if((!($this instanceof FighterFlight)) && (!($this->osat)) && (!$this->base) && (!$this->smallBase) ){
-					$this->addPrimarySystem(new RammingAttack(0, 0, 360, 0, 0));
-				}
-			//}
+			if((!($this instanceof FighterFlight)) && (!($this->osat)) && (!$this->base) && (!$this->smallBase) ){
+				$newRamming = new RammingAttack(0, 0, 360, 0, 0);
+				$this->addPrimarySystem($newRamming);
+			}
 		}
 
 			$this->notesFill(); //add miscellanous info to notes!
@@ -972,7 +969,7 @@ class BaseShip {
         }
         if($location!=0){ //if there is no appropriate structure for a section, then it must be PRIMARY Structure!
             return $this->getStructureSystem(0);
-        }else{
+        }else{ //should never happen!
             return null;
         }
     }
@@ -1223,7 +1220,7 @@ class BaseShip {
         if($weapon->ballistic){
             $movement = $shooter->getLastTurnMovement($fireOrder->turn); //turn - 1?...
             $posLaunch = mathlib::hexCoToPixel($movement->position);
-            $foundLocation = $this->getHitSectionPos($posLaunch, $fireOrder->turn);
+            $foundLocation = $this->getHitSectionPos($posLaunch, $fireOrder->turn, $returnDestroyed);
         }else{
             $foundLocation = $this->getHitSection($shooter, $fireOrder->turn, $returnDestroyed);
         }
@@ -1238,10 +1235,9 @@ class BaseShip {
             $this->activeHitLocations[$shooter->id] = $loc; //save location for further hits from same unit
             $foundLocation = $loc["loc"];
         }
-
-        if($foundLocation > 0 && $returnDestroyed == false){ //return it only if not destroyed as of previous turn
+        if(($foundLocation > 0) && ($returnDestroyed == false)){ //return it only if not destroyed as of previous turn
             $structure = $this->getStructureSystem($foundLocation); //this always returns appropriate structure
-            if($structure->isDestroyed($turn-1)) $foundLocaton = 0;
+            if($structure->isDestroyed($turn-1)) $foundLocation = 0;
         }
         return $foundLocation;
     }
@@ -1249,9 +1245,9 @@ class BaseShip {
         $foundLocation = 0;
         $loc = $this->doGetHitSectionPos($pos); //finds array with relevant data!
         $foundLocation = $loc["loc"];
-        if($foundLocation > 0 && $returnDestroyed == false){ //return it only if not destroyed as of previous turn
+        if(($foundLocation > 0) && ($returnDestroyed == false)){ //return it only if not destroyed as of previous turn
             $structure = $this->getStructureSystem($foundLocation); //this always returns appropriate structure
-            if($structure->isDestroyed($turn-1)) $foundLocaton = 0;
+            if($structure->isDestroyed($turn-1)) $foundLocation = 0;
         }
         return $foundLocation;
     }
