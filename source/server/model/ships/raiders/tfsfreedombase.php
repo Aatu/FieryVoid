@@ -46,7 +46,7 @@ class tfsfreedombase extends SmallStarBaseFourSections{
 				new ParticleCannon(5, 8, 7, $min, $max),
 				new ParticleCannon(5, 8, 7, $min, $max),
 				new Hangar(5, 7, 6),
-				new SubReactor(5, 12, 0, 0),
+				new SubReactorUniversal(5, 12, 0, 0),
 				new CargoBay(5, 36),
 				new Structure(5, 80)
 			);
@@ -56,7 +56,7 @@ class tfsfreedombase extends SmallStarBaseFourSections{
 				3 => "Particle Cannon",
 				8 => "Cargo Bay",
 				9 => "Hangar",
-				10 => "Reactor",
+				10 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			);

@@ -65,7 +65,7 @@ class OrionDelta extends StarBaseSixSections{
 				new InterceptorMKI(4, 4, 1, $min, $max),
 				new InterceptorMKI(4, 4, 1, $min, $max),
 				new Hangar(4, 6, 6),
-				new SubReactor(4, 20, 0, 0),
+				new SubReactorUniversal(4, 20, 0, 0),
 				new Structure( 4, 100)
 			);
 
@@ -78,7 +78,7 @@ class OrionDelta extends StarBaseSixSections{
 				3 => "Railgun",
 				5 => "Interceptor I",
 				6 => "Hangar",
-				7 => "Reactor",
+				7 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			);

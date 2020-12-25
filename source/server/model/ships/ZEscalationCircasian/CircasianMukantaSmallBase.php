@@ -35,25 +35,25 @@ class CircasianMukantaSmallBase extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Hangar(3, 6));
 		$this->addPrimarySystem(new CargoBay(3, 20));
 
-		$this->addFrontSystem(new EWDualRocketLauncher(2, 6, 2, 270, 90));
+		$this->addFrontSystem(new EWRangedDualRocketLauncher(2, 6, 2, 270, 90));
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
 		$this->addFrontSystem(new Hangar(2, 1));
 		$this->addFrontSystem(new CargoBay(2, 30));
 
-		$this->addAftSystem(new EWDualRocketLauncher(2, 6, 2, 90, 270));
+		$this->addAftSystem(new EWRangedDualRocketLauncher(2, 6, 2, 90, 270));
 		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 90, 270));
 		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 90, 270));
 		$this->addAftSystem(new Hangar(2, 1));
 		$this->addAftSystem(new CargoBay(2, 30));
 		
-		$this->addLeftSystem(new EWDualRocketLauncher(2, 6, 2, 180, 360));
+		$this->addLeftSystem(new EWRangedDualRocketLauncher(2, 6, 2, 180, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
 		$this->addLeftSystem(new Hangar(2, 1));
 		$this->addLeftSystem(new CargoBay(2, 30));
 		
-		$this->addRightSystem(new EWDualRocketLauncher(2, 6, 2, 0, 180));
+		$this->addRightSystem(new EWRangedDualRocketLauncher(2, 6, 2, 0, 180));
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
 		$this->addRightSystem(new Hangar(2, 1));
@@ -77,7 +77,7 @@ class CircasianMukantaSmallBase extends SmallStarBaseFourSections{
 			),
 			1=> array(
 				1 => "Light Particle Beam",
-				2 => "Dual Rocket Launcher",
+				2 => "Ranged Dual Rocket Launcher",
 				7 => "Cargo Bay",
 				8 => "Hangar",
 				18 => "Structure",
@@ -85,7 +85,7 @@ class CircasianMukantaSmallBase extends SmallStarBaseFourSections{
 			),
 			2=> array(
 				1 => "Light Particle Beam",
-				2 => "Dual Rocket Launcher",
+				2 => "Ranged Dual Rocket Launcher",
 				7 => "Cargo Bay",
 				8 => "Hangar",
 				18 => "Structure",
@@ -93,7 +93,7 @@ class CircasianMukantaSmallBase extends SmallStarBaseFourSections{
 			),	
 			3=> array(
 				1 => "Light Particle Beam",
-				2 => "Dual Rocket Launcher",
+				2 => "Ranged Dual Rocket Launcher",
 				7 => "Cargo Bay",
 				8 => "Hangar",
 				18 => "Structure",
@@ -101,7 +101,7 @@ class CircasianMukantaSmallBase extends SmallStarBaseFourSections{
 			),
 			4=> array(
 				1 => "Light Particle Beam",
-				2 => "Dual Rocket Launcher",
+				2 => "Ranged Dual Rocket Launcher",
 				7 => "Cargo Bay",
 				8 => "Hangar",
 				18 => "Structure",

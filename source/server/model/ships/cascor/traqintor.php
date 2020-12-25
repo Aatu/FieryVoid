@@ -46,7 +46,7 @@ class Traqintor extends SmallStarBaseFourSections{
 				4 => "Ion Cannon",
 				6 => "Dual Ion Bolter",
 				8 => "Cargo Bay",
-			    9 => "Reactor",
+			    9 => "Sub Reactor",
 			    10 => "Hangar",
 				18 => "Structure",
 				20 => "Primary",
@@ -56,7 +56,7 @@ class Traqintor extends SmallStarBaseFourSections{
 			    4 => "Ion Cannon",
 			    6 => "Dual Ion Bolter",
 			    8 => "Cargo Bay",
-			    9 => "Reactor",
+			    9 => "Sub Reactor",
 			    10 => "Hangar",
 			    18 => "Structure",
 			    20 => "Primary",
@@ -66,7 +66,7 @@ class Traqintor extends SmallStarBaseFourSections{
 			    4 => "Ion Cannon",
 			    6 => "Dual Ion Bolter",
 			    8 => "Cargo Bay",
-			    9 => "Reactor",
+			    9 => "Sub Reactor",
 			    10 => "Hangar",
 			    18 => "Structure",
 			    20 => "Primary",
@@ -76,7 +76,7 @@ class Traqintor extends SmallStarBaseFourSections{
 			    4 => "Ion Cannon",
 			    6 => "Dual Ion Bolter",
 			    8 => "Cargo Bay",
-			    9 => "Reactor",
+			    9 => "Sub Reactor",
 			    10 => "Hangar",
 			    18 => "Structure",
 			    20 => "Primary",
@@ -85,7 +85,7 @@ class Traqintor extends SmallStarBaseFourSections{
 
 
 		$this->addPrimarySystem(new Reactor(5, 26, 0, 0));
-		$this->addPrimarySystem(new CnC(6, 40, 0, 0)); //originally 2 systems with sructure 20, armor 5 each
+		$this->addPrimarySystem(new ProtectedCnC(6, 40, 0, 0)); //originally 2 systems with sructure 20, armor 5 each
 		$this->addPrimarySystem(new Scanner(5, 18, 5, 7));
 		$this->addPrimarySystem(new Scanner(5, 18, 5, 7));
 		$this->addPrimarySystem(new Hangar(5, 4));
@@ -95,7 +95,7 @@ class Traqintor extends SmallStarBaseFourSections{
 		$this->addFrontSystem(new Hangar(4, 6));
 		$this->addFrontSystem(new Hangar(5, 6));
 		$this->addFrontSystem(new CargoBay(4, 25));
-		$this->addFrontSystem(new SubReactor(5, 25, 0, 0)); //combining 2 original subreacotrs, from outer section (4/20) and inter-section (5/11)
+		$this->addFrontSystem(new SubReactorUniversal(5, 25, 0, 0)); //combining 2 original subreacotrs, from outer section (4/20) and inter-section (5/11)
 		$this->addFrontSystem(new DualIonBolter(5, 4, 4, 270, 360));
 		$this->addFrontSystem(new DualIonBolter(5, 4, 4, 0, 90));
 		$this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 60));
@@ -107,7 +107,7 @@ class Traqintor extends SmallStarBaseFourSections{
 		$this->addAftSystem(new Hangar(4, 6));
 		$this->addAftSystem(new Hangar(5, 6));
 		$this->addAftSystem(new CargoBay(4, 25));
-		$this->addAftSystem(new SubReactor(5, 25, 0, 0)); //combining 2 original subreacotrs, from outer section (4/20) and inter-section (5/11)
+		$this->addAftSystem(new SubReactorUniversal(5, 25, 0, 0)); //combining 2 original subreacotrs, from outer section (4/20) and inter-section (5/11)
 		$this->addAftSystem(new DualIonBolter(5, 4, 4, 90, 180));
 		$this->addAftSystem(new DualIonBolter(5, 4, 4, 180, 270));
 		$this->addAftSystem(new IonTorpedo(4, 5, 4, 120, 240));
@@ -119,7 +119,7 @@ class Traqintor extends SmallStarBaseFourSections{
 		$this->addRightSystem(new Hangar(4, 6));
 		$this->addRightSystem(new Hangar(5, 6));
 		$this->addRightSystem(new CargoBay(4, 25));
-		$this->addRightSystem(new SubReactor(5, 25, 0, 0)); //combining 2 original subreacotrs, from outer section (4/20) and inter-section (5/11)
+		$this->addRightSystem(new SubReactorUniversal(5, 25, 0, 0)); //combining 2 original subreacotrs, from outer section (4/20) and inter-section (5/11)
 		$this->addRightSystem(new DualIonBolter(5, 4, 4, 0, 90));
 		$this->addRightSystem(new DualIonBolter(5, 4, 4, 90, 180));
 		$this->addRightSystem(new IonTorpedo(4, 5, 4, 30, 150));
@@ -131,7 +131,7 @@ class Traqintor extends SmallStarBaseFourSections{
 		$this->addLeftSystem(new Hangar(4, 6));
 		$this->addLeftSystem(new Hangar(5, 6));
 		$this->addLeftSystem(new CargoBay(4, 25));
-		$this->addLeftSystem(new SubReactor(5, 25, 0, 0)); //combining 2 original subreacotrs, from outer section (4/20) and inter-section (5/11)
+		$this->addLeftSystem(new SubReactorUniversal(5, 25, 0, 0)); //combining 2 original subreacotrs, from outer section (4/20) and inter-section (5/11)
 		$this->addLeftSystem(new DualIonBolter(5, 4, 4, 270, 360));
 		$this->addLeftSystem(new DualIonBolter(5, 4, 4, 180, 270));
 		$this->addLeftSystem(new IonTorpedo(4, 5, 4, 210, 330));

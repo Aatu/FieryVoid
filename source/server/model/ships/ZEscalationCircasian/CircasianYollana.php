@@ -4,7 +4,7 @@ class CircasianYollana extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 225;
+        $this->pointCost = 250;
         $this->faction = "ZEscalation Circasian";
         $this->phpclass = "CircasianYollana";
         $this->imagePath = "img/ships/EscalationWars/CircasianYollana.png";
@@ -33,14 +33,13 @@ class CircasianYollana extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 8, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 5, 4));        
         
-		$this->addFrontSystem(new LightParticleBeamShip(3, 2, 1, 300, 360));
-		$this->addFrontSystem(new LightParticleBeamShip(3, 2, 1, 300, 360));
-		$this->addFrontSystem(new LightParticleBeamShip(3, 2, 1, 0, 60));
-		$this->addFrontSystem(new LightParticleBeamShip(3, 2, 1, 0, 60));
+		$this->addFrontSystem(new LightParticleCannon(3, 6, 5, 300, 360));
+		$this->addFrontSystem(new LightParticleCannon(3, 6, 5, 0, 60));
+		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 270, 90));
         $this->addFrontSystem(new Thruster(2, 5, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 5, 0, 3, 1));
 	    
-		$this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 120, 240));
+		$this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 90, 270));
         $this->addAftSystem(new Thruster(3, 6, 0, 3, 2));    
         $this->addAftSystem(new Thruster(3, 6, 0, 3, 2));    
         $this->addAftSystem(new Thruster(3, 6, 0, 3, 2));    
@@ -63,7 +62,8 @@ class CircasianYollana extends MediumShip{
 
 		1=> array(
 			4 => "Thruster",
-			7 => "Light Particle Beam",
+			7 => "Light Particle Cannon",
+			8 => "Light Particle Beam",
 			17 => "Structure",
 			20 => "Primary",
 		),

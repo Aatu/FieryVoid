@@ -31,7 +31,7 @@ class OmegaGamma  extends BaseShip{
 	$this->initiative = 1*5; 
          
         $this->addPrimarySystem(new Reactor(6, 25, 0, 0));
-        $this->addPrimarySystem(new CnC(7, 20, 0, 0)); //I'm afraid to put in second C&C, so I combine their structure and increase armor
+        $this->addPrimarySystem(new ProtectedCnC(7, 20, 0, 0)); //One armor 6/str16 and a second one 4/4
         $this->addPrimarySystem(new Scanner(6, 20, 4, 8));
         $this->addPrimarySystem(new Engine(6, 20, 0, 8, 3));
 	$this->addPrimarySystem(new Hangar(6, 26, 24));
