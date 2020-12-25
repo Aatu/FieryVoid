@@ -1600,6 +1600,15 @@ spl_autoload_register(
 				'gaimtoraosat' => '/server/model/ships/gaim/gaimToraOSAT.php',
 				'gaimtracha' => '/server/model/ships/gaim/gaimTracha.php',
 				
+				//Corillani
+				'plasmaprojector' => 'server/model/weapons/plasma.php',
+				'conosti' => '/server/model/ships/corillani/Conosti.php',
+				'garunda' => '/server/model/ships/corillani/Garunda.php',
+				'llartol' => '/server/model/ships/corillani/Llartol.php',
+				'mollanta' => '/server/model/ships/corillani/Mollanta.php',
+				'zftrtillinicpn' => '/server/model/ships/corillani/ZFtrTilliniCPN.php',
+				'zftrtillinidoc' => '/server/model/ships/corillani/ZFtrTilliniDoC.php',
+				'zftrtilliniosf' +> '/server/model/ships/corillani/ZFtrTilliniOSF.php',
 				
 				
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
