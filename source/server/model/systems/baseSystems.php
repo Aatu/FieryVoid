@@ -362,6 +362,7 @@ class MagGravReactor extends Reactor{
 
 
 //warning: needs external code to function properly. Intended for starbases only.
+/* let's disable it - all use changed to SubReactorUniversal!
 class SubReactor extends ShipSystem{	
 	//SubReactor is very important, though not as much as primary reactor itself!
 	public $repairPriority = 8;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -392,6 +393,7 @@ class SubReactor extends ShipSystem{
         return false;
     }	
 }
+*/
 
 
 
@@ -405,6 +407,9 @@ class SubReactorUniversal extends ShipSystem{
     public $displayName = "Sub Reactor";
     public $iconPath = "reactor.png";
     public $primary = true; //well, it's intended to be fitted on outer sections, but treated as core system
+	
+	//SubReactor is very important, though not as much as primary reactor itself!
+	public $repairPriority = 8;
     	
     public $possibleCriticals = array(
         11=>"OutputReduced1", 
@@ -692,6 +697,32 @@ class CnC extends ShipSystem{
         parent::__construct($armour, $maxhealth, $powerReq, $output );
     }
 } //endof class CnC
+
+/*Protected CnC - as compensation for ships lacking two C&Cs, these systems get different (lighter) critical table 
+*/
+class ProtectedCnC extends CnC{
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= 'This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
+	}
+	
+	public $possibleCriticals = array(
+		8=>"CommunicationsDisrupted", 
+		16=>"PenaltyToHit", 
+		20=>"RestrictedEW", 
+		24=>array("ReducedIniativeOneTurn","ReducedIniative"), 
+		32=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative"), 
+		40=>array("RestrictedEW","ReducedIniative","ShipDisabledOneTurn")
+    );
+	
+}//endof class ProtectedCnC
+	
 
 
 class CargoBay extends ShipSystem{

@@ -63,7 +63,7 @@ class Orion extends StarBaseSixSections{
 				new InterceptorMKII(4, 4, 2, $min, $max),
 				new InterceptorMKII(4, 4, 2, $min, $max),
 				new Hangar(4, 6, 6),
-				new SubReactor(4, 20, 0, 0),
+				new SubReactorUniversal(4, 20, 0, 0),
 				new Structure( 4, 100)
 			);
 
@@ -77,7 +77,7 @@ class Orion extends StarBaseSixSections{
 				5 => "Interceptor II",
 				6 => "Quad Particle Beam",
 				7 => "Hangar",
-				8 => "Reactor",
+				8 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			);

@@ -65,7 +65,7 @@ class wlcChlonasVaLothar extends SmallStarBaseThreeSections{
 				new Hangar(4, 14),
 				new CargoBay(4, 24),
 				new CargoBay(4, 24),
-				new SubReactor(4, 20, 0, 0),
+				new SubReactorUniversal(4, 20, 0, 0),
 				new Structure( 4, 154)
 			);
 
@@ -79,7 +79,7 @@ class wlcChlonasVaLothar extends SmallStarBaseThreeSections{
 				9 => "Light Particle Beam",
 				10 => "Hangar",
 				11 => "Cargo Bay",
-				12 => "Reactor",
+				12 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			);

@@ -48,7 +48,7 @@ class SanctuaryBase extends StarBaseSixSections{
 				new StdParticleBeam(3, 4, 1, $min, $max),
 				new StdParticleBeam(3, 4, 1, $min, $max),
 				new Hangar(3, 1),
-				new SubReactor(3, 8, 0, 0),
+				new SubReactorUniversal(3, 8, 0, 0),
 				new CargoBay(3, 36),
 				new Structure(3, 76)
 			);
@@ -57,7 +57,7 @@ class SanctuaryBase extends StarBaseSixSections{
 				3 => "Standard Particle Beam",
 				7 => "Cargo",
 				8 => "Hangar",
-				9 => "Reactor",
+				9 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			);
