@@ -38,7 +38,7 @@ class NovaStarfury extends FighterFlight{
             $frontGun = new PairedParticleGun(330, 30, 4);
             $frontGun->displayName = "Uni-Pulse Cannon";
             $fighter->addFrontSystem($frontGun);
-		$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack	
+		//$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack	
             $this->addSystem($fighter);
 	}
     }
