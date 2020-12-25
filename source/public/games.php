@@ -55,11 +55,11 @@ if (isset($_SESSION["user"])) {
 <div class="panel news">
     <!-- <div id="newsHeader">Latest News - September 2020</div> -->
     <div id="newsEntry">
-        <!--
+        
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
-        -->
+        
 		---------- <b>LATEST NEWS - December 2020</b> ----------	
 	    <br><b><u>Simultaneous movement change</u></b> – I have slightly moved Ini brackets - which should result in more units in higher brackets (especially 6th!) and less in bracket 1 (this would make Ini penalties more effective, too - especially for capital ships)  
 	    <br><b>Restricted EW crit fix</b> – now -2 penalty does stack
@@ -67,8 +67,11 @@ if (isset($_SESSION["user"])) {
   	    <br><b>Fighter ballistics fixed</b> - now OB is used correctly
   	    <br><b>Onmouseover additional information</b> - firing penalty due to rolls/pivots/combat pivots is now explicitly listed onmouseover
   	    <br><b>Multiplayer games</b> - allied units should be shown in friendly green and prevented from being fired upon
-	    <br><br><b>WARNING WARNING WARNING</b> - Soon (eg. this year ;) ) I plan to add Ramming Attack to all fighters that don't have it yet, and also to immobile constructs. This will break games that use them, so please try to avoid such units for a week or so when creating new games ;)
-  
+  	    <br><b>Zombie shield bug fixed</b> - recently destroyed shield no longer gives protection
+  	    <br><b>Open PRIMARY now behaving as such</b> - damage allocation bug fixed
+  	    <br><b>Enormous unit now behaving as such</b> - or at least trying to. They will be automatically rammed by anything that enters the same hex! Fighters are advised to stay that one hex away, as Skin Dancing is not implemented.
+  	    <br><b>All fighters can now ram</b> - first victims are games they were currently in... Sorry for that, I tried to find moment when these particular units are not used but didn't manage with a few factions!
+  	    <br><b>Starting speed options changed</b> - now possible range is 0-10.
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
