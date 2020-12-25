@@ -2177,7 +2177,8 @@ class RammingAttack extends Weapon{
 		parent::fire($gamedata, $fireOrder);
 		if($fireOrder->shotshit > 0){
 			$pos = null;
-			$shooter = $gamedata->getShipById($fireOrder->targetid);
+			//$shooter = $gamedata->getShipById($fireOrder->targetid);
+			$shooter = $this->unit; //technically this unit after all
 			$target = $this->unit;
 			$fireOrder->chosenLocation = 0;//to be redetermined!
 			$damage = $this->getReturnDamage($fireOrder);
@@ -2189,6 +2190,17 @@ class RammingAttack extends Weapon{
 				$fireOrder->calledid = $ftr->id;
 			}
 			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
+			if($fireOrder->id < 0){ //for automatic firing orders return damage will not be correctly assigned; create a virtual firing order for this damage to be displayed
+				$newFireOrder = new FireOrder(
+					-1, "normal", $shooter->id, $target->id,
+					$this->id, -1, $gamedata->turn, 1, 
+					100, 100, 1, 1, 0,
+					0,0,'Reactor',10000
+				);
+				$newFireOrder->pubnotes = "Automatic ramming - return damage.";
+				$newFireOrder->addToDB = true;
+				$this->fireOrders[] = $newFireOrder;				
+			}
 			$fireOrder->calledid = -1; //just in case!
 		}
 	} //endof function fire
