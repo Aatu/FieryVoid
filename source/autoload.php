@@ -643,7 +643,7 @@ spl_autoload_register(
                 'phalan' => '/server/model/ships/centauri_old/phalan.php',
                 'phalani' => '/server/model/ships/centauri_old/phalanI.php',
                 'phalanm' => '/server/model/ships/centauri_old/phalanM.php',
-                'phalanmnav' => '/server/model/ships/centauri_old/phalanMNav.php',
+                //'phalanmnav' => '/server/model/ships/centauri_old/phalanMNav.php',
                 'phalanx' => '/server/model/ships/centauri/phalanx.php',
                 'phase' => '/server/Phase/Phase.php',
                 'phasefactory' => '/server/Phase/PhaseFactory.php',
@@ -908,7 +908,7 @@ spl_autoload_register(
                 'targath' => '/server/model/ships/dilgar/targath.php',
                 'targathc' => '/server/model/ships/dilgar/targathC.php',
                 'tarza' => '/server/model/ships/narn/tarza.php',
-                'tarzanav' => '/server/model/ships/narn/tarzanav.php',
+                //'tarzanav' => '/server/model/ships/narn/tarzanav.php',
                 'tatros' => '/server/model/ships/centauri_old/tatros.php',
                 'technicaltargetdrone' => '/server/model/ships/customs/technicalTargetDrone.php',
 				'zzftrtargetdrone' => '/server/model/ships/customs/zzftrTargetDrone.php',
@@ -932,7 +932,7 @@ spl_autoload_register(
                 'throkan' => '/server/model/ships/drazi_raiders/throkan.php',
                 'thruster' => '/server/model/systems/baseSystems.php',
                 'thunderboltstarfury' => '/server/model/ships/EA/thunderboltStarfury.php',
-                'thunderboltstarfurynav' => '/server/model/ships/EA/thunderboltStarfuryNav.php',
+                //'thunderboltstarfurynav' => '/server/model/ships/EA/thunderboltStarfuryNav.php',
                 'tigara' => '/server/model/ships/minbari/tigara.php',
                 'tigarin' => '/server/model/ships/minbari/tigarin.php',
                 'tigerstarfury' => '/server/model/ships/EA/tigerStarfury.php',
@@ -1600,6 +1600,7 @@ spl_autoload_register(
 				'gaimtoraosat' => '/server/model/ships/gaim/gaimToraOSAT.php',
 				'gaimtracha' => '/server/model/ships/gaim/gaimTracha.php',
 				
+
 				//Corillani
 				'plasmaprojector' => 'server/model/weapons/plasma.php',
 				'conosti' => '/server/model/ships/corillani/Conosti.php',
@@ -1609,7 +1610,6 @@ spl_autoload_register(
 				'zftrtillinicpn' => '/server/model/ships/corillani/ZFtrTilliniCPN.php',
 				'zftrtillinidoc' => '/server/model/ships/corillani/ZFtrTilliniDoC.php',
 				'zftrtilliniosf' +> '/server/model/ships/corillani/ZFtrTilliniOSF.php',
-				
 				
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
