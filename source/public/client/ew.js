@@ -21,7 +21,7 @@ window.ew = {
         /*if (ship.base)*/{
             var primary = shipManager.getPrimaryCnC(ship);
             if (primary && shipManager.criticals.hasCritical(primary, "RestrictedEW")) {
-                ret -= 2;
+                ret -= 2 * shipManager.criticals.hasCritical(primary, "RestrictedEW"); //-2 does stack!
             }
             if (primary) {
                 ret -= shipManager.criticals.hasCritical(primary, "tmpsensordown"); //Sensors reduced

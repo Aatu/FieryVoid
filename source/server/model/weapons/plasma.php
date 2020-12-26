@@ -980,8 +980,48 @@ class MegaPlasma extends Plasma{
 
 } //end of class MegaPlasma
 
+class PlasmaProjector extends Raking{
 
+	public $name = "PlasmaProjector";
+	public $displayName = "Plasma Projector";
+	public $iconPath = "PlasmaProjector.png";
+	public $animation = "beam";
+	public $animationColor = array(75, 250, 90);
+	public $trailColor = array(75, 250, 90);
+	public $projectilespeed = 20;
+	public $animationWidth = 4;
+	public $animationExplosionScale = 0.3;
+	public $trailLength = 500;
+	public $priority = 6;
 
+	public $rangeDamagePenalty = 0.25;
+	public $loadingtime = 3;
+	public $raking = 8;
+	public $rangePenalty = 0.5;
+	public $fireControl = array(null, 2, 3);
+
+	public $damageType = "Raking";
+	public $weaponClass = "Plasma";	
+	public $firingModes = array(1 => "Raking");
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 8;
+			if ( $powerReq == 0 ) $powerReq = 5;
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "Damage reduced by 1 points per 4 hexes.";
+			$this->data["Special"] .= "<br>Does damage in raking mode (8)";
+			$this->data["Special"] .= "<br>Ignores half of armor.";
+	}
+			
+    public function getDamage($fireOrder){        return Dice::d(10,4)+5;   }
+	public function setMinDamage(){     $this->minDamage = 9;      }
+	public function setMaxDamage(){     $this->maxDamage = 45;      }
+
+}// End of class PlasmaProjector
 
 
 ?>

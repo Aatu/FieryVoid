@@ -28,7 +28,9 @@ window.ShipTooltipFireMenu = function () {
     }
 
     function isEnemy() {
-        return this.selectedShip && !gamedata.isMyShip(this.targetedShip);
+        //return this.selectedShip && !gamedata.isMyShip(this.targetedShip);
+		//actually enemy is anyone not on players' TEAM, not every other player:
+		return this.selectedShip && !gamedata.isMyOrTeamOneShip(this.targetedShip);
     }
 
     function hasWeaponsSelected() {

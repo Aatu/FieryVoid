@@ -26,7 +26,7 @@ class Selatra extends StarBaseSixSections{
 			),
 		);
 		$this->addPrimarySystem(new Reactor(5, 26, 0, 0));
-		$this->addPrimarySystem(new CnC(5, 40, 0, 0)); 
+		$this->addPrimarySystem(new ProtectedCnC(6, 40, 0, 0)); //original: 2x20, armor 5
 		$this->addPrimarySystem(new Scanner(5, 24, 5, 7));
 		$this->addPrimarySystem(new Scanner(5, 24, 5, 7));
 		$this->addPrimarySystem(new Hangar(5, 6));
@@ -44,7 +44,7 @@ class Selatra extends StarBaseSixSections{
 				new AssaultLaser(4, 6, 4, $min, $max),
 				new GraviticShield(4, 6, 0, 2, $min, $max),
 				new CargoBay(4, 25),
-				new SubReactor(4, 20, 0, 0),
+				new SubReactorUniversal(4, 20, 0, 0),
 				new Structure(4, 80)
 			);
 			$loc = $this->locations[$i];
@@ -54,7 +54,7 @@ class Selatra extends StarBaseSixSections{
 				5 => "Sensor Spear",
 				6 => "Gravitic Shield",	
 				8 => "Cargo Bay",
-				10 => "Reactor",
+				10 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			);

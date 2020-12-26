@@ -7,7 +7,7 @@ window.ShipTooltipBallisticsMenu = function () {
     function ShipTooltipBallisticsMenu(shipIconContainer, turn, allowIntercept, selectedShip) {
         this.shipIconContainer = shipIconContainer;
         this.turn = turn;
-        this.allowIntercept = false; //allowIntercept; TODO: fix manual intercept
+        this.allowIntercept = false; //obsolete, actually
         this.selectedShip = selectedShip;
     }
 

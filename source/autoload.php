@@ -129,6 +129,7 @@ spl_autoload_register(
                 'civilianfreighter' => '/server/model/ships/civilians/civilianFreighter.php',
                 'civiliantanker' => '/server/model/ships/civilians/civilianTanker.php',
                 'cnc' => '/server/model/systems/baseSystems.php',
+                'protectedcnc' => '/server/model/systems/baseSystems.php',
                 'cobra' => '/server/model/ships/raiders/cobra.php',
                 'adjudicator' => '/server/model/ships/streib/adjudicator.php',
                 'collector' => '/server/model/ships/streib/collector.php',
@@ -836,7 +837,7 @@ spl_autoload_register(
                 'strikehawk' => '/server/model/ships/drazi/strikehawk.php',
                 'structure' => '/server/model/systems/baseSystems.php',
                 'stunbeam' => '/server/model/weapons/specialWeapons.php',
-                'subreactor' => '/server/model/systems/baseSystems.php',
+                //'subreactor' => '/server/model/systems/baseSystems.php', //obsoleted!
                 'sulust' => '/server/model/ships/centauri/sulust.php',
                 'sunhawk' => '/server/model/ships/drazi/sunhawk.php',
                 'superheavyfighter' => '/server/model/ships/FighterFlight.php',
@@ -1121,6 +1122,8 @@ spl_autoload_register(
 				'ewomissilerack' => '/server/model/weapons/customEscalation.php',
 				'ewfightertorpedolauncher' => '/server/model/weapons/customEscalation.php',
 				'ewlightplasmamine' => '/server/model/weapons/customEscalation.php',
+				'ewrangedrocketlauncher' => '/server/model/weapons/customEscalation.php',
+				'ewrangeddualrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewplasmamine' => '/server/model/weapons/customEscalation.php',
 			//EW gravitic weapons
 				'ewgravitictractingrod' => '/server/model/weapons/customEscalation.php',
@@ -1182,6 +1185,7 @@ spl_autoload_register(
 				//Escalation Wars - Circasian
 				'circasianaschartrooptransport' => '/server/model/ships/ZEscalationCircasian/CircasianAscharTroopTransport.php',
 				'circasiancairn' => '/server/model/ships/ZEscalationCircasian/CircasianCairn.php',
+				'circasianelaric' => '/server/model/ships/ZEscalationCircasian/CircasianElaric.php',
 				'circasianfeilah' => '/server/model/ships/ZEscalationCircasian/CircasianFeilah.php',
 				'circasiangallahcarrier' => '/server/model/ships/ZEscalationCircasian/CircasianGallahCarrier.php',
 				'circasiangallahtransport' => '/server/model/ships/ZEscalationCircasian/CircasianGallahTransport.php',
@@ -1211,6 +1215,7 @@ spl_autoload_register(
 				'circasianrotarra' => '/server/model/ships/ZEscalationCircasian/CircasianRotarra.php',
 				'circasianrehkafighter' => '/server/model/ships/ZEscalationCircasian/CircasianRehkaFighter.php',
 				'circasianshenna' => '/server/model/ships/ZEscalationCircasian/CircasianShenna.php',
+				'circasiansularascoutcarrier' => '/server/model/ships/ZEscalationCircasian/CircasianSularaScoutCarrier.php',
 				'circasianthracejumpcruiser' => '/server/model/ships/ZEscalationCircasian/CircasianThraceJumpcruiser.php',
 				'circasiantoltara' => '/server/model/ships/ZEscalationCircasian/CircasianToltara.php',
 				'circasiantormin' => '/server/model/ships/ZEscalationCircasian/CircasianTormin.php',
@@ -1595,6 +1600,15 @@ spl_autoload_register(
 				'gaimtoraosat' => '/server/model/ships/gaim/gaimToraOSAT.php',
 				'gaimtracha' => '/server/model/ships/gaim/gaimTracha.php',
 				
+				//Corillani
+				'plasmaprojector' => 'server/model/weapons/plasma.php',
+				'conosti' => '/server/model/ships/corillani/Conosti.php',
+				'garunda' => '/server/model/ships/corillani/Garunda.php',
+				'llartol' => '/server/model/ships/corillani/Llartol.php',
+				'mollanta' => '/server/model/ships/corillani/Mollanta.php',
+				'zftrtillinicpn' => '/server/model/ships/corillani/ZFtrTilliniCPN.php',
+				'zftrtillinidoc' => '/server/model/ships/corillani/ZFtrTilliniDoC.php',
+				'zftrtilliniosf' +> '/server/model/ships/corillani/ZFtrTilliniOSF.php',
 				
 				
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    

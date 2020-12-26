@@ -36,7 +36,7 @@ class JaStat extends StarBaseFiveSections{
 		);
 
 		//$this->addPrimarySystem(new CnC(6, 25, 0, 0)); 
-		$this->addPrimarySystem(new CnC(7, 50, 0, 0)); //instead of one 6x25 C&C, make it 1 7x50
+		$this->addPrimarySystem(new ProtectedCnC(7, 50, 0, 0)); //instead of two 6x25 C&C, make it 1 7x50
 		$this->addPrimarySystem(new Scanner(6, 28, 4, 8));
 		$this->addPrimarySystem(new Scanner(6, 28, 4, 8));
 		$this->addPrimarySystem(new Reactor(6, 25, 0, 0));
@@ -66,7 +66,7 @@ class JaStat extends StarBaseFiveSections{
 				new LightPulse(5, 4, 2, $min, $max),
 				new LightPulse(5, 4, 2, $min, $max),
 				new CargoBay(5, 36),
-				new SubReactor(5, 35, 0, 0),
+				new SubReactorUniversal(5, 35, 0, 0),
 				new Hangar(5, 7, 6),
 				new Structure(5, 90)
 			);
@@ -81,7 +81,7 @@ class JaStat extends StarBaseFiveSections{
 				5 => "Twin Array",
 				6 => "Light Pulse Cannon",
 				8 => "Cargo Bay",
-				9 => "Reactor",
+				9 => "Sub Reactor",
 				10 => "Hangar",
 				18 => "Structure",
 				20 => "Primary",
