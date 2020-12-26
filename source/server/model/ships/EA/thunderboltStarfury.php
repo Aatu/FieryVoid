@@ -43,6 +43,8 @@ class ThunderboltStarfury extends FighterFlight{
             $fighter->addFrontSystem(new FighterMissileRack(3, 330, 30));
             $fighter->addFrontSystem(new GatlingPulseCannon(330, 30));
             $fighter->addFrontSystem(new FighterMissileRack(3, 330, 30));
+		
+		//$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack	
             
             $this->addSystem($fighter);
         }

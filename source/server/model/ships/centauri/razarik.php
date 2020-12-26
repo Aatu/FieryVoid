@@ -44,6 +44,8 @@ class Razarik extends FighterFlight{
             $fighter->addFrontSystem(new PairedParticleGun(330, 30, 1));
             $fighter->addFrontSystem(new FighterTorpedoLauncher(2, 330, 30));
 
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+			
             $this->addSystem($fighter);
         }
     }

@@ -287,16 +287,18 @@ class ShipSystem {
             }
         }        
 
-	    /*moved to potentially exploding systems themselves
+	/*moved to potentially exploding systems themselves
         if ($this instanceof MissileLauncher || $this instanceof ReloadRack){
             $crit = $this->testAmmoExplosion($ship, $gamedata);
             $crits[] = $crit;
         }
         else */
-		if ($this instanceof SubReactor){
+	/*SubReactor is now obsoleted, replaced by SubReactorUniversal
+	if ($this instanceof SubReactor){
             //debug::log("subreactor, multiple damage by 0.5");
             $damageMulti = 0.5;
         }
+	*/
 
         $roll = Dice::d(20) + floor(($this->getTotalDamage())*$damageMulti) + $add +$bonusCrit;
         $criticalTypes = -1;
@@ -341,10 +343,10 @@ class ShipSystem {
                 if ($turn === false){ //now should never go here...
                     $count++;
                 }else if ((($critical->oneturn && $critical->turn+1 == $turn) || !$critical->oneturn) && $critical->turn<= $turn){
-					//additional test for turn of ending effect!
-					if(($critical->turnend==0) || ($critical->turnend>=$turn)){
-						$count++;
-					}
+			//additional test for turn of ending effect!
+			if(($critical->turnend==0) || ($critical->turnend>=$turn)){
+				$count++;
+			}
                 }
             }
         }
@@ -374,7 +376,7 @@ class ShipSystem {
         //convert percentage mod to absolute value...
         if($percentageMod != 0){
             //$this->outputMod += round($percentageMod * $this->output /100 );
-			$this->outputMod += round($percentageMod * $this->output /100 );
+		$this->outputMod += round($percentageMod * $this->output /100 );
         }    
     }
 	
@@ -398,9 +400,13 @@ class ShipSystem {
 	    /*or if it's Structure system is destroyed AT LEAST ONE TURN EARLIER*/
 	    $currTurn = TacGamedata::$currentTurn;
 	    if($turn !== false) $currTurn = $turn;
-	    $prevTurn = $currTurn-1;
+		if($currTurn < TacGamedata::$currentTurn){ //if we're looking for past game state, system is destroyed even if structure was destroyed on the same turn
+			$prevTurn = $currTurn;
+		}else{ //system has fallen off if structure was destroyed a turn earlier
+			$prevTurn = $currTurn-1; 
+		}
         
-        if ( ! ($this instanceof Structure) && $this->structureSystem && $this->structureSystem->isDestroyed($prevTurn))
+        if ( (!($this instanceof Structure)) && $this->structureSystem && $this->structureSystem->isDestroyed($prevTurn))
             return true;
   
 		$isDestroyed=false;

@@ -55,6 +55,7 @@ class BadgerStarfury extends FighterFlight{
             $fighter->addFrontSystem(new FighterMissileRack(4, 330, 30));
             
             $fighter->addAftSystem($aftGun);
+		$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack	
             
             $this->addSystem($fighter);
 	   }

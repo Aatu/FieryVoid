@@ -44,7 +44,7 @@ class Pikitos extends FighterFlight{
             $fighter->addFrontSystem(new LightGraviticBolt(330, 30, 0));
             $fighter->addFrontSystem(new LightGravitonBeam(330, 30, 0));
 
-			//$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+		$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
 
             $this->addSystem($fighter);

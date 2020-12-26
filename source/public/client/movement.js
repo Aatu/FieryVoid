@@ -62,7 +62,7 @@ shipManager.movement = {
         var speed = ship.deploymove.speed;
         var newSpeed = speed + value;
 
-        if (newSpeed >= 3 && newSpeed <= 7) {
+        if (newSpeed >= 0 && newSpeed <= 10) { //originally 2-7, changed as people wanted to try scenarios where that was too limiting
             ship.deploymove.speed += value;
         }
     },

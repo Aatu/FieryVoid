@@ -129,6 +129,19 @@
      
 		}
 		
+
+	/*function called before firing orders are resolved; weapons with special actions (like auto-fire, combination fire, etc)
+		will have their special before firing logic here (like creating additional fire orders!)
+		In future, other systems may have similar needs
+		For fighter - it needs to call its own subsystems!
+	*/
+    public function beforeFiringOrderResolution($gamedata)
+    {
+            foreach ($this->systems as $system){
+                $system->beforeFiringOrderResolution($gamedata);
+            }		
+    }		
+		
 	public function testCritical($ship, $gamedata, $crits, $add = 0){
 		$d = Dice::d(10);
 		
