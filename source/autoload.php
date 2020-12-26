@@ -1612,11 +1612,9 @@ spl_autoload_register(
 				'zftrtilliniosf' +> '/server/model/ships/corillani/ZFtrTilliniOSF.php',
 				
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
-				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
+				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',				
 				
-				
-				'apollostrike' => '/server/model/ships/EA/apollostrike.php',
-						
+				'apollostrike' => '/server/model/ships/EA/apollostrike.php',						
 				
 				//let's end this with unit enhancement class...		    
 				'enhancements' => '/server/model/ships/Enhancements.php'
