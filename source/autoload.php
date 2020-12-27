@@ -1608,7 +1608,7 @@ spl_autoload_register(
 				'mollanta' => '/server/model/ships/corillani/Mollanta.php',
 				'zftrtillinicpn' => '/server/model/ships/corillani/ZFtrTilliniCPN.php',
 				'zftrtillinidoc' => '/server/model/ships/corillani/ZFtrTilliniDoC.php',
-				'zftrtilliniosf' +> '/server/model/ships/corillani/ZFtrTilliniOSF.php',
+				'zftrtilliniosf' => '/server/model/ships/corillani/ZFtrTilliniOSF.php',
 				
 				
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
