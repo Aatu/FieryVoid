@@ -1604,7 +1604,11 @@ spl_autoload_register(
 				//TO BE DELETED once nobody is using them		    
                 		'tobedeletedpikitos' => '/server/model/ships/brakiri/ToBeDeletedPikitos.php',	    
                 		'tobedeletedfalkosi' => '/server/model/ships/brakiri/ToBeDeletedFalkosi.php',	    
-                		'tobedeletedaurora' => '/server/model/ships/EA/ToBeDeletedAurora.php',
+                		'tobedeletedaurora' => '/server/model/ships/EA/ToBeDeletedAurora.php',	        
+                		'tobedeletednova' => '/server/model/ships/EA/ToBeDeletedNova.php',	        
+                		'tobedeletedtiger' => '/server/model/ships/EA/ToBeDeletedTiger.php',	        
+                		'tobedeletedtbolt' => '/server/model/ships/EA/ToBeDeletedTBolt.php',	    
+                		'tobedeletedsentri' => '/server/model/ships/centauri/ToBeDeletedSentri.php',
 		    		
 		    
 		    
