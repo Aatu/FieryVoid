@@ -13,7 +13,7 @@ class Llartol extends BaseShip{
         $this->fighters = array("assault shuttles"=>12);
 	    $this->isd = 2242;
 		$this->notes = 'Corillani Peoples Navy (CPN)';	    
-        $this->occurence = "Uncommon";
+        $this->occurence = "uncommon";
 		$this->variantOf = "Mollanta Heavy Cruiser (CPN)";	    
 		
         $this->forwardDefense = 13;
