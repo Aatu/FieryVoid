@@ -1603,7 +1603,8 @@ spl_autoload_register(
 				
 				//TO BE DELETED once nobody is using them		    
                 		'tobedeletedpikitos' => '/server/model/ships/brakiri/ToBeDeletedPikitos.php',	    
-                		'tobedeletedfalkosi' => '/server/model/ships/brakiri/ToBeDeletedFalkosi.php',
+                		'tobedeletedfalkosi' => '/server/model/ships/brakiri/ToBeDeletedFalkosi.php',	    
+                		'tobedeletedaurora' => '/server/model/ships/EA/ToBeDeletedAurora.php',
 		    		
 		    
 		    
