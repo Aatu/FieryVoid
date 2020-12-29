@@ -36,8 +36,8 @@ class Garunda extends HeavyCombatVessel{
 		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 0, 180));                   
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-        $this->addFrontSystem(new ParticleCannon (3, 8, 7, 300, 60));
-        $this->addFrontSystem(new ParticleCannon (3, 8, 7, 300, 60));
+        $this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
+        $this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
         $this->addFrontSystem(new TwinArray(2, 6, 2, 240, 60));
         $this->addFrontSystem(new TwinArray(2, 6, 2, 300, 120));
 
