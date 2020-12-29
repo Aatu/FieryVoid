@@ -1601,7 +1601,7 @@ spl_autoload_register(
 				'gaimtracha' => '/server/model/ships/gaim/gaimTracha.php',
 				
 				//Corillani
-				'plasmaprojector' => 'server/model/weapons/plasma.php',
+				'plasmaprojector' => '/server/model/weapons/plasma.php',
 				'conosti' => '/server/model/ships/corillani/Conosti.php',
 				'garunda' => '/server/model/ships/corillani/Garunda.php',
 				'llartol' => '/server/model/ships/corillani/Llartol.php',

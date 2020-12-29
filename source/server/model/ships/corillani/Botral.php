@@ -11,7 +11,8 @@ class Botral extends HeavyCombatVessel{
         $this->shipClass = "Botral Light Cruiser (OSF)";
 	    $this->isd = 2241;
 		$this->notes = 'Orillani Space Forces (OSF)';
-		$this->canvasSize= 200;	    
+		$this->canvasSize= 200;
+        $this->fighters = array("normal"=>6);			    
         
         
         $this->forwardDefense = 12;
