@@ -986,13 +986,10 @@ class PlasmaProjector extends Raking{
 	public $name = "PlasmaProjector";
 	public $displayName = "Plasma Projector";
 	public $iconPath = "PlasmaProjector.png";
-	public $animation = "beam";
+	public $animation = "laser";
 	public $animationColor = array(75, 250, 90);
-	public $trailColor = array(75, 250, 90);
-	public $projectilespeed = 20;
-	public $animationWidth = 4;
-	public $animationExplosionScale = 0.3;
-	public $trailLength = 500;
+    public $animationWidth = 4;
+    public $animationWidth2 = 0.2;
 	public $priority = 6;
 
 	public $rangeDamagePenalty = 0.25;
