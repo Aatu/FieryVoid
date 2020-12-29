@@ -1609,6 +1609,7 @@ spl_autoload_register(
 				'zftrtillinicpn' => '/server/model/ships/corillani/ZFtrTilliniCPN.php',
 				'zftrtillinidoc' => '/server/model/ships/corillani/ZFtrTilliniDoC.php',
 				'zftrtilliniosf' => '/server/model/ships/corillani/ZFtrTilliniOSF.php',
+				'botral' => '/server/model/ships/corillani/Botral.php',
 				
 				
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
