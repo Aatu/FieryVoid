@@ -38,11 +38,12 @@ class Botral extends HeavyCombatVessel{
               
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-        $this->addFrontSystem(new PlasmaProjector(4, 8, 5, 240, 0));
-        $this->addFrontSystem(new PlasmaProjector(4, 8, 5, 0, 120));
-        $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));        
         $this->addFrontSystem(new TwinArray(2, 6, 2, 240, 60));
         $this->addFrontSystem(new TwinArray(2, 6, 2, 300, 120));
+        $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));        
+        $this->addFrontSystem(new PlasmaProjector(4, 8, 5, 240, 0));
+        $this->addFrontSystem(new PlasmaProjector(4, 8, 5, 0, 120));
+
 
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
