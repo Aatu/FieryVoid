@@ -36,8 +36,8 @@ class Intona extends BaseShip{
         $this->addFrontSystem(new SMissileRack(3, 6, 0, 270, 90));	
         $this->addFrontSystem(new SMissileRack(3, 6, 0, 270, 90)); 
         $this->addFrontSystem(new TwinArray(2, 6, 2, 270, 90));                
-        $this->addFrontSystem(new PlasmaProjector(4, 8, 5, 300, 60))
-        $this->addFrontSystem(new PlasmaProjector(4, 8, 5, 300, 60))
+        $this->addFrontSystem(new PlasmaProjector(4, 8, 5, 300, 60));
+        $this->addFrontSystem(new PlasmaProjector(4, 8, 5, 300, 60));
 
         $this->addAftSystem(new TwinArray(2, 6, 2, 90, 270));
         $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
