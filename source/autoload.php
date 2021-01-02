@@ -1608,7 +1608,8 @@ spl_autoload_register(
                 		'tobedeletednova' => '/server/model/ships/EA/ToBeDeletedNova.php',	        
                 		'tobedeletedtiger' => '/server/model/ships/EA/ToBeDeletedTiger.php',	        
                 		'tobedeletedtbolt' => '/server/model/ships/EA/ToBeDeletedTBolt.php',	    
-                		'tobedeletedsentri' => '/server/model/ships/centauri/ToBeDeletedSentri.php',
+                		'tobedeletedsentri' => '/server/model/ships/centauri/ToBeDeletedSentri.php',  
+                		'tobedeletedlellata' => '/server/model/ships/llort/ToBeDeletedLellatA.php',
 		    		
 		    
 		    
