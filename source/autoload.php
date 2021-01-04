@@ -1612,6 +1612,8 @@ spl_autoload_register(
 				'botral' => '/server/model/ships/corillani/Botral.php',
 				'intona' => '/server/model/ships/corillani/Intona.php',
 				'ortana' => '/server/model/ships/corillani/Ortana.php',
+				'nollita' => '/server/model/ships/corillani/Nollita.php',
+				'dovota' => '/server/model/ships/corillani/Dovota.php',
 				
 				
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
