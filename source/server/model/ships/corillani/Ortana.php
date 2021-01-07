@@ -13,7 +13,8 @@ class Ortana extends BaseShip{
 	    $this->isd = 2241;
 		$this->notes = 'Orillani Space Forces (OSF)';
         $this->occurence = "rare";
-		$this->variantOf = "Intona Strike Cruiser (OSF)";				    
+		$this->variantOf = "Intona Strike Cruiser (OSF)";
+        $this->limited = 33;						    
 		
         $this->forwardDefense = 13;
         $this->sideDefense = 16;

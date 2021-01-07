@@ -13,7 +13,8 @@ class Nollita extends MediumShip
 		$this->shipClass = "Nollita Tactical Frigate (DoC)";
 		$this->canvasSize = 100;
 		$this->isd = 2239;
-		$this->notes = 'Defenders of Corrilan (DoC)';		
+		$this->notes = 'Defenders of Corrilan (DoC)';
+        $this->agile = true;				
 		
 
 		$this->forwardDefense = 12;

@@ -15,7 +15,10 @@ class Dovota extends MediumShip
 		$this->isd = 2237;
 		$this->notes = 'Defenders of Corrilan (DoC)';
         $this->occurence = "uncommon";
-		$this->variantOf = "Nollita Tactical Frigate (DoC)";				    
+		$this->variantOf = "Nollita Tactical Frigate (DoC)";
+        $this->agile = true;	
+        
+        $this->minesweeperbonus = 2;        					    
 		
 
 		$this->forwardDefense = 12;
