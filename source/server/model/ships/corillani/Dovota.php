@@ -9,7 +9,7 @@ class Dovota extends MediumShip
 		$this->pointCost = 385;
 		$this->faction = "Corillani";
 		$this->phpclass = "Dovota";
-		$this->imagePath = "img/ships/CorillaniDovota.png";
+		$this->imagePath = "img/ships/CorillaniNollita.png";
 		$this->shipClass = "Dovota Minesweeper (DoC)";
 		$this->canvasSize = 100;
 		$this->isd = 2237;
