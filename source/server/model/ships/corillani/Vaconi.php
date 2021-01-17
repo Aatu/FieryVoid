@@ -34,7 +34,7 @@ class Vaconi extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));        
 		
-        $this->addAftSystem(new PlasmaAccelerator(3, 6, 0, 180, 360));	
+        $this->addAftSystem(new PlasmaAccelerator(3, 6, 0, 120, 240));	
         $this->addAftSystem(new Thruster(4, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 8, 0, 3, 2));
