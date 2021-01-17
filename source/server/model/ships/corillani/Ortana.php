@@ -8,7 +8,7 @@ class Ortana extends BaseShip{
 		$this->faction = "Corillani";
         $this->phpclass = "Ortana";
         $this->imagePath = "img/ships/CorillaniIntona.png";
-        $this->shipClass = "Ortana Battle Scout (OSF)";
+        $this->shipClass = "Ortana Battle Scout";
         $this->shipSizeClass = 3;
 	    $this->isd = 2241;
 		$this->notes = 'Orillani Space Forces (OSF)';

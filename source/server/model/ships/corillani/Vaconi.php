@@ -8,7 +8,7 @@ class Vaconi extends BaseShip{
 		$this->faction = "Corillani";
         $this->phpclass = "Vaconi";
         $this->imagePath = "img/ships/CorillaniVaconi.png";
-        $this->shipClass = "Vaconi Strike Cruiser (DoC)";
+        $this->shipClass = "Vaconi Strike Cruiser";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>24);
 	    $this->isd = 2229;

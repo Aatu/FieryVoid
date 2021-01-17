@@ -8,7 +8,7 @@ class Judanna extends HeavyCombatVessel{
         $this->faction = "Corillani";
         $this->phpclass = "Judanna";
         $this->imagePath = "img/ships/CorillaniJudanna.png";
-        $this->shipClass = "Judanna Escort Frigate (DoC)";
+        $this->shipClass = "Judanna Escort Frigate";
 	    $this->isd = 2229;
 		$this->notes = 'Defenders of Corillan (DoC)';
 		$this->canvasSize= 200;	    

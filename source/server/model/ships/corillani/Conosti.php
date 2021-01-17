@@ -10,7 +10,7 @@ class Conosti extends MediumShip
 		$this->faction = "Corillani";
 		$this->phpclass = "Conosti";
 		$this->imagePath = "img/ships/CorillaniConosti.png";
-		$this->shipClass = "Conosti Patrol Frigate (CPN)";
+		$this->shipClass = "Conosti Patrol Frigate";
 		$this->canvasSize = 100;
 		$this->isd = 2230;
 		$this->notes = 'Corillani Peoples Navy (CPN)';		

@@ -10,12 +10,12 @@ class Dovota extends MediumShip
 		$this->faction = "Corillani";
 		$this->phpclass = "Dovota";
 		$this->imagePath = "img/ships/CorillaniNollita.png";
-		$this->shipClass = "Dovota Minesweeper (DoC)";
+		$this->shipClass = "Dovota Minesweeper";
 		$this->canvasSize = 100;
 		$this->isd = 2237;
 		$this->notes = 'Defenders of Corrilan (DoC)';
         $this->occurence = "uncommon";
-		$this->variantOf = "Nollita Tactical Frigate (DoC)";
+		$this->variantOf = "Nollita Tactical Frigate";
         $this->agile = true;	
         
         $this->minesweeperbonus = 2;        					    

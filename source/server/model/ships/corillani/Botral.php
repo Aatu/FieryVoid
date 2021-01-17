@@ -8,7 +8,7 @@ class Botral extends HeavyCombatVessel{
         $this->faction = "Corillani";
         $this->phpclass = "Botral";
         $this->imagePath = "img/ships/CorillaniBotral.png";
-        $this->shipClass = "Botral Light Cruiser (OSF)";
+        $this->shipClass = "Botral Light Cruiser";
 	    $this->isd = 2241;
 		$this->notes = 'Orillani Space Forces (OSF)';
 		$this->canvasSize= 200;

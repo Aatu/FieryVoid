@@ -8,7 +8,7 @@ class Intona extends BaseShip{
 		$this->faction = "Corillani";
         $this->phpclass = "Intona";
         $this->imagePath = "img/ships/CorillaniIntona.png";
-        $this->shipClass = "Intona Strike Cruiser (OSF)";
+        $this->shipClass = "Intona Strike Cruiser";
         $this->shipSizeClass = 3;
 	    $this->isd = 2239;
 		$this->notes = 'Orillani Space Forces (OSF)';	    

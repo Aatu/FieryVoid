@@ -10,7 +10,7 @@ class Nollita extends MediumShip
 		$this->faction = "Corillani";
 		$this->phpclass = "Nollita";
 		$this->imagePath = "img/ships/CorillaniNollita.png";
-		$this->shipClass = "Nollita Tactical Frigate (DoC)";
+		$this->shipClass = "Nollita Tactical Frigate";
 		$this->canvasSize = 100;
 		$this->isd = 2239;
 		$this->notes = 'Defenders of Corrilan (DoC)';
