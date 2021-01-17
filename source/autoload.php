@@ -1615,6 +1615,7 @@ spl_autoload_register(
 				'nollita' => '/server/model/ships/corillani/Nollita.php',
 				'dovota' => '/server/model/ships/corillani/Dovota.php',
 				'vaconi' => '/server/model/ships/corillani/Vaconi.php',
+				'judanna' => '/server/model/ships/corillani/Judanna.php',
 				
 				
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
