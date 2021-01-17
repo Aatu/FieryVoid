@@ -47,8 +47,8 @@ class Dovota extends MediumShip
 		$this->addFrontSystem(new Thruster(3, 5, 0, 3, 1));
 
 		$this->addAftSystem(new TwinArray(2, 6, 2, 180, 360));
-		$this->addAftSystem(new TwinArray(2, 6, 2, 90, 270));
 		$this->addAftSystem(new TwinArray(2, 6, 2, 0, 180));
+		$this->addAftSystem(new TwinArray(2, 6, 2, 90, 270));
 		$this->addAftSystem(new Thruster(3, 8, 0, 4, 2));
 		$this->addAftSystem(new Thruster(3, 8, 0, 4, 2));
 	
