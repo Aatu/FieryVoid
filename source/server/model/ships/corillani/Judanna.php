@@ -11,7 +11,8 @@ class Judanna extends HeavyCombatVessel{
         $this->shipClass = "Judanna Escort Frigate";
 	    $this->isd = 2229;
 		$this->notes = 'Defenders of Corillan (DoC)';
-		$this->canvasSize= 200;	    
+		$this->canvasSize= 200;
+        $this->fighters = array("normal"=>6);			    
         
         
         $this->forwardDefense = 13;
