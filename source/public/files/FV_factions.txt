@@ -65,7 +65,8 @@ Ultralight fighters - smallest Cascor fighters are of Ultralight type, which all
 Tiqincc - medium Cascor fighters have tail gun. In tabletop, this gun has -2 penalty when fired together with main gun. In FV it does not.
 
 CENTAURI
-Ballistic Torpedo - in tabletop this weapon is able to target multiple units. In FV it's lacking this ability.
+Ballistic Torpedo - in tabletop this weapon is able to target multiple units. In FV it's lacking this ability. Also, way to fire this weapon is very peculiar (You need to fire, THEN on the weapon itself indicate number of missiles launched).
+Plasma Stream - weapon that permanently reduces armor of systems hit (in FV - every system hit, in tabletop - only those hit by full rakes). Also, counts full armor for every rake, despite Raking mode. 
 Guardian Array - primarily defensive weapon that can intercept fire directed at third party, provided the weapon is between firing unit and it's target.
 	In tabletop, it needs to be shut down to switch between offensive (antifighter) and defensive modes.
 	There is no such requirement in Fiery Void, weapon can intercept or fire offensively at will.
@@ -147,6 +148,7 @@ Notable technologies:
 	Bulkheads - defensive system that can take damage first (after armor) when system is hit, which greatly increases resilience of Gaim systems. Bulkhead can protect systems on the same section, and structure it's mounted to (even if it's technically on different section, like on MCV). Note that PRIMARY systems are not protected by bulkheads. In FV decision whether to use bulkhead will be made automatically - Bulkheads will be used if they can prevent system destruction, when structure would be destroyed by the hit or when integrity of relevant Structure block remaining boxes fall too low. 
 	Particle Concentrator - multiple Concentrators firing from the same hex may combine into one more powerful (and more accurate!) shot, a bit similar to what Ipsha Surge Cannons do. Its hit chance is average of all weapons concentrating (as they may be fitted on different ships, with different EW, their chances may differ).
 		In tabletop it's more or less the same, except weapons within 1 hex can still participate and lock-on is denied if any participating weapon lacks lock-on.
+		Kind of "known bug" - on MCVs/LCVs all Bulkheads can protect Structure against any shot, even coming from different direction (so eg. Aft bulkhead may kick in if a ship is attacked from front - though it will protect only Structure in this case)
 	Packet Torpedo - ballistic weapon that has (besides range) a range penalty, just like direct fire weapons - with a twist that it kicks in only after first 10 hexes of travel.
 		In tabletop target of this weapon is not known to opponent until impact (not implemented in FV).
 	Scattergun - light weapon that fires random number of shots. When firing defensively (also random number of shots) those shots must be directed at separate threats.

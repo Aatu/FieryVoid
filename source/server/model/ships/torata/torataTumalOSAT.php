@@ -27,15 +27,29 @@ class TorataTumalOSAT extends OSAT
 		$this->addPrimarySystem(new Reactor(4, 8, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 7, 2, 5));
 		$this->addPrimarySystem(new Thruster(4, 6, 0, 0, 2));
-		$this->addPrimarySystem(new LaserAccelerator(4, 7, 6, 270, 90));
-		$this->addPrimarySystem(new LaserAccelerator(4, 7, 6, 270, 90));
-		$this->addPrimarySystem(new ParticleAccelerator(4, 8, 8, 180, 0));
-		$this->addPrimarySystem(new ParticleAccelerator(4, 8, 8, 0, 180));
+		$this->addPrimarySystem(new LaserAccelerator(3, 7, 6, 270, 90));
+		$this->addPrimarySystem(new LaserAccelerator(3, 7, 6, 270, 90));
+		$this->addPrimarySystem(new ParticleAccelerator(3, 8, 8, 180, 0));
+		$this->addPrimarySystem(new ParticleAccelerator(3, 8, 8, 0, 180));
 		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
 
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
 
 		$this->addPrimarySystem(new Structure(4, 30));
+		
+		
+		$this->hitChart = array(
+			0=> array(
+					9 => "Structure",
+					11 => "Thruster",
+					13 => "Laser Accelerator",
+					15 => "Particle Accelerator",
+					16 => "Light Particle Beam",
+					18 => "Scanner",
+					20 => "Reactor",
+			),
+		);
+		
 	}
 }
 

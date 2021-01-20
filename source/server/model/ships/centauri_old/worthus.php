@@ -30,7 +30,7 @@ class worthus extends SmallStarBaseFourSections{
 		
 		
 		$this->addPrimarySystem(new Reactor(6, 48, 0, 0));
-		$this->addPrimarySystem(new CnC(7, 50, 0, 0)); //2x 6/25 C&C originally
+		$this->addPrimarySystem(new ProtectedCnC(7, 50, 0, 0)); //2x 6/25 C&C originally
 		$this->addPrimarySystem(new Scanner(6, 24, 4, 8));
 		$this->addPrimarySystem(new Scanner(6, 24, 4, 8));
 		//4 Hangars from between sections, plus small PRIMARY hangar for shuttles - I make them into one PRIMARY hangar with extra armor
@@ -59,25 +59,25 @@ class worthus extends SmallStarBaseFourSections{
         	$this->addFrontSystem(new LightParticleBeamShip(5, 2, 1, 300, 60));
         	$this->addFrontSystem(new LightParticleBeamShip(5, 2, 1, 300, 60));
 			$this->addFrontSystem(new CargoBay(5, 25));
-			$this->addFrontSystem(new SubReactor(5, 25, 0, 0));
+			$this->addFrontSystem(new SubReactorUniversal(5, 25, 0, 0));
 
 			$this->addAftSystem(new TacLaser(5, 5, 4, 120, 240));
         	$this->addAftSystem(new LightParticleBeamShip(5, 2, 1, 120, 240));
         	$this->addAftSystem(new LightParticleBeamShip(5, 2, 1, 120, 240));
 			$this->addAftSystem(new CargoBay(5, 25));
-			$this->addAftSystem(new SubReactor(5, 25, 0, 0));
+			$this->addAftSystem(new SubReactorUniversal(5, 25, 0, 0));
 		
 			$this->addLeftSystem(new TacLaser(5, 5, 4, 210, 330));
         	$this->addLeftSystem(new LightParticleBeamShip(5, 2, 1, 210, 330));
         	$this->addLeftSystem(new LightParticleBeamShip(5, 2, 1, 210, 330));
 			$this->addLeftSystem(new CargoBay(5, 25));
-			$this->addLeftSystem(new SubReactor(5, 25, 0, 0));
+			$this->addLeftSystem(new SubReactorUniversal(5, 25, 0, 0));
 		
 			$this->addRightSystem(new TacLaser(5, 5, 4, 30, 150));
         	$this->addRightSystem(new LightParticleBeamShip(5, 2, 1, 30, 150));
         	$this->addRightSystem(new LightParticleBeamShip(5, 2, 1, 30, 150));
 			$this->addRightSystem(new CargoBay(5, 25));
-			$this->addRightSystem(new SubReactor(5, 25, 0, 0));
+			$this->addRightSystem(new SubReactorUniversal(5, 25, 0, 0));
 		
 		
 		
@@ -98,7 +98,7 @@ class worthus extends SmallStarBaseFourSections{
 				5 => "Light Particle Beam",
 				7 => "Tactical Laser",
 				9 => "Cargo Bay",
-				10 => "Reactor",
+				10 => "Sub Reactor",
 				11 => "0:Hangar",
 				18 => "Structure",
 				20 => "Primary",
@@ -109,7 +109,7 @@ class worthus extends SmallStarBaseFourSections{
 				5 => "Light Particle Beam",
 				7 => "Tactical Laser",
 				9 => "Cargo Bay",
-				10 => "Reactor",
+				10 => "Sub Reactor",
 				11 => "0:Hangar",
 				18 => "Structure",
 				20 => "Primary",
@@ -120,7 +120,7 @@ class worthus extends SmallStarBaseFourSections{
 				5 => "Light Particle Beam",
 				7 => "Tactical Laser",
 				9 => "Cargo Bay",
-				10 => "Reactor",
+				10 => "Sub Reactor",
 				11 => "0:Hangar",
 				18 => "Structure",
 				20 => "Primary",
@@ -131,7 +131,7 @@ class worthus extends SmallStarBaseFourSections{
 				5 => "Light Particle Beam",
 				7 => "Tactical Laser",
 				9 => "Cargo Bay",
-				10 => "Reactor",
+				10 => "Sub Reactor",
 				11 => "0:Hangar",
 				18 => "Structure",
 				20 => "Primary",

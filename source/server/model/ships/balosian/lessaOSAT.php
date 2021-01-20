@@ -33,6 +33,19 @@ class LessaOSAT extends OSAT
 		$this->addPrimarySystem(new StdParticleBeam(3, 4, 1, 240, 120));
 
 		$this->addPrimarySystem(new Structure(4, 36));
+		
+		
+		
+		$this->hitChart = array(
+			0=> array(
+					9 => "Structure",
+					11 => "Thruster",
+					14 => "Ion Cannon",
+					16 => "Standard Particle Beam",
+					18 => "Scanner",
+					20 => "Reactor",
+			),
+		);
 	}
 }
 

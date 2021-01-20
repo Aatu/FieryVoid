@@ -55,19 +55,17 @@ if (isset($_SESSION["user"])) {
 <div class="panel news">
     <!-- <div id="newsHeader">Latest News - September 2020</div> -->
     <div id="newsEntry">
-        <!--
+        
+<!--	    
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
-        -->
-		---------- <b>LATEST NEWS - November 2020</b> ----------	
-	    <br><b><u>The Gaim have arrived</u></b> – what we have here is a new Big4-level deep faction, able to duke it out with the best! (courtesy of Geoffrey and Douglas) 
-	    <br><b>Cancel all moves</b> – R-click on cancel move icon now cancels ALL moves for a given unit (so You can avoid backclicking for every step of speed-12 fighter that's jinking and pivoting ;) )
-  	    <br><b>More Gaim!</b> – reinforcements have arrived (courtesy of Geoffrey and Douglas). Also, Packet Torpedo was fixed (its range is limited after all!).
-  
+-->        
+		---------- <b>LATEST NEWS - January 2021</b> ----------	
+	    <br><b>Escalation Wars update</b> – new units and balance updates to existing ones, courtesy of Geoffrey and Tyrel!
 	    
         <br><br>
-        Enjoy and report BUGS on FB. Also force reload (<b><u>ctrl+F5</u></b>) whenever something weird happens.
+        Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
 
         
 		

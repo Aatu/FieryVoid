@@ -949,7 +949,7 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
                     if ($shooter->hasNavigator) {// Fighter has navigator. Flight always benefits from offensive bonus.
                         $oew = $effectiveOB;
                     } else { // Check if target is in current weapon arc
-                        $relativeBearing = $target->getBearingOnUnit($shooter);
+                        $relativeBearing = $shooter->getBearingOnUnit($target);
                         if (mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc)) {
                             // Target is in current launcher arc. Flight benefits from offensive bonus.
                             // Now check if the fighter is not firing any non-ballistic weapons

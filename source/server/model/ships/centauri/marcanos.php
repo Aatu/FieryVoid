@@ -39,7 +39,7 @@ class marcanos extends SmallStarBaseFourSections{
 				4 => "Twin Array",
 				6 => "Plasma Accelerator",
 				8 => "Cargo Bay",
-				9 => "Reactor",
+				9 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -47,7 +47,7 @@ class marcanos extends SmallStarBaseFourSections{
 				4 => "Twin Array",
 				6 => "Plasma Accelerator",
 				8 => "Cargo Bay",
-				9 => "Reactor",
+				9 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			),	
@@ -55,7 +55,7 @@ class marcanos extends SmallStarBaseFourSections{
 				4 => "Twin Array",
 				6 => "Plasma Accelerator",
 				8 => "Cargo Bay",
-				9 => "Reactor",
+				9 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -63,7 +63,7 @@ class marcanos extends SmallStarBaseFourSections{
 				4 => "Twin Array",
 				6 => "Plasma Accelerator",
 				8 => "Cargo Bay",
-				9 => "Reactor",
+				9 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -85,7 +85,7 @@ class marcanos extends SmallStarBaseFourSections{
         	$this->addFrontSystem(new TwinArray(4, 6, 2, 270, 90));
         	$this->addFrontSystem(new TwinArray(4, 6, 2, 270, 90));
 		$this->addFrontSystem(new CargoBay(4, 24));
-		$this->addFrontSystem(new SubReactor(4, 20, 0, 0));
+		$this->addFrontSystem(new SubReactorUniversal(4, 20, 0, 0));
 
 		$this->addAftSystem(new PlasmaAccelerator(4, 10, 5, 90, 270));
         	$this->addAftSystem(new TwinArray(4, 6, 2, 90, 270));
@@ -93,7 +93,7 @@ class marcanos extends SmallStarBaseFourSections{
         	$this->addAftSystem(new TwinArray(4, 6, 2, 90, 270));
             	$this->addAftSystem(new TwinArray(4, 6, 2, 90, 270));
 		$this->addAftSystem(new CargoBay(4, 24));
-		$this->addAftSystem(new SubReactor(4, 20, 0, 0));
+		$this->addAftSystem(new SubReactorUniversal(4, 20, 0, 0));
 		
 		$this->addRightSystem(new PlasmaAccelerator(4, 10, 5, 0, 180));
         	$this->addRightSystem(new TwinArray(4, 6, 2, 0, 180));
@@ -101,7 +101,7 @@ class marcanos extends SmallStarBaseFourSections{
         	$this->addRightSystem(new TwinArray(4, 6, 2, 0, 180));
         	$this->addRightSystem(new TwinArray(4, 6, 2, 0, 180));
 		$this->addRightSystem(new CargoBay(4, 24));
-		$this->addRightSystem(new SubReactor(4, 20, 0, 0));
+		$this->addRightSystem(new SubReactorUniversal(4, 20, 0, 0));
 		
 		$this->addLeftSystem(new PlasmaAccelerator(4, 10, 5, 180, 360));
         	$this->addLeftSystem(new TwinArray(4, 6, 2, 180, 360));
@@ -109,7 +109,7 @@ class marcanos extends SmallStarBaseFourSections{
         	$this->addLeftSystem(new TwinArray(4, 6, 2, 180, 360));
         	$this->addLeftSystem(new TwinArray(4, 6, 2, 180, 360));
 		$this->addLeftSystem(new CargoBay(4, 24));
-		$this->addLeftSystem(new SubReactor(4, 20, 0, 0));
+		$this->addLeftSystem(new SubReactorUniversal(4, 20, 0, 0));
 		
 		
     }

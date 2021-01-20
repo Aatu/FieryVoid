@@ -31,7 +31,7 @@ class PrimusMaximus extends BaseShip{
         
          
         $this->addPrimarySystem(new Reactor(8, 22, 0, 0));
-        $this->addPrimarySystem(new CnC(8, 31, 0, 0)); //nominally one 7/20 and one 8/8
+        $this->addPrimarySystem(new ProtectedCnC(8, 28, 0, 0)); //nominally one 7/20 and one 8/8
         $this->addPrimarySystem(new Scanner(7, 20, 5, 10));
         $this->addPrimarySystem(new Engine(7, 18, 0, 10, 2));
 	$this->addPrimarySystem(new Hangar(7, 14));

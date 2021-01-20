@@ -11,7 +11,8 @@ class Jumpgate  extends BaseShip{
         $this->canvasSize = 200;
         $this->shipClass = "Fixed Jump Gate";
         $this->shipSizeClass = 3;
-        $this->Enormous = true;
+        $this->Enormous = false; //classify it as a Capital just so it doesn't auto-ram passing units!
+		$this->iniativebonus = -200; //no voluntary movement anyway
 	            
 		$this->base = true;
 		$this->smallBase = true;
@@ -25,7 +26,7 @@ class Jumpgate  extends BaseShip{
         $this->accelcost = 99;
         $this->rollcost = 99;
         $this->pivotcost = 99;	
-        
+	    
          
         $this->addPrimarySystem(new Reactor(6, 50, 0, 0));
         $this->addPrimarySystem(new CnC(6, 8, 0, 0));
@@ -76,12 +77,12 @@ class Jumpgate  extends BaseShip{
                 3=> array(
                         3 => "Support System",
                         18 => "Structure",
-                        20 => "Structure",
+                        20 => "Primary",
                 ),
                 4=> array(
                         3 => "Support System",
                         18 => "Structure",
-                        20 => "Structure",
+                        20 => "Primary",
                 ),
         );
     }
