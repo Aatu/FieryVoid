@@ -429,7 +429,7 @@ class NexusDartInterceptor extends Weapon{
         
         public $loadingtime = 1; // 1 turn
         public $rangePenalty = 0;
-        public $fireControl = array(0, 0, 3); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $fireControl = array(3, 0, 0); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
 	public $priority = 4; //Standard weapon
 	    
@@ -497,7 +497,7 @@ class NexusStreakInterceptor extends Weapon{
         
         public $loadingtime = 1; // 1 turn
         public $rangePenalty = 0;
-        public $fireControl = array(0, 3, 4); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $fireControl = array(4, 3, 0); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
 	public $priority = 4; //Standard weapon
 	    
@@ -1537,104 +1537,6 @@ class NexusTwinParticleBeam extends Particle{
 }// endof NexusTwinParticleBeam
 
 
-class NexusLightCPGun extends Particle{
-        public $trailColor = array(30, 170, 255);
-
-        public $name = "NexusLightCPGun";
-        public $displayName = "Light CP Gun";
-		public $iconPath = "NexusLightCPGun.png";
-	    
-        public $animation = "bolt";
-        public $animationColor = array(255, 250, 230);
-        public $animationExplosionScale = 0.15;
-        public $projectilespeed = 15;
-        public $animationWidth = 4;
-        public $trailLength = 10;
-        public $loadingtime = 1;
-        public $priority = 3;
-        public $intercept = 1;
-
-        public $rangePenalty = 2; //-2/hex
-        public $fireControl = array(2, 1, 1); // fighters, <mediums, <capitals
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 2;
-            if ( $powerReq == 0 ) $powerReq = 1;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-
-        public function getDamage($fireOrder){ return Dice::d(3, 2)+1;   }
-        public function setMinDamage(){     $this->minDamage = 3 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 7 ;      }
-		
-}// endof NexusLightCPGun
-
-
-class NexusStandardCPGun extends Particle{
-        public $trailColor = array(30, 170, 255);
-
-        public $name = "NexusStandardCPGun";
-        public $displayName = "Standard CP Gun";
-		public $iconPath = "NexusStandardCPGun.png";
-	    
-        public $animation = "bolt";
-        public $animationColor = array(255, 250, 230);
-        public $animationExplosionScale = 0.15;
-        public $projectilespeed = 15;
-        public $animationWidth = 4;
-        public $trailLength = 10;
-        public $loadingtime = 2;
-        public $priority = 5;
-
-        public $rangePenalty = 1; //-1/hex
-        public $fireControl = array(1, 1, 2); // fighters, <mediums, <capitals
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 6;
-            if ( $powerReq == 0 ) $powerReq = 2;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-
-        public function getDamage($fireOrder){ return Dice::d(6, 2)+6;   }
-        public function setMinDamage(){     $this->minDamage = 8 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 18 ;      }
-		
-}// endof NexusStandardCPGun
-
-
-class NexusHeavyCPGun extends Particle{
-        public $trailColor = array(30, 170, 255);
-
-        public $name = "NexusHeavyCPGun";
-        public $displayName = "Heavy CP Gun";
-		public $iconPath = "NexusDualParticleBeam.png";
-	    
-        public $animation = "bolt";
-        public $animationColor = array(255, 250, 230);
-        public $animationExplosionScale = 0.15;
-        public $projectilespeed = 15;
-        public $animationWidth = 4;
-        public $trailLength = 10;
-        public $loadingtime = 1;
-        public $priority = 5;
-
-        public $rangePenalty = 0.66; //-1/hex
-        public $fireControl = array(0, 2, 3); // fighters, <mediums, <capitals
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 9;
-            if ( $powerReq == 0 ) $powerReq = 4;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-
-        public function getDamage($fireOrder){ return Dice::d(10, 2)+6;   }
-        public function setMinDamage(){     $this->minDamage = 8 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 26 ;      }
-}// endof NexusHeavyCPGun
-
 class NexusLightParticleArray extends Particle{
         public $trailColor = array(30, 170, 255);
 
@@ -1697,18 +1599,18 @@ class NexusParticleArray extends Particle{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return Dice::d(6, 1)+5;   }
-        public function setMinDamage(){     $this->minDamage = 6 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 11 ;      }
+        public function getDamage($fireOrder){ return Dice::d(3, 2)+3;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 9 ;      }
 }// endof NexusLightParticleArray
 
 
-class NexusHeavyPartcleArray extends Particle{
+class NexusHeavyParticleArray extends Particle{
         public $trailColor = array(30, 170, 255);
 
-        public $name = "NexusHeavyPartcleArray";
+        public $name = "NexusHeavyParticleArray";
         public $displayName = "Heavy Particle Array";
-		public $iconPath = "NexusHeavyPartcleArray.png";
+		public $iconPath = "NexusHeavyParticleArray.png";
 	    
         public $animation = "bolt";
         public $animationColor = array(255, 250, 230);
@@ -1726,13 +1628,13 @@ class NexusHeavyPartcleArray extends Particle{
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ) $maxhealth = 6;
-            if ( $powerReq == 0 ) $powerReq = 3;
+            if ( $powerReq == 0 ) $powerReq = 2;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return Dice::d(6, 2)+5;   }
-        public function setMinDamage(){     $this->minDamage = 7 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 17 ;      }
+        public function getDamage($fireOrder){ return Dice::d(3, 2)+7;   }
+        public function setMinDamage(){     $this->minDamage = 9 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 13 ;      }
 }// endof NexusHeavyPartcleArray
 
 
@@ -1740,7 +1642,7 @@ class NexusGatlingParticleArray extends Particle{
         public $trailColor = array(30, 170, 255);
 
         public $name = "NexusGatlingParticleArray";
-        public $displaNexusGatlingParticleArrayyName = "Gatling Particle Array";
+        public $displayName = "Gatling Particle Array";
 		public $iconPath = "NexusGatlingParticleArray.png";
 	    
         public $animation = "bolt";
@@ -1764,9 +1666,9 @@ class NexusGatlingParticleArray extends Particle{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return Dice::d(6, 2)+4;   }
-        public function setMinDamage(){     $this->minDamage = 6 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 16 ;      }
+        public function getDamage($fireOrder){ return Dice::d(3, 2)+5;   }
+        public function setMinDamage(){     $this->minDamage = 7 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 11 ;      }
 }// endof NexusGatlingParticleArray
 
 
@@ -2060,7 +1962,7 @@ class NexusAutocannonDefender extends Particle{
 			return true;
 		}
 
-        public function getDamage($fireOrder){        return Dice::d(3,2)+6;   }
+        public function getDamage($fireOrder){        return Dice::d(3,2)+5;   }
         public function setMinDamage(){     $this->minDamage = 8 ;      }
         public function setMaxDamage(){     $this->maxDamage = 12 ;      }
     }	//endof class NexusInterceptorArray
@@ -2150,9 +2052,9 @@ class NexusSpiker extends Matter{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-    	public function getDamage($fireOrder){        return Dice::d(5, 1)+2;   }
+    	public function getDamage($fireOrder){        return Dice::d(6, 1)+2;   }
         public function setMinDamage(){     $this->minDamage = 3 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 7 ;      }    
+        public function setMaxDamage(){     $this->maxDamage = 8 ;      }    
     } // endof NexusUltralightRailgun
 
 
@@ -2546,6 +2448,95 @@ class NexusMatterGun extends Matter{
         public function setMaxDamage(){ $this->maxDamage = 17 ; }		
 		
     } // endof NexusMatterGun
+
+
+
+
+	/*custom Orieni fighter weapon*/
+    class LightGatlingGun extends LinkedWeapon{
+        public $name = "LightGatlingGun";
+        public $displayName = "Light Gatling Guns";
+	    public $iconPath = 'pairedGatlingGun.png';
+        public $animation = "trail";
+        public $animationColor = array(250, 250, 190);
+        public $projectilespeed = 24;
+        public $animationWidth = 2;
+        public $trailLength = 12;
+        public $animationExplosionScale = 0.15;
+        public $shots = 2;
+        public $defaultShots = 2;
+        public $ammunition = 6;
+	    
+        
+        public $loadingtime = 1;
+
+        public $intercept = 2;
+        public $ballisticIntercept = true;
+
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        private $damagebonus = 0;
+	    
+	    public $noOverkill = true;
+	    
+	    public $priority = 3;//equivalent of d6+4, due to Matter properties 
+		
+	    
+	    public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!  
+	 
+
+        function __construct($startArc, $endArc){
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();
+    
+            $strippedSystem->ammunition = $this->ammunition;
+           
+            return $strippedSystem;
+        }
+        
+	    
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Ignores armor, does not overkill.";
+            $this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
+            $this->data["Ammunition"] = $this->ammunition;
+        }
+
+
+        public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+            return 0; //Matter ignores armor!
+        }
+
+
+
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+
+
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+        	//debug::log("fire function");
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
+    
+        public function getDamage($fireOrder){
+            $dmg = Dice::d(3, 1);
+            return $dmg;
+        }
+        public function setMinDamage(){     $this->minDamage = 1;      }
+        public function setMaxDamage(){     $this->maxDamage = 3;      }
+
+    }
+
+
+
+
 
 
 // END OF MATTER WEAPONS
@@ -3395,185 +3386,7 @@ class NexusLaserMissile extends Weapon{
 
     } //endof class NexusHeavyXRayLaser
 
-
-
-
-
-    class NexusLightAttackLaser extends Laser{
-        public $name = "NexusLightAttackLaser";
-        public $displayName = "Light Attack Laser";
-        public $iconPath = "NexusLightAttackLaser.png"; 		
-        public $animation = "laser";
-        public $animationColor = array(220, 60, 120);
-        public $animationWidth = 5;
-        public $animationWidth2 = 0.5;
-        public $priority = 8;
-
-        public $loadingtime = 2;
-
-        public $raking = 10;
-
-        public $rangePenalty = 1;
-        public $fireControl = array(-3, 1, 1); // fighters, <mediums, <capitals
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            if ( $maxhealth == 0 ) $maxhealth = 5;
-            if ( $powerReq == 0 ) $powerReq = 3;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-		
-        public function getDamage($fireOrder){ return Dice::d(10, 3)+0; }
-        public function setMinDamage(){ $this->minDamage = 3 ; }
-        public function setMaxDamage(){ $this->maxDamage = 30 ; }
-    } // endof NexusLightAttackLaser
 	
-
-
-    class NexusStabilizedLightAttackLaser extends Laser{
-        public $name = "NexusStabilizedLightAttackLaser";
-        public $displayName = "Stabilized Light Attack Laser";
-        public $iconPath = "NexusLightAttackLaser.png"; 		
-        public $animation = "laser";
-        public $animationColor = array(220, 60, 120);
-        public $animationWidth = 5;
-        public $animationWidth2 = 0.5;
-        public $priority = 8;
-
-        public $loadingtime = 2;
-
-        public $raking = 10;
-
-        public $rangePenalty = 1;
-        public $fireControl = array(-3, 1, 1); // fighters, <mediums, <capitals
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            if ( $maxhealth == 0 ) $maxhealth = 5;
-            if ( $powerReq == 0 ) $powerReq = 3;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-		
-        public function getDamage($fireOrder){ return Dice::d(10, 1)+10; }
-        public function setMinDamage(){ $this->minDamage = 11 ; }
-        public function setMaxDamage(){ $this->maxDamage = 20 ; }
-    } // endof NexusStabilizedLightAttackLaser	
-	
-
-
-    class NexusMediumAttackLaser extends Laser{
-        public $name = "NexusMediumAttackLaser";
-        public $displayName = "Medium Attack Laser";
-        public $iconPath = "NexusMediumAttackLaser.png"; 		
-        public $animation = "laser";
-        public $animationColor = array(220, 60, 120);
-        public $animationWidth = 5;
-        public $animationWidth2 = 0.5;
-        public $priority = 8;
-
-        public $loadingtime = 3;
-
-        public $raking = 10;
-
-        public $rangePenalty = 0.67;
-        public $fireControl = array(-4, 2, 2); // fighters, <mediums, <capitals
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            if ( $maxhealth == 0 ) $maxhealth = 7;
-            if ( $powerReq == 0 ) $powerReq = 4;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-		
-        public function getDamage($fireOrder){ return Dice::d(10, 4)+0; }
-        public function setMinDamage(){ $this->minDamage = 4 ; }
-        public function setMaxDamage(){ $this->maxDamage = 40 ; }
-    } // endof NexusMediumAttackLaser
-	
-
-    class NexusStabilizedMediumAttackLaser extends Laser{
-        public $name = "NexusStabilizedMediumAttackLaser";
-        public $displayName = "Stabilized Medium Attack Laser";
-        public $iconPath = "NexusMediumAttackLaser.png"; 		
-        public $animation = "laser";
-        public $animationColor = array(220, 60, 120);
-        public $animationWidth = 5;
-        public $animationWidth2 = 0.5;
-        public $priority = 8;
-
-        public $loadingtime = 3;
-
-        public $raking = 10;
-
-        public $rangePenalty = 0.67;
-        public $fireControl = array(-4, 2, 2); // fighters, <mediums, <capitals
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            if ( $maxhealth == 0 ) $maxhealth = 7;
-            if ( $powerReq == 0 ) $powerReq = 4;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-		
-        public function getDamage($fireOrder){ return Dice::d(10, 2)+12; }
-        public function setMinDamage(){ $this->minDamage = 14 ; }
-        public function setMaxDamage(){ $this->maxDamage = 32 ; }
-    } // endof NexusStabilizedMediumAttackLaser	
-	
-
-    class NexusHeavyAttackLaser extends Laser{
-        public $name = "NexusHeavyAttackLaser";
-        public $displayName = "Heavy Attack Laser";
-        public $iconPath = "NexusHeavyAttackLaser.png"; 		
-        public $animation = "laser";
-        public $animationColor = array(220, 60, 120);
-        public $animationWidth = 5;
-        public $animationWidth2 = 0.5;
-        public $priority = 8;
-
-        public $loadingtime = 4;
-
-        public $raking = 10;
-
-        public $rangePenalty = 0.50;
-        public $fireControl = array(-5, 2, 3); // fighters, <mediums, <capitals
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            if ( $maxhealth == 0 ) $maxhealth = 9;
-            if ( $powerReq == 0 ) $powerReq = 6;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-		
-        public function getDamage($fireOrder){ return Dice::d(10, 5)+0; }
-        public function setMinDamage(){ $this->minDamage = 5 ; }
-        public function setMaxDamage(){ $this->maxDamage = 50 ; }
-    } // endof NexusHeavyAttackLaser
-	
-	
-    class NexusStabilizedHeavyAttackLaser extends Laser{
-        public $name = "NexusStabilizedHeavyAttackLaser";
-        public $displayName = "Stabilized Heavy Attack Laser";
-        public $iconPath = "NexusHeavyAttackLaser.png"; 		
-        public $animation = "laser";
-        public $animationColor = array(220, 60, 120);
-        public $animationWidth = 5;
-        public $animationWidth2 = 0.5;
-        public $priority = 8;
-
-        public $loadingtime = 4;
-
-        public $raking = 10;
-
-        public $rangePenalty = 0.50;
-        public $fireControl = array(-5, 2, 3); // fighters, <mediums, <capitals
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            if ( $maxhealth == 0 ) $maxhealth = 9;
-            if ( $powerReq == 0 ) $powerReq = 6;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-		
-        public function getDamage($fireOrder){ return Dice::d(10, 3)+18; }
-        public function setMinDamage(){ $this->minDamage = 21 ; }
-        public function setMaxDamage(){ $this->maxDamage = 48 ; }
-    } // endof NexusStabilizedHeavyAttackLaser	
-
 
     class NexusLightChemicalLaser extends Laser{
         public $name = "NexusLightChemicalLaser";
@@ -3677,7 +3490,7 @@ class NexusLaserMissile extends Weapon{
         
         public $loadingtime = 2;
         
-        public $raking = 4;
+        public $raking = 6;
         
         public $rangePenalty = 1; //-1 / hexes
         public $fireControl = array(1, 1, 1); // fighters, <mediums, <capitals 
@@ -3693,9 +3506,9 @@ class NexusLaserMissile extends Weapon{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        public function getDamage($fireOrder){        return Dice::d(10, 2)+2;   }
-        public function setMinDamage(){     $this->minDamage = 4 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+4;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 24 ;      }
     } //endof NexusLightLaserCutter
 
 
@@ -3735,95 +3548,6 @@ class NexusLaserMissile extends Weapon{
         public function setMaxDamage(){     $this->maxDamage = 54 ;      }
     } //endof NexusHeavyLaserCutter
 
-
-    class NexusLightHEPLaser extends Laser{
-        /*always piercing*/
-        public $name = "NexusLightHEPLaser";
-        public $displayName = "Light HEP Laser";        
-	    public $iconPath = "NexusLightHEPLaser.png";
-        public $animation = "laser";
-        public $animationColor = array(255, 58, 31);
-        public $animationWidth = 3;
-        public $animationWidth2 = 0.2;
-        
-        public $loadingtime = 2;
-
-        public $raking = 10;
-        public $priority = 2; //Piercing shots go early, to do damage while sections aren't detroyed yet!
-        
-        public $firingModes = array(
-            1 => "Piercing"
-        );
-        public $damageType = 'Piercing';
-        public $weaponClass = "Laser"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
-        
-                
-        public $rangePenalty = 1; //-1/3 hexes
-        public $fireControl = array(-5, 3, 3); // fighters, <mediums, <capitals 
-    
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ){
-                $maxhealth = 5;
-            }
-            if ( $powerReq == 0 ){
-                $powerReq = 3;
-            }
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-        
-        public function getDamage($fireOrder){
-			return Dice::d(10, 1)+12;   
-		}
-        public function setMinDamage(){     $this->minDamage = 13 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
-        
-    } //endof class NexusLightHEPLaser
-
-
-    class NexusHEPLaser extends Laser{
-        /*always piercing*/
-        public $name = "NexusHEPLaser";
-        public $displayName = "HEP Laser";        
-	    public $iconPath = "NexusHEPLaser.png";
-        public $animation = "laser";
-        public $animationColor = array(255, 58, 31);
-        public $animationWidth = 3;
-        public $animationWidth2 = 0.2;
-        
-        public $loadingtime = 3;
-
-        public $raking = 10;
-        public $priority = 2; //Piercing shots go early, to do damage while sections aren't detroyed yet!
-        
-        public $firingModes = array(
-            1 => "Piercing"
-        );
-        public $damageType = 'Piercing';
-        public $weaponClass = "Laser"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
-        
-                
-        public $rangePenalty = 0.50; //-1/3 hexes
-        public $fireControl = array(-5, 3, 3); // fighters, <mediums, <capitals 
-    
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ){
-                $maxhealth = 7;
-            }
-            if ( $powerReq == 0 ){
-                $powerReq = 6;
-            }
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-        
-        public function getDamage($fireOrder){
-			return Dice::d(10, 2)+12;   
-		}
-        public function setMinDamage(){     $this->minDamage = 14 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 32 ;      }
-        
-    } //endof class NexusHEPLaser
 
 
     class NexusInterceptLaser extends Weapon{
@@ -3967,16 +3691,24 @@ class NexusLaserMissile extends Weapon{
 
 
 
-    class NexusLightLaserLance extends LaserLance{
-        public $name = "NexusLightLaserLance";
-        public $displayName = "Light Laser Lance";
-        public $animationWidth = 4;
-        public $animationWidth2 = 0.6;
 
-        public $loadingtime = 2;
 
-        public $priority = 7;
-        public $priorityArray = array(1=>7, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
+    class NexusLaserSpear extends LaserLance{
+
+        public $name = "NexusLaserSpear";
+        public $displayName = "Laser Spear";
+	    public $iconPath = "NexusLaserSpear.png";
+        public $animation = "laser";
+        public $animationColor = array(64, 123, 168);
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.3;
+        public $priority = 8;
+        public $priorityArray = array(1=>8, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
+
+        public $loadingtime = 3;
+        public $overloadable = false;
+
+        public $raking = 10;
 
             public $firingModes = array(
                 1 => "Raking",
@@ -3984,20 +3716,60 @@ class NexusLaserMissile extends Weapon{
             );
         
             public $damageTypeArray=array(1=>'Raking', 2=>'Piercing');
-            public $fireControlArray = array( 1=>array(-5, 3, 3), 2=>array(null,-1,-1) ); //Raking and Piercing mode
+            public $fireControlArray = array( 1=>array(-5, 2, 3), 2=>array(null,-1,-1) ); //Raking and Piercing mode
 
-        public $rangePenalty = 1;
-        //public $fireControl = array(-5, 3, 3); // fighters, <mediums, <capitals
+        public $rangePenalty = 0.66;
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 5;
+            if ( $powerReq == 0 ) $powerReq = 3;            
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return Dice::d(10, 2)+9; }
-        public function setMinDamage(){ $this->minDamage = 11 ; }
-        public function setMaxDamage(){ $this->maxDamage = 29 ; }
+        public function getDamage($fireOrder){ return Dice::d(10, 3)+3; }
+        public function setMinDamage(){ $this->minDamage = 6 ; }
+        public function setMaxDamage(){ $this->maxDamage = 33 ; }
 		
-    } // endof class NexusLightLaserLance
+    }  // endof class NexusLaserSpear
+
+    class NexusHeavyLaserSpear extends LaserLance{
+
+        public $name = "NexusHeavyLaserSpear";
+        public $displayName = "Heavy Laser Spear";
+	    public $iconPath = "NexusHeavyLaserSpear.png";
+        public $animation = "laser";
+        public $animationColor = array(64, 123, 168);
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.3;
+        public $priority = 8;
+        public $priorityArray = array(1=>8, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
+
+        public $loadingtime = 4;
+        public $overloadable = false;
+
+        public $raking = 10;
+
+            public $firingModes = array(
+                1 => "Raking",
+                2 => "Piercing"
+            );
+        
+            public $damageTypeArray=array(1=>'Raking', 2=>'Piercing');
+            public $fireControlArray = array( 1=>array(-5, 2, 3), 2=>array(null,-1,-1) ); //Raking and Piercing mode
+
+        public $rangePenalty = 0.66;
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 4;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 4)+4; }
+        public function setMinDamage(){ $this->minDamage = 8 ; }
+        public function setMaxDamage(){ $this->maxDamage = 44 ; }
+		
+    }  // endof class NexusHeavyLaserSpear
 
 
 
@@ -4120,6 +3892,331 @@ class NexusHeavyPlasmaGun extends Plasma{
         public function setMaxDamage(){     $this->maxDamage = 34 /*- $this->dp*/;      }
 
 }  // endof NexusHeavyPlasmaGun
+
+
+
+
+class NexusChargedPlasmaGun extends Plasma{
+    	public $name = "NexusChargedPlasmaGun";
+        public $displayName = "Charged Plasma Gun";
+		public $iconPath = "NexusChargedPlasmaGun.png";
+		
+    	public $trailColor = array(75, 250, 90);
+        public $animation = "ball";
+        public $animationColor = array(75, 250, 90);
+    	public $projectilespeed = 10;
+        public $animationWidth = 4;
+    	public $animationExplosionScale = 0.9;
+    	public $trailLength = 8;
+    	public $rangeDamagePenalty = 0.5;
+		public $intercept = 0;
+
+		public $rangeDamagePenaltyHCPG = 0.5;  // -1 / 2 hexes, but only after 6 hexes!
+
+		public $priority = 2; //Flash weapon
+		
+		public $addedDice;
+
+        public $loadingtime = 2;
+
+		public $boostable = true;
+        public $boostEfficiency = 2;
+        public $maxBoostLevel = 2;
+			
+        public $rangePenalty = 0.5;
+        public $fireControl = array(null, 2, 3); // fighters, <=mediums, <=capitals 
+		
+		public $damageType = "Flash"; 
+		public $weaponClass = "Plasma"; 		
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 5;
+            if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+// Code using Gravitic Pulsar to obtain cooldown due to boosting weapon
+	public function setSystemDataWindow($turn){
+            $boost = $this->getExtraDicebyBoostlevel($turn);            
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+//original                $this->data["Special"] .= '<br>';
+                $this->data["Special"] = '<br>';
+            } 
+		$this->data["Special"] .= "Plasma weapon. Armor treated as half.";
+		$this->data["Special"] .= "<br>Loses -1 damage per 2 hexes after the first 10 hexes.";
+		$this->data["Special"] .= "<br>+2 power = +1d10 damage and 1 turn cooldown.";
+		$this->data["Special"] .= "<br>+4 power = +2d10 damage and 2 turns cooldown.";
+		$this->data["Boostlevel"] = $boost;
+		$this->normalload = $this->loadingtime;
+		parent::setSystemDataWindow($turn);		
+	}
+
+        private function getExtraDicebyBoostlevel($turn){
+            $add = 0;
+            switch($this->getBoostLevel($turn)){
+                case 1:
+                    $add = 1;
+                    break;
+                case 2:
+                    $add = 2;
+                    break;
+                default:
+                    break;
+            }
+            return $add;
+        }
+
+	protected function applyCooldown($gamedata){
+		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
+		//if boosted, cooldown (1 or 2 tuns)
+		if($currBoostlevel > 0){
+			$cooldownLength = $currBoostlevel ;
+			$finalTurn = $gamedata->turn + $cooldownLength;
+			$crit = new ForcedOfflineForTurns(-1, $this->unit->id, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $finalTurn);
+			$crit->updated = true;
+			$this->criticals[] =  $crit;
+		} 
+	}
+
+         private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                if ($i->turn != $turn){
+                   continue;
+                }
+                if ($i->type == 2){
+                    $boostLevel += $i->amount;
+                }
+            }
+            return $boostLevel;
+        }
+
+// Variable damage reduction with range from the Descari Plasma Bolter
+
+	//skip first 6 hexes when calculating the damage modifier
+	protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
+	{
+		parent::getDamageMod($damage, $shooter, $target, $pos, $gamedata);
+					if ($pos != null) {
+					$sourcePos = $pos;
+					} 
+					else {
+					$sourcePos = $shooter->getHexPos();
+					}
+			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			if ($dis <= 6) {
+				$damage -= 0;
+				}
+			else {
+				$damage -= round(($dis - 6) * $this->rangeDamagePenaltyHCPG);
+			}	
+		        $damage = max(0, $damage); //at least 0	    
+        		$damage = floor($damage); //drop fractions, if any were generated
+      			 return $damage;
+	}		
+
+// Code for adding extra dice of damage. Based on Fusion Agitator
+        public function getDamage($fireOrder){
+            $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
+            $dmg = Dice::d(10, (1 + $add))+4;
+            return $dmg;
+        }
+
+		public function fire($gamedata, $fireOrder){
+			parent::fire($gamedata, $fireOrder);
+			$this->applyCooldown($gamedata);
+		}
+
+        public function getAvgDamage(){
+            $this->setMinDamage();
+            $this->setMaxDamage();
+
+            $min = $this->minDamage;
+            $max = $this->maxDamage;
+            $avg = round(($min+$max)/2);
+            return $avg;
+        }
+		
+        public function setMinDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->minDamage = 1 + ($boost * 1) + 4;
+        }   
+
+        public function setMaxDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->maxDamage = 10 + ($boost * 10) + 4;
+        }  
+
+}  // endof NexusChargedPlasmaGun
+
+
+
+
+class NexusHeavyChargedPlasmaGun extends Plasma{
+    	public $name = "NexusHeavyChargedPlasmaGun";
+        public $displayName = "Heavy Charged Plasma Gun";
+		public $iconPath = "NexusHeavyChargedPlasmaGun.png";
+		
+    	public $trailColor = array(75, 250, 90);
+        public $animation = "ball";
+        public $animationColor = array(75, 250, 90);
+    	public $projectilespeed = 10;
+        public $animationWidth = 5;
+    	public $animationExplosionScale = 1;
+    	public $trailLength = 10;
+    	public $rangeDamagePenalty = 0.5;
+		public $intercept = 0;
+
+		public $rangeDamagePenaltyHCPG = 0.5;  // -1 / 2 hexes, but only after 10 hexes!
+
+		public $priority = 2; //Flash weapon
+		
+		public $addedDice;
+
+        public $loadingtime = 3;
+
+		public $boostable = true;
+        public $boostEfficiency = 3;
+        public $maxBoostLevel = 2;
+			
+        public $rangePenalty = 0.5;
+        public $fireControl = array(null, 2, 3); // fighters, <=mediums, <=capitals 
+		
+		public $damageType = "Flash"; 
+		public $weaponClass = "Plasma"; 		
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 7;
+            if ( $powerReq == 0 ) $powerReq = 3;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+// Code using Gravitic Pulsar to obtain cooldown due to boosting weapon
+	public function setSystemDataWindow($turn){
+            $boost = $this->getExtraDicebyBoostlevel($turn);            
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+//original                $this->data["Special"] .= '<br>';
+                $this->data["Special"] = '<br>';
+            } 
+		$this->data["Special"] .= "Plasma weapon. Armor treated as half.";
+		$this->data["Special"] .= "<br>Loses -1 damage per 2 hexes after the first 10 hexes.";
+		$this->data["Special"] .= "<br>+3 power = +1d10 damage and 1 turn cooldown.";
+		$this->data["Special"] .= "<br>+6 power = +2d10 damage and 2 turns cooldown.";
+		$this->data["Boostlevel"] = $boost;
+		$this->normalload = $this->loadingtime;
+		parent::setSystemDataWindow($turn);		
+	}
+
+        private function getExtraDicebyBoostlevel($turn){
+            $add = 0;
+            switch($this->getBoostLevel($turn)){
+                case 1:
+                    $add = 1;
+                    break;
+                case 2:
+                    $add = 2;
+                    break;
+                default:
+                    break;
+            }
+            return $add;
+        }
+
+	protected function applyCooldown($gamedata){
+		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
+		//if boosted, cooldown (1 or 2 tuns)
+		if($currBoostlevel > 0){
+			$cooldownLength = $currBoostlevel ;
+			$finalTurn = $gamedata->turn + $cooldownLength;
+			$crit = new ForcedOfflineForTurns(-1, $this->unit->id, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $finalTurn);
+			$crit->updated = true;
+			$this->criticals[] =  $crit;
+		} 
+	}
+
+         private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                if ($i->turn != $turn){
+                   continue;
+                }
+                if ($i->type == 2){
+                    $boostLevel += $i->amount;
+                }
+            }
+            return $boostLevel;
+        }
+
+// Variable damage reduction with range from the Descari Plasma Bolter
+
+	//skip first 10 hexes when calculating the damage modifier
+	protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
+	{
+		parent::getDamageMod($damage, $shooter, $target, $pos, $gamedata);
+					if ($pos != null) {
+					$sourcePos = $pos;
+					} 
+					else {
+					$sourcePos = $shooter->getHexPos();
+					}
+			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			if ($dis <= 10) {
+				$damage -= 0;
+				}
+			else {
+				$damage -= round(($dis - 10) * $this->rangeDamagePenaltyHCPG);
+			}	
+		        $damage = max(0, $damage); //at least 0	    
+        		$damage = floor($damage); //drop fractions, if any were generated
+      			 return $damage;
+	}		
+
+// Code for adding extra dice of damage. Based on Fusion Agitator
+        public function getDamage($fireOrder){
+            $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
+            $dmg = Dice::d(10, (2 + $add))+4;
+            return $dmg;
+        }
+
+		public function fire($gamedata, $fireOrder){
+			parent::fire($gamedata, $fireOrder);
+			$this->applyCooldown($gamedata);
+		}
+
+        public function getAvgDamage(){
+            $this->setMinDamage();
+            $this->setMaxDamage();
+
+            $min = $this->minDamage;
+            $max = $this->maxDamage;
+            $avg = round(($min+$max)/2);
+            return $avg;
+        }
+		
+        public function setMinDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->minDamage = 2 + ($boost * 1) + 4;
+        }   
+
+        public function setMaxDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->maxDamage = 20 + ($boost * 10) + 4;
+        }  
+
+}  // endof NexusHeavyChargedPlasmaGun
+
+
+
 
 
 

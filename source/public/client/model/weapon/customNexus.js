@@ -131,12 +131,6 @@ var NexusFletchletteGun = function NexusFletchletteGun(json, ship) {
 NexusFletchletteGun.prototype = Object.create(Weapon.prototype);
 NexusFletchletteGun.prototype.constructor = NexusFletchletteGun;
 
-var NexusHeavyAttackLaser = function NexusHeavyAttackLaser(json, ship) {
-	Weapon.call(this, json, ship);
-};
-NexusHeavyAttackLaser.prototype = Object.create(Weapon.prototype);
-NexusHeavyAttackLaser.prototype.constructor = NexusHeavyAttackLaser;
-
 var NexusHeavyAutocannon = function NexusHeavyAutocannon(json, ship) {
 	Weapon.call(this, json, ship);
 };
@@ -148,12 +142,6 @@ var NexusHeavyChemicalLaser = function NexusHeavyChemicalLaser(json, ship) {
 };
 NexusHeavyChemicalLaser.prototype = Object.create(Weapon.prototype);
 NexusHeavyChemicalLaser.prototype.constructor = NexusHeavyChemicalLaser;
-
-var NexusHeavyCPGun = function NexusHeavyCPGun(json, ship) {
-	Weapon.call(this, json, ship);
-};
-NexusHeavyCPGun.prototype = Object.create(Weapon.prototype);
-NexusHeavyCPGun.prototype.constructor = NexusHeavyCPGun;
 
 var NexusHeavyFletchletteGun = function NexusHeavyFletchletteGun(json, ship) {
 	Weapon.call(this, json, ship);
@@ -184,12 +172,6 @@ var NexusHeavyXRayLaser = function NexusHeavyXRayLaser(json, ship) {
 };
 NexusHeavyXRayLaser.prototype = Object.create(Weapon.prototype);
 NexusHeavyXRayLaser.prototype.constructor = NexusHeavyXRayLaser;
-
-var NexusHEPLaser = function NexusHEPLaser(json, ship) {
-	Weapon.call(this, json, ship);
-};
-NexusHEPLaser.prototype = Object.create(Weapon.prototype);
-NexusHEPLaser.prototype.constructor = NexusHEPLaser;
 
 var NexusImpactor = function NexusImpactor(json, ship) {
 	Weapon.call(this, json, ship);
@@ -245,12 +227,6 @@ var NexusLightCoilgun = function NexusLightCoilgun(json, ship) {
 NexusLightCoilgun.prototype = Object.create(Weapon.prototype);
 NexusLightCoilgun.prototype.constructor = NexusLightCoilgun;
 
-var NexusLightCPGun = function NexusLightCPGun(json, ship) {
-	Weapon.call(this, json, ship);
-};
-NexusLightCPGun.prototype = Object.create(Weapon.prototype);
-NexusLightCPGun.prototype.constructor = NexusLightCPGun;
-
 var NexusLightGasGun = function NexusLightGasGun(json, ship) {
 	Weapon.call(this, json, ship);
 };
@@ -263,23 +239,11 @@ var NexusLightGaussCannon = function NexusLightGaussCannon(json, ship) {
 NexusLightGaussCannon.prototype = Object.create(Weapon.prototype);
 NexusLightGaussCannon.prototype.constructor = NexusLightGaussCannon;
 
-var NexusLightHEPLaser = function NexusLightHEPLaser(json, ship) {
-	Weapon.call(this, json, ship);
-};
-NexusLightHEPLaser.prototype = Object.create(Weapon.prototype);
-NexusLightHEPLaser.prototype.constructor = NexusLightHEPLaser;
-
 var NexusLightLaserCutter = function NexusLightLaserCutter(json, ship) {
 	Weapon.call(this, json, ship);
 };
 NexusLightLaserCutter.prototype = Object.create(Weapon.prototype);
 NexusLightLaserCutter.prototype.constructor = NexusLightLaserCutter;
-
-var NexusLightLaserLance = function NexusLightLaserLance(json, ship) {
-	Weapon.call(this, json, ship);
-};
-NexusLightLaserLance.prototype = Object.create(Weapon.prototype);
-NexusLightLaserLance.prototype.constructor = NexusLightLaserLance;
 
 var NexusLightMatterGun = function NexusLightMatterGun(json, ship) {
 	Weapon.call(this, json, ship);
@@ -388,30 +352,6 @@ var NexusSpiker = function NexusSpiker(json, ship) {
 };
 NexusSpiker.prototype = Object.create(Weapon.prototype);
 NexusSpiker.prototype.constructor = NexusSpiker;
-
-var NexusStabilizedLightAttackLaser = function NexusStabilizedLightAttackLaser(json, ship) {
-	Weapon.call(this, json, ship);
-};
-NexusStabilizedLightAttackLaser.prototype = Object.create(Weapon.prototype);
-NexusStabilizedLightAttackLaser.prototype.constructor = NexusStabilizedLightAttackLaser;
-
-var NexusStabilizedMediumAttackLaser = function NexusStabilizedMediumAttackLaser(json, ship) {
-	Weapon.call(this, json, ship);
-};
-NexusStabilizedMediumAttackLaser.prototype = Object.create(Weapon.prototype);
-NexusStabilizedMediumAttackLaser.prototype.constructor = NexusStabilizedMediumAttackLaser;
-
-var NexusStabilizedHeavyAttackLaser = function NexusStabilizedHeavyAttackLaser(json, ship) {
-	Weapon.call(this, json, ship);
-};
-NexusStabilizedHeavyAttackLaser.prototype = Object.create(Weapon.prototype);
-NexusStabilizedHeavyAttackLaser.prototype.constructor = NexusStabilizedHeavyAttackLaser;
-
-var NexusStandardCPGun = function NexusStandardCPGun(json, ship) {
-	Weapon.call(this, json, ship);
-};
-NexusStandardCPGun.prototype = Object.create(Weapon.prototype);
-NexusStandardCPGun.prototype.constructor = NexusStandardCPGun;
 
 var NexusStandardRocket = function NexusStandardRocket(json, ship) {
 	Weapon.call(this, json, ship);
@@ -551,7 +491,159 @@ var NexusHeavyPlasmaCharge = function NexusHeavyPlasmaCharge(json, ship) {
 NexusHeavyPlasmaCharge.prototype = Object.create(Torpedo.prototype);
 NexusHeavyPlasmaCharge.prototype.constructor = NexusHeavyPlasmaCharge;
 NexusHeavyPlasmaCharge.prototype.calculateSpecialRangePenalty = function (distance) {
-    var distancePenalized = Math.max(0,distance - 3); //ignore first 3 hexes
+    var distancePenalized = Math.max(0,distance - 12); //ignore first 12 hexes
     var rangePenalty = this.rangePenalty * distancePenalized;
     return rangePenalty;
 };
+
+var LightGatlingGun = function  LightGatlingGun(json, ship) {
+    Weapon.call(this, json, ship);
+};
+LightGatlingGun.prototype = Object.create(Weapon.prototype);
+LightGatlingGun.prototype.constructor =  LightGatlingGun;
+
+
+
+
+
+
+
+var NexusHeavyChargedPlasmaGun = function  NexusHeavyChargedPlasmaGun(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusHeavyChargedPlasmaGun.prototype = Object.create(Weapon.prototype);
+NexusHeavyChargedPlasmaGun.prototype.constructor =  NexusHeavyChargedPlasmaGun;
+
+NexusHeavyChargedPlasmaGun.prototype.initBoostableInfo = function () {
+    switch (shipManager.power.getBoost(this)) {
+        case 0:
+            this.data["Damage"] = '6 - 24';
+            this.data["Boostlevel"] = '0';
+            break;
+        case 1:
+            this.data["Damage"] = '7 - 34';
+            this.data["Boostlevel"] = '1';
+            break;
+        case 2:
+            this.data["Damage"] = '8 - 44';
+            this.data["Boostlevel"] = '2';
+            break;
+        default:
+            this.data["Damage"] = '6 - 24';
+            this.data["Boostlevel"] = '0';
+            break;
+    }
+	
+    if (!window.weaponManager.isLoaded(this)) {
+        var count = shipManager.power.getBoost(this);
+
+        for (var i = 0; i < count; i++) {
+            shipManager.power.unsetBoost(null, this);
+        }
+    }
+	
+    return this;
+};
+
+NexusHeavyChargedPlasmaGun.prototype.clearBoost = function () {
+    for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
+
+        if (power.type == 2) {
+            system.power.splice(i, 1);
+
+            return;
+        }
+    }
+};
+
+NexusHeavyChargedPlasmaGun.prototype.hasMaxBoost = function () {
+    return true;
+};
+
+NexusHeavyChargedPlasmaGun.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
+
+
+
+
+var NexusChargedPlasmaGun = function  NexusChargedPlasmaGun(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusChargedPlasmaGun.prototype = Object.create(Weapon.prototype);
+NexusChargedPlasmaGun.prototype.constructor =  NexusChargedPlasmaGun;
+
+NexusChargedPlasmaGun.prototype.initBoostableInfo = function () {
+    switch (shipManager.power.getBoost(this)) {
+        case 0:
+            this.data["Damage"] = '5 - 14';
+            this.data["Boostlevel"] = '0';
+            break;
+        case 1:
+            this.data["Damage"] = '6 - 24';
+            this.data["Boostlevel"] = '1';
+            break;
+        case 2:
+            this.data["Damage"] = '7 - 34';
+            this.data["Boostlevel"] = '2';
+            break;
+        default:
+            this.data["Damage"] = '5 - 14';
+            this.data["Boostlevel"] = '0';
+            break;
+    }
+	
+    if (!window.weaponManager.isLoaded(this)) {
+        var count = shipManager.power.getBoost(this);
+
+        for (var i = 0; i < count; i++) {
+            shipManager.power.unsetBoost(null, this);
+        }
+    }
+	
+    return this;
+};
+
+NexusChargedPlasmaGun.prototype.clearBoost = function () {
+    for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
+
+        if (power.type == 2) {
+            system.power.splice(i, 1);
+
+            return;
+        }
+    }
+};
+
+NexusChargedPlasmaGun.prototype.hasMaxBoost = function () {
+    return true;
+};
+
+NexusChargedPlasmaGun.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
+
+
+
+
+
+
+
+
+var NexusLaserSpear = function  NexusLaserSpear(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusLaserSpear.prototype = Object.create(Weapon.prototype);
+NexusLaserSpear.prototype.constructor =  NexusLaserSpear;
+
+var NexusHeavyLaserSpear = function  NexusHeavyLaserSpear(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusHeavyLaserSpear.prototype = Object.create(Weapon.prototype);
+NexusHeavyLaserSpear.prototype.constructor =  NexusHeavyLaserSpear;
