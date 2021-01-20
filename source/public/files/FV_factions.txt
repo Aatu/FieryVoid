@@ -89,6 +89,11 @@ Commonly available/generic civilian ships - or, if they're faction-specific civi
 No very specific technologies (or technologies specific to base faction).
 
 
+CORILLANI
+The Corillani are unusual in that they operate three independant navies, the Defenders of Corillan (DoC), the Corillani's People's Navy (CPN), andthe Orillani Space Force (OSF).  Whilst these forces generally operate independant of one another they can and will fight alongside, so in practice there is no restriction on mixing and matching ships from the three different sub-navies during fleet selection.
+The OSF use the unique Plasma Projector weapon which focuses plasma into tight beam, resulting in a longer range than most plasma weapons and with lower degradation.  It deals damage similar to a heavy plasma cannon, however applies this in raking (8) mode rather than standard.
+
+
 CUSTOM SHIPS
 Units that, for some reason, were not fit for any faction. 
 Mostly a technical directory, not representing a playable faction.
