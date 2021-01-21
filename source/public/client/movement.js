@@ -214,7 +214,7 @@ shipManager.movement = {
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
         if (shipManager.movement.isRolling(ship)) return true; //rolling ship should be always able to stop...
-        if (shipManager.movement.hasRolled(ship) && !ship.agile) {
+        if ((!ship.agile) && shipManager.movement.hasRolled(ship) ) {
             return false;
         }
         if (shipManager.movement.isPivoting(ship) != "no" && !ship.gravitic) {
