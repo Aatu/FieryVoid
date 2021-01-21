@@ -63,6 +63,11 @@ if (isset($_SESSION["user"])) {
 -->        
 		---------- <b>LATEST NEWS - January 2021</b> ----------	
 	    <br><b>Escalation Wars update</b> – new units and balance updates to existing ones, courtesy of Geoffrey and Tyrel!
+	    <br><b>Enormous ramming</b> - fighters no longer auto-ram (so they can safely enter Enormous unit's hex). This is to reflect their tabletop ability to Skin Dance.
+	    <br><b>Auto-ramming fixed</b> - auto-ramming will not happen if ramming is declared manually.
+	    <br><b>Immobile units got their Ramming Attacks</b> - any games containing such units are now broken. <b><big>PLEASE REPORT THEM TO ME, I CAN RESTORE THEM!</big></b>.
+	    <br><b>Rolling penalty for Agile ships</b> - now they suffer it correctly
+
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
