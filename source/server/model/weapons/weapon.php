@@ -890,10 +890,12 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
             $oew = 0;
         }
 
-        if (!($shooter instanceof FighterFlight)) {
-            if (Movement::isRolling($shooter, $gamedata->turn) /*&& !$this->ballistic*/) {
+        if (!($shooter instanceof FighterFlight)) {			
+            if ((!$shooter->agile) && Movement::isRolling($shooter, $gamedata->turn)) { //non-agile ships suffer as long as they're ROLLING
                 $mod -= 3;
-            }
+            } else if ($shooter->agile && Movement::hasRolled($shooter, $gamedata->turn)) { //Agile ships suffer on the turn they actually rolled!
+				$mod -= 3;
+			}
             if (Movement::hasPivoted($shooter, $gamedata->turn) /*&& !$this->ballistic*/) {
                 $mod -= 3;
             }
@@ -904,7 +906,7 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
             if ($target->base) $mod += $this->getCalledShotMod();//called shots vs bases suffer double penalty!
         }
 
-        if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)) { //leaving instanceof OSAT here - assuming MicroSATs will not suffer this penalty (DOarum seems to be able to turn/pivot like a superheavy fighter it's based on)
+        if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)) { //leaving instanceof OSAT here - assuming MicroSATs will not suffer this penalty (Dovarum seems to be able to turn/pivot like a superheavy fighter it's based on)
             $mod -= 1;
         }
 

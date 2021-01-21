@@ -697,7 +697,7 @@ window.weaponManager = {
 
         mod -= target.getHitChangeMod(shooter, weapon);
 
-        if (shooter.flight) {
+        if (shooter.flight===true) {
             //oew = shooter.offensivebonus;
 
             //Abbai critical...
@@ -717,10 +717,17 @@ window.weaponManager = {
 
             if (shipManager.movement.hasCombatPivoted(shooter)) mod--;
         } else {
-            if (shipManager.movement.isRolling(shooter)) {
-                //		console.log("is rolling -3");
-                mod -= 3;
-            }
+			if (shooter.agile === true){
+				if (shipManager.movement.hasRolled(shooter)) {
+					//		console.log("is rolling -3");
+					mod -= 3;
+				}
+			} else {
+				if (shipManager.movement.isRolling(shooter)) {
+					//		console.log("is rolling -3");
+					mod -= 3;
+				}
+			}
 
             if (shipManager.movement.hasPivotedForShooting(shooter)) {
                 //		console.log("pivoting");
