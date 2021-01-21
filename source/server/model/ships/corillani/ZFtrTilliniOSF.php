@@ -9,7 +9,7 @@ class ZFtrTilliniOSF extends FighterFlight
 		$this->pointCost = 52 *6;
 		$this->faction = "Corillani";
 		$this->phpclass = "ZFtrTilliniOSF";
-		$this->shipClass = "Tillini Medium Fighters";
+		$this->shipClass = "Tillini Medium Fighters (OSF)";
 		$this->imagePath = "img/ships/CorillaniTilliniOSF.png";
 		$this->notes = 'The Orillani Space Force (OSF) version of the Tillini fighter';
 				

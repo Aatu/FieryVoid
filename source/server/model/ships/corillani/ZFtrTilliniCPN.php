@@ -9,7 +9,7 @@ class ZFtrTilliniCPN extends FighterFlight
 		$this->pointCost = 52 *6;
 		$this->faction = "Corillani";
 		$this->phpclass = "ZFtrTilliniCPN";
-		$this->shipClass = "Tillini Medium Fighters";
+		$this->shipClass = "Tillini Medium Fighters CPN";
 		$this->imagePath = "img/ships/CorillaniTilliniCPN.png";
 		$this->notes = 'The Corillani Peoples Navy (CPN) version of the Tillini fighter';
 				
