@@ -48,7 +48,7 @@ class Vaconi extends BaseShip{
         $this->addLeftSystem(new Thruster(3, 8, 0, 3, 3));
         $this->addLeftSystem(new Hangar(3, 14));
 		
- 		$this->addRightSystem(new HeavyPlasma(3, 8, 5, 300, 60));
+ 		$this->addRightSystem(new HeavyPlasma(3, 8, 5, 0, 120));
         $this->addRightSystem(new TwinArray(2, 6, 2, 300, 120));
         $this->addRightSystem(new TwinArray(2, 6, 2, 60, 240));
         $this->addRightSystem(new Thruster(3, 8, 0, 3, 4));
