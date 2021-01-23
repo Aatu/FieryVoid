@@ -33,8 +33,8 @@ class Garunda extends HeavyCombatVessel{
         $this->addPrimarySystem(new Hangar(2, 7));
         $this->addPrimarySystem(new Thruster(4, 8, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(3, 5, 0, 2, 3));        
+        $this->addPrimarySystem(new Thruster(3, 5, 0, 2, 4)); 
         $this->addPrimarySystem(new Thruster(4, 8, 0, 3, 4));
-        $this->addPrimarySystem(new Thruster(3, 5, 0, 2, 4));        
         $this->addPrimarySystem(new SMissileRack(3, 6, 0, 180, 360));
 		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 0, 180));                   
         
