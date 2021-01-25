@@ -57,7 +57,8 @@ var Engine = function Engine(json, ship) {
 Engine.prototype = Object.create(ShipSystem.prototype);
 Engine.prototype.constructor = Engine;
 Engine.prototype.addInfo = function () {
-    this.data["Effiency"] = this.boostEfficiency;
+    //this.data["Effiency"] = this.boostEfficiency;
+    this.data["Efficiency"] = this.boostEfficiency;
 };
 
 //  this.data["Weapon type"] ="Gravitic";

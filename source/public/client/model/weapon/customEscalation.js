@@ -141,3 +141,50 @@ var EWRangedDualRocketLauncher = function  EWRangedDualRocketLauncher(json, ship
 };
 EWRangedDualRocketLauncher.prototype = Object.create(Weapon.prototype);
 EWRangedDualRocketLauncher.prototype.constructor =  EWRangedDualRocketLauncher;
+
+var EWLightGaussCannon = function  EWLightGaussCannon(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWLightGaussCannon.prototype = Object.create(Weapon.prototype);
+EWLightGaussCannon.prototype.constructor =  EWLightGaussCannon;
+
+var EWPlasmaArc = function  EWPlasmaArc(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWPlasmaArc.prototype = Object.create(Weapon.prototype);
+EWPlasmaArc.prototype.constructor =  EWPlasmaArc;
+
+var EWElectronPolarizer = function  EWElectronPolarizer(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWElectronPolarizer.prototype = Object.create(Weapon.prototype);
+EWElectronPolarizer.prototype.constructor =  EWElectronPolarizer;
+
+var EWEMTorpedo = function  EWEMTorpedo(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWEMTorpedo.prototype = Object.create(Weapon.prototype);
+EWEMTorpedo.prototype.constructor =  EWEMTorpedo;
+EWEMTorpedo.prototype.calculateSpecialRangePenalty = function (distance) {
+    var distancePenalized = Math.max(0,distance - 20); //ignore first 20 hexes
+    var rangePenalty = this.rangePenalty * distancePenalized;
+    return rangePenalty;
+};
+
+var EWEarlyRailgun = function  EWEarlyRailgun(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWEarlyRailgun.prototype = Object.create(Weapon.prototype);
+EWEarlyRailgun.prototype.constructor =  EWEarlyRailgun;
+
+var EWRangedDualHeavyRocketLauncher = function  EWRangedDualHeavyRocketLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWRangedDualHeavyRocketLauncher.prototype = Object.create(Weapon.prototype);
+EWRangedDualHeavyRocketLauncher.prototype.constructor =  EWRangedDualHeavyRocketLauncher;
+
+var EWDefenseLaser = function  EWDefenseLaser(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWDefenseLaser.prototype = Object.create(Weapon.prototype);
+EWDefenseLaser.prototype.constructor =  EWDefenseLaser;

@@ -2301,7 +2301,7 @@ class Bulkhead extends ShipSystem{
 			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= "Absorbs damage from hits on the same section - activation is automatic.";
-		$this->data["Special"] .= "<br>Will kick in when it can prevent system destruction or when sections' structural integrity falls below 34%.";
+		$this->data["Special"] .= "<br>Will kick in when it can prevent system destruction or when sections' structural integrity falls too low.";
 	}	
 	
      public function getOutput(){ //output = remaining health - just for visual purposes
@@ -2331,7 +2331,7 @@ class Bulkhead extends ShipSystem{
 		$protectionValue = 0;
 		if ( ($targetHealth <= $expectedDmg) && ($targetHealth + $ownHealth > $expectedDmg) ){
 			$protectionValue = $targetHealth + $ownHealth - $expectedDmg; //I cannot prioritize smaller Bulkhead if it'd do the job, but at least I can avoid prioritizing larger one
-		} else if (($targetHealth <= $expectedDmg) && ($this->structureSystem == $systemProtected)) { //structure is in danger of being destroyed, do protect for fear of not using the bulkhead at all 
+		} else if ( (($targetHealth - $expectedDmg) <= 12) && ($this->structureSystem == $systemProtected)) { //Structure is hit - and is expected to fall to or below 12 points after hit, do protect
 			$protectionValue = $ownHealth;
 		} else if ($structureHealthFraction < 0.34) { //structure health is low, do protect for fear of not using the bulkhead at all 
 			$protectionValue = $ownHealth;

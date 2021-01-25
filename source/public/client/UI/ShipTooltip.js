@@ -146,12 +146,22 @@ window.ShipTooltip = function () {
 	var rollPivotModifier = 0;
 	if (ship.flight === true && jinking > 0) toDisplay += 'Evasion: -' + jinking + ' to hit; ';
 	if (shipManager.movement.isPivoting(ship) !== 'no') toDisplay += 'Pivoting; ';
-	if (shipManager.movement.isRolling(ship)){
-		toDisplay += 'Rolling; ';
-		rollPivotModifier -= 15;
+	if (ship.agile && (!ship.flight)){
+		if (shipManager.movement.hasRolled(ship)){
+			toDisplay += 'Has rolled; ';
+			rollPivotModifier -= 15;
+		}
+	}else if (!ship.flight){
+		if (shipManager.movement.isRolling(ship)){
+			toDisplay += 'Rolling; ';
+			rollPivotModifier -= 15;
+		}
 	}
-	if (shipManager.movement.isRolled(ship)) toDisplay += 'Rolled; ';
-	if (shipManager.movement.isHalfPhased(ship)) toDisplay += 'Half-Phased; ';
+	if ((!ship.flight) && shipManager.movement.isRolled(ship)) toDisplay += 'Rolled; '; //fighters don't roll, no point looking for it
+	if ((!ship.flight) && shipManager.movement.isHalfPhased(ship)){ //fighters don't half phase, no point looking for it
+		toDisplay += 'Half-Phased; ';
+		rollPivotModifier -= 50;
+	}
 	if (ship.flight === true){		
 		if (shipManager.movement.hasCombatPivoted(ship)) rollPivotModifier -= 5;
 	}else if (ship.osat){
