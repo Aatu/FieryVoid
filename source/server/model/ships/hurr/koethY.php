@@ -28,7 +28,7 @@ class koethy extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
 		$armour = array(2, 0, 1, 1);
 		$fighter = new Fighter("Koeth", $armour, 7, $this->id);
-		$fighter->displayName = "Koeth Light Fighter";
+		$fighter->displayName = "Koeth";
 		$fighter->imagePath = "img/ships/Hurrkoeth.png";
 		$fighter->iconPath = "img/ships/Hurrkoeth_large.png";
 		
