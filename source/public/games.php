@@ -63,6 +63,7 @@ if (isset($_SESSION["user"])) {
 -->        
 		---------- <b>LATEST NEWS - January 2021</b> ----------	
 	    <br><b>Escalation Wars update</b> – new units and balance updates to existing ones, courtesy of Geoffrey and Tyrel!
+	    <br><b>Corillani have arrived</b> – new official faction is ready to roll, courtesy of Douglas!
 	    <br><b>Enormous ramming</b> - fighters no longer auto-ram (so they can safely enter Enormous unit's hex). This is to reflect their tabletop ability to Skin Dance.
 	    <br><b>Auto-ramming fixed</b> - auto-ramming will not happen if ramming is declared manually.
 	    <br><b>Immobile units got their Ramming Attacks</b> - any games containing such units are now broken. <b><big>PLEASE REPORT THEM TO ME, I CAN RESTORE THEM!</big></b>.
