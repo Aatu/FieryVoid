@@ -56,22 +56,18 @@ if (isset($_SESSION["user"])) {
     <!-- <div id="newsHeader">Latest News - September 2020</div> -->
     <div id="newsEntry">
         
+<!--	    
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
-        
-		---------- <b>LATEST NEWS - December 2020</b> ----------	
-	    <br><b><u>Simultaneous movement change</u></b> – I have slightly moved Ini brackets - which should result in more units in higher brackets (especially 6th!) and less in bracket 1 (this would make Ini penalties more effective, too - especially for capital ships)  
-	    <br><b>Restricted EW crit fix</b> – now -2 penalty does stack
-  	    <br><b>Abbai Motenaion fixed</b> – now it can be deployed again
-  	    <br><b>Fighter ballistics fixed</b> - now OB is used correctly
-  	    <br><b>Onmouseover additional information</b> - firing penalty due to rolls/pivots/combat pivots is now explicitly listed onmouseover
-  	    <br><b>Multiplayer games</b> - allied units should be shown in friendly green and prevented from being fired upon
-  	    <br><b>Zombie shield bug fixed</b> - recently destroyed shield no longer gives protection
-  	    <br><b>Open PRIMARY now behaving as such</b> - damage allocation bug fixed
-  	    <br><b>Enormous unit now behaving as such</b> - or at least trying to. They will be automatically rammed by anything that enters the same hex! Fighters are advised to stay that one hex away, as Skin Dancing is not implemented.
-  	    <br><b>All fighters can now ram</b> - first victims are games they were currently in... Sorry for that, I tried to find moment when these particular units are not used but didn't manage with a few factions!
-  	    <br><b>Starting speed options changed</b> - now possible range is 0-10.
+-->        
+		---------- <b>LATEST NEWS - January 2021</b> ----------	
+	    <br><b>Escalation Wars update</b> – new units and balance updates to existing ones, courtesy of Geoffrey and Tyrel!
+	    <br><b>Enormous ramming</b> - fighters no longer auto-ram (so they can safely enter Enormous unit's hex). This is to reflect their tabletop ability to Skin Dance.
+	    <br><b>Auto-ramming fixed</b> - auto-ramming will not happen if ramming is declared manually.
+	    <br><b>Immobile units got their Ramming Attacks</b> - any games containing such units are now broken. <b><big>PLEASE REPORT THEM TO ME, I CAN RESTORE THEM!</big></b>.
+	    <br><b>Rolling penalty for Agile ships</b> - now they suffer it correctly
+
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
