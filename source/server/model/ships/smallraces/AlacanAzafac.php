@@ -69,7 +69,7 @@ class AlacanAzafac extends HeavyCombatVessel{
 			),
 			1=> array(
 					3 => "Thruster",
-					5 => "SO-Missile Rack",
+					5 => "Light SO-Missile Rack",
 					6 => "Light Particle Beam",
 					10 => "Cargo Bay",
 					17 => "Structure",
