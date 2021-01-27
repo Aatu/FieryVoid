@@ -27,7 +27,7 @@ class CircasianMoshesta extends MediumShip{
         $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
         $this->addPrimarySystem(new CnC(4, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 4, 5));
-        $this->addPrimarySystem(new Engine(4, 10, 0, 10, 2));
+        $this->addPrimarySystem(new Engine(4, 11, 0, 10, 2));
         $this->addPrimarySystem(new Hangar(2, 1));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));        
@@ -41,8 +41,8 @@ class CircasianMoshesta extends MediumShip{
         $this->addAftSystem(new Thruster(3, 8, 0, 5, 2));    
         $this->addAftSystem(new Thruster(3, 8, 0, 5, 2));    
 		$this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 240, 360));
-		$this->addAftSystem(new LightParticleCannon(1, 6, 5, 240, 360));
-		$this->addAftSystem(new LightParticleCannon(1, 6, 5, 0, 120));
+		$this->addAftSystem(new LightParticleCannon(2, 6, 5, 240, 360));
+		$this->addAftSystem(new LightParticleCannon(2, 6, 5, 0, 120));
 		$this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 0, 120));
        
         $this->addPrimarySystem(new Structure(3, 36));

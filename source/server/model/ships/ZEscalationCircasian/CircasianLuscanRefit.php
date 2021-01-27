@@ -4,11 +4,11 @@ class CircasianLuscanRefit extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 170;
+        $this->pointCost = 175;
         $this->faction = "ZEscalation Circasian";
         $this->phpclass = "CircasianLuscanRefit";
         $this->imagePath = "img/ships/EscalationWars/CircasianLuscan.png";
-        $this->shipClass = "Luscan Assault Frigate Refit";
+        $this->shipClass = "Luscan Assault Frigate (1935 Refit)";
 			$this->variantOf = "Luscan Assault Frigate";
 			$this->occurence = "common";
 		$this->unofficial = true;
@@ -34,13 +34,15 @@ class CircasianLuscanRefit extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 11, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 5, 4));        
         
-		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 240, 120));
-		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 240, 120));
-		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 240, 120));
+		$this->addFrontSystem(new LightParticleCannon(2, 6, 5, 300, 60));
+		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 180, 60));
+		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 300, 180));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
 	    
         $this->addAftSystem(new Thruster(3, 10, 0, 5, 2));    
+		$this->addAftSystem(new CargoBay(2, 12));
+		$this->addAftSystem(new CargoBay(2, 12));
        
         $this->addPrimarySystem(new Structure(3, 48));
 
@@ -59,13 +61,15 @@ class CircasianLuscanRefit extends MediumShip{
 
 		1=> array(
 			4 => "Thruster",
-			8 => "Light Particle Beam",
+			6 => "Light Particle Cannon",
+			9 => "Light Particle Beam",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
-			5 => "Thruster",
+			6 => "Thruster",
+			9 => "Cargo Bay",
 			17 => "Structure",
 			20 => "Primary",
 		),

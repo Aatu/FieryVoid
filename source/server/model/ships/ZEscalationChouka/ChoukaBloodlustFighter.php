@@ -12,7 +12,6 @@ class ChoukaBloodlustFighter extends FighterFlight{
  //       $this->customFtrName = "Bloodlust";  //Only used for special hangar needs like T-bolts
 		$this->unofficial = true;
 
-		
         $this->isd = 1943;
         
         $this->forwardDefense = 9;
@@ -21,7 +20,7 @@ class ChoukaBloodlustFighter extends FighterFlight{
         $this->offensivebonus = 5;
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
-		$this->turndelay = 0.25;
+		$this->turndelay = 0;
         
         $this->iniativebonus = 80;
         $this->populate();       
@@ -35,7 +34,7 @@ class ChoukaBloodlustFighter extends FighterFlight{
         $toAdd = $new - $current;
 
         for ($i = 0; $i < $toAdd; $i++){            
-            $armour = array(3, 1, 1, 1);
+            $armour = array(3, 1, 2, 2);
             $fighter = new Fighter("ChoukaBloodlustFighter", $armour, 15, $this->id);
             $fighter->displayName = "Bloodlust";
             $fighter->imagePath = "img/ships/EscalationWars/ChoukaBloodlust.png";

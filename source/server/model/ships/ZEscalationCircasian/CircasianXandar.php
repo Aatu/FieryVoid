@@ -37,8 +37,8 @@ class CircasianXandar extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
 		$this->addFrontSystem(new Hangar(3, 2));
 		$this->addFrontSystem(new EWRocketLauncher(2, 4, 1, 240, 360));
-		$this->addFrontSystem(new EWRocketLauncher(2, 2, 1, 0, 120));
-		$this->addFrontSystem(new EWParticleLance(2, 10, 10, 330, 30));
+		$this->addFrontSystem(new EWRocketLauncher(2, 4, 1, 0, 120));
+		$this->addFrontSystem(new EWParticleLance(3, 12, 14, 330, 30));
                 
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));
@@ -46,7 +46,6 @@ class CircasianXandar extends HeavyCombatVessel{
         $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 120, 300));
         $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 60, 240));
         $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 300, 120));
-
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 30));

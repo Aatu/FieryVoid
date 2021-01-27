@@ -4,12 +4,13 @@ class CircasianShenna extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 375;
+        $this->pointCost = 400;
         $this->faction = "ZEscalation Circasian";
         $this->phpclass = "CircasianShenna";
         $this->imagePath = "img/ships/EscalationWars/CircasianShenna.png";
 			$this->canvasSize = 150; //img has 200px per side
         $this->shipClass = "Shenna Strike Carrier";
+			$this->limited = 33;
 			$this->unofficial = true;
         $this->isd = 1953;
 		$this->fighters = array("normal"=>18);
@@ -36,11 +37,13 @@ class CircasianShenna extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
 		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 270, 90));
-		$this->addFrontSystem(new EWParticleLance(3, 10, 10, 300, 360));
-		$this->addFrontSystem(new EWParticleLance(3, 10, 10, 0, 60));
+		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 270, 90));
+		$this->addFrontSystem(new EWParticleLance(3, 12, 14, 300, 360));
+		$this->addFrontSystem(new EWParticleLance(3, 12, 14, 0, 60));
                 
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));
+        $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 90, 270));
         $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 90, 270));
         $this->addAftSystem(new EWRocketLauncher(2, 4, 1, 240, 360));
         $this->addAftSystem(new EWRocketLauncher(2, 4, 1, 0, 120));
@@ -62,8 +65,8 @@ class CircasianShenna extends HeavyCombatVessel{
             ),
             1=> array(
                     3 => "Thruster",
-					6 => "Particle Lance",
-                    9 => "Light Particle Beam",
+					7 => "Particle Lance",
+                    10 => "Light Particle Beam",
 					18 => "Structure",
                     20 => "Primary",
             ),

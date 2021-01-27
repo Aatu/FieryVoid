@@ -4,10 +4,10 @@ class ChoukaWarPrayerEscort extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 325;
+        $this->pointCost = 275;
         $this->faction = "ZEscalation Chouka";
         $this->phpclass = "ChoukaWarPrayerEscort";
-        $this->imagePath = "img/ships/EscalationWars/ChoukaWarPrayerFrigate.png";
+        $this->imagePath = "img/ships/EscalationWars/ChoukaWarPrayer.png";
         $this->shipClass = "War Prayer Escort";
 			$this->variantOf = "War Prayer Gunship";
 			$this->occurence = "uncommon";

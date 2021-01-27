@@ -10,7 +10,7 @@ class CircasianMukantaSmallBase extends SmallStarBaseFourSections{
 		$this->faction = "ZEscalation Circasian";
 		$this->phpclass = "CircasianMukantaSmallBase";
 		$this->shipClass = "Mukanta Small Base";
-		$this->imagePath = "img/ships/EscalationWars/CircasianMukantaSmallBase.png";
+		$this->imagePath = "img/ships/EscalationWars/CircasianMukanta.png";
 		$this->fighters = array("light"=>6); 
 
 

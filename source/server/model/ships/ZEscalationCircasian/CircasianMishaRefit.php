@@ -7,8 +7,8 @@ class CircasianMishaRefit extends BaseShip{
 	$this->pointCost = 500;
 	$this->faction = "ZEscalation Circasian";
         $this->phpclass = "CircasianMishaRefit";
-        $this->imagePath = "img/ships/EscalationWars/CircasianMishaJumpCarrier.png";
-        $this->shipClass = "Misha Jump Carrier (Refit)";
+        $this->imagePath = "img/ships/EscalationWars/CircasianMisha.png";
+        $this->shipClass = "Misha Jump Carrier (1984 Refit)";
 			$this->variantOf = "Misha Jump Carrier";
 			$this->occurence = "common";		
         $this->shipSizeClass = 3;

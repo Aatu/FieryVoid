@@ -23,7 +23,6 @@ class CircasianToltara extends HeavyCombatVessel{
         $this->pivotcost = 2;
         $this->iniativebonus = 6*5;
         
-         
         $this->addPrimarySystem(new Reactor(3, 10, 0, 0));
         $this->addPrimarySystem(new CnC(3, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 9, 4, 5));
@@ -36,13 +35,15 @@ class CircasianToltara extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(2, 6, 0, 3, 1));
 		$this->addFrontSystem(new EWDualRocketLauncher(3, 6, 2, 270, 90));
 		$this->addFrontSystem(new EWDualRocketLauncher(3, 6, 2, 270, 90));
-		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 270, 90));
-		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 270, 90));
+		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 240, 60));
+		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 240, 60));
+		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 300, 120));
+		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 300, 120));
                 
         $this->addAftSystem(new Thruster(2, 10, 0, 5, 2));
         $this->addAftSystem(new Thruster(2, 10, 0, 5, 2));
-        $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 90, 270));
-        $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 90, 270));
+        $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 120, 300));
+        $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 60, 240));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 36));

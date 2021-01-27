@@ -4,10 +4,10 @@ class CircasianSularaScoutCarrier extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 525;
+	$this->pointCost = 575;
 	$this->faction = "ZEscalation Circasian";
         $this->phpclass = "CircasianSularaScoutCarrier";
-        $this->imagePath = "img/ships/EscalationWars/CircasianMishaJumpCarrier.png";
+        $this->imagePath = "img/ships/EscalationWars/CircasianMisha.png";
         $this->shipClass = "Sulara Scout Carrier";
 			$this->variantOf = "Misha Jump Carrier";
 			$this->occurence = "rare";		

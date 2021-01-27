@@ -7,7 +7,7 @@ class ChoukaDevotionFreeTrader extends MediumShip{
         $this->pointCost = 180;
         $this->faction = "ZEscalation Chouka";
         $this->phpclass = "ChoukaDevotionFreeTrader";
-        $this->imagePath = "img/ships/EscalationWars/ChoukaDevotionFreeTrader.png";
+        $this->imagePath = "img/ships/EscalationWars/ChoukaDevotion.png";
         $this->shipClass = "Devotion Free Trader";
 		$this->unofficial = true;
         $this->canvasSize = 75;

@@ -7,7 +7,7 @@ class ChoukaWarPrayerGunship extends MediumShip{
         $this->pointCost = 325;
         $this->faction = "ZEscalation Chouka";
         $this->phpclass = "ChoukaWarPrayerGunship";
-        $this->imagePath = "img/ships/EscalationWars/ChoukaWarPrayerFrigate.png";
+        $this->imagePath = "img/ships/EscalationWars/ChoukaWarPrayer.png";
         $this->shipClass = "War Prayer Gunship";
 		$this->unofficial = true;
         $this->agile = true;
