@@ -30,14 +30,14 @@ class CircasianOlcata extends MediumShip{
         $this->addPrimarySystem(new Scanner(3, 8, 2, 4));
         $this->addPrimarySystem(new Engine(3, 7, 0, 5, 2));
         $this->addPrimarySystem(new Hangar(3, 1));
-        $this->addPrimarySystem(new Thruster(1, 8, 0, 2, 3));
-        $this->addPrimarySystem(new Thruster(1, 8, 0, 2, 4));        
+        $this->addPrimarySystem(new Thruster(2, 8, 0, 2, 3));
+        $this->addPrimarySystem(new Thruster(2, 8, 0, 2, 4));        
         
         $this->addFrontSystem(new LightLaser(3, 4, 3, 240, 360));
         $this->addFrontSystem(new LightLaser(3, 4, 3, 0, 120));
 		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 240, 60));
 		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 300, 120));
-        $this->addFrontSystem(new Thruster(1, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
 	    
 		$this->addAftSystem(new LightLaser(1, 4, 3, 180, 300));
 		$this->addAftSystem(new LightLaser(1, 4, 3, 60, 180));

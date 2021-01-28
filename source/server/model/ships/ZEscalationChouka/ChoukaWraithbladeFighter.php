@@ -4,13 +4,12 @@ class ChoukaWraithbladeFighter extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 24*6;
+        $this->pointCost = 25*6;
         $this->faction = "ZEscalation Chouka";
         $this->phpclass = "ChoukaWraithbladeFighter";
         $this->shipClass = "Wraithblade Heavy flight";
         $this->imagePath = "img/ships/EscalationWars/ChoukaWraithblade.png";
 		$this->unofficial = true;
-
 		
         $this->isd = 1880;
         

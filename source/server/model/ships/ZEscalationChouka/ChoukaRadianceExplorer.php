@@ -7,7 +7,7 @@ class ChoukaRadianceExplorer extends BaseShip{
 	$this->pointCost = 480;
 	$this->faction = "ZEscalation Chouka";
         $this->phpclass = "ChoukaRadianceExplorer";
-        $this->imagePath = "img/ships/EscalationWars/ChoukaRadianceExplorer.png";
+        $this->imagePath = "img/ships/EscalationWars/ChoukaRadiance.png";
         $this->shipClass = "Radiance Explorer";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 200; //img has 200px per side

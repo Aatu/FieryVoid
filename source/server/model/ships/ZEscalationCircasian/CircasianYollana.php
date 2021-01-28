@@ -8,11 +8,11 @@ class CircasianYollana extends MediumShip{
         $this->faction = "ZEscalation Circasian";
         $this->phpclass = "CircasianYollana";
         $this->imagePath = "img/ships/EscalationWars/CircasianYollana.png";
-        $this->shipClass = "Yollana Escort Frigate";
+        $this->shipClass = "Yollana Patrol Frigate";
 		$this->unofficial = true;
         $this->agile = true;
-        $this->canvasSize = 75;
-	    $this->isd = 1926;
+        $this->canvasSize = 60;
+	    $this->isd = 1916;
         
         $this->forwardDefense = 11;
         $this->sideDefense = 9;
@@ -23,30 +23,30 @@ class CircasianYollana extends MediumShip{
         $this->rollcost = 2;
         $this->pivotcost = 2;
         $this->iniativebonus = 60;
-        
          
         $this->addPrimarySystem(new Reactor(3, 8, 0, 0));
-        $this->addPrimarySystem(new CnC(4, 5, 0, 0));
+        $this->addPrimarySystem(new CnC(3, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 2, 4));
-        $this->addPrimarySystem(new Engine(3, 9, 0, 12, 1));
+        $this->addPrimarySystem(new Engine(3, 9, 0, 10, 2));
         $this->addPrimarySystem(new Hangar(3, 1));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 5, 4));        
         
-		$this->addFrontSystem(new LightParticleCannon(3, 6, 5, 300, 360));
-		$this->addFrontSystem(new LightParticleCannon(3, 6, 5, 0, 60));
-		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 270, 90));
-        $this->addFrontSystem(new Thruster(2, 5, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(2, 5, 0, 3, 1));
+		$this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 60));
+		$this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 60));
+		$this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 60));
+		$this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 60));
+		$this->addFrontSystem(new LightRailGun(1, 6, 3, 240, 120));
+        $this->addFrontSystem(new Thruster(2, 6, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(2, 6, 0, 3, 1));
 	    
-		$this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 90, 270));
-        $this->addAftSystem(new Thruster(3, 6, 0, 3, 2));    
-        $this->addAftSystem(new Thruster(3, 6, 0, 3, 2));    
-        $this->addAftSystem(new Thruster(3, 6, 0, 3, 2));    
-        $this->addAftSystem(new Thruster(3, 6, 0, 3, 2));    
+		$this->addAftSystem(new LightRailGun(1, 6, 3, 60, 300));
+        $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));    
+        $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));    
+        $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));    
+        $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));    
        
-        $this->addPrimarySystem(new Structure(3, 36));
-
+        $this->addPrimarySystem(new Structure(2, 36));
 
 	//d20 hit chart
 	$this->hitChart = array(
@@ -62,15 +62,15 @@ class CircasianYollana extends MediumShip{
 
 		1=> array(
 			4 => "Thruster",
-			7 => "Light Particle Cannon",
-			8 => "Light Particle Beam",
+			7 => "Light Plasma Cannon",
+			9 => "Light Railgun",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
 			6 => "Thruster",
-			8 => "Light Particle Beam",
+			8 => "Light Railgun",
 			17 => "Structure",
 			20 => "Primary",
 		),

@@ -1186,6 +1186,7 @@ spl_autoload_register(
 				'choukawarprayergunship' => '/server/model/ships/ZEscalationChouka/ChoukaWarPrayerGunship.php',
 				'choukawarprayerescort' => '/server/model/ships/ZEscalationChouka/ChoukaWarPrayerEscort.php',
 				'choukawraithbladefighter' => '/server/model/ships/ZEscalationChouka/ChoukaWraithbladeFighter.php',
+
 				
 				//Escalation Wars - Chouka Raiders
 				'choukaraidercruiser' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderCruiser.php',

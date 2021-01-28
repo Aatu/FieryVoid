@@ -7,7 +7,7 @@ class CircasianMorketOSAT extends OSAT{
 	$this->pointCost = 70;
 	$this->faction = "ZEscalation Circasian";
         $this->phpclass = "CircasianMorketOSAT";
-        $this->imagePath = "img/ships/EscalationWars/CircasianMorketOSAT.png";
+        $this->imagePath = "img/ships/EscalationWars/CircasianMorket.png";
         $this->canvasSize = 60;
         $this->shipClass = 'Morket Defense Satellite';
         

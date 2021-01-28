@@ -8,7 +8,7 @@ class CircasianMoshestaBeta extends MediumShip{
         $this->faction = "ZEscalation Circasian";
         $this->phpclass = "CircasianMoshestaBeta";
         $this->imagePath = "img/ships/EscalationWars/CircasianMoshesta.png";
-        $this->shipClass = "Moshesta Frigate (Beta)";
+        $this->shipClass = "Moshesta Frigate (1974 Refit)";
 			$this->variantOf = "Moshesta Frigate";
 			$this->occurence = "common";
 		$this->unofficial = true;
@@ -29,13 +29,13 @@ class CircasianMoshestaBeta extends MediumShip{
         $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
         $this->addPrimarySystem(new CnC(4, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 4, 5));
-        $this->addPrimarySystem(new Engine(4, 10, 0, 10, 2));
+        $this->addPrimarySystem(new Engine(4, 11, 0, 10, 2));
         $this->addPrimarySystem(new Hangar(2, 1));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));        
         
-		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 300, 60));
-		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 300, 60));
+		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 240, 60));
+		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 300, 120));
 		$this->addFrontSystem(new EWRocketLauncher(2, 4, 1, 270, 90));
         $this->addFrontSystem(new Thruster(2, 5, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 5, 0, 3, 1));
@@ -43,8 +43,8 @@ class CircasianMoshestaBeta extends MediumShip{
         $this->addAftSystem(new Thruster(3, 8, 0, 5, 2));    
         $this->addAftSystem(new Thruster(3, 8, 0, 5, 2));    
 		$this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 240, 360));
-		$this->addAftSystem(new LightParticleCannon(1, 6, 5, 240, 360));
-		$this->addAftSystem(new LightParticleCannon(1, 6, 5, 0, 120));
+		$this->addAftSystem(new LightParticleCannon(2, 6, 5, 240, 360));
+		$this->addAftSystem(new LightParticleCannon(2, 6, 5, 0, 120));
 		$this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 0, 120));
        
         $this->addPrimarySystem(new Structure(3, 36));

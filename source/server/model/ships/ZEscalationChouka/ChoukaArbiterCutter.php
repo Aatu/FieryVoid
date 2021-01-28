@@ -4,20 +4,18 @@ class ChoukaArbiterCutter extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 330;
+        $this->pointCost = 250;
         $this->faction = "ZEscalation Chouka";
         $this->phpclass = "ChoukaArbiterCutter";
-        $this->imagePath = "img/ships/EscalationWars/ChoukaArbiterCutter.png";
+        $this->imagePath = "img/ships/EscalationWars/ChoukaArbiter.png";
         $this->shipClass = "Arbiter Customs Cutter";
 		$this->unofficial = true;
         $this->agile = true;
         $this->canvasSize = 75;
 	    $this->isd = 1933;
-
-		$this->notes = 'Atmospheric Capable';
         
         $this->forwardDefense = 12;
-        $this->sideDefense = 11;
+        $this->sideDefense = 10;
         
         $this->turncost = 0.33;
         $this->turndelaycost = 0.5;
@@ -31,17 +29,17 @@ class ChoukaArbiterCutter extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 4, 4));
         $this->addPrimarySystem(new Engine(3, 9, 0, 6, 1));
-        $this->addPrimarySystem(new Hangar(3, 1));
 		$this->addPrimarySystem(new Quarters(3, 9));
+        $this->addPrimarySystem(new Hangar(3, 1));
         $this->addPrimarySystem(new Thruster(1, 11, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(1, 11, 0, 3, 4));        
         
+		$this->addFrontSystem(new CustomIndustrialGrappler(2, 5, 0, 300, 60));
+		$this->addFrontSystem(new CustomIndustrialGrappler(2, 5, 0, 300, 60));
         $this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 60));
         $this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 60));
 		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 1, 270, 90));
 		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 1, 270, 90));
-		$this->addFrontSystem(new CustomIndustrialGrappler(2, 5, 0, 300, 60));
-		$this->addFrontSystem(new CustomIndustrialGrappler(2, 5, 0, 300, 60));
         $this->addFrontSystem(new Thruster(1, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(1, 6, 0, 2, 1));
 	    
@@ -61,7 +59,7 @@ class ChoukaArbiterCutter extends MediumShip{
 			13 => "Scanner",
 			16 => "Engine",
 			17 => "Hangar",
-			18 => "Reactor",
+			19 => "Reactor",
 			20 => "C&C",
 		),
 

@@ -36,8 +36,6 @@ class CircasianIlustris extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
 		$this->addFrontSystem(new EWRocketLauncher(1, 4, 1, 270, 90));
 		$this->addFrontSystem(new EWRocketLauncher(1, 4, 1, 270, 90));
-		$this->addFrontSystem(new LightParticleCannon(3, 6, 5, 300, 360));
-		$this->addFrontSystem(new LightParticleCannon(3, 6, 5, 0, 60));
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 300, 60));
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 300, 60));
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 360));
@@ -45,6 +43,8 @@ class CircasianIlustris extends HeavyCombatVessel{
                 
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 7, 0, 3, 2));
+		$this->addAftSystem(new ParticleCannon(3, 8, 7, 300, 360));
+		$this->addAftSystem(new ParticleCannon(3, 8, 7, 0, 60));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 300));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 60, 180));
         $this->addAftSystem(new Thruster(3, 7, 0, 3, 2));
@@ -57,26 +57,26 @@ class CircasianIlustris extends HeavyCombatVessel{
 		
         $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-                    11 => "Thruster",
-                    13 => "Scanner",
-                    15 => "Engine",
+                    9 => "Structure",
+                    12 => "Thruster",
+                    14 => "Scanner",
+                    16 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",
             ),
             1=> array(
-                    3 => "Thruster",
-                    5 => "Light Laser",
-					7 => "Light Particle Cannon",
-					9 => "Rocket Launcher",
-					12 => "Light Particle Beam",
+                    4 => "Thruster",
+                    6 => "Light Laser",
+					8 => "Rocket Launcher",
+					11 => "Light Particle Beam",
 					18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     6 => "Thruster",
-                    9 => "Light Particle Beam",
+                    8 => "Particle Cannon",
+					10 => "Light Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),

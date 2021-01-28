@@ -4,13 +4,13 @@ class CircasianKiralinaUpgrade extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 750;
+		$this->pointCost = 875;
 		$this->faction = "ZEscalation Circasian";
         $this->phpclass = "CircasianKiralinaUpgrade";
-        $this->imagePath = "img/ships/EscalationWars/CircasianKiralinaJumpship.png";
+        $this->imagePath = "img/ships/EscalationWars/CircasianKiralina.png";
 			$this->canvasSize = 300; //img has 300px per side
 		$this->unofficial = true;
-        $this->shipClass = "Kiralina Jump Ship (Upgrade)";
+        $this->shipClass = "Kiralina Jump Ship (1962 Refit)";
 			$this->variantOf = "Kiralina Jump Ship";
 			$this->occurence = "common";
         $this->fighters = array("normal"=>12);
@@ -29,9 +29,9 @@ class CircasianKiralinaUpgrade extends BaseShip{
 
         $this->iniativebonus = -2*5; //-2 Ini
          
-        $this->addPrimarySystem(new Reactor(4, 23, 0, 0));
+        $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
         $this->addPrimarySystem(new CnC(4, 28, 0, 0));
-        $this->addPrimarySystem(new ElintScanner(3, 25, 7, 7));
+        $this->addPrimarySystem(new ElintScanner(3, 25, 6, 8));
         $this->addPrimarySystem(new Engine(4, 18, 0, 8, 5));
 		$this->addPrimarySystem(new Hangar(3, 18));
 		$this->addPrimarySystem(new JumpEngine(4, 20, 5, 36));
@@ -40,8 +40,8 @@ class CircasianKiralinaUpgrade extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 15, 0, 2, 1));
 		$this->addFrontSystem(new CargoBay(2, 30));
 		$this->addFrontSystem(new CargoBay(2, 30));
-		$this->addFrontSystem(new EWHeavyRocketLauncher(2, 9, 1, 270, 90));
-		$this->addFrontSystem(new EWHeavyRocketLauncher(2, 9, 1, 270, 90));
+		$this->addFrontSystem(new EWHeavyRocketLauncher(2, 6, 2, 270, 90));
+		$this->addFrontSystem(new EWHeavyRocketLauncher(2, 6, 2, 270, 90));
 		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 240, 60));
 		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 300, 120));
 
@@ -59,14 +59,14 @@ class CircasianKiralinaUpgrade extends BaseShip{
 		$this->addLeftSystem(new Thruster(2, 20, 0, 6, 3));
 		$this->addLeftSystem(new CargoBay(3, 30));
 		$this->addLeftSystem(new EWRocketLauncher(1, 4, 1, 180, 360));
-		$this->addLeftSystem(new LightPlasma(2, 4, 2, 180, 360));
-		$this->addLeftSystem(new LightPlasma(2, 4, 2, 180, 360));
+		$this->addLeftSystem(new EWRocketLauncher(1, 4, 1, 180, 360));
+		$this->addLeftSystem(new EWRocketLauncher(1, 4, 1, 180, 360));
 		
 		$this->addRightSystem(new Thruster(2, 20, 0, 6, 4));
 		$this->addRightSystem(new CargoBay(3, 30));
 		$this->addRightSystem(new EWRocketLauncher(1, 4, 1, 0, 180));
-		$this->addRightSystem(new LightPlasma(2, 4, 2, 0, 180));
-		$this->addRightSystem(new LightPlasma(2, 4, 2, 0, 180));
+		$this->addRightSystem(new EWRocketLauncher(1, 4, 1, 0, 180));
+		$this->addRightSystem(new EWRocketLauncher(1, 4, 1, 0, 180));
 
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -103,16 +103,14 @@ class CircasianKiralinaUpgrade extends BaseShip{
 			),
 			3=> array(
 					5 => "Thruster",
-					6 => "Rocket Launcher",
-					8 => "Light Plasma Cannon",
+					8 => "Rocket Launcher",
 					11 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					5 => "Thruster",
-					6 => "Rocket Launcher",
-					8 => "Light Plasma Cannon",
+					8 => "Rocket Launcher",
 					11 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",

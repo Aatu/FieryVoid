@@ -7,7 +7,7 @@ class CircasianMishaJumpCarrier extends BaseShip{
 	$this->pointCost = 480;
 	$this->faction = "ZEscalation Circasian";
         $this->phpclass = "CircasianMishaJumpCarrier";
-        $this->imagePath = "img/ships/EscalationWars/CircasianMishaJumpCarrier.png";
+        $this->imagePath = "img/ships/EscalationWars/CircasianMisha.png";
         $this->shipClass = "Misha Jump Carrier";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 175; //img has 200px per side

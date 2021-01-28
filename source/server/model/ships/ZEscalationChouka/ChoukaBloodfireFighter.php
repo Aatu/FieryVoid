@@ -8,6 +8,8 @@ class ChoukaBloodfireFighter extends FighterFlight{
         $this->faction = "ZEscalation Chouka";
         $this->phpclass = "ChoukaBloodfireFighter";
         $this->shipClass = "Bloodfire Suicide flight";
+			$this->variantOf = "Bloodlust Assault flight";
+			$this->occurence = "rare";
         $this->imagePath = "img/ships/EscalationWars/ChoukaBloodlust.png";
  //       $this->customFtrName = "Bloodlust";  //Only used for special hangar needs like T-bolts
 		$this->unofficial = true;

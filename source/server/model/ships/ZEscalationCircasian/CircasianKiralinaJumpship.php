@@ -7,7 +7,7 @@ class CircasianKiralinaJumpship extends BaseShip{
 		$this->pointCost = 700;
 		$this->faction = "ZEscalation Circasian";
         $this->phpclass = "CircasianKiralinaJumpship";
-        $this->imagePath = "img/ships/EscalationWars/CircasianKiralinaJumpship.png";
+        $this->imagePath = "img/ships/EscalationWars/CircasianKiralina.png";
 			$this->canvasSize = 300; //img has 300px per side
 		$this->unofficial = true;
         $this->shipClass = "Kiralina Jump Ship";
@@ -29,7 +29,7 @@ class CircasianKiralinaJumpship extends BaseShip{
          
         $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
         $this->addPrimarySystem(new CnC(4, 28, 0, 0));
-        $this->addPrimarySystem(new ElintScanner(3, 25, 6, 6));
+        $this->addPrimarySystem(new ElintScanner(3, 25, 6, 7));
         $this->addPrimarySystem(new Engine(4, 18, 0, 8, 5));
 		$this->addPrimarySystem(new Hangar(3, 18));
 		$this->addPrimarySystem(new JumpEngine(4, 20, 5, 36));
@@ -40,18 +40,17 @@ class CircasianKiralinaJumpship extends BaseShip{
 		$this->addFrontSystem(new CargoBay(2, 30));
 		$this->addFrontSystem(new EWRocketLauncher(2, 4, 1, 270, 90));
 		$this->addFrontSystem(new EWRocketLauncher(2, 4, 1, 270, 90));
-		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 1, 240, 60));
-		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 1, 300, 120));
+		$this->addFrontSystem(new LightRailGun(1, 6, 3, 240, 60));
+		$this->addFrontSystem(new LightRailGun(1, 6, 3, 300, 120));
 
-		
         $this->addAftSystem(new Thruster(2, 16, 0, 2, 2));
         $this->addAftSystem(new Thruster(2, 16, 0, 2, 2));
         $this->addAftSystem(new Thruster(2, 16, 0, 2, 2));
         $this->addAftSystem(new Thruster(2, 16, 0, 2, 2));
-		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 1, 180, 360));
-		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 1, 120, 300));
-		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 1, 60, 240));
-		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 1, 0, 180));
+		$this->addAftSystem(new LightRailGun(1, 6, 3, 180, 360));
+		$this->addAftSystem(new LightRailGun(1, 6, 3, 120, 300));
+		$this->addAftSystem(new LightRailGun(1, 6, 3, 60, 240));
+		$this->addAftSystem(new LightRailGun(1, 6, 3, 0, 180));
 		$this->addAftSystem(new CargoBay(2, 50));
         
 		$this->addLeftSystem(new Thruster(2, 20, 0, 6, 3));
@@ -87,14 +86,14 @@ class CircasianKiralinaJumpship extends BaseShip{
 			1=> array(
 					4 => "Thruster",
 					6 => "Rocket Launcher",
-					8 => "Point Plasma Gun",
+					8 => "Light Railgun",
 					11 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
 					6 => "Thruster",
-					8 => "Point Plasma Gun",
+					8 => "Light Railgun",
 					11 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
