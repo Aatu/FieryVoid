@@ -78,7 +78,7 @@ class AlacanAtica extends BaseShip{
 			),
 			2=> array(
 					4 => "Thruster",
-					6 => "S-Missile Rack",	
+					6 => "Light S-Missile Rack",	
 					8 => "Light Particle Beam",
 					11 => "Hangar",
 					17 => "Structure",
@@ -86,13 +86,13 @@ class AlacanAtica extends BaseShip{
 			),
 			3=> array(
 					4 => "Thruster",
-					6 => "S-Missile Rack",
+					6 => "Light S-Missile Rack",
 					17 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					4 => "Thruster",
-					6 => "S-Missile Rack",
+					6 => "Light S-Missile Rackk",
 					17 => "Structure",
 					20 => "Primary",
 			),

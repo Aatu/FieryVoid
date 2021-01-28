@@ -4,10 +4,10 @@ class ChoukaScriptureScout extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 325;
+	$this->pointCost = 350;
 	$this->faction = "ZEscalation Chouka";
         $this->phpclass = "ChoukaScriptureScout";
-        $this->imagePath = "img/ships/EscalationWars/ChoukaScriptureScout.png";
+        $this->imagePath = "img/ships/EscalationWars/ChoukaScripture.png";
         $this->shipClass = "Scripture Intelligence Cruiser";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 150; //img has 200px per side
@@ -31,32 +31,31 @@ class ChoukaScriptureScout extends BaseShip{
         $this->addPrimarySystem(new ELINTScanner(4, 16, 6, 6));
         $this->addPrimarySystem(new Engine(4, 13, 0, 10, 3));
 		$this->addPrimarySystem(new Hangar(4, 2));
-		
    
-        $this->addFrontSystem(new Thruster(2, 13, 0, 5, 1));
-		$this->addFrontSystem(new HeavyPlasma(2, 8, 5, 300, 60));
-
+        $this->addFrontSystem(new Thruster(3, 13, 0, 5, 1));
+		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
 
         $this->addAftSystem(new Thruster(3, 15, 0, 10, 2));
 		$this->addAftSystem(new LightLaser(1, 4, 3, 180, 360));
 		$this->addAftSystem(new LightLaser(1, 4, 3, 0, 180));
         $this->addAftSystem(new JumpEngine(3, 10, 3, 36));
 
-
         $this->addLeftSystem(new LightPlasma(2, 4, 2, 240, 360));
-        $this->addLeftSystem(new Thruster(2, 11, 0, 3, 3));
-
+		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
+        $this->addLeftSystem(new Thruster(3, 11, 0, 3, 3));
 
         $this->addRightSystem(new LightPlasma(2, 4, 2, 0, 120));
-        $this->addRightSystem(new Thruster(2, 11, 0, 3, 4));
-
+		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
+        $this->addRightSystem(new Thruster(3, 11, 0, 3, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(3, 30));
         $this->addAftSystem(new Structure(3, 32));
         $this->addLeftSystem(new Structure(3, 30));
         $this->addRightSystem(new Structure(3, 30));
-        $this->addPrimarySystem(new Structure(3, 32));
+        $this->addPrimarySystem(new Structure(4, 32));
 		
 		$this->hitChart = array(
 			0=> array(
@@ -70,25 +69,28 @@ class ChoukaScriptureScout extends BaseShip{
 			1=> array(
 					5 => "Thruster",
 					7 => "Heavy Plasma Cannon",
+					9 => "Point Plasma Gun",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
-					5 => "Thruster",
-					7 => "Light Laser",
-					11 => "Jump Engine",
+					6 => "Thruster",
+					8 => "Light Laser",
+					10 => "Jump Engine",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
 					5 => "Thruster",
 					8 => "Light Plasma Cannon",
+					9 => "Point Plasma Gun",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					5 => "Thruster",
 					8 => "Light Plasma Cannon",
+					9 => "Point Plasma Gun",
 					18 => "Structure",
 					20 => "Primary",
 			),

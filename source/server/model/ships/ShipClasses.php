@@ -398,8 +398,13 @@ class BaseShip {
 		}
 		if(!$rammingExists){
 			//add ramming attack
-			if((!($this instanceof FighterFlight)) && (!($this->osat)) && (!$this->base) && (!$this->smallBase) ){
+			//if((!($this instanceof FighterFlight)) && (!($this->osat)) && (!$this->base) && (!$this->smallBase) ){
+			if(!($this instanceof FighterFlight)){
 				$newRamming = new RammingAttack(0, 0, 360, 0, 0);
+				//add Ramming to immobile objects too!
+				if(($this->osat) || ($this->base) || ($this->smallBase)) {
+					$newRamming->autoFireOnly = true; //do not allow manual attack!
+				}
 				$this->addPrimarySystem($newRamming);
 			}
 		}

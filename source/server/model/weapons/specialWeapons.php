@@ -2129,7 +2129,8 @@ class RammingAttack extends Weapon{
 		  $this->data["Special"] .= "<br>	Hunter-Killers have speed penalty as well.";  
 		  $this->data["Special"] .= "<br>Ramming damage is also influenced by conditions - moving head on with initiative slightly increases chance of high damage.";
 		  $this->data["Special"] .= "<br>Ramming attacks will be done in ship firing phase (even attacks by fighters) and cannot be intercepted.";
-		  $this->data["Special"] .= "<br>Unit on the same hex as Enormous unit will automatically declare ramming attack against it!";
+		  $this->data["Special"] .= "<br>Ships (not fighters) on the same hex as Enormous unit will automatically declare ramming attack against it!";
+		  $this->data["Special"] .= "<br>Immobile objects do have ramming attack for technical purposes, but won't use it offensively.";
 	}	
 	
 	
@@ -2142,13 +2143,11 @@ class RammingAttack extends Weapon{
 	
 	 //find Enormous units on the same hex (other than self), create automatic attacks vs them
 	public function beforeFiringOrderResolution($gamedata){
+		if($this->autoFireOnly) return;//ramming attack on some units (eg. immobile ones) is for technical purposes only!
 		$this->gamedata = $gamedata;//fill gamedata variable, which might otherwise be left out!
 		$shooter = $this->getUnit();		
-		if($shooter->isDestroyed()) return; //destroyed unit does not ram		
-		if($shooter instanceof FighterFlight){ //check particular fighter!
-			$ftr = $shooter->getFighterBySystem($this->id);
-			if ($ftr->isDestroyed()) return;
-		}		
+		if($shooter instanceof FighterFlight) return; //fighters do not auto-ram; in tabletop they would make skin dance roll instead, but its success chance would be very high and it carries additional benefit if successful
+		if($shooter->isDestroyed()) return; //destroyed unit does not ram
 		$targetList = $gamedata->getShipsInDistance($shooter);
 		$alreadyFiringAt = $this->getFireOrders($gamedata->turn);
 		Foreach($targetList as $targetID=>$target){
@@ -2158,7 +2157,7 @@ class RammingAttack extends Weapon{
 			//don’t repeat manual ramming order
 			$alreadyDeclared = false;
 			Foreach ($alreadyFiringAt as $existingFiringOrder){
-				if($existingFiringOrder->targetid == $targetID) $alreadyDeclared = false;
+				if($existingFiringOrder->targetid == $targetID) $alreadyDeclared = true;
 			}
 			If($alreadyDeclared) continue;
 			//unit on the same hex is Enormous, not self, and not being rammed by this unit already – auto-ram it!
@@ -2172,7 +2171,7 @@ class RammingAttack extends Weapon{
 	} //endof public function beforeFiringOrderResolution
 	
 	public function fire($gamedata, $fireOrder){
-		// If hit, firing unit itself suffers damage, too (based on raming factor of target)!
+		// If hit, firing unit itself suffers damage, too (based on ramming factor of target)!
 		$this->gamedata = $gamedata;
 		parent::fire($gamedata, $fireOrder);
 		if($fireOrder->shotshit > 0){

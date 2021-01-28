@@ -11,7 +11,6 @@ class CircasianRehkaFighter extends FighterFlight{
         $this->imagePath = "img/ships/EscalationWars/CircasianRehka.png";
 		$this->unofficial = true;
 
-		
 	    $this->notes = 'Non-atmospheric.';
 		
         $this->isd = 1950;

@@ -39,7 +39,7 @@ class AlacanCacarasA extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 				10 => "Structure",
-				13 => "SO-Missile Rack",
+				13 => "Light SO-Missile Rack",
 				15 => "Light Particle Beam",
 				17 => "Scanner",
 				20 => "Reactor",

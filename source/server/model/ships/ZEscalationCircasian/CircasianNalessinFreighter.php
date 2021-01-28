@@ -7,7 +7,7 @@ class CircasianNalessinFreighter extends BaseShip{
 	$this->pointCost = 300;
 	$this->faction = "ZEscalation Circasian";
         $this->phpclass = "CircasianNalessinFreighter";
-        $this->imagePath = "img/ships/EscalationWars/CircasianNalessinFreighter.png";
+        $this->imagePath = "img/ships/EscalationWars/CircasianNalessin.png";
         $this->shipClass = "Nalessin Military Freighter";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 175; //img has 200px per side

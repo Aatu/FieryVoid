@@ -4,7 +4,7 @@ class CircasianLuscan extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 130;
+        $this->pointCost = 150;
         $this->faction = "ZEscalation Circasian";
         $this->phpclass = "CircasianLuscan";
         $this->imagePath = "img/ships/EscalationWars/CircasianLuscan.png";
@@ -32,13 +32,15 @@ class CircasianLuscan extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 11, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 5, 4));        
         
-        $this->addFrontSystem(new EWParticleGun(2, 4, 2, 300, 60));
-		$this->addFrontSystem(new EWLightParticleGun(1, 2, 1, 240, 120));
-		$this->addFrontSystem(new EWLightParticleGun(1, 2, 1, 240, 120));
+        $this->addFrontSystem(new LightLaser(2, 4, 3, 300, 60));
+		$this->addFrontSystem(new LightRailGun(1, 6, 3, 180, 60));
+		$this->addFrontSystem(new LightRailGun(1, 6, 3, 300, 180));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
 	    
         $this->addAftSystem(new Thruster(3, 10, 0, 5, 2));    
+		$this->addAftSystem(new CargoBay(2, 12));
+		$this->addAftSystem(new CargoBay(2, 12));
        
         $this->addPrimarySystem(new Structure(2, 48));
 
@@ -57,14 +59,15 @@ class CircasianLuscan extends MediumShip{
 
 		1=> array(
 			4 => "Thruster",
-			6 => "Particle Gun",
-			8 => "Light Particle Gun",
+			6 => "Light Laser",
+			9 => "Light Railgun",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
-			5 => "Thruster",
+			6 => "Thruster",
+			9 => "Cargo Bay",
 			17 => "Structure",
 			20 => "Primary",
 		),

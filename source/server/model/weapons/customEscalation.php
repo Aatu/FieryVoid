@@ -1314,6 +1314,7 @@ class EWGraviticTractingRod extends SWDirectWeapon{
         public $displayName = "EM Torpedo";
         public $iconPath = "EWEMTorpedo.png";
         public $loadingtime = 3;
+		public $specialRangeCalculation = true; //to inform front end that it should use weapon-specific range penalty calculation - such a method should be present in .js!
         
         public $weaponClass = "Electromagnetic"; //deals Electromagnetic, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
         public $damageType = "Flash"; 

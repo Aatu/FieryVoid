@@ -11,7 +11,7 @@ class HurrmissileOSAT2240 extends OSAT
 		$this->phpclass = "HurrmissileOSAT2240";
 		$this->shipClass = "Missile Satellite (2240)";
 		$this->imagePath = "img/ships/HurrOSAT.png";
-		$this->canvasSize = 200;
+		$this->canvasSize = 80;
 		$this->isd = 2240;
 
 		$this->forwardDefense = 10;

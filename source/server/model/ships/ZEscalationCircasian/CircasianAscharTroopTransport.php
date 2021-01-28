@@ -7,7 +7,7 @@ class CircasianAscharTroopTransport extends BaseShip{
 	$this->pointCost = 400;
 	$this->faction = "ZEscalation Circasian";
         $this->phpclass = "CircasianAscharTroopTransport";
-        $this->imagePath = "img/ships/EscalationWars/CircasianNalessinFreighter.png";
+        $this->imagePath = "img/ships/EscalationWars/CircasianNalessin.png";
         $this->shipClass = "Aschar Troop Transport";
 			$this->variantOf = "Nalessin Military Freighter";
 			$this->occurence = "common";		

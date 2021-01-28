@@ -36,7 +36,7 @@ class SshelathSkreghaA extends FighterFlight{
 		$fighter->imagePath = "img/ships/EscalationWars/SshelathSkregha.png";
 		$fighter->iconPath = "img/ships/EscalationWars/SshelathSkregha_Large.png";
 			
-		$gun = new LightParticleBeam(330, 30, 2);
+		$gun = new LightParticleBeam(330, 30, 2, 1);
 		$gun->displayName = "Paired Particle Beam";
 		$fighter->addFrontSystem($gun);
 			

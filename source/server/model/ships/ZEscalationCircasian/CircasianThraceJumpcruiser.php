@@ -4,7 +4,7 @@ class CircasianThraceJumpcruiser extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 450;
+	$this->pointCost = 475;
 	$this->faction = "ZEscalation Circasian";
         $this->phpclass = "CircasianThraceJumpcruiser";
         $this->imagePath = "img/ships/EscalationWars/CircasianThraceJumpcruiser.png";
@@ -16,7 +16,7 @@ class CircasianThraceJumpcruiser extends BaseShip{
 		$this->fighters = array("normal"=>6);
 
 
-	$this->isd = 1975;
+		$this->isd = 1975;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
@@ -43,24 +43,22 @@ class CircasianThraceJumpcruiser extends BaseShip{
         $this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
         $this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
 
-
         $this->addAftSystem(new Thruster(3, 16, 0, 6, 2));
         $this->addAftSystem(new Thruster(3, 16, 0, 6, 2));
         $this->addAftSystem(new JumpEngine(3, 11, 3, 36));
-        $this->addAftSystem(new LightParticleCannon(2, 6, 5, 180, 240));
-        $this->addAftSystem(new LightParticleCannon(2, 6, 5, 120, 180));
+        $this->addAftSystem(new ParticleCannon(2, 8, 7, 180, 240));
+        $this->addAftSystem(new ParticleCannon(2, 8, 7, 120, 180));
 		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 120, 300));
 		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 60, 240));
 		
-
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
-        $this->addLeftSystem(new LightParticleCannon(3, 6, 5, 300, 360));
+        $this->addLeftSystem(new LightParticleCannon(3, 8, 7, 300, 360));
         $this->addLeftSystem(new Thruster(3, 15, 0, 4, 3));
 
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
-        $this->addRightSystem(new LightParticleCannon(3, 6, 5, 0, 60));
+        $this->addRightSystem(new ParticleCannon(3, 8, 7, 0, 60));
         $this->addRightSystem(new Thruster(3, 15, 0, 4, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -88,7 +86,7 @@ class CircasianThraceJumpcruiser extends BaseShip{
 			),
 			2=> array(
 					5 => "Thruster",
-					7 => "Light Particle Cannon",
+					7 => "Particle Cannon",
 					9 => "Light Particle Beam",
 					11 => "Jump Engine",
 					18 => "Structure",
@@ -96,14 +94,14 @@ class CircasianThraceJumpcruiser extends BaseShip{
 			),
 			3=> array(
 					4 => "Thruster",
-					6 => "Light Particle Cannon",
+					6 => "Particle Cannon",
 					9 => "Light Particle Beam",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					4 => "Thruster",
-					6 => "Light Particle Cannon",
+					6 => "Particle Cannon",
 					9 => "Light Particle Beam",
 					18 => "Structure",
 					20 => "Primary",
