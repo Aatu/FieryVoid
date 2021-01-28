@@ -70,7 +70,7 @@ class AlacanAzan extends HeavyCombatVessel{
 			),
 			1=> array(
 					3 => "Thruster",
-					6 => "SO-Missile Rack",
+					6 => "Light S-Missile Rack",
 					7 => "Light Particle Beam",
 					10 => "Laser Cutter",
 					17 => "Structure",

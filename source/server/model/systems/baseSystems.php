@@ -2481,7 +2481,7 @@ capacitor is completely emptied.
 					break;
 				
 				case 4: //firing phase
-					//take power as front end reports it
+					//take what front end reports, and add what back end calculated (basically weapons fire cost)
 					$this->setPowerHeld($this->powerReceivedFromFrontEnd + $this->powerReceivedFromBackEnd); 
 					//AND PREPARE APPROPRIATE NOTES!		
 					$notekey = 'powerStored';
@@ -2497,8 +2497,7 @@ capacitor is completely emptied.
 	*/
 	public function onIndividualNotesLoaded($gamedata){
 		foreach ($this->individualNotes as $currNote){ //assume ASCENDING sorting - so enact all changes as is
-			$explodedKey = explode ( ';' , $currNote->notekey ) ;//split into array: [area;value] where area denotes action, value - damage type (typically) 
-			switch($explodedKey[0]){
+			switch($currNote->notekey){
 				case 'powerStored': //power that should be stored at this moment
 					$this->setPowerHeld($currNote->notevalue);
 					break;			
@@ -2511,7 +2510,9 @@ capacitor is completely emptied.
         parent::setSystemDataWindow($turn); 
 		$this->data["Power stored/max"] =  $this->powerCurr . '/' . $this->getMaxCapacity();
         $this->data["Special"] = "This system is responsible for generating and storing power (Reactor is nearby for technical purposes).";	   
-        $this->data["Special"] .= "<br>You may boost this system to increase recharge rate by 50% - at the cost of treating all armor values as 2 points lower.";
+	if ($this->boostable){
+        	$this->data["Special"] .= "<br>You may boost this system (open petals) to increase recharge rate by 50% - at the cost of treating all armor values as 2 points lower.";
+	}
 
     }
 	
