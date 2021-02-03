@@ -80,45 +80,42 @@ class Plasma extends Weapon{
 	}
         
         public function setMinDamage(){
-		/* sadly this does not work correctly... seting always full load, and leaving comment about accelerated fire!
             switch($this->turnsloaded){
-                case 0:
                 case 1:
                     $this->minDamage = 5 ;
-                    $this->animationExplosionScale = 0.15;
                     break;
                 case 2:
-                    $this->animationExplosionScale = 0.25;
                     $this->minDamage = 10 ;  
                     break;
-                case 3:
                 default:
-                    $this->animationExplosionScale = 0.35;
                     $this->minDamage = 16 ;  
                     break;
             }
-	    */
-		$this->minDamage = 16 ;   
-	}
-                
+		}
+             
         public function setMaxDamage(){
-		/* sadly this does not work correctly... seting always full load, and leaving comment about accelerated fire!
             switch($this->turnsloaded){
-                case 0:
                 case 1:
                     $this->maxDamage = 14 ;
                     break;
                 case 2:
                     $this->maxDamage = 28 ;  
                     break;
-                case 3:
                 default:
                     $this->maxDamage = 52 ;  
                     break;
             }
-	    */
-		    $this->maxDamage = 52;
-	}
+		}
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			return $strippedSystem;
+		}
 
 }//endof class PlasmaAccelerator
 
