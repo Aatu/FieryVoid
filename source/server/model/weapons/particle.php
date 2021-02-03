@@ -1444,8 +1444,37 @@ class ParticleAccelerator extends Raking{
         	}
 		}
 
-		public function setMinDamage(){		$this->minDamage = 16;		}
-		public function setMaxDamage(){		$this->maxDamage = 34;		}
+ 		public function setMinDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->minDamage = 7 ;
+                    break;
+                default:
+                    $this->minDamage = 16 ;  
+                    break;
+            }
+		}
+             
+        public function setMaxDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->maxDamage = 16 ;
+                    break;
+                default:
+                    $this->maxDamage = 34 ;  
+                    break;
+            }
+		}
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			return $strippedSystem;
+		}
 
 }//end of class Particle Accelerator
 	
@@ -1530,7 +1559,19 @@ class LightParticleAccelerator extends LinkedWeapon{
 								break;
 				}
 				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
-		}	
+		}
+		
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			return $strippedSystem;
+		}
+
+			
 }//end of class Light Particle Accelerator	
 
 
