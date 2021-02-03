@@ -69,7 +69,7 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Auto-ramming fixed</b> - auto-ramming will not happen if ramming is declared manually.
 	    <br><b>Immobile units got their Ramming Attacks</b> - any games containing such units are now broken. <b><big>PLEASE REPORT THEM TO ME, I CAN RESTORE THEM!</big></b>.
 	    <br><b>Rolling penalty for Agile ships</b> - now they suffer it correctly
-
+	    <br><b>Escalation Wars update</b> - once more!
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
