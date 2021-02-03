@@ -65,6 +65,7 @@ class Plasma extends Weapon{
 
 	public function getDamage($fireOrder){
             switch($this->turnsloaded){
+                case 0:
                 case 1:
                     return Dice::d(10)+4;
 			    	break;

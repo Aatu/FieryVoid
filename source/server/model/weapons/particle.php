@@ -1433,10 +1433,10 @@ class ParticleAccelerator extends Raking{
 	
 		public function getDamage($fireOrder){
         	switch($this->turnsloaded){
+            	case 0:
             	case 1:
                 	return Dice::d(10)+6;
 			    	break;
-            	case 2:
             	default:
                 	return Dice::d(10,2)+14;
 			    	break;
