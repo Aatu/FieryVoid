@@ -641,8 +641,47 @@ class LaserAccelerator extends Laser{
         	}
 		}
 
-		public function setMinDamage(){		$this->minDamage = 20;		}
-		public function setMaxDamage(){		$this->maxDamage = 56;		}
+        public function setMinDamage(){
+            switch($this->turnsloaded){
+                case 0:
+            	case 1: 
+            	case 2:
+                    $this->minDamage = 8 ;
+                    break;
+                case 3:
+                    $this->minDamage = 13 ;  
+                    break;
+                default:
+                    $this->minDamage = 20 ;  
+                    break;
+            }
+		}
+             
+        public function setMaxDamage(){
+            switch($this->turnsloaded){
+                case 0:
+            	case 1:                 
+                case 2:
+                    $this->maxDamage = 26 ;
+                    break;
+                case 3:
+                    $this->maxDamage = 40 ;  
+                    break;
+                default:
+                    $this->maxDamage = 56 ;  
+                    break;
+            }
+		}
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			return $strippedSystem;
+		}
 
 } // End of class Laser Accelerator
 
