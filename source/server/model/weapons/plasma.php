@@ -68,13 +68,14 @@ class Plasma extends Weapon{
                 case 0:
                 case 1:
                     return Dice::d(10)+4;
-			    	break;
+			    	return;
                 case 2:
                     return Dice::d(10, 2)+8;
-			    	break;
+			    	return;
+                case 3:
                 default:
                     return Dice::d(10,4)+12;
-			    	break;
+			    	return;
             }
 	}
         
