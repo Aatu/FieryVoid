@@ -603,7 +603,18 @@ class LightPlasmaAccelerator extends LinkedWeapon{
 								break;
 				}
 				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+		}
+		
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			return $strippedSystem;
 		}	
+		
 }//end of class LightPlasmaAccelerator
 
 
