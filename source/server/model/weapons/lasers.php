@@ -634,7 +634,6 @@ class LaserAccelerator extends Laser{
             	case 3:
             	   	return Dice::d(10,3)+10;
 					break;
-			    case 4:
 			    default:
 			    	return Dice::d(10,4)+16;
 					break;			
