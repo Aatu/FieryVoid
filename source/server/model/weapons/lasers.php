@@ -642,8 +642,6 @@ class LaserAccelerator extends Laser{
 
         public function setMinDamage(){
             switch($this->turnsloaded){
-            	case 0:
-            	case 1: 
             	case 2:
                     $this->minDamage = 8 ;
                     break;
@@ -658,8 +656,6 @@ class LaserAccelerator extends Laser{
              
         public function setMaxDamage(){
             switch($this->turnsloaded){
-                case 0:
-            	case 1:                 
                 case 2:
                     $this->maxDamage = 26 ;
                     break;
