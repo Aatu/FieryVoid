@@ -1048,7 +1048,7 @@ class PlasmaBlast extends Plasma{
     	public $weaponClass = "Plasma"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
 
         public $rangePenalty = 0; //none
-        public $fireControl = array(1000, 1000, 1000); // fighters, <mediums, <capitals
+        public $fireControl = array(200, 200, 200); // fighters, <mediums, <capitals
 
 
 // BEGIN MARCIN'S CODE
