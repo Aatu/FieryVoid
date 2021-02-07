@@ -1022,7 +1022,7 @@ class PlasmaProjector extends Raking{
 }// End of class PlasmaProjector
 
 
-class PlasmaBlast extends Plasma{
+class PlasmaBlast extends Weapon{
         public $name = "PlasmaBlast";
         public $displayName = "Plasma Blast";
 		public $iconPath = "PlasmaProjector.png";
