@@ -35,9 +35,9 @@ class gaimShamor extends BaseShip{
 
 		$this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
 		$this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
-		$this->addFrontSystem(new TwinArray(2, 6, 2, 180, 360));
-		$this->addFrontSystem(new TwinArray(2, 6, 2, 0, 180));
-		$this->addFrontSystem(new TwinArray(2, 6, 2, 270, 90));
+		$this->addFrontSystem(new PlasmaBlast(2, 6, 2, 180, 360));
+		$this->addFrontSystem(new PlasmaBlast(2, 6, 2, 0, 180));
+		$this->addFrontSystem(new PlasmaBlast(2, 6, 2, 270, 90));
 		$this->addFrontSystem(new Bulkhead(0, 3));
 		$this->addFrontSystem(new Bulkhead(0, 3));
 

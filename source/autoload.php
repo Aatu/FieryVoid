@@ -1803,6 +1803,10 @@ spl_autoload_register(
 				'orrono' => '/server/model/ships/corillani/Orrono.php',
 				'drolla' => '/server/model/ships/corillani/Drolla.php',
 				
+				
+				
+				'plasmablast' => '/server/model/weapons/plasma.php',
+				
 				//TO BE DELETED once nobody is using them		    
                 		'tobedeletedpikitos' => '/server/model/ships/brakiri/ToBeDeletedPikitos.php',	    
                 		'tobedeletedfalkosi' => '/server/model/ships/brakiri/ToBeDeletedFalkosi.php',	    
