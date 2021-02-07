@@ -9,7 +9,8 @@ class Makar extends OSAT{
         $this->phpclass = "Makar";
         $this->imagePath = "img/ships/MarkabOSAT.png";
         $this->shipClass = "Makar Defense Satellite";
-        
+ 		$this->canvasSize = 80;
+ 		       
         $this->forwardDefense = 11;
         $this->sideDefense = 10;
         
