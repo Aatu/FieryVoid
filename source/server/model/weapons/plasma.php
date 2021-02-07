@@ -1118,8 +1118,8 @@ public function calculateHitBase($gamedata, $fireOrder)
         
 public function getDamage($fireOrder){        return Dice::d(6, 1)+2;   }
     	//public function getDamage($fireOrder){        return 12;   }
-        public function setMinDamage(){     $this->minDamage = 12;      }
-        public function setMaxDamage(){     $this->maxDamage = 12;      }
+        public function setMinDamage(){     $this->minDamage = 3;      }
+        public function setMaxDamage(){     $this->maxDamage = 8;      }
 }//endof PlasmaBlast
 
 ?>
