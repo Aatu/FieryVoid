@@ -1025,7 +1025,7 @@ class PlasmaProjector extends Raking{
 class PlasmaBlast extends Plasma{
         public $name = "PlasmaBlast";
         public $displayName = "Plasma Blast";
-		public $iconPath = "PlasmaWeb.png";
+		public $iconPath = "PlasmaProjector.png";
 		
 		public $range = 3;
 		public $loadingtime = 1;
