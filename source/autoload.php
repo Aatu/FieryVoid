@@ -1722,6 +1722,12 @@ spl_autoload_register(
 		    	'hurrmissileosat2240' => '/server/model/ships/hurr/HurrmissileOSAT2240.php',
 		    	'roskorbase2215' => '/server/model/ships/hurr/Roskorbase2215.php',
 		    	'roskorbase2240' => '/server/model/ships/hurr/Roskorbase2240.php',
+		    	'highguarda' => '/server/model/ships/orieni/HighguardA.php',
+		    	'highguarda2003' => '/server/model/ships/orieni/HighguardA2003.php',
+		    	'highguarda2007' => '/server/model/ships/orieni/HighguardA2007.php',
+		    	'highguardb' => '/server/model/ships/orieni/HighguardB.php',
+		    	'highguardb2003' => '/server/model/ships/orieni/HighguardB2003.php',
+		    	'highguardb2007' => '/server/model/ships/orieni/HighguardB2007.php',
 				
 				
 				//new SW - Uglies

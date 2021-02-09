@@ -102,7 +102,7 @@ class ShadowPatrolCruiserPrimordial extends MediumShip{
 		$this->addLeftSystem($tendril);
         $this->addPrimarySystem($diffuserPort);
 		
-		$diffuserStbd = new EnergyDiffuser(5, 17, 10, 0, 0, 180);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+		$diffuserStbd = new EnergyDiffuser(5, 17, 10, 0, 180);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
 		$tendril=new DiffuserTendril(20,'R');//absorbtion capacity,side
 		$diffuserStbd->addTendril($tendril);
 		$this->addRightSystem($tendril);
