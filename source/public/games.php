@@ -61,15 +61,13 @@ if (isset($_SESSION["user"])) {
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
 -->        
-		---------- <b>LATEST NEWS - January 2021</b> ----------	
-	    <br><b>Escalation Wars update</b> – new units and balance updates to existing ones, courtesy of Geoffrey and Tyrel!
-	    <br><b>Ssel'ath have arrived</b> – new Escalation Wars faction, courtesy of Geoffrey and Tyrel!
-	    <br><b>Corillani have arrived</b> – new official faction is ready to roll, courtesy of Douglas!
-	    <br><b>Enormous ramming</b> - fighters no longer auto-ram (so they can safely enter Enormous unit's hex). This is to reflect their tabletop ability to Skin Dance.
-	    <br><b>Auto-ramming fixed</b> - auto-ramming will not happen if ramming is declared manually.
-	    <br><b>Immobile units got their Ramming Attacks</b> - any games containing such units are now broken. <b><big>PLEASE REPORT THEM TO ME, I CAN RESTORE THEM!</big></b>.
-	    <br><b>Rolling penalty for Agile ships</b> - now they suffer it correctly
-	    <br><b>Escalation Wars update</b> - once more!
+		---------- <b>LATEST NEWS - February 2021</b> ----------
+	    <br><b>Cache files changed</b> - should be completely transparent and allow ctrl+F5 to properly work again.
+	    <br><b>Layout fixes</b> - there are always some of those!
+	    <br><b>Accelerator fixes</b> - (some) Accelerator weapons now display correct damage when only partially charged.
+	    <br><b>Orieni OSATs</b>
+	    <br><b>Image updates</b> - for Torata, Deneth and Descari.
+	    <br><b>Escalation Wars update</b>
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
