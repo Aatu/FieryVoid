@@ -28,8 +28,8 @@ class HighguardA2007 extends OSAT
 		$this->addPrimarySystem(new Reactor(4, 6, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 4, 2, 5));
 		$this->addPrimarySystem(new Thruster(4, 4, 0, 0, 2));
-		$this->addPrimarySystem(new SMissileRack(5, 6, 0, 270, 90));
-		$this->addPrimarySystem(new SMissileRack(5, 6, 0, 270, 90));
+		$this->addPrimarySystem(new SMissileRack(5, 6, 0, 270, 90, true));
+		$this->addPrimarySystem(new SMissileRack(5, 6, 0, 270, 90, true));
 		$this->addPrimarySystem(new RapidGatling(2, 4, 1, 180, 360));
 		$this->addPrimarySystem(new RapidGatling(2, 4, 1, 0, 180));
 
