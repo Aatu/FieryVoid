@@ -11,7 +11,6 @@ class gaimTiros extends BaseShip{
 		$this->shipClass = "Tiros Cruiser";
 			$this->variantOf = "Tiac Long Range Explorer";
 			$this->occurence = "common";
-			$this->limited = 33;
 		$this->shipSizeClass = 3;
 		$this->fighters = array("normal"=>6);
 	    
