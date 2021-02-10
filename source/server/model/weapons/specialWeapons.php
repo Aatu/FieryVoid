@@ -1879,6 +1879,19 @@ class EmPulsar extends Pulse{
 		$this->criticals[] =  $crit;	
 	} //endof function fire
 	 
+	/* applying cooldown when firing defensively, too
+	*/
+	public function fireDefensively($gamedata, $interceptedWeapon)
+	{
+		if ($this->firedDefensivelyAlready==0){ //in case of multiple interceptions during one turn - suffer backlash only once
+			$trgtTurn = $gamedata->turn;
+			$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
+			$crit->updated = true;
+			$crit->newCrit = true; //force save even if crit is not for current turn
+			$this->criticals[] =  $crit;		
+		}
+		parent::fireDefensively($gamedata, $interceptedWeapon);
+	}
         
         public function getDamage($fireOrder){        return 9;   }
     }//endof class EmPulsar
