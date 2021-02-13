@@ -1728,6 +1728,7 @@ spl_autoload_register(
 		    	'highguardb' => '/server/model/ships/orieni/HighguardB.php',
 		    	'highguardb2003' => '/server/model/ships/orieni/HighguardB2003.php',
 		    	'highguardb2007' => '/server/model/ships/orieni/HighguardB2007.php',
+		    	'kaedashkada' => '/server/model/ships/llort/Kaedashkada.php',
 				
 				
 				//new SW - Uglies

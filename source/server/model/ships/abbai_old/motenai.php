@@ -8,7 +8,7 @@ class Motenai extends BaseShip{
 	$this->faction = "Abbai (WotCR)";
         $this->phpclass = "Motenai";
         $this->imagePath = "img/ships/AbbaiMotenai.png";
-        $this->shipClass = "Motenaion Missile Cruiser";
+        $this->shipClass = "Motenai Missile Cruiser";
         $this->shipSizeClass = 3;
 		
 	    $this->unofficial = true;

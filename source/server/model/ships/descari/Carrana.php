@@ -47,8 +47,8 @@ class Carrana extends SmallStarBaseThreeSections{
 
 			$systems = array(
 				new HeavyPlasmaBolter(4, 0, 0, $min, $max),
-				new SMissileRack(4, 6, 0, $min, $max),
-				new SMissileRack(4, 6, 0, $min, $max),
+				new SMissileRack(4, 6, 0, $min, $max, true),
+				new SMissileRack(4, 6, 0, $min, $max, true),
 				new LightParticleBeamShip(4, 2, 1, $min, $max),
 				new LightParticleBeamShip(4, 2, 1, $min, $max),
 				new LightParticleBeamShip(4, 2, 1, $min, $max),
