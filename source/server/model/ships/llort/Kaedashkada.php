@@ -46,9 +46,9 @@ class Kaedashkada extends SmallStarBaseFourSections
 		$this->addFrontSystem(new SubReactorUniversal(4, 24, 0, 0));
 		$this->addFrontSystem(new LMissileRack(4, 6, 0, 300, 60, true));
 		$this->addFrontSystem(new ParticleCannon(4, 8, 7, 300, 60));
-		$this->addFrontSystem(new ScatterGun(3, 8, 3, 240, 120));
-		$this->addFrontSystem(new ScatterGun(3, 8, 3, 240, 120));
-		$this->addFrontSystem(new ScatterGun(3, 8, 3, 240, 120));
+		$this->addFrontSystem(new ScatterGun(3, 8, 3, 240, 60));
+		$this->addFrontSystem(new ScatterGun(3, 8, 3, 240, 60));
+		$this->addFrontSystem(new ScatterGun(3, 8, 3, 240, 60));
 
 
 		$this->addAftSystem(new Hangar(4, 6));
