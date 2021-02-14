@@ -14,7 +14,7 @@ class MishakurD extends BaseShip{
         
         $this->occurence = "unique";
         $this->variantOf = "Mishakur Dreadnought";        
-        $this->limited = 33;
+        $this->limited = 10;
 
         $this->forwardDefense = 16;
         $this->sideDefense = 17;

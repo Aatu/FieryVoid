@@ -12,7 +12,7 @@ class Mishakur extends BaseShip{
         $this->shipClass = "Mishakur Dreadnought";
         $this->shipSizeClass = 3;
         
-        $this->limited = 33;
+        $this->limited = 10;
         $this->fighters = array("normal"=>12);
 
         $this->forwardDefense = 16;
