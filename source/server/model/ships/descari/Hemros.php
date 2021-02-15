@@ -28,8 +28,8 @@ class Hemros extends OSAT
 		$this->addPrimarySystem(new Scanner(4, 7, 2, 4));
 		$this->addPrimarySystem(new Thruster(3, 6, 0, 0, 2));
 		$this->addPrimarySystem(new MediumPlasmaBolter(3, 0, 0, 270, 90));
-		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 270, 90));
-		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 270, 90));
+		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 270, 90, true));
+		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 270, 90, true));
 		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
 		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
 

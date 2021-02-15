@@ -12,6 +12,7 @@ class OchlavitaFull extends HeavyCombatVessel{
         $this->shipClass = "Ochlavita Destroyer (full)";
 	    $this->unofficial = true;
         $this->variantOf = "Ochlavita Destroyer";
+                $this->isd = 2227;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;

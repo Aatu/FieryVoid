@@ -11,6 +11,7 @@ class TargathC extends BaseShip{
         $this->imagePath = "img/ships/targath.png";
         $this->shipClass = "Targath-C Attack Cruiser";
         $this->shipSizeClass = 3;
+                $this->isd = 2231;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;

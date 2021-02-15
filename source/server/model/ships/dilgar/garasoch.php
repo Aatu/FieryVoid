@@ -11,7 +11,8 @@ class Garasoch extends BaseShip{
         $this->imagePath = "img/ships/garasoch.png";
         $this->shipClass = "Garasoch Heavy Carrier";
         $this->shipSizeClass = 3;
-        
+        $this->isd = 2231;
+                
         $this->limited = 33;
         $this->fighters = array("normal"=>48);
 

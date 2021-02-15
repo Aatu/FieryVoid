@@ -12,6 +12,7 @@ class ProtraI extends BaseShip{
         $this->shipClass = "Protra-I Improved Scoutship";
         $this->shipSizeClass = 3;
         $this->iniativebonus = 5;
+                $this->isd = 2229;
         
         $this->limited = 33;
         $this->occurence = "uncommon";
