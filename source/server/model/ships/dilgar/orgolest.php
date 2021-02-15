@@ -9,6 +9,7 @@ class Orgolest extends OSAT{
         $this->phpclass = "Orgolest";
         $this->imagePath = "img/ships/orgolest.png";
         $this->shipClass = "Orgolest Satellite";
+                $this->isd = 2230;
         
         $this->forwardDefense = 8;
         $this->sideDefense = 8;

@@ -11,6 +11,7 @@ class Nitratha extends BaseShip{
         $this->imagePath = "img/ships/nitratha.png";
         $this->shipClass = "Ni'Tratha Jumpcruiser";
         $this->shipSizeClass = 3;
+        $this->isd = 2214;
 
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
