@@ -12,6 +12,7 @@ class AbrithiB extends BaseShip{
         $this->shipClass = "Abrithi-B Light Carrier";
         $this->shipSizeClass = 3;
         $this->variantOf = "Abrithi Assault Cruiser";
+        $this->isd = 2226;        
 
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

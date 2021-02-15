@@ -10,6 +10,7 @@ class Rishekar extends MediumShip{
         $this->imagePath = "img/ships/rishekar.png";
         $this->shipClass = "Rishekar Early Frigate";
         $this->canvasSize = 100;
+                $this->isd = 2210;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 13;
