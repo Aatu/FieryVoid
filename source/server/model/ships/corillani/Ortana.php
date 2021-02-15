@@ -42,10 +42,10 @@ class Ortana extends BaseShip{
         $this->addFrontSystem(new TwinArray(2, 6, 2, 270, 90));    
 
         $this->addAftSystem(new TwinArray(2, 6, 2, 90, 270));
-        $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
-        $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 5, 0, 2, 2));
-        $this->addAftSystem(new Thruster(3, 5, 0, 2, 2));       
+        $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
+        $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
+        $this->addAftSystem(new Thruster(3, 5, 0, 2, 2));    
 		
 		$this->addLeftSystem(new MediumPlasma(4, 5, 3, 240, 360));
         $this->addLeftSystem(new TwinArray(2, 6, 2, 180, 360));

@@ -10,6 +10,7 @@ class Torushka extends FighterFlight{
         $this->phpclass = "Torushka";
         $this->shipClass = "Torushka Stingfighters";
         $this->imagePath = "img/ships/Torushka.png";
+                $this->isd = 2210;
 
 
         $this->forwardDefense = 7;
