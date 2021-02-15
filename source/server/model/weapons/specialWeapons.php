@@ -1853,7 +1853,7 @@ class EmPulsar extends Pulse{
 	 
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-		$this->data["Special"] .= "<br>-1 per hit to crit rolls, -2 on dropout rolls.";
+		$this->data["Special"] .= "<br>+1 per hit to crit rolls, +2 on dropout rolls.";
 		$this->data["Special"] .= "<br>Cooldown period: 1 turn.";  
 	}
 	 
@@ -1879,6 +1879,19 @@ class EmPulsar extends Pulse{
 		$this->criticals[] =  $crit;	
 	} //endof function fire
 	 
+	/* applying cooldown when firing defensively, too
+	*/
+	public function fireDefensively($gamedata, $interceptedWeapon)
+	{
+		if ($this->firedDefensivelyAlready==0){ //in case of multiple interceptions during one turn - suffer backlash only once
+			$trgtTurn = $gamedata->turn;
+			$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
+			$crit->updated = true;
+			$crit->newCrit = true; //force save even if crit is not for current turn
+			$this->criticals[] =  $crit;		
+		}
+		parent::fireDefensively($gamedata, $interceptedWeapon);
+	}
         
         public function getDamage($fireOrder){        return 9;   }
     }//endof class EmPulsar
@@ -2051,6 +2064,21 @@ class SurgeBlaster extends Weapon{
 		$crit->updated = true;
 		$this->criticals[] = $crit;
 	} //endof function fire
+	
+	
+	/* applying cooldown when firing defensively, too
+	*/
+	public function fireDefensively($gamedata, $interceptedWeapon)
+	{
+		if ($this->firedDefensivelyAlready==0){ //in case of multiple interceptions during one turn - suffer backlash only once
+			$trgtTurn = $gamedata->turn;
+			$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
+			$crit->updated = true;
+			$crit->newCrit = true; //force save even if crit is not for current turn
+			$this->criticals[] =  $crit;		
+		}
+		parent::fireDefensively($gamedata, $interceptedWeapon);
+	}
 	
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)

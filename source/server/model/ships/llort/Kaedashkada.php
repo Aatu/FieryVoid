@@ -1,5 +1,5 @@
 <?php
-class Kaedashkada extends SmallStarBaseFourSections
+class Kaedashkada extends UnevenBaseFourSections 
 {
 
 	function __construct($id, $userid, $name,  $slot)
@@ -8,7 +8,7 @@ class Kaedashkada extends SmallStarBaseFourSections
 
 		$this->pointCost = 2250;
 		$this->base = true;
-		$this->smallBase = true; //"small" as in 4 outer sections
+		$this->smallBase = true; //small = four sections
 		$this->faction = "Llort";
 		$this->phpclass = "Kaedashkada";
 		$this->shipClass = "Kaedashkada Starbase";
