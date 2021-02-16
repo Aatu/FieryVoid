@@ -419,7 +419,7 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
 	/*weapon of Rogolon fighters - very nasty!*/
         public $name = "RogolonLtPlasmaGun";
         public $displayName = "Light Plasma Gun";
-	public $iconPath = "plasmaGun.png";
+	public $iconPath = "lightPlasmalinked.png";
 	
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
