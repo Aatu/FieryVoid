@@ -11,7 +11,8 @@ class LeskratiD extends BaseShip{
         $this->imagePath = "img/ships/leskrati.png";
         $this->shipClass = "Leskrati-D Command Cruiser";
         $this->shipSizeClass = 3;
-
+        $this->isd = 2229;
+        
         $this->occurence = "uncommon";
         $this->variantOf = "Leskrati Jumpcruiser";
         $this->limited = 33;

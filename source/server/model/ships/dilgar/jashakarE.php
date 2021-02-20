@@ -10,7 +10,8 @@ class JashakarE extends MediumShip{
         $this->imagePath = "img/ships/jashakar.png";
         $this->shipClass = "Jashakar-E Escort Frigate";
         $this->canvasSize = 100;
-        
+        $this->isd = 2229;
+                
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
         

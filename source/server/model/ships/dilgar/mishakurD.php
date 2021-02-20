@@ -11,10 +11,11 @@ class MishakurD extends BaseShip{
         $this->imagePath = "img/ships/mishakur.png";
         $this->shipClass = "Mishakur-D Command Dreadnought";
         $this->shipSizeClass = 3;
-        
+        $this->isd = 2231;
+                
         $this->occurence = "unique";
         $this->variantOf = "Mishakur Dreadnought";        
-        $this->limited = 33;
+        $this->limited = 10;
 
         $this->forwardDefense = 16;
         $this->sideDefense = 17;

@@ -46,7 +46,12 @@
     <script src="client/lib/three.min.js"></script>
     <script src="client/lib/THREE.MeshLine.js"></script>
     <script src="client/UI/reactJs/UI.bundle.js"></script>
+	<!-- replaced by php include below
     <script src="static/ships.js"></script>
+	-->
+<?php		
+	include 'static/ships.php';
+?>
     <script>
         window.Config = {
             HEX_SIZE: 50

@@ -21,8 +21,8 @@ class Hector extends OSAT{
         $this->iniativebonus = 60;
 
 
-        $this->addPrimarySystem(new BMissileRack(3, 9, 0, 270, 90));
-        $this->addPrimarySystem(new BMissileRack(3, 9, 0, 270, 90));
+        $this->addPrimarySystem(new BMissileRack(3, 9, 0, 270, 90, true));
+        $this->addPrimarySystem(new BMissileRack(3, 9, 0, 270, 90, true));
         $this->addPrimarySystem(new LightPulse(2, 4, 2, 180, 360));
         $this->addPrimarySystem(new LightPulse(2, 4, 2, 0, 180));
         $this->addPrimarySystem(new InterceptorMkI(2, 4, 1, 0, 360));

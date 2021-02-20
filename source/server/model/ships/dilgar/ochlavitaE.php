@@ -9,6 +9,7 @@ class OchlavitaE extends HeavyCombatVessel{
         $this->phpclass = "OchlavitaE";
         $this->imagePath = "img/ships/ochlavita.png";
         $this->shipClass = "Ochlavita-E Escort Destroyer";
+                $this->isd = 2229;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
