@@ -449,7 +449,7 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
         if($nrOfShots === 1){
 			$this->iconPath = "lightPlasma.png";
 		}
-		if($nrOfShots >2){//no special icon for more than 3 linked weapons
+		if($nrOfShots === 2){
 			$this->iconPath = "lightPlasmalinked.png";
 							}    
            
