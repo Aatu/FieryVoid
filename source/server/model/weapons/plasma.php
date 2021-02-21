@@ -441,15 +441,15 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
     	public $damageType = "Standard"; 
     	public $weaponClass = "Plasma"; 
 
-	function __construct($startArc, $endArc, $nrOfShots = 2){ 
-		$this->shots = $nrOfShots;
-		$this->defaultShots = $nrOfShots;
+	function __construct($startArc, $endArc, $damageBonus=5, $nrOfShots = 2){
+            $this->shots = $nrOfShots;
+            $this->defaultShots = $nrOfShots;
 	    $this->damageBonus = $damageBonus;
 	    
         if($nrOfShots === 1){
 			$this->iconPath = "lightPlasma.png";
 		}
-		if($nrOfShots >2){
+		if($nrOfShots >2){//no special icon for more than 3 linked weapons
 			$this->iconPath = "lightPlasmalinked.png";
 							}    
            
