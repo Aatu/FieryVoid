@@ -2106,4 +2106,47 @@ class SmallStarBaseThreeSections extends SmallStarBaseFourSections{
     }
 } //end of StarBaseThreeSections
 
+class UnevenBaseFourSections extends BaseShip{ //4-sided base which has differend fwd and side profile
+    function __construct($id, $userid, $name,  $slot){
+        parent::__construct($id, $userid, $name,  $slot);
+
+        $this->base = true;
+        $this->smallBase = true;
+
+        $this->shipSizeClass = 3;
+        $this->iniativebonus = -200; //no voluntary movement anyway
+        $this->turncost = 0;
+        $this->turndelaycost = 0;
+    }
+
+    public function getLocations(){
+        $locs = array();
+		//fwd: 270..90, incl. fwd profile at 330..30
+		//aft: 90..270, incl. fwd profile at 150..210
+		//Port: 180..0, incl. fwd profile at 180..210 and 330..0
+		//Stbd: 0..180, incl. fwd profile at 0..30 and 150..180
+
+        $locs[] = array("loc" => 1, "min" => 270, "max" => 330, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 1, "min" => 30, "max" => 90, "profile" => $this->sideDefense);
+		
+		
+        $locs[] = array("loc" => 2, "min" => 90, "max" => 150, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 2, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 2, "min" => 210, "max" => 270, "profile" => $this->sideDefense);
+		
+		
+        $locs[] = array("loc" => 3, "min" => 180, "max" => 210, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 3, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 3, "min" => 330, "max" => 0, "profile" => $this->forwardDefense);
+		
+        $locs[] = array("loc" => 4, "min" => 0, "max" => 30, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 4, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 4, "min" => 150, "max" => 180, "profile" => $this->forwardDefense);
+
+        return $locs;
+    }
+} //end of SmallStarBaseFourSections
+
+
 ?>
