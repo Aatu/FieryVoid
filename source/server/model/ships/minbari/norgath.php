@@ -19,7 +19,7 @@ class Norgath extends StarBaseSixSections{
 		$this->forwardDefense = 21;
 		$this->sideDefense = 21;
 
-		$this->imagePath = "img/ships/orion.png";
+		$this->imagePath = "img/ships/Norgath.png";
 		$this->canvasSize = 280; //Enormous Starbase
 
 		$this->locations = array(41, 42, 2, 32, 31, 1);
