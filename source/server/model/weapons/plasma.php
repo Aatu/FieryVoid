@@ -419,7 +419,6 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
 	/*weapon of Rogolon fighters - very nasty!*/
         public $name = "RogolonLtPlasmaGun";
         public $displayName = "Light Plasma Gun";
-	public $iconPath = "plasmaGun.png";
 	
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
@@ -442,11 +441,18 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
     	public $damageType = "Standard"; 
     	public $weaponClass = "Plasma"; 
 
-        function __construct($startArc, $endArc, $damageBonus=5, $shots = 2){
-            $this->shots = $shots;
-            $this->defaultShots = $shots;
+	function __construct($startArc, $endArc, $damageBonus=5, $nrOfShots = 2){
+            $this->shots = $nrOfShots;
+            $this->defaultShots = $nrOfShots;
 	    $this->damageBonus = $damageBonus;
-            
+	    
+        if($nrOfShots === 1){
+			$this->iconPath = "lightPlasma.png";
+		}
+		if($nrOfShots === 2){
+			$this->iconPath = "lightPlasmalinked.png";
+							}    
+           
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }      
 
