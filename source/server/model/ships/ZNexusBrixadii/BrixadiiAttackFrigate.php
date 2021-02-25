@@ -7,8 +7,8 @@ class BrixadiiAttackFrigate extends LCV{
         $this->pointCost = 280;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiAttackFrigate";
-        $this->imagePath = "img/ships/Nexus/BrixadiiPursuitFrigate.png";
-			$this->canvasSize = 125; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/BrixadiiAttackFrigate.png";
+			$this->canvasSize = 70; //img has 200px per side
         $this->shipClass = "Attack Frigate";
 //			$this->variantOf = "Pursuit Frigate";
 //			$this->occurence = "common";
@@ -39,7 +39,7 @@ class BrixadiiAttackFrigate extends LCV{
 		$this->addFrontSystem(new NexusParticleAgitator(3, 8, 3, 240, 360));
 		$this->addFrontSystem(new NexusParticleAgitator(3, 8, 3, 0, 120));
 		$this->addFrontSystem(new LightParticleProjector(1, 3, 1, 180, 60));
-		$this->addFrontSystem(new LightParticleProjector(1, 2, 1, 300, 180));
+		$this->addFrontSystem(new LightParticleProjector(1, 3, 1, 300, 180));
 		$this->addFrontSystem(new NexusKineticBoxLauncher(0, 4, 0, 300, 60));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));

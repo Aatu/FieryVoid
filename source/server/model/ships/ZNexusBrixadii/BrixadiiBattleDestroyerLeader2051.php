@@ -7,8 +7,8 @@ class BrixadiiBattleDestroyerLeader2051 extends HeavyCombatVessel{
         $this->pointCost = 405;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiBattleDestroyerLeader2051";
-        $this->imagePath = "img/ships/Nexus/BrixadiiBattleDestroyer.png";
-			$this->canvasSize = 175; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/BrixadiiBDDLeader.png";
+			$this->canvasSize = 120; //img has 200px per side
         $this->shipClass = "Battle Destroyer Leader (2051)";
         $this->variantOf = "Battle Destroyer";
 			$this->occurence = "common";
