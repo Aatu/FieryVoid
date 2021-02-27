@@ -710,3 +710,4 @@ var TestGun = function  TestGun(json, ship) {
 };
 TestGun.prototype = Object.create(Weapon.prototype);
 TestGun.prototype.constructor =  TestGun;
+

@@ -1258,7 +1258,8 @@ spl_autoload_register(
 				'circasianvestas' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianVestas.php',
 				'circasianyollana' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianYollana.php',
 				'circasianyollanabeta' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianYollanaBeta.php',
-				
+
+
 
 				//Escalation Wars - Sshel'ath
 				'sshelathalvekascout' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathAlvekaScout.php',
@@ -1471,6 +1472,11 @@ spl_autoload_register(
 
                 //Grome Weapons and Systems
                 'antiquatedscanner' => '/server/model/systems/baseSystems.php',
+
+
+                //Custom Minbari
+                'shargoti' => '/server/model/ships/minbari/shargoti.php',
+
 
 
 				//Stano Customs
