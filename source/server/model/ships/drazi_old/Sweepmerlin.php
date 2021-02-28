@@ -13,7 +13,8 @@ class Sweepmerlin extends MediumShip{
         $this->agile = true;
         $this->canvasSize = 100;
         $this->occurence = "common"; 
-	    $this->variantOf = "Merlin Frigate";        
+	    $this->variantOf = "Merlin Frigate";
+	    $this->unofficial = true;  	            
         
         $this->forwardDefense = 11;
         $this->sideDefense = 11;
