@@ -1730,6 +1730,8 @@ spl_autoload_register(
 		    	'highguardb2007' => '/server/model/ships/orieni/HighguardB2007.php',
 		    	'kaedashkada' => '/server/model/ships/llort/Kaedashkada.php',
 		    	'brostilli' => '/server/model/ships/drazi/Brostilli.php',
+		    	'deathfalcon' => '/server/model/ships/drazi/Deathfalcon.php',
+		    	'deathfalcon2230' => '/server/model/ships/drazi/Deathfalcon2230.php',
 				
 				
 				//new SW - Uglies
