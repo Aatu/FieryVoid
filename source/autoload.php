@@ -1732,6 +1732,7 @@ spl_autoload_register(
 		    	'brostilli' => '/server/model/ships/drazi/Brostilli.php',
 		    	'deathfalcon' => '/server/model/ships/drazi/Deathfalcon.php',
 		    	'deathfalcon2230' => '/server/model/ships/drazi/Deathfalcon2230.php',
+		    	'sweepmerlin' => '/server/model/ships/drazi_old/Sweepmerlin.php',
 				
 				
 				//new SW - Uglies
