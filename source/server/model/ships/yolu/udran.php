@@ -11,6 +11,7 @@ class Udran extends BaseShip{
         $this->shipClass = "Udran Command Cruiser";
         $this->gravitic = true;
         $this->occurence = "rare";
+		$this->variantOf = "Ulana Patrol Cruiser";       
         $this->fighters=array("normal"=>6);
 
         $this->forwardDefense = 16;
