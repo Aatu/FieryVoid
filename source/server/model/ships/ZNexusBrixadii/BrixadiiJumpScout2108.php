@@ -8,7 +8,7 @@ class BrixadiiJumpScout2108 extends BaseShipNoAft{
 		$this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiJumpScout2108";
         $this->imagePath = "img/ships/Nexus/BrixadiiWarship.png";
-			$this->canvasSize = 200; //img has 200px per side
+			$this->canvasSize = 145; //img has 200px per side
         $this->shipClass = "Jump Scout (2108)";
 			$this->variantOf = "Jump Scout";
 			$this->occurence = "common";		

@@ -7,8 +7,8 @@ class BrixadiiLightEscortFrigate extends MediumShip{
         $this->pointCost = 320;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiLightEscortFrigate";
-        $this->imagePath = "img/ships/Nexus/BrixadiiPursuitFrigate.png";
-			$this->canvasSize = 125; //img has 100px per side
+        $this->imagePath = "img/ships/Nexus/BrixadiiLightEscort.png";
+			$this->canvasSize = 70; //img has 100px per side
         $this->shipClass = "Light Escort Frigate";
 		$this->variantOf = "Pursuit Frigate";
 		$this->occurence = "uncommon";

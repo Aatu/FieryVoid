@@ -45,6 +45,15 @@ SWScanner.prototype.hasMaxBoost = function () {
     return true;
 };
 
+var AntiquatedScanner = function AntiquatedScanner(json, ship) {
+    Scanner.call(this, json, ship);
+};
+AntiquatedScanner.prototype = Object.create(Scanner.prototype);
+AntiquatedScanner.prototype.constructor = AntiquatedScanner;
+AntiquatedScanner.prototype.hasMaxBoost = function () {
+    return true;
+};
+
 var ElintScanner = function ElintScanner(json, ship) {
     Scanner.call(this, json, ship);
 };

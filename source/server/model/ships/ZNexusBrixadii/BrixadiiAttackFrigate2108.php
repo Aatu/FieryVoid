@@ -7,8 +7,8 @@ class BrixadiiAttackFrigate2108 extends LCV{
         $this->pointCost = 310;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiAttackFrigate2108";
-        $this->imagePath = "img/ships/Nexus/BrixadiiPursuitFrigate.png";
-			$this->canvasSize = 125; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/BrixadiiAttackFrigate.png";
+			$this->canvasSize = 70; //img has 200px per side
         $this->shipClass = "Attack Frigate (2108)";
 			$this->variantOf = "Attack Frigate";
 			$this->occurence = "common";
