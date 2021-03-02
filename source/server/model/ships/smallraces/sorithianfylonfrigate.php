@@ -37,8 +37,8 @@ class SorithianFylonFrigate extends MediumShip{
         $this->addFrontSystem(new LightLaser(2, 4, 3, 300, 60));
 	$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 360));
 	$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 0, 120));
-        $this->addFrontSystem(new SoMissileRack(3, 6, 0, 240, 360));
-        $this->addFrontSystem(new SoMissileRack(3, 6, 0, 0, 120));
+        $this->addFrontSystem(new CustomLightSoMissileRack(3, 6, 0, 240, 360));
+        $this->addFrontSystem(new CustomLightSoMissileRack(3, 6, 0, 0, 120));
 
 	$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 300));
 	$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 60, 180));

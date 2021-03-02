@@ -7,8 +7,8 @@ class BrixadiiSurveyorBase extends HeavyCombatVessel{
         $this->pointCost = 365;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiSurveyorBase";
-        $this->imagePath = "img/ships/Nexus/BrixadiiBattleDestroyer.png";
-			$this->canvasSize = 175; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/BrixadiiSurveyor.png";
+			$this->canvasSize = 120; //img has 200px per side
         $this->shipClass = "Surveyor";
 			//$this->variantOf = "Surveyor";
 			$this->limited = 10;
