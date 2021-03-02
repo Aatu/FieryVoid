@@ -592,6 +592,17 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		}
 		$this->data["Special"] .= 'Star Wars Sensors - boostability limited to +2.';
 	}	
+	public function markAntiquated(){		
+    	$this->specialAbilities[] = "AntiquatedSensors";
+		$this->specialAbilityValue = true; //so it is actually recognized as special ability!
+		$this->maxBoostLevel = 0;
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= 'Antiquated Sensors cannot be boosted.';
+	}
 	/*note: LCV Sensors are (or will be) checked at committing Initial Orders, in front end. All but 2 EW points need to be OEW. 
 	This is Sensor trait rather than being strictly tied to hull size - while no larger units have it, of LCVs themselves only Young ones have it more or less universally.
 	More advanced factions usually do not, and for custom factions it's up to their creator.
@@ -672,6 +683,17 @@ class SWScanner extends Scanner {
     */
 } //end of SWScanner
 
+/*Antiquated Scanners cannot be boosted*/
+class AntiquatedScanner extends Scanner {
+    public $name = "AntiquatedScanner";
+    public $iconPath = "scanner.png";
+	
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+	$this->markAntiquated();
+    }
+	
+} //end of AntiquatedScanner
 
 class CnC extends ShipSystem{
     public $name = "cnC";

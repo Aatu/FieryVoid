@@ -8,7 +8,7 @@ class BrixadiiAssaultShip extends BaseShipNoAft{
 		$this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiAssaultShip";
         $this->imagePath = "img/ships/Nexus/BrixadiiWarship.png";
-			$this->canvasSize = 200; //img has 200px per side
+			$this->canvasSize = 145; //img has 200px per side
         $this->shipClass = "Assault Ship";
 			$this->limited = 33;
 		$this->unofficial = true;
