@@ -11,6 +11,7 @@ class Targath extends BaseShip{
         $this->imagePath = "img/ships/targath.png";
         $this->shipClass = "Targath Strike Cruiser";
         $this->shipSizeClass = 3;
+                $this->isd = 2226;
         
         $this->fighters = array("normal"=>24);
         

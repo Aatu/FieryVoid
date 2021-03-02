@@ -11,6 +11,7 @@ class TrathartiG extends BaseShip{
         $this->imagePath = "img/ships/tratharti.png";
         $this->shipClass = "Tratharti-G Heavy Gunship";
         $this->shipSizeClass = 3;
+                $this->isd = 2231;
         
         $this->occurence = "rare";
         $this->variantOf = "Tratharti Gunship";

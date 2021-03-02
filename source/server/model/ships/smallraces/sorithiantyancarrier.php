@@ -14,6 +14,8 @@ class SorithianTyanCarrier extends BaseShip{
 	    
         $this->isd = 2212;
         $this->unofficial = true;
+
+	    $this->notes = 'Uses Light missiles.';
 	
         $this->forwardDefense = 15;
         $this->sideDefense = 18;
@@ -45,12 +47,12 @@ class SorithianTyanCarrier extends BaseShip{
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 240));
 
         $this->addLeftSystem(new Thruster(2, 13, 0, 5, 3));
-        $this->addLeftSystem(new SoMissileRack(3, 6, 0, 240, 360));
+        $this->addLeftSystem(new CustomLightSoMissileRack(3, 6, 0, 240, 360));
         $this->addLeftSystem(new CargoBay(2, 24));
         $this->addLeftSystem(new CargoBay(2, 24));
 
         $this->addRightSystem(new Thruster(2, 13, 0, 5, 4));
-        $this->addRightSystem(new SoMissileRack(3, 6, 0, 0, 120));
+        $this->addRightSystem(new CustomLightSoMissileRack(3, 6, 0, 0, 120));
         $this->addRightSystem(new CargoBay(2, 24));
         $this->addRightSystem(new CargoBay(2, 24));
 
