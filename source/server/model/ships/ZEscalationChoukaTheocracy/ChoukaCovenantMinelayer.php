@@ -41,7 +41,7 @@ class ChoukaCovenantMinelayer extends BaseShip{
 		$this->addFrontSystem(new LightEnergyMine(2, 3, 2, 300, 60));
 
         $this->addAftSystem(new Thruster(2, 21, 0, 9, 2));
-		$this->addAftSystem(new LightEnergyMine(2, 3, 2, 300, 60));
+		$this->addAftSystem(new LightEnergyMine(2, 3, 2, 120, 240));
 		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 1, 90, 270));
 		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 1, 90, 270));
 		$this->addAftSystem(new CargoBay(2, 24));

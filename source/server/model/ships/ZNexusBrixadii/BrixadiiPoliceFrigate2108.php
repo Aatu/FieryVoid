@@ -4,16 +4,21 @@ class BrixadiiPoliceFrigate2108 extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 70;
+        $this->pointCost = 135;
         $this->faction = "ZNexus Brixadii";
-        $this->phpclass = "BrixadiiPoliceFrigate2047";
+        $this->phpclass = "BrixadiiPoliceFrigate2108";
         $this->imagePath = "img/ships/Nexus/BrixadiiPoliceFrigate.png";
-			$this->canvasSize = 100; //img has 200px per side
-        $this->shipClass = "Police Frigate (2108)";
-		$this->variantOf = "Police Frigate";
+			$this->canvasSize = 60; //img has 200px per side
+        $this->shipClass = "Police Frigate (2108 Refit)";
+			$this->variantOf = "Police Frigate";
 			$this->occurence = "common";
+		//$this->variantOf = "Police Frigate";
 		$this->unofficial = true;
 			$this->isd = 2108;
+
+        $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
+	    $this->notes = 'May deploy independently.';
+	    $this->notes .= '<br>Antiquated Sensors.';
         
         $this->forwardDefense = 9;
         $this->sideDefense = 11;
@@ -34,19 +39,19 @@ class BrixadiiPoliceFrigate2108 extends LCV{
   
 		$this->addPrimarySystem(new Reactor(4, 7, 0, 0));
 		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-	    	$sensors = new Scanner(4, 9, 2, 4);
-		$sensors->markLCV();
-		$this->addPrimarySystem($sensors);
-		$this->addPrimarySystem(new Engine(3, 10, 0, 5, 3));
-		$this->addPrimarySystem(new NexusProjectorArray(2, 6, 1, 240, 120));
-		$this->addPrimarySystem(new NexusProjectorArray(2, 6, 1, 240, 120));
+        $this->addPrimarySystem(new AntiquatedScanner(4, 9, 2, 4));
+		$this->addPrimarySystem(new Engine(3, 10, 0, 8, 3));
+		$this->addPrimarySystem(new NexusProjectorArray(2, 6, 1, 270, 90));
+		$this->addPrimarySystem(new NexusProjectorArray(2, 6, 1, 270, 90));
+		$this->addPrimarySystem(new NexusLightProjectorArray(2, 5, 2, 180, 360));
+		$this->addPrimarySystem(new NexusLightProjectorArray(2, 5, 2, 0, 180));
 	    
-	    
-        $this->addPrimarySystem(new Structure(4, 21));
+        $this->addPrimarySystem(new Structure(3, 27));
 	    
         $this->hitChart = array(
         		0=> array( 
         				11 => "Structure",
+						13 => "Light Projector Array",
         				15 => "Projector Array",
         				18 => "Engine",
         				19 => "Reactor",
@@ -54,18 +59,20 @@ class BrixadiiPoliceFrigate2108 extends LCV{
         		),
         		1=> array( //redirect to PRIMARY
         				11 => "0:Structure",
+						13 => "0:Light Projector Array",
         				15 => "0:Projector Array",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
-        		),
+				),
         		2=> array( //redirect to PRIMARY
         				11 => "0:Structure",
+						13 => "0:Light Projector Array",
         				15 => "0:Projector Array",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
-        		),     
+        		),        		
         ); //end of hit chart
     }
 }

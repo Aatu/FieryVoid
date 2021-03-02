@@ -350,10 +350,44 @@ Fiery Void encoding done in collaboration with Geoffrey Stano.
 
 
 ZNEXUS BRIXADII (custom, alternate universe faction)
-Not quite finished faction from Nexus universe, designed by Jeremy and Geoffrey Stano.
+The Brixadii Clans are a spinward power within the Nexus sector, having fought with the Dalithorn Commonwealth early on and having hostile relations with the Velrax Republic. The Brixadii's 
+technology is primarily focused around particle weapons. These are rugged, easy to repair, and low mass. This last point is important as the key feature that defines the Clans are their extremely
+maneuverable ships. They have few longer-ranged weapons, but prefer high-speed firing passes or getting in close and using maneuverability to get advantageous shots. They do not field fighters and
+therefore rely on their rapid firing weapons, wide arcs, and light combat vessels to deal with fighters. The Brixadii have their basic designs for their earliest tech levels, which are fairly low tech.
+The Brixadii are part of the Nexus Universe setting and are designed by Jeremy and Geoffrey Stano.
 If You want interesting low tech faction then by all means use it, just be warned :)
 Chaff Launcher - technically fired at enemy ship, it will always hit (causing no damage or adverse effects) and apply interception to ALL fire from target hex at chaff-protected unit (including nominally uninterceptable weapons).
+Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently and field Antiquated Sensors. This allows them to use EW 
+without any restrictions, but they cannot boost their sensors.
 
+ZPLAYTEST DALITHORN  (custom, alternate universe faction)
+The Dalithorn Commonwealth are likely the lowest tech of the main Nexus powers. They managed to leverage their position across a major trade route to keep their sovereignty up to the later years of
+the First War of Control in the 2150s. They primarily use terrestrial weapons converted for use in space combat. While individually weak, many of the weapons are treated as matter weapons, allowing
+the Dalithorn to cause some damage. Also, while simple, a number of their weapons are still effective, such as the gas gun. The Commonwealth does not use fighters in the traditional sense. They only
+field super-heavy fighters, but these are typically slow. However, their size and armament allow them to serve as area of denial platforms against enemy fighters or as serviceable anti-ship units.
+The Dalithorn are part of the Nexus Universe setting and are designed by Geoffrey and Jeremy Stano.
+At this stage, this low tech faction is in a playtest state. Their art is just a fancy silhouette and they need some matches played to ensure that their capabilities and points are accurate. Fiery
+Void currently has their basic, early units.
+Protector - Given their ships were already using a variety of ammunition-based weapons, necessitating the primary cargo bay, the Dalithorn had no issue creating a flak-style system to defend their ships.
+Although not designed to engage targets, the Protector is capable of intercepting any weapon, including lasers, and intercepting for a friendly unit as long as the friendly unit is in arc and 3 hexs and
+the firing ship is in arc. 
+Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently and field Antiquated Sensors. This allows them to use EW 
+without any restrictions, but they cannot boost their sensors.
+
+ZPLAYTEST VELRAX  (custom, alternate universe faction)
+The Velrax Republic is potentially the most aggressive, but not necessarily the most militarisitic faction within the Nexus setting. They have engaged both the Brixadii Clans and Dalithorn Commonwealth
+several times. In the chaos of the First War of Control, they did managed to conquer must of Dalithorn space. Unlike the Brixadii and Dalithorn, the Velrax are heavy fighter users and this plays into
+a rigid fleet structure. The Velrax field well armed "strike" carriers supported by anti-ship focused "gunships". Everything revolves around supporting their fighter operations. The carriers utilize plasma
+waves to break up enemy forces at range, and gunships with lasers to single out anti-fighter units. Also, the Velrax carry plasma arcs, which are smaller versions of the plasma stream. These are used to strip armor to
+make their weapons more effective, including the light fighter guns. Their heavy fighter mounts a potent anti-ship gun that was retrofitted to some of the interceptor fighters when they realized that
+their opponents did not use fighters to the degree they did.
+At this stage, this low tech faction is in a playtest state. Their art is just a fancy silhouette and they need some matches played to ensure that their capabilities and points are accurate. Fiery
+Void currently has their basic, early units.
+Plasma Arc - Small, raking plasma weapon that is designed to strip armor from their target.
+Dart/Streak Interceptors - These are small torpedoes that can accept OEW and used to engage enemy fighters, although they can target ships.
+Laser Spear - A precursor to the laser lances the Velrax eventually field.
+Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently and field Antiquated Sensors. This allows them to use EW 
+without any restrictions, but they cannot boost their sensors.
 	
 ZSTARWARS (custom, alternate universe faction)
 Star Wars units, as designed by Wolfgang Lackner-Warton and Marcin Sawicki.
@@ -422,13 +456,16 @@ THE REST
 Factions that cannot seriously compete. Usually they have some deficiencies that cannot be fixed by simply increasing their PV allowance (like combination of poor maneuvrability/poor Sensors/short range weapons on low-tech ships or some glaring weakness in overall fleet layout).
 Abbai (WotCR)
 Alacan (Small Races)
+Brixadii
 Chouka
 Chouka Raiders
 Circasian
+Dalithorn
 Hurr
 Rogolon (Small Races)
 Sorithian (Small Races)
 Usuuth
+Velrax
 
 
 SUPERIOR
