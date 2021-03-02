@@ -7,7 +7,7 @@ class DalithornLightCruiser extends HeavyCombatVessel{
         $this->pointCost = 400;
         $this->faction = "ZPlaytest Dalithorn";
         $this->phpclass = "DalithornLightCruiser";
-        $this->imagePath = "img/ships/Playtest/DalithornFlagCruiser.png";
+        $this->imagePath = "img/ships/Nexus/DalithornFlagCruiser.png";
 		$this->canvasSize = 115; //img has 200px per side
         $this->shipClass = "Light Cruiser";
 		$this->unofficial = true;
