@@ -7,7 +7,7 @@ class VelraxHisshrimRefit extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 335;
 	$this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxHisshrimRefit";
-        $this->imagePath = "img/ships/Playtest/VelraxHisshrimCarrier.png";
+        $this->imagePath = "img/ships/Playtest/VelraxHisshrim.png";
         $this->shipClass = "Hisshrim Patrol Carrier (2059 Refit)";
 			$this->variantOf = "Hisshrim Patrol Carrier";
 			$this->occurence = "common";
@@ -37,15 +37,15 @@ class VelraxHisshrimRefit extends HeavyCombatVesselLeftRight{
 
         $this->addLeftSystem(new NexusHeavyLaserSpear(3, 6, 4, 240, 360));
         $this->addLeftSystem(new NexusDartInterceptor(2, 4, 1, 180, 60));
-        $this->addLeftSystem(new NexusLightParticleArray(2, 2, 2, 240, 60));
-        $this->addLeftSystem(new NexusLightParticleArray(2, 2, 2, 120, 300));
+        $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 240, 60));
+        $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 120, 300));
 		$this->addLeftSystem(new Hangar(3, 8));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 
         $this->addRightSystem(new NexusHeavyLaserSpear(3, 6, 4, 0, 120));
         $this->addRightSystem(new NexusDartInterceptor(2, 4, 1, 300, 180));
-        $this->addRightSystem(new NexusLightParticleArray(2, 2, 2, 300, 120));
-        $this->addRightSystem(new NexusLightParticleArray(2, 2, 2, 60, 240));
+        $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 300, 120));
+        $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 60, 240));
 		$this->addRightSystem(new Hangar(3, 8));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 
@@ -66,7 +66,7 @@ class VelraxHisshrimRefit extends HeavyCombatVesselLeftRight{
         		),
         		3=> array(
         				5 => "Thruster",
-        				7 => "Light Particle Array",
+        				7 => "Twin Ion Gun",
 						8 => "Dart Interceptor",
 						10 => "Heavy Laser Spear",
 						12 => "Hangar",
@@ -75,7 +75,7 @@ class VelraxHisshrimRefit extends HeavyCombatVesselLeftRight{
         		),
         		4=> array(
         				5 => "Thruster",
-        				7 => "Light Particle Array",
+        				7 => "Twin Ion Gun",
 						8 => "Dart Interceptor",
 						10 => "Heavy Laser Spear",
 						12 => "Hangar",

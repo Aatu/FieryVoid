@@ -1,18 +1,22 @@
 <?php
-class VelraxSathrinFrigate extends MediumShip{
+class VelraxSevashRefit extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 350;
         $this->faction = "ZPlaytest Velrax";
-        $this->phpclass = "VelraxSathrinFrigate";
-        $this->imagePath = "img/ships/Playtest/VelraxSathrin.png";
-        $this->shipClass = "Sathrin Border Frigate";
+        $this->phpclass = "VelraxSevashRefit";
+        $this->imagePath = "img/ships/Playtest/VelraxSevash.png";
+        $this->shipClass = "Sevash Light Carrier (2108 refit)";
+			$this->variantOf = "Sathrin Border Frigate";
+			$this->occurence = "common";
 		$this->unofficial = true;
         $this->agile = true;
         $this->canvasSize = 60;
-	    $this->isd = 2062;
+	    $this->isd = 2108;
+
+        $this->fighters = array("normal"=>6);
         
         $this->forwardDefense = 11;
         $this->sideDefense = 13;
@@ -24,22 +28,21 @@ class VelraxSathrinFrigate extends MediumShip{
         $this->pivotcost = 2;
         $this->iniativebonus = 60;
          
-        $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
-        $this->addPrimarySystem(new CnC(4, 10, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 14, 5, 4));
-        $this->addPrimarySystem(new Engine(3, 12, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(1, 2));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 3));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 4));        
+        $this->addPrimarySystem(new Reactor(4, 10, 0, 0));
+        $this->addPrimarySystem(new CnC(4, 15, 0, 0));
+        $this->addPrimarySystem(new Scanner(3, 14, 5, 5));
+        $this->addPrimarySystem(new Engine(3, 12, 0, 10, 3));
+        $this->addPrimarySystem(new Hangar(1, 8));
+        $this->addPrimarySystem(new Thruster(3, 12, 0, 5, 3));
+        $this->addPrimarySystem(new Thruster(3, 12, 0, 5, 4));        
         
-		$this->addFrontSystem(new NexusLaserSpear(3, 5, 3, 240, 60));
-		$this->addFrontSystem(new NexusLaserSpear(3, 5, 3, 300, 120));
+		$this->addFrontSystem(new LaserLance(3, 5, 4, 240, 60));
+		$this->addFrontSystem(new LaserLance(3, 5, 4, 300, 120));
 		$this->addFrontSystem(new NexusTwinIonGun(2, 4, 4, 270, 90));
-		$this->addFrontSystem(new EWPlasmaArc(2, 5, 4, 300, 60));
         $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
 	    
-        $this->addAftSystem(new Thruster(3, 9, 0, 4, 2));    
-        $this->addAftSystem(new Thruster(3, 9, 0, 4, 2));    
+        $this->addAftSystem(new Thruster(3, 9, 0, 5, 2));    
+        $this->addAftSystem(new Thruster(3, 9, 0, 5, 2));    
 		$this->addAftSystem(new NexusTwinIonGun(2, 4, 4, 120, 360));
 		$this->addAftSystem(new NexusTwinIonGun(2, 4, 4, 0, 240));
        
@@ -59,9 +62,8 @@ class VelraxSathrinFrigate extends MediumShip{
 
 		1=> array(
 			6 => "Thruster",
-			8 => "Laser Spear",
+			8 => "Laser Lance",
 			9 => "Twin Ion Gun",
-			11 => "Plasma Arc",
 			17 => "Structure",
 			20 => "Primary",
 		),

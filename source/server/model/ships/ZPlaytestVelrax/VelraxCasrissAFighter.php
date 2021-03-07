@@ -39,7 +39,7 @@ class VelraxCasrissAFighter extends FighterFlight{
             $fighter->imagePath = "img/ships/Playtest/VelraxCasriss.png";
             $fighter->iconPath = "img/ships/Playtest/VelraxCasriss_Large.png";
 
-	        $light = new NexusFighterArray(330, 30, 1); //$startArc, $endArc, $nrOfShots
+	        $light = new NexusLightIonGun(330, 30, 0); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($light);
 			
 //			$missile = new NexusDartFtr(2, 330, 30);

@@ -7,9 +7,9 @@ class VelraxStrikeCarrierRefit extends BaseShip{
 	$this->pointCost = 575;
 	$this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxStrikeCarrierRefit";
-        $this->imagePath = "img/ships/Playtest/VelraxJumpCarrier.png";
-        $this->shipClass = "Strike Carrier (2104 Refit)";
-			$this->variantOf = "Strike Carrier";
+        $this->imagePath = "img/ships/Playtest/VelraxResskar.png";
+        $this->shipClass = "Resskar Strike Carrier (2104 Refit)";
+			$this->variantOf = "Resskar Strike Carrier";
 			$this->occurence = "common";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 150; //img has 200px per side
@@ -47,21 +47,21 @@ class VelraxStrikeCarrierRefit extends BaseShip{
         $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
 		$this->addAftSystem(new JumpEngine(3, 15, 6, 35));
-        $this->addAftSystem(new NexusParticleArray(2, 4, 2, 120, 300));
+        $this->addAftSystem(new DualIonBolter(2, 4, 4, 120, 300));
         $this->addAftSystem(new LaserLance(3, 6, 4, 180, 240));
         $this->addAftSystem(new LaserLance(3, 6, 4, 120, 180));
-        $this->addAftSystem(new NexusParticleArray(2, 4, 2, 60, 240));
+        $this->addAftSystem(new DualIonBolter(2, 4, 4, 60, 240));
 
 		$this->addLeftSystem(new LaserLance(3, 6, 4, 300, 60));
 		$this->addLeftSystem(new LaserLance(3, 6, 4, 180, 360));
-        $this->addLeftSystem(new NexusParticleArray(2, 4, 2, 240, 60));
+        $this->addLeftSystem(new DualIonBolter(2, 4, 4, 240, 60));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 		$this->addLeftSystem(new Hangar(2, 7));
 		$this->addLeftSystem(new Hangar(2, 7));
 
 		$this->addRightSystem(new LaserLance(3, 6, 4, 300, 60));
 		$this->addRightSystem(new LaserLance(3, 6, 4, 0, 180));
-        $this->addRightSystem(new NexusParticleArray(2, 4, 2, 300, 120));
+        $this->addRightSystem(new DualIonBolter(2, 4, 4, 300, 120));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 		$this->addRightSystem(new Hangar(2, 7));
 		$this->addRightSystem(new Hangar(2, 7));
@@ -92,14 +92,14 @@ class VelraxStrikeCarrierRefit extends BaseShip{
 			2=> array(
 					6 => "Thruster",
 					8 => "Laser Lance",
-					9 => "Particle Array",
+					9 => "Dual Ion Bolter",
 					12 => "Jump Engine",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
 					5 => "Thruster",
-					6 => "Particle Array",
+					6 => "Dual Ion Bolter",
 					10 => "Laser Lance",
 					12 => "Hangar",
 					18 => "Structure",
@@ -107,7 +107,7 @@ class VelraxStrikeCarrierRefit extends BaseShip{
 			),
 			4=> array(
 					5 => "Thruster",
-					6 => "Particle Array",
+					6 => "Dual Ion Bolter",
 					10 => "Laser Lance",
 					12 => "Hangar",
 					18 => "Structure",
