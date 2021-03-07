@@ -744,15 +744,3 @@ var TestGun = function  TestGun(json, ship) {
 };
 TestGun.prototype = Object.create(Weapon.prototype);
 TestGun.prototype.constructor =  TestGun;
-
-var BSGFlakBattery = function BSGFlakBattery(json, ship) {
-    Weapon.call(this, json, ship);
-};
-BSGFlakBattery.prototype = Object.create(Weapon.prototype);
-BSGFlakBattery.prototype.constructor = BSGFlakBattery;
-
-var BSGRailgun = function BSGRailgun(json, ship) {
-    Weapon.call(this, json, ship);
-};
-BSGRailgun.prototype = Object.create(Weapon.prototype);
-BSGRailgun.prototype.constructor = BSGRailgun;

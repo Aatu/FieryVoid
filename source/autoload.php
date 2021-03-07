@@ -1497,18 +1497,6 @@ spl_autoload_register(
 
 
 
-				//Battlestar Galactica
-					//weapons
-                'bsgflakbattery' => '/server/model/weapons/customNexus.php',
-                'bsgrailgun' => '/server/model/weapons/customNexus.php',
-					//ships
-                'colonialjupiterclass' => '/server/model/ships/ZbsgColonial/ColonialJupiterClass.php',
-                'colonialviper' => '/server/model/ships/ZbsgColonial/ColonialViper.php',
-				
-
-
-
-
 
                 //Usuuth Weapons
                 'hvyparticleprojector' => '/server/model/weapons/particle.php',
