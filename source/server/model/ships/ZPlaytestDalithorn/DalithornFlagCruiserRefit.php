@@ -7,7 +7,7 @@ class DalithornFlagCruiserRefit extends HeavyCombatVessel{
         $this->pointCost = 375;
         $this->faction = "ZPlaytest Dalithorn";
         $this->phpclass = "DalithornFlagCruiserRefit";
-        $this->imagePath = "img/ships/Playtest/DalithornFlagCruiser.png";
+        $this->imagePath = "img/ships/Nexus/DalithornFlagCruiser.png";
 		$this->canvasSize = 115; //img has 200px per side
         $this->shipClass = "Flag Cruiser (2048 Refit)";
 			$this->variantOf = "Flag Cruiser";

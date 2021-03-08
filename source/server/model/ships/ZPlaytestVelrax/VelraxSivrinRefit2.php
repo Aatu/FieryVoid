@@ -37,13 +37,13 @@ class VelraxSivrinRefit2 extends HeavyCombatVesselLeftRight{
         $this->addLeftSystem(new LaserLance(3, 6, 4, 300, 60));
         $this->addLeftSystem(new LaserLance(3, 6, 4, 240, 360));
         $this->addLeftSystem(new LaserLance(3, 6, 4, 180, 360));
-        $this->addLeftSystem(new NexusParticleArray(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new DualIonBolter(2, 4, 4, 180, 360));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 
         $this->addRightSystem(new LaserLance(3, 6, 4, 300, 60));
         $this->addRightSystem(new LaserLance(3, 6, 4, 0, 120));
         $this->addRightSystem(new LaserLance(3, 6, 4, 0, 180));
-        $this->addRightSystem(new NexusParticleArray(2, 2, 2, 0, 180));
+        $this->addRightSystem(new DualIonBolter(2, 4, 4, 0, 180));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -63,14 +63,14 @@ class VelraxSivrinRefit2 extends HeavyCombatVesselLeftRight{
         		),
         		3=> array(
         				5 => "Thruster",
-        				6 => "Particle Array",
+        				6 => "Dual Ion Bolter",
 						12 => "Laser Lance",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		4=> array(
         				5 => "Thruster",
-        				6 => "Particle Array",
+        				6 => "Dual Ion Bolter",
 						12 => "Laser Lance",
         				18 => "Structure",
         				20 => "Primary",

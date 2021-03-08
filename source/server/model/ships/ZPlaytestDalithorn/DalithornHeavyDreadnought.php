@@ -7,7 +7,7 @@ class DalithornHeavyDreadnought extends BaseShip{
 	$this->pointCost = 480;
 	$this->faction = "ZPlaytest Dalithorn";
         $this->phpclass = "DalithornHeavyDreadnought";
-        $this->imagePath = "img/ships/Playtest/DalithornDreadnought.png";
+        $this->imagePath = "img/ships/Nexus/DalithornDreadnought.png";
         $this->shipClass = "Heavy Dreadnought";
 		$this->shipSizeClass = 3;
 		$this->canvasSize = 175; //img has 200px per side

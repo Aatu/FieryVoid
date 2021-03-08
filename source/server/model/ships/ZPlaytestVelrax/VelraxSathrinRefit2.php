@@ -7,7 +7,7 @@ class VelraxSathrinRefit2 extends MediumShip{
         $this->pointCost = 400;
         $this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxSathrinRefit2";
-        $this->imagePath = "img/ships/Playtest/VelraxSathrinFrigate.png";
+        $this->imagePath = "img/ships/Playtest/VelraxSathrin.png";
         $this->shipClass = "Sathrin Border Frigate (2152 refit)";
 			$this->variantOf = "Sathrin Border Frigate";
 			$this->occurence = "common";
@@ -36,14 +36,14 @@ class VelraxSathrinRefit2 extends MediumShip{
         
 		$this->addFrontSystem(new LaserLance(3, 6, 4, 240, 60));
 		$this->addFrontSystem(new LaserLance(3, 6, 4, 300, 120));
-		$this->addFrontSystem(new NexusHeavyParticleArray(2, 6, 2, 270, 90));
+		$this->addFrontSystem(new DualIonBolter(2, 4, 4, 270, 90));
 		$this->addFrontSystem(new EWPlasmaArc(2, 5, 4, 300, 60));
         $this->addFrontSystem(new Thruster(2, 12, 0, 6, 1));
 	    
         $this->addAftSystem(new Thruster(3, 9, 0, 6, 2));    
         $this->addAftSystem(new Thruster(3, 9, 0, 6, 2));    
-		$this->addAftSystem(new NexusParticleArray(2, 4, 2, 120, 360));
-		$this->addAftSystem(new NexusParticleArray(2, 4, 2, 0, 240));
+		$this->addAftSystem(new DualIonBolter(2, 4, 4, 120, 360));
+		$this->addAftSystem(new DualIonBolter(2, 4, 4, 0, 240));
        
         $this->addPrimarySystem(new Structure(5, 50));
 
@@ -62,7 +62,7 @@ class VelraxSathrinRefit2 extends MediumShip{
 		1=> array(
 			6 => "Thruster",
 			8 => "Laser Lance",
-			9 => "Heavy Particle Array",
+			9 => "Dual Ion Bolter",
 			11 => "Plasma Arc",
 			17 => "Structure",
 			20 => "Primary",
@@ -70,7 +70,7 @@ class VelraxSathrinRefit2 extends MediumShip{
 
 		2=> array(
 			7 => "Thruster",
-			10 => "Particle Array",
+			10 => "Dual Ion Bolter",
 			17 => "Structure",
 			20 => "Primary",
 		),
