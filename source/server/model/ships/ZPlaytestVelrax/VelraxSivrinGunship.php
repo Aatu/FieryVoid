@@ -34,7 +34,7 @@ class VelraxSivrinGunship extends HeavyCombatVesselLeftRight{
 
         $this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 300, 60));
         $this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 240, 360));
-        $this->addLeftSystem(new NexusTwinIonGun(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 180, 360));
         $this->addLeftSystem(new MediumPlasma(3, 5, 3, 180, 360));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 

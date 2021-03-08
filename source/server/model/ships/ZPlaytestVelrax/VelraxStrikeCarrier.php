@@ -49,7 +49,7 @@ class VelraxStrikeCarrier extends BaseShip{
         $this->addAftSystem(new NexusTwinIonGun(2, 4, 4, 120, 300));
         $this->addAftSystem(new NexusHeavyLaserSpear(3, 6, 4, 180, 240));
         $this->addAftSystem(new NexusHeavyLaserSpear(3, 6, 4, 120, 180));
-        $this->addAftSystem(new NexusTwinIonGun(2, 4,42, 60, 240));
+        $this->addAftSystem(new NexusTwinIonGun(2, 4, 4, 60, 240));
 
 		$this->addLeftSystem(new NexusHeavyLaserSpear(3, 6, 4, 300, 60));
 		$this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 180, 360));
