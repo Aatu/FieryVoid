@@ -64,6 +64,7 @@ if (isset($_SESSION["user"])) {
 		---------- <b>LATEST NEWS - March 2021</b> ----------
 	    <br><b>Shargoti added</b> - in "customized" version, without Gravity Nets.
 	    <br><b>Nexus universe updated</b> - PLAYTEST versions of a few factions.
+	    <br><b>Nexus graphics updated</b> - PLAYTEST versions as above.
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
