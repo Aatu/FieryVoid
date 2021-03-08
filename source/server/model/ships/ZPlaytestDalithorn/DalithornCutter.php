@@ -8,7 +8,7 @@ class DalithornCutter extends SuperHeavyFighter{
         $this->faction = "ZPlaytest Dalithorn";
         $this->phpclass = "DalithornCutter";
         $this->shipClass = "Cutter";
-        $this->imagePath = "img/ships/Playtest/DalithornCutter.png";
+        $this->imagePath = "img/ships/Nexus/DalithornCutter.png";
 		$this->unofficial = true;
 	    $this->isd = 1879;
         $this->canvasSize = 100;
@@ -39,8 +39,8 @@ class DalithornCutter extends SuperHeavyFighter{
 			$armour = array(2, 1, 2, 2);
 			$fighter = new Fighter("DalithornCutter", $armour, 24, $this->id);
 			$fighter->displayName = "Cutter";
-			$fighter->imagePath = "img/ships/Playtest/DalithornCutter.png.png";
-			$fighter->iconPath = "img/ships/Playtest/DalithornCutter_Large.png";
+			$fighter->imagePath = "img/ships/Nexus/DalithornCutter.png.png";
+			$fighter->iconPath = "img/ships/Nexus/DalithornCutter_Large.png";
 
 	        $lightGasGun = new NexusLightGasGunFtr(300, 60, 1); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($lightGasGun);

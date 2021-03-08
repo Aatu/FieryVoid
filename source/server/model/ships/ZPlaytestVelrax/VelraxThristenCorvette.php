@@ -7,7 +7,7 @@ class VelraxThristenCorvette extends MediumShip{
         $this->pointCost = 260;
         $this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxThristenCorvette";
-        $this->imagePath = "img/ships/Playtest/VelraxThristenCorvette.png";
+        $this->imagePath = "img/ships/Playtest/VelraxThristen.png";
         $this->shipClass = "Thristen Corvette";
 		$this->unofficial = true;
         $this->canvasSize = 75;
@@ -31,8 +31,8 @@ class VelraxThristenCorvette extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));        
         
 		$this->addFrontSystem(new NexusLaserSpear(2, 5, 3, 300, 60));
-		$this->addFrontSystem(new NexusLightParticleArray(1, 2, 2, 180, 60));
-		$this->addFrontSystem(new NexusLightParticleArray(1, 2, 2, 300, 180));
+		$this->addFrontSystem(new NexusIonGun(1, 2, 2, 180, 60));
+		$this->addFrontSystem(new NexusIonGun(1, 2, 2, 300, 180));
 		$this->addFrontSystem(new LightPlasma(2, 4, 2, 240, 60));
 		$this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 120));
         $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
@@ -58,7 +58,7 @@ class VelraxThristenCorvette extends MediumShip{
 			6 => "Thruster",
 			8 => "Light Plasma Cannon",
 			10 => "Laser Spear",
-			11 => "Light Particle Array",
+			11 => "Ion Gun",
 			17 => "Structure",
 			20 => "Primary",
 		),

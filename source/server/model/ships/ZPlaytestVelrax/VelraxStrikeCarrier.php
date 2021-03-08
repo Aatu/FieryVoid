@@ -7,8 +7,8 @@ class VelraxStrikeCarrier extends BaseShip{
 	$this->pointCost = 525;
 	$this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxStrikeCarrier";
-        $this->imagePath = "img/ships/Playtest/VelraxJumpCarrier.png";
-        $this->shipClass = "Strike Carrier";
+        $this->imagePath = "img/ships/Playtest/VelraxResskar.png";
+        $this->shipClass = "Resskar Strike Carrier";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 150; //img has 200px per side
 		$this->limited = 33;
@@ -46,21 +46,21 @@ class VelraxStrikeCarrier extends BaseShip{
         $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
 		$this->addAftSystem(new JumpEngine(4, 20, 6, 35));
-        $this->addAftSystem(new NexusLightParticleArray(2, 2, 2, 120, 300));
+        $this->addAftSystem(new NexusTwinIonGun(2, 4, 4, 120, 300));
         $this->addAftSystem(new NexusHeavyLaserSpear(3, 6, 4, 180, 240));
         $this->addAftSystem(new NexusHeavyLaserSpear(3, 6, 4, 120, 180));
-        $this->addAftSystem(new NexusLightParticleArray(2, 2, 2, 60, 240));
+        $this->addAftSystem(new NexusTwinIonGun(2, 4,42, 60, 240));
 
 		$this->addLeftSystem(new NexusHeavyLaserSpear(3, 6, 4, 300, 60));
 		$this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 180, 360));
-        $this->addLeftSystem(new NexusLightParticleArray(2, 2, 2, 240, 60));
+        $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 240, 60));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 		$this->addLeftSystem(new Hangar(2, 7));
 		$this->addLeftSystem(new Hangar(2, 7));
 
 		$this->addRightSystem(new NexusHeavyLaserSpear(3, 6, 4, 300, 60));
 		$this->addRightSystem(new NexusLaserSpear(3, 5, 3, 0, 180));
-        $this->addRightSystem(new NexusLightParticleArray(2, 2, 2, 300, 120));
+        $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 300, 120));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 		$this->addRightSystem(new Hangar(2, 7));
 		$this->addRightSystem(new Hangar(2, 7));
@@ -91,14 +91,14 @@ class VelraxStrikeCarrier extends BaseShip{
 			2=> array(
 					6 => "Thruster",
 					8 => "Heavy Laser Spear",
-					9 => "Light Particle Array",
+					9 => "Twin Ion Gun",
 					12 => "Jump Engine",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
 					5 => "Thruster",
-					6 => "Light Particle Array",
+					6 => "Twin Ion Gun",
 					8 => "Heavy Laser Spear",
 					9 => "Laser Spear",
 					12 => "Hangar",
@@ -107,7 +107,7 @@ class VelraxStrikeCarrier extends BaseShip{
 			),
 			4=> array(
 					5 => "Thruster",
-					6 => "Light Particle Array",
+					6 => "Twin Ion Gun",
 					8 => "Heavy Laser Spear",
 					10 => "Laser Spear",
 					12 => "Hangar",
