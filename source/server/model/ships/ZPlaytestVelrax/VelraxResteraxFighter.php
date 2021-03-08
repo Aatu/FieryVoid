@@ -42,9 +42,9 @@ class VelraxResteraxFighter extends FighterFlight{
 
 			$mauler = new NexusMauler(330, 30, 1);
 			$fighter->addFrontSystem($mauler);
-	        $light = new NexusFighterArray(330, 30, 1); //$startArc, $endArc, $nrOfShots
+	        $light = new NexusLightIonGun(330, 30, 0, 1); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($light);
-			$aftLight = new NexusFighterArray(150, 210, 1, 1);
+			$aftLight = new NexusLightIonGun(150, 210, 0, 1);
 			
 			$fighter->addAftSystem($aftLight);
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			

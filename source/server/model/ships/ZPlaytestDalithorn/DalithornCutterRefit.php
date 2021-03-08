@@ -10,7 +10,7 @@ class DalithornCutterRefit extends SuperHeavyFighter{
         $this->shipClass = "Cutter (2041 Refit)";
 			$this->variantOf = "Cutter";
 			$this->occurence = "common";
-        $this->imagePath = "img/ships/Playtest/DalithornCutter.png";
+        $this->imagePath = "img/ships/Nexus/DalithornCutter.png";
 		$this->unofficial = true;
 	    $this->isd = 2041;
         $this->canvasSize = 100;
@@ -41,8 +41,8 @@ class DalithornCutterRefit extends SuperHeavyFighter{
 			$armour = array(3, 1, 2, 2);
 			$fighter = new Fighter("DalithornCutterRefit ", $armour, 24, $this->id);
 			$fighter->displayName = "Cutter Refit";
-			$fighter->imagePath = "img/ships/Playtest/DalithornCutter.png.png";
-			$fighter->iconPath = "img/ships/Playtest/DalithornCutter_Large.png";
+			$fighter->imagePath = "img/ships/Nexus/DalithornCutter.png.png";
+			$fighter->iconPath = "img/ships/Nexus/DalithornCutter_Large.png";
 
 			$leftgun = new NexusShatterGunFtr(180, 360, 1);
 			$fighter->addFrontSystem($leftgun);

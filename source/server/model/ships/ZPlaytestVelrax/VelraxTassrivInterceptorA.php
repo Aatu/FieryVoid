@@ -39,14 +39,12 @@ class VelraxTassrivInterceptorA extends FighterFlight{
             $fighter->imagePath = "img/ships/Playtest/VelraxTassriv.png";
             $fighter->iconPath = "img/ships/Playtest/VelraxTassriv_Large.png";
 
-	        $light = new NexusFighterArray(330, 30, 1); //$startArc, $endArc, $nrOfShots
+	        $light = new NexusLightIonGun(330, 30, 0); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($light);
-			
-//			$missile = new NexusDartFtr(2, 330, 30);
-//			$missile->firingModes = array(1="DI");
-//			$missile->iconPath = "NexusDartInterceptor.png";
-//			$missile->displayName = "Dart Interceptor";
-//			$missile->missileArray = array(1=> new 
+            	$missileRack = new FighterMissileRack(2, 330, 30);
+            	$missileRack->firingModes = array( 1 => "FY" );
+            	$missileRack->missileArray = array( 1 => new MissileFY(330, 30) );
+			$fighter->addFrontSystem($missileRack);	
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			
             

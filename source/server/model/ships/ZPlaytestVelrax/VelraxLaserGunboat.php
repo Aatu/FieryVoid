@@ -9,8 +9,8 @@ class VelraxLaserGunboat extends LCV{
         $this->phpclass = "VelraxLaserGunboat";
         $this->imagePath = "img/ships/Playtest/VelraxGunboat.png";
 			$this->canvasSize = 55; //img has 200px per side
-        $this->shipClass = "Laser Gunboat";
-			$this->variantOf = "Gunboat";
+        $this->shipClass = "Nashran Laser Gunboat";
+			$this->variantOf = "Nashran Gunboat";
 			$this->occurence = "common";
 		$this->unofficial = true;
 			$this->isd = 2033;
@@ -44,9 +44,9 @@ class VelraxLaserGunboat extends LCV{
 //		$this->addPrimarySystem($sensors);
         $this->addPrimarySystem(new AntiquatedScanner(2, 7, 2, 3));
 		$this->addPrimarySystem(new Engine(3, 15, 0, 5, 2));
-		$this->addPrimarySystem(new NexusLightParticleArray(2, 2, 2, 240, 60));
+		$this->addPrimarySystem(new NexusIonGun(2, 2, 2, 240, 60));
 		$this->addPrimarySystem(new NexusLaserSpear(2, 5, 3, 300, 60));
-		$this->addPrimarySystem(new NexusLightParticleArray(2, 2, 2, 300, 120));
+		$this->addPrimarySystem(new NexusIonGun(2, 2, 2, 300, 120));
 	    
 	    
         $this->addPrimarySystem(new Structure(3, 44));
@@ -55,7 +55,7 @@ class VelraxLaserGunboat extends LCV{
         		0=> array( 
         				10 => "Structure",
         				13 => "Laser Spear",
-        				15 => "Light Particle Array",
+        				15 => "Ion Gun",
 						17 => "Engine",
         				19 => "Reactor",
         				20 => "Scanner",
@@ -63,7 +63,7 @@ class VelraxLaserGunboat extends LCV{
         		1=> array( //redirect to PRIMARY
         				10 => "0:Structure",
         				13 => "0:Laser Spear",
-        				15 => "0:Light Particle Array",
+        				15 => "0:Ion Gun",
 						17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -71,7 +71,7 @@ class VelraxLaserGunboat extends LCV{
         		2=> array( //redirect to PRIMARY
         				10 => "0:Structure",
         				13 => "0:Laser Spear",
-        				15 => "0:Light Particle Array",
+        				15 => "0:Ion Gun",
 						17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

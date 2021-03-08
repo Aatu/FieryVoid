@@ -1348,6 +1348,12 @@ spl_autoload_register(
 				'nexusheavylaserspear' => '/server/model/weapons/customNexus.php',
 				'nexuslaserspear' => '/server/model/weapons/customNexus.php',
 				'nexuslightlasercutter' => '/server/model/weapons/customNexus.php',
+			//Nexus ion weapons
+				'nexusionblaster' => '/server/model/weapons/customNexus.php',
+				'nexusiongun' => '/server/model/weapons/customNexus.php',
+				'nexuslightionbolter' => '/server/model/weapons/customNexus.php',
+				'nexuslightiongun' => '/server/model/weapons/customNexus.php',
+				'nexustwiniongun' => '/server/model/weapons/customNexus.php',
 
 
 //                'pakmarasimsalle' => '/server/model/ships/pakmara/PakmaraSimSallE.php',					
@@ -1444,6 +1450,7 @@ spl_autoload_register(
                 'velraxarccorvetterefit' => '/server/model/ships/ZPlaytestVelrax/VelraxArcCorvetteRefit.php',					
                 'velraxarccorvetterefit2' => '/server/model/ships/ZPlaytestVelrax/VelraxArcCorvetteRefit2.php',					
                 'velraxcasrissafighter' => '/server/model/ships/ZPlaytestVelrax/VelraxCasrissAFighter.php',					
+                'velraxcasrissbfighter' => '/server/model/ships/ZPlaytestVelrax/VelraxCasrissBFighter.php',					
                 'velraxearlycarrier' => '/server/model/ships/ZPlaytestVelrax/VelraxEarlyCarrier.php',					
                 'velraxgunboat' => '/server/model/ships/ZPlaytestVelrax/VelraxGunboat.php',					
                 'velraxgunboatrefit' => '/server/model/ships/ZPlaytestVelrax/VelraxGunboatRefit.php',					
@@ -1459,6 +1466,8 @@ spl_autoload_register(
                 'velraxsathrinfrigate' => '/server/model/ships/ZPlaytestVelrax/VelraxSathrinFrigate.php',					
                 'velraxsathrinrefit' => '/server/model/ships/ZPlaytestVelrax/VelraxSathrinRefit.php',					
                 'velraxsathrinrefit2' => '/server/model/ships/ZPlaytestVelrax/VelraxSathrinRefit2.php',					
+                'velraxsevashcarrier' => '/server/model/ships/ZPlaytestVelrax/VelraxSevashCarrier.php',					
+                'velraxsevashrefit' => '/server/model/ships/ZPlaytestVelrax/VelraxSevashRefit.php',					
                 'velraxsivringunship' => '/server/model/ships/ZPlaytestVelrax/VelraxSivrinGunship.php',					
                 'velraxsivrinrefit' => '/server/model/ships/ZPlaytestVelrax/VelraxSivrinRefit.php',					
                 'velraxsivrinrefit2' => '/server/model/ships/ZPlaytestVelrax/VelraxSivrinRefit2.php',					
@@ -1484,6 +1493,8 @@ spl_autoload_register(
 				'paladin' => '/server/model/ships/orieni/paladin.php',
 				'coutari' => '/server/model/ships/centauri_old/coutari.php',
 				*/
+
+
 
 
 

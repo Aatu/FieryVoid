@@ -420,16 +420,17 @@ class NexusDartInterceptor extends Weapon{
         public $projectilespeed = 12;
         public $animationWidth = 4;
         public $trailLength = 100;    
+		public $guns = 2;
 
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile
         public $range = 8;
-        public $distanceRange = 20;
-        public $ammunition = 20; //limited number of shots
+        public $distanceRange = 24;
+        public $ammunition = 40; //limited number of shots
         
         public $loadingtime = 1; // 1 turn
         public $rangePenalty = 0;
-        public $fireControl = array(3, 0, 0); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $fireControl = array(3, null, null); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
 	public $priority = 4; //Standard weapon
 	    
@@ -458,7 +459,7 @@ class NexusDartInterceptor extends Weapon{
         }
 
         public function getDamage($fireOrder){ 
-			return Dice::d(6, 1)+3;   
+			return 8;   
 		}
 
         public function setAmmo($firingMode, $amount){
@@ -470,8 +471,8 @@ class NexusDartInterceptor extends Weapon{
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
         }
     
-        public function setMinDamage(){     $this->minDamage = 4;      }
-        public function setMaxDamage(){     $this->maxDamage = 9;      }
+        public function setMinDamage(){     $this->minDamage = 8;      }
+        public function setMaxDamage(){     $this->maxDamage = 8;      }
 		
 }//endof NexusDartInterceptor
 
@@ -491,13 +492,13 @@ class NexusStreakInterceptor extends Weapon{
 
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile
-        public $range = 12;
-        public $distanceRange = 25;
+        public $range = 10;
+        public $distanceRange = 30;
         public $ammunition = 40; //limited number of shots
         
         public $loadingtime = 1; // 1 turn
         public $rangePenalty = 0;
-        public $fireControl = array(4, 3, 0); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $fireControl = array(4, null, null); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
 	public $priority = 4; //Standard weapon
 	    
@@ -526,7 +527,7 @@ class NexusStreakInterceptor extends Weapon{
         }
 
         public function getDamage($fireOrder){ 
-			return Dice::d(6, 1)+4;   
+			return 10;   
 		}
 
         public function setAmmo($firingMode, $amount){
@@ -538,7 +539,7 @@ class NexusStreakInterceptor extends Weapon{
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
         }
     
-        public function setMinDamage(){     $this->minDamage = 5;      }
+        public function setMinDamage(){     $this->minDamage = 10;      }
         public function setMaxDamage(){     $this->maxDamage = 10;      }
 		
 }//endof NexusStreakInterceptor
@@ -1198,7 +1199,7 @@ class NexusChaffLauncher extends Weapon{
 
         public $name = "NexusShatterGun";
         public $displayName = "Shatter Gun";
-		public $iconPath = "NexusShatterGun.png";
+		public $iconPath = "NexusShattergun.png";
 	    
         public $animation = "trail";
         public $animationColor = array(245, 245, 44);
@@ -1207,6 +1208,7 @@ class NexusChaffLauncher extends Weapon{
         public $projectilespeed = 18;
         public $animationExplosionScale = 0.10;
 
+	protected $useDie = 3; //die used for base number of hits
 		public $rof = 3;
         public $grouping = 25;
         public $maxpulses = 3;
@@ -1240,7 +1242,7 @@ class NexusChaffLauncher extends Weapon{
 
         public $name = "NexusShatterGunFtr";
         public $displayName = "Shatter Gun";
-		public $iconPath = "NexusShatterGun.png";
+		public $iconPath = "NexusShattergun.png";
 	    
         public $animation = "trail";
         public $animationColor = array(245, 245, 44);
@@ -1249,6 +1251,7 @@ class NexusChaffLauncher extends Weapon{
         public $animationWidth = 4;
         public $trailLength = 5;
 
+	protected $useDie = 3; //die used for base number of hits
 		public $rof = 3;
         public $grouping = 25;
         public $maxpulses = 3;
@@ -2000,6 +2003,7 @@ class NexusMinigun extends Pulse{
         public $projectilespeed = 18;
         public $animationExplosionScale = 0.10;
 
+	protected $useDie = 3; //die used for base number of hits
 		public $rof = 3;
 		public $grouping = 15;
 		public $maxpulses = 6;
@@ -2041,6 +2045,7 @@ class NexusMinigunFtr extends Pulse{
         public $projectilespeed = 18;
         public $animationExplosionScale = 0.10;
 
+	protected $useDie = 3; //die used for base number of hits
 		public $rof = 3;
 		public $grouping = 15;
 		public $maxpulses = 6;
@@ -4616,6 +4621,209 @@ class NexusIonBeam extends Raking{
 
 
 
+    class NexusIonGun extends Weapon{
+        public $name = "NexusIonGun";
+        public $displayName = "Ion Gun";
+        public $iconPath = "NexusIonGun.png";
+        
+        public $animation = "trail";
+        public $animationColor = array(127, 0, 255);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 16;
+        public $animationWidth = 3;
+        public $trailLength = 3;
+        
+        public $priority = 3; //damage output 8 is very light
+        public $loadingtime = 1;
+        public $intercept = 2;
+        public $rangePenalty = 1;
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Ion"; 
+        
+        public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 2;
+            if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return 6;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 6 ;      }
+		
+    } // endof NexusIonGun
+
+
+    class NexusTwinIonGun extends Weapon{
+        public $name = "NexusTwinIonGun";
+        public $displayName = "Twin Ion Gun";
+        public $iconPath = "dualIonBolter.png";
+        
+        public $animation = "trail";
+        public $animationColor = array(127, 0, 255);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 16;
+        public $animationWidth = 3;
+        public $trailLength = 3;
+        
+        public $priority = 3; //damage output 8 is very light
+        public $loadingtime = 1;
+        public $intercept = 2;
+        public $rangePenalty = 1;
+        public $guns = 2;
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Ion"; 
+        
+        public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 4;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return 6;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 6 ;      }
+		
+    } // endof NexusTwinIonGun
+
+
+    class NexusLightIonGun extends Weapon{
+        public $name = "NexusLightIonGun";
+        public $displayName = "Light Ion Gun";
+        public $iconPath = "NexusFtrTwinIon.png";
+        
+        public $animation = "trail";
+        public $animationColor = array(127, 0, 255);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 16;
+        public $animationWidth = 3;
+        public $trailLength = 3;
+        
+        public $priority = 3; //damage output 8 is very light
+        public $loadingtime = 1;
+        public $intercept = 2;
+		public $shots = 2;
+		public $defaultShots = 2;
+        public $rangePenalty = 2;
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Ion"; 
+        
+
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            $this->intercept = $nrOfShots;		
+
+            if($nrOfShots === 1){
+                $this->iconPath = "particleGun.png";
+            }
+
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+        }
+
+        
+        public function getDamage($fireOrder){        return 5;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 5 ;      }
+		
+    } // endof NexusLightIonGun	
+
+
+    class NexusIonBolter extends Weapon{
+        public $name = "NexusIonBolter";
+        public $displayName = "Ion Bolter";
+        public $iconPath = "NexusIonBolter.png";
+        
+        public $animation = "trail";
+        public $animationColor = array(127, 0, 255);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 16;
+        public $animationWidth = 3;
+        public $trailLength = 3;
+        
+        public $priority = 3; //damage output 8 is very light
+        public $loadingtime = 1;
+        public $intercept = 2;
+        public $rangePenalty = 1;
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Ion"; 
+        
+        public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 2;
+            if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return 8;   }
+        public function setMinDamage(){     $this->minDamage = 8 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 8 ;      }
+		
+    } // endof NexusIonBolter
+	
+	
+    class NexusLightIonBolter extends Weapon{
+        public $name = "NexusLightIonBolter";
+        public $displayName = "Light Ion Bolter";
+        public $iconPath = "NexusFtrTwinIon.png";
+        
+        public $animation = "trail";
+        public $animationColor = array(127, 0, 255);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 16;
+        public $animationWidth = 3;
+        public $trailLength = 3;
+        
+        public $priority = 3; //damage output 8 is very light
+        public $loadingtime = 1;
+        public $intercept = 2;
+		public $shots = 2;
+		public $defaultShots = 2;
+        public $rangePenalty = 2;
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Ion"; 
+        
+
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            $this->intercept = $nrOfShots;		
+
+            if($nrOfShots === 1){
+                $this->iconPath = "particleGun.png";
+            }
+
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+        }
+
+        
+        public function getDamage($fireOrder){        return 7;   }
+        public function setMinDamage(){     $this->minDamage = 7 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 7 ;      }
+		
+    } // endof NexusLightIonBolter	
+	
+
+
 // END OF ION WEAPONS
 
 
@@ -5274,3 +5482,5 @@ class TestGun extends Particle{
 
 
 
+
+?>
