@@ -1496,7 +1496,7 @@ spl_autoload_register(
 
 				//Stano Customs
 				//Rich Bax Early Earth Alliance
-                'tychealpha' => '/server/model/ships/EA/tycheAlpha.php',
+//                'tychealpha' => '/server/model/ships/EA/tycheAlpha.php',
 
 
 
