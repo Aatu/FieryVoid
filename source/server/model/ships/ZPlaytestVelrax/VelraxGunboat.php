@@ -46,7 +46,7 @@ class VelraxGunboat extends LCV{
 		$this->addPrimarySystem(new NexusIonGun(2, 2, 2, 300, 120));
 	    
 	    
-        $this->addPrimarySystem(new Structure(3, 44));
+        $this->addPrimarySystem(new Structure(3, 34));
 	    
         $this->hitChart = array(
         		0=> array( 

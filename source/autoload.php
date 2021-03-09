@@ -1494,7 +1494,9 @@ spl_autoload_register(
 				'coutari' => '/server/model/ships/centauri_old/coutari.php',
 				*/
 
-
+				//Stano Customs
+				//Rich Bax Early Earth Alliance
+                'tychealpha' => '/server/model/ships/EA/tycheAlpha.php',
 
 
 
