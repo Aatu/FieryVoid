@@ -57,7 +57,7 @@ class Brostilli extends SmallStarBaseFourSections
 		$this->addAftSystem(new ParticleCannon(5, 8, 7, 120, 240));
 		$this->addAftSystem(new ParticleBlaster(5, 8, 5, 120, 240));
 		$this->addAftSystem(new ParticleBlaster(5, 8, 5, 120, 240));
-		$this->addAftSystem(new HvyParticleCannon(5, 12, 9, 0, 90));
+		$this->addAftSystem(new HvyParticleCannon(5, 12, 9, 180, 270));
 		$this->addAftSystem(new StdParticleBeam(5, 4, 1, 180, 270));
 		$this->addAftSystem(new StdParticleBeam(5, 4, 1, 180, 270));
 
