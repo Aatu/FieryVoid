@@ -37,7 +37,7 @@ class Sweepmerlin extends MediumShip{
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 0));
-    	$this->addFrontSystem(new ParticleBlaster(3, 8, 5, 300, 60));
+    	$this->addFrontSystem(new ParticleBlaster(3, 8, 5, 300, 0));
     	$this->addFrontSystem(new ParticleBlaster(3, 8, 5, 0, 60));
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 0, 120));
 		
