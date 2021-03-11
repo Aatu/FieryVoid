@@ -40,9 +40,9 @@ class Deathfalcon extends BaseShipNoAft{
 
         $this->addFrontSystem(new ParticleRepeater(3, 6, 4, 240, 0));
         $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 60));        
-        $this->addFrontSystem(new ParticleRepeater(3, 6, 4, 300, 60));
-        $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 60));        
         $this->addFrontSystem(new ParticleRepeater(3, 6, 4, 0, 120));
+        $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 60));        
+        $this->addFrontSystem(new ParticleRepeater(3, 6, 4, 300, 60));
         $this->addFrontSystem(new Thruster(4, 13, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 13, 0, 4, 1));
 
