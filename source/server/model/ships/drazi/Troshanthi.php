@@ -9,6 +9,7 @@ class Troshanthi extends FighterFlight{
         $this->phpclass = "Troshanthi";
         $this->shipClass = "Troshanthi Assault Shuttles";
 		    $this->imagePath = "img/ships/DraziTroshanthi.png";
+	    $this->unofficial = true;  		    
         
         $this->forwardDefense = 7;
         $this->sideDefense = 9;
