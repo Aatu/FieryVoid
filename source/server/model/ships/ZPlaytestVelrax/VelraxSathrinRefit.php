@@ -7,7 +7,7 @@ class VelraxSathrinRefit extends MediumShip{
         $this->pointCost = 375;
         $this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxSathrinRefit";
-        $this->imagePath = "img/ships/Playtest/VelraxSathrin.png";
+        $this->imagePath = "img/ships/Nexus/VelraxSathrin.png";
         $this->shipClass = "Sathrin Border Frigate (2108 refit)";
 			$this->variantOf = "Sathrin Border Frigate";
 			$this->occurence = "common";

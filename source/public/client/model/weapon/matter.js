@@ -65,3 +65,9 @@ var MatterGun = function MatterGun(json, ship) {
 };
 MatterGun.prototype = Object.create(Matter.prototype);
 MatterGun.prototype.constructor = MatterGun;
+
+var FlakCannon = function FlakCannon(json, ship) {
+    Matter.call(this, json, ship);
+};
+FlakCannon.prototype = Object.create(Matter.prototype);
+FlakCannon.prototype.constructor = FlakCannon;

@@ -7,7 +7,7 @@ class VelraxStrikeCarrierRefit extends BaseShip{
 	$this->pointCost = 575;
 	$this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxStrikeCarrierRefit";
-        $this->imagePath = "img/ships/Playtest/VelraxResskar.png";
+        $this->imagePath = "img/ships/Nexus/VelraxResskar.png";
         $this->shipClass = "Resskar Strike Carrier (2104 Refit)";
 			$this->variantOf = "Resskar Strike Carrier";
 			$this->occurence = "common";
@@ -53,14 +53,14 @@ class VelraxStrikeCarrierRefit extends BaseShip{
         $this->addAftSystem(new DualIonBolter(2, 4, 4, 60, 240));
 
 		$this->addLeftSystem(new LaserLance(3, 6, 4, 300, 60));
-		$this->addLeftSystem(new LaserLance(3, 6, 4, 180, 360));
+		$this->addLeftSystem(new LaserLance(3, 6, 4, 240, 360));
         $this->addLeftSystem(new DualIonBolter(2, 4, 4, 240, 60));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 		$this->addLeftSystem(new Hangar(2, 7));
 		$this->addLeftSystem(new Hangar(2, 7));
 
 		$this->addRightSystem(new LaserLance(3, 6, 4, 300, 60));
-		$this->addRightSystem(new LaserLance(3, 6, 4, 0, 180));
+		$this->addRightSystem(new LaserLance(3, 6, 4, 0, 120));
         $this->addRightSystem(new DualIonBolter(2, 4, 4, 300, 120));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 		$this->addRightSystem(new Hangar(2, 7));

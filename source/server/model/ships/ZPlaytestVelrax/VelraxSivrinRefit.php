@@ -7,7 +7,7 @@ class VelraxSivrinRefit extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 375;
 	$this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxSivrinRefit";
-        $this->imagePath = "img/ships/Playtest/VelraxSivrin.png";
+        $this->imagePath = "img/ships/Nexus/VelraxSivrin.png";
         $this->shipClass = "Sivrin Gunship (2059 refit)";
 			$this->variantOf = "Sivrin Gunship";
 			$this->occurence = "common";
@@ -34,14 +34,14 @@ class VelraxSivrinRefit extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Thruster(3, 15, 0, 4, 1));
         $this->addPrimarySystem(new Thruster(4, 20, 0, 8, 2));
 
-        $this->addLeftSystem(new NexusHeavyLaserSpear(3, 6, 4, 300, 60));
+        $this->addLeftSystem(new NexusHeavyLaserSpear(3, 6, 4, 240, 360));
         $this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 240, 360));
         $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 180, 360));
         $this->addLeftSystem(new MediumPlasma(3, 5, 3, 180, 360));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 
-        $this->addRightSystem(new NexusHeavyLaserSpear(3, 6, 4, 300, 60));
-        $this->addRightSystem(new NexusLaserSpear(3, 5, 3, 300, 120));
+        $this->addRightSystem(new NexusHeavyLaserSpear(3, 6, 4, 0, 120));
+        $this->addRightSystem(new NexusLaserSpear(3, 5, 3, 0, 120));
         $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 0, 180));
         $this->addRightSystem(new MediumPlasma(3, 5, 3, 0, 180));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));

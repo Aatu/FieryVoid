@@ -7,7 +7,7 @@ class VelraxThristenCorvetteRefit2 extends MediumShip{
         $this->pointCost = 290;
         $this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxThristenCorvetteRefit2";
-        $this->imagePath = "img/ships/Playtest/VelraxThristen.png";
+        $this->imagePath = "img/ships/Nexus/VelraxThristen.png";
         $this->shipClass = "Thristen Corvette (2109 Refit)";
 			$this->variantOf = "Thristen Corvette";
 			$this->occurence = "common";
