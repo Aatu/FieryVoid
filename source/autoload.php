@@ -1129,6 +1129,7 @@ spl_autoload_register(
 				'ewrangeddualrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewrangeddualheavyrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewplasmamine' => '/server/model/weapons/customEscalation.php',
+				'ewnucleartorpedo' => '/server/model/weapons/customEscalation.php',
 			//EW gravitic weapons
 				'ewgravitictractingrod' => '/server/model/weapons/customEscalation.php',
 			//EW laser weapons
@@ -1321,6 +1322,8 @@ spl_autoload_register(
 				'nexusshattergunftr' => '/server/model/weapons/customNexus.php',
 				'nexusultralightrailgun' => '/server/model/weapons/customNexus.php',
 			//Nexus particle weapons
+				'gatlinggunftr' => '/server/model/weapons/customNexus.php', 
+				'lightparticlebeamftr' => '/server/model/weapons/customNexus.php', 
 				'nexusfighterarray' => '/server/model/weapons/customNexus.php', 
 				'nexusheavyparticlearray' => '/server/model/weapons/customNexus.php',
 				'nexusmauler' => '/server/model/weapons/customNexus.php', 
@@ -1452,6 +1455,8 @@ spl_autoload_register(
                 'velraxcasrissafighter' => '/server/model/ships/ZPlaytestVelrax/VelraxCasrissAFighter.php',					
                 'velraxcasrissbfighter' => '/server/model/ships/ZPlaytestVelrax/VelraxCasrissBFighter.php',					
                 'velraxearlycarrier' => '/server/model/ships/ZPlaytestVelrax/VelraxEarlyCarrier.php',					
+                'velraxfleetcarrier' => '/server/model/ships/ZPlaytestVelrax/VelraxFleetCarrier.php',					
+                'velraxfleetcarrierrefit' => '/server/model/ships/ZPlaytestVelrax/VelraxFleetCarrierRefit.php',					
                 'velraxgunboat' => '/server/model/ships/ZPlaytestVelrax/VelraxGunboat.php',					
                 'velraxgunboatrefit' => '/server/model/ships/ZPlaytestVelrax/VelraxGunboatRefit.php',					
                 'velraxgunboatrefit2' => '/server/model/ships/ZPlaytestVelrax/VelraxGunboatRefit2.php',					
@@ -1493,6 +1498,74 @@ spl_autoload_register(
 				'paladin' => '/server/model/ships/orieni/paladin.php',
 				'coutari' => '/server/model/ships/centauri_old/coutari.php',
 				*/
+
+				//Stano Customs
+				//Rich Bax Early Earth Alliance
+                'bagammaftr' => '/server/model/ships/smallraces/baGammaFtr.php',
+                'basentinelftr' => '/server/model/ships/smallraces/baSentinelFtr.php',
+
+                'ariesstarfury' => '/server/model/ships/EA/ariesStarfury.php',
+                'atlasstarfury' => '/server/model/ships/EA/atlasStarfury.php',
+                'atlasstarfuryrefit' => '/server/model/ships/EA/atlasStarfuryRefit.php',
+                'avengeralpha' => '/server/model/ships/EA/avengerAlpha.php',
+                'cottenalpha' => '/server/model/ships/EA/cottenAlpha.php',
+                'cottenbeta' => '/server/model/ships/EA/cottenBeta.php',
+                'cottengamma' => '/server/model/ships/EA/cottenGamma.php',
+                'deltaftr' => '/server/model/ships/EA/deltaFtr.php',
+                'epimetheusalpha' => '/server/model/ships/EA/epimetheusAlpha.php',
+                'epimetheusbeta' => '/server/model/ships/EA/epimetheusBeta.php',
+                'epimetheusgamma' => '/server/model/ships/EA/epimetheusGamma.php',
+                'epimetheusdelta' => '/server/model/ships/EA/epimetheusDelta.php',
+                'epimetheusepsilon' => '/server/model/ships/EA/epimetheusEpsilon.php',
+                'flyingfoxstarfury' => '/server/model/ships/EA/flyingfoxStarfury.php',
+                'hermesalpha' => '/server/model/ships/EA/hermesAlpha.php',
+                'laertesalpha' => '/server/model/ships/EA/laertesAlpha.php',
+                'laertesbeta' => '/server/model/ships/EA/laertesBeta.php',
+                'laertesdelta' => '/server/model/ships/EA/laertesDelta.php',
+                'oraclescoutalpha' => '/server/model/ships/EA/oracleScoutAlpha.php',
+                'oraclescoutbeta' => '/server/model/ships/EA/oracleScoutBeta.php',
+                'orestesalpha' => '/server/model/ships/EA/orestesAlpha.php',
+                'orestesbeta' => '/server/model/ships/EA/orestesBeta.php',
+                'orionalpha' => '/server/model/ships/EA/OrionAlpha.php',
+                'orionbeta' => '/server/model/ships/EA/OrionBeta.php',
+                'oriongamma' => '/server/model/ships/EA/OrionGamma.php',
+                'porcupinealpha' => '/server/model/ships/EA/porcupineAlpha.php',
+                'porcupinebeta' => '/server/model/ships/EA/porcupineBeta.php',
+                'raptorftr' => '/server/model/ships/EA/raptorFtr.php',
+//                'sabreftr' => '/server/model/ships/EA/sabreFtr.php',
+                'sagittariusalpha' => '/server/model/ships/EA/sagittariusAlpha.php',
+                'shepherdalpha' => '/server/model/ships/EA/shepherdAlpha.php',
+                'shepherdbeta' => '/server/model/ships/EA/shepherdBeta.php',
+                'shepherdgamma' => '/server/model/ships/EA/shepherdGamma.php',
+                'tethysalpha' => '/server/model/ships/EA/tethysAlpha.php',
+                'tethysbeta' => '/server/model/ships/EA/tethysBeta.php',
+                'tychealpha' => '/server/model/ships/EA/tycheAlpha.php',
+                'valkyrieftr' => '/server/model/ships/EA/valkyrieFtr.php',
+
+
+				//Battlestar Galactica - Fred
+					//weapons
+                'bsgflakbattery' => '/server/model/weapons/customNexus.php',
+                'bsgrailgun' => '/server/model/weapons/customNexus.php',
+					//ships
+                'colonialjupiterclass' => '/server/model/ships/ZBSGColonial_Fred/ColonialJupiterClass.php',
+                'colonialminervaclass' => '/server/model/ships/ZBSGColonial_Fred/ColonialMinervaClass.php',
+                'colonialodinclass' => '/server/model/ships/ZBSGColonial_Fred/ColonialOdinClass.php',
+                'colonialvipermk7' => '/server/model/ships/ZBSGColonial_Fred/ColonialViperMk7.php',
+
+				//Battlestar Galactica - Kirill
+					//weapons
+                'flakcannon' => '/server/model/weapons/matter.php',
+                'flakarray' => '/server/model/weapons/customNexus.php',
+					//ships
+                'colonialjupiterclass_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialJupiterClass_K.php',
+                'colonialmanticore_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialManticore_K.php',
+                'colonialvalkyrie_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialValkyrie_K.php',
+                'vipermk2_k' => '/server/model/ships/ZBSGColonial_Kirill/vipermk2_K.php',
+                'vipermk7_k' => '/server/model/ships/ZBSGColonial_Kirill/vipermk7_K.php',
+//                'colonialraptor_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialRaptor_K.php',
+//                'colonialraptorassault_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialRaptorAssault_K.php',
+
 
 
 
@@ -1738,6 +1811,11 @@ spl_autoload_register(
 		    	'highguardb2003' => '/server/model/ships/orieni/HighguardB2003.php',
 		    	'highguardb2007' => '/server/model/ships/orieni/HighguardB2007.php',
 		    	'kaedashkada' => '/server/model/ships/llort/Kaedashkada.php',
+		    	'brostilli' => '/server/model/ships/drazi/Brostilli.php',
+		    	'deathfalcon' => '/server/model/ships/drazi/Deathfalcon.php',
+		    	'deathfalcon2230' => '/server/model/ships/drazi/Deathfalcon2230.php',
+		    	'sweepmerlin' => '/server/model/ships/drazi_old/Sweepmerlin.php',
+		    	'troshanthi' => '/server/model/ships/drazi/Troshanthi.php',
 				
 				
 				//new SW - Uglies

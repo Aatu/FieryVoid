@@ -7,7 +7,7 @@ class VelraxHisshrimRefit2 extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 350;
 	$this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxHisshrimRefit2";
-        $this->imagePath = "img/ships/Playtest/VelraxHisshrim.png";
+        $this->imagePath = "img/ships/Nexus/VelraxHisshrim.png";
         $this->shipClass = "Hisshrim Patrol Carrier (2105 Refit)";
 			$this->variantOf = "Hisshrim Patrol Carrier";
 			$this->occurence = "common";

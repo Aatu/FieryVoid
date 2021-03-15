@@ -8,7 +8,7 @@ class VelraxTassrivInterceptorA extends FighterFlight{
         $this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxTassrivInterceptorA";
         $this->shipClass = "Tassriv Interceptor-A flight";
-        $this->imagePath = "img/ships/Playtest/VelraxTassriv.png";
+        $this->imagePath = "img/ships/Nexus/VelraxTassriv.png";
 		$this->unofficial = true;
 
         $this->isd = 2061;
@@ -36,8 +36,8 @@ class VelraxTassrivInterceptorA extends FighterFlight{
             $armour = array(2, 1, 1, 1);
             $fighter = new Fighter("VelraxTassrivInterceptorA", $armour, 9, $this->id);
             $fighter->displayName = "Tassriv-A";
-            $fighter->imagePath = "img/ships/Playtest/VelraxTassriv.png";
-            $fighter->iconPath = "img/ships/Playtest/VelraxTassriv_Large.png";
+            $fighter->imagePath = "img/ships/Nexus/VelraxTassriv.png";
+            $fighter->iconPath = "img/ships/Nexus/VelraxTassriv_Large.png";
 
 	        $light = new NexusLightIonGun(330, 30, 0); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($light);

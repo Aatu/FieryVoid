@@ -90,7 +90,7 @@ No very specific technologies (or technologies specific to base faction).
 
 
 CORILLANI
-The Corillani are unusual in that they operate three independant navies, the Defenders of Corillan (DoC), the Corillani's People's Navy (CPN), and the Orillani Space Force (OSF).  Whilst these forces generally operate independantly of one another they can, and will, fight alongside one another, so in practice there is no restriction on mixing and matching ships from the three different sub-navies during fleet selection.
+The Corillani are unusual in that they operate three independant navies, the Defenders of Corillan (DoC), the Corillani's People's Navy (CPN), and the Orillani Space Force (OSF).  Whilst these forces generally operate independently of one another they can, and will, fight alongside one another.  In practice, there is no restriction on mixing and matching ships from the three different sub-navies during fleet selection. However, when choosing fighters you must take the version of the Tillini which corresponds with the type of faction where hangar space is available i.e. DoC or OSF fighters could not be taken if the only hanger space available was on a CPN ship.
 The OSF use the unique Plasma Projector weapon which focuses plasma into tight beam, resulting in a longer range than most plasma weapons and with lower damage degradation.  It deals damage similar to a heavy plasma cannon, however this is applied in raking (8) mode rather than standard mode as with most other plasma weapons.
 
 
@@ -384,7 +384,7 @@ their opponents did not use fighters to the degree they did.
 At this stage, this low tech faction is in a playtest state. Their art is just a fancy silhouette and they need some matches played to ensure that their capabilities and points are accurate. Fiery
 Void currently has their basic, early units.
 Plasma Arc - Small, raking plasma weapon that is designed to strip armor from their target.
-Dart/Streak Interceptors - These are small torpedoes that can accept OEW and used to engage enemy fighters, although they can target ships.
+Dart/Streak Interceptors - These are small torpedoes that can accept OEW and used to engage enemy fighters.
 Laser Spear - A precursor to the laser lances the Velrax eventually field.
 Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently and field Antiquated Sensors. This allows them to use EW 
 without any restrictions, but they cannot boost their sensors.
