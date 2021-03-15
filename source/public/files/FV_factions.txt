@@ -384,7 +384,7 @@ their opponents did not use fighters to the degree they did.
 At this stage, this low tech faction is in a playtest state. Their art is just a fancy silhouette and they need some matches played to ensure that their capabilities and points are accurate. Fiery
 Void currently has their basic, early units.
 Plasma Arc - Small, raking plasma weapon that is designed to strip armor from their target.
-Dart/Streak Interceptors - These are small torpedoes that can accept OEW and used to engage enemy fighters, although they can target ships.
+Dart/Streak Interceptors - These are small torpedoes that can accept OEW and used to engage enemy fighters.
 Laser Spear - A precursor to the laser lances the Velrax eventually field.
 Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently and field Antiquated Sensors. This allows them to use EW 
 without any restrictions, but they cannot boost their sensors.

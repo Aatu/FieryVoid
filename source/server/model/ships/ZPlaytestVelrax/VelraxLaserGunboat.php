@@ -7,7 +7,7 @@ class VelraxLaserGunboat extends LCV{
         $this->pointCost = 160;
         $this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxLaserGunboat";
-        $this->imagePath = "img/ships/Playtest/VelraxGunboat.png";
+        $this->imagePath = "img/ships/Nexus/VelraxGunboat.png";
 			$this->canvasSize = 55; //img has 200px per side
         $this->shipClass = "Nashran Laser Gunboat";
 			$this->variantOf = "Nashran Gunboat";
@@ -49,7 +49,7 @@ class VelraxLaserGunboat extends LCV{
 		$this->addPrimarySystem(new NexusIonGun(2, 2, 2, 300, 120));
 	    
 	    
-        $this->addPrimarySystem(new Structure(3, 44));
+        $this->addPrimarySystem(new Structure(3, 34));
 	    
         $this->hitChart = array(
         		0=> array( 
