@@ -1738,6 +1738,11 @@ spl_autoload_register(
 		    	'highguardb2003' => '/server/model/ships/orieni/HighguardB2003.php',
 		    	'highguardb2007' => '/server/model/ships/orieni/HighguardB2007.php',
 		    	'kaedashkada' => '/server/model/ships/llort/Kaedashkada.php',
+		    	'brostilli' => '/server/model/ships/drazi/Brostilli.php',
+		    	'deathfalcon' => '/server/model/ships/drazi/Deathfalcon.php',
+		    	'deathfalcon2230' => '/server/model/ships/drazi/Deathfalcon2230.php',
+		    	'sweepmerlin' => '/server/model/ships/drazi_old/Sweepmerlin.php',
+		    	'troshanthi' => '/server/model/ships/drazi/Troshanthi.php',
 				
 				
 				//new SW - Uglies
