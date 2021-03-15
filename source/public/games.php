@@ -65,6 +65,10 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Shargoti added</b> - in "customized" version, without Gravity Nets.
 	    <br><b>Nexus universe updated</b> - PLAYTEST versions of a few factions.
 	    <br><b>Nexus graphics updated</b> - PLAYTEST versions as above.
+	    <br><b>Battlestar Galactica</b> - PLAYTEST new custom factions.
+	    <br><b>Drazi enhanced</b> - Showdowns-10 units.
+	    <br><b>Earth Alliance enhanced</b> - early units.
+	    <br><b>Dogfight missile fixed</b> - now it deals 6 damage, as it should.
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
