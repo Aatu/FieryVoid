@@ -7,7 +7,7 @@ class VelraxStrikeCarrier extends BaseShip{
 	$this->pointCost = 525;
 	$this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxStrikeCarrier";
-        $this->imagePath = "img/ships/Playtest/VelraxResskar.png";
+        $this->imagePath = "img/ships/Nexus/VelraxResskar.png";
         $this->shipClass = "Resskar Strike Carrier";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 150; //img has 200px per side

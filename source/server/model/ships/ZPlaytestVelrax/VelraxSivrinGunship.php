@@ -7,7 +7,7 @@ class VelraxSivrinGunship extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 350;
 	$this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxSivrinGunship";
-        $this->imagePath = "img/ships/Playtest/VelraxSivrin.png";
+        $this->imagePath = "img/ships/Nexus/VelraxSivrin.png";
         $this->shipClass = "Sivrin Gunship";
 	    $this->isd = 2023;
         $this->canvasSize = 95;

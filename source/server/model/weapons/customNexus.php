@@ -5481,6 +5481,365 @@ class TestGun extends Particle{
 
 
 
+/*fighter-mounted variant*/
+    class LightParticleBeamFtr extends Particle{
+//        public $trailColor = array(30, 170, 255);
+
+        public $name = "LightParticleBeamFtr";
+        public $displayName = "Light Particle Beam";
+		public $iconPath = "lightParticleBeamShip.png";
+	    
+        public $animation = "beam";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.12;
+        public $projectilespeed = 12;
+        public $animationWidth = 3;
+        public $trailLength = 8;
+
+        public $intercept = 2;
+        public $loadingtime = 1;
+        public $priority = 4;
+
+        public $rangePenalty = 2 ; //-2 / hex
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+
+	function __construct($startArc, $endArc, $nrOfShots = 1){
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 1)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+	}// endof LightParticleBeamFtr
+	
+
+/*fighter-mounted variant*/
+    class GatlingGunFtr extends LinkedWeapon{
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "GatlingGunFtr";
+        public $displayName = "Gatling Gun"; //it's not 'paired' in any way, except being usually mounted twin linked - like most fighter weapons...
+        public $iconPath = "pairedParticleGun.png";
+        public $animation = "trail";
+        public $animationColor = array(30, 170, 255);
+        public $animationExplosionScale = 0.10;
+        public $projectilespeed = 12;
+        public $animationWidth = 2;
+        public $trailLength = 10;
+        public $intercept = 2;
+        public $ballisticIntercept = true;
+        public $ammunition = 6;
+		
+        public $loadingtime = 1;
+        public $shots = 2;
+        public $defaultShots = 2;
+		public $priority = 2; //correct for d6+2 and lighter
+
+        public $rangePenalty = 3;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        private $damagebonus = 0;
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle";         
+
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            $this->intercept = $nrOfShots;		
+
+            if ($damagebonus >= 3) $this->priority++; //heavier varieties fire later in the queue
+            if ($damagebonus >= 5) $this->priority++;
+            if ($damagebonus >= 7) $this->priority++;
+
+            if($nrOfShots === 1){
+                $this->iconPath = "particleGun.png";
+            }
+            if($nrOfShots >2){//no special icon for more than 3 linked weapons
+                $this->iconPath = "pairedParticleGun3.png";
+            }
+
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();
+    
+            $strippedSystem->ammunition = $this->ammunition;
+           
+            return $strippedSystem;
+        }
+	    
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+//            $this->data["Special"] = "Ignores armor, does not overkill.";
+            $this->data["Special"] = "Can intercept ballistic weapons only.";
+            $this->data["Ammunition"] = $this->ammunition;
+        }
+
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+        	//debug::log("fire function");
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
+		
+        public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
+        public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
+        public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
+    } //endof GatlingGunFtr
+
+
+
+/*file for Battlestar Galactica universe weapons*/
+
+
+ class BSGFlakBattery extends Weapon{ 
+
+        public $name = "BSGFlakBattery";
+        public $displayName = "Flak Battery";
+	    public  $iconPath = "FlakCannon.png";
+
+        public $trailColor = array(245, 245, 44);
+        public $animation = "ball";
+        public $animationColor = array(245, 245, 44);
+        public $animationExplosionScale = 1; //covers 1/2 hex away from explosion center
+        public $animationExplosionType = "AoE";
+        public $explosionColor = array(141, 240, 255);
+        public $projectilespeed = 12;
+        public $animationWidth = 4;
+        public $trailLength = 5;
+
+        public $range = 4;
+        public $intercept = 3;
+        public $loadingtime = 1;
+
+		public $canInterceptUninterceptable = true;
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "Defensive Flak: -15 to hit on arc with active Flak Battery.";
+			$this->data["Special"] .= "<br>Can intercept lasers.";
+		}
+
+        public $rangePenalty = 2; //-2/hex
+        public $fireControl = array(6, 0, 0); // fighters, <mediums, <capitals
+        public $priority = 1; //Flash 
+
+        public $damageType = "Flash"; 
+        public $weaponClass = "Matter";
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 2;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+        public function getDamage($fireOrder){        return Dice::d(6, 2);   }
+        public function setMinDamage(){     $this->minDamage = 2 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+    }	//endof class BSGFlakBattery
+
+
+
+
+
+
+class BSGRailgun extends Weapon{ 
+/*Based on the Medium Laser Pulse Array. This is a singular weapon that fires two
+different types of shells. One is a solid shell and acts exactly like a long-ranged
+matter cannon and the second breaks up before impact to act like a blast cannon*/	
+        public $name = "BSGRailgun";
+        public $displayName = "Railgun";
+	    public $iconPath = "NexusAssaultCannon.png";
+	
+	//visual display - will it be enough to ensure correct animations?...
+		public $animationArray = array(1=>'trail', 2=>'trail');
+        public $animationColorArray = array(1=>array(245, 245, 44), 2=>array(245, 245, 44));
+        public $animationWidthArray = array(1=>4, 2=>5);
+        public $animationWidth2 = 0.2; 
+		public $trailColor = array(245, 245, 44); 
+        public $trailLength = 20;
+        public $projectilespeed = 10;
+        public $animationExplosionScale = 0.20;
+	
+	//actual weapons data
+        public $groupingArray = array(1=>0, 2=>25);
+        public $maxpulses = 6; //only useful for Pulse mode
+        public $priorityArray = array(1=>8, 2=>8);
+		public $defaultShotsArray = array(1=>1, 2=>6); //for Pulse mode it should be equal to maxpulses
+	
+        public $loadingtimeArray = array(1=>3, 2=>3); //mode 1 should be the one with longest loading time
+        public $rangePenaltyArray = array(1=>0.33, 2=>0.33); //-1/3 hexes for each
+        public $fireControlArray = array( 1=>array(null, 3, 3), 2=>array(null, 3, 3) ); // fighters, <mediums, <capitals 
+	
+	public $firingModes = array(1=>'Standard', 2=>'Pulse');
+	public $damageTypeArray = array(1=>'Standard', 2=>'Pulse'); //indicates that this weapon does damage in Pulse mode
+    	public $weaponClassArray = array(1=>'Matter', 2=>'Matter'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 9;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 5;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Can fire as either -1/3 hex Railgun or Heavy Blast Cannon. ';
+        }
+	
+        public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1:
+				return Dice::d(10, 3)+3; //Railgun
+				break;
+			case 2:
+				return 8; //Blast Cannon
+				break;	
+		}
+	}
+        public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 6; //Railgun
+				break;
+			case 2:
+				$this->minDamage = 8; //Blast Cannon
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 33; //Railgun
+				break;
+			case 2:
+				$this->maxDamage = 8; //Blast Cannon
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
+	
+	//necessary for Pulse mode
+        protected function getPulses($turn)
+        {
+            return Dice::d(6);
+        }
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return floor(($needed - $rolled) / ($this->grouping));
+        }
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn);
+		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses);
+		return $pulses;
+	}
+	
+} //endof class BSGRailgun
+
+
+ class FlakArray extends InterceptorMkI{ 
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "FlakArray";
+        public $displayName = "Flak Array";
+        public $animation = "trail";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.1;
+        public $projectilespeed = 10;
+        public $animationWidth = 2;
+        public $trailLength = 8;
+	    public  $iconPath = "FlakArray.png";
+
+		public $guns = 2;
+        public $intercept = 3;
+        public $freeintercept = true; //can intercept fire directed at different unit
+        public $freeinterceptspecial = true; //has own custom routine for deciding whether third party interception is legal
+        public $loadingtime = 1;
+
+        public $output = 3;
+		public $canInterceptUninterceptable = true;
+
+        public $rangePenalty = 2; //-2/hex
+        public $fireControl = array(5, 4, 3); // fighters, <mediums, <capitals
+        public $priority = 1; //Flash 
+
+        public $damageType = "Flash"; 
+        public $weaponClass = "Matter";
+
+        public function onConstructed($ship, $turn, $phase){
+            parent::onConstructed($ship, $turn, $phase);
+            $this->tohitPenalty = $this->getOutput();
+            $this->damagePenalty = 0;
+     
+        }
+        
+        public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
+            if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn))
+                return 0;
+
+            $output = $this->output;
+            $output -= $this->outputMod;
+            return $output;
+        }
+
+        public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
+            return 0;
+        }
+		
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 3;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "Defensive Flak: -15 to hit on arc with active Flak Array.";
+			$this->data["Special"] .= "<br>Can intercept lasers.";
+			$this->data["Special"] .= "<br>May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 5 hexes.";
+		}
+
+		public function canFreeInterceptShot($gamedata, $fireOrder, $shooter, $target, $interceptingShip, $firingWeapon){
+			//target must be within 5 hexes
+			$distance = mathlib::getDistanceHex($interceptingShip, $target);
+			if ($distance > 5) return false;
+			
+			//both source and target of fire must be in arc
+			//first check target
+			$targetBearing = $interceptingShip->getBearingOnUnit($target);
+			if (!mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) return false;
+			//check on source - launch hex for ballistics, current position for direct fire
+			if ($firingWeapon->ballistic){
+				$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+				$pos = mathlib::hexCoToPixel($movement->position); //launch hex
+				$sourceBearing = $interceptingShip->getBearingOnPos($pos);				
+			}else{ //direct fire
+				$sourceBearing = $interceptingShip->getBearingOnUnit($shooter);
+			}
+			if (!mathlib::isInArc($sourceBearing, $this->startArc, $this->endArc)) return false;
+						
+			return true;
+		}
+
+        public function getDamage($fireOrder){        return Dice::d(10,1)+6;   }
+        public function setMinDamage(){     $this->minDamage = 7 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 16 ;      }
+    }	//endof class FlakArray
 
 
 ?>

@@ -8,7 +8,7 @@ class VelraxResteraxFighter extends FighterFlight{
         $this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxResteraxFighter";
         $this->shipClass = "Resterax Assault flight";
-        $this->imagePath = "img/ships/Playtest/VelraxResterax.png";
+        $this->imagePath = "img/ships/Nexus/VelraxResterax.png";
 		$this->unofficial = true;
         $this->canvasSize = 5;
 
@@ -37,8 +37,8 @@ class VelraxResteraxFighter extends FighterFlight{
             $armour = array(3, 1, 1, 1);
             $fighter = new Fighter("VelraxResteraxFighter", $armour, 12, $this->id);
             $fighter->displayName = "Resterax";
-            $fighter->imagePath = "img/ships/Playtest/VelraxResterax.png";
-            $fighter->iconPath = "img/ships/Playtest/VelraxResterax_Large.png";
+            $fighter->imagePath = "img/ships/Nexus/VelraxResterax.png";
+            $fighter->iconPath = "img/ships/Nexus/VelraxResterax_Large.png";
 
 			$mauler = new NexusMauler(330, 30, 1);
 			$fighter->addFrontSystem($mauler);

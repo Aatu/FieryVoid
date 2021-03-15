@@ -7,7 +7,7 @@ class VelraxSivrinRefit2 extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 405;
 	$this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxSivrinRefit2";
-        $this->imagePath = "img/ships/Playtest/VelraxSivrin.png";
+        $this->imagePath = "img/ships/Nexus/VelraxSivrin.png";
         $this->shipClass = "Sivrin Gunship (2106 refit)";
 			$this->variantOf = "Sivrin Gunship";
 			$this->occurence = "common";

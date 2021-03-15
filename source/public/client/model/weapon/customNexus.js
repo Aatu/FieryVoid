@@ -744,3 +744,33 @@ var TestGun = function  TestGun(json, ship) {
 };
 TestGun.prototype = Object.create(Weapon.prototype);
 TestGun.prototype.constructor =  TestGun;
+
+var LightParticleBeamFtr = function  LightParticleBeamFtr(json, ship) {
+    Weapon.call(this, json, ship);
+};
+LightParticleBeamFtr.prototype = Object.create(Weapon.prototype);
+LightParticleBeamFtr.prototype.constructor =  LightParticleBeamFtr;
+
+var GatlingGunFtr = function  GatlingGunFtr(json, ship) {
+    Weapon.call(this, json, ship);
+};
+GatlingGunFtr.prototype = Object.create(Weapon.prototype);
+GatlingGunFtr.prototype.constructor =  GatlingGunFtr;
+
+var BSGFlakBattery = function BSGFlakBattery(json, ship) {
+    Weapon.call(this, json, ship);
+};
+BSGFlakBattery.prototype = Object.create(Weapon.prototype);
+BSGFlakBattery.prototype.constructor = BSGFlakBattery;
+
+var BSGRailgun = function BSGRailgun(json, ship) {
+    Weapon.call(this, json, ship);
+};
+BSGRailgun.prototype = Object.create(Weapon.prototype);
+BSGRailgun.prototype.constructor = BSGRailgun;
+
+var FlakArray = function FlakArray(json, ship) {
+    Weapon.call(this, json, ship);
+};
+FlakArray.prototype = Object.create(Weapon.prototype);
+FlakArray.prototype.constructor = FlakArray;

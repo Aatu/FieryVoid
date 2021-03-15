@@ -7,7 +7,7 @@ class VelraxStrikeCarrierRefit extends BaseShip{
 	$this->pointCost = 575;
 	$this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxStrikeCarrierRefit";
-        $this->imagePath = "img/ships/Playtest/VelraxResskar.png";
+        $this->imagePath = "img/ships/Nexus/VelraxResskar.png";
         $this->shipClass = "Resskar Strike Carrier (2104 Refit)";
 			$this->variantOf = "Resskar Strike Carrier";
 			$this->occurence = "common";
