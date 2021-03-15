@@ -151,9 +151,9 @@ class MissileFY extends MissileFB
         parent::__construct($startArc, $endArc, $fireControl);
     }
 
-    public function getDamage($fireOrder){  return 8;   }
-    public function setMinDamage(){     $this->minDamage = 8;      }
-    public function setMaxDamage(){     $this->maxDamage = 8;      }        
+    public function getDamage($fireOrder){  return 6;   }
+    public function setMinDamage(){     $this->minDamage = 6;      }
+    public function setMaxDamage(){     $this->maxDamage = 6;      }        
 }
 
 

@@ -7,9 +7,9 @@ class VelraxGunboat extends LCV{
         $this->pointCost = 160;
         $this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxGunboat";
-        $this->imagePath = "img/ships/Playtest/VelraxGunboat.png";
+        $this->imagePath = "img/ships/Nexus/VelraxPlasmaGunboat.png";
 			$this->canvasSize = 55; //img has 200px per side
-        $this->shipClass = "Gunboat";
+        $this->shipClass = "Nashran Gunboat";
 		$this->unofficial = true;
 			$this->isd = 2033;
 
@@ -41,18 +41,18 @@ class VelraxGunboat extends LCV{
 //		$this->addPrimarySystem($sensors);
         $this->addPrimarySystem(new AntiquatedScanner(2, 7, 2, 3));
 		$this->addPrimarySystem(new Engine(3, 15, 0, 5, 2));
-		$this->addPrimarySystem(new NexusLightParticleArray(2, 2, 2, 240, 60));
+		$this->addPrimarySystem(new NexusIonGun(2, 2, 2, 240, 60));
 		$this->addPrimarySystem(new EWPlasmaArc(2, 5, 4, 300, 60));
-		$this->addPrimarySystem(new NexusLightParticleArray(2, 2, 2, 300, 120));
+		$this->addPrimarySystem(new NexusIonGun(2, 2, 2, 300, 120));
 	    
 	    
-        $this->addPrimarySystem(new Structure(3, 44));
+        $this->addPrimarySystem(new Structure(3, 34));
 	    
         $this->hitChart = array(
         		0=> array( 
         				10 => "Structure",
         				13 => "Plasma Arc",
-        				15 => "Light Particle Array",
+        				15 => "Ion Gun",
 						17 => "Engine",
         				19 => "Reactor",
         				20 => "Scanner",
@@ -60,7 +60,7 @@ class VelraxGunboat extends LCV{
         		1=> array( //redirect to PRIMARY
         				10 => "0:Structure",
         				13 => "0:Plasma Arc",
-        				15 => "0:Light Particle Array",
+        				15 => "0:Ion Gun",
 						17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -68,7 +68,7 @@ class VelraxGunboat extends LCV{
         		2=> array( //redirect to PRIMARY
         				10 => "0:Structure",
         				13 => "0:Plasma Arc",
-        				15 => "0:Light Particle Array",
+        				15 => "0:Ion Gun",
 						17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

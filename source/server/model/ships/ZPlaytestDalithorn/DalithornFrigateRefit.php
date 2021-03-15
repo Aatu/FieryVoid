@@ -7,7 +7,7 @@ class DalithornFrigateRefit extends MediumShip{
         $this->pointCost = 250;
         $this->faction = "ZPlaytest Dalithorn";
         $this->phpclass = "DalithornFrigateRefit";
-        $this->imagePath = "img/ships/Playtest/DalithornFrigate.png";
+        $this->imagePath = "img/ships/Nexus/DalithornFrigate.png";
         $this->shipClass = "Frigate (2044 Refit)";
 			$this->variantOf = "Frigate";
 			$this->occurence = "common";

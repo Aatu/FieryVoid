@@ -4,10 +4,10 @@ class DalithornHeavyJumpDreadnought extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 500;
+	$this->pointCost = 460;
 	$this->faction = "ZPlaytest Dalithorn";
         $this->phpclass = "DalithornHeavyJumpDreadnought";
-        $this->imagePath = "img/ships/Playtest/DalithornJumpDreadnought.png";
+        $this->imagePath = "img/ships/Nexus/DalithornJumpDreadnought.png";
         $this->shipClass = "Heavy Jump Dreadnought";
 			$this->variantOf = "Heavy Dreadnought";
 			$this->occurence = "uncommon";

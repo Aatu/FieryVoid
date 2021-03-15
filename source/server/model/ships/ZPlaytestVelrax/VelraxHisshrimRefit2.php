@@ -7,7 +7,7 @@ class VelraxHisshrimRefit2 extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 350;
 	$this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxHisshrimRefit2";
-        $this->imagePath = "img/ships/Playtest/VelraxHisshrimCarrier.png";
+        $this->imagePath = "img/ships/Nexus/VelraxHisshrim.png";
         $this->shipClass = "Hisshrim Patrol Carrier (2105 Refit)";
 			$this->variantOf = "Hisshrim Patrol Carrier";
 			$this->occurence = "common";
@@ -37,15 +37,15 @@ class VelraxHisshrimRefit2 extends HeavyCombatVesselLeftRight{
 
         $this->addLeftSystem(new LaserLance(3, 6, 4, 240, 360));
         $this->addLeftSystem(new NexusStreakInterceptor(2, 4, 1, 180, 60));
-        $this->addLeftSystem(new NexusParticleArray(2, 4, 2, 240, 60));
-        $this->addLeftSystem(new NexusParticleArray(2, 4, 2, 120, 300));
+        $this->addLeftSystem(new DualIonBolter(2, 4, 4, 240, 60));
+        $this->addLeftSystem(new DualIonBolter(2, 4, 4, 120, 300));
 		$this->addLeftSystem(new Hangar(3, 8));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 
         $this->addRightSystem(new LaserLance(3, 6, 4, 0, 120));
         $this->addRightSystem(new NexusStreakInterceptor(2, 4, 1, 300, 180));
-        $this->addRightSystem(new NexusParticleArray(2, 4, 2, 300, 120));
-        $this->addRightSystem(new NexusParticleArray(2, 4, 2, 60, 240));
+        $this->addRightSystem(new DualIonBolter(2, 4, 4, 300, 120));
+        $this->addRightSystem(new DualIonBolter(2, 4, 4, 60, 240));
 		$this->addRightSystem(new Hangar(3, 8));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 
@@ -66,7 +66,7 @@ class VelraxHisshrimRefit2 extends HeavyCombatVesselLeftRight{
         		),
         		3=> array(
         				5 => "Thruster",
-        				7 => "Particle Array",
+        				7 => "Dual Ion Bolter",
 						8 => "Streak Interceptor",
 						10 => "Laser Lance",
 						12 => "Hangar",
@@ -75,7 +75,7 @@ class VelraxHisshrimRefit2 extends HeavyCombatVesselLeftRight{
         		),
         		4=> array(
         				5 => "Thruster",
-        				7 => "Particle Array",
+        				7 => "Dual Ion Bolter",
 						8 => "Streak Interceptor",
 						10 => "Laser Lance",
 						12 => "Hangar",
