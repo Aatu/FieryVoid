@@ -9,10 +9,11 @@ class Maishan extends MediumShip{
         $this->phpclass = "Maishan";
         $this->imagePath = "img/ships/maitau.png";
         $this->shipClass = "Maishan Strike Frigate";
-        $this->occurence = "uncommon";
         $this->gravitic = true;
         $this->canvasSize = 100;
-        
+        $this->occurence = "uncommon";
+		$this->variantOf = "Maitau Pursuit Frigate";  
+		        
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
         

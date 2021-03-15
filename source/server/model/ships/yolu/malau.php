@@ -11,6 +11,8 @@ class Malau extends MediumShip{
         $this->shipClass = "Malau Attack Frigate";
         $this->gravitic = true;
         $this->canvasSize = 100;
+        $this->occurence = "common";
+		$this->variantOf = "Maitau Pursuit Frigate";        
 
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
