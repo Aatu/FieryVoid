@@ -35,7 +35,8 @@ class SixTester extends SixSidedShip{
 			)
 		);
 		$bioDrive = new BioDrive(); //BioDrive just is, all parameters needed are calculated automatically
-	
+		$bioDrive->addThruster($bioThruster);
+		$this->addPrimarySystem($bioThruster);	
 		$this->addPrimarySystem(new Reactor(7, 35, 0, 0));
 		$this->addPrimarySystem(new Hangar(7, 14, 12));
 		$this->addPrimarySystem(new Hangar(7, 14, 12));
@@ -58,9 +59,6 @@ class SixTester extends SixSidedShip{
 			$max = 120 + ($i*60);
 
 			$systems = array(
-				new BioThruster(5,8,3), //armour, health, output
-				$bioDrive->addThruster($bioThruster),
-				
 				new MatterCannon(5, 7, 4, $min, $max),
 				new BattleLaser(5, 6, 6, $min, $max),
 				new MatterCannon(5, 7, 4, $min, $max),
