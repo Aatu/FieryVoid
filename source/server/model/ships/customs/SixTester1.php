@@ -36,8 +36,8 @@ class SixTester1 extends SixSidedShip{
                     17 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",
-           		 ),
-
+			),
+		);
 		//$bioDrive = new BioDrive(); //BioDrive just is, all parameters needed are calculated automatically
 		
 		//$bioThruster = new BioThruster(7,30,20);
