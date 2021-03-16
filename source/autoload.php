@@ -1803,6 +1803,8 @@ spl_autoload_register(
 				'orrono' => '/server/model/ships/corillani/Orrono.php',
 				'drolla' => '/server/model/ships/corillani/Drolla.php',
 				'plasmablast' => '/server/model/weapons/plasma.php',
+				
+				'sixtester' => '/server/model/ships/customs/SixTester.php',
 
 		
 			
