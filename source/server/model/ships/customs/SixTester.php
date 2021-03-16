@@ -43,41 +43,79 @@ class SixTester extends SixSidedShip{
 		$this->addPrimarySystem(new CnC(8, 60, 0, 0));
 		$this->addPrimarySystem(new Scanner(7, 32, 5, 10));
 
-		for ($i = 0; $i < sizeof($this->locations); $i++){
-
-			$min = 0 + ($i*60);
-			$max = 120 + ($i*60);
-
-			$systems = array(
-				new MatterCannon(5, 7, 4, $min, $max),
-				new BattleLaser(5, 6, 6, $min, $max),
-				new MatterCannon(5, 7, 4, $min, $max),
-				new TwinArray(5, 6, 2, $min, $max),
-				new TwinArray(5, 6, 2, $min, $max),
-				new TwinArray(5, 6, 2, $min, $max),
-				new TwinArray(5, 6, 2, $min, $max),
-				new CargoBay(5, 30),
-				new SubReactorUniversal(5, 30, 0, 0),
-				new Structure(5, 115)
-			);
-
-			$loc = $this->locations[$i];
-
-			$this->hitChart[$loc] = array(
-				3 => "Twin Array",
-				5 => "Matter Cannon",
-				6 => "Battle Laser",
-				8 => "Cargo Bay",
-				9 => "Sub Reactor",
-				18 => "Structure",
-				20 => "Primary",
-			);
-
-			foreach ($systems as $system){
-				$this->addSystem($system, $loc);
-			}
+		$this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
+		$this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
+        $this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
+		
+		$this->addAftSystem(new JumpEngine(6, 25, 3, 16));
+        $this->addAftSystem(new Thruster(5, 8, 0, 2, 2));
+        $this->addAftSystem(new Thruster(5, 8, 0, 3, 2));
+        $this->addAftSystem(new Thruster(5, 8, 0, 3, 2));
+        $this->addAftSystem(new Thruster(5, 8, 0, 2, 2));
+        
+		$this->addLeftSystem(new BattleLaser(5, 6, 6, 240, 0));
+		$this->addLeftSystem(new BattleLaser(5, 6, 6, 240, 0));
+		$this->addLeftSystem(new TwinArray(3, 6, 2, 180, 60));
+		$this->addLeftSystem(new TwinArray(3, 6, 2, 180, 60));
+		$this->addLeftSystem(new Thruster(5, 15, 0, 5, 3));
+				
+		$this->addRightSystem(new BattleLaser(5, 6, 6, 0, 120));
+		$this->addRightSystem(new BattleLaser(5, 6, 6, 0, 120));
+		$this->addRightSystem(new TwinArray(3, 6, 2, 300, 180));
+		$this->addRightSystem(new TwinArray(3, 6, 2, 300, 180));
+		$this->addRightSystem(new Thruster(5, 15, 0, 5, 4));
+		
+        
+        
+        //0:primary, 1:front, 2:rear, 3:left, 4:right;
+        $this->addFrontSystem(new Structure( 5, 42));
+        $this->addAftSystem(new Structure( 5, 40));
+        $this->addLeftSystem(new Structure( 5, 56));
+        $this->addRightSystem(new Structure( 5, 56));
+        $this->addPrimarySystem(new Structure( 7, 40));
+	    
+	//d20 hit chart
+        $this->hitChart = array(
+            0=> array( //PRIMARY
+                    9 => "Structure",
+                    12 => "Scanner",
+                    15 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array( //Forward
+                    3 => "Thruster",
+                    7 => "Twin Array",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array( //Aft
+                    7 => "Thruster",
+                    12 => "Jump Engine",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            3=> array( //Port
+                    3 => "Thruster",
+                    7 => "Battle Laser",
+                    11 => "Twin Array",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            4=> array( //Starboard
+                    3 => "Thruster",
+                    7 => "Battle Laser",
+                    11 => "Twin Array",
+                    18 => "Structure",
+                    20 => "Primary",
+                    
+           		)
+       		 );
 		}
-    }
-}
+	}
 		
 ?>		
