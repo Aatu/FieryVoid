@@ -2108,7 +2108,12 @@ class SmallStarBaseThreeSections extends SmallStarBaseFourSections{
 
 
 class SixSidedShip extends BaseShip{
-
+     public $base = true;
+ 
+    function __construct($id, $userid, $name, $slot){
+        parent::__construct($id, $userid, $name,$slot);
+    }
+    
     protected function addLeftFrontSystem($system){
         $this->addSystem($system, 31);
     }
