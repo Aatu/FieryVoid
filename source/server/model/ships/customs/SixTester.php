@@ -10,11 +10,10 @@ class SixTester extends SixSidedShip{
 		$this->shipClass = "SixTester";
 		$this->fighters = array("heavy"=>36); 
 		$this->isd = 2202;
+		$this->locations = array(41, 42, 2, 32, 31, 1);		
 
 		$this->shipSizeClass = 3; //Enormous is not implemented
 		$this->iniativebonus = 0; //no voluntary movement anyway
-		$this->turncost = 0;
-		$this->turndelaycost = 0;
 		
         $this->turncost = 1.50;
         $this->turndelaycost = 1.50;
@@ -48,15 +47,15 @@ class SixTester extends SixSidedShip{
         $this->addFrontSystem(new BattleLaser(3, 6, 2, 300, 60));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
 		$this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
-        $this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(6, 10, 0, 5, 1));
+        $this->addFrontSystem(new Thruster(6, 10, 0, 5, 1));
 		
         $this->addLeftFrontSystem(new BattleLaser(5, 6, 6, 120, 40));
 		$this->addLeftFrontSystem(new BattleLaser(5, 6, 6, 120, 40));
 		$this->addLeftFrontSystem(new TwinArray(3, 6, 2, 120, 240));
 		$this->addLeftFrontSystem(new TwinArray(3, 6, 2, 120, 240));
-		$this->addAftSystem(new Thruster(5, 8, 0, 3, 2));
-        $this->addAftSystem(new Thruster(5, 8, 0, 2, 2));
+		$this->addAftSystem(new Thruster(5, 8, 0, 5, 2));
+        $this->addAftSystem(new Thruster(5, 8, 0, 5, 2));
         
 		$this->addLeftFrontSystem(new BattleLaser(5, 6, 6, 240, 0));
 		$this->addLeftFrontSystem(new BattleLaser(5, 6, 6, 240, 0));
