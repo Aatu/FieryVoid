@@ -2107,7 +2107,7 @@ class SmallStarBaseThreeSections extends SmallStarBaseFourSections{
 } //end of StarBaseThreeSections
 
 
-class SixSidedShip extends StarBase{
+class SixSidedShip extends BaseShip{
 
     protected function addLeftFrontSystem($system){
         $this->addSystem($system, 31);
