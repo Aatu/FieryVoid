@@ -63,7 +63,7 @@ class ColonialOdinClass extends BaseShip{
         $this->addLeftSystem(new SMissileRack(5, 6, 0, 210, 330));
         $this->addLeftSystem(new Hangar(5, 20));
 
-        $this->addRightSystem(new Thruster(5, 20, 0, 3, 3));
+        $this->addRightSystem(new Thruster(5, 20, 0, 3, 4));
         $this->addRightSystem(new Bulkhead(0, 6));
         $this->addRightSystem(new BSGRailgun(5, 9, 6, 45, 135));
         $this->addRightSystem(new BSGFlakBattery(5, 6, 2, 30, 150));
