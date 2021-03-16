@@ -5,7 +5,7 @@ class SixTester extends SixSidedShip{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 5000;
-		$this->faction = "customs";
+		$this->faction = "Custom Ships";
 		$this->phpclass = "SixTester";
 		$this->shipClass = "SixTester";
 		$this->fighters = array("heavy"=>36); 
