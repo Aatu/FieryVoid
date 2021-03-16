@@ -2107,7 +2107,7 @@ class SmallStarBaseThreeSections extends SmallStarBaseFourSections{
 } //end of StarBaseThreeSections
 
 
-class SixSidedShip extends BaseShip{
+class SixSidedShip extends StarBase{
 
     function __construct($id, $userid, $name, $slot){
         parent::__construct($id, $userid, $name,$slot);
