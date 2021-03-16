@@ -8,9 +8,11 @@ class Laertes extends MediumShip{
 	$this->faction = 'EA';//"EA defenses";
         $this->phpclass = "Laertes";
         $this->imagePath = "img/ships/laertes.png";
-        $this->shipClass = "Laertes Police Corvette";
+        $this->shipClass = "Laertes Police Corvette (Gamma)";
         $this->canvasSize = 100;
         
+        $this->isd = 2184;
+
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
         

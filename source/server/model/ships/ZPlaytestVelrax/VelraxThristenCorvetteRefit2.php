@@ -7,7 +7,7 @@ class VelraxThristenCorvetteRefit2 extends MediumShip{
         $this->pointCost = 290;
         $this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxThristenCorvetteRefit2";
-        $this->imagePath = "img/ships/Playtest/VelraxThristenCorvette.png";
+        $this->imagePath = "img/ships/Nexus/VelraxThristen.png";
         $this->shipClass = "Thristen Corvette (2109 Refit)";
 			$this->variantOf = "Thristen Corvette";
 			$this->occurence = "common";
@@ -33,8 +33,8 @@ class VelraxThristenCorvetteRefit2 extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));        
         
 		$this->addFrontSystem(new NexusLaserSpear(2, 5, 3, 300, 60));
-		$this->addFrontSystem(new NexusParticleArray(1, 4, 2, 180, 60));
-		$this->addFrontSystem(new NexusParticleArray(1, 4, 2, 300, 180));
+		$this->addFrontSystem(new NexusTwinIonGun(1, 4, 4, 180, 60));
+		$this->addFrontSystem(new NexusTwinIonGun(1, 4, 4, 300, 180));
 		$this->addFrontSystem(new LightPlasma(2, 4, 2, 240, 60));
 		$this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 120));
         $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
@@ -42,8 +42,8 @@ class VelraxThristenCorvetteRefit2 extends MediumShip{
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    
         $this->addAftSystem(new Hangar(1, 2));
-		$this->addAftSystem(new NexusParticleArray(1, 4, 2, 120, 360));
-		$this->addAftSystem(new NexusParticleArray(1, 4, 2, 0, 240));
+		$this->addAftSystem(new NexusIonGun(1, 2, 2, 120, 360));
+		$this->addAftSystem(new NexusIonGun(1, 2, 2, 0, 240));
        
         $this->addPrimarySystem(new Structure(3, 40));
 
@@ -62,7 +62,7 @@ class VelraxThristenCorvetteRefit2 extends MediumShip{
 			6 => "Thruster",
 			8 => "Light Plasma Cannon",
 			10 => "Laser Spear",
-			11 => "Particle Array",
+			11 => "Twin Ion Gun",
 			17 => "Structure",
 			20 => "Primary",
 		),
@@ -70,7 +70,7 @@ class VelraxThristenCorvetteRefit2 extends MediumShip{
 		2=> array(
 			7 => "Thruster",
 			9 => "Hangar",
-			11 => "Particle Array",
+			11 => "Ion Gun",
 			17 => "Structure",
 			20 => "Primary",
 		),

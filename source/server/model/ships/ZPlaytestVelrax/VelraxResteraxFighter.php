@@ -8,7 +8,7 @@ class VelraxResteraxFighter extends FighterFlight{
         $this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxResteraxFighter";
         $this->shipClass = "Resterax Assault flight";
-        $this->imagePath = "img/ships/Playtest/VelraxResterax.png";
+        $this->imagePath = "img/ships/Nexus/VelraxResterax.png";
 		$this->unofficial = true;
         $this->canvasSize = 5;
 
@@ -37,14 +37,14 @@ class VelraxResteraxFighter extends FighterFlight{
             $armour = array(3, 1, 1, 1);
             $fighter = new Fighter("VelraxResteraxFighter", $armour, 12, $this->id);
             $fighter->displayName = "Resterax";
-            $fighter->imagePath = "img/ships/Playtest/VelraxResterax.png";
-            $fighter->iconPath = "img/ships/Playtest/VelraxResterax_Large.png";
+            $fighter->imagePath = "img/ships/Nexus/VelraxResterax.png";
+            $fighter->iconPath = "img/ships/Nexus/VelraxResterax_Large.png";
 
 			$mauler = new NexusMauler(330, 30, 1);
 			$fighter->addFrontSystem($mauler);
-	        $light = new NexusFighterArray(330, 30, 1); //$startArc, $endArc, $nrOfShots
+	        $light = new NexusLightIonGun(330, 30, 0, 1); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($light);
-			$aftLight = new NexusFighterArray(150, 210, 1, 1);
+			$aftLight = new NexusLightIonGun(150, 210, 0, 1);
 			
 			$fighter->addAftSystem($aftLight);
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			
