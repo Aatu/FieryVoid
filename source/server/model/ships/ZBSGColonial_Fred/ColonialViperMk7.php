@@ -39,7 +39,7 @@ class ColonialViperMk7 extends FighterFlight{
             $fighter = new Fighter("ColonialViperMk7", $armour, 9, $this->id);
             $fighter->displayName = "Viper Mk7";
             $fighter->imagePath = "img/ships/BSG/viperMk7.png";
-            $fighter->iconPath = "img/ships/BSG/viperMk7_Large.png";
+            $fighter->iconPath = "img/ships/BSG/viperMk7_large.png";
 
             $frontGun = new PairedParticleGun(340, 20, 0, 4);
             $frontGun->displayName = "Kinetic Energy Cannon";
