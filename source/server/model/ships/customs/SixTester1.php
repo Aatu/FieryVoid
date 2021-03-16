@@ -1,16 +1,15 @@
 <?php
-class SixTester extends SixSidedShip{
+class SixTester1 extends SixSidedShip{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 1500;
 		$this->faction = "Custom Ships";
-		$this->phpclass = "SixTester";
-		$this->shipClass = "SixTester";
+		$this->phpclass = "SixTester1";
+		$this->shipClass = "SixTester1";
 		$this->fighters = array("heavy"=>36); 
 		$this->isd = 2202;
-		$this->locations = array(41, 42, 2, 32, 31, 1);		
 
 		$this->shipSizeClass = 3; //Enormous is not implemented
 		$this->iniativebonus = 0; //no voluntary movement anyway
@@ -26,7 +25,18 @@ class SixTester extends SixSidedShip{
 
 		$this->imagePath = "img/ships/CylonBasestar.png";
 		$this->canvasSize = 280;
-
+		$this->locations = array(41, 42, 2, 32, 31, 1);	
+			
+        $this->hitChart = array(
+            0=> array( //PRIMARY
+                    8 => "Structure",
+                    10 => "Jump Engine",
+                    12 => "Scanner",
+                    15 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+           		 ),
 
 		//$bioDrive = new BioDrive(); //BioDrive just is, all parameters needed are calculated automatically
 		
@@ -35,13 +45,11 @@ class SixTester extends SixSidedShip{
 		//$this->addPrimarySystem($bioThruster);	
 		
 				
-		$this->addPrimarySystem(new Reactor(7, 35, 0, 0));
-		$this->addPrimarySystem(new Hangar(7, 14, 12));
-		$this->addPrimarySystem(new Hangar(7, 14, 12));
-		$this->addPrimarySystem(new Hangar(7, 14, 12));
-		$this->addPrimarySystem(new CnC(8, 60, 0, 0));
-		$this->addPrimarySystem(new Scanner(7, 32, 5, 10));
-		$this->addPrimarySystem(new JumpEngine(6, 25, 3, 16));
+		$this->addPrimarySystem(new Reactor(6, 30, 0, 0));
+		$this->addPrimarySystem(new Hangar(6, 36));
+		$this->addPrimarySystem(new CnC(6, 30, 0, 0));
+		$this->addPrimarySystem(new Scanner(6, 24, 5, 8));
+		$this->addPrimarySystem(new JumpEngine(6, 30, 3, 16));
 		
 		$this->addPrimarySystem(new Structure( 6, 80));		
 
