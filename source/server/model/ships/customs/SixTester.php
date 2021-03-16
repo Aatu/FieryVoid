@@ -58,8 +58,8 @@ class SixTester extends SixSidedShip{
 			$max = 120 + ($i*60);
 
 			$systems = array(
-				new BioThruster(5,8,3); //armour, health, output
-				$bioDrive->addThruster($bioThruster);
+				new BioThruster(5,8,3), //armour, health, output
+				$bioDrive->addThruster($bioThruster),
 				
 				new MatterCannon(5, 7, 4, $min, $max),
 				new BattleLaser(5, 6, 6, $min, $max),
