@@ -12,10 +12,13 @@ class SixTester extends SixSidedShip{
 		$this->isd = 2202;
 
 		$this->shipSizeClass = 3; //Enormous is not implemented
-        $this->Enormous = true;
-		$this->iniativebonus = -200; //no voluntary movement anyway
-		$this->turncost = 0;
-		$this->turndelaycost = 0;
+		$this->iniativebonus = 0;
+		
+        $this->turncost = 1.50;
+        $this->turndelaycost = 1.50;
+        $this->accelcost = 4;
+        $this->rollcost = 999;
+        $this->pivotcost = 0;		
 
 		$this->forwardDefense = 24;
 		$this->sideDefense = 24;
@@ -35,6 +38,8 @@ class SixTester extends SixSidedShip{
 			)
 		);
 		$bioDrive = new BioDrive(); //BioDrive just is, all parameters needed are calculated automatically
+		
+		$bioThruster = new BioThruster(7,30,20);
 		$bioDrive->addThruster($bioThruster);
 		$this->addPrimarySystem($bioThruster);	
 		$this->addPrimarySystem(new Reactor(7, 35, 0, 0));
