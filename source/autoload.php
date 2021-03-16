@@ -1805,6 +1805,7 @@ spl_autoload_register(
 				'plasmablast' => '/server/model/weapons/plasma.php',
 				
 				'sixtester' => '/server/model/ships/customs/SixTester.php',
+				'sixsidedship' => '/server/model/ShipClasses.php',
 
 		
 			
