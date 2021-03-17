@@ -4,7 +4,7 @@ class RaptorFtr extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 36;
+	$this->pointCost = 54;
 	$this->faction = "EA";
         $this->phpclass = "RaptorFtr";
         $this->shipClass = "Raptor Aerospace Fighter";
