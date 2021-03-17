@@ -35,7 +35,7 @@ class ColonialViperMk7 extends FighterFlight{
         $toAdd = $new - $current;
 
         for ($i = 0; $i < $toAdd; $i++){            
-            $armour = array(3, 1, 2,20);
+            $armour = array(3, 1, 2, 2);
             $fighter = new Fighter("ColonialViperMk7", $armour, 9, $this->id);
             $fighter->displayName = "Viper Mk7";
             $fighter->imagePath = "img/ships/BSG/viperMk7.png";

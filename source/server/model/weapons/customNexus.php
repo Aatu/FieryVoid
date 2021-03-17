@@ -2118,7 +2118,7 @@ class NexusAutocannonDefender extends Particle{
         public $projectilespeed = 10;
         public $animationWidth = 3;
         public $trailLength = 8;
-	    public  $iconPath = "NexusProtector.png";
+	    public $iconPath = "NexusProtector.png";
 		public $canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
 
         public $intercept = 2;
