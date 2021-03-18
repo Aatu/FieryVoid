@@ -156,7 +156,14 @@ window.shipWindowManager = {
 			shipWindowManager.addSystems(ship, shipwindow, 32);
 			shipWindowManager.addSystems(ship, shipwindow, 41);
 			shipWindowManager.addSystems(ship, shipwindow, 42);
-		} else {
+		} 
+		if (SixSidedShip) {
+			shipWindowManager.addSystems(ship, shipwindow, 31);
+			shipWindowManager.addSystems(ship, shipwindow, 32);
+			shipWindowManager.addSystems(ship, shipwindow, 41);
+			shipWindowManager.addSystems(ship, shipwindow, 42);
+		}
+		else {
 			shipWindowManager.addSystems(ship, shipwindow, 3);
 			shipWindowManager.addSystems(ship, shipwindow, 4);
 		}
