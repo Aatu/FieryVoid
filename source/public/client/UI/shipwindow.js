@@ -176,7 +176,7 @@ window.shipWindowManager = {
 
 		var names = ["Primary", "Front", "Aft", "Port", "Starboard"];
 
-		if (ship.base && !ship.smallBase) {
+		if ( (ship.base && !ship.smallBase) || (ship.SixSidedShip)) {
 			names[1] = "Sections";
 			toDo = 2;
 		} else {
@@ -409,7 +409,7 @@ window.shipWindowManager = {
 		var table = " table";
 		var dest = "";
 
-		if (ship.base && !ship.smallBase) {
+		if ( (ship.base && !ship.smallBase) || (ship.SixSidedShip))  {
 			type = ".shipwindow.base_";
 
 			if (location > 4) {
@@ -592,7 +592,7 @@ window.shipWindowManager = {
 
 		var grouped = shipManager.systems.groupSystems(systems);
 
-		if (ship.base && ship.smallBase) {
+		if ( (ship.base && !ship.smallBase) || (ship.SixSidedShip))  {
 			grouped = shipWindowManager.combineGroupsForBase(grouped);
 		} else {
 			grouped = shipWindowManager.combineGroups(grouped);
