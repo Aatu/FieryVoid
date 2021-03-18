@@ -39,6 +39,7 @@ class SixTester extends SixSidedShip{
 		$this->addPrimarySystem(new Hangar(6, 36));
 		$this->addPrimarySystem(new CnC(6, 30, 0, 0));
 		$this->addPrimarySystem(new Scanner(6, 24, 5, 8));
+        $this->addPrimarySystem(new Engine(6, 25, 0, 15, 3));			
 		$this->addPrimarySystem(new JumpEngine(6, 25, 3, 16));		
 
 		$this->addFrontSystem(new BattleLaser(3, 6, 2, 300, 60));
