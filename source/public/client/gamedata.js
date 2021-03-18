@@ -237,7 +237,7 @@ window.gamedata = {
             }
             if (bases) {
                 for (var i = 0; i < bases.length; i++) {
-                    if ((bases[i].movement[1].value == 0) && (!bases[i].nonRotating)){
+                    if ((bases[i].movement[1].value == 0) && (!bases[i].nonRotating) && (!bases[i].sixSidedShip)){
                         confirm.error("Please setup the rotation of your starbase.", function () {});
                         return false;
                     }
