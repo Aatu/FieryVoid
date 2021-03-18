@@ -2156,11 +2156,7 @@ class SixSidedShipBase extends Starbase{
     public $sixsidedship = true;
     public $base = true;
 	public $nonRotating = true;    
-     
-    function __construct($id, $userid, $name, $slot){
-        parent::__construct($id, $userid, $name,$slot);
-    }
-    
+      
     protected function addFrontSystem($system){
         $this->addSystem($system, 1);
     }
