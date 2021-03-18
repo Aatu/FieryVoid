@@ -2115,6 +2115,24 @@ class SixSidedShip extends BaseShip{
         parent::__construct($id, $userid, $name,$slot);
     }
     
+    protected function addFrontSystem($system){
+        $this->addSystem($system, 1);
+    }
+    protected function addAftSystem($system){
+        $this->addSystem($system, 2);
+    }
+    protected function addLeftFrontSystem($system){
+        $this->addSystem($system, 31);
+    }
+    protected function addLeftAftSystem($system){
+        $this->addSystem($system, 32);
+    }
+    protected function addRightFrontSystem($system){
+        $this->addSystem($system, 41);
+    }
+    protected function addRightAftSystem($system){
+        $this->addSystem($system, 42);
+    }
 
     public function getLocations(){
         //debug::log("getLocations");         
