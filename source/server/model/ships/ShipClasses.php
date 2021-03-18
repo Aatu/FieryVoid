@@ -2152,9 +2152,8 @@ class SixSidedShip extends BaseShip{
 
 }
 
-class SixSidedShipBase extends Starbase{
+class SixSidedShipBase extends StarBaseSixSections{
     public $sixsidedship = true;
-    public $base = true;
 	public $nonRotating = true;    
       
 }
