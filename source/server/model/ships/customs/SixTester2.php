@@ -1,5 +1,5 @@
 <?php
-class SixTester2 extends Starbase{
+class SixTester2 extends SixSidedShip{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
@@ -38,18 +38,16 @@ class SixTester2 extends Starbase{
                     20 => "C&C",
 			),
 		);
-		$bioDrive = new BioDrive(); //BioDrive just is, all parameters needed are calculated automatically
 		
-		$bioThruster = new BioThruster(7,30,20);
-		$bioDrive->addThruster($bioThruster);
-		$this->addPrimarySystem($bioThruster);	
-		
-				
 		$this->addPrimarySystem(new Reactor(6, 30, 0, 0));
 		$this->addPrimarySystem(new Hangar(6, 36));
 		$this->addPrimarySystem(new CnC(6, 30, 0, 0));
 		$this->addPrimarySystem(new Scanner(6, 24, 5, 8));
 		$this->addPrimarySystem(new JumpEngine(6, 30, 3, 16));
+		$this->addPrimarySystem(new Thruster(6, 20, 8, 1));
+		$this->addPrimarySystem(new Thruster(6, 20, 8, 2));	
+		$this->addPrimarySystem(new Thruster(6, 20, 8, 3));	
+		$this->addPrimarySystem(new Thruster(6, 20, 8, 4));									
 		
 		$this->addPrimarySystem(new Structure( 6, 80));		
 
