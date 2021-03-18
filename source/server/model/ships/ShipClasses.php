@@ -35,7 +35,7 @@ class BaseShip {
     public $smallBase = false;
 	public $nonRotating = false; //some bases do not rotate - this attribute is used in combination with $base or $smallBase
 	public $osat = false; //true if object is OSAT (this includes MicroSATs and mines)
-    public $sixsidedship = false;	
+    public $SixSidedShip = false;	
 	
     public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for all systems)
 
@@ -2109,7 +2109,7 @@ class SmallStarBaseThreeSections extends SmallStarBaseFourSections{
 
 
 class SixSidedShip extends BaseShip{
-    public $sixsidedship = true;    
+    public $SixSidedShip = true;    
      
     function __construct($id, $userid, $name, $slot){
         parent::__construct($id, $userid, $name,$slot);
