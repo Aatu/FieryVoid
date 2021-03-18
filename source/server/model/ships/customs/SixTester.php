@@ -38,8 +38,8 @@ class SixTester extends SixSidedShip{
 		$this->addPrimarySystem(new Reactor(6, 35, 0, 0));
 		$this->addPrimarySystem(new Hangar(6, 36));
 		$this->addPrimarySystem(new CnC(6, 30, 0, 0));
-		$this->addPrimarySystem(new Scanner(6, 24, 5, 10));
-		$this->addPrimarySystem(new JumpEngine(6, 25, 3, 16));		
+		$this->addPrimarySystem(new Scanner(6, 24, 5, 8));
+		$this->addPrimarySystem(new JumpEng ine(6, 25, 3, 16));		
 
 		$this->addFrontSystem(new BattleLaser(3, 6, 2, 300, 60));
         $this->addFrontSystem(new BattleLaser(3, 6, 2, 300, 60));
@@ -83,10 +83,10 @@ class SixTester extends SixSidedShip{
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 5, 60));
         $this->addAftSystem(new Structure( 5, 60));
-        $this->addLeftSystem(new Structure( 5, 60));
-        $this->addRightSystem(new Structure( 5, 60));
-        $this->addLeftSystem(new Structure( 5, 60));
-        $this->addRightSystem(new Structure( 5, 60));        
+        $this->addLeftFrontSystem(new Structure( 5, 60));
+        $this->addLeftAftSystem(new Structure( 5, 60));
+        $this->addRightFrontSystem(new Structure( 5, 60));
+        $this->addRightAftSystem(new Structure( 5, 60));        
         $this->addPrimarySystem(new Structure( 6, 80));
 	    
 	//d20 hit chart
