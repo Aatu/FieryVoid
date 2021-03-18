@@ -22,10 +22,6 @@ class SixTester2 extends Starbase{
 
 		$this->forwardDefense = 20;
 		$this->sideDefense = 20;
-		
-		
-		$this->nonRotating = true;
-		$this->sixsidedship = true;
 
 		$this->imagePath = "img/ships/CylonBasestar.png";
 		$this->canvasSize = 280;
