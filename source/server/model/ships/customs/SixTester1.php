@@ -6,8 +6,8 @@ class SixTester2 extends SixSidedShip{
 
 		$this->pointCost = 1500;
 		$this->faction = "Custom Ships";
-		$this->phpclass = "SixTester2";
-		$this->shipClass = "SixTester2";
+		$this->phpclass = "SixTester1";
+		$this->shipClass = "SixTester1";
 		$this->fighters = array("heavy"=>36); 
 		$this->isd = 2202;
 
