@@ -2426,7 +2426,7 @@ class PowerCapacitor extends ShipSystem{ /********* UNDER CONSTRUCTION *********
 	//petals opening - done as boost of Capacitor!
     public $boostable = false; //changed to True if a given ship has Petals! 
     public $maxBoostLevel = 1;
-    public $boostEfficiency = 0;	
+    public $boostEfficiency = 0;
 	
 /*
 	1-17: No effect.
@@ -2463,7 +2463,7 @@ capacitor is completely emptied.
 	in this case: 
 	 - Deployment phase: fill to full
 	 - Initial phase: may be changed in front end (boosting Capacitor and/or systems)
-	 - Firing phase: may be changed in FRONT END (firing costs power!)
+	 - Firing phase: may be changed in FRONT END (firing costs power!) - actually belay that, only BACK END will know whether firing actually happened!
 	 - Firing phase: may be changed in BACK END as well (intercepting costs power! - intercept-capable weapons will have appropriate checks in place to see they don't overextax the capacitor)
 	 Save always current stored power, not the changes that led to this value.
 	*/
@@ -2504,7 +2504,9 @@ capacitor is completely emptied.
 				
 				case 4: //firing phase
 					//take what front end reports, and add what back end calculated (basically weapons fire cost)
-					$this->setPowerHeld($this->powerReceivedFromFrontEnd + $this->powerReceivedFromBackEnd); 
+					//$this->setPowerHeld($this->powerReceivedFromFrontEnd + $this->powerReceivedFromBackEnd); 
+					//or perhaps disregard what front end says - in this phase it's cost of firing... and this is better calculated by back end!
+					$this->setPowerHeld($this->powerCurr - $this->powerReceivedFromBackEnd); 
 					//AND PREPARE APPROPRIATE NOTES!		
 					$notekey = 'powerStored';
 					$noteHuman = 'Power Capacitor - stored power';
@@ -2535,27 +2537,45 @@ capacitor is completely emptied.
 	if ($this->boostable){
         	$this->data["Special"] .= "<br>You may boost this system (open petals) to increase recharge rate by 50% - at the cost of treating all armor values as 2 points lower.";
 	}
-
     }
 	
-	public function stripForJson(){
+	public function beforeFiringOrderResolution($gamedata){ //actually mark armor reduced temporary critical if Petals are open
+		$boostlevel = $this->getBoostLevel($gamedata->turn);
+		if ($boostlevel <1) return; //not boosted - no crit!
+		$ship = $this->unit;
+		foreach($ship->systems as $system){		
+			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn, $gamedata->turn);
+			$crit->updated = true;
+			$crit->inEffect = true;
+			$system->criticals[] =  $crit;
+		}
+	}	
+	
+        private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn)
+                            continue;
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
+            }
+            return $boostLevel;
+        }		
+	
+    public function stripForJson(){
         $strippedSystem = parent::stripForJson();
         $strippedSystem->data = $this->data;
         $strippedSystem->powerCurr = $this->powerCurr;
-		$strippedSystem->powerReceivedFromFrontEnd = $this->powerReceivedFromFrontEnd;
+		//$strippedSystem->powerReceivedFromFrontEnd = $this->powerReceivedFromFrontEnd;
 		$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer;
         return $strippedSystem;
     }
 	
 	public function doIndividualNotesTransfer(){
 		//data received in variable individualNotesTransfer, further functions will look for it in powerReceivedFromFrontEnd
-		
-		//TO BE DONE
-		
-		
-		
-		
-		if(is_array($this->individualNotesTransfer))	$this->currchangedAA = $this->individualNotesTransfer; //else there's nothing relevant there
+		//in this case it should be just one entry, power remaining
+		if(is_array($this->individualNotesTransfer)) foreach($this->individualNotesTransfer as $powerLeft)  $this->powerReceivedFromFrontEnd = $powerLeft;
 		$this->individualNotesTransfer = array(); //empty, just in case
 	}		
 	
