@@ -2109,9 +2109,9 @@ class SmallStarBaseThreeSections extends SmallStarBaseFourSections{
 
 
 class SixSidedShip extends BaseShip{
-    public $sixsidedship = true;
-    public $base = false;
-	public $nonRotating = false;    
+    public $sixsidedship = false;
+    public $base = true;
+	public $nonRotating = true;    
      
     function __construct($id, $userid, $name, $slot){
         parent::__construct($id, $userid, $name,$slot);
