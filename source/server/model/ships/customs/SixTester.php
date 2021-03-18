@@ -50,10 +50,10 @@ class SixTester extends SixSidedShip{
         $this->addFrontSystem(new Thruster(6, 10, 0, 5, 1));
         $this->addFrontSystem(new Thruster(6, 10, 0, 5, 1));
 		
-        $this->addLeftFrontSystem(new BattleLaser(5, 6, 6, 120, 40));
-		$this->addLeftFrontSystem(new BattleLaser(5, 6, 6, 120, 40));
-		$this->addLeftFrontSystem(new TwinArray(3, 6, 2, 120, 240));
-		$this->addLeftFrontSystem(new TwinArray(3, 6, 2, 120, 240));
+        $this->addAftSystem(new BattleLaser(5, 6, 6, 120, 40));
+		$this->addAftSystem(new BattleLaser(5, 6, 6, 120, 40));
+		$this->addAftSystem(new TwinArray(3, 6, 2, 120, 240));
+		$this->addAftSystem(new TwinArray(3, 6, 2, 120, 240));
 		$this->addAftSystem(new Thruster(5, 8, 0, 5, 2));
         $this->addAftSystem(new Thruster(5, 8, 0, 5, 2));
         
