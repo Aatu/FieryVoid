@@ -34,7 +34,7 @@ shipManager.movement = {
             ship.deploymove.position = pos;
         }
 
-        if (ship.deploymove && ship.osat || ship.deploymove && ship.base) {
+        if (ship.deploymove && ship.osat || ship.deploymove && ship.base && (!ship.sixsidedship)) {
             ship.deploymove.speed = 0;
         }
     },

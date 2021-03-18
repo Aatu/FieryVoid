@@ -1,13 +1,13 @@
 <?php
-class SixTester1 extends SixSidedShip{
+class SixTester2 extends SixSidedShip{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 1500;
 		$this->faction = "Custom Ships";
-		$this->phpclass = "SixTester1";
-		$this->shipClass = "SixTester1";
+		$this->phpclass = "SixTester2";
+		$this->shipClass = "SixTester2";
 		$this->fighters = array("heavy"=>36); 
 		$this->isd = 2202;
 
@@ -38,11 +38,11 @@ class SixTester1 extends SixSidedShip{
                     20 => "C&C",
 			),
 		);
-		//$bioDrive = new BioDrive(); //BioDrive just is, all parameters needed are calculated automatically
+		$bioDrive = new BioDrive(); //BioDrive just is, all parameters needed are calculated automatically
 		
-		//$bioThruster = new BioThruster(7,30,20);
-		//$bioDrive->addThruster($bioThruster);
-		//$this->addPrimarySystem($bioThruster);	
+		$bioThruster = new BioThruster(7,30,20);
+		$bioDrive->addThruster($bioThruster);
+		$this->addPrimarySystem($bioThruster);	
 		
 				
 		$this->addPrimarySystem(new Reactor(6, 30, 0, 0));
@@ -61,7 +61,6 @@ class SixTester1 extends SixSidedShip{
 				new BattleLaser(5, 6, 6, $min, $max),
 				new TwinArray(3, 6, 2, $min, $max),
 				new TwinArray(3, 6, 2, $min, $max),
-				new Thruster(5, 15, 0, $min, $max),
 				new Structure(5, 60)
 			);
 			$loc = $this->locations[$i];
