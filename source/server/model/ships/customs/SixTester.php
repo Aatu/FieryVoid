@@ -91,7 +91,7 @@ class SixTester extends SixSidedShip{
 	    
 	//d20 hit chart
         $this->hitChart = array(
-            0=> array( //PRIMARY
+            0=> array(
                     8 => "Structure",
                     10 => "Jump Engine",
                     12 => "Scanner",
@@ -100,42 +100,42 @@ class SixTester extends SixSidedShip{
                     19 => "Reactor",
                     20 => "C&C",
            		 ),
-            1=> array( //Forward
+            1=> array(
                     3 => "Thruster",
                     7 => "Battle Laser",
                     11 => "Twin Array",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
-            2=> array( //Aft
+            2=> array(
                     3 => "Thruster",
                     7 => "Battle Laser",
                     11 => "Twin Array",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
-            31=> array( //Port
+            31=> array(
                     3 => "Thruster",
                     7 => "Battle Laser",
                     11 => "Twin Array",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
-            32=> array( //Port
+            32=> array(
                      3 => "Thruster",
                     7 => "Battle Laser",
                     11 => "Twin Array",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
-            41=> array( //Starboard
+            41=> array(
                     3 => "Thruster",
                     7 => "Battle Laser",
                     11 => "Twin Array",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
-       		42=> array( //Starboard
+       		42=> array(
                     3 => "Thruster",
                     7 => "Battle Laser",
                     11 => "Twin Array",

@@ -29,6 +29,7 @@ class SixTester2 extends SixSidedShip{
 			
         $this->hitChart = array(
             0=> array( //PRIMARY
+                    3 => 'Thruster',
                     8 => "Structure",
                     10 => "Jump Engine",
                     12 => "Scanner",
@@ -63,7 +64,6 @@ class SixTester2 extends SixSidedShip{
 			);
 			$loc = $this->locations[$i];
 			$this->hitChart[$loc] = array(
-                    3 => "Thruster",
                     7 => "Battle Laser",
                     11 => "Twin Array",
                     18 => "Structure",
