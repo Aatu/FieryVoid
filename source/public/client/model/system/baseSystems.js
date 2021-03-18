@@ -406,3 +406,47 @@ var Bulkhead = function(json, ship)
 }
 Bulkhead.prototype = Object.create( ShipSystem.prototype );
 Bulkhead.prototype.constructor = Bulkhead;
+
+
+
+var PowerCapacitor = function PowerCapacitor(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+PowerCapacitor.prototype = Object.create(ShipSystem.prototype);
+PowerCapacitor.prototype.constructor = PowerCapacitor;
+PowerCapacitor.prototype.initBoostableInfo = function () {
+    // Needed because it can change during initial phase
+    var count = shipManager.power.getBoost(this);
+    var effectiveOutput = this.output;
+	if(count > 0){//boosted!
+		effectiveOutput = Math.round(effectiveOutput *1.5);
+	}
+	if(effectiveOutput > this.powerMax) effectiveOutput = this.powerMax;
+    this.powerReq =  - effectiveOutput; //NEGATIVE VALUE - this system adds power to Reactor :)
+    return this;
+};
+/* is this really necessary?...
+PowerCapacitor.prototype.clearBoost = function () {
+    for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
+        if (power.type == 2) {
+            system.power.splice(i, 1);
+            return;
+        }
+    }
+};
+*/
+PowerCapacitor.prototype.hasMaxBoost = function () {
+    return true;
+};
+PowerCapacitor.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+PowerCapacitor.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+	this.individualNotesTransfer = Array();
+	//note power currently remaining ON REACTOR as charge held
+	var powerRemaining = shipManager.power.getReactorPower(this.ship, this); //second attribute really not relevant here
+	this.individualNotesTransfer.push(powerRemaining);
+	return true;
+};
