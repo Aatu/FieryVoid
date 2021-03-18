@@ -2420,6 +2420,7 @@ class PowerCapacitor extends ShipSystem{ /********* UNDER CONSTRUCTION *********
 	
 	//power held
 	public $powerCurr = 0;
+	public $powerMax = 0; //for front end only - maximum output
 	public $powerReceivedFromFrontEnd = 0; //communication variable	
 	public $powerReceivedFromBackEnd = 0; //communication variable
 	
@@ -2567,6 +2568,7 @@ capacitor is completely emptied.
         $strippedSystem = parent::stripForJson();
         $strippedSystem->data = $this->data;
         $strippedSystem->powerCurr = $this->powerCurr;
+	   $strippedSystem->powerMax = $this->getMaxCapacity();
 		//$strippedSystem->powerReceivedFromFrontEnd = $this->powerReceivedFromFrontEnd;
 		$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer;
         return $strippedSystem;
