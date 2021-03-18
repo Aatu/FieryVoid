@@ -151,18 +151,12 @@ window.shipWindowManager = {
 		shipWindowManager.addSystems(ship, shipwindow, 0);
 		shipWindowManager.addSystems(ship, shipwindow, 2);
 
-		if (ship.base && !ship.smallBase) {
+		if ( (ship.base && !ship.smallBase) || (ship.sixSidedShip)) {
 			shipWindowManager.addSystems(ship, shipwindow, 31);
 			shipWindowManager.addSystems(ship, shipwindow, 32);
 			shipWindowManager.addSystems(ship, shipwindow, 41);
 			shipWindowManager.addSystems(ship, shipwindow, 42);
 		} 
-		if (SixSidedShip) {
-			shipWindowManager.addSystems(ship, shipwindow, 31);
-			shipWindowManager.addSystems(ship, shipwindow, 32);
-			shipWindowManager.addSystems(ship, shipwindow, 41);
-			shipWindowManager.addSystems(ship, shipwindow, 42);
-		}
 		else {
 			shipWindowManager.addSystems(ship, shipwindow, 3);
 			shipWindowManager.addSystems(ship, shipwindow, 4);
