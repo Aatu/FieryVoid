@@ -61,25 +61,25 @@ class SixTester extends SixSidedShip{
 		$this->addLeftFrontSystem(new BattleLaser(5, 6, 6, 240, 0));
 		$this->addLeftFrontSystem(new TwinArray(3, 6, 2, 240, 0));
 		$this->addLeftFrontSystem(new TwinArray(3, 6, 2, 240, 0));
-		$this->addLeftFrontSystem(new Thruster(5, 15, 0, 5, 4));
+		$this->addLeftFrontSystem(new Thruster(5, 15, 0, 5, 3));
 				
 		$this->addLeftAftSystem(new BattleLaser(5, 6, 6, 180, 300));
 		$this->addLeftAftSystem(new BattleLaser(5, 6, 6, 180, 300));
 		$this->addLeftAftSystem(new TwinArray(3, 6, 2, 180, 300));
 		$this->addLeftAftSystem(new TwinArray(3, 6, 2, 180, 300));
-		$this->addLeftAftSystem(new Thruster(5, 15, 0, 5, 4));
+		$this->addLeftAftSystem(new Thruster(5, 15, 0, 5, 3));
 		
 		$this->addRightFrontSystem(new BattleLaser(5, 6, 6, 0, 120));
 		$this->addRightFrontSystem(new BattleLaser(5, 6, 6, 0, 120));
 		$this->addRightFrontSystem(new TwinArray(3, 6, 2, 0, 120));
 		$this->addRightFrontSystem(new TwinArray(3, 6, 2, 0, 120));
-		$this->addRightFrontSystem(new Thruster(5, 15, 0, 5, 3));
+		$this->addRightFrontSystem(new Thruster(5, 15, 0, 5, 4));
 				
 		$this->addRightAftSystem(new BattleLaser(5, 6, 6, 60, 180));
 		$this->addRightAftSystem(new BattleLaser(5, 6, 6, 60, 1800));
 		$this->addRightAftSystem(new TwinArray(3, 6, 2, 60, 180));
 		$this->addRightAftSystem(new TwinArray(3, 6, 2, 60, 180));
-		$this->addRightAftSystem(new Thruster(5, 15, 0, 5, 3));		
+		$this->addRightAftSystem(new Thruster(5, 15, 0, 5, 4));		
 		
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
