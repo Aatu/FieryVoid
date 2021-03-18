@@ -2110,11 +2110,8 @@ class SmallStarBaseThreeSections extends SmallStarBaseFourSections{
 
 class SixSidedShip extends BaseShip{
     public $sixsidedship = true;
-<<<<<<< HEAD
     public $base = true;
 	public $nonRotating = true;    
-=======
->>>>>>> parent of 784663683 (base)
      
     function __construct($id, $userid, $name, $slot){
         parent::__construct($id, $userid, $name,$slot);
@@ -2155,13 +2152,9 @@ class SixSidedShip extends BaseShip{
 
 }
 
-<<<<<<< HEAD
 class SixSidedShipBase extends StarBaseSixSections{
     public $sixsidedship = true;
 	public $nonRotating = true;    
       
 }
-=======
-
->>>>>>> parent of 784663683 (base)
 ?>
