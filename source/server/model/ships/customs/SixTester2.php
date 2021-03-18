@@ -1,5 +1,5 @@
 <?php
-class SixTester2 extends SixSidedShip{
+class SixTester2 extends SixSidedShipBase{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
