@@ -1,5 +1,5 @@
 <?php
-class SixTester2 extends Stabase{
+class SixTester2 extends Starbase{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
