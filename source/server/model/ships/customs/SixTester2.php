@@ -24,7 +24,7 @@ class SixTester2 extends SixSidedShip{
 		$this->sideDefense = 20;
 
 		$this->imagePath = "img/ships/CylonBasestar.png";
-		$this->canvasSize = 280;
+		$this->canvasSize = 300;
 		$this->locations = array(41, 42, 2, 32, 31, 1);	
 			
         $this->hitChart = array(

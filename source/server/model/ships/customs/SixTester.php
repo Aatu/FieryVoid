@@ -25,7 +25,7 @@ class SixTester extends SixSidedShip{
 		$this->sideDefense = 20;
 
 		$this->imagePath = "img/ships/CylonBasestar.png";
-		$this->canvasSize = 280;
+		$this->canvasSize = 300;
 
 
 		//$bioDrive = new BioDrive(); //BioDrive just is, all parameters needed are calculated automatically
