@@ -2109,7 +2109,7 @@ class SmallStarBaseThreeSections extends SmallStarBaseFourSections{
 
 
 class SixSidedShip extends BaseShip{
-    public $sixsidedship = true;
+    public $sixsidedship = false;
     public $base = true;
 	public $nonRotating = true;    
      
