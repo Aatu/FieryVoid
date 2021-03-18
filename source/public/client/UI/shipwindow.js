@@ -70,7 +70,7 @@ window.shipWindowManager = {
 	createShipWindow: function createShipWindow(ship) {
 		var template;
 
-		if (ship.base && !ship.smallBase) {
+		if ( (ship.base && !ship.smallBase) || (ship.SixSidedShip)){
 			template = $("#shipwindowtemplatecontainer .shipwindow.base");
 		} else {
 			template = $("#shipwindowtemplatecontainer .shipwindow.ship");
