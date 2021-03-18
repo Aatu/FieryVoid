@@ -2110,6 +2110,8 @@ class SmallStarBaseThreeSections extends SmallStarBaseFourSections{
 
 class SixSidedShip extends BaseShip{
     public $sixsidedship = true;
+    public $base = false;
+	public $nonRotating = false;    
      
     function __construct($id, $userid, $name, $slot){
         parent::__construct($id, $userid, $name,$slot);
@@ -2150,5 +2152,47 @@ class SixSidedShip extends BaseShip{
 
 }
 
+class SixSidedShipBase extends Starbase{
+    public $sixsidedship = true;
+    public $base = false;
+	public $nonRotating = true;    
+     
+    function __construct($id, $userid, $name, $slot){
+        parent::__construct($id, $userid, $name,$slot);
+    }
+    
+    protected function addFrontSystem($system){
+        $this->addSystem($system, 1);
+    }
+    protected function addAftSystem($system){
+        $this->addSystem($system, 2);
+    }
+    protected function addLeftFrontSystem($system){
+        $this->addSystem($system, 31);
+    }
+    protected function addLeftAftSystem($system){
+        $this->addSystem($system, 32);
+    }
+    protected function addRightFrontSystem($system){
+        $this->addSystem($system, 41);
+    }
+    protected function addRightAftSystem($system){
+        $this->addSystem($system, 42);
+    }
 
+    public function getLocations(){
+        //debug::log("getLocations");         
+        $locs = array();
+
+        $locs[] = array("loc" => 1, "min" => 300, "max" => 60, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 41, "min" => 0, "max" => 120, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 42, "min" => 60, "max" => 180, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 2, "min" => 120, "max" => 240, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 32, "min" => 180, "max" => 300, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 31, "min" => 240, "max" => 360, "profile" => $this->forwardDefense);
+
+        return $locs;
+    }		
+
+}
 ?>
