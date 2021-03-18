@@ -2467,6 +2467,11 @@ capacitor is completely emptied.
 	 - Firing phase: may be changed in FRONT END (firing costs power!) - actually belay that, only BACK END will know whether firing actually happened!
 	 - Firing phase: may be changed in BACK END as well (intercepting costs power! - intercept-capable weapons will have appropriate checks in place to see they don't overextax the capacitor)
 	 Save always current stored power, not the changes that led to this value.
+	 
+	 CHANGES COMPARED TO OFFICIAL VERSION:
+	  - recharge occurs in Initial phase (official - just before movement, which makes power not usable in Initial phase)
+	  - opening petals reduces armor by 2 (official - armor is reduced on PRIMARY only, but all profiles are increased by 1)
+	  - cannot icrease recharge rate in any other way (official: can shut down everything (weapons, shields) and incrrease by 100%)
 	*/
     public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
 		$ship = $this->getUnit();
@@ -2545,6 +2550,10 @@ capacitor is completely emptied.
 		if ($boostlevel <1) return; //not boosted - no crit!
 		$ship = $this->unit;
 		foreach($ship->systems as $system){		
+			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn, $gamedata->turn);
+			$crit->updated = true;
+			$crit->inEffect = true;
+			$system->criticals[] =  $crit;
 			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn, $gamedata->turn);
 			$crit->updated = true;
 			$crit->inEffect = true;

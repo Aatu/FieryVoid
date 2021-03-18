@@ -415,13 +415,14 @@ var PowerCapacitor = function PowerCapacitor(json, ship) {
 PowerCapacitor.prototype = Object.create(ShipSystem.prototype);
 PowerCapacitor.prototype.constructor = PowerCapacitor;
 PowerCapacitor.prototype.initBoostableInfo = function () {
-    // Needed because it can change during initial phase
-    var count = shipManager.power.getBoost(this);
-    var effectiveOutput = this.output;
-	if(count > 0){//boosted!
-		effectiveOutput = Math.round(effectiveOutput *1.5);
+    // Needed because it can change during initial phase    
+    var effectiveOutput = this.powerCurr;
+	var boostCount = shipManager.power.getBoost(this);	
+	effectiveOutput += this.output;
+	if(boostCount > 0){//boosted!
+		effectiveOutput += Math.round(this.output *0.5);
 	}
-	if(effectiveOutput > this.powerMax) effectiveOutput = this.powerMax;
+	//can be more than maximum - but cannot HOLD more than maximum after Initial phase (server end takes care of that)
     this.powerReq =  - effectiveOutput; //NEGATIVE VALUE - this system adds power to Reactor :)
     return this;
 };

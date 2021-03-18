@@ -35,12 +35,12 @@ class TechnicalTestbed extends MediumShip{
 		$this->enhancementOptionsDisabled[] = 'IMPR_ENG'; //no Engine ;)
 		
          
-        $this->addPrimarySystem(new MagGravReactor(3, 12, 0, 8));
+        $this->addPrimarySystem(new MagGravReactor(3, 12, 0, 0));
 	$this->addPrimarySystem(new PowerCapacitor( 4, 25, 0, 2, true));//armor, structure, power req, output, has petals    
 	    
         $this->addPrimarySystem(new ShadowPilot(3, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 14, 3, 6));
-		$this->addPrimarySystem(new PhasingDrive(4, 16, 5, 15));		
+        $this->addPrimarySystem(new Scanner(3, 14, 0, 6));
+		$this->addPrimarySystem(new PhasingDrive(4, 16, 0, 15));		
 		$this->addPrimarySystem(new Hangar(3, 1));
         $this->addPrimarySystem(new SelfRepair(5, 6, 3)); //armor, structure, output
 		
@@ -72,7 +72,7 @@ class TechnicalTestbed extends MediumShip{
 		
 		
 		//weapons - Forward for visual reasons!
-        $this->addFrontSystem(new new BattleLaser(3, 6, 6, 300, 60));
+        $this->addFrontSystem(new BattleLaser(3, 6, 6, 300, 60));
         
 		
 		//technical thrusters - unlimited, like for MCVs		
