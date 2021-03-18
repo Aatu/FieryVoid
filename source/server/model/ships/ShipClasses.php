@@ -2154,7 +2154,7 @@ class SixSidedShip extends BaseShip{
 
 class SixSidedShipBase extends Starbase{
     public $sixsidedship = true;
-    public $base = true;
+    public $base = false;
 	public $nonRotating = true;    
      
     function __construct($id, $userid, $name, $slot){
