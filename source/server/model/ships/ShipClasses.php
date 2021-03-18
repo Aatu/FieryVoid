@@ -2115,12 +2115,6 @@ class SixSidedShip extends BaseShip{
         parent::__construct($id, $userid, $name,$slot);
     }
     
-    protected function addFrontSystem($system){
-        $this->addSystem($system, 1);
-    }
-    protected function addAftSystem($system){
-        $this->addSystem($system, 2);
-    }
     protected function addLeftFrontSystem($system){
         $this->addSystem($system, 31);
     }
