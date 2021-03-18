@@ -2117,5 +2117,5 @@ class SixSidedShip extends StarBaseSixSections{
 
 }
 
-
+}
 ?>
