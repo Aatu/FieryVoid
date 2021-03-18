@@ -1,13 +1,13 @@
 <?php
-class SixTester1 extends Stabase{
+class SixTester2 extends Stabase{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 1500;
 		$this->faction = "Custom Ships";
-		$this->phpclass = "SixTester1";
-		$this->shipClass = "SixTester1";
+		$this->phpclass = "SixTester2";
+		$this->shipClass = "SixTester2";
 		$this->fighters = array("heavy"=>36); 
 		$this->isd = 2202;
 
