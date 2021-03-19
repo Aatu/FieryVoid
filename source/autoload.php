@@ -1806,7 +1806,7 @@ spl_autoload_register(
 				
 				'sixtester' => '/server/model/ships/customs/SixTester.php',
 				'sixtester2' => '/server/model/ships/customs/SixTester2.php',
-				'sixsidedship' => '/server/model/ShipClasses.php',
+				'sixsidedship' => '/server/model/ships/ShipClasses.php',
 
 		
 			
