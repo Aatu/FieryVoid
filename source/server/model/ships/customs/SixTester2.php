@@ -57,16 +57,16 @@ class SixTester2 extends SixSidedShip{
 			$min = 0 + ($i*60);
 			$max = 120 + ($i*60);
 			$systems = array(
-				new BattleLaser(5, 6, 6, $min, $max),
-				new BattleLaser(5, 6, 6, $min, $max),
-				new TwinArray(3, 6, 2, $min, $max),
-				new TwinArray(3, 6, 2, $min, $max),
+				new LHMissileRack(4, 8, 0, $min, $max),
+				new LHMissileRack(4, 8, 0, $min, $max),
+				new StdParticleBeam(2, 4, 1, $min, $max),
+				new StdParticleBeam(2, 4, 1, $min, $max),
 				new Structure(5, 60)
 			);
 			$loc = $this->locations[$i];
 			$this->hitChart[$loc] = array(
-                    7 => "Battle Laser",
-                    11 => "Twin Array",
+                    7 => "Class-LH Missile Rack",
+                    11 => "Standard Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
 			);
