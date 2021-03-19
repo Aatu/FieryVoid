@@ -15,14 +15,14 @@ class SixTester extends SixSidedShip{
 		$this->shipSizeClass = 3; //Enormous is not implemented
 		$this->iniativebonus = 0; //no voluntary movement anyway
 		
-        $this->turncost = 1.50;
-        $this->turndelaycost = 1.50;
+        $this->turncost = 1.25;
+        $this->turndelaycost = 1.25;
         $this->accelcost = 4;
         $this->rollcost = 999;
         $this->pivotcost = 3;		
 
-		$this->forwardDefense = 20;
-		$this->sideDefense = 20;
+		$this->forwardDefense = 19;
+		$this->sideDefense = 19;
 
 		$this->imagePath = "img/ships/CylonBasestar.png";
 		$this->canvasSize = 300;
@@ -36,8 +36,8 @@ class SixTester extends SixSidedShip{
 
 		$this->addFrontSystem(new LHMissileRack(4, 8, 0, 300, 60));
         $this->addFrontSystem(new LHMissileRack(4, 8, 0,  300, 60));
-        $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 120));
-		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 120));
+        $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 120, 240));
+		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 120, 240));
         $this->addFrontSystem(new Thruster(6, 10, 0, 5, 1));
         $this->addFrontSystem(new Thruster(6, 10, 0, 5, 1));
 		

@@ -20,8 +20,8 @@ class SixTester2 extends SixSidedShip{
         $this->rollcost = 999;
         $this->pivotcost = 3;		
 
-		$this->forwardDefense = 20;
-		$this->sideDefense = 20;
+		$this->forwardDefense = 19;
+		$this->sideDefense = 19;
 
 		$this->imagePath = "img/ships/CylonBasestar.png";
 		$this->canvasSize = 300;
