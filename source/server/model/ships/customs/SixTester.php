@@ -27,14 +27,6 @@ class SixTester extends SixSidedShip{
 		$this->imagePath = "img/ships/CylonBasestar.png";
 		$this->canvasSize = 300;
 
-
-		//$bioDrive = new BioDrive(); //BioDrive just is, all parameters needed are calculated automatically
-		
-		//$bioThruster = new BioThruster(7,30,20);
-		//$bioDrive->addThruster($bioThruster);
-		//$this->addPrimarySystem($bioThruster);	
-		
-				
 		$this->addPrimarySystem(new Reactor(6, 35, 0, 0));
 		$this->addPrimarySystem(new Hangar(6, 36));
 		$this->addPrimarySystem(new CnC(6, 30, 0, 0));
@@ -42,42 +34,42 @@ class SixTester extends SixSidedShip{
         $this->addPrimarySystem(new Engine(6, 25, 0, 15, 3));			
 		$this->addPrimarySystem(new JumpEngine(6, 25, 3, 16));		
 
-		$this->addFrontSystem(new BattleLaser(3, 6, 2, 300, 60));
-        $this->addFrontSystem(new BattleLaser(3, 6, 2, 300, 60));
-        $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
-		$this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
+		$this->addFrontSystem(new LHMissileRack(4, 8, 0, 300, 60));
+        $this->addFrontSystem(new LHMissileRack(4, 8, 0,  300, 60));
+        $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 120));
+		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 120));
         $this->addFrontSystem(new Thruster(6, 10, 0, 5, 1));
         $this->addFrontSystem(new Thruster(6, 10, 0, 5, 1));
 		
-        $this->addAftSystem(new BattleLaser(5, 6, 6, 120, 40));
-		$this->addAftSystem(new BattleLaser(5, 6, 6, 120, 40));
-		$this->addAftSystem(new TwinArray(3, 6, 2, 120, 240));
-		$this->addAftSystem(new TwinArray(3, 6, 2, 120, 240));
+        $this->addAftSystem(new LHMissileRack(4, 8, 0, 120, 240));
+		$this->addAftSystem(new LHMissileRack(4, 8, 0, 120, 240));
+		$this->addAftSystem(new StdParticleBeam(2, 4, 1, 120, 240));
+		$this->addAftSystem(new StdParticleBeam(2, 4, 1, 120, 240));
 		$this->addAftSystem(new Thruster(5, 8, 0, 5, 2));
         $this->addAftSystem(new Thruster(5, 8, 0, 5, 2));
         
-		$this->addLeftFrontSystem(new BattleLaser(5, 6, 6, 240, 0));
-		$this->addLeftFrontSystem(new BattleLaser(5, 6, 6, 240, 0));
-		$this->addLeftFrontSystem(new TwinArray(3, 6, 2, 240, 0));
-		$this->addLeftFrontSystem(new TwinArray(3, 6, 2, 240, 0));
+		$this->addLeftFrontSystem(new LHMissileRack(4, 8, 0, 240, 0));
+		$this->addLeftFrontSystem(new LHMissileRack(4, 8, 0, 240, 0));
+		$this->addLeftFrontSystem(new StdParticleBeam(2, 4, 1, 240, 0));
+		$this->addLeftFrontSystem(new StdParticleBeam(2, 4, 1, 240, 0));
 		$this->addLeftFrontSystem(new Thruster(5, 15, 0, 5, 3));
 				
-		$this->addLeftAftSystem(new BattleLaser(5, 6, 6, 180, 300));
-		$this->addLeftAftSystem(new BattleLaser(5, 6, 6, 180, 300));
-		$this->addLeftAftSystem(new TwinArray(3, 6, 2, 180, 300));
-		$this->addLeftAftSystem(new TwinArray(3, 6, 2, 180, 300));
+		$this->addLeftAftSystem(new LHMissileRack(4, 8, 0, 180, 300));
+		$this->addLeftAftSystem(new LHMissileRack(4, 8, 0, 180, 300));
+		$this->addLeftAftSystem(new StdParticleBeam(2, 4, 1, 180, 300));
+		$this->addLeftAftSystem(new StdParticleBeam(2, 4, 1, 180, 300));
 		$this->addLeftAftSystem(new Thruster(5, 15, 0, 5, 3));
 		
-		$this->addRightFrontSystem(new BattleLaser(5, 6, 6, 0, 120));
-		$this->addRightFrontSystem(new BattleLaser(5, 6, 6, 0, 120));
-		$this->addRightFrontSystem(new TwinArray(3, 6, 2, 0, 120));
-		$this->addRightFrontSystem(new TwinArray(3, 6, 2, 0, 120));
+		$this->addRightFrontSystem(new LHMissileRack(4, 8, 0, 0, 120));
+		$this->addRightFrontSystem(new LHMissileRack(4, 8, 0, 0, 120));
+		$this->addRightFrontSystem(new StdParticleBeam(2, 4, 1, 0, 120));
+		$this->addRightFrontSystem(new StdParticleBeam(2, 4, 1, 0, 120));
 		$this->addRightFrontSystem(new Thruster(5, 15, 0, 5, 4));
 				
-		$this->addRightAftSystem(new BattleLaser(5, 6, 6, 60, 180));
-		$this->addRightAftSystem(new BattleLaser(5, 6, 6, 60, 1800));
-		$this->addRightAftSystem(new TwinArray(3, 6, 2, 60, 180));
-		$this->addRightAftSystem(new TwinArray(3, 6, 2, 60, 180));
+		$this->addRightAftSystem(new LHMissileRack(4, 8, 0, 60, 180));
+		$this->addRightAftSystem(new LHMissileRack(4, 8, 0, 60, 180));
+		$this->addRightAftSystem(new StdParticleBeam(2, 4, 1, 60, 180));
+		$this->addRightAftSystem(new StdParticleBeam(2, 4, 1, 60, 180));
 		$this->addRightAftSystem(new Thruster(5, 15, 0, 5, 4));		
 		
        
@@ -102,48 +94,46 @@ class SixTester extends SixSidedShip{
                     20 => "C&C",
            		 ),
             1=> array(
-                    3 => "Thruster",
-                    7 => "Battle Laser",
-                    11 => "Twin Array",
+                    4 => "Thruster",
+                    7 => "Class-LH Missile Rack",
+                    11 => "Standard Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             2=> array(
-                    3 => "Thruster",
-                    7 => "Battle Laser",
-                    11 => "Twin Array",
+                    4 => "Thruster",
+                    7 => "Class-LH Missile Rack",
+                    11 => "Standard Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             31=> array(
-                    3 => "Thruster",
-                    7 => "Battle Laser",
-                    11 => "Twin Array",
+                    4 => "Thruster",
+                    7 => "Class-LH Missile Rack",
+                    11 => "Standard Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
-                     3 => "Thruster",
-                    7 => "Battle Laser",
-                    11 => "Twin Array",
+                    4 => "Thruster",
+                    7 => "Class-LH Missile Rack",
+                    11 => "Standard Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
-                    3 => "Thruster",
-                    7 => "Battle Laser",
-                    11 => "Twin Array",
+                    4 => "Thruster",
+                    7 => "Class-LH Missile Rack",
+                    11 => "Standard Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
-                    3 => "Thruster",
-                    7 => "Battle Laser",
-                    11 => "Twin Array",
+                    4 => "Thruster",
+                    7 => "Class-LH Missile Rack",
+                    11 => "Standard Particle Beam",
                     18 => "Structure",
-                    20 => "Primary",
-           		
-                    
+                    20 => "Primary",   
             	),
            	);
        		
