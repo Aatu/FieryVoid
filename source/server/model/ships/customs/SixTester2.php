@@ -65,8 +65,8 @@ class SixTester2 extends SixSidedShip{
 			);
 			$loc = $this->locations[$i];
 			$this->hitChart[$loc] = array(
-                    7 => "Class-LH Missile Rack",
-                    11 => "Standard Particle Beam",
+                    3 => "Class-LH Missile Rack",
+                    6 => "Standard Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
 			);
