@@ -2146,7 +2146,7 @@ class UnevenBaseFourSections extends BaseShip{ //4-sided base which has differen
 
         return $locs;
     }
-} //end of SmallStarBaseFourSections
+} //end of UnevenBaseFourSections
 
 
 ?>
