@@ -5,7 +5,7 @@ class CylonBasestar extends SixSidedShip{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 1500;
-		$this->faction = "zBSGCylons";
+		$this->faction = "ZBSGCylons";
 		$this->phpclass = "SixTester";
 		$this->shipClass = "SixTester";
 		$this->fighters = array("heavy"=>36); 
