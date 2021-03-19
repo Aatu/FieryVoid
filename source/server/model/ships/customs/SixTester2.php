@@ -18,7 +18,8 @@ class SixTester2 extends SixSidedShip{
         $this->turndelaycost = 1.50;
         $this->accelcost = 4;
         $this->rollcost = 999;
-        $this->pivotcost = 3;		
+        $this->pivotcost = 2;	
+        $this->gravitic = true;    		
 
 		$this->forwardDefense = 19;
 		$this->sideDefense = 19;
