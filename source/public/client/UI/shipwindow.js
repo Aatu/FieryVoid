@@ -180,7 +180,7 @@ window.shipWindowManager = {
 			names[1] = "Sections";
 			toDo = 2;
 		} 
-		if ( (ship.SixSidedShip)) {
+		else if ( (ship.SixSidedShip)) {
 			names[0] = "Primary";
 			names[1] = "Front";
 			names[2] = "Aft";
@@ -188,7 +188,7 @@ window.shipWindowManager = {
 			names[32] = "Port Aft";
 			names[41] = "Starboard Front";
 			names[42] = "Starboard Aft";
-			toDo = 7;
+			toDo = 42;
 		}
 		else {
 			toDo = 5; //(almost) always try to show all 5 sections, there may be holes
