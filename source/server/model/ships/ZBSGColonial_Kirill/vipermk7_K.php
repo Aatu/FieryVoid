@@ -8,7 +8,7 @@ class ViperMk7_K extends FighterFlight{
         $this->faction = "ZPlaytest 12 Colonies of Cobol";
         $this->phpclass = "ViperMk7_K";
         $this->shipClass = "Viper Mk-7 flight (2212)";
-        $this->imagePath = "img/ships/BSG/vipermk7.png";
+        $this->imagePath = "img/ships/BSG/viperMk7.png";
 //	    $this->isd = 2212;
  		$this->unofficial = true;
 	    
@@ -31,10 +31,10 @@ class ViperMk7_K extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 2, 2, 2);
-            $fighter = new Fighter("ViperMk2_K", $armour, 10, $this->id);
-            $fighter->displayName = "Vipper Mk2";
-            $fighter->imagePath = "img/ships/BSG/vipermk7.png";
-            $fighter->iconPath = "img/ships/BSG/vipermk7_large.png";
+            $fighter = new Fighter("ViperMk7_K", $armour, 10, $this->id);
+            $fighter->displayName = "Vipper Mk7";
+            $fighter->imagePath = "img/ships/BSG/viperMk7.png";
+            $fighter->iconPath = "img/ships/BSG/viperMk7_large.png";
 
             $frontGun = new PairedParticleGun(330, 30, 3);
             $frontGun->displayName = "MEC Cannon Mk2";

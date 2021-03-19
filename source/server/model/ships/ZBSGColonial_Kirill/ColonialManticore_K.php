@@ -15,8 +15,8 @@ class ColonialManticore_K extends MediumShip{
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
         
-        $this->turncost = 0.66;
-        $this->turndelaycost = 0.66;
+        $this->turncost = 0.5;
+        $this->turndelaycost = 0.5;
         $this->accelcost = 2;
         $this->rollcost = 2;
         $this->pivotcost = 3;
@@ -30,8 +30,8 @@ class ColonialManticore_K extends MediumShip{
         $this->addPrimarySystem(new ReloadRack(4, 9));
         $this->addPrimarySystem(new SMissileRack(4, 6, 0, 0, 360));
 		$this->addPrimarySystem(new Hangar(4, 4));
-		$this->addPrimarySystem(new Thruster(4, 9, 0, 3, 3));
-		$this->addPrimarySystem(new Thruster(4, 9, 0, 3, 4));        
+		$this->addPrimarySystem(new Thruster(4, 9, 0, 4, 3));
+		$this->addPrimarySystem(new Thruster(4, 9, 0, 4, 4));        
 		$this->addPrimarySystem(new Bulkhead(0, 3));
 		$hyperdrive = new JumpEngine(4, 12, 6, 20);
 		$hyperdrive->displayName = 'Phasing Drive';
