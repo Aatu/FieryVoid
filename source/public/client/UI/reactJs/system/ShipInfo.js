@@ -25,7 +25,7 @@ class ShipInfo extends React.Component {
 			var hitChance = 0;
 			
 			var toDo = 5;
-		if ( (ship.base && !ship.smallBase) {
+		if ( (ship.base && !ship.smallBase) ) {
 				names[1] = "Sections";
 				toDo = 2;
 			} 
