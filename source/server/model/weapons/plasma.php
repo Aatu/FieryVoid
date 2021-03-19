@@ -1035,4 +1035,104 @@ class PlasmaProjector extends Raking{
 }// End of class PlasmaProjector
 
 
+class PlasmaBlast extends Weapon{
+        public $name = "PlasmaBlast";
+        public $displayName = "Plasma Blast";
+		public $iconPath = "PlasmaProjector.png";
+		
+		public $range = 3;
+		public $loadingtime = 1;
+//		public $hextarget = true;
+		
+		public $flashDamage = true;
+		public $priority = 1;
+			
+        public $animation = "ball";
+        public $trailColor = array(30, 140, 60);
+        public $animationColor = array(30, 140, 60);
+        public $animationExplosionScale = 1;
+		public $animationExplosionType = "AoE";
+        public $projectilespeed = 12;
+        public $animationWidth = 10;
+        public $trailLength = 10;    
+
+		public $firingMode = 'AoE'; //firing mode - just a name essentially
+		public $damageType = "Flash"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Plasma"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+
+        public $rangePenalty = 0; //none
+        public $fireControl = array(200, 200, 200); // fighters, <mediums, <capitals
+
+
+// BEGIN MARCIN'S CODE
+
+public function calculateHitBase($gamedata, $fireOrder)
+    {
+        $fireOrder->needed = 100; //100% chance of hitting everything on target hex
+        $fireOrder->updated = true;
+    } 
+
+ public function fire($gamedata, $fireOrder){
+        $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
+        $shooter = $gamedata->getShipById($fireOrder->shooterid); //so we know which ship is firing, this is useful
+
+		if ($fireOrder->targetid != -1) { //make weapon target hex rather than unit
+            $targetship = $gamedata->getShipById($fireOrder->targetid);
+            //insert correct target coordinates: CURRENT  target position
+            $position = $targetship->getCoPos(); 
+            $fireOrder->x = $position["x"];
+            $fireOrder->y = $position["y"];
+            $fireOrder->targetid = -1; 
+        }
+
+		//roll to hit - we'll make a regular roll (irrelevant as hit is automatic, but we need to mark SOME number anyway):
+		$rolled = Dice::d(100);
+		$fireOrder->rolled = $rolled;
+
+		//deal damage!
+        $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+        $ships1 = $gamedata->getShipsInDistance($target); //all ships on target hex
+        foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
+
+            $this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
+        }
+    }
+	
+//and now actual damage dealing - and we already know fighter is hit (fire()) doesn't pass anything else)
+//source hex will be taken from firing unit, damage will be individually rolled for each fighter hit
+ public function AOEdamage($target, $shooter, $fireOrder, $gamedata)
+    {
+        if ($target->isDestroyed()) return; //no point allocating
+            foreach ($target->systems as $fighter) {
+                if ($fighter == null || $fighter->isDestroyed()) {
+                    continue;
+                }
+         //roll (and modify as appropriate) damage for this particular fighter:
+        $damage = $this->getDamage();
+//        $damage = $this->getDamageMod($damage, $shooter, $target, null, $gamedata);
+//        $damage -= $target->getDamageMod($shooter, null, $gamedata->turn, $this);
+
+                $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
+
+		}
+	}
+
+
+// END MARCIN'S CODE
+
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+public function getDamage($fireOrder){        return Dice::d(6, 1)+2;   }
+    	//public function getDamage($fireOrder){        return 12;   }
+        public function setMinDamage(){     $this->minDamage = 3;      }
+        public function setMaxDamage(){     $this->maxDamage = 8;      }
+}//endof PlasmaBlast
+
 ?>

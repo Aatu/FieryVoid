@@ -25,10 +25,21 @@ class ShipInfo extends React.Component {
 			var hitChance = 0;
 			
 			var toDo = 5;
-			if (ship.base && !ship.smallBase) {
+		if ( (ship.base && !ship.smallBase) {
 				names[1] = "Sections";
 				toDo = 2;
-			} else {
+			} 
+		else if ( (ship.SixSidedShip)) {
+			names[0] = "Primary";
+			names[1] = "Front";
+			names[2] = "Aft";
+			names[31] = "Port Front";
+			names[32] = "Port Aft";
+			names[41] = "Starboard Front";
+			names[42] = "Starboard Aft";
+			toDo = 42;
+		}
+			else {
 				toDo = 5; //(almost) always try to show all 5 sections, there may be holes
 			}
 			for (var i = 0; i < toDo; i++) {
