@@ -181,7 +181,7 @@ window.shipWindowManager = {
 			toDo = 2;
 		} 
 		if ( (ship.SixSidedShip)) {
-			names[0] = "Priimary";
+			names[0] = "Primary";
 			names[1] = "Front";
 			names[2] = "Aft";
 			names[31] = "Port Front";
