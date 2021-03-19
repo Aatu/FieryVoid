@@ -176,10 +176,21 @@ window.shipWindowManager = {
 
 		var names = ["Primary", "Front", "Aft", "Port", "Starboard"];
 
-		if ( (ship.base && !ship.smallBase) || (ship.SixSidedShip)) {
+		if ( (ship.base && !ship.smallBase) ) {
 			names[1] = "Sections";
 			toDo = 2;
-		} else {
+		} 
+		if ( (ship.SixSidedShip)) {
+			names[0] = "Priimary";
+			names[1] = "Front";
+			names[2] = "Aft";
+			names[31] = "Port Front";
+			names[32] = "Port Aft";
+			names[41] = "Starboard Front";
+			names[42] = "Starboard Aft";
+			toDo = 7;
+		}
+		else {
 			toDo = 5; //(almost) always try to show all 5 sections, there may be holes
 		}
 
