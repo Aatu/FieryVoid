@@ -6,10 +6,10 @@ class CylonBasestar extends SixSidedShip{
 
 		$this->pointCost = 1500;
 		$this->faction = "ZBSGCylons";
-		$this->phpclass = "SixTester";
-		$this->shipClass = "SixTester";
+		$this->phpclass = "CylonBasestar";
+		$this->shipClass = "Cylon Basestar";
 		$this->fighters = array("heavy"=>36); 
-		$this->isd = 2202;
+		$this->isd = 1980;
 		$this->locations = array(41, 42, 2, 32, 31, 1);		
 
 		$this->shipSizeClass = 3; //Enormous is not implemented
@@ -22,8 +22,8 @@ class CylonBasestar extends SixSidedShip{
         $this->pivotcost = 2;	
         $this->gravitic = true;        	
 
-		$this->forwardDefense = 19;
-		$this->sideDefense = 19;
+		$this->forwardDefense = 18;
+		$this->sideDefense = 18;
 
 		$this->imagePath = "img/ships/CylonBasestar.png";
 		$this->canvasSize = 300;
@@ -32,7 +32,7 @@ class CylonBasestar extends SixSidedShip{
 		$this->addPrimarySystem(new Hangar(6, 36));
 		$this->addPrimarySystem(new CnC(6, 30, 0, 0));
 		$this->addPrimarySystem(new Scanner(6, 24, 5, 8));
-        $this->addPrimarySystem(new Engine(6, 25, 0, 15, 3));			
+        $this->addPrimarySystem(new Engine(6, 25, 0, 16, 3));			
 		$this->addPrimarySystem(new JumpEngine(6, 25, 3, 16));		
 
 		$this->addFrontSystem(new LHMissileRack(4, 8, 0, 300, 60));
@@ -86,9 +86,9 @@ class CylonBasestar extends SixSidedShip{
 	//d20 hit chart
         $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-                    10 => "Jump Engine",
-                    12 => "Scanner",
+                    9 => "Structure",
+                    11 => "Jump Engine",
+                    13 => "Scanner",
                     15 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",
