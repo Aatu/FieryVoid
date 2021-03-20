@@ -53,7 +53,7 @@ class AntiprotonGun extends Weapon{
         public $animationExplosionScale = 0.20;
         public $trailLength = 5;
         public $priority = 3;
-		public $specialRangeCalculation = true; //to inform front end that it should use weapon-specific range penalty calculation - such a method should be present in .js!
+		public $specialRangeCalculation = true;  //to inform front end that it should use weapon-specific range penalty calculation - such a method should be present in .js!
 
         public $intercept = 2;
         public $loadingtime = 1;
@@ -71,16 +71,22 @@ class AntiprotonGun extends Weapon{
 	    {
 			$targetPos = $target->getHexPos();
 			$dis = mathlib::getDistanceHex($pos, $targetPos);
-			$dis = max(0,$dis-10);//first 10 hexes are "free"
 
-			if ($dis < 6) {
-				$rangePenalty = ($this->rangePenalty * $dis);
+			if ($dis >= 0 && $dis <= 5) {
+			$rangePenalty = 0;
+			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
+			return Array("rp" => $rangePenalty, "notes" => $notes);				
 		}
-			else
+			else if ($dis >= 6 && $dis <= 10) {
+			$rangePenalty = ($this->rangePenalty * $dis);
+			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
+			return Array("rp" => $rangePenalty, "notes" => $notes);				
+		}		
+			else {
 			$rangePenalty = (($this->rangePenalty * $dis) + (($this->rangePenalty * $dis) - 5));
 			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
 			return Array("rp" => $rangePenalty, "notes" => $notes);
-	   			 }	    
+		}			    
 	}
 		
 		
