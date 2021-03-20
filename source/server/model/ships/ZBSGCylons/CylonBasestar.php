@@ -37,8 +37,8 @@ class CylonBasestar extends SixSidedShip{
 
 		$this->addFrontSystem(new LHMissileRack(4, 8, 0, 300, 60));
         $this->addFrontSystem(new LHMissileRack(4, 8, 0,  300, 60));
-        $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 120, 240));
-		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 120, 240));
+        $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 60));
+		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 60));
         $this->addFrontSystem(new Thruster(6, 10, 0, 5, 1));
         $this->addFrontSystem(new Thruster(6, 10, 0, 5, 1));
 		
