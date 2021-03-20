@@ -84,25 +84,25 @@ class Xorr extends SixSidedShip{
            		 ),
             31=> array(
                     4 => "Thruster",
-                    7 => "Antiproton Gun";
+                    7 => "Antiproton Gun",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
                     4 => "Thruster",
-                    7 => "Antiproton Gun";
+                    7 => "Antiproton Gun",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
                     4 => "Thruster",
-                    7 => "Antiproton Gun";
+                    7 => "Antiproton Gun",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
                     4 => "Thruster",
-                    7 => "Antiproton Gun";
+                    7 => "Antiproton Gun",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
