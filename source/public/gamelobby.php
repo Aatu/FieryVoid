@@ -449,7 +449,7 @@ if ($simMv==true){//simultaneous movement
         <div class="shipwindow base" style="width: 450px;">
             <div class="topbar">
                 <span class="valueheader name">Name:</span><span class="value name">name here</span>
-                <span class="valueheader shipclass">Base:</span><span class="value shipclass">ship type class here</span>
+                <span class="valueheader shipclass">Class:</span><span class="value shipclass">ship type class here</span>
                 <div class="close"></div>
             </div>
 
