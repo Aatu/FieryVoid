@@ -71,9 +71,9 @@ class AntiprotonGun extends Weapon{
 	    {
 			$targetPos = $target->getHexPos();
 			$dis = mathlib::getDistanceHex($pos, $targetPos);
-			$dis = max(0,$dis-5);//first 5 hexes are "free"
+			$dis = max(0,$dis-10);//first 10 hexes are "free"
 
-			if ($dis >= 1 && $dis < 6) {
+			if ($dis < 6) {
 				$rangePenalty = ($this->rangePenalty * $dis);
 			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
 			return Array("rp" => $rangePenalty, "notes" => $notes);
