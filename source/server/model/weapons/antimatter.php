@@ -66,7 +66,7 @@ class AntiprotonGun extends Weapon{
         public $fireControl = array(2, 3, 3); // fighters, <mediums, <capitals 
 
 
-	    //override standard to skip first 3 hexes when calculating range penalty
+	    //override standard to skip first 5 hexes when calculating range penalty
 	    public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
 	    {
 			$targetPos = $target->getHexPos();
@@ -79,7 +79,8 @@ class AntiprotonGun extends Weapon{
 				return Array("rp" => $rangePenalty, "notes" => $notes);
 		}
 			if ($dis >= 6 ) {
-				$rangePenalty = ($this->rangePenalty * 2 * $dis);
+				//$dis = max(0,$dis-10); // skipping first 6 hexes
+				$rangePenalty = (($this->rangePenalty * $dis) + (($this->rangePenalty * $dis) - 5));
 				$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $					dis, 				rangePenalty: $rangePenalty";
 				return Array("rp" => $rangePenalty, "notes" => $notes);
 	   			 }	    
