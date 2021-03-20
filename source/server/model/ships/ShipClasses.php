@@ -2185,6 +2185,28 @@ class SixSidedShip extends BaseShip{
         return $locs;
     }		
 
+} //end of SixSidedShip
+
+class VreeCapital extends SixSidedShip{
+     
+    function __construct($id, $userid, $name, $slot){
+        parent::__construct($id, $userid, $name,$slot);
+    }
+
+    public function getLocations(){
+        //debug::log("getLocations");         
+        $locs = array();
+
+        $locs[] = array("loc" => 1, "min" => 300, "max" => 60, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 41, "min" => 0, "max" => 120, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 42, "min" => 60, "max" => 180, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 2, "min" => 120, "max" => 240, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 32, "min" => 180, "max" => 300, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 31, "min" => 240, "max" => 360, "profile" => $this->forwardDefense);
+
+        return $locs;
+    }	
+
 }
 
 

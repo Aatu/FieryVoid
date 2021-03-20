@@ -1905,6 +1905,7 @@ spl_autoload_register(
 				'sixtester2' => '/server/model/ships/customs/SixTester2.php',
 				'sixsidedship' => '/server/model/ships/ShipClasses.php',
 				'antiprotongun' => '/server/model/weapons/antimatter.php',
+				'xorr' => '/server/model/ships/vree/Xorr.php',
 
 
 		
