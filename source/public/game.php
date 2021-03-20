@@ -391,7 +391,7 @@
                     </div>
     			</td>
                 <td class="col3">
-                        <div class="EW" style="display:none;"><!-- Marcin Sawicki - at fleet selection EW window is useless! -->
+                    <div class="EW">
                         <div class="ewheader">
                             <span class="header">ELECTRONIC WARFARE</span>
                         </div>
