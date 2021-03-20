@@ -75,13 +75,13 @@ class AntiprotonGun extends Weapon{
 
 			if ($dis >= 1 && $dis < 6) {
 				$rangePenalty = ($this->rangePenalty * $dis);
-				$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $					dis, 				rangePenalty: $rangePenalty";
-				return Array("rp" => $rangePenalty, "notes" => $notes);
+			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
+			return Array("rp" => $rangePenalty, "notes" => $notes);
 		}
 			if ($dis >= 6 ) {
 				$rangePenalty = (($this->rangePenalty * $dis) + (($this->rangePenalty * $dis) - 5));
-				$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $					dis, 				rangePenalty: $rangePenalty";
-				return Array("rp" => $rangePenalty, "notes" => $notes);
+			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
+			return Array("rp" => $rangePenalty, "notes" => $notes);
 	   			 }	    
 	}
 		
@@ -89,7 +89,10 @@ class AntiprotonGun extends Weapon{
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Special"] = "Damage is dependent on how good a hit is - it's not randomized (actual damage done is 1X+12).<br>The maximum X is 10 for 22 damage.";
-			$this->data["Special"] .= "This weapon suffers range penalty, of 0 from 0-5 hexes, -1 per hex from 6-10 hexes, and -2 per hex at 11+ hexes.";
+			$this->data["Special"] .= "This weapon suffers the following range penalties:"; 
+			$this->data["Special"] .= "0 from 0-5 hexes"; 
+			$this->data["Special"] .= "-1 per hex from 6-10 hexes";
+			$this->data["Special"] .= "-2 per hex at 11+ hexes.";
         }
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
