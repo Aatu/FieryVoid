@@ -5,7 +5,7 @@ class Xorr extends SixSidedShip{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 550;
-		$this->faction = "vree";
+		$this->faction = "Vree";
 		$this->phpclass = "Xorr";
 		$this->shipClass = "Xorr War Saucer";
 		$this->isd = 2210;
