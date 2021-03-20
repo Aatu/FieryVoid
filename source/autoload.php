@@ -1900,10 +1900,11 @@ spl_autoload_register(
 				'drolla' => '/server/model/ships/corillani/Drolla.php',
 				'plasmablast' => '/server/model/weapons/plasma.php',
 				
-				
+				//Vree
 				'sixtester' => '/server/model/ships/customs/SixTester.php',
 				'sixtester2' => '/server/model/ships/customs/SixTester2.php',
 				'sixsidedship' => '/server/model/ships/ShipClasses.php',
+				'antiprotongun' => '/server/model/weapons/antimatter.php',
 
 
 		
