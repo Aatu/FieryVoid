@@ -71,24 +71,19 @@ class AntiprotonGun extends Weapon{
 	    {
 			$targetPos = $target->getHexPos();
 			$dis = mathlib::getDistanceHex($pos, $targetPos);
+			$dis = max(0,$dis-5);//first 10 hexes are "free"
 
-			if ($dis >= 0 && $dis <= 5) {
-			$rangePenalty = 0;
-			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
-			return Array("rp" => $rangePenalty, "notes" => $notes);				
-		}
-			else if ($dis >= 6 && $dis <= 10) {
+		if ($dis < 6) {
 			$rangePenalty = ($this->rangePenalty * $dis);
 			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
-			return Array("rp" => $rangePenalty, "notes" => $notes);				
-		}		
-			else {
-			$rangePenalty = (($this->rangePenalty * $dis) + (($this->rangePenalty * $dis) - 5));
-			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
 			return Array("rp" => $rangePenalty, "notes" => $notes);
-		}			    
-	}
-		
+	   		 }	
+	    else ($dis >= 6) {
+	    	$rangePenalty = ($this->rangePenalty * $dis * 2 - 5);
+			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
+			return Array("rp" => $rangePenalty, "notes" => $notes);	
+	  	 	 } 
+		}
 		
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
