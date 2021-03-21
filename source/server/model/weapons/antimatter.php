@@ -5,7 +5,7 @@
         public $name = "antimatterConverter";
         public $displayName = "Antimatter Converter";
         public $animation = "beam";
-        public $animationColor = array(175, 225, 175);
+        public $animationColor = array(0, 204, 255);
         public $projectilespeed = 10;
         public $animationWidth = 4;
         public $animationExplosionScale = 0.90;
@@ -48,7 +48,7 @@ class AntiprotonGun extends Weapon{
 		public $iconPath = "AntiprotonGun.png";
         public $animation = "beam";
 //        public $animationColor = array(175, 225, 175);
-        public $animationColor = array(26, 240, 112);
+        public $animationColor = array(0, 204, 255);
         public $projectilespeed = 10;
         public $animationWidth = 1;
         public $animationExplosionScale = 0.20;
