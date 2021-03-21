@@ -121,7 +121,7 @@ class AntimatterCannon extends Weapon{
 		public $iconPath = "AntimatterCannon.png";
         public $animation = "laser";
 //        public $animationColor = array(175, 225, 175);
-        public $animationColor = array(26, 240, 112);
+        public $animationColor = array(221, 255, 255);
 		public $animationWidth = 4;
 		public $animationWidth2 = 0.2;
         public $priority = 3;
