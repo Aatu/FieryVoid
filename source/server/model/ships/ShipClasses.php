@@ -2222,7 +2222,7 @@ class VreeCapital extends BaseShip{
         return $locs;
     }	
 
-}// end fo VreeCapital
+}// end of VreeCapital
 
 
 ?>

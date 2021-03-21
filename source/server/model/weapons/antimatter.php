@@ -78,11 +78,11 @@ class AntiprotonGun extends Weapon{
 			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
 			return Array("rp" => $rangePenalty, "notes" => $notes);
 	   		 }	
-	    else ($dis >= 6) {
-	    	$rangePenalty = ($this->rangePenalty * $dis * 2 - 5);
+		if ($dis >= 6) {
+			$rangePenalty = ((($this->rangePenalty * $dis)*2)-5);
 			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
-			return Array("rp" => $rangePenalty, "notes" => $notes);	
-	  	 	 } 
+			return Array("rp" => $rangePenalty, "notes" => $notes);
+	   		 }	
 		}
 		
         public function setSystemDataWindow($turn){

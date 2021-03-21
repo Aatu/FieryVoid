@@ -1,5 +1,5 @@
 <?php
-class Xorr extends SixSidedShip{
+class Xorr extends VreeCapital{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
