@@ -40,6 +40,7 @@
         public function setMaxDamage(){     $this->maxDamage = 82;      }
     }
 
+
 class AntiprotonGun extends Weapon{
         
         public $name = "AntiprotonGun";
@@ -54,7 +55,8 @@ class AntiprotonGun extends Weapon{
         public $trailLength = 5;
         public $priority = 3;
 		public $specialRangeCalculation = true;  //to inform front end that it should use weapon-specific range penalty calculation - such a method should be present in .js!
-
+		public $doubleRangeIfNoLock = true;
+		
         public $intercept = 2;
         public $loadingtime = 1;
 		public $rangePenalty = 1;        
@@ -62,7 +64,6 @@ class AntiprotonGun extends Weapon{
 		public $damageType = "Standard";
     	public $weaponClass = "Antimatter"; 
 		public $firingMode = "Standard";
-		public $doubleRangeIfNoLock = true;
 
         public $fireControl = array(2, 3, 3); // fighters, <mediums, <capitals 
 
@@ -96,7 +97,7 @@ class AntiprotonGun extends Weapon{
         }
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-			if ( $maxhealth == 0 ) $maxhealth = 4;
+			if ( $maxhealth == 0 ) $maxhealth = 8;
             if ( $powerReq == 0 ) $powerReq = 4;            
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -109,5 +110,79 @@ class AntiprotonGun extends Weapon{
 
         public function setMinDamage(){     $this->minDamage = 12;      }
         public function setMaxDamage(){     $this->maxDamage = 22;      }
+        
+} //end of class AntiprotonGun
+
+
+class AntimatterCannon extends Weapon{
+        
+        public $name = "AntimatterCannon";
+        public $displayName = "Antimatter Cannon";
+		public $iconPath = "AntimatterCannon.png";
+        public $animation = "laser";
+//        public $animationColor = array(175, 225, 175);
+        public $animationColor = array(26, 240, 112);
+		public $animationWidth = 4;
+		public $animationWidth2 = 0.2;
+        public $priority = 3;
+		public $specialRangeCalculation = true;  //to inform front end that it should use weapon-specific range penalty calculation - such a method should be present in .js!
+		public $doubleRangeIfNoLock = true;
+		
+        public $loadingtime = 3;
+		public $rangePenalty = 1; 
+		       
+        public $firingModes = array(
+            1 => "Raking",
+            2 => "Piercing"
+        );
+        public $damageTypeArray=array(1=>'Raking', 2=>'Piercing');
+    	public $weaponClass = "Antimatter"; 
+
+        public $fireControlArray = array( 1=>array(-2, 3, 5), 2=>array(null, -1, 1) ); // fighters, <mediums, <capitals 
+
+
+	    //override standard to skip first 5 hexes when calculating range penalty
+	    public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
+	    {
+			$targetPos = $target->getHexPos();
+			$dis = mathlib::getDistanceHex($pos, $targetPos);
+			$dis = max(0,$dis-10);//first 5 hexes are "free"
+
+		if ($dis < 11) {
+			$rangePenalty = ($this->rangePenalty * $dis);
+			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
+			return Array("rp" => $rangePenalty, "notes" => $notes);
+	   		 }	
+		if ($dis >= 11) {
+			$rangePenalty = ((($this->rangePenalty * $dis)*2)-10);
+			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
+			return Array("rp" => $rangePenalty, "notes" => $notes);
+	   		 }	
+		}
+		
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Damage is dependent on how good a hit is - it's not randomized (actual damage done is 2X+16).<br>The maximum X is 20 for 56 damage.";
+			$this->data["Special"] .= "<br>This weapon suffers the following range penalties:"; 
+			$this->data["Special"] .= "<br>  0 from 0-10 hexes"; 
+			$this->data["Special"] .= "<br> -1 per hex from 11-20 hexes";
+			$this->data["Special"] .= "<br> -2 per hex at 21+ hexes.";
+        }
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 9;
+            if ( $powerReq == 0 ) $powerReq = 8;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+       	public function getDamage($fireOrder){
+                $X = round(($fireOrder->needed - $fireOrder->rolled)/5);
+				if ($X > 20) $X = 20;
+				return $damage = ($X) + 16;
+            }
+
+        public function setMinDamage(){     $this->minDamage = 16;      }
+        public function setMaxDamage(){     $this->maxDamage = 56;      }
 }
+
 ?>

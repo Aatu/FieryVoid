@@ -31,3 +31,23 @@ AntiprotonGun.prototype.calculateSpecialRangePenalty = function (distance) {
 	    return rangePenalty;
 	    }			
 };
+
+
+var AntimatterCannon = function AntimatterCannon(json, ship) {
+    Antimatter.call(this, json, ship);
+};
+AntimatterCannon.prototype = Object.create(Antimatter.prototype);
+AntimatterCannon.prototype.constructor = AntimatterCannon;
+
+AntimatterCannon.prototype.calculateSpecialRangePenalty = function (distance) {
+    var distancePenalized = Math.max(0,distance - 10); //ignore first 5 hexes
+			
+	if (distancePenalized < 11){
+    var rangePenalty = this.rangePenalty * distancePenalized;
+	    return rangePenalty;
+	    }
+	if (distancePenalized >= 11){
+    var rangePenalty = this.rangePenalty * distancePenalized*2-10;
+	    return rangePenalty;
+	    }			
+};

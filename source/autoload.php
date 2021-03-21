@@ -1907,6 +1907,7 @@ spl_autoload_register(
 				'antiprotongun' => '/server/model/weapons/antimatter.php',
 				'xorr' => '/server/model/ships/vree/Xorr.php',
 				'vreecapital' => '/server/model/ships/ShipClasses.php',
+				'antimattercannon' => '/server/model/weapons/antimatter.php',
 
 
 		

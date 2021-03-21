@@ -32,9 +32,9 @@ class Xorr extends VreeCapital{
 		$this->addPrimarySystem(new CnC(5, 12, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 12, 9, 8));
         $this->addPrimarySystem(new Engine(5, 12, 0, 8, 2));			
-		$this->addPrimarySystem(new AntiprotonGun(3, 8, 4, 0, 360));
-		$this->addPrimarySystem(new AntiprotonGun(3, 8, 4, 0, 360));
-		$this->addPrimarySystem(new AntiprotonGun(3, 8, 4, 0, 360));		
+		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
+		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
+		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));		
 
         $this->addFrontSystem(new Thruster(4, 14, 0, 8, 1));
 		
