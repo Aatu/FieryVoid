@@ -18,8 +18,16 @@ var AntiprotonGun = function AntiprotonGun(json, ship) {
 };
 AntiprotonGun.prototype = Object.create(Antimatter.prototype);
 AntiprotonGun.prototype.constructor = AntiprotonGun;
+
 AntiprotonGun.prototype.calculateSpecialRangePenalty = function (distance) {
     var distancePenalized = Math.max(0,distance - 5); //ignore first 5 hexes
+			
+	if (distancePenalized < 6){
     var rangePenalty = this.rangePenalty * distancePenalized;
-    return rangePenalty;
+	    return rangePenalty;
+	    }
+	if (distancePenalized >= 6){
+    var rangePenalty = this.rangePenalty * distancePenalized*2-5;
+	    return rangePenalty;
+	    }			
 };
