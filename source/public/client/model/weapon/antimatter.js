@@ -14,9 +14,9 @@ AntimatterConverter.prototype.constructor = AntimatterConverter;
 
 
 var AntiprotonGun = function AntiprotonGun(json, ship) {
-    Torpedo.call(this, json, ship);
+    Antimatter.call(this, json, ship);
 };
-AntiprotonGun.prototype = Object.create(Torpedo.prototype);
+AntiprotonGun.prototype = Object.create(Antimatter.prototype);
 AntiprotonGun.prototype.constructor = AntiprotonGun;
 AntiprotonGun.prototype.calculateSpecialRangePenalty = function (distance) {
     var distancePenalized = Math.max(0,distance - 5); //ignore first 5 hexes

@@ -1906,6 +1906,7 @@ spl_autoload_register(
 				'sixsidedship' => '/server/model/ships/ShipClasses.php',
 				'antiprotongun' => '/server/model/weapons/antimatter.php',
 				'xorr' => '/server/model/ships/vree/Xorr.php',
+				'vreecapital' => '/server/model/ships/ShipClasses.php',
 
 
 		
