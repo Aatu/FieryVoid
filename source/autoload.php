@@ -1765,6 +1765,9 @@ spl_autoload_register(
 				'powercapacitor' => '/server/model/systems/baseSystems.php',
                 'chargehalve' => '/server/model/cricialClasses.php',
                 'chargeempty' => '/server/model/cricialClasses.php',
+				'maggravreactortechnical' => '/server/model/systems/baseSystems.php',
+				'vorlondischargegun' => '/server/model/weapons/specialWeapons.php',
+				
 				
 				
 				

@@ -10,7 +10,7 @@ class TechnicalTestbed extends MediumShip{
         $this->imagePath = "img/ships/ShadowCruiser.png";
         $this->shipClass = "New Technology Testbed";
         $this->canvasSize = 200;
-	    $this->isd = 2240;
+	    $this->isd = 9999;
         $this->shipSizeClass = 2; //it's actually a HCV using MCV layout
         $this->agile = true;
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
@@ -35,14 +35,14 @@ class TechnicalTestbed extends MediumShip{
 		$this->enhancementOptionsDisabled[] = 'IMPR_ENG'; //no Engine ;)
 		
          
-        $this->addPrimarySystem(new MagGravReactor(3, 12, 0, 0));
-	$this->addPrimarySystem(new PowerCapacitor( 4, 25, 0, 2, true));//armor, structure, power req, output, has petals    
+        $this->addPrimarySystem(new MagGravReactorTechnical(3, 12, 0, 0));
+		$this->addPrimarySystem(new PowerCapacitor( 4, 100, 0, 3, true));//armor, structure, power req, output, has petals    
 	    
-        $this->addPrimarySystem(new ShadowPilot(3, 8, 0, 0));
+        $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 14, 0, 6));
-		$this->addPrimarySystem(new PhasingDrive(4, 16, 0, 15));		
+		$this->addPrimarySystem(new JumpEngine(4, 16, 3, 24));		
 		$this->addPrimarySystem(new Hangar(3, 1));
-        $this->addPrimarySystem(new SelfRepair(5, 6, 3)); //armor, structure, output
+        //$this->addPrimarySystem(new SelfRepair(5, 6, 3)); //armor, structure, output
 		
 		
 		
@@ -72,7 +72,7 @@ class TechnicalTestbed extends MediumShip{
 		
 		
 		//weapons - Forward for visual reasons!
-        $this->addFrontSystem(new BattleLaser(3, 6, 6, 300, 60));
+        $this->addFrontSystem(new VorlonDischargeGun(3, 0, 0, 240, 120));
         
 		
 		//technical thrusters - unlimited, like for MCVs		
@@ -109,7 +109,7 @@ class TechnicalTestbed extends MediumShip{
 				18 => "0:Reactor",
 				20 => "Primary",
 				*/
-				20 => "0:Phasing Drive",
+				20 => "0:Power Capacitor",
 			),
 			2=> array(
 				5 => "1:Burst Beam",

@@ -199,6 +199,13 @@ class Weapon extends ShipSystem
 	{
 		return false;
 	}
+	
+    //can intercept at all? true means standard rules apply, false blocks interception
+	//added for Vorlon weapons that need to check whether they have power available to continue firing, but interface is large to enable possible further needs
+	public function canInterceptAtAll($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon)
+	{
+		return true;
+	}
 
     public function getRange($fireOrder)
     {

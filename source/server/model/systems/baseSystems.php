@@ -361,6 +361,18 @@ class MagGravReactor extends Reactor{
 }//endof MagGravReactor		
 
 
+class MagGravReactorTechnical extends MagGravReactor{
+/*Mag-Gravitic Reactor, but displayed in grey - as a technical system that cannot be damaged (Vorlons use it)
+*/		
+    public $iconPath = "reactorTechnical.png";
+	public function setSystemDataWindow($turn){
+		$this->data["Output"] = $this->output;
+		parent::setSystemDataWindow($turn);     
+		$this->data["Special"] = "Mag-Gravitic Reactor: provides fixed total power, regardless of destroyed systems.";
+		$this->data["Special"] .= "<br>This system is here for technical purposes only. Cannot be damaged in any way.";
+	}		
+}//endof MagGravReactor		
+
 //warning: needs external code to function properly. Intended for starbases only.
 /* let's disable it - all use changed to SubReactorUniversal!
 class SubReactor extends ShipSystem{	
@@ -2450,12 +2462,12 @@ capacitor is completely emptied.
 		$this->boostable = $hasPetals;
     }
 	
-	function getMaxCapacity(){ //maximum capacity = health remaining
+	public function getMaxCapacity(){ //maximum capacity = health remaining
 		return $this->getRemainingHealth();
 	}
 	
 	
-	function setPowerHeld($newValue){ //cut off by maximum capacity
+	public function setPowerHeld($newValue){ //cut off by maximum capacity
 		$this->powerCurr = min($newValue, $this->getMaxCapacity() );
 	}
 
@@ -2470,8 +2482,8 @@ capacitor is completely emptied.
 	 
 	 CHANGES COMPARED TO OFFICIAL VERSION:
 	  - recharge occurs in Initial phase (official - just before movement, which makes power not usable in Initial phase)
-	  - opening petals reduces armor by 2 (official - armor is reduced on PRIMARY only, but all profiles are increased by 1)
-	  - cannot icrease recharge rate in any other way (official: can shut down everything (weapons, shields) and incrrease by 100%)
+	  - opening petals reduces armor of all systems by 2 (official - armor is reduced on PRIMARY only, but all profiles are increased by 1)
+	  - cannot icrease recharge rate in any other way (official - can shut down everything (weapons, shields) to increase by 100%)
 	*/
     public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
 		$ship = $this->getUnit();
@@ -2511,16 +2523,35 @@ capacitor is completely emptied.
 				case 4: //firing phase
 					//take what front end reports, and add what back end calculated (basically weapons fire cost)
 					//$this->setPowerHeld($this->powerReceivedFromFrontEnd + $this->powerReceivedFromBackEnd); 
-					//or perhaps disregard what front end says - in this phase it's cost of firing... and this is better calculated by back end!
+					//or perhaps disregard what front end says - in this phase it's cost of firing... and this is better calculated by back end (firing _declaration_ doesn't equal actual firing, especially for Ligntning Cannons!
 					$this->setPowerHeld($this->powerCurr - $this->powerReceivedFromBackEnd); 
+					//apply critical eefects: halve charge/empty charge
+					if($this->hasCritical("ChargeEmpty")){
+						$this->setPowerHeld(0); 
+					}else if ($this->hasCritical("ChargeHalve")){
+						$this->setPowerHeld(floor($this->powerCurr/2)); 
+					}
 					//AND PREPARE APPROPRIATE NOTES!		
 					$notekey = 'powerStored';
 					$noteHuman = 'Power Capacitor - stored power';
-					$noteValue = $this->powerCurr;
+					$noteValue = $this->powerCurr ;
 					$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
 					break;
 		}
 	} //endof function generateIndividualNotes
+	
+	public function canDrawPower($powerNeeded){
+		if(($this->powerCurr - $this->powerReceivedFromBackEnd) >= $powerNeeded){
+			return true; //drawing such power is possible
+		}else{
+			return false; //cannot draw so much power!
+		}
+	}
+	
+	//it should not happen, but technically it's possible to actually draw more power than Capacitor holds...
+	public function doDrawPower($powerDrawn){
+		$this->powerReceivedFromBackEnd += $powerDrawn;
+	}
 	
 	/*act on notes just loaded - to be redefined by systems as necessary
 	 - set power held
@@ -2540,9 +2571,9 @@ capacitor is completely emptied.
         parent::setSystemDataWindow($turn); 
 		$this->data["Power stored/max"] =  $this->powerCurr . '/' . $this->getMaxCapacity();
         $this->data["Special"] = "This system is responsible for generating and storing power (Reactor is nearby for technical purposes).";	   
-	if ($this->boostable){
-        	$this->data["Special"] .= "<br>You may boost this system (open petals) to increase recharge rate by 50% - at the cost of treating all armor values as 2 points lower.";
-	}
+		if ($this->boostable){
+				$this->data["Special"] .= "<br>You may boost this system (open petals) to increase recharge rate by 50% - at the cost of treating all armor values as 2 points lower.";
+		}
     }
 	
 	public function beforeFiringOrderResolution($gamedata){ //actually mark armor reduced temporary critical if Petals are open

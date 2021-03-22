@@ -18,6 +18,15 @@ MagGravReactor.prototype.hasMaxBoost = function () {
     return true;
 };
 
+var MagGravReactorTechnical = function MagGravReactorTechnical(json, ship) {
+    Reactor.call(this, json, ship);
+};
+MagGravReactorTechnical.prototype = Object.create(Reactor.prototype);
+MagGravReactorTechnical.prototype.constructor = MagGravReactorTechnical;
+MagGravReactorTechnical.prototype.hasMaxBoost = function () {
+    return true;
+};
+
 
 var SubReactorUniversal = function(json, ship)
 {
@@ -426,18 +435,6 @@ PowerCapacitor.prototype.initBoostableInfo = function () {
     this.powerReq =  - effectiveOutput; //NEGATIVE VALUE - this system adds power to Reactor :)
     return this;
 };
-/* is this really necessary?...
-PowerCapacitor.prototype.clearBoost = function () {
-    for (var i in system.power) {
-        var power = system.power[i];
-        if (power.turn != gamedata.turn) continue;
-        if (power.type == 2) {
-            system.power.splice(i, 1);
-            return;
-        }
-    }
-};
-*/
 PowerCapacitor.prototype.hasMaxBoost = function () {
     return true;
 };
@@ -447,7 +444,7 @@ PowerCapacitor.prototype.getMaxBoost = function () {
 PowerCapacitor.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
 	this.individualNotesTransfer = Array();
 	//note power currently remaining ON REACTOR as charge held
-	var powerRemaining = shipManager.power.getReactorPower(this.ship, this); //second attribute really not relevant here
+	var powerRemaining = shipManager.power.getReactorPower(this.ship, this); 
 	this.individualNotesTransfer.push(powerRemaining);
 	return true;
 };

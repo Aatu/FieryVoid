@@ -16,6 +16,9 @@ ShipSystem.prototype = {
 ShipSystem.prototype.initBoostableInfo = function () {
 				return this;
 };
+ShipSystem.prototype.initializationUpdate = function () { //for all systems, not just boostable ones
+				return this;
+};
 
 ShipSystem.prototype.hasMaxBoost = function () {
 				return false;
