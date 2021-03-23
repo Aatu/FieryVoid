@@ -1767,6 +1767,10 @@ spl_autoload_register(
                 'chargeempty' => '/server/model/cricialClasses.php',
 				'maggravreactortechnical' => '/server/model/systems/baseSystems.php',
 				'vorlondischargegun' => '/server/model/weapons/specialWeapons.php',
+				'vorlonlightningcannon' => '/server/model/weapons/specialWeapons.php',
+				
+				'vorlonbattledestroyer' => '/server/model/ships/vorlons/vorlonBattleDestroyer.php',
+				
 				
 				
 				

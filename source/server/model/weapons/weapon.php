@@ -84,6 +84,7 @@ class Weapon extends ShipSystem
     public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
 	public $isRammingAttack = false; //true means hit chance calculations are completely different, relying on speed
 	public $raking = 10;//size of rake (for Raking weapons only)
+	public $rakingArray = array();//size of rake (for multi-mode weapons with variable rake size)
 
     public $shots = 1;
     public $shotsArray = array();
@@ -1638,6 +1639,8 @@ full Advanced Armor effects (by rules) for reference:
 
         if (isset($this->systemKillerArray[$i])) $this->systemKiller = $this->systemKillerArray[$i];
         if (isset($this->noOverkillArray[$i])) $this->noOverkill = $this->noOverkillArray[$i];
+				
+        if (isset($this->rakingArray[$i])) $this->raking = $this->rakingArray[$i];
 
     }//endof function changeFiringMode
 

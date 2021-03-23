@@ -1547,6 +1547,7 @@ class SurgeCannon extends Raking{
 			$notes = "technical fire order - weapon combined into another shot";
 			$fireOrder->chosenLocation = 0; //tylko techniczne i tak
 			$fireOrder->needed = 0;
+			$fireOrder->shots = 0;
 			$fireOrder->notes = $notes;
 			$fireOrder->updated = true;
 			$this->changeFiringMode($fireOrder->firingMode);
@@ -2876,6 +2877,7 @@ class ParticleConcentrator extends Raking{
 			$notes = "technical fire order - weapon combined into another shot";
 			$fireOrder->chosenLocation = 0; //tylko techniczne i tak
 			$fireOrder->needed = 0;
+			$fireOrder->shots = 0;
 			$fireOrder->notes = $notes;
 			$fireOrder->updated = true;
 			$this->changeFiringMode($fireOrder->firingMode);
@@ -3157,6 +3159,273 @@ class VorlonDischargeGun extends Weapon{
 }//endof class VorlonDischargeGun
 
 
+
+/* Vorlon primary weapon */
+class VorlonLightningCannon extends Weapon{
+	public $name = "VorlonLightningCannon";
+	public $displayName = "Lightning Cannon";
+	//public $iconPath = "VorlonDischargeGun.png";
+	public $animation = "laser";
+	public $animationColor = array(195, 235, 195);
+	public $trailColor = array(175, 225, 175);
+	public $projectilespeed = 15;
+	public $animationWidth = 4;
+	public $animationExplosionScale = 0.3;
+	public $trailLength = 30;
+	
+	//technical variables for combined shot
+	public $isCombined = false;
+	public $alreadyConsidered = false;
+	
+	public $loadingtime = 1;
+	
+	public $intercept = 4; //intercept rating -4
+	
+	
+	public $firingMode = 1;	
+	public $firingModes = array(
+		1 => "1Prong",
+		2 => "2Prongs",
+		3 => "3Prongs",
+		4 => "4Prongs",
+		5 => "P3Piercing",
+		6 => "Q4Piercing"
+	);
+	
+	public $priority = 5; //medium Standard weapon - for single fire...
+	public $priorityArray = array(1=>5, 2=>8, 3=>7, 4=>7, 5=>2, 6=>2); //single fire is Medium Standard, double Light Raking, 3/4 Heavy Raking, 5/6 Piercing)
+    public $rangePenalty = 1; 
+	public $rangePenaltyArray = array(1=>1, 2=>0.5, 3=>0.33, 4=>0.25, 5=>0.33, 6=>0.25);
+	public $fireControl = array(8, 5, 5); // fighters, <=mediums, <=capitals 
+	public $fireControlArray = array( 1=>array(8, 5, 5), 2=>array(4,5,5), 3=>array(0,5,5), 4=>array(null,5,5), 5=>array(null,1,1), 6=>array(null,1,1) ); // fighters, <mediums, <capitals ; Piercing shots incorporate Piercing shot penalty into FC
+	
+	//number of prongs/power required to fire - PER PRONG!
+	public $powerRequiredArray = array( 1=>array(1,1), 2=>array(2,2), 3=>array(3,4), 4=>array(4,6), 5=>array(3,4), 6=>array(4,6) );
+
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $damageTypeArray = array( 1=>array("Standard"), 2=>array("Raking"), 3=>array("Raking"), 4=>array("Raking"), 5=>array("Piercing"), 6=>array("Piercing") );
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	
+	//rake size array
+	public $raking = 10;//more in higher modes
+	public $rakingArray = array( 1=>10, 2=>10, 3=>15, 4=>20, 5=>15, 6=>20 );
+	
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $orientation ) //$orientation is 'L'eft or 'R'ight - regarding graphics
+	{
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+			$maxhealth = 11;
+		}
+		if ( $powerReq == 0 ){
+			$powerReq = 0;
+		}
+		$this->iconPath = "VorlonLightningCannon".$orientation.".png";
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+	
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);   
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}	    		
+		$this->data["Special"] .= "Lightning Cannon is capable of multiple modes of fire. Higher modes require combining multiple prongs on the same target.";  
+		$this->data["Special"] .= "<br>Firing modes available (Number of prongs/power used per SHOT/damage output (and mode)/range penalty):";  
+		$this->data["Special"] .= "<br> - 1 Prong: 1 Power, 1d10+8 Standard, -1/hex"; 
+		$this->data["Special"] .= "<br> - 2 Prongs: 4 Power, 2d10+16 Raking(10), -1/2 hexes";
+		$this->data["Special"] .= "<br> - 3 Prongs: 12 Power, 4d10+32 Raking(15), -1/3 hexes"; 
+		$this->data["Special"] .= "<br> - 4 Prongs: 24 Power, 8d10+64 Raking(20), -1/4 hexes"; 
+		$this->data["Special"] .= "<br> - 3 Prongs Piercing: 12 Power, 4d10+32 Piercing, -1/3 hexes"; 
+		$this->data["Special"] .= "<br> - 4 Prongs Piercing: 24 Power, 8d10+64 Piercing, -1/4 hexes"; 
+		$this->data["Special"] .= "<br>If weapon is mis-declared (shot is declared but not enough prongs are allocated in appropriate mode) shot will automatically miss and Power will NOT be drained."; 
+	}
+		
+		
+		
+
+	public function getDamage($fireOrder){
+		switch($this->firingMode){
+			case 1:
+				return Dice::d(10, 1)+8; 
+				break;
+			case 2:
+				return Dice::d(10, 2)+16; 
+				break;
+			case 3:	
+				return Dice::d(10, 4)+32; 
+				break;
+			case 4:
+				return Dice::d(10, 8)+64; 
+				break;
+			case 5:
+				return Dice::d(10, 4)+32; 
+				break;
+			case 6:
+				return Dice::d(10, 8)+64; 
+				break;
+			default: //should never go here
+				return Dice::d(10, 1)+8;
+				break;
+		}
+	}
+        
+	public function setMinDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 9; 
+				break;
+			case 2:
+				$this->minDamage = 18; 
+				break;
+			case 3:
+				$this->minDamage = 36; 
+				break;
+			case 4:
+				$this->minDamage = 72; 
+				break;
+			case 5:
+				$this->minDamage = 36; 
+				break;
+			case 6:
+				$this->minDamage = 72; 
+				break;
+			default: //should never go here
+				$this->minDamage = 9;
+				break;
+		}
+	}
+	
+	public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 18; 
+				break;
+			case 2:
+				$this->maxDamage = 36; 
+				break;
+			case 3:
+				$this->maxDamage = 72; 
+				break;
+			case 4:
+				$this->maxDamage = 144; 
+				break;
+			case 5:
+				$this->maxDamage = 72; 
+				break;
+			case 6:
+				$this->maxDamage = 144; 
+				break;
+			default: //should never go here
+				$this->maxDamage = 18;
+				break;
+		}
+	}
+	
+	
+	//hit chance calculation is standard - but at this stage power used information is sent to Capacitor, too
+	//if already combining - do not fire at all (eg. set hit chance at 0, make self completely uninterceptable and number of shots at 0)
+	public function calculateHitBase($gamedata, $fireOrder){
+		$this->changeFiringMode($fireOrder->firingMode);
+		$doDrain = true;
+		$doCalculate = true;
+		$this->alreadyConsidered = true;
+		if ($this->isCombined){  //this weapon is being used as subordinate combination weapon! 
+			$notes = "technical fire order - weapon combined into another shot";
+			$fireOrder->chosenLocation = 0; //tylko techniczne i tak
+			$fireOrder->needed = 0;
+			$fireOrder->shots = 0;
+			$fireOrder->notes = $notes;
+			$fireOrder->updated = true;
+			$this->doNotIntercept = true;
+			return;
+		}
+		
+		$powerRequired = $this->powerRequiredArray[$fireOrder->firingMode];				
+		$powerPerProng = $powerRequired[1];
+		$prongsNeeded = $powerRequired[0] ; 
+		if ($prongsNeeded < 2){ //nothing extra is needed, do fire!
+			$doDrain = true;
+			$doCalculate = true;
+		} else {//additional prongs needed!
+			$firingShip = $gamedata->getShipById($fireOrder->shooterid);
+			$subordinateOrders = array();
+			$subordinateOrdersNo = 0;
+			//look for firing orders from same ship at same target (and same called id as well) in same mode - and make sure it's same type of weapon
+			$allOrders = $firingShip->getAllFireOrders($gamedata->turn);
+			foreach($allOrders as $subOrder) {
+				if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->targetid) && ($subOrder->calledid == $fireOrder->calledid) && ($subOrder->firingMode == $fireOrder->firingMode) ){ 
+					//order data fits - is weapon another Lightning Cannon?...
+					$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
+					if ($subWeapon instanceof VorlonLightningCannon){
+						if (!$subWeapon->alreadyConsidered){ //ok, can be combined then!
+							$subordinateOrdersNo++;
+							$subordinateOrders[] = $subOrder;
+						}
+					}
+				}
+				if ($subordinateOrdersNo>=($prongsNeeded-1)) break;//enough subordinate weapons found! - exit loop
+			}						
+			if ($subordinateOrdersNo == ($prongsNeeded-1)){ //combining - set other combining weapons/fire orders to technical status!
+				foreach($subordinateOrders as $subOrder){
+					$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
+					$subWeapon->isCombined = true;
+					$subWeapon->alreadyConsidered = true;
+					$subWeapon->doNotIntercept = true;
+				}				
+				$doDrain = true;
+				$doCalculate = true;
+			}else{//not enough weapons to combine in this mode - mark combined and effectively don't fire
+				$notes = "technical fire order - weapon mis-declared";
+				$fireOrder->chosenLocation = 0; //tylko techniczne i tak
+				$fireOrder->needed = 0;
+				$fireOrder->shots = 0;
+				$fireOrder->notes = $notes;
+				$fireOrder->updated = true;
+				$this->doNotIntercept = true;
+				$doDrain = false;
+				$doCalculate = false;
+			}
+		}
+		
+		if($doDrain){
+			$capacitor = $this->unit->getSystemByName("PowerCapacitor");
+			if($capacitor){ //else something is wrong - weapon is put on a ship without Power Capacitor!
+				$powerNeeded = $powerPerProng*$prongsNeeded;//drain for ALL combined prongs!
+				$capacitor->doDrawPower($powerNeeded);
+			}
+		}
+		if($doCalculate){
+			parent::calculateHitBase($gamedata, $fireOrder); //standard hit chance calculation
+		}
+	}//endof function calculateHitBase
+
+
+	/* drain power when firing defensively
+	*/
+	public function fireDefensively($gamedata, $interceptedWeapon)
+	{
+		$capacitor = $this->unit->getSystemByName("PowerCapacitor");
+		if($capacitor){ //else something is wrong - weapon is put on a ship without Power Capacitor!
+			$capacitor->doDrawPower(1);
+		}
+		parent::fireDefensively($gamedata, $interceptedWeapon);
+	}
+	
+	/*can intercept anything only if Capacitor holds enough Power...*/
+	public function canInterceptAtAll($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon)
+	{
+		$powerIsAvailable = false;
+		$capacitor = $this->unit->getSystemByName("PowerCapacitor");
+		if($capacitor){ //else something is wrong - weapon is put on a ship without Power Capacitor!
+			if($capacitor->canDrawPower(1)) $powerIsAvailable = true;
+		}
+		return $powerIsAvailable;
+	}
+
+}//endof class VorlonLightningCannon
 
 
 ?>

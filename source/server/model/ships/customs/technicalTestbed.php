@@ -36,13 +36,14 @@ class TechnicalTestbed extends MediumShip{
 		
          
         $this->addPrimarySystem(new MagGravReactorTechnical(3, 12, 0, 0));
-		$this->addPrimarySystem(new PowerCapacitor( 4, 100, 0, 3, true));//armor, structure, power req, output, has petals    
+		$this->addPrimarySystem(new PowerCapacitor( 4, 40, 0, 4, true));//armor, structure, power req, output, has petals    
 	    
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 14, 0, 6));
 		$this->addPrimarySystem(new JumpEngine(4, 16, 3, 24));		
 		$this->addPrimarySystem(new Hangar(3, 1));
-        //$this->addPrimarySystem(new SelfRepair(5, 6, 3)); //armor, structure, output
+        $this->addPrimarySystem(new SelfRepair(5, 6, 3)); //armor, structure, output
+        $this->addPrimarySystem(new SelfRepair(5, 6, 3)); //armor, structure, output
 		
 		
 		
@@ -109,7 +110,7 @@ class TechnicalTestbed extends MediumShip{
 				18 => "0:Reactor",
 				20 => "Primary",
 				*/
-				20 => "0:Power Capacitor",
+				20 => "0:Jump Engine",
 			),
 			2=> array(
 				5 => "1:Burst Beam",

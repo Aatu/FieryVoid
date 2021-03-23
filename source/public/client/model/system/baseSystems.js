@@ -426,10 +426,12 @@ PowerCapacitor.prototype.constructor = PowerCapacitor;
 PowerCapacitor.prototype.initBoostableInfo = function () {
     // Needed because it can change during initial phase    
     var effectiveOutput = this.powerCurr;
-	var boostCount = shipManager.power.getBoost(this);	
-	effectiveOutput += this.output;
-	if(boostCount > 0){//boosted!
-		effectiveOutput += Math.round(this.output *0.5);
+	if (gamedata.gamephase == 1){//in Initial phase - add output to power available
+		var boostCount = shipManager.power.getBoost(this);	
+		effectiveOutput += this.output;
+		if(boostCount > 0){//boosted!
+			effectiveOutput += Math.round(this.output *0.5);
+		}
 	}
 	//can be more than maximum - but cannot HOLD more than maximum after Initial phase (server end takes care of that)
     this.powerReq =  - effectiveOutput; //NEGATIVE VALUE - this system adds power to Reactor :)

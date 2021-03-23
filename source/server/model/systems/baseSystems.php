@@ -2423,13 +2423,15 @@ class Bulkhead extends ShipSystem{
 it should replace Reactor, in FV I think it would be better when Reactor just coordinates with Capacitor!
 actual power shenanigans are almost entirely in front end!
 */
-class PowerCapacitor extends ShipSystem{ /********* UNDER CONSTRUCTION *********/
+class PowerCapacitor extends ShipSystem{ 
     public $name = "powerCapacitor";
     public $displayName = "Power Capacitor";
     public $primary = true; 
 	public $isPrimaryTargetable = false;
     public $iconPath = "PowerCapacitor.png";
 	
+	public $repairPriority = 10;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
 	//power held
 	public $powerCurr = 0;
 	public $powerMax = 0; //for front end only - maximum output
@@ -2572,8 +2574,9 @@ capacitor is completely emptied.
 		$this->data["Power stored/max"] =  $this->powerCurr . '/' . $this->getMaxCapacity();
         $this->data["Special"] = "This system is responsible for generating and storing power (Reactor is nearby for technical purposes).";	   
 		if ($this->boostable){
-				$this->data["Special"] .= "<br>You may boost this system (open petals) to increase recharge rate by 50% - at the cost of treating all armor values as 2 points lower.";
+			$this->data["Special"] .= "<br>You may boost this system (open petals) to increase recharge rate by 50% - at the cost of treating all armor values as 2 points lower.";
 		}
+		$this->data["Special"] .= "<br>Destroying Capacitor disables (but does not destroy) the ship.";
     }
 	
 	public function beforeFiringOrderResolution($gamedata){ //actually mark armor reduced temporary critical if Petals are open
@@ -2621,6 +2624,29 @@ capacitor is completely emptied.
 		$this->individualNotesTransfer = array(); //empty, just in case
 	}		
 	
+	
+	//upon destruction (ship should be completely disabled) go for:
+	// - add Power reduction critical to Reactor (so ship goes out of control) 
+	// - add SelfRepair output reduction critical (so the damage isn't just repaired in a few turns ;) ).
+	public function criticalPhaseEffects($ship, $gamedata)
+    { 
+		if (!$this->isDamagedOnTurn($gamedata->turn)) return; 
+		if (!$this->isDestroyed()) return;		
+		
+		$reactor = $ship->getSystemByName("Reactor"); //by class name
+		if($reactor){
+			$reactor->addCritical($ship->id, "OutputReduced4", $gamedata);
+			$reactor->addCritical($ship->id, "OutputReduced4", $gamedata);
+			$reactor->addCritical($ship->id, "OutputReduced4", $gamedata);
+		}
+		
+		$selfRepairList = $ship->getSystemsByName("Self Repair", true);//by readable name
+		foreach($selfRepairList as $selfRepair){
+			$selfRepair->addCritical($ship->id, "OutputReduced4", $gamedata);
+			$selfRepair->addCritical($ship->id, "OutputReduced4", $gamedata);
+			$selfRepair->addCritical($ship->id, "OutputReduced4", $gamedata);
+		}
+    } //endof function criticalPhaseEffects	
 							
 } //endof PowerCapacitor
 

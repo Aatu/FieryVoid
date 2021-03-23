@@ -153,6 +153,7 @@ Weapon.prototype.changeFiringMode = function () {
 		this.guns = this.gunsArray[this.firingMode];
 		this.data["Number of guns"] = this.guns;
 	}
+	if (!mathlib.arrayIsEmpty(this.rakingArray)) this.raking = this.rakingArray[this.firingMode];
 
 	//firing animation related...
 	if (!mathlib.arrayIsEmpty(this.animationArray)) this.animation = this.animationArray[this.firingMode];
