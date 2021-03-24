@@ -2434,7 +2434,7 @@ class PowerCapacitor extends ShipSystem{
     
 	//power held
 	public $powerCurr = 0;
-	public $powerMax = 0; //for front end only - maximum output
+	public $capacityBonus = 0; //additional capacity - potentially set by enhancements
 	public $powerReceivedFromFrontEnd = 0; //communication variable	
 	public $powerReceivedFromBackEnd = 0; //communication variable
 	
@@ -2460,12 +2460,16 @@ capacitor is completely emptied.
     
 
     function __construct( $armour, $maxhealth, $powerReq, $output, $hasPetals = true  ){ //technical object, does not need typical system attributes (armor, structure...)
-        parent::__construct( $armour, $maxhealth, $powerReq, $output ); //$armour, $maxhealth, $powerReq, $output
+        parent::__construct( $armour, $maxhealth, $powerReq, $output ); //$armour, $maxhealth, $powerReq, $output		
 		$this->boostable = $hasPetals;
     }
 	
-	public function getMaxCapacity(){ //maximum capacity = health remaining
-		return $this->getRemainingHealth();
+	public function getMaxCapacity(){ //maximum capacity = health remaining + bonus (bonus only if there is no damage!)
+		$baseCapacity = $this->getRemainingHealth();
+		if($this->maxhealth == $baseCapacity){
+			$baseCapacity += $this->capacityBonus;
+		}
+		return $baseCapacity;
 	}
 	
 	
