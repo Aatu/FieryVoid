@@ -68,24 +68,16 @@ class AntiprotonGun extends Weapon{
         public $fireControl = array(2, 3, 3); // fighters, <mediums, <capitals 
 
 
-	    //override standard to skip first 5 hexes when calculating range penalty
-	    public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
-	    {
-			$targetPos = $target->getHexPos();
-			$dis = mathlib::getDistanceHex($pos, $targetPos);
-			$dis = max(0,$dis-5);//first 5 hexes are "free"
-
-		if ($dis < 6) {
-			$rangePenalty = ($this->rangePenalty * $dis);
-			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
-			return Array("rp" => $rangePenalty, "notes" => $notes);
-	   		 }	
-		if ($dis >= 6) {
-			$rangePenalty = ((($this->rangePenalty * $dis)*2)-5);
-			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
-			return Array("rp" => $rangePenalty, "notes" => $notes);
-	   		 }	
-		}
+        public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
+        {
+            $targetPos = $target->getHexPos();
+            $dis = mathlib::getDistanceHex($pos, $targetPos);
+            $rangePenalty = 0;//base penalty
+            $rangePenalty += $this->rangePenalty * max(0,$dis-5); //everything above 5 hexes receives range penalty
+            $rangePenalty += $this->rangePenalty * max(0,$dis-10); //everything above 10 hexes receives range penalty again (for effective double penalty)
+            $notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
+            return Array("rp" => $rangePenalty, "notes" => $notes);
+        }
 		
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
@@ -141,24 +133,16 @@ class AntimatterCannon extends Weapon{
         public $fireControlArray = array( 1=>array(-2, 3, 5), 2=>array(null, -1, 1) ); // fighters, <mediums, <capitals 
 
 
-	    //override standard to skip first 5 hexes when calculating range penalty
-	    public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
-	    {
-			$targetPos = $target->getHexPos();
-			$dis = mathlib::getDistanceHex($pos, $targetPos);
-			$dis = max(0,$dis-10);//first 5 hexes are "free"
-
-		if ($dis < 11) {
-			$rangePenalty = ($this->rangePenalty * $dis);
-			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
-			return Array("rp" => $rangePenalty, "notes" => $notes);
-	   		 }	
-		if ($dis >= 11) {
-			$rangePenalty = ((($this->rangePenalty * $dis)*2)-10);
-			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
-			return Array("rp" => $rangePenalty, "notes" => $notes);
-	   		 }	
-		}
+        public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
+        {
+            $targetPos = $target->getHexPos();
+            $dis = mathlib::getDistanceHex($pos, $targetPos);
+            $rangePenalty = 0;//base penalty
+            $rangePenalty += $this->rangePenalty * max(0,$dis-10); //everything above 10 hexes receives range penalty
+            $rangePenalty += $this->rangePenalty * max(0,$dis-20); //everything above 20 hexes receives range penalty again (for effective double penalty)
+            $notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
+            return Array("rp" => $rangePenalty, "notes" => $notes);
+        }
 		
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
