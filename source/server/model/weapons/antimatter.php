@@ -79,6 +79,7 @@ class AntiprotonGun extends Weapon{
 				return Array("rp" => $rangePenalty, "notes" => $notes);
 		}
 			if ($dis >= 6 ) {
+				//$dis = max(0,$dis-10); // skipping first 6 hexes
 				$rangePenalty = (($this->rangePenalty * $dis) + (($this->rangePenalty * $dis) - 5));
 				$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $					dis, 				rangePenalty: $rangePenalty";
 				return Array("rp" => $rangePenalty, "notes" => $notes);
