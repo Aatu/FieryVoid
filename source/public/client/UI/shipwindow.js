@@ -70,7 +70,7 @@ window.shipWindowManager = {
 	createShipWindow: function createShipWindow(ship) {
 		var template;
 
-		if (ship.base && !ship.smallBase) {
+		if ( (ship.base && !ship.smallBase) || (ship.SixSidedShip)){
 			template = $("#shipwindowtemplatecontainer .shipwindow.base");
 		} else {
 			template = $("#shipwindowtemplatecontainer .shipwindow.ship");
@@ -151,15 +151,16 @@ window.shipWindowManager = {
 		shipWindowManager.addSystems(ship, shipwindow, 0);
 		shipWindowManager.addSystems(ship, shipwindow, 2);
 
-		if (ship.base && !ship.smallBase) {
-			shipWindowManager.addSystems(ship, shipwindow, 31);
-			shipWindowManager.addSystems(ship, shipwindow, 32);
-			shipWindowManager.addSystems(ship, shipwindow, 41);
-			shipWindowManager.addSystems(ship, shipwindow, 42);
-		} else {
-			shipWindowManager.addSystems(ship, shipwindow, 3);
-			shipWindowManager.addSystems(ship, shipwindow, 4);
-		}
+		if ( (ship.base && !ship.smallBase) || (ship.SixSidedShip)) {
+            shipWindowManager.addSystems(ship, shipwindow, 31);
+            shipWindowManager.addSystems(ship, shipwindow, 32);
+            shipWindowManager.addSystems(ship, shipwindow, 41);
+            shipWindowManager.addSystems(ship, shipwindow, 42);
+        } 
+        else {
+            shipWindowManager.addSystems(ship, shipwindow, 3);
+            shipWindowManager.addSystems(ship, shipwindow, 4);
+        }
 	},
 
 /*old!*/
@@ -175,10 +176,21 @@ window.shipWindowManager = {
 
 		var names = ["Primary", "Front", "Aft", "Port", "Starboard"];
 
-		if (ship.base && !ship.smallBase) {
+		if ( (ship.base && !ship.smallBase) ) {
 			names[1] = "Sections";
 			toDo = 2;
-		} else {
+		} 
+		else if ( (ship.SixSidedShip)) {
+			names[0] = "Primary";
+			names[1] = "Front";
+			names[2] = "Aft";
+			names[31] = "Port Front";
+			names[32] = "Port Aft";
+			names[41] = "Starboard Front";
+			names[42] = "Starboard Aft";
+			toDo = 42;
+		}
+		else {
 			toDo = 5; //(almost) always try to show all 5 sections, there may be holes
 		}
 
@@ -408,7 +420,7 @@ window.shipWindowManager = {
 		var table = " table";
 		var dest = "";
 
-		if (ship.base && !ship.smallBase) {
+		if ( (ship.base && !ship.smallBase) || (ship.SixSidedShip))  {
 			type = ".shipwindow.base_";
 
 			if (location > 4) {
@@ -591,7 +603,7 @@ window.shipWindowManager = {
 
 		var grouped = shipManager.systems.groupSystems(systems);
 
-		if (ship.base && ship.smallBase) {
+		if ( (ship.base && !ship.smallBase) || (ship.SixSidedShip))  {
 			grouped = shipWindowManager.combineGroupsForBase(grouped);
 		} else {
 			grouped = shipWindowManager.combineGroups(grouped);

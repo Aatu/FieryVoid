@@ -4,7 +4,7 @@ class baGammaFtr extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 42;
+	$this->pointCost = 60;
 	$this->faction = "Small Races";
         $this->phpclass = "baGammaFtr";
         $this->shipClass = "BA Gamma Light Fighters";
