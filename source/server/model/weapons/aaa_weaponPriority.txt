@@ -10,7 +10,7 @@ General remarks:
   
 Ship weapon priority:
 1: mostly special weapons that should be fired ASAP (eg. area-affecting weapons) (eg. AM Converter, EMine)
-2: special weapons requiring to be fired early, but not so much as priority 1 (eg. Plasma Stream)
+2: special weapons requiring to be fired early, but not so much as priority 1 (eg. Plasma Stream or Piercing weapons)
 3: very light weapons (average damage 8 and less) (eg. Scatter Pulsar, Ligh Pulse Cannon)
 4: light weapons (average damage less than 12) (eg. Light/Standard Particle Beam, Medium Pulse Cannon)
 5: medium weapons (average damage less than 14) (eg. Light Bolter)
