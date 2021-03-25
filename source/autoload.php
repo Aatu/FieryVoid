@@ -1914,6 +1914,10 @@ spl_autoload_register(
 				'xorr' => '/server/model/ships/vree/Xorr.php',
 				'vreecapital' => '/server/model/ships/ShipClasses.php',
 				'antimattercannon' => '/server/model/weapons/antimatter.php',
+				'antiprotondefender' => '/server/model/weapons/antimatter.php',
+				'xill' => '/server/model/ships/vree/Xill.php',
+				
+				
 
 
 		

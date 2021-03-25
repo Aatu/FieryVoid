@@ -206,5 +206,61 @@
         public function setMaxDamage(){     $this->maxDamage = 56;      }
 	
 } //end of AntimatterCannon
+	
+	
+	class AntiprotonDefender extends AntimatterWeapon{        
+        public $name = "AntiprotonDefender";
+        public $displayName = "Antiproton Defender";
+		public $iconPath = "AntiprotonDefender.png";
+		/* already included in AntimatterWeapon class; if a given weapon should be different then override, but if You want to change general AM weapons animation properties - go to AntimatterWeapon class instead		
+        public $animation = "beam";
+        public $animationColor = array(26, 240, 112);
+        public $projectilespeed = 10;
+        public $animationWidth = 1;
+        public $animationExplosionScale = 0.20;
+        public $trailLength = 5;
+		*/
+        public $priority = 4; //that's Standard Heavy hit!
+
+        public $intercept = 3;
+        public $loadingtime = 1;
 		
+		public $rangePenalty = 1; //-1/hex base penalty
+
+		public $rngNoPenalty = 3; //maximum range at which weapon suffers no penalty
+		public $rngNormalPenalty = 6;//maximum range at which weapon suffers regular penalty
+		public $maxX = 10; //maximum value of X
+		public $dmgEquation = 'X+8'; //to be able to automatically incorporate this into weapon description
+
+        public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals 
+		
+		
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			/*
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			//...and NOW $this->data["Special"] may be extended by further text, if still needed
+			*/
+        }
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 3;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+       	public function getDamage($fireOrder){
+                $X = $this->getX($fireOrder);
+				$damage = $X + 8;
+				return $damage ;
+            }
+
+        public function setMinDamage(){     $this->minDamage = 8;      }
+        public function setMaxDamage(){     $this->maxDamage = 18;      }
+	
+} //end of AntiprotonDefender		
 ?>

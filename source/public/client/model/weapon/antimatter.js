@@ -39,3 +39,10 @@ var AntimatterCannon = function AntimatterCannon(json, ship) {
 };
 AntimatterCannon.prototype = Object.create(AntimatterWeapon.prototype);
 AntimatterCannon.prototype.constructor = AntimatterCannon;
+
+
+var AntiprotonDefender = function AntiprotonDefender(json, ship) {
+    Antimatter.call(this, json, ship);
+};
+AntiprotonDefender.prototype = Object.create(AntimatterWeapon.prototype);
+AntiprotonDefender.prototype.constructor = AntiprotonDefender;

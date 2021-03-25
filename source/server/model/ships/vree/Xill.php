@@ -66,7 +66,7 @@ class Xill extends VreeCapital{
 	    
 	//d20 hit chart
         $this->hitChart = array(
-            0=> array(
+
             0=> array(
                     8 => "Structure",
                     10 => "Antimatter Cannon",
@@ -80,36 +80,42 @@ class Xill extends VreeCapital{
             1=> array(
                     4 => "Thruster",
                     8 => "Antiproton Gun",
+                    10 => "0:Antimatter Cannon",                    
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             2=> array(
                     4 => "Thruster",
                     8 => "Antiproton Gun",
+                    10 => "0:Antimatter Cannon",                    
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             31=> array(
                     4 => "Thruster",
                     8 => "Antiproton Gun",
+                    10 => "0:Antimatter Cannon",                    
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
                     4 => "Thruster",
                     8 => "Antiproton Gun",
+                    10 => "0:Antimatter Cannon",                    
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
                     4 => "Thruster",
                     8 => "Antiproton Gun",
+                    10 => "0:Antimatter Cannon",                    
                     18 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
                     4 => "Thruster",
                     8 => "Antiproton Gun",
+                    10 => "0:Antimatter Cannon",                    
                     18 => "Structure",
                     20 => "Primary",
            		 ),
