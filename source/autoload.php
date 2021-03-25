@@ -1766,6 +1766,13 @@ spl_autoload_register(
 				'powercapacitor' => '/server/model/systems/baseSystems.php',
                 'chargehalve' => '/server/model/cricialClasses.php',
                 'chargeempty' => '/server/model/cricialClasses.php',
+				'maggravreactortechnical' => '/server/model/systems/baseSystems.php',
+				'vorlondischargegun' => '/server/model/weapons/specialWeapons.php',
+				'vorlonlightningcannon' => '/server/model/weapons/specialWeapons.php',
+				
+				'vorlonbattledestroyer' => '/server/model/ships/vorlons/vorlonBattleDestroyer.php',
+				
+				
 				
 				
 				
@@ -1900,10 +1907,12 @@ spl_autoload_register(
 				'drolla' => '/server/model/ships/corillani/Drolla.php',
 				'plasmablast' => '/server/model/weapons/plasma.php',
 				
-				
+				//Vree
 				'sixtester' => '/server/model/ships/customs/SixTester.php',
 				'sixtester2' => '/server/model/ships/customs/SixTester2.php',
 				'sixsidedship' => '/server/model/ships/ShipClasses.php',
+				'antimatterweapon' => '/server/model/weapons/antimatter.php',
+				'antiprotongun' => '/server/model/weapons/antimatter.php',
 
 
 		
