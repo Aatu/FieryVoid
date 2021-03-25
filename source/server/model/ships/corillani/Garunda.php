@@ -8,11 +8,9 @@ class Garunda extends HeavyCombatVessel{
         $this->faction = "Corillani";
         $this->phpclass = "Garunda";
         $this->imagePath = "img/ships/CorillaniGarunda.png";
-        $this->shipClass = "Garunda Destroyer";
+        $this->shipClass = "Garunda Destroyer (CPN)";
 	    $this->isd = 2227;
-		$this->notes = 'Corillani Peoples Navy (CPN)';
-		$this->canvasSize= 200;
-        $this->fighters = array("normal"=>6);			    
+		$this->notes = 'Corillani Peoples Navy (CPN)';	    
         
         
         $this->forwardDefense = 13;
@@ -32,16 +30,13 @@ class Garunda extends HeavyCombatVessel{
         $this->addPrimarySystem(new Engine(4, 18, 0, 12, 3));
         $this->addPrimarySystem(new Hangar(2, 7));
         $this->addPrimarySystem(new Thruster(4, 8, 0, 3, 3));
-        $this->addPrimarySystem(new Thruster(3, 5, 0, 2, 3));        
-        $this->addPrimarySystem(new Thruster(3, 5, 0, 2, 4)); 
         $this->addPrimarySystem(new Thruster(4, 8, 0, 3, 4));
         $this->addPrimarySystem(new SMissileRack(3, 6, 0, 180, 360));
 		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 0, 180));                   
-        
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-        $this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
-        $this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
+        $this->addFrontSystem(new ParticleCannon (3, 8, 7, 300, 60));
+        $this->addFrontSystem(new ParticleCannon (3, 8, 7, 300, 60));
         $this->addFrontSystem(new TwinArray(2, 6, 2, 240, 60));
         $this->addFrontSystem(new TwinArray(2, 6, 2, 300, 120));
 

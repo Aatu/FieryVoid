@@ -73,54 +73,37 @@ Vagrant.configure("2") do |config|
   # documentation for more information about their specific syntax and use.
     config.vm.provision "shell", inline: <<-SHELL
     apt-get -y update
-
     sudo echo -e "ubuntu\nubuntu" | sudo passwd ubuntu
-
     sudo apt-get install -y software-properties-common python-software-properties
-
     sudo apt-get install -y apache2
-
     sudo a2enmod cache
     sudo a2enmod cache_disk
     sudo a2enmod expires
     sudo a2enmod headers
-
     debconf-set-selections <<< "mysql-server mysql-server/root_password_again password root"
     apt-get install -y mysql-server
-
     mysql -uroot -proot < /vagrant/db/emptyDatabase.sql
     mysql -uroot -proot B5CGM < /vagrant/db/addGameRules.sql
     mysql -uroot -proot B5CGM < /vagrant/db/playerWaiting.sql
-
     add-apt-repository ppa:ondrej/php
     apt-get update -y
     apt-get install -y php7.2 libapache2-mod-php7.2
     apt-get install -y php7.2-mysqlnd
-
     apt-get install -y git
     apt-get install -y zip
     apt-get install -y php7.2-dom
     sudo apt-get install php7.2-mbstring
-
     touch /tmp/fieryvoid.log
     chmod a+w /tmp/fieryvoid.log
-
     mkdir /var/www/html
-
     if ! [ -L /var/www/html ]; then
       rm -rf /var/www/html
       ln -fs /vagrant /var/www/html
     fi
-
     /etc/init.d/apache2 restart
-
     apt-get install -y curl
-
-
-
     cd /vagrant/
     php composer.phar install
     ./autoload.sh
-
   SHELL
 end

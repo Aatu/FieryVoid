@@ -65,56 +65,60 @@ class Plasma extends Weapon{
 
 	public function getDamage($fireOrder){
             switch($this->turnsloaded){
-                case 0:
+                case 0: 
                 case 1:
                     return Dice::d(10)+4;
-			    	break;
+			    return;
                 case 2:
                     return Dice::d(10, 2)+8;
-			    	break;
+			    return;
+                case 3:
                 default:
                     return Dice::d(10,4)+12;
-			    	break;
+			    return;
             }
 	}
         
         public function setMinDamage(){
+		/* sadly this does not work correctly... seting always full load, and leaving comment about accelerated fire!
             switch($this->turnsloaded){
+                case 0:
                 case 1:
                     $this->minDamage = 5 ;
+                    $this->animationExplosionScale = 0.15;
                     break;
                 case 2:
+                    $this->animationExplosionScale = 0.25;
                     $this->minDamage = 10 ;  
                     break;
+                case 3:
                 default:
+                    $this->animationExplosionScale = 0.35;
                     $this->minDamage = 16 ;  
                     break;
             }
-		}
-             
+	    */
+		$this->minDamage = 16 ;   
+	}
+                
         public function setMaxDamage(){
+		/* sadly this does not work correctly... seting always full load, and leaving comment about accelerated fire!
             switch($this->turnsloaded){
+                case 0:
                 case 1:
                     $this->maxDamage = 14 ;
                     break;
                 case 2:
                     $this->maxDamage = 28 ;  
                     break;
+                case 3:
                 default:
                     $this->maxDamage = 52 ;  
                     break;
             }
-		}
-
-		public function stripForJson(){
-			$strippedSystem = parent::stripForJson();
-			$strippedSystem->data = $this->data;
-			$strippedSystem->minDamage = $this->minDamage;
-			$strippedSystem->minDamageArray = $this->minDamageArray;
-			$strippedSystem->maxDamage = $this->maxDamage;
-			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
-			return $strippedSystem;
-		}
+	    */
+		    $this->maxDamage = 52;
+	}
 
 }//endof class PlasmaAccelerator
 
@@ -419,6 +423,7 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
 	/*weapon of Rogolon fighters - very nasty!*/
         public $name = "RogolonLtPlasmaGun";
         public $displayName = "Light Plasma Gun";
+	public $iconPath = "plasmaGun.png";
 	
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
@@ -441,18 +446,11 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
     	public $damageType = "Standard"; 
     	public $weaponClass = "Plasma"; 
 
-	function __construct($startArc, $endArc, $damageBonus=5, $nrOfShots = 2){
-            $this->shots = $nrOfShots;
-            $this->defaultShots = $nrOfShots;
+        function __construct($startArc, $endArc, $damageBonus=5, $shots = 2){
+            $this->shots = $shots;
+            $this->defaultShots = $shots;
 	    $this->damageBonus = $damageBonus;
-	    
-        if($nrOfShots === 1){
-			$this->iconPath = "lightPlasma.png";
-		}
-		if($nrOfShots === 2){
-			$this->iconPath = "lightPlasmalinked.png";
-							}    
-           
+            
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }      
 
@@ -609,18 +607,7 @@ class LightPlasmaAccelerator extends LinkedWeapon{
 								break;
 				}
 				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
-		}
-		
-		public function stripForJson(){
-			$strippedSystem = parent::stripForJson();
-			$strippedSystem->data = $this->data;
-			$strippedSystem->minDamage = $this->minDamage;
-			$strippedSystem->minDamageArray = $this->minDamageArray;
-			$strippedSystem->maxDamage = $this->maxDamage;
-			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
-			return $strippedSystem;
 		}	
-		
 }//end of class LightPlasmaAccelerator
 
 
@@ -993,16 +980,18 @@ class MegaPlasma extends Plasma{
 
 } //end of class MegaPlasma
 
-
 class PlasmaProjector extends Raking{
 
 	public $name = "PlasmaProjector";
 	public $displayName = "Plasma Projector";
 	public $iconPath = "PlasmaProjector.png";
-	public $animation = "laser";
+	public $animation = "beam";
 	public $animationColor = array(75, 250, 90);
-    public $animationWidth = 4;
-    public $animationWidth2 = 0.2;
+	public $trailColor = array(75, 250, 90);
+	public $projectilespeed = 20;
+	public $animationWidth = 4;
+	public $animationExplosionScale = 0.3;
+	public $trailLength = 500;
 	public $priority = 6;
 
 	public $rangeDamagePenalty = 0.25;
@@ -1033,5 +1022,6 @@ class PlasmaProjector extends Raking{
 	public function setMaxDamage(){     $this->maxDamage = 45;      }
 
 }// End of class PlasmaProjector
+
 
 ?>
