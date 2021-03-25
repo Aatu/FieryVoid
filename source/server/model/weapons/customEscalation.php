@@ -1404,7 +1404,7 @@ class EWGraviticTractingRod extends SWDirectWeapon{
 		public $rangePenalty = 1; //-1 hex - BUT ONLY AFTER 20 HEXES
 
 	    //override standard to skip first 20 hexes when calculating range penalty
-	    public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
+	    /*public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
 	    {
 			$targetPos = $target->getHexPos();
 			$dis = mathlib::getDistanceHex($pos, $targetPos);
@@ -1413,7 +1413,12 @@ class EWGraviticTractingRod extends SWDirectWeapon{
 			$rangePenalty = ($this->rangePenalty * $dis);
 			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
 			return Array("rp" => $rangePenalty, "notes" => $notes);
-	    }	
+	    }*/	
+		public function calculateRangePenalty($distance){
+			$rangePenalty = 0;//base penalty
+			$rangePenalty += $this->rangePenalty * max(0,$distance-20); //everything above X hexes receives range penalty
+			return $rangePenalty;
+		}
 
 	//ignore armor; advanced armor halves effect (due to this weapon being Electromagnetic)
 	public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){

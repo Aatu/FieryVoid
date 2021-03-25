@@ -74,6 +74,8 @@ class TechnicalTestbed extends MediumShip{
 		
 		//weapons - Forward for visual reasons!
         $this->addFrontSystem(new VorlonDischargeGun(3, 0, 0, 240, 120));
+        $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 240, 120));
+        $this->addFrontSystem(new StdParticleBeam(3, 1, 1, 240, 120));
         
 		
 		//technical thrusters - unlimited, like for MCVs		
