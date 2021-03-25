@@ -8,7 +8,7 @@ class Mollanta extends BaseShip{
 		$this->faction = "Corillani";
         $this->phpclass = "Mollanta";
         $this->imagePath = "img/ships/CorillaniMollanta.png";
-        $this->shipClass = "Mollanta Heavy Cruiser (CPN)";
+        $this->shipClass = "Mollanta Heavy Cruiser";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);
 	    $this->isd = 2230;
