@@ -186,3 +186,35 @@ var ParticleConcentrator = function(json, ship)
 }
 ParticleConcentrator.prototype = Object.create( Weapon.prototype );
 ParticleConcentrator.prototype.constructor = ParticleConcentrator;
+
+var VorlonDischargeGun = function VorlonDischargeGun(json, ship) {
+    Weapon.call(this, json, ship);
+};
+VorlonDischargeGun.prototype = Object.create(Weapon.prototype);
+VorlonDischargeGun.prototype.constructor = VorlonDischargeGun;
+VorlonDischargeGun.prototype.initializationUpdate = function() {
+    // Needed because it can change power consumption during firing phase, depending on power and number of shots being changed
+	this.powerReq = 0;
+	var isFiring = weaponManager.hasFiringOrder(this.ship, this);
+    if (isFiring) {
+		var firing = weaponManager.getFiringOrder(this.ship, this);
+		this.powerReq = 2*firing.shots*firing.firingMode;		
+	}
+    return this;
+};
+
+var VorlonLightningCannon = function VorlonLightningCannon(json, ship) {
+    Weapon.call(this, json, ship);
+};
+VorlonLightningCannon.prototype = Object.create(Weapon.prototype);
+VorlonLightningCannon.prototype.constructor = VorlonLightningCannon;
+VorlonLightningCannon.prototype.initializationUpdate = function() {
+    // Needed because it can change power consumption during firing phase, depending on power and number of shots being changed
+	this.powerReq = 0;
+	var isFiring = weaponManager.hasFiringOrder(this.ship, this);
+    if (isFiring) {
+		var firing = weaponManager.getFiringOrder(this.ship, this);
+		this.powerReq = this.powerRequiredArray[firing.firingMode][1]; //element is array Number of prongs/Power)		
+	}
+    return this;
+};

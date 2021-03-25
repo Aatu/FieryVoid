@@ -39,6 +39,7 @@ class Weapon extends ShipSystem
     public $projectilespeed = 17;
     public $projectilespeedArray = array();
 
+	public $doubleRangeIfNoLock = false; //in case of no lock-on default procedure is to double range penalty; some weapons (notably most Antimatter ones) double range itself instead
     public $rangePenalty = 0;
     public $rangePenaltyArray = array();
     public $specialRangeCalculation = false; //set to true if weapon should use its own range calculation IN FRONT END (server side range calculation is in weapon class anyway)
@@ -84,6 +85,7 @@ class Weapon extends ShipSystem
     public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
 	public $isRammingAttack = false; //true means hit chance calculations are completely different, relying on speed
 	public $raking = 10;//size of rake (for Raking weapons only)
+	public $rakingArray = array();//size of rake (for multi-mode weapons with variable rake size)
 
     public $shots = 1;
     public $shotsArray = array();
@@ -198,6 +200,13 @@ class Weapon extends ShipSystem
 	public function canFreeInterceptShot($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon)
 	{
 		return false;
+	}
+	
+    //can intercept at all? true means standard rules apply, false blocks interception
+	//added for Vorlon weapons that need to check whether they have power available to continue firing, but interface is large to enable possible further needs
+	public function canInterceptAtAll($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon)
+	{
+		return true;
 	}
 
     public function getRange($fireOrder)
@@ -699,6 +708,7 @@ class Weapon extends ShipSystem
 
     }
 
+/*replacing this with function just accepting distance as parameter and returning penalty!
     public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
     {
         $targetPos = $target->getHexPos();
@@ -708,9 +718,15 @@ class Weapon extends ShipSystem
         $notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
         return Array("rp" => $rangePenalty, "notes" => $notes);
     }
+*/
+    public function calculateRangePenalty($distance)
+    {
+        $rangePenalty = $this->rangePenalty * $distance;
+        return $rangePenalty;
+    }
 
 
-protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
+	protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
     {
         // first get the fighter that is armed with this weapon
         // We have to go looking for it because the shooter is a flight,
@@ -835,6 +851,7 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
         $pos = $shooter->getHexPos();
+		$targetPos = $target->getHexPos();
         $jammermod = 0;
         $jinkSelf = 0;
         $jinkTarget = 0;
@@ -859,8 +876,10 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
             return;
         }
 
-        $rp = $this->calculateRangePenalty($launchPos, $target);
+        /*replaced by different calculation later
+		$rp = $this->calculateRangePenalty($launchPos, $target);		
         $rangePenalty = $rp["rp"];
+		*/
 
         if ($shooter instanceof FighterFlight) $jinkSelf = Movement::getJinking($shooter, $gamedata->turn);  //count own jinking always
 
@@ -977,7 +996,7 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
 		}else if ($oew < 1){ //OEW beteen 0.5 and 1 is achievable for targets of Distortion EW
 			$noLockPenalty = 0.5;
 		}
-		$noLockMod =  $rangePenalty * $noLockPenalty;
+		//$noLockMod =  $rangePenalty * $noLockPenalty; //moved lower!
 			
 		$jammerValue = 0;
 		//if ($shooter->faction != $target->faction) { //checked by ability itself now!
@@ -999,9 +1018,26 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
 				}
 			}
 			*/		
-		//}
-			
-		$jammermod = $rangePenalty * max(0,($jammerValue-$noLockPenalty));//no lock and jammer work on the same thing, but they still need to be separated (for jinking).
+		//}			
+		//$jammermod = $rangePenalty * max(0,($jammerValue-$noLockPenalty));//no lock and jammer work on the same thing, but they still need to be separated (for jinking). //moved lower!
+
+		//new calculation of range penalty - with different way of counting for weapons that double range itself (...antimatter...)
+		$distanceForPenalty = mathlib::getDistanceHex($launchPos, $targetPos);
+		$rangePenalty = $this->calculateRangePenalty($distanceForPenalty);
+		$noLockMod = 0;
+		$jammermod = 0; //no lock and jammer work on the same thing, but they still need to be separated (for jinking).
+		$rngPenaltyMultiplier = max($noLockPenalty,$jammerValue);
+		if($rngPenaltyMultiplier > 0){			
+			if($this->doubleRangeIfNoLock){//double range (mostly Antimatter weapons)
+				$modifiedDistance = $distanceForPenalty * (1+$noLockPenalty);
+				$noLockMod = $this->calculateRangePenalty($modifiedDistance)-$rangePenalty;//modifier: difference between penalty at modified range and original range
+				$modifiedDistance = $distanceForPenalty * (1+max(0,($jammerValue-$noLockPenalty)));
+				$jammermod = $this->calculateRangePenalty($modifiedDistance)-$rangePenalty;	//modifier: difference between penalty at modified range and original range			
+			}else{//double penalty (standard)
+				$noLockMod =  $rangePenalty * $noLockPenalty;
+				$jammermod = $rangePenalty * max(0,($jammerValue-$noLockPenalty));
+			}
+		}
 
         if (!($shooter instanceof FighterFlight) && !($shooter instanceof OSAT)) {//leaving instanceof OSAT here - MicroSATs will be omitted as they're SHFs
             $CnC = $shooter->getSystemByName("CnC");
@@ -1049,7 +1085,9 @@ protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
 
         //range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty,
         //interception penalty not yet calculated, will be logged later
-        $notes = $rp["notes"] . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
+        //$notes = $rp["notes"] . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
+		$notes = $distanceForPenalty . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
+        
         $fireOrder->chosenLocation = $hitLoc;
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
@@ -1631,6 +1669,8 @@ full Advanced Armor effects (by rules) for reference:
 
         if (isset($this->systemKillerArray[$i])) $this->systemKiller = $this->systemKillerArray[$i];
         if (isset($this->noOverkillArray[$i])) $this->noOverkill = $this->noOverkillArray[$i];
+				
+        if (isset($this->rakingArray[$i])) $this->raking = $this->rakingArray[$i];
 
     }//endof function changeFiringMode
 

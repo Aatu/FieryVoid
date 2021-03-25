@@ -368,6 +368,8 @@ class Firing
             return false;
         }
 
+		//added for Vorlon weapons
+		if(!$weapon->canInterceptAtAll($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon)) return false; //some weapons do have exotic rules whether they can intercept at all
 
         if ($interceptingShip->id == $target->id) { //ship intercepting fire directed at it - usual case
             return true;

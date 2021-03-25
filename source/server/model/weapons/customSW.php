@@ -1301,7 +1301,7 @@ class SWFighterASLaserR extends SWDirectWeapon{
     public $priority = 6; //very large fighter weapon all right!
     public $loadingtime = 3;
     public $rangePenalty = 1.5;//-3 per 2 hexes
-    public $fireControl = array(0, 0, -4); // fighters, <mediums, <capitals
+    public $fireControl = array(-4, 0, 0); // fighters, <mediums, <capitals
     public $intercept = 0;
 
 	protected $damagebonus = 0;
@@ -1341,7 +1341,7 @@ class SWFighterASLaser extends SWDirectWeapon{
     public $priority = 6; //very large fighter weapon all right!
     public $loadingtime = 2;
     public $rangePenalty = 1.5;//-3 per 2 hexes
-    public $fireControl = array(0, 0, -4); // fighters, <mediums, <capitals
+    public $fireControl = array(-4, 0, 0); // fighters, <mediums, <capitals
     public $intercept = 0;
 
 	protected $damagebonus = 0;
