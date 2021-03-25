@@ -361,6 +361,18 @@ class MagGravReactor extends Reactor{
 }//endof MagGravReactor		
 
 
+class MagGravReactorTechnical extends MagGravReactor{
+/*Mag-Gravitic Reactor, but displayed in grey - as a technical system that cannot be damaged (Vorlons use it)
+*/		
+    public $iconPath = "reactorTechnical.png";
+	public function setSystemDataWindow($turn){
+		$this->data["Output"] = $this->output;
+		parent::setSystemDataWindow($turn);     
+		$this->data["Special"] = "Mag-Gravitic Reactor: provides fixed total power, regardless of destroyed systems.";
+		$this->data["Special"] .= "<br>This system is here for technical purposes only. Cannot be damaged in any way.";
+	}		
+}//endof MagGravReactor		
+
 //warning: needs external code to function properly. Intended for starbases only.
 /* let's disable it - all use changed to SubReactorUniversal!
 class SubReactor extends ShipSystem{	
@@ -2411,22 +2423,25 @@ class Bulkhead extends ShipSystem{
 it should replace Reactor, in FV I think it would be better when Reactor just coordinates with Capacitor!
 actual power shenanigans are almost entirely in front end!
 */
-class PowerCapacitor extends ShipSystem{ /********* UNDER CONSTRUCTION *********/
+class PowerCapacitor extends ShipSystem{ 
     public $name = "powerCapacitor";
     public $displayName = "Power Capacitor";
     public $primary = true; 
 	public $isPrimaryTargetable = false;
     public $iconPath = "PowerCapacitor.png";
 	
+	public $repairPriority = 10;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
 	//power held
 	public $powerCurr = 0;
+	public $capacityBonus = 0; //additional capacity - potentially set by enhancements
 	public $powerReceivedFromFrontEnd = 0; //communication variable	
 	public $powerReceivedFromBackEnd = 0; //communication variable
 	
 	//petals opening - done as boost of Capacitor!
     public $boostable = false; //changed to True if a given ship has Petals! 
     public $maxBoostLevel = 1;
-    public $boostEfficiency = 0;	
+    public $boostEfficiency = 0;
 	
 /*
 	1-17: No effect.
@@ -2445,16 +2460,20 @@ capacitor is completely emptied.
     
 
     function __construct( $armour, $maxhealth, $powerReq, $output, $hasPetals = true  ){ //technical object, does not need typical system attributes (armor, structure...)
-        parent::__construct( $armour, $maxhealth, $powerReq, $output ); //$armour, $maxhealth, $powerReq, $output
+        parent::__construct( $armour, $maxhealth, $powerReq, $output ); //$armour, $maxhealth, $powerReq, $output		
 		$this->boostable = $hasPetals;
     }
 	
-	function getMaxCapacity(){ //maximum capacity = health remaining
-		return $this->getRemainingHealth();
+	public function getMaxCapacity(){ //maximum capacity = health remaining + bonus (bonus only if there is no damage!)
+		$baseCapacity = $this->getRemainingHealth();
+		if($this->maxhealth == $baseCapacity){
+			$baseCapacity += $this->capacityBonus;
+		}
+		return $baseCapacity;
 	}
 	
 	
-	function setPowerHeld($newValue){ //cut off by maximum capacity
+	public function setPowerHeld($newValue){ //cut off by maximum capacity
 		$this->powerCurr = min($newValue, $this->getMaxCapacity() );
 	}
 
@@ -2463,9 +2482,14 @@ capacitor is completely emptied.
 	in this case: 
 	 - Deployment phase: fill to full
 	 - Initial phase: may be changed in front end (boosting Capacitor and/or systems)
-	 - Firing phase: may be changed in FRONT END (firing costs power!)
+	 - Firing phase: may be changed in FRONT END (firing costs power!) - actually belay that, only BACK END will know whether firing actually happened!
 	 - Firing phase: may be changed in BACK END as well (intercepting costs power! - intercept-capable weapons will have appropriate checks in place to see they don't overextax the capacitor)
 	 Save always current stored power, not the changes that led to this value.
+	 
+	 CHANGES COMPARED TO OFFICIAL VERSION:
+	  - recharge occurs in Initial phase (official - just before movement, which makes power not usable in Initial phase)
+	  - opening petals reduces armor of all systems by 2 (official - armor is reduced on PRIMARY only, but all profiles are increased by 1)
+	  - cannot icrease recharge rate in any other way (official - can shut down everything (weapons, shields) to increase by 100%)
 	*/
     public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
 		$ship = $this->getUnit();
@@ -2504,15 +2528,36 @@ capacitor is completely emptied.
 				
 				case 4: //firing phase
 					//take what front end reports, and add what back end calculated (basically weapons fire cost)
-					$this->setPowerHeld($this->powerReceivedFromFrontEnd + $this->powerReceivedFromBackEnd); 
+					//$this->setPowerHeld($this->powerReceivedFromFrontEnd + $this->powerReceivedFromBackEnd); 
+					//or perhaps disregard what front end says - in this phase it's cost of firing... and this is better calculated by back end (firing _declaration_ doesn't equal actual firing, especially for Ligntning Cannons!
+					$this->setPowerHeld($this->powerCurr - $this->powerReceivedFromBackEnd); 
+					//apply critical eefects: halve charge/empty charge
+					if($this->hasCritical("ChargeEmpty")){
+						$this->setPowerHeld(0); 
+					}else if ($this->hasCritical("ChargeHalve")){
+						$this->setPowerHeld(floor($this->powerCurr/2)); 
+					}
 					//AND PREPARE APPROPRIATE NOTES!		
 					$notekey = 'powerStored';
 					$noteHuman = 'Power Capacitor - stored power';
-					$noteValue = $this->powerCurr;
+					$noteValue = $this->powerCurr ;
 					$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
 					break;
 		}
 	} //endof function generateIndividualNotes
+	
+	public function canDrawPower($powerNeeded){
+		if(($this->powerCurr - $this->powerReceivedFromBackEnd) >= $powerNeeded){
+			return true; //drawing such power is possible
+		}else{
+			return false; //cannot draw so much power!
+		}
+	}
+	
+	//it should not happen, but technically it's possible to actually draw more power than Capacitor holds...
+	public function doDrawPower($powerDrawn){
+		$this->powerReceivedFromBackEnd += $powerDrawn;
+	}
 	
 	/*act on notes just loaded - to be redefined by systems as necessary
 	 - set power held
@@ -2532,33 +2577,80 @@ capacitor is completely emptied.
         parent::setSystemDataWindow($turn); 
 		$this->data["Power stored/max"] =  $this->powerCurr . '/' . $this->getMaxCapacity();
         $this->data["Special"] = "This system is responsible for generating and storing power (Reactor is nearby for technical purposes).";	   
-	if ($this->boostable){
-        	$this->data["Special"] .= "<br>You may boost this system (open petals) to increase recharge rate by 50% - at the cost of treating all armor values as 2 points lower.";
-	}
-
+		if ($this->boostable){
+			$this->data["Special"] .= "<br>You may boost this system (open petals) to increase recharge rate by 50% - at the cost of treating all armor values as 2 points lower.";
+		}
+		$this->data["Special"] .= "<br>Destroying Capacitor disables (but does not destroy) the ship.";
     }
 	
-	public function stripForJson(){
+	public function beforeFiringOrderResolution($gamedata){ //actually mark armor reduced temporary critical if Petals are open
+		$boostlevel = $this->getBoostLevel($gamedata->turn);
+		if ($boostlevel <1) return; //not boosted - no crit!
+		$ship = $this->unit;
+		foreach($ship->systems as $system){		
+			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn, $gamedata->turn);
+			$crit->updated = true;
+			$crit->inEffect = true;
+			$system->criticals[] =  $crit;
+			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn, $gamedata->turn);
+			$crit->updated = true;
+			$crit->inEffect = true;
+			$system->criticals[] =  $crit;
+		}
+	}	
+	
+        private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn)
+                            continue;
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
+            }
+            return $boostLevel;
+        }		
+	
+    public function stripForJson(){
         $strippedSystem = parent::stripForJson();
         $strippedSystem->data = $this->data;
         $strippedSystem->powerCurr = $this->powerCurr;
-		$strippedSystem->powerReceivedFromFrontEnd = $this->powerReceivedFromFrontEnd;
+	   $strippedSystem->powerMax = $this->getMaxCapacity();
+		//$strippedSystem->powerReceivedFromFrontEnd = $this->powerReceivedFromFrontEnd;
 		$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer;
         return $strippedSystem;
     }
 	
 	public function doIndividualNotesTransfer(){
 		//data received in variable individualNotesTransfer, further functions will look for it in powerReceivedFromFrontEnd
-		
-		//TO BE DONE
-		
-		
-		
-		
-		if(is_array($this->individualNotesTransfer))	$this->currchangedAA = $this->individualNotesTransfer; //else there's nothing relevant there
+		//in this case it should be just one entry, power remaining
+		if(is_array($this->individualNotesTransfer)) foreach($this->individualNotesTransfer as $powerLeft)  $this->powerReceivedFromFrontEnd = $powerLeft;
 		$this->individualNotesTransfer = array(); //empty, just in case
 	}		
 	
+	
+	//upon destruction (ship should be completely disabled) go for:
+	// - add Power reduction critical to Reactor (so ship goes out of control) 
+	// - add SelfRepair output reduction critical (so the damage isn't just repaired in a few turns ;) ).
+	public function criticalPhaseEffects($ship, $gamedata)
+    { 
+		if (!$this->isDamagedOnTurn($gamedata->turn)) return; 
+		if (!$this->isDestroyed()) return;		
+		
+		$reactor = $ship->getSystemByName("Reactor"); //by class name
+		if($reactor){
+			$reactor->addCritical($ship->id, "OutputReduced4", $gamedata);
+			$reactor->addCritical($ship->id, "OutputReduced4", $gamedata);
+			$reactor->addCritical($ship->id, "OutputReduced4", $gamedata);
+		}
+		
+		$selfRepairList = $ship->getSystemsByName("Self Repair", true);//by readable name
+		foreach($selfRepairList as $selfRepair){
+			$selfRepair->addCritical($ship->id, "OutputReduced4", $gamedata);
+			$selfRepair->addCritical($ship->id, "OutputReduced4", $gamedata);
+			$selfRepair->addCritical($ship->id, "OutputReduced4", $gamedata);
+		}
+    } //endof function criticalPhaseEffects	
 							
 } //endof PowerCapacitor
 

@@ -1566,7 +1566,8 @@ spl_autoload_register(
 //                'colonialraptor_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialRaptor_K.php',
 //                'colonialraptorassault_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialRaptorAssault_K.php',
 
-
+				//Battlestar Galactic - Cylons
+				'cylonbasestar' => '/server/model/ships/zbsgcylons/CylonBasestar.php',				
 
 
 
@@ -1765,6 +1766,13 @@ spl_autoload_register(
 				'powercapacitor' => '/server/model/systems/baseSystems.php',
                 'chargehalve' => '/server/model/cricialClasses.php',
                 'chargeempty' => '/server/model/cricialClasses.php',
+				'maggravreactortechnical' => '/server/model/systems/baseSystems.php',
+				'vorlondischargegun' => '/server/model/weapons/specialWeapons.php',
+				'vorlonlightningcannon' => '/server/model/weapons/specialWeapons.php',
+				
+				'vorlonbattledestroyer' => '/server/model/ships/vorlons/vorlonBattleDestroyer.php',
+				
+				
 				
 				
 				
@@ -1897,7 +1905,18 @@ spl_autoload_register(
 				'judanna' => '/server/model/ships/corillani/Judanna.php',
 				'orrono' => '/server/model/ships/corillani/Orrono.php',
 				'drolla' => '/server/model/ships/corillani/Drolla.php',
+				'plasmablast' => '/server/model/weapons/plasma.php',
 				
+				//Vree
+				'sixtester' => '/server/model/ships/customs/SixTester.php',
+				'sixtester2' => '/server/model/ships/customs/SixTester2.php',
+				'sixsidedship' => '/server/model/ships/ShipClasses.php',
+				'antimatterweapon' => '/server/model/weapons/antimatter.php',
+				'antiprotongun' => '/server/model/weapons/antimatter.php',
+
+
+		
+			
 				//TO BE DELETED once nobody is using them		    
                 		'tobedeletedpikitos' => '/server/model/ships/brakiri/ToBeDeletedPikitos.php',	    
                 		'tobedeletedfalkosi' => '/server/model/ships/brakiri/ToBeDeletedFalkosi.php',	    
