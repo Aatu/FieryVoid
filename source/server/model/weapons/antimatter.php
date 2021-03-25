@@ -3,7 +3,7 @@
 	//common  functionality of Antimatter weapons
 	class AntimatterWeapon extends Weapon{   
         public $animation = "beam";     
-		public $animationColor = array(26, 240, 112);
+		public $animationColor = array(0, 184, 230);
         public $projectilespeed = 10;
         public $animationWidth = 1;
         public $animationExplosionScale = 0.20;
@@ -145,7 +145,66 @@
 
         public function setMinDamage(){     $this->minDamage = 12;      }
         public function setMaxDamage(){     $this->maxDamage = 22;      }
-	} //endof AntiprotonGun
 	
+} //end of AntiprotonGun
+
 	
+	class AntimatterCannon extends AntimatterWeapon{        
+        public $name = "AntimatterCannon";
+        public $displayName = "Antimatter Cannon";
+		public $iconPath = "AntimatterCannon.png";
+        public $animation = "laser";
+        public $animationColor = array(0, 184, 230);
+        public $animationWidth = 4;
+        public $animationWidth2 = 0.2;
+		
+        public $priority = 6; //that's Standard Heavy hit!
+        public $raking = 10;
+        public $loadingtime = 3;
+		public $rangePenalty = 1; //-1/hex base penalty
+
+        public $firingModes = array(
+            1 => "Raking",
+            2 => "Piercing"
+        );
+        
+        public $damageTypeArray = array(1=>'Raking', 2=>'Piercing');
+
+		public $rngNoPenalty = 10; //maximum range at which weapon suffers no penalty
+		public $rngNormalPenalty = 20;//maximum range at which weapon suffers regular penalty
+		public $maxX = 20; //maximum value of X
+		public $dmgEquation = '2X+16'; //to be able to automatically incorporate this into weapon description
+
+        public $fireControlArray = array( 1=>array(-2, 3, 5), 2=>array(null,-1, 4) ); // fighters, <mediums, <capitals 
+		
+		
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			/*
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			//...and NOW $this->data["Special"] may be extended by further text, if still needed
+			*/
+        }
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 9;
+            if ( $powerReq == 0 ) $powerReq = 8;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+       	public function getDamage($fireOrder){
+                $X = $this->getX($fireOrder);
+				$damage = $X + 16;
+				return $damage ;
+            }
+
+        public function setMinDamage(){     $this->minDamage = 16;      }
+        public function setMaxDamage(){     $this->maxDamage = 56;      }
+	
+} //end of AntimatterCannon
+		
 ?>
