@@ -1566,7 +1566,7 @@ spl_autoload_register(
 //                'colonialraptor_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialRaptor_K.php',
 //                'colonialraptorassault_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialRaptorAssault_K.php',
 
-				//Battlestar Galactic - Cylons
+				//Battlestar Galactica - Cylons
 				'cylonbasestar' => '/server/model/ships/zbsgcylons/CylonBasestar.php',				
 
 
@@ -1908,8 +1908,6 @@ spl_autoload_register(
 				'plasmablast' => '/server/model/weapons/plasma.php',
 				
 				//Vree
-				'sixtester' => '/server/model/ships/customs/SixTester.php',
-				'sixtester2' => '/server/model/ships/customs/SixTester2.php',
 				'sixsidedship' => '/server/model/ships/ShipClasses.php',
 				'antimatterweapon' => '/server/model/weapons/antimatter.php',
 				'antiprotongun' => '/server/model/weapons/antimatter.php',
