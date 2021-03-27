@@ -2210,9 +2210,7 @@ class VreeCapital extends SixSidedShip{
 }// end of VreeCapital
 
 
-class VreeHCV extends BaseShip{
-
-    public $shipSizeClass = 2;
+class VreeHCV extends HeavyCombatVessel{
 
     function __construct($id, $userid, $name, $slot){
         parent::__construct($id, $userid, $name,$slot);
