@@ -40,7 +40,7 @@ class Xill extends VreeCapital{
         $this->addFrontSystem(new Thruster(5, 16, 0, 9, 1));        
 		
         $this->addAftSystem(new AntiprotonGun(3, 0, 0, 120, 240));
-        $this->addAftSystem(new Thruster(5, 16, 0, 9, 1));       
+        $this->addAftSystem(new Thruster(5, 16, 0, 9, 2));       
         
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
 		$this->addLeftFrontSystem(new Thruster(5, 8, 0, 4, 3));
@@ -49,10 +49,10 @@ class Xill extends VreeCapital{
 		$this->addLeftAftSystem(new Thruster(5, 8, 0, 5, 3));
 		
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
-		$this->addRightFrontSystem(new Thruster(5, 8, 0, 4, 3));
+		$this->addRightFrontSystem(new Thruster(5, 8, 0, 4, 4));
 				
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
-		$this->addRightAftSystem(new Thruster(5, 8, 0, 5, 3));	
+		$this->addRightAftSystem(new Thruster(5, 8, 0, 5, 4));	
 		
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

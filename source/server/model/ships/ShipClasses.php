@@ -2210,4 +2210,26 @@ class VreeCapital extends SixSidedShip{
 }// end of VreeCapital
 
 
+class VreeHCV extends BaseShip{
+
+    public $shipSizeClass = 2;
+
+    function __construct($id, $userid, $name, $slot){
+        parent::__construct($id, $userid, $name,$slot);
+    }
+    public function getLocations(){
+        $locs = array();
+
+        $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 1, "min" => 30, "max" => 120, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 2, "min" => 60, "max" => 150, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 2, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 2, "min" => 210, "max" => 300, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 1, "min" => 240, "max" => 330, "profile" => $this->sideDefense);
+
+        return $locs;
+    }
+
+}// end of VreeHCV
+
 ?>

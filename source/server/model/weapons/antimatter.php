@@ -98,13 +98,13 @@
 		public $iconPath = "AntiprotonGun.png";
 		/* already included in AntimatterWeapon class; if a given weapon should be different then override, but if You want to change general AM weapons animation properties - go to AntimatterWeapon class instead		
         public $animation = "beam";
-        public $animationColor = array(26, 240, 112);
+        public $animationColor = array(0, 184, 230);
         public $projectilespeed = 10;
         public $animationWidth = 1;
         public $animationExplosionScale = 0.20;
         public $trailLength = 5;
 		*/
-        public $priority = 6; //that's Standard Heavy hit!
+        public $priority = 5; //that's Standard Heavy hit!
 
         public $intercept = 2;
         public $loadingtime = 1;
@@ -175,7 +175,7 @@
 		public $maxX = 20; //maximum value of X
 		public $dmgEquation = '2X+16'; //to be able to automatically incorporate this into weapon description
 
-        public $fireControlArray = array( 1=>array(-2, 3, 5), 2=>array(null,-1, 4) ); // fighters, <mediums, <capitals 
+        public $fireControlArray = array( 1=>array(-2, 3, 5), 2=>array(null,-1, 1) ); // fighters, <mediums, <capitals 
 		
 		
         public function setSystemDataWindow($turn){
@@ -214,7 +214,7 @@
 		public $iconPath = "AntiprotonDefender.png";
 		/* already included in AntimatterWeapon class; if a given weapon should be different then override, but if You want to change general AM weapons animation properties - go to AntimatterWeapon class instead		
         public $animation = "beam";
-        public $animationColor = array(26, 240, 112);
+        public $animationColor = array(0, 184, 230);
         public $projectilespeed = 10;
         public $animationWidth = 1;
         public $animationExplosionScale = 0.20;
