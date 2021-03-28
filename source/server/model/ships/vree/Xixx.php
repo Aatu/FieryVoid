@@ -74,7 +74,7 @@ class Xixx extends HeavyCombatVessel{
             1=> array(
                     4 => "Thruster",
                     5 => "0:Antiproton Defender",
-                    6 => "0:Antiproton Gun"
+                    6 => "0:Antiproton Gun",
                     9 => "Antimatter Torpedo",
                     18 => "Structure",
                     20 => "Primary",
@@ -82,7 +82,7 @@ class Xixx extends HeavyCombatVessel{
             2=> array(
                     4 => "Thruster",
                     5 => "0:Antiproton Defender",
-                    6 => "0:Antiproton Gun"
+                    6 => "0:Antiproton Gun",
                     9 => "Antimatter Torpedo",
                     18 => "Structure",
                     20 => "Primary",
