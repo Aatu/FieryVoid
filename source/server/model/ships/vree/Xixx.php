@@ -39,13 +39,13 @@ class Xixx extends HeavyCombatVessel{
 		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 3));
 		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 4));		
 
-        $this->addFrontSystem(new Thruster(4, 12 0, 7, 1));
+        $this->addFrontSystem(new Thruster(4, 12, 0, 7, 1));
 		$this->addFrontSystem(new AntimatterTorpedo(3, 0, 0, 240, 0));
 		$this->addFrontSystem(new AntimatterTorpedo(3, 0, 0, 300, 60)); 
 		$this->addFrontSystem(new AntimatterTorpedo(3, 0, 0, 300, 60)); 
 		$this->addFrontSystem(new AntimatterTorpedo(3, 0, 0, 0, 120)); 						        
 		
-        $this->addAftSystem(new Thruster(4, 12 0, 7, 2));
+        $this->addAftSystem(new Thruster(4, 12, 0, 7, 2));
 		$this->addFrontSystem(new AntimatterTorpedo(3, 0, 0, 180, 300));
 		$this->addFrontSystem(new AntimatterTorpedo(3, 0, 0, 120, 240)); 
 		$this->addFrontSystem(new AntimatterTorpedo(3, 0, 0, 120, 240)); 
