@@ -162,7 +162,8 @@ class AntimatterCannon extends AntimatterWeapon{
         public $raking = 10;
         public $loadingtime = 3;
 		public $rangePenalty = 1; //-1/hex base penalty
-
+        public $intercept = 1;
+        
         public $firingModes = array(
             1 => "Raking",
             2 => "Piercing"
@@ -205,7 +206,7 @@ class AntimatterCannon extends AntimatterWeapon{
         public function setMinDamage(){     $this->minDamage = 16;      }
         public function setMaxDamage(){     $this->maxDamage = 56;      }
 	
-} //end of AntimatterCannon
+} //end of class AntimatterCannon
 	
 	
 class AntiprotonDefender extends AntimatterWeapon{        
@@ -262,7 +263,8 @@ class AntiprotonDefender extends AntimatterWeapon{
         public function setMinDamage(){     $this->minDamage = 8;      }
         public function setMaxDamage(){     $this->maxDamage = 18;      }
 	
-} //end of AntiprotonDefender
+} //end of class AntiprotonDefender
+
 
 class AntimatterTorpedo extends AntimatterWeapon{        
         public $name = "AntimatterTorpedo";
@@ -319,6 +321,86 @@ class AntimatterTorpedo extends AntimatterWeapon{
         public function setMinDamage(){     $this->minDamage = 8;      }
         public function setMaxDamage(){     $this->maxDamage = 20;      }
 	
-} //end of AntimatterTorpedo
+} //end of class AntimatterTorpedo
+
+class LightAntiprotonGun extends LinkedWeapon{  //deliberately NOT extending AntimatterWeapon class uses regular calculations 
+	public $name = "LightAntiprotonGun";
+	public $displayName = "Light Antiproton Gun";
+    public $animation = "trail";
+    public $animationColor = array(0, 184, 230);
+    public $animationExplosionScale = 0.10;
+    public $projectilespeed = 12;
+    public $animationWidth = 2;
+    public $trailLength = 10;
+
+	public $priority = 3;
+
+	public $loadingtime = 1;
+	public $shots = 2;
+	public $defaultShots = 2;
+
+	public $rangePenalty = 2;
+	public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+	public $rangeDamagePenalty = 1;
+
+	public $damageType = "Standard"; 
+	public $weaponClass = "Antimatter"; 
+
+	function __construct($startArc, $endArc, $nrOfShots = 2){ 
+		$this->shots = $nrOfShots;
+		$this->defaultShots = $nrOfShots;        
+	
+		if($nrOfShots === 1){
+			$this->iconPath = "LightAntiprotonGun.png";
+		}
+		if($nrOfShots === 2){
+			$this->iconPath = "LightAntiprotonGun2.png";
+		}
+	
+		parent::__construct(0, 1, 0, $startArc, $endArc);
+	}
+
+	public function getDamage($fireOrder){        return Dice::d(6, 2) - 1;   }
+	public function setMinDamage(){     $this->minDamage = 1 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 11 ;      }
+
+}// end of class LightAntiprotonGun
+
+
+class LtAntimatterCannon extends Weapon{  //deliberately NOT extending AntimatterWeapon class uses regular calculations 
+		public $iconPath = "LightAntimatterCannon.png";
+        public $name = "LtAntimatterCannon";
+        public $displayName = "Light Antimatter Cannon";
+        public $animation = "trail";
+        public $animationColor = array(0, 184, 230);
+        public $trailColor = array(0, 184, 230);
+        public $projectilespeed = 11;
+        public $animationWidth = 4;
+        public $trailLength = 12;
+        public $animationExplosionScale = 0.25;
+                
+        public $loadingtime = 2;
+		public $priority = 5;
+		public $shots = 1;		
+            
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <=mediums, <=capitals 
+
+		public $damageType = "Standard"; 
+		public $weaponClass = "Antimatter"; 
+
+        function __construct($startArc, $endArc, $shots = 1){
+            $this->shots = $shots;
+            $this->defaultShots = $shots;
+            
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }   
+
+        
+        public function getDamage($fireOrder){        return Dice::(d(10)+4) * 2;   }
+        public function setMinDamage(){     $this->minDamage = 10 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 28 ;      }
+
+}//end of class LtAntimatterCannon
 		
 ?>
