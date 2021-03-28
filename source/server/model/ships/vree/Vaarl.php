@@ -44,10 +44,10 @@ class Vaarl extends HeavyCombatVessel{
 		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 0, 120)); 						        
 		
         $this->addAftSystem(new Thruster(3, 12, 0, 7, 2));
-		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 180, 300));
-		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 120, 240)); 
-		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 120, 240)); 
-		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 60, 180));         
+		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 180, 300));
+		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240)); 
+		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240)); 
+		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 60, 180));         
         
 	
        
