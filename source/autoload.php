@@ -1917,6 +1917,8 @@ spl_autoload_register(
 				'antiprotondefender' => '/server/model/weapons/antimatter.php',
 				'xill' => '/server/model/ships/vree/Xill.php',
 				'vaarl' => '/server/model/ships/vree/Vaarl.php',
+				'antimattertorpedo' => '/server/model/weapons/antimatter.php',
+				'xixx' => '/server/model/ships/vree/Xixx.php',
 				
 
 

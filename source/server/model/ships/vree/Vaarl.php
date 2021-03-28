@@ -1,5 +1,5 @@
 <?php
-class Vaarl extends VreeHCV{
+class Vaarl extends HeavyCombatVessel{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
@@ -59,9 +59,9 @@ class Vaarl extends VreeHCV{
 	//d20 hit chart
         $this->hitChart = array(
             0=> array(
-                    6 => "Structure",
-                    9 => "Thruster",
-                    11 => "Jumpe Engine",
+                    7 => "Structure",
+                    10 => "Thruster",
+                    11 => "Jump Engine",
                     12 => "Antimatter Cannon",
                     14 => "Scanner",
                     16 => "Engine",
@@ -73,14 +73,14 @@ class Vaarl extends VreeHCV{
                     4 => "Thruster",
                     5 => "0:Antimatter Cannon",
                     9 => "Antiproton Defender",
-                    17 => "Structure",
+                    18 => "Structure",
                     20 => "Primary",
            		 ),
             2=> array(
                     4 => "Thruster",
                     5 => "0:Antimatter Cannon",
                     9 => "Antiproton Defender",
-                    17 => "Structure",
+                    18 => "Structure",
                     20 => "Primary",
            		 ),
 

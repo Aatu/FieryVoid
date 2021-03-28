@@ -92,7 +92,7 @@
 
 
 
-	class AntiprotonGun extends AntimatterWeapon{        
+class AntiprotonGun extends AntimatterWeapon{        
         public $name = "AntiprotonGun";
         public $displayName = "Antiproton Gun";
 		public $iconPath = "AntiprotonGun.png";
@@ -104,7 +104,7 @@
         public $animationExplosionScale = 0.20;
         public $trailLength = 5;
 		*/
-        public $priority = 5; //that's Standard Heavy hit!
+        public $priority = 5;
 
         public $intercept = 2;
         public $loadingtime = 1;
@@ -149,7 +149,7 @@
 } //end of AntiprotonGun
 
 	
-	class AntimatterCannon extends AntimatterWeapon{        
+class AntimatterCannon extends AntimatterWeapon{        
         public $name = "AntimatterCannon";
         public $displayName = "Antimatter Cannon";
 		public $iconPath = "AntimatterCannon.png";
@@ -208,7 +208,7 @@
 } //end of AntimatterCannon
 	
 	
-	class AntiprotonDefender extends AntimatterWeapon{        
+class AntiprotonDefender extends AntimatterWeapon{        
         public $name = "AntiprotonDefender";
         public $displayName = "Antiproton Defender";
 		public $iconPath = "AntiprotonDefender.png";
@@ -262,5 +262,63 @@
         public function setMinDamage(){     $this->minDamage = 8;      }
         public function setMaxDamage(){     $this->maxDamage = 18;      }
 	
-} //end of AntiprotonDefender		
+} //end of AntiprotonDefender
+
+class AntimatterTorpedo extends AntimatterWeapon{        
+        public $name = "AntimatterTorpedo";
+        public $displayName = "Antimatter Torpedo";
+		public $iconPath = "AntimatterTorpedo.png";
+        public $trailColor = array(0, 184, 230);
+        public $animation = "torpedo";
+        public $animationColor = array(30, 170, 255);
+        public $animationExplosionScale = 0.25;
+        public $projectilespeed = 12;
+        public $animationWidth = 10;
+        public $trailLength = 10;
+        public $priority = 6;
+        
+        public $ballistic = true;
+        public $weaponClass = "Ballistic";         
+
+        public $loadingtime = 2;
+		
+		public $rangePenalty = 1; //-1/hex base penalty
+
+		public $rngNoPenalty = 25; //maximum range at which weapon suffers no penalty
+		public $rngNormalPenalty = 50;//maximum range at which weapon suffers regular penalty
+		public $maxX = 12; //maximum value of X
+		public $dmgEquation = 'X+8'; //to be able to automatically incorporate this into weapon description
+
+        public $fireControl = array(-2, 2, 4); // fighters, <mediums, <capitals 
+		
+		
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			/*
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			//...and NOW $this->data["Special"] may be extended by further text, if still needed
+			*/
+        }
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 7;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+       	public function getDamage($fireOrder){
+                $X = $this->getX($fireOrder);
+				$damage = $X + 8;
+				return $damage ;
+            }
+
+        public function setMinDamage(){     $this->minDamage = 8;      }
+        public function setMaxDamage(){     $this->maxDamage = 20;      }
+	
+} //end of AntimatterTorpedo
+		
 ?>
