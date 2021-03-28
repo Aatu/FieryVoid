@@ -1,15 +1,16 @@
 <?php
-class Xorr extends VreeCapital{
+class Xeel extends VreeCapital{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
-		$this->pointCost = 550;
+		$this->pointCost = 340;
 		$this->faction = "Vree";
-		$this->phpclass = "Xorr";
-		$this->shipClass = "Xorr War Saucer";
-		$this->isd = 2210;
-		$this->locations = array(41, 42, 2, 32, 31, 1);		
+		$this->phpclass = "Xeel";
+		$this->shipClass = "Xeel War Carrier";
+		$this->isd = 2218;
+		$this->locations = array(41, 42, 2, 32, 31, 1);
+        $this->fighters = array("normal"=>12);				
 
 		$this->shipSizeClass = 3; //Enormous is not implemented
 		$this->iniativebonus = 0; //no voluntary movement anyway
@@ -17,99 +18,89 @@ class Xorr extends VreeCapital{
         $this->turncost = 0.66;
         $this->turndelaycost = 0.5;
         $this->accelcost = 3;
-        $this->rollcost = 4;
+        $this->rollcost = 3;
         $this->pivotcost = 0;	
         $this->gravitic = true;        	
 
 		$this->forwardDefense = 14;
 		$this->sideDefense = 14;
 
-		$this->imagePath = "img/ships/VreeXorr.png";
+		$this->imagePath = "img/ships/VreeXeel.png";
 		$this->canvasSize = 200;
 
-		$this->addPrimarySystem(new Reactor(5, 15, 0, 0));
-		$this->addPrimarySystem(new Hangar(5, 1));
+		$this->addPrimarySystem(new Reactor(5, 13, 0, 0));
+		$this->addPrimarySystem(new Hangar(5, 14));
 		$this->addPrimarySystem(new CnC(5, 12, 0, 0));
-		$this->addPrimarySystem(new Scanner(5, 12, 9, 8));
-        $this->addPrimarySystem(new Engine(5, 12, 0, 8, 2));			
-		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));		
+		$this->addPrimarySystem(new Scanner(5, 10, 7, 7));
+        $this->addPrimarySystem(new Engine(5, 11, 0, 7, 2));			
 
-        $this->addFrontSystem(new Thruster(4, 14, 0, 8, 1));
+        $this->addFrontSystem(new Thruster(4, 12, 0, 7, 1));
 		
-        $this->addAftSystem(new Thruster(4, 14, 0, 8, 2));
+        $this->addAftSystem(new Thruster(4, 12, 0, 7, 2));
         
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
-		$this->addLeftFrontSystem(new Thruster(4, 7, 0, 4, 3));
+		$this->addLeftFrontSystem(new Thruster(4, 6, 0, 3, 3));
 				
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
-		$this->addLeftAftSystem(new Thruster(4, 7, 0, 4, 3));
+		$this->addLeftAftSystem(new Thruster(4, 6, 0, 4, 3));
 		
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
-		$this->addRightFrontSystem(new Thruster(4, 7, 0, 4, 4));
+		$this->addRightFrontSystem(new Thruster(4, 6, 0, 3, 4));
 				
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
-		$this->addRightAftSystem(new Thruster(4, 7, 0, 4, 4));	
+		$this->addRightAftSystem(new Thruster(4, 6, 0, 4, 4));	
 		
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 4, 24));
-        $this->addAftSystem(new Structure( 4, 24));
-        $this->addLeftFrontSystem(new Structure( 4, 24));
-        $this->addLeftAftSystem(new Structure( 4, 24));
-        $this->addRightFrontSystem(new Structure( 4, 24));
-        $this->addRightAftSystem(new Structure( 4, 24));      
+        $this->addFrontSystem(new Structure( 4, 21));
+        $this->addAftSystem(new Structure( 4, 21));
+        $this->addLeftFrontSystem(new Structure( 4, 21));
+        $this->addLeftAftSystem(new Structure( 4, 21));
+        $this->addRightFrontSystem(new Structure( 4, 21));
+        $this->addRightAftSystem(new Structure( 4, 21));      
         $this->addPrimarySystem(new Structure( 5, 40));
 	    
 	//d20 hit chart
         $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-                    10 => "Antimatter Cannon",
-                    12 => "Scanner",
-                    15 => "Engine",
-                    16 => "Hangar",
+                    9 => "Structure",
+                    11 => "Scanner",
+                    14 => "Engine",
+                    17 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",
            		 ),
             1=> array(
                     4 => "Thruster",
-                    6 => "0:Antimatter Cannon",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             2=> array(
                     4 => "Thruster",
-                    6 => "0:Antimatter Cannon",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             31=> array(
                     4 => "Thruster",
-                    7 => "Antiproton Gun",
-					9 => "0:Antimatter Cannon",                    
+                    6 => "Antiproton Gun",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
                     4 => "Thruster",
-                    7 => "Antiproton Gun",
-					9 => "0:Antimatter Cannon",                    
+                    6 => "Antiproton Gun",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
                     4 => "Thruster",
-                    7 => "Antiproton Gun",
-					9 => "0:Antimatter Cannon",                    
+                    6 => "Antiproton Gun",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
                     4 => "Thruster",
-                    7 => "Antiproton Gun",
-					9 => "0:Antimatter Cannon",                    
+                    6 => "Antiproton Gun",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
