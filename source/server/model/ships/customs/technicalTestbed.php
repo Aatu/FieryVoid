@@ -10,7 +10,7 @@ class TechnicalTestbed extends MediumShip{
         $this->imagePath = "img/ships/ShadowCruiser.png";
         $this->shipClass = "New Technology Testbed";
         $this->canvasSize = 200;
-	    $this->isd = 2240;
+	    $this->isd = 9999;
         $this->shipSizeClass = 2; //it's actually a HCV using MCV layout
         $this->agile = true;
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
@@ -35,50 +35,17 @@ class TechnicalTestbed extends MediumShip{
 		$this->enhancementOptionsDisabled[] = 'IMPR_ENG'; //no Engine ;)
 		
          
-        $this->addPrimarySystem(new Reactor(3, 12, 0, 2));
-        $this->addPrimarySystem(new ShadowPilot(3, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 14, 3, 6));
-		$this->addPrimarySystem(new PhasingDrive(4, 16, 5, 15));		
+        $this->addPrimarySystem(new MagGravReactorTechnical(3, 12, 0, 0));
+		$this->addPrimarySystem(new PowerCapacitor( 4, 40, 0, 4, true));//armor, structure, power req, output, has petals    
+	    
+        $this->addPrimarySystem(new CnC(5, 16, 0, 0));
+        $this->addPrimarySystem(new Scanner(3, 14, 0, 6));
+		$this->addPrimarySystem(new JumpEngine(4, 16, 3, 24));		
 		$this->addPrimarySystem(new Hangar(3, 1));
+        $this->addPrimarySystem(new SelfRepair(5, 6, 3)); //armor, structure, output
         $this->addPrimarySystem(new SelfRepair(5, 6, 3)); //armor, structure, output
 		
 		
-		//EnergyDiffuser		
-		$diffuserPort = new EnergyDiffuser(2, 20, 4, 180, 0);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
-		$tendril=new DiffuserTendril(30,'L');//absorbtion capacity,side
-		$diffuserPort->addTendril($tendril);
-		$this->addLeftSystem($tendril);
-		$tendril=new DiffuserTendril(20,'L');//absorbtion capacity,side
-		$diffuserPort->addTendril($tendril);
-		$this->addLeftSystem($tendril);		
-		$tendril=new DiffuserTendril(4,'L');//absorbtion capacity,side
-		$diffuserPort->addTendril($tendril);
-		$this->addLeftSystem($tendril);
-		$tendril=new DiffuserTendril(4,'L');//absorbtion capacity,side
-		$diffuserPort->addTendril($tendril);
-		$this->addLeftSystem($tendril);
-		$tendril=new DiffuserTendril(4,'L');//absorbtion capacity,side
-		$diffuserPort->addTendril($tendril);
-		$this->addLeftSystem($tendril);
-        $this->addPrimarySystem($diffuserPort);
-		
-		$diffuserStbd = new EnergyDiffuser(2, 20, 4, 0, 180);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
-		$tendril=new DiffuserTendril(30,'R');//absorbtion capacity,side
-		$diffuserStbd->addTendril($tendril);
-		$this->addRightSystem($tendril);
-		$tendril=new DiffuserTendril(20,'R');//absorbtion capacity,side
-		$diffuserStbd->addTendril($tendril);
-		$this->addRightSystem($tendril);
-		$tendril=new DiffuserTendril(4,'R');//absorbtion capacity,side
-		$diffuserStbd->addTendril($tendril);
-		$this->addRightSystem($tendril);
-		$tendril=new DiffuserTendril(4,'R');//absorbtion capacity,side
-		$diffuserStbd->addTendril($tendril);
-		$this->addRightSystem($tendril);
-		$tendril=new DiffuserTendril(4,'R');//absorbtion capacity,side
-		$diffuserStbd->addTendril($tendril);
-		$this->addRightSystem($tendril);
-        $this->addPrimarySystem($diffuserStbd);
 		
 		
 		//BioDrive
@@ -106,14 +73,9 @@ class TechnicalTestbed extends MediumShip{
 		
 		
 		//weapons - Forward for visual reasons!
-        $this->addFrontSystem(new LightEnergyMine(2, 0, 0, 300, 120));
-        $this->addFrontSystem(new LightEnergyMine(2, 0, 0, 300, 120));
-        $this->addFrontSystem(new LightEnergyMine(2, 0, 0, 300, 120));
-        $this->addFrontSystem(new LightEnergyMine(2, 0, 0, 300, 120));
-        $this->addFrontSystem(new NexusInterceptorArray(2, 0, 0, 300, 60));
-        $this->addFrontSystem(new NexusInterceptorArray(2, 0, 0, 300, 60));
-        $this->addFrontSystem(new NexusInterceptorArray(2, 0, 0, 300, 60));
-        $this->addFrontSystem(new NexusInterceptorArray(2, 0, 0, 300, 60));
+        $this->addFrontSystem(new VorlonDischargeGun(3, 0, 0, 240, 120));
+        $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 240, 120));
+        $this->addFrontSystem(new StdParticleBeam(3, 1, 1, 240, 120));
         
 		
 		//technical thrusters - unlimited, like for MCVs		
@@ -150,7 +112,7 @@ class TechnicalTestbed extends MediumShip{
 				18 => "0:Reactor",
 				20 => "Primary",
 				*/
-				20 => "0:Phasing Drive",
+				20 => "0:Jump Engine",
 			),
 			2=> array(
 				5 => "1:Burst Beam",

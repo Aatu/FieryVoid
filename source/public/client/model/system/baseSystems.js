@@ -18,6 +18,15 @@ MagGravReactor.prototype.hasMaxBoost = function () {
     return true;
 };
 
+var MagGravReactorTechnical = function MagGravReactorTechnical(json, ship) {
+    Reactor.call(this, json, ship);
+};
+MagGravReactorTechnical.prototype = Object.create(Reactor.prototype);
+MagGravReactorTechnical.prototype.constructor = MagGravReactorTechnical;
+MagGravReactorTechnical.prototype.hasMaxBoost = function () {
+    return true;
+};
+
 
 var SubReactorUniversal = function(json, ship)
 {
@@ -406,3 +415,38 @@ var Bulkhead = function(json, ship)
 }
 Bulkhead.prototype = Object.create( ShipSystem.prototype );
 Bulkhead.prototype.constructor = Bulkhead;
+
+
+
+var PowerCapacitor = function PowerCapacitor(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+PowerCapacitor.prototype = Object.create(ShipSystem.prototype);
+PowerCapacitor.prototype.constructor = PowerCapacitor;
+PowerCapacitor.prototype.initBoostableInfo = function () {
+    // Needed because it can change during initial phase    
+    var effectiveOutput = this.powerCurr;
+	if (gamedata.gamephase == 1){//in Initial phase - add output to power available
+		var boostCount = shipManager.power.getBoost(this);	
+		effectiveOutput += this.output;
+		if(boostCount > 0){//boosted!
+			effectiveOutput += Math.round(this.output *0.5);
+		}
+	}
+	//can be more than maximum - but cannot HOLD more than maximum after Initial phase (server end takes care of that)
+    this.powerReq =  - effectiveOutput; //NEGATIVE VALUE - this system adds power to Reactor :)
+    return this;
+};
+PowerCapacitor.prototype.hasMaxBoost = function () {
+    return true;
+};
+PowerCapacitor.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+PowerCapacitor.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+	this.individualNotesTransfer = Array();
+	//note power currently remaining ON REACTOR as charge held
+	var powerRemaining = shipManager.power.getReactorPower(this.ship, this); 
+	this.individualNotesTransfer.push(powerRemaining);
+	return true;
+};

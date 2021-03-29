@@ -33,7 +33,7 @@ class Plasma extends Weapon{
 		public $trailColor = array(75, 250, 90);
 		public $projectilespeed = 15;
         public $animationWidth = 4;
-		public $animationExplosionScale = 0.20;
+		public $animationExplosionScale = 0.40;
 		public $trailLength = 30;
 		public $rangeDamagePenalty = 1;
         
@@ -1033,6 +1033,5 @@ class PlasmaProjector extends Raking{
 	public function setMaxDamage(){     $this->maxDamage = 45;      }
 
 }// End of class PlasmaProjector
-
 
 ?>
