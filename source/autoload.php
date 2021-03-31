@@ -1922,7 +1922,9 @@ spl_autoload_register(
 				'xeel' => '/server/model/ships/vree/Xeel.php',
 				'lightantiprotongun' => '/server/model/weapons/antimatter.php',
 				'ltantimattercannon' => '/server/model/weapons/antimatter.php',
-				
+				'tzymm' => '/server/model/ships/vree/Tzymm.php',
+				'zorth' => '/server/model/ships/vree/Zorth.php',
+				'vymish' => '/server/model/ships/vree/Vymish.php',
 
 
 		
