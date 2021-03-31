@@ -59,10 +59,8 @@ class Vaarl extends HeavyCombatVessel{
 	//d20 hit chart
         $this->hitChart = array(
             0=> array(
-                    7 => "Structure",
-                    10 => "Thruster",
-                    11 => "Jump Engine",
-                    12 => "Antimatter Cannon",
+                    10 => "Structure",
+                    12 => "Jump Engine",
                     14 => "Scanner",
                     16 => "Engine",
                     17 => "Hangar",
@@ -70,14 +68,16 @@ class Vaarl extends HeavyCombatVessel{
                     20 => "C&C",
            		 ),
             1=> array(
-                    4 => "Thruster",
+                    2 => "Thruster",
+                    4 => "0:Thruster",
                     5 => "0:Antimatter Cannon",
                     9 => "Antiproton Defender",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             2=> array(
-                    4 => "Thruster",
+                    2 => "Thruster",
+                    4 => "0:Thruster",
                     5 => "0:Antimatter Cannon",
                     9 => "Antiproton Defender",
                     18 => "Structure",

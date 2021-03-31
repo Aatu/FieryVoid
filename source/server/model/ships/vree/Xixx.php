@@ -61,10 +61,7 @@ class Xixx extends HeavyCombatVessel{
 	//d20 hit chart
         $this->hitChart = array(
             0=> array(
-                    7 => "Structure",
-                    10 => "Thruster",
-                    11 => "Antiproton Gun",
-                    12 => "Antiproton Defender",
+                    12 => "Structure",
                     14 => "Scanner",
                     16 => "Engine",
                     17 => "Hangar",
@@ -72,7 +69,8 @@ class Xixx extends HeavyCombatVessel{
                     20 => "C&C",
            		 ),
             1=> array(
-                    4 => "Thruster",
+                    2 => "Thruster",
+                    4 => "0:Thruster",
                     5 => "0:Antiproton Defender",
                     6 => "0:Antiproton Gun",
                     9 => "Antimatter Torpedo",
@@ -80,10 +78,11 @@ class Xixx extends HeavyCombatVessel{
                     20 => "Primary",
            		 ),
             2=> array(
-                    4 => "Thruster",
+                    2 => "Thruster",
+                    4 => "0:Thruster",
                     5 => "0:Antiproton Defender",
                     6 => "0:Antiproton Gun",
-                    9 => "Antimatter Torpedo",
+                    8 => "Antimatter Torpedo",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
