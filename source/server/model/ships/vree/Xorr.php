@@ -65,8 +65,7 @@ class Xorr extends VreeCapital{
 	//d20 hit chart
         $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-                    10 => "Antimatter Cannon",
+                    10 => "Structure",
                     12 => "Scanner",
                     15 => "Engine",
                     16 => "Hangar",
