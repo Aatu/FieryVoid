@@ -68,9 +68,9 @@ class GromeTrokanMargus extends BaseShip{
         $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
         $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
         $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
-		$this->addLeftSystem(new HeavyRailGun(3, 9, 6, 300, 360));
+		$this->addLeftSystem(new HeavyRailGun(3, 12, 9, 300, 360));
 		$this->addLeftSystem(new Railgun(3, 9, 6, 300, 360));
-		$this->addLeftSystem(new HeavyRailGun(3, 9, 6, 180, 240));
+		$this->addLeftSystem(new HeavyRailGun(3, 12, 9, 180, 240));
 		$this->addLeftSystem(new Railgun(3, 9, 6, 180, 240));
         $this->addLeftSystem(new Thruster(3, 10, 0, 3, 3));
         $this->addLeftSystem(new Thruster(3, 10, 0, 3, 3));
@@ -80,9 +80,9 @@ class GromeTrokanMargus extends BaseShip{
         $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
         $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
         $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
-		$this->addRightSystem(new HeavyRailGun(3, 9, 6, 0, 60));
+		$this->addRightSystem(new HeavyRailGun(3, 12, 9, 0, 60));
 		$this->addRightSystem(new Railgun(3, 9, 6, 0, 60));
-		$this->addRightSystem(new HeavyRailGun(3, 9, 6, 120, 180));
+		$this->addRightSystem(new HeavyRailGun(3, 12, 9, 120, 180));
 		$this->addRightSystem(new Railgun(3, 9, 6, 120, 180));
         $this->addRightSystem(new Thruster(3, 10, 0, 3, 4));
         $this->addRightSystem(new Thruster(3, 10, 0, 3, 4));

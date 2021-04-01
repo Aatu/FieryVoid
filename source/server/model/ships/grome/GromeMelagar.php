@@ -30,7 +30,7 @@ class GromeMelagar extends MediumShip{
          
         $this->addPrimarySystem(new Reactor(3, 18, 0, 0));
         $this->addPrimarySystem(new CnC(3, 16, 0, 0));
-        $this->addPrimarySystem(new AntiquatedScanner(3, 12, 4, 4));
+        $this->addPrimarySystem(new AntiquatedScanner(3, 12, 4, 5));
 		$targetingArray = new AntiquatedScanner(2, 6, 2, 1);
 		$targetingArray->displayName = 'Targeting Array';
 		$this->addPrimarySystem($targetingArray);
