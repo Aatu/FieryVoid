@@ -5,7 +5,7 @@ class ColonialJupiterClass_K extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 1600;
-	$this->faction = "ZPlaytest 12 Colonies of Cobol";
+	$this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "ColonialJupiterClass_K";
         $this->imagePath = "img/ships/BSG/ColonialBattlestar.png";
         $this->shipClass = "Jupiter Class Battlestar";
