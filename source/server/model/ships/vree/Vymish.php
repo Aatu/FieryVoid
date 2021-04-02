@@ -7,8 +7,9 @@ class Vymish extends MediumShip{
 		$this->pointCost = 300;
 		$this->faction = "Vree";
         $this->phpclass = "Vymish";
-        $this->imagePath = "img/ships/Vymish.png";
+        $this->imagePath = "img/ships/VreeVymish.png";
         $this->shipClass = "Vymish Armed Trader";
+  	  $this->canvasSize = 100;        
 	    
 	    $this->isd = 2191;
 

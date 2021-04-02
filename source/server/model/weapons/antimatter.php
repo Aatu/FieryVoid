@@ -397,7 +397,7 @@ class LtAntimatterCannon extends Weapon{  //deliberately NOT extending Antimatte
         }   
 
         
-        public function getDamage($fireOrder){        return Dice::(d(10)+4) * 2;   }
+        public function getDamage($fireOrder){        return Dice::d(10, 1) + 4 * 2;   }
         public function setMinDamage(){     $this->minDamage = 10 ;      }
         public function setMaxDamage(){     $this->maxDamage = 28 ;      }
 

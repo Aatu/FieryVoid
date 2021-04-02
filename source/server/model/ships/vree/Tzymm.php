@@ -7,7 +7,7 @@ class Tzymm extends FighterFlight{
         $this->pointCost = 85*6;
         $this->phpclass = "Tzymm";
         $this->shipClass = "Tzymm Heavy flight";
-        $this->imagePath = "img/ships/VreeTzymm.png";
+        $this->imagePath = "img/ships/VreeTyzmm.png";
         
         $this->faction = "Vree";
 	    $this->isd = 2210;
@@ -32,7 +32,7 @@ class Tzymm extends FighterFlight{
             $armour = array(3, 3, 3, 3);
             $fighter = new Fighter("Tzymm", $armour, 17, $this->id);
             $fighter->displayName = "Tzymm";
-            $fighter->imagePath = "img/ships/VreeTzymm.png";
+            $fighter->imagePath = "img/ships/VreeTyzmm.png";
             $fighter->iconPath = "img/ships/VreeTyzmm_Large.png";
             $fighter->addFrontSystem(new LightAntiprotonGun(330, 30, 2));
             $fighter->addFrontSystem(new LtAntimatterCannon(330, 30));
