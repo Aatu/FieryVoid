@@ -269,7 +269,7 @@ window.gamedata = {
 			if(smallCraftSize !=''){
 				
 				if(lship.customFtrName){
-					specialFtrAmt = lship.flightSize;
+					specialFtrAmt = lship.flightSize/lship.unitSize;
 					specialFtrName = lship.customFtrName;
 					specialFighters.push([specialFtrName,specialFtrAmt]);
 					//console.table(specialFighters);
@@ -281,13 +281,13 @@ window.gamedata = {
 				}
 				
 				if(smallCraftSize =="heavy"){
-					totalFtrH += lship.flightSize;
+					totalFtrH += lship.flightSize/lship.unitSize;
 				}else if(smallCraftSize=="medium"){ 
-					totalFtrM += lship.flightSize;
+					totalFtrM += lship.flightSize/lship.unitSize;
 				}else if(smallCraftSize=="light"){ 
-					totalFtrL += lship.flightSize;
+					totalFtrL += lship.flightSize/lship.unitSize;
 				}else if(smallCraftSize=="ultralight"){ 
-					totalFtrXL += lship.flightSize;
+					totalFtrXL += lship.flightSize/lship.unitSize;
 				}else{ //something other than standard fighters
 					var found = false;
 					for(var nh in totalFtrOther){ 					

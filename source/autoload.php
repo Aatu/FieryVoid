@@ -1769,7 +1769,10 @@ spl_autoload_register(
 				'maggravreactortechnical' => '/server/model/systems/baseSystems.php',
 				'vorlondischargegun' => '/server/model/weapons/specialWeapons.php',
 				'vorlonlightningcannon' => '/server/model/weapons/specialWeapons.php',
+				'vorlonltdischargegun' => '/server/model/weapons/specialWeapons.php',
 				
+				'vorlonassaultfighterflight' => '/server/model/ships/vorlons/vorlonAssaultFighterFlight.php',
+				'vorlonheavyfighterflight' => '/server/model/ships/vorlons/vorlonHeavyFighterFlight.php',
 				'vorlonbattledestroyer' => '/server/model/ships/vorlons/vorlonBattleDestroyer.php',
 				
 				

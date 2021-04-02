@@ -432,6 +432,13 @@ PowerCapacitor.prototype.initBoostableInfo = function () {
 		if(boostCount > 0){//boosted!
 			effectiveOutput += Math.round(this.output *0.5);
 		}
+	}else if (gamedata.gamephase > 1){//later phases - actually ADD power used by other systems - that's boosts that are already subtracted from power held!
+		//ACTUALLY only Engine and Sensors can have meaningful boosts; still, check everything except obvious exceptions
+		this.ship.systems.forEach(function (systemToCheck) {
+			if ( (systemToCheck.name != 'powerCapacitor') && (systemToCheck.name != 'reactor') ){ //checking these might end badly!
+				effectiveOutput += shipManager.power.countBoostPowerUsed(this.ship, systemToCheck);
+			}
+		}, this);
 	}
 	//can be more than maximum - but cannot HOLD more than maximum after Initial phase (server end takes care of that)
     this.powerReq =  - effectiveOutput; //NEGATIVE VALUE - this system adds power to Reactor :)
@@ -446,7 +453,8 @@ PowerCapacitor.prototype.getMaxBoost = function () {
 PowerCapacitor.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
 	this.individualNotesTransfer = Array();
 	//note power currently remaining ON REACTOR as charge held
-	var powerRemaining = shipManager.power.getReactorPower(this.ship, this); 
+	var powerRemaining = shipManager.power.getReactorPower(this.ship, this);
+	powerRemaining = Math.min(powerRemaining,this.powerMax);
 	this.individualNotesTransfer.push(powerRemaining);
 	return true;
 };

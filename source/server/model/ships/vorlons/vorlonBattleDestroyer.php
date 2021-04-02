@@ -8,8 +8,8 @@ class VorlonBattleDestroyer extends HeavyCombatVessel{
 		$this->faction = "Custom Ships";
         $this->phpclass = "VorlonBattleDestroyer";
         $this->shipClass = "Battle Destroyer";
-        $this->imagePath = "img/ships/ShadowCruiser.png";
-        $this->canvasSize = 200;
+        $this->imagePath = "img/ships/VorlonBattleDestroyer.png";
+        $this->canvasSize = 100;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 2; 
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
@@ -29,12 +29,9 @@ class VorlonBattleDestroyer extends HeavyCombatVessel{
 		
 		//$this->fighters = array("normal"=>12);
         
-		/* enhancement options to be redone... Vorlons are allowed Improved Self Repair and skins, and that's it
-		$this->enhancementOptionsEnabled[] = 'SHAD_FTRL'; //can launch Shadow fighters (IF hangar capacity allows!)
-		$this->enhancementOptionsDisabled[] = 'POOR_CREW'; //no crew ;)
-		$this->enhancementOptionsDisabled[] = 'ELITE_CREW'; //no crew ;)
-		$this->enhancementOptionsDisabled[] = 'IMPR_ENG'; //no Engine ;)
-		*/
+		/*Vorlons use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'VorlonShip');
+		
          
         $this->addPrimarySystem(new MagGravReactorTechnical(99, 99, 0, 0));
 		$this->addPrimarySystem(new PowerCapacitor( 6, 24, 0, 12, true));//armor, structure, power req, output, has petals 
@@ -74,8 +71,6 @@ class VorlonBattleDestroyer extends HeavyCombatVessel{
         $this->addPrimarySystem(new Structure( 6, 60 ));
 		
 		
-		
-				
 	
 		$this->hitChart = array(
 			0=> array( //PRIMARY
@@ -103,7 +98,8 @@ class VorlonBattleDestroyer extends HeavyCombatVessel{
 				18 => "Structure",
 				20 => "Primary",
 			),
-		);				
+		);
+		
     }
 }
 
