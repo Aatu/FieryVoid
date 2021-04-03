@@ -1,16 +1,18 @@
 <?php
-class Xeel extends VreeCapital{
+class Xeon extends VreeCapital{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 340;
 		$this->faction = "Vree";
-		$this->phpclass = "Xeel";
-		$this->shipClass = "Xeel War Carrier";
-		$this->isd = 2218;
+		$this->phpclass = "Xeon";
+		$this->shipClass = "Xeon Assault Saucer";
+		$this->isd = 2225;
 		$this->locations = array(41, 42, 2, 32, 31, 1);
-        $this->fighters = array("normal"=>12);				
+        $this->fighters = array("assault shuttles"=>12);
+  		$this->occurence = "uncommon";
+    	$this->variantOf = 'Xeel War Carrier';	        				
 
 		$this->shipSizeClass = 3; //Enormous is not implemented
 		$this->iniativebonus = 0; //no voluntary movement anyway
@@ -35,19 +37,21 @@ class Xeel extends VreeCapital{
         $this->addPrimarySystem(new Engine(5, 11, 0, 7, 2));			
 
         $this->addFrontSystem(new Thruster(4, 12, 0, 7, 1));
+         $this->addFrontSystem(new AntiprotonDefender(3, 0, 0, 300, 60));
 		
         $this->addAftSystem(new Thruster(4, 12, 0, 7, 2));
+        $this->addAftSystem(new AntiprotonDefender(3, 0, 0, 120, 240));
         
-		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
+		$this->addLeftFrontSystem(new AntiprotonDefender(3, 0, 0, 240, 360));
 		$this->addLeftFrontSystem(new Thruster(4, 6, 0, 3, 3));
 				
-		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
+		$this->addLeftAftSystem(new AntiprotonDefender(3, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new Thruster(4, 6, 0, 4, 3));
 		
-		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
+		$this->addRightFrontSystem(new AntiprotonDefender(3, 0, 0, 0, 120));
 		$this->addRightFrontSystem(new Thruster(4, 6, 0, 3, 4));
 				
-		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
+		$this->addRightAftSystem(new AntiprotonDefender(3, 0, 0, 60, 180));
 		$this->addRightAftSystem(new Thruster(4, 6, 0, 4, 4));	
 		
        
@@ -72,35 +76,37 @@ class Xeel extends VreeCapital{
            		 ),
             1=> array(
                     4 => "Thruster",
+                    6 => "Antiproton Defender",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             2=> array(
                     4 => "Thruster",
+                    6 => "Antiproton Defender",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             31=> array(
                     4 => "Thruster",
-                    6 => "Antiproton Gun",
+                    6 => "Antiproton Defender",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
                     4 => "Thruster",
-                    6 => "Antiproton Gun",
+                    6 => "Antiproton Defender",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
                     4 => "Thruster",
-                    6 => "Antiproton Gun",
+                    6 => "Antiproton Defender",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
                     4 => "Thruster",
-                    6 => "Antiproton Gun",
+                    6 => "Antiproton Defender",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
