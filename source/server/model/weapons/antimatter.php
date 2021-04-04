@@ -19,7 +19,9 @@
 		public $rngNoPenalty = 1; //maximum range at which weapon suffers no penalty
 		public $rngNormalPenalty = 2;//maximum range at which weapon suffers regular penalty
 		public $maxX = 10; //maximum value of X
-		public $dmgEquation = '2X+5'; //to be able to automatically incorporate this into weaon description
+		public $maxXArray = array(); //maximum value of X
+		public $dmgEquation = '2X+5'; //to be able to automatically incorporate this into weapon description
+		public $dmgEquationArray = array(); //For AntimatterShredder		
 		//effect: 
 		// - for range up to $rngNoPenalty weapon suffers no penalty
 		// - for ranges higher than $rngNoPenalty up to $rngNormalPenalty weapon suffers regular range penalty
@@ -402,5 +404,136 @@ class LtAntimatterCannon extends Weapon{  //deliberately NOT extending Antimatte
         public function setMaxDamage(){     $this->maxDamage = 28 ;      }
 
 }//end of class LtAntimatterCannon
+
+
+class AntimatterShredder extends AntimatterWeapon{        
+        public $name = "AntimatterShredder";
+        public $displayName = "Antimatter Shredder";
+		public $iconPath = "AntimatterShredder.png";
+		public $animationArray = array(1=>'ball', 2=>'laser', 3=>'laser');
+        public $animationColor = array(0, 184, 230);
+        public $explosionColor = array(0, 184, 230);
+        public $trailColor = array(0, 184, 230);                
+   		public $animationWidthArray = array(1=>10, 2=>4, 3=>4);
+        public $animationWidth2 = 0.2; 	
+        public $projectilespeed = 12;
+        public $trailLength = 10;
+        public $animationExplosionScale = 1;                        	
+   		public $animationExplosionTypeArray = array(1=>'AoE', 2=>'normal', 3=>'normal');        
+
+        public $priority = 6; //that's Standard Heavy hit!
+        public $raking = 10;
+        public $loadingtime = 3;
+  		public $rangePenaltyArray = array(1=>0, 2=>1, 3=>1); //-1/hex base penalty
+        public $intercept = 1;
+ 		public $rangeArray = array(1=>10, 2=>0, 3=>0);
+		public $dmgEquationArray = array(1=>'2X+6', 2=>'2X+16', 3=>'2X+16');  		        
+
+ 	    public $hextargetArray = array(1=>true, 2=>false, 3=>false);
+    
+        public $firingModes = array(
+            1 => "AoE",
+            2 => "Raking",
+            3 => "Piercing"
+        );
+        
+        public $damageTypeArray = array(1=>'Antimatter', 2=>'Raking', 3=>'Piercing');
+
+		public $rngNoPenalty = 10; //maximum range at which weapon suffers no penalty
+		public $rngNormalPenalty = 20;//maximum range at which weapon suffers regular penalty
+		public $maxXArray = array(1=>10, 2=>20, 3=>20); //maximum value of X
+		public $dmgEquationArray = array(1=>'2X+6', 2=>'2X+16', 3=>'2X+16');  //to be able to automatically incorporate this into weapon description
+
+        public $fireControlArray = array(1=>array(0, 0, 0), 2=>array(-2, 3, 5), 3=>array(null,-1, 1) ); // fighters, <mediums, <capitals 
+		
+
+//tons of stuff to be added here
+
+// - targeting direct fire weapons at hex rather than unit (Vortex Disruptor does that)
+// - multiplying one declared attack into actual multiple attacks on nearby units (finding nearby units - EMine, multiplying attacks - ScatterGun)
+
+
+
+
+		
+        public function setSystemDataWindow($turn){ //this is done I think
+            parent::setSystemDataWindow($turn);
+        
+		switch($this->firingMode){
+        	
+       case 1:	
+            $this->data["Special"] = "Damage is dependent on how good a hit is - it's not randomized. Quality of hit is called X, and equals difference between actual and needed to-hit roll divided by 5.";
+			$this->data["Special"] .= "<br>This weapon does " . $this->dmgEquation .' damage, with maximum X being ' . $this->maxX . '.';
+			$this->data["Special"] .= '<br>This weapon targets a hex within a maximum range of 10 hexes and rolls to hit each unit/fighter in that and adjacent hexes';
+			$this->data["Special"] .= '<br>The Shredder can potentially hit capital ships 1d6 times, HCVs and medium ships 1d3 times, fighters once, and enormous units 1d6+3 times';
+			$this->data["Special"] .= "<br>Once the number of hits is determined it rolls to hits as normal but ignores DEW and jinking.";			
+       case 2:	   
+            $this->data["Special"] = "Damage is dependent on how good a hit is - it's not randomized. Quality of hit is called X, and equals difference between actual and needed to-hit roll divided by 5.";
+			$this->data["Special"] .= "<br>This weapon does " . $this->dmgEquation .' damage, with maximum X being ' . $this->maxX . '.';
+			$this->data["Special"] .= '<br>This weapon suffers no range penalty up to ' . $this->rngNoPenalty . ' hexes, regular penalty up to ' . $this->rngNormalPenalty . ' hexes, and double penalty for remaining distance.';
+			$this->data["Special"] .= "<br>In case of no lock-on the range itself is doubled (for the calculation above), not calculated penalty.";
+      case 3:	   
+            $this->data["Special"] = "Damage is dependent on how good a hit is - it's not randomized. Quality of hit is called X, and equals difference between actual and needed to-hit roll divided by 5.";
+			$this->data["Special"] .= "<br>This weapon does " . $this->dmgEquation .' damage, with maximum X being ' . $this->maxX . '.';
+			$this->data["Special"] .= '<br>This weapon suffers no range penalty up to ' . $this->rngNoPenalty . ' hexes, regular penalty up to ' . $this->rngNormalPenalty . ' hexes, and double penalty for remaining distance.';
+			$this->data["Special"] .= "<br>In case of no lock-on the range itself is doubled (for the calculation above), not calculated penalty.";
+			}
+		}  
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //done
+			if ( $maxhealth == 0 ) $maxhealth = 10;
+            if ( $powerReq == 0 ) $powerReq = 8;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+ 
+//used MLPA text as a basis
+        public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1:
+                $X = $this->getX($fireOrder);
+				$damage = $X + 6; //Shredder
+				return $damage ;
+			case 2:
+                $X = $this->getX($fireOrder);
+				$damage = $X + 16;
+				return $damage ; //AMCannonRaking
+				break;
+			case 3:
+                $X = $this->getX($fireOrder);
+				$damage = $X + 16;
+				return $damage ; //AMCannonPiercing
+				break;			
+		}
+	}
+        public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 6; //Shredder
+				break;
+			case 2:
+				$this->minDamage = 16; //AMCannonRaking
+				break;	
+			case 3:
+				$this->minDamage = 16; //AMCannonPiercing
+				break;		
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 26; //Shredder
+				break;
+			case 2:
+				$this->maxDamage = 56; //AMCannonRaking
+				break;	
+			case 3:
+				$this->maxDamage = 56; //AMCannonPiercing
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
+	
+} //end of class AntimatterShredder
 		
 ?>

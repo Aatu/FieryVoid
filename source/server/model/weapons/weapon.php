@@ -121,6 +121,7 @@ class Weapon extends ShipSystem
     public $ballistic = false; //this is a ballictic weapon, not direct fire
     public $ballisticIntercept = false; //can intercept, but only ballistics
     public $hextarget = false; //this weapon is targeted on hex, not unit
+    public $hextargetArray = array(); //For AntimatterShredder
     public $noPrimaryHits = false; //PRIMARY removed from outer charts if true
 
     public $minDamage, $maxDamage;
