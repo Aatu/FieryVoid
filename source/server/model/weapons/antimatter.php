@@ -429,7 +429,11 @@ class AntimatterShredder extends AntimatterWeapon{
  		public $rangeArray = array(1=>10, 2=>0, 3=>0);
 		public $dmgEquationArray = array(1=>'2X+6', 2=>'2X+16', 3=>'2X+16');  		        
 
- 	    public $hextargetArray = array(1=>true, 2=>false, 3=>false);
+ 	    public $hextargetArray = array(1=>true, 2=>false, 3=>false); //I have added this as a new marker to weapon.php
+		public $hidetarget = false;
+		public $ballistic = false;
+		//public $uninterceptable = true; Need $uninterceptableArray added to Weapon.php
+		//public $doNotIntercept = true; Need $doNotInterceptArray added to Weapon.php	    
     
         public $firingModes = array(
             1 => "AoE",
@@ -439,24 +443,125 @@ class AntimatterShredder extends AntimatterWeapon{
         
         public $damageTypeArray = array(1=>'Antimatter', 2=>'Raking', 3=>'Piercing');
 
-		public $rngNoPenalty = 10; //maximum range at which weapon suffers no penalty
+		public $rngNoPenalty = 10; //maximum range at which weapon suffers no penalty.  Do not need arrays as Shredder has max range 10 anyway?
 		public $rngNormalPenalty = 20;//maximum range at which weapon suffers regular penalty
 		public $maxXArray = array(1=>10, 2=>20, 3=>20); //maximum value of X
 		public $dmgEquationArray = array(1=>'2X+6', 2=>'2X+16', 3=>'2X+16');  //to be able to automatically incorporate this into weapon description
 
         public $fireControlArray = array(1=>array(0, 0, 0), 2=>array(-2, 3, 5), 3=>array(null,-1, 1) ); // fighters, <mediums, <capitals 
 		
+// - multiplying one declared attack into actual multiple attacks on nearby units (finding nearby units - EMine, multiplying attacks - ScatterGun)ONLY FOR FIRING MODE 1
+	public function beforeFiringOrderResolution($gamedata){ //from scattergun
+		if($this->multiplied==true) return;//shots of this weapon are already multiplied
+		$this->multiplied = true;//shots WILL be multiplied in a moment, mark this
+		//is offensive fire declared?...
+		$offensiveShot = null;
+		$noOfShots = Dice::d(6,1); //actual number of shots for this turn
 
-//tons of stuff to be added here
+		foreach($this->fireOrders as $fire){
+			if(($fire->type =='normal') && ($fire->turn == $gamedata->turn)) $offensiveShot = $fire;
+		}
+		if($offensiveShot!==null){ //offensive fire declared, multiply!
+			while($noOfShots > 1){ //first shot is already declared!
+				$multipliedFireOrder = new FireOrder( -1, $offensiveShot->type, $offensiveShot->shooterid, $offensiveShot->targetid,
+					$offensiveShot->weaponid, $offensiveShot->calledid, $offensiveShot->turn, $offensiveShot->firingMode,
+					0, 0, 1, 0, 0, null, null
+				);
+				$multipliedFireOrder->addToDB = true;
+				$this->fireOrders[] = $multipliedFireOrder;
+				$noOfShots--;	      
+			}
+		//}else{   DEFENSIVE
+			//$this->guns = $noOfShots; DEFENSIVE
+		}
+	} //endof function beforeFiringOrderResolution
+	
 
-// - targeting direct fire weapons at hex rather than unit (Vortex Disruptor does that)
-// - multiplying one declared attack into actual multiple attacks on nearby units (finding nearby units - EMine, multiplying attacks - ScatterGun)
+// - targeting direct fire weapons at hex rather than unit (Vortex Disruptor does that) ONLY FOR FIRING MODE 1
+    public function fire($gamedata, $fireOrder) {
+    switch($this->firingMode){
+        	
+       case 1:    	 
+        $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+
+        /** @var MovementOrder $movement */
+        $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+
+        $posLaunch = $movement->position;//at moment of launch!!!
+
+        //sometimes player does manage to target ship after all..
+        if ($fireOrder->targetid != -1) {
+            $targetship = $gamedata->getShipById($fireOrder->targetid);
+            //insert correct target coordinates: last turns' target position
+            $movement = $targetship->getLastTurnMovement($fireOrder->turn);
+            $fireOrder->x = $movement->position->q;
+            $fireOrder->y = $movement->position->r;
+            $fireOrder->targetid = -1; //correct the error
+        }
+
+		$rolled = Dice::d(100);
+		$fireOrder->rolled = $rolled;
+
+        $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+        
+            $ships1 = $gamedata->getShipsInDistance($target);
+            $ships2 = $gamedata->getShipsInDistance($target, 1);
+            foreach ($ships2 as $targetShip) {
+            //    if (isset($ships1[$targetShip->id])) { //ship on target hex!
+           //         $sourceHex = $posLaunch;
+           //         $damage = $this->maxDamage;
+              //  } else { //ship at range 1!
+              //      $sourceHex = $target;
+              //      $damage = $this->minDamage;
+              //  }
+                $this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
+            }
+          //    $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+		}
+	} //endof function fire  
+        
 
 
+    public function AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata) //do I need to put a firing mode switch for this?
+    {
+        if ($target->isDestroyed()) return; //no point allocating
+        $damage = $this->getDamageMod($damage, $shooter, $target, $sourceHex, $gamedata);
+        $damage -= $target->getDamageMod($shooter, $sourceHex, $gamedata->turn, $this);
+        if ($target instanceof FighterFlight) {
+            foreach ($target->systems as $fighter) {
+                if ($fighter == null || $fighter->isDestroyed()) {
+                    continue;
+                }
+				$damage = $this->getDamage($fireOrder);
+                $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, $sourceHex, $gamedata, false);
+            }
+        //add more if functions???
+        
+        } else {   //Commented out as this targets ships and not needed for the plasma web
+            $tmpLocation = $target->getHitSectionPos(Mathlib::hexCoToPixel($sourceHex), $fireOrder->turn);
+          $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $tmpLocation);
+           $this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, false, $tmpLocation);
+        }
+    }
+    
+//only one Shredder can affect a given unit. The two Ipsha systems Marcin recommended looking at to address this are the Ipsha Spark Field and Surge Cannon	
+	
+	
+    public function calculateHitBase($gamedata, $fireOrder) {   ONLY FOR FIRING MODE 1
+    switch($this->firingMode){
+        	
+       case 1:	
+		$fireOrder->needed = 100; //update to be against defense profile only + range penalty which is usually 0.  Cannot hit firing unit too.
+		$fireOrder->updated = true;
+       case 2:	//how do i make Case 2 and 3 act normal for AM Cannon modes?
+       case 3:	    
+		}
+    }
 
 
 		
-        public function setSystemDataWindow($turn){ //this is done I think
+    public function setSystemDataWindow($turn){ //this is done I think, but can it be tidied so Case 2 and 3 are combined?
             parent::setSystemDataWindow($turn);
         
 		switch($this->firingMode){
