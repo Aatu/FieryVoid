@@ -432,8 +432,8 @@ class AntimatterShredder extends AntimatterWeapon{
  	    public $hextargetArray = array(1=>true, 2=>false, 3=>false); //I have added this as a new marker to weapon.php
 		public $hidetarget = false;
 		public $ballistic = false;
-		//public $uninterceptable = true; Need $uninterceptableArray added to Weapon.php
-		//public $doNotIntercept = true; Need $doNotInterceptArray added to Weapon.php	    
+		public $uninterceptableArray = array(1=>true, 2=>false, 3=>false)
+		public $doNotInterceptArray = array(1=>true, 2=>false, 3=>false); //Added $doNotInterceptArray added to Weapon.php	    
     
         public $firingModes = array(
             1 => "AoE",
@@ -456,8 +456,20 @@ class AntimatterShredder extends AntimatterWeapon{
 		$this->multiplied = true;//shots WILL be multiplied in a moment, mark this
 		//is offensive fire declared?...
 		$offensiveShot = null;
+		
+		if ($targetShip->shipSizeClass = -1){ //I am 99% sure this next part is wrong, but can't think how it should be
+		$noOfShots = 1; //actual number of shots for this turn
+		}
+		if ( ($targetShip->shipSizeClass = 0) || ($targetShip->shipSizeClass = 1) || ($targetShip->shipSizeClass = 2) ){
+		$noOfShots = Dice::d(3,1); //actual number of shots for this turn
+		}		
+		if ($targetShip->shipSizeClass = 3){
 		$noOfShots = Dice::d(6,1); //actual number of shots for this turn
-
+		}
+		if ($targetShip->shipSizeClass = 4){
+		$noOfShots = Dice::d(6,1) + 3; //actual number of shots for this turn
+		}		
+		
 		foreach($this->fireOrders as $fire){
 			if(($fire->type =='normal') && ($fire->turn == $gamedata->turn)) $offensiveShot = $fire;
 		}
@@ -471,9 +483,6 @@ class AntimatterShredder extends AntimatterWeapon{
 				$this->fireOrders[] = $multipliedFireOrder;
 				$noOfShots--;	      
 			}
-		//}else{   DEFENSIVE
-			//$this->guns = $noOfShots; DEFENSIVE
-		}
 	} //endof function beforeFiringOrderResolution
 	
 
@@ -508,16 +517,8 @@ class AntimatterShredder extends AntimatterWeapon{
             $ships1 = $gamedata->getShipsInDistance($target);
             $ships2 = $gamedata->getShipsInDistance($target, 1);
             foreach ($ships2 as $targetShip) {
-            //    if (isset($ships1[$targetShip->id])) { //ship on target hex!
-           //         $sourceHex = $posLaunch;
-           //         $damage = $this->maxDamage;
-              //  } else { //ship at range 1!
-              //      $sourceHex = $target;
-              //      $damage = $this->minDamage;
-              //  }
-                $this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
+            $this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
             }
-          //    $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
 		}
 	} //endof function fire  
         
@@ -536,9 +537,9 @@ class AntimatterShredder extends AntimatterWeapon{
 				$damage = $this->getDamage($fireOrder);
                 $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, $sourceHex, $gamedata, false);
             }
-        //add more if functions???
+
         
-        } else {   //Commented out as this targets ships and not needed for the plasma web
+        } else { 
             $tmpLocation = $target->getHitSectionPos(Mathlib::hexCoToPixel($sourceHex), $fireOrder->turn);
           $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $tmpLocation);
            $this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, false, $tmpLocation);
@@ -547,14 +548,18 @@ class AntimatterShredder extends AntimatterWeapon{
     
 //only one Shredder can affect a given unit. The two Ipsha systems Marcin recommended looking at to address this are the Ipsha Spark Field and Surge Cannon	
 	
-	
     public function calculateHitBase($gamedata, $fireOrder) {   ONLY FOR FIRING MODE 1
     switch($this->firingMode){
         	
        case 1:	
-		$fireOrder->needed = 100; //update to be against defense profile only + range penalty which is usually 0.  Cannot hit firing unit too.
+		if ($target = $shooter()){ //cannot hit firing ship
+		$fireOrder->needed = 0;
+		} else {	
+		
+		$fireOrder->needed = ($this->profile - $this->rangepenalty); //Range penalty usually 0 for Shredder, but could be raised by crits and rules say it does apply.
 		$fireOrder->updated = true;
-       case 2:	//how do i make Case 2 and 3 act normal for AM Cannon modes?
+			}
+       case 2:	//how do I make Case 2 and 3 act normal for AM Cannon modes???
        case 3:	    
 		}
     }
@@ -577,7 +582,7 @@ class AntimatterShredder extends AntimatterWeapon{
 			$this->data["Special"] .= "<br>This weapon does " . $this->dmgEquation .' damage, with maximum X being ' . $this->maxX . '.';
 			$this->data["Special"] .= '<br>This weapon suffers no range penalty up to ' . $this->rngNoPenalty . ' hexes, regular penalty up to ' . $this->rngNormalPenalty . ' hexes, and double penalty for remaining distance.';
 			$this->data["Special"] .= "<br>In case of no lock-on the range itself is doubled (for the calculation above), not calculated penalty.";
-      case 3:	   
+      case 3:	   //Is there a way I can combine this with Case 2 e.g. just say 'else'?
             $this->data["Special"] = "Damage is dependent on how good a hit is - it's not randomized. Quality of hit is called X, and equals difference between actual and needed to-hit roll divided by 5.";
 			$this->data["Special"] .= "<br>This weapon does " . $this->dmgEquation .' damage, with maximum X being ' . $this->maxX . '.';
 			$this->data["Special"] .= '<br>This weapon suffers no range penalty up to ' . $this->rngNoPenalty . ' hexes, regular penalty up to ' . $this->rngNormalPenalty . ' hexes, and double penalty for remaining distance.';

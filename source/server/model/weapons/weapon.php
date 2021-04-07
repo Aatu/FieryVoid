@@ -71,6 +71,7 @@ class Weapon extends ShipSystem
     public $extraoverloadshotsArray = array();
 
     public $doNotIntercept = false; //for attacks that are not subject to interception at all - like fields and ramming
+	public $doNotInterceptArray = array(); //For AM Shredder to allow mode switching.
     public $uninterceptable = false;
     public $uninterceptableArray = array();
     public $canInterceptUninterceptable = false; //able to intercept shots that are normally uninterceptable, eg. Lasers
