@@ -19,7 +19,7 @@ class Vymish extends MediumShip{
         $this->turncost = 0.50;
         $this->turndelaycost = 0.33;
         $this->accelcost = 2;
-        $this->rollcost = 1;
+        $this->rollcost = 2;
         $this->pivotcost = 0;
         
         $this->iniativebonus = 60;

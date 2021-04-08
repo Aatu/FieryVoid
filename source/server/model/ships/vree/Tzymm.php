@@ -6,7 +6,7 @@ class Tzymm extends FighterFlight{
         
         $this->pointCost = 85*6;
         $this->phpclass = "Tzymm";
-        $this->shipClass = "Tzymm Heavy flight";
+        $this->shipClass = "Tzymm Heavy Fighters";
         $this->imagePath = "img/ships/VreeTyzmm.png";
         
         $this->faction = "Vree";

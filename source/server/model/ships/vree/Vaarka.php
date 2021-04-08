@@ -35,7 +35,7 @@ class Vaarka extends HeavyCombatVessel{
 		$this->addPrimarySystem(new ElintScanner(4, 20, 9, 12));
         $this->addPrimarySystem(new Engine(4, 11, 0, 7, 2));
 		$this->addPrimarySystem(new JumpEngine(6, 10, 4, 24));        			
-		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
+		$this->addPrimarySystem(new AntimatterShredder(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 3));
 		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 4));		
 

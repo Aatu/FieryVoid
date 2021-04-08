@@ -6,7 +6,7 @@ class Zorth extends FighterFlight{
         
         $this->pointCost = 35*6;
         $this->phpclass = "Zorth";
-        $this->shipClass = "Zorth Ultralight flight";
+        $this->shipClass = "Zorth Ultralight Fighters";
         $this->imagePath = "img/ships/VreeZorth.png";
         
         $this->faction = "Vree";
