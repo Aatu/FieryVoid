@@ -293,6 +293,25 @@ class BMissileRack extends MissileLauncher {
 }
 
 
+class AMissileRack extends MissileLauncher{
+    public $name = "aMissileRack";
+    public $displayName = "Class-A Missile Rack";
+    public $range = 15;
+    public $distanceRange = 45;
+    public $loadingtime = 1;
+    public $iconPath = "missile1.png";
+
+    public $fireControl = array(10, 3, 3); // fighters, <mediums, <capitals 
+    
+    public function getDamage($fireOrder)
+    {
+        return 15;
+    }
+    public function setMinDamage(){     $this->minDamage = 15 ;}
+    public function setMaxDamage(){     $this->maxDamage = 15 ;}     
+}
+
+
 class BombRack extends MissileLauncher
 {
     public $name = "BombRack";

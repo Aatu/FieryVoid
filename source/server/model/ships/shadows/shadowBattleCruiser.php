@@ -33,10 +33,13 @@ class ShadowBattleCruiser extends MediumShip{
 		$this->fighters = array("normal"=>24);
 		$this->notes = "Atmospheric capable";//even largest Shadow ships are atmospheric capable
 		
+		/*
 		$this->enhancementOptionsEnabled[] = 'SHAD_FTRL'; //can launch Shadow fighters (IF hangar capacity allows!)
 		$this->enhancementOptionsDisabled[] = 'POOR_CREW'; //no crew ;)
 		$this->enhancementOptionsDisabled[] = 'ELITE_CREW'; //no crew ;)
 		$this->enhancementOptionsDisabled[] = 'IMPR_ENG'; //no Engine ;)
+		*/
+		Enhancements::nonstandardEnhancementSet($this, 'ShadowShip');
 		
 		
 		

@@ -6,7 +6,7 @@ class ColonialValkyrie_K extends BaseShipNoAft{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 1000;
-        $this->faction = "ZPlaytest 12 Colonies of Cobol";
+        $this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "ColonialValkyrie_K";
         $this->imagePath = "img/ships/BSG/ColonialOdin.png";
         $this->shipClass = "Valkyrie Class Battlestar";
