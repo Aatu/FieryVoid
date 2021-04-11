@@ -252,7 +252,7 @@ Otherwise no very specific technologies.
 
 SHADOWS
 Ancient race, by definition complicated, very specific and not really on par with younger ones - tech difference is too high for proper balance. Ancient factions were officially not tournament legal.
-But with these caveats - have fun! Ancients should be balanced against each other, and if Your opponent knows what to expect/You're playing a scenario, go ahead with other pairings as well. Note that sky-high individual cost of Ancient units makes standard requirements based on total fleet value completely inadequate (like number of units on a hull and number of required capital ships).
+But with these caveats - have fun! Ancients should be balanced against each other, and if Your opponent knows what to expect/You're playing a scenario, go ahead with other pairings as well. Note that sky-high individual cost of Ancient units makes standard requirements based on total fleet value completely inadequate - so they have been modified for fleet checker.
 Below list of systems Shadows use, with short description of effect and design differences from original tabletop.
 Called shots - systems on Shadow ships cannot be targeted by called shots.
 Enhancements - Shadow ships use no crew, so cannot use rew-related enhancements. They can use enhancements relating to special officers (that would be ship pilot's skill in such case). They have their own faction-specific enhancements as well.
@@ -313,6 +313,44 @@ USUUTH
 No very specific rules or technologies.
 Their fleet relies on LCVs but doesn't have a carrier for them (it's not needed when they operate within home system).
 	This challenges Usuuth fleets when deploy under standard tournament/pickup battle limitations, unless rules are changed or allowances for Usuuth are made. 
+	
+	
+VORLONS
+Ancient race, by definition complicated, very specific and not really on par with younger ones - tech difference is too high for proper balance. Ancient factions were officially not tournament legal.
+But with these caveats - have fun! Ancients should be balanced against each other, and if Your opponent knows what to expect/You're playing a scenario, go ahead with other pairings as well. Note that sky-high individual cost of Ancient units makes standard requirements based on total fleet value completely inadequate - so they have been modified for fleet checker.
+Below list of systems and rules Vorlons use, with short description of effect and design differences from original tabletop.
+Self-Repair - see Shadows and Minbari. Vorlon sef-repair systems work the same, although are usually more powerful.
+Power Capacitor: defines how much Power a Vorlon ship has available. Can hold Power between turns (up to Capacity).
+ - recharge occurs in Initial phase (tabletop - just before movement, which makes power not usable in Initial phase)
+ - opening petals reduces armor of all systems by 2 (tabletop - armor is reduced on PRIMARY only, but all profiles are increased by 1)
+ - cannot icrease recharge rate in any other way (tabletop - can shut down everything (weapons, shields) to increase by 100%)
+ - Capacitor destruction would leave ship powerless, but doesn't cause catastrophic explosion like Reactor destruction. In FV terms: it will leave ship powerless (as the Capacitor is the main power source on Vorlon ships), add Power reduction critical to Reactor (so ship goes out of control) and SelfRepair (so the damage isn't just repaired in a few turns ;) ).
+ - fighters do not get Open Petals option (tabletop: can increase profiles and decrease armor to gain thrust)
+Mag-Gravitic Reactor: for technical reasons Vorlons in FV are using Mag-Gravitic Reactor. This means destroying power-using systems will free appropriate power. Note that technically Vorlons in FV do not have power using systems :) .
+Scanner uses no power: it's operating cost are base hull feature and do not affect power usage.
+Jump Drive uses no power: it's operating cost are base hull feature and do not affect power usage. This differes a bit from tabletop where Jump Drive odes use power (...which is counted as nominal). The only actual difference is that You cannot shut down Jump Drive on Vorlon ships for power in FV.
+All Vorlon weapons have nominally 0 Power usage - they need Power to actually shoot, but that is only decided and drained at moment of firing.
+Discharge Gun:
+ - Accelerator property added just so weapon requires explicit permission to intercept
+ - increased power levels are implemented as firing modes.
+ - additional shots are handled as in Ballistic Torpedo, by changing number of shots fired AFTER declaration is made
+ - by default full rate of fire is used
+ - each shot is at the same power level
+Lightning Cannon:
+ - can combine weapons for higher power shots. To do so, appropriate number of weapons must have same mode and target assigned (same mechanics as Ipsha Surge Cannons actually).
+ - if player mis-declares and not enough weapons are assigned for declared mode, shot is cancelled (technically: automatically misses) (and does not drain Power)
+ - interception shot is very effective, so weapon was not locked away from it - unassigned Lightning Cannons will try to intercept if applicable (and drain Power for it).
+ - Lightning Cannons in tabletop are usually mounted on two sections (on capital ships at least). In FV they are always tied to one section.
+Adaptive Armor for fighters:
+ - every fighter can use different settings (tabletop: only superheavy fighters)
+ - for superheavy fighters only damage to particular craft counts towards unlocking AA points. For lighter craft AA points are unlocked for entire flight.
+Vorlon superheavy fighters use regular hangars - one SHF counts as two heavy fighters for fleet designhangar purposes. Also, for purposes of fleet selection, they are treated as Rare variant of Heavy Fighters (tabletop: Uncommon but counted as single Assault per flights of Heavy). In Primordial timeframe Assault Fighters are treated as base hull.
+Vorlon unit can pick only ONE Skin Color enhancement (game will not check this though, it's up to player to conform!). Detailed descriptions are available in enhancements list.
+ - Amethyst Skin Coloring: for individuals desiring flexibility, Adaptive Armor improvement
+ - Azure Skin Coloring: for those desiring exceptional protection, Shield improvement
+ - Crimson Skin Coloring: for warmongers, Power Capacitor improvement
+  -- bonus works regardless of damage (tabletop: damage to Capacitor disables the enhancement and it needs to be separately repaired)
+	
 	
 	
 YOLU

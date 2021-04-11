@@ -97,6 +97,7 @@ window.gamedata = {
 	    var customShipPresent = false;
 	    var enhancementPresent = false;
 	    var uniqueShipPresent = false;
+		var ancientUnitPresent = false;
 		var specialVariantPresent = false;
 	    var staticPresent = false;
 	    var shipTable = []; 
@@ -195,6 +196,9 @@ window.gamedata = {
 				specialVariantPresent = true;
 		     }
 		     shipTable.push(nHull);
+		}
+		if (lship.factionAge > 2){
+			ancientUnitPresent = true;
 		}
 		if(!lship.flight){
 	            totalShips++;
@@ -314,8 +318,7 @@ window.gamedata = {
 			customShipPresent = true;
 			warningFound = true;
 		}
-		if ((lship.base == true) || (lship.osat == true)) staticPresent = true;
-		
+		if ((lship.base == true) || (lship.osat == true)) staticPresent = true;		
 			//check for presence of enhancements
 			if (!enhancementPresent){ //if already found - no point in checking
 				for (var enhNo in lship.enhancementOptions){
@@ -324,8 +327,6 @@ window.gamedata = {
 					}						
 				}
 			}
-		    
-		    
 	    } //end of loop at ships preparing data
 	    
 	    
@@ -345,10 +346,17 @@ window.gamedata = {
 	    checkResult += "Capital ships: " + capitalShips + ": "; //Capital Ship present?
 	    //var capsRequired = Math.floor(selectedSlot.points/3000);//1 per 3000, round down; so 1 at 3000, 2 at 6000, 3 at 9000, 10 at 30000
 	    //let's decrease the requirement at larger battles: 1 per 4000, round up, with first 2499 not counted; so 1 at 2500, 2 at 6500, 3 at 10500, 10 at 42500
-	    var capsRequired = 0;
-	    if (selectedSlot.points >= 3000){
-		    capsRequired = Math.ceil((selectedSlot.points-2499)/4000);
-	    }    
+	    var capsRequired = 0;	    
+		if (!ancientUnitPresent){ //regular limit: one per 5000 points, starting at 3000
+			if (selectedSlot.points >= 3000){
+				//capsRequired = Math.ceil((selectedSlot.points-2499)/4000); //previous: one per 4000 points above 2499
+				capsRequired = Math.ceil(selectedSlot.points/5000);
+			}
+		}else{ //Ancient-level limit: one per 10000 points, starting at 4000			
+			if (selectedSlot.points >= 4000){
+				capsRequired = Math.ceil(selectedSlot.points/10000);
+			}
+		}
 	    
 	   
 	    if (capitalShips >= capsRequired){ //tournament rules: at least 1; changed for scalability
@@ -359,6 +367,11 @@ window.gamedata = {
 	    }
 	    checkResult += "<br>";
 	    
+	    //Ancient units present?
+	    if (ancientUnitPresent){
+			warningText += "<br> - Ancient unit(s) present! Seek opponent's permission first. Fleet restrictions adjusted to Ancients."; 	
+			warningFound = true;
+	    }
 	    //Custom units present?
 	    if (customShipPresent){
 			warningText += "<br> - Custom unit(s) present! Seek opponent's permission first."; 	
@@ -418,14 +431,17 @@ window.gamedata = {
 		    }
 	    }
 	    if(points10>0 && totalShips<2){
-		checkResult += "<br>Restricted (10%) ship present without escort! Such a rare ship needs to be accompanied by at least one other unit, unless it's Dargan or a Minbari ship.";
-		problemFound = true;
+			checkResult += "<br>Restricted (10%) ship present without escort! Such a rare ship needs to be accompanied by at least one other unit, unless it's Dargan or a Minbari ship.";
+			problemFound = true;
 	    }	    
 	    checkResult += "<br><br>";
 	    
 	    //variant restrictions
 	    checkResult += "<br>><u><b>Variant restrictions:</b></u><br><br>";
-	    var limitPerHull = Math.floor(selectedSlot.points/1000); //turnament rules: 3, but it's for 3500 points
+	    var limitPerHull = Math.floor(selectedSlot.points/1100); //turnament rules: 3, but it's for 3500 points
+		if (ancientUnitPresent){ //Ancients have way fewer total units...
+			limitPerHull = Math.floor(selectedSlot.points/4000);
+		}
 	    limitPerHull = Math.max(limitPerHull,2); //always allow at least 2!
 	    var currRlimit = 0;
 	    var currUlimit = 0;
@@ -476,26 +492,23 @@ window.gamedata = {
 	    //total Uncommon/Rare units in fleet	    
 	    var limitUTotal =  0;
 	    var limitRTotal =  0;
+		
 	    if((selectedSlot.points-1500) > 0){
 	    	limitUTotal = Math.floor((selectedSlot.points-1500)/1000); //limit Uncommon units per fleet; turnament rules: 2, but it's for 3500 points
 	    }
+		if (ancientUnitPresent){ //Ancients have way fewer total units...
+			limitUTotal = Math.floor(selectedSlot.points/4000);
+		}
 	    limitUTotal = Math.max(limitUTotal,2); //always allow at least 2! 
 	    limitRTotal = Math.floor(limitUTotal/2); //limit Rare units per fleet; turnament rules: 1, but it's for 3500 points    
 	    if (totalU>limitUTotal){
-		checkResult += "FAILED: You have " + totalU + " Uncommon units, out of " + limitUTotal + " allowed for fleet.<br><br>" ;
-		problemFound = true;
+			checkResult += "FAILED: You have " + totalU + " Uncommon units, out of " + limitUTotal + " allowed for fleet.<br><br>" ;
+			problemFound = true;
 	    }
 	    if (totalR>limitRTotal){
-		checkResult += "FAILED: You have " + totalR + " Rare/Unique units, out of " + limitRTotal + " allowed for fleet.<br><br>" ;
-		problemFound = true;
+			checkResult += "FAILED: You have " + totalR + " Rare/Unique units, out of " + limitRTotal + " allowed for fleet.<br><br>" ;
+			problemFound = true;
 	    }
-	    
-		    /*old version
-	    var totalCombined = totalU + 2*totalR; //Rares take 2 slots
-	    if (totalCombined>limitUTotal){
-		    checkResult += "FAILED: You have " + totalU + " Uncommon and " + totalR + " Rare units , out of total " + limitUTotal + " Uncommon allowed (Rare units count double).<br><br>" ;
-		    problemFound = true;
-	    }	    */
 	    
 	    //fighters!
 		//ultralights count as half a fighter when accounting for hangar space used - IF packed into something other than ultralight hangars...

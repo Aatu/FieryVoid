@@ -5,10 +5,12 @@ class VorlonAssaultFighterFlight extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 295*6;
-		$this->faction = "Custom Ships";
+		$this->faction = "Vorlons";
 		$this->phpclass = "VorlonAssaultFighterFlight";
 		$this->shipClass = "Assault Fighters";
 		$this->imagePath = "img/ships/VorlonFighter.png";
+		$this->variantOf = 'Heavy Fighters'; 
+        $this->occurence = "rare";
 	    
 		$this->isd = 'Primordial';
 		$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
@@ -16,7 +18,7 @@ class VorlonAssaultFighterFlight extends FighterFlight{
 		/*Vorlons use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'VorlonFighter');
 		
-		//$this->notes = "Adaptive Armor is unlocked separately for each craft in flight."; //covered in AA description itself
+		$this->notes = "In Primordial timeframe treated as base hull instead of variant."; 
 		
 		$this->forwardDefense = 10;
 		$this->sideDefense = 12;
