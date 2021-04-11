@@ -218,3 +218,10 @@ VorlonLightningCannon.prototype.initializationUpdate = function() {
 	}
     return this;
 };
+
+
+var VorlonLtDischargeGun = function VorlonLtDischargeGun(json, ship) {
+    Weapon.call(this, json, ship);
+};
+VorlonLtDischargeGun.prototype = Object.create(Weapon.prototype);
+VorlonLtDischargeGun.prototype.constructor = VorlonLtDischargeGun;
