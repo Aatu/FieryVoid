@@ -27,6 +27,7 @@ spl_autoload_register(
                 'aluin' => '/server/model/ships/yolu/aluin.php',
                 'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
                 'amar' => '/server/model/ships/centauri/amar.php',
+                'amissilerack' => '/server/model/weapons/missile.php',
                 'ammo' => '/server/model/weapons/ammo.php',
                 'ammoexplosion' => '/server/model/cricialClasses.php',
                 'anoro' => '/server/model/ships/hurr/anoro.php',
@@ -1486,6 +1487,21 @@ spl_autoload_register(
 
                 //Grome Weapons and Systems
                 'antiquatedscanner' => '/server/model/systems/baseSystems.php',
+                'flakcannon' => '/server/model/weapons/matter.php',
+				'slugcannon' => '/server/model/weapons/matter.php',
+                
+                //Grome Ships
+                'gromegormokosat' => '/server/model/ships/grome/GromeGormokOSAT.php',
+                'gromegralac' => '/server/model/ships/grome/GromeGralac.php',
+                'gromegroth' => '/server/model/ships/grome/GromeGroth.php',
+                'gromemahkgar' => '/server/model/ships/grome/GromeMahkgar.php',
+                'gromemelagar' => '/server/model/ships/grome/GromeMelagar.php',
+                'gromemogorta' => '/server/model/ships/grome/GromeMogorta.php',
+                'gromemorgat' => '/server/model/ships/grome/GromeMorgat.php',
+                'gromeregla' => '/server/model/ships/grome/GromeRegla.php',
+                'grometelgar' => '/server/model/ships/grome/GromeTelgar.php',
+                'grometrokan' => '/server/model/ships/grome/GromeTrokan.php',
+                'grometrokanmargus' => '/server/model/ships/grome/GromeTrokanMargus.php',
 
 
                 //Custom Minbari
