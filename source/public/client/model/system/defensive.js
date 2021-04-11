@@ -30,10 +30,8 @@ var Shield = function Shield(json, ship) {
 
 Shield.prototype = Object.create(ShipSystem.prototype);
 Shield.prototype.constructor = Shield;
-
 Shield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
-    if (shooter.flight && mathlib.getDistanceBetweenShipsInHex(target, shooter) == 0) return 0;
-
+    if (shooter.flight && (mathlib.getDistanceBetweenShipsInHex(target, shooter) == 0)) return 0;
     return shipManager.systems.getOutput(target, this);
 };
 
@@ -41,7 +39,6 @@ var EMShield = function EMShield(json, ship) {
     Shield.call(this, json, ship);
     this.defensiveType = "Shield";
 };
-
 EMShield.prototype = Object.create(Shield.prototype);
 EMShield.prototype.constructor = EMShield;
 
@@ -49,7 +46,6 @@ var GraviticShield = function GraviticShield(json, ship) {
     Shield.call(this, json, ship);
     this.defensiveType = "Shield";
 };
-
 GraviticShield.prototype = Object.create(Shield.prototype);
 GraviticShield.prototype.constructor = GraviticShield;
 

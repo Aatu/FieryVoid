@@ -1785,8 +1785,19 @@ spl_autoload_register(
 				'maggravreactortechnical' => '/server/model/systems/baseSystems.php',
 				'vorlondischargegun' => '/server/model/weapons/specialWeapons.php',
 				'vorlonlightningcannon' => '/server/model/weapons/specialWeapons.php',
+				'vorlonltdischargegun' => '/server/model/weapons/specialWeapons.php',
 				
+				'vorlonassaultfighterflight' => '/server/model/ships/vorlons/vorlonAssaultFighterFlight.php',
+				'vorlonheavyfighterflight' => '/server/model/ships/vorlons/vorlonHeavyFighterFlight.php',
+				'vorlontransport' => '/server/model/ships/vorlons/vorlonTransport.php',
 				'vorlonbattledestroyer' => '/server/model/ships/vorlons/vorlonBattleDestroyer.php',
+				'vorlondestroyerescort' => '/server/model/ships/vorlons/vorlonDestroyerEscort.php',
+				'vorlonlightcarrier' => '/server/model/ships/vorlons/vorlonLightCarrier.php',
+				'vorlonscout' => '/server/model/ships/vorlons/vorlonScout.php',
+				'vorlonlightcruiser' => '/server/model/ships/vorlons/vorlonLightCruiser.php',
+				'vorlonheavycruiser' => '/server/model/ships/vorlons/vorlonHeavyCruiser.php',
+				'vorlonheavycarrier' => '/server/model/ships/vorlons/vorlonHeavyCarrier.php',
+				'vorlondreadnought' => '/server/model/ships/vorlons/vorlonDreadnought.php',
 				
 				
 				
@@ -1931,17 +1942,9 @@ spl_autoload_register(
 				'antiprotongun' => '/server/model/weapons/antimatter.php',
 
 
-		
+				//other				
+				'apollostrike' => '/server/model/ships/EA/apollostrike.php',
 			
-				//TO BE DELETED once nobody is using them		    
-                		'tobedeletedpikitos' => '/server/model/ships/brakiri/ToBeDeletedPikitos.php',	    
-                		'tobedeletedfalkosi' => '/server/model/ships/brakiri/ToBeDeletedFalkosi.php',	    
-                		'tobedeletedaurora' => '/server/model/ships/EA/ToBeDeletedAurora.php',	        
-                		'tobedeletednova' => '/server/model/ships/EA/ToBeDeletedNova.php',	        
-                		'tobedeletedtiger' => '/server/model/ships/EA/ToBeDeletedTiger.php',	        
-                		'tobedeletedtbolt' => '/server/model/ships/EA/ToBeDeletedTBolt.php',	    
-                		'tobedeletedsentri' => '/server/model/ships/centauri/ToBeDeletedSentri.php',  
-                		'tobedeletedlellata' => '/server/model/ships/llort/ToBeDeletedLellatA.php',
 		    		
 		    
 		    
@@ -1949,7 +1952,6 @@ spl_autoload_register(
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
 				
 				
-				'apollostrike' => '/server/model/ships/EA/apollostrike.php',
 						
 				
 				//let's end this with unit enhancement class...		    

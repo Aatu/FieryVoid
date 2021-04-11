@@ -61,7 +61,7 @@ if (isset($_SESSION["user"])) {
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
 -->        
-		---------- <b>LATEST NEWS - March 2021</b> ----------
+		---------- <b>LATEST NEWS - April 2021</b> ----------
 	    <br><b>Shargoti added</b> - in "customized" version, without Gravity Nets.
 	    <br><b>Nexus universe updated</b> - PLAYTEST versions of a few factions.
 	    <br><b>Nexus graphics updated</b> - PLAYTEST versions as above.
@@ -69,6 +69,13 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Drazi enhanced</b> - Showdowns-10 units.
 	    <br><b>Earth Alliance enhanced</b> - early units.
 	    <br><b>Dogfight missile fixed</b> - now it deals 6 damage, as it should.
+	    
+	    <br><b><u>Vorlons have arrived</u></b> - now the Order will surely prevail! Note that, as with every new faction, probability of encountering bugs is quite high (Shadow servants are always active!)
+	    <br><b><u>Grome have arrived</u></b> - now the most powerful nation in the universe is Yours to command!
+	    <br><b>Ancient-level fleet restrictions</b> - now fleets containing Ancient units will have different requirements.
+	    <br><b>fighter defensive systems fixed</b> - now hit chance shown accounts for them properly (so You know what Your chance of hitting that crucial Kotha flight is :) )
+	    <br><b>early EA ships hit chart fixed</b> - now shooting their Starboard shouldn't hang the game :)
+	    <br><b>Warlock hit chart fixed</b> - now her Sensors are hittable :)
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
