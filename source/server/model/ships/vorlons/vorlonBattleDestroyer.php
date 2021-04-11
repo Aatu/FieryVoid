@@ -5,10 +5,10 @@ class VorlonBattleDestroyer extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 850;
-		$this->faction = "Custom Ships";
+		$this->faction = "Vorlons";
         $this->phpclass = "VorlonBattleDestroyer";
         $this->shipClass = "Battle Destroyer";
-        $this->imagePath = "img/ships/ShadowCruiser.png";
+        $this->imagePath = "img/ships/VorlonBattleDestroyer.png";
         $this->canvasSize = 200;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 2; 
@@ -27,14 +27,11 @@ class VorlonBattleDestroyer extends HeavyCombatVessel{
         $this->pivotcost = 2;
 		$this->iniativebonus = 8 *5;
 		
-		//$this->fighters = array("normal"=>12);
+		//$this->fighters = array("heavy"=>12);
         
-		/* enhancement options to be redone... Vorlons are allowed Improved Self Repair and skins, and that's it
-		$this->enhancementOptionsEnabled[] = 'SHAD_FTRL'; //can launch Shadow fighters (IF hangar capacity allows!)
-		$this->enhancementOptionsDisabled[] = 'POOR_CREW'; //no crew ;)
-		$this->enhancementOptionsDisabled[] = 'ELITE_CREW'; //no crew ;)
-		$this->enhancementOptionsDisabled[] = 'IMPR_ENG'; //no Engine ;)
-		*/
+		/*Vorlons use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'VorlonShip');
+		
          
         $this->addPrimarySystem(new MagGravReactorTechnical(99, 99, 0, 0));
 		$this->addPrimarySystem(new PowerCapacitor( 6, 24, 0, 12, true));//armor, structure, power req, output, has petals 
@@ -42,7 +39,7 @@ class VorlonBattleDestroyer extends HeavyCombatVessel{
 		$scanner = new Scanner(6, 16, 0, 12);//Vorlon Scanners do not need power - base systems are included in zero hull running costs
 		$scanner->markAdvanced();
 		$this->addPrimarySystem($scanner);			
-		$this->addPrimarySystem(new Hangar(4, 2));
+		$this->addPrimarySystem(new Hangar(4, 2, 0));
 		$this->addPrimarySystem(new Engine(6, 17, 0, 12, 3));
         $this->addPrimarySystem(new SelfRepair(5, 6, 4)); //armor, structure, output
 		$AAC = $this->createAdaptiveArmorController(5, 2, 2); //$AAtotal, $AApertype, $AApreallocated
@@ -50,22 +47,21 @@ class VorlonBattleDestroyer extends HeavyCombatVessel{
         $this->addPrimarySystem(new GraviticThruster(5, 20, 0, 6, 3));
         $this->addPrimarySystem(new GraviticThruster(5, 20, 0, 6, 4));
 		
-		
-        $this->addFrontSystem(new GraviticThruster(5, 11, 0, 5, 1));
-        $this->addFrontSystem(new GraviticThruster(5, 11, 0, 5, 1));
-        $this->addFrontSystem(new EMShield(4, 6, 0, 4, 240, 60));
-        $this->addFrontSystem(new EMShield(4, 6, 0, 4, 300, 120));
         $this->addFrontSystem(new VorlonDischargeGun(4, 0, 0, 240, 120));
         $this->addFrontSystem(new VorlonLightningCannon(5, 0, 0, 240, 60, 'L'));
         $this->addFrontSystem(new VorlonLightningCannon(5, 0, 0, 300, 120, 'R'));
+        $this->addFrontSystem(new EMShield(4, 6, 0, 4, 240, 60));
+        $this->addFrontSystem(new EMShield(4, 6, 0, 4, 300, 120));
+        $this->addFrontSystem(new GraviticThruster(5, 11, 0, 5, 1));
+        $this->addFrontSystem(new GraviticThruster(5, 11, 0, 5, 1));
 
-        $this->addAftSystem(new GraviticThruster(5, 11, 0, 3, 2));
-        $this->addAftSystem(new GraviticThruster(5, 11, 0, 3, 2));
-        $this->addAftSystem(new GraviticThruster(5, 11, 0, 3, 2));
-        $this->addAftSystem(new GraviticThruster(5, 11, 0, 3, 2));
         $this->addAftSystem(new EMShield(4, 6, 0, 4, 120, 300));
         $this->addAftSystem(new EMShield(4, 6, 0, 4, 60, 240));
 		$this->addAftSystem(new JumpEngine(5, 16, 0, 12));//Vorlon Jump Engines normally do use power (the only system onboard that does so), but still are counted as base running costs - in FV I simplify to 0 power requirement
+        $this->addAftSystem(new GraviticThruster(5, 11, 0, 3, 2));
+        $this->addAftSystem(new GraviticThruster(5, 11, 0, 3, 2));
+        $this->addAftSystem(new GraviticThruster(5, 11, 0, 3, 2));
+        $this->addAftSystem(new GraviticThruster(5, 11, 0, 3, 2));
 		
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -74,8 +70,6 @@ class VorlonBattleDestroyer extends HeavyCombatVessel{
         $this->addPrimarySystem(new Structure( 6, 60 ));
 		
 		
-		
-				
 	
 		$this->hitChart = array(
 			0=> array( //PRIMARY
@@ -103,7 +97,8 @@ class VorlonBattleDestroyer extends HeavyCombatVessel{
 				18 => "Structure",
 				20 => "Primary",
 			),
-		);				
+		);
+		
     }
 }
 

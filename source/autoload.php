@@ -27,6 +27,7 @@ spl_autoload_register(
                 'aluin' => '/server/model/ships/yolu/aluin.php',
                 'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
                 'amar' => '/server/model/ships/centauri/amar.php',
+                'amissilerack' => '/server/model/weapons/missile.php',
                 'ammo' => '/server/model/weapons/ammo.php',
                 'ammoexplosion' => '/server/model/cricialClasses.php',
                 'anoro' => '/server/model/ships/hurr/anoro.php',
@@ -1486,6 +1487,21 @@ spl_autoload_register(
 
                 //Grome Weapons and Systems
                 'antiquatedscanner' => '/server/model/systems/baseSystems.php',
+                'flakcannon' => '/server/model/weapons/matter.php',
+				'slugcannon' => '/server/model/weapons/matter.php',
+                
+                //Grome Ships
+                'gromegormokosat' => '/server/model/ships/grome/GromeGormokOSAT.php',
+                'gromegralac' => '/server/model/ships/grome/GromeGralac.php',
+                'gromegroth' => '/server/model/ships/grome/GromeGroth.php',
+                'gromemahkgar' => '/server/model/ships/grome/GromeMahkgar.php',
+                'gromemelagar' => '/server/model/ships/grome/GromeMelagar.php',
+                'gromemogorta' => '/server/model/ships/grome/GromeMogorta.php',
+                'gromemorgat' => '/server/model/ships/grome/GromeMorgat.php',
+                'gromeregla' => '/server/model/ships/grome/GromeRegla.php',
+                'grometelgar' => '/server/model/ships/grome/GromeTelgar.php',
+                'grometrokan' => '/server/model/ships/grome/GromeTrokan.php',
+                'grometrokanmargus' => '/server/model/ships/grome/GromeTrokanMargus.php',
 
 
                 //Custom Minbari
@@ -1769,8 +1785,19 @@ spl_autoload_register(
 				'maggravreactortechnical' => '/server/model/systems/baseSystems.php',
 				'vorlondischargegun' => '/server/model/weapons/specialWeapons.php',
 				'vorlonlightningcannon' => '/server/model/weapons/specialWeapons.php',
+				'vorlonltdischargegun' => '/server/model/weapons/specialWeapons.php',
 				
+				'vorlonassaultfighterflight' => '/server/model/ships/vorlons/vorlonAssaultFighterFlight.php',
+				'vorlonheavyfighterflight' => '/server/model/ships/vorlons/vorlonHeavyFighterFlight.php',
+				'vorlontransport' => '/server/model/ships/vorlons/vorlonTransport.php',
 				'vorlonbattledestroyer' => '/server/model/ships/vorlons/vorlonBattleDestroyer.php',
+				'vorlondestroyerescort' => '/server/model/ships/vorlons/vorlonDestroyerEscort.php',
+				'vorlonlightcarrier' => '/server/model/ships/vorlons/vorlonLightCarrier.php',
+				'vorlonscout' => '/server/model/ships/vorlons/vorlonScout.php',
+				'vorlonlightcruiser' => '/server/model/ships/vorlons/vorlonLightCruiser.php',
+				'vorlonheavycruiser' => '/server/model/ships/vorlons/vorlonHeavyCruiser.php',
+				'vorlonheavycarrier' => '/server/model/ships/vorlons/vorlonHeavyCarrier.php',
+				'vorlondreadnought' => '/server/model/ships/vorlons/vorlonDreadnought.php',
 				
 				
 				
@@ -1927,17 +1954,9 @@ spl_autoload_register(
 				'vymish' => '/server/model/ships/vree/Vymish.php',
 
 
-		
+				//other				
+				'apollostrike' => '/server/model/ships/EA/apollostrike.php',
 			
-				//TO BE DELETED once nobody is using them		    
-                		'tobedeletedpikitos' => '/server/model/ships/brakiri/ToBeDeletedPikitos.php',	    
-                		'tobedeletedfalkosi' => '/server/model/ships/brakiri/ToBeDeletedFalkosi.php',	    
-                		'tobedeletedaurora' => '/server/model/ships/EA/ToBeDeletedAurora.php',	        
-                		'tobedeletednova' => '/server/model/ships/EA/ToBeDeletedNova.php',	        
-                		'tobedeletedtiger' => '/server/model/ships/EA/ToBeDeletedTiger.php',	        
-                		'tobedeletedtbolt' => '/server/model/ships/EA/ToBeDeletedTBolt.php',	    
-                		'tobedeletedsentri' => '/server/model/ships/centauri/ToBeDeletedSentri.php',  
-                		'tobedeletedlellata' => '/server/model/ships/llort/ToBeDeletedLellatA.php',
 		    		
 		    
 		    
@@ -1945,7 +1964,6 @@ spl_autoload_register(
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
 				
 				
-				'apollostrike' => '/server/model/ships/EA/apollostrike.php',
 						
 				
 				//let's end this with unit enhancement class...		    
