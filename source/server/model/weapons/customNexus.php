@@ -832,7 +832,7 @@ class NexusHeavyPlasmaCharge extends Torpedo{
 // Variable range penalty from the Gaim Packet Torpedo
 
 	    //override standard to skip first 12 hexes when calculating range penalty
-	    public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
+	    /*public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
 	    {
 			$targetPos = $target->getHexPos();
 			$dis = mathlib::getDistanceHex($pos, $targetPos);
@@ -841,7 +841,12 @@ class NexusHeavyPlasmaCharge extends Torpedo{
 			$rangePenalty = ($this->rangePenalty * $dis);
 			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
 			return Array("rp" => $rangePenalty, "notes" => $notes);
-	    }	    
+	    }*/
+		public function calculateRangePenalty($distance){
+			$rangePenalty = 0;//base penalty
+			$rangePenalty += $this->rangePenalty * max(0,$distance-12); //everything above X hexes receives range penalty
+			return $rangePenalty;
+		}
 
         public function getDamage($fireOrder){ 
 			return Dice::d(10, 1)+10;   

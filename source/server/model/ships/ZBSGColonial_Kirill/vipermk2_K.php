@@ -5,7 +5,7 @@ class ViperMk2_K extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 210;
-        $this->faction = "ZPlaytest 12 Colonies of Cobol";
+        $this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "ViperMk2_K";
         $this->shipClass = "Viper Mk-2 flight";
         $this->imagePath = "img/ships/BSG/viperMk2.png";
