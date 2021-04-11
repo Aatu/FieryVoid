@@ -449,7 +449,7 @@ if ($simMv==true){//simultaneous movement
         <div class="shipwindow base" style="width: 450px;">
             <div class="topbar">
                 <span class="valueheader name">Name:</span><span class="value name">name here</span>
-                <span class="valueheader shipclass">base:</span><span class="value shipclass">ship type class here</span>
+                <span class="valueheader shipclass">Class:</span><span class="value shipclass">ship type class here</span>
                 <div class="close"></div>
             </div>
 
@@ -475,13 +475,13 @@ if ($simMv==true){//simultaneous movement
                         </div>
                     </td>
                     <td class="col3" style="width: 33%">
-                        <div class="EW" style="margin: auto;">
+			<div class="notes"></div> <!-- Marcin Sawicki - here more readable -->
+                        <div class="EW" style="display:none;"><!-- Marcin Sawicki - at fleet selection EW window is useless! -->
                             <div class="ewheader"><span class="header">ELECTRONIC WARFARE</span></div>
                             <div class="EWcontainer">
                                 <div class="ewentry"><span class="valueheader">Defensive:</span><span class="value DEW"></span></div>
                                 <div class="ewentry CCEW"><span class="valueheader">Close combat:</span><span class="value CCEW"></span><div class="button1" data-ew="CCEW"></div><div class="button2" data-ew="CCEW"></div></div>
                                 <div class="ewentry BDEW"><span class="valueheader">Area defence:</span><span class="value BDEW"></span><div class="button1" data-ew="BDEW"></div><div class="button2" data-ew="BDEW"></div></div>
-                                <div class="notes"></div>
                             </div>
                         </div>
                         <div id="shipSection_4" class="shipSection" style="right: 75px; top: 180px">

@@ -16,6 +16,55 @@ class Enhancements{
 		Enhancements::setEnhancementOptionsShip($ship);
 	}	
   } //endof function setEnhancementOptions
+  
+  /* block all available enhancements (those that are by default enabled) - ADD ANY NEW STANDARD ENHANCEMENTS HERE!
+  */
+  public static function blockStandardEnhancements($unit){
+	  if($unit instanceOf FighterFlight){ //enhancements for fighters
+		$unit->enhancementOptionsDisabled[] = 'EXP_MOTIV'; 
+		$unit->enhancementOptionsDisabled[] = 'IMPR_OB'; 
+		$unit->enhancementOptionsDisabled[] = 'IMPR_THR'; 
+		$unit->enhancementOptionsDisabled[] = 'POOR_TRAIN'; 
+	  }else{ //enhancements for ships
+		$unit->enhancementOptionsDisabled[] = 'ELITE_CREW'; 
+		$unit->enhancementOptionsDisabled[] = 'IMPR_ENG'; 
+		$unit->enhancementOptionsDisabled[] = 'IMPR_REA'; 
+		$unit->enhancementOptionsDisabled[] = 'IMPR_SENS'; 
+		$unit->enhancementOptionsDisabled[] = 'POOR_CREW'; 
+		$unit->enhancementOptionsDisabled[] = 'SLUGGISH'; 
+		$unit->enhancementOptionsDisabled[] = 'VULN_CRIT'; 		
+	  }
+  }
+  
+  /*
+  mark appropriate options if the set is other than generic (or enhances generic set)
+  */
+  public static function nonstandardEnhancementSet($unit, $setName){
+	switch($setName) {
+		case 'ShadowShip':
+			Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsEnabled[] = 'SHAD_FTRL';
+			break;
+	  
+		case 'ShadowFighter':
+			Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsEnabled[] = 'SHAD_CTRL';
+			break;	  
+			
+		case 'VorlonShip':
+			Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsEnabled[] = 'VOR_AMETHS';
+			$unit->enhancementOptionsEnabled[] = 'VOR_AZURS';
+			$unit->enhancementOptionsEnabled[] = 'VOR_CRIMS';
+			break;
+	  
+		case 'VorlonFighter':
+			Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsEnabled[] = 'VOR_AZURF';
+			break;	  
+			
+	}	  
+  }//endof function nonstandardEnhancementSet
 	
 	
 	/* all ship enhancement options - availability and cost calculation
@@ -216,7 +265,76 @@ class Enhancements{
 		  $enhPrice = -6; //fixed, very low value
 		  $enhPriceStep = 0; //flat rate
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+	  }
+	  
+
+	//Vorlon Amethyst Skin (for ship). +1 Adaptive Armor point, AA maximum and available for pre-assignment increased as well for every even total.
+	//cost: ramming value (let's simplify to total structure) x number of point / 5; max. +50%
+	  $enhID = 'VOR_AMETHS';
+	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is not disabled
+		  $enhName = 'Amethyst Skin Coloring';
+		  //find AA controller and count Structure boxes while at it		  
+		  $AActrl = $ship->getSystemByName("AdaptiveArmorController");
+		  if($AActrl){
+			  $structureTotal = 0;			  
+			  foreach ($ship->systems as $system){
+				if ($system instanceof Structure){
+					$structureTotal += $system->maxhealth;
+				}
+			  }  
+			  $enhPrice = round($structureTotal*($AActrl->AAtotal+1)/5);	
+			  $enhPriceStep = round($structureTotal/5);
+			  $enhLimit = floor($AActrl->AAtotal/2);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
 	  }	  
+
+	/* Vorlon Azure Skin Coloring:
+	Effect: +1 Shield rating, for all shields.
+	Cost: unit size factor x new shield rating x nuber of emitters
+	Limit: 50% of base shield rating
+	Init size factor is 30 for Enormous units, 25 for Capitals, 20 for anything smaller (including fighters).
+	*/
+	  $enhID = 'VOR_AZURS';
+	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is not disabled
+		  $enhName = 'Azure Skin Coloring';
+		  $count = 0;	
+		  $rating = 0;
+		  foreach ($ship->systems as $system){
+			if ($system instanceof EMShield){
+				$count++;
+				$rating = $system->output;
+			}
+		  }		  
+		  if($count>0 && $rating>1){
+			  $sizeFactor = 20;//all units except Caps and Enormous)
+			  if($ship->shipSizeClass ==3){
+				  $sizeFactor = 25;
+				  if($ship->Enormous) $sizeFactor = 30;
+			  }
+			  $enhPrice = $sizeFactor*$count*($rating+1);	
+			  $enhPriceStep = $sizeFactor*$count;
+			  $enhLimit = floor($rating/2);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+	  }	  
+	  
+	/* Vorlon Crimson Skin Coloring (ship only):
+	Effect: Power Capacitor gains +2 storage points and +1 recharge point.
+	Cost: 20x new recharge rate
+	Limit: 6*/
+	  $enhID = 'VOR_CRIMS';
+	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is not disabled
+		  $enhName = 'Crimson Skin Coloring';
+		  $capacitor = $ship->getSystemByName("PowerCapacitor");//find Power Capacitor
+		  if($capacitor){
+			  $enhPrice = ($capacitor->output+1) *20;	
+			  $enhPriceStep = 20;
+			  $enhLimit = 6;
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+	  }
+	
 	  
 		//Vulnerable to Criticals: +1 to critical rolls, and let's make it scalable :)
 		//let's make it very cheap too
@@ -228,9 +346,7 @@ class Enhancements{
 		  $enhPrice = -4; //fixed, very low value
 		  $enhPriceStep = 0; //flat rate
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
-	  }	  
-	  
-	  	  
+	  }
   } //endof function setEnhancementOptionsShip
 	
 	
@@ -323,6 +439,31 @@ class Enhancements{
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 	  }  
 	  
+	/* Vorlon Azure Skin Coloring:
+	Effect: +1 Shield rating, for all shields.
+	Cost: unit size factor x new shield rating x nuber of emitters
+	Limit: 50% of base shield rating
+	Init size factor is 30 for Enormous units, 25 for Capitals, 20 for anything smaller (including fighters).
+	*/
+	  $enhID = 'VOR_AZURF';	  
+	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Azure Skin Coloring';
+		$sampleFighter = $flight->getSampleFighter();
+		$count = 0;
+		$rating = 0;
+		foreach($sampleFighter->systems as $sys) if($sys instanceOf FtrShield){
+			$count++;
+			$rating = $sys->output;
+		}
+		if($count>0 && $rating>1){
+		  $enhLimit = floor($rating/2);
+		  $enhPrice = 20*$count*($rating+1);		  
+		  $enhPriceStep = 20*$count;
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		}
+	  }
+	  
+	  
   } //endof function setEnhancementOptionsFighter
 	    
     
@@ -388,6 +529,12 @@ class Enhancements{
 						$flight->offensivebonus -= $enhCount*2;
 						$flight->iniativebonus -= $enhCount*3*5;
 						break;
+					case 'VOR_AZURF':// Vorlon Azure Skin Coloring: +1 shield factor - needst to be separately applied for every shield in flight...
+						foreach($flight->systems as $ftr) foreach($ftr->systems as $sys) if($sys instanceOf FtrShield){
+							$sys->output += $enhCount;
+						}
+						break;
+							
 				}
 			}			
 		}
@@ -630,6 +777,32 @@ class Enhancements{
 						$ship->iniativebonus -= $enhCount*5;
 						break;
 						
+					case 'VOR_AMETHS': //Vorlon Amethyst Skin (for ship). +1 Adaptive Armor point, AA maximum and available for pre-assignment increased for every even total.
+						$AActrl = $ship->getSystemByName("AdaptiveArmorController");
+						  if($AActrl){
+							  $AActrl->AAtotal += $enhCount;
+							  $AActrl->output = $AActrl->AAtotal;
+							  $AActrl->AApertype = floor($AActrl->AAtotal/2); //Vorlon standard
+							  $AActrl->AApreallocated = floor($AActrl->AAtotal/2); //Vorlon standard
+						  }
+						  break;
+						  
+					case 'VOR_AZURS': //Vorlon Azure Skin (for ship). +1 Shield rating					 
+						foreach ($ship->systems as $system){
+							if ($system instanceof EMShield){
+								$system->output += $enhCount;
+							}
+						}
+						break;
+						  
+					case 'VOR_CRIMS': // Vorlon Crimson Skin (for ship). Power Capacitor gains +2 storage points and +1 recharge point.		
+						  $capacitor = $ship->getSystemByName("PowerCapacitor");//find Power Capacitor
+						  if($capacitor){
+							  $capacitor->output += $enhCount;
+							  $capacitor->capacityBonus = 2*$enhCount;
+						  }
+						  break;
+		  
 					case 'VULN_CRIT': //Vulnerable to Criticals: +1 Crit roll mod
 						//fixed values
 						$ship->critRollMod += $enhCount;
@@ -736,8 +909,7 @@ class Enhancements{
 							$strippedShip->forwardDefense = $ship->forwardDefense;
 							$strippedShip->sideDefense = $ship->sideDefense;
 							$strippedShip->iniativebonus = $ship->iniativebonus;
-							break;
-							
+							break;							
 						
 						case 'SLUGGISH': //Sluggish: Initiative  modified
 							$strippedShip->iniativebonus = $ship->iniativebonus;
@@ -821,13 +993,43 @@ class Enhancements{
 							if ($system instanceof Structure) { //Shadows ships have only one Structure
 								$strippedSystem->maxhealth = $system->maxhealth;
 							}
-							break;								
+							break;						
 					
 						case 'SPARK_CURT': //Spark Curtain - affects output of Spark Field
 							if($system instanceof SparkField){
 								$strippedSystem->output = $system->output;
 							}
 							break;
+							
+
+						case 'VOR_AMETHS': //Adaptive Armor Controller properties are affected
+							if ($system instanceof AdaptiveArmorController) { 
+								$strippedSystem->AAtotal = $system->AAtotal;
+								$strippedSystem->AApertype = $system->AApertype;
+								$strippedSystem->AApreallocated = $system->AApreallocated;
+								$strippedSystem->output = $system->output;
+							}
+							break;	
+
+						case 'VOR_AZURF':// Vorlon Azure Skin Coloring (for fighter): this is applied at the level of individual subsystem (shield emitter)...
+							if ($system instanceof FtrShield){
+								$strippedSystem->output = $system->output;
+							}
+							break;
+							
+						case 'VOR_AZURS': // Vorlon Azure Skin (for ship). Sfields gain +1 Rating.
+							if ($system instanceof EMShield) { 
+								$strippedSystem->output = $system->output;
+							}
+							break;	
+							
+						case 'VOR_CRIMS': // Vorlon Crimson Skin (for ship). Power Capacitor gains +2 storage points and +1 recharge point.
+							if ($system instanceof PowerCapacitor) { 
+								$strippedSystem->output = $system->output;
+								$strippedSystem->capacityBonus = $system->capacityBonus;
+							}
+							break;							
+							
 					}					
 				}
 		    }			

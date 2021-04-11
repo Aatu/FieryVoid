@@ -35,6 +35,7 @@ class BaseShip {
     public $smallBase = false;
 	public $nonRotating = false; //some bases do not rotate - this attribute is used in combination with $base or $smallBase
 	public $osat = false; //true if object is OSAT (this includes MicroSATs and mines)
+    public $SixSidedShip = false;	
 	
     public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for all systems)
 
@@ -2146,7 +2147,45 @@ class UnevenBaseFourSections extends BaseShip{ //4-sided base which has differen
 
         return $locs;
     }
-} //end of SmallStarBaseFourSections
+} //end of UnevenBaseFourSections
+
+
+class SixSidedShip extends BaseShip{
+    public $SixSidedShip = true;
+ 
+     
+    function __construct($id, $userid, $name, $slot){
+        parent::__construct($id, $userid, $name,$slot);
+    }
+    
+    protected function addLeftFrontSystem($system){
+        $this->addSystem($system, 31);
+    }
+    protected function addLeftAftSystem($system){
+        $this->addSystem($system, 32);
+    }
+    protected function addRightFrontSystem($system){
+        $this->addSystem($system, 41);
+    }
+    protected function addRightAftSystem($system){
+        $this->addSystem($system, 42);
+    }
+
+    public function getLocations(){
+        //debug::log("getLocations");         
+        $locs = array();
+
+        $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 41, "min" => 30, "max" => 90, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 42, "min" => 90, "max" => 150, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 2, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 32, "min" => 210, "max" => 270, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 31, "min" => 270, "max" => 330, "profile" => $this->sideDefense);
+
+        return $locs;
+    }		
+
+}
 
 
 ?>

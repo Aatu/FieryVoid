@@ -251,6 +251,7 @@
 	}
         
 	    //override standard to skip first 10 hexes when calculating range penalty
+		/*
 	    public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
 	    {
 			$targetPos = $target->getHexPos();
@@ -260,7 +261,12 @@
 			$rangePenalty = ($this->rangePenalty * $dis);
 			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
 			return Array("rp" => $rangePenalty, "notes" => $notes);
-	    }	    
+	    }*/
+		public function calculateRangePenalty($distance){
+			$rangePenalty = 0;//base penalty
+			$rangePenalty += $this->rangePenalty * max(0,$distance-10); //everything above 10 hexes receives range penalty
+			return $rangePenalty;
+		}
         
         public function getDamage($fireOrder){        return Dice::d(10, 2)+10;    }
         public function setMinDamage(){     $this->minDamage = 12;      }

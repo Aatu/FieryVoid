@@ -1402,7 +1402,8 @@ class AdaptiveArmorController extends ShipSystem{
 				break;
 				
 				case 4: //firing phase
-					if(!($ship instanceOf FighterFlight)){ 
+					//after re-reading ship control sheets: AA should be at flight level unless fighter in question is SuperHeavy
+					if((!($ship instanceOf FighterFlight)) || (!$ship->superheavy)){ 
 						foreach($ship->systems as $system) foreach($system->damage as $dmg) if($dmg->turn==$gameData->turn){//damage suffered this turn
 							if($dmg->damage > $dmg->armour){ //actual damage was caused!
 								$weaponClass = $dmg->damageclass;
@@ -1415,7 +1416,7 @@ class AdaptiveArmorController extends ShipSystem{
 								}
 							}
 						}
-					}else{ //for fighter flight - only damage of a particular fighter counts!
+					}else{ //for SUPERHEAVY fighter flight - only damage of a particular fighter counts!
 						$relevantFtr = $ship->getFighterBySystem($this->id);
 						foreach($relevantFtr->damage as $dmg) if($dmg->turn==$gameData->turn){//damage suffered this turn
 							if($dmg->damage > $dmg->armour){ //actual damage was caused!
@@ -1496,6 +1497,7 @@ class AdaptiveArmorController extends ShipSystem{
         $this->data["Special"] .= "<br>You may assign AA points in Initial phase.";
         $this->data["Special"] .= "<br>Pre-set AA points may be used in turn 1 only.";
         $this->data["Special"] .= "<br>AA points set in previous turns cannot be unassigned.";
+        $this->data["Special"] .= "<br>AA points are unlocked individually down to superheavy fighters - lighter craft unlock AA points as whole flights. Assignment is always individual.";
     }
 	
 	/*always redefine $this->data for AA controller! A lot of variable information goes there...*/
@@ -2465,17 +2467,18 @@ capacitor is completely emptied.
     }
 	
 	public function getMaxCapacity(){ //maximum capacity = health remaining + bonus (bonus only if there is no damage!)
-		$baseCapacity = $this->getRemainingHealth();
-		if($this->maxhealth == $baseCapacity){
-			$baseCapacity += $this->capacityBonus;
-		}
-		return $baseCapacity;
+		$capacity = $this->getRemainingHealth();
+		$capacity += $this->capacityBonus ;
+		return $capacity;
 	}
 	
 	
 	public function setPowerHeld($newValue){ //cut off by maximum capacity
-		$this->powerCurr = min($newValue, $this->getMaxCapacity() );
+		//$this->powerCurr = min($newValue, $this->getMaxCapacity() ); //cutting off at this point interacts badly with enhancements... moving to FRONT END!
+		$this->powerCurr = $newValue;
 	}
+	
+	
 
 
 	/* this method generates additional non-standard informaction in the form of individual system notes
@@ -2575,7 +2578,9 @@ capacitor is completely emptied.
 	
     public function setSystemDataWindow($turn){
         parent::setSystemDataWindow($turn); 
-		$this->data["Power stored/max"] =  $this->powerCurr . '/' . $this->getMaxCapacity();
+		$this->powerMax = $this->getMaxCapacity(); //do cut off overflow here as well!
+		$this->powerCurr =min($this->powerCurr, $this->powerMax);
+		$this->data["Power stored/max"] =  $this->powerCurr . '/' . $this->powerMax;
         $this->data["Special"] = "This system is responsible for generating and storing power (Reactor is nearby for technical purposes).";	   
 		if ($this->boostable){
 			$this->data["Special"] .= "<br>You may boost this system (open petals) to increase recharge rate by 50% - at the cost of treating all armor values as 2 points lower.";
@@ -2615,7 +2620,7 @@ capacitor is completely emptied.
         $strippedSystem = parent::stripForJson();
         $strippedSystem->data = $this->data;
         $strippedSystem->powerCurr = $this->powerCurr;
-	   $strippedSystem->powerMax = $this->getMaxCapacity();
+	    $strippedSystem->powerMax = $this->getMaxCapacity();
 		//$strippedSystem->powerReceivedFromFrontEnd = $this->powerReceivedFromFrontEnd;
 		$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer;
         return $strippedSystem;
@@ -2646,6 +2651,7 @@ capacitor is completely emptied.
 		
 		$selfRepairList = $ship->getSystemsByName("Self Repair", true);//by readable name
 		foreach($selfRepairList as $selfRepair){
+			$selfRepair->addCritical($ship->id, "OutputReduced4", $gamedata);
 			$selfRepair->addCritical($ship->id, "OutputReduced4", $gamedata);
 			$selfRepair->addCritical($ship->id, "OutputReduced4", $gamedata);
 			$selfRepair->addCritical($ship->id, "OutputReduced4", $gamedata);

@@ -391,7 +391,7 @@
                     </div>
     			</td>
                 <td class="col3">
-                    <div class="EW">
+                        <div class="EW" style="display:none;">
                         <div class="ewheader">
                             <span class="header">ELECTRONIC WARFARE</span>
                         </div>
@@ -449,7 +449,7 @@
                     </div>
                 </td>
                 <td class="col3" style="width: 33%">
-                    <div class="EW" style="margin: auto;">
+                        <div class="EW" style="display:none;">
                         <div class="ewheader"><span class="header">ELECTRONIC WARFARE</span></div>
                         <div class="EWcontainer">
                             <div class="ewentry"><span class="valueheader">Defensive:</span><span class="value DEW"></span></div>

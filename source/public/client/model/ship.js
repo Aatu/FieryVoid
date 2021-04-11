@@ -24,6 +24,8 @@ Ship.prototype = {
     constructor: Ship,
 
     getHitChangeMod: function getHitChangeMod(shooter, weapon) {
+		if (this.flight) return this.getHitChangeModFlight(shooter, weapon); //separate function for fighter flight - same approach, different loop
+		
         var affectingSystems = Array();
         for (var i in this.systems) {
             var system = this.systems[i];
@@ -32,10 +34,12 @@ Ship.prototype = {
             if (!this.checkIsValidAffectingSystem(system, shooter)) //Marcin Sawicki: change to unit itself...
                 continue;
 
+/* redirecting - this will be covered by getDefensiveHitChangeMod function itself; it already is in back end!
             if (system instanceof Shield && mathlib.getDistanceBetweenShipsInHex(shooter, this) === 0 && shooter.flight) {
                 // Shooter is a flight, and the flight is under the shield
                 continue;
             }
+*/			
 
             var mod = system.getDefensiveHitChangeMod(this, shooter, weapon);
             mod = weapon.shieldInteractionDefense(this, shooter, system,mod);
@@ -58,7 +62,44 @@ Ship.prototype = {
             sum += affectingSystems[i];
         }
         return sum;
-    },
+    }, //getHitChangeMod
+	
+	//loop through ALL fighters - sample fighter should be enough, but let's loop through all in case of eg. criticals
+	getHitChangeModFlight: function getHitChangeModFlight(shooter, weapon) {
+        var affectingSystems = Array();
+        for (var i in this.systems) {
+            var fighter = this.systems[i];
+			for (var j in fighter.systems) {
+				var system = fighter.systems[j];
+
+				//if (!this.checkIsValidAffectingSystem(system, shipManager.getShipPosition(shooter)))
+				if (!this.checkIsValidAffectingSystem(system, shooter)) //Marcin Sawicki: change to unit itself...
+					continue;
+
+				var mod = system.getDefensiveHitChangeMod(this, shooter, weapon);
+				mod = weapon.shieldInteractionDefense(this, shooter, system,mod);
+				
+				if (mod > 0){
+					//Advanced Sensors negate positive (eg. reducing profile) defensive systems' effects operated by less advanced races
+					if ( (this.factionAge < 3) && (shipManager.hasSpecialAbility(shooter, "AdvancedSensors")) ){
+						mod = 0;
+					}	
+				}
+
+				if ( ! (affectingSystems[system.defensiveType])
+					|| affectingSystems[system.defensiveType] < mod)
+				{
+					affectingSystems[system.defensiveType] = mod;
+				}
+			}
+        }
+        var sum = 0;
+        for (var i in affectingSystems) {
+            sum += affectingSystems[i];
+        }
+        return sum;
+    }, //getHitChangeModFlight
+	
 
     //Marcin Sawicki: this should use shooter, not pos - OR insert pos only if necessary!
     //otherwise serious trouble at range 0

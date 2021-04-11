@@ -119,3 +119,9 @@ var PlasmaProjector = function PlasmaProjector(json, ship) {
 };
 PlasmaProjector.prototype = Object.create(Weapon.prototype);
 PlasmaProjector.prototype.constructor = PlasmaProjector;
+
+var PlasmaBlast = function PlasmaBlast(json, ship) {
+    Weapon.call(this, json, ship);
+};
+PlasmaBlast.prototype = Object.create(Weapon.prototype);
+PlasmaBlast.prototype.constructor = PlasmaBlast;

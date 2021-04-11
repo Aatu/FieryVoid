@@ -672,7 +672,7 @@ window.weaponManager = {
         	defence = weaponManager.getShipDefenceValue(shooter, target);
 			distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
 	    } 	    
-        var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
+        //var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon); //moved lower
 	    
         //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
 
@@ -763,7 +763,7 @@ window.weaponManager = {
 		}else if (oew < 1){ //OEW beteen 0.5 and 1 is achievable for targets of Distortion EW
 			noLockPenalty = 0.5;
 		}
-		noLockMod =  rangePenalty * noLockPenalty;    
+		//noLockMod =  rangePenalty * noLockPenalty; //moved lower   
         var jammermod = 0;
 	    
 		//if (shooter.faction != target.faction){ //moved to getJammerValueFromTo!
@@ -778,10 +778,12 @@ window.weaponManager = {
 			if (jammermod > 0){
 				soew = 0;//jammer negates SOEW
 			}
+			/* moved lower
 			jammermod = jammermod * rangePenalty; //actual reduction
 		
 			jammermod = jammermod - noLockMod; //noLock does the same thing as Jammer, but cannot be overcame by sensors
 			if (jammermod < 0) jammermod = 0; //cannot reduce below 0
+			*/
 	
 	/*already taken care of by ew.getJammerValueFromTo
 	   if (jammermod > 0){	 //else Improved Sensors do nothing
@@ -793,6 +795,22 @@ window.weaponManager = {
 		}
 	   }
 	   */
+	   
+	   var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
+	   /*and now nolock and jammer mods...*/
+	   if ((jammermod>0) || (noLockPenalty>0)){
+		   if (weapon.doubleRangeIfNoLock){//multiply range - eg. Antimatter!
+				var modifiedDistance = distance * (1+noLockPenalty);
+				noLockMod =  weaponManager.calculateRangePenalty(modifiedDistance, weapon) -rangePenalty ;
+				modifiedDistance = distance * (1+jammermod);
+				jammermod = weaponManager.calculateRangePenalty(modifiedDistance, weapon) -rangePenalty ;
+		   }else{ //multiply penalty - standard!
+				noLockMod =  rangePenalty * noLockPenalty;
+				jammermod = jammermod * rangePenalty; //change multiplier into actual reduction
+		   }
+			jammermod = jammermod - noLockMod; //noLock does the same thing as Jammer, but cannot be overcame by sensors
+			if (jammermod < 0) jammermod = 0; //cannot reduce below 0
+	   }
 		
 			//jammer and jinking do not stack
             if (target.flight) {

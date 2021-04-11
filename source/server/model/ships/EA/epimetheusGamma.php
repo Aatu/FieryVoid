@@ -95,7 +95,7 @@ class EpimetheusGamma extends BaseShip{
         		18 => "Structure",
         		20 => "Primary",           			
         	),			
-        	3=> array(
+        	4=> array(
         		4 => "Thruster",
         		6 => "Medium Plasma Cannon",
 				10 => "Class-SO Missile Rack",

@@ -83,7 +83,7 @@ class WarlockMlpaFull extends BaseShip{
                 0=> array(
                         9 => "Structure",
                         11 => "Jump Drive",
-                        11 => "Scanner",
+                        13 => "Scanner",
                         15 => "Engine",
                         17 => "Hangar",
                         19 => "Reactor",
