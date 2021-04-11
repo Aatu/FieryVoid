@@ -121,3 +121,22 @@ Elite Pilot (fighter):
 	Effect: Pivot Cost is 1 (2 for combat pivot) rather than regular 2. Initiative +5. OB +1. Profile -1.
 	Cost: 40% of craft price (round up)
 	Limit: 1
+	
+	
+VORLONS (note that Vorlon "skin color" enhancements cannot be combined, You may pick only one for a given unit!):
+
+Amethyst Skin Coloring (ship only):
+	Effect: +1 Adaptive Armor point, AA allowance per weapon type and AA pre-assigned are increased on every even total
+	Cost: 20% of (new AA total x structure total of ship)
+	Limit: 50% of base AA points
+
+Crimson Skin Coloring (ship/fighter):
+	Effect: +1 Shield rating, for all shields.
+	Cost: unit size factor x new shield rating x nuber of emitters
+	Limit: 50% of base shield rating
+	Init size factor is 30 for Enormous units, 25 for Capitals, 20 for anything smaller (including fighters).
+
+Crimson Skin Coloring (ship only):
+	Effect: Power Capacitor gains +2 storage points and +1 recharge point.
+	Cost: 20x new recharge rate
+	Limit: 6

@@ -71,3 +71,9 @@ var FlakCannon = function FlakCannon(json, ship) {
 };
 FlakCannon.prototype = Object.create(Matter.prototype);
 FlakCannon.prototype.constructor = FlakCannon;
+
+var SlugCannon = function SlugCannon(json, ship) {
+    Matter.call(this, json, ship);
+};
+SlugCannon.prototype = Object.create(Matter.prototype);
+SlugCannon.prototype.constructor = SlugCannon;
