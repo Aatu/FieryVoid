@@ -1583,7 +1583,7 @@ spl_autoload_register(
 //                'colonialraptorassault_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialRaptorAssault_K.php',
 
 				//Battlestar Galactica - Cylons
-				'cylonbasestar' => '/server/model/ships/zbsgcylons/CylonBasestar.php',				
+				'cylonbasestar' => '/server/model/ships/ZBSGCylons/CylonBasestar.php',				
 
 
 
