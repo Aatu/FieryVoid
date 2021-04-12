@@ -8,8 +8,9 @@ class VorlonHeavyCarrier extends BaseShip{
 		$this->faction = "Vorlons";
         $this->phpclass = "VorlonHeavyCarrier";
         $this->shipClass = "Heavy Carrier";
-        $this->variantOf = "Heavy Cruiser";
-        $this->occurence = "common";
+        //$this->variantOf = "Heavy Cruiser"; //officially this is NOT a variant, presumably to stack Limited restriction on it	
+		$this->limited = 33;//while Cruiser itself is not so restricted; this is not a mistake
+        //$this->occurence = "common";
         $this->imagePath = "img/ships/VorlonHeavyCruiser.png";
         $this->canvasSize = 200;
 	    $this->isd = 'Ancient';
