@@ -8,12 +8,16 @@ class VorlonDreadnought extends BaseShip{
 		$this->faction = "Vorlons";
         $this->phpclass = "VorlonDreadnought";
         $this->shipClass = "Dreadnought";
-        //$this->variantOf = "Battle Destroyer";
+        //$this->variantOf = "Battle Destroyer";		
+		$this->limited = 33;
+		
         $this->imagePath = "img/ships/VorlonDreadnought.png";
         $this->canvasSize = 300;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 3; 
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+				
+				
 				
         $this->gravitic = true;
 		$this->advancedArmor = true;   

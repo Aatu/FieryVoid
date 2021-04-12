@@ -10,7 +10,7 @@ class VorlonAssaultFighterFlight extends FighterFlight{
 		$this->shipClass = "Assault Fighters";
 		$this->imagePath = "img/ships/VorlonFighter.png";
 		$this->variantOf = 'Heavy Fighters'; 
-        $this->occurence = "rare";
+        $this->occurence = "rare"; //official: Uncommon, but counted as Assault craft per Heavy flights
 	    
 		$this->isd = 'Primordial';
 		$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial

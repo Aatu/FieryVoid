@@ -3234,12 +3234,12 @@ class VorlonLightningCannon extends Weapon{
 		}	    		
 		$this->data["Special"] .= "Lightning Cannon is capable of multiple modes of fire. Higher modes require combining multiple prongs on the same target.";  
 		$this->data["Special"] .= "<br>Firing modes available (Number of prongs/power used per SHOT/damage output (and mode)/range penalty):";  
-		$this->data["Special"] .= "<br> - 1 Prong: 1 Power, 1d10+8 Standard, -1/hex"; 
-		$this->data["Special"] .= "<br> - 2 Prongs: 4 Power, 2d10+16 Raking(10), -1/2 hexes";
-		$this->data["Special"] .= "<br> - 3 Prongs: 12 Power, 4d10+32 Raking(15), -1/3 hexes"; 
-		$this->data["Special"] .= "<br> - 4 Prongs: 24 Power, 8d10+64 Raking(20), -1/4 hexes"; 
-		$this->data["Special"] .= "<br> - 3 Prongs Piercing: 12 Power, 4d10+32 Piercing, -1/3 hexes"; 
-		$this->data["Special"] .= "<br> - 4 Prongs Piercing: 24 Power, 8d10+64 Piercing, -1/4 hexes"; 
+		$this->data["Special"] .= "<br> - 1 Prong: 1 Power, 1d10+8 Standard, -5/hex"; 
+		$this->data["Special"] .= "<br> - 2 Prongs: 4 Power, 2d10+16 Raking(10), -2.5/hex";
+		$this->data["Special"] .= "<br> - 3 Prongs: 12 Power, 4d10+32 Raking(15), -1.65/hex"; 
+		$this->data["Special"] .= "<br> - 4 Prongs: 24 Power, 8d10+64 Raking(20), -1.25/hex"; 
+		$this->data["Special"] .= "<br> - 3 Prongs Piercing: 12 Power, 4d10+32 Piercing, -1.65/hex"; 
+		$this->data["Special"] .= "<br> - 4 Prongs Piercing: 24 Power, 8d10+64 Piercing, -1.25/hex"; 
 		$this->data["Special"] .= "<br>If weapon is mis-declared (shot is declared but not enough prongs are allocated in appropriate mode) shot will automatically miss and Power will NOT be drained."; 
 	}
 		
