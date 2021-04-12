@@ -423,14 +423,14 @@ var PowerCapacitor = function PowerCapacitor(json, ship) {
 };
 PowerCapacitor.prototype = Object.create(ShipSystem.prototype);
 PowerCapacitor.prototype.constructor = PowerCapacitor;
-PowerCapacitor.prototype.initBoostableInfo = function () {
-    // Needed because it can change during initial phase    
+PowerCapacitor.prototype.initializationUpdate = function () {
+    // Needed because it can change during initial phase  
     var effectiveOutput = this.powerCurr;
 	if (gamedata.gamephase == 1){//in Initial phase - add output to power available
+		effectiveOutput += this.baseRechargeRate;
 		var boostCount = shipManager.power.getBoost(this);	
-		effectiveOutput += this.output;
 		if(boostCount > 0){//boosted!
-			effectiveOutput += Math.round(this.output *0.5);
+			effectiveOutput += Math.round(this.baseRechargeRate *0.5);
 		}
 	}else if (gamedata.gamephase > 1){//later phases - actually ADD power used by other systems - that's boosts that are already subtracted from power held!
 		//ACTUALLY only Engine and Sensors can have meaningful boosts; still, check everything except obvious exceptions
