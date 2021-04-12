@@ -3428,4 +3428,107 @@ class VorlonLightningCannon extends Weapon{
 }//endof class VorlonLightningCannon
 
 
+
+/*Vorlon fighter weapon*/
+    class VorlonLtDischargeGun extends Weapon{
+        public $name = "VorlonLtDischargeGun";
+        public $displayName = "Light Discharge Gun";
+	    public $iconPath = "VorlonLtDischargeGun.png";
+        public $animation = "trail";
+		public $animationColor = array(175, 225, 175);
+		public $trailColor = array(175, 225, 175);
+        public $animationExplosionScale = 0.15;
+        public $projectilespeed = 10;
+        public $animationWidth = 2;
+        public $trailLength = 10;
+        public $intercept = 1; //not very good ant intercepting things... I am going with default as nothing is marged on control card
+        public $loadingtime = 1;
+        public $shots = 1;
+	    public $guns = 2;
+        public $defaultShots = 1;
+        public $rangePenalty = 2; // -2/hex... for single fire
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+	    public $priority = 5;
+	    public $priorityArray = array(1=>5, 2=>6); //alternate mode is stronger
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Electromagnetic"; 
+		
+		public $firingModes = array(1=>'Single', 2=>'Dual');
+		public $damageTypeArray = array(1=>'Standard', 2=>'Standard'); 
+		public $gunsArray = array(1=>2, 2=>1);
+        public $rangePenaltyArray = array(1=>2, 2=>1.5); //-2/hex and -3/2 hexes
+		
+		public $factionAge = 3; //Ancient
+	    
+        
+        function __construct($startArc, $endArc,$dual = false){
+			$this->isLinked = false; //shots are separate, not linked! 
+			if($dual){ //dual weapon is extending base weapon by adding third firing mode - combining ALL FOUR shots into one massive blast!
+				$this->firingModes[3] = 'Quad';
+				$this->damageTypeArray[3] = 'Standard'; 
+				$this->gunsArray = array(1=>4, 2=>2, 3=>1); //lower modes get double allowance
+				$this->rangePenaltyArray[3] = 1.5; // -3/2 hexes
+				$this->iconPath = "VorlonLtDischargeGun2.png"; //alternate graphics showing off more powerful mount
+			}
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+	
+	
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "This weapon is capable of combining basic shots into smaller number of more powerful ones:";
+            $this->data["Special"] .= "<br> Single shot: d6+6 damage, -10/hex";
+            $this->data["Special"] .= "<br> Dual shot: 2d6+9 damage, -7.5/hex";
+			if(isset ($this->firingModes[3])){
+				$this->data["Special"] .= "<br> Quad shot: 4d6+9 damage, -7.5/hex";
+			}
+        }
+	
+	    
+        public function getDamage($fireOrder){
+			switch($this->firingMode){
+				case 1:
+					return Dice::d(6, 1)+6; 
+					break;
+				case 2:
+					return Dice::d(6, 2)+9; 
+					break;
+				case 3:
+					return Dice::d(6, 4)+9; 
+					break;
+			}
+		}
+        public function setMinDamage(){ 
+			switch($this->firingMode){
+				case 1:
+					$this->minDamage = 7; 
+					break;
+				case 2:
+					$this->minDamage = 11; 
+					break;
+				case 3:
+					$this->minDamage = 13; 
+					break;
+			}
+			$this->minDamageArray[$this->firingMode] = $this->minDamage;
+		}
+        public function setMaxDamage(){
+			switch($this->firingMode){
+				case 1:
+					$this->maxDamage = 12; 
+					break;
+				case 2:
+					$this->maxDamage = 21; 
+					break;	
+				case 3:
+					$this->maxDamage = 33; 
+					break;	
+			}
+			$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+		}
+		
+    } //endof class VorlonLtDischargeGun
+
+
 ?>
