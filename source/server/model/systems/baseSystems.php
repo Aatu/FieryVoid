@@ -2439,6 +2439,7 @@ class PowerCapacitor extends ShipSystem{
 	public $capacityBonus = 0; //additional capacity - potentially set by enhancements
 	public $powerReceivedFromFrontEnd = 0; //communication variable	
 	public $powerReceivedFromBackEnd = 0; //communication variable
+	public $baseRechargeRate = 0; 
 	
 	//petals opening - done as boost of Capacitor!
     public $boostable = false; //changed to True if a given ship has Petals! 
@@ -2462,7 +2463,8 @@ capacitor is completely emptied.
     
 
     function __construct( $armour, $maxhealth, $powerReq, $output, $hasPetals = true  ){ //technical object, does not need typical system attributes (armor, structure...)
-        parent::__construct( $armour, $maxhealth, $powerReq, $output ); //$armour, $maxhealth, $powerReq, $output		
+        parent::__construct( $armour, $maxhealth, $powerReq, $output ); //$armour, $maxhealth, $powerReq, $output	
+		$this->baseRechargeRate = $output;
 		$this->boostable = $hasPetals;
     }
 	
