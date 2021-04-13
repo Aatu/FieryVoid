@@ -3203,7 +3203,7 @@ class VorlonLightningCannon extends Weapon{
 	public $powerRequiredArray = array( 1=>array(1,1), 2=>array(2,2), 3=>array(3,4), 4=>array(4,6), 5=>array(3,4), 6=>array(4,6) );
 
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-	public $damageTypeArray = array( 1=>array("Standard"), 2=>array("Raking"), 3=>array("Raking"), 4=>array("Raking"), 5=>array("Piercing"), 6=>array("Piercing") );
+	public $damageTypeArray = array( 1=>"Standard", 2=>"Raking", 3=>"Raking", 4=>"Raking", 5=>"Piercing", 6=>"Piercing" );
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 	
 	//rake size array
