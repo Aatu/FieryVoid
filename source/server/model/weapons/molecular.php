@@ -868,8 +868,8 @@
 		public function setSystemDataWindow($turn){			
 			parent::setSystemDataWindow($turn);   
 			$this->data["Special"] = "Uninterceptable. Ignores armor. 15-point rakes.";  
-			$this->data["Special"] = "<br>Full (3 turns arming) power can be unleashed only in Piercing mode, but it will become Piercing(Standard), with ability to overkill.";  
-			$this->data["Special"] = "<br>Raking shot can still be used (at 2 turns damage output).";  
+			$this->data["Special"] .= "<br>Full (3 turns arming) power can be unleashed only in Piercing mode, but it will become Piercing(Standard), with ability to overkill.";  
+			$this->data["Special"] .= "<br>Raking shot can still be used (at 2 turns damage output).";  
 			$this->data["Special"] .= "<br>Can fire accelerated for less damage:";  
 			$this->data["Special"] .= "<br> - 1 turn: 8d10+12"; 
 			$this->data["Special"] .= "<br> - 2 turns: 16d10+24"; 

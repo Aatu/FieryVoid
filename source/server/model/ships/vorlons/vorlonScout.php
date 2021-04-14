@@ -9,6 +9,8 @@ class VorlonScout extends HeavyCombatVessel{
         $this->phpclass = "VorlonScout";
         $this->shipClass = "Scout";
         $this->variantOf = "Battle Destroyer";
+        $this->occurence = "uncommon";
+		
         $this->imagePath = "img/ships/VorlonBattleDestroyer.png";
         $this->canvasSize = 200;
 	    $this->isd = 'Ancient';

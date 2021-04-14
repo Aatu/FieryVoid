@@ -1,14 +1,14 @@
 <?php
-class VorlonLightCruiser extends VorlonCapitalShip{
+class VorlonLightCruiserOld extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 2500;
 		$this->faction = "Vorlons";
-        $this->phpclass = "VorlonLightCruiser";
+        $this->phpclass = "VorlonLightCruiserOld";
         $this->shipClass = "Light Cruiser";
-        //$this->variantOf = "Battle Destroyer";
+        $this->variantOf = "TO BE DELETED";	
         $this->imagePath = "img/ships/VorlonLightCruiser.png";
         $this->canvasSize = 200;
 	    $this->isd = 'Ancient';
@@ -47,6 +47,8 @@ class VorlonLightCruiser extends VorlonCapitalShip{
 		$this->addPrimarySystem( $AAC );
 		
 		
+        $this->addFrontSystem(new VorlonLightningCannon(5, 0, 0, 240, 60, 'L'));
+        $this->addFrontSystem(new VorlonLightningCannon(5, 0, 0, 300, 120, 'R'));
         $this->addFrontSystem(new GraviticThruster(5, 25, 0, 8, 1));
 
 
@@ -59,13 +61,11 @@ class VorlonLightCruiser extends VorlonCapitalShip{
 		$this->addAftSystem(new GraviticThruster(5, 13, 0, 3, 2));
 		
 		
-        $this->addLeftFrontSystem(new VorlonLightningCannon(5, 0, 0, 240, 60, 'L'));
-        $this->addLeftFrontSystem(new VorlonLightningCannon(5, 0, 0, 240, 60, 'L'));
+        $this->addLeftSystem(new VorlonLightningCannon(5, 0, 0, 240, 60, 'L'));
         $this->addLeftSystem(new EMShield(4, 6, 0, 4, 240, 60));
         $this->addLeftSystem(new GraviticThruster(5, 21, 0, 6, 3));
 		
-        $this->addRightFrontSystem(new VorlonLightningCannon(5, 0, 0, 300, 120, 'R'));
-        $this->addRightFrontSystem(new VorlonLightningCannon(5, 0, 0, 300, 120, 'R'));
+        $this->addRightSystem(new VorlonLightningCannon(5, 0, 0, 300, 120, 'R'));
         $this->addRightSystem(new EMShield(4, 6, 0, 4, 300, 120));
         $this->addRightSystem(new GraviticThruster(5, 21, 0, 6, 4));
 		
@@ -91,8 +91,7 @@ class VorlonLightCruiser extends VorlonCapitalShip{
 			),
 			1=> array( //Fwd
 				4 => "Thruster",
-				7 => "31:Lightning Cannon", 
-				10 => "41:Lightning Cannon", 
+				10 => "Lightning Cannon", 
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -103,32 +102,18 @@ class VorlonLightCruiser extends VorlonCapitalShip{
 				18 => "Structure",
 				20 => "Primary",
 			),
-			32=> array( //Fwd
+			3=> array( //Fwd
 				5 => "Thruster",
 				7 => "EM Shield",
-				11 => "31:Lightning Cannon",
+				11 => "Lightning Cannon",
 				18 => "Structure",
 				20 => "Primary",
 			),
-			42=> array( //Fwd
+			4=> array( //Fwd
 				5 => "Thruster",
 				7 => "EM Shield",
-				11 => "42:Lightning Cannon",
+				11 => "Lightning Cannon",
 				18 => "Structure",
-				20 => "Primary",
-			),
-			31=> array( //Fwd
-				5 => "32:Thruster",
-				7 => "32:EM Shield",
-				11 => "31:Lightning Cannon",
-				18 => "32:Structure",
-				20 => "Primary",
-			),
-			41=> array( //Fwd
-				5 => "42:Thruster",
-				7 => "42:EM Shield",
-				11 => "42:Lightning Cannon",
-				18 => "42:Structure",
 				20 => "Primary",
 			),
 		);
