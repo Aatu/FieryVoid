@@ -1786,7 +1786,8 @@ spl_autoload_register(
 				'vorlondischargegun' => '/server/model/weapons/specialWeapons.php',
 				'vorlonlightningcannon' => '/server/model/weapons/specialWeapons.php',
 				'vorlonltdischargegun' => '/server/model/weapons/specialWeapons.php',
-				
+								
+				'vorloncapitalship' => '/server/model/ships/ShipClasses.php',
 				'vorlonassaultfighterflight' => '/server/model/ships/vorlons/vorlonAssaultFighterFlight.php',
 				'vorlonheavyfighterflight' => '/server/model/ships/vorlons/vorlonHeavyFighterFlight.php',
 				'vorlontransport' => '/server/model/ships/vorlons/vorlonTransport.php',
@@ -1798,6 +1799,12 @@ spl_autoload_register(
 				'vorlonheavycruiser' => '/server/model/ships/vorlons/vorlonHeavyCruiser.php',
 				'vorlonheavycarrier' => '/server/model/ships/vorlons/vorlonHeavyCarrier.php',
 				'vorlondreadnought' => '/server/model/ships/vorlons/vorlonDreadnought.php',
+				
+				//old versions of capital ships, to be deleted when games are over
+				'vorlonlightcruiserold' => '/server/model/ships/vorlons/vorlonLightCruiserOld.php',
+				'vorlonheavycruiserold' => '/server/model/ships/vorlons/vorlonHeavyCruiserOld.php',
+				'vorlonheavycarrierold' => '/server/model/ships/vorlons/vorlonHeavyCarrierOld.php',
+				'vorlondreadnoughtold' => '/server/model/ships/vorlons/vorlonDreadnoughtOld.php',
 				
 				
 				

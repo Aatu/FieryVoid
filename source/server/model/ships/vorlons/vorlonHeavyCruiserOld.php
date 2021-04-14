@@ -1,14 +1,14 @@
 <?php
-class VorlonHeavyCruiser extends VorlonCapitalShip{
+class VorlonHeavyCruiserOld extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 3250;
 		$this->faction = "Vorlons";
-        $this->phpclass = "VorlonHeavyCruiser";
+        $this->phpclass = "VorlonHeavyCruiserOld";
         $this->shipClass = "Heavy Cruiser";
-        //$this->variantOf = "Battle Destroyer";
+        $this->variantOf = "TO BE DELETED";	
         $this->imagePath = "img/ships/VorlonHeavyCruiser.png";
         $this->canvasSize = 200;
 	    $this->isd = 'Ancient';
@@ -48,6 +48,8 @@ class VorlonHeavyCruiser extends VorlonCapitalShip{
 		
 		
         $this->addFrontSystem(new VorlonDischargeGun(5, 0, 0, 240, 120));
+        $this->addFrontSystem(new VorlonLightningCannon(5, 0, 0, 240, 60, 'L'));
+        $this->addFrontSystem(new VorlonLightningCannon(5, 0, 0, 300, 120, 'R'));
         $this->addFrontSystem(new EMShield(4, 6, 0, 4, 240, 60));
         $this->addFrontSystem(new EMShield(4, 6, 0, 4, 300, 120));
         $this->addFrontSystem(new GraviticThruster(5, 15, 0, 5, 1));
@@ -63,12 +65,10 @@ class VorlonHeavyCruiser extends VorlonCapitalShip{
 		$this->addAftSystem(new GraviticThruster(5, 15, 0, 4, 2));
 		
 		
-        $this->addLeftFrontSystem(new VorlonLightningCannon(5, 0, 0, 240, 60, 'L'));
-        $this->addLeftFrontSystem(new VorlonLightningCannon(5, 0, 0, 240, 60, 'L'));
+        $this->addLeftSystem(new VorlonLightningCannon(5, 0, 0, 240, 60, 'L'));
         $this->addLeftSystem(new GraviticThruster(5, 25, 0, 7, 3));
 		
-        $this->addRightFrontSystem(new VorlonLightningCannon(5, 0, 0, 300, 120, 'R'));
-        $this->addRightFrontSystem(new VorlonLightningCannon(5, 0, 0, 300, 120, 'R'));
+        $this->addRightSystem(new VorlonLightningCannon(5, 0, 0, 300, 120, 'R'));
         $this->addRightSystem(new GraviticThruster(5, 25, 0, 7, 4));
 		
 
@@ -93,8 +93,7 @@ class VorlonHeavyCruiser extends VorlonCapitalShip{
 			),
 			1=> array( //Fwd
 				4 => "Thruster",
-				6 => "31:Lightning Cannon", 
-				8 => "41:Lightning Cannon", 
+				8 => "Lightning Cannon", 
 				10 => "Discharge Gun",
 				12 => "EM Shield",
 				18 => "Structure",
@@ -107,28 +106,16 @@ class VorlonHeavyCruiser extends VorlonCapitalShip{
 				18 => "Structure",
 				20 => "Primary",
 			),
-			32=> array( //Fwd
+			3=> array( //Fwd
 				6 => "Thruster",
-				10 => "31:Lightning Cannon",
+				10 => "Lightning Cannon",
 				18 => "Structure",
 				20 => "Primary",
 			),
-			42=> array( //Fwd
+			4=> array( //Fwd
 				6 => "Thruster",
-				10 => "41:Lightning Cannon",
+				10 => "Lightning Cannon",
 				18 => "Structure",
-				20 => "Primary",
-			),
-			31=> array( //Fwd
-				6 => "32:Thruster",
-				10 => "31:Lightning Cannon",
-				18 => "32:Structure",
-				20 => "Primary",
-			),
-			41=> array( //Fwd
-				6 => "42:Thruster",
-				10 => "41:Lightning Cannon",
-				18 => "42:Structure",
 				20 => "Primary",
 			),
 		);
