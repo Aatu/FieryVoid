@@ -1582,7 +1582,7 @@ spl_autoload_register(
 //                'colonialraptor_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialRaptor_K.php',
 //                'colonialraptorassault_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialRaptorAssault_K.php',
 
-				//Battlestar Galactica - Cylons
+				//Battlestar Galactic - Cylons
 				'cylonbasestar' => '/server/model/ships/ZBSGCylons/CylonBasestar.php',				
 
 
@@ -1786,7 +1786,8 @@ spl_autoload_register(
 				'vorlondischargegun' => '/server/model/weapons/specialWeapons.php',
 				'vorlonlightningcannon' => '/server/model/weapons/specialWeapons.php',
 				'vorlonltdischargegun' => '/server/model/weapons/specialWeapons.php',
-				
+								
+				'vorloncapitalship' => '/server/model/ships/ShipClasses.php',
 				'vorlonassaultfighterflight' => '/server/model/ships/vorlons/vorlonAssaultFighterFlight.php',
 				'vorlonheavyfighterflight' => '/server/model/ships/vorlons/vorlonHeavyFighterFlight.php',
 				'vorlontransport' => '/server/model/ships/vorlons/vorlonTransport.php',
@@ -1798,6 +1799,12 @@ spl_autoload_register(
 				'vorlonheavycruiser' => '/server/model/ships/vorlons/vorlonHeavyCruiser.php',
 				'vorlonheavycarrier' => '/server/model/ships/vorlons/vorlonHeavyCarrier.php',
 				'vorlondreadnought' => '/server/model/ships/vorlons/vorlonDreadnought.php',
+				
+				//old versions of capital ships, to be deleted when games are over
+				'vorlonlightcruiserold' => '/server/model/ships/vorlons/vorlonLightCruiserOld.php',
+				'vorlonheavycruiserold' => '/server/model/ships/vorlons/vorlonHeavyCruiserOld.php',
+				'vorlonheavycarrierold' => '/server/model/ships/vorlons/vorlonHeavyCarrierOld.php',
+				'vorlondreadnoughtold' => '/server/model/ships/vorlons/vorlonDreadnoughtOld.php',
 				
 				
 				
@@ -1935,23 +1942,11 @@ spl_autoload_register(
 				'plasmablast' => '/server/model/weapons/plasma.php',
 				
 				//Vree
+				'sixtester' => '/server/model/ships/customs/SixTester.php',
+				'sixtester2' => '/server/model/ships/customs/SixTester2.php',
 				'sixsidedship' => '/server/model/ships/ShipClasses.php',
 				'antimatterweapon' => '/server/model/weapons/antimatter.php',
 				'antiprotongun' => '/server/model/weapons/antimatter.php',
-				'xorr' => '/server/model/ships/vree/Xorr.php',
-				'vreecapital' => '/server/model/ships/ShipClasses.php',
-				'antimattercannon' => '/server/model/weapons/antimatter.php',
-				'antiprotondefender' => '/server/model/weapons/antimatter.php',
-				'xill' => '/server/model/ships/vree/Xill.php',
-				'vaarl' => '/server/model/ships/vree/Vaarl.php',
-				'antimattertorpedo' => '/server/model/weapons/antimatter.php',
-				'xixx' => '/server/model/ships/vree/Xixx.php',
-				'xeel' => '/server/model/ships/vree/Xeel.php',
-				'lightantiprotongun' => '/server/model/weapons/antimatter.php',
-				'ltantimattercannon' => '/server/model/weapons/antimatter.php',
-				'tzymm' => '/server/model/ships/vree/Tzymm.php',
-				'zorth' => '/server/model/ships/vree/Zorth.php',
-				'vymish' => '/server/model/ships/vree/Vymish.php',
 
 
 				//other				

@@ -9,6 +9,8 @@ class VorlonLightCarrier extends HeavyCombatVessel{
         $this->phpclass = "VorlonLightCarrier";
         $this->shipClass = "Light Carrier";
         $this->variantOf = "Battle Destroyer";
+        $this->occurence = "uncommon";
+		
         $this->imagePath = "img/ships/VorlonBattleDestroyer.png";
         $this->canvasSize = 200;
 	    $this->isd = 'Ancient';

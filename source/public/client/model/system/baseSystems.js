@@ -423,12 +423,12 @@ var PowerCapacitor = function PowerCapacitor(json, ship) {
 };
 PowerCapacitor.prototype = Object.create(ShipSystem.prototype);
 PowerCapacitor.prototype.constructor = PowerCapacitor;
-PowerCapacitor.prototype.initBoostableInfo = function () {
-    // Needed because it can change during initial phase    
+PowerCapacitor.prototype.initializationUpdate = function () {
+    // Needed because it can change during initial phase  
     var effectiveOutput = this.powerCurr;
 	if (gamedata.gamephase == 1){//in Initial phase - add output to power available
-		var boostCount = shipManager.power.getBoost(this);	
 		effectiveOutput += this.output;
+		var boostCount = shipManager.power.getBoost(this);	
 		if(boostCount > 0){//boosted!
 			effectiveOutput += Math.round(this.output *0.5);
 		}
