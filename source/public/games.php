@@ -68,6 +68,9 @@ if (isset($_SESSION["user"])) {
 	    <br><b>fighter defensive systems fixed</b> - now hit chance shown accounts for them properly (so You know what Your chance of hitting that crucial Kotha flight is :) )
 	    <br><b>early EA ships hit chart fixed</b> - now shooting their Starboard shouldn't hang the game :)
 	    <br><b>Warlock hit chart fixed</b> - now her Sensors are hittable :)
+	    <br><b>SelfRepair priorities change</b> - now reviving destroyed systems comes before repairing damaged Structure
+	    <br><b>Vorlon major refit</b> - now Lightning Cannons on capital ships cannot fall off. New breed only :) - already picked ships will not be affected.
+
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
