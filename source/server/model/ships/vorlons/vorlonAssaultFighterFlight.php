@@ -8,9 +8,9 @@ class VorlonAssaultFighterFlight extends FighterFlight{
 		$this->faction = "Vorlons";
 		$this->phpclass = "VorlonAssaultFighterFlight";
 		$this->shipClass = "Assault Fighters";
-		$this->imagePath = "img/ships/VorlonFighter.png";
+		$this->imagePath = "img/ships/VorlonAssaultFighter.png";
 		$this->variantOf = 'Heavy Fighters'; 
-        $this->occurence = "rare";
+        $this->occurence = "rare"; //official: Uncommon, but counted as Assault craft per Heavy flights
 	    
 		$this->isd = 'Primordial';
 		$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
@@ -55,8 +55,8 @@ class VorlonAssaultFighterFlight extends FighterFlight{
 			$armour = array(4, 3, 4, 4);
 			$fighter = new Fighter("VorlonAssaultFighterFlight", $armour, 30, $this->id);
 			$fighter->displayName = "Assault Fighter";
-			$fighter->imagePath = "img/ships/VorlonFighter.png";
-			$fighter->iconPath = "img/ships/VorlonFighter_Large.png";
+			$fighter->imagePath = "img/ships/VorlonAssaultFighter.png";
+			$fighter->iconPath = "img/ships/VorlonAssaultFighter_Large.png";
 						
 			//main weapon
 			$fighter->addFrontSystem(new VorlonLtDischargeGun(330, 30, true));//arcfrom, arcto, dual mount true/false

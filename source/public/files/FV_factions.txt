@@ -353,7 +353,12 @@ Lightning Cannon:
  - can combine weapons for higher power shots. To do so, appropriate number of weapons must have same mode and target assigned (same mechanics as Ipsha Surge Cannons actually).
  - if player mis-declares and not enough weapons are assigned for declared mode, shot is cancelled (technically: automatically misses) (and does not drain Power)
  - interception shot is very effective, so weapon was not locked away from it - unassigned Lightning Cannons will try to intercept if applicable (and drain Power for it).
- - Lightning Cannons in tabletop are usually mounted on two sections (on capital ships at least). In FV they are always tied to one section.
+Capital Ship layout:
+ - in tabletop, capital ships' Lightning Cannons are usually tied to TWO sections (Forward and appropriate side), to prevent them from easily falling off. This was not possible in FV.
+ - instead, they are fitted to virtual "Side-front" sections, that are not directly hittable and do not have actual structure system. They cannot fall off (at all).
+ - "Side-aft" sections are, for all intents and purposes, actual ship sides, and behave as such.
+ - Lightning Cannons are present on both Front and Side hit charts, as in tabletop - but Front has separate entries for Port and Stbd guns.
+ - weapons on pseudo-sections can be engaged by called shots from their own arc (instead of section arc)
 Adaptive Armor for fighters:
  - every fighter can use different settings (tabletop: only superheavy fighters)
  - for superheavy fighters only damage to particular craft counts towards unlocking AA points. For lighter craft AA points are unlocked for entire flight.

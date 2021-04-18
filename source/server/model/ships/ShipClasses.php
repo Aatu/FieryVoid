@@ -2184,8 +2184,31 @@ class SixSidedShip extends BaseShip{
 
         return $locs;
     }		
+} //end of SixSidedShip
 
-}
+//Vorlon Capital Ships are made using 6-sided layout - with side-aft being actual sides, and side-front a pseudo-section to fit Lightning Cannons that do not fall off
+class VorlonCapitalShip extends SixSidedShip{	
 
+    protected function addLeftSystem($system){//Left = Left Aft
+        $this->addLeftAftSystem($system);
+    }
+    protected function addRightSystem($system){//Right = Right Aft
+        $this->addRightAftSystem($system);
+    }
+
+    public function getLocations(){
+        //debug::log("getLocations");         
+        $locs = array();
+
+		//locations 41 and 31 CANNOT be targeted, because it would be picked if PRIMARY Structure was more healthy than side
+		///41 and 42 systems can be targeted as MCV systems would have been (eg. weapons from their arc)
+        $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 2, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 32, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 42, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
+
+        return $locs;
+    }		
+} //end of VorlonCapitalShip
 
 ?>

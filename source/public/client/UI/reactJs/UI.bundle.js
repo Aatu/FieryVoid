@@ -38511,7 +38511,7 @@ var ShipInfo = function (_React$Component) {
 					names[32] = "Port Aft";
 					names[41] = "Starboard Front";
 					names[42] = "Starboard Aft";
-					toDo = 42;
+					toDo = 43;
 				} else {
 					toDo = 5; //(almost) always try to show all 5 sections, there may be holes
 				}
