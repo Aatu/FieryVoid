@@ -25,7 +25,7 @@ class Terillon extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 4, 6));
         $this->addPrimarySystem(new Engine(4, 12, 0, 8, 2));
-	$this->addPrimarySystem(new Hangar(4, 2));
+	$this->addPrimarySystem(new Hangar(4, 2,0));
 	$this->addPrimarySystem(new Thruster(2, 5, 0, 2, 3));
 	$this->addPrimarySystem(new Thruster(2, 5, 0, 2, 3));
 	$this->addPrimarySystem(new Thruster(2, 5, 0, 2, 3));

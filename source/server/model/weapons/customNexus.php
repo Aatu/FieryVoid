@@ -5345,7 +5345,7 @@ class PlasmaWeb extends Weapon{
 
 
 
-
+/* moving to official Plasma weapons, plasma.php file!
 class PlasmaBlast extends Weapon{
         public $name = "PlasmaBlast";
         public $displayName = "Plasma Blast";
@@ -5445,7 +5445,7 @@ public function calculateHitBase($gamedata, $fireOrder)
         public function setMinDamage(){     $this->minDamage = 12;      }
         public function setMaxDamage(){     $this->maxDamage = 12;      }
 }//endof PlasmaBlast
-
+*/
 
 
 
