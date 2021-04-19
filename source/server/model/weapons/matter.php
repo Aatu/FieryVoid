@@ -65,7 +65,7 @@
         public $name = "heavyRailGun";
         public $displayName = "Heavy Railgun";
         public $animation = "trail";
-        public $iconPath = "matterCannon.png";
+        public $iconPath = "HeavyRailgun.png";
         public $animationColor = array(250, 250, 190);
         public $projectilespeed = 20;
         public $animationWidth = 6;
@@ -92,7 +92,7 @@
         public $name = "railGun";
         public $displayName = "Railgun";
         public $animation = "trail";
-        public $iconPath = "matterCannon.png";
+        public $iconPath = "Railgun.png";
         public $animationColor = array(250, 250, 190);
         public $projectilespeed = 25;
         public $animationWidth = 5;
@@ -119,7 +119,7 @@
         public $name = "lightRailGun";
         public $displayName = "Light Railgun";
         public $animation = "trail";
-        public $iconPath = "matterCannon.png";
+        public $iconPath = "LightRailgun.png";
         public $animationColor = array(250, 250, 190);
         public $projectilespeed = 30;
         public $animationWidth = 4;

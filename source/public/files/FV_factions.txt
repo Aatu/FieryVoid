@@ -170,6 +170,9 @@ Notable technologies:
 	Light and Heavy Railguns - These are smaller and larger versions, respectively, of the standard railgun.
 	Targeting Array - Currently, this system is being developed for Fiery Void. However, with are available and all other systems ready, the Grome are deploying with a modified version in Fiery Void. The Targeting Arrays are treated as 1 point Antiquated Sensors. This does 
 		enable the Grome to improve their defensive abilities, but the overall trade-off enables the Grome to become a playable faction.
+	Special Shells - Like missile armed vessels, the table top Grome had the ability to purchase special shells for their railguns. Currently, individual shells are not available. Therefore, the Grome have custom "full" variants of each of their units. These "full" variants
+	    have an increased points cost, but enable you to fire any shell type that is legal for the size railgun being fired.
+
 
 
 HURR

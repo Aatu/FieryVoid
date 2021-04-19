@@ -32,8 +32,9 @@ class GromeMelagar extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 16, 0, 0));
         $this->addPrimarySystem(new AntiquatedScanner(3, 12, 4, 5));
 		$targetingArray = new AntiquatedScanner(2, 6, 2, 1);
-		$targetingArray->displayName = 'Targeting Array';
-		$this->addPrimarySystem($targetingArray);
+			$targetingArray->displayName = 'Targeting Array';
+			$targetingArray->iconPath = "TargetingArray.png";
+			$this->addPrimarySystem($targetingArray);
         $this->addPrimarySystem(new Engine(3, 16, 0, 6, 3));
         $this->addPrimarySystem(new Hangar(2, 1));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 3, 3));
