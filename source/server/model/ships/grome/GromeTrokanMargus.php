@@ -37,11 +37,13 @@ class GromeTrokanMargus extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new AntiquatedScanner(4, 24, 6, 6)); //kept at 6 for sensor fluctuations
 		$targetingArray = new AntiquatedScanner(2, 6, 2, 1);
-		$targetingArray->displayName = 'Targeting Array';
-		$this->addPrimarySystem($targetingArray);
+			$targetingArray->displayName = 'Targeting Array';
+			$targetingArray->iconPath = "TargetingArray.png";
+			$this->addPrimarySystem($targetingArray);
 		$targetingArray = new AntiquatedScanner(2, 6, 2, 1);
-		$targetingArray->displayName = 'Targeting Array';
-		$this->addPrimarySystem($targetingArray);
+			$targetingArray->displayName = 'Targeting Array';
+			$targetingArray->iconPath = "TargetingArray.png";
+			$this->addPrimarySystem($targetingArray);
         $this->addPrimarySystem(new Engine(4, 36, 0, 10, 4)); //kept at 10 for engine fluctuations
 		$this->addPrimarySystem(new Hangar(3, 14));
 		$this->addPrimarySystem(new JumpEngine(5, 20, 4, 36));

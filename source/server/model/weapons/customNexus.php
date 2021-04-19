@@ -1541,7 +1541,7 @@ class NexusAutocannonFtr extends Matter{
 		public $guns = 1;
         public $priority = 5;
 
-        public $rangePenalty = 1; //-2/hex
+        public $rangePenalty = 1; //
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
 
 	function __construct($startArc, $endArc, $nrOfShots = 1){
@@ -5604,6 +5604,87 @@ class TestGun extends Particle{
 
 /*file for Battlestar Galactica universe weapons*/
 
+//BSG Fighter Weapons
+class BSGKineticEnergyWeapon extends Pulse{
+
+        public $name = "BSGKineticEnergyWeapon";
+        public $displayName = "Kinetic Energy Weapon";
+        public $iconPath = "starwars/swFighter4.png"; 		
+		
+        public $animation = "trail";
+        public $animationColor = array(217, 11, 41);
+        public $trailLength = 5;
+        public $animationWidth = 4;
+        public $projectilespeed = 18;
+        public $animationExplosionScale = 0.10;
+
+	protected $useDie = 1; //die used for base number of hits
+//		public $rof = 3;
+		public $grouping = 15;
+		public $maxpulses = 4;
+        
+        public $loadingtime = 1;
+        public $intercept = 2;
+		public $ballisticIntercept = true;
+        public $priority = 3; 
+        
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        
+//        public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+
+	function __construct($startArc, $endArc, $nrOfShots = 1){
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+		
+        public function getDamage($fireOrder){ return Dice::d(6, 1)+2; }
+        public function setMinDamage(){ $this->minDamage = 3 ; }
+        public function setMaxDamage(){ $this->maxDamage = 8 ; }		
+		
+    } // endof BSGKineticEnergyWeapon	
+
+
+class BSGHvyKineticEnergyWeapon extends Pulse{
+
+        public $name = "BSGHvyKineticEnergyWeapon";
+        public $displayName = "Heavy Kinetic Energy Weapon";
+        public $iconPath = "gatlingPulseCannon.png"; 		
+		
+        public $animation = "trail";
+        public $animationColor = array(217, 11, 41);
+        public $trailLength = 6;
+        public $animationWidth = 5;
+        public $projectilespeed = 15;
+        public $animationExplosionScale = 0.20;
+
+	protected $useDie = 1; //die used for base number of hits
+//		public $rof = 3;
+		public $grouping = 20;
+		public $maxpulses = 3;
+        
+        public $loadingtime = 3;
+        public $priority = 4; 
+        
+        public $rangePenalty = 1;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        
+//        public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+
+	function __construct($startArc, $endArc, $nrOfShots = 1){
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+		
+        public function getDamage($fireOrder){ return Dice::d(3, 2)+5; }
+        public function setMinDamage(){ $this->minDamage = 7 ; }
+        public function setMaxDamage(){ $this->maxDamage = 11 ; }		
+		
+    } // endof BSGHvyKineticEnergyWeapon	
+
+
 
  class BSGFlakBattery extends Weapon{ 
 
@@ -5618,10 +5699,12 @@ class TestGun extends Particle{
         public $animationExplosionType = "AoE";
         public $explosionColor = array(141, 240, 255);
         public $projectilespeed = 12;
-        public $animationWidth = 4;
-        public $trailLength = 5;
+        public $animationWidth = 10;
+        public $trailLength = 10;
 
-        public $range = 4;
+        public $range = 5;
+        public $freeintercept = true; //can intercept fire directed at different unit
+        public $freeinterceptspecial = true; //has own custom routine for deciding whether third party interception is legal
         public $intercept = 3;
         public $loadingtime = 1;
 
@@ -5631,10 +5714,11 @@ class TestGun extends Particle{
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "Defensive Flak: -15 to hit on arc with active Flak Battery.";
 			$this->data["Special"] .= "<br>Can intercept lasers.";
+			$this->data["Special"] .= "<br>May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 5 hexes.";
 		}
 
         public $rangePenalty = 2; //-2/hex
-        public $fireControl = array(6, 0, 0); // fighters, <mediums, <capitals
+        public $fireControl = array(6, null, null); // fighters, <mediums, <capitals
         public $priority = 1; //Flash 
 
         public $damageType = "Flash"; 
@@ -5645,6 +5729,28 @@ class TestGun extends Particle{
             if ( $powerReq == 0 ) $powerReq = 2;            
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
+
+		public function canFreeInterceptShot($gamedata, $fireOrder, $shooter, $target, $interceptingShip, $firingWeapon){
+			//target must be within 5 hexes
+			$distance = mathlib::getDistanceHex($interceptingShip, $target);
+			if ($distance > 5) return false;
+			
+			//both source and target of fire must be in arc
+			//first check target
+			$targetBearing = $interceptingShip->getBearingOnUnit($target);
+			if (!mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) return false;
+			//check on source - launch hex for ballistics, current position for direct fire
+			if ($firingWeapon->ballistic){
+				$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+				$pos = mathlib::hexCoToPixel($movement->position); //launch hex
+				$sourceBearing = $interceptingShip->getBearingOnPos($pos);				
+			}else{ //direct fire
+				$sourceBearing = $interceptingShip->getBearingOnUnit($shooter);
+			}
+			if (!mathlib::isInArc($sourceBearing, $this->startArc, $this->endArc)) return false;
+						
+			return true;
+		}
 		
         public function getDamage($fireOrder){        return Dice::d(6, 2);   }
         public function setMinDamage(){     $this->minDamage = 2 ;      }
@@ -5655,106 +5761,52 @@ class TestGun extends Particle{
 
 
 
-
-class BSGRailgun extends Weapon{ 
-/*Based on the Medium Laser Pulse Array. This is a singular weapon that fires two
-different types of shells. One is a solid shell and acts exactly like a long-ranged
-matter cannon and the second breaks up before impact to act like a blast cannon*/	
-        public $name = "BSGRailgun";
-        public $displayName = "Railgun";
-	    public $iconPath = "NexusAssaultCannon.png";
-	
-	//visual display - will it be enough to ensure correct animations?...
-		public $animationArray = array(1=>'trail', 2=>'trail');
-        public $animationColorArray = array(1=>array(245, 245, 44), 2=>array(245, 245, 44));
-        public $animationWidthArray = array(1=>4, 2=>5);
-        public $animationWidth2 = 0.2; 
-		public $trailColor = array(245, 245, 44); 
+    class BSGMainBattery extends Pulse{
+	/* Belt Alliance Heavy Blast Cannon - Just renamed and a different icon.
+	Using this as a template to allow for potential modification in the future.*/
+        public $name = "BSGMainBattery";
+        public $displayName = "Main Battery";
+	    public $iconPath = 'NexusHeavyAssaultCannon.png';
+		public $animation = "trail";
+		public $animationColor = array(245, 245, 44);
         public $trailLength = 20;
-        public $projectilespeed = 10;
-        public $animationExplosionScale = 0.20;
-	
-	//actual weapons data
-        public $groupingArray = array(1=>0, 2=>25);
-        public $maxpulses = 6; //only useful for Pulse mode
-        public $priorityArray = array(1=>8, 2=>8);
-		public $defaultShotsArray = array(1=>1, 2=>6); //for Pulse mode it should be equal to maxpulses
-	
-        public $loadingtimeArray = array(1=>3, 2=>3); //mode 1 should be the one with longest loading time
-        public $rangePenaltyArray = array(1=>0.33, 2=>0.33); //-1/3 hexes for each
-        public $fireControlArray = array( 1=>array(null, 3, 3), 2=>array(null, 3, 3) ); // fighters, <mediums, <capitals 
-	
-	public $firingModes = array(1=>'Standard', 2=>'Pulse');
-	public $damageTypeArray = array(1=>'Standard', 2=>'Pulse'); //indicates that this weapon does damage in Pulse mode
-    	public $weaponClassArray = array(1=>'Matter', 2=>'Matter'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
-	
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
+        public $animationWidth = 5;
+        public $projectilespeed = 12;
+        public $animationExplosionScale = 0.15;
+		public $rof = 3;
+
+        public $priority = 6;
+		public $grouping = 25; //+1/5
+        public $maxpulses = 6;
+		protected $useDie = 6; //die used for base number of hits
+        
+        public $loadingtime = 3;
+        
+        public $rangePenalty = 0.33; //-1/3hex
+        public $fireControl = array(null, 3, 4); // fighters, <mediums, <capitals 
+		
+		public $noOverkill = true; //Matter weapon
+//		public $damageType = "Pulse";
+		public $weaponClass = "Matter";
+        
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
 		if ( $maxhealth == 0 ){
 		    $maxhealth = 9;
 		}
 		if ( $powerReq == 0 ){
-		    $powerReq = 5;
-		}
-		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		    $powerReq = 6;
+		}		
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-	
-        public function setSystemDataWindow($turn){
-			parent::setSystemDataWindow($turn);
-			$this->data["Special"] = 'Can fire as either -1/3 hex Railgun or Heavy Blast Cannon. ';
-        }
-	
-        public function getDamage($fireOrder){ 
-		switch($this->firingMode){
-			case 1:
-				return Dice::d(10, 3)+3; //Railgun
-				break;
-			case 2:
-				return 8; //Blast Cannon
-				break;	
-		}
-	}
-        public function setMinDamage(){ 
-		switch($this->firingMode){
-			case 1:
-				$this->minDamage = 6; //Railgun
-				break;
-			case 2:
-				$this->minDamage = 8; //Blast Cannon
-				break;	
-		}
-		$this->minDamageArray[$this->firingMode] = $this->minDamage;
-	}
-        public function setMaxDamage(){
-		switch($this->firingMode){
-			case 1:
-				$this->maxDamage = 33; //Railgun
-				break;
-			case 2:
-				$this->maxDamage = 8; //Blast Cannon
-				break;	
-		}
-		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
-	}
-	
-	//necessary for Pulse mode
-        protected function getPulses($turn)
-        {
-            return Dice::d(6);
-        }
-        protected function getExtraPulses($needed, $rolled)
-        {
-            return floor(($needed - $rolled) / ($this->grouping));
-        }
-	public function rollPulses($turn, $needed, $rolled){
-		$pulses = $this->getPulses($turn);
-		$pulses+= $this->getExtraPulses($needed, $rolled);
-		$pulses=min($pulses,$this->maxpulses);
-		return $pulses;
-	}
-	
-} //endof class BSGRailgun
+	    
+        public function getDamage($fireOrder){        return 8;   }
+        public function setMinDamage(){     $this->minDamage = 8 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 8 ;      }
+		
+    } //endof class BSGMainBattery
+
+
 
 
  class FlakArray extends InterceptorMkI{ 
@@ -5844,7 +5896,81 @@ matter cannon and the second breaks up before impact to act like a blast cannon*
         public function getDamage($fireOrder){        return Dice::d(10,1)+6;   }
         public function setMinDamage(){     $this->minDamage = 7 ;      }
         public function setMaxDamage(){     $this->maxDamage = 16 ;      }
+		
     }	//endof class FlakArray
 
+
+class SensorSpearFtr extends Weapon{
+    /*Modified Abbai weapon - does no damage, but limits target's Sensors next turn
+    */
+    public $name = "SensorSpearFtr";
+    public $displayName = "DRADIS Jammer";
+	
+    public $priority = 10; //let's fire last, order not all that important here!
+    public $loadingtime = 2;
+    public $rangePenalty = 0.5; //-1/2 hexes
+    public $intercept = 0;
+    public $fireControl = array(0, 0, 0);
+	
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+	//let's animate this as a very wide beam...
+	public $animation = "laser";
+        public $animationColor = array(150, 150, 220);
+        public $animationColor2 = array(160, 160, 240);
+        public $animationExplosionScale = 0.25;
+        public $animationWidth = 10;
+        public $animationWidth2 = 0.5;
+
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 1){
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+
+            if($nrOfShots === 1){
+                $this->iconPath = "sensorSpike.png";
+            }
+
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+	
+    public function setSystemDataWindow($turn){
+	      parent::setSystemDataWindow($turn);    
+	      $this->data["Special"] = "Does no damage, but weakens target's Sensors (-1d3) rating next turn";  
+    }	
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
+
+		$effectSensors = Dice::d(3,1);//strength of effect: 1d3
+		$fireOrder->pubnotes .= "<br> Sensors reduced by $effectSensors.";
+		
+		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
+			$firstFighter = $ship->getSampleFighter();
+			if($firstFighter){
+				for($i=1; $i<=$effectSensors;$i++){
+					$crit = new tmpsensordown(-1, $ship->id, $firstFighter->id, 'tmpsensordown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$firstFighter->criticals[] =  $crit;
+				}
+			}
+		}else{ //ship - place effcet on C&C!
+			$CnC = $ship->getSystemByName("CnC");
+			if($CnC){
+				for($i=1; $i<=$effectSensors;$i++){
+					$crit = new tmpsensordown(-1, $ship->id, $CnC->id, 'tmpsensordown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+				}
+			}
+		}
+	} //endof function onDamagedSystem
+
+	public function getDamage($fireOrder){ return  0;   }
+	public function setMinDamage(){   $this->minDamage =  0 ;      }
+	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
+	
+} //end of class SensorSpearFtr
 
 ?>

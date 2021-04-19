@@ -1489,6 +1489,9 @@ spl_autoload_register(
                 'antiquatedscanner' => '/server/model/systems/baseSystems.php',
                 'flakcannon' => '/server/model/weapons/matter.php',
 				'slugcannon' => '/server/model/weapons/matter.php',
+				'gromelgtrailgun' => '/server/model/weapons/customs.php',
+				'gromemedrailgun' => '/server/model/weapons/customs.php',
+				'gromehvyrailgun' => '/server/model/weapons/customs.php',
                 
                 //Grome Ships
                 'gromegormokosat' => '/server/model/ships/grome/GromeGormokOSAT.php',
@@ -1502,6 +1505,18 @@ spl_autoload_register(
                 'grometelgar' => '/server/model/ships/grome/GromeTelgar.php',
                 'grometrokan' => '/server/model/ships/grome/GromeTrokan.php',
                 'grometrokanmargus' => '/server/model/ships/grome/GromeTrokanMargus.php',
+
+					//Grome Ships Using grome(lgt/med/hvy)railgun with special shells similar to full missile ships
+					'gromegormokfull' => '/server/model/ships/grome/GromeGormokFull.php',
+					'gromegralacfull' => '/server/model/ships/grome/GromeGralacFull.php',
+					'gromegrothfull' => '/server/model/ships/grome/GromeGrothFull.php',
+					'gromemahkgarfull' => '/server/model/ships/grome/GromeMahkgarFull.php',
+					'gromemelagarfull' => '/server/model/ships/grome/GromeMelagarFull.php',
+					'gromemogortafull' => '/server/model/ships/grome/GromeMogortaFull.php',
+					'gromemorgatfull' => '/server/model/ships/grome/GromeMorgatFull.php',
+					'grometelgarfull' => '/server/model/ships/grome/GromeTelgarFull.php',
+					'grometrokanfull' => '/server/model/ships/grome/GromeTrokanFull.php',
+					'grometrokanmargusfull' => '/server/model/ships/grome/GromeTrokanMargusFull.php',
 
 
                 //Custom Minbari
@@ -1562,16 +1577,20 @@ spl_autoload_register(
 				//Battlestar Galactica - Fred
 					//weapons
                 'bsgflakbattery' => '/server/model/weapons/customNexus.php',
-                'bsgrailgun' => '/server/model/weapons/customNexus.php',
+                'bsghvykineticenergyweapon' => '/server/model/weapons/customNexus.php',
+                'bsgkineticenergyweapon' => '/server/model/weapons/customNexus.php',
+                'bsgmainbattery' => '/server/model/weapons/customNexus.php',
 					//ships
                 'colonialjupiterclass' => '/server/model/ships/ZBSGColonial_Fred/ColonialJupiterClass.php',
+                'colonialmanticoreclass' => '/server/model/ships/ZBSGColonial_Fred/ColonialManticoreClass.php',
                 'colonialminervaclass' => '/server/model/ships/ZBSGColonial_Fred/ColonialMinervaClass.php',
                 'colonialodinclass' => '/server/model/ships/ZBSGColonial_Fred/ColonialOdinClass.php',
+				'colonialraptor' => '/server/model/ships/ZBSGColonial_Fred/ColonialRaptor.php',
+				'colonialassaultraptor' => '/server/model/ships/ZBSGColonial_Fred/ColonialAssaultRaptor.php',
                 'colonialvipermk7' => '/server/model/ships/ZBSGColonial_Fred/ColonialViperMk7.php',
 
 				//Battlestar Galactica - Kirill
 					//weapons
-                'flakcannon' => '/server/model/weapons/matter.php',
                 'flakarray' => '/server/model/weapons/customNexus.php',
 					//ships
                 'colonialjupiterclass_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialJupiterClass_K.php',

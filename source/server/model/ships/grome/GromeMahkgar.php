@@ -44,14 +44,17 @@ class GromeMahkgar extends StarBaseSixSections{
 		$this->addPrimarySystem(new AntiquatedScanner(4, 24, 6, 6));
 		$this->addPrimarySystem(new AntiquatedScanner(4, 24, 6, 6));
 		$targetingArray = new AntiquatedScanner(4, 6, 2, 1);
-		$targetingArray->displayName = 'Targeting Array';
-		$this->addPrimarySystem($targetingArray);
+			$targetingArray->displayName = 'Targeting Array';
+			$targetingArray->iconPath = "TargetingArray.png";
+			$this->addPrimarySystem($targetingArray);
 		$targetingArray = new AntiquatedScanner(4, 6, 2, 1);
-		$targetingArray->displayName = 'Targeting Array';
-		$this->addPrimarySystem($targetingArray);
+			$targetingArray->displayName = 'Targeting Array';
+			$targetingArray->iconPath = "TargetingArray.png";
+			$this->addPrimarySystem($targetingArray);
 		$targetingArray = new AntiquatedScanner(4, 6, 2, 1);
-		$targetingArray->displayName = 'Targeting Array';
-		$this->addPrimarySystem($targetingArray);
+			$targetingArray->displayName = 'Targeting Array';
+			$targetingArray->iconPath = "TargetingArray.png";
+			$this->addPrimarySystem($targetingArray);
 
 		$this->addPrimarySystem(new Structure( 4, 240));
 
