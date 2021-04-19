@@ -1,5 +1,5 @@
 <?php
-class VorlonLightCruiser extends BaseShip{
+class VorlonLightCruiser extends VorlonCapitalShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -47,8 +47,6 @@ class VorlonLightCruiser extends BaseShip{
 		$this->addPrimarySystem( $AAC );
 		
 		
-        $this->addFrontSystem(new VorlonLightningCannon(5, 0, 0, 240, 60, 'L'));
-        $this->addFrontSystem(new VorlonLightningCannon(5, 0, 0, 300, 120, 'R'));
         $this->addFrontSystem(new GraviticThruster(5, 25, 0, 8, 1));
 
 
@@ -61,11 +59,13 @@ class VorlonLightCruiser extends BaseShip{
 		$this->addAftSystem(new GraviticThruster(5, 13, 0, 3, 2));
 		
 		
-        $this->addLeftSystem(new VorlonLightningCannon(5, 0, 0, 240, 60, 'L'));
+        $this->addLeftFrontSystem(new VorlonLightningCannon(5, 0, 0, 240, 60, 'L'));
+        $this->addLeftFrontSystem(new VorlonLightningCannon(5, 0, 0, 240, 60, 'L'));
         $this->addLeftSystem(new EMShield(4, 6, 0, 4, 240, 60));
         $this->addLeftSystem(new GraviticThruster(5, 21, 0, 6, 3));
 		
-        $this->addRightSystem(new VorlonLightningCannon(5, 0, 0, 300, 120, 'R'));
+        $this->addRightFrontSystem(new VorlonLightningCannon(5, 0, 0, 300, 120, 'R'));
+        $this->addRightFrontSystem(new VorlonLightningCannon(5, 0, 0, 300, 120, 'R'));
         $this->addRightSystem(new EMShield(4, 6, 0, 4, 300, 120));
         $this->addRightSystem(new GraviticThruster(5, 21, 0, 6, 4));
 		
@@ -91,7 +91,8 @@ class VorlonLightCruiser extends BaseShip{
 			),
 			1=> array( //Fwd
 				4 => "Thruster",
-				10 => "Lightning Cannon", 
+				7 => "31:Lightning Cannon", 
+				10 => "41:Lightning Cannon", 
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -102,18 +103,32 @@ class VorlonLightCruiser extends BaseShip{
 				18 => "Structure",
 				20 => "Primary",
 			),
-			3=> array( //Fwd
+			32=> array( //Fwd
 				5 => "Thruster",
 				7 => "EM Shield",
-				11 => "Lightning Cannon",
+				11 => "31:Lightning Cannon",
 				18 => "Structure",
 				20 => "Primary",
 			),
-			4=> array( //Fwd
+			42=> array( //Fwd
 				5 => "Thruster",
 				7 => "EM Shield",
-				11 => "Lightning Cannon",
+				11 => "42:Lightning Cannon",
 				18 => "Structure",
+				20 => "Primary",
+			),
+			31=> array( //Fwd
+				5 => "32:Thruster",
+				7 => "32:EM Shield",
+				11 => "31:Lightning Cannon",
+				18 => "32:Structure",
+				20 => "Primary",
+			),
+			41=> array( //Fwd
+				5 => "42:Thruster",
+				7 => "42:EM Shield",
+				11 => "42:Lightning Cannon",
+				18 => "42:Structure",
 				20 => "Primary",
 			),
 		);

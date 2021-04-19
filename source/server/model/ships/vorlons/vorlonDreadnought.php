@@ -1,5 +1,5 @@
 <?php
-class VorlonDreadnought extends BaseShip{
+class VorlonDreadnought extends VorlonCapitalShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -8,12 +8,16 @@ class VorlonDreadnought extends BaseShip{
 		$this->faction = "Vorlons";
         $this->phpclass = "VorlonDreadnought";
         $this->shipClass = "Dreadnought";
-        //$this->variantOf = "Battle Destroyer";
+        //$this->variantOf = "Battle Destroyer";		
+		$this->limited = 33;
+		
         $this->imagePath = "img/ships/VorlonDreadnought.png";
         $this->canvasSize = 300;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 3; 
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+				
+				
 				
         $this->gravitic = true;
 		$this->advancedArmor = true;   
@@ -48,8 +52,6 @@ class VorlonDreadnought extends BaseShip{
 		
 		
         $this->addFrontSystem(new VorlonDischargeGun(6, 0, 0, 270, 90));
-        $this->addFrontSystem(new VorlonLightningCannon(6, 0, 0, 240, 60, 'L'));
-        $this->addFrontSystem(new VorlonLightningCannon(6, 0, 0, 300, 120, 'R'));
         $this->addFrontSystem(new EMShield(4, 6, 0, 5, 240, 60));
         $this->addFrontSystem(new EMShield(4, 6, 0, 5, 270, 90));
         $this->addFrontSystem(new EMShield(4, 6, 0, 5, 300, 120));
@@ -68,15 +70,19 @@ class VorlonDreadnought extends BaseShip{
         $this->addAftSystem(new GraviticThruster(6, 20, 0, 6, 2));
 		
 		
-        $this->addLeftSystem(new VorlonLightningCannon(6, 0, 0, 240, 60, 'L'));
-        $this->addLeftSystem(new VorlonLightningCannon(6, 0, 0, 240, 60, 'L'));
-        $this->addLeftSystem(new VorlonLightningCannon(6, 0, 0, 240, 60, 'L'));
+        $this->addLeftFrontSystem(new VorlonLightningCannon(6, 0, 0, 240, 60, 'L'));
+        $this->addLeftFrontSystem(new VorlonLightningCannon(6, 0, 0, 240, 60, 'L'));
+        $this->addLeftFrontSystem(new VorlonLightningCannon(6, 0, 0, 240, 60, 'L'));
+        $this->addLeftFrontSystem(new VorlonLightningCannon(6, 0, 0, 240, 60, 'L'));
         $this->addLeftSystem(new GraviticThruster(6, 35, 0, 9, 3));
 		
-        $this->addRightSystem(new VorlonLightningCannon(6, 0, 0, 300, 120, 'R'));
-        $this->addRightSystem(new VorlonLightningCannon(6, 0, 0, 300, 120, 'R'));
-        $this->addRightSystem(new VorlonLightningCannon(6, 0, 0, 300, 120, 'R'));
+        $this->addRightFrontSystem(new VorlonLightningCannon(6, 0, 0, 300, 120, 'R'));
+        $this->addRightFrontSystem(new VorlonLightningCannon(6, 0, 0, 300, 120, 'R'));
+        $this->addRightFrontSystem(new VorlonLightningCannon(6, 0, 0, 300, 120, 'R'));
+        $this->addRightFrontSystem(new VorlonLightningCannon(6, 0, 0, 300, 120, 'R'));
         $this->addRightSystem(new GraviticThruster(6, 35, 0, 9, 4));
+		
+		
 		
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -100,7 +106,8 @@ class VorlonDreadnought extends BaseShip{
 			),
 			1=> array( //Fwd
 				3 => "Thruster",
-				9 => "Lightning Cannon", 
+				6 => "31:Lightning Cannon", 
+				9 => "41:Lightning Cannon", 
 				10 => "Discharge Gun",
 				13 => "EM Shield",
 				18 => "Structure",
@@ -114,16 +121,28 @@ class VorlonDreadnought extends BaseShip{
 				18 => "Structure",
 				20 => "Primary",
 			),
-			3=> array( //Fwd
+			32=> array( //actual Port
 				4 => "Thruster",
-				10 => "Lightning Cannon",
+				10 => "31:Lightning Cannon",
 				18 => "Structure",
 				20 => "Primary",
 			),
-			4=> array( //Fwd
+			42=> array( //actual Stbd
 				4 => "Thruster",
-				10 => "Lightning Cannon",
+				10 => "41:Lightning Cannon",
 				18 => "Structure",
+				20 => "Primary",
+			),
+			31=> array( //virtual Port - redirects to actual Port systems!
+				4 => "32:Thruster",
+				10 => "31:Lightning Cannon",
+				18 => "32:Structure",
+				20 => "Primary",
+			),
+			41=> array( //actual Stbd - redirects to actual Stbd systems!
+				4 => "42:Thruster",
+				10 => "41:Lightning Cannon",
+				18 => "42:Structure",
 				20 => "Primary",
 			),
 		);

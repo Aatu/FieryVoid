@@ -1974,6 +1974,7 @@ class SelfRepair extends ShipSystem{
 		//repair damaged systems
 		foreach ($systemList as $systemToRepair){
 			if ($availableRepairPoints<1) continue;//cannot repair anything any longer
+			if ($systemToRepair instanceOf Structure) continue; //let's repair destroyed systems first, then go for damaged Structure
 			if ($systemToRepair->isDestroyed($gamedata->turn)) continue;//don't repair damage on destroyed system... yet!
 			$currentDamage = $systemToRepair->maxhealth - $systemToRepair->getRemainingHealth( );
 			if($currentDamage > 0){ //do repair!
@@ -1992,6 +1993,7 @@ class SelfRepair extends ShipSystem{
 		//repair destroyed systems, possibly undestroying them in the process (cannot repair destroyed Structure)
 		foreach ($systemList as $systemToRepair){
 			if ($availableRepairPoints<1) continue;//cannot repair anything any longer
+			if ($systemToRepair instanceOf Structure) continue; //cannot repair destroyed Structure
 			$currentDamage = $systemToRepair->maxhealth - $systemToRepair->getRemainingHealth( );
 			if($currentDamage > 0){ //do repair!
 				$toBeFixed = min($currentDamage, $availableRepairPoints);
@@ -2007,7 +2009,25 @@ class SelfRepair extends ShipSystem{
 				$availableRepairPoints -= $toBeFixed;
 				$this->usedThisTurn += $toBeFixed;
 			}
-		}		
+		}	
+
+		//repair damaged Structure
+		foreach ($systemList as $systemToRepair){
+			if ($availableRepairPoints<1) continue;//cannot repair anything any longer
+			if (!($systemToRepair instanceOf Structure)) continue; //now it's Structure exclusively
+			if ($systemToRepair->isDestroyed($gamedata->turn)) continue;//cannot repair destroyed Structure
+			$currentDamage = $systemToRepair->maxhealth - $systemToRepair->getRemainingHealth( );
+			if($currentDamage > 0){ //do repair!
+				$toBeFixed = min($currentDamage, $availableRepairPoints);
+				//actual healing entry
+				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $systemToRepair->id, -$toBeFixed, 0, 0, -1, false, false, 'SelfRepair', 'SelfRepair');
+				$damageEntry->updated = true;
+				$systemToRepair->damage[] = $damageEntry;
+				//meark repair points used
+				$availableRepairPoints -= $toBeFixed;
+				$this->usedThisTurn += $toBeFixed;
+			}
+		}	
 		
     } //endof function criticalPhaseEffects
 	
@@ -2462,7 +2482,7 @@ capacitor is completely emptied.
     
 
     function __construct( $armour, $maxhealth, $powerReq, $output, $hasPetals = true  ){ //technical object, does not need typical system attributes (armor, structure...)
-        parent::__construct( $armour, $maxhealth, $powerReq, $output ); //$armour, $maxhealth, $powerReq, $output		
+        parent::__construct( $armour, $maxhealth, $powerReq, $output ); //$armour, $maxhealth, $powerReq, $output	
 		$this->boostable = $hasPetals;
     }
 	

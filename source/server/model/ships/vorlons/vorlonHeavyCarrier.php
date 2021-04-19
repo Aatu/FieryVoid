@@ -1,5 +1,5 @@
 <?php
-class VorlonHeavyCarrier extends BaseShip{
+class VorlonHeavyCarrier extends VorlonCapitalShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -8,8 +8,9 @@ class VorlonHeavyCarrier extends BaseShip{
 		$this->faction = "Vorlons";
         $this->phpclass = "VorlonHeavyCarrier";
         $this->shipClass = "Heavy Carrier";
-        $this->variantOf = "Heavy Cruiser";
-        $this->occurence = "common";
+        //$this->variantOf = "Heavy Cruiser"; //officially this is NOT a variant, presumably to stack Limited restriction on it	
+		$this->limited = 33;//while Cruiser itself is not so restricted; this is not a mistake
+        //$this->occurence = "common";
         $this->imagePath = "img/ships/VorlonHeavyCruiser.png";
         $this->canvasSize = 200;
 	    $this->isd = 'Ancient';
@@ -49,8 +50,6 @@ class VorlonHeavyCarrier extends BaseShip{
 		
 		
         $this->addFrontSystem(new VorlonDischargeGun(5, 0, 0, 240, 120));
-        $this->addFrontSystem(new VorlonLightningCannon(5, 0, 0, 240, 60, 'L'));
-        $this->addFrontSystem(new VorlonLightningCannon(5, 0, 0, 300, 120, 'R'));
         $this->addFrontSystem(new EMShield(4, 6, 0, 4, 240, 60));
         $this->addFrontSystem(new EMShield(4, 6, 0, 4, 300, 120));
         $this->addFrontSystem(new GraviticThruster(5, 15, 0, 5, 1));
@@ -66,10 +65,12 @@ class VorlonHeavyCarrier extends BaseShip{
 		$this->addAftSystem(new GraviticThruster(5, 15, 0, 4, 2));
 		
 		
-        $this->addLeftSystem(new VorlonLightningCannon(5, 0, 0, 240, 60, 'L'));
+        $this->addLeftFrontSystem(new VorlonLightningCannon(5, 0, 0, 240, 60, 'L'));
+        $this->addLeftFrontSystem(new VorlonLightningCannon(5, 0, 0, 240, 60, 'L'));
         $this->addLeftSystem(new GraviticThruster(5, 25, 0, 7, 3));
 		
-        $this->addRightSystem(new VorlonLightningCannon(5, 0, 0, 300, 120, 'R'));
+        $this->addRightFrontSystem(new VorlonLightningCannon(5, 0, 0, 300, 120, 'R'));
+        $this->addRightFrontSystem(new VorlonLightningCannon(5, 0, 0, 300, 120, 'R'));
         $this->addRightSystem(new GraviticThruster(5, 25, 0, 7, 4));
 		
 
@@ -94,7 +95,8 @@ class VorlonHeavyCarrier extends BaseShip{
 			),
 			1=> array( //Fwd
 				4 => "Thruster",
-				8 => "Lightning Cannon", 
+				6 => "31:Lightning Cannon", 
+				8 => "41:Lightning Cannon", 
 				10 => "Discharge Gun",
 				12 => "EM Shield",
 				18 => "Structure",
@@ -107,16 +109,28 @@ class VorlonHeavyCarrier extends BaseShip{
 				18 => "Structure",
 				20 => "Primary",
 			),
-			3=> array( //Fwd
+			32=> array( //Fwd
 				6 => "Thruster",
-				10 => "Lightning Cannon",
+				10 => "31:Lightning Cannon",
 				18 => "Structure",
 				20 => "Primary",
 			),
-			4=> array( //Fwd
+			42=> array( //Fwd
 				6 => "Thruster",
-				10 => "Lightning Cannon",
+				10 => "41:Lightning Cannon",
 				18 => "Structure",
+				20 => "Primary",
+			),
+			31=> array( //Fwd
+				6 => "32:Thruster",
+				10 => "31:Lightning Cannon",
+				18 => "32:Structure",
+				20 => "Primary",
+			),
+			41=> array( //Fwd
+				6 => "42:Thruster",
+				10 => "41:Lightning Cannon",
+				18 => "42:Structure",
 				20 => "Primary",
 			),
 		);
