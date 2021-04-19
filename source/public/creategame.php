@@ -178,8 +178,10 @@ FORBIDDEN FACTIONS: none
                     <span>Type</span>
                     <select class="deptype" name="deptype">
                         <option value="box">box</option>
+						<!-- options other than 'box' do not work correctly, I'm disabling them
                         <option value="circle">circle</option>
                         <option value="distance">distance</option>
+						-->
                     </select>
                     <span class="depwidthheader">Width:</span>
                     <input class ="depwidth tinySize" type="text" name="depwidth" value="0">

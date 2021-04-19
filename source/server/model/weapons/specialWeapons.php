@@ -70,8 +70,9 @@ class PlasmaStream extends Raking{
 		if (!$system->advancedArmor){//advanced armor prevents effect 
 			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
 			$crit->updated = true;
-			    $crit->inEffect = false;
-			    $system->criticals[] =  $crit;
+			$crit->inEffect = true; //in effect immediately, affecting further damage in the same turn!
+			$system->criticals[] =  $crit;			
+			//and previous turn crit - to be NOT saved, but so crit is recognized as
 		}
 	}
 	

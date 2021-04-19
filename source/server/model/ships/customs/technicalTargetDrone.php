@@ -93,7 +93,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->addRightSystem(new TwinArray(3, 6, 2, 0, 180));
 		
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
-		$this->addFrontSystem(new Structure( 5, 1));
+		$this->addFrontSystem(new Structure( 7, 100));
 		$this->addAftSystem(new Structure( 5, 95));
 		$this->addLeftSystem(new Structure( 4, 98));
 		$this->addRightSystem(new Structure( 4, 98));
@@ -123,23 +123,29 @@ class technicalTargetDrone extends BaseShip{
 				*/
 			),
 			2=> array(
+				20=>"Structure",
+				/*
 				5 => "Thruster",
 				8 => "Jump Engine",
 				10 => "Assault Laser",
 				12 => "Twin Array",
 				18 => "Structure",
 				20 => "Primary",
+				*/
 			),
-			3=> array( //Stbd
+			3=> array( //Port
+				20=>"Structure",
+				/*
 				10 => "2:Thruster", //Aft Twin Arrays
 				20 => "0:Imperial Laser", //PRIMARY Imperial Lasers
+				*/
 			),
-			4=> array(
-				4 => "Thruster",
-				6 => "Imperial Laser",
-				8 => "Twin Array",
-				18 => "Structure",
-				20 => "Primary",
+			4=> array( //Stbd
+				20=>"Structure",
+				/*
+				10 => "2:Thruster", //Aft Twin Arrays
+				20 => "0:Imperial Laser", //PRIMARY Imperial Lasers
+				*/
 			),
 		);
     }
