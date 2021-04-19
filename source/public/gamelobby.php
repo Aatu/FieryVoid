@@ -256,7 +256,8 @@ if ($simMv==true){//simultaneous movement
 			</table>
 			
 			<div><span class="clickable readybutton">READY</span>
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="clickable checkbutton">CHECK</span> <!--fleet correctness check -->
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="clickable checkbutton">CHECK</span> <!--fleet correctness check -->				
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="files/FV_FleetChecker.txt" title="details of fleet composition rules" target="_blank">Fleet Checker rules</a><!--fleet correctness check description-->	
 			</div>
 			<div id="fleetcheck" class="panel large" style="display:none;"><p id="fleetchecktxt" style="display:block;"><span></div>
 		
