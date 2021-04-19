@@ -33,6 +33,7 @@ If You're looking for a balanced game with these rules, it's advisable to use:
  - both players use fleets of similar power level (see Faction Descriptions file - it contains subjective grouping of available fleets into "power levels" suitable for balanced pickup battles)
 
 And actual rules are as below. Due to huge individual costs (and small numbers) of Ancient vessels, if You have picked at least one it's assumed You're creating Ancient fleet - some numbers are different for Young and Ancient fleets.
+WARNING: numbers for Ancients are still untested and prone to change!
  - at least one Jump Drive is required
  - Capital Ships required (minimum number, You can take more):
   -- (Young) 1 per 5000 points (no capital ship is required below 3000 points)

@@ -1066,13 +1066,13 @@ class PlasmaBlast extends Weapon{
 
 
 
-public function calculateHitBase($gamedata, $fireOrder)
+	public function calculateHitBase($gamedata, $fireOrder)
     {
         $fireOrder->needed = 100; //100% chance of hitting everything on target hex
         $fireOrder->updated = true;
     } 
 
- public function fire($gamedata, $fireOrder){
+	public function fire($gamedata, $fireOrder){
         $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
         $shooter = $gamedata->getShipById($fireOrder->shooterid); //so we know which ship is firing, this is useful
 
@@ -1098,9 +1098,9 @@ public function calculateHitBase($gamedata, $fireOrder)
         }
     }
 	
-//and now actual damage dealing - and we already know fighter is hit (fire()) doesn't pass anything else)
-//source hex will be taken from firing unit, damage will be individually rolled for each fighter hit
- public function AOEdamage($target, $shooter, $fireOrder, $gamedata)
+	//and now actual damage dealing - and we already know fighter is hit (fire()) doesn't pass anything else)
+	//source hex will be taken from firing unit, damage will be individually rolled for each fighter hit
+	 public function AOEdamage($target, $shooter, $fireOrder, $gamedata)
     {
         if ($target->isDestroyed()) return; //no point allocating
             foreach ($target->systems as $fighter) {
@@ -1116,11 +1116,6 @@ public function calculateHitBase($gamedata, $fireOrder)
 
 		}
 	}
-
-
-
-
-
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
