@@ -19,7 +19,6 @@
 		public $rngNoPenalty = 1; //maximum range at which weapon suffers no penalty
 		public $rngNormalPenalty = 2;//maximum range at which weapon suffers regular penalty
 		public $maxX = 10; //maximum value of X
-		public $maxXArray = array(); //maximum value of X
 		public $dmgEquation = '2X+5'; //to be able to automatically incorporate this into weapon description
 		public $dmgEquationArray = array(); //For AntimatterShredder		
 		//effect: 
