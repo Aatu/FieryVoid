@@ -839,6 +839,7 @@ spl_autoload_register(
                 'strikecarrier' => '/server/model/ships/raiders/strikeCarrier.php',
                 'strikehawk' => '/server/model/ships/drazi/strikehawk.php',
                 'structure' => '/server/model/systems/baseSystems.php',
+                'vreestructureplaceholder' => '/server/model/systems/baseSystems.php',
                 'stunbeam' => '/server/model/weapons/specialWeapons.php',
                 //'subreactor' => '/server/model/systems/baseSystems.php', //obsoleted!
                 'sulust' => '/server/model/ships/centauri/sulust.php',
@@ -1942,13 +1943,39 @@ spl_autoload_register(
 				'plasmablast' => '/server/model/weapons/plasma.php',
 				
 				//Vree
-				'sixtester' => '/server/model/ships/customs/SixTester.php',
-				'sixtester2' => '/server/model/ships/customs/SixTester2.php',
 				'sixsidedship' => '/server/model/ships/ShipClasses.php',
+				'vreecapital' => '/server/model/ships/ShipClasses.php',
+				'vreemedium' => '/server/model/ships/ShipClasses.php',			
+				'vreehcv' => '/server/model/ships/ShipClasses.php',
 				'antimatterweapon' => '/server/model/weapons/antimatter.php',
 				'antiprotongun' => '/server/model/weapons/antimatter.php',
-
-
+				'antimattercannon' => '/server/model/weapons/antimatter.php',
+				'antiprotondefender' => '/server/model/weapons/antimatter.php',
+				'antimattertorpedo' => '/server/model/weapons/antimatter.php',
+				'lightantiprotongun' => '/server/model/weapons/antimatter.php',
+				'ltantimattercannon' => '/server/model/weapons/antimatter.php',
+				'antimattershredder' => '/server/model/weapons/antimatter.php',
+				'xorr' => '/server/model/ships/vree/Xorr.php',
+				//'xorralt' => '/server/model/ships/vree/XorrAlt.php',				
+				//'vaarl' => '/server/model/ships/vree/Vaarl.php',
+				'vaarlalt' => '/server/model/ships/vree/VaarlAlt.php',
+				'vymish' => '/server/model/ships/vree/Vymish.php',
+				//'vymishalt' => '/server/model/ships/vree/VymishAlt.php',  
+				//'vaarka' => '/server/model/ships/vree/Vaarka.php',
+				'vaarkaalt' => '/server/model/ships/vree/VaarkaAlt.php',				
+				'xill' => '/server/model/ships/vree/Xill.php',
+				'xixx' => '/server/model/ships/vree/Xixx.php',
+				'xeel' => '/server/model/ships/vree/Xeel.php',	
+				'tyzmm' => '/server/model/ships/vree/Tyzmm.php',			
+				'zorth' => '/server/model/ships/vree/Zorth.php',														'xeecra' => '/server/model/ships/vree/Xeecra.php',								
+				'xeon' => '/server/model/ships/vree/Xeon.php',	
+				'zeoth' => '/server/model/ships/vree/Zeoth.php',							
+				'ximm' => '/server/model/ships/vree/Ximm.php',							
+				'xurr' => '/server/model/ships/vree/Xurr.php',							
+				'xonn' => '/server/model/ships/vree/Xonn.php',
+				'xvell' => '/server/model/ships/vree/Xvell.php',
+				'xavan' => '/server/model/ships/vree/Xavan.php',														
+				
 				//other				
 				'apollostrike' => '/server/model/ships/EA/apollostrike.php',
 			

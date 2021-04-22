@@ -12,6 +12,7 @@ class Weapon extends ShipSystem
     public $priority = 1; //array may be skipped, in which case this variable value will be used for all modes
     public $priorityArray = array();
 	public $maxXArray = array(); //For Antimatter weapons such as shredder
+	public $dmgEquationArray = array(); //For AntimatterShredder		
     public $priorityAF = 0; //array must be set explicitly - otherwise it will be generated, ignoring this variable! 
     public $priorityAFArray = array();
 

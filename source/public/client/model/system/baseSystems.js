@@ -152,6 +152,12 @@ var Structure = function Structure(json, ship) {
 Structure.prototype = Object.create(ShipSystem.prototype);
 Structure.prototype.constructor = Structure;
 
+var VreeStructurePlaceholder = function VreeStructurePlaceholder(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+VreeStructurePlaceholder.prototype = Object.create(ShipSystem.prototype);
+VreeStructurePlaceholder.prototype.constructor = VreeStructurePlaceholder;
+
 var Jammer = function Jammer(json, ship) {
     ShipSystem.call(this, json, ship);
 };

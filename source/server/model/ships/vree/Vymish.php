@@ -21,6 +21,7 @@ class Vymish extends MediumShip{
         $this->accelcost = 2;
         $this->rollcost = 2;
         $this->pivotcost = 0;
+        $this->gravitic = true;             
         
         $this->iniativebonus = 60;
 
@@ -57,21 +58,21 @@ class Vymish extends MediumShip{
 				20 => "C&C",
 			),
 			1=> array(
-				3 => "Thruster",
-				5 => "0:Thruster",				
-				6 => "0:Antimatter Cannon",
-				7 => "0:Antiproton Defender",
-				9 => "Antiproton Defender",				
-				17 => "Structure",
+				4 => "Thruster",
+				6 => "0:Thruster",					
+				7 => "0:Antimatter Cannon",
+				8 => "0:Antiproton Defender",
+				10 => "Antiproton Defender",				
+				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
-				3 => "Thruster",
-				5 => "0:Thruster",	
-				6 => "0:Antimatter Cannon",
-				7 => "0:Antiproton Defender",
-				9 => "Antiproton Defender",				
-				17 => "Structure",
+				4 => "Thruster",
+				6 => "0:Thruster",					
+				7 => "0:Antimatter Cannon",
+				8 => "0:Antiproton Defender",
+				10 => "Antiproton Defender",				
+				18 => "Structure",
 				20 => "Primary",
 			),
 		); 
