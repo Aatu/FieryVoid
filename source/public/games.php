@@ -77,8 +77,10 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Special deployment zones disabled</b> - they weren't working correctly
 	    <br><b>Gaim Shamor usable again</b> - Plasma Blast bug fixed (replaced by true and tested Twin Array ;) )
 	    <br><b>Armor Reduced bug fixed</b> - now armor reduction of Plasma Stream and open Capacitor Petals work immediately (correctly)
+	    <br><i><u><b>--- 22.04.2021 ---</b></u></i>
+	    <br><b>Lightning Cannon fix</b> - now it is uninterceptable. 
+	    <br><b>RNG test</b> - if You like number crunching
 
-	    
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
@@ -93,6 +95,7 @@ if (isset($_SESSION["user"])) {
 		<br><a href="files/FV_FAQ.txt">Fiery Void FAQ</a> - differences from B5 Wars, known bugs... look here if something works contrary to how You expect it to!
 		<br><a href="files/enhancements_list.txt">Fiery Void Enhancement list</a> - unit enhancements available, with short explanations.
 		<br><a href="files/FV_factions.txt">Fiery Void Factions list</a> - short info on more exotic rules and systems of fleets available.
+		<br><a href="randomTest.php">RNG test</a> - what is Lady's mood today?
 				
 		<br><br>---------- <b>PLAYER ACCOUNT</b> ----------
         <br><a href="chpass.php">Change password</a> of Your account
