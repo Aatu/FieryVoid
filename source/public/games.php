@@ -78,8 +78,11 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Gaim Shamor usable again</b> - Plasma Blast bug fixed (replaced by true and tested Twin Array ;) )
 	    <br><b>Armor Reduced bug fixed</b> - now armor reduction of Plasma Stream and open Capacitor Petals work immediately (correctly)
 	    <br><i><u><b>--- 22.04.2021 ---</b></u></i>
-	    <br><b>Lightning Cannon fix</b> - now it is uninterceptable. 
+	    <br><b>Lightning Cannon fix</b> - now it is uninterceptable
 	    <br><b>RNG test</b> - if You like number crunching
+	    <br><i><u><b>--- 23.04.2021 ---</b></u></i>
+	    <br><b>Vorlon credit line closed</b> - firing declaration using more power than available will be blocked from committing
+	    <br><b>Vorlon safe travel enabled</b> - have You set Your Adaptive Armor today? check added
 
 	    
         <br><br>
