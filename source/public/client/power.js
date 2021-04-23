@@ -201,6 +201,25 @@ shipManager.power = {
 		return shipNames;
 	},
 
+	//like getShipsNegativePower BUT only looks for PowerCapacitor-equipped ships
+	getCapacitorShipsNegativePower: function getCapacitorShipsNegativePower() {
+		var shipNames = new Array();
+		var counter = 0;
+		for (var i in gamedata.ships) {
+			var ship = gamedata.ships[i];
+			if (ship.unavailable) continue;
+			if (ship.flight) continue;
+			if (ship.userid != gamedata.thisplayer) continue;			
+			if (!(shipManager.systems.getSystemByName(ship, "powerCapacitor"))) continue;
+			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
+			if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) < 0) {
+				shipNames[counter] = ship.name;
+				counter++;
+			}
+		}
+		return shipNames;
+	},	//endof getCapacitorShipsNegativePower
+
 	getPowerNeedForSection: function getPowerNeedForSection(ship, loc) {
 		var power = 0;
 
