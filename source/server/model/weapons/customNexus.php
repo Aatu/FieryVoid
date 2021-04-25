@@ -5605,6 +5605,48 @@ class TestGun extends Particle{
 /*file for Battlestar Galactica universe weapons*/
 
 //BSG Fighter Weapons
+class BSGLtKineticEnergyWeapon extends Pulse{
+
+        public $name = "BSGLtKineticEnergyWeapon";
+        public $displayName = "Light Kinetic Energy Weapon";
+        public $iconPath = "starwars/swFighter2.png"; 		
+		
+        public $animation = "trail";
+        public $animationColor = array(217, 11, 41);
+        public $trailLength = 5;
+        public $animationWidth = 4;
+        public $projectilespeed = 18;
+        public $animationExplosionScale = 0.10;
+
+	protected $useDie = 1; //die used for base number of hits
+//		public $rof = 3;
+		public $grouping = 25;
+		public $maxpulses = 2;
+        
+        public $loadingtime = 1;
+        public $intercept = 2;
+		public $ballisticIntercept = true;
+        public $priority = 3; 
+        
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        
+//        public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+
+	function __construct($startArc, $endArc, $nrOfShots = 1){
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+		
+        public function getDamage($fireOrder){ return Dice::d(6, 1)+1; }
+        public function setMinDamage(){ $this->minDamage = 2 ; }
+        public function setMaxDamage(){ $this->maxDamage = 7 ; }		
+		
+    } // endof BSGLtKineticEnergyWeapon	
+
+
+
 class BSGKineticEnergyWeapon extends Pulse{
 
         public $name = "BSGKineticEnergyWeapon";
@@ -5664,7 +5706,7 @@ class BSGHvyKineticEnergyWeapon extends Pulse{
 		public $grouping = 20;
 		public $maxpulses = 3;
         
-        public $loadingtime = 3;
+        public $loadingtime = 2;
         public $priority = 4; 
         
         public $rangePenalty = 1;
@@ -5678,9 +5720,9 @@ class BSGHvyKineticEnergyWeapon extends Pulse{
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 		
-        public function getDamage($fireOrder){ return Dice::d(3, 2)+5; }
-        public function setMinDamage(){ $this->minDamage = 7 ; }
-        public function setMaxDamage(){ $this->maxDamage = 11 ; }		
+        public function getDamage($fireOrder){ return Dice::d(6, 2)+4; }
+        public function setMinDamage(){ $this->minDamage = 6 ; }
+        public function setMaxDamage(){ $this->maxDamage = 16 ; }		
 		
     } // endof BSGHvyKineticEnergyWeapon	
 
@@ -5762,8 +5804,9 @@ class BSGHvyKineticEnergyWeapon extends Pulse{
 
 
     class BSGMainBattery extends Pulse{
-	/* Belt Alliance Heavy Blast Cannon - Just renamed and a different icon.
-	Using this as a template to allow for potential modification in the future.*/
+	/* Belt Alliance Medium Blast Cannon used as template. Stats are very similar.
+	Primary difference is that this cannot target fighters, is larger, and uses
+	more power.*/
         public $name = "BSGMainBattery";
         public $displayName = "Main Battery";
 	    public $iconPath = 'NexusHeavyAssaultCannon.png';
@@ -5805,6 +5848,54 @@ class BSGHvyKineticEnergyWeapon extends Pulse{
         public function setMaxDamage(){     $this->maxDamage = 8 ;      }
 		
     } //endof class BSGMainBattery
+
+
+
+    class BSGMedBattery extends Pulse{
+	/* Belt Alliance Medium Blast Cannon used as template. Stats are very similar.
+	Primary difference is that this cannot target fighters, is larger, and uses
+	more power.*/
+        public $name = "BSGMedBattery";
+        public $displayName = "Battery";
+	    public $iconPath = 'NexusAssaultCannon.png';
+		public $animation = "trail";
+		public $animationColor = array(245, 245, 44);
+        public $trailLength = 15;
+        public $animationWidth = 3;
+        public $projectilespeed = 12;
+        public $animationExplosionScale = 0.10;
+		public $rof = 3;
+
+        public $priority = 6;
+		public $grouping = 25; //+1/5
+        public $maxpulses = 5;
+		protected $useDie = 5; //die used for base number of hits
+        
+        public $loadingtime = 2;
+        
+        public $rangePenalty = 0.5; //-1/3hex
+        public $fireControl = array(null, 2, 3); // fighters, <mediums, <capitals 
+		
+		public $noOverkill = true; //Matter weapon
+//		public $damageType = "Pulse";
+		public $weaponClass = "Matter";
+        
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 7;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 4;
+		}		
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	    
+        public function getDamage($fireOrder){        return 5;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 5 ;      }
+		
+    } //endof class BSGMedBattery
 
 
 

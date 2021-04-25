@@ -1587,14 +1587,19 @@ spl_autoload_register(
                 'bsgflakbattery' => '/server/model/weapons/customNexus.php',
                 'bsghvykineticenergyweapon' => '/server/model/weapons/customNexus.php',
                 'bsgkineticenergyweapon' => '/server/model/weapons/customNexus.php',
+                'bsgltkineticenergyweapon' => '/server/model/weapons/customNexus.php',
                 'bsgmainbattery' => '/server/model/weapons/customNexus.php',
 					//ships
+                'colonialberserkclasscarrier' => '/server/model/ships/ZBSGColonial_Fred/ColonialBerserkClassCarrier.php',
+                'colonialjanuscruiser' => '/server/model/ships/ZBSGColonial_Fred/ColonialJanusCruiser.php',
                 'colonialjupiterclass' => '/server/model/ships/ZBSGColonial_Fred/ColonialJupiterClass.php',
                 'colonialmanticoreclass' => '/server/model/ships/ZBSGColonial_Fred/ColonialManticoreClass.php',
                 'colonialminervaclass' => '/server/model/ships/ZBSGColonial_Fred/ColonialMinervaClass.php',
                 'colonialodinclass' => '/server/model/ships/ZBSGColonial_Fred/ColonialOdinClass.php',
+				'colonialpythonmk3' => '/server/model/ships/ZBSGColonial_Fred/ColonialPythonMk3.php',
 				'colonialraptor' => '/server/model/ships/ZBSGColonial_Fred/ColonialRaptor.php',
 				'colonialassaultraptor' => '/server/model/ships/ZBSGColonial_Fred/ColonialAssaultRaptor.php',
+                'colonialvipermk2' => '/server/model/ships/ZBSGColonial_Fred/ColonialViperMk2.php',
                 'colonialvipermk7' => '/server/model/ships/ZBSGColonial_Fred/ColonialViperMk7.php',
 
 				//Battlestar Galactica - Kirill

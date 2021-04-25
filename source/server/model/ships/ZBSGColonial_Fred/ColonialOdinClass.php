@@ -8,7 +8,7 @@ class ColonialOdinClass extends BaseShip{
 	$this->faction = "ZPlaytest BSG Colonials";
         $this->phpclass = "ColonialOdinClass";
         $this->imagePath = "img/ships/BSG/ColonialOdin2.png";
-        $this->shipClass = "Odin Class Battlestar";
+        $this->shipClass = "Odin Battlestar";
         $this->shipSizeClass = 2;
 		$this->canvasSize = 140; //img has 140px per side
 //		$this->unlimited 
@@ -35,7 +35,7 @@ class ColonialOdinClass extends BaseShip{
         $this->addPrimarySystem(new Engine(5, 20, 0, 10, 4));
         $this->addPrimarySystem(new ReloadRack(5, 9));
 		$this->addPrimarySystem(new BSGFlakBattery(5, 6, 2, 0, 360));
-        $this->addPrimarySystem(new RapidGatling(5, 6, 2, 0, 360));
+        $this->addPrimarySystem(new RapidGatling(5, 4, 1, 0, 360));
 		$this->addPrimarySystem(new Bulkhead(0, 6));
    
         $this->addFrontSystem(new Thruster(3, 15, 0, 4, 1));
@@ -52,8 +52,8 @@ class ColonialOdinClass extends BaseShip{
         $this->addAftSystem(new BSGMainBattery(5, 9, 6, 135, 225));
         $this->addAftSystem(new BSGFlakBattery(5, 6, 2, 120, 240));
 		$this->addAftSystem(new BSGFlakBattery(5, 6, 2, 120, 240));
-		$this->addAftSystem(new RapidGatling(5, 6, 2, 120, 240));
-		$this->addAftSystem(new RapidGatling(5, 6, 2, 120, 240));
+		$this->addAftSystem(new RapidGatling(5, 4, 1, 120, 240));
+		$this->addAftSystem(new RapidGatling(5, 4, 1, 120, 240));
 		$this->addAftSystem(new LMissileRack(4, 6, 0, 90, 270));
         $hyperdrive = new JumpEngine(6, 30, 8, 20);
 			$hyperdrive->displayName = 'Hyperdrive';
@@ -64,8 +64,8 @@ class ColonialOdinClass extends BaseShip{
         $this->addLeftSystem(new BSGMainBattery(5, 9, 6, 225, 305));
         $this->addLeftSystem(new BSGFlakBattery(5, 6, 2, 210, 330));
         $this->addLeftSystem(new BSGFlakBattery(5, 6, 2, 210, 330));
-		$this->addLeftSystem(new RapidGatling(5, 6, 2, 210, 330));
-		$this->addLeftSystem(new RapidGatling(5, 6, 2, 210, 330));
+		$this->addLeftSystem(new RapidGatling(5, 4, 1, 210, 330));
+		$this->addLeftSystem(new RapidGatling(5, 4, 1, 210, 330));
 		$this->addLeftSystem(new SMissileRack(5, 6, 0, 210, 330));
         $this->addLeftSystem(new SMissileRack(5, 6, 0, 210, 330));
         $this->addLeftSystem(new Hangar(5, 22));
@@ -75,8 +75,8 @@ class ColonialOdinClass extends BaseShip{
         $this->addRightSystem(new BSGMainBattery(5, 9, 6, 55, 125));
         $this->addRightSystem(new BSGFlakBattery(5, 6, 2, 30, 150));
         $this->addRightSystem(new BSGFlakBattery(5, 6, 2, 30, 150));
-		$this->addRightSystem(new RapidGatling(5, 6, 2, 30, 150));
-		$this->addRightSystem(new RapidGatling(5, 6, 2, 30, 150));
+		$this->addRightSystem(new RapidGatling(5, 4, 1, 30, 150));
+		$this->addRightSystem(new RapidGatling(5, 4, 1, 30, 150));
         $this->addRightSystem(new SMissileRack(5, 6, 0, 30, 150));
         $this->addRightSystem(new SMissileRack(5, 6, 0, 30, 150));
         $this->addRightSystem(new Hangar(5, 22));
