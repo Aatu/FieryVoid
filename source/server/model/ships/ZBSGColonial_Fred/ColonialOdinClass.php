@@ -31,7 +31,7 @@ class ColonialOdinClass extends BaseShip{
         
         $this->addPrimarySystem(new Reactor(6, 27, 0, 0));
         $this->addPrimarySystem(new CnC(6, 20, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 9, 3, 6));
+        $this->addPrimarySystem(new Scanner(5, 9, 3, 7));
         $this->addPrimarySystem(new Engine(5, 20, 0, 10, 4));
         $this->addPrimarySystem(new ReloadRack(5, 9));
 		$this->addPrimarySystem(new BSGFlakBattery(5, 6, 2, 0, 360));

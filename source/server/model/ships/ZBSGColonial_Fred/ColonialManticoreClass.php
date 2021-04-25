@@ -20,7 +20,7 @@ class ColonialManticoreClass extends MediumShip{
         $this->accelcost = 2;
         $this->rollcost = 1;
         $this->pivotcost = 3;
-		$this->iniativebonus = 40;
+		$this->iniativebonus = 60;
          
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));

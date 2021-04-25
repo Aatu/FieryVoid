@@ -25,9 +25,7 @@ class ColonialJanusCruiser extends HeavyCombatVessel{
         $this->rollcost = 3;
         $this->pivotcost = 2;
         
-        $this->iniativebonus = 10;
-
-      
+        $this->iniativebonus = 30;
 
         $this->addPrimarySystem(new Reactor(6, 18, 0, 0));
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));
