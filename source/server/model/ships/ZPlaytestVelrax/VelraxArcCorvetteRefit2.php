@@ -35,8 +35,8 @@ class VelraxArcCorvetteRefit2 extends MediumShip{
 		$this->addFrontSystem(new EWPlasmaArc(2, 5, 4, 300, 60));
 		$this->addFrontSystem(new NexusTwinIonGun(1, 4, 4, 180, 60));
 		$this->addFrontSystem(new NexusTwinIonGun(1, 4, 4, 300, 180));
-		$this->addFrontSystem(new LightPlasma(2, 4, 2, 240, 60));
-		$this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 120));
+		$this->addFrontSystem(new NexusIonGun(2, 2, 2, 240, 60));
+		$this->addFrontSystem(new NexusIonGun(2, 2, 2, 300, 120));
         $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
 	    
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    
@@ -60,9 +60,9 @@ class VelraxArcCorvetteRefit2 extends MediumShip{
 
 		1=> array(
 			6 => "Thruster",
-			8 => "Light Plasma Cannon",
+			8 => "Twin Ion Gun",
 			10 => "Plasma Arc",
-			11 => "Twin Ion Gun",
+			11 => "Ion Gun",
 			17 => "Structure",
 			20 => "Primary",
 		),

@@ -29,6 +29,7 @@ class VelraxSivrinGunship extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 12, 5, 5));
         $this->addPrimarySystem(new Engine(4, 13, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(1, 2));
+		$this->addPrimarySystem(new MediumPlasma(3, 5, 3, 300, 60));
         $this->addPrimarySystem(new Thruster(3, 15, 0, 4, 1));
         $this->addPrimarySystem(new Thruster(4, 20, 0, 8, 2));
 
@@ -51,7 +52,8 @@ class VelraxSivrinGunship extends HeavyCombatVesselLeftRight{
     
             $this->hitChart = array(
         		0=> array(
-        				7 => "Structure",
+        				6 => "Structure",
+						7 => "Medium Plasma Cannon",
         				12 => "Thruster",
 						13 => "Hangar",
         				15 => "Scanner",

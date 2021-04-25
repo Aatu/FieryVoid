@@ -4,7 +4,7 @@ class VelraxSevashRefit extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 350;
+        $this->pointCost = 320;
         $this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxSevashRefit";
         $this->imagePath = "img/ships/Nexus/VelraxSevash.png";

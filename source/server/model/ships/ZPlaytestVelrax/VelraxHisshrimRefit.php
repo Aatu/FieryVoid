@@ -4,7 +4,7 @@ class VelraxHisshrimRefit extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 335;
+	$this->pointCost = 305;
 	$this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxHisshrimRefit";
         $this->imagePath = "img/ships/Nexus/VelraxHisshrim.png";

@@ -27,7 +27,7 @@ class ColonialOdinClass extends BaseShip{
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 3;
-        $this->iniativebonus = 30;
+        $this->iniativebonus = 5;
         
         $this->addPrimarySystem(new Reactor(6, 27, 0, 0));
         $this->addPrimarySystem(new CnC(6, 20, 0, 0));

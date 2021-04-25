@@ -4,7 +4,7 @@ class VelraxFleetCarrier extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 575;
+	$this->pointCost = 520;
 	$this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxFleetCarrier";
         $this->imagePath = "img/ships/Nexus/VelraxNaresh.png";

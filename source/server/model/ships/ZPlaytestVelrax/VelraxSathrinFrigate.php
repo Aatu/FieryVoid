@@ -4,7 +4,7 @@ class VelraxSathrinFrigate extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 350;
+        $this->pointCost = 315;
         $this->faction = "ZPlaytest Velrax";
         $this->phpclass = "VelraxSathrinFrigate";
         $this->imagePath = "img/ships/Nexus/VelraxSathrin.png";
@@ -35,7 +35,7 @@ class VelraxSathrinFrigate extends MediumShip{
 		$this->addFrontSystem(new NexusLaserSpear(3, 5, 3, 240, 60));
 		$this->addFrontSystem(new NexusLaserSpear(3, 5, 3, 300, 120));
 		$this->addFrontSystem(new NexusTwinIonGun(2, 4, 4, 270, 90));
-		$this->addFrontSystem(new EWPlasmaArc(2, 5, 4, 300, 60));
+		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 300, 60));
         $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
 	    
         $this->addAftSystem(new Thruster(3, 9, 0, 4, 2));    
@@ -61,7 +61,7 @@ class VelraxSathrinFrigate extends MediumShip{
 			6 => "Thruster",
 			8 => "Laser Spear",
 			9 => "Twin Ion Gun",
-			11 => "Plasma Arc",
+			11 => "Medium Plasma Cannon",
 			17 => "Structure",
 			20 => "Primary",
 		),

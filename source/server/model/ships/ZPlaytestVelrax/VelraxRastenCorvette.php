@@ -1,19 +1,19 @@
 <?php
-class VelraxArcCorvetteRefit extends MediumShip{
+class VelraxRastenCorvette extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 270;
+        $this->pointCost = 260;
         $this->faction = "ZPlaytest Velrax";
-        $this->phpclass = "VelraxArcCorvetteRefit";
-        $this->imagePath = "img/ships/Nexus/VelraxMassken.png";
-        $this->shipClass = "Massken Arc Corvette (2067 Refit)";
-			$this->variantOf = "Massken Arc Corvette";
-			$this->occurence = "common";
+        $this->phpclass = "VelraxRastenCorvette";
+        $this->imagePath = "img/ships/Nexus/VelraxThristen.png";
+        $this->shipClass = "Rasten Attack Corvette";
+			$this->variantOf = "Thristen Corvette";
+			$this->occurence = "uncommon";
 		$this->unofficial = true;
         $this->canvasSize = 75;
-	    $this->isd = 2067;
+	    $this->isd = 2021;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 10;
@@ -32,18 +32,14 @@ class VelraxArcCorvetteRefit extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));        
         
-		$this->addFrontSystem(new EWPlasmaArc(2, 5, 4, 300, 60));
-		$this->addFrontSystem(new NexusIonGun(1, 2, 2, 180, 60));
-		$this->addFrontSystem(new NexusIonGun(1, 2, 2, 300, 180));
-		$this->addFrontSystem(new NexusIonGun(2, 2, 2, 240, 60));
-		$this->addFrontSystem(new NexusIonGun(2, 2, 2, 300, 120));
+		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 300, 60));
+		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 300, 60));
+		$this->addFrontSystem(new NexusIonGun(2, 2, 2, 240, 120));
         $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
 	    
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    
         $this->addAftSystem(new Hangar(1, 2));
-		$this->addAftSystem(new NexusIonGun(1, 2, 2, 120, 360));
-		$this->addAftSystem(new NexusIonGun(1, 2, 2, 0, 240));
        
         $this->addPrimarySystem(new Structure(3, 40));
 
@@ -60,8 +56,8 @@ class VelraxArcCorvetteRefit extends MediumShip{
 
 		1=> array(
 			6 => "Thruster",
-			9 => "Ion Gun",
-			11 => "Plasma Arc",
+			9 => "Medium Plasma Cannon",
+			10 => "Ion Gun",
 			17 => "Structure",
 			20 => "Primary",
 		),
@@ -69,7 +65,6 @@ class VelraxArcCorvetteRefit extends MediumShip{
 		2=> array(
 			7 => "Thruster",
 			9 => "Hangar",
-			11 => "Ion Gun",
 			17 => "Structure",
 			20 => "Primary",
 		),

@@ -1,21 +1,21 @@
 <?php
-class VelraxSathrinRefit extends MediumShip{
+class VelraxVasrevRefit2 extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 335;
+        $this->pointCost = 365;
         $this->faction = "ZPlaytest Velrax";
-        $this->phpclass = "VelraxSathrinRefit";
+        $this->phpclass = "VelraxVasrevRefit2";
         $this->imagePath = "img/ships/Nexus/VelraxSathrin.png";
-        $this->shipClass = "Sathrin Border Frigate (2108 refit)";
+        $this->shipClass = "Vasrev Escort Frigate (2152 refit)";
 			$this->variantOf = "Sathrin Border Frigate";
-			$this->occurence = "common";
+			$this->occurence = "uncommon";
 		$this->unofficial = true;
         $this->agile = true;
         $this->canvasSize = 60;
-	    $this->isd = 2108;
-        
+	    $this->isd = 2152;
+
         $this->forwardDefense = 11;
         $this->sideDefense = 13;
         
@@ -26,26 +26,26 @@ class VelraxSathrinRefit extends MediumShip{
         $this->pivotcost = 2;
         $this->iniativebonus = 60;
          
-        $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
-        $this->addPrimarySystem(new CnC(4, 10, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 14, 5, 5));
-        $this->addPrimarySystem(new Engine(3, 12, 0, 10, 3));
+        $this->addPrimarySystem(new Reactor(4, 10, 0, 0));
+        $this->addPrimarySystem(new CnC(4, 15, 0, 0));
+        $this->addPrimarySystem(new Scanner(3, 14, 5, 6));
+        $this->addPrimarySystem(new Engine(3, 12, 0, 12, 3));
         $this->addPrimarySystem(new Hangar(1, 2));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 5, 3));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 5, 4));        
+        $this->addPrimarySystem(new Thruster(3, 12, 0, 6, 3));
+        $this->addPrimarySystem(new Thruster(3, 12, 0, 6, 4));        
         
-		$this->addFrontSystem(new LaserLance(3, 5, 4, 240, 60));
-		$this->addFrontSystem(new LaserLance(3, 5, 4, 300, 120));
+		$this->addFrontSystem(new EWPlasmaArc(3, 5, 4, 300, 60));
+		$this->addFrontSystem(new EWPlasmaArc(3, 5, 4, 300, 60));
+		$this->addFrontSystem(new DualIonBolter(2, 4, 4, 300, 60));
 		$this->addFrontSystem(new DualIonBolter(2, 4, 4, 270, 90));
-		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 300, 60));
-        $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(2, 12, 0, 6, 1));
 	    
-        $this->addAftSystem(new Thruster(3, 9, 0, 5, 2));    
-        $this->addAftSystem(new Thruster(3, 9, 0, 5, 2));    
+        $this->addAftSystem(new Thruster(3, 9, 0, 6, 2));    
+        $this->addAftSystem(new Thruster(3, 9, 0, 6, 2));    
 		$this->addAftSystem(new DualIonBolter(2, 4, 4, 120, 360));
 		$this->addAftSystem(new DualIonBolter(2, 4, 4, 0, 240));
        
-        $this->addPrimarySystem(new Structure(4, 50));
+        $this->addPrimarySystem(new Structure(5, 50));
 
 	//d20 hit chart
 	$this->hitChart = array(
@@ -61,9 +61,8 @@ class VelraxSathrinRefit extends MediumShip{
 
 		1=> array(
 			6 => "Thruster",
-			8 => "Laser Lance",
+			8 => "Plasma Arc",
 			9 => "Dual Ion Bolter",
-			11 => "Medium Plasma Cannon",
 			17 => "Structure",
 			20 => "Primary",
 		),

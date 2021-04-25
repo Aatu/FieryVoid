@@ -31,18 +31,19 @@ class VelraxSivrinRefit2 extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 12, 5, 6));
         $this->addPrimarySystem(new Engine(4, 13, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(1, 2));
+		$this->addPrimarySystem(new MediumPlasma(3, 5, 3, 300, 60));
         $this->addPrimarySystem(new Thruster(3, 15, 0, 4, 1));
         $this->addPrimarySystem(new Thruster(4, 20, 0, 8, 2));
 
         $this->addLeftSystem(new LaserLance(3, 6, 4, 240, 360));
         $this->addLeftSystem(new LaserLance(3, 6, 4, 240, 360));
-        $this->addLeftSystem(new LaserLance(3, 6, 4, 180, 360));
+        $this->addLeftSystem(new MediumPlasma(3, 5, 3, 180, 360));
         $this->addLeftSystem(new DualIonBolter(2, 4, 4, 180, 360));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 
         $this->addRightSystem(new LaserLance(3, 6, 4, 0, 120));
         $this->addRightSystem(new LaserLance(3, 6, 4, 0, 120));
-        $this->addRightSystem(new LaserLance(3, 6, 4, 0, 180));
+        $this->addRightSystem(new MediumPlasma(3, 5, 3, 0, 180));
         $this->addRightSystem(new DualIonBolter(2, 4, 4, 0, 180));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 
@@ -53,7 +54,8 @@ class VelraxSivrinRefit2 extends HeavyCombatVesselLeftRight{
     
             $this->hitChart = array(
         		0=> array(
-        				7 => "Structure",
+        				6 => "Structure",
+						7 => "Medium Plasma Cannon",
         				12 => "Thruster",
 						13 => "Hangar",
         				15 => "Scanner",
@@ -64,14 +66,16 @@ class VelraxSivrinRefit2 extends HeavyCombatVesselLeftRight{
         		3=> array(
         				5 => "Thruster",
         				6 => "Dual Ion Bolter",
-						12 => "Laser Lance",
+						9 => "Laser Lance",
+						11 => "Medium Plasma Cannon",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		4=> array(
         				5 => "Thruster",
         				6 => "Dual Ion Bolter",
-						12 => "Laser Lance",
+						9 => "Laser Lance",
+						11 => "Medium Plasma Cannon",
         				18 => "Structure",
         				20 => "Primary",
         		),

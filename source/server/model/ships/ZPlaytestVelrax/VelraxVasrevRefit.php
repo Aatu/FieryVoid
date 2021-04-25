@@ -1,23 +1,21 @@
 <?php
-class VelraxSevashCarrier extends MediumShip{
+class VelraxVasrevRefit extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 300;
+        $this->pointCost = 335;
         $this->faction = "ZPlaytest Velrax";
-        $this->phpclass = "VelraxSevashCarrier";
-        $this->imagePath = "img/ships/Nexus/VelraxSevash.png";
-        $this->shipClass = "Sevash Light Carrier";
+        $this->phpclass = "VelraxVasrevRefit";
+        $this->imagePath = "img/ships/Nexus/VelraxSathrin.png";
+        $this->shipClass = "Vasrev Escort Frigate (2108 refit)";
 			$this->variantOf = "Sathrin Border Frigate";
-			$this->occurence = "common";
+			$this->occurence = "uncommon";
 		$this->unofficial = true;
         $this->agile = true;
         $this->canvasSize = 60;
-	    $this->isd = 2062;
+	    $this->isd = 2108;
 
-        $this->fighters = array("normal"=>6);
-        
         $this->forwardDefense = 11;
         $this->sideDefense = 13;
         
@@ -30,21 +28,22 @@ class VelraxSevashCarrier extends MediumShip{
          
         $this->addPrimarySystem(new Reactor(4, 10, 0, 0));
         $this->addPrimarySystem(new CnC(4, 15, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 14, 5, 4));
-        $this->addPrimarySystem(new Engine(3, 12, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(1, 8));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 3));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 4));        
+        $this->addPrimarySystem(new Scanner(3, 14, 5, 5));
+        $this->addPrimarySystem(new Engine(3, 12, 0, 10, 3));
+        $this->addPrimarySystem(new Hangar(1, 2));
+        $this->addPrimarySystem(new Thruster(3, 12, 0, 5, 3));
+        $this->addPrimarySystem(new Thruster(3, 12, 0, 5, 4));        
         
-		$this->addFrontSystem(new NexusLaserSpear(3, 5, 3, 240, 60));
-		$this->addFrontSystem(new NexusLaserSpear(3, 5, 3, 300, 120));
-		$this->addFrontSystem(new NexusTwinIonGun(2, 4, 4, 270, 90));
+		$this->addFrontSystem(new EWPlasmaArc(3, 5, 4, 300, 60));
+		$this->addFrontSystem(new EWPlasmaArc(3, 5, 4, 300, 60));
+		$this->addFrontSystem(new DualIonBolter(2, 4, 4, 300, 60));
+		$this->addFrontSystem(new DualIonBolter(2, 4, 4, 270, 90));
         $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
 	    
-        $this->addAftSystem(new Thruster(3, 9, 0, 4, 2));    
-        $this->addAftSystem(new Thruster(3, 9, 0, 4, 2));    
-		$this->addAftSystem(new NexusTwinIonGun(2, 4, 4, 120, 360));
-		$this->addAftSystem(new NexusTwinIonGun(2, 4, 4, 0, 240));
+        $this->addAftSystem(new Thruster(3, 9, 0, 5, 2));    
+        $this->addAftSystem(new Thruster(3, 9, 0, 5, 2));    
+		$this->addAftSystem(new DualIonBolter(2, 4, 4, 120, 360));
+		$this->addAftSystem(new DualIonBolter(2, 4, 4, 0, 240));
        
         $this->addPrimarySystem(new Structure(4, 50));
 
@@ -62,15 +61,15 @@ class VelraxSevashCarrier extends MediumShip{
 
 		1=> array(
 			6 => "Thruster",
-			8 => "Laser Spear",
-			9 => "Twin Ion Gun",
+			8 => "Plasma Arc",
+			9 => "Dual Ion Bolter",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
 			7 => "Thruster",
-			10 => "Twin Ion Gun",
+			10 => "Dual Ion Bolter",
 			17 => "Structure",
 			20 => "Primary",
 		),

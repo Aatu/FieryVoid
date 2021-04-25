@@ -1468,7 +1468,11 @@ spl_autoload_register(
                 'velraxlasergunboat' => '/server/model/ships/ZPlaytestVelrax/VelraxLaserGunboat.php',					
                 'velraxlasergunboatrefit' => '/server/model/ships/ZPlaytestVelrax/VelraxLaserGunboatRefit.php',					
                 'velraxlasergunboatrefit2' => '/server/model/ships/ZPlaytestVelrax/VelraxLaserGunboatRefit2.php',					
+                'velraxrastencorvette' => '/server/model/ships/ZPlaytestVelrax/VelraxRastenCorvette.php',					
+                'velraxrastencorvetterefit' => '/server/model/ships/ZPlaytestVelrax/VelraxRastenCorvetteRefit.php',					
+                'velraxrastencorvetterefit2' => '/server/model/ships/ZPlaytestVelrax/VelraxRastenCorvetteRefit2.php',					
                 'velraxresteraxfighter' => '/server/model/ships/ZPlaytestVelrax/VelraxResteraxFighter.php',					
+                'velraxresteraxrefit' => '/server/model/ships/ZPlaytestVelrax/VelraxResteraxRefit.php',					
                 'velraxsathrinfrigate' => '/server/model/ships/ZPlaytestVelrax/VelraxSathrinFrigate.php',					
                 'velraxsathrinrefit' => '/server/model/ships/ZPlaytestVelrax/VelraxSathrinRefit.php',					
                 'velraxsathrinrefit2' => '/server/model/ships/ZPlaytestVelrax/VelraxSathrinRefit2.php',					
@@ -1480,9 +1484,13 @@ spl_autoload_register(
                 'velraxstrikecarrier' => '/server/model/ships/ZPlaytestVelrax/VelraxStrikeCarrier.php',					
                 'velraxstrikecarrierrefit' => '/server/model/ships/ZPlaytestVelrax/VelraxStrikeCarrierRefit.php',					
                 'velraxtassrivinterceptora' => '/server/model/ships/ZPlaytestVelrax/VelraxTassrivInterceptorA.php',					
+                'velraxtassrivinterceptorb' => '/server/model/ships/ZPlaytestVelrax/VelraxTassrivInterceptorB.php',					
                 'velraxthristencorvette' => '/server/model/ships/ZPlaytestVelrax/VelraxThristenCorvette.php',					
                 'velraxthristencorvetterefit' => '/server/model/ships/ZPlaytestVelrax/VelraxThristenCorvetteRefit.php',					
                 'velraxthristencorvetterefit2' => '/server/model/ships/ZPlaytestVelrax/VelraxThristenCorvetteRefit2.php',					
+                'velraxvasrevescort' => '/server/model/ships/ZPlaytestVelrax/VelraxVasrevEscort.php',					
+                'velraxvasrevrefit' => '/server/model/ships/ZPlaytestVelrax/VelraxVasrevRefit.php',					
+                'velraxvasrevrefit2' => '/server/model/ships/ZPlaytestVelrax/VelraxVasrevRefit2.php',					
 
 
                 //Grome Weapons and Systems
