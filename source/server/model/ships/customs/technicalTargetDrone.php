@@ -59,13 +59,15 @@ class technicalTargetDrone extends BaseShip{
 		$this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
 		*/
 		
+		/*
 		$this->addFrontSystem(new CustomERLightPBeam(3, 0, 0, 240, 120));
 		$this->addFrontSystem(new CustomBPALight(3, 0, 0, 240, 120));
 		$this->addFrontSystem(new CustomBPAMedium(3, 0, 0, 240, 120));
 		$this->addFrontSystem(new CustomBPAHeavy(3, 0, 0, 240, 120));
 		$this->addFrontSystem(new NexusKineticBoxLauncher(1, 0, 0, 270, 180));
 		$this->addFrontSystem(new NexusChaffLauncher(1, 0, 0, 0, 360));
-		
+		*/
+		/*
 		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));
 		$this->addAftSystem(new CommJammer(3, 0, 0, 0, 360));		
 		$this->addAftSystem(new ImpCommJammer(3, 0, 0, 0, 360));
@@ -73,7 +75,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->addAftSystem(new SensorSpike(3, 0, 0, 0, 360));		
 		$this->addAftSystem(new CombatLaser(3, 0, 0, 0, 360));	
 		$this->addAftSystem(new LaserCutter(3, 0, 0, 0, 360));
-		
+		*/
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
 		$this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));

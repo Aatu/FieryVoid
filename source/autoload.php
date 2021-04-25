@@ -1649,7 +1649,8 @@ spl_autoload_register(
                 'zzftraassaulttransport' => '/server/model/ships/ZStarWars/zzftrAassaultTransport.php',
                 'zzftryt2400' => '/server/model/ships/ZStarWars/zzftrYT2400.php',
                 'zzftryt2400raider' => '/server/model/ships/ZStarWars/zzftrYT2400Raider.php',
-		    
+                'swmoncalmc75' => '/server/model/ships/ZStarWars/swMonCalMC75.php',
+						    
 		 //mining equipment
 		'customminingcutter' => '/server/model/weapons/customs.php',   
 		'customindustrialgrappler' => '/server/model/weapons/customs.php', 
