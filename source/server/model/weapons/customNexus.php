@@ -5210,6 +5210,45 @@ class NexusHeavySwarmTorpedo extends Pulse{
     }  // endof NexusHeavySwarmTorpedo
 
 
+
+class NexusDefensePulsar extends Pulse{
+
+        public $name = "NexusDefensePulsar";
+        public $displayName = "Defense Pulsar";
+		public $iconPath = "NexusDefensePulsar.png";
+		
+        public $animation = "trail";
+        public $trailLength = 12;
+        public $animationWidth = 4;
+        public $projectilespeed = 9;
+        public $animationExplosionScale = 0.10;
+		
+		protected $useDie = 2; //die used for the number of hits
+        public $rof = 3;
+        public $grouping = 25;
+        public $maxpulses = 3;
+        
+        public $loadingtime = 1;
+        public $intercept = 2;
+        public $priority = 3;
+        
+        public $rangePenalty = 2;
+        public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+        public function getDamage($fireOrder){ return 6; }
+        public function setMinDamage(){ $this->minDamage = 6 ; }
+        public function setMaxDamage(){ $this->maxDamage = 6 ; }		
+		
+    }  // endof NexusDefensePulsar
+
+
+
 // END OF PULSE WEAPONS
 
 

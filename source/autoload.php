@@ -1325,6 +1325,7 @@ spl_autoload_register(
 			//Nexus particle weapons
 				'gatlinggunftr' => '/server/model/weapons/customNexus.php', 
 				'lightparticlebeamftr' => '/server/model/weapons/customNexus.php', 
+				'nexusdefensepulsar' => '/server/model/weapons/customNexus.php', 
 				'nexusfighterarray' => '/server/model/weapons/customNexus.php', 
 				'nexusheavyparticlearray' => '/server/model/weapons/customNexus.php',
 				'nexusmauler' => '/server/model/weapons/customNexus.php', 
@@ -1400,12 +1401,6 @@ spl_autoload_register(
                 'brixadiipolicefrigatebase' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigateBase.php',
                 'brixadiipolicefrigate2047' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2047.php',
 				'brixadiipolicefrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2108.php',
-                'brixadiiscreenfrigate' => '/server/model/ships/ZNexusBrixadii/BrixadiiScreenFrigate.php',
-//                'brixadiiscreenfrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiScreenFrigate2108.php',
-		    		    
-//                'brixadiipolicefrigatebaseshf' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigateBaseSHF.php',
-//                'brixadiipolicefrigate2047shf' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2047SHF.php',
-//                'brixadiiscreenfrigateshf' => '/server/model/ships/ZNexusBrixadii/BrixadiiScreenFrigateSHF.php',
 		    
                 'brixadiisurveyorbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyorBase.php',
                 'brixadiisurveyor2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyor2057.php',
@@ -1413,18 +1408,6 @@ spl_autoload_register(
 			
 				'brixadiiweaponsplatformbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiWeaponsPlatformBase.php',
 				'brixadiiweaponsplatform2107' => '/server/model/ships/ZNexusBrixadii/BrixadiiWeaponsPlatform2107.php',
-				'brixadiisentinelplatformbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiSentinelPlatformBase.php',
-				'brixadiisentinelplatform2078' => '/server/model/ships/ZNexusBrixadii/BrixadiiSentinelPlatform2078.php',
-
-//				'brixadiigunsatbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiGunSatBase.php',
-//				'brixadiigunsat2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiGunSat2108.php',
-//				'brixadiipointdefensesatbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiPointDefenseSatBase.php',
-//				'brixadiipointdefensesat2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiPointDefenseSat2108.php',
-
-//				'brixadiisupportbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiSupportBase.php',
-//				'brixadiisupportbase2048' => '/server/model/ships/ZNexusBrixadii/BrixadiiSupportBase2048.php',
-//				'brixadiicombatbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiCombatBase.php',
-//				'brixadiicombatbase2112' => '/server/model/ships/ZNexusBrixadii/BrixadiiCombatBase2112.php',
 
 
 

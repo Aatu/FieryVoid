@@ -46,9 +46,9 @@ class ColonialBerserkClassCarrier extends BaseShip{
 		$this->addFrontSystem(new RapidGatling(5, 4, 1, 315, 45));
 	
 
-        $this->addAftSystem(new Thruster(4, 15, 0, 3, 2));
-        $this->addAftSystem(new Thruster(4, 15, 0, 3, 2));
-        $this->addAftSystem(new Thruster(4, 15, 0, 3, 2));
+        $this->addAftSystem(new Thruster(4, 15, 0, 4, 2));
+        $this->addAftSystem(new Thruster(4, 15, 0, 4, 2));
+        $this->addAftSystem(new Thruster(4, 15, 0, 4, 2));
         $this->addAftSystem(new Bulkhead(0, 5));
         $this->addAftSystem(new Bulkhead(0, 5));
         $this->addAftSystem(new RapidGatling(5, 4, 1, 120, 240));

@@ -4,7 +4,7 @@ class BrixadiiSurveyorBase extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 365;
+        $this->pointCost = 380;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiSurveyorBase";
         $this->imagePath = "img/ships/Nexus/BrixadiiSurveyor.png";
@@ -24,7 +24,6 @@ class BrixadiiSurveyorBase extends HeavyCombatVessel{
         $this->rollcost = 2;
         $this->pivotcost = 2;
         $this->iniativebonus = 6*5;
-        
          
         $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(5, 10, 0, 0));
@@ -35,10 +34,10 @@ class BrixadiiSurveyorBase extends HeavyCombatVessel{
         $this->addPrimarySystem(new Thruster(3, 14, 0, 4, 4));
       
         $this->addFrontSystem(new Thruster(3, 14, 0, 6, 1));
-    	$this->addFrontSystem(new NexusParticleAgitator(3, 8, 3, 240, 360));
-        $this->addFrontSystem(new NexusParticleAgitator(3, 8, 3, 0, 120));
-        $this->addFrontSystem(new LightParticleProjector(2, 3, 1, 180, 60));
-        $this->addFrontSystem(new LightParticleProjector(2, 3, 1, 300, 180));
+    	$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 240, 0));
+        $this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 0, 120));
+        $this->addFrontSystem(new NexusDefensePulsar(2, 4, 2, 180, 60));
+        $this->addFrontSystem(new NexusDefensePulsar(2, 4, 2, 300, 180));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
@@ -60,8 +59,8 @@ class BrixadiiSurveyorBase extends HeavyCombatVessel{
             ),
             1=> array(
                     5 => "Thruster",
-                    8 => "Particle Agitator",
-                    10 => "Light Particle Projector",
+                    8 => "Heavy Particle Projector",
+                    10 => "Defense Pulsar",
 					18 => "Structure",
                     20 => "Primary",
             ),

@@ -717,6 +717,12 @@ var NexusIonBolter = function  NexusIonBolter(json, ship) {
 NexusIonBolter.prototype = Object.create(Weapon.prototype);
 NexusIonBolter.prototype.constructor =  NexusIonBolter;
 
+var NexusDefensePulsar = function  NexusDefensePulsar(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusDefensePulsar.prototype = Object.create(Weapon.prototype);
+NexusDefensePulsar.prototype.constructor =  NexusDefensePulsar;
+
 
 
 
