@@ -8,7 +8,7 @@ class ColonialMinervaClass extends BaseShip{
 	$this->faction = "ZPlaytest BSG Colonials";
         $this->phpclass = "ColonialMinervaClass";
         $this->imagePath = "img/ships/BSG/ColonialMinerva.png";
-        $this->shipClass = "Minerva Class Battlestar";
+        $this->shipClass = "Minerva Battlestar";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 170; //img has 170px per side
 //		$this->limited
@@ -59,8 +59,8 @@ class ColonialMinervaClass extends BaseShip{
         $this->addLeftSystem(new BSGMainBattery(5, 9, 6, 225, 305));
         $this->addLeftSystem(new BSGFlakBattery(5, 6, 2, 210, 330));
         $this->addLeftSystem(new BSGFlakBattery(5, 6, 2, 210, 330));
-        $this->addLeftSystem(new RapidGatling(5, 6, 2, 210, 330));
-        $this->addLeftSystem(new RapidGatling(5, 6, 2, 210, 330));
+        $this->addLeftSystem(new RapidGatling(5, 4, 1, 210, 330));
+        $this->addLeftSystem(new RapidGatling(5, 4, 1, 210, 330));
         $this->addLeftSystem(new SMissileRack(5, 6, 0, 210, 330));
         $this->addLeftSystem(new SMissileRack(5, 6, 0, 210, 330));
         $this->addLeftSystem(new Hangar(5, 13));
@@ -69,8 +69,8 @@ class ColonialMinervaClass extends BaseShip{
         $this->addRightSystem(new BSGMainBattery(5, 9, 6, 55, 125));
         $this->addRightSystem(new BSGFlakBattery(5, 6, 2, 30, 150));
         $this->addRightSystem(new BSGFlakBattery(5, 6, 2, 30, 150));
-        $this->addRightSystem(new RapidGatling(5, 6, 2, 30, 150));
-        $this->addRightSystem(new RapidGatling(5, 6, 2, 30, 150));
+        $this->addRightSystem(new RapidGatling(5, 4, 1, 30, 150));
+        $this->addRightSystem(new RapidGatling(5, 4, 1, 30, 150));
         $this->addRightSystem(new SMissileRack(5, 6, 0, 30, 150));
         $this->addRightSystem(new SMissileRack(5, 6, 0, 30, 150));
         $this->addRightSystem(new Hangar(5, 13));

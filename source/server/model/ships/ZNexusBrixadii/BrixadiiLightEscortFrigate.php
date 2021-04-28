@@ -4,7 +4,7 @@ class BrixadiiLightEscortFrigate extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 320;
+        $this->pointCost = 385;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiLightEscortFrigate";
         $this->imagePath = "img/ships/Nexus/BrixadiiLightEscort.png";
@@ -34,16 +34,16 @@ class BrixadiiLightEscortFrigate extends MediumShip{
 		$this->addPrimarySystem(new Thruster(2, 14, 0, 6, 4));
       
         $this->addFrontSystem(new Thruster(3, 14, 0, 6, 1));
-		$this->addFrontSystem(new NexusLightProjectorArray(2, 5, 2, 180, 60));
-		$this->addFrontSystem(new NexusLightProjectorArray(2, 5, 2, 270, 90));
-		$this->addFrontSystem(new NexusLightProjectorArray(2, 5, 2, 270, 90));
-		$this->addFrontSystem(new NexusLightProjectorArray(2, 5, 2, 300, 180));
+		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 180, 60));
+		$this->addFrontSystem(new EnergyPulsar(2, 6, 3, 300, 60));
+		$this->addFrontSystem(new EnergyPulsar(2, 6, 3, 300, 60));
+		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 300, 180));
 		$this->addFrontSystem(new NexusKineticBoxLauncher(0, 4, 0, 300, 60));
 		
 		$this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
-        $this->addAftSystem(new NexusLightProjectorArray(1, 5, 2, 120, 0));
-        $this->addAftSystem(new NexusLightProjectorArray(1, 5, 2, 0, 240));
+        $this->addAftSystem(new ScatterPulsar(2, 4, 2, 120, 360));
+        $this->addAftSystem(new ScatterPulsar(2, 4, 2, 0, 240));
 		$this->addAftSystem(new NexusChaffLauncher(2, 2, 1, 0, 360));
 		
 		$this->addPrimarySystem(new Structure(3, 40));
@@ -63,14 +63,15 @@ class BrixadiiLightEscortFrigate extends MediumShip{
             1=> array(
 				5 => "Thruster",
 				6 => "Kinetic Box Launcher",
-				10 => "Light Projector Array",
+				8 => "Energy Pulsar",
+				10 => "Scatter Pulsar",
 				17 => "Structure",
 				20 => "Primary",
             ),
             2=> array(
 				7 => "Thruster",
 				8 => "Chaff Launcer",
-				10 => "Light Projector Array",
+				10 => "Scatter Pulsar",
 				17 => "Structure",
 				20 => "Primary",
             ),

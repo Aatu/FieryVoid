@@ -260,6 +260,7 @@ window.gamedata = {
             var hasNoEW = [];
             var selfDestructing = [];
 			var notLaunching = [];
+			var notSetAA = [];//available Adaptive Armor points remaining! 
 
             for (var ship in myShips) {
                 if (!myShips[ship].flight) {
@@ -272,7 +273,11 @@ window.gamedata = {
                                     selfDestructing.push(myShips[ship]);
                                 }
                             }
-                        }
+                        } else if (myShips[ship].systems[syst].name == "adaptiveArmorController") {
+							if (myShips[ship].systems[syst].canIncreaseAnything()) {
+								notSetAA.push(myShips[ship]);
+							}
+						}
                     }
 
                     if (shipManager.isDisabled(myShips[ship])) {
@@ -318,17 +323,19 @@ window.gamedata = {
 					}	
                 } else { //fighter flight
 					//check for ballistic launch
+					//and Adaptive Armor
 					var fired = 0;
+					var didNotSetAA = false;
 					var hasReadyLaunchers = false;
 					for (var i = 0; i < myShips[ship].systems.length; i++) {
 						if (typeof myShips[ship].systems[i] != "undefined") {
 							for (var j = 0; j < myShips[ship].systems[i].systems.length; j++) {
 								if (typeof myShips[ship].systems[i].systems[j] != "undefined") {
 									var currWeapon = myShips[ship].systems[i].systems[j];
-									if(currWeapon.ballistic){ //only ballistic weapons are of interest now
+									if( (fired == 0) && currWeapon.ballistic){ //only ballistic weapons are of interest now
 										if (currWeapon.fireOrders.length > 0) {
 											fired = 1;
-											break;
+											//break;
 										}	
 										/*
 										if (weaponManager.isLoaded(currWeapon) ){ //ballistic weapon ready to fire
@@ -339,6 +346,10 @@ window.gamedata = {
 										){ //non-ballistic weapon ready to fire
 											hasReadyLaunchers = true;
 										}										
+									} else if (currWeapon.name == "adaptiveArmorController") {
+										if (currWeapon.canIncreaseAnything()) {
+											didNotSetAA = true;
+										}
 									}
 								}
 							}
@@ -346,6 +357,9 @@ window.gamedata = {
 					}
 					if ((fired == 0) && hasReadyLaunchers) { //no missile launch was declared, and there are ready launchers
 						notLaunching.push(myShips[ship]);
+					}
+					if (didNotSetAA){ //available Adaptive Armor has not been set
+						notSetAA.push(myShips[ship]);
 					}
 				}
             }
@@ -388,6 +402,15 @@ window.gamedata = {
                 html += "<br>";
                 for (var ship in notLaunching) {
                     html += notLaunching[ship].name + " (" + notLaunching[ship].shipClass + ")";
+                    html += "<br>";
+                }
+                html += "<br>";
+            }
+            if (notSetAA.length > 0) {
+                html += "You have not assigned available AA points for the following units: ";
+                html += "<br>";
+                for (var ship in notSetAA) {
+                    html += notSetAA[ship].name + " (" + notSetAA[ship].shipClass + ")";
                     html += "<br>";
                 }
                 html += "<br>";
@@ -596,7 +619,22 @@ window.gamedata = {
             ajaxInterface.submitGamedata();
         } else if (gamedata.gamephase == 2) {
             ajaxInterface.submitGamedata();
-        } else if (gamedata.gamephase == 3) {
+        } else if (gamedata.gamephase == 3) { //firing phase
+		
+			//prevent Vorlons from borrowing future power for firing 
+			//Capacitor-equipped ships ONLY cannot commit firing with negative power balance (they're only ones that actiely use power in this phase, AND they don't have any legal option of achieving negative balance by other means)
+			var shipNames = shipManager.power.getCapacitorShipsNegativePower();
+            if (shipNames.length > 0) {
+                var negPowerError = "The following ships have insufficient power:<br>";
+                for (var index in shipNames) {
+                    var name = shipNames[index];
+                    negPowerError += "- " + name + "<br>";
+                }
+                negPowerError += "You need to reduce Your firing declarations before you can commit the turn.";
+                window.confirm.error(negPowerError, function () {});
+                return false;
+            }
+		
             ajaxInterface.submitGamedata();
         } else if (gamedata.gamephase == 4) {
             ajaxInterface.submitGamedata();
