@@ -1507,6 +1507,7 @@ class AdaptiveArmorController extends ShipSystem{
         $strippedSystem->allocatedAA = $this->allocatedAA;
         $strippedSystem->availableAA = $this->availableAA;
         $strippedSystem->currchangedAA = $this->currchangedAA;
+        $strippedSystem->AAtotal_used = $this->AAtotal_used;
         $strippedSystem->AApreallocated_used = $this->AApreallocated_used;
 		
         return $strippedSystem;

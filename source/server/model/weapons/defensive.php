@@ -273,7 +273,7 @@
         public function setSystemDataWindow($turn){
 	    $this->data["Boostlevel"] = $this->getBoostLevel($turn);
             $this->data["Special"] = "Can intercept uninterceptable weapons.<br>";
-            $this->data["Special"] .= "Can be boosted for increased intercept rating (up to +" . $this->maxBoostLevel . ").<br>";
+            $this->data["Special"] .= "Can be boosted for increased intercept rating (5% per step, up to +" . $this->maxBoostLevel . " steps).<br>";
             $this->data["Special"] .= "Additionally, boost itself reduces fighter hit chance.";
             parent::setSystemDataWindow($turn);
             

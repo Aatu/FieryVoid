@@ -24,6 +24,7 @@ class ColonialViperMk7 extends FighterFlight{
 		$this->turndelay = 0;
         
         $this->iniativebonus = 90;
+        $this->hasNavigator = true;
         $this->populate();       
 
     }

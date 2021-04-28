@@ -8,7 +8,7 @@ class ColonialJupiterClass extends BaseShip{
 	$this->faction = "ZPlaytest BSG Colonials";
         $this->phpclass = "ColonialJupiterClass";
         $this->imagePath = "img/ships/BSG/ColonialBattlestar.png";
-        $this->shipClass = "Jupiter Class Battlestar";
+        $this->shipClass = "Jupiter Battlestar";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 190; //img has 200px per side
 		$this->limited = 33;
@@ -51,8 +51,8 @@ class ColonialJupiterClass extends BaseShip{
 		$this->addFrontSystem(new BSGMainBattery(6, 9, 6, 315, 45));
         $this->addFrontSystem(new LMissileRack(6, 6, 0, 315, 45));
         $this->addFrontSystem(new LMissileRack(6, 6, 0, 315, 45));
-        $this->addFrontSystem(new RapidGatling(6, 5, 1, 315, 45));
-        $this->addFrontSystem(new RapidGatling(6, 5, 1, 315, 45));
+        $this->addFrontSystem(new RapidGatling(6, 4, 1, 315, 45));
+        $this->addFrontSystem(new RapidGatling(6, 4, 1, 315, 45));
 
         $this->addAftSystem(new Thruster(6, 18, 0, 3, 2));
         $this->addAftSystem(new Thruster(6, 18, 0, 3, 2));
@@ -64,8 +64,8 @@ class ColonialJupiterClass extends BaseShip{
 		$this->addAftSystem(new BSGMainBattery(6, 9, 6, 135, 225));
         $this->addAftSystem(new LMissileRack(6, 6, 0, 135, 225));
         $this->addAftSystem(new LMissileRack(6, 6, 0, 135, 225));
-		$this->addAftSystem(new RapidGatling(6, 5, 1, 135, 225));
-		$this->addAftSystem(new RapidGatling(6, 5, 1, 135, 225));
+		$this->addAftSystem(new RapidGatling(6, 4, 1, 135, 225));
+		$this->addAftSystem(new RapidGatling(6, 4, 1, 135, 225));
 
         $this->addLeftSystem(new Thruster(6, 18, 0, 3, 3));
         $this->addLeftSystem(new Thruster(6, 18, 0, 3, 3));
@@ -74,9 +74,9 @@ class ColonialJupiterClass extends BaseShip{
         $this->addLeftSystem(new BSGMainBattery(6, 9, 6, 205, 335));
         $this->addLeftSystem(new BSGFlakBattery(6, 6, 2, 190, 350));
         $this->addLeftSystem(new BSGFlakBattery(6, 6, 2, 190, 350));
-		$this->addLeftSystem(new RapidGatling(6, 5, 1, 190, 350));
-		$this->addLeftSystem(new RapidGatling(6, 5, 1, 190, 350));
-		$this->addLeftSystem(new RapidGatling(6, 5, 1, 190, 350));
+		$this->addLeftSystem(new RapidGatling(6, 4, 1, 190, 350));
+		$this->addLeftSystem(new RapidGatling(6, 4, 1, 190, 350));
+		$this->addLeftSystem(new RapidGatling(6, 4, 1, 190, 350));
 		$this->addLeftSystem(new Hangar(6, 33));
 
         $this->addRightSystem(new Thruster(6, 18, 0, 3, 4));
@@ -86,9 +86,9 @@ class ColonialJupiterClass extends BaseShip{
         $this->addRightSystem(new BSGMainBattery(6, 9, 6, 25, 155));
         $this->addRightSystem(new BSGFlakBattery(6, 6, 2, 10, 170));
         $this->addRightSystem(new BSGFlakBattery(6, 6, 2, 10, 170));
-		$this->addRightSystem(new RapidGatling(6, 5, 1, 10, 170));
-		$this->addRightSystem(new RapidGatling(6, 5, 1, 10, 170));
-		$this->addRightSystem(new RapidGatling(6, 5, 1, 10, 170));
+		$this->addRightSystem(new RapidGatling(6, 4, 1, 10, 170));
+		$this->addRightSystem(new RapidGatling(6, 4, 1, 10, 170));
+		$this->addRightSystem(new RapidGatling(6, 4, 1, 10, 170));
 		$this->addRightSystem(new Hangar(6, 33));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
