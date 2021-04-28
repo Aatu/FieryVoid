@@ -8,7 +8,7 @@ class ColonialManticore_K extends MediumShip{
 		$this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "ColonialManticore_K";
         $this->imagePath = "img/ships/BSG/ColonialManticore.png";
-        $this->shipClass = "Manticore Class Corvette";
+        $this->shipClass = "Manticore Corvette";
         $this->canvasSize = 100;
 //	    $this->isd = 2007;
         

@@ -8,7 +8,7 @@ class ColonialManticoreClass extends MediumShip{
 		$this->faction = "ZPlaytest BSG Colonials";
         $this->phpclass = "ColonialManticoreClass";
         $this->imagePath = "img/ships/BSG/ColonialManticore.png";
-        $this->shipClass = "Manticore Class Corvette";
+        $this->shipClass = "Manticore Corvette";
         $this->canvasSize = 100;
 //	    $this->isd = 2007;
         
@@ -20,7 +20,7 @@ class ColonialManticoreClass extends MediumShip{
         $this->accelcost = 2;
         $this->rollcost = 1;
         $this->pivotcost = 3;
-		$this->iniativebonus = 40;
+		$this->iniativebonus = 60;
          
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
@@ -44,10 +44,10 @@ class ColonialManticoreClass extends MediumShip{
         $this->addFrontSystem(new Bulkhead(0, 3));
         $this->addFrontSystem(new SMissileRack(4, 6, 0, 0, 360));
 
-		$this->addAftSystem(new RapidGatling(3, 4, 2, 180, 30));
-		$this->addAftSystem(new RapidGatling(3, 4, 2, 180, 30));
-		$this->addAftSystem(new RapidGatling(3, 4, 2, 330, 180));
-		$this->addAftSystem(new RapidGatling(3, 4, 2, 330, 180));
+		$this->addAftSystem(new RapidGatling(3, 4, 1, 180, 30));
+		$this->addAftSystem(new RapidGatling(3, 4, 1, 180, 30));
+		$this->addAftSystem(new RapidGatling(3, 4, 1, 330, 180));
+		$this->addAftSystem(new RapidGatling(3, 4, 1, 330, 180));
         $this->addAftSystem(new Thruster(3, 9, 0, 4, 2));    
         $this->addAftSystem(new Thruster(3, 9, 0, 4, 2));    
 		$this->addAftSystem(new Bulkhead(0, 2));
