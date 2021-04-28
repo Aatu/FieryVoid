@@ -83,6 +83,10 @@ if (isset($_SESSION["user"])) {
 	    <br><i><u><b>--- 23.04.2021 ---</b></u></i>
 	    <br><b>Vorlon credit line closed</b> - firing declaration using more power than available will be blocked from committing
 	    <br><b>Vorlon safe travel enabled</b> - have You set Your Adaptive Armor today? check added
+	    <br><i><u><b>--- 28.04.2021 ---</b></u></i>
+	    <br><b>Adaptive Armor bug fixed</b> - now total AA points available are properly recognized as such
+	    <br><b>BSG Colonials updated</b>
+	    <br><b>Nexus Updated</b>
 
 	    
         <br><br>
