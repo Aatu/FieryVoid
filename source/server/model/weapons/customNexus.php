@@ -5866,6 +5866,11 @@ class BSGHvyKineticEnergyWeapon extends Pulse{
         
         public $rangePenalty = 0.33; //-1/3hex
         public $fireControl = array(null, 3, 4); // fighters, <mediums, <capitals 
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
+		}
 		
 		public $noOverkill = true; //Matter weapon
 //		public $damageType = "Pulse";
@@ -5914,6 +5919,11 @@ class BSGHvyKineticEnergyWeapon extends Pulse{
         
         public $rangePenalty = 0.5; //-1/3hex
         public $fireControl = array(null, 2, 3); // fighters, <mediums, <capitals 
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
+		}
 		
 		public $noOverkill = true; //Matter weapon
 //		public $damageType = "Pulse";
