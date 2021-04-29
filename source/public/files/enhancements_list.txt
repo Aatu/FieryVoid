@@ -130,7 +130,7 @@ Amethyst Skin Coloring (ship only):
 	Cost: 20% of (new AA total x structure total of ship)
 	Limit: 50% of base AA points
 
-Crimson Skin Coloring (ship/fighter):
+Azure Skin Coloring (ship/fighter):
 	Effect: +1 Shield rating, for all shields.
 	Cost: unit size factor x new shield rating x nuber of emitters
 	Limit: 50% of base shield rating
