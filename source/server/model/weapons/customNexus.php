@@ -1228,6 +1228,11 @@ class NexusChaffLauncher extends Weapon{
         public $fireControl = array(2, 1, 1); // fighters, <mediums, <capitals
 		public $weaponClass = "Matter";
 
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
+		}
+
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ) $maxhealth = 2;
@@ -2023,6 +2028,11 @@ class NexusMinigun extends Pulse{
         
 //        public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClass = "Matter";
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
+		}
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             if ( $maxhealth == 0 ) $maxhealth = 4;
