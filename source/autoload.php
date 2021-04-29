@@ -1588,6 +1588,7 @@ spl_autoload_register(
 				//Battlestar Galactica - Kirill
 					//weapons
                 'flakarray' => '/server/model/weapons/customNexus.php',
+                'bsgkirillgun' => '/server/model/weapons/customNexus.php',
 					//ships
                 'colonialjupiterclass_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialJupiterClass_K.php',
                 'colonialmanticore_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialManticore_K.php',

@@ -1220,6 +1220,7 @@ class NexusChaffLauncher extends Weapon{
 		
 		public $intercept = 1;
 		public $ballisticIntercept = true;
+		public $noOverkill = true; //Matter weapon
 
         public $loadingtime = 1;
         public $priority = 4;
@@ -2023,6 +2024,7 @@ class NexusMinigun extends Pulse{
 		public $ballisticIntercept = true;
         public $priority = 3; // Matter weapon
         
+		public $noOverkill = true; //Matter weapon
         public $rangePenalty = 2;
         public $fireControl = array(3, 2, 2); // fighters, <mediums, <capitals
         
@@ -6048,6 +6050,10 @@ class BSGHvyKineticEnergyWeapon extends Pulse{
         public function setMaxDamage(){     $this->maxDamage = 16 ;      }
 		
     }	//endof class FlakArray
+
+
+
+
 
 
 class SensorSpearFtr extends Weapon{

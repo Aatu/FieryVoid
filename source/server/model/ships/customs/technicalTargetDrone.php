@@ -31,7 +31,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->addFrontSystem($sensors);
 		$this->addPrimarySystem(new Engine(5, 20, 0, 20, 3));
 		$this->addPrimarySystem(new Hangar(6, 100));
-		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
+		$this->addPrimarySystem(new BSGKirillGun(2, 0, 0, 0, 360));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
