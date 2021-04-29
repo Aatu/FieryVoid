@@ -14,7 +14,7 @@ class ColonialRaptor extends SuperHeavyFighter{
 		$this->unofficial = true;
 
 	    $this->notes = 'Atmospheric.';
-		$this->notes .= '<br>Provides +5 Initiative all Vipers and Assault Raptors within 5 hexes.';
+		$this->notes .= '<br>Provides +5 Initiative all Vipers, Pythons, and Assault Raptors within 5 hexes.';
 		
         $this->forwardDefense = 7;
         $this->sideDefense = 9;
