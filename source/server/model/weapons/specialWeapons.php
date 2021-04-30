@@ -70,8 +70,9 @@ class PlasmaStream extends Raking{
 		if (!$system->advancedArmor){//advanced armor prevents effect 
 			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
 			$crit->updated = true;
-			    $crit->inEffect = false;
-			    $system->criticals[] =  $crit;
+			$crit->inEffect = true; //in effect immediately, affecting further damage in the same turn!
+			$system->criticals[] =  $crit;			
+			//and previous turn crit - to be NOT saved, but so crit is recognized as
 		}
 	}
 	
@@ -3179,6 +3180,7 @@ class VorlonLightningCannon extends Weapon{
 	
 	public $loadingtime = 1;
 	
+	public $uninterceptable = true; //Lightning Cannon is uninterceptable
 	public $intercept = 4; //intercept rating -4
 	
 	
@@ -3232,7 +3234,7 @@ class VorlonLightningCannon extends Weapon{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}	    		
-		$this->data["Special"] .= "Lightning Cannon is capable of multiple modes of fire. Higher modes require combining multiple prongs on the same target.";  
+		$this->data["Special"] .= "Uninterceptable. Capable of multiple modes of fire. Higher modes require combining multiple prongs on the same target.";  
 		$this->data["Special"] .= "<br>Firing modes available (Number of prongs/power used per SHOT/damage output (and mode)/range penalty):";  
 		$this->data["Special"] .= "<br> - 1 Prong: 1 Power, 1d10+8 Standard, -5/hex"; 
 		$this->data["Special"] .= "<br> - 2 Prongs: 4 Power, 2d10+16 Raking(10), -2.5/hex";

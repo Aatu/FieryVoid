@@ -65,7 +65,7 @@
         public $name = "heavyRailGun";
         public $displayName = "Heavy Railgun";
         public $animation = "trail";
-        public $iconPath = "matterCannon.png";
+        public $iconPath = "HeavyRailgun.png";
         public $animationColor = array(250, 250, 190);
         public $projectilespeed = 20;
         public $animationWidth = 6;
@@ -92,7 +92,7 @@
         public $name = "railGun";
         public $displayName = "Railgun";
         public $animation = "trail";
-        public $iconPath = "matterCannon.png";
+        public $iconPath = "Railgun.png";
         public $animationColor = array(250, 250, 190);
         public $projectilespeed = 25;
         public $animationWidth = 5;
@@ -119,7 +119,7 @@
         public $name = "lightRailGun";
         public $displayName = "Light Railgun";
         public $animation = "trail";
-        public $iconPath = "matterCannon.png";
+        public $iconPath = "LightRailgun.png";
         public $animationColor = array(250, 250, 190);
         public $projectilespeed = 30;
         public $animationWidth = 4;
@@ -491,12 +491,9 @@ for friendly units.*/
 			$this->data["Special"] .= "<br>May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 5 hexes. Friendly intercept only engages individual shots.";
 			$this->data["Special"] .= "<br>If manually targeted in Intercept (I) mode, will intercept all fire from targeted ship, with usual intercept degredation, at the Flak Cannon-firing ship.";
 			$this->data["Special"] .= "<br>Offensiver, Anti-fighter mode (A) targets fighters only, but as a matter weapon doing damage in flash mode.";
+			$this->data["Special"] .= "<br>Offensiver mode fire control is +20/--/--. Damage is 1d10+2 as Matter (Flash).";
 		}
 
-
-
-
-	
 		//hit chance always 100 - so it always hits and is correctly animated
 		public function calculateHitBase($gamedata, $fireOrder){
 
@@ -578,12 +575,6 @@ for friendly units.*/
 
 		} //endof function fire
 			
-			
-
-
-
-
-
 		public function canFreeInterceptShot($gamedata, $fireOrder, $shooter, $target, $interceptingShip, $firingWeapon){
 			//target must be within 5 hexes
 			$distance = mathlib::getDistanceHex($interceptingShip, $target);

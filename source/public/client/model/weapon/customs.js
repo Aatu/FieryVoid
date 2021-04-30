@@ -184,3 +184,21 @@ var CustomLightSMissileRack = function  CustomLightSMissileRack(json, ship) {
 };
 CustomLightSMissileRack.prototype = Object.create(Weapon.prototype);
 CustomLightSMissileRack.prototype.constructor =  CustomLightSMissileRack;
+
+var GromeLgtRailgun = function GromeLgtRailgun(json, ship) {
+    Weapon.call(this, json, ship);
+};
+GromeLgtRailgun.prototype = Object.create(Weapon.prototype);
+GromeLgtRailgun.prototype.constructor = GromeLgtRailgun;
+
+var GromeMedRailgun = function GromeMedRailgun(json, ship) {
+    Weapon.call(this, json, ship);
+};
+GromeMedRailgun.prototype = Object.create(Weapon.prototype);
+GromeMedRailgun.prototype.constructor = GromeMedRailgun;
+
+var GromeHvyRailgun = function GromeHvyRailgun(json, ship) {
+    Weapon.call(this, json, ship);
+};
+GromeHvyRailgun.prototype = Object.create(Weapon.prototype);
+GromeHvyRailgun.prototype.constructor = GromeHvyRailgun;

@@ -31,11 +31,11 @@ class gaimShamor extends BaseShip{
 		$this->addPrimarySystem(new CnC(4, 6, 0, 0));
 		$this->addPrimarySystem(new ELINTScanner(5, 20, 9, 10));
 		$this->addPrimarySystem(new Engine(4, 14, 0, 10, 3));
-		$this->addPrimarySystem(new Hangar(2, 9));
+		$this->addPrimarySystem(new Hangar(2, 9,6));
 
 		$this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
 		$this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
-		$this->addFrontSystem(new PlasmaBlast(2, 6, 2, 180, 360));
+		$this->addFrontSystem(new TwinArray(2, 6, 2, 180, 360));
 		$this->addFrontSystem(new TwinArray(2, 6, 2, 0, 180));
 		$this->addFrontSystem(new TwinArray(2, 6, 2, 270, 90));
 		$this->addFrontSystem(new Bulkhead(0, 3));
@@ -44,8 +44,8 @@ class gaimShamor extends BaseShip{
 		$this->addAftSystem(new Thruster(4, 13, 0, 5, 2));
 		$this->addAftSystem(new Thruster(4, 13, 0, 5, 2));
 		$this->addAftSystem(new TwinArray(2, 6, 2, 90, 270));
-		$this->addAftSystem(new Hangar(3, 6));
-		$this->addAftSystem(new Hangar(3, 6));
+		$this->addAftSystem(new Hangar(3, 6,6));
+		$this->addAftSystem(new Hangar(3, 6,6));
 		$this->addAftSystem(new Bulkhead(0, 2));
 		$this->addAftSystem(new Bulkhead(0, 2));
 
