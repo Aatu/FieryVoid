@@ -1,0 +1,102 @@
+DISCLAIMER
+Fleet Checker will tell you whether your fleet conforms to standard battle fleet composition rules, and also higlight any elements that might need manual check or opponent's consent.  If you don't wish to use the rules applied by the Fleet Checker, or for some reason need to deploy something different (perhaps scenario-related), the game will not block you in any way, providing that yor total points value does not exceed your points allowance. Just make sure you're on the same page as your opponent and have fun!
+However, if you want standard and reasonably balanced match - it's generally a good idea to conform to Fleet Checker's rules. 
+
+
+FLEET COMPOSITION RULES IN BABYLON 5 WARS
+In order to allow players to compete in fair conditions a set of tournament rules was created by AoG. Fleets created using these rules tend to be well-rounded, and create fair battles, so it's worthwhile to use them even outside of tournament conditions.
+
+Original rules made a set of assumptions:
+ - 3500 points game size
+ - 42x30 fixed map
+ - player uses one faction
+ - Ancient and ISA fleets are not allowed
+
+Actual rules:
+ - at least one Jump Drive is required
+ - at least one Capital Ship is required
+ - all units of LCV size or smaller need to have hangars present (eg. cannot bring fighters based elsewhere)
+ - at least half of fighter hangars need to be filled (eg. cannot bring (too many) empty carriers) (this rule is only relevant for actual fighters, not for other craft like assault shuttles or LCVs)
+ - deployment restrictions observed (see end of file)
+ - variant restrictions observed (see end of file)
+ - at most two Uncommon and one Rare unit in fleet (on top of regular variant restrictions)
+ - at most three ships based on the same hull (fighters and other small craft are exempt)
+ - static objects (bases, OSATs, mines...) are not allowed
+ 
+ 
+FIERY VOID FLEET COMPOSITION RULES (EG. WHAT THE FLEET CHECKER CHECKS)
+For Fiery Void the rules above were modified to allow balancing different fleet sizes and Ancient fleets. This tailoring was made by FV team and is not B5Wars-official in any way (except it was inspired by tournament rules above).
+
+If You're looking for a balanced game with these rules, it's advisable to use:
+ - 42x30 fixed map (or similar)
+ - player uses one faction
+ - both players use fleets of similar power level (see Faction Descriptions file - it contains subjective grouping of available fleets into "power levels" suitable for balanced pickup battles)
+
+And actual rules are as below. Due to huge individual costs (and small numbers) of Ancient vessels, if You have picked at least one it's assumed You're creating Ancient fleet - some numbers are different for Young and Ancient fleets.
+WARNING: numbers for Ancients are still untested and prone to change!
+ - at least one Jump Drive is required
+ - Capital Ships required (minimum number, You can take more):
+  -- (Young) 1 per 5000 points (no capital ship is required below 3000 points)
+  -- (Ancient) 1 per 10000 points (no capital ship is required below 4000 points)
+ - most units of LCV size or smaller need to have hangars present (there are exceptions, especially for custom factions from other universes)
+ - at least half of fighter hangars need to be filled (this rule is only relevant for actual fighters, not for other craft like assault shuttles or LCVs)
+ - deployment restrictions observed 
+ - variant restrictions observed 
+ - Uncommon/Rare units are limited at fleet level (on top of Variant Restrictions above) to at most:
+  -- (Young) Uncommon: 2 up to 3500 points, and additional one per every further full 1000 points (so 3rd Uncommon slot is unlocked at 4500 points)
+  -- (Ancient) Uncommon: 2 up to 8000 points and additional one per every further full 4000 points (so 3rd Uncommon slot is unlocked at 12000 points)
+  -- Rare: half of Uncommon allowance (rounded DOWN)
+ - maximum number of ships being variants of same hull (units that require hangar space are exempt):
+  -- (Young) One per full 1100 points (with minimum of 2)
+  -- (Ancient) One per full 4000 points (with minimum of 2)
+ - static objects (bases, OSATs) are not allowed
+
+ 
+VARIANT RESTRICTIONS
+Every unit in game has variant rating, in one of categories:
+ - Common (C) - unit is, well, a common example of what is built on a given hull. No limit.
+ - Uncommon (U) - not as common, they're found in numbers only in presence of their more mundane cousins. For every three units of any given hull, or fraction thereof, one unit may be Uncommon.
+ - Rare (R) - very rare units, almost never deployed in numbers (often command variants). One of every three Uncommon slots may instead be taken by Rare unit .
+ - Unique (Q) - only very few (possibly even one) exist. For fleet selection rules treat them as Rare, but with added limitation than no more than 1 may be present.
+ - Special (X) - non-standard restrictions that require special player attention. Actual restriction is present in unit description. Fleet Checker will NOT check them correctly, but will bring them to player's attention with appropriate note.
+What the above means for number of variously restricted units:
+ - 1 ship total (on a given hull): may be of any restriction
+ - 2 ships: 1 any, 1 has to be Common
+ - 3 ships: 1 any, 2 Common
+ - 4 ships: 1 any, 1 U or C, 2 Common
+ - 5 ships: 1 any, 1 U or C, 3 Common
+ - 6 ships: 1 any, 1 U or C, 4 Common
+ - 7 ships: 1 any, 2 U or C, 4 Common
+ - 8 ships: 1 any, 2 U or C, 5 Common
+ - 9 ships: 1 any, 2 U or C, 6 Common
+...and beginning with 10th ship You start again.
+For fighters rule is exactly the same, but You count entire flights instead of individual craft. 
+Please do not abuse variable flight size - keep Your restricted flights the same size as regular ones! Automatic checker will let You take 2 full-sized Rare Flights with 8 1-craft Common "Flights", but it's not good sportsmanship.
+
+
+DEPLOYMENT RESTRICTIONS
+Every unit in game has availability rating. It's one of three categories:
+ - Unlimited (100%) - unit is common in a given fleet
+ - Limited (33%) - mostly specialty support units, like dedicated missile ships and ElInt ships
+ - Restricted (10%) - rarest of units, like newest/experimental designs and largest battleships
+To put it simply, total value of units in a given category cannot exceed appropriate percentage (so you can spend up to 33% of total fleet allowance on Limited units, for example).
+There are two additional rules though:
+ - if you have only one unit in a given category, it can exceed the limit (to allow taking such units in small battles, basically)
+ - if you have Restricted unit - it needs another unit as escort (such rare vessels aren't usually allowed to wander all alone)
+
+
+
+GAME OPTIONS AVAILABLE
+Background: You can put an image underneath hex grid. Some people like it (as it brings flavor), others don't (as it makes picking actual ships more difficult). Try a few different backgrounds and see what fits you (default is just flat black, but you can find images from subdued stars and moons to bright and aggressive blood-red hyperspace to choose from). 
+Game title: so You (and Your opponent) can quickly recognize which game is this.
+Game description: by default a generic pickup game description is put here, and rather conservative one. If you have different ideas - replace the text (or just fragments of it) with description of Your desired battle conditions!
+Standard or Simultaneous movement: Standard movement is how the game was designed, with one unit moving at a time. Simultaneous movement divides units into up to 6 groups with similar Initiative, and entire group (for all players) moves together. This loses some detail, but makes for quicker game (especially at large point values).
+	My personal suggestion would be to keep to Standard movement up to game size of 5-6k points and switch to Simultaneous for larger battles (for Young fleets), balancing time requirements and detail achieved - but ultimately it's dictated by players' preferences.
+Map size: game offers choice of open map (eg. without any boundaries) or fixed map (defaulted to tournament-sized, but you may change it at will). You can tailor deployment zones appropriately, too (although getting it right requires a few tries).
+	I'd suggest fixed map for balance reasons (that's how units were evaluated), but if you want it different the option is there. Gamer does NOT track whether units are on map or not, just displays the boundaries - everything else is up to players.
+Deployment zones: You may stick to default deployment zones, which are predefined for both open and standard-sized fixed map. If You want something more tailored to Your scenario (or want to resize the map) You'll have to manually reshape deployment zones as well.
+	Default deployment zone shape ("box") represents a rectangle. Its width/height (in hexes) defines size, while X/Y coordinates locate its central point. Consider coordinates 0/0 to be center of the map (which is why, by default numbers, one player has them positive and the other negative).
+	Other options are not available at the moment.
+Please do not touch "Turn available" setting.	
+	
+	

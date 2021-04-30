@@ -14,7 +14,8 @@ class TethysBeta extends MediumShip{
         $this->canvasSize = 100;
 	    
 	    $this->isd = 2158;
-        
+ 		$this->unofficial = true;
+       
         $this->forwardDefense = 13;
         $this->sideDefense = 13;
         

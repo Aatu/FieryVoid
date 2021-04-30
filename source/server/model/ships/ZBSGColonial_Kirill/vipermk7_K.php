@@ -9,7 +9,7 @@ class ViperMk7_K extends FighterFlight{
         $this->phpclass = "ViperMk7_K";
         $this->shipClass = "Viper Mk-7 flight (2212)";
         $this->imagePath = "img/ships/BSG/viperMk7.png";
-//	    $this->isd = 2212;
+	    $this->isd = 2212;
  		$this->unofficial = true;
 	    
         $this->forwardDefense = 6;

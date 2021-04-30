@@ -25,16 +25,11 @@ class Allovan extends HeavyCombatVessel{
         $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 14, 5, 7));
-	$this->addPrimarySystem(new Engine(4, 14, 0, 8, 2));
+		$this->addPrimarySystem(new Engine(4, 14, 0, 8, 2));
+		$this->addPrimarySystem(new Hangar(4, 3, 0));
         $this->addPrimarySystem(new Thruster(3, 11, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 11, 0, 4, 4));
 
-	    //old thrusters - mistake!
-	    /*
-        $this->addFrontSystem(new Thruster(2, 5, 0, 2, 3));
-        $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
-        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
-	*/
 	    
 	    //new thrusters (correct)
         $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));

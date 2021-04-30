@@ -4,7 +4,7 @@ class BrixadiiPoliceFrigateBase extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 70;
+        $this->pointCost = 80;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiPoliceFrigateBase";
         $this->imagePath = "img/ships/Nexus/BrixadiiPoliceFrigateEarly.png";
@@ -28,7 +28,6 @@ class BrixadiiPoliceFrigateBase extends LCV{
         $this->rollcost = 1;
         $this->pivotcost = 1;
         $this->iniativebonus = 14*5;
-    
  
 		$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
@@ -39,9 +38,10 @@ class BrixadiiPoliceFrigateBase extends LCV{
 		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
         $this->addPrimarySystem(new AntiquatedScanner(4, 9, 2, 3));
 		$this->addPrimarySystem(new Engine(3, 10, 0, 6, 3));
-		$this->addPrimarySystem(new ParticleProjector(2, 6, 1, 270, 90));
-		$this->addPrimarySystem(new LightParticleProjector(2, 3, 1, 240, 120));
-		$this->addPrimarySystem(new LightParticleProjector(2, 3, 1, 240, 120));
+		$this->addPrimarySystem(new LightParticleProjector(2, 3, 1, 240, 60));
+		$this->addPrimarySystem(new NexusProjectorArray(2, 6, 1, 270, 90));
+		$this->addPrimarySystem(new NexusProjectorArray(2, 6, 1, 270, 90));
+		$this->addPrimarySystem(new LightParticleProjector(2, 3, 1, 300, 120));
 	    
         $this->addPrimarySystem(new Structure(3, 27));
 	    
@@ -49,7 +49,7 @@ class BrixadiiPoliceFrigateBase extends LCV{
         		0=> array( 
         				11 => "Structure",
 						13 => "Light Particle Projector",
-        				15 => "Particle Projector",
+        				15 => "Projector Array",
         				18 => "Engine",
         				19 => "Reactor",
         				20 => "Scanner",
@@ -57,7 +57,7 @@ class BrixadiiPoliceFrigateBase extends LCV{
         		1=> array( //redirect to PRIMARY
         				11 => "0:Structure",
 						13 => "0:Light Particle Projector",
-        				15 => "0:Particle Projector",
+        				15 => "0:Projector Array",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -65,7 +65,7 @@ class BrixadiiPoliceFrigateBase extends LCV{
         		2=> array( //redirect to PRIMARY
         				11 => "0:Structure",
 						13 => "0:Light Particle Projector",
-        				15 => "0:Particle Projector",
+        				15 => "0:Projector Array",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

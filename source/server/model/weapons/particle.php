@@ -1205,7 +1205,7 @@ Nonetheless two copies of Particle Projector lines now exist in FV, in customNex
         
         public $name = "hvyParticleProjector";
         public $displayName = "Heavy Particle Projector";
-        public $iconPath = "NexusParticleProjectorHeavy.png";
+        public $iconPath = "HeavyParticleProjector.png";
         public $animation = "beam";
         public $animationColor = array(255, 250, 230);
         public $animationExplosionScale = 0.30;
@@ -1238,7 +1238,7 @@ Nonetheless two copies of Particle Projector lines now exist in FV, in customNex
         
         public $name = "lightParticleProjector";
         public $displayName = "Light Particle Projector";
-        public $iconPath = "NexusParticleProjectorLight.png";
+        public $iconPath = "LightParticleProjector.png";
         public $animation = "trail";
         public $animationColor = array(255, 250, 230);
         public $animationExplosionScale = 0.30;

@@ -8,7 +8,7 @@ class ColonialJupiterClass_K extends BaseShip{
 	$this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "ColonialJupiterClass_K";
         $this->imagePath = "img/ships/BSG/ColonialBattlestar.png";
-        $this->shipClass = "Jupiter Class Battlestar";
+        $this->shipClass = "Jupiter Battlestar";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 200; //img has 200px per side
 		$this->unofficial = true;
