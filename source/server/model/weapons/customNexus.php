@@ -6057,14 +6057,14 @@ class BSGHvyKineticEnergyWeapon extends Pulse{
 
 
 class SensorSpearFtr extends Weapon{
-    /*Modified Abbai weapon - does no damage, but limits target's Sensors next turn
-    */
+    /*Modified Abbai weapon - does no damage, but limits target's Sensors next turn.
+	Note, the range has been halved to -1/hex. */
     public $name = "SensorSpearFtr";
     public $displayName = "DRADIS Jammer";
 	
     public $priority = 10; //let's fire last, order not all that important here!
     public $loadingtime = 2;
-    public $rangePenalty = 0.5; //-1/2 hexes
+    public $rangePenalty = 1; //-1/ hex
     public $intercept = 0;
     public $fireControl = array(0, 0, 0);
 	
