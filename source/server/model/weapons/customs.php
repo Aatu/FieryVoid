@@ -1963,6 +1963,420 @@ class CustomLightSMissileRack extends Weapon{
 }//endof CustomLightSMissileRack
 
 
+//Grome special shell railguns
+//Listed in Customs as these are official options for the Grome.
+//However, I did not want these in Matter as they do not adhear the to proper shell limits.
+
+class GromeLgtRailgun extends Weapon{ 
+/*Multi-mode weapon based off the EA Laser-Pulse Array code. This fires as:
+	Standard light railgun (S): Matter, 1d10+5, -1/hex, +0/+2/+3, 1/2 turns
+	Flash shell (F): Plasma (Flash), 1d10+5, -1/hex, +0/+2/+3, 1/2 turns, cost 3
+	Heavy shell (H): Matter, 1d10+10, -1/hex, +0/+2/+3, 1/2 turns, cost 6
+	Scatter shell (P): Matter (Pulse), 1 shot, max 4, +1/5, -1/hex, -2/+0/+1, 1/2 turns, cost 2
+	Note, the light railgun cannot use a long-range shell. */
+        public $name = "GromeLgtRailgun";
+        public $displayName = "Light Railgun";
+	    public $iconPath = "LightRailgun.png";
+	
+		public $animationArray = array(1=>'trail', 2=>'trail', 3=>'trail', 4=>'trail');
+        public $animationColorArray = array(1=>array(250, 250, 190), 2=>array(250, 250, 190), 3=>array(250, 250, 190), 4=>array(250, 250, 190));
+        public $animationWidthArray = array(1=>4, 2=>4, 3=>4, 4=>4);
+		public $trailColor = array(190, 75, 20); 
+        public $trailLength = 3;//not used for Laser animation?...
+        public $projectilespeed = 30;//not used for Laser animation?...
+        public $animationExplosionScaleArray = array(1=>0.2, 2=>0.4, 3=>0.3, 4=>0.3);
+	
+		//actual weapons data
+		public $groupingArray = array(1=>0, 2=>0, 3=>0, 4=>25);
+		public $maxpulses = 4; //Pulse mode only
+		public $priorityArray = array(1=>6, 2=>1, 3=>7, 4=>5);
+		public $uninterceptableArray = array(1=>false, 2=>false, 3=>false, 4=>false);
+		public $defaultShotsArray = array(1=>1, 2=>1, 3=>1, 4=>4); 
+	
+        public $loadingtimeArray = array(1=>2, 2=>2, 3=>2, 4=>2); //mode 1 should be the one with longest loading time
+        public $rangePenaltyArray = array(1=>1, 2=>1, 3=>1, 4=>1);
+        public $fireControlArray = array(1=>array(3, 2, 0), 2=>array(3, 2, 0), 3=>array(3, 2, 0), 4=>array(1, 0, -2)); // fighters, <mediums, <capitals 
+		public $noOverkillArray = array(1=>true, 2=>false, 3=>true, 4=>true);
+
+		public $firingModes = array(1=>'Standard', 2=>'Flash', 3=>'Heavy', 4=>'Pulse');
+		public $damageTypeArray = array(1=>'Standard', 2=>'Flash', 3=>'Standard', 4=>'Pulse'); //indicates that this weapon does damage in Pulse mode
+    	public $weaponClassArray = array(1=>'Matter', 2=>'Plasma', 3=>'Matter', 4=>'Matter'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 6;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 3;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'The Light Railgun has four different shell options.';
+			$this->data["Special"] .= '<br>Standard (S): 1d10+5 dmg, -1/hex, +15/+10/+0, 1 per 2 turns.';
+			$this->data["Special"] .= '<br>Flash (F): 1d10+5 dmg, Plasma (Flash) - ignores half armor, -1/hex, +15/+10/+0, 1 per 2 turns. ';
+			$this->data["Special"] .= '<br>Heavy (H): 1d10+10 dmg, -1/hex, +15/+10/+0, 1 per 2 turns.';
+			$this->data["Special"] .= '<br>Pulse (P): 1d6+1 dmg, +1/5, max 4 shots, -1/hex, +5/+0/-10, 1 per 2 turns.';
+        } 
+	
+        public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1:
+				return Dice::d(10, 1)+5; //Standard shot
+				break;
+			case 2:
+				return Dice::d(10, 1)+5; //Flash
+				break;	
+			case 3:
+				return Dice::d(10, 1)+10; //Heavy
+				break;
+			case 4:
+				return Dice::d(6, 1)+1; //Pulse
+				break;	
+		}
+	}
+        public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 6; //Standard shot
+				break;
+			case 2:
+				$this->minDamage = 6; //Flash
+				break;	
+			case 3:
+				$this->minDamage = 11; //Heavy
+				break;
+			case 4:
+				$this->minDamage = 2; //Pulse
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 15; //Standard shot
+				break;
+			case 2:
+				$this->maxDamage = 15; //Flash
+				break;	
+			case 3:
+				$this->maxDamage = 20; //Heavy
+				break;
+			case 4:
+				$this->maxDamage = 7; //Pulse
+				break;			}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
+
+	//necessary for Pulse mode
+        protected function getPulses($turn)
+        {
+            return 1;
+        }
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return floor(($needed - $rolled) / ($this->grouping));
+        }
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn);
+		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses);
+		return $pulses;
+	}	
+	
+} //endof class GromeLgtRailgun
+
+
+class GromeMedRailgun extends Weapon{ 
+/*Multi-mode weapon based off the EA Laser-Pulse Array code. This fires as:
+	Standard light railgun (S): Matter, 3d10+3, -1/2 hexes, +2/+2/-3, 1/3 turns
+	Flash shell (F): Plasma (Flash), 3d10+3, -1/2 hexes, +2/+2/-3, 1/3 turns, cost 6
+	Heavy shell (H): Matter, 3d10+13, -1/2 hexes, +2/+2/-3, 1/3 turns, cost 12
+	Scatter shell (P): Matter (Pulse), 1d10+3 dmg, 1 shot, max 4, +1/5, -1/2 hexs, +0/+0/-5, 1/3 turns, cost 5
+	Long-range shell (L): Matter, 1d10+5, -1/3 hexes, +2/+2/-3, 1/3 turns, cost 2 */
+        public $name = "GromeMedRailgun";
+        public $displayName = "Medium Railgun";
+	    public $iconPath = "Railgun.png";
+	
+		public $animationArray = array(1=>'trail', 2=>'trail', 3=>'trail', 4=>'trail', 5=>'trail');
+        public $animationColorArray = array(1=>array(250, 250, 190), 2=>array(250, 250, 190), 3=>array(250, 250, 190), 4=>array(250, 250, 190), 5=>array(250, 250, 190));
+        public $animationWidthArray = array(1=>5, 2=>5, 3=>5, 4=>5, 5=>5);
+		public $trailColor = array(190, 75, 20); 
+        public $trailLength = 3;//not used for Laser animation?...
+        public $projectilespeed = 25;//not used for Laser animation?...
+        public $animationExplosionScaleArray = array(1=>0.25, 2=>0.45, 3=>0.35, 4=>0.35, 5=>0.2);
+	
+		//actual weapons data
+		public $groupingArray = array(1=>0, 2=>0, 3=>0, 4=>25, 5=>0);
+		public $maxpulses = 4; //Pulse mode only
+		public $priorityArray = array(1=>7, 2=>1, 3=>7, 4=>5, 5=>6);
+		public $uninterceptableArray = array(1=>false, 2=>false, 3=>false, 4=>false, 5=>false);
+		public $defaultShotsArray = array(1=>1, 2=>1, 3=>1, 4=>4, 5=>1); 
+	
+        public $loadingtimeArray = array(1=>3, 2=>3, 3=>3, 4=>3, 5=>3); //mode 1 should be the one with longest loading time
+        public $rangePenaltyArray = array(1=>0.5, 2=>0.5, 3=>0.5, 4=>0.5, 5=>0.33);
+        public $fireControlArray = array(1=>array(-3, 2, 2), 2=>array(-3, 2, 2), 3=>array(-3, 2, 2), 4=>array(-5, 0, 0), 5=>array(-3, 2, 2)); // fighters, <mediums, <capitals 
+		public $noOverkillArray = array(1=>true, 2=>false, 3=>true, 4=>true, 5=>true);
+	
+		public $firingModes = array(1=>'Standard', 2=>'Flash', 3=>'Heavy', 4=>'Pulse', 5=>'Long-range');
+		public $damageTypeArray = array(1=>'Standard', 2=>'Flash', 3=>'Standard', 4=>'Pulse', 5=>'Standard'); //indicates that this weapon does damage in Pulse mode
+    	public $weaponClassArray = array(1=>'Matter', 2=>'Plasma', 3=>'Matter', 4=>'Matter', 5=>'Matter'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 9;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 6;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'The Medium Railgun has five different shell options.';
+			$this->data["Special"] .= '<br>Standard (S): 3d10+3 dmg, -1/2 hexes, -15/+10/+10, 1 per 3 turns.';
+			$this->data["Special"] .= '<br>Flash (F): 3d10+3 dmg, Plasma (Flash) - ignores half armor, -1/2 hexes, -15/+10/+10, 1 per 3 turns. ';
+			$this->data["Special"] .= '<br>Heavy (H): 3d10+13 dmg, -1/2 hexes, -15/+10/+10, 1 per 3 turns.';
+			$this->data["Special"] .= '<br>Pulse (P): 1d10+3 dmg, +1/5, max 4 shots, -1/2 hexes, -25/+0/+0, 1 per 3 turns.';
+			$this->data["Special"] .= '<br>Long-range (L): 1d10+5 dmg, -1/3 hexes, -15/+10/+10, 1 per 3 turns.';
+        } 
+	
+        public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1:
+				return Dice::d(10, 3)+3; //Standard shot
+				break;
+			case 2:
+				return Dice::d(10, 3)+3; //Flash
+				break;	
+			case 3:
+				return Dice::d(10, 3)+13; //Heavy
+				break;
+			case 4:
+				return Dice::d(10, 1)+3; //Pulse
+				break;	
+			case 5:
+				return Dice::d(10, 1)+5; //Long-range
+				break;			
+		}
+	}
+	
+        public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 6; //Standard shot
+				break;
+			case 2:
+				$this->minDamage = 6; //Flash
+				break;	
+			case 3:
+				$this->minDamage = 16; //Heavy
+				break;
+			case 4:
+				$this->minDamage = 4; //Pulse
+				break;	
+			case 5:
+				$this->minDamage = 6; //Long-range
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 33; //Standard shot
+				break;
+			case 2:
+				$this->maxDamage = 33; //Flash
+				break;	
+			case 3:
+				$this->maxDamage = 43; //Heavy
+				break;
+			case 4:
+				$this->maxDamage = 13; //Pulse
+				break;			
+			case 5:
+				$this->maxDamage = 15; //Long-range
+				break;			
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
+
+	//necessary for Pulse mode
+        protected function getPulses($turn)
+        {
+            return 1;
+        }
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return floor(($needed - $rolled) / ($this->grouping));
+        }
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn);
+		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses);
+		return $pulses;
+	}	
+	
+} //endof class GromeMedRailgun
+
+
+class GromeHvyRailgun extends Weapon{ 
+/*Multi-mode weapon based off the EA Laser-Pulse Array code. This fires as:
+	Standard light railgun (S): Matter, 5d10+7, -1/3 hexes, +2/+2/-3, 1/4 turns
+	Flash shell (F): Plasma (Flash), 5d10+7, -1/3 hexes, +2/+2/-3, 1/4 turns, cost 10
+	Heavy shell (H): Matter, 5d10+22, -1/3 hexes, +2/+2/-3, 1/4 turns, cost 18
+	Scatter shell (P): Matter (Pulse), 1d10+5 dmg, 1 shot, max 6, +1/5, -1/3 hexs, +0/+0/-5, 1/4 turns, cost 10
+	Long-range shell (L): Matter, 3d10+3, -1/4 hexes, +2/+2/-3, 1/4 turns, cost 4 
+	Ultra long-range shell (U): Matter, 1d10+5, -1/5 hexes, +2/+2/-3, 1/4 turns, cost 6*/
+        public $name = "GromeHvyRailgun";
+        public $displayName = "Heavy Railgun";
+	    public $iconPath = "HeavyRailgun.png";
+	
+		public $animationArray = array(1=>'trail', 2=>'trail', 3=>'trail', 4=>'trail', 5=>'trail', 6=>'trail');
+        public $animationColorArray = array(1=>array(250, 250, 190), 2=>array(250, 250, 190), 3=>array(250, 250, 190), 4=>array(250, 250, 190), 5=>array(250, 250, 190), 6=>array(250, 250, 190));
+        public $animationWidthArray = array(1=>6, 2=>6, 3=>6, 4=>6, 5=>6, 6=>6);
+		public $trailColor = array(190, 75, 20); 
+        public $trailLength = 3;//not used for Laser animation?...
+        public $projectilespeed = 25;//not used for Laser animation?...
+        public $animationExplosionScaleArray = array(1=>0.3, 2=>0.5, 3=>0.4, 4=>0.4, 5=>0.25, 6=>0.2);
+	
+		//actual weapons data
+		public $groupingArray = array(1=>0, 2=>0, 3=>0, 4=>25, 5=>0, 6=>0);
+		public $maxpulses = 6; //Pulse mode only
+		public $priorityArray = array(1=>7, 2=>1, 3=>7, 4=>5, 5=>7, 6=>6);
+		public $uninterceptableArray = array(1=>false, 2=>false, 3=>false, 4=>false, 5=>false, 6=>false);
+		public $defaultShotsArray = array(1=>1, 2=>1, 3=>1, 4=>5, 5=>1, 6=>1); 
+	
+        public $loadingtimeArray = array(1=>4, 2=>4, 3=>4, 4=>4, 5=>4, 6=>4); //mode 1 should be the one with longest loading time
+        public $rangePenaltyArray = array(1=>0.33, 2=>0.33, 3=>0.33, 4=>0.33, 5=>0.25, 6=>0.2);
+        public $fireControlArray = array(1=>array(-3, 2, 2), 2=>array(-3, 2, 2), 3=>array(-3, 2, 2), 4=>array(-5, 0, 0), 5=>array(-3, 2, 2), 6=>array(-3, 2, 2)); // fighters, <mediums, <capitals 
+		public $noOverkillArray = array(1=>true, 2=>false, 3=>true, 4=>true, 5=>true, 6=>true);
+	
+		public $firingModes = array(1=>'Standard', 2=>'Flash', 3=>'Heavy', 4=>'Pulse', 5=>'Long-range', 6=>'Ultra long-range');
+		public $damageTypeArray = array(1=>'Standard', 2=>'Flash', 3=>'Standard', 4=>'Pulse', 5=>'Standard', 6=>'Standard'); //indicates that this weapon does damage in Pulse mode
+    	public $weaponClassArray = array(1=>'Matter', 2=>'Plasma', 3=>'Matter', 4=>'Matter', 5=>'Matter', 6=>'Matter'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 12;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 9;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'The Heavy Railgun has six different shell options.';
+			$this->data["Special"] .= '<br>Standard (S): 5d10+7 dmg, -1/3 hexes, -15/+10/+10, 1 per 4 turns.';
+			$this->data["Special"] .= '<br>Flash (F): 5d10+7 dmg, Plasma (Flash) - ignores half armor, -1/3 hexes, -15/+10/+10, 1 per 4 turns. ';
+			$this->data["Special"] .= '<br>Heavy (H): 5d10+22 dmg, -1/3 hexes, -15/+10/+10, 1 per 4 turns.';
+			$this->data["Special"] .= '<br>Pulse (P): 1d10+4 dmg, +1/5, max 6 shots, -1/3 hexes, -25/+0/+0, 1 per 4 turns.';
+			$this->data["Special"] .= '<br>Long-range (L): 3d10+3 dmg, -1/4 hexes, -15/+10/+10, 1 per 4 turns.';
+			$this->data["Special"] .= '<br>Ultra long-range (U): 1d10+5 dmg, -1/5 hexes, -15/+10/+10, 1 per 4 turns.';
+        } 
+	
+        public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1:
+				return Dice::d(10, 5)+7; //Standard shot
+				break;
+			case 2:
+				return Dice::d(10, 5)+7; //Flash
+				break;	
+			case 3:
+				return Dice::d(10, 5)+22; //Heavy
+				break;
+			case 4:
+				return Dice::d(10, 1)+5; //Pulse
+				break;	
+			case 5:
+				return Dice::d(10, 3)+3; //Long-range
+				break;			
+			case 6:
+				return Dice::d(10, 1)+5; //Ultra long-range
+				break;			
+		}
+	}
+	
+        public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 12; //Standard shot
+				break;
+			case 2:
+				$this->minDamage = 12; //Flash
+				break;	
+			case 3:
+				$this->minDamage = 27; //Heavy
+				break;
+			case 4:
+				$this->minDamage = 5; //Pulse
+				break;	
+			case 5:
+				$this->minDamage = 12; //Long-range
+				break;	
+			case 6:
+				$this->minDamage = 6; //Ultra long-range
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 57; //Standard shot
+				break;
+			case 2:
+				$this->maxDamage = 57; //Flash
+				break;	
+			case 3:
+				$this->maxDamage = 72; //Heavy
+				break;
+			case 4:
+				$this->maxDamage = 14; //Pulse
+				break;			
+			case 5:
+				$this->maxDamage = 33; //Long-range
+				break;			
+			case 6:
+				$this->maxDamage = 15; //Ultra long-range
+				break;			
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
+
+	//necessary for Pulse mode
+        protected function getPulses($turn)
+        {
+            return 1;
+        }
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return floor(($needed - $rolled) / ($this->grouping));
+        }
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn);
+		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses);
+		return $pulses;
+	}	
+	
+} //endof class GromeHvyRailgun
+
+
 
 
 ?>

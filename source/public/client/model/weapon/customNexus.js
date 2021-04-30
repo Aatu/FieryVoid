@@ -717,6 +717,12 @@ var NexusIonBolter = function  NexusIonBolter(json, ship) {
 NexusIonBolter.prototype = Object.create(Weapon.prototype);
 NexusIonBolter.prototype.constructor =  NexusIonBolter;
 
+var NexusDefensePulsar = function  NexusDefensePulsar(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusDefensePulsar.prototype = Object.create(Weapon.prototype);
+NexusDefensePulsar.prototype.constructor =  NexusDefensePulsar;
+
 
 
 
@@ -763,14 +769,44 @@ var BSGFlakBattery = function BSGFlakBattery(json, ship) {
 BSGFlakBattery.prototype = Object.create(Weapon.prototype);
 BSGFlakBattery.prototype.constructor = BSGFlakBattery;
 
-var BSGRailgun = function BSGRailgun(json, ship) {
+var BSGMainBattery = function BSGMainBattery(json, ship) {
     Weapon.call(this, json, ship);
 };
-BSGRailgun.prototype = Object.create(Weapon.prototype);
-BSGRailgun.prototype.constructor = BSGRailgun;
+BSGMainBattery.prototype = Object.create(Weapon.prototype);
+BSGMainBattery.prototype.constructor = BSGMainBattery;
+
+var BSGMedBattery = function BSGMedBattery(json, ship) {
+    Weapon.call(this, json, ship);
+};
+BSGMedBattery.prototype = Object.create(Weapon.prototype);
+BSGMedBattery.prototype.constructor = BSGMedBattery;
 
 var FlakArray = function FlakArray(json, ship) {
     Weapon.call(this, json, ship);
 };
 FlakArray.prototype = Object.create(Weapon.prototype);
 FlakArray.prototype.constructor = FlakArray;
+
+var BSGLtKineticEnergyWeapon = function BSGLtKineticEnergyWeapon(json, ship) {
+    Weapon.call(this, json, ship);
+};
+BSGLtKineticEnergyWeapon.prototype = Object.create(Weapon.prototype);
+BSGLtKineticEnergyWeapon.prototype.constructor = BSGLtKineticEnergyWeapon;
+
+var BSGKineticEnergyWeapon = function BSGKineticEnergyWeapon(json, ship) {
+    Weapon.call(this, json, ship);
+};
+BSGKineticEnergyWeapon.prototype = Object.create(Weapon.prototype);
+BSGKineticEnergyWeapon.prototype.constructor = BSGKineticEnergyWeapon;
+
+var BSGHvyKineticEnergyWeapon = function BSGHvyKineticEnergyWeapon(json, ship) {
+    Weapon.call(this, json, ship);
+};
+BSGHvyKineticEnergyWeapon.prototype = Object.create(Weapon.prototype);
+BSGHvyKineticEnergyWeapon.prototype.constructor = BSGHvyKineticEnergyWeapon;
+
+var SensorSpearFtr = function SensorSpearFtr(json, ship) {
+    Weapon.call(this, json, ship);
+};
+SensorSpearFtr.prototype = Object.create(Weapon.prototype);
+SensorSpearFtr.prototype.constructor = SensorSpearFtr;

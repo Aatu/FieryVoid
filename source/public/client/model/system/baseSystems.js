@@ -203,6 +203,7 @@ var AdaptiveArmorController = function AdaptiveArmorController(json, ship) {
 };
 AdaptiveArmorController.prototype = Object.create(ShipSystem.prototype);
 AdaptiveArmorController.prototype.constructor = AdaptiveArmorController;
+
 AdaptiveArmorController.prototype.getCurrClass = function () { //get current damage class for display; if none, find first!
     if (this.currClass == ''){
 		var classes = Object.keys(this.availableAA);
@@ -353,6 +354,19 @@ AdaptiveArmorController.prototype.doIndividualNotesTransfer = function () { //pr
 		for (var j = 0; j< this.currchangedAA[currType];j++) this.individualNotesTransfer.push(currType);
 	}
 	return true;
+};
+AdaptiveArmorController.prototype.canIncreaseAnything = function () { //returns true if any AA points can currently be allocated
+	var toReturn = false;
+	var startingFrom = this.getCurrClass(); //so we know where we should stop checking
+	var lookingAt = startingFrom;
+	do{
+		if (this.canIncrease()) {
+			toReturn = true;
+		}else{
+			lookingAt = this.nextCurrClass();
+		}
+	} while ( (toReturn!=true) && (lookingAt != startingFrom) );
+	return toReturn;
 };
 
 

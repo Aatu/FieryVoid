@@ -8,8 +8,8 @@ class ColonialValkyrie_K extends BaseShipNoAft{
         $this->pointCost = 1000;
         $this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "ColonialValkyrie_K";
-        $this->imagePath = "img/ships/BSG/ColonialOdin.png";
-        $this->shipClass = "Valkyrie Class Battlestar";
+        $this->imagePath = "img/ships/BSG/ColonialOdin2.png";
+        $this->shipClass = "Valkyrie Battlestar";
         $this->fighters = array("normal" => 12, "superheavy" => 2);
  //       $this->isd = 2238;
         $this->canvasSize = 160;
