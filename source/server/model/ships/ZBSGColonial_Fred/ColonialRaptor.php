@@ -14,7 +14,7 @@ class ColonialRaptor extends SuperHeavyFighter{
 		$this->unofficial = true;
 
 	    $this->notes = 'Atmospheric.';
-		$this->notes .= '<br>Provides +5 Initiative all Vipers, Pythons, and Assault Raptors within 5 hexes.';
+		$this->notes .= '<br>Provides +5 Initiative to all Vipers, Pythons, and Assault Raptors within 5 hexes.';
 		
         $this->forwardDefense = 7;
         $this->sideDefense = 9;
@@ -28,12 +28,23 @@ class ColonialRaptor extends SuperHeavyFighter{
         $this->iniativebonus = 70;
         $this->hasNavigator = true;
         $this->maxFlightSize = 3;//this is a superheavy fighter originally intended as single unit, limit flight size to 3
+
+		$this->populate();
+		
+	}
         
-        $armour = array(4, 2, 3, 3);
-        $fighter = new Fighter("raptor", $armour, 30, $this->id);
-        $fighter->displayName = "Raptor Basic Fit";
-        $fighter->imagePath = "img/ships/BSG/raptor.png";
-        $fighter->iconPath = "img/ships/BSG/raptor_large.png";
+    public function populate(){        
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+		
+		for ($i = 0; $i < $toAdd; $i++) {
+			$armour = array(4, 2, 3, 3);
+			$fighter = new Fighter("raptor", $armour, 30, $this->id);
+			$fighter->displayName = "Raptor Basic Fit";
+			$fighter->imagePath = "img/ships/BSG/raptor.png";
+			$fighter->iconPath = "img/ships/BSG/raptor_large.png";
 
             $frontGun = new BSGKineticEnergyWeapon(340, 20, 2, 4);
             $frontGun->displayName = "Kinetic Energy Cannon";
@@ -44,32 +55,8 @@ class ColonialRaptor extends SuperHeavyFighter{
         
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
-        $this->addSystem($fighter);
+			$this->addSystem($fighter);
+		}
     }
 
-    public function populate(){
-        return;
-    }
-    
-/*    public function getInitiativebonus($gamedata){
-        $initiativeBonusRet = parent::getInitiativebonus($gamedata);
-        
-        if($gamedata->turn > 0 && $gamedata->phase >= 0 ){
-            // If within 5 hexes of a Fanged Serpent,
-            // each Sky Serpent gets +1 initiative.
-            
-            $ships = $gamedata->getShipsInDistance($this, 5);
-
-            foreach($ships as $ship){
-                if(!$ship->isDestroyed()
-                        && ($this->userid == $ship->userid)
-                        && ($ship instanceof FangedSerpent)){
-                    $initiativeBonusRet+=5;
-                    break;
-                }
-            }
-        }
-        
-        return $initiativeBonusRet;
-    } */
 }
