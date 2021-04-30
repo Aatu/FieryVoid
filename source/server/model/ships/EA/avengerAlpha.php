@@ -14,6 +14,7 @@ class AvengerAlpha extends BaseShip{
 			$this->variantOf = "Avenger Heavy Carrier (Gamma)";
 			$this->occurence = "common";
 	    $this->isd = 2168;
+		$this->unofficial = true;
 	    
         $this->forwardDefense = 14;
         $this->sideDefense = 17;

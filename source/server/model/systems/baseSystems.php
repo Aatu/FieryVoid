@@ -1535,6 +1535,7 @@ class AdaptiveArmorController extends ShipSystem{
         $strippedSystem->allocatedAA = $this->allocatedAA;
         $strippedSystem->availableAA = $this->availableAA;
         $strippedSystem->currchangedAA = $this->currchangedAA;
+        $strippedSystem->AAtotal_used = $this->AAtotal_used;
         $strippedSystem->AApreallocated_used = $this->AApreallocated_used;
 		
         return $strippedSystem;
@@ -1924,7 +1925,8 @@ class SelfRepair extends ShipSystem{
 		//it's Ion (not EM) weapon with no special remarks regarding advanced races and system - so works normally on AdvArmor/Ancients etc
 		$this->data["Repair points (used/max)"] = $this->usedRepairPoints . "/" . $this->maxRepairPoints;
 		$this->data["Special"] = "At end of turn phase automatically repairs damage to vessel. Cannot repair destroyed structure blocks.";      
-		$this->data["Special"] .= "<br>Priority: first fix criticals, then damaged systems, finally restore destroyed systems.";  
+		//$this->data["Special"] .= "<br>Priority: first fix criticals, then damaged systems, finally restore destroyed systems.";  
+		$this->data["Special"] .= "<br>Priority: first fix criticals, then revive destroyed systems, finally restore boxes to damaged systems.";  
 		$this->data["Special"] .= "<br>Core (and other particularly important) systems are repaired first, then weapons, then other systems.";     
 		$this->data["Special"] .= "<br>Will not fix criticals that are caused in current turn.";    
 	}
@@ -1998,25 +2000,7 @@ class SelfRepair extends ShipSystem{
 				}
 			}
 		}		
-		
-		//repair damaged systems
-		foreach ($systemList as $systemToRepair){
-			if ($availableRepairPoints<1) continue;//cannot repair anything any longer
-			if ($systemToRepair instanceOf Structure) continue; //let's repair destroyed systems first, then go for damaged Structure
-			if ($systemToRepair->isDestroyed($gamedata->turn)) continue;//don't repair damage on destroyed system... yet!
-			$currentDamage = $systemToRepair->maxhealth - $systemToRepair->getRemainingHealth( );
-			if($currentDamage > 0){ //do repair!
-				$toBeFixed = min($currentDamage, $availableRepairPoints);
-				//actual healing entry
-				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $systemToRepair->id, -$toBeFixed, 0, 0, -1, false, false, 'SelfRepair', 'SelfRepair');
-				$damageEntry->updated = true;
-				$systemToRepair->damage[] = $damageEntry;
-				//meark repair points used
-				$availableRepairPoints -= $toBeFixed;
-				$this->usedThisTurn += $toBeFixed;
-			}
-		}	
-		
+			
 		
 		//repair destroyed systems, possibly undestroying them in the process (cannot repair destroyed Structure)
 		foreach ($systemList as $systemToRepair){
@@ -2038,7 +2022,28 @@ class SelfRepair extends ShipSystem{
 				$this->usedThisTurn += $toBeFixed;
 			}
 		}	
+		
+		
+		//repair damaged systems
+		foreach ($systemList as $systemToRepair){
+			if ($availableRepairPoints<1) continue;//cannot repair anything any longer
+			//structure is okay - at apprpriate priority - as revivable systems were revived already
+			//if ($systemToRepair instanceOf Structure) continue; //let's repair destroyed systems first, then go for damaged Structure
+			if ($systemToRepair->isDestroyed($gamedata->turn)) continue;//don't repair damage on destroyed system... yet!
+			$currentDamage = $systemToRepair->maxhealth - $systemToRepair->getRemainingHealth( );
+			if($currentDamage > 0){ //do repair!
+				$toBeFixed = min($currentDamage, $availableRepairPoints);
+				//actual healing entry
+				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $systemToRepair->id, -$toBeFixed, 0, 0, -1, false, false, 'SelfRepair', 'SelfRepair');
+				$damageEntry->updated = true;
+				$systemToRepair->damage[] = $damageEntry;
+				//meark repair points used
+				$availableRepairPoints -= $toBeFixed;
+				$this->usedThisTurn += $toBeFixed;
+			}
+		}	
 
+		/* separate block not necessary when repair happens AFTER reviving
 		//repair damaged Structure
 		foreach ($systemList as $systemToRepair){
 			if ($availableRepairPoints<1) continue;//cannot repair anything any longer
@@ -2056,6 +2061,7 @@ class SelfRepair extends ShipSystem{
 				$this->usedThisTurn += $toBeFixed;
 			}
 		}	
+		*/
 		
     } //endof function criticalPhaseEffects
 	
@@ -2168,7 +2174,7 @@ class BioDrive extends Engine{
 		$this->data["Efficiency"] = $this->boostEfficiency;
 		$this->data["Special"] = "BioDrive - basically an Engine with basic output calculated from BioThruster outputs.";      
 		$this->data["Special"] .= "<br>Will never be damaged.";  
-		$this->data["Special"] .= "<br>Cannot but extra thrust.";    
+		$this->data["Special"] .= "<br>Cannot buy extra thrust.";    
 	}
 	
 	

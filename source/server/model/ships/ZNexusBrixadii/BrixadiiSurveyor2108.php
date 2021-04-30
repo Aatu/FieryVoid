@@ -4,7 +4,7 @@ class BrixadiiSurveyor2108 extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 425;
+        $this->pointCost = 440;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiSurveyor2108";
         $this->imagePath = "img/ships/Nexus/BrixadiiSurveyor.png";
@@ -25,7 +25,6 @@ class BrixadiiSurveyor2108 extends HeavyCombatVessel{
         $this->rollcost = 2;
         $this->pivotcost = 2;
         $this->iniativebonus = 6*5;
-        
          
         $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(5, 10, 0, 0));
@@ -36,10 +35,10 @@ class BrixadiiSurveyor2108 extends HeavyCombatVessel{
         $this->addPrimarySystem(new Thruster(3, 14, 0, 6, 4));
       
         $this->addFrontSystem(new Thruster(3, 14, 0, 6, 1));
-    	$this->addFrontSystem(new NexusParticleAgitator(3, 8, 3, 240, 360));
-        $this->addFrontSystem(new NexusParticleAgitator(3, 8, 3, 0, 120));
-        $this->addFrontSystem(new NexusLightProjectorArray(2, 5, 2, 180, 60));
-        $this->addFrontSystem(new NexusLightProjectorArray(2, 5, 2, 300, 180));
+    	$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 240, 0));
+        $this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 0, 120));
+        $this->addFrontSystem(new ScatterPulsar(2, 4, 2, 180, 60));
+        $this->addFrontSystem(new ScatterPulsar(2, 4, 2, 300, 180));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
@@ -63,8 +62,8 @@ class BrixadiiSurveyor2108 extends HeavyCombatVessel{
             ),
             1=> array(
                     5 => "Thruster",
-                    8 => "Particle Agitator",
-                    10 => "Light Projector Array",
+                    8 => "Heavy Particle Projector",
+                    10 => "Scatter Pulsar",
 					18 => "Structure",
                     20 => "Primary",
             ),

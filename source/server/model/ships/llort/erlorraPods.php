@@ -29,7 +29,7 @@ class ErlorraPods extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 14, 5, 8));
         $this->addPrimarySystem(new Engine(5, 20, 0, 11, 3));
-        $this->addPrimarySystem(new Hangar(5, 14));
+        $this->addPrimarySystem(new Hangar(5, 14,12));
         $this->addPrimarySystem(new JumpEngine(5, 15, 5, 20));
   
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));

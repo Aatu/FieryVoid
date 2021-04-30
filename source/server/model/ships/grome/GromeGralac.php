@@ -36,11 +36,13 @@ class GromeGralac extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 20, 0, 0));
         $this->addPrimarySystem(new AntiquatedScanner(3, 20, 6, 6));
 		$targetingArray = new AntiquatedScanner(2, 6, 2, 1);
-		$targetingArray->displayName = 'Targeting Array';
-		$this->addPrimarySystem($targetingArray);
+			$targetingArray->displayName = 'Targeting Array';
+			$targetingArray->iconPath = "TargetingArray.png";
+			$this->addPrimarySystem($targetingArray);
 		$targetingArray = new AntiquatedScanner(2, 6, 2, 1);
-		$targetingArray->displayName = 'Targeting Array';
-		$this->addPrimarySystem($targetingArray);
+			$targetingArray->displayName = 'Targeting Array';
+			$targetingArray->iconPath = "TargetingArray.png";
+			$this->addPrimarySystem($targetingArray);
         $this->addPrimarySystem(new Engine(4, 28, 0, 8, 4));
 		$this->addPrimarySystem(new Hangar(2, 8));
 		$this->addPrimarySystem(new JumpEngine(4, 20, 4, 36));

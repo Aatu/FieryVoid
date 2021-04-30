@@ -29,8 +29,9 @@ class GromeGormokOSAT extends OSAT{
         $this->addPrimarySystem(new Reactor(3, 8, 0, 0));
         $this->addPrimarySystem(new AntiquatedScanner(3, 4, 2, 3)); 
 		$targetingArray = new AntiquatedScanner(3, 6, 2, 1);
-		$targetingArray->displayName = 'Targeting Array';
-		$this->addPrimarySystem($targetingArray);
+			$targetingArray->displayName = 'Targeting Array';
+			$targetingArray->iconPath = "TargetingArray.png";
+			$this->addPrimarySystem($targetingArray);
         $this->addPrimarySystem(new Thruster(4, 6, 0, 0, 2)); 
         $this->addPrimarySystem(new FlakCannon(2, 4, 2, 0, 360)); 
         $this->addPrimarySystem(new HeavyRailGun(3, 12, 9, 300, 60)); 

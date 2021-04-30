@@ -59,13 +59,15 @@ class technicalTargetDrone extends BaseShip{
 		$this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
 		*/
 		
+		/*
 		$this->addFrontSystem(new CustomERLightPBeam(3, 0, 0, 240, 120));
 		$this->addFrontSystem(new CustomBPALight(3, 0, 0, 240, 120));
 		$this->addFrontSystem(new CustomBPAMedium(3, 0, 0, 240, 120));
 		$this->addFrontSystem(new CustomBPAHeavy(3, 0, 0, 240, 120));
 		$this->addFrontSystem(new NexusKineticBoxLauncher(1, 0, 0, 270, 180));
 		$this->addFrontSystem(new NexusChaffLauncher(1, 0, 0, 0, 360));
-		
+		*/
+		/*
 		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));
 		$this->addAftSystem(new CommJammer(3, 0, 0, 0, 360));		
 		$this->addAftSystem(new ImpCommJammer(3, 0, 0, 0, 360));
@@ -73,7 +75,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->addAftSystem(new SensorSpike(3, 0, 0, 0, 360));		
 		$this->addAftSystem(new CombatLaser(3, 0, 0, 0, 360));	
 		$this->addAftSystem(new LaserCutter(3, 0, 0, 0, 360));
-		
+		*/
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
 		$this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
@@ -93,7 +95,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->addRightSystem(new TwinArray(3, 6, 2, 0, 180));
 		
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
-		$this->addFrontSystem(new Structure( 5, 1));
+		$this->addFrontSystem(new Structure( 7, 100));
 		$this->addAftSystem(new Structure( 5, 95));
 		$this->addLeftSystem(new Structure( 4, 98));
 		$this->addRightSystem(new Structure( 4, 98));
@@ -123,23 +125,29 @@ class technicalTargetDrone extends BaseShip{
 				*/
 			),
 			2=> array(
+				20=>"Structure",
+				/*
 				5 => "Thruster",
 				8 => "Jump Engine",
 				10 => "Assault Laser",
 				12 => "Twin Array",
 				18 => "Structure",
 				20 => "Primary",
+				*/
 			),
-			3=> array( //Stbd
+			3=> array( //Port
+				20=>"Structure",
+				/*
 				10 => "2:Thruster", //Aft Twin Arrays
 				20 => "0:Imperial Laser", //PRIMARY Imperial Lasers
+				*/
 			),
-			4=> array(
-				4 => "Thruster",
-				6 => "Imperial Laser",
-				8 => "Twin Array",
-				18 => "Structure",
-				20 => "Primary",
+			4=> array( //Stbd
+				20=>"Structure",
+				/*
+				10 => "2:Thruster", //Aft Twin Arrays
+				20 => "0:Imperial Laser", //PRIMARY Imperial Lasers
+				*/
 			),
 		);
     }

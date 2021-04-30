@@ -1471,7 +1471,8 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
         }
         $armor = $system->getArmourBase($target, $shooter, $this->weaponClass, $pos);
 
-        $mod = $system->hasCritical("ArmorReduced", $gamedata->turn - 1);
+        //$mod = $system->hasCritical("ArmorReduced", $gamedata->turn - 1);
+		$mod = $system->hasCritical("ArmorReduced", $gamedata->turn ); //$inEffect variable should distinguish effect that are not immediately in effect
         $armor -= $mod;
 
         $armor = max(0, $armor); //at least 0
