@@ -23,7 +23,7 @@ class ColonialViperMk2 extends FighterFlight{
         $this->turncost = 0.33;
 		$this->turndelay = 0;
         
-        $this->iniativebonus = 20;
+        $this->iniativebonus = 100;
         $this->populate();       
 
     }
