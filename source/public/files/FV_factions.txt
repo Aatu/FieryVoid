@@ -496,9 +496,13 @@ Factions that point for point will have uphill battle against First League, yet 
 Abbai
 Balosian
 Belt Alliance (Small Races)
+Brixadii (custom faction - No fighters and high maneuvrability)
 Cascor
 Centauri (WotCR)
 Ch’Lonas
+Chouka (custom faction)
+Circasian (custom faction)
+Dalithorn (custom faction)
 Deneth
 Descari
 Drazi (WotCR)
@@ -506,23 +510,21 @@ Ipsha
 Markab
 Raiders (note plethora of background-driven options – Raiders often use a hodgepodge of units and formal FV fleet selection rules don’t always do them justice!)
 Star Wars (custom faction with VERY different playstyle - consider them difficult to fly!)
+Velrax (custom faction)
 
 
 THE REST
 Factions that cannot seriously compete. Usually they have some deficiencies that cannot be fixed by simply increasing their PV allowance (like combination of poor maneuvrability/poor Sensors/short range weapons on low-tech ships or some glaring weakness in overall fleet layout).
 Abbai (WotCR)
 Alacan (Small Races)
-Brixadii
-Chouka
-Chouka Raiders
-Circasian
-Dalithorn
+Chouka Raiders (custom faction)
 Grome
 Hurr
 Rogolon (Small Races)
 Sorithian (Small Races)
+Sshel'ath (custom faction)
 Usuuth
-Velrax
+
 
 
 SUPERIOR
