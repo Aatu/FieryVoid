@@ -225,3 +225,11 @@ var VorlonLtDischargeGun = function VorlonLtDischargeGun(json, ship) {
 };
 VorlonLtDischargeGun.prototype = Object.create(Weapon.prototype);
 VorlonLtDischargeGun.prototype.constructor = VorlonLtDischargeGun;
+
+
+
+var VorlonDischargeCannon = function VorlonDischargeCannon(json, ship) {
+    Weapon.call(this, json, ship);
+};
+VorlonDischargeCannon.prototype = Object.create(Weapon.prototype);
+VorlonDischargeCannon.prototype.constructor = VorlonDischargeCannon;
