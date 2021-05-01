@@ -62,7 +62,7 @@ class wlcChlonasFenFahraFFE extends MediumShipLeftRight{
 			16 => "Engine",
 			17 => "Hangar",
 			19 => "Reactor",
-			20 => "CnC",
+			20 => "C&C",
 		),
 
 		3=> array(
