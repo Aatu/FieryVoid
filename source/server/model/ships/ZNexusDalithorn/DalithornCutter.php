@@ -8,7 +8,7 @@ class DalithornCutter extends SuperHeavyFighter{
         $this->faction = "ZNexus Dalithorn";
         $this->phpclass = "DalithornCutter";
         $this->shipClass = "Cutter";
-        $this->imagePath = "img/ships/Nexus/DalithornCutter.png";
+        $this->imagePath = "img/ships/Nexus/DalithornCutterv2.png";
 		$this->unofficial = true;
 	    $this->isd = 1879;
         $this->canvasSize = 100;

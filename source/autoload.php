@@ -282,6 +282,7 @@ spl_autoload_register(
                 'falenna1975' => '/server/model/ships/centauri_old/falenna1975.php',
                 'falkosi' => '/server/model/ships/brakiri/falkosi.php',
                 'fangedserpent' => '/server/model/ships/drazi/fangedserpent.php',
+                'fangedserpent_v2' => '/server/model/ships/drazi/fangedserpent_v2.php',
                 'fastfreighter' => '/server/model/ships/civilians/fastFreighter.php',
                 'felucca' => '/server/model/ships/raiders/felucca.php',
                 'fetula' => '/server/model/ships/abbai/fetula.php',
@@ -793,6 +794,7 @@ spl_autoload_register(
                 'skua' => '/server/model/ships/drazi_old/skua.php',
                 'skylark' => '/server/model/ships/civilians/skylark.php',
                 'skyserpent' => '/server/model/ships/drazi/skyserpent.php',
+                'skyserpent_v2' => '/server/model/ships/drazi/skyserpent_v2.php',
                 'sleekbird' => '/server/model/ships/drazi/sleekbird.php',
                 'sloop' => '/server/model/ships/raiders/sloop.php',
                 'smallbase' => '/server/model/ships/civilians/smallBase.php',
@@ -1802,6 +1804,7 @@ spl_autoload_register(
 				'vorlondischargegun' => '/server/model/weapons/specialWeapons.php',
 				'vorlonlightningcannon' => '/server/model/weapons/specialWeapons.php',
 				'vorlonltdischargegun' => '/server/model/weapons/specialWeapons.php',
+				'vorlondischargecannon' => '/server/model/weapons/specialWeapons.php',
 								
 				'vorloncapitalship' => '/server/model/ships/ShipClasses.php',
 				'vorlonassaultfighterflight' => '/server/model/ships/vorlons/vorlonAssaultFighterFlight.php',
@@ -1815,13 +1818,15 @@ spl_autoload_register(
 				'vorlonheavycruiser' => '/server/model/ships/vorlons/vorlonHeavyCruiser.php',
 				'vorlonheavycarrier' => '/server/model/ships/vorlons/vorlonHeavyCarrier.php',
 				'vorlondreadnought' => '/server/model/ships/vorlons/vorlonDreadnought.php',
+				'vorlonheavydestroyer' => '/server/model/ships/vorlons/vorlonHeavyDestroyer.php',
 				
 				//old versions of capital ships, to be deleted when games are over
+				/*
 				'vorlonlightcruiserold' => '/server/model/ships/vorlons/vorlonLightCruiserOld.php',
 				'vorlonheavycruiserold' => '/server/model/ships/vorlons/vorlonHeavyCruiserOld.php',
 				'vorlonheavycarrierold' => '/server/model/ships/vorlons/vorlonHeavyCarrierOld.php',
 				'vorlondreadnoughtold' => '/server/model/ships/vorlons/vorlonDreadnoughtOld.php',
-				
+				*/
 				
 				
 				
