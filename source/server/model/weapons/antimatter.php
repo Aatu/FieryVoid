@@ -431,7 +431,7 @@ class AntimatterShredder extends AntimatterWeapon{
 	 		public $rangeArray = array(1=>10, 2=>0, 3=>0);
 	      
 	 	    public $hextargetArray = array(1=>true, 2=>false, 3=>false); //I have added $hextargetArray as a new marker to weapon.php
-			public $hidetarget = false;
+//			public $hidetarget = false;
 			public $ballistic = false;
 			public $uninterceptableArray = array(1=>true, 2=>false, 3=>false);
 			public $doNotInterceptArray = array(1=>true, 2=>false, 3=>false); //Added $doNotInterceptArray added to Weapon.php	    
@@ -455,12 +455,12 @@ class AntimatterShredder extends AntimatterWeapon{
 
 
 
-	public function beforeFiringOrderResolution($gamedata){
+public function beforeFiringOrderResolution($gamedata){
 			if($this->firingMode ==1){
 			
 			if($this->multiplied==true); return;//shots of this weapon are already multiplied
 			$this->multiplied = true;//shots WILL be multiplied in a moment, mark this
-			//just basic precaution in case this function is called multiple times for the same weapon ;) . Of course You have to actually _declare_ appropriate variable first, look a few lines higher:
+			//just basic precaution in case this function is called multiple times for the same weapon ;) . Of course You have to actually _declare_ appropriate variable first, look a f				ew lines higher:
 
 			$fire = null;
 
@@ -470,7 +470,7 @@ class AntimatterShredder extends AntimatterWeapon{
 			}
 			if(!$fire) return; //nothing to multiply
 
-			//...and now if You are inside THAT, You know You have firing order that, during current turn, tries to actually use Shredder. HERE You need to try to do something about that. Let's get some basic variables we'll probably need:
+			//...and now if You are inside THAT, You know You have firing order that, during current turn, tries to actually use Shredder. HERE You need to try to do something about tha				t. Let's get some basic variables we'll probably need:
 			$shooter = $this->getUnit();
 			$targetHex = new OffsetCoordinate($fire->x, $fire->y);
 
@@ -485,7 +485,7 @@ class AntimatterShredder extends AntimatterWeapon{
 			if($targetUnit->id == $shooter->id) continue;//ignore firing ship itself
 			if(isset(AntimatterShredder::$alreadyFiredAt[$targetUnit->id])) continue;//already fired at by another Shredder
 			$distanceToTarget = mathlib::getDistance($shooter, $targetUnit);
-		//	if($distance>10) continue;//too far
+			//	if($distance>10) continue;//too far
 			if($distance > 0){//if ==0 it's automatically eligible, even if it technically isn't in arc; but between 1 and 10 we need to check whether target is in arc
 				$relativeBearing = $shooter->getBearingOnUnit($targetUnit);
 			        if (!(mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc))) continue; //not in arc
@@ -534,136 +534,195 @@ class AntimatterShredder extends AntimatterWeapon{
 
 
 		
-    public function calculateHitBase($gamedata, $fireOrder) {   //ONLY FOR FIRING MODE 1
-    
-		if($this->firingMode ==1){    	
+ public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder){ //ADD THE VORLON STUFF
+		if($this->firingMode ==1){
+				
+				$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too! - certainly important for calculating hit chance...
+				if ($this->isRammingAttack) return $this->calculateHitBaseRam($gamedata, $fireOrder);
+		        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+		        $target = $gamedata->getShipById($fireOrder->targetid);
+		        $pos = $shooter->getHexPos();
+				$targetPos = $target->getHexPos();
+		        $jammermod = 0;
+		        $jinkSelf = 0;
+		        $jinkTarget = 0;
+		        $defence = 0;
+		        $mod = 0;
+		        $oew = 0;
+		        $dew = 0;
+		        $bdew = 0;
+		        $sdew = 0;        
 
-	//insert shredder calculateHitBase code
+				$noLockPenalty = 0;
+				$noLockMod = 0;	
+				
+				$jammerValue = 0;			
+
+				    //    $dew = $target->getDEW($gamedata->turn);
+				    //    $bdew = EW::getBlanketDEW($gamedata, $target);
+				    //    $sdew = EW::getSupportedDEW($gamedata, $target);
+				    //    $dist = EW::getDistruptionEW($gamedata, $shooter);
+				    //    if ($this->useOEW) {
+				    //        $soew = EW::getSupportedOEW($gamedata, $shooter, $target);
+				    //        $oew = $shooter->getOEW($target, $gamedata->turn);
+				    //        $oew -= $dist;
+				    //        if ($oew <= 0) {
+					//			$oew = 0; //OEW cannot be negative
+					//			$soew = 0; //no lock-on negates SOEW, if any
+					//		}
+				   //     } else {
+				    //        $soew = 0;
+				     //       $oew = 0;
+				      //  }
+
+				     //   if (!($shooter instanceof FighterFlight)) {			
+				     //       if ((!$shooter->agile) && Movement::isRolling($shooter, $gamedata->turn)) { //non-agile ships suffer as long as they're ROLLING
+				     //           $mod -= 3;
+				    //       } else if ($shooter->agile && Movement::hasRolled($shooter, $gamedata->turn)) { //Agile ships suffer on the turn they actually rolled!
+					//			$mod -= 3;
+					//		}
+				      //      if (Movement::hasPivoted($shooter, $gamedata->turn) /*&& !$this->ballistic*/) {
+				      //          $mod -= 3;
+				      //      }
+				     //   }
+
+				    //    if ($fireOrder->calledid != -1) {
+				     //       $mod += $this->getCalledShotMod();
+				    //        if ($target->base) $mod += $this->getCalledShotMod();//called shots vs bases suffer double penalty!
+				    //    }
+
+		        if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)) { //leaving instanceof OSAT here - assuming MicroSATs will not suffer this penalty (Dovarum seems to be able to turn/pivot like a superheavy fighter it's based on)
+		            $mod -= 1;
+		        }			
+
+		        if (!($shooter instanceof FighterFlight) && !($shooter instanceof OSAT)) {//leaving instanceof OSAT here - MicroSATs will be omitted as they're SHFs
+		            $CnC = $shooter->getSystemByName("CnC");
+		            $mod -= ($CnC->hasCritical("PenaltyToHit", $gamedata->turn - 1));
+		            $mod -= ($CnC->hasCritical("ShadowPilotPain", $gamedata->turn));
+		        }
+		        $firecontrol = $this->fireControl[$target->getFireControlIndex()];		
+				
+				//half-phasing: +4 vs gunfire, +8 vs ballistics, -10 to own fire KEEP THIS?
+				$halfphasemod = 0;
+			//	$shooterHalfphased = Movement::isHalfPhased($shooter, $gamedata->turn);
+				$targetHalfphased = Movement::isHalfPhased($target, $gamedata->turn);
+			//	if ($shooterHalfphased) $halfphasemod = 10;
+				if ($targetHalfphased) {
+					$halfphasemod += 4;
+					}
+						
+		        $hitPenalties = $dew + $bdew + $sdew + $rangePenalty + $jinkSelf + max($jammermod, $jinkTarget) + $noLockMod + $halfphasemod;
+		        $hitBonuses = $oew + $soew + $firecontrol + $mod;
+		        $hitLoc = null;
+
+			
+		        $change = round($goal * 5); //d20 to d100: ($goal/20)*100
+				$target->setExpectedDamage($hitLoc, $change, $this, $shooter);
+
+		        //range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty,
+		        //interception penalty not yet calculated, will be logged later
+		        //$notes = $rp["notes"] . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, 					SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
+				$notes = $distanceForPenalty . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $					oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
+		        
+		        $fireOrder->chosenLocation = $hitLoc;
+		        $fireOrder->needed = $change;
+		        $fireOrder->notes = $notes;
+		        $fireOrder->updated = true;
+		    } 
+				else{
+			parent::calculateHitBase();//call standard 
+					}
+	}//endof calculateHitBase
 	
-		//$fireOrder->needed = ($this->profile - $this->rangepenalty); //Range penalty usually 0 for Shredder, but could be raised by crits and rules say it does apply.
-		//$fireOrder->updated = true;
-		
-		} 
-		else {	
-		parent::calculateHitBase();//call standard
-    		}
-	}//endof function calculateHitBase	
-	
-	
-	// - targeting direct fire weapons at hex rather than unit
-    public function fire($gamedata, $fireOrder) {
-	    if($this->firingMode ==1){
-	   	 
-	        $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
-	        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+// - targeting direct fire weapons at hex rather than unit STILL NEEDS CHECKING.
+public function fire($gamedata, $fireOrder){
+	if($this->firingMode ==1){	
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+        $target = $gamedata->getShipById($fireOrder->targetid);
 
-	        /** @var MovementOrder $movement */
-	        $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+       $fireOrder->needed -= $fireOrder->totalIntercept;
+       $notes = "Interception: " . $fireOrder->totalIntercept . " sources:" . $fireOrder->numInterceptors . ", final to hit: " . $fireOrder->needed;
+       $fireOrder->notes .= $notes;
 
-	        $posLaunch = $movement->position;//at moment of launch!!!
+        $pos = null; //functions will properly calculate from firing unit, which is important at range 0
 
-	        //sometimes player does manage to target ship after all..
-	        if ($fireOrder->targetid != -1) {
-	            $targetship = $gamedata->getShipById($fireOrder->targetid);
-	            //insert correct target coordinates: last turns' target position
-	            $movement = $targetship->getLastTurnMovement($fireOrder->turn);
-	            $fireOrder->x = $movement->position->q;
-	            $fireOrder->y = $movement->position->r;
-	            $fireOrder->targetid = -1; //correct the error
-	        }
+    //    if ($this->ballistic) {
+     //       $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+     //       $pos = $movement->position;
+      //  }
 
-			$rolled = Dice::d(100);
-			$fireOrder->rolled = $rolled;
+        $shotsFired = $fireOrder->shots; //number of actual shots fired
+    //    if ($this->damageType == 'Pulse') {//Pulse mode always fires one shot of weapon - while 	$fireOrder->shots marks number of pulses for display purposes
+  //          $shotsFired = 1;
+	//		$fireOrder->shots = $this->maxpulses;
+   //     }
+   //     for ($i = 0; $i < $shotsFired; $i++) {
+   //         $needed = $fireOrder->needed;
+   //         if ($this->damageType != 'Pulse') {//non-Pulse weapons may use $grouping, too!
+   //             $needed = $fireOrder->needed - $this->getShotHitChanceMod($i);
+   //         }
 
-	        $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
-	        
-	            $ships1 = $gamedata->getShipsInDistance($target);
-	            $ships2 = $gamedata->getShipsInDistance($target, 1);
-	            foreach ($ships2 as $targetShip) {
-	            $this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
-	            }
-			}
+            //for linked shot: further shots will do the same as first!
+   //         if ($i == 0) { //clear variables that may be relevant for further shots in line
+   //             $fireOrder->linkedHit = null;
+   //         }
+   //         $rolled = Dice::d(100);
+   //         if ($this->isLinked && $i > 0) { //linked shot - number rolled (and effect) for furthr shots will be just the same as for first
+   //             $rolled = $fireOrder->rolled;
+    //        }
+
+            //interception?
+      //      if ($rolled > $needed && $rolled <= $needed + ($fireOrder->totalIntercept * 5)) { //$fireOrder->pubnotes .= "Shot intercepted. ";
+      //          if ($this->damageType == 'Pulse') {
+      //              $fireOrder->intercepted += $this->maxpulses;
+      //          } else {
+      //              $fireOrder->intercepted += 1;
+      //          }
+      //      }
+        if ($target instanceof FighterFlight) {
+            foreach ($target->systems as $fighter) {
+                if ($fighter == null || $fighter->isDestroyed()) {
+                    continue;
+                }
+
+            $fireOrder->notes .= " FIRING SHOT " . ($i + 1) . ": rolled: $rolled, needed: $needed\n";
+            $fireOrder->rolled = $rolled; //might be useful for weapon itself, too - like counting damage for Anti-Matter
+
+            //hit?
+            if ($rolled <= $needed) {
+                $hitsRemaining = 1;
+
+        //        if ($this->damageType == 'Pulse') { //possibly more than 1 hit from a shot
+      //          $hitsRemaining = $this->rollPulses($gamedata->turn, $needed, $rolled); //this takes care of all details
+     //           }
+
+                while ($hitsRemaining > 0) {
+                    $hitsRemaining--;
+                    $fireOrder->shotshit++;
+                    $this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+                }
+            }
+        }
+	    
+		//for last segment of Sustained shot - force shutdown!
+	//	$newExtraShots = $this->overloadshots - 1; 	
+	//	if( $newExtraShots == 0 ) {
+	//		$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
+	//		$crit->updated = true;
+	//		$crit->newCrit = true; //force save even if crit is not for current turn
+	//		$this->criticals[] =  $crit;
+		}
+
+        $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
+		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
+	    
+    }
 			else{
 			parent::fire();//call standard 
 			} 
 		} //endof function fire  
 	        
-
-    public function AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata){ //MARCIN - do I need to put a firing mode switch for this?
-   		    if ($target->isDestroyed()) return; //no point allocating
-	        $damage = $this->getDamageMod($damage, $shooter, $target, $sourceHex, $gamedata);
-	        $damage -= $target->getDamageMod($shooter, $sourceHex, $gamedata->turn, $this);
-	        if ($target instanceof FighterFlight) {
-	            foreach ($target->systems as $fighter) {
-	                if ($fighter == null || $fighter->isDestroyed()) {
-	                    continue;
-	                }
-					$damage = $this->getDamage($fireOrder);
-	                $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, $sourceHex, $gamedata, false);
-	            }
-
-	        } else { 
-	            $tmpLocation = $target->getHitSectionPos(Mathlib::hexCoToPixel($sourceHex), $fireOrder->turn);
-	          $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $tmpLocation);
-	           $this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, false, $tmpLocation);
-	        }
-	    }
-    
-//only one Shredder can affect a given unit. The two Ipsha systems Marcin recommended looking at to address this are the Ipsha Spark Field and Surge Cannon	
-	//public static function createFiringOrders($gamedata){ //MARCIN - This feels like the right place to stop units being hit more than one and prevent damage to the shooter, I'm just not sure how to apply it.  Does it need a firing mode switch also?
-		//if (SparkFieldHandler::$firingDeclared) return; //already done!
-		//SparkFieldHandler::$firingDeclared = true;
-		
-		//apparently ships may be loaded multiple times... make sure fields in array belong to current gamedata!
-		//$tmpFields = array();
-		//foreach(SparkFieldHandler::$sparkFields as $field){
-		//	$shooter = $field->getUnit();
-			//if($field->isDestroyed($gamedata->turn-1)) continue; //destroyed weapons can be safely left out
-		//	if($field->isDestroyed($gamedata->turn)) continue; //actually at this stage - CURRENT turn should be indicated!
-			//is this unit defined in current gamedata? (particular instance!)
-		//	$belongs = $gamedata->shipBelongs($shooter);
-		//	if ($belongs){
-		//		$tmpFields[] = $field;
-		//	}			
-		//}
-	//	SparkFieldHandler::$sparkFields = $tmpFields;
-		
-		
-		//make sure boost level for all weapons is calculated
-		//foreach(SparkFieldHandler::$sparkFields as $field){
-	//		$field->calculateBoostLevel($gamedata->turn);
-	//	}
-		
-		//sort all fields by boost
-	//	usort(SparkFieldHandler::$sparkFields, "self::sortByBoost");	
-	
-		//table of units that are already targeted
-		//$alreadyTargeted = array();
-		//create firing order for each weapon (target self)
-		//for each weapon find possible targets and add them to weapons' target list
-		//strongest weapons fire first, and only 1 field affects particular ship	
-		//foreach(SparkFieldHandler::$sparkFields as $field){			
-		//	if ($field->isDestroyed($gamedata->turn-1)) continue; //destroyed field does not attack
-		//	if ($field->isOfflineOnTurn($gamedata->turn)) continue; //disabled field does not attack
-			//$shooter = $field->getUnit();      
-			//$targetPos = $shooter->getCoPos();
-			//$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
-			//$fire = new FireOrder(-1, 'normal', $shooter->id, -1, $field->id, -1, $gamedata->turn, 
-			//	1, 0, 0, 1, 0, 0, $movementThisTurn->position->q,  $movementThisTurn->position->r, $field->weaponClass
-		//	);
-		//	$fire->addToDB = true;
-		//	$field->fireOrders[] = $fire;			
-		//	$aoe = $field->getAoE($gamedata->turn);			
-		//	$inAoE = $gamedata->getShipsInDistance($shooter, $aoe);
-		//	foreach($inAoE as $targetID=>$target){		
-		//		if ($shooter->id == $target->id) continue;//does not threaten self!
-		//		if ($target->isDestroyed()) continue; //no point allocating				
-		//		if (in_array($target->id,$alreadyTargeted,true)) continue;//each target only once 
-				//add to target list
-		//		$alreadyTargeted[] = $target->id; //add to list of already targeted units
-		//		$field->addTarget($target);
-		//	}
-	//	} //endof foreach AM Shredder
 	
 	
 	public function setSystemDataWindow($turn){ //this is done I think, but can it be tidied so Case 2 and 3 are combined?
