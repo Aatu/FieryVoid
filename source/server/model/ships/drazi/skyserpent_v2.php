@@ -7,7 +7,7 @@ class SkySerpent_v2 extends SuperHeavyFighter{
         $this->pointCost = 130*6;
         $this->faction = "Drazi";
         $this->phpclass = "SkySerpent_v2";
-        $this->shipClass = "Sky Serpent Heavy Assault Fighter";
+        $this->shipClass = "Sky Serpent Heavy Assault Fighters";
         $this->imagePath = "img/ships/drazi/skyserpent.png";
 	    $this->isd = 2220;
         $this->canvasSize = 64;
@@ -38,7 +38,7 @@ class SkySerpent_v2 extends SuperHeavyFighter{
 		for ($i = 0; $i < $toAdd; $i++) {
 			$armour = array(4, 2, 3, 3);
 			$fighter = new Fighter("skyserpent", $armour, 30, $this->id);
-			$fighter->displayName = "Sky Serpent Heavy Assault Fighter";
+			$fighter->displayName = "Sky Serpent";
 			$fighter->imagePath = "img/ships/drazi/skyserpent.png";
 			$fighter->iconPath = "img/ships/drazi/skyserpent_large.png";
 
@@ -67,7 +67,7 @@ class SkySerpent_v2 extends SuperHeavyFighter{
             foreach($ships as $ship){
                 if(!$ship->isDestroyed()
                         && ($this->userid == $ship->userid)
-                        && ($ship instanceof FangedSerpent)){
+                        && ($ship instanceof FangedSerpent_v2)){
                     $initiativeBonusRet+=5;
                     break;
                 }

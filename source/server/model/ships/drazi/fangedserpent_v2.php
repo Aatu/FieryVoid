@@ -7,10 +7,10 @@ class FangedSerpent_v2 extends SuperHeavyFighter{
         $this->pointCost = 145*6;
         $this->faction = "Drazi";
         $this->phpclass = "FangedSerpent_v2";
-        $this->shipClass = "Fanged Serpent Command Fighter";
+        $this->shipClass = "Fanged Serpent Command Fighters";
 	    $this->imagePath = "img/ships/drazi/skyserpent.png";
         $this->occurence = "rare";
-	    $this->variantOf = "Sky Serpent Heavy Assault Fighter";
+	    $this->variantOf = "Sky Serpent Heavy Assault Fighters";
 	    $this->isd = 2231;
         $this->canvasSize = 64;
 
@@ -41,7 +41,7 @@ class FangedSerpent_v2 extends SuperHeavyFighter{
 		for ($i = 0; $i < $toAdd; $i++) {
 			$armour = array(4, 3, 4, 4);
 			$fighter = new Fighter("fangedserpent", $armour, 32, $this->id);
-			$fighter->displayName = "Fanged Serpent Command Fighter";
+			$fighter->displayName = "Fanged Serpent";
 			$fighter->imagePath = "img/ships/drazi/skyserpent.png";
 			$fighter->iconPath = "img/ships/drazi/skyserpent_large.png";
 
