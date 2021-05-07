@@ -177,6 +177,14 @@ class Shield extends ShipSystem implements DefensiveSystem{
         $this->endArc = (int)$endArc;
     }
     
+    public function setSystemDataWindow($turn){
+		$damageReduction = $this->output;
+		$profileReduction = $this->output *5;
+		$this->data["Special"] = "Reduces damage done by incoming shots by $damageReduction."; 
+		$this->data["Special"] .= "<br>Reduces hit chance of incoming shots by $profileReduction."; //not that of advanced races
+		$this->data["Special"] .= "<br>Typical ship shields are ignored by fighter direct fire at range 0 (fighters flying under shields)."; 
+	}
+	
     public function onConstructed($ship, $turn, $phase){
         parent::onConstructed($ship, $turn, $phase);
 		$this->tohitPenalty = $this->getOutput();
@@ -1600,7 +1608,9 @@ class DiffuserTendrilFtr extends DiffuserTendril{
 	public function setSystemDataWindow($turn){
 		//add information about damage stored - ships do have visual reminder about it, but fighters do not!
 		parent::setSystemDataWindow($turn); 
-		$this->data["Capacity"] = $this->getUsedCapacity() . '/' . $this->maxhealth;
+		$freeCapacity = $this->maxhealth - $this->getUsedCapacity();
+		//$this->data["Capacity"] = $this->getUsedCapacity() . '/' . $this->maxhealth;
+		$this->data["Capacity available/max"] = $freeCapacity . '/' . $this->maxhealth;
 	}	
 	
 	/*always redefine $this->data due to current capacity info*/
