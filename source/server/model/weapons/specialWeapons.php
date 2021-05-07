@@ -766,7 +766,7 @@ class CommDisruptor extends Weapon{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}	    
-	      $this->data["Special"] .= "Does no damage, but weakens target's Initiative (-1d6) and Sensors (-1d6) rating next turn";  
+	      $this->data["Special"] .= "Does no damage, but weakens target's Initiative (-1d6) and Sensors/OB (-1d6) rating next turn";  
     }	
     
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -857,7 +857,7 @@ class CommJammer extends Weapon{
 	
     public function setSystemDataWindow($turn){
 	      parent::setSystemDataWindow($turn);    
-	      $this->data["Special"] = "Does no damage, but weakens target's Initiative (-1d6) rating next turn";  
+	      $this->data["Special"] = "Does no damage, but weakens target's Initiative (-1d6) rating next turn.";  
     }	
     
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -949,7 +949,7 @@ class SensorSpear extends Weapon{
 	
     public function setSystemDataWindow($turn){
 	      parent::setSystemDataWindow($turn);    
-	      $this->data["Special"] = "Does no damage, but weakens target's Sensors (-1d3) rating next turn";  
+	      $this->data["Special"] = "Does no damage, but weakens target's Sensors/OB (-1d3) rating next turn.";  
     }	
     
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -1009,7 +1009,7 @@ class SensorSpike extends SensorSpear{
 	
     public function setSystemDataWindow($turn){
 	      parent::setSystemDataWindow($turn);  
-	      $this->data["Special"] = "Does no damage, but weakens target's Sensors (-1d6) rating next turn";  
+	      $this->data["Special"] = "Does no damage, but weakens target's Sensors/OB (-1d6) rating next turn";  
     }	
     
 
@@ -3599,9 +3599,9 @@ class VorlonDischargeCannon extends Weapon{
 		}	    		
 		$this->data["Special"] .= "Accelerator option is here only to force explicit player consent for interception. It does not change damage output.";  
 		$this->data["Special"] .= "<br>Firing mode affects damage output (and power used), and also fire control (hogher modes become antiship-optimized):";  
-		$this->data["Special"] .= "<br> - 5 power: 4d10+5, R10"; 
-		$this->data["Special"] .= "<br> - 10 power: 6d10+10, R15"; 
-		$this->data["Special"] .= "<br> - 15 power: 8d10+15, R15"; 
+		$this->data["Special"] .= "<br> - 5 power: 4d10+5, Raking(10)"; 
+		$this->data["Special"] .= "<br> - 10 power: 6d10+10, Raking(15)"; 
+		$this->data["Special"] .= "<br> - 15 power: 8d10+15, Raking(15)"; 
 		$this->data["Special"] .= "<br>Weapon can fire up to 4 times (charging power above for each shot) - NEEDS TO BE DECLARED MANUALLY (by default 4 shots are declared but You may decrease this number)."; 
 	}
 		
