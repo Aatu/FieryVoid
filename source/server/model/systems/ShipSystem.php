@@ -441,6 +441,18 @@ class ShipSystem {
         return false;    
     }
 	
+	public function damageReceivedOnTurn($turn){
+		$damageReceived = 0;
+        foreach ($this->damage as $damage){
+            if ($damage->turn == $turn || $damage->turn == -1){
+                if ($damage->damage > $damage->armour){
+                    $damageReceived += $damage->damage - $damage->armour;
+				}
+            }
+        }        
+        return $damageReceived;    
+    }
+	
     
     public function getRemainingHealth(){
         $damage = $this->getTotalDamage();

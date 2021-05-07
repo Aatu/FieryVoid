@@ -272,7 +272,7 @@ But with these caveats - have fun! Ancients should be balanced against each othe
 Below list of systems Shadows use, with short description of effect and design differences from original tabletop.
 Called shots - systems on Shadow ships cannot be targeted by called shots.
 Enhancements - Shadow ships use no crew, so cannot use rew-related enhancements. They can use enhancements relating to special officers (that would be ship pilot's skill in such case). They have their own faction-specific enhancements as well.
-Self-Repair - automated, player cannot decide what is repaired. Damage suffered in current turn can be repaired, criticals can't. Cost of critical repair has been changed in places, and there's no partial repair of crits. See system description for details.
+Self-Repair - automated, player cannot decide what is repaired. Damage and criticals suffered in current turn cannot be repaired. Cost of critical repair has been changed in places (in particular C&C criticals aren't that costly to fix), and there's no partial repair of crits. 
 	If Self-Repair is destroyed or damaged, unused repair points are NOT lost.
 Energy Diffuser - absorbs damage as it's being dealt (and diffuses it over time). In FV Diffuser always kicks in if possible, there's no option to withhold its use eg. waiting for more threatening damage and conserving resources. Diffuser can dissipate damage just absorbed. For visual reasons tendrils are shown as separate (untargetable) systems. Damage absorbed by ship tendrils is not shown in log.
 	Diffuser will not try to stop no-overkill damage that would kill system hit despite Diffuser interference. This is important for very strong Matter or Piercing shots.
@@ -335,7 +335,7 @@ VORLONS
 Ancient race, by definition complicated, very specific and not really on par with younger ones - tech difference is too high for proper balance. Ancient factions were officially not tournament legal.
 But with these caveats - have fun! Ancients should be balanced against each other, and if Your opponent knows what to expect/You're playing a scenario, go ahead with other pairings as well. Note that sky-high individual cost of Ancient units makes standard requirements based on total fleet value completely inadequate - so they have been modified for fleet checker.
 Below list of systems and rules Vorlons use, with short description of effect and design differences from original tabletop.
-Self-Repair - see Shadows and Minbari. Vorlon sef-repair systems work the same, although are usually more powerful.
+Self-Repair - see Shadows. Vorlon sef-repair systems work the same way, although are usually more powerful.
 Power Capacitor: defines how much Power a Vorlon ship has available. Can hold Power between turns (up to Capacity).
  - recharge occurs in Initial phase (tabletop - just before movement, which makes power not usable in Initial phase)
  - opening petals reduces armor of all systems by 2 (tabletop - armor is reduced on PRIMARY only, but all profiles are increased by 1)
@@ -346,13 +346,14 @@ Mag-Gravitic Reactor: for technical reasons Vorlons in FV are using Mag-Gravitic
 Scanner uses no power: it's operating cost are base hull feature and do not affect power usage.
 Jump Drive uses no power: it's operating cost are base hull feature and do not affect power usage. This differes a bit from tabletop where Jump Drive odes use power (...which is counted as nominal). The only actual difference is that You cannot shut down Jump Drive on Vorlon ships for power in FV.
 All Vorlon weapons have nominally 0 Power usage - they need Power to actually shoot, but that is only decided and drained at moment of firing.
-Discharge Gun:
+Discharge Gun (and Cannon):
  - Accelerator property added just so weapon requires explicit permission to intercept
  - increased power levels are implemented as firing modes.
  - additional shots are handled as in Ballistic Torpedo, by changing number of shots fired AFTER declaration is made
  - by default full rate of fire is used
  - each shot is at the same power level
 Lightning Cannon:
+ - Accelerator property added just so weapon requires explicit permission to intercept
  - can combine weapons for higher power shots. To do so, appropriate number of weapons must have same mode and target assigned (same mechanics as Ipsha Surge Cannons actually).
  - if player mis-declares and not enough weapons are assigned for declared mode, shot is cancelled (technically: automatically misses) (and does not drain Power)
  - interception shot is very effective, so weapon was not locked away from it - unassigned Lightning Cannons will try to intercept if applicable (and drain Power for it).
