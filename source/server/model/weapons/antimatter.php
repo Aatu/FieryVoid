@@ -534,11 +534,11 @@ public function beforeFiringOrderResolution($gamedata){
 
 
 		
- public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder){ //ADD THE VORLON STUFF
+ public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder){ 
 		if($this->firingMode ==1){
 				
-				$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too! - certainly important for calculating hit chance...
-				if ($this->isRammingAttack) return $this->calculateHitBaseRam($gamedata, $fireOrder);
+		//		$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too! - certainly important for calculating hit chance...
+		//		if ($this->isRammingAttack) return $this->calculateHitBaseRam($gamedata, $fireOrder);
 		        $shooter = $gamedata->getShipById($fireOrder->shooterid);
 		        $target = $gamedata->getShipById($fireOrder->targetid);
 		        $pos = $shooter->getHexPos();
@@ -558,6 +558,16 @@ public function beforeFiringOrderResolution($gamedata){
 				
 				$jammerValue = 0;			
 
+				if ($fireOrder->targetid == -1){  //this fire order targets hex, should remain unresolved
+				            $notes = "technical fire order - weapon combined into another shot";
+				            $fireOrder->chosenLocation = 0; //tylko techniczne i tak
+				            $fireOrder->needed = 0;
+				            $fireOrder->shots = 0;
+				            $fireOrder->notes = $notes;
+				            $fireOrder->updated = true;
+				            $this->changeFiringMode($fireOrder->firingMode);
+				            return;
+				        }
 				    //    $dew = $target->getDEW($gamedata->turn);
 				    //    $bdew = EW::getBlanketDEW($gamedata, $target);
 				    //    $sdew = EW::getSupportedDEW($gamedata, $target);
@@ -640,9 +650,9 @@ public function fire($gamedata, $fireOrder){
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
 
-       $fireOrder->needed -= $fireOrder->totalIntercept;
-       $notes = "Interception: " . $fireOrder->totalIntercept . " sources:" . $fireOrder->numInterceptors . ", final to hit: " . $fireOrder->needed;
-       $fireOrder->notes .= $notes;
+    //   $fireOrder->needed -= $fireOrder->totalIntercept;
+    //   $notes = "Interception: " . $fireOrder->totalIntercept . " sources:" . $fireOrder->numInterceptors . ", final to hit: " . $fireOrder->needed;
+    //   $fireOrder->notes .= $notes;
 
         $pos = null; //functions will properly calculate from firing unit, which is important at range 0
 
@@ -679,11 +689,20 @@ public function fire($gamedata, $fireOrder){
       //              $fireOrder->intercepted += 1;
       //          }
       //      }
-        if ($target instanceof FighterFlight) {
-            foreach ($target->systems as $fighter) {
-                if ($fighter == null || $fighter->isDestroyed()) {
-                    continue;
-                }
+			if ($target instanceof FighterFlight) {
+			    $targetedCraft = null; 
+			            foreach ($target->systems as $fighter) {
+			                  if($fighter->id == $fireOrder->calledid){ 
+			                         $targetedCraft = $fighter;
+			                         break; //exit loop - the fighter we're looking for is found, there's no point looking further
+			                  }
+			            }
+				
+			if (  $targetedCraft &&   $targetedCraft->isDestroyed()) {
+         	          $fireOrder->needed = 0; //auto-miss
+					}
+				
+		
 
             $fireOrder->notes .= " FIRING SHOT " . ($i + 1) . ": rolled: $rolled, needed: $needed\n";
             $fireOrder->rolled = $rolled; //might be useful for weapon itself, too - like counting damage for Anti-Matter
@@ -711,7 +730,6 @@ public function fire($gamedata, $fireOrder){
 	//		$crit->updated = true;
 	//		$crit->newCrit = true; //force save even if crit is not for current turn
 	//		$this->criticals[] =  $crit;
-		}
 
         $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
 		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
