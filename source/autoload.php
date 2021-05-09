@@ -1593,7 +1593,11 @@ spl_autoload_register(
 					//ships
                 'colonialjupiterclass_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialJupiterClass_K.php',
                 'colonialmanticore_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialManticore_K.php',
+                'colonialmercuryclass_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialMercuryClass_K.php',
+                'colonialminervaclass_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialMinervaClass_K.php',
+                'colonialorion_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialOrion_K.php',
                 'colonialvalkyrie_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialValkyrie_K.php',
+                'colonialraptor_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialRaptor_K.php',
                 'vipermk2_k' => '/server/model/ships/ZBSGColonial_Kirill/vipermk2_K.php',
                 'vipermk7_k' => '/server/model/ships/ZBSGColonial_Kirill/vipermk7_K.php',
 //                'colonialraptor_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialRaptor_K.php',

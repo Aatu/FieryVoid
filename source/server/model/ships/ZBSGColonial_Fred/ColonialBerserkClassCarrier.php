@@ -16,10 +16,13 @@ class ColonialBerserkClassCarrier extends BaseShip{
 //		$this->unlimited 
 		$this->unofficial = true;
 
-        $this->fighters = array("normal"=>36, "superheavy"=>6);
+        $this->fighters = array("medium"=>30, "heavy"=>6, "superheavy"=>6);
+		$this->customFighter = array("Python"=>6);
 
 		$this->notes = "Primary users: Colonial Fleet";
 		$this->isd = 1948;
+
+        $this->notes = 'Python capable';
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
@@ -67,7 +70,7 @@ class ColonialBerserkClassCarrier extends BaseShip{
                 $this->addLeftSystem(new RapidGatling(4, 4,12, 180, 360));
 		$this->addLeftSystem(new SMissileRack(4, 6, 0, 190, 350));
                 $this->addLeftSystem(new SMissileRack(4, 6, 0, 190, 350));
-        $this->addLeftSystem(new Hangar(4, 22));
+        $this->addLeftSystem(new Hangar(4, 21));
 
         $this->addRightSystem(new Thruster(5, 20, 0, 3, 4));
      
@@ -79,7 +82,7 @@ class ColonialBerserkClassCarrier extends BaseShip{
 		$this->addRightSystem(new RapidGatling(4, 4, 1, 0, 180));
         $this->addRightSystem(new SMissileRack(4, 6, 0, 10, 170));
         $this->addRightSystem(new SMissileRack(4, 6, 0, 10, 170));
-        $this->addRightSystem(new Hangar(4, 22));
+        $this->addRightSystem(new Hangar(4, 21));
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(4, 70));

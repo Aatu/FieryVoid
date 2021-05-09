@@ -10,6 +10,7 @@ class ColonialPythonMk3 extends FighterFlight{
         $this->shipClass = "Python Mk3 Attack Flight";
         $this->imagePath = "img/ships/BSG/pythonMk3.png";
 		$this->unofficial = true;
+        $this->customFtrName = "Python";
 
 //        $this->isd = 1948;
 

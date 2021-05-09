@@ -4,19 +4,19 @@ class ColonialJupiterClass_K extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 1600;
-	$this->faction = "ZPlaytest 12 Colonies of Kobol";
+	$this->pointCost = 1400;
+	$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "ColonialJupiterClass_K";
         $this->imagePath = "img/ships/BSG/ColonialBattlestar.png";
         $this->shipClass = "Jupiter Battlestar";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 200; //img has 200px per side
+		$this->canvasSize = 180; //img has 200px per side
 		$this->unofficial = true;
 
         $this->fighters = array("normal"=>36, "superheavy"=>6);
 
-		$this->notes = "Primary users: Colonial Fleet";
-		$this->isd = 1948;
+//		$this->notes = "Primary users: Colonial Fleet";
+//		$this->isd = 1948;
         
         $this->forwardDefense = 17;
         $this->sideDefense = 20;
@@ -34,6 +34,7 @@ class ColonialJupiterClass_K extends BaseShip{
         $this->addPrimarySystem(new Engine(5, 32, 0, 12, 3));
         $this->addPrimarySystem(new ReloadRack(5, 9));
         $this->addPrimarySystem(new SMissileRack(5, 6, 0, 0, 360));
+        $this->addPrimarySystem(new SMissileRack(5, 6, 0, 0, 360));
         $this->addPrimarySystem(new EWNuclearTorpedo(5, 6, 3, 0, 360));
 		$this->addPrimarySystem(new Bulkhead(0, 4));
         $this->addPrimarySystem(new Bulkhead(0, 4));
@@ -49,13 +50,11 @@ class ColonialJupiterClass_K extends BaseShip{
 		$this->addFrontSystem(new Bulkhead(0, 4));
         $this->addFrontSystem(new Railgun(5, 9, 6, 330, 30));
         $this->addFrontSystem(new Railgun(5, 9, 6, 330, 30));
-		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 0, 360));
-		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 0, 360));
-		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 0, 360));
-		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 0, 360));
+		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 240, 120));
+		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 240, 120));
+		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 240, 120));
+		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 240, 120));
 		$this->addFrontSystem(new FlakCannon(4, 4, 2, 270, 30));
-		$this->addFrontSystem(new FlakCannon(4, 4, 2, 270, 30));
-		$this->addFrontSystem(new FlakCannon(4, 4, 2, 330, 90));
 		$this->addFrontSystem(new FlakCannon(4, 4, 2, 330, 90));
 
         $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
@@ -64,13 +63,11 @@ class ColonialJupiterClass_K extends BaseShip{
         $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
 		$this->addAftSystem(new Bulkhead(0, 4));
 		$this->addAftSystem(new Bulkhead(0, 4));
-		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 0, 360));
-		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 0, 360));
-		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 0, 360));
-		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 0, 360));
+		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 60, 300));
+		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 60, 300));
+		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 60, 300));
+		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 60, 300));
 		$this->addAftSystem(new FlakCannon(4, 4, 2, 150, 270));
-		$this->addAftSystem(new FlakCannon(4, 4, 2, 150, 270));
-		$this->addAftSystem(new FlakCannon(4, 4, 2, 90, 210));
 		$this->addAftSystem(new FlakCannon(4, 4, 2, 90, 210));
 
         $this->addLeftSystem(new Thruster(4, 9, 0, 3, 3));
@@ -81,8 +78,8 @@ class ColonialJupiterClass_K extends BaseShip{
         $this->addLeftSystem(new FlakCannon(4, 4, 2, 210, 330));
         $this->addLeftSystem(new FlakCannon(4, 4, 2, 210, 330));
         $this->addLeftSystem(new FlakCannon(4, 4, 2, 210, 330));
-        $this->addLeftSystem(new LtBlastCannon(4, 4, 1, 180, 360));        
-        $this->addLeftSystem(new LtBlastCannon(4, 4, 1, 180, 360));        
+        $this->addLeftSystem(new FlakCannon(4, 4, 2, 210, 330));
+        $this->addLeftSystem(new FlakCannon(4, 4, 2, 210, 330));
 		$this->addLeftSystem(new Hangar(5, 21));
 
         $this->addRightSystem(new Thruster(4, 9, 0, 3, 4));
@@ -93,8 +90,8 @@ class ColonialJupiterClass_K extends BaseShip{
         $this->addRightSystem(new FlakCannon(4, 4, 2, 30, 150));
         $this->addRightSystem(new FlakCannon(4, 4, 2, 30, 150));
         $this->addRightSystem(new FlakCannon(4, 4, 2, 30, 150));
-        $this->addRightSystem(new LtBlastCannon(4, 4, 1, 0, 180));        
-        $this->addRightSystem(new LtBlastCannon(4, 4, 1, 0, 180));        
+        $this->addRightSystem(new FlakCannon(4, 4, 2, 30, 150));
+        $this->addRightSystem(new FlakCannon(4, 4, 2, 30, 150));
 		$this->addRightSystem(new Hangar(5, 21));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -108,7 +105,7 @@ class ColonialJupiterClass_K extends BaseShip{
 			0=> array(
 					6 => "Structure",
 					7 => "Class-S Missile Rack",
-					8 => "Mag Gun",
+					8 => "Nuclear Torpedo",
 					10 => "Reload Rack",
 					12 => "Scanner",
 					15 => "Engine",
@@ -128,21 +125,19 @@ class ColonialJupiterClass_K extends BaseShip{
 					6 => "Thruster",
 					10 => "Medium Blast Cannon",
 					12 => "Flak Cannon",
-					18 => "Structure",
+					19 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
 					4 => "Thruster",
-					7 => "Flak Cannon",
-					9 => "Light Blast Cannon",
+					8 => "Flak Cannon",
 					12 => "Hangar",
 					19 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					4 => "Thruster",
-					7 => "Flak Cannon",
-					9 => "Light Blast Cannon",
+					8 => "Flak Cannon",
 					12 => "Hangar",
 					19 => "Structure",
 					20 => "Primary",

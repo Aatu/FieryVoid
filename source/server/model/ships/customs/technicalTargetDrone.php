@@ -7,9 +7,11 @@ class technicalTargetDrone extends BaseShip{
 		$this->pointCost = 10;
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
-		$this->imagePath = "img/ships/BASurveyShip.png";
+//		$this->imagePath = "img/ships/BASurveyShip.png";
+		$this->imagePath = "img/ships/BSG/ColonialMercuryBeta.png";
 		$this->shipClass = "Target Drone - DO NOT USE";
-		$this->shipSizeClass = 3;
+//		$this->shipSizeClass = 3;
+		$this->canvasSize = 200; //img has 170px per side
 		$this->forwardDefense = 20;
 		$this->sideDefense = 20;
 		$this->fighters = array("light"=>12);        

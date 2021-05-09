@@ -24,7 +24,7 @@ class BrixadiiSurveyor2108 extends HeavyCombatVessel{
         $this->accelcost = 2;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-        $this->iniativebonus = 6*5;
+        $this->iniativebonus = 7*5;
          
         $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(5, 10, 0, 0));
