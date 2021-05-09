@@ -697,6 +697,7 @@ public function fire($gamedata, $fireOrder){
 			                         break; //exit loop - the fighter we're looking for is found, there's no point looking further
 			                  }
 			            }
+			}
 				
 			if (  $targetedCraft &&   $targetedCraft->isDestroyed()) {
          	          $fireOrder->needed = 0; //auto-miss
@@ -721,7 +722,7 @@ public function fire($gamedata, $fireOrder){
                     $this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
                 }
             }
-        }
+        
 	    
 		//for last segment of Sustained shot - force shutdown!
 	//	$newExtraShots = $this->overloadshots - 1; 	
