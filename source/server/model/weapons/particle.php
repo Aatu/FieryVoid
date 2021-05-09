@@ -731,12 +731,14 @@
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= "No overkill.<br>Reduce armor by 2.";
-			$this->data["Special"] .= "<br>Damage scored is repeated on appropriate Structure";
+			$this->data["Special"] .= "No overkill.<br>Reduce armor by 2 (on ships only)."; //tabletop: facing armor on a fighter as well!
+			$this->data["Special"] .= "<br>Damage scored is repeated on appropriate Structure.";
         }
 
-        
-        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
+
+
+        /*actually doDamage as standard seems all right, it's onDamagedSystem that needs to be redefined - to this function will never be called, but just in case I don't remove it yet!*/
+        protected function doDamageOBSOLETE($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
             /*repeat damage on structure (ignoring armor); 
               system hit will have its armor reduced by 2
               for non-fighter targets
@@ -744,7 +746,7 @@
             parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
 			if(!$target instanceof FighterFlight){
 				$damageWasDealt=true; //if structure is already destroyed, no further overkill will happen
-				$struct = $target->getStructureSystem($system->location);
+				//$struct = $target->getStructureSystem($system->location);
 				//reduce damage by armor of system hit - as it would be (was!) during actual damage-dealing procedure
 				//do NOT acount for special defensive systems (Energy Diffuser, Bulkheads...) - they will kick in (or not) separately on Structure
 				$damage = $damage - $this->getSystemArmourComplete($target, $system, $gamedata, $fireOrder);
@@ -752,7 +754,7 @@
 				if (!$system->advancedArmor) { //Advanced Armor prevents armor reduction
 					$crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
 					$crit->updated = true;
-					$crit->inEffect = false;
+					$crit->inEffect = false; //in effect only on next turn
 					if ( $system != null ){
 						$system->criticals[] = $crit;
 						$system->criticals[] = $crit;
@@ -763,16 +765,61 @@
 				$damage = $damage + $this->getSystemArmourStandard($target, $struct, $gamedata, $fireOrder) + $this->getSystemArmourInvulnerable($target, $struct, $gamedata, $fireOrder);
 				parent::doDamage($target, $shooter, $struct, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location); 
 				*/
+				/*doesn't exactly work correctly, and damage should just be "marked" anyway
 				//effective armor of 0
 				$effects = $system->assignDamageReturnOverkill($target, $shooter, $this, $gamedata, $fireOrder, $damage, 0, $pos); //here $effects are irrelevant, no overkill of any kind happens
+				*/
+				$struct = $target->getStructureSystem($system->location);
+				if($struct && (!$struct->isDestroyed())){
+					$destroyed = false;
+					$remHealth = $struct->getRemainingHealth();
+					$dmgToDo = min($damage,$remHealth);			
+					if($dmgToDo >= $remHealth) $destroyed = true;
+					$damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $struct->id, $dmgToDo, 0, 0, $fireOrder->id, $destroyed, false, "", $this->weaponClass, $shooter->id, $this->id);
+					$damageEntry->updated = true;
+					$system->damage[] = $damageEntry;
+				}
 			}
-		} //endof function doDamage
+		} //endof function doDamageOBSOLETE
+		
+		/*repeat damage on structure (ignoring armor); 
+              system hit will have its armor reduced by 2
+              for non-fighter targets
+        */
+		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder)
+		{
+			$target = $ship;
+			if(!$target instanceof FighterFlight){
+				//reduce armor of system hit
+				if (!$system->advancedArmor) { //Advanced Armor prevents armor reduction
+					$crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = false; //in effect only on next turn
+					$system->criticals[] = $crit;
+					$crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = false; //in effect only on next turn
+					$system->criticals[] = $crit;
+				}
+				//repeat damage on structure this system is mounted to
+				$struct = $target->getStructureSystem($system->location);
+				if($struct && (!$struct->isDestroyed())){
+					$destroyed = false;
+					$remHealth = $struct->getRemainingHealth();
+					$dmgToDo = min(($damage-$armour),$remHealth);			
+					if($dmgToDo >= $remHealth) $destroyed = true;
+					$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $struct->id, $dmgToDo, 0, 0, $fireOrder->id, $destroyed, false, "", $this->weaponClass, $fireOrder->shooterid, $this->id);
+					$damageEntry->updated = true;
+					$struct->damage[] = $damageEntry;
+				}
+			}
+		}//endof onDamagedSystem
         
         public function getDamage($fireOrder){        return Dice::d(5)+12;   }
         public function setMinDamage(){     $this->minDamage = 13 ;      }
         public function setMaxDamage(){     $this->maxDamage = 17 ;      }
 
-    }
+    }//endof class SolarCannon
 
 
 
