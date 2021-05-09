@@ -64,6 +64,8 @@ if (isset($_SESSION["user"])) {
 		---------- <b>LATEST NEWS - May 2021</b> ----------	    
 	    <br><b><u>Drazi Serpents can be deployed as flights</u></b> - making them behave as the other SHFs in game.
 	    <br><b><u>Geoffrey's update spree</u></b> - a lot of fixes for custom universes: BSG, Nexus, Escalation...
+	    <br><b><u>Fighter Diffuser Tendrils</u></b> - capacity display is reverted (now they show available capacity rather than filled, to match their shipborne cousins)
+	    <br><b><u>Solar Cannon fixed</u></b> - badly needed overhaul
 
 	    
         <br><br>
