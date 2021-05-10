@@ -52,8 +52,8 @@ class VorlonDestroyerEscort extends HeavyCombatVessel{
 		
 		
         $this->addFrontSystem(new VorlonDischargeGun(4, 0, 0, 120, 360));
-        $this->addFrontSystem(new VorlonDischargeGun(4, 0, 0, 240, 120));
         $this->addFrontSystem(new VorlonDischargeGun(4, 0, 0, 0, 240));
+        $this->addFrontSystem(new VorlonDischargeGun(4, 0, 0, 240, 120));
         $this->addFrontSystem(new EMShield(4, 6, 0, 4, 240, 60));
         $this->addFrontSystem(new EMShield(4, 6, 0, 4, 300, 120));
         $this->addFrontSystem(new GraviticThruster(5, 11, 0, 5, 1));

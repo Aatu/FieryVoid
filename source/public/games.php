@@ -67,6 +67,11 @@ if (isset($_SESSION["user"])) {
 	    <br><b><u>Geoffrey's update spree</u></b> - a lot of fixes for custom universes: BSG, Nexus, Escalation...
 	    <br><b><u>Fighter Diffuser Tendrils</u></b> - capacity display is reverted (now they show available capacity rather than filled, to match their shipborne cousins)
 	    <br><b><u>Solar Cannon fixed</u></b> - badly needed overhaul
+	    <br><b><u>Solar Cannon fixed</u></b> - why do it once when it can be done twice ;)
+	    <br><b><u>Self-Repair reined in</u></b> - will no longer fix damage caused in current turn
+	    <br><b><u>Lightning Cannon gained Accelerator status</u></b> - to prevent it from automatically intercepting stray shots and draining Power
+	    <br><b><u>Tiers list separated from Factions list</u></b> - now they're accessible separately
+	    <br><b><u>Brixadii and Colonials</u></b> - ongoing development updates and enhancements :)
 
 	    
         <br><br>
