@@ -23,7 +23,7 @@ class BrixadiiLightEscortFrigate extends MediumShip{
         $this->accelcost = 1;
         $this->rollcost = 1;
         $this->pivotcost = 1;
-        $this->iniativebonus = 12*5;
+        $this->iniativebonus = 14*5;
 
 		$this->addPrimarySystem(new Reactor(4, 9, 0, 0));
 		$this->addPrimarySystem(new CnC(4, 8, 0, 0));

@@ -10,14 +10,18 @@ class ColonialJupiterClass extends BaseShip{
         $this->imagePath = "img/ships/BSG/ColonialBattlestar.png";
         $this->shipClass = "Jupiter Battlestar";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 190; //img has 200px per side
+		$this->canvasSize = 180; //img has 200px per side
 		$this->limited = 33;
 		$this->unofficial = true;
 
-        $this->fighters = array("normal"=>60, "superheavy"=>6);
+        $this->fighters = array("medium"=>24, "heavy"=>6, "superheavy"=>6);
+		$this->customFighter = array("Python"=>6);
 
 		$this->notes = "Primary users: Colonial Fleet";
 		$this->isd = 1948;
+
+        $this->notes = 'Python capable';
+//        $this->notes .= '<br>Provides +5 Initiative for all friendly Colonial units';
         
         $this->forwardDefense = 17;
         $this->sideDefense = 20;
@@ -27,7 +31,7 @@ class ColonialJupiterClass extends BaseShip{
         $this->accelcost = 4;
         $this->rollcost = 4;
         $this->pivotcost = 6;
-        $this->iniativebonus = -1;
+        $this->iniativebonus = -5;
         
         $this->addPrimarySystem(new Reactor(6, 40, 0, 0));
         $this->addPrimarySystem(new CnC(6, 30, 0, 0));
@@ -77,7 +81,7 @@ class ColonialJupiterClass extends BaseShip{
 		$this->addLeftSystem(new RapidGatling(6, 4, 1, 190, 350));
 		$this->addLeftSystem(new RapidGatling(6, 4, 1, 190, 350));
 		$this->addLeftSystem(new RapidGatling(6, 4, 1, 190, 350));
-		$this->addLeftSystem(new Hangar(6, 33));
+		$this->addLeftSystem(new Hangar(6, 18));
 
         $this->addRightSystem(new Thruster(6, 18, 0, 3, 4));
         $this->addRightSystem(new Thruster(6, 18, 0, 3, 4));
@@ -89,7 +93,7 @@ class ColonialJupiterClass extends BaseShip{
 		$this->addRightSystem(new RapidGatling(6, 4, 1, 10, 170));
 		$this->addRightSystem(new RapidGatling(6, 4, 1, 10, 170));
 		$this->addRightSystem(new RapidGatling(6, 4, 1, 10, 170));
-		$this->addRightSystem(new Hangar(6, 33));
+		$this->addRightSystem(new Hangar(6, 18));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(4, 80));

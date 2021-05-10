@@ -109,7 +109,7 @@ class DrakhHeavyTender extends BaseShip{
             ),
             1=> array(
                     5 => "Thruster",
-					7 => "Absorbtion Shield",
+					7 => "Absorption Shield",
                     8 => "Light Polarity Pulsar",
                     10 => "Medium Polarity Pulsar",
                     18 => "Structure",
@@ -124,7 +124,7 @@ class DrakhHeavyTender extends BaseShip{
             ),
             3=> array(
                     4 => "Thruster",
-					5 => "Absorbtion Shield",
+					5 => "Absorption Shield",
                     8 => "Cargo Bay",
                     12 => "Catapult",
                     18 => "Structure",
@@ -132,7 +132,7 @@ class DrakhHeavyTender extends BaseShip{
             ),
             4=> array(
                     4 => "Thruster",
-					5 => "Absorbtion Shield",
+					5 => "Absorption Shield",
                     8 => "Cargo Bay",
                     12 => "Catapult",
                     18 => "Structure",

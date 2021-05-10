@@ -704,7 +704,7 @@ class MLPA extends Weapon{
 */
 class AbsorbtionShield extends Shield implements DefensiveSystem{
     public $name = "absorbtionshield";
-    public $displayName = "Absorbtion Shield";
+    public $displayName = "Absorption Shield"; //typo corection: 'Absorption' is correct rather than 'Absorbtion'!
     public $iconPath = "shield.png";
     public $boostable = true; //$this->boostEfficiency and $this->maxBoostLevel in __construct() 
     public $baseOutput = 0; //base output, before boost
