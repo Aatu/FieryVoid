@@ -14,6 +14,7 @@ class ApolloFull extends BaseShip{
         $this->canvasSize = 200;
         $this->limited = 33;
 	    $this->unofficial = true;
+  	    $this->isd = 2264;	    
 
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
