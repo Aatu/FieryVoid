@@ -71,7 +71,8 @@ if (isset($_SESSION["user"])) {
 	    <br><b><u>Self-Repair reined in</u></b> - will no longer fix damage caused in current turn
 	    <br><b><u>Lightning Cannon gained Accelerator status</u></b> - to prevent it from automatically intercepting stray shots and draining Power
 	    <br><b><u>Tiers list separated from Factions list</u></b> - now they're accessible separately
-	    <br><b><u>Brixadii and Colonials</u></b> - ongoing development updates and enhancements :)
+	    <br><b><u>Brixadii and Colonials</u></b> - ongoing development updates and enhancements 	    
+	    <br><b><u>Torata graphics update</u></b> 
 
 	    
         <br><br>
