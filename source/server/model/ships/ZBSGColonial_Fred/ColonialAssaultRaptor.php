@@ -30,34 +30,42 @@ class ColonialAssaultRaptor extends SuperHeavyFighter{
         $this->iniativebonus = 70;
         $this->hasNavigator = true;
         $this->maxFlightSize = 3;//this is a superheavy fighter originally intended as single unit, limit flight size to 3
+
+		$this->populate();
+		
+	}
         
-        $armour = array(4, 3, 3, 3);
-        $fighter = new Fighter("raptor", $armour, 30, $this->id);
-        $fighter->displayName = "Raptor Basic Fit";
-        $fighter->imagePath = "img/ships/BSG/raptor.png";
-        $fighter->iconPath = "img/ships/BSG/raptor_large.png";
+    public function populate(){        
 
-        $frontGun = new BSGKineticEnergyWeapon(340, 20, 2, 4);
-        $frontGun->displayName = "Kinetic Energy Cannon";
-        $hvyGun = new BSGHvyKineticEnergyWeapon(340, 20, 1); //$startArc, $endArc, $nrOfShots
-		$hvyGun->displayName = "Heavy Kinetic Energy Cannon";
-        $missile1 = new FighterMissileRack(3, 330, 30);
-		$missile1->displayName = "Missile Pod";
-        $missile2 = new FighterMissileRack(3, 330, 30);
-		$missile2->displayName = "Missile Pod";
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+		
+		for ($i = 0; $i < $toAdd; $i++) {
+			$armour = array(4, 3, 3, 3);
+			$fighter = new Fighter("raptor", $armour, 30, $this->id);
+			$fighter->displayName = "Assault Raptor";
+			$fighter->imagePath = "img/ships/BSG/raptor.png";
+			$fighter->iconPath = "img/ships/BSG/raptor_large.png";
 
-        $fighter->addFrontSystem($frontGun);
-        $fighter->addFrontSystem($hvyGun);
+			$frontGun = new BSGKineticEnergyWeapon(340, 20, 2, 4);
+			$frontGun->displayName = "Kinetic Energy Cannon";
+			$hvyGun = new BSGHvyKineticEnergyWeapon(340, 20, 1); //$startArc, $endArc, $nrOfShots
+			$hvyGun->displayName = "Heavy Kinetic Energy Cannon";
+			$missile1 = new FighterMissileRack(3, 330, 30);
+			$missile1->displayName = "Missile Pod";
+			$missile2 = new FighterMissileRack(3, 330, 30);
+			$missile2->displayName = "Missile Pod";
 
-        $fighter->addAftSystem($missile1);
-        $fighter->addAftSystem($missile2);
-		$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+			$fighter->addFrontSystem($frontGun);
+			$fighter->addFrontSystem($hvyGun);
+
+			$fighter->addAftSystem($missile1);
+			$fighter->addAftSystem($missile2);
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
-        $this->addSystem($fighter);
-    }
-
-    public function populate(){
-        return;
+			$this->addSystem($fighter);
+		}
     }
     
     public function getInitiativebonus($gamedata){

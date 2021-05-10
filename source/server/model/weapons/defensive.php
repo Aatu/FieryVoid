@@ -417,10 +417,14 @@ class FtrShield extends Shield implements DefensiveSystem{
     }
 	
     public function setSystemDataWindow($turn){
-	parent::setSystemDataWindow($turn);
-	$this->data["Basic Strength"] = $this->output;      
-	if (!array_key_exists ( "Special" , $this->data )) $this->data["Special"] = "";
-	$this->data["Special"] .= "<br>Cannot fly under fighter shield (too small)."; 
+		parent::setSystemDataWindow($turn);
+		$this->data["Basic Strength"] = $this->output;      
+		if (!array_key_exists ( "Special" , $this->data )) {
+			$this->data["Special"] = "";
+		}else{
+			$this->data["Special"] .= "<br>";
+		}
+		$this->data["Special"] .= "Cannot fly under fighter shield."; 
     }
 	
 } //endof class  FtrShield

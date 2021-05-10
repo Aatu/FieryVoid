@@ -51,7 +51,7 @@ class DrakhHeavyRaider extends LCV{
         		0=> array( //should never happen (but it will!)
         				10 => "Structure",
         				12 => "Phase Disruptor",
-        				14 => "Absorbtion Shield",
+        				14 => "Absorption Shield",
         				16 => "Engine",
         				18 => "Reactor",
         				20 => "Scanner",
@@ -59,7 +59,7 @@ class DrakhHeavyRaider extends LCV{
         		1=> array( //PRIMARY hit table, effectively
         				10 => "Structure",
         				12 => "0:Phase Disruptor",
-        				14 => "0:Absorbtion Shield",
+        				14 => "0:Absorption Shield",
         				16 => "0:Engine",
         				18 => "0:Reactor",
         				20 => "0:Scanner",
@@ -67,7 +67,7 @@ class DrakhHeavyRaider extends LCV{
         		2=> array( //PRIMARY hit table, effectively
         				10 => "Structure",
         				12 => "0:Phase Disruptor",
-        				14 => "0:Absorbtion Shield",
+        				14 => "0:Absorption Shield",
         				16 => "0:Engine",
         				18 => "0:Reactor",
         				20 => "0:Scanner",

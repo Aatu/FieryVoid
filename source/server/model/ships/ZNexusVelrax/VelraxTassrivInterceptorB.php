@@ -10,7 +10,7 @@ class VelraxTassrivInterceptorB extends FighterFlight{
         $this->shipClass = "Tassriv Interceptor-B flight";
 			$this->variantOf = "Tassriv Interceptor-A flight";
 			$this->occurence = "common";
-        $this->imagePath = "img/ships/Nexus/VelraxTassriv.png";
+        $this->imagePath = "img/ships/Nexus/VelraxTassriv_v2.png";
 		$this->unofficial = true;
 
         $this->isd = 2107;
@@ -38,7 +38,7 @@ class VelraxTassrivInterceptorB extends FighterFlight{
             $armour = array(2, 1, 1, 1);
             $fighter = new Fighter("VelraxTassrivInterceptorA", $armour, 9, $this->id);
             $fighter->displayName = "Tassriv-B";
-            $fighter->imagePath = "img/ships/Nexus/VelraxTassriv.png";
+            $fighter->imagePath = "img/ships/Nexus/VelraxTassriv_v2.png";
             $fighter->iconPath = "img/ships/Nexus/VelraxTassriv_Large.png";
 
 	        $light = new NexusLightIonBolter(330, 30, 0); //$startArc, $endArc, $nrOfShots
