@@ -61,32 +61,12 @@ if (isset($_SESSION["user"])) {
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
 -->        
-		---------- <b>LATEST NEWS - April 2021</b> ----------	    
-	    <br><b><u>Vorlons have arrived</u></b> - now the Order will surely prevail! Note that, as with every new faction, probability of encountering bugs is quite high (Shadow servants are always active!)
-	    <br><b><u>Grome have arrived</u></b> - now the most powerful nation in the universe is Yours to command!
-	    <br><b>Ancient-level fleet restrictions</b> - now fleets containing Ancient units will have different requirements.
-	    <br><b>fighter defensive systems fixed</b> - now hit chance shown accounts for them properly (so You know what Your chance of hitting that crucial Kotha flight is :) )
-	    <br><b>early EA ships hit chart fixed</b> - now shooting their Starboard shouldn't hang the game :)
-	    <br><b>Warlock hit chart fixed</b> - now her Sensors are hittable :)
-	    <br><b>SelfRepair priorities change</b> - now reviving destroyed systems comes before repairing damaged Structure
-	    <br><b>Vorlon major refit</b> - now Lightning Cannons on capital ships cannot fall off. New breed only :) - already picked ships will not be affected.
-	    <br><i><u><b>--- 19.04.2021 ---</b></u></i>
-	    <br><b><u>Grome expanded</u></b> - new ships and special Railgun shells!
-	    <br><b>Self Repair reprioritized again</b> - revive first, fill boxes later
-	    <br><b>Fleet Checker explained</b> - fleet design details file, available from fleet design screen
-	    <br><b>Special deployment zones disabled</b> - they weren't working correctly
-	    <br><b>Gaim Shamor usable again</b> - Plasma Blast bug fixed (replaced by true and tested Twin Array ;) )
-	    <br><b>Armor Reduced bug fixed</b> - now armor reduction of Plasma Stream and open Capacitor Petals work immediately (correctly)
-	    <br><i><u><b>--- 22.04.2021 ---</b></u></i>
-	    <br><b>Lightning Cannon fix</b> - now it is uninterceptable
-	    <br><b>RNG test</b> - if You like number crunching
-	    <br><i><u><b>--- 23.04.2021 ---</b></u></i>
-	    <br><b>Vorlon credit line closed</b> - firing declaration using more power than available will be blocked from committing
-	    <br><b>Vorlon safe travel enabled</b> - have You set Your Adaptive Armor today? check added
-	    <br><i><u><b>--- 28.04.2021 ---</b></u></i>
-	    <br><b>Adaptive Armor bug fixed</b> - now total AA points available are properly recognized as such
-	    <br><b>BSG Colonials updated</b>
-	    <br><b>Nexus Updated</b>
+		
+		---------- <b>LATEST NEWS - May 2021</b> ----------	    
+	    <br><b><u>Drazi Serpents can be deployed as flights</u></b> - making them behave as the other SHFs in game.
+	    <br><b><u>Geoffrey's update spree</u></b> - a lot of fixes for custom universes: BSG, Nexus, Escalation...
+	    <br><b><u>Fighter Diffuser Tendrils</u></b> - capacity display is reverted (now they show available capacity rather than filled, to match their shipborne cousins)
+	    <br><b><u>Solar Cannon fixed</u></b> - badly needed overhaul
 
 	    
         <br><br>
@@ -101,6 +81,7 @@ if (isset($_SESSION["user"])) {
 		<br><a href="https://www.youtube.com/channel/UCpzERJTeVoFVon_QqWQxesw/featured" target=\"_blank\">Video tutorials</a> - Fiery Void video tutorials are available on YouTube!
 		<br><a href="files/enhancements_list.txt">Fiery Void Enhancement list</a> - unit enhancements available, with short explanations.
 		<br><a href="files/FV_factions.txt">Fiery Void Factions list</a> - short info on more exotic rules and systems of fleets available.
+		<br><a href="files/FV_tiers.txt">Fiery Void Tiers list</a> - UNOFFICIAL and SUBJECTIVE factions grouping.
 		<br><a href="randomTest.php">RNG test</a> - what is Lady's mood today?
 				
 		<br><br>---------- <b>PLAYER ACCOUNT</b> ----------
