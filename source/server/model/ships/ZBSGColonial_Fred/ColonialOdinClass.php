@@ -9,12 +9,12 @@ class ColonialOdinClass extends BaseShip{
         $this->phpclass = "ColonialOdinClass";
         $this->imagePath = "img/ships/BSG/ColonialOdin2.png";
         $this->shipClass = "Odin Battlestar";
-        $this->shipSizeClass = 2;
+        $this->shipSizeClass = 3;
 		$this->canvasSize = 140; //img has 140px per side
 //		$this->unlimited 
 		$this->unofficial = true;
 
-        $this->fighters = array("normal"=>40, "superheavy"=>4);
+        $this->fighters = array("medium"=>18, "superheavy"=>2);
 
 		$this->notes = "Primary users: Colonial Fleet";
 		$this->isd = 1948;
@@ -27,7 +27,7 @@ class ColonialOdinClass extends BaseShip{
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 3;
-        $this->iniativebonus = 5;
+        $this->iniativebonus = 0;
         
         $this->addPrimarySystem(new Reactor(6, 27, 0, 0));
         $this->addPrimarySystem(new CnC(6, 20, 0, 0));
@@ -61,14 +61,14 @@ class ColonialOdinClass extends BaseShip{
 
         $this->addLeftSystem(new Thruster(5, 20, 0, 3, 3));
         $this->addLeftSystem(new Bulkhead(0, 6));
-        $this->addLeftSystem(new BSGMainBattery(5, 9, 6, 225, 305));
+        $this->addLeftSystem(new BSGMainBattery(5, 9, 6, 235, 305));
         $this->addLeftSystem(new BSGFlakBattery(5, 6, 2, 210, 330));
         $this->addLeftSystem(new BSGFlakBattery(5, 6, 2, 210, 330));
 		$this->addLeftSystem(new RapidGatling(5, 4, 1, 210, 330));
 		$this->addLeftSystem(new RapidGatling(5, 4, 1, 210, 330));
 		$this->addLeftSystem(new SMissileRack(5, 6, 0, 210, 330));
         $this->addLeftSystem(new SMissileRack(5, 6, 0, 210, 330));
-        $this->addLeftSystem(new Hangar(5, 22));
+        $this->addLeftSystem(new Hangar(5, 10));
 
         $this->addRightSystem(new Thruster(5, 20, 0, 3, 4));
         $this->addRightSystem(new Bulkhead(0, 6));
@@ -79,7 +79,7 @@ class ColonialOdinClass extends BaseShip{
 		$this->addRightSystem(new RapidGatling(5, 4, 1, 30, 150));
         $this->addRightSystem(new SMissileRack(5, 6, 0, 30, 150));
         $this->addRightSystem(new SMissileRack(5, 6, 0, 30, 150));
-        $this->addRightSystem(new Hangar(5, 22));
+        $this->addRightSystem(new Hangar(5, 10));
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(4, 50));

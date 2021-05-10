@@ -41,11 +41,20 @@ class ColonialViperMk2 extends FighterFlight{
             $fighter->imagePath = "img/ships/BSG/viperMk2.png";
             $fighter->iconPath = "img/ships/BSG/viperMk2_large.png";
 
+            $missileRack = new FighterMissileRack(2, 330, 30);
+            $missileRack->firingModes = array(
+                1 => "FY"
+            );
+
+            $missileRack->missileArray = array(
+                1 => new MissileFY(330, 30)
+            );
+
             $frontGun = new BSGLtKineticEnergyWeapon(340, 20, 1, 2);
             $frontGun->displayName = "Light Kinetic Energy Cannon";
 
             $fighter->addFrontSystem($frontGun);
-            $fighter->addFrontSystem(new FighterMissileRack(2, 330, 30));
+            $fighter->addFrontSystem($missileRack);
 
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			
             
