@@ -961,7 +961,10 @@ class Hangar extends ShipSystem{
 	//Hangar is not important at all!
 	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
-    function __construct($armour, $maxhealth, $output = 6){
+    function __construct($armour, $maxhealth, $output = null){
+		if($output === null){ //if output is not explicitly indicated, assume it to be 6 per every full 6 boxes! (that's the usual combat craft capacity)
+			$output = floor($maxhealth/6);
+		}
         parent::__construct($armour, $maxhealth, 0, $output ); 
     }
 }
