@@ -721,7 +721,7 @@
         public $damageType = "Standard"; 
         public $weaponClass = "Particle"; 
         public $noOverkill = true; // The damage of a solar cannon does not overkill.
-        public $firingModes = array( 1 => "Special"); 
+		public $firingModes = array( 1 => "Melt"); 
         
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -782,6 +782,27 @@
 			}
 		} //endof function doDamageOBSOLETE
 		
+		/*actually repeating damage scored on appropriate Structure*/
+		private function doRepeatDamageOnStructure($fireOrder,$target,$systemHit,$damageToRepeat){
+			if(!$target instanceof FighterFlight){
+				$struct = null;
+				if($systemHit instanceof Structure){
+					$struct = $systemHit;
+				}else{
+					$struct = $target->getStructureSystem($systemHit->location);
+				}
+				if($struct && (!$struct->isDestroyed())){
+					$destroyed = false;
+					$remHealth = $struct->getRemainingHealth();	
+					if($damageToRepeat >= $remHealth) $destroyed = true;
+					$damageToMark = min($damageToRepeat, $remHealth);
+					$damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $struct->id, $damageToMark, 0, 0, $fireOrder->id, $destroyed, false, "", $this->weaponClass, $fireOrder->shooterid, $this->id);
+					$damageEntry->updated = true;
+					$struct->damage[] = $damageEntry;
+				}
+			}
+		}//endof function doRepeatDamageOnStructure
+		
 		/*repeat damage on structure (ignoring armor); 
               system hit will have its armor reduced by 2
               for non-fighter targets
@@ -802,7 +823,15 @@
 					$system->criticals[] = $crit;
 				}
 				//repeat damage on structure this system is mounted to
-				$struct = $target->getStructureSystem($system->location);
+				$damageToRepeat = $damage-$armour;
+				$this->doRepeatDamageOnStructure($fireOrder,$target,$system,$damageToRepeat);
+				/*
+				$struct = null;
+				if($system instanceof Structure){
+					$struct = $system;
+				}else{
+					$struct = $target->getStructureSystem($system->location);
+				}
 				if($struct && (!$struct->isDestroyed())){
 					$destroyed = false;
 					$remHealth = $struct->getRemainingHealth();
@@ -812,8 +841,35 @@
 					$damageEntry->updated = true;
 					$struct->damage[] = $damageEntry;
 				}
+				*/
 			}
 		}//endof onDamagedSystem
+		
+		//overkill should return damaged system itself, even if it is destroyed! - necessary for redefined doDamage to work properly
+		protected function getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location = null)
+		{
+			if($damageWasDealt){
+				if(!$target instanceof FighterFlight){
+					return $system;
+				}else{
+					return null;
+				}
+			}else{ //if damage was NOT dealt yet - regular looking for system hit should happen
+				return parent::getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location );
+			}
+		}//endof function getOverkillSystem
+		
+		//if damage was already dealt - proceed immediately to melting effect (of overkill) - else regular behavior
+		protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
+		{
+			if($damageWasDealt){
+				$this->doRepeatDamageOnStructure($fireOrder,$target,$system,$damage);
+			}else{
+				parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+			}			
+		}//endof function doDamage
+		
+		
         
         public function getDamage($fireOrder){        return Dice::d(5)+12;   }
         public function setMinDamage(){     $this->minDamage = 13 ;      }

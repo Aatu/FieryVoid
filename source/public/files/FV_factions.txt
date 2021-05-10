@@ -11,10 +11,7 @@ Custom designs - some units are marked as "custom". This means they're not offic
 Unit enhancements - Fiery Void allows players to add enhancements to their ships (full list is available in separate file). Keep in mind that unit enhancements are originally optional rule, and enhancements may not be evaluated as well as base hulls (although they're generally pricy compared to their effect!). 
 	Before using enhancements for more than rounding out remaining points it's good practice to make sure that Your opponent agrees with that (and if You create a game with enhancements allowed - say so explicitly in game description!).
 	Note that some options listed as "Enhancements" are such only technically, as they're regularly available unit options (eg. fighter navigator). This is noted in enhancements list as well.
-Fleet checker - tool that performs automatic check of fleet composition (using standard tournament rules). Game does not enforce its use, but these restrictions are aimed at creation of balanced and interesting fleets so it's encouraged :) . There are a few caveats to its workings:
-	- non-standard restrictions are not checked (unit- or faction- specific requirements, allowances and restrictions - they're usually present in unit notes, for player to check (or not))
-	- fighter variant restrictions are at flight level. This means that flight size does not matter, please do not abuse this. Secondly, official rules says fighter variant restrictions are of FLIGHTS per SQUADRONS (eg. uncommon - one flight per three squadrons). FV goes for straight one per three flights (this is a deliberate change). 
-	- Fiery Void scales restrictions with fleet size (base rules have some restrictions flat aimed at 3500 level, eg. up to 3 ships on a given hull - this would have been ridiculous in 10000 points battle and hardly a limit at 2000)
+Fleet checker - tool that performs automatic check of fleet composition. Game does not enforce its use, but these restrictions are aimed at creation of balanced and interesting fleets so it's encouraged :) . It's SUBJECTIVELY extrapolated from official tournament rules.
 
 
 
@@ -272,7 +269,7 @@ But with these caveats - have fun! Ancients should be balanced against each othe
 Below list of systems Shadows use, with short description of effect and design differences from original tabletop.
 Called shots - systems on Shadow ships cannot be targeted by called shots.
 Enhancements - Shadow ships use no crew, so cannot use rew-related enhancements. They can use enhancements relating to special officers (that would be ship pilot's skill in such case). They have their own faction-specific enhancements as well.
-Self-Repair - automated, player cannot decide what is repaired. Damage suffered in current turn can be repaired, criticals can't. Cost of critical repair has been changed in places, and there's no partial repair of crits. See system description for details.
+Self-Repair - automated, player cannot decide what is repaired. Damage and criticals suffered in current turn cannot be repaired. Cost of critical repair has been changed in places (in particular C&C criticals aren't that costly to fix), and there's no partial repair of crits. 
 	If Self-Repair is destroyed or damaged, unused repair points are NOT lost.
 Energy Diffuser - absorbs damage as it's being dealt (and diffuses it over time). In FV Diffuser always kicks in if possible, there's no option to withhold its use eg. waiting for more threatening damage and conserving resources. Diffuser can dissipate damage just absorbed. For visual reasons tendrils are shown as separate (untargetable) systems. Damage absorbed by ship tendrils is not shown in log.
 	Diffuser will not try to stop no-overkill damage that would kill system hit despite Diffuser interference. This is important for very strong Matter or Piercing shots.
@@ -335,7 +332,7 @@ VORLONS
 Ancient race, by definition complicated, very specific and not really on par with younger ones - tech difference is too high for proper balance. Ancient factions were officially not tournament legal.
 But with these caveats - have fun! Ancients should be balanced against each other, and if Your opponent knows what to expect/You're playing a scenario, go ahead with other pairings as well. Note that sky-high individual cost of Ancient units makes standard requirements based on total fleet value completely inadequate - so they have been modified for fleet checker.
 Below list of systems and rules Vorlons use, with short description of effect and design differences from original tabletop.
-Self-Repair - see Shadows and Minbari. Vorlon sef-repair systems work the same, although are usually more powerful.
+Self-Repair - see Shadows. Vorlon sef-repair systems work the same way, although are usually more powerful.
 Power Capacitor: defines how much Power a Vorlon ship has available. Can hold Power between turns (up to Capacity).
  - recharge occurs in Initial phase (tabletop - just before movement, which makes power not usable in Initial phase)
  - opening petals reduces armor of all systems by 2 (tabletop - armor is reduced on PRIMARY only, but all profiles are increased by 1)
@@ -346,13 +343,14 @@ Mag-Gravitic Reactor: for technical reasons Vorlons in FV are using Mag-Gravitic
 Scanner uses no power: it's operating cost are base hull feature and do not affect power usage.
 Jump Drive uses no power: it's operating cost are base hull feature and do not affect power usage. This differes a bit from tabletop where Jump Drive odes use power (...which is counted as nominal). The only actual difference is that You cannot shut down Jump Drive on Vorlon ships for power in FV.
 All Vorlon weapons have nominally 0 Power usage - they need Power to actually shoot, but that is only decided and drained at moment of firing.
-Discharge Gun:
+Discharge Gun (and Cannon):
  - Accelerator property added just so weapon requires explicit permission to intercept
  - increased power levels are implemented as firing modes.
  - additional shots are handled as in Ballistic Torpedo, by changing number of shots fired AFTER declaration is made
  - by default full rate of fire is used
  - each shot is at the same power level
 Lightning Cannon:
+ - Accelerator property added just so weapon requires explicit permission to intercept
  - can combine weapons for higher power shots. To do so, appropriate number of weapons must have same mode and target assigned (same mechanics as Ipsha Surge Cannons actually).
  - if player mis-declares and not enough weapons are assigned for declared mode, shot is cancelled (technically: automatically misses) (and does not drain Power)
  - interception shot is very effective, so weapon was not locked away from it - unassigned Lightning Cannons will try to intercept if applicable (and drain Power for it).
@@ -460,85 +458,3 @@ StarWars Sensors are portrayed to be generally of lower tech than B5 ones. This 
 	
 	
 
-
-
-POWER RATINGS
--------------
-Below is completely subjective grouping of factions by power rating. Factions from the same bracket share some characteristics, which in most cases means they should be well-matched for a competitive pickup play (which doesn't mean perfect!). In a few cases I took liberty to highlight a particular build as a separate ‘faction’.
-Note that evaluation (just like point values) assumes standard conditions (default-sized fixed map, basically) – changing conditions throws it away.
-
-
-EASY AND FORGIVING
-Factions that are particularly easy to fly, and recommended for new players. Use these factions for Your first set of battles – You will fight interface and opponent, let Your ships make that a bit easier for You! When You feel that period is over and want to expand – be advised to still avoid factions marked as particularly difficult.
-Drazi (their jack-of-all-trades ships are very flexible and can unleash full power against any oponent, while their layout makes them surprisingly resistant to damage).
-Narn (very tough and with powerful weapons – they may not be fancy, but they get the job done and refuse to die even if put in unfavorable position; average in most other aspects, which gives good feeling of what You want from Your units and allows informed choices for expanding Your picks)
-EA (extremely tough, with awesome defenses and good firepower – balanced by difficulties with firepower concentration and low maneuvrability. Their resilience makes them very forgiving to any mistakes a beginner may make)
-  
-
-FIRST TIER
-This is default Big4 power level in show era – what I consider to be the ‘baseline’ of competitive play. Smaller factions may fit here due to their raw power, but usually won’t allow flexibility of fleet design offered by major factions.
-Brakiri
-Centauri
-Dilgar
-Drakh (although, being Middleborn rather than Young race, they exhibit some traits similar to Ancients – not enough to kick them to Ancients grouping though)
-Drazi
-EA (barring Warlock)
-Gaim
-Llort
-Minbari (warning: Jammer is very daunting, expecially to new players – it’s easy to feel overwhelmed; at the same time flying Minbari is not easy either. It’s advised to stay away from them on either side of the table until You feel You have solid command of the game)
-Narn (barring massed EMines)
-Orieni (this one is tricky – will usually feel superior against average player due to raw damage output of Hunter-Killers and massed RGRs, while remaining vulnerable against sharp handling by expert oponent; if You don’t consider Yourself an expert, be advised to treat Orieni as a Superior faction)
-Torata 
-
-
-SECOND TIER
-Factions that point for point will have uphill battle against First League, yet otherwise are balanced and competitive. Should be interesting to play against each other, and if given some extra PV allowance – against First League as well. Most of these factions do not offer fleet build flexibility of major factions, but may offer a very distinct handling/playstyle instead.
-Abbai
-Balosian
-Belt Alliance (Small Races)
-Brixadii (custom faction - No fighters and high maneuvrability)
-Cascor
-Centauri (WotCR)
-Ch’Lonas
-Chouka (custom faction)
-Circasian (custom faction)
-Dalithorn (custom faction)
-Deneth
-Descari
-Drazi (WotCR)
-Ipsha
-Markab
-Raiders (note plethora of background-driven options – Raiders often use a hodgepodge of units and formal FV fleet selection rules don’t always do them justice!)
-Star Wars (custom faction with VERY different playstyle - consider them difficult to fly!)
-Velrax (custom faction)
-
-
-THE REST
-Factions that cannot seriously compete. Usually they have some deficiencies that cannot be fixed by simply increasing their PV allowance (like combination of poor maneuvrability/poor Sensors/short range weapons on low-tech ships or some glaring weakness in overall fleet layout).
-Abbai (WotCR)
-Alacan (Small Races)
-Chouka Raiders (custom faction)
-Grome
-Hurr
-Rogolon (Small Races)
-Sorithian (Small Races)
-Sshel'ath (custom faction)
-Usuuth
-
-
-
-SUPERIOR
-Factions that, point for point, usually beat First League. That may be due to overall superior value or some special side effect of their rules, so simply allowing opponent extra PV might not be enough to balance things.
-EA using Warlock
-ISA (eg. all-White Star fleet - note that it's difficult to fly, too!)
-Narn using massed EMines 
-Yolu
-
-
-ANCIENTS
-Factions that can’t really be balanced vs Young Races. Overall high power and durability and selective ignoring enemy systems (especially defensive ones – which hurts some opponents while leaving others untouched) coupled with small numer of shots and relative vulnerability to swarms are impossible to properly balance for pickup battle. For these reasons Ancients got their own category.
-Shadows
-Streib (actually a Young race, but their ship design and technology is peculiar enough for them to feel surprisingly Ancient-like when it comes to balancing: some opponents are easily overwhelmed (especially those that rely on mass of individually light shots), while others are overwhelming themselves (especially if they’re resistant to EM weapons or have high quantity of armor-ignoring weapons). Streib are definitely NOT up to fighting actual Ancients though! )
-Vorlons
-
- 
