@@ -24,7 +24,7 @@ class BrixadiiBattleDestroyerLeader2108 extends HeavyCombatVessel{
         $this->accelcost = 2;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-        $this->iniativebonus = 30;
+        $this->iniativebonus = 40;
          
         $this->addPrimarySystem(new Reactor(4, 19, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));

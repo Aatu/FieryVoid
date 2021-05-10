@@ -5,7 +5,7 @@ class ViperMk2_K extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 210;
-        $this->faction = "ZPlaytest 12 Colonies of Kobol";
+        $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "ViperMk2_K";
         $this->shipClass = "Viper Mk-2 flight";
         $this->imagePath = "img/ships/BSG/viperMk2.png";
@@ -19,7 +19,7 @@ class ViperMk2_K extends FighterFlight{
         $this->jinkinglimit = 8;
         $this->turncost = 0.33;
         
-	$this->iniativebonus = 90;
+	$this->iniativebonus = 100;
         $this->populate();
     }
 
@@ -31,7 +31,7 @@ class ViperMk2_K extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(2, 1, 2, 2);
-            $fighter = new Fighter("ViperMk2_K", $armour, 9, $this->id);
+            $fighter = new Fighter("ViperMk2_K", $armour, 7, $this->id);
             $fighter->displayName = "Vipper Mk2";
             $fighter->imagePath = "img/ships/BSG/viperMk2.png";
             $fighter->iconPath = "img/ships/BSG/viperMk2_large.png";
@@ -53,7 +53,30 @@ class ViperMk2_K extends FighterFlight{
 
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack	
             $this->addSystem($fighter);
-	}
+		}
     }
+	
+    public function getInitiativebonus($gamedata){
+        $initiativeBonusRet = parent::getInitiativebonus($gamedata);
+        
+        if($gamedata->turn > 0 && $gamedata->phase >= 0 ){
+            // If within 5 hexes of a Raptor,
+            // each Viper gets +1 initiative.
+            
+            $ships = $gamedata->getShipsInDistance($this, 5);
+
+            foreach($ships as $ship){
+                if(!$ship->isDestroyed()
+                        && ($this->userid == $ship->userid)
+                        && ($ship instanceof ColonialRaptor_K)){
+                    $initiativeBonusRet+=5;
+                    break;
+                }
+            }
+        }
+        
+        return $initiativeBonusRet;
+    }		
+	
 }
 ?>
