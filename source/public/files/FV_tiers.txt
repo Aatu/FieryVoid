@@ -1,0 +1,84 @@
+FACTIONS available in Fiery Void split to more or less cohesive groups ("Tiers").
+Factions from the same bracket share some characteristics, which in most means they should be well-matched for a competitive pickup play (which doesn't mean perfect! - also, see Tier's description).
+This list is completely UNOFFICIAL and SUBJECTIVE. In a few cases I took liberty to highlight a particular build as a separate 'faction', too.
+This evaluation (just like official point values) assumes standard conditions (default-sized fixed map, basically) - changing conditions throws it away.
+
+
+EASY AND FORGIVING
+Factions that are particularly easy to fly, and recommended for new players. Use these factions for Your first set of battles - You will fight interface and opponent, let Your ships make that a bit easier for You! When You feel that period is over and want to expand - be advised to still avoid factions marked as particularly difficult.
+ - Drazi (their jack-of-all-trades ships are very flexible and can unleash full power against any oponent, while their layout makes them surprisingly resistant to damage)
+ - Narn (very tough and with powerful weapons - they may not be fancy, but they get the job done and refuse to die even if put in unfavorable position; average in most other aspects, which gives good feeling of what You want from Your units and allows informed choices for expanding Your picks)
+ - EA (extremely tough, with awesome defenses and good firepower - balanced by difficulties with firepower concentration and low maneuvrability. Their resilience makes them very forgiving to any mistakes a beginner may make)
+  
+
+FIRST TIER
+This is default power level of show era major factions ('Big 4') - what I consider to be the 'baseline' of competitive play. Smaller factions may fit here due to their raw power, but usually won't allow flexibility of fleet design offered by major factions.
+ - Brakiri
+ - Centauri
+ - Dilgar
+ - Drakh (custom faction; being Middleborn rather than Young race, they exhibit some traits similar to Ancients - not enough to kick them to Ancients grouping though)
+ - Drazi
+ - EA (barring Warlock)
+ - Gaim
+ - Llort
+ - Minbari (warning: Jammer is very daunting, expecially to new players - it's easy to feel overwhelmed; at the same time flying Minbari is not easy either. Not recommended (on either side of the table) until You feel You have solid command of the game!)
+ - Narn (barring massed EMines)
+ - Orieni (very tricky - may feel superior due to raw damage output of Hunter-Killers and massed RGRs, while remaining vulnerable against sharp handling by expert oponent; if You don't consider Yourself an expert, You may treat Orieni as a Superior faction)
+ - Torata 
+
+
+SECOND TIER
+Factions that point for point will have uphill battle against First Tier, yet otherwise are balanced and competitive. Should be interesting to play against each other, and if given some extra PV allowance - against First Tier as well. Most of these factions do not offer fleet build flexibility of major ones, but may offer very distinct playstyle instead.
+ - Abbai
+ - Balosian
+ - Belt Alliance (Small Races)
+ - Brixadii (custom faction - Nexus universe)
+ - Cascor
+ - Centauri (WotCR)
+ - Ch'Lonas (custom faction)
+ - Chouka (custom faction - Escalation Wars universe)
+ - Circasian (custom faction - Escalation Wars universe)
+ - Corillani
+ - Dalithorn (custom faction - Nexus universe)
+ - Deneth
+ - Descari
+ - Drazi (WotCR)
+ - Ipsha  
+ - Markab
+ - Raiders (note plethora of background-driven options - Raiders often use a hodgepodge of units and formal FV fleet selection rules don't always do them justice!)
+ - Star Wars (custom faction (or rather factions), Star Wars universe - with VERY different playstyle, consider them difficult to fly!)
+ - Velrax (custom faction - Nexus universe)
+
+
+THE REST
+Factions that cannot seriously compete. Usually they have some deficiencies that cannot be fixed by simply increasing their PV allowance (like combination of poor maneuvrability/poor Sensors/short range weapons on low-tech ships or some glaring weakness in overall fleet layout).
+This group is inherently unbalanced, even against each other!
+ - Abbai (WotCR)
+ - Alacan (Small Races)
+ - Chouka Raiders (custom faction - Escalation Wars universe)
+ - Grome
+ - Hurr
+ - Rogolon (Small Races)
+ - Sorithian (Small Races)
+ - Sshel'ath (custom faction - Escalation Wars universe)
+ - Streib (custom faction; their ship design and technology is peculiar enough for them to feel surprisingly Ancient-like when it comes to balancing. Streib are definitely NOT up to fighting actual Ancients though! - hence "the Rest")
+ - Usuuth
+
+
+
+SUPERIOR
+Factions that, point for point, usually beat First Tier. That may be due to overall superior value or some special side effect of their rules, so simply allowing opponent extra PV might not be enough to balance things.
+This group is inherently unbalanced, even against each other!
+ - EA using Warlock
+ - ISA (eg. all-White Star fleet - note that it's difficult to fly, too!)
+ - Narn using massed EMines 
+ - Yolu
+
+
+ANCIENTS
+Ancient factions that can't really be balanced vs Young Races. Overall high power and durability and selective ignoring enemy systems (especially defensive ones - which hurts some opponents while leaving others untouched) coupled with small numer of shots and relative vulnerability to swarms are impossible to properly balance for pickup battle, being vulnerable to some fleet builds and devastating vs others. For these reasons Ancients got their own category. Be warned that these fleets generally are difficult to fly and have LOTS of special rules.
+They should be balanced against each other though! Playing against Young fleet that is deliberately built to face Ancients may be interesting as well.
+ - Shadows
+ - Vorlons
+
+ 
