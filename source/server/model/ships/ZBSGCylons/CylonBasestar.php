@@ -8,7 +8,7 @@ class CylonBasestar extends SixSidedShip{
 		$this->faction = "ZPlaytest BSG Cylons";
 		$this->phpclass = "CylonBasestar";
 		$this->shipClass = "Cylon Basestar";
-		$this->fighters = array("heavy"=>36); 
+		$this->fighters = array("heavy"=>48); 
 		$this->isd = 1980;
 		$this->locations = array(41, 42, 2, 32, 31, 1);		
 
@@ -39,16 +39,15 @@ class CylonBasestar extends SixSidedShip{
         $this->addFrontSystem(new LHMissileRack(4, 8, 0,  300, 60));
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 60));
 		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 60));
-        $this->addFrontSystem(new Thruster(6, 10, 0, 5, 1));
-        $this->addFrontSystem(new Thruster(6, 10, 0, 5, 1));
+        $this->addFrontSystem(new Thruster(5, 15, 0, 5, 1));
+
 		
         $this->addAftSystem(new LHMissileRack(4, 8, 0, 120, 240));
 		$this->addAftSystem(new LHMissileRack(4, 8, 0, 120, 240));
 		$this->addAftSystem(new StdParticleBeam(2, 4, 1, 120, 240));
 		$this->addAftSystem(new StdParticleBeam(2, 4, 1, 120, 240));
-		$this->addAftSystem(new Thruster(5, 8, 0, 5, 2));
-        $this->addAftSystem(new Thruster(5, 8, 0, 5, 2));
-        
+		$this->addAftSystem(new Thruster(5, 15, 0, 5, 2));
+       
 		$this->addLeftFrontSystem(new LHMissileRack(4, 8, 0, 240, 0));
 		$this->addLeftFrontSystem(new LHMissileRack(4, 8, 0, 240, 0));
 		$this->addLeftFrontSystem(new StdParticleBeam(2, 4, 1, 240, 0));
