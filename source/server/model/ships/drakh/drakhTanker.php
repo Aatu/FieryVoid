@@ -97,14 +97,14 @@ class DrakhTanker extends BaseShip{
             ),
             3=> array(
                     4 => "Thruster",
-					6 => "Absorbtion Shield",
+					6 => "Absorption Shield",
                     10 => "Cargo Bay",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array(
                     4 => "Thruster",
-					6 => "Absorbtion Shield",
+					6 => "Absorption Shield",
                     10 => "Cargo Bay",
                     18 => "Structure",
                     20 => "Primary",
