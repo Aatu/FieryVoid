@@ -23,7 +23,7 @@ class BrixadiiFastCourier extends BaseShipNoAft{
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-		$this->iniativebonus = 0;
+		$this->iniativebonus = 5;
          
         $this->addPrimarySystem(new Reactor(5, 18, 0, 0));
         $this->addPrimarySystem(new CnC(5, 20, 0, 0));

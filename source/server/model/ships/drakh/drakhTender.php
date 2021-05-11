@@ -102,7 +102,7 @@ class DrakhTender extends BaseShip{
             ),
             3=> array(
                     4 => "Thruster",
-					6 => "Absorbtion Shield",
+					6 => "Absorption Shield",
                     11 => "Cargo Bay",
                     13 => "Catapult",
                     18 => "Structure",
@@ -110,7 +110,7 @@ class DrakhTender extends BaseShip{
             ),
             4=> array(
                     4 => "Thruster",
-					6 => "Absorbtion Shield",
+					6 => "Absorption Shield",
                     11 => "Cargo Bay",
                     13 => "Catapult",
                     18 => "Structure",

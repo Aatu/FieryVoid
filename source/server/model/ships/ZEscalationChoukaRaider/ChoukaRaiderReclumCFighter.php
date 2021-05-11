@@ -8,6 +8,8 @@ class ChoukaRaiderReclumCFighter extends FighterFlight{
         $this->faction = "ZEscalation Chouka Raider";
         $this->phpclass = "ChoukaRaiderReclumCFighter";
         $this->shipClass = "Reclum-C Light flight";
+			$this->variantOf = "Reclum-A Light flight";
+			$this->occurence = "common";
         $this->imagePath = "img/ships/EscalationWars/ChoukaRaiderReclum.png";
 		$this->unofficial = true;
 		

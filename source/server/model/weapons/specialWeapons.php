@@ -766,7 +766,7 @@ class CommDisruptor extends Weapon{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}	    
-	      $this->data["Special"] .= "Does no damage, but weakens target's Initiative (-1d6) and Sensors (-1d6) rating next turn";  
+	      $this->data["Special"] .= "Does no damage, but weakens target's Initiative (-1d6) and Sensors/OB (-1d6) rating next turn";  
     }	
     
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -857,7 +857,7 @@ class CommJammer extends Weapon{
 	
     public function setSystemDataWindow($turn){
 	      parent::setSystemDataWindow($turn);    
-	      $this->data["Special"] = "Does no damage, but weakens target's Initiative (-1d6) rating next turn";  
+	      $this->data["Special"] = "Does no damage, but weakens target's Initiative (-1d6) rating next turn.";  
     }	
     
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -949,7 +949,7 @@ class SensorSpear extends Weapon{
 	
     public function setSystemDataWindow($turn){
 	      parent::setSystemDataWindow($turn);    
-	      $this->data["Special"] = "Does no damage, but weakens target's Sensors (-1d3) rating next turn";  
+	      $this->data["Special"] = "Does no damage, but weakens target's Sensors/OB (-1d3) rating next turn.";  
     }	
     
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -1009,7 +1009,7 @@ class SensorSpike extends SensorSpear{
 	
     public function setSystemDataWindow($turn){
 	      parent::setSystemDataWindow($turn);  
-	      $this->data["Special"] = "Does no damage, but weakens target's Sensors (-1d6) rating next turn";  
+	      $this->data["Special"] = "Does no damage, but weakens target's Sensors/OB (-1d6) rating next turn";  
     }	
     
 
@@ -3179,6 +3179,7 @@ class VorlonLightningCannon extends Weapon{
 	public $alreadyConsidered = false;
 	
 	public $loadingtime = 1;
+	public $normalload = 2;
 	
 	public $uninterceptable = true; //Lightning Cannon is uninterceptable
 	public $intercept = 4; //intercept rating -4
@@ -3234,7 +3235,8 @@ class VorlonLightningCannon extends Weapon{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}	    		
-		$this->data["Special"] .= "Uninterceptable. Capable of multiple modes of fire. Higher modes require combining multiple prongs on the same target.";  
+		$this->data["Special"] .= "Uninterceptable. Capable of multiple modes of fire. Higher modes require combining multiple prongs on the same target."; 
+		$this->data["Special"] .= "<br>Accelerator option added only to force explicit player consent for interception. It does not change damage output.";   
 		$this->data["Special"] .= "<br>Firing modes available (Number of prongs/power used per SHOT/damage output (and mode)/range penalty):";  
 		$this->data["Special"] .= "<br> - 1 Prong: 1 Power, 1d10+8 Standard, -5/hex"; 
 		$this->data["Special"] .= "<br> - 2 Prongs: 4 Power, 2d10+16 Raking(10), -2.5/hex";
@@ -3531,6 +3533,198 @@ class VorlonLightningCannon extends Weapon{
 		}
 		
     } //endof class VorlonLtDischargeGun
+
+
+
+
+/* Vorlon not-quite-secondary weapon */
+class VorlonDischargeCannon extends Weapon{
+	public $name = "VorlonDischargeCannon";
+	public $displayName = "Discharge Cannon";
+	public $iconPath = "VorlonDischargeCannon.png";
+	public $animation = "laser";
+	public $animationColor = array(175, 225, 175);
+	public $trailColor = array(175, 225, 175);
+	public $projectilespeed = 15;
+	public $animationWidth = 5;
+	public $animationExplosionScale = 0.45;
+	public $trailLength = 30;
+	
+	public $loadingtime = 1;
+	public $normalload = 2;
+		
+	public $canChangeShots = true;
+	public $shots = 4;
+	public $defaultShots = 4; //can fire up to 4 shots (if power is available); LET'S DECLARE ALL 4 BY DEFAULT - chance of player wanting full power is higher than conserving energy (if he has energy shortages he'll be stopped by EoT check anyway)
+	public $intercept = 2; //intercept rating -2
+	
+	public $priority = 8; //light Raking weapon in lightest mode - heavier modes are definitely heavy Raking
+	public $priorityArray = array(1=>8, 2=>7, 3=>7);
+	
+	public $firingMode = 1;	
+	public $firingModes = array(
+		1 => "1xPower",
+		2 => "2xPower",
+		3 => "3xPower"
+	);
+	
+    public $rangePenalty = 0.5; //-1/2 hexes
+	public $fireControl = array(4, 3, 2); // fighters, <=mediums, <=capitals 
+	public $fireControlArray = array( 1=>array(4, 3, 2), 2=>array(3, 3, 3), 3=>array(2, 3, 5) ); 
+	public $rakingArray = array(1=>10, 2=>15, 3=>15);
+
+	public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	
+	public $multiplied = false; //technical variable
+	
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+	{
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+			$maxhealth = 15;
+		}
+		if ( $powerReq == 0 ){
+			$powerReq = 0;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+	
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);   
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}	    		
+		$this->data["Special"] .= "Accelerator option is here only to force explicit player consent for interception. It does not change damage output.";  
+		$this->data["Special"] .= "<br>Firing mode affects damage output (and power used), and also fire control (hogher modes become antiship-optimized):";  
+		$this->data["Special"] .= "<br> - 5 power: 4d10+5, Raking(10)"; 
+		$this->data["Special"] .= "<br> - 10 power: 6d10+10, Raking(15)"; 
+		$this->data["Special"] .= "<br> - 15 power: 8d10+15, Raking(15)"; 
+		$this->data["Special"] .= "<br>Weapon can fire up to 4 times (charging power above for each shot) - NEEDS TO BE DECLARED MANUALLY (by default 4 shots are declared but You may decrease this number)."; 
+	}
+		
+		
+		
+
+	public function getDamage($fireOrder){
+		switch($this->firingMode){
+			case 1:
+				return Dice::d(10, 4)+5; //5 Power
+				break;
+			case 2:
+				return Dice::d(10, 6)+10; //10 Power
+				break;
+			case 3:
+				return Dice::d(10, 8)+15; //15 Power
+				break;
+			default: //should never go here
+				return Dice::d(10, 4)+5;
+				break;
+		}
+	}
+        
+	public function setMinDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 9; //5 Power
+				break;
+			case 2:
+				$this->minDamage = 16; //10 Power
+				break;
+			case 3:
+				$this->minDamage = 23; //15 Power
+				break;
+			default: //should never go here
+				$this->minDamage = 9;
+				break;
+		}
+	}
+             
+	public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 45; //5 Power
+				break;
+			case 2:
+				$this->maxDamage = 70; //10 Power
+				break;
+			case 3:
+				$this->maxDamage = 95; //15 Power
+				break;
+			default: //should never go here
+				$this->maxDamage = 45;
+				break;
+		}
+	}
+	
+	
+	//hit chance calculation is standard - but at this stage power used information is sent to Capacitor, too
+	//if already combining - do not fire at all (eg. set hit chance at 0, make self completely uninterceptable and number of shots at 0)
+	public function calculateHitBase($gamedata, $fireOrder){
+		$capacitor = $this->unit->getSystemByName("PowerCapacitor");
+		if($capacitor){ //else something is wrong - weapon is put on a ship without Power Capacitor!
+			$powerNeeded = 5*$this->firingMode*$fireOrder->shots;
+			$capacitor->doDrawPower($powerNeeded);
+		}
+		parent::calculateHitBase($gamedata, $fireOrder); //standard hit chance calculation
+	}//endof function calculateHitBase
+
+	/* drain power when firing defensively
+	*/
+	public function fireDefensively($gamedata, $interceptedWeapon)
+	{
+		$capacitor = $this->unit->getSystemByName("PowerCapacitor");
+		if($capacitor){ //else something is wrong - weapon is put on a ship without Power Capacitor!
+			$capacitor->doDrawPower(5);
+		}
+		parent::fireDefensively($gamedata, $interceptedWeapon);
+	}
+	
+	/*can intercept anything only if Capacitor holds enough Power...*/
+	public function canInterceptAtAll($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon)
+	{
+		$powerIsAvailable = false;
+		$capacitor = $this->unit->getSystemByName("PowerCapacitor");
+		if($capacitor){ //else something is wrong - weapon is put on a ship without Power Capacitor!
+			if($capacitor->canDrawPower(5)) $powerIsAvailable = true;
+		}
+		return $powerIsAvailable;
+	}
+
+
+	//if fired offensively - make as many attacks as firing order declares shots (and resent number of shots declared to 1 :) )
+	//if defensively - make weapon have 4 GUNS (would be temporary, but enough to assign multiple shots for interception)
+	public function beforeFiringOrderResolution($gamedata){
+		if($this->multiplied==true) return;//shots of this weapon are already multiplied
+		$this->multiplied = true;//shots WILL be multiplied in a moment, mark this
+		//is offensive fire declared?...
+		$offensiveShot = null;
+
+		foreach($this->fireOrders as $fire){
+			if(($fire->type =='normal') && ($fire->turn == $gamedata->turn)) $offensiveShot = $fire;
+		}
+		if($offensiveShot!==null){ //offensive fire declared, multiply!
+			$shotsDeclared = $fire->shots;
+			$fire->shots = 1;
+			while($shotsDeclared > 1){ //first attack is already declared!
+				$multipliedFireOrder = new FireOrder( -1, $offensiveShot->type, $offensiveShot->shooterid, $offensiveShot->targetid,
+					$offensiveShot->weaponid, $offensiveShot->calledid, $offensiveShot->turn, $offensiveShot->firingMode,
+					0, 0, 1, 0, 0, null, null
+				);
+				$multipliedFireOrder->addToDB = true;
+				$this->fireOrders[] = $multipliedFireOrder;
+				$shotsDeclared--;	      
+			}
+		}else{//offensive fire NOT declared, multiply guns for interception!
+			$this->guns = 4; //up to 4 intercept shots (if Power is available and weapon is declared eligible)
+		}
+	} //endof function beforeFiringOrderResolution
+
+}//endof class VorlonDischargeCannon
 
 
 ?>

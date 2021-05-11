@@ -10,7 +10,7 @@ class VelraxResteraxRefit extends FighterFlight{
         $this->shipClass = "Resterax-B Assault flight";
 			$this->variantOf = "Resterax Assault flight";
 			$this->occurence = "common";
-        $this->imagePath = "img/ships/Nexus/VelraxResterax.png";
+        $this->imagePath = "img/ships/Nexus/VelraxResterax_v2.png";
 		$this->unofficial = true;
         $this->canvasSize = 5;
 
@@ -39,7 +39,7 @@ class VelraxResteraxRefit extends FighterFlight{
             $armour = array(3, 2, 2, 2);
             $fighter = new Fighter("VelraxResteraxFighter", $armour, 12, $this->id);
             $fighter->displayName = "Resterax-B";
-            $fighter->imagePath = "img/ships/Nexus/VelraxResterax.png";
+            $fighter->imagePath = "img/ships/Nexus/VelraxResterax_v2.png";
             $fighter->iconPath = "img/ships/Nexus/VelraxResterax_Large.png";
 
 			$mauler = new NexusMauler(330, 30, 1);

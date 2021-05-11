@@ -10,6 +10,7 @@ class ColonialPythonMk3 extends FighterFlight{
         $this->shipClass = "Python Mk3 Attack Flight";
         $this->imagePath = "img/ships/BSG/pythonMk3.png";
 		$this->unofficial = true;
+        $this->customFtrName = "Python";
 
 //        $this->isd = 1948;
 
@@ -39,7 +40,7 @@ class ColonialPythonMk3 extends FighterFlight{
             $fighter = new Fighter("ColonialPythonMk3", $armour, 18, $this->id);
             $fighter->displayName = "Python Mk3";
             $fighter->imagePath = "img/ships/BSG/pythonMk3.png";
-            $fighter->iconPath = "img/ships/BSG/pythonMk3_large.png";
+            $fighter->iconPath = "img/ships/BSG/pythonMk3_Large.png";
 
             $frontGun = new BSGKineticEnergyWeapon(340, 20, 2, 4);
             $frontGun->displayName = "Kinetic Energy Cannon";

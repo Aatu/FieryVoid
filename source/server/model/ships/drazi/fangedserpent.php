@@ -10,7 +10,8 @@ class FangedSerpent extends SuperHeavyFighter{
         $this->shipClass = "Fanged Serpent Command Fighter";
 	    $this->imagePath = "img/ships/drazi/skyserpent.png";
         $this->occurence = "rare";
-	    $this->variantOf = "Sky Serpent Heavy Assault Fighter";
+	    //$this->variantOf = "Sky Serpent Heavy Assault Fighter";
+		$this->variantOf = "TO BE DELETED";
 	    $this->isd = 2231;
         $this->canvasSize = 64;
         

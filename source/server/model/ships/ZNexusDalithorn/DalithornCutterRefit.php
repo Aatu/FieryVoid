@@ -10,7 +10,7 @@ class DalithornCutterRefit extends SuperHeavyFighter{
         $this->shipClass = "Cutter (2041 Refit)";
 			$this->variantOf = "Cutter";
 			$this->occurence = "common";
-        $this->imagePath = "img/ships/Nexus/DalithornCutter.png";
+        $this->imagePath = "img/ships/Nexus/DalithornCutterv2.png";
 		$this->unofficial = true;
 	    $this->isd = 2041;
         $this->canvasSize = 100;

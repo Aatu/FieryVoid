@@ -37,8 +37,8 @@ class DalithornPinnace extends SuperHeavyFighter{
 		
 		for ($i = 0; $i < $toAdd; $i++) {
 			$armour = array(4, 3, 3, 3);
-			$fighter = new Fighter("DalithornCutter", $armour, 30, $this->id);
-			$fighter->displayName = "Cutter";
+			$fighter = new Fighter("DalithornPinnace", $armour, 30, $this->id);
+			$fighter->displayName = "Pinnace";
 			$fighter->imagePath = "img/ships/Nexus/DalithornPinnacev2.png";
 			$fighter->iconPath = "img/ships/Nexus/DalithornPinnace_Large.png";
 

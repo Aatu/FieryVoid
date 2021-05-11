@@ -1220,6 +1220,7 @@ class NexusChaffLauncher extends Weapon{
 		
 		public $intercept = 1;
 		public $ballisticIntercept = true;
+		public $noOverkill = true; //Matter weapon
 
         public $loadingtime = 1;
         public $priority = 4;
@@ -1227,6 +1228,11 @@ class NexusChaffLauncher extends Weapon{
         public $rangePenalty = 2 ; //-2 / hexes
         public $fireControl = array(2, 1, 1); // fighters, <mediums, <capitals
 		public $weaponClass = "Matter";
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
+		}
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -2018,11 +2024,17 @@ class NexusMinigun extends Pulse{
 		public $ballisticIntercept = true;
         public $priority = 3; // Matter weapon
         
+		public $noOverkill = true; //Matter weapon
         public $rangePenalty = 2;
         public $fireControl = array(3, 2, 2); // fighters, <mediums, <capitals
         
 //        public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClass = "Matter";
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
+		}
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             if ( $maxhealth == 0 ) $maxhealth = 4;
@@ -5866,6 +5878,11 @@ class BSGHvyKineticEnergyWeapon extends Pulse{
         
         public $rangePenalty = 0.33; //-1/3hex
         public $fireControl = array(null, 3, 4); // fighters, <mediums, <capitals 
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
+		}
 		
 		public $noOverkill = true; //Matter weapon
 //		public $damageType = "Pulse";
@@ -5914,6 +5931,11 @@ class BSGHvyKineticEnergyWeapon extends Pulse{
         
         public $rangePenalty = 0.5; //-1/3hex
         public $fireControl = array(null, 2, 3); // fighters, <mediums, <capitals 
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
+		}
 		
 		public $noOverkill = true; //Matter weapon
 //		public $damageType = "Pulse";
@@ -6030,15 +6052,19 @@ class BSGHvyKineticEnergyWeapon extends Pulse{
     }	//endof class FlakArray
 
 
+
+
+
+
 class SensorSpearFtr extends Weapon{
-    /*Modified Abbai weapon - does no damage, but limits target's Sensors next turn
-    */
+    /*Modified Abbai weapon - does no damage, but limits target's Sensors next turn.
+	Note, the range has been halved to -1/hex. */
     public $name = "SensorSpearFtr";
     public $displayName = "DRADIS Jammer";
 	
     public $priority = 10; //let's fire last, order not all that important here!
     public $loadingtime = 2;
-    public $rangePenalty = 0.5; //-1/2 hexes
+    public $rangePenalty = 1; //-1/ hex
     public $intercept = 0;
     public $fireControl = array(0, 0, 0);
 	
@@ -6102,5 +6128,10 @@ class SensorSpearFtr extends Weapon{
 	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
 	
 } //end of class SensorSpearFtr
+
+
+
+
+
 
 ?>
