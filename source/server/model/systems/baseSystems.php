@@ -2560,6 +2560,7 @@ class PowerCapacitor extends ShipSystem{
 	public $capacityBonus = 0; //additional capacity - potentially set by enhancements
 	public $powerReceivedFromFrontEnd = 0; //communication variable	
 	public $powerReceivedFromBackEnd = 0; //communication variable
+	public $nominalOutput = 0;//output to be used in front end display!
 	
 	//petals opening - done as boost of Capacitor!
     public $boostable = false; //changed to True if a given ship has Petals! 
@@ -2702,6 +2703,7 @@ capacitor is completely emptied.
 		$this->powerMax = $this->getMaxCapacity(); //do cut off overflow here as well!
 		$this->powerCurr =min($this->powerCurr, $this->powerMax);
 		$this->data["Power stored/max"] =  $this->powerCurr . '/' . $this->powerMax;
+		$this->data["Power regeneration"] =  'Initial phase only';
         $this->data["Special"] = "This system is responsible for generating and storing power (Reactor is nearby for technical purposes).";	   
 		if ($this->boostable){
 			$this->data["Special"] .= "<br>You may boost this system (open petals) to increase recharge rate by 50% - at the cost of treating all armor values as 2 points lower.";
@@ -2740,8 +2742,9 @@ capacitor is completely emptied.
     public function stripForJson(){
         $strippedSystem = parent::stripForJson();
         $strippedSystem->data = $this->data;
-        $strippedSystem->powerCurr = $this->powerCurr;
+        $strippedSystem->powerCurr = max($this->powerCurr,0); //power less than 0 would block the game in case of this system
 	    $strippedSystem->powerMax = $this->getMaxCapacity();
+		$strippedSystem->nominalOutput = $this->output;
 		//$strippedSystem->powerReceivedFromFrontEnd = $this->powerReceivedFromFrontEnd;
 		$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer;
         return $strippedSystem;

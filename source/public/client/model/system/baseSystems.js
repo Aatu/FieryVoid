@@ -437,6 +437,7 @@ var PowerCapacitor = function PowerCapacitor(json, ship) {
 };
 PowerCapacitor.prototype = Object.create(ShipSystem.prototype);
 PowerCapacitor.prototype.constructor = PowerCapacitor;
+/*old version - regenerating power IN initial phase
 PowerCapacitor.prototype.initializationUpdate = function () {
     // Needed because it can change during initial phase  
     var effectiveOutput = this.powerCurr;
@@ -458,6 +459,37 @@ PowerCapacitor.prototype.initializationUpdate = function () {
     this.powerReq =  - effectiveOutput; //NEGATIVE VALUE - this system adds power to Reactor :)
     return this;
 };
+*/
+PowerCapacitor.prototype.initializationUpdate = function () {
+    // Needed because it can change during initial phase  
+    var effectiveOutput = this.powerCurr;
+	var regeneration = this.getRegeneration();
+	this.data["Power regeneration"] = regeneration;
+	var boostCount = shipManager.power.getBoost(this);	
+	if(boostCount > 0){//boosted!
+		regeneration -= 1; //system will automatically add boostlevel to output display in this case...
+	}
+	this.output = regeneration;
+	if (gamedata.gamephase > 1){//later phases - actually ADD power used by other systems - that's boosts that are already subtracted from power held!
+		//ACTUALLY only Engine and Sensors can have meaningful boosts; still, check everything except obvious exceptions
+		this.ship.systems.forEach(function (systemToCheck) {
+			if ( (systemToCheck.name != 'powerCapacitor') && (systemToCheck.name != 'reactor') ){ //checking these might end badly!
+				effectiveOutput += shipManager.power.countBoostPowerUsed(this.ship, systemToCheck);
+			}
+		}, this);
+	}
+	//can be more than maximum - but cannot HOLD more than maximum after Initial phase (server end takes care of that)
+    this.powerReq =  - effectiveOutput; //NEGATIVE VALUE - this system adds power to Reactor :)
+    return this;
+};
+PowerCapacitor.prototype.getRegeneration = function () {
+	var regeneration = this.nominalOutput;
+	var boostCount = shipManager.power.getBoost(this);	
+	if(boostCount > 0){//boosted!
+		regeneration += Math.round(this.nominalOutput *0.5);
+	}
+	return regeneration;
+};
 PowerCapacitor.prototype.hasMaxBoost = function () {
     return true;
 };
@@ -469,6 +501,7 @@ PowerCapacitor.prototype.doIndividualNotesTransfer = function () { //prepare ind
 	//note power currently remaining ON REACTOR as charge held
 	var powerRemaining = shipManager.power.getReactorPower(this.ship, this);
 	powerRemaining = Math.min(powerRemaining,this.powerMax);
+	powerRemaining = powerRemaining + this.getRegeneration();
 	this.individualNotesTransfer.push(powerRemaining);
 	return true;
 };
