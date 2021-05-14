@@ -8,7 +8,7 @@ class TorataHeltakaCLogPods extends BaseShip{
 		$this->pointCost = 600;
 		$this->faction = "Torata";
 		$this->phpclass = "TorataHeltakaCLogPods";
-		$this->imagePath = "img/ships/TorataHeltaka.png";
+		$this->imagePath = "img/ships/TorataHeltakaNOPODS.png";
 		$this->shipClass = "Heltaka Logistics Cruiser (w/Cargo Pods)";
 		$this->variantOf = "Heltaka Logistics Cruiser";
 		$this->canvasSize = 200;
