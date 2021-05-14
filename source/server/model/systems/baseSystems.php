@@ -963,7 +963,7 @@ class Hangar extends ShipSystem{
     
     function __construct($armour, $maxhealth, $output = null){
 		if($output === null){ //if output is not explicitly indicated, assume it to be 6 per every full 6 boxes! (that's the usual combat craft capacity)
-			$output = floor($maxhealth/6);
+			$output = floor($maxhealth/6)*6;
 		}
         parent::__construct($armour, $maxhealth, 0, $output ); 
     }

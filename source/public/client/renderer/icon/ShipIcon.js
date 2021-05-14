@@ -3,6 +3,7 @@
 window.ShipIcon = function () {
 
     var directionOfMovementTexture = new THREE.TextureLoader().load('./img/directionOfMovement.png');
+    var directionOfProwTexture = new THREE.TextureLoader().load('./img/directionOfProw.png');
 
     function ShipIcon(ship, scene) {
 
@@ -21,6 +22,7 @@ window.ShipIcon = function () {
         this.ShipSelectedSprite = null;
         this.ShipSideSprite = null;
         this.shipDirectionOfMovementSprite = null;
+        this.shipDirectionOfProwSprite = null;
         this.weaponArcs = [];
         this.hidden = false;
         this.BDEWSprite = null;
@@ -82,18 +84,24 @@ window.ShipIcon = function () {
         this.hidden = false;
     };
 
+	//shouldn't use provided heading as it's GET method
     ShipIcon.prototype.getFacing = function (facing) {
-        return mathlib.radianToDegree(this.shipSprite.mesh.rotation.z);
+		var facingActual = mathlib.radianToDegree(this.shipSprite.mesh.rotation.z);
+		this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
+        return facingActual ;//mathlib.radianToDegree(this.shipSprite.mesh.rotation.z);
     };
 
     ShipIcon.prototype.setFacing = function (facing) {
-        this.shipSprite.mesh.rotation.z = mathlib.degreeToRadian(facing);
+		var facingActual = mathlib.degreeToRadian(facing);
+		this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
+        this.shipSprite.mesh.rotation.z = facingActual;//mathlib.degreeToRadian(facing);
     };
 
     ShipIcon.prototype.setHeading = function (heading) {
         this.shipDirectionOfMovementSprite.mesh.rotation.z = mathlib.degreeToRadian(heading);
     };
 
+	//this function is never used actually... and certainly shouldn't use provided heading as it's GET method
     ShipIcon.prototype.getHeading = function (heading) {
         this.shipDirectionOfMovementSprite.mesh.rotation.z = mathlib.degreeToRadian(heading);
     };
@@ -144,6 +152,7 @@ window.ShipIcon = function () {
     ShipIcon.prototype.setHighlighted = function (value) {
         if (value) {
             this.mesh.position.z = 500;
+            this.shipDirectionOfProwSprite.show();
             this.shipDirectionOfMovementSprite.show();
         } else {
             if (this.selected) {
@@ -151,6 +160,7 @@ window.ShipIcon = function () {
             } else {
                 this.mesh.position.z = 0;
             }
+            this.shipDirectionOfProwSprite.hide();
             this.shipDirectionOfMovementSprite.hide();
         }
 
@@ -189,10 +199,15 @@ window.ShipIcon = function () {
         this.mesh.position.set(500, 0, 0);
         this.mesh.renderDepth = 10;
 
-        
+
+        this.shipDirectionOfProwSprite = new window.webglSprite('./img/directionOfProw.png', { width: this.size / 1.5, height: this.size / 1.5 }, -2);
+        this.mesh.add(this.shipDirectionOfProwSprite.mesh);
+        this.shipDirectionOfProwSprite.hide();
+      
         this.shipDirectionOfMovementSprite = new window.webglSprite('./img/directionOfMovement.png', { width: this.size / 1.5, height: this.size / 1.5 }, -2);
         this.mesh.add(this.shipDirectionOfMovementSprite.mesh);
         this.shipDirectionOfMovementSprite.hide();
+		
 
         this.shipSprite = new window.webglSprite(imagePath, { width: this.size / 2, height: this.size / 2 }, 1);
         this.shipSprite.setOverlayColor(this.mine ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) : new THREE.Color(255 / 255, 40 / 255, 40 / 255));
