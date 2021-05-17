@@ -1,0 +1,95 @@
+<?php
+class ColonialTigerClass extends HeavyCombatVessel{
+    
+    function __construct($id, $userid, $name,  $slot){
+        parent::__construct($id, $userid, $name,  $slot);
+        
+         $this->pointCost = 800;
+        $this->faction = "ZPlaytest BSG Colonials";
+        $this->phpclass = "ColonialTigerClass";
+        $this->imagePath = "img/ships/BSG/ColonialTiger.png";
+        $this->shipClass = "Tiger Gunstar";
+        $this->fighters = array("normal" => 6, "superheavy" => 1);
+ //       $this->isd = 2160;
+        $this->canvasSize = 145;
+        
+        $this->forwardDefense = 13;
+        $this->sideDefense = 16;
+
+        $this->turncost = 0.50;
+        $this->turndelaycost = 0.50;
+        $this->accelcost = 3;
+        $this->rollcost = 3;
+        $this->pivotcost = 2;
+        
+        $this->iniativebonus = 35;
+
+        $this->addPrimarySystem(new Reactor(5, 18, 0, 0));
+        $this->addPrimarySystem(new CnC(5, 12, 0, 0));
+        $this->addPrimarySystem(new Scanner(4, 12, 6, 7));
+        $this->addPrimarySystem(new Engine(5, 14, 0, 12, 3));
+        $this->addPrimarySystem(new Hangar(4, 7));
+        $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 3));
+        $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4));
+        $this->addPrimarySystem(new Flakcannon(4, 4, 1, 0, 360));
+        
+        $this->addFrontSystem(new Thruster(5, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(5, 8, 0, 3, 1));
+		$this->addFrontSystem(new BSGMainBattery(5, 9, 6, 315, 45));
+		$this->addFrontSystem(new BSGMedBattery(5, 9, 6, 315, 0)); 
+        $this->addFrontSystem(new BSGMedBattery(5, 9, 6, 0, 45)); 
+		$this->addFrontSystem(new BSGMedBattery(5, 9, 6, 315, 45)); 
+		$this->addFrontSystem(new SMissileRack(4, 6, 0, 270, 360));
+		$this->addFrontSystem(new SMissileRack(4, 6, 0, 0, 90));
+		$this->addFrontSystem(new Bulkhead(0, 5));
+		$this->addFrontSystem(new Bulkhead(0, 5));
+
+        $this->addAftSystem(new Thruster(5, 12, 0, 6, 2));
+        $this->addAftSystem(new Thruster(5, 12, 0, 6, 2));
+		$this->addAftSystem(new BSGMedBattery(5, 7, 4, 180, 225)); 
+		$this->addAftSystem(new BSGMedBattery(5, 7, 4, 135, 180)); 
+		$this->addAftSystem(new BSGMedBattery(5, 9, 6, 135, 225)); 
+        $this->addAftSystem(new Bulkhead(0, 5));
+		$this->addAftSystem(new SMissileRack(5, 6, 0, 135, 225));
+		$this->addAftSystem(new RapidGatling(4, 7, 4, 180, 360)); 
+		$this->addAftSystem(new RapidGatling(4, 7, 4, 180, 360)); 
+		$this->addAftSystem(new RapidGatling(4, 7, 4, 0, 180)); 
+		$this->addAftSystem(new RapidGatling(4, 7, 4, 0, 180)); 
+
+        //0:primary, 1:front, 2:rear, 3:left, 4:right;
+        $this->addFrontSystem(new Structure( 5, 50));
+        $this->addAftSystem(new Structure( 5, 50));
+        $this->addPrimarySystem(new Structure( 5, 60));
+		
+		$this->hitChart = array(
+			0=> array(
+					8 => "Structure",
+					10 => "Flak Cannon",					
+					12 => "Thruster",
+					14 => "Scanner",
+					16 => "Engine",
+					17 => "Hangar",
+					19 => "Reactor",
+					20 => "C&C",
+			),
+			1=> array(
+					5 => "Thruster",
+					8 => "Battery",
+					10 => "Class-S Missile Rack",
+                    18 => "Structure",
+					20 => "Primary",
+			),
+			2=> array(
+					5 => "Thruster",
+					8 => "Battery",
+                    9 => "Class-S Missile Rack",
+                    11 => "RapidGatling",
+					18 => "Structure",
+					20 => "Primary",
+			),
+		);
+		
+
+    }
+}
+?>
