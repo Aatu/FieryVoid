@@ -10,7 +10,7 @@ class VorlonHeavyCruiser extends VorlonCapitalShip{
         $this->shipClass = "Heavy Cruiser";
         //$this->variantOf = "Battle Destroyer";
         $this->imagePath = "img/ships/VorlonHeavyCruiser.png";
-        $this->canvasSize = 200;
+        $this->canvasSize = 250;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 3; 
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
