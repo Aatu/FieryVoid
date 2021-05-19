@@ -75,7 +75,7 @@ if (isset($_SESSION["user"])) {
 	    <br><b><u>Torata graphics update</u></b> 
 	    <br><b><big>---- batch 19.05.2021 ----</big></b>
 		<br><b><u>Vorlon Power Capacitor reworked</u></b>  - now new power is added AFTER Initial phase
-		<br><b><u>Chat font modified</u></b>  - do You like i (<a href="https://strawpoll.com/syxor2vda">poll here!</a>)
+		<br><b><u>Chat font modified</u></b>  - do You like it? (<a href="https://strawpoll.com/syxor2vda">poll here!</a>)
 		<br><b><u>Ancient fleet restrictions modified</u></b>  - loosened a bit
 		<br><b><u>Facing arrow</u></b>  - so everyone can know where Ipsha are pointing their noses!
 		<br><b><u>Self-repair modified</u></b>  - now player can indicate desired repair priority (to a degree)
