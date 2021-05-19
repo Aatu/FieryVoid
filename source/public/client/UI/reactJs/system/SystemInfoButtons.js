@@ -111,6 +111,15 @@ class SystemInfoButtons extends React.Component {
         weaponManager.removeFiringOrder(ship, system);
         webglScene.customEvent('CloseSystemInfo');
 	}
+	removeFireOrderAll(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		if (!canRemoveFireOrder(ship, system)) {
+            return;
+		}
+        weaponManager.removeFiringOrderAll(ship, system);
+        webglScene.customEvent('CloseSystemInfo');
+	}
 
 	allChangeFiringMode(e) {
 		e.stopPropagation(); e.preventDefault();
@@ -267,7 +276,34 @@ class SystemInfoButtons extends React.Component {
 		}
 		
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-	}		
+	}
+
+	/*Self Repair - display next system in need of repairs*/
+	nextSRsystem(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.getNextSystem();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}
+	/*Self Repair - change system priority*/
+	SRPriorityUp(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.setRepairPriority(20);
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}
+	SRPriorityDown(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.setRepairPriority(0);
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}
+	SRPriorityCancel(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.setRepairPriority(-1);
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}
 	
     render() {
 		const {ship, selectedShip, system} = this.props;
@@ -286,7 +322,7 @@ class SystemInfoButtons extends React.Component {
                 {canBoost(ship, system) && <Button title="boost" onClick={this.boost.bind(this)} img="./img/plussquare.png"></Button>}
                 {canAddShots(ship, system) && <Button title="more shots"onClick={this.addShots.bind(this)} img="./img/plussquare.png"></Button>}
                 {canReduceShots(ship, system) && <Button title="less shots" onClick={this.reduceShots.bind(this)} img="./img/minussquare.png"></Button>}
-				{canRemoveFireOrder(ship, system) && <Button title="cancel fire order" onClick={this.removeFireOrder.bind(this)} img="./img/firing.png"></Button>}
+				{canRemoveFireOrder(ship, system) && <Button title="cancel fire order (R = mass)" onClick={this.removeFireOrder.bind(this)} onContextMenu={this.removeFireOrderAll.bind(this)} img="./img/firing.png"></Button>}
 				
 				{canChangeFiringMode(ship, system) && getFiringModesCurr(ship, system)}
 				{canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this))}
@@ -297,6 +333,13 @@ class SystemInfoButtons extends React.Component {
 				{canAAincrease(ship, system) && <Button onClick={this.AAincrease.bind(this)} img="./img/systemicons/AAclasses/iconPlus.png"></Button>}
 				{canAAdecrease(ship, system) && <Button onClick={this.AAdecrease.bind(this)} img="./img/systemicons/AAclasses/iconMinus.png"></Button>}
 				{canAApropagate(ship, system) && <Button title="propagate setting" onClick={this.AApropagate.bind(this)} img="./img/systemicons/AAclasses/iconPropagate.png"></Button>}
+				 
+				{canSRdisplayCurrSystem(ship, system) && <Button title="next" onClick={this.nextSRsystem.bind(this)} img="./img/systemicons/AAclasses/iconNext.png"></Button>}
+				{canSRdisplayCurrSystem(ship, system) && <Button title={getSRdescription(ship,system)} img={getSRicon(ship,system)}></Button>}
+				{canSRdisplayCurrSystem(ship, system) && <Button title="Highest priority" onClick={this.SRPriorityUp.bind(this)} img="./img/iconSRHigh.png"></Button>}
+				{canSRdisplayCurrSystem(ship, system) && <Button title="Disable repair" onClick={this.SRPriorityDown.bind(this)} img="./img/iconSRLow.png"></Button>}
+				{canSRdisplayCurrSystem(ship, system) && <Button title="Default priority" onClick={this.SRPriorityCancel.bind(this)} img="./img/iconSRCancel.png"></Button>}
+				
             </Container>
         )
     }
@@ -311,11 +354,16 @@ const canAAincrease = (ship,system) => canAA(ship,system) && system.canIncrease(
 const canAAdecrease = (ship,system) => canAA(ship,system) && system.canDecrease()!='';
 const canAApropagate = (ship,system) => canAA(ship,system) && system.canPropagate()!='';
 
+//can do something with Self Repair...
+const canSRdisplayCurrSystem = (ship,system) => (gamedata.gamephase === 1) && (system.name == 'SelfRepair') && (system.getCurrSystem()>=0); 
+const getSRdescription = (ship,system) => system.getCurrSystemDescription(); 
+const getSRicon = (ship,system) => system.getCurrSystemIcon(); 
+
 export const canDoAnything = (ship, system) => canOffline(ship, system) || canOnline(ship, system) 
 	|| canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) 
 	|| canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system)
 	|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system)
-	|| canSelfIntercept(ship, system) || canAA(ship,system);
+	|| canSelfIntercept(ship, system) || canAA(ship,system) || canSRdisplayCurrSystem(ship,system);
 
 const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
 

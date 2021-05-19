@@ -1345,13 +1345,40 @@ window.weaponManager = {
     },
 
     removeFiringOrder: function removeFiringOrder(ship, system) {
-
         for (var i = system.fireOrders.length - 1; i >= 0; i--) {
             if (system.fireOrders[i].weaponid == system.id) {
                 system.fireOrders.splice(i, 1);
             }
         }
 
+        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+    },
+	removeFiringOrderAll: function removeFiringOrderAll(ship, system) { //remove firing orders for ALL similar weapons that have them
+		if (!gamedata.isMyShip(ship)) {
+			return;
+		} 
+		if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) {
+			return;
+		}
+        var array = [];
+        var systems = [];
+        if (ship.flight) {
+            systems = ship.systems
+                .map(fighter => fighter.systems)
+                .reduce((all, weapons) => all.concat(weapons), [])
+                .filter(system => system.weapon);
+        } else {
+            systems = ship.systems.filter(system => system.weapon);
+        }
+        
+        array = systems.filter(function(weapon) {return weapon.displayName === system.displayName});
+		
+		for (var i = 0; i < array.length; i++) {
+			var weapon = array[i];
+			if (!weaponManager.hasFiringOrder(ship, weapon)) continue;//does not have any declared firing orders
+			weaponManager.removeFiringOrder(ship,weapon);
+		}
+		
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
     },
 

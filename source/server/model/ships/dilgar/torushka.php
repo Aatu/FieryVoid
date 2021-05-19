@@ -10,8 +10,9 @@ class Torushka extends FighterFlight{
         $this->phpclass = "Torushka";
         $this->shipClass = "Torushka Stingfighters";
         $this->imagePath = "img/ships/Torushka.png";
-                $this->isd = 2210;
-
+		$this->isd = 2210;
+				
+        $this->notes = '+5 Initiative bonu as long as flight leader is alive and uninjured.';
 
         $this->forwardDefense = 7;
         $this->sideDefense = 6;

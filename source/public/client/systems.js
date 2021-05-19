@@ -375,12 +375,11 @@ shipManager.systems = {
     getTotalDamage: function getTotalDamage(system) {
         var total = 0;
 
-        for (var i = 0; i < system.damage.lemgth; i++) {
+        for (var i = 0; i < system.damage.length; i++) {
             var damage = system.damage[i].damage - system.damage[i].armour;
-			/* healing is a thing!
-            if (damage > 0) {
+            //if (damage > 0) {// healing is a thing!
                 total += damage;
-            }*/
+            //}
         }
 
         return total;
