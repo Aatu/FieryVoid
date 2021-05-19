@@ -72,9 +72,9 @@ window.FlightIcon = function () {
     };
 
     FlightIcon.prototype.getFacing = function (facing) {
-		var facingActual = mathlib.degreeToRadian(this.fighterObject.rotation.z);
+		var facingActual = this.fighterObject.rotation.z;
 		this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
-        return facingActual;//mathlib.radianToDegree(this.fighterObject.rotation.z);
+        return mathlib.radianToDegree(facingActual);
     };
 
     FlightIcon.prototype.setFacing = function (facing) {

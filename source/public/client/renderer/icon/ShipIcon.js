@@ -86,9 +86,9 @@ window.ShipIcon = function () {
 
 	//shouldn't use provided heading as it's GET method
     ShipIcon.prototype.getFacing = function (facing) {
-		var facingActual = mathlib.radianToDegree(this.shipSprite.mesh.rotation.z);
+		var facingActual = this.shipSprite.mesh.rotation.z;
 		this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
-        return facingActual ;//mathlib.radianToDegree(this.shipSprite.mesh.rotation.z);
+        return mathlib.radianToDegree(facingActual);
     };
 
     ShipIcon.prototype.setFacing = function (facing) {
