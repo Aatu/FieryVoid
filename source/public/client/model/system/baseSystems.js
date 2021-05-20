@@ -389,11 +389,118 @@ EnergyDiffuser.prototype = Object.create(ShipSystem.prototype);
 EnergyDiffuser.prototype.constructor = EnergyDiffuser;
 
 
+
 var SelfRepair = function SelfRepair(json, ship) {
     ShipSystem.call(this, json, ship);
 };
 SelfRepair.prototype = Object.create(ShipSystem.prototype);
 SelfRepair.prototype.constructor = SelfRepair;
+SelfRepair.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+	this.individualNotesTransfer = Array();
+	//every entry contains one system override, in format: systemID;overrideValue
+	var overridedArray = Object.keys(this.priorityChanges);
+	for (var i = 0; i < overridedArray.length; i++) {
+		var currSystem = overridedArray[i];
+		var currEntry = "";
+		currEntry += currSystem + ';' + this.priorityChanges[currSystem];
+		this.individualNotesTransfer.push(currEntry);
+	}
+	return true;
+};
+SelfRepair.prototype.setOverride = function (systemID, overrideValue) { //set override of repair priority value of a system
+	this.priorityChanges[systemID] = overrideValue;
+}
+SelfRepair.prototype.getCurrSystem = function () { //gets system ID of currently displayed system 
+	if(this.currentlyDisplayedSystem == -1){ //not searched yet!
+		this.getNextSystem();//currentlyDisplayedSystem will be updated inside
+	}//else searched and either found or not found and no point in further searches
+	return this.currentlyDisplayedSystem;
+}
+SelfRepair.prototype.getNextSystem = function () { //gets system ID of next damaged system
+	if (this.currentlyDisplayedSystem != -2){ //-2 means there's no point looking
+		var count = this.ship.systems.length;
+		var searchID = this.currentlyDisplayedSystem;
+		var startID = searchID;
+		if (startID < 0){ //search up to last system in this case!
+			startID = count -1;
+		}
+		do{
+			searchID++;
+			if (searchID>=count) searchID = 0;
+			var checkedSystem =  this.ship.systems[searchID];
+			if (checkedSystem.repairPriority ==0) continue; //this system cannot be repaired
+			//belongs here if is damaged or is on modified priorities list
+			if (searchID in this.priorityChanges){ //already modified
+				this.currentlyDisplayedSystem = searchID;
+				break;
+			}else{
+				//if Structure - skip if destroyed (can't be repaired anyway)
+				if ((checkedSystem.name == 'structure')&&(shipManager.systems.isDestroyed(checkedSystem.ship, checkedSystem))) continue;
+				//if fitted to destroyed Structure - skip (can't be repaired anyway)
+				if ((checkedSystem.name != 'structure') && (checkedSystem.location != 0)){
+					var stru = shipManager.systems.getStructureSystem(checkedSystem.ship, checkedSystem.location);
+					if (stru && shipManager.systems.isDestroyed(checkedSystem.ship, stru)) continue;
+				}
+				//is it damaged?
+				var damage = shipManager.systems.getTotalDamage(checkedSystem);
+				if (damage > 0){
+					this.currentlyDisplayedSystem = searchID;
+					break;
+				}
+			}
+		}while (startID!= searchID);
+	}//else searched and either found or not found and no point in further searches
+	if (this.currentlyDisplayedSystem == -1) this.currentlyDisplayedSystem = -2;//if nothing found - mark so further searches are skipped
+	return this.currentlyDisplayedSystem;
+}
+SelfRepair.prototype.getCurrSystemDescription = function () { //gets description onmouseover for currently displayed system
+	var description = '';
+	if (this.currentlyDisplayedSystem >= 0){ //something is displayed!
+		var displayedSystem = this.ship.systems[this.currentlyDisplayedSystem];
+		//first, ID name
+		description += displayedSystem.displayName;
+		description += ', ID ' + displayedSystem.id;
+		//Priority
+		var priority = displayedSystem.repairPriority;
+		if (this.currentlyDisplayedSystem in this.priorityChanges) if (this.priorityChanges[this.currentlyDisplayedSystem] >= 0) priority = this.priorityChanges[this.currentlyDisplayedSystem];
+		description += ', priority ' + priority;
+		//current damage
+		description += ', dmg ' + shipManager.systems.getTotalDamage(displayedSystem) + '/' + displayedSystem.maxhealth;
+		//status (alive/destroyed)
+		if (shipManager.systems.isDestroyed(displayedSystem.ship, displayedSystem)) {
+			description += ' DESTROYED';
+		}		
+	}
+	return description;
+}
+SelfRepair.prototype.getCurrSystemIcon = function () { //gets description onmouseover for currently displayed system
+	var icon = '';
+	if (this.currentlyDisplayedSystem >= 0){ //something is displayed!
+		var displayedSystem = this.ship.systems[this.currentlyDisplayedSystem];
+		if ( (displayedSystem.iconPath != null) && (displayedSystem.iconPath != '')){
+			icon = displayedSystem.iconPath;
+		}else{
+			icon = displayedSystem.name+'.png';
+		}
+		icon = './img/systemicons/'+icon;
+	}	
+	return icon;
+}
+SelfRepair.prototype.setRepairPriority = function (newPriority) { //sets priorityoverride for current system
+	if (this.currentlyDisplayedSystem >= 0){ //something is displayed!
+		this.priorityChanges[this.currentlyDisplayedSystem] = newPriority;
+		//propagate the change to ALL other self-repair systems on ship!
+		var count = this.ship.systems.length;
+		var i = 0;
+		for (i = 0; i < count; i++) if (i != this.ID){
+			var displayedSystem = this.ship.systems[i];
+			if (displayedSystem.name == 'SelfRepair'){
+				displayedSystem.priorityChanges[this.currentlyDisplayedSystem] = newPriority;
+			}
+		}
+	}
+}
+
 
 
 var BioDrive = function BioDrive(json, ship) {
@@ -437,6 +544,7 @@ var PowerCapacitor = function PowerCapacitor(json, ship) {
 };
 PowerCapacitor.prototype = Object.create(ShipSystem.prototype);
 PowerCapacitor.prototype.constructor = PowerCapacitor;
+/*old version - regenerating power IN initial phase
 PowerCapacitor.prototype.initializationUpdate = function () {
     // Needed because it can change during initial phase  
     var effectiveOutput = this.powerCurr;
@@ -458,6 +566,37 @@ PowerCapacitor.prototype.initializationUpdate = function () {
     this.powerReq =  - effectiveOutput; //NEGATIVE VALUE - this system adds power to Reactor :)
     return this;
 };
+*/
+PowerCapacitor.prototype.initializationUpdate = function () {
+    // Needed because it can change during initial phase  
+    var effectiveOutput = this.powerCurr;
+	var regeneration = this.getRegeneration();
+	this.data["Power regeneration"] = regeneration;
+	var boostCount = shipManager.power.getBoost(this);	
+	if(boostCount > 0){//boosted!
+		regeneration -= 1; //system will automatically add boostlevel to output display in this case...
+	}
+	this.output = regeneration;
+	if (gamedata.gamephase > 1){//later phases - actually ADD power used by other systems - that's boosts that are already subtracted from power held!
+		//ACTUALLY only Engine and Sensors can have meaningful boosts; still, check everything except obvious exceptions
+		this.ship.systems.forEach(function (systemToCheck) {
+			if ( (systemToCheck.name != 'powerCapacitor') && (systemToCheck.name != 'reactor') ){ //checking these might end badly!
+				effectiveOutput += shipManager.power.countBoostPowerUsed(this.ship, systemToCheck);
+			}
+		}, this);
+	}
+	//can be more than maximum - but cannot HOLD more than maximum after Initial phase (server end takes care of that)
+    this.powerReq =  - effectiveOutput; //NEGATIVE VALUE - this system adds power to Reactor :)
+    return this;
+};
+PowerCapacitor.prototype.getRegeneration = function () {
+	var regeneration = this.nominalOutput;
+	var boostCount = shipManager.power.getBoost(this);	
+	if(boostCount > 0){//boosted!
+		regeneration += Math.round(this.nominalOutput *0.5);
+	}
+	return regeneration;
+};
 PowerCapacitor.prototype.hasMaxBoost = function () {
     return true;
 };
@@ -469,6 +608,7 @@ PowerCapacitor.prototype.doIndividualNotesTransfer = function () { //prepare ind
 	//note power currently remaining ON REACTOR as charge held
 	var powerRemaining = shipManager.power.getReactorPower(this.ship, this);
 	powerRemaining = Math.min(powerRemaining,this.powerMax);
+	powerRemaining = powerRemaining + this.getRegeneration();
 	this.individualNotesTransfer.push(powerRemaining);
 	return true;
 };

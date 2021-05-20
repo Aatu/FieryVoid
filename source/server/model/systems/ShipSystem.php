@@ -234,6 +234,9 @@ class ShipSystem {
 	
     
     public function setSystemDataWindow($turn){
+		//now with advent of self repair - system ID might get important...
+		$this->data["ID"] = $this->id;
+		
 	if($this->startArc !== null){
 		$this->data["Arc"] = $this->startArc . ".." . $this->endArc;
 	}

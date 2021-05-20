@@ -72,11 +72,15 @@ window.FlightIcon = function () {
     };
 
     FlightIcon.prototype.getFacing = function (facing) {
-        return mathlib.radianToDegree(this.fighterObject.rotation.z);
+		var facingActual = this.fighterObject.rotation.z;
+		this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
+        return mathlib.radianToDegree(facingActual);
     };
 
     FlightIcon.prototype.setFacing = function (facing) {
-        this.fighterObject.rotation.z = mathlib.degreeToRadian(facing);
+		var facingActual = mathlib.degreeToRadian(facing);
+		this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
+        this.fighterObject.rotation.z = facingActual;//mathlib.degreeToRadian(facing);
     };
 
     FlightIcon.prototype.create = function (ship, scene) {
@@ -84,6 +88,11 @@ window.FlightIcon = function () {
         this.mesh = new THREE.Object3D();
         this.mesh.position.set(500, 0, 0);
         this.mesh.renderDepth = 10;
+
+
+        this.shipDirectionOfProwSprite = new window.webglSprite('./img/directionOfProw.png', { width: this.size / 1.5, height: this.size / 1.5 }, -2);
+        this.mesh.add(this.shipDirectionOfProwSprite.mesh);
+        this.shipDirectionOfProwSprite.hide();
 
         this.shipDirectionOfMovementSprite = new window.webglSprite('./img/directionOfMovement.png', { width: this.size / 1.5, height: this.size / 1.5 }, -2);
         this.mesh.add(this.shipDirectionOfMovementSprite.mesh);
