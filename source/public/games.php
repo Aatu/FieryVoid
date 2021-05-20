@@ -73,6 +73,13 @@ if (isset($_SESSION["user"])) {
 	    <br><b><u>Tiers list separated from Factions list</u></b> - now they're accessible separately
 	    <br><b><u>Brixadii and Colonials</u></b> - ongoing development updates and enhancements 	    
 	    <br><b><u>Torata graphics update</u></b> 
+	    <br><b><big>---- batch 19.05.2021 ----</big></b>
+		<br><b><u>Vorlon Power Capacitor reworked</u></b>  - now new power is added AFTER Initial phase
+		<br><b><u>Chat font modified</u></b>  - do You like it? (<a href="https://strawpoll.com/syxor2vda">poll here!</a>)
+		<br><b><u>Ancient fleet restrictions modified</u></b>  - loosened a bit
+		<br><b><u>Facing arrow</u></b>  - so everyone can know where Ipsha are pointing their noses!
+		<br><b><u>Self-repair modified</u></b>  - now player can indicate desired repair priority (to a degree)
+		<br><b><u>Mass undeclare</u></b>  - one-click cancel of firing order for ALL similar weapons
 
 	    
         <br><br>
@@ -82,8 +89,9 @@ if (isset($_SESSION["user"])) {
 		
         <br><br>---------- <b>LINKS</b> ----------
 		<br><a href="http://b5warsvault.wikidot.com/" target="_blank">B5Wars Vault</a> - B5Wars <a href="http://www.tesarta.com/b5wars/aogwarskitchensink.pdf" target="_blank">rules</a> (under the name of AoG Wars) and LOTS of related stuff
-        	<br><a href="https://www.facebook.com/groups/218482691602941/" target=\"_blank\">Facebook group</a> - if You want to discuss, ask for help or report a bug!<br><a href="https://discord.gg/kjZAjr3" target=\"_blank\">Discord channel</a> - talk about FV/B5 with likeminded people!
-		<br><a href="files/FV_FAQ.txt">Fiery Void FAQ</a> - differences from B5 Wars, known bugs... look here if something works contrary to how You expect it to!
+	    	<br><a href="https://discord.gg/kjZAjr3" target=\"_blank\">Discord channel</a> - talk about FV/B5 with likeminded people!
+        	<br><a href="https://www.facebook.com/groups/218482691602941/" target=\"_blank\">Facebook group</a> - if You want to discuss, ask for help or report a bug! <i>(nowadays mostly superseded by discord)</i>
+	    	<br><a href="files/FV_FAQ.txt">Fiery Void FAQ</a> - differences from B5 Wars, known bugs... look here if something works contrary to how You expect it to!
 		<br><a href="https://www.youtube.com/channel/UCpzERJTeVoFVon_QqWQxesw/featured" target=\"_blank\">Video tutorials</a> - Fiery Void video tutorials are available on YouTube!
 		<br><a href="files/enhancements_list.txt">Fiery Void Enhancement list</a> - unit enhancements available, with short explanations.
 		<br><a href="files/FV_factions.txt">Fiery Void Factions list</a> - short info on more exotic rules and systems of fleets available.
