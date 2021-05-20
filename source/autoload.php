@@ -1581,9 +1581,11 @@ spl_autoload_register(
                 'colonialmanticoreclass' => '/server/model/ships/ZBSGColonial_Fred/ColonialManticoreClass.php',
                 'colonialminervaclass' => '/server/model/ships/ZBSGColonial_Fred/ColonialMinervaClass.php',
                 'colonialodinclass' => '/server/model/ships/ZBSGColonial_Fred/ColonialOdinClass.php',
+                'colonialorion' => '/server/model/ships/ZBSGColonial_Fred/ColonialOrion.php',
 				'colonialpythonmk3' => '/server/model/ships/ZBSGColonial_Fred/ColonialPythonMk3.php',
 				'colonialraptor' => '/server/model/ships/ZBSGColonial_Fred/ColonialRaptor.php',
 				'colonialassaultraptor' => '/server/model/ships/ZBSGColonial_Fred/ColonialAssaultRaptor.php',
+                'colonialtigerclass' => '/server/model/ships/ZBSGColonial_Fred/ColonialTigerClass.php',
                 'colonialvipermk2' => '/server/model/ships/ZBSGColonial_Fred/ColonialViperMk2.php',
                 'colonialvipermk7' => '/server/model/ships/ZBSGColonial_Fred/ColonialViperMk7.php',
 

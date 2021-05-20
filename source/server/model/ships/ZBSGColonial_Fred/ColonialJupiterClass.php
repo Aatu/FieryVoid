@@ -40,12 +40,12 @@ class ColonialJupiterClass extends BaseShip{
         $this->addPrimarySystem(new ReloadRack(5, 9));
 		$this->addPrimarySystem(new BSGFlakBattery(5, 6, 2, 0, 360));
 		$this->addPrimarySystem(new BSGFlakBattery(5, 6, 2, 0, 360));
-		$this->addPrimarySystem(new Bulkhead(0, 6));
-        $this->addPrimarySystem(new Bulkhead(0, 6));
+//		$this->addPrimarySystem(new Bulkhead(0, 6));
+//      $this->addPrimarySystem(new Bulkhead(0, 6));
 		$this->addPrimarySystem(new Thruster(5, 24, 0, 4, 2));
 		$hyperdrive = new JumpEngine(6, 30, 8, 20);
-		$hyperdrive->displayName = 'Hyperdrive';
-		$this->addPrimarySystem($hyperdrive);
+			$hyperdrive->displayName = 'Hyperdrive';
+			$this->addPrimarySystem($hyperdrive);
    
         $this->addFrontSystem(new Thruster(6, 30, 0, 3, 1));
         $this->addFrontSystem(new Thruster(6, 30, 0, 3, 1));

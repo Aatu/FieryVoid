@@ -7,7 +7,7 @@ class zzftrTargetDrone extends FighterFlight{
         $this->faction = "Custom Ships";
         $this->phpclass = "zzftrTargetDrone";
 		$this->shipClass = "Fighter Target Drone - DO NOT USE";
-        $this->imagePath = "img/starwars/skipray.png";
+        $this->imagePath = "img/ships/Nexus/salbez_urzchk.png";
         
 		$this->notes = "DO NOT USE, prone to change!";
 	    
@@ -41,8 +41,8 @@ class zzftrTargetDrone extends FighterFlight{
             $armour = array(4, 2, 3, 3);
             $fighter = new Fighter("zzftrTargetDrone", $armour, 25, $this->id);
             $fighter->displayName = "Target Drone";
-            $fighter->imagePath = "img/starwars/skipray.png";
-            $fighter->iconPath = "img/starwars/skipray_large.png"; 
+            $fighter->imagePath = "img/ships/Nexus/salbez_urzchk.png";
+            $fighter->iconPath = "img/ships/Nexus/salbez_urzchk_large.png"; 
 		            
        		
             $frontGun = new SWFighterIon(300, 60, 2, 3); //fwd triple Ion Cannons

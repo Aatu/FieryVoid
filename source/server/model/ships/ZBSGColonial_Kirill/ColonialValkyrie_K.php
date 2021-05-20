@@ -12,7 +12,9 @@ class ColonialValkyrie_K extends BaseShipNoAft{
         $this->shipClass = "Valkyrie Battlestar";
         $this->fighters = array("normal" => 12, "superheavy" => 2);
  //       $this->isd = 2238;
-        $this->canvasSize = 160;
+        $this->canvasSize = 145;
+
+	    $this->notes = 'May only boost sensors by 2.';
         
         $this->forwardDefense = 15;
         $this->sideDefense = 14;
@@ -27,21 +29,21 @@ class ColonialValkyrie_K extends BaseShipNoAft{
 
         $this->addPrimarySystem(new Reactor(4, 15, 0, 0));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 9, 5, 6));
+        $this->addPrimarySystem(new SWScanner(5, 9, 5, 6));
         $this->addPrimarySystem(new Engine(4, 16, 0, 12, 3));
         $this->addPrimarySystem(new ReloadRack(5, 9));
         $this->addPrimarySystem(new SMissileRack(5, 6, 0, 0, 360));
         $this->addPrimarySystem(new SMissileRack(5, 6, 0, 0, 360));
-		$this->addPrimarySystem(new Bulkhead(0, 4));
-        $this->addPrimarySystem(new Bulkhead(0, 4));
-        $this->addPrimarySystem(new Bulkhead(0, 4));
+//		$this->addPrimarySystem(new Bulkhead(0, 4));
+//      $this->addPrimarySystem(new Bulkhead(0, 4));
+ //     $this->addPrimarySystem(new Bulkhead(0, 4));
         $this->addPrimarySystem(new Thruster(4, 9, 0, 3, 2));
         $this->addPrimarySystem(new Thruster(4, 9, 0, 3, 2));
         $this->addPrimarySystem(new Thruster(4, 9, 0, 3, 2));
         $this->addPrimarySystem(new Thruster(4, 9, 0, 3, 2));
 		$hyperdrive = new JumpEngine(4, 16, 6, 20);
-		$hyperdrive->displayName = 'Phasing Drive';
-		$this->addPrimarySystem($hyperdrive);
+			$hyperdrive->displayName = 'Phasing Drive';
+			$this->addPrimarySystem($hyperdrive);
 
         $this->addFrontSystem(new Railgun(4, 9, 6, 330, 30));
         $this->addFrontSystem(new Railgun(4, 9, 6, 330, 30));

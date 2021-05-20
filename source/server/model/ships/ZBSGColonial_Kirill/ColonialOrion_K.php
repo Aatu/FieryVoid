@@ -9,9 +9,11 @@ class ColonialOrion_K extends MediumShip{
         $this->phpclass = "ColonialOrion_K";
         $this->imagePath = "img/ships/BSG/ColonialOrion.png";
         $this->shipClass = "Orion Reconisance Battlestar";
-        $this->canvasSize = 100;
+        $this->canvasSize = 80;
         $this->limited = 33;
 //	    $this->isd = 2007;
+
+	    $this->notes = 'May boost sensors normally.';
 
         $this->fighters = array("normal"=>6, "superheavy"=>2);
         
@@ -27,7 +29,7 @@ class ColonialOrion_K extends MediumShip{
          
         $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
-        $this->addPrimarySystem(new ElintScanner(3, 15, 5, 6));
+        $this->addPrimarySystem(new ElintScanner(3, 15, 5, 6));  //full ELINT, not under the 2 point only boost
         $this->addPrimarySystem(new Engine(3, 16, 0, 8, 3));
         $this->addPrimarySystem(new ReloadRack(3, 9));
         $this->addPrimarySystem(new LMissileRack(3, 6, 0, 0, 360));
@@ -35,8 +37,8 @@ class ColonialOrion_K extends MediumShip{
 		$this->addPrimarySystem(new Thruster(3, 9, 0, 3, 3));
 		$this->addPrimarySystem(new Thruster(3, 9, 0, 3, 4));        
 		$hyperdrive = new JumpEngine(3, 12, 6, 20);
-		$hyperdrive->displayName = 'Phasing Drive';
-		$this->addPrimarySystem($hyperdrive);
+			$hyperdrive->displayName = 'Phasing Drive';
+			$this->addPrimarySystem($hyperdrive);
 
 		$this->addFrontSystem(new Hangar(3, 8));
         $this->addFrontSystem(new Thruster(2, 9, 0, 4, 1));

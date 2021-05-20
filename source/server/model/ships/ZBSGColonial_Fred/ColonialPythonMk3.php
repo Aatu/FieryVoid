@@ -37,7 +37,7 @@ class ColonialPythonMk3 extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){            
             $armour = array(3, 2, 3, 3);
-            $fighter = new Fighter("ColonialPythonMk3", $armour, 18, $this->id);
+            $fighter = new Fighter("ColonialPythonMk3", $armour, 15, $this->id);
             $fighter->displayName = "Python Mk3";
             $fighter->imagePath = "img/ships/BSG/pythonMk3.png";
             $fighter->iconPath = "img/ships/BSG/pythonMk3_Large.png";
