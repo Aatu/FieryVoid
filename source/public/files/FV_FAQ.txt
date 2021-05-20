@@ -15,10 +15,11 @@ USEFUL TRIVIA
  - If You have ship that shouldn't be there any longer (jumped out, left map...) or just crippled and useless, You may simply get rid of it so it doesn't bog down Your game. In Initial phase You may set its Reactor to overload - it will explode in firing resolution phase!
  - r-click on unit - select the unit (if it's Yours) and bring its control window up.
  - r-click on weapon - select all similar weapons on this unit (eg. to fire all guns in fighter flight, or all Twin Arrays on a Centauri cruiser...)
- - r-click on power button - power on/off on all similar weapons on this ship
+ - r-click on power button - power on/off on all similar weapons on this unit
  - r-click mode change - change firing mode on all similar UNDECLARED weapons
  - r-click on defensive fire - enable defensive fire on all similar UNDECLARED weapons
  - r-click on cancel move button - cancels entire current batch of moves for indicated unit
+ - r-click on cancel firing order button - cancels firing orders on all similar weapons on this unit
 
 
 GAMEPLAY GENERAL IDEAS
@@ -48,7 +49,7 @@ ELECTRONIC WARFARE
 
 
 FIRING AND WEAPONS
- - Firing order of weapons: each weapon has initiative number which determines order of firing. Player cannot influence it. It was tried to optimize effectiveness of weapons, but as in B5Wars every player prefers different firing pattern (and also it's influenced by a particular target) - usually it won't be as good as You could achieve manually.
+ - Firing order of weapons: each weapon has priority number which determines order of firing. Player cannot influence it. It was tried to optimize effectiveness of weapons, but as in B5Wars every player prefers different firing pattern (and also it's influenced by a particular target) - usually it won't be as good as You could achieve manually.
  - Choosing target section: it's done automatically, based on algorithm that takes into account target section profile and remaining boxes of structure. Weapons from the same ship CAN be split between multiple sections if firing happens on dividing line. 
  - Choosing target system: it's done randomly out of eligible targets if there are multiple ones. 
  - Choosing target fighter: there is algorithm that tries to minimize damage done. However, it operates on expected damage instead of actual, and won't take into account most special effects.
@@ -63,7 +64,7 @@ FIRING AND WEAPONS
  - Multi-shot weapons can choose only one target when firing offensively (Twin/Quad Arrays, Heavy Arrays, Ballistic Torpedoes...)
  - Power and missile launches are simultaneous in FV - so disabling Jammer cannot affect missile launch on current turn. Instead, it will affect missile launch on NEXT turn!
  - Multi-mode weapons, switched at power on in B5Wars: simplified and can use any mode at will (Interceptor, Guardian Array).
- - Ramming takes place in ship fire step (even if ramming ship is fighter). So ship fire from guns destroyed in ramming will still happen.
+ - Ramming takes place in ship fire step (even if ramming ship is fighter). So ship fire from guns destroyed by ramming will still happen.
  - all ramming attacks are resolved separately. So if two units try to ram each other, and they both hit, ramming damage is effectively applied twice!
  - Piercing attacks have quirky way of finding whether damage should be split into 2 or 3 parts - essentially split to 2 if shot enters and exits through the same section.
  - Piercing damage vs MCVs is reduced by 10% (instead of -2/die).
