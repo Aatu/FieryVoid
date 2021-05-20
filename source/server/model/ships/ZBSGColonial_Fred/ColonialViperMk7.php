@@ -18,7 +18,7 @@ class ColonialViperMk7 extends FighterFlight{
         $this->forwardDefense = 5;
         $this->sideDefense = 7;
         $this->freethrust = 12;
-        $this->offensivebonus = 3;
+        $this->offensivebonus = 4;
         $this->jinkinglimit = 8;
         $this->turncost = 0.33;
 		$this->turndelay = 0;

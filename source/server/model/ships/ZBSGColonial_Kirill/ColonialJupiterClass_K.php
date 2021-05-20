@@ -13,6 +13,8 @@ class ColonialJupiterClass_K extends BaseShip{
 		$this->canvasSize = 180; //img has 200px per side
 		$this->unofficial = true;
 
+	    $this->notes = 'May only boost sensors by 2.';
+
         $this->fighters = array("normal"=>36, "superheavy"=>6);
 
 //		$this->notes = "Primary users: Colonial Fleet";
@@ -30,19 +32,19 @@ class ColonialJupiterClass_K extends BaseShip{
         
         $this->addPrimarySystem(new Reactor(5, 25, 0, 0));
         $this->addPrimarySystem(new CnC(6, 20, 0, 0));
-        $this->addPrimarySystem(new Scanner(6, 18, 6, 6));
+        $this->addPrimarySystem(new SWScanner(6, 18, 6, 6));
         $this->addPrimarySystem(new Engine(5, 32, 0, 12, 3));
         $this->addPrimarySystem(new ReloadRack(5, 9));
         $this->addPrimarySystem(new SMissileRack(5, 6, 0, 0, 360));
         $this->addPrimarySystem(new SMissileRack(5, 6, 0, 0, 360));
         $this->addPrimarySystem(new EWNuclearTorpedo(5, 6, 3, 0, 360));
-		$this->addPrimarySystem(new Bulkhead(0, 4));
-        $this->addPrimarySystem(new Bulkhead(0, 4));
-		$this->addPrimarySystem(new Bulkhead(0, 4));
-        $this->addPrimarySystem(new Bulkhead(0, 4));
+//		$this->addPrimarySystem(new Bulkhead(0, 4));
+//        $this->addPrimarySystem(new Bulkhead(0, 4));
+//		$this->addPrimarySystem(new Bulkhead(0, 4));
+//        $this->addPrimarySystem(new Bulkhead(0, 4));
 		$hyperdrive = new JumpEngine(5, 16, 6, 20);
-		$hyperdrive->displayName = 'Phasing Drive';
-		$this->addPrimarySystem($hyperdrive);
+			$hyperdrive->displayName = 'Phasing Drive';
+			$this->addPrimarySystem($hyperdrive);
 		
         $this->addFrontSystem(new Thruster(4, 9, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 9, 0, 4, 1));

@@ -14,6 +14,8 @@ class ColonialMercuryClass_K extends BaseShip{
 		$this->unofficial = true;
         $this->limited = 10;
 
+	    $this->notes = 'May only boost sensors by 2.';
+
         $this->fighters = array("normal"=>72, "superheavy"=>12);
 
 //		$this->notes = "Primary users: Colonial Fleet";
@@ -31,7 +33,7 @@ class ColonialMercuryClass_K extends BaseShip{
         
         $this->addPrimarySystem(new Reactor(5, 36, 0, 0));
         $this->addPrimarySystem(new CnC(6, 36, 0, 0));
-        $this->addPrimarySystem(new Scanner(6, 18, 6, 8));
+        $this->addPrimarySystem(new SWScanner(6, 18, 6, 8));
         $this->addPrimarySystem(new Engine(5, 48, 0, 18, 5));
         $this->addPrimarySystem(new ReloadRack(5, 9));
         $this->addPrimarySystem(new SMissileRack(5, 6, 0, 0, 360));
@@ -39,15 +41,15 @@ class ColonialMercuryClass_K extends BaseShip{
         $this->addPrimarySystem(new SMissileRack(5, 6, 0, 0, 360));
         $this->addPrimarySystem(new SMissileRack(5, 6, 0, 0, 360));
         $this->addPrimarySystem(new EWNuclearTorpedo(5, 6, 3, 0, 360));
-		$this->addPrimarySystem(new Bulkhead(0, 4));
-        $this->addPrimarySystem(new Bulkhead(0, 4));
-		$this->addPrimarySystem(new Bulkhead(0, 4));
-		$this->addPrimarySystem(new Bulkhead(0, 4));
-        $this->addPrimarySystem(new Bulkhead(0, 4));
-        $this->addPrimarySystem(new Bulkhead(0, 4));
+//		$this->addPrimarySystem(new Bulkhead(0, 4));
+//      $this->addPrimarySystem(new Bulkhead(0, 4));
+//		$this->addPrimarySystem(new Bulkhead(0, 4));
+//		$this->addPrimarySystem(new Bulkhead(0, 4));
+//      $this->addPrimarySystem(new Bulkhead(0, 4));
+//      $this->addPrimarySystem(new Bulkhead(0, 4));
 		$hyperdrive = new JumpEngine(5, 32, 6, 20);
-		$hyperdrive->displayName = 'Phasing Drive';
-		$this->addPrimarySystem($hyperdrive);
+			$hyperdrive->displayName = 'Phasing Drive';
+			$this->addPrimarySystem($hyperdrive);
 		
         $this->addFrontSystem(new Thruster(6, 16, 0, 6, 1));
         $this->addFrontSystem(new Thruster(6, 16, 0, 6, 1));
