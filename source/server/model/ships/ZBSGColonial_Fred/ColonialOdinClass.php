@@ -36,7 +36,7 @@ class ColonialOdinClass extends BaseShip{
         $this->addPrimarySystem(new ReloadRack(5, 9));
 		$this->addPrimarySystem(new BSGFlakBattery(5, 6, 2, 0, 360));
         $this->addPrimarySystem(new RapidGatling(5, 4, 1, 0, 360));
-		$this->addPrimarySystem(new Bulkhead(0, 6));
+//		$this->addPrimarySystem(new Bulkhead(0, 6));
    
         $this->addFrontSystem(new Thruster(3, 15, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 15, 0, 4, 1));
@@ -122,7 +122,7 @@ class ColonialOdinClass extends BaseShip{
 					8 => "Main Battery",
 					9 => "Rapid Gatling Railgun",
 					10 => "Flak Battery",
-                    12 => "SMissileRack",
+                    12 => "Class-S Missile Rack",
 					18 => "Structure",
 					20 => "Primary",
 			),
@@ -132,7 +132,7 @@ class ColonialOdinClass extends BaseShip{
 					8 => "Main Battery",
 					9 => "Rapid Gatling Railgun",
 					10 => "Flak Battery",
-                    12 => "SMissileRack",
+                    12 => "Class-S Missile Rack",
 					18 => "Structure",
 					20 => "Primary",
 			),

@@ -9,8 +9,10 @@ class ColonialManticore_K extends MediumShip{
         $this->phpclass = "ColonialManticore_K";
         $this->imagePath = "img/ships/BSG/ColonialManticore.png";
         $this->shipClass = "Manticore Corvette";
-        $this->canvasSize = 100;
+        $this->canvasSize = 80;
 //	    $this->isd = 2007;
+
+	    $this->notes = 'May only boost sensors by 2.';
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
@@ -24,17 +26,17 @@ class ColonialManticore_K extends MediumShip{
          
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 9, 5, 5));
+        $this->addPrimarySystem(new SWScanner(4, 9, 5, 5));
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 2));
         $this->addPrimarySystem(new ReloadRack(4, 9));
         $this->addPrimarySystem(new SMissileRack(4, 6, 0, 0, 360));
 		$this->addPrimarySystem(new Hangar(4, 2));
 		$this->addPrimarySystem(new Thruster(4, 9, 0, 4, 3));
 		$this->addPrimarySystem(new Thruster(4, 9, 0, 4, 4));        
-		$this->addPrimarySystem(new Bulkhead(0, 4));
+//		$this->addPrimarySystem(new Bulkhead(0, 4));
 		$hyperdrive = new JumpEngine(4, 12, 6, 20);
-		$hyperdrive->displayName = 'Phasing Drive';
-		$this->addPrimarySystem($hyperdrive);
+			$hyperdrive->displayName = 'Phasing Drive';
+			$this->addPrimarySystem($hyperdrive);
 
         $this->addFrontSystem(new MedBlastCannon(4, 5, 2, 300, 60));
         $this->addFrontSystem(new Thruster(4, 9, 0, 4, 1));

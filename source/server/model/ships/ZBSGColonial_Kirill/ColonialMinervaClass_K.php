@@ -14,6 +14,8 @@ class ColonialMinervaClass_K extends BaseShip{
 		$this->unofficial = true;
         $this->limited = 33;
 
+	    $this->notes = 'May only boost sensors by 2.';
+
         $this->fighters = array("normal"=>24, "superheavy"=>4);
 
 //		$this->notes = "Primary users: Colonial Fleet";
@@ -31,19 +33,19 @@ class ColonialMinervaClass_K extends BaseShip{
         
         $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 18, 6, 6));
+        $this->addPrimarySystem(new SWScanner(5, 18, 6, 6));
         $this->addPrimarySystem(new Engine(4, 16, 0, 12, 5));
         $this->addPrimarySystem(new ReloadRack(5, 9));
         $this->addPrimarySystem(new SMissileRack(4, 6, 0, 0, 360));
         $this->addPrimarySystem(new SMissileRack(4, 6, 0, 0, 360));
         $this->addPrimarySystem(new EWNuclearTorpedo(4, 6, 3, 0, 360));
-		$this->addPrimarySystem(new Bulkhead(0, 4));
-        $this->addPrimarySystem(new Bulkhead(0, 4));
-		$this->addPrimarySystem(new Bulkhead(0, 4));
-		$this->addPrimarySystem(new Bulkhead(0, 4));
+//		$this->addPrimarySystem(new Bulkhead(0, 4));
+//        $this->addPrimarySystem(new Bulkhead(0, 4));
+//		$this->addPrimarySystem(new Bulkhead(0, 4));
+//		$this->addPrimarySystem(new Bulkhead(0, 4));
 		$hyperdrive = new JumpEngine(4, 16, 6, 20);
-		$hyperdrive->displayName = 'Phasing Drive';
-		$this->addPrimarySystem($hyperdrive);
+			$hyperdrive->displayName = 'Phasing Drive';
+			$this->addPrimarySystem($hyperdrive);
 		
         $this->addFrontSystem(new Thruster(4, 9, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 9, 0, 3, 1));
