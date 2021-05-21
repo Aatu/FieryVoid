@@ -358,11 +358,11 @@ window.gamedata = {
 			}
 		}
 	    
-	   
+	    checkResult += " (min. " + capsRequired +")";
 	    if (capitalShips >= capsRequired){ //tournament rules: at least 1; changed for scalability
 		    checkResult += " OK";
 	    }else{		    
-		    checkResult += " FAILED! (at least " + capsRequired + " required)";
+		    checkResult += " FAILED!";
 		    problemFound = true;
 	    }
 	    checkResult += "<br>";
@@ -455,6 +455,8 @@ window.gamedata = {
 			if (currHull.Total>limitPerHull ){
 				checkResult += " TOO MANY!";
 				problemFound = true;
+			} else {
+				checkResult += " OK";
 			}
 		}
 		checkResult += "<br>";
@@ -466,6 +468,8 @@ window.gamedata = {
 			if (sumVar>currUlimit){
 				checkResult += " TOO MANY!";
 				problemFound = true;
+			} else {
+				checkResult += " OK";
 			}
 			checkResult += "<br>";
 		}
@@ -475,6 +479,8 @@ window.gamedata = {
 			if (sumVar>currRlimit){
 				checkResult += " TOO MANY!";
 				problemFound = true;
+			} else {
+				checkResult += " OK";
 			}
 			checkResult += "<br>";
 		}
@@ -500,14 +506,21 @@ window.gamedata = {
 	    }
 	    limitUTotal = Math.max(limitUTotal,2); //always allow at least 2! 
 	    limitRTotal = Math.floor(limitUTotal/2); //limit Rare units per fleet; turnament rules: 1, but it's for 3500 points    
+		var limitUTotalResult = 'OK';
+		var limitRTotalResult = 'OK';
 	    if (totalU>limitUTotal){
-			checkResult += "FAILED: You have " + totalU + " Uncommon units, out of " + limitUTotal + " allowed for fleet.<br><br>" ;
+			limitUTotalResult = 'TOO MANY!';
+			//checkResult += "FAILED: You have " + totalU + " Uncommon units, out of " + limitUTotal + " allowed for fleet.<br><br>" ;
 			problemFound = true;
 	    }
 	    if (totalR>limitRTotal){
-			checkResult += "FAILED: You have " + totalR + " Rare/Unique units, out of " + limitRTotal + " allowed for fleet.<br><br>" ;
+			limitRTotalResult = 'TOO MANY!';
+			//checkResult += "FAILED: You have " + totalR + " Rare/Unique units, out of " + limitRTotal + " allowed for fleet.<br><br>" ;
 			problemFound = true;
 	    }
+		checkResult += 'Total Uncommon units: ' + totalU + ' (allowed ' + limitUTotal +') ' + limitUTotalResult +'<br>';
+		checkResult += 'Total Rare/Unique units: ' + totalR + ' (allowed ' + limitRTotal +') ' + limitRTotalResult +'<br><br>';
+		
 	    
 	    //fighters!
 		//ultralights count as half a fighter when accounting for hangar space used - IF packed into something other than ultralight hangars...

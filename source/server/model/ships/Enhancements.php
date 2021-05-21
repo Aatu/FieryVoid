@@ -43,6 +43,7 @@ class Enhancements{
 	switch($setName) {
 		case 'ShadowShip':
 			Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';
 			$unit->enhancementOptionsEnabled[] = 'SHAD_FTRL';
 			break;
 	  
@@ -53,6 +54,7 @@ class Enhancements{
 			
 		case 'VorlonShip':
 			Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';
 			$unit->enhancementOptionsEnabled[] = 'VOR_AMETHS';
 			$unit->enhancementOptionsEnabled[] = 'VOR_AZURS';
 			$unit->enhancementOptionsEnabled[] = 'VOR_CRIMS';
@@ -164,6 +166,30 @@ class Enhancements{
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
 	  }	  
+	  
+	  
+	  //Improved Self Repair - +1 Self-Repair rating
+	  $enhID = 'IMPR_SR';	  
+	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Improved Self Repair';
+		  //find number and output of Self-Repair modules
+		  $count = 0;	
+		  $outputTotal = 0;
+		  $outputMin = 10000;
+		  foreach ($ship->systems as $system){
+			if ($system instanceof SelfRepair){
+				$count++;
+				$outputTotal += $system->output;//count CURRENT output!
+				$outputMin = Min($outputMin, $system->output); //weakest system - to determine maxiumum upgrade
+			}
+		  }  
+		  if(($count > 0) && ($outputMin>=2)){ //ship is actually equipped with Self Repair system(s) strong enough to be upgraded
+			  $enhPrice = ($outputTotal+$count)*100; //every self repair system increased by one
+			  $enhPriceStep = $count*100; //additional 100 points for every self-repair on ship
+			  $enhLimit = floor($outputMin/2);	  
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+	  }  	
 	    
 	  
 	  //Ipsha-specific - Eethan Barony refit (available for generic Ipsha designs only, Eethan-specific may have it already incorporated in some form)
@@ -666,6 +692,14 @@ class Enhancements{
 						}
 						break;
 						
+					case 'IMPR_SR': //Improved Self Repair: +1 Output for each Self Repair
+						foreach ($ship->systems as $system){
+							if ($system instanceof SelfRepair){
+								$system->output += $enhCount;
+							}
+						}  
+						break;	
+						
 					case 'IPSH_EETH': //Ipsha Eethan Barony refit: +2 free thrust, +25% available power (round arithmetically), +0.1 turn delay, -5 Initiative, +4 critical roll modifier for Reactor and Engine
 						//fixed values:
 						$ship->iniativebonus -= $enhCount*5;
@@ -947,7 +981,14 @@ class Enhancements{
 							if($system instanceof Thruster){
 								$strippedSystem->output = $system->output;
 							}
-							break;							
+							break;
+
+						case 'IMPR_SR': //improved self repair: modifies output of Self Repair
+							if ($system instanceof SelfRepair){ //SelfRepair
+								$strippedSystem->output = $system->output ;
+								$strippedSystem->critRollMod = $system->critRollMod ;
+							}
+							break;		
 
 						case 'IPSH_EETH': //modifies output and crit mod of Engine and Reactor
 							if ($system instanceof MagGravReactor){ //Reactor
@@ -957,7 +998,7 @@ class Enhancements{
 								$strippedSystem->output = $system->output ;
 								$strippedSystem->critRollMod = $system->critRollMod ;
 							}
-							break;		
+							break;
 							
 							
 						foreach ($ship->systems as $system){

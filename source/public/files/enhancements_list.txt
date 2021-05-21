@@ -78,6 +78,13 @@ Poor Training (equivalent of Poor Crew for ships):
 FACTION SPECIFIC ENHANCEMENTS:
 
 
+ANCIENTS (all of them):
+
+Improved Self Repair:
+	Effect: +1 rating for every Self Repair system on ship
+	Cost: new output times 100 (for every self repair system on ship)
+	Limit: half of weakest Self Repair's base rating (round down)
+
 
 IPSHA:
 
@@ -118,7 +125,7 @@ Uncontrolled (fighter; not actual enhancement - rather inherent penalty for figh
 STAR WARS:
 
 Elite Pilot (fighter):
-	Effect: Pivot Cost is 1 (2 for combat pivot) rather than regular 2. Initiative +5. OB +1. Profile -1.
+	Effect: Pivot Cost is 1 (2 for combat pivot) rather than SW regular 2(3). Initiative +5. OB +1. Profile -1.
 	Cost: 40% of craft price (round up)
 	Limit: 1
 	
