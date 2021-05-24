@@ -269,7 +269,7 @@ But with these caveats - have fun! Ancients should be balanced against each othe
 Below list of systems Shadows use, with short description of effect and design differences from original tabletop.
 Called shots - systems on Shadow ships cannot be targeted by called shots.
 Enhancements - Shadow ships use no crew, so cannot use rew-related enhancements. They can use enhancements relating to special officers (that would be ship pilot's skill in such case). They have their own faction-specific enhancements as well.
-Self-Repair - automated, player cannot decide what is repaired. Damage and criticals suffered in current turn cannot be repaired. Cost of critical repair has been changed in places (in particular C&C criticals aren't that costly to fix), and there's no partial repair of crits. 
+Self-Repair - automated, but player can modify default priority of repairs. Damage and criticals suffered in current turn cannot be repaired. Cost of critical repair has been changed in places (in particular C&C criticals aren't that costly to fix), and there's no partial repair of crits. 
 	If Self-Repair is destroyed or damaged, unused repair points are NOT lost.
 Energy Diffuser - absorbs damage as it's being dealt (and diffuses it over time). In FV Diffuser always kicks in if possible, there's no option to withhold its use eg. waiting for more threatening damage and conserving resources. Diffuser can dissipate damage just absorbed. For visual reasons tendrils are shown as separate (untargetable) systems. Damage absorbed by ship tendrils is not shown in log.
 	Diffuser will not try to stop no-overkill damage that would kill system hit despite Diffuser interference. This is important for very strong Matter or Piercing shots.

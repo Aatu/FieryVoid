@@ -358,6 +358,12 @@ shipManager.power = {
 					return false;
 				}
 			}
+			//and no system except Reactor may be boosted, too
+			if (system.name != 'reactor'){
+				if (shipManager.power.getBoost(system) > 0){
+					return false;
+				}					
+			}
 		}
 
 		return true;

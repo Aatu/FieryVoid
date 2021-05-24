@@ -352,9 +352,9 @@ window.gamedata = {
 				//capsRequired = Math.ceil((selectedSlot.points-2499)/4000); //previous: one per 4000 points above 2499
 				capsRequired = Math.ceil(selectedSlot.points/5000);
 			}
-		}else{ //Ancient-level limit: one per 10000 points, starting at 4000			
-			if (selectedSlot.points >= 4000){
-				capsRequired = Math.ceil(selectedSlot.points/10000);
+		}else{ //Ancient-level limit: one per 15000 points, starting at 5000			
+			if (selectedSlot.points >= 5000){
+				capsRequired = Math.ceil(selectedSlot.points/15000);
 			}
 		}
 	    
@@ -440,7 +440,7 @@ window.gamedata = {
 	    checkResult += "<br>><u><b>Variant restrictions:</b></u><br><br>";
 	    var limitPerHull = Math.floor(selectedSlot.points/1100); //turnament rules: 3, but it's for 3500 points
 		if (ancientUnitPresent){ //Ancients have way fewer total units...
-			limitPerHull = Math.floor(selectedSlot.points/4000);
+			limitPerHull = Math.floor(selectedSlot.points/3000);
 		}
 	    limitPerHull = Math.max(limitPerHull,2); //always allow at least 2!
 	    var currRlimit = 0;
@@ -493,12 +493,11 @@ window.gamedata = {
 	    var limitUTotal =  0;
 	    var limitRTotal =  0;
 		
-	    if((selectedSlot.points-1500) > 0){
-	    	limitUTotal = Math.floor((selectedSlot.points-1500)/1000); //limit Uncommon units per fleet; turnament rules: 2, but it's for 3500 points
-	    }
 		if (ancientUnitPresent){ //Ancients have way fewer total units...
 			limitUTotal = Math.floor(selectedSlot.points/4000);
-		}
+		} else if((selectedSlot.points-1500) > 0){
+	    	limitUTotal = Math.floor((selectedSlot.points-1500)/1000); //limit Uncommon units per fleet; turnament rules: 2, but it's for 3500 points
+	    }
 	    limitUTotal = Math.max(limitUTotal,2); //always allow at least 2! 
 	    limitRTotal = Math.floor(limitUTotal/2); //limit Rare units per fleet; turnament rules: 1, but it's for 3500 points    
 	    if (totalU>limitUTotal){
