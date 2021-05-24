@@ -39747,12 +39747,26 @@ var SystemInfoButtons = function (_React$Component) {
 			webglScene.customEvent('CloseSystemInfo');
 		}
 	}, {
-		key: "allChangeFiringMode",
-		value: function allChangeFiringMode(e) {
+		key: "removeFireOrderAll",
+		value: function removeFireOrderAll(e) {
 			e.stopPropagation();e.preventDefault();
 			var _props12 = this.props,
 			    ship = _props12.ship,
 			    system = _props12.system;
+
+			if (!canRemoveFireOrder(ship, system)) {
+				return;
+			}
+			weaponManager.removeFiringOrderAll(ship, system);
+			webglScene.customEvent('CloseSystemInfo');
+		}
+	}, {
+		key: "allChangeFiringMode",
+		value: function allChangeFiringMode(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props13 = this.props,
+			    ship = _props13.ship,
+			    system = _props13.system;
 
 			if (!canChangeFiringMode(ship, system)) {
 				return;
@@ -39807,9 +39821,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "changeFiringMode",
 		value: function changeFiringMode(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props13 = this.props,
-			    ship = _props13.ship,
-			    system = _props13.system;
+			var _props14 = this.props,
+			    ship = _props14.ship,
+			    system = _props14.system;
 
 			if (!canChangeFiringMode(ship, system)) {
 				return;
@@ -39824,9 +39838,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "declareSelfIntercept",
 		value: function declareSelfIntercept(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props14 = this.props,
-			    ship = _props14.ship,
-			    system = _props14.system;
+			var _props15 = this.props,
+			    ship = _props15.ship,
+			    system = _props15.system;
 
 			if (!canSelfIntercept(ship, system)) {
 				return;
@@ -39840,9 +39854,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "declareSelfInterceptAll",
 		value: function declareSelfInterceptAll(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props15 = this.props,
-			    ship = _props15.ship,
-			    system = _props15.system;
+			var _props16 = this.props,
+			    ship = _props16.ship,
+			    system = _props16.system;
 
 			weaponManager.onDeclareSelfInterceptSingleAll(ship, system);
 			webglScene.customEvent('CloseSystemInfo');
@@ -39854,9 +39868,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "nextCurrClass",
 		value: function nextCurrClass(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props16 = this.props,
-			    ship = _props16.ship,
-			    system = _props16.system;
+			var _props17 = this.props,
+			    ship = _props17.ship,
+			    system = _props17.system;
 
 			system.nextCurrClass();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -39868,9 +39882,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "AAincrease",
 		value: function AAincrease(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props17 = this.props,
-			    ship = _props17.ship,
-			    system = _props17.system;
+			var _props18 = this.props,
+			    ship = _props18.ship,
+			    system = _props18.system;
 
 			system.doIncrease();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -39881,9 +39895,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "AAdecrease",
 		value: function AAdecrease(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props18 = this.props,
-			    ship = _props18.ship,
-			    system = _props18.system;
+			var _props19 = this.props,
+			    ship = _props19.ship,
+			    system = _props19.system;
 
 			system.doDecrease();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -39894,9 +39908,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "AApropagate",
 		value: function AApropagate(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props19 = this.props,
-			    ship = _props19.ship,
-			    system = _props19.system;
+			var _props20 = this.props,
+			    ship = _props20.ship,
+			    system = _props20.system;
 
 			var dmgType = system.getCurrDmgType();
 			var allocated = system.getCurrAllocated();
@@ -39949,13 +39963,62 @@ var SystemInfoButtons = function (_React$Component) {
 
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 		}
+
+		/*Self Repair - display next system in need of repairs*/
+
+	}, {
+		key: "nextSRsystem",
+		value: function nextSRsystem(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props21 = this.props,
+			    ship = _props21.ship,
+			    system = _props21.system;
+
+			system.getNextSystem();
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
+		/*Self Repair - change system priority*/
+
+	}, {
+		key: "SRPriorityUp",
+		value: function SRPriorityUp(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props22 = this.props,
+			    ship = _props22.ship,
+			    system = _props22.system;
+
+			system.setRepairPriority(20);
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
+	}, {
+		key: "SRPriorityDown",
+		value: function SRPriorityDown(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props23 = this.props,
+			    ship = _props23.ship,
+			    system = _props23.system;
+
+			system.setRepairPriority(0);
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
+	}, {
+		key: "SRPriorityCancel",
+		value: function SRPriorityCancel(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props24 = this.props,
+			    ship = _props24.ship,
+			    system = _props24.system;
+
+			system.setRepairPriority(-1);
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
 	}, {
 		key: "render",
 		value: function render() {
-			var _props20 = this.props,
-			    ship = _props20.ship,
-			    selectedShip = _props20.selectedShip,
-			    system = _props20.system;
+			var _props25 = this.props,
+			    ship = _props25.ship,
+			    selectedShip = _props25.selectedShip,
+			    system = _props25.system;
 
 
 			if (!canDoAnything) {
@@ -39973,7 +40036,7 @@ var SystemInfoButtons = function (_React$Component) {
 				canBoost(ship, system) && React.createElement(Button, { title: "boost", onClick: this.boost.bind(this), img: "./img/plussquare.png" }),
 				canAddShots(ship, system) && React.createElement(Button, { title: "more shots", onClick: this.addShots.bind(this), img: "./img/plussquare.png" }),
 				canReduceShots(ship, system) && React.createElement(Button, { title: "less shots", onClick: this.reduceShots.bind(this), img: "./img/minussquare.png" }),
-				canRemoveFireOrder(ship, system) && React.createElement(Button, { title: "cancel fire order", onClick: this.removeFireOrder.bind(this), img: "./img/firing.png" }),
+				canRemoveFireOrder(ship, system) && React.createElement(Button, { title: "cancel fire order (R = mass)", onClick: this.removeFireOrder.bind(this), onContextMenu: this.removeFireOrderAll.bind(this), img: "./img/firing.png" }),
 				canChangeFiringMode(ship, system) && getFiringModesCurr(ship, system),
 				canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this)),
 				canSelfIntercept(ship, system) && React.createElement(Button, { title: "allow interception (R = mass)", onClick: this.declareSelfIntercept.bind(this), onContextMenu: this.declareSelfInterceptAll.bind(this), img: "./img/selfIntercept.png" }),
@@ -39981,7 +40044,12 @@ var SystemInfoButtons = function (_React$Component) {
 				canAAdisplayCurrClass(ship, system) && React.createElement(Button, { title: "next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/AAclasses/iconNext.png" }),
 				canAAincrease(ship, system) && React.createElement(Button, { onClick: this.AAincrease.bind(this), img: "./img/systemicons/AAclasses/iconPlus.png" }),
 				canAAdecrease(ship, system) && React.createElement(Button, { onClick: this.AAdecrease.bind(this), img: "./img/systemicons/AAclasses/iconMinus.png" }),
-				canAApropagate(ship, system) && React.createElement(Button, { title: "propagate setting", onClick: this.AApropagate.bind(this), img: "./img/systemicons/AAclasses/iconPropagate.png" })
+				canAApropagate(ship, system) && React.createElement(Button, { title: "propagate setting", onClick: this.AApropagate.bind(this), img: "./img/systemicons/AAclasses/iconPropagate.png" }),
+				canSRdisplayCurrSystem(ship, system) && React.createElement(Button, { title: "next", onClick: this.nextSRsystem.bind(this), img: "./img/systemicons/AAclasses/iconNext.png" }),
+				canSRdisplayCurrSystem(ship, system) && React.createElement(Button, { title: getSRdescription(ship, system), img: getSRicon(ship, system) }),
+				canSRdisplayCurrSystem(ship, system) && React.createElement(Button, { title: "Highest priority", onClick: this.SRPriorityUp.bind(this), img: "./img/iconSRHigh.png" }),
+				canSRdisplayCurrSystem(ship, system) && React.createElement(Button, { title: "Disable repair", onClick: this.SRPriorityDown.bind(this), img: "./img/iconSRLow.png" }),
+				canSRdisplayCurrSystem(ship, system) && React.createElement(Button, { title: "Default priority", onClick: this.SRPriorityCancel.bind(this), img: "./img/iconSRCancel.png" })
 			);
 		}
 	}]);
@@ -40014,8 +40082,19 @@ var canAApropagate = function canAApropagate(ship, system) {
 	return canAA(ship, system) && system.canPropagate() != '';
 };
 
+//can do something with Self Repair...
+var canSRdisplayCurrSystem = function canSRdisplayCurrSystem(ship, system) {
+	return gamedata.gamephase === 1 && system.name == 'SelfRepair' && system.getCurrSystem() >= 0;
+};
+var getSRdescription = function getSRdescription(ship, system) {
+	return system.getCurrSystemDescription();
+};
+var getSRicon = function getSRicon(ship, system) {
+	return system.getCurrSystemIcon();
+};
+
 var canDoAnything = exports.canDoAnything = function canDoAnything(ship, system) {
-	return canOffline(ship, system) || canOnline(ship, system) || canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) || canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system) || canSelfIntercept(ship, system) || canAA(ship, system);
+	return canOffline(ship, system) || canOnline(ship, system) || canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) || canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system) || canSelfIntercept(ship, system) || canAA(ship, system) || canSRdisplayCurrSystem(ship, system);
 };
 
 var canOffline = function canOffline(ship, system) {

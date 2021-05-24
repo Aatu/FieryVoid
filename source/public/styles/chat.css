@@ -20,7 +20,8 @@
 
 .chatmessage{
     margin: 2px 5px 2px 5px;
-    font-size:11px;
+    /*font-size:11px;*/
+	font-size:15px;
 }
 
 .chattime{
@@ -36,9 +37,11 @@
 }
 
 .chatuser.mine{
-    color:#2f5123;
+    /*color:#2f5123;*/
+	color:#00D800;
 }
 
 .chattext{
-    color:#496791;
+    /*color:#496791;*/
+	color:#BDEAFA;
 }
