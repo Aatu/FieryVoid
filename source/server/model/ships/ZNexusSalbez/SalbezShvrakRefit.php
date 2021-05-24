@@ -12,7 +12,7 @@ class SalbezShvrakRefit extends MediumShip{
         $this->imagePath = "img/ships/Nexus/salbez_mining_frigate.png";
         $this->shipClass = "Shv'rak Mining Frigate (2099 refit)";
 		$this->unofficial = true;
-        $this->canvasSize = 75;
+        $this->canvasSize = 65;
 	    $this->isd = 2099;
         
         $this->forwardDefense = 11;

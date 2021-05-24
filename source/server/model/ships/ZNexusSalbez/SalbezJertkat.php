@@ -10,7 +10,7 @@ class SalbezJertkat extends BaseShip{
         $this->imagePath = "img/ships/Nexus/salbez_jertkat.png";
         $this->shipClass = "Jer't'kat Heavy Cruiser";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 175; //img has 200px per side
+		$this->canvasSize = 135; //img has 200px per side
 		$this->unofficial = true;
         $this->limited = 33;
 
