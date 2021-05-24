@@ -2286,6 +2286,42 @@ class NexusMauler extends Particle{
     } // endof NexusMauler	
 
 
+
+    class NexusParticleGrid extends Particle{
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "NexusParticleGrid";
+        public $displayName = "Particle Grid";
+		public $iconPath = "NexusParticleGrid.png";
+	    
+        public $animation = "beam";
+        public $animationColor = array(205, 200, 200);
+        public $animationExplosionScale = 0.15;
+        public $projectilespeed = 10;
+        public $animationWidth = 3;
+        public $trailLength = 10;
+
+        public $intercept = 2;
+        public $loadingtime = 1;
+        public $priority = 3;
+
+        public $rangePenalty = 2; //-2/hex
+        public $fireControl = array(3, 0, 0); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 3;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 1)+1;   }
+        public function setMinDamage(){     $this->minDamage = 2 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 11 ;      }
+    }
+
+
+
 // END OF PARTICLE WEAPONS
 
 
@@ -4090,6 +4126,43 @@ class NexusLaserMissile extends Weapon{
     }  // endof class NexusHeavyLaserSpear
 
 
+    class NexusIndustrialLaser extends Laser{
+     
+        public $name = "NexusIndustrialLaser";
+        public $displayName = "Industrial Laser";  
+	    public $iconPath = "NexusIndustrialLaser.png";
+	    
+        public $animation = "laser";
+        public $animationColor = array(255, 91, 91);
+        public $animationExplosionScale = 0.16;
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.3;
+        public $priority = 7;
+        
+        public $loadingtime = 3;
+        
+        public $raking = 6;
+        
+        public $rangePenalty = 1; //-1 / hex
+        public $fireControl = array(-2, 0, 3); // fighters, <mediums, <capitals 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 6;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 2;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 3)+6;   }
+        public function setMinDamage(){     $this->minDamage = 9 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 36 ;      }
+    } //endof NexusIndustrialLaser
+
+
 
 // END OF LASER WEAPONS
 
@@ -5160,8 +5233,9 @@ class NexusSwarmTorpedo extends Pulse{
 
         public function setSystemDataWindow($turn){            
             parent::setSystemDataWindow($turn);
-            $this->data["Pulses"] = 'D 2';            
-			$this->data["Special"] = '<br>Benefits from offensive EW.';			
+//            $this->data["Pulses"] = 'D2';            
+//			$this->data["Special"] .= '<br>Max 4 pulse. +1 per 25%';			
+			$this->data["Special"] .= '<br>Benefits from offensive EW.';			
         }
 
 	
@@ -5570,6 +5644,40 @@ class TestGun extends Particle{
         public function setMaxDamage(){     $this->maxDamage = 14 ;      }
 	}// endof LightParticleBeamFtr
 	
+
+/*fighter-mounted variant*/
+    class NexusParticleGridFtr extends Particle{
+//        public $trailColor = array(30, 170, 255);
+
+        public $name = "NexusParticleGridFtr";
+        public $displayName = "Particle Grid";
+		public $iconPath = "NexusParticleGrid.png";
+	    
+        public $animation = "beam";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.12;
+        public $projectilespeed = 12;
+        public $animationWidth = 3;
+        public $trailLength = 8;
+
+        public $intercept = 2;
+        public $loadingtime = 1;
+        public $priority = 4;
+
+        public $rangePenalty = 2 ; //-2 / hex
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+
+	function __construct($startArc, $endArc, $nrOfShots = 1){
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 1)+1;   }
+        public function setMinDamage(){     $this->minDamage = 2 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 11 ;      }
+	}// endof NexusParticleGridFtr
+
 
 /*fighter-mounted variant*/
     class GatlingGunFtr extends LinkedWeapon{

@@ -1338,6 +1338,8 @@ spl_autoload_register(
 				'nexuslightparticlearray' => '/server/model/weapons/customNexus.php',
 				'nexusgatlingparticlearray' => '/server/model/weapons/customNexus.php',
 				'nexusparticlearray' => '/server/model/weapons/customNexus.php',
+				'nexusparticlegrid' => '/server/model/weapons/customNexus.php',
+				'nexusparticlegridftr' => '/server/model/weapons/customNexus.php',
 				'nexusprotector' => '/server/model/weapons/customNexus.php',
 			//Nexus ballistic weapons
 				'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php', 
@@ -1345,6 +1347,7 @@ spl_autoload_register(
 				'nexusstreakinterceptor' => '/server/model/weapons/customNexus.php',
 				'nexusdartinterceptor' => '/server/model/weapons/customNexus.php',
 				'nexusearlyplasmawave' => '/server/model/weapons/customNexus.php',
+				'nexusswarmtorpedo' => '/server/model/weapons/customNexus.php',
 			//Nexus plasma weapons
 				'nexusheavyplasmacharge' => '/server/model/weapons/customNexus.php',
 //				'nexusheavychargedplasmagun' => '/server/model/weapons/customNexus.php',
@@ -1353,6 +1356,7 @@ spl_autoload_register(
 				'nexusmediumchemicallaser' => '/server/model/weapons/customNexus.php',
 				'nexusheavylasercutter' => '/server/model/weapons/customNexus.php',
 				'nexusheavylaserspear' => '/server/model/weapons/customNexus.php',
+				'nexusindustriallaser' => '/server/model/weapons/customNexus.php',
 				'nexuslaserspear' => '/server/model/weapons/customNexus.php',
 				'nexuslightlasercutter' => '/server/model/weapons/customNexus.php',
 			//Nexus ion weapons
@@ -1432,6 +1436,28 @@ spl_autoload_register(
                 'dalithornlightcruiser' => '/server/model/ships/ZNexusDalithorn/DalithornLightCruiser.php',					
                 'dalithornpinnace' => '/server/model/ships/ZNexusDalithorn/DalithornPinnace.php',					
 
+
+				//Nexus ships - Sal-bez
+                'salbezattackshuttle' => '/server/model/ships/ZNexusSalbez/SalbezAttackShuttle.php',					
+                'salbezesver' => '/server/model/ships/ZNexusSalbez/SalbezEsver.php',					
+                'salbezevsk' => '/server/model/ships/ZNexusSalbez/SalbezEvsk.php',					
+                'salbezfelriz' => '/server/model/ships/ZNexusSalbez/SalbezFelriz.php',					
+                'salbezfelrizrefit' => '/server/model/ships/ZNexusSalbez/SalbezFelrizRefit.php',					
+                'salbezfelrizrefit2' => '/server/model/ships/ZNexusSalbez/SalbezFelrizRefit2.php',					
+                'salbezjertkat' => '/server/model/ships/ZNexusSalbez/SalbezJertkat.php',					
+                'salbezjertkatrefit' => '/server/model/ships/ZNexusSalbez/SalbezJertkatRefit.php',					
+                'salbeznewfighter' => '/server/model/ships/ZNexusSalbez/SalbezNewFighter.php',					
+                'salbezshvrak' => '/server/model/ships/ZNexusSalbez/SalbezShvrak.php',					
+                'salbezshvrakrefit' => '/server/model/ships/ZNexusSalbez/SalbezShvrakRefit.php',					
+                'salbezshvrez' => '/server/model/ships/ZNexusSalbez/SalbezShvrez.php',					
+                'salbezshvrezrefit' => '/server/model/ships/ZNexusSalbez/SalbezShvrezRefit.php',					
+                'salbezurzchk' => '/server/model/ships/ZNexusSalbez/SalbezUrzchk.php',					
+                'salbezurzchkrefit' => '/server/model/ships/ZNexusSalbez/SalbezUrzchkRefit.php',					
+                'salbezvasren' => '/server/model/ships/ZNexusSalbez/SalbezVasren.php',					
+                'salbezvasrenrefit' => '/server/model/ships/ZNexusSalbez/SalbezVasrenRefit.php',					
+                'salbezzefjem' => '/server/model/ships/ZNexusSalbez/SalbezZefjem.php',					
+                'salbezzefjemrefit' => '/server/model/ships/ZNexusSalbez/SalbezZefjemRefit.php',					
+                'salbezzefjemrefit2' => '/server/model/ships/ZNexusSalbez/SalbezZefjemRefit2.php',					
 
 
 				//Nexus ships - Velrax
@@ -1608,6 +1634,12 @@ spl_autoload_register(
 				//Battlestar Galactic - Cylons
 				'cylonbasestar' => '/server/model/ships/ZBSGCylons/CylonBasestar.php',				
 
+
+				//Specific Raider Groups
+				//Imperial Star Legion
+                'legionaugustus' => '/server/model/ships/raiders/LegionAugustus.php',
+                'legiongladius' => '/server/model/ships/raiders/LegionGladius.php',
+                'legionstarjammer' => '/server/model/ships/raiders/LegionStarjammer.php',
 
 
 
