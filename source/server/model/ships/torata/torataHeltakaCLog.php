@@ -9,7 +9,7 @@ class TorataHeltakaCLog extends BaseShip{
 		$this->faction = "Torata";
 		$this->phpclass = "TorataHeltakaCLog";
 		$this->shipClass = "Heltaka Logistics Cruiser";
-		$this->imagePath = "img/ships/TorataHeltaka.png";
+		$this->imagePath = "img/ships/TorataHeltakaNOPODS.png";
 		$this->canvasSize = 200;
 		$this->shipSizeClass = 3;
 		$this->isd = 2256;
