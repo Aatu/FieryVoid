@@ -4,7 +4,7 @@ class SalbezZefjemRefit extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 380;
+        $this->pointCost = 375;
         $this->faction = "ZNexus Playtest Sal-bez";
         $this->phpclass = "SalbezZefjemRefit";
 			$this->variantOf = "Zef'jem Heavy Frigate";

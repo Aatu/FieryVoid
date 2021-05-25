@@ -4,7 +4,7 @@ class SalbezEsver extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 175;
+        $this->pointCost = 150;
         $this->faction = "ZNexus Playtest Sal-bez";
         $this->phpclass = "SalbezEsver";
         $this->imagePath = "img/ships/Nexus/salbez_evsk.png";

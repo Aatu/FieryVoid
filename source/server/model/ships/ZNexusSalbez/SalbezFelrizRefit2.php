@@ -4,7 +4,7 @@ class SalbezFelrizRefit2 extends BaseShipNoAft{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 425;
+		$this->pointCost = 500;
 		$this->faction = "ZNexus Playtest Sal-bez";
         $this->phpclass = "SalbezFelrizRefit2";
         $this->imagePath = "img/ships/Nexus/salbez_felriz.png";

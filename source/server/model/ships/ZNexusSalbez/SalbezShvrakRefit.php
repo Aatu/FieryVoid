@@ -4,7 +4,7 @@ class SalbezShvrakRefit extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 245;
+        $this->pointCost = 200;
         $this->faction = "ZNexus Playtest Sal-bez";
         $this->phpclass = "SalbezShvrakRefit";
 			$this->variantOf = "Shv'rak Mining Frigate";

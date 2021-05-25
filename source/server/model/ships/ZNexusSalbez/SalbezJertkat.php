@@ -4,7 +4,7 @@ class SalbezJertkat extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 490;
+	$this->pointCost = 500;
 	$this->faction = "ZNexus Playtest Sal-bez";
         $this->phpclass = "SalbezJertkat";
         $this->imagePath = "img/ships/Nexus/salbez_jertkat.png";

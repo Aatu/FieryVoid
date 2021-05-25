@@ -4,7 +4,7 @@ class SalbezNewFighter extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 47*6;
+        $this->pointCost = 43*6;
         $this->faction = "ZNexus Playtest Sal-bez";
         $this->phpclass = "SalbezNewFighter";
         $this->shipClass = "New Fighter";

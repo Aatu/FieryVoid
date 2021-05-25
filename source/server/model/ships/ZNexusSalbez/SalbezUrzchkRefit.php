@@ -4,7 +4,7 @@ class SalbezUrzchkRefit extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 42*6;
+        $this->pointCost = 38*6;
         $this->faction = "ZNexus Playtest Sal-bez";
         $this->phpclass = "SalbezUrzchkRefit";
         $this->shipClass = "Urz'chk Heavy Flight (2102 refit)";
