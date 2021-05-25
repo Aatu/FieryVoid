@@ -5196,8 +5196,8 @@ class NexusSwarmTorpedo extends Pulse{
 		public $iconPath = "NexusSwarmTorpedo.png";
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile
-		public $range = 15;
-		public $distanceRange = 25;		
+		public $range = 25;
+		public $distanceRange = 35;		
         public $animation = "trail";
         public $animationColor = array(192, 192, 192);
     	public $trailColor = array(215, 126, 111);

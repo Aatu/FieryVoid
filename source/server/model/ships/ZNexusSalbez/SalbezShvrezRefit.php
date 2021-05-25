@@ -39,7 +39,8 @@ class SalbezShvrezRefit extends MediumShip{
 		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 120));
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 270, 90));
 		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
-        $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	    
 		$this->addAftSystem(new NexusImprovedParticleBeam(2, 3, 1, 60, 300));
 		$this->addAftSystem(new NexusImprovedParticleBeam(2, 3, 1, 60, 300));
@@ -64,14 +65,14 @@ class SalbezShvrezRefit extends MediumShip{
 			5 => "Thruster",
 			7 => "Medium Laser",
 			9 => "Light Laser",
-			10 => "Light Particle Beam",
+			10 => "Improved Particle Beam",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
 			8 => "Thruster",
-			10 => "Light Particle Beam",
+			10 => "Improved Particle Beam",
 			17 => "Structure",
 			20 => "Primary",
 		),

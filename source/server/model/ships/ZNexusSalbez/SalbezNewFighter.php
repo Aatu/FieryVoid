@@ -33,7 +33,7 @@ class SalbezNewFighter extends FighterFlight{
         $toAdd = $new - $current;
 
         for ($i = 0; $i < $toAdd; $i++){            
-            $armour = array(3, 2, 2, 2);
+            $armour = array(3, 3, 2, 2);
             $fighter = new Fighter("SalbezNewFighter", $armour, 12, $this->id);
             $fighter->displayName = "New Fighter";
             $fighter->imagePath = "img/ships/Nexus/salbez_new_fighter.png";

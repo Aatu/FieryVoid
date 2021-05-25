@@ -42,7 +42,7 @@ class SalbezEsver extends LCV{
 		$this->addPrimarySystem(new Engine(3, 12, 0, 6, 3));
 		$this->addPrimarySystem(new LaserCutter(2, 6, 4, 300, 60));
 		$this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
-		$this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 0, 108));
+		$this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 0, 180));
 		$this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 270, 90));
 	    
 	    

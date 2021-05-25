@@ -37,7 +37,8 @@ class SalbezShvrez extends MediumShip{
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 270, 90));
 		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
-        $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	    
 		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 60, 300));
 		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 60, 300));

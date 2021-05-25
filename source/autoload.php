@@ -1334,6 +1334,7 @@ spl_autoload_register(
 				'nexusparticleagitator' => '/server/model/weapons/customNexus.php', 
 				'nexusprojectorarray' => '/server/model/weapons/customNexus.php',
 				'nexuslightprojectorarray' => '/server/model/weapons/customNexus.php',
+				'nexusimprovedparticlebeam' => '/server/model/weapons/customNexus.php',
 				'nexusinterceptorarray' => '/server/model/weapons/customNexus.php',
 				'nexuslightparticlearray' => '/server/model/weapons/customNexus.php',
 				'nexusgatlingparticlearray' => '/server/model/weapons/customNexus.php',
