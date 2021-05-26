@@ -3,6 +3,7 @@
     height:100%;
     overflow:hidden;
     position:relative;
+	font-style:italic;
 }
 
 .chatMessages{
@@ -43,5 +44,6 @@
 
 .chattext{
     /*color:#496791;*/
-	color:#BDEAFA; /*white-ish*/
+	color:#BDEAFA; /*white-ish*/	
+	font-style:normal;
 }
