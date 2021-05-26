@@ -1601,6 +1601,7 @@ spl_autoload_register(
                 'bsgkineticenergyweapon' => '/server/model/weapons/customNexus.php',
                 'bsgltkineticenergyweapon' => '/server/model/weapons/customNexus.php',
                 'bsgmainbattery' => '/server/model/weapons/customNexus.php',
+                'bsgmedbattery' => '/server/model/weapons/customNexus.php',
 					//ships
                 'colonialberserkclasscarrier' => '/server/model/ships/ZBSGColonial_Fred/ColonialBerserkClassCarrier.php',
                 'colonialjanuscruiser' => '/server/model/ships/ZBSGColonial_Fred/ColonialJanusCruiser.php',
