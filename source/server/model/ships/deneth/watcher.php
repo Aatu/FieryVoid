@@ -8,7 +8,7 @@ class Watcher extends HeavyCombatVessel{
         $this->faction = "Deneth";
         $this->phpclass = "watcher";
         $this->imagePath = "img/ships/DenethProtector.png"; 
-	$this->canvasSize = 100;
+		$this->canvasSize = 100;
         $this->shipClass = "Watcher Scout";
 	    
         $this->occurence = "rare";

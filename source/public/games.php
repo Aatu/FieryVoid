@@ -80,6 +80,7 @@ if (isset($_SESSION["user"])) {
 		<br><b><u>Facing arrow</u></b>  - so everyone can know where Ipsha are pointing their noses!
 		<br><b><u>Self-repair modified</u></b>  - now player can indicate desired repair priority (to a degree)
 		<br><b><u>Mass undeclare</u></b>  - one-click cancel of firing order for ALL similar weapons
+		<br><b><u>Colonials update</u></b>  - ongoing efforts of Fred and Geoffrey
 
 	    
         <br><br>
