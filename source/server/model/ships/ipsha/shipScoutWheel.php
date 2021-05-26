@@ -59,9 +59,9 @@ class ShipScoutWheel extends BaseShip{
         $this->addFrontSystem(new MagGraviticThruster(4, 13, 0, 99, 1));
 		
 	    
-	$this->addAftSystem(new SurgeCannon(3, 0, 0, 120, 240));
+	$this->addAftSystem(new SurgeCannon(3, 0, 0, 120, 240, true));
         $this->addAftSystem(new EmPulsar(3, 0, 0, 90, 270));
-	$this->addAftSystem(new SurgeCannon(3, 0, 0, 120, 240));
+	$this->addAftSystem(new SurgeCannon(3, 0, 0, 120, 240, true));
 	$this->addAftSystem(new MagGraviticThruster(4, 13, 0, 99, 2));
         $this->addAftSystem(new MagGraviticThruster(4, 13, 0, 99, 2));
 	    
