@@ -9,6 +9,11 @@ class Adder extends FighterFlight{
       $this->phpclass = "Adder";
        $this->shipClass = "Adder Light Fighters";
 	$this->imagePath = "img/ships/dragon.png"; //much earlier than Dragon, but still Drazi - closer to that silhouette than Delta-V
+
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 1730;
         
         $this->forwardDefense = 8;
         $this->sideDefense = 8;

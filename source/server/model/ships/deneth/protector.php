@@ -8,7 +8,7 @@ class Protector extends HeavyCombatVessel{
         $this->faction = "Deneth";
         $this->phpclass = "protector";
         $this->imagePath = "img/ships/DenethProtector.png"; 
-	$this->canvasSize = 100;
+		$this->canvasSize = 100;
         $this->shipClass = "Protector Heavy Destroyer";
         $this->occurence = "common";
         $this->fighters = array("normal"=>6);

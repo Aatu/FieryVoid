@@ -723,15 +723,34 @@ var NexusDefensePulsar = function  NexusDefensePulsar(json, ship) {
 NexusDefensePulsar.prototype = Object.create(Weapon.prototype);
 NexusDefensePulsar.prototype.constructor =  NexusDefensePulsar;
 
-
-
-
-
 var NexusEarlyPlasmaWave = function  NexusEarlyPlasmaWave(json, ship) {
     Weapon.call(this, json, ship);
 };
 NexusEarlyPlasmaWave.prototype = Object.create(Weapon.prototype);
 NexusEarlyPlasmaWave.prototype.constructor =  NexusEarlyPlasmaWave;
+
+var NexusParticleGrid = function  NexusParticleGrid(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusParticleGrid.prototype = Object.create(Weapon.prototype);
+NexusParticleGrid.prototype.constructor =  NexusParticleGrid;
+
+var NexusParticleGridFtr = function  NexusParticleGridFtr(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusParticleGridFtr.prototype = Object.create(Weapon.prototype);
+NexusParticleGridFtr.prototype.constructor =  NexusParticleGridFtr;
+
+var NexusIndustrialLaser = function  NexusIndustrialLaser(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusIndustrialLaser.prototype = Object.create(Weapon.prototype);
+NexusIndustrialLaser.prototype.constructor =  NexusIndustrialLaser;
+
+
+
+
+
 
 var PlasmaWeb = function  PlasmaWeb(json, ship) {
     Weapon.call(this, json, ship);
@@ -762,6 +781,12 @@ var GatlingGunFtr = function  GatlingGunFtr(json, ship) {
 };
 GatlingGunFtr.prototype = Object.create(Weapon.prototype);
 GatlingGunFtr.prototype.constructor =  GatlingGunFtr;
+
+
+
+
+
+
 
 var BSGFlakBattery = function BSGFlakBattery(json, ship) {
     Weapon.call(this, json, ship);
