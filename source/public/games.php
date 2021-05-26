@@ -81,6 +81,11 @@ if (isset($_SESSION["user"])) {
 		<br><b><u>Self-repair modified</u></b>  - now player can indicate desired repair priority (to a degree)
 		<br><b><u>Mass undeclare</u></b>  - one-click cancel of firing order for ALL similar weapons
 		<br><b><u>Colonials update</u></b>  - ongoing efforts of Fred and Geoffrey
+	    <br><b><big>---- batch 26.05.2021 ----</big></b>
+	    <br><b><u>Combat Pivot fixed</u></b> - now it causes appropriate firing penalty
+	    <br><b><u>Ipsha weapon orientation</u></b> - now (some) Aft-oriented weapons will be recognizable by icon. Some ships got weapons rearranged a bit, too.
+	    <br><b><u>Raiders!</u></b> - Geoffrey has structured notable Raider groups in accordance with sourcebooks! - and added new ships, too :) 
+
 
 	    
         <br><br>
