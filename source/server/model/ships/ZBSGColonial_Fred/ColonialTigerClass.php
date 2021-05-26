@@ -31,14 +31,14 @@ class ColonialTigerClass extends HeavyCombatVessel{
         $this->addPrimarySystem(new Hangar(4, 7));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4));
-        $this->addPrimarySystem(new Flakcannon(4, 4, 1, 0, 360));
+        $this->addPrimarySystem(new Flakcannon(4, 4, 2, 0, 360));
         
         $this->addFrontSystem(new Thruster(5, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(5, 8, 0, 3, 1));
 		$this->addFrontSystem(new BSGMainBattery(5, 9, 6, 315, 45));
-		$this->addFrontSystem(new BSGMedBattery(5, 9, 6, 315, 0)); 
-        $this->addFrontSystem(new BSGMedBattery(5, 9, 6, 0, 45)); 
-		$this->addFrontSystem(new BSGMedBattery(5, 9, 6, 315, 45)); 
+		$this->addFrontSystem(new BSGMedBattery(5, 9, 4, 315, 0)); 
+        $this->addFrontSystem(new BSGMedBattery(5, 9, 4, 0, 45)); 
+		$this->addFrontSystem(new BSGMedBattery(5, 9, 4, 315, 45)); 
 		$this->addFrontSystem(new SMissileRack(4, 6, 0, 270, 360));
 		$this->addFrontSystem(new SMissileRack(4, 6, 0, 0, 90));
 		$this->addFrontSystem(new Bulkhead(0, 5));
@@ -48,13 +48,13 @@ class ColonialTigerClass extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(5, 12, 0, 6, 2));
 		$this->addAftSystem(new BSGMedBattery(5, 7, 4, 180, 225)); 
 		$this->addAftSystem(new BSGMedBattery(5, 7, 4, 135, 180)); 
-		$this->addAftSystem(new BSGMedBattery(5, 9, 6, 135, 225)); 
+		$this->addAftSystem(new BSGMedBattery(5, 9, 4, 135, 225)); 
         $this->addAftSystem(new Bulkhead(0, 5));
 		$this->addAftSystem(new SMissileRack(5, 6, 0, 135, 225));
-		$this->addAftSystem(new RapidGatling(4, 7, 4, 180, 360)); 
-		$this->addAftSystem(new RapidGatling(4, 7, 4, 180, 360)); 
-		$this->addAftSystem(new RapidGatling(4, 7, 4, 0, 180)); 
-		$this->addAftSystem(new RapidGatling(4, 7, 4, 0, 180)); 
+		$this->addAftSystem(new RapidGatling(4, 7, 1, 180, 360)); 
+		$this->addAftSystem(new RapidGatling(4, 7, 1, 180, 360)); 
+		$this->addAftSystem(new RapidGatling(4, 7, 1, 0, 180)); 
+		$this->addAftSystem(new RapidGatling(4, 7, 1, 0, 180)); 
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 5, 50));

@@ -10,6 +10,7 @@ class Barque extends HeavyCombatVessel{
         $this->imagePath = "img/ships/DenethProtector.png"; //need to change
         $this->shipClass = "Barque";
         $this->occurence = "common";
+		$this->canvasSize = 100; //img has 140px per side
         $this->fighters = array("normal"=>6);
         
         $this->forwardDefense = 13;

@@ -185,6 +185,9 @@ class BaseShip {
 			if($this->faction == "EA"){
                 return $this->doEAInitiativeBonus($gamedata);
             }
+			if($this->faction == "Raiders"){
+                return $this->doRaidersInitiativeBonus($gamedata);
+            }
             return $this->iniativebonus;
         }
         
@@ -242,7 +245,60 @@ class BaseShip {
             }
 			return $this->iniativebonus;
         }               
-        
+
+
+/*         private function doRaidersInitiativeBonus($gamedata){
+
+			$mod = 0;
+
+			if($gamedata->turn > 0 && $gamedata->phase >= 0 ){
+				$pixPos = $this->getCoPos();
+				//TODO: Better distance calculation
+				$ships = $gamedata->getShipsInDistance($this, 5);
+
+				foreach($gamedata->ships as $ship){
+					if(!$ship->isDestroyed()
+							&& ($ship->faction == "Raiders")
+							&& ($this->userid == $ship->userid)
+							&& ($ship instanceof LegionStarjammer)
+							&& ($this->id != $ship->id)){
+						//return ($this->iniativebonus+5);
+						$mod = 5;
+					}
+				}
+				return $this->iniativebonus + $mod; 
+			}  
+		 } */
+ 
+
+        private function doRaidersInitiativeBonus($gamedata){
+
+        $mod = 0;
+
+        if($gamedata->turn > 0 && $gamedata->phase >= 0 ){
+            $pixPos = $this->getCoPos();
+            //TODO: Better distance calculation
+            $ships = $gamedata->getShipsInDistance($this, 5);
+
+            foreach($ships as $ship){
+                if( !$ship->isDestroyed()
+                    && ($ship->faction == "Raiders")
+                    && ($this->userid == $ship->userid)
+                    && ($ship->shipSizeClass == 3)
+                    && ($this->id != $ship->id)){
+                    $cnc = $ship->getSystemByName("CnC");
+                    $bonus = $cnc->output;
+                    if ($bonus > $mod){
+                        $mod = $bonus;
+                    } else continue;
+                }
+            }
+        }
+        //    debug::log($this->phpclass."- bonus: ".$mod);
+        return $this->iniativebonus + $mod*5;
+    }
+
+ 
         
         private function doDilgarInitiativeBonus($gamedata){
 
