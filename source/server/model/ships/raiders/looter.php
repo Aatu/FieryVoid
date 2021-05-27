@@ -11,6 +11,12 @@ class Looter extends BaseShip{
         $this->shipClass = "Looter Support Cruiser";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);
+        $this->limited = 33; //Limited Deployment
+        
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 1972;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;

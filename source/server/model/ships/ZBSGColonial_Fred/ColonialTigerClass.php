@@ -31,7 +31,7 @@ class ColonialTigerClass extends HeavyCombatVessel{
         $this->addPrimarySystem(new Hangar(4, 7));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4));
-        $this->addPrimarySystem(new Flakcannon(4, 4, 2, 0, 360));
+        $this->addPrimarySystem(new BSGFlakBattery(4, 6, 2, 0, 360));
         
         $this->addFrontSystem(new Thruster(5, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(5, 8, 0, 3, 1));

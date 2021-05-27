@@ -18,6 +18,13 @@ class Cobra extends FighterFlight{
         $this->jinkinglimit = 10;
         $this->turncost = 0.33;
         
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+		$this->notes .= "<br>More detailed deployment restrictions are in the Faction List document.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 2085;
+        
 	$this->iniativebonus = 20 *5; //Drazi design but not necessarily Drazi piloted, hence no Drazi Ini bonus
         $this->populate();
     }

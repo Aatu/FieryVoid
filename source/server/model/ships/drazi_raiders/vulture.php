@@ -12,6 +12,8 @@ class Vulture extends BaseShipNoAft{
         $this->fighters = array("light" => 12);
         $this->limited = 33;
         
+		$this->notes = "Used only by the Drazi Hunters";
+
         $this->isd = 2065;
         
         $this->forwardDefense = 15;

@@ -16,6 +16,9 @@ class DuxRaider extends BaseShip{
 		$this->isd = 2002;
 		$this->variantOf = "Centauri Privateer Dux Jump Cruiser";
         
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
         

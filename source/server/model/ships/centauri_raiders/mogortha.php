@@ -13,6 +13,8 @@ class Mogortha extends MediumShip{
 		$this->canvasSize = 100;
 		$this->isd = 2198;
 
+		$this->notes = "Used only by Centauri Privateers";
+
 		$this->forwardDefense = 12;
 		$this->sideDefense = 12;
 

@@ -13,6 +13,8 @@ class Throkan extends MediumShip{
         $this->canvasSize = 128;
         $this->isd = 2144;
 
+		$this->notes = "Used only by the Drazi Hunters";
+
         $this->forwardDefense = 12;
         $this->sideDefense = 11;
 

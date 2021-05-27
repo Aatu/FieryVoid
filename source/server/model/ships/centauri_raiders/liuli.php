@@ -10,6 +10,8 @@ class Liuli extends HeavyCombatVesselLeftRight{
         $this->shipClass = "Centauri Privateer Liuli Destroyer";
         $this->isd = 1935;
         
+		$this->notes = "Used only by Centauri Privateers";
+
         $this->forwardDefense = 15;
         $this->sideDefense = 13;
         

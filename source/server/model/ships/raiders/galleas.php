@@ -12,6 +12,13 @@ class Galleas extends BaseShip{
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>18);
         
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+		$this->notes .= "<br>More detailed deployment restrictions are in the Faction List document.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 2233;
+        
         $this->forwardDefense = 15;
         $this->sideDefense = 13;
         

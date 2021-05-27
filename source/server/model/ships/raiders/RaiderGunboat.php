@@ -15,6 +15,10 @@ class RaiderGunboat extends LCV{
 	$this->sideDefense = 11;
 	$this->isd = 2218;
 	//$this->unofficial = true;
+
+	$this->notes = "Generic raider unit.";
+	$this->notes .= "<br> ";
+
 	$this->turncost = 0.25;
 	$this->turndelaycost = 0.25;
 	$this->accelcost = 1;

@@ -13,6 +13,8 @@ class Raven extends MediumShip{
         $this->canvasSize = 100;
         $this->isd = 2042;
 
+		$this->notes = "Used only by the Drazi Hunters";
+
         $this->forwardDefense = 11;
         $this->sideDefense = 11;
 

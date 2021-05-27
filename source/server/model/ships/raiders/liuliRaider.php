@@ -11,6 +11,11 @@ class LiuliRaider extends HeavyCombatVesselLeftRight{
         $this->isd = 1965;
         $this->variantOf = "Centauri Privateer Liuli Destroyer";
         
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 1965;
+        
         $this->forwardDefense = 15;
         $this->sideDefense = 13;
         
