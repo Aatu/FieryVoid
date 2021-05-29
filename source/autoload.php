@@ -393,6 +393,10 @@ spl_autoload_register(
                 'hyperionrail' => '/server/model/ships/EA/hyperionRail.php',
                 'poseidon' => '/server/model/ships/EA/Poseidon.php',
                 'ikorta' => '/server/model/ships/brakiri/ikorta.php',
+                'imlarmedtransport' => '/server/model/ships/raiders/IMLArmedTransport.php',
+                'imlarmedtransporttorpedo' => '/server/model/ships/raiders/IMLArmedTransportTorpedo.php',
+                'imlattackcruiser' => '/server/model/ships/raiders/IMLAttackCruiser.php',
+                'imlattackcruiserlaser' => '/server/model/ships/raiders/IMLAttackCruiserLaser.php',
                 'impcommjammer' => '/server/model/weapons/specialWeapons.php',
                 'imperiallaser' => '/server/model/weapons/lasers.php',
                 'blastlaser' => '/server/model/weapons/lasers.php',
@@ -926,7 +930,9 @@ spl_autoload_register(
                 'tethyspolice' => '/server/model/ships/EA/tethysPolice.php',
                 'tetrana' => '/server/model/ships/abbai_old/tetrana.php',
                 'tetrav' => '/server/model/ships/abbai_old/tetrav.php',
+      //          'tfsblockaderunner' => '/server/model/ships/raiders/tfsblockaderunner.php',
                 'tfsfreedombase' => '/server/model/ships/raiders/tfsfreedombase.php',
+                'tfsmonitor' => '/server/model/ships/raiders/tfsmonitor.php',
                 'tgan' => '/server/model/ships/narn/tgan.php',
                 'thentus' => '/server/model/ships/narn/thentus.php',
                 'thorun' => '/server/model/ships/dilgar/thorun.php',
@@ -1620,6 +1626,7 @@ spl_autoload_register(
 				//Battlestar Galactica - Kirill
 					//weapons
                 'flakarray' => '/server/model/weapons/customNexus.php',
+                'sensorspearftr' => '/server/model/weapons/customNexus.php',
 					//ships
                 'colonialjupiterclass_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialJupiterClass_K.php',
                 'colonialmanticore_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialManticore_K.php',
@@ -1627,11 +1634,10 @@ spl_autoload_register(
                 'colonialminervaclass_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialMinervaClass_K.php',
                 'colonialorion_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialOrion_K.php',
                 'colonialvalkyrie_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialValkyrie_K.php',
-                'colonialraptor_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialRaptor_K.php',
+//                'colonialraptor_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialRaptor_K.php',
+                'kobolraptor' => '/server/model/ships/ZBSGColonial_Kirill/KobolRaptor.php',
                 'vipermk2_k' => '/server/model/ships/ZBSGColonial_Kirill/vipermk2_K.php',
                 'vipermk7_k' => '/server/model/ships/ZBSGColonial_Kirill/vipermk7_K.php',
-//                'colonialraptor_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialRaptor_K.php',
-//                'colonialraptorassault_k' => '/server/model/ships/ZBSGColonial_Kirill/ColonialRaptorAssault_K.php',
 
 				//Battlestar Galactic - Cylons
 				'cylonbasestar' => '/server/model/ships/ZBSGCylons/CylonBasestar.php',				
