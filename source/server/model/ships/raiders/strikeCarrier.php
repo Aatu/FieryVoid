@@ -12,6 +12,11 @@ class StrikeCarrier extends BaseShip{
 		$this->shipSizeClass = 3;
 		$this->fighters = array("light"=>24);
 
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 2247;
+        
 		$this->forwardDefense = 14;
 		$this->sideDefense = 11;
 

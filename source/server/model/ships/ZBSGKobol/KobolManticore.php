@@ -1,17 +1,18 @@
 <?php
-class ColonialManticore_K extends MediumShip{
+class KobolManticore extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 350;
 		$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
-        $this->phpclass = "ColonialManticore_K";
+        $this->phpclass = "KobolManticore";
         $this->imagePath = "img/ships/BSG/ColonialManticore.png";
         $this->shipClass = "Manticore Corvette";
         $this->canvasSize = 80;
 //	    $this->isd = 2007;
 
+		$this->unofficial = true;
 	    $this->notes = 'May only boost sensors by 2.';
         
         $this->forwardDefense = 13;

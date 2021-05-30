@@ -14,6 +14,8 @@ class PrivateerLessara extends BaseShip{
         $this->fighters = array("light"=>18);
 		$this->isd = 2124;
         
+		$this->notes = "Used only by Centauri Privateers";
+
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
         

@@ -9,8 +9,7 @@ class Raiderglaive extends FighterFlight{
         $this->phpclass = "Raiderglaive";
         $this->shipClass = "Raider Glaive Light Fighters";
 		$this->imagePath = "img/ships/glaive.png";
-		$this->isd = 2012;
-	    
+
 	    $this->variantOf = "DISABLED";  //no point in having two identical Glaives in one directory
 	    
 	    $this->notes = "For Centauri Privateers - available even before 2000.";

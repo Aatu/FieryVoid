@@ -14,6 +14,13 @@ class Uidace extends BaseShip{
 			$this->limited = 10;
         $this->fighters = array("normal"=>12);
         
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+		$this->notes .= "<br>More detailed deployment restrictions are in the Faction List document.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 2235;
+        
         $this->forwardDefense = 16;
         $this->sideDefense = 18;
         

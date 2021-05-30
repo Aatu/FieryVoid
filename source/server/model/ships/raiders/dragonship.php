@@ -12,6 +12,11 @@ class Dragonship extends BaseShip{
         $this->shipSizeClass = 3;
         $this->fighters = array("heavy"=>12);
         
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 2245;
+        
         $this->forwardDefense = 15;
         $this->sideDefense = 16;
         

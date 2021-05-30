@@ -11,6 +11,13 @@ class MaRiu extends MediumShip{
         $this->shipClass = "Ma'Ri'u Frigate";
         $this->canvasSize = 100;
         
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+		$this->notes .= "<br>More detailed deployment restrictions are in the Faction List document.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 2233;
+        
         $this->forwardDefense = 12;
         $this->sideDefense = 14;
         

@@ -13,6 +13,11 @@ class Barque extends HeavyCombatVessel{
 		$this->canvasSize = 100; //img has 140px per side
         $this->fighters = array("normal"=>6);
         
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 2244;
+        
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
         

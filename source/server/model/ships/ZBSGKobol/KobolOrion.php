@@ -1,18 +1,19 @@
 <?php
-class ColonialOrion_K extends MediumShip{
+class KobolOrion extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 600;
 		$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
-        $this->phpclass = "ColonialOrion_K";
+        $this->phpclass = "KobolOrion";
         $this->imagePath = "img/ships/BSG/ColonialOrion.png";
         $this->shipClass = "Orion Reconisance Battlestar";
         $this->canvasSize = 80;
         $this->limited = 33;
 //	    $this->isd = 2007;
 
+		$this->unofficial = true;
 	    $this->notes = 'May boost sensors normally.';
 
         $this->fighters = array("normal"=>6, "superheavy"=>2);

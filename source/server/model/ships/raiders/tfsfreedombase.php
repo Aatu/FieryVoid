@@ -15,6 +15,8 @@ class tfsfreedombase extends SmallStarBaseFourSections{
 		$this->forwardDefense = 18;
 		$this->sideDefense = 18;
 		
+		$this->notes = "Used only by the Tirrith Free State";
+		$this->isd = 2243;
 		        $this->occurence = "unique";
 
 		$this->imagePath = "img/ships/orion.png";

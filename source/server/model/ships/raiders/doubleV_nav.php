@@ -22,6 +22,13 @@ class DoubleV_Nav extends FighterFlight{
 		
         $this->notes = 'Needs 2 rail slots.';
 
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+		$this->notes .= "<br>More detailed deployment restrictions are in the Faction List document.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 2236;
+        
 		$this->iniativebonus = 90;
         $this->populate();
     }

@@ -18,6 +18,11 @@ class DeltaVAlt extends FighterFlight{
         $this->jinkinglimit = 10;
         $this->turncost = 0.33;
         
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 2190;
+        
     	$this->iniativebonus = 100;
         $this->populate();
     }
