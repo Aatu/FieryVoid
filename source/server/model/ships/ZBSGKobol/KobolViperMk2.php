@@ -1,12 +1,12 @@
 <?php
-class ViperMk2_K extends FighterFlight{
+class KobolViperMk2 extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 210;
         $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
-        $this->phpclass = "ViperMk2_K";
+        $this->phpclass = "KobolViperMk2";
         $this->shipClass = "Viper Mk-2 flight";
         $this->imagePath = "img/ships/BSG/viperMk2.png";
 //	    $this->isd = 2212;
@@ -31,7 +31,7 @@ class ViperMk2_K extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(2, 1, 2, 2);
-            $fighter = new Fighter("ViperMk2_K", $armour, 7, $this->id);
+            $fighter = new Fighter("KobolViperMk2", $armour, 7, $this->id);
             $fighter->displayName = "Vipper Mk2";
             $fighter->imagePath = "img/ships/BSG/viperMk2.png";
             $fighter->iconPath = "img/ships/BSG/viperMk2_large.png";
