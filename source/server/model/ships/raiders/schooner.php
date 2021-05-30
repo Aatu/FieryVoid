@@ -11,6 +11,11 @@ class Schooner extends MediumShip{
         $this->shipClass = "Schooner";
         $this->canvasSize = 100;
         
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 2183;
+        
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
         

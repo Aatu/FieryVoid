@@ -11,6 +11,8 @@ class Cestus extends HeavyCombatVessel{
     $this->shipClass = "Centauri Privateer Cestus Attack Ship";
 	$this->isd = 1870;
 
+	$this->notes = "Used only by Centauri Privateers";
+
     $this->forwardDefense = 11;
     $this->sideDefense = 13;
 

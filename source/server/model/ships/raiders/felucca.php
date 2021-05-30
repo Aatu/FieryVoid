@@ -11,6 +11,13 @@ class Felucca extends MediumShip{
         $this->shipClass = "Felucca";
         $this->canvasSize = 100;
         
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+		$this->notes .= "<br>More detailed deployment restrictions are in the Faction List document.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 2195;
+        
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
         

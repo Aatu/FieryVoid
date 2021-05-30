@@ -12,6 +12,8 @@ class ColonialTigerClass extends HeavyCombatVessel{
         $this->fighters = array("normal" => 6, "superheavy" => 1);
  //       $this->isd = 2160;
         $this->canvasSize = 145;
+
+		$this->unofficial = true;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 16;
@@ -31,7 +33,10 @@ class ColonialTigerClass extends HeavyCombatVessel{
         $this->addPrimarySystem(new Hangar(4, 7));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4));
-        $this->addPrimarySystem(new Flakcannon(4, 4, 2, 0, 360));
+        $this->addPrimarySystem(new BSGFlakBattery(4, 6, 2, 0, 360));
+        $hyperdrive = new JumpEngine(3, 12, 6, 20);
+			$hyperdrive->displayName = 'Hyperdrive';
+			$this->addPrimarySystem($hyperdrive);
         
         $this->addFrontSystem(new Thruster(5, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(5, 8, 0, 3, 1));
@@ -64,11 +69,12 @@ class ColonialTigerClass extends HeavyCombatVessel{
 		$this->hitChart = array(
 			0=> array(
 					8 => "Structure",
-					10 => "Flak Cannon",					
-					12 => "Thruster",
-					14 => "Scanner",
-					16 => "Engine",
-					17 => "Hangar",
+					9 => "Flak Battery",					
+					11 => "Thruster",
+					13 => "Scanner",
+					15 => "Engine",
+					16 => "Hangar",
+					17 => "Hyperdrive",
 					19 => "Reactor",
 					20 => "C&C",
 			),
@@ -83,7 +89,7 @@ class ColonialTigerClass extends HeavyCombatVessel{
 					5 => "Thruster",
 					8 => "Battery",
                     9 => "Class-S Missile Rack",
-                    11 => "RapidGatling",
+                    11 => "Rapid Gatling Railgun",
 					18 => "Structure",
 					20 => "Primary",
 			),

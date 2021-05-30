@@ -12,6 +12,13 @@ class Aspar extends HeavyCombatVessel{
         $this->occurence = "common";
         $this->fighters = array("normal"=>6);
         
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+		$this->notes .= "<br>More detailed deployment restrictions are in the Faction List document.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 2227;
+
         $this->forwardDefense = 18;
         $this->sideDefense = 18;
         

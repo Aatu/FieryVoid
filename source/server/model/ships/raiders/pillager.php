@@ -11,6 +11,12 @@ class Pillager extends BaseShip{
         $this->shipClass = "Pillager Advanced Cruiser";
         $this->shipSizeClass = 3;
         $this->fighters = array("Normal"=>12);
+        $this->limited = 10; //Restricted Deployment
+        
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 2182;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
