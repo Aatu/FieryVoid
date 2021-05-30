@@ -14,6 +14,8 @@ class ColonialOrion extends HeavyCombatVessel{
 //	    $this->isd = 2007;
 
         $this->fighters = array("normal"=>6 );
+
+		$this->unofficial = true;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;

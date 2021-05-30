@@ -11,6 +11,8 @@ class ColonialManticoreClass extends MediumShip{
         $this->shipClass = "Manticore Corvette";
         $this->canvasSize = 80;
 //	    $this->isd = 2007;
+
+		$this->unofficial = true;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;

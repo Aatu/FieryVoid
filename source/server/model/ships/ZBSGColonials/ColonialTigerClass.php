@@ -12,6 +12,8 @@ class ColonialTigerClass extends HeavyCombatVessel{
         $this->fighters = array("normal" => 6, "superheavy" => 1);
  //       $this->isd = 2160;
         $this->canvasSize = 145;
+
+		$this->unofficial = true;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 16;

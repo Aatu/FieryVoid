@@ -13,6 +13,8 @@ class ColonialJanusCruiser extends HeavyCombatVessel{
  //       $this->isd = 2160;
         $this->canvasSize = 140;
         $this->limited = 33;
+
+		$this->unofficial = true;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 17;
