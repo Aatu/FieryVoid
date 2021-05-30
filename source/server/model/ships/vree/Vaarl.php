@@ -1,12 +1,12 @@
 <?php
-class VaarlAlt extends VreeHCV{
+class Vaarl extends VreeHCV{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 625;
 		$this->faction = "Vree";
-		$this->phpclass = "VaarlAlt";
+		$this->phpclass = "Vaarl";
 		$this->shipClass = "Vaarl Scout Saucer";
 		$this->isd = 2210;
 		$this->locations = array(41, 42, 2, 32, 31, 1);					
