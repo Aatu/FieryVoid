@@ -1019,6 +1019,34 @@ class Structure extends ShipSystem{
         parent::__construct($armour, $maxhealth, 0, 0);
     }
 } //endof Structure	
+
+
+class VreeStructurePlaceholder extends ShipSystem{
+    public $name = "VreeStructurePlaceholder";
+    public $displayName = "VreeStructurePlaceholder";
+    public $iconPath = "VreePlaceholderStructure.png";    
+    
+	//Cannot be repaired
+	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+ 
+     public function getArmourInvulnerable($target, $shooter, $dmgClass, $pos=null){ //this thruster should be invulnerable to anything...
+		$activeAA = 99;
+		return $activeAA;
+    }
+    
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);     
+	$this->data["Special"] = "This system is here for technical purposes only. Cannot be damaged in any way.";
+	}  
+	
+	public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
+	public $isTargetable = false; //cannot be targeted ever!
+	
+    function __construct($armour, $maxhealth, $powerReq, $output){
+	    parent::__construct($armour, $maxhealth, $powerReq, $output);
+		}
+      
+}//endof VreeStructurePlaceholder		
 	
 	
 /*custom system - Drakh Raider Controller*/
@@ -2422,7 +2450,6 @@ class PhasingDrive extends JumpEngine{
         }	
     } //endof function criticalPhaseEffects	
 }//endof class PhasingDrive
-
 
 
 

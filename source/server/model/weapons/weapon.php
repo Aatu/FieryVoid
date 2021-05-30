@@ -71,6 +71,7 @@ class Weapon extends ShipSystem
     public $extraoverloadshotsArray = array();
 
     public $doNotIntercept = false; //for attacks that are not subject to interception at all - like fields and ramming
+	public $doNotInterceptArray = array(); //For AM Shredder to allow mode switching.
     public $uninterceptable = false;
     public $uninterceptableArray = array();
     public $canInterceptUninterceptable = false; //able to intercept shots that are normally uninterceptable, eg. Lasers
@@ -121,6 +122,7 @@ class Weapon extends ShipSystem
     public $ballistic = false; //this is a ballictic weapon, not direct fire
     public $ballisticIntercept = false; //can intercept, but only ballistics
     public $hextarget = false; //this weapon is targeted on hex, not unit
+    public $hextargetArray = array(); //For AntimatterShredder
     public $noPrimaryHits = false; //PRIMARY removed from outer charts if true
 
     public $minDamage, $maxDamage;
