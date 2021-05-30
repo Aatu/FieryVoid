@@ -31,14 +31,14 @@ class ColonialOrion extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 5, 6));
         $this->addPrimarySystem(new Engine(4, 16, 0, 10, 3));
-        $this->addPrimarySystem(new FlakCannon(3, 6, 2, 0, 360));
-        $this->addPrimarySystem(new FlakCannon(3, 6, 2, 0, 360));
+        $this->addPrimarySystem(new BSGFlakBattery(3, 6, 2, 0, 360));
+        $this->addPrimarySystem(new BSGFlakBattery(3, 6, 2, 0, 360));
 		$this->addPrimarySystem(new Thruster(3, 9, 0, 3, 3));
 		$this->addPrimarySystem(new Thruster(3, 9, 0, 3, 4));        
-		$hyperdrive = new JumpEngine(3, 12, 6, 20);
-			$hyperdrive->displayName = 'Phasing Drive';
+        $hyperdrive = new JumpEngine(3, 12, 6, 20);
+			$hyperdrive->displayName = 'Hyperdrive';
 			$this->addPrimarySystem($hyperdrive);
-
+			
 		$this->addFrontSystem(new Hangar(3, 8));
         $this->addFrontSystem(new Thruster(3, 9, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 9, 0, 3, 1));
@@ -70,17 +70,17 @@ class ColonialOrion extends HeavyCombatVessel{
 		
 		0=> array(
 			7 => "Thruster",
-			9 => "Flack Cannon",
+			9 => "Flak Battery",
 			12 => "Scanner",
 			15 => "Engine",
 			17 => "Reactor",
-			19 => "Phasing Drive",
+			19 => "Hyperdrive",
 			20 => "C&C",
 		),
 		1=> array(
 			5 => "Thruster",
 			8 => "Battery",
-			10 => "Rapid Gatling",
+			10 => "Rapid Gatling Railgun",
 			12 => "Hangar",
 			18 => "Structure",
 			20 => "Primary",
@@ -88,7 +88,7 @@ class ColonialOrion extends HeavyCombatVessel{
 		2=> array(
 			6 => "Thruster",
 			8 => "Battery",
-			10 => "Rapid Gatling",
+			10 => "Rapid Gatling Railgun",
 			18 => "Structure",
 			20 => "Primary",
 		),

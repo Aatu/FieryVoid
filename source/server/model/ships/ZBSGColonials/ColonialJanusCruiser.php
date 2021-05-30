@@ -36,6 +36,9 @@ class ColonialJanusCruiser extends HeavyCombatVessel{
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4));
         $this->addPrimarySystem(new RapidGatling(5, 4, 1, 0, 360));
         $this->addPrimarySystem(new RapidGatling(5, 4, 1, 0, 360));
+        $hyperdrive = new JumpEngine(4, 12, 6, 20);
+			$hyperdrive->displayName = 'Hyperdrive';
+			$this->addPrimarySystem($hyperdrive);
         
         $this->addFrontSystem(new Thruster(6, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(6, 8, 0, 3, 1));
@@ -63,11 +66,12 @@ class ColonialJanusCruiser extends HeavyCombatVessel{
 		$this->hitChart = array(
 			0=> array(
 					8 => "Structure",
-					10 => "Rapid Gatling",					
-					12 => "Thruster",
-					14 => "Scanner",
-					16 => "Engine",
-					17 => "Hangar",
+					9 => "Rapid Gatling Railgun",					
+					11 => "Thruster",
+					13 => "Scanner",
+					15 => "Engine",
+					16 => "Hangar",
+					17 => "Hyperdrive",
 					19 => "Reactor",
 					20 => "C&C",
 			),
