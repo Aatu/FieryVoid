@@ -1,12 +1,12 @@
 <?php
-class ColonialRaptor_K extends SuperHeavyFighter{
+class KobolRaptor extends SuperHeavyFighter{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 480;
         $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
-        $this->phpclass = "ColonialRaptor_K";
+        $this->phpclass = "KobolRaptor";
         $this->shipClass = "Raptor";
         $this->imagePath = "img/ships/BSG/raptor.png";
 //	    $this->isd = ;

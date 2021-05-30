@@ -856,7 +856,7 @@ class DBManager
                     $yOffset = (int)$move->yOffset;
 
                     $stmt->bind_param(
-                        'iisiiiiiiiissiii',
+                        'iisiiiiiiiissisi', //21.05.2021 - combat pivot apparently not registered correctly; original: 'iisiiiiiiiissiii'
                         $shipid,
                         $gameid,
                         $move->type,

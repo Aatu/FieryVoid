@@ -34,7 +34,7 @@ class SalbezShvrak extends MediumShip{
 		$this->addFrontSystem(new CustomIndustrialGrappler(3, 5, 0, 300, 60));
 		$this->addFrontSystem(new LaserCutter(1, 6, 4, 300, 60));
 		$this->addFrontSystem(new LaserCutter(1, 6, 4, 300, 60));
-        $this->addFrontSystem(new Thruster(2, 10, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(2, 10, 0, 4, 1));
 	    
 		$this->addAftSystem(new LightParticleBeamShip(0, 2, 1, 180, 360));
 		$this->addAftSystem(new LightParticleBeamShip(0, 2, 1, 0, 180));

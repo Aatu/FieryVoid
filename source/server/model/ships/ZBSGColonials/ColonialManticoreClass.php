@@ -11,6 +11,8 @@ class ColonialManticoreClass extends MediumShip{
         $this->shipClass = "Manticore Corvette";
         $this->canvasSize = 80;
 //	    $this->isd = 2007;
+
+		$this->unofficial = true;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
@@ -33,7 +35,7 @@ class ColonialManticoreClass extends MediumShip{
 //		$this->addPrimarySystem(new Bulkhead(0, 3));
 		$this->addPrimarySystem(new BSGFlakBattery(5, 6, 2, 0, 360));
 		$hyperdrive = new JumpEngine(4, 12, 6, 20);
-			$hyperdrive->displayName = 'Phasing Drive';
+			$hyperdrive->displayName = 'Hyperdrive';
 			$this->addPrimarySystem($hyperdrive);
 
         $this->addFrontSystem(new BSGMainBattery(4, 9, 6, 300, 60));
@@ -64,7 +66,7 @@ class ColonialManticoreClass extends MediumShip{
 			14 => "Engine",
 			15 => "Hangar",
 			17 => "Reactor",
-			19 => "Phasing Drive",
+			19 => "Hyperdrive",
 			20 => "C&C",
 		),
 		1=> array(
@@ -76,7 +78,7 @@ class ColonialManticoreClass extends MediumShip{
 		),
 		2=> array(
 			6 => "Thruster",
-			8 => "Rapid Gatling",
+			8 => "Rapid Gatling Railgun",
 			18 => "Structure",
 			20 => "Primary",
 		),

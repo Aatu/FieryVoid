@@ -58,18 +58,18 @@ class ShipBoltglobe extends HeavyCombatVesselLeftRight{ //technically a Capital 
         $this->addPrimarySystem(new MagGraviticThruster(4, 13, 0, 99, 1));
         $this->addPrimarySystem(new MagGraviticThruster(4, 13, 0, 99, 2));
         $this->addPrimarySystem(new MagGraviticThruster(4, 13, 0, 99, 2));	    
-	    
-	$this->addLeftSystem(new EmBolter(4, 0, 0, 120, 240));
-	$this->addLeftSystem(new EmBolter(4, 0, 0, 120, 240));
-	$this->addLeftSystem(new EmBolter(4, 0, 0, 120, 240));	 
+	    	 
+	$this->addLeftSystem(new EmBolter(4, 0, 0, 120, 240, true));
+	$this->addLeftSystem(new EmBolter(4, 0, 0, 120, 240, true));
+	$this->addLeftSystem(new EmBolter(4, 0, 0, 120, 240, true));
 	$this->addLeftSystem(new EmBolter(4, 0, 0, 300, 60));
 	$this->addLeftSystem(new EmBolter(4, 0, 0, 300, 60));
 	$this->addLeftSystem(new EmBolter(4, 0, 0, 300, 60));   
 	$this->addLeftSystem(new MagGraviticThruster(4, 15, 0, 99, 3));
 		
-	$this->addRightSystem(new EmBolter(4, 0, 0, 120, 240));
-	$this->addRightSystem(new EmBolter(4, 0, 0, 120, 240));
-	$this->addRightSystem(new EmBolter(4, 0, 0, 120, 240));
+	$this->addRightSystem(new EmBolter(4, 0, 0, 120, 240, true));
+	$this->addRightSystem(new EmBolter(4, 0, 0, 120, 240, true));
+	$this->addRightSystem(new EmBolter(4, 0, 0, 120, 240, true));
 	$this->addRightSystem(new EmBolter(4, 0, 0, 300, 60));
 	$this->addRightSystem(new EmBolter(4, 0, 0, 300, 60));
 	$this->addRightSystem(new EmBolter(4, 0, 0, 300, 60));

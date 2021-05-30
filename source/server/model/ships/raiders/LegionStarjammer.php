@@ -17,6 +17,8 @@ class LegionStarjammer extends BaseShip{
 		$this->notes = "Used only by the Imperial Star Legion";
 		$this->notes .= "<br>Provides +5 initiative to all friendly Raider units within 5 hexes.";
         
+		$this->isd = 2267;
+
         $this->forwardDefense = 15;
         $this->sideDefense = 16;
         

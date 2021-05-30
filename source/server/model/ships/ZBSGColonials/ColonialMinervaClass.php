@@ -84,7 +84,8 @@ class ColonialMinervaClass extends BaseShip{
 		
 		$this->hitChart = array(
 			0=> array(
-					12 => "Structure",
+					10 => "Structure",
+					12 => "Hyperdrive",
 					14 => "Scanner",
 					16 => "Engine",
 					18 => "Reload Rack",

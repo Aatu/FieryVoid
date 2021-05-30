@@ -11,6 +11,9 @@ class Privateerrazik extends FighterFlight{
         $this->shipClass = "Centauri Privateer Razik Light Fighters";
 	$this->imagePath = "img/ships/razik.png";
         
+		$this->notes = "Used only by Centauri Privateers";
+		$this->notes .= "<br>Junkyard Dogs may field a Razik flight";
+
         $this->forwardDefense = 6;
         $this->sideDefense = 5;
         $this->freethrust = 14;

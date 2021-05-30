@@ -1114,7 +1114,7 @@ class EmBolter extends Weapon{
 	} //endof function fire
 	
 	
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $aftFacing=false)
         {
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ){
@@ -1123,6 +1123,10 @@ class EmBolter extends Weapon{
             if ( $powerReq == 0 ){
                 $powerReq = 9;
             }
+			//switch to Aft-facing icons for weapons that are facing Aft-oriented!
+			if($aftFacing){
+				$this->iconPath = "EMBolterAft.png";
+			}
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 	
@@ -1588,7 +1592,7 @@ class SurgeCannon extends Raking{
 	}//endof function calculateHitBase
 	
 	
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $aftFacing = false)
         {
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ){
@@ -1597,6 +1601,11 @@ class SurgeCannon extends Raking{
             if ( $powerReq == 0 ){
                 $powerReq = 3;
             }
+			//switch to Aft-facing icons for weapons that are facing Aft-oriented!
+			if($aftFacing){
+				$this->iconPath = "SurgeCannonAft.png";
+			}
+			
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 	
@@ -1928,7 +1937,7 @@ class ResonanceGenerator extends Weapon{
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
 	
-	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $aftFacing=false)
 	{
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
 		if ( $maxhealth == 0 ){
@@ -1936,6 +1945,10 @@ class ResonanceGenerator extends Weapon{
 		}
 		if ( $powerReq == 0 ){
 			$powerReq = 6;
+		}
+		//switch to Aft-facing icons for weapons that are facing Aft-oriented!
+		if($aftFacing){
+			$this->iconPath = "ResonanceGeneratorAft.png";
 		}
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	}

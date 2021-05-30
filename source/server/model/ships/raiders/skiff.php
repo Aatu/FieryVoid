@@ -11,6 +11,11 @@ class Skiff extends MediumShip{
         $this->shipClass = "Skiff";
         $this->canvasSize = 100;
         
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 2232;
+        
         $this->forwardDefense = 12;
         $this->sideDefense = 14;
         
