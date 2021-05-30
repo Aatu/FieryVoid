@@ -1970,7 +1970,6 @@ spl_autoload_register(
 				//Vree
 				'sixsidedship' => '/server/model/ships/ShipClasses.php',
 				'vreecapital' => '/server/model/ships/ShipClasses.php',
-				'vreemedium' => '/server/model/ships/ShipClasses.php',			
 				'vreehcv' => '/server/model/ships/ShipClasses.php',
 				'antimatterweapon' => '/server/model/weapons/antimatter.php',
 				'antiprotongun' => '/server/model/weapons/antimatter.php',
