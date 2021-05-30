@@ -39231,10 +39231,10 @@ exports.Header = exports.Entry = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(["\n    font-size: 12px;\n"], ["\n    font-size: 12px;\n"]),
+var _templateObject = _taggedTemplateLiteral(["\n    /*font-size: 12px;*/\n\tfont-size: 13px;\n"], ["\n    /*font-size: 12px;*/\n\tfont-size: 13px;\n"]),
     _templateObject2 = _taggedTemplateLiteral(["\n    position: absolute;\n    z-index: 20000;\n    ", "\n    width: ", ";\n    text-align: left;\n    opacity:0.8;\n"], ["\n    position: absolute;\n    z-index: 20000;\n    ", "\n    width: ", ";\n    text-align: left;\n    opacity:0.8;\n"]),
-    _templateObject3 = _taggedTemplateLiteral(["\n    text-align: left;\n    color: #5e85bc;\n    font-family: arial;\n    font-size: 11px;\n"], ["\n    text-align: left;\n    color: #5e85bc;\n    font-family: arial;\n    font-size: 11px;\n"]),
-    _templateObject4 = _taggedTemplateLiteral(["\n    color: white;\n"], ["\n    color: white;\n"]),
+    _templateObject3 = _taggedTemplateLiteral(["\n    text-align: left;\n    /*color: #5e85bc;*/\n\tcolor: #BDEAFA; /*replace dark blue above with bluish white, more eyes friendly*/\n    font-family: arial;\n    /*font-size: 11px;*/\n\tfont-size: 12px;\n"], ["\n    text-align: left;\n    /*color: #5e85bc;*/\n\tcolor: #BDEAFA; /*replace dark blue above with bluish white, more eyes friendly*/\n    font-family: arial;\n    /*font-size: 11px;*/\n\tfont-size: 12px;\n"]),
+    _templateObject4 = _taggedTemplateLiteral(["\n    color: white;\n\tfont-style:italic;\n\tfont-size: 11px;\n"], ["\n    color: white;\n\tfont-style:italic;\n\tfont-size: 11px;\n"]),
     _templateObject5 = _taggedTemplateLiteral(["\n    color: #C6E2FF;\n"], ["\n    color: #C6E2FF;\n"]);
 
 var _react = require("react");
