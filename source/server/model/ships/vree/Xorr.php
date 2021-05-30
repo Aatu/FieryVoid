@@ -1,12 +1,12 @@
 <?php
-class XorrAlt extends VreeCapital{
+class Xorr extends VreeCapital{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 550;
 		$this->faction = "Vree";
-		$this->phpclass = "XorrAlt";
+		$this->phpclass = "Xorr";
 		$this->shipClass = "Xorr War Saucer";
 		$this->isd = 2210;
 		$this->locations = array(41, 42, 2, 32, 31, 1);		
