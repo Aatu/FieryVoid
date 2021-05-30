@@ -5,7 +5,8 @@ class Zorth extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 35*6;
-        $this->phpclass = "Zorth";
+		$this->faction = "Vree";
+		$this->phpclass = "Zorth";
         $this->shipClass = "Zorth Ultralight Fighters";
         $this->imagePath = "img/ships/VreeZorth.png";
         

@@ -5,7 +5,8 @@ class Zeoth extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 30*6;
-        $this->phpclass = "Zeoth";
+		$this->faction = "Vree";
+		$this->phpclass = "Zeoth";
         $this->shipClass = "Zeoth Assault Shuttles";
 		$this->imagePath = "img/ships/VreeZeoth.png";
         
