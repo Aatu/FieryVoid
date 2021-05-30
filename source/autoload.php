@@ -1986,7 +1986,7 @@ spl_autoload_register(
 				'xill' => '/server/model/ships/vree/Xill.php',
 				'xixx' => '/server/model/ships/vree/Xixx.php',
 				'xeel' => '/server/model/ships/vree/Xeel.php',	
-				'tyzmm' => '/server/model/ships/vree/Tyzmm.php',			
+				'tzymm' => '/server/model/ships/vree/Tzymm.php',			
 				'zorth' => '/server/model/ships/vree/Zorth.php',														
 				'xeecra' => '/server/model/ships/vree/Xeecra.php',								
 				'xeon' => '/server/model/ships/vree/Xeon.php',	
