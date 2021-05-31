@@ -68,7 +68,7 @@ class KobolViperMk2 extends FighterFlight{
             foreach($ships as $ship){
                 if(!$ship->isDestroyed()
                         && ($this->userid == $ship->userid)
-                        && ($ship instanceof ColonialRaptor_K)){
+                        && ($ship instanceof KobolRaptor)){
                     $initiativeBonusRet+=5;
                     break;
                 }
