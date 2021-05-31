@@ -4,7 +4,8 @@ import {Tooltip, TooltipHeader, TooltipEntry} from '../common'
 import ShipInfo from "./ShipInfo";
 
 const InfoHeader = TooltipHeader.extend`
-    font-size: 12px;
+    /*font-size: 12px;*/
+	font-size: 13px;
 `;
 
 const SystemInfoTooltip = Tooltip.extend`
@@ -20,13 +21,17 @@ const SystemInfoTooltip = Tooltip.extend`
 
 export const Entry = TooltipEntry.extend`
     text-align: left;
-    color: #5e85bc;
+    /*color: #5e85bc;*/
+	color: #BDEAFA; /*replace dark blue above with bluish white, more eyes friendly*/
     font-family: arial;
-    font-size: 11px;
+    /*font-size: 11px;*/
+	font-size: 12px;
 `;
 
 export const Header = styled.span`
     color: white;
+	font-style:italic;
+	font-size: 11px;
 `;
 
 const ShipNameHeader = styled.span`

@@ -85,6 +85,11 @@ if (isset($_SESSION["user"])) {
 	    <br><b><u>Combat Pivot fixed</u></b> - now it causes appropriate firing penalty
 	    <br><b><u>Ipsha weapon orientation</u></b> - now (some) Aft-oriented weapons will be recognizable by icon. Some ships got weapons rearranged a bit, too.
 	    <br><b><u>Raiders!</u></b> - Geoffrey has structured notable Raider groups in accordance with sourcebooks! - and added new ships, too :) 
+	    <br><b><big>---- batch 30.05.2021 ----</big></b>
+	    <br><b><u>Font modifications</u></b> - weapon data fonts modified, for hopefully better readability
+	    <br><b><u>Jinking valu</u></b>e - now aligned with player, like speed value
+	    <br><b><u>Raider beefed up</u></b> - courtesy of Geoffrey
+	    <br><b><u>Colonial updates and fixes</u></b> - courtesy of Geoffrey
 
 
 	    
