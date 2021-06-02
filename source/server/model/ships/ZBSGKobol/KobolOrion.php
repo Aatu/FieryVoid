@@ -33,8 +33,8 @@ class KobolOrion extends MediumShip{
         $this->addPrimarySystem(new ElintScanner(3, 15, 5, 6));  //full ELINT, not under the 2 point only boost
         $this->addPrimarySystem(new Engine(3, 16, 0, 8, 3));
         $this->addPrimarySystem(new ReloadRack(3, 9));
-        $this->addPrimarySystem(new LMissileRack(3, 6, 0, 0, 360));
-        $this->addPrimarySystem(new LMissileRack(3, 6, 0, 0, 360));
+        $this->addPrimarySystem(new SMissileRack(3, 6, 0, 0, 360));
+        $this->addPrimarySystem(new SMissileRack(3, 6, 0, 0, 360));
 		$this->addPrimarySystem(new Thruster(3, 9, 0, 3, 3));
 		$this->addPrimarySystem(new Thruster(3, 9, 0, 3, 4));        
 		$hyperdrive = new JumpEngine(3, 12, 6, 20);
@@ -67,7 +67,7 @@ class KobolOrion extends MediumShip{
 		
 		0=> array(
 			7 => "Thruster",
-			9 => "Class-L Missile Rack",
+			9 => "Class-S Missile Rack",
 			10 => "Reload Rack",
 			12 => "ELINT Scanner",
 			15 => "Engine",
