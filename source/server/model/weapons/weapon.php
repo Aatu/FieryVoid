@@ -159,6 +159,8 @@ class Weapon extends ShipSystem
             $this->minDamageArray[$i] = $this->minDamage;
             $this->setMaxDamage();
             $this->maxDamageArray[$i] = $this->maxDamage;
+            $this->sethextarget();
+            $this->hextargetArray[$i] = $this->hextarget;
 			//set AF priority, too!
 			$this->setPriorityAF(); 
 			$this->priorityAFArray[$i] = $this->priorityAF;
