@@ -1438,10 +1438,10 @@ spl_autoload_register(
 
 
 				//Nexus ships - Sal-bez
-                'salbezattackshuttle' => '/server/model/ships/ZNexusSalbez/SalbezAttackShuttle.php',					
                 'salbezavrtz' => '/server/model/ships/ZNexusSalbez/SalbezAvrtz.php',					
                 'salbezavrtzrefit' => '/server/model/ships/ZNexusSalbez/SalbezAvrtzRefit.php',					
                 'salbezbevtun' => '/server/model/ships/ZNexusSalbez/SalbezBevtun.php',					
+                'salbezcrevnen' => '/server/model/ships/ZNexusSalbez/SalbezCrevnen.php',					
                 'salbezdrazchk' => '/server/model/ships/ZNexusSalbez/SalbezDrazchk.php',					
                 'salbezesver' => '/server/model/ships/ZNexusSalbez/SalbezEsver.php',					
                 'salbezevsk' => '/server/model/ships/ZNexusSalbez/SalbezEvsk.php',					
