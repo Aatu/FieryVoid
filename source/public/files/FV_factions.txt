@@ -228,6 +228,16 @@ Gravitic Net - weapon that moves target, fired before regular weapon declaration
 Electro-Pulse Gun - very short range, slow firing weapon that only affects fighters. However, it can make called shots at no penalty.
 
 
+MINBARI PROTECTORATE
+This is a part of the Minbari Federation, but consists of several non-Minbari members that are overseen by the Federation. They have a degree of autonomy, 
+including providing local defense to their worlds. The Protectorate uses older Minbari hulls. One notable difference is that Protectorate units have no 
+jammers. The Tinashi is their most modern hull along with a handful of Nials. The Protectorate generally uses the Tishat medium fighter. Their fleet options 
+are rather limited based on the number of hulls and lacking ways to bring fighters outside a Morshin carrier. Their one noted conflict is the Pseudo-War with 
+the Imperial Star Legion raider group.
+NOTE: No other Minbari units, other than those listed in the fleet selection screen, may be used by the Protectorate. Other Minbari units can only be included 
+if part of a joint force with the Minbari Federation.
+
+
 NARN
 Energy Mine - hex-targeted weapon, causing heavy damage to everything on hex hit and lighter to everything on adjacent hexes. 
 	Opponent does not see EMine target hexes (just the fact that they've been launched).

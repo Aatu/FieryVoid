@@ -52,8 +52,8 @@ class SalbezVasrenRefit extends HeavyCombatVessel{
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 40));
-        $this->addAftSystem(new Structure( 4, 39));
-        $this->addPrimarySystem(new Structure( 5, 42));
+        $this->addAftSystem(new Structure( 4, 40));
+        $this->addPrimarySystem(new Structure( 5, 45));
 		
         $this->hitChart = array(
             0=> array(

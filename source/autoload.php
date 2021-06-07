@@ -1439,6 +1439,10 @@ spl_autoload_register(
 
 				//Nexus ships - Sal-bez
                 'salbezattackshuttle' => '/server/model/ships/ZNexusSalbez/SalbezAttackShuttle.php',					
+                'salbezavrtz' => '/server/model/ships/ZNexusSalbez/SalbezAvrtz.php',					
+                'salbezavrtzrefit' => '/server/model/ships/ZNexusSalbez/SalbezAvrtzRefit.php',					
+                'salbezbevtun' => '/server/model/ships/ZNexusSalbez/SalbezBevtun.php',					
+                'salbezdrazchk' => '/server/model/ships/ZNexusSalbez/SalbezDrazchk.php',					
                 'salbezesver' => '/server/model/ships/ZNexusSalbez/SalbezEsver.php',					
                 'salbezevsk' => '/server/model/ships/ZNexusSalbez/SalbezEvsk.php',					
                 'salbezfelriz' => '/server/model/ships/ZNexusSalbez/SalbezFelriz.php',					
@@ -1446,13 +1450,17 @@ spl_autoload_register(
                 'salbezfelrizrefit2' => '/server/model/ships/ZNexusSalbez/SalbezFelrizRefit2.php',					
                 'salbezjertkat' => '/server/model/ships/ZNexusSalbez/SalbezJertkat.php',					
                 'salbezjertkatrefit' => '/server/model/ships/ZNexusSalbez/SalbezJertkatRefit.php',					
-                'salbeznewfighter' => '/server/model/ships/ZNexusSalbez/SalbezNewFighter.php',					
+                'salbezreshken' => '/server/model/ships/ZNexusSalbez/SalbezReshken.php',					
+                'salbezreshkenrefit' => '/server/model/ships/ZNexusSalbez/SalbezReshkenRefit.php',					
                 'salbezshvrak' => '/server/model/ships/ZNexusSalbez/SalbezShvrak.php',					
                 'salbezshvrakrefit' => '/server/model/ships/ZNexusSalbez/SalbezShvrakRefit.php',					
                 'salbezshvrez' => '/server/model/ships/ZNexusSalbez/SalbezShvrez.php',					
                 'salbezshvrezrefit' => '/server/model/ships/ZNexusSalbez/SalbezShvrezRefit.php',					
                 'salbezurzchk' => '/server/model/ships/ZNexusSalbez/SalbezUrzchk.php',					
                 'salbezurzchkrefit' => '/server/model/ships/ZNexusSalbez/SalbezUrzchkRefit.php',					
+                'salbezushkrit' => '/server/model/ships/ZNexusSalbez/SalbezUshkrit.php',					
+                'salbezushkritrefit' => '/server/model/ships/ZNexusSalbez/SalbezUshkritRefit.php',					
+                'salbezushkritrefit2' => '/server/model/ships/ZNexusSalbez/SalbezUshkritRefit2.php',					
                 'salbezvasren' => '/server/model/ships/ZNexusSalbez/SalbezVasren.php',					
                 'salbezvasrenrefit' => '/server/model/ships/ZNexusSalbez/SalbezVasrenRefit.php',					
                 'salbezzefjem' => '/server/model/ships/ZNexusSalbez/SalbezZefjem.php',					
@@ -1665,6 +1673,26 @@ spl_autoload_register(
                 'tfsblockaderunner' => '/server/model/ships/raiders/tfsblockaderunner.php',
                 'tfsfreedombase' => '/server/model/ships/raiders/tfsfreedombase.php',
                 'tfsmonitor' => '/server/model/ships/raiders/tfsmonitor.php',
+
+
+				//Minbari Protectorate
+                'protectoratecivilianbase' => '/server/model/ships/minbari_protectorate/ProtectorateCivilianBase.php',
+                'protectorateflyerassault' => '/server/model/ships/minbari_protectorate/ProtectorateFlyerAssault.php',
+                'protectorateflyercombat' => '/server/model/ships/minbari_protectorate/ProtectorateFlyerCombat.php',
+//                'protectorateleshath' => '/server/model/ships/minbari_protectorate/ProtectorateLeshath.php',
+                'protectorateletann' => '/server/model/ships/minbari_protectorate/ProtectorateLetann.php',
+                'protectoratemorshin' => '/server/model/ships/minbari_protectorate/ProtectorateMorshin.php',
+                'protectoratemorshin' => '/server/model/ships/minbari_protectorate/ProtectorateMorshin.php',
+                'protectoratenial' => '/server/model/ships/minbari_protectorate/ProtectorateNial.php',
+                'protectoratenorgath' => '/server/model/ships/minbari_protectorate/ProtectorateNorgath.php',
+                'protectorateretlata' => '/server/model/ships/minbari_protectorate/ProtectorateRetlata.php',
+                'protectoraterolentha' => '/server/model/ships/minbari_protectorate/ProtectorateRolentha.php',
+                'protectoratesheganna' => '/server/model/ships/minbari_protectorate/ProtectorateSheganna.php',
+                'protectoratetigara' => '/server/model/ships/minbari_protectorate/ProtectorateTigara.php',
+                'protectoratetigarin' => '/server/model/ships/minbari_protectorate/ProtectorateTigarin.php',
+                'protectoratetishat' => '/server/model/ships/minbari_protectorate/ProtectorateTishat.php',
+                'protectoratetorotha' => '/server/model/ships/minbari_protectorate/ProtectorateTorotha.php',
+                'protectoratetradana' => '/server/model/ships/minbari_protectorate/ProtectorateTradana.php',
 
 
 
