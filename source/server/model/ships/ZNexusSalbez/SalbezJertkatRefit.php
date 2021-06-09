@@ -37,8 +37,8 @@ class SalbezJertkatRefit extends BaseShip{
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
-		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
+		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 360));
+		$this->addFrontSystem(new MediumLaser(3, 6, 5, 0, 60));
 		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 270, 90));
 		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 270, 90));
 
@@ -46,8 +46,8 @@ class SalbezJertkatRefit extends BaseShip{
         $this->addAftSystem(new Thruster(3, 10, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 2, 2));
-		$this->addAftSystem(new MediumLaser(3, 6, 5, 180, 300));
-		$this->addAftSystem(new MediumLaser(3, 6, 5, 60, 180));
+		$this->addAftSystem(new LightLaser(3, 4, 3, 90, 270));
+		$this->addAftSystem(new LightLaser(3, 4, 3, 90, 270));
 
         $this->addLeftSystem(new MediumLaser(3, 6, 5, 240, 360));
         $this->addLeftSystem(new NexusSwarmTorpedo(3, 4, 2, 240, 360));
@@ -62,11 +62,11 @@ class SalbezJertkatRefit extends BaseShip{
         $this->addRightSystem(new Thruster(3, 15, 0, 4, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure(4, 40));
-        $this->addAftSystem(new Structure(4, 40));
-        $this->addLeftSystem(new Structure(4, 40));
-        $this->addRightSystem(new Structure(4, 40));
-        $this->addPrimarySystem(new Structure(5, 40));
+        $this->addFrontSystem(new Structure(4, 36));
+        $this->addAftSystem(new Structure(4, 36));
+        $this->addLeftSystem(new Structure(4, 36));
+        $this->addRightSystem(new Structure(4, 36));
+        $this->addPrimarySystem(new Structure(5, 36));
 		
 		$this->hitChart = array(
 			0=> array(
@@ -86,7 +86,7 @@ class SalbezJertkatRefit extends BaseShip{
 			),
 			2=> array(
 					8 => "Thruster",
-					10 => "Medium Laser",
+					10 => "Light Laser",
 					18 => "Structure",
 					20 => "Primary",
 			),

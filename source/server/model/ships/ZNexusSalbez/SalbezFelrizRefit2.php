@@ -8,7 +8,7 @@ class SalbezFelrizRefit2 extends BaseShipNoAft{
 		$this->faction = "ZNexus Playtest Sal-bez";
         $this->phpclass = "SalbezFelrizRefit2";
         $this->imagePath = "img/ships/Nexus/salbez_felriz.png";
-			$this->canvasSize = 145; //img has 200px per side
+			$this->canvasSize = 135; //img has 200px per side
         $this->shipClass = "Fel-riz Patrol Cruiser (2118 refit)";
 			$this->variantOf = "Fel-riz Patrol Cruiser";
 			$this->occurence = "common";
@@ -36,29 +36,28 @@ class SalbezFelrizRefit2 extends BaseShipNoAft{
 
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
-		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 360));
+		$this->addFrontSystem(new LightLaser(2, 4, 3, 180, 360));
+		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
 		$this->addFrontSystem(new NexusSwarmTorpedo(2, 5, 2, 300, 60));
-		$this->addFrontSystem(new MediumLaser(3, 6, 5, 0, 60));
+		$this->addFrontSystem(new LightLaser(2, 4, 3, 0, 180));
         
 		$this->addLeftSystem(new Thruster(3, 14, 0, 4, 3));
 		$this->addLeftSystem(new LaserCutter(3, 6, 4, 240, 360));
-		$this->addLeftSystem(new LightLaser(2, 4, 3, 180, 360));
-		$this->addLeftSystem(new NexusImprovedParticleBeam(1, 3, 1, 240, 60));
-		$this->addLeftSystem(new NexusImprovedParticleBeam(1, 3, 1, 180, 360));
-		$this->addLeftSystem(new NexusImprovedParticleBeam(1, 3, 1, 120, 300));
+		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 60));
+		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 180, 360));
+		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 120, 300));
 
 		$this->addRightSystem(new Thruster(3, 14, 0, 4, 4));
 		$this->addRightSystem(new LaserCutter(3, 6, 4, 0, 120));
-		$this->addRightSystem(new LightLaser(2, 4, 3, 0, 180));
-		$this->addRightSystem(new NexusImprovedParticleBeam(1, 3, 1, 300, 120));
-		$this->addRightSystem(new NexusImprovedParticleBeam(1, 3, 1, 0, 180));
-		$this->addRightSystem(new NexusImprovedParticleBeam(1, 3, 1, 60, 240));
+		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 300, 120));
+		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 0, 180));
+		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 60, 240));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 4, 40));
-        $this->addLeftSystem(new Structure( 4, 40));
-        $this->addRightSystem(new Structure( 4, 40));
-        $this->addPrimarySystem(new Structure( 4, 40));
+        $this->addFrontSystem(new Structure( 3, 36));
+        $this->addLeftSystem(new Structure( 3, 36));
+        $this->addRightSystem(new Structure( 3, 36));
+        $this->addPrimarySystem(new Structure( 4, 36));
 		
         $this->hitChart = array(
             0=> array(
@@ -73,25 +72,25 @@ class SalbezFelrizRefit2 extends BaseShipNoAft{
             1=> array(
                     6 => "Thruster",
 					8 => "Medium Laser",
-					10 => "Swarm Torpedo",
+					9 => "Light Laser",
+					11 => "Swarm Torpedo",
 					18 => "Structure",
                     20 => "Primary",
             ),
             3=> array(
                     5 => "Thruster",
-					6 => "Light Laser",
-					8 => "Laser Cutter",
+					7 => "Laser Cutter",
 					10 => "Improved Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
 			),
             4=> array(
                     5 => "Thruster",
-					6 => "Light Laser",
-					8 => "Laser Cutter",
+					7 => "Laser Cutter",
 					10 => "Improved Particle Beam",
                     18 => "Structure",
-                    20 => "Primary",            ),
+                    20 => "Primary",
+            ),
         );
 
 		

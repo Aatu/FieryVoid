@@ -35,8 +35,7 @@ class SalbezZefjemRefit2 extends HeavyCombatVessel{
       
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-        $this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 360));
-        $this->addFrontSystem(new MediumLaser(3, 6, 5, 0, 60));
+        $this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
         $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 270, 90));
         $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 270, 90));
 		$this->addFrontSystem(new NexusSwarmTorpedo(2, 5, 2, 300, 60));
@@ -51,9 +50,9 @@ class SalbezZefjemRefit2 extends HeavyCombatVessel{
         $this->addAftSystem(new LaserCutter(2, 6, 4, 0, 120));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 4, 39));
-        $this->addAftSystem(new Structure( 4, 39));
-        $this->addPrimarySystem(new Structure( 4, 42));
+        $this->addFrontSystem(new Structure( 4, 35));
+        $this->addAftSystem(new Structure( 4, 35));
+        $this->addPrimarySystem(new Structure( 4, 40));
 		
         $this->hitChart = array(
             0=> array(

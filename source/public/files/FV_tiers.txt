@@ -22,6 +22,7 @@ This is default power level of show era major factions ('Big 4') - what I consid
  - Gaim
  - Llort
  - Minbari (warning: Jammer is very daunting, expecially to new players - it's easy to feel overwhelmed; at the same time flying Minbari is not easy either. Not recommended (on either side of the table) until You feel You have solid command of the game!)
+ - Minbari Protectorate (whlie lacking Jammers, they still field quite capable units, but their fleet selection is limited)
  - Narn (barring massed EMines)
  - Orieni (very tricky - may feel superior due to raw damage output of Hunter-Killers and massed RGRs, while remaining vulnerable against sharp handling by expert oponent; if You don't consider Yourself an expert, You may treat Orieni as a Superior faction)
  - Torata 

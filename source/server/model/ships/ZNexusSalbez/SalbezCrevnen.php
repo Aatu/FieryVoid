@@ -1,13 +1,13 @@
 <?php
-class SalbezAttackShuttle extends FighterFlight{
+class SalbezCrevnen extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 17*6;
         $this->faction = "ZNexus Playtest Sal-bez";
-        $this->phpclass = "SalbezAttackShuttle";
-        $this->shipClass = "Attack Shuttle";
+        $this->phpclass = "SalbezCrevnen";
+        $this->shipClass = "Crev-nen Attack Shuttle Heavy Flight";
         $this->imagePath = "img/ships/Nexus/salbez_attack_shuttle.png";
 		$this->unofficial = true;
 
@@ -34,12 +34,12 @@ class SalbezAttackShuttle extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){            
             $armour = array(1, 0, 1, 1);
-            $fighter = new Fighter("SalbezAttackShuttle", $armour, 12, $this->id);
-            $fighter->displayName = "Attack Shuttle";
-            $fighter->imagePath = "img/ships/Nexus/salbez_attack_shuttle.png";
-            $fighter->iconPath = "img/ships/Nexus/salbez_attack_shuttle_large.png";
+            $fighter = new Fighter("SalbezCrevnen", $armour, 12, $this->id);
+            $fighter->displayName = "Crev-nen";
+            $fighter->imagePath = "img/ships/Nexus/salbez_crevnen.png";
+            $fighter->iconPath = "img/ships/Nexus/salbez_crevnen_large.png";
 
-	        $light = new NexusParticleGridFtr(270, 90, 0); //$startArc, $endArc, $nrOfShots
+	        $light = new NexusParticleGridFtr(270, 90, 1); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($light);
 			
 			$aft = new LightParticleBeam(150, 210, 1, 1);

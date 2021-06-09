@@ -31,21 +31,21 @@ class SalbezShvrez extends MediumShip{
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 4));        
         $this->addPrimarySystem(new Hangar(2, 2));
         
-		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
+		$this->addFrontSystem(new LaserCutter(3, 6, 4, 300, 60));
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 270, 90));
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
-		$this->addFrontSystem(new LightLaser(2, 4, 3, 270, 90));
-		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
+		$this->addFrontSystem(new LaserCutter(3, 6, 4, 300, 60));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	    
 		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 60, 300));
 		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 60, 300));
+		$this->addAftSystem(new LightLaser(2, 4, 3, 90, 270));
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));    
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));    
        
-        $this->addPrimarySystem(new Structure(4, 49));
+        $this->addPrimarySystem(new Structure(4, 45));
 
 	//d20 hit chart
 	$this->hitChart = array(
@@ -61,7 +61,7 @@ class SalbezShvrez extends MediumShip{
 
 		1=> array(
 			5 => "Thruster",
-			7 => "Medium Laser",
+			7 => "Laser Cutter",
 			9 => "Light Laser",
 			10 => "Light Particle Beam",
 			17 => "Structure",
@@ -69,7 +69,8 @@ class SalbezShvrez extends MediumShip{
 		),
 
 		2=> array(
-			8 => "Thruster",
+			7 => "Thruster",
+			9 => "Light Laser",
 			10 => "Light Particle Beam",
 			17 => "Structure",
 			20 => "Primary",

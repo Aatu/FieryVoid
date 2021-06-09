@@ -34,24 +34,24 @@ class SalbezVasren extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addFrontSystem(new NexusSwarmTorpedo(3, 5, 2, 300, 60));
-        $this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
+        $this->addFrontSystem(new NexusHeavyLaserCutter(3, 8, 5, 300, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
                 
         $this->addAftSystem(new Thruster(3, 28, 0, 10, 2));
-        $this->addAftSystem(new MediumLaser(3, 6, 5, 240, 360));
+        $this->addAftSystem(new LaserCutter(3, 6, 4, 240, 360));
         $this->addAftSystem(new LightLaser(2, 4, 3, 180, 360));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 90, 270));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 90, 270));
         $this->addAftSystem(new LightLaser(2, 4, 3, 0, 180));
-        $this->addAftSystem(new MediumLaser(3, 6, 5, 0, 120));
+        $this->addAftSystem(new LaserCutter(3, 6, 4, 0, 120));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 40));
-        $this->addAftSystem(new Structure( 4, 39));
-        $this->addPrimarySystem(new Structure( 4, 42));
+        $this->addAftSystem(new Structure( 4, 40));
+        $this->addPrimarySystem(new Structure( 4, 45));
 		
         $this->hitChart = array(
             0=> array(
@@ -65,7 +65,7 @@ class SalbezVasren extends HeavyCombatVessel{
             ),
             1=> array(
                     5 => "Thruster",
-                    7 => "Medium Laser",
+                    7 => "Heavy Laser Cutter",
                     9 => "Swarm Torpedo",
 					11 => "Light Particle Beam",
 					18 => "Structure",
@@ -73,7 +73,7 @@ class SalbezVasren extends HeavyCombatVessel{
             ),
             2=> array(
                     6 => "Thruster",
-                    8 => "Medium Laser",
+                    8 => " Laser Cutter",
 					10 => "Light Laser",
 					11 => "Light Particle Beam",
                     18 => "Structure",
