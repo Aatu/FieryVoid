@@ -5197,7 +5197,7 @@ class NexusSwarmTorpedo extends Pulse{
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile
 		public $range = 25;
-		public $distanceRange = 35;		
+//		public $distanceRange = 35;		
         public $animation = "trail";
         public $animationColor = array(192, 192, 192);
     	public $trailColor = array(215, 126, 111);
@@ -5239,7 +5239,7 @@ class NexusSwarmTorpedo extends Pulse{
         }
 
 	
-        public function getDamage($fireOrder){        return 10;   }
+        public function getDamage($fireOrder){        return 8;   }
     }  // endof NexusSwarmTorpedo
 
 
@@ -5251,7 +5251,7 @@ class NexusHeavySwarmTorpedo extends Pulse{
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile
 		public $range = 25;
-		public $distanceRange = 35;		
+//		public $distanceRange = 35;		
         public $animation = "trail";
         public $animationColor = array(192, 192, 192);
     	public $trailColor = array(215, 126, 111);

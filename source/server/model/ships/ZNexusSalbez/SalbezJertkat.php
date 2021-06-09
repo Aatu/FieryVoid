@@ -36,8 +36,8 @@ class SalbezJertkat extends BaseShip{
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
-		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
+		$this->addFrontSystem(new NexusHeavyLaserCutter(2, 8, 5, 300, 360));
+		$this->addFrontSystem(new NexusHeavyLaserCutter(2, 8, 5, 0, 60));
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
 
@@ -45,27 +45,27 @@ class SalbezJertkat extends BaseShip{
         $this->addAftSystem(new Thruster(3, 10, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 2, 2));
-		$this->addAftSystem(new MediumLaser(3, 6, 5, 180, 300));
-		$this->addAftSystem(new MediumLaser(3, 6, 5, 60, 180));
+		$this->addAftSystem(new LightLaser(3, 4, 3, 90, 270));
+		$this->addAftSystem(new LightLaser(3, 4, 3, 90, 270));
 
-        $this->addLeftSystem(new MediumLaser(3, 6, 5, 240, 360));
+        $this->addLeftSystem(new LaserCutter(3, 6, 4, 240, 360));
         $this->addLeftSystem(new NexusSwarmTorpedo(3, 4, 2, 240, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 120, 300));
         $this->addLeftSystem(new Thruster(3, 15, 0, 4, 3));
 
-        $this->addRightSystem(new MediumLaser(3, 6, 5, 0, 120));
+        $this->addRightSystem(new LaserCutter(3, 6, 4, 0, 120));
         $this->addRightSystem(new NexusSwarmTorpedo(3, 4, 2, 0, 120));
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 60, 240));
         $this->addRightSystem(new Thruster(3, 15, 0, 4, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure(4, 40));
-        $this->addAftSystem(new Structure(4, 40));
-        $this->addLeftSystem(new Structure(4, 40));
-        $this->addRightSystem(new Structure(4, 40));
-        $this->addPrimarySystem(new Structure(4, 40));
+        $this->addFrontSystem(new Structure(4, 36));
+        $this->addAftSystem(new Structure(4, 36));
+        $this->addLeftSystem(new Structure(4, 36));
+        $this->addRightSystem(new Structure(4, 36));
+        $this->addPrimarySystem(new Structure(4, 36));
 		
 		$this->hitChart = array(
 			0=> array(
@@ -78,20 +78,20 @@ class SalbezJertkat extends BaseShip{
 			),
 			1=> array(
 					6 => "Thruster",
-					9 => "Medium Laser",
+					9 => "Heavy Laser Cutter",
 					10 => "Light Particle Beam",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
 					8 => "Thruster",
-					10 => "Medium Laser",
+					10 => "Light Laser",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
 					5 => "Thruster",
-					7 => "Medium Laser",
+					7 => "Laser Cutter",
 					9 => "Swarm Torpedo",
 					11 => "Light Particle Beam",
 					18 => "Structure",
@@ -99,7 +99,7 @@ class SalbezJertkat extends BaseShip{
 			),
 			4=> array(
 					5 => "Thruster",
-					7 => "Medium Laser",
+					7 => "Laser Cutter",
 					9 => "Swarm Torpedo",
 					11 => "Light Particle Beam",
 					18 => "Structure",

@@ -37,17 +37,17 @@ class SalbezShvrezRefit extends MediumShip{
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 270, 90));
 		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 120));
 		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 120));
-		$this->addFrontSystem(new LightLaser(2, 4, 3, 270, 90));
 		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	    
 		$this->addAftSystem(new NexusImprovedParticleBeam(2, 3, 1, 60, 300));
 		$this->addAftSystem(new NexusImprovedParticleBeam(2, 3, 1, 60, 300));
+		$this->addAftSystem(new LightLaser(2, 4, 3, 90, 270));
         $this->addAftSystem(new Thruster(3, 10, 0, 5, 2));    
         $this->addAftSystem(new Thruster(3, 10, 0, 5, 2));    
        
-        $this->addPrimarySystem(new Structure(4, 49));
+        $this->addPrimarySystem(new Structure(4, 45));
 
 	//d20 hit chart
 	$this->hitChart = array(
@@ -71,7 +71,8 @@ class SalbezShvrezRefit extends MediumShip{
 		),
 
 		2=> array(
-			8 => "Thruster",
+			7 => "Thruster",
+			9 => "Light Laser",
 			10 => "Improved Particle Beam",
 			17 => "Structure",
 			20 => "Primary",
