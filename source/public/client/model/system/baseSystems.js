@@ -607,8 +607,8 @@ PowerCapacitor.prototype.doIndividualNotesTransfer = function () { //prepare ind
 	this.individualNotesTransfer = Array();
 	//note power currently remaining ON REACTOR as charge held
 	var powerRemaining = shipManager.power.getReactorPower(this.ship, this);
-	powerRemaining = Math.min(powerRemaining,this.powerMax);
 	powerRemaining = powerRemaining + this.getRegeneration();
+	powerRemaining = Math.min(powerRemaining,this.powerMax);
 	this.individualNotesTransfer.push(powerRemaining);
 	return true;
 };

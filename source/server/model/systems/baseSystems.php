@@ -1914,7 +1914,7 @@ class SelfRepair extends ShipSystem{
 		$this->data["Special"] .= "<br>Priority: first fix criticals, then revive destroyed systems, finally restore boxes to damaged systems.";  
 		$this->data["Special"] .= "<br>Core (and other particularly important) systems are repaired first, then weapons, then other systems.";
 		$this->data["Special"] .= "<br>Will not fix criticals and damage caused in current turn.";
-		$this->data["Special"] .= "<br>Player may modify repair priorities - click self repair system in Initial phase and cucle through damaged systems.";
+		$this->data["Special"] .= "<br>Player may modify repair priorities - click self repair system in Initial phase and cycle through damaged systems.";
 	}
 
 	

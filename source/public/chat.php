@@ -94,17 +94,21 @@ if (! isset($chatelement))
                         mine = " mine";
                     
                     var ingame;
-
+					
+					/* NOT NECESSARY, player sees where (s)he is!*/
                     if (chat.gameid == 0){
-                        ingame = '<span class="chatglobal">GLOBAL: </span>';
+                        //ingame = '<span class="chatglobal">GLOBAL: </span>';
+						ingame = '<span class="chatglobal"></span>';
                     }
                     else{
-                        ingame = '<span class="chatingame">IN GAME: </span>';
+                        //ingame = '<span class="chatingame">IN GAME: </span>';
+                        ingame = '<span class="chatingame"></span>';
                     }
 
                     if(message.userid != chat.playerid){
                         chat.lastTimeStamp = message.time;
                     }
+					
 
                     var e = $('<div class="chatmessage">'+ingame+'<span class="chattime">('+message.time+')</span> <span class="chatuser'+mine+'">'+message.username+': </span><span class="chattext">'+message.message+'</span></div></div>');
                     e.appendTo(c);
