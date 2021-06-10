@@ -21,7 +21,7 @@ class SalbezZefjem extends HeavyCombatVessel{
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 3;
-        $this->iniativebonus = 6*5;
+        $this->iniativebonus = 5*5;
          
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new CnC(4, 9, 0, 0));
@@ -33,7 +33,7 @@ class SalbezZefjem extends HeavyCombatVessel{
       
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-        $this->addFrontSystem(new NexusHeavyLaserCutter(2, 8, 5, 300, 60));
+        $this->addFrontSystem(new LaserCutter(2, 6, 4, 300, 60));
         $this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 270, 90));
         $this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 270, 90));
 		$this->addFrontSystem(new CargoBay(1, 16));
@@ -47,9 +47,9 @@ class SalbezZefjem extends HeavyCombatVessel{
 		$this->addAftSystem(new CargoBay(1, 12));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 3, 39));
-        $this->addAftSystem(new Structure( 3, 39));
-        $this->addPrimarySystem(new Structure( 3, 42));
+        $this->addFrontSystem(new Structure( 3, 35));
+        $this->addAftSystem(new Structure( 3, 35));
+        $this->addPrimarySystem(new Structure( 3, 40));
 		
         $this->hitChart = array(
             0=> array(
@@ -63,7 +63,7 @@ class SalbezZefjem extends HeavyCombatVessel{
             ),
             1=> array(
                     5 => "Thruster",
-                    7 => "Heavy Laser Cutter",
+                    7 => "Laser Cutter",
                     9 => "Cargo Bay",
 					10 => "Light Particle Beam",
 					18 => "Structure",

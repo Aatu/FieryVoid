@@ -1,13 +1,13 @@
 <?php
-class SalbezNewFighter extends FighterFlight{
+class SalbezDrazchk extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 43*6;
         $this->faction = "ZNexus Playtest Sal-bez";
-        $this->phpclass = "SalbezNewFighter";
-        $this->shipClass = "New Fighter";
+        $this->phpclass = "SalbezDrazchk";
+        $this->shipClass = "Draz-chk Heavy Fighter";
         $this->imagePath = "img/ships/Nexus/salbez_new_fighter.png";
 		$this->unofficial = true;
 
