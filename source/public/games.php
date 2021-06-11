@@ -62,34 +62,10 @@ if (isset($_SESSION["user"])) {
         <br>
 -->        
 		
-		---------- <b>LATEST NEWS - May 2021</b> ----------	    
-	    <br><b><u>Drazi Serpents can be deployed as flights</u></b> - making them behave as the other SHFs in game.
-	    <br><b><u>Geoffrey's update spree</u></b> - a lot of fixes for custom universes: BSG, Nexus, Escalation...
-	    <br><b><u>Fighter Diffuser Tendrils</u></b> - capacity display is reverted (now they show available capacity rather than filled, to match their shipborne cousins)
-	    <br><b><u>Solar Cannon fixed</u></b> - badly needed overhaul
-	    <br><b><u>Solar Cannon fixed</u></b> - why do it once when it can be done twice ;)
-	    <br><b><u>Self-Repair reined in</u></b> - will no longer fix damage caused in current turn
-	    <br><b><u>Lightning Cannon gained Accelerator status</u></b> - to prevent it from automatically intercepting stray shots and draining Power
-	    <br><b><u>Tiers list separated from Factions list</u></b> - now they're accessible separately
-	    <br><b><u>Brixadii and Colonials</u></b> - ongoing development updates and enhancements 	    
-	    <br><b><u>Torata graphics update</u></b> 
-	    <br><b><big>---- batch 19.05.2021 ----</big></b>
-		<br><b><u>Vorlon Power Capacitor reworked</u></b>  - now new power is added AFTER Initial phase
-		<br><b><u>Chat font modified</u></b>  - do You like it? (<a href="https://strawpoll.com/syxor2vda">poll here!</a>)
-		<br><b><u>Ancient fleet restrictions modified</u></b>  - loosened a bit
-		<br><b><u>Facing arrow</u></b>  - so everyone can know where Ipsha are pointing their noses!
-		<br><b><u>Self-repair modified</u></b>  - now player can indicate desired repair priority (to a degree)
-		<br><b><u>Mass undeclare</u></b>  - one-click cancel of firing order for ALL similar weapons
-		<br><b><u>Colonials update</u></b>  - ongoing efforts of Fred and Geoffrey
-	    <br><b><big>---- batch 26.05.2021 ----</big></b>
-	    <br><b><u>Combat Pivot fixed</u></b> - now it causes appropriate firing penalty
-	    <br><b><u>Ipsha weapon orientation</u></b> - now (some) Aft-oriented weapons will be recognizable by icon. Some ships got weapons rearranged a bit, too.
-	    <br><b><u>Raiders!</u></b> - Geoffrey has structured notable Raider groups in accordance with sourcebooks! - and added new ships, too :) 
-	    <br><b><big>---- batch 30.05.2021 ----</big></b>
-	    <br><b><u>Font modifications</u></b> - weapon data fonts modified, for hopefully better readability
-	    <br><b><u>Jinking valu</u></b>e - now aligned with player, like speed value
-	    <br><b><u>Raider beefed up</u></b> - courtesy of Geoffrey
-	    <br><b><u>Colonial updates and fixes</u></b> - courtesy of Geoffrey
+		---------- <b>LATEST NEWS - June 2021</b> ----------	    
+	    <br><b><u>Minbari Protectorate</u></b> - courtesy of Geoffrey
+	    <br><b><u>Vorlon Power Capacitor fixed</u></b> - <font color="red"><b><big>ctrl+F5</big></b></font> necessary for fix to work!
+	    <br><b><u>chat modified</u></b> - 'In game/Global' indicator was skipped as unnecessary, so there's more room for actual chat :)
 
 
 	    

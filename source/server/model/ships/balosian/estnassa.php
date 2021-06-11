@@ -36,8 +36,8 @@ class Estnassa extends HeavyCombatVessel{
         $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 180, 60));
         $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 180));
         $this->addFrontSystem(new IonCannon(4, 6, 4, 240, 0));
-        $this->addFrontSystem(new IonCannon(3, 6, 4, 300, 60));
         $this->addFrontSystem(new IonCannon(4, 6, 4, 0, 120));
+        $this->addFrontSystem(new IonCannon(3, 6, 4, 300, 60));
         
         $this->addAftSystem(new IonCannon(4, 6, 4, 120, 240));
         $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
