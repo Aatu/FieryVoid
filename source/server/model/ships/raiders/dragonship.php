@@ -4,7 +4,7 @@ class Dragonship extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-  		$this->pointCost = 540;
+  		$this->pointCost = 650;
   		$this->faction = "Raiders";
         $this->phpclass = "Dragonship";
         $this->imagePath = "img/ships/dragonship.png";

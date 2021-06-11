@@ -5388,8 +5388,8 @@ class PlasmaWeb extends Weapon{
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 2;
-            if ( $powerReq == 0 ) $powerReq = 1;
+            if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 2;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		

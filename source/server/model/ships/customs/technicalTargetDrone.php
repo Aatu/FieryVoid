@@ -43,10 +43,10 @@ class technicalTargetDrone extends BaseShip{
 		
 		//new weapon showcase
 		
-		$this->addFrontSystem(new NexusHeavyPlasmaCharge(3, 9, 5, 270, 90));
-		$this->addFrontSystem(new NexusHeavyPlasmaCharge(3, 9, 5, 270, 90));
-		$this->addFrontSystem(new NexusHeavyPlasmaCharge(3, 9, 5, 270, 90));
-		$this->addFrontSystem(new NexusHeavyPlasmaCharge(3, 9, 5, 270, 90));
+		$this->addFrontSystem(new Maser(3, 6, 3, 270, 90));
+		$this->addFrontSystem(new Maser(3, 6, 3, 270, 90));
+		$this->addFrontSystem(new Maser(3, 6, 3, 270, 90));
+		$this->addFrontSystem(new Maser(3, 6, 3, 270, 90));
 		//$this->addFrontSystem(new PlasmaWaveTorpedo(3, 0, 0, 300, 60));
 		//$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));
 		//$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));
