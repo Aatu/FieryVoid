@@ -24,7 +24,7 @@ class Optine extends BaseShip{
         $this->addPrimarySystem(new Reactor(6, 25, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 23, 4, 7));
-        $this->addPrimarySystem(new Engine(5, 10, 0, 10, 3));
+        $this->addPrimarySystem(new Engine(5, 20, 0, 10, 3));
 		$this->addPrimarySystem(new Hangar(4, 2));
         
 	$this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));

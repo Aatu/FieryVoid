@@ -36,8 +36,8 @@ class Altarian extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 180, 60));
-        $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 180));
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
         $this->addFrontSystem(new MatterCannon(4, 7, 4, 240, 0));
         $this->addFrontSystem(new MatterCannon(4, 7, 4, 0, 120));
         
