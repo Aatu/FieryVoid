@@ -730,7 +730,9 @@ class LaserAccelerator extends Laser{
 
         public function setSystemDataWindow($turn){
             //$this->data["Special"] = '<br>Armor counts as double.';
-            $this->data["Special"] = '<br>Armor is doubled, and damage doubled for criticals.';
+            $this->data["Special"] = "<br>Armor is doubled, and damage from turn of firing doubled for criticals.";
+			$this->data["Special"] .= "<br>Forces critical on any system hit, even if Maser does not penetrate armor.";
+			$this->data["Special"] .= "<br>No overkill damage.";
             parent::setSystemDataWindow($turn);
         }
 
