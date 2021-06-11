@@ -8,7 +8,7 @@ class ProtectorateTinashi extends HeavyCombatVessel{
         $this->faction = "Minbari Protectorate";
         $this->phpclass = "ProtectorateTinashi";
         $this->imagePath = "img/ships/tinashi.png";
-        $this->shipClass = "Protectorate Tinashi War Frigate";
+        $this->shipClass = "Tinashi War Frigate";
         $this->gravitic = true;
         $this->forwardDefense = 14;
         $this->sideDefense = 17;

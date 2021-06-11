@@ -8,7 +8,7 @@ class ProtectorateSheganna extends OSAT{
 		$this->faction = "Minbari Protectorate";
         $this->phpclass = "ProtectorateSheganna";
         $this->imagePath = "img/ships/sheganna.png";
-        $this->shipClass = 'Protectorate Sheganna OSAT';        
+        $this->shipClass = 'Sheganna OSAT';        
         $this->forwardDefense = 9;
         $this->sideDefense = 9;
         $this->turncost = 0;

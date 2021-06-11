@@ -8,7 +8,7 @@ class ProtectorateLetann extends HeavyCombatVessel{
         $this->faction = "Minbari Protectorate";
         $this->phpclass = "ProtectorateLetann";
         $this->imagePath = "img/ships/letann.png";
-        $this->shipClass = "Protectorate Letann Scout";
+        $this->shipClass = "Letann Scout";
         $this->gravitic = true;
         $this->limited = 10;
         $this->forwardDefense = 14;

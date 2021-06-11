@@ -1682,7 +1682,6 @@ spl_autoload_register(
 //                'protectorateleshath' => '/server/model/ships/minbari_protectorate/ProtectorateLeshath.php',
                 'protectorateletann' => '/server/model/ships/minbari_protectorate/ProtectorateLetann.php',
                 'protectoratemorshin' => '/server/model/ships/minbari_protectorate/ProtectorateMorshin.php',
-                'protectoratemorshin' => '/server/model/ships/minbari_protectorate/ProtectorateMorshin.php',
                 'protectoratenial' => '/server/model/ships/minbari_protectorate/ProtectorateNial.php',
                 'protectoratenorgath' => '/server/model/ships/minbari_protectorate/ProtectorateNorgath.php',
                 'protectorateretlata' => '/server/model/ships/minbari_protectorate/ProtectorateRetlata.php',
