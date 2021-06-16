@@ -429,7 +429,7 @@ class AntimatterShredder extends AntimatterWeapon{
 	  		public $rangePenaltyArray = array(1=>0, 2=>1, 3=>1); //-1/hex base penalty
 	        public $intercept = 1;
 	 		public $rangeArray = array(1=>10, 2=>0, 3=>0);
-	      
+			public $hextargert = true;	      
 	 	    public $hextargetArray = array(1=>true, 2=>false, 3=>false); //I have added $hextargetArray as a new marker to weapon.php
 //			public $hidetarget = false;
 			public $ballistic = false;
