@@ -127,10 +127,7 @@ Weapon.prototype.changeFiringMode = function () {
 		this.range = this.rangeArray[this.firingMode];
 		this.data["Range"] = this.range;
 	}
-	if (!mathlib.arrayIsEmpty(this.hextargetArray)) {
-		this.hextarget = this.hextargetArray[this.firingMode];
-		this.data["Hex Target"] = this.hextarget;
-	}	
+
 	if (!mathlib.arrayIsEmpty(this.fireControlArray)) {
 		this.fireControl = this.fireControlArray[this.firingMode];
 		this.data["Fire control (fighter/med/cap)"] = this.translateFCtoD100txt(this.fireControl);
@@ -172,6 +169,7 @@ Weapon.prototype.changeFiringMode = function () {
 	if (!mathlib.arrayIsEmpty(this.trailLengthArray)) this.trailLength = this.trailLengthArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.trailColorArray)) this.trailColor = this.trailColorArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.projectilespeedArray)) this.projectilespeed = this.projectilespeedArray[this.firingMode];
+	if (!mathlib.arrayIsEmpty(this.hextargetArray)) this.hextarget = this.hextargetArray[this.firingMode];		
 }; //end of Weapon.prototype.changeFiringMode
 
 
