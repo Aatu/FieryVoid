@@ -457,6 +457,7 @@ spl_autoload_register(
                 'leskratid' => '/server/model/ships/dilgar/leskratiD.php',
                 'letann' => '/server/model/ships/minbari/letann.php',
                 'lhmissilerack' => '/server/model/weapons/missile.php',
+                'lias' => '/server/model/ships/centauri/lias.php',
                 'liberatorcannon' => '/server/model/ships/deneth/liberatorCannon.php',
                 'liberatorescort' => '/server/model/ships/deneth/liberatorEscort.php',
                 'liberatorplasma' => '/server/model/ships/deneth/liberatorPlasma.php',
