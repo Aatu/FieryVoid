@@ -8,7 +8,8 @@ class Cobra extends FighterFlight{
 	$this->faction = "Raiders";
 	$this->phpclass = "Cobra";
         $this->shipClass = "Cobra Light Fighters";
-	$this->imagePath = "img/ships/dragon.png"; 
+//	$this->imagePath = "img/ships/dragon.png"; 
+	$this->imagePath = "img/ships/cobra.png"; 
         $this->limited = 33; //difficult to maintain for non-Drazi, hence limitation
         
         $this->forwardDefense = 6;
@@ -39,8 +40,10 @@ class Cobra extends FighterFlight{
 		$armour = array(1, 1, 1, 1);
 		$fighter = new Fighter("Cobra", $armour, 5, $this->id);
 		$fighter->displayName = "Cobra";
-		$fighter->imagePath = "img/ships/dragon.png"; 
-		$fighter->iconPath = "img/ships/dragon_large.png"; 
+//		$fighter->imagePath = "img/ships/dragon.png"; 
+//		$fighter->iconPath = "img/ships/dragon_large.png"; 
+		$fighter->imagePath = "img/ships/cobra.png"; 
+		$fighter->iconPath = "img/ships/cobra_large.png"; 
 			
 		$fighter->addFrontSystem(new PairedParticleGun(330, 30, 2));
 	    $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
