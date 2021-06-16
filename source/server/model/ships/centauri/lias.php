@@ -10,8 +10,8 @@ class Lias extends BaseShip{
         $this->phpclass = "Lias";
         $this->imagePath = "img/ships/Lias.png";
         $this->shipClass = "Lias Supply Ship";
-        $this->shipSizeClass = 3;
-        $this->fighters = array("light"=>18);
+		$this->canvasSize = 180; 
+//        $this->shipSizeClass = 3;
 		$this->isd = 2053;
         
         $this->forwardDefense = 14;
