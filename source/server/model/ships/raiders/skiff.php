@@ -10,7 +10,7 @@ class Skiff extends MediumShip{
 //        $this->imagePath = "img/ships/sloop.png"; //needs to be changed
         $this->imagePath = "img/ships/skiff.png"; 
         $this->shipClass = "Skiff";
-        $this->canvasSize = 80;
+        $this->canvasSize = 70;
         
 		$this->notes = "Generic raider unit.";
 		$this->notes .= "<br> ";
