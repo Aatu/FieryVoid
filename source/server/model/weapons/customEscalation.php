@@ -276,9 +276,9 @@ class EWGatlingLaser extends Pulse{
         public $rangePenalty = 1;
         public $fireControl = array(1, 1, 2); // fighters, <mediums, <capitals
 
-		public $firingMode = "Laser";
+		public $firingMode = "Pulse";
         public $damageType = "Pulse"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-        public $weaponClass = "Pulse";
+        public $weaponClass = "Laser";
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             if ( $maxhealth == 0 ) $maxhealth = 7;
@@ -321,9 +321,9 @@ class EWHeavyGatlingLaser extends Pulse{
         public $rangePenalty = 0.5;
         public $fireControl = array(1, 1, 2); // fighters, <mediums, <capitals
 
-		public $firingMode = "Laser";
+		public $firingMode = "Pulse";
         public $damageType = "Pulse"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-        public $weaponClass = "Pulse";
+        public $weaponClass = "Laser";
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             if ( $maxhealth == 0 ) $maxhealth = 8;
