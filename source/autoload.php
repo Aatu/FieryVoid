@@ -226,6 +226,10 @@ spl_autoload_register(
                 'drikorta' => '/server/model/ships/brakiri/drikorta.php',
                 'droftae' => '/server/model/ships/markab/droftaE.php',
                 'droftan' => '/server/model/ships/markab/droftaN.php',
+                'dtarnattack' => '/server/model/ships/narn/DtarnAttack.php',
+                'dtarnescort' => '/server/model/ships/narn/DtarnEscort.php',
+                'dtarnplasma' => '/server/model/ships/narn/DtarnPlasma.php',
+                'dtarnpulse' => '/server/model/ships/narn/DtarnPulse.php',
                 'dualburstbeam' => '/server/model/weapons/specialWeapons.php',
                 'dualweapon' => '/server/model/weapons/dualWeapon.php',
                 'dudromaa' => '/server/model/ships/drazi/dudromaA.php',
@@ -1674,6 +1678,13 @@ spl_autoload_register(
                 'tfsblockaderunner' => '/server/model/ships/raiders/tfsblockaderunner.php',
                 'tfsfreedombase' => '/server/model/ships/raiders/tfsfreedombase.php',
                 'tfsmonitor' => '/server/model/ships/raiders/tfsmonitor.php',
+
+                'lkarus' => '/server/model/ships/narn_raiders/lkarus.php',
+                'lkarusrefit' => '/server/model/ships/narn_raiders/lkarusRefit.php',
+                'lshon' => '/server/model/ships/narn_raiders/lshon.php',
+                'lshonrefit' => '/server/model/ships/narn_raiders/lshonRefit.php',
+                'privateergorith' => '/server/model/ships/narn_raiders/Privateergorith.php',
+
 
 
 				//Minbari Protectorate
