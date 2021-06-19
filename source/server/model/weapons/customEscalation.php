@@ -24,7 +24,7 @@ class EWParticleLance extends Raking{
         public $fireControlArray = array( 1=>array(2, 4, 5), 2=>array(2, 4, 5) ); 
 	
 		public $weaponClassArray = array(1=>'Particle', 2=>'Particle');
-		public $firingModes = array(1=>'Dual', 2=>'Particle Cannons');
+		public $firingModes = array(1=>'Lance', 2=>'Particle Cannons');
 		public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
