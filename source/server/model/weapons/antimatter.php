@@ -514,7 +514,7 @@ public function beforeFiringOrderResolution($gamedata){
 						$noOfAttacks = Dice::d(3, 1);
 					}else{//capital : d6 attacks
 						$noOfAttacks = Dice::d(6, 1);
-						if($targetUnit->Enormous) $noOfAttacks+=3;//3 more if target is Enormous
+					if($targetUnit->Enormous) $noOfAttacks+=3;//3 more if target is Enormous
 					} 
 					for($i=0;$i<$noOfAttacks;$i++){ //declare appropriate number of attacks
 						//actually we're adding a fire order now!
@@ -540,9 +540,9 @@ public function beforeFiringOrderResolution($gamedata){
 		//		$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too! - certainly important for calculating hit chance...
 		//		if ($this->isRammingAttack) return $this->calculateHitBaseRam($gamedata, $fireOrder);
 		        $shooter = $gamedata->getShipById($fireOrder->shooterid);
-		        $target = $gamedata->getShipById($fireOrder->targetid);
+ 		    	$target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
 		        $pos = $shooter->getHexPos();
-				$targetPos = $target->getHexPos();
+		//		$targetPos = $target->getHexPos();
 		        $jammermod = 0;
 		        $jinkSelf = 0;
 		        $jinkTarget = 0;
@@ -568,6 +568,10 @@ public function beforeFiringOrderResolution($gamedata){
 				            $this->changeFiringMode($fireOrder->firingMode);
 				            return;
 				        }
+				        
+          	
+            	
+            	        
 				    //    $dew = $target->getDEW($gamedata->turn);
 				    //    $bdew = EW::getBlanketDEW($gamedata, $target);
 				    //    $sdew = EW::getSupportedDEW($gamedata, $target);
@@ -621,7 +625,7 @@ public function beforeFiringOrderResolution($gamedata){
 					$halfphasemod += 4;
 					}
 						
-		        $hitPenalties = $dew + $bdew + $sdew + $rangePenalty + $jinkSelf + max($jammermod, $jinkTarget) + $noLockMod + $halfphasemod;
+		        $hitPenalties = $dew + $bdew + $sdew + $rangePenalty + $jinkSelf + max($jammermod, $jinkTarget) + $noLockMod + $				halfphasemod;
 		        $hitBonuses = $oew + $soew + $firecontrol + $mod;
 		        $hitLoc = null;
 
@@ -649,7 +653,23 @@ public function fire($gamedata, $fireOrder){
 	if($this->firingMode ==1){	
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
-
+			//do damage to ships in range...
+            $ships1 = $gamedata->getShipsInDistance($target);
+            $ships2 = $gamedata->getShipsInDistance($target, 1);
+            foreach ($ships2 as $targetShip) {
+         //       if (isset($ships1[$targetShip->id])) { //ship on target hex!
+          //          $sourceHex = $posLaunch;
+          //          $damage = $this->getdamage;
+          //      } else { //ship at range 1!
+          //          $sourceHex = $target;
+          //          $damage = $this->getdamage;
+           //     }
+                $this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
+            }
+        }
+        	
+        	
+        	
     //   $fireOrder->needed -= $fireOrder->totalIntercept;
     //   $notes = "Interception: " . $fireOrder->totalIntercept . " sources:" . $fireOrder->numInterceptors . ", final to hit: " . $fireOrder->needed;
     //   $fireOrder->notes .= $notes;
@@ -742,6 +762,26 @@ public function fire($gamedata, $fireOrder){
 			} 
 		} //endof function fire  
 	        
+
+    public function AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata)
+    {
+        if ($target->isDestroyed()) return; //no point allocating
+        $damage = $this->getDamageMod($damage, $shooter, $target, $sourceHex, $gamedata);
+        $damage -= $target->getDamageMod($shooter, $sourceHex, $gamedata->turn, $this);
+        if ($target instanceof FighterFlight) {
+            foreach ($target->systems as $fighter) {
+                if ($fighter == null || $fighter->isDestroyed()) {
+                    continue;
+                }
+                $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, $sourceHex, $gamedata, false);
+            }
+        } else {
+            $tmpLocation = $target->getHitSectionPos(Mathlib::hexCoToPixel($sourceHex), $fireOrder->turn);
+            $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $tmpLocation);
+            $this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, false, $tmpLocation);
+        }
+    }
+}
 	
 	
 	public function setSystemDataWindow($turn){ //this is done I think, but can it be tidied so Case 2 and 3 are combined?
