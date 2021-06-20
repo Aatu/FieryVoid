@@ -543,20 +543,20 @@ public function beforeFiringOrderResolution($gamedata){
  		    	$target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
 		        $pos = $shooter->getHexPos();
 		//		$targetPos = $target->getHexPos();
-		        $jammermod = 0;
-		        $jinkSelf = 0;
-		        $jinkTarget = 0;
+		//        $jammermod = 0;
+		//        $jinkSelf = 0;
+		//        $jinkTarget = 0;
 		        $defence = 0;
 		        $mod = 0;
-		        $oew = 0;
-		        $dew = 0;
-		        $bdew = 0;
-		        $sdew = 0;        
+		 //       $oew = 0;
+		 //       $dew = 0;
+		 //       $bdew = 0;
+		 //       $sdew = 0;        
 
-				$noLockPenalty = 0;
-				$noLockMod = 0;	
+		//		$noLockPenalty = 0;
+		//		$noLockMod = 0;	
 				
-				$jammerValue = 0;			
+		//		$jammerValue = 0;			
 
 				if ($fireOrder->targetid == -1){  //this fire order targets hex, should remain unresolved
 				            $notes = "technical fire order - weapon combined into another shot";
@@ -569,7 +569,16 @@ public function beforeFiringOrderResolution($gamedata){
 				            return;
 				        }
 				        
-          	
+          	if (!($shooter instanceof FighterFlight)) {			
+            if ((!$shooter->agile) && Movement::isRolling($shooter, $gamedata->turn)) { //non-agile ships suffer as long as they're ROLLING
+                $mod -= 3;
+            } else if ($shooter->agile && Movement::hasRolled($shooter, $gamedata->turn)) { //Agile ships suffer on the turn they actually rolled!
+				$mod -= 3;
+			}
+            if (Movement::hasPivoted($shooter, $gamedata->turn) /*&& !$this->ballistic*/) {
+                $mod -= 3;
+            }
+        }
             	
             	        
 				    //    $dew = $target->getDEW($gamedata->turn);
@@ -625,8 +634,8 @@ public function beforeFiringOrderResolution($gamedata){
 					$halfphasemod += 4;
 					}
 						
-		        $hitPenalties = $dew + $bdew + $sdew + $rangePenalty + $jinkSelf + max($jammermod, $jinkTarget) + $noLockMod + $				halfphasemod;
-		        $hitBonuses = $oew + $soew + $firecontrol + $mod;
+		        $hitPenalties = $rangePenalty + $halfphasemod;
+		        $hitBonuses = $firecontrol + $mod;
 		        $hitLoc = null;
 
 			
@@ -636,7 +645,7 @@ public function beforeFiringOrderResolution($gamedata){
 		        //range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty,
 		        //interception penalty not yet calculated, will be logged later
 		        //$notes = $rp["notes"] . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, 					SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
-				$notes = $distanceForPenalty . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $					oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
+				$notes = $distanceForPenalty . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
 		        
 		        $fireOrder->chosenLocation = $hitLoc;
 		        $fireOrder->needed = $change;
@@ -648,14 +657,17 @@ public function beforeFiringOrderResolution($gamedata){
 					}
 	}//endof calculateHitBase
 	
-// - targeting direct fire weapons at hex rather than unit STILL NEEDS CHECKING.
+// - targeting direct fire weapons at hex rather than unit.
 public function fire($gamedata, $fireOrder){
 	if($this->firingMode ==1){	
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
-        $target = $gamedata->getShipById($fireOrder->targetid);
+        $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
 			//do damage to ships in range...
-            $ships1 = $gamedata->getShipsInDistance($target);
-            $ships2 = $gamedata->getShipsInDistance($target, 1);
+        $pos = null;
+        $shotsFired = $fireOrder->shots;
+        
+        $ships1 = $gamedata->getShipsInDistance($target);
+        $ships2 = $gamedata->getShipsInDistance($target, 1);
             foreach ($ships2 as $targetShip) {
          //       if (isset($ships1[$targetShip->id])) { //ship on target hex!
           //          $sourceHex = $posLaunch;
@@ -666,7 +678,6 @@ public function fire($gamedata, $fireOrder){
            //     }
                 $this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
             }
-        }
         	
         	
         	
@@ -674,14 +685,14 @@ public function fire($gamedata, $fireOrder){
     //   $notes = "Interception: " . $fireOrder->totalIntercept . " sources:" . $fireOrder->numInterceptors . ", final to hit: " . $fireOrder->needed;
     //   $fireOrder->notes .= $notes;
 
-        $pos = null; //functions will properly calculate from firing unit, which is important at range 0
+     //   $pos = null; //functions will properly calculate from firing unit, which is important at range 0
 
     //    if ($this->ballistic) {
      //       $movement = $shooter->getLastTurnMovement($fireOrder->turn);
      //       $pos = $movement->position;
       //  }
 
-        $shotsFired = $fireOrder->shots; //number of actual shots fired
+    //    $shotsFired = $fireOrder->shots; //number of actual shots fired
     //    if ($this->damageType == 'Pulse') {//Pulse mode always fires one shot of weapon - while 	$fireOrder->shots marks number of pulses for display purposes
   //          $shotsFired = 1;
 	//		$fireOrder->shots = $this->maxpulses;
@@ -709,19 +720,19 @@ public function fire($gamedata, $fireOrder){
       //              $fireOrder->intercepted += 1;
       //          }
       //      }
-			if ($target instanceof FighterFlight) {
-			    $targetedCraft = null; 
-			            foreach ($target->systems as $fighter) {
-			                  if($fighter->id == $fireOrder->calledid){ 
-			                         $targetedCraft = $fighter;
-			                         break; //exit loop - the fighter we're looking for is found, there's no point looking further
-			                  }
-			            }
-			}
+	//		if ($target instanceof FighterFlight) {
+	//		    $targetedCraft = null; 
+	//		            foreach ($target->systems as $fighter) {
+	//		                  if($fighter->id == $fireOrder->calledid){ 
+	//		                         $targetedCraft = $fighter;
+	//		                         break; //exit loop - the fighter we're looking for is found, there's no point looking further
+	//		                  }
+	//		            }
+	//		}
 				
-			if (  $targetedCraft &&   $targetedCraft->isDestroyed()) {
-         	          $fireOrder->needed = 0; //auto-miss
-					}
+	//		if (  $targetedCraft &&   $targetedCraft->isDestroyed()) {
+     //    	          $fireOrder->needed = 0; //auto-miss
+	//				}
 				
 		
 
@@ -763,7 +774,7 @@ public function fire($gamedata, $fireOrder){
 		} //endof function fire  
 	        
 
-    public function AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata)
+public function AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata)
     {
         if ($target->isDestroyed()) return; //no point allocating
         $damage = $this->getDamageMod($damage, $shooter, $target, $sourceHex, $gamedata);
@@ -781,14 +792,13 @@ public function fire($gamedata, $fireOrder){
             $this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, false, $tmpLocation);
         }
     }
-}
+
 	
-	
-	public function setSystemDataWindow($turn){ //this is done I think, but can it be tidied so Case 2 and 3 are combined?
+public function setSystemDataWindow($turn){ //this is done I think, but can it be tidied so Case 2 and 3 are combined?
             parent::setSystemDataWindow($turn);
 
             $this->data["Special"] = "The Shredder targets a hex and adjacent hexes, rolling to hit any capital ships within 1d6 times, HCVs and medium ships 1d3 times, fighters once, and enormous units 1d6+3 times";
-			$this->data["Special"] .= "<br>Once the number of potential hits is determined, it rolls to hits as normal but ignores DEW and jinking.";
+			$this->data["Special"] .= "<br>Once the number of potential hits is determined, it rolls to hits as normal but ignores DEW, jammers and jinking.";
 			$this->data["Special"] .= "<br>Damage is dependent on how good a hit is - it is not randomized. Quality of hit is called X, and equals difference between actual and needed to-hit roll divided by 5.";
 			$this->data["Special"] .= "<br>This weapon does ' . $this->dmgEquation .' damage, with maximum X being ' . $this->maxX . '.";			
 
