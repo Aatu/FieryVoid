@@ -645,7 +645,7 @@ public function beforeFiringOrderResolution($gamedata){
 		        //range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty,
 		        //interception penalty not yet calculated, will be logged later
 		        //$notes = $rp["notes"] . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, 					SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
-				$notes = $distanceForPenalty . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
+				$notes = $distanceForPenalty . ", defence: $defence, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
 		        
 		        $fireOrder->chosenLocation = $hitLoc;
 		        $fireOrder->needed = $change;
@@ -664,19 +664,24 @@ public function fire($gamedata, $fireOrder){
         $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
 			//do damage to ships in range...
         $pos = null;
-        $shotsFired = $fireOrder->shots;
+    	$needed = $fireOrder->needed;
+        $rolled = Dice::d(100);        
+
+        $shotsFired = $fireOrder->shots; //number of actual shots fired
+        for ($i = 0; $i < $shotsFired; $i++) {
+			}
         
         $ships1 = $gamedata->getShipsInDistance($target);
         $ships2 = $gamedata->getShipsInDistance($target, 1);
             foreach ($ships2 as $targetShip) {
-         //       if (isset($ships1[$targetShip->id])) { //ship on target hex!
-          //          $sourceHex = $posLaunch;
-          //          $damage = $this->getdamage;
-          //      } else { //ship at range 1!
-          //          $sourceHex = $target;
-          //          $damage = $this->getdamage;
-           //     }
-                $this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
+            if (isset($ships1[$targetShip->id])) { //ship on target hex!
+                $sourceHex = $posLaunch;
+         //        $damage = $this->getdamage;
+            } else { //ship at range 1!
+                 $sourceHex = $target;
+         //         $damage = $this->getdamage;
+              }
+                $this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, $gamedata);
             }
         	
         	
