@@ -5840,9 +5840,9 @@ class BSGKineticEnergyWeapon extends Pulse{
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 		
-        public function getDamage($fireOrder){ return Dice::d(6, 1)+2; }
-        public function setMinDamage(){ $this->minDamage = 3 ; }
-        public function setMaxDamage(){ $this->maxDamage = 8 ; }		
+        public function getDamage($fireOrder){ return Dice::d(6, 1)+3; }
+        public function setMinDamage(){ $this->minDamage = 4 ; }
+        public function setMaxDamage(){ $this->maxDamage = 9 ; }		
 		
     } // endof BSGKineticEnergyWeapon	
 
