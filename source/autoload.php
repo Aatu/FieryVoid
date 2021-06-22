@@ -1621,7 +1621,7 @@ spl_autoload_register(
                 'colonialjanuscruiser' => '/server/model/ships/ZBSGColonials/ColonialJanusCruiser.php',
                 'colonialjupiterclass' => '/server/model/ships/ZBSGColonials/ColonialJupiterClass.php',
                 'coloniallokiclass' => '/server/model/ships/ZBSGColonials/ColonialLokiClass.php',
-//                'colonialmamba' => '/server/model/ships/ZBSGColonials/ColonialMamba.php',
+                'colonialmamba' => '/server/model/ships/ZBSGColonials/ColonialMamba.php',
                 'colonialmanticorebeta' => '/server/model/ships/ZBSGColonials/ColonialManticoreBeta.php',
                 'colonialmanticoreclass' => '/server/model/ships/ZBSGColonials/ColonialManticoreClass.php',
                 'colonialmanticoregamma' => '/server/model/ships/ZBSGColonials/ColonialManticoreGamma.php',

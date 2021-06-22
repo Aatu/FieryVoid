@@ -4,7 +4,7 @@ class ColonialMamba extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 45*6;
+        $this->pointCost = 52*6;
         $this->faction = "ZPlaytest BSG Colonials";
         $this->phpclass = "ColonialMamba";
         $this->shipClass = "Mamba Prototype Medium Flight";
@@ -14,15 +14,15 @@ class ColonialMamba extends FighterFlight{
 
 //        $this->isd = 1948;
 
-	    $this->notes = 'Atmospheric.';
+	    $this->notes = 'Atmospheric and a 1/3 turn delay.';
         
         $this->forwardDefense = 6;
-        $this->sideDefense = 7;
+        $this->sideDefense = 8;
         $this->freethrust = 14;
-        $this->offensivebonus = 4;
+        $this->offensivebonus = 5;
         $this->jinkinglimit = 8;
         $this->turncost = 0.33;
-		$this->turndelay = 0;
+		$this->turndelaycost = 0.33;
         
         $this->iniativebonus = 90;
         $this->populate();       
@@ -36,7 +36,7 @@ class ColonialMamba extends FighterFlight{
         $toAdd = $new - $current;
 
         for ($i = 0; $i < $toAdd; $i++){            
-            $armour = array(2, 1, 2, 2);
+            $armour = array(2, 1, 1, 1);
             $fighter = new Fighter("ColonialMamba", $armour, 9, $this->id);
             $fighter->displayName = "Mamba";
             $fighter->imagePath = "img/ships/BSG/mamba.png";
