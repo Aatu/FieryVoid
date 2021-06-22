@@ -26,7 +26,7 @@ class VorlonAssaultFighterFlight extends FighterFlight{
 		$this->offensivebonus = 10;
 		$this->jinkinglimit = 4; //superheavy fighter
 		$this->turncost = 0.33;
-		$this->turndelay = 0.25;
+		$this->turndelaycost = 0.25;
         
 		
 	    $this->superheavy = true; //this is superheavy fighter, grouped into flight for convenience in large battles!
