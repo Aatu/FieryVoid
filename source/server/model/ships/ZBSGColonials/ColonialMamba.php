@@ -10,6 +10,7 @@ class ColonialMamba extends FighterFlight{
         $this->shipClass = "Mamba Prototype Medium Flight";
         $this->imagePath = "img/ships/BSG/mamba.png";
 		$this->unofficial = true;
+        $this->limited = 10;
 
 //        $this->isd = 1948;
 
@@ -35,14 +36,14 @@ class ColonialMamba extends FighterFlight{
         $toAdd = $new - $current;
 
         for ($i = 0; $i < $toAdd; $i++){            
-            $armour = array(3, 1, 2, 2);
+            $armour = array(2, 1, 2, 2);
             $fighter = new Fighter("ColonialMamba", $armour, 9, $this->id);
             $fighter->displayName = "Mamba";
             $fighter->imagePath = "img/ships/BSG/mamba.png";
             $fighter->iconPath = "img/ships/BSG/mamba_large.png";
 
-            $frontGun = new BSGKineticEnergyWeapon(340, 20, 3, 4);
-            $frontGun->displayName = "Kinetic Energy Cannon";
+            $frontGun = new BSGHypergun(340, 20, 0, 4);
+            $frontGun->displayName = "Hypergun";
 
 //            $fighter->addFrontSystem(new FighterMissileRack(4, 330, 30));
             $fighter->addFrontSystem($frontGun);

@@ -1610,6 +1610,7 @@ spl_autoload_register(
 					//weapons
                 'bsgflakbattery' => '/server/model/weapons/customNexus.php',
                 'bsghvykineticenergyweapon' => '/server/model/weapons/customNexus.php',
+                'bsghypergun' => '/server/model/weapons/customNexus.php',
                 'bsgkineticenergyweapon' => '/server/model/weapons/customNexus.php',
                 'bsgltkineticenergyweapon' => '/server/model/weapons/customNexus.php',
                 'bsgmainbattery' => '/server/model/weapons/customNexus.php',

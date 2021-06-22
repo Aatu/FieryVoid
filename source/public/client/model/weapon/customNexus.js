@@ -835,3 +835,9 @@ var SensorSpearFtr = function SensorSpearFtr(json, ship) {
 };
 SensorSpearFtr.prototype = Object.create(Weapon.prototype);
 SensorSpearFtr.prototype.constructor = SensorSpearFtr;
+
+var BSGHypergun = function BSGHypergun(json, ship) {
+    Weapon.call(this, json, ship);
+};
+BSGHypergun.prototype = Object.create(Weapon.prototype);
+BSGHypergun.prototype.constructor = BSGHypergun;

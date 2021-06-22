@@ -1283,6 +1283,11 @@ class NexusChaffLauncher extends Weapon{
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
+		}
+		
         public function getDamage($fireOrder){ return 3;   }
         public function setMinDamage(){     $this->minDamage = 3 ;      }
         public function setMaxDamage(){     $this->maxDamage = 3 ;      }
@@ -2083,6 +2088,11 @@ class NexusMinigunFtr extends Pulse{
             $this->shots = $nrOfShots;
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
+		}
 		
         public function getDamage($fireOrder){ return 3; }
         public function setMinDamage(){ $this->minDamage = 3 ; }
@@ -5764,6 +5774,56 @@ class TestGun extends Particle{
 /*file for Battlestar Galactica universe weapons*/
 
 //BSG Fighter Weapons
+
+
+class BSGHypergun extends Pulse{
+
+        public $name = "BSGHypergun";
+        public $displayName = "Hypergun";
+        public $iconPath = "starwars/swFighter4.png"; 		
+		
+        public $animation = "trail";
+        public $animationColor = array(217, 11, 41);
+        public $trailLength = 5;
+        public $animationWidth = 4;
+        public $projectilespeed = 18;
+        public $animationExplosionScale = 0.10;
+
+	protected $useDie = 1; //die used for base number of hits
+//		public $rof = 3;
+		public $grouping = 15;
+		public $maxpulses = 5;
+        
+        public $loadingtime = 1;
+        public $intercept = 2;
+		public $ballisticIntercept = true;
+        public $priority = 5; 
+        
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        
+//        public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        public $weaponClass = "Matter";
+
+	function __construct($startArc, $endArc, $nrOfShots = 1){
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
+		}
+		
+        public function getDamage($fireOrder){ return 3; }
+        public function setMinDamage(){ $this->minDamage = 3 ; }
+        public function setMaxDamage(){ $this->maxDamage = 3 ; }		
+		
+    } // endof BSGHypergun	
+
+
+
 class BSGLtKineticEnergyWeapon extends Pulse{
 
         public $name = "BSGLtKineticEnergyWeapon";
