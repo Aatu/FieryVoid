@@ -46,7 +46,7 @@ class ColonialBerserkClassCarrier extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
 		$this->addFrontSystem(new Bulkhead(0, 5));
 		$this->addFrontSystem(new Bulkhead(0, 5));
-		$this->addFrontSystem(new RapidGatling(5, 4, 1, 315, 45));
+		$this->addFrontSystem(new RapidGatling(5, 4, 1, 300, 60));
 
         $this->addAftSystem(new Thruster(4, 15, 0, 4, 2));
         $this->addAftSystem(new Thruster(4, 15, 0, 4, 2));
@@ -63,8 +63,8 @@ class ColonialBerserkClassCarrier extends BaseShip{
 		$this->addLeftSystem(new RapidGatling(4, 4, 1, 180, 360));
 		$this->addLeftSystem(new RapidGatling(4, 4, 1, 180, 360));
         $this->addLeftSystem(new RapidGatling(4, 4, 1, 180, 360));
-		$this->addLeftSystem(new SMissileRack(4, 6, 0, 190, 350));
-        $this->addLeftSystem(new SMissileRack(4, 6, 0, 190, 350));
+		$this->addLeftSystem(new SMissileRack(4, 6, 0, 210, 330));
+        $this->addLeftSystem(new SMissileRack(4, 6, 0, 210, 330));
         $this->addLeftSystem(new Hangar(4, 21));
 
         $this->addRightSystem(new Thruster(5, 20, 0, 3, 4));
@@ -72,8 +72,8 @@ class ColonialBerserkClassCarrier extends BaseShip{
 		$this->addRightSystem(new RapidGatling(4, 4, 1, 0, 180));
         $this->addRightSystem(new RapidGatling(4, 6, 1, 0, 180));
 		$this->addRightSystem(new RapidGatling(4, 4, 1, 0, 180));
-        $this->addRightSystem(new SMissileRack(4, 6, 0, 10, 170));
-        $this->addRightSystem(new SMissileRack(4, 6, 0, 10, 170));
+        $this->addRightSystem(new SMissileRack(4, 6, 0, 30, 150));
+        $this->addRightSystem(new SMissileRack(4, 6, 0, 30, 150));
         $this->addRightSystem(new Hangar(4, 21));
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

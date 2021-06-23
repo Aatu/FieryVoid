@@ -51,7 +51,7 @@ class ColonialMercuryClass extends BaseShip{
         $this->addFrontSystem(new Thruster(6, 30, 0, 3, 1));
 		$this->addFrontSystem(new Bulkhead(0, 6));
 		$this->addFrontSystem(new Bulkhead(0, 6));
-		$this->addFrontSystem(new BSGMainBattery(6, 9, 6, 315, 45));
+		$this->addFrontSystem(new BSGMainBattery(6, 9, 6, 330, 30));
 		$this->addFrontSystem(new BSGMainBattery(6, 9, 6, 270, 360));
         $this->addFrontSystem(new BSGMainBattery(6, 9, 6, 0, 90));
         $this->addFrontSystem(new BSGMedBattery(6, 7, 4, 270, 360));
