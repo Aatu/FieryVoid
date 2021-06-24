@@ -736,12 +736,12 @@ class LaserAccelerator extends Laser{
             parent::setSystemDataWindow($turn);
         }
 
-	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
-		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
-		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
-		$system->critRollMod+=max(0, ($damage-$armour)); //+twice damage to all critical/dropout rolls on system hit this turn
-		$system->forceCriticalRoll = true;
-	} //endof function onDamagedSystem
+		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+			if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
+			$system->critRollMod+=max(0, ($damage-$armour)); //+twice damage to all critical/dropout rolls on system hit this turn
+			$system->forceCriticalRoll = true;
+		} //endof function onDamagedSystem
 
         public function getDamage($fireOrder){ return Dice::d(10, 2)+2;   }
         public function setMinDamage(){     $this->minDamage = 4 ;      }
