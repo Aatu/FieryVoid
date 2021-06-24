@@ -8,7 +8,7 @@ class SalbezCrevnen extends FighterFlight{
         $this->faction = "ZNexus Playtest Sal-bez";
         $this->phpclass = "SalbezCrevnen";
         $this->shipClass = "Crev-nen Attack Shuttle Heavy Flight";
-        $this->imagePath = "img/ships/Nexus/salbez_attack_shuttle.png";
+        $this->imagePath = "img/ships/Nexus/salbez_crevnen.png";
 		$this->unofficial = true;
 
         $this->isd = 1999;

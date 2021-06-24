@@ -7,7 +7,7 @@ class IMLMissileFrigateRapidBeam extends MediumShip{
 		$this->pointCost = 390;
 		$this->faction = "Raiders";
         $this->phpclass = "IMLMissileFrigateRapidBeam";
-        $this->imagePath = "img/ships/shokos.png";
+        $this->imagePath = "img/ships/iml_missile_frigate.png";
         $this->shipClass = "IML Missile Frigate (Rapid, Beam)";
 			$this->occurence = "common";
 			$this->variantOf = "IML Missile Frigate";

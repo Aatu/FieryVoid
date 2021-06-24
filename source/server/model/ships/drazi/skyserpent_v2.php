@@ -18,6 +18,7 @@ class SkySerpent_v2 extends SuperHeavyFighter{
         $this->offensivebonus = 7;
         $this->jinkinglimit = 4;
         $this->turncost = 0.33;
+		$this->turndelaycost = 0.25;
 
 		$this->hangarRequired = 'superheavy'; //for fleet check
         $this->iniativebonus = 70;

@@ -8,7 +8,7 @@ class ProtectorateMorshin extends HeavyCombatVessel{
         $this->faction = "Minbari Protectorate";
         $this->phpclass = "ProtectorateMorshin";
         $this->imagePath = "img/ships/morshin.png";
-        $this->shipClass = "Protectorate Morshin Carrier";
+        $this->shipClass = "Morshin Carrier";
         $this->gravitic = true;
         $this->limited = 33;
         $this->fighters = array("normal"=>48);

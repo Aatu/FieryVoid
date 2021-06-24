@@ -323,6 +323,7 @@
 
         public function setSystemDataWindow($turn){
             $boost = $this->getExtraDicebyBoostlevel($turn);            
+            parent::setSystemDataWindow($turn);
             if (!isset($this->data["Special"])) {
                 $this->data["Special"] = '';
             }else{
@@ -332,7 +333,6 @@
             $this->data["Special"] .= 'Treats armor as if it was 1 point lower.';
             $this->data["Special"] .= '<br>Can be boosted for increased dmg output (+1d10 per 4 power added, up to 4 times).';
             $this->data["Boostlevel"] = $boost;
-            parent::setSystemDataWindow($turn);
         }
 
 

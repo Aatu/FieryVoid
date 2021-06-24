@@ -24,7 +24,7 @@ class EWParticleLance extends Raking{
         public $fireControlArray = array( 1=>array(2, 4, 5), 2=>array(2, 4, 5) ); 
 	
 		public $weaponClassArray = array(1=>'Particle', 2=>'Particle');
-		public $firingModes = array(1=>'Dual', 2=>'Particle Cannons');
+		public $firingModes = array(1=>'Lance', 2=>'Particle Cannons');
 		public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
@@ -276,9 +276,9 @@ class EWGatlingLaser extends Pulse{
         public $rangePenalty = 1;
         public $fireControl = array(1, 1, 2); // fighters, <mediums, <capitals
 
-		public $firingMode = "Laser";
+		public $firingMode = "Pulse";
         public $damageType = "Pulse"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-        public $weaponClass = "Pulse";
+        public $weaponClass = "Laser";
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             if ( $maxhealth == 0 ) $maxhealth = 7;
@@ -321,9 +321,9 @@ class EWHeavyGatlingLaser extends Pulse{
         public $rangePenalty = 0.5;
         public $fireControl = array(1, 1, 2); // fighters, <mediums, <capitals
 
-		public $firingMode = "Laser";
+		public $firingMode = "Pulse";
         public $damageType = "Pulse"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-        public $weaponClass = "Pulse";
+        public $weaponClass = "Laser";
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             if ( $maxhealth == 0 ) $maxhealth = 8;

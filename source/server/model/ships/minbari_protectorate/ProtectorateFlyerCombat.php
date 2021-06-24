@@ -8,8 +8,8 @@ class ProtectorateFlyerCombat extends FighterFlight{
     	$this->pointCost = 63*6;
     	$this->faction = "Minbari Protectorate";
         $this->phpclass = "ProtectorateFlyerCombat";
-        $this->shipClass = "Protectorate Combat Flyers";
-        $this->variantOf = "Protectorate Assault Flyers";
+        $this->shipClass = "Combat Flyers";
+        $this->variantOf = "Assault Flyers";
     	$this->imagePath = "img/ships/nial.png"; //need Minbari Flyer image!
         
 		$this->notes = "Usually housed in common shuttle bays (not mentioned in FV). Most ships can take a pair.";

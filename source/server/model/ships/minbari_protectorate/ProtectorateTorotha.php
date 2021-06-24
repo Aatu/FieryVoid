@@ -8,7 +8,7 @@ class ProtectorateTorotha extends MediumShip{
 		$this->faction = "Minbari Protectorate";
         $this->phpclass = "ProtectorateTorotha";
         $this->imagePath = "img/ships/torotha.png";
-        $this->shipClass = "Protectorate Torotha Assault Frigate";
+        $this->shipClass = "Torotha Assault Frigate";
         $this->canvasSize = 100;
         $this->gravitic = true;
         $this->forwardDefense = 15;

@@ -7,7 +7,7 @@ class ProtectorateTishat extends FighterFlight{
 		$this->pointCost = 75*6;
 		$this->faction = "Minbari Protectorate";
 		$this->phpclass = "ProtectorateTishat";
-		$this->shipClass = "Protectorate Tishat flight";
+		$this->shipClass = "Tishat flight";
 		// need picture
 		$this->imagePath = "img/ships/tishat.png";
 

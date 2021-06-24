@@ -4,7 +4,7 @@ class ColonialViperMk7 extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 210;
+        $this->pointCost = 45*6;
         $this->faction = "ZPlaytest BSG Colonials";
         $this->phpclass = "ColonialViperMk7";
         $this->shipClass = "Viper Mk7 Medium Flight";
@@ -42,12 +42,12 @@ class ColonialViperMk7 extends FighterFlight{
             $fighter->imagePath = "img/ships/BSG/viperMk7.png";
             $fighter->iconPath = "img/ships/BSG/viperMk7_large.png";
 
-            $frontGun = new BSGKineticEnergyWeapon(340, 20, 2, 4);
+            $frontGun = new BSGKineticEnergyWeapon(340, 20, 3, 4);
             $frontGun->displayName = "Kinetic Energy Cannon";
 
-            $fighter->addFrontSystem(new FighterMissileRack(2, 330, 30));
+            $fighter->addFrontSystem(new FighterMissileRack(4, 330, 30));
             $fighter->addFrontSystem($frontGun);
-            $fighter->addFrontSystem(new FighterMissileRack(2, 330, 30));
+//            $fighter->addFrontSystem(new FighterMissileRack(1, 330, 30));
 
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			
             
