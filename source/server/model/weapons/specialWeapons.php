@@ -3680,7 +3680,7 @@ class VorlonDischargeCannon extends Weapon{
 	public function calculateHitBase($gamedata, $fireOrder){
 		$capacitor = $this->unit->getSystemByName("PowerCapacitor");
 		if($capacitor){ //else something is wrong - weapon is put on a ship without Power Capacitor!
-			$powerNeeded = 5*$this->firingMode*$fireOrder->shots;
+			$powerNeeded = 5*$fireOrder->firingMode*$fireOrder->shots;
 			$capacitor->doDrawPower($powerNeeded);
 		}
 		parent::calculateHitBase($gamedata, $fireOrder); //standard hit chance calculation
