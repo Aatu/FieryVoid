@@ -9,7 +9,7 @@ class ColonialManticoreClass extends MediumShip{
         $this->phpclass = "ColonialManticoreClass";
         $this->imagePath = "img/ships/BSG/ColonialManticore.png";
         $this->shipClass = "Manticore Corvette";
-        $this->canvasSize = 80;
+        $this->canvasSize = 65;
 //	    $this->isd = 2007;
 
 		$this->unofficial = true;
@@ -32,7 +32,6 @@ class ColonialManticoreClass extends MediumShip{
 		$this->addPrimarySystem(new Hangar(4, 4));
 		$this->addPrimarySystem(new Thruster(4, 9, 0, 4, 3));
 		$this->addPrimarySystem(new Thruster(4, 9, 0, 4, 4));        
-//		$this->addPrimarySystem(new Bulkhead(0, 3));
 		$this->addPrimarySystem(new BSGFlakBattery(5, 6, 2, 0, 360));
 		$hyperdrive = new JumpEngine(4, 12, 6, 20);
 			$hyperdrive->displayName = 'Hyperdrive';
@@ -71,7 +70,7 @@ class ColonialManticoreClass extends MediumShip{
 		),
 		1=> array(
 			6 => "Thruster",
-			9 => "Main Battery",
+			8 => "Main Battery",
             10 => "Class-S Missile Rack",
 			18 => "Structure",
 			20 => "Primary",

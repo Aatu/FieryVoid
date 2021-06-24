@@ -10,7 +10,7 @@ class AtlasStarfuryRefit extends FighterFlight{
         $this->shipClass = "Starfury: Atlas Heavy flight (2234)";
 			$this->variantOf = "Starfury: Flying Fox Heavy flight";
 			$this->occurence = "uncommon";
-        $this->imagePath = "img/ships/BAStarFox.png";
+        $this->imagePath = "img/ships/aries.png";
 	    $this->isd = 2234;
  		$this->unofficial = true;
 	    
@@ -37,8 +37,8 @@ class AtlasStarfuryRefit extends FighterFlight{
             $armour = array(1, 1, 1, 1);
             $fighter = new Fighter("AtlasStarfury", $armour, 13, $this->id);
             $fighter->displayName = "Atlas";
-            $fighter->imagePath = "img/ships/BAStarFox.png";
-            $fighter->iconPath = "img/ships/BAStarFox_large.png";
+            $fighter->imagePath = "img/ships/aries.png";
+            $fighter->iconPath = "img/ships/aries_large.png";
 
             $frontGun = new PairedParticleGun(330, 30, 4);
             $frontGun->displayName = "Uni-Pulse Cannon";

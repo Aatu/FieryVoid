@@ -8,7 +8,7 @@ class ProtectorateLetann extends HeavyCombatVessel{
         $this->faction = "Minbari Protectorate";
         $this->phpclass = "ProtectorateLetann";
         $this->imagePath = "img/ships/letann.png";
-        $this->shipClass = "Protectorate Letann Scout";
+        $this->shipClass = "Letann Scout";
         $this->gravitic = true;
         $this->limited = 10;
         $this->forwardDefense = 14;
@@ -21,7 +21,7 @@ class ProtectorateLetann extends HeavyCombatVessel{
         $this->iniativebonus = 35;
         $this->isd = 2020;
         $this->occurence = "rare";
-        $this->variantOf = "Protectorate Tinashi War Frigate";
+        $this->variantOf = "Tinashi War Frigate";
 
         $this->addPrimarySystem(new Reactor(5, 25, 0, 6));
         $this->addPrimarySystem(new CnC(6, 24, 0, 0));

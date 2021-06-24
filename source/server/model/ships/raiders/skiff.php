@@ -7,9 +7,10 @@ class Skiff extends MediumShip{
 	$this->pointCost = 230;
 	$this->faction = "Raiders";
         $this->phpclass = "Skiff";
-        $this->imagePath = "img/ships/sloop.png"; //needs to be changed
+//        $this->imagePath = "img/ships/sloop.png"; //needs to be changed
+        $this->imagePath = "img/ships/skiff.png"; 
         $this->shipClass = "Skiff";
-        $this->canvasSize = 100;
+        $this->canvasSize = 70;
         
 		$this->notes = "Generic raider unit.";
 		$this->notes .= "<br> ";

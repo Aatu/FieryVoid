@@ -8,7 +8,7 @@ class ProtectorateTigarin extends BaseShip{
             $this->faction = "Minbari Protectorate";
             $this->phpclass = "ProtectorateTigarin";
             $this->imagePath = "img/ships/tigara.png";
-            $this->shipClass = "Protectorate Tigarin Patrol Cruiser";
+            $this->shipClass = "Tigarin Patrol Cruiser";
             $this->shipSizeClass = 3;
             $this->gravitic = true;
             $this->fighters = array("normal"=>6);
@@ -20,7 +20,7 @@ class ProtectorateTigarin extends BaseShip{
             $this->rollcost = 3;
             $this->pivotcost = 4;
             $this->iniativebonus = 5;
-            $this->variantOf ="Protectorate Tigara Attack Cruiser";
+            $this->variantOf ="Tigara Attack Cruiser";
 			$this->occurence = "rare";
             $this->isd = 2059;
 

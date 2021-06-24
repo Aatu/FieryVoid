@@ -42,8 +42,8 @@ class ColonialOrion extends HeavyCombatVessel{
 		$this->addFrontSystem(new Hangar(3, 8));
         $this->addFrontSystem(new Thruster(3, 9, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 9, 0, 3, 1));
-		$this->addFrontSystem(new BSGMedBattery(4, 7, 4, 315, 0));
-		$this->addFrontSystem(new BSGMedBattery(4, 7, 4, 0, 45));
+		$this->addFrontSystem(new BSGMedBattery(4, 7, 4, 300, 360));
+		$this->addFrontSystem(new BSGMedBattery(4, 7, 4, 0, 60));
 		$this->addFrontSystem(new RapidGatling(4, 4, 1, 270, 90));
 		$this->addFrontSystem(new RapidGatling(4, 4, 1, 270, 90));
 		$this->addFrontSystem(new RapidGatling(4, 4, 1, 270, 90));
@@ -54,8 +54,8 @@ class ColonialOrion extends HeavyCombatVessel{
 		$this->addAftSystem(new RapidGatling(4, 4, 1, 90, 270));
 		$this->addAftSystem(new RapidGatling(4, 4, 1, 90, 270));
 		$this->addAftSystem(new RapidGatling(4, 4, 1, 90, 270));
-		$this->addAftSystem(new BSGMedBattery(4, 7, 4, 180, 225));
-		$this->addAftSystem(new BSGMedBattery(4, 7, 4, 135, 180));
+		$this->addAftSystem(new BSGMedBattery(4, 7, 4, 180, 240));
+		$this->addAftSystem(new BSGMedBattery(4, 7, 4, 120, 180));
 		$this->addAftSystem(new Bulkhead(0, 5));
         $this->addAftSystem(new Thruster(3, 12, 0, 3, 2));    
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));   

@@ -8,7 +8,7 @@ class ProtectorateTradana extends MediumShip{
 		$this->faction = "Minbari Protectorate";
         $this->phpclass = "ProtectorateTradana";
         $this->imagePath = "img/ships/tradana.png";
-        $this->shipClass = "Protectorate Tradana Combat Frigate";
+        $this->shipClass = "Tradana Combat Frigate";
         $this->canvasSize = 100;
         $this->gravitic = true;
         $this->occurence = "uncommon";
@@ -21,7 +21,7 @@ class ProtectorateTradana extends MediumShip{
         $this->pivotcost = 2;
 		$this->iniativebonus = 65;
 		$this->isd = 2266;
-		$this->variantOf = "Protectorate Torotha Assault Frigate";
+		$this->variantOf = "Torotha Assault Frigate";
 
         $this->addPrimarySystem(new Reactor(5, 18, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));

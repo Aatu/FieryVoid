@@ -8,7 +8,7 @@ class ProtectorateRetlata extends HeavyCombatVessel{
         $this->faction = "Minbari Protectorate";
         $this->phpclass = "ProtectorateRetlata";
         $this->imagePath = "img/ships/rogata.png";
-        $this->shipClass = "Protectorate Retlata Transport";
+        $this->shipClass = "Retlata Transport";
         $this->gravitic = true;
         $this->occurence = "common";
         $this->forwardDefense = 17;
