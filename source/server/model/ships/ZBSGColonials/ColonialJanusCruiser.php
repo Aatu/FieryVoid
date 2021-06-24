@@ -45,8 +45,7 @@ class ColonialJanusCruiser extends HeavyCombatVessel{
 		$this->addFrontSystem(new BSGMainBattery(6, 9, 6, 300, 360));
 		$this->addFrontSystem(new BSGMainBattery(6, 9, 6, 0, 60)); 
 		$this->addFrontSystem(new BSGMainBattery(6, 9, 6, 330, 30)); 
-		$this->addFrontSystem(new SMissileRack(5, 6, 0, 270, 360));
-		$this->addFrontSystem(new SMissileRack(5, 6, 0, 0, 90));
+		$this->addFrontSystem(new SMissileRack(5, 6, 0, 300, 60));
 		$this->addFrontSystem(new Bulkhead(0, 5));
 		$this->addFrontSystem(new Bulkhead(0, 5));
 
@@ -54,13 +53,13 @@ class ColonialJanusCruiser extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(5, 12, 0, 6, 2));
 		$this->addAftSystem(new BSGMainBattery(5, 9, 6, 150, 210)); 
         $this->addAftSystem(new Bulkhead(0, 5));
-		$this->addAftSystem(new SMissileRack(5, 6, 0, 135, 225));
+		$this->addAftSystem(new SMissileRack(5, 6, 0, 120, 240));
 		$this->addAftSystem(new BSGMedBattery(5, 7, 4, 180, 240)); 
 		$this->addAftSystem(new BSGMedBattery(5, 7, 4, 120, 180)); 
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 5, 70));
-        $this->addAftSystem(new Structure( 5, 50));
+        $this->addFrontSystem(new Structure( 4, 70));
+        $this->addAftSystem(new Structure( 4, 50));
         $this->addPrimarySystem(new Structure( 5, 50 ));
 		
 		$this->hitChart = array(

@@ -62,8 +62,8 @@ class ColonialJupiterClass extends BaseShip{
         $this->addAftSystem(new Thruster(6, 18, 0, 3, 2));
 		$this->addAftSystem(new Bulkhead(0, 6));
 		$this->addAftSystem(new Bulkhead(0, 6));
-        $this->addAftSystem(new BSGMainBattery(6, 9, 6, 180, 270));
-		$this->addAftSystem(new BSGMainBattery(6, 9, 6, 90, 180));
+        $this->addAftSystem(new BSGMainBattery(6, 9, 6, 180, 240));
+		$this->addAftSystem(new BSGMainBattery(6, 9, 6, 120, 180));
         $this->addAftSystem(new LMissileRack(6, 6, 0, 180, 270));
         $this->addAftSystem(new LMissileRack(6, 6, 0, 90, 180));
 		$this->addAftSystem(new RapidGatling(6, 4, 1, 90, 270));
