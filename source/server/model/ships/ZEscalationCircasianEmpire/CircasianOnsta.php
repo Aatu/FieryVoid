@@ -20,7 +20,7 @@ class CircasianOnsta extends FighterFlight{
         $this->offensivebonus = 2;
         $this->jinkinglimit = 0;
         $this->turncost = 0.33;
-		$this->turndelay = 0;
+		$this->turndelaycost = 0;
         
         $this->pivotcost = 2; //shuttles have pivot cost higher
 		$this->hangarRequired = 'assault shuttles'; //for fleet check

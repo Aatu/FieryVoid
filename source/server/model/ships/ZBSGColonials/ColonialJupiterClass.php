@@ -17,11 +17,10 @@ class ColonialJupiterClass extends BaseShip{
         $this->fighters = array("medium"=>24, "heavy"=>6, "superheavy"=>6);
 		$this->customFighter = array("Python"=>6);
 
-		$this->notes = "Primary users: Colonial Fleet";
+		$this->notes = 'Primary users: Colonial Fleet';
+        $this->notes .= '<br>Python capable';
 		$this->isd = 1948;
 
-        $this->notes = 'Python capable';
-//        $this->notes .= '<br>Provides +5 Initiative for all friendly Colonial units';
         
         $this->forwardDefense = 17;
         $this->sideDefense = 20;
@@ -42,21 +41,20 @@ class ColonialJupiterClass extends BaseShip{
 		$this->addPrimarySystem(new BSGFlakBattery(5, 6, 2, 0, 360));
 //		$this->addPrimarySystem(new Bulkhead(0, 6));
 //      $this->addPrimarySystem(new Bulkhead(0, 6));
-		$this->addPrimarySystem(new Thruster(5, 24, 0, 4, 2));
+//		$this->addPrimarySystem(new Thruster(5, 24, 0, 4, 2));
 		$hyperdrive = new JumpEngine(6, 30, 8, 20);
 			$hyperdrive->displayName = 'Hyperdrive';
 			$this->addPrimarySystem($hyperdrive);
    
         $this->addFrontSystem(new Thruster(6, 30, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(6, 30, 0, 3, 1));
 		$this->addFrontSystem(new Bulkhead(0, 6));
 		$this->addFrontSystem(new Bulkhead(0, 6));
-		$this->addFrontSystem(new BSGMainBattery(6, 9, 6, 315, 45));
-		$this->addFrontSystem(new BSGMainBattery(6, 9, 6, 315, 45));
-        $this->addFrontSystem(new LMissileRack(6, 6, 0, 315, 45));
-        $this->addFrontSystem(new LMissileRack(6, 6, 0, 315, 45));
-        $this->addFrontSystem(new RapidGatling(6, 4, 1, 315, 45));
-        $this->addFrontSystem(new RapidGatling(6, 4, 1, 315, 45));
+		$this->addFrontSystem(new BSGMainBattery(6, 9, 6, 300, 360));
+		$this->addFrontSystem(new BSGMainBattery(6, 9, 6, 0, 60));
+        $this->addFrontSystem(new LMissileRack(6, 6, 0, 300, 60));
+        $this->addFrontSystem(new LMissileRack(6, 6, 0, 300, 60));
+        $this->addFrontSystem(new RapidGatling(6, 4, 1, 270, 90));
+        $this->addFrontSystem(new RapidGatling(6, 4, 1, 270, 90));
 
         $this->addAftSystem(new Thruster(6, 18, 0, 3, 2));
         $this->addAftSystem(new Thruster(6, 18, 0, 3, 2));
@@ -64,43 +62,47 @@ class ColonialJupiterClass extends BaseShip{
         $this->addAftSystem(new Thruster(6, 18, 0, 3, 2));
 		$this->addAftSystem(new Bulkhead(0, 6));
 		$this->addAftSystem(new Bulkhead(0, 6));
-        $this->addAftSystem(new BSGMainBattery(6, 9, 6, 135, 225));
-		$this->addAftSystem(new BSGMainBattery(6, 9, 6, 135, 225));
-        $this->addAftSystem(new LMissileRack(6, 6, 0, 135, 225));
-        $this->addAftSystem(new LMissileRack(6, 6, 0, 135, 225));
-		$this->addAftSystem(new RapidGatling(6, 4, 1, 135, 225));
-		$this->addAftSystem(new RapidGatling(6, 4, 1, 135, 225));
+        $this->addAftSystem(new BSGMainBattery(6, 9, 6, 180, 240));
+		$this->addAftSystem(new BSGMainBattery(6, 9, 6, 120, 180));
+        $this->addAftSystem(new LMissileRack(6, 6, 0, 180, 270));
+        $this->addAftSystem(new LMissileRack(6, 6, 0, 90, 180));
+		$this->addAftSystem(new RapidGatling(6, 4, 1, 90, 270));
+		$this->addAftSystem(new RapidGatling(6, 4, 1, 90, 270));
 
         $this->addLeftSystem(new Thruster(6, 18, 0, 3, 3));
         $this->addLeftSystem(new Thruster(6, 18, 0, 3, 3));
 		$this->addLeftSystem(new Bulkhead(0, 6));
 		$this->addLeftSystem(new Bulkhead(0, 6));
-        $this->addLeftSystem(new BSGMainBattery(6, 9, 6, 205, 335));
-        $this->addLeftSystem(new BSGFlakBattery(6, 6, 2, 190, 350));
-        $this->addLeftSystem(new BSGFlakBattery(6, 6, 2, 190, 350));
-		$this->addLeftSystem(new RapidGatling(6, 4, 1, 190, 350));
-		$this->addLeftSystem(new RapidGatling(6, 4, 1, 190, 350));
-		$this->addLeftSystem(new RapidGatling(6, 4, 1, 190, 350));
+        $this->addLeftSystem(new BSGMainBattery(6, 9, 6, 210, 330));
+        $this->addLeftSystem(new BSGFlakBattery(6, 6, 2, 180, 360));
+        $this->addLeftSystem(new BSGFlakBattery(6, 6, 2, 180, 360));
+		$this->addLeftSystem(new BSGMedBattery(6, 7, 4, 180, 360));
+		$this->addLeftSystem(new BSGMedBattery(6, 7, 4, 180, 360));
+		$this->addLeftSystem(new RapidGatling(6, 4, 1, 210, 330));
+		$this->addLeftSystem(new RapidGatling(6, 4, 1, 210, 330));
+		$this->addLeftSystem(new RapidGatling(6, 4, 1, 210, 330));
 		$this->addLeftSystem(new Hangar(6, 18));
 
         $this->addRightSystem(new Thruster(6, 18, 0, 3, 4));
         $this->addRightSystem(new Thruster(6, 18, 0, 3, 4));
 		$this->addRightSystem(new Bulkhead(0, 6));
 		$this->addRightSystem(new Bulkhead(0, 6));
-        $this->addRightSystem(new BSGMainBattery(6, 9, 6, 25, 155));
-        $this->addRightSystem(new BSGFlakBattery(6, 6, 2, 10, 170));
-        $this->addRightSystem(new BSGFlakBattery(6, 6, 2, 10, 170));
-		$this->addRightSystem(new RapidGatling(6, 4, 1, 10, 170));
-		$this->addRightSystem(new RapidGatling(6, 4, 1, 10, 170));
-		$this->addRightSystem(new RapidGatling(6, 4, 1, 10, 170));
+        $this->addRightSystem(new BSGMainBattery(6, 9, 6, 30, 150));
+        $this->addRightSystem(new BSGFlakBattery(6, 6, 2, 0, 180));
+        $this->addRightSystem(new BSGFlakBattery(6, 6, 2, 0, 180));
+		$this->addRightSystem(new BSGMedBattery(6, 7, 4, 0, 180));
+		$this->addRightSystem(new BSGMedBattery(6, 7, 4, 0, 180));
+		$this->addRightSystem(new RapidGatling(6, 4, 1, 30, 150));
+		$this->addRightSystem(new RapidGatling(6, 4, 1, 30, 150));
+		$this->addRightSystem(new RapidGatling(6, 4, 1, 30, 150));
 		$this->addRightSystem(new Hangar(6, 18));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure(4, 80));
-        $this->addAftSystem(new Structure(3, 70));
-        $this->addLeftSystem(new Structure(4, 90));
-        $this->addRightSystem(new Structure(4, 90));
-        $this->addPrimarySystem(new Structure(5, 70));
+        $this->addFrontSystem(new Structure(6, 80));
+        $this->addAftSystem(new Structure(6, 70));
+        $this->addLeftSystem(new Structure(6, 90));
+        $this->addRightSystem(new Structure(6, 90));
+        $this->addPrimarySystem(new Structure(6, 70));
 		
 		$this->hitChart = array(
 			0=> array(
@@ -132,18 +134,18 @@ class ColonialJupiterClass extends BaseShip{
 			3=> array(
 					3 => "Thruster",
 					6 => "Hangar",
-					7 => "Main Battery",
-					9 => "Flak Battery",
-                    11 => "Rapid Gatling Railgun",
+					8 => "Main Battery",
+					10 => "Flak Battery",
+                    13 => "Rapid Gatling Railgun",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					3 => "Thruster",
 					6 => "Hangar",
-					7 => "Main Battery",
-					9 => "Flak Battery",
-                    11 => "Rapid Gatling Railgun",
+					8 => "Main Battery",
+					10 => "Flak Battery",
+                    13 => "Rapid Gatling Railgun",
 					18 => "Structure",
 					20 => "Primary",
 			),

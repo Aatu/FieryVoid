@@ -75,6 +75,7 @@ This group is inherently unbalanced, even against each other!
  - Chouka Raiders (custom faction - Escalation Wars universe)
  - Grome
  - Hurr
+ - Mitoc (Small Races - only one MCV-class vessel)
  - Rogolon (Small Races)
  - Sorithian (Small Races)
  - Sshel'ath (custom faction - Escalation Wars universe)

@@ -8,7 +8,7 @@ class AriesStarfury extends FighterFlight{
         $this->faction = "EA";
         $this->phpclass = "AriesStarfury";
         $this->shipClass = "Starfury: Aries Heavy flight";
-        $this->imagePath = "img/ships/BAStarFox.png";
+        $this->imagePath = "img/ships/aries.png";
 	    $this->isd = 2168;
  		$this->unofficial = true;
 	    
@@ -35,8 +35,8 @@ class AriesStarfury extends FighterFlight{
             $armour = array(1, 1, 1, 1);
             $fighter = new Fighter("AriesStarfury", $armour, 12, $this->id);
             $fighter->displayName = "Aries";
-            $fighter->imagePath = "img/ships/BAStarFox.png";
-            $fighter->iconPath = "img/ships/BAStarFox_large.png";
+            $fighter->imagePath = "img/ships/aries.png";
+            $fighter->iconPath = "img/ships/aries_large.png";
 
 	        $gun = new LightParticleBeamFtr(270, 90, 1); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($gun);

@@ -10,7 +10,7 @@ class ColonialOdinClass extends BaseShip{
         $this->imagePath = "img/ships/BSG/ColonialOdin2.png";
         $this->shipClass = "Odin Battlestar";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 140; //img has 140px per side
+		$this->canvasSize = 160; //img has 140px per side
 //		$this->unlimited 
 		$this->unofficial = true;
 
@@ -42,59 +42,62 @@ class ColonialOdinClass extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 15, 0, 4, 1));
 		$this->addFrontSystem(new Bulkhead(0, 5));
 		$this->addFrontSystem(new Bulkhead(0, 5));
-        $this->addFrontSystem(new BSGMainBattery(5, 9, 6, 315, 45));
+        $this->addFrontSystem(new BSGMainBattery(5, 9, 6, 330, 30));
+		$this->addFrontSystem(new BSGMedBattery(5, 7, 4, 300, 360)); 
+		$this->addFrontSystem(new BSGMedBattery(5, 7, 4, 0, 60)); 
 		$this->addFrontSystem(new LMissileRack(4, 6, 0, 270, 90));
 
         $this->addAftSystem(new Thruster(3, 15, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 15, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 15, 0, 3, 2));
         $this->addAftSystem(new Bulkhead(0, 5));
-        $this->addAftSystem(new BSGMainBattery(5, 9, 6, 135, 225));
+        $this->addAftSystem(new BSGMainBattery(5, 9, 6, 150, 210));
+		$this->addAftSystem(new BSGMedBattery(5, 7, 4, 150, 210)); 
         $this->addAftSystem(new BSGFlakBattery(5, 6, 2, 120, 240));
 		$this->addAftSystem(new BSGFlakBattery(5, 6, 2, 120, 240));
 		$this->addAftSystem(new RapidGatling(5, 4, 1, 120, 240));
 		$this->addAftSystem(new RapidGatling(5, 4, 1, 120, 240));
-		$this->addAftSystem(new LMissileRack(4, 6, 0, 90, 270));
+		$this->addAftSystem(new SMissileRack(4, 6, 0, 90, 270));
         $hyperdrive = new JumpEngine(6, 30, 8, 20);
 			$hyperdrive->displayName = 'Hyperdrive';
 			$this->addAftSystem($hyperdrive);
 
         $this->addLeftSystem(new Thruster(5, 20, 0, 3, 3));
         $this->addLeftSystem(new Bulkhead(0, 6));
-        $this->addLeftSystem(new BSGMainBattery(5, 9, 6, 235, 305));
+        $this->addLeftSystem(new BSGMainBattery(5, 9, 6, 210, 330));
+        $this->addLeftSystem(new BSGMedBattery(5, 7, 4, 210, 330));
         $this->addLeftSystem(new BSGFlakBattery(5, 6, 2, 210, 330));
         $this->addLeftSystem(new BSGFlakBattery(5, 6, 2, 210, 330));
 		$this->addLeftSystem(new RapidGatling(5, 4, 1, 210, 330));
 		$this->addLeftSystem(new RapidGatling(5, 4, 1, 210, 330));
 		$this->addLeftSystem(new SMissileRack(5, 6, 0, 210, 330));
-        $this->addLeftSystem(new SMissileRack(5, 6, 0, 210, 330));
         $this->addLeftSystem(new Hangar(5, 10));
 
         $this->addRightSystem(new Thruster(5, 20, 0, 3, 4));
         $this->addRightSystem(new Bulkhead(0, 6));
-        $this->addRightSystem(new BSGMainBattery(5, 9, 6, 55, 125));
+        $this->addRightSystem(new BSGMainBattery(5, 9, 6, 30, 150));
+        $this->addRightSystem(new BSGMedBattery(5, 7, 4, 30, 150));
         $this->addRightSystem(new BSGFlakBattery(5, 6, 2, 30, 150));
         $this->addRightSystem(new BSGFlakBattery(5, 6, 2, 30, 150));
 		$this->addRightSystem(new RapidGatling(5, 4, 1, 30, 150));
 		$this->addRightSystem(new RapidGatling(5, 4, 1, 30, 150));
-        $this->addRightSystem(new SMissileRack(5, 6, 0, 30, 150));
         $this->addRightSystem(new SMissileRack(5, 6, 0, 30, 150));
         $this->addRightSystem(new Hangar(5, 10));
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure(4, 50));
-        $this->addAftSystem(new Structure(4, 42));
-        $this->addLeftSystem(new Structure(4, 60));
-        $this->addRightSystem(new Structure(4, 60));
+        $this->addFrontSystem(new Structure(6, 50));
+        $this->addAftSystem(new Structure(5, 42));
+        $this->addLeftSystem(new Structure(5, 60));
+        $this->addRightSystem(new Structure(5, 60));
         $this->addPrimarySystem(new Structure(5, 40));
 		
 		$this->hitChart = array(
 			0=> array(
 					10 => "Structure",
-                    12 => "Rapid Gatling Railgun",
-					13 => "Flak Battery",
+                    11 => "Rapid Gatling Railgun",
+					12 => "Flak Battery",
 					14 => "Scanner",
-					15 => "Engine",
+					16 => "Engine",
 					17 => "Reload Rack",
 					19 => "Reactor",
 					20 => "C&C",
@@ -102,7 +105,8 @@ class ColonialOdinClass extends BaseShip{
 			1=> array(
 					5 => "Thruster",
 					7 => "Main Battery",
-					9 => "Class-L Missile Rack",
+					9 => "Battery",
+					11 => "Class-L Missile Rack",
 					18 => "Structure",
 					20 => "Primary",
 			),
@@ -110,9 +114,10 @@ class ColonialOdinClass extends BaseShip{
                     5 => "Thruster",
 					6 => "Rapid Gatling Railgun",
 					7 => "Flak Battery",
-                    8 => "Class-L Missile Rack",
+                    8 => "Class-S Missile Rack",
 					10 => "Main Battery",
-                    12 => "HyperDrive",
+					12 => "Battery",
+                    14 => "HyperDrive",
 					18 => "Structure",
 					20 => "Primary",
 			),
@@ -123,6 +128,7 @@ class ColonialOdinClass extends BaseShip{
 					9 => "Rapid Gatling Railgun",
 					10 => "Flak Battery",
                     12 => "Class-S Missile Rack",
+					13 => "Battery",
 					18 => "Structure",
 					20 => "Primary",
 			),
@@ -133,6 +139,7 @@ class ColonialOdinClass extends BaseShip{
 					9 => "Rapid Gatling Railgun",
 					10 => "Flak Battery",
                     12 => "Class-S Missile Rack",
+					13 => "Battery",
 					18 => "Structure",
 					20 => "Primary",
 			),

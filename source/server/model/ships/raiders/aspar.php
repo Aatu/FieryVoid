@@ -7,7 +7,8 @@ class Aspar extends HeavyCombatVessel{
         $this->pointCost = 360;
         $this->faction = "Raiders";
         $this->phpclass = "Aspar";
-        $this->imagePath = "img/ships/brigantine.png"; //need to change
+//        $this->imagePath = "img/ships/brigantine.png"; //need to change
+        $this->imagePath = "img/ships/Aspar.png"; //need to change
         $this->shipClass = "Aspar Corvette";
         $this->occurence = "common";
         $this->fighters = array("normal"=>6);

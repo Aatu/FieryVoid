@@ -8,7 +8,7 @@ class ProtectorateLeshath extends BaseShip{
         $this->faction = "Minbari Protectorate";
         $this->phpclass = "ProtectorateLeshath";
         $this->imagePath = "img/ships/leshath.png";
-        $this->shipClass = "Protectorate Leshath Heavy Scout";
+        $this->shipClass = "Leshath Heavy Scout";
         $this->shipSizeClass = 3;
         $this->gravitic = true;
         $this->limited = 10;
