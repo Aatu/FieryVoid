@@ -8,10 +8,10 @@ class technicalTargetDrone extends BaseShip{
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
 		$this->imagePath = "img/ships/BASurveyShip.png";
-//		$this->imagePath = "img/ships/Nexus/salbez_bevtun.png";
+//		$this->imagePath = "img/ships/dsharda.png";
 		$this->shipClass = "Target Drone - DO NOT USE";
 		$this->shipSizeClass = 3;
-//		$this->canvasSize = 125; //img has 125px per side
+//		$this->canvasSize = 75; //img has 125px per side
 		$this->forwardDefense = 20;
 		$this->sideDefense = 20;
 		$this->fighters = array("light"=>12);        
@@ -43,10 +43,10 @@ class technicalTargetDrone extends BaseShip{
 		
 		//new weapon showcase
 		
-		$this->addFrontSystem(new NexusHeavyPlasmaCharge(3, 9, 5, 270, 90));
-		$this->addFrontSystem(new NexusHeavyPlasmaCharge(3, 9, 5, 270, 90));
-		$this->addFrontSystem(new NexusHeavyPlasmaCharge(3, 9, 5, 270, 90));
-		$this->addFrontSystem(new NexusHeavyPlasmaCharge(3, 9, 5, 270, 90));
+		$this->addFrontSystem(new Maser(3, 6, 3, 270, 90));
+		$this->addFrontSystem(new Maser(3, 6, 3, 270, 90));
+		$this->addFrontSystem(new Maser(3, 6, 3, 270, 90));
+		$this->addFrontSystem(new Maser(3, 6, 3, 270, 90));
 		//$this->addFrontSystem(new PlasmaWaveTorpedo(3, 0, 0, 300, 60));
 		//$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));
 		//$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));

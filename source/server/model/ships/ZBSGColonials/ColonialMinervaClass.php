@@ -41,10 +41,10 @@ class ColonialMinervaClass extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 15, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 15, 0, 4, 1));
 		$this->addFrontSystem(new Bulkhead(0, 5));
-        $this->addFrontSystem(new BSGMainBattery(5, 9, 6, 315, 360));
-        $this->addFrontSystem(new BSGMainBattery(5, 9, 6, 315, 360));
-        $this->addFrontSystem(new BSGMainBattery(5, 9, 6, 0, 45));
-        $this->addFrontSystem(new BSGMainBattery(5, 9, 6, 0, 45));
+        $this->addFrontSystem(new BSGMainBattery(5, 9, 6, 300, 360));
+        $this->addFrontSystem(new BSGMainBattery(5, 9, 6, 300, 360));
+        $this->addFrontSystem(new BSGMainBattery(5, 9, 6, 0, 60));
+        $this->addFrontSystem(new BSGMainBattery(5, 9, 6, 0, 60));
 		$this->addFrontSystem(new LMissileRack(5, 6, 0, 270, 360));
         $this->addFrontSystem(new LMissileRack(5, 6, 0, 0, 90));
 
@@ -56,7 +56,7 @@ class ColonialMinervaClass extends BaseShip{
 		$this->addAftSystem(new BSGFlakBattery(5, 6, 2, 120, 240));
     
         $this->addLeftSystem(new Thruster(5, 20, 0, 3, 3));
-        $this->addLeftSystem(new BSGMainBattery(5, 9, 6, 235, 305));
+        $this->addLeftSystem(new BSGMainBattery(5, 9, 6, 240, 300));
         $this->addLeftSystem(new BSGFlakBattery(5, 6, 2, 210, 330));
         $this->addLeftSystem(new BSGFlakBattery(5, 6, 2, 210, 330));
         $this->addLeftSystem(new RapidGatling(5, 4, 1, 210, 330));
@@ -66,7 +66,7 @@ class ColonialMinervaClass extends BaseShip{
         $this->addLeftSystem(new Hangar(5, 7));
 
         $this->addRightSystem(new Thruster(5, 20, 0, 3, 4));
-        $this->addRightSystem(new BSGMainBattery(5, 9, 6, 55, 125));
+        $this->addRightSystem(new BSGMainBattery(5, 9, 6, 60, 120));
         $this->addRightSystem(new BSGFlakBattery(5, 6, 2, 30, 150));
         $this->addRightSystem(new BSGFlakBattery(5, 6, 2, 30, 150));
         $this->addRightSystem(new RapidGatling(5, 4, 1, 30, 150));

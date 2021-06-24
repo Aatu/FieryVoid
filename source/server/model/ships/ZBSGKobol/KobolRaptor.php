@@ -22,7 +22,7 @@ class KobolRaptor extends SuperHeavyFighter{
         $this->offensivebonus = 5;
         $this->jinkinglimit = 4;
         $this->turncost = 0.33;
-        $this->turndelay = 0.10;
+        $this->turndelaycost = 0.10;
 
 		$this->hangarRequired = 'superheavy'; //for fleet check
         $this->iniativebonus = 70;

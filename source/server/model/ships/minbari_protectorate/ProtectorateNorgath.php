@@ -7,7 +7,7 @@ class ProtectorateNorgath extends StarBaseSixSections{
 		$this->pointCost = 8100;
 		$this->faction = 'Minbari Protectorate';
 		$this->phpclass = "ProtectorateNorgath";
-		$this->shipClass = "Protectorate Norgath Starbase";
+		$this->shipClass = "Norgath Starbase";
 		$this->fighters = array("heavy"=>36); 
 
 		$this->shipSizeClass = 3; //Enormous is not implemented

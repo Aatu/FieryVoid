@@ -7,9 +7,10 @@ class Pinnace extends MediumShip{
 		$this->pointCost = 240;
 		$this->faction = "Raiders";
         $this->phpclass = "Pinnace";
-        $this->imagePath = "img/ships/pinnace.png";
+//        $this->imagePath = "img/ships/pinnace.png";
+        $this->imagePath = "img/ships/raider_pinnace.png";
         $this->shipClass = "Pinnace";
-        $this->canvasSize = 100;
+        $this->canvasSize = 85;
 
 		$this->notes = "Generic raider unit.";
 		$this->notes .= "<br> ";

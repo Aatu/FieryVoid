@@ -9,7 +9,7 @@ class ProtectorateCivilianBase extends SmallStarBaseFourSections{
 		$this->smallBase = true;
 		$this->faction = "Minbari Protectorate";
 		$this->phpclass = "ProtectorateCivilianBase";
-		$this->shipClass = "Protectorate Civilian Base";
+		$this->shipClass = "Civilian Base";
 		$this->imagePath = "img/ships/MinbariCivBase.png";
 		$this->canvasSize = 200;
 		$this->fighters = array("heavy"=>6); 
