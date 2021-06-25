@@ -10,6 +10,8 @@ class AnroethAS extends FighterFlight{
         $this->phpclass = "AnroethAS";
         $this->shipClass = "Anroeth Assault Shuttles";
 		$this->imagePath = "img/ships/Hurranroeth.png";
+
+        $this->isd = 2230;
         
         $this->forwardDefense = 9;
         $this->sideDefense = 10;
