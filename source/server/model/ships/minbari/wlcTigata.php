@@ -8,7 +8,7 @@ class wlcTigata extends BaseShip{
         $this->faction = "Minbari";
         $this->phpclass = "wlcTigata";
         $this->imagePath = "img/ships/tigara.png";
-        $this->shipClass = "Tigata";
+        $this->shipClass = "Tigata Jump Cruiser";
         $this->shipSizeClass = 3;
         $this->gravitic = true;
         $this->fighters = array("normal"=>6, "medium"=>6);
@@ -22,7 +22,7 @@ class wlcTigata extends BaseShip{
         $this->iniativebonus = 5;
         $this->unofficial = true;
         $this->isd = 1870;
-        $this->variantOf ="Tigara";
+        $this->variantOf ="Tigara Attack Cruiser";
 		
 		$this->notes = 'ALTERNATE UNIVERSE - unit designed for "In ancient times" campaign';
 
