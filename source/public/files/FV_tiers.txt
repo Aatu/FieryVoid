@@ -47,6 +47,7 @@ Factions that point for point will have uphill battle against First Tier, yet ot
  - Ipsha  
  - Markab
  - Raiders (note plethora of background-driven options - Raiders often use a hodgepodge of units and formal FV fleet selection rules don't always do them justice!)
+ - Sal-bez (custom faction - Nexus universe, in playtest currently)
  - Star Wars (custom faction (or rather factions), Star Wars universe - with VERY different playstyle, consider them difficult to fly!)
  - Velrax (custom faction - Nexus universe)
 
