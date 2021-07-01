@@ -12,11 +12,11 @@ class KobolViperMk2 extends FighterFlight{
 //	    $this->isd = 2212;
  		$this->unofficial = true;
 	    
-        $this->forwardDefense = 7;
-        $this->sideDefense = 9;
+        $this->forwardDefense = 6;
+        $this->sideDefense = 7;
         $this->freethrust = 11;
-        $this->offensivebonus = 2;
-        $this->jinkinglimit = 8;
+        $this->offensivebonus = 3;
+        $this->jinkinglimit = 10;
         $this->turncost = 0.33;
         
 	$this->iniativebonus = 100;
