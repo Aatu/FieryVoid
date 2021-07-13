@@ -33,6 +33,7 @@ Factions that point for point will have uphill battle against First Tier, yet ot
  - Abbai
  - Balosian
  - Belt Alliance (Small Races)
+ - Blood Sword Raiders (custom faction - Escalation Wars universe - small unit selection)
  - Brixadii (custom faction - Nexus universe)
  - Cascor
  - Centauri (WotCR)
@@ -45,9 +46,11 @@ Factions that point for point will have uphill battle against First Tier, yet ot
  - Descari
  - Drazi (WotCR)
  - Ipsha  
+ - Kastan (custom faction - Escalation Wars universe)
  - Markab
  - Raiders (note plethora of background-driven options - Raiders often use a hodgepodge of units and formal FV fleet selection rules don't always do them justice!)
  - Sal-bez (custom faction - Nexus universe, in playtest currently)
+ - Sshel'ath (custom faction - Escalation Wars universe)
  - Star Wars (custom faction (or rather factions), Star Wars universe - with VERY different playstyle, consider them difficult to fly!)
  - Velrax (custom faction - Nexus universe)
 
@@ -79,7 +82,6 @@ This group is inherently unbalanced, even against each other!
  - Mitoc (Small Races - only one MCV-class vessel)
  - Rogolon (Small Races)
  - Sorithian (Small Races)
- - Sshel'ath (custom faction - Escalation Wars universe)
  - Streib (custom faction; their ship design and technology is peculiar enough for them to feel surprisingly Ancient-like when it comes to balancing. Streib are definitely NOT up to fighting actual Ancients though! - hence "the Rest")
  - Usuuth
  
