@@ -1136,15 +1136,19 @@ spl_autoload_register(
 				'ewrangeddualrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewrangeddualheavyrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewplasmamine' => '/server/model/weapons/customEscalation.php',
+				'ewpulsetorpedo' => '/server/model/weapons/customEscalation.php',
 				'ewnucleartorpedo' => '/server/model/weapons/customEscalation.php',
 			//EW gravitic weapons
 				'ewgravitictractingrod' => '/server/model/weapons/customEscalation.php',
 			//EW laser weapons
 				'ewdefenselaser' => '/server/model/weapons/customEscalation.php',
+				'ewlaserbolt' => '/server/model/weapons/customEscalation.php',
 				'ewtwinlasercannon' => '/server/model/weapons/customEscalation.php',
 				'ewlightlaserbeam' => '/server/model/weapons/customEscalation.php',
 				'ewgatlinglaser' => '/server/model/weapons/customEscalation.php',
 				'ewheavygatlinglaser' => '/server/model/weapons/customEscalation.php',
+				'ewroyallaser' => '/server/model/weapons/customEscalation.php',
+				'ewsovereignlaser' => '/server/model/weapons/customEscalation.php',
 			//EW AoE weapons
 				'lightenergymine' => '/server/model/weapons/AoE.php',
 			//EW electromagnetic weapons
@@ -1153,6 +1157,17 @@ spl_autoload_register(
 			//EW matter weapons
 				'ewearlyrailgun' => '/server/model/weapons/customEscalation.php',
 				'ewlightgausscannon' => '/server/model/weapons/customEscalation.php',
+
+
+
+				//Escalation Wars - Blood Sword Raiders
+				'bloodsworddarksoul' => '/server/model/ships/ZEscalationBloodSword/BloodSwordDarkSoul.php',
+				'bloodswordepee' => '/server/model/ships/ZEscalationBloodSword/BloodSwordEpee.php',
+				'bloodswordfirebrand' => '/server/model/ships/ZEscalationBloodSword/BloodSwordFirebrand.php',
+				'bloodswordrazor' => '/server/model/ships/ZEscalationBloodSword/BloodSwordRazor.php',
+				'bloodswordscythe' => '/server/model/ships/ZEscalationBloodSword/BloodSwordScythe.php',
+
+
 
 				//Escalation Wars - Chouka
 				'choukaacolytefrigate' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaAcolyteFrigate.php',
@@ -1266,6 +1281,38 @@ spl_autoload_register(
 				'circasianvestas' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianVestas.php',
 				'circasianyollana' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianYollana.php',
 				'circasianyollanabeta' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianYollanaBeta.php',
+
+
+				//Escalation Wars - Civilian
+				'civilianfelenia' => '/server/model/ships/ZEscalationCivilian/CivilianFelenia.php',
+				'civilianhastal' => '/server/model/ships/ZEscalationCivilian/CivilianHastal.php',
+				'civilianhatanra' => '/server/model/ships/ZEscalationCivilian/CivilianHatanra.php',
+				'civilianmissionary' => '/server/model/ships/ZEscalationCivilian/CivilianMissionary.php',
+				'civilianrustedcrest' => '/server/model/ships/ZEscalationCivilian/CivilianRustedcrest.php',
+				'civiliantolona' => '/server/model/ships/ZEscalationCivilian/CivilianTolona.php',
+
+
+				// Escalation Wars - Kastan
+				'kastanbattleknife' => '/server/model/ships/ZEscalationKastan/KastanBattleknife.php',
+				'kastanbattlekniferefit' => '/server/model/ships/ZEscalationKastan/KastanBattleknifeRefit.php',
+				'kastancudgelas' => '/server/model/ships/ZEscalationKastan/KastanCudgelAS.php',
+				'kastandullknife' => '/server/model/ships/ZEscalationKastan/KastanDullknife.php',
+				'kastanbronzecrest' => '/server/model/ships/ZEscalationKastan/KastanBronzecrest.php',
+				'kastanflameblade' => '/server/model/ships/ZEscalationKastan/KastanFlameblade.php',
+				'kastanironblade' => '/server/model/ships/ZEscalationKastan/KastanIronblade.php',
+				'kastanironbladerefit' => '/server/model/ships/ZEscalationKastan/KastanIronbladeRefit.php',
+				'kastanironbladerefit2' => '/server/model/ships/ZEscalationKastan/KastanIronbladeRefit2.php',
+				'kastanironcrest' => '/server/model/ships/ZEscalationKastan/KastanIroncrest.php',
+				'kastanironshear' => '/server/model/ships/ZEscalationKastan/KastanIronshear.php',
+				'kastanironshearrefit' => '/server/model/ships/ZEscalationKastan/KastanIronshearRefit.php',
+				'kastankatana' => '/server/model/ships/ZEscalationKastan/KastanKatana.php',
+				'kastannightblade' => '/server/model/ships/ZEscalationKastan/KastanNightblade.php',
+				'kastansteelsabre' => '/server/model/ships/ZEscalationKastan/KastanSteelsabre.php',
+				'kastansteelsabrerefit' => '/server/model/ships/ZEscalationKastan/KastanSteelsabreRefit.php',
+				'kastansteelsabrerefit2' => '/server/model/ships/ZEscalationKastan/KastanSteelsabreRefit2.php',
+				'kastanstormsabre' => '/server/model/ships/ZEscalationKastan/KastanStormsabre.php',
+				'kastanstormsabrerefit' => '/server/model/ships/ZEscalationKastan/KastanStormsabreRefit.php',
+				'kastantrident' => '/server/model/ships/ZEscalationKastan/KastanTrident.php',
 
 
 
