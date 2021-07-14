@@ -1679,6 +1679,7 @@ spl_autoload_register(
 				'colonialpythonmk3' => '/server/model/ships/ZBSGColonials/ColonialPythonMk3.php',
 				'colonialraptor' => '/server/model/ships/ZBSGColonials/ColonialRaptor.php',
 				'colonialriverescort' => '/server/model/ships/ZBSGColonials/ColonialRiverEscort.php',
+				'colonialrussanclass' => '/server/model/ships/ZBSGColonials/ColonialRussanClass.php',
 				'colonialassaultraptor' => '/server/model/ships/ZBSGColonials/ColonialAssaultRaptor.php',
                 'colonialtigerclass' => '/server/model/ships/ZBSGColonials/ColonialTigerClass.php',
                 'colonialvipermk2' => '/server/model/ships/ZBSGColonials/ColonialViperMk2.php',
