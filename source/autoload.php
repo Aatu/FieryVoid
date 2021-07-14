@@ -1312,6 +1312,8 @@ spl_autoload_register(
 				'kastansteelsabrerefit2' => '/server/model/ships/ZEscalationKastan/KastanSteelsabreRefit2.php',
 				'kastanstormsabre' => '/server/model/ships/ZEscalationKastan/KastanStormsabre.php',
 				'kastanstormsabrerefit' => '/server/model/ships/ZEscalationKastan/KastanStormsabreRefit.php',
+				'kastanstormshear' => '/server/model/ships/ZEscalationKastan/KastanStormshear.php',
+				'kastanstormshearrefit' => '/server/model/ships/ZEscalationKastan/KastanStormshearRefit.php',
 				'kastantrident' => '/server/model/ships/ZEscalationKastan/KastanTrident.php',
 
 
