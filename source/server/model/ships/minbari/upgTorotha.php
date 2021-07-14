@@ -18,9 +18,10 @@ class upgTorotha extends MediumShip{
         $this->rollcost = 2;
         $this->pivotcost = 2;
 		$this->iniativebonus = 65;
+        $this->canvasSize = 100;
 		$this->isd = 2261;
 		$this->unofficial = true;
-		$this->variantOf = "Torotha";
+		$this->variantOf = "Torotha Assault Frigate";
 
         $this->addPrimarySystem(new Reactor(5, 15, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));

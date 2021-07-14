@@ -15,6 +15,8 @@ class AlacanRotiaFlight extends FighterFlight{
         $this->offensivebonus = 3;
         $this->jinkinglimit = 10;
         $this->turncost = 0.33;
+
+        $this->isd = 2198;
         
        	$this->iniativebonus = 100;
         $this->populate();        

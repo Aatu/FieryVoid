@@ -11,6 +11,8 @@ class orak extends HeavyCombatVessel{
         $this->shipClass = "Orak Frigate";
         $this->occurence = "common";
         $this->fighters = array("normal"=>6);
+
+        $this->isd = 2230;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;

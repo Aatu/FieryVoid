@@ -429,6 +429,13 @@ Fusion Agitator - Raking weapon that does damage in inefficient Raking(6) mode. 
 	Many Yolu weapons have special features, usually relating to target armor - see descriptions.
 	
 
+
+ZESCALATION BLOOD SWORD RAIDERS (custom, alternate universe faction)
+The Blood Swords were a pirate group active during the Circasian "Raider Wars" time period. They were a serious threat to the trade routes near the Thaline node of the Outward sector trade routes due to the size and capabilities of their warships. The raiders were eventually defeated by the Circasians, and their defeat marked the unofficial end of the Raider Wars.
+- This faction uses ships acquired from the Kastan, and have access to the same technologies as that faction
+
+
+
 ZESCALATION CHOUKA (custom, alternate universe faction)
 The Chouka Theocracy was a minor regional power in the Escalation Wars universe, and the Circasian's opponents in their first major interstellar war. The Chouka were more technologically advanced than the Circasians, but lacked the tactical experience and fleet assets to combat the more numerous and maneuverable Circasian fleet.
 The ships included here are the Chouka spacecraft that served during the Chouka War period. They are armed with a mix of plasma and laser weapons, with older Chouka ships relying on plasma weapons while their newer ships rely on lasers in the anti-shipping role. Plasma weapons continued to be used for anti-fighter work into the Chouka War period, however.
@@ -456,6 +463,25 @@ The Circasian faction was created by Tyrel Lohr for his Escalation Wars setting.
 Fiery Void encoding done in collaboration with Geoffrey Stano.
 
 
+ZESCALATION KASTAN (custom, alternate universe faction)
+The Kastan Imperial Monarchy inhabits a remote location of hyperspace deep within the Rapids of Rodirra, a treacherous section of hyperspace that makes travel to or from the Kastan territories difficult at best (and impossible at worst). Navigating the rapids has forced the Kastan to be superb pilots. The 
+Kastan have had limited interactions with their neighbors, although they do engage in trade and have been known to sell out their services as mercenaries. Most of their active political ambitions have focused on the coreward sectors, having fought back against an invasion by the Ingalli in recent history.
+- Plasma Cannons: older Kastan ships made heavy use of light, medium, and heavy plasma weapons
+- Missile Racks: older Kastan ships used a variety of basic missile racks
+- Imperial Laser: the Kastan make heavy use of this primitive laser weapon, and have developed a number of other related laser weapons (Royal Laser, Sovereign Laser) based on this technology
+- Laser Bolt: the Kastan developed an effective short range anti-fighter laser weapon for their ships
+- Pulse Torpedo: this weapon fires a number of small munitions at a target, designed to strip targets of weapons and external systems prior to closing to close range
+
+
+ZESCALATION SSHEL'ATH (custom, alternate universe faction)
+The Sshel'ath Alliance was formed out of the civil war between the two largest Sshel'ath factions. The early Alliance focused on growth of the homeworld, as they were blocked by the more established Chouka Theocracy and Novon Trade Lords. Two conflicts with the Novon showed that action against this faction 
+was ill-advised. It wasn't until the later Circasian defeat of the Chouka that the Sshel'ath managed to expand into and capture several Chouka worlds. The Sshel'ath themselves are made of intertwined mass of rope-like elastic fibers, which allow for limited rearrangement of their body's form. Only their faces 
+are inelastic and they are highly resistant to radiation.
+Gatling Laser - Evolved from the basic light laser cannon, the gatling laser fires several short, discreet volleys in pulse mode.
+Electromagnetic Torpedo - The EM Torpedo was developed to counter Novon shields. This ballistic weapon releases a large electromagnetic pulse and can destroy or short out enemy systems.
+Electron Polarizer - A flash mode electromagnetic weapon, this can destroy or short out numerous systems on a target.
+
+
 ZNEXUS BRIXADII (custom, alternate universe faction)
 The Brixadii Clans are a spinward power within the Nexus sector, having fought with the Dalithorn Commonwealth early on and having hostile relations with the Velrax Republic. The Brixadii's 
 technology is primarily focused around particle weapons. These are rugged, easy to repair, and low mass. The Clans have begun to specialize in pulsar technology as this affords superior mass to damage ratios. This last point is important as the key feature that defines the Clans are their extremely
@@ -466,6 +492,7 @@ If You want interesting low tech faction then by all means use it, just be warne
 Chaff Launcher - technically fired at enemy ship, it will always hit (causing no damage or adverse effects) and apply interception to ALL fire from target hex at chaff-protected unit (including nominally uninterceptable weapons).
 Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently and field Antiquated Sensors. This allows them to use EW 
 without any restrictions, but they cannot boost their sensors.
+
 
 ZNEXUS DALITHORN  (custom, alternate universe faction)
 The Dalithorn Commonwealth are likely the lowest tech of the main Nexus powers. They managed to leverage their position across a major trade route to keep their sovereignty up to the later years of
@@ -480,15 +507,17 @@ the firing ship is in arc.
 Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently and field Antiquated Sensors. This allows them to use EW 
 without any restrictions, but they cannot boost their sensors.
 
+
 ZNEXUS PLAYTEST SAL-BEZ  (custom, alternate universe faction)
 The Sal-bez Coalition is the first anti-spinward faction from Nexus to be brought into Fiery Void. This insectoid race started as a typical queen / worker arrangement, but during the Enlightenment of Fire, 
 the Sal-bez won their freedom. They are now a fiercly individualistic society. The Coalition did not have a traditional military upon reaching for the stars and their early units are exclusively civilian
-designs using industrial systems as makeshift weapons. As the Sal-bez grew, they quickly began to field purpose-built combat vessels that would ultimately lead to the Coalition becoming one of the most 
-powerful of the Nexus factions.
-Swarm Torpedo - This is perhaps one of the most iconic systems developed by the Sal-bez. It fires multiple, small ballistics at a target, which has led to its common name of swarm torpedo. This system provides
-both long-range potential and can strip systems off a target to enable more effective laser hits.
+designs using industrial systems as makeshift weapons. As the Sal-bez grew (and discovered several technology caches from a previous power), they quickly began to field purpose-built combat vessels that 
+would ultimately lead to the Coalition becoming one of the most powerful of the Nexus factions.
+Swarm Torpedo - This is perhaps one of the most iconic systems developed by the Sal-bez for their later generation of ships. It fires multiple, small ballistics at a target, which has led to its common name of swarm torpedo. This system provides
+both long-range firepower and can strip systems off a target to enable more effective laser hits.
 Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently and field Antiquated Sensors. This allows them to use EW 
 without any restrictions, but they cannot boost their sensors.
+
 
 ZNEXUS VELRAX  (custom, alternate universe faction)
 The Velrax Republic is potentially the most aggressive, but not necessarily the most militarisitic faction within the Nexus setting. They have engaged both the Brixadii Clans and Dalithorn Commonwealth

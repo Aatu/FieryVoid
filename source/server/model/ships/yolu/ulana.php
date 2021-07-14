@@ -11,6 +11,8 @@ class Ulana extends BaseShip{
         $this->shipClass = "Ulana Patrol Cruiser";
         $this->gravitic = true;
 
+        $this->isd = 2065;
+
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
 

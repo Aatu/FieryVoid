@@ -12,6 +12,8 @@ class RogolonRogon extends BaseShip{
         $this->limited = 33;
         $this->fighters = array("normal" => 24, "superheavy" => 2);
 
+        $this->isd = 1987;
+
         $this->forwardDefense = 15;
         $this->sideDefense = 19;
         

@@ -438,6 +438,126 @@ class EWHeavyGatlingLaser extends Pulse{
 
 
 
+    class EWRoyalLaser extends Laser{
+
+        public $name = "EWRoyalLaser";
+        public $displayName = "Royal Laser";
+	    public $iconPath = "EWRoyalLaser.png";
+
+        public $animation = "laser";
+        public $animationColor = array(220, 60, 120);
+        public $animationWidth = 4;
+        public $animationWidth2 = 0.2;
+
+        public $loadingtime = 3;
+
+        public $raking = 10;
+        public $priority = 6;
+        
+        public $rangePenalty = 0.5;
+        public $fireControl = array(-5, 1, 2); // fighters, <mediums, <capitals 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 6;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 4;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+6;   }
+        public function setMinDamage(){     $this->minDamage = 8 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 26 ;      }
+        
+        
+    }  //endof EWRoyalLaser
+
+
+
+
+    class EWSovereignLaser extends Laser{
+
+        public $name = "EWSovereignLaser";
+        public $displayName = "Sovereign Laser";
+	    public $iconPath = "EWSovereignLaser.png";
+
+        public $animation = "laser";
+        public $animationColor = array(220, 60, 120);
+        public $animationWidth = 6;
+        public $animationWidth2 = 0.6;
+
+        public $loadingtime = 5;
+
+        public $raking = 10;
+        public $priority = 7;
+        
+        public $rangePenalty = 0.25;
+        public $fireControl = array(-5, 3, 4); // fighters, <mediums, <capitals 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 12;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 6;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 4)+10;   }
+        public function setMinDamage(){     $this->minDamage = 14 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 50 ;      }
+        
+        
+    }  //endof EWSovereignLaser
+
+
+
+
+    class EWLaserBolt extends Weapon{
+     
+        public $name = "EWLaserBolt";
+        public $displayName = "Laser Bolt";  
+	    public $iconPath = "EWLaserBolt.png";
+	    
+        public $animation = "trail";
+        public $animationColor = array(220, 60, 120);
+		public $trailColor = array(220, 60, 120);
+        public $animationExplosionScale = 0.16;
+        public $animationWidth = 3;
+//        public $animationWidth2 = 0.3;
+		public $trailLength = 10;
+        public $priority = 4;
+        public $loadingtime = 1;
+        
+        public $rangePenalty = 1.0; //-1 / hex
+        public $fireControl = array(3, 2, 0); // fighters, <mediums, <capitals 
+
+		public $firingMode = "Standard";
+        public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        public $weaponClass = "Laser";
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 4;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 2;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+    } //endof EWLaserBolt
+
+
     class EWDefenseLaser extends Weapon{
         public $name = "EWDefenseLaser";
         public $displayName = "Defense Laser";
@@ -1283,6 +1403,63 @@ class EWLightPlasmaMine extends MissileFB
         public function setMaxDamage(){     $this->maxDamage = 50;      }
     
     }//endof class EWNuclearTorpedo
+
+
+
+
+class EWPulseTorpedo extends Pulse{
+
+        public $name = "EWPulseTorpedo";
+        public $displayName = "Pulse Torpedo";
+		public $iconPath = "EWPulseTorpedo.png";
+        public $useOEW = true; //torpedo
+        public $ballistic = true; //missile
+		public $range = 20;
+//		public $distanceRange = 35;		
+        public $animation = "trail";
+        public $animationColor = array(192, 192, 192);
+    	public $trailColor = array(215, 126, 111);
+        public $trailLength = 45;
+        public $animationWidth = 2;
+        public $projectilespeed = 5;
+        public $animationExplosionScale = 0.15;
+        public $rof = 2;
+        public $grouping = 20;
+        public $maxpulses = 6;
+        public $priority = 5;
+	protected $useDie = 5; //die used for base number of hits	
+        
+        public $loadingtime = 2;
+        
+        public $rangePenalty = 0;
+        public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals 
+
+		public $firingMode = "Ballistic";
+        public $damageType = "Pulse"; 
+        public $weaponClass = "Pulse"; 
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 6;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 4;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){            
+            parent::setSystemDataWindow($turn);
+//            $this->data["Pulses"] = 'D2';            
+//			$this->data["Special"] .= '<br>Max 4 pulse. +1 per 25%';			
+			$this->data["Special"] .= '<br>Benefits from offensive EW.';			
+        }
+
+	
+        public function getDamage($fireOrder){        return 8;   }
+    }  // endof EWPulseTorpedo
+
 
 
 

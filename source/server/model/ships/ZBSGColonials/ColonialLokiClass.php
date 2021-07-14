@@ -9,7 +9,7 @@ class ColonialLokiClass extends MediumShip{
         $this->phpclass = "ColonialLokiClass";
         $this->imagePath = "img/ships/BSG/ColonialLoki.png";
         $this->shipClass = "Loki Gunboat Corvette";
-        $this->canvasSize = 100;
+        $this->canvasSize = 90;
 //	    $this->isd = 2007;
 
 		$this->unofficial = true;

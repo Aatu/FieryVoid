@@ -9,7 +9,9 @@ class Rowlon extends FighterFlight{
         $this->phpclass = "Rowlon";
         $this->shipClass = "Rowlon Armored Fighter";
         $this->imagePath = "img/ships/UsuuthRowlon.png";
-        
+ 
+        $this->isd = 1942;
+ 
         $this->forwardDefense = 5;
         $this->sideDefense = 7;
         $this->freethrust = 8;

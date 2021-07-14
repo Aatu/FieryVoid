@@ -14,6 +14,8 @@ class Udran extends BaseShip{
 		$this->variantOf = "Ulana Patrol Cruiser";       
         $this->fighters=array("normal"=>6);
 
+        $this->isd = 2241;
+
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
 

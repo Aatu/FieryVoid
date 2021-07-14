@@ -17,6 +17,8 @@ class SorithianZolorIII extends FighterFlight{
         $this->turncost = 0.33;
         
         $this->unofficial = true;
+
+        $this->isd = 2209;
         
     	$this->iniativebonus = 90;
         $this->populate();        

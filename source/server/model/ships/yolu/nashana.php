@@ -9,6 +9,8 @@ class Nashana extends BaseShip{
         $this->phpclass = "Nashana";
         $this->imagePath = "img/ships/nashana.png";
         $this->shipClass = "Nashana Light Cruiser";
+
+        $this->isd = 2244;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 16;

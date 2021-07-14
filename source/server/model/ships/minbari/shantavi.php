@@ -8,7 +8,7 @@ class Shantavi extends HeavyCombatVessel{
         $this->faction = "Minbari";
         $this->phpclass = "Shantavi";
         $this->imagePath = "img/ships/tinashi.png";
-        $this->shipClass = "Shantavi";
+        $this->shipClass = "Shantavi Heavy Battle Frigate";
         $this->gravitic = true;
         $this->occurence = "rare";
         $this->forwardDefense = 14;
@@ -20,7 +20,7 @@ class Shantavi extends HeavyCombatVessel{
         $this->pivotcost = 3;
         $this->iniativebonus = 35;
         $this->isd = 2259;
-        $this->variantOf = "Tinashi";
+        $this->variantOf = "Tinashi War Frigate";
 
         $this->addPrimarySystem(new Reactor(5, 25, 0, 6));
         $this->addPrimarySystem(new CnC(6, 24, 0, 0));

@@ -11,6 +11,8 @@ class Notali extends BaseShip{
         $this->shipClass = "Notali Carrier";
         $this->gravitic = true;
 
+        $this->isd = 2096;
+
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
 

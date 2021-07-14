@@ -13,6 +13,8 @@ class Maishan extends MediumShip{
         $this->canvasSize = 100;
         $this->occurence = "uncommon";
 		$this->variantOf = "Maitau Pursuit Frigate";  
+
+        $this->isd = 2251;
 		        
         $this->forwardDefense = 13;
         $this->sideDefense = 14;

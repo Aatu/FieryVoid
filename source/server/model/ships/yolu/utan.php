@@ -9,6 +9,8 @@ class Utan extends FighterFlight{
 		$this->phpclass = "Utan";
 		$this->shipClass = "Utan Heavy Fighters";
 		$this->imagePath = "img/ships/utan.png";
+
+        $this->isd = 2050;
 		
 		$this->forwardDefense = 7;
 		$this->sideDefense = 9;

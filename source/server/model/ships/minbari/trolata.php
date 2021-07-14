@@ -8,7 +8,7 @@ class Trolata extends BaseShip{
         $this->faction = "Minbari";
         $this->phpclass = "Trolata";
         $this->imagePath = "img/ships/troligan.png";
-        $this->shipClass = "Trolata";
+        $this->shipClass = "Trolata Armored Cruiser";
         $this->shipSizeClass = 3;
         $this->gravitic = true;
         $this->occurence = "uncommon";

@@ -8,7 +8,7 @@ class Tinashi extends HeavyCombatVessel{
         $this->faction = "Minbari";
         $this->phpclass = "Tinashi";
         $this->imagePath = "img/ships/tinashi.png";
-        $this->shipClass = "Tinashi";
+        $this->shipClass = "Tinashi War Frigate";
         $this->gravitic = true;
         $this->forwardDefense = 14;
         $this->sideDefense = 17;

@@ -13,6 +13,8 @@ class Yuan extends BaseShip{
         $this->fighters = array("normal"=>12);
         $this->canvasSize = 280;
 
+        $this->isd = 2100;
+
         $this->forwardDefense = 18;
         $this->sideDefense = 19;
 		$this->limited = 10;

@@ -15,6 +15,8 @@ class BAStarfoxFtr extends FighterFlight{
         $this->offensivebonus = 4;
         $this->jinkinglimit = 8;
         $this->turncost = 0.33;
+
+        $this->isd = 2208;
         
     	$this->iniativebonus = 90;
         $this->populate();        

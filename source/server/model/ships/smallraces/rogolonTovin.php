@@ -11,6 +11,7 @@ class RogolonTovin extends HeavyCombatVessel{
         $this->shipClass = "Rogolon Tovin Small Warship";
         $this->occurence = "common";
 
+        $this->isd = 1966;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;

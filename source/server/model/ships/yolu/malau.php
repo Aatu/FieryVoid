@@ -14,6 +14,8 @@ class Malau extends MediumShip{
         $this->occurence = "common";
 		$this->variantOf = "Maitau Pursuit Frigate";        
 
+        $this->isd = 2012;
+
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
 

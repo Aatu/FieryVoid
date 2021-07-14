@@ -8,7 +8,7 @@ class Ashinta extends HeavyCombatVessel{
         $this->faction = "Minbari";
         $this->phpclass = "Ashinta";
         $this->imagePath = "img/ships/tinashi.png";
-        $this->shipClass = "Ashinta";
+        $this->shipClass = "Ashinta Close Escort";
         $this->gravitic = true;
         $this->forwardDefense = 14;
         $this->sideDefense = 17;
@@ -20,7 +20,7 @@ class Ashinta extends HeavyCombatVessel{
         $this->iniativebonus = 35;
         $this->isd = 2066;
         $this->occurence = "uncommon";
-        $this->variantOf = "Tinashi";
+        $this->variantOf = "Tinashi War Frigate";
 
         $this->addPrimarySystem(new Reactor(5, 25, 0, 8));
         $this->addPrimarySystem(new CnC(6, 24, 0, 0));

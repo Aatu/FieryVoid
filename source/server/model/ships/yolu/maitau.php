@@ -12,6 +12,8 @@ class Maitau extends MediumShip{
         $this->gravitic = true;
         $this->canvasSize = 100;
 
+        $this->isd = 2106;
+
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
 

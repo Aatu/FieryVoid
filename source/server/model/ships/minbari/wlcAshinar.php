@@ -8,7 +8,7 @@ class wlcAshinar extends HeavyCombatVessel{
         $this->faction = "Minbari";
         $this->phpclass = "wlcAshinar";
         $this->imagePath = "img/ships/tinashi.png";
-        $this->shipClass = "Ashinar";
+        $this->shipClass = "Ashinar Close Escort";
         $this->gravitic = true;
         $this->occurence = "rare";
         $this->forwardDefense = 14;
@@ -21,7 +21,7 @@ class wlcAshinar extends HeavyCombatVessel{
         $this->iniativebonus = 35;
         $this->isd = 1994;
         $this->unofficial = true;
-        $this->variantOf = "Tinashi";
+        $this->variantOf = "Tinashi War Frigate";
 		
 		$this->notes = 'ALTERNATE UNIVERSE - unit designed for "In ancient times" campaign';
 
