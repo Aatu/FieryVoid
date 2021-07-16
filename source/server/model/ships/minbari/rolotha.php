@@ -18,6 +18,7 @@ class Rolotha extends MediumShip{
         $this->rollcost = 2;
         $this->pivotcost = 2;
 		$this->iniativebonus = 0;
+		$this->canvasSize = 115; 
 		$this->isd = 1990;
 
         $this->addPrimarySystem(new Reactor(5, 17, 0, 4));

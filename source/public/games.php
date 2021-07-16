@@ -66,6 +66,7 @@ if (isset($_SESSION["user"])) {
 	    <br><b><u>Minbari Protectorate</u></b> - courtesy of Geoffrey
 	    <br><b><u>Vorlon Power Capacitor fixed</u></b> - <font color="red"><b><big>ctrl+F5</big></b></font> necessary for fix to work!
 	    <br><b><u>chat modified</u></b> - 'In game/Global' indicator was skipped as unnecessary, so there's more room for actual chat :)
+	    <br><b><u>24.06</u></b> - LOTS of changes by Geoffrey, enjoy!
 
 
 	    
