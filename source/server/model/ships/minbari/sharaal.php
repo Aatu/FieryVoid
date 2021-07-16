@@ -8,7 +8,7 @@ class Sharaal extends BaseShip{
 		$this->faction = "Minbari";
         $this->phpclass = "Sharaal";
         $this->imagePath = "img/ships/sharlin.png";
-        $this->shipClass = "Sharaal";
+        $this->shipClass = "Sharaal War Cruiser";
         $this->shipSizeClass = 3;
         $this->gravitic = true;
 		$this->canvasSize = 280;
@@ -23,7 +23,7 @@ class Sharaal extends BaseShip{
         $this->pivotcost = 5;
         $this->iniativebonus = 5;
         $this->isd = 1999;
-        $this->variantOf = "Sharlin";
+        $this->variantOf = "Sharlin War Cruiser";
 
         // Ship system arguments: armor, health, power req, output
         $this->addPrimarySystem(new Reactor(5, 33, 0, -2));

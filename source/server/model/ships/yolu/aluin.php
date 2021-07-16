@@ -10,6 +10,8 @@ class Aluin extends BaseShip{
         $this->imagePath = "img/ships/aluin.png";
         $this->shipClass = "Aluin Gunship";
         $this->gravitic = true;
+
+        $this->isd = 2110;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 16;

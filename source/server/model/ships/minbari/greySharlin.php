@@ -23,7 +23,7 @@ class GreySharlin extends BaseShip{
         $this->iniativebonus = 5;
         $this->isd = 2058;
         $this->occurence = "unique";
-        $this->variantOf = "Sharlin";
+        $this->variantOf = "Sharlin War Cruiser";
 
         // Ship system arguments: armor, health, power req, output
         $this->addPrimarySystem(new Reactor(6, 35, 0, 0));
