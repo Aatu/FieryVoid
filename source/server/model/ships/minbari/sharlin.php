@@ -8,7 +8,7 @@ class Sharlin extends BaseShip{
 		$this->faction = "Minbari";
         $this->phpclass = "Sharlin";
         $this->imagePath = "img/ships/sharlin.png";
-        $this->shipClass = "Sharlin";
+        $this->shipClass = "Sharlin War Cruiser";
         $this->shipSizeClass = 3;
         $this->gravitic = true;
         $this->canvasSize = 280;

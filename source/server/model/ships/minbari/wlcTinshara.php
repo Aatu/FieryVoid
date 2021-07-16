@@ -8,7 +8,7 @@ class wlcTinshara extends HeavyCombatVessel{
         $this->faction = "Minbari";
         $this->phpclass = "wlcTinshara";
         $this->imagePath = "img/ships/tinashi.png";
-        $this->shipClass = "Tinshara";
+        $this->shipClass = "Tinshara War Frigate";
         $this->gravitic = true;
         $this->forwardDefense = 14;
         $this->sideDefense = 17;
@@ -19,7 +19,7 @@ class wlcTinshara extends HeavyCombatVessel{
         $this->pivotcost = 3;
         $this->iniativebonus = 35;
         $this->isd = 1869;
-        $this->variantOf = "Tinashi";
+        $this->variantOf = "Tinashi War Frigate";
         $this->unofficial = true;
 		
 		$this->notes = 'ALTERNATE UNIVERSE - unit designed for "In ancient times" campaign';

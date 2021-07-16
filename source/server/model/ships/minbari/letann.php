@@ -21,7 +21,7 @@ class Letann extends HeavyCombatVessel{
         $this->iniativebonus = 35;
         $this->isd = 2020;
         $this->occurence = "rare";
-        $this->variantOf = "Tinashi";
+        $this->variantOf = "Tinashi War Frigate";
 
         $this->addPrimarySystem(new Reactor(5, 25, 0, 6));
         $this->addPrimarySystem(new CnC(6, 24, 0, 0));

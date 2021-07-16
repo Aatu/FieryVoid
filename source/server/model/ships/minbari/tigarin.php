@@ -8,7 +8,7 @@ class Tigarin extends BaseShip{
             $this->faction = "Minbari";
             $this->phpclass = "Tigarin";
             $this->imagePath = "img/ships/tigara.png";
-            $this->shipClass = "Tigarin";
+            $this->shipClass = "Tigarin Patrol Cruiser";
             $this->shipSizeClass = 3;
             $this->gravitic = true;
             $this->fighters = array("normal"=>6);
@@ -20,7 +20,7 @@ class Tigarin extends BaseShip{
             $this->rollcost = 3;
             $this->pivotcost = 4;
             $this->iniativebonus = 5;
-            $this->variantOf ="Tigara";
+            $this->variantOf ="Tigara Attack Cruiser";
             $this->isd = 2059;
 
             // Ship system arguments: armor, health, power req, output
