@@ -862,6 +862,55 @@ class NexusHeavyPlasmaCharge extends Torpedo{
 
 
 
+class NexusBoltTorpedo extends Weapon{
+        public $name = "NexusBoltTorpedo";
+        public $displayName = "Bolt Torpedo";
+		    public $iconPath = "NexusBoltTorpedo.png";
+        public $animation = "trail";
+        public $trailColor = array(11, 224, 255);
+        public $animationColor = array(50, 50, 50);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 12;
+        public $animationWidth = 4;
+        public $trailLength = 100;    
+
+        public $useOEW = true; //torpedo
+        public $ballistic = true; //missile
+        public $range = 20;
+        
+        public $loadingtime = 2; // 1 turn
+        public $rangePenalty = 0;
+        public $fireControl = array(-1, 2, 2); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+	    
+	public $priority = 5; //Standard weapon
+	    
+	public $firingMode = 'Ballistic'; //firing mode - just a name essentially
+	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+	 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 5;
+            if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			$this->data["Special"] = '<br>Benefits from offensive EW.';			
+        }
+
+        public function getDamage($fireOrder){ 
+			return 10;   
+		}
+
+        public function setMinDamage(){     $this->minDamage = 10;      }
+        public function setMaxDamage(){     $this->maxDamage = 10;      }
+		
+}//endof NexusBoltTorpedo
+
+
 
 
 
@@ -4153,8 +4202,8 @@ class NexusLaserMissile extends Weapon{
         
         public $raking = 6;
         
-        public $rangePenalty = 1; //-1 / hex
-        public $fireControl = array(-2, 0, 3); // fighters, <mediums, <capitals 
+        public $rangePenalty = 0.66; //-2 / 3 hexes
+        public $fireControl = array(-3, 0, 2); // fighters, <mediums, <capitals 
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -4162,7 +4211,7 @@ class NexusLaserMissile extends Weapon{
                 $maxhealth = 6;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 2;
+                $powerReq = 3;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -4171,6 +4220,46 @@ class NexusLaserMissile extends Weapon{
         public function setMinDamage(){     $this->minDamage = 9 ;      }
         public function setMaxDamage(){     $this->maxDamage = 36 ;      }
     } //endof NexusIndustrialLaser
+
+
+
+    class NexusLightIndustrialLaser extends Laser{
+     
+        public $name = "NexusLightIndustrialLaser";
+        public $displayName = "Light Industrial Laser";  
+	    public $iconPath = "NexusLightIndustrialLaser.png";
+	    
+        public $animation = "laser";
+        public $animationColor = array(255, 91, 91);
+        public $animationExplosionScale = 0.16;
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.3;
+        public $priority = 7;
+        
+        public $loadingtime = 2;
+        
+        public $raking = 4;
+        
+        public $rangePenalty = 1.0; //-1 / hex
+        public $fireControl = array(-3, 0, 2); // fighters, <mediums, <capitals 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 4;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 2;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+4;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 24 ;      }
+
+    } //endof NexusLightIndustrialLaser
+
 
 
 

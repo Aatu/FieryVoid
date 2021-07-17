@@ -1,23 +1,24 @@
 <?php
-class SalbezJertkatRefit extends BaseShip{
+class SalbezReshkenRefit extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 550;
+	$this->pointCost = 555;
 	$this->faction = "ZNexus Playtest Sal-bez";
-        $this->phpclass = "SalbezJertkatRefit";
-        $this->imagePath = "img/ships/Nexus/salbez_jertkat.png";
-        $this->shipClass = "Jer't'kat Heavy Cruiser (2118 refit)";
+        $this->phpclass = "SalbezReshkenRefit";
+        $this->imagePath = "img/ships/Nexus/salbez_reshken.png";
+        $this->shipClass = "Resh-ken Command Cruiser (2119 refit)";
 			$this->variantOf = "Jer't'kat Heavy Cruiser";
-			$this->occurence = "common";
+			$this->occurence = "uncommon";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 135; //img has 200px per side
+		$this->canvasSize = 155; //img has 200px per side
 		$this->unofficial = true;
+        $this->limited = 33;
 
         $this->fighters = array("normal"=>6);
 
-		$this->isd = 2143;
+		$this->isd = 2119;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
@@ -62,11 +63,11 @@ class SalbezJertkatRefit extends BaseShip{
         $this->addRightSystem(new Thruster(3, 15, 0, 4, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure(4, 40));
-        $this->addAftSystem(new Structure(4, 40));
-        $this->addLeftSystem(new Structure(4, 40));
-        $this->addRightSystem(new Structure(4, 40));
-        $this->addPrimarySystem(new Structure(5, 40));
+        $this->addFrontSystem(new Structure(4, 36));
+        $this->addAftSystem(new Structure(4, 36));
+        $this->addLeftSystem(new Structure(4, 36));
+        $this->addRightSystem(new Structure(4, 36));
+        $this->addPrimarySystem(new Structure(5, 36));
 		
 		$this->hitChart = array(
 			0=> array(

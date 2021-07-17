@@ -1,14 +1,14 @@
 <?php
-class SalbezAvrtzRefit extends BaseShip{
+class SalbezAvrtzRefit2 extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 825;
 		$this->faction = "ZNexus Playtest Sal-bez";
-        $this->phpclass = "SalbezAvrtzRefit";
+        $this->phpclass = "SalbezAvrtzRefit2";
         $this->imagePath = "img/ships/Nexus/salbez_bevtun.png";
-        $this->shipClass = "Av'rtz Explorer (2122 Refit)";
+        $this->shipClass = "Av'rtz Explorer (2153 Refit)";
 			$this->variantOf = "Av'rtz Explorer";
 			$this->occurence = "common";
 //        $this->shipSizeClass = 3;
@@ -19,7 +19,7 @@ class SalbezAvrtzRefit extends BaseShip{
         $this->fighters = array("normal"=>12);
 
         $this->Enormous = true;
-		$this->isd = 2122;
+		$this->isd = 2153;
         
         $this->forwardDefense = 17;
         $this->sideDefense = 19;
@@ -41,8 +41,8 @@ class SalbezAvrtzRefit extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 20, 0, 4, 1));
 		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
 		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
-		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
-		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
+		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 60));
+		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 300, 120));
 		$this->addFrontSystem(new CargoBay(2, 15));
 		$this->addFrontSystem(new CargoBay(2, 15));
 
@@ -56,18 +56,18 @@ class SalbezAvrtzRefit extends BaseShip{
 		$this->addAftSystem(new JumpEngine(4, 20, 5, 50));
 
         $this->addLeftSystem(new MediumLaser(2, 6, 5, 240, 360));
-		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
-		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
-		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
-		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
+		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 180, 360));
+		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 180, 360));
+		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 180, 360));
+		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 180, 360));
 		$this->addLeftSystem(new NexusSwarmTorpedo(2, 5, 2, 240, 360));
         $this->addLeftSystem(new Thruster(3, 20, 0, 6, 3));
 
         $this->addRightSystem(new MediumLaser(2, 6, 5, 0, 120));
-		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
-		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
-		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
-		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
+		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 0, 180));
+		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 0, 180));
+		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 0, 180));
+		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 0, 180));
 		$this->addRightSystem(new NexusSwarmTorpedo(2, 5, 2, 240, 360));
         $this->addRightSystem(new Thruster(2, 20, 0, 6, 4));
 
@@ -90,7 +90,7 @@ class SalbezAvrtzRefit extends BaseShip{
 			1=> array(
 					4 => "Thruster",
 					6 => "Medium Laser",
-					8 => "Light Particle Beam",
+					8 => "Improved Particle Beam",
 					11 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
@@ -106,7 +106,7 @@ class SalbezAvrtzRefit extends BaseShip{
 			3=> array(
 					3 => "Thruster",
 					5 => "Medium Laser",
-					6 => "Light Particle Beam",
+					6 => "Improved Particle Beam",
 					8 => "Swarm Torpedo",
 					10 => "Cargo Bay",
 					18 => "Structure",
@@ -115,7 +115,7 @@ class SalbezAvrtzRefit extends BaseShip{
 			4=> array(
 					3 => "Thruster",
 					5 => "Medium Laser",
-					6 => "Light Particle Beam",
+					6 => "Improved Particle Beam",
 					8 => "Swarm Torpedo",
 					10 => "Cargo Bay",
 					18 => "Structure",

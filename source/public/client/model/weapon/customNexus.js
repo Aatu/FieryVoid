@@ -747,6 +747,22 @@ var NexusIndustrialLaser = function  NexusIndustrialLaser(json, ship) {
 NexusIndustrialLaser.prototype = Object.create(Weapon.prototype);
 NexusIndustrialLaser.prototype.constructor =  NexusIndustrialLaser;
 
+var NexusBoltTorpedo = function  NexusBoltTorpedo(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusBoltTorpedo.prototype = Object.create(Weapon.prototype);
+NexusBoltTorpedo.prototype.constructor =  NexusBoltTorpedo;
+
+var NexusLightIndustrialLaser = function  NexusLightIndustrialLaser(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusLightIndustrialLaser.prototype = Object.create(Weapon.prototype);
+NexusLightIndustrialLaser.prototype.constructor =  NexusLightIndustrialLaser;
+
+
+
+
+
 
 
 
@@ -781,6 +797,7 @@ var GatlingGunFtr = function  GatlingGunFtr(json, ship) {
 };
 GatlingGunFtr.prototype = Object.create(Weapon.prototype);
 GatlingGunFtr.prototype.constructor =  GatlingGunFtr;
+
 
 
 

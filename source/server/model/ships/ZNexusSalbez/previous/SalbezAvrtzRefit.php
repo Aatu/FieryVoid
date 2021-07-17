@@ -31,45 +31,45 @@ class SalbezAvrtzRefit extends BaseShip{
         $this->pivotcost = 4;
         $this->iniativebonus = 0;
         
-        $this->addPrimarySystem(new Reactor(5, 34, 0, 0));
-        $this->addPrimarySystem(new CnC(5, 32, 0, 0));
-        $this->addPrimarySystem(new ELINTScanner(4, 25, 7, 10));
-        $this->addPrimarySystem(new Engine(4, 25, 0, 12, 4));
+        $this->addPrimarySystem(new Reactor(5, 25, 0, 0));
+        $this->addPrimarySystem(new CnC(5, 24, 0, 0));
+        $this->addPrimarySystem(new ELINTScanner(4, 25, 7, 8));
+        $this->addPrimarySystem(new Engine(4, 20, 0, 10, 4));
 		$this->addPrimarySystem(new Hangar(2, 18));
 		
-        $this->addFrontSystem(new Thruster(3, 20, 0, 4, 1));
-        $this->addFrontSystem(new Thruster(3, 20, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(3, 15, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(3, 15, 0, 4, 1));
 		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
 		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
-		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
-		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
-		$this->addFrontSystem(new CargoBay(2, 15));
-		$this->addFrontSystem(new CargoBay(2, 15));
+		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 60));
+		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 300, 120));
+		$this->addFrontSystem(new CargoBay(2, 20));
+		$this->addFrontSystem(new CargoBay(2, 20));
 
+        $this->addAftSystem(new Thruster(3, 16, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 16, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 16, 0, 3, 2));
-        $this->addAftSystem(new Thruster(3, 16, 0, 3, 2));
-        $this->addAftSystem(new Thruster(3, 16, 0, 3, 2));
+        $this->addAftSystem(new Thruster(3, 16, 0, 2, 2));
 		$this->addAftSystem(new MediumLaser(3, 6, 5, 120, 240));
 		$this->addAftSystem(new MediumLaser(3, 6, 5, 120, 240));
-		$this->addAftSystem(new CargoBay(2, 15));
+		$this->addAftSystem(new CargoBay(2, 20));
 		$this->addAftSystem(new JumpEngine(4, 20, 5, 50));
 
         $this->addLeftSystem(new MediumLaser(2, 6, 5, 240, 360));
-		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
-		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
-		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
-		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
+		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 180, 360));
+		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 180, 360));
+		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 180, 360));
+		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 180, 360));
 		$this->addLeftSystem(new NexusSwarmTorpedo(2, 5, 2, 240, 360));
-        $this->addLeftSystem(new Thruster(3, 20, 0, 6, 3));
+        $this->addLeftSystem(new Thruster(3, 20, 0, 5, 3));
 
         $this->addRightSystem(new MediumLaser(2, 6, 5, 0, 120));
-		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
-		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
-		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
-		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
+		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 0, 180));
+		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 0, 180));
+		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 0, 180));
+		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 0, 180));
+        $this->addRightSystem(new Thruster(2, 20, 0, 5, 4));
 		$this->addRightSystem(new NexusSwarmTorpedo(2, 5, 2, 240, 360));
-        $this->addRightSystem(new Thruster(2, 20, 0, 6, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(4, 60));
@@ -90,7 +90,7 @@ class SalbezAvrtzRefit extends BaseShip{
 			1=> array(
 					4 => "Thruster",
 					6 => "Medium Laser",
-					8 => "Light Particle Beam",
+					8 => "Improved Particle Beam",
 					11 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
@@ -104,20 +104,18 @@ class SalbezAvrtzRefit extends BaseShip{
 					20 => "Primary",
 			),
 			3=> array(
-					3 => "Thruster",
-					5 => "Medium Laser",
-					6 => "Light Particle Beam",
-					8 => "Swarm Torpedo",
-					10 => "Cargo Bay",
+					4 => "Thruster",
+					6 => "Medium Laser",
+					8 => "Improved Particle Beam",
+					10 => "Swarm Torpedo",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
-					3 => "Thruster",
-					5 => "Medium Laser",
-					6 => "Light Particle Beam",
-					8 => "Swarm Torpedo",
-					10 => "Cargo Bay",
+					4 => "Thruster",
+					6 => "Medium Laser",
+					8 => "Improved Particle Beam",
+					10 => "Swarm Torpedo",
 					18 => "Structure",
 					20 => "Primary",
 			),

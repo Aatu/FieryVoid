@@ -17,7 +17,7 @@ class SalbezJertkatRefit extends BaseShip{
 
         $this->fighters = array("normal"=>6);
 
-		$this->isd = 2143;
+		$this->isd = 2118;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
@@ -62,11 +62,11 @@ class SalbezJertkatRefit extends BaseShip{
         $this->addRightSystem(new Thruster(3, 15, 0, 4, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure(4, 40));
-        $this->addAftSystem(new Structure(4, 40));
-        $this->addLeftSystem(new Structure(4, 40));
-        $this->addRightSystem(new Structure(4, 40));
-        $this->addPrimarySystem(new Structure(5, 40));
+        $this->addFrontSystem(new Structure(4, 36));
+        $this->addAftSystem(new Structure(4, 36));
+        $this->addLeftSystem(new Structure(4, 36));
+        $this->addRightSystem(new Structure(4, 36));
+        $this->addPrimarySystem(new Structure(5, 36));
 		
 		$this->hitChart = array(
 			0=> array(

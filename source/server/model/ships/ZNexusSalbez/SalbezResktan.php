@@ -1,17 +1,17 @@
 <?php
-class SalbezShvrak extends MediumShip{
+class SalbezResktan extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 175;
         $this->faction = "ZNexus Playtest Sal-bez";
-        $this->phpclass = "SalbezShvrak";
+        $this->phpclass = "SalbezResktan";
         $this->imagePath = "img/ships/Nexus/salbez_mining_frigate.png";
-        $this->shipClass = "Shv'rak Mining Frigate";
+        $this->shipClass = "Resk'tan Frigate";
 		$this->unofficial = true;
         $this->canvasSize = 65;
-	    $this->isd = 2019;
+	    $this->isd = 2092;
         
         $this->forwardDefense = 11;
         $this->sideDefense = 11;
@@ -32,13 +32,12 @@ class SalbezShvrak extends MediumShip{
         $this->addPrimarySystem(new Hangar(2, 1));
         
 		$this->addFrontSystem(new NexusBoltTorpedo(2, 5, 2, 300, 60));
-		$this->addFrontSystem(new NexusIndustrialLaser(2, 6, 3, 240, 360));
-		$this->addFrontSystem(new NexusIndustrialLaser(2, 6, 3, 0, 120));
+		$this->addFrontSystem(new LaserCutter(2, 6, 4, 240, 360));
+		$this->addFrontSystem(new LaserCutter(2, 6, 4, 0, 120));
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
 	    
-		$this->addAftSystem(new NexusParticleGrid(1, 3, 1, 180, 360));
-		$this->addAftSystem(new NexusParticleGrid(1, 3, 1, 0, 180));
-		$this->addAftSystem(new CargoBay(1, 16));
+		$this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
+		$this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 0, 180));
         $this->addAftSystem(new Thruster(2, 15, 0, 6, 2));    
        
         $this->addPrimarySystem(new Structure(3, 36));
@@ -57,7 +56,7 @@ class SalbezShvrak extends MediumShip{
 
 		1=> array(
 			5 => "Thruster",
-			8 => "Industrial Laser",
+			8 => "Laser Cutter",
 			9 => "Bolt Torpedo",
 			17 => "Structure",
 			20 => "Primary",
@@ -65,8 +64,7 @@ class SalbezShvrak extends MediumShip{
 
 		2=> array(
 			6 => "Thruster",
-			8 => "Cargo Bay",
-			10 => "Particle Grid",
+			8 => "Light Particle Beam",
 			17 => "Structure",
 			20 => "Primary",
 		),
