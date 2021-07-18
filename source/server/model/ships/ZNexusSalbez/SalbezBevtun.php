@@ -53,7 +53,7 @@ class SalbezBevtun extends BaseShip{
         $this->addAftSystem(new Thruster(2, 16, 0, 2, 2));
 		$this->addAftSystem(new NexusIndustrialLaser(2, 6, 3, 120, 240));
 		$this->addAftSystem(new NexusIndustrialLaser(2, 6, 3, 120, 240));
-		$this->addAftSystem(new CargoBay(2, 30));
+		$this->addAftSystem(new CargoBay(2, 50));
 		$this->addAftSystem(new JumpEngine(4, 20, 5, 50));
 
         $this->addLeftSystem(new NexusIndustrialLaser(2, 6, 3, 240, 360));

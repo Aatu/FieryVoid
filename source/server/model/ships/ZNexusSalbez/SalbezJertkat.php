@@ -4,7 +4,7 @@ class SalbezJertkat extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 500;
+	$this->pointCost = 550;
 	$this->faction = "ZNexus Playtest Sal-bez";
         $this->phpclass = "SalbezJertkat";
         $this->imagePath = "img/ships/Nexus/salbez_jertkat.png";
@@ -51,11 +51,13 @@ class SalbezJertkat extends BaseShip{
         $this->addLeftSystem(new MediumLaser(3, 6, 5, 240, 360));
         $this->addLeftSystem(new NexusSwarmTorpedo(3, 5, 2, 240, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
+		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 120, 300));
         $this->addLeftSystem(new Thruster(3, 15, 0, 4, 3));
 
         $this->addRightSystem(new MediumLaser(3, 6, 5, 0, 120));
         $this->addRightSystem(new NexusSwarmTorpedo(3, 5, 2, 0, 120));
+		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 60, 240));
         $this->addRightSystem(new Thruster(3, 15, 0, 4, 4));

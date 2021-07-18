@@ -39,7 +39,7 @@ class BloodSwordEpee extends FighterFlight{
             $fighter->imagePath = "img/ships/EscalationWars/BloodSwordEpee.png";
             $fighter->iconPath = "img/ships/EscalationWars/BloodSwordEpee_large.png";
 
-			$gun = new EWLightLaserBeam(330, 30, 1);
+			$gun = new EWLaserBoltFtr(330, 30, 1);
 			$gun->displayName = "Ultralight Laser Bolt";
 			$fighter->addFrontSystem($gun);
 

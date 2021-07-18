@@ -217,4 +217,9 @@ var EWPulseTorpedo = function  EWPulseTorpedo(json, ship) {
     Weapon.call(this, json, ship);
 };
 EWPulseTorpedo.prototype = Object.create(Weapon.prototype);
-EWPulseTorpedo.prototype.constructor =  EWPulseTorpedo;
+
+var EWLaserBoltFtr = function  EWLaserBoltFtr(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWLaserBoltFtr.prototype = Object.create(Weapon.prototype);
+EWLaserBoltFtr.prototype.constructor =  EWLaserBoltFtr;

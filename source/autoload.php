@@ -1143,6 +1143,7 @@ spl_autoload_register(
 			//EW laser weapons
 				'ewdefenselaser' => '/server/model/weapons/customEscalation.php',
 				'ewlaserbolt' => '/server/model/weapons/customEscalation.php',
+				'ewlaserboltftr' => '/server/model/weapons/customEscalation.php',
 				'ewtwinlasercannon' => '/server/model/weapons/customEscalation.php',
 				'ewlightlaserbeam' => '/server/model/weapons/customEscalation.php',
 				'ewgatlinglaser' => '/server/model/weapons/customEscalation.php',

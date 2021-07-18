@@ -4,7 +4,7 @@ class SalbezNavren extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 360;
+        $this->pointCost = 330;
         $this->faction = "ZNexus Playtest Sal-bez";
         $this->phpclass = "SalbezNavren";
         $this->imagePath = "img/ships/Nexus/salbez_zefjem.png";

@@ -4,7 +4,7 @@ class SalbezResktan extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 175;
+        $this->pointCost = 280;
         $this->faction = "ZNexus Playtest Sal-bez";
         $this->phpclass = "SalbezResktan";
         $this->imagePath = "img/ships/Nexus/salbez_mining_frigate.png";

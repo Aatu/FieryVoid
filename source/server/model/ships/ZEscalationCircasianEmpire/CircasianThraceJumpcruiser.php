@@ -53,7 +53,7 @@ class CircasianThraceJumpcruiser extends BaseShip{
 		
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
-        $this->addLeftSystem(new LightParticleCannon(3, 8, 7, 300, 360));
+        $this->addLeftSystem(new ParticleCannon(3, 8, 7, 300, 360));
         $this->addLeftSystem(new Thruster(3, 15, 0, 4, 3));
 
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));

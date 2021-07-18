@@ -48,8 +48,6 @@ class SalbezAvrtz extends BaseShip{
         $this->addAftSystem(new Thruster(3, 16, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 16, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 16, 0, 2, 2));
-		$this->addAftSystem(new LightLaser(2, 4, 3, 180, 360));
-		$this->addAftSystem(new LightLaser(2, 4, 3, 0, 180));
 		$this->addAftSystem(new LaserCutter(3, 6, 4, 120, 240));
 		$this->addAftSystem(new LaserCutter(3, 6, 4, 120, 240));
 		$this->addAftSystem(new CargoBay(2, 20));
@@ -69,8 +67,8 @@ class SalbezAvrtz extends BaseShip{
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
+		$this->addRightSystem(new NexusBoltTorpedo(2, 5, 2, 0, 120));
         $this->addRightSystem(new Thruster(2, 20, 0, 5, 4));
-		$this->addRightSystem(new NexusBoltTorpedo(2, 5, 2, 240, 360));
 		$this->addRightSystem(new CargoBay(2, 15));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

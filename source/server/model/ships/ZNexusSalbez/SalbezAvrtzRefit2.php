@@ -52,7 +52,7 @@ class SalbezAvrtzRefit2 extends BaseShip{
         $this->addAftSystem(new Thruster(3, 16, 0, 3, 2));
 		$this->addAftSystem(new MediumLaser(3, 6, 5, 120, 240));
 		$this->addAftSystem(new MediumLaser(3, 6, 5, 120, 240));
-		$this->addAftSystem(new CargoBay(2, 15));
+		$this->addAftSystem(new CargoBay(2, 30));
 		$this->addAftSystem(new JumpEngine(4, 20, 5, 50));
 
         $this->addLeftSystem(new MediumLaser(2, 6, 5, 240, 360));
@@ -68,7 +68,7 @@ class SalbezAvrtzRefit2 extends BaseShip{
 		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 0, 180));
 		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 0, 180));
 		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 0, 180));
-		$this->addRightSystem(new NexusSwarmTorpedo(2, 5, 2, 240, 360));
+		$this->addRightSystem(new NexusSwarmTorpedo(2, 5, 2, 0, 120));
         $this->addRightSystem(new Thruster(2, 20, 0, 6, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
