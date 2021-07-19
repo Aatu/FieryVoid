@@ -7,7 +7,7 @@ class SalbezCrensk extends LCV{
         $this->pointCost = 200;
         $this->faction = "ZNexus Playtest Sal-bez";
         $this->phpclass = "SalbezCrensk";
-        $this->imagePath = "img/ships/Nexus/salbez_evsk.png";
+        $this->imagePath = "img/ships/Nexus/salbez_crensk.png";
 			$this->canvasSize = 55; //img has 200px per side
         $this->shipClass = "Cre-nsk Combat Cutter";
 		$this->unofficial = true;
