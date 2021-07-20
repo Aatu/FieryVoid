@@ -77,6 +77,7 @@ This group is inherently unbalanced, even against each other!
  - Abbai (WotCR)
  - Alacan (Small Races)
  - Chouka Raiders (custom faction - Escalation Wars universe)
+ - EA (early) (predominantly semi-official, custom units armed with blast cannons and much weaker defenses)
  - Grome
  - Hurr
  - Mitoc (Small Races - only one MCV-class vessel)

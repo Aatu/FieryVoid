@@ -144,6 +144,11 @@ Energy Web - defensive system integrated with Interceptor. Active Interceptor pr
 Shadow Omega - official Shadow Omega conversion by AoG is marked as unofficial because that's what official deployment restrictions sum up to (not tournament legal, opponent permission required). Actual fan-made conversions are present as well!
 
 
+EARTH ALLIANCE (early)
+The early Earth Alliance units are composed of semi-official custom designs that all were deployed before 2200. These units generally lack the better defenses of the later Earth designs and many use blast cannons. Some official units, like the Olympus Alpha are listed in 
+both the standard Earth Alliance fleet list as well as the early EA section. This is to represent their transitional nature from being high-end units in the early EA to very old units in the Dilgar War era. Although the more famous Starfuries (Tiger, Nova, Aurora) are unavailable 
+the early examples of the Starfury lineage (Flying Fox, Aries, and Atlas) formed the foundation of the fighter-heavy EA fleet in the future. 
+
 GAIM
 Gaim are minor League race, but their ships are very good and their diversity is excellent - making them (in game, tactically ) in all respects equal to Big4 factions.
 Notable technologies:

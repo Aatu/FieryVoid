@@ -9,14 +9,14 @@ class ShepherdGamma extends MediumShip{
         $this->phpclass = "ShepherdGamma";
         $this->imagePath = "img/ships/shepherd.png";
         $this->shipClass = "Shepherd Fighter Transport (Gamma)";
-			$this->variantOf = "Shepherd Fighter Transport (Alpha)";
-			$this->occurence = "common";
+//			$this->variantOf = "Shepherd Fighter Transport (Alpha)";
+//			$this->occurence = "common";
         $this->canvasSize = 80;
  		$this->unofficial = true;
 
 		$this->fighters = array("normal"=>6); 
         
-        $this->isd = 2184;
+        $this->isd = 2205;
 
         $this->forwardDefense = 14;
         $this->sideDefense = 14;
@@ -60,15 +60,17 @@ class ShepherdGamma extends MediumShip{
             ),
             1=> array(
                     5 => "Thruster",
-					8 => "Medium Blast Cannon",
-                    10 => "Light Blast Cannon",
+					8 => "Hangar",
+					9 => "Interceptor I",
+                    10 => "Standard Particle Beam",
 					17 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     6 => "Thruster",
-					8 => "Light Blast Cannon",
-                    10 => "Engine",
+					8 => "Standard Particle Beam",
+					9 => "Interceptor I", 
+                    11 => "Engine",
                     17 => "Structure",
                     20 => "Primary",
             ),
