@@ -67,6 +67,7 @@ if (isset($_SESSION["user"])) {
 	    <br><b><u>SW shields can (somewhat) stop Matter</u></b> - balance change, not affecting in-universe clashes
 		
 	    <br><b><u>Escalation Wars and Nexus updates</u></b> - The Kastan Monarchy and Blood Swords Raiders join the Escalation Wars, while the Sal-bez Coalition has been fully updated.
+	    <br><b><u>EA force list update</u></b> - The EA list has been split into separate early and modern forces.
 		
 
 
