@@ -65,6 +65,9 @@ if (isset($_SESSION["user"])) {
 		---------- <b>LATEST NEWS - July 2021</b> ----------	   
 	    <br><b><u>Minbari unit types</u></b> - thanks to Geoffrey, Minbari units now are listed not just with class names, but with types too!
 	    <br><b><u>SW shields can (somewhat) stop Matter</u></b> - balance change, not affecting in-universe clashes
+		
+	    <br><b><u>Escalation Wars and Nexus updates</u></b> - The Kastan Monarchy and Blood Swords Raiders join the Escalation Wars, while the Sal-bez Coalition has been fully updated.
+		
 
 
 	    
