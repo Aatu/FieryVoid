@@ -1672,13 +1672,13 @@ spl_autoload_register(
 
 				//Battlestar Galactica - Fred
 					//weapons
-                'bsgflakbattery' => '/server/model/weapons/customNexus.php',
-                'bsghvykineticenergyweapon' => '/server/model/weapons/customNexus.php',
-                'bsghypergun' => '/server/model/weapons/customNexus.php',
-                'bsgkineticenergyweapon' => '/server/model/weapons/customNexus.php',
-                'bsgltkineticenergyweapon' => '/server/model/weapons/customNexus.php',
-                'bsgmainbattery' => '/server/model/weapons/customNexus.php',
-                'bsgmedbattery' => '/server/model/weapons/customNexus.php',
+                'bsgflakbattery' => '/server/model/weapons/customBSG.php',
+                'bsghvykineticenergyweapon' => '/server/model/weapons/customBSG.php',
+                'bsghypergun' => '/server/model/weapons/customBSG.php',
+                'bsgkineticenergyweapon' => '/server/model/weapons/customBSG.php',
+                'bsgltkineticenergyweapon' => '/server/model/weapons/customBSG.php',
+                'bsgmainbattery' => '/server/model/weapons/customBSG.php',
+                'bsgmedbattery' => '/server/model/weapons/customBSG.php',
 					//ships
                 'colonialalliance' => '/server/model/ships/ZBSGColonials/ColonialAlliance.php',
                 'colonialberserkclasscarrier' => '/server/model/ships/ZBSGColonials/ColonialBerserkClassCarrier.php',
@@ -1704,8 +1704,8 @@ spl_autoload_register(
 
 				//Battlestar Galactica - Kirill
 					//weapons
-                'flakarray' => '/server/model/weapons/customNexus.php',
-                'sensorspearftr' => '/server/model/weapons/customNexus.php',
+                'flakarray' => '/server/model/weapons/customBSG.php',
+                'sensorspearftr' => '/server/model/weapons/customBSG.php',
 					//ships
                 'koboljupiter' => '/server/model/ships/ZBSGKobol/KobolJupiter.php',
                 'kobolmanticore' => '/server/model/ships/ZBSGKobol/KobolManticore.php',
@@ -1720,6 +1720,8 @@ spl_autoload_register(
 				//Battlestar Galactic - Cylons
 				'cylonbasestar' => '/server/model/ships/ZBSGCylons/CylonBasestar.php',				
 				'cylonsparrowraider' => '/server/model/ships/ZBSGCylons/CylonSparrowRaider.php',				
+
+
 
 
 				//Specific Raider Groups
