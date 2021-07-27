@@ -98,6 +98,8 @@
 	<script src="client/model/weapon/customSW.js"></script>
         <script src="client/model/weapon/customNexus.js"></script>
         <script src="client/model/weapon/customEscalation.js"></script>		
+        <script src="client/model/weapon/customBSG.js"></script>		
+        <script src="client/model/weapon/customTrek.js"></script>		
 		<script>
 			
             window.weaponManager = 

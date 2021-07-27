@@ -9,7 +9,7 @@ class CottenGamma extends BaseShip{
         $this->phpclass = "CottenGamma";
         $this->imagePath = "img/ships/cotton.png";
         $this->shipClass = "Cotten Long-Range Tender (Gamma)";
-			$this->variantOf = "Cotten Long-Range Tender (Alpha)";
+			$this->variantOf = "Cotten Long-Range Tender (Beta)";
 			$this->occurence = "common";
         $this->shipSizeClass = 3;
 //			$this->canvasSize = 175; //img has 200px per side

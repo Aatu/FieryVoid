@@ -4,7 +4,7 @@ class SalbezEvsk extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 110;
+        $this->pointCost = 150;
         $this->faction = "ZNexus Playtest Sal-bez";
         $this->phpclass = "SalbezEvsk";
         $this->imagePath = "img/ships/Nexus/salbez_evsk.png";
@@ -27,7 +27,6 @@ class SalbezEvsk extends LCV{
         $this->rollcost = 1;
         $this->pivotcost = 1;
         $this->iniativebonus = 14*5;
-    
  
 		$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
@@ -38,17 +37,15 @@ class SalbezEvsk extends LCV{
 		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
         $this->addPrimarySystem(new AntiquatedScanner(3, 12, 2, 3));
 		$this->addPrimarySystem(new Engine(3, 12, 0, 6, 4));
-		$this->addPrimarySystem(new NexusIndustrialLaser(1, 6, 2, 300, 360));
 		$this->addPrimarySystem(new NexusParticleGrid(1, 3, 1, 180, 360));
+		$this->addPrimarySystem(new NexusIndustrialLaser(1, 6, 3, 300, 60));
 		$this->addPrimarySystem(new NexusParticleGrid(1, 3, 1, 0, 180));
-		$this->addPrimarySystem(new NexusIndustrialLaser(1, 6, 2, 0, 60));
-	    
 	    
         $this->addPrimarySystem(new Structure(2, 30));
 	    
         $this->hitChart = array(
         		0=> array( 
-        				10 => "Structure",
+        				11 => "Structure",
         				13 => "Industrial Laser",
         				15 => "Particle Grid",
 						17 => "Engine",
@@ -56,7 +53,7 @@ class SalbezEvsk extends LCV{
         				20 => "Scanner",
         		),
         		1=> array( //redirect to PRIMARY
-        				10 => "0:Structure",
+        				11 => "0:Structure",
         				13 => "0:Industrial Laser",
         				15 => "0:Particle Grid",
 						17 => "0:Engine",
@@ -64,7 +61,7 @@ class SalbezEvsk extends LCV{
         				20 => "0:Scanner",
         		),
         		2=> array( //redirect to PRIMARY
-        				10 => "0:Structure",
+        				11 => "0:Structure",
         				13 => "0:Industrial Laser",
         				15 => "0:Particle Grid",
 						17 => "0:Engine",

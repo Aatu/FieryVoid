@@ -4,16 +4,16 @@ class SalbezVasrenRefit extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 375;
+        $this->pointCost = 425;
         $this->faction = "ZNexus Playtest Sal-bez";
         $this->phpclass = "SalbezVasrenRefit";
         $this->imagePath = "img/ships/Nexus/salbez_destroyer.png";
 			$this->canvasSize = 115; //img has 200px per side
-        $this->shipClass = "Vas-ren Destroyer (2118 refit)";
+        $this->shipClass = "Vas-ren Destroyer (2143 refit)";
 			$this->variantOf = "Vas-ren Destroyer";
 			$this->occurence = "common";
 		$this->unofficial = true;
-        $this->isd = 2118;
+        $this->isd = 2143;
 		
         $this->forwardDefense = 12;
         $this->sideDefense = 14;
@@ -43,17 +43,17 @@ class SalbezVasrenRefit extends HeavyCombatVessel{
         $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 300, 120));
                 
         $this->addAftSystem(new Thruster(3, 28, 0, 10, 2));
-        $this->addAftSystem(new MediumLaser(3, 6, 5, 240, 360));
+        $this->addAftSystem(new MediumLaser(3, 6, 5, 300, 360));
         $this->addAftSystem(new LightLaser(2, 4, 3, 180, 360));
         $this->addAftSystem(new NexusImprovedParticleBeam(2, 3, 1, 90, 270));
         $this->addAftSystem(new NexusImprovedParticleBeam(2, 3, 1, 90, 270));
         $this->addAftSystem(new LightLaser(2, 4, 3, 0, 180));
-        $this->addAftSystem(new MediumLaser(3, 6, 5, 0, 120));
+        $this->addAftSystem(new MediumLaser(3, 6, 5, 0, 60));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 4, 40));
-        $this->addAftSystem(new Structure( 4, 40));
-        $this->addPrimarySystem(new Structure( 5, 45));
+        $this->addFrontSystem(new Structure( 4, 35));
+        $this->addAftSystem(new Structure( 4, 34));
+        $this->addPrimarySystem(new Structure( 5, 36));
 		
         $this->hitChart = array(
             0=> array(

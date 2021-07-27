@@ -4,11 +4,11 @@ class SalbezJertkatRefit extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 550;
+	$this->pointCost = 590;
 	$this->faction = "ZNexus Playtest Sal-bez";
         $this->phpclass = "SalbezJertkatRefit";
         $this->imagePath = "img/ships/Nexus/salbez_jertkat.png";
-        $this->shipClass = "Jer't'kat Heavy Cruiser (2118 refit)";
+        $this->shipClass = "Jer't'kat Heavy Cruiser (2143 refit)";
 			$this->variantOf = "Jer't'kat Heavy Cruiser";
 			$this->occurence = "common";
         $this->shipSizeClass = 3;
@@ -17,7 +17,7 @@ class SalbezJertkatRefit extends BaseShip{
 
         $this->fighters = array("normal"=>6);
 
-		$this->isd = 2118;
+		$this->isd = 2143;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
@@ -52,21 +52,23 @@ class SalbezJertkatRefit extends BaseShip{
         $this->addLeftSystem(new MediumLaser(3, 6, 5, 240, 360));
         $this->addLeftSystem(new NexusSwarmTorpedo(3, 4, 2, 240, 360));
 		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 60));
+		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 60));
 		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 120, 300));
         $this->addLeftSystem(new Thruster(3, 15, 0, 4, 3));
 
         $this->addRightSystem(new MediumLaser(3, 6, 5, 0, 120));
         $this->addRightSystem(new NexusSwarmTorpedo(3, 4, 2, 0, 120));
 		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 300, 120));
+		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 300, 120));
 		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 60, 240));
         $this->addRightSystem(new Thruster(3, 15, 0, 4, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure(4, 36));
-        $this->addAftSystem(new Structure(4, 36));
-        $this->addLeftSystem(new Structure(4, 36));
-        $this->addRightSystem(new Structure(4, 36));
-        $this->addPrimarySystem(new Structure(5, 36));
+        $this->addFrontSystem(new Structure(4, 40));
+        $this->addAftSystem(new Structure(4, 40));
+        $this->addLeftSystem(new Structure(4, 40));
+        $this->addRightSystem(new Structure(4, 40));
+        $this->addPrimarySystem(new Structure(5, 40));
 		
 		$this->hitChart = array(
 			0=> array(

@@ -62,11 +62,13 @@ if (isset($_SESSION["user"])) {
         <br>
 -->        
 		
-		---------- <b>LATEST NEWS - June 2021</b> ----------	    
-	    <br><b><u>Minbari Protectorate</u></b> - courtesy of Geoffrey
-	    <br><b><u>Vorlon Power Capacitor fixed</u></b> - <font color="red"><b><big>ctrl+F5</big></b></font> necessary for fix to work!
-	    <br><b><u>chat modified</u></b> - 'In game/Global' indicator was skipped as unnecessary, so there's more room for actual chat :)
-	    <br><b><u>24.06</u></b> - LOTS of changes by Geoffrey, enjoy!
+		---------- <b>LATEST NEWS - July 2021</b> ----------	   
+	    <br><b><u>Minbari unit types</u></b> - thanks to Geoffrey, Minbari units now are listed not just with class names, but with types too!
+	    <br><b><u>SW shields can (somewhat) stop Matter</u></b> - balance change, not affecting in-universe clashes
+		
+	    <br><b><u>Escalation Wars and Nexus updates</u></b> - The Kastan Monarchy and Blood Swords Raiders join the Escalation Wars, while the Sal-bez Coalition has been fully updated.
+	    <br><b><u>EA force list update</u></b> - The EA list has been split into separate early and modern forces.
+		
 
 
 	    

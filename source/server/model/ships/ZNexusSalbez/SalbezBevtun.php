@@ -31,19 +31,19 @@ class SalbezBevtun extends BaseShip{
         $this->pivotcost = 4;
         $this->iniativebonus = 0;
         
-        $this->addPrimarySystem(new Reactor(3, 25, 0, 0));
+        $this->addPrimarySystem(new Reactor(3, 20, 0, 0));
         $this->addPrimarySystem(new CnC(3, 16, 0, 0));
-        $this->addPrimarySystem(new ELINTScanner(3, 25, 5, 5));
-        $this->addPrimarySystem(new Engine(3, 15, 0, 8, 4));
+        $this->addPrimarySystem(new ELINTScanner(3, 25, 6, 5));
+        $this->addPrimarySystem(new Engine(3, 18, 0, 8, 4));
 		$this->addPrimarySystem(new Hangar(2, 18));
 		$this->addPrimarySystem(new CargoBay(2, 30));
 		
         $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
-		$this->addFrontSystem(new LaserCutter(2, 6, 4, 300, 60));
-		$this->addFrontSystem(new LaserCutter(2, 6, 4, 300, 60));
-		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 240, 60));
-		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 300, 120));
+		$this->addFrontSystem(new NexusIndustrialLaser(2, 6, 3, 300, 60));
+		$this->addFrontSystem(new NexusIndustrialLaser(2, 6, 3, 300, 60));
+		$this->addFrontSystem(new NexusParticleGrid(1, 3, 1, 240, 60));
+		$this->addFrontSystem(new NexusParticleGrid(1, 3, 1, 300, 120));
 		$this->addFrontSystem(new CargoBay(2, 30));
 		$this->addFrontSystem(new CargoBay(2, 30));
 
@@ -51,23 +51,23 @@ class SalbezBevtun extends BaseShip{
         $this->addAftSystem(new Thruster(2, 16, 0, 2, 2));
         $this->addAftSystem(new Thruster(2, 16, 0, 2, 2));
         $this->addAftSystem(new Thruster(2, 16, 0, 2, 2));
-		$this->addAftSystem(new LightLaser(2, 4, 3, 180, 360));
-		$this->addAftSystem(new LightLaser(2, 4, 3, 0, 180));
-		$this->addAftSystem(new CargoBay(2, 30));
+		$this->addAftSystem(new NexusIndustrialLaser(2, 6, 3, 120, 240));
+		$this->addAftSystem(new NexusIndustrialLaser(2, 6, 3, 120, 240));
+		$this->addAftSystem(new CargoBay(2, 50));
 		$this->addAftSystem(new JumpEngine(4, 20, 5, 50));
 
-        $this->addLeftSystem(new LaserCutter(2, 6, 4, 240, 360));
-		$this->addLeftSystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
-		$this->addLeftSystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
-		$this->addLeftSystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
+        $this->addLeftSystem(new NexusIndustrialLaser(2, 6, 3, 240, 360));
+		$this->addLeftSystem(new NexusParticleGrid(1, 3, 1, 180, 360));
+		$this->addLeftSystem(new NexusParticleGrid(1, 3, 1, 180, 360));
+		$this->addLeftSystem(new NexusParticleGrid(1, 3, 1, 180, 360));
         $this->addLeftSystem(new Thruster(2, 20, 0, 4, 3));
 		$this->addLeftSystem(new CustomIndustrialGrappler(2, 5, 0, 300, 0));
 		$this->addLeftSystem(new CargoBay(2, 30));
 
-        $this->addRightSystem(new LaserCutter(2, 6, 4, 0, 120));
-		$this->addRightSystem(new LightParticleBeamShip(1, 2, 1, 0, 180));
-		$this->addRightSystem(new LightParticleBeamShip(1, 2, 1, 0, 180));
-		$this->addRightSystem(new LightParticleBeamShip(1, 2, 1, 0, 180));
+        $this->addRightSystem(new NexusIndustrialLaser(2, 6, 3, 0, 120));
+		$this->addRightSystem(new NexusParticleGrid(1, 3, 1, 0, 180));
+		$this->addRightSystem(new NexusParticleGrid(1, 3, 1, 0, 180));
+		$this->addRightSystem(new NexusParticleGrid(1, 3, 1, 0, 180));
         $this->addRightSystem(new Thruster(2, 20, 0, 4, 4));
 		$this->addRightSystem(new CustomIndustrialGrappler(2, 5, 0, 0, 60));
 		$this->addRightSystem(new CargoBay(2, 30));
@@ -91,15 +91,15 @@ class SalbezBevtun extends BaseShip{
 			),
 			1=> array(
 					4 => "Thruster",
-					6 => "Laser Cutter",
-					8 => "Light Particle Beam",
+					6 => "Industrial Laser",
+					8 => "Particle Grid",
 					11 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
 					5 => "Thruster",
-					7 => "Light Laser",
+					7 => "Industrial Laser",
 					9 => "Cargo Bay",
 					11 => "Jump Engine",
 					18 => "Structure",
@@ -107,19 +107,19 @@ class SalbezBevtun extends BaseShip{
 			),
 			3=> array(
 					3 => "Thruster",
-					5 => "Laser Cutter",
-					7 => "Light Particle Beam",
+					5 => "Industrial Laser",
+					7 => "Particle Grid",
 					8 => "Industrial Grappler",
-					11 => "Cargo Bay",
+					10 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					3 => "Thruster",
-					5 => "Laser Cutter",
-					7 => "Light Particle Beam",
+					5 => "Industrial Laser",
+					7 => "Particle Grid",
 					8 => "Industrial Grappler",
-					11 => "Cargo Bay",
+					10 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
 			),
