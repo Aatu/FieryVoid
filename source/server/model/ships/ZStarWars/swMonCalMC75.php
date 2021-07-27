@@ -59,8 +59,8 @@ class swMonCalMC75 extends BaseShip{
 	$this->addAftSystem(new Thruster(3, 16, 0, 4, 2));
 	$this->addAftSystem(new Thruster(3, 14, 0, 3, 2));
  	$this->addAftSystem(new SWRayShield(3,18,6,3,120,240)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-	$this->addAftSystem(new SWHeavyIon(3, 120, 240, 1)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addAftSystem(new SWHeavyIon(3, 120, 240, 1)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addAftSystem(new SWHeavyIon(3, 60, 300, 1)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addAftSystem(new SWHeavyIon(3, 60, 300, 1)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWMediumLaser(2, 120, 300, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWMediumLaser(2, 60, 240, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWTractorBeam(2,180,300,1));
