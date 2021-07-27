@@ -401,6 +401,70 @@ class EWHeavyGatlingLaser extends Pulse{
     }  // endof EWLightLaserBeam
 
 
+
+
+    class EWLaserBoltFtr extends LinkedWeapon{
+
+        public $name = "EWLaserBoltFtr";
+        public $iconPath = "EWLightLaserBeam.png";
+        public $displayName = "Ultralight Laser Bolt";
+		
+        public $animation = "trail";
+        public $animationColor = array(220, 60, 120);
+		public $trailColor = array(220, 60, 120);
+        public $animationExplosionScale = 0.1;
+        public $animationWidth = 3;
+//        public $animationWidth2 = 0.3;
+		public $trailLength = 10;
+        public $uninterceptable = true; // This is a laser        
+        public $intercept = 2;
+		public $ballisticIntercept = true;
+		
+        public $priority = 3;
+
+        public $loadingtime = 1;
+        public $shots = 2;
+        public $defaultShots = 2;
+
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+
+        public $damageType = "Standard"; 
+        public $weaponClass = "Laser"; 
+        
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            $this->intercept = $nrOfShots;
+
+            if ($damagebonus >= 3) $this->priority++; //heavier varieties fire later in the queue
+            if ($damagebonus >= 5) $this->priority++;
+            if ($damagebonus >= 7) $this->priority++;
+			
+            if($nrOfShots === 1){
+                $this->iconPath = "EWLightLaserBeamSingle.png";
+            }
+            if($nrOfShots >2){//no special icon for more than 3 linked weapons
+                $this->iconPath = "lightParticleBeam3.png";
+            }
+			
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Laser. Uninterceptable. Able to intercept ballistics.';
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
+        public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
+        public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
+
+    }  // endof EWLaserBoltFtr
+
+
+
     class EWTwinLaserCannon extends Laser{
      
         public $name = "EWTwinLaserCannon";

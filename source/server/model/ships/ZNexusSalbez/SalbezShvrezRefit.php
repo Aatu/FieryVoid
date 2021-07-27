@@ -4,7 +4,7 @@ class SalbezShvrezRefit extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 350;
+        $this->pointCost = 345;
         $this->faction = "ZNexus Playtest Sal-bez";
         $this->phpclass = "SalbezShvrezRefit";
         $this->imagePath = "img/ships/Nexus/salbez_shvrez.png";
@@ -13,7 +13,7 @@ class SalbezShvrezRefit extends MediumShip{
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->canvasSize = 75;
-	    $this->isd = 2119;
+	    $this->isd = 2143;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
@@ -33,11 +33,11 @@ class SalbezShvrezRefit extends MediumShip{
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4));        
         $this->addPrimarySystem(new Hangar(2, 2));
         
-		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
+		$this->addFrontSystem(new MediumLaser(3, 6, 5, 240, 360));
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 270, 90));
 		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 120));
 		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 120));
-		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
+		$this->addFrontSystem(new MediumLaser(3, 6, 5, 0, 120));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	    

@@ -39,7 +39,7 @@ class KastanTrident extends FighterFlight{
             $fighter->imagePath = "img/ships/EscalationWars/KastanTrident.png";
             $fighter->iconPath = "img/ships/EscalationWars/KastanTrident_large.png";
 
-			$gun = new EWLightLaserBeam(330, 30, 1, 3);
+			$gun = new EWLaserBoltFtr(330, 30, 1, 3);
 			$gun->displayName = "Ultralight Laser Bolt";
 			$fighter->addFrontSystem($gun);
 
