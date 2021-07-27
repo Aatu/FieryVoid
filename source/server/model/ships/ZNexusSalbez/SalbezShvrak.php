@@ -4,7 +4,7 @@ class SalbezShvrak extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 175;
+        $this->pointCost = 250;
         $this->faction = "ZNexus Playtest Sal-bez";
         $this->phpclass = "SalbezShvrak";
         $this->imagePath = "img/ships/Nexus/salbez_mining_frigate.png";
@@ -23,23 +23,23 @@ class SalbezShvrak extends MediumShip{
         $this->pivotcost = 2;
         $this->iniativebonus = 60;
          
-        $this->addPrimarySystem(new Reactor(3, 7, 0, 0));
+        $this->addPrimarySystem(new Reactor(3, 9, 0, 0));
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 9, 3, 3));
-        $this->addPrimarySystem(new Engine(3, 9, 0, 4, 2));
-        $this->addPrimarySystem(new Thruster(2, 8, 0, 2, 3));
-        $this->addPrimarySystem(new Thruster(2, 8, 0, 2, 4));        
+        $this->addPrimarySystem(new Scanner(3, 9, 3, 4));
+        $this->addPrimarySystem(new Engine(3, 9, 0, 6, 2));
+        $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 3));
+        $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 4));        
         $this->addPrimarySystem(new Hangar(2, 1));
         
-		$this->addFrontSystem(new CustomIndustrialGrappler(3, 5, 0, 300, 60));
-		$this->addFrontSystem(new LaserCutter(1, 6, 4, 300, 60));
-		$this->addFrontSystem(new LaserCutter(1, 6, 4, 300, 60));
-        $this->addFrontSystem(new Thruster(2, 10, 0, 4, 1));
+		$this->addFrontSystem(new NexusBoltTorpedo(2, 5, 2, 300, 60));
+		$this->addFrontSystem(new NexusIndustrialLaser(2, 6, 3, 240, 360));
+		$this->addFrontSystem(new NexusIndustrialLaser(2, 6, 3, 0, 120));
+        $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
 	    
-		$this->addAftSystem(new LightParticleBeamShip(0, 2, 1, 180, 360));
-		$this->addAftSystem(new LightParticleBeamShip(0, 2, 1, 0, 180));
+		$this->addAftSystem(new NexusParticleGrid(1, 3, 1, 180, 360));
+		$this->addAftSystem(new NexusParticleGrid(1, 3, 1, 0, 180));
 		$this->addAftSystem(new CargoBay(1, 16));
-        $this->addAftSystem(new Thruster(2, 15, 0, 4, 2));    
+        $this->addAftSystem(new Thruster(2, 15, 0, 6, 2));    
        
         $this->addPrimarySystem(new Structure(3, 36));
 
@@ -56,9 +56,9 @@ class SalbezShvrak extends MediumShip{
 		),
 
 		1=> array(
-			6 => "Thruster",
-			9 => "Laser Cutter",
-			10 => "Industrial Grappler",
+			5 => "Thruster",
+			8 => "Industrial Laser",
+			9 => "Bolt Torpedo",
 			17 => "Structure",
 			20 => "Primary",
 		),
@@ -66,7 +66,7 @@ class SalbezShvrak extends MediumShip{
 		2=> array(
 			6 => "Thruster",
 			8 => "Cargo Bay",
-			10 => "Light Particle Beam",
+			10 => "Particle Grid",
 			17 => "Structure",
 			20 => "Primary",
 		),

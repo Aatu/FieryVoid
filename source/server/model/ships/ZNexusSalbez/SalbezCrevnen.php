@@ -19,7 +19,7 @@ class SalbezCrevnen extends FighterFlight{
         $this->offensivebonus = 3;
         $this->jinkinglimit = 0;
         $this->turncost = 0.33;
-		$this->turndelay = 0.2;
+		$this->turndelaycost = 0.2;
         
         $this->iniativebonus = 80;
         $this->populate();       

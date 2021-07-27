@@ -39,7 +39,7 @@ class KobolViperMk7 extends FighterFlight{
             $frontGun = new PairedParticleGun(330, 30, 3);
             $frontGun->displayName = "MEC Cannon Mk2";
 
-            $missileRack1 = new FighterMissileRack(3, 330, 30);
+/*            $missileRack1 = new FighterMissileRack(3, 330, 30);
             $missileRack1->firingModes = array(
                 1 => "FY"
             );
@@ -56,11 +56,12 @@ class KobolViperMk7 extends FighterFlight{
             $missileRack2->missileArray = array(
                 1 => new MissileFY(330, 30)
             );
+*/
 
-//            $fighter->addFrontSystem(new FighterMissileRack(2, 330, 30));
-            $fighter->addFrontSystem($missileRack1);
+            $fighter->addFrontSystem(new FighterMissileRack(2, 330, 30));
+//            $fighter->addFrontSystem($missileRack1);
             $fighter->addFrontSystem($frontGun);
-            $fighter->addFrontSystem($missileRack2);
+//            $fighter->addFrontSystem($missileRack2);
 //            $fighter->addFrontSystem(new FighterMissileRack(2, 330, 30));
 
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack	

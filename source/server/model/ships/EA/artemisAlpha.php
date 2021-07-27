@@ -13,8 +13,6 @@ class ArtemisAlpha extends HeavyCombatVessel{
         $this->variantOf = "Artemis Heavy Frigate (Beta)";
         $this->isd = 2168;
 
-        $this->limited = 33;
-        
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
         

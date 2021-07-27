@@ -4,7 +4,7 @@ class SalbezEsver extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 150;
+        $this->pointCost = 175;
         $this->faction = "ZNexus Playtest Sal-bez";
         $this->phpclass = "SalbezEsver";
         $this->imagePath = "img/ships/Nexus/salbez_evsk.png";
@@ -13,7 +13,7 @@ class SalbezEsver extends LCV{
 			$this->variantOf = "Ev'sk Mining Cutter";
 			$this->occurence = "common";
 		$this->unofficial = true;
-			$this->isd = 2082;
+			$this->isd = 2103;
 
         $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
 	    $this->notes = 'May deploy independently.';
@@ -40,10 +40,9 @@ class SalbezEsver extends LCV{
 		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
         $this->addPrimarySystem(new AntiquatedScanner(3, 12, 2, 4));
 		$this->addPrimarySystem(new Engine(3, 12, 0, 6, 3));
-		$this->addPrimarySystem(new LaserCutter(2, 6, 4, 300, 60));
-		$this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
-		$this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 0, 180));
-		$this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 270, 90));
+		$this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 120, 60));
+		$this->addPrimarySystem(new LaserCutter(1, 6, 4, 300, 60));
+		$this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 300, 240));
 	    
 	    
         $this->addPrimarySystem(new Structure(3, 30));

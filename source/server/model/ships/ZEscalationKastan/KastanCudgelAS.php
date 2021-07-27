@@ -38,7 +38,7 @@ class KastanCudgelAS extends FighterFlight{
             $fighter->imagePath = "img/ships/EscalationWars/KastanKatana.png";
             $fighter->iconPath = "img/ships/EscalationWars/KastanKatana_large.png";
 			
-			$gun = new EWLightLaserBeam(330, 30, 2, 1);
+			$gun = new EWLaserBoltFtr(330, 30, 2, 1);
 			$gun->displayName = "Light Laser Bolt";
 			$fighter->addFrontSystem($gun);
 			
