@@ -4,7 +4,7 @@ class ColonialOrion extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 725;
+		$this->pointCost = 700;
 		$this->faction = "ZPlaytest BSG Colonials";
         $this->phpclass = "ColonialOrion";
         $this->imagePath = "img/ships/BSG/ColonialOrion.png";
@@ -20,17 +20,17 @@ class ColonialOrion extends HeavyCombatVessel{
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
         
-        $this->turncost = 0.66;
-        $this->turndelaycost = 0.66;
+        $this->turncost = 1;
+        $this->turndelaycost = 1;
         $this->accelcost = 3;
-        $this->rollcost = 2;
-        $this->pivotcost = 2;
-		$this->iniativebonus = 30;
+        $this->rollcost = 4;
+        $this->pivotcost = 4;
+		$this->iniativebonus = 25;
          
-        $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
-        $this->addPrimarySystem(new CnC(3, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 12, 5, 6));
-        $this->addPrimarySystem(new Engine(4, 16, 0, 10, 3));
+        $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
+        $this->addPrimarySystem(new CnC(5, 8, 0, 0));
+        $this->addPrimarySystem(new Scanner(4, 12, 5, 6));
+        $this->addPrimarySystem(new Engine(4, 16, 0, 8, 3));
         $this->addPrimarySystem(new BSGFlakBattery(3, 6, 2, 0, 360));
         $this->addPrimarySystem(new BSGFlakBattery(3, 6, 2, 0, 360));
 		$this->addPrimarySystem(new Thruster(3, 9, 0, 3, 3));
@@ -48,8 +48,10 @@ class ColonialOrion extends HeavyCombatVessel{
 		$this->addFrontSystem(new RapidGatling(4, 4, 1, 270, 90));
 		$this->addFrontSystem(new RapidGatling(4, 4, 1, 270, 90));
 		$this->addFrontSystem(new RapidGatling(4, 4, 1, 270, 90));
+		$this->addFrontSystem(new RapidGatling(4, 4, 1, 270, 90));
 		$this->addFrontSystem(new Bulkhead(0, 5));
 
+		$this->addAftSystem(new RapidGatling(4, 4, 1, 90, 270));
 		$this->addAftSystem(new RapidGatling(4, 4, 1, 90, 270));
 		$this->addAftSystem(new RapidGatling(4, 4, 1, 90, 270));
 		$this->addAftSystem(new RapidGatling(4, 4, 1, 90, 270));
@@ -57,13 +59,13 @@ class ColonialOrion extends HeavyCombatVessel{
 		$this->addAftSystem(new BSGMedBattery(4, 7, 4, 180, 240));
 		$this->addAftSystem(new BSGMedBattery(4, 7, 4, 120, 180));
 		$this->addAftSystem(new Bulkhead(0, 5));
-        $this->addAftSystem(new Thruster(3, 12, 0, 3, 2));    
+        $this->addAftSystem(new Thruster(3, 12, 0, 2, 2));    
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));   
-        $this->addAftSystem(new Thruster(3, 12, 0, 3, 2)); 
+        $this->addAftSystem(new Thruster(3, 12, 0, 2, 2)); 
        
         $this->addPrimarySystem(new Structure(5, 60));
-		$this->addAftSystem(new Structure(5, 50));
-        $this->addPrimarySystem(new Structure(5, 50 ));
+		$this->addAftSystem(new Structure(5, 60));
+        $this->addPrimarySystem(new Structure(5, 60 ));
 
 	//d20 hit chart
 	$this->hitChart = array(

@@ -20,13 +20,12 @@ class ColonialJupiterClass extends BaseShip{
 		$this->notes = 'Primary users: Colonial Fleet';
         $this->notes .= '<br>Python capable';
 		$this->isd = 1948;
-
         
         $this->forwardDefense = 17;
-        $this->sideDefense = 20;
+        $this->sideDefense = 19;
         
-        $this->turncost = 1.5;
-        $this->turndelaycost = 1.5;
+        $this->turncost = 1.25;
+        $this->turndelaycost = 1.25;
         $this->accelcost = 4;
         $this->rollcost = 4;
         $this->pivotcost = 6;
@@ -74,6 +73,7 @@ class ColonialJupiterClass extends BaseShip{
 		$this->addLeftSystem(new Bulkhead(0, 6));
 		$this->addLeftSystem(new Bulkhead(0, 6));
         $this->addLeftSystem(new BSGMainBattery(6, 9, 6, 210, 330));
+        $this->addLeftSystem(new BSGMainBattery(6, 9, 6, 210, 330));
         $this->addLeftSystem(new BSGFlakBattery(6, 6, 2, 180, 360));
         $this->addLeftSystem(new BSGFlakBattery(6, 6, 2, 180, 360));
 		$this->addLeftSystem(new BSGMedBattery(6, 7, 4, 180, 360));
@@ -87,6 +87,7 @@ class ColonialJupiterClass extends BaseShip{
         $this->addRightSystem(new Thruster(6, 18, 0, 3, 4));
 		$this->addRightSystem(new Bulkhead(0, 6));
 		$this->addRightSystem(new Bulkhead(0, 6));
+        $this->addRightSystem(new BSGMainBattery(6, 9, 6, 30, 150));
         $this->addRightSystem(new BSGMainBattery(6, 9, 6, 30, 150));
         $this->addRightSystem(new BSGFlakBattery(6, 6, 2, 0, 180));
         $this->addRightSystem(new BSGFlakBattery(6, 6, 2, 0, 180));

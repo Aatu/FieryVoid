@@ -48,8 +48,8 @@ class KobolJupiter extends BaseShip{
 		
         $this->addFrontSystem(new Thruster(4, 9, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 9, 0, 4, 1));
-		$this->addFrontSystem(new Bulkhead(0, 4));
-		$this->addFrontSystem(new Bulkhead(0, 4));
+//		$this->addFrontSystem(new Bulkhead(0, 4));
+//		$this->addFrontSystem(new Bulkhead(0, 4));
         $this->addFrontSystem(new Railgun(5, 9, 6, 330, 30));
         $this->addFrontSystem(new Railgun(5, 9, 6, 330, 30));
 		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 240, 120));
@@ -63,8 +63,8 @@ class KobolJupiter extends BaseShip{
         $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
-		$this->addAftSystem(new Bulkhead(0, 4));
-		$this->addAftSystem(new Bulkhead(0, 4));
+//		$this->addAftSystem(new Bulkhead(0, 4));
+//		$this->addAftSystem(new Bulkhead(0, 4));
 		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 60, 300));
 		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 60, 300));
 		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 60, 300));

@@ -7,11 +7,11 @@ class technicalTargetDrone extends BaseShip{
 		$this->pointCost = 10;
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
-		$this->imagePath = "img/ships/BASurveyShip.png";
-//		$this->imagePath = "img/ships/dsharda.png";
+//		$this->imagePath = "img/ships/BASurveyShip.png";
+		$this->imagePath = "img/ships/StarTrek/EnterpriseNX.png";
 		$this->shipClass = "Target Drone - DO NOT USE";
-		$this->shipSizeClass = 3;
-//		$this->canvasSize = 75; //img has 125px per side
+//		$this->shipSizeClass = 3;
+		$this->canvasSize = 75; //img has 125px per side
 		$this->forwardDefense = 20;
 		$this->sideDefense = 20;
 		$this->fighters = array("light"=>12);        
@@ -43,8 +43,8 @@ class technicalTargetDrone extends BaseShip{
 		
 		//new weapon showcase
 		
-//		$this->addFrontSystem(new BSGParticleBeam(3, 4, 1, 270, 90));
-//		$this->addFrontSystem(new BSGParticleBeam(3, 4, 1, 270, 90));
+		$this->addFrontSystem(new FlakArray2(3, 6, 3, 270, 90));
+		$this->addFrontSystem(new FlakArray2(3, 6, 3, 270, 90));
 //		$this->addFrontSystem(new PlasmaWaveTorpedo(3, 0, 0, 300, 60));
 		//$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));
 		//$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));

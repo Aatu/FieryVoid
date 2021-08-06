@@ -333,6 +333,7 @@ spl_autoload_register(
                 'govall' => '/server/model/ships/llort/govall.php',
                 'govallfull' => '/server/model/ships/llort/govallFull.php',
                 'gquan' => '/server/model/ships/narn/gquan.php',
+//                'gquell' => '/server/model/ships/narn/Gquell.php',
                 'gquonth' => '/server/model/ships/narn/gquonth.php',
                 'graemlar' => '/server/model/ships/llort/graemlar.php',
                 'gravitic' => '/server/model/weapons/gravitic.php',
@@ -1682,6 +1683,7 @@ spl_autoload_register(
 					//ships
                 'colonialalliance' => '/server/model/ships/ZBSGColonials/ColonialAlliance.php',
                 'colonialberserkclasscarrier' => '/server/model/ships/ZBSGColonials/ColonialBerserkClassCarrier.php',
+                'colonialfreya' => '/server/model/ships/ZBSGColonials/ColonialFreya.php',
                 'colonialjanuscruiser' => '/server/model/ships/ZBSGColonials/ColonialJanusCruiser.php',
                 'colonialjupiterclass' => '/server/model/ships/ZBSGColonials/ColonialJupiterClass.php',
                 'coloniallokiclass' => '/server/model/ships/ZBSGColonials/ColonialLokiClass.php',
@@ -1705,6 +1707,7 @@ spl_autoload_register(
 				//Battlestar Galactica - Kirill
 					//weapons
                 'flakarray' => '/server/model/weapons/customBSG.php',
+                'flakarray2' => '/server/model/weapons/customBSG.php',
                 'sensorspearftr' => '/server/model/weapons/customBSG.php',
 					//ships
                 'koboljupiter' => '/server/model/ships/ZBSGKobol/KobolJupiter.php',
@@ -2148,6 +2151,14 @@ spl_autoload_register(
 				//other				
 				'apollostrike' => '/server/model/ships/EA/apollostrike.php',
 			
+
+
+				//Star Trek conversions
+				//weapons
+				'trekphasecannon' => '/server/model/weapons/customTrek.php',
+                'trekwarpdrive' => '/server/model/weapons/customTrek.php',
+				
+				'federationconstitution' => '/server/model/ships/customs/FederationConstitution.php',
 		    		
 		    
 		    
