@@ -43,13 +43,13 @@ class KobolJupiter extends BaseShip{
 //		$this->addPrimarySystem(new Bulkhead(0, 4));
 //        $this->addPrimarySystem(new Bulkhead(0, 4));
 		$hyperdrive = new JumpEngine(5, 16, 6, 20);
-			$hyperdrive->displayName = 'Phasing Drive';
+			$hyperdrive->displayName = 'FTL Drive';
 			$this->addPrimarySystem($hyperdrive);
 		
         $this->addFrontSystem(new Thruster(4, 9, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 9, 0, 4, 1));
-//		$this->addFrontSystem(new Bulkhead(0, 4));
-//		$this->addFrontSystem(new Bulkhead(0, 4));
+		$this->addFrontSystem(new Bulkhead(0, 4));
+		$this->addFrontSystem(new Bulkhead(0, 4));
         $this->addFrontSystem(new Railgun(5, 9, 6, 330, 30));
         $this->addFrontSystem(new Railgun(5, 9, 6, 330, 30));
 		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 240, 120));
@@ -63,8 +63,8 @@ class KobolJupiter extends BaseShip{
         $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
-//		$this->addAftSystem(new Bulkhead(0, 4));
-//		$this->addAftSystem(new Bulkhead(0, 4));
+		$this->addAftSystem(new Bulkhead(0, 4));
+		$this->addAftSystem(new Bulkhead(0, 4));
 		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 60, 300));
 		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 60, 300));
 		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 60, 300));
@@ -112,7 +112,7 @@ class KobolJupiter extends BaseShip{
 					12 => "Scanner",
 					15 => "Engine",
 					17 => "Reactor",
-					19 => "Phasing Drive",
+					19 => "FTL Drive",
 					20 => "C&C",
 			),
 			1=> array(

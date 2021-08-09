@@ -1710,12 +1710,19 @@ spl_autoload_register(
                 'flakarray2' => '/server/model/weapons/customBSG.php',
                 'sensorspearftr' => '/server/model/weapons/customBSG.php',
 					//ships
+                'koboladamant' => '/server/model/ships/ZBSGKobol/KobolAdamant.php',
+                'kobolartemis' => '/server/model/ships/ZBSGKobol/KobolArtemis.php',
+                'kobolatlas' => '/server/model/ships/ZBSGKobol/KobolAtlas.php',
+                'kobolberserk' => '/server/model/ships/ZBSGKobol/KobolBerserk.php',
+                'koboljanus' => '/server/model/ships/ZBSGKobol/KobolJanus.php',
                 'koboljupiter' => '/server/model/ships/ZBSGKobol/KobolJupiter.php',
                 'kobolmanticore' => '/server/model/ships/ZBSGKobol/KobolManticore.php',
                 'kobolmercury' => '/server/model/ships/ZBSGKobol/KobolMercury.php',
                 'kobolminerva' => '/server/model/ships/ZBSGKobol/KobolMinerva.php',
+                'kobolminotaur' => '/server/model/ships/ZBSGKobol/KobolMinotaur.php',
                 'kobolorion' => '/server/model/ships/ZBSGKobol/KobolOrion.php',
                 'kobolvalkyrie' => '/server/model/ships/ZBSGKobol/KobolValkyrie.php',
+                'kobolranger' => '/server/model/ships/ZBSGKobol/KobolRanger.php',
                 'kobolraptor' => '/server/model/ships/ZBSGKobol/KobolRaptor.php',
                 'kobolvipermk2' => '/server/model/ships/ZBSGKobol/KobolViperMk2.php',
                 'kobolvipermk7' => '/server/model/ships/ZBSGKobol/KobolViperMk7.php',
@@ -2156,9 +2163,14 @@ spl_autoload_register(
 				//Star Trek conversions
 				//weapons
 				'trekphasecannon' => '/server/model/weapons/customTrek.php',
+				'trekphotonictorp' => '/server/model/weapons/customTrek.php',
+				
+				//systems
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php',
 				
+				//ships
 				'federationconstitution' => '/server/model/ships/customs/FederationConstitution.php',
+				'federationnxwarcruiser' => '/server/model/ships/customs/FederationNXWarCruiser.php',
 		    		
 		    
 		    

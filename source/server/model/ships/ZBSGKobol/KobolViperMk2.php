@@ -4,7 +4,7 @@ class KobolViperMk2 extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 180;
+        $this->pointCost = 210;
         $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolViperMk2";
         $this->shipClass = "Viper Mk-2 flight";
@@ -12,12 +12,12 @@ class KobolViperMk2 extends FighterFlight{
 //	    $this->isd = 2212;
  		$this->unofficial = true;
 	    
-        $this->forwardDefense = 6;
-        $this->sideDefense = 7;
+        $this->forwardDefense = 4;
+        $this->sideDefense = 6;
         $this->freethrust = 11;
-        $this->offensivebonus = 3;
+        $this->offensivebonus = 2;
         $this->jinkinglimit = 10;
-        $this->turncost = 0.33;
+        $this->turncost = 0.25;
         
 	$this->iniativebonus = 100;
         $this->populate();
@@ -30,13 +30,13 @@ class KobolViperMk2 extends FighterFlight{
         $toAdd = $new - $current;
 
         for ($i = 0; $i < $toAdd; $i++){
-            $armour = array(2, 1, 2, 2);
+            $armour = array(2, 2, 2, 2);
             $fighter = new Fighter("KobolViperMk2", $armour, 7, $this->id);
             $fighter->displayName = "Vipper Mk2";
             $fighter->imagePath = "img/ships/BSG/viperMk2.png";
             $fighter->iconPath = "img/ships/BSG/viperMk2_large.png";
 
-            $missileRack = new FighterMissileRack(2, 330, 30);
+            $missileRack = new FighterMissileRack(1, 330, 30);
             $missileRack->firingModes = array(
                 1 => "FY"
             );
@@ -45,11 +45,10 @@ class KobolViperMk2 extends FighterFlight{
                 1 => new MissileFY(330, 30)
             );
 
-            $frontGun = new PairedParticleGun(330, 30, 2);
-            $frontGun->displayName = "MEC Cannon";
+            $frontGun = new LightScattergun(330, 30); //always a single mount for this weapon
+            $fighter->addFrontSystem($frontGun);
 
             $fighter->addFrontSystem($missileRack);
-            $fighter->addFrontSystem($frontGun);
 
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack	
             $this->addSystem($fighter);

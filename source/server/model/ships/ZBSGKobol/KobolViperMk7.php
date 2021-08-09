@@ -7,17 +7,17 @@ class KobolViperMk7 extends FighterFlight{
         $this->pointCost = 360;
         $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolViperMk7";
-        $this->shipClass = "Viper Mk-7 flight (2212)";
+        $this->shipClass = "Viper Mk-7 flight";
         $this->imagePath = "img/ships/BSG/viperMk7.png";
 	    $this->isd = 2212;
  		$this->unofficial = true;
 	    
         $this->forwardDefense = 6;
         $this->sideDefense = 7;
-        $this->freethrust = 15;
-        $this->offensivebonus = 4;
+        $this->freethrust = 13;
+        $this->offensivebonus = 5;
         $this->jinkinglimit = 8;
-        $this->turncost = 0.33;
+        $this->turncost = 0.25;
         
 	$this->iniativebonus = 90;
         $this->populate();
@@ -30,14 +30,14 @@ class KobolViperMk7 extends FighterFlight{
         $toAdd = $new - $current;
 
         for ($i = 0; $i < $toAdd; $i++){
-            $armour = array(3, 2, 2, 2);
+            $armour = array(3, 2, 3, 3);
             $fighter = new Fighter("KobolViperMk7", $armour, 10, $this->id);
             $fighter->displayName = "Vipper Mk7";
             $fighter->imagePath = "img/ships/BSG/viperMk7.png";
             $fighter->iconPath = "img/ships/BSG/viperMk7_large.png";
 
-            $frontGun = new PairedParticleGun(330, 30, 3);
-            $frontGun->displayName = "MEC Cannon Mk2";
+            $frontGun = new LightScattergun(330, 30); //always a single mount for this weapon
+            $fighter->addFrontSystem($frontGun);
 
 /*            $missileRack1 = new FighterMissileRack(3, 330, 30);
             $missileRack1->firingModes = array(
@@ -60,7 +60,6 @@ class KobolViperMk7 extends FighterFlight{
 
             $fighter->addFrontSystem(new FighterMissileRack(2, 330, 30));
 //            $fighter->addFrontSystem($missileRack1);
-            $fighter->addFrontSystem($frontGun);
 //            $fighter->addFrontSystem($missileRack2);
 //            $fighter->addFrontSystem(new FighterMissileRack(2, 330, 30));
 

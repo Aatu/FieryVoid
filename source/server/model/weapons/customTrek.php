@@ -131,4 +131,56 @@ class TrekPhaseCannon extends Raking{
 
 
 
+class TrekPhotonicTorp extends Weapon{
+        public $name = "TrekPhotonicTorp";
+        public $displayName = "Photonic Torpedo";
+		    public $iconPath = "TrekPhotonicTorpedo.png";
+        public $animation = "trail";
+        public $trailColor = array(11, 224, 255);
+        public $animationColor = array(50, 50, 50);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 12;
+        public $animationWidth = 4;
+        public $trailLength = 100;    
+
+        public $useOEW = true; //torpedo
+        public $ballistic = true; //missile
+        public $range = 20;
+		public $guns = 1;
+        
+        public $loadingtime = 1; // 1 turn
+        public $rangePenalty = 0;
+        public $fireControl = array(1, 1, 1); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+	    
+	public $priority = 4; //Standard weapon
+	    
+	public $firingMode = 'Ballistic'; //firing mode - just a name essentially
+	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+	 
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Benefits from offensive EW.';			
+        }
+        
+        public function getDamage($fireOrder){ 
+		
+			return Dice::d(6, 2)+6;   
+		}
+
+        public function setMinDamage(){     $this->minDamage = 8;      }
+        public function setMaxDamage(){     $this->maxDamage = 18;      }
+		
+}//endof TrekPhotonicTorp
+
+
+
+
 ?>

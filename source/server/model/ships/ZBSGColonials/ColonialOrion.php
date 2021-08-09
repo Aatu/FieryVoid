@@ -63,7 +63,7 @@ class ColonialOrion extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));   
         $this->addAftSystem(new Thruster(3, 12, 0, 2, 2)); 
        
-        $this->addPrimarySystem(new Structure(5, 60));
+        $this->addFrontSystem(new Structure(5, 60));
 		$this->addAftSystem(new Structure(5, 60));
         $this->addPrimarySystem(new Structure(5, 60 ));
 

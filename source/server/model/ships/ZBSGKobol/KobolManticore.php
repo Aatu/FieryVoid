@@ -34,19 +34,18 @@ class KobolManticore extends MediumShip{
 		$this->addPrimarySystem(new Hangar(4, 2));
 		$this->addPrimarySystem(new Thruster(4, 9, 0, 4, 3));
 		$this->addPrimarySystem(new Thruster(4, 9, 0, 4, 4));        
-//		$this->addPrimarySystem(new Bulkhead(0, 4));
 		$hyperdrive = new JumpEngine(4, 12, 6, 20);
-			$hyperdrive->displayName = 'Phasing Drive';
+			$hyperdrive->displayName = 'FTL Drive';
 			$this->addPrimarySystem($hyperdrive);
 
         $this->addFrontSystem(new MedBlastCannon(4, 5, 2, 300, 60));
         $this->addFrontSystem(new Thruster(4, 9, 0, 4, 1));
 		$this->addFrontSystem(new Bulkhead(0, 4));
 
-		$this->addAftSystem(new LtBlastCannon(4, 4, 1, 120, 240));
-		$this->addAftSystem(new LtBlastCannon(4, 4, 1, 120, 240));
-        $this->addAftSystem(new Thruster(4, 9, 0, 4, 2));    
-        $this->addAftSystem(new Thruster(4, 9, 0, 4, 2));    
+		$this->addAftSystem(new FlakCannon(4, 4, 2, 180, 360));
+		$this->addAftSystem(new FlakCannon(4, 4, 2, 0, 180));
+        $this->addAftSystem(new Thruster(3, 9, 0, 4, 2));    
+        $this->addAftSystem(new Thruster(3, 9, 0, 4, 2));    
 		$this->addAftSystem(new Bulkhead(0, 4));
        
         $this->addPrimarySystem(new Structure(4, 40));
@@ -62,7 +61,7 @@ class KobolManticore extends MediumShip{
 			14 => "Engine",
 			15 => "Hangar",
 			17 => "Reactor",
-			19 => "Phasing Drive",
+			19 => "FTL Drive",
 			20 => "C&C",
 		),
 		1=> array(
@@ -73,7 +72,7 @@ class KobolManticore extends MediumShip{
 		),
 		2=> array(
 			6 => "Thruster",
-			10 => "Light Blast Cannon",
+			10 => "Flak Cannon",
 			18 => "Structure",
 			20 => "Primary",
 		),
