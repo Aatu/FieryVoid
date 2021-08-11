@@ -10,7 +10,7 @@ class KobolArtemis extends BaseShip{
         $this->imagePath = "img/ships/BSG/ColonialArtemis.png";
         $this->shipClass = "Artemis Battlestar";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 180; //img has 200px per side
+		$this->canvasSize = 160; //img has 200px per side
 		$this->unofficial = true;
 
 	    $this->notes = 'May only boost sensors by 2.';

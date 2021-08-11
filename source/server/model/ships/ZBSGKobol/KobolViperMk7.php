@@ -15,7 +15,7 @@ class KobolViperMk7 extends FighterFlight{
         $this->forwardDefense = 6;
         $this->sideDefense = 7;
         $this->freethrust = 13;
-        $this->offensivebonus = 5;
+        $this->offensivebonus = 4;
         $this->jinkinglimit = 8;
         $this->turncost = 0.25;
         
@@ -36,7 +36,8 @@ class KobolViperMk7 extends FighterFlight{
             $fighter->imagePath = "img/ships/BSG/viperMk7.png";
             $fighter->iconPath = "img/ships/BSG/viperMk7_large.png";
 
-            $frontGun = new LightScattergun(330, 30); //always a single mount for this weapon
+            $frontGun = new PairedParticleGun(330, 30, 3);
+            $frontGun->displayName = "MEC Cannon Mk2";
             $fighter->addFrontSystem($frontGun);
 
 /*            $missileRack1 = new FighterMissileRack(3, 330, 30);

@@ -94,7 +94,7 @@ class KobolMercury extends BaseShip{
 		$this->addLeftSystem(new FlakArray(4, 10, 3, 210, 330));
 		$this->addLeftSystem(new FlakArray(4, 10, 3, 210, 330));
 		$this->addLeftSystem(new FlakArray(4, 10, 3, 210, 330));
-		$this->addLeftSystem(new HvyBlastCannon(5, 6, 4, 210, 330));
+		$this->addLeftSystem(new HvyBlastCannon(5, 6, 4, 210, 360));
 		$this->addLeftSystem(new MedBlastCannon(4, 5, 2, 210, 360));
 		$this->addLeftSystem(new MedBlastCannon(4, 5, 2, 210, 360));
 		$this->addLeftSystem(new MedBlastCannon(4, 5, 2, 180, 330));

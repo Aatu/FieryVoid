@@ -15,7 +15,7 @@ class KobolViperMk2 extends FighterFlight{
         $this->forwardDefense = 4;
         $this->sideDefense = 6;
         $this->freethrust = 11;
-        $this->offensivebonus = 2;
+        $this->offensivebonus = 3;
         $this->jinkinglimit = 10;
         $this->turncost = 0.25;
         
@@ -45,11 +45,12 @@ class KobolViperMk2 extends FighterFlight{
                 1 => new MissileFY(330, 30)
             );
 
-            $frontGun = new LightScattergun(330, 30); //always a single mount for this weapon
-            $fighter->addFrontSystem($frontGun);
+            $frontGun = new PairedParticleGun(330, 30, 2);
+            $frontGun->displayName = "MEC Cannon";
 
             $fighter->addFrontSystem($missileRack);
-
+            $fighter->addFrontSystem($frontGun);
+			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack	
             $this->addSystem($fighter);
 		}

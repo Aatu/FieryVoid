@@ -60,9 +60,9 @@ class KobolMinotaur extends BaseShip{
 		$this->addLeftSystem(new Bulkhead(0, 4));
 		$this->addLeftSystem(new FlakCannon(3, 4, 2, 210, 330));
 		$this->addLeftSystem(new FlakCannon(3, 4, 2, 210, 330));
-		$this->addLeftSystem(new MedBlastCannon(4, 5, 2, 210, 360));
-		$this->addLeftSystem(new MedBlastCannon(4, 5, 2, 180, 330));
-		$this->addLeftSystem(new MedBlastCannon(4, 5, 2, 180, 330));
+		$this->addLeftSystem(new MedBlastCannon(4, 5, 2, 210, 330));
+		$this->addLeftSystem(new MedBlastCannon(4, 5, 2, 210, 330));
+		$this->addLeftSystem(new MedBlastCannon(4, 5, 2, 210, 330));
 		$this->addLeftSystem(new LtBlastCannon(4, 4, 1, 210, 330));
 		$this->addLeftSystem(new LtBlastCannon(4, 4, 1, 210, 330));
 		$this->addLeftSystem(new LtBlastCannon(4, 4, 1, 210, 330));
@@ -77,13 +77,13 @@ class KobolMinotaur extends BaseShip{
 		$this->addRightSystem(new FlakCannon(3, 4, 2, 30, 150));
 		$this->addRightSystem(new MedBlastCannon(4, 5, 2, 30, 150));
 		$this->addRightSystem(new MedBlastCannon(4, 5, 2, 30, 150));
-		$this->addRightSystem(new MedBlastCannon(4, 5, 2, 30, 180));
-		$this->addRightSystem(new LtBlastCannon(4, 4, 1, 30, 180));
-		$this->addRightSystem(new LtBlastCannon(4, 4, 1, 30, 180));
-		$this->addRightSystem(new LtBlastCannon(4, 4, 1, 30, 180));
-		$this->addRightSystem(new LtBlastCannon(4, 4, 1, 30, 180));
-		$this->addRightSystem(new LtBlastCannon(4, 4, 1, 30, 180));
-		$this->addRightSystem(new LtBlastCannon(4, 4, 1, 30, 180));
+		$this->addRightSystem(new MedBlastCannon(4, 5, 2, 30, 150));
+		$this->addRightSystem(new LtBlastCannon(4, 4, 1, 30, 150));
+		$this->addRightSystem(new LtBlastCannon(4, 4, 1, 30, 150));
+		$this->addRightSystem(new LtBlastCannon(4, 4, 1, 30, 150));
+		$this->addRightSystem(new LtBlastCannon(4, 4, 1, 30, 150));
+		$this->addRightSystem(new LtBlastCannon(4, 4, 1, 30, 150));
+		$this->addRightSystem(new LtBlastCannon(4, 4, 1, 30, 150));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(7, 80));

@@ -45,10 +45,10 @@ class KobolAtlas extends BaseShip{
 		$this->addFrontSystem(new FlakCannon(3, 4, 2, 240, 120));
 		$this->addFrontSystem(new FlakCannon(3, 4, 2, 240, 120));
 
-        $this->addAftSystem(new Thruster(3, 9, 0, 3, 2));
-        $this->addAftSystem(new Thruster(3, 9, 0, 3, 2));
-        $this->addAftSystem(new Thruster(3, 9, 0, 3, 2));
-        $this->addAftSystem(new Thruster(3, 9, 0, 3, 2));
+        $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
+        $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
+        $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
+        $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
 		$this->addAftSystem(new Bulkhead(0, 4));
 		$this->addAftSystem(new Railgun(4, 9, 6, 150, 270));
 		$this->addAftSystem(new Railgun(4, 9, 6, 90, 210));
