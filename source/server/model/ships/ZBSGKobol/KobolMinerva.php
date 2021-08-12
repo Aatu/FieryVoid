@@ -8,7 +8,7 @@ class KobolMinerva extends BaseShip{
 	$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolMinerva";
         $this->imagePath = "img/ships/BSG/ColonialMinerva.png";
-        $this->shipClass = "Minerva Battlestar";
+        $this->shipClass = "Minerva Battlestar (Alpha prototype)";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 170; //img has 200px per side
 		$this->unofficial = true;

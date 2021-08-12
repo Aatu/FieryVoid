@@ -8,7 +8,7 @@ class KobolAtlas extends BaseShip{
 	$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolAtlas";
         $this->imagePath = "img/ships/BSG/ColonialAtlas.png";
-        $this->shipClass = "Atlas Carrier";
+        $this->shipClass = "Atlas Carrier (Alpha prototype)";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 170; //img has 200px per side
 		$this->unofficial = true;

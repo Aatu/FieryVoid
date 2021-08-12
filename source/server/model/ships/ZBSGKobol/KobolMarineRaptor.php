@@ -1,20 +1,23 @@
 <?php
-class KobolRaptor extends SuperHeavyFighter{
+class KobolMarineRaptor extends SuperHeavyFighter{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 360;
+        $this->pointCost = 420;
         $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
-        $this->phpclass = "KobolRaptor";
-        $this->shipClass = "Raptor (Beta prototype)";
+        $this->phpclass = "KobolMarineRaptor";
+        $this->shipClass = "Marine Assault Raptor (Beta prototype)";
+			$this->variantOf = "Raptor (Beta prototype)";
+			$this->occurence = "common";
         $this->imagePath = "img/ships/BSG/raptor.png";
 //	    $this->isd = ;
 //        $this->canvasSize = 60;
 		$this->unofficial = true;
 
 	    $this->notes = 'Atmospheric.';
-		$this->notes .= '<br>Provides +10 Initiative to all Vipers and Raptor variants within 5 hexes.';
+	    $this->notes .= '<br>Cannot fire both weapons on the same turn.';
+	    $this->notes .= '<br>Gains +10 initiative when within 5 hexes of a standard Raptor.';
 		
         $this->forwardDefense = 8;
         $this->sideDefense = 9;
@@ -40,24 +43,46 @@ class KobolRaptor extends SuperHeavyFighter{
         $toAdd = $new - $current;
 		
 		for ($i = 0; $i < $toAdd; $i++) {
-			$armour = array(2, 1, 2, 2);
+			$armour = array(3, 1, 2, 2);
 			$fighter = new Fighter("raptor", $armour, 20, $this->id);
-			$fighter->displayName = "Raptor";
+			$fighter->displayName = "Marine Raptor";
 			$fighter->imagePath = "img/ships/BSG/raptor.png";
 			$fighter->iconPath = "img/ships/BSG/raptor_large.png";
 
-//            $frontGun = new PairedParticleGun(330, 30, 3);
             $frontGun = new LightScattergun(330, 30); //always a single mount for this weapon
             $frontGun->displayName = "Heavy MEC Cannon";
-//			$ewGun = new SensorSpearFtr(240, 120, 0);
+			$marines = new BSGMarineAssault(0, 360);
 
             $fighter->addFrontSystem($frontGun);
-//			$fighter->addFrontSystem($ewGun);
-        
+			$fighter->addFrontSystem($marines);
+
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
 			$this->addSystem($fighter);
 		}
     }
+
+    public function getInitiativebonus($gamedata){
+        $initiativeBonusRet = parent::getInitiativebonus($gamedata);
+        
+        if($gamedata->turn > 0 && $gamedata->phase >= 0 ){
+            // If within 5 hexes of a Raptor,
+            // each EW Raptor gets +2 initiative.
+            
+            $ships = $gamedata->getShipsInDistance($this, 5);
+
+            foreach($ships as $ship){
+                if(!$ship->isDestroyed()
+                        && ($this->userid == $ship->userid)
+                        && ($ship instanceof KobolRaptor)){
+                    $initiativeBonusRet+=10;
+                    break;
+                }
+            }
+        }
+        
+        return $initiativeBonusRet;
+    }	
+
 
 }

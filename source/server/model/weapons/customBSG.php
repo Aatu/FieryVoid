@@ -67,7 +67,7 @@ class BSGLtKineticEnergyWeapon extends Pulse{
         public $projectilespeed = 18;
         public $animationExplosionScale = 0.10;
 
-	protected $useDie = 1; //die used for base number of hits
+	protected $useDie = 2; //die used for base number of hits
 //		public $rof = 3;
 		public $grouping = 25;
 		public $maxpulses = 2;
@@ -88,9 +88,9 @@ class BSGLtKineticEnergyWeapon extends Pulse{
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 		
-        public function getDamage($fireOrder){ return Dice::d(6, 1)+1; }
-        public function setMinDamage(){ $this->minDamage = 2 ; }
-        public function setMaxDamage(){ $this->maxDamage = 7 ; }		
+        public function getDamage($fireOrder){ return Dice::d(6, 1)+2; }
+        public function setMinDamage(){ $this->minDamage = 3 ; }
+        public function setMaxDamage(){ $this->maxDamage = 8 ; }		
 		
     } // endof BSGLtKineticEnergyWeapon	
 
@@ -109,7 +109,7 @@ class BSGKineticEnergyWeapon extends Pulse{
         public $projectilespeed = 18;
         public $animationExplosionScale = 0.10;
 
-	protected $useDie = 1; //die used for base number of hits
+	protected $useDie = 2; //die used for base number of hits
 //		public $rof = 3;
 		public $grouping = 15;
 		public $maxpulses = 4;
@@ -174,6 +174,55 @@ class BSGHvyKineticEnergyWeapon extends Pulse{
         public function setMaxDamage(){ $this->maxDamage = 16 ; }		
 		
     } // endof BSGHvyKineticEnergyWeapon	
+
+
+
+class BSGMarineAssault extends Weapon{
+
+        public $name = "BSGMarineAssault";
+        public $displayName = "Marine Assault";
+        public $iconPath = "BSGMarines.png"; 		
+		
+        public $animation = "trail";
+        public $animationColor = array(217, 11, 41);
+        public $trailLength = 5;
+        public $animationWidth = 4;
+        public $projectilespeed = 18;
+        public $animationExplosionScale = 0.10;
+		public $noOverkill = true; //this will let simplify entire Matter line enormously!
+        public $uninterceptable = true;
+
+        public $loadingtime = 2;
+        public $priority = 2; 
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "Simulates marines attacking a system directly.";
+			$this->data["Special"] .= "<br>Must be in same hex as target.";
+			$this->data["Special"] .= "<br>Uninterceptable.";
+			$this->data["Special"] .= "<br>No called shot penalty.";
+			$this->data["Special"] .= "<br>Causes 3d6+2 matter damage to targetted system.";
+		}
+        
+        public $rangePenalty = 0;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        public $range = 0;
+        public $calledShotMod = 0; //instead of usual -8
+        
+        public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        public $weaponClass = "Matter";
+
+	function __construct($startArc, $endArc, $nrOfShots = 1){
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+		
+        public function getDamage($fireOrder){ return Dice::d(6, 3)+2; }
+        public function setMinDamage(){ $this->minDamage = 5 ; }
+        public function setMaxDamage(){ $this->maxDamage = 20 ; }		
+		
+    } // endof BSGMarineAssault	
 
 
 
@@ -737,6 +786,218 @@ class SensorSpearFtr extends Weapon{
 
 
 
+
+class SensorSpikeFtr extends Weapon{
+    /*Modified Abbai weapon - does no damage, but limits target's Sensors next turn.
+	Note, the range has been halved to -1/hex. */
+    public $name = "SensorSpikeFtr";
+    public $displayName = "DRADIS Jammer";
+	
+    public $priority = 10; //let's fire last, order not all that important here!
+    public $loadingtime = 2;
+    public $rangePenalty = 1; //-1/ hex
+    public $intercept = 0;
+    public $fireControl = array(0, 0, 0);
+	
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+	//let's animate this as a very wide beam...
+	public $animation = "laser";
+        public $animationColor = array(150, 150, 220);
+        public $animationColor2 = array(160, 160, 240);
+        public $animationExplosionScale = 0.25;
+        public $animationWidth = 10;
+        public $animationWidth2 = 0.5;
+
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 1){
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+
+            if($nrOfShots === 1){
+                $this->iconPath = "sensorSpike.png";
+            }
+
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+	
+    public function setSystemDataWindow($turn){
+	      parent::setSystemDataWindow($turn);    
+	      $this->data["Special"] = "Does no damage, but weakens target's Sensors (-1d6) rating next turn";  
+    }	
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
+
+		$effectSensors = Dice::d(6,1);//strength of effect: 1d6
+		$fireOrder->pubnotes .= "<br> Sensors reduced by $effectSensors.";
+		
+		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
+			$firstFighter = $ship->getSampleFighter();
+			if($firstFighter){
+				for($i=1; $i<=$effectSensors;$i++){
+					$crit = new tmpsensordown(-1, $ship->id, $firstFighter->id, 'tmpsensordown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$firstFighter->criticals[] =  $crit;
+				}
+			}
+		}else{ //ship - place effcet on C&C!
+			$CnC = $ship->getSystemByName("CnC");
+			if($CnC){
+				for($i=1; $i<=$effectSensors;$i++){
+					$crit = new tmpsensordown(-1, $ship->id, $CnC->id, 'tmpsensordown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+				}
+			}
+		}
+	} //endof function onDamagedSystem
+
+	public function getDamage($fireOrder){ return  0;   }
+	public function setMinDamage(){   $this->minDamage =  0 ;      }
+	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
+	
+} //end of class SensorSpikeFtr
+
+
+
+
+class CommJammerFtr extends Weapon{
+    /*Abbai weapon - does no damage, but limits target's Initiative  next turn
+    */
+    public $name = "CommJammerFtr";
+    public $displayName = "Comm Jammer";
+	
+    public $priority = 10; //let's fire last, order not all that important here!
+    public $loadingtime = 3;
+    public $rangePenalty = 1; //-1/hex
+    public $intercept = 0;
+    public $fireControl = array(0, 2, 2);
+    public $exclusive = true;
+	
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+   
+	   
+	//let's animate this as a very wide beam...
+	public $animation = "laser";
+        public $animationColor = array(150, 150, 220);
+        public $animationColor2 = array(160, 160, 240);
+        public $animationExplosionScale = 0.25;
+        public $animationWidth = 10;
+        public $animationWidth2 = 0.5;
+
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 1){
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+
+            if($nrOfShots === 1){
+                $this->iconPath = "commJammer.png";
+            }
+
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+	
+    public function setSystemDataWindow($turn){
+	      parent::setSystemDataWindow($turn);    
+	      $this->data["Special"] = "Does no damage, but weakens target's Initiative (-1d6) rating next turn.";  
+    }	
+    
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
+		
+		$effectIni = Dice::d(6,1);//strength of effect: 1d6
+		$effectIni5 = $effectIni * 5;
+		$fireOrder->pubnotes .= "<br> Initiative reduced by $effectIni5.";
+		
+		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
+			$firstFighter = $ship->getSampleFighter();
+			if($firstFighter){
+				for($i=1; $i<=$effectIni;$i++){
+					$crit = new tmpinidown(-1, $ship->id, $firstFighter->id, 'tmpinidown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$firstFighter->criticals[] =  $crit;
+				}
+			}
+		}else{ //ship - place effcet on C&C!
+			$CnC = $ship->getSystemByName("CnC");
+			if($CnC){
+				for($i=1; $i<=$effectIni;$i++){
+					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+				}
+			}
+		}
+	} //endof function onDamagedSystem
+
+	public function getDamage($fireOrder){ return  0;   }
+	public function setMinDamage(){   $this->minDamage =  0 ;      }
+	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
+	
+} //end of class CommJammerFtr
+
+
+
+
+
+class BSGMedScattergun extends Pulse{
+    /*Markab fighter weapon - d3 shots (here treated as a single Pulse shot, no grouping bonus)*/
+       public $shots = 2;
+	public  $iconPath = "scatterGun.png";
+	
+	//for Pulse mode
+	public $grouping = 2500; //NO GROUPING BONUS
+	public $maxpulses = 2;	
+	protected $useDie = 3; //die used for base number of hits
+ 
+    public $damageType = "Pulse"; 
+    public $weaponClass = "Particle";
+   
+	//animation for fighter laser - bigger guns need to change size and speed attributes :)
+	public $name = "BSGMedScattergun";
+	public $displayName = "Medium Scattergun";
+	public $animation = "trail";
+	public $animationColor = array(30, 170, 255);
+	public $animationExplosionScale = 0.10;
+	public $projectilespeed = 12;
+	public $animationWidth = 2;
+	public $trailLength = 10;
+	
+	public $intercept = 2;
+	
+	public $rangePenalty = 2;
+	
+	public $priority = 4;
+
+	
+    
+	function __construct($startArc, $endArc){//more than a single emplacement not supported!
+		$this->maxpulses = 4;
+		$this->defaultShots = 2;	
+						
+		parent::__construct(0, 1, 0, $startArc, $endArc);
+	}    
+	
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = 'does always d4 pulses, no grouping bonus';
+	}
+	
+    
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn); //$this->useDie usually
+		//$pulses+= $this->getExtraPulses($needed, $rolled); //no grouping bonus for this weapon
+		return $pulses;
+	}	
+	
+	public function getDamage($fireOrder){        return Dice::d(6,2);   }
+	public function setMinDamage(){     $this->minDamage = 2 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+} //end of class LightScattergun
 
 
 

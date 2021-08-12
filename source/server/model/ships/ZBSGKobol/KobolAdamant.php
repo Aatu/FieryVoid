@@ -8,7 +8,7 @@ class KobolAdamant extends HeavyCombatVessel{
         $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolAdamant";
         $this->imagePath = "img/ships/BSG/ColonialAdamant.png";
-        $this->shipClass = "Adamant Frigate";
+        $this->shipClass = "Adamant Frigate (Alpha prototype)";
         $this->fighters = array("normal" => 12, "superheavy" => 2);
  //       $this->isd = 2160;
         $this->canvasSize = 145;

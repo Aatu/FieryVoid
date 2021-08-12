@@ -15,6 +15,7 @@ class ColonialPythonMk3 extends FighterFlight{
 //        $this->isd = 1948;
 
 	    $this->notes = 'Atmospheric.';
+	    $this->notes .= '<br>Gains +5 initiative when within 5 hexes of a standard Raptor.';
         
         $this->forwardDefense = 6;
         $this->sideDefense = 8;
@@ -42,9 +43,9 @@ class ColonialPythonMk3 extends FighterFlight{
             $fighter->imagePath = "img/ships/BSG/pythonMk3.png";
             $fighter->iconPath = "img/ships/BSG/pythonMk3_Large.png";
 
-            $frontGun = new BSGKineticEnergyWeapon(340, 20, 2, 4);
+            $frontGun = new BSGKineticEnergyWeapon(330, 30, 3, 4);
             $frontGun->displayName = "Kinetic Energy Cannon";
-			$hvyGun = new BSGHvyKineticEnergyWeapon(340, 20, 1); //$startArc, $endArc, $nrOfShots
+			$hvyGun = new BSGHvyKineticEnergyWeapon(330, 30, 1); //$startArc, $endArc, $nrOfShots
 			$hvyGun->displayName = "Heavy Kinetic Energy Cannon";
 
             $fighter->addFrontSystem($frontGun);

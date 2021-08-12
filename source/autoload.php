@@ -1706,17 +1706,23 @@ spl_autoload_register(
 
 				//Battlestar Galactica - Kirill
 					//weapons
+                'commjammerftr' => '/server/model/weapons/customBSG.php',
                 'flakarray' => '/server/model/weapons/customBSG.php',
                 'flakarray2' => '/server/model/weapons/customBSG.php',
+                'bsgmarineassault' => '/server/model/weapons/customBSG.php',
                 'sensorspearftr' => '/server/model/weapons/customBSG.php',
+                'sensorspikeftr' => '/server/model/weapons/customBSG.php',
+                'bsgmedscattergun' => '/server/model/weapons/customBSG.php',
 					//ships
                 'koboladamant' => '/server/model/ships/ZBSGKobol/KobolAdamant.php',
                 'kobolartemis' => '/server/model/ships/ZBSGKobol/KobolArtemis.php',
                 'kobolatlas' => '/server/model/ships/ZBSGKobol/KobolAtlas.php',
                 'kobolberserk' => '/server/model/ships/ZBSGKobol/KobolBerserk.php',
+                'kobolewraptor' => '/server/model/ships/ZBSGKobol/KobolEWRaptor.php',
                 'koboljanus' => '/server/model/ships/ZBSGKobol/KobolJanus.php',
                 'koboljupiter' => '/server/model/ships/ZBSGKobol/KobolJupiter.php',
                 'kobolmanticore' => '/server/model/ships/ZBSGKobol/KobolManticore.php',
+                'kobolmarineraptor' => '/server/model/ships/ZBSGKobol/KobolMarineRaptor.php',
                 'kobolmercury' => '/server/model/ships/ZBSGKobol/KobolMercury.php',
                 'kobolminerva' => '/server/model/ships/ZBSGKobol/KobolMinerva.php',
                 'kobolminotaur' => '/server/model/ships/ZBSGKobol/KobolMinotaur.php',
@@ -1724,6 +1730,7 @@ spl_autoload_register(
                 'kobolvalkyrie' => '/server/model/ships/ZBSGKobol/KobolValkyrie.php',
                 'kobolranger' => '/server/model/ships/ZBSGKobol/KobolRanger.php',
                 'kobolraptor' => '/server/model/ships/ZBSGKobol/KobolRaptor.php',
+                'kobolraptorsupport' => '/server/model/ships/ZBSGKobol/KobolRaptorSupport.php',
                 'kobolvipermk2' => '/server/model/ships/ZBSGKobol/KobolViperMk2.php',
                 'kobolvipermk7' => '/server/model/ships/ZBSGKobol/KobolViperMk7.php',
 

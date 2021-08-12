@@ -8,7 +8,7 @@ class KobolJanus extends HeavyCombatVessel{
         $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolJanus";
         $this->imagePath = "img/ships/BSG/KobolJanus.png";
-        $this->shipClass = "Janus Heavy Cruiser";
+        $this->shipClass = "Janus Heavy Cruiser (Alpha prototype)";
  //       $this->isd = 2160;
         $this->canvasSize = 145;
 

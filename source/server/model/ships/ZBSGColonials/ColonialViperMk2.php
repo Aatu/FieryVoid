@@ -14,6 +14,7 @@ class ColonialViperMk2 extends FighterFlight{
 //        $this->isd = 1948;
 
 	    $this->notes = 'Atmospheric.';
+	    $this->notes .= '<br>Gains +5 initiative when within 5 hexes of a standard Raptor.';
         
         $this->forwardDefense = 4;
         $this->sideDefense = 6;
