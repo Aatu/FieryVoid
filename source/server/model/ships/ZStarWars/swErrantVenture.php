@@ -8,7 +8,7 @@ class swErrantVenture extends BaseShip{
 	$this->pointCost = 925;
 	$this->faction = "ZStarWars";
         $this->phpclass = "swErrantVenture";
-        $this->imagePath = "img/starwars/errantventure.png";
+        $this->imagePath = "img/starwars/ErrantVenture.png";
         $this->shipClass = "Errant Venture";
         $this->shipSizeClass = 3;
         $this->limited = 33; //Limited Deployment
