@@ -43,7 +43,7 @@ class KobolJupiter extends BaseShip{
 //		$this->addPrimarySystem(new Bulkhead(0, 4));
 //        $this->addPrimarySystem(new Bulkhead(0, 4));
 		$hyperdrive = new JumpEngine(5, 16, 6, 20);
-			$hyperdrive->displayName = 'Phasing Drive';
+			$hyperdrive->displayName = 'FTL Drive';
 			$this->addPrimarySystem($hyperdrive);
 		
         $this->addFrontSystem(new Thruster(4, 9, 0, 4, 1));
@@ -112,7 +112,7 @@ class KobolJupiter extends BaseShip{
 					12 => "Scanner",
 					15 => "Engine",
 					17 => "Reactor",
-					19 => "Phasing Drive",
+					19 => "FTL Drive",
 					20 => "C&C",
 			),
 			1=> array(

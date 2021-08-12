@@ -14,8 +14,8 @@ class ColonialRiverEscort extends MediumShip{
         
 		$this->unofficial = true;
 
-        $this->forwardDefense = 11;
-        $this->sideDefense = 13;
+        $this->forwardDefense = 12;
+        $this->sideDefense = 14;
         
         $this->turncost = 0.5;
         $this->turndelaycost = 0.5;
@@ -26,7 +26,7 @@ class ColonialRiverEscort extends MediumShip{
          
         $this->addPrimarySystem(new Reactor(4, 10, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 8, 5, 6));
+        $this->addPrimarySystem(new Scanner(4, 8, 5, 5));
         $this->addPrimarySystem(new Engine(4, 12, 0, 6, 3));
         $this->addPrimarySystem(new ReloadRack(4, 9));
 		$this->addPrimarySystem(new Hangar(2, 4));
@@ -51,7 +51,7 @@ class ColonialRiverEscort extends MediumShip{
         $this->addAftSystem(new Thruster(3, 9, 0, 3, 2));    
 		$this->addAftSystem(new Bulkhead(0, 2));
        
-        $this->addPrimarySystem(new Structure(4, 40));
+        $this->addPrimarySystem(new Structure(4, 45));
 
 		//d20 hit chart
 		$this->hitChart = array(

@@ -4,7 +4,7 @@ class ColonialJanusCruiser extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 900;
+        $this->pointCost = 725;
         $this->faction = "ZPlaytest BSG Colonials";
         $this->phpclass = "ColonialJanusCruiser";
         $this->imagePath = "img/ships/BSG/ColonialJanus.png";
@@ -19,18 +19,18 @@ class ColonialJanusCruiser extends HeavyCombatVessel{
         $this->forwardDefense = 14;
         $this->sideDefense = 17;
 
-        $this->turncost = 0.66;
-        $this->turndelaycost = 0.66;
+        $this->turncost = 1;
+        $this->turndelaycost = 1;
         $this->accelcost = 3;
-        $this->rollcost = 3;
-        $this->pivotcost = 2;
+        $this->rollcost = 4;
+        $this->pivotcost = 3;
         
-        $this->iniativebonus = 30;
+        $this->iniativebonus = 20;
 
         $this->addPrimarySystem(new Reactor(6, 18, 0, 0));
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 12, 6, 7));
-        $this->addPrimarySystem(new Engine(6, 14, 0, 12, 3));
+        $this->addPrimarySystem(new Engine(6, 14, 0, 10, 3));
         $this->addPrimarySystem(new Hangar(5, 2));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4));
@@ -49,8 +49,8 @@ class ColonialJanusCruiser extends HeavyCombatVessel{
 		$this->addFrontSystem(new Bulkhead(0, 5));
 		$this->addFrontSystem(new Bulkhead(0, 5));
 
-        $this->addAftSystem(new Thruster(5, 12, 0, 6, 2));
-        $this->addAftSystem(new Thruster(5, 12, 0, 6, 2));
+        $this->addAftSystem(new Thruster(5, 12, 0, 5, 2));
+        $this->addAftSystem(new Thruster(5, 12, 0, 5, 2));
 		$this->addAftSystem(new BSGMainBattery(5, 9, 6, 150, 210)); 
         $this->addAftSystem(new Bulkhead(0, 5));
 		$this->addAftSystem(new SMissileRack(5, 6, 0, 120, 240));

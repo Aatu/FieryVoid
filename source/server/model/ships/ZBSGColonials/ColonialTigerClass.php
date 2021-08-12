@@ -15,11 +15,11 @@ class ColonialTigerClass extends HeavyCombatVessel{
 
 		$this->unofficial = true;
         
-        $this->forwardDefense = 13;
-        $this->sideDefense = 16;
+        $this->forwardDefense = 14;
+        $this->sideDefense = 17;
 
-        $this->turncost = 0.50;
-        $this->turndelaycost = 0.50;
+        $this->turncost = 0.66;
+        $this->turndelaycost = 0.66;
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 2;
@@ -56,10 +56,10 @@ class ColonialTigerClass extends HeavyCombatVessel{
 		$this->addAftSystem(new BSGMedBattery(5, 9, 4, 150, 210)); 
         $this->addAftSystem(new Bulkhead(0, 5));
 		$this->addAftSystem(new SMissileRack(5, 6, 0, 120, 240));
-		$this->addAftSystem(new RapidGatling(4, 7, 1, 180, 360)); 
-		$this->addAftSystem(new RapidGatling(4, 7, 1, 180, 360)); 
-		$this->addAftSystem(new RapidGatling(4, 7, 1, 0, 180)); 
-		$this->addAftSystem(new RapidGatling(4, 7, 1, 0, 180)); 
+		$this->addAftSystem(new RapidGatling(4, 4, 1, 180, 360)); 
+		$this->addAftSystem(new RapidGatling(4, 4, 1, 180, 360)); 
+		$this->addAftSystem(new RapidGatling(4, 4, 1, 0, 180)); 
+		$this->addAftSystem(new RapidGatling(4, 4, 1, 0, 180)); 
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 5, 50));

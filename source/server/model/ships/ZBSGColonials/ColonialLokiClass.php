@@ -4,7 +4,7 @@ class ColonialLokiClass extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 500;
+		$this->pointCost = 450;
 		$this->faction = "ZPlaytest BSG Colonials";
         $this->phpclass = "ColonialLokiClass";
         $this->imagePath = "img/ships/BSG/ColonialLoki.png";
@@ -18,15 +18,15 @@ class ColonialLokiClass extends MediumShip{
         $this->sideDefense = 14;
         
         $this->turncost = 0.5;
-        $this->turndelaycost = 0.3;
+        $this->turndelaycost = 0.5;
         $this->accelcost = 2;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-		$this->iniativebonus = 60;
+		$this->iniativebonus = 55;
          
         $this->addPrimarySystem(new Reactor(5, 10, 0, 0));
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 8, 5, 6));
+        $this->addPrimarySystem(new Scanner(5, 8, 5, 5));
         $this->addPrimarySystem(new Engine(5, 12, 0, 6, 3));
 		$this->addPrimarySystem(new Hangar(2, 4));
 		$this->addPrimarySystem(new Thruster(5, 9, 0, 3, 3));
@@ -49,7 +49,7 @@ class ColonialLokiClass extends MediumShip{
         $this->addAftSystem(new Thruster(4, 9, 0, 3, 2));    
 		$this->addAftSystem(new Bulkhead(0, 2));
        
-        $this->addPrimarySystem(new Structure(4, 50));
+        $this->addPrimarySystem(new Structure(4, 55));
 
 		//d20 hit chart
 		$this->hitChart = array(

@@ -333,6 +333,7 @@ spl_autoload_register(
                 'govall' => '/server/model/ships/llort/govall.php',
                 'govallfull' => '/server/model/ships/llort/govallFull.php',
                 'gquan' => '/server/model/ships/narn/gquan.php',
+//                'gquell' => '/server/model/ships/narn/Gquell.php',
                 'gquonth' => '/server/model/ships/narn/gquonth.php',
                 'graemlar' => '/server/model/ships/llort/graemlar.php',
                 'gravitic' => '/server/model/weapons/gravitic.php',
@@ -1682,6 +1683,7 @@ spl_autoload_register(
 					//ships
                 'colonialalliance' => '/server/model/ships/ZBSGColonials/ColonialAlliance.php',
                 'colonialberserkclasscarrier' => '/server/model/ships/ZBSGColonials/ColonialBerserkClassCarrier.php',
+                'colonialfreya' => '/server/model/ships/ZBSGColonials/ColonialFreya.php',
                 'colonialjanuscruiser' => '/server/model/ships/ZBSGColonials/ColonialJanusCruiser.php',
                 'colonialjupiterclass' => '/server/model/ships/ZBSGColonials/ColonialJupiterClass.php',
                 'coloniallokiclass' => '/server/model/ships/ZBSGColonials/ColonialLokiClass.php',
@@ -1705,14 +1707,22 @@ spl_autoload_register(
 				//Battlestar Galactica - Kirill
 					//weapons
                 'flakarray' => '/server/model/weapons/customBSG.php',
+                'flakarray2' => '/server/model/weapons/customBSG.php',
                 'sensorspearftr' => '/server/model/weapons/customBSG.php',
 					//ships
+                'koboladamant' => '/server/model/ships/ZBSGKobol/KobolAdamant.php',
+                'kobolartemis' => '/server/model/ships/ZBSGKobol/KobolArtemis.php',
+                'kobolatlas' => '/server/model/ships/ZBSGKobol/KobolAtlas.php',
+                'kobolberserk' => '/server/model/ships/ZBSGKobol/KobolBerserk.php',
+                'koboljanus' => '/server/model/ships/ZBSGKobol/KobolJanus.php',
                 'koboljupiter' => '/server/model/ships/ZBSGKobol/KobolJupiter.php',
                 'kobolmanticore' => '/server/model/ships/ZBSGKobol/KobolManticore.php',
                 'kobolmercury' => '/server/model/ships/ZBSGKobol/KobolMercury.php',
                 'kobolminerva' => '/server/model/ships/ZBSGKobol/KobolMinerva.php',
+                'kobolminotaur' => '/server/model/ships/ZBSGKobol/KobolMinotaur.php',
                 'kobolorion' => '/server/model/ships/ZBSGKobol/KobolOrion.php',
                 'kobolvalkyrie' => '/server/model/ships/ZBSGKobol/KobolValkyrie.php',
+                'kobolranger' => '/server/model/ships/ZBSGKobol/KobolRanger.php',
                 'kobolraptor' => '/server/model/ships/ZBSGKobol/KobolRaptor.php',
                 'kobolvipermk2' => '/server/model/ships/ZBSGKobol/KobolViperMk2.php',
                 'kobolvipermk7' => '/server/model/ships/ZBSGKobol/KobolViperMk7.php',
@@ -2148,6 +2158,19 @@ spl_autoload_register(
 				//other				
 				'apollostrike' => '/server/model/ships/EA/apollostrike.php',
 			
+
+
+				//Star Trek conversions
+				//weapons
+				'trekphasecannon' => '/server/model/weapons/customTrek.php',
+				'trekphotonictorp' => '/server/model/weapons/customTrek.php',
+				
+				//systems
+                'trekwarpdrive' => '/server/model/weapons/customTrek.php',
+				
+				//ships
+				'federationconstitution' => '/server/model/ships/customs/FederationConstitution.php',
+				'federationnxwarcruiser' => '/server/model/ships/customs/FederationNXWarCruiser.php',
 		    		
 		    
 		    
