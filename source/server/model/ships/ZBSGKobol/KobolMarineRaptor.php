@@ -7,7 +7,7 @@ class KobolMarineRaptor extends SuperHeavyFighter{
         $this->pointCost = 420;
         $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolMarineRaptor";
-        $this->shipClass = "Marine Assault Raptor (Beta prototype)";
+        $this->shipClass = "Marine Assault Raptor (Alpha prototype)";
 			$this->variantOf = "Raptor (Beta prototype)";
 			$this->occurence = "common";
         $this->imagePath = "img/ships/BSG/raptor.png";
