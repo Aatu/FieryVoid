@@ -46,6 +46,12 @@ var FlakArray = function FlakArray(json, ship) {
 FlakArray.prototype = Object.create(Weapon.prototype);
 FlakArray.prototype.constructor = FlakArray;
 
+var FlakArray2 = function FlakArray2(json, ship) {
+    Weapon.call(this, json, ship);
+};
+FlakArray2.prototype = Object.create(Weapon.prototype);
+FlakArray2.prototype.constructor = FlakArray2;
+
 var SensorSpearFtr = function SensorSpearFtr(json, ship) {
     Weapon.call(this, json, ship);
 };

@@ -30,7 +30,7 @@ class KobolOrion extends MediumShip{
          
         $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
-        $this->addPrimarySystem(new ElintScanner(3, 15, 5, 6));  //full ELINT, not under the 2 point only boost
+        $this->addPrimarySystem(new ElintScanner(3, 15, 6, 6));  //full ELINT, not under the 2 point only boost
         $this->addPrimarySystem(new Engine(3, 16, 0, 8, 3));
         $this->addPrimarySystem(new ReloadRack(3, 9));
         $this->addPrimarySystem(new SMissileRack(3, 6, 0, 0, 360));
@@ -38,21 +38,17 @@ class KobolOrion extends MediumShip{
 		$this->addPrimarySystem(new Thruster(3, 9, 0, 3, 3));
 		$this->addPrimarySystem(new Thruster(3, 9, 0, 3, 4));        
 		$hyperdrive = new JumpEngine(3, 12, 6, 20);
-			$hyperdrive->displayName = 'Phasing Drive';
+			$hyperdrive->displayName = 'FTL Drive';
 			$this->addPrimarySystem($hyperdrive);
 
-		$this->addFrontSystem(new Hangar(3, 8));
+		$this->addFrontSystem(new Hangar(3, 9));
         $this->addFrontSystem(new Thruster(2, 9, 0, 4, 1));
 		$this->addFrontSystem(new FlakCannon(2, 4, 2, 240, 120));
 		$this->addFrontSystem(new FlakCannon(2, 4, 2, 240, 120));
 		$this->addFrontSystem(new LtBlastCannon(3, 4, 1, 180, 30));
-		$this->addFrontSystem(new LtBlastCannon(3, 4, 1, 180, 30));
-		$this->addFrontSystem(new LtBlastCannon(3, 4, 1, 330, 180));
 		$this->addFrontSystem(new LtBlastCannon(3, 4, 1, 330, 180));
 
 		$this->addAftSystem(new LtBlastCannon(3, 4, 1, 150, 360));
-		$this->addAftSystem(new LtBlastCannon(3, 4, 1, 150, 360));
-		$this->addAftSystem(new LtBlastCannon(3, 4, 1, 0, 210));
 		$this->addAftSystem(new LtBlastCannon(3, 4, 1, 0, 210));
 		$this->addAftSystem(new FlakCannon(2, 4, 2, 60, 300));
 		$this->addAftSystem(new FlakCannon(2, 4, 2, 60, 300));
@@ -72,19 +68,19 @@ class KobolOrion extends MediumShip{
 			12 => "ELINT Scanner",
 			15 => "Engine",
 			17 => "Reactor",
-			19 => "Phasing Drive",
+			19 => "FTL Drive",
 			20 => "C&C",
 		),
 		1=> array(
-			4 => "Thruster",
-			8 => "Light Blast Cannon",
-			10 => "Flak Cannon",
-			12 => "Hangar",
+			5 => "Thruster",
+			7 => "Light Blast Cannon",
+			9 => "Flak Cannon",
+			11 => "Hangar",
 			19 => "Structure",
 			20 => "Primary",
 		),
 		2=> array(
-			4 => "Thruster",
+			6 => "Thruster",
 			8 => "Light Blast Cannon",
 			10 => "Flak Cannon",
 			12 => "ELINT Scanner",

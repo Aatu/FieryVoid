@@ -4,7 +4,7 @@ class ColonialMinervaClass extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 1200;
+	$this->pointCost = 1100;
 	$this->faction = "ZPlaytest BSG Colonials";
         $this->phpclass = "ColonialMinervaClass";
         $this->imagePath = "img/ships/BSG/ColonialMinerva.png";
@@ -19,15 +19,15 @@ class ColonialMinervaClass extends BaseShip{
 		$this->notes = "Primary users: Colonial Fleet";
 		$this->isd = 1935;
         
-        $this->forwardDefense = 15;
-        $this->sideDefense = 17;
+        $this->forwardDefense = 16;
+        $this->sideDefense = 18;
         
         $this->turncost = 1;
         $this->turndelaycost = 1;
         $this->accelcost = 4;
         $this->rollcost = 4;
         $this->pivotcost = 3;
-        $this->iniativebonus = 5;
+        $this->iniativebonus = 0;
         
         $this->addPrimarySystem(new Reactor(5, 27, 0, 0));
         $this->addPrimarySystem(new CnC(5, 20, 0, 0));

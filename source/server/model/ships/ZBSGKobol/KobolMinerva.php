@@ -4,7 +4,7 @@ class KobolMinerva extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 1500;
+	$this->pointCost = 1700;
 	$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolMinerva";
         $this->imagePath = "img/ships/BSG/ColonialMinerva.png";
@@ -31,20 +31,16 @@ class KobolMinerva extends BaseShip{
         $this->pivotcost = 2;
         $this->iniativebonus = 0;
         
-        $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
-        $this->addPrimarySystem(new CnC(4, 16, 0, 0));
+        $this->addPrimarySystem(new Reactor(4, 17, 0, 0));
+        $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new SWScanner(5, 18, 6, 6));
         $this->addPrimarySystem(new Engine(4, 16, 0, 12, 5));
         $this->addPrimarySystem(new ReloadRack(5, 9));
         $this->addPrimarySystem(new SMissileRack(4, 6, 0, 0, 360));
         $this->addPrimarySystem(new SMissileRack(4, 6, 0, 0, 360));
         $this->addPrimarySystem(new EWNuclearTorpedo(4, 6, 3, 0, 360));
-//		$this->addPrimarySystem(new Bulkhead(0, 4));
-//        $this->addPrimarySystem(new Bulkhead(0, 4));
-//		$this->addPrimarySystem(new Bulkhead(0, 4));
-//		$this->addPrimarySystem(new Bulkhead(0, 4));
 		$hyperdrive = new JumpEngine(4, 16, 6, 20);
-			$hyperdrive->displayName = 'Phasing Drive';
+			$hyperdrive->displayName = 'FTL Drive';
 			$this->addPrimarySystem($hyperdrive);
 		
         $this->addFrontSystem(new Thruster(4, 9, 0, 3, 1));
@@ -55,6 +51,10 @@ class KobolMinerva extends BaseShip{
 		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 240, 120));
 		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 240, 120));
 		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 240, 120));
+		$this->addFrontSystem(new Railgun(3, 9, 6, 270, 30));
+		$this->addFrontSystem(new Railgun(3, 9, 6, 330, 90));
+		$this->addFrontSystem(new HeavyRailGun(3, 12, 9, 300, 30));
+		$this->addFrontSystem(new HeavyRailGun(3, 12, 9, 330, 60));
 		$this->addFrontSystem(new FlakArray(4, 10, 3, 210, 30));
 		$this->addFrontSystem(new FlakArray(4, 10, 3, 330, 150));
 
@@ -66,10 +66,6 @@ class KobolMinerva extends BaseShip{
 		$this->addAftSystem(new Bulkhead(0, 4));
 		$this->addAftSystem(new FlakArray(4, 10, 3, 150, 330));
 		$this->addAftSystem(new FlakArray(4, 10, 3, 30, 210));
-        $this->addAftSystem(new Railgun(4, 9, 6, 180, 30));
-        $this->addAftSystem(new Railgun(4, 9, 6, 180, 30));
-        $this->addAftSystem(new Railgun(4, 9, 6, 330, 180));
-        $this->addAftSystem(new Railgun(4, 9, 6, 330, 180));
 		$this->addAftSystem(new MedBlastCannon(3, 5, 2, 60, 300));
 		$this->addAftSystem(new MedBlastCannon(3, 5, 2, 60, 300));
 		$this->addAftSystem(new MedBlastCannon(3, 5, 2, 60, 300));
@@ -84,8 +80,7 @@ class KobolMinerva extends BaseShip{
 		$this->addLeftSystem(new FlakArray(3, 10, 3, 210, 330));
 		$this->addLeftSystem(new FlakArray(3, 10, 3, 210, 330));
 		$this->addLeftSystem(new FlakArray(3, 10, 3, 210, 330));
-		$this->addLeftSystem(new Railgun(4, 9, 6, 300, 30));
-		$this->addLeftSystem(new HvyBlastCannon(3, 6, 4, 300, 30));
+		$this->addLeftSystem(new HvyBlastCannon(3, 6, 4, 210, 360));
 		$this->addLeftSystem(new Hangar(4, 14));
 
         $this->addRightSystem(new Thruster(4, 9, 0, 3, 4));
@@ -97,16 +92,15 @@ class KobolMinerva extends BaseShip{
 		$this->addRightSystem(new FlakArray(3, 10, 3, 30, 150));
 		$this->addRightSystem(new FlakArray(3, 10, 3, 30, 150));
 		$this->addRightSystem(new FlakArray(3, 10, 3, 30, 150));
-		$this->addRightSystem(new Railgun(4, 9, 6, 330, 60));
-		$this->addRightSystem(new HvyBlastCannon(3, 6, 4, 330, 60));
+		$this->addRightSystem(new HvyBlastCannon(3, 6, 4, 0, 150));
 		$this->addRightSystem(new Hangar(4, 14));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure(4, 65));
-        $this->addAftSystem(new Structure(3, 55));
-        $this->addLeftSystem(new Structure(4, 85));
-        $this->addRightSystem(new Structure(4, 85));
-        $this->addPrimarySystem(new Structure(4, 60));
+        $this->addFrontSystem(new Structure(5, 65));
+        $this->addAftSystem(new Structure(4, 55));
+        $this->addLeftSystem(new Structure(5, 85));
+        $this->addRightSystem(new Structure(5, 85));
+        $this->addPrimarySystem(new Structure(5, 60));
 		
 		$this->hitChart = array(
 			0=> array(
@@ -117,28 +111,28 @@ class KobolMinerva extends BaseShip{
 					12 => "Scanner",
 					15 => "Engine",
 					17 => "Reactor",
-					19 => "Phasing Drive",
+					19 => "FTL Drive",
 					20 => "C&C",
 			),
 			1=> array(
-					4 => "Thruster",
-					8 => "Medium Blast Cannon",
+					3 => "Thruster",
+					6 => "Medium Blast Cannon",
+					8 => "Heavy Railgun",
+					10 => "Railgun",
 					12 => "Flak Array",
 					19 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
-					5 => "Thruster",
-					7 => "Flak Array",
-					10 => "Medium Blast Cannon",
-					13 => "Railgun",
+					6 => "Thruster",
+					8 => "Flak Array",
+					12 => "Medium Blast Cannon",
 					19 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
 					4 => "Thruster",
-					6 => "Flak Array",
-					8 => "Railgun",
+					7 => "Flak Array",
 					10 => "Heavy Blast Cannon",
 					12 => "Hangar",
 					19 => "Structure",
@@ -146,12 +140,12 @@ class KobolMinerva extends BaseShip{
 			),
 			4=> array(
 					4 => "Thruster",
-					6 => "Flak Array",
-					8 => "Railgun",
+					7 => "Flak Array",
 					10 => "Heavy Blast Cannon",
 					12 => "Hangar",
 					19 => "Structure",
-					20 => "Primary",			),
+					20 => "Primary",
+			),
 		);
     }
 }

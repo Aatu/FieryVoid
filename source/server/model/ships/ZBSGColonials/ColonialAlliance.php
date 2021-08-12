@@ -24,12 +24,12 @@ class ColonialAlliance extends HeavyCombatVessel{
         $this->rollcost = 3;
         $this->pivotcost = 3;
         
-        $this->iniativebonus = 45;
+        $this->iniativebonus = 35;
 
         $this->addPrimarySystem(new Reactor(5, 15, 0, 0));
         $this->addPrimarySystem(new CnC(5, 10, 0, 0));
         $this->addPrimarySystem(new ElintScanner(4, 12, 6, 9));
-        $this->addPrimarySystem(new Engine(5, 12, 0, 12, 3));
+        $this->addPrimarySystem(new Engine(5, 12, 0, 10, 3));
         $this->addPrimarySystem(new Hangar(4, 8));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4));
@@ -44,8 +44,8 @@ class ColonialAlliance extends HeavyCombatVessel{
 		$this->addFrontSystem(new Bulkhead(0, 5));
 		$this->addFrontSystem(new Bulkhead(0, 5));
 
-        $this->addAftSystem(new Thruster(5, 12, 0, 8, 2));
-        $this->addAftSystem(new Thruster(5, 12, 0, 8, 2));
+        $this->addAftSystem(new Thruster(5, 12, 0, 5, 2));
+        $this->addAftSystem(new Thruster(5, 12, 0, 5, 2));
         $this->addAftSystem(new Bulkhead(0, 5));
 		$this->addAftSystem(new RapidGatling(4, 4, 1, 180, 360)); 
 		$this->addAftSystem(new RapidGatling(4, 4, 1, 180, 360)); 
