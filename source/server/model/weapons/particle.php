@@ -1215,7 +1215,7 @@ Nonetheless two copies of Particle Projector lines now exist in FV, in customNex
         public $rangePenalty = 2;
         public $fireControl = array(6, 5, 4); // fighters, <mediums, <capitals
 
-        public $firingModes = array(1=>'Quad', 2=>'Triple', 3=>'Dual');
+        public $firingModes = array(1=>'4Quad', 2=>'3Triple', 3=>'2Dual');
         public $gunsArray = array(1=>4,2=>3,3=>2);
 	    
 	public $firedThisTurn = false; //to avoid re-rolling criticals!
