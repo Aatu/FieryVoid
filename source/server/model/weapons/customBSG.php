@@ -191,6 +191,7 @@ class BSGMarineAssault extends Weapon{
         public $animationExplosionScale = 0.10;
 		public $noOverkill = true; //this will let simplify entire Matter line enormously!
         public $uninterceptable = true;
+		public $exclusive = true;
 
         public $loadingtime = 2;
         public $priority = 2; 
