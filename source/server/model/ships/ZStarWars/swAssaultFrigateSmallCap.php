@@ -45,17 +45,17 @@ class swAssaultFrigateSmallCap extends BaseShipNoAft{
         $this->addFrontSystem(new Thruster(3, 15, 0, 4, 1));
 	$this->addFrontSystem(new SWRayShield(3,15,9,3,300,60)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addFrontSystem(new SWLightTLaser(2, 240, 0, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated! 
-	$this->addFrontSystem(new SWHeavyTLaser(2, 270, 30, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addFrontSystem(new SWHeavyTLaser(2, 300, 60, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addFrontSystem(new SWHeavyTLaser(2, 330, 90, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addFrontSystem(new SWHeavyTLaser(3, 270, 30, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addFrontSystem(new SWHeavyTLaser(3, 300, 60, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addFrontSystem(new SWHeavyTLaser(3, 330, 90, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWLightTLaser(2, 0, 120, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 
 	$this->addLeftSystem(new Thruster(3, 14, 0, 6, 3));
 	$this->addLeftSystem(new SWRayShield(2,12,6,2,180,300)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addLeftSystem(new SWLightTLaser(2, 240, 0, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addLeftSystem(new SWLightTLaser(2, 240, 0, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addLeftSystem(new SWHeavyLaser(3, 180, 0, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addLeftSystem(new SWHeavyLaser(3, 180, 0, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addLeftSystem(new SWHeavyLaser(2, 180, 0, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addLeftSystem(new SWHeavyLaser(2, 180, 0, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addLeftSystem(new SWHeavyTLaser(3, 240, 0, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 
 	$this->addRightSystem(new Thruster(3, 14, 0, 6, 4));
@@ -64,7 +64,7 @@ class swAssaultFrigateSmallCap extends BaseShipNoAft{
 	$this->addRightSystem(new SWLightTLaser(2, 0, 120, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addRightSystem(new SWHeavyLaser(2, 0, 180, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addRightSystem(new SWHeavyLaser(2, 0, 180, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addRightSystem(new SWHeavyTLaser(2, 0, 120, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addRightSystem(new SWHeavyTLaser(3, 0, 120, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
     
 	    
         $this->addFrontSystem(new Structure( 4, 50));
