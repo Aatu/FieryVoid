@@ -2172,20 +2172,26 @@ spl_autoload_register(
 				//weapons
 				'trekphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekphotonictorp' => '/server/model/weapons/customTrek.php',
+				'trekspatialtorp' => '/server/model/weapons/customTrek.php',
 				
 				//systems
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php',
 				
 				//ships
-				'federationconstitution' => '/server/model/ships/customs/FederationConstitution.php',
-				'federationnxwarcruiser' => '/server/model/ships/customs/FederationNXWarCruiser.php',
+				'nxcruiser' => '/server/model/ships/ZTrekFederation/NXCruiser.php',
+				'nxshuttlepod' => '/server/model/ships/ZTrekFederation/NXShuttlepod.php',
+				'nxwarcruiser' => '/server/model/ships/ZTrekFederation/NXWarCruiser.php',
 		    		
 		    
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
 				
-				
+
+				//TEMPORARY variable hangar size testing
+				'variablehangarsize' => '/server/model/ships/customs/VariableHangarSize.php',
+				'ltviper' => '/server/model/ships/customs/LtViper.php',
+				'medviper' => '/server/model/ships/customs/medViper.php',
 						
 				
 				//let's end this with unit enhancement class...		    
