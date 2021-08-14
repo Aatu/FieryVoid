@@ -498,7 +498,47 @@ class EWHeavyGatlingLaser extends Pulse{
         public function getDamage($fireOrder){        return Dice::d(10, 2)+14;   }
         public function setMinDamage(){     $this->minDamage = 16 ;      }
         public function setMaxDamage(){     $this->maxDamage = 34 ;      }
+		
     } //endof EWTwinLaserCannon
+
+
+
+    class EWProtoMedLaser extends Laser{
+     
+        public $name = "EWProtoMedLaser";
+        public $displayName = "Proto Medium Laser";  
+	    public $iconPath = "mediumLaser.png";
+	    
+        public $animation = "laser";
+        public $animationColor = array(255, 91, 91);
+        public $animationExplosionScale = 0.16;
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.3;
+        public $priority = 8;
+        public $loadingtime = 3;
+        
+        public $raking = 10;
+        
+        public $rangePenalty = 0.5; //-1 / 2 hexes
+        public $fireControl = array(-5, 1, 2); // fighters, <mediums, <capitals 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 6;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 6;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 3)+10;   }
+        public function setMinDamage(){     $this->minDamage = 13 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 40 ;      }
+		
+    } //endof EWProtoMedLaser
+
 
 
 

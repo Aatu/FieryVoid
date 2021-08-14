@@ -223,3 +223,9 @@ var EWLaserBoltFtr = function  EWLaserBoltFtr(json, ship) {
 };
 EWLaserBoltFtr.prototype = Object.create(Weapon.prototype);
 EWLaserBoltFtr.prototype.constructor =  EWLaserBoltFtr;
+
+var EWProtoMedLaser = function  EWProtoMedLaser(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWProtoMedLaser.prototype = Object.create(Weapon.prototype);
+EWProtoMedLaser.prototype.constructor =  EWProtoMedLaser;
