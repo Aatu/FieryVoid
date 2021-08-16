@@ -8,7 +8,7 @@ class KobolBerserk extends BaseShip{
 	$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolBerserk";
         $this->imagePath = "img/ships/BSG/ColonialBerserk.png";
-        $this->shipClass = "Berserk Carrier";
+        $this->shipClass = "Berserk Carrier (Alpha prototype)";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 140; //img has 140px per side
 //		$this->unlimited 

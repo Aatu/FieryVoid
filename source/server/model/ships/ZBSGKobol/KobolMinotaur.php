@@ -8,7 +8,7 @@ class KobolMinotaur extends BaseShip{
 	$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolMinotaur";
         $this->imagePath = "img/ships/BSG/ColonialMinotaur.png";
-        $this->shipClass = "Minotaur Gunship";
+        $this->shipClass = "Minotaur Gunship (Alpha prototype)";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 200; //img has 200px per side
 		$this->unofficial = true;

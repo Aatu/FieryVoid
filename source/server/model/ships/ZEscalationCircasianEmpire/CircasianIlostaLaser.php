@@ -1,19 +1,22 @@
 <?php
-class CircasianIlustrisCommand extends HeavyCombatVessel{
+class CircasianIlostaLaser extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 400;
         $this->faction = "ZEscalation Circasian Empire";
-        $this->phpclass = "CircasianIlustrisCommand";
+        $this->phpclass = "CircasianIlostaLaser";
         $this->imagePath = "img/ships/EscalationWars/CircasianIlustris.png";
 			$this->canvasSize = 125; //img has 200px per side
-        $this->shipClass = "Ilustris Command Destroyer";
+        $this->shipClass = "Ilosta Laser Destroyer";
 			$this->variantOf = "Ilustris Heavy Destroyer";
-			$this->occurence = "rare";
+			$this->occurence = "unique";
 			$this->unofficial = true;
-        $this->isd = 1948;
+        $this->isd = 1951;
+
+		$this->notes = 'Vulnerable to criticals';	  
+		$this->critRollMod = +1; //general penalty to critical rolls!
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
@@ -23,32 +26,30 @@ class CircasianIlustrisCommand extends HeavyCombatVessel{
         $this->accelcost = 2;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-        $this->iniativebonus = 7*5;
-        
+        $this->iniativebonus = 6*5;
          
-        $this->addPrimarySystem(new Reactor(3, 13, 0, 0));
-        $this->addPrimarySystem(new CnC(5, 14, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 12, 6, 6));
-        $this->addPrimarySystem(new Engine(3, 13, 0, 10, 4));
+        $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
+        $this->addPrimarySystem(new CnC(4, 12, 0, 0));
+        $this->addPrimarySystem(new Scanner(3, 10, 4, 5));
+        $this->addPrimarySystem(new Engine(3, 13, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(3, 2));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
       
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
-		$this->addFrontSystem(new EWRocketLauncher(1, 4, 1, 270, 90));
-		$this->addFrontSystem(new EWRocketLauncher(1, 4, 1, 270, 90));
-		$this->addFrontSystem(new LightParticleCannon(3, 6, 5, 300, 360));
-		$this->addFrontSystem(new LightParticleCannon(2, 6, 5, 300, 60));
-		$this->addFrontSystem(new LightParticleCannon(2, 6, 5, 300, 60));
-		$this->addFrontSystem(new LightParticleCannon(3, 6, 5, 0, 60));
+		$this->addFrontSystem(new LightLaser(2, 4, 3, 300, 60));
+		$this->addFrontSystem(new LightLaser(2, 4, 3, 300, 60));
+		$this->addFrontSystem(new EWProtoMedLaser(3, 6, 6, 300, 60));
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 360));
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 0, 120));
                 
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 7, 0, 3, 2));
-        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 300));
-        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 60, 180));
+		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 300));
+        $this->addAftSystem(new EWProtoMedLaser(3, 6, 6, 300, 360));
+        $this->addAftSystem(new EWProtoMedLaser(3, 6, 6, 0, 60));
+		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 60, 180));
         $this->addAftSystem(new Thruster(3, 7, 0, 3, 2));
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
         
@@ -59,25 +60,26 @@ class CircasianIlustrisCommand extends HeavyCombatVessel{
 		
         $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-                    11 => "Thruster",
-                    13 => "Scanner",
-                    15 => "Engine",
+                    9 => "Structure",
+                    12 => "Thruster",
+                    14 => "Scanner",
+                    16 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",
             ),
             1=> array(
-                    3 => "Thruster",
-					7 => "Light Particle Cannon",
-					9 => "Rocket Launcher",
-					12 => "Light Particle Beam",
+                    4 => "Thruster",
+					6 => "Light Laser",
+					8 => "Proto Medium Laser",
+					11 => "Light Particle Beam",
 					18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     6 => "Thruster",
-                    9 => "Light Particle Beam",
+					8 => "Proto Medium Laser",
+                    10 => "Light Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),

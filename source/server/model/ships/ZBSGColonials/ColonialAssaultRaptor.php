@@ -17,6 +17,7 @@ class ColonialAssaultRaptor extends SuperHeavyFighter{
 		$this->unofficial = true;
 
 	    $this->notes = 'Atmospheric.';
+	    $this->notes .= '<br>Gains +5 initiative when within 5 hexes of a standard Raptor.';
 		
         $this->forwardDefense = 7;
         $this->sideDefense = 9;
@@ -81,7 +82,7 @@ class ColonialAssaultRaptor extends SuperHeavyFighter{
                 if(!$ship->isDestroyed()
                         && ($this->userid == $ship->userid)
                         && ($ship instanceof ColonialRaptor)){
-                    $initiativeBonusRet+=10;
+                    $initiativeBonusRet+=5;
                     break;
                 }
             }

@@ -7,10 +7,12 @@ class KobolViperMk2 extends FighterFlight{
         $this->pointCost = 210;
         $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolViperMk2";
-        $this->shipClass = "Viper Mk-2 flight";
+        $this->shipClass = "Viper Mk-2 flight (Beta)";
         $this->imagePath = "img/ships/BSG/viperMk2.png";
 //	    $this->isd = 2212;
  		$this->unofficial = true;
+
+	    $this->notes = 'Gains +10 initiative when within 5 hexes of a standard Raptor.';
 	    
         $this->forwardDefense = 4;
         $this->sideDefense = 6;
@@ -69,7 +71,7 @@ class KobolViperMk2 extends FighterFlight{
                 if(!$ship->isDestroyed()
                         && ($this->userid == $ship->userid)
                         && ($ship instanceof KobolRaptor)){
-                    $initiativeBonusRet+=5;
+                    $initiativeBonusRet+=10;
                     break;
                 }
             }

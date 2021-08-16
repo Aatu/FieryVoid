@@ -1149,6 +1149,7 @@ spl_autoload_register(
 				'ewdefenselaser' => '/server/model/weapons/customEscalation.php',
 				'ewlaserbolt' => '/server/model/weapons/customEscalation.php',
 				'ewlaserboltftr' => '/server/model/weapons/customEscalation.php',
+				'ewprotomedlaser' => '/server/model/weapons/customEscalation.php',
 				'ewtwinlasercannon' => '/server/model/weapons/customEscalation.php',
 				'ewlightlaserbeam' => '/server/model/weapons/customEscalation.php',
 				'ewgatlinglaser' => '/server/model/weapons/customEscalation.php',
@@ -1238,12 +1239,15 @@ spl_autoload_register(
 				//Escalation Wars - Circasian
 				'circasianaschartrooptransport' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianAscharTroopTransport.php',
 				'circasiancairn' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianCairn.php',
+				'circasiandolinar' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianDolinar.php',
+				'circasiandolinarp' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianDolinarP.php',
 				'circasianelaric' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianElaric.php',
 				'circasianeltesa' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianEltesa.php',
 				'circasianfeilah' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianFeilah.php',
 				'circasiangallahcarrier' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianGallahCarrier.php',
 				'circasiangallahtransport' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianGallahTransport.php',
 				'circasianheltara' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianHeltara.php',
+				'circasianilostalaser' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianIlostaLaser.php',
 				'circasianilustris' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianIlustris.php',
 				'circasianilvaosat' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianIlvaOSAT.php',
 				'circasianistale' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianIstale.php',
@@ -1706,17 +1710,23 @@ spl_autoload_register(
 
 				//Battlestar Galactica - Kirill
 					//weapons
+                'commjammerftr' => '/server/model/weapons/customBSG.php',
                 'flakarray' => '/server/model/weapons/customBSG.php',
                 'flakarray2' => '/server/model/weapons/customBSG.php',
+                'bsgmarineassault' => '/server/model/weapons/customBSG.php',
                 'sensorspearftr' => '/server/model/weapons/customBSG.php',
+                'sensorspikeftr' => '/server/model/weapons/customBSG.php',
+                'bsgmedscattergun' => '/server/model/weapons/customBSG.php',
 					//ships
                 'koboladamant' => '/server/model/ships/ZBSGKobol/KobolAdamant.php',
                 'kobolartemis' => '/server/model/ships/ZBSGKobol/KobolArtemis.php',
                 'kobolatlas' => '/server/model/ships/ZBSGKobol/KobolAtlas.php',
                 'kobolberserk' => '/server/model/ships/ZBSGKobol/KobolBerserk.php',
+                'kobolewraptor' => '/server/model/ships/ZBSGKobol/KobolEWRaptor.php',
                 'koboljanus' => '/server/model/ships/ZBSGKobol/KobolJanus.php',
                 'koboljupiter' => '/server/model/ships/ZBSGKobol/KobolJupiter.php',
                 'kobolmanticore' => '/server/model/ships/ZBSGKobol/KobolManticore.php',
+                'kobolmarineraptor' => '/server/model/ships/ZBSGKobol/KobolMarineRaptor.php',
                 'kobolmercury' => '/server/model/ships/ZBSGKobol/KobolMercury.php',
                 'kobolminerva' => '/server/model/ships/ZBSGKobol/KobolMinerva.php',
                 'kobolminotaur' => '/server/model/ships/ZBSGKobol/KobolMinotaur.php',
@@ -1724,6 +1734,7 @@ spl_autoload_register(
                 'kobolvalkyrie' => '/server/model/ships/ZBSGKobol/KobolValkyrie.php',
                 'kobolranger' => '/server/model/ships/ZBSGKobol/KobolRanger.php',
                 'kobolraptor' => '/server/model/ships/ZBSGKobol/KobolRaptor.php',
+                'kobolraptorsupport' => '/server/model/ships/ZBSGKobol/KobolRaptorSupport.php',
                 'kobolvipermk2' => '/server/model/ships/ZBSGKobol/KobolViperMk2.php',
                 'kobolvipermk7' => '/server/model/ships/ZBSGKobol/KobolViperMk7.php',
 
@@ -2165,20 +2176,26 @@ spl_autoload_register(
 				//weapons
 				'trekphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekphotonictorp' => '/server/model/weapons/customTrek.php',
+				'trekspatialtorp' => '/server/model/weapons/customTrek.php',
 				
 				//systems
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php',
 				
 				//ships
-				'federationconstitution' => '/server/model/ships/customs/FederationConstitution.php',
-				'federationnxwarcruiser' => '/server/model/ships/customs/FederationNXWarCruiser.php',
+				'nxcruiser' => '/server/model/ships/ZTrekFederation/NXCruiser.php',
+				'nxshuttlepod' => '/server/model/ships/ZTrekFederation/NXShuttlepod.php',
+				'nxwarcruiser' => '/server/model/ships/ZTrekFederation/NXWarCruiser.php',
 		    		
 		    
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
 				
-				
+
+				//TEMPORARY variable hangar size testing
+				'variablehangarsize' => '/server/model/ships/customs/VariableHangarSize.php',
+				'ltviper' => '/server/model/ships/customs/LtViper.php',
+				'medviper' => '/server/model/ships/customs/medViper.php',
 						
 				
 				//let's end this with unit enhancement class...		    
