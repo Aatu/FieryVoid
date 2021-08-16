@@ -17,6 +17,7 @@ class ColonialAssaultRaptor extends SuperHeavyFighter{
 		$this->unofficial = true;
 
 	    $this->notes = 'Atmospheric.';
+	    $this->notes .= '<br>Gains +5 initiative when within 5 hexes of a standard Raptor.';
 		
         $this->forwardDefense = 7;
         $this->sideDefense = 9;
@@ -48,9 +49,9 @@ class ColonialAssaultRaptor extends SuperHeavyFighter{
 			$fighter->imagePath = "img/ships/BSG/raptor.png";
 			$fighter->iconPath = "img/ships/BSG/raptor_large.png";
 
-			$frontGun = new BSGKineticEnergyWeapon(340, 20, 2, 4);
+			$frontGun = new BSGKineticEnergyWeapon(330, 30, 2, 4);
 			$frontGun->displayName = "Kinetic Energy Cannon";
-			$hvyGun = new BSGHvyKineticEnergyWeapon(340, 20, 1); //$startArc, $endArc, $nrOfShots
+			$hvyGun = new BSGHvyKineticEnergyWeapon(330, 30, 1); //$startArc, $endArc, $nrOfShots
 			$hvyGun->displayName = "Heavy Kinetic Energy Cannon";
 			$missile1 = new FighterMissileRack(3, 330, 30);
 			$missile1->displayName = "Missile Pod";
@@ -81,7 +82,7 @@ class ColonialAssaultRaptor extends SuperHeavyFighter{
                 if(!$ship->isDestroyed()
                         && ($this->userid == $ship->userid)
                         && ($ship instanceof ColonialRaptor)){
-                    $initiativeBonusRet+=10;
+                    $initiativeBonusRet+=5;
                     break;
                 }
             }

@@ -14,7 +14,7 @@ class ColonialRaptor extends SuperHeavyFighter{
 		$this->unofficial = true;
 
 	    $this->notes = 'Atmospheric.';
-		$this->notes .= '<br>Provides +5 Initiative to all Vipers, Pythons, and Assault Raptors within 5 hexes.';
+		$this->notes .= '<br>Provides +5 Initiative to all Vipers, Pythons, Mambas, and Assault Raptors within 5 hexes.';
 		
         $this->forwardDefense = 7;
         $this->sideDefense = 9;
@@ -46,7 +46,7 @@ class ColonialRaptor extends SuperHeavyFighter{
 			$fighter->imagePath = "img/ships/BSG/raptor.png";
 			$fighter->iconPath = "img/ships/BSG/raptor_large.png";
 
-            $frontGun = new BSGKineticEnergyWeapon(340, 20, 2, 4);
+            $frontGun = new BSGKineticEnergyWeapon(330, 30, 2, 4);
             $frontGun->displayName = "Kinetic Energy Cannon";
 			$ewGun = new SensorSpearFtr(240, 120, 0);
 

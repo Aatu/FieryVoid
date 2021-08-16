@@ -14,6 +14,7 @@ class ColonialViperMk2 extends FighterFlight{
 //        $this->isd = 1948;
 
 	    $this->notes = 'Atmospheric.';
+	    $this->notes .= '<br>Gains +5 initiative when within 5 hexes of a standard Raptor.';
         
         $this->forwardDefense = 4;
         $this->sideDefense = 6;
@@ -41,19 +42,28 @@ class ColonialViperMk2 extends FighterFlight{
             $fighter->imagePath = "img/ships/BSG/viperMk2.png";
             $fighter->iconPath = "img/ships/BSG/viperMk2_large.png";
 
+			//should be single gun with variable arc, but that's not possible ATM - so 2 exclusive weapons; narrow arc gets bonus FC, wide arc gets penalty
+            $frontGun = new BSGLtKineticEnergyWeapon(340, 20, 1, 2);
+            $frontGun->displayName = "Lt Kinetic Energy Cannon (narrow)";
+            $frontGun->exclusive = true;
+			$frontGun->fireControl[0] += 1;
+            $fighter->addFrontSystem($frontGun);
+			
+            $frontGun = new BSGLtKineticEnergyWeapon(330, 30, 1, 2);
+            $frontGun->displayName = "Lt Kinetic Energy Cannon (wide)";
+            $frontGun->exclusive = true;
+			$frontGun->fireControl[0] += -1;
+            $fighter->addFrontSystem($frontGun);
+			
+			
+			
             $missileRack = new FighterMissileRack(2, 330, 30);
             $missileRack->firingModes = array(
                 1 => "FY"
             );
-
             $missileRack->missileArray = array(
                 1 => new MissileFY(330, 30)
             );
-
-            $frontGun = new BSGLtKineticEnergyWeapon(340, 20, 1, 2);
-            $frontGun->displayName = "Light Kinetic Energy Cannon";
-
-            $fighter->addFrontSystem($frontGun);
             $fighter->addFrontSystem($missileRack);
 
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			

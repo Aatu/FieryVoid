@@ -25,15 +25,15 @@ class ColonialMercuryClass extends BaseShip{
 
 //        $this->notes .= '<br>Provides +5 Initiative for all friendly Colonial units';
         
-        $this->forwardDefense = 20;
-        $this->sideDefense = 22;
+        $this->forwardDefense = 19;
+        $this->sideDefense = 21;
         
         $this->turncost = 1.75;
         $this->turndelaycost = 1.75;
         $this->accelcost = 4;
         $this->rollcost = 4;
         $this->pivotcost = 6;
-        $this->iniativebonus = -5;
+        $this->iniativebonus = -10;
         
         $this->addPrimarySystem(new Reactor(7, 45, 0, 0));
         $this->addPrimarySystem(new CnC(6, 35, 0, 0));
@@ -68,8 +68,8 @@ class ColonialMercuryClass extends BaseShip{
 		$this->addAftSystem(new Bulkhead(0, 6));
 		$this->addAftSystem(new BSGMainBattery(6, 9, 6, 180, 270));
         $this->addAftSystem(new BSGMainBattery(6, 9, 6, 90, 180));
-        $this->addAftSystem(new LMissileRack(6, 6, 0, 150, 210));
-        $this->addAftSystem(new LMissileRack(6, 6, 0, 150, 210));
+        $this->addAftSystem(new SMissileRack(6, 6, 0, 150, 210));
+        $this->addAftSystem(new SMissileRack(6, 6, 0, 150, 210));
 		$this->addAftSystem(new BSGMedBattery(6, 7, 4, 180, 270));
 		$this->addAftSystem(new BSGMedBattery(6, 7, 4, 90, 180));
 
@@ -110,7 +110,7 @@ class ColonialMercuryClass extends BaseShip{
 		$this->addRightSystem(new Hangar(6, 27));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure(7, 100));
+        $this->addFrontSystem(new Structure(7, 90));
         $this->addAftSystem(new Structure(6, 80));
         $this->addLeftSystem(new Structure(6, 100));
         $this->addRightSystem(new Structure(6, 100));
@@ -140,7 +140,7 @@ class ColonialMercuryClass extends BaseShip{
 			2=> array(
 					5 => "Thruster",
 					8 => "Main Battery",
-                    9 => "Class-L Missile Rack",
+                    9 => "Class-S Missile Rack",
                     11 => "Battery",
 					18 => "Structure",
 					20 => "Primary",

@@ -8,7 +8,7 @@ class KobolJupiter extends BaseShip{
 	$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolJupiter";
         $this->imagePath = "img/ships/BSG/ColonialBattlestar.png";
-        $this->shipClass = "Jupiter Battlestar";
+        $this->shipClass = "Jupiter Battlestar (Final design)";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 180; //img has 200px per side
 		$this->unofficial = true;
@@ -43,7 +43,7 @@ class KobolJupiter extends BaseShip{
 //		$this->addPrimarySystem(new Bulkhead(0, 4));
 //        $this->addPrimarySystem(new Bulkhead(0, 4));
 		$hyperdrive = new JumpEngine(5, 16, 6, 20);
-			$hyperdrive->displayName = 'Phasing Drive';
+			$hyperdrive->displayName = 'FTL Drive';
 			$this->addPrimarySystem($hyperdrive);
 		
         $this->addFrontSystem(new Thruster(4, 9, 0, 4, 1));
@@ -112,7 +112,7 @@ class KobolJupiter extends BaseShip{
 					12 => "Scanner",
 					15 => "Engine",
 					17 => "Reactor",
-					19 => "Phasing Drive",
+					19 => "FTL Drive",
 					20 => "C&C",
 			),
 			1=> array(

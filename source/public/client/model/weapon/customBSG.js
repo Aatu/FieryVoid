@@ -46,8 +46,38 @@ var FlakArray = function FlakArray(json, ship) {
 FlakArray.prototype = Object.create(Weapon.prototype);
 FlakArray.prototype.constructor = FlakArray;
 
+var FlakArray2 = function FlakArray2(json, ship) {
+    Weapon.call(this, json, ship);
+};
+FlakArray2.prototype = Object.create(Weapon.prototype);
+FlakArray2.prototype.constructor = FlakArray2;
+
 var SensorSpearFtr = function SensorSpearFtr(json, ship) {
     Weapon.call(this, json, ship);
 };
 SensorSpearFtr.prototype = Object.create(Weapon.prototype);
 SensorSpearFtr.prototype.constructor = SensorSpearFtr;
+
+var SensorSpikeFtr = function SensorSpikeFtr(json, ship) {
+    Weapon.call(this, json, ship);
+};
+SensorSpikeFtr.prototype = Object.create(Weapon.prototype);
+SensorSpikeFtr.prototype.constructor = SensorSpikeFtr;
+
+var CommJammerFtr = function CommJammerFtr(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CommJammerFtr.prototype = Object.create(Weapon.prototype);
+CommJammerFtr.prototype.constructor = CommJammerFtr;
+
+var BSGMedScattergun = function BSGMedScattergun(json, ship) {
+    Weapon.call(this, json, ship);
+};
+BSGMedScattergun.prototype = Object.create(Weapon.prototype);
+BSGMedScattergun.prototype.constructor = BSGMedScattergun;
+
+var BSGMarineAssault = function BSGMarineAssault(json, ship) {
+    Weapon.call(this, json, ship);
+};
+BSGMarineAssault.prototype = Object.create(Weapon.prototype);
+BSGMarineAssault.prototype.constructor = BSGMarineAssault;

@@ -1,5 +1,3 @@
-
-  
 <?php
 class ColonialBerserkClassCarrier extends BaseShip{
     
@@ -20,9 +18,9 @@ class ColonialBerserkClassCarrier extends BaseShip{
 		$this->customFighter = array("Python"=>6);
 
 		$this->notes = "Primary users: Colonial Fleet";
+        $this->notes .= '<br>Python capable';
 		$this->isd = 1948;
 
-        $this->notes = 'Python capable';
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
@@ -70,7 +68,7 @@ class ColonialBerserkClassCarrier extends BaseShip{
         $this->addRightSystem(new Thruster(5, 20, 0, 3, 4));
         $this->addRightSystem(new BSGFlakBattery(5, 6, 2, 30, 150));
 		$this->addRightSystem(new RapidGatling(4, 4, 1, 0, 180));
-        $this->addRightSystem(new RapidGatling(4, 6, 1, 0, 180));
+        $this->addRightSystem(new RapidGatling(4, 4, 1, 0, 180));
 		$this->addRightSystem(new RapidGatling(4, 4, 1, 0, 180));
         $this->addRightSystem(new SMissileRack(4, 6, 0, 30, 150));
         $this->addRightSystem(new SMissileRack(4, 6, 0, 30, 150));
