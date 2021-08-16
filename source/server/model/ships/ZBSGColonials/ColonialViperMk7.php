@@ -4,7 +4,7 @@ class ColonialViperMk7 extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 45*6;
+        $this->pointCost = 48*6;
         $this->faction = "ZPlaytest BSG Colonials";
         $this->phpclass = "ColonialViperMk7";
         $this->shipClass = "Viper Mk7 Medium Flight";
@@ -14,11 +14,12 @@ class ColonialViperMk7 extends FighterFlight{
         $this->isd = 1948;
 
 	    $this->notes = 'Atmospheric.';
+	    $this->notes .= '<br>Gains +5 initiative when within 5 hexes of a standard Raptor.';
         
         $this->forwardDefense = 5;
         $this->sideDefense = 7;
         $this->freethrust = 12;
-        $this->offensivebonus = 4;
+        $this->offensivebonus = 5;
         $this->jinkinglimit = 8;
         $this->turncost = 0.33;
 		$this->turndelay = 0;

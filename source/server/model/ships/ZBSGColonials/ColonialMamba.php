@@ -15,6 +15,7 @@ class ColonialMamba extends FighterFlight{
 //        $this->isd = 1948;
 
 	    $this->notes = 'Atmospheric and a 1/3 turn delay.';
+	    $this->notes .= '<br>Gains +5 initiative when within 5 hexes of a standard Raptor.';
         
         $this->forwardDefense = 6;
         $this->sideDefense = 8;

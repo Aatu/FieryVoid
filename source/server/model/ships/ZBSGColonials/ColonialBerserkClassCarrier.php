@@ -18,9 +18,9 @@ class ColonialBerserkClassCarrier extends BaseShip{
 		$this->customFighter = array("Python"=>6);
 
 		$this->notes = "Primary users: Colonial Fleet";
+        $this->notes .= '<br>Python capable';
 		$this->isd = 1948;
 
-        $this->notes = 'Python capable';
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;

@@ -8,7 +8,7 @@ class KobolArtemis extends BaseShip{
 	$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolArtemis";
         $this->imagePath = "img/ships/BSG/ColonialArtemis.png";
-        $this->shipClass = "Artemis Battlestar";
+        $this->shipClass = "Artemis Battlestar (Alpha prototype)";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; //img has 200px per side
 		$this->unofficial = true;

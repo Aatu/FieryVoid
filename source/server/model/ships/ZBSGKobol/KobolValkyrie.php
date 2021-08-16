@@ -8,7 +8,7 @@ class KobolValkyrie extends BaseShip{
         $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolValkyrie";
         $this->imagePath = "img/ships/BSG/ColonialOdin2.png";
-        $this->shipClass = "Valkyrie Battlestar";
+        $this->shipClass = "Valkyrie Battlestar (Alpha prototype)";
         $this->fighters = array("normal" => 12, "superheavy" => 2);
  //       $this->isd = 2238;
         $this->canvasSize = 145;

@@ -8,7 +8,7 @@ class KobolRanger extends HeavyCombatVessel{
         $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolRanger";
         $this->imagePath = "img/ships/BSG/ColonialRanger.png";
-        $this->shipClass = "Ranger Missile Cruiser";
+        $this->shipClass = "Ranger Missile Cruiser (Alpha prototype)";
  //       $this->isd = 2160;
         $this->canvasSize = 145;
 

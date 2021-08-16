@@ -10,6 +10,11 @@ var TrekPhotonicTorp = function TrekPhotonicTorp(json, ship) {
 TrekPhotonicTorp.prototype = Object.create(Weapon.prototype);
 TrekPhotonicTorp.prototype.constructor = TrekPhotonicTorp;
 
+var TrekSpatialTorp = function TrekSpatialTorp(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekSpatialTorp.prototype = Object.create(Weapon.prototype);
+TrekSpatialTorp.prototype.constructor = TrekSpatialTorp;
 
 
 var TrekWarpDrive = function TrekWarpDrive(json, ship) {

@@ -8,7 +8,7 @@ class KobolMercury extends BaseShip{
 	$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolMercury";
         $this->imagePath = "img/ships/BSG/ColonialMercury.png";
-        $this->shipClass = "Mercury Battlestar";
+        $this->shipClass = "Mercury Battlestar (Beta prototype)";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 200; //img has 200px per side
 		$this->unofficial = true;

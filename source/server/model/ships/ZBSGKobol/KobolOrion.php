@@ -8,7 +8,7 @@ class KobolOrion extends MediumShip{
 		$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolOrion";
         $this->imagePath = "img/ships/BSG/ColonialOrion.png";
-        $this->shipClass = "Orion Reconisance Battlestar";
+        $this->shipClass = "Orion Reconisance Battlestar (Beta prototype)";
         $this->canvasSize = 80;
         $this->limited = 33;
 //	    $this->isd = 2007;
