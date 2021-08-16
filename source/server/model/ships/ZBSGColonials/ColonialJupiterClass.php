@@ -45,7 +45,8 @@ class ColonialJupiterClass extends BaseShip{
 			$hyperdrive->displayName = 'Hyperdrive';
 			$this->addPrimarySystem($hyperdrive);
    
-        $this->addFrontSystem(new Thruster(6, 30, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(6, 20, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(6, 20, 0, 3, 1));
 		$this->addFrontSystem(new Bulkhead(0, 6));
 		$this->addFrontSystem(new Bulkhead(0, 6));
 		$this->addFrontSystem(new BSGMainBattery(6, 9, 6, 300, 360));

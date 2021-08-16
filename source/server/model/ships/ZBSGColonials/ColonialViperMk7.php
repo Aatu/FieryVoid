@@ -23,9 +23,12 @@ class ColonialViperMk7 extends FighterFlight{
         $this->jinkinglimit = 8;
         $this->turncost = 0.33;
 		$this->turndelay = 0;
+		
         
         $this->iniativebonus = 90;
-        $this->hasNavigator = true;
+        //$this->hasNavigator = true; //that's too much, Navigator OPTION instead
+		$this->enhancementOptionsEnabled[] = 'NAVIGATOR'; //this flight can have Navigator enhancement option	
+		
         $this->populate();       
 
     }
@@ -43,11 +46,20 @@ class ColonialViperMk7 extends FighterFlight{
             $fighter->imagePath = "img/ships/BSG/viperMk7.png";
             $fighter->iconPath = "img/ships/BSG/viperMk7_large.png";
 
-            $frontGun = new BSGKineticEnergyWeapon(340, 20, 3, 4);
-            $frontGun->displayName = "Kinetic Energy Cannon";
+			//should be single gun with variable arc, but that's not possible ATM - so 2 exclusive weapons; narrow arc gets bonus FC, wide arc gets penalty
+            $frontGun = new BSGLtKineticEnergyWeapon(340, 20, 3, 4);
+            $frontGun->displayName = "Kinetic Energy Cannon (narrow)";
+            $frontGun->exclusive = true;
+			$frontGun->fireControl[0] += 1;
+            $fighter->addFrontSystem($frontGun);
+			
+            $frontGun = new BSGLtKineticEnergyWeapon(330, 30, 3, 4);
+            $frontGun->displayName = "Kinetic Energy Cannon (wide)";
+            $frontGun->exclusive = true;
+			$frontGun->fireControl[0] += -1;
+            $fighter->addFrontSystem($frontGun);
 
             $fighter->addFrontSystem(new FighterMissileRack(4, 330, 30));
-            $fighter->addFrontSystem($frontGun);
 //            $fighter->addFrontSystem(new FighterMissileRack(1, 330, 30));
 
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			

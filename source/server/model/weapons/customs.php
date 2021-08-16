@@ -749,14 +749,17 @@ class AbsorbtionShield extends Shield implements DefensiveSystem{
 		parent::setSystemDataWindow($turn);
 		//$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
 		$this->data["Basic Strength"] = $this->baseOutput; 
+		/*standard shield description is misleading!
 		if (!isset($this->data["Special"])) {
 			$this->data["Special"] = '';
 		}else{
 			$this->data["Special"] .= '<br>';
 		}	    
-		$this->data["Special"] .= "Does not decrease profile.";  
+		*/
+		$this->data["Special"] = "Reduces damage done by incoming shots (by shield rating), but does not decrease profile."; 
 		$this->data["Special"] .= "<br>Cannot be flown under."; 
 		$this->data["Special"] .= "<br>Doubly effective vs Raking weapons."; 
+		$this->data["Special"] .= "<br>Can be boosted."; 
     }
 	  
         private function getBoostLevel($turn){

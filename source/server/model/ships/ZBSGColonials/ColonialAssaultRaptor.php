@@ -49,9 +49,9 @@ class ColonialAssaultRaptor extends SuperHeavyFighter{
 			$fighter->imagePath = "img/ships/BSG/raptor.png";
 			$fighter->iconPath = "img/ships/BSG/raptor_large.png";
 
-			$frontGun = new BSGKineticEnergyWeapon(340, 20, 2, 4);
+			$frontGun = new BSGKineticEnergyWeapon(330, 30, 2, 4);
 			$frontGun->displayName = "Kinetic Energy Cannon";
-			$hvyGun = new BSGHvyKineticEnergyWeapon(340, 20, 1); //$startArc, $endArc, $nrOfShots
+			$hvyGun = new BSGHvyKineticEnergyWeapon(330, 30, 1); //$startArc, $endArc, $nrOfShots
 			$hvyGun->displayName = "Heavy Kinetic Energy Cannon";
 			$missile1 = new FighterMissileRack(3, 330, 30);
 			$missile1->displayName = "Missile Pod";
