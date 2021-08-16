@@ -62,12 +62,8 @@ if (isset($_SESSION["user"])) {
         <br>
 -->        
 		
-		---------- <b>LATEST NEWS - July 2021</b> ----------	   
-	    <br><b><u>Minbari unit types</u></b> - thanks to Geoffrey, Minbari units now are listed not just with class names, but with types too!
-	    <br><b><u>SW shields can (somewhat) stop Matter</u></b> - balance change, not affecting in-universe clashes
-		
-	    <br><b><u>Escalation Wars and Nexus updates</u></b> - The Kastan Monarchy and Blood Swords Raiders join the Escalation Wars, while the Sal-bez Coalition has been fully updated.
-	    <br><b><u>EA force list update</u></b> - The EA list has been split into separate early and modern forces.
+		---------- <b>LATEST NEWS - August 2021</b> ----------	   
+	    <br><b><u>BSG update</u></b> - large playtest Battlestar Galactica update! 
 		
 
 
