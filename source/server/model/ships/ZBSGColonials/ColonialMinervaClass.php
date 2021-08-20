@@ -5,7 +5,7 @@ class ColonialMinervaClass extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 1100;
-	$this->faction = "ZPlaytest BSG Colonials";
+	$this->faction = "ZBSG Colonials";
         $this->phpclass = "ColonialMinervaClass";
         $this->imagePath = "img/ships/BSG/ColonialMinerva.png";
         $this->shipClass = "Minerva Battlestar";

@@ -5,7 +5,7 @@ class ColonialAlliance extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
          $this->pointCost = 800;
-        $this->faction = "ZPlaytest BSG Colonials";
+        $this->faction = "ZBSG Colonials";
         $this->phpclass = "ColonialAlliance";
         $this->imagePath = "img/ships/BSG/ColonialAlliance.png";
         $this->shipClass = "Alliance Scout Cruiser";

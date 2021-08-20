@@ -5,7 +5,7 @@ class ColonialBerserkClassCarrier extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 750;
-	$this->faction = "ZPlaytest BSG Colonials";
+	$this->faction = "ZBSG Colonials";
         $this->phpclass = "ColonialBerserkClassCarrier";
         $this->imagePath = "img/ships/BSG/ColonialBerserk.png";
         $this->shipClass = "Berserk Carrier";

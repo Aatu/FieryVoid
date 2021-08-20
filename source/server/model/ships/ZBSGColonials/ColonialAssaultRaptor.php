@@ -5,7 +5,7 @@ class ColonialAssaultRaptor extends SuperHeavyFighter{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 660;
-        $this->faction = "ZPlaytest BSG Colonials";
+        $this->faction = "ZBSG Colonials";
         $this->phpclass = "ColonialAssaultRaptor";
         $this->shipClass = "Assault Raptor";
 			$this->variantOf = "Raptor";
