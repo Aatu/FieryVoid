@@ -253,8 +253,8 @@ class BSGMarineAssault extends Weapon{
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-			$this->data["Special"] = "Defensive Flak: -15 to hit on arc with active Flak Battery.";
-			$this->data["Special"] .= "<br>Can intercept lasers.";
+//			$this->data["Special"] = "Defensive Flak: -15 to hit on arc with active Flak Battery.";
+			$this->data["Special"] = "Can intercept lasers.";
 			$this->data["Special"] .= "<br>May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 5 hexes.";
 		}
 
@@ -296,6 +296,7 @@ class BSGMarineAssault extends Weapon{
         public function getDamage($fireOrder){        return Dice::d(6, 2);   }
         public function setMinDamage(){     $this->minDamage = 2 ;      }
         public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+		
     }	//endof class BSGFlakBattery
 
 
