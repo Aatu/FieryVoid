@@ -2182,6 +2182,9 @@ spl_autoload_register(
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php',
 				
 				//ships
+				'deltaclassalpha' => '/server/model/ships/ZTrekFederation/DeltaClassAlpha.php',
+				'deltaclassbeta' => '/server/model/ships/ZTrekFederation/DeltaClassBeta.php',
+				'intrepidclass' => '/server/model/ships/ZTrekFederation/IntrepidClass.php',
 				'nxcruiser' => '/server/model/ships/ZTrekFederation/NXCruiser.php',
 				'nxshuttlepod' => '/server/model/ships/ZTrekFederation/NXShuttlepod.php',
 				'nxwarcruiser' => '/server/model/ships/ZTrekFederation/NXWarCruiser.php',
