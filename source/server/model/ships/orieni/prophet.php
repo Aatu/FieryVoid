@@ -10,7 +10,7 @@ class Prophet extends BaseShip{
         $this->imagePath = "img/ships/prophet.png";
         $this->canvasSize = 280;
         $this->shipClass = "Prophet Command Ship";
-	    $this->isd = 1780;
+	    $this->isd = 2007;
         $this->limited = 33;
         $this->shipSizeClass = 3;
         $this->fighters = array("light"=>12, "medium"=>18, "assault shuttles"=>6);
@@ -23,7 +23,6 @@ class Prophet extends BaseShip{
         $this->accelcost = 6;
         $this->rollcost = 4;
         $this->pivotcost = 3;
-
         
         $this->addPrimarySystem(new Reactor(5, 34, 0, 0));
         $this->addPrimarySystem(new CnC(6, 30, 0, 0));
