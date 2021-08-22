@@ -22,7 +22,7 @@ class zzftrUglyChirdaki extends FighterFlight{
         $this->freethrust = 12;
         $this->offensivebonus = 4;
         $this->jinkinglimit = 8;
-        $this->turncost = 0.25;
+        $this->turncost = 0.33;
         
         $this->pivotcost = 2; //SW fighters have higher pivot cost - only elite pilots perform such maneuvers on screen!
 		$this->enhancementOptionsEnabled[] = 'ELITE_SW'; //this flight can have Elite Pilot (SW) enhancement option	
@@ -43,7 +43,7 @@ class zzftrUglyChirdaki extends FighterFlight{
         $new = $this->flightSize;
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
-            $armour = array(2, 2, 2, 1);
+            $armour = array(2, 1, 2, 2);
             $fighter = new Fighter("zzftrUglyChirdaki", $armour, 11, $this->id);
             $fighter->displayName = "Ugly Chirdaki";
             $fighter->imagePath = "img/starwars/tieuglychirdaki.png";
