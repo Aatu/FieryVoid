@@ -63,7 +63,13 @@ if (isset($_SESSION["user"])) {
 -->        
 		
 		---------- <b>LATEST NEWS - August 2021</b> ----------	   
-	    <br><b><u>BSG update</u></b> - large playtest Battlestar Galactica update! 
+	    <br><b><u>Star Trek</u></b> - Wolfgang brings a few Enterprise-era Federation units to playtest in Fiery Void!
+	    <br><b><u>12 Colonies of Kobol</u></b> - The Kobol BSG version have several new designs to test thanks to Kirill!
+	    <br><b><u>Reinforcements for Colonials</u></b> - Fred's BSG Colonials have added several updates and the new Freya!
+	    <br><b><u>Star Trek</u></b> - The NX cruisers have been updated so that you can hit their warp nacelles.
+	    <br><b><u>BSG Colonials</u></b> - Flak Battery has been updated so that it does not reference an e-web type effect.
+	    <br><b><u>WotCR era refits</u></b> - Thanks to Daniel, several missing refits have been added to the Centauri and Orieni forces!
+	    <br><b><u>WotCR unit updates</u></b> - Daniel's update found a few units with incorrect stats that have been updated.
 		
 
 
