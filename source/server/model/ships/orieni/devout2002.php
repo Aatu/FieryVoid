@@ -9,7 +9,7 @@ class Devout2002 extends MediumShip{
         $this->phpclass = "devout2002";
         $this->imagePath = "img/ships/obedient.png";
         $this->shipClass = "Devout Escort Frigate (early)";
-        	$this->variantOf = "Obedient Patrol Frigate";
+        	$this->variantOf = "Obedient Patrol Frigate (2007)";
         $this->agile = true;
         $this->canvasSize = 100;
 	    $this->isd = 2002;

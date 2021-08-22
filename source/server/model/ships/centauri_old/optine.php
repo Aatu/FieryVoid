@@ -30,8 +30,8 @@ class Optine extends BaseShip{
 	$this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addFrontSystem(new TacLaser(3, 5, 4, 240, 360));
-        $this->addFrontSystem(new ImperialLaser(3, 8, 6, 300, 60));
-        $this->addFrontSystem(new ImperialLaser(3, 8, 6, 300, 60));
+        $this->addFrontSystem(new ImperialLaser(3, 8, 5, 300, 60));
+        $this->addFrontSystem(new ImperialLaser(3, 8, 5, 300, 60));
         $this->addFrontSystem(new TacLaser(3, 5, 4, 0, 120));
         $this->addFrontSystem(new ParticleProjector(3, 6, 1, 270, 90));
 		
@@ -45,12 +45,12 @@ class Optine extends BaseShip{
 	$this->addAftSystem(new ParticleProjector(3, 6, 1, 60, 240));
 		
 	$this->addLeftSystem(new Thruster(4, 14, 0, 5, 3));
-        $this->addLeftSystem(new ImperialLaser(3, 8, 6, 300, 360));
+        $this->addLeftSystem(new ImperialLaser(3, 8, 5, 300, 360));
 	$this->addLeftSystem(new ParticleProjector(3, 6, 1, 240, 360));
 	$this->addLeftSystem(new ParticleProjector(3, 6, 1, 180, 300));
 
 	$this->addRightSystem(new Thruster(4, 14, 0, 5, 4));
-        $this->addRightSystem(new ImperialLaser(3, 8, 6, 0, 60));
+        $this->addRightSystem(new ImperialLaser(3, 8, 5, 0, 60));
 	$this->addRightSystem(new ParticleProjector(3, 2, 1, 0, 120));
 	$this->addRightSystem(new ParticleProjector(3, 2, 1, 60, 180));
 		

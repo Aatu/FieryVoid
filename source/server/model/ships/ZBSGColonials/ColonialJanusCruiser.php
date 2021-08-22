@@ -5,7 +5,7 @@ class ColonialJanusCruiser extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 725;
-        $this->faction = "ZPlaytest BSG Colonials";
+        $this->faction = "ZBSG Colonials";
         $this->phpclass = "ColonialJanusCruiser";
         $this->imagePath = "img/ships/BSG/ColonialJanus.png";
         $this->shipClass = "Janus Cruiser";

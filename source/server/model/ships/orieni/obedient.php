@@ -8,7 +8,7 @@ class Obedient extends MediumShip{
         $this->faction = "Orieni";
         $this->phpclass = "Obedient";
         $this->imagePath = "img/ships/obedient.png";
-        $this->shipClass = "Obedient Patrol Frigate";
+        $this->shipClass = "Obedient Patrol Frigate (2007)";
         $this->agile = true;
         $this->canvasSize = 100;
 	    

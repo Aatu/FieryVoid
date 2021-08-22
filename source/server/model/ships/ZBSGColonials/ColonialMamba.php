@@ -5,7 +5,7 @@ class ColonialMamba extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 52*6;
-        $this->faction = "ZPlaytest BSG Colonials";
+        $this->faction = "ZBSG Colonials";
         $this->phpclass = "ColonialMamba";
         $this->shipClass = "Mamba Prototype Medium Flight";
         $this->imagePath = "img/ships/BSG/mamba.png";

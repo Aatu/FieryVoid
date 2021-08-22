@@ -5,7 +5,7 @@ class ColonialManticoreClass extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 575;
-		$this->faction = "ZPlaytest BSG Colonials";
+		$this->faction = "ZBSG Colonials";
         $this->phpclass = "ColonialManticoreClass";
         $this->imagePath = "img/ships/BSG/ColonialManticore.png";
         $this->shipClass = "Manticore Corvette";

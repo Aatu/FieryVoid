@@ -5,7 +5,7 @@ class ColonialOrion extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 700;
-		$this->faction = "ZPlaytest BSG Colonials";
+		$this->faction = "ZBSG Colonials";
         $this->phpclass = "ColonialOrion";
         $this->imagePath = "img/ships/BSG/ColonialOrion.png";
         $this->shipClass = "Orion Reconisance Battlestar";

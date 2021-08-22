@@ -3,6 +3,7 @@ class worthus extends SmallStarBaseFourSections{
 	/*two-section weapons are simply moved to PRIMARY. Hit chart modified to make PRIMARY weapons hittable from outer chart. */
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
+
 		$this->pointCost = 2000;
 		$this->base = true;
 		$this->smallBase = true;
@@ -21,13 +22,11 @@ class worthus extends SmallStarBaseFourSections{
 		$this->sideDefense = 21;
 		$this->isd = 2001;
 		
-		
 		$this->addFrontSystem(new Structure( 5, 108));
 		$this->addAftSystem(new Structure( 5, 108));
 		$this->addLeftSystem(new Structure( 5, 108));
 		$this->addRightSystem(new Structure( 5, 108));
 		$this->addPrimarySystem(new Structure( 6, 140));
-		
 		
 		$this->addPrimarySystem(new Reactor(6, 48, 0, 0));
 		$this->addPrimarySystem(new ProtectedCnC(7, 50, 0, 0)); //2x 6/25 C&C originally
@@ -36,12 +35,12 @@ class worthus extends SmallStarBaseFourSections{
 		//4 Hangars from between sections, plus small PRIMARY hangar for shuttles - I make them into one PRIMARY hangar with extra armor
 		$this->addPrimarySystem(new Hangar(7, 28));
 		//2 all-around Imperial Lasers on PRIMARY, plus four 90-degrees from between outer sections
-        	$this->addPrimarySystem(new ImperialLaser(5, 8, 6, 0, 90));
-        	$this->addPrimarySystem(new ImperialLaser(5, 8, 6, 90, 180));
-        	$this->addPrimarySystem(new ImperialLaser(5, 8, 6, 180, 270));
-        	$this->addPrimarySystem(new ImperialLaser(5, 8, 6, 270, 360));
-        	$this->addPrimarySystem(new ImperialLaser(6, 8, 6, 0, 360));
-        	$this->addPrimarySystem(new ImperialLaser(6, 8, 6, 0, 360));
+        	$this->addPrimarySystem(new ImperialLaser(5, 8, 5, 0, 90));
+        	$this->addPrimarySystem(new ImperialLaser(5, 8, 5, 90, 180));
+        	$this->addPrimarySystem(new ImperialLaser(5, 8, 5, 180, 270));
+        	$this->addPrimarySystem(new ImperialLaser(5, 8, 5, 270, 360));
+        	$this->addPrimarySystem(new ImperialLaser(6, 8, 5, 0, 360));
+        	$this->addPrimarySystem(new ImperialLaser(6, 8, 5, 0, 360));
 		//2 all-around Tactical Lasers on PRIMARY
         	$this->addPrimarySystem(new TacLaser(6, 5, 4, 0, 360));
         	$this->addPrimarySystem(new TacLaser(6, 5, 4, 0, 360));
