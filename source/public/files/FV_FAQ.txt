@@ -36,7 +36,6 @@ GAMEPLAY GENERAL IDEAS
 MOVEMENT
  - Snap turn: it's implemented as consecutive but still separate turns. Turn delay is taken from first one only (so if You wan to shorten snap turn, shorten its first segment). This means even thrust allocation is checked for each hexside separately, not for combined turn.
  - Fighters don't get auto-return from pivot.
- - Sideslips into different directions in one movement phase are allowed.
  - Turn into pivot does not stop pivoting itself.
 
 
