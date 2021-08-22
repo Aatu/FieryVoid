@@ -22,43 +22,41 @@ class Centaurum extends BaseShip{
         $this->accelcost = 5;
         $this->rollcost = 4;
         $this->pivotcost = 4;
-        
          
         $this->addPrimarySystem(new Reactor(6, 30, 0, 0));
         $this->addPrimarySystem(new CnC(6, 25, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 25, 4, 8));
         $this->addPrimarySystem(new Engine(6, 25, 0, 10, 3));
-	$this->addPrimarySystem(new Hangar(5, 16));
+		$this->addPrimarySystem(new Hangar(5, 16));
         
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
         $this->addFrontSystem(new ParticleProjector(3, 6, 1, 240, 120));
-	$this->addFrontSystem(new ImperialLaser(3, 8, 6, 300, 60));
-        $this->addFrontSystem(new ImperialLaser(3, 8, 6, 300, 60));
+		$this->addFrontSystem(new ImperialLaser(3, 8, 5, 300, 60));
+        $this->addFrontSystem(new ImperialLaser(3, 8, 5, 300, 60));
         $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));
         $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));
-
 		
         $this->addAftSystem(new Thruster(3, 10, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 2, 2));
-	$this->addAftSystem(new JumpEngine(5, 24, 4, 20));      
+		$this->addAftSystem(new JumpEngine(5, 24, 4, 20));      
         $this->addAftSystem(new ParticleProjector(3, 6, 1, 90, 270));  
         $this->addAftSystem(new TacLaser(3, 5, 4, 180, 300));
-	$this->addAftSystem(new ImperialLaser(3, 8, 6, 120, 240));
-        $this->addAftSystem(new ImperialLaser(3, 8, 6, 120, 240));
+		$this->addAftSystem(new ImperialLaser(3, 8, 5, 120, 240));
+        $this->addAftSystem(new ImperialLaser(3, 8, 5, 120, 240));
         $this->addAftSystem(new TacLaser(3, 5, 4, 60, 180));
 
 		$this->addLeftSystem(new Thruster(4, 20, 0, 6, 3));
-        $this->addLeftSystem(new ImperialLaser(3, 8, 6, 240, 360));
+        $this->addLeftSystem(new ImperialLaser(3, 8, 5, 240, 360));
         $this->addLeftSystem(new ParticleProjector(3, 6, 1, 180, 360));
         $this->addLeftSystem(new LightParticleBeamShip(3, 2, 1, 180, 360));
         $this->addLeftSystem(new LightParticleBeamShip(3, 2, 1, 180, 360));
         $this->addLeftSystem(new LightParticleBeamShip(3, 2, 1, 180, 360));
 
 		$this->addRightSystem(new Thruster(4, 20, 0, 6, 4));
-        $this->addRightSystem(new ImperialLaser(3, 8, 6, 0, 120));
+        $this->addRightSystem(new ImperialLaser(3, 8, 5, 0, 120));
         $this->addRightSystem(new ParticleProjector(3, 6, 1, 0, 180));
         $this->addRightSystem(new LightParticleBeamShip(3, 2, 1, 0, 180));
         $this->addRightSystem(new LightParticleBeamShip(3, 2, 1, 0, 180));

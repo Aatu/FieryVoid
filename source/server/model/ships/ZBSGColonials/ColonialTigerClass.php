@@ -5,7 +5,7 @@ class ColonialTigerClass extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
          $this->pointCost = 800;
-        $this->faction = "ZPlaytest BSG Colonials";
+        $this->faction = "ZBSG Colonials";
         $this->phpclass = "ColonialTigerClass";
         $this->imagePath = "img/ships/BSG/ColonialTiger.png";
         $this->shipClass = "Tiger Gunstar";

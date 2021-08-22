@@ -5,7 +5,7 @@ class ColonialFreya extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 975;
-	$this->faction = "ZPlaytest BSG Colonials";
+	$this->faction = "ZBSG Colonials";
         $this->phpclass = "ColonialFreya";
         $this->imagePath = "img/ships/BSG/ColonialOdin2.png";
         $this->shipClass = "Freya Missile Battlestar";

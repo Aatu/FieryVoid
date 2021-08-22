@@ -5,7 +5,7 @@ class ColonialLokiClass extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 450;
-		$this->faction = "ZPlaytest BSG Colonials";
+		$this->faction = "ZBSG Colonials";
         $this->phpclass = "ColonialLokiClass";
         $this->imagePath = "img/ships/BSG/ColonialLoki.png";
         $this->shipClass = "Loki Gunboat Corvette";

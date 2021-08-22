@@ -5,7 +5,7 @@ class ColonialPythonMk3 extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 75*6;
-        $this->faction = "ZPlaytest BSG Colonials";
+        $this->faction = "ZBSG Colonials";
         $this->phpclass = "ColonialPythonMk3";
         $this->shipClass = "Python Mk3 Attack Flight";
         $this->imagePath = "img/ships/BSG/pythonMk3.png";
