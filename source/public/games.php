@@ -70,9 +70,8 @@ if (isset($_SESSION["user"])) {
 	    <br><b><u>BSG Colonials</u></b> - Flak Battery has been updated so that it does not reference an e-web type effect.
 	    <br><b><u>WotCR era refits</u></b> - Thanks to Daniel, several missing refits have been added to the Centauri and Orieni forces!
 	    <br><b><u>WotCR unit updates</u></b> - Daniel's update found a few units with incorrect stats that have been updated.
+
 		
-
-
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
