@@ -43,7 +43,7 @@ class zzftrSkipray extends FighterFlight{
         $new = $this->flightSize;
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
-            $armour = array(3, 3, 3, 2);
+            $armour = array(3, 2, 3, 3);
             $fighter = new Fighter("zzftrSkipray", $armour, 25, $this->id);
             $fighter->displayName = "Skipray Blastboat";
             $fighter->imagePath = "img/starwars/skipray.png";
