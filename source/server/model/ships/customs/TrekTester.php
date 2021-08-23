@@ -14,8 +14,8 @@ class TrekTester extends MediumShip{
         $this->canvasSize = 100;
 	    $this->isd = 2150;
         
-        $this->forwardDefense = 23;
-        $this->sideDefense = 23;
+        $this->forwardDefense = 13;
+        $this->sideDefense = 13;
 
         $this->gravitic = true;    
         $this->turncost = 0.5;
@@ -26,7 +26,6 @@ class TrekTester extends MediumShip{
         $this->iniativebonus = 60;
 		
 		
-	$this->critRollMod = +10; //general penalty to critical rolls! - this ship tests effects of critical hits...
 
         $this->addPrimarySystem(new Reactor(3, 10, 0, 3));
         $this->addPrimarySystem(new CnC(3, 9, 0, 0));
@@ -95,11 +94,21 @@ class TrekTester extends MediumShip{
 		),
 
 		1=> array(
-			20 => "0:Engine",
+			5 => "Phase Cannon",
+			8 => "Spatial Torpedo",
+		    9 => "Polarized Hull Plating",
+			17 => "Structure",
+			20 => "Primary",
 		),
 
 		2=> array(
-			20 => "Warp Drive",
+			4 => "Engine",
+			8 => "Warp Drive",
+		    9 => "Polarized Hull Plating",
+			10 => "Phase Cannon",
+			11 => "Spatial Torpedo",
+			17 => "Structure",
+			20 => "Primary",
 		),
 
 	);

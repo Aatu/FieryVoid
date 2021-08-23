@@ -3,8 +3,8 @@
 
 
 /*output is not recharge time (like for B5 warp drives), but rather impulse rating (eg. how much thrust is derived from this system...)*/
-class TrekWarpDrive extends ShipSystem{
-    public $name = "TrekWarpDrive";
+class TrekWarpDrive extends JumpEngine{
+    //public $name = "TrekWarpDrive";
     public $displayName = "Warp Drive";
     public $iconPath = "WarpDrive.png";
     public $primary = true;
@@ -18,7 +18,8 @@ class TrekWarpDrive extends ShipSystem{
 	);
 	
     function __construct($armour, $maxhealth, $powerReq, $output){
-        parent::__construct($armour, $maxhealth, $powerReq, $output);    
+        parent::__construct($armour, $maxhealth, $powerReq, $output);   
+			$this->output = $output; //as JumpEngine doesn't show output really...
     }
 	
      public function setSystemDataWindow($turn){
