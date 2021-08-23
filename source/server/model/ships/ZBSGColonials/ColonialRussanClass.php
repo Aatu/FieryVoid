@@ -5,7 +5,7 @@ class ColonialRussanClass extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 450;
-		$this->faction = "ZPlaytest BSG Colonials";
+		$this->faction = "ZBSG Colonials";
         $this->phpclass = "ColonialRussanClass";
         $this->imagePath = "img/ships/BSG/ColonialRussan.png";
         $this->shipClass = "Russan Escortstar";

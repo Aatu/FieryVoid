@@ -23,7 +23,6 @@ class Talvan extends BaseShip{
         $this->rollcost = 3;
         $this->pivotcost = 3;
         $this->iniativebonus = 1*5;  
-        
          
         $this->addPrimarySystem(new Reactor(6, 22, 0, 0));
         $this->addPrimarySystem(new CnC(6, 18, 0, 0));
@@ -33,26 +32,23 @@ class Talvan extends BaseShip{
         
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
-        $this->addFrontSystem(new ImperialLaser(3, 8, 6, 300, 60));
+        $this->addFrontSystem(new ImperialLaser(3, 8, 5, 300, 60));
         $this->addFrontSystem(new ParticleProjector(3, 0, 0, 240, 60));
         $this->addFrontSystem(new ParticleProjector(3, 0, 0, 240, 60));
         $this->addFrontSystem(new ParticleProjector(3, 0, 0, 300, 120));
         $this->addFrontSystem(new ParticleProjector(3, 0, 0, 300, 120));
-	    	    
-	    
 		
-        $this->addAftSystem(new Thruster(4, 14, 0, 6, 2));
-        $this->addAftSystem(new Thruster(4, 14, 0, 6, 2));
-	$this->addAftSystem(new JumpEngine(4, 20, 3, 20));      
+        $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
+        $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
+		$this->addAftSystem(new JumpEngine(4, 20, 3, 20));      
 	    
-	$this->addLeftSystem(new Thruster(4, 15, 0, 6, 3));
+		$this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
         $this->addLeftSystem(new HeavyPlasma(3, 8, 5, 300, 0));
         $this->addLeftSystem(new TacLaser(3, 5, 4, 240, 360));
 	    
-	$this->addRightSystem(new Thruster(4, 15, 0, 6, 4));
+		$this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
         $this->addRightSystem(new HeavyPlasma(3, 8, 5, 0, 60));
         $this->addRightSystem(new TacLaser(3, 5, 4, 0, 120));
-       
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 42));

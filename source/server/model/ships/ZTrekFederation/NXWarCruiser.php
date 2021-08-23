@@ -36,7 +36,6 @@ class NXWarCruiser extends MediumShip{
 			$grappler->displayName = "Magnetic Grappler";
 			$this->addPrimarySystem($grappler);
 
-
 		$polarizedhullplating = new AbsorbtionShield(2,4,3,1,270,90);  //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 			$polarizedhullplating->displayName = "Polarized Hull Plating";
 			$this->addFrontSystem($polarizedhullplating);
@@ -50,7 +49,7 @@ class NXWarCruiser extends MediumShip{
 	    
 		$this->addAftSystem(new TrekWarpDrive(2, 18, 3, 13));
 		$this->addAftSystem(new TrekWarpDrive(2, 18, 3, 13));
-       		$this->addAftSystem(new Engine(3, 14, 0, 6, 2));
+   		$this->addAftSystem(new Engine(3, 14, 0, 6, 2));
 		$this->addAftSystem(new TrekPhaseCannon(2, 6, 4, 90, 270));
 		$this->addAftSystem(new TrekPhotonicTorp(2, 6, 1, 120, 240));
 		$polarizedhullplating = new AbsorbtionShield(2,4,3,1,90,270);  //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
@@ -88,7 +87,7 @@ class NXWarCruiser extends MediumShip{
 
 		2=> array(
 			4 => "Engine",
-			8 => "Trek Warp Drive",
+			8 => "Warp Drive",
 		    9 => "Polarized Hull Plating",
 			10 => "Phase Cannon",
 			11 => "Photonic Torpedo",

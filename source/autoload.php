@@ -119,9 +119,11 @@ spl_autoload_register(
                 'catapult' => '/server/model/systems/baseSystems.php',
                 'celerian' => '/server/model/ships/centauri_old/celerian.php',
                 'celerian1850' => '/server/model/ships/centauri_old/celerian1850.php',
+                'celerian1975' => '/server/model/ships/centauri_old/celerian1975.php',
                 'centaurum' => '/server/model/ships/centauri_old/centaurum.php',
                 'centaurum2005' => '/server/model/ships/centauri_old/centaurum2005.php',
                 'talvan' => '/server/model/ships/centauri_old/talvan.php',
+                'talvan1990' => '/server/model/ships/centauri_old/talvan1990.php',
                 'talvan2006' => '/server/model/ships/centauri_old/talvan2006.php',
                 'centurion' => '/server/model/ships/centauri/centurion.php',
                 'chatmanager' => '/server/controller/ChatManager.php',
@@ -201,6 +203,7 @@ spl_autoload_register(
                 'destabilizerbeam' => '/server/model/weapons/molecular.php',
                 'devaskar' => '/server/model/ships/brakiri/devaskar.php',
                 'devout2002' => '/server/model/ships/orieni/devout2002.php',
+                'devout2003' => '/server/model/ships/orieni/devout2003.php',
                 'devout2007' => '/server/model/ships/orieni/devout2007.php',
                 'dice' => '/server/lib/dice.php',
                 'disengagedfighter' => '/server/model/cricialClasses.php',
@@ -588,6 +591,7 @@ spl_autoload_register(
                 'novastarfury' => '/server/model/ships/EA/novaStarfury.php',
                 'obedient' => '/server/model/ships/orieni/obedient.php',
                 'obedient1780' => '/server/model/ships/orieni/obedient1780.php',
+                'obedient2003' => '/server/model/ships/orieni/obedient2003.php',
                 'ochlavita' => '/server/model/ships/dilgar/ochlavita.php',
                 'ochlavitab' => '/server/model/ships/dilgar/ochlavitaB.php',
                 'ochlavitad' => '/server/model/ships/dilgar/ochlavitaD.php',
@@ -605,6 +609,7 @@ spl_autoload_register(
                 'garut' => '/server/model/ships/centauri_old/garut.php',
                 'garut2006' => '/server/model/ships/centauri_old/garut2006.php',
                 'optine' => '/server/model/ships/centauri_old/optine.php',
+                'optine1966' => '/server/model/ships/centauri_old/optine1966.php',
                 'optine2005' => '/server/model/ships/centauri_old/optine2005.php',
                 'oracle' => '/server/model/ships/EA/oracle.php',
                 'oraclescout' => '/server/model/ships/EA/oracleScout.php',
@@ -636,6 +641,7 @@ spl_autoload_register(
                 'pairedplasmablaster' => '/server/model/weapons/plasma.php',
                 'paragon' => '/server/model/ships/orieni/paragon.php',
                 'paragon1782' => '/server/model/ships/orieni/paragon1782.php',
+                'paragon2003' => '/server/model/ships/orieni/paragon2003.php',
                 'pariah' => '/server/model/ships/orieni/pariah.php',
                 'partialburnout' => '/server/model/cricialClasses.php',
                 'particle' => '/server/model/weapons/particle.php',
@@ -678,6 +684,7 @@ spl_autoload_register(
                 'primusmaximus' => '/server/model/ships/centauri/primusMaximus.php',
                 'prophet' => '/server/model/ships/orieni/prophet.php',
                 'prophet1780' => '/server/model/ships/orieni/prophet1780.php',
+                'prophet2003' => '/server/model/ships/orieni/prophet2003.php',
                 'protector' => '/server/model/ships/deneth/protector.php',
                 'protra' => '/server/model/ships/dilgar/protra.php',
                 'protrai' => '/server/model/ships/dilgar/protraI.php',
@@ -835,6 +842,7 @@ spl_autoload_register(
                 'stdparticlebeam' => '/server/model/weapons/particle.php',
                 'steadfast' => '/server/model/ships/orieni/steadfast.php',
                 'steadfast1780' => '/server/model/ships/orieni/steadfast1780.php',
+                'steadfast2004' => '/server/model/ships/orieni/steadfast2004.php',
                 'stealth' => '/server/model/systems/baseSystems.php',
 				
 				
@@ -845,6 +853,7 @@ spl_autoload_register(
                 'stormfront' => '/server/model/ships/orieni/stormfront.php',
                 'stormfront1874' => '/server/model/ships/orieni/stormfront1874.php',
                 'strela' => '/server/model/ships/centauri_old/strela.php',
+                'strela2003' => '/server/model/ships/centauri_old/strela2003.php',
                 'strela2008' => '/server/model/ships/centauri_old/strela2008.php',
                 'strikebird' => '/server/model/ships/drazi/strikebird.php',
                 'strikecarrier' => '/server/model/ships/raiders/strikeCarrier.php',
@@ -995,6 +1004,7 @@ spl_autoload_register(
                 'vasachi' => '/server/model/ships/centauri/vasachi.php',
                 'vengeful' => '/server/model/ships/orieni/vengeful.php',
                 'vengeful1780' => '/server/model/ships/orieni/vengeful1780.php',
+                'vengeful2003' => '/server/model/ships/orieni/vengeful2003.php',
                 'ventrus' => '/server/model/ships/centauri_old/ventrus.php',
                 'ventrus2007' => '/server/model/ships/centauri_old/ventrus2007.php',
                 'vigilant' => '/server/model/ships/orieni/vigilant.php',
@@ -1002,6 +1012,7 @@ spl_autoload_register(
                 'vindicatorca' => '/server/model/ships/deneth/vindicatorCA.php',
                 'virtue' => '/server/model/ships/orieni/virtue.php',
                 'virtue1783' => '/server/model/ships/orieni/virtue1783.php',
+                'virtue2004' => '/server/model/ships/orieni/virtue2004.php',
                 'vorchan' => '/server/model/ships/centauri/vorchan.php',
                 'vorchar' => '/server/model/ships/centauri/vorchar.php',
                 'vulture' => '/server/model/ships/drazi_raiders/vulture.php',
@@ -2182,11 +2193,17 @@ spl_autoload_register(
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php',
 				
 				//ships
+				'deltaclassalpha' => '/server/model/ships/ZTrekFederation/DeltaClassAlpha.php',
+				'deltaclassbeta' => '/server/model/ships/ZTrekFederation/DeltaClassBeta.php',
+				'intrepidclass' => '/server/model/ships/ZTrekFederation/IntrepidClass.php',
 				'nxcruiser' => '/server/model/ships/ZTrekFederation/NXCruiser.php',
 				'nxshuttlepod' => '/server/model/ships/ZTrekFederation/NXShuttlepod.php',
 				'nxwarcruiser' => '/server/model/ships/ZTrekFederation/NXWarCruiser.php',
 		    		
-		    
+				//Marcin Trek
+                'trekimpulsedrive' => '/server/model/weapons/customTrek.php',
+				'trektester' => '/server/model/ships/customs/TrekTester.php',
+				
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',

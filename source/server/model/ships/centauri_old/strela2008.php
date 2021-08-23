@@ -9,7 +9,7 @@ class Strela2008 extends HeavyCombatVessel{
         $this->phpclass = "Strela2008";
         $this->imagePath = "img/ships/strela.png";
         $this->shipClass = "Strela Light Jump Ship (2008)";
-        $this->variantOf = "Strela Light Jump Ship";
+			$this->variantOf = "Strela Light Jump Ship";
         $this->fighters = array("heavy"=>6);
 	    $this->isd = 2008;
 		$this->limited = 33;  //Limited Deployment
@@ -24,7 +24,6 @@ class Strela2008 extends HeavyCombatVessel{
         $this->rollcost = 2;
         $this->pivotcost = 3;
         $this->iniativebonus = 30;
-        
          
         $this->addPrimarySystem(new Reactor(6, 17, 0, 0));
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));
@@ -38,24 +37,22 @@ class Strela2008 extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
-        $this->addFrontSystem(new AssaultLaser(4, 6, 4, 240, 0));
+        $this->addFrontSystem(new AssaultLaser(4, 6, 4, 240, 360));
         $this->addFrontSystem(new AssaultLaser(4, 6, 4, 0, 120));
         
-        $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
-        $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
+        $this->addAftSystem(new Thruster(4, 14, 0, 4, 2));
+        $this->addAftSystem(new Thruster(4, 14, 0, 4, 2));
         $this->addAftSystem(new JumpEngine(3, 15, 3, 25));
-        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 0));
-        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 0));
+        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
+        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
 		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         $this->addAftSystem(new AssaultLaser(3, 6, 4, 120, 240));
-        
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 50));
         $this->addAftSystem(new Structure( 4, 50));
         $this->addPrimarySystem(new Structure( 5, 40 ));
-        
 
         $this->hitChart = array(
             0=> array(

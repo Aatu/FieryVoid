@@ -8,7 +8,7 @@ class Virtue extends MediumShip{
 		$this->faction = "Orieni";
         $this->phpclass = "Virtue";
         $this->imagePath = "img/ships/steadfast.png";
-        $this->shipClass = "Virtue Strike Force Corvette";
+        $this->shipClass = "Virtue Strike Force Corvette (2007)";
         $this->variantOf = "Steadfast Escort Corvette";
 	    $this->isd = 2007;
         $this->agile = true;

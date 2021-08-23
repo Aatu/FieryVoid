@@ -9,7 +9,7 @@ class Obedient1780 extends MediumShip{
         $this->phpclass = "Obedient1780";
         $this->imagePath = "img/ships/obedient.png";
         $this->shipClass = "Obedient Patrol Frigate (early)";
-        	$this->variantOf = "Obedient Patrol Frigate";
+        	$this->variantOf = "Obedient Patrol Frigate (2007)";
         $this->agile = true;
         $this->canvasSize = 100;
 	    

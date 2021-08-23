@@ -39,14 +39,14 @@ class NXCruiser extends MediumShip{
 			$this->addFrontSystem($polarizedhullplating);
 		$this->addFrontSystem(new TrekPhaseCannon(3, 6, 4, 270, 60));
 		$this->addFrontSystem(new TrekPhaseCannon(3, 6, 4, 300, 90));
-      		$this->addFrontSystem(new TrekSpatialTorp(2, 6, 1, 300, 60));
-        	$this->addFrontSystem(new TrekSpatialTorp(2, 6, 1, 300, 60));
+   		$this->addFrontSystem(new TrekSpatialTorp(2, 6, 1, 300, 60));
+       	$this->addFrontSystem(new TrekSpatialTorp(2, 6, 1, 300, 60));
 	    
 		$this->addAftSystem(new TrekWarpDrive(2, 18, 3, 13));
 		$this->addAftSystem(new TrekWarpDrive(2, 18, 3, 13));
-       		$this->addAftSystem(new Engine(3, 14, 0, 6, 2));
+   		$this->addAftSystem(new Engine(3, 14, 0, 6, 2));
 		$this->addAftSystem(new TrekPhaseCannon(2, 6, 4, 90, 270));
-      		$this->addAftSystem(new TrekSpatialTorp(2, 6, 1, 120, 240));
+   		$this->addAftSystem(new TrekSpatialTorp(2, 6, 1, 120, 240));
 		$polarizedhullplating = new AbsorbtionShield(2,4,3,1,90,270);  //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 			$polarizedhullplating->displayName = "Polarized Hull Plating";
 			$this->addAftSystem($polarizedhullplating);
@@ -81,7 +81,7 @@ class NXCruiser extends MediumShip{
 
 		2=> array(
 			4 => "Engine",
-			8 => "Trek Warp Drive",
+			8 => "Warp Drive",
 		    9 => "Polarized Hull Plating",
 			10 => "Phase Cannon",
 			11 => "Spatial Torpedo",
