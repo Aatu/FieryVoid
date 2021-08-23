@@ -2200,7 +2200,10 @@ spl_autoload_register(
 				'nxshuttlepod' => '/server/model/ships/ZTrekFederation/NXShuttlepod.php',
 				'nxwarcruiser' => '/server/model/ships/ZTrekFederation/NXWarCruiser.php',
 		    		
-		    
+				//Marcin Trek
+                'trekimpulsedrive' => '/server/model/weapons/customTrek.php',
+				'trektester' => '/server/model/ships/customs/TrekTester.php',
+				
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',

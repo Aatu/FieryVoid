@@ -2,28 +2,91 @@
 /*file for Star Trek universe weapons*/
 
 
-
+/*output is not recharge time (like for B5 warp drives), but rather impulse rating (eg. how much thrust is derived from this system...)*/
 class TrekWarpDrive extends ShipSystem{
     public $name = "TrekWarpDrive";
     public $displayName = "Warp Drive";
     public $iconPath = "WarpDrive.png";
-    public $delay = 0;
     public $primary = true;
     
-	//JumpEngine tactically  is not important at all!
-	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	public $repairPriority = 7;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
-    function __construct($armour, $maxhealth, $powerReq, $delay){
-        parent::__construct($armour, $maxhealth, $powerReq, 0);
-    
-        $this->delay = $delay;
+	
+    public $possibleCriticals = array( //reduced output reduces available thrust
+        12=>"OutputReduced1",
+        24=>"OutputReduced2"
+	);
+	
+    function __construct($armour, $maxhealth, $powerReq, $output){
+        parent::__construct($armour, $maxhealth, $powerReq, $output);    
     }
 	
      public function setSystemDataWindow($turn){
-        $this->data["Special"] = "SHOULD NOT be shut down for power (unless damaged >50% or in desperate circumstances).";
-	parent::setSystemDataWindow($turn);     
+		parent::setSystemDataWindow($turn);    
+        $this->data["Special"] = "SHOULD NOT be shut down for power (unless damaged >50% or in desperate circumstances)."; 
+        $this->data["Special"] .= "<br>Warp Drive provides impulse thrust as well - amount equals to system rating."; 
     }
 }
+
+
+//ImpulseDrive - basically an engine with rating calculated from ships' WarpDrive
+//technical system, should never get hit.
+//remember to plug WarpDrives to the ImpulseDrive at design stage!
+class TrekImpulseDrive extends Engine{
+	public $iconPath = "engineTechnical.png";
+    public $name = "engine";
+    public $displayName = "Engine";
+    public $primary = true;
+    public $isPrimaryTargetable = false;
+    public $boostable = false;//cannot boost BioDrive!
+    public $outputType = "thrust";
+	
+	private $warpDrives = array();
+	
+    
+    public $possibleCriticals = array( ); //technical system, should never get damaged
+    
+    function __construct(){
+        parent::__construct(0, 1, 0, 0, 0 ); //($armour, $maxhealth, $powerReq, $output, $boostEfficiency
+    }
+    
+	function addThruster($thruster){
+		if($thruster) $this->warpDrives[] = $thruster;
+	}
+	
+	
+	public function setSystemDataWindow($turn){
+		//$this->output = $this->getOutput();	
+		parent::setSystemDataWindow($turn); 	
+		$this->output = $this->getOutput();	
+		//$this->data["Efficiency"] = $this->boostEfficiency;
+		$this->data["Special"] = "Impulse Drive - basically an Engine with basic output calculated from Warp Drive outputs.";      
+		$this->data["Special"] .= "<br>Will never be damaged.";  
+		$this->data["Special"] .= "<br>Cannot buy extra thrust.";    
+		$this->data["Special"] .= "<br>If Warp Nacelle is shut down - Thrust effect will be visible only after committing orders.";   
+	}
+	
+	
+    public function getOutput(){
+        $output = 0;
+		//count thrust from Warp Drives
+		foreach($this->warpDrives as $thruster){
+			$output += max(0,$thruster->getOutput());//cannot provide negative output!
+		}
+			
+        return $output;        
+    } //endof function getOutput
+	
+	
+	public function stripForJson(){
+		//$this->output = $this->getOutput();	
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->output = $this->getOutput();	
+		//$strippedSystem->data = $this->data;	
+        return $strippedSystem;
+    }
+	
+}//endof class TrekImpulseDrive
 
 
 
