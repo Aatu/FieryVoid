@@ -1519,7 +1519,12 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
         $damage = $this->getDamage($fireOrder);
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
-
+		
+		$impactProtectionSystem = $target->getSystemProtectingFromImpactDamage($shooter, $pos, $gamedata->turn, $this, $damage);//damage-reducing system activating at weapon impact - other than shield (eg. Star Trek shield)
+		if($impactProtectionSystem){ //some system can actually affect damage at this stage
+			$damage = $impactProtectionSystem->doReduceImpactDamage($gamedata, $fireOrder, $target, $shooter, $this, $damage);
+		}
+		
         return $damage;
     }
 

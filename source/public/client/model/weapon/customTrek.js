@@ -22,3 +22,27 @@ var TrekWarpDrive = function TrekWarpDrive(json, ship) {
 };
 TrekWarpDrive.prototype = Object.create(ShipSystem.prototype);
 TrekWarpDrive.prototype.constructor = TrekWarpDrive;
+
+var TrekImpulseDrive = function TrekImpulseDrive(json, ship) {
+    Engine.call(this, json, ship);
+};
+TrekImpulseDrive.prototype = Object.create(Engine.prototype);
+TrekImpulseDrive.prototype.constructor = TrekImpulseDrive;
+
+var TrekShieldProjection = function TrekShieldProjection(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+TrekShieldProjection.prototype = Object.create(ShipSystem.prototype);
+TrekShieldProjection.prototype.constructor = TrekShieldProjection;
+
+var TrekShieldProjector = function TrekShieldProjector(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+TrekShieldProjector.prototype = Object.create(ShipSystem.prototype);
+TrekShieldProjector.prototype.constructor = TrekShieldProjector;
+TrekShieldProjector.prototype.hasMaxBoost = function () {
+    return true;
+};
+TrekShieldProjector.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
