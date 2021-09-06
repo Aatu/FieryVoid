@@ -353,7 +353,7 @@ class GraviticBolt extends Gravitic
             parent::setSystemDataWindow($turn);
         }
         
-        public function getDamage($fireOrder){        return Dice::d(10, 5)+12;   }
+        public function getDamage($fireOrder){   return Dice::d(10, 5)+12;   }
         public function setMinDamage(){   return  $this->minDamage = 17 ;      }
         public function setMaxDamage(){   return  $this->maxDamage = 62 ;      }
     }

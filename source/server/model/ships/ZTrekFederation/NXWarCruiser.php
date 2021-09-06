@@ -87,7 +87,7 @@ class NXWarCruiser extends MediumShip{
 
 		2=> array(
 			4 => "Engine",
-			8 => "Warp Drive",
+			8 => "Nacelle",
 		    9 => "Polarized Hull Plating",
 			10 => "Phase Cannon",
 			11 => "Photonic Torpedo",

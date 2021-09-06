@@ -37,7 +37,7 @@ class TrekTester extends MediumShip{
 			$this->addPrimarySystem($grappler);
 			
 			
-		$impulseDrive = new TrekImpulseDrive(); //Impulse Drive just is, all parameters needed are calculated automatically
+		$impulseDrive = new TrekImpulseDrive(3,20,0,0,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 		
 
 		
@@ -102,8 +102,7 @@ class TrekTester extends MediumShip{
 		),
 
 		2=> array(
-			4 => "Engine",
-			8 => "Warp Drive",
+			8 => "Nacelle",
 		    9 => "Polarized Hull Plating",
 			10 => "Phase Cannon",
 			11 => "Spatial Torpedo",

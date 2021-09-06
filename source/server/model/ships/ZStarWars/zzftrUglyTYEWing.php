@@ -44,7 +44,7 @@ class zzftrUglyTYEWing extends FighterFlight{
         $new = $this->flightSize;
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
-            $armour = array(0, 2, 2, 1);
+            $armour = array(0, 1, 2, 2);
             $fighter = new Fighter("zzftrUglyTYEWing", $armour, 6, $this->id);
             $fighter->displayName = "Ugly TYE-Wing";
             $fighter->imagePath = "img/starwars/tieuglyTYE.png";
