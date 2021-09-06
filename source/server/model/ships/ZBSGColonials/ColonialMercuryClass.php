@@ -139,9 +139,9 @@ class ColonialMercuryClass extends BaseShip{
 			),
 			2=> array(
 					5 => "Thruster",
-					8 => "Main Battery",
-                    9 => "Class-S Missile Rack",
-                    11 => "Battery",
+					7 => "Main Battery",
+                    8 => "Class-S Missile Rack",
+                    10 => "Battery",
 					18 => "Structure",
 					20 => "Primary",
 			),

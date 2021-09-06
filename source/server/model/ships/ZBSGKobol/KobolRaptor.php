@@ -7,7 +7,7 @@ class KobolRaptor extends SuperHeavyFighter{
         $this->pointCost = 360;
         $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolRaptor";
-        $this->shipClass = "Raptor (Beta prototype)";
+        $this->shipClass = "Raptor C2 (Beta prototype)";
         $this->imagePath = "img/ships/BSG/raptor.png";
 //	    $this->isd = ;
 //        $this->canvasSize = 60;
@@ -42,7 +42,7 @@ class KobolRaptor extends SuperHeavyFighter{
 		for ($i = 0; $i < $toAdd; $i++) {
 			$armour = array(2, 1, 2, 2);
 			$fighter = new Fighter("raptor", $armour, 20, $this->id);
-			$fighter->displayName = "Raptor";
+			$fighter->displayName = "Raptor C2";
 			$fighter->imagePath = "img/ships/BSG/raptor.png";
 			$fighter->iconPath = "img/ships/BSG/raptor_large.png";
 

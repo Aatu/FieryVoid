@@ -1388,6 +1388,8 @@ spl_autoload_register(
 				'nexusautocannon' => '/server/model/weapons/customNexus.php',
 				'nexusautocannonftr' => '/server/model/weapons/customNexus.php',
 				'nexuscoilgun' => '/server/model/weapons/customNexus.php',
+				'nexusheavyautocannon' => '/server/model/weapons/customNexus.php',
+				'nexusmedautocannon' => '/server/model/weapons/customNexus.php',
 				'nexuslightcoilgun' => '/server/model/weapons/customNexus.php',
 				'nexuslightgasgun' => '/server/model/weapons/customNexus.php',
 				'nexuslightgasgunftr' => '/server/model/weapons/customNexus.php',
@@ -1416,6 +1418,7 @@ spl_autoload_register(
 				'nexusparticlegrid' => '/server/model/weapons/customNexus.php',
 				'nexusparticlegridftr' => '/server/model/weapons/customNexus.php',
 				'nexusprotector' => '/server/model/weapons/customNexus.php',
+				'nexustestblaster' => '/server/model/weapons/customNexus.php',
 			//Nexus ballistic weapons
 				'nexusbolttorpedo' => '/server/model/weapons/customNexus.php',
 				'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php', 
@@ -1445,7 +1448,7 @@ spl_autoload_register(
 
 //                'pakmarasimsalle' => '/server/model/ships/pakmara/PakmaraSimSallE.php',					
 //                'pakmarasimsalle2' => '/server/model/ships/pakmara/PakmaraSimSallE2.php',					
-//				'plasmaweb' => '/server/model/weapons/customNexus.php',
+				'plasmaweb' => '/server/model/weapons/customNexus.php',
 //				'plasmablast' => '/server/model/weapons/customNexus.php',
 //				'testgun' => '/server/model/weapons/customNexus.php',
 //                'plasmabattery' => '/server/model/systems/baseSystems.php',
@@ -1490,6 +1493,14 @@ spl_autoload_register(
 			
 				'brixadiiweaponsplatformbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiWeaponsPlatformBase.php',
 				'brixadiiweaponsplatform2107' => '/server/model/ships/ZNexusBrixadii/BrixadiiWeaponsPlatform2107.php',
+
+
+
+				//Nexus ships - Craytan
+//                'craytancorvette' => '/server/model/ships/ZNexusCraytan/CraytanCorvette.php',					
+//                'craytancorvette2089' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2089.php',					
+//                'craytancorvette2126' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2126.php',					
+
 
 
 
@@ -1705,7 +1716,7 @@ spl_autoload_register(
                 'colonialmamba' => '/server/model/ships/ZBSGColonials/ColonialMamba.php',
                 'colonialmanticorebeta' => '/server/model/ships/ZBSGColonials/ColonialManticoreBeta.php',
                 'colonialmanticoreclass' => '/server/model/ships/ZBSGColonials/ColonialManticoreClass.php',
-                'colonialmanticoregamma' => '/server/model/ships/ZBSGColonials/ColonialManticoreGamma.php',
+//                'colonialmanticoregamma' => '/server/model/ships/ZBSGColonials/ColonialManticoreGamma.php',
                 'colonialmercuryclass' => '/server/model/ships/ZBSGColonials/ColonialMercuryClass.php',
                 'colonialminervaclass' => '/server/model/ships/ZBSGColonials/ColonialMinervaClass.php',
                 'colonialodinclass' => '/server/model/ships/ZBSGColonials/ColonialOdinClass.php',
@@ -2080,6 +2091,14 @@ spl_autoload_register(
 		    	'highguardb' => '/server/model/ships/orieni/HighguardB.php',
 		    	'highguardb2003' => '/server/model/ships/orieni/HighguardB2003.php',
 		    	'highguardb2007' => '/server/model/ships/orieni/HighguardB2007.php',
+//                'penitent' => '/server/model/ships/orieni/penitent.php',
+//                'penitent1782' => '/server/model/ships/orieni/penitent1782.php',
+//                'penitent2003' => '/server/model/ships/orieni/penitent2003.php',
+		    	'resolute' => '/server/model/ships/orieni/resolute.php',
+		    	'resolute2007' => '/server/model/ships/orieni/resolute2007.php',
+		    	'skywatch' => '/server/model/ships/orieni/skywatch.php',
+		    	'skywatch1810' => '/server/model/ships/orieni/skywatch1810.php',
+		    	'skywatch2003' => '/server/model/ships/orieni/skywatch2003.php',
 		    	'kaedashkada' => '/server/model/ships/llort/Kaedashkada.php',
 		    	'brostilli' => '/server/model/ships/drazi/Brostilli.php',
 		    	'deathfalcon' => '/server/model/ships/drazi/Deathfalcon.php',

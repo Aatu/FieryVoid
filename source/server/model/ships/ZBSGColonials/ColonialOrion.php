@@ -4,7 +4,7 @@ class ColonialOrion extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 700;
+		$this->pointCost = 750;
 		$this->faction = "ZBSG Colonials";
         $this->phpclass = "ColonialOrion";
         $this->imagePath = "img/ships/BSG/ColonialOrion.png";
@@ -17,15 +17,15 @@ class ColonialOrion extends HeavyCombatVessel{
 
 		$this->unofficial = true;
         
-        $this->forwardDefense = 13;
-        $this->sideDefense = 15;
+        $this->forwardDefense = 14;
+        $this->sideDefense = 16;
         
         $this->turncost = 1;
         $this->turndelaycost = 1;
-        $this->accelcost = 3;
-        $this->rollcost = 4;
-        $this->pivotcost = 4;
-		$this->iniativebonus = 25;
+        $this->accelcost = 4;
+        $this->rollcost = 6;
+        $this->pivotcost = 6;
+		$this->iniativebonus = 0;
          
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
@@ -33,6 +33,7 @@ class ColonialOrion extends HeavyCombatVessel{
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 3));
         $this->addPrimarySystem(new BSGFlakBattery(3, 6, 2, 0, 360));
         $this->addPrimarySystem(new BSGFlakBattery(3, 6, 2, 0, 360));
+		$this->addPrimarySystem(new BSGMedBattery(4, 7, 4, 0, 360));
 		$this->addPrimarySystem(new Thruster(3, 9, 0, 3, 3));
 		$this->addPrimarySystem(new Thruster(3, 9, 0, 3, 4));        
         $hyperdrive = new JumpEngine(3, 12, 6, 20);
@@ -44,7 +45,7 @@ class ColonialOrion extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(3, 9, 0, 3, 1));
 		$this->addFrontSystem(new BSGMedBattery(4, 7, 4, 300, 360));
 		$this->addFrontSystem(new BSGMedBattery(4, 7, 4, 0, 60));
-		$this->addFrontSystem(new RapidGatling(4, 4, 1, 270, 90));
+		$this->addFrontSystem(new BSGMainBattery(4, 9, 6, 300, 60)); 
 		$this->addFrontSystem(new RapidGatling(4, 4, 1, 270, 90));
 		$this->addFrontSystem(new RapidGatling(4, 4, 1, 270, 90));
 		$this->addFrontSystem(new RapidGatling(4, 4, 1, 270, 90));
@@ -55,7 +56,7 @@ class ColonialOrion extends HeavyCombatVessel{
 		$this->addAftSystem(new RapidGatling(4, 4, 1, 90, 270));
 		$this->addAftSystem(new RapidGatling(4, 4, 1, 90, 270));
 		$this->addAftSystem(new RapidGatling(4, 4, 1, 90, 270));
-		$this->addAftSystem(new RapidGatling(4, 4, 1, 90, 270));
+		$this->addAftSystem(new BSGMainBattery(4, 9, 6, 150, 210)); 
 		$this->addAftSystem(new BSGMedBattery(4, 7, 4, 180, 240));
 		$this->addAftSystem(new BSGMedBattery(4, 7, 4, 120, 180));
 		$this->addAftSystem(new Bulkhead(0, 5));
@@ -71,7 +72,8 @@ class ColonialOrion extends HeavyCombatVessel{
 	$this->hitChart = array(
 		
 		0=> array(
-			7 => "Thruster",
+			6 => "Thruster",
+			7 => "Battery",
 			9 => "Flak Battery",
 			12 => "Scanner",
 			15 => "Engine",
@@ -81,6 +83,7 @@ class ColonialOrion extends HeavyCombatVessel{
 		),
 		1=> array(
 			5 => "Thruster",
+			6 => "Main Battery",
 			8 => "Battery",
 			10 => "Rapid Gatling Railgun",
 			12 => "Hangar",
@@ -88,7 +91,8 @@ class ColonialOrion extends HeavyCombatVessel{
 			20 => "Primary",
 		),
 		2=> array(
-			6 => "Thruster",
+			5 => "Thruster",
+			6 => "Main Battery",
 			8 => "Battery",
 			10 => "Rapid Gatling Railgun",
 			18 => "Structure",

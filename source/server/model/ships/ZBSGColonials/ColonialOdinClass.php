@@ -62,7 +62,7 @@ class ColonialOdinClass extends BaseShip{
 			$hyperdrive->displayName = 'Hyperdrive';
 			$this->addAftSystem($hyperdrive);
 
-        $this->addLeftSystem(new Thruster(5, 20, 0, 3, 3));
+        $this->addLeftSystem(new Thruster(4, 20, 0, 4, 3));
         $this->addLeftSystem(new Bulkhead(0, 6));
         $this->addLeftSystem(new BSGMainBattery(5, 9, 6, 210, 330));
         $this->addLeftSystem(new BSGMedBattery(5, 7, 4, 210, 330));
@@ -73,7 +73,7 @@ class ColonialOdinClass extends BaseShip{
 		$this->addLeftSystem(new SMissileRack(5, 6, 0, 210, 330));
         $this->addLeftSystem(new Hangar(5, 10));
 
-        $this->addRightSystem(new Thruster(5, 20, 0, 3, 4));
+        $this->addRightSystem(new Thruster(4, 20, 0, 4, 4));
         $this->addRightSystem(new Bulkhead(0, 6));
         $this->addRightSystem(new BSGMainBattery(5, 9, 6, 30, 150));
         $this->addRightSystem(new BSGMedBattery(5, 7, 4, 30, 150));

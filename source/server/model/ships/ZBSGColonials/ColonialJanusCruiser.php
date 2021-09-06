@@ -29,7 +29,7 @@ class ColonialJanusCruiser extends HeavyCombatVessel{
 
         $this->addPrimarySystem(new Reactor(6, 18, 0, 0));
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 12, 6, 7));
+        $this->addPrimarySystem(new Scanner(5, 12, 6, 6));
         $this->addPrimarySystem(new Engine(6, 14, 0, 10, 3));
         $this->addPrimarySystem(new Hangar(5, 2));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 3));
