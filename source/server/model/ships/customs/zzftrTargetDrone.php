@@ -7,7 +7,7 @@ class zzftrTargetDrone extends FighterFlight{
         $this->faction = "Custom Ships";
         $this->phpclass = "zzftrTargetDrone";
 		$this->shipClass = "Fighter Target Drone - DO NOT USE";
-        $this->imagePath = "img/starwars/skipray.png";
+        $this->imagePath = "img/ships/tiger.png";
         
 		$this->notes = "DO NOT USE, prone to change!";
 	    
@@ -41,19 +41,23 @@ class zzftrTargetDrone extends FighterFlight{
             $armour = array(4, 2, 3, 3);
             $fighter = new Fighter("zzftrTargetDrone", $armour, 25, $this->id);
             $fighter->displayName = "Target Drone";
-            $fighter->imagePath = "img/starwars/skipray.png";
-            $fighter->iconPath = "img/starwars/skipray_large.png"; 
+            $fighter->imagePath = "img/ships/tiger.png";
+            $fighter->iconPath = "img/ships/tiger_large.png"; 
 		            
        		
-            $frontGun = new SWFighterIon(300, 60, 2, 3); //fwd triple Ion Cannons
+            $frontGun = new PairedParticleGun(330, 30, 4);
+            $frontGun->displayName = "Uni-Pulse Cannon";
             $fighter->addFrontSystem($frontGun);
+
+//            $frontGun = new SWFighterIon(300, 60, 2, 3); //fwd triple Ion Cannons
+//            $fighter->addFrontSystem($frontGun);
             
-            $roundGun = new SWFighterLaser(0, 360, 2, 2); //all-around dual Laser Cannons
-            $fighter->addFrontSystem($roundGun);
+//            $roundGun = new SWFighterLaser(0, 360, 2, 2); //all-around dual Laser Cannons
+//            $fighter->addFrontSystem($roundGun);
            
 
-			$AAC = $this->createAdaptiveArmorController(4, 3, 1); //$AAtotal, $AApertype, $AApreallocated
-			$fighter->addAftSystem( $AAC );
+//			$AAC = $this->createAdaptiveArmorController(4, 3, 1); //$AAtotal, $AApertype, $AApreallocated
+//			$fighter->addAftSystem( $AAC );
 
 			
         	$this->addSystem($fighter);

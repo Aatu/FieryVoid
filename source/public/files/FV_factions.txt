@@ -144,6 +144,11 @@ Energy Web - defensive system integrated with Interceptor. Active Interceptor pr
 Shadow Omega - official Shadow Omega conversion by AoG is marked as unofficial because that's what official deployment restrictions sum up to (not tournament legal, opponent permission required). Actual fan-made conversions are present as well!
 
 
+EARTH ALLIANCE (early)
+The early Earth Alliance units are composed of semi-official custom designs that all were deployed before 2200. These units generally lack the better defenses of the later Earth designs and many use blast cannons. Some official units, like the Olympus Alpha are listed in 
+both the standard Earth Alliance fleet list as well as the early EA section. This is to represent their transitional nature from being high-end units in the early EA to very old units in the Dilgar War era. Although the more famous Starfuries (Tiger, Nova, Aurora) are unavailable 
+the early examples of the Starfury lineage (Flying Fox, Aries, and Atlas) formed the foundation of the fighter-heavy EA fleet in the future. 
+
 GAIM
 Gaim are minor League race, but their ships are very good and their diversity is excellent - making them (in game, tactically ) in all respects equal to Big4 factions.
 Notable technologies:
@@ -228,6 +233,16 @@ Gravitic Net - weapon that moves target, fired before regular weapon declaration
 Electro-Pulse Gun - very short range, slow firing weapon that only affects fighters. However, it can make called shots at no penalty.
 
 
+MINBARI PROTECTORATE
+This is a part of the Minbari Federation, but consists of several non-Minbari members that are overseen by the Federation. They have a degree of autonomy, 
+including providing local defense to their worlds. The Protectorate uses older Minbari hulls. One notable difference is that Protectorate units have no 
+jammers. The Tinashi is their most modern hull along with a handful of Nials. The Protectorate generally uses the Tishat medium fighter. Their fleet options 
+are rather limited based on the number of hulls and lacking ways to bring fighters outside a Morshin carrier. Their one noted conflict is the Pseudo-War with 
+the Imperial Star Legion raider group.
+NOTE: No other Minbari units, other than those listed in the fleet selection screen, may be used by the Protectorate. Other Minbari units can only be included 
+if part of a joint force with the Minbari Federation.
+
+
 NARN
 Energy Mine - hex-targeted weapon, causing heavy damage to everything on hex hit and lighter to everything on adjacent hexes. 
 	Opponent does not see EMine target hexes (just the fact that they've been launched).
@@ -251,8 +266,49 @@ Strike Force - Orieni military is split into a few branches. Of interest for fle
 	
 
 RAIDERS
-Pirates and privateers of Babylon 5 universe, both generic and faction-specific (the latter have appropriate faction/species as part of their name).
-No very specific technologies (or technologies specific to base faction).
+The Raiders are not a single faction with a standardized force list. The Raiders "faction" represents all kinds of pirates, privateers, and wanderers in the Babylon 5
+universe. Specific raider factions will be listed in the unit name, such as "Centauri Privateer". Any unit without a specific faction name is a generic raider and can be fielded by any Raider faction. It is impossible to generate 
+a fleet checker for all of the various combinations. The factions below offer options to build a more customized force. Still, Raiders are so varied, there is no wrong way to build a force from the genericly available units.
+NOTE: Details for all known Raider factions are listed below. However, not all are fully implemented in Fiery Void. This will be evolving over the next few updates of Fiery Void. In addition to describing the faction, a brief
+summary of the generic units most commonly used by the faction are listed here.
+
+    - Imperial Star Legion (Legion): A raider group that supported the Army of Light, but had bigger plans for the future and wound up fighting the Minbari Protectorate.
+		The Legion has three unique hulls, the Starjammer, Gladius, and Augustus and is characterized by using heavy weapons and fielding fusion cannons. The Legion operated 
+		all of the generic raider units at various times in their existance. The Legion uses Delta-Vs and Double-Vs exclusively.
+	
+	- Junkyard Dogs (JYD): This group operates primarily within Centauri, Earth, and Narn space and in addition to generic raider hulls, operate versions of several 
+		hulls from the main powers including a Lias, two Tethys, a Kutai, a Mograth, two Vorchans, two Sho'Kos, and a Thentus. The Junkyard Dogs primarily used Armed
+		Shuttles, Delta-Vs, and Double-Vs but may also field a flight of Raziks or Goriths.
+		
+	- Independent Mercenaries League (IML): The IML formed during the Dilgar War, originally by Belt Alliance forces out of work. They have been supported since the War
+		by various Non-Aligned Worlds powers and typically have better access to technology than traditional raider groups. The IML fields three unique units, the Attack Cruiser, 
+		Armed Transport, and Missile Frigate along with variants of each. The IML may use Armed Shuttles and Delta-Vs almost exclusively, but have restricted access
+		to Star Snakes and Lellats.
+		
+	- Tirrith Free State (TFS): Born out of an EA base built in the Tirrith system from the Dilgar War, the raiders that took over the base ultimately formed an independent star
+		system at the confluence of multiple powers. The TFS is now less of a raider group and more a tiny nation. The TFS has three unique hulls including the Blockade Runner, 
+		System Monitor, and Freedom Base. Beyond this, the TFS will utilize any generic raider unit. The majority of TFS fighters are Delta-Vs, but they can field Armed Shuttles, 
+		Double-Vs, Goriths, Star Snakes, and Koists. The TFS only use Drazi Dudroma defense satellites.
+		
+	- Drazi Hunters: Derived from the Drazi penchant of hunting, it is typically assembled from Drazi disaffected with traditional Drazi society. The Hunters operate more as a raider
+		group than privateers, they are not officially endorsed by the Drazi. However, their members are welcome in Drazi space to a limited degree. They operate three units of Drazi 
+		design as well as as a few generic raider hulls. These are the Aspar (limited), Galleon, Hawk, Ma'Ri'e, Pinnace, and Wolf Raider (limited). Drazi Hunters only employ
+		Cobra and Delta-V fighters.
+	
+	- Centauri Privateers: Generally led by lesser nobles of the great houses or those from minor houses looking to advance, Centauri privateers have existed throughout the Centauri's
+		time in space. Originally, they operated against other Houses, but focused more on the edges of Centauri space as other powers were discovered. In additional to Centauri hulls, these
+		privateers use a limited selection of the generic raider hulls, including the Ma'Ri'e, Ma'Ri'u, Pinnace, Uid'Ac'e, Felucca, and Xebec. Centauri privateers use Delta-Vs almost exclusively,
+		but have restricted access to Razik fighters or older Centauri fighters like the Glaive and Phalen.
+	
+	- Narn Privateers: Formed out of Narn elements considered too radical or unrulely to integrate with the newly free Narn Regime, the Narn sent these privateers out to continue to strike
+		at the Centauri. The more organized groups received greater support from the Narn Regime and fulfilled many missions ranging from traditional raiding to intelligence gathering. The 
+		Narn privateers operate three specific Narn units as well as a selection of generic raider designs. These include the Brigantine (limited), Hawk, Ma'Ri'u, Pinnace, and Xebec. 
+		These privateers primarily use Delta-V and Double-V fighters and a restricted number of Goriths.
+		
+	- Brakiri Shokhan: The Shokhan grew out of various Brakiri groups that did not integrate into the modern Brakiri society. Many Shokhan operate purely as raiders, but it is suspected 
+		that some receive outside support from Brakiri corporations or other entities and fulfill the roll of privateers and sometimes mercenaries. The Shokhan have three Brakiri specific 
+		ships. They also operate a limited selection of generic raider units including the Aspar, Galleas, Hawk, Ma'Ri'e, Felucca, and Xebec. The Delta-V and Folshot-A are the two 
+		fighter designs operated by the Shokhan.
 
 
 SMALL RACES
@@ -269,7 +325,7 @@ But with these caveats - have fun! Ancients should be balanced against each othe
 Below list of systems Shadows use, with short description of effect and design differences from original tabletop.
 Called shots - systems on Shadow ships cannot be targeted by called shots.
 Enhancements - Shadow ships use no crew, so cannot use rew-related enhancements. They can use enhancements relating to special officers (that would be ship pilot's skill in such case). They have their own faction-specific enhancements as well.
-Self-Repair - automated, player cannot decide what is repaired. Damage and criticals suffered in current turn cannot be repaired. Cost of critical repair has been changed in places (in particular C&C criticals aren't that costly to fix), and there's no partial repair of crits. 
+Self-Repair - automated, but player can modify default priority of repairs. Damage and criticals suffered in current turn cannot be repaired. Cost of critical repair has been changed in places (in particular C&C criticals aren't that costly to fix), and there's no partial repair of crits. 
 	If Self-Repair is destroyed or damaged, unused repair points are NOT lost.
 Energy Diffuser - absorbs damage as it's being dealt (and diffuses it over time). In FV Diffuser always kicks in if possible, there's no option to withhold its use eg. waiting for more threatening damage and conserving resources. Diffuser can dissipate damage just absorbed. For visual reasons tendrils are shown as separate (untargetable) systems. Damage absorbed by ship tendrils is not shown in log.
 	Diffuser will not try to stop no-overkill damage that would kill system hit despite Diffuser interference. This is important for very strong Matter or Piercing shots.
@@ -378,6 +434,13 @@ Fusion Agitator - Raking weapon that does damage in inefficient Raking(6) mode. 
 	Many Yolu weapons have special features, usually relating to target armor - see descriptions.
 	
 
+
+ZESCALATION BLOOD SWORD RAIDERS (custom, alternate universe faction)
+The Blood Swords were a pirate group active during the Circasian "Raider Wars" time period. They were a serious threat to the trade routes near the Thaline node of the Outward sector trade routes due to the size and capabilities of their warships. The raiders were eventually defeated by the Circasians, and their defeat marked the unofficial end of the Raider Wars.
+- This faction uses ships acquired from the Kastan, and have access to the same technologies as that faction
+
+
+
 ZESCALATION CHOUKA (custom, alternate universe faction)
 The Chouka Theocracy was a minor regional power in the Escalation Wars universe, and the Circasian's opponents in their first major interstellar war. The Chouka were more technologically advanced than the Circasians, but lacked the tactical experience and fleet assets to combat the more numerous and maneuverable Circasian fleet.
 The ships included here are the Chouka spacecraft that served during the Chouka War period. They are armed with a mix of plasma and laser weapons, with older Chouka ships relying on plasma weapons while their newer ships rely on lasers in the anti-shipping role. Plasma weapons continued to be used for anti-fighter work into the Chouka War period, however.
@@ -405,6 +468,25 @@ The Circasian faction was created by Tyrel Lohr for his Escalation Wars setting.
 Fiery Void encoding done in collaboration with Geoffrey Stano.
 
 
+ZESCALATION KASTAN (custom, alternate universe faction)
+The Kastan Imperial Monarchy inhabits a remote location of hyperspace deep within the Rapids of Rodirra, a treacherous section of hyperspace that makes travel to or from the Kastan territories difficult at best (and impossible at worst). Navigating the rapids has forced the Kastan to be superb pilots. The 
+Kastan have had limited interactions with their neighbors, although they do engage in trade and have been known to sell out their services as mercenaries. Most of their active political ambitions have focused on the coreward sectors, having fought back against an invasion by the Ingalli in recent history.
+- Plasma Cannons: older Kastan ships made heavy use of light, medium, and heavy plasma weapons
+- Missile Racks: older Kastan ships used a variety of basic missile racks
+- Imperial Laser: the Kastan make heavy use of this primitive laser weapon, and have developed a number of other related laser weapons (Royal Laser, Sovereign Laser) based on this technology
+- Laser Bolt: the Kastan developed an effective short range anti-fighter laser weapon for their ships
+- Pulse Torpedo: this weapon fires a number of small munitions at a target, designed to strip targets of weapons and external systems prior to closing to close range
+
+
+ZESCALATION SSHEL'ATH (custom, alternate universe faction)
+The Sshel'ath Alliance was formed out of the civil war between the two largest Sshel'ath factions. The early Alliance focused on growth of the homeworld, as they were blocked by the more established Chouka Theocracy and Novon Trade Lords. Two conflicts with the Novon showed that action against this faction 
+was ill-advised. It wasn't until the later Circasian defeat of the Chouka that the Sshel'ath managed to expand into and capture several Chouka worlds. The Sshel'ath themselves are made of intertwined mass of rope-like elastic fibers, which allow for limited rearrangement of their body's form. Only their faces 
+are inelastic and they are highly resistant to radiation.
+Gatling Laser - Evolved from the basic light laser cannon, the gatling laser fires several short, discreet volleys in pulse mode.
+Electromagnetic Torpedo - The EM Torpedo was developed to counter Novon shields. This ballistic weapon releases a large electromagnetic pulse and can destroy or short out enemy systems.
+Electron Polarizer - A flash mode electromagnetic weapon, this can destroy or short out numerous systems on a target.
+
+
 ZNEXUS BRIXADII (custom, alternate universe faction)
 The Brixadii Clans are a spinward power within the Nexus sector, having fought with the Dalithorn Commonwealth early on and having hostile relations with the Velrax Republic. The Brixadii's 
 technology is primarily focused around particle weapons. These are rugged, easy to repair, and low mass. The Clans have begun to specialize in pulsar technology as this affords superior mass to damage ratios. This last point is important as the key feature that defines the Clans are their extremely
@@ -416,7 +498,8 @@ Chaff Launcher - technically fired at enemy ship, it will always hit (causing no
 Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently and field Antiquated Sensors. This allows them to use EW 
 without any restrictions, but they cannot boost their sensors.
 
-ZPLAYTEST DALITHORN  (custom, alternate universe faction)
+
+ZNEXUS DALITHORN  (custom, alternate universe faction)
 The Dalithorn Commonwealth are likely the lowest tech of the main Nexus powers. They managed to leverage their position across a major trade route to keep their sovereignty up to the later years of
 the First War of Control in the 2150s. They primarily use terrestrial weapons converted for use in space combat. While individually weak, many of the weapons are treated as matter weapons, allowing
 the Dalithorn to cause some damage. Also, while simple, a number of their weapons are still effective, such as the gas gun. The Commonwealth does not use fighters in the traditional sense. They only
@@ -429,7 +512,19 @@ the firing ship is in arc.
 Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently and field Antiquated Sensors. This allows them to use EW 
 without any restrictions, but they cannot boost their sensors.
 
-ZPLAYTEST VELRAX  (custom, alternate universe faction)
+
+ZNEXUS PLAYTEST SAL-BEZ  (custom, alternate universe faction)
+The Sal-bez Coalition is the first anti-spinward faction from Nexus to be brought into Fiery Void. This insectoid race started as a typical queen / worker arrangement, but during the Enlightenment of Fire, 
+the Sal-bez won their freedom. They are now a fiercly individualistic society. The Coalition did not have a traditional military upon reaching for the stars and their early units are exclusively civilian
+designs using industrial systems as makeshift weapons. As the Sal-bez grew (and discovered several technology caches from a previous power), they quickly began to field purpose-built combat vessels that 
+would ultimately lead to the Coalition becoming one of the most powerful of the Nexus factions.
+Swarm Torpedo - This is perhaps one of the most iconic systems developed by the Sal-bez for their later generation of ships. It fires multiple, small ballistics at a target, which has led to its common name of swarm torpedo. This system provides
+both long-range firepower and can strip systems off a target to enable more effective laser hits.
+Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently and field Antiquated Sensors. This allows them to use EW 
+without any restrictions, but they cannot boost their sensors.
+
+
+ZNEXUS VELRAX  (custom, alternate universe faction)
 The Velrax Republic is potentially the most aggressive, but not necessarily the most militarisitic faction within the Nexus setting. They have engaged both the Brixadii Clans and Dalithorn Commonwealth
 several times. In the chaos of the First War of Control, they did managed to conquer most of Dalithorn space. Unlike the Brixadii and Dalithorn, the Velrax are heavy fighter users and this plays into
 a rigid fleet structure. The Velrax field well armed "strike" carriers supported by anti-ship focused "gunships". Everything revolves around supporting their fighter operations. The carriers utilize plasma

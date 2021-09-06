@@ -3,6 +3,7 @@
     height:100%;
     overflow:hidden;
     position:relative;
+	font-style:italic;
 }
 
 .chatMessages{
@@ -20,7 +21,8 @@
 
 .chatmessage{
     margin: 2px 5px 2px 5px;
-    font-size:11px;
+    /*font-size:11px;*/
+	font-size:12px;/*actual text will have larger, separate size*/
 }
 
 .chattime{
@@ -36,9 +38,13 @@
 }
 
 .chatuser.mine{
-    color:#2f5123;
+    /*color:#2f5123;*/
+	color:#00D800; /*green*/
 }
 
 .chattext{
-    color:#496791;
+    /*color:#496791;*/
+	color:#BDEAFA; /*white-ish*/	
+	font-style:normal;
+	font-size:15px;
 }

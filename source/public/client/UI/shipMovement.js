@@ -421,6 +421,9 @@ window.UI = {
             element.css("top", position.y + "px").css("left", position.x + "px").css("transform", "rotate(" + heading + "deg)");
             jQuery(".speedvalue.value").css("transform", "rotate(" + -heading + "deg)").css("display", "block");
 
+			//align jinking value with player:
+			jQuery(".jinkvalue.value").css("transform", "rotate(" + -heading + "deg)").css("display", "block");
+
             UI.shipMovement.currentPosition = position;
             UI.shipMovement.currentHeading = heading;
         },

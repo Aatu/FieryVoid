@@ -22,7 +22,6 @@ class CircasianXandar extends HeavyCombatVessel{
         $this->rollcost = 3;
         $this->pivotcost = 2;
         $this->iniativebonus = 6*5;
-        
          
         $this->addPrimarySystem(new Reactor(2, 15, 0, 0));
         $this->addPrimarySystem(new CnC(4, 10, 0, 0));

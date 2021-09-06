@@ -460,6 +460,7 @@ for friendly units.*/
 	//actual weapons data
         public $priorityArray = array(1=>1, 2=>1);
 		public $uninterceptableArray = array(1=>true, 2=>false);
+		public $doNotInterceptArray = array(1=>true, 2=>false);
 
         public $intercept = 3;
         public $freeintercept = true; //can intercept fire directed at different unit
@@ -489,7 +490,7 @@ for friendly units.*/
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "Can intercept lasers.";
 			$this->data["Special"] .= "<br>May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 5 hexes. Friendly intercept only engages individual shots.";
-			$this->data["Special"] .= "<br>If manually targeted in Intercept (I) mode, will intercept all fire from targeted ship, with usual intercept degredation, at the Flak Cannon-firing ship.";
+			$this->data["Special"] .= "<br>If manually targeted in Intercept (I) mode, will intercept all fire from targeted ship  (except ballistics), with usual intercept degredation, at the Flak Cannon-firing ship.";
 			$this->data["Special"] .= "<br>Offensiver, Anti-fighter mode (A) targets fighters only, but as a matter weapon doing damage in flash mode.";
 			$this->data["Special"] .= "<br>Offensiver mode fire control is +20/--/--. Damage is 1d10+2 as Matter (Flash).";
 		}
@@ -631,8 +632,6 @@ for friendly units.*/
 	}
 
     }	//endof class FlakCannon
-
-
 
 
 

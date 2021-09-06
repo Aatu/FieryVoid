@@ -23,7 +23,6 @@ class Kasta1973 extends BaseShip{
         $this->rollcost = 2;
         $this->pivotcost = 3;
         $this->occurence = "rare";
-        
          
         $this->addPrimarySystem(new Reactor(6, 16, 0, 4));
         $this->addPrimarySystem(new CnC(6, 14, 0, 0));
@@ -42,17 +41,15 @@ class Kasta1973 extends BaseShip{
         $this->addAftSystem(new Thruster(2, 10, 0, 3, 2));
         $this->addAftSystem(new JumpEngine(5, 25, 3, 20));
         
-	$this->addLeftSystem(new Thruster(4, 14, 0, 5, 3));
-        $this->addLeftSystem(new ImperialLaser(3, 8, 6, 300, 360));
-	$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
+		$this->addLeftSystem(new Thruster(4, 14, 0, 5, 3));
+        $this->addLeftSystem(new ImperialLaser(3, 8, 5, 300, 360));
+		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
         $this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
         		
-	$this->addRightSystem(new Thruster(4, 14, 0, 5, 4));
-        $this->addRightSystem(new ImperialLaser(3, 8, 6, 0, 60));
+		$this->addRightSystem(new Thruster(4, 14, 0, 5, 4));
+        $this->addRightSystem(new ImperialLaser(3, 8, 5, 0, 60));
         $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
-	
-        
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 38));

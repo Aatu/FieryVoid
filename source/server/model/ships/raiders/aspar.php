@@ -7,11 +7,19 @@ class Aspar extends HeavyCombatVessel{
         $this->pointCost = 360;
         $this->faction = "Raiders";
         $this->phpclass = "Aspar";
-        $this->imagePath = "img/ships/brigantine.png"; //need to change
+//        $this->imagePath = "img/ships/brigantine.png"; //need to change
+        $this->imagePath = "img/ships/Aspar.png"; //need to change
         $this->shipClass = "Aspar Corvette";
         $this->occurence = "common";
         $this->fighters = array("normal"=>6);
         
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+		$this->notes .= "<br>More detailed deployment restrictions are in the Faction List document.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 2227;
+
         $this->forwardDefense = 18;
         $this->sideDefense = 18;
         

@@ -15,6 +15,8 @@ class Dux extends BaseShip{
         $this->fighters = array("heavy"=>12);
 		$this->isd = 1910;
         
+		$this->notes = "Used only by Centauri Privateers";
+
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
         

@@ -15,6 +15,9 @@ class SanctuaryBase extends StarBaseSixSections{
 		$this->forwardDefense = 20;
 		$this->sideDefense = 20;
 
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+        
 		$this->imagePath = "img/ships/orion.png";
 		$this->canvasSize = 280; 
 

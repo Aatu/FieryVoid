@@ -963,7 +963,7 @@ class Hangar extends ShipSystem{
     
     function __construct($armour, $maxhealth, $output = null){
 		if($output === null){ //if output is not explicitly indicated, assume it to be 6 per every full 6 boxes! (that's the usual combat craft capacity)
-			$output = floor($maxhealth/6);
+			$output = floor($maxhealth/6)*6;
 		}
         parent::__construct($armour, $maxhealth, 0, $output ); 
     }
@@ -1406,8 +1406,6 @@ class AdaptiveArmorController extends ShipSystem{
 							$noteValue = $ptsSet;
 							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
 						}
-						
-						
 					}
 					
 				break;
@@ -1883,6 +1881,8 @@ class SelfRepair extends ShipSystem{
 	public $maxRepairPoints=0;//maximum points that can be repaired during battle
 	public $usedRepairPoints=0;//repair points already used
 	public $usedThisTurn=0;
+	public $priorityChanges = array();//priority overrides - in format systemID->priority; 0 don't repair, 20 priority repair, -1 cancel override :)
+	public $currentlyDisplayedSystem = -1; //for front end only
       
 	
 	//SelfRepair itself is most important to be repaired - as it's the condition of further repairs being effected!
@@ -1912,8 +1912,9 @@ class SelfRepair extends ShipSystem{
 		$this->data["Special"] = "At end of turn phase automatically repairs damage to vessel. Cannot repair destroyed structure blocks.";      
 		//$this->data["Special"] .= "<br>Priority: first fix criticals, then damaged systems, finally restore destroyed systems.";  
 		$this->data["Special"] .= "<br>Priority: first fix criticals, then revive destroyed systems, finally restore boxes to damaged systems.";  
-		$this->data["Special"] .= "<br>Core (and other particularly important) systems are repaired first, then weapons, then other systems.";     
-		$this->data["Special"] .= "<br>Will not fix criticals and damage caused in current turn.";    
+		$this->data["Special"] .= "<br>Core (and other particularly important) systems are repaired first, then weapons, then other systems.";
+		$this->data["Special"] .= "<br>Will not fix criticals and damage caused in current turn.";
+		$this->data["Special"] .= "<br>Player may modify repair priorities - click self repair system in Initial phase and cycle through damaged systems.";
 	}
 
 	
@@ -1961,6 +1962,10 @@ class SelfRepair extends ShipSystem{
 		$systemList = array();
 		foreach($ship->systems as $system){			
 			if ( $system->maxhealth <= $system->getRemainingHealth( ) ) continue; //skip undamaged systems...
+			//priority overrides...
+			if(array_key_exists($system->id, $this->priorityChanges) && ($this->priorityChanges[$system->id]>=0)){
+				$system->repairPriority = $this->priorityChanges[$system->id];
+			}			
 			//skip systems attached to destroyed structure blocks...
 			if($system->repairPriority<1) continue;//skip systems that cannot be repaired
 			if(!($system instanceOf Structure)){ //non-Structure system - cannot repair if attached to destroyed Structure block
@@ -2141,8 +2146,19 @@ class SelfRepair extends ShipSystem{
     public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
 		$ship = $this->getUnit();
 		switch($gameData->phase){
+				case 1: //Initial phase - set new priority overrides! (and ONLY new, don't bother with preexisting ones)
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+						/*set new overrides, just received from front end - so no need to load old ones at this point*/
+						foreach($this->priorityChanges as $systemID=>$priorityValue){							
+							$notekey = 'override';
+							$noteHuman = 'Repair priority override';
+							$noteValue = $systemID . ';' . $priorityValue;
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue	
+						}
+					}
+				
 				case 4: //firing phase
-					if($this->usedThisTurn>0){ //self-repair was actually used this turn!						
+					if($this->usedThisTurn>0){ //self-repair was actually used this turn!
 						$notekey = 'used';
 						$noteHuman = 'Self-repair used';
 						$noteValue = $this->usedThisTurn;
@@ -2163,19 +2179,39 @@ class SelfRepair extends ShipSystem{
 				case 'used': //self-repair points used in a given turn
 					$this->usedRepairPoints += $currNote->notevalue;
 					break;		
+				case 'override': //priority override for systems
+					$explodedOverride = explode ( ';' , $currNote->notevalue ) ;//split into array: [systemID;overriding Priority] 
+					if ($explodedOverride[1] >= 0){
+						$this->priorityChanges[$explodedOverride[0]] = $explodedOverride[1];
+					}else{
+						unset($this->priorityChanges[$explodedOverride[0]]);
+					}
+					break;
 			}
 		}
 		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
 		$this->individualNotes = array();
 	} //endof function onIndividualNotesLoaded
 
-/*always redefine $this->data for AA controller! A lot of variable information goes there...*/
 	public function stripForJson(){
         $strippedSystem = parent::stripForJson();
         $strippedSystem->data = $this->data;		
         $strippedSystem->output = $this->getOutput();		
+        $strippedSystem->priorityChanges = $this->priorityChanges;	
         return $strippedSystem;
     }
+	
+	/* data transferred from front end, if any - priority overrides!*/	
+	public function doIndividualNotesTransfer(){
+		//data received in variable individualNotesTransfer, further functions will look for it in currchangedAA
+		if(is_array($this->individualNotesTransfer)){
+			foreach($this->individualNotesTransfer as $noteReceived){
+				$explodedOverride = explode ( ';' , $noteReceived ) ;//split into array: [systemID;overriding Priority] 
+				$this->priorityChanges[$explodedOverride[0]] = $explodedOverride[1]; //here do add ALL values, -1 including - it's necessary so it's later saved to database
+			}
+		}
+		$this->individualNotesTransfer = array(); //empty, just in case
+	}		
 
 }//endof class SelfRepair
 
@@ -2560,6 +2596,7 @@ class PowerCapacitor extends ShipSystem{
 	public $capacityBonus = 0; //additional capacity - potentially set by enhancements
 	public $powerReceivedFromFrontEnd = 0; //communication variable	
 	public $powerReceivedFromBackEnd = 0; //communication variable
+	public $nominalOutput = 0;//output to be used in front end display!
 	
 	//petals opening - done as boost of Capacitor!
     public $boostable = false; //changed to True if a given ship has Petals! 
@@ -2702,6 +2739,7 @@ capacitor is completely emptied.
 		$this->powerMax = $this->getMaxCapacity(); //do cut off overflow here as well!
 		$this->powerCurr =min($this->powerCurr, $this->powerMax);
 		$this->data["Power stored/max"] =  $this->powerCurr . '/' . $this->powerMax;
+		$this->data["Power regeneration"] =  'Initial phase only';
         $this->data["Special"] = "This system is responsible for generating and storing power (Reactor is nearby for technical purposes).";	   
 		if ($this->boostable){
 			$this->data["Special"] .= "<br>You may boost this system (open petals) to increase recharge rate by 50% - at the cost of treating all armor values as 2 points lower.";
@@ -2740,8 +2778,9 @@ capacitor is completely emptied.
     public function stripForJson(){
         $strippedSystem = parent::stripForJson();
         $strippedSystem->data = $this->data;
-        $strippedSystem->powerCurr = $this->powerCurr;
+        $strippedSystem->powerCurr = max($this->powerCurr,0); //power less than 0 would block the game in case of this system
 	    $strippedSystem->powerMax = $this->getMaxCapacity();
+		$strippedSystem->nominalOutput = $this->output;
 		//$strippedSystem->powerReceivedFromFrontEnd = $this->powerReceivedFromFrontEnd;
 		$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer;
         return $strippedSystem;

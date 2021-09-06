@@ -63,7 +63,7 @@ class ProtraI extends BaseShip{
                 0=> array(
                     9 => "Structure",
                     11 => "Jump Engine",
-                    14 => "Scanner",
+                    14 => "ELINT Scanner",
                     16 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",

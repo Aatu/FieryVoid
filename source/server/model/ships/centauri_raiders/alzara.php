@@ -12,6 +12,8 @@ class Alzara extends HeavyCombatVessel{
         $this->fighters = array("medium"=>6);
 		$this->isd = 2167;
         
+		$this->notes = "Used only by Centauri Privateers";
+
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
         

@@ -4,12 +4,15 @@ class ThorunHeavy extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 312;
-	$this->faction = "Dilgar";
+		$this->pointCost = 312;
+		$this->faction = "Dilgar";
         $this->phpclass = "ThorunHeavy";
         $this->shipClass = "Thorun Heavy Dartfighters";
-	$this->imagePath = "img/ships/thorun.png";
-	        $this->isd = 2232;
+		$this->imagePath = "img/ships/thorun.png";
+		$this->isd = 2232;
+				
+        $this->notes = '+5 Initiative bonu as long as flight leader is alive and uninjured.';
+
 
         $this->occurence = "rare";
         $this->variantOf = "Thorun Dartfighters";
@@ -23,7 +26,7 @@ class ThorunHeavy extends FighterFlight{
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
         
-	$this->iniativebonus = 80;
+		$this->iniativebonus = 80;
         
         $this->dropOutBonus = -2;
         $this->populate();

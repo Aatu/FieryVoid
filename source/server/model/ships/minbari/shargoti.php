@@ -8,14 +8,14 @@ class Shargoti extends BaseShip{
 		$this->faction = "Minbari";
         $this->phpclass = "Shargoti";
         $this->imagePath = "img/ships/sharlin.png";
-        $this->shipClass = "Shargoti";
+        $this->shipClass = "Shargoti Battlecruiser";
         $this->shipSizeClass = 3;
         $this->gravitic = true;
         $this->canvasSize = 310;
         $this->fighters = array("normal"=>24);
         $this->limited = 10;
 
-		$this->notes .= "<br>official Shargoti Battlecruiser with Gravity Nets replaced by Fusion Cannons"; 
+		$this->notes .= "<br>Official Shargoti Battlecruiser with Gravity Nets replaced by Fusion Cannons"; 
 		$this->unofficial = true;
 
 		

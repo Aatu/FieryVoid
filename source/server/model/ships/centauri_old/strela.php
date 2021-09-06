@@ -22,7 +22,6 @@ class Strela extends HeavyCombatVessel{
         $this->rollcost = 2;
         $this->pivotcost = 3;
         $this->iniativebonus = 30;
-        
          
         $this->addPrimarySystem(new Reactor(5, 17, 0, 0));
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));
@@ -34,25 +33,23 @@ class Strela extends HeavyCombatVessel{
 		
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-        $this->addFrontSystem(new ParticleProjector(2, 0, 0, 240, 60));
-        $this->addFrontSystem(new ParticleProjector(2, 0, 0, 300, 120));
-        $this->addFrontSystem(new TacLaser(3, 5, 4, 240, 0));
+        $this->addFrontSystem(new ParticleProjector(2, 6, 1, 240, 60));
+        $this->addFrontSystem(new ParticleProjector(2, 6, 1, 300, 120));
+        $this->addFrontSystem(new TacLaser(3, 5, 4, 240, 360));
         $this->addFrontSystem(new TacLaser(3, 5, 4, 0, 120));
         
-        $this->addAftSystem(new Thruster(3, 14, 0, 5, 2));
-        $this->addAftSystem(new Thruster(3, 14, 0, 5, 2));
+        $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
+        $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new JumpEngine(3, 15, 3, 25));
-        $this->addAftSystem(new ParticleProjector(2, 0, 0, 180, 0));
-        $this->addAftSystem(new ParticleProjector(2, 0, 0, 0, 180));
+        $this->addAftSystem(new ParticleProjector(2, 6, 1, 180, 0));
+        $this->addAftSystem(new ParticleProjector(2, 6, 1, 0, 180));
         $this->addAftSystem(new TacLaser(3, 4, 4, 120, 240));
-        
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 50));
         $this->addAftSystem(new Structure( 4, 50));
         $this->addPrimarySystem(new Structure( 5, 40 ));
         
-		
         $this->hitChart = array(
             0=> array(
                     6 => "Structure",

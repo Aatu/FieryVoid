@@ -354,6 +354,7 @@ shipManager.movement = {
             if (movement.turn != gamedata.turn) continue;
             if (movement.type == othername || movement.type == name) movebetween = false;
             if (movement.type == "move") movebetween = true;
+			if (movement.type == othername) return false;//cannot sideslip if sideslip in opposite direction was already made (eg. can sideslip only in one direction in a turn)
         }
         if (movebetween == false) return false;
         if (!ship.flight && Math.ceil(shipManager.movement.getSpeed(ship) / 5) > shipManager.movement.getRemainingEngineThrust(ship)) {

@@ -48,7 +48,7 @@ class zzftrYT2400Raider extends FighterFlight{
         $new = $this->flightSize;
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
-            $armour = array(3, 3, 3, 2);
+            $armour = array(3, 2, 3, 3);
             $fighter = new Fighter("zzftrYT2400Raider", $armour, 30, $this->id);
             $fighter->displayName = "YT-2400 Raider";
             $fighter->imagePath = "img/starwars/YT2400.png";

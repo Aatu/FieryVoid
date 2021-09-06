@@ -27,9 +27,9 @@ class Paragon extends BaseShip{
         $this->rollcost = 4;
         $this->pivotcost = 3;
         
-        $this->addPrimarySystem(new Reactor(5, 34, 0, 0));
+        $this->addPrimarySystem(new Reactor(5, 42, 0, 0));
         $this->addPrimarySystem(new CnC(6, 30, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 30, 4, 8));
+        $this->addPrimarySystem(new Scanner(5, 30, 5, 8));
         $this->addPrimarySystem(new Engine(5, 30, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(5, 38, 30));
         $this->addPrimarySystem(new JumpEngine(5, 40, 6, 25));

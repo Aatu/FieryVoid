@@ -12,6 +12,8 @@ class CylonBasestar extends SixSidedShip{
 		$this->isd = 1980;
 		$this->locations = array(41, 42, 2, 32, 31, 1);		
 
+		$this->unofficial = true;
+
 		$this->shipSizeClass = 3; //Enormous is not implemented
 		$this->iniativebonus = 0; //no voluntary movement anyway
 		

@@ -8,7 +8,7 @@ class TigerStarfury extends FighterFlight{
         $this->faction = "EA";
         $this->phpclass = "TigerStarfury";
         $this->shipClass = "Starfury: Tiger Heavy flight";
-        $this->imagePath = "img/ships/tigerStarfury.png";
+        $this->imagePath = "img/ships/tigerStarfury2.png";
 	    $this->isd = 2203;
 	    
 	    $this->notes = 'Non-atmospheric.';
@@ -34,8 +34,8 @@ class TigerStarfury extends FighterFlight{
             $armour = array(2, 2, 2, 2);
             $fighter = new Fighter("tigerStarfury", $armour, 11, $this->id);
             $fighter->displayName = "Tiger";
-            $fighter->imagePath = "img/ships/tigerStarfury.png";
-            $fighter->iconPath = "img/ships/tigerStarfury_large.png";
+            $fighter->imagePath = "img/ships/tigerStarfury2.png";
+            $fighter->iconPath = "img/ships/tigerStarfury2_large.png";
 
             $frontGun = new PairedParticleGun(330, 30, 4);
             $frontGun->displayName = "Uni-Pulse Cannon";
