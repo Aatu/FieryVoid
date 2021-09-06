@@ -8,7 +8,7 @@ class KobolEWRaptor extends SuperHeavyFighter{
         $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolEWRaptor";
         $this->shipClass = "EW Raptor (Alpha prototype)";
-			$this->variantOf = "Raptor (Beta prototype)";
+			$this->variantOf = "Raptor C2 (Beta prototype)";
 			$this->occurence = "common";
         $this->imagePath = "img/ships/BSG/raptor.png";
 //	    $this->isd = ;

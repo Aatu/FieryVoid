@@ -8,7 +8,7 @@ class KobolRaptorSupport extends SuperHeavyFighter{
         $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolRaptorSupport";
         $this->shipClass = "Raptor Fire Support (Alpha prototype)";
-			$this->variantOf = "Raptor (Beta prototype)";
+			$this->variantOf = "Raptor C2 (Beta prototype)";
 			$this->occurence = "uncommon";
         $this->imagePath = "img/ships/BSG/raptor.png";
 //	    $this->isd = ;
@@ -48,15 +48,19 @@ class KobolRaptorSupport extends SuperHeavyFighter{
 			$fighter->imagePath = "img/ships/BSG/raptor.png";
 			$fighter->iconPath = "img/ships/BSG/raptor_large.png";
 
-//            $frontGun = new PairedParticleGun(330, 30, 3);
             $frontGun = new BSGMedScattergun(330, 30); //always a single mount for this weapon
             $frontGun->displayName = "Assault MEC Cannon";
-//			$ewGun = new SensorSpearFtr(240, 120, 0);
-            $fighter->addFrontSystem(new FighterTorpedoLauncher(3, 330, 30));
+			$torp = new FighterTorpedoLauncher(3, 330, 30);
+			$torp->displayName = "Light Ballistic Torpedo";
+//            $fighter->addFrontSystem(new FighterTorpedoLauncher(3, 330, 30));
+            $missile = new FighterMissileRack(2, 330, 30);
+			$missile->displayName = "Basic Fighter Missile";
 
             $fighter->addFrontSystem($frontGun);
-//			$fighter->addFrontSystem($ewGun);
+            $fighter->addFrontSystem($torp);
+            $fighter->addFrontSystem($missile);
 
+//            $fighter->addFrontSystem(new FighterMissileRack(2, 330, 30));
 
             $aftGun = new LightScattergun(150, 210); //always a single mount for this weapon
             $aftGun->displayName = "Heavy MEC Cannon";

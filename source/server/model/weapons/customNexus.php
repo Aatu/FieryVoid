@@ -1444,7 +1444,7 @@ class NexusChaffLauncher extends Weapon{
 	}// endof NexusGasGun
 
 
-    class NexusACIDS extends Particle{
+/*    class NexusACIDS extends Particle{
         public $trailColor = array(206, 206, 83);
 
         public $name = "NexusACIDS";
@@ -1477,6 +1477,7 @@ class NexusChaffLauncher extends Weapon{
         public function setMinDamage(){     $this->minDamage = 4 ;      }
         public function setMaxDamage(){     $this->maxDamage = 9 ;      }
 	}// endof NexusACIDS
+*/
 
 
     class NexusRCIDS extends Particle{
@@ -1515,12 +1516,12 @@ class NexusChaffLauncher extends Weapon{
 
 
 
-    class NexusCIDS extends Particle{
+/*    class NexusCIDS extends Particle{
         public $trailColor = array(206, 206, 83);
 
         public $name = "NexusCIDS";
         public $displayName = "Close-In Defense System";
-		public $iconPath = "NexusCIDS.png";
+		public $iconPath = "NexusRCIDS.png";
 	    
         public $animation = "trail";
         public $animationColor = array(245, 245, 44);
@@ -1548,6 +1549,256 @@ class NexusChaffLauncher extends Weapon{
         public function setMinDamage(){     $this->minDamage = 4 ;      }
         public function setMaxDamage(){     $this->maxDamage = 9 ;      }
 	}// endof NexusCIDS
+*/
+
+
+
+
+
+
+
+
+
+
+    class NexusCIDS extends Weapon //this is NOT a Pulse weapon, disregard Pulse-specific settings...
+    {
+	public $name = "NexusCIDS";
+        public $displayName = "Close-In Defense System";
+        public $iconPath = "NexusRCIDS.png";
+        public $animation = "trail";
+        public $trailLength = 35;
+        public $animationWidth = 2;
+        public $projectilespeed = 10;
+        public $animationExplosionScale = 0.10;
+        public $animationColor =  array(245, 245, 44);
+        public $trailColor = array(206, 206, 83);
+	public $guns = 1; //multiplied to d6 at firing
+	     
+        public $loadingtime = 1;
+        public $normalload = 1;	    
+        public $priority = 3; //very light weapon
+        	    
+		public $ballisticIntercept = true;
+        public $intercept = 1; //as it should be, but here they CAN combine vs same shot!
+	    
+	public $rangePenalty = 2;
+        public $fireControl = array(2, 1, 1); // fighters, <mediums, <capitals
+	    
+	    public $damageType = "Standard"; 
+	    public $weaponClass = "Matter"; 
+	    
+	    //temporary private variables
+	    private $multiplied = false;
+	    private $alreadyIntercepted = array();
+	    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ) $maxhealth = 4;
+		if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+	    
+        public function setSystemDataWindow($turn){            
+            parent::setSystemDataWindow($turn);		
+			$this->data["Special"] = "Fires d4 separate shots (actual number rolled at firing resolution).";
+			$this->data["Special"] .= "<br>When fired defensively, a single Scattergun cannot engage the same incoming shot twice (even ballistic one).";
+			$this->data["Special"] .= "<br>Ignores armor.";
+        }
+	    
+	//if fired offensively - make d4 attacks (copies of 1 existing); 
+	//if defensively - make weapon have d4 GUNS (would be temporary, but enough to assign multiple shots for interception)
+	public function beforeFiringOrderResolution($gamedata){
+		if($this->multiplied==true) return;//shots of this weapon are already multiplied
+		$this->multiplied = true;//shots WILL be multiplied in a moment, mark this
+		//is offensive fire declared?...
+		$offensiveShot = null;
+		$noOfShots = Dice::d(4,1); //actual number of shots for this turn
+
+		foreach($this->fireOrders as $fire){
+			if(($fire->type =='normal') && ($fire->turn == $gamedata->turn)) $offensiveShot = $fire;
+		}
+		if($offensiveShot!==null){ //offensive fire declared, multiply!
+			while($noOfShots > 1){ //first shot is already declared!
+				$multipliedFireOrder = new FireOrder( -1, $offensiveShot->type, $offensiveShot->shooterid, $offensiveShot->targetid,
+					$offensiveShot->weaponid, $offensiveShot->calledid, $offensiveShot->turn, $offensiveShot->firingMode,
+					0, 0, 1, 0, 0, null, null
+				);
+				$multipliedFireOrder->addToDB = true;
+				$this->fireOrders[] = $multipliedFireOrder;
+				$noOfShots--;	      
+			}
+		}else{//offensive fire NOT declared, multiply guns for interception!
+			$this->guns = $noOfShots; //d6 intercept shots
+		}
+	} //endof function beforeFiringOrderResolution
+        
+	    /*return 0 if given fire order was already intercepted by this weapon - this should prevent such assignment*/
+	public function getInterceptionMod($gamedata, $intercepted)
+	{
+		$wasIntercepted = false;
+		$interceptMod = 0;
+		foreach($this->alreadyIntercepted as $alreadyAssignedAgainst){
+			if ($alreadyAssignedAgainst->id == $intercepted->id){ //this fire order was already intercepted by this weapon, this Scattergun cannot do so again
+				$wasIntercepted = true;
+				break;//foreach
+			}
+		}
+		if(!$wasIntercepted) $interceptMod = parent::getInterceptionMod($gamedata, $intercepted);
+		return $interceptMod;
+	}//endof  getInterceptionMod
+        
+	//on weapon being ordered to intercept - note which shot (fireorder, actually) was intercepted!
+	public function fireDefensively($gamedata, $interceptedWeapon)
+	{
+		parent::fireDefensively($gamedata, $interceptedWeapon);
+		$this->alreadyIntercepted[] = $interceptedWeapon;
+	}	    
+	    
+        public function getDamage($fireOrder){
+            return 2; 
+        }
+ 
+        public function setMinDamage()
+        {
+            $this->minDamage = 2;
+        }
+        public function setMaxDamage()
+        {
+            $this->maxDamage = 2 ;
+        }
+		
+    }  // endof NexusCIDS
+
+
+
+    class NexusACIDS extends Weapon //this is NOT a Pulse weapon, disregard Pulse-specific settings...
+    {
+	public $name = "NexusACIDS";
+        public $displayName = "Advanced Close-In Defense System";
+        public $iconPath = "NexusACIDS.png";
+        public $animation = "trail";
+        public $trailLength = 35;
+        public $animationWidth = 2;
+        public $projectilespeed = 10;
+        public $animationExplosionScale = 0.10;
+        public $animationColor =  array(245, 245, 44);
+        public $trailColor = array(206, 206, 83);
+	public $guns = 1; //multiplied to d6 at firing
+	     
+        public $loadingtime = 1;
+        public $normalload = 1;	    
+        public $priority = 3; //very light weapon
+        	    
+		public $ballisticIntercept = true;
+        public $intercept = 1; //as it should be, but here they CAN combine vs same shot!
+	    
+	public $rangePenalty = 2;
+        public $fireControl = array(3, 1, 1); // fighters, <mediums, <capitals
+	    
+	    public $damageType = "Standard"; 
+	    public $weaponClass = "Matter"; 
+	    
+	    //temporary private variables
+	    private $multiplied = false;
+	    private $alreadyIntercepted = array();
+	    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+		if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+	    
+        public function setSystemDataWindow($turn){            
+            parent::setSystemDataWindow($turn);		
+			$this->data["Special"] = "Fires d6 separate shots (actual number rolled at firing resolution).";
+			$this->data["Special"] .= "<br>When fired defensively, a single Scattergun cannot engage the same incoming shot twice (even ballistic one).";
+			$this->data["Special"] .= "<br>Ignores armor.";
+        }
+	    
+	//if fired offensively - make d6 attacks (copies of 1 existing); 
+	//if defensively - make weapon have d6 GUNS (would be temporary, but enough to assign multiple shots for interception)
+	public function beforeFiringOrderResolution($gamedata){
+		if($this->multiplied==true) return;//shots of this weapon are already multiplied
+		$this->multiplied = true;//shots WILL be multiplied in a moment, mark this
+		//is offensive fire declared?...
+		$offensiveShot = null;
+		$noOfShots = Dice::d(6,1); //actual number of shots for this turn
+
+		foreach($this->fireOrders as $fire){
+			if(($fire->type =='normal') && ($fire->turn == $gamedata->turn)) $offensiveShot = $fire;
+		}
+		if($offensiveShot!==null){ //offensive fire declared, multiply!
+			while($noOfShots > 1){ //first shot is already declared!
+				$multipliedFireOrder = new FireOrder( -1, $offensiveShot->type, $offensiveShot->shooterid, $offensiveShot->targetid,
+					$offensiveShot->weaponid, $offensiveShot->calledid, $offensiveShot->turn, $offensiveShot->firingMode,
+					0, 0, 1, 0, 0, null, null
+				);
+				$multipliedFireOrder->addToDB = true;
+				$this->fireOrders[] = $multipliedFireOrder;
+				$noOfShots--;	      
+			}
+		}else{//offensive fire NOT declared, multiply guns for interception!
+			$this->guns = $noOfShots; //d6 intercept shots
+		}
+	} //endof function beforeFiringOrderResolution
+        
+	    /*return 0 if given fire order was already intercepted by this weapon - this should prevent such assignment*/
+	public function getInterceptionMod($gamedata, $intercepted)
+	{
+		$wasIntercepted = false;
+		$interceptMod = 0;
+		foreach($this->alreadyIntercepted as $alreadyAssignedAgainst){
+			if ($alreadyAssignedAgainst->id == $intercepted->id){ //this fire order was already intercepted by this weapon, this Scattergun cannot do so again
+				$wasIntercepted = true;
+				break;//foreach
+			}
+		}
+		if(!$wasIntercepted) $interceptMod = parent::getInterceptionMod($gamedata, $intercepted);
+		return $interceptMod;
+	}//endof  getInterceptionMod
+        
+	//on weapon being ordered to intercept - note which shot (fireorder, actually) was intercepted!
+	public function fireDefensively($gamedata, $interceptedWeapon)
+	{
+		parent::fireDefensively($gamedata, $interceptedWeapon);
+		$this->alreadyIntercepted[] = $interceptedWeapon;
+	}	    
+	    
+        public function getDamage($fireOrder){
+            return 3; 
+        }
+ 
+        public function setMinDamage()
+        {
+            $this->minDamage = 3;
+        }
+        public function setMaxDamage()
+        {
+            $this->maxDamage = 3 ;
+        }
+		
+    }  // endof NexusACIDS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class NexusAutocannon extends Matter{
@@ -1580,6 +1831,7 @@ class NexusAutocannon extends Matter{
         public function getDamage($fireOrder){ return 5;   }
         public function setMinDamage(){     $this->minDamage = 5 ;      }
         public function setMaxDamage(){     $this->maxDamage = 5 ;      }
+		
 }// endof NexusAutocannon
 
 
@@ -1616,7 +1868,7 @@ class NexusAutocannonFtr extends Matter{
 }// endof NexusAutocannon
 
 
-class NexusHeavyAutocannon extends Particle{
+class NexusHeavyAutocannon extends Matter{
         public $trailColor = array(206, 206, 83);
 
         public $name = "NexusHeavyAutocannon";
@@ -1629,11 +1881,11 @@ class NexusHeavyAutocannon extends Particle{
         public $projectilespeed = 10;
         public $animationWidth = 2;
         public $trailLength = 35;
-        public $loadingtime = 2;
-        public $priority = 4;
+        public $loadingtime = 3;
+        public $priority = 8;
 
-        public $rangePenalty = 1.5; // -3 / 2 hexes
-        public $fireControl = array(null, 1, 2); // fighters, <mediums, <capitals
+        public $rangePenalty = 0.66; // -2 / 3 hexes
+        public $fireControl = array(-1, 1, 2); // fighters, <mediums, <capitals
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -1642,10 +1894,44 @@ class NexusHeavyAutocannon extends Particle{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return Dice::d(6, 2)+6;   }
-        public function setMinDamage(){     $this->minDamage = 8 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 18 ;      }
+        public function getDamage($fireOrder){ return Dice::d(6, 4);   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 24 ;      }
+		
 }// endof NexusHeavyAutocannon
+
+
+class NexusMedAutocannon extends Matter{
+        public $trailColor = array(206, 206, 83);
+
+        public $name = "NexusMedAutocannon";
+        public $displayName = "Medium Autocannon";
+		public $iconPath = "NexusAutocannon.png";
+	    
+        public $animation = "trail";
+        public $animationColor = array(245, 245, 44);
+        public $animationExplosionScale = 0.10;
+        public $projectilespeed = 10;
+        public $animationWidth = 2;
+        public $trailLength = 35;
+        public $loadingtime = 2;
+        public $priority = 8;
+
+        public $rangePenalty = 1; 
+        public $fireControl = array(-1, 1, 2); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 5;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(6, 2);   }
+        public function setMinDamage(){     $this->minDamage = 2 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+		
+}// endof NexusMedAutocannon
 
 
 class NexusDualParticleBeam extends Particle{
@@ -5449,7 +5735,7 @@ Done as: kind of offensive mode - player needs to pick hex to fire at. Animated 
 All appropriate fire orders will get an interception set up before other intercepts are declared.
 If weapon is left to its own devices it will simply provide a single interception (...if game allows non-1-per-turn weapon to be intercepting in the first place!)
 */
-class PlasmaWeb extends Weapon{
+class PlasmaWeb extends Weapon implements DefensiveSystem{
         public $name = "PlasmaWeb";
         public $displayName = "Plasma Web";
 		public $iconPath = "PlasmaWeb.png";
@@ -5498,12 +5784,28 @@ class PlasmaWeb extends Weapon{
             $this->data["Special"] .= "<br>Will affect uninterceptable weapons.";
         }
 
+
+	//Defensive system functions
+
+    public function getDefensiveType()
+    {
+       return "Interceptor";
+    }
+
+    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
+            return 0;
+    }
+
     public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
-        $output = 2;
-	//Affects only Antimatter, Laser, and Particle weapons
-	//if($weapon->weaponClass == 'Laser' || $weapon->weaponClass == 'Particle' || $weapon->weaponClass == 'Antimatter' || $weapon->weaponClass == 'Ramming') $output = 2;
+		$output = 0;
+		//Affects only Antimatter, Laser, and Particle weapons
+		if($weapon->weaponClass == 'Laser' || $weapon->weaponClass == 'Particle' || $weapon->weaponClass == 'Antimatter') $output = 2;
         return $output;
     }
+
+	//end Defensive system functions
+
+
 	        
 	//hit chance always 100 - so it always hits and is correctly animated
 	public function calculateHitBase($gamedata, $fireOrder)
@@ -5563,6 +5865,7 @@ class PlasmaWeb extends Weapon{
         }
         public function setMinDamage(){     $this->minDamage = 0;      }
         public function setMaxDamage(){     $this->maxDamage = 0;      }
+		
 }//endof PlasmaWeb	
 
 
@@ -5861,6 +6164,80 @@ class TestGun extends Particle{
 
 
 
+
+
+class NexusTestBlaster extends Weapon{
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "NexusTestBlaster";
+        public $displayName = "Test Blaster";
+		public $iconPath = "NexusParticleBolt.png";
+	    
+        public $animation = "bolt";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.15;
+        public $projectilespeed = 15;
+        public $animationWidth = 4;
+        public $trailLength = 10;
+        public $loadingtime = 1;
+        public $priority = 5;
+        public $intercept = 2;
+
+        public $rangePenalty = 2; //-1/hex
+        public $fireControl = array(3, 2, 1); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+
+
+
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle";
+        public $firingModes = array( 1 => "Standard");
+
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Does up to three pulses of 1 damage, combined into a single hit.";
+        }
+
+
+        public $grouping = 25;
+        public $maxpulses = 3;
+		protected $useDie = 1; //die used for base number of hits	
+
+        protected function getPulses($turn)
+        {
+            return Dice::d($this->useDie) + $this->fixedBonusPulses;
+        }
+	
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return floor(($needed - $rolled) / ($this->grouping));
+        }
+	
+		public function rollPulses($turn, $needed, $rolled){
+			$pulses = $this->getPulses($turn);
+			$pulses+= $this->getExtraPulses($needed, $rolled);
+			$pulses=min($pulses,$this->maxpulses);
+			return $pulses;
+		}
+
+        public function getDamage($fireOrder){
+			$damage = 0;
+			$damage+=(($this->rollPulses($turn, $needed, $rolled)) * 1);
+			return $damage;
+		}
+
+        public function setMinDamage(){     $this->minDamage = 1 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 3 ;      }
+		
+}// endof NexusTestBlaster
 
 
 
