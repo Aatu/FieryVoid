@@ -157,6 +157,7 @@ class Weapon extends ShipSystem
             $this->minDamageArray[$i] = $this->minDamage;
             $this->setMaxDamage();
             $this->maxDamageArray[$i] = $this->maxDamage;
+
 			//set AF priority, too!
 			$this->setPriorityAF(); 
 			$this->priorityAFArray[$i] = $this->priorityAF;
@@ -1677,6 +1678,8 @@ full Advanced Armor effects (by rules) for reference:
         if (isset($this->noOverkillArray[$i])) $this->noOverkill = $this->noOverkillArray[$i];
 				
         if (isset($this->rakingArray[$i])) $this->raking = $this->rakingArray[$i];
+        
+        if (isset($this->hextargetArray[$i])) $this->hextarget = $this->hextargetArray[$i];	
 
     }//endof function changeFiringMode
 
