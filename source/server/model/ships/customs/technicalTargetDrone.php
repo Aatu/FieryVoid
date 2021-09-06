@@ -8,7 +8,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
 //		$this->imagePath = "img/ships/BASurveyShip.png";
-		$this->imagePath = "img/ships/Nexus/CraytanCorvette2.png";
+		$this->imagePath = "img/ships/Nexus/CraytanCorvette.png";
 		$this->shipClass = "Target Drone - DO NOT USE";
 //		$this->shipSizeClass = 3;
 		$this->canvasSize = 75; //img has 125px per side
@@ -42,6 +42,12 @@ class technicalTargetDrone extends BaseShip{
 		//$this->addFrontSystem(new Hangar(4, 6));
 		
 		//new weapon showcase
+
+//		$this->addFrontSystem(new PlasmaWeb(2, 4, 2, 0, 360));
+//		$this->addFrontSystem(new PlasmaWeb(2, 4, 2, 0, 360));
+//		$this->addFrontSystem(new PlasmaWeb(2, 4, 2, 0, 360));
+
+		$this->addFrontSystem(new PlasmaBlast(2, 4, 2, 0, 360));
 		
 //		$this->addFrontSystem(new PlasmaWaveTorpedo(3, 0, 0, 300, 60));
 		//$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));

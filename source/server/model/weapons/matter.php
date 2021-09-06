@@ -460,6 +460,7 @@ for friendly units.*/
 	//actual weapons data
         public $priorityArray = array(1=>1, 2=>1);
 		public $uninterceptableArray = array(1=>true, 2=>false);
+		public $doNotInterceptArray = array(1=>true, 2=>false);
 
         public $intercept = 3;
         public $freeintercept = true; //can intercept fire directed at different unit

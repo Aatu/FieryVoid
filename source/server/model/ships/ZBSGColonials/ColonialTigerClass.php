@@ -29,7 +29,7 @@ class ColonialTigerClass extends HeavyCombatVessel{
         $this->addPrimarySystem(new Reactor(5, 18, 0, 0));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 6, 7));
-        $this->addPrimarySystem(new Engine(5, 14, 0, 12, 3));
+        $this->addPrimarySystem(new Engine(5, 14, 0, 10, 3));
         $this->addPrimarySystem(new Hangar(4, 7));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4));

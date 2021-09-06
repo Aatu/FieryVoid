@@ -41,12 +41,12 @@ class ColonialRaptor extends SuperHeavyFighter{
 		
 		for ($i = 0; $i < $toAdd; $i++) {
 			$armour = array(4, 2, 3, 3);
-			$fighter = new Fighter("raptor", $armour, 30, $this->id);
+			$fighter = new Fighter("raptor", $armour, 20, $this->id);
 			$fighter->displayName = "Raptor Basic Fit";
 			$fighter->imagePath = "img/ships/BSG/raptor.png";
 			$fighter->iconPath = "img/ships/BSG/raptor_large.png";
 
-            $frontGun = new BSGKineticEnergyWeapon(330, 30, 2, 4);
+            $frontGun = new BSGKineticEnergyWeapon(300, 60, 2, 4);
             $frontGun->displayName = "Kinetic Energy Cannon";
 			$ewGun = new SensorSpearFtr(240, 120, 0);
 
