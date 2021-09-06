@@ -2221,7 +2221,13 @@ spl_autoload_register(
 		    		
 				//Marcin Trek
                 'trekimpulsedrive' => '/server/model/weapons/customTrek.php',
+                'trekshieldprojection' => '/server/model/weapons/customTrek.php',
+                'trekshieldprojector' => '/server/model/weapons/customTrek.php',
 				'trektester' => '/server/model/ships/customs/TrekTester.php',
+				'trektester2' => '/server/model/ships/customs/TrekTester2.php',
+				'trektester3' => '/server/model/ships/customs/TrekTester3.php',
+				'trektester4' => '/server/model/ships/customs/TrekTester4.php',
+				
 				
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
