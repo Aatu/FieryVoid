@@ -10,6 +10,8 @@ class koethy extends FighterFlight{
         $this->shipClass = "Koeth Light Fighters (w/FY)";
         $this->imagePath = "img/ships/Hurrkoeth.png";
 	    $this->variantOf = "Koeth Light Fighters";
+
+        $this->isd = 2230;
         
         $this->forwardDefense = 5;
         $this->sideDefense = 5;

@@ -10,6 +10,8 @@ class Maltra extends BaseShip{
         $this->imagePath = "img/ships/maltra.png";
         $this->shipClass = "Maltra Scout";
         $this->gravitic = true;
+
+        $this->isd = 2050;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;

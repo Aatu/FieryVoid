@@ -12,6 +12,8 @@ class RogolonTolov extends BaseShip{
         $this->occurence = "common";
         $this->fighters = array("normal" => 12, "superheavy" => 1);
 
+        $this->isd = 1975;
+
         $this->forwardDefense = 14;
         $this->sideDefense = 17;
         

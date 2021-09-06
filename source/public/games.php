@@ -62,18 +62,11 @@ if (isset($_SESSION["user"])) {
         <br>
 -->        
 		
-		---------- <b>LATEST NEWS - May 2021</b> ----------	    
-	    <br><b><u>Drazi Serpents can be deployed as flights</u></b> - making them behave as the other SHFs in game.
-	    <br><b><u>Geoffrey's update spree</u></b> - a lot of fixes for custom universes: BSG, Nexus, Escalation...
-	    <br><b><u>Fighter Diffuser Tendrils</u></b> - capacity display is reverted (now they show available capacity rather than filled, to match their shipborne cousins)
-	    <br><b><u>Solar Cannon fixed</u></b> - badly needed overhaul
-	    <br><b><u>Solar Cannon fixed</u></b> - why do it once when it can be done twice ;)
-	    <br><b><u>Self-Repair reined in</u></b> - will no longer fix damage caused in current turn
-	    <br><b><u>Lightning Cannon gained Accelerator status</u></b> - to prevent it from automatically intercepting stray shots and draining Power
-	    <br><b><u>Tiers list separated from Factions list</u></b> - now they're accessible separately
-	    <br><b><u>Brixadii and Colonials</u></b> - ongoing development updates and enhancements 	    
-	    <br><b><u>Torata graphics update</u></b> 
+		---------- <b>LATEST NEWS - September 2021</b> ----------	   
+	    <br><b>Escalation Wars</b> - New faction, courtesy of Geoffrey!
+	    <br><b>Nexus</b> - New faction, courtesy of Geoffrey!
 
+		
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
@@ -82,8 +75,9 @@ if (isset($_SESSION["user"])) {
 		
         <br><br>---------- <b>LINKS</b> ----------
 		<br><a href="http://b5warsvault.wikidot.com/" target="_blank">B5Wars Vault</a> - B5Wars <a href="http://www.tesarta.com/b5wars/aogwarskitchensink.pdf" target="_blank">rules</a> (under the name of AoG Wars) and LOTS of related stuff
-        	<br><a href="https://www.facebook.com/groups/218482691602941/" target=\"_blank\">Facebook group</a> - if You want to discuss, ask for help or report a bug!<br><a href="https://discord.gg/kjZAjr3" target=\"_blank\">Discord channel</a> - talk about FV/B5 with likeminded people!
-		<br><a href="files/FV_FAQ.txt">Fiery Void FAQ</a> - differences from B5 Wars, known bugs... look here if something works contrary to how You expect it to!
+	    	<br><a href="https://discord.gg/kjZAjr3" target=\"_blank\">Discord channel</a> - talk about FV/B5 with likeminded people!
+        	<br><a href="https://www.facebook.com/groups/218482691602941/" target=\"_blank\">Facebook group</a> - if You want to discuss, ask for help or report a bug! <i>(nowadays mostly superseded by discord)</i>
+	    	<br><a href="files/FV_FAQ.txt">Fiery Void FAQ</a> - differences from B5 Wars, known bugs... look here if something works contrary to how You expect it to!
 		<br><a href="https://www.youtube.com/channel/UCpzERJTeVoFVon_QqWQxesw/featured" target=\"_blank\">Video tutorials</a> - Fiery Void video tutorials are available on YouTube!
 		<br><a href="files/enhancements_list.txt">Fiery Void Enhancement list</a> - unit enhancements available, with short explanations.
 		<br><a href="files/FV_factions.txt">Fiery Void Factions list</a> - short info on more exotic rules and systems of fleets available.

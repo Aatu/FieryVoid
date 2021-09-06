@@ -10,6 +10,8 @@ class boroca extends BaseShip{
         $this->imagePath = "img/ships/hurrBoroca.png";
         $this->shipClass = "Boroca Gunship";
         $this->shipSizeClass = 3;
+
+        $this->isd = 2225;
         
         $this->forwardDefense = 16;
         $this->sideDefense = 17;

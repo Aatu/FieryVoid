@@ -10,6 +10,8 @@ class Hastan extends HeavyCombatVessel{
         $this->imagePath = "img/ships/hastan.png";
         $this->shipClass = "Hastan Escort Frigate";
         $this->gravitic = true;
+
+        $this->isd = 2243;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;

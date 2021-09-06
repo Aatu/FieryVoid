@@ -7,7 +7,7 @@ class Nial extends FighterFlight{
 		$this->pointCost = 636;
 		$this->faction = "Minbari";
 		$this->phpclass = "Nial";
-		$this->shipClass = "Nial flight";
+		$this->shipClass = "Nial heavy flight";
 		$this->imagePath = "img/ships/nial.png";
 
         $this->forwardDefense = 6;

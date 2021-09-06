@@ -12,7 +12,7 @@ Original rules made a set of assumptions:
  - player uses one faction
  - Ancient and ISA fleets are not allowed
 
-Actual rules:
+Actual original rules:
  - at least one Jump Drive is required
  - at least one Capital Ship is required
  - all units of LCV size or smaller need to have hangars present (eg. cannot bring fighters based elsewhere)
@@ -22,6 +22,8 @@ Actual rules:
  - at most two Uncommon and one Rare unit in fleet (on top of regular variant restrictions)
  - at most three ships based on the same hull (fighters and other small craft are exempt)
  - static objects (bases, OSATs, mines...) are not allowed
+ - only actual combat units are allowed (so eg. no transports (even military transports) or diplomatic ships)
+ - some factions (notably ISA (all-White Star fleet) and Ancients) were deemed not tournament-legal
  
  
 FIERY VOID FLEET COMPOSITION RULES (EG. WHAT THE FLEET CHECKER CHECKS)
@@ -37,7 +39,7 @@ WARNING: numbers for Ancients are still untested and prone to change!
  - at least one Jump Drive is required
  - Capital Ships required (minimum number, You can take more):
   -- (Young) 1 per 5000 points (no capital ship is required below 3000 points)
-  -- (Ancient) 1 per 10000 points (no capital ship is required below 4000 points)
+  -- (Ancient) 1 per 15000 points (no capital ship is required below 5000 points)
  - most units of LCV size or smaller need to have hangars present (there are exceptions, especially for custom factions from other universes)
  - at least half of fighter hangars need to be filled (this rule is only relevant for actual fighters, not for other craft like assault shuttles or LCVs)
  - deployment restrictions observed 
@@ -48,7 +50,7 @@ WARNING: numbers for Ancients are still untested and prone to change!
   -- Rare: half of Uncommon allowance (rounded DOWN)
  - maximum number of ships being variants of same hull (units that require hangar space are exempt):
   -- (Young) One per full 1100 points (with minimum of 2)
-  -- (Ancient) One per full 4000 points (with minimum of 2)
+  -- (Ancient) One per full 3000 points (with minimum of 2)
  - static objects (bases, OSATs) are not allowed
 
  
@@ -56,7 +58,7 @@ VARIANT RESTRICTIONS
 Every unit in game has variant rating, in one of categories:
  - Common (C) - unit is, well, a common example of what is built on a given hull. No limit.
  - Uncommon (U) - not as common, they're found in numbers only in presence of their more mundane cousins. For every three units of any given hull, or fraction thereof, one unit may be Uncommon.
- - Rare (R) - very rare units, almost never deployed in numbers (often command variants). One of every three Uncommon slots may instead be taken by Rare unit .
+ - Rare (R) - very rare units, almost never deployed in numbers (often command variants). One of every three Uncommon slots may instead be taken by Rare unit.
  - Unique (Q) - only very few (possibly even one) exist. For fleet selection rules treat them as Rare, but with added limitation than no more than 1 may be present.
  - Special (X) - non-standard restrictions that require special player attention. Actual restriction is present in unit description. Fleet Checker will NOT check them correctly, but will bring them to player's attention with appropriate note.
 What the above means for number of variously restricted units:

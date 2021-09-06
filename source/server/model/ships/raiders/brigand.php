@@ -10,6 +10,11 @@ class Brigand extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/drazi/warbird.png"; 
         $this->shipClass = "Brigand Attack Cruiser";
 
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 1984;
+        
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
         

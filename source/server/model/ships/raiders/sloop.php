@@ -11,6 +11,11 @@ class Sloop extends MediumShip{
         $this->shipClass = "Sloop";
         $this->canvasSize = 100;
         
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 2243;
+        
         $this->forwardDefense = 11;
         $this->sideDefense = 11;
         

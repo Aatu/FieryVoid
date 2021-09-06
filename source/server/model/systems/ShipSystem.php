@@ -234,6 +234,9 @@ class ShipSystem {
 	
     
     public function setSystemDataWindow($turn){
+		//now with advent of self repair - system ID might get important...
+		$this->data["ID"] = $this->id;
+		
 	if($this->startArc !== null){
 		$this->data["Arc"] = $this->startArc . ".." . $this->endArc;
 	}
@@ -524,6 +527,13 @@ class ShipSystem {
 	public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $systemProtected, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
 		$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
 		return $returnValues;
+	}
+	
+	public function doesReduceImpactDamage($expectedDmg){ //hook - systems that can affect damage dealing at the moment of impact will return positive value; strongest one will be chosen to interact
+		return 0;
+	}
+	public function doReduceImpactDamage($gamedata, $fireOrder, $target, $shooter, $weapon, $effectiveDamage){ //hook for actual effect of protection - return modified value of damage that should be used in further calculations
+		return $effectiveDamage;
 	}
 	
 	/*assigns damage, returns remaining (overkilling) damage and how much armor was actually pierced

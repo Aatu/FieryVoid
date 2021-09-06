@@ -8,8 +8,10 @@ class Notai extends BaseShip{
         $this->faction = "Yolu";
         $this->phpclass = "Notai";
         $this->imagePath = "img/ships/notali.png";
-        $this->shipClass = "Notali Assault Carrier";
+        $this->shipClass = "Notai Assault Carrier";
         $this->gravitic = true;
+
+        $this->isd = 2096;
 
         $this->forwardDefense = 15;
         $this->sideDefense = 17;

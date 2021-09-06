@@ -48,28 +48,35 @@ class SWRayShield extends Shield implements DefensiveSystem{
     public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
         if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn()) return 0; //destroyed shield gives no protection
         $output = $this->output + $this->getBoostLevel($turn);
-	//Ballistic, Matter, SWIon - passes through!
-	if($weapon->weaponClass == 'Ballistic' || $weapon->weaponClass == 'Matter' || $weapon->weaponClass == 'SWIon' || $weapon->weaponClass == 'Ramming') $output = 0;
-        $output += $this->outputMod; //outputMod itself is negative!
-	if($weapon->damageType == 'Raking') $output = 2*$output;//Raking - double effect!
-	$output=max(0,$output); //no less than 0!
+		//Ballistic, Matter, SWIon - passes through!
+		//if($weapon->weaponClass == 'Ballistic' || $weapon->weaponClass == 'Matter' || $weapon->weaponClass == 'SWIon' || $weapon->weaponClass == 'Ramming') $output = 0;
+		//BALANCE CHANGE - Matter weapons are affected at half efficiency (important vs eg. Orieni and Belt Alliance)
+		if($weapon->weaponClass == 'Ballistic' || $weapon->weaponClass == 'SWIon' || $weapon->weaponClass == 'Ramming') $output = 0;
+			$output += $this->outputMod; //outputMod itself is negative!
+		if($weapon->weaponClass == 'Matter') $output = ceil($output/2);
+		if($weapon->damageType == 'Raking') $output = 2*$output;//Raking - double effect!
+		$output=max(0,$output); //no less than 0!
         return $output;
     }
 	
     public function setSystemDataWindow($turn){
-	parent::setSystemDataWindow($turn);
-	//$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
-	$this->data["Basic Strength"] = $this->baseOutput;      	    
+		parent::setSystemDataWindow($turn);
+		//$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
+		$this->data["Basic Strength"] = $this->baseOutput;    
+		/* standard shield text is misleading!	
 		if (!isset($this->data["Special"])) {
 			$this->data["Special"] = '';
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-	$this->data["Special"] .= "Does not decrease profile."; 
-	$this->data["Special"] .= "<br>Cannot be flown under."; 
-	$this->data["Special"] .= "<br>Does not protect from Ballistic, Matter and StarWars Ion damage (and Ramming!)."; 
-	$this->data["Special"] .= "<br>Doubly effective vs Raking weapons."; 
-    }
+		*/
+		$this->data["Special"] = "Reduces damage done by incoming shots (by shield rating), but does not decrease profile."; 
+		$this->data["Special"] .= "<br>Cannot be flown under."; 
+		$this->data["Special"] .= "<br>Does not protect from Ramming, Ballistic, StarWars Ion damage."; 
+		$this->data["Special"] .= "<br>Doubly effective vs Raking weapons."; 
+		$this->data["Special"] .= "<br>Half efficiency (round up) vs Matter weapons (game balance, irrelevant in-universe)."; 
+		$this->data["Special"] .= "<br>Can be boosted."; 
+	}
 	  
         private function getBoostLevel($turn){
             $boostLevel = 0;

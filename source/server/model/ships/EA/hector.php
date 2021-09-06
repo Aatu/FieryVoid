@@ -9,6 +9,8 @@ class Hector extends OSAT{
         $this->phpclass = "Hector";
         $this->imagePath = "img/ships/hector.png";
         $this->shipClass = 'Hector Satellite';
+
+	    $this->isd = 2247;
         
         $this->forwardDefense = 10;
         $this->sideDefense = 10;
@@ -20,14 +22,12 @@ class Hector extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
-
         $this->addPrimarySystem(new BMissileRack(3, 9, 0, 270, 90, true));
         $this->addPrimarySystem(new BMissileRack(3, 9, 0, 270, 90, true));
         $this->addPrimarySystem(new LightPulse(2, 4, 2, 180, 360));
         $this->addPrimarySystem(new LightPulse(2, 4, 2, 0, 180));
         $this->addPrimarySystem(new InterceptorMkI(2, 4, 1, 0, 360));
         //$this->addPrimarySystem(new InterceptorMkI(2, 4, 1, 0, 360));
-
 
         $this->addPrimarySystem(new Reactor(4, 7, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 2, 4));   

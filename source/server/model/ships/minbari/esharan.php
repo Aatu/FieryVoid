@@ -8,7 +8,7 @@ class Esharan extends HeavyCombatVessel{
         $this->faction = "Minbari";
         $this->phpclass = "Esharan";
         $this->imagePath = "img/ships/tinashi.png";
-        $this->shipClass = "Esharan";
+        $this->shipClass = "Esharan Anti-Fighter Frigate";
         $this->gravitic = true;
         $this->occurence = "rare";
         $this->fighters = array("normal"=>6);
@@ -21,7 +21,7 @@ class Esharan extends HeavyCombatVessel{
         $this->pivotcost = 3;
         $this->iniativebonus = 35;
         $this->isd = 2063;
-        $this->variantOf = "Tinashi";
+        $this->variantOf = "Tinashi War Frigate";
 
         $this->addPrimarySystem(new Reactor(5, 25, 0, 4));
         $this->addPrimarySystem(new CnC(6, 24, 0, 0));

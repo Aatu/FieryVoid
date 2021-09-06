@@ -12,6 +12,13 @@ class Galleon extends HeavyCombatVessel{
         $this->occurence = "common";
         $this->fighters = array("light"=>12);
         
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+		$this->notes .= "<br>More detailed deployment restrictions are in the Faction List document.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 2197;
+        
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
         

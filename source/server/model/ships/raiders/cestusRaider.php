@@ -12,6 +12,9 @@ class CestusRaider extends HeavyCombatVessel{
 	$this->isd = 2002;
 	$this->variantOf = "Centauri Privateer Cestus Attack Ship";
 
+	$this->notes = "Generic raider unit.";
+	$this->notes .= "<br> ";
+       
     $this->forwardDefense = 11;
     $this->sideDefense = 13;
 

@@ -194,3 +194,38 @@ var EWNuclearTorpedo = function  EWNuclearTorpedo(json, ship) {
 };
 EWNuclearTorpedo.prototype = Object.create(Weapon.prototype);
 EWNuclearTorpedo.prototype.constructor =  EWNuclearTorpedo;
+
+var EWLaserBolt = function  EWLaserBolt(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWLaserBolt.prototype = Object.create(Weapon.prototype);
+EWLaserBolt.prototype.constructor =  EWLaserBolt;
+
+var EWRoyalLaser = function  EWRoyalLaser(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWRoyalLaser.prototype = Object.create(Weapon.prototype);
+EWRoyalLaser.prototype.constructor =  EWRoyalLaser;
+
+var EWSovereignLaser = function  EWSovereignLaser(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWSovereignLaser.prototype = Object.create(Weapon.prototype);
+EWSovereignLaser.prototype.constructor =  EWSovereignLaser;
+
+var EWPulseTorpedo = function  EWPulseTorpedo(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWPulseTorpedo.prototype = Object.create(Weapon.prototype);
+
+var EWLaserBoltFtr = function  EWLaserBoltFtr(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWLaserBoltFtr.prototype = Object.create(Weapon.prototype);
+EWLaserBoltFtr.prototype.constructor =  EWLaserBoltFtr;
+
+var EWProtoMedLaser = function  EWProtoMedLaser(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWProtoMedLaser.prototype = Object.create(Weapon.prototype);
+EWProtoMedLaser.prototype.constructor =  EWProtoMedLaser;

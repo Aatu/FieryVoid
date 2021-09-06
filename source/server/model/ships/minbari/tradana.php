@@ -8,7 +8,8 @@ class Tradana extends MediumShip{
 		$this->faction = "Minbari";
         $this->phpclass = "Tradana";
         $this->imagePath = "img/ships/tradana.png";
-        $this->shipClass = "Tradana";
+        $this->shipClass = "Tradana Combat Frigate";
+        $this->canvasSize = 100;
         $this->gravitic = true;
         $this->occurence = "rare";
         $this->forwardDefense = 15;
@@ -20,7 +21,7 @@ class Tradana extends MediumShip{
         $this->pivotcost = 2;
 		$this->iniativebonus = 65;
 		$this->isd = 2266;
-		$this->variantOf = "Torotha";
+		$this->variantOf = "Torotha Assault Frigate";
 
         $this->addPrimarySystem(new Reactor(5, 18, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));

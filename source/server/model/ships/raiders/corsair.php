@@ -11,6 +11,11 @@ class Corsair extends MediumShip{
         $this->shipClass = "Corsair";
         $this->canvasSize = 100;
         
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 1900;
+        
         $this->forwardDefense = 13;
         $this->sideDefense = 13;
         

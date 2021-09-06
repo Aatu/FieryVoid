@@ -27,7 +27,7 @@ class Kotha extends FighterFlight{
         $new = $this->flightSize;
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
-            $armour = array(3, 3, 3, 3);
+            $armour = array(2, 2, 2, 2); //armor 3 _including shield_!
             $fighter = new Fighter("Kotha", $armour, 9, $this->id);
             $fighter->displayName = "Kotha";
             $fighter->imagePath = "img/ships/AbbaiKotha.png";

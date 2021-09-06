@@ -7,10 +7,19 @@ class Uidace extends BaseShip{
   $this->pointCost = 550;
   $this->faction = "Raiders";
         $this->phpclass = "Uidace";
-        $this->imagePath = "img/ships/battlewagon.png"; //need to change this
+        $this->imagePath = "img/ships/GaimShamor.png"; //Currently using Gaim version of this hull
         $this->shipClass = "Uid'Ac'e Cruiser";
-        $this->shipSizeClass = 3;
+//        $this->shipSizeClass = 3;
+		$this->canvasSize = 175;
+			$this->limited = 10;
         $this->fighters = array("normal"=>12);
+        
+		$this->notes = "Generic raider unit.";
+		$this->notes .= "<br> ";
+		$this->notes .= "<br>More detailed deployment restrictions are in the Faction List document.";
+		$this->notes .= "<br> ";
+
+		$this->isd = 2235;
         
         $this->forwardDefense = 16;
         $this->sideDefense = 18;
