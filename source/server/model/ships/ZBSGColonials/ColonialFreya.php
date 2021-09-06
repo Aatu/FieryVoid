@@ -37,20 +37,19 @@ class ColonialFreya extends BaseShip{
         $this->addPrimarySystem(new Engine(5, 20, 0, 10, 4));
         $this->addPrimarySystem(new ReloadRack(5, 9));
 		$this->addPrimarySystem(new BSGFlakBattery(5, 6, 2, 0, 360));
-//        $this->addPrimarySystem(new RapidGatling(5, 4, 1, 0, 360));
-//		$this->addPrimarySystem(new Bulkhead(0, 6));
    
         $this->addFrontSystem(new Thruster(3, 15, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 15, 0, 4, 1));
 		$this->addFrontSystem(new Bulkhead(0, 5));
-		$this->addFrontSystem(new Bulkhead(0, 5));
+		$this->addFrontSystem(new RapidGatling(5, 4, 1, 300, 60));
+		$this->addFrontSystem(new RapidGatling(5, 4, 1, 300, 60));
 		$this->addFrontSystem(new LMissileRack(5, 6, 0, 330, 30));
 		$this->addFrontSystem(new SMissileRack(5, 6, 0, 300, 360));
 		$this->addFrontSystem(new SMissileRack(5, 6, 0, 330, 30));
 		$this->addFrontSystem(new SMissileRack(5, 6, 0, 0, 60));
 
         $this->addAftSystem(new Thruster(3, 15, 0, 3, 2));
-        $this->addAftSystem(new Thruster(3, 16, 0, 3, 2));
+        $this->addAftSystem(new Thruster(4, 16, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 15, 0, 3, 2));
         $this->addAftSystem(new Bulkhead(0, 5));
 		$this->addAftSystem(new RapidGatling(5, 4, 1, 120, 240));
@@ -62,7 +61,7 @@ class ColonialFreya extends BaseShip{
 			$hyperdrive->displayName = 'Hyperdrive';
 			$this->addAftSystem($hyperdrive);
 
-        $this->addLeftSystem(new Thruster(5, 20, 0, 3, 3));
+        $this->addLeftSystem(new Thruster(4, 20, 0, 4, 3));
         $this->addLeftSystem(new Bulkhead(0, 6));
 		$this->addLeftSystem(new RapidGatling(5, 4, 1, 210, 330));
 		$this->addLeftSystem(new RapidGatling(5, 4, 1, 210, 330));
@@ -71,7 +70,7 @@ class ColonialFreya extends BaseShip{
 		$this->addLeftSystem(new SMissileRack(5, 6, 0, 210, 330));
         $this->addLeftSystem(new Hangar(5, 10));
 
-        $this->addRightSystem(new Thruster(5, 20, 0, 3, 4));
+        $this->addRightSystem(new Thruster(4, 20, 0, 4, 4));
         $this->addRightSystem(new Bulkhead(0, 6));
 		$this->addRightSystem(new RapidGatling(5, 4, 1, 30, 150));
 		$this->addRightSystem(new RapidGatling(5, 4, 1, 30, 150));
@@ -90,7 +89,6 @@ class ColonialFreya extends BaseShip{
 		$this->hitChart = array(
 			0=> array(
 					10 => "Structure",
-                    11 => "Rapid Gatling Railgun",
 					12 => "Flak Battery",
 					14 => "Scanner",
 					16 => "Engine",
@@ -100,14 +98,15 @@ class ColonialFreya extends BaseShip{
 			),
 			1=> array(
 					5 => "Thruster",
-					7 => "Class-L Missile Rack",
+					7 => "Rapid Gatling Railgun",
+					9 => "Class-L Missile Rack",
 					11 => "Class-S Missile Rack",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
                     5 => "Thruster",
-					6 => "Rapid Gatling Railgun",
+					7 => "Rapid Gatling Railgun",
                     9 => "Class-S Missile Rack",
 					11 => "Class-L Missile Rack",
                     13 => "HyperDrive",

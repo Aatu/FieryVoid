@@ -44,7 +44,7 @@ class ColonialAssaultRaptor extends SuperHeavyFighter{
 		
 		for ($i = 0; $i < $toAdd; $i++) {
 			$armour = array(4, 3, 3, 3);
-			$fighter = new Fighter("raptor", $armour, 30, $this->id);
+			$fighter = new Fighter("raptor", $armour, 20, $this->id);
 			$fighter->displayName = "Assault Raptor";
 			$fighter->imagePath = "img/ships/BSG/raptor.png";
 			$fighter->iconPath = "img/ships/BSG/raptor_large.png";

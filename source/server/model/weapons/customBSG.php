@@ -253,12 +253,11 @@ class BSGMarineAssault extends Weapon{
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-//			$this->data["Special"] = "Defensive Flak: -15 to hit on arc with active Flak Battery.";
 			$this->data["Special"] = "Can intercept lasers.";
 			$this->data["Special"] .= "<br>May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 5 hexes.";
 		}
 
-        public $rangePenalty = 2; //-2/hex
+        public $rangePenalty = 1; //
         public $fireControl = array(6, null, null); // fighters, <mediums, <capitals
         public $priority = 1; //Flash 
 
@@ -293,8 +292,8 @@ class BSGMarineAssault extends Weapon{
 			return true;
 		}
 		
-        public function getDamage($fireOrder){        return Dice::d(6, 2);   }
-        public function setMinDamage(){     $this->minDamage = 2 ;      }
+        public function getDamage($fireOrder){        return Dice::d(6, 1)+6 ;   }
+        public function setMinDamage(){     $this->minDamage = 7 ;      }
         public function setMaxDamage(){     $this->maxDamage = 12 ;      }
 		
     }	//endof class BSGFlakBattery
@@ -410,10 +409,10 @@ class BSGMarineAssault extends Weapon{
 
 
 
- class FlakArray extends InterceptorMkI{ 
+ class FlakArray2 extends InterceptorMkI{ 
         public $trailColor = array(30, 170, 255);
 
-        public $name = "FlakArray";
+        public $name = "FlakArray2";
         public $displayName = "Flak Array";
         public $animation = "trail";
         public $animationColor = array(255, 250, 230);
@@ -498,13 +497,13 @@ class BSGMarineAssault extends Weapon{
         public function setMinDamage(){     $this->minDamage = 7 ;      }
         public function setMaxDamage(){     $this->maxDamage = 16 ;      }
 		
-    }	//endof class FlakArray
+    }	//endof class FlakArray2
 
 
 
 
 
-   class FlakArray2 extends Weapon{ 
+   class FlakArray extends Weapon{ 
 /*Dual mode weapon based off the EA Laser-Pulse Array code to operate more as it did in 
 the table top verion. This is based off the Grome Flak Cannon and could be considered an 
 advanced version of it as it fires twice and can target ships. The Flak Array has the option 
@@ -519,7 +518,7 @@ mode and can still intercept for friendly units.*/
 2. Option to switch to offensive-mode. Unlike the Flak Cannon, this can target all units.
 3. If nothing is done, it will follow automated, friendly intercept routines.*/
 
-        public $name = "FlakArray2";
+        public $name = "FlakArray";
         public $displayName = "Flak Array";
 	    public  $iconPath = "FlakArray.png";
 
@@ -534,6 +533,7 @@ mode and can still intercept for friendly units.*/
 	//actual weapons data
         public $priorityArray = array(1=>1, 2=>1);
 		public $uninterceptableArray = array(1=>true, 2=>false);
+		public $doNotInterceptArray = array(1=>true, 2=>false);
 
 		public $guns = 2;
         public $intercept = 3;
@@ -565,7 +565,7 @@ mode and can still intercept for friendly units.*/
 			$this->data["Special"] = "Can intercept lasers.";
 			$this->data["Special"] .= "<br>Fires twice.";
 			$this->data["Special"] .= "<br>May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 5 hexes. Friendly intercept only engages individual shots.";
-			$this->data["Special"] .= "<br>If manually targeted in Intercept (I) mode, will intercept all fire from targeted ship (except ballistics), with usual intercept degredation, at the Flak Cannon-firing ship.";
+			$this->data["Special"] .= "<br>If manually targeted in Intercept (I) mode, will intercept all fire from targeted ship (except ballistics), with usual intercept degredation, at the Flak Array-firing ship.";
 			$this->data["Special"] .= "<br>Offensiver-mode (O) can engage any unit as a matter weapon doing damage in flash mode.";
 			$this->data["Special"] .= "<br>Offensiver mode fire control is +25/+20/+15. Damage is 1d10+2 as Matter (Flash).";
 		}
@@ -630,7 +630,7 @@ mode and can still intercept for friendly units.*/
 					$shooter = $gamedata->getShipById($fireOrder->shooterid);
 					/** @var MovementOrder $movement */
 					$movement = $shooter->getLastTurnMovement($fireOrder->turn);
-					$posLaunch = $movement->position;//at moment of launch!!!		
+	//GTS				$posLaunch = $movement->position;//at moment of launch!!!		
 					//$this->calculateHit($gamedata, $fireOrder); //already calculated!
 					$rolled = Dice::d(100);
 					$fireOrder->rolled = $rolled; ///and auto-hit ;)
@@ -706,7 +706,7 @@ mode and can still intercept for friendly units.*/
 		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 	}
 
-    }	//endof class FlakArray2
+    }	//endof class FlakArray
 
 
 
@@ -1000,6 +1000,104 @@ class BSGMedScattergun extends Pulse{
 	public function setMinDamage(){     $this->minDamage = 2 ;      }
 	public function setMaxDamage(){     $this->maxDamage = 12 ;      }
 } //end of class LightScattergun
+
+
+
+
+class FlakBlast extends Weapon{
+        public $name = "FlakBlast";
+        public $displayName = "Flak Blast";
+		public $iconPath = "PlasmaWeb.png";
+		
+		public $range = 5;
+		public $loadingtime = 1;
+//		public $hextarget = true;
+		
+		public $flashDamage = true;
+		public $priority = 1;
+			
+        public $animation = "ball";
+        public $trailColor = array(30, 140, 60);
+        public $animationColor = array(30, 140, 60);
+        public $animationExplosionScale = 1;
+		public $animationExplosionType = "AoE";
+        public $projectilespeed = 12;
+        public $animationWidth = 10;
+        public $trailLength = 10;    
+
+		public $firingMode = 'AoE'; //firing mode - just a name essentially
+		public $damageType = "Flash"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Plasma"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+
+        public $rangePenalty = 0; //none
+        public $fireControl = array(50, null, null); // fighters, <mediums, <capitals
+
+
+
+
+	public function calculateHitBase($gamedata, $fireOrder)
+    {
+        $fireOrder->needed = 100; //100% chance of hitting everything on target hex
+        $fireOrder->updated = true;
+    } 
+
+	public function fire($gamedata, $fireOrder){
+        $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
+        $shooter = $gamedata->getShipById($fireOrder->shooterid); //so we know which ship is firing, this is useful
+
+		if ($fireOrder->targetid != -1) { //make weapon target hex rather than unit
+            $targetship = $gamedata->getShipById($fireOrder->targetid);
+            //insert correct target coordinates: CURRENT  target position
+            $position = $targetship->getCoPos(); 
+            $fireOrder->x = $position["x"];
+            $fireOrder->y = $position["y"];
+            $fireOrder->targetid = -1; 
+        }
+
+		//roll to hit - we'll make a regular roll (irrelevant as hit is automatic, but we need to mark SOME number anyway):
+		$rolled = Dice::d(100);
+		$fireOrder->rolled = $rolled;
+
+		//deal damage!
+        $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+        $ships1 = $gamedata->getShipsInDistance($target); //all ships on target hex
+        foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
+
+            $this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
+        }
+    }
+	
+	//and now actual damage dealing - and we already know fighter is hit (fire()) doesn't pass anything else)
+	//source hex will be taken from firing unit, damage will be individually rolled for each fighter hit
+	 public function AOEdamage($target, $shooter, $fireOrder, $gamedata)
+    {
+        if ($target->isDestroyed()) return; //no point allocating
+            foreach ($target->systems as $fighter) {
+                if ($fighter == null || $fighter->isDestroyed()) {
+                    continue;
+                }
+         //roll (and modify as appropriate) damage for this particular fighter:
+        $damage = $this->getDamage();
+//        $damage = $this->getDamageMod($damage, $shooter, $target, null, $gamedata);
+//        $damage -= $target->getDamageMod($shooter, null, $gamedata->turn, $this);
+
+                $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
+
+		}
+	}
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+//    	public function getDamage($fireOrder){        return Dice::d(6, 1)+2;   }
+    	public function getDamage($fireOrder){        return 12;   }
+        public function setMinDamage(){     $this->minDamage = 12;      }
+        public function setMaxDamage(){     $this->maxDamage = 12;      }
+}//endof PlasmaBlast
 
 
 

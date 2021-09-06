@@ -42,6 +42,7 @@ class ColonialManticoreBeta extends MediumShip{
 
 		$this->addFrontSystem(new BSGMedBattery(4, 7, 4, 270, 360));
         $this->addFrontSystem(new BSGMedBattery(4, 7, 4, 0, 90));
+        $this->addFrontSystem(new BSGMedBattery(4, 7, 4, 300, 60));
         $this->addFrontSystem(new Thruster(5, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(5, 10, 0, 3, 1));
 		$this->addFrontSystem(new Bulkhead(0, 3));
