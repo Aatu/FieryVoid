@@ -569,6 +569,7 @@ spl_autoload_register(
                 'movementorder' => '/server/model/BaseClasses.php',
                 'nakarsa' => '/server/model/ships/abbai/nakarsa.php',
                 'nalor' => '/server/model/ships/centauri_old/nalor.php',
+                'nalor1857' => '/server/model/ships/centauri_old/nalor1857.php',
                 'nashana' => '/server/model/ships/yolu/nashana.php',
                 'worthus' => '/server/model/ships/centauri_old/worthus.php',
                 'navask' => '/server/model/ships/centauri_old/navask.php',
