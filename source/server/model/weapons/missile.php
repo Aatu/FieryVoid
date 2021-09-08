@@ -33,7 +33,8 @@ class MissileLauncher extends Weapon{
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $base=false){
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 
-        if ($base){ //mounted on base - double the launch range
+		//Stabilized missiles should have triple the range, not double - Geoffrey (06 September 2021)
+        if ($base){ //mounted on base - triple the launch range
             $this->rangeMod = $this->rangeMod + $this->range; 
             $this->range = $this->range *2;            
         }
