@@ -2082,6 +2082,7 @@ spl_autoload_register(
 		    
 		    	//Random Ships which don't require new mechanics to add
 		    	'zzunofftlorr' => '/server/model/ships/narn/zzunoffTlorr.php',
+		    	'daverous' => '/server/model/ships/centauri_old/daverous.php',
 		    	'hurrmissileosat2220' => '/server/model/ships/hurr/HurrmissileOSAT2220.php',
 		    	'hurrmissileosat2240' => '/server/model/ships/hurr/HurrmissileOSAT2240.php',
 		    	'roskorbase2215' => '/server/model/ships/hurr/Roskorbase2215.php',
