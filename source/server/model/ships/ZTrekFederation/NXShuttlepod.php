@@ -19,6 +19,10 @@ class NXShuttlepod extends FighterFlight{
         $this->offensivebonus = 3;
         $this->jinkinglimit = 4;
         $this->turncost = 0.33;
+		
+		
+		$this->hangarRequired = "Shuttlecraft"; //I took category name from ST wikis
+		$this->unitSize = 1; //counted as singles
         
        	$this->iniativebonus = 70;
         $this->populate();        

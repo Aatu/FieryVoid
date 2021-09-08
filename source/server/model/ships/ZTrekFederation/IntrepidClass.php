@@ -8,7 +8,8 @@ class IntrepidClass extends MediumShip{
         $this->faction = "ZTrek Playtest Federation";
         $this->phpclass = "IntrepidClass";
         $this->imagePath = "img/ships/StarTrek/Intrepid.png";
-        $this->shipClass = "Intrepid Class";
+        $this->shipClass = "Intrepid";
+        $this->variantOf = "OBSOLETE";
 
 		$this->unofficial = true;
         $this->canvasSize = 90;

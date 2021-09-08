@@ -1,0 +1,115 @@
+<?php
+class TrekFederationConstitutionCL extends HeavyCombatVessel{
+	
+    function __construct($id, $userid, $name,  $slot){
+        parent::__construct($id, $userid, $name,  $slot);
+        
+	$this->pointCost = 500;
+	$this->faction = "ZTrek Playtest Federation";
+        $this->phpclass = "TrekFederationConstitutionCL";
+        $this->imagePath = "img/ships/StarTrek/Constitution.png";
+        $this->shipClass = "Constitution Light Cruiser";
+
+	$this->unofficial = true;
+	    $this->isd = 'please fill!';
+
+
+	$this->fighters = array("Shuttlecraft"=>6);
+        
+        $this->forwardDefense = 13;
+        $this->sideDefense = 15;
+ 
+        $this->gravitic = true;       
+        $this->turncost = 0.66;
+        $this->turndelaycost = 0.5;
+        $this->accelcost = 2;
+        $this->rollcost = 2;
+        $this->pivotcost = 2;
+	$this->iniativebonus = 6 *5; 
+		
+	$this->addPrimarySystem(new CnC(4, 10, 0, 0));
+        $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
+        $this->addPrimarySystem(new Scanner(4, 12, 6, 6));
+	$this->addPrimarySystem(new Hangar(3, 6, 6));
+
+	$impulseDrive = new TrekImpulseDrive(4,24,0,0,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
+		
+  
+	$projection = new TrekShieldProjection(2, 24, 6, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+		$projector = new TrekShieldProjector(1, 6, 2, 2, 270, 90, 'F'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+		$projection->addProjector($projector);
+		$this->addFrontSystem($projector);
+		$projector = new TrekShieldProjector(1, 6, 2, 2, 270, 90, 'F'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+		$projection->addProjector($projector);
+		$this->addFrontSystem($projector);
+	$this->addFrontSystem($projection);
+	$this->addFrontSystem(new EWHeavyRocketLauncher(3, 6, 3, 270, 90));
+        $this->addFrontSystem(new EWHeavyRocketLauncher(3, 6, 3, 270, 90));
+	$this->addFrontSystem(new ParticleAccelerator(3, 6, 4, 240, 60));
+	$this->addFrontSystem(new ParticleAccelerator(3, 6, 4, 270, 90));
+	$this->addFrontSystem(new ParticleAccelerator(3, 6, 4, 300, 120));
+	$this->addFrontSystem(new SWTractorBeam(2,300,60,2));
+
+	$warpNacelle = new TrekWarpDrive(4, 24, 0, 4); //armor, structure, power usage, impulse output
+	$impulseDrive->addThruster($warpNacelle);
+	$this->addAftSystem($warpNacelle);
+		
+	$warpNacelle = new TrekWarpDrive(4, 24, 0, 4); //armor, structure, power usage, impulse output
+	$impulseDrive->addThruster($warpNacelle);
+	$this->addAftSystem($warpNacelle);
+		
+	$projection = new TrekShieldProjection(2, 24, 6, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+		$projector = new TrekShieldProjector(1, 6, 2, 2, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+		$projection->addProjector($projector);
+		$this->addAftSystem($projector);
+		$projector = new TrekShieldProjector(1, 6, 2, 2, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+		$projection->addProjector($projector);
+		$this->addAftSystem($projector);
+	$this->addAftSystem($projection);
+	$this->addAftSystem(new ParticleAccelerator(3, 6, 4, 120, 240));
+	$this->addAftSystem(new SWTractorBeam(2,120,240,1));
+
+		
+	//technical thrusters - unlimited, like for LCVs		
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance  
+        $this->addPrimarySystem($impulseDrive);
+        
+        //0:primary, 1:front, 2:rear, 3:left, 4:right;
+        $this->addFrontSystem(new Structure( 4, 45));
+        $this->addPrimarySystem(new Structure( 4, 45));
+        // no aft structure, can't fall off and should be safe therefore    
+	    
+        $this->hitChart = array(
+            0=> array(
+                    8 => "Structure",
+                    11 => "Scanner",
+                    14 => "Engine",
+                    16 => "Hangar",
+                    18 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+				1 => "Shield Projector",
+				5 => "Heavy Rocket Launcher",
+				9 => "Particle Accelerator",
+				10 => "Tractor Beam",
+				18 => "Structure",
+				20 => "Primary",
+            ),
+            2=> array(
+				1 => "Shield Projector",
+				7 => "Nacelle",
+				8 => "Tractor Beam",
+				10 => "Particle Accelerator",
+				17 => "Structure",
+				20 => "Primary",
+            ),
+       );
+	    
+	    
+    }
+}
+?>
