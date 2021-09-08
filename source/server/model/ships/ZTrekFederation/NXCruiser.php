@@ -9,6 +9,8 @@ class NXCruiser extends MediumShip{
         $this->phpclass = "NXCruiser";
         $this->imagePath = "img/ships/StarTrek/EnterpriseNX.png";
         $this->shipClass = "NX Cruiser";
+		
+        $this->variantOf = "OBSOLETE";
 
 		$this->unofficial = true;
         $this->canvasSize = 100;

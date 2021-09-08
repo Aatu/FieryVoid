@@ -10,7 +10,7 @@ class NXWarCruiser extends MediumShip{
         $this->imagePath = "img/ships/StarTrek/EnterpriseNX.png";
         $this->shipClass = "NX War Cruiser";
 			$this->occurence = "common";
-			$this->variantOf = "NX Cruiser";
+			$this->variantOf = "OBSOLETE";
 
 		$this->unofficial = true;
         $this->canvasSize = 100;

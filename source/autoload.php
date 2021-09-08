@@ -569,6 +569,7 @@ spl_autoload_register(
                 'movementorder' => '/server/model/BaseClasses.php',
                 'nakarsa' => '/server/model/ships/abbai/nakarsa.php',
                 'nalor' => '/server/model/ships/centauri_old/nalor.php',
+                'nalor1857' => '/server/model/ships/centauri_old/nalor1857.php',
                 'nashana' => '/server/model/ships/yolu/nashana.php',
                 'worthus' => '/server/model/ships/centauri_old/worthus.php',
                 'navask' => '/server/model/ships/centauri_old/navask.php',
@@ -2081,6 +2082,7 @@ spl_autoload_register(
 		    
 		    	//Random Ships which don't require new mechanics to add
 		    	'zzunofftlorr' => '/server/model/ships/narn/zzunoffTlorr.php',
+		    	'daverous' => '/server/model/ships/centauri_old/daverous.php',
 		    	'hurrmissileosat2220' => '/server/model/ships/hurr/HurrmissileOSAT2220.php',
 		    	'hurrmissileosat2240' => '/server/model/ships/hurr/HurrmissileOSAT2240.php',
 		    	'roskorbase2215' => '/server/model/ships/hurr/Roskorbase2215.php',
@@ -2091,9 +2093,9 @@ spl_autoload_register(
 		    	'highguardb' => '/server/model/ships/orieni/HighguardB.php',
 		    	'highguardb2003' => '/server/model/ships/orieni/HighguardB2003.php',
 		    	'highguardb2007' => '/server/model/ships/orieni/HighguardB2007.php',
-//                'penitent' => '/server/model/ships/orieni/penitent.php',
-//                'penitent1782' => '/server/model/ships/orieni/penitent1782.php',
-//                'penitent2003' => '/server/model/ships/orieni/penitent2003.php',
+                'penitent' => '/server/model/ships/orieni/penitent.php',
+                'penitent1782' => '/server/model/ships/orieni/penitent1782.php',
+                'penitent2003' => '/server/model/ships/orieni/penitent2003.php',
 		    	'resolute' => '/server/model/ships/orieni/resolute.php',
 		    	'resolute2007' => '/server/model/ships/orieni/resolute2007.php',
 		    	'skywatch' => '/server/model/ships/orieni/skywatch.php',
@@ -2218,6 +2220,9 @@ spl_autoload_register(
 				'nxcruiser' => '/server/model/ships/ZTrekFederation/NXCruiser.php',
 				'nxshuttlepod' => '/server/model/ships/ZTrekFederation/NXShuttlepod.php',
 				'nxwarcruiser' => '/server/model/ships/ZTrekFederation/NXWarCruiser.php',
+				
+				'trekfederationnxcruiserv2' => '/server/model/ships/ZTrekFederation/TrekFederationNXCruiserV2.php',
+				'trekfederationconstitutioncl' => '/server/model/ships/ZTrekFederation/TrekFederationConstitutionCL.php',
 		    		
 				//Marcin Trek
                 'trekimpulsedrive' => '/server/model/weapons/customTrek.php',
