@@ -11,7 +11,7 @@ class penitent1782 extends SmallStarBaseFourSections{
 		$this->shipClass = "Penitent Station (1782)";
 			$this->variantOf = "Penitent Station";
 			$this->occurence = "common";
-		$this->imagePath = "img/ships/MarkabShadrakShrine.png";
+		$this->imagePath = "img/ships/penitent.png";
 		$this->canvasSize = 280; 
 		$this->fighters = array("light"=>24, "medium"=>24); 
 		$this->shipSizeClass = 3; 
