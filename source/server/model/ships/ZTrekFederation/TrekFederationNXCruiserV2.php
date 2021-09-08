@@ -1,17 +1,17 @@
 <?php
-class NXCruiser extends MediumShip{
+class TrekFederationNXCruiserV2 extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 325;
         $this->faction = "ZTrek Playtest Federation";
-        $this->phpclass = "NXCruiser";
+        $this->phpclass = "TrekFederationNXCruiserV2";
         $this->imagePath = "img/ships/StarTrek/EnterpriseNX.png";
         $this->shipClass = "NX Cruiser";
-		
-        $this->variantOf = "OBSOLETE";
 
+	$this->fighters = array("Shuttlecraft"=>2);
+	
 		$this->unofficial = true;
         $this->canvasSize = 100;
 	    $this->isd = 2150;
@@ -26,15 +26,18 @@ class NXCruiser extends MediumShip{
         $this->rollcost = 2;
         $this->pivotcost = 2;
         $this->iniativebonus = 60;
+		
+		
 
         $this->addPrimarySystem(new Reactor(3, 10, 0, 3));
         $this->addPrimarySystem(new CnC(3, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 9, 4, 4));
-        $this->addPrimarySystem(new Engine(3, 10, 0, 4, 2));
-        $this->addPrimarySystem(new Hangar(3, 2));
+        $this->addPrimarySystem(new Hangar(3, 2, 2));
 		$grappler = new CustomIndustrialGrappler(2, 5, 0, 0, 360);
 			$grappler->displayName = "Magnetic Grappler";
 			$this->addPrimarySystem($grappler);
+		$impulseDrive = new TrekImpulseDrive(3,20,0,1,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
+		
 
 		$polarizedhullplating = new AbsorbtionShield(2,4,3,1,270,90);  //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 			$polarizedhullplating->displayName = "Polarized Hull Plating";
@@ -44,9 +47,17 @@ class NXCruiser extends MediumShip{
    		$this->addFrontSystem(new TrekSpatialTorp(2, 6, 1, 300, 60));
        	$this->addFrontSystem(new TrekSpatialTorp(2, 6, 1, 300, 60));
 	    
-		$this->addAftSystem(new TrekWarpDrive(2, 18, 3, 13));
-		$this->addAftSystem(new TrekWarpDrive(2, 18, 3, 13));
-   		$this->addAftSystem(new Engine(3, 14, 0, 6, 2));
+		
+		
+		$warpNacelle = new TrekWarpDrive(4, 18, 3, 4); //armor, structure, power usage, impulse output
+		$impulseDrive->addThruster($warpNacelle);
+		$this->addAftSystem($warpNacelle);
+		
+		$warpNacelle = new TrekWarpDrive(4, 18, 3, 4); //armor, structure, power usage, impulse output
+		$impulseDrive->addThruster($warpNacelle);
+		$this->addAftSystem($warpNacelle);
+		
+		
 		$this->addAftSystem(new TrekPhaseCannon(2, 6, 4, 90, 270));
    		$this->addAftSystem(new TrekSpatialTorp(2, 6, 1, 120, 240));
 		$polarizedhullplating = new AbsorbtionShield(2,4,3,1,90,270);  //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
@@ -58,6 +69,7 @@ class NXCruiser extends MediumShip{
 		$this->addPrimarySystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 		$this->addPrimarySystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 		$this->addPrimarySystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance  
+        $this->addPrimarySystem($impulseDrive);
 
         $this->addPrimarySystem(new Structure(3, 60));
 
@@ -74,18 +86,17 @@ class NXCruiser extends MediumShip{
 		),
 
 		1=> array(
+		    1 => "Polarized Hull Plating",
 			5 => "Phase Cannon",
 			8 => "Spatial Torpedo",
-		    9 => "Polarized Hull Plating",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
-			4 => "Engine",
-			8 => "Warp Drive",
-		    9 => "Polarized Hull Plating",
-			10 => "Phase Cannon",
+		    1 => "Polarized Hull Plating",
+			7 => "Nacelle",
+			9 => "Phase Cannon",
 			11 => "Spatial Torpedo",
 			17 => "Structure",
 			20 => "Primary",
