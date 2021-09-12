@@ -15,6 +15,7 @@ class Heron1940 extends HeavyCombatVesselLeftRight{
         $this->minesweeperbonus = 2;
         
         $this->isd = 1940;
+        $this->canvasSize = 160;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

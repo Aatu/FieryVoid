@@ -10,6 +10,7 @@ class EarlyWarbird extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/drazi/DraziWarbird.png";
         $this->shipClass = "Warbird Cruiser";
         $this->isd = 2002;
+        $this->canvasSize = 160;
 
         $this->forwardDefense = 13;
         $this->sideDefense = 12;

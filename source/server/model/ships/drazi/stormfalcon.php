@@ -13,7 +13,7 @@ class Stormfalcon extends BaseShipNoAft{
         $this->fighters = array("light" => 12, "superheavy" => 1);
         $this->isd = 2238;
         $this->limited = 33;
-        $this->canvasSize = 256;
+        $this->canvasSize = 180;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 14;

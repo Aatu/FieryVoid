@@ -9,6 +9,7 @@ class EarlyWartalon extends HeavyCombatVesselLeftRight{
         $this->phpclass = "EarlyWartalon";
         $this->imagePath = "img/ships/drazi/DraziWarbird.png";
         $this->shipClass = "Wartalon Escort Carrier";
+        $this->canvasSize = 160;
         
         $this->fighters = array("light" => 6);
         

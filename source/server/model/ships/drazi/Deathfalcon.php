@@ -15,7 +15,7 @@ class Deathfalcon extends BaseShipNoAft{
         $this->variantOf = 'Stormfalcon Heavy Cruiser';
         $this->isd = 2234;
         $this->limited = 33;
-        $this->canvasSize = 256;
+        $this->canvasSize = 180;
 	    $this->unofficial = true;        
 
         $this->forwardDefense = 15;

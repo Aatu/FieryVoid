@@ -12,7 +12,7 @@ class Jumphawk extends HeavyCombatVesselLeftRight{
         $this->occurence = "uncommon";
 	    $this->variantOf = "Sunhawk Battlecruiser";
 	    $this->isd = 2230;
-        $this->canvasSize = 256;
+        $this->canvasSize = 180;
 
         $this->forwardDefense = 14;
         $this->sideDefense = 13;

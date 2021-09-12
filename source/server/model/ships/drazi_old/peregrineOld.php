@@ -11,6 +11,7 @@ class PeregrineOld extends BaseShipNoAft{
         $this->shipClass = "Peregrine Jump Ship (1938)";
         $this->fighters = array("light" => 12);
         $this->limited = 33;
+        $this->canvasSize = 180;
         
         $this->variantOf = "Peregrine Jump Ship";
         $this->isd = 1938;

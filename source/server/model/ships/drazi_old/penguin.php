@@ -10,6 +10,7 @@ class Penguin extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/drazi/DraziPenguin.png";
         $this->shipClass = "Penguin Landing Ship";
         $this->isd = 2002;
+        $this->canvasSize = 160;
 
 	    $this->notes = 'Atmospheric.';
         $this->fighters = array("assault shuttles"=>6);

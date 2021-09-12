@@ -10,7 +10,7 @@ class Sunhawk extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/drazi/DraziSunhawk.png";
         $this->shipClass = "Sunhawk Battlecruiser";
 	    $this->isd = 2198;
-        $this->canvasSize = 256;
+        $this->canvasSize = 180;
 
         $this->forwardDefense = 14;
         $this->sideDefense = 13;

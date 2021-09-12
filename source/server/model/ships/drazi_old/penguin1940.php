@@ -12,6 +12,7 @@ class Penguin1940 extends HeavyCombatVesselLeftRight{
 			$this->occurence = 'common'; 
 			$this->variantOf = "Penguin Landing Ship";
         $this->isd = 1940;
+        $this->canvasSize = 160;
 
 	    $this->notes = 'Atmospheric.';
         $this->fighters = array("assault shuttles"=>6);

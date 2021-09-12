@@ -13,6 +13,7 @@ class Skua extends HeavyCombatVesselLeftRight{
         $this->occurence = 'rare'; 
         $this->variantOf = "Shrike Heavy Destroyer";
         $this->isd = 2002;
+        $this->canvasSize = 160;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

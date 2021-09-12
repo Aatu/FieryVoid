@@ -10,6 +10,7 @@ class Pelican extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/drazi/DraziPelican.png";
         $this->shipClass = "Pelican Military Freighter";
         $this->isd = 1941;
+        $this->canvasSize = 160;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;

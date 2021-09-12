@@ -13,7 +13,7 @@ class Wartalon extends HeavyCombatVesselLeftRight{
         $this->fighters = array("light" => 6);
 	    $this->variantOf = "Warbird Cruiser";
 	    $this->isd = 2234;
-        $this->canvasSize = 256;
+        $this->canvasSize = 160;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 12;

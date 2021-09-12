@@ -13,7 +13,7 @@ class Strikehawk extends HeavyCombatVesselLeftRight{
 	    $this->isd = 2220;
 	    $this->variantOf = "Sunhawk Battlecruiser"; //not noted on sheet, but fluf says so and it's consistent with name and silhouette
 
-        $this->canvasSize = 256;
+        $this->canvasSize = 180;
         $this->forwardDefense = 13;
         $this->sideDefense = 12;
         

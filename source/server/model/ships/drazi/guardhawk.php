@@ -12,7 +12,7 @@ class Guardhawk extends HeavyCombatVesselLeftRight{
         $this->occurence = "uncommon";
 	    $this->variantOf = "Sunhawk Battlecruiser";
 	    $this->isd = 2234;
-        $this->canvasSize = 256;
+        $this->canvasSize = 180;
 
         $this->forwardDefense = 14;
         $this->sideDefense = 13;

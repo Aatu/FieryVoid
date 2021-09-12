@@ -15,7 +15,7 @@ class Nightfalcon extends BaseShipNoAft{
         $this->variantOf = 'Stormfalcon Heavy Cruiser';
         $this->isd = 2243;
         $this->limited = 33;
-        $this->canvasSize = 256;
+        $this->canvasSize = 180;
 
         $this->forwardDefense = 15;
         $this->sideDefense = 14;

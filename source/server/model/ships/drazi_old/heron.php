@@ -11,7 +11,7 @@ class Heron extends HeavyCombatVesselLeftRight{
         $this->shipClass = "Heron Minesweeper";
         
         $this->minesweeperbonus = 3;
-        
+        $this->canvasSize = 160;
 
         $this->occurence = 'uncommon'; 
         $this->variantOf = "Shrike Heavy Destroyer";

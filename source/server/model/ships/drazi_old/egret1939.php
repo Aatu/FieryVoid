@@ -12,6 +12,7 @@ class Egret1939 extends HeavyCombatVesselLeftRight{
 			$this->occurence = 'uncommon'; 
 			$this->variantOf = "Shrike Heavy Destroyer";
         $this->isd = 1939;
+        $this->canvasSize = 160;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

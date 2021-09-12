@@ -12,6 +12,7 @@ class Auk1935 extends HeavyCombatVesselLeftRight{
 			$this->occurence = 'rare'; //uncommon is for Plasma version
 			$this->variantOf = "Shrike Heavy Destroyer";
         $this->isd = 1935;
+        $this->canvasSize = 160;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

@@ -12,6 +12,7 @@ class Shrike1984 extends HeavyCombatVesselLeftRight{
 			$this->occurence = 'common'; 
 			$this->variantOf = "Shrike Heavy Destroyer";
         $this->isd = 1984;
+        $this->canvasSize = 160;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
