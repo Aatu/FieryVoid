@@ -7,7 +7,7 @@ class DarkhawkFull extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 450+4*25;
 	$this->faction = "Drazi";
         $this->phpclass = "DarkhawkFull";
-        $this->imagePath = "img/ships/drazi/sunhawk4.png";
+        $this->imagePath = "img/ships/drazi/DraziSunhawk.png";
         $this->shipClass = "Darkhawk Missile Cruiser (full)";
 	        $this->unofficial = true;
 	    $this->variantOf = "Sunhawk Battlecruiser";

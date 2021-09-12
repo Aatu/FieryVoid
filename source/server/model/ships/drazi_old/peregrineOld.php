@@ -8,7 +8,7 @@ class PeregrineOld extends BaseShipNoAft{
         $this->faction = "Drazi (WotCR)";
         $this->phpclass = "peregrineOld";
         $this->imagePath = "img/ships/vulture.png";
-        $this->shipClass = "Peregrine Jump Ship";
+        $this->shipClass = "Peregrine Jump Ship (1938)";
         $this->fighters = array("light" => 12);
         $this->limited = 33;
         
@@ -29,23 +29,23 @@ class PeregrineOld extends BaseShipNoAft{
         $this->addPrimarySystem(new CnC(5, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 4, 6));
         $this->addPrimarySystem(new Engine(4, 15, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(4, 13));
+        $this->addPrimarySystem(new Hangar(3, 13));
         $this->addPrimarySystem(new JumpEngine(4, 12, 3, 38));
         $this->addPrimarySystem(new Thruster(4, 12, 0, 4, 2));
-	$this->addPrimarySystem(new Thruster(4, 12, 0, 4, 2));
+		$this->addPrimarySystem(new Thruster(4, 12, 0, 4, 2));
 	    
-	$this->addFrontSystem(new StdParticleBeam(3, 4, 1, 240, 60));
+		$this->addFrontSystem(new StdParticleBeam(3, 4, 1, 240, 60));
         $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));
         $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 120));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         
-        $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 180, 0));
-        $this->addLeftSystem(new HeavyPlasma(3, 8, 5, 240, 0));
+        $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 180, 360));
+        $this->addLeftSystem(new HeavyPlasma(3, 8, 5, 300, 360));
         $this->addLeftSystem(new Thruster(4, 16, 0, 4, 3));
 	    
         $this->addRightSystem(new StdParticleBeam(3, 4, 1, 0, 180));
-        $this->addRightSystem(new HeavyPlasma(3, 8, 5, 0, 120));
+        $this->addRightSystem(new HeavyPlasma(3, 8, 5, 0, 60));
         $this->addRightSystem(new Thruster(4, 16, 0, 4, 4));
 	    
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -60,7 +60,7 @@ class PeregrineOld extends BaseShipNoAft{
         				8=> "Structure",
         				10=> "Thruster",
         				12=> "Scanner",
-					14=> "Jump Engine",
+						14=> "Jump Engine",
         				16=> "Engine",
         				18=> "Hangar",
         				19=> "Reactor",

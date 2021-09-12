@@ -7,7 +7,7 @@ class Sunhawk extends HeavyCombatVesselLeftRight{
         $this->pointCost = 525;
         $this->faction = "Drazi";
         $this->phpclass = "Sunhawk";
-        $this->imagePath = "img/ships/drazi/sunhawk.png";
+        $this->imagePath = "img/ships/drazi/DraziSunhawk.png";
         $this->shipClass = "Sunhawk Battlecruiser";
 	    $this->isd = 2198;
         $this->canvasSize = 256;

@@ -50,7 +50,7 @@ class Egret extends HeavyCombatVesselLeftRight{
         				8 => "Structure",
         				11 => "Thruster",
 					    12 => "Repeater Gun",
-        				14 => "Scanner",
+        				14 => "ELINT Scanner",
         				16 => "Engine",
         				17 => "Hangar",
         				19 => "Reactor",

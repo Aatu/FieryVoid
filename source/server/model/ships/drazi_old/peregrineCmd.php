@@ -31,7 +31,7 @@ class PeregrineCmd extends BaseShipNoAft{
         $this->addPrimarySystem(new CnC(6, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 5, 8));
         $this->addPrimarySystem(new Engine(4, 15, 0, 9, 3));
-        $this->addPrimarySystem(new Hangar(4, 15));
+        $this->addPrimarySystem(new Hangar(3, 15));
         $this->addPrimarySystem(new JumpEngine(4, 12, 3, 38));
         $this->addPrimarySystem(new Thruster(4, 12, 0, 5, 2));
 	$this->addPrimarySystem(new Thruster(4, 12, 0, 5, 2));

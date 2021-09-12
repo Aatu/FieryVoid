@@ -8,7 +8,7 @@ class Nightfalcon extends BaseShipNoAft{
         $this->pointCost = 725;
         $this->faction = "Drazi";
         $this->phpclass = "Nightfalcon";
-        $this->imagePath = "img/ships/drazi/stormfalcon3.png";
+        $this->imagePath = "img/ships/drazi/DraziStormfalcon.png";
         $this->shipClass = "Nightfalcon Heavy Carrier";
         $this->fighters = array("light" => 12, "superheavy" => 3);
         $this->occurence = "rare";

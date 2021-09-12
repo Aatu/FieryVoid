@@ -7,7 +7,7 @@ class Strikebird extends HeavyCombatVesselLeftRight{
         $this->pointCost = 400;
         $this->faction = "Drazi";
         $this->phpclass = "Strikebird";
-        $this->imagePath = "img/ships/drazi/warbird.png";
+        $this->imagePath = "img/ships/drazi/DraziWarbird.png";
         $this->shipClass = "Strikebird Carrier";
         $this->occurence = "uncommon";
         $this->fighters = array("light" => 12);

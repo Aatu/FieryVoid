@@ -7,7 +7,7 @@ class Strikehawk extends HeavyCombatVesselLeftRight{
         $this->pointCost = 485;
         $this->faction = "Drazi";
         $this->phpclass = "Strikehawk";
-        $this->imagePath = "img/ships/drazi/sunhawk4.png";
+        $this->imagePath = "img/ships/drazi/DraziSunhawk.png";
         $this->shipClass = "Strikehawk Battle Carrier";
         $this->fighters = array("superheavy" => 1);
 	    $this->isd = 2220;

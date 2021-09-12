@@ -7,7 +7,7 @@ class Sleekbird extends HeavyCombatVesselLeftRight{
         $this->pointCost = 400;
         $this->faction = "Drazi";
         $this->phpclass = "Sleekbird";
-        $this->imagePath = "img/ships/drazi/warbird3.png";
+        $this->imagePath = "img/ships/drazi/DraziWarbird.png";
         $this->shipClass = "Sleekbird Assault Cruiser";
 	    $this->variantOf = "Warbird Cruiser";
 	    $this->isd = 2052;

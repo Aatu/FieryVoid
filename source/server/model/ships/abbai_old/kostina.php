@@ -22,8 +22,8 @@ class Kostina extends BaseShip{
         $this->turncost = 0.66;
         $this->turndelaycost = 0.66;
         $this->accelcost = 4;
-        $this->rollcost = 3;
-        $this->pivotcost = 2;
+        $this->rollcost = 2;
+        $this->pivotcost = 3;
         $this->iniativebonus = 0;
         
         $this->addPrimarySystem(new Reactor(5, 15, 0, 0));

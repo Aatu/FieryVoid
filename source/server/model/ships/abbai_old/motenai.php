@@ -4,8 +4,8 @@ class Motenai extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 625;
-	$this->faction = "Abbai (WotCR)";
+		$this->pointCost = 625;
+		$this->faction = "Abbai (WotCR)";
         $this->phpclass = "Motenai";
         $this->imagePath = "img/ships/AbbaiMotenai.png";
         $this->shipClass = "Motenai Missile Cruiser";
@@ -13,6 +13,7 @@ class Motenai extends BaseShip{
 		
 	    $this->unofficial = true;
 		$this->notes = "official Motenai Mine Layer with Class-SO racks replacing Mine Launchers";
+        $this->minesweeperbonus = 4;    	
 
         $this->limited = 33;
         $this->isd = 2025;
@@ -31,7 +32,7 @@ class Motenai extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 5, 6));  //+4 Minesweeper
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 4));
- 	$this->addPrimarySystem(new Hangar(4, 8));
+		$this->addPrimarySystem(new Hangar(4, 8));
         $this->addPrimarySystem(new ShieldGenerator(5, 16, 4, 4));
    
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
@@ -54,13 +55,13 @@ class Motenai extends BaseShip{
         $this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
         $this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
         $this->addLeftSystem(new GraviticShield(0, 6, 0, 1, 240, 300));
-        $this->addLeftSystem(new Thruster(3, 15, 0, 5, 3));
+        $this->addLeftSystem(new Thruster(3, 13, 0, 5, 3));
 
         $this->addRightSystem(new SoMissileRack(3, 6, 0, 0, 120));
         $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         $this->addRightSystem(new GraviticShield(0, 6, 0, 1, 60, 120));
-        $this->addRightSystem(new Thruster(3, 15, 0, 5, 4));
+        $this->addRightSystem(new Thruster(3, 13, 0, 5, 4));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(4, 36));
@@ -83,7 +84,7 @@ class Motenai extends BaseShip{
 					4 => "Thruster",
 					6 => "Gravitic Shield",	
 					7 => "Assault Laser",
-                        		10 => "Class-S Missile Rack",
+              		10 => "Class-SO Missile Rack",
 					17 => "Structure",
 					20 => "Primary",
 			),
@@ -98,7 +99,7 @@ class Motenai extends BaseShip{
 					3 => "Thruster",
 					4 => "Gravitic Shield",
 					6 => "Light Particle Beam",
-                        		8 => "Class-S Missile Rack",
+              		8 => "Class-SO Missile Rack",
 					17 => "Structure",
 					20 => "Primary",
 			),
@@ -106,7 +107,7 @@ class Motenai extends BaseShip{
 					3 => "Thruster",
 					4 => "Gravitic Shield",
 					6 => "Light Particle Beam",
-                        		8 => "Class-S Missile Rack",
+              		8 => "Class-SO Missile Rack",
 					17 => "Structure",
 					20 => "Primary",
 			),

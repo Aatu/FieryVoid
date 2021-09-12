@@ -7,7 +7,7 @@ class Stareagle extends MediumShipLeftRight{
 	$this->pointCost = 350;
 	$this->faction = "Drazi";
         $this->phpclass = "Stareagle";
-        $this->imagePath = "img/ships/drazi/stareagle.png";
+        $this->imagePath = "img/ships/drazi/DraziStareagle.png";
         $this->shipClass = "Stareagle Frigate";
         $this->agile = true;
         $this->canvasSize = 128;

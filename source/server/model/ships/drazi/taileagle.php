@@ -7,7 +7,7 @@ class Taileagle extends MediumShipLeftRight{
 	$this->pointCost = 325;
 	$this->faction = "Drazi";
         $this->phpclass = "Taileagle";
-        $this->imagePath = "img/ships/drazi/stareagle.png";
+        $this->imagePath = "img/ships/drazi/DraziStareagle.png";
         $this->shipClass = "Taileagle Escort Frigate";
         $this->agile = true;
         $this->canvasSize = 128;
