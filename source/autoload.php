@@ -2254,6 +2254,9 @@ spl_autoload_register(
 				'nxcruiser' => '/server/model/ships/ZTrekFederation/NXCruiser.php',
 				'nxshuttlepod' => '/server/model/ships/ZTrekFederation/NXShuttlepod.php',
 				'nxwarcruiser' => '/server/model/ships/ZTrekFederation/NXWarCruiser.php',
+				
+				'trekfederationnxcruiserv2' => '/server/model/ships/ZTrekFederation/TrekFederationNXCruiserV2.php',
+				'trekfederationconstitutioncl' => '/server/model/ships/ZTrekFederation/TrekFederationConstitutionCL.php',
 		    		
 				//Marcin Trek
                 'trekimpulsedrive' => '/server/model/weapons/customTrek.php',
