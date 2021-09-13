@@ -1507,7 +1507,7 @@ class BaseShip {
 		$bearing = 0;
 		//this will ignore on-standard direction of impact - like with Flash collateral damage. This information is simply not available here, and IMO not important enough to rewrite entire chain if calls to pass
 		if($weapon->ballistic){
-			$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+			$movement = $shooter->getLastTurnMovement($fire->turn);
             $pos = mathlib::hexCoToPixel($movement->position);
 			$bearing = $this->getBearingOnPos($pos);
 		}else{
