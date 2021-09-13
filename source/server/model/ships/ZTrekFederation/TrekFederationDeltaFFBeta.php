@@ -44,7 +44,7 @@ class TrekFederationDeltaFFBeta extends LCV{
 		$polarizedhullplating->displayName = "Polarized Hull Plating";
 		$this->addPrimarySystem($polarizedhullplating);
 		$this->addPrimarySystem(new TrekPhaseCannon(3, 6, 4, 330, 180));
-		$this->addPrimarySystem(new TrekPhaseCannon(3, 6, 4, 180, 300));
+		$this->addPrimarySystem(new TrekPhaseCannon(3, 6, 4, 180, 30));
 
 		$warpNacelle = new TrekWarpDrive(2, 10, 2, 3); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
