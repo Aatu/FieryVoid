@@ -63,10 +63,10 @@ if (isset($_SESSION["user"])) {
 -->        
 		
 		---------- <b>LATEST NEWS - September 2021</b> ----------	   
-	    <br><b>Escalation Wars</b> - New faction, courtesy of Geoffrey!
-	    <br><b>Nexus</b> - New faction, courtesy of Geoffrey!
-	    <br><b>New mid-war refits for Orieni and Centauri ships</b> - courtesy of Geoffrey
+	    <br><b>New mid-war refits for Orieni and Centauri ships</b> - courtesy of Daniel
 	    <br><b>New graphics for Orieni and Centauri ships</b> - courtesy of Lunara
+		<br><b>New early versions for WotCR-era Abbai and Drazi</b> - courtesy of Daniel
+		<br><b>New graphics for the modern Drazi ships</b> - courtesy of Lunara
 
 
 		

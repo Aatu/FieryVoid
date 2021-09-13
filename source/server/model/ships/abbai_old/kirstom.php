@@ -4,8 +4,8 @@ class Kirstom extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 625;
-	$this->faction = "Abbai (WotCR)";
+		$this->pointCost = 625;
+		$this->faction = "Abbai (WotCR)";
         $this->phpclass = "Kirstom";
         $this->imagePath = "img/ships/AbbaiBrova.png";
         $this->shipClass = "Kirstom Large Cruiser";
@@ -29,7 +29,7 @@ class Kirstom extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 12, 4, 7));
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 4));
- 	$this->addPrimarySystem(new Hangar(4, 2));
+		$this->addPrimarySystem(new Hangar(4, 2));
         $this->addPrimarySystem(new ShieldGenerator(5, 16, 4, 4));
    
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
@@ -80,7 +80,7 @@ class Kirstom extends BaseShip{
 			1=> array(
 					4 => "Thruster",
 					6 => "Gravitic Shield",	
-					7 => "Assault Laser",
+					8 => "Assault Laser",
 					10 => "Light Particle Beam",
 					17 => "Structure",
 					20 => "Primary",

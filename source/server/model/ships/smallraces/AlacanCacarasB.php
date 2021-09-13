@@ -10,9 +10,8 @@ class AlacanCacarasB extends OSAT{
         $this->imagePath = "img/ships/AlacanCacaras.png";
 			$this->canvasSize = 100; //img has 100px per side
         $this->shipClass = "Alacan Cacaras B Defense Satellite";
-		$this->unofficial = true;
+//		$this->unofficial = true;
 		$this->isd = 2202;
-
         
         $this->forwardDefense = 7;
         $this->sideDefense = 7;
@@ -23,7 +22,6 @@ class AlacanCacarasB extends OSAT{
         $this->rollcost = 999;
         $this->pivotcost = 999;	*/
         $this->iniativebonus = 60;
-
 
         $this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
         $this->addPrimarySystem(new LaserCutter(2, 6, 4, 270, 90));

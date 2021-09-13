@@ -8,7 +8,7 @@ class Kestrel extends MediumShip{
 		$this->pointCost = 390;
 		$this->faction = "Drazi";
         $this->phpclass = "Kestrel";
-        $this->imagePath = "img/ships/drazi/kestrel.png";
+        $this->imagePath = "img/ships/drazi/DraziKestrel.png";
         $this->shipClass = "Kestrel Corvette Leader";
         $this->agile = true;
         $this->canvasSize = 128;

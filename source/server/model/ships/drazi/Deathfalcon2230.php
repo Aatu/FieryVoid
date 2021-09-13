@@ -8,14 +8,14 @@ class Deathfalcon2230 extends BaseShipNoAft{
         $this->pointCost = 725;
         $this->faction = "Drazi";
         $this->phpclass = "Deathfalcon2230";
-        $this->imagePath = "img/ships/drazi/stormfalcon2.png";
+        $this->imagePath = "img/ships/drazi/DraziStormfalcon.png";
         $this->shipClass = "Deathfalcon Heavy Assault Cruiser (2230)";
         $this->fighters = array("assault shuttles"=>12);
         $this->occurence = "rare";
         $this->variantOf = 'Stormfalcon Heavy Cruiser';
         $this->isd = 2234;
         $this->limited = 33;
-        $this->canvasSize = 256;
+        $this->canvasSize = 180;
 	    $this->unofficial = true;        
 
         $this->forwardDefense = 15;

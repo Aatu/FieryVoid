@@ -13,6 +13,7 @@ class Auk extends HeavyCombatVesselLeftRight{
         $this->occurence = 'rare'; //uncommon is for Plasma version
         $this->variantOf = "Shrike Heavy Destroyer";
         $this->isd = 1998;
+        $this->canvasSize = 160;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
@@ -24,7 +25,7 @@ class Auk extends HeavyCombatVesselLeftRight{
         $this->pivotcost = 3;
         $this->iniativebonus = 40;
 
-        $this->addPrimarySystem(new Reactor(5, 12, 0, 0));
+        $this->addPrimarySystem(new Reactor(5, 16, 0, 0));
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 3, 6));
         $this->addPrimarySystem(new Engine(4, 12, 0, 7, 3));
