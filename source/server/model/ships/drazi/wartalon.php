@@ -7,13 +7,13 @@ class Wartalon extends HeavyCombatVesselLeftRight{
 	    $this->pointCost = 500;
 	    $this->faction = "Drazi";
         $this->phpclass = "Wartalon";
-        $this->imagePath = "img/ships/drazi/warbird4.png";
+        $this->imagePath = "img/ships/drazi/DraziWarbird.png";
         $this->shipClass = "Wartalon Escort Carrier";
         $this->occurence = "uncommon";
         $this->fighters = array("light" => 6);
 	    $this->variantOf = "Warbird Cruiser";
 	    $this->isd = 2234;
-        $this->canvasSize = 256;
+        $this->canvasSize = 160;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 12;

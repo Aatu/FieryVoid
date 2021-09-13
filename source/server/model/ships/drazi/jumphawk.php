@@ -7,12 +7,12 @@ class Jumphawk extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 500;
 	$this->faction = "Drazi";
         $this->phpclass = "Jumphawk";
-        $this->imagePath = "img/ships/drazi/sunhawk3.png";
+        $this->imagePath = "img/ships/drazi/DraziSunhawk.png";
         $this->shipClass = "Jumphawk Command Cruiser";
         $this->occurence = "uncommon";
 	    $this->variantOf = "Sunhawk Battlecruiser";
 	    $this->isd = 2230;
-        $this->canvasSize = 256;
+        $this->canvasSize = 180;
 
         $this->forwardDefense = 14;
         $this->sideDefense = 13;

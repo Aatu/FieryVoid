@@ -13,6 +13,7 @@ class Nightowl extends BaseShipNoAft{
         $this->fighters = array("normal" => 6);
         $this->isd = 1994;
         $this->limited = 10;
+        $this->canvasSize = 180;
 
         $this->forwardDefense = 18;
         $this->sideDefense = 18;

@@ -1501,6 +1501,24 @@ class BaseShip {
             $struct = $this->getStructureSystem($location);
             return $struct;
         }
+		
+		//prioritize in-arc systems - 13.09.2021
+		$systemsInArc = array();
+		$bearing = 0;
+		//this will ignore on-standard direction of impact - like with Flash collateral damage. This information is simply not available here, and IMO not important enough to rewrite entire chain if calls to pass
+		if($weapon->ballistic){
+			$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            $pos = mathlib::hexCoToPixel($movement->position);
+			$bearing = $this->getBearingOnPos($pos);
+		}else{
+			$bearing = $this->getBearingOnUnit($shooter);	
+		}		
+		foreach($systems as $systemInArc){
+			if(mathlib::isInArc($bearing, $systemInArc->startArc, $systemInArc->endArc)){ //actually this system is in relevant arc!
+				$systemsInArc[] = $systemInArc;
+			}
+		}
+		if(sizeof($systemsInArc)>0) $systems = $systemsInArc; //some of indicated systems are in arc - they have to be targeted as priority!
 
         //now choose one of equal eligible systems (they're already known to be undestroyed... well, they may be destroyed, but then they're to be returned anyway)
         $roll = Dice::d(sizeof($systems));
