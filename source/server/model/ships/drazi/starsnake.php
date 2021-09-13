@@ -8,7 +8,7 @@ class Starsnake extends FighterFlight{
         $this->faction = "Drazi";
         $this->phpclass = "Starsnake";
         $this->shipClass = "Star Snake Light Fighters";
-	    $this->imagePath = "img/ships/drazi/starsnake.png";
+	    $this->imagePath = "img/ships/drazi/DraziStarsnake.png";
 	    $this->isd = 2110;
         
         $this->forwardDefense = 6;
@@ -31,8 +31,8 @@ class Starsnake extends FighterFlight{
             $armour = array(1, 1, 1, 1);
             $fighter = new Fighter("starsnake", $armour, 8, $this->id);
             $fighter->displayName = "Star Snake";
-            $fighter->imagePath = "img/ships/drazi/starsnake.png";
-            $fighter->iconPath = "img/ships/drazi/starsnake_large.png";
+            $fighter->imagePath = "img/ships/drazi/DraziStarsnake.png";
+            $fighter->iconPath = "img/ships/drazi/DraziStarsnake_large.png";
 
 
             $fighter->addFrontSystem(new LightParticleBlaster(330, 30, 5));

@@ -4,14 +4,14 @@ class Sellac extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 105;
-	$this->faction = "Civilians";
+		$this->pointCost = 110;
+		$this->faction = "Civilians";
         $this->phpclass = "Sellac";
         $this->imagePath = "img/ships/AbbaiSellac.png";
         $this->shipClass = "Abbai Sellac Freighter";
         $this->canvasSize = 200;
 	    
-	$this->isd = 2000;
+		$this->isd = 2000;
         
         $this->forwardDefense = 16;
         $this->sideDefense = 16;
@@ -19,20 +19,20 @@ class Sellac extends MediumShip{
         $this->turncost = 0.66;
         $this->turndelaycost = 0.66;
         $this->accelcost = 3;
-        $this->rollcost = 3;
-        $this->pivotcost = 6;
-	$this->iniativebonus = -20;
+        $this->rollcost = 99;
+        $this->pivotcost = 99;
+		$this->iniativebonus = -20;
 		
         $this->addPrimarySystem(new Reactor(3, 7, 0, 0));
         $this->addPrimarySystem(new CnC(4, 4, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 2, 3));
         $this->addPrimarySystem(new Engine(4, 9, 0, 4, 4));
-	$this->addPrimarySystem(new Hangar(3, 2));
-	$this->addPrimarySystem(new Thruster(3, 10, 0, 2, 3));
-	$this->addPrimarySystem(new Thruster(3, 10, 0, 2, 4));
+		$this->addPrimarySystem(new Hangar(3, 2));
+		$this->addPrimarySystem(new Thruster(3, 10, 0, 2, 3));
+		$this->addPrimarySystem(new Thruster(3, 10, 0, 2, 4));
 		
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-	$this->addFrontSystem(new CargoBay(2, 32));
+		$this->addFrontSystem(new CargoBay(2, 32));
         $this->addFrontSystem(new CargoBay(2, 32));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
 		
