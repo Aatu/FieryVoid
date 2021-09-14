@@ -26,6 +26,7 @@ class TrekFederationDeltaFFBeta extends LCV{
         $this->rollcost = 1;
         $this->pivotcost = 1;
         $this->iniativebonus = 70;
+		$this->hangarRequired = ''; //no hangar required!
 
 
 
@@ -39,15 +40,15 @@ class TrekFederationDeltaFFBeta extends LCV{
 		$polarizedhullplating = new AbsorbtionShield(2,4,2,1,0,360);  //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 		$polarizedhullplating->displayName = "Polarized Hull Plating";
 		$this->addPrimarySystem($polarizedhullplating);
-		$this->addPrimarySystem(new TrekPhaseCannon(3, 6, 4, 330, 180));
-		$this->addPrimarySystem(new TrekPhaseCannon(3, 6, 4, 180, 30));
+		$this->addFrontSystem(new TrekPhaseCannon(3, 6, 4, 180, 30));
+		$this->addFrontSystem(new TrekPhaseCannon(3, 6, 4, 330, 180));
 
 		$warpNacelle = new TrekWarpDrive(2, 10, 2, 3); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
-		$this->addPrimarySystem($warpNacelle);
+		$this->addAftSystem($warpNacelle);
 		$warpNacelle = new TrekWarpDrive(2, 10, 2, 3); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
-		$this->addPrimarySystem($warpNacelle);
+		$this->addAftSystem($warpNacelle);
 
 
 	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
@@ -64,8 +65,8 @@ class TrekFederationDeltaFFBeta extends LCV{
 		0=> array(
 			1 => "Polarized Hull Plating",
 			10 => "Structure",
-			13 => "Phase Cannon",
-			17 => "Nacelle",
+			13 => "1:Phase Cannon",
+			17 => "2:Nacelle",
 			18 => "Engine",
 			19 => "Reactor",
 			20 => "Scanner",
@@ -74,8 +75,8 @@ class TrekFederationDeltaFFBeta extends LCV{
 		1=> array(
 			1 => "0:Polarized Hull Plating",
 			10 => "Structure",
-			14 => "0:Phase Cannon",
-			17 => "0:Nacelle",
+			14 => "1:Phase Cannon",
+			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
 			20 => "0:Scanner",
@@ -84,8 +85,8 @@ class TrekFederationDeltaFFBeta extends LCV{
 		2=> array(
 			1 => "0:Polarized Hull Plating",
 			10 => "Structure",
-			12 => "0:Phase Cannon",
-			17 => "0:Nacelle",
+			12 => "1:Phase Cannon",
+			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
 			20 => "0:Scanner",
