@@ -65,8 +65,9 @@ if (isset($_SESSION["user"])) {
 		---------- <b>LATEST NEWS - September 2021</b> ----------	   
 	    <br><b>New mid-war refits for Orieni and Centauri ships</b> - courtesy of Daniel
 	    <br><b>New graphics for Orieni and Centauri ships</b> - courtesy of Lunara
-		<br><b>New early versions for WotCR-era Abbai and Drazi</b> - courtesy of Daniel
-		<br><b>New graphics for the modern Drazi ships</b> - courtesy of Lunara
+	    <br><b>New early versions for WotCR-era Abbai and Drazi</b> - courtesy of Daniel
+	    <br><b>New graphics for the modern Drazi ships</b> - courtesy of Lunara - <i>rejoice Greens and Purples, for Your ships look Drazi again!</i>
+	    <br><b>Firing routines modified</b> - in-arc systems are prioritized to be hit (eg. off-arc weapon can't be hit if in-arc one is available)
 
 
 		

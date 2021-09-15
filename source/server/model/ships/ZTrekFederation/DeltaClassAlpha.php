@@ -8,8 +8,10 @@ class DeltaClassAlpha extends LCV{
         $this->faction = "ZTrek Playtest Federation";
         $this->phpclass = "DeltaClassAlpha";
         $this->imagePath = "img/ships/StarTrek/DeltaClass.png";
-        $this->shipClass = "Delta Alpha";
+        $this->shipClass = "Delta Frigate Alpha";
 
+		$this->variantOf = 'OBSOLETE';
+		
 		$this->unofficial = true;
         $this->canvasSize = 65;
 		$this->isd = 2148;

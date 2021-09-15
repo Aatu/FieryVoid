@@ -2258,6 +2258,11 @@ spl_autoload_register(
 				
 				'trekfederationnxcruiserv2' => '/server/model/ships/ZTrekFederation/TrekFederationNXCruiserV2.php',
 				'trekfederationconstitutioncl' => '/server/model/ships/ZTrekFederation/TrekFederationConstitutionCL.php',
+				'trekfederationnxwarcruiser' => '/server/model/ships/ZTrekFederation/TrekFederationNXWarCruiser.php',
+				'trekfederationnxwarcruiserupg' => '/server/model/ships/ZTrekFederation/TrekFederationNXWarCruiserUpg.php',
+				'trekfederationintrepid' => '/server/model/ships/ZTrekFederation/TrekFederationIntrepid.php',
+				'trekfederationdeltaffalpha' => '/server/model/ships/ZTrekFederation/TrekFederationDeltaFFAlpha.php',
+				'trekfederationdeltaffbeta' => '/server/model/ships/ZTrekFederation/TrekFederationDeltaFFBeta.php',
 		    		
 				//Marcin Trek
                 'trekimpulsedrive' => '/server/model/weapons/customTrek.php',
