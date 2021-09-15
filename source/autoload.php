@@ -768,6 +768,7 @@ spl_autoload_register(
                 'rolotha' => '/server/model/ships/minbari/rolotha.php',
                 'romak' => '/server/model/ships/markab/romak.php',
                 'rongoth' => '/server/model/ships/narn/rongoth.php',
+                'roshanthi' => '/server/model/ships/drazi_old/Roshanthi.php',
                 'rothan' => '/server/model/ships/narn/rothan.php',
                 'rutarian' => '/server/model/ships/centauri/rutarian.php',
                 'sagittarius' => '/server/model/ships/EA/sagittarius.php',
