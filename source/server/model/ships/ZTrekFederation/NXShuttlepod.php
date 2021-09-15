@@ -4,7 +4,7 @@ class NXShuttlepod extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 90; //for 6
+        $this->pointCost = 20 *6; //for 6
         $this->faction = "ZTrek Playtest Federation";
         $this->phpclass = "NXShuttlepod";
         $this->shipClass = "Shuttlepod Flight";
