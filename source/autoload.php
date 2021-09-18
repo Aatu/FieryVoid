@@ -2190,6 +2190,7 @@ spl_autoload_register(
 				'gaimrafatorpedo' => '/server/model/ships/gaim/gaimRafaTorpedo.php',
 				'gaimrakalla' => '/server/model/ships/gaim/gaimRakalla.php',
 				'gaimrakar' => '/server/model/ships/gaim/gaimRakar.php',
+                'gaimralla' => '/server/model/ships/gaim/gaimRalla.php',
 				'gaimrassa' => '/server/model/ships/gaim/gaimRassa.php',
 				'gaimroka' => '/server/model/ships/gaim/gaimRoka.php',
 				'gaimreskafighter' => '/server/model/ships/gaim/gaimReskaFighter.php',

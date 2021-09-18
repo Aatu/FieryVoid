@@ -1,20 +1,21 @@
 <?php
-class gaimRoka extends MediumShip{
+class gaimRalla extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 400;
+		$this->pointCost = 425;
 		$this->faction = "Gaim";
-        $this->phpclass = "gaimRoka";
+        $this->phpclass = "gaimRalla";
         $this->imagePath = "img/ships/GaimRoka.png";
-        $this->shipClass = "Roka Auxiliary Cruiser";
+        $this->shipClass = "Ralla Escort Carrier";
+			$this->variantOf = "Roka Auxiliary Cruiser";
+			$this->occurence = "uncommon";
         $this->canvasSize = 100;
 		
-		$this->fighters = array("light"=>6);
+		$this->fighters = array("light"=>12);
 
-
-        $this->isd = 2249;
+        $this->isd = 2251;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
@@ -26,27 +27,27 @@ class gaimRoka extends MediumShip{
         $this->pivotcost = 999;
 		$this->iniativebonus = 0;
 		
-        $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
+        $this->addPrimarySystem(new Reactor(4, 9, 0, 4));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 5));
 		$this->addPrimarySystem(new CnC(4, 9, 0, 0));
         $this->addPrimarySystem(new Hangar(3, 2));
         $this->addPrimarySystem(new Engine(3, 12, 0, 6, 3));
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 3, 3));
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 3, 4));
-		$this->addPrimarySystem(new TwinArray(2, 6, 2, 0, 360));
+		$this->addPrimarySystem(new LightPulse(2, 4, 2, 0, 360));
 		
         $this->addFrontSystem(new Thruster(3, 8, 0, 6, 1));
-        $this->addFrontSystem(new TwinArray(2, 6, 2, 180, 60));
-        $this->addFrontSystem(new TwinArray(2, 6, 2, 300, 180));
-        $this->addFrontSystem(new Hangar(0, 3));
-        $this->addFrontSystem(new Hangar(0, 3));
-		$this->addFrontSystem(new PacketTorpedo(3, 6, 5, 300, 60));
-		$this->addFrontSystem(new PacketTorpedo(3, 6, 5, 300, 60));
+        $this->addFrontSystem(new LightPulse(2, 4, 2, 180, 60));
+        $this->addFrontSystem(new LightPulse(2, 4, 2, 300, 180));
+        $this->addFrontSystem(new Hangar(0, 6));
+        $this->addFrontSystem(new Hangar(0, 6));
+		$this->addFrontSystem(new MediumPulse(3, 6, 3, 300, 60));
+		$this->addFrontSystem(new MediumPulse(3, 6, 3, 300, 60));
 		$this->addFrontSystem(new Bulkhead(0, 3));
 		
         $this->addAftSystem(new Thruster(3, 12, 0, 6, 2));
-        $this->addAftSystem(new TwinArray(2, 6, 2, 120, 360));
-        $this->addAftSystem(new TwinArray(2, 6, 2, 0, 240));
+        $this->addAftSystem(new LightPulse(2, 4, 2, 120, 360));
+        $this->addAftSystem(new LightPulse(2, 4, 2, 0, 240));
 		$this->addAftSystem(new CargoBay(2, 20));
 		$this->addAftSystem(new CargoBay(2, 20));
 		$this->addAftSystem(new Bulkhead(0, 3));
@@ -56,7 +57,7 @@ class gaimRoka extends MediumShip{
         $this->hitChart = array(
         		0=> array(
         				7 => "Thruster",
-						9 => "Twin Array",
+						9 => "Light Pulse Cannon",
 						12 => "Scanner",
 						15 => "Engine",
 						17 => "Hangar",
@@ -65,8 +66,8 @@ class gaimRoka extends MediumShip{
         		),
         		1=> array(
         				3 => "Thruster",
-        				5 => "Packet Torpedo",
-        				7 => "Twin Array",
+        				5 => "Medium Pulse Cannon",
+        				7 => "Light Pulse Cannon",
 						10 => "Hangar",
         				17 => "Structure",
         				20 => "Primary",
@@ -74,7 +75,7 @@ class gaimRoka extends MediumShip{
         		2=> array(
         				3 => "Thruster",
 						7 => "Cargo Bay",
-        				11 => "Twin Array",
+        				11 => "Light Pulse Cannon",
         				17 => "Structure",
         				20 => "Primary",
         		),
