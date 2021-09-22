@@ -1536,10 +1536,10 @@ spl_autoload_register(
 
 
 				//Nexus ships - Craytan
-                'craytancorvette' => '/server/model/ships/ZNexusCraytan/CraytanCorvette.php',					
-                'craytancorvette2089' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2089.php',					
-                'craytancorvette2126' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2126.php',					
-                'craytanhepron' => '/server/model/ships/ZNexusCraytan/CraytanHepron.php',					
+//                'craytancorvette' => '/server/model/ships/ZNexusCraytan/CraytanCorvette.php',					
+//                'craytancorvette2089' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2089.php',					
+//                'craytancorvette2126' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2126.php',					
+//                'craytanhepron' => '/server/model/ships/ZNexusCraytan/CraytanHepron.php',					
 
 
 
