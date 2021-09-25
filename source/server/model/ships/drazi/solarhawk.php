@@ -7,7 +7,7 @@ class Solarhawk extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 525;
 	$this->faction = "Drazi";
         $this->phpclass = "Solarhawk";
-        $this->imagePath = "img/ships/drazi/DraziSunhawk.png";
+        $this->imagePath = "img/ships/drazi/DraziSolarhawk.png";
         $this->shipClass = "Solarhawk Battlecruiser";
         $this->occurence = "rare";
 	    $this->variantOf = "Sunhawk Battlecruiser";
