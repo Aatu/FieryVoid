@@ -64,9 +64,10 @@ class gaimRoka extends MediumShip{
         				20 => "C&C",
         		),
         		1=> array(
-        				4 => "Thruster",
-        				7 => "Packet Torpedo",
-        				9 => "Twin Array",
+        				3 => "Thruster",
+        				5 => "Packet Torpedo",
+        				7 => "Twin Array",
+						10 => "Hangar",
         				17 => "Structure",
         				20 => "Primary",
         		),

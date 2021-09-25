@@ -12,7 +12,7 @@ class CraytanCorvette2126 extends MediumShip{
 			$this->variantOf = "Corvette";
 			$this->occurence = "common";
 		$this->unofficial = true;
-        $this->canvasSize = 75;
+        $this->canvasSize = 60;
         $this->agile = true;
 	    $this->isd = 2126;
         

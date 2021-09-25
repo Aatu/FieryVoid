@@ -768,6 +768,7 @@ spl_autoload_register(
                 'rolotha' => '/server/model/ships/minbari/rolotha.php',
                 'romak' => '/server/model/ships/markab/romak.php',
                 'rongoth' => '/server/model/ships/narn/rongoth.php',
+                'roshanthi' => '/server/model/ships/drazi_old/Roshanthi.php',
                 'rothan' => '/server/model/ships/narn/rothan.php',
                 'rutarian' => '/server/model/ships/centauri/rutarian.php',
                 'sagittarius' => '/server/model/ships/EA/sagittarius.php',
@@ -1420,8 +1421,10 @@ spl_autoload_register(
 				
 		//Nexus weapons
 			//Nexus matter weapons
+				'nexusacids' => '/server/model/weapons/customNexus.php',
 				'nexusautocannon' => '/server/model/weapons/customNexus.php',
 				'nexusautocannonftr' => '/server/model/weapons/customNexus.php',
+				'nexuscids' => '/server/model/weapons/customNexus.php',
 				'nexuscoilgun' => '/server/model/weapons/customNexus.php',
 				'nexusheavyautocannon' => '/server/model/weapons/customNexus.php',
 				'nexusmedautocannon' => '/server/model/weapons/customNexus.php',
@@ -1441,6 +1444,7 @@ spl_autoload_register(
 				'nexusdefensepulsar' => '/server/model/weapons/customNexus.php', 
 				'nexusfighterarray' => '/server/model/weapons/customNexus.php', 
 				'nexusheavyparticlearray' => '/server/model/weapons/customNexus.php',
+				'nexuslightassaultcannon' => '/server/model/weapons/customNexus.php', 
 				'nexusmauler' => '/server/model/weapons/customNexus.php', 
 				'nexusparticleagitator' => '/server/model/weapons/customNexus.php', 
 				'nexusprojectorarray' => '/server/model/weapons/customNexus.php',
@@ -1535,6 +1539,7 @@ spl_autoload_register(
 //                'craytancorvette' => '/server/model/ships/ZNexusCraytan/CraytanCorvette.php',					
 //                'craytancorvette2089' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2089.php',					
 //                'craytancorvette2126' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2126.php',					
+//                'craytanhepron' => '/server/model/ships/ZNexusCraytan/CraytanHepron.php',					
 
 
 
@@ -2189,6 +2194,7 @@ spl_autoload_register(
 				'gaimrafatorpedo' => '/server/model/ships/gaim/gaimRafaTorpedo.php',
 				'gaimrakalla' => '/server/model/ships/gaim/gaimRakalla.php',
 				'gaimrakar' => '/server/model/ships/gaim/gaimRakar.php',
+                'gaimralla' => '/server/model/ships/gaim/gaimRalla.php',
 				'gaimrassa' => '/server/model/ships/gaim/gaimRassa.php',
 				'gaimroka' => '/server/model/ships/gaim/gaimRoka.php',
 				'gaimreskafighter' => '/server/model/ships/gaim/gaimReskaFighter.php',

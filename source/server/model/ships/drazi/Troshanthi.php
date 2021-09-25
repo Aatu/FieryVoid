@@ -8,7 +8,7 @@ class Troshanthi extends FighterFlight{
 		    $this->faction = "Drazi";
         $this->phpclass = "Troshanthi";
         $this->shipClass = "Troshanthi Assault Shuttles";
-		    $this->imagePath = "img/ships/DraziTroshanthi.png";
+		    $this->imagePath = "img/ships/drazi/DraziTroshanthi.png";
         
         $this->forwardDefense = 7;
         $this->sideDefense = 9;
@@ -32,10 +32,10 @@ class Troshanthi extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
 			
 			$armour = array(3, 3, 3, 3);
-			$fighter = new Fighter("Drolla", $armour, 10, $this->id);
-			$fighter->displayName = "Drolla";
-			$fighter->imagePath = "img/ships/DraziTroshanthi.png";
-			$fighter->iconPath = "img/ships/DraziTroshanthi_large.png";
+			$fighter = new Fighter("Troshanthi", $armour, 10, $this->id);
+			$fighter->displayName = "Troshanthi";
+			$fighter->imagePath = "img/ships/drazi/DraziTroshanthi.png";
+			$fighter->iconPath = "img/ships/drazi/DraziTroshanthi_large.png";
 			
 			
 			$fighter->addFrontSystem(new PairedParticleGun(330, 30, 2, 1)); //1 gun d6+2
