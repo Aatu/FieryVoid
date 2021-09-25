@@ -1,15 +1,18 @@
 <?php
-class TrekFederationConstitutionCL extends HeavyCombatVessel{
+class TrekFederationConstitutionCmdCL extends HeavyCombatVessel{
 	
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 500;
+	$this->pointCost = 525;
 	$this->faction = "ZTrek Playtest Federation";
-        $this->phpclass = "TrekFederationConstitutionCL";
+        $this->phpclass = "TrekFederationConstitutionCmdCL";
         $this->imagePath = "img/ships/StarTrek/Constitution.png";
-        $this->shipClass = "Constitution Light Cruiser";
+        $this->shipClass = "Constitution Command Light Cruiser";
 
+			$this->occurence = "rare";
+			$this->variantOf = "Constitution Light Cruiser";
+			
 	$this->unofficial = true;
 	    $this->isd = 'please fill!';
 
@@ -25,14 +28,14 @@ class TrekFederationConstitutionCL extends HeavyCombatVessel{
         $this->accelcost = 2;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-	$this->iniativebonus = 6 *5; 
+	$this->iniativebonus = 8 *5; 
 		
 	$this->addPrimarySystem(new CnC(4, 10, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 6, 6));
 	$this->addPrimarySystem(new Hangar(3, 6, 6));
 
-	$impulseDrive = new TrekImpulseDrive(4,24,0,0,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
+	$impulseDrive = new TrekImpulseDrive(4,26,0,0,4); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 		
   
 	$projection = new TrekShieldProjection(2, 24, 6, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
@@ -45,9 +48,8 @@ class TrekFederationConstitutionCL extends HeavyCombatVessel{
 	$this->addFrontSystem($projection);
 	$this->addFrontSystem(new TrekPhotonTorp(3, 0, 0, 270, 90));
         $this->addFrontSystem(new TrekPhotonTorp(3, 0, 0, 270, 90));
-	$this->addFrontSystem(new TrekPhaser(3, 0, 0, 240, 60));
-	$this->addFrontSystem(new TrekPhaser(3, 0, 0, 270, 90));
-	$this->addFrontSystem(new TrekPhaser(3, 0, 0, 300, 120));
+	$this->addFrontSystem(new TrekPhaserHeavy(3, 0, 0, 270, 30));
+	$this->addFrontSystem(new TrekPhaserHeavy(3, 0, 0, 330, 90));
 	$this->addFrontSystem(new SWTractorBeam(2,0,360,1));
 
 	$warpNacelle = new TrekWarpDrive(4, 24, 0, 4); //armor, structure, power usage, impulse output
@@ -94,7 +96,7 @@ class TrekFederationConstitutionCL extends HeavyCombatVessel{
             1=> array(
 				1 => "Shield Projector",
 				5 => "Photon Torpedo",
-				9 => "Phaser",
+				9 => "Heavy Phaser",
 				10 => "Tractor Beam",
 				18 => "Structure",
 				20 => "Primary",

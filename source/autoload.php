@@ -2247,8 +2247,11 @@ spl_autoload_register(
 				//Star Trek conversions
 				//weapons
 				'trekphasecannon' => '/server/model/weapons/customTrek.php',
-				'trekphotonictorp' => '/server/model/weapons/customTrek.php',
 				'trekspatialtorp' => '/server/model/weapons/customTrek.php',
+				'trekphotonictorp' => '/server/model/weapons/customTrek.php',
+				'trekphotontorp' => '/server/model/weapons/customTrek.php',
+				'trekphaser' => '/server/model/weapons/customTrek.php',
+				'trekphaserheavy' => '/server/model/weapons/customTrek.php',
 				
 				//systems
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php',
@@ -2263,6 +2266,7 @@ spl_autoload_register(
 				
 				'trekfederationnxcruiserv2' => '/server/model/ships/ZTrekFederation/TrekFederationNXCruiserV2.php',
 				'trekfederationconstitutioncl' => '/server/model/ships/ZTrekFederation/TrekFederationConstitutionCL.php',
+				'trekfederationconstitutioncmdcl' => '/server/model/ships/ZTrekFederation/TrekFederationConstitutionCmdCL.php',
 				'trekfederationnxwarcruiser' => '/server/model/ships/ZTrekFederation/TrekFederationNXWarCruiser.php',
 				'trekfederationnxwarcruiserupg' => '/server/model/ships/ZTrekFederation/TrekFederationNXWarCruiserUpg.php',
 				'trekfederationintrepid' => '/server/model/ships/ZTrekFederation/TrekFederationIntrepid.php',

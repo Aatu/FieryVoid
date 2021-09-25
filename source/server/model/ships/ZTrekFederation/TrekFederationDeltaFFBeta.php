@@ -37,9 +37,15 @@ class TrekFederationDeltaFFBeta extends LCV{
 		$this->addPrimarySystem($sensors);
 	$impulseDrive = new TrekImpulseDrive(3,10,0,0,2);
 
+/*
 		$polarizedhullplating = new AbsorbtionShield(2,4,2,1,0,360);  //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 		$polarizedhullplating->displayName = "Polarized Hull Plating";
 		$this->addPrimarySystem($polarizedhullplating);
+	*/		
+		$projection = new TrekShieldProjection(1, 8, 3, 0, 360, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$projection->displayName = "Polarized Hull Plating";
+		$this->addPrimarySystem($projection);
+		
 		$this->addFrontSystem(new TrekPhaseCannon(3, 6, 4, 180, 30));
 		$this->addFrontSystem(new TrekPhaseCannon(3, 6, 4, 330, 180));
 
