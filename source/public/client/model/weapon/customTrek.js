@@ -46,3 +46,21 @@ TrekShieldProjector.prototype.hasMaxBoost = function () {
 TrekShieldProjector.prototype.getMaxBoost = function () {
     return this.maxBoostLevel;
 };
+
+var TrekPhotonTorp = function TrekPhotonTorp(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekPhotonTorp.prototype = Object.create(Weapon.prototype);
+TrekPhotonTorp.prototype.constructor = TrekPhotonTorp;
+
+var TrekPhaser = function TrekPhaser(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekPhaser.prototype = Object.create(Weapon.prototype);
+TrekPhaser.prototype.constructor = TrekPhaser;
+
+var TrekPhaserLance = function TrekPhaserLance(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekPhaserLance.prototype = Object.create(Weapon.prototype);
+TrekPhaserLance.prototype.constructor = TrekPhaserLance;

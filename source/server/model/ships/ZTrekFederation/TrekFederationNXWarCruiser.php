@@ -29,7 +29,7 @@ class TrekFederationNXWarCruiser extends MediumShip{
         $this->pivotcost = 2;
         $this->iniativebonus = 60;
 
-        $this->addPrimarySystem(new Reactor(3, 12, 0, 6));
+        $this->addPrimarySystem(new Reactor(3, 12, 0, 4));
         $this->addPrimarySystem(new CnC(3, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 9, 4, 4));
         $this->addPrimarySystem(new Hangar(3, 2));

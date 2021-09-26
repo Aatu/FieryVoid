@@ -279,108 +279,105 @@ class TrekPhaser extends Raking{
 
 
 
-class TrekPhaserHeavy extends Raking{
-		public $name = "TrekPhaserHeavy";
-        public $displayName = "Heavy Phaser";
+class TrekPhaserLance extends Raking{
+		public $name = "TrekPhaserLance";
+        public $displayName = "Phaser Lance";
         public $iconPath = "HeavyLaser.png"; //Laser icon - just so it's clear it needs to be changed!
         public $animation = "laser";
         public $animationColor = array(225, 0, 0);
-		public $animationExplosionScale = 0.4;
+		public $animationExplosionScale = 0.3;
 		public $animationWidth = 4;
 		public $animationWidth2 = 0.3;
 
         public $raking = 10;
         
         public $intercept = 2;
-		public $priority = 7; //heavy Raking		
+		public $priority = 8; //light Raking		
 		
-        public $loadingtime = 1;
-		public $normalload = 3;
+        public $loadingtime = 2;
 		
-        public $rangePenalty = 0.33;
-        public $fireControl = array(1, 3, 4);
+        public $rangePenaltyArray = array(1=>0.33, 2=>0.5);
+        public $fireControlArray = array( 1=>array(0, 4, 4), 2=>array(3, 3, 3) ); 
+	
 
         public $damageType = "Raking";
+		public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); 
 		public $weaponClass = "Particle";
-		public $firingModes = array( 1 => "Raking");
+		public $weaponClassArray = array(1=>'Particle', 2=>'Particle');
+		public $firingModes = array( 1 => "Lance", 2=> "Dual Phasers");
+		public $firingMode = 1;
+		
+		
 
 	 	public function getInterceptRating($turn){
 			return 2;
 		}
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
-			if ( $maxhealth == 0 ) $maxhealth = 9;
-			if ( $powerReq == 0 ) $powerReq = 7;
+			if ( $maxhealth == 0 ) $maxhealth = 10;
+			if ( $powerReq == 0 ) $powerReq = 8;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
         public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);   
-		if (!isset($this->data["Special"])) {
-			$this->data["Special"] = '';
-		}else{
-			$this->data["Special"] .= '<br>';
-		}
-			$this->data["Special"] .= "Can fire accelerated ROF for less damage:";  
-			$this->data["Special"] .= "<br> - 1 turn: 1d10+2"; 
-			$this->data["Special"] .= "<br> - 2 turns: 2d10+14"; 
-			$this->data["Special"] .= "<br> - 3 turns: 4d10+14"; 
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Can fire as either:";  
+			$this->data["Special"] .= "<br> - Phaser Lance: single shot, improved range, damage and antiship FC"; 
+			$this->data["Special"] .= "<br> - Dual Phasers: two regular Phaser shots."; 
+			$this->data["Special"] .= "<br>Cannot fire accelerated."; 
 		}
 	
 		public function getDamage($fireOrder){
-        	switch($this->turnsloaded){
-            	case 0:
-            	case 1:
-                	return Dice::d(10)+4;
-			    	break;
-            	case 2:
-                	return Dice::d(10,2)+14;
-			    	break;
-            	default:
-                	return Dice::d(10,4)+14;
-			    	break;
-        	}
+			switch($this->firingMode){
+				case 1:
+					return Dice::d(10, 3)+14; //Phaser Lance
+					break;
+				case 2:
+					return Dice::d(10, 2)+14; //Phaser
+					break;	
+			}
 		}
 
  		public function setMinDamage(){
-            switch($this->turnsloaded){
-                case 1:
-                    $this->minDamage = 3 ;
-                    break;
-                case 2:
-                    $this->minDamage = 16 ;  
-                    break;
-                default:
-                    $this->minDamage = 18 ;  
-                    break;
-            }
+			switch($this->firingMode){
+				case 1:
+					$this->minDamage = 17; //Phaser Lance
+					break;
+				case 2:
+					$this->minDamage = 16; //Phaser
+					break;	
+			}
 		}
              
         public function setMaxDamage(){
-            switch($this->turnsloaded){
-                case 1:
-                    $this->minDamage = 12 ;
-                    break;
-                case 2:
-                    $this->minDamage = 34 ;  
-                    break;
-                default:
-                    $this->minDamage = 54 ;  
-                    break;
-            }
+			switch($this->firingMode){
+				case 1:
+					$this->maxDamage = 44; //Phaser Lance
+					break;
+				case 2:
+					$this->maxDamage = 34; //Phaser
+					break;	
+			}
 		}
 
 		public function stripForJson(){
 			$strippedSystem = parent::stripForJson();
+			/* no need to override - no Accelerator option
 			$strippedSystem->data = $this->data;
 			$strippedSystem->minDamage = $this->minDamage;
 			$strippedSystem->minDamageArray = $this->minDamageArray;
 			$strippedSystem->maxDamage = $this->maxDamage;
 			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			*/
 			return $strippedSystem;
 		}
 
-}//end of class TrekPhaserHeavy
+}//end of class TrekPhaserLance
 
 
 

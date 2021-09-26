@@ -2251,7 +2251,7 @@ spl_autoload_register(
 				'trekphotonictorp' => '/server/model/weapons/customTrek.php',
 				'trekphotontorp' => '/server/model/weapons/customTrek.php',
 				'trekphaser' => '/server/model/weapons/customTrek.php',
-				'trekphaserheavy' => '/server/model/weapons/customTrek.php',
+				'trekphaserlance' => '/server/model/weapons/customTrek.php',
 				
 				//systems
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php',

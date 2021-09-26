@@ -37,7 +37,7 @@ class TrekFederationIntrepid extends MediumShip{
 		$polarizedhullplating->displayName = "Polarized Hull Plating";
 		$this->addFrontSystem($polarizedhullplating);
 	*/	
-		$projection = new TrekShieldProjection(1, 8, 3, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+		$projection = new TrekShieldProjection(1, 6, 3, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projection->displayName = "Polarized Hull Plating";
 		$this->addFrontSystem($projection);
 		
@@ -56,7 +56,7 @@ class TrekFederationIntrepid extends MediumShip{
 			$polarizedhullplating->displayName = "Polarized Hull Plating";
 			$this->addAftSystem($polarizedhullplating);
 			*/			
-		$projection = new TrekShieldProjection(1, 8, 3, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+		$projection = new TrekShieldProjection(1, 6, 3, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projection->displayName = "Polarized Hull Plating";
 		$this->addAftSystem($projection);
 		

@@ -29,7 +29,7 @@ class TrekFederationNXCruiserV2 extends MediumShip{
 		
 		
 
-        $this->addPrimarySystem(new Reactor(3, 10, 0, 3));
+        $this->addPrimarySystem(new Reactor(3, 10, 0, 1));
         $this->addPrimarySystem(new CnC(3, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 9, 4, 4));
         $this->addPrimarySystem(new Hangar(3, 2, 2));
@@ -43,7 +43,7 @@ class TrekFederationNXCruiserV2 extends MediumShip{
 			$polarizedhullplating->displayName = "Polarized Hull Plating";
 			$this->addFrontSystem($polarizedhullplating);
 			*/			
-		$projection = new TrekShieldProjection(1, 8, 3, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+		$projection = new TrekShieldProjection(1, 6, 3, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projection->displayName = "Polarized Hull Plating";
 		$this->addFrontSystem($projection);
 		
@@ -69,7 +69,7 @@ class TrekFederationNXCruiserV2 extends MediumShip{
 		$polarizedhullplating = new AbsorbtionShield(2,4,3,1,90,270);  //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 			$polarizedhullplating->displayName = "Polarized Hull Plating";
 			$this->addAftSystem($polarizedhullplating);*/
-		$projection = new TrekShieldProjection(1, 8, 3, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+		$projection = new TrekShieldProjection(1, 6, 3, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projection->displayName = "Polarized Hull Plating";
 		$this->addAftSystem($projection);
 

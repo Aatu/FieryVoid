@@ -28,7 +28,7 @@ class TrekFederationDeltaFFAlpha extends LCV{
 
 
 
-	$this->addPrimarySystem(new Reactor(3, 9, 0, 2));
+	$this->addPrimarySystem(new Reactor(3, 9, 0, 0));
 	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
 	    	$sensors = new Scanner(3, 12, 4, 2);
 		$sensors->markLCV(); 
@@ -40,7 +40,7 @@ class TrekFederationDeltaFFAlpha extends LCV{
 		$polarizedhullplating->displayName = "Polarized Hull Plating";
 		$this->addPrimarySystem($polarizedhullplating);
 		*/
-		$projection = new TrekShieldProjection(1, 8, 3, 0, 360, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+		$projection = new TrekShieldProjection(1, 6, 3, 0, 360, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projection->displayName = "Polarized Hull Plating";
 		$this->addPrimarySystem($projection);
 		

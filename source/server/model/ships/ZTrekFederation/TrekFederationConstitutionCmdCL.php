@@ -48,8 +48,8 @@ class TrekFederationConstitutionCmdCL extends HeavyCombatVessel{
 	$this->addFrontSystem($projection);
 	$this->addFrontSystem(new TrekPhotonTorp(3, 0, 0, 270, 90));
         $this->addFrontSystem(new TrekPhotonTorp(3, 0, 0, 270, 90));
-	$this->addFrontSystem(new TrekPhaserHeavy(3, 0, 0, 270, 30));
-	$this->addFrontSystem(new TrekPhaserHeavy(3, 0, 0, 330, 90));
+	$this->addFrontSystem(new TrekPhaserLance(3, 0, 0, 270, 30));
+	$this->addFrontSystem(new TrekPhaserLance(3, 0, 0, 330, 90));
 	$this->addFrontSystem(new SWTractorBeam(2,0,360,1));
 
 	$warpNacelle = new TrekWarpDrive(4, 24, 0, 4); //armor, structure, power usage, impulse output
@@ -96,7 +96,7 @@ class TrekFederationConstitutionCmdCL extends HeavyCombatVessel{
             1=> array(
 				1 => "Shield Projector",
 				5 => "Photon Torpedo",
-				9 => "Heavy Phaser",
+				9 => "Phaser Lance",
 				10 => "Tractor Beam",
 				18 => "Structure",
 				20 => "Primary",
