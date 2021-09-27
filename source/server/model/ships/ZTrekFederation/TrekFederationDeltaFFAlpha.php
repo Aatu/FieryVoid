@@ -24,28 +24,35 @@ class TrekFederationDeltaFFAlpha extends LCV{
         $this->rollcost = 1;
         $this->pivotcost = 1;
         $this->iniativebonus = 70;
+		$this->hangarRequired = ''; //no hangar required!
 
 
 
-	$this->addPrimarySystem(new Reactor(3, 9, 0, 2));
+	$this->addPrimarySystem(new Reactor(3, 9, 0, 0));
 	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
 	    	$sensors = new Scanner(3, 12, 4, 2);
 		$sensors->markLCV(); 
 		$this->addPrimarySystem($sensors);
 	$impulseDrive = new TrekImpulseDrive(3,10,0,0,2);
 
+		/*
 		$polarizedhullplating = new AbsorbtionShield(2,4,2,1,0,360);  //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 		$polarizedhullplating->displayName = "Polarized Hull Plating";
 		$this->addPrimarySystem($polarizedhullplating);
-      		$this->addPrimarySystem(new TrekSpatialTorp(2, 6, 1, 300, 60));
-        	$this->addPrimarySystem(new TrekSpatialTorp(2, 6, 1, 300, 60));
+		*/
+		$projection = new TrekShieldProjection(1, 6, 3, 0, 360, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$projection->displayName = "Polarized Hull Plating";
+		$this->addPrimarySystem($projection);
+		
+      		$this->addFrontSystem(new TrekSpatialTorp(2, 6, 1, 300, 60));
+        	$this->addFrontSystem(new TrekSpatialTorp(2, 6, 1, 300, 60));
 
 		$warpNacelle = new TrekWarpDrive(2, 10, 2, 3); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
-		$this->addPrimarySystem($warpNacelle);
+		$this->addAftSystem($warpNacelle);
 		$warpNacelle = new TrekWarpDrive(2, 10, 2, 3); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
-		$this->addPrimarySystem($warpNacelle);
+		$this->addAftSystem($warpNacelle);
 
 
 	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
@@ -62,8 +69,8 @@ class TrekFederationDeltaFFAlpha extends LCV{
 		0=> array(
 			1 => "Polarized Hull Plating",
 			10 => "Structure",
-			13 => "Spatial Torpedo",
-			17 => "Nacelle",
+			13 => "1:Spatial Torpedo",
+			17 => "2:Nacelle",
 			18 => "Engine",
 			19 => "Reactor",
 			20 => "Scanner",
@@ -72,8 +79,8 @@ class TrekFederationDeltaFFAlpha extends LCV{
 		1=> array(
 			1 => "0:Polarized Hull Plating",
 			10 => "Structure",
-			14 => "0:Spatial Torpedo",
-			17 => "0:Nacelle",
+			14 => "1:Spatial Torpedo",
+			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
 			20 => "0:Scanner",
@@ -82,8 +89,8 @@ class TrekFederationDeltaFFAlpha extends LCV{
 		2=> array(
 			1 => "0:Polarized Hull Plating",
 			10 => "Structure",
-			12 => "0:Spatial Torpedo",
-			17 => "0:Nacelle",
+			12 => "1:Spatial Torpedo",
+			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
 			20 => "0:Scanner",
