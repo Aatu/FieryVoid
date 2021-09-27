@@ -68,7 +68,10 @@ if (isset($_SESSION["user"])) {
 	    <br><b>New early versions for WotCR-era Abbai and Drazi</b> - courtesy of Daniel
 	    <br><b>New graphics for the modern Drazi ships</b> - courtesy of Lunara - <i>rejoice Greens and Purples, for Your ships look Drazi again!</i>
 	    <br><b>Firing routines modified</b> - in-arc systems are prioritized to be hit (eg. off-arc weapon can't be hit if in-arc one is available)
-
+		---------- <b>end-of-month update</b> ----------
+	    <br><b>SCS compliance check</b> - Geoffrey ran a wide details check and corrected things like structure block sizes!
+	    <br><b>Drazi variant graphics</b> - courtesy of Lunara
+	    <br><b>Disruption EW fixed</b> - range limited to 30 hexes (previously: 50)
 
 		
 	    
