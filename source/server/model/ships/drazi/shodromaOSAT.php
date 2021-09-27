@@ -7,7 +7,7 @@ class ShodromaOSAT extends OSAT{
 		$this->pointCost = 300;
 		$this->faction = "Drazi";
         $this->phpclass = "shodromaosat";
-        $this->imagePath = "img/ships/dudroma.png";
+        $this->imagePath = "img/ships/drazi/DraziShodroma.png";
         $this->shipClass = 'Shodroma Armed Satellite';
 	    $this->isd = 2226;
         

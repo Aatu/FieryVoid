@@ -4,8 +4,8 @@ class cidikar extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 800;
-	$this->faction = "Brakiri";
+		$this->pointCost = 800;
+		$this->faction = "Brakiri";
         $this->phpclass = "cidikar";
         $this->imagePath = "img/ships/Cidikar.png";
         $this->shipClass = "Cidikar Heavy Carrier";
@@ -13,15 +13,12 @@ class cidikar extends BaseShip{
         $this->fighters = array("heavy"=>24, "light"=>24);
 
         $this->limited = 10; //only 3 exist
-
         
 		$this->notes = 'Ly-Nakir Industries';//Corporation producing the design
 		$this->isd = 2246;
 		
         $this->forwardDefense = 17;
         $this->sideDefense = 19;
-        
-
 
         $this->turncost = 1;
         $this->turndelaycost = 0.66;
@@ -35,42 +32,38 @@ class cidikar extends BaseShip{
         $this->addPrimarySystem(new CnC(8, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 18, 8, 8));
         $this->addPrimarySystem(new Engine(5, 18, 0, 15, 4));
-	$this->addPrimarySystem(new ShieldGenerator(5, 16, 5, 4));
-        $this->addPrimarySystem(new JumpEngine(4, 16, 4, 24));
-	$this->addPrimarySystem(new Hangar(5, 26, 12));
-   
+		$this->addPrimarySystem(new ShieldGenerator(5, 16, 5, 4));
+		$this->addPrimarySystem(new JumpEngine(4, 16, 4, 24));
+		$this->addPrimarySystem(new Hangar(5, 26, 12));
 
-	$this->addFrontSystem(new GraviticShield(0, 6, 0, 2, 300, 0));
+		$this->addFrontSystem(new GraviticShield(0, 6, 0, 2, 300, 0));
         $this->addFrontSystem(new GravitonPulsar(4, 5, 2, 300, 60));
         $this->addFrontSystem(new GravitonPulsar(4, 5, 2, 300, 60));
-	$this->addFrontSystem(new GraviticShield(0, 6, 0, 2, 0, 60));
+		$this->addFrontSystem(new GraviticShield(0, 6, 0, 2, 0, 60));
         $this->addFrontSystem(new GraviticThruster(4, 10, 0, 4, 1));
         $this->addFrontSystem(new GraviticThruster(4, 10, 0, 4, 1));
    
-	$this->addAftSystem(new GraviticShield(0, 6, 0, 2, 180, 240));
-	$this->addAftSystem(new GraviticShield(0, 6, 0, 2, 120, 180));
+		$this->addAftSystem(new GraviticShield(0, 6, 0, 2, 180, 240));
+		$this->addAftSystem(new GraviticShield(0, 6, 0, 2, 120, 180));
         $this->addAftSystem(new GraviticThruster(4, 12, 0, 5, 2));
         $this->addAftSystem(new GraviticThruster(4, 12, 0, 5, 2));
-	$this->addAftSystem(new GraviticThruster(4, 12, 0, 5, 2));
+		$this->addAftSystem(new GraviticThruster(4, 12, 0, 5, 2));
 
-
-	$this->addLeftSystem(new GravitonPulsar(3, 5, 2, 180, 0));
-	$this->addLeftSystem(new GravitonPulsar(3, 5, 2, 180, 0));
-	$this->addLeftSystem(new GravitonPulsar(3, 5, 2, 180, 0));
-	$this->addLeftSystem(new HeavyLaser(4, 8, 6, 240, 0));
-	$this->addLeftSystem(new GraviticShield(0, 6, 0, 2, 240, 300));
-	$this->addLeftSystem(new Hangar(5, 12));
+		$this->addLeftSystem(new GravitonPulsar(3, 5, 2, 180, 0));
+		$this->addLeftSystem(new GravitonPulsar(3, 5, 2, 180, 0));
+		$this->addLeftSystem(new GravitonPulsar(3, 5, 2, 180, 0));
+		$this->addLeftSystem(new HeavyLaser(4, 8, 6, 240, 0));
+		$this->addLeftSystem(new GraviticShield(0, 6, 0, 2, 240, 300));
+		$this->addLeftSystem(new Hangar(5, 12));
         $this->addLeftSystem(new GraviticThruster(5, 20, 0, 8, 3));
-
         
-	$this->addRightSystem(new GravitonPulsar(3, 5, 2, 0, 180));
-	$this->addRightSystem(new GravitonPulsar(3, 5, 2, 0, 180));
-	$this->addRightSystem(new GravitonPulsar(3, 5, 2, 0, 180));
-	$this->addRightSystem(new HeavyLaser(4, 8, 6, 0, 120));
-	$this->addRightSystem(new GraviticShield(0, 6, 0, 2, 60, 120));
-	$this->addRightSystem(new Hangar(5, 12));
+		$this->addRightSystem(new GravitonPulsar(3, 5, 2, 0, 180));
+		$this->addRightSystem(new GravitonPulsar(3, 5, 2, 0, 180));
+		$this->addRightSystem(new GravitonPulsar(3, 5, 2, 0, 180));
+		$this->addRightSystem(new HeavyLaser(4, 8, 6, 0, 120));
+		$this->addRightSystem(new GraviticShield(0, 6, 0, 2, 60, 120));
+		$this->addRightSystem(new Hangar(5, 12));
         $this->addRightSystem(new GraviticThruster(5, 20, 0, 8, 4));
-
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(5, 50));

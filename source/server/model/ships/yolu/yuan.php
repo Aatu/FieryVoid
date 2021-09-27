@@ -31,7 +31,7 @@ class Yuan extends BaseShip{
         $this->addPrimarySystem(new Engine(7, 30, 0, 16, 6));
         $this->addPrimarySystem(new Hangar(6, 16));
 
-    //    $this->addFrontSystem(new JumpEngine(6, 25, 6, 18));
+        $this->addFrontSystem(new JumpEngine(6, 25, 6, 18));
         $this->addFrontSystem(new GraviticThruster(5, 28, 0, 10, 1));
         $this->addFrontSystem(new FusionCannon(4, 8, 1, 240, 60));
         $this->addFrontSystem(new FusionCannon(4, 8, 1, 240, 60));

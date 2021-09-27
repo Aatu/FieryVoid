@@ -45,7 +45,7 @@ class gaimHadros extends MediumShip{
         $this->addAftSystem(new TwinArray(2, 6, 2, 0, 240));
 		$this->addAftSystem(new Bulkhead(0, 2));
        
-        $this->addPrimarySystem(new Structure( 4, 52));
+        $this->addPrimarySystem(new Structure( 4, 33));
         
         $this->hitChart = array(
         		0=> array(

@@ -7,7 +7,7 @@ class Eyehawk extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 600;
 	$this->faction = "Drazi";
         $this->phpclass = "Eyehawk";
-        $this->imagePath = "img/ships/drazi/DraziSunhawk.png";
+        $this->imagePath = "img/ships/drazi/DraziEyehawk.png";
         $this->shipClass = "Eyehawk Scout Cruiser";
         $this->occurence = "rare";
 	    $this->variantOf = "Sunhawk Battlecruiser";
