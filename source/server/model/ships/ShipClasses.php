@@ -35,7 +35,8 @@ class BaseShip {
     public $smallBase = false;
 	public $nonRotating = false; //some bases do not rotate - this attribute is used in combination with $base or $smallBase
 	public $osat = false; //true if object is OSAT (this includes MicroSATs and mines)
-    public $SixSidedShip = false;	
+    public $SixSidedShip = false;
+    public $VreeHitLocations = false; //Value to indicate that all gunfire from the same ship may not hit same side on Vree capital ships	
 	
     public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for all systems)
 
@@ -2307,6 +2308,7 @@ class VorlonCapitalShip extends SixSidedShip{
 
 class VreeCapital extends SixSidedShip{
 
+    public $VreeHitLocations = true; //Value to indicate that all gunfire from the same ship may not hit same side on Vree capital ships
     
     public function getLocations(){
         //debug::log("getLocations");         
