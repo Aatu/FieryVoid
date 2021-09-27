@@ -186,7 +186,7 @@ class TrekPhaseCannon extends Raking{
 class TrekPhaser extends Raking{
 		public $name = "TrekPhaser";
         public $displayName = "Phaser";
-        public $iconPath = "MediumLaser.png"; //Laser icon - just so it's clear it needs to be changed!
+        public $iconPath = "mediumLaser.png"; //Laser icon - just so it's clear it needs to be changed!
         public $animation = "laser";
         public $animationColor = array(225, 0, 0);
 		public $animationExplosionScale = 0.3;
@@ -282,7 +282,7 @@ class TrekPhaser extends Raking{
 class TrekPhaserLance extends Raking{
 		public $name = "TrekPhaserLance";
         public $displayName = "Phaser Lance";
-        public $iconPath = "HeavyLaser.png"; //Laser icon - just so it's clear it needs to be changed!
+        public $iconPath = "heavyLaser.png"; //Laser icon - just so it's clear it needs to be changed!
         public $animation = "laser";
         public $animationColor = array(225, 0, 0);
 		public $animationExplosionScale = 0.3;
