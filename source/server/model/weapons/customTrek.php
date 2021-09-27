@@ -553,7 +553,8 @@ class TrekPhotonTorp extends Torpedo{
 /* Star Trek shield projection
  note this is NOT a shield as far as FV recognizes it!
 */
-class TrekShieldProjection extends ShipSystem{
+//class TrekShieldProjection extends ShipSystem{
+class TrekShieldProjection extends Shield implements DefensiveSystem { //defensive values of zero, but still formally there to display arcs!
     public $name = "TrekShieldProjection";
     public $displayName = "Shield Projection";
     public $primary = true;
@@ -571,13 +572,26 @@ class TrekShieldProjection extends ShipSystem{
     
     function __construct($armor, $maxhealth, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$this->iconPath = 'TrekShieldProjection' . $side . '.png';
-		parent::__construct($armor, $maxhealth, 0, $rating);
-		
+		//parent::__construct($armor, $maxhealth, 0, $rating);
+		parent::__construct($armor, $maxhealth, 0, $rating, $startArc, $endArc);
+		/*
         $this->startArc = (int)$startArc;
         $this->endArc = (int)$endArc;
+		*/
 		
 		$this->output=$rating;//output is displayed anyway, make it show something useful... in this case - number of points absorbed per hit
 	}
+	
+	
+    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
+            return 0;
+    }
+	public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){ //no shield-like damage reduction
+		return 0;
+	}
+    private function checkIsFighterUnderShield($target, $shooter){ //no flying under shield
+        return false;
+    }
 	
 
 	public function setSystemDataWindow($turn){
@@ -716,7 +730,8 @@ class TrekShieldProjection extends ShipSystem{
  reinforces shield projection (and prevents it from falling)
  actual reinforcing (and falling) is done from Projection's own end, Projector just is (needs to be plugged into appropriate projection at design stage
 */
-class TrekShieldProjector extends ShipSystem{
+//class TrekShieldProjector extends ShipSystem{
+class TrekShieldProjector  extends Shield implements DefensiveSystem { //defensive values of zero, but still formally there to display arcs!
     public $name = "TrekShieldProjector";
     public $displayName = "Shield Projector";
 	public $isPrimaryTargetable = true; //projector can be targeted even on PRIMARY, like a weapon!
@@ -735,20 +750,29 @@ class TrekShieldProjector extends ShipSystem{
     
     function __construct($armor, $maxhealth, $power, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$this->iconPath = 'TrekShieldProjector' . $side . '.png';
-		parent::__construct($armor, $maxhealth, $power, $rating);
-		
-        $this->startArc = (int)$startArc;
-        $this->endArc = (int)$endArc;
+		//parent::__construct($armor, $maxhealth, $power, $rating);
+		parent::__construct($armor, $maxhealth, $power, $rating, $startArc, $endArc);
+        //$this->startArc = (int)$startArc;
+        //$this->endArc = (int)$endArc;
 		$this->baseOutput = $rating;
 		$this->maxBoostLevel = $rating; //maximum double effect		
 	}
 	
+	
+    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
+            return 0;
+    }
+	public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){ //no shield-like damage reduction
+		return 0;
+	}
+    private function checkIsFighterUnderShield($target, $shooter){ //no flying under shield
+        return false;
+    }
 
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn); 
 		$this->data["Special"] = "Shield projector - replenishes appropriate projection by its rating at end of turn.";
 		$this->data["Special"] .= "<br>Can be boosted.";
-		$this->data["Special"] .= "<br>At least one active Projector is necessary to maintain the projection.";
 	}	
 	
     public function getOutputOnTurn($turn){
