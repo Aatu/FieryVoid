@@ -25,7 +25,7 @@ class TrekFederationNXCruiserV2 extends MediumShip{
         $this->accelcost = 2;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-        $this->iniativebonus = 60;
+        $this->iniativebonus = 10 *5; //deliberately lowered compared to standard MCV
 		
 		
 

@@ -23,7 +23,7 @@ class TrekFederationDeltaFFAlpha extends LCV{
         $this->accelcost = 1;
         $this->rollcost = 1;
         $this->pivotcost = 1;
-        $this->iniativebonus = 70;
+        $this->iniativebonus = 12 *5; //deliberately lowered compared to standard LCV
 		$this->hangarRequired = ''; //no hangar required!
 
 

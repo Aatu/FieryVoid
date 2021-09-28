@@ -25,7 +25,7 @@ class TrekFederationIntrepid extends MediumShip{
         $this->accelcost = 2;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-        $this->iniativebonus = 60;
+        $this->iniativebonus = 11 *5; //deliberately lowered compared to standard MCV
 
         $this->addPrimarySystem(new Reactor(3, 8, 0, 0));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
