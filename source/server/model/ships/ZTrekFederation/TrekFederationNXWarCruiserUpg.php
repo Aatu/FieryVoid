@@ -27,7 +27,7 @@ class TrekFederationNXWarCruiserUpg extends MediumShip{
         $this->accelcost = 2;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-        $this->iniativebonus = 60;
+        $this->iniativebonus =  10 *5; //deliberately lowered compared to standard MCV
 
         $this->addPrimarySystem(new Reactor(3, 15, 0, 4));
         $this->addPrimarySystem(new CnC(3, 9, 0, 0));
