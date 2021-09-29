@@ -2329,7 +2329,9 @@ class VreeCapital extends SixSidedShip{
 
 class VreeHCV extends SixSidedShip{
  
-     public $shipSizeClass = 2;
+    protected $VreeHitLocations = true; //Value to indicate that all gunfire from the same ship may not hit same side on Vree capital ships
+        
+    public $shipSizeClass = 2;
         
     public function getLocations(){
         //debug::log("getLocations");         
