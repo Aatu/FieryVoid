@@ -859,6 +859,7 @@ spl_autoload_register(
                 'strikecarrier' => '/server/model/ships/raiders/strikeCarrier.php',
                 'strikehawk' => '/server/model/ships/drazi/strikehawk.php',
                 'structure' => '/server/model/systems/baseSystems.php',
+                'vreestructureplaceholder' => '/server/model/systems/baseSystems.php', 
                 'stunbeam' => '/server/model/weapons/specialWeapons.php',
                 //'subreactor' => '/server/model/systems/baseSystems.php', //obsoleted!
                 'sulust' => '/server/model/ships/centauri/sulust.php',
