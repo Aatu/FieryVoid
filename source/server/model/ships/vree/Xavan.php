@@ -9,7 +9,9 @@ class Xavan extends VreeCapital{
 		$this->phpclass = "Xavan";
 		$this->shipClass = "Xavan Gun Saucer";
 		$this->isd = 2213;
-		$this->locations = array(41, 42, 2, 32, 31, 1);		
+		$this->locations = array(41, 42, 2, 32, 31, 1);	
+  		$this->occurence = "uncommon";
+    	$this->variantOf = 'Xorr War Saucer';				
 
 		$this->shipSizeClass = 3; //Enormous is not implemented
 		$this->iniativebonus = 0; //no voluntary movement anyway
