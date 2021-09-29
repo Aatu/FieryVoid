@@ -36,27 +36,32 @@ class Vaarka extends VreeHCV{
 		$this->addPrimarySystem(new ElintScanner(4, 20, 9, 12));
         $this->addPrimarySystem(new Engine(4, 11, 0, 7, 2));
 		$this->addPrimarySystem(new JumpEngine(6, 10, 4, 24));        			
-		$this->addPrimarySystem(new AntimatterShredder(3, 0, 0, 0, 360));
+		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
+		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));		
 
-        $this->addLeftFrontSystem(new Thruster(3, 12, 0, 7, 1));
+		$this->addFrontSystem(new Thruster(3, 12, 0, 7, 1));
+		
+        $this->addAftSystem(new Thruster(3, 12, 0, 7, 2));
+        
+        $this->addLeftFrontSystem(new Thruster(3, 6, 0, 3, 3));
 		$this->addLeftFrontSystem(new AntiprotonDefender(2, 0, 0, 240, 0));
 		$this->addLeftFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60)); 
 		
-		$this->addRightFrontSystem(new Thruster(3, 12, 0, 7, 4));
+		$this->addRightFrontSystem(new Thruster(3, 6, 0, 3, 4));
 		$this->addRightFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60)); 
 		$this->addRightFrontSystem(new AntiprotonDefender(2, 0, 0, 0, 120)); 						        
 		
-		$this->addLeftAftSystem(new Thruster(3, 12, 0, 7, 3));
+		$this->addLeftAftSystem(new Thruster(3, 6, 0, 4, 3));
 		$this->addLeftAftSystem(new AntiprotonDefender(2, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240));
 		 
-		$this->addRightAftSystem(new Thruster(3, 12, 0, 7, 2));
+		$this->addRightAftSystem(new Thruster(3, 6, 0, 4, 4));
 		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 60, 180));  
 		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240)); 
        
-		$this->addFrontSystem(new VreeStructurePlaceholder(0, 0, 0, 0)); 
+	//	$this->addFrontSystem(new VreeStructurePlaceholder(0, 0, 0, 0)); 
         
-		$this->addAftSystem(new VreeStructurePlaceholder(0, 0, 0, 0)); 
+	//	$this->addAftSystem(new VreeStructurePlaceholder(0, 0, 0, 0)); 
 			
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -76,62 +81,58 @@ class Vaarka extends VreeHCV{
                     20 => "C&C",
            		 ),
             1=> array(
-                    2 => "31:Thruster",
-                    3 => "32:Thruster",   
-                    4 => "41:Thruster",   
+                    4 => "Thruster",   
                     6 => "31:Antiproton Defender",
                     8 => "41:Antiproton Defender",
-                    17 => "0:Antimatter Shredder",
+                    17 => "0:Antimatter Cannon",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             2=> array(
-                    2 => "42:Thruster",
-                    3 => "32:Thruster",   
-                    4 => "41:Thruster",   
+                    4 => "Thruster",   
                     6 => "32:Antiproton Defender",
                     8 => "42:Antiproton Defender",
-                    17 => "0:Antimatter Shredder",
+                    17 => "0:Antimatter Cannon",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             31=> array(
-                    2 => "31:Thruster",
-                    3 => "32:Thruster",   
-                    4 => "41:Thruster",   
-                    6 => "31:Antiproton Defender",
-                    8 => "41:Antiproton Defender",
-                    17 => "0:Antimatter Shredder",
+                    2 => "1:Thruster",
+                    3 => "Thruster",
+                    4 => "32:Thruster",                        
+                    6 => "Antiproton Defender",
+                    7 => "41:Antiproton Defender",
+                    8 => "0:Antimatter Cannon",
                     18 => "1:Structure",
                     20 => "Primary",
            		 ),
             32=> array(
-                    2 => "42:Thruster",
-                    3 => "32:Thruster",   
-                    4 => "41:Thruster",   
-                    6 => "32:Antiproton Defender",
-                    8 => "42:Antiproton Defender",
-                    17 => "0:Antimatter Shredder",
+                    2 => "2:Thruster",
+                    3 => "Thruster",
+                    4 => "31:Thruster",                        
+                    6 => "Antiproton Defender",
+                    7 => "42:Antiproton Defender",
+                    8 => "0:Antimatter Cannon",
                     18 => "2:Structure",
                     20 => "Primary",
            		 ),
             41=> array(
-                    2 => "31:Thruster",
-                    3 => "32:Thruster",   
-                    4 => "41:Thruster",   
-                    6 => "31:Antiproton Defender",
-                    8 => "41:Antiproton Defender",
-                    17 => "0:Antimatter Shredder",
+                    2 => "1:Thruster",
+                    3 => "Thruster",
+                    4 => "42:Thruster",                        
+                    6 => "Antiproton Defender",
+                    7 => "31:Antiproton Defender",
+                    8 => "0:Antimatter Cannon",
                     18 => "1:Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
-                    2 => "42:Thruster",
-                    3 => "32:Thruster",   
-                    4 => "41:Thruster",   
-                    6 => "32:Antiproton Defender",
-                    8 => "42:Antiproton Defender",
-                    17 => "0:Antimatter Shredder",
+                    2 => "2:Thruster",
+                    3 => "Thruster",
+                    4 => "41:Thruster",                        
+                    6 => "Antiproton Defender",
+                    7 => "32:Antiproton Defender",
+                    8 => "0:Antimatter Cannon",
                     18 => "2:Structure",
                     20 => "Primary",
            		 ),
