@@ -1045,7 +1045,7 @@ class Structure extends ShipSystem{
 //	    parent::__construct($armour, $maxhealth, $powerReq, $output);
 //		}
       
-}//endof VreeStructurePlaceholder			
+//}//endof VreeStructurePlaceholder			
 	
 /*custom system - Drakh Raider Controller*/
 class DrakhRaiderController extends ShipSystem {
