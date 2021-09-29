@@ -33,8 +33,10 @@ class Xill extends VreeCapital{
 		$this->addPrimarySystem(new Scanner(6, 14, 9, 10));
         $this->addPrimarySystem(new Engine(6, 16, 0, 9, 2));
 		$this->addPrimarySystem(new JumpEngine(6, 10, 5, 24));         			
-		$this->addPrimarySystem(new AntimatterShredder(3, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntimatterShredder(3, 0, 0, 0, 360));
+		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
+		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
+		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
+		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));		
 
 
         $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 300, 60));

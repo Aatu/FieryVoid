@@ -34,10 +34,12 @@ class Xonn extends VreeCapital{
         $this->addPrimarySystem(new Engine(6, 18, 0, 10, 3));
 		$this->addPrimarySystem(new JumpEngine(7, 16, 6, 24));
 		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));		         			
-		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));
+		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));		
-		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));		
+		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));
+		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));
+		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));
+		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));						
 
 
         $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 300, 60));
@@ -90,7 +92,7 @@ class Xonn extends VreeCapital{
                     4 => "Thruster",
                     7 => "Antiproton Gun",
                     8 => "0:Antimatter Cannon",                    
-                    9 => "0:Antimatter Shredder",
+                    9 => "0:Antimatter Cannon",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
@@ -98,7 +100,7 @@ class Xonn extends VreeCapital{
                     4 => "Thruster",
                     7 => "Antiproton Gun",
                     8 => "0:Antimatter Cannon",                    
-                    9 => "0:Antimatter Shredder",
+                    9 => "0:Antimatter Cannon",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
@@ -106,7 +108,7 @@ class Xonn extends VreeCapital{
                     4 => "Thruster",
                     7 => "Antiproton Gun",
                     8 => "0:Antimatter Cannon",                    
-                    9 => "0:Antimatter Shredder",
+                    9 => "0:Antimatter Cannon",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
@@ -114,7 +116,7 @@ class Xonn extends VreeCapital{
                     4 => "Thruster",
                     7 => "Antiproton Gun",
                     8 => "0:Antimatter Cannon",                    
-                    9 => "0:Antimatter Shredder",
+                    9 => "0:Antimatter Cannon",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
@@ -122,7 +124,7 @@ class Xonn extends VreeCapital{
                     4 => "Thruster",
                     7 => "Antiproton Gun",
                     8 => "0:Antimatter Cannon",                    
-                    9 => "0:Antimatter Shredder",
+                    9 => "0:Antimatter Cannon",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
@@ -130,7 +132,7 @@ class Xonn extends VreeCapital{
                     4 => "Thruster",
                     7 => "Antiproton Gun",
                     8 => "0:Antimatter Cannon",                    
-                    9 => "0:Antimatter Shredder",
+                    9 => "0:Antimatter Cannon",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
