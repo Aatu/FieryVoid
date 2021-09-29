@@ -1,5 +1,5 @@
 <?php
-class Xixx extends HeavyCombatVessel{
+class Xixx extends VreeHCV{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
@@ -9,6 +9,7 @@ class Xixx extends HeavyCombatVessel{
 		$this->phpclass = "Xixx";
 		$this->shipClass = "Xixx Torpedo Saucer";
 		$this->isd = 2251;
+		$this->locations = array(41, 42, 2, 32, 31, 1);			
 
 
 		$this->shipSizeClass = 2; //Enormous is not implemented
@@ -36,8 +37,6 @@ class Xixx extends HeavyCombatVessel{
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));				
 		$this->addPrimarySystem(new AntiprotonGun(3, 0, 0, 0, 360));		
-		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 3));
-		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 4));		
 
 		$this->addFrontSystem(new Thruster(4, 12, 0, 7, 1));
 		
