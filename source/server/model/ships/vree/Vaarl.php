@@ -52,9 +52,9 @@ class Vaarl extends VreeHCV{
 		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 60, 180));  
 		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240)); 
        
-		$this->addFrontSystem(new VreeStructurePlaceholder(0, 0, 0, 0)); 
+	//	$this->addFrontSystem(new VreeStructurePlaceholder(0, 0, 0, 0)); 
         
-		$this->addAftSystem(new VreeStructurePlaceholder(0, 0, 0, 0)); 
+	//	$this->addAftSystem(new VreeStructurePlaceholder(0, 0, 0, 0)); 
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 50));

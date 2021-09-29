@@ -61,25 +61,7 @@ class Xixx extends VreeHCV{
 	//	$this->addFrontSystem(new VreeStructurePlaceholder(0, 0, 0, 0)); 
         
 	//	$this->addAftSystem(new VreeStructurePlaceholder(0, 0, 0, 0)); 
-		
-		
-		
-		
-
-        $this->addFrontSystem(new Thruster(4, 12, 0, 7, 1));
-		$this->addFrontSystem(new AntimatterTorpedo(3, 0, 0, 240, 0));
-		$this->addFrontSystem(new AntimatterTorpedo(3, 0, 0, 300, 60)); 
-		$this->addFrontSystem(new AntimatterTorpedo(3, 0, 0, 300, 60)); 
-		$this->addFrontSystem(new AntimatterTorpedo(3, 0, 0, 0, 120)); 						        
-		
-        $this->addAftSystem(new Thruster(4, 12, 0, 7, 2));
-		$this->addAftSystem(new AntimatterTorpedo(3, 0, 0, 180, 300));
-		$this->addAftSystem(new AntimatterTorpedo(3, 0, 0, 120, 240)); 
-		$this->addAftSystem(new AntimatterTorpedo(3, 0, 0, 120, 240)); 
-		$this->addAftSystem(new AntimatterTorpedo(3, 0, 0, 60, 180));         
-        
-	
-       
+		     
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 50));
         $this->addAftSystem(new Structure( 4, 50));
