@@ -102,6 +102,20 @@ var Thruster = function Thruster(json, ship) {
 Thruster.prototype = Object.create(ShipSystem.prototype);
 Thruster.prototype.constructor = Thruster;
 
+var VreePortThruster = function VreePortThruster(json, ship) {
+    ShipSystem.call(this, json, ship);
+    this.channeled = 0;
+};
+VreePortThruster.prototype = Object.create(ShipSystem.prototype);
+VreePortThruster.prototype.constructor = VreePortThruster;
+
+var VreeStarboardThruster = function VreeStarboardThruster(json, ship) {
+    ShipSystem.call(this, json, ship);
+    this.channeled = 0;
+};
+VreeStarboardThruster.prototype = Object.create(ShipSystem.prototype);
+VreeStarboardThruster.prototype.constructor = VreeStarboardThruster;
+
 var GraviticThruster = function GraviticThruster(json, ship) {
     Thruster.call(this, json, ship);
 };
