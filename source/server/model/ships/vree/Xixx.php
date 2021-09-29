@@ -39,6 +39,34 @@ class Xixx extends HeavyCombatVessel{
 		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 3));
 		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 4));		
 
+		$this->addFrontSystem(new Thruster(4, 12, 0, 7, 1));
+		
+        $this->addAftSystem(new Thruster(4, 12, 0, 7, 2));
+        
+        $this->addLeftFrontSystem(new Thruster(3, 6, 0, 3, 3));
+		$this->addLeftFrontSystem(new AntimatterTorpedo(3, 0, 0, 240, 0));
+		$this->addLeftFrontSystem(new AntimatterTorpedo(3, 0, 0, 300, 60)); 
+		
+		$this->addRightFrontSystem(new Thruster(3, 6, 0, 3, 4));
+		$this->addRightFrontSystem(new AntimatterTorpedo(3, 0, 0, 300, 60)); 
+		$this->addRightFrontSystem(new AntimatterTorpedo(3, 0, 0, 0, 120)); 						        
+		
+		$this->addLeftAftSystem(new Thruster(3, 6, 0, 4, 3));
+		$this->addLeftAftSystem(new AntimatterTorpedo(3, 0, 0, 180, 300));
+		$this->addLeftAftSystem(new AntimatterTorpedo(3, 0, 0, 120, 240));
+		 
+		$this->addRightAftSystem(new Thruster(3, 6, 0, 4, 4));
+		$this->addRightAftSystem(new AntimatterTorpedo(3, 0, 0, 60, 180));  
+		$this->addRightAftSystem(new AntimatterTorpedo(3, 0, 0, 120, 240)); 
+       
+	//	$this->addFrontSystem(new VreeStructurePlaceholder(0, 0, 0, 0)); 
+        
+	//	$this->addAftSystem(new VreeStructurePlaceholder(0, 0, 0, 0)); 
+		
+		
+		
+		
+
         $this->addFrontSystem(new Thruster(4, 12, 0, 7, 1));
 		$this->addFrontSystem(new AntimatterTorpedo(3, 0, 0, 240, 0));
 		$this->addFrontSystem(new AntimatterTorpedo(3, 0, 0, 300, 60)); 
