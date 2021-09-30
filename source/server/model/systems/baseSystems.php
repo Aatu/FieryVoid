@@ -835,7 +835,7 @@ class Thruster extends ShipSystem{
 class VreePortThruster extends ShipSystem{
     public $name = "thruster";
     public $displayName = "Port Thruster";
-    public $direction;
+    public $direction = 3;
     public $thrustused;
     public $thrustwasted = 0;
     public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?	
@@ -857,7 +857,7 @@ class VreePortThruster extends ShipSystem{
 class VreeStarboardThruster extends ShipSystem{
     public $name = "thruster";
     public $displayName = "Starboard Thruster";
-    public $direction;
+    public $direction = 4;
     public $thrustused;
     public $thrustwasted = 0;
     public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?	
