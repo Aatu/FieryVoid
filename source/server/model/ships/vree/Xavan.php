@@ -38,8 +38,8 @@ class Xavan extends VreeCapital{
 		$this->addPrimarySystem(new AntiprotonGun(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntiprotonGun(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntiprotonGun(3, 0, 0, 0, 360));
-		$this->addPrimarySystem(new VreePortThruster(4, 12, 0, 7, 3));
-		$this->addPrimarySystem(new VreeStarboardThruster(4, 12	, 0, 7, 4));						
+		$this->addPrimarySystem(new Thruster(4, 12, 0, 7, 3));
+		$this->addPrimarySystem(new Thruster(4, 12, 0, 7, 4));						
 
         $this->addFrontSystem(new Thruster(4, 12, 0, 7, 1));
 		
@@ -87,7 +87,7 @@ class Xavan extends VreeCapital{
            		 ),
             31=> array(
                     1 => "1:Thruster",
-                    4 => "0:Port Thruster",
+                    4 => "0:Thruster",
                     6 => "Antiproton Gun",
 					8 => "0:Antiproton Gun",                    
                     18 => "Structure",
@@ -95,7 +95,7 @@ class Xavan extends VreeCapital{
            		 ),
             32=> array(
                     1 => "2:Thruster",
-                    4 => "0:Port Thruster",
+                    4 => "0:Thruster",
                     6 => "Antiproton Gun",
 					8 => "0:Antiproton Gun",                    
                     18 => "Structure",
@@ -103,7 +103,7 @@ class Xavan extends VreeCapital{
            		 ),
             41=> array(
                     1 => "1:Thruster",
-                    4 => "0:Starboard Thruster", 
+                    4 => "0:Thruster", 
                     6 => "Antiproton Gun",
 					8 => "0:Antiproton Gun",                    
                     18 => "Structure",
@@ -111,7 +111,7 @@ class Xavan extends VreeCapital{
            		 ),
        		42=> array(
                     1 => "2:Thruster",
-                    4 => "0:Starboard Thruster", 
+                    4 => "0:Thruster", 
                     6 => "Antiproton Gun",
 					8 => "0:Antiproton Gun",                    
                     18 => "Structure",

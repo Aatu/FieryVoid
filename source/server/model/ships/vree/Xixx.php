@@ -37,8 +37,8 @@ class Xixx extends VreeHCV{
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));				
 		$this->addPrimarySystem(new AntiprotonGun(3, 0, 0, 0, 360));
-		$this->addPrimarySystem(new VreePortThruster(3, 12, 0, 7, 3));
-		$this->addPrimarySystem(new VreeStarboardThruster(3, 12, 0, 7, 4));					
+		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 3));
+		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 4));					
 
 		$this->addFrontSystem(new Thruster(4, 12, 0, 7, 1));
 		
@@ -96,7 +96,7 @@ class Xixx extends VreeHCV{
            		 ),
             31=> array(
                     2 => "1:Thruster",
-                    4 => "0:Port Thruster",                         
+                    4 => "0:Thruster",                         
                     6 => "31:Antiproton Torpedo",
                     7 => "41:Antiproton Torpedo",
                     8 => "0:Antiproton Gun",
@@ -106,7 +106,7 @@ class Xixx extends VreeHCV{
            		 ),
             32=> array(
                     2 => "2:Thruster",
-                    4 => "0:Port Thruster",                        
+                    4 => "0:Thruster",                        
                     6 => "32:Antiproton Torpedo",
                     7 => "42:Antiproton Torpedo",
                     8 => "0:Antiproton Gun",
@@ -116,7 +116,7 @@ class Xixx extends VreeHCV{
            		 ),
             41=> array(
                     2 => "1:Thruster",
-                    4 => "0:Starboard Thruster",                         
+                    4 => "0:Thruster",                         
                     6 => "41:Antiproton Torpedo",
                     7 => "31:Antiproton Torpedo",
                     8 => "0:Antiproton Gun",
@@ -126,7 +126,7 @@ class Xixx extends VreeHCV{
            		 ),
        		42=> array(
                     2 => "2:Thruster",
-                    4 => "0:Starboard Thruster",                        
+                    4 => "0:Thruster",                        
                     6 => "42:Antiproton Torpedo",
                     7 => "32:Antiproton Torpedo",
                     8 => "0:Antiproton Gun",

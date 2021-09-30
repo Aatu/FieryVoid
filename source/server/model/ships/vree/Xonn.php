@@ -41,8 +41,8 @@ class Xonn extends VreeCapital{
 		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));
-		$this->addPrimarySystem(new VreePortThruster(5, 20, 0, 10, 3));
-		$this->addPrimarySystem(new VreeStarboardThruster(5, 20, 0, 10, 4));									
+		$this->addPrimarySystem(new Thruster(5, 20, 0, 10, 3));
+		$this->addPrimarySystem(new Thruster(5, 20, 0, 10, 4));									
 
 
         $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 300, 60));
@@ -105,7 +105,7 @@ class Xonn extends VreeCapital{
            		 ),
             31=> array(
                     1 => "1:Thruster",
-                    4 => "0:Port Thruster", 
+                    4 => "0:Thruster", 
                     7 => "Antiproton Gun",
                     8 => "0:Antimatter Cannon",                    
                     9 => "0:Antimatter Cannon",
@@ -114,7 +114,7 @@ class Xonn extends VreeCapital{
            		 ),
             32=> array(
                     1 => "2:Thruster",
-                    4 => "0:Port Thruster", 
+                    4 => "0:Thruster", 
                     7 => "Antiproton Gun",
                     8 => "0:Antimatter Cannon",                    
                     9 => "0:Antimatter Cannon",
@@ -123,7 +123,7 @@ class Xonn extends VreeCapital{
            		 ),
             41=> array(
                     1 => "1:Thruster",
-                    4 => "0:Starboard Thruster", 
+                    4 => "0:Thruster", 
                     7 => "Antiproton Gun",
                     8 => "0:Antimatter Cannon",                    
                     9 => "0:Antimatter Cannon",
@@ -132,7 +132,7 @@ class Xonn extends VreeCapital{
            		 ),
        		42=> array(
                     1 => "2:Thruster",
-                    4 => "0:Starboard Thruster", 
+                    4 => "0:Thruster", 
                     7 => "Antiproton Gun",
                     8 => "0:Antimatter Cannon",                    
                     9 => "0:Antimatter Cannon",

@@ -38,8 +38,8 @@ class Vaarka extends VreeHCV{
 		$this->addPrimarySystem(new JumpEngine(6, 10, 4, 24));        			
 		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
-		$this->addPrimarySystem(new VreePortThruster(3, 12, 0, 7, 3));
-		$this->addPrimarySystem(new VreeStarboardThruster(3, 12, 0, 7, 4));				
+		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 3));
+		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 4));				
 
 		$this->addFrontSystem(new Thruster(3, 12, 0, 7, 1));
 		
@@ -96,7 +96,7 @@ class Vaarka extends VreeHCV{
            		 ),
             31=> array(
                     2 => "1:Thruster",
-                    4 => "0:Port Thruster",                          
+                    4 => "0:Thruster",                          
                     6 => "31:Antiproton Defender",
                     7 => "41:Antiproton Defender",
                     8 => "0:Antimatter Cannon",
@@ -105,7 +105,7 @@ class Vaarka extends VreeHCV{
            		 ),
             32=> array(
                     2 => "2:Thruster",
-                    4 => "0:Port Thruster",                        
+                    4 => "0:Thruster",                        
                     6 => "32:Antiproton Defender",
                     7 => "42:Antiproton Defender",
                     8 => "0:Antimatter Cannon",
@@ -114,7 +114,7 @@ class Vaarka extends VreeHCV{
            		 ),
             41=> array(
                     2 => "1:Thruster",
-                    4 => "0:Starboard Thruster",                         
+                    4 => "0:Thruster",                         
                     6 => "41:Antiproton Defender",
                     7 => "31:Antiproton Defender",
                     8 => "0:Antimatter Cannon",
@@ -123,7 +123,7 @@ class Vaarka extends VreeHCV{
            		 ),
        		42=> array(
                     2 => "2:Thruster",
-                    4 => "0:Starboard Thruster",                         
+                    4 => "0:Thruster",                         
                     6 => "42:Antiproton Defender",
                     7 => "32:Antiproton Defender",
                     8 => "0:Antimatter Cannon",

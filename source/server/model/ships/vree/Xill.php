@@ -38,8 +38,8 @@ class Xill extends VreeCapital{
 		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
-		$this->addPrimarySystem(new VreePortThruster(5, 16, 0, 9, 3));
-		$this->addPrimarySystem(new VreeStarboardThruster(5, 16, 0, 9, 4));					
+		$this->addPrimarySystem(new Thruster(5, 16, 0, 9, 3));
+		$this->addPrimarySystem(new Thruster(5, 16, 0, 9, 4));					
 
 
         $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 300, 60));
@@ -94,7 +94,7 @@ class Xill extends VreeCapital{
            		 ),
             31=> array(
                     1 => "1:Thruster",
-                    4 => "0:Port Thruster", 
+                    4 => "0:Thruster", 
                     6 => "Antiproton Gun",
                     8 => "0:Antimatter Cannon",                    
                     18 => "Structure",
@@ -102,14 +102,14 @@ class Xill extends VreeCapital{
            		 ),
             32=> array(
                     1 => "2:Thruster",
-                    4 => "0:Port Thruster", 
+                    4 => "0:Thruster", 
                     8 => "0:Antimatter Cannon",                    
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
                     1 => "1:Thruster",
-                    4 => "0:Starboard Thruster", 
+                    4 => "0:Thruster", 
                     6 => "Antiproton Gun",
                     8 => "0:Antimatter Cannon",                    
                     18 => "Structure",
@@ -117,7 +117,7 @@ class Xill extends VreeCapital{
            		 ),
        		42=> array(
                     1 => "2:Thruster",
-                    4 => "0:Starboard Thruster", 
+                    4 => "0:Thruster", 
                     6 => "Antiproton Gun",
                     8 => "0:Antimatter Cannon",                    
                     18 => "Structure",

@@ -35,8 +35,8 @@ class Xeecra extends VreeCapital{
 		$this->addPrimarySystem(new Scanner(5, 12, 6, 6));
         $this->addPrimarySystem(new Engine(5, 11, 0, 6, 3));
 		$this->addPrimarySystem(new CargoBay(4, 25));
-		$this->addPrimarySystem(new VreePortThruster(4, 14, 0, 6, 3));
-		$this->addPrimarySystem(new VreeStarboardThruster(4, 14	, 0, 6, 4));			        			
+		$this->addPrimarySystem(new Thruster(4, 14, 0, 6, 3));
+		$this->addPrimarySystem(new Thruster(4, 14, 0, 6, 4));			        			
 
 
         $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 300, 60));
@@ -103,7 +103,7 @@ class Xeecra extends VreeCapital{
            		 ),
             31=> array(
                     1 => "1:Thruster",
-                    4 => "0:Port Thruster",
+                    4 => "0:Thruster",
                     6 => "Cargo Bay",
                     7 => "Antiproton Gun",                    
                     17 => "Structure",
@@ -111,7 +111,7 @@ class Xeecra extends VreeCapital{
            		 ),
             32=> array(
                     1 => "2:Thruster",
-                    4 => "0:Port Thruster",
+                    4 => "0:Thruster",
                     6 => "Cargo Bay",
                     7 => "Antiproton Gun",                    
                     17 => "Structure",
@@ -119,7 +119,7 @@ class Xeecra extends VreeCapital{
            		 ),
             41=> array(
                     1 => "1:Thruster",
-                    4 => "0:Starboard Thruster",
+                    4 => "0:Thruster",
                     6 => "Cargo Bay",
                     7 => "Antiproton Gun",                    
                     17 => "Structure",
@@ -127,7 +127,7 @@ class Xeecra extends VreeCapital{
            		 ),
        		42=> array(
                     1 => "2:Thruster",
-                    4 => "0:Starboard Thruster",
+                    4 => "0:Thruster",
                     6 => "Cargo Bay",
                     7 => "Antiproton Gun",                    
                     17 => "Structure",
