@@ -7,11 +7,12 @@ class Zorth extends FighterFlight{
         $this->pointCost = 35*6;
 		$this->faction = "Vree";
 		$this->phpclass = "Zorth";
-        $this->shipClass = "Zorth Ultralight Fighters";
+        $this->shipClass = "Zorth Light Fighters";
         $this->imagePath = "img/ships/VreeZorth.png";
         
         $this->faction = "Vree";
 	    $this->isd = 2162;
+        $this->notes = 'Each hangar space on a ship can stack two Zorth fighters.';	    
 
         $this->forwardDefense = 6;
         $this->sideDefense = 6;

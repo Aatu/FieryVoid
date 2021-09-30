@@ -9,7 +9,8 @@ class Xill extends VreeCapital{
 		$this->phpclass = "Xill";
 		$this->shipClass = "Xill Battle Saucer";
 		$this->isd = 2258;
-		$this->locations = array(41, 42, 2, 32, 31, 1);		
+		$this->locations = array(41, 42, 2, 32, 31, 1);
+	      $this->unofficial = true;				
 
 		$this->shipSizeClass = 3;
 		$this->iniativebonus = 0;

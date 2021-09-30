@@ -9,7 +9,8 @@ class Xonn extends VreeCapital{
 		$this->phpclass = "Xonn";
 		$this->shipClass = "Xonn Dreadnought";
 		$this->isd = 2260;
-		$this->locations = array(41, 42, 2, 32, 31, 1);		
+		$this->locations = array(41, 42, 2, 32, 31, 1);	
+	      $this->unofficial = true;			
 
 		$this->shipSizeClass = 3;
 		$this->iniativebonus = 0;

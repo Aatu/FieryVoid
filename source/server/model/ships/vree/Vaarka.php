@@ -12,7 +12,7 @@ class Vaarka extends VreeHCV{
   		$this->occurence = "rare";
     	$this->variantOf = 'Vaarl Scout Saucer';
   		$this->locations = array(41, 42, 2, 32, 31, 1);  			
-
+	      $this->unofficial = true;
 
 		$this->shipSizeClass = 2; //Enormous is not implemented
 		$this->iniativebonus = 6; //no voluntary movement anyway
@@ -97,7 +97,7 @@ class Vaarka extends VreeHCV{
             31=> array(
                     2 => "1:Thruster",
                     4 => "0:Port Thruster",                          
-                    6 => "Antiproton Defender",
+                    6 => "31:Antiproton Defender",
                     7 => "41:Antiproton Defender",
                     8 => "0:Antimatter Cannon",
                     18 => "1:Structure",
@@ -106,7 +106,7 @@ class Vaarka extends VreeHCV{
             32=> array(
                     2 => "2:Thruster",
                     4 => "0:Port Thruster",                        
-                    6 => "Antiproton Defender",
+                    6 => "32:Antiproton Defender",
                     7 => "42:Antiproton Defender",
                     8 => "0:Antimatter Cannon",
                     18 => "2:Structure",
@@ -115,7 +115,7 @@ class Vaarka extends VreeHCV{
             41=> array(
                     2 => "1:Thruster",
                     4 => "0:Starboard Thruster",                         
-                    6 => "Antiproton Defender",
+                    6 => "41:Antiproton Defender",
                     7 => "31:Antiproton Defender",
                     8 => "0:Antimatter Cannon",
                     18 => "1:Structure",
@@ -124,7 +124,7 @@ class Vaarka extends VreeHCV{
        		42=> array(
                     2 => "2:Thruster",
                     4 => "0:Starboard Thruster",                         
-                    6 => "Antiproton Defender",
+                    6 => "42:Antiproton Defender",
                     7 => "32:Antiproton Defender",
                     8 => "0:Antimatter Cannon",
                     18 => "2:Structure",

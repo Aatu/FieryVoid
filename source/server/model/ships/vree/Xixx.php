@@ -97,7 +97,7 @@ class Xixx extends VreeHCV{
             31=> array(
                     2 => "1:Thruster",
                     4 => "0:Port Thruster",                         
-                    6 => "Antiproton Torpedo",
+                    6 => "31:Antiproton Torpedo",
                     7 => "41:Antiproton Torpedo",
                     8 => "0:Antiproton Gun",
                     9 => "0: Antiproton Defender",
@@ -107,7 +107,7 @@ class Xixx extends VreeHCV{
             32=> array(
                     2 => "2:Thruster",
                     4 => "0:Port Thruster",                        
-                    6 => "Antiproton Torpedo",
+                    6 => "32:Antiproton Torpedo",
                     7 => "42:Antiproton Torpedo",
                     8 => "0:Antiproton Gun",
                     9 => "0: Antiproton Defender",
@@ -117,7 +117,7 @@ class Xixx extends VreeHCV{
             41=> array(
                     2 => "1:Thruster",
                     4 => "0:Starboard Thruster",                         
-                    6 => "Antiproton Torpedo",
+                    6 => "41:Antiproton Torpedo",
                     7 => "31:Antiproton Torpedo",
                     8 => "0:Antiproton Gun",
                     9 => "0: Antiproton Defender",
@@ -127,7 +127,7 @@ class Xixx extends VreeHCV{
        		42=> array(
                     2 => "2:Thruster",
                     4 => "0:Starboard Thruster",                        
-                    6 => "Antiproton Torpedo",
+                    6 => "42:Antiproton Torpedo",
                     7 => "32:Antiproton Torpedo",
                     8 => "0:Antiproton Gun",
                     9 => "0: Antiproton Defender",
