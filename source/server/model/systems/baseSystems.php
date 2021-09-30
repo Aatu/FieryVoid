@@ -832,49 +832,6 @@ class Thruster extends ShipSystem{
     }
 } //endof Thruster
 
-class VreePortThruster extends ShipSystem{
-    public $name = "thruster";
-    public $displayName = "Port Thruster";
-    public $direction;
-    public $thrustused;
-    public $thrustwasted = 0;
-    public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?	
-    
-    public $possibleCriticals = array(15=>"FirstThrustIgnored", 20=>"HalfEfficiency", 25=>array("FirstThrustIgnored","HalfEfficiency"));
-    
-    function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
-        parent::__construct($armour, $maxhealth, $powerReq, $output );
-         
-        $this->thrustused = (int)$thrustused;
-        $this->direction = (int)$direction;
-
-		$this->startArc = 210;
-		$this->endArc = 330;
-	}
-    
-} //endof VreePortThruster
-
-class VreeStarboardThruster extends ShipSystem{
-    public $name = "thruster";
-    public $displayName = "Starboard Thruster";
-    public $direction;
-    public $thrustused;
-    public $thrustwasted = 0;
-    public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?	
-    
-    public $possibleCriticals = array(15=>"FirstThrustIgnored", 20=>"HalfEfficiency", 25=>array("FirstThrustIgnored","HalfEfficiency"));
-    
-    function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
-        parent::__construct($armour, $maxhealth, $powerReq, $output );
-         
-        $this->thrustused = (int)$thrustused;
-        $this->direction = (int)$direction;
-
-		$this->startArc = 30;
-		$this->endArc = 150;
-	}
-    
-} //endof VreeStarboardThruster
 
 class InvulnerableThruster extends Thruster{
 	/*sometimes thruster is techically necessary, despite the fact that it shouldn't be there (eg. on LCVs)*/
@@ -1062,32 +1019,6 @@ class Structure extends ShipSystem{
     }
 } //endof Structure	
 
-//class VreeStructurePlaceholder extends ShipSystem{
-//    public $name = "VreeStructurePlaceholder";
-//    public $displayName = "VreeStructurePlaceholder";
-//    public $iconPath = "VreePlaceholderStructure.png";    
-    
-	//Cannot be repaired
-//	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
- 
- //    public function getArmourInvulnerable($target, $shooter, $dmgClass, $pos=null){ //this thruster should be invulnerable to anything...
-//		$activeAA = 99;
-//		return $activeAA;
- //   }
-    
- //   public function setSystemDataWindow($turn){
-//	parent::setSystemDataWindow($turn);     
-//	$this->data["Special"] = "This system is here for technical purposes only. Cannot be damaged in any way.";
-//	}  
-	
-//	public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
-//	public $isTargetable = false; //cannot be targeted ever!
-	
- //   function __construct($armour, $maxhealth, $powerReq, $output){
-//	    parent::__construct($armour, $maxhealth, $powerReq, $output);
-//		}
-      
-//}//endof VreeStructurePlaceholder			
 	
 /*custom system - Drakh Raider Controller*/
 class DrakhRaiderController extends ShipSystem {
