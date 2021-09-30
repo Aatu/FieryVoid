@@ -36,22 +36,20 @@ class Xurr extends VreeCapital{
         $this->addPrimarySystem(new Engine(5, 12, 0, 8, 2));			
 		$this->addPrimarySystem(new AntimatterConverter(3, 7, 5, 0, 360));
 		$this->addPrimarySystem(new AntimatterConverter(3, 7, 5, 0, 360));
+		$this->addPrimarySystem(new VreePortThruster(4, 14, 0, 8, 3));
+		$this->addPrimarySystem(new VreeStarboardThruster(4, 14	, 0, 8, 4));		
 
         $this->addFrontSystem(new Thruster(4, 14, 0, 8, 1));
 		
         $this->addAftSystem(new Thruster(4, 14, 0, 8, 2));
         
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
-		$this->addLeftFrontSystem(new Thruster(4, 7, 0, 4, 3));
 				
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
-		$this->addLeftAftSystem(new Thruster(4, 7, 0, 4, 3));
 		
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
-		$this->addRightFrontSystem(new Thruster(4, 7, 0, 4, 4));
 				
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
-		$this->addRightAftSystem(new Thruster(4, 7, 0, 4, 4));	
 		
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -87,28 +85,32 @@ class Xurr extends VreeCapital{
                     20 => "Primary",
            		 ),
             31=> array(
-                    4 => "Thruster",
+                    1 => "1:Thruster",
+                    4 => "0:Port Thruster",
                     6 => "Antiproton Gun",
 					8 => "0:Antimatter Converter",                    
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
-                    4 => "Thruster",
+                    1 => "2:Thruster",
+                    4 => "0:Port Thruster",
                     6 => "Antiproton Gun",
 					8 => "0:Antimatter Converter",                    
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
-                    4 => "Thruster",
+                    1 => "1:Thruster",
+                    4 => "0:Starboard Thruster",
                     6 => "Antiproton Gun",
 					8 => "0:Antimatter Converter",                    
                     18 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
-                    4 => "Thruster",
+                    1 => "2:Thruster",
+                    4 => "0:Starboard Thruster",
                     6 => "Antiproton Gun",
 					8 => "0:Antimatter Converter",                    
                     18 => "Structure",

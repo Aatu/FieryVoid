@@ -34,7 +34,9 @@ class Xeecra extends VreeCapital{
 		$this->addPrimarySystem(new CnC(5, 16, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 12, 6, 6));
         $this->addPrimarySystem(new Engine(5, 11, 0, 6, 3));
-		$this->addPrimarySystem(new CargoBay(4, 25));	        			
+		$this->addPrimarySystem(new CargoBay(4, 25));
+		$this->addPrimarySystem(new VreePortThruster(4, 14, 0, 6, 3));
+		$this->addPrimarySystem(new VreeStarboardThruster(4, 14	, 0, 6, 4));			        			
 
 
         $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 300, 60));
@@ -48,22 +50,18 @@ class Xeecra extends VreeCapital{
      
         
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
-		$this->addLeftFrontSystem(new Thruster(4, 7, 0, 3, 3));
 		$this->addLeftFrontSystem(new CargoBay(3, 15));		
 
 				
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
-		$this->addLeftAftSystem(new Thruster(4, 7, 0, 3, 3));
 		$this->addLeftAftSystem(new CargoBay(3, 15));		
 
 		
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
-		$this->addRightFrontSystem(new Thruster(4, 7, 0, 3, 4));
 		$this->addRightFrontSystem(new CargoBay(3, 15));		
 
 				
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
-		$this->addRightAftSystem(new Thruster(4, 7, 0, 3, 4));
 		$this->addRightAftSystem(new CargoBay(3, 15));		
 	
 		
@@ -104,28 +102,32 @@ class Xeecra extends VreeCapital{
                     20 => "Primary",
            		 ),
             31=> array(
-                    4 => "Thruster",
+                    1 => "1:Thruster",
+                    4 => "0:Port Thruster",
                     6 => "Cargo Bay",
                     7 => "Antiproton Gun",                    
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
-                    4 => "Thruster",
+                    1 => "2:Thruster",
+                    4 => "0:Port Thruster",
                     6 => "Cargo Bay",
                     7 => "Antiproton Gun",                    
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
-                    4 => "Thruster",
+                    1 => "1:Thruster",
+                    4 => "0:Starboard Thruster",
                     6 => "Cargo Bay",
                     7 => "Antiproton Gun",                    
                     17 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
-                    4 => "Thruster",
+                    1 => "2:Thruster",
+                    4 => "0:Starboard Thruster",
                     6 => "Cargo Bay",
                     7 => "Antiproton Gun",                    
                     17 => "Structure",

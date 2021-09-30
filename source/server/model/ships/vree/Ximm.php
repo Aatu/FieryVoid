@@ -36,7 +36,9 @@ class Ximm extends VreeCapital{
         $this->addPrimarySystem(new Engine(5, 12, 0, 8, 2));			
 		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));		
+		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
+		$this->addPrimarySystem(new VreePortThruster(4, 14, 0, 8, 3));
+		$this->addPrimarySystem(new VreeStarboardThruster(4, 14	, 0, 8, 4));				
 
         $this->addFrontSystem(new Thruster(4, 14, 0, 8, 1));
 		
@@ -44,19 +46,15 @@ class Ximm extends VreeCapital{
         
 		$this->addLeftFrontSystem(new AntiprotonDefender(3, 0, 0, 240, 360));
 		$this->addLeftFrontSystem(new AntiprotonDefender(3, 0, 0, 240, 360));		
-		$this->addLeftFrontSystem(new Thruster(4, 7, 0, 4, 3));
 				
 		$this->addLeftAftSystem(new AntiprotonDefender(3, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new AntiprotonDefender(3, 0, 0, 180, 300));		
-		$this->addLeftAftSystem(new Thruster(4, 7, 0, 4, 3));
 		
 		$this->addRightFrontSystem(new AntiprotonDefender(3, 0, 0, 0, 120));
 		$this->addRightFrontSystem(new AntiprotonDefender(3, 0, 0, 0, 120));		
-		$this->addRightFrontSystem(new Thruster(4, 7, 0, 4, 4));
 				
 		$this->addRightAftSystem(new AntiprotonDefender(3, 0, 0, 60, 180));
 		$this->addRightAftSystem(new AntiprotonDefender(3, 0, 0, 60, 180));		
-		$this->addRightAftSystem(new Thruster(4, 7, 0, 4, 4));	
 		
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -93,7 +91,8 @@ class Ximm extends VreeCapital{
                     20 => "Primary",
            		 ),                    
             31=> array(
-                    4 => "Thruster",
+                    1 => "1:Thruster",
+                    4 => "0:Port Thruster", 
                     7 => "Antiproton Defender",
 					8 => "0:Antiproton Defender",
 					9 => "0:Antimatter Cannon",                    
@@ -101,7 +100,8 @@ class Ximm extends VreeCapital{
                     20 => "Primary",
            		 ),
             32=> array(
-                    4 => "Thruster",
+                    1 => "2:Thruster",
+                    4 => "0:Port Thruster", 
                     7 => "Antiproton Defender",
 					8 => "0:Antiproton Defender",
 					9 => "0:Antimatter Cannon",                    
@@ -109,7 +109,8 @@ class Ximm extends VreeCapital{
                     20 => "Primary",
            		 ),
             41=> array(
-                    4 => "Thruster",
+                    1 => "1:Thruster",
+                    4 => "0:Starboard Thruster", 
                     7 => "Antiproton Defender",
 					8 => "0:Antiproton Defender",
 					9 => "0:Antimatter Cannon",                    
@@ -117,7 +118,8 @@ class Ximm extends VreeCapital{
                     20 => "Primary",
            		 ),
        		42=> array(
-                    4 => "Thruster",
+                    1 => "2:Thruster",
+                    4 => "0:Starboard Thruster", 
                     7 => "Antiproton Defender",
 					8 => "0:Antiproton Defender",
 					9 => "0:Antimatter Cannon",                    

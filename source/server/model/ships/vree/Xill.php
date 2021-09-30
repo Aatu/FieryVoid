@@ -37,7 +37,9 @@ class Xill extends VreeCapital{
 		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));		
+		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
+		$this->addPrimarySystem(new VreePortThruster(5, 16, 0, 9, 3));
+		$this->addPrimarySystem(new VreeStarboardThruster(5, 16, 0, 9, 4));					
 
 
         $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 300, 60));
@@ -47,16 +49,12 @@ class Xill extends VreeCapital{
         $this->addAftSystem(new Thruster(5, 16, 0, 9, 2));       
         
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
-		$this->addLeftFrontSystem(new Thruster(5, 8, 0, 4, 3));
 				
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
-		$this->addLeftAftSystem(new Thruster(5, 8, 0, 5, 3));
 		
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
-		$this->addRightFrontSystem(new Thruster(5, 8, 0, 4, 4));
 				
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
-		$this->addRightAftSystem(new Thruster(5, 8, 0, 5, 4));	
 		
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -95,28 +93,31 @@ class Xill extends VreeCapital{
                     20 => "Primary",
            		 ),
             31=> array(
-                    4 => "Thruster",
+                    1 => "1:Thruster",
+                    4 => "0:Port Thruster", 
                     6 => "Antiproton Gun",
                     8 => "0:Antimatter Cannon",                    
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
-                    4 => "Thruster",
-                    6 => "Antiproton Gun",
+                    1 => "2:Thruster",
+                    4 => "0:Port Thruster", 
                     8 => "0:Antimatter Cannon",                    
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
-                    4 => "Thruster",
+                    1 => "1:Thruster",
+                    4 => "0:Starboard Thruster", 
                     6 => "Antiproton Gun",
                     8 => "0:Antimatter Cannon",                    
                     18 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
-                    4 => "Thruster",
+                    1 => "2:Thruster",
+                    4 => "0:Starboard Thruster", 
                     6 => "Antiproton Gun",
                     8 => "0:Antimatter Cannon",                    
                     18 => "Structure",
