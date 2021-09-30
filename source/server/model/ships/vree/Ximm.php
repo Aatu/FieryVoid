@@ -29,6 +29,8 @@ class Ximm extends VreeCapital{
 		$this->imagePath = "img/ships/VreeXorr.png";
 		$this->canvasSize = 200;
 
+		$this->addPrimarySystem(new Thruster(4, 14, 0, 8, 3));
+		$this->addPrimarySystem(new Thruster(4, 14, 0, 8, 4));	
 		$this->addPrimarySystem(new Reactor(5, 17, 0, 0));
 		$this->addPrimarySystem(new Hangar(5, 1));
 		$this->addPrimarySystem(new CnC(5, 12, 0, 0));
@@ -37,8 +39,7 @@ class Ximm extends VreeCapital{
 		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
-		$this->addPrimarySystem(new Thruster(4, 14, 0, 8, 3));
-		$this->addPrimarySystem(new Thruster(4, 14, 0, 8, 4));			
+		
 
         $this->addFrontSystem(new Thruster(4, 14, 0, 8, 1));
 		
