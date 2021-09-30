@@ -846,7 +846,7 @@ class VreePortThruster extends ShipSystem{
         parent::__construct($armour, $maxhealth, $powerReq, $output );
          
         $this->thrustused = (int)$thrustused;
-        $this->direction = (int)$direction;
+        $this->direction = 3;
 
 		$this->startArc = 210;
 		$this->endArc = 330;
@@ -868,7 +868,7 @@ class VreeStarboardThruster extends ShipSystem{
         parent::__construct($armour, $maxhealth, $powerReq, $output );
          
         $this->thrustused = (int)$thrustused;
-        $this->direction = (int)$direction;
+        $this->direction = 4;
 
 		$this->startArc = 30;
 		$this->endArc = 150;
