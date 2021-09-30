@@ -2819,6 +2819,32 @@ capacitor is completely emptied.
 							
 } //endof PowerCapacitor
 
+class VreeStructureTechnical extends ShipSystem{
+    public $name = "VreeStructureTechnicalr";
+    public $displayName = "Vree Structure Technical";
+    public $iconPath = "VreeStructureTechnical.png";    
+    
+	//Cannot be repaired
+	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+ 
+     public function getArmourInvulnerable($target, $shooter, $dmgClass, $pos=null){ //this thruster should be invulnerable to anything...
+		$activeAA = 99;
+		return $activeAA;
+    }
+    
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);     
+	$this->data["Special"] = "This system is here for technical purposes only. Cannot be damaged in any way.";
+	}  
+	
+	public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
+	public $isTargetable = false; //cannot be targeted ever!
+	
+   function __construct($armour, $maxhealth, $powerReq, $output){
+	    parent::__construct($armour, $maxhealth, $powerReq, $output);
+		}
+      
+}//endof VreeStructurePlaceholder	
 
 
 

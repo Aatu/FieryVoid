@@ -102,20 +102,6 @@ var Thruster = function Thruster(json, ship) {
 Thruster.prototype = Object.create(ShipSystem.prototype);
 Thruster.prototype.constructor = Thruster;
 
-var VreePortThruster = function VreePortThruster(json, ship) {
-    ShipSystem.call(this, json, ship);
-    this.channeled = 0;
-};
-VreePortThruster.prototype = Object.create(ShipSystem.prototype);
-VreePortThruster.prototype.constructor = VreePortThruster;
-
-var VreeStarboardThruster = function VreeStarboardThruster(json, ship) {
-    ShipSystem.call(this, json, ship);
-    this.channeled = 0;
-};
-VreeStarboardThruster.prototype = Object.create(ShipSystem.prototype);
-VreeStarboardThruster.prototype.constructor = VreeStarboardThruster;
-
 var GraviticThruster = function GraviticThruster(json, ship) {
     Thruster.call(this, json, ship);
 };
@@ -166,11 +152,11 @@ var Structure = function Structure(json, ship) {
 Structure.prototype = Object.create(ShipSystem.prototype);
 Structure.prototype.constructor = Structure;
 
-//var VreeStructurePlaceholder = function VreeStructurePlaceholder(json, ship) {
- //   ShipSystem.call(this, json, ship);
-//};
-//VreeStructurePlaceholder.prototype = Object.create(ShipSystem.prototype);
-//VreeStructurePlaceholder.prototype.constructor = VreeStructurePlaceholder;
+var VreeStructureTechnical = function VreeStructureTechnical(json, ship) {
+    ShipSystem.call(this, json, ship);
+ };
+VreeStructureTechnical.prototype = Object.create(ShipSystem.prototype);
+VreeStructureTechnical.prototype.constructor = VreeStructureTechnical;
 
 var Jammer = function Jammer(json, ship) {
     ShipSystem.call(this, json, ship);

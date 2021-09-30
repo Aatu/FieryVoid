@@ -2192,7 +2192,7 @@ spl_autoload_register(
 				'sixsidedship' => '/server/model/ships/ShipClasses.php',
 				'vreecapital' => '/server/model/ships/ShipClasses.php',
 				'vreehcv' => '/server/model/ships/ShipClasses.php',
-				//'vreestructureplaceholder' => '/server/model/systems/baseSystems.php',
+				'vreestructuretechnical' => '/server/model/systems/baseSystems.php',
 				'vreeportthruster' => '/server/model/systems/baseSystems.php',
 				'vreestarboardthruster' => '/server/model/systems/baseSystems.php',	 
 				'antimatterweapon' => '/server/model/weapons/antimatter.php',
