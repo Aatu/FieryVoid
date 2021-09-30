@@ -835,7 +835,7 @@ class Thruster extends ShipSystem{
 class VreePortThruster extends ShipSystem{
     public $name = "thruster";
     public $displayName = "Port Thruster";
-    public $direction = 3;
+    public $direction;
     public $thrustused;
     public $thrustwasted = 0;
     public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?	
@@ -846,7 +846,7 @@ class VreePortThruster extends ShipSystem{
         parent::__construct($armour, $maxhealth, $powerReq, $output );
          
         $this->thrustused = (int)$thrustused;
-        $this->direction = 3;
+        $this->direction = (int)$direction;
 
 		$this->startArc = 210;
 		$this->endArc = 330;
@@ -857,7 +857,7 @@ class VreePortThruster extends ShipSystem{
 class VreeStarboardThruster extends ShipSystem{
     public $name = "thruster";
     public $displayName = "Starboard Thruster";
-    public $direction = 4;
+    public $direction;
     public $thrustused;
     public $thrustwasted = 0;
     public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?	
@@ -868,7 +868,7 @@ class VreeStarboardThruster extends ShipSystem{
         parent::__construct($armour, $maxhealth, $powerReq, $output );
          
         $this->thrustused = (int)$thrustused;
-        $this->direction = 4;
+        $this->direction = (int)$direction;
 
 		$this->startArc = 30;
 		$this->endArc = 150;
