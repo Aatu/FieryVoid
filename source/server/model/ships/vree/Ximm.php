@@ -48,19 +48,19 @@ class Ximm extends VreeCapital{
         
 		$this->addLeftFrontSystem(new AntiprotonDefender(3, 0, 0, 240, 0));
 		$this->addLeftFrontSystem(new AntiprotonDefender(3, 0, 0, 240, 0)); 
-		$this->addLeftFrontSystem(new VreeStructurePlaceholder(0, 0, 0, 0));
+		$this->addLeftFrontSystem(new VreeStructureTechnical(0, 0, 0, 0));
 		
 		$this->addRightFrontSystem(new AntiprotonDefender(3, 0, 0, 0, 120)); 
 		$this->addRightFrontSystem(new AntiprotonDefender(3, 0, 0, 0, 120)); 						        
-		$this->addRightFrontSystem(new VreeStructurePlaceholder(0, 0, 0, 0));
+		$this->addRightFrontSystem(new VreeStructureTechnical(0, 0, 0, 0));
 		
 		$this->addLeftAftSystem(new AntiprotonDefender(3, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new AntiprotonDefender(3, 0, 0, 180, 300));
-		$this->addLeftAftSystem(new VreeStructurePlaceholder(0, 0, 0, 0));
+		$this->addLeftAftSystem(new VreeStructureTechnical(0, 0, 0, 0));
 		 
 		$this->addRightAftSystem(new AntiprotonDefender(3, 0, 0, 60, 180));  
 		$this->addRightAftSystem(new AntiprotonDefender(3, 0, 0, 60, 180)); 
-		$this->addRightAftSystem(new VreeStructurePlaceholder(0, 0, 0, 0));
+		$this->addRightAftSystem(new VreeStructureTechnical(0, 0, 0, 0));
 		
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
