@@ -13,8 +13,8 @@ class Ximm extends VreeCapital{
   		$this->occurence = "uncommon";
     	$this->variantOf = 'Xorr War Saucer';					
 
-		$this->shipSizeClass = 3; //Enormous is not implemented
-		$this->iniativebonus = 0; //no voluntary movement anyway
+		$this->shipSizeClass = 3; 
+		$this->iniativebonus = 0; 
 		
         $this->turncost = 0.66;
         $this->turndelaycost = 0.5;
