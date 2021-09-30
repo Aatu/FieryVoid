@@ -2820,7 +2820,7 @@ capacitor is completely emptied.
 } //endof PowerCapacitor
 
 class VreeStructureTechnical extends ShipSystem{
-    public $name = "VreeStructureTechnicalr";
+    public $name = "VreeStructureTechnical";
     public $displayName = "Vree Structure Technical";
     public $iconPath = "VreeStructureTechnical.png";    
     
