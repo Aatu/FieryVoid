@@ -38,7 +38,7 @@ class Ximm extends VreeCapital{
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new VreePortThruster(4, 14, 0, 8, 3));
-		$this->addPrimarySystem(new VreeStarboardThruster(4, 14	, 0, 8, 4));				
+		$this->addPrimarySystem(new VreeStarboardThruster(4, 14	, 0, 8, 4));			
 
         $this->addFrontSystem(new Thruster(4, 14, 0, 8, 1));
 		
