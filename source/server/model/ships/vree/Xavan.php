@@ -52,10 +52,7 @@ class Xavan extends VreeCapital{
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
 				
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
-<frameset>
-	<frame src="" name="" />
-	<frame src="" name="" />
-</frameset>		
+	
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 24));
