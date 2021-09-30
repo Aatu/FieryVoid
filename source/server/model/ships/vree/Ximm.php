@@ -29,8 +29,6 @@ class Ximm extends VreeCapital{
 		$this->imagePath = "img/ships/VreeXorr.png";
 		$this->canvasSize = 200;
 
-		$this->addPrimarySystem(new Thruster(4, 14, 0, 8, 3));
-		$this->addPrimarySystem(new Thruster(4, 14, 0, 8, 4));	
 		$this->addPrimarySystem(new Reactor(5, 17, 0, 0));
 		$this->addPrimarySystem(new Hangar(5, 1));
 		$this->addPrimarySystem(new CnC(5, 12, 0, 0));
@@ -39,7 +37,8 @@ class Ximm extends VreeCapital{
 		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
-		
+		$this->addPrimarySystem(new Thruster(4, 14, 0, 8, 3));
+		$this->addPrimarySystem(new Thruster(4, 14, 0, 8, 4));
 
         $this->addFrontSystem(new Thruster(4, 14, 0, 8, 1));
 		
@@ -68,66 +67,7 @@ class Ximm extends VreeCapital{
         $this->addPrimarySystem(new Structure( 5, 40));
 	    
 	//d20 hit chart
-        $this->hitChart = array(
-            0=> array(
-                    10 => "Structure",
-                    12 => "Scanner",
-                    15 => "Engine",
-                    16 => "Hangar",
-                    19 => "Reactor",
-                    20 => "C&C",
-           		 ),
-            1=> array(
-                    4 => "Thruster",
-                    5 => "0:Antimatter Cannon",
-					6 => "0:Antiproton Defender",                    
-                    18 => "Structure",
-                    20 => "Primary",
-           		 ),
-            2=> array(
-                    4 => "Thruster",
-                    5 => "0:Antimatter Cannon",
-					6 => "0:Antiproton Defender",                    
-                    18 => "Structure",
-                    20 => "Primary",
-           		 ),                    
-            31=> array(
-                    1 => "1:Thruster",
-                    4 => "0:Thruster", 
-                    7 => "Antiproton Defender",
-					8 => "0:Antiproton Defender",
-					9 => "0:Antimatter Cannon",                    
-                    18 => "Structure",
-                    20 => "Primary",
-           		 ),
-            32=> array(
-                    1 => "2:Thruster",
-                    4 => "0:Thruster", 
-                    7 => "Antiproton Defender",
-					8 => "0:Antiproton Defender",
-					9 => "0:Antimatter Cannon",                    
-                    18 => "Structure",
-                    20 => "Primary",
-           		 ),
-            41=> array(
-                    1 => "1:Thruster",
-                    4 => "0:Thruster", 
-                    7 => "Antiproton Defender",
-					8 => "0:Antiproton Defender",
-					9 => "0:Antimatter Cannon",                    
-                    18 => "Structure",
-                    20 => "Primary",
-           		 ),
-       		42=> array(
-                    1 => "2:Thruster",
-                    4 => "0:Thruster", 
-                    7 => "Antiproton Defender",
-					8 => "0:Antiproton Defender",
-					9 => "0:Antimatter Cannon",                    
-                    18 => "Structure",
-                    20 => "Primary",
-           		 ),
-           	);
+    
        		
 		}
 	}
