@@ -833,7 +833,7 @@ class Thruster extends ShipSystem{
 } //endof Thruster
 
 class VreePortThruster extends ShipSystem{
-    public $name = "PortThruster";
+    public $name = "thruster";
     public $displayName = "Port Thruster";
     public $direction;
     public $thrustused;
@@ -855,7 +855,7 @@ class VreePortThruster extends ShipSystem{
 } //endof VreePortThruster
 
 class VreeStarboardThruster extends ShipSystem{
-    public $name = "StarboardThruster";
+    public $name = "thruster";
     public $displayName = "Starboard Thruster";
     public $direction;
     public $thrustused;
