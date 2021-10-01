@@ -61,7 +61,7 @@ class TrekImpulseDrive extends Engine{
 		parent::setSystemDataWindow($turn); 	
 		$this->output = $this->getOutput();	
 		$this->data["Efficiency"] = $this->boostEfficiency;
-		$this->data["Special"] = "Impulse Drive - basically an Engine with basic output calculated from Warp Drive outputs in addition to its own.";  
+		$this->data["Special"] = "Impulse Drive - basically an Engine with basic output calculated from Nacelle outputs in addition to its own.";  
 	}
 	
 	
@@ -114,14 +114,7 @@ class TrekPhaseCannon extends Raking{
 		public $firingModes = array( 1 => "Raking");
 
 	 	public function getInterceptRating($turn){
-			if ($this->turnsloaded == 1)
-			{
-				return 2;
-			}
-			else
-			{
-				return 2;
-			}
+			return 2;
 		}
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -138,8 +131,8 @@ class TrekPhaseCannon extends Raking{
 			$this->data["Special"] .= '<br>';
 		}
 			$this->data["Special"] .= "Can fire accelerated ROF for less damage:";  
-			$this->data["Special"] .= "<br> - 1 turn: 1d10+3, intercept -10"; 
-			$this->data["Special"] .= "<br> - 2 turns: 2d10+12, intercept -10"; 
+			$this->data["Special"] .= "<br> - 1 turn: 1d10+3"; 
+			$this->data["Special"] .= "<br> - 2 turns: 2d10+12"; 
 		}
 	
 		public function getDamage($fireOrder){
@@ -190,8 +183,205 @@ class TrekPhaseCannon extends Raking{
 
 
 
+class TrekPhaser extends Raking{
+		public $name = "TrekPhaser";
+        public $displayName = "Phaser";
+        public $iconPath = "mediumLaser.png"; //Laser icon - just so it's clear it needs to be changed!
+        public $animation = "laser";
+        public $animationColor = array(225, 0, 0);
+		public $animationExplosionScale = 0.3;
+		public $animationWidth = 4;
+		public $animationWidth2 = 0.3;
 
-class TrekSpatialTorp extends Weapon{
+        public $raking = 10;
+        
+        public $intercept = 2;
+		public $priority = 8; //light Raking		
+		
+        public $loadingtime = 1;
+		public $normalload = 2;
+		
+        public $rangePenalty = 0.5;
+        public $fireControl = array(3, 3, 3);
+
+        public $damageType = "Raking";
+		public $weaponClass = "Particle";
+		public $firingModes = array( 1 => "Raking");
+
+	 	public function getInterceptRating($turn){
+			return 2;
+		}
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 7;
+			if ( $powerReq == 0 ) $powerReq = 5;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);   
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+			$this->data["Special"] .= "Can fire accelerated ROF for less damage:";  
+			$this->data["Special"] .= "<br> - 1 turn: 1d10+4"; 
+			$this->data["Special"] .= "<br> - 2 turns: 2d10+14"; 
+		}
+	
+		public function getDamage($fireOrder){
+        	switch($this->turnsloaded){
+            	case 0:
+            	case 1:
+                	return Dice::d(10)+4;
+			    	break;
+            	default:
+                	return Dice::d(10,2)+14;
+			    	break;
+        	}
+		}
+
+ 		public function setMinDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->minDamage = 5 ;
+                    break;
+                default:
+                    $this->minDamage = 14 ;  
+                    break;
+            }
+		}
+             
+        public function setMaxDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->maxDamage = 14 ;
+                    break;
+                default:
+                    $this->maxDamage = 34 ;  
+                    break;
+            }
+		}
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			return $strippedSystem;
+		}
+
+}//end of class TrekPhaser
+
+
+
+
+class TrekPhaserLance extends Raking{
+		public $name = "TrekPhaserLance";
+        public $displayName = "Phaser Lance";
+        public $iconPath = "heavyLaser.png"; //Laser icon - just so it's clear it needs to be changed!
+        public $animation = "laser";
+        public $animationColor = array(225, 0, 0);
+		public $animationExplosionScale = 0.3;
+		public $animationWidth = 4;
+		public $animationWidth2 = 0.3;
+
+        public $raking = 10;
+        
+        public $intercept = 2;
+		public $priority = 8; //light Raking		
+		
+        public $loadingtime = 2;
+		
+        public $rangePenaltyArray = array(1=>0.33, 2=>0.5);
+        public $fireControlArray = array( 1=>array(0, 4, 4), 2=>array(3, 3, 3) ); 
+	
+
+        public $damageType = "Raking";
+		public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); 
+		public $weaponClass = "Particle";
+		public $weaponClassArray = array(1=>'Particle', 2=>'Particle');
+		public $firingModes = array( 1 => "Lance", 2=> "Dual Phasers");
+		public $firingMode = 1;
+		
+		
+
+	 	public function getInterceptRating($turn){
+			return 2;
+		}
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 10;
+			if ( $powerReq == 0 ) $powerReq = 8;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);   
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Can fire as either:";  
+			$this->data["Special"] .= "<br> - Phaser Lance: single shot, improved range, damage and antiship FC"; 
+			$this->data["Special"] .= "<br> - Dual Phasers: two regular Phaser shots."; 
+			$this->data["Special"] .= "<br>Cannot fire accelerated."; 
+		}
+	
+		public function getDamage($fireOrder){
+			switch($this->firingMode){
+				case 1:
+					return Dice::d(10, 3)+14; //Phaser Lance
+					break;
+				case 2:
+					return Dice::d(10, 2)+14; //Phaser
+					break;	
+			}
+		}
+
+ 		public function setMinDamage(){
+			switch($this->firingMode){
+				case 1:
+					$this->minDamage = 17; //Phaser Lance
+					break;
+				case 2:
+					$this->minDamage = 16; //Phaser
+					break;	
+			}
+		}
+             
+        public function setMaxDamage(){
+			switch($this->firingMode){
+				case 1:
+					$this->maxDamage = 44; //Phaser Lance
+					break;
+				case 2:
+					$this->maxDamage = 34; //Phaser
+					break;	
+			}
+		}
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			/* no need to override - no Accelerator option
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			*/
+			return $strippedSystem;
+		}
+
+}//end of class TrekPhaserLance
+
+
+
+class TrekSpatialTorp extends Torpedo{
         public $name = "TrekSpatialTorp";
         public $displayName = "Spatial Torpedo";
 		    public $iconPath = "EWRocketLauncher.png";
@@ -205,8 +395,9 @@ class TrekSpatialTorp extends Weapon{
 
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile
-        public $range = 15;
-		public $guns = 1;
+        public $range = 12;
+		public $distanceRange = 18;
+		
         
         public $loadingtime = 2; // 1 turn
         public $rangePenalty = 0;
@@ -226,8 +417,13 @@ class TrekSpatialTorp extends Weapon{
         }
         
         public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-			$this->data["Special"] = 'Benefits from offensive EW.';			
+            parent::setSystemDataWindow($turn); 
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= 'Benefits from offensive EW.';			
         }
         
         public function getDamage($fireOrder){ 
@@ -242,7 +438,7 @@ class TrekSpatialTorp extends Weapon{
 
 
 
-class TrekPhotonicTorp extends Weapon{
+class TrekPhotonicTorp extends Torpedo{
         public $name = "TrekPhotonicTorp";
         public $displayName = "Photonic Torpedo";
 		    public $iconPath = "TrekPhotonicTorpedo.png";
@@ -256,8 +452,8 @@ class TrekPhotonicTorp extends Weapon{
 
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile
-        public $range = 20;
-		public $guns = 1;
+        public $range = 15;
+		public $distanceRange = 25;
         
         public $loadingtime = 2; // 1 turn
         public $rangePenalty = 0;
@@ -278,7 +474,12 @@ class TrekPhotonicTorp extends Weapon{
         
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-			$this->data["Special"] = 'Benefits from offensive EW.';			
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= 'Benefits from offensive EW.';			
         }
         
         public function getDamage($fireOrder){ 
@@ -294,10 +495,66 @@ class TrekPhotonicTorp extends Weapon{
 
 
 
+class TrekPhotonTorp extends Torpedo{
+        public $name = "TrekPhotonTorp";
+        public $displayName = "Photon Torpedo";
+		    public $iconPath = "TrekPhotonicTorpedo.png";
+        public $animation = "trail";
+        public $trailColor = array(11, 224, 255);
+        public $animationColor = array(50, 50, 50);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 12;
+        public $animationWidth = 4;
+        public $trailLength = 100;    
+
+        public $useOEW = true; //torpedo
+        public $ballistic = true; //missile
+        public $range = 20;
+		public $distanceRange = 30;
+        
+        public $loadingtime = 2; // 1 turn
+        public $rangePenalty = 0;
+        public $fireControl = array(1, 1, 2); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+	    
+	public $priority = 4; //Standard weapon
+	    
+	public $firingMode = 'Ballistic'; //firing mode - just a name essentially
+	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+	 
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= 'Benefits from offensive EW.';			
+        }
+        
+        public function getDamage($fireOrder){ 
+		
+			return Dice::d(6, 3)+6;   
+		}
+
+        public function setMinDamage(){     $this->minDamage = 9;      }
+        public function setMaxDamage(){     $this->maxDamage = 24;      }
+		
+}//endof TrekPhotonTorp
+
+
 /* Star Trek shield projection
  note this is NOT a shield as far as FV recognizes it!
 */
-class TrekShieldProjection extends ShipSystem{
+//class TrekShieldProjection extends ShipSystem{
+class TrekShieldProjection extends Shield implements DefensiveSystem { //defensive values of zero, but still formally there to display arcs!
     public $name = "TrekShieldProjection";
     public $displayName = "Shield Projection";
     public $primary = true;
@@ -315,13 +572,26 @@ class TrekShieldProjection extends ShipSystem{
     
     function __construct($armor, $maxhealth, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$this->iconPath = 'TrekShieldProjection' . $side . '.png';
-		parent::__construct($armor, $maxhealth, 0, $rating);
-		
+		//parent::__construct($armor, $maxhealth, 0, $rating);
+		parent::__construct($armor, $maxhealth, 0, $rating, $startArc, $endArc);
+		/*
         $this->startArc = (int)$startArc;
         $this->endArc = (int)$endArc;
+		*/
 		
 		$this->output=$rating;//output is displayed anyway, make it show something useful... in this case - number of points absorbed per hit
 	}
+	
+	
+    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
+            return 0;
+    }
+	public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){ //no shield-like damage reduction
+		return 0;
+	}
+    private function checkIsFighterUnderShield($target, $shooter){ //no flying under shield
+        return false;
+    }
 	
 
 	public function setSystemDataWindow($turn){
@@ -338,6 +608,7 @@ class TrekShieldProjection extends ShipSystem{
 		$this->data["Special"] .= ", including " . $this->armour . " without reducing capacity for further absorption.";
 		$this->data["Special"] .= "<br>Will absorb more from Raking mode hits.";
 		$this->data["Special"] .= "<br>System's health represents damage capacity. If it is reduced to zero system will cease to function.";
+		$this->data["Special"] .= "<br>Will not fall on its own unless its structure block is destroyed.";
 		$this->data["Special"] .= "<br>This is NOT a shield as far as any shield-related interactions go.";
 	}	
 	
@@ -424,7 +695,7 @@ class TrekShieldProjection extends ShipSystem{
 		if($projector) $this->projectorList[] = $projector;
 	}
 	
-	//effects that happen in Critical phase (after criticals are rolled) - replenishment from active projectors (or falling if none are present)
+	//effects that happen in Critical phase (after criticals are rolled) - replenishment from active projectors 
 	public function criticalPhaseEffects($ship, $gamedata){
 		if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
 		
@@ -439,9 +710,11 @@ class TrekShieldProjection extends ShipSystem{
 			$activeProjectors++;
 			$projectorOutput += $projector->getOutputOnTurn($gamedata->turn);
 		}
+		/*after all - shield will NOT fall!
 		if($activeProjectors <= 0){ //no active projectors - shield is falling!
-			$toReplenish = -$this->getRemainingCapacity();		
-		}else{ //active projectors present - reinforce shield!
+			$toReplenish = -$this->getRemainingCapacity();	
+			*/
+		if($activeProjectors > 0){ //active projectors present - reinforce shield!
 			$toReplenish = min($projectorOutput,$this->getUsedCapacity());		
 		}
 		
@@ -457,7 +730,8 @@ class TrekShieldProjection extends ShipSystem{
  reinforces shield projection (and prevents it from falling)
  actual reinforcing (and falling) is done from Projection's own end, Projector just is (needs to be plugged into appropriate projection at design stage
 */
-class TrekShieldProjector extends ShipSystem{
+//class TrekShieldProjector extends ShipSystem{
+class TrekShieldProjector  extends Shield implements DefensiveSystem { //defensive values of zero, but still formally there to display arcs!
     public $name = "TrekShieldProjector";
     public $displayName = "Shield Projector";
 	public $isPrimaryTargetable = true; //projector can be targeted even on PRIMARY, like a weapon!
@@ -476,20 +750,29 @@ class TrekShieldProjector extends ShipSystem{
     
     function __construct($armor, $maxhealth, $power, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$this->iconPath = 'TrekShieldProjector' . $side . '.png';
-		parent::__construct($armor, $maxhealth, $power, $rating);
-		
-        $this->startArc = (int)$startArc;
-        $this->endArc = (int)$endArc;
+		//parent::__construct($armor, $maxhealth, $power, $rating);
+		parent::__construct($armor, $maxhealth, $power, $rating, $startArc, $endArc);
+        //$this->startArc = (int)$startArc;
+        //$this->endArc = (int)$endArc;
 		$this->baseOutput = $rating;
 		$this->maxBoostLevel = $rating; //maximum double effect		
 	}
 	
+	
+    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
+            return 0;
+    }
+	public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){ //no shield-like damage reduction
+		return 0;
+	}
+    private function checkIsFighterUnderShield($target, $shooter){ //no flying under shield
+        return false;
+    }
 
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn); 
 		$this->data["Special"] = "Shield projector - replenishes appropriate projection by its rating at end of turn.";
 		$this->data["Special"] .= "<br>Can be boosted.";
-		$this->data["Special"] .= "<br>At least one active Projector is necessary to maintain the projection.";
 	}	
 	
     public function getOutputOnTurn($turn){

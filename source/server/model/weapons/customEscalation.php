@@ -1098,7 +1098,7 @@ class EWOMissileRack extends MissileLauncher
 } // end of EWOMissileRack
 
 
-class EWRocketLauncher extends Weapon{
+class EWRocketLauncher extends Torpedo{
         public $name = "EWRocketLauncher";
         public $displayName = "Rocket Launcher";
 		    public $iconPath = "EWRocketLauncher.png";
@@ -1148,7 +1148,7 @@ class EWRocketLauncher extends Weapon{
 
 
 
-class EWRangedRocketLauncher extends Weapon{
+class EWRangedRocketLauncher extends Torpedo{
         public $name = "EWRangedRocketLauncher";
         public $displayName = "Ranged Rocket Launcher";
 		    public $iconPath = "EWRocketLauncher.png";
@@ -1197,7 +1197,7 @@ class EWRangedRocketLauncher extends Weapon{
 }//endof EWRangedRocketLauncher
 
 
-class EWDualRocketLauncher extends Weapon{
+class EWDualRocketLauncher extends Torpedo{
         public $name = "EWDualRocketLauncher";
         public $displayName = "Dual Rocket Launcher";
 		    public $iconPath = "EWDualRocketLauncher.png";
@@ -1246,7 +1246,7 @@ class EWDualRocketLauncher extends Weapon{
 
 
 
-class EWRangedDualRocketLauncher extends Weapon{
+class EWRangedDualRocketLauncher extends Torpedo{
         public $name = "EWRangedDualRocketLauncher";
         public $displayName = "Ranged Dual Rocket Launcher";
 		    public $iconPath = "EWDualRocketLauncher.png";
@@ -1294,7 +1294,7 @@ class EWRangedDualRocketLauncher extends Weapon{
 }//endof EWRangedDualRocketLauncher
 
 
-class EWHeavyRocketLauncher extends Weapon{
+class EWHeavyRocketLauncher extends Torpedo{
         public $name = "EWHeavyRocketLauncher";
         public $displayName = "Heavy Rocket Launcher";
 		    public $iconPath = "EWHeavyRocketLauncher.png";
@@ -1343,7 +1343,7 @@ class EWHeavyRocketLauncher extends Weapon{
 
 
 
-class EWRangedDualHeavyRocketLauncher extends Weapon{
+class EWRangedDualHeavyRocketLauncher extends Torpedo{
         public $name = "EWRangedDualHeavyRocketLauncher";
         public $displayName = "Ranged Dual Heavy Rocket Launcher";
 		    public $iconPath = "EWRangedDualHeavyRocketLauncher.png";
