@@ -44,7 +44,7 @@ class Xurr extends VreeCapital{
         $this->addAftSystem(new Thruster(4, 14, 0, 8, 2));
         
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
-		$this->addLeftFrontSyste(new VreeStructureTechnical(0, 0, 0, 0));
+		$this->addLeftFrontSystem(new VreeStructureTechnical(0, 0, 0, 0));
 				
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new VreeStructureTechnical(0, 0, 0, 0));
