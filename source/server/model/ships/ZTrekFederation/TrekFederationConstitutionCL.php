@@ -43,12 +43,12 @@ class TrekFederationConstitutionCL extends HeavyCombatVessel{
 		$projection->addProjector($projector);
 		$this->addFrontSystem($projector);
 	$this->addFrontSystem($projection);
-	$this->addFrontSystem(new EWHeavyRocketLauncher(3, 6, 3, 270, 90));
-        $this->addFrontSystem(new EWHeavyRocketLauncher(3, 6, 3, 270, 90));
-	$this->addFrontSystem(new ParticleAccelerator(3, 6, 4, 240, 60));
-	$this->addFrontSystem(new ParticleAccelerator(3, 6, 4, 270, 90));
-	$this->addFrontSystem(new ParticleAccelerator(3, 6, 4, 300, 120));
-	$this->addFrontSystem(new SWTractorBeam(2,300,60,2));
+	$this->addFrontSystem(new TrekPhotonTorp(3, 0, 0, 270, 90));
+        $this->addFrontSystem(new TrekPhotonTorp(3, 0, 0, 270, 90));
+	$this->addFrontSystem(new TrekPhaser(3, 0, 0, 240, 60));
+	$this->addFrontSystem(new TrekPhaser(3, 0, 0, 270, 90));
+	$this->addFrontSystem(new TrekPhaser(3, 0, 0, 300, 120));
+	$this->addFrontSystem(new SWTractorBeam(2,0,360,1));
 
 	$warpNacelle = new TrekWarpDrive(4, 24, 0, 4); //armor, structure, power usage, impulse output
 	$impulseDrive->addThruster($warpNacelle);
@@ -66,8 +66,8 @@ class TrekFederationConstitutionCL extends HeavyCombatVessel{
 		$projection->addProjector($projector);
 		$this->addAftSystem($projector);
 	$this->addAftSystem($projection);
-	$this->addAftSystem(new ParticleAccelerator(3, 6, 4, 120, 240));
-	$this->addAftSystem(new SWTractorBeam(2,120,240,1));
+	$this->addAftSystem(new TrekPhaser(3, 0, 0, 120, 240));
+	//$this->addAftSystem(new SWTractorBeam(2,120,240,1));
 
 		
 	//technical thrusters - unlimited, like for LCVs		
@@ -93,18 +93,17 @@ class TrekFederationConstitutionCL extends HeavyCombatVessel{
             ),
             1=> array(
 				1 => "Shield Projector",
-				5 => "Heavy Rocket Launcher",
-				9 => "Particle Accelerator",
+				5 => "Photon Torpedo",
+				9 => "Phaser",
 				10 => "Tractor Beam",
 				18 => "Structure",
 				20 => "Primary",
             ),
             2=> array(
 				1 => "Shield Projector",
-				7 => "Nacelle",
-				8 => "Tractor Beam",
-				10 => "Particle Accelerator",
-				17 => "Structure",
+				8 => "Nacelle",
+				10 => "Phaser",
+				18 => "Structure",
 				20 => "Primary",
             ),
        );
