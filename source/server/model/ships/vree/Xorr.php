@@ -48,12 +48,13 @@ class Xorr extends VreeCapital{
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new VreeStructureTechnical(0, 0, 0, 0));	
 		
-		$this->addRightFrontSystem(new VreeStructureTechnical(0, 0, 0, 0));	
+
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
-				
-		$this->addRightAftSystem(new VreeStructureTechnical(0, 0, 0, 0));	
+		$this->addRightFrontSystem(new VreeStructureTechnical(0, 0, 0, 0));	
+						
+	
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
-		
+		$this->addRightAftSystem(new VreeStructureTechnical(0, 0, 0, 0));		
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 24));

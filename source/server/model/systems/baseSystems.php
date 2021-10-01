@@ -2840,8 +2840,8 @@ class VreeStructureTechnical extends ShipSystem{
 	public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
 	public $isTargetable = false; //cannot be targeted ever!
 	
-   function __construct($armour, $maxhealth, $powerReq, $output){
-	    parent::__construct(0, 1, 0, 0); //$armour, $maxhealth, $powerReq, $output
+   function __construct($armour, $maxhealth, $powerReq){
+	    parent::__construct(0, 1, 0); //$armour, $maxhealth, $powerReq, $output
 		}
       
 }//endof VreeStructurePlaceholder	
