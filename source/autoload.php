@@ -491,6 +491,7 @@ spl_autoload_register(
                 'liberatorescort' => '/server/model/ships/deneth/liberatorEscort.php',
                 'liberatorplasma' => '/server/model/ships/deneth/liberatorPlasma.php',
                 'liberatorpulse' => '/server/model/ships/deneth/liberatorPulse.php',
+                'lightauxcarrier' => '/server/model/ships/civilians/lightAuxCarrier.php',
                 'lightballistictorpedo' => '/server/model/weapons/ammo.php',
                 'lightbolter' => '/server/model/weapons/particle.php',
                 'lightfusioncannon' => '/server/model/weapons/molecular.php',
@@ -770,6 +771,8 @@ spl_autoload_register(
                 'rongoth' => '/server/model/ships/narn/rongoth.php',
                 'roshanthi' => '/server/model/ships/drazi_old/Roshanthi.php',
                 'rothan' => '/server/model/ships/narn/rothan.php',
+                'ruffian' => '/server/model/ships/raiders/ruffian.php',
+                'ruffian1972' => '/server/model/ships/raiders/ruffian1972.php',
                 'rutarian' => '/server/model/ships/centauri/rutarian.php',
                 'sagittarius' => '/server/model/ships/EA/sagittarius.php',
                 'sakar' => '/server/model/ships/centauri_old/sakar.php',
@@ -892,6 +895,7 @@ spl_autoload_register(
                 'strikebird' => '/server/model/ships/drazi/strikebird.php',
                 'strikecarrier' => '/server/model/ships/raiders/strikeCarrier.php',
                 'strikehawk' => '/server/model/ships/drazi/strikehawk.php',
+                'strikelaser' => '/server/model/weapons/lasers.php',
                 'structure' => '/server/model/systems/baseSystems.php',
                 'stunbeam' => '/server/model/weapons/specialWeapons.php',
                 //'subreactor' => '/server/model/systems/baseSystems.php', //obsoleted!
@@ -983,6 +987,7 @@ spl_autoload_register(
                 'tetrav1954' => '/server/model/ships/abbai_old/tetrav1954.php',
                 'tgan' => '/server/model/ships/narn/tgan.php',
                 'thentus' => '/server/model/ships/narn/thentus.php',
+                'thirsta' => '/server/model/ships/raiders/thirsta.php',
                 'thorun' => '/server/model/ships/dilgar/thorun.php',
                 'thorunearly' => '/server/model/ships/dilgar/thorunEarly.php',
                 'thorunheavy' => '/server/model/ships/dilgar/thorunHeavy.php',
@@ -1536,10 +1541,12 @@ spl_autoload_register(
 
 
 				//Nexus ships - Craytan
-//                'craytancorvette' => '/server/model/ships/ZNexusCraytan/CraytanCorvette.php',					
-//                'craytancorvette2089' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2089.php',					
-//                'craytancorvette2126' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2126.php',					
-//                'craytanhepron' => '/server/model/ships/ZNexusCraytan/CraytanHepron.php',					
+                'craytancorvette' => '/server/model/ships/ZNexusCraytan/CraytanCorvette.php',					
+                'craytancorvette2089' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2089.php',					
+                'craytancorvette2126' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2126.php',					
+                'craytanhepron' => '/server/model/ships/ZNexusCraytan/CraytanHepron.php',					
+                'craytanhepron2085' => '/server/model/ships/ZNexusCraytan/CraytanHepron2085.php',					
+                'craytanhepron2126' => '/server/model/ships/ZNexusCraytan/CraytanHepron2126.php',					
 
 
 
@@ -2136,7 +2143,9 @@ spl_autoload_register(
                 'penitent1782' => '/server/model/ships/orieni/penitent1782.php',
                 'penitent2003' => '/server/model/ships/orieni/penitent2003.php',
 		    	'resolute' => '/server/model/ships/orieni/resolute.php',
+		    	'resolutehk' => '/server/model/ships/orieni/resoluteHK.php',
 		    	'resolute2007' => '/server/model/ships/orieni/resolute2007.php',
+		    	'resolutehk2007' => '/server/model/ships/orieni/resoluteHK2007.php',
 		    	'skywatch' => '/server/model/ships/orieni/skywatch.php',
 		    	'skywatch1810' => '/server/model/ships/orieni/skywatch1810.php',
 		    	'skywatch2003' => '/server/model/ships/orieni/skywatch2003.php',
