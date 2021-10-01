@@ -49,9 +49,9 @@ class Xavan extends VreeCapital{
 		$this->addLeftFrontSystem(new VreeStructureTechnical(0, 0, 0, 0));
 				
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
-		$this->addLeftAftSyste(new VreeStructureTechnical(0, 0, 0, 0));
+		$this->addLeftAftSystem(new VreeStructureTechnical(0, 0, 0, 0));
 		
-		$this->addRightFrontSyste(new VreeStructureTechnical(0, 0, 0, 0));
+		$this->addRightFrontSystem(new VreeStructureTechnical(0, 0, 0, 0));
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
 				
 		$this->addRightAftSystem(new VreeStructureTechnical(0, 0, 0, 0));
