@@ -45,11 +45,15 @@ class Xeon extends VreeCapital{
         $this->addAftSystem(new AntiprotonDefender(3, 0, 0, 120, 240));
         
 		$this->addLeftFrontSystem(new AntiprotonDefender(3, 0, 0, 240, 360));
+		$this->addLeftFrontSystem(new VreeStructureTechnical(0, 0, 0, 0));	
 				
 		$this->addLeftAftSystem(new AntiprotonDefender(3, 0, 0, 180, 300));
+		$this->addLeftAftSystem(new VreeStructureTechnical(0, 0, 0, 0));	
 		
+		$this->addRightFrontSystem(new VreeStructureTechnical(0, 0, 0, 0));	
 		$this->addRightFrontSystem(new AntiprotonDefender(3, 0, 0, 0, 120));
 				
+		$this->addRightAftSystem(new VreeStructureTechnical(0, 0, 0, 0));	
 		$this->addRightAftSystem(new AntiprotonDefender(3, 0, 0, 60, 180));
 		
        

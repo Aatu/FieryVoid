@@ -41,11 +41,15 @@ class Xeel extends VreeCapital{
         $this->addAftSystem(new Thruster(4, 12, 0, 7, 2));
         
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
+		$this->addLeftFrontSystem(new VreeStructureTechnical(0, 0, 0, 0));	
 				
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
+		$this->addLeftAftSystem(new VreeStructureTechnical(0, 0, 0, 0));	
 		
+		$this->addRightFrontSystem(new VreeStructureTechnical(0, 0, 0, 0));	
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
 				
+		$this->addRightAftSystem(new VreeStructureTechnical(0, 0, 0, 0));	
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
 		
        
