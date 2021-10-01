@@ -43,14 +43,18 @@ class Vaarl extends VreeHCV{
         $this->addAftSystem(new Thruster(3, 12, 0, 7, 2));
         
 		$this->addLeftFrontSystem(new AntiprotonDefender(2, 0, 0, 240, 0));
-		$this->addLeftFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60)); 
-		
-		$this->addRightFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60)); 
-		$this->addRightFrontSystem(new AntiprotonDefender(2, 0, 0, 0, 120)); 						        
+		$this->addLeftFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60));
+		$this->addLeftFrontSystem(new VreeStructureTechnical(0, 0, 0, 0));	 
 		
 		$this->addLeftAftSystem(new AntiprotonDefender(2, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240));
-		 
+		$this->addLeftAftSystem(new VreeStructureTechnical(0, 0, 0, 0));	
+		
+		$this->addRightFrontSystem(new VreeStructureTechnical(0, 0, 0, 0));		
+		$this->addRightFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60)); 
+		$this->addRightFrontSystem(new AntiprotonDefender(2, 0, 0, 0, 120)); 
+					        
+		$this->addRightAftSystem(new VreeStructureTechnical(0, 0, 0, 0));	
 		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 60, 180));  
 		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240)); 
        
