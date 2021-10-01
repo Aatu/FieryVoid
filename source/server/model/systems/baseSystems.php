@@ -2841,11 +2841,10 @@ class VreeStructureTechnical extends ShipSystem{
 	public $isTargetable = false; //cannot be targeted ever!
 	
    function __construct($armour, $maxhealth, $powerReq, $output){
-	    parent::__construct($armour, $maxhealth, $powerReq, $output);
+	    parent::__construct(0, 1, 0, 0); //$armour, $maxhealth, $powerReq, $output
 		}
       
 }//endof VreeStructurePlaceholder	
-
 
 
 ?>
