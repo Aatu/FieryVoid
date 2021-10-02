@@ -54,6 +54,7 @@ class BaseShip {
    
     protected $activeHitLocations = array(); //$shooterID->targetSection ; no need for this to go public! just making sure that firing from one unit is assigned to one section
     protected $VreeHitLocations = false; //Value to indicate that all gunfire from the same ship may not hit same side on Vree capital ships	
+   
     //following values from DB
     public $id, $userid, $name, $campaignX, $campaignY;
     public $rolled = false;
