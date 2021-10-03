@@ -1,12 +1,12 @@
 <?php
-class Tzymm extends FighterFlight{
+class ZFtrTzymm extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 85*6;
 		$this->faction = "Vree";
-		$this->phpclass = "Tzymm";
+		$this->phpclass = "ZFtrTzymm";
         $this->shipClass = "Tzymm Heavy Fighters";
         $this->imagePath = "img/ships/VreeTzymm.png";
         
