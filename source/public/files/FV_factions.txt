@@ -426,6 +426,18 @@ Vorlon unit can pick only ONE Skin Color enhancement (game will not check this t
  - Crimson Skin Coloring: for warmongers, Power Capacitor improvement
   -- bonus works regardless of damage (tabletop: damage to Capacitor disables the enhancement and it needs to be separately repaired)
 	
+
+VREE
+INTRO/LORE. Saucers.  Antimatter weapons
+
+Below list of systems and rules Vree use, with short description of effect and design differences from original tabletop.
+- Vree capital ships have six outer hull sections, similar to starbases.  On Vree capital ships each section has it's own structure and functions the same as four-sided capital ships e.g. destruction of structure will also destroy any systems/weapons on the outer hull section. Side thrusters have been placed on primary structure of Vree capital ships to prevent their arbitrary placement on outer hull, however they are not included on the Primary Hitchart and instead can be hit by incoming fire to side sections, with FV prioritising the thrusters which is in arc of incoming shot where applicable i.e. shots from port side will prioritise port thruster.
+- On Vree HCV the weapons have been moved from forward and aft structures and will not be destroyed with outer hull sections, which is similar to tabletop rules for Vree.
+- Vree Medium Ships and Fighters function normally, albeit with 0 pivot cost and wider firing arcs on Zorth.
+- Unlike tabletop the Vree player is not able to select which weapon, thruster, structure is hit by incoming fire on capital ships and HCVs.  Instead FV will randomly allocate hits based on which sections/systems are in arc of the firing ship.  Note, unlike starbases, weapons fire from the same ship CAN hit different sections of a Vree ship to help maintain some of their durability in battle.
+- Turrets have been placed on the Primary structure of Vree ships, but do not appear on Primary Hit chart.  Instead there is a chance they will be hit by incoming fire from any direction, iwth overkill damage to Primary section.  All turrets have 360 degree firing arcs and unlike tabletop it was not possible to add to FV the restriction that weapons on the same turret must fire in the same 30 degree arc.  Consequently all Vree turret weapons can fire at the targets they desire in a 360 degree arc.
+- The Antimatter Shredder has not yet been implemented in the Xonn, Xill or Vaarka, until this weapon is available it has been temporarily replaced with two antimatter cannons. 
+
 	
 	
 YOLU
@@ -435,13 +447,13 @@ Fusion Agitator - Raking weapon that does damage in inefficient Raking(6) mode. 
 	
 
 
-ZESCALATION BLOOD SWORD RAIDERS (custom, alternate universe faction)
+zESCALATION BLOOD SWORD RAIDERS (custom, alternate universe faction)
 The Blood Swords were a pirate group active during the Circasian "Raider Wars" time period. They were a serious threat to the trade routes near the Thaline node of the Outward sector trade routes due to the size and capabilities of their warships. The raiders were eventually defeated by the Circasians, and their defeat marked the unofficial end of the Raider Wars.
 - This faction uses ships acquired from the Kastan, and have access to the same technologies as that faction
 
 
 
-ZESCALATION CHOUKA (custom, alternate universe faction)
+zESCALATION CHOUKA (custom, alternate universe faction)
 The Chouka Theocracy was a minor regional power in the Escalation Wars universe, and the Circasian's opponents in their first major interstellar war. The Chouka were more technologically advanced than the Circasians, but lacked the tactical experience and fleet assets to combat the more numerous and maneuverable Circasian fleet.
 The ships included here are the Chouka spacecraft that served during the Chouka War period. They are armed with a mix of plasma and laser weapons, with older Chouka ships relying on plasma weapons while their newer ships rely on lasers in the anti-shipping role. Plasma weapons continued to be used for anti-fighter work into the Chouka War period, however.
 As with the Circasians, the Chouka are best used against minor B5 powers (Alacans, Mitoc, Raiders), however some of their larger, more powerful units are roughly the equivalent of Dilgar-war era Earth Alliance. 
@@ -451,13 +463,13 @@ Twin Laser Cannon - This Chouka weapon is an advancement over the basic Light La
 Light Energy Mine - This is a smaller version of the Energy Mine used by the Narn. It has shorter range (25 hexes) and does less damage (10/5) than the conventional Energy Mine. This weapon is being substituted for the Ballistic Mine Launchers these ships historically were deployed with.
 
 
-ZESCALATION CHOUKA RAIDERS (custom, alternate universe faction)
+zESCALATION CHOUKA RAIDERS (custom, alternate universe faction)
 This group of raiders operated in and around Chouka controlled territories and were directly financed by the Chouka Theocracy. They were an early threat to the Circasian Empire as it expanded its own sphere of influence. 
 These raiders operate cast-off Chouka military and civilian ships and fighters. Their weapons are sourced from the Chouka, along with limited supplies from other black market sources.
 Because of their ties to the Chouka government, these raiders are fairly well armed compared to the Circasian and Chouka fleets and are comparable to other low tech raiders in the B5 universe.
 
 
-ZESCALATION CIRCASIAN (custom, alternate universe faction)
+zESCALATION CIRCASIAN (custom, alternate universe faction)
 The Circasians are one of the two central powers in the Escalation Wars milieu. These Dilgar-like humanoids started as a small minor power surrounded by other, more established empires but through political manuevering and conquest they were able to eventually carve out a major imperium of their own.
 The ships included here are low tech units the Circasians used during the Chouka War period. These vessels are principally armed with light particle, plasma, and laser weapons. Anything more powerful is beyond their level of technology at the start of the war.
 They are capable opponents against the minor B5 powers (Alacans, Hurr, Usuuth) but will be completely overwhelmed by more capable units.
@@ -468,7 +480,7 @@ The Circasian faction was created by Tyrel Lohr for his Escalation Wars setting.
 Fiery Void encoding done in collaboration with Geoffrey Stano.
 
 
-ZESCALATION KASTAN (custom, alternate universe faction)
+zESCALATION KASTAN (custom, alternate universe faction)
 The Kastan Imperial Monarchy inhabits a remote location of hyperspace deep within the Rapids of Rodirra, a treacherous section of hyperspace that makes travel to or from the Kastan territories difficult at best (and impossible at worst). Navigating the rapids has forced the Kastan to be superb pilots. The 
 Kastan have had limited interactions with their neighbors, although they do engage in trade and have been known to sell out their services as mercenaries. Most of their active political ambitions have focused on the coreward sectors, having fought back against an invasion by the Ingalli in recent history.
 - Plasma Cannons: older Kastan ships made heavy use of light, medium, and heavy plasma weapons
@@ -478,7 +490,7 @@ Kastan have had limited interactions with their neighbors, although they do enga
 - Pulse Torpedo: this weapon fires a number of small munitions at a target, designed to strip targets of weapons and external systems prior to closing to close range
 
 
-ZESCALATION SSHEL'ATH (custom, alternate universe faction)
+zESCALATION SSHEL'ATH (custom, alternate universe faction)
 The Sshel'ath Alliance was formed out of the civil war between the two largest Sshel'ath factions. The early Alliance focused on growth of the homeworld, as they were blocked by the more established Chouka Theocracy and Novon Trade Lords. Two conflicts with the Novon showed that action against this faction 
 was ill-advised. It wasn't until the later Circasian defeat of the Chouka that the Sshel'ath managed to expand into and capture several Chouka worlds. The Sshel'ath themselves are made of intertwined mass of rope-like elastic fibers, which allow for limited rearrangement of their body's form. Only their faces 
 are inelastic and they are highly resistant to radiation.
@@ -487,7 +499,7 @@ Electromagnetic Torpedo - The EM Torpedo was developed to counter Novon shields.
 Electron Polarizer - A flash mode electromagnetic weapon, this can destroy or short out numerous systems on a target.
 
 
-ZNEXUS BRIXADII (custom, alternate universe faction)
+zNEXUS BRIXADII (custom, alternate universe faction)
 The Brixadii Clans are a spinward power within the Nexus sector, having fought with the Dalithorn Commonwealth early on and having hostile relations with the Velrax Republic. The Brixadii's 
 technology is primarily focused around particle weapons. These are rugged, easy to repair, and low mass. The Clans have begun to specialize in pulsar technology as this affords superior mass to damage ratios. This last point is important as the key feature that defines the Clans are their extremely
 maneuverable ships. They have few longer-ranged weapons, but prefer high-speed firing passes or getting in close and using maneuverability to get advantageous shots. They do not field fighters and
@@ -499,7 +511,7 @@ Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort o
 without any restrictions, but they cannot boost their sensors.
 
 
-ZNEXUS DALITHORN  (custom, alternate universe faction)
+zNEXUS DALITHORN  (custom, alternate universe faction)
 The Dalithorn Commonwealth are likely the lowest tech of the main Nexus powers. They managed to leverage their position across a major trade route to keep their sovereignty up to the later years of
 the First War of Control in the 2150s. They primarily use terrestrial weapons converted for use in space combat. While individually weak, many of the weapons are treated as matter weapons, allowing
 the Dalithorn to cause some damage. Also, while simple, a number of their weapons are still effective, such as the gas gun. The Commonwealth does not use fighters in the traditional sense. They only
@@ -513,7 +525,7 @@ Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort o
 without any restrictions, but they cannot boost their sensors.
 
 
-ZNEXUS PLAYTEST SAL-BEZ  (custom, alternate universe faction)
+zNEXUS PLAYTEST SAL-BEZ  (custom, alternate universe faction)
 The Sal-bez Coalition is the first anti-spinward faction from Nexus to be brought into Fiery Void. This insectoid race started as a typical queen / worker arrangement, but during the Enlightenment of Fire, 
 the Sal-bez won their freedom. They are now a fiercly individualistic society. The Coalition did not have a traditional military upon reaching for the stars and their early units are exclusively civilian
 designs using industrial systems as makeshift weapons. As the Sal-bez grew (and discovered several technology caches from a previous power), they quickly began to field purpose-built combat vessels that 
@@ -524,7 +536,7 @@ Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort o
 without any restrictions, but they cannot boost their sensors.
 
 
-ZNEXUS VELRAX  (custom, alternate universe faction)
+zNEXUS VELRAX  (custom, alternate universe faction)
 The Velrax Republic is potentially the most aggressive, but not necessarily the most militarisitic faction within the Nexus setting. They have engaged both the Brixadii Clans and Dalithorn Commonwealth
 several times. In the chaos of the First War of Control, they did managed to conquer most of Dalithorn space. Unlike the Brixadii and Dalithorn, the Velrax are heavy fighter users and this plays into
 a rigid fleet structure. The Velrax field well armed "strike" carriers supported by anti-ship focused "gunships". Everything revolves around supporting their fighter operations. The carriers utilize plasma
@@ -538,7 +550,7 @@ Laser Spear - A precursor to the laser lances the Velrax eventually field.
 Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently and field Antiquated Sensors. This allows them to use EW 
 without any restrictions, but they cannot boost their sensors.
 	
-ZSTARWARS (custom, alternate universe faction)
+zSTARWARS (custom, alternate universe faction)
 Star Wars units, as designed by Wolfgang Lackner-Warton and Marcin Sawicki.
 We tried to make it playable against B5 fleets as well.
 Due to nature of StarWars universe, essentially any faction can use almost any unit. Primary users are indicated in notes though.
