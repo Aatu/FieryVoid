@@ -21,7 +21,7 @@ Fleet checker - tool that performs automatic check of fleet composition. Game do
 AVAILABLE FACTIONS
 ------------------
 
-ABBAI
+ABBAI MATRIARCHATE
 Gravitic Shield - most Abbai units are equipped with Gravitic Shield. Active shield reduces both hit chance and damage of incoming fire. At range 0 fighters are assumed to be able to come close enough to ignore ship shields.
 	Gravitic Shields are powered by separate generator, that can power up a limited number of them (usually not allowing a ship all-around protection unless generator output is boosted).
 Quad Array - 4 separate weapons in a single housing that's prone to overheating. Using more than 2 shots can cause forced shutdown for a turn, to cool down. Number of shots is changed by using alternate firing modes. Defensive fire is always safe. (this is somewhat changed from tabletop arrangement, where a regular critical is rolled instead - with defensive fire too).
@@ -32,16 +32,16 @@ Particle Impeder - purely defensive weapon, capable of intercepting weapons with
 	In effect, FV solution is more flexible (can boost Impeder without sacrificing protection in other arcs, can use power elsewhere), but weaker (in practice achievable boost is much lower, and requires forfeiting that point of EW), for hopefully similar overall power and playstyle.
 
 
-ABBAI (WotCR)
+ABBAI MATRIARCHATE (WotCR)
 Abbai fleet a few hundred years before the show era, representing Wars of the Centauri Republic period.
 They have Gravitic Shielding much like modern Abbai (although much weaker), and weapons being precursors to modern Comm Disruptor (Comm Jammer and Sensor Spike).
 Mine Launcher - weapon that can deploy mines during combat. Not implemented in FV, unit that has it (Motenai Mine Layer) is present in game but equipped with missile launchers instead.
 
-BALOSIAN
+BALOSIAN UNDERDWELLERS
 No notable special systems/rules.
 
 
-BRAKIRI
+BRAKIRI SYNDICRACY
 Gravitic Drive - adds a few perks to movement, notably being able to do all maneuvers even while pivoted/pivoting (they use thrusters appropriate for current orientation when pivoted). Also, Gravitic Thrusters ignore first "Efficiency Reduced" reduced critical, increasing their resistance to damage.
 Corporations - Brakiri are split into competing corporations. On each unit it's noted which Corporation produces a given design (if not - it's assumed that all Corporations have equal access to it). This is irrelevant when fielding national Brakiri fleet, but You have option of fielding single Corporation as well. In this case, You have access only to that Corporation's designs (and common ones), but all restrictions (deployment & variant) are eased by one level. For Variant restrictions this means Rare->Uncommon->Common, for deployment Restricted(10%)->Limited->(33%)->Unlimited.
 	Corporations have access to slightly different technologies and heave their own areas of specialisation, so their individual fleets are usually lacking in some area but have excellent access to something else.
@@ -54,14 +54,14 @@ Gravitic Shifter - weapon that rotates target, fired in special firing step befo
 Gravitic Mines - ballistic, hex-targeted weapon that can move units hit.
 	Not implemented in FV.
 
-CASCOR
+CASCOR COMMONWEALTH
 Ionizer - Laser-based primary fighter weapon. Unlike more typical fighter weapons it's uninterceptable, but also cannot itself intercept.
 Ion Field Generator - area-of effect weapon, targeted on a hex rather than ship. Units caught in area of effect have capabilities reduced next turn (reduced Initiative, Power, EW, OB, and has a chance to force shutdown a system).
 Poor acceleration - for ships it's just that, very high acceleration cost. For fighters, it's double acceleration cost - but medium and lighter fighters have unusually high thrust ratings, too. In effect they can't accelerate very well, but are exceptionally maneuvrable even at high speed.
 Ultralight fighters - smallest Cascor fighters are of Ultralight type, which allows them to efficiently fit into hangar space inended for larger fighters.
 Tiqincc - medium Cascor fighters have tail gun. In tabletop, this gun has -2 penalty when fired together with main gun. In FV it does not.
 
-CENTAURI
+CENTAURI REPUBLIC
 Ballistic Torpedo - in tabletop this weapon is able to target multiple units. In FV it's lacking this ability. Also, way to fire this weapon is very peculiar (You need to fire, THEN on the weapon itself indicate number of missiles launched).
 Plasma Stream - weapon that permanently reduces armor of systems hit (in FV - every system hit, in tabletop - only those hit by full rakes). Also, counts full armor for every rake, despite Raking mode. 
 Guardian Array - primarily defensive weapon that can intercept fire directed at third party, provided the weapon is between firing unit and it's target.
@@ -71,7 +71,7 @@ Guardian Array - primarily defensive weapon that can intercept fire directed at 
 
 
 
-CENTAURI (WotCR)
+CENTAURI REPUBLIC (WotCR)
 Centauri fleet a few hundred years before the show era, representing Wars of the Centauri Republic period.
 Sentinel Point Defense - Guardian Array precursor, with the same comments (except it doesn't have offensive mode available at all).
 
@@ -86,7 +86,7 @@ Commonly available/generic civilian ships - or, if they're faction-specific civi
 No very specific technologies (or technologies specific to base faction).
 
 
-CORILLANI
+CORILLANI THEOCRACY
 The Corillani are unusual in that they operate three independant navies, the Defenders of Corillan (DoC), the Corillani's People's Navy (CPN), and the Orillani Space Force (OSF).  Whilst these forces generally operate independently of one another they can, and will, fight alongside one another.  In practice, there is no restriction on mixing and matching ships from the three different sub-navies during fleet selection. However, when choosing fighters you must take the version of the Tillini which corresponds with the type of faction where hangar space is available i.e. DoC or OSF fighters could not be taken if the only hanger space available was on a CPN ship.
 The OSF use the unique Plasma Projector weapon which focuses plasma into tight beam, resulting in a longer range than most plasma weapons and with lower damage degradation.  It deals damage similar to a heavy plasma cannon, however this is applied in raking (8) mode rather than standard mode as with most other plasma weapons.
 
@@ -100,12 +100,12 @@ DENETH
 LCV Carrier - Deneth are the only official faction that have LCV carrier available, allowing these smallest ships to be fielded while conforming standard fleet composition rules. 
 
 
-DESCARI
+DESCARI COMMITTEES
 The Descari possess unique Plasma Bolter weapons which combine features from both plasma and bolter weapon types.  These weapons do a set damage amount and do not suffer the damage reduction typical in plasma weapons up to a set range (which varies depending on the type of Plasma Bolter used).  
 Aside from this the Descari field a mixed of typical missile, laser, plasma and light particle weaponry.
 
 
-DILGAR
+DILGAR IMPERIUM
 Pentacan Formation (Inverted Wedge Formation in AoG Wars) - Dilgar ships can benefit from using Pentacan formation. In FV the rules for it have been altered (mostly simplified).
 	Tabletop: Pentacan needs to be organized before battle begins (and there are strict requirements on number and size of ships in formation). Ships need to be within 10 hexes of Pentacan command ship to receive bonuses.
 		Bonuses are:
@@ -129,11 +129,11 @@ LCVs - Drakh LCVs use regular Sensors (that is, they're not bound by "all but 2 
 Hangar space - Drakh LCVs do require hangar space (like regular LCVs). They share it with Drakh fighters, although LCVs take twice as many slots.
 
 
-DRAZI
+DRAZI FREEHOLD
 No very specific rules/technologies, although using alternate HCV layout is very notable and results in surprisingly resilient ships.
 
 
-DRAZI (WotCR)
+DRAZI FREEHOLD (WotCR)
 Drazi fleet a few hundred years before the show era, representing Wars of the Centauri Republic period.
 No very specific rules/technologies.
 
@@ -149,7 +149,7 @@ The early Earth Alliance units are composed of semi-official custom designs that
 both the standard Earth Alliance fleet list as well as the early EA section. This is to represent their transitional nature from being high-end units in the early EA to very old units in the Dilgar War era. Although the more famous Starfuries (Tiger, Nova, Aurora) are unavailable 
 the early examples of the Starfury lineage (Flying Fox, Aries, and Atlas) formed the foundation of the fighter-heavy EA fleet in the future. 
 
-GAIM
+GAIM INTELLIGENCE
 Gaim are minor League race, but their ships are very good and their diversity is excellent - making them (in game, tactically ) in all respects equal to Big4 factions.
 Notable technologies:
 	Bulkheads - defensive system that can take damage first (after armor) when system is hit, which greatly increases resilience of Gaim systems. Bulkhead can protect systems on the same section, and structure it's mounted to (even if it's technically on different section, like on MCV). Note that PRIMARY systems are not protected by bulkheads. In FV decision whether to use bulkhead will be made automatically - Bulkheads will be used if they can prevent system destruction, when structure would be destroyed by the hit or when integrity of relevant Structure block remaining boxes fall too low. 
@@ -161,7 +161,7 @@ Notable technologies:
 	Scattergun - light weapon that fires random number of shots. When firing defensively (also random number of shots) those shots must be directed at separate threats.
 
 
-GROME
+GROME AUTOCRACY
 The Grome a low-tech faction that prides itself in only using what they can build themselves. Their armament is made entirely of matter class weapons.
 Notable technologies:
 	Antiquated Sensors - These sensors cannot be boosted beyond their base state.
@@ -177,11 +177,11 @@ Notable technologies:
 
 
 
-HURR
+HURR REPUBLIC
 Low-tech faction. No very specific rules/technologies.
 
 
-IPSHA
+IPSHA BARONIES
 Baronies - there is no Ipsha "national fleet". Ipsha species is split into "Baronies" (separate feudal-like states), and fielded fleet belongs to one of them. Player may use only generic designs in use by all Baronies and designs specific to one chosen Barony (it's indicated in unit notes). Similarly, some enhancements are Barony-specific.
 	In-game fleet checker does not take this rule into account.
 	Some "baronization" of ships is available through unit enhancements (eg. You can apply typical Essan changes to basic Ipsha design).
@@ -208,11 +208,11 @@ No very specific rules/technologies.
 It's worth noting that their ships are generally asymmetric and have atypical firing arcs and eclectic weapons sets.
 
 
-MARKAB
+MARKAB THEOCRACY
 Scattergun - see Gaim 
 
 
-MINBARI
+MINBARI FEDERATION
 Jammer - Minbari units are equipped with possibly the most powerful piece of defensive technology in game. It prevents lock-on (which means range penalties against Jammer-protected units are always doubled) and halves ballistic weapons launch range. Minbari themselves ignore Jammer.
 	Note that Jammer protection does not stack with jinking.
 Gravitic Drive - see Brakiri
@@ -373,7 +373,7 @@ Layout of their ships is atypical as well - highly assymetrical, with many core 
 Their design makes them a bit Ancient-like when it comes to balancing - they are very vulnerable in some situations and unbeatable in others. In particular they are essentially shut down if their opponent is resistant to Electromagnetic weapons (eg. Advanced Armor or EM Hardening).
 
 
-TORATA
+TORATA REGENCY
 Torata extensively use Accelerator weapons, either allowing them to fire faster at the price of decreased damage output (most ship weapons) or store double charge to be able to deal massive damage if fire is held for a turn (fighter weapons).
 Accelerator weapons will NOT be used for interception without explicit order to do so - even fighter guns! Also, full-charge mode is specifically anti-ship (cannot be used vs fighters) - for this reason it's an actual alternate mode and will NOT be used without explicit order (You'll fire in basic mode by default).
 
@@ -427,17 +427,16 @@ Vorlon unit can pick only ONE Skin Color enhancement (game will not check this t
   -- bonus works regardless of damage (tabletop: damage to Capacitor disables the enhancement and it needs to be separately repaired)
 	
 
-VREE
-INTRO/LORE. Saucers.  Antimatter weapons
+VREE CONGLOMERATE
+The Vree are an advanced race within the League of Non-Aligned Worlds that use a distinctive 'saucer' designs on all of their ships.  The Vree use antimatter weapons almost exclusively, which deal increased damage based on the difference between the base to-hit chance and actual hit rolled.  As a result their weapons are powerful at close and medium range but typically less effective at longer distances.
 
-Below list of systems and rules Vree use, with short description of effect and design differences from original tabletop.
-- Vree capital ships have six outer hull sections, similar to starbases.  On Vree capital ships each section has it's own structure and functions the same as four-sided capital ships e.g. destruction of structure will also destroy any systems/weapons on the outer hull section. Side thrusters have been placed on primary structure of Vree capital ships to prevent their arbitrary placement on outer hull, however they are not included on the Primary Hitchart and instead can be hit by incoming fire to side sections, with FV prioritising the thrusters which is in arc of incoming shot where applicable i.e. shots from port side will prioritise port thruster.
-- On Vree HCV the weapons have been moved from forward and aft structures and will not be destroyed with outer hull sections, which is similar to tabletop rules for Vree.
-- Vree Medium Ships and Fighters function normally, albeit with 0 pivot cost and wider firing arcs on Zorth.
+Below is a list of systems and rules Vree use, with short descriptions of effect and design differences in FV implementation from original tabletop.
+- Vree capital ships have six outer hull sections, similar to starbases.  On Vree capital ships each section has it's own structure and function the same as on normal four-sided capital ships e.g. destruction of structure will also destroy any systems/weapons on the outer hull section. Side thrusters have been placed on primary structure of Vree capital ships to prevent their arbitrary placement on outer hull, however they are not included on the Primary Hitchart and instead can be hit by incoming fire to side sections, with FV prioritising the thrusters which is in arc of incoming shot where applicable i.e. shots from port side will prioritise port thruster.
+- On Vree HCV the weapons have been moved from forward and aft structures to side structures and will not be destroyed with outer hull sections, which is similar to tabletop rules for Vree.
+- Vree Medium Ships and Fighters function normally, albeit with usual 0 pivot cost for Vree ships and wider firing arcs on Zorth.
 - Unlike tabletop the Vree player is not able to select which weapon, thruster, structure is hit by incoming fire on capital ships and HCVs.  Instead FV will randomly allocate hits based on which sections/systems are in arc of the firing ship.  Note, unlike starbases, weapons fire from the same ship CAN hit different sections of a Vree ship to help maintain some of their durability in battle.
 - Turrets have been placed on the Primary structure of Vree ships, but do not appear on Primary Hit chart.  Instead there is a chance they will be hit by incoming fire from any direction, iwth overkill damage to Primary section.  All turrets have 360 degree firing arcs and unlike tabletop it was not possible to add to FV the restriction that weapons on the same turret must fire in the same 30 degree arc.  Consequently all Vree turret weapons can fire at the targets they desire in a 360 degree arc.
 - The Antimatter Shredder has not yet been implemented in the Xonn, Xill or Vaarka, until this weapon is available it has been temporarily replaced with two antimatter cannons. 
-
 	
 	
 YOLU
