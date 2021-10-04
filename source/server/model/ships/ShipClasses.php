@@ -1331,7 +1331,7 @@ class BaseShip {
     }
     public function getHitSection($shooter, $turn, $returnDestroyed = false){ //returns value - location! DO NOT USE FOR BALLISTICS!
         $foundLocation = 0;
-        if(isset($this->activeHitLocations[$shooter->id]) && ($this->$VreeHitLocations != true)){
+        if(isset($this->activeHitLocations[$shooter->id]) && ($this->VreeHitLocations != true)){
             $foundLocation = $this->activeHitLocations[$shooter->id]["loc"];
         }else{
             $loc = $this->doGetHitSection($shooter); //finds array with relevant data!
