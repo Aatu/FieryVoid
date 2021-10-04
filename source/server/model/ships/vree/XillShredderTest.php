@@ -11,7 +11,7 @@ class XillShredderTest extends VreeCapital{
 		$this->isd = 2258;
 		$this->locations = array(41, 42, 2, 32, 31, 1);
 	      $this->unofficial = true;
-	//          	$this->variantOf = 'NOT YET EXISTING';					
+	          	$this->variantOf = 'NOT YET EXISTING';					
 
 		$this->shipSizeClass = 3;
 		$this->iniativebonus = 0;
