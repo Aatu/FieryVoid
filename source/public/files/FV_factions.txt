@@ -96,7 +96,7 @@ Units that, for some reason, were not fit for any faction.
 Mostly a technical directory, not representing a playable faction.
 
 
-DENETH
+DENETH ASSEMBLY
 LCV Carrier - Deneth are the only official faction that have LCV carrier available, allowing these smallest ships to be fielded while conforming standard fleet composition rules. 
 
 
@@ -243,7 +243,7 @@ NOTE: No other Minbari units, other than those listed in the fleet selection scr
 if part of a joint force with the Minbari Federation.
 
 
-NARN
+NARN REGIME
 Energy Mine - hex-targeted weapon, causing heavy damage to everything on hex hit and lighter to everything on adjacent hexes. 
 	Opponent does not see EMine target hexes (just the fact that they've been launched).
 	Not 100% accurate - a launched mine may scatter or fizzle.
@@ -252,7 +252,7 @@ Pulsar Mine - higly automated short-range weapon that fires at passing fighters 
 	In Fiery Void it is not implemented. Ships using it are also not present, bases have it replaced by other weapons.
 
 	
-ORIENI
+ORIENI IMPERIUM
 Hunter-Killer - Orieni long-range weapon of choice, and probably their most outstanding feature. They're very large (fighter-sized) missiles, using fighter rules and attacking by ramming.
 	They're automated, which means their parameters (primarily Initiative) are very poor for such small craft. But they're intended to engage capital ships, not other fighters.
 	They're controlled by Hunter-Killer Control Nodes on Orieni ships. If there is no such control (or it's inadequate) HKs operate autonomously, which further limits their performance.
@@ -265,7 +265,7 @@ Strike Force - Orieni military is split into a few branches. Of interest for fle
 	In-game checker does not take this rule into account.
 	
 
-RAIDERS
+RAIDERS & PRIVATEERS
 The Raiders are not a single faction with a standardized force list. The Raiders "faction" represents all kinds of pirates, privateers, and wanderers in the Babylon 5
 universe. Specific raider factions will be listed in the unit name, such as "Centauri Privateer". Any unit without a specific faction name is a generic raider and can be fielded by any Raider faction. It is impossible to generate 
 a fleet checker for all of the various combinations. The factions below offer options to build a more customized force. Still, Raiders are so varied, there is no wrong way to build a force from the genericly available units.
@@ -366,7 +366,7 @@ Vortex Disruptor - weapon that destabilizes hyperspace vortexes, preventing enem
 	Semi-trivia: Vortex Disruptor will not function properly while half-phased (will be able to fire, but not hit). 
 
 
-STREIB
+STREIB COLLECTORS
 A faction that has only one offically released ship (Collector), it was expanded a bit in BabCom by Paul Brown to create a playable faction.
 Streib are notable for their extremely tough armor (without any special properties though) and extensive use of energy draining/dropout causing weapons. 
 Layout of their ships is atypical as well - highly assymetrical, with many core systems placed on outer sections.
@@ -378,7 +378,7 @@ Torata extensively use Accelerator weapons, either allowing them to fire faster 
 Accelerator weapons will NOT be used for interception without explicit order to do so - even fighter guns! Also, full-charge mode is specifically anti-ship (cannot be used vs fighters) - for this reason it's an actual alternate mode and will NOT be used without explicit order (You'll fire in basic mode by default).
 
 
-USUUTH
+USUUTH COALITION
 No very specific rules or technologies.
 Their fleet relies on LCVs but doesn't have a carrier for them (it's not needed when they operate within home system).
 	This challenges Usuuth fleets when deploy under standard tournament/pickup battle limitations, unless rules are changed or allowances for Usuuth are made. 
@@ -439,7 +439,7 @@ Below is a list of systems and rules Vree use, with short descriptions of effect
 - The Antimatter Shredder has not yet been implemented in the Xonn, Xill or Vaarka, until this weapon is available it has been temporarily replaced with two antimatter cannons. 
 	
 	
-YOLU
+YOLU THEOCRACY
 Light Molecular Disruptor - armor-stripping heavy fighter weapon.
 Fusion Agitator - Raking weapon that does damage in inefficient Raking(6) mode. However, it ignores a point of armor (which helps), its raw damage output is decent, and if extra power is thrown in to boost it - damage output can rise to extremely high. Make no mistake: this is a very dangerous weapon! 
 	Many Yolu weapons have special features, usually relating to target armor - see descriptions.
