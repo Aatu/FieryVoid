@@ -2819,10 +2819,10 @@ capacitor is completely emptied.
 							
 } //endof PowerCapacitor
 
-class VreeStructureTechnical extends ShipSystem{
-    public $name = "VreeStructureTechnical";
-    public $displayName = "Vree Structure Technical";
-    public $iconPath = "VreeStructureTechnical.png";    
+class StructureTechnical extends ShipSystem{
+    public $name = "StructureTechnical";
+    public $displayName = "Structure Technical";
+    public $iconPath = "StructureTechnical.png";    
     
 	//Cannot be repaired
 	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired

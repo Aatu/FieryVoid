@@ -44,25 +44,25 @@ class Vaarl extends VreeHCV{
         
 		$this->addLeftFrontSystem(new AntiprotonDefender(2, 0, 0, 240, 0));
 		$this->addLeftFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60));
-		$this->addLeftFrontSystem(new VreeStructureTechnical(0, 0, 0, 0));	 
+		$this->addLeftFrontSystem(new StructureTechnical(0, 0, 0, 0));	 
 		
 		$this->addLeftAftSystem(new AntiprotonDefender(2, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240));
-		$this->addLeftAftSystem(new VreeStructureTechnical(0, 0, 0, 0));	
+		$this->addLeftAftSystem(new StructureTechnical(0, 0, 0, 0));	
 		
 	
 		$this->addRightFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60)); 
 		$this->addRightFrontSystem(new AntiprotonDefender(2, 0, 0, 0, 120)); 
-		$this->addRightFrontSystem(new VreeStructureTechnical(0, 0, 0, 0));			
+		$this->addRightFrontSystem(new StructureTechnical(0, 0, 0, 0));			
 					        
 
 		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 60, 180));  
 		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240)); 
-		$this->addRightAftSystem(new VreeStructureTechnical(0, 0, 0, 0));			
+		$this->addRightAftSystem(new StructureTechnical(0, 0, 0, 0));			
        
-	//	$this->addFrontSystem(new VreeStructurePlaceholder(0, 0, 0, 0)); 
+	//	$this->addFrontSystem(new StructurePlaceholder(0, 0, 0, 0)); 
         
-	//	$this->addAftSystem(new VreeStructurePlaceholder(0, 0, 0, 0)); 
+	//	$this->addAftSystem(new StructurePlaceholder(0, 0, 0, 0)); 
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 50));
