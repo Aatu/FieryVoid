@@ -336,7 +336,7 @@ window.shipWindowManager = {
 		var fDef = ship.forwardDefense*5;
 		var sDef = ship.sideDefense*5
 		abilities.push("&nbsp;Profile (F/S): " + fDef + "/" + sDef + "; Ini: " + ship.iniativebonus );
-		abilities.push("&nbsp;Acc: " + ship.accelcost + "  Roll:  " + ship.rollcost + "  Pivot: " + ship.pivotcost  );
+		abilities.push("&nbsp;Acc: " + ship.accelcost + "  Pivot:  " + ship.pivotcost + "  Roll: " + ship.rollcost  );
         }
 
 	if(ship.flight){
