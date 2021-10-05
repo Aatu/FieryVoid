@@ -25,7 +25,7 @@ class Xixx extends VreeHCV{
 		$this->forwardDefense = 13;
 		$this->sideDefense = 13;
 
-		$this->imagePath = "img/ships/VreeVaarl.png";
+		$this->imagePath = "img/ships/VreeXixx.png";
 		$this->canvasSize = 200;
 
 		$this->addPrimarySystem(new Reactor(4, 20, 0, 0));
