@@ -5,10 +5,10 @@ class VulcanDVahl extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 240;
-        $this->faction = "ZTrek Playtest Federation";
+        $this->faction = "ZTrek Playtest Vulcans";
         $this->phpclass = "VulcanDVahl";
         $this->imagePath = "img/ships/StarTrek/VulcanDVahl.png";
-        $this->shipClass = "Vulcan D'Vahl Light Explorer";
+        $this->shipClass = "D'Vahl Light Explorer";
 		
 
 	$this->unofficial = true;
@@ -24,7 +24,8 @@ class VulcanDVahl extends LCV{
         $this->accelcost = 1;
         $this->rollcost = 1;
         $this->pivotcost = 1;
-        $this->iniativebonus = 70;
+        $this->iniativebonus = 14 *5;
+		$this->hangarRequired = ''; //no hangar required!
 
 
 		$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
