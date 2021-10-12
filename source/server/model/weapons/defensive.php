@@ -286,7 +286,7 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $this->output);
         }
    
-        private function checkIsFighterUnderShield($target, $shooter){ //no flying under Impeder
+        private function checkIsFighterUnderShield($target, $shooter, $weapon){ //no flying under Impeder
             return false;
         }
 	    
@@ -403,7 +403,7 @@ class FtrShield extends Shield implements DefensiveSystem{
 		$this->damagePenalty = $this->getOutput();
     }
 	
-    private function checkIsFighterUnderShield($target, $shooter){ //no flying under fighter shield
+    private function checkIsFighterUnderShield($target, $shooter, $weapon){ //no flying under fighter shield
         return false;
     }
 	
