@@ -12,7 +12,7 @@ class VorlonHeavyCarrier extends VorlonCapitalShip{
 		$this->limited = 33;//while Cruiser itself is not so restricted; this is not a mistake
         //$this->occurence = "common";
         $this->imagePath = "img/ships/VorlonHeavyCruiser.png";
-        $this->canvasSize = 200;
+        $this->canvasSize = 250;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 3; 
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial

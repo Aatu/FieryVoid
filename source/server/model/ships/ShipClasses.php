@@ -35,7 +35,8 @@ class BaseShip {
     public $smallBase = false;
 	public $nonRotating = false; //some bases do not rotate - this attribute is used in combination with $base or $smallBase
 	public $osat = false; //true if object is OSAT (this includes MicroSATs and mines)
-    public $SixSidedShip = false;	
+    public $SixSidedShip = false;
+
 	
     public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for all systems)
 
@@ -50,8 +51,10 @@ class BaseShip {
     public $canvasSize = 200;
 
     public $outerSections = array(); //for determining hit locations in GUI: loc, min, max, call (loc is location id, min/max is for arc, call is true if location systems can be called)
-
+   
     protected $activeHitLocations = array(); //$shooterID->targetSection ; no need for this to go public! just making sure that firing from one unit is assigned to one section
+    protected $VreeHitLocations = false; //Value to indicate that all gunfire from the same ship may not hit same side on Vree capital ships	
+   
     //following values from DB
     public $id, $userid, $name, $campaignX, $campaignY;
     public $rolled = false;
@@ -1328,7 +1331,7 @@ class BaseShip {
     }
     public function getHitSection($shooter, $turn, $returnDestroyed = false){ //returns value - location! DO NOT USE FOR BALLISTICS!
         $foundLocation = 0;
-        if(isset($this->activeHitLocations[$shooter->id])){
+        if(isset($this->activeHitLocations[$shooter->id]) && ($this->VreeHitLocations != true)){
             $foundLocation = $this->activeHitLocations[$shooter->id]["loc"];
         }else{
             $loc = $this->doGetHitSection($shooter); //finds array with relevant data!
@@ -2305,4 +2308,47 @@ class VorlonCapitalShip extends SixSidedShip{
     }		
 } //end of VorlonCapitalShip
 
+class VreeCapital extends SixSidedShip{
+
+    protected $VreeHitLocations = true; //Value to indicate that all gunfire from the same ship may not hit same side on Vree capital ships
+    
+    public function getLocations(){
+        //debug::log("getLocations");         
+        $locs = array();
+
+        $locs[] = array("loc" => 1, "min" => 300, "max" => 60, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 41, "min" => 0, "max" => 120, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 42, "min" => 60, "max" => 180, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 2, "min" => 120, "max" => 240, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 32, "min" => 180, "max" => 300, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 31, "min" => 240, "max" => 360, "profile" => $this->sideDefense);
+
+        return $locs;
+    }
+} //end of VreeCapital
+
+
+class VreeHCV extends SixSidedShip{
+ 
+    protected $VreeHitLocations = true; //Value to indicate that all gunfire from the same ship may not hit same side on Vree capital ships
+        
+    public $shipSizeClass = 2;
+        
+    public function getLocations(){
+        //debug::log("getLocations");         
+        $locs = array();
+
+        $locs[] = array("loc" => 1, "min" => 300, "max" => 60, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 41, "min" => 0, "max" => 90, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 42, "min" => 90, "max" => 180, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 2, "min" => 120, "max" => 240, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 32, "min" => 180, "max" => 270, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 31, "min" => 270, "max" => 360, "profile" => $this->sideDefense);
+
+        return $locs;
+    }
+} //end of VreeHCV
+
+    
 ?>
+
