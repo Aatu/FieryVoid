@@ -5,10 +5,10 @@ class VulcanShran extends BaseShipNoAft{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 500;
-	$this->faction = "ZTrek Playtest Federation";
+	$this->faction = "ZTrek Playtest Vulcans";
         $this->phpclass = "VulcanShran";
         $this->imagePath = "img/ships/StarTrek/VulcanShran.png";
-        $this->shipClass = "Vulcan Sh'Ran Cruiser";
+        $this->shipClass = "Sh'Ran Cruiser";
 
 	$this->unofficial = true;
 	    $this->isd = '2140';
@@ -30,7 +30,7 @@ class VulcanShran extends BaseShipNoAft{
 	$this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 5, 5));
-	$this->addPrimarySystem(new Hangar(3, 4, 2));
+	$this->addPrimarySystem(new Hangar(3, 4, 4));
 
 	$impulseDrive = new TrekImpulseDrive(4,20,0,2,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 		
