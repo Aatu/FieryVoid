@@ -31,7 +31,9 @@ var Shield = function Shield(json, ship) {
 Shield.prototype = Object.create(ShipSystem.prototype);
 Shield.prototype.constructor = Shield;
 Shield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
-    if (shooter.flight && (mathlib.getDistanceBetweenShipsInHex(target, shooter) == 0)) return 0;
+    if (!weapon.ballistic) {
+        if (shooter.flight && (mathlib.getDistanceBetweenShipsInHex(target, shooter) == 0)) return 0;
+    }
     return shipManager.systems.getOutput(target, this);
 };
 
