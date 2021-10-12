@@ -7,7 +7,7 @@ class VulcanShuttle extends FighterFlight{
         $this->pointCost = 30 *6; //for 6
         $this->faction = "ZTrek Playtest Vulcans";
         $this->phpclass = "VulcanShuttle";
-        $this->shipClass = "Shuttles";
+        $this->shipClass = "Shuttle flight";
         $this->imagePath = "img/ships/StarTrek/VulcanShuttle.png";
 		$this->unofficial = true;
 		
