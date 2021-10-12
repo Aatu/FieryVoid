@@ -35,10 +35,11 @@ class MissileLauncher extends Weapon{
 
 		//Stabilized missiles should have triple the range, not double - Geoffrey (06 September 2021)
         if ($base){ //mounted on base - triple the launch range
+//GTS            $this->rangeMod = $this->rangeMod + ($this->range * 2); 
+//GTS            $this->range = $this->range * 3;            
             $this->rangeMod = $this->rangeMod + $this->range; 
-            $this->range = $this->range *2;            
-        }
-        
+            $this->range = $this->range *2;                    }
+
         $MissileB = new MissileB($startArc, $endArc, $this->fireControl);
         $this->missileArray = array(
             1 => $MissileB

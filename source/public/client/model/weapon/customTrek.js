@@ -1,8 +1,20 @@
+var TrekLtPhaseCannon = function TrekLtPhaseCannon(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekLtPhaseCannon.prototype = Object.create(Weapon.prototype);
+TrekLtPhaseCannon.prototype.constructor = TrekLtPhaseCannon;
+
 var TrekPhaseCannon = function TrekPhaseCannon(json, ship) {
     Weapon.call(this, json, ship);
 };
 TrekPhaseCannon.prototype = Object.create(Weapon.prototype);
 TrekPhaseCannon.prototype.constructor = TrekPhaseCannon;
+
+var TrekHvyPhaseCannon = function TrekHvyPhaseCannon(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekHvyPhaseCannon.prototype = Object.create(Weapon.prototype);
+TrekHvyPhaseCannon.prototype.constructor = TrekHvyPhaseCannon;
 
 var TrekPhotonicTorp = function TrekPhotonicTorp(json, ship) {
     Weapon.call(this, json, ship);
@@ -74,3 +86,61 @@ var TrekPhaserLance = function TrekPhaserLance(json, ship) {
 };
 TrekPhaserLance.prototype = Object.create(Weapon.prototype);
 TrekPhaserLance.prototype.constructor = TrekPhaserLance;
+
+var HvyPlasmaProjector = function HvyPlasmaProjector(json, ship) {
+    Weapon.call(this, json, ship);
+};
+HvyPlasmaProjector.prototype = Object.create(Weapon.prototype);
+HvyPlasmaProjector.prototype.constructor = HvyPlasmaProjector;
+
+var LtPlasmaProjector = function LtPlasmaProjector(json, ship) {
+    Weapon.call(this, json, ship);
+};
+LtPlasmaProjector.prototype = Object.create(Weapon.prototype);
+LtPlasmaProjector.prototype.constructor = LtPlasmaProjector;
+
+var TrekPlasmaBurst = function TrekPlasmaBurst(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekPlasmaBurst.prototype = Object.create(Weapon.prototype);
+TrekPlasmaBurst.prototype.constructor = TrekPlasmaBurst;
+
+TrekPlasmaBurst.prototype.clearBoost = function () {
+    for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
+
+        if (power.type == 2) {
+            system.power.splice(i, 1);
+
+            return;
+        }
+    }
+};
+
+TrekPlasmaBurst.prototype.hasMaxBoost = function () {
+    return true;
+};
+
+TrekPlasmaBurst.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
+TrekPlasmaBurst.prototype.initBoostableInfo = function () {
+    switch (shipManager.power.getBoost(this)) {
+        case 0:
+            this.data["Damage"] = '2-12';
+            this.data["Boostlevel"] = '0';
+            break;
+        case 1:
+            this.data["Damage"] = '4 - 24';
+            this.data["Boostlevel"] = '1';
+            break;
+
+        default:
+            this.data["Damage"] = '2-12';
+            this.data["Boostlevel"] = '0';
+            break;
+    }
+    return this;
+};

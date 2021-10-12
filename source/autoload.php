@@ -1541,12 +1541,12 @@ spl_autoload_register(
 
 
 				//Nexus ships - Craytan
-                'craytancorvette' => '/server/model/ships/ZNexusCraytan/CraytanCorvette.php',					
-                'craytancorvette2089' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2089.php',					
-                'craytancorvette2126' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2126.php',					
-                'craytanhepron' => '/server/model/ships/ZNexusCraytan/CraytanHepron.php',					
-                'craytanhepron2085' => '/server/model/ships/ZNexusCraytan/CraytanHepron2085.php',					
-                'craytanhepron2126' => '/server/model/ships/ZNexusCraytan/CraytanHepron2126.php',					
+//                'craytancorvette' => '/server/model/ships/ZNexusCraytan/CraytanCorvette.php',					
+//                'craytancorvette2089' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2089.php',					
+//                'craytancorvette2126' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2126.php',					
+//                'craytanhepron' => '/server/model/ships/ZNexusCraytan/CraytanHepron.php',					
+//                'craytanhepron2085' => '/server/model/ships/ZNexusCraytan/CraytanHepron2085.php',					
+//                'craytanhepron2126' => '/server/model/ships/ZNexusCraytan/CraytanHepron2126.php',					
 
 
 
@@ -2255,12 +2255,17 @@ spl_autoload_register(
 
 				//Star Trek conversions
 				//weapons
+				'trekltphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekphasecannon' => '/server/model/weapons/customTrek.php',
+				'trekhvyphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekspatialtorp' => '/server/model/weapons/customTrek.php',
 				'trekphotonictorp' => '/server/model/weapons/customTrek.php',
 				'trekphotontorp' => '/server/model/weapons/customTrek.php',
 				'trekphaser' => '/server/model/weapons/customTrek.php',
 				'trekphaserlance' => '/server/model/weapons/customTrek.php',
+//				'trekplasmaburst' => '/server/model/weapons/customTrek.php',
+				'hvyplasmaprojector' => '/server/model/weapons/customTrek.php',
+				'ltplasmaprojector' => '/server/model/weapons/customTrek.php',
 				
 				//systems
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php',

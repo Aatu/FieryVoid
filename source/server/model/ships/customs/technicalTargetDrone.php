@@ -47,7 +47,10 @@ class technicalTargetDrone extends BaseShip{
 //		$this->addFrontSystem(new PlasmaWeb(2, 4, 2, 0, 360));
 //		$this->addFrontSystem(new PlasmaWeb(2, 4, 2, 0, 360));
 
-		$this->addFrontSystem(new PlasmaBlast(2, 4, 2, 0, 360));
+//		$this->addFrontSystem(new PlasmaBlast(2, 4, 2, 0, 360));
+		$this->addFrontSystem(new graviticBolt(2, 5, 2, 0, 360));
+		$this->addFrontSystem(new FusionAgitator(2, 10, 4, 0, 360));
+//		$this->addFrontSystem(new TrekPlasmaBurst(2, 4, 1, 0, 360));
 		
 //		$this->addFrontSystem(new PlasmaWaveTorpedo(3, 0, 0, 300, 60));
 		//$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));
