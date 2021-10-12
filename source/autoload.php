@@ -2284,13 +2284,14 @@ spl_autoload_register(
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php',
 				
 				//ships
+		    /*
 				'deltaclassalpha' => '/server/model/ships/ZTrekFederation/DeltaClassAlpha.php',
 				'deltaclassbeta' => '/server/model/ships/ZTrekFederation/DeltaClassBeta.php',
 				'intrepidclass' => '/server/model/ships/ZTrekFederation/IntrepidClass.php',
 				'nxcruiser' => '/server/model/ships/ZTrekFederation/NXCruiser.php',
 				'nxshuttlepod' => '/server/model/ships/ZTrekFederation/NXShuttlepod.php',
 				'nxwarcruiser' => '/server/model/ships/ZTrekFederation/NXWarCruiser.php',
-				
+			*/	
 				'trekfederationnxcruiserv2' => '/server/model/ships/ZTrekFederation/TrekFederationNXCruiserV2.php',
 				'trekfederationconstitutioncl' => '/server/model/ships/ZTrekFederation/TrekFederationConstitutionCL.php',
 				'trekfederationconstitutioncmdcl' => '/server/model/ships/ZTrekFederation/TrekFederationConstitutionCmdCL.php',
@@ -2299,6 +2300,16 @@ spl_autoload_register(
 				'trekfederationintrepid' => '/server/model/ships/ZTrekFederation/TrekFederationIntrepid.php',
 				'trekfederationdeltaffalpha' => '/server/model/ships/ZTrekFederation/TrekFederationDeltaFFAlpha.php',
 				'trekfederationdeltaffbeta' => '/server/model/ships/ZTrekFederation/TrekFederationDeltaFFBeta.php',
+		    
+		    
+				'vulcandkyr' => '/server/model/ships/ZTrekFVulcans/VulcanDKyr.php',
+				'vulcandvahl' => '/server/model/ships/ZTrekFVulcans/VulcanDVahl.php',
+				'vulcanahran' => '/server/model/ships/ZTrekFVulcans/VulcanShran.php',
+				'vulcanahuttle' => '/server/model/ships/ZTrekFVulcans/VulcanShuttle.php',
+				'vulcanaurak' => '/server/model/ships/ZTrekFVulcans/VulcanSurak.php',
+				'vulcantimur' => '/server/model/ships/ZTrekFVulcans/VulcanTimur.php',
+				'vulcanvahklasr' => '/server/model/ships/ZTrekFVulcans/VulcanVahklas.php',
+		
 		    		
 				//Marcin Trek
                 'trekimpulsedrive' => '/server/model/weapons/customTrek.php',
