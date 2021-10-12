@@ -5,10 +5,10 @@ class VulcanSurak extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 350;
-        $this->faction = "ZTrek Playtest Federation";
+        $this->faction = "ZTrek Playtest Vulcans";
         $this->phpclass = "VulcanSurak";
         $this->imagePath = "img/ships/StarTrek/VulcanSurak.png";
-        $this->shipClass = "Vulcan Surak Light Cruiser";
+        $this->shipClass = "Surak Light Cruiser";
 			//$this->occurence = "uncommon";
 			//$this->variantOf = "Vulcan Surak Light Cruiser";
 
@@ -32,7 +32,7 @@ class VulcanSurak extends MediumShip{
         $this->addPrimarySystem(new Reactor(3, 11, 0, 0));
         $this->addPrimarySystem(new CnC(3, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 5, 5));
-        $this->addPrimarySystem(new Hangar(3, 3));
+        $this->addPrimarySystem(new Hangar(3, 3, 3));
 	$this->addPrimarySystem(new SWTractorBeam(2,0,360,1));
 	$impulseDrive = new TrekImpulseDrive(3,20,0,1,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 
