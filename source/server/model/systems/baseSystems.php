@@ -191,8 +191,9 @@ class Shield extends ShipSystem implements DefensiveSystem{
 		$this->damagePenalty = $this->getOutput();
     }
     
-    private function checkIsFighterUnderShield($target, $shooter){
+    private function checkIsFighterUnderShield($target, $shooter, $weapon){
 	if(!($shooter instanceof FighterFlight)) return false; //only fighters may fly under shield!
+	if($weapon && $weapon->ballistic) return false; //fighter missiles may NOT fly under shield
         $dis = mathlib::getDistanceOfShipInHex($target, $shooter);
         if ( $dis == 0 ){ //If shooter are fighers and range is 0, they are under the shield
             return true;
@@ -209,7 +210,7 @@ class Shield extends ShipSystem implements DefensiveSystem{
         if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn))
             return 0;
         
-        if ($this->checkIsFighterUnderShield($target, $shooter))
+        if ($this->checkIsFighterUnderShield($target, $shooter, $weapon))
             return 0;
 
         $output = $this->output;
@@ -221,7 +222,7 @@ class Shield extends ShipSystem implements DefensiveSystem{
         if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn())
             return 0;
         
-        if ($this->checkIsFighterUnderShield($target, $shooter))
+        if ($this->checkIsFighterUnderShield($target, $shooter, $weapon))
             return 0;
         
         if ($this->hasCritical('DamageReductionRemoved'))
