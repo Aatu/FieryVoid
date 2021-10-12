@@ -5,10 +5,10 @@ class VulcanDkyr extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 650;
-	$this->faction = "ZTrek Playtest Federation";
+	$this->faction = "ZTrek Playtest Vulcans";
         $this->phpclass = "VulcanDkyr";
         $this->imagePath = "img/ships/StarTrek/VulcanDKyr.png";
-        $this->shipClass = "Vulcan D'Kyr Heavy Cruiser";
+        $this->shipClass = "D'Kyr Heavy Cruiser";
 
 	$this->unofficial = true;
 	    $this->isd = '2140';
@@ -30,7 +30,7 @@ class VulcanDkyr extends BaseShip{
 	$this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 6, 6));
-	$this->addPrimarySystem(new Hangar(3, 4, 2));
+	$this->addPrimarySystem(new Hangar(3, 4, 4));
 
 	$impulseDrive = new TrekImpulseDrive(4,20,0,1,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 		
