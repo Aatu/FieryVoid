@@ -5,9 +5,9 @@ class VulcanShuttle extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 30 *6; //for 6
-        $this->faction = "ZTrek Playtest Federation";
+        $this->faction = "ZTrek Playtest Vulcans";
         $this->phpclass = "VulcanShuttle";
-        $this->shipClass = "Vulcan Shuttles";
+        $this->shipClass = "Shuttles";
         $this->imagePath = "img/ships/StarTrek/VulcanShuttle.png";
 		$this->unofficial = true;
 		
@@ -24,7 +24,7 @@ class VulcanShuttle extends FighterFlight{
 		$this->hangarRequired = "Shuttlecraft"; //I took category name from ST wikis
 		$this->unitSize = 1; //counted as singles
         
-       	$this->iniativebonus = 75;
+       	$this->iniativebonus = 15 *5;
         $this->populate();        
     }
     public function populate(){
@@ -34,7 +34,7 @@ class VulcanShuttle extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){   
             $armour = array(2, 2, 2, 2);
             $fighter = new Fighter("VulcanShuttle", $armour, 11, $this->id);
-            $fighter->displayName = "Vulcan Shuttle";
+            $fighter->displayName = "Shuttle";
 			
             $fighter->imagePath = "img/ships/StarTrek/VulcanShuttle.png";
             $fighter->iconPath = "img/ships/StarTrek/VulcanShuttle_Large.png";
@@ -43,7 +43,7 @@ class VulcanShuttle extends FighterFlight{
             $frontGun->displayName = "Ultralight Phase Cannon";
             $fighter->addFrontSystem($frontGun);
 			
-			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+		$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
             $this->addSystem($fighter);
         }
     }
