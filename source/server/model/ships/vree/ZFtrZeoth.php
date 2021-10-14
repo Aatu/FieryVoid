@@ -35,7 +35,7 @@ class ZFtrZeoth extends FighterFlight{
 			$fighter = new Fighter("Zeoth", $armour, 10, $this->id);
 			$fighter->displayName = "Zeoth";
 			$fighter->imagePath = "img/ships/VreeZeoth.png";
-			$fighter->iconPath = "img/ships/VreeZeoth_large.png";
+			$fighter->iconPath = "img/ships/VreeZeoth_Large.png";
 			
 			
             $fighter->addFrontSystem(new LightAntiprotonGun(330, 30, 1));
