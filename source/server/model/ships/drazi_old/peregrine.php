@@ -11,6 +11,7 @@ class Peregrine extends BaseShipNoAft{
         $this->shipClass = "Peregrine Jump Ship";
         $this->fighters = array("light" => 12);
         $this->limited = 33;
+        $this->canvasSize = 180;
         
         $this->isd = 1999;
         
@@ -28,7 +29,7 @@ class Peregrine extends BaseShipNoAft{
         $this->addPrimarySystem(new CnC(5, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 4, 7));
         $this->addPrimarySystem(new Engine(4, 15, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(4, 13));
+        $this->addPrimarySystem(new Hangar(3, 13));
         $this->addPrimarySystem(new JumpEngine(4, 12, 3, 38));
         $this->addPrimarySystem(new Thruster(4, 12, 0, 4, 2));
 	      $this->addPrimarySystem(new Thruster(4, 12, 0, 4, 2));

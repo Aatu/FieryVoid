@@ -46,10 +46,10 @@ class Kirva extends OSAT{
 					10 => "Thruster",
 					11 => "Sensor Spike",
 					12 => "Improved Comm Jammer",
-          				13 => "Light Particle Beam",
+      				13 => "Light Particle Beam",
 					15 => "Gravitic Shield",
 					17 => "Elint Scanner",
-					29 => "Reactor",
+					19 => "Reactor",
 					20 => "Shield Generator",
 			)
 		);

@@ -11,7 +11,7 @@ class Heron extends HeavyCombatVesselLeftRight{
         $this->shipClass = "Heron Minesweeper";
         
         $this->minesweeperbonus = 3;
-        
+        $this->canvasSize = 160;
 
         $this->occurence = 'uncommon'; 
         $this->variantOf = "Shrike Heavy Destroyer";
@@ -27,7 +27,7 @@ class Heron extends HeavyCombatVesselLeftRight{
         $this->pivotcost = 3;
         $this->iniativebonus = 40;
 
-        $this->addPrimarySystem(new Reactor(5, 12, 0, 0));
+        $this->addPrimarySystem(new Reactor(5, 10, 0, 2));
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 5, 6));
         $this->addPrimarySystem(new Engine(4, 12, 0, 7, 3));

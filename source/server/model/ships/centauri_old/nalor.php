@@ -7,7 +7,7 @@ class Nalor extends BaseShip{
 		$this->pointCost = 600;
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Nalor";
-        $this->imagePath = "img/ships/celerian.png";
+        $this->imagePath = "img/ships/nalor.png";
         $this->shipClass = "Nalor Armored Cruiser";
         $this->shipSizeClass = 3;
     //    $this->fighters = array("normal"=>12);
@@ -21,11 +21,11 @@ class Nalor extends BaseShip{
         $this->turncost = 1;
         $this->turndelaycost = 0.66;
         $this->accelcost = 3;
-        $this->rollcost = 2;
+        $this->rollcost = 3;
         $this->pivotcost = 3;
         $this->occurence = "uncommon";    
          
-        $this->addPrimarySystem(new Reactor(6, 16, 0, 3));
+        $this->addPrimarySystem(new Reactor(6, 16, 0, 4));
         $this->addPrimarySystem(new CnC(6, 14, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 18, 4, 8));
         $this->addPrimarySystem(new Engine(5, 20, 0, 9, 3));
@@ -34,7 +34,7 @@ class Nalor extends BaseShip{
         $this->addFrontSystem(new Thruster(5, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(5, 10, 0, 4, 1));
         $this->addFrontSystem(new HeavyPlasma(4, 8, 5, 300, 360));
-        $this->addFrontSystem(new MediumPlasma(3, 6, 3, 300, 60));
+        $this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
         $this->addFrontSystem(new HeavyPlasma(4, 8, 5, 0, 60));
 		
         $this->addAftSystem(new Thruster(4, 10, 0, 3, 2));

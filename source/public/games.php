@@ -62,9 +62,12 @@ if (isset($_SESSION["user"])) {
         <br>
 -->        
 		
-		---------- <b>LATEST NEWS - September 2021</b> ----------	   
-	    <br><b>Escalation Wars</b> - New faction, courtesy of Geoffrey!
-	    <br><b>Nexus</b> - New faction, courtesy of Geoffrey!
+		---------- <b>LATEST NEWS - October 2021</b> ----------	   
+	    <br><b>Stabilized missile launch ranges</b> - All missile racks on bases/OSATs, except "full" versions, now have the correct ranges (courtesy of Geoffrey)
+	    <br><b><u>Vree have arrived</u></b> - let's spin them in honor of Douglas! Beware, they're still early and subject to changes.
+	    <br><b>turn delay fix</b> - -1 thrust critical calculation corrected
+	    <br><b>fleet selection enhances</b> - now Acceleration, Pivot and Roll costs are visible
+	    <br><b>fighter ballistics vs shields fixed</b> - now fighter missiles won't ignore shields when their launch platforms get to range 0
 
 		
 	    

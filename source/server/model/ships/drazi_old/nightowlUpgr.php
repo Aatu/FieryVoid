@@ -2,6 +2,7 @@
 class NightowlUpgr extends BaseShipNoAft{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
+
         $this->pointCost = 600;
         $this->faction = "Drazi (WotCR)";
         $this->phpclass = "NightowlUpgr";
@@ -10,10 +11,11 @@ class NightowlUpgr extends BaseShipNoAft{
         $this->fighters = array("normal" => 12);
         $this->isd = 2014;
         $this->limited = 10;
+        $this->canvasSize = 180;
 
-	$this->unofficial = true;
+		$this->unofficial = true;
         $this->occurence = "uncommon";
-	$this->variantOf = 'Nightowl Hyperspace Probe'; 
+		$this->variantOf = 'Nightowl Hyperspace Probe'; 
 		$this->notes = 'ALTERNATE UNIVERSE - unit designed for "In ancient times" campaign';
 
         $this->forwardDefense = 18;

@@ -8,12 +8,12 @@ class Stormfalcon extends BaseShipNoAft{
         $this->pointCost = 725;
         $this->faction = "Drazi";
         $this->phpclass = "Stormfalcon";
-        $this->imagePath = "img/ships/drazi/stormfalcon2.png";
+        $this->imagePath = "img/ships/drazi/DraziStormfalcon.png";
         $this->shipClass = "Stormfalcon Heavy Cruiser";
         $this->fighters = array("light" => 12, "superheavy" => 1);
         $this->isd = 2238;
         $this->limited = 33;
-        $this->canvasSize = 256;
+        $this->canvasSize = 180;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 14;

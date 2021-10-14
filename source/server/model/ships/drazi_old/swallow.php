@@ -13,6 +13,7 @@ class Swallow extends HeavyCombatVesselLeftRight{
         $this->occurence = 'uncommon'; 
         $this->variantOf = "Shrike Heavy Destroyer";
         $this->isd = 1986;
+        $this->canvasSize = 160;
         
         $this->fighters = array("light" => 12);
         

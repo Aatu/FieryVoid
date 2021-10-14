@@ -31,19 +31,18 @@ class Erlorra extends BaseShip{
         $this->addPrimarySystem(new JumpEngine(5, 15, 5, 20));
   
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
-	$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
+		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         $this->addFrontSystem(new MagGun(4, 9, 8, 240, 30));
         $this->addFrontSystem(new ScatterPulsar(2, 4, 2, 270, 90));
-	$this->addFrontSystem(new HeavyPlasma(4, 8, 5, 0, 120));
+		$this->addFrontSystem(new HeavyPlasma(4, 8, 5, 0, 120));
         
         $this->addAftSystem(new ScatterPulsar(2, 4, 2, 120, 360));
-	$this->addAftSystem(new HeavyPlasma(4, 8, 5, 120, 240));
-	$this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 90, 270));
+		$this->addAftSystem(new HeavyPlasma(4, 8, 5, 120, 240));
+		$this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 90, 270));
         $this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 6, 0, 2, 2));
-
                 
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
         $this->addLeftSystem(new QuadPulsar(4, 10, 4, 180, 360));
@@ -52,9 +51,8 @@ class Erlorra extends BaseShip{
         $this->addRightSystem(new Thruster(4, 13, 0, 4, 4));
         $this->addRightSystem(new TwinArray(2, 6, 2, 0, 180));
         
-        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 5, 54));
+        $this->addFrontSystem(new Structure( 5, 44));
         $this->addAftSystem(new Structure( 5, 48));
         $this->addLeftSystem(new Structure( 5, 56));
         $this->addRightSystem(new Structure( 5, 64));

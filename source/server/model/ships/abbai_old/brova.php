@@ -4,8 +4,8 @@ class Brova extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 580;
-	$this->faction = "Abbai (WotCR)";
+		$this->pointCost = 580;
+		$this->faction = "Abbai (WotCR)";
         $this->phpclass = "Brova";
         $this->imagePath = "img/ships/AbbaiBrova.png";
         $this->shipClass = "Brova Jump Cruiser";
@@ -22,13 +22,13 @@ class Brova extends BaseShip{
         $this->accelcost = 4;
         $this->rollcost = 3;
         $this->pivotcost = 3;
-        $this->iniativebonus = +5;
+        $this->iniativebonus = 5;
         
         $this->addPrimarySystem(new Reactor(4, 15, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 14, 5, 8));
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 4));
- 	$this->addPrimarySystem(new Hangar(4, 2));
+		$this->addPrimarySystem(new Hangar(4, 2));
         $this->addPrimarySystem(new ShieldGenerator(5, 16, 4, 4));
    
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
@@ -78,7 +78,7 @@ class Brova extends BaseShip{
 			1=> array(
 					4 => "Thruster",
 					6 => "Gravitic Shield",	
-					7 => "Assault Laser",
+					8 => "Assault Laser",
 					10 => "Light Particle Beam",
 					17 => "Structure",
 					20 => "Primary",

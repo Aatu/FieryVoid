@@ -10,7 +10,8 @@ class Vaarka extends VreeHCV{
 		$this->shipClass = "Vaarka Escort Saucer";
 		$this->isd = 2257;
   		$this->occurence = "rare";
-    	$this->variantOf = 'Vaarl Scout Saucer';
+    	//$this->variantOf = 'Vaarl Scout Saucer';
+		$this->variantOf = "WAITING FOR SHREDDERS";
   		$this->locations = array(41, 42, 2, 32, 31, 1);  			
 	      $this->unofficial = true;
 

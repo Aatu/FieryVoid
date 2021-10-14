@@ -33,11 +33,13 @@ class MissileLauncher extends Weapon{
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $base=false){
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 
-        if ($base){ //mounted on base - double the launch range
-            $this->rangeMod = $this->rangeMod + $this->range; 
-            $this->range = $this->range *2;            
-        }
-        
+		//Stabilized missiles should have triple the range, not double - Geoffrey (06 September 2021)
+        if ($base){ //mounted on base - triple the launch range
+            $this->rangeMod = $this->rangeMod + ($this->range * 2); 
+			$this->range = $this->range * 3;            }
+//GTS            $this->rangeMod = $this->rangeMod + $this->range; 
+//GTS            $this->range = $this->range *2;                    }
+
         $MissileB = new MissileB($startArc, $endArc, $this->fireControl);
         $this->missileArray = array(
             1 => $MissileB
@@ -218,6 +220,21 @@ class LMissileRack extends MissileLauncher
 
     public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals 
 
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $base = false){
+
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+
+// Updated by Geoffrey Stano (13 October 21) to have B-Launchers fire at the correct range when stabilized.
+        if ($base){
+			$this->range = 20;
+			$this->distanceRange = 60;
+			$this->rangeMod = 10;
+            $this->rangeMod = $this->rangeMod + ($this->range * 2); 
+			$this->range = $this->range * 3;            
+			$this->distanceRange = $this->distanceRange + 10;
+        }		
+
+    }
     
     public function getDamage($fireOrder)
     {
@@ -242,8 +259,19 @@ class LHMissileRack extends MissileLauncher
     
     public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals 
     
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $base = false){
+
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+
+// Updated by Geoffrey Stano (13 October 21) to have B-Launchers fire at the correct range when stabilized.
+        if ($base){
+			$this->range = 20;
+			$this->distanceRange = 60;
+			$this->rangeMod = 10;
+            $this->rangeMod = $this->rangeMod + ($this->range * 2); 
+			$this->range = $this->range * 3;            
+			$this->distanceRange = $this->distanceRange + 10;
+        }		
 
     }
     
@@ -260,7 +288,7 @@ class BMissileRack extends MissileLauncher {
 
     public $name = "bMissileRack";
     public $displayName = "Class-B Missile Rack";
-    public $range = 30;
+    public $range = 20;
     public $distanceRange = 60;
     public $loadingtime = 1;
     public $iconPath = "missile3.png";
@@ -275,14 +303,20 @@ class BMissileRack extends MissileLauncher {
 
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 
-        if ($base){
+/*        if ($base){
             $this->range = 60;
             $this->rangeMod = 30;
         }
+*/		
+
+// Updated by Geoffrey Stano (13 October 21) to have B-Launchers fire at the correct range when stabilized.
+        if ($base){
+            $this->rangeMod = $this->rangeMod + ($this->range * 2); 
+			$this->range = $this->range * 3;            
+			$this->distanceRange = $this->distanceRange + 10;
+        }		
 
     }
-
-
 
     public function getDamage($fireOrder){
         return 20;
@@ -297,11 +331,24 @@ class AMissileRack extends MissileLauncher{
     public $name = "aMissileRack";
     public $displayName = "Class-A Missile Rack";
     public $range = 15;
+	public $rangeMod = -5;
     public $distanceRange = 45;
     public $loadingtime = 1;
     public $iconPath = "missile1.png";
 
     public $fireControl = array(10, 3, 3); // fighters, <mediums, <capitals 
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $base = false){
+
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+
+// Updated by Geoffrey Stano (13 October 21) to have A-Launchers fire at the correct range when stabilized.
+        if ($base){
+            $this->rangeMod = 25; 
+			$this->range = 45;
+        }		
+
+    }
     
     public function getDamage($fireOrder)
     {

@@ -6,8 +6,8 @@ class resolute2007 extends MediumShip{
         
 		$this->pointCost = 200;
 		$this->faction = "Orieni";
-        $this->phpclass = "Resolute";
-        $this->imagePath = "img/ships/fastFreighter.png";
+        $this->phpclass = "Resolute2007";
+        $this->imagePath = "img/ships/resolute.png";
         $this->shipClass = "Resolute Military Freighter (2007)";
 			$this->variantOf = "Resolute Military Freighter";
         $this->canvasSize = 100;

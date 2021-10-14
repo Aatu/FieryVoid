@@ -64,11 +64,10 @@ class Righteous1894 extends BaseShip{
 	    
 		//structures
         $this->addFrontSystem(new Structure(4, 48));
-        $this->addAftSystem(new Structure(4, 48));
+        $this->addAftSystem(new Structure(4, 44));
         $this->addLeftSystem(new Structure(4, 45));
         $this->addRightSystem(new Structure(4, 45));
         $this->addPrimarySystem(new Structure(5, 56));
-        
 	    
 	//d20 hit chart
 	$this->hitChart = array(

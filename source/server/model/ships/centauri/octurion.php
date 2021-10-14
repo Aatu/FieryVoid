@@ -55,9 +55,9 @@ class Octurion extends BaseShip{
 	$this->addAftSystem(new TwinArray(3, 6, 2, 60, 240));
 	$this->addAftSystem(new JumpEngine(6, 30, 4, 16)); 
 	$this->addAftSystem(new Thruster(5, 8, 0, 2, 2));
-        $this->addAftSystem(new Thruster(5, 8, 0, 2, 2));
         $this->addAftSystem(new Thruster(5, 16, 0, 3, 2));
         $this->addAftSystem(new Thruster(5, 16, 0, 3, 2));   
+        $this->addAftSystem(new Thruster(5, 8, 0, 2, 2));
 		
 		$this->addLeftSystem(new BattleLaser(4, 6, 6, 240, 0));
 		$this->addLeftSystem(new BattleLaser(4, 6, 6, 240, 0));

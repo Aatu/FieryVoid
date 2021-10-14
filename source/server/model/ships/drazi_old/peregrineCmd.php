@@ -13,7 +13,9 @@ class PeregrineCmd extends BaseShipNoAft{
         $this->limited = 33;
         $this->occurence = "rare";
         $this->variantOf = 'Peregrine Jump Ship';
-	$this->isd = 2065;
+		$this->isd = 2065;
+        $this->canvasSize = 180;
+
 	    $this->unofficial = true;
 		$this->notes = 'ALTERNATE UNIVERSE - unit designed for "In ancient times" campaign';
         
@@ -31,10 +33,10 @@ class PeregrineCmd extends BaseShipNoAft{
         $this->addPrimarySystem(new CnC(6, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 5, 8));
         $this->addPrimarySystem(new Engine(4, 15, 0, 9, 3));
-        $this->addPrimarySystem(new Hangar(4, 15));
+        $this->addPrimarySystem(new Hangar(3, 15));
         $this->addPrimarySystem(new JumpEngine(4, 12, 3, 38));
         $this->addPrimarySystem(new Thruster(4, 12, 0, 5, 2));
-	$this->addPrimarySystem(new Thruster(4, 12, 0, 5, 2));
+		$this->addPrimarySystem(new Thruster(4, 12, 0, 5, 2));
   
         $this->addFrontSystem(new SolarCannon(4, 7, 3, 300, 60));
         $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 240, 120));
@@ -43,7 +45,7 @@ class PeregrineCmd extends BaseShipNoAft{
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         
         $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 180, 0));
-	$this->addLeftSystem(new StdParticleBeam(3, 4, 1, 180, 0));
+		$this->addLeftSystem(new StdParticleBeam(3, 4, 1, 180, 0));
         $this->addLeftSystem(new ParticleCannon(3, 8, 7, 240, 60));
         $this->addLeftSystem(new Thruster(4, 16, 0, 5, 3));
         

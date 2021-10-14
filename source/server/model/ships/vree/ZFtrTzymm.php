@@ -19,8 +19,9 @@ class ZFtrTzymm extends FighterFlight{
         $this->offensivebonus = 5;
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
-        $this->iniativebonus = 80;
+        $this->iniativebonus = 16 *5;
 
+        $this->maxFlightSize = 6;//this fighter is partcularly large/tough even for Heavy fighter, limit flight size
         
         $this->populate();
     }

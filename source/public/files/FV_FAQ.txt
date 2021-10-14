@@ -50,7 +50,7 @@ ELECTRONIC WARFARE
 FIRING AND WEAPONS
  - Firing order of weapons: each weapon has priority number which determines order of firing. Player cannot influence it. It was tried to optimize effectiveness of weapons, but as in B5Wars every player prefers different firing pattern (and also it's influenced by a particular target) - usually it won't be as good as You could achieve manually.
  - Choosing target section: it's done automatically, based on algorithm that takes into account target section profile and remaining boxes of structure. Weapons from the same ship CAN be split between multiple sections if firing happens on dividing line. 
- - Choosing target system: it's done randomly out of eligible targets if there are multiple ones. 
+ - Choosing target system: it's done randomly out of eligible targets if there are multiple ones. UPDATE 13.09.2021: in-arc systems will be hit before off-arc ones (assumes that direction of damage comes from shot, which may be occassionally incorrect (eg. for Flash collateral damage)). 
  - Choosing target fighter: there is algorithm that tries to minimize damage done. However, it operates on expected damage instead of actual, and won't take into account most special effects.
  - You can target individual fighters (just target any of its systems). This will be treated as a called shot.
  - Fighter dropouts are done together with critical hits (so AFTER firing at ships, not before)
