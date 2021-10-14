@@ -50,33 +50,33 @@ class VulcanShran extends BaseShipNoAft{
 	$projection = new TrekShieldProjection(2, 20, 6, 180, 300, 'L');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projector = new TrekShieldProjector(1, 6, 2, 2, 180, 300, 'L'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
-		$this->addPortSystem($projector);
+		$this->addLeftSystem($projector);
 		$projector = new TrekShieldProjector(1, 6, 2, 2, 180, 300, 'L'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
-		$this->addPortSystem($projector);
-	$this->addPortSystem($projection);
-	$this->addPortSystem(new TrekPhotonicTorp(2, 6, 1, 240, 0));
-	$this->addPortSystem(new TrekLtPhaseCannon(2, 4, 2, 180, 360));
-	$this->addPortSystem(new TrekPhaseCannon(3, 6, 4, 120, 300));
+		$this->addLeftSystem($projector);
+	$this->addLeftSystem($projection);
+	$this->addLeftSystem(new TrekPhotonicTorp(2, 6, 1, 240, 0));
+	$this->addLeftSystem(new TrekLtPhaseCannon(2, 4, 2, 180, 360));
+	$this->addLeftSystem(new TrekPhaseCannon(3, 6, 4, 120, 300));
 	$warpNacelle = new TrekWarpDrive(3, 18, 0, 4); //armor, structure, power usage, impulse output
 	$impulseDrive->addThruster($warpNacelle);
-	$this->addPortSystem($warpNacelle);
+	$this->addLeftSystem($warpNacelle);
 
 
 	$projection = new TrekShieldProjection(2, 20, 6, 60, 180, 'R');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projector = new TrekShieldProjector(1, 6, 2, 2, 60, 180, 'R'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
-		$this->addStbdSystem($projector);
+		$this->addRightSystem($projector);
 		$projector = new TrekShieldProjector(1, 6, 2, 2, 60, 180, 'R'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
-		$this->addStbdSystem($projector);
-	$this->addStbdSystem($projection);
-	$this->addStbdSystem(new TrekPhotonicTorp(2, 6, 1, 0, 120));
-	$this->addStbdSystem(new TrekLtPhaseCannon(2, 4, 2, 0, 180));
-	$this->addStbdSystem(new TrekPhaseCannon(3, 6, 4, 60, 240));
+		$this->addRightSystem($projector);
+	$this->addRightSystem($projection);
+	$this->addRightSystem(new TrekPhotonicTorp(2, 6, 1, 0, 120));
+	$this->addRightSystem(new TrekLtPhaseCannon(2, 4, 2, 0, 180));
+	$this->addRightSystem(new TrekPhaseCannon(3, 6, 4, 60, 240));
 	$warpNacelle = new TrekWarpDrive(3, 18, 0, 4); //armor, structure, power usage, impulse output
 	$impulseDrive->addThruster($warpNacelle);
-	$this->addStbdSystem($warpNacelle);
+	$this->addRightSystem($warpNacelle);
 
 
 
@@ -90,8 +90,8 @@ class VulcanShran extends BaseShipNoAft{
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 36));
-        $this->addPortSystem(new Structure( 3, 36));
-        $this->addStbdSystem(new Structure( 3, 36));
+        $this->addLeftSystem(new Structure( 3, 36));
+        $this->addRightSystem(new Structure( 3, 36));
         $this->addPrimarySystem(new Structure( 3, 36));
 
 	    

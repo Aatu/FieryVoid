@@ -51,26 +51,26 @@ class VulcanDkyr extends BaseShip{
 	$projection = new TrekShieldProjection(2, 20, 6, 210, 330, 'L');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projector = new TrekShieldProjector(1, 6, 2, 2, 210, 330, 'L'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
-		$this->addPortSystem($projector);
+		$this->addLeftSystem($projector);
 		$projector = new TrekShieldProjector(1, 6, 2, 2, 210, 330, 'L'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
-		$this->addPortSystem($projector);
-	$this->addPortSystem($projection);
-	$this->addPortSystem(new TrekPhotonicTorp(2, 6, 1, 240, 0));
-	$this->addPortSystem(new TrekPhotonicTorp(2, 6, 1, 240, 0));
-	$this->addPortSystem(new TrekLtPhaseCannon(2, 4, 2, 180, 60));
+		$this->addLeftSystem($projector);
+	$this->addLeftSystem($projection);
+	$this->addLeftSystem(new TrekPhotonicTorp(2, 6, 1, 240, 0));
+	$this->addLeftSystem(new TrekPhotonicTorp(2, 6, 1, 240, 0));
+	$this->addLeftSystem(new TrekLtPhaseCannon(2, 4, 2, 180, 60));
 
 	$projection = new TrekShieldProjection(2, 20, 6, 30, 150, 'R');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projector = new TrekShieldProjector(1, 6, 2, 2, 30, 150, 'R'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
-		$this->addStbdSystem($projector);
+		$this->addRightSystem($projector);
 		$projector = new TrekShieldProjector(1, 6, 2, 2, 30, 150, 'R'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
-		$this->addStbdSystem($projector);
-	$this->addStbdSystem($projection);
-	$this->addStbdSystem(new TrekPhotonicTorp(2, 6, 1, 0, 120));
-	$this->addStbdSystem(new TrekPhotonicTorp(2, 6, 1, 0, 120));
-	$this->addStbdSystem(new TrekLtPhaseCannon(2, 4, 2, 300, 180));
+		$this->addRightSystem($projector);
+	$this->addRightSystem($projection);
+	$this->addRightSystem(new TrekPhotonicTorp(2, 6, 1, 0, 120));
+	$this->addRightSystem(new TrekPhotonicTorp(2, 6, 1, 0, 120));
+	$this->addRightSystem(new TrekLtPhaseCannon(2, 4, 2, 300, 180));
 
 	$warpNacelle = new TrekWarpDrive(3, 12, 0, 2); //armor, structure, power usage, impulse output
 	$impulseDrive->addThruster($warpNacelle);
@@ -108,8 +108,8 @@ class VulcanDkyr extends BaseShip{
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 36));
         $this->addAftSystem(new Structure( 3, 32));
-        $this->addPortSystem(new Structure( 3, 40));
-        $this->addStbdSystem(new Structure( 3, 40));
+        $this->addLeftSystem(new Structure( 3, 40));
+        $this->addRightSystem(new Structure( 3, 40));
         $this->addPrimarySystem(new Structure( 4, 36));
 
 	    

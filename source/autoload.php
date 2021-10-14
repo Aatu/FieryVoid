@@ -2311,15 +2311,15 @@ spl_autoload_register(
 				'trekfederationdeltaffalpha' => '/server/model/ships/ZTrekFederation/TrekFederationDeltaFFAlpha.php',
 				'trekfederationdeltaffbeta' => '/server/model/ships/ZTrekFederation/TrekFederationDeltaFFBeta.php',
 		    
-		    /* weapons for them are not ready yet!
-				'vulcandkyr' => '/server/model/ships/ZTrekFVulcans/VulcanDKyr.php',
-				'vulcandvahl' => '/server/model/ships/ZTrekFVulcans/VulcanDVahl.php',
-				'vulcanahran' => '/server/model/ships/ZTrekFVulcans/VulcanShran.php',
-				'vulcanahuttle' => '/server/model/ships/ZTrekFVulcans/VulcanShuttle.php',
-				'vulcanaurak' => '/server/model/ships/ZTrekFVulcans/VulcanSurak.php',
-				'vulcantimur' => '/server/model/ships/ZTrekFVulcans/VulcanTimur.php',
-				'vulcanvahklasr' => '/server/model/ships/ZTrekFVulcans/VulcanVahklas.php',
-		*/
+		    
+				'vulcandkyr' => '/server/model/ships/ZTrekVulcans/VulcanDKyr.php',
+				'vulcandvahl' => '/server/model/ships/ZTrekVulcans/VulcanDVahl.php',
+				'vulcanshran' => '/server/model/ships/ZTrekVulcans/VulcanShran.php',
+				'vulcanshuttle' => '/server/model/ships/ZTrekVulcans/VulcanShuttle.php',
+				'vulcansurak' => '/server/model/ships/ZTrekVulcans/VulcanSurak.php',
+				'vulcantimur' => '/server/model/ships/ZTrekVulcans/VulcanTimur.php',
+				'vulcanvahklasr' => '/server/model/ships/ZTrekVulcans/VulcanVahklas.php',
+		
 		    		
 				//Marcin Trek
                 'trekimpulsedrive' => '/server/model/weapons/customTrek.php',
