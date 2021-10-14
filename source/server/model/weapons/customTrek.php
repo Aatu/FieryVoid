@@ -45,6 +45,18 @@ class TrekImpulseDrive extends Engine{
 	
 	private $warpDrives = array();
 	
+	
+    public $possibleCriticals = array( //as actual output is minima, so should be crits!	     
+        16=>"OutputReduced1",
+        22=>"OutputReduced2",
+        28=>"ForcedOfflineOneTurn"
+	/*original Engine crits:    
+        15=>"OutputReduced2",
+        21=>"OutputReduced4",
+        28=>"ForcedOfflineOneTurn"
+	*/
+    );
+	
     
     function __construct($armour, $maxhealth, $powerReq, $output, $boostEfficiency){
         parent::__construct($armour, $maxhealth, $powerReq, $output, $boostEfficiency ); //($armour, $maxhealth, $powerReq, $output, $boostEfficiency
