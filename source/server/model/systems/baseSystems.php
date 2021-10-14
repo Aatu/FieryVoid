@@ -191,8 +191,9 @@ class Shield extends ShipSystem implements DefensiveSystem{
 		$this->damagePenalty = $this->getOutput();
     }
     
-    private function checkIsFighterUnderShield($target, $shooter){
+    private function checkIsFighterUnderShield($target, $shooter, $weapon){
 	if(!($shooter instanceof FighterFlight)) return false; //only fighters may fly under shield!
+	if($weapon && $weapon->ballistic) return false; //fighter missiles may NOT fly under shield
         $dis = mathlib::getDistanceOfShipInHex($target, $shooter);
         if ( $dis == 0 ){ //If shooter are fighers and range is 0, they are under the shield
             return true;
@@ -209,7 +210,7 @@ class Shield extends ShipSystem implements DefensiveSystem{
         if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn))
             return 0;
         
-        if ($this->checkIsFighterUnderShield($target, $shooter))
+        if ($this->checkIsFighterUnderShield($target, $shooter, $weapon))
             return 0;
 
         $output = $this->output;
@@ -221,7 +222,7 @@ class Shield extends ShipSystem implements DefensiveSystem{
         if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn())
             return 0;
         
-        if ($this->checkIsFighterUnderShield($target, $shooter))
+        if ($this->checkIsFighterUnderShield($target, $shooter, $weapon))
             return 0;
         
         if ($this->hasCritical('DamageReductionRemoved'))
@@ -833,7 +834,6 @@ class Thruster extends ShipSystem{
 } //endof Thruster
 
 
-
 class InvulnerableThruster extends Thruster{
 	/*sometimes thruster is techically necessary, despite the fact that it shouldn't be there (eg. on LCVs)*/
 	/*this thruster will be almost impossible to damage :) (it should be out of hit table, too!)*/
@@ -1019,7 +1019,7 @@ class Structure extends ShipSystem{
         parent::__construct($armour, $maxhealth, 0, 0);
     }
 } //endof Structure	
-	
+
 	
 /*custom system - Drakh Raider Controller*/
 class DrakhRaiderController extends ShipSystem {
@@ -2820,7 +2820,32 @@ capacitor is completely emptied.
 							
 } //endof PowerCapacitor
 
-
+class StructureTechnical extends ShipSystem{
+    public $name = "StructureTechnical";
+    public $displayName = "Structure Technical";
+    public $iconPath = "StructureTechnical.png";    
+    
+	//Cannot be repaired
+	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+ 
+     public function getArmourInvulnerable($target, $shooter, $dmgClass, $pos=null){ //this thruster should be invulnerable to anything...
+		$activeAA = 99;
+		return $activeAA;
+    }
+    
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);     
+	$this->data["Special"] = "This system is here for technical purposes only. Cannot be damaged in any way.";
+	}  
+	
+	public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
+	public $isTargetable = false; //cannot be targeted ever!
+	
+   function __construct($armour, $maxhealth, $powerReq, $output){
+	    parent::__construct(0, 1, 0, 0); //$armour, $maxhealth, $powerReq, $output
+		}
+      
+}//endof VreeStructurePlaceholder	
 
 
 ?>

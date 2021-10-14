@@ -2244,11 +2244,38 @@ spl_autoload_register(
 				'plasmablast' => '/server/model/weapons/plasma.php',
 				
 				//Vree
-				'sixtester' => '/server/model/ships/customs/SixTester.php',
-				'sixtester2' => '/server/model/ships/customs/SixTester2.php',
 				'sixsidedship' => '/server/model/ships/ShipClasses.php',
+				'vreecapital' => '/server/model/ships/ShipClasses.php',
+				'vreehcv' => '/server/model/ships/ShipClasses.php',
+				'structuretechnical' => '/server/model/systems/baseSystems.php',
+				'vreeportthruster' => '/server/model/systems/baseSystems.php',
+				'vreestarboardthruster' => '/server/model/systems/baseSystems.php',	 
 				'antimatterweapon' => '/server/model/weapons/antimatter.php',
 				'antiprotongun' => '/server/model/weapons/antimatter.php',
+				'antimattercannon' => '/server/model/weapons/antimatter.php',
+				'antiprotondefender' => '/server/model/weapons/antimatter.php',
+				'antimattertorpedo' => '/server/model/weapons/antimatter.php',
+				'lightantiprotongun' => '/server/model/weapons/antimatter.php',
+				'ltantimattercannon' => '/server/model/weapons/antimatter.php',
+				'antimattershredder' => '/server/model/weapons/antimatter.php',
+				'xorr' => '/server/model/ships/vree/Xorr.php',
+				'vaarl' => '/server/model/ships/vree/Vaarl.php',
+				'vymish' => '/server/model/ships/vree/Vymish.php',
+				'vaarka' => '/server/model/ships/vree/Vaarka.php',				
+				'xill' => '/server/model/ships/vree/Xill.php',
+				'xixx' => '/server/model/ships/vree/Xixx.php',
+				'xeel' => '/server/model/ships/vree/Xeel.php',	
+				'zftrtzymm' => '/server/model/ships/vree/ZFtrTzymm.php',			
+				'zftrzorth' => '/server/model/ships/vree/ZFtrZorth.php',														
+				'xeecra' => '/server/model/ships/vree/Xeecra.php',								
+				'xeon' => '/server/model/ships/vree/Xeon.php',	
+				'zftrzeoth' => '/server/model/ships/vree/ZFtrZeoth.php',							
+				'ximm' => '/server/model/ships/vree/Ximm.php',							
+				'xurr' => '/server/model/ships/vree/Xurr.php',							
+				'xonn' => '/server/model/ships/vree/Xonn.php',
+				'xvell' => '/server/model/ships/vree/Xvell.php',
+				'xavan' => '/server/model/ships/vree/Xavan.php',
+				'xillshreddertest' => '/server/model/ships/vree/XillShredderTest.php',
 
 
 				//other				
@@ -2275,13 +2302,6 @@ spl_autoload_register(
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php',
 				
 				//ships
-				'deltaclassalpha' => '/server/model/ships/ZTrekFederation/DeltaClassAlpha.php',
-				'deltaclassbeta' => '/server/model/ships/ZTrekFederation/DeltaClassBeta.php',
-				'intrepidclass' => '/server/model/ships/ZTrekFederation/IntrepidClass.php',
-				'nxcruiser' => '/server/model/ships/ZTrekFederation/NXCruiser.php',
-				'nxshuttlepod' => '/server/model/ships/ZTrekFederation/NXShuttlepod.php',
-				'nxwarcruiser' => '/server/model/ships/ZTrekFederation/NXWarCruiser.php',
-				
 				'trekfederationnxcruiserv2' => '/server/model/ships/ZTrekFederation/TrekFederationNXCruiserV2.php',
 				'trekfederationconstitutioncl' => '/server/model/ships/ZTrekFederation/TrekFederationConstitutionCL.php',
 				'trekfederationconstitutioncmdcl' => '/server/model/ships/ZTrekFederation/TrekFederationConstitutionCmdCL.php',
@@ -2290,6 +2310,16 @@ spl_autoload_register(
 				'trekfederationintrepid' => '/server/model/ships/ZTrekFederation/TrekFederationIntrepid.php',
 				'trekfederationdeltaffalpha' => '/server/model/ships/ZTrekFederation/TrekFederationDeltaFFAlpha.php',
 				'trekfederationdeltaffbeta' => '/server/model/ships/ZTrekFederation/TrekFederationDeltaFFBeta.php',
+		    
+		    
+				'vulcandkyr' => '/server/model/ships/ZTrekVulcans/VulcanDKyr.php',
+				'vulcandvahl' => '/server/model/ships/ZTrekVulcans/VulcanDVahl.php',
+				'vulcanshran' => '/server/model/ships/ZTrekVulcans/VulcanShran.php',
+				'vulcanshuttle' => '/server/model/ships/ZTrekVulcans/VulcanShuttle.php',
+				'vulcansurak' => '/server/model/ships/ZTrekVulcans/VulcanSurak.php',
+				'vulcantimur' => '/server/model/ships/ZTrekVulcans/VulcanTimur.php',
+				'vulcanvahklasr' => '/server/model/ships/ZTrekVulcans/VulcanVahklas.php',
+		
 		    		
 				//Marcin Trek
                 'trekimpulsedrive' => '/server/model/weapons/customTrek.php',
