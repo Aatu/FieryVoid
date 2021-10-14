@@ -1,17 +1,20 @@
 <?php
-class resolute2007 extends MediumShip{
+class resoluteHK2007 extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 200;
 		$this->faction = "Orieni";
-        $this->phpclass = "Resolute2007";
+        $this->phpclass = "ResoluteHK2007";
         $this->imagePath = "img/ships/resolute.png";
-        $this->shipClass = "Resolute Military Freighter (2007)";
+        $this->shipClass = "Resolute Hunter-Killer Conveyor (2007)";
 			$this->variantOf = "Resolute Military Freighter";
         $this->canvasSize = 100;
 	    $this->isd = 2007;
+
+        $this->fighters = array("normal"=>6);
+        $this->notes = 'Carries 6 hunter-killers in pods. Note, no hunter-killer controller.';
         
         $this->forwardDefense = 15;
         $this->sideDefense = 13;

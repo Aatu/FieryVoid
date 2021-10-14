@@ -72,6 +72,9 @@ if (isset($_SESSION["user"])) {
 	    <br><b>SCS compliance check</b> - Geoffrey ran a wide details check and corrected things like structure block sizes!
 	    <br><b>Drazi variant graphics</b> - courtesy of Lunara
 	    <br><b>Disruption EW fixed</b> - range limited to 30 hexes (previously: 50)
+        <br>
+		---------- <b>LATEST NEWS - October 2021</b> ----------	   
+	    <br><b>Stabilized missile launch ranges</b> - All missile racks on bases/OSATs, except "full" versions, now have the correct ranges
 
 		
 	    

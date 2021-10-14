@@ -1,17 +1,21 @@
 <?php
-class resolute2007 extends MediumShip{
+class resoluteHK extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 200;
+		$this->pointCost = 175;
 		$this->faction = "Orieni";
-        $this->phpclass = "Resolute2007";
+        $this->phpclass = "ResoluteHK";
         $this->imagePath = "img/ships/resolute.png";
-        $this->shipClass = "Resolute Military Freighter (2007)";
-			$this->variantOf = "Resolute Military Freighter";
+        $this->shipClass = "Resolute Hunter-Killer Conveyor";
+			$this->variantOf = "Resolute Military Freighter";	    
+			$this->occurence = "common";
         $this->canvasSize = 100;
-	    $this->isd = 2007;
+	    $this->isd = 1802;
+
+        $this->fighters = array("normal"=>6);
+        $this->notes = 'Carries 6 hunter-killers in pods. Note, no hunter-killer controller.';
         
         $this->forwardDefense = 15;
         $this->sideDefense = 13;
@@ -41,14 +45,14 @@ class resolute2007 extends MediumShip{
 		$this->addPrimarySystem(new Thruster(2, 13, 0, 4, 4));
 		
         $this->addFrontSystem(new Thruster(2, 12, 0, 6, 1));
-        $this->addFrontSystem(new RapidGatling(1, 4, 1, 240, 60));
-        $this->addFrontSystem(new RapidGatling(1, 4, 1, 300, 120));
+        $this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 240, 60));
+        $this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 300, 120));
         $this->addFrontSystem($cA);
         $this->addFrontSystem($cB);
         
         $this->addAftSystem(new Thruster(2, 15, 0, 8, 2));
-        $this->addAftSystem(new RapidGatling(1, 4, 1, 120, 300));
-        $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 240));
+        $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 120, 300));
+        $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 60, 240));
         $this->addAftSystem($cC);
         $this->addAftSystem($cD);
        
@@ -65,7 +69,7 @@ class resolute2007 extends MediumShip{
         		),
         		1=> array(
         				5 => "Thruster",
-                        7 => "Rapid Gatling Railgun",
+                        7 => "Gatling Railgun",
         				9 => "Cargo Bay A",
         				11 => "Cargo Bay B",
         				17 => "Structure",
@@ -73,7 +77,7 @@ class resolute2007 extends MediumShip{
         		),
         		2=> array(
         				5 => "Thruster",
-                        7 => "Rapid Gatling Railgun",
+                        7 => "Gatling Railgun",
         				9 => "Cargo Bay C",
         				11 => "Cargo Bay D",
         				17 => "Structure",

@@ -385,6 +385,41 @@
     }
 
 
+    class StrikeLaser extends Laser{
+        public $name = "StrikeLaser";
+        public $displayName = "Strike Laser";
+		public $iconPath = "StrikeLaser.png";
+        public $animation = "laser";
+        public $animationColor = array(220, 60, 120);
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.2;
+        public $priority = 8;
+
+        public $loadingtime = 4;
+
+        public $raking = 10;
+
+        public $rangePenalty = 0.5;
+        public $fireControl = array(null, 2, 2); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 7;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 4;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 3)+10; }
+        public function setMinDamage(){ $this->minDamage = 13 ; }
+        public function setMaxDamage(){ $this->maxDamage = 40 ; }
+    }
+
+
+
 
     class ImperialLaser extends Laser{
         public $name = "imperialLaser";
