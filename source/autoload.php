@@ -2310,15 +2310,16 @@ spl_autoload_register(
 				'trekfederationintrepid' => '/server/model/ships/ZTrekFederation/TrekFederationIntrepid.php',
 				'trekfederationdeltaffalpha' => '/server/model/ships/ZTrekFederation/TrekFederationDeltaFFAlpha.php',
 				'trekfederationdeltaffbeta' => '/server/model/ships/ZTrekFederation/TrekFederationDeltaFFBeta.php',
+				'nxshuttlepod' => '/server/model/ships/ZTrekFederation/NXShuttlepod.php',
 		    
 		    
-				'vulcandkyr' => '/server/model/ships/ZTrekVulcans/VulcanDKyr.php',
-				'vulcandvahl' => '/server/model/ships/ZTrekVulcans/VulcanDVahl.php',
-				'vulcanshran' => '/server/model/ships/ZTrekVulcans/VulcanShran.php',
-				'vulcanshuttle' => '/server/model/ships/ZTrekVulcans/VulcanShuttle.php',
-				'vulcansurak' => '/server/model/ships/ZTrekVulcans/VulcanSurak.php',
-				'vulcantimur' => '/server/model/ships/ZTrekVulcans/VulcanTimur.php',
-				'vulcanvahklasr' => '/server/model/ships/ZTrekVulcans/VulcanVahklas.php',
+				'vulcandkyr' => '/server/model/ships/ZTrekFederation/VulcanDKyr.php',
+				'vulcandvahl' => '/server/model/ships/ZTrekFederation/VulcanDVahl.php',
+				'vulcanshran' => '/server/model/ships/ZTrekFederation/VulcanShran.php',
+				'vulcanshuttle' => '/server/model/ships/ZTrekFederation/VulcanShuttle.php',
+				'vulcansurak' => '/server/model/ships/ZTrekFederation/VulcanSurak.php',
+				'vulcantimur' => '/server/model/ships/ZTrekFederation/VulcanTimur.php',
+				'vulcanvahklasr' => '/server/model/ships/ZTrekFederation/VulcanVahklas.php',
 		
 		    		
 				//Marcin Trek
