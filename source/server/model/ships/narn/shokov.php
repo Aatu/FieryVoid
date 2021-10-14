@@ -37,8 +37,8 @@ class Shokov extends MediumShip{
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new IonTorpedo(3, 5, 4, 240, 60));
-        $this->addFrontSystem(new IonTorpedo(3, 5, 4, 240, 120));
         $this->addFrontSystem(new IonTorpedo(3, 5, 4, 300, 120));
+        $this->addFrontSystem(new IonTorpedo(3, 5, 4, 240, 120));
 				
 		
         $this->addAftSystem(new Thruster(3, 10, 0, 6, 2));

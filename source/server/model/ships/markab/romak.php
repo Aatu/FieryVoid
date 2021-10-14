@@ -34,8 +34,8 @@ class Romak extends MediumShip{
         $this->addFrontSystem(new Thruster(3, 5, 0, 1, 1));
         $this->addFrontSystem(new Thruster(3, 5, 0, 1, 1));
         $this->addFrontSystem(new ScatterGun(2, 0, 0, 240, 0));
-        $this->addFrontSystem(new ScatterGun(2, 0, 0, 270, 90));
         $this->addFrontSystem(new ScatterGun(2, 0, 0, 0, 120));
+        $this->addFrontSystem(new ScatterGun(2, 0, 0, 270, 90));
         
         $this->addAftSystem(new Thruster(3, 8, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 8, 0, 2, 2));

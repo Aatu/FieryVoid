@@ -47,20 +47,24 @@ class technicalTargetDrone extends BaseShip{
 //		$this->addFrontSystem(new PlasmaWeb(2, 4, 2, 0, 360));
 //		$this->addFrontSystem(new PlasmaWeb(2, 4, 2, 0, 360));
 
-		$this->addFrontSystem(new PlasmaBlast(2, 4, 2, 0, 360));
+//		$this->addFrontSystem(new PlasmaBlast(2, 4, 2, 0, 360));
+//		$this->addFrontSystem(new graviticBolt(2, 5, 2, 0, 360));
+//		$this->addFrontSystem(new FusionAgitator(2, 10, 4, 0, 360));
+//		$this->addFrontSystem(new TrekPlasmaBurst(2, 4, 1, 0, 360));
 		
-//		$this->addFrontSystem(new PlasmaWaveTorpedo(3, 0, 0, 300, 60));
-		//$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));
-		//$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));
-		//$this->addFrontSystem(new ScatterGun(1, 0, 0, 270, 90));
-		
-		/*
-		$this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 60));
-		$this->addFrontSystem(new ImperialLaser(3, 8, 5, 300, 60));
-		$this->addFrontSystem(new ImperialLaser(3, 8, 5, 300, 60));
-		$this->addFrontSystem(new TwinArray(3, 6, 2, 240, 60));
-		$this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
-		*/
+		$this->addPrimarySystem(new AMissileRack(5, 6, 0, 0, 360));
+		$this->addPrimarySystem(new BMissileRack(6, 9, 0, 0, 360));
+        $this->addPrimarySystem(new MultiMissileLauncher(3, 'B', 0, 360));
+		$this->addPrimarySystem(new LMissileRack(5, 6, 0, 0, 360));
+        $this->addPrimarySystem(new MultiMissileLauncher(3, 'L', 0, 360));
+		$this->addPrimarySystem(new LHMissileRack(5, 6, 0, 0, 360));
+        $this->addPrimarySystem(new MultiMissileLauncher(3, 'LH', 0, 360));
+        $this->addPrimarySystem(new SoMissileRack(3, 6, 0, 0, 360));
+        $this->addPrimarySystem(new SMissileRack(3, 6, 0, 0, 360));
+		$this->addPrimarySystem(new MultiMissileLauncher(3, 'S', 0, 360));
+        $this->addPrimarySystem(new EWOMissileRack(3, 6, 0, 0, 360));
+        $this->addPrimarySystem(new RMissileRack(3, 6, 0, 0, 360));
+
 		
 		/*
 		$this->addFrontSystem(new CustomERLightPBeam(3, 0, 0, 240, 120));

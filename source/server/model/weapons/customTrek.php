@@ -88,6 +88,49 @@ class TrekImpulseDrive extends Engine{
 
 
 
+
+class TrekLtPhaseCannon extends Raking{
+		public $name = "TrekLtPhaseCannon";
+        public $displayName = "Light Phase Cannon";
+        public $iconPath = "TrekLightPhaseCannon.png";
+        public $animation = "laser";
+        public $animationColor = array(225, 0, 0);
+		public $animationExplosionScale = 0.25;
+		public $animationWidth = 3;
+		public $animationWidth2 = 0.2;
+
+        public $raking = 6;
+        
+        public $intercept = 2;
+		public $priority = 6; //light Raking		
+		
+        public $loadingtime = 1;
+		
+        public $rangePenalty = 1;
+        public $fireControl = array(3, 3, 3);
+
+        public $damageType = "Raking";
+		public $weaponClass = "Particle";
+		public $firingModes = array( 1 => "Raking");
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 4;
+			if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "Does damage in raking mode (6)";
+	}
+	
+        public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+
+}//end of class Trek Light Phase Cannon
+
+
 class TrekPhaseCannon extends Raking{
 		public $name = "TrekPhaseCannon";
         public $displayName = "Phase Cannon";
@@ -180,6 +223,98 @@ class TrekPhaseCannon extends Raking{
 		}
 
 }//end of class Trek Phase Cannon
+
+
+
+class TrekHvyPhaseCannon extends Raking{
+		public $name = "TrekHvyPhaseCannon";
+        public $displayName = "Heavy Phase Cannon";
+        public $iconPath = "TrekHeavyPhaseCannon.png";
+        public $animation = "laser";
+        public $animationColor = array(225, 0, 0);
+		public $animationExplosionScale = 0.25;
+		public $animationWidth = 5;
+		public $animationWidth2 = 0.4;
+
+        public $raking = 10;
+        
+        public $intercept = 1;
+		public $priority = 8; 		
+		
+        public $loadingtime = 2;
+		public $normalload = 3;
+		
+        public $rangePenalty = 0.33;
+        public $fireControl = array(0, 2, 3);
+
+        public $damageType = "Raking";
+		public $weaponClass = "Particle";
+		public $firingModes = array( 1 => "Raking");
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 8;
+			if ( $powerReq == 0 ) $powerReq = 5;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);   
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+			$this->data["Special"] .= "Can fire accelerated ROF for less damage:";  
+			$this->data["Special"] .= "<br> - 2 turns: 2d10+8"; 
+			$this->data["Special"] .= "<br> - 3 turns: 3d10+12"; 
+		}
+	
+		public function getDamage($fireOrder){
+        	switch($this->turnsloaded){
+            	case 0:
+            	case 1:
+                	return Dice::d(10,2)+8;
+			    	break;
+            	default:
+                	return Dice::d(10,3)+12;
+			    	break;
+        	}
+		}
+
+ 		public function setMinDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->minDamage = 10 ;
+                    break;
+                default:
+                    $this->minDamage = 28 ;  
+                    break;
+            }
+		}
+             
+        public function setMaxDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->maxDamage = 15 ;
+                    break;
+                default:
+                    $this->maxDamage = 42 ;  
+                    break;
+            }
+		}
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			return $strippedSystem;
+		}
+
+}//end of class Trek Heavy Phase Cannon
+
 
 
 
@@ -381,6 +516,113 @@ class TrekPhaserLance extends Raking{
 
 
 
+    class TrekPlasmaBurst extends Plasma{
+
+    	public $name = "TrekPlasmaBurst";
+        public $displayName = "Plasma Burst";
+		public $iconPath = "TrekPlasmaBurst.png";
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+    	public $trailColor = array(75, 250, 90);
+    	public $projectilespeed = 11;
+        public $animationWidth = 3;
+    	public $animationExplosionScale = 0.2;
+    	public $trailLength = 12;
+    	public $rangeDamagePenalty = 1;
+		public $priority = 4;
+
+        public $intercept = 0;
+        public $loadingtime = 1;
+
+        public $addedDice;
+        public $boostable = true;
+        public $boostEfficiency = 1;
+        public $maxBoostLevel = 1;
+
+        public $firingModes = array(
+            1 => "Standard"
+        );
+
+        public $rangePenalty = 1;
+        public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals
+
+
+        public function setSystemDataWindow($turn){
+            $boost = $this->getExtraDicebyBoostlevel($turn);            
+            parent::setSystemDataWindow($turn);
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            } 
+            $this->data["Special"] .= 'Standard power: 2d6 damage.';
+            $this->data["Special"] .= '<br>Double power: +2d6 damage, rolls for critical with +10 penalty.';
+            $this->data["Boostlevel"] = $boost;
+        }
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        private function getExtraDicebyBoostlevel($turn){
+            $add = 0;
+            switch($this->getBoostLevel($turn)){
+                case 1:
+                    $add = 2;
+                    break;
+                default:
+                    break;
+            }
+            return $add;
+        }
+
+         private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                if ($i->turn != $turn){
+                   continue;
+                }
+                if ($i->type == 2){
+                    $boostLevel += $i->amount;
+                }
+            }
+            return $boostLevel;
+        }
+
+        public function getDamage($fireOrder){
+            $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
+            $dmg = Dice::d(6, (2 + $add)) + 0;
+            return $dmg;
+        }
+
+        public function getAvgDamage(){
+            $this->setMinDamage();
+            $this->setMaxDamage();
+
+            $min = $this->minDamage;
+            $max = $this->maxDamage;
+            $avg = round(($min+$max)/2);
+            return $avg;
+        }
+
+        public function setMinDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->minDamage = 2 + ($boost * 2);
+        }   
+
+        public function setMaxDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->maxDamage = 12 + ($boost * 6);
+        }  
+   }   //end of class TrekPlasmaBurst
+
+
+
 class TrekSpatialTorp extends Torpedo{
         public $name = "TrekSpatialTorp";
         public $displayName = "Spatial Torpedo";
@@ -550,6 +792,90 @@ class TrekPhotonTorp extends Torpedo{
 }//endof TrekPhotonTorp
 
 
+
+class HvyPlasmaProjector extends Raking{
+
+	public $name = "HvyPlasmaProjector";
+	public $displayName = "Heavy Plasma Projector";
+	public $iconPath = "HeavyPlasmaProjector.png";
+	public $animation = "laser";
+	public $animationColor = array(75, 250, 90);
+    public $animationWidth = 5;
+    public $animationWidth2 = 0.3;
+	public $priority = 7;
+
+	public $rangeDamagePenalty = 0.25;
+	public $loadingtime = 4;
+	public $raking = 8;
+	public $rangePenalty = 0.33;
+	public $fireControl = array(null, 2, 4);
+
+	public $damageType = "Raking";
+	public $weaponClass = "Plasma";	
+	public $firingModes = array(1 => "Raking");
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 11;
+			if ( $powerReq == 0 ) $powerReq = 8;
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "Damage reduced by 1 points per 4 hexes.";
+			$this->data["Special"] .= "<br>Does damage in raking mode (8)";
+			$this->data["Special"] .= "<br>Ignores half of armor.";
+	}
+			
+    public function getDamage($fireOrder){        return Dice::d(10,5)+10;   }
+	public function setMinDamage(){     $this->minDamage = 15;      }
+	public function setMaxDamage(){     $this->maxDamage = 60;      }
+
+}// End of class HvyPlasmaProjector
+
+
+class LtPlasmaProjector extends Raking{
+
+	public $name = "LtPlasmaProjector";
+	public $displayName = "Light Plasma Projector";
+	public $iconPath = "LightPlasmaProjector.png";
+	public $animation = "laser";
+	public $animationColor = array(75, 250, 90);
+    public $animationWidth = 3;
+    public $animationWidth2 = 0.1;
+	public $priority = 5;
+
+	public $rangeDamagePenalty = 0.5;
+	public $loadingtime = 2;
+	public $raking = 8;
+	public $rangePenalty = 1;
+	public $fireControl = array(1, 2, 2);
+
+	public $damageType = "Raking";
+	public $weaponClass = "Plasma";	
+	public $firingModes = array(1 => "Raking");
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 6;
+			if ( $powerReq == 0 ) $powerReq = 3;
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "Damage reduced by 1 points per 2 hexes.";
+			$this->data["Special"] .= "<br>Does damage in raking mode (8)";
+			$this->data["Special"] .= "<br>Ignores half of armor.";
+	}
+			
+    public function getDamage($fireOrder){        return Dice::d(10,2)+5;   }
+	public function setMinDamage(){     $this->minDamage = 7;      }
+	public function setMaxDamage(){     $this->maxDamage = 25;      }
+
+}// End of class LtPlasmaProjector
+
+
+
 /* Star Trek shield projection
  note this is NOT a shield as far as FV recognizes it!
 */
@@ -589,7 +915,7 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 	public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){ //no shield-like damage reduction
 		return 0;
 	}
-    private function checkIsFighterUnderShield($target, $shooter){ //no flying under shield
+    private function checkIsFighterUnderShield($target, $shooter, $weapon){ //no flying under shield
         return false;
     }
 	

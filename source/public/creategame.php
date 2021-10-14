@@ -99,7 +99,7 @@ FORBIDDEN FACTIONS: none
                     </div>
                 </div>
 
-                <div style="margin-top:20px;"><h3>SIMULTAENOUS MOVEMENT</h3></div>
+                <div style="margin-top:20px;"><h3>SIMULTANEOUS MOVEMENT</h3></div>
                 <div id="simultaenousMovement" class="subpanel movementspacecontainer">
                     <div class="slot" >
                         <div>

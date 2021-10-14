@@ -491,6 +491,7 @@ spl_autoload_register(
                 'liberatorescort' => '/server/model/ships/deneth/liberatorEscort.php',
                 'liberatorplasma' => '/server/model/ships/deneth/liberatorPlasma.php',
                 'liberatorpulse' => '/server/model/ships/deneth/liberatorPulse.php',
+                'lightauxcarrier' => '/server/model/ships/civilians/lightAuxCarrier.php',
                 'lightballistictorpedo' => '/server/model/weapons/ammo.php',
                 'lightbolter' => '/server/model/weapons/particle.php',
                 'lightfusioncannon' => '/server/model/weapons/molecular.php',
@@ -770,6 +771,8 @@ spl_autoload_register(
                 'rongoth' => '/server/model/ships/narn/rongoth.php',
                 'roshanthi' => '/server/model/ships/drazi_old/Roshanthi.php',
                 'rothan' => '/server/model/ships/narn/rothan.php',
+                'ruffian' => '/server/model/ships/raiders/ruffian.php',
+                'ruffian1972' => '/server/model/ships/raiders/ruffian1972.php',
                 'rutarian' => '/server/model/ships/centauri/rutarian.php',
                 'sagittarius' => '/server/model/ships/EA/sagittarius.php',
                 'sakar' => '/server/model/ships/centauri_old/sakar.php',
@@ -892,6 +895,7 @@ spl_autoload_register(
                 'strikebird' => '/server/model/ships/drazi/strikebird.php',
                 'strikecarrier' => '/server/model/ships/raiders/strikeCarrier.php',
                 'strikehawk' => '/server/model/ships/drazi/strikehawk.php',
+                'strikelaser' => '/server/model/weapons/lasers.php',
                 'structure' => '/server/model/systems/baseSystems.php',
                 'stunbeam' => '/server/model/weapons/specialWeapons.php',
                 //'subreactor' => '/server/model/systems/baseSystems.php', //obsoleted!
@@ -983,6 +987,7 @@ spl_autoload_register(
                 'tetrav1954' => '/server/model/ships/abbai_old/tetrav1954.php',
                 'tgan' => '/server/model/ships/narn/tgan.php',
                 'thentus' => '/server/model/ships/narn/thentus.php',
+                'thirsta' => '/server/model/ships/raiders/thirsta.php',
                 'thorun' => '/server/model/ships/dilgar/thorun.php',
                 'thorunearly' => '/server/model/ships/dilgar/thorunEarly.php',
                 'thorunheavy' => '/server/model/ships/dilgar/thorunHeavy.php',
@@ -1540,6 +1545,8 @@ spl_autoload_register(
 //                'craytancorvette2089' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2089.php',					
 //                'craytancorvette2126' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2126.php',					
 //                'craytanhepron' => '/server/model/ships/ZNexusCraytan/CraytanHepron.php',					
+//                'craytanhepron2085' => '/server/model/ships/ZNexusCraytan/CraytanHepron2085.php',					
+//                'craytanhepron2126' => '/server/model/ships/ZNexusCraytan/CraytanHepron2126.php',					
 
 
 
@@ -2008,6 +2015,10 @@ spl_autoload_register(
 				'flyerassault' => '/server/model/ships/minbari/flyerAssault.php',
 				'flyercombat' => '/server/model/ships/minbari/flyerCombat.php',
 				'genericarmedshuttle' => '/server/model/ships/civilians/genericArmedShuttle.php',
+
+				//Base Testbed
+                'basetestbed' => '/server/model/ships/customs/baseTestbed.php',
+
 				
 				//Shadowtech
                 'technicaltestbed' => '/server/model/ships/customs/technicalTestbed.php',
@@ -2136,7 +2147,9 @@ spl_autoload_register(
                 'penitent1782' => '/server/model/ships/orieni/penitent1782.php',
                 'penitent2003' => '/server/model/ships/orieni/penitent2003.php',
 		    	'resolute' => '/server/model/ships/orieni/resolute.php',
+		    	'resolutehk' => '/server/model/ships/orieni/resoluteHK.php',
 		    	'resolute2007' => '/server/model/ships/orieni/resolute2007.php',
+		    	'resolutehk2007' => '/server/model/ships/orieni/resoluteHK2007.php',
 		    	'skywatch' => '/server/model/ships/orieni/skywatch.php',
 		    	'skywatch1810' => '/server/model/ships/orieni/skywatch1810.php',
 		    	'skywatch2003' => '/server/model/ships/orieni/skywatch2003.php',
@@ -2231,11 +2244,38 @@ spl_autoload_register(
 				'plasmablast' => '/server/model/weapons/plasma.php',
 				
 				//Vree
-				'sixtester' => '/server/model/ships/customs/SixTester.php',
-				'sixtester2' => '/server/model/ships/customs/SixTester2.php',
 				'sixsidedship' => '/server/model/ships/ShipClasses.php',
+				'vreecapital' => '/server/model/ships/ShipClasses.php',
+				'vreehcv' => '/server/model/ships/ShipClasses.php',
+				'structuretechnical' => '/server/model/systems/baseSystems.php',
+				'vreeportthruster' => '/server/model/systems/baseSystems.php',
+				'vreestarboardthruster' => '/server/model/systems/baseSystems.php',	 
 				'antimatterweapon' => '/server/model/weapons/antimatter.php',
 				'antiprotongun' => '/server/model/weapons/antimatter.php',
+				'antimattercannon' => '/server/model/weapons/antimatter.php',
+				'antiprotondefender' => '/server/model/weapons/antimatter.php',
+				'antimattertorpedo' => '/server/model/weapons/antimatter.php',
+				'lightantiprotongun' => '/server/model/weapons/antimatter.php',
+				'ltantimattercannon' => '/server/model/weapons/antimatter.php',
+				'antimattershredder' => '/server/model/weapons/antimatter.php',
+				'xorr' => '/server/model/ships/vree/Xorr.php',
+				'vaarl' => '/server/model/ships/vree/Vaarl.php',
+				'vymish' => '/server/model/ships/vree/Vymish.php',
+				'vaarka' => '/server/model/ships/vree/Vaarka.php',				
+				'xill' => '/server/model/ships/vree/Xill.php',
+				'xixx' => '/server/model/ships/vree/Xixx.php',
+				'xeel' => '/server/model/ships/vree/Xeel.php',	
+				'zftrtzymm' => '/server/model/ships/vree/ZFtrTzymm.php',			
+				'zftrzorth' => '/server/model/ships/vree/ZFtrZorth.php',														
+				'xeecra' => '/server/model/ships/vree/Xeecra.php',								
+				'xeon' => '/server/model/ships/vree/Xeon.php',	
+				'zftrzeoth' => '/server/model/ships/vree/ZFtrZeoth.php',							
+				'ximm' => '/server/model/ships/vree/Ximm.php',							
+				'xurr' => '/server/model/ships/vree/Xurr.php',							
+				'xonn' => '/server/model/ships/vree/Xonn.php',
+				'xvell' => '/server/model/ships/vree/Xvell.php',
+				'xavan' => '/server/model/ships/vree/Xavan.php',
+				'xillshreddertest' => '/server/model/ships/vree/XillShredderTest.php',
 
 
 				//other				
@@ -2246,24 +2286,22 @@ spl_autoload_register(
 
 				//Star Trek conversions
 				//weapons
+				'trekltphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekphasecannon' => '/server/model/weapons/customTrek.php',
+				'trekhvyphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekspatialtorp' => '/server/model/weapons/customTrek.php',
 				'trekphotonictorp' => '/server/model/weapons/customTrek.php',
 				'trekphotontorp' => '/server/model/weapons/customTrek.php',
 				'trekphaser' => '/server/model/weapons/customTrek.php',
 				'trekphaserlance' => '/server/model/weapons/customTrek.php',
+//				'trekplasmaburst' => '/server/model/weapons/customTrek.php',
+				'hvyplasmaprojector' => '/server/model/weapons/customTrek.php',
+				'ltplasmaprojector' => '/server/model/weapons/customTrek.php',
 				
 				//systems
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php',
 				
 				//ships
-				'deltaclassalpha' => '/server/model/ships/ZTrekFederation/DeltaClassAlpha.php',
-				'deltaclassbeta' => '/server/model/ships/ZTrekFederation/DeltaClassBeta.php',
-				'intrepidclass' => '/server/model/ships/ZTrekFederation/IntrepidClass.php',
-				'nxcruiser' => '/server/model/ships/ZTrekFederation/NXCruiser.php',
-				'nxshuttlepod' => '/server/model/ships/ZTrekFederation/NXShuttlepod.php',
-				'nxwarcruiser' => '/server/model/ships/ZTrekFederation/NXWarCruiser.php',
-				
 				'trekfederationnxcruiserv2' => '/server/model/ships/ZTrekFederation/TrekFederationNXCruiserV2.php',
 				'trekfederationconstitutioncl' => '/server/model/ships/ZTrekFederation/TrekFederationConstitutionCL.php',
 				'trekfederationconstitutioncmdcl' => '/server/model/ships/ZTrekFederation/TrekFederationConstitutionCmdCL.php',
@@ -2272,6 +2310,16 @@ spl_autoload_register(
 				'trekfederationintrepid' => '/server/model/ships/ZTrekFederation/TrekFederationIntrepid.php',
 				'trekfederationdeltaffalpha' => '/server/model/ships/ZTrekFederation/TrekFederationDeltaFFAlpha.php',
 				'trekfederationdeltaffbeta' => '/server/model/ships/ZTrekFederation/TrekFederationDeltaFFBeta.php',
+		    
+		    
+				'vulcandkyr' => '/server/model/ships/ZTrekVulcans/VulcanDKyr.php',
+				'vulcandvahl' => '/server/model/ships/ZTrekVulcans/VulcanDVahl.php',
+				'vulcanshran' => '/server/model/ships/ZTrekVulcans/VulcanShran.php',
+				'vulcanshuttle' => '/server/model/ships/ZTrekVulcans/VulcanShuttle.php',
+				'vulcansurak' => '/server/model/ships/ZTrekVulcans/VulcanSurak.php',
+				'vulcantimur' => '/server/model/ships/ZTrekVulcans/VulcanTimur.php',
+				'vulcanvahklasr' => '/server/model/ships/ZTrekVulcans/VulcanVahklas.php',
+		
 		    		
 				//Marcin Trek
                 'trekimpulsedrive' => '/server/model/weapons/customTrek.php',

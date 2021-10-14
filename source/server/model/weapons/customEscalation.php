@@ -270,7 +270,7 @@ class EWGatlingLaser extends Pulse{
         public $loadingtime = 2;
         public $intercept = 2; 
 		public $ballisticIntercept = true;
-        public $priority = 5; // 
+        public $priority = 4; //light Standard
 	protected $useDie = 3; //die used for base number of hits
 
         public $rangePenalty = 1;
@@ -476,7 +476,7 @@ class EWHeavyGatlingLaser extends Pulse{
         public $animationExplosionScale = 0.16;
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
-        public $priority = 7;
+        public $priority = 8;
         public $loadingtime = 2;
         
         public $raking = 10;
@@ -556,7 +556,7 @@ class EWHeavyGatlingLaser extends Pulse{
         public $loadingtime = 3;
 
         public $raking = 10;
-        public $priority = 6;
+        public $priority = 8;
         
         public $rangePenalty = 0.5;
         public $fireControl = array(-5, 1, 2); // fighters, <mediums, <capitals 
@@ -672,7 +672,7 @@ class EWHeavyGatlingLaser extends Pulse{
         public $projectilespeed = 25;
         public $animationWidth = 10;
         public $trailLength = 5;
-        public $priority = 3; //light Standard weapons
+        public $priority = 3; //very light Standard weapons
         public $uninterceptable = true; // This is a laser
 
         public $loadingtime = 1;
