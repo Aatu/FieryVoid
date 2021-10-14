@@ -4,8 +4,8 @@ class Benevolent1791 extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 600;
-	$this->faction = "Orieni";
+		$this->pointCost = 600;
+		$this->faction = "Orieni";
         $this->phpclass = "Benevolent1791";
         $this->imagePath = "img/ships/benevolent.png";
         $this->shipClass = "Benevolent Heavy Scout (early)";
@@ -24,7 +24,6 @@ class Benevolent1791 extends BaseShip{
         $this->rollcost = 3;
         $this->pivotcost = 3;
         $this->limited = 33;
-        
 	    
         $this->addPrimarySystem(new Reactor(5, 24, 0, 0));
         $this->addPrimarySystem(new CnC(6, 25, 0, 0));
@@ -51,7 +50,7 @@ class Benevolent1791 extends BaseShip{
         
         $this->addLeftSystem(new OrieniGatlingRG(1, 4, 1, 180, 360));
         $this->addLeftSystem(new OrieniGatlingRG(1, 4, 1, 180, 360));
-	$this->addLeftSystem(new Thruster(4, 20, 0, 6, 3));
+		$this->addLeftSystem(new Thruster(4, 20, 0, 6, 3));
 	    
         $this->addRightSystem(new RapidGatling(1, 4, 1, 0, 180));
         $this->addRightSystem(new RapidGatling(1, 4, 1, 0, 180));
@@ -59,7 +58,7 @@ class Benevolent1791 extends BaseShip{
 	    
 		//structures
         $this->addFrontSystem(new Structure(4, 48));
-        $this->addAftSystem(new Structure(4, 48));
+        $this->addAftSystem(new Structure(4, 44));
         $this->addLeftSystem(new Structure(4, 45));
         $this->addRightSystem(new Structure(4, 45));
         $this->addPrimarySystem(new Structure(5, 56));
@@ -68,36 +67,36 @@ class Benevolent1791 extends BaseShip{
 	$this->hitChart = array(
                 0=> array(
                         7 => "Structure",
-			9 => "Jump Engine",
+						9 => "Jump Engine",
                         12 => "ELINT Scanner",
                         14 => "Engine",
-			16 => "Hangar",
-			17 => "Class-SO Missile Rack",
+						16 => "Hangar",
+						17 => "Class-SO Missile Rack",
                         19 => "Reactor",
                         20 => "C&C",
                 ),
                 1=> array(
                         4 => "Thruster",
-			8 => "Laser Lance",
-			12 => "Gatling Railgun",
+						8 => "Laser Lance",
+						12 => "Gatling Railgun",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 2=> array(
-			6 => "Thruster",
+						6 => "Thruster",
                         9 => "Gatling Railgun",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 3=> array(
                         5 => "Thruster",
-			9 => "Gatling Railgun",
+						9 => "Gatling Railgun",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 4=> array(
                         5 => "Thruster",
-			9 => "Gatling Railgun",
+						9 => "Gatling Railgun",
                         18 => "Structure",
                         20 => "Primary",
                 ),

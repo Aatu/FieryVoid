@@ -4,8 +4,8 @@ class Benevolent extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 660;
-	$this->faction = "Orieni";
+		$this->pointCost = 660;
+		$this->faction = "Orieni";
         $this->phpclass = "Benevolent";
         $this->imagePath = "img/ships/benevolent.png";
         $this->shipClass = "Benevolent Heavy Scout";
@@ -57,7 +57,7 @@ class Benevolent extends BaseShip{
 
 		//structures
         $this->addFrontSystem(new Structure(4, 48));
-        $this->addAftSystem(new Structure(4, 48));
+        $this->addAftSystem(new Structure(4, 44));
         $this->addLeftSystem(new Structure(4, 45));
         $this->addRightSystem(new Structure(4, 45));
         $this->addPrimarySystem(new Structure(5, 56));
@@ -65,36 +65,36 @@ class Benevolent extends BaseShip{
 	$this->hitChart = array(
                 0=> array(
                         7 => "Structure",
-			9 => "Jump Engine",
+						9 => "Jump Engine",
                         12 => "ELINT Scanner",
                         14 => "Engine",
-			16 => "Hangar",
-			17 => "Class-S Missile Rack",
+						16 => "Hangar",
+						17 => "Class-S Missile Rack",
                         19 => "Reactor",
                         20 => "C&C",
                 ),
                 1=> array(
                         4 => "Thruster",
-			8 => "Heavy Laser Lance",
-			12 => "Rapid Gatling Railgun",
+						8 => "Heavy Laser Lance",
+						12 => "Rapid Gatling Railgun",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 2=> array(
-			6 => "Thruster",
+						6 => "Thruster",
                         9 => "Rapid Gatling Railgun",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 3=> array(
                         5 => "Thruster",
-			9 => "Rapid Gatling Railgun",
+						9 => "Rapid Gatling Railgun",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 4=> array(
                         5 => "Thruster",
-			9 => "Rapid Gatling Railgun",
+						9 => "Rapid Gatling Railgun",
                         18 => "Structure",
                         20 => "Primary",
                 ),
