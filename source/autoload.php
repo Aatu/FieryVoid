@@ -2015,6 +2015,10 @@ spl_autoload_register(
 				'flyerassault' => '/server/model/ships/minbari/flyerAssault.php',
 				'flyercombat' => '/server/model/ships/minbari/flyerCombat.php',
 				'genericarmedshuttle' => '/server/model/ships/civilians/genericArmedShuttle.php',
+
+				//Base Testbed
+                'basetestbed' => '/server/model/ships/customs/baseTestbed.php',
+
 				
 				//Shadowtech
                 'technicaltestbed' => '/server/model/ships/customs/technicalTestbed.php',
