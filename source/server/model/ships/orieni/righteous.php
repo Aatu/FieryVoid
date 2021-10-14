@@ -25,7 +25,6 @@ class Righteous extends BaseShip{
         $this->accelcost = 4;
         $this->rollcost = 3;
         $this->pivotcost = 3;
-
         
         $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
@@ -63,15 +62,12 @@ class Righteous extends BaseShip{
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
         $this->addRightSystem(new Thruster(4, 20, 0, 6, 4));
 
-
 		//structures
         $this->addFrontSystem(new Structure(4, 48));
-        $this->addAftSystem(new Structure(4, 48));
+        $this->addAftSystem(new Structure(4, 44));
         $this->addLeftSystem(new Structure(4, 45));
         $this->addRightSystem(new Structure(4, 45));
         $this->addPrimarySystem(new Structure(5, 56));
-        
-	    
 
 	//d20 hit chart
 	$this->hitChart = array(

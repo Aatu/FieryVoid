@@ -11,8 +11,8 @@ class skywatch1810 extends OSAT
 		$this->phpclass = "skywatch1810";
 		$this->shipClass = "Skywatch Heavy Orbital Satellite (Early)";
 			$this->variantOf = "Skywatch Heavy Orbital Satellite";		
-		$this->imagePath = "img/ships/OrieniHighguardOSAT.png";
-		$this->canvasSize = 100;
+		$this->imagePath = "img/ships/OrieniSkywatchOSAT.png";
+		$this->canvasSize = 150;
 		$this->isd = 1810;
 
         $this->fighters = array("medium"=>6);

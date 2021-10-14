@@ -4,14 +4,14 @@ class Kastona extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 530;
-	$this->faction = "Abbai (WotCR)";
+		$this->pointCost = 530;
+		$this->faction = "Abbai (WotCR)";
         $this->phpclass = "Kastona";
         $this->imagePath = "img/ships/AbbaiKastona.png";
         $this->shipClass = "Kastona Cruiser";
         $this->shipSizeClass = 3;
 
-	$this->isd = 2040;
+		$this->isd = 2040;
         
         $this->forwardDefense = 16;
         $this->sideDefense = 16;
@@ -19,15 +19,15 @@ class Kastona extends BaseShip{
         $this->turncost = 0.66;
         $this->turndelaycost = 0.66;
         $this->accelcost = 4;
-        $this->rollcost = 3;
-        $this->pivotcost = 2;
+        $this->rollcost = 2;
+        $this->pivotcost = 3;
         $this->iniativebonus = 0;
         
         $this->addPrimarySystem(new Reactor(5, 15, 0, 0));
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 12, 4, 6));
         $this->addPrimarySystem(new Engine(5, 14, 0, 8, 3));
- 	$this->addPrimarySystem(new Hangar(5, 2));
+		$this->addPrimarySystem(new Hangar(5, 2));
         $this->addPrimarySystem(new ShieldGenerator(6, 12, 4, 2));
    
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
@@ -40,9 +40,9 @@ class Kastona extends BaseShip{
 
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 0));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
-        $this->addAftSystem(new Thruster(3, 16, 0, 5, 2));
+        $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));
         $this->addAftSystem(new JumpEngine(5, 12, 4, 32));
-        $this->addAftSystem(new Thruster(3, 16, 0, 5, 2));
+        $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));
         $this->addAftSystem(new GraviticShield(0, 6, 0, 1, 180, 300));
         $this->addAftSystem(new GraviticShield(0, 6, 0, 1, 60, 180));
 

@@ -7,13 +7,13 @@ class Strikehawk extends HeavyCombatVesselLeftRight{
         $this->pointCost = 485;
         $this->faction = "Drazi";
         $this->phpclass = "Strikehawk";
-        $this->imagePath = "img/ships/drazi/sunhawk4.png";
+        $this->imagePath = "img/ships/drazi/DraziSunhawk.png";
         $this->shipClass = "Strikehawk Battle Carrier";
         $this->fighters = array("superheavy" => 1);
 	    $this->isd = 2220;
 	    $this->variantOf = "Sunhawk Battlecruiser"; //not noted on sheet, but fluf says so and it's consistent with name and silhouette
 
-        $this->canvasSize = 256;
+        $this->canvasSize = 180;
         $this->forwardDefense = 13;
         $this->sideDefense = 12;
         

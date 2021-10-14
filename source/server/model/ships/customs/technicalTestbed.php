@@ -86,6 +86,8 @@ class TechnicalTestbed extends MediumShip{
 
        	   
 	    //Structure
+        $this->addFrontSystem(new Structure( 3, 80));
+        $this->addAftSystem(new Structure( 3, 80));
         $this->addPrimarySystem(new Structure( 3, 80));
 		
 				

@@ -83,8 +83,8 @@ class WarlockMlpa extends BaseShip{
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 6, 72));
         $this->addAftSystem(new Structure( 5, 60));
-        $this->addLeftSystem(new Structure( 5, 75));
-        $this->addRightSystem(new Structure( 5, 75));
+        $this->addLeftSystem(new Structure( 5, 80));
+        $this->addRightSystem(new Structure( 5, 80));
         $this->addPrimarySystem(new Structure(6, 60));
 		
 		$this->hitChart = array(

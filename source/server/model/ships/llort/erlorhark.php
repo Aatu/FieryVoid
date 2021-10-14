@@ -58,7 +58,7 @@ class Erlorhark extends BaseShip{
         $this->addRightSystem(new Thruster(3, 6, 0, 1, 2));       
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 5, 54));
+        $this->addFrontSystem(new Structure( 5, 44));
         $this->addAftSystem(new Structure( 5, 48));
         $this->addLeftSystem(new Structure( 5, 56));
         $this->addRightSystem(new Structure( 5, 64));

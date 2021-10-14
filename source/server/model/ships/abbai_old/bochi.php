@@ -9,9 +9,9 @@ class Bochi extends OSAT{
         $this->phpclass = "Bochi";
         $this->imagePath = "img/ships/AbbaiBochi.png";
         $this->shipClass = 'Bochi Defense Satellite';
-        $this->canvasSize = 200;
+        $this->canvasSize = 100;
 
-        $this->isd = 1865;
+        $this->isd = 2030;
 
         $this->forwardDefense = 8;
         $this->sideDefense = 8;
@@ -22,6 +22,7 @@ class Bochi extends OSAT{
         $this->rollcost = 0;
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
+
         $this->addPrimarySystem(new Reactor(4, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 6, 2, 5)); 
         $this->addPrimarySystem(new Thruster(4, 5, 0, 0, 2)); 
@@ -43,10 +44,10 @@ class Bochi extends OSAT{
 					9 => "Structure",
 					10 => "Thruster",
 					12 => "Assault Laser",
-          				13 => "Light Particle Beam",
+       				13 => "Light Particle Beam",
 					15 => "Gravitic Shield",
 					17 => "Scanner",
-					29 => "Reactor",
+					19 => "Reactor",
 					20 => "Shield Generator",
 			)
 		);

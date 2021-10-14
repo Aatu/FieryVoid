@@ -7,11 +7,11 @@ class Sleekbird extends HeavyCombatVesselLeftRight{
         $this->pointCost = 400;
         $this->faction = "Drazi";
         $this->phpclass = "Sleekbird";
-        $this->imagePath = "img/ships/drazi/warbird3.png";
+        $this->imagePath = "img/ships/drazi/DraziWarbird.png";
         $this->shipClass = "Sleekbird Assault Cruiser";
 	    $this->variantOf = "Warbird Cruiser";
 	    $this->isd = 2052;
-        $this->canvasSize = 256;
+        $this->canvasSize = 160;
 	    
         $this->fighters = array("assault shuttles" => 6); //originally 3 AS and 3 Breaching Pods
 

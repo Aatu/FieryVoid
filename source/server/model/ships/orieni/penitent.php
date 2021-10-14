@@ -9,7 +9,7 @@ class penitent extends SmallStarBaseFourSections{
 		$this->faction = "Orieni";
 		$this->phpclass = "penitent";
 		$this->shipClass = "Penitent Station";
-		$this->imagePath = "img/ships/MarkabShadrakShrine.png";
+		$this->imagePath = "img/ships/penitent.png";
 		$this->canvasSize = 280; 
 		$this->fighters = array("light"=>24, "medium"=>24); 
 		$this->shipSizeClass = 3; 

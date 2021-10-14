@@ -32,7 +32,7 @@ class Brokados extends BaseShip{
         $this->addPrimarySystem(new Scanner(4, 16, 8, 8));
         $this->addPrimarySystem(new Engine(4, 16, 0, 12, 3));
         $this->addPrimarySystem(new JumpEngine(4, 12, 4, 28));
-		$this->addPrimarySystem(new Hangar(4, 30));
+		$this->addPrimarySystem(new Hangar(4, 30, 24));
         $this->addPrimarySystem(new ShieldGenerator(5, 16, 5, 3));
    
         $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 240, 60));

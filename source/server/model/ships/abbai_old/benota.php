@@ -4,13 +4,13 @@ class Benota extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 400;
-	$this->faction = "Abbai (WotCR)";
+		$this->pointCost = 400;
+		$this->faction = "Abbai (WotCR)";
         $this->phpclass = "Benota";
         $this->imagePath = "img/ships/AbbaiBenota.png";
         $this->shipClass = "Benota Fast Frigate";
 
-	$this->isd = 2030;
+		$this->isd = 2030;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 15;
@@ -26,7 +26,7 @@ class Benota extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 3, 5));
         $this->addPrimarySystem(new Engine(4, 14, 0, 10, 3));
- 	$this->addPrimarySystem(new Hangar(4, 1));
+		$this->addPrimarySystem(new Hangar(4, 1));
         $this->addPrimarySystem(new ShieldGenerator(4, 12, 4, 2));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4));

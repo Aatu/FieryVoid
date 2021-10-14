@@ -10,7 +10,7 @@ class CraytanCorvette extends MediumShip{
         $this->imagePath = "img/ships/Nexus/CraytanCorvette.png";
         $this->shipClass = "Corvette";
 		$this->unofficial = true;
-        $this->canvasSize = 75;
+        $this->canvasSize = 60;
         $this->agile = true;
 	    $this->isd = 2048;
         
@@ -51,26 +51,26 @@ class CraytanCorvette extends MediumShip{
 		
 		0=> array(
 			8 => "Thruster",
-			11 => "Scanner",
-			14 => "Engine",
-			16 => "Hangar",
+			11 => "Cargo Bay",
+			14 => "Scanner",
+			17 => "Engine",
 			19 => "Reactor",
 			20 => "C&C",
 		),
 
 		1=> array(
-			5 => "Thruster",
-			7 => "Medium Laser",
-			9 => "Light Laser",
-			10 => "Light Particle Beam",
+			6 => "Thruster",
+			8 => "Heavy Autocannon",
+			9 => "Close-In Defense System",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
-			7 => "Thruster",
-			9 => "Light Laser",
-			10 => "Light Particle Beam",
+			6 => "Thruster",
+			8 => "Medium Autocannon",
+			9 => "Close-In Defense System",
+			10 => "Hangar",
 			17 => "Structure",
 			20 => "Primary",
 		),
