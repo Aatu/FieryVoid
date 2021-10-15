@@ -68,8 +68,8 @@ if (isset($_SESSION["user"])) {
 	    <br><b>turn delay fix</b> - -1 thrust critical calculation corrected
 	    <br><b>fleet selection enhances</b> - now Acceleration, Pivot and Roll costs are visible
 	    <br><b>fighter ballistics vs shields fixed</b> - now fighter missiles won't ignore shields when their launch platforms get to range 0
-	    <br><b>early League</b> - early Brakiri and Abbai ships added (courtesy of Geoffrey)
-
+	    <br><b>Early Abbai</b> - Early versions of the Lakara, Miliani, and Tiraca from the Dilgar Invasion source book
+	    <br><b>Gravitic Bolt Brakiri</b> - Early versions of Brakiri vessels that used Gravitic Bolts before Graviton Pulsars
 		
 	    
         <br><br>
