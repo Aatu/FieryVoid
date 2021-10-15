@@ -12,7 +12,7 @@ class Avioki extends BaseShip{
         $this->shipSizeClass = 3;
 		
 		$this->notes = 'Ak-Habil Conglomerate';//Corporation producing the design
-		$this->isd = 2204;
+		$this->isd = 2250;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 18;
