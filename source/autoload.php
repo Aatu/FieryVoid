@@ -885,6 +885,7 @@ spl_autoload_register(
 		'sparkfield' => '/server/model/weapons/specialWeapons.php',
                 'sparkfieldhandler' => '/server/model/weapons/specialWeapons.php',
                 'specialability' => '/server/model/systems/baseSystems.php',
+                'spinallaser' => '/server/model/weapons/laser.php',
                 'starbase' => '/server/model/ships/ShipClasses.php',
                 'starbasefivesections' => '/server/model/ships/ShipClasses.php',
                 'starbasesixsections' => '/server/model/ships/ShipClasses.php',
@@ -2302,6 +2303,7 @@ spl_autoload_register(
 
 				//Star Trek conversions
 				//weapons
+				'trekftrphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekltphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekhvyphasecannon' => '/server/model/weapons/customTrek.php',
