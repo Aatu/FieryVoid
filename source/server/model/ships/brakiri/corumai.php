@@ -13,7 +13,7 @@ class Corumai extends BaseShip{
         $this->limited = 10;
         
 		$this->notes = 'Ak-Habil Conglomerate';//Corporation producing the design
-		$this->isd = 2230;
+		$this->isd = 2250;
 		
         $this->forwardDefense = 18;
         $this->sideDefense = 20;

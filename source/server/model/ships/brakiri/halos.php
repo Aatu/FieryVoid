@@ -14,7 +14,7 @@ class Halos extends BaseShip{
 	    $this->variantOf = "Avioki Heavy Cruiser";
         
 		$this->notes = 'Ak-Habil Conglomerate';//Corporation producing the design
-		$this->isd = 2219;
+		$this->isd = 2250;
 		
         $this->forwardDefense = 14;
         $this->sideDefense = 18;
