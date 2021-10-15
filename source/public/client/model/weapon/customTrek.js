@@ -4,6 +4,12 @@ var TrekLtPhaseCannon = function TrekLtPhaseCannon(json, ship) {
 TrekLtPhaseCannon.prototype = Object.create(Weapon.prototype);
 TrekLtPhaseCannon.prototype.constructor = TrekLtPhaseCannon;
 
+var TrekFtrPhaseCannon = function TrekFtrPhaseCannon(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekFtrPhaseCannon.prototype = Object.create(Weapon.prototype);
+TrekFtrPhaseCannon.prototype.constructor = TrekFtrPhaseCannon;
+
 var TrekPhaseCannon = function TrekPhaseCannon(json, ship) {
     Weapon.call(this, json, ship);
 };

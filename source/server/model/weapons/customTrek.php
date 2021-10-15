@@ -45,6 +45,18 @@ class TrekImpulseDrive extends Engine{
 	
 	private $warpDrives = array();
 	
+	
+    public $possibleCriticals = array( //as actual output is minima, so should be crits!	     
+        16=>"OutputReduced1",
+        22=>"OutputReduced2",
+        28=>"ForcedOfflineOneTurn"
+	/*original Engine crits:    
+        15=>"OutputReduced2",
+        21=>"OutputReduced4",
+        28=>"ForcedOfflineOneTurn"
+	*/
+    );
+	
     
     function __construct($armour, $maxhealth, $powerReq, $output, $boostEfficiency){
         parent::__construct($armour, $maxhealth, $powerReq, $output, $boostEfficiency ); //($armour, $maxhealth, $powerReq, $output, $boostEfficiency
@@ -129,6 +141,44 @@ class TrekLtPhaseCannon extends Raking{
         public function setMaxDamage(){     $this->maxDamage = 14 ;      }
 
 }//end of class Trek Light Phase Cannon
+
+
+/*super-heavy fighter weapon*/
+    class TrekFtrPhaseCannon extends Weapon{
+        public $name = "TrekFtrPhaseCannon";
+        public $displayName = "Light Phase Cannon";
+        public $iconPath = "TrekLightPhaseCannon.png";
+        public $animation = "laser";
+        public $animationColor = array(225, 0, 0);
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.2;
+
+        public $loadingtime = 1;
+        public $raking = 6;
+//        public $exclusive = true;
+        public $intercept = 2;
+        public $priority = 8; //Raking weapon
+        
+        public $rangePenalty = 1;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+ 
+		public $damageType = 'Raking'; 
+		public $weaponClass = "Particle"; 
+	    
+        function __construct($startArc, $endArc, $damagebonus){
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+				$this->data["Special"] = "Does damage in raking mode (6)";
+		}
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
+        public function setMinDamage(){   return  $this->minDamage = 5 ;      }
+        public function setMaxDamage(){   return  $this->maxDamage = 14 ;      }
+		
+    }  //end of class Trek Fighter Light Phase Cannon
 
 
 class TrekPhaseCannon extends Raking{

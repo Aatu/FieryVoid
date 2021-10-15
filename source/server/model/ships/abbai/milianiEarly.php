@@ -1,20 +1,22 @@
 <?php
-class Milani extends BaseShip{
+class MilianiEarly extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 500;
+	$this->pointCost = 475;
 	$this->faction = "Abbai";
-        $this->phpclass = "Milani";
+        $this->phpclass = "MilianiEarly";
         $this->imagePath = "img/ships/AbbaiMilani.png";
-        $this->shipClass = "Milani Carrier";
+        $this->shipClass = "Miliani Carrier (early)";
+			$this->occurence = "common";
+			$this->variantOf = 'Miliani Carrier';
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>24);
         
 	//$this->occurence = "uncommon";
-        //$this->variantOf = 'Milani Carrier';
-	$this->isd = 2230;
+        //$this->variantOf = 'Miliani Carrier';
+		$this->isd = 2180;
         
         $this->forwardDefense = 16;
         $this->sideDefense = 16;
@@ -26,15 +28,16 @@ class Milani extends BaseShip{
         $this->pivotcost = 3;
         $this->iniativebonus = 0;
         
-        $this->addPrimarySystem(new Reactor(4, 17, 0, 8));
+        $this->addPrimarySystem(new Reactor(4, 15, 0, 8));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 14, 6, 7));
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 3));
         $this->addPrimarySystem(new ShieldGenerator(4, 14, 4, 4));
    
-        $this->addFrontSystem(new CombatLaser(3, 0, 0, 300, 60));
-        $this->addFrontSystem(new QuadArray(3, 0, 0, 240, 60));
-        $this->addFrontSystem(new QuadArray(3, 0, 0, 300, 120));
+        $this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 60));
+        $this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 60));
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 60));
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
         $this->addFrontSystem(new Particleimpeder(2, 0, 0, 240, 60));
         $this->addFrontSystem(new Particleimpeder(2, 0, 0, 300, 120));
         $this->addFrontSystem(new GraviticShield(0, 6, 0, 3, 300, 360));
@@ -50,14 +53,13 @@ class Milani extends BaseShip{
 
         $this->addLeftSystem(new GraviticShield(0, 6, 0, 3, 240, 300));
         $this->addLeftSystem(new Hangar(3, 13));
-        $this->addLeftSystem(new QuadArray(3, 0, 0, 180, 360));
+        $this->addLeftSystem(new TwinArray(3, 6, 2, 180, 360));
         $this->addLeftSystem(new Thruster(3, 13, 0, 5, 3));
 
         $this->addRightSystem(new GraviticShield(0, 6, 0, 3, 60, 120));
         $this->addRightSystem(new Hangar(3, 13));
-        $this->addRightSystem(new QuadArray(3, 0, 0, 0, 180));
+        $this->addRightSystem(new TwinArray(3, 6, 2, 0, 180));
         $this->addRightSystem(new Thruster(3, 13, 0, 5, 4));
-	    
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(3, 30));
@@ -78,9 +80,9 @@ class Milani extends BaseShip{
 			1=> array(
 					4 => "Thruster",
 					6 => "Gravitic Shield",
-					7 => "Combat Laser",
+					7 => "Assault Laser",
 					9 => "Particle Impeder",
-					11 => "Quad Array",
+					11 => "Twin Array",
 					17 => "Structure",
 					20 => "Primary",
 			),
@@ -94,7 +96,7 @@ class Milani extends BaseShip{
 			3=> array(
 					5 => "Thruster",
 					7 => "Gravitic Shield",
-					9 => "Quad Array",
+					9 => "Twin Array",
 					11 => "Hangar",
 					17 => "Structure",
 					20 => "Primary",
@@ -102,7 +104,7 @@ class Milani extends BaseShip{
 			4=> array(
 					5 => "Thruster",
 					7 => "Gravitic Shield",
-					9 => "Quad Array",
+					9 => "Twin Array",
 					11 => "Hangar",
 					17 => "Structure",
 					20 => "Primary",

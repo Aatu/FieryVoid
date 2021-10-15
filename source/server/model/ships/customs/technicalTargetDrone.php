@@ -51,8 +51,12 @@ class technicalTargetDrone extends BaseShip{
 //		$this->addFrontSystem(new graviticBolt(2, 5, 2, 0, 360));
 //		$this->addFrontSystem(new FusionAgitator(2, 10, 4, 0, 360));
 //		$this->addFrontSystem(new TrekPlasmaBurst(2, 4, 1, 0, 360));
+
+
+		$this->addPrimarySystem(new SpinalLaser(5, 12, 12, 330, 30));
+
 		
-		$this->addPrimarySystem(new AMissileRack(5, 6, 0, 0, 360));
+/*		$this->addPrimarySystem(new AMissileRack(5, 6, 0, 0, 360));
 		$this->addPrimarySystem(new BMissileRack(6, 9, 0, 0, 360));
         $this->addPrimarySystem(new MultiMissileLauncher(3, 'B', 0, 360));
 		$this->addPrimarySystem(new LMissileRack(5, 6, 0, 0, 360));
@@ -64,7 +68,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->addPrimarySystem(new MultiMissileLauncher(3, 'S', 0, 360));
         $this->addPrimarySystem(new EWOMissileRack(3, 6, 0, 0, 360));
         $this->addPrimarySystem(new RMissileRack(3, 6, 0, 0, 360));
-
+*/
 		
 		/*
 		$this->addFrontSystem(new CustomERLightPBeam(3, 0, 0, 240, 120));
