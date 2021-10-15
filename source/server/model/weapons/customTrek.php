@@ -915,7 +915,7 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 	public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){ //no shield-like damage reduction
 		return 0;
 	}
-    private function checkIsFighterUnderShield($target, $shooter){ //no flying under shield
+    private function checkIsFighterUnderShield($target, $shooter, $weapon){ //no flying under shield
         return false;
     }
 	

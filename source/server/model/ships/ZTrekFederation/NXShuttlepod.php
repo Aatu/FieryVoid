@@ -24,7 +24,7 @@ class NXShuttlepod extends FighterFlight{
 		$this->hangarRequired = "Shuttlecraft"; //I took category name from ST wikis
 		$this->unitSize = 1; //counted as singles
         
-       	$this->iniativebonus = 70;
+       	$this->iniativebonus = 14 *5;
         $this->populate();        
     }
     public function populate(){

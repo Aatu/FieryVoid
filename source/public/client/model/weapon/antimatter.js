@@ -27,9 +27,48 @@ AntimatterWeapon.prototype.calculateSpecialRangePenalty = function (distance) {
     return rangePenalty;
 };
 
-
 var AntiprotonGun = function AntiprotonGun(json, ship) {
     Antimatter.call(this, json, ship);
 };
 AntiprotonGun.prototype = Object.create(AntimatterWeapon.prototype);
 AntiprotonGun.prototype.constructor = AntiprotonGun;
+
+var AntimatterCannon = function AntimatterCannon(json, ship) {
+    Antimatter.call(this, json, ship);
+};
+AntimatterCannon.prototype = Object.create(AntimatterWeapon.prototype);
+AntimatterCannon.prototype.constructor = AntimatterCannon;
+
+
+var AntiprotonDefender = function AntiprotonDefender(json, ship) {
+    Antimatter.call(this, json, ship);
+};
+AntiprotonDefender.prototype = Object.create(AntimatterWeapon.prototype);
+AntiprotonDefender.prototype.constructor = AntiprotonDefender;
+
+
+var AntimatterTorpedo = function AntimatterTorpedo(json, ship) {
+    Antimatter.call(this, json, ship);
+};
+AntimatterTorpedo.prototype = Object.create(AntimatterWeapon.prototype);
+AntimatterTorpedo.prototype.constructor = AntimatterTorpedo;
+
+
+var LightAntiprotonGun = function LightAntiprotonGun(json, ship) {
+    Antimatter.call(this, json, ship);
+};
+LightAntiprotonGun.prototype = Object.create(AntimatterWeapon.prototype);
+LightAntiprotonGun.prototype.constructor = LightAntiprotonGun;
+
+
+var LtAntimatterCannon = function LtAntimatterCannon(json, ship) {
+    Antimatter.call(this, json, ship);
+};
+LtAntimatterCannon.prototype = Object.create(AntimatterWeapon.prototype);
+LtAntimatterCannon.prototype.constructor = LtAntimatterCannon;
+
+var AntimatterShredder = function AntimatterShredder(json, ship) {
+    Antimatter.call(this, json, ship);
+};
+AntimatterShredder.prototype = Object.create(AntimatterWeapon.prototype);
+AntimatterShredder.prototype.constructor = AntimatterShredder;
