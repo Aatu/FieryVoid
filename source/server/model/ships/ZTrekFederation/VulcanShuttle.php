@@ -4,7 +4,7 @@ class VulcanShuttle extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 30 *6; //for 6
+        $this->pointCost = 25 *6; //for 6
         $this->faction = "ZTrek Playtest Federation";
         $this->phpclass = "VulcanShuttle";
         $this->shipClass = "Vulcan Shuttle flight";
