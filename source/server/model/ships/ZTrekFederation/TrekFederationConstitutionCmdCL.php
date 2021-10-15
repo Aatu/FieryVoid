@@ -35,7 +35,7 @@ class TrekFederationConstitutionCmdCL extends HeavyCombatVessel{
         $this->addPrimarySystem(new Scanner(4, 12, 6, 6));
 	$this->addPrimarySystem(new Hangar(3, 6, 6));
 
-	$impulseDrive = new TrekImpulseDrive(4,26,0,0,4); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
+	$impulseDrive = new TrekImpulseDrive(4,26,0,1,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 		
   
 	$projection = new TrekShieldProjection(2, 24, 6, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics

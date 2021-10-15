@@ -62,19 +62,12 @@ if (isset($_SESSION["user"])) {
         <br>
 -->        
 		
-		---------- <b>LATEST NEWS - September 2021</b> ----------	   
-	    <br><b>New mid-war refits for Orieni and Centauri ships</b> - courtesy of Daniel
-	    <br><b>New graphics for Orieni and Centauri ships</b> - courtesy of Lunara
-	    <br><b>New early versions for WotCR-era Abbai and Drazi</b> - courtesy of Daniel
-	    <br><b>New graphics for the modern Drazi ships</b> - courtesy of Lunara - <i>rejoice Greens and Purples, for Your ships look Drazi again!</i>
-	    <br><b>Firing routines modified</b> - in-arc systems are prioritized to be hit (eg. off-arc weapon can't be hit if in-arc one is available)
-		---------- <b>end-of-month update</b> ----------
-	    <br><b>SCS compliance check</b> - Geoffrey ran a wide details check and corrected things like structure block sizes!
-	    <br><b>Drazi variant graphics</b> - courtesy of Lunara
-	    <br><b>Disruption EW fixed</b> - range limited to 30 hexes (previously: 50)
-        <br>
 		---------- <b>LATEST NEWS - October 2021</b> ----------	   
-	    <br><b>Stabilized missile launch ranges</b> - All missile racks on bases/OSATs, except "full" versions, now have the correct ranges
+	    <br><b>Stabilized missile launch ranges</b> - All missile racks on bases/OSATs, except "full" versions, now have the correct ranges (courtesy of Geoffrey)
+	    <br><b><u>Vree have arrived</u></b> - let's spin them in honor of Douglas! Beware, they're still early and subject to changes.
+	    <br><b>turn delay fix</b> - -1 thrust critical calculation corrected
+	    <br><b>fleet selection enhances</b> - now Acceleration, Pivot and Roll costs are visible
+	    <br><b>fighter ballistics vs shields fixed</b> - now fighter missiles won't ignore shields when their launch platforms get to range 0
 
 		
 	    
