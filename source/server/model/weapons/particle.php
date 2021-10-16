@@ -1708,5 +1708,11 @@ class LightParticleAccelerator extends LinkedWeapon{
         public function setMaxDamage(){     $this->maxDamage = 12 ;      }
     }	
 	
+
+	
+	
+	
+	
+	
 ?>
 

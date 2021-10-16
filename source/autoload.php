@@ -434,6 +434,7 @@ spl_autoload_register(
                 'interceptormki' => '/server/model/weapons/defensive.php',
                 'interceptormkii' => '/server/model/weapons/defensive.php',
                 'interceptorprototype' => '/server/model/weapons/defensive.php',
+//                'interdictor' => '/server/model/weapons/particle.php',
                 'heavyinterceptorbattery' => '/server/model/weapons/defensive.php',
                 'invulnerablethruster' => '/server/model/systems/baseSystems.php',
                 'ionbolt' => '/server/model/weapons/ion.php',
@@ -2312,7 +2313,7 @@ spl_autoload_register(
 				'trekphotontorp' => '/server/model/weapons/customTrek.php',
 				'trekphaser' => '/server/model/weapons/customTrek.php',
 				'trekphaserlance' => '/server/model/weapons/customTrek.php',
-//				'trekplasmaburst' => '/server/model/weapons/customTrek.php',
+				'trekplasmaburst' => '/server/model/weapons/customTrek.php',
 				'hvyplasmaprojector' => '/server/model/weapons/customTrek.php',
 				'ltplasmaprojector' => '/server/model/weapons/customTrek.php',
 				
