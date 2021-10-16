@@ -54,7 +54,7 @@ class technicalTargetDrone extends BaseShip{
 
 
 		$this->addPrimarySystem(new SpinalLaser(5, 12, 12, 330, 30));
-
+		$this->addPrimarySystem(new Stealth(1,1,0));
 		
 /*		$this->addPrimarySystem(new AMissileRack(5, 6, 0, 0, 360));
 		$this->addPrimarySystem(new BMissileRack(6, 9, 0, 0, 360));
