@@ -2337,7 +2337,7 @@ spl_autoload_register(
 				'vulcanshuttle' => '/server/model/ships/ZTrekFederation/VulcanShuttle.php',
 				'vulcansurak' => '/server/model/ships/ZTrekFederation/VulcanSurak.php',
 				'vulcantimur' => '/server/model/ships/ZTrekFederation/VulcanTimur.php',
-				'vulcanvahklasr' => '/server/model/ships/ZTrekFederation/VulcanVahklas.php',
+				'vulcanvahklas' => '/server/model/ships/ZTrekFederation/VulcanVahklas.php',
 		
 		    		
 				//Marcin Trek
