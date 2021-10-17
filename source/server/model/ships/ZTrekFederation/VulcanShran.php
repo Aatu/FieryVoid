@@ -43,7 +43,7 @@ class VulcanShran extends BaseShipNoAft{
 		$projection->addProjector($projector);
 		$this->addFrontSystem($projector);
 	$this->addFrontSystem($projection);
-	$this->addFrontSystem(new TrekHvyPhaseCannon(3, 8, 6, 300, 120));
+	$this->addFrontSystem(new TrekHvyPhaseCannon(3, 8, 6, 300, 60));
 	$this->addFrontSystem(new TrekPhaseCannon(3, 6, 4, 240, 60));
 	$this->addFrontSystem(new TrekPhaseCannon(3, 6, 4, 300, 120));
 
