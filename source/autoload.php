@@ -2350,6 +2350,13 @@ spl_autoload_register(
 				'trektester3' => '/server/model/ships/customs/TrekTester3.php',
 				'trektester4' => '/server/model/ships/customs/TrekTester4.php',
 				
+
+				//Hyach conversions
+				//systems
+                'hyachscanner' => '/server/model/systems/baseSystems.php',
+				
+				
+				//weapons
 				
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    

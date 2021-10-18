@@ -37,6 +37,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
 		
+//        $this->addFrontSystem(new AntiquatedScanner(3, 20, 6, 6));
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
 		//$this->addFrontSystem(new Hangar(4, 6));
@@ -50,6 +51,10 @@ class technicalTargetDrone extends BaseShip{
 //		$this->addFrontSystem(new PlasmaBlast(2, 4, 2, 0, 360));
 //		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
 //		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
+		$targetingArray = new AntiquatedScanner(2, 6, 2, 1);
+			$targetingArray->displayName = 'Targeting Array';
+			$targetingArray->iconPath = "TargetingArray.png";
+			$this->addFrontSystem($targetingArray);
 		$this->addFrontSystem(new TrekPlasmaBurst(2, 4, 1, 0, 360));
 		$this->addFrontSystem(new GraviticBolt(2, 5, 2, 0, 360));
 		$this->addFrontSystem(new GraviticBolt(2, 5, 2, 0, 360));
@@ -130,7 +135,7 @@ class technicalTargetDrone extends BaseShip{
 				*/
 			),
 			1=> array(
-				20 => "Structure",
+				20 => "Targeting Array",
 				/*
 				5 => "Plasma Wave",
 				10 => "Stun Beam",

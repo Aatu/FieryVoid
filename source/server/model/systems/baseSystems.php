@@ -624,6 +624,18 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		}
 		$this->data["Special"] .= 'Antiquated Sensors cannot be boosted.';
 	}
+	public function markHyach(){		
+    	$this->specialAbilities[] = "HyachSensors";
+		$this->specialAbilityValue = true; //so it is actually recognized as special ability!
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= 'Hyach Sensors have a +5% critical bonus for every two damage.';
+		
+		$this->criticalRollMod = $this->criticalRollMod / 2;
+	}
 	/*note: LCV Sensors are (or will be) checked at committing Initial Orders, in front end. All but 2 EW points need to be OEW. 
 	This is Sensor trait rather than being strictly tied to hull size - while no larger units have it, of LCVs themselves only Young ones have it more or less universally.
 	More advanced factions usually do not, and for custom factions it's up to their creator.
@@ -715,6 +727,18 @@ class AntiquatedScanner extends Scanner {
     }
 	
 } //end of AntiquatedScanner
+
+/*Hyach Scanners are more resistent to criticals. +5% per two damage.*/
+class HyachScanner extends Scanner {
+    public $name = "HyachScanner";
+    public $iconPath = "scanner.png";
+	
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+	$this->markHyach();
+    }
+	
+} //end of HyachScanner
 
 class CnC extends ShipSystem{
     public $name = "cnC";
