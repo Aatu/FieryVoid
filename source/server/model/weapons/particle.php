@@ -19,12 +19,12 @@
 
     class StdParticleBeam extends Particle{ 
 
-        public $trailColor = array(255, 128, 0);
+        public $trailColor = array(230, 115, 0);
 
         public $name = "stdParticleBeam";
         public $displayName = "Standard Particle Beam";
-        public $animation = "beam";
-        public $animationColor = array(255, 128, 0);
+        public $animation = "trail";
+        public $animationColor = array(230, 115, 0);
         public $animationExplosionScale = 0.15;
         public $projectilespeed = 15;
         public $animationWidth = 4;
