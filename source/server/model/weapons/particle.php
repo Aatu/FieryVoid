@@ -19,12 +19,12 @@
 
     class StdParticleBeam extends Particle{ 
 
-        public $trailColor = array(230, 115, 1);
+        public $trailColor = array(255, 102, 0);
 
         public $name = "stdParticleBeam";
         public $displayName = "Standard Particle Beam";
-        public $animation = "trail";
-        public $animationColor = array(230, 115, 1);
+        public $animation = "beam";
+        public $animationColor = array(255, 102, 0);
         public $animationExplosionScale = 0.15;
         public $projectilespeed = 12;
         public $animationWidth = 3;
@@ -66,12 +66,12 @@
 
 
     class ParticleBlaster extends Particle{
-        public $trailColor = array(30, 170, 255);
+        public $trailColor = array(255, 102, 0);
 
         public $name = "particleBlaster";
         public $displayName = "Particle Blaster";
         public $animation = "trail";
-        public $animationColor = array(255, 250, 230);
+        public $animationColor = array(255, 102, 0);
         public $animationExplosionScale = 0.25;
         public $projectilespeed = 15;
         public $animationWidth = 5;
@@ -98,13 +98,13 @@
 
 /*fighter-mounted variant*/
     class ParticleBlasterFtr extends Particle{
-        public $trailColor = array(30, 170, 255);
+        public $trailColor = array(255, 102, 0);
 
         public $name = "particleBlasterFtr";
         public $displayName = "Particle Blaster";
         public $iconPath = "particleBlaster.png";
         public $animation = "trail";
-        public $animationColor = array(255, 250, 230);
+        public $animationColor = array(255, 102, 0);
         public $animationExplosionScale = 0.25;
         public $projectilespeed = 12;
         public $animationWidth = 5;
@@ -132,12 +132,12 @@
 
 
     class AdvParticleBeam extends Particle{
-        public $trailColor = array(30, 170, 255);
+        public $trailColor = array(255, 102, 0);
 
         public $name = "advParticleBeam";
         public $displayName = "Advanced Particle Beam";
         public $animation = "beam";
-        public $animationColor = array(255, 250, 230);
+        public $animationColor = array(255, 102, 0);
         public $animationExplosionScale = 0.20;
         public $projectilespeed = 14;
         public $animationWidth = 5;
@@ -229,12 +229,12 @@
 
 
     class ParticleCannon extends Raking{
-        public $trailColor = array(30, 170, 255);
+        public $trailColor = array(255, 163, 26);
 
         public $name = "particleCannon";
         public $displayName = "Particle Cannon";
 	public $animation = "laser";
-        public $animationColor = array(255, 250, 230);
+        public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.25;
         public $animationWidth = 4;
         public $animationWidth2 = 0.3;
@@ -267,12 +267,12 @@
 
 
     class LightParticleCannon extends Raking{
-        public $trailColor = array(30, 170, 255);
+        public $trailColor = array(255, 163, 26);
 
         public $name = "lightParticleCannon";
         public $displayName = "Light Particle Cannon";
 	public $animation = "laser";
-        public $animationColor = array(255, 250, 230);
+        public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.2;
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
@@ -304,13 +304,13 @@
 
 
     class HvyParticleCannon extends Raking{
-        public $trailColor = array(252, 252, 252);
+        public $trailColor = array(255, 163, 26);
 
         public $name = "hvyParticleCannon";
         public $displayName = "Heavy Particle Cannon";
         public $animation = "laser";
-        public $animationColor = array(255, 230, 100);
-        public $animationColor2 = array(255, 255, 255);
+        public $animationColor = array(255, 163, 26);
+        public $animationColor2 = array(255, 163, 26);
         public $animationExplosionScale = 0.45;
         public $animationWidth = 7;
         public $priority = 7;
@@ -340,12 +340,12 @@
 
 
     class ParticleCutter extends Raking{
-        public $trailColor = array(252, 252, 252);
+        public $trailColor = array(255, 153, 102);
 
         public $name = "particleCutter";
         public $displayName = "Particle Cutter";
 	public $animation = "laser";
-        public $animationColor = array(255, 250, 230);
+        public $animationColor = array(255, 153, 102);
         public $animationExplosionScale = 0.25;
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
@@ -393,11 +393,11 @@
 
 
     class ParticleRepeater extends Particle{
-        public $trailColor = array(252, 252, 252);
+        public $trailColor = array(255, 163, 26);
         public $name = "particleRepeater";
         public $displayName = "Particle Repeater";
         public $animation = "trail";
-        public $animationColor = array(252, 252, 252);
+        public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.40;
         public $projectilespeed = 40;
         public $animationWidth = 4;
@@ -519,11 +519,11 @@
     
 	
     class RepeaterGun extends Particle{
-        public $trailColor = array(252, 252, 252);
+        public $trailColor = array(255, 163, 26);
         public $name = "repeaterGun";
         public $displayName = "Repeater Gun";
         public $animation = "trail";
-        public $animationColor = array(252, 252, 252);
+        public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.30;
         public $projectilespeed = 20;
         public $animationWidth = 4;
@@ -646,12 +646,12 @@
 
 
     class PairedParticleGun extends LinkedWeapon{
-        public $trailColor = array(30, 170, 255);
+        public $trailColor = array(255, 163, 26);
 
         public $name = "pairedParticleGun";
         public $displayName = "Particle Gun"; //it's not 'paired' in any way, except being usually mounted twin linked - like most fighter weapons...
         public $animation = "trail";
-        public $animationColor = array(30, 170, 255);
+        public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.10;
         public $projectilespeed = 12;
         public $animationWidth = 2;
@@ -705,7 +705,7 @@
         public $name = "solarCannon";
         public $displayName = "Solar Cannon";
         public $animation = "beam";
-        public $animationColor = array(0, 250, 0);
+        public $animationColor = array(204, 204, 0);
         public $animationExplosionScale = 0.45;
         public $projectilespeed = 15;
         public $animationWidth = 8;
@@ -879,12 +879,12 @@
 
 
     class LightParticleBlaster extends LinkedWeapon{
-        public $trailColor = array(30, 170, 255);
+        public $trailColor = array(230, 115, 0);
 
         public $name = "lightParticleBlaster";
         public $displayName = "Light Particle Blaster";
         public $animation = "trail";
-        public $animationColor = array(30, 170, 255);
+        public $animationColor = array(230, 115, 0);
         public $animationExplosionScale = 0.10;
         public $projectilespeed = 12;
         public $animationWidth = 2;
@@ -1003,7 +1003,7 @@
         public $name = "heavyBolter";
         public $displayName = "Heavy Bolter";
         public $animation = "trail";
-        public $animationColor = array(255, 250, 230);
+        public $animationColor = array(204, 122, 0);
         public $animationExplosionScale = 0.5;
         public $projectilespeed = 12;
         public $animationWidth = 6;
@@ -1032,7 +1032,7 @@
         public $name = "mediumBolter";
         public $displayName = "Medium Bolter";
         public $animation = "trail";
-        public $animationColor = array(255, 250, 230);
+        public $animationColor = array(204, 122, 0);
         public $animationExplosionScale = 0.4;
         public $projectilespeed = 14;
         public $animationWidth = 4;
@@ -1060,7 +1060,7 @@
         public $name = "lightBolter";
         public $displayName = "Light Bolter";
         public $animation = "trail";
-        public $animationColor = array(255, 250, 230);
+        public $animationColor = array(204, 122, 0);
         public $animationExplosionScale = 0.3;
         public $projectilespeed = 16;
         public $animationWidth = 3;
@@ -1086,13 +1086,13 @@
     
 
     class LightParticleBeamShip extends StdParticleBeam{
-        public $trailColor = array(30, 170, 255);
+        public $trailColor = array(255, 153, 51);
 
         public $name = "lightParticleBeamShip";
         public $displayName = "Light Particle Beam";
         public $iconPath = "lightParticleBeamShip.png";
         public $animation = "beam";
-        public $animationColor = array(255, 250, 230);
+        public $animationColor = array(255, 153, 51);
         public $animationExplosionScale = 0.12;
         public $projectilespeed = 12;
         public $animationWidth = 3;
@@ -1120,15 +1120,15 @@ EDIT: other weapons in the line do indeed exist, on Usuuth ships.
 Nonetheless two copies of Particle Projector lines now exist in FV, in customNexus and particle files. They should be have the same properties.
 */
     class ParticleProjector extends Particle{
-        public $trailColor = array(30, 170, 255);
+        public $trailColor = array(255, 163, 26);
 
         public $name = "particleProjector";
         public $displayName = "Particle Projector";
         public $animation = "beam";
-        public $animationColor = array(205, 200, 200);
+        public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.25;
         public $projectilespeed = 15;
-        public $animationWidth = 4;
+        public $animationWidth = 3;
         public $trailLength = 20;
 
         public $intercept = 2;
@@ -1153,13 +1153,13 @@ Nonetheless two copies of Particle Projector lines now exist in FV, in customNex
 
     class BAInterceptorMkI extends Particle{
         /*Belt Alliance version of Mk I Interceptor - identical to EA one, but without EWeb*/
-        public $trailColor = array(30, 170, 255);
+        public $trailColor = array(255, 163, 26);
         public $name = "BAInterceptorMkI";
         public $displayName = "BA Interceptor I";
         
         public $animation = "trail";
         public $iconPath = "interceptor.png";
-        public $animationColor = array(30, 170, 255);
+        public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.15;
         public $priority = 4;
         public $animationWidth = 1;
@@ -1271,13 +1271,13 @@ Nonetheless two copies of Particle Projector lines now exist in FV, in customNex
 	
 
     class ParticleHammer extends Particle{        
-        public $trailColor = array(30, 170, 255);
+        public $trailColor = array(255, 163, 26);
         
         public $name = "particleHammer";
         public $displayName = "Particle Hammer";
         public $iconPath = "ParticleHammer.png";
         public $animation = "beam";
-        public $animationColor = array(255, 250, 230);
+        public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.5;
         public $projectilespeed = 15;
         public $animationWidth = 10;
@@ -1303,13 +1303,13 @@ Nonetheless two copies of Particle Projector lines now exist in FV, in customNex
 	
 
     class HvyParticleProjector extends Particle{        
-        public $trailColor = array(30, 170, 255);
+        public $trailColor = array(255, 163, 26);
         
         public $name = "hvyParticleProjector";
         public $displayName = "Heavy Particle Projector";
         public $iconPath = "HeavyParticleProjector.png";
         public $animation = "beam";
-        public $animationColor = array(255, 250, 230);
+        public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.30;
         public $projectilespeed = 15;
         public $animationWidth = 7;
@@ -1336,13 +1336,13 @@ Nonetheless two copies of Particle Projector lines now exist in FV, in customNex
     
 	
     class LightParticleProjector extends Particle{        
-        public $trailColor = array(30, 170, 255);
+        public $trailColor = array(255, 163, 26);
         
         public $name = "lightParticleProjector";
         public $displayName = "Light Particle Projector";
         public $iconPath = "LightParticleProjector.png";
         public $animation = "trail";
-        public $animationColor = array(255, 250, 230);
+        public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.30;
         public $projectilespeed = 15;
         public $animationWidth = 3;
@@ -1374,8 +1374,8 @@ class PentagonArray extends Raking{
 	public $displayName = "Pentagon Array";
 	public $iconPath = "PentagonArray.png";
 	public $animation = "laser";
-	public $animationColor = array(255, 250, 230);
-	public $animationWidth = 4;	
+	public $animationColor = array(255, 153, 51);
+	public $animationWidth = 3;	
 	public $animationWidth2 = 0.2;
 	public $animationExplosionScale = 0.2;
 
@@ -1491,7 +1491,7 @@ class ParticleAccelerator extends Raking{
         public $displayName = "Particle Accelerator";
         public $iconPath = "ParticleAccelerator.png";
         public $animation = "laser";
-        public $animationColor = array(255, 250, 230);
+        public $animationColor = array(255, 163, 26);
 		public $animationExplosionScale = 0.25;
 		public $animationWidth = 4;
 		public $animationWidth2 = 0.3;
@@ -1587,8 +1587,8 @@ class LightParticleAccelerator extends LinkedWeapon{
 		public $displayName = "Light Particle Accelerator";
 		public $iconPath = "LightParticleAccelerator.png";
 		public $animation = "trail";
-		public $trailColor = array(30, 170, 255);
-		public $animationColor = array(255, 250, 230);
+		public $trailColor = array(255, 163, 26);
+		public $animationColor = array(255, 163, 26);
 		public $animationExplosionScaleArray = array(1=>0.10, 2=>0.15);
 		public $animationWidthArray = array(1=>2, 2=>3);
 		public $trailLengthArray = array(1=>10, 2=>15);
@@ -1681,7 +1681,7 @@ class LightParticleAccelerator extends LinkedWeapon{
         public $displayName = "Light Particle Bolt";
    		public $iconPath = "LightParticleBolt.png";
         public $animation = "trail";
-        public $animationColor = array(255, 250, 230);
+        public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.2;
         public $projectilespeed = 16;
         public $animationWidth = 2;
