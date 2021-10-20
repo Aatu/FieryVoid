@@ -13,7 +13,7 @@ class Vaarl extends VreeHCV{
 
 
 		$this->shipSizeClass = 2; //Enormous is not implemented
-		$this->iniativebonus = 6*5; //no voluntary movement anyway
+		$this->iniativebonus = 6; //no voluntary movement anyway
 		
         $this->turncost = 0.66;
         $this->turndelaycost = 0.5;
