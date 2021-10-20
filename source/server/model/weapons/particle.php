@@ -19,12 +19,12 @@
 
     class StdParticleBeam extends Particle{ 
 
-        public $trailColor = array(30, 170, 255);
+        public $trailColor = array(255, 128, 0);
 
         public $name = "stdParticleBeam";
         public $displayName = "Standard Particle Beam";
         public $animation = "beam";
-        public $animationColor = array(255, 250, 230);
+        public $animationColor = array(255, 128, 0);
         public $animationExplosionScale = 0.15;
         public $projectilespeed = 15;
         public $animationWidth = 4;
@@ -196,12 +196,12 @@
     }
 
     class HeavyArray extends Particle{
-        public $trailColor = array(30, 170, 255);
+        public $trailColor = array(255, 163, 26);
 
         public $name = "heavyArray";
         public $displayName = "Heavy array";
         public $animation = "trail";
-        public $animationColor = array(30, 170, 255);
+        public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.25;
         public $projectilespeed = 20;
         public $animationWidth = 4;
@@ -1200,9 +1200,9 @@ Nonetheless two copies of Particle Projector lines now exist in FV, in customNex
         public $displayName = "Quad Array";
         public $iconPath = "quadParticleBeam.png";//"quadArray.png";
         public $animation = "trail";
-        public $animationColor = array(30, 170, 255);
+        public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.15;
-        public $trailColor = array(30, 170, 255);
+        public $trailColor = array(255, 163, 26);
         public $projectilespeed = 12;
         public $animationWidth = 3;
         public $trailLength = 10;
