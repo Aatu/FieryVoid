@@ -24,12 +24,11 @@
         public $name = "stdParticleBeam";
         public $displayName = "Standard Particle Beam";
         public $animation = "trail";
-        public $animationColor = array(230, 115, 0);
+        public $animationColor = array(230, 115, 1);
         public $animationExplosionScale = 0.15;
-        public $projectilespeed = 15;
-        public $animationWidth = 4;
+        public $projectilespeed = 12;
+        public $animationWidth = 3;
         public $trailLength = 10;
-	   public  $iconPath = "stdParticleBeam.png";
 
         public $intercept = 2;
         public $loadingtime = 1;
