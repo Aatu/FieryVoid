@@ -942,13 +942,13 @@
 
 
     class LightParticleBeam extends LinkedWeapon{
-        public $trailColor = array(30, 170, 255);
+        public $trailColor = array(230, 115, 0);
 
         public $name = "lightParticleBeam";
         public $iconPath = "lightParticleBeam.png";
         public $displayName = "Light Particle Beam";
         public $animation = "trail";
-        public $animationColor = array(30, 170, 255);
+        public $animationColor = array(230, 115, 0);
         public $animationExplosionScale = 0.10;
         public $projectilespeed = 12;
         public $animationWidth = 2;
