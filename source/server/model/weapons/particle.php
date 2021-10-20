@@ -1276,12 +1276,12 @@ Nonetheless two copies of Particle Projector lines now exist in FV, in customNex
         public $name = "particleHammer";
         public $displayName = "Particle Hammer";
         public $iconPath = "ParticleHammer.png";
-        public $animation = "beam";
+        public $animation = "trail";
         public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.15;
         public $projectilespeed = 12;
         public $animationWidth = 8;
-        public $trailLength = 10;
+        public $trailLength = 12;
         
         public $loadingtime = 4;        
         
@@ -1308,7 +1308,7 @@ Nonetheless two copies of Particle Projector lines now exist in FV, in customNex
         public $name = "hvyParticleProjector";
         public $displayName = "Heavy Particle Projector";
         public $iconPath = "HeavyParticleProjector.png";
-        public $animation = "beam";
+        public $animation = "trail";
         public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.15;
         public $projectilespeed = 12;
@@ -1347,7 +1347,7 @@ Nonetheless two copies of Particle Projector lines now exist in FV, in customNex
         public $animationExplosionScale = 0.15;
         public $projectilespeed = 12;
         public $animationWidth = 1;
-        public $trailLength = 10;
+        public $trailLength = 5;
         
         public $loadingtime = 1;
         public $intercept = 2;
