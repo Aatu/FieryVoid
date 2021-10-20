@@ -164,12 +164,12 @@
 
 
     class TwinArray extends Particle{
-        public $trailColor = array(230, 184, 0);
+        public $trailColor = array(255, 163, 26);
 
         public $name = "twinArray";
         public $displayName = "Twin Array";
         public $animation = "trail";
-        public $animationColor = array(230, 184, 0);
+        public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.15;
         public $projectilespeed = 12;
         public $animationWidth = 3;
