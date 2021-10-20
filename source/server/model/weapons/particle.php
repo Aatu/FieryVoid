@@ -1128,7 +1128,7 @@ Nonetheless two copies of Particle Projector lines now exist in FV, in customNex
         public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.15;
         public $projectilespeed = 12;
-        public $animationWidth = 3;
+        public $animationWidth = 4;
         public $trailLength = 10;
 
         public $intercept = 2;
