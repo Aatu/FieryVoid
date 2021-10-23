@@ -49,13 +49,13 @@ class VulcanSurak extends MediumShip{
 		$this->addFrontSystem(new TrekPhotonicTorp(3, 6, 1, 270, 30));
 		$this->addFrontSystem(new TrekPhotonicTorp(3, 6, 1, 330, 90));
 	    
-		$warpNacelle = new TrekWarpDrive(3, 12, 3, 3); //armor, structure, power usage, impulse output
+		$warpNacelle = new TrekWarpDrive(3, 12, 0, 3); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
 		$this->addAftSystem($warpNacelle);
-		$warpNacelle = new TrekWarpDrive(3, 12, 3, 3); //armor, structure, power usage, impulse output
+		$warpNacelle = new TrekWarpDrive(3, 12, 0, 3); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
 		$this->addAftSystem($warpNacelle);
-		$warpNacelle = new TrekWarpDrive(3, 12, 3, 3); //armor, structure, power usage, impulse output
+		$warpNacelle = new TrekWarpDrive(3, 12, 0, 3); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
 		$this->addAftSystem($warpNacelle);
 		$this->addAftSystem(new TrekPhaseCannon(2, 6, 4, 90, 270));

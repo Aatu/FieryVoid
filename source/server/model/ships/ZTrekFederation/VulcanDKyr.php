@@ -138,14 +138,14 @@ class VulcanDkyr extends BaseShip{
             ),
             3=> array(
 				2 => "Shield Projector",
-				7 => "Spatial Torpedo",
+				7 => "Photonic Torpedo",
 				9 => "Light Phase Cannon",
 				18 => "Structure",
 				20 => "Primary",
             ),
             4=> array(
 				2 => "Shield Projector",
-				7 => "Spatial Torpedo",
+				7 => "Photonic Torpedo",
 				9 => "Light Phase Cannon",
 				18 => "Structure",
 				20 => "Primary",

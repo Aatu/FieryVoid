@@ -54,10 +54,10 @@ class TrekFederationNXWarCruiserUpg extends MediumShip{
 		$this->addFrontSystem(new TrekPhotonicTorp(2, 6, 1, 270, 90));
 		$this->addFrontSystem(new TrekPhotonicTorp(2, 6, 1, 270, 90));
 	    
-		$warpNacelle = new TrekWarpDrive(3, 18, 3, 4); //armor, structure, power usage, impulse output
+		$warpNacelle = new TrekWarpDrive(3, 18, 0, 4); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
 		$this->addAftSystem($warpNacelle);
-		$warpNacelle = new TrekWarpDrive(3, 18, 3, 4); //armor, structure, power usage, impulse output
+		$warpNacelle = new TrekWarpDrive(3, 18, 0, 4); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
 		$this->addAftSystem($warpNacelle);
 

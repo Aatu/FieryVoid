@@ -14,8 +14,8 @@ class Xeon extends VreeCapital{
   		$this->occurence = "uncommon";
     	$this->variantOf = 'Xeel War Carrier';	        				
 
-		$this->shipSizeClass = 3; //Enormous is not implemented
-		$this->iniativebonus = 0; //no voluntary movement anyway
+		$this->shipSizeClass = 3; 
+		$this->iniativebonus = 0;
 		
         $this->turncost = 0.66;
         $this->turndelaycost = 0.5;

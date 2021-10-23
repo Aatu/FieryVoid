@@ -49,10 +49,10 @@ class TrekFederationDeltaFFBeta extends LCV{
 		$this->addFrontSystem(new TrekPhaseCannon(3, 6, 4, 180, 30));
 		$this->addFrontSystem(new TrekPhaseCannon(3, 6, 4, 330, 180));
 
-		$warpNacelle = new TrekWarpDrive(2, 10, 2, 3); //armor, structure, power usage, impulse output
+		$warpNacelle = new TrekWarpDrive(2, 10, 0, 3); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
 		$this->addAftSystem($warpNacelle);
-		$warpNacelle = new TrekWarpDrive(2, 10, 2, 3); //armor, structure, power usage, impulse output
+		$warpNacelle = new TrekWarpDrive(2, 10, 0, 3); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
 		$this->addAftSystem($warpNacelle);
 

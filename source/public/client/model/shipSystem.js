@@ -155,6 +155,10 @@ Weapon.prototype.changeFiringMode = function () {
 		this.data["Number of guns"] = this.guns;
 	}
 	if (!mathlib.arrayIsEmpty(this.rakingArray)) this.raking = this.rakingArray[this.firingMode];
+	
+	
+	if (!mathlib.arrayIsEmpty(this.doNotInterceptArray)) this.hextarget = this.doNotInterceptArray[this.firingMode];
+	if (!mathlib.arrayIsEmpty(this.uninterceptableArray)) this.hextarget = this.uninterceptableArray[this.firingMode];		
 
 	//firing animation related...
 	if (!mathlib.arrayIsEmpty(this.animationArray)) this.animation = this.animationArray[this.firingMode];
@@ -170,6 +174,40 @@ Weapon.prototype.changeFiringMode = function () {
 	if (!mathlib.arrayIsEmpty(this.trailColorArray)) this.trailColor = this.trailColorArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.projectilespeedArray)) this.projectilespeed = this.projectilespeedArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.hextargetArray)) this.hextarget = this.hextargetArray[this.firingMode];		
+	
+	
+	if (!mathlib.arrayIsEmpty(this.ignoreJinkingArray)) this.ignoreJinking = this.ignoreJinkingArray[this.firingMode];		
+	if (!mathlib.arrayIsEmpty(this.ignoreAllEWArray)) this.ignoreAllEW = this.ignoreAllEWArray[this.firingMode];		
+	
+	//Antimatter-specific
+	if (this instanceof AntimatterWeapon){
+		var updateDataPenalty = false; 
+		if (!mathlib.arrayIsEmpty(this.rngNoPenaltyArray)) {
+			this.rngNoPenalty = this.rngNoPenaltyArray[this.firingMode];
+			updateDataPenalty = true;
+		}
+		if (!mathlib.arrayIsEmpty(this.rngNormalPenaltyArray)) {
+			this.rngNormalPenaltyPenalty = this.rngNormalPenaltyArray[this.firingMode];
+			updateDataPenalty = true;
+		}
+		if (updateDataPenalty == true){
+			this.data["Range brackets"] = 'no penalty up to ' + this.rngNoPenalty + ' / regular up to ' + this.rngNormalPenalty + ' / double' ;
+		}
+		
+		updateDataPenalty = false;
+		if (!mathlib.arrayIsEmpty(this.maxXArray)) {
+			this.maxX = this.maxXArray[this.firingMode];
+			updateDataPenalty = true;
+		}
+		if (!mathlib.arrayIsEmpty(this.dmgEquationArray)) {
+			this.dmgEquation = this.dmgEquationArray[this.firingMode];
+			updateDataPenalty = true;
+		}
+		if (updateDataPenalty == true){
+			this.data["X-dependent damage"] = this.dmgEquation + ' ( max X = ' + this.maxX + ')';
+		}
+	}//endof Antimatter specific
+	
 }; //end of Weapon.prototype.changeFiringMode
 
 
