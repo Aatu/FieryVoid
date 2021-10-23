@@ -10,13 +10,11 @@ class Vaarka extends VreeHCV{
 		$this->shipClass = "Vaarka Escort Saucer";
 		$this->isd = 2257;
   		$this->occurence = "rare";
-    	//$this->variantOf = 'Vaarl Scout Saucer';
-		$this->variantOf = "WAITING FOR SHREDDERS";
-  		$this->locations = array(41, 42, 2, 32, 31, 1);  			
+    	$this->variantOf = 'Vaarl Scout Saucer';			
 	      $this->unofficial = true;
 
-		$this->shipSizeClass = 2; //Enormous is not implemented
-		$this->iniativebonus = 6; //no voluntary movement anyway
+		$this->shipSizeClass = 2; 
+		$this->iniativebonus = 6 *5; 
 		
         $this->turncost = 0.66;
         $this->turndelaycost = 0.5;
@@ -37,14 +35,15 @@ class Vaarka extends VreeHCV{
 		$this->addPrimarySystem(new ElintScanner(4, 20, 9, 12));
         $this->addPrimarySystem(new Engine(4, 11, 0, 7, 2));
 		$this->addPrimarySystem(new JumpEngine(6, 10, 4, 24));        			
-		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
+		$this->addPrimarySystem(new AntimatterShredder(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 3));
-		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 4));				
-
-		$this->addFrontSystem(new Thruster(3, 12, 0, 7, 1));
+		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 4));
+		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 1));		
+        $this->addPrimarySystem(new Thruster(3, 12, 0, 7, 2));
 		
-        $this->addAftSystem(new Thruster(3, 12, 0, 7, 2));
+		
+		$this->addFrontSystem(new StructureTechnical(0, 0, 0, 0)); //SOMETHING is necessary for structure to be shown
+		$this->addAftSystem(new StructureTechnical(0, 0, 0, 0));
         
 		$this->addLeftFrontSystem(new AntiprotonDefender(2, 0, 0, 240, 0));
 		$this->addLeftFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60)); 
@@ -82,55 +81,51 @@ class Vaarka extends VreeHCV{
                     20 => "C&C",
            		 ),
             1=> array(
-                    3 => "Thruster",   
+                    4 => "0:Thruster",   
                     5 => "31:Antiproton Defender",
-                    7 => "41:Antiproton Defender",
-                    8 => "0:Antimatter Cannon",
-                    18 => "Structure",
+                    6 => "41:Antiproton Defender",
+                    8 => "0:Antimatter Shredder",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
             2=> array(
-                    3 => "Thruster",   
+                    4 => "0:Thruster",   
                     5 => "32:Antiproton Defender",
-                    7 => "42:Antiproton Defender",
-                    8 => "0:Antimatter Cannon",
-                    18 => "Structure",
+                    6 => "42:Antiproton Defender",
+                    8 => "0:Antimatter Shredder",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
             31=> array(
-                    2 => "1:Thruster",
-                    4 => "0:Thruster",                          
-                    6 => "31:Antiproton Defender",
-                    7 => "41:Antiproton Defender",
-                    8 => "0:Antimatter Cannon",
-                    18 => "1:Structure",
+                    4 => "0:Thruster",   
+                    5 => "31:Antiproton Defender",
+                    6 => "32:Antiproton Defender",
+                    8 => "0:Antimatter Shredder",
+                    17 => "1:Structure",
                     20 => "Primary",
            		 ),
             32=> array(
-                    2 => "2:Thruster",
-                    4 => "0:Thruster",                        
+                    4 => "0:Thruster",   
+                    5 => "31:Antiproton Defender",
                     6 => "32:Antiproton Defender",
-                    7 => "42:Antiproton Defender",
-                    8 => "0:Antimatter Cannon",
-                    18 => "2:Structure",
+                    8 => "0:Antimatter Shredder",
+                    17 => "2:Structure",
                     20 => "Primary",
            		 ),
             41=> array(
-                    2 => "1:Thruster",
-                    4 => "0:Thruster",                         
-                    6 => "41:Antiproton Defender",
-                    7 => "31:Antiproton Defender",
-                    8 => "0:Antimatter Cannon",
-                    18 => "1:Structure",
+                    4 => "0:Thruster",   
+                    5 => "41:Antiproton Defender",
+                    6 => "42:Antiproton Defender",
+                    8 => "0:Antimatter Shredder",
+                    17 => "1:Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
-                    2 => "2:Thruster",
-                    4 => "0:Thruster",                         
+                    4 => "0:Thruster",   
+                    5 => "41:Antiproton Defender",
                     6 => "42:Antiproton Defender",
-                    7 => "32:Antiproton Defender",
-                    8 => "0:Antimatter Cannon",
-                    18 => "2:Structure",
+                    8 => "0:Antimatter Shredder",
+                    17 => "2:Structure",
                     20 => "Primary",
            		 ),
            	);

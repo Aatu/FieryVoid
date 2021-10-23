@@ -9,8 +9,6 @@ class Xonn extends VreeCapital{
 		$this->phpclass = "Xonn";
 		$this->shipClass = "Xonn Dreadnought";
 		$this->isd = 2260;
-		$this->locations = array(41, 42, 2, 32, 31, 1);	
-		$this->variantOf = "WAITING FOR SHREDDERS";
 
 		$this->shipSizeClass = 3;
 		$this->iniativebonus = 0;
@@ -34,24 +32,24 @@ class Xonn extends VreeCapital{
 		$this->addPrimarySystem(new Scanner(6, 18, 9, 10));
         $this->addPrimarySystem(new Engine(6, 18, 0, 10, 3));
 		$this->addPrimarySystem(new JumpEngine(7, 16, 6, 24));
-		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));		         			
-		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));		
-		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));
+		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));		         			
+		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));
+		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));      
+        $this->addPrimarySystem(new Thruster(5, 20, 0, 10, 1));        
 		$this->addPrimarySystem(new Thruster(5, 20, 0, 10, 3));
-		$this->addPrimarySystem(new Thruster(5, 20, 0, 10, 4));									
+		$this->addPrimarySystem(new Thruster(5, 20, 0, 10, 4));	   
+        $this->addPrimarySystem(new Thruster(5, 20, 0, 10, 2));       								
 
 
         $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 300, 60));
-        $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 300, 60));        
-        $this->addFrontSystem(new Thruster(5, 20, 0, 10, 1));        
+        $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 300, 60));  	
+		$this->addFrontSystem(new StructureTechnical(0, 0, 0, 0));	
 		
         $this->addAftSystem(new AntiprotonGun(3, 0, 0, 120, 240));
-        $this->addAftSystem(new AntiprotonGun(3, 0, 0, 120, 240));        
-        $this->addAftSystem(new Thruster(5, 20, 0, 10, 2));       
+        $this->addAftSystem(new AntiprotonGun(3, 0, 0, 120, 240));  	
+		$this->addAftSystem(new StructureTechnical(0, 0, 0, 0));	   
         
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
@@ -92,55 +90,51 @@ class Xonn extends VreeCapital{
                     20 => "C&C",
            		 ),
             1=> array(
-                    4 => "Thruster",
-                    7 => "Antiproton Gun",
-                    8 => "0:Antimatter Cannon",                    
-                    9 => "0:Antimatter Cannon",
-                    18 => "Structure",
+                    4 => "0:Thruster",
+                    6 => "Antiproton Gun",
+                    8 => "0:Antimatter Shredder",                    
+                    10 => "0:Antimatter Cannon",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
             2=> array(
-                    4 => "Thruster",
-                    7 => "Antiproton Gun",
-                    8 => "0:Antimatter Cannon",                    
-                    9 => "0:Antimatter Cannon",
-                    18 => "Structure",
+                    4 => "0:Thruster",
+                    6 => "Antiproton Gun",
+                    8 => "0:Antimatter Shredder",                    
+                    10 => "0:Antimatter Cannon",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
             31=> array(
-                    1 => "1:Thruster",
-                    4 => "0:Thruster", 
-                    7 => "Antiproton Gun",
-                    8 => "0:Antimatter Cannon",                    
-                    9 => "0:Antimatter Cannon",
-                    18 => "Structure",
+                    4 => "0:Thruster",
+                    6 => "Antiproton Gun",
+                    8 => "0:Antimatter Shredder",                    
+                    10 => "0:Antimatter Cannon",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
-                    1 => "2:Thruster",
-                    4 => "0:Thruster", 
-                    7 => "Antiproton Gun",
-                    8 => "0:Antimatter Cannon",                    
-                    9 => "0:Antimatter Cannon",
-                    18 => "Structure",
+                    4 => "0:Thruster",
+                    6 => "Antiproton Gun",
+                    8 => "0:Antimatter Shredder",                    
+                    10 => "0:Antimatter Cannon",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
-                    1 => "1:Thruster",
-                    4 => "0:Thruster", 
-                    7 => "Antiproton Gun",
-                    8 => "0:Antimatter Cannon",                    
-                    9 => "0:Antimatter Cannon",
-                    18 => "Structure",
+                    4 => "0:Thruster",
+                    6 => "Antiproton Gun",
+                    8 => "0:Antimatter Shredder",                    
+                    10 => "0:Antimatter Cannon",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
-                    1 => "2:Thruster",
-                    4 => "0:Thruster", 
-                    7 => "Antiproton Gun",
-                    8 => "0:Antimatter Cannon",                    
-                    9 => "0:Antimatter Cannon",
-                    18 => "Structure",
+                    4 => "0:Thruster",
+                    6 => "Antiproton Gun",
+                    8 => "0:Antimatter Shredder",                    
+                    10 => "0:Antimatter Cannon",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
            	);

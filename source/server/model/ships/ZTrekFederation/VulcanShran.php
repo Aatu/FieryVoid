@@ -114,7 +114,7 @@ class VulcanShran extends BaseShipNoAft{
             3=> array(
 				2 => "Shield Projector",
 				6 => "Nacelle",
-				8 => "Spatial Torpedo",
+				8 => "Photonic Torpedo",
 				9 => "Light Phase Cannon",
 				11 => "Phase Cannon",
 				18 => "Structure",
@@ -123,7 +123,7 @@ class VulcanShran extends BaseShipNoAft{
             4=> array(
 				2 => "Shield Projector",
 				6 => "Nacelle",
-				8 => "Spatial Torpedo",
+				8 => "Photonic Torpedo",
 				9 => "Light Phase Cannon",
 				11 => "Phase Cannon",
 				18 => "Structure",

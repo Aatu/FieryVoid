@@ -45,10 +45,10 @@ class TrekFederationIntrepid extends MediumShip{
       		$this->addFrontSystem(new TrekSpatialTorp(2, 6, 1, 300, 60));
         	$this->addFrontSystem(new TrekSpatialTorp(2, 6, 1, 300, 60));
 	    
-		$warpNacelle = new TrekWarpDrive(3, 12, 3, 4); //armor, structure, power usage, impulse output
+		$warpNacelle = new TrekWarpDrive(3, 12, 0, 4); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
 		$this->addAftSystem($warpNacelle);
-		$warpNacelle = new TrekWarpDrive(3, 12, 3, 4); //armor, structure, power usage, impulse output
+		$warpNacelle = new TrekWarpDrive(3, 12, 0, 4); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
 		$this->addAftSystem($warpNacelle);
 		/*

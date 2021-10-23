@@ -23,6 +23,7 @@ class Xvell extends MediumShip{
         $this->pivotcost = 0;
         
         $this->iniativebonus = 60;
+        $this->agile = true;
 
         
         $this->addPrimarySystem(new Reactor(3, 11, 0, 0));

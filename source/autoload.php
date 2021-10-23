@@ -2292,7 +2292,6 @@ spl_autoload_register(
 				'xonn' => '/server/model/ships/vree/Xonn.php',
 				'xvell' => '/server/model/ships/vree/Xvell.php',
 				'xavan' => '/server/model/ships/vree/Xavan.php',
-				'xillshreddertest' => '/server/model/ships/vree/XillShredderTest.php',
 
 
 				//other				
