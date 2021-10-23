@@ -289,6 +289,7 @@ spl_autoload_register(
                 'erlorrapods' => '/server/model/ships/llort/erlorraPods.php',
                 'error' => '/server/lib/random_compat-2.0.2/lib/error_polyfill.php',
                 'esharan' => '/server/model/ships/minbari/esharan.php',
+                'eskravat' => '/server/model/ships/dilgar/eskravat.php',
                 'essusu' => '/server/model/ships/balosian/essusu.php',
                 'esthasa' => '/server/model/ships/balosian/esthasa.php',
                 'estnassa' => '/server/model/ships/balosian/estnassa.php',
@@ -446,6 +447,10 @@ spl_autoload_register(
                 'jashakarp' => '/server/model/ships/dilgar/jashakarP.php',
                 'jastat' => '/server/model/ships/narn/jastat.php',
                 'jenas' => '/server/model/ships/centauri_old/jenas.php',
+                'jorthuna' => '/server/model/ships/dilgar/jorthunA.php',
+                'jorthunk' => '/server/model/ships/dilgar/jorthunK.php',
+                'jorthunl' => '/server/model/ships/dilgar/jorthunL.php',
+                'jorthunq' => '/server/model/ships/dilgar/jorthunQ.php',
                 'jumpengine' => '/server/model/systems/baseSystems.php',
                 'jumpgate' => '/server/model/ships/civilians/jumpgate.php',
                 'jumphawk' => '/server/model/ships/drazi/jumphawk.php',
@@ -2311,7 +2316,7 @@ spl_autoload_register(
 				'trekphotontorp' => '/server/model/weapons/customTrek.php',
 				'trekphaser' => '/server/model/weapons/customTrek.php',
 				'trekphaserlance' => '/server/model/weapons/customTrek.php',
-//				'trekplasmaburst' => '/server/model/weapons/customTrek.php',
+				'trekplasmaburst' => '/server/model/weapons/customTrek.php',
 				'hvyplasmaprojector' => '/server/model/weapons/customTrek.php',
 				'ltplasmaprojector' => '/server/model/weapons/customTrek.php',
 				
@@ -2348,6 +2353,16 @@ spl_autoload_register(
 				'trektester3' => '/server/model/ships/customs/TrekTester3.php',
 				'trektester4' => '/server/model/ships/customs/TrekTester4.php',
 				
+
+				//Hyach conversions
+				//systems
+//                'hyachscanner' => '/server/model/systems/baseSystems.php',
+//                'hyachelintscanner' => '/server/model/systems/baseSystems.php',
+				
+				
+				//weapons
+//                'interdictorhandler' => '/server/model/weapons/particle.php',
+//                'interdictor' => '/server/model/weapons/particle.php',
 				
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    

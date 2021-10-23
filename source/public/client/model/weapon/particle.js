@@ -307,3 +307,9 @@ var LightParticleBolt = function LightParticleBolt(json, ship) {
 };
 LightParticleBolt.prototype = Object.create(Weapon.prototype);
 LightParticleBolt.prototype.constructor = LightParticleBolt;
+
+var Interdictor = function Interdictor(json, ship) {
+    Weapon.call(this, json, ship);
+};
+Interdictor.prototype = Object.create(Weapon.prototype);
+Interdictor.prototype.constructor = Interdictor;

@@ -94,7 +94,7 @@ The costs before rounding the final value are:
 					9 => "Targeting Array",
 					11 => "Jump Engine",
 					13 => "Engine",
-					16 => "Antiquated Scanner",
+					16 => "Scanner",
 					17 => "Hangar",
 					19 => "Reactor",
 					20 => "C&C",

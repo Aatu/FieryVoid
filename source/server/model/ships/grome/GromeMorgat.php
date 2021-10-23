@@ -63,7 +63,7 @@ class GromeMorgat extends MediumShip{
 			7 => "Targeting Array",
 			9 => "Flak Cannon",
 			12 => "Engine",
-			15 => "Antiquated Scanner",
+			15 => "Scanner",
 			17 => "Hangar",
 			19 => "Reactor",
 			20 => "C&C",
