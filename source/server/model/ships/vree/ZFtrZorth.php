@@ -21,7 +21,8 @@ class ZFtrZorth extends FighterFlight{
         $this->jinkinglimit = 10;
         $this->turncost = 0.33;
         $this->iniativebonus = 100;
-		$this->unitSize = 2;        
+		$this->unitSize = 2; 
+        $this->pivotcost = 0;		       
 
         
         $this->populate();

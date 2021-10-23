@@ -436,7 +436,7 @@ Below is a list of systems and rules Vree use, with short descriptions of effect
 - Vree Medium Ships and Fighters function normally, albeit with usual 0 pivot cost for Vree ships and wider firing arcs on Zorth.
 - Unlike in tabletop rules, the Vree player is not able to select which weapon, thruster, structure is hit by incoming fire on capital ships and HCVs.  Instead FV will randomly allocate hits based on which sections/systems are in arc of the firing ship.  Note, unlike starbases, weapons fire from the same ship CAN hit different sections of a Vree ship to help maintain some of their durability in battle.
 - Turrets have been placed on the Primary structure of Vree ships, but do not appear on Primary Hit chart.  Instead there is a chance they will be hit by incoming fire from any direction, with overkill damage going to Primary section.  All turrets have 360 degree firing arcs and unlike tabletop it was not possible to add in FV the restriction that weapons on the same turret must fire in the same 30 degree arc.  Consequently all Vree turret weapons can fire at any targets in a 360 degree arc.
-- The Antimatter Shredder has not yet been implemented in the Xonn, Xill or Vaarka, until this weapon is available it has been temporarily replaced with two antimatter cannons. 
+- The Antimatter Shredder has not yet been implemented, but is planned for future updates.
 	
 	
 YOLU THEOCRACY
