@@ -22,7 +22,7 @@ class Xvell extends MediumShip{
         $this->rollcost = 2;
         $this->pivotcost = 0;
         
-        $this->iniativebonus = 60;
+        $this->iniativebonus = 12 *5;
         $this->agile = true;
 
         

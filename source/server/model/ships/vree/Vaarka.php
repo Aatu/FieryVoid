@@ -7,7 +7,7 @@ class Vaarka extends VreeHCV{
 		$this->pointCost = 675;
 		$this->faction = "Vree";
 		$this->phpclass = "Vaarka";
-		$this->shipClass = "Vaarka Escort Saucer";
+		$this->shipClass = "Vaarka Escort Scout";
 		$this->isd = 2257;
   		$this->occurence = "rare";
     	$this->variantOf = 'Vaarl Scout Saucer';			

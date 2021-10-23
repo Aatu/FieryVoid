@@ -79,7 +79,7 @@
         public $animationWidth = 4;
         public $animationExplosionScale = 0.90;
         public $trailLength = 20;
-        public $priority = 2;
+        public $priority = 2; //fire early due to potential Flash damage
         public $loadingtime = 3;
         public $rangePenalty = 1;
         public $fireControl = array(-6, 4, 4); // fighters, <=mediums, <=capitals 
@@ -115,7 +115,7 @@ class AntiprotonGun extends AntimatterWeapon{
         public $name = "AntiprotonGun";
         public $displayName = "Antiproton Gun";
 		public $iconPath = "AntiprotonGun.png";
-        public $priority = 5;
+        public $priority = 6; //X+12 easily qualifies for heavy Standard weapon
 
         public $intercept = 2;
         public $loadingtime = 1;
@@ -225,7 +225,7 @@ class AntiprotonDefender extends AntimatterWeapon{
         public $name = "AntiprotonDefender";
         public $displayName = "Antiproton Defender";
 		public $iconPath = "AntiprotonDefender.png";
-        public $priority = 4; //that's Standard Heavy hit!
+        public $priority = 5; //that's Standard Heavy hit!
 
         public $intercept = 3;
         public $loadingtime = 1;
@@ -281,7 +281,7 @@ class AntimatterTorpedo extends AntimatterWeapon{
         public $projectilespeed = 12;
         public $animationWidth = 10;
         public $trailLength = 10;
-        public $priority = 6;
+        public $priority = 5;
         
         public $ballistic = true;
         public $weaponClass = "Ballistic";         
@@ -327,7 +327,7 @@ class AntimatterTorpedo extends AntimatterWeapon{
 	
 } //end of class AntimatterTorpedo
 
-class LightAntiprotonGun extends LinkedWeapon{  //deliberately NOT extending AntimatterWeapon class uses regular calculations 
+class LightAntiprotonGun extends LinkedWeapon{  //deliberately NOT extending AntimatterWeapon class, uses regular calculations 
 	public $name = "LightAntiprotonGun";
 	public $displayName = "Light Antiproton Gun";
     public $animation = "trail";
@@ -337,7 +337,7 @@ class LightAntiprotonGun extends LinkedWeapon{  //deliberately NOT extending Ant
     public $animationWidth = 2;
     public $trailLength = 10;
 
-	public $priority = 3;
+	public $priority = 4;
 
 	public $loadingtime = 1;
 	public $shots = 2;
@@ -384,7 +384,7 @@ class LtAntimatterCannon extends Weapon{  //deliberately NOT extending Antimatte
         public $animationExplosionScale = 0.25;
                 
         public $loadingtime = 2;
-		public $priority = 5;
+		public $priority = 6;
 		public $shots = 1;		
             
         public $rangePenalty = 2;
@@ -422,8 +422,7 @@ class AntimatterShredder extends AntimatterWeapon{
         public $trailLength = 9;
         //public $animationColor = array(0, 184, 230); //let's inherit from Antimatter...
         public $animationWidth2 = 0.2;
-		public $animationExplosionScale = 0.4;                        	
-		//public $animationExplosionTypeArray = array(1=>'AoE', 2=>'normal', 3=>'normal'); 
+		public $animationExplosionScale = 0.4;                   
 		
         public $priority = 2; 
 		public $priorityArray = array(1=>2, 2=>7, 3=>2); //Shredder affects every unit in range, while Piercing affects all sections in its path - both should be fired very early
@@ -441,9 +440,9 @@ class AntimatterShredder extends AntimatterWeapon{
        
         public $damageTypeArray = array(1=> 'Standard', 2=>'Raking', 3=>'Piercing');
 		
-		public $rngNoPenalty = 10; //maximum range at which weapon suffers no penalty
+		public $rngNoPenalty = 11; //maximum range at which weapon suffers no penalty
 		public $rngNoPenaltyArray = array(11,10,10); //Shredder can be targeted up to 10 hexes away, but can actually reach a hex further away
-		public $rngNormalPenalty = 20;//maximum range at which weapon suffers regular penalty
+		public $rngNormalPenalty = 11;//maximum range at which weapon suffers regular penalty
 		public $rngNormalPenaltyArray = array(11,20,20);
 		public $maxX = 10; //maximum value of X
 		public $maxXArray = array(1=>10, 2=>20, 3=>20); //maximum value of X
@@ -461,13 +460,6 @@ class AntimatterShredder extends AntimatterWeapon{
 		
 		public $range = 10;
         public $rangeArray = array(1=>10, 2=>0, 3=>0); //range is unlimited for AMCannon, but limited for Shredder
-		//actually it should be interceptable, but with fire orders not having assigned ID at the time of interception it won't work properly anyway.
-		/*
-		public $uninterceptable = true;
-		public $uninterceptableArray = array(1=>true, 2=>false, 3=>false);
-		public $doNotIntercept = true;
-		public $doNotInterceptArray = array(1=>true, 2=>false, 3=>false);
-		*/
 		public $hextarget = true;
 		public $hextargetArray = array(1=>true, 2=>false, 3=>false);
 		
