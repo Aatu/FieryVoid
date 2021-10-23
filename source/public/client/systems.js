@@ -219,7 +219,8 @@ shipManager.systems = {
                 for (var a in system.systems) {
                     var figsys = system.systems[a];
 
-                    if (figsys.name == name) {
+                    if ((figsys.name == name)
+						&& (!shipManager.systems.isDestroyed(ship,figsys)) ) { //only on alive fighters!
                         return figsys;
                     }
                 }

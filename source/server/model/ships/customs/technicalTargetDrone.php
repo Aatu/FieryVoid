@@ -28,15 +28,16 @@ class technicalTargetDrone extends BaseShip{
 		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 0, 180));
 		$this->addPrimarySystem(new Reactor(6, 35, 0, 0));
 		$this->addPrimarySystem(new CnC(1, 1, 0, 0));
-		$sensors = new Scanner(6, 23, 4, 20);
-		$sensors->markAdvanced();
-		$this->addFrontSystem($sensors);
+//		$sensors = new Scanner(6, 23, 4, 20);
+//			$sensors->markAdvanced();
+//			$this->addFrontSystem($sensors);
 		$this->addPrimarySystem(new Engine(5, 20, 0, 20, 3));
 		$this->addPrimarySystem(new Hangar(6, 100));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
 		
+//        $this->addFrontSystem(new AntiquatedScanner(3, 20, 6, 6));
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
 		//$this->addFrontSystem(new Hangar(4, 6));
@@ -48,13 +49,24 @@ class technicalTargetDrone extends BaseShip{
 //		$this->addFrontSystem(new PlasmaWeb(2, 4, 2, 0, 360));
 
 //		$this->addFrontSystem(new PlasmaBlast(2, 4, 2, 0, 360));
-//		$this->addFrontSystem(new graviticBolt(2, 5, 2, 0, 360));
-//		$this->addFrontSystem(new FusionAgitator(2, 10, 4, 0, 360));
+//		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
+//		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
+//    	$sensors = new Scanner(3, 12, 3, 5);
+//			$sensors->HyachScanner();
+//			$this->addPrimarySystem($sensors);
+//		$this->addFrontSystem(new HyachScanner(3, 12, 3, 5));
+//		$this->addFrontSystem(new HyachElintScanner(3, 12, 3, 5));
+//    	$sensors = new Scanner(3, 12, 3, 5);
+//			$sensors->markHyach();
+//			$this->addFrontSystem($sensors);
+//		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
+//		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
 //		$this->addFrontSystem(new TrekPlasmaBurst(2, 4, 1, 0, 360));
+		$this->addFrontSystem(new GraviticBolt(2, 5, 2, 0, 360));
 
 
 		$this->addPrimarySystem(new SpinalLaser(5, 12, 12, 330, 30));
-
+//		$this->addPrimarySystem(new Stealth(1,1,0));
 		
 /*		$this->addPrimarySystem(new AMissileRack(5, 6, 0, 0, 360));
 		$this->addPrimarySystem(new BMissileRack(6, 9, 0, 0, 360));
@@ -127,7 +139,7 @@ class technicalTargetDrone extends BaseShip{
 				*/
 			),
 			1=> array(
-				20 => "Structure",
+				20 => "Targeting Array",
 				/*
 				5 => "Plasma Wave",
 				10 => "Stun Beam",

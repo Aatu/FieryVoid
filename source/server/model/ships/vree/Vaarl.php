@@ -12,8 +12,8 @@ class Vaarl extends VreeHCV{
 		$this->locations = array(41, 42, 2, 32, 31, 1);					
 
 
-		$this->shipSizeClass = 2; //Enormous is not implemented
-		$this->iniativebonus = 6; //no voluntary movement anyway
+		$this->shipSizeClass = 2; 
+		$this->iniativebonus = 6 *5; 
 		
         $this->turncost = 0.66;
         $this->turndelaycost = 0.5;
@@ -42,12 +42,12 @@ class Vaarl extends VreeHCV{
 		
         $this->addAftSystem(new Thruster(3, 12, 0, 7, 2));
         
-		$this->addLeftFrontSystem(new AntiprotonDefender(2, 0, 0, 240, 0));
 		$this->addLeftFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60));
+		$this->addLeftFrontSystem(new AntiprotonDefender(2, 0, 0, 240, 0));
 		$this->addLeftFrontSystem(new StructureTechnical(0, 0, 0, 0));	 
 		
-		$this->addLeftAftSystem(new AntiprotonDefender(2, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240));
+		$this->addLeftAftSystem(new AntiprotonDefender(2, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new StructureTechnical(0, 0, 0, 0));	
 		
 	
@@ -56,8 +56,8 @@ class Vaarl extends VreeHCV{
 		$this->addRightFrontSystem(new StructureTechnical(0, 0, 0, 0));			
 					        
 
-		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 60, 180));  
-		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240)); 
+		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240));  
+		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 60, 180)); 
 		$this->addRightAftSystem(new StructureTechnical(0, 0, 0, 0));			
        
 	//	$this->addFrontSystem(new StructurePlaceholder(0, 0, 0, 0)); 

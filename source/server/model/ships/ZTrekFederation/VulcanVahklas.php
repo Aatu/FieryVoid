@@ -36,7 +36,7 @@ class VulcanVahklas extends LCV{
 		$this->addPrimarySystem(new Reactor(3, 10, 0, 2));
 		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
     	$sensors = new Scanner(3, 12, 4, 4);
-			$sensors->markLCV();
+			//$sensors->markLCV();
 			$this->addPrimarySystem($sensors);
 	$impulseDrive = new TrekImpulseDrive(3,16,0,2,3);
 
@@ -51,7 +51,7 @@ class VulcanVahklas extends LCV{
 		$this->addFrontSystem(new TrekLtPhaseCannon(2, 4, 2, 180, 30));
 	
 
-		$warpNacelle = new TrekWarpDrive(3, 12, 3, 4); //armor, structure, power usage, impulse output
+		$warpNacelle = new TrekWarpDrive(3, 12, 0, 4); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
 		$this->addAftSystem($warpNacelle);
         $this->addPrimarySystem($impulseDrive);

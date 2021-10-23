@@ -63,11 +63,27 @@ AntiquatedScanner.prototype.hasMaxBoost = function () {
     return true;
 };
 
+/*var HyachScanner = function HyachScanner(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+HyachScanner.prototype = Object.create(ShipSystem.prototype);
+HyachScanner.prototype.constructor = HyachScanner;
+HyachScanner.prototype.isScanner = function () {
+    return true;
+}; */
+
 var ElintScanner = function ElintScanner(json, ship) {
     Scanner.call(this, json, ship);
 };
 ElintScanner.prototype = Object.create(Scanner.prototype);
 ElintScanner.prototype.constructor = ElintScanner;
+
+/*var HyachElintScanner = function HyachElintScanner(json, ship) {
+    Scanner.call(this, json, ship);
+};
+HyachElintScanner.prototype = Object.create(Scanner.prototype);
+HyachElintScanner.prototype.constructor = HyachElintScanner;
+*/
 
 var Engine = function Engine(json, ship) {
     ShipSystem.call(this, json, ship);

@@ -49,13 +49,13 @@ class VulcanTimur extends MediumShip{
 		$this->addFrontSystem(new CargoBay(2, 12));
 		$this->addFrontSystem(new CargoBay(2, 12));
 	    
-		$warpNacelle = new TrekWarpDrive(3, 12, 3, 3); //armor, structure, power usage, impulse output
+		$warpNacelle = new TrekWarpDrive(3, 12, 0, 3); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
 		$this->addAftSystem($warpNacelle);
-		$warpNacelle = new TrekWarpDrive(3, 12, 3, 3); //armor, structure, power usage, impulse output
+		$warpNacelle = new TrekWarpDrive(3, 12, 0, 3); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
 		$this->addAftSystem($warpNacelle);
-		$warpNacelle = new TrekWarpDrive(3, 12, 3, 3); //armor, structure, power usage, impulse output
+		$warpNacelle = new TrekWarpDrive(3, 12, 0, 3); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
 		$this->addAftSystem($warpNacelle);
 		$this->addAftSystem(new TrekPhaseCannon(2, 6, 4, 90, 270));
