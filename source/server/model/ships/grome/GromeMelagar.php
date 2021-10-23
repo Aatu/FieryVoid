@@ -63,7 +63,7 @@ class GromeMelagar extends MediumShip{
 			6 => "Connection Strut",
 			8 => "Targeting Array",
 			11 => "Engine",
-			14 => "Antiquated Scanner",
+			14 => "Scanner",
 			16 => "Hangar",
 			18 => "Reactor",
 			20 => "C&C",

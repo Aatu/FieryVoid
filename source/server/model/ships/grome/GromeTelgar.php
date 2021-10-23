@@ -63,7 +63,7 @@ class GromeTelgar extends MediumShip{
 			7 => "Connection Strut",
 			9 => "Targeting Array",
 			12 => "Engine",
-			15 => "Antiquated Scanner",
+			15 => "Scanner",
 			17 => "Hangar",
 			19 => "Reactor",
 			20 => "C&C",

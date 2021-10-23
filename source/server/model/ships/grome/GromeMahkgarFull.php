@@ -42,7 +42,7 @@ The costs before rounding the final value are:
 			0=> array(
 				12 => "Structure",
 				14 => "Targeting Array",
-				16 => "Antiquated Scanner",
+				16 => "Scanner",
 				18 => "Reactor",
 				20 => "C&C",
 			),
