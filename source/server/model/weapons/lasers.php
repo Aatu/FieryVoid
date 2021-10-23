@@ -785,4 +785,40 @@ class LaserAccelerator extends Laser{
     }  //endof Maser
 
 
+    class SpinalLaser extends Laser{
+        public $name = "SpinalLaser";
+        public $displayName = "Spinal Laser";
+        public $animation = "laser";
+        public $animationColor = array(255, 79, 15);
+        public $animationWidth = 5;
+        public $animationWidth2 = 0.3;
+
+        public $loadingtime = 5;
+        public $overloadable = true;
+        public $extraoverloadshots = 2;
+
+        public $raking = 10;
+        public $priority = 8;
+        
+        public $rangePenalty = 0.2;
+        public $fireControl = array(null, 2, 4); // fighters, <mediums, <capitals 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 12;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 12;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 6)+40;   }
+        public function setMinDamage(){     $this->minDamage = 46 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 100 ;      }
+        
+        
+    } // endof Spinal Laser
+
 ?>

@@ -13,7 +13,7 @@ class RakartaCannon extends MediumShip{
 		$this->variantOf = "Rakarta Frigate";
 
 		$this->notes = 'Pri-Wakat Concepts & Solutions (common for other Corporations without separate variant)';//Corporation producing the design
-		$this->isd = 2206;
+		$this->isd = 2250;
 		
 		$this->forwardDefense = 11;
 		$this->sideDefense = 13;

@@ -50,7 +50,7 @@ class GromeGormokOSAT extends OSAT{
 					11 => "Targeting Array",
 					13 => "Heavy Railgun",
 					15 => "Light Railgun",
-					17 => "Antiquated Scanner",
+					17 => "Scanner",
 					19 => "Reactor",
 					20 => "Flak Cannon",
 			)

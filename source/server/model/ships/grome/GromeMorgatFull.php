@@ -73,7 +73,7 @@ The costs before rounding the final value are:
 			7 => "Targeting Array",
 			9 => "Flak Cannon",
 			12 => "Engine",
-			15 => "Antiquated Scanner",
+			15 => "Scanner",
 			17 => "Hangar",
 			19 => "Reactor",
 			20 => "C&C",

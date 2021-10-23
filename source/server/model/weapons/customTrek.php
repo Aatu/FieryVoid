@@ -45,6 +45,18 @@ class TrekImpulseDrive extends Engine{
 	
 	private $warpDrives = array();
 	
+	
+    public $possibleCriticals = array( //as actual output is minima, so should be crits!	     
+        16=>"OutputReduced1",
+        22=>"OutputReduced2",
+        28=>"ForcedOfflineOneTurn"
+	/*original Engine crits:    
+        15=>"OutputReduced2",
+        21=>"OutputReduced4",
+        28=>"ForcedOfflineOneTurn"
+	*/
+    );
+	
     
     function __construct($armour, $maxhealth, $powerReq, $output, $boostEfficiency){
         parent::__construct($armour, $maxhealth, $powerReq, $output, $boostEfficiency ); //($armour, $maxhealth, $powerReq, $output, $boostEfficiency
@@ -129,6 +141,44 @@ class TrekLtPhaseCannon extends Raking{
         public function setMaxDamage(){     $this->maxDamage = 14 ;      }
 
 }//end of class Trek Light Phase Cannon
+
+
+/*super-heavy fighter weapon*/
+    class TrekFtrPhaseCannon extends Weapon{
+        public $name = "TrekFtrPhaseCannon";
+        public $displayName = "Light Phase Cannon";
+        public $iconPath = "TrekLightPhaseCannon.png";
+        public $animation = "laser";
+        public $animationColor = array(225, 0, 0);
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.2;
+
+        public $loadingtime = 1;
+        public $raking = 6;
+//        public $exclusive = true;
+        public $intercept = 2;
+        public $priority = 8; //Raking weapon
+        
+        public $rangePenalty = 1;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+ 
+		public $damageType = 'Raking'; 
+		public $weaponClass = "Particle"; 
+	    
+        function __construct($startArc, $endArc, $damagebonus){
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+				$this->data["Special"] = "Does damage in raking mode (6)";
+		}
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
+        public function setMinDamage(){   return  $this->minDamage = 5 ;      }
+        public function setMaxDamage(){   return  $this->maxDamage = 14 ;      }
+		
+    }  //end of class Trek Fighter Light Phase Cannon
 
 
 class TrekPhaseCannon extends Raking{
@@ -518,23 +568,21 @@ class TrekPhaserLance extends Raking{
 
     class TrekPlasmaBurst extends Plasma{
 
-    	public $name = "TrekPlasmaBurst";
+        public $name = "TrekPlasmaBurst";
         public $displayName = "Plasma Burst";
-		public $iconPath = "TrekPlasmaBurst.png";
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
-    	public $trailColor = array(75, 250, 90);
-    	public $projectilespeed = 11;
-        public $animationWidth = 3;
-    	public $animationExplosionScale = 0.2;
-    	public $trailLength = 12;
+        public $trailColor = array(75, 250, 90);
+        public $animationWidth = 2;
+        public $animationExplosionScale = 0.15;
+    	public $trailLength = 10;
     	public $rangeDamagePenalty = 1;
-		public $priority = 4;
 
         public $intercept = 0;
         public $loadingtime = 1;
-
         public $addedDice;
+        public $priority = 6;
+
         public $boostable = true;
         public $boostEfficiency = 1;
         public $maxBoostLevel = 1;
@@ -545,7 +593,10 @@ class TrekPhaserLance extends Raking{
 
         public $rangePenalty = 1;
         public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals
+        //private $damagebonus = 10;
 
+        public $damageType = "Standard"; 
+        public $weaponClass = "Plasma"; 
 
         public function setSystemDataWindow($turn){
             $boost = $this->getExtraDicebyBoostlevel($turn);            
@@ -555,16 +606,8 @@ class TrekPhaserLance extends Raking{
             }else{
                 $this->data["Special"] .= '<br>';
             } 
-            $this->data["Special"] .= 'Standard power: 2d6 damage.';
-            $this->data["Special"] .= '<br>Double power: +2d6 damage, rolls for critical with +10 penalty.';
+            $this->data["Special"] .= '<br>Double power boosts damage from 2d6 to 4d6. Forces a critical roll at a +10 penalty.';
             $this->data["Boostlevel"] = $boost;
-        }
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 4;
-            if ( $powerReq == 0 ) $powerReq = 1;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
         private function getExtraDicebyBoostlevel($turn){
@@ -594,7 +637,7 @@ class TrekPhaserLance extends Raking{
 
         public function getDamage($fireOrder){
             $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
-            $dmg = Dice::d(6, (2 + $add)) + 0;
+            $dmg = Dice::d(6, (2 + $add)) +0;
             return $dmg;
         }
 
@@ -611,15 +654,27 @@ class TrekPhaserLance extends Raking{
         public function setMinDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->minDamage = 2 + ($boost * 2);
+            $this->minDamage = 2 + ($boost * 1) + 0;
         }   
 
         public function setMaxDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->maxDamage = 12 + ($boost * 6);
+            $this->maxDamage = 12 + ($boost * 6) + 0;
         }  
-   }   //end of class TrekPlasmaBurst
+
+        public function fire($gamedata, $fireOrder){
+		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
+            parent::fire($gamedata, $fireOrder);
+		
+            // If fully boosted: test for possible crit.
+            if($currBoostlevel === $this->maxBoostLevel){
+				$this->criticalRollMod = 10;
+            	$this->forceCriticalRoll = true;
+            }
+        }
+		
+    }  //end of class TrekPlasmaBurst
 
 
 

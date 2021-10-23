@@ -16,9 +16,9 @@ AntimatterConverter.prototype.constructor = AntimatterConverter;
 
 
 var AntimatterWeapon = function AntimatterWeapon(json, ship) {
-    Antimatter.call(this, json, ship);
+    Weapon.call(this, json, ship);
 };
-AntimatterWeapon.prototype = Object.create(Antimatter.prototype);
+AntimatterWeapon.prototype = Object.create(Weapon.prototype);
 AntimatterWeapon.prototype.constructor = AntimatterWeapon;
 AntimatterWeapon.prototype.calculateSpecialRangePenalty = function (distance) {
 	var rangePenalty = 0;
@@ -26,6 +26,36 @@ AntimatterWeapon.prototype.calculateSpecialRangePenalty = function (distance) {
     rangePenalty += this.rangePenalty * Math.max(0,distance - this.rngNormalPenalty);
     return rangePenalty;
 };
+/* I don't know how to make this work - calling parent eludes me ATM; moving entire code to shipSystem.js!
+AntimatterWeapon.prototype.changeFiringMode = function () { //additional arrays to change during mode change - Antimatter-specific
+Weapon.prototype.changeFiringMode(this);
+	var updateDataPenalty = false; 
+	if (!mathlib.arrayIsEmpty(this.rngNoPenaltyArray)) {
+		this.rngNoPenalty = this.rngNoPenaltyArray[this.firingMode];
+		updateDataPenalty = true;
+	}
+	if (!mathlib.arrayIsEmpty(this.rngNormalPenaltyArray)) {
+		this.rngNormalPenaltyPenalty = this.rngNormalPenaltyArray[this.firingMode];
+		updateDataPenalty = true;
+	}
+	if (updateDataPenalty == true){
+		this.data["Range brackets"] = 'no penalty up to ' + this.rngNoPenalty + ' / regular up to ' + this.rngNormalPenalty + ' / double' ;
+	}
+	
+	updateDataPenalty = false;
+	if (!mathlib.arrayIsEmpty(this.maxXArray)) {
+		this.maxX = this.maxXArray[this.firingMode];
+		updateDataPenalty = true;
+	}
+	if (!mathlib.arrayIsEmpty(this.dmgEquationArray)) {
+		this.dmgEquation = this.dmgEquationArray[this.firingMode];
+		updateDataPenalty = true;
+	}
+	if (updateDataPenalty == true){
+		this.data["X-dependent damage"] = this.dmgEquation + ' ( max X = ' + this.maxX + ')';
+	}
+}
+*/
 
 var AntiprotonGun = function AntiprotonGun(json, ship) {
     Antimatter.call(this, json, ship);

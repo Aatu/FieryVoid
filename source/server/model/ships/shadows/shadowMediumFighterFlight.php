@@ -30,7 +30,7 @@ class ShadowMediumFighterFlight extends FighterFlight{
         
 		
 	    $this->advancedArmor = true; 
-        $this->gravitic = true;
+        //$this->gravitic = true;
 		$this->critRollMod = -100; //cannot drop out 
 		
 		$this->iniativebonus = 20 *5;

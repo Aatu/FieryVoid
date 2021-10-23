@@ -21,7 +21,7 @@ class ShadowBattleCruiser extends MediumShip{
         $this->sideDefense = 18;
         
 		$this->halfPhaseThrust = 6; //needed for half phasing; equal to thrust from two BioThrusters on a given ship
-        $this->gravitic = true;
+        //$this->gravitic = true;
 		$this->advancedArmor = true;   
         $this->turncost = 1.5;
         $this->turndelaycost = 0.5;

@@ -4,11 +4,13 @@ class Antoph extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 500;
+        $this->pointCost = 470;
         $this->faction = "Brakiri";
         $this->phpclass = "Antoph";
         $this->imagePath = "img/ships/antoph.png";
         $this->shipClass = "Antoph Light Cruiser";
+			$this->occurence = "common";
+			$this->variantOf = 'Antoph Light Cruiser (upgrade)';
                 
 		$this->notes = 'Ak-Habil Conglomerate';//Corporation producing the design
 		$this->isd = 2220;
@@ -37,11 +39,11 @@ class Antoph extends HeavyCombatVessel{
         
         $this->addFrontSystem(new GraviticThruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new GraviticThruster(4, 8, 0, 3, 1));
-        $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 240, 60));
+        $this->addFrontSystem(new GraviticBolt(3, 5, 2, 240, 60));
         $this->addFrontSystem(new GravitonBeam(5, 8, 8, 300, 60));
-        $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 300, 120));
+        $this->addFrontSystem(new GraviticBolt(3, 5, 2, 300, 120));
         
-        $this->addAftSystem(new GravitonPulsar(3, 5, 2, 120, 240));
+        $this->addAftSystem(new GraviticBolt(3, 5, 2, 120, 240));
         $this->addAftSystem(new GraviticThruster(4, 12, 0, 6, 2));
         $this->addAftSystem(new GraviticThruster(4, 12, 0, 6, 2));
         
@@ -63,14 +65,14 @@ class Antoph extends HeavyCombatVessel{
 			),
 			1=> array(
 					4 => "Thruster",
-					7 => "Graviton Pulsar",
+					7 => "Gravitic Bolt",
 					9 => "Graviton Beam",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
 					7 => "Thruster",
-					8 => "Graviton Pulsar",
+					8 => "Gravitic Bolt",
 					18 => "Structure",
 					20 => "Primary",
 			),
