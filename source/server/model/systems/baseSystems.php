@@ -612,7 +612,8 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= 'Star Wars Sensors - boostability limited to +2.';
-	}	
+	}
+	
 	public function markAntiquated(){		
     	$this->specialAbilities[] = "AntiquatedSensors";
 		$this->specialAbilityValue = true; //so it is actually recognized as special ability!
@@ -624,7 +625,32 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		}
 		$this->data["Special"] .= 'Antiquated Sensors cannot be boosted.';
 	}
-	public function markHyach(){		
+
+
+    public function markHyach(){
+        $this->specialAbilities[] = "HyachSensors";
+        $this->specialAbilityValue = true; //so it is actually recognized as special ability!
+        if (!isset($this->data["Special"])) {
+            $this->data["Special"] = '';
+        }else{
+            $this->data["Special"] .= '<br>';
+        }
+        $this->data["Special"] .= 'Damage sustained is halved for purposes of critical rolls.';
+    }
+
+	public function testCritical($ship, $gamedata, $crits, $add=0){ 
+		$hasHyachSensors = $ship->getSpecialAbilityValue("HyachSensors");
+		$damageBonus = 0;
+		if( $hasHyachSensors){
+			$damageBonus = -round($this->getTotalDamage() /2); //half of current damage, rounded
+		}
+		$this->critRollMod += $damageBonus; //apply bonus
+		$critsReturn = parent::testCritical($ship, $gamedata, $crits); //add appropriate critical(s)
+		$this->critRollMod -= $damageBonus; //unapply bonus
+		return $critsReturn; //return new set of critical damage
+	}
+	
+/*	public function markHyach(){		
     	$this->specialAbilities[] = "HyachSensors";
 		$this->specialAbilityValue = true; //so it is actually recognized as special ability!
 		if (!isset($this->data["Special"])) {
@@ -632,10 +658,21 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= 'Hyach Sensors have a +5% critical bonus for every two damage.';
-		
-		$this->criticalRollMod = $this->criticalRollMod / 2;
-	}
+		$this->data["Special"] .= 'Damaged sustained by Hyach Sensors is halved for pusposes of critical rolls.';
+	} */
+
+/*	public function testCritical($ship, $gamedata, $crits, $add=0){
+		$hasHyachSensors = $ship->getSpecialAbilityValue("HyachSensors");
+		$damageBonus = 0;
+		if ($hasHyachSensors){
+			$damageBonus =- round($this->getTotalDamage()/2); //half of current damage, rounded
+		}
+		$this->critRollMod += $damageBonus; // apply bonus
+		$critsReturn = parent::testCritical($ship, $gamedata, $crits); //add appropriate critical(s)
+		$this->critRollMod -= $damageBonues; //unapply bonus
+		return $critsReturn; // return new set of critical damage
+	} */
+
 	/*note: LCV Sensors are (or will be) checked at committing Initial Orders, in front end. All but 2 EW points need to be OEW. 
 	This is Sensor trait rather than being strictly tied to hull size - while no larger units have it, of LCVs themselves only Young ones have it more or less universally.
 	More advanced factions usually do not, and for custom factions it's up to their creator.
@@ -665,7 +702,7 @@ class ElintScanner extends Scanner implements SpecialAbility{
         parent::__construct($armour, $maxhealth, $powerReq, $output );
     }
     
-     public function setSystemDataWindow($turn){
+    public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);     
 	$boostability = $this->maxBoostLevel;		
 	if (!isset($this->data["Special"])) {
@@ -687,6 +724,30 @@ class ElintScanner extends Scanner implements SpecialAbility{
     {
         return true;
     }
+
+/*	public function markHyachElint(){		
+    	$this->specialAbilities[] = "HyachElintSensors";
+		$this->specialAbilityValue = true; //so it is actually recognized as special ability!
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= 'Damaged sustained by Hyach Sensors is halved for pusposes of critical rolls.';
+	}
+
+	public function testCritical($ship, $gamedata, $crits, $add=0){
+		$hasHyachElintSensors = $ship->getSpecialAbilityValue("HyachElintSensors");
+		$damageBonus = 0;
+		if ($hasHyachSensors){
+			$damageBonus =- round($this->getTotalDamage()/2); //half of current damage, rounded
+		}
+		$this->critRollMod += $damageBonus; // apply bonus
+		$critsReturn = parent::testCritical($ship, $gamedata, $crits); //add appropriate critical(s)
+		$this->critRollMod -= $damageBonues; //unapply bonus
+		return $critsReturn; // return new set of critical damage
+	}
+*/
 }
 
 
@@ -728,17 +789,31 @@ class AntiquatedScanner extends Scanner {
 	
 } //end of AntiquatedScanner
 
+
 /*Hyach Scanners are more resistent to criticals. +5% per two damage.*/
-class HyachScanner extends Scanner {
+/*class HyachScanner extends Scanner {
     public $name = "HyachScanner";
     public $iconPath = "scanner.png";
 	
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
 	$this->markHyach();
-    }
-	
+	}
 } //end of HyachScanner
+*/
+
+/*Hyach Scanners are more resistent to criticals. +5% per two damage.*/
+/* class HyachElintScanner extends ElintScanner {
+    public $name = "HyachElintScanner";
+    public $iconPath = "elintArray.png";
+	
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+	$this->markHyachElint();
+	}
+} */ //end of HyachElintScanner
+
+
 
 class CnC extends ShipSystem{
     public $name = "cnC";
