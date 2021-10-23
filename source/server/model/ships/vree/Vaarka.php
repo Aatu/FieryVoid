@@ -45,20 +45,20 @@ class Vaarka extends VreeHCV{
 		$this->addFrontSystem(new StructureTechnical(0, 0, 0, 0)); //SOMETHING is necessary for structure to be shown
 		$this->addAftSystem(new StructureTechnical(0, 0, 0, 0));
         
+		$this->addLeftFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60));
 		$this->addLeftFrontSystem(new AntiprotonDefender(2, 0, 0, 240, 0));
-		$this->addLeftFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60)); 
 		$this->addLeftFrontSystem(new StructureTechnical(0, 0, 0, 0));			
 		
-		$this->addLeftAftSystem(new AntiprotonDefender(2, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240));
+		$this->addLeftAftSystem(new AntiprotonDefender(2, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new StructureTechnical(0, 0, 0, 0));
 		
 		$this->addRightFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60)); 
 		$this->addRightFrontSystem(new AntiprotonDefender(2, 0, 0, 0, 120));
 		$this->addRightFrontSystem(new StructureTechnical(0, 0, 0, 0));			 						        
 			 
-		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 60, 180));  
-		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240)); 
+		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240));  
+		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 60, 180)); 
 		$this->addRightAftSystem(new StructureTechnical(0, 0, 0, 0));				
        
 

@@ -21,6 +21,7 @@ class ZFtrTzymm extends FighterFlight{
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
         $this->iniativebonus = 16 *5;
+        $this->pivotcost = 0;        
 
         $this->maxFlightSize = 6;//this fighter is partcularly large/tough even for Heavy fighter, limit flight size
         

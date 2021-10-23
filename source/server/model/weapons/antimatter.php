@@ -33,7 +33,7 @@
 		
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-			$this->data["Range brackets"] = 'no penalty up to ' . $this->rngNoPenalty . ' / regular up to ' . $this->rngNormalPenalty . ' / double' ;
+			$this->data["Range brackets"] = 'No penalty up to ' . $this->rngNoPenalty . ' / Normal penalty up to ' . $this->rngNormalPenalty . ' / Double therafter ' ;
 			$this->data["X-dependent damage"] = $this->dmgEquation . ' ( max X = ' . $this->maxX . ')';
             $this->data["Special"] = "Damage is dependent on how good a hit is - it's not randomized. Quality of hit is called X, and equals difference between actual and needed to-hit roll divided by 5.";
 			//$this->data["Special"] .= "<br>This weapon does " . $this->dmgEquation .' damage, with maximum X being ' . $this->maxX . '.';
