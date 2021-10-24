@@ -60,10 +60,10 @@ class technicalTargetDrone extends BaseShip{
 //		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
 //		$this->addFrontSystem(new TrekPlasmaBurst(2, 4, 1, 0, 360));
 		$this->addFrontSystem(new GraviticBolt(2, 5, 2, 0, 360));
-//		$sensors = new Scanner(6, 23, 4, 20);
-//			$sensors->markAdvanced();
-//			$this->addFrontSystem($sensors);
-        $this->addFrontSystem(new HyachScanner(3, 20, 2, 4));
+		$sensors = new ELINTScanner(6, 23, 4, 20);
+			$sensors->markHyachELINT();
+			$this->addFrontSystem($sensors);
+//        $this->addFrontSystem(new HyachScanner(3, 20, 2, 4));
 
 
 		$this->addPrimarySystem(new SpinalLaser(5, 12, 12, 330, 30));

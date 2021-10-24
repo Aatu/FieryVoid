@@ -2367,13 +2367,13 @@ spl_autoload_register(
 
 				//Hyach conversions
 				//systems
-               'hyachscanner' => '/server/model/systems/baseSystems.php',
+//               'hyachscanner' => '/server/model/systems/baseSystems.php',
 //               'hyachelintscanner' => '/server/model/systems/baseSystems.php',
 				
 				
 				//weapons
-//                'interdictorhandler' => '/server/model/weapons/particle.php',
-//                'interdictor' => '/server/model/weapons/particle.php',
+                'interdictorhandler' => '/server/model/weapons/particle.php',
+                'interdictor' => '/server/model/weapons/particle.php',
 				
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
