@@ -37,8 +37,8 @@ class JorthunA extends LCV{
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(1, 11, 0, 6, 2));
 	$this->addPrimarySystem(new LightPlasma(1, 4, 2, 240, 60));
-	$this->addPrimarySystem(new LightPlasma(1, 4, 5, 270, 90));
 	$this->addPrimarySystem(new LightPlasma(1, 4, 2, 300, 120));
+	$this->addPrimarySystem(new LightPlasma(1, 4, 5, 270, 90));
 	$this->addPrimarySystem(new Structure(3, 26));
   
         $this->hitChart = array(
