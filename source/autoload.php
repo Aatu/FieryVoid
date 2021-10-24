@@ -1259,6 +1259,8 @@ spl_autoload_register(
 				'choukabishopwarship' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBishopWarship.php',
 				'choukabloodfirefighter' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBloodfireFighter.php',
 				'choukabloodlustfighter' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBloodlustFighter.php',
+				'choukabrimstoneheavyosat' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBrimstoneHeavyOSAT.php',
+				'choukacitadel' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaCitadel.php',
 				'choukaclergy' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaClergy.php',
 				'choukacontritionheavyescort' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaContritionHeavyEscort.php',
 				'choukacovenantminelayer' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaCovenantMinelayer.php',
@@ -1267,10 +1269,12 @@ spl_autoload_register(
 				'choukaflagellantfreighter' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaFlagellantFreighter.php',
 				'choukagrandinquisitor' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaGrandInquisitor.php',
 				'choukahellfireaosat' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHellfireAOSAT.php',
+				'choukahellfireaosatrefit' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHellfireAOSATRefit.php',
 				'choukahellfirebosat' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHellfireBOSAT.php',
 				'choukaheraldwarcruiser' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHeraldWarCruiser.php',
 				'choukaholylandassault' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHolylandAssault.php',
 				'choukainquisitorlightcruiser' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaInquisitorLightCruiser.php',
+				'choukapenancebase' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaPenanceBase.php',
 				'choukapenitentpatrolship' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaPenitentPatrolShip.php',
 				'choukapledgeminelayer' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaPledgeMinelayer.php',
 				'choukapriestdestroyer' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaPriestDestroyer.php',
@@ -1285,6 +1289,8 @@ spl_autoload_register(
 				'choukascripturescout' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaScriptureScout.php',
 				'choukasinnercorvette' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaSinnerCorvette.php',
 				'choukasuppliantauxiliarycarrier' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaSuppliantAuxiliaryCarrier.php',
+				'choukatemplestarbase' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaTempleStarbase.php',
+				'choukatemplerefit' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaTempleRefit.php',
 				'choukateuton' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaTeuton.php',
 				'choukatribunalmissilecruiser' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaTribunalMissileCruiser.php',
 				'choukatribunalmissilecruiserrefit' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaTribunalMissileCruiserRefit.php',
@@ -2357,8 +2363,8 @@ spl_autoload_register(
 
 				//Hyach conversions
 				//systems
-//                'hyachscanner' => '/server/model/systems/baseSystems.php',
-//                'hyachelintscanner' => '/server/model/systems/baseSystems.php',
+               'hyachscanner' => '/server/model/systems/baseSystems.php',
+//               'hyachelintscanner' => '/server/model/systems/baseSystems.php',
 				
 				
 				//weapons

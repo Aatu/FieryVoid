@@ -650,28 +650,6 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		return $critsReturn; //return new set of critical damage
 	}
 	
-/*	public function markHyach(){		
-    	$this->specialAbilities[] = "HyachSensors";
-		$this->specialAbilityValue = true; //so it is actually recognized as special ability!
-		if (!isset($this->data["Special"])) {
-			$this->data["Special"] = '';
-		}else{
-			$this->data["Special"] .= '<br>';
-		}
-		$this->data["Special"] .= 'Damaged sustained by Hyach Sensors is halved for pusposes of critical rolls.';
-	} */
-
-/*	public function testCritical($ship, $gamedata, $crits, $add=0){
-		$hasHyachSensors = $ship->getSpecialAbilityValue("HyachSensors");
-		$damageBonus = 0;
-		if ($hasHyachSensors){
-			$damageBonus =- round($this->getTotalDamage()/2); //half of current damage, rounded
-		}
-		$this->critRollMod += $damageBonus; // apply bonus
-		$critsReturn = parent::testCritical($ship, $gamedata, $crits); //add appropriate critical(s)
-		$this->critRollMod -= $damageBonues; //unapply bonus
-		return $critsReturn; // return new set of critical damage
-	} */
 
 	/*note: LCV Sensors are (or will be) checked at committing Initial Orders, in front end. All but 2 EW points need to be OEW. 
 	This is Sensor trait rather than being strictly tied to hull size - while no larger units have it, of LCVs themselves only Young ones have it more or less universally.
@@ -789,18 +767,18 @@ class AntiquatedScanner extends Scanner {
 	
 } //end of AntiquatedScanner
 
-
-/*Hyach Scanners are more resistent to criticals. +5% per two damage.*/
-/*class HyachScanner extends Scanner {
+/*Hyach Scanners are resistant to criticals*/
+class HyachScanner extends Scanner {
     public $name = "HyachScanner";
     public $iconPath = "scanner.png";
 	
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
 	$this->markHyach();
-	}
+    }
+	
 } //end of HyachScanner
-*/
+
 
 /*Hyach Scanners are more resistent to criticals. +5% per two damage.*/
 /* class HyachElintScanner extends ElintScanner {
