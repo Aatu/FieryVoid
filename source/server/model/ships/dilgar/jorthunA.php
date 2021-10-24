@@ -53,15 +53,15 @@ class JorthunA extends LCV{
         				12 => "0:Structure",
         				16 => "0:Light Plasma Cannon",
         				18 => "0:Engine",
-        				19 => "Reactor",
-        				20 => "Scanner",
+        				19 => "0:Reactor",
+        				20 => "0:Scanner",
         		),
         		2=> array( //same as Fwd
         				12 => "0:Structure",
         				16 => "0:Light Plasma Cannon",
         				18 => "0:Engine",
-        				19 => "Reactor",
-        				20 => "Scanner",
+        				19 => "0:Reactor",
+        				20 => "0:Scanner",
 				),
         		
         ); //end of hit chart

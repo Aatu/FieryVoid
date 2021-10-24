@@ -228,6 +228,38 @@
 
 
 
+    class HeavyParticleBeam extends Particle{
+        public $trailColor = array(255, 163, 26);
+
+        public $name = "HeavyParticleBeam";
+        public $displayName = "Heavy Particle Beam";
+        public $animation = "trail";
+        public $animationColor = array(255, 163, 26);
+        public $animationExplosionScale = 0.25;
+        public $projectilespeed = 20;
+        public $animationWidth = 4;
+        public $trailLength = 15;
+
+        public $intercept = 2;
+
+        public $loadingtime = 1;
+        public $priority = 6;
+
+        public $rangePenalty = 1;
+        public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+6;   }
+        public function setMinDamage(){     $this->minDamage = 8 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 26 ;      }
+
+    }
+
+
+
     class ParticleCannon extends Raking{
         public $trailColor = array(255, 163, 26);
 
