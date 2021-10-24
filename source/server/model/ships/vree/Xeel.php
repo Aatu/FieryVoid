@@ -12,8 +12,8 @@ class Xeel extends VreeCapital{
 		$this->locations = array(41, 42, 2, 32, 31, 1);
         $this->fighters = array("normal"=>12);				
 
-		$this->shipSizeClass = 3; //Enormous is not implemented
-		$this->iniativebonus = 0; //no voluntary movement anyway
+		$this->shipSizeClass = 3; 
+		$this->iniativebonus = 0; 
 		
         $this->turncost = 0.66;
         $this->turndelaycost = 0.5;
