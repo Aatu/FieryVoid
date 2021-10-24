@@ -12,8 +12,8 @@ class Xixx extends VreeHCV{
 		$this->locations = array(41, 42, 2, 32, 31, 1);			
 
 
-		$this->shipSizeClass = 2; //Enormous is not implemented
-		$this->iniativebonus = 6; //no voluntary movement anyway
+		$this->shipSizeClass = 2; 
+		$this->iniativebonus = 6 *5; 
 		
         $this->turncost = 0.66;
         $this->turndelaycost = 0.5;
@@ -44,20 +44,20 @@ class Xixx extends VreeHCV{
 		
         $this->addAftSystem(new Thruster(4, 12, 0, 7, 2));
         
-		$this->addLeftFrontSystem(new AntimatterTorpedo(3, 0, 0, 240, 0));
-		$this->addLeftFrontSystem(new AntimatterTorpedo(3, 0, 0, 300, 60)); 
+		$this->addLeftFrontSystem(new AntimatterTorpedo(3, 0, 0, 300, 60));
+		$this->addLeftFrontSystem(new AntimatterTorpedo(3, 0, 0, 240, 0)); 
 		$this->addLeftFrontSystem(new StructureTechnical(0, 0, 0, 0));			
 		
-		$this->addLeftAftSystem(new AntimatterTorpedo(3, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new AntimatterTorpedo(3, 0, 0, 120, 240));
+		$this->addLeftAftSystem(new AntimatterTorpedo(3, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new StructureTechnical(0, 0, 0, 0));	
 		
 		$this->addRightFrontSystem(new AntimatterTorpedo(3, 0, 0, 300, 60)); 
 		$this->addRightFrontSystem(new AntimatterTorpedo(3, 0, 0, 0, 120));
 		$this->addRightFrontSystem(new StructureTechnical(0, 0, 0, 0));			 						        
 	
-		$this->addRightAftSystem(new AntimatterTorpedo(3, 0, 0, 60, 180));  
-		$this->addRightAftSystem(new AntimatterTorpedo(3, 0, 0, 120, 240)); 
+		$this->addRightAftSystem(new AntimatterTorpedo(3, 0, 0, 120, 240));  
+		$this->addRightAftSystem(new AntimatterTorpedo(3, 0, 0, 60, 180)); 
 		$this->addRightAftSystem(new StructureTechnical(0, 0, 0, 0));				
        
 	//	$this->addFrontSystem(new StructurePlaceholder(0, 0, 0, 0)); 

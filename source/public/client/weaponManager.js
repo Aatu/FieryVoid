@@ -554,18 +554,22 @@ window.weaponManager = {
         var dew = 0;
 
         if (target.flight && shooter) {
-            if (!shooter.flight) {
-                jink = shipManager.movement.getJinking(target);
-            } else {
-                if (shooter) {
-                    var sPosHex = shipManager.getShipPosition(shooter);
-                    var tPosHex = shipManager.getShipPosition(target);
+			if (!shooter.flight) {
+				jink = shipManager.movement.getJinking(target);
+			} else {
+				if (shooter) {
+					var sPosHex = shipManager.getShipPosition(shooter);
+					var tPosHex = shipManager.getShipPosition(target);
 
-                    if (!sPosHex.equals(tPosHex) || shipManager.movement.getJinking(shooter) > 0) {
-                        jink = shipManager.movement.getJinking(target);
-                    }
-                }
-            }
+					if (!sPosHex.equals(tPosHex) || shipManager.movement.getJinking(shooter) > 0) {
+						jink = shipManager.movement.getJinking(target);
+					}
+				}
+			}
+			
+			if (weapon && weapon.ignoreJinking) { //some weapons do ignore Jinking completely
+				jink = 0;
+			}
         } else {
             dew = ew.getDefensiveEW(target);
         }
@@ -587,6 +591,13 @@ window.weaponManager = {
 			bdew = 0;
 			sdew = 0;
 		}	
+		
+		//some weapons do ignore EW completely
+		if (weapon && weapon.ignoreAllEW) {
+            dew = 0;
+            bdew = 0;
+            sdew = 0;
+		}
 		
 		//half-phasing target is more difficult to hit
 		var halfphase = 0;
@@ -713,7 +724,9 @@ window.weaponManager = {
             oew = Math.max(0, oew); //OBCrit cannot bring Offensive Bonus below 0
 			if(oew == 0) soew = 0;
 
-            mod -= shipManager.movement.getJinking(shooter);
+			if (!weapon.ignoreJinking) {
+				mod -= shipManager.movement.getJinking(shooter);
+			}
 
             if (shipManager.movement.hasCombatPivoted(shooter)) mod--;
         } else {
@@ -765,7 +778,6 @@ window.weaponManager = {
 		}
 		//noLockMod =  rangePenalty * noLockPenalty; //moved lower   
         var jammermod = 0;
-	    
 		//if (shooter.faction != target.faction){ //moved to getJammerValueFromTo!
 		
 			jammermod = ew.getJammerValueFromTo(shooter,target); //accounts for both jammer and stealth!
@@ -795,6 +807,13 @@ window.weaponManager = {
 		}
 	   }
 	   */
+	   
+	   if(weapon.ignoreAllEW){
+			noLockPenalty = 0;
+			jammermod = 0;
+			oew = 0;
+			soew = 0;
+		}
 	   
 	   var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
 	   /*and now nolock and jammer mods...*/

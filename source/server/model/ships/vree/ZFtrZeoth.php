@@ -13,6 +13,7 @@ class ZFtrZeoth extends FighterFlight{
         $this->forwardDefense = 8;
         $this->sideDefense = 8;
         $this->freethrust = 5;
+        $this->gravitic = true;
         $this->offensivebonus = 3;
         $this->jinkinglimit = 0;
         $this->pivotcost = 0; //shuttles have pivot cost higher
@@ -35,7 +36,7 @@ class ZFtrZeoth extends FighterFlight{
 			$fighter = new Fighter("Zeoth", $armour, 10, $this->id);
 			$fighter->displayName = "Zeoth";
 			$fighter->imagePath = "img/ships/VreeZeoth.png";
-			$fighter->iconPath = "img/ships/VreeZeoth_large.png";
+			$fighter->iconPath = "img/ships/VreeZeoth_Large.png";
 			
 			
             $fighter->addFrontSystem(new LightAntiprotonGun(330, 30, 1));
