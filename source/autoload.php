@@ -2297,6 +2297,10 @@ spl_autoload_register(
 				'xonn' => '/server/model/ships/vree/Xonn.php',
 				'xvell' => '/server/model/ships/vree/Xvell.php',
 				'xavan' => '/server/model/ships/vree/Xavan.php',
+				
+				//antimatter-specific criticals
+                'reducedrangeantimatter' => '/server/model/cricialClasses.php',
+                'reduceddamageantimatter' => '/server/model/cricialClasses.php',
 
 
 				//other				
