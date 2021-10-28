@@ -4,7 +4,7 @@ class ChoukaHellfireAOSAT extends OSAT{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 90;
+	$this->pointCost = 110;
 	$this->faction = "ZEscalation Chouka Theocracy";
         $this->phpclass = "ChoukaHellfireAOSAT";
         $this->imagePath = "img/ships/EscalationWars/ChoukaHellfireOSAT.png";
@@ -28,6 +28,7 @@ class ChoukaHellfireAOSAT extends OSAT{
         $this->addPrimarySystem(new Thruster(2, 6, 0, 0, 2)); 
         $this->addPrimarySystem(new MediumPlasma(2, 5, 3, 300, 60)); 
         $this->addPrimarySystem(new MediumPlasma(2, 5, 3, 300, 60)); 
+		$this->addPrimarySystem(new SoMissileRack(3, 6, 0, 270, 90, true));
         $this->addPrimarySystem(new LightLaser(0, 4, 3, 180, 360));
         $this->addPrimarySystem(new LightLaser(0, 4, 3, 0, 180));
         
@@ -38,9 +39,10 @@ class ChoukaHellfireAOSAT extends OSAT{
 		
 		$this->hitChart = array(
 			0=> array(
-					10 => "Structure",
-					12 => "Thruster",
-					14 => "Medium Plasma Cannon",
+					9 => "Structure",
+					11 => "Thruster",
+					13 => "Medium Plasma Cannon",
+					14 => "Class-SO Missile Rack",
           			16 => "Light Laser",
 					18 => "Scanner",
 					20 => "Reactor",

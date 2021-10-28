@@ -39,8 +39,8 @@ class JorthunQ extends LCV{
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(1, 11, 0, 6, 2));
 	$this->addPrimarySystem(new LightBolter(1, 6, 2, 240, 60));
-	$this->addPrimarySystem(new LightBolter(1, 6, 2, 270, 90));
 	$this->addPrimarySystem(new LightBolter(1, 6, 2, 300, 120));
+	$this->addPrimarySystem(new LightBolter(1, 6, 2, 270, 90));
 	$this->addPrimarySystem(new Structure(3, 26));
   
         $this->hitChart = array(
@@ -55,15 +55,15 @@ class JorthunQ extends LCV{
         				12 => "0:Structure",
         				16 => "0:Light Bolter",
         				18 => "0:Engine",
-        				19 => "Reactor",
-        				20 => "Scanner",
+        				19 => "0:Reactor",
+        				20 => "0:Scanner",
         		),
         		2=> array( //same as Fwd
         				12 => "0:Structure",
         				16 => "0:Light Bolter",
         				18 => "0:Engine",
-        				19 => "Reactor",
-        				20 => "Scanner",
+        				19 => "0:Reactor",
+        				20 => "0:Scanner",
 				),
         		
         ); //end of hit chart
