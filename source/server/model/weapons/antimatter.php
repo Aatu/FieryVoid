@@ -449,7 +449,7 @@
         public $damageTypeArray = array(1=> 'Standard', 2=>'Raking', 3=>'Piercing');
 		
 		public $rngNoPenalty = 11; //maximum range at which weapon suffers no penalty
-		public $rngNoPenaltyArray = array(11,10,10); //Shredder can be targeted up to 10 hexes away, but can actually reach a hex further away
+		public $rngNoPenaltyArray = array(1=>11,2=>10,3=>10); //Shredder can be targeted up to 10 hexes away, but can actually reach a hex further away
 		public $rngNormalPenalty = 11;//maximum range at which weapon suffers regular penalty
 		public $rngNormalPenaltyArray = array(1=>11,2=>20,3=>20);
 		public $maxX = 10; //maximum value of X
