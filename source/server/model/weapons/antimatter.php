@@ -451,7 +451,7 @@
 		public $rngNoPenalty = 11; //maximum range at which weapon suffers no penalty
 		public $rngNoPenaltyArray = array(11,10,10); //Shredder can be targeted up to 10 hexes away, but can actually reach a hex further away
 		public $rngNormalPenalty = 11;//maximum range at which weapon suffers regular penalty
-		public $rngNormalPenaltyArray = array(11,20,20);
+		public $rngNormalPenaltyArray = array(1=>11,2=>20,3=>20);
 		public $maxX = 10; //maximum value of X
 		public $maxXArray = array(1=>10, 2=>20, 3=>20); //maximum value of X
 		public $dmgEquation = '2X+6'; //to be able to automatically incorporate this into weapon description
