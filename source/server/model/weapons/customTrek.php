@@ -337,7 +337,7 @@ class TrekHvyPhaseCannon extends Raking{
                     $this->minDamage = 10 ;
                     break;
                 default:
-                    $this->minDamage = 28 ;  
+                    $this->minDamage = 15 ;  
                     break;
             }
 		}
@@ -345,7 +345,7 @@ class TrekHvyPhaseCannon extends Raking{
         public function setMaxDamage(){
             switch($this->turnsloaded){
                 case 1:
-                    $this->maxDamage = 15 ;
+                    $this->maxDamage = 28 ;
                     break;
                 default:
                     $this->maxDamage = 42 ;  

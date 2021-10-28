@@ -24,6 +24,12 @@ var HeavyArray = function HeavyArray(json, ship) {
 HeavyArray.prototype = Object.create(Particle.prototype);
 HeavyArray.prototype.constructor = HeavyArray;
 
+var HeavyParticleBeam = function HeavyParticleBeam(json, ship) {
+    Particle.call(this, json, ship);
+};
+HeavyParticleBeam.prototype = Object.create(Particle.prototype);
+HeavyParticleBeam.prototype.constructor = HeavyParticleBeam;
+
 var StdParticleBeam = function StdParticleBeam(json, ship) {
     Particle.call(this, json, ship);
 };
