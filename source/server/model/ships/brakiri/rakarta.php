@@ -12,7 +12,7 @@ class Rakarta extends MediumShip{
 		$this->canvasSize = 100;
 
 		$this->notes = 'Kam-Lassit';//Corporation producing the design
-		$this->isd = 2206;
+		$this->isd = 2250;
 		
 		$this->forwardDefense = 11;
 		$this->sideDefense = 13;

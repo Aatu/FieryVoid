@@ -13,6 +13,7 @@ class ZFtrZeoth extends FighterFlight{
         $this->forwardDefense = 8;
         $this->sideDefense = 8;
         $this->freethrust = 5;
+        $this->gravitic = true;
         $this->offensivebonus = 3;
         $this->jinkinglimit = 0;
         $this->pivotcost = 0; //shuttles have pivot cost higher

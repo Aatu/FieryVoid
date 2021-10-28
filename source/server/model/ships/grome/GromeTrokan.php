@@ -94,7 +94,7 @@ class GromeTrokan extends BaseShip{
 					9 => "Targeting Array",
 					11 => "Jump Engine",
 					13 => "Engine",
-					15 => "Antiquated Scanner",
+					15 => "Scanner",
 					17 => "Hangar",
 					19 => "Reactor",
 					20 => "C&C",

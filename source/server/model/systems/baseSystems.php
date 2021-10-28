@@ -612,7 +612,8 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= 'Star Wars Sensors - boostability limited to +2.';
-	}	
+	}
+	
 	public function markAntiquated(){		
     	$this->specialAbilities[] = "AntiquatedSensors";
 		$this->specialAbilityValue = true; //so it is actually recognized as special ability!
@@ -624,6 +625,31 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		}
 		$this->data["Special"] .= 'Antiquated Sensors cannot be boosted.';
 	}
+
+    public function markHyach(){
+        $this->specialAbilities[] = "HyachSensors";
+        $this->specialAbilityValue = true; //so it is actually recognized as special ability!
+        if (!isset($this->data["Special"])) {
+            $this->data["Special"] = '';
+        }else{
+            $this->data["Special"] .= '<br>';
+        }
+        $this->data["Special"] .= 'Damage sustained by Hyach sensors is halved for purposes of critical rolls.';
+    }
+
+	public function testCritical($ship, $gamedata, $crits, $add=0){ 
+		$hasHyachSensors = $ship->getSpecialAbilityValue("HyachSensors");
+		$damageBonus = 0;
+		if( $hasHyachSensors){
+			$damageBonus = -round($this->getTotalDamage() /2); //half of current damage, rounded
+		}
+		$this->critRollMod += $damageBonus; //apply bonus
+		$critsReturn = parent::testCritical($ship, $gamedata, $crits); //add appropriate critical(s)
+		$this->critRollMod -= $damageBonus; //unapply bonus
+		return $critsReturn; //return new set of critical damage
+	}
+	
+
 	/*note: LCV Sensors are (or will be) checked at committing Initial Orders, in front end. All but 2 EW points need to be OEW. 
 	This is Sensor trait rather than being strictly tied to hull size - while no larger units have it, of LCVs themselves only Young ones have it more or less universally.
 	More advanced factions usually do not, and for custom factions it's up to their creator.
@@ -637,10 +663,12 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		}
 		$this->data["Special"] .= 'LCV Sensors - up to 2 EW points may be allocated freely. All surplus can be allocated ONLY as OEW.';
 	}	
+
 	public function getSpecialAbilityValue($args)
     {
-		return $specialAbilityValue;
+		return $this->specialAbilityValue;
 	}
+	
 } //endof Scanner
 
 class ElintScanner extends Scanner implements SpecialAbility{
@@ -653,7 +681,7 @@ class ElintScanner extends Scanner implements SpecialAbility{
         parent::__construct($armour, $maxhealth, $powerReq, $output );
     }
     
-     public function setSystemDataWindow($turn){
+    public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);     
 	$boostability = $this->maxBoostLevel;		
 	if (!isset($this->data["Special"])) {
@@ -671,10 +699,35 @@ class ElintScanner extends Scanner implements SpecialAbility{
 	public function markImproved(){	parent::markImproved();   }
 	public function markAdvanced(){	parent::markImproved();	}
 	*/
+
+    public function markHyachELINT(){
+        $this->specialAbilities[] = "HyachELINTSensors";
+        $this->specialAbilityValue = true; //so it is actually recognized as special ability!
+        if (!isset($this->data["Special"])) {
+            $this->data["Special"] = '';
+        }else{
+            $this->data["Special"] .= '<br>';
+        }
+        $this->data["Special"] .= 'Damage sustained by Hyach sensors is halved for purposes of critical rolls.';
+    }
+
+	public function testCritical($ship, $gamedata, $crits, $add=0){ 
+		$hasHyachELINTSensors = $ship->getSpecialAbilityValue("HyachELINTSensors");
+		$damageBonus = 0;
+		if( $hasHyachELINTSensors){
+			$damageBonus = -round($this->getTotalDamage() /2); //half of current damage, rounded
+		}
+		$this->critRollMod += $damageBonus; //apply bonus
+		$critsReturn = parent::testCritical($ship, $gamedata, $crits); //add appropriate critical(s)
+		$this->critRollMod -= $damageBonus; //unapply bonus
+		return $critsReturn; //return new set of critical damage
+	}
+
     public function getSpecialAbilityValue($args)
     {
-        return true;
+        return $this->specialAbilityValue;
     }
+
 }
 
 
@@ -715,6 +768,8 @@ class AntiquatedScanner extends Scanner {
     }
 	
 } //end of AntiquatedScanner
+
+
 
 class CnC extends ShipSystem{
     public $name = "cnC";

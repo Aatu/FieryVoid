@@ -17,6 +17,7 @@ class ZFtrZorth extends FighterFlight{
         $this->forwardDefense = 6;
         $this->sideDefense = 6;
         $this->freethrust = 12;
+        $this->gravitic = true;
         $this->offensivebonus = 6;
         $this->jinkinglimit = 10;
         $this->turncost = 0.33;

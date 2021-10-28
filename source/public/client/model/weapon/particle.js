@@ -24,6 +24,12 @@ var HeavyArray = function HeavyArray(json, ship) {
 HeavyArray.prototype = Object.create(Particle.prototype);
 HeavyArray.prototype.constructor = HeavyArray;
 
+var HeavyParticleBeam = function HeavyParticleBeam(json, ship) {
+    Particle.call(this, json, ship);
+};
+HeavyParticleBeam.prototype = Object.create(Particle.prototype);
+HeavyParticleBeam.prototype.constructor = HeavyParticleBeam;
+
 var StdParticleBeam = function StdParticleBeam(json, ship) {
     Particle.call(this, json, ship);
 };
@@ -307,3 +313,9 @@ var LightParticleBolt = function LightParticleBolt(json, ship) {
 };
 LightParticleBolt.prototype = Object.create(Weapon.prototype);
 LightParticleBolt.prototype.constructor = LightParticleBolt;
+
+var Interdictor = function Interdictor(json, ship) {
+    Weapon.call(this, json, ship);
+};
+Interdictor.prototype = Object.create(Weapon.prototype);
+Interdictor.prototype.constructor = Interdictor;

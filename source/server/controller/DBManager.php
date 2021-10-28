@@ -628,13 +628,13 @@ class DBManager
                 $fireID = $damage->fireorderid;
 
                 if ($fireID < 0){ //Marcin Sawicki: fire order ID not known at the moment of dealing damage!
-                    //read it from database by source, target and weapon ID
+                    //read it from database by source, target and weapon ID (if multiple ones fit - assign to any of them _that hit_
                     try{
                         $targetid = $damage->shipid;
                         $shooterid = $damage->shooterid; //additional field
                         $weaponid = $damage->weaponid; //additional field
                         //targetid = -1 if weapon is hex targeted!
-                        $sql1 = "SELECT * FROM `B5CGM`.`tac_fireorder` where gameid = $gameid and turn = $turn and shooterid = $shooterid and (targetid = $targetid or targetid = -1) and weaponid = $weaponid";
+                        $sql1 = "SELECT * FROM `B5CGM`.`tac_fireorder` where gameid = $gameid and turn = $turn and shooterid = $shooterid and (targetid = $targetid or targetid = -1) and weaponid = $weaponid and shotshit >0";
                         $result = $this->query($sql1);
                         if ($result == null || sizeof($result) == 0){  //nothing, keep -1 as ID
                         }else{

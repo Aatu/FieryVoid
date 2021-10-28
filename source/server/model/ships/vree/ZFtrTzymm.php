@@ -16,6 +16,7 @@ class ZFtrTzymm extends FighterFlight{
         $this->forwardDefense = 9;
         $this->sideDefense = 9;
         $this->freethrust = 8;
+        $this->gravitic = true;
         $this->offensivebonus = 5;
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;

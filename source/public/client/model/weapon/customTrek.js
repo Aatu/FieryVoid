@@ -4,6 +4,12 @@ var TrekLtPhaseCannon = function TrekLtPhaseCannon(json, ship) {
 TrekLtPhaseCannon.prototype = Object.create(Weapon.prototype);
 TrekLtPhaseCannon.prototype.constructor = TrekLtPhaseCannon;
 
+var TrekFtrPhaseCannon = function TrekFtrPhaseCannon(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekFtrPhaseCannon.prototype = Object.create(Weapon.prototype);
+TrekFtrPhaseCannon.prototype.constructor = TrekFtrPhaseCannon;
+
 var TrekPhaseCannon = function TrekPhaseCannon(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -104,7 +110,6 @@ var TrekPlasmaBurst = function TrekPlasmaBurst(json, ship) {
 };
 TrekPlasmaBurst.prototype = Object.create(Weapon.prototype);
 TrekPlasmaBurst.prototype.constructor = TrekPlasmaBurst;
-
 TrekPlasmaBurst.prototype.clearBoost = function () {
     for (var i in system.power) {
         var power = system.power[i];
@@ -117,15 +122,12 @@ TrekPlasmaBurst.prototype.clearBoost = function () {
         }
     }
 };
-
 TrekPlasmaBurst.prototype.hasMaxBoost = function () {
     return true;
 };
-
 TrekPlasmaBurst.prototype.getMaxBoost = function () {
     return this.maxBoostLevel;
 };
-
 TrekPlasmaBurst.prototype.initBoostableInfo = function () {
     switch (shipManager.power.getBoost(this)) {
         case 0:

@@ -68,7 +68,19 @@ if (isset($_SESSION["user"])) {
 	    <br><b>turn delay fix</b> - -1 thrust critical calculation corrected
 	    <br><b>fleet selection enhances</b> - now Acceleration, Pivot and Roll costs are visible
 	    <br><b>fighter ballistics vs shields fixed</b> - now fighter missiles won't ignore shields when their launch platforms get to range 0
-
+	    <br><b>Early Abbai</b> - Early versions of the Lakara, Miliani, and Tiraca from the Dilgar Invasion source book
+	    <br><b>Gravitic Bolt Brakiri</b> - Early versions of Brakiri vessels that used Gravitic Bolts before Graviton Pulsars
+	    <br>---------- <b>23rd of October 2021</b> ----------	
+	    <br><b>fighter Jammer fixed</b> - will work correctly even if fighter #1 is destroyed
+	    <br><b>Shadows are no longer Gravitic</b> 
+	    <br><b>Antimatter Shredder</b> - Vree iconic weapon is live  
+	    <br><b><u>Vree warning</u></b> - Vree layout is still under development. Don't plan very long games using Vree yet, as they may easily become broken when new update is deployed.
+	    <br><b>Graphics updates and some ships added to existing factions (mainly Dilgar)</b> - courtesy of Geoffrey
+	    <br>---------- <b>28th of October 2021</b> ----------
+	    <br><b>Federation Andorians</b> - for Star Trek fans and testers
+	    <br><b>Antimatter weapons criticals</b> - now Vree weapons should be penalized properly (new criticals only)
+	    <br><b>Centauri LCVs and Chouka fixed defenses</b> - for assault scenarios (courtesy of Geoffrey and Lunara)
+	    
 		
 	    
         <br><br>

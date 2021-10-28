@@ -71,6 +71,7 @@ class Weapon extends ShipSystem
     public $extraoverloadshotsArray = array();
 
     public $doNotIntercept = false; //for attacks that are not subject to interception at all - like fields and ramming
+    public $doNotInterceptArray = array(); //for attacks that are not subject to interception at all - like fields and ramming
     public $uninterceptable = false;
     public $uninterceptableArray = array();
     public $canInterceptUninterceptable = false; //able to intercept shots that are normally uninterceptable, eg. Lasers
@@ -121,7 +122,14 @@ class Weapon extends ShipSystem
     public $ballistic = false; //this is a ballictic weapon, not direct fire
     public $ballisticIntercept = false; //can intercept, but only ballistics
     public $hextarget = false; //this weapon is targeted on hex, not unit
+   		public $hextargetArray = array(); //For AntimatterShredder		
+		
     public $noPrimaryHits = false; //PRIMARY removed from outer charts if true
+	
+	public $ignoreAllEW = false;//weapon ignores EW and lock-ons completely (at the moment Antimatter Shredder does so)
+	public $ignoreAllEWArray = array();
+	public $ignoreJinking = false;//weapon ignores jinking completely (at the moment Antimatter Shredder does so)
+	public $ignoreJinkingArray = array();
 
     public $minDamage, $maxDamage;
     public $minDamageArray = array();
@@ -892,6 +900,11 @@ class Weapon extends ShipSystem
                 $jinkTarget = Movement::getJinking($target, $gamedata->turn);
             }
         }
+		// if jinking is ignored - make it so
+		if($this->ignoreJinking){
+			$jinkTarget = 0;
+			$jinkSelf = 0;
+		}	
 
         $dew = $target->getDEW($gamedata->turn);
         $bdew = EW::getBlanketDEW($gamedata, $target);
@@ -1027,6 +1040,18 @@ class Weapon extends ShipSystem
 		$rangePenalty = $this->calculateRangePenalty($distanceForPenalty);
 		$noLockMod = 0;
 		$jammermod = 0; //no lock and jammer work on the same thing, but they still need to be separated (for jinking).
+		
+		// if EW is ignored - make it so (and also Jammer and no lock modifier, which are derived from EW as well)
+		if($this->ignoreAllEW){
+			$noLockPenalty = 0;
+			$jammerValue = 0;
+			$dew = 0;
+			$bdew = 0;
+			$sdew = 0;
+			$oew = 0;
+			$soew = 0;
+		}		
+		
 		$rngPenaltyMultiplier = max($noLockPenalty,$jammerValue);
 		if($rngPenaltyMultiplier > 0){			
 			if($this->doubleRangeIfNoLock){//double range (mostly Antimatter weapons)
@@ -1662,6 +1687,7 @@ full Advanced Armor effects (by rules) for reference:
         if (isset($this->turnsloadedArray[$i])) $this->turnsloaded = $this->turnsloadedArray[$i];
         if (isset($this->extraoverloadshotsArray[$i])) $this->extraoverloadshots = $this->extraoverloadshotsArray[$i];
         if (isset($this->uninterceptableArray[$i])) $this->uninterceptable = $this->uninterceptableArray[$i];
+        if (isset($this->doNotInterceptArray[$i])) $this->uninterceptable = $this->doNotInterceptArray[$i];
         if (isset($this->shotsArray[$i])) $this->shots = $this->shotsArray[$i];
         if (isset($this->defaultShotsArray[$i])) $this->defaultShots = $this->defaultShotsArray[$i];
         if (isset($this->maxpulsesArray[$i])) $this->maxpulses = $this->maxpulsesArray[$i];
@@ -1680,6 +1706,9 @@ full Advanced Armor effects (by rules) for reference:
         if (isset($this->rakingArray[$i])) $this->raking = $this->rakingArray[$i];
         
         if (isset($this->hextargetArray[$i])) $this->hextarget = $this->hextargetArray[$i];	
+		
+		if (isset($this->ignoreAllEWArray[$i])) $this->ignoreAllEW = $this->ignoreAllEWArray[$i];	
+		if (isset($this->ignoreJinkingArray[$i])) $this->ignoreJinking = $this->ignoreJinkingArray[$i];	
 
     }//endof function changeFiringMode
 

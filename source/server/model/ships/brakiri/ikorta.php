@@ -12,7 +12,7 @@ class Ikorta extends HeavyCombatVesselLeftRight{
 	    $this->fighters = array("assault shuttles"=>6);
         
 		$this->notes = 'Pri-Wakat Concepts & Solutions';//Corporation producing the design
-		$this->isd = 2198;
+		$this->isd = 2250;
 		
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

@@ -54,10 +54,10 @@ class TrekFederationNXWarCruiserUpg extends MediumShip{
 		$this->addFrontSystem(new TrekPhotonicTorp(2, 6, 1, 270, 90));
 		$this->addFrontSystem(new TrekPhotonicTorp(2, 6, 1, 270, 90));
 	    
-		$warpNacelle = new TrekWarpDrive(3, 18, 3, 4); //armor, structure, power usage, impulse output
+		$warpNacelle = new TrekWarpDrive(3, 18, 0, 4); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
 		$this->addAftSystem($warpNacelle);
-		$warpNacelle = new TrekWarpDrive(3, 18, 3, 4); //armor, structure, power usage, impulse output
+		$warpNacelle = new TrekWarpDrive(3, 18, 0, 4); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
 		$this->addAftSystem($warpNacelle);
 
@@ -92,18 +92,18 @@ class TrekFederationNXWarCruiserUpg extends MediumShip{
 		),
 
 		1=> array(
-		    	1 => "Shield Projector",
-			6 => "Phase Cannon",
-			9 => "Photonic Torpedo",
+		    	2 => "Shield Projector",
+			7 => "Phase Cannon",
+			10 => "Photonic Torpedo",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
-		    	1 => "Shield Projector",
-			7 => "Nacelle",
-			9 => "Phase Cannon",
-			11 => "Spatial Torpedo",
+		    	2 => "Shield Projector",
+			8 => "Nacelle",
+			10 => "Phase Cannon",
+			12 => "Spatial Torpedo",
 			17 => "Structure",
 			20 => "Primary",
 		),

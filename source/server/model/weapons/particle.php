@@ -228,6 +228,38 @@
 
 
 
+    class HeavyParticleBeam extends Particle{
+        public $trailColor = array(255, 163, 26);
+
+        public $name = "HeavyParticleBeam";
+        public $displayName = "Heavy Particle Beam";
+        public $animation = "trail";
+        public $animationColor = array(255, 163, 26);
+        public $animationExplosionScale = 0.25;
+        public $projectilespeed = 20;
+        public $animationWidth = 4;
+        public $trailLength = 15;
+
+        public $intercept = 2;
+
+        public $loadingtime = 1;
+        public $priority = 6;
+
+        public $rangePenalty = 1;
+        public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+6;   }
+        public function setMinDamage(){     $this->minDamage = 8 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 26 ;      }
+
+    }
+
+
+
     class ParticleCannon extends Raking{
         public $trailColor = array(255, 163, 26);
 
@@ -1706,6 +1738,151 @@ class LightParticleAccelerator extends LinkedWeapon{
         public function setMinDamage(){     $this->minDamage = 3 ;      }
         public function setMaxDamage(){     $this->maxDamage = 12 ;      }
     }	
+	
+
+
+
+
+
+/*handles creation of firing orders for Interdictors*/
+class InterdictorHandler{
+	public $name = "InterdictorHandler";
+	private static $interdictors = array();
+	private static $firingDeclared = false;
+	
+	//should be called by every Interdictor on creation!
+	public static function addInterdictor($weapon){
+		InterdictorHandler::$interdictors[] = $weapon;		
+	}
+
+
+	public static function getInterceptionMod($gamedata, $intercepted) {
+
+		if (InterdictorHandler::$firingDeclared) return; //already done!
+		InterdictorHandler::$firingDeclared = true;
+		
+		//apparently ships may be loaded multiple times... make sure fields in array belong to current gamedata!
+		$tmpFields = array();
+		foreach(InterdictorHandler::$interdictors as $field){
+			$shooter = $field->getUnit();
+			//if($field->isDestroyed($gamedata->turn-1)) continue; //destroyed weapons can be safely left out
+			if($field->isDestroyed($gamedata->turn)) continue; //actually at this stage - CURRENT turn should be indicated!
+			//is this unit defined in current gamedata? (particular instance!)
+			$belongs = $gamedata->shipBelongs($shooter);
+			if ($belongs){
+				$tmpFields[] = $field;
+			}			
+		}
+		IndterdictorHandler::$interdictors = $tmpFields;
+	
+		$wasIntercepted = false;
+		$interceptMod = 0;
+
+		foreach(InterdictorHandler::$interdictors as $field){			
+			if ($field->isDestroyed($gamedata->turn-1)) continue; //destroyed field does not attack
+			if ($field->isOfflineOnTurn($gamedata->turn)) continue; //disabled field does not attack
+
+			foreach($this->alreadyIntercepted as $alreadyAssignedAgainst){
+					if ($alreadyAssignedAgainst->id == $intercepted->id){ //this fire order was already intercepted by this weapon, this Scattergun cannot do so again
+						$wasIntercepted = true;
+						break;
+					}
+				
+			}
+			if(!$wasIntercepted) $interceptMod = parent::getInterceptionMod($gamedata, $intercepted);
+			
+			$fire->addToDB = true;
+			$field->fireOrders[] = $fire;			
+		} //endof foreach Interdictor
+
+
+
+		
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		//table of units that are already targeted
+		$alreadyTargeted = array();
+		//create firing order for each weapon (target self)
+		//for each weapon find possible targets and add them to weapons' target list
+		//strongest weapons fire first, and only 1 field affects particular ship	
+	}//endof function getInterceptionMod
+	
+}//endof class InterdictorHandler
+
+    class Interdictor extends Weapon{
+        public $name = "Interdictor";
+        public $displayName = "Interdictor";
+		public $iconPath = "Interdictor.png";
+
+        public $loadingtime = 1;
+        public $priority = 1; //will never fire anyway except defensively, purely a defensive system
+		public $autoFireOnly = true; //this weapon cannot be fired by player
+
+        public $rangePenalty = 2; //irrelevant
+        public $fireControl = array(null, null, null); // fighters, <mediums, <capitals
+
+		public $firingMode = 'Intercept'; //firing mode - just a name essentially
+		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Particle"; //not important really
+        
+        public $intercept = 4;
+
+     	public $possibleCriticals = array( //different than usual B5Wars weapon
+            16=>"ForcedOfflineOneTurn"
+		);
+
+		public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 5 hexes.";
+            $this->data["Special"] .= "<br>Only one interdictor can be applied to any incoming shot, including ballistics.";
+        }
+                
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+			InterdictorHandler::addInterdictor($this);//so all Interdictors are accessible together, and firing orders can be uniformly created
+        }
+
+//		InterdictorHandler::$firingDeclared;
+
+		//find units in range (other than self), create attacks vs them
+		public function beforeFiringOrderResolution($gamedata){
+			InterdictorHandler::getInterceptionMod($gamedata, $intercepted);		
+		}
+
+		
+        public function getDamage($fireOrder){        return 0;   }
+        public function setMinDamage(){     $this->minDamage = 0 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+    }
+	
+	
+	
+	
 	
 ?>
 
