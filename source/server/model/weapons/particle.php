@@ -1790,11 +1790,43 @@ class InterdictorHandler{
 				
 			}
 			if(!$wasIntercepted) $interceptMod = parent::getInterceptionMod($gamedata, $intercepted);
-			return $interceptMod;
+			
 			$fire->addToDB = true;
 			$field->fireOrders[] = $fire;			
 		} //endof foreach Interdictor
 
+
+
+		
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		//table of units that are already targeted
+		$alreadyTargeted = array();
+		//create firing order for each weapon (target self)
+		//for each weapon find possible targets and add them to weapons' target list
+		//strongest weapons fire first, and only 1 field affects particular ship	
 	}//endof function getInterceptionMod
 	
 }//endof class InterdictorHandler

@@ -10,10 +10,10 @@ class ChoukaTempleStarbase extends SmallStarBaseFourSections{
 		$this->faction = "ZEscalation Chouka Theocracy";
 		$this->phpclass = "ChoukaTempleStarbase";
 		$this->shipClass = "Temple Starbase";
-		$this->imagePath = "img/ships/EscalationWars/ChoukaHellfireOSAT.png";
+		$this->imagePath = "img/ships/EscalationWars/ChoukaTemple.png";
 		$this->fighters = array("normal"=>12); 
 
-		$this->shipSizeClass = 3; 
+//		$this->shipSizeClass = 3; 
 		$this->iniativebonus = -200; //no voluntary movement anyway
 		$this->turncost = 0;
 		$this->turndelaycost = 0;
@@ -21,7 +21,7 @@ class ChoukaTempleStarbase extends SmallStarBaseFourSections{
 		$this->forwardDefense = 18;
 		$this->sideDefense = 18;
 
-		$this->canvasSize = 200; 
+		$this->canvasSize = 150; 
 		$this->unofficial = true;
 
 		$this->isd = 1932;

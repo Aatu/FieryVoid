@@ -12,7 +12,7 @@ class ChoukaTempleRefit extends SmallStarBaseFourSections{
 		$this->shipClass = "Temple Starbase (refit)";
 			$this->variantOf = "Temple Starbase";
 			$this->occurence = "common";
-		$this->imagePath = "img/ships/EscalationWars/ChoukaHellfireOSAT.png";
+		$this->imagePath = "img/ships/EscalationWars/ChoukaTemple.png";
 		$this->fighters = array("normal"=>12); 
 
 		$this->shipSizeClass = 3; 
@@ -23,7 +23,7 @@ class ChoukaTempleRefit extends SmallStarBaseFourSections{
 		$this->forwardDefense = 18;
 		$this->sideDefense = 18;
 
-		$this->canvasSize = 200; 
+		$this->canvasSize = 150; 
 		$this->unofficial = true;
 
 		$this->isd = 1960;
