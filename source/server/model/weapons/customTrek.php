@@ -337,7 +337,7 @@ class TrekHvyPhaseCannon extends Raking{
                     $this->minDamage = 10 ;
                     break;
                 default:
-                    $this->minDamage = 28 ;  
+                    $this->minDamage = 15 ;  
                     break;
             }
 		}
@@ -345,7 +345,7 @@ class TrekHvyPhaseCannon extends Raking{
         public function setMaxDamage(){
             switch($this->turnsloaded){
                 case 1:
-                    $this->maxDamage = 15 ;
+                    $this->maxDamage = 28 ;
                     break;
                 default:
                     $this->maxDamage = 42 ;  
@@ -433,7 +433,7 @@ class TrekPhaser extends Raking{
                     $this->minDamage = 5 ;
                     break;
                 default:
-                    $this->minDamage = 14 ;  
+                    $this->minDamage = 16 ;  
                     break;
             }
 		}
@@ -549,19 +549,6 @@ class TrekPhaserLance extends Raking{
 					break;	
 			}
 		}
-
-		public function stripForJson(){
-			$strippedSystem = parent::stripForJson();
-			/* no need to override - no Accelerator option
-			$strippedSystem->data = $this->data;
-			$strippedSystem->minDamage = $this->minDamage;
-			$strippedSystem->minDamageArray = $this->minDamageArray;
-			$strippedSystem->maxDamage = $this->maxDamage;
-			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
-			*/
-			return $strippedSystem;
-		}
-
 }//end of class TrekPhaserLance
 
 
@@ -655,13 +642,13 @@ class TrekPhaserLance extends Raking{
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
             $this->minDamage = 2 + ($boost * 1) + 0;
-        }   
+        }
 
         public function setMaxDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
             $this->maxDamage = 12 + ($boost * 6) + 0;
-        }  
+        }
 
         public function fire($gamedata, $fireOrder){
 		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
@@ -877,8 +864,8 @@ class HvyPlasmaProjector extends Raking{
 
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-			$this->data["Special"] = "Damage reduced by 1 points per 4 hexes.";
-			$this->data["Special"] .= "<br>Does damage in raking mode (8)";
+			$this->data["Special"] = "Damage reduced by 1 point per 4 hexes.";
+			$this->data["Special"] .= "<br>Does damage in raking(8) mode ";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
@@ -890,7 +877,6 @@ class HvyPlasmaProjector extends Raking{
 
 
 class LtPlasmaProjector extends Raking{
-
 	public $name = "LtPlasmaProjector";
 	public $displayName = "Light Plasma Projector";
 	public $iconPath = "LightPlasmaProjector.png";
@@ -919,14 +905,13 @@ class LtPlasmaProjector extends Raking{
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "Damage reduced by 1 points per 2 hexes.";
-			$this->data["Special"] .= "<br>Does damage in raking mode (8)";
+			$this->data["Special"] .= "<br>Does damage in raking(8) mode";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
     public function getDamage($fireOrder){        return Dice::d(10,2)+5;   }
 	public function setMinDamage(){     $this->minDamage = 7;      }
 	public function setMaxDamage(){     $this->maxDamage = 25;      }
-
 }// End of class LtPlasmaProjector
 
 
@@ -1172,8 +1157,6 @@ class TrekShieldProjector  extends Shield implements DefensiveSystem { //defensi
 		}
 		return $boostLevel;
 	}
-	
-
 } //endof class TrekShieldProjector
 
 

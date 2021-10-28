@@ -228,6 +228,38 @@
 
 
 
+    class HeavyParticleBeam extends Particle{
+        public $trailColor = array(255, 163, 26);
+
+        public $name = "HeavyParticleBeam";
+        public $displayName = "Heavy Particle Beam";
+        public $animation = "trail";
+        public $animationColor = array(255, 163, 26);
+        public $animationExplosionScale = 0.25;
+        public $projectilespeed = 20;
+        public $animationWidth = 4;
+        public $trailLength = 15;
+
+        public $intercept = 2;
+
+        public $loadingtime = 1;
+        public $priority = 6;
+
+        public $rangePenalty = 1;
+        public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+6;   }
+        public function setMinDamage(){     $this->minDamage = 8 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 26 ;      }
+
+    }
+
+
+
     class ParticleCannon extends Raking{
         public $trailColor = array(255, 163, 26);
 
@@ -1722,8 +1754,10 @@ class InterdictorHandler{
 	public static function addInterdictor($weapon){
 		InterdictorHandler::$interdictors[] = $weapon;		
 	}
-	
-	public static function createFiringOrders($gamedata){
+
+
+	public static function getInterceptionMod($gamedata, $intercepted) {
+
 		if (InterdictorHandler::$firingDeclared) return; //already done!
 		InterdictorHandler::$firingDeclared = true;
 		
@@ -1740,36 +1774,60 @@ class InterdictorHandler{
 			}			
 		}
 		IndterdictorHandler::$interdictors = $tmpFields;
-		
 	
+		$wasIntercepted = false;
+		$interceptMod = 0;
+
+		foreach(InterdictorHandler::$interdictors as $field){			
+			if ($field->isDestroyed($gamedata->turn-1)) continue; //destroyed field does not attack
+			if ($field->isOfflineOnTurn($gamedata->turn)) continue; //disabled field does not attack
+
+			foreach($this->alreadyIntercepted as $alreadyAssignedAgainst){
+					if ($alreadyAssignedAgainst->id == $intercepted->id){ //this fire order was already intercepted by this weapon, this Scattergun cannot do so again
+						$wasIntercepted = true;
+						break;
+					}
+				
+			}
+			if(!$wasIntercepted) $interceptMod = parent::getInterceptionMod($gamedata, $intercepted);
+			
+			$fire->addToDB = true;
+			$field->fireOrders[] = $fire;			
+		} //endof foreach Interdictor
+
+
+
+		
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		//table of units that are already targeted
 		$alreadyTargeted = array();
 		//create firing order for each weapon (target self)
 		//for each weapon find possible targets and add them to weapons' target list
 		//strongest weapons fire first, and only 1 field affects particular ship	
-		foreach(InterdictorHandler::$interdictors as $field){			
-			if ($field->isDestroyed($gamedata->turn-1)) continue; //destroyed field does not attack
-			if ($field->isOfflineOnTurn($gamedata->turn)) continue; //disabled field does not attack
-			$shooter = $field->getUnit();      
-			$targetPos = $shooter->getCoPos();
-			$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
-			$fire = new FireOrder(-1, 'normal', $shooter->id, -1, $field->id, -1, $gamedata->turn, 
-				1, 0, 0, 1, 0, 0, $movementThisTurn->position->q,  $movementThisTurn->position->r, $field->weaponClass
-			);
-			$fire->addToDB = true;
-			$field->fireOrders[] = $fire;			
-/*			$aoe = $field->getAoE($gamedata->turn);			
-			$inAoE = $gamedata->getShipsInDistance($shooter, $aoe);
-			foreach($inAoE as $targetID=>$target){		
-				if ($shooter->id == $target->id) continue;//does not threaten self!
-				if ($target->isDestroyed()) continue; //no point allocating				
-				if (in_array($target->id,$alreadyTargeted,true)) continue;//each target only once 
-				//add to target list
-				$alreadyTargeted[] = $target->id; //add to list of already targeted units
-				$field->addTarget($target);
-			} */
-		} //endof foreach Interdictor
-	}//endof function createFiringOrders
+	}//endof function getInterceptionMod
 	
 }//endof class InterdictorHandler
 
@@ -1813,7 +1871,7 @@ class InterdictorHandler{
 
 		//find units in range (other than self), create attacks vs them
 		public function beforeFiringOrderResolution($gamedata){
-			InterdictorHandler::firingDeclared($gamedata);		
+			InterdictorHandler::getInterceptionMod($gamedata, $intercepted);		
 		}
 
 		
