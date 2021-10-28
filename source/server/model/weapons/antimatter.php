@@ -29,6 +29,8 @@
 		// - for ranges higher than $rngNoPenalty up to $rngNormalPenalty weapon suffers regular range penalty
 		// - for ranges above $rngNormalPenalty weapon suffers double range penalty
 		
+		//Antimatter weapons suffer distinct versions of criticals
+		public $possibleCriticals = array(14 => "ReducedRangeAntimatter", 19 => "ReducedDamageAntimatter", 25 => array("ReducedRangeAntimatter", "ReducedDamageAntimatter"));
 		
 		
         public function setSystemDataWindow($turn){
@@ -44,13 +46,17 @@
 		public function getX($fireOrder){
 			$X = floor(($fireOrder->needed - $fireOrder->rolled)/5);
 			$X = min($this->maxX, $X);
+			//Damage Reduced: reduces X by 2 (no less than 0)			
+			$X -= 2*$this->hasCritical('ReducedDamageAntimatter');//account for range reduced critical(s)
+			$X = max(0, $X);		
 			return $X;
 		}
 		
 		public function calculateRangePenalty($distance){
+			$distanceEffective = $distance + 3*$this->hasCritical('ReducedRangeAntimatter');//account for range reduced critical(s) - increase effective range by 3
 			$rangePenalty = 0;//base penalty	
-			$rangePenalty += $this->rangePenalty * max(0,$distance-$this->rngNoPenalty); //regular range penalty
-			$rangePenalty += $this->rangePenalty * max(0,$distance-$this->rngNormalPenalty); //regular range penalty again (for effective double penalty)
+			$rangePenalty += $this->rangePenalty * max(0,$distanceEffective-$this->rngNoPenalty); //regular range penalty
+			$rangePenalty += $this->rangePenalty * max(0,$distanceEffective-$this->rngNormalPenalty); //regular range penalty again (for effective double penalty)
 			return $rangePenalty;
 		}		
 		
@@ -68,7 +74,7 @@
 		
 	}
 
-
+/*converting to AntimatterWeapon class!
     class AntimatterConverter extends Weapon{ //deliberately NOT extending AntimatterWeapon class, AMConverter mostly uses regular calculations        
         public $name = "antimatterConverter";
         public $displayName = "Antimatter Converter";
@@ -108,10 +114,54 @@
         public function setMinDamage(){     $this->minDamage = 2;      }
         public function setMaxDamage(){     $this->maxDamage = 82;      }
     }
+*/
+
+    class AntimatterConverter extends AntimatterWeapon{ 
+        public $name = "antimatterConverter";
+        public $displayName = "Antimatter Converter";
+        public $animation = "beam";
+        public $projectilespeed = 10;
+        public $animationWidth = 4;
+        public $animationExplosionScale = 0.90;
+        public $trailLength = 20;
+		
+        public $priority = 2; //fire early due to potential Flash damage
+        public $loadingtime = 3;
+        public $fireControl = array(-6, 4, 4); // fighters, <=mediums, <=capitals 
+		
+        public $rangePenalty = 1; //-1/hex
+		public $rngNoPenalty = 0; //maximum range at which weapon suffers no penalty
+		public $rngNormalPenalty = 999;//maximum range at which weapon suffers regular penalty
+		//Antimatter Converter uses regular range penalty at all ranges - which is translated to AntimatterWeapon rules as no penalty up to 0 hexes and double penalty after 999 hexes (eg. at infinity)
+		
+		public $maxX = 999; //maximum value of X - UNLIMITED for this weapon
+		public $dmgEquation = '4X+2'; //to be able to automatically incorporate this into weapon description
+		
+
+	    public $damageType = 'Flash'; 
+    	public $weaponClass = "Antimatter"; 
+    	public $firingMode = "Flash"; 	    
+		public $firingModes = array( 
+			1 => "Flash"
+		);	    
+        
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+       	public function getDamage($fireOrder){
+			$X = $this->getX($fireOrder);
+			$damage = 4*$X + 2;
+			return $damage ;
+		}
+
+        public function setMinDamage(){     $this->minDamage = 2;      }
+        public function setMaxDamage(){     $this->maxDamage = 82;      } //actually this isn't maximum, but game needs _something_ to use in calculations - and this is good estimation of reasonable maximum (for X = 20)
+    } //endof class AntimatterConverter
 
 
-
-class AntiprotonGun extends AntimatterWeapon{        
+	class AntiprotonGun extends AntimatterWeapon{        
         public $name = "AntiprotonGun";
         public $displayName = "Antiproton Gun";
 		public $iconPath = "AntiprotonGun.png";
@@ -129,18 +179,7 @@ class AntiprotonGun extends AntimatterWeapon{
 
         public $fireControl = array(2, 3, 3); // fighters, <mediums, <capitals 
 		
-		
-        public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-			/*
-			if (!isset($this->data["Special"])) {
-				$this->data["Special"] = '';
-			}else{
-				$this->data["Special"] .= '<br>';
-			}
-			//...and NOW $this->data["Special"] may be extended by further text, if still needed
-			*/
-        }
+	
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 			if ( $maxhealth == 0 ) $maxhealth = 8;
@@ -157,10 +196,10 @@ class AntiprotonGun extends AntimatterWeapon{
         public function setMinDamage(){     $this->minDamage = 12;      }
         public function setMaxDamage(){     $this->maxDamage = 22;      }
 	
-} //end of AntiprotonGun
+	} //end of AntiprotonGun
 
 	
-class AntimatterCannon extends AntimatterWeapon{        
+	class AntimatterCannon extends AntimatterWeapon{        
         public $name = "AntimatterCannon";
         public $displayName = "Antimatter Cannon";
 		public $iconPath = "AntimatterCannon.png";
@@ -190,18 +229,6 @@ class AntimatterCannon extends AntimatterWeapon{
 
         public $fireControlArray = array( 1=>array(-2, 3, 5), 2=>array(null,-1, 1) ); // fighters, <mediums, <capitals 
 		
-		
-        public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-			/*
-			if (!isset($this->data["Special"])) {
-				$this->data["Special"] = '';
-			}else{
-				$this->data["Special"] .= '<br>';
-			}
-			//...and NOW $this->data["Special"] may be extended by further text, if still needed
-			*/
-        }
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 			if ( $maxhealth == 0 ) $maxhealth = 9;
@@ -218,10 +245,10 @@ class AntimatterCannon extends AntimatterWeapon{
         public function setMinDamage(){     $this->minDamage = 16;      }
         public function setMaxDamage(){     $this->maxDamage = 56;      }
 	
-} //end of class AntimatterCannon
+	} //end of class AntimatterCannon
 	
 	
-class AntiprotonDefender extends AntimatterWeapon{        
+	class AntiprotonDefender extends AntimatterWeapon{        
         public $name = "AntiprotonDefender";
         public $displayName = "Antiproton Defender";
 		public $iconPath = "AntiprotonDefender.png";
@@ -239,18 +266,6 @@ class AntiprotonDefender extends AntimatterWeapon{
 
         public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals 
 		
-		
-        public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-			/*
-			if (!isset($this->data["Special"])) {
-				$this->data["Special"] = '';
-			}else{
-				$this->data["Special"] .= '<br>';
-			}
-			//...and NOW $this->data["Special"] may be extended by further text, if still needed
-			*/
-        }
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 			if ( $maxhealth == 0 ) $maxhealth = 4;
@@ -267,10 +282,10 @@ class AntiprotonDefender extends AntimatterWeapon{
         public function setMinDamage(){     $this->minDamage = 8;      }
         public function setMaxDamage(){     $this->maxDamage = 18;      }
 	
-} //end of class AntiprotonDefender
+	} //end of class AntiprotonDefender
 
 
-class AntimatterTorpedo extends AntimatterWeapon{        
+	class AntimatterTorpedo extends AntimatterWeapon{        
         public $name = "AntimatterTorpedo";
         public $displayName = "Antimatter Torpedo";
 		public $iconPath = "AntimatterTorpedo.png";
@@ -297,18 +312,6 @@ class AntimatterTorpedo extends AntimatterWeapon{
 
         public $fireControl = array(-2, 2, 4); // fighters, <mediums, <capitals 
 		
-		
-        public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-			/*
-			if (!isset($this->data["Special"])) {
-				$this->data["Special"] = '';
-			}else{
-				$this->data["Special"] .= '<br>';
-			}
-			//...and NOW $this->data["Special"] may be extended by further text, if still needed
-			*/
-        }
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 			if ( $maxhealth == 0 ) $maxhealth = 6;
@@ -325,53 +328,53 @@ class AntimatterTorpedo extends AntimatterWeapon{
         public function setMinDamage(){     $this->minDamage = 8;      }
         public function setMaxDamage(){     $this->maxDamage = 20;      }
 	
-} //end of class AntimatterTorpedo
+	} //end of class AntimatterTorpedo
 
-class LightAntiprotonGun extends LinkedWeapon{  //deliberately NOT extending AntimatterWeapon class, uses regular calculations 
-	public $name = "LightAntiprotonGun";
-	public $displayName = "Light Antiproton Gun";
-    public $animation = "trail";
-    public $animationColor = array(0, 184, 230);
-    public $animationExplosionScale = 0.10;
-    public $projectilespeed = 12;
-    public $animationWidth = 2;
-    public $trailLength = 10;
+	class LightAntiprotonGun extends LinkedWeapon{  //deliberately NOT extending AntimatterWeapon class, uses regular calculations 
+		public $name = "LightAntiprotonGun";
+		public $displayName = "Light Antiproton Gun";
+		public $animation = "trail";
+		public $animationColor = array(0, 184, 230);
+		public $animationExplosionScale = 0.10;
+		public $projectilespeed = 12;
+		public $animationWidth = 2;
+		public $trailLength = 10;
 
-	public $priority = 4;
+		public $priority = 4;
 
-	public $loadingtime = 1;
-	public $shots = 2;
-	public $defaultShots = 2;
+		public $loadingtime = 1;
+		public $shots = 2;
+		public $defaultShots = 2;
 
-	public $rangePenalty = 2;
-	public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
-	public $rangeDamagePenalty = 1;
+		public $rangePenalty = 2;
+		public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+		public $rangeDamagePenalty = 1;
 
-	public $damageType = "Standard"; 
-	public $weaponClass = "Antimatter"; 
+		public $damageType = "Standard"; 
+		public $weaponClass = "Antimatter"; 
 
-	function __construct($startArc, $endArc, $nrOfShots = 2){ 
-		$this->shots = $nrOfShots;
-		$this->defaultShots = $nrOfShots;        
-	
-		if($nrOfShots === 1){
-			$this->iconPath = "LightAntiprotonGun.png";
+		function __construct($startArc, $endArc, $nrOfShots = 2){ 
+			$this->shots = $nrOfShots;
+			$this->defaultShots = $nrOfShots;        
+		
+			if($nrOfShots === 1){
+				$this->iconPath = "LightAntiprotonGun.png";
+			}
+			if($nrOfShots === 2){
+				$this->iconPath = "LightAntiprotonGun2.png";
+			}
+		
+			parent::__construct(0, 1, 0, $startArc, $endArc);
 		}
-		if($nrOfShots === 2){
-			$this->iconPath = "LightAntiprotonGun2.png";
-		}
-	
-		parent::__construct(0, 1, 0, $startArc, $endArc);
-	}
 
-	public function getDamage($fireOrder){        return Dice::d(6, 2) - 1;   }
-	public function setMinDamage(){     $this->minDamage = 1 ;      }
-	public function setMaxDamage(){     $this->maxDamage = 11 ;      }
+		public function getDamage($fireOrder){        return Dice::d(6, 2) - 1;   }
+		public function setMinDamage(){     $this->minDamage = 1 ;      }
+		public function setMaxDamage(){     $this->maxDamage = 11 ;      }
 
-}// end of class LightAntiprotonGun
+	}// end of class LightAntiprotonGun
 
 
-class LtAntimatterCannon extends Weapon{  //deliberately NOT extending AntimatterWeapon class uses regular calculations 
+	class LtAntimatterCannon extends Weapon{  //deliberately NOT extending AntimatterWeapon class uses regular calculations 
 		public $iconPath = "LightAntimatterCannon.png";
         public $name = "LtAntimatterCannon";
         public $displayName = "Light Antimatter Cannon";
@@ -405,13 +408,13 @@ class LtAntimatterCannon extends Weapon{  //deliberately NOT extending Antimatte
         public function setMinDamage(){     $this->minDamage = 10 ;      }
         public function setMaxDamage(){     $this->maxDamage = 28 ;      }
 
-}//end of class LtAntimatterCannon
+	}//end of class LtAntimatterCannon
 
 
 
 
 
-class AntimatterShredder extends AntimatterWeapon{        
+	class AntimatterShredder extends AntimatterWeapon{        
         public $name = "AntimatterShredder";
         public $displayName = "Antimatter Shredder";
 		public $iconPath = "AntimatterShredder.png";
@@ -437,6 +440,11 @@ class AntimatterShredder extends AntimatterWeapon{
 			2 => "Raking",
             3 => "Piercing"			
         );
+		
+		
+		//Range Reduced on Shredder would be quite awkward OR require additional custom coding - I went for givit it only ReducedDamage critical instead
+		public $possibleCriticals = array(14 => "ReducedDamageAntimatter", 25 => array("ReducedDamageAntimatter", "ReducedDamageAntimatter"));
+		
        
         public $damageTypeArray = array(1=> 'Standard', 2=>'Raking', 3=>'Piercing');
 		
@@ -640,6 +648,6 @@ class AntimatterShredder extends AntimatterWeapon{
 			parent::fire($gamedata, $fireOrder);
 		}
 	
-} //end of class AntimatterShredder
+	} //end of class AntimatterShredder
 		
 ?>
