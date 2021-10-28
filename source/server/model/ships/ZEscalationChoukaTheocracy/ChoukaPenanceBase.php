@@ -21,7 +21,7 @@ class ChoukaPenanceBase extends SmallStarBaseFourSections{
 		$this->forwardDefense = 15;
 		$this->sideDefense = 15;
 
-		$this->canvasSize = 200; 
+		$this->canvasSize = 170; 
 		$this->unofficial = true;
 
 		$this->isd = 1966;
