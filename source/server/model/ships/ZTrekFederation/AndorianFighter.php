@@ -10,6 +10,7 @@ class AndorianFighter extends FighterFlight{
         $this->shipClass = "Andorian Medium Fighters";
 	    $this->imagePath = "img/ships/StarTrek/AndorianFighter.png";
 	    $this->isd = 2150;
+		$this->hangarRequired = "medium"; //Initiative suggests it's heavy fighter, but it's in fact medium
         
         $this->forwardDefense = 6;
         $this->sideDefense = 8;
@@ -32,7 +33,7 @@ class AndorianFighter extends FighterFlight{
             $fighter = new Fighter("AndorianFighter", $armour, 10, $this->id);
             $fighter->displayName = "Andorian Medium Fighter";
             $fighter->imagePath = "img/ships/StarTrek/AndorianFighter.png";
-            $fighter->iconPath = "img/ships/StarTrek/AndorianFighter_large.png";
+            $fighter->iconPath = "img/ships/StarTrek/AndorianFighter_Large.png";
 
 
             $fighter->addFrontSystem(new LightParticleBlaster(330, 30, 4));
