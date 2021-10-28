@@ -48,8 +48,8 @@ class technicalTargetDrone extends BaseShip{
 //		$this->addFrontSystem(new PlasmaBlast(2, 4, 2, 0, 360));
 //		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
 //		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
-		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
-		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
+//		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
+//		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
 		$sensors = new ELINTScanner(6, 23, 4, 20);
 			$sensors->markHyachELINT();
 			$this->addFrontSystem($sensors);

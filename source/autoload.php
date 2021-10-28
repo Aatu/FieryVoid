@@ -2372,8 +2372,8 @@ spl_autoload_register(
 				
 				
 				//weapons
-                'interdictorhandler' => '/server/model/weapons/particle.php',
-                'interdictor' => '/server/model/weapons/particle.php',
+//                'interdictorhandler' => '/server/model/weapons/particle.php',
+//                'interdictor' => '/server/model/weapons/particle.php',
 				
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
