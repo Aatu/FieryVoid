@@ -187,7 +187,7 @@ Weapon.prototype.changeFiringMode = function () {
 			updateDataPenalty = true;
 		}
 		if (!mathlib.arrayIsEmpty(this.rngNormalPenaltyArray)) {
-			this.rngNormalPenaltyPenalty = this.rngNormalPenaltyArray[this.firingMode];
+			this.rngNormalPenalty = this.rngNormalPenaltyArray[this.firingMode];
 			updateDataPenalty = true;
 		}
 		if (updateDataPenalty == true){
