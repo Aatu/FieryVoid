@@ -1279,7 +1279,7 @@ spl_autoload_register(
 				'choukaheraldwarcruiser' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHeraldWarCruiser.php',
 				'choukaholylandassault' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHolylandAssault.php',
 				'choukainquisitorlightcruiser' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaInquisitorLightCruiser.php',
-//				'choukapenancebase' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaPenanceBase.php',
+				'choukapenancebase' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaPenanceBase.php',
 				'choukapenitentpatrolship' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaPenitentPatrolShip.php',
 				'choukapledgeminelayer' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaPledgeMinelayer.php',
 				'choukapriestdestroyer' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaPriestDestroyer.php',

@@ -10,7 +10,7 @@ class ChoukaPenanceBase extends SmallStarBaseFourSections{
 		$this->faction = "ZEscalation Chouka Theocracy";
 		$this->phpclass = "ChoukaPenanceBase";
 		$this->shipClass = "Penance Military Base";
-		$this->imagePath = "img/ships/EscalationWars/ChoukaHellfireOSAT.png";
+		$this->imagePath = "img/ships/EscalationWars/ChoukaTemple.png";
 		$this->fighters = array("normal"=>12); 
 
 		$this->shipSizeClass = 3; 
