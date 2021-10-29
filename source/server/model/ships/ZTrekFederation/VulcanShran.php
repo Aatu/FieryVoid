@@ -31,6 +31,7 @@ class VulcanShran extends BaseShipNoAft{
         $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 5, 5));
 	$this->addPrimarySystem(new Hangar(3, 4, 4));
+	//$this->addPrimarySystem(new SWTractorBeam(2,0,360,1)); //temporarily commented out - so games don't break
 
 	$impulseDrive = new TrekImpulseDrive(4,20,0,2,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 		
@@ -97,12 +98,13 @@ class VulcanShran extends BaseShipNoAft{
 	    
         $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-                    11 => "Scanner",
-                    14 => "Engine",
-                    16 => "Hangar",
-                    18 => "Reactor",
-                    20 => "C&C",
+				8 => "Structure",
+				10 => "Tractor Beam",
+				12 => "Scanner",
+				15 => "Engine",
+				17 => "Hangar",
+				19 => "Reactor",
+				20 => "C&C",
             ),
             1=> array(
 				2 => "Shield Projector",

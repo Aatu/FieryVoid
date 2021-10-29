@@ -46,8 +46,8 @@ class VulcanDVahl extends LCV{
 		$projection->addProjector($projector);
 		$this->addPrimarySystem($projector);
 	$this->addPrimarySystem($projection);
-		$this->addFrontSystem(new TrekLtPhaseCannon(2, 4, 2, 330, 180));
 		$this->addFrontSystem(new TrekLtPhaseCannon(2, 4, 2, 180, 30));
+		$this->addFrontSystem(new TrekLtPhaseCannon(2, 4, 2, 330, 180));
 		$this->addAftSystem(new CargoBay(2, 20));
 
 		$warpNacelle = new TrekWarpDrive(3, 12, 0, 4); //armor, structure, power usage, impulse output
@@ -72,8 +72,8 @@ class VulcanDVahl extends LCV{
 		),
 
 		1=> array(
-			8 => "Structure",
-			10 => "2:Cargo Bay",
+			7 => "Structure",
+			9 => "2:Cargo Bay",
 			12 => "1:Light Phase Cannon",
 			13 => "0:Shield Projector",
 			16 => "2:Nacelle",

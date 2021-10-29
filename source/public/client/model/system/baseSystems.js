@@ -618,3 +618,5 @@ PowerCapacitor.prototype.doIndividualNotesTransfer = function () { //prepare ind
 	this.individualNotesTransfer.push(powerRemaining);
 	return true;
 };
+
+

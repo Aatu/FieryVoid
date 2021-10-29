@@ -1000,7 +1000,7 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 		$remainingCapacity = $this->getRemainingCapacity();
 		$protectionValue = 0;
 		if($remainingCapacity>0){
-			$protectionValue = min($remainingCapacity+$this->armour,$this->output);
+			$protectionValue = max($remainingCapacity+$this->armour,$this->output); //this is actually more than this system can protect from - but allows to balance load between systems in arc
 		}
 		return $protectionValue;
 	}
