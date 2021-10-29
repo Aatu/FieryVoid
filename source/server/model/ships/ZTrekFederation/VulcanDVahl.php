@@ -61,8 +61,8 @@ class VulcanDVahl extends LCV{
 	$this->hitChart = array(
 		
 		0=> array(
-			7 => "Structure",
-			9 => "2:Cargo Bay",
+			8 => "Structure",
+			10 => "2:Cargo Bay",
 			12 => "1:Light Phase Cannon",
 			13 => "Shield Projector",
 			16 => "2:Nacelle",
@@ -72,8 +72,8 @@ class VulcanDVahl extends LCV{
 		),
 
 		1=> array(
-			8 => "Structure",
-			10 => "2:Cargo Bay",
+			7 => "Structure",
+			9 => "2:Cargo Bay",
 			12 => "1:Light Phase Cannon",
 			13 => "0:Shield Projector",
 			16 => "2:Nacelle",

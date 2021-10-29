@@ -1066,13 +1066,29 @@ class JumpEngine extends ShipSystem{
 class Structure extends ShipSystem{
     public $name = "structure";
     public $displayName = "Structure";
+	private $isIndestructible = false;
     
 	//Structure is last to be repaired, except purely cosmetic systems like Hanngars  
 	public $repairPriority = 2;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
-    function __construct($armour, $maxhealth){
+    function __construct($armour, $maxhealth, $isIndestructible = false){
         parent::__construct($armour, $maxhealth, 0, 0);
+		$this->isIndestructible = $isIndestructible;
     }
+
+	
+	//Vree need Structure that doesn't fall off even if it's destroyed - here it is!
+	//it will get destroyed all right (possibly multiple times in a batlle), but will still be there afterwards
+	//upon destruction - delete destruction marker
+	public function criticalPhaseEffects($ship, $gamedata)
+    { 
+		if($this->isIndestructible){
+			foreach ($this->damage as $damage){ 
+				if ($damage->destroyed) $damage->destroyed = false;		
+			}
+		}
+    } //endof function criticalPhaseEffects	
+	
 } //endof Structure	
 
 	
@@ -2901,6 +2917,8 @@ class StructureTechnical extends ShipSystem{
 		}
       
 }//endof VreeStructurePlaceholder	
+
+
 
 
 ?>
