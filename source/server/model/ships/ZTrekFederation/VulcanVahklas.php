@@ -47,8 +47,8 @@ class VulcanVahklas extends LCV{
 	$this->addPrimarySystem($projection);
 		$this->addFrontSystem(new TrekPhaseCannon(2, 6, 4, 300, 60));
 		$this->addFrontSystem(new TrekPhaseCannon(2, 6, 4, 300, 60));
-		$this->addFrontSystem(new TrekLtPhaseCannon(2, 4, 2, 330, 180));
 		$this->addFrontSystem(new TrekLtPhaseCannon(2, 4, 2, 180, 30));
+		$this->addFrontSystem(new TrekLtPhaseCannon(2, 4, 2, 330, 180));
 	
 
 		$warpNacelle = new TrekWarpDrive(3, 12, 0, 4); //armor, structure, power usage, impulse output

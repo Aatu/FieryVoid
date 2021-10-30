@@ -1053,7 +1053,9 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){        return 24;   }
+        public function getDamage($fireOrder){  
+			return 24;   		
+		}
         public function setMinDamage(){     $this->minDamage = 24 ;      }
         public function setMaxDamage(){     $this->maxDamage = 24 ;      }
     }

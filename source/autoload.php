@@ -2308,6 +2308,10 @@ spl_autoload_register(
 				'xonn' => '/server/model/ships/vree/Xonn.php',
 				'xvell' => '/server/model/ships/vree/Xvell.php',
 				'xavan' => '/server/model/ships/vree/Xavan.php',
+				
+				//antimatter-specific criticals
+                'reducedrangeantimatter' => '/server/model/cricialClasses.php',
+                'reduceddamageantimatter' => '/server/model/cricialClasses.php',
 
 
 				//other				
@@ -2353,6 +2357,13 @@ spl_autoload_register(
 				'vulcansurak' => '/server/model/ships/ZTrekFederation/VulcanSurak.php',
 				'vulcantimur' => '/server/model/ships/ZTrekFederation/VulcanTimur.php',
 				'vulcanvahklas' => '/server/model/ships/ZTrekFederation/VulcanVahklas.php',
+				
+				
+				'andorianthyzon' => '/server/model/ships/ZTrekFederation/AndorianThyzon.php',
+				'andorianthymasescort' => '/server/model/ships/ZTrekFederation/AndorianThymasEscort.php',
+				'andoriankumari' => '/server/model/ships/ZTrekFederation/AndorianKumari.php',
+				'andorianfighter' => '/server/model/ships/ZTrekFederation/AndorianFighter.php',
+				'andorianchimesh' => '/server/model/ships/ZTrekFederation/AndorianChimesh.php',
 		
 		    		
 				//Marcin Trek

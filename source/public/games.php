@@ -76,6 +76,10 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Antimatter Shredder</b> - Vree iconic weapon is live  
 	    <br><b><u>Vree warning</u></b> - Vree layout is still under development. Don't plan very long games using Vree yet, as they may easily become broken when new update is deployed.
 	    <br><b>Graphics updates and some ships added to existing factions (mainly Dilgar)</b> - courtesy of Geoffrey
+	    <br>---------- <b>28th of October 2021</b> ----------
+	    <br><b>Federation Andorians</b> - for Star Trek fans and testers
+	    <br><b>Antimatter weapons criticals</b> - now Vree weapons should be penalized properly (new criticals only)
+	    <br><b>Centauri LCVs and Chouka fixed defenses</b> - for assault scenarios (courtesy of Geoffrey and Lunara)
 	    
 		
 	    
