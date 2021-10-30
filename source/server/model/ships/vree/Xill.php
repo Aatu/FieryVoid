@@ -61,12 +61,12 @@ class Xill extends VreeCapital{
 		
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 5, 30));
-        $this->addAftSystem(new Structure( 5, 30));
-        $this->addLeftFrontSystem(new Structure( 5, 30));
-        $this->addLeftAftSystem(new Structure( 5, 30));
-        $this->addRightFrontSystem(new Structure( 5, 30));
-        $this->addRightAftSystem(new Structure( 5, 30));      
+        $this->addFrontSystem(new Structure( 5, 30, true));
+        $this->addAftSystem(new Structure( 5, 30, true));
+        $this->addLeftFrontSystem(new Structure( 5, 30, true));
+        $this->addLeftAftSystem(new Structure( 5, 30, true));
+        $this->addRightFrontSystem(new Structure( 5, 30, true));
+        $this->addRightAftSystem(new Structure( 5, 30, true));      
         $this->addPrimarySystem(new Structure( 6, 44));
 	    
 	//d20 hit chart

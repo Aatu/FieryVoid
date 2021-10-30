@@ -259,6 +259,22 @@ class ReducedDamage extends Critical{
     }
 }
 
+//Antimatter has special ReducedRange critical
+class ReducedRangeAntimatter extends Critical{
+    public $description = "Range penalty increased.";//increase range by 3
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
+//Antimatter has special ReducedDamage critical
+class ReducedDamageAntimatter extends Critical{
+    public $description = "Damage reduced."; //reduce X by 2 (not below 0)
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
 class ArmorReduced extends Critical{
     public $description = "Armor reduced.";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
