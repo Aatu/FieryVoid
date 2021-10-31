@@ -13,9 +13,11 @@ class EarthforceOne  extends BaseShip{
         $this->canvasSize = 180;
         $this->fighters = array("normal"=>12);
 		$this->customFighter = array("Thunderbolt"=>12);
+        $this->occurence = "unique"; 
 	    
 	    $this->isd = 2251;
 	    $this->notes = 'Thunderbolt capable.';
+	    $this->notes .= '<br>Only one in service.';
         
         $this->forwardDefense = 17;
         $this->sideDefense = 14;

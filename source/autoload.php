@@ -998,6 +998,7 @@ spl_autoload_register(
                 'taileagle' => '/server/model/ships/drazi/taileagle.php',
                 'talafat' => '/server/model/ships/markab/talafat.php',
                 'tankertug' => '/server/model/ships/civilians/tankerTug.php',
+                'tantalus' => '/server/model/ships/EA/tantalus.php',
                 'taras' => '/server/model/ships/centauri_old/taras.php',
                 'targath' => '/server/model/ships/dilgar/targath.php',
                 'targathc' => '/server/model/ships/dilgar/targathC.php',
