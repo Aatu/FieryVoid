@@ -37,20 +37,20 @@ class Vaarl extends VreeHCV{
 		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 1));		
         $this->addPrimarySystem(new Thruster(3, 12, 0, 7, 2));						
 
-		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60));
-		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 240, 0)); 
+		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 240, 0));
+		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60)); 
 		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60)); 
 		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 0, 120)); 
 
-		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240));  
-		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 60, 180)); 		
+		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 180, 300));  
+		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240)); 		
  		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240));
-		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 180, 300));	      
+		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 60, 180));	      
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 50, true));
         $this->addAftSystem(new Structure( 4, 50, true));
-        $this->addPrimarySystem(new Structure( 4, 50, true));
+        $this->addPrimarySystem(new Structure( 4, 50));
 	    
 	//d20 hit chart
         $this->hitChart = array(
