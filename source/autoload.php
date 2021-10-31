@@ -1506,6 +1506,7 @@ spl_autoload_register(
 			//Nexus ballistic weapons
 				'nexusbolttorpedo' => '/server/model/weapons/customNexus.php',
 				'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php', 
+				'nexusrangedkineticboxlauncher' => '/server/model/weapons/customNexus.php', 
 				'nexuschafflauncher' => '/server/model/weapons/customNexus.php',
 				'nexusstreakinterceptor' => '/server/model/weapons/customNexus.php',
 				'nexusdartinterceptor' => '/server/model/weapons/customNexus.php',
@@ -1565,11 +1566,17 @@ spl_autoload_register(
                 'brixadiiattackfrigate' => '/server/model/ships/ZNexusBrixadii/BrixadiiAttackFrigate.php',
                 'brixadiiattackfrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiAttackFrigate2108.php',
 
+                'brixadiilauncherplatformbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiLauncherPlatformBase.php',
+                'brixadiilauncherplatform2107' => '/server/model/ships/ZNexusBrixadii/BrixadiiLauncherPlatform2107.php',
+
                 'brixadiilightescortfrigate' => '/server/model/ships/ZNexusBrixadii/BrixadiiLightEscortFrigate.php',
 
                 'brixadiipolicefrigatebase' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigateBase.php',
                 'brixadiipolicefrigate2047' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2047.php',
 				'brixadiipolicefrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2108.php',
+
+                'brixadiisentinelplatformbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiSentinelPlatformBase.php',
+                'brixadiisentinelplatform2107' => '/server/model/ships/ZNexusBrixadii/BrixadiiSentinelPlatform2107.php',
 		    
                 'brixadiisurveyorbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyorBase.php',
                 'brixadiisurveyor2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyor2057.php',
