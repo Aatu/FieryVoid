@@ -35,35 +35,30 @@ class Xeon extends VreeCapital{
 		$this->addPrimarySystem(new CnC(5, 12, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 10, 7, 7));
         $this->addPrimarySystem(new Engine(5, 11, 0, 7, 2));
-		$this->addPrimarySystem(new Thruster(4, 12, 0, 7, 3));
-		$this->addPrimarySystem(new Thruster(4, 12, 0, 7, 4));         			
 
         $this->addFrontSystem(new Thruster(4, 12, 0, 7, 1));
-         $this->addFrontSystem(new AntiprotonDefender(3, 0, 0, 300, 60));
+        $this->addFrontSystem(new AntiprotonDefender(3, 0, 0, 300, 60));
 		
         $this->addAftSystem(new Thruster(4, 12, 0, 7, 2));
         $this->addAftSystem(new AntiprotonDefender(3, 0, 0, 120, 240));
         
 		$this->addLeftFrontSystem(new AntiprotonDefender(3, 0, 0, 240, 360));
-	//	$this->addLeftFrontSystem(new VreeStructureTechnical(0, 0, 0, 0));	
 				
+		$this->addLeftAftSystem(new Thruster(4, 12, 0, 7, 3));
 		$this->addLeftAftSystem(new AntiprotonDefender(3, 0, 0, 180, 300));
-	//	$this->addLeftAftSystem(new VreeStructureTechnical(0, 0, 0, 0));	
 		
+		$this->addRightFrontSystem(new AntiprotonDefender(3, 0, 0, 0, 120));			
 
-		$this->addRightFrontSystem(new AntiprotonDefender(3, 0, 0, 0, 120));
-	//	$this->addRightFrontSystem(new VreeStructureTechnical(0, 0, 0, 0));					
-
-		$this->addRightAftSystem(new AntiprotonDefender(3, 0, 0, 60, 180));
-	//	$this->addRightAftSystem(new VreeStructureTechnical(0, 0, 0, 0));		
+		$this->addRightAftSystem(new Thruster(4, 12, 0, 7, 4));  
+		$this->addRightAftSystem(new AntiprotonDefender(3, 0, 0, 60, 180));	
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 4, 21));
-        $this->addAftSystem(new Structure( 4, 21));
-        $this->addLeftFrontSystem(new Structure( 4, 21));
-        $this->addLeftAftSystem(new Structure( 4, 21));
-        $this->addRightFrontSystem(new Structure( 4, 21));
-        $this->addRightAftSystem(new Structure( 4, 21));      
+        $this->addFrontSystem(new Structure( 4, 21, true));
+        $this->addAftSystem(new Structure( 4, 21, true));
+        $this->addLeftFrontSystem(new Structure( 4, 21, true));
+        $this->addLeftAftSystem(new Structure( 4, 21, true));
+        $this->addRightFrontSystem(new Structure( 4, 21, true));
+        $this->addRightAftSystem(new Structure( 4, 21, true));      
         $this->addPrimarySystem(new Structure( 5, 36));
 	    
 	//d20 hit chart
@@ -89,29 +84,25 @@ class Xeon extends VreeCapital{
                     20 => "Primary",
            		 ),
             31=> array(
-                    1 => "1:Thruster",
-                    4 => "0:Thruster", 
+                    4 => "32:Thruster", 
                     6 => "Antiproton Defender",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
-                    1 => "2:Thruster",
-                    4 => "0:Thruster", 
+                    4 => "Thruster", 
                     6 => "Antiproton Defender",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
-                    1 => "1:Thruster",
-                    4 => "0:Thruster",
+                    4 => "42:Thruster",
                     6 => "Antiproton Defender",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
-                    1 => "2:Thruster",
-                    4 => "0:Thruster",
+                    4 => "Thruster",
                     6 => "Antiproton Defender",
                     17 => "Structure",
                     20 => "Primary",

@@ -294,8 +294,8 @@
         public $animationColor = array(30, 170, 255);
         public $animationExplosionScale = 0.25;
         public $projectilespeed = 12;
-        public $animationWidth = 10;
-        public $trailLength = 10;
+        public $animationWidth = 7;
+        public $trailLength = 7;
         public $priority = 5;
         
         public $ballistic = true;
@@ -411,21 +411,20 @@
 	}//end of class LtAntimatterCannon
 
 
-
-
-
 	class AntimatterShredder extends AntimatterWeapon{        
         public $name = "AntimatterShredder";
         public $displayName = "Antimatter Shredder";
 		public $iconPath = "AntimatterShredder.png";
-        public $animation = "trail";
+ //     public $animation = "trail";
         public $animationArray = array(1=>"trail", 2=>"laser", 3=>"laser");
-        public $projectilespeed = 13;
-        public $animationWidth = 3;
-        public $trailLength = 9;
+        public $projectilespeed = 10;
+        public $animationWidth = 4;
+        public $trailLength = 15;
+        public $trailColor = array(0, 184, 230);        
         //public $animationColor = array(0, 184, 230); //let's inherit from Antimatter...
         public $animationWidth2 = 0.2;
 		public $animationExplosionScale = 0.4;                   
+		public $rof = 2;
 		
         public $priority = 2; 
 		public $priorityArray = array(1=>2, 2=>7, 3=>2); //Shredder affects every unit in range, while Piercing affects all sections in its path - both should be fired very early

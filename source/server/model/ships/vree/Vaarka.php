@@ -11,9 +11,7 @@ class Vaarka extends VreeHCV{
 		$this->isd = 2257;
   		$this->occurence = "rare";
     	$this->variantOf = 'Vaarl Scout Saucer';			
-	      $this->unofficial = true;
 
-		$this->shipSizeClass = 2; 
 		$this->iniativebonus = 6 *5; 
 		
         $this->turncost = 0.66;
@@ -42,32 +40,23 @@ class Vaarka extends VreeHCV{
         $this->addPrimarySystem(new Thruster(3, 12, 0, 7, 2));
 		
 		
-		$this->addFrontSystem(new StructureTechnical(0, 0, 0, 0)); //SOMETHING is necessary for structure to be shown
-		$this->addAftSystem(new StructureTechnical(0, 0, 0, 0));
-        
-		$this->addLeftFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60));
-		$this->addLeftFrontSystem(new AntiprotonDefender(2, 0, 0, 240, 0));
-		$this->addLeftFrontSystem(new StructureTechnical(0, 0, 0, 0));			
-		
-		$this->addLeftAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240));
-		$this->addLeftAftSystem(new AntiprotonDefender(2, 0, 0, 180, 300));
-		$this->addLeftAftSystem(new StructureTechnical(0, 0, 0, 0));
-		
-		$this->addRightFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60)); 
-		$this->addRightFrontSystem(new AntiprotonDefender(2, 0, 0, 0, 120));
-		$this->addRightFrontSystem(new StructureTechnical(0, 0, 0, 0));			 						        
-			 
-		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240));  
-		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 60, 180)); 
-		$this->addRightAftSystem(new StructureTechnical(0, 0, 0, 0));				
+		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60));
+		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 240, 0)); 
+		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60)); 
+		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 0, 120)); 
+
+		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240));  
+		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 60, 180)); 		
+ 		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240));
+		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 180, 300));	 			
        
 
 			
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 4, 50));
-        $this->addAftSystem(new Structure( 4, 50));
-        $this->addPrimarySystem(new Structure( 4, 50));
+        $this->addFrontSystem(new Structure( 4, 50, true));
+        $this->addAftSystem(new Structure( 4, 50, true));
+        $this->addPrimarySystem(new Structure( 4, 50, true));
 	    
 	//d20 hit chart
         $this->hitChart = array(
@@ -81,51 +70,17 @@ class Vaarka extends VreeHCV{
                     20 => "C&C",
            		 ),
             1=> array(
-                    4 => "0:Thruster",   
-                    5 => "31:Antiproton Defender",
-                    6 => "41:Antiproton Defender",
-                    8 => "0:Antimatter Shredder",
+                    4 => "0:Thruster",                        
+                    7 => "Antiproton Defender",
+                    8 => "0:Antimatter Shredder", 
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             2=> array(
                     4 => "0:Thruster",   
-                    5 => "32:Antiproton Defender",
-                    6 => "42:Antiproton Defender",
-                    8 => "0:Antimatter Shredder",
+                    7 => "Antiproton Defender",
+                    8 => "0:Antimatter Shredder", 
                     17 => "Structure",
-                    20 => "Primary",
-           		 ),
-            31=> array(
-                    4 => "0:Thruster",   
-                    5 => "31:Antiproton Defender",
-                    6 => "32:Antiproton Defender",
-                    8 => "0:Antimatter Shredder",
-                    17 => "1:Structure",
-                    20 => "Primary",
-           		 ),
-            32=> array(
-                    4 => "0:Thruster",   
-                    5 => "31:Antiproton Defender",
-                    6 => "32:Antiproton Defender",
-                    8 => "0:Antimatter Shredder",
-                    17 => "2:Structure",
-                    20 => "Primary",
-           		 ),
-            41=> array(
-                    4 => "0:Thruster",   
-                    5 => "41:Antiproton Defender",
-                    6 => "42:Antiproton Defender",
-                    8 => "0:Antimatter Shredder",
-                    17 => "1:Structure",
-                    20 => "Primary",
-           		 ),
-       		42=> array(
-                    4 => "0:Thruster",   
-                    5 => "41:Antiproton Defender",
-                    6 => "42:Antiproton Defender",
-                    8 => "0:Antimatter Shredder",
-                    17 => "2:Structure",
                     20 => "Primary",
            		 ),
            	);

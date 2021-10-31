@@ -9,7 +9,7 @@ class Vymish extends MediumShip{
         $this->phpclass = "Vymish";
         $this->imagePath = "img/ships/VreeVymish.png";
         $this->shipClass = "Vymish Armed Trader";
-  	  $this->canvasSize = 100;        
+  	    $this->canvasSize = 100;        
 	    
 	    $this->isd = 2191;
 
@@ -23,7 +23,7 @@ class Vymish extends MediumShip{
         $this->pivotcost = 0;
         $this->gravitic = true;             
         
-        $this->iniativebonus = 60;
+        $this->iniativebonus = 12 *5;
 
         
         $this->addPrimarySystem(new Reactor(3, 10, 0, 0));
@@ -33,17 +33,18 @@ class Vymish extends MediumShip{
 		$this->addPrimarySystem(new Hangar(3, 2));
 		$this->addPrimarySystem(new CargoBay(3, 20));		
 		$this->addPrimarySystem(new Thruster(3, 12, 0, 6, 3));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 6, 4));        
+        $this->addPrimarySystem(new Thruster(3, 12, 0, 6, 4));
+        $this->addPrimarySystem(new Thruster(3, 12, 0, 6, 1)); 
+        $this->addPrimarySystem(new Thruster(3, 12, 0, 6, 2));                        
         $this->addPrimarySystem(new AntiprotonDefender(2, 0, 0, 0, 360));
         $this->addPrimarySystem(new AntimatterCannon(2, 0, 0, 0, 360));
 		        
         $this->addFrontSystem(new AntiprotonDefender(3, 0, 0, 240, 0));
         $this->addFrontSystem(new AntiprotonDefender(3, 0, 0, 0, 120));
-        $this->addFrontSystem(new Thruster(3, 12, 0, 6, 1));
 
         $this->addAftSystem(new AntiprotonDefender(3, 0, 0, 180, 300));
         $this->addAftSystem(new AntiprotonDefender(3, 0, 0, 60, 180));        
-        $this->addAftSystem(new Thruster(3, 12, 0, 6, 2));        
+       
 
 		//structures
         $this->addPrimarySystem(new Structure(3, 60));
@@ -58,21 +59,19 @@ class Vymish extends MediumShip{
 				20 => "C&C",
 			),
 			1=> array(
-				4 => "Thruster",
-				6 => "0:Thruster",					
+				6 => "0:Thruster",			
 				7 => "0:Antimatter Cannon",
 				8 => "0:Antiproton Defender",
 				10 => "Antiproton Defender",				
-				18 => "Structure",
+				17 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
-				4 => "Thruster",
 				6 => "0:Thruster",					
 				7 => "0:Antimatter Cannon",
 				8 => "0:Antiproton Defender",
 				10 => "Antiproton Defender",				
-				18 => "Structure",
+				17 => "Structure",
 				20 => "Primary",
 			),
 		); 

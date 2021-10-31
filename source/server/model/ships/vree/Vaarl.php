@@ -8,11 +8,8 @@ class Vaarl extends VreeHCV{
 		$this->faction = "Vree";
 		$this->phpclass = "Vaarl";
 		$this->shipClass = "Vaarl Scout Saucer";
-		$this->isd = 2210;
-		$this->locations = array(41, 42, 2, 32, 31, 1);					
+		$this->isd = 2210;			
 
-
-		$this->shipSizeClass = 2; 
 		$this->iniativebonus = 6 *5; 
 		
         $this->turncost = 0.66;
@@ -36,38 +33,24 @@ class Vaarl extends VreeHCV{
 		$this->addPrimarySystem(new JumpEngine(6, 10, 4, 24));        			
 		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));		
 		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 3));
-		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 4));		
-						
-		$this->addFrontSystem(new Thruster(3, 12, 0, 7, 1));
-		
-        $this->addAftSystem(new Thruster(3, 12, 0, 7, 2));
-        
-		$this->addLeftFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60));
-		$this->addLeftFrontSystem(new AntiprotonDefender(2, 0, 0, 240, 0));
-		$this->addLeftFrontSystem(new StructureTechnical(0, 0, 0, 0));	 
-		
-		$this->addLeftAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240));
-		$this->addLeftAftSystem(new AntiprotonDefender(2, 0, 0, 180, 300));
-		$this->addLeftAftSystem(new StructureTechnical(0, 0, 0, 0));	
-		
-	
-		$this->addRightFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60)); 
-		$this->addRightFrontSystem(new AntiprotonDefender(2, 0, 0, 0, 120)); 
-		$this->addRightFrontSystem(new StructureTechnical(0, 0, 0, 0));			
-					        
+		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 4));
+		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 1));		
+        $this->addPrimarySystem(new Thruster(3, 12, 0, 7, 2));						
 
-		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240));  
-		$this->addRightAftSystem(new AntiprotonDefender(2, 0, 0, 60, 180)); 
-		$this->addRightAftSystem(new StructureTechnical(0, 0, 0, 0));			
-       
-	//	$this->addFrontSystem(new StructurePlaceholder(0, 0, 0, 0)); 
-        
-	//	$this->addAftSystem(new StructurePlaceholder(0, 0, 0, 0)); 
+		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60));
+		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 240, 0)); 
+		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60)); 
+		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 0, 120)); 
+
+		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240));  
+		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 60, 180)); 		
+ 		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 120, 240));
+		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 180, 300));	      
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 4, 50));
-        $this->addAftSystem(new Structure( 4, 50));
-        $this->addPrimarySystem(new Structure( 4, 50));
+        $this->addFrontSystem(new Structure( 4, 50, true));
+        $this->addAftSystem(new Structure( 4, 50, true));
+        $this->addPrimarySystem(new Structure( 4, 50, true));
 	    
 	//d20 hit chart
         $this->hitChart = array(
@@ -81,55 +64,17 @@ class Vaarl extends VreeHCV{
                     20 => "C&C",
            		 ),
             1=> array(
-                    3 => "Thruster",   
-                    5 => "31:Antiproton Defender",
-                    7 => "41:Antiproton Defender",
+                    4 => "0:Thruster",                        
+                    7 => "Antiproton Defender",
                     8 => "0:Antimatter Cannon",
-                    18 => "Structure",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
             2=> array(
-                    3 => "Thruster",   
-                    5 => "32:Antiproton Defender",
-                    7 => "42:Antiproton Defender",
+                    4 => "0:Thruster",   
+                    7 => "Antiproton Defender",
                     8 => "0:Antimatter Cannon",
-                    18 => "Structure",
-                    20 => "Primary",
-           		 ),
-            31=> array(
-                    2 => "1:Thruster",
-                    4 => "0:Thruster",                        
-                    6 => "31:Antiproton Defender",
-                    7 => "41:Antiproton Defender",
-                    8 => "0:Antimatter Cannon",
-                    18 => "1:Structure",
-                    20 => "Primary",
-           		 ),
-            32=> array(
-                    2 => "2:Thruster",
-                    4 => "0:Thruster",                        
-                    6 => "32:Antiproton Defender",
-                    7 => "42:Antiproton Defender",
-                    8 => "0:Antimatter Cannon",
-                    18 => "2:Structure",
-                    20 => "Primary",
-           		 ),
-            41=> array(
-                    2 => "1:Thruster",
-                    4 => "0:Thruster",                         
-                    6 => "41:Antiproton Defender",
-                    7 => "31:Antiproton Defender",
-                    8 => "0:Antimatter Cannon",
-                    18 => "1:Structure",
-                    20 => "Primary",
-           		 ),
-       		42=> array(
-                    2 => "2:Thruster",
-                    4 => "0:Thruster",                        
-                    6 => "42:Antiproton Defender",
-                    7 => "32:Antiproton Defender",
-                    8 => "0:Antimatter Cannon",
-                    18 => "2:Structure",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
            	);

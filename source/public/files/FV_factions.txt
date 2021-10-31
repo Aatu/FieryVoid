@@ -149,6 +149,7 @@ The early Earth Alliance units are composed of semi-official custom designs that
 both the standard Earth Alliance fleet list as well as the early EA section. This is to represent their transitional nature from being high-end units in the early EA to very old units in the Dilgar War era. Although the more famous Starfuries (Tiger, Nova, Aurora) are unavailable 
 the early examples of the Starfury lineage (Flying Fox, Aries, and Atlas) formed the foundation of the fighter-heavy EA fleet in the future. 
 
+
 GAIM INTELLIGENCE
 Gaim are minor League race, but their ships are very good and their diversity is excellent - making them (in game, tactically ) in all respects equal to Big4 factions.
 Notable technologies:
@@ -431,12 +432,13 @@ VREE CONGLOMERATE
 The Vree are an advanced race within the League of Non-Aligned Worlds that use a distinctive 'saucer' designs on all of their ships.  The Vree use antimatter weapons almost exclusively, which deal increased damage based on the difference between the base to-hit chance and actual hit rolled.  As a result their weapons are powerful at close and medium range but typically less effective at longer distances.
 
 Below is a list of systems and rules Vree use, with short descriptions of effect and design differences in FV implementation from original tabletop.
-- Vree capital ships have six outer hull sections, similar to starbases.  On Vree capital ships each section has it's own structure and functions the same as on normal four-sided capital ships e.g. destruction of structure will also destroy any systems/weapons on the outer hull section. Side thrusters have been placed on primary structure of Vree capital ships to prevent their arbitrary placement on outer hull, however they are not included on the Primary Hitchart and instead can be hit by incoming fire to side sections, with FV prioritising the thrusters which is in arc of any incoming shot where applicable i.e. shots from port side will prioritise port thruster.
-- On Vree HCV the weapons have been moved from forward and aft structures to side structures and will not be destroyed with outer hull sections, which is similar to tabletop rules for Vree.
-- Vree Medium Ships and Fighters function normally, albeit with usual 0 pivot cost for Vree ships and wider firing arcs on Zorth.
+- Vree capital ships have six outer hull sections, similar to starbases.  On Vree capital ships each section has it's own structure and largely functions the same as on normal four-sided capital ships, however destruction of an outer hull structure will not destroy any systems/weapons on that section. Thrusters have been placed on the side-aft sections of Vree capital ships for convenience but hit charts altho these to be hit by incoming shots to side-front sections too.
+- Vree HCVs, like capitals, do not lose their systems when front or aft structures are destroyed but otherwise function the same as other HCVs in Fiery Void.
+- Vree Medium Ships and Fighters function normally, albeit with the usual 0 pivot cost for Vree ships and wider firing arcs on Zorth.
 - Unlike in tabletop rules, the Vree player is not able to select which weapon, thruster, structure is hit by incoming fire on capital ships and HCVs.  Instead FV will randomly allocate hits based on which sections/systems are in arc of the firing ship.  Note, unlike starbases, weapons fire from the same ship CAN hit different sections of a Vree ship to help maintain some of their durability in battle.
-- Turrets have been placed on the Primary structure of Vree ships, but do not appear on Primary Hit chart.  Instead there is a chance they will be hit by incoming fire from any direction, with overkill damage going to Primary section.  All turrets have 360 degree firing arcs and unlike tabletop it was not possible to add in FV the restriction that weapons on the same turret must fire in the same 30 degree arc.  Consequently all Vree turret weapons can fire at any targets in a 360 degree arc.
-- The Antimatter Shredder has not yet been implemented, but is planned for future updates.
+- Turrets have been placed on the Primary structure of Vree ships, but do not appear on Primary Hit chart.  Instead there is a chance they will be hit by incoming fire to external hitcharts from any direction, with overkill damage going to Primary section.  All turrets have 360 degree firing arcs however ,unlike in tabletop, it was not possible to add the restriction that weapons on the same turret must fire in the same 30 degree arc.  As a result, all Vree turret weapons can fire at any targets in a 360 degree arc.
+- The Antimatter Shredder is a hex targetted weapon, however it was not possible to code the target hex to highlight once you've locked in the shot.  Players should therefore be careful when targetting to ensure the Antimatter Shredder has been activated during firing phase.  
+- The Antimatter Shredder rolls to hit on any enemy ships in the target hex and adjacent hexes, however please note that the combat log will show attacks against targets as separate shots during replay due to how FV code resolve firing for this weapon.
 	
 	
 YOLU THEOCRACY
