@@ -11,6 +11,8 @@ class Babylon5Refit extends StarBaseSixSections{
 			$this->occurence = "common";
 			$this->variantOf = 'Babylon 5 Diplomatic Station';
 		$this->fighters = array("heavy"=>48); 
+		$this->customFighter = array("Thunderbolt"=>48);
+	    $this->notes = 'Thunderbolt capable.';
 
         $this->isd = 2259;
 		$this->shipSizeClass = 3; //Enormous is not implemented

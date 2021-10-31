@@ -268,6 +268,7 @@ spl_autoload_register(
                 'eacgeminimlpa' => '/server/model/ships/customs/eacGeminiMlpa.php',
                 'earlywarbird' => '/server/model/ships/drazi_old/earlywarbird.php',
                 'earlywartalon' => '/server/model/ships/drazi_old/earlywartalon.php',
+                'earthforceone' => '/server/model/ships/EA/earthforceOne.php',
                 'egret' => '/server/model/ships/drazi_old/egret.php',
                 'egret1939' => '/server/model/ships/drazi_old/egret1939.php',
                 'electropulsegun' => '/server/model/weapons/specialWeapons.php',
