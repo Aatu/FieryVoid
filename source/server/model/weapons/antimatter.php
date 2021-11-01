@@ -415,7 +415,7 @@
         public $name = "AntimatterShredder";
         public $displayName = "Antimatter Shredder";
 		public $iconPath = "AntimatterShredder.png";
- //     public $animation = "trail";
+ 	    public $animation = "trail";
         public $animationArray = array(1=>"trail", 2=>"laser", 3=>"laser");
         public $projectilespeed = 10;
         public $animationWidth = 4;
