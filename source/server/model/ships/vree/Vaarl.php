@@ -8,7 +8,8 @@ class Vaarl extends VreeHCV{
 		$this->faction = "Vree";
 		$this->phpclass = "Vaarl";
 		$this->shipClass = "Vaarl Scout Saucer";
-		$this->isd = 2210;			
+		$this->isd = 2210;		
+        $this->limited = 33; //Limited Deployment	
 
 		$this->iniativebonus = 6 *5; 
 		

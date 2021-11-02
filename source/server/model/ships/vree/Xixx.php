@@ -9,6 +9,7 @@ class Xixx extends VreeHCV{
 		$this->phpclass = "Xixx";
 		$this->shipClass = "Xixx Torpedo Saucer";
 		$this->isd = 2251;
+        $this->limited = 10; //Restricted Deployment
 
 		$this->iniativebonus = 6 *5; 
 		

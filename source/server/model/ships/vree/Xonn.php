@@ -9,6 +9,7 @@ class Xonn extends VreeCapital{
 		$this->phpclass = "Xonn";
 		$this->shipClass = "Xonn Dreadnought";
 		$this->isd = 2260;
+        $this->limited = 10; //Restricted Deployment
 
 		$this->shipSizeClass = 3;
 		$this->iniativebonus = 0;
