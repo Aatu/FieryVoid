@@ -294,8 +294,8 @@
         public $animationColor = array(30, 170, 255);
         public $animationExplosionScale = 0.25;
         public $projectilespeed = 12;
-        public $animationWidth = 10;
-        public $trailLength = 10;
+        public $animationWidth = 7;
+        public $trailLength = 7;
         public $priority = 5;
         
         public $ballistic = true;
@@ -411,18 +411,15 @@
 	}//end of class LtAntimatterCannon
 
 
-
-
-
 	class AntimatterShredder extends AntimatterWeapon{        
         public $name = "AntimatterShredder";
         public $displayName = "Antimatter Shredder";
 		public $iconPath = "AntimatterShredder.png";
-        public $animation = "trail";
+ 	    public $animation = "trail";
         public $animationArray = array(1=>"trail", 2=>"laser", 3=>"laser");
-        public $projectilespeed = 13;
-        public $animationWidth = 3;
-        public $trailLength = 9;
+        public $projectilespeed = 10;
+        public $animationWidth = 4;
+        public $trailLength = 15;       
         //public $animationColor = array(0, 184, 230); //let's inherit from Antimatter...
         public $animationWidth2 = 0.2;
 		public $animationExplosionScale = 0.4;                   
