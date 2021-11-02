@@ -58,30 +58,15 @@ if (isset($_SESSION["user"])) {
         
 <!--	    
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
-        <h4>   may our games be fiery and our lives peaceful</h4>
+        <h4>may our games be fiery and our lives peaceful</h4>
         <br>
 -->        
 		
-		---------- <b>LATEST NEWS - October 2021</b> ----------	   
-	    <br><b>Stabilized missile launch ranges</b> - All missile racks on bases/OSATs, except "full" versions, now have the correct ranges (courtesy of Geoffrey)
-	    <br><b><u>Vree have arrived</u></b> - let's spin them in honor of Douglas! Beware, they're still early and subject to changes.
-	    <br><b>turn delay fix</b> - -1 thrust critical calculation corrected
-	    <br><b>fleet selection enhances</b> - now Acceleration, Pivot and Roll costs are visible
-	    <br><b>fighter ballistics vs shields fixed</b> - now fighter missiles won't ignore shields when their launch platforms get to range 0
-	    <br><b>Early Abbai</b> - Early versions of the Lakara, Miliani, and Tiraca from the Dilgar Invasion source book
-	    <br><b>Gravitic Bolt Brakiri</b> - Early versions of Brakiri vessels that used Gravitic Bolts before Graviton Pulsars
-	    <br>---------- <b>23rd of October 2021</b> ----------	
-	    <br><b>fighter Jammer fixed</b> - will work correctly even if fighter #1 is destroyed
-	    <br><b>Shadows are no longer Gravitic</b> 
-	    <br><b>Antimatter Shredder</b> - Vree iconic weapon is live  
-	    <br><b><u>Vree warning</u></b> - Vree layout is still under development. Don't plan very long games using Vree yet, as they may easily become broken when new update is deployed.
-	    <br><b>Graphics updates and some ships added to existing factions (mainly Dilgar)</b> - courtesy of Geoffrey
-	    <br>---------- <b>28th of October 2021</b> ----------
-	    <br><b>Federation Andorians</b> - for Star Trek fans and testers
-	    <br><b>Antimatter weapons criticals</b> - now Vree weapons should be penalized properly (new criticals only)
-	    <br><b>Centauri LCVs and Chouka fixed defenses</b> - for assault scenarios (courtesy of Geoffrey and Lunara)
-	    
-		
+		---------- <b>LATEST NEWS - November 2021</b> ----------	
+	    <br><b><u>Vree have arrived</u></b> - for a second time - but this time in (hopefully) final form!
+	    <br><b>Vree games are crashed</b> - as per warning (new ones created after this point should be safe)
+	    <br><b>Trek shielding was reworked</b> - Star Trek ship shields now work differently - hopefully as intended!
+	    <br><b>Babylon 5 station was built</b> - courtesy of Geoffrey!
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
