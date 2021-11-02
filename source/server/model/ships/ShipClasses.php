@@ -2346,25 +2346,12 @@ class VreeCapital extends SixSidedShip{
 } //end of VreeCapital
 
 
-class VreeHCV extends SixSidedShip{
+class VreeHCV extends HeavyCombatVessel{
  
     protected $VreeHitLocations = true; //Value to indicate that all gunfire from the same ship may not hit same side on Vree capital ships
         
     public $shipSizeClass = 2;
         
-    public function getLocations(){
-        //debug::log("getLocations");         
-        $locs = array();
-
-        $locs[] = array("loc" => 1, "min" => 300, "max" => 60, "profile" => $this->forwardDefense);
-        $locs[] = array("loc" => 41, "min" => 0, "max" => 90, "profile" => $this->sideDefense);
-        $locs[] = array("loc" => 42, "min" => 90, "max" => 180, "profile" => $this->sideDefense);
-        $locs[] = array("loc" => 2, "min" => 120, "max" => 240, "profile" => $this->forwardDefense);
-        $locs[] = array("loc" => 32, "min" => 180, "max" => 270, "profile" => $this->sideDefense);
-        $locs[] = array("loc" => 31, "min" => 270, "max" => 360, "profile" => $this->sideDefense);
-
-        return $locs;
-    }
 } //end of VreeHCV
 
     
