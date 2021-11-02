@@ -521,7 +521,7 @@ class ShipSystem {
     }
 	
 	
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null){ //hook - systems that can affect damage dealing will return positive value; strongest one will be chosen to interact
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false){ //hook - systems that can affect damage dealing will return positive value; strongest one will be chosen to interact
 		return 0;
 	}
 	public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $systemProtected, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
@@ -529,19 +529,22 @@ class ShipSystem {
 		return $returnValues;
 	}
 	
+	/*first attempt at StarTrek shield
 	public function doesReduceImpactDamage($expectedDmg){ //hook - systems that can affect damage dealing at the moment of impact will return positive value; strongest one will be chosen to interact
 		return 0;
 	}
 	public function doReduceImpactDamage($gamedata, $fireOrder, $target, $shooter, $weapon, $effectiveDamage){ //hook for actual effect of protection - return modified value of damage that should be used in further calculations
 		return $effectiveDamage;
 	}
+	*/
 	
 	/*assigns damage, returns remaining (overkilling) damage and how much armor was actually pierced
 	all extra data needed for defensive modifying damage as it's being dealt - like Shadow Energy Diffusers and Gaim Bulkheads
 	returns array: dmgDealt, dmgRemaining, armorPierced
 	special treatment for Flash: assign only as much damage as necessary to destroy system and treat it as an entire shot! (important for defensive systems such as Diffusers and Bulkheads)
 	*/
-	public function assignDamageReturnOverkill($target, $shooter, $weapon, $gamedata, $fireOrder, $damage, $armour, $pos=null){
+	//public function assignDamageReturnOverkill($target, $shooter, $weapon, $gamedata, $fireOrder, $damage, $armour, $pos = null){ //earlier version
+	public function assignDamageReturnOverkill($target, $shooter, $weapon, $gamedata, $fireOrder, $damage, $armour, $pos, $damageWasDealt){
 		$returnArray = array("dmgDealt"=>0, "dmgRemaining"=>0, "armorPierced"=>0);
 		$effectiveDamage = $damage;
 		$remainingDamage = 0;
@@ -560,7 +563,7 @@ class ShipSystem {
 		
 		
 		//CALL SYSTEMS PROTECTING FROM DAMAGE HERE! 
-		$systemProtectingDmg = $target->getSystemProtectingFromDamage($shooter, $pos, $gamedata->turn, $weapon, $this, $expectedDmg);
+		$systemProtectingDmg = $target->getSystemProtectingFromDamage($shooter, $pos, $gamedata->turn, $weapon, $this, $expectedDmg, $damageWasDealt);
 		if($systemProtectingDmg){
 			$effectOfProtection = $systemProtectingDmg->doProtect($gamedata, $fireOrder, $target, $shooter,$weapon,$this,$effectiveDamage,$effectiveArmor);
 			$effectiveDamage = $effectOfProtection['dmg'];
@@ -592,7 +595,7 @@ class ShipSystem {
 			$remainingDamage = $remainingDamage+$overkillDamage;
 			$overkillDamage = 0; //just poured into remaining damage
 			
-			$receivedArray = $this->assignDamageReturnOverkill($target, $shooter, $weapon, $gamedata, $fireOrder, $remainingDamage, $armour, $pos);
+			$receivedArray = $this->assignDamageReturnOverkill($target, $shooter, $weapon, $gamedata, $fireOrder, $remainingDamage, $armour, $pos, $damageWasDealt);
 			
 			$effectiveDamage += $receivedArray["dmgDealt"]; //sum of dealt now and in recursive call
 			$remainingDamage = $receivedArray["dmgRemaining"]; //should be 0 unless fighter was destroyed

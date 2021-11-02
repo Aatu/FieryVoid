@@ -130,11 +130,13 @@ class TrekLtPhaseCannon extends Raking{
 			if ( $powerReq == 0 ) $powerReq = 2;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-
+		
+		/*
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "Does damage in raking mode (6)";
 	}
+	*/
 	
         public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
         public function setMinDamage(){     $this->minDamage = 5 ;      }
@@ -144,7 +146,7 @@ class TrekLtPhaseCannon extends Raking{
 
 
 /*super-heavy fighter weapon*/
-    class TrekFtrPhaseCannon extends Weapon{
+    class TrekFtrPhaseCannon extends Raking{
         public $name = "TrekFtrPhaseCannon";
         public $displayName = "Light Phase Cannon";
         public $iconPath = "TrekLightPhaseCannon.png";
@@ -163,17 +165,19 @@ class TrekLtPhaseCannon extends Raking{
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
  
 		public $damageType = 'Raking'; 
-		public $weaponClass = "Particle"; 
+		public $weaponClass = "Particle";  
+		public $firingModes = array( 1 => "Raking");
 	    
         function __construct($startArc, $endArc, $damagebonus){
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 
+/*
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-				$this->data["Special"] = "Does damage in raking mode (6)";
+				$this->data["Special"] = "Does 6 damage per rake.";
 		}
-        
+  */      
         public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
         public function setMinDamage(){   return  $this->minDamage = 5 ;      }
         public function setMaxDamage(){   return  $this->maxDamage = 14 ;      }
@@ -593,7 +597,7 @@ class TrekPhaserLance extends Raking{
             }else{
                 $this->data["Special"] .= '<br>';
             } 
-            $this->data["Special"] .= '<br>Double power boosts damage from 2d6 to 4d6. Forces a critical roll at a +10 penalty.';
+            $this->data["Special"] .= 'Double power boosts damage from 2d6 to 4d6 and forces a critical roll at a +10 penalty.';
             $this->data["Boostlevel"] = $boost;
         }
 
@@ -654,9 +658,9 @@ class TrekPhaserLance extends Raking{
 		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
             parent::fire($gamedata, $fireOrder);
 		
-            // If fully boosted: test for possible crit.
+            // If fully boosted: force a critical roll (with hefty penalty)
             if($currBoostlevel === $this->maxBoostLevel){
-				$this->criticalRollMod = 10;
+				$this->criticalRollMod += 10;
             	$this->forceCriticalRoll = true;
             }
         }
@@ -864,8 +868,13 @@ class HvyPlasmaProjector extends Raking{
 
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-			$this->data["Special"] = "Damage reduced by 1 point per 4 hexes.";
-			$this->data["Special"] .= "<br>Does damage in raking(8) mode ";
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Damage reduced by 1 point per 4 hexes.";
+			//$this->data["Special"] .= "<br>Does damage in raking(8) mode ";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
@@ -904,8 +913,13 @@ class LtPlasmaProjector extends Raking{
 
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-			$this->data["Special"] = "Damage reduced by 1 points per 2 hexes.";
-			$this->data["Special"] .= "<br>Does damage in raking(8) mode";
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Damage reduced by 1 points per 2 hexes.";
+			//$this->data["Special"] .= "<br>Does damage in raking(8) mode";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
@@ -972,7 +986,7 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 		$this->data["Special"] = "Defensive system absorbing damage from hits before projectile touches actual hull.";
 		$this->data["Special"] .= "<br>Can absorb up to " .$this->output ." damage points per hit. ";
 		$this->data["Special"] .= ", including " . $this->armour . " without reducing capacity for further absorption.";
-		$this->data["Special"] .= "<br>Will absorb more from Raking mode hits.";
+		$this->data["Special"] .= "<br>Protects from every separate impact (eg. every rake!) separately.";
 		$this->data["Special"] .= "<br>System's health represents damage capacity. If it is reduced to zero system will cease to function.";
 		$this->data["Special"] .= "<br>Will not fall on its own unless its structure block is destroyed.";
 		$this->data["Special"] .= "<br>This is NOT a shield as far as any shield-related interactions go.";
@@ -993,6 +1007,48 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 	}
 	
 	
+	
+	//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
+		if($damageWasDealt) return 0; //does not protect from overkill damage, just first impact
+		
+		$remainingCapacity = $this->getRemainingCapacity();
+		$protectionValue = 0;
+		if($remainingCapacity>0){
+			$protectionValue = $remainingCapacity+$this->armour; //this is actually more than this system can protect from - but allows to balance load between systems in arc
+		}
+		return $protectionValue;
+	}
+	//actual protection
+	public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $systemProtected, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
+		$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
+		$damageToAbsorb=$effectiveDamage; //shield works BEFORE armor
+		$damageAbsorbed=0;
+		
+		if($damageToAbsorb<=0) return $returnValues; //nothing to absorb
+		
+		$remainingCapacity = $this->getRemainingCapacity();
+		$absorbedDamage = 0;
+		
+		if($remainingCapacity>0) { //else projection does not protect
+			$absorbedFreely = 0;
+			//first, armor takes part
+			$absorbedFreely = min($this->armour, $damageToAbsorb);
+			$damageToAbsorb += -$absorbedFreely;
+			//next, actual absorbtion
+			$absorbedDamage = min($this->output - $this->armour, $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
+			$damageToAbsorb += -$absorbedDamage;
+			if($absorbedDamage>0){ //mark!
+				$this->absorbDamage($target,$gamedata,$absorbedDamage);
+			}
+			$returnValues['dmg'] = $damageToAbsorb;
+			$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
+		}
+		
+		return $returnValues;
+	} //endof function doProtect
+	
+	/*first attempt
 	//function estimating how good this system is at stopping damage;
 	//in case of shield projection, its effectiveness equals largest shot it can stop, with tiebreaker equal to remaining capacity
 	//this is for recognizing it as system capable of affecting damage resolution and choosing best one if multiple Diffusers can protect
@@ -1004,7 +1060,6 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 		}
 		return $protectionValue;
 	}
-	
 	//actual protection - should return modified $effectiveDamage value
 	public function doReduceImpactDamage($gamedata, $fireOrder, $target, $shooter, $weapon, $effectiveDamage){ 
 		$returnValue = $effectiveDamage;
@@ -1036,12 +1091,6 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 					$returnValue += -$reduction;
 					$absorbedDamage += $reduction;
 					$remainingCapacity -= $reduction;
-					/*
-					$reduction = 5; //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
-					$returnValue += -$reduction;
-					$absorbedDamage += $reduction;
-					$remainingCapacity -= $reduction;
-					*/
 					if($remainingCapacity<=0) $fullRakes = 0; //do not continue after shield is brought down to 0
 				}
 				//round damage UP and absorbed values DOWN
@@ -1055,6 +1104,7 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 		
 		return $returnValue;
 	}		
+	*/
 	
     
 	function addProjector($projector){

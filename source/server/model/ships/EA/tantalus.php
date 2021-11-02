@@ -30,7 +30,7 @@ class Tantalus  extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 18, 4, 7));
         $this->addPrimarySystem(new Engine(5, 20, 0, 9, 4));
-        $this->addPrimarySystem(new Hangar(5, 42));
+        $this->addPrimarySystem(new Hangar(5, 42, 36));
         $this->addPrimarySystem(new Quarters(5, 21));
         $this->addPrimarySystem(new Quarters(5, 21));
         $this->addPrimarySystem(new JumpEngine(5, 20, 3, 24));
