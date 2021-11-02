@@ -35,40 +35,36 @@ class Xeecra extends VreeCapital{
 		$this->addPrimarySystem(new Scanner(5, 12, 6, 6));
         $this->addPrimarySystem(new Engine(5, 11, 0, 6, 3));
 		$this->addPrimarySystem(new CargoBay(4, 25));
-		$this->addPrimarySystem(new Thruster(4, 14, 0, 6, 3));
-		$this->addPrimarySystem(new Thruster(4, 14, 0, 6, 4));			        			
-
 
         $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 300, 60));
 		$this->addFrontSystem(new Thruster(4, 14, 0, 6, 1));   
 		$this->addFrontSystem(new CargoBay(3, 15));        
-     
-		
+     	
         $this->addAftSystem(new AntiprotonGun(3, 0, 0, 120, 240));
 		$this->addAftSystem(new Thruster(4, 14, 0, 6, 1)); 
 		$this->addAftSystem(new CargoBay(3, 15));        
      
-        
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
 		$this->addLeftFrontSystem(new CargoBay(3, 15));		
 				
+		$this->addPrimarySystem(new Thruster(4, 14, 0, 6, 3));
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new CargoBay(3, 15));		
 		
-	
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
 		$this->addRightFrontSystem(new CargoBay(3, 15));					
 	
+		$this->addRightAftSystem(new Thruster(4, 14, 0, 6, 4));	
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
 		$this->addRightAftSystem(new CargoBay(3, 15));
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 4, 45));
-        $this->addAftSystem(new Structure( 4, 45));
-        $this->addLeftFrontSystem(new Structure( 4, 45));
-        $this->addLeftAftSystem(new Structure( 4, 45));
-        $this->addRightFrontSystem(new Structure( 4, 45));
-        $this->addRightAftSystem(new Structure( 4, 45));      
+        $this->addFrontSystem(new Structure( 4, 45, true));
+        $this->addAftSystem(new Structure( 4, 45, true));
+        $this->addLeftFrontSystem(new Structure( 4, 45, true));
+        $this->addLeftAftSystem(new Structure( 4, 45, true));
+        $this->addRightFrontSystem(new Structure( 4, 45, true));
+        $this->addRightAftSystem(new Structure( 4, 45, true));      
         $this->addPrimarySystem(new Structure( 5, 63));
 	    
 	//d20 hit chart
@@ -98,32 +94,28 @@ class Xeecra extends VreeCapital{
                     20 => "Primary",
            		 ),
             31=> array(
-                    1 => "1:Thruster",
-                    4 => "0:Thruster",
+                    4 => "32:Thruster",
                     6 => "Cargo Bay",
                     7 => "Antiproton Gun",                    
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
-                    1 => "2:Thruster",
-                    4 => "0:Thruster",
+                    4 => "Thruster",
                     6 => "Cargo Bay",
                     7 => "Antiproton Gun",                    
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
-                    1 => "1:Thruster",
-                    4 => "0:Thruster",
+                    4 => "42:Thruster",
                     6 => "Cargo Bay",
                     7 => "Antiproton Gun",                    
                     17 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
-                    1 => "2:Thruster",
-                    4 => "0:Thruster",
+                    4 => "Thruster",
                     6 => "Cargo Bay",
                     7 => "Antiproton Gun",                    
                     17 => "Structure",

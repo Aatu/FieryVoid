@@ -33,14 +33,15 @@ class Xvell extends MediumShip{
 		$this->addPrimarySystem(new Hangar(3, 1));	
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 6, 3));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 6, 4));        
-		        
+        $this->addPrimarySystem(new Thruster(3, 10, 0, 6, 1));
+        $this->addPrimarySystem(new Thruster(3, 10, 0, 6, 2)); 
+        		        
         $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 240, 0));
         $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
-        $this->addFrontSystem(new Thruster(3, 10, 0, 6, 1));
 
         $this->addAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
         $this->addAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));        
-        $this->addAftSystem(new Thruster(3, 10, 0, 6, 2));        
+       
 
 		//structures
         $this->addPrimarySystem(new Structure(3, 40));
@@ -54,14 +55,12 @@ class Xvell extends MediumShip{
 				20 => "C&C",
 			),
 			1=> array(
-				4 => "Thruster",
 				6 => "0:Thruster",				
 				9 => "Antiproton Gun",			
 				17 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
-				4 => "Thruster",
 				6 => "0:Thruster",				
 				9 => "Antiproton Gun",				
 				17 => "Structure",
