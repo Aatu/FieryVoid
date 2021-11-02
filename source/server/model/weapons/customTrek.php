@@ -1007,6 +1007,48 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 	}
 	
 	
+	
+	//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
+		if($damageWasDealt) return 0; //does not protect from overkill damage, just first impact
+		
+		$remainingCapacity = $this->getRemainingCapacity();
+		$protectionValue = 0;
+		if($remainingCapacity>0){
+			$protectionValue = $remainingCapacity+$this->armour; //this is actually more than this system can protect from - but allows to balance load between systems in arc
+		}
+		return $protectionValue;
+	}
+	//actual protection
+	public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $systemProtected, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
+		$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
+		$damageToAbsorb=$effectiveDamage; //shield works BEFORE armor
+		$damageAbsorbed=0;
+		
+		if($damageToAbsorb<=0) return $returnValues; //nothing to absorb
+		
+		$remainingCapacity = $this->getRemainingCapacity();
+		$absorbedDamage = 0;
+		
+		if($remainingCapacity>0) { //else projection does not protect
+			$absorbedFreely = 0;
+			//first, armor takes part
+			$absorbedFreely = min($this->armour, $damageToAbsorb);
+			$damageToAbsorb += -$absorbedFreely;
+			//next, actual absorbtion
+			$absorbedDamage = min($this->output - $this->armour, $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
+			$damageToAbsorb += -$absorbedDamage;
+			if($absorbedDamage>0){ //mark!
+				$this->absorbDamage($target,$gamedata,$absorbedDamage);
+			}
+			$returnValues['dmg'] = $damageToAbsorb;
+			$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
+		}
+		
+		return $returnValues;
+	} //endof function doProtect
+	
+	/*first attempt
 	//function estimating how good this system is at stopping damage;
 	//in case of shield projection, its effectiveness equals largest shot it can stop, with tiebreaker equal to remaining capacity
 	//this is for recognizing it as system capable of affecting damage resolution and choosing best one if multiple Diffusers can protect
@@ -1018,7 +1060,6 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 		}
 		return $protectionValue;
 	}
-	
 	//actual protection - should return modified $effectiveDamage value
 	public function doReduceImpactDamage($gamedata, $fireOrder, $target, $shooter, $weapon, $effectiveDamage){ 
 		$returnValue = $effectiveDamage;
@@ -1050,12 +1091,6 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 					$returnValue += -$reduction;
 					$absorbedDamage += $reduction;
 					$remainingCapacity -= $reduction;
-					/*
-					$reduction = 5; //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
-					$returnValue += -$reduction;
-					$absorbedDamage += $reduction;
-					$remainingCapacity -= $reduction;
-					*/
 					if($remainingCapacity<=0) $fullRakes = 0; //do not continue after shield is brought down to 0
 				}
 				//round damage UP and absorbed values DOWN
@@ -1069,6 +1104,7 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 		
 		return $returnValue;
 	}		
+	*/
 	
     
 	function addProjector($projector){

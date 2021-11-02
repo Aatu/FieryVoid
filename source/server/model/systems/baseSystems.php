@@ -1883,7 +1883,7 @@ by 4.
 	//function estimating how good this Diffuser is at stopping damage;
 	//in case of diffuser, its effectiveness equals largest shot it can stop, with tiebreaker equal to remaining total capacity
 	//this is for recognizing it as system capable of affecting damage resolution and choosing best one if multiple Diffusers can protect
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null) {
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
 		$remainingCapacity = 0;
 		$totalCapacity = 0;
 		$largestCapacity = 0;
@@ -2593,7 +2593,7 @@ class Bulkhead extends ShipSystem{
 	
 	
 	//function estimating how good this Bulkhead is at stopping damage;
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null) {
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
 		//first do check whether this system can be protected! (same location or appropriate structure location)
 		if ($systemProtected) {
 			//is it on the same section?

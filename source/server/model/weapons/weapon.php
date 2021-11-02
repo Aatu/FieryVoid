@@ -1614,7 +1614,7 @@ full Advanced Armor effects (by rules) for reference:
 
 			//returned array: dmgDealt, dmgRemaining, armorPierced	
 			$damage = $this->beforeDamagedSystem($target, $system, $damage, $armour, $gamedata, $fireOrder);
-			$effects = $system->assignDamageReturnOverkill($target, $shooter, $this, $gamedata, $fireOrder, $damage, $armour, $pos);
+			$effects = $system->assignDamageReturnOverkill($target, $shooter, $this, $gamedata, $fireOrder, $damage, $armour, $pos, $damageWasDealt);
 			$this->onDamagedSystem($target, $system, $effects["dmgDealt"], $effects["armorPierced"], $gamedata, $fireOrder);//weapons that do effects on hitting something
 			$damage = $effects["dmgRemaining"];
 			if ($this->damageType == 'Raking'){ //note armor already pierced so further rakes have it easier
