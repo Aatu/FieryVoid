@@ -1310,12 +1310,11 @@ class Weapon extends ShipSystem
             $okSystem = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $location); //for Flash it won't return destroyed system other than PRIMARY Structure
         }
 
-        if ($okSystem == null || $okSystem->isDestroyed()) { //overkill to Structure system is mounted on
+        if (($okSystem == null) || $okSystem->isDestroyed() || ($okSystem->getRemainingHealth() == 0)) { //overkill to Structure system is mounted on
             $okSystem = $target->getStructureSystem($system->location);
         }
 
-
-        if ($okSystem == null || $okSystem->isDestroyed()) { //overkill to PRIMARY Structure
+        if (($okSystem == null) || $okSystem->isDestroyed() || ($okSystem->getRemainingHealth() == 0)) { //overkill to PRIMARY Structure
             if ($this->damageType == 'Piercing') { //Piercing does not overkill to PRIMARY
                 return null;
             } else {
@@ -1323,8 +1322,7 @@ class Weapon extends ShipSystem
             }
         }
 
-
-        if ($okSystem == null || $okSystem->isDestroyed()) { //nowhere to overkill to
+        if (($okSystem == null) || $okSystem->isDestroyed() || ($okSystem->getRemainingHealth() == 0)) { //nowhere to overkill to
             return null;
         }
 
@@ -1546,10 +1544,12 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 		
+		/* first attempt of StarTrek shield
 		$impactProtectionSystem = $target->getSystemProtectingFromImpactDamage($shooter, $pos, $gamedata->turn, $this, $damage);//damage-reducing system activating at weapon impact - other than shield (eg. Star Trek shield)
 		if($impactProtectionSystem){ //some system can actually affect damage at this stage
 			$damage = $impactProtectionSystem->doReduceImpactDamage($gamedata, $fireOrder, $target, $shooter, $this, $damage);
 		}
+		*/
 		
         return $damage;
     }
@@ -1596,8 +1596,8 @@ full Advanced Armor effects (by rules) for reference:
         /*$pos ONLY relevant for FIGHTER armor if damage source position is different than one from weapon itself*/
         /*otherwise best leave null BUT fill $location!*/
         /*damageWasDealt indicates whether this hit already caused damage - important for overkill for some damage modes*/
-        if (!$system->isDestroyed()) { //else system was already destroyed, proceed to overkill
-            $damageWasDealt = true; //actual damage was done! might be relevant for overkill allocation
+        //if (!$system->isDestroyed()) { //else system was already destroyed, proceed to overkill
+		if ($system->getRemainingHealth() > 0) { //Vree Structure systems are considered not there despite not being formally destroyed
             $damage = floor($damage);//make sure damage is a whole number, without fractions!
             $armour = $this->getSystemArmourComplete($target, $system, $gamedata, $fireOrder, $pos); //handles standard and Adaptive armor, as well as Advanced armor and weapon class modifiers
 			// ...if armor-related modifications are needed, they should extend appropriate method (Complete or Base, as Adaptive should not be affected)
@@ -1620,7 +1620,9 @@ full Advanced Armor effects (by rules) for reference:
 			if ($this->damageType == 'Raking'){ //note armor already pierced so further rakes have it easier
 				$armourIgnored = $armourIgnored + $effects["armorPierced"];
 				$fireOrder->armorIgnored[$system->id] = $armourIgnored;
-			}
+			}			
+			
+            $damageWasDealt = true; //actual damage was done! might be relevant for overkill allocation
         }
 
         if (($damage > 0) || (!$damageWasDealt)) {//overkilling!

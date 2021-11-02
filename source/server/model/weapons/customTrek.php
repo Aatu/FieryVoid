@@ -130,11 +130,13 @@ class TrekLtPhaseCannon extends Raking{
 			if ( $powerReq == 0 ) $powerReq = 2;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-
+		
+		/*
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "Does damage in raking mode (6)";
 	}
+	*/
 	
         public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
         public function setMinDamage(){     $this->minDamage = 5 ;      }
@@ -144,7 +146,7 @@ class TrekLtPhaseCannon extends Raking{
 
 
 /*super-heavy fighter weapon*/
-    class TrekFtrPhaseCannon extends Weapon{
+    class TrekFtrPhaseCannon extends Raking{
         public $name = "TrekFtrPhaseCannon";
         public $displayName = "Light Phase Cannon";
         public $iconPath = "TrekLightPhaseCannon.png";
@@ -163,17 +165,19 @@ class TrekLtPhaseCannon extends Raking{
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
  
 		public $damageType = 'Raking'; 
-		public $weaponClass = "Particle"; 
+		public $weaponClass = "Particle";  
+		public $firingModes = array( 1 => "Raking");
 	    
         function __construct($startArc, $endArc, $damagebonus){
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 
+/*
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-				$this->data["Special"] = "Does damage in raking mode (6)";
+				$this->data["Special"] = "Does 6 damage per rake.";
 		}
-        
+  */      
         public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
         public function setMinDamage(){   return  $this->minDamage = 5 ;      }
         public function setMaxDamage(){   return  $this->maxDamage = 14 ;      }
@@ -593,7 +597,7 @@ class TrekPhaserLance extends Raking{
             }else{
                 $this->data["Special"] .= '<br>';
             } 
-            $this->data["Special"] .= '<br>Double power boosts damage from 2d6 to 4d6. Forces a critical roll at a +10 penalty.';
+            $this->data["Special"] .= 'Double power boosts damage from 2d6 to 4d6 and forces a critical roll at a +10 penalty.';
             $this->data["Boostlevel"] = $boost;
         }
 
@@ -654,9 +658,9 @@ class TrekPhaserLance extends Raking{
 		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
             parent::fire($gamedata, $fireOrder);
 		
-            // If fully boosted: test for possible crit.
+            // If fully boosted: force a critical roll (with hefty penalty)
             if($currBoostlevel === $this->maxBoostLevel){
-				$this->criticalRollMod = 10;
+				$this->criticalRollMod += 10;
             	$this->forceCriticalRoll = true;
             }
         }
@@ -864,8 +868,13 @@ class HvyPlasmaProjector extends Raking{
 
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-			$this->data["Special"] = "Damage reduced by 1 point per 4 hexes.";
-			$this->data["Special"] .= "<br>Does damage in raking(8) mode ";
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Damage reduced by 1 point per 4 hexes.";
+			//$this->data["Special"] .= "<br>Does damage in raking(8) mode ";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
@@ -904,8 +913,13 @@ class LtPlasmaProjector extends Raking{
 
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-			$this->data["Special"] = "Damage reduced by 1 points per 2 hexes.";
-			$this->data["Special"] .= "<br>Does damage in raking(8) mode";
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Damage reduced by 1 points per 2 hexes.";
+			//$this->data["Special"] .= "<br>Does damage in raking(8) mode";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
