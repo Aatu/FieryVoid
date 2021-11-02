@@ -69,7 +69,6 @@ class TrekFederationDeltaFFBeta extends LCV{
 	$this->hitChart = array( //differences are deliberate
 		
 		0=> array(
-			1 => "Polarized Hull Plating",
 			10 => "Structure",
 			13 => "1:Phase Cannon",
 			17 => "2:Nacelle",
@@ -79,7 +78,6 @@ class TrekFederationDeltaFFBeta extends LCV{
 		),
 
 		1=> array(
-			1 => "0:Polarized Hull Plating",
 			10 => "Structure",
 			14 => "1:Phase Cannon",
 			17 => "2:Nacelle",
@@ -89,7 +87,6 @@ class TrekFederationDeltaFFBeta extends LCV{
 		),
 
 		2=> array(
-			1 => "0:Polarized Hull Plating",
 			10 => "Structure",
 			12 => "1:Phase Cannon",
 			17 => "2:Nacelle",

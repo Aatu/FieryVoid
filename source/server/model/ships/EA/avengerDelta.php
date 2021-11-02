@@ -11,7 +11,6 @@ class AvengerDelta extends BaseShip{
         $this->shipClass = "Avenger Heavy Carrier (Delta)";
         $this->shipSizeClass = 3;
 			$this->unofficial = true;
-        $this->fighters = array("normal"=>48);
 			$this->variantOf = "Avenger Heavy Carrier (Gamma)";
 		$this->fighters = array("normal"=>48);			
 			

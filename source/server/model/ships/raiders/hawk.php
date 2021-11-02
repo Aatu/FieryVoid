@@ -7,7 +7,7 @@ class Hawk extends MediumShipLeftRight{
 		$this->pointCost = 210;
 		$this->faction = "Raiders";
         $this->phpclass = "Hawk";
-        $this->imagePath = "img/ships/drazi/stareagle.png"; 
+        $this->imagePath = "img/ships/drazi/DraziStareagle.png"; 
         $this->shipClass = "Hawk Frigate";
         $this->canvasSize = 128;
         

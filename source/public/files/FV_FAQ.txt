@@ -25,12 +25,12 @@ USEFUL TRIVIA
 GAMEPLAY GENERAL IDEAS
  - As much as possible was automated. This means that player has somewhat less control over things he does, but things are way streamlined for computer game. This is especially visible in firing (You'll see in details).
  - There is no separate Power and EW phase. They're combined into a single Init phase, which happens after Initiative roll.
- - Deployment: player may deploy anywhere in pre-designated DZ, with any direction  of movement and speed between 3 and 7. WARNING: game will crash if deployment zones overlap, remember that when manually changing DZ!
+ - Deployment: player may deploy anywhere in pre-designated DZ, with any direction  of movement and speed between 0 and 10. WARNING: game will crash if deployment zones overlap, remember that when manually changing DZ!
  - Fixed map: the game allows displaying the boundaries of a fixed, rectangular map. It does not, however, enforce anything about it. It's up to the player for the ships leaving the map to actually behave as disengaged. 
  - Game does not enforce fleet design rules. We try to include necessary information into ship window, however, so player may do it without using outside source.
  - Fleet design rules may be checked automatically using appropriate button at design stage. Note that the check is not perfect, especially faction- or unit-specific rules are not taken into account. Rules were modified to allow scalability, too. 
  - Game was changed from d20 to d100 (displayed as percentages usually). Most values are now displayed as percentages (1 point on d20 equals 5%).
- - Rounding is done for d100 now, too, not d20. So -1/3 weapon (-1.65/hex, by FV numbers) at 1 hex range would get 2% penalty (4% with no lock on), instead of B5Wars' 1 and 2 respectively (which would have translated to 5 and 10 %)
+ - Rounding is done for d100 now, too, not d20. So -1/3 weapon (-1.65/hex, by FV numbers) at 1 hex range would get ~2% penalty (~4% with no lock on), instead of B5Wars' 1 and 2 respectively (which would have translated to 5 and 10 %)
 
 
 MOVEMENT
@@ -49,7 +49,7 @@ ELECTRONIC WARFARE
 
 FIRING AND WEAPONS
  - Firing order of weapons: each weapon has priority number which determines order of firing. Player cannot influence it. It was tried to optimize effectiveness of weapons, but as in B5Wars every player prefers different firing pattern (and also it's influenced by a particular target) - usually it won't be as good as You could achieve manually.
- - Choosing target section: it's done automatically, based on algorithm that takes into account target section profile and remaining boxes of structure. Weapons from the same ship CAN be split between multiple sections if firing happens on dividing line. 
+ - Choosing target section: it's done automatically, based on algorithm that takes into account target section profile and remaining boxes of structure. Weapons from the same ship CANNOT be split between multiple sections even if they overlap. Shot into open PRIMARY will not be picked if there is any alternative. 
  - Choosing target system: it's done randomly out of eligible targets if there are multiple ones. UPDATE 13.09.2021: in-arc systems will be hit before off-arc ones (assumes that direction of damage comes from shot, which may be occassionally incorrect (eg. for Flash collateral damage)). 
  - Choosing target fighter: there is algorithm that tries to minimize damage done. However, it operates on expected damage instead of actual, and won't take into account most special effects.
  - You can target individual fighters (just target any of its systems). This will be treated as a called shot.
