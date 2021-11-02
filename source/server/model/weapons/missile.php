@@ -6,7 +6,7 @@ class MissileLauncher extends Weapon{
     public $trailColor = array(141, 240, 255);
     public $animation = "trail";
     public $animationColor = array(50, 50, 50);
-    public $animationExplosionScale = 0.25;
+    public $animationExplosionScale = 0.6; //more visually impressive weapons - which missiles should be given their power!
     public $projectilespeed = 8;
     public $animationWidth = 4;
     public $trailLength = 100;
