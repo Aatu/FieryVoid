@@ -1,19 +1,19 @@
 <?php
-class BrixadiiWeaponsPlatformBase extends OSAT{
+class BrixadiiLauncherPlatform2107 extends OSAT{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 100;
+		$this->pointCost = 120;
 		$this->faction = 'ZNexus Brixadii';
-        $this->phpclass = "BrixadiiWeaponsPlatformBase";
-        $this->imagePath = "img/ships/Nexus/BrixadiiWeaponsPlatform.png";
-        $this->shipClass = "Brixadii Weapons Platform";
+        $this->phpclass = "BrixadiiLauncherPlatform2107";
+        $this->imagePath = "img/ships/Nexus/BrixadiiSentinelPlatform.png";
+        $this->shipClass = "Brixadii Launcher Platform (2107)";
+			$this->variantOf = "Brixadii Launcher Platform";
+			$this->occurence = "common";
 			$this->canvasSize = 175;
-	    $this->limited = 10;
 		$this->unofficial = true;
-		$this->isd = 2059;
-
+		$this->isd = 2107;
         
         $this->forwardDefense = 8;
         $this->sideDefense = 8;
@@ -25,12 +25,12 @@ class BrixadiiWeaponsPlatformBase extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
-
-        $this->addPrimarySystem(new ParticleHammer(1, 12, 6, 300, 60));
+        $this->addPrimarySystem(new NexusRangedKineticBoxLauncher(3, 10, 0, 270, 90));
+        $this->addPrimarySystem(new NexusRangedKineticBoxLauncher(3, 10, 0, 270, 90));
         $this->addPrimarySystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
-        $this->addPrimarySystem(new NexusDefensePulsar(1, 4, 2, 0, 360));
+        $this->addPrimarySystem(new ScatterPulsar(1, 4, 2, 0, 360));
         $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 6, 2, 3));   
+        $this->addPrimarySystem(new Scanner(4, 6, 2, 4));   
         $this->addPrimarySystem(new Thruster(3, 6, 0, 0, 2));
                 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -40,9 +40,9 @@ class BrixadiiWeaponsPlatformBase extends OSAT{
 			0=> array(
 				8 => "Structure",
 				10 => "Thruster",
-				14 => "Particle Hammer",
+				14 => "Ranged Kinetic Box Launcher",
 				15 => "Chaff Launcher",
-				16 => "Defense Pulsar",
+				16 => "Scatter Pulsar",
 				18 => "Scanner",
 				20 => "Reactor",
 			),

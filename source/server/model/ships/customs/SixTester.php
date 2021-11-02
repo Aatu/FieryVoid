@@ -32,46 +32,46 @@ class SixTester extends SixSidedShip{
 		$this->addPrimarySystem(new Hangar(6, 36));
 		$this->addPrimarySystem(new CnC(6, 30, 0, 0));
 		$this->addPrimarySystem(new Scanner(6, 24, 5, 8));
-        $this->addPrimarySystem(new Engine(6, 25, 0, 15, 3));			
-		$this->addPrimarySystem(new JumpEngine(6, 25, 3, 16));		
+//        $this->addPrimarySystem(new Engine(6, 25, 0, 15, 3));			
+//		$this->addPrimarySystem(new JumpEngine(6, 25, 3, 16));		
 
 		$this->addFrontSystem(new LHMissileRack(4, 8, 0, 300, 60));
         $this->addFrontSystem(new LHMissileRack(4, 8, 0,  300, 60));
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 120, 240));
 		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 120, 240));
-        $this->addFrontSystem(new Thruster(6, 10, 0, 5, 1));
-        $this->addFrontSystem(new Thruster(6, 10, 0, 5, 1));
+//        $this->addFrontSystem(new Thruster(6, 10, 0, 5, 1));
+//        $this->addFrontSystem(new Thruster(6, 10, 0, 5, 1));
 		
         $this->addAftSystem(new LHMissileRack(4, 8, 0, 120, 240));
 		$this->addAftSystem(new LHMissileRack(4, 8, 0, 120, 240));
 		$this->addAftSystem(new StdParticleBeam(2, 4, 1, 120, 240));
 		$this->addAftSystem(new StdParticleBeam(2, 4, 1, 120, 240));
-		$this->addAftSystem(new Thruster(5, 8, 0, 5, 2));
-        $this->addAftSystem(new Thruster(5, 8, 0, 5, 2));
+//		$this->addAftSystem(new Thruster(5, 8, 0, 5, 2));
+//        $this->addAftSystem(new Thruster(5, 8, 0, 5, 2));
         
 		$this->addLeftFrontSystem(new LHMissileRack(4, 8, 0, 240, 0));
 		$this->addLeftFrontSystem(new LHMissileRack(4, 8, 0, 240, 0));
 		$this->addLeftFrontSystem(new StdParticleBeam(2, 4, 1, 240, 0));
 		$this->addLeftFrontSystem(new StdParticleBeam(2, 4, 1, 240, 0));
-		$this->addLeftFrontSystem(new Thruster(5, 15, 0, 5, 3));
+//		$this->addLeftFrontSystem(new Thruster(5, 15, 0, 5, 3));
 				
 		$this->addLeftAftSystem(new LHMissileRack(4, 8, 0, 180, 300));
 		$this->addLeftAftSystem(new LHMissileRack(4, 8, 0, 180, 300));
 		$this->addLeftAftSystem(new StdParticleBeam(2, 4, 1, 180, 300));
 		$this->addLeftAftSystem(new StdParticleBeam(2, 4, 1, 180, 300));
-		$this->addLeftAftSystem(new Thruster(5, 15, 0, 5, 3));
+//		$this->addLeftAftSystem(new Thruster(5, 15, 0, 5, 3));
 		
 		$this->addRightFrontSystem(new LHMissileRack(4, 8, 0, 0, 120));
 		$this->addRightFrontSystem(new LHMissileRack(4, 8, 0, 0, 120));
 		$this->addRightFrontSystem(new StdParticleBeam(2, 4, 1, 0, 120));
 		$this->addRightFrontSystem(new StdParticleBeam(2, 4, 1, 0, 120));
-		$this->addRightFrontSystem(new Thruster(5, 15, 0, 5, 4));
+//		$this->addRightFrontSystem(new Thruster(5, 15, 0, 5, 4));
 				
 		$this->addRightAftSystem(new LHMissileRack(4, 8, 0, 60, 180));
 		$this->addRightAftSystem(new LHMissileRack(4, 8, 0, 60, 180));
 		$this->addRightAftSystem(new StdParticleBeam(2, 4, 1, 60, 180));
 		$this->addRightAftSystem(new StdParticleBeam(2, 4, 1, 60, 180));
-		$this->addRightAftSystem(new Thruster(5, 15, 0, 5, 4));		
+//		$this->addRightAftSystem(new Thruster(5, 15, 0, 5, 4));		
 		
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

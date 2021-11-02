@@ -4,6 +4,12 @@ var NexusKineticBoxLauncher = function NexusKineticBoxLauncher(json, ship) {
 NexusKineticBoxLauncher.prototype = Object.create(Weapon.prototype);
 NexusKineticBoxLauncher.prototype.constructor = NexusKineticBoxLauncher;
 
+var NexusRangedKineticBoxLauncher = function NexusRangedKineticBoxLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusRangedKineticBoxLauncher.prototype = Object.create(Weapon.prototype);
+NexusRangedKineticBoxLauncher.prototype.constructor = NexusRangedKineticBoxLauncher;
+
 var NexusAdvKineticBoxLauncher = function NexusAdvKineticBoxLauncher(json, ship) {
     Weapon.call(this, json, ship);
 };

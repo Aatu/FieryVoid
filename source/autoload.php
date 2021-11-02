@@ -59,6 +59,8 @@ spl_autoload_register(
                 'avengerdelta' => '/server/model/ships/EA/avengerDelta.php',
                 'avioki' => '/server/model/ships/brakiri/avioki.php',
                 'aviokiearly' => '/server/model/ships/brakiri/aviokiEarly.php',
+                'babylon5' => '/server/model/ships/EA/babylon5.php',
+                'babylon5refit' => '/server/model/ships/EA/babylon5refit.php',
                 'bacloseescort' => '/server/model/ships/smallraces/baCloseEscort.php',
                 'badgerstarfury' => '/server/model/ships/EA/badgerStarfury.php',
                 'baescortcarrier' => '/server/model/ships/smallraces/baEscortCarrier.php',
@@ -266,6 +268,7 @@ spl_autoload_register(
                 'eacgeminimlpa' => '/server/model/ships/customs/eacGeminiMlpa.php',
                 'earlywarbird' => '/server/model/ships/drazi_old/earlywarbird.php',
                 'earlywartalon' => '/server/model/ships/drazi_old/earlywartalon.php',
+                'earthforceone' => '/server/model/ships/EA/earthforceOne.php',
                 'egret' => '/server/model/ships/drazi_old/egret.php',
                 'egret1939' => '/server/model/ships/drazi_old/egret1939.php',
                 'electropulsegun' => '/server/model/weapons/specialWeapons.php',
@@ -404,6 +407,7 @@ spl_autoload_register(
                 'hectorfull' => '/server/model/ships/EA/hectorFull.php',
                 'helpmanager' => '/server/controller/HelpManager.php',
                 'hermes' => '/server/model/ships/EA/hermes.php',
+                'hephaestus' => '/server/model/ships/EA/hephaestus.php',
                 'hermes_early' => '/server/model/ships/EA_old/hermes_early.php',
                 'heron' => '/server/model/ships/drazi_old/heron.php',
                 'heron1940' => '/server/model/ships/drazi_old/heron1940.php',
@@ -486,7 +490,9 @@ spl_autoload_register(
                 'kromala' => '/server/model/ships/drazi_old/kromala.php',
                 'kutai' => '/server/model/ships/centauri/kutai.php',
                 'kutaiplasma' => '/server/model/ships/centauri/kutaiPlasma.php',
-                'laertes' => '/server/model/ships/EA_old/laertes.php',
+                'laertes' => '/server/model/ships/EA/laertes.php',
+                'laertesepsilon' => '/server/model/ships/EA/laertesEpsilon.php',
+                'laertes_early' => '/server/model/ships/EA_old/laertes_early.php',
                 'lahas' => '/server/model/ships/balosian/lahas.php',
                 'lakara' => '/server/model/ships/abbai/lakara.php',
                 'lakaraearly' => '/server/model/ships/abbai/lakaraEarly.php',
@@ -992,6 +998,7 @@ spl_autoload_register(
                 'taileagle' => '/server/model/ships/drazi/taileagle.php',
                 'talafat' => '/server/model/ships/markab/talafat.php',
                 'tankertug' => '/server/model/ships/civilians/tankerTug.php',
+                'tantalus' => '/server/model/ships/EA/tantalus.php',
                 'taras' => '/server/model/ships/centauri_old/taras.php',
                 'targath' => '/server/model/ships/dilgar/targath.php',
                 'targathc' => '/server/model/ships/dilgar/targathC.php',
@@ -1499,6 +1506,7 @@ spl_autoload_register(
 			//Nexus ballistic weapons
 				'nexusbolttorpedo' => '/server/model/weapons/customNexus.php',
 				'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php', 
+				'nexusrangedkineticboxlauncher' => '/server/model/weapons/customNexus.php', 
 				'nexuschafflauncher' => '/server/model/weapons/customNexus.php',
 				'nexusstreakinterceptor' => '/server/model/weapons/customNexus.php',
 				'nexusdartinterceptor' => '/server/model/weapons/customNexus.php',
@@ -1533,6 +1541,7 @@ spl_autoload_register(
 
 
 				//Nexus ships - Brixadii
+                'brixadiibase2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiBase2108.php',					
                 'brixadiibattledestroyerbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerBase.php',					
                 'brixadiibattledestroyer2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyer2057.php',		
                 'brixadiibattledestroyer2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyer2108.php',	
@@ -1558,11 +1567,17 @@ spl_autoload_register(
                 'brixadiiattackfrigate' => '/server/model/ships/ZNexusBrixadii/BrixadiiAttackFrigate.php',
                 'brixadiiattackfrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiAttackFrigate2108.php',
 
+                'brixadiilauncherplatformbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiLauncherPlatformBase.php',
+                'brixadiilauncherplatform2107' => '/server/model/ships/ZNexusBrixadii/BrixadiiLauncherPlatform2107.php',
+
                 'brixadiilightescortfrigate' => '/server/model/ships/ZNexusBrixadii/BrixadiiLightEscortFrigate.php',
 
                 'brixadiipolicefrigatebase' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigateBase.php',
                 'brixadiipolicefrigate2047' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2047.php',
 				'brixadiipolicefrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2108.php',
+
+                'brixadiisentinelplatformbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiSentinelPlatformBase.php',
+                'brixadiisentinelplatform2107' => '/server/model/ships/ZNexusBrixadii/BrixadiiSentinelPlatform2107.php',
 		    
                 'brixadiisurveyorbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyorBase.php',
                 'brixadiisurveyor2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiSurveyor2057.php',
@@ -1752,7 +1767,8 @@ spl_autoload_register(
                 'hermesalpha' => '/server/model/ships/EA_old/hermesAlpha.php',
                 'laertesalpha' => '/server/model/ships/EA_old/laertesAlpha.php',
                 'laertesbeta' => '/server/model/ships/EA_old/laertesBeta.php',
-                'laertesdelta' => '/server/model/ships/EA_old/laertesDelta.php',
+                'laertesdelta' => '/server/model/ships/EA/laertesDelta.php',
+                'laertesdelta_early' => '/server/model/ships/EA_old/laertesDelta_early.php',
                 'leonidasalpha' => '/server/model/ships/EA_old/leonidasAlpha.php',
                 'leonidasbeta' => '/server/model/ships/EA_old/leonidasBeta.php',
                 'leonidasgamma' => '/server/model/ships/EA_old/leonidasGamma.php',

@@ -1,19 +1,17 @@
 <?php
-class BrixadiiWeaponsPlatformBase extends OSAT{
+class BrixadiiSentinelPlatformBase extends OSAT{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 100;
+		$this->pointCost = 120;
 		$this->faction = 'ZNexus Brixadii';
-        $this->phpclass = "BrixadiiWeaponsPlatformBase";
-        $this->imagePath = "img/ships/Nexus/BrixadiiWeaponsPlatform.png";
-        $this->shipClass = "Brixadii Weapons Platform";
+        $this->phpclass = "BrixadiiSentinelPlatformBase";
+        $this->imagePath = "img/ships/Nexus/BrixadiiSentinelPlatform.png";
+        $this->shipClass = "Brixadii Sentinel Platform";
 			$this->canvasSize = 175;
-	    $this->limited = 10;
 		$this->unofficial = true;
-		$this->isd = 2059;
-
+		$this->isd = 1960;
         
         $this->forwardDefense = 8;
         $this->sideDefense = 8;
@@ -26,7 +24,8 @@ class BrixadiiWeaponsPlatformBase extends OSAT{
         $this->iniativebonus = 60;
 
 
-        $this->addPrimarySystem(new ParticleHammer(1, 12, 6, 300, 60));
+        $this->addPrimarySystem(new HvyParticleProjector(3, 8, 4, 300, 60));
+        $this->addPrimarySystem(new HvyParticleProjector(3, 8, 4, 300, 60));
         $this->addPrimarySystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
         $this->addPrimarySystem(new NexusDefensePulsar(1, 4, 2, 0, 360));
         $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
@@ -40,7 +39,7 @@ class BrixadiiWeaponsPlatformBase extends OSAT{
 			0=> array(
 				8 => "Structure",
 				10 => "Thruster",
-				14 => "Particle Hammer",
+				14 => "Heavy Particle Projector",
 				15 => "Chaff Launcher",
 				16 => "Defense Pulsar",
 				18 => "Scanner",
