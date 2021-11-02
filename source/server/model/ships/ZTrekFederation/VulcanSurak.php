@@ -94,7 +94,7 @@ class VulcanSurak extends MediumShip{
 		1=> array(
 		    	2 => "Shield Projector",
 			5 => "Phase Cannon",
-			9 => "Photonic Torpedo",
+			8 => "Photonic Torpedo",
 			17 => "Structure",
 			20 => "Primary",
 		),
@@ -102,7 +102,7 @@ class VulcanSurak extends MediumShip{
 		2=> array(
 		    	2 => "Shield Projector",
 			9 => "Nacelle",
-			11 => "Phase Cannon",
+			12 => "Phase Cannon",
 			17 => "Structure",
 			20 => "Primary",
 		),

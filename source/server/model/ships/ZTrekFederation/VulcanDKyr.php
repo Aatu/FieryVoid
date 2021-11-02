@@ -31,7 +31,7 @@ class VulcanDkyr extends BaseShip{
         $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 6, 6));
 	$this->addPrimarySystem(new Hangar(3, 4, 4));
-	//$this->addPrimarySystem(new SWTractorBeam(2,0,360,1)); //temporarily commented out - so games don't break
+	$this->addPrimarySystem(new SWTractorBeam(2,0,360,1)); 
 
 	$impulseDrive = new TrekImpulseDrive(4,20,0,1,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 		

@@ -1079,12 +1079,30 @@ class Structure extends ShipSystem{
 	
 	//Vree need Structure that doesn't fall off even if it's destroyed - here it is!
 	//it will get destroyed all right (possibly multiple times in a batlle), but will still be there afterwards
+	//Will be destroyed if all such Structures are reduced to 0 (and then all of them will get destroyed !)
 	//upon destruction - delete destruction marker
 	public function criticalPhaseEffects($ship, $gamedata)
     { 
 		if($this->isIndestructible){
-			foreach ($this->damage as $damage){ 
-				if ($damage->destroyed) $damage->destroyed = false;		
+			foreach ($this->damage as $damage ) if(($damage->turn == $gamedata->turn) && ($damage->destroyed)){ 
+				//check all others - if all of them are reduced to 0 - mark them destroyed as well; if not, delete destroyed marker!
+				$structures = $ship->getSystemsByName('Structure', true);
+				$allDestroyed = true;
+				foreach($structures as $struct){
+					if(($struct->isIndestructible) && ($struct->getRemainingHealth() > 0)) {
+						$allDestroyed = false;
+						break;
+					}
+				}
+				if($allDestroyed){//actually do mark them so!
+					foreach($structures as $struct) if( $struct->isIndestructible && (!$struct->isDestroyed())){
+						$damageEntry = new DamageEntry(-1, $damage->shipid, -1, $damage->turn, $struct->id, 0, 0, 0, $damage->fireorderid, true, false, "Structure falls off", $damage->damageclass, $damage->shooterid, $damage->weaponid);
+						$damageEntry->updated = true;
+						$struct->damage[] = $damageEntry;
+					}
+				}else{//unmark this one
+					$damage->destroyed = false;
+				}
 			}
 		}
     } //endof function criticalPhaseEffects	
@@ -1865,7 +1883,7 @@ by 4.
 	//function estimating how good this Diffuser is at stopping damage;
 	//in case of diffuser, its effectiveness equals largest shot it can stop, with tiebreaker equal to remaining total capacity
 	//this is for recognizing it as system capable of affecting damage resolution and choosing best one if multiple Diffusers can protect
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null) {
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
 		$remainingCapacity = 0;
 		$totalCapacity = 0;
 		$largestCapacity = 0;
@@ -2348,7 +2366,7 @@ class BioDrive extends Engine{
 		$this->data["Efficiency"] = $this->boostEfficiency;
 		$this->data["Special"] = "BioDrive - basically an Engine with basic output calculated from BioThruster outputs.";      
 		$this->data["Special"] .= "<br>Will never be damaged.";  
-		$this->data["Special"] .= "<br>Cannot buy extra thrust.";    
+		$this->data["Special"] .= "<br>Cannot but extra thrust."; //rules say BioThrusters CAN buy extra thrust, with rating provided on SCS... But rating on SCS is N/A...
 	}
 	
 	
@@ -2575,7 +2593,7 @@ class Bulkhead extends ShipSystem{
 	
 	
 	//function estimating how good this Bulkhead is at stopping damage;
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null) {
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
 		//first do check whether this system can be protected! (same location or appropriate structure location)
 		if ($systemProtected) {
 			//is it on the same section?

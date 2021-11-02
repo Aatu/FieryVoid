@@ -56,7 +56,16 @@ class Xorr extends VreeCapital{
         $this->addLeftFrontSystem(new Structure( 4, 24, true));
         $this->addLeftAftSystem(new Structure( 4, 24, true));
         $this->addRightFrontSystem(new Structure( 4, 24, true));
-        $this->addRightAftSystem(new Structure( 4, 24, true));      
+        $this->addRightAftSystem(new Structure( 4, 24, true));  
+		
+		/*
+        $this->addFrontSystem(new Structure( 4, 24, false));
+        $this->addAftSystem(new Structure( 4, 24, false));
+        $this->addLeftFrontSystem(new Structure( 4, 24, false));
+        $this->addLeftAftSystem(new Structure( 4, 24, false));
+        $this->addRightFrontSystem(new Structure( 4, 24, false));
+        $this->addRightAftSystem(new Structure( 4, 24, false));     
+		*/
         $this->addPrimarySystem(new Structure( 5, 40));
 	    
 	//d20 hit chart
