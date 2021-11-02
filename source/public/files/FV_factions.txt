@@ -432,14 +432,25 @@ VREE CONGLOMERATE
 The Vree are an advanced race within the League of Non-Aligned Worlds that use a distinctive 'saucer' designs on all of their ships.  The Vree use antimatter weapons almost exclusively, which deal increased damage based on the difference between the base to-hit chance and actual hit rolled.  As a result their weapons are powerful at close and medium range but typically less effective at longer distances.
 
 Below is a list of systems and rules Vree use, with short descriptions of effect and design differences in FV implementation from original tabletop.
-- Vree capital ships have six outer hull sections, similar to starbases.  On Vree capital ships each section has it's own structure and largely functions the same as on normal four-sided capital ships, however destruction of an outer hull structure will not destroy any systems/weapons on that section. Thrusters have been placed on the side-aft sections of Vree capital ships for convenience but hit charts altho these to be hit by incoming shots to side-front sections too.
-- Vree HCVs, like capitals, do not lose their systems when front or aft structures are destroyed.  
-- On both Vree HCVs and Medium ships thrusters display the primary hull section, however these can be hit by shots to external hull sections and FV will prioritise hits based on which thrusters are in arc of the incoming shot(s).
-- Unlike in tabletop rules, the Vree player is not able to select which weapon, thruster, structure is hit by incoming fire.  Instead, FV will randomly allocate hits based on which sections/systems are in arc of the firing ship, but unlike starbases, weapons fire from the same ship CAN hit different hull sections of a Vree ship to help maintain some of their durability in battle.
-- Turrets have been placed on the Primary structure of Vree ships, but do not appear on Primary Hit chart.  Instead there is a chance they will be hit by incoming fire to external hitcharts from any direction, with overkill damage going to Primary section.  All turrets have 360 degree firing arcs however ,unlike in tabletop, it was not possible to add the restriction that weapons on the same turret must fire in the same 30 degree arc.  As a result, all Vree turret weapons can fire at any targets in a 360 degree arc.
-- The Antimatter Shredder is a hex targetted weapon, however it was not possible to code the target hex to highlight once you've locked in a firing order.  Players should therefore be careful when targetting to ensure the Antimatter Shredder system is scheduled to fire (i.e. highlighted orange) and that they selected the correct hex to target.  
-- The Antimatter Shredder rolls to hit on any enemy ships in the target hex and adjacent hexes, however the combat log will show attacks against targets as separate shots during replay due to how the FV code resolves firing for this weapon.
-	
+ - Vree capital ships have six outer hull sections, similar to starbases.  On Vree capital ships each section has it's own structure and largely functions the same as on normal four-sided capital ships, however destruction of an outer hull structure will not destroy any systems/weapons on that section. Thrusters have been placed on the side-aft sections of Vree capital ships for convenience but hit charts altho these to be hit by incoming shots to side-front sections too.
+ - Vree HCVs, like capitals, do not lose their systems when front or aft structures are destroyed.  
+ - On both Vree HCVs and Medium ships thrusters display the primary hull section, however these can be hit by shots to external hull sections and FV will prioritise hits based on which thrusters are in arc of the incoming shot(s).
+ - Unlike in tabletop rules, the Vree player is not able to select which weapon, thruster, structure is hit by incoming fire.  Instead, FV will randomly allocate hits based on which sections/systems are in arc of the firing ship, but unlike starbases, weapons fire from the same ship CAN hit different hull sections of a Vree ship to help maintain some of their durability in battle.
+ - Unlike in tabletop rules, single shot can't be split between multiple sections. This means Vree are much more vulnerable to Raking (and to lesser degree Pulse) weapons than in tabletop.
+ - In tabletop, Vree PRIMARY-fitted weapons are grouped into Turrets, which incurse some limitation (namely, all weapons in one turret have to enagage targets within 60 degrees of each other - and upon being hit, a turret may become locked). These Turrets (and their limitations) are not present in Fiery Void (all PRIMARY weapons have all-around arc of fire, without small print).
+ - Antimatter weapons calculate range penalty in non-standard way.  
+  -- For first few hexes they receive no penalty, then they receive normal penalty, and at further ranges - they receive double penalty. 
+  -- in case of no lock-on, range itself is doubled (rather than range penalty)
+  -- range-reduced critical doesn't affect range penalty itself. Rather, it adds 3 hexes to effective distance to target.
+ - Antimatter weapons calculate damage in non-standard way. 
+  -- rather than being randomized, difference between actual and needed to hit number is calculated. The difference is called X (every 5 points of difference translates into 1 point of X value).
+  -- damage equation incorporates X factor rather than die roll. Usually X value does have upper limit.
+  -- damage reduced critical, instead of standard damage reduction, reduces value of X by 2 (can't reduce below 0).
+ - The Antimatter Shredder is a hex targetted weapon, however it was not possible to code the target hex to highlight once you've locked in a firing order.  Players should therefore be careful when targetting to ensure the Antimatter Shredder system is scheduled to fire (i.e. highlighted orange) and that they selected the correct hex to target.  
+  -- The Antimatter Shredder rolls to hit on any enemy ships in the target hex and adjacent hexes, however the combat log will show attacks against targets as separate shots during replay due to how the FV code resolves firing for this weapon.
+  -- Note that only one Shredder may engage a target - if multiple ones are eligible, only one of them (chosen randomly) will actually fire. Also, Shredder engages any unit in target area, without discriminating friend or foe (won't engage firing ship itself).
+  -- Shredder completely ignores any and all EW (and EW-affecting systems like Jammer or Rutarian Stealth), as well as Jinking. 
+
 	
 YOLU THEOCRACY
 Light Molecular Disruptor - armor-stripping heavy fighter weapon.
