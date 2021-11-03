@@ -50,7 +50,8 @@ class Weapon extends ShipSystem
     private $rp = 0; //range penalty - number of crits ! effect is reflected on $range anyway, no need to hold an array
     public $range = 0;
     public $rangeArray = array();
-    protected $distanceRange = 0;
+    public $distanceRange = 0;
+    public $distanceRangeArray = array();
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
     public $fireControlArray = array();
 
@@ -1688,6 +1689,7 @@ full Advanced Armor effects (by rules) for reference:
         if (isset($this->rangePenaltyArray[$i])) $this->rangePenalty = $this->rangePenaltyArray[$i];
         if (isset($this->rangeDamagePenaltyArray[$i])) $this->rangeDamagePenalty = $this->rangeDamagePenaltyArray[$i];
         if (isset($this->rangeArray[$i])) $this->range = $this->rangeArray[$i];
+        if (isset($this->distanceRangeArray[$i])) $this->distanceRange = $this->distanceRangeArray[$i];
         if (isset($this->fireControlArray[$i])) $this->fireControl = $this->fireControlArray[$i];
         if (isset($this->loadingtimeArray[$i])) $this->loadingtime = $this->loadingtimeArray[$i];
         if (isset($this->turnsloadedArray[$i])) $this->turnsloaded = $this->turnsloadedArray[$i];
