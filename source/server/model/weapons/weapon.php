@@ -135,6 +135,10 @@ class Weapon extends ShipSystem
     public $minDamageArray = array();
     public $maxDamageArray = array();
 
+	//some weapons might use variable firing arc...	
+    public $startArcArray = array(); 
+	public $endArcArray = array();
+	
     public $exclusive = false; //for fighter guns - exclusive weapon can't bve fired together with others
 
     public $useOEW = true;
@@ -1708,7 +1712,10 @@ full Advanced Armor effects (by rules) for reference:
         if (isset($this->rakingArray[$i])) $this->raking = $this->rakingArray[$i];
         
         if (isset($this->hextargetArray[$i])) $this->hextarget = $this->hextargetArray[$i];	
-		
+	    
+        if (isset($this->startArcArray[$i])) $this->startArc = $this->startArcArray[$i];
+        if (isset($this->endArcArray[$i])) $this->endArc = $this->endArcArray[$i];
+	    
 		if (isset($this->ignoreAllEWArray[$i])) $this->ignoreAllEW = $this->ignoreAllEWArray[$i];	
 		if (isset($this->ignoreJinkingArray[$i])) $this->ignoreJinking = $this->ignoreJinkingArray[$i];	
 
