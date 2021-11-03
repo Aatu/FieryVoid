@@ -213,7 +213,9 @@ class ShadowBattleCruiser extends MediumShip{
 		
 		
 		//weapons - Forward for visual reasons!
+	    // now weapon can actually have multiple arcs! ...but with multiple modes available for Slicer - I'm not convinced it's worth it.
         $this->addFrontSystem(new MolecularSlicerBeamH(5, 0, 0, 270, 90));//widened as a compensation for lack of back arc
+	    
         $this->addFrontSystem(new VortexDisruptor(5, 0, 0, 240, 360));
         $this->addFrontSystem(new VortexDisruptor(5, 0, 0, 0, 120));
         
