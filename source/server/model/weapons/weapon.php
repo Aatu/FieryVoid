@@ -93,7 +93,7 @@ class Weapon extends ShipSystem
     public $defaultShots = 1;
     public $defaultShotsArray = array();
 
-    public $rof = 1; //??? I do not see any use of this variable, besides one point in .js checking if it's 0...
+    public $rof = 1; 
 
 
     public $grouping = 0;
@@ -135,6 +135,10 @@ class Weapon extends ShipSystem
     public $minDamageArray = array();
     public $maxDamageArray = array();
 
+	//some weapons might use variable firing arc...	
+    public $startArcArray = array(); 
+	public $endArcArray = array();
+	
     public $exclusive = false; //for fighter guns - exclusive weapon can't bve fired together with others
 
     public $useOEW = true;
@@ -1711,7 +1715,10 @@ full Advanced Armor effects (by rules) for reference:
 		
 		if (isset($this->ignoreAllEWArray[$i])) $this->ignoreAllEW = $this->ignoreAllEWArray[$i];	
 		if (isset($this->ignoreJinkingArray[$i])) $this->ignoreJinking = $this->ignoreJinkingArray[$i];	
-
+	    
+        if (isset($this->startArcArray[$i])) $this->startArc = $this->startArcArray[$i];
+        if (isset($this->endArcArray[$i])) $this->endArc = $this->endArcArray[$i];
+	    
     }//endof function changeFiringMode
 
 
