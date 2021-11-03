@@ -38,9 +38,9 @@ class Ximm extends VreeCapital{
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
 
-        $this->addFrontSystem(new Thruster(4, 14, 0, 8, 1));
+        $this->addFrontSystem(new GraviticThruster(4, 14, 0, 8, 1));
 	
-		$this->addAftSystem(new Thruster(4, 14, 0, 8, 2));
+		$this->addAftSystem(new GraviticThruster(4, 14, 0, 8, 2));
     
     	$this->addLeftFrontSystem(new AntiprotonDefender(3, 0, 0, 240, 0));
 		$this->addLeftFrontSystem(new AntiprotonDefender(3, 0, 0, 240, 0)); 
@@ -50,11 +50,11 @@ class Ximm extends VreeCapital{
 		$this->addRightFrontSystem(new AntiprotonDefender(3, 0, 0, 0, 120)); 						        
 		$this->addRightFrontSystem(new StructureTechnical(0, 0, 0, 0));
 		
-		$this->addLeftAftSystem(new Thruster(4, 14, 0, 8, 3));
+		$this->addLeftAftSystem(new GraviticThruster(4, 14, 0, 8, 3));
 		$this->addLeftAftSystem(new AntiprotonDefender(3, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new AntiprotonDefender(3, 0, 0, 180, 300));
 		 
-		$this->addRightAftSystem(new Thruster(4, 14, 0, 8, 4));
+		$this->addRightAftSystem(new GraviticThruster(4, 14, 0, 8, 4));
 		$this->addRightAftSystem(new AntiprotonDefender(3, 0, 0, 60, 180));  
 		$this->addRightAftSystem(new AntiprotonDefender(3, 0, 0, 60, 180)); 		
        

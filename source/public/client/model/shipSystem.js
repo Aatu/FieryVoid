@@ -175,6 +175,8 @@ Weapon.prototype.changeFiringMode = function () {
 	if (!mathlib.arrayIsEmpty(this.projectilespeedArray)) this.projectilespeed = this.projectilespeedArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.hextargetArray)) this.hextarget = this.hextargetArray[this.firingMode];		
 	
+	if (!mathlib.arrayIsEmpty(this.startArcArray)) this.startArc = this.startArcArray[this.firingMode];
+	if (!mathlib.arrayIsEmpty(this.endArcArray)) this.endArc = this.endArcArray[this.firingMode];		
 	
 	if (!mathlib.arrayIsEmpty(this.ignoreJinkingArray)) this.ignoreJinking = this.ignoreJinkingArray[this.firingMode];		
 	if (!mathlib.arrayIsEmpty(this.ignoreAllEWArray)) this.ignoreAllEW = this.ignoreAllEWArray[this.firingMode];		

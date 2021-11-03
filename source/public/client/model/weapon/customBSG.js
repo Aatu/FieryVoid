@@ -81,3 +81,9 @@ var BSGMarineAssault = function BSGMarineAssault(json, ship) {
 };
 BSGMarineAssault.prototype = Object.create(Weapon.prototype);
 BSGMarineAssault.prototype.constructor = BSGMarineAssault;
+
+var BSGLtKineticEnergyWeaponVA = function BSGLtKineticEnergyWeaponVA(json, ship) {
+    Weapon.call(this, json, ship);
+};
+BSGLtKineticEnergyWeaponVA.prototype = Object.create(Weapon.prototype);
+BSGLtKineticEnergyWeaponVA.prototype.constructor = BSGLtKineticEnergyWeaponVA;

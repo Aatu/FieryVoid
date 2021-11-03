@@ -37,24 +37,24 @@ class Xeecra extends VreeCapital{
 		$this->addPrimarySystem(new CargoBay(4, 25));
 
         $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 300, 60));
-		$this->addFrontSystem(new Thruster(4, 14, 0, 6, 1));   
+		$this->addFrontSystem(new GraviticThruster(4, 14, 0, 6, 1));   
 		$this->addFrontSystem(new CargoBay(3, 15));        
      	
         $this->addAftSystem(new AntiprotonGun(3, 0, 0, 120, 240));
-		$this->addAftSystem(new Thruster(4, 14, 0, 6, 1)); 
+		$this->addAftSystem(new GraviticThruster(4, 14, 0, 6, 1)); 
 		$this->addAftSystem(new CargoBay(3, 15));        
      
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
 		$this->addLeftFrontSystem(new CargoBay(3, 15));		
 				
-		$this->addPrimarySystem(new Thruster(4, 14, 0, 6, 3));
+		$this->addPrimarySystem(new GraviticThruster(4, 14, 0, 6, 3));
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new CargoBay(3, 15));		
 		
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
 		$this->addRightFrontSystem(new CargoBay(3, 15));					
 	
-		$this->addRightAftSystem(new Thruster(4, 14, 0, 6, 4));	
+		$this->addRightAftSystem(new GraviticThruster(4, 14, 0, 6, 4));	
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
 		$this->addRightAftSystem(new CargoBay(3, 15));
        
