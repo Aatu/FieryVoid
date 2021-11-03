@@ -36,20 +36,20 @@ class Xeon extends VreeCapital{
 		$this->addPrimarySystem(new Scanner(5, 10, 7, 7));
         $this->addPrimarySystem(new Engine(5, 11, 0, 7, 2));
 
-        $this->addFrontSystem(new Thruster(4, 12, 0, 7, 1));
+        $this->addFrontSystem(new GraviticThruster(4, 12, 0, 7, 1));
         $this->addFrontSystem(new AntiprotonDefender(3, 0, 0, 300, 60));
 		
-        $this->addAftSystem(new Thruster(4, 12, 0, 7, 2));
+        $this->addAftSystem(new GraviticThruster(4, 12, 0, 7, 2));
         $this->addAftSystem(new AntiprotonDefender(3, 0, 0, 120, 240));
         
 		$this->addLeftFrontSystem(new AntiprotonDefender(3, 0, 0, 240, 360));
 				
-		$this->addLeftAftSystem(new Thruster(4, 12, 0, 7, 3));
+		$this->addLeftAftSystem(new GraviticThruster(4, 12, 0, 7, 3));
 		$this->addLeftAftSystem(new AntiprotonDefender(3, 0, 0, 180, 300));
 		
 		$this->addRightFrontSystem(new AntiprotonDefender(3, 0, 0, 0, 120));			
 
-		$this->addRightAftSystem(new Thruster(4, 12, 0, 7, 4));  
+		$this->addRightAftSystem(new GraviticThruster(4, 12, 0, 7, 4));  
 		$this->addRightAftSystem(new AntiprotonDefender(3, 0, 0, 60, 180));	
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

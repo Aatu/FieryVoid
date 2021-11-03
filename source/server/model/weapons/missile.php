@@ -587,7 +587,7 @@ class MultiMissileLauncher extends Weapon{
     public $trailColor = array(141, 240, 255);
     public $animation = "trail";
     public $animationColor = array(50, 50, 50);
-    public $animationExplosionScale = 0.4;
+    public $animationExplosionScale = 0.6;
     public $projectilespeed = 8;
     public $animationWidth = 4;
     public $trailLength = 100;
