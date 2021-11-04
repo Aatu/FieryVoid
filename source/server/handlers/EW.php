@@ -71,10 +71,10 @@
                     $blanket = $ship->getBlanketDEW($gamedata->turn);
                     
                     if ( $blanket > $FDEW )
-                        $FDEW = $blanket*0.25;
+                        $FDEW = $blanket;
                 }
             }
-            
+            $FDEW = $FDEW*0.25;
             return $FDEW;
         }
         
