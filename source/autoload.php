@@ -1800,6 +1800,7 @@ spl_autoload_register(
                 'bsghypergun' => '/server/model/weapons/customBSG.php',
                 'bsgkineticenergyweapon' => '/server/model/weapons/customBSG.php',
                 'bsgltkineticenergyweapon' => '/server/model/weapons/customBSG.php',
+                'bsgltkineticenergyweaponva' => '/server/model/weapons/customBSG.php',
                 'bsgmainbattery' => '/server/model/weapons/customBSG.php',
                 'bsgmedbattery' => '/server/model/weapons/customBSG.php',
 					//ships

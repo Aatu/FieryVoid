@@ -42,7 +42,7 @@
         public $name = "heavyLaser";
         public $displayName = "Heavy Laser";
         public $animation = "laser";
-        public $animationColor = array(255, 79, 15);
+        public $animationColor = array(230, 0, 0);
         public $animationWidth = 4;
         public $animationWidth2 = 0.2;
 
@@ -425,7 +425,7 @@
         public $name = "imperialLaser";
         public $displayName = "Imperial Laser";
         public $animation = "laser";
-        public $animationColor = array(220, 60, 120);
+        public $animationColor = array(172, 0, 230);
         public $animationWidth = 5;
         public $animationWidth2 = 0.5;
         public $priority = 7;
@@ -543,7 +543,7 @@
         public $displayName = "Combat Laser";        
 	    public $iconPath = "battleLaser.png";
         public $animation = "laser";
-        public $animationColor = array(255, 58, 31);
+        public $animationColor = array(230, 0, 230);
         public $animationWidth = 3;
         public $animationWidth2 = 0.2;
         
@@ -628,7 +628,7 @@ class LaserAccelerator extends Laser{
         public $displayName = "Laser Accelerator";
         public $iconPath = "LaserAccelerator.png";
         public $animation = "laser";
-        public $animationColor = array(255, 79, 15);
+        public $animationColor = array(230, 0, 0);
 		public $animationWidth = 4;
 		public $animationWidth2 = 0.2;
         

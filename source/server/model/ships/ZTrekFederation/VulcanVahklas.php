@@ -38,7 +38,7 @@ class VulcanVahklas extends LCV{
     	$sensors = new Scanner(3, 12, 4, 4);
 			//$sensors->markLCV();
 			$this->addPrimarySystem($sensors);
-	$impulseDrive = new TrekImpulseDrive(3,16,0,2,3);
+	$impulseDrive = new TrekImpulseDrive(3,16,0,2,2);
 
 	$projection = new TrekShieldProjection(2, 12, 5, 0, 360, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projector = new TrekShieldProjector(2, 6, 2, 2, 0, 360, 'F'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
@@ -65,8 +65,8 @@ class VulcanVahklas extends LCV{
 			8 => "Structure",
 			10 => "1:Phase Cannon",
 			12 => "1:Light Phase Cannon",
-			13 => "0:Shield Projector",
-			16 => "2:Nacelle",
+			14 => "0:Shield Projector",
+			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
 			20 => "0:Scanner",
@@ -76,8 +76,8 @@ class VulcanVahklas extends LCV{
 			8 => "Structure",
 			10 => "1:Phase Cannon",
 			12 => "1:Light Phase Cannon",
-			13 => "0:Shield Projector",
-			16 => "2:Nacelle",
+			14 => "0:Shield Projector",
+			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
 			20 => "0:Scanner",
@@ -87,8 +87,8 @@ class VulcanVahklas extends LCV{
 			8 => "Structure",
 			10 => "1:Phase Cannon",
 			12 => "1:Light Phase Cannon",
-			13 => "0:Shield Projector",
-			16 => "2:Nacelle",
+			14 => "0:Shield Projector",
+			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
 			20 => "0:Scanner",
