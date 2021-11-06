@@ -348,7 +348,6 @@
 
 		public $rangePenalty = 2;
 		public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
-		public $rangeDamagePenalty = 1;
 
 		public $damageType = "Standard"; 
 		public $weaponClass = "Antimatter"; 
