@@ -418,8 +418,8 @@
  	    public $animation = "trail";
         public $animationArray = array(1=>"trail", 2=>"laser", 3=>"laser");
         public $projectilespeed = 10;
-        public $animationWidth = 4;
-        public $trailLength = 15;       
+        public $animationWidth = 2;
+        public $trailLength = 10;       
         //public $animationColor = array(0, 184, 230); //let's inherit from Antimatter...
         public $animationWidth2 = 0.2;
 		public $animationExplosionScale = 0.4;                   
