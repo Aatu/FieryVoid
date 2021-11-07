@@ -80,7 +80,7 @@ class Ximm extends VreeCapital{
             1=> array(
                     4 => "Thruster",
                     5 => "31:Antiproton Defender",
-                    6 => "41:Antiproton Defendern",  
+                    6 => "41:Antiproton Defender",  
                     7 => "0:Antimatter Cannon",
 					8 => "0:Antiproton Defender",                    
                     17 => "Structure",
@@ -89,7 +89,7 @@ class Ximm extends VreeCapital{
             2=> array(
                     4 => "Thruster",
                     5 => "32:Antiproton Defender",
-                    6 => "42:Antiproton Defendern",  
+                    6 => "42:Antiproton Defender",  
                     7 => "0:Antimatter Cannon",
 					8 => "0:Antiproton Defender",                    
                     17 => "Structure",
@@ -98,7 +98,7 @@ class Ximm extends VreeCapital{
             31=> array(
                     4 => "32:Thruster", 
                     5 => "31:Antiproton Defender",
-                    6 => "32:Antiproton Defendern",  
+                    6 => "32:Antiproton Defender",  
                     7 => "0:Antimatter Cannon",
 					8 => "0:Antiproton Defender",                    
                     17 => "Structure",
@@ -107,7 +107,7 @@ class Ximm extends VreeCapital{
             32=> array(
                     4 => "Thruster", 
                     5 => "31:Antiproton Defender",
-                    6 => "32:Antiproton Defendern",  
+                    6 => "32:Antiproton Defender",  
                     7 => "0:Antimatter Cannon",
 					8 => "0:Antiproton Defender",                    
                     17 => "Structure",
@@ -116,7 +116,7 @@ class Ximm extends VreeCapital{
             41=> array(
                     4 => "42:Thruster", 
                     5 => "41:Antiproton Defender",
-                    6 => "42:Antiproton Defendern",  
+                    6 => "42:Antiproton Defender",  
                     7 => "0:Antimatter Cannon",
 					8 => "0:Antiproton Defender",                    
                     17 => "Structure",
@@ -125,7 +125,7 @@ class Ximm extends VreeCapital{
        		42=> array(
                     4 => "Thruster", 
                     5 => "41:Antiproton Defender",
-                    6 => "42:Antiproton Defendern",  
+                    6 => "42:Antiproton Defender",  
                     7 => "0:Antimatter Cannon",
 					8 => "0:Antiproton Defender",                    
                     17 => "Structure",
