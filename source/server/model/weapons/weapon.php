@@ -50,7 +50,8 @@ class Weapon extends ShipSystem
     private $rp = 0; //range penalty - number of crits ! effect is reflected on $range anyway, no need to hold an array
     public $range = 0;
     public $rangeArray = array();
-    protected $distanceRange = 0;
+    public $distanceRange = 0;
+    public $distanceRangeArray = array();
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
     public $fireControlArray = array();
 
@@ -1116,8 +1117,12 @@ class Weapon extends ShipSystem
         //range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty,
         //interception penalty not yet calculated, will be logged later
         //$notes = $rp["notes"] . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
-		$notes = $distanceForPenalty . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
+		$notes = $distanceForPenalty . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change, ";
         
+		//update by arc - this caused some trouble and I want it logged...		
+        $relativeBearing = $target->getBearingOnUnit($shooter);
+		$notes .= 'bearing from target ' . $relativeBearing . ', ';
+				
         $fireOrder->chosenLocation = $hitLoc;
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
@@ -1688,6 +1693,7 @@ full Advanced Armor effects (by rules) for reference:
         if (isset($this->rangePenaltyArray[$i])) $this->rangePenalty = $this->rangePenaltyArray[$i];
         if (isset($this->rangeDamagePenaltyArray[$i])) $this->rangeDamagePenalty = $this->rangeDamagePenaltyArray[$i];
         if (isset($this->rangeArray[$i])) $this->range = $this->rangeArray[$i];
+        if (isset($this->distanceRangeArray[$i])) $this->distanceRange = $this->distanceRangeArray[$i];
         if (isset($this->fireControlArray[$i])) $this->fireControl = $this->fireControlArray[$i];
         if (isset($this->loadingtimeArray[$i])) $this->loadingtime = $this->loadingtimeArray[$i];
         if (isset($this->turnsloadedArray[$i])) $this->turnsloaded = $this->turnsloadedArray[$i];

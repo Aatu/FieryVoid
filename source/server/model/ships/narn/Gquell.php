@@ -4,7 +4,7 @@ class Gquell extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 625;
+		$this->pointCost = 660;
 		$this->faction = "Narn";
         $this->phpclass = "Gquell";
         $this->imagePath = "img/ships/gquan.png";
@@ -15,6 +15,8 @@ class Gquell extends BaseShip{
         $this->fighters = array("normal"=>12);
 	    $this->isd = 2245;
 		$this->unofficial = true;
+
+	    $this->notes = 'Custom GQuan with energy mines replaced with medium pulse cannons.';
 		
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
@@ -24,7 +26,6 @@ class Gquell extends BaseShip{
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 2;
-
         
         $this->addPrimarySystem(new Reactor(6, 22, 0, 0));
         $this->addPrimarySystem(new CnC(6, 20, 0, 0));
