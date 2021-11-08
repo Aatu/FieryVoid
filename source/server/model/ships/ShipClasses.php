@@ -425,7 +425,8 @@ class BaseShip {
 
     public function isElint()
     {
-        return $this->getSpecialAbilityValue("ELINT");
+        //return $this->getSpecialAbilityValue("ELINT");
+		return $this->hasSpecialAbility("ELINT");
     }
 
     protected function addSystem($system, $loc){

@@ -1122,11 +1122,7 @@ class Weapon extends ShipSystem
 		//update by arc - this caused some trouble and I want it logged...		
         $relativeBearing = $target->getBearingOnUnit($shooter);
 		$notes .= 'bearing from target ' . $relativeBearing . ', ';
-		
-		        $tf = $target->getFacingAngle(); //ship facing
-        $compassHeading = mathlib::getCompassHeadingOfShip($target, $shooter); //absolute bearing        
-		$notes .= 'tf, compass ' . $tf . ' ' . $compassHeading . '; ';
-		
+				
         $fireOrder->chosenLocation = $hitLoc;
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
