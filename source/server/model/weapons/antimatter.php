@@ -418,12 +418,12 @@
 		public $iconPath = "AntimatterShredder.png";
  	    public $animation = "trail";
         public $animationArray = array(1=>"trail", 2=>"laser", 3=>"laser");
-        public $projectilespeed = 10;
-        public $animationWidth = 4;
-        public $trailLength = 15;       
+        public $projectilespeed = 7;
+        public $animationWidth = 3;
+        public $trailLength = 10;       
         //public $animationColor = array(0, 184, 230); //let's inherit from Antimatter...
         public $animationWidth2 = 0.2;
-		public $animationExplosionScale = 0.4;                   
+		public $animationExplosionScale = 0.2;                   
 		
         public $priority = 2; 
 		public $priorityArray = array(1=>2, 2=>7, 3=>2); //Shredder affects every unit in range, while Piercing affects all sections in its path - both should be fired very early

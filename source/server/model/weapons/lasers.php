@@ -42,7 +42,7 @@
         public $name = "heavyLaser";
         public $displayName = "Heavy Laser";
         public $animation = "laser";
-        public $animationColor = array(230, 0, 0);
+        public $animationColor = array(179, 45, 0);
         public $animationWidth = 4;
         public $animationWidth2 = 0.2;
 
