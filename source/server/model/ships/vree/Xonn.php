@@ -9,6 +9,7 @@ class Xonn extends VreeCapital{
 		$this->phpclass = "Xonn";
 		$this->shipClass = "Xonn Dreadnought";
 		$this->isd = 2260;
+        $this->limited = 10; //Restricted Deployment
 
 		$this->shipSizeClass = 3;
 		$this->iniativebonus = 0;
@@ -38,11 +39,11 @@ class Xonn extends VreeCapital{
 		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));      							
 
-        $this->addFrontSystem(new Thruster(5, 20, 0, 10, 1));   
+        $this->addFrontSystem(new GraviticThruster(5, 20, 0, 10, 1));   
         $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 300, 60));
         $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 300, 60));  	
 
-        $this->addAftSystem(new Thruster(5, 20, 0, 10, 2));  		
+        $this->addAftSystem(new GraviticThruster(5, 20, 0, 10, 2));  		
         $this->addAftSystem(new AntiprotonGun(3, 0, 0, 120, 240));
         $this->addAftSystem(new AntiprotonGun(3, 0, 0, 120, 240));  		   
         
@@ -50,7 +51,7 @@ class Xonn extends VreeCapital{
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
 		$this->addLeftFrontSystem(new StructureTechnical(0, 0, 0, 0));				
 
-		$this->addLeftAftSystem(new Thruster(5, 20, 0, 10, 3));				
+		$this->addLeftAftSystem(new GraviticThruster(5, 20, 0, 10, 3));				
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));			
 		
@@ -58,7 +59,7 @@ class Xonn extends VreeCapital{
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));	
 		$this->addRightFrontSystem(new StructureTechnical(0, 0, 0, 0));			
 
-		$this->addRightAftSystem(new Thruster(5, 20, 0, 10, 4));				
+		$this->addRightAftSystem(new GraviticThruster(5, 20, 0, 10, 4));				
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));		
 		

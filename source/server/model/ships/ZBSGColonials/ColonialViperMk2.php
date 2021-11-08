@@ -41,7 +41,11 @@ class ColonialViperMk2 extends FighterFlight{
             $fighter->displayName = "Viper Mk2";
             $fighter->imagePath = "img/ships/BSG/viperMk2.png";
             $fighter->iconPath = "img/ships/BSG/viperMk2_large.png";
-
+		
+		
+            $frontGun = new BSGLtKineticEnergyWeaponVA(345, 15, 15, 2, 2);//narower arc (from/to), difference between narrow and wide arc, damage bonus, number of shots
+            $fighter->addFrontSystem($frontGun);
+		/*
 			//should be single gun with variable arc, but that's not possible ATM - so 2 exclusive weapons; narrow arc gets bonus FC, wide arc gets penalty
             $frontGun = new BSGLtKineticEnergyWeapon(340, 20, 1, 2);
             $frontGun->displayName = "Lt Kinetic Energy Cannon (narrow)";
@@ -54,7 +58,7 @@ class ColonialViperMk2 extends FighterFlight{
             $frontGun->exclusive = true;
 			$frontGun->fireControl[0] += -1;
             $fighter->addFrontSystem($frontGun);
-			
+		*/	
 			
 			
             $missileRack = new FighterMissileRack(2, 330, 30);

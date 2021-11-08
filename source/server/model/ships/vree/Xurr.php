@@ -37,18 +37,18 @@ class Xurr extends VreeCapital{
 		$this->addPrimarySystem(new AntimatterConverter(3, 7, 5, 0, 360));
 		$this->addPrimarySystem(new AntimatterConverter(3, 7, 5, 0, 360));	
 
-        $this->addFrontSystem(new Thruster(4, 14, 0, 8, 1));
+        $this->addFrontSystem(new GraviticThruster(4, 14, 0, 8, 1));
 		
-        $this->addAftSystem(new Thruster(4, 14, 0, 8, 2));
+        $this->addAftSystem(new GraviticThruster(4, 14, 0, 8, 2));
         
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
 				
-		$this->addLeftAftSystem(new Thruster(4, 14, 0, 8, 3));
+		$this->addLeftAftSystem(new GraviticThruster(4, 14, 0, 8, 3));
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
 		
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));			
 
-		$this->addRightAftSystem(new Thruster(4, 14, 0, 8, 4));
+		$this->addRightAftSystem(new GraviticThruster(4, 14, 0, 8, 4));
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));	
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

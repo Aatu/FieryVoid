@@ -9,6 +9,7 @@ class Xixx extends VreeHCV{
 		$this->phpclass = "Xixx";
 		$this->shipClass = "Xixx Torpedo Saucer";
 		$this->isd = 2251;
+        $this->limited = 10; //Restricted Deployment
 
 		$this->iniativebonus = 6 *5; 
 		
@@ -34,10 +35,10 @@ class Xixx extends VreeHCV{
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));				
 		$this->addPrimarySystem(new AntiprotonGun(3, 0, 0, 0, 360));
-		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 3));
-		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 4));
-		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 1));		
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 7, 2));						
+		$this->addPrimarySystem(new GraviticThruster(3, 12, 0, 7, 3));
+		$this->addPrimarySystem(new GraviticThruster(3, 12, 0, 7, 4));
+		$this->addPrimarySystem(new GraviticThruster(3, 12, 0, 7, 1));		
+        $this->addPrimarySystem(new GraviticThruster(3, 12, 0, 7, 2));						
 
 		$this->addFrontSystem(new AntimatterTorpedo(2, 0, 0, 240, 0));
 		$this->addFrontSystem(new AntimatterTorpedo(2, 0, 0, 300, 60)); 

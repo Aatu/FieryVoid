@@ -1679,7 +1679,6 @@ class EWGraviticTractingRod extends SWDirectWeapon{
 			$this->data["Special"] = "Ignores armor and deactivates power using systems.";
 			$this->data["Special"] .= "<br>+4 to criticals and +2 to dropout rolls";
 			$this->data["Special"] .= "<br>This weapon suffers range penalty (like direct fire weapons do), but only after first 20 hexes of distance.";
-
 		}
 
 		public $rangePenalty = 1; //-1 hex - BUT ONLY AFTER 20 HEXES
@@ -1719,7 +1718,7 @@ class EWGraviticTractingRod extends SWDirectWeapon{
 		if ($system->powerReq > 0 || $system->canOffLine){
 			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
 		}
-		$system->criticalRollMod = 4;
+		$system->criticalRollMod += 4;
 	}
 		
         public function getDamage($fireOrder){        return Dice::d(10, 2);   }
@@ -1774,7 +1773,7 @@ class EWGraviticTractingRod extends SWDirectWeapon{
 		if ($system->powerReq > 0 || $system->canOffLine){
 			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
 		}
-		$system->criticalRollMod = 3;
+		$system->criticalRollMod += 3;
 	}
 		
         public function getDamage($fireOrder){        return Dice::d(10, 5);   }

@@ -39,18 +39,18 @@ class Xavan extends VreeCapital{
 		$this->addPrimarySystem(new AntiprotonGun(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntiprotonGun(3, 0, 0, 0, 360));
 			
-        $this->addFrontSystem(new Thruster(4, 12, 0, 7, 1));
+        $this->addFrontSystem(new GraviticThruster(4, 12, 0, 7, 1));
 		
-        $this->addAftSystem(new Thruster(4, 12, 0, 7, 2));
+        $this->addAftSystem(new GraviticThruster(4, 12, 0, 7, 2));
         
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));				
 				
-		$this->addLeftAftSystem(new Thruster(4, 12, 0, 7, 3));	
+		$this->addLeftAftSystem(new GraviticThruster(4, 12, 0, 7, 3));	
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
 	
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
 
-		$this->addRightAftSystem(new Thruster(4, 12, 0, 7, 4));	
+		$this->addRightAftSystem(new GraviticThruster(4, 12, 0, 7, 4));	
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
 		
        
