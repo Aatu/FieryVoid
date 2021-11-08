@@ -207,7 +207,7 @@ class BSGMarineAssault extends Weapon{
         
         public $rangePenalty = 0;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
-        public $range = 0;
+        public $range = 0.1;
         public $calledShotMod = 0; //instead of usual -8
         
         public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
