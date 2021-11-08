@@ -67,7 +67,7 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Vree games are crashed</b> - as per warning (new ones created after this point should be safe)
 	    <br><b>Trek shielding was reworked</b> - Star Trek ship shields now work differently - hopefully as intended!
 	    <br><b>Babylon 5 station was built</b> - courtesy of Geoffrey!
-		---------- <b>update 8th of November</b> ----------
+		<br><br>---------- <b>update 8th of November</b> ----------
 	    <br><b>Out of range calulated</b> - target moving out of range of launched ballistic weapon will immediately see appropriate drop in hit chance
 	    <br><b>Full missile launcher fixed</b> - now distance range is calculated properly instead of being fixed 
 	    <br><b>Light Antiproton Gun fixed</b> - now it doesn't lose damage with distance
