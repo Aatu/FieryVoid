@@ -1117,8 +1117,16 @@ class Weapon extends ShipSystem
         //range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty,
         //interception penalty not yet calculated, will be logged later
         //$notes = $rp["notes"] . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
-		$notes = $distanceForPenalty . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
+		$notes = $distanceForPenalty . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change, ";
         
+		//update by arc - this caused some trouble and I want it logged...		
+        $relativeBearing = $target->getBearingOnUnit($shooter);
+		$notes .= 'bearing from target ' . $relativeBearing . ', ';
+		
+		        $tf = $target->getFacingAngle(); //ship facing
+        $compassHeading = mathlib::getCompassHeadingOfShip($target, $shooter); //absolute bearing        
+		$notes .= 'tf, compass ' . $tf . ' ' . $compassHeading . '; ';
+		
         $fireOrder->chosenLocation = $hitLoc;
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;

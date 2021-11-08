@@ -1141,7 +1141,7 @@ class BaseShip {
                 $relativeBearing = 360-$relativeBearing;
             }
         }
-        return $relativeBearing;
+        return round($relativeBearing); //round to full degrees - otherwise there were sometimes problems!!!
     }
 
     public function getBearingOnUnit($unit){ //returns relative angle from this unit to indicated unit
@@ -1153,7 +1153,7 @@ class BaseShip {
                 $relativeBearing = 360-$relativeBearing;
             }
         }
-        return $relativeBearing;
+        return round($relativeBearing); //round to full degrees - otherwise there were sometimes problems!!!
     }
 
 
