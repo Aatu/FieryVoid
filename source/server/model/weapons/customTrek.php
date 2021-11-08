@@ -673,13 +673,14 @@ class TrekSpatialTorp extends Torpedo{
         public $name = "TrekSpatialTorp";
         public $displayName = "Spatial Torpedo";
 		    public $iconPath = "EWRocketLauncher.png";
+			
         public $animation = "trail";
-        public $trailColor = array(11, 224, 255);
-        public $animationColor = array(50, 50, 50);
-        public $animationExplosionScale = 0.2;
-        public $projectilespeed = 12;
-        public $animationWidth = 4;
-        public $trailLength = 100;    
+        //public $trailColor = array(211, 0, 0); ///doesn't seem to matter...
+        public $animationColor = array(100, 100, 100); //color of projectile
+        public $animationExplosionScale = 0.4; //indicates projectile size
+        //public $projectilespeed = 10; //doesn't seem to matter
+        //public $animationWidth = 6; //doesn't seem to matter
+        //public $trailLength = 10; //doesn't seem to matter
 
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile
@@ -730,13 +731,15 @@ class TrekPhotonicTorp extends Torpedo{
         public $name = "TrekPhotonicTorp";
         public $displayName = "Photonic Torpedo";
 		    public $iconPath = "TrekPhotonicTorpedo.png";
-        public $animation = "trail";
-        public $trailColor = array(11, 224, 255);
-        public $animationColor = array(50, 50, 50);
+		
+        public $animation = "torpedo";
+        public $animationColor = array(255, 188, 0); //let's make it yellowish
+        //public $trailColor = array(0, 255, 0); /doesn't seem to matter
         public $animationExplosionScale = 0.2;
-        public $projectilespeed = 12;
-        public $animationWidth = 4;
-        public $trailLength = 100;    
+        //public $projectilespeed = 10;//doesn't seem to matter
+        //public $animationWidth = 8;//doesn't seem to matter
+        //public $trailLength = 10; //doesn't seem to matter
+		
 
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile
@@ -787,13 +790,10 @@ class TrekPhotonTorp extends Torpedo{
         public $name = "TrekPhotonTorp";
         public $displayName = "Photon Torpedo";
 		    public $iconPath = "TrekPhotonicTorpedo.png";
-        public $animation = "trail";
-        public $trailColor = array(11, 224, 255);
-        public $animationColor = array(50, 50, 50);
-        public $animationExplosionScale = 0.2;
-        public $projectilespeed = 12;
-        public $animationWidth = 4;
-        public $trailLength = 100;    
+			
+			public $animation = "torpedo";
+        public $animationColor = array(255, 188, 0); //let's make it yellowish
+        public $animationExplosionScale = 0.3;
 
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile

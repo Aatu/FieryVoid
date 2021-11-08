@@ -5423,7 +5423,6 @@ class NexusLightBurstBeam extends Weapon{
 		$this->data["Special"] .= "<br>Does not affect units protected by Advanced Armor.";  	
 	}
 	
-	
 	//Burst Beams ignore armor; advanced armor halves effect (due to weapon being Electromagnetic)
 	public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
 		if (WeaponEM::isTargetEMResistant($target,$system)){

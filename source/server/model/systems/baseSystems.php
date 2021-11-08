@@ -638,7 +638,7 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
     }
 
 	public function testCritical($ship, $gamedata, $crits, $add=0){ 
-		$hasHyachSensors = $ship->getSpecialAbilityValue("HyachSensors");
+		$hasHyachSensors = $ship->hasSpecialAbility("HyachSensors");
 		$damageBonus = 0;
 		if( $hasHyachSensors){
 			$damageBonus = -round($this->getTotalDamage() /2); //half of current damage, rounded

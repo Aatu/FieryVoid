@@ -348,14 +348,14 @@
 
 		public $rangePenalty = 2;
 		public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
-		public $rangeDamagePenalty = 1;
 
 		public $damageType = "Standard"; 
 		public $weaponClass = "Antimatter"; 
 
 		function __construct($startArc, $endArc, $nrOfShots = 2){ 
 			$this->shots = $nrOfShots;
-			$this->defaultShots = $nrOfShots;        
+			$this->defaultShots = $nrOfShots;  
+            $this->intercept = $nrOfShots;	      
 		
 			if($nrOfShots === 1){
 				$this->iconPath = "LightAntiprotonGun.png";
@@ -399,6 +399,7 @@
         function __construct($startArc, $endArc, $shots = 1){
             $this->shots = $shots;
             $this->defaultShots = $shots;
+            $this->intercept = $shots;	
             
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }   

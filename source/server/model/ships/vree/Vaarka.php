@@ -10,7 +10,8 @@ class Vaarka extends VreeHCV{
 		$this->shipClass = "Vaarka Escort Scout";
 		$this->isd = 2257;
   		$this->occurence = "rare";
-    	$this->variantOf = 'Vaarl Scout Saucer';			
+    	$this->variantOf = 'Vaarl Scout Saucer';	
+        $this->limited = 33; //Limited Deployment			
 
 		$this->iniativebonus = 6 *5; 
 		
@@ -34,10 +35,10 @@ class Vaarka extends VreeHCV{
         $this->addPrimarySystem(new Engine(4, 11, 0, 7, 2));
 		$this->addPrimarySystem(new JumpEngine(6, 10, 4, 24));        			
 		$this->addPrimarySystem(new AntimatterShredder(3, 0, 0, 0, 360));
-		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 3));
-		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 4));
-		$this->addPrimarySystem(new Thruster(3, 12, 0, 7, 1));		
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 7, 2));
+		$this->addPrimarySystem(new GraviticThruster(3, 12, 0, 7, 3));
+		$this->addPrimarySystem(new GraviticThruster(3, 12, 0, 7, 4));
+		$this->addPrimarySystem(new GraviticThruster(3, 12, 0, 7, 1));		
+        $this->addPrimarySystem(new GraviticThruster(3, 12, 0, 7, 2));
 		
 		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 240, 0));
 		$this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 300, 60)); 
