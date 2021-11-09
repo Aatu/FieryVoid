@@ -47,7 +47,7 @@ class Xeecra extends VreeCapital{
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
 		$this->addLeftFrontSystem(new CargoBay(3, 15));		
 				
-		$this->addLeftAftSystem(new GraviticThruster(4, 14, 0, 6, 3));
+		$this->addPrimarySystem(new GraviticThruster(4, 14, 0, 6, 3));
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new CargoBay(3, 15));		
 		

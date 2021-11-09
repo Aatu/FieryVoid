@@ -50,7 +50,8 @@ class Weapon extends ShipSystem
     private $rp = 0; //range penalty - number of crits ! effect is reflected on $range anyway, no need to hold an array
     public $range = 0;
     public $rangeArray = array();
-    protected $distanceRange = 0;
+    public $distanceRange = 0;
+    public $distanceRangeArray = array();
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
     public $fireControlArray = array();
 
@@ -93,7 +94,7 @@ class Weapon extends ShipSystem
     public $defaultShots = 1;
     public $defaultShotsArray = array();
 
-    public $rof = 1; //??? I do not see any use of this variable, besides one point in .js checking if it's 0...
+    public $rof = 1; 
 
 
     public $grouping = 0;
@@ -135,6 +136,10 @@ class Weapon extends ShipSystem
     public $minDamageArray = array();
     public $maxDamageArray = array();
 
+	//some weapons might use variable firing arc...	
+    public $startArcArray = array(); 
+	public $endArcArray = array();
+	
     public $exclusive = false; //for fighter guns - exclusive weapon can't bve fired together with others
 
     public $useOEW = true;
@@ -1112,8 +1117,12 @@ class Weapon extends ShipSystem
         //range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty,
         //interception penalty not yet calculated, will be logged later
         //$notes = $rp["notes"] . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
-		$notes = $distanceForPenalty . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
+		$notes = $distanceForPenalty . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change, ";
         
+		//update by arc - this caused some trouble and I want it logged...		
+        $relativeBearing = $target->getBearingOnUnit($shooter);
+		$notes .= 'bearing from target ' . $relativeBearing . ', ';
+				
         $fireOrder->chosenLocation = $hitLoc;
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
@@ -1310,12 +1319,11 @@ class Weapon extends ShipSystem
             $okSystem = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $location); //for Flash it won't return destroyed system other than PRIMARY Structure
         }
 
-        if ($okSystem == null || $okSystem->isDestroyed()) { //overkill to Structure system is mounted on
+        if (($okSystem == null) || $okSystem->isDestroyed() || ($okSystem->getRemainingHealth() == 0)) { //overkill to Structure system is mounted on
             $okSystem = $target->getStructureSystem($system->location);
         }
 
-
-        if ($okSystem == null || $okSystem->isDestroyed()) { //overkill to PRIMARY Structure
+        if (($okSystem == null) || $okSystem->isDestroyed() || ($okSystem->getRemainingHealth() == 0)) { //overkill to PRIMARY Structure
             if ($this->damageType == 'Piercing') { //Piercing does not overkill to PRIMARY
                 return null;
             } else {
@@ -1323,8 +1331,7 @@ class Weapon extends ShipSystem
             }
         }
 
-
-        if ($okSystem == null || $okSystem->isDestroyed()) { //nowhere to overkill to
+        if (($okSystem == null) || $okSystem->isDestroyed() || ($okSystem->getRemainingHealth() == 0)) { //nowhere to overkill to
             return null;
         }
 
@@ -1546,10 +1553,12 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 		
+		/* first attempt of StarTrek shield
 		$impactProtectionSystem = $target->getSystemProtectingFromImpactDamage($shooter, $pos, $gamedata->turn, $this, $damage);//damage-reducing system activating at weapon impact - other than shield (eg. Star Trek shield)
 		if($impactProtectionSystem){ //some system can actually affect damage at this stage
 			$damage = $impactProtectionSystem->doReduceImpactDamage($gamedata, $fireOrder, $target, $shooter, $this, $damage);
 		}
+		*/
 		
         return $damage;
     }
@@ -1596,8 +1605,8 @@ full Advanced Armor effects (by rules) for reference:
         /*$pos ONLY relevant for FIGHTER armor if damage source position is different than one from weapon itself*/
         /*otherwise best leave null BUT fill $location!*/
         /*damageWasDealt indicates whether this hit already caused damage - important for overkill for some damage modes*/
-        if (!$system->isDestroyed()) { //else system was already destroyed, proceed to overkill
-            $damageWasDealt = true; //actual damage was done! might be relevant for overkill allocation
+        //if (!$system->isDestroyed()) { //else system was already destroyed, proceed to overkill
+		if ($system->getRemainingHealth() > 0) { //Vree Structure systems are considered not there despite not being formally destroyed
             $damage = floor($damage);//make sure damage is a whole number, without fractions!
             $armour = $this->getSystemArmourComplete($target, $system, $gamedata, $fireOrder, $pos); //handles standard and Adaptive armor, as well as Advanced armor and weapon class modifiers
 			// ...if armor-related modifications are needed, they should extend appropriate method (Complete or Base, as Adaptive should not be affected)
@@ -1614,13 +1623,15 @@ full Advanced Armor effects (by rules) for reference:
 
 			//returned array: dmgDealt, dmgRemaining, armorPierced	
 			$damage = $this->beforeDamagedSystem($target, $system, $damage, $armour, $gamedata, $fireOrder);
-			$effects = $system->assignDamageReturnOverkill($target, $shooter, $this, $gamedata, $fireOrder, $damage, $armour, $pos);
+			$effects = $system->assignDamageReturnOverkill($target, $shooter, $this, $gamedata, $fireOrder, $damage, $armour, $pos, $damageWasDealt);
 			$this->onDamagedSystem($target, $system, $effects["dmgDealt"], $effects["armorPierced"], $gamedata, $fireOrder);//weapons that do effects on hitting something
 			$damage = $effects["dmgRemaining"];
 			if ($this->damageType == 'Raking'){ //note armor already pierced so further rakes have it easier
 				$armourIgnored = $armourIgnored + $effects["armorPierced"];
 				$fireOrder->armorIgnored[$system->id] = $armourIgnored;
-			}
+			}			
+			
+            $damageWasDealt = true; //actual damage was done! might be relevant for overkill allocation
         }
 
         if (($damage > 0) || (!$damageWasDealt)) {//overkilling!
@@ -1682,6 +1693,7 @@ full Advanced Armor effects (by rules) for reference:
         if (isset($this->rangePenaltyArray[$i])) $this->rangePenalty = $this->rangePenaltyArray[$i];
         if (isset($this->rangeDamagePenaltyArray[$i])) $this->rangeDamagePenalty = $this->rangeDamagePenaltyArray[$i];
         if (isset($this->rangeArray[$i])) $this->range = $this->rangeArray[$i];
+        if (isset($this->distanceRangeArray[$i])) $this->distanceRange = $this->distanceRangeArray[$i];
         if (isset($this->fireControlArray[$i])) $this->fireControl = $this->fireControlArray[$i];
         if (isset($this->loadingtimeArray[$i])) $this->loadingtime = $this->loadingtimeArray[$i];
         if (isset($this->turnsloadedArray[$i])) $this->turnsloaded = $this->turnsloadedArray[$i];
@@ -1706,10 +1718,16 @@ full Advanced Armor effects (by rules) for reference:
         if (isset($this->rakingArray[$i])) $this->raking = $this->rakingArray[$i];
         
         if (isset($this->hextargetArray[$i])) $this->hextarget = $this->hextargetArray[$i];	
-		
+	    
+        if (isset($this->startArcArray[$i])) $this->startArc = $this->startArcArray[$i];
+        if (isset($this->endArcArray[$i])) $this->endArc = $this->endArcArray[$i];
+	    
 		if (isset($this->ignoreAllEWArray[$i])) $this->ignoreAllEW = $this->ignoreAllEWArray[$i];	
 		if (isset($this->ignoreJinkingArray[$i])) $this->ignoreJinking = $this->ignoreJinkingArray[$i];	
-
+	    
+        if (isset($this->startArcArray[$i])) $this->startArc = $this->startArcArray[$i];
+        if (isset($this->endArcArray[$i])) $this->endArc = $this->endArcArray[$i];
+	    
     }//endof function changeFiringMode
 
 

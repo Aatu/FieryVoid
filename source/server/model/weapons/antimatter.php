@@ -72,7 +72,7 @@
 			if (isset($this->maxXArray[$i])) $this->maxX = $this->maxXArray[$i];
 		}//endof function changeFiringMode
 		
-	}
+	} //endof class AntimatterWeapon
 
 /*converting to AntimatterWeapon class!
     class AntimatterConverter extends Weapon{ //deliberately NOT extending AntimatterWeapon class, AMConverter mostly uses regular calculations        
@@ -348,14 +348,14 @@
 
 		public $rangePenalty = 2;
 		public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
-		public $rangeDamagePenalty = 1;
 
 		public $damageType = "Standard"; 
 		public $weaponClass = "Antimatter"; 
 
 		function __construct($startArc, $endArc, $nrOfShots = 2){ 
 			$this->shots = $nrOfShots;
-			$this->defaultShots = $nrOfShots;        
+			$this->defaultShots = $nrOfShots;  
+            $this->intercept = $nrOfShots;	      
 		
 			if($nrOfShots === 1){
 				$this->iconPath = "LightAntiprotonGun.png";
@@ -399,6 +399,7 @@
         function __construct($startArc, $endArc, $shots = 1){
             $this->shots = $shots;
             $this->defaultShots = $shots;
+            $this->intercept = $shots;	
             
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }   
@@ -551,6 +552,11 @@
 			
 					$unitsInRange = $gamedata->getShipsInDistance($targetLocation, 1);
 					foreach ($unitsInRange as $targetUnit) {
+						//just for debugging purposes - range to target					
+						$dist = mathlib::getDistanceHex($shooter, $targetUnit);
+						$fireOrder->notes .= $targetUnit->phpclass . ": $dist;";		
+						$fireOrder->updated = true;						
+						
 						if ($targetUnit === $shooter) continue; //do not target self
 						if ($targetUnit->isDestroyed()) continue; //no point engaging dead ships
 						if (isset(AntimatterShredder::$alreadyEngaged[$targetUnit->id])) continue; //unit already engaged
@@ -558,8 +564,6 @@
 						if (mathlib::getDistance($shooter->getCoPos(), $targetUnit->getCoPos()) > 0){ //check arc only if target  is not on the same hex!
 							if (!(mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc))) continue; //must be in arc
 						}
-						if (mathlib::getDistance($shooter->getCoPos(), $targetUnit->getCoPos()) > $this->range) continue; //must be in range
-						
 						AntimatterShredder::$alreadyEngaged[$targetUnit->id] = true;//mark engaged
 						$this->prepareShredderOrders($shooter, $targetUnit, $gamedata, $fireOrder); //actually declare appropriate number of attacks!				
 					}					
@@ -618,7 +622,7 @@
 				if ($fireOrder->targetid == -1) {				
 					$fireOrder->needed = 0;	//just so no one tries to intercept it				
 					$fireOrder->updated = true;
-					$fireOrder->notes = 'Antimatter Shredder aiming shot, not resolved.';
+					$fireOrder->notes .= 'Antimatter Shredder aiming shot, not resolved.';
 					return;
 				} 
 				//set range to 11 - so targets out of nominal range aren't missed!

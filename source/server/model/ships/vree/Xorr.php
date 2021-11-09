@@ -36,18 +36,18 @@ class Xorr extends VreeCapital{
 		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
 
-		$this->addFrontSystem(new Thruster(4, 14, 0, 8, 1));
+		$this->addFrontSystem(new GraviticThruster(4, 14, 0, 8, 1));
 		
-        $this->addAftSystem(new Thruster(4, 14, 0, 8, 2));
+        $this->addAftSystem(new GraviticThruster(4, 14, 0, 8, 2));
         
         $this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
 				
-		$this->addLeftAftSystem(new Thruster(4, 14, 0, 8, 3));
+		$this->addLeftAftSystem(new GraviticThruster(4, 14, 0, 8, 3));
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
 
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));		
 	
-		$this->addRightAftSystem(new Thruster(4, 14, 0, 8, 4));	
+		$this->addRightAftSystem(new GraviticThruster(4, 14, 0, 8, 4));	
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -56,7 +56,16 @@ class Xorr extends VreeCapital{
         $this->addLeftFrontSystem(new Structure( 4, 24, true));
         $this->addLeftAftSystem(new Structure( 4, 24, true));
         $this->addRightFrontSystem(new Structure( 4, 24, true));
-        $this->addRightAftSystem(new Structure( 4, 24, true));      
+        $this->addRightAftSystem(new Structure( 4, 24, true));  
+		
+		/*
+        $this->addFrontSystem(new Structure( 4, 24, false));
+        $this->addAftSystem(new Structure( 4, 24, false));
+        $this->addLeftFrontSystem(new Structure( 4, 24, false));
+        $this->addLeftAftSystem(new Structure( 4, 24, false));
+        $this->addRightFrontSystem(new Structure( 4, 24, false));
+        $this->addRightAftSystem(new Structure( 4, 24, false));     
+		*/
         $this->addPrimarySystem(new Structure( 5, 40));
 	    
 	//d20 hit chart

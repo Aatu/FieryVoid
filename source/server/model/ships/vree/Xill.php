@@ -37,20 +37,20 @@ class Xill extends VreeCapital{
 		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));
 		
 
-        $this->addFrontSystem(new Thruster(5, 16, 0, 9, 1)); 
+        $this->addFrontSystem(new GraviticThruster(5, 16, 0, 9, 1)); 
         $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 300, 60));
 
-        $this->addAftSystem(new Thruster(5, 16, 0, 9, 2));  		
+        $this->addAftSystem(new GraviticThruster(5, 16, 0, 9, 2));  		
         $this->addAftSystem(new AntiprotonGun(3, 0, 0, 120, 240));
         
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
 
-		$this->addLeftAftSystem(new Thruster(5, 16, 0, 9, 3));				
+		$this->addLeftAftSystem(new GraviticThruster(5, 16, 0, 9, 3));				
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
 		
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
 			
-		$this->addRightAftSystem(new Thruster(5, 16, 0, 9, 4));
+		$this->addRightAftSystem(new GraviticThruster(5, 16, 0, 9, 4));
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
 	
 		

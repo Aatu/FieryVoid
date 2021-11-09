@@ -170,7 +170,7 @@
         public $name = "assaultLaser";
         public $displayName = "Assault Laser";
         public $animation = "laser";
-        public $animationColor = array(255, 58, 31);
+        public $animationColor = array(255, 58, 31);//same as Battle Laser
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
         public $priority = 8;
@@ -543,7 +543,7 @@
         public $displayName = "Combat Laser";        
 	    public $iconPath = "battleLaser.png";
         public $animation = "laser";
-        public $animationColor = array(230, 0, 230);
+        public $animationColor = array(255, 58, 31);//same as Battle Laser
         public $animationWidth = 3;
         public $animationWidth2 = 0.2;
         

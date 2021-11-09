@@ -7,7 +7,7 @@ class Corsair extends MediumShip{
 		$this->pointCost = 300;
 		$this->faction = "Raiders";
         $this->phpclass = "Corsair";
-        $this->imagePath = "img/ships/pinnace.png"; //need ot change
+        $this->imagePath = "img/ships/merlin.png";
         $this->shipClass = "Corsair";
         $this->canvasSize = 100;
         

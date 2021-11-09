@@ -1830,7 +1830,7 @@ class CustomIndustrialGrappler extends Weapon {
     } //CustomMiningCutter
 
 
-class CustomLightSoMissileRack extends Weapon{
+class CustomLightSoMissileRack extends MissileLauncher{
         public $name = "CustomLightSoMissileRack";
         public $displayName = "Light SO-Missile Rack";
 		    public $iconPath = "missile1.png";
@@ -1847,7 +1847,6 @@ class CustomLightSoMissileRack extends Weapon{
         public $range = 15;
         public $distanceRange = 45;
         public $ammunition = 12; //limited number of shots
-	    
         
         public $loadingtime = 2; // 1/2 turns
         public $rangePenalty = 0;
@@ -1859,7 +1858,6 @@ class CustomLightSoMissileRack extends Weapon{
 		public $firingMode = 'Standard'; //firing mode - just a name essentially
 		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
-	 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -1873,7 +1871,6 @@ class CustomLightSoMissileRack extends Weapon{
             $strippedSystem->ammunition = $this->ammunition;           
             return $strippedSystem;
         }
-        
 	    
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
@@ -1895,6 +1892,7 @@ class CustomLightSoMissileRack extends Weapon{
     
         public function setMinDamage(){     $this->minDamage = 12;      }
         public function setMaxDamage(){     $this->maxDamage = 12;      }
+
 }//endof CustomLightSoMissileRack
 
 

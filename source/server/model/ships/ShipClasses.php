@@ -425,7 +425,8 @@ class BaseShip {
 
     public function isElint()
     {
-        return $this->getSpecialAbilityValue("ELINT");
+        //return $this->getSpecialAbilityValue("ELINT");
+		return $this->hasSpecialAbility("ELINT");
     }
 
     protected function addSystem($system, $loc){
@@ -779,7 +780,7 @@ class BaseShip {
 
 	//defensive system that can affect damage dealing - only one (best) such system will be called
 	//call overridden by FighterFlight to get only systems on a fighter actually hit
-	public function getSystemProtectingFromDamage($shooter, $pos, $turn, $weapon, $systemhit, $expectedDmg){ //$systemhit actually used by fighter flight
+	public function getSystemProtectingFromDamage($shooter, $pos, $turn, $weapon, $systemhit, $expectedDmg, $damageWasDealt = false){ //$systemhit actually used by fighter flight
 		$chosenSystem = null;
 		$chosenValue=0;
 		if($this instanceOf FighterFlight){ //only subsystems of a particular fighter
@@ -789,7 +790,7 @@ class BaseShip {
 		}		
         //foreach($this->systems as $system){
 		foreach($listOfPotentialSystems as $system){
-			$value=$system->doesProtectFromDamage($expectedDmg, $systemhit);
+			$value=$system->doesProtectFromDamage($expectedDmg, $systemhit, $damageWasDealt);
             if ($value<1) continue;
 			if ($system->isDestroyed($turn-1)) continue;
 			if ($system->isOfflineOnTurn($turn)) continue;
@@ -816,6 +817,7 @@ class BaseShip {
 	} //endof getSystemProtectingFromDamage
 	
 	
+	/*first attempt at StarTrek shield
 	//defensive system that can affect damage dealing at the moment of impact - only one (best) such system will be called
 	//Not relevant for fighters - in their case appropriate system may be simplified to regular damage absorbing system, as in their case system hit is either already chosen or being chosen 
 	public function getSystemProtectingFromImpactDamage($shooter, $pos, $turn, $weapon, $expectedDmg){ //$systemhit actually used by fighter flight
@@ -852,6 +854,7 @@ class BaseShip {
         }
 		return ($chosenSystem);
 	} //endof getSystemProtectingFromImpactDamage
+	*/
 	
 
     public function getHitChanceMod($shooter, $pos, $turn, $weapon){
@@ -1139,7 +1142,7 @@ class BaseShip {
                 $relativeBearing = 360-$relativeBearing;
             }
         }
-        return $relativeBearing;
+        return round($relativeBearing); //round to full degrees - otherwise there were sometimes problems!!!
     }
 
     public function getBearingOnUnit($unit){ //returns relative angle from this unit to indicated unit
@@ -1151,7 +1154,7 @@ class BaseShip {
                 $relativeBearing = 360-$relativeBearing;
             }
         }
-        return $relativeBearing;
+        return round($relativeBearing); //round to full degrees - otherwise there were sometimes problems!!!
     }
 
 

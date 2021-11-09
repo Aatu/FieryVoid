@@ -6,7 +6,7 @@ class MissileLauncher extends Weapon{
     public $trailColor = array(141, 240, 255);
     public $animation = "trail";
     public $animationColor = array(50, 50, 50);
-    public $animationExplosionScale = 0.25;
+    public $animationExplosionScale = 0.6; //more visually impressive weapons - which missiles should be given their power!
     public $projectilespeed = 8;
     public $animationWidth = 4;
     public $trailLength = 100;
@@ -587,7 +587,7 @@ class MultiMissileLauncher extends Weapon{
     public $trailColor = array(141, 240, 255);
     public $animation = "trail";
     public $animationColor = array(50, 50, 50);
-    public $animationExplosionScale = 0.4;
+    public $animationExplosionScale = 0.6;
     public $projectilespeed = 8;
     public $animationWidth = 4;
     public $trailLength = 100;
@@ -609,8 +609,9 @@ class MultiMissileLauncher extends Weapon{
 	public $firingModes = array(1=>'Basic', 2=>'LongRange', 3=>'Heavy', 4=>'Flash', 5=>'Piercing', 6=>'AntiFighter'); //equals to available missiles; data is basic - if launcher is special, constructor will modify it
 	public $damageTypeArray = array(1=>'Standard', 2=>'Standard', 3=>'Standard', 4=>'Flash', 5=>'Piercing', 1=>'Standard'); //indicates that this weapon does damage in Pulse mode
     public $fireControlArray = array( 1=>array(6, 6, 6), 2=>array(6,6,6), 3=>array(3,6,6), 4=>array(6,6,6), 5=>array(3,6,6), 6=>array(9,6,6) ); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
-    public $rangeArray = array(1=>20, 2=>30, 3=>10, 4=>20, 5=>20, 6=>15); //distanceRange remains fixed, as it's improbable that anyone gets out of missile range and this would need more coding
     //typical (class-S) launcher is FC 3/3/3 and warhead +3 - which would mean 6/6/6!
+    public $rangeArray = array(1=>20, 2=>30, 3=>10, 4=>20, 5=>20, 6=>15); 
+	public $distanceRangeArray = array(1=>60, 2=>90, 3=>30, 4=>60, 5=>60, 6=>45); 
     
     /*ATYPICAL constructor: doesn't take health and power usage, but takes desired launcher type - and does appropriate modifications*/
         function __construct($armour, $launcherType, $startArc, $endArc, $base=false)
@@ -633,8 +634,8 @@ class MultiMissileLauncher extends Weapon{
 				$this->iconPath = "missile1.png";
 				foreach ($this->rangeArray as $key=>$rng) {
 					$this->rangeArray[$key] += 10; 
+					$this->distanceRangeArray[$key] += 10; 
 				}     
-				$this->distanceRange += 10;
 				break;				
 			case 'LH': //Long range, Hardened: +10 launch range, RoF 1/turn, does not explode, better FC
 				$this->displayName = "Class-LH Missile Rack";
@@ -642,13 +643,13 @@ class MultiMissileLauncher extends Weapon{
 				$this->iconPath = "missile2.png";
 				foreach ($this->rangeArray as $key=>$rng) {
 					$this->rangeArray[$key] += 10; 
+					$this->distanceRangeArray[$key] += 10; 
 				}     
 				foreach ($this->fireControlArray as $key=>$FCarray){
 					$this->fireControlArray[$key][0] += 1; //fighter
 					$this->fireControlArray[$key][1] += 1; //medium
 					$this->fireControlArray[$key][2] += 1; //Cap
-				}    
-				$this->distanceRange += 10;
+				}
 				$this->loadingtime = 1; //fires every turn
 				$this->rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
 				$this->rackExplosionThreshold = 21; //how high roll is needed for rack explosion   
@@ -659,8 +660,8 @@ class MultiMissileLauncher extends Weapon{
 				$this->iconPath = "missile3.png";
 				foreach ($this->rangeArray as $key=>$rng) {
 					$this->rangeArray[$key] += 10; 
+					$this->distanceRangeArray[$key] += 10; 
 				}     
-				$this->distanceRange += 10;
 				$this->loadingtime = 1; //fires every turn
 				$this->rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
 				$this->rackExplosionThreshold = 21; //how high roll is needed for rack explosion   
@@ -681,13 +682,14 @@ class MultiMissileLauncher extends Weapon{
 				break;
 		}
 		
-		if ($base){ //mounted on base (or other stable platform): +40 launch range (launch range = distance range)
+		if ($base){ //mounted on base: launch range = distance range
 			foreach ($this->rangeArray as $key=>$rng) {
-		    		$this->rangeArray[$key] += 40; 
+		    		$this->rangeArray[$key] = $this->distanceRangeArray[$key]; 
 			}         
 		}
 		
 		$this->range = $this->rangeArray[1]; //base range = first range
+		$this->distanceRange = $this->distanceRangeArray[1]; //base range = first range
 		
 		parent::__construct($armour, $maxhealth, 0, $startArc, $endArc);
         }
