@@ -123,9 +123,21 @@ Weapon.prototype.changeFiringMode = function () {
 		this.rangePenalty = this.rangePenaltyArray[this.firingMode];
 		this.data["Range penalty"] = this.rangePenalty*5 + " per hex"; //converted to percentage system
 	}
+	var changeRange = false;
 	if (!mathlib.arrayIsEmpty(this.rangeArray)) {
 		this.range = this.rangeArray[this.firingMode];
-		this.data["Range"] = this.range;
+		changeRange = true;
+	}
+	if (!mathlib.arrayIsEmpty(this.distanceRangeArray)) {
+		this.distanceRange = this.distanceRangeArray[this.firingMode];
+		changeRange = true;
+	}
+	if (changeRange) {
+		if (!(this.distanceRange > 0)) {
+			this.data["Range"] = this.range;			
+		}else{
+			this.data["Range"] = this.range + '/' + this.distanceRange;
+		}
 	}
 
 	if (!mathlib.arrayIsEmpty(this.fireControlArray)) {

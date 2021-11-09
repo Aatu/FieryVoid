@@ -62,7 +62,7 @@ class VulcanVahklas extends LCV{
 	$this->hitChart = array(
 		
 		0=> array(
-			8 => "Structure",
+			7 => "Structure",
 			10 => "1:Phase Cannon",
 			12 => "1:Light Phase Cannon",
 			14 => "0:Shield Projector",
