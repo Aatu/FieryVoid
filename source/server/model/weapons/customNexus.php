@@ -414,7 +414,7 @@ class NexusMiniRocket extends Weapon{
 class NexusPlasmaBombRack extends Plasma{
         public $name = "NexusPlasmaBombRack";
         public $displayName = "Plasma Bomb Rack";
-		    public $iconPath = "NexusPlasmaBombRack.png";
+		    public $iconPath = "NexusPlasmaBomb.png";
         public $animation = "trail";
         public $trailColor = array(11, 224, 255);
         public $animationColor = array(50, 50, 50);
