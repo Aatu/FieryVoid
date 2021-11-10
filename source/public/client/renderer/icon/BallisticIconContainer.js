@@ -102,8 +102,11 @@ window.BallisticIconContainer = function () {
     }
 
     function createBallisticIcon(ballistic, iconContainer, turn, scene) {
-        var shooterIcon = iconContainer.getById(ballistic.shooterid);
+        var shooterIcon = iconContainer.getById(ballistic.shooterid);		
         var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
+		if (ballistic.type == 'normal') { //it's direct fire after all!
+			launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
+		}
         var targetPosition = null;
         var targetIcon = null;
 
