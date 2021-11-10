@@ -76,6 +76,10 @@ if (isset($_SESSION["user"])) {
 	    <br><b>EMine-less Narn mainline ships</b> - don't ask for more variants before tournament please :P (courtesy of Geoffrey)
 	    <br><b>BSG marine assault fixed</b> - now Marines can't be freely tossed across the map!
 	    <br><b>BDEW fixed</b> - now it works again...
+		<br><br>---------- <b>update 9th of November</b> ----------
+	    <br><b>Shadow Destroyer fixed</b> - Advanced Armor seems appropriate there somehow
+	    <br><b>Direct fire hextarget fire orders highlight</b> - Shredder users rejoice!
+	    <br><b>-1 Thrust crit behavior fixed</b> - again... please report any irregularities with this crit!
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
