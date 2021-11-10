@@ -88,7 +88,7 @@ class Xonn extends VreeCapital{
             1=> array(
                     4 => "Thruster",
                     6 => "Antiproton Gun",
-                    8 => "0:Antimatter Shredder",                    
+                    7 => "0:Antimatter Shredder",                    
                     9 => "0:Antimatter Cannon",
                     17 => "Structure",
                     20 => "Primary",
