@@ -1591,15 +1591,15 @@ spl_autoload_register(
 
 
 				//Nexus ships - Craytan
-                'craytanbromin' => '/server/model/ships/ZNexusCraytan/CraytanBromin.php',					
-                'craytancorvette' => '/server/model/ships/ZNexusCraytan/CraytanCorvette.php',					
-                'craytancorvette2089' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2089.php',					
-                'craytancorvette2126' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2126.php',					
-                'craytanepiron' => '/server/model/ships/ZNexusCraytan/CraytanEpiron.php',					
-                'craytanepiron2101' => '/server/model/ships/ZNexusCraytan/CraytanEpiron2101.php',					
-                'craytanhepron' => '/server/model/ships/ZNexusCraytan/CraytanHepron.php',					
-                'craytanhepron2085' => '/server/model/ships/ZNexusCraytan/CraytanHepron2085.php',					
-                'craytanhepron2126' => '/server/model/ships/ZNexusCraytan/CraytanHepron2126.php',					
+//                'craytanbromin' => '/server/model/ships/ZNexusCraytan/CraytanBromin.php',					
+//                'craytancorvette' => '/server/model/ships/ZNexusCraytan/CraytanCorvette.php',					
+//                'craytancorvette2089' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2089.php',					
+//                'craytancorvette2126' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2126.php',					
+//                'craytanepiron' => '/server/model/ships/ZNexusCraytan/CraytanEpiron.php',					
+//                'craytanepiron2101' => '/server/model/ships/ZNexusCraytan/CraytanEpiron2101.php',					
+//                'craytanhepron' => '/server/model/ships/ZNexusCraytan/CraytanHepron.php',					
+ //               'craytanhepron2085' => '/server/model/ships/ZNexusCraytan/CraytanHepron2085.php',					
+ //               'craytanhepron2126' => '/server/model/ships/ZNexusCraytan/CraytanHepron2126.php',					
 
 
 
