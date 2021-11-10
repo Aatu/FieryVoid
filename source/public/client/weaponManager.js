@@ -686,6 +686,12 @@ window.weaponManager = {
         //var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon); //moved lower
 	    
         //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
+		
+		//check whether target moved out of range - then set to 0!
+		var maxDistance = Math.max(weapon.range, weapon.distanceRange);
+		if ( (maxDistance>0) && (maxDistance<distance) ){ //range is limited and shorter than current distance to target
+			return 0;
+		}
 
         var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter, weapon);
 		

@@ -523,7 +523,7 @@
         public $trailLength = 10;
 		public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
 
-        public $intercept = 0; //it seems that this weapon cannot intercept!
+        public $intercept = 1; //weapon can (..probably...) intercept at default rules... probably intended as a single shot of -2/-3 - but in FV these shots are separate, so that's a lot of separate -1s
         public $loadingtime = 1;
 		public $normalload = 2; //full power (one more shot) needs longer charge
 		public $guns = 2;//3 after a turn of charging

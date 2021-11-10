@@ -66,15 +66,15 @@
             $FDEW = 0;
             foreach ($gamedata->ships as $ship)
             {
-                if ($ship->team == $target->team && $ship->isElint()
-                     && Mathlib::getDistanceHex($target, $ship) <= 20){
+                if ( ($ship->team == $target->team) 
+					&& $ship->isElint()
+                    && Mathlib::getDistanceHex($target, $ship) <= 20
+				){
                     $blanket = $ship->getBlanketDEW($gamedata->turn);
-                    
-                    if ( $blanket > $FDEW )
-                        $FDEW = $blanket*0.25;
+                    if ( $blanket > $FDEW ) $FDEW = $blanket;
                 }
             }
-            
+            $FDEW = $FDEW * 0.25;
             return $FDEW;
         }
         
