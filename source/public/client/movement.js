@@ -1622,9 +1622,10 @@ shipManager.movement = {
             var sub = 0;
             if (shipManager.criticals.hasCritical(system, "FirstThrustIgnored")) {
 				//correction of bug reducing turn delay if channeled through damaged thruster...
-                //if (shipManager.movement.getAmountChanneledReal(ship, system, true) === 0) sub = 1				
+                if (shipManager.movement.getAmountChanneledReal(ship, system, true) === 0) sub = 1	
+				//correction not working, returning to original for now
 				//if (shipManager.movement.getAmountChanneledReal(ship, system, false) > 0) sub = 1;
-				if (shipManager.movement.getAmountChanneledReal(ship, system, true) > 0) sub = 1;
+				//if (shipManager.movement.getAmountChanneledReal(ship, system, true) > 0) sub = 1;
             }
 
             assignedarray[ship.systems[i].direction] += Math.ceil(movement.assignedThrust[i] * mod) - sub;
