@@ -1640,16 +1640,16 @@ class NexusChaffLauncher extends Weapon{
         public $animationExplosionScale = 0.10;
         public $animationColor =  array(245, 245, 44);
         public $trailColor = array(206, 206, 83);
-	public $guns = 1; //multiplied to d6 at firing
+		public $guns = 1; //multiplied to d4 at firing
 	     
         public $loadingtime = 1;
         public $normalload = 1;	    
-        public $priority = 3; //very light weapon
+        public $priority = 6; 
         	    
 		public $ballisticIntercept = true;
         public $intercept = 1; //as it should be, but here they CAN combine vs same shot!
 	    
-	public $rangePenalty = 2;
+		public $rangePenalty = 2;
         public $fireControl = array(2, 1, 1); // fighters, <mediums, <capitals
 	    
 	    public $damageType = "Standard"; 
@@ -1666,13 +1666,13 @@ class NexusChaffLauncher extends Weapon{
 		if ( $powerReq == 0 ) $powerReq = 2;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-        
 	    
         public function setSystemDataWindow($turn){            
             parent::setSystemDataWindow($turn);		
 			$this->data["Special"] = "Fires d4 separate shots (actual number rolled at firing resolution).";
-			$this->data["Special"] .= "<br>When fired defensively, a single Scattergun cannot engage the same incoming shot twice (even ballistic one).";
+			$this->data["Special"] .= "<br>When fired defensively, a single CIDS cannot engage the same incoming shot twice (even ballistic one).";
 			$this->data["Special"] .= "<br>Ignores armor.";
+			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
         }
 	    
 	//if fired offensively - make d4 attacks (copies of 1 existing); 
@@ -1725,16 +1725,16 @@ class NexusChaffLauncher extends Weapon{
 	}	    
 	    
         public function getDamage($fireOrder){
-            return 2; 
+            return 3; 
         }
  
         public function setMinDamage()
         {
-            $this->minDamage = 2;
+            $this->minDamage = 3;
         }
         public function setMaxDamage()
         {
-            $this->maxDamage = 2 ;
+            $this->maxDamage =  3;
         }
 		
     }  // endof NexusCIDS
@@ -1896,9 +1896,9 @@ class NexusAutocannon extends Matter{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return 5;   }
-        public function setMinDamage(){     $this->minDamage = 5 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 5 ;      }
+        public function getDamage($fireOrder){ return 6;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 6 ;      }
 		
 }// endof NexusAutocannon
 
@@ -1930,18 +1930,20 @@ class NexusAutocannonFtr extends Matter{
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return 5;   }
-        public function setMinDamage(){     $this->minDamage = 5 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 5 ;      }
+        public function getDamage($fireOrder){ return 6;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 6 ;      }
 }// endof NexusAutocannon
 
 
-class NexusHeavyAutocannon extends Matter{
+
+/*fighter-mounted variant*/
+class NexusAutogun extends Matter{
         public $trailColor = array(206, 206, 83);
 
-        public $name = "NexusHeavyAutocannon";
-        public $displayName = "Heavy Autocannon";
-		public $iconPath = "NexusHeavyAutocannon.png";
+        public $name = "NexusAutogun";
+        public $displayName = "Autogun";
+		public $iconPath = "NexusAutocannon.png";
 	    
         public $animation = "trail";
         public $animationColor = array(245, 245, 44);
@@ -1949,32 +1951,34 @@ class NexusHeavyAutocannon extends Matter{
         public $projectilespeed = 10;
         public $animationWidth = 2;
         public $trailLength = 35;
-        public $loadingtime = 3;
-        public $priority = 8;
+        public $loadingtime = 1;
+		public $guns = 1;
+        public $priority = 5;
 
-        public $rangePenalty = 0.66; // -2 / 3 hexes
-        public $fireControl = array(-1, 1, 2); // fighters, <mediums, <capitals
+        public $rangePenalty = 1; //
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
 
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 6;
-            if ( $powerReq == 0 ) $powerReq = 2;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	function __construct($startArc, $endArc, $nrOfShots = 1){
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return Dice::d(6, 4);   }
-        public function setMinDamage(){     $this->minDamage = 4 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 24 ;      }
+        public function getDamage($fireOrder){ return Dice::d(3, 2);   }
+        public function setMinDamage(){     $this->minDamage = 2 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 6 ;      }
 		
-}// endof NexusHeavyAutocannon
+}// endof NexusAutogun
 
 
-class NexusMedAutocannon extends Matter{
+
+
+class NexusHeavySentryGun extends Matter{
         public $trailColor = array(206, 206, 83);
 
-        public $name = "NexusMedAutocannon";
-        public $displayName = "Medium Autocannon";
-		public $iconPath = "NexusAutocannon.png";
+        public $name = "NexusHeavySentryGun";
+        public $displayName = "Heavy Sentry Gun";
+		public $iconPath = "NexusHeavyAutocannon.png";
 	    
         public $animation = "trail";
         public $animationColor = array(245, 245, 44);
@@ -1985,8 +1989,41 @@ class NexusMedAutocannon extends Matter{
         public $loadingtime = 2;
         public $priority = 8;
 
+        public $rangePenalty = 0.66; // -2 / 3 hexes
+        public $fireControl = array(-2, 1, 2); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(6, 3);   }
+        public function setMinDamage(){     $this->minDamage = 3 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 18 ;      }
+		
+}// endof NexusHeavySentryGun
+
+
+class NexusSentryGun extends Matter{
+        public $trailColor = array(206, 206, 83);
+
+        public $name = "NexusSentryGun";
+        public $displayName = "Sentry Gun";
+		public $iconPath = "NexusAutocannon.png";
+	    
+        public $animation = "trail";
+        public $animationColor = array(245, 245, 44);
+        public $animationExplosionScale = 0.10;
+        public $projectilespeed = 10;
+        public $animationWidth = 2;
+        public $trailLength = 35;
+        public $loadingtime = 1;
+        public $priority = 8;
+
         public $rangePenalty = 1; 
-        public $fireControl = array(-1, 1, 2); // fighters, <mediums, <capitals
+        public $fireControl = array(-1, 2, 2); // fighters, <mediums, <capitals
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -3312,9 +3349,44 @@ class NexusMatterGun extends Matter{
 // DUAL-MODE WEAPONS
 
 
-class NexusLightAssaultCannon extends Weapon{ 
-/*Dual mode weapon based off the EA Heavy Laser-Pulse Array code*/	
+
+    class NexusLightAssaultCannon extends Particle{
+        public $trailColor = array(190, 75, 20);
+
         public $name = "NexusLightAssaultCannon";
+        public $displayName = "Light Assault Cannon";
+		public $iconPath = "NexusLightAssaultCannon.png";
+	    
+        public $animation = "trail";
+        public $animationColor = array(255, 11, 11);
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 12;
+        public $animationWidth = 2;
+        public $trailLength = 10;
+
+        public $loadingtime = 2;
+        public $priority = 5;
+
+        public $rangePenalty = 0.5; 
+        public $fireControl = array(null, 1, 2); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 3;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 2)+7;   }
+        public function setMinDamage(){     $this->minDamage = 9 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 27 ;      }
+    }
+
+
+
+//class NexusLightAssaultCannon extends Weapon{ 
+/*Dual mode weapon based off the EA Heavy Laser-Pulse Array code*/	
+/*        public $name = "NexusLightAssaultCannon";
         public $displayName = "Light Assault Cannon";
 	    public $iconPath = "NexusLightAssaultCannon.png";
 	
@@ -3398,7 +3470,7 @@ class NexusLightAssaultCannon extends Weapon{
 	
 	
 } //endof class NexusLightAssaultCannon
-
+*/
 
 class NexusLightAssaultCannonBattery extends Weapon{ 
 /*Dual mode weapon based off the EA Heavy Laser-Pulse Array code*/	
@@ -3489,9 +3561,49 @@ class NexusLightAssaultCannonBattery extends Weapon{
 
 
 
-class NexusAssaultCannon extends Weapon{ 
-/*Dual mode weapon based off the EA Heavy Laser-Pulse Array code*/	
+    class NexusAssaultCannon extends Particle{
+        public $trailColor = array(190, 75, 20);
+
         public $name = "NexusAssaultCannon";
+        public $displayName = "Assault Cannon";
+		public $iconPath = "NexusAssaultCannon.png";
+	    
+        public $animation = "trail";
+        public $animationColor = array(255, 11, 11);
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 12;
+        public $animationWidth = 2;
+        public $trailLength = 10;
+
+        public $loadingtime = 3;
+        public $priority = 2;  //Piercing shots go early
+
+        public $firingModes = array(
+            1 => "Piercing"
+        );
+        public $damageType = 'Piercing';
+        public $weaponClass = "Particle"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+        public $rangePenalty = 0.33; 
+        public $fireControl = array(null, 1, 2); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 8;
+            if ( $powerReq == 0 ) $powerReq = 5;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 2)+24;   }
+        public function setMinDamage(){     $this->minDamage = 26 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 44 ;      }
+    }
+
+
+
+//class NexusAssaultCannon extends Weapon{ 
+/*Dual mode weapon based off the EA Heavy Laser-Pulse Array code*/	
+/*        public $name = "NexusAssaultCannon";
         public $displayName = "Assault Cannon";
 	    public $iconPath = "NexusAssaultCannon.png";
 	
@@ -3575,6 +3687,7 @@ class NexusAssaultCannon extends Weapon{
 	
 	
 } //endof class NexusAssaultCannon
+*/
 
 
 class NexusHeavyAssaultCannon extends Weapon{ 
