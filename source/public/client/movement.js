@@ -518,11 +518,12 @@ shipManager.movement = {
         var isPivoting = shipManager.movement.isPivoting(ship);
         if (hasPivoted.right && isPivoting != "right" && right && !ship.agile) return false;
         if (hasPivoted.left && isPivoting != "left" && !right && !ship.agile) return false;
-        //var isPivoting = shipManager.movement.isPivoting(ship);
         if (right && isPivoting == "left" || !right && isPivoting == "right" && !ship.agile) {
             return false;
         }
-        if (ship.pivotcost > shipManager.movement.getRemainingEngineThrust(ship)) return false;
+		if (!shipManager.movement.hasJustTurnedIntoPivot(ship)){ //don't look at thrust available for pivot cancelling IF previous maneuver is turn into pivot
+			if (ship.pivotcost > shipManager.movement.getRemainingEngineThrust(ship)) return false;
+		}
         if (ship.flight && gamedata.gamephase == 3) {
             if (!weaponManager.canCombatTurn(ship)) return false;
             if (Math.ceil(ship.pivotcost * 1.5) > shipManager.movement.getRemainingEngineThrust(ship)) return false;
@@ -531,6 +532,16 @@ shipManager.movement = {
         return true;
     },
 
+	hasJustTurnedIntoPivot: function hasJustTurnedIntoPivot(ship){
+		if(shipManager.movement.isOutOfAlignment(ship)) return false; //if ship is out of alignment, then it hasn't just turned into pivot
+		if (shipManager.movement.isPivoting(ship) == "no" ) return false; //if it's not pivoting, then theres noting to talk about
+		//was last maneuver a turn?
+		var lastmove = shipManager.movement.getLastCommitedMove(ship);
+		if (lastmove.turn != gamedata.turn) return false;//not this turn
+		if ((lastmove.type != 'turnright') && (lastmove.type != 'turnleft')) return false; //not actually a turn ;)
+		//ship is pivoting, last maneuver was a turn and it brought ship in alignment - call it turn into pivot!
+		return true;
+	},
     
     countCombatPivot: function countCombatPivot(ship) {
         var c = 0;
@@ -550,6 +561,12 @@ shipManager.movement = {
         var step = 1;
         var pivoting = shipManager.movement.isPivoting(ship);
         var pivotcost = ship.pivotcost;
+		
+		
+		if (shipManager.movement.hasJustTurnedIntoPivot(ship)){ //just after turning into pivot - cancelling pivot is free!
+			pivotcost = 0;
+		}
+		
         var value = 0;
         if (gamedata.gamephase == 3) {
             pivotcost = Math.ceil(pivotcost * 1.5); //2 for fighters, 3 for shuttles
