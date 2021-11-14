@@ -102,10 +102,12 @@ window.BallisticIconContainer = function () {
     }
 
     function createBallisticIcon(ballistic, iconContainer, turn, scene) {
-        var shooterIcon = iconContainer.getById(ballistic.shooterid);		
+        var shooterIcon = iconContainer.getById(ballistic.shooterid);	
+		var targetType = 'hex';
         var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
 		if (ballistic.type == 'normal') { //it's direct fire after all!
 			launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
+			targetType = 'hexDirect';
 		}
         var targetPosition = null;
         var targetIcon = null;
@@ -128,10 +130,10 @@ window.BallisticIconContainer = function () {
 
         if (!getByTargetIdOrTargetPosition(targetPosition, ballistic.targetId, this.ballisticIcons)) {
             if (targetIcon && targetPosition) {
-                targetSprite =  new BallisticSprite(targetPosition, 'hex');
+                targetSprite =  new BallisticSprite(targetPosition, targetType);//'hex');
                 targetIcon.mesh.add(targetSprite.mesh);
             } else if (targetPosition) {
-                targetSprite =  new BallisticSprite(targetPosition, 'hex');
+                targetSprite =  new BallisticSprite(targetPosition, targetType);//'hex');
                 scene.add(targetSprite.mesh);
             }
         }

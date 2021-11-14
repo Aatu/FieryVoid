@@ -6,6 +6,7 @@ window.BallisticSprite = function () {
     var TEXTURE_LAUNCH = null;
     var TEXTURE_HEX = null;
     var TEXTURE_SHIP = null;
+    var TEXTURE_HEX_DIRECT = null;
 
     function BallisticSprite(position, type) {
         HexagonSprite.call(this, -2);
@@ -26,6 +27,8 @@ window.BallisticSprite = function () {
             return TEXTURE_LAUNCH;
         } else if (type == "hex") {
             return TEXTURE_HEX;
+        } else if (type == "hexDirect") {
+            return TEXTURE_HEX_DIRECT;
         } else {
             return TEXTURE_SHIP;
         }
@@ -35,6 +38,7 @@ window.BallisticSprite = function () {
         TEXTURE_LAUNCH = createTexture('launch');
         TEXTURE_HEX = createTexture('hex');
         TEXTURE_SHIP = createTexture('ship');
+        TEXTURE_HEX_DIRECT = createTexture('hexDirect'); 
     }
 
     function createTexture(type) {
@@ -48,11 +52,13 @@ window.BallisticSprite = function () {
 
     function getStrokeColorByType(type) {
 
-        if (type == "launch") {
-            return "rgba(250,110,5,0.50)";
-        } else if (type == "hex") {
+        if (type == "launch") {//launch hex - orange
+            return "rgba(250,110,5,0.50)"; 
+        } else if (type == "hex") {//ballistic target hex - red
             return "rgba(230,20,10,0.50)";
-        } else {
+        } else if (type == "hexDirect") {//direct fire target hex - light blue
+            return "rgba(25,200,250,0.50)";
+        } else {//...something else...
             return "rgba(144,185,208,0.80)";
         }
     }
@@ -60,10 +66,12 @@ window.BallisticSprite = function () {
     function getFillColorByType(type) {
 
         if (type == "launch") {
-            return "rgba(250,110,5,0.15)";
-        } else if (type == "hex") {
+            return "rgba(250,110,5,0.15)";//launch hex - orange
+        } else if (type == "hex") {//ballistic target hex - red
             return "rgba(230,20,10,0.15)";
-        } else {
+        } else if (type == "hexDirect") {//direct fire target hex - light blue
+            return "rgba(25,200,250,0.50)";
+        } else {//...something else...
             return "rgba(144,185,208,0.30)";
         }
     }
