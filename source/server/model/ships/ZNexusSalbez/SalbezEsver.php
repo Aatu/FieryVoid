@@ -5,7 +5,7 @@ class SalbezEsver extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 175;
-        $this->faction = "ZNexus Playtest Sal-bez";
+        $this->faction = "ZNexus Sal-bez";
         $this->phpclass = "SalbezEsver";
         $this->imagePath = "img/ships/Nexus/salbez_evsk.png";
 			$this->canvasSize = 55; //img has 200px per side
