@@ -1624,7 +1624,12 @@ spl_autoload_register(
                 'dalithornjumpdreadnought' => '/server/model/ships/ZNexusDalithorn/DalithornJumpDreadnought.php',					
                 'dalithornheavyjumpdreadnought' => '/server/model/ships/ZNexusDalithorn/DalithornHeavyJumpDreadnought.php',					
                 'dalithornlightcruiser' => '/server/model/ships/ZNexusDalithorn/DalithornLightCruiser.php',					
+                'dalithornmicrosat' => '/server/model/ships/ZNexusDalithorn/DalithornMicrosat.php',					
+                'dalithornmicrosatrefit' => '/server/model/ships/ZNexusDalithorn/DalithornMicrosatRefit.php',					
+                'dalithornosat' => '/server/model/ships/ZNexusDalithorn/DalithornOSAT.php',					
                 'dalithornpinnace' => '/server/model/ships/ZNexusDalithorn/DalithornPinnace.php',					
+                'dalithornstation' => '/server/model/ships/ZNexusDalithorn/DalithornStation.php',					
+                'dalithornstationearly' => '/server/model/ships/ZNexusDalithorn/DalithornStationEarly.php',					
 
 
 				//Nexus ships - Sal-bez
