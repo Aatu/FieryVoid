@@ -57,7 +57,7 @@ window.BallisticSprite = function () {
         } else if (type == "hex") {//ballistic target hex - red
             return "rgba(230,20,10,0.50)";
         } else if (type == "hexDirect") {//direct fire target hex - light blue
-            return "rgba(25,200,250,0.50)";
+            return "rgba(0,184,230,0.50)";
         } else {//...something else...
             return "rgba(144,185,208,0.80)";
         }
@@ -70,7 +70,7 @@ window.BallisticSprite = function () {
         } else if (type == "hex") {//ballistic target hex - red
             return "rgba(230,20,10,0.15)";
         } else if (type == "hexDirect") {//direct fire target hex - light blue
-            return "rgba(25,200,250,0.50)";
+            return "rgba(0,184,230,0.50)";
         } else {//...something else...
             return "rgba(144,185,208,0.30)";
         }
