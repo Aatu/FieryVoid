@@ -21,7 +21,7 @@ class DalithornStation extends SmallStarBaseFourSections{
 		$this->turncost = 0;
 		$this->turndelaycost = 0;
 
-		$this->fighters = array("superheavy"=>8);
+		$this->fighters = array("superheavy"=>4);
 
 		$this->forwardDefense = 17;
 		$this->sideDefense = 17;
@@ -42,7 +42,6 @@ class DalithornStation extends SmallStarBaseFourSections{
 		$this->addFrontSystem(new NexusLightGasGun(4, 5, 1, 270, 90));
 		$this->addFrontSystem(new NexusLightGasGun(4, 5, 1, 270, 90));
 		$this->addFrontSystem(new Catapult(4, 6));
-		$this->addFrontSystem(new Catapult(4, 6));
 		$this->addFrontSystem(new CargoBay(4, 24));
 
 		$this->addAftSystem(new NexusCoilgun(4, 10, 4, 120, 240));
@@ -50,7 +49,6 @@ class DalithornStation extends SmallStarBaseFourSections{
 		$this->addAftSystem(new NexusGasGun(4, 7, 2, 90, 270));
 		$this->addAftSystem(new NexusLightGasGun(4, 5, 1, 90, 270));
 		$this->addAftSystem(new NexusLightGasGun(4, 5, 1, 90, 270));
-		$this->addAftSystem(new Catapult(4, 6));
 		$this->addAftSystem(new Catapult(4, 6));
 		$this->addAftSystem(new CargoBay(4, 24));
 			
@@ -60,7 +58,6 @@ class DalithornStation extends SmallStarBaseFourSections{
 		$this->addLeftSystem(new NexusLightGasGun(4, 5, 1, 180, 360));
 		$this->addLeftSystem(new NexusLightGasGun(4, 5, 1, 180, 360));
 		$this->addLeftSystem(new Catapult(4, 6));
-		$this->addLeftSystem(new Catapult(4, 6));
 		$this->addLeftSystem(new CargoBay(4, 24));
 
 		$this->addRightSystem(new NexusCoilgun(4, 10, 4, 30, 150));
@@ -68,7 +65,6 @@ class DalithornStation extends SmallStarBaseFourSections{
 		$this->addRightSystem(new NexusGasGun(4, 7, 2, 0, 180));
 		$this->addRightSystem(new NexusLightGasGun(4, 5, 1, 0, 180));
 		$this->addRightSystem(new NexusLightGasGun(4, 5, 1, 0, 180));
-		$this->addRightSystem(new Catapult(4, 6));
 		$this->addRightSystem(new Catapult(4, 6));
 		$this->addRightSystem(new CargoBay(4, 24));
 
