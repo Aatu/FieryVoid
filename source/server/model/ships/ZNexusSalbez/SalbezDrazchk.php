@@ -5,7 +5,7 @@ class SalbezDrazchk extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 43*6;
-        $this->faction = "ZNexus Playtest Sal-bez";
+        $this->faction = "ZNexus Sal-bez";
         $this->phpclass = "SalbezDrazchk";
         $this->shipClass = "Draz-chk Heavy Flight";
         $this->imagePath = "img/ships/Nexus/salbez_drazchk.png";

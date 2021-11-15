@@ -5,7 +5,7 @@ class SalbezBevtun extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 575;
-		$this->faction = "ZNexus Playtest Sal-bez";
+		$this->faction = "ZNexus Sal-bez";
         $this->phpclass = "SalbezBevtun";
         $this->imagePath = "img/ships/Nexus/salbez_bevtun.png";
         $this->shipClass = "Bev'tun Long-Range Miner (2029)";

@@ -67,7 +67,7 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Vree games are crashed</b> - as per warning (new ones created after this point should be safe)
 	    <br><b>Trek shielding was reworked</b> - Star Trek ship shields now work differently - hopefully as intended!
 	    <br><b>Babylon 5 station was built</b> - courtesy of Geoffrey!
-		---------- <b>update 8th of November/b> ----------
+		<br><br>---------- <b>update 8th of November</b> ----------
 	    <br><b>Out of range calulated</b> - target moving out of range of launched ballistic weapon will immediately see appropriate drop in hit chance
 	    <br><b>Full missile launcher fixed</b> - now distance range is calculated properly instead of being fixed 
 	    <br><b>Light Antiproton Gun fixed</b> - now it doesn't lose damage with distance
@@ -76,6 +76,12 @@ if (isset($_SESSION["user"])) {
 	    <br><b>EMine-less Narn mainline ships</b> - don't ask for more variants before tournament please :P (courtesy of Geoffrey)
 	    <br><b>BSG marine assault fixed</b> - now Marines can't be freely tossed across the map!
 	    <br><b>BDEW fixed</b> - now it works again...
+		<br><br>---------- <b>update 9th of November</b> ----------
+	    <br><b>Shadow Destroyer fixed</b> - Advanced Armor seems appropriate there somehow
+	    <br><b>Direct fire hextarget fire orders highlight</b> - Shredder users rejoice!
+	    <br><b>-1 Thrust crit behavior fixed</b> - again... please report any irregularities with this crit!
+		<br><br>---------- <b>update 15th of November</b> ----------
+	    <br><b>Craytan Union playtest</b> - A new Nexus faction is testing its systems
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.

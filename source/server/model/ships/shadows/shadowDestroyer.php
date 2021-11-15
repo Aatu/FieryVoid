@@ -19,6 +19,7 @@ class ShadowDestroyer extends MediumShip{
         
 		$this->halfPhaseThrust = 6; //needed for half phasing; equal to thrust from two BioThrusters on a given ship
         //$this->gravitic = true;
+		$this->advancedArmor = true;   
         $this->agile = true;
         $this->turncost = 0.33;
         $this->turndelaycost = 0.25;
