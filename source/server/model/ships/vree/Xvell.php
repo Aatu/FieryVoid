@@ -24,6 +24,7 @@ class Xvell extends MediumShip{
         
         $this->iniativebonus = 12 *5;
         $this->agile = true;
+        $this->gravitic = true;           
 
         
         $this->addPrimarySystem(new Reactor(3, 11, 0, 0));
