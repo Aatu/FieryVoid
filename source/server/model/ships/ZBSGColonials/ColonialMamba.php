@@ -43,11 +43,14 @@ class ColonialMamba extends FighterFlight{
             $fighter->imagePath = "img/ships/BSG/mamba.png";
             $fighter->iconPath = "img/ships/BSG/mamba_large.png";
 
-            $frontGun = new BSGHypergun(340, 20, 0, 4);
-            $frontGun->displayName = "Hypergun";
+//            $frontGun = new BSGHypergun(340, 20, 0, 4);
+//            $frontGun->displayName = "Hypergun";
+//            $fighter->addFrontSystem($frontGun);
+
+            $frontGun = new BSGHypergunVA(345, 15, 15, 0, 5);//narower arc (from/to), difference between narrow and wide arc, damage bonus, number of shots
+            $fighter->addFrontSystem($frontGun);
 
 //            $fighter->addFrontSystem(new FighterMissileRack(4, 330, 30));
-            $fighter->addFrontSystem($frontGun);
 //            $fighter->addFrontSystem(new FighterMissileRack(1, 330, 30));
 
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			

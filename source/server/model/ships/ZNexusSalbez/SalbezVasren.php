@@ -5,7 +5,7 @@ class SalbezVasren extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 400;
-        $this->faction = "ZNexus Playtest Sal-bez";
+        $this->faction = "ZNexus Sal-bez";
         $this->phpclass = "SalbezVasren";
         $this->imagePath = "img/ships/Nexus/salbez_destroyer.png";
 			$this->canvasSize = 115; //img has 200px per side

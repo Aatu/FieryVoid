@@ -87,3 +87,9 @@ var BSGLtKineticEnergyWeaponVA = function BSGLtKineticEnergyWeaponVA(json, ship)
 };
 BSGLtKineticEnergyWeaponVA.prototype = Object.create(Weapon.prototype);
 BSGLtKineticEnergyWeaponVA.prototype.constructor = BSGLtKineticEnergyWeaponVA;
+
+var BSGHypergunVA = function BSGHypergunVA(json, ship) {
+    Weapon.call(this, json, ship);
+};
+BSGHypergunVA.prototype = Object.create(Weapon.prototype);
+BSGHypergunVA.prototype.constructor = BSGHypergunVA;

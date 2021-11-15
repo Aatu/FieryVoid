@@ -518,11 +518,12 @@ shipManager.movement = {
         var isPivoting = shipManager.movement.isPivoting(ship);
         if (hasPivoted.right && isPivoting != "right" && right && !ship.agile) return false;
         if (hasPivoted.left && isPivoting != "left" && !right && !ship.agile) return false;
-        //var isPivoting = shipManager.movement.isPivoting(ship);
         if (right && isPivoting == "left" || !right && isPivoting == "right" && !ship.agile) {
             return false;
         }
-        if (ship.pivotcost > shipManager.movement.getRemainingEngineThrust(ship)) return false;
+		if (!shipManager.movement.hasJustTurnedIntoPivot(ship)){ //don't look at thrust available for pivot cancelling IF previous maneuver is turn into pivot
+			if (ship.pivotcost > shipManager.movement.getRemainingEngineThrust(ship)) return false;
+		}
         if (ship.flight && gamedata.gamephase == 3) {
             if (!weaponManager.canCombatTurn(ship)) return false;
             if (Math.ceil(ship.pivotcost * 1.5) > shipManager.movement.getRemainingEngineThrust(ship)) return false;
@@ -531,6 +532,16 @@ shipManager.movement = {
         return true;
     },
 
+	hasJustTurnedIntoPivot: function hasJustTurnedIntoPivot(ship){
+		if(shipManager.movement.isOutOfAlignment(ship)) return false; //if ship is out of alignment, then it hasn't just turned into pivot
+		if (shipManager.movement.isPivoting(ship) == "no" ) return false; //if it's not pivoting, then theres noting to talk about
+		//was last maneuver a turn?
+		var lastmove = shipManager.movement.getLastCommitedMove(ship);
+		if (lastmove.turn != gamedata.turn) return false;//not this turn
+		if ((lastmove.type != 'turnright') && (lastmove.type != 'turnleft')) return false; //not actually a turn ;)
+		//ship is pivoting, last maneuver was a turn and it brought ship in alignment - call it turn into pivot!
+		return true;
+	},
     
     countCombatPivot: function countCombatPivot(ship) {
         var c = 0;
@@ -542,14 +553,20 @@ shipManager.movement = {
     },
 
     
-    doPivot: function doPivot(ship, right) {
-        if (!shipManager.movement.canPivot(ship, right)) return false;
+    doPivot: function doPivot(ship, right) { 
+		if (!shipManager.movement.canPivot(ship, right)) return false;
         var lm = ship.movement[ship.movement.length - 1];
         var name;
         var newfacing = lm.facing;
         var step = 1;
         var pivoting = shipManager.movement.isPivoting(ship);
         var pivotcost = ship.pivotcost;
+		
+		
+		if (shipManager.movement.hasJustTurnedIntoPivot(ship)){ //just after turning into pivot - cancelling pivot is free!
+			pivotcost = 0;
+		}
+		
         var value = 0;
         if (gamedata.gamephase == 3) {
             pivotcost = Math.ceil(pivotcost * 1.5); //2 for fighters, 3 for shuttles
@@ -779,6 +796,9 @@ shipManager.movement = {
         /*cannot turn into pivot if unit is aligned...*/
         if(!shipManager.movement.isOutOfAlignment(ship)) return false;
         
+		var turndelay = shipManager.movement.calculateCurrentTurndelay(ship);
+        if (turndelay > 0) return false; //cannot turn into pivot if turn delay is not satisfied!
+		
         var heading = shipManager.movement.getLastCommitedMove(ship).heading;
         var facing = shipManager.movement.getLastCommitedMove(ship).facing;        
         var reverseheading = mathlib.addToHexFacing(heading, 3);
@@ -852,6 +872,17 @@ shipManager.movement = {
         if (!ship.flight) {
             shipWindowManager.assignThrust(ship);
         }
+		
+		/*does not work correctly, because thrust is yest to be actually assigned!!!
+		//cancel pivoting itself, too
+		//it will be cancelled separately - but if done so, it will return to current state of turning into pivot without cancelling pivoting
+		var isPivoting = shipManager.movement.isPivoting(ship) ;
+		if (isPivoting == 'left'){
+			shipManager.movement.doPivot(ship,false,true); //to stop pivot, counter-pivot order is given; parameters: ship, right, free)
+		}else if (isPivoting == 'right'){
+			shipManager.movement.doPivot(ship,true,true); //to stop pivot, counter-pivot order is given; parameters: ship, right, free)
+		}
+		*/
     },
 
     hasPivoted: function hasPivoted(ship) {
@@ -1607,7 +1638,7 @@ shipManager.movement = {
     }, //endof function calculateRequiredThrust
 
     
-    calculateAssignedThrust: function calculateAssignedThrust(ship, movement) {
+    calculateAssignedThrust: function calculateAssignedThrust(ship, movement, overthrustCheck = false) {//fix attempt: third parameter: is it overthrust check? (else: this is thrust assignment check)
         var assignedarray = Array(null, null, null, null, null);
         for (var i in movement.assignedThrust) {
             if (!ship.systems[i]) continue;
@@ -1621,9 +1652,13 @@ shipManager.movement = {
 
             var sub = 0;
             if (shipManager.criticals.hasCritical(system, "FirstThrustIgnored")) {
-				//correction of bug reducing turn delay if channeled through damaged thruster...
-                //if (shipManager.movement.getAmountChanneledReal(ship, system, true) === 0) sub = 1;
-				if (shipManager.movement.getAmountChanneledReal(ship, system, false) > 0) sub = 1;
+				if (overthrustCheck){ //another fix attempt! - call when checking for overthrust
+					if (shipManager.movement.getAmountChanneledReal(ship, system, false) == movement.assignedThrust[i]) sub = 1; //when it's entire channeled thrust - otherwise it's not first maneuver using this thruster this turn!
+				}else{ //original call - working correctly when assigning thrust
+					if (shipManager.movement.getAmountChanneledReal(ship, system, true) === 0) sub = 1; //original call - if this is the first point being assigned
+				}
+				//ok, reason of first fix failure is that the function is called both when assigning thrust (where above call is correct), and later when calculating delay (...when it is incorrect...)
+				//now attempting to fix this by third parameter...
             }
 
             assignedarray[ship.systems[i].direction] += Math.ceil(movement.assignedThrust[i] * mod) - sub;
@@ -1632,9 +1667,9 @@ shipManager.movement = {
         return assignedarray;
     },
 
-    /*called when point of thrust is assigned*/
-    calculateThrustStillReq: function calculateThrustStillReq(ship, movement) {
-        var assignedarray = shipManager.movement.calculateAssignedThrust(ship, movement);
+    /*called when point of thrust is assigned... but also when calculationg how much overthrust was spent*/
+    calculateThrustStillReq: function calculateThrustStillReq(ship, movement, overthrustCheck = false) { //fix attempt: third parameter: is it overthrust check? (else: this is thrust assignment check)
+        var assignedarray = shipManager.movement.calculateAssignedThrust(ship, movement, overthrustCheck);
         var requiredThrust = movement.requiredThrust;
         var stillReq = requiredThrust.slice();
         var any = 0;
@@ -1786,7 +1821,7 @@ shipManager.movement = {
     },
 
     calculateExtraThrustSpent: function calculateExtraThrustSpent(ship, movement) {
-        var reg = shipManager.movement.calculateThrustStillReq(ship, movement);
+        var reg = shipManager.movement.calculateThrustStillReq(ship, movement, true); //third parameter: calculating overthrusting
         var extra = 0 - reg[0];
         if (extra < 0) extra = 0;
         return extra;
