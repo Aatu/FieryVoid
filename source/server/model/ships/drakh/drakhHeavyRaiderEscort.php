@@ -45,15 +45,15 @@ class DrakhHeavyRaiderEscort extends LCV{
 		$sensors->markImproved();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(4, 12, 0, 7, 2));
-	$this->addPrimarySystem(new customLtPhaseDisruptorShip(3, 0, 0, 240, 30));
-	$this->addPrimarySystem(new customLtPhaseDisruptorShip(3, 0, 0, 330, 120));
+	$this->addFrontSystem(new customLtPhaseDisruptorShip(3, 0, 0, 240, 30));
+	$this->addFrontSystem(new customLtPhaseDisruptorShip(3, 0, 0, 330, 120));
 	$this->addPrimarySystem(new AbsorbtionShield(2,6,4,1,0,360));
 	$this->addPrimarySystem(new Structure( 4, 30));
 	    
         $this->hitChart = array(
         		0=> array( //should never happen
         				10 => "Structure",
-        				12 => "Light Phase Disruptor",
+        				12 => "1:Light Phase Disruptor",
         				14 => "Absorption Shield",
         				16 => "Engine",
         				18 => "Reactor",
@@ -61,7 +61,7 @@ class DrakhHeavyRaiderEscort extends LCV{
         		),
         		1=> array( //PRIMARY hit table, effectively
         				10 => "Structure",
-        				12 => "0:Light Phase Disruptor",
+        				12 => "1:Light Phase Disruptor",
         				14 => "0:Absorption Shield",
         				16 => "0:Engine",
         				18 => "0:Reactor",
@@ -69,7 +69,7 @@ class DrakhHeavyRaiderEscort extends LCV{
         		),
         		2=> array( //PRIMARY hit table, effectively
         				10 => "Structure",
-        				12 => "0:Light Phase Disruptor",
+        				12 => "1:Light Phase Disruptor",
         				14 => "0:Absorption Shield",
         				16 => "0:Engine",
         				18 => "0:Reactor",
