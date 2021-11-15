@@ -4,7 +4,7 @@ class DalithornStation extends SmallStarBaseFourSections{
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
-		$this->pointCost = 850;
+		$this->pointCost = 800;
 		$this->base = true;
 		$this->smallBase = true;
 		$this->faction = "ZNexus Dalithorn";
