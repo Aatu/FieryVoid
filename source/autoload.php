@@ -1471,10 +1471,11 @@ spl_autoload_register(
 				'nexusacids' => '/server/model/weapons/customNexus.php',
 				'nexusautocannon' => '/server/model/weapons/customNexus.php',
 				'nexusautocannonftr' => '/server/model/weapons/customNexus.php',
+				'nexusautogun' => '/server/model/weapons/customNexus.php',
 				'nexuscids' => '/server/model/weapons/customNexus.php',
 				'nexuscoilgun' => '/server/model/weapons/customNexus.php',
-				'nexusheavyautocannon' => '/server/model/weapons/customNexus.php',
-				'nexusmedautocannon' => '/server/model/weapons/customNexus.php',
+				'nexusheavysentrygun' => '/server/model/weapons/customNexus.php',
+				'nexussentrygun' => '/server/model/weapons/customNexus.php',
 				'nexuslightcoilgun' => '/server/model/weapons/customNexus.php',
 				'nexuslightgasgun' => '/server/model/weapons/customNexus.php',
 				'nexuslightgasgunftr' => '/server/model/weapons/customNexus.php',
@@ -1591,12 +1592,17 @@ spl_autoload_register(
 
 
 				//Nexus ships - Craytan
-//                'craytancorvette' => '/server/model/ships/ZNexusCraytan/CraytanCorvette.php',					
+//                'craytanbromin' => '/server/model/ships/ZNexusCraytan/CraytanBromin.php',					
+                'craytanmaprin' => '/server/model/ships/ZNexusCraytan/CraytanMaprin.php',					
 //                'craytancorvette2089' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2089.php',					
 //                'craytancorvette2126' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2126.php',					
-//                'craytanhepron' => '/server/model/ships/ZNexusCraytan/CraytanHepron.php',					
-//                'craytanhepron2085' => '/server/model/ships/ZNexusCraytan/CraytanHepron2085.php',					
-//                'craytanhepron2126' => '/server/model/ships/ZNexusCraytan/CraytanHepron2126.php',					
+                'craytanepiron' => '/server/model/ships/ZNexusCraytan/CraytanEpiron.php',					
+//                'craytanepiron2101' => '/server/model/ships/ZNexusCraytan/CraytanEpiron2101.php',					
+                'craytanhelis' => '/server/model/ships/ZNexusCraytan/CraytanHelis.php',					
+                'craytanhepron' => '/server/model/ships/ZNexusCraytan/CraytanHepron.php',					
+ //               'craytanhepron2085' => '/server/model/ships/ZNexusCraytan/CraytanHepron2085.php',					
+ //               'craytanhepron2126' => '/server/model/ships/ZNexusCraytan/CraytanHepron2126.php',					
+                'craytanpolten' => '/server/model/ships/ZNexusCraytan/CraytanPolten.php',					
 
 
 
@@ -1618,7 +1624,13 @@ spl_autoload_register(
                 'dalithornjumpdreadnought' => '/server/model/ships/ZNexusDalithorn/DalithornJumpDreadnought.php',					
                 'dalithornheavyjumpdreadnought' => '/server/model/ships/ZNexusDalithorn/DalithornHeavyJumpDreadnought.php',					
                 'dalithornlightcruiser' => '/server/model/ships/ZNexusDalithorn/DalithornLightCruiser.php',					
+                'dalithornmicrosat' => '/server/model/ships/ZNexusDalithorn/DalithornMicrosat.php',					
+                'dalithornmicrosatrefit' => '/server/model/ships/ZNexusDalithorn/DalithornMicrosatRefit.php',					
+                'dalithornosat' => '/server/model/ships/ZNexusDalithorn/DalithornOSAT.php',					
+                'dalithornosatrefit' => '/server/model/ships/ZNexusDalithorn/DalithornOSATRefit.php',					
                 'dalithornpinnace' => '/server/model/ships/ZNexusDalithorn/DalithornPinnace.php',					
+                'dalithornstation' => '/server/model/ships/ZNexusDalithorn/DalithornStation.php',					
+                'dalithornstationearly' => '/server/model/ships/ZNexusDalithorn/DalithornStationEarly.php',					
 
 
 				//Nexus ships - Sal-bez
@@ -1677,6 +1689,9 @@ spl_autoload_register(
                 'velraxlasergunboat' => '/server/model/ships/ZNexusVelrax/VelraxLaserGunboat.php',					
                 'velraxlasergunboatrefit' => '/server/model/ships/ZNexusVelrax/VelraxLaserGunboatRefit.php',					
                 'velraxlasergunboatrefit2' => '/server/model/ships/ZNexusVelrax/VelraxLaserGunboatRefit2.php',					
+                'velraxosat' => '/server/model/ships/ZNexusVelrax/VelraxOSAT.php',					
+                'velraxosatearly' => '/server/model/ships/ZNexusVelrax/VelraxOSATEarly.php',					
+                'velraxosatrefit' => '/server/model/ships/ZNexusVelrax/VelraxOSATRefit.php',					
                 'velraxrastencorvette' => '/server/model/ships/ZNexusVelrax/VelraxRastenCorvette.php',					
                 'velraxrastencorvetterefit' => '/server/model/ships/ZNexusVelrax/VelraxRastenCorvetteRefit.php',					
                 'velraxrastencorvetterefit2' => '/server/model/ships/ZNexusVelrax/VelraxRastenCorvetteRefit2.php',					
@@ -1800,6 +1815,7 @@ spl_autoload_register(
                 'bsgflakbattery' => '/server/model/weapons/customBSG.php',
                 'bsghvykineticenergyweapon' => '/server/model/weapons/customBSG.php',
                 'bsghypergun' => '/server/model/weapons/customBSG.php',
+                'bsghypergunva' => '/server/model/weapons/customBSG.php',
                 'bsgkineticenergyweapon' => '/server/model/weapons/customBSG.php',
                 'bsgltkineticenergyweapon' => '/server/model/weapons/customBSG.php',
                 'bsgltkineticenergyweaponva' => '/server/model/weapons/customBSG.php',
@@ -2327,7 +2343,12 @@ spl_autoload_register(
 				'xonn' => '/server/model/ships/vree/Xonn.php',
 				'xvell' => '/server/model/ships/vree/Xvell.php',
 				'xavan' => '/server/model/ships/vree/Xavan.php',
-				
+				'hybridsaucer' => '/server/model/ships/raiders/HybridSaucer.php',
+				'jia' => '/server/model/ships/raiders/Jia.php',
+				'vastar' => '/server/model/ships/raiders/Vastar.php',
+				'vasy' => '/server/model/ships/raiders/Vasy.php',
+				'vyshesh' => '/server/model/ships/civilians/Vyshesh.php',								
+												
 				//antimatter-specific criticals
                 'reducedrangeantimatter' => '/server/model/cricialClasses.php',
                 'reduceddamageantimatter' => '/server/model/cricialClasses.php',

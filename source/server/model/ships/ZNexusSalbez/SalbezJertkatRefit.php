@@ -5,7 +5,7 @@ class SalbezJertkatRefit extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 590;
-	$this->faction = "ZNexus Playtest Sal-bez";
+	$this->faction = "ZNexus Sal-bez";
         $this->phpclass = "SalbezJertkatRefit";
         $this->imagePath = "img/ships/Nexus/salbez_jertkat.png";
         $this->shipClass = "Jer't'kat Heavy Cruiser (2143 refit)";

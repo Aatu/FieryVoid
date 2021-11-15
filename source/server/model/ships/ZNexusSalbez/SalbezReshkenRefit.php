@@ -4,8 +4,8 @@ class SalbezReshkenRefit extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 625;
-	$this->faction = "ZNexus Playtest Sal-bez";
+	$this->pointCost = 600;
+	$this->faction = "ZNexus Sal-bez";
         $this->phpclass = "SalbezReshkenRefit";
         $this->imagePath = "img/ships/Nexus/salbez_reshken.png";
         $this->shipClass = "Resh-ken Command Cruiser (2150 refit)";
@@ -38,8 +38,8 @@ class SalbezReshkenRefit extends BaseShip{
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-		$this->addFrontSystem(new HeavyLaser(2, 8, 6, 300, 360));
-		$this->addFrontSystem(new HeavyLaser(2, 8, 6, 0, 60));
+		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 360));
+		$this->addFrontSystem(new MediumLaser(3, 6, 5, 0, 60));
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 270, 90));
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 270, 90));
 
@@ -83,7 +83,7 @@ class SalbezReshkenRefit extends BaseShip{
 			),
 			1=> array(
 					6 => "Thruster",
-					8 => "Heavy Laser",
+					8 => "Medium Laser",
 					10 => "Light Laser",
 					18 => "Structure",
 					20 => "Primary",
