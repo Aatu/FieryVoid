@@ -1814,6 +1814,7 @@ spl_autoload_register(
                 'bsgflakbattery' => '/server/model/weapons/customBSG.php',
                 'bsghvykineticenergyweapon' => '/server/model/weapons/customBSG.php',
                 'bsghypergun' => '/server/model/weapons/customBSG.php',
+                'bsghypergunva' => '/server/model/weapons/customBSG.php',
                 'bsgkineticenergyweapon' => '/server/model/weapons/customBSG.php',
                 'bsgltkineticenergyweapon' => '/server/model/weapons/customBSG.php',
                 'bsgltkineticenergyweaponva' => '/server/model/weapons/customBSG.php',
