@@ -1627,6 +1627,7 @@ spl_autoload_register(
                 'dalithornmicrosat' => '/server/model/ships/ZNexusDalithorn/DalithornMicrosat.php',					
                 'dalithornmicrosatrefit' => '/server/model/ships/ZNexusDalithorn/DalithornMicrosatRefit.php',					
                 'dalithornosat' => '/server/model/ships/ZNexusDalithorn/DalithornOSAT.php',					
+                'dalithornosatrefit' => '/server/model/ships/ZNexusDalithorn/DalithornOSATRefit.php',					
                 'dalithornpinnace' => '/server/model/ships/ZNexusDalithorn/DalithornPinnace.php',					
                 'dalithornstation' => '/server/model/ships/ZNexusDalithorn/DalithornStation.php',					
                 'dalithornstationearly' => '/server/model/ships/ZNexusDalithorn/DalithornStationEarly.php',					

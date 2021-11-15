@@ -1,19 +1,19 @@
 <?php
-class DalithornOSAT extends OSAT{
+class DalithornOSATRefit extends OSAT{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 200;
+		$this->pointCost = 225;
 		$this->faction = 'ZNexus Dalithorn';
-        $this->phpclass = "DalithornOSAT";
+        $this->phpclass = "DalithornOSATRefit";
         $this->imagePath = "img/ships/Nexus/DalithornOSAT.png";
 			$this->canvasSize = 80; //img has 100px per side
-        $this->shipClass = "Coilgun OSAT";
-//	    $this->variantOf = "Brixadii Weapons Platform";
-//		$this->limited = 33;
+        $this->shipClass = "Coilgun OSAT (2111 refit)";
+			$this->variantOf = "Coilgun OSAT";
+			$this->occurence = "common";
 		$this->unofficial = true;
-		$this->isd = 1908;
+		$this->isd = 2111;
         
         $this->forwardDefense = 10;
         $this->sideDefense = 10;
@@ -26,12 +26,12 @@ class DalithornOSAT extends OSAT{
         $this->iniativebonus = 60;
 
         $this->addPrimarySystem(new NexusCoilgun(2, 10, 4, 300, 60));
-        $this->addPrimarySystem(new NexusLightGasGun(2, 5, 1, 180, 60));
-        $this->addPrimarySystem(new NexusShatterGun(1, 2, 1, 0, 360));
-        $this->addPrimarySystem(new NexusLightGasGun(2, 5, 1, 300, 180));
+        $this->addPrimarySystem(new NexusAutocannon(2, 4, 1, 180, 60));
+        $this->addPrimarySystem(new NexusMinigun(2, 4, 1, 0, 360));
+        $this->addPrimarySystem(new NexusAutocannon(2, 4, 1, 300, 180));
         $this->addPrimarySystem(new NexusCoilgun(2, 10, 4, 300, 60));
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 10, 2, 3));
+        $this->addPrimarySystem(new Scanner(4, 10, 2, 5));
 		$this->addPrimarySystem(new CargoBay(4, 12));
         $this->addPrimarySystem(new Thruster(3, 8, 0, 0, 2));
                 
@@ -44,8 +44,8 @@ class DalithornOSAT extends OSAT{
 				9 => "Cargo Bay",
 				10 => "Thruster",
 				13 => "Coilgun",
-				14 => "Shatter Gun",
-				16 => "Light Gas Gun",
+				14 => "Minigun",
+				16 => "Autocannon",
 				18 => "Scanner",
 				20 => "Reactor",
 			),
