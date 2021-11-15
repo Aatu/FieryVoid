@@ -15,6 +15,7 @@ class DrakhDreadnought extends BaseShip{
         $this->gravitic = true;	    
 	$this->unofficial = true;
 	$this->advancedArmor = true;   
+        $this->limited = 33; //Limited Deployment
        
 	$this->isd = 2234;
         
