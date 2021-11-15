@@ -12,6 +12,8 @@ class CraytanHepron extends HeavyCombatVessel{
         $this->shipClass = "Hepron Early Cruiser";
 		$this->unofficial = true;
         $this->isd = 1947;
+
+        $this->fighters = array("assault shuttles"=>4);
 		
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
@@ -34,17 +36,17 @@ class CraytanHepron extends HeavyCombatVessel{
       
         $this->addFrontSystem(new Thruster(2, 15, 0, 6, 1));
 		$this->addFrontSystem(new NexusCIDS(2, 4, 2, 180, 60));
-		$this->addFrontSystem(new NexusHeavyAutocannon(2, 6, 2, 240, 60));
+		$this->addFrontSystem(new NexusHeavySentryGun(2, 6, 2, 240, 60));
 		$this->addFrontSystem(new NexusLightAssaultCannon(2, 6, 3, 300, 360));
 		$this->addFrontSystem(new NexusLightAssaultCannon(2, 6, 3, 0, 60));
-		$this->addFrontSystem(new NexusHeavyAutocannon(2, 6, 2, 300, 120));
+		$this->addFrontSystem(new NexusHeavySentryGun(2, 6, 2, 300, 120));
 		$this->addFrontSystem(new NexusCIDS(2, 4, 2, 300, 180));
                 
         $this->addAftSystem(new Thruster(2, 13, 0, 4, 2));
         $this->addAftSystem(new Thruster(2, 13, 0, 4, 2));
 		$this->addAftSystem(new NexusCIDS(2, 4, 2, 120, 360));
-		$this->addAftSystem(new NexusMedAutocannon(2, 5, 1, 90, 270));
-		$this->addAftSystem(new NexusMedAutocannon(2, 5, 1, 90, 270));
+		$this->addAftSystem(new NexusSentryGun(2, 5, 1, 90, 270));
+		$this->addAftSystem(new NexusSentryGun(2, 5, 1, 90, 270));
 		$this->addAftSystem(new NexusCIDS(2, 4, 2, 0, 240));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -66,7 +68,7 @@ class CraytanHepron extends HeavyCombatVessel{
             1=> array(
                     3 => "Thruster",
                     6 => "Light Assault Cannon",
-                    8 => "Heavy Autocannon",
+                    8 => "Heavy Sentry Gun",
 					10 => "Close-In Defense System",
 					18 => "Structure",
                     20 => "Primary",
@@ -74,7 +76,7 @@ class CraytanHepron extends HeavyCombatVessel{
             2=> array(
                     6 => "Thruster",
                     8 => "Close-In Defense System",
-					10 => "Medium Autocannon",
+					10 => "Sentry Gun",
                     18 => "Structure",
                     20 => "Primary",
             ),

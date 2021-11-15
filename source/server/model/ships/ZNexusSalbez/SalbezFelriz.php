@@ -5,7 +5,7 @@ class SalbezFelriz extends BaseShipNoAft{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 450;
-		$this->faction = "ZNexus Playtest Sal-bez";
+		$this->faction = "ZNexus Sal-bez";
         $this->phpclass = "SalbezFelriz";
         $this->imagePath = "img/ships/Nexus/salbez_felriz.png";
 			$this->canvasSize = 135; //img has 200px per side
