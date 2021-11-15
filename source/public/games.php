@@ -82,6 +82,13 @@ if (isset($_SESSION["user"])) {
 	    <br><b>-1 Thrust crit behavior fixed</b> - again... please report any irregularities with this crit!
 		<br><br>---------- <b>update 15th of November</b> ----------
 	    <br><b>Craytan Union playtest</b> - A new Nexus faction is testing its systems
+	    <br><b>-1 Thrust crit fixed</b> - hopefully it works correctly at last
+	    <br><b>Turn into pivot fixed</b> - now it observes necessary turn delay
+	    <br><b>Turn into pivot fixed some more</b> - still doesn't stop pivoting... but stopping pivot afterwards s now free!
+	    <br><b>New Nexus units</b> - courtesy of Geoffrey
+	    <br><b>Vree Raiders and Civilians</b> - courtesy of Douglas
+	    <br><b>A lot of (mostly minor) unit fixes</b> - notably BSG Colonials, Drakh, Raiders, Vree... 
+
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.

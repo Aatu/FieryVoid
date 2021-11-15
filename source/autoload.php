@@ -2343,7 +2343,12 @@ spl_autoload_register(
 				'xonn' => '/server/model/ships/vree/Xonn.php',
 				'xvell' => '/server/model/ships/vree/Xvell.php',
 				'xavan' => '/server/model/ships/vree/Xavan.php',
-				
+				'hybridsaucer' => '/server/model/ships/raiders/HybridSaucer.php',
+				'jia' => '/server/model/ships/raiders/Jia.php',
+				'vastar' => '/server/model/ships/raiders/Vastar.php',
+				'vasy' => '/server/model/ships/raiders/Vasy.php',
+				'vyshesh' => '/server/model/ships/civilians/Vyshesh.php',								
+												
 				//antimatter-specific criticals
                 'reducedrangeantimatter' => '/server/model/cricialClasses.php',
                 'reduceddamageantimatter' => '/server/model/cricialClasses.php',
