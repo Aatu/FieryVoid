@@ -1,7 +1,7 @@
 <?php
 class DrakhHeavyRaider extends LCV{
 	/*Drakh Heavy Raider LCV*/
-	/*approximated as MCV, no EW restrictions*/
+	/*no EW restrictions*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
