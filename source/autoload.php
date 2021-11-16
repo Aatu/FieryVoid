@@ -2374,6 +2374,8 @@ spl_autoload_register(
 				'trekplasmaburst' => '/server/model/weapons/customTrek.php',
 				'hvyplasmaprojector' => '/server/model/weapons/customTrek.php',
 				'ltplasmaprojector' => '/server/model/weapons/customTrek.php',
+				'customltparticlecutter' => '/server/model/weapons/customs.php',
+				'customearlyltparticlecutter' => '/server/model/weapons/customs.php',
 				
 				//systems
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php',
@@ -2387,8 +2389,7 @@ spl_autoload_register(
 				'trekfederationintrepid' => '/server/model/ships/ZTrekFederation/TrekFederationIntrepid.php',
 				'trekfederationdeltaffalpha' => '/server/model/ships/ZTrekFederation/TrekFederationDeltaFFAlpha.php',
 				'trekfederationdeltaffbeta' => '/server/model/ships/ZTrekFederation/TrekFederationDeltaFFBeta.php',
-				'nxshuttlepod' => '/server/model/ships/ZTrekFederation/NXShuttlepod.php',
-		    
+				'nxshuttlepod' => '/server/model/ships/ZTrekFederation/NXShuttlepod.php',		    
 		    
 				'vulcandkyr' => '/server/model/ships/ZTrekFederation/VulcanDKyr.php',
 				'vulcandvahl' => '/server/model/ships/ZTrekFederation/VulcanDVahl.php',
@@ -2396,14 +2397,16 @@ spl_autoload_register(
 				'vulcanshuttle' => '/server/model/ships/ZTrekFederation/VulcanShuttle.php',
 				'vulcansurak' => '/server/model/ships/ZTrekFederation/VulcanSurak.php',
 				'vulcantimur' => '/server/model/ships/ZTrekFederation/VulcanTimur.php',
-				'vulcanvahklas' => '/server/model/ships/ZTrekFederation/VulcanVahklas.php',
-				
+				'vulcanvahklas' => '/server/model/ships/ZTrekFederation/VulcanVahklas.php',				
 				
 				'andorianthyzon' => '/server/model/ships/ZTrekFederation/AndorianThyzon.php',
 				'andorianthymasescort' => '/server/model/ships/ZTrekFederation/AndorianThymasEscort.php',
 				'andoriankumari' => '/server/model/ships/ZTrekFederation/AndorianKumari.php',
 				'andorianfighter' => '/server/model/ships/ZTrekFederation/AndorianFighter.php',
 				'andorianchimesh' => '/server/model/ships/ZTrekFederation/AndorianChimesh.php',
+				
+				'tellariteattackvessel' => '/server/model/ships/ZTrekFederation/TellariteAttackVessel.php',
+				'tellaritecruiser' => '/server/model/ships/ZTrekFederation/TellariteCruiser.php',
 		
 		    		
 				//Marcin Trek
