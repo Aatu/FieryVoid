@@ -202,3 +202,16 @@ var GromeHvyRailgun = function GromeHvyRailgun(json, ship) {
 };
 GromeHvyRailgun.prototype = Object.create(Weapon.prototype);
 GromeHvyRailgun.prototype.constructor = GromeHvyRailgun;
+
+
+var CustomLtParticleCutter = function CustomLtParticleCutter(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CustomLtParticleCutter.prototype = Object.create(Weapon.prototype);
+CustomLtParticleCutter.prototype.constructor = CustomLtParticleCutter;
+
+var CustomEarlyLtParticleCutter = function CustomEarlyLtParticleCutter(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CustomEarlyLtParticleCutter.prototype = Object.create(Weapon.prototype);
+CustomEarlyLtParticleCutter.prototype.constructor = CustomEarlyLtParticleCutter;

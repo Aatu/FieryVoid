@@ -45,9 +45,9 @@ class TellariteAttackVessel extends LCV{
 			$this->addPrimarySystem($projector);
 		$this->addPrimarySystem($projection);
 
-		$this->addFrontSystem(new TrekLtPhaseCannon(2, 4, 2, 210, 30));
-		$this->addFrontSystem(new TrekLtPhaseCannon(2, 4, 2, 270, 90));
-		$this->addFrontSystem(new TrekLtPhaseCannon(2, 4, 2, 330, 150));
+		$this->addFrontSystem(new CustomEarlyLtParticleCutter(2, 0, 0, 210, 30));
+		$this->addFrontSystem(new CustomEarlyLtParticleCutter(2, 0, 0, 270, 90));
+		$this->addFrontSystem(new CustomEarlyLtParticleCutter(2, 0, 0, 330, 150));
 	
 
 		$impulseDrive = new TrekImpulseDrive(3,14,0,0,2);

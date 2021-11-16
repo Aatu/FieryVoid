@@ -2130,14 +2130,14 @@ class GromeMedRailgun extends Weapon{
 	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
-		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-		if ( $maxhealth == 0 ){
-		    $maxhealth = 9;
-		}
-		if ( $powerReq == 0 ){
-		    $powerReq = 6;
-		}
-		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ){
+				$maxhealth = 9;
+			}
+			if ( $powerReq == 0 ){
+				$powerReq = 6;
+			}
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 	
         public function setSystemDataWindow($turn){
@@ -2377,6 +2377,88 @@ class GromeHvyRailgun extends Weapon{
 	
 } //endof class GromeHvyRailgun
 
+
+
+
+/*custom-made light version of official Particle Cutter*/
+    class CustomLtParticleCutter extends Raking{
+        public $name = "customLtParticleCutter";
+        public $displayName = "Light Particle Cutter";
+	    public $iconPath = "customLtParticleCutter.png";
+		public $animation = "laser";
+        public $animationColor = array(255, 153, 102);
+        public $animationExplosionScale = 0.35;
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.3;
+	    
+        public $firingModes = array( 1 => "Sustained");
+        
+        public $damageType = "Raking"; 
+        public $weaponClass = "Particle";
+		public $raking = 8; //smaller rake size
+        
+        // Set to make the weapon start already overloaded.
+        public $alwaysoverloading = true;
+        public $overloadturns = 2;
+        public $extraoverloadshots = 2;
+        public $overloadshots = 2;
+        public $loadingtime = 2;
+        public $priority = 8; //light Raking weapon
+
+        public $rangePenalty = 1; //-1/hex
+        public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ){
+				$maxhealth = 6;
+			}
+			if ( $powerReq == 0 ){
+				$powerReq = 2;
+			}
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){			
+            parent::setSystemDataWindow($turn);        
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+            $this->data["Special"] .= "This weapon is always in sustained mode.";
+		}
+
+
+        public function isOverloadingOnTurn($turn = null){
+            return true;
+        }
+        
+        public function getDamage($fireOrder){ return Dice::d(6, 8)+8;   }
+        public function setMinDamage(){     $this->minDamage = 10 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 24 ;      }
+    } //endof class CustomLtParticleCutter
+
+
+/*custom-made light version of official Particle Cutter - make it early*/
+    class CustomEarlyLtParticleCutter extends CustomLtParticleCutter{
+        public $name = "customEarlyLtParticleCutter";
+        public $displayName = "Early Light Particle Cutter";
+	    public $iconPath = "customLtParticleCutter.png";
+		
+		public $raking = 6; //smaller rake size
+        
+        public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){ return Dice::d(8, 2)+4;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 20 ;      }
+    } //endof class CustomEarlyLtParticleCutter
 
 
 

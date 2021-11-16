@@ -378,7 +378,7 @@
         public $displayName = "Particle Cutter";
 	public $animation = "laser";
         public $animationColor = array(255, 153, 102);
-        public $animationExplosionScale = 0.25;
+        public $animationExplosionScale = 0.45;
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
 	    

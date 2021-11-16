@@ -2374,6 +2374,8 @@ spl_autoload_register(
 				'trekplasmaburst' => '/server/model/weapons/customTrek.php',
 				'hvyplasmaprojector' => '/server/model/weapons/customTrek.php',
 				'ltplasmaprojector' => '/server/model/weapons/customTrek.php',
+				'customltparticlecutter' => '/server/model/weapons/customs.php',
+				'customearlyltparticlecutter' => '/server/model/weapons/customs.php',
 				
 				//systems
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php',

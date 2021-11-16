@@ -42,9 +42,9 @@ class TellariteCruiser extends HeavyCombatVessel{
 			$this->addFrontSystem($projector);
 		$this->addFrontSystem($projection);
         $this->addFrontSystem(new ParticleCutter(4, 8, 3, 300, 60));
-		$this->addFrontSystem(new TrekLtPhaseCannon(2, 4, 2, 240, 60));
-		$this->addFrontSystem(new TrekLtPhaseCannon(2, 4, 2, 270, 90));
-		$this->addFrontSystem(new TrekLtPhaseCannon(2, 4, 2, 300, 120));
+		$this->addFrontSystem(new CustomEarlyLtParticleCutter(2, 0, 0, 240, 60));
+		$this->addFrontSystem(new CustomEarlyLtParticleCutter(2, 0, 0, 270, 90));
+		$this->addFrontSystem(new CustomEarlyLtParticleCutter(2, 0, 0, 300, 120));
 
 
 		$impulseDrive = new TrekImpulseDrive(3,20,0,0,2); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
@@ -71,8 +71,8 @@ class TellariteCruiser extends HeavyCombatVessel{
 		$projection->addProjector($projector);
 		$this->addAftSystem($projector);
 	$this->addAftSystem($projection);
-	$this->addAftSystem(new TrekLtPhaseCannon(2, 4, 2, 0, 240));
-	$this->addAftSystem(new TrekLtPhaseCannon(2, 4, 2, 120, 360));
+	$this->addAftSystem(new CustomEarlyLtParticleCutter(2, 0, 0, 0, 240));
+	$this->addAftSystem(new CustomEarlyLtParticleCutter(2, 0, 0, 120, 360));
 
 		
 		//technical thrusters - unlimited, like for LCVs	
