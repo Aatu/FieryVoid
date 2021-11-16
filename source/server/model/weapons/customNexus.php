@@ -1955,7 +1955,7 @@ class NexusAutogun extends Matter{
 		public $guns = 1;
         public $priority = 5;
 
-        public $rangePenalty = 1; //
+        public $rangePenalty = 2; //
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
 
 	function __construct($startArc, $endArc, $nrOfShots = 1){
