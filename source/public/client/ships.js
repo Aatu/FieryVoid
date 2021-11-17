@@ -694,15 +694,16 @@ window.shipManager = {
 
         if (a.iniative < b.iniative) return false;
 
+/*
         if (a.unmodifiedIniative != null && b.unmodifiedIniative != null) {
             if (a.unmodifiedIniative > b.unmodifiedIniative)
-                return true;
+                return 1;
         
             if (a.unmodifiedIniative < b.unmodifiedIniative)
-                return false;
+                return -1;
         }
-
-        if (a.iniative == b.iniative) {
+*/
+        //if (a.iniative == b.iniative) {
             if (a.iniativebonus > b.iniativebonus) return true;
 
             if (b.iniativebonus > a.iniativebonus) return false;
@@ -712,9 +713,15 @@ window.shipManager = {
 
                 if (gamedata.ships[i] == b) return true;
             }
-        }
+        //}
 
-        return false;
+        return 0; //shouldn't get here
+    },
+	
+	hasWorseInitiveSort: function hasWorseInitiveSort(a, b) {
+		var hasBetterIni = shipManager.hasBetterInitive(a, b);
+		if(hasBetterIni) return -1; //reverse
+		return 1;
     },
 
     getShipsInSameHex: function getShipsInSameHex(ship, pos1) {
