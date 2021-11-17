@@ -1671,6 +1671,7 @@ spl_autoload_register(
 
 
 				//Nexus ships - Velrax
+                'velraxcommandbase' => '/server/model/ships/ZNexusVelrax/VelraxCommandBase.php',					
                 'velraxarccorvette' => '/server/model/ships/ZNexusVelrax/VelraxArcCorvette.php',					
                 'velraxarccorvetterefit' => '/server/model/ships/ZNexusVelrax/VelraxArcCorvetteRefit.php',					
                 'velraxarccorvetterefit2' => '/server/model/ships/ZNexusVelrax/VelraxArcCorvetteRefit2.php',					
@@ -1689,6 +1690,7 @@ spl_autoload_register(
                 'velraxlasergunboat' => '/server/model/ships/ZNexusVelrax/VelraxLaserGunboat.php',					
                 'velraxlasergunboatrefit' => '/server/model/ships/ZNexusVelrax/VelraxLaserGunboatRefit.php',					
                 'velraxlasergunboatrefit2' => '/server/model/ships/ZNexusVelrax/VelraxLaserGunboatRefit2.php',					
+                'velraxlogisticsbase' => '/server/model/ships/ZNexusVelrax/VelraxLogisticsBase.php',					
                 'velraxosat' => '/server/model/ships/ZNexusVelrax/VelraxOSAT.php',					
                 'velraxosatearly' => '/server/model/ships/ZNexusVelrax/VelraxOSATEarly.php',					
                 'velraxosatrefit' => '/server/model/ships/ZNexusVelrax/VelraxOSATRefit.php',					
@@ -1715,6 +1717,7 @@ spl_autoload_register(
                 'velraxvasrevescort' => '/server/model/ships/ZNexusVelrax/VelraxVasrevEscort.php',					
                 'velraxvasrevrefit' => '/server/model/ships/ZNexusVelrax/VelraxVasrevRefit.php',					
                 'velraxvasrevrefit2' => '/server/model/ships/ZNexusVelrax/VelraxVasrevRefit2.php',					
+                'velraxwarbase' => '/server/model/ships/ZNexusVelrax/VelraxWarbase.php',					
 
 
                 //Grome Weapons and Systems
