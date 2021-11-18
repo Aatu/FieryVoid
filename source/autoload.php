@@ -2378,7 +2378,11 @@ spl_autoload_register(
 				'customearlyltparticlecutter' => '/server/model/weapons/customs.php',
 				
 				//systems
-                'trekwarpdrive' => '/server/model/weapons/customTrek.php',
+                'trekwarpdrive' => '/server/model/weapons/customTrek.php', //nacelle
+                'trekimpulsedrive' => '/server/model/weapons/customTrek.php',
+                'trekshieldprojection' => '/server/model/weapons/customTrek.php',
+                'trekshieldprojector' => '/server/model/weapons/customTrek.php',
+                'trekshieldftr' => '/server/model/weapons/customTrek.php',
 				
 				//ships
 				'trekfederationnxcruiserv2' => '/server/model/ships/ZTrekFederation/TrekFederationNXCruiserV2.php',
@@ -2409,10 +2413,7 @@ spl_autoload_register(
 				'tellaritecruiser' => '/server/model/ships/ZTrekFederation/TellariteCruiser.php',
 		
 		    		
-				//Marcin Trek
-                'trekimpulsedrive' => '/server/model/weapons/customTrek.php',
-                'trekshieldprojection' => '/server/model/weapons/customTrek.php',
-                'trekshieldprojector' => '/server/model/weapons/customTrek.php',
+				//tmp
 				'trektester' => '/server/model/ships/customs/TrekTester.php',
 				'trektester2' => '/server/model/ships/customs/TrekTester2.php',
 				'trektester3' => '/server/model/ships/customs/TrekTester3.php',
