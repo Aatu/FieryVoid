@@ -2413,11 +2413,6 @@ spl_autoload_register(
 				'tellaritecruiser' => '/server/model/ships/ZTrekFederation/TellariteCruiser.php',
 		
 		    		
-				//tmp
-				'trektester' => '/server/model/ships/customs/TrekTester.php',
-				'trektester2' => '/server/model/ships/customs/TrekTester2.php',
-				'trektester3' => '/server/model/ships/customs/TrekTester3.php',
-				'trektester4' => '/server/model/ships/customs/TrekTester4.php',
 				
 
 				//Hyach conversions
