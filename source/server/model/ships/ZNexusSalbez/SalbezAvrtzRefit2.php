@@ -81,7 +81,7 @@ class SalbezAvrtzRefit2 extends BaseShip{
 		$this->hitChart = array(
 			0=> array(
 					9 => "Structure",
-					12 => "Scanner",
+					12 => "ELINT Scanner",
 					15 => "Engine",
 					17 => "Hangar",
 					19 => "Reactor",
