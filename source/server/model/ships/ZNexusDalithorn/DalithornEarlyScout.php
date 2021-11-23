@@ -7,7 +7,7 @@ class DalithornEarlyScout extends HeavyCombatVessel{
         $this->pointCost = 360;
         $this->faction = "ZNexus Dalithorn";
         $this->phpclass = "DalithornEarlyScout";
-        $this->imagePath = "img/ships/Nexus/DalithornFlagCruiserEarly.png";
+        $this->imagePath = "img/ships/Nexus/DalithornScout.png";
 			$this->canvasSize = 115; //img has 200px per side
         $this->shipClass = "Early Scout";
 			$this->variantOf = "Flag Cruiser";

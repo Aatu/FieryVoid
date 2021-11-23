@@ -1,16 +1,18 @@
 <?php
-class VelraxVersytheExplorer extends HeavyCombatVesselLeftRight{
+class VelraxVersytheRefit extends HeavyCombatVesselLeftRight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 400;
+	$this->pointCost = 430;
 	$this->faction = "ZNexus Velrax";
-        $this->phpclass = "VelraxVersytheExplorer";
+        $this->phpclass = "VelraxVersytheRefit";
         $this->imagePath = "img/ships/Nexus/VelraxVersythe.png";
-        $this->shipClass = "Versythe Explorer";
-	    $this->isd = 2031;
+        $this->shipClass = "Versythe Explorer (2070 refit)";
+			$this->variantOf = "Versythe Explorer";
+			$this->occurence = "common";
         $this->limited = 10;
+	    $this->isd = 2070;
         $this->canvasSize = 105;
 		$this->unofficial = true;
 
@@ -28,7 +30,7 @@ class VelraxVersytheExplorer extends HeavyCombatVesselLeftRight{
 
         $this->addPrimarySystem(new Reactor(3, 18, 0, 0));
         $this->addPrimarySystem(new CnC(3, 12, 0, 0));
-        $this->addPrimarySystem(new ELINTScanner(3, 16, 5, 5));
+        $this->addPrimarySystem(new ELINTScanner(3, 16, 6, 6));
         $this->addPrimarySystem(new Engine(3, 20, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(2, 2));
         $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 1));
@@ -36,7 +38,7 @@ class VelraxVersytheExplorer extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 2));
 		$this->addPrimarySystem(new JumpEngine(3, 20, 5, 35));
 
-        $this->addLeftSystem(new MediumPlasma(3, 5, 3, 300, 60));
+        $this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 300, 60));
         $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 180, 60));
         $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 120, 360));
 		$this->addLeftSystem(new Hangar(3, 3));
@@ -44,7 +46,7 @@ class VelraxVersytheExplorer extends HeavyCombatVesselLeftRight{
 		$this->addLeftSystem(new ELINTScanner(3, 9, 2, 1));
 		$this->addLeftSystem(new CargoBay(2, 30)); 
 
-        $this->addRightSystem(new MediumPlasma(3, 5, 3, 300, 60));
+        $this->addRightSystem(new NexusLaserSpear(3, 5, 3, 300, 60));
         $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 300, 180));
         $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 0, 240));
 		$this->addRightSystem(new Hangar(3, 6));
@@ -53,7 +55,7 @@ class VelraxVersytheExplorer extends HeavyCombatVesselLeftRight{
 		$this->addRightSystem(new Quarters(2, 20)); 
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addPrimarySystem(new Structure(3, 36));
+        $this->addPrimarySystem(new Structure(4, 36));
         $this->addLeftSystem(new Structure(3, 28));
         $this->addRightSystem(new Structure(3, 28));
     
@@ -71,7 +73,7 @@ class VelraxVersytheExplorer extends HeavyCombatVesselLeftRight{
         		3=> array(
         				3 => "Thruster",
 						5 => "Cargo Bay",
-						7 => "Medium Plasma Cannon",
+						7 => "Laser Spear",
         				9 => "Twin Ion Gun",
 						10 => "ELINT Scanner",
 						11 => "Hangar",
@@ -81,7 +83,7 @@ class VelraxVersytheExplorer extends HeavyCombatVesselLeftRight{
         		4=> array(
         				3 => "Thruster",
 						5 => "Quarters",
-						7 => "Medium Plasma Cannon",
+						7 => "Laser Spear",
         				9 => "Twin Ion Gun",
 						10 => "ELINT Scanner",
 						11 => "Hangar",

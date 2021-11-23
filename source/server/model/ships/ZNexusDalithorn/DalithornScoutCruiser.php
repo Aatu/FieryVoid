@@ -4,12 +4,12 @@ class DalithornScoutCruiser extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 400;
+        $this->pointCost = 520;
         $this->faction = "ZNexus Dalithorn";
-        $this->phpclass = "DalithornLightCruiser";
-        $this->imagePath = "img/ships/Nexus/DalithornFlagCruiser.png";
+        $this->phpclass = "DalithornScoutCruiser";
+        $this->imagePath = "img/ships/Nexus/DalithornScout.png";
 		$this->canvasSize = 115; //img has 200px per side
-        $this->shipClass = "Light Scout Cruiser";
+        $this->shipClass = "Scout Cruiser";
 			$this->variantOf = "Light Cruiser";
 			$this->occurence = "common";
 		$this->unofficial = true;
@@ -51,8 +51,8 @@ class DalithornScoutCruiser extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(3, 13, 0, 4, 2));
         $this->addAftSystem(new NexusAutocannon(2, 4, 1, 300, 60));
         $this->addAftSystem(new NexusAutocannon(2, 4, 1, 300, 60));
-        $this->addAftSystem(new NexusProtector(2, 4, 1, 120, 360));
-        $this->addAftSystem(new NexusProtector(2, 4, 1, 0, 240));
+        $this->addAftSystem(new NexusMinigun(2, 4, 1, 120, 360));
+        $this->addAftSystem(new NexusMinigun(2, 4, 1, 0, 240));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 40));
@@ -81,7 +81,7 @@ class DalithornScoutCruiser extends HeavyCombatVessel{
             ),
             2=> array(
                     6 => "Thruster",
-					8 => "Protector",
+					8 => "Minigun",
                     10 => "Autocannon",
                     18 => "Structure",
                     20 => "Primary",

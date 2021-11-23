@@ -1733,6 +1733,11 @@ spl_autoload_register(
                 'velraxvasrevescort' => '/server/model/ships/ZNexusVelrax/VelraxVasrevEscort.php',					
                 'velraxvasrevrefit' => '/server/model/ships/ZNexusVelrax/VelraxVasrevRefit.php',					
                 'velraxvasrevrefit2' => '/server/model/ships/ZNexusVelrax/VelraxVasrevRefit2.php',					
+                'velraxversissscout' => '/server/model/ships/ZNexusVelrax/VelraxVersissScout.php',					
+                'velraxversissrefit' => '/server/model/ships/ZNexusVelrax/VelraxVersissRefit.php',					
+                'velraxversytheexplorer' => '/server/model/ships/ZNexusVelrax/VelraxVersytheExplorer.php',					
+                'velraxversytherefit' => '/server/model/ships/ZNexusVelrax/VelraxVersytheRefit.php',					
+                'velraxversytherefit2' => '/server/model/ships/ZNexusVelrax/VelraxVersytheRefit2.php',					
                 'velraxwarbase' => '/server/model/ships/ZNexusVelrax/VelraxWarbase.php',					
 
 

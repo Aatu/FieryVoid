@@ -7,7 +7,7 @@ class DalithornScoutFrigate extends MediumShip{
         $this->pointCost = 325;
         $this->faction = "ZNexus Dalithorn";
         $this->phpclass = "DalithornScoutFrigate";
-        $this->imagePath = "img/ships/Nexus/DalithornHeavyFrigate.png";
+        $this->imagePath = "img/ships/Nexus/DalithornSmallScout.png";
         $this->shipClass = "Scout Frigate";
 			$this->variantOf = "Heavy Frigate";
 			$this->occurence = "common";

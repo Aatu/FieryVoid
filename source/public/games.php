@@ -88,6 +88,8 @@ if (isset($_SESSION["user"])) {
 	    <br><b>New Nexus units</b> - courtesy of Geoffrey
 	    <br><b>Vree Raiders and Civilians</b> - courtesy of Douglas
 	    <br><b>A lot of (mostly minor) unit fixes</b> - notably BSG Colonials, Drakh, Raiders, Vree... 
+		<br><br>---------- <b>update late November</b> ----------
+	    <br><b>Nexus "campaign capable"</b> - Support units (bases, OSATs, scouts) for all non-playtest factions
 
 	    
         <br><br>
