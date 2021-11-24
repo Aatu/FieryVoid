@@ -729,6 +729,18 @@ var NexusEarlyPlasmaWave = function  NexusEarlyPlasmaWave(json, ship) {
 NexusEarlyPlasmaWave.prototype = Object.create(Weapon.prototype);
 NexusEarlyPlasmaWave.prototype.constructor =  NexusEarlyPlasmaWave;
 
+var NexusRangedEarlyPlasmaWave = function  NexusRangedEarlyPlasmaWave(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusRangedEarlyPlasmaWave.prototype = Object.create(Weapon.prototype);
+NexusRangedEarlyPlasmaWave.prototype.constructor =  NexusRangedEarlyPlasmaWave;
+
+var NexusRangedPlasmaWave = function  NexusRangedPlasmaWave(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusRangedPlasmaWave.prototype = Object.create(Weapon.prototype);
+NexusRangedPlasmaWave.prototype.constructor =  NexusRangedPlasmaWave;
+
 var NexusParticleGrid = function  NexusParticleGrid(json, ship) {
     Weapon.call(this, json, ship);
 };

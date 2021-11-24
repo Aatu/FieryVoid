@@ -4,7 +4,7 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
-		$this->pointCost = 725;
+		$this->pointCost = 735;
 		$this->base = true;
 		$this->smallBase = true;
 		$this->faction = "ZNexus Velrax";
@@ -38,28 +38,28 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new NexusStreakInterceptor(5, 4, 1, 0, 360));
 		
 		$this->addFrontSystem(new LaserLance(4, 6, 4, 270, 90));
-		$this->addFrontSystem(new PlasmaWaveTorpedo(4, 7, 4, 270, 90));
+		$this->addFrontSystem(new NexusRangedPlasmaWave(4, 7, 4, 270, 90));
 		$this->addFrontSystem(new DualIonBolter(4, 4, 4, 270, 90));
 		$this->addFrontSystem(new DualIonBolter(4, 4, 4, 270, 90));
 		$this->addFrontSystem(new Hangar(4, 9));
 		$this->addFrontSystem(new CargoBay(4, 24));
 
 		$this->addAftSystem(new LaserLance(4, 6, 4, 90, 270));
-		$this->addAftSystem(new PlasmaWaveTorpedo(4, 7, 4, 270, 270));
+		$this->addAftSystem(new NexusRangedPlasmaWave(4, 7, 4, 270, 270));
 		$this->addAftSystem(new DualIonBolter(4, 4, 4, 90, 270));
 		$this->addAftSystem(new DualIonBolter(4, 4, 4, 90, 270));
 		$this->addAftSystem(new Hangar(4, 6));
 		$this->addAftSystem(new CargoBay(4, 24));
 			
 		$this->addLeftSystem(new LaserLance(4, 6, 4, 180, 360));
-		$this->addLeftSystem(new PlasmaWaveTorpedo(4, 7, 4, 180, 360));
+		$this->addLeftSystem(new NexusRangedPlasmaWave(4, 7, 4, 180, 360));
 		$this->addLeftSystem(new DualIonBolter(4, 4, 4, 180, 360));
 		$this->addLeftSystem(new DualIonBolter(4, 4, 4, 180, 360));
 		$this->addLeftSystem(new Hangar(4, 6));
 		$this->addLeftSystem(new CargoBay(4, 24));
 
 		$this->addRightSystem(new LaserLance(4, 6, 4, 0, 180));
-		$this->addRightSystem(new PlasmaWaveTorpedo(4, 7, 4, 0, 180));
+		$this->addRightSystem(new NexusRangedPlasmaWave(4, 7, 4, 0, 180));
 		$this->addRightSystem(new DualIonBolter(4, 4, 4, 0, 180));
 		$this->addRightSystem(new DualIonBolter(4, 4, 4, 0, 180));
 		$this->addRightSystem(new Hangar(4, 6));
@@ -86,7 +86,7 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 				4 => "Dual Ion Bolter",
 				5 => "Hangar",
 				9 => "Cargo Bay",
-				11 => "Plasma Wave",
+				11 => "Ranged Plasma Wave",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -95,7 +95,7 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 				4 => "Dual Ion Bolter",
 				5 => "Hangar",
 				9 => "Cargo Bay",
-				11 => "Plasma Wave",
+				11 => "Ranged Plasma Wave",
 				18 => "Structure",
 				20 => "Primary",
 			),	
@@ -104,7 +104,7 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 				4 => "Dual Ion Bolter",
 				5 => "Hangar",
 				9 => "Cargo Bay",
-				11 => "Plasma Wave",
+				11 => "Ranged Plasma Wave",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -113,7 +113,7 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 				4 => "Dual Ion Bolter",
 				5 => "Hangar",
 				9 => "Cargo Bay",
-				11 => "Plasma Wave",
+				11 => "Ranged Plasma Wave",
 				18 => "Structure",
 				20 => "Primary",
 			),

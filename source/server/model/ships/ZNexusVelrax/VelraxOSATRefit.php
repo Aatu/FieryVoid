@@ -4,7 +4,7 @@ class VelraxOSATRefit extends OSAT{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 200;
+		$this->pointCost = 210;
 		$this->faction = 'ZNexus Velrax';
         $this->phpclass = "VelraxOSATRefit";
         $this->imagePath = "img/ships/Nexus/VelraxOSAT.png";
@@ -25,13 +25,13 @@ class VelraxOSATRefit extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
-        $this->addPrimarySystem(new PlasmaWaveTorpedo(3, 7, 4, 270, 90));
+        $this->addPrimarySystem(new NexusRangedPlasmaWave(3, 7, 4, 270, 90));
         $this->addPrimarySystem(new DualIonBolter(2, 4, 4, 180, 360));
         $this->addPrimarySystem(new LaserLance(3, 6, 4, 300, 60));
         $this->addPrimarySystem(new DualIonBolter(2, 4, 4, 0, 180));
-        $this->addPrimarySystem(new PlasmaWaveTorpedo(3, 7, 4, 270, 90));
+        $this->addPrimarySystem(new NexusRangedPlasmaWave(3, 7, 4, 270, 90));
         $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 10, 4, 5));
+        $this->addPrimarySystem(new Scanner(3, 10, 4, 6));
         $this->addPrimarySystem(new Thruster(3, 8, 0, 0, 2));
                 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -41,7 +41,7 @@ class VelraxOSATRefit extends OSAT{
 			0=> array(
 				8 => "Structure",
 				10 => "Laser Lance",
-				12 => "Plasma Wave",
+				12 => "Ranged Plasma Wave",
 				14 => "Dual Ion Bolter",
 				16 => "Thruster",
 				18 => "Scanner",

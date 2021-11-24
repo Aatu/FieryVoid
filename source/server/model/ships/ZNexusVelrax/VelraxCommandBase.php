@@ -4,7 +4,7 @@ class VelraxCommandBase extends SmallStarBaseFourSections{
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
-		$this->pointCost = 650;
+		$this->pointCost = 660;
 		$this->base = true;
 		$this->smallBase = true;
 		$this->faction = "ZNexus Velrax";
@@ -36,28 +36,28 @@ class VelraxCommandBase extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new NexusDartInterceptor(4, 4, 1, 0, 360));
 		
 		$this->addFrontSystem(new NexusHeavyLaserSpear(3, 6, 4, 270, 90));
-		$this->addFrontSystem(new PlasmaWaveTorpedo(3, 7, 4, 270, 90));
+		$this->addFrontSystem(new NexusRangedPlasmaWave(3, 7, 4, 270, 90));
 		$this->addFrontSystem(new NexusTwinIonGun(3, 4, 4, 270, 90));
 		$this->addFrontSystem(new NexusTwinIonGun(3, 4, 4, 270, 90));
 		$this->addFrontSystem(new Hangar(3, 9));
 		$this->addFrontSystem(new CargoBay(3, 24));
 
 		$this->addAftSystem(new NexusHeavyLaserSpear(3, 6, 4, 90, 270));
-		$this->addAftSystem(new PlasmaWaveTorpedo(3, 7, 4, 270, 270));
+		$this->addAftSystem(new NexusRangedPlasmaWave(3, 7, 4, 270, 270));
 		$this->addAftSystem(new NexusTwinIonGun(3, 4, 4, 90, 270));
 		$this->addAftSystem(new NexusTwinIonGun(3, 4, 4, 90, 270));
 		$this->addAftSystem(new Hangar(3, 6));
 		$this->addAftSystem(new CargoBay(3, 24));
 			
 		$this->addLeftSystem(new NexusHeavyLaserSpear(3, 6, 4, 180, 360));
-		$this->addLeftSystem(new PlasmaWaveTorpedo(3, 7, 4, 180, 360));
+		$this->addLeftSystem(new NexusRangedPlasmaWave(3, 7, 4, 180, 360));
 		$this->addLeftSystem(new NexusTwinIonGun(3, 4, 4, 180, 360));
 		$this->addLeftSystem(new NexusTwinIonGun(3, 4, 4, 180, 360));
 		$this->addLeftSystem(new Hangar(3, 6));
 		$this->addLeftSystem(new CargoBay(3, 24));
 
 		$this->addRightSystem(new NexusHeavyLaserSpear(3, 6, 4, 0, 180));
-		$this->addRightSystem(new PlasmaWaveTorpedo(3, 7, 4, 0, 180));
+		$this->addRightSystem(new NexusRangedPlasmaWave(3, 7, 4, 0, 180));
 		$this->addRightSystem(new NexusTwinIonGun(3, 4, 4, 0, 180));
 		$this->addRightSystem(new NexusTwinIonGun(3, 4, 4, 0, 180));
 		$this->addRightSystem(new Hangar(3, 6));
@@ -84,7 +84,7 @@ class VelraxCommandBase extends SmallStarBaseFourSections{
 				4 => "Twin Ion Gun",
 				5 => "Hangar",
 				9 => "Cargo Bay",
-				11 => "Plasma Wave",
+				11 => "Ranged Plasma Wave",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -93,7 +93,7 @@ class VelraxCommandBase extends SmallStarBaseFourSections{
 				4 => "Twin Ion Gun",
 				5 => "Hangar",
 				9 => "Cargo Bay",
-				11 => "Plasma Wave",
+				11 => "Ranged Plasma Wave",
 				18 => "Structure",
 				20 => "Primary",
 			),	
@@ -102,7 +102,7 @@ class VelraxCommandBase extends SmallStarBaseFourSections{
 				4 => "Twin Ion Gun",
 				5 => "Hangar",
 				9 => "Cargo Bay",
-				11 => "Plasma Wave",
+				11 => "Ranged Plasma Wave",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -111,7 +111,7 @@ class VelraxCommandBase extends SmallStarBaseFourSections{
 				4 => "Twin Ion Gun",
 				5 => "Hangar",
 				9 => "Cargo Bay",
-				11 => "Plasma Wave",
+				11 => "Ranged Plasma Wave",
 				18 => "Structure",
 				20 => "Primary",
 			),

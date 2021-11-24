@@ -5184,7 +5184,6 @@ class NexusHeavyChargedPlasmaGun extends Plasma{
         public $weaponClass = "Plasma"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
         public $damageType = "Flash"; 
         
-        
         public $fireControl = array(null, 0, 2); // fighters, <mediums, <capitals 
         
         public $trailColor = array(75, 230, 90);
@@ -5226,6 +5225,112 @@ class NexusHeavyChargedPlasmaGun extends Plasma{
     
     }//endof class NexusEarlyPlasmaWave
 
+
+
+
+    class NexusRangedEarlyPlasmaWave extends Torpedo{
+		// for bases and OSATs
+        public $name = "NexusRangedEarlyPlasmaWave";
+        public $displayName = "Ranged Early Plasma Wave";
+        public $iconPath = "plasmaWaveTorpedo.png";
+        public $range = 40;
+        public $loadingtime = 3;
+        
+        public $weaponClass = "Plasma"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
+        public $damageType = "Flash"; 
+        
+        public $fireControl = array(null, 0, 2); // fighters, <mediums, <capitals 
+        
+        public $trailColor = array(75, 230, 90);
+        public $animation = "torpedo";
+        public $animationColor = array(75, 230, 90);
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 11;
+        public $animationWidth = 10;
+        public $trailLength = 10;
+        public $priority = 1; //Flash! should strike first (?)
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 7;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 4;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+	    //ignores half armor (as a Plasma weapon should!) - now handled by standard routines
+    	
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Ignores half of armor.";
+		}
+        
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 2);   }
+        public function setMinDamage(){     $this->minDamage = 2;      }
+        public function setMaxDamage(){     $this->maxDamage = 20;      }
+    
+    }//endof class NexusRangedEarlyPlasmaWave
+
+
+
+    class NexusRangedPlasmaWave extends Torpedo{
+        public $name = "NexusRangedPlasmaWave";
+        public $displayName = "Ranged Plasma Wave";
+        public $iconPath = "plasmaWaveTorpedo.png";
+        public $range = 60;
+        public $loadingtime = 3;
+        
+        public $weaponClass = "Plasma"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
+        public $damageType = "Flash"; 
+        
+        public $fireControl = array(null, 0, 2); // fighters, <mediums, <capitals 
+        
+        public $trailColor = array(75, 230, 90);
+        public $animation = "torpedo";
+        public $animationColor = array(75, 230, 90);
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 11;
+        public $animationWidth = 10;
+        public $trailLength = 10;
+        public $priority = 1; //Flash! should strike first (?)
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 7;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 4;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+	    //ignores half armor (as a Plasma weapon should!) - now handled by standard routines
+    	
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Ignores half of armor.";
+		}
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 3);   }
+        public function setMinDamage(){     $this->minDamage = 3;      }
+        public function setMaxDamage(){     $this->maxDamage = 30;      }
+    
+    }//endof class NexusRangedPlasmaWave
 
 
 
