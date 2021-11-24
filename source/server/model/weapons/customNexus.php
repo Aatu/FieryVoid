@@ -1650,7 +1650,7 @@ class NexusChaffLauncher extends Weapon{
         public $intercept = 1; //as it should be, but here they CAN combine vs same shot!
 	    
 		public $rangePenalty = 2;
-        public $fireControl = array(2, 1, 1); // fighters, <mediums, <capitals
+        public $fireControl = array(3, 1, 1); // fighters, <mediums, <capitals
 	    
 	    public $damageType = "Standard"; 
 	    public $weaponClass = "Matter"; 

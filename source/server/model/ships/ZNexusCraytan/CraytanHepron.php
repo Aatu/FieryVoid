@@ -18,7 +18,7 @@ class CraytanHepron extends HeavyCombatVessel{
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
         
-        $this->turncost = 1.0;
+        $this->turncost = 0.66;
         $this->turndelaycost = 0.66;
         $this->accelcost = 3;
         $this->rollcost = 2;
@@ -27,7 +27,7 @@ class CraytanHepron extends HeavyCombatVessel{
          
         $this->addPrimarySystem(new Reactor(3, 16, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 12, 4, 4));
+        $this->addPrimarySystem(new Scanner(3, 12, 4, 5));
         $this->addPrimarySystem(new Engine(3, 14, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(2, 4));
 		$this->addPrimarySystem(new CargoBay(3, 9));
@@ -37,8 +37,8 @@ class CraytanHepron extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(2, 15, 0, 6, 1));
 		$this->addFrontSystem(new NexusCIDS(2, 4, 2, 180, 60));
 		$this->addFrontSystem(new NexusHeavySentryGun(2, 6, 2, 240, 60));
-		$this->addFrontSystem(new NexusLightAssaultCannon(2, 6, 3, 300, 360));
-		$this->addFrontSystem(new NexusLightAssaultCannon(2, 6, 3, 0, 60));
+		$this->addFrontSystem(new NexusLightAssaultCannon(2, 6, 3, 240, 360));
+		$this->addFrontSystem(new NexusLightAssaultCannon(2, 6, 3, 0, 120));
 		$this->addFrontSystem(new NexusHeavySentryGun(2, 6, 2, 300, 120));
 		$this->addFrontSystem(new NexusCIDS(2, 4, 2, 300, 180));
                 

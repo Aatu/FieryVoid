@@ -90,6 +90,7 @@ if (isset($_SESSION["user"])) {
 	    <br><b>A lot of (mostly minor) unit fixes</b> - notably BSG Colonials, Drakh, Raiders, Vree... 
 		<br><br>---------- <b>update late November</b> ----------
 	    <br><b>Nexus "campaign capable"</b> - Support units (bases, OSATs, scouts) for all non-playtest factions
+	    <br><b>Craytan Union update</b> - The first round of playtesting is done and bugs/updates addressed
 
 	    
         <br><br>
