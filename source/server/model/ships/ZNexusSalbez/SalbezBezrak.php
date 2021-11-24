@@ -38,7 +38,7 @@ class SalbezBezrak extends SmallStarBaseFourSections{
 		$this->addFrontSystem(new LaserCutter(3, 6, 4, 270, 90));
 		$this->addFrontSystem(new LightParticleBeamShip(3, 2, 1, 270, 90));
 		$this->addFrontSystem(new LightParticleBeamShip(3, 2, 1, 270, 90));
-		$this->addFrontSystem(new NexusBoltTorpedo(3, 5, 2, 270, 90));
+		$this->addFrontSystem(new NexusRangedBoltTorpedo(3, 5, 2, 270, 90));
 		$this->addFrontSystem(new Hangar(3, 3));
 		$this->addFrontSystem(new CargoBay(3, 10));
 
@@ -46,7 +46,7 @@ class SalbezBezrak extends SmallStarBaseFourSections{
 		$this->addAftSystem(new LaserCutter(3, 6, 4, 90, 270));
 		$this->addAftSystem(new LightParticleBeamShip(3, 2, 1, 90, 270));
 		$this->addAftSystem(new LightParticleBeamShip(3, 2, 1, 90, 270));
-		$this->addAftSystem(new NexusBoltTorpedo(3, 5, 2, 90, 270));
+		$this->addAftSystem(new NexusRangedBoltTorpedo(3, 5, 2, 90, 270));
 		$this->addAftSystem(new Hangar(3, 3));
 		$this->addAftSystem(new CargoBay(3, 10));
 			
@@ -54,7 +54,7 @@ class SalbezBezrak extends SmallStarBaseFourSections{
 		$this->addLeftSystem(new LaserCutter(3, 6, 4, 180, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(3, 2, 1, 180, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(3, 2, 1, 180, 360));
-		$this->addLeftSystem(new NexusBoltTorpedo(3, 5, 2, 180, 360));
+		$this->addLeftSystem(new NexusRangedBoltTorpedo(3, 5, 2, 180, 360));
 		$this->addLeftSystem(new Hangar(3, 3));
 		$this->addLeftSystem(new CargoBay(3, 10));
 
@@ -62,7 +62,7 @@ class SalbezBezrak extends SmallStarBaseFourSections{
 		$this->addRightSystem(new LaserCutter(3, 6, 4, 0, 180));
 		$this->addRightSystem(new LightParticleBeamShip(3, 2, 1, 0, 180));
 		$this->addRightSystem(new LightParticleBeamShip(3, 2, 1, 0, 180));
-		$this->addRightSystem(new NexusBoltTorpedo(3, 5, 2, 0, 180));
+		$this->addRightSystem(new NexusRangedBoltTorpedo(3, 5, 2, 0, 180));
 		$this->addRightSystem(new Hangar(3, 3));
 		$this->addRightSystem(new CargoBay(3, 10));
 
@@ -85,7 +85,7 @@ class SalbezBezrak extends SmallStarBaseFourSections{
 			1=> array(
 				2 => "Laser Cutter",
 				4 => "Light Particle Beam",
-				5 => "Bolt Torpedo",
+				5 => "Ranged Bolt Torpedo",
 				7 => "Cargo Bay",
 				9 => "Hangar",
 				18 => "Structure",
@@ -94,7 +94,7 @@ class SalbezBezrak extends SmallStarBaseFourSections{
 			2=> array(
 				2 => "Laser Cutter",
 				4 => "Light Particle Beam",
-				5 => "Bolt Torpedo",
+				5 => "Ranged Bolt Torpedo",
 				7 => "Cargo Bay",
 				9 => "Hangar",
 				18 => "Structure",
@@ -103,7 +103,7 @@ class SalbezBezrak extends SmallStarBaseFourSections{
 			3=> array(
 				2 => "Laser Cutter",
 				4 => "Light Particle Beam",
-				5 => "Bolt Torpedo",
+				5 => "Ranged Bolt Torpedo",
 				7 => "Cargo Bay",
 				9 => "Hangar",
 				18 => "Structure",
@@ -112,7 +112,7 @@ class SalbezBezrak extends SmallStarBaseFourSections{
 			4=> array(
 				2 => "Laser Cutter",
 				4 => "Light Particle Beam",
-				5 => "Bolt Torpedo",
+				5 => "Ranged Bolt Torpedo",
 				7 => "Cargo Bay",
 				9 => "Hangar",
 				18 => "Structure",

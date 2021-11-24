@@ -455,6 +455,12 @@ var NexusSwarmTorpedo = function  NexusSwarmTorpedo(json, ship) {
 NexusSwarmTorpedo.prototype = Object.create(Weapon.prototype);
 NexusSwarmTorpedo.prototype.constructor =  NexusSwarmTorpedo;
 
+var NexusRangedSwarmTorpedo = function  NexusRangedSwarmTorpedo(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusRangedSwarmTorpedo.prototype = Object.create(Weapon.prototype);
+NexusRangedSwarmTorpedo.prototype.constructor =  NexusRangedSwarmTorpedo;
+
 var NexusHeavySwarmTorpedo = function  NexusHeavySwarmTorpedo(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -764,6 +770,12 @@ var NexusBoltTorpedo = function  NexusBoltTorpedo(json, ship) {
 };
 NexusBoltTorpedo.prototype = Object.create(Weapon.prototype);
 NexusBoltTorpedo.prototype.constructor =  NexusBoltTorpedo;
+
+var NexusRangedBoltTorpedo = function  NexusRangedBoltTorpedo(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusRangedBoltTorpedo.prototype = Object.create(Weapon.prototype);
+NexusRangedBoltTorpedo.prototype.constructor =  NexusRangedBoltTorpedo;
 
 var NexusLightIndustrialLaser = function  NexusLightIndustrialLaser(json, ship) {
     Weapon.call(this, json, ship);

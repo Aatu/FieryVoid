@@ -26,7 +26,7 @@ class SalbezTakrizRefit extends OSAT{
         $this->iniativebonus = 60;
 
         $this->addPrimarySystem(new LaserCutter(2, 6, 4, 270, 90));
-        $this->addPrimarySystem(new NexusBoltTorpedo(2, 5, 2, 270, 90));
+        $this->addPrimarySystem(new NexusRangedBoltTorpedo(2, 5, 2, 270, 90));
         $this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
         $this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 0, 180));
         $this->addPrimarySystem(new Reactor(2, 7, 0, 0));
@@ -40,7 +40,7 @@ class SalbezTakrizRefit extends OSAT{
 			0=> array(
 				10 => "Structure",
 				12 => "Thruster",
-				13 => "Bolt Torpedo",
+				13 => "Ranged Bolt Torpedo",
 				14 => "Laser Cutter",
 				16 => "Light Particle Beam",
 				18 => "Scanner",

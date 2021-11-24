@@ -980,6 +980,54 @@ class NexusBoltTorpedo extends Weapon{
 
 
 
+class NexusRangedBoltTorpedo extends Weapon{
+        public $name = "NexusRangedBoltTorpedo";
+        public $displayName = "Ranged Bolt Torpedo";
+		    public $iconPath = "NexusBoltTorpedo.png";
+        public $animation = "trail";
+        public $trailColor = array(11, 224, 255);
+        public $animationColor = array(50, 50, 50);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 12;
+        public $animationWidth = 4;
+        public $trailLength = 100;    
+
+        public $useOEW = true; //torpedo
+        public $ballistic = true; //missile
+        public $range = 40;
+        
+        public $loadingtime = 2; // 1 turn
+        public $rangePenalty = 0;
+        public $fireControl = array(-1, 2, 2); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+	    
+	public $priority = 5; //Standard weapon
+	    
+	public $firingMode = 'Ballistic'; //firing mode - just a name essentially
+	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+	 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 5;
+            if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			$this->data["Special"] = '<br>Benefits from offensive EW.';			
+        }
+
+        public function getDamage($fireOrder){ 
+			return 10;   
+		}
+
+        public function setMinDamage(){     $this->minDamage = 10;      }
+        public function setMaxDamage(){     $this->maxDamage = 10;      }
+		
+}//endof NexusRangedBoltTorpedo
+
 
 
 /*Chaff Launcher
@@ -5911,6 +5959,62 @@ class NexusSwarmTorpedo extends Pulse{
 	
         public function getDamage($fireOrder){        return 8;   }
     }  // endof NexusSwarmTorpedo
+
+
+
+class NexusRangedSwarmTorpedo extends Pulse{
+
+        public $name = "NexusRangedSwarmTorpedo";
+        public $displayName = "Ranged Swarm Torpedo";
+		public $iconPath = "NexusSwarmTorpedo.png";
+        public $useOEW = true; //torpedo
+        public $ballistic = true; //missile
+		public $range = 50;
+//		public $distanceRange = 35;		
+        public $animation = "trail";
+        public $animationColor = array(192, 192, 192);
+    	public $trailColor = array(215, 126, 111);
+        public $trailLength = 45;
+        public $animationWidth = 2;
+        public $projectilespeed = 5;
+        public $animationExplosionScale = 0.15;
+        public $rof = 2;
+        public $grouping = 25;
+        public $maxpulses = 4;
+        public $priority = 6;
+	protected $useDie = 2; //die used for base number of hits	
+        
+        public $loadingtime = 2;
+        
+        public $rangePenalty = 0;
+        public $fireControl = array(-1, 2, 2); // fighters, <mediums, <capitals 
+
+		public $firingMode = "Ballistic";
+        public $damageType = "Pulse"; 
+        public $weaponClass = "Pulse"; 
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 5;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 2;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){            
+            parent::setSystemDataWindow($turn);
+//            $this->data["Pulses"] = 'D2';            
+//			$this->data["Special"] .= '<br>Max 4 pulse. +1 per 25%';			
+			$this->data["Special"] .= '<br>Benefits from offensive EW.';			
+        }
+	
+        public function getDamage($fireOrder){        return 8;   }
+    }  
+
+// endof NexusRangedSwarmTorpedo
 
 
 class NexusHeavySwarmTorpedo extends Pulse{

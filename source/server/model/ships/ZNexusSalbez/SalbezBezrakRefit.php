@@ -39,7 +39,7 @@ class SalbezBezrakRefit extends SmallStarBaseFourSections{
 		$this->addFrontSystem(new MediumLaser(4, 6, 5, 270, 90));
 		$this->addFrontSystem(new LightParticleBeamShip(4, 2, 1, 270, 90));
 		$this->addFrontSystem(new LightParticleBeamShip(4, 2, 1, 270, 90));
-		$this->addFrontSystem(new NexusSwarmTorpedo(4, 5, 2, 270, 90));
+		$this->addFrontSystem(new NexusRangedSwarmTorpedo(4, 5, 2, 270, 90));
 		$this->addFrontSystem(new Hangar(4, 3));
 		$this->addFrontSystem(new CargoBay(4, 10));
 
@@ -47,7 +47,7 @@ class SalbezBezrakRefit extends SmallStarBaseFourSections{
 		$this->addAftSystem(new MediumLaser(4, 6, 5, 90, 270));
 		$this->addAftSystem(new LightParticleBeamShip(4, 2, 1, 90, 270));
 		$this->addAftSystem(new LightParticleBeamShip(4, 2, 1, 90, 270));
-		$this->addAftSystem(new NexusSwarmTorpedo(4, 5, 2, 90, 270));
+		$this->addAftSystem(new NexusRangedSwarmTorpedo(4, 5, 2, 90, 270));
 		$this->addAftSystem(new Hangar(4, 3));
 		$this->addAftSystem(new CargoBay(4, 10));
 			
@@ -55,7 +55,7 @@ class SalbezBezrakRefit extends SmallStarBaseFourSections{
 		$this->addLeftSystem(new MediumLaser(4, 6, 5, 180, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(4, 2, 1, 180, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(4, 2, 1, 180, 360));
-		$this->addLeftSystem(new NexusSwarmTorpedo(4, 5, 2, 180, 360));
+		$this->addLeftSystem(new NexusRangedSwarmTorpedo(4, 5, 2, 180, 360));
 		$this->addLeftSystem(new Hangar(4, 3));
 		$this->addLeftSystem(new CargoBay(4, 10));
 
@@ -63,7 +63,7 @@ class SalbezBezrakRefit extends SmallStarBaseFourSections{
 		$this->addRightSystem(new MediumLaser(4, 6, 5, 0, 180));
 		$this->addRightSystem(new LightParticleBeamShip(4, 2, 1, 0, 180));
 		$this->addRightSystem(new LightParticleBeamShip(4, 2, 1, 0, 180));
-		$this->addRightSystem(new NexusSwarmTorpedo(4, 5, 2, 0, 180));
+		$this->addRightSystem(new NexusRangedSwarmTorpedo(4, 5, 2, 0, 180));
 		$this->addRightSystem(new Hangar(4, 3));
 		$this->addRightSystem(new CargoBay(4, 10));
 
@@ -85,7 +85,7 @@ class SalbezBezrakRefit extends SmallStarBaseFourSections{
 			1=> array(
 				2 => "Medium Laser",
 				4 => "Light Particle Beam",
-				5 => "Swarm Torpedo",
+				5 => "Ranged Swarm Torpedo",
 				7 => "Cargo Bay",
 				9 => "Hangar",
 				18 => "Structure",
@@ -94,7 +94,7 @@ class SalbezBezrakRefit extends SmallStarBaseFourSections{
 			2=> array(
 				2 => "Medium Laser",
 				4 => "Light Particle Beam",
-				5 => "Swarm Torpedo",
+				5 => "Ranged Swarm Torpedo",
 				7 => "Cargo Bay",
 				9 => "Hangar",
 				18 => "Structure",
@@ -103,7 +103,7 @@ class SalbezBezrakRefit extends SmallStarBaseFourSections{
 			3=> array(
 				2 => "Medium Laser",
 				4 => "Light Particle Beam",
-				5 => "Swarm Torpedo",
+				5 => "Ranged Swarm Torpedo",
 				7 => "Cargo Bay",
 				9 => "Hangar",
 				18 => "Structure",
@@ -112,7 +112,7 @@ class SalbezBezrakRefit extends SmallStarBaseFourSections{
 			4=> array(
 				2 => "Medium Laser",
 				4 => "Light Particle Beam",
-				5 => "Swarm Torpedo",
+				5 => "Ranged Swarm Torpedo",
 				7 => "Cargo Bay",
 				9 => "Hangar",
 				18 => "Structure",

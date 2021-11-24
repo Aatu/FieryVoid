@@ -1514,9 +1514,11 @@ spl_autoload_register(
 				'nexusstreakinterceptor' => '/server/model/weapons/customNexus.php',
 				'nexusdartinterceptor' => '/server/model/weapons/customNexus.php',
 				'nexusearlyplasmawave' => '/server/model/weapons/customNexus.php',
+				'nexusrangedbolttorpedo' => '/server/model/weapons/customNexus.php',
 				'nexusrangedearlyplasmawave' => '/server/model/weapons/customNexus.php',
 				'nexusrangedplasmawave' => '/server/model/weapons/customNexus.php',
 				'nexusswarmtorpedo' => '/server/model/weapons/customNexus.php',
+				'nexusrangedswarmtorpedo' => '/server/model/weapons/customNexus.php',
 			//Nexus plasma weapons
 				'nexusheavyplasmacharge' => '/server/model/weapons/customNexus.php',
 //				'nexusheavychargedplasmagun' => '/server/model/weapons/customNexus.php',

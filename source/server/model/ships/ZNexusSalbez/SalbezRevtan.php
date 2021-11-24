@@ -26,10 +26,10 @@ class SalbezRevTan extends OSAT{
         $this->iniativebonus = 60;
 
         $this->addPrimarySystem(new MediumLaser(3, 6, 5, 300, 60));
-        $this->addPrimarySystem(new NexusSwarmTorpedo(3, 5, 2, 270, 90));
+        $this->addPrimarySystem(new NexusRangedSwarmTorpedo(3, 5, 2, 270, 90));
         $this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
         $this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
-        $this->addPrimarySystem(new NexusSwarmTorpedo(3, 5, 2, 270, 90));
+        $this->addPrimarySystem(new NexusRangedSwarmTorpedo(3, 5, 2, 270, 90));
         $this->addPrimarySystem(new MediumLaser(3, 6, 5, 300, 60));
         $this->addPrimarySystem(new Reactor(4, 14, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 7, 3, 5));
@@ -42,7 +42,7 @@ class SalbezRevTan extends OSAT{
 			0=> array(
 				9 => "Structure",
 				11 => "Thruster",
-				13 => "Swarm Torpedo",
+				13 => "Ranged Swarm Torpedo",
 				15 => "Medium Laser",
 				16 => "Light Particle Beam",
 				18 => "Scanner",
