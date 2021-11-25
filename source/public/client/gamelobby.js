@@ -201,14 +201,14 @@ window.gamedata = {
 			ancientUnitPresent = true;
 		}
 		if(!lship.flight){
-	            totalShips++;
+	        totalShips++;
 	        //check for custom hangars
 			if(lship.customFighter){
 				for (var h in lship.customFighter){
 					specialHgrName = h;
 					specialHgrAmt = lship.customFighter[h];
-				}
-				specialHangars.push([specialHgrName, specialHgrAmt]);
+					specialHangars.push([specialHgrName, specialHgrAmt]);
+				}				
 				//console.table(specialHangars);
 			}
 			
