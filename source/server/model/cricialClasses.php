@@ -67,7 +67,7 @@ class OutputReduced extends Critical{
 }
 
 class OutputReducedOneTurn extends Critical{
-    public $description = "Critical Shutdown.";
+    public $description = "Output reduced.";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
         //$this->description = $this->description." ".($turn+1).".";
 		if($turnend == 0) $turnend = $turn + 1;
