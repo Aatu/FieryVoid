@@ -25,11 +25,11 @@ class DalithornOSATRefit extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
-        $this->addPrimarySystem(new NexusCoilgun(2, 10, 4, 300, 60));
+        $this->addPrimarySystem(new NexusHeavyCoilgun(2, 12, 5, 300, 60));
         $this->addPrimarySystem(new NexusAutocannon(2, 4, 1, 180, 60));
         $this->addPrimarySystem(new NexusMinigun(2, 4, 1, 0, 360));
         $this->addPrimarySystem(new NexusAutocannon(2, 4, 1, 300, 180));
-        $this->addPrimarySystem(new NexusCoilgun(2, 10, 4, 300, 60));
+        $this->addPrimarySystem(new NexusHeavyCoilgun(2, 12, 5, 300, 60));
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 3, 5));
 		$this->addPrimarySystem(new CargoBay(4, 12));
@@ -43,7 +43,7 @@ class DalithornOSATRefit extends OSAT{
 				7 => "Structure",
 				9 => "Cargo Bay",
 				10 => "Thruster",
-				13 => "Coilgun",
+				13 => "Heavy Coilgun",
 				14 => "Minigun",
 				16 => "Autocannon",
 				18 => "Scanner",
