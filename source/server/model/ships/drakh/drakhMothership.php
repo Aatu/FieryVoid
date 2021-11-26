@@ -43,7 +43,7 @@ class DrakhMothership extends BaseShip{
         $this->addPrimarySystem(new Engine(5, 33, 0, 16, 12));
         $this->addPrimarySystem(new SWTractorBeam(5, 0, 360, 1));
         $this->addPrimarySystem(new JumpEngine(6, 30, 8, 18));
-	$this->addPrimarySystem(new Hangar(4, 24, 12));
+	$this->addPrimarySystem(new Hangar(4, 24, 24)); //24 Shuttles
         $this->addPrimarySystem(new CargoBay(3, 80));
  		
         $this->addFrontSystem(new GraviticThruster(3, 25, 0, 8, 1));
@@ -75,12 +75,12 @@ class DrakhMothership extends BaseShip{
 	$this->addLeftSystem(new customMedPolarityPulsar(3, 0, 0, 240, 60)); 		
 	$this->addLeftSystem(new customLtPolarityPulsar(2, 0, 0, 180, 360)); 
 	$this->addLeftSystem(new customLtPolarityPulsar(2, 0, 0, 180, 360));        
-	$this->addLeftSystem(new Catapult(3, 36));
-	$this->addLeftSystem(new Catapult(3, 36));
-	$this->addLeftSystem(new Catapult(3, 36));
-	$this->addLeftSystem(new Catapult(3, 36));
-	$this->addLeftSystem(new Catapult(3, 36));
-	$this->addLeftSystem(new Catapult(3, 36));
+	$this->addLeftSystem(new Catapult(3, 36, 6)); //6 Raiders each - it's pretty big catapult :)
+	$this->addLeftSystem(new Catapult(3, 36, 6));
+	$this->addLeftSystem(new Catapult(3, 36, 6));
+	$this->addLeftSystem(new Catapult(3, 36, 6));
+	$this->addLeftSystem(new Catapult(3, 36, 6));
+	$this->addLeftSystem(new Catapult(3, 36, 6));
         $this->addLeftSystem(new CargoBay(3, 80));			
 	    
 	$this->addRightSystem(new GraviticThruster(3, 30, 0, 8, 4));
@@ -89,12 +89,12 @@ class DrakhMothership extends BaseShip{
 	$this->addRightSystem(new customMedPolarityPulsar(3, 0, 0, 300, 120)); 		
 	$this->addRightSystem(new customLtPolarityPulsar(2, 0, 0, 0, 180)); 
 	$this->addRightSystem(new customLtPolarityPulsar(2, 0, 0, 0, 180));          
-	$this->addRightSystem(new Catapult(4, 36));	
-	$this->addRightSystem(new Catapult(4, 36));	
-	$this->addRightSystem(new Catapult(4, 36));	
-	$this->addRightSystem(new Catapult(4, 36));	
-	$this->addRightSystem(new Catapult(4, 36));	
-	$this->addRightSystem(new Catapult(4, 36));
+	$this->addRightSystem(new Catapult(3, 36, 6));	
+	$this->addRightSystem(new Catapult(3, 36, 6));	
+	$this->addRightSystem(new Catapult(3, 36, 6));	
+	$this->addRightSystem(new Catapult(3, 36, 6));	
+	$this->addRightSystem(new Catapult(3, 36, 6));	
+	$this->addRightSystem(new Catapult(3, 36, 6));
         $this->addRightSystem(new CargoBay(3, 80));	
 	        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

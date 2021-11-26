@@ -40,7 +40,7 @@ class DrakhHeavyTender extends BaseShip{
         $this->addPrimarySystem(new Engine(5, 30, 0, 10, 3));
         $this->addPrimarySystem(new SWTractorBeam(5, 0, 360, 1));
         $this->addPrimarySystem(new JumpEngine(5, 25, 5, 36));
-	$this->addPrimarySystem(new Hangar(4, 6, 2));
+	$this->addPrimarySystem(new Hangar(4, 6, 0));
  		
         $this->addFrontSystem(new GraviticThruster(3, 25, 0, 5, 1));
         $this->addFrontSystem(new GraviticThruster(3, 25, 0, 5, 1));
@@ -54,38 +54,38 @@ class DrakhHeavyTender extends BaseShip{
 	$this->addAftSystem(new GraviticThruster(3, 30, 0, 6, 2));
 	$this->addAftSystem(new customLtPolarityPulsar(2, 0, 0, 120, 300));  
 	$this->addAftSystem(new customLtPolarityPulsar(2, 0, 0, 60, 240));  
-        $this->addAftSystem(new Catapult(4, 4)); 
-        $this->addAftSystem(new Catapult(4, 4)); 
-        $this->addAftSystem(new Catapult(4, 4)); 
-        $this->addAftSystem(new Catapult(4, 4)); 
-        $this->addAftSystem(new Catapult(4, 4)); 
-        $this->addAftSystem(new Catapult(4, 4)); 
-        $this->addAftSystem(new Catapult(4, 4)); 
-        $this->addAftSystem(new Catapult(4, 4));   
+        $this->addAftSystem(new Catapult(4, 4, 1)); 
+        $this->addAftSystem(new Catapult(4, 4, 1)); 
+        $this->addAftSystem(new Catapult(4, 4, 1)); 
+        $this->addAftSystem(new Catapult(4, 4, 1)); 
+        $this->addAftSystem(new Catapult(4, 4, 1)); 
+        $this->addAftSystem(new Catapult(4, 4, 1)); 
+        $this->addAftSystem(new Catapult(4, 4, 1)); 
+        $this->addAftSystem(new Catapult(4, 4, 1));   
 	    
 	$this->addLeftSystem(new GraviticThruster(3, 28, 0, 7, 3));
 	$this->addLeftSystem(new AbsorbtionShield(3,8,8,3,180,0)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
         $this->addLeftSystem(new CargoBay(3, 30));
-        $this->addLeftSystem(new Catapult(4, 4));
-        $this->addLeftSystem(new Catapult(4, 4));
-        $this->addLeftSystem(new Catapult(4, 4));
-        $this->addLeftSystem(new Catapult(4, 4));
-        $this->addLeftSystem(new Catapult(4, 4));
-        $this->addLeftSystem(new Catapult(4, 4));
-        $this->addLeftSystem(new Catapult(4, 4));
-        $this->addLeftSystem(new Catapult(4, 4));			
+        $this->addLeftSystem(new Catapult(4, 4, 1));
+        $this->addLeftSystem(new Catapult(4, 4, 1));
+        $this->addLeftSystem(new Catapult(4, 4, 1));
+        $this->addLeftSystem(new Catapult(4, 4, 1));
+        $this->addLeftSystem(new Catapult(4, 4, 1));
+        $this->addLeftSystem(new Catapult(4, 4, 1));
+        $this->addLeftSystem(new Catapult(4, 4, 1));
+        $this->addLeftSystem(new Catapult(4, 4, 1));			
 	    
 	$this->addRightSystem(new GraviticThruster(3, 28, 0, 7, 4));
 	$this->addRightSystem(new AbsorbtionShield(3,8,8,3,0,180)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
         $this->addRightSystem(new CargoBay(3, 30));
-        $this->addRightSystem(new Catapult(4, 4));	
-        $this->addRightSystem(new Catapult(4, 4));
-        $this->addRightSystem(new Catapult(4, 4));	
-        $this->addRightSystem(new Catapult(4, 4));
-        $this->addRightSystem(new Catapult(4, 4));	
-        $this->addRightSystem(new Catapult(4, 4));
-        $this->addRightSystem(new Catapult(4, 4));	
-        $this->addRightSystem(new Catapult(4, 4));	  
+        $this->addRightSystem(new Catapult(4, 4, 1));	
+        $this->addRightSystem(new Catapult(4, 4, 1));
+        $this->addRightSystem(new Catapult(4, 4, 1));	
+        $this->addRightSystem(new Catapult(4, 4, 1));
+        $this->addRightSystem(new Catapult(4, 4, 1));	
+        $this->addRightSystem(new Catapult(4, 4, 1));
+        $this->addRightSystem(new Catapult(4, 4, 1));	
+        $this->addRightSystem(new Catapult(4, 4, 1));	  
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 120));
