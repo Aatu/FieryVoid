@@ -11,7 +11,7 @@ class BrixadiiLauncherPlatformBase extends OSAT{
         $this->shipClass = "Brixadii Launcher Platform";
 			$this->canvasSize = 175;
 		$this->unofficial = true;
-		$this->isd = 1960;
+		$this->isd = 2060;
         
         $this->forwardDefense = 8;
         $this->sideDefense = 8;

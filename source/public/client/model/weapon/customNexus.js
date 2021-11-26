@@ -107,6 +107,12 @@ var NexusCoilgun = function NexusCoilgun(json, ship) {
 NexusCoilgun.prototype = Object.create(Weapon.prototype);
 NexusCoilgun.prototype.constructor = NexusCoilgun;
 
+var NexusHeavyCoilgun = function NexusHeavyCoilgun(json, ship) {
+	Weapon.call(this, json, ship);
+};
+NexusHeavyCoilgun.prototype = Object.create(Weapon.prototype);
+NexusHeavyCoilgun.prototype.constructor = NexusHeavyCoilgun;
+
 var NexusDualSlugCannon = function NexusDualSlugCannon(json, ship) {
 	Weapon.call(this, json, ship);
 };

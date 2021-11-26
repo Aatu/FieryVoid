@@ -2910,6 +2910,44 @@ class NexusSpiker extends Matter{
     } // endof NexusUltralightRailgun
 
 
+
+class NexusHeavyCoilgun extends Matter{
+//		intended for base / OSAT use only        
+        public $trailColor = array(226, 26, 20);
+
+        public $name = "NexusHeavyCoilgun";
+        public $displayName = "Heavy Coilgun";
+		public $iconPath = "NexusCoilgun.png";
+	    
+        public $animation = "trail";
+        public $animationColor = array(250, 191, 190);
+        public $animationExplosionScale = 0.25;
+        public $projectilespeed = 30;
+        public $animationWidth = 4;
+        public $trailLength = 10;
+        public $loadingtime = 3;
+		public $guns = 1;
+        public $priority = 9;
+
+        public $rangePenalty = 0.25; //-1/4 hexes
+        public $fireControl = array(null, 3, 3); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 12;
+            if ( $powerReq == 0 ) $powerReq = 5;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 2)+2;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
+}
+
+// endof NexusHeavyCoilgun
+
+
+
 class NexusCoilgun extends Matter{
         public $trailColor = array(226, 26, 20);
 
