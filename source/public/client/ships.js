@@ -619,9 +619,12 @@ window.shipManager = {
         }
         
         /*ship without power (power deficit or Reactor shutdown critical) is adrift as well*/
+	/*...after consulting rulebook - it isn't!*/
+	/*
         //isPowerless already checks for appropriate critical, actually
         if (shipManager.power.isPowerless(ship)) return true;
-        
+        */
+	    
         return false;
     },
 
