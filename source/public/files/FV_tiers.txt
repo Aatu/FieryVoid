@@ -50,7 +50,7 @@ Factions that point for point will have uphill battle against First Tier, yet ot
  - Kastan (custom faction - Escalation Wars universe)
  - Markab
  - Raiders (note plethora of background-driven options - Raiders often use a hodgepodge of units and formal FV fleet selection rules don't always do them justice!)
- - Sal-bez (custom faction - Nexus universe, in playtest currently)
+ - Sal-bez (custom faction - Nexus universe)
  - Sshel'ath (custom faction - Escalation Wars universe)
  - Star Wars (custom faction (or rather factions), Star Wars universe - with VERY different playstyle, consider them difficult to fly!)
  - Velrax (custom faction - Nexus universe)
@@ -78,7 +78,7 @@ This group is inherently unbalanced, even against each other!
  - Abbai (WotCR)
  - Alacan (Small Races)
  - Chouka Raiders (custom faction - Escalation Wars universe)
- - Craytan Union (custom faction - Nexus universe)
+ - Craytan Union (custom faction - Nexus universe, in playtest currently)
  - EA (early) (predominantly semi-official, custom units armed with blast cannons and much weaker defenses)
  - Grome
  - Hurr

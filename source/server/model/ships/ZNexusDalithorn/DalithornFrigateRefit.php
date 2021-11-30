@@ -27,7 +27,7 @@ class DalithornFrigateRefit extends MediumShip{
          
         $this->addPrimarySystem(new Reactor(3, 9, 0, 0));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 10, 3, 4));
+        $this->addPrimarySystem(new Scanner(3, 10, 3, 5));
         $this->addPrimarySystem(new Engine(3, 12, 0, 6, 3));
         $this->addPrimarySystem(new Hangar(1, 1));
 		$this->addPrimarySystem(new CargoBay(2, 10));

@@ -73,7 +73,7 @@ class SalbezNavren extends HeavyCombatVessel{
             ),
             2=> array(
                     6 => "Thruster",
-                    8 => "Laser Cutter",
+                    8 => "Industrial Laser",
 					10 => "Particle Grid",
 					12 => "Cargo Bay",
                     18 => "Structure",

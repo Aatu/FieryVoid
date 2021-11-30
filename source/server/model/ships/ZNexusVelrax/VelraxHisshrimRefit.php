@@ -29,7 +29,7 @@ class VelraxHisshrimRefit extends HeavyCombatVesselLeftRight{
 
         $this->addPrimarySystem(new Reactor(4, 14, 0, 0));
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 14, 5, 5));
+        $this->addPrimarySystem(new Scanner(4, 14, 5, 6));
         $this->addPrimarySystem(new Engine(4, 15, 0, 8, 4));
 		$this->addPrimarySystem(new PlasmaWaveTorpedo(3, 7, 4, 300, 60));
         $this->addPrimarySystem(new Thruster(3, 15, 0, 4, 1));

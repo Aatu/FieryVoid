@@ -980,6 +980,54 @@ class NexusBoltTorpedo extends Weapon{
 
 
 
+class NexusRangedBoltTorpedo extends Weapon{
+        public $name = "NexusRangedBoltTorpedo";
+        public $displayName = "Ranged Bolt Torpedo";
+		    public $iconPath = "NexusBoltTorpedo.png";
+        public $animation = "trail";
+        public $trailColor = array(11, 224, 255);
+        public $animationColor = array(50, 50, 50);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 12;
+        public $animationWidth = 4;
+        public $trailLength = 100;    
+
+        public $useOEW = true; //torpedo
+        public $ballistic = true; //missile
+        public $range = 40;
+        
+        public $loadingtime = 2; // 1 turn
+        public $rangePenalty = 0;
+        public $fireControl = array(-1, 2, 2); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+	    
+	public $priority = 5; //Standard weapon
+	    
+	public $firingMode = 'Ballistic'; //firing mode - just a name essentially
+	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+	 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 5;
+            if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			$this->data["Special"] = '<br>Benefits from offensive EW.';			
+        }
+
+        public function getDamage($fireOrder){ 
+			return 10;   
+		}
+
+        public function setMinDamage(){     $this->minDamage = 10;      }
+        public function setMaxDamage(){     $this->maxDamage = 10;      }
+		
+}//endof NexusRangedBoltTorpedo
+
 
 
 /*Chaff Launcher
@@ -1650,7 +1698,7 @@ class NexusChaffLauncher extends Weapon{
         public $intercept = 1; //as it should be, but here they CAN combine vs same shot!
 	    
 		public $rangePenalty = 2;
-        public $fireControl = array(2, 1, 1); // fighters, <mediums, <capitals
+        public $fireControl = array(3, 1, 1); // fighters, <mediums, <capitals
 	    
 	    public $damageType = "Standard"; 
 	    public $weaponClass = "Matter"; 
@@ -1955,7 +2003,7 @@ class NexusAutogun extends Matter{
 		public $guns = 1;
         public $priority = 5;
 
-        public $rangePenalty = 1; //
+        public $rangePenalty = 2; //
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
 
 	function __construct($startArc, $endArc, $nrOfShots = 1){
@@ -2860,6 +2908,44 @@ class NexusSpiker extends Matter{
         public function setMinDamage(){     $this->minDamage = 3 ;      }
         public function setMaxDamage(){     $this->maxDamage = 8 ;      }    
     } // endof NexusUltralightRailgun
+
+
+
+class NexusHeavyCoilgun extends Matter{
+//		intended for base / OSAT use only        
+        public $trailColor = array(226, 26, 20);
+
+        public $name = "NexusHeavyCoilgun";
+        public $displayName = "Heavy Coilgun";
+		public $iconPath = "NexusCoilgun.png";
+	    
+        public $animation = "trail";
+        public $animationColor = array(250, 191, 190);
+        public $animationExplosionScale = 0.25;
+        public $projectilespeed = 30;
+        public $animationWidth = 4;
+        public $trailLength = 10;
+        public $loadingtime = 3;
+		public $guns = 1;
+        public $priority = 9;
+
+        public $rangePenalty = 0.25; //-1/4 hexes
+        public $fireControl = array(null, 3, 3); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 12;
+            if ( $powerReq == 0 ) $powerReq = 5;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 2)+2;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
+}
+
+// endof NexusHeavyCoilgun
+
 
 
 class NexusCoilgun extends Matter{
@@ -5184,7 +5270,6 @@ class NexusHeavyChargedPlasmaGun extends Plasma{
         public $weaponClass = "Plasma"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
         public $damageType = "Flash"; 
         
-        
         public $fireControl = array(null, 0, 2); // fighters, <mediums, <capitals 
         
         public $trailColor = array(75, 230, 90);
@@ -5226,6 +5311,112 @@ class NexusHeavyChargedPlasmaGun extends Plasma{
     
     }//endof class NexusEarlyPlasmaWave
 
+
+
+
+    class NexusRangedEarlyPlasmaWave extends Torpedo{
+		// for bases and OSATs
+        public $name = "NexusRangedEarlyPlasmaWave";
+        public $displayName = "Ranged Early Plasma Wave";
+        public $iconPath = "plasmaWaveTorpedo.png";
+        public $range = 40;
+        public $loadingtime = 3;
+        
+        public $weaponClass = "Plasma"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
+        public $damageType = "Flash"; 
+        
+        public $fireControl = array(null, 0, 2); // fighters, <mediums, <capitals 
+        
+        public $trailColor = array(75, 230, 90);
+        public $animation = "torpedo";
+        public $animationColor = array(75, 230, 90);
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 11;
+        public $animationWidth = 10;
+        public $trailLength = 10;
+        public $priority = 1; //Flash! should strike first (?)
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 7;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 4;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+	    //ignores half armor (as a Plasma weapon should!) - now handled by standard routines
+    	
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Ignores half of armor.";
+		}
+        
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 2);   }
+        public function setMinDamage(){     $this->minDamage = 2;      }
+        public function setMaxDamage(){     $this->maxDamage = 20;      }
+    
+    }//endof class NexusRangedEarlyPlasmaWave
+
+
+
+    class NexusRangedPlasmaWave extends Torpedo{
+        public $name = "NexusRangedPlasmaWave";
+        public $displayName = "Ranged Plasma Wave";
+        public $iconPath = "plasmaWaveTorpedo.png";
+        public $range = 60;
+        public $loadingtime = 3;
+        
+        public $weaponClass = "Plasma"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
+        public $damageType = "Flash"; 
+        
+        public $fireControl = array(null, 0, 2); // fighters, <mediums, <capitals 
+        
+        public $trailColor = array(75, 230, 90);
+        public $animation = "torpedo";
+        public $animationColor = array(75, 230, 90);
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 11;
+        public $animationWidth = 10;
+        public $trailLength = 10;
+        public $priority = 1; //Flash! should strike first (?)
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 7;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 4;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+	    //ignores half armor (as a Plasma weapon should!) - now handled by standard routines
+    	
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Ignores half of armor.";
+		}
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 3);   }
+        public function setMinDamage(){     $this->minDamage = 3;      }
+        public function setMaxDamage(){     $this->maxDamage = 30;      }
+    
+    }//endof class NexusRangedPlasmaWave
 
 
 
@@ -5806,6 +5997,62 @@ class NexusSwarmTorpedo extends Pulse{
 	
         public function getDamage($fireOrder){        return 8;   }
     }  // endof NexusSwarmTorpedo
+
+
+
+class NexusRangedSwarmTorpedo extends Pulse{
+
+        public $name = "NexusRangedSwarmTorpedo";
+        public $displayName = "Ranged Swarm Torpedo";
+		public $iconPath = "NexusSwarmTorpedo.png";
+        public $useOEW = true; //torpedo
+        public $ballistic = true; //missile
+		public $range = 50;
+//		public $distanceRange = 35;		
+        public $animation = "trail";
+        public $animationColor = array(192, 192, 192);
+    	public $trailColor = array(215, 126, 111);
+        public $trailLength = 45;
+        public $animationWidth = 2;
+        public $projectilespeed = 5;
+        public $animationExplosionScale = 0.15;
+        public $rof = 2;
+        public $grouping = 25;
+        public $maxpulses = 4;
+        public $priority = 6;
+	protected $useDie = 2; //die used for base number of hits	
+        
+        public $loadingtime = 2;
+        
+        public $rangePenalty = 0;
+        public $fireControl = array(-1, 2, 2); // fighters, <mediums, <capitals 
+
+		public $firingMode = "Ballistic";
+        public $damageType = "Pulse"; 
+        public $weaponClass = "Pulse"; 
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 5;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 2;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){            
+            parent::setSystemDataWindow($turn);
+//            $this->data["Pulses"] = 'D2';            
+//			$this->data["Special"] .= '<br>Max 4 pulse. +1 per 25%';			
+			$this->data["Special"] .= '<br>Benefits from offensive EW.';			
+        }
+	
+        public function getDamage($fireOrder){        return 8;   }
+    }  
+
+// endof NexusRangedSwarmTorpedo
 
 
 class NexusHeavySwarmTorpedo extends Pulse{
