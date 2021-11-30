@@ -32,7 +32,7 @@ class SalbezReshken extends BaseShip{
         
         $this->addPrimarySystem(new Reactor(5, 22, 0, 0));
         $this->addPrimarySystem(new CnC(5, 30, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 16, 5, 6));
+        $this->addPrimarySystem(new Scanner(4, 16, 5, 7));
         $this->addPrimarySystem(new Engine(4, 18, 0, 8, 3));
 		$this->addPrimarySystem(new Hangar(2, 8));
 		

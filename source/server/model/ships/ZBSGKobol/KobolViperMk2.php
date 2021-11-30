@@ -34,7 +34,7 @@ class KobolViperMk2 extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(2, 2, 2, 2);
             $fighter = new Fighter("KobolViperMk2", $armour, 7, $this->id);
-            $fighter->displayName = "Vipper Mk2";
+            $fighter->displayName = "Viper Mk2";
             $fighter->imagePath = "img/ships/BSG/viperMk2.png";
             $fighter->iconPath = "img/ships/BSG/viperMk2_large.png";
 

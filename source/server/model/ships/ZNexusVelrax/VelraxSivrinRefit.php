@@ -28,7 +28,7 @@ class VelraxSivrinRefit extends HeavyCombatVesselLeftRight{
 
         $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 12, 5, 5));
+        $this->addPrimarySystem(new Scanner(4, 12, 5, 6));
         $this->addPrimarySystem(new Engine(4, 13, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(1, 2));
 		$this->addPrimarySystem(new MediumPlasma(3, 5, 3, 300, 60));

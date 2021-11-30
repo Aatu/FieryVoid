@@ -30,7 +30,7 @@ class BrixadiiJumpScout2108 extends BaseShipNoAft{
         
         $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
         $this->addPrimarySystem(new CnC(5, 20, 0, 0));
-        $this->addPrimarySystem(new ELINTScanner(4, 16, 5, 8));
+        $this->addPrimarySystem(new ELINTScanner(4, 16, 7, 9));
         $this->addPrimarySystem(new Engine(4, 18, 0, 10, 4));
 		$this->addPrimarySystem(new Hangar(2, 4));
 		$this->addPrimarySystem(new JumpEngine(4, 12, 5, 40));

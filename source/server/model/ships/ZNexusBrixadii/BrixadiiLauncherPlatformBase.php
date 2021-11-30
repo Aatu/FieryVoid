@@ -11,7 +11,7 @@ class BrixadiiLauncherPlatformBase extends OSAT{
         $this->shipClass = "Brixadii Launcher Platform";
 			$this->canvasSize = 175;
 		$this->unofficial = true;
-		$this->isd = 1960;
+		$this->isd = 2060;
         
         $this->forwardDefense = 8;
         $this->sideDefense = 8;
@@ -28,7 +28,7 @@ class BrixadiiLauncherPlatformBase extends OSAT{
         $this->addPrimarySystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
         $this->addPrimarySystem(new NexusDefensePulsar(1, 4, 2, 0, 360));
         $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 6, 2, 3));   
+        $this->addPrimarySystem(new Scanner(4, 6, 2, 5));   
         $this->addPrimarySystem(new Thruster(3, 6, 0, 0, 2));
                 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

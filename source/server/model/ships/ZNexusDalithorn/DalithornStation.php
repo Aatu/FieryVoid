@@ -4,7 +4,7 @@ class DalithornStation extends SmallStarBaseFourSections{
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
-		$this->pointCost = 800;
+		$this->pointCost = 700;
 		$this->base = true;
 		$this->smallBase = true;
 		$this->faction = "ZNexus Dalithorn";
@@ -36,7 +36,7 @@ class DalithornStation extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new NexusShatterGun(4, 2, 1, 0, 360));
 		$this->addPrimarySystem(new NexusShatterGun(4, 2, 1, 0, 360));
 		
-		$this->addFrontSystem(new NexusCoilgun(4, 10, 4, 300, 60));
+		$this->addFrontSystem(new NexusHeavyCoilgun(4, 12, 5, 300, 60));
 		$this->addFrontSystem(new NexusGasGun(4, 7, 2, 270, 90));
 		$this->addFrontSystem(new NexusGasGun(4, 7, 2, 270, 90));
 		$this->addFrontSystem(new NexusLightGasGun(4, 5, 1, 270, 90));
@@ -44,7 +44,7 @@ class DalithornStation extends SmallStarBaseFourSections{
 		$this->addFrontSystem(new Catapult(4, 6));
 		$this->addFrontSystem(new CargoBay(4, 24));
 
-		$this->addAftSystem(new NexusCoilgun(4, 10, 4, 120, 240));
+		$this->addAftSystem(new NexusHeavyCoilgun(4, 12, 5, 120, 240));
 		$this->addAftSystem(new NexusGasGun(4, 7, 2, 90, 270));
 		$this->addAftSystem(new NexusGasGun(4, 7, 2, 90, 270));
 		$this->addAftSystem(new NexusLightGasGun(4, 5, 1, 90, 270));
@@ -52,7 +52,7 @@ class DalithornStation extends SmallStarBaseFourSections{
 		$this->addAftSystem(new Catapult(4, 6));
 		$this->addAftSystem(new CargoBay(4, 24));
 			
-		$this->addLeftSystem(new NexusCoilgun(4, 10, 4, 210, 330));
+		$this->addLeftSystem(new NexusHeavyCoilgun(4, 12, 5, 210, 330));
 		$this->addLeftSystem(new NexusGasGun(4, 7, 2, 180, 360));
 		$this->addLeftSystem(new NexusGasGun(4, 7, 2, 180, 360));
 		$this->addLeftSystem(new NexusLightGasGun(4, 5, 1, 180, 360));
@@ -60,7 +60,7 @@ class DalithornStation extends SmallStarBaseFourSections{
 		$this->addLeftSystem(new Catapult(4, 6));
 		$this->addLeftSystem(new CargoBay(4, 24));
 
-		$this->addRightSystem(new NexusCoilgun(4, 10, 4, 30, 150));
+		$this->addRightSystem(new NexusHeavyCoilgun(4, 12, 5, 30, 150));
 		$this->addRightSystem(new NexusGasGun(4, 7, 2, 0, 180));
 		$this->addRightSystem(new NexusGasGun(4, 7, 2, 0, 180));
 		$this->addRightSystem(new NexusLightGasGun(4, 5, 1, 0, 180));
@@ -85,7 +85,7 @@ class DalithornStation extends SmallStarBaseFourSections{
 				20 => "C&C",
 			),
 			1=> array(
-				3 => "Coilgun",
+				3 => "Heavy Coilgun",
 				5 => "Light Gas Gun",
 				7 => "Catapult",
 				9 => "Gas Gun",
@@ -94,7 +94,7 @@ class DalithornStation extends SmallStarBaseFourSections{
 				20 => "Primary",
 			),
 			2=> array(
-				3 => "Coilgun",
+				3 => "Heavy Coilgun",
 				5 => "Light Gas Gun",
 				7 => "Catapult",
 				9 => "Gas Gun",
@@ -103,7 +103,7 @@ class DalithornStation extends SmallStarBaseFourSections{
 				20 => "Primary",
 			),	
 			3=> array(
-				3 => "Coilgun",
+				3 => "Heavy Coilgun",
 				5 => "Light Gas Gun",
 				7 => "Catapult",
 				9 => "Gas Gun",
@@ -112,7 +112,7 @@ class DalithornStation extends SmallStarBaseFourSections{
 				20 => "Primary",
 			),
 			4=> array(
-				3 => "Coilgun",
+				3 => "Heavy Coilgun",
 				5 => "Light Gas Gun",
 				7 => "Catapult",
 				9 => "Gas Gun",
