@@ -32,7 +32,7 @@ class Stormfalcon extends BaseShipNoAft{
         $this->addPrimarySystem(new Engine(5, 15, 0, 8, 3));
         $this->addPrimarySystem(new JumpEngine(5, 10, 0, 5, 36));
         $this->addPrimarySystem(new Hangar(4, 14));
-        $this->addPrimarySystem(new Catapult(5, 6));
+        $this->addPrimarySystem(new Catapult(5, 6,1));
         $this->addPrimarySystem(new Thruster(5, 21, 0, 8, 2));
 
         $this->addFrontSystem(new ParticleRepeater(3, 6, 4, 240, 0));
