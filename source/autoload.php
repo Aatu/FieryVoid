@@ -1643,6 +1643,7 @@ spl_autoload_register(
                 'dalithornsmallscoutrefit' => '/server/model/ships/ZNexusDalithorn/DalithornSmallScoutRefit.php',					
                 'dalithornstation' => '/server/model/ships/ZNexusDalithorn/DalithornStation.php',					
                 'dalithornstationearly' => '/server/model/ships/ZNexusDalithorn/DalithornStationEarly.php',					
+                'dalithornwarstation' => '/server/model/ships/ZNexusDalithorn/DalithornWarStation.php',					
 
 
 				//Nexus ships - Sal-bez
