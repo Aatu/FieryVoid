@@ -73,14 +73,10 @@ class technicalTargetDrone extends BaseShip{
         $this->addPrimarySystem(new RMissileRack(3, 6, 0, 0, 360));
 */
 		
-		/*
-		$this->addFrontSystem(new CustomERLightPBeam(3, 0, 0, 240, 120));
-		$this->addFrontSystem(new CustomBPALight(3, 0, 0, 240, 120));
-		$this->addFrontSystem(new CustomBPAMedium(3, 0, 0, 240, 120));
-		$this->addFrontSystem(new CustomBPAHeavy(3, 0, 0, 240, 120));
-		$this->addFrontSystem(new NexusKineticBoxLauncher(1, 0, 0, 270, 180));
-		$this->addFrontSystem(new NexusChaffLauncher(1, 0, 0, 0, 360));
-		*/
+
+		$this->addFrontSystem(new NexusLaserMissile(1, 6, 1, 0, 360));
+		$this->addFrontSystem(new NexusLaserMissile(1, 6, 1, 0, 360));
+
 		/*
 		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));
 		$this->addAftSystem(new CommJammer(3, 0, 0, 0, 360));		
