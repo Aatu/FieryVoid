@@ -27,7 +27,7 @@ class DalithornLightCruiser extends HeavyCombatVessel{
         
         $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(4, 14, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 14, 5, 5));
+        $this->addPrimarySystem(new Scanner(4, 14, 5, 6));
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(1, 2));
 		$this->addPrimarySystem(new CargoBay(2, 12));

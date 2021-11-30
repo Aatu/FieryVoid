@@ -35,7 +35,7 @@ class CraytanHelis extends LCV{
   
 		$this->addPrimarySystem(new Reactor(3, 7, 0, 0));
 		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-        $this->addPrimarySystem(new AntiquatedScanner(3, 12, 2, 3));
+        $this->addPrimarySystem(new AntiquatedScanner(3, 12, 2, 4));
 		$this->addPrimarySystem(new Engine(3, 12, 0, 6, 2));
 		$this->addPrimarySystem(new NexusSentryGun(2, 5, 1, 240, 60));
 		$this->addPrimarySystem(new NexusHeavySentryGun(2, 6, 2, 270, 90));

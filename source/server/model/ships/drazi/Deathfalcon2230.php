@@ -34,7 +34,7 @@ class Deathfalcon2230 extends BaseShipNoAft{
         $this->addPrimarySystem(new Scanner(5, 14, 5, 7));
         $this->addPrimarySystem(new Engine(5, 15, 0, 8, 3));
         $this->addPrimarySystem(new JumpEngine(5, 10, 5, 36));
-        $this->addPrimarySystem(new Hangar(4, 12));
+        $this->addPrimarySystem(new Hangar(4, 14, 12));
         $this->addPrimarySystem(new HvyParticleCannon(5, 12, 9, 330, 30));
         $this->addPrimarySystem(new Thruster(5, 21, 0, 8, 2));
 
