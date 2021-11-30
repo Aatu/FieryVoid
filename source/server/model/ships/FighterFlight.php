@@ -513,6 +513,20 @@ class FighterFlight extends BaseShip
 
         return $orders;
     }
+	
+	public function getFighterFireOrders($craft, $turn = -1)
+    {
+        $orders = array();
+
+        foreach ($this->systems as $fighter) if ($fighter->id == $craft->id){//only for indicated craft
+            foreach ($fighter->systems as $system) {
+                $orders = array_merge($orders, $system->getFireOrders($turn));
+                //$orders = array_merge($orders, $system->fireOrders); //old version
+            }
+        }
+
+        return $orders;
+    }
 
 
     /*always nothing to do for fighters*/

@@ -75,6 +75,13 @@ TrekShieldProjector.prototype.getDefensiveHitChangeMod = function (target, shoot
     return 0;
 };
 
+var TrekShieldFtr = function TrekShieldFtr(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+TrekShieldFtr.prototype = Object.create(ShipSystem.prototype);
+TrekShieldFtr.prototype.constructor = TrekShieldFtr;
+
+
 var TrekPhotonTorp = function TrekPhotonTorp(json, ship) {
     Weapon.call(this, json, ship);
 };

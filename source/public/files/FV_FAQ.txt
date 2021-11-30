@@ -68,6 +68,7 @@ FIRING AND WEAPONS
  - Piercing attacks have quirky way of finding whether damage should be split into 2 or 3 parts - essentially split to 2 if shot enters and exits through the same section.
  - Piercing damage vs MCVs is reduced by 10% (instead of -2/die).
  - Piercing attacks can be made without special requirements regarding EW - appropriate penalty is always included in fire control. 
+ - Relative position of units on the same hex is not correctly resolved if units start turn on the same hex. As a compensation for this, all targets at range 0 are considered valid for ballistics launch.
  
 
 OTHERS

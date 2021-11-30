@@ -33,8 +33,8 @@ class Nightfalcon extends BaseShipNoAft{
         $this->addPrimarySystem(new Scanner(5, 18, 6, 8));
         $this->addPrimarySystem(new Engine(5, 15, 0, 8, 3));
         $this->addPrimarySystem(new JumpEngine(5, 10, 5, 36));
-        $this->addPrimarySystem(new Hangar(4, 14));
-        $this->addPrimarySystem(new Catapult(5, 6));
+        $this->addPrimarySystem(new Hangar(4, 14, 12));
+        $this->addPrimarySystem(new Catapult(5, 6, 1));
         $this->addPrimarySystem(new Thruster(5, 21, 0, 8, 2));
 
         $this->addFrontSystem(new ParticleCutter(3, 8, 3, 240, 0));
@@ -42,8 +42,8 @@ class Nightfalcon extends BaseShipNoAft{
         $this->addFrontSystem(new ParticleCutter(3, 8, 3, 0, 120));
         $this->addFrontSystem(new Thruster(4, 13, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 13, 0, 4, 1));
-        $this->addFrontSystem(new Catapult(4, 6));
-        $this->addFrontSystem(new Catapult(4, 6));
+        $this->addFrontSystem(new Catapult(4, 6, 1));
+        $this->addFrontSystem(new Catapult(4, 6, 1));
 
         $this->addLeftSystem(new ParticleCannon(3, 8, 7, 240, 0));
         $this->addLeftSystem(new ParticleCannon(3, 8, 7, 240, 0));
