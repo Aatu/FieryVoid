@@ -2411,8 +2411,10 @@ spl_autoload_register(
 				
 				'tellariteattackvessel' => '/server/model/ships/ZTrekFederation/TellariteAttackVessel.php',
 				'tellaritecruiser' => '/server/model/ships/ZTrekFederation/TellariteCruiser.php',
-		
-		    		
+				    		
+				'trekfederationsarajevo' => '/server/model/ships/ZTrekFederation/TrekFederationSarajevo.php',
+				'trekfederationjclass' => '/server/model/ships/ZTrekFederation/TrekFederationJClass.php',
+				'trekfederationyclass' => '/server/model/ships/ZTrekFederation/TrekFederationYClass.php',
 				
 
 				//Hyach conversions
