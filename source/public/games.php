@@ -88,10 +88,12 @@ if (isset($_SESSION["user"])) {
 	    <br><b>New Nexus units</b> - courtesy of Geoffrey
 	    <br><b>Vree Raiders and Civilians</b> - courtesy of Douglas
 	    <br><b>A lot of (mostly minor) unit fixes</b> - notably BSG Colonials, Drakh, Raiders, Vree... 
-		<br><br>---------- <b>update late November</b> ----------
+		<br><br>---------- <b>update last of November</b> ----------
 	    <br><b>Nexus "campaign capable"</b> - Support units (bases, OSATs, scouts) for all non-playtest factions
 	    <br><b>Craytan Union update</b> - The first round of playtesting is done and bugs/updates addressed
-
+	    <br><b>Dogpiles properly sorted</b> - with highest Ini on top
+	    <br><b>Powerless ships can still maneuver</b> - after consulting rulebook it turned out that disabling maneuvering when power is cut was... overenthusiastic ;) 
+	    <br><b>Shredder targeting highlight</b> - now properly recognizing RE-targeting as well!
 	    
         <br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.

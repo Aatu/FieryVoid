@@ -18,6 +18,7 @@ class AndorianKumari extends HeavyCombatVesselLeftRight{
         $this->forwardDefense = 13;
         $this->sideDefense = 13;
         
+        $this->gravitic = true;    
         $this->turncost = 0.5;
         $this->turndelaycost = 0.5;
         $this->accelcost = 2;
