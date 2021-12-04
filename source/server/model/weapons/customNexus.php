@@ -225,6 +225,7 @@ class NexusLaserMissile extends Weapon{
         public $animationWidth = 5;
         public $trailLength = 100;    
 
+		public $doInterceptDegradation = true; //Will be intercepted with normal degradation even though a ballistic
         public $useOEW = false; //missile
         public $ballistic = true; //missile
         public $range = 20;
@@ -2725,6 +2726,7 @@ class NexusAutocannonDefender extends Particle{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 3 hexes.";
+			$this->data["Special"] .= "<br>Can intercept laser weapons.";
 		}
 		
 		public function canFreeInterceptShot($gamedata, $fireOrder, $shooter, $target, $interceptingShip, $firingWeapon){

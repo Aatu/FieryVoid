@@ -41,7 +41,7 @@ class CraytanHelis extends LCV{
 		$this->addPrimarySystem(new NexusHeavySentryGun(2, 6, 2, 270, 90));
 		$this->addPrimarySystem(new NexusSentryGun(2, 5, 1, 300, 120));
 	    
-        $this->addPrimarySystem(new Structure(3, 36));
+        $this->addPrimarySystem(new Structure(3, 32));
 	    
         $this->hitChart = array(
         		0=> array( 

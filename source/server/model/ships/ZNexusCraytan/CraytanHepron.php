@@ -46,6 +46,7 @@ class CraytanHepron extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(2, 13, 0, 4, 2));
 		$this->addAftSystem(new NexusCIDS(2, 4, 2, 120, 360));
 		$this->addAftSystem(new NexusSentryGun(2, 5, 1, 90, 270));
+		$this->addAftSystem(new NexusHeavySentryGun(2, 6, 2, 120, 240));
 		$this->addAftSystem(new NexusSentryGun(2, 5, 1, 90, 270));
 		$this->addAftSystem(new NexusCIDS(2, 4, 2, 0, 240));
         
@@ -77,6 +78,7 @@ class CraytanHepron extends HeavyCombatVessel{
                     6 => "Thruster",
                     8 => "Close-In Defense System",
 					10 => "Sentry Gun",
+					11 => "Heavy Sentry Gun",
                     18 => "Structure",
                     20 => "Primary",
             ),
