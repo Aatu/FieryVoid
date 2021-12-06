@@ -293,7 +293,8 @@ class Reactor extends ShipSystem{
         11=>"OutputReduced2",
         15=>"OutputReduced4",
         19=>"OutputReduced8",
-        27=>array("OutputReduced10", "ForcedOfflineOneTurn"));
+        //27=>array("OutputReduced10", "ForcedOfflineOneTurn"));
+	27=>array("OutputReduced10", "ContainmentBreach"));
     
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );        
