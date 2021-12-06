@@ -378,7 +378,8 @@ class ChargeEmpty extends Critical{ //charge emptied - instant effect, to be rec
     }
 }
 
-
+//for Reactor - it will check for explosion every turn (including turn the critical was added, as officially this is done at start of turn; in FV there is no option to voluntarily shut down the Reactor to prevent that)
+//-10 Power that comes with the crit officially will be applied as a separate critical
 class ContainmentBreach extends OutputReduced1{
      public $description = "Containment Breach!";
 	public $repairCost = 2;
