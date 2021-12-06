@@ -326,6 +326,43 @@ class Reactor extends ShipSystem{
         parent::addCritical($shipid, $phpclass, $gamedata);
     }
 	
+
+	//in case of containment breach - roll whether reactor explodes
+	public function criticalPhaseEffects($ship, $gamedata)
+    { 
+	if ($this->isDestroyed()) return; //no point if Reactor is actually destroyed already
+	if (!$this->hasCritical("ContainmentBreach")) return; //no Containment Breach, everything is fine
+		
+	$explodeRoll = Dice::d(100);
+	$chance = $this->getDamage()
+	if ($explodeRoll > $chance) return; //roll indicates that explosion did not happen
+		
+	//explosion!
+	//try to make actual attack to show in log - use Ramming Attack system!				
+	$rammingSystem = $ship->getSystemByName("RammingAttack");
+	$newFireOrder=null;
+	if($rammingSystem){ //actually exists! - it should on every ship!				
+		$newFireOrder = new FireOrder(
+			-1, "normal", $ship->id, $ship->id,
+			$rammingSystem->id, -1, $gamedata->turn, 1, 
+			100, 100, 1, 1, 0,
+			0,0,'HalfPhase',10000
+		);
+		$newFireOrder->pubnotes = "Containment Breach - reactor explosion! Chance $chance %, roll $explodeRoll.";
+		$newFireOrder->addToDB = true;
+		$rammingSystem->fireOrders[] = $newFireOrder;
+	}
+		
+	//destroy self		
+        $remaining = $this->getRemainingHealth();
+    	$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $remaining, 0, 0, -1, true, false, "", "ContainmentBreach");
+    	$damageEntry->updated = true;
+    	$primaryStruct->damage[] = $damageEntry;			
+	if($rammingSystem){ //add extra data to damage entry - so firing order can be identified!
+		$damageEntry->shooterid = $ship->id; //additional field
+		$damageEntry->weaponid = $rammingSystem->id; //additional field
+	}
+    } //endof function criticalPhaseEffects
 	
     public function isOverloading($turn){
         foreach ($this->power as $power){
