@@ -377,3 +377,12 @@ class ChargeEmpty extends Critical{ //charge emptied - instant effect, to be rec
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
 }
+
+
+class ContainmentBreach extends OutputReduced1{
+     public $description = "Containment Breach!";
+	public $repairCost = 2;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
