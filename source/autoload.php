@@ -124,7 +124,6 @@ spl_autoload_register(
                 'brova' => '/server/model/ships/abbai_old/brova.php',
                 'brova1945' => '/server/model/ships/abbai_old/brova1945.php',
                 'brova1970' => '/server/model/ships/abbai_old/brova1970.php',
-				'bsghybrid' => '/server/model/systems/baseSystems.php',				
                 'bulkfreighter' => '/server/model/ships/civilians/bulkFreighter.php',
                 'bulkorefreighter' => '/server/model/ships/civilians/bulkOreFreighter.php',
                 'burstbeam' => '/server/model/weapons/specialWeapons.php',
