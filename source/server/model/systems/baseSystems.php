@@ -513,7 +513,7 @@ class SubReactorUniversal extends ShipSystem{
 }//endof class SubReactorUniversal
 
 
-class Engine extends ShipSystem{
+class Engine extends ShipSystem implements SpecialAbility {
     public $name = "engine";
     public $displayName = "Engine";
     public $thrustused;
@@ -536,8 +536,57 @@ class Engine extends ShipSystem{
         $this->thrustused = (int)$thrustused;
         $this->boostEfficiency = (int)$boostEfficiency;
     }
-    
+
+    public function markFlux(){
+        $this->specialAbilities[] = "EngineFlux";
+        $this->specialAbilityValue = true; //so it is actually recognized as special ability!
+        if (!isset($this->data["Special"])) {
+            $this->data["Special"] = '';
+        }else{
+            $this->data["Special"] .= '<br>';
+        }
+        $this->data["Special"] .= 'Each turn, the engine rolls for a critical, with a +5% penalty. Any effects last only 1 turn.';
+    }
+
+    public function getSpecialAbilityValue($args)
+    {
+        return $this->specialAbilityValue;
+    }
+
+	public function criticalPhaseEffects($ship, $gamedata) {
+		
+		$hasEngineFlux = $ship->hasSpecialAbility("EngineFlux");
+
+		if ($hasEngineFlux) {
+
+			$roll = Dice::d(20) + 1 + $this->getTotalDamage();  //There is a +1 penalty in addition to any damage
+
+			if($roll >= 15 && $roll < 21){ // Output reduced by 2 for one turn
+				$finalTurn = $gamedata->turn + 1;
+				$crit = new OutputReduced2(-1, $this->unit->id, $this->id, "OutputReduced2", $gamedata->turn, $finalTurn);
+				$crit->updated = true;
+				$crit->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit;
+			} elseif ($roll >=21 && $roll < 28) { // Output reduced by 4 for one turn
+				$finalTurn = $gamedata->turn + 1;
+				$crit = new OutputReduced4(-1, $this->unit->id, $this->id, "OutputReduced4", $gamedata->turn, $finalTurn);
+				$crit->updated = true;
+				$crit->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit;
+			} elseif ($roll >=28) { // Forced offline for one turn
+				$finalTurn = $gamedata->turn + 1;
+				$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
+				$crit->updated = true;
+				$crit->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit;
+            }
+			
+		}
+		
+	}
+
 }
+
 
 class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner does not implement anything in particular, but classes ovverriding it do!
     public $name = "scanner";
@@ -2935,6 +2984,7 @@ class StructureTechnical extends ShipSystem{
 		}
       
 }//endof VreeStructurePlaceholder	
+
 
 
 

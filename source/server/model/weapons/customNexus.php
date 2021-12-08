@@ -1546,7 +1546,7 @@ class NexusChaffLauncher extends Weapon{
 
         public $loadingtime = 1;
 		public $guns = 1;
-        public $priority = 6;
+        public $priority = 8;
 
         public $rangePenalty = 1.0 ; //-1 / hex
         public $fireControl = array(0, 1, 2); // fighters, <mediums, <capitals
@@ -1613,7 +1613,7 @@ class NexusChaffLauncher extends Weapon{
 
         public $loadingtime = 2;
 		public $guns = 1;
-        public $priority = 7;
+        public $priority = 9;
 
         public $rangePenalty = 0.66; //-2/3 hexes
         public $fireControl = array(-2, 2, 2); // fighters, <mediums, <capitals
@@ -2598,6 +2598,7 @@ class NexusMinigun extends Pulse{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
+			$this->data["Special"] .= "<br>Ballistic intercept only.";
 		}
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){

@@ -8,7 +8,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
 //		$this->imagePath = "img/ships/BASurveyShip.png";
-		$this->imagePath = "img/ships/Nexus/CraytanCorvette.png";
+		$this->imagePath = "img/ships/GaimSkassa.png";
 		$this->shipClass = "Target Drone - DO NOT USE";
 //		$this->shipSizeClass = 3;
 		$this->canvasSize = 75; //img has 125px per side
@@ -21,6 +21,8 @@ class technicalTargetDrone extends BaseShip{
 		$this->rollcost = 3;
 		$this->pivotcost = 4;
 
+		$this->critRollMod += 1;
+		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
 		
 		$this->notes = "DO NOT USE, prone to change!";
 		
@@ -28,7 +30,10 @@ class technicalTargetDrone extends BaseShip{
 		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 0, 180));
 		$this->addPrimarySystem(new Reactor(6, 35, 0, 0));
 		$this->addPrimarySystem(new CnC(1, 1, 0, 0));
-		$this->addPrimarySystem(new Engine(5, 20, 0, 20, 3));
+		$engine = new Engine(5, 20, 0, 20, 3);
+			$engine->markFlux();
+			$this->addPrimarySystem($engine);
+//		$this->addPrimarySystem(new Engine(5, 20, 0, 20, 3));
 		$this->addPrimarySystem(new Hangar(6, 100));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
