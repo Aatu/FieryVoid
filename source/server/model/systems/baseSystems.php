@@ -337,7 +337,12 @@ class Reactor extends ShipSystem implements SpecialAbility {
 	
     public function setSystemDataWindow($turn){
         parent::setSystemDataWindow($turn);     
-        $this->data["Special"] = "Can be set to overload, self-destroying ship after Firing phase.";	     
+		if(!isset($this->data["Special"])){
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+        $this->data["Special"] .= "Can be set to overload, self-destroying ship after Firing phase.";	     
     }
 	
     public function markPowerFlux(){
