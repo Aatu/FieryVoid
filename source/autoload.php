@@ -142,6 +142,7 @@ spl_autoload_register(
                 'talvan' => '/server/model/ships/centauri_old/talvan.php',
                 'talvan1990' => '/server/model/ships/centauri_old/talvan1990.php',
                 'talvan2006' => '/server/model/ships/centauri_old/talvan2006.php',
+                'talvanupgrade' => '/server/model/ships/centauri/talvanUpgrade.php',
                 'centurion' => '/server/model/ships/centauri/centurion.php',
                 'chatmanager' => '/server/controller/ChatManager.php',
                 'chatmessage' => '/server/model/ChatMessage.php',
