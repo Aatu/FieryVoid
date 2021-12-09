@@ -16,6 +16,7 @@ class gaimSkassa extends BaseShip{
 
 		$this->critRollMod += 1;
 		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
+		$this->enhancementOptionsDisabled[] = 'IMPR_ENG';
 		
 		$this->notes = "Engine fluctuations. Rolls for engine critical every turn with +5% penalty. Effect lasts one turn.";
         
