@@ -1010,7 +1010,7 @@ class CnC extends ShipSystem implements SpecialAbility {
         }else{
             $this->data["Special"] .= '<br>';
         }
-        $this->data["Special"] .= 'Communications problems. Each turn, the C&C rolls for a critical, with a +5% penalty. Any effects last only 1 turn.';
+        $this->data["Special"] .= '<br>Communications problems. Each turn, the C&C rolls for a critical, with a +5% penalty. Any effects last only 1 turn.';
     }
 
     public function getSpecialAbilityValue($args)
