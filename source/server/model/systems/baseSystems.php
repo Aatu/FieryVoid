@@ -274,7 +274,7 @@ class ShieldGenerator extends ShipSystem{
     }    
 }
 
-class Reactor extends ShipSystem{
+class Reactor extends ShipSystem implements SpecialAbility {
     public $name = "reactor";
     public $displayName = "Reactor";
     public $primary = true;
@@ -298,7 +298,6 @@ class Reactor extends ShipSystem{
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );        
     }
-
     
     public function addCritical($shipid, $phpclass, $gamedata) {
         if(strcmp($phpclass, "ForcedOfflineOneTurn") == 0){
@@ -340,6 +339,61 @@ class Reactor extends ShipSystem{
         parent::setSystemDataWindow($turn);     
         $this->data["Special"] = "Can be set to overload, self-destroying ship after Firing phase.";	     
     }
+	
+    public function markPowerFlux(){
+        $this->specialAbilities[] = "ReactorFlux";
+        $this->specialAbilityValue = true; //so it is actually recognized as special ability!
+        if (!isset($this->data["Special"])) {
+            $this->data["Special"] = '';
+        }else{
+            $this->data["Special"] .= '<br>';
+        }
+        $this->data["Special"] .= '<br>Power fluctuations. Each turn, the reactor rolls for a critical, with a +5% penalty. Any effects last only 1 turn.';
+    }
+
+    public function getSpecialAbilityValue($args)
+    {
+        return $this->specialAbilityValue;
+    }
+
+	public function criticalPhaseEffects($ship, $gamedata) {
+		
+		$hasPowerFlux = $ship->hasSpecialAbility("ReactorFlux");
+
+		if ($hasPowerFlux) {
+
+			$roll = Dice::d(20) + 1 + $this->getTotalDamage();  //There is a +1 penalty in addition to any damage
+
+			if($roll >= 11 && $roll < 15){ // Output reduced by 2 for one turn
+				$finalTurn = $gamedata->turn + 1;
+				$crit = new OutputReduced2(-1, $this->unit->id, $this->id, "OutputReduced2", $gamedata->turn, $finalTurn);
+				$crit->updated = true;
+				$crit->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit;
+			} elseif ($roll >=15 && $roll < 19) { // Output reduced by 4 for one turn
+				$finalTurn = $gamedata->turn + 1;
+				$crit = new OutputReduced4(-1, $this->unit->id, $this->id, "OutputReduced4", $gamedata->turn, $finalTurn);
+				$crit->updated = true;
+				$crit->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit;
+			} elseif ($roll >=19 && $roll < 27) { // Output reduced by 8 for one turn
+				$finalTurn = $gamedata->turn + 1;
+				$crit = new OutputReduced8(-1, $this->unit->id, $this->id, "OutputReduced8", $gamedata->turn, $finalTurn);
+				$crit->updated = true;
+				$crit->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit;
+			} elseif ($roll >=27) { // Output reduced by 10 for one turn
+				$finalTurn = $gamedata->turn + 1;
+				$crit = new OutputReduced10(-1, $this->unit->id, $this->id, "OutputReduced10", $gamedata->turn, $finalTurn);
+				$crit->updated = true;
+				$crit->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit;
+			}
+			
+		}
+		
+	}	
+	
 } //endof Reactor
 
 
@@ -545,7 +599,7 @@ class Engine extends ShipSystem implements SpecialAbility {
         }else{
             $this->data["Special"] .= '<br>';
         }
-        $this->data["Special"] .= 'Each turn, the engine rolls for a critical, with a +5% penalty. Any effects last only 1 turn.';
+        $this->data["Special"] .= 'Engine fluctuations. Each turn, the engine rolls for a critical, with a +5% penalty. Any effects last only 1 turn.';
     }
 
     public function getSpecialAbilityValue($args)
