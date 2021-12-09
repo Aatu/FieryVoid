@@ -30,7 +30,7 @@ class gaimSkassa extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 18, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 20, 4, 8));
 		$engine = new Engine(5, 20, 0, 9, 3);
-			$engine->markFlux();
+			$engine->markEngineFlux();
 			$this->addPrimarySystem($engine);
 		$this->addPrimarySystem(new Hangar(5, 2));
         

@@ -591,7 +591,7 @@ class Engine extends ShipSystem implements SpecialAbility {
         $this->boostEfficiency = (int)$boostEfficiency;
     }
 
-    public function markFlux(){
+    public function markEngineFlux(){
         $this->specialAbilities[] = "EngineFlux";
         $this->specialAbilityValue = true; //so it is actually recognized as special ability!
         if (!isset($this->data["Special"])) {
@@ -767,9 +767,58 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		$this->data["Special"] .= 'LCV Sensors - up to 2 EW points may be allocated freely. All surplus can be allocated ONLY as OEW.';
 	}	
 
+    public function markSensorFlux(){
+        $this->specialAbilities[] = "SensorFlux";
+        $this->specialAbilityValue = true; //so it is actually recognized as special ability!
+        if (!isset($this->data["Special"])) {
+            $this->data["Special"] = '';
+        }else{
+            $this->data["Special"] .= '<br>';
+        }
+        $this->data["Special"] .= 'Sensor fluctuations. Each turn, the sensor rolls for a critical, with a +5% penalty. Any effects last only 1 turn.';
+    }
+
 	public function getSpecialAbilityValue($args)
     {
 		return $this->specialAbilityValue;
+	}
+
+	public function criticalPhaseEffects($ship, $gamedata) {
+		
+		$hasSensorFlux = $ship->hasSpecialAbility("SensorFlux");
+
+		if ($hasSensorFlux) {
+
+			$roll = Dice::d(20) + 1 + $this->getTotalDamage();  //There is a +1 penalty in addition to any damage
+
+			if($roll >= 15 && $roll < 19){ // Output reduced by 1 for one turn
+				$finalTurn = $gamedata->turn + 1;
+				$crit = new OutputReduced1(-1, $this->unit->id, $this->id, "OutputReduced1", $gamedata->turn, $finalTurn);
+				$crit->updated = true;
+				$crit->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit;
+			} elseif ($roll >=19 && $roll < 23) { // Output reduced by 2 for one turn
+				$finalTurn = $gamedata->turn + 1;
+				$crit = new OutputReduced2(-1, $this->unit->id, $this->id, "OutputReduced2", $gamedata->turn, $finalTurn);
+				$crit->updated = true;
+				$crit->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit;
+			} elseif ($roll >=23 && $roll < 27) { // Output reduced by 3 for one turn
+				$finalTurn = $gamedata->turn + 1;
+				$crit = new OutputReduced3(-1, $this->unit->id, $this->id, "OutputReduced3", $gamedata->turn, $finalTurn);
+				$crit->updated = true;
+				$crit->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit;
+			} elseif ($roll >=27) { // Output reduced by 4 for one turn
+				$finalTurn = $gamedata->turn + 1;
+				$crit = new OutputReduced4(-1, $this->unit->id, $this->id, "OutputReduced4", $gamedata->turn);
+				$crit->updated = true;
+				$crit->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit;
+            }
+			
+		}
+		
 	}
 	
 } //endof Scanner

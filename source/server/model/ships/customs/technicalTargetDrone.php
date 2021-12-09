@@ -10,8 +10,8 @@ class technicalTargetDrone extends BaseShip{
 //		$this->imagePath = "img/ships/BASurveyShip.png";
 		$this->imagePath = "img/ships/GaimSkassa.png";
 		$this->shipClass = "Target Drone - DO NOT USE";
-//		$this->shipSizeClass = 3;
-		$this->canvasSize = 75; //img has 125px per side
+		$this->shipSizeClass = 3;
+//		$this->canvasSize = 75; //img has 125px per side
 		$this->forwardDefense = 20;
 		$this->sideDefense = 20;
 		$this->fighters = array("light"=>12);        
@@ -34,7 +34,7 @@ class technicalTargetDrone extends BaseShip{
 //		$this->addPrimarySystem(new Reactor(6, 35, 0, 0));
 		$this->addPrimarySystem(new CnC(1, 1, 0, 0));
 		$engine = new Engine(5, 20, 0, 20, 3);
-			$engine->markFlux();
+			$engine->markEngineFlux();
 			$this->addPrimarySystem($engine);
 //		$this->addPrimarySystem(new Engine(5, 20, 0, 20, 3));
 		$this->addPrimarySystem(new Hangar(6, 100));
@@ -58,10 +58,12 @@ class technicalTargetDrone extends BaseShip{
 //		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
 //		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
 //		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
-		$sensors = new ELINTScanner(6, 23, 4, 20);
+/*		$sensors = new ELINTScanner(6, 23, 4, 20);
 			$sensors->markHyachELINT();
+			$this->addFrontSystem($sensors); */
+		$sensors = new Scanner(6, 23, 4, 20);
+			$sensors->markSensorFlux();
 			$this->addFrontSystem($sensors);
-//        $this->addFrontSystem(new HyachScanner(3, 20, 2, 4));
 
 
 		$this->addPrimarySystem(new SpinalLaser(5, 12, 12, 330, 30));
