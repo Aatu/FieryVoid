@@ -335,7 +335,7 @@ class Reactor extends ShipSystem{
 	if (!$this->hasCritical("ContainmentBreach")) return; //no Containment Breach, everything is fine
 		
 	$explodeRoll = Dice::d(100);
-	$chance = $this->getDamage()
+	$chance = $this->getTotalDamage();
 	if ($explodeRoll > $chance) return; //roll indicates that explosion did not happen
 		
 	//explosion!
