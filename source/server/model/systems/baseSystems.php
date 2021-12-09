@@ -923,7 +923,7 @@ class AntiquatedScanner extends Scanner {
 
 
 
-class CnC extends ShipSystem{
+class CnC extends ShipSystem implements SpecialAbility {
     public $name = "cnC";
     public $displayName = "C&C";
     public $primary = true;
@@ -946,6 +946,73 @@ class CnC extends ShipSystem{
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
     }
+	
+    public function markCommsFlux(){
+        $this->specialAbilities[] = "CommsFlux";
+        $this->specialAbilityValue = true; //so it is actually recognized as special ability!
+        if (!isset($this->data["Special"])) {
+            $this->data["Special"] = '';
+        }else{
+            $this->data["Special"] .= '<br>';
+        }
+        $this->data["Special"] .= 'Communications problems. Each turn, the C&C rolls for a critical, with a +5% penalty. Any effects last only 1 turn.';
+    }
+
+    public function getSpecialAbilityValue($args)
+    {
+        return $this->specialAbilityValue;
+    }
+	
+	public function criticalPhaseEffects($ship, $gamedata) {
+		
+		$hasCommsFlux = $ship->hasSpecialAbility("CommsFlux");
+
+		if ($hasCommsFlux) {
+
+			$roll = Dice::d(20) + 1 + $this->getTotalDamage();  //There is a +1 penalty in addition to any damage
+
+			if($roll >= 9 && $roll < 12){ // Initiative reduced by 5 for one turn
+				$finalTurn = $gamedata->turn + 1;
+				$crit = new CommunicationsDisrupted(-1, $this->unit->id, $this->id, "CommunicationsDisrupted", $gamedata->turn);
+				$crit->updated = true;
+				$crit->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit;
+			} elseif ($roll >=12 && $roll < 15) { // Reduce chance to hit for all weapons by 1 for one turn
+				$finalTurn = $gamedata->turn + 1;
+				$crit = new PenaltyToHit(-1, $this->unit->id, $this->id, "PenaltyToHit", $gamedata->turn);
+				$crit->updated = true;
+				$crit->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit;
+			} elseif ($roll >=15 && $roll < 18) { // Reduce sensors by 2 and no more than half can be used offensively for one turn
+				$finalTurn = $gamedata->turn + 1;
+				$crit = new RestrictedEW(-1, $this->unit->id, $this->id, "RestrictedEW", $gamedata->turn);
+				$crit->updated = true;
+				$crit->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit;
+			} elseif ($roll >=18 && $roll < 21) { // Initiative reduced by 10 for one turn
+				$finalTurn = $gamedata->turn + 1;
+				$crit = new ReducedIniativeOneTurn(-1, $this->unit->id, $this->id, "ReducedIniativeOneTurn", $gamedata->turn);
+				$crit->updated = true;
+				$crit->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit;
+			} elseif ($roll >=21) { // Output reduced by 4 for one turn
+				// Reduce sensors by 2 and no more than half can be used offensively for one turn	
+				// Initiative reduced by 10 for one turn				
+				$finalTurn = $gamedata->turn + 1;
+				$crit = new RestrictedEW(-1, $this->unit->id, $this->id, "RestrictedEW", $gamedata->turn);
+				$crit->updated = true;
+				$crit->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit;
+				$crit2 = new ReducedIniativeOneTurn(-1, $this->unit->id, $this->id, "ReducedIniativeOneTurn", $gamedata->turn);
+				$crit2->updated = true;
+				$crit2->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit2;
+            }
+			
+		}
+		
+	}	
+	
 } //endof class CnC
 
 /*Protected CnC - as compensation for ships lacking two C&Cs, these systems get different (lighter) critical table 

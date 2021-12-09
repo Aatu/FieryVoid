@@ -32,7 +32,10 @@ class technicalTargetDrone extends BaseShip{
 			$reactor->markPowerFlux();
 			$this->addPrimarySystem($reactor);
 //		$this->addPrimarySystem(new Reactor(6, 35, 0, 0));
-		$this->addPrimarySystem(new CnC(1, 1, 0, 0));
+		$cnc = new CnC(5, 20, 0, 0);
+			$cnc->markCommsFlux();
+			$this->addPrimarySystem($cnc);
+//		$this->addPrimarySystem(new CnC(5, 20, 0, 0));
 		$engine = new Engine(5, 20, 0, 20, 3);
 			$engine->markEngineFlux();
 			$this->addPrimarySystem($engine);
