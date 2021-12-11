@@ -14,7 +14,7 @@ class Critical{
 	public $turnend = 0; //last turn when critical is in efect; 0 = indefinitely
 	public $repairCost = 1; //how many self repair points are needed to repair it;
 	//official: all crits cost 1, except C&C cost 4; FV: except C&C and nastier Reactor crits, cost 2; no partial repairs!
-	public $repairPriority = 4;//lower = lower priority, 0 means it's irrepairable
+	public $repairPriority = 4;//0-9; lower = lower priority, 0 means it's irrepairable
 	
 		
     public function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $param = null){
