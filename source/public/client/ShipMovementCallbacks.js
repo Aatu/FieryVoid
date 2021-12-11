@@ -122,11 +122,14 @@ window.ShipMovementCallbacks = function () {
         e.stopPropagation();
 
         if (UI.shipMovement.checkUITimeout()) return false;
-
-        shipManager.movement.doMove(this.ship);
+		if (event.which == 3){ //r-click - move for all remaining movement
+			shipManager.movement.doMoveFully(this.ship);
+		}else{
+			shipManager.movement.doMove(this.ship);
+		}
         this.updateCallback({ ship: this.ship });
     };
-
+	
     ShipMovementCallbacks.prototype.turnIntoPivotCallback = function (e, right) {
         e.stopPropagation();
 
