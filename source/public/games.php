@@ -62,7 +62,7 @@ if (isset($_SESSION["user"])) {
         <br>
 -->        
 		
-		---------- <b>LATEST NEWS - Decemberr 2021</b> ----------	
+		---------- <b>LATEST NEWS - December 2021</b> ----------	
 	    <br><b>Sustaining even without Power available</b> - just like boosting
 	    <br><b>Containment Breach</b> - Reactor won't temporatily shut down due to critical roll now. It will become unstable and might explode though!
 	    <br><b>All ahead full</b> - r-click on "move forward" arrow will cause unit to use all remaining movement on moving straight ahead
