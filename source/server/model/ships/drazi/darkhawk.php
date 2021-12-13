@@ -28,9 +28,9 @@ class Darkhawk extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 13, 4, 8));
         $this->addPrimarySystem(new Engine(5, 11, 0, 10, 2));
         $this->addPrimarySystem(new Hangar(4, 2));
-        $this->addPrimarySystem(new ParticleCutter(4, 8, 3, 300, 60));
-        $this->addPrimarySystem(new Thruster(4, 15, 0, 5, 1));
-        $this->addPrimarySystem(new Thruster(5, 21, 0, 10, 2));
+        $this->addFrontSystem(new ParticleCutter(4, 8, 3, 300, 60));
+        $this->addAftSystem(new Thruster(4, 15, 0, 5, 1));
+        $this->addAftSystem(new Thruster(5, 21, 0, 10, 2));
 
         $this->addLeftSystem(new SMissileRack(4, 6, 0, 240, 0));
         $this->addLeftSystem(new SMissileRack(4, 6, 0, 240, 0));
@@ -50,8 +50,8 @@ class Darkhawk extends HeavyCombatVesselLeftRight{
                 $this->hitChart = array(
         		0=> array(
         				8 => "Structure",
-        				11 => "Thruster",
-					12 => "Particle Cutter",
+        				11 => "2:Thruster",
+					12 => "1:Particle Cutter",
         				14 => "Scanner",
         				16 => "Engine",
         				17 => "Hangar",

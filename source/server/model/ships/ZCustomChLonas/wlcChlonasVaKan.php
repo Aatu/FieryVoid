@@ -30,9 +30,9 @@ class wlcChlonasVaKan extends MediumShipLeftRight{
         $this->addPrimarySystem(new Scanner(4, 13, 3, 6));
         $this->addPrimarySystem(new Engine(4, 11, 0, 10, 3));
 		$this->addPrimarySystem(new Hangar(3, 1));
-      	$this->addPrimarySystem(new CustomGatlingMattergunHeavy(4, 0, 0, 300, 60));  
-      	$this->addPrimarySystem(new Thruster(4, 10, 0, 5, 1));
-        $this->addPrimarySystem(new Thruster(4, 21, 0, 10, 2));
+      	$this->addFrontSystem(new CustomGatlingMattergunHeavy(4, 0, 0, 300, 60));  
+      	$this->addAftSystem(new Thruster(4, 10, 0, 5, 1));
+        $this->addAftSystem(new Thruster(4, 21, 0, 10, 2));
 
 
         $this->addLeftSystem(new AssaultLaser(3, 6, 4, 240, 360));
@@ -55,8 +55,8 @@ class wlcChlonasVaKan extends MediumShipLeftRight{
 		$this->hitChart = array(
 			
 			0=> array(
-				8 => "Thruster",
-				11 => "Heavy Gatling Mattergun",
+				8 => "2:Thruster",
+				11 => "1:Heavy Gatling Mattergun",
 				13 => "Scanner",
 				15 => "Engine",
 				17 => "Hangar",

@@ -30,8 +30,8 @@ class Strikehawk extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Engine(5, 11, 0, 8, 2));
         $this->addPrimarySystem(new Catapult(4, 6,1));
         $this->addPrimarySystem(new Hangar(4, 1));
-        $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 1));
-        $this->addPrimarySystem(new Thruster(5, 19, 0, 8, 2));
+        $this->addAftSystem(new Thruster(4, 13, 0, 4, 1));
+        $this->addAftSystem(new Thruster(5, 19, 0, 8, 2));
 
         $this->addLeftSystem(new ParticleCannon(4, 8, 7, 240, 0));
         $this->addLeftSystem(new ParticleBlaster(4, 8, 5, 240, 0));
@@ -51,7 +51,7 @@ class Strikehawk extends HeavyCombatVesselLeftRight{
             $this->hitChart = array(
         		0=> array(
         				8 => "Structure",
-        				11 => "Thruster",
+        				11 => "2:Thruster",
 					12 => "Catapult",
         				14 => "Scanner",
         				16 => "Engine",

@@ -293,7 +293,9 @@ class Reactor extends ShipSystem{
         11=>"OutputReduced2",
         15=>"OutputReduced4",
         19=>"OutputReduced8",
-        27=>array("OutputReduced10", "ForcedOfflineOneTurn"));
+        //27=>array("OutputReduced10", "ForcedOfflineOneTurn"));
+		27=>array("OutputReduced10", "ContainmentBreach")
+	);
     
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );        
@@ -326,6 +328,43 @@ class Reactor extends ShipSystem{
         parent::addCritical($shipid, $phpclass, $gamedata);
     }
 	
+
+	//in case of containment breach - roll whether reactor explodes
+	public function criticalPhaseEffects($ship, $gamedata)
+    { 
+		if ($this->isDestroyed()) return; //no point if Reactor is actually destroyed already
+		if (!$this->hasCritical("ContainmentBreach")) return; //no Containment Breach, everything is fine
+			
+		$explodeRoll = Dice::d(100);
+		$chance = $this->getTotalDamage();
+			
+		//try to make actual attack to show in log - use Ramming Attack system!	- even if there is no explosion			
+		$rammingSystem = $ship->getSystemByName("RammingAttack");
+		$newFireOrder=null;
+		if($rammingSystem){ //actually exists! - it should on every ship!				
+			$newFireOrder = new FireOrder(
+				-1, "normal", $ship->id, $ship->id,
+				$rammingSystem->id, -1, $gamedata->turn, 1, 
+				$chance, $explodeRoll, 1, 1, 0,
+				0,0,'HalfPhase',10000
+			);
+			$newFireOrder->pubnotes = "Containment Breach - reactor explosion! Chance $chance %, roll $explodeRoll.";
+			$newFireOrder->addToDB = true;
+			$rammingSystem->fireOrders[] = $newFireOrder;
+		}
+			
+		if ($explodeRoll <= $chance) { //actual explosion
+			//destroy self		
+			$remaining = $this->getRemainingHealth();
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $remaining, 0, 0, -1, true, false, "", "ContainmentBreach");
+			$damageEntry->updated = true;
+			$this->damage[] = $damageEntry;			
+			if($rammingSystem){ //add extra data to damage entry - so firing order can be identified!
+				$damageEntry->shooterid = $ship->id; //additional field
+				$damageEntry->weaponid = $rammingSystem->id; //additional field
+			}
+		}
+    } //endof function criticalPhaseEffects
 	
     public function isOverloading($turn){
         foreach ($this->power as $power){
@@ -1034,7 +1073,7 @@ class Catapult extends ShipSystem{
 	//Catapult is not impotant at all!
 	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
-    function __construct($armour, $maxhealth, $output = 6){
+    function __construct($armour, $maxhealth, $output = 1){
         parent::__construct($armour, $maxhealth, 0, $output );
  
     }

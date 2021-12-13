@@ -26,7 +26,7 @@ class technicalTargetDrone extends BaseShip{
 		
 		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 180, 360));
 		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 0, 180));
-		$this->addPrimarySystem(new Reactor(6, 35, 0, 0));
+		$this->addPrimarySystem(new Reactor(5, 95, 0, 0));
 		$this->addPrimarySystem(new CnC(1, 1, 0, 0));
 		$this->addPrimarySystem(new Engine(5, 20, 0, 20, 3));
 		$this->addPrimarySystem(new Hangar(6, 100));
@@ -130,7 +130,7 @@ class technicalTargetDrone extends BaseShip{
 				*/
 			),
 			1=> array(
-				20 => "Targeting Array",
+				20 => "0:Reactor",
 				/*
 				5 => "Plasma Wave",
 				10 => "Stun Beam",

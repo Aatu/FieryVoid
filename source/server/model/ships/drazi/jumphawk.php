@@ -28,11 +28,11 @@ class Jumphawk extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 13, 4, 8));
         $this->addPrimarySystem(new Engine(5, 11, 0, 10, 2));
-        $this->addPrimarySystem(new JumpEngine(4, 16, 4, 0));
+        $this->addAftSystem(new JumpEngine(4, 16, 4, 0));
         $this->addPrimarySystem(new Hangar(4, 2));
-        $this->addPrimarySystem(new StdParticleBeam(3, 4, 1, 300, 60));
-        $this->addPrimarySystem(new Thruster(4, 15, 0, 5, 1));
-        $this->addPrimarySystem(new Thruster(5, 21, 0, 10, 2));
+        $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 60));
+        $this->addAftSystem(new Thruster(4, 15, 0, 5, 1));
+        $this->addAftSystem(new Thruster(5, 21, 0, 10, 2));
 
         $this->addLeftSystem(new ParticleCannon(4, 8, 7, 240, 0));
         $this->addLeftSystem(new ParticleBlaster(4, 8, 5, 240, 0));
@@ -51,30 +51,31 @@ class Jumphawk extends HeavyCombatVesselLeftRight{
     
          	 $this->hitChart = array(
         		0=> array(
-        				6 => "Structure",
-        				9 => "Thruster",
-					11 => "Jump Engine",
-        				14 => "Scanner",
-        				16 => "Engine",
-        				17 => "Hangar",
-        				19 => "Reactor",
-        				20 => "C&C",
+					6 => "Structure",
+					9 => "2:Thruster",
+					11 => "2:Jump Engine",
+					12 => "1:Standard Particle Beam",
+					14 => "Scanner",
+					16 => "Engine",
+					17 => "Hangar",
+					19 => "Reactor",
+					20 => "C&C",
         		),
         		3=> array(
-        				3 => "Thruster",
-        				4 => "Particle Blaster",
-				        5 => "Particle Cannon",
-				        7 => "Standard Particle Beam",
+					3 => "Thruster",
+					4 => "Particle Blaster",
+					5 => "Particle Cannon",
+					7 => "Standard Particle Beam",
 					18 => "Structure",
-        				20 => "Primary",
+					20 => "Primary",
         		),
         		4=> array(
-        				3 => "Thruster",
-        				4 => "Particle Blaster",
-				        5 => "Particle Cannon",
-				        7 => "Standard Particle Beam",
+					3 => "Thruster",
+					4 => "Particle Blaster",
+					5 => "Particle Cannon",
+					7 => "Standard Particle Beam",
 					18 => "Structure",
-        				20 => "Primary",
+					20 => "Primary",
         		),
         );
     

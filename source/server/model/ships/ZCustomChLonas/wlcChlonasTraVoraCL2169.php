@@ -29,7 +29,7 @@ class wlcChlonasTraVoraCL2169 extends BaseShipNoAft{
         $this->addPrimarySystem(new Scanner(4, 15, 6, 5));
         $this->addPrimarySystem(new Engine(4, 13, 0, 9, 4));
         $this->addPrimarySystem(new Hangar(4, 2));
-        $this->addPrimarySystem(new Thruster(4, 19, 0, 9, 2));
+        $this->addAftSystem(new Thruster(4, 19, 0, 9, 2));
 
         $this->addFrontSystem(new ImperialLaser(3, 8, 5, 330, 30));
         $this->addFrontSystem(new CustomLightMatterCannon(3, 0,0, 240, 0));//Power and Structure are defined in weapon
@@ -62,8 +62,8 @@ class wlcChlonasTraVoraCL2169 extends BaseShipNoAft{
 	$this->hitChart = array(
 		
 		0=> array(
-			9 => "Structure",
-			12 => "Thruster",
+			8 => "Structure",
+			12 => "2:Thruster",
 			14 => "Scanner",
 			16 => "Engine",
 			18 => "Hangar",
