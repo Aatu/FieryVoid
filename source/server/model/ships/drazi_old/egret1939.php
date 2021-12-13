@@ -29,10 +29,10 @@ class Egret1939 extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new ElintScanner(5, 20, 6, 6));
         $this->addPrimarySystem(new Engine(4, 12, 0, 7, 3));
         $this->addPrimarySystem(new Hangar(3, 1));
-        $this->addPrimarySystem(new StdParticleBeam(3, 4, 1, 240, 60));
-        $this->addPrimarySystem(new StdParticleBeam(3, 4, 1, 300, 120));
-        $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 1));
-        $this->addPrimarySystem(new Thruster(4, 16, 0, 7, 2));
+        $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 240, 60));
+        $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 120));
+        $this->addAftSystem(new Thruster(3, 10, 0, 4, 1));
+        $this->addAftSystem(new Thruster(4, 16, 0, 7, 2));
 
         $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 240, 60));
         $this->addLeftSystem(new Thruster(4, 11, 0, 3, 3));
@@ -49,8 +49,8 @@ class Egret1939 extends HeavyCombatVesselLeftRight{
         $this->hitChart = array(
         		0=> array(
         				8 => "Structure",
-        				11 => "Thruster",
-						12 => "Standard Particle Beam",
+        				11 => "2:Thruster",
+						12 => "1:Standard Particle Beam",
         				14 => "ELINT Scanner",
         				16 => "Engine",
         				17 => "Hangar",

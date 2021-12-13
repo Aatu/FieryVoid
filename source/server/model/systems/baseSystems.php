@@ -1073,7 +1073,7 @@ class Catapult extends ShipSystem{
 	//Catapult is not impotant at all!
 	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
-    function __construct($armour, $maxhealth, $output = 6){
+    function __construct($armour, $maxhealth, $output = 1){
         parent::__construct($armour, $maxhealth, 0, $output );
  
     }

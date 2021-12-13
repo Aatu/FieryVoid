@@ -33,9 +33,9 @@ class wlcChlonasNaKashiDDA extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 13, 3, 5));
         $this->addPrimarySystem(new Engine(5, 11, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(3, 10));
-        $this->addPrimarySystem(new Thruster(4, 15, 0, 4, 1));
-        $this->addPrimarySystem(new Thruster(4, 21, 0, 8, 2));
-        $this->addPrimarySystem(new MatterCannon(4, 7, 4, 300, 60));
+        $this->addAftSystem(new Thruster(4, 15, 0, 4, 1));
+        $this->addAftSystem(new Thruster(4, 21, 0, 8, 2));
+        $this->addFrontSystem(new MatterCannon(4, 7, 4, 300, 60));
         
         $this->addLeftSystem(new Thruster(4, 15, 0, 4, 3));
         $this->addLeftSystem(new customStrikeLaser(3, 0, 0, 240, 60));
@@ -62,8 +62,8 @@ class wlcChlonasNaKashiDDA extends HeavyCombatVesselLeftRight{
 	$this->hitChart = array(
 		0=> array(
 			5 => "Structure",
-			7 => "Matter Cannon",
-			11 => "Thruster",
+			7 => "1:Matter Cannon",
+			11 => "2:Thruster",
 			13 => "Scanner",
 			15 => "Engine",
 			17 => "Hangar",

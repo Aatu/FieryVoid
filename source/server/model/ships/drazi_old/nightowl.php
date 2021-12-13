@@ -28,10 +28,10 @@ class Nightowl extends BaseShipNoAft{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new ElintScanner(5, 20, 6, 8));
         $this->addPrimarySystem(new Engine(5, 15, 0, 8, 3));
-        $this->addPrimarySystem(new JumpEngine(5, 15, 4, 38));
+        $this->addAftSystem(new JumpEngine(5, 15, 4, 38));
         $this->addPrimarySystem(new Hangar(3, 8));
-        $this->addPrimarySystem(new Thruster(4, 12, 0, 4, 2));
-        $this->addPrimarySystem(new Thruster(4, 12, 0, 4, 2));
+        $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
+        $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
 
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 120));
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 120));
@@ -60,8 +60,8 @@ class Nightowl extends BaseShipNoAft{
         $this->hitChart = array(		
             0=> array(
                 8 => "Structure",
-                10 => "Thruster",
-                11 => "Jump Engine",
+                10 => "2:Thruster",
+                11 => "2:Jump Engine",
                 13 => "Elint Scanner",
                 15 => "Engine",
                 17 => "Hangar",

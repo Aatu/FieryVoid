@@ -12,7 +12,7 @@ class wlcChlonasVaLothar extends SmallStarBaseThreeSections{
 
 		$this->shipSizeClass = 3;
         $this->Enormous = true;
-		$this->iniativebonus = -200;
+		$this->iniativebonus = -200; //starbases move first
 		$this->turncost = 0;
 		$this->turndelaycost = 0;
 		$this->forwardDefense = 20;

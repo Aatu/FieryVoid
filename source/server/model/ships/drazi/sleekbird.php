@@ -30,8 +30,8 @@ class Sleekbird extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 12, 4, 7));
         $this->addPrimarySystem(new Engine(5, 11, 0, 8, 2));
         $this->addPrimarySystem(new Hangar(4, 7));
-        $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 1));
-        $this->addPrimarySystem(new Thruster(5, 19, 0, 8, 2));
+        $this->addAftSystem(new Thruster(4, 13, 0, 4, 1));
+        $this->addAftSystem(new Thruster(5, 19, 0, 8, 2));
 
         $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 240, 60));
         $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 240, 60));
@@ -49,7 +49,7 @@ class Sleekbird extends HeavyCombatVesselLeftRight{
                 $this->hitChart = array(
         		0=> array(
         				8 => "Structure",
-        				11 => "Thruster",
+        				11 => "2:Thruster",
 					13 => "Scanner",
         				15 => "Engine",
         				17 => "Hangar",

@@ -30,8 +30,8 @@ class wlcChlonasForVoraScout extends BaseShipNoAft{
         $this->addPrimarySystem(new ElintScanner(5, 20, 7, 6));
         $this->addPrimarySystem(new Engine(4, 13, 0, 9, 4));
         $this->addPrimarySystem(new Hangar(4, 2));
-        $this->addPrimarySystem(new Thruster(4, 19, 0, 9, 2));
-	$this->addPrimarySystem(new JumpEngine(5, 10, 6, 48));
+        $this->addAftSystem(new Thruster(4, 19, 0, 9, 2));
+		$this->addAftSystem(new JumpEngine(5, 10, 6, 48));
 
         $this->addFrontSystem(new ElintScanner(4, 9, 6, 4));
 	$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
@@ -60,9 +60,9 @@ class wlcChlonasForVoraScout extends BaseShipNoAft{
 	//d20 hit chart
 	$this->hitChart = array(		
 		0=> array(
-			8 => "Structure",
-			10 => "Jump Engine",
-			12 => "Thruster",
+			7 => "Structure",
+			9 => "2:Jump Engine",
+			12 => "2:Thruster",
 			14 => "Elint Scanner",
 			16 => "Engine",
 			18 => "Hangar",
