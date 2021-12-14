@@ -346,7 +346,7 @@ class Reactor extends ShipSystem{
 				-1, "normal", $ship->id, $ship->id,
 				$rammingSystem->id, -1, $gamedata->turn, 1, 
 				$chance, $explodeRoll, 1, 1, 0,
-				0,0,'HalfPhase',10000
+				0,0,'ContainmentBreach',10000
 			);
 			$newFireOrder->pubnotes = "Containment Breach - reactor explosion! Chance $chance %, roll $explodeRoll.";
 			$newFireOrder->addToDB = true;
