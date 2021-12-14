@@ -807,6 +807,11 @@ var NexusAutogun = function NexusAutogun(json, ship) {
 NexusAutogun.prototype = Object.create(Weapon.prototype);
 NexusAutogun.prototype.constructor = NexusAutogun;
 
+var NexusLaserMissile = function NexusLaserMissile(json, ship) {
+	Weapon.call(this, json, ship);
+};
+NexusLaserMissile.prototype = Object.create(Weapon.prototype);
+NexusLaserMissile.prototype.constructor = NexusLaserMissile;
 
 
 

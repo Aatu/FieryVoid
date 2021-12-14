@@ -7,7 +7,7 @@ class Talvan extends BaseShip{
 		$this->pointCost = 600;
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Talvan";
-        $this->imagePath = "img/ships/centurion.png";
+        $this->imagePath = "img/ships/talvan.png";
         $this->shipClass = "Talvan Attack Cruiser";
         //$this->variantOf = "Talvan Attack Cruiser";
         $this->shipSizeClass = 3;

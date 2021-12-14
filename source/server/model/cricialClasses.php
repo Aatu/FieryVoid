@@ -199,6 +199,13 @@ class AmmoExplosion extends Critical{
     }
 }
 
+class CommunicationsDisruptedOneTurn extends Critical{
+    public $description = "Communications disrupted. -5 initiative.";
+    public $oneturn = true;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
 
 class CommunicationsDisrupted extends Critical{
     public $description = "Communications disrupted. -5 initiative.";
@@ -207,8 +214,25 @@ class CommunicationsDisrupted extends Critical{
     }
 }
 
+class PenaltyToHitOneTurn extends Critical{
+    public $description = "-1 penalty to hit for all weapons.";
+    public $oneturn = true;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
 class PenaltyToHit extends Critical{
     public $description = "-1 penalty to hit for all weapons.";
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
+class RestrictedEWOneTurn extends Critical{
+    public $description = "-2 EW. May use no more than half of its EW offensively.";
+    public $oneturn = true;
+//	public $priority = 1; //probably the nastiest C&C crit, to be fixed at first priority
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }

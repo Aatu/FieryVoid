@@ -77,6 +77,7 @@ class Weapon extends ShipSystem
     public $uninterceptableArray = array();
     public $canInterceptUninterceptable = false; //able to intercept shots that are normally uninterceptable, eg. Lasers
     public $noInterceptDegradation = false; //if true, this weapon will be intercepted without degradation!
+	public $doInterceptDegradation = false; //if true, this weapon will be intercepted with normal degradation, even if a ballistic
     public $intercept = 0; //intercept rating
     public $freeintercept = false;  //can intercept fire directed at other unit?
     public $freeinterceptspecial = false;  //has its own routine for handling decision whether it's capable of interception - for freeintercept only?
@@ -120,7 +121,7 @@ class Weapon extends ShipSystem
     public $noOverkill = false; //this will let simplify entire Matter line enormously!
     public $doOverkill = false; //opposite of $noOverkill - allows Piercing shots to overkill (eg. Shadow Heavy Molecular Slicer Beam has such ability)
     protected $noOverkillArray = array();
-    public $ballistic = false; //this is a ballictic weapon, not direct fire
+    public $ballistic = false; //this is a ballistic weapon, not direct fire
     public $ballisticIntercept = false; //can intercept, but only ballistics
     public $hextarget = false; //this weapon is targeted on hex, not unit
    		public $hextargetArray = array(); //For AntimatterShredder		
@@ -401,6 +402,13 @@ class Weapon extends ShipSystem
                 $interceptMod -= 1; //-1 for each already intercepting weapon
             }
         }
+
+		if( ($interceptedWeapon->doInterceptDegradation) || (!($interceptedWeapon->ballistic || $interceptedWeapon->noInterceptDegradation)) ) {//target is neither ballistic weapon nor has lifted degradatoin, so apply degradation!
+            for ($i = 0; $i < $intercepted->numInterceptors; $i++) {
+                $interceptMod -= 1; //-1 for each already intercepting weapon
+			}
+		}
+ 
         $interceptMod = max(0, $interceptMod) * 5;//*5: d20->d100
         return $interceptMod;
     }//endof  getInterceptionMod

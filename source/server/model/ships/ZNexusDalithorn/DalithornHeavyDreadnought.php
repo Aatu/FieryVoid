@@ -9,6 +9,9 @@ class DalithornHeavyDreadnought extends BaseShip{
         $this->phpclass = "DalithornHeavyDreadnought";
         $this->imagePath = "img/ships/Nexus/DalithornDreadnought.png";
         $this->shipClass = "Heavy Dreadnought";
+// NOTE: As an updated version of the Dreadnought, the Dalithorn have
+// perfected their construction techniques. As such, the hull no longer has
+// the limited 33% availability restriction.
 		$this->shipSizeClass = 3;
 		$this->canvasSize = 175; //img has 200px per side
 		$this->unofficial = true;
