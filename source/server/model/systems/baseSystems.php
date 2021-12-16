@@ -327,43 +327,6 @@ class Reactor extends ShipSystem implements SpecialAbility {
         parent::addCritical($shipid, $phpclass, $gamedata);
     }
 	
-
-	//in case of containment breach - roll whether reactor explodes
-	public function criticalPhaseEffects($ship, $gamedata)
-    { 
-		if ($this->isDestroyed()) return; //no point if Reactor is actually destroyed already
-		if (!$this->hasCritical("ContainmentBreach")) return; //no Containment Breach, everything is fine
-			
-		$explodeRoll = Dice::d(100);
-		$chance = $this->getTotalDamage();
-			
-		//try to make actual attack to show in log - use Ramming Attack system!	- even if there is no explosion			
-		$rammingSystem = $ship->getSystemByName("RammingAttack");
-		$newFireOrder=null;
-		if($rammingSystem){ //actually exists! - it should on every ship!				
-			$newFireOrder = new FireOrder(
-				-1, "normal", $ship->id, $ship->id,
-				$rammingSystem->id, -1, $gamedata->turn, 1, 
-				$chance, $explodeRoll, 1, 1, 0,
-				0,0,'ContainmentBreach',10000
-			);
-			$newFireOrder->pubnotes = "Containment Breach - reactor explosion! Chance $chance %, roll $explodeRoll.";
-			$newFireOrder->addToDB = true;
-			$rammingSystem->fireOrders[] = $newFireOrder;
-		}
-			
-		if ($explodeRoll <= $chance) { //actual explosion
-			//destroy self		
-			$remaining = $this->getRemainingHealth();
-			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $remaining, 0, 0, -1, true, false, "", "ContainmentBreach");
-			$damageEntry->updated = true;
-			$this->damage[] = $damageEntry;			
-			if($rammingSystem){ //add extra data to damage entry - so firing order can be identified!
-				$damageEntry->shooterid = $ship->id; //additional field
-				$damageEntry->weaponid = $rammingSystem->id; //additional field
-			}
-		}
-    } //endof function criticalPhaseEffects
 	
     public function isOverloading($turn){
         foreach ($this->power as $power){
@@ -399,15 +362,19 @@ class Reactor extends ShipSystem implements SpecialAbility {
     {
         return $this->specialAbilityValue;
     }
+	
+	
+	public function criticalPhaseEffects($ship, $gamedata) {		
+		//as effects are getting complicate - call them separately
+		$this->executeContainmentBreach($ship, $gamedata);	
+		$this->executeReactorFlux($ship, $gamedata);	
+	}//endof function criticalPhaseEffects
 
-	public function criticalPhaseEffects($ship, $gamedata) {
-		
+	public function executeReactorFlux($ship, $gamedata) {		
+		if ($this->isDestroyed()) return; //no point if Reactor is actually destroyed already
 		$hasPowerFlux = $ship->hasSpecialAbility("ReactorFlux");
-
 		if ($hasPowerFlux) {
-
 			$roll = Dice::d(20) + 1 + $this->getTotalDamage();  //There is a +1 penalty in addition to any damage
-
 			if($roll >= 11 && $roll < 15){ // Output reduced by 2 for one turn
 				$finalTurn = $gamedata->turn + 1;
 				$crit = new OutputReduced2(-1, $this->unit->id, $this->id, "OutputReduced2", $gamedata->turn, $finalTurn);
@@ -432,11 +399,46 @@ class Reactor extends ShipSystem implements SpecialAbility {
 				$crit->updated = true;
 				$crit->newCrit = true; // force save even if crit is not for current turn
 				$this->criticals[] =  $crit;
-			}
+			}			
+		}	
+	}	//endof function executeReactorFlux
+	
+	//in case of containment breach - roll whether reactor explodes
+	public function executeContainmentBreach($ship, $gamedata)
+    { 
+		if ($this->isDestroyed()) return; //no point if Reactor is actually destroyed already
+		if (!$this->hasCritical("ContainmentBreach")) return; //no Containment Breach, everything is fine
 			
+		$explodeRoll = Dice::d(100);
+		$chance = $this->getTotalDamage();
+			
+		//try to make actual attack to show in log - use Ramming Attack system!	- even if there is no explosion			
+		$rammingSystem = $ship->getSystemByName("RammingAttack");
+		$newFireOrder=null;
+		if($rammingSystem){ //actually exists! - it should on every ship!				
+			$newFireOrder = new FireOrder(
+				-1, "normal", $ship->id, $ship->id,
+				$rammingSystem->id, -1, $gamedata->turn, 1, 
+				$chance, $explodeRoll, 1, 1, 0,
+				0,0,'ContainmentBreach',10000
+			);
+			$newFireOrder->pubnotes = "Containment Breach - reactor explosion! Chance $chance %, roll $explodeRoll.";
+			$newFireOrder->addToDB = true;
+			$rammingSystem->fireOrders[] = $newFireOrder;
 		}
-		
-	}	
+			
+		if ($explodeRoll <= $chance) { //actual explosion
+			//destroy self		
+			$remaining = $this->getRemainingHealth();
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $remaining, 0, 0, -1, true, false, "", "ContainmentBreach");
+			$damageEntry->updated = true;
+			$this->damage[] = $damageEntry;			
+			if($rammingSystem){ //add extra data to damage entry - so firing order can be identified!
+				$damageEntry->shooterid = $ship->id; //additional field
+				$damageEntry->weaponid = $rammingSystem->id; //additional field
+			}
+		}
+    } //endof function executeContainmentBreach
 	
 } //endof Reactor
 
@@ -624,9 +626,16 @@ class Engine extends ShipSystem implements SpecialAbility {
     
     
     public $possibleCriticals = array(
+	//official: 15-20 -2, 21-27 either all ahead full or shutdown, 28+ both
+        15=>"OutputReduced2",
+        21=>"ForcedOfflineOneTurn",
+        28=>array("ForcedOfflineOneTurn", "OutputReduced2")
+	/*old crits
         15=>"OutputReduced2",
         21=>"OutputReduced4",
-        28=>"ForcedOfflineOneTurn");
+        28=>"ForcedOfflineOneTurn"
+		*/
+		);
     
     function __construct($armour, $maxhealth, $powerReq, $output, $boostEfficiency, $thrustused = 0 ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
@@ -665,7 +674,14 @@ class Engine extends ShipSystem implements SpecialAbility {
 				$crit->updated = true;
 				$crit->newCrit = true; // force save even if crit is not for current turn
 				$this->criticals[] =  $crit;
-			} elseif ($roll >=21 && $roll < 28) { // Output reduced by 4 for one turn
+			}elseif ($roll >=21){
+				$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
+				$crit->updated = true;
+				$crit->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit;
+			}
+/*this is based on old crit chart!
+			elseif ($roll >=21 && $roll < 28) { // Output reduced by 4 for one turn
 				$finalTurn = $gamedata->turn + 1;
 				$crit = new OutputReduced4(-1, $this->unit->id, $this->id, "OutputReduced4", $gamedata->turn, $finalTurn);
 				$crit->updated = true;
@@ -678,6 +694,7 @@ class Engine extends ShipSystem implements SpecialAbility {
 				$crit->newCrit = true; // force save even if crit is not for current turn
 				$this->criticals[] =  $crit;
             }
+*/
 			
 		}
 		
@@ -827,12 +844,9 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		return $this->specialAbilityValue;
 	}
 
-	public function criticalPhaseEffects($ship, $gamedata) {
-		
+	public function criticalPhaseEffects($ship, $gamedata) {		
 		$hasSensorFlux = $ship->hasSpecialAbility("SensorFlux");
-
 		if ($hasSensorFlux) {
-
 			$roll = Dice::d(20) + 1 + $this->getTotalDamage();  //There is a +1 penalty in addition to any damage
 
 			if($roll >= 15 && $roll < 19){ // Output reduced by 1 for one turn
@@ -859,11 +873,9 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 				$crit->updated = true;
 				$crit->newCrit = true; // force save even if crit is not for current turn
 				$this->criticals[] =  $crit;
-            }
-			
-		}
-		
-	}
+            }			
+		}		
+	}//endof function criticalPhaseEffects
 	
 } //endof Scanner
 
