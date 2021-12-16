@@ -8,10 +8,10 @@ class technicalTargetDrone extends BaseShip{
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
 //		$this->imagePath = "img/ships/BASurveyShip.png";
-		$this->imagePath = "img/ships/Nexus/CraytanCorvette.png";
+		$this->imagePath = "img/ships/GaimSkassa.png";
 		$this->shipClass = "Target Drone - DO NOT USE";
-//		$this->shipSizeClass = 3;
-		$this->canvasSize = 75; //img has 125px per side
+		$this->shipSizeClass = 3;
+//		$this->canvasSize = 75; //img has 125px per side
 		$this->forwardDefense = 20;
 		$this->sideDefense = 20;
 		$this->fighters = array("light"=>12);        
@@ -21,14 +21,25 @@ class technicalTargetDrone extends BaseShip{
 		$this->rollcost = 3;
 		$this->pivotcost = 4;
 
+		$this->critRollMod += 1;
+		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
 		
 		$this->notes = "DO NOT USE, prone to change!";
 		
 		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 180, 360));
 		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 0, 180));
-		$this->addPrimarySystem(new Reactor(5, 95, 0, 0));
-		$this->addPrimarySystem(new CnC(1, 1, 0, 0));
-		$this->addPrimarySystem(new Engine(5, 20, 0, 20, 3));
+		$reactor = new Reactor(6, 35, 0, 0);
+			$reactor->markPowerFlux();
+			$this->addPrimarySystem($reactor);
+//		$this->addPrimarySystem(new Reactor(6, 35, 0, 0));
+		$cnc = new CnC(5, 20, 0, 0);
+			$cnc->markCommsFlux();
+			$this->addPrimarySystem($cnc);
+//		$this->addPrimarySystem(new CnC(5, 20, 0, 0));
+		$engine = new Engine(5, 20, 0, 20, 3);
+			$engine->markEngineFlux();
+			$this->addPrimarySystem($engine);
+//		$this->addPrimarySystem(new Engine(5, 20, 0, 20, 3));
 		$this->addPrimarySystem(new Hangar(6, 100));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
@@ -50,10 +61,12 @@ class technicalTargetDrone extends BaseShip{
 //		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
 //		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
 //		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
-		$sensors = new ELINTScanner(6, 23, 4, 20);
+/*		$sensors = new ELINTScanner(6, 23, 4, 20);
 			$sensors->markHyachELINT();
+			$this->addFrontSystem($sensors); */
+		$sensors = new Scanner(6, 23, 4, 20);
+			$sensors->markSensorFlux();
 			$this->addFrontSystem($sensors);
-//        $this->addFrontSystem(new HyachScanner(3, 20, 2, 4));
 
 
 		$this->addPrimarySystem(new SpinalLaser(5, 12, 12, 330, 30));
@@ -73,14 +86,10 @@ class technicalTargetDrone extends BaseShip{
         $this->addPrimarySystem(new RMissileRack(3, 6, 0, 0, 360));
 */
 		
-		/*
-		$this->addFrontSystem(new CustomERLightPBeam(3, 0, 0, 240, 120));
-		$this->addFrontSystem(new CustomBPALight(3, 0, 0, 240, 120));
-		$this->addFrontSystem(new CustomBPAMedium(3, 0, 0, 240, 120));
-		$this->addFrontSystem(new CustomBPAHeavy(3, 0, 0, 240, 120));
-		$this->addFrontSystem(new NexusKineticBoxLauncher(1, 0, 0, 270, 180));
-		$this->addFrontSystem(new NexusChaffLauncher(1, 0, 0, 0, 360));
-		*/
+
+		$this->addFrontSystem(new NexusLaserMissile(1, 6, 1, 0, 360));
+		$this->addFrontSystem(new NexusLaserMissile(1, 6, 1, 0, 360));
+
 		/*
 		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));
 		$this->addAftSystem(new CommJammer(3, 0, 0, 0, 360));		
@@ -130,7 +139,7 @@ class technicalTargetDrone extends BaseShip{
 				*/
 			),
 			1=> array(
-				20 => "0:Reactor",
+				20 => "Targeting Array",
 				/*
 				5 => "Plasma Wave",
 				10 => "Stun Beam",

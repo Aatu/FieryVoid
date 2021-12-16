@@ -213,6 +213,77 @@ class NexusAdvKineticBoxLauncher extends Weapon{
 
 
 
+class NexusLaserMissile extends Weapon{
+        public $name = "NexusLaserMissile";
+        public $displayName = "Laser Missile";
+		    public $iconPath = "NexusLaserMissile.png";
+        public $animation = "laser";
+        public $trailColor = array(141, 240, 255);
+        public $animationColor = array(220, 60, 120);
+        public $animationExplosionScale = 0.5;
+        public $projectilespeed = 10;
+        public $animationWidth = 5;
+        public $trailLength = 100;    
+
+		public $doInterceptDegradation = true; //Will be intercepted with normal degradation even though a ballistic
+        public $useOEW = false; //missile
+        public $ballistic = true; //missile
+        public $range = 20;
+        public $distanceRange = 30;
+        public $ammunition = 20; //limited number of shots
+	    
+        public $loadingtime = 2; // 1/2 turns
+        public $rangePenalty = 0;
+        public $fireControl = array(null, 0, 0); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+	    
+        public $raking = 8;
+		public $priority = 8; //Matter weapon
+	    
+		public $firingMode = 'Ballistic'; //firing mode - just a name essentially
+		public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+	 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->ammunition = $this->ammunition;           
+            return $strippedSystem;
+        }
+        
+	    
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Bomb-pumped laser. Ballistic weapon that scores raking (8) damage.";
+            $this->data["Ammunition"] = $this->ammunition;
+        }
+        
+        public function getDamage($fireOrder){
+            $dmg = 24;
+            return $dmg;
+       }
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
+    
+        public function setMinDamage(){     $this->minDamage = 24;      }
+        public function setMaxDamage(){     $this->maxDamage = 24;      }
+		
+}//endof NexusLaserMissile
+
+
+
 class NexusLargeRocket extends Weapon{
         public $name = "NexusLargeRocket";
         public $displayName = "Large Rocket Launcher";
@@ -1475,7 +1546,7 @@ class NexusChaffLauncher extends Weapon{
 
         public $loadingtime = 1;
 		public $guns = 1;
-        public $priority = 6;
+        public $priority = 8;
 
         public $rangePenalty = 1.0 ; //-1 / hex
         public $fireControl = array(0, 1, 2); // fighters, <mediums, <capitals
@@ -1542,7 +1613,7 @@ class NexusChaffLauncher extends Weapon{
 
         public $loadingtime = 2;
 		public $guns = 1;
-        public $priority = 7;
+        public $priority = 9;
 
         public $rangePenalty = 0.66; //-2/3 hexes
         public $fireControl = array(-2, 2, 2); // fighters, <mediums, <capitals
@@ -2527,6 +2598,7 @@ class NexusMinigun extends Pulse{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
+			$this->data["Special"] .= "<br>Ballistic intercept only.";
 		}
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -2655,6 +2727,7 @@ class NexusAutocannonDefender extends Particle{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 3 hexes.";
+			$this->data["Special"] .= "<br>Can intercept laser weapons.";
 		}
 		
 		public function canFreeInterceptShot($gamedata, $fireOrder, $shooter, $target, $interceptingShip, $firingWeapon){
@@ -3951,95 +4024,7 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
 } //endof class NexusHeavyAssaultCannonBattery
 
 
-class NexusLaserMissile extends Weapon{ 
-/*Dual mode weapon based off the EA Heavy Laser-Pulse Array code*/	
-        public $name = "NexusLaserMissile";
-        public $displayName = "Laser Missile";
-	    public $iconPath = "NexusLaserMissile.png";
-	
-	//This is a missile that attacks its target by using its fuel
-	//to fire a single chemical laser. At full range, it is the 
-	//equivalent of a light chemical laser. However, if used at short
-	//range, it fires a standard chemical laser. The issue is to get 
-	//it to fire like a ballistic, but get intercepted like a normal
-	//weapon. Also, I do not want it to be uninterceptalbe as an opponent
-	//can try to shoot the missile before it fires.
-	public $animationArray = array(1=>'trail', 2=>'trail');
-        public $animationColorArray = array(1=>array(255, 11, 11), 2=>array(124, 219, 226));
-        public $animationWidthArray = array(1=>2, 2=>2);
-	public $trailColor = array(190, 75, 20); //not used for Laser animation?...
-        public $trailLength = 10;//not used for Laser animation?...
-        public $projectilespeed = 12;//not used for Laser animation?...
-        public $animationExplosionScaleArray = array(1=>0.3, 2=>2);//not used for Laser animation?...
-	
-	
-	//actual weapons data
-        public $priorityArray = array(1=>7, 2=>1);
-	public $uninterceptableArray = array(1=>false, 2=>false);
-	public $defaultShotsArray = array(1=>1, 2=>1); 
-	
-        public $loadingtimeArray = array(1=>4, 2=>4); //mode 1 should be the one with longest loading time
-        public $rangePenaltyArray = array(1=>0.33, 2=>0.33);
-        public $fireControlArray = array( 1=>array(null, 1, 2), 2=>array(null,1,2) ); // fighters, <mediums, <capitals 
-	
-	public $firingModes = array(1=>'Standard', 2=>'Flash');
-	public $damageTypeArray = array(1=>'Standard', 2=>'Flash'); //indicates that this weapon does damage in Pulse mode
-    	public $weaponClassArray = array(1=>'Particle', 2=>'Particle'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
-	
-	
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
-		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-		if ( $maxhealth == 0 ){
-		    $maxhealth = 8;
-		}
-		if ( $powerReq == 0 ){
-		    $powerReq = 5;
-		}
-		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-	
-        public function setSystemDataWindow($turn){
-			parent::setSystemDataWindow($turn);
-			$this->data["Special"] = 'Can fire as either Standard or High-Explosive (Flash) shot. ';
-        }
 
-	
-        public function getDamage($fireOrder){ 
-		switch($this->firingMode){
-			case 1:
-				return Dice::d(10, 2)+12; //Standard shot
-				break;
-			case 2:
-				return Dice::d(10, 2)+6; //High Explosive shot
-				break;	
-		}
-	}
-        public function setMinDamage(){ 
-		switch($this->firingMode){
-			case 1:
-				$this->minDamage = 14; //Standard shot
-				break;
-			case 2:
-				$this->minDamage = 8; //High Explosive shot
-				break;	
-		}
-		$this->minDamageArray[$this->firingMode] = $this->minDamage;
-	}
-        public function setMaxDamage(){
-		switch($this->firingMode){
-			case 1:
-				$this->maxDamage = 32; //Standard shot
-				break;
-			case 2:
-				$this->maxDamage = 26; //High Explosive shot
-				break;	
-		}
-		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
-	}
-	
-	
-} //endof class NexusLaserMissile
 
 
 

@@ -574,24 +574,45 @@ class BaseShip {
 					$this->notes .= '<br>Critical roll modifier: ' . $plus . $totalMod;
 				}
 			}
-			if(!($this instanceof FighterFlight)) foreach($this->systems as $sensor) if ($sensor instanceof Scanner){
-				foreach($sensor->specialAbilities as $ability){
-					if ($ability=='AdvancedSensors'){
-						$this->notes .= '<br>Advanced Sensors';
-					}else if ($ability=='ImprovedSensors'){
-						$this->notes .= '<br>Improved Sensors';
-					}else if ($ability=='StarWarsSensors'){
-						$this->notes .= '<br>Star Wars Sensors';
-					}else if ($ability=='LCVSensors'){ 
-						$this->notes .= '<br>LCV Sensors';
+			if(!($this instanceof FighterFlight)){
+				foreach($this->systems as $engine) if ($engine instanceof Engine){
+					foreach($engine->specialAbilities as $ability){
+						if ($ability=='EngineFlux'){
+							$this->notes .= '<br>Engine Fluctuations';
+						}
 					}
+					break; //checking one Engine is enough
 				}
-				if ($sensor instanceof ElintScanner) {
-					$this->notes .= '<br>ElInt Sensors';
+				foreach($this->systems as $sensor) if ($sensor instanceof Scanner){
+					foreach($sensor->specialAbilities as $ability){
+						if ($ability=='AdvancedSensors'){
+							$this->notes .= '<br>Advanced Sensors';
+						}else if ($ability=='ImprovedSensors'){
+							$this->notes .= '<br>Improved Sensors';
+						}else if ($ability=='StarWarsSensors'){
+							$this->notes .= '<br>Star Wars Sensors';
+						}else if ($ability=='LCVSensors'){ 
+							$this->notes .= '<br>LCV Sensors';
+						}else if ($ability=='SensorFlux'){ 
+							$this->notes .= '<br>Sensor Fluctuations';
+						}
+						if ($sensor instanceof ElintScanner) {
+							$this->notes .= '<br>ElInt Sensors';
+						}
+					}
+					break; //checking one Scanner is enough
+				}				
+				foreach($this->systems as $reactor) if ($reactor instanceof Reactor){
+					foreach($reactor->specialAbilities as $ability){
+						if ($ability=='ReactorFlux'){
+							$this->notes .= '<br>Power Fluctuations';
+						}
+					}if ($reactor instanceof MagGravReactor) {
+						$this->notes .= '<br>Mag-Gravitic Reactor';
+					}
+					break; //checking one Engine is enough
 				}
-				break; //checking one Scanner is enough
 			}
-
 
 			//fighter-specific
 			if($this instanceof FighterFlight){

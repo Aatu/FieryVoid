@@ -4,7 +4,7 @@ class CraytanMaprin extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 275;
+        $this->pointCost = 290;
         $this->faction = "ZNexus Playtest Craytan";
         $this->phpclass = "CraytanMaprin";
         $this->imagePath = "img/ships/Nexus/CraytanCorvette.png";
