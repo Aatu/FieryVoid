@@ -7,7 +7,7 @@ class TrekFederationYClass extends MediumShip{
         $this->pointCost = 140;
         $this->faction = "ZTrek Playtest Federation";
         $this->phpclass = "TrekFederationYClass";
-        $this->imagePath = "img/ships/StarTrek/YClassfreighter.png";
+        $this->imagePath = "img/ships/StarTrek/YClassFreighter.png";
         $this->shipClass = "Y-Class Freighter";
 
 	$this->unofficial = true;

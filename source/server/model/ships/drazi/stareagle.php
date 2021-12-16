@@ -23,14 +23,14 @@ class Stareagle extends MediumShipLeftRight{
         $this->pivotcost = 1;
 		$this->iniativebonus = 70;
 
-        $this->addPrimarySystem(new ParticleBlaster(4, 8, 5, 240, 120));
+        $this->addFrontSystem(new ParticleBlaster(4, 8, 5, 240, 120));
         $this->addPrimarySystem(new Reactor(5, 10, 0, 0));
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 3, 6));
         $this->addPrimarySystem(new Engine(5, 10, 0, 7, 2));
 		$this->addPrimarySystem(new Hangar(4, 1));
-		$this->addPrimarySystem(new Thruster(4, 10, 0, 4, 1));
-		$this->addPrimarySystem(new Thruster(5, 14, 0, 7, 2));
+		$this->addAftSystem(new Thruster(4, 10, 0, 4, 1));
+		$this->addAftSystem(new Thruster(5, 14, 0, 7, 2));
 		
         $this->addLeftSystem(new Thruster(4, 11, 0, 4, 3));
         $this->addLeftSystem(new StdParticleBeam(4, 4, 1, 240, 60));
@@ -45,8 +45,8 @@ class Stareagle extends MediumShipLeftRight{
             $this->hitChart = array(
         		0=> array(
         				8=> "Structure",
-					10 => "Thruster",
-        				12 => "Particle Blaster",
+					10 => "2:Thruster",
+        				12 => "1:Particle Blaster",
 					14 => "Scanner",
         				16 => "Engine",
         				17 => "Hangar",

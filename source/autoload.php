@@ -84,6 +84,7 @@ spl_autoload_register(
                 'bamediumgunboatpulse' => '/server/model/ships/smallraces/baMediumGunboatPulse.php',
                 'barque' => '/server/model/ships/raiders/barque.php',
                 'bascoutcarrier' => '/server/model/ships/smallraces/baScoutCarrier.php',
+                'balcvcarrier' => '/server/model/ships/smallraces/baLCVCarrier.php',
                 'baseship' => '/server/model/ships/ShipClasses.php',
                 'baseshipnoaft' => '/server/model/ships/ShipClasses.php',
                 'baseshipnofwd' => '/server/model/ships/ShipClasses.php',

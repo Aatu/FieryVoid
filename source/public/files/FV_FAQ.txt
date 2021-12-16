@@ -20,7 +20,7 @@ USEFUL TRIVIA
  - r-click on defensive fire - enable defensive fire on all similar UNDECLARED weapons
  - r-click on cancel move button - cancels entire current batch of moves for indicated unit
  - r-click on cancel firing order button - cancels firing orders on all similar weapons on this unit
-
+ - r-click on move forward button - move forward using all remaining movement
 
 GAMEPLAY GENERAL IDEAS
  - As much as possible was automated. This means that player has somewhat less control over things he does, but things are way streamlined for computer game. This is especially visible in firing (You'll see in details).

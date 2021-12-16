@@ -11,10 +11,10 @@ class wlcChlonasMerTanCRV2230 extends MediumShip{
         $this->agile = true;
         $this->canvasSize = 200;
 	    
-	$this->faction = "Ch'Lonas";
+		$this->faction = "Ch'Lonas";
         $this->variantOf = "Mer'Tan Corvette";
-	$this->isd = 2230;
-	$this->unofficial = true;
+		$this->isd = 2230;
+		$this->unofficial = true;
         
         $this->forwardDefense = 11;
         $this->sideDefense = 13;
@@ -24,24 +24,24 @@ class wlcChlonasMerTanCRV2230 extends MediumShip{
         $this->accelcost = 1;
         $this->rollcost = 1;
         $this->pivotcost = 1;
-	$this->iniativebonus = 65;
+		$this->iniativebonus = 13 *5;
          
         $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 3, 4));
         $this->addPrimarySystem(new Engine(3, 10, 0, 4, 4));
-	$this->addPrimarySystem(new Hangar(2, 1));
+		$this->addPrimarySystem(new Hangar(2, 1));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 2, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 2, 4));
 
-	$this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));
+		$this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));
         $this->addFrontSystem(new AssaultLaser(4, 6, 4, 270, 90));
         $this->addFrontSystem(new CustomLightMatterCannon(2, 5, 2, 240, 0));
         $this->addFrontSystem(new CustomLightMatterCannon(2, 5, 2, 0, 120));
 
-	$this->addAftSystem(new Thruster(2, 15, 0, 4, 2));
-	$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 0));
-	$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
+		$this->addAftSystem(new Thruster(2, 15, 0, 4, 2));
+		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 0));
+		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
        
         $this->addPrimarySystem(new Structure( 4, 32));
 

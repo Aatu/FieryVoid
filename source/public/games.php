@@ -56,46 +56,27 @@ if (isset($_SESSION["user"])) {
     <!-- <div id="newsHeader">Latest News - September 2020</div> -->
     <div id="newsEntry">
         
-<!--	    
+	    
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
         <h4>may our games be fiery and our lives peaceful</h4>
         <br>
--->        
+       
 		
-		---------- <b>LATEST NEWS - November 2021</b> ----------	
-	    <br><b><u>Vree have arrived</u></b> - for a second time - but this time in (hopefully) final form!
-	    <br><b>Vree games are crashed</b> - as per warning (new ones created after this point should be safe)
-	    <br><b>Trek shielding was reworked</b> - Star Trek ship shields now work differently - hopefully as intended!
-	    <br><b>Babylon 5 station was built</b> - courtesy of Geoffrey!
-		<br><br>---------- <b>update 8th of November</b> ----------
-	    <br><b>Out of range calulated</b> - target moving out of range of launched ballistic weapon will immediately see appropriate drop in hit chance
-	    <br><b>Full missile launcher fixed</b> - now distance range is calculated properly instead of being fixed 
-	    <br><b>Light Antiproton Gun fixed</b> - now it doesn't lose damage with distance
-	    <br><b>Vree hit tables updated</b> - call them improved :)
-	    <br><b>Arc calculation fixed</b> - shields on the edge won't be ignored now and then... hopefully
-	    <br><b>EMine-less Narn mainline ships</b> - don't ask for more variants before tournament please :P (courtesy of Geoffrey)
-	    <br><b>BSG marine assault fixed</b> - now Marines can't be freely tossed across the map!
-	    <br><b>BDEW fixed</b> - now it works again...
-		<br><br>---------- <b>update 9th of November</b> ----------
-	    <br><b>Shadow Destroyer fixed</b> - Advanced Armor seems appropriate there somehow
-	    <br><b>Direct fire hextarget fire orders highlight</b> - Shredder users rejoice!
-	    <br><b>-1 Thrust crit behavior fixed</b> - again... please report any irregularities with this crit!
-		<br><br>---------- <b>update 15th of November</b> ----------
-	    <br><b>Craytan Union playtest</b> - A new Nexus faction is testing its systems
-	    <br><b>-1 Thrust crit fixed</b> - hopefully it works correctly at last
-	    <br><b>Turn into pivot fixed</b> - now it observes necessary turn delay
-	    <br><b>Turn into pivot fixed some more</b> - still doesn't stop pivoting... but stopping pivot afterwards s now free!
-	    <br><b>New Nexus units</b> - courtesy of Geoffrey
-	    <br><b>Vree Raiders and Civilians</b> - courtesy of Douglas
-	    <br><b>A lot of (mostly minor) unit fixes</b> - notably BSG Colonials, Drakh, Raiders, Vree... 
-		<br><br>---------- <b>update last of November</b> ----------
-	    <br><b>Nexus "campaign capable"</b> - Support units (bases, OSATs, scouts) for all non-playtest factions
-	    <br><b>Craytan Union update</b> - The first round of playtesting is done and bugs/updates addressed
-	    <br><b>Dogpiles properly sorted</b> - with highest Ini on top
-	    <br><b>Powerless ships can still maneuver</b> - after consulting rulebook it turned out that disabling maneuvering when power is cut was... overenthusiastic ;) 
-	    <br><b>Shredder targeting highlight</b> - now properly recognizing RE-targeting as well!
+		---------- <b>LATEST NEWS - December 2021</b> ----------	
+	    <br><b>Sustaining even without Power available</b> - just like boosting
+	    <br><b>Containment Breach</b> - Reactor won't temporatily shut down due to critical roll now. It will become unstable and might explode though!
+	    <br><b>All ahead full</b> - r-click on "move forward" arrow will cause unit to use all remaining movement on moving straight ahead
+	    <br><b>Side-by-side layout update</b> - weapons moved forward, thrusters aft (to reduce visual clutter) - for Drazi and Ch'Lonas
 	    
-        <br><br>
+	    <br><br>---------- <b>update 16th of December</b> ---------- 
+	    <br><b>proper Unreliable traits</b> - complete with Gaim Skassa, courtesy of Geoffrey
+	    <br><b>Engine criticals remade</b> - more chance of shutdown, less of permanent thrust reduction
+	    <br><b>Belt Alliance LCV Carrier</b> - completely unofficial, but allows fielding proper Belters in pickup battles without additional allowances	    
+	    
+		<!-- <br><br>---------- <b>update 8th of November</b> ---------- 
+		-->
+	    
+        <br><br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
 
         

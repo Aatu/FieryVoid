@@ -33,11 +33,11 @@ class wlcChlonasLoFahraFFA extends MediumShipLeftRight{
         $this->addPrimarySystem(new Scanner(4, 10, 3, 5));
         $this->addPrimarySystem(new Engine(5, 10, 0, 5, 2));
 	$this->addPrimarySystem(new Hangar(4, 1));
-	$this->addPrimarySystem(new Thruster(3, 10, 0, 3, 1));
-	$this->addPrimarySystem(new Thruster(3, 14, 0, 5, 2));
-	$this->addPrimarySystem(new MatterCannon(4, 7, 4, 330, 30));
-	$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
-	$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
+	$this->addAftSystem(new Thruster(3, 10, 0, 3, 1));
+	$this->addAftSystem(new Thruster(3, 14, 0, 5, 2));
+	$this->addFrontSystem(new MatterCannon(4, 7, 4, 330, 30));
+	$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
+	$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
 
 		
         $this->addLeftSystem(new Thruster(3, 11, 0, 3, 3));
@@ -55,9 +55,9 @@ class wlcChlonasLoFahraFFA extends MediumShipLeftRight{
 	$this->hitChart = array(
 		
 		0=> array(
-			9 => "Thruster",
-			11 => "Matter Cannon",
-			12 => "Light Particle Beam",
+			8 => "2:Thruster",
+			10 => "1:Matter Cannon",
+			12 => "1:Light Particle Beam",
 			14 => "Scanner",
 			16 => "Engine",
 			17 => "Hangar",

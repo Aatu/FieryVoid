@@ -29,9 +29,9 @@ class Solarhawk extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 13, 4, 8));
         $this->addPrimarySystem(new Engine(5, 11, 0, 10, 2));
         $this->addPrimarySystem(new Hangar(4, 2));
-        $this->addPrimarySystem(new StdParticleBeam(4, 4, 1, 270, 90));
-        $this->addPrimarySystem(new Thruster(4, 15, 0, 5, 1));
-        $this->addPrimarySystem(new Thruster(5, 21, 0, 10, 2));
+        $this->addFrontSystem(new StdParticleBeam(4, 4, 1, 270, 90));
+        $this->addAftSystem(new Thruster(4, 15, 0, 5, 1));
+        $this->addAftSystem(new Thruster(5, 21, 0, 10, 2));
 
         $this->addLeftSystem(new SolarCannon(4, 7, 3, 240, 0));
         $this->addLeftSystem(new SolarCannon(4, 7, 3, 240, 0));
@@ -49,8 +49,8 @@ class Solarhawk extends HeavyCombatVesselLeftRight{
                $this->hitChart = array(
         		0=> array(
         				8 => "Structure",
-        				11 => "Thruster",
-					12 => "Standard Particle Beam",
+        				11 => "2:Thruster",
+					12 => "1:Standard Particle Beam",
         				14 => "Scanner",
         				16 => "Engine",
         				17 => "Hangar",
