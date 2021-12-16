@@ -17,6 +17,12 @@ class CircasianDolinarP extends BaseShip{
 		$this->limited = 10;
 
 		$this->isd = 1973;
+
+		$this->enhancementOptionsDisabled[] = 'IMPR_REA';
+		$this->enhancementOptionsDisabled[] = 'IMPR_ENG';
+		
+		$this->notes = "Engine fluctuations. Rolls for engine critical every turn with +5% penalty. Effect lasts one turn.";
+		$this->notes .= "<br>Power fluctuations. Rolls for reactor critical every turn with +5% penalty. Effect lasts one turn.";
         
         $this->forwardDefense = 15;
         $this->sideDefense = 16;
@@ -28,10 +34,16 @@ class CircasianDolinarP extends BaseShip{
         $this->pivotcost = 2;
         $this->iniativebonus = -20;
         
-        $this->addPrimarySystem(new Reactor(3, 23, 0, 0));
+		$reactor = new Reactor(3, 25, 0, 0);
+			$reactor->markPowerFlux();
+			$this->addPrimarySystem($reactor);
+//        $this->addPrimarySystem(new Reactor(3, 23, 0, 0));
         $this->addPrimarySystem(new CnC(4, 14, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 4, 5));
-        $this->addPrimarySystem(new Engine(3, 18, 0, 9, 3));
+		$engine = new Engine(3, 18, 0, 9, 3);
+			$engine->markEngineFlux();
+			$this->addPrimarySystem($engine);
+//        $this->addPrimarySystem(new Engine(3, 18, 0, 9, 3));
 		$this->addPrimarySystem(new Hangar(4, 2));
 		$laboratory = new Quarters(4, 9);
 			$laboratory->displayName = "Laboratory";

@@ -37,11 +37,12 @@ class CraytanHelis extends LCV{
 		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
         $this->addPrimarySystem(new AntiquatedScanner(3, 12, 2, 4));
 		$this->addPrimarySystem(new Engine(3, 12, 0, 6, 2));
-		$this->addPrimarySystem(new NexusSentryGun(2, 5, 1, 240, 60));
-		$this->addPrimarySystem(new NexusHeavySentryGun(2, 6, 2, 270, 90));
-		$this->addPrimarySystem(new NexusSentryGun(2, 5, 1, 300, 120));
+
+		$this->addFrontSystem(new NexusSentryGun(2, 5, 1, 240, 60));
+		$this->addFrontSystem(new NexusHeavySentryGun(2, 6, 2, 270, 90));
+		$this->addFrontSystem(new NexusSentryGun(2, 5, 1, 300, 120));
 	    
-        $this->addPrimarySystem(new Structure(3, 36));
+        $this->addPrimarySystem(new Structure(3, 32));
 	    
         $this->hitChart = array(
         		0=> array( 
@@ -53,17 +54,17 @@ class CraytanHelis extends LCV{
         				20 => "Scanner",
         		),
         		1=> array( //redirect to PRIMARY
-        				11 => "0:Structure",
-        				13 => "0:Heavy Sentry Gun",
-        				16 => "0:Sentry Gun",
+        				11 => "Structure",
+        				13 => "1:Heavy Sentry Gun",
+        				16 => "1:Sentry Gun",
 						18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		2=> array( //redirect to PRIMARY
-        				11 => "0:Structure",
-        				13 => "0:Heavy Sentry Gun",
-        				16 => "0:Sentry Gun",
+        				11 => "Structure",
+        				13 => "1:Heavy Sentry Gun",
+        				16 => "1:Sentry Gun",
 						18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

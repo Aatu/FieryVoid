@@ -11,6 +11,9 @@ class DalithornHeavyJumpDreadnought extends BaseShip{
         $this->shipClass = "Heavy Jump Dreadnought";
 			$this->variantOf = "Heavy Dreadnought";
 			$this->occurence = "uncommon";
+// NOTE: As an updated version of the Jump Dreadnought, the Dalithorn have
+// perfected their construction techniques. As such, the hull no longer has
+// the limited 33% availability restriction.
 		$this->shipSizeClass = 3;
 		$this->canvasSize = 175; //img has 200px per side
 		$this->unofficial = true;

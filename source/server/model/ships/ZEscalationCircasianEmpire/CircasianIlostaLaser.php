@@ -15,8 +15,11 @@ class CircasianIlostaLaser extends HeavyCombatVessel{
 			$this->unofficial = true;
         $this->isd = 1951;
 
-		$this->notes = 'Vulnerable to criticals';	  
-		$this->critRollMod = +1; //general penalty to critical rolls!
+		$this->critRollMod += 1;
+		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
+		$this->enhancementOptionsDisabled[] = 'IMPR_REA';
+		
+		$this->notes = "Power fluctuations. Rolls for reactor critical every turn with +5% penalty. Effect lasts one turn.";
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
@@ -28,10 +31,13 @@ class CircasianIlostaLaser extends HeavyCombatVessel{
         $this->pivotcost = 2;
         $this->iniativebonus = 6*5;
          
-        $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
+		$reactor = new Reactor(3, 12, 0, 0);
+			$reactor->markPowerFlux();
+			$this->addPrimarySystem($reactor);
+//        $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 4, 5));
-        $this->addPrimarySystem(new Engine(3, 13, 0, 8, 4));
+        $this->addPrimarySystem(new Engine(3, 13, 0, 10, 4));
         $this->addPrimarySystem(new Hangar(3, 2));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
