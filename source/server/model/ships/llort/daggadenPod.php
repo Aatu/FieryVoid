@@ -25,7 +25,7 @@ class DaggadenPod extends LCV{
 	$this->pivotcost = 1;
 	$this->iniativebonus = 14 *5;
 	
-	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
@@ -35,20 +35,30 @@ class DaggadenPod extends LCV{
 	$this->addPrimarySystem(new Scanner(3, 10, 3, 3));
 	$this->addPrimarySystem(new Engine(4, 9, 0, 4, 1));
 	$this->addPrimarySystem(new CargoBay(2, 20));
-	$this->addPrimarySystem(new TwinArray(2, 6, 2, 180, 270));
-	$this->addPrimarySystem(new MediumPlasma(3, 5, 3, 300, 90));
-	$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
+	
+	$this->addFrontSystem(new TwinArray(2, 6, 2, 180, 270));
+	$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 90));
+	$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
+	
 	$this->addPrimarySystem(new Structure( 4, 36));
+	
         $this->hitChart = array(
         		0=> array( //should never happen
-        				20 => "Structure",
+        				9 => "Structure",
+        				11 => "0:Cargo Bay",
+        				13 => "1:Medium Plasma Cannon",
+        				15 => "1:Twin Array",
+        				16 => "1:Light Particle Beam",
+        				18 => "0:Engine",
+        				19 => "0:Reactor",
+        				20 => "0:Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				9 => "Structure",
         				11 => "0:Cargo Bay",
-        				13 => "0:Medium Plasma Cannon",
-        				15 => "0:Twin Array",
-        				16 => "0:Light Particle Beam",
+        				13 => "1:Medium Plasma Cannon",
+        				15 => "1:Twin Array",
+        				16 => "1:Light Particle Beam",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -56,9 +66,9 @@ class DaggadenPod extends LCV{
         		2=> array( //same as Fwd
         				9 => "Structure",
         				11 => "0:Cargo Bay",
-        				13 => "0:Medium Plasma Cannon",
-        				15 => "0:Twin Array",
-        				16 => "0:Light Particle Beam",
+        				13 => "1:Medium Plasma Cannon",
+        				15 => "1:Twin Array",
+        				16 => "1:Light Particle Beam",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

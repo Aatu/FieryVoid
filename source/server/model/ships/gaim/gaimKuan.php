@@ -28,9 +28,9 @@ class gaimKuan extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 13, 4, 8));
         $this->addPrimarySystem(new Engine(5, 11, 0, 8, 2));
         $this->addPrimarySystem(new Hangar(4, 1));
-        $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 1));
-        $this->addPrimarySystem(new Thruster(5, 19, 0, 8, 2));
-        $this->addPrimarySystem(new ScatterGun(4, 8, 3, 240, 120));
+        $this->addAftSystem(new Thruster(4, 13, 0, 4, 1));
+        $this->addAftSystem(new Thruster(5, 19, 0, 8, 2));
+        $this->addFrontSystem(new ScatterGun(4, 8, 3, 240, 120));
 
         $this->addLeftSystem(new PacketTorpedo(4, 6, 5, 240, 360));
         $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 240, 60));
@@ -52,8 +52,8 @@ class gaimKuan extends HeavyCombatVesselLeftRight{
 		$this->hitChart = array(
 			0=> array(
 					8 => "Structure",
-					11 => "Thruster",
-					12 => "Scattergun",
+					11 => "2:Thruster",
+					12 => "1:Scattergun",
 					14 => "Scanner",
 					16 => "Engine",
 					17 => "Hangar",

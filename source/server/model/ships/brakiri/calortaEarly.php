@@ -33,17 +33,17 @@ class CalortaEarly extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new ElintScanner(6, 20, 9, 9));
         $this->addPrimarySystem(new Engine(6, 14, 0, 10, 3));
         $this->addPrimarySystem(new Hangar(6, 2));
-        $this->addPrimarySystem(new GraviticThruster(6, 15, 0, 6, 1));
-        $this->addPrimarySystem(new GraviticThruster(6, 18, 0, 10, 2));
-        $this->addPrimarySystem(new GraviticBolt(4, 5, 2, 90, 270));
+        $this->addAftSystem(new GraviticThruster(6, 15, 0, 6, 1));
+        $this->addAftSystem(new GraviticThruster(6, 18, 0, 10, 2));
+        $this->addAftSystem(new GraviticBolt(4, 5, 2, 90, 270));
 
-        $this->addLeftSystem(new GraviticBolt(4, 5, 2, 240, 0));
         $this->addLeftSystem(new GraviticBolt(4, 5, 2, 240, 60));
+        $this->addLeftSystem(new GraviticBolt(4, 5, 2, 240, 0));
         $this->addLeftSystem(new GraviticBolt(4, 5, 2, 180, 0));
         $this->addLeftSystem(new GraviticThruster(6, 15, 0, 6, 3));
 
-        $this->addRightSystem(new GraviticBolt(4, 5, 2, 0, 120));
         $this->addRightSystem(new GraviticBolt(4, 5, 2, 300, 120));
+        $this->addRightSystem(new GraviticBolt(4, 5, 2, 0, 120));
         $this->addRightSystem(new GraviticBolt(4, 5, 2, 0, 180));
         $this->addRightSystem(new GraviticThruster(6, 15, 0, 6, 4));
 
@@ -55,8 +55,8 @@ class CalortaEarly extends HeavyCombatVesselLeftRight{
 		$this->hitChart = array(
 			0=> array(
 					8 => "Structure",
-					10 => "Thruster",
-					11 => "Gravitic Bolt",
+					10 => "2:Thruster",
+					11 => "2:Gravitic Bolt",
 					14 => "ELINT Scanner",
 					16 => "Engine",
 					17 => "Hangar",

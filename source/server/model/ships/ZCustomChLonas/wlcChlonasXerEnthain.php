@@ -35,10 +35,10 @@ class wlcChlonasXerEnthain extends BaseShipNoAft
 		$this->addPrimarySystem(new Hangar(4, 26));
 		$this->addAftSystem(new Thruster(5, 24, 0, 12, 2));
 
-		$this->addFrontSystem(new AssaultLaser(4, 6, 4, 240, 360));
+		$this->addFrontSystem(new CustomGatlingMattergunHeavy(5, 0, 0, 300, 60));
 		$this->addFrontSystem(new CustomGatlingMattergunHeavy(5, 0, 0, 300, 60));
 		$this->addFrontSystem(new CustomPulsarLaser(4, 0, 0, 300, 60));
-		$this->addFrontSystem(new CustomGatlingMattergunHeavy(5, 0, 0, 300, 60));
+		$this->addFrontSystem(new AssaultLaser(4, 6, 4, 240, 360));
 		$this->addFrontSystem(new AssaultLaser(4, 6, 4, 0, 120));
 		$this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
 		$this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));

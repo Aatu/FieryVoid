@@ -41,7 +41,6 @@ class Shargoti extends BaseShip{
         $this->addPrimarySystem(new TractorBeam(6, 10, 0, 0));
 
         // weapons arguments: armor, health, power, start arc, end arc
-		$this->addFrontSystem(new GraviticThruster(4, 14, 0, 5, 1));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 240, 360));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
@@ -53,35 +52,36 @@ class Shargoti extends BaseShip{
         $this->addFrontSystem(new NeutronLaser(4, 10, 6, 300, 60));
         $this->addFrontSystem(new ElectroPulseGun(2, 6, 3, 300, 60));
         $this->addFrontSystem(new ElectroPulseGun(2, 6, 3, 300, 60));
+		$this->addFrontSystem(new GraviticThruster(4, 14, 0, 5, 1));
         $this->addFrontSystem(new GraviticThruster(4, 14, 0, 5, 1));
 
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
+        $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
+        $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
+        $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
+        $this->addAftSystem(new NeutronLaser(4, 10, 6, 120, 240));
         $this->addAftSystem(new NeutronLaser(4, 10, 6, 120, 240));
         $this->addAftSystem(new GraviticThruster(4, 56, 0, 16, 2));
-        $this->addAftSystem(new NeutronLaser(4, 10, 6, 120, 240));
-        $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
-        $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
-        $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
 
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 300));
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 300));
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 300));
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 360));
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 360));
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 360));
         $this->addLeftSystem(new NeutronLaser(4, 10, 6, 300, 60));
-        $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 300));
-        $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 300));
-        $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 300));
         $this->addLeftSystem(new GraviticThruster(4, 20, 0, 7, 3));
-        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 360));
-        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 360));
-        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 360));
 
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
         $this->addRightSystem(new NeutronLaser(4, 10, 6, 300, 60));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
         $this->addRightSystem(new GraviticThruster(4, 20, 0, 7, 4));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 6, 80));

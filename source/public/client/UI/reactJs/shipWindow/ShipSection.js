@@ -328,7 +328,7 @@ const pickOuter = (systems, amount = 3) => {
 		if ((i<fromBeginning) || (i>=(picked2.length-fromEnding))){ //elements from beginning and end get picked
 			picked.push(picked2[i]);
 		}else{//remaining elements (from the middle) get returned to the pool
-			remaining.push(picked2[i]);
+			remaining.unshift(picked2[i]); //return to the beginning - so they're picked first in next row!
 		}
 	}
 
