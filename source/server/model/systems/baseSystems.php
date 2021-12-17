@@ -2947,6 +2947,8 @@ class Bulkhead extends ShipSystem{
 			$protectionValue = $ownHealth;
 		} else if ($structureHealthFraction < 0.34) { //structure health is low, do protect for fear of not using the bulkhead at all 
 			$protectionValue = $ownHealth;
+		} else if ( ($systemProtected->repairPriority > 5) && ($targetHealth + $ownHealth > $expectedDmg)){ //for very important systems - protect even if result would be just damage reduction, as reduced crit on them is important
+			$protectionValue = $ownHealth;
 		}
 		return $protectionValue;
 	}
