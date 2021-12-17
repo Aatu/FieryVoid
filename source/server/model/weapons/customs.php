@@ -443,29 +443,31 @@ class CustomStrikeLaser extends Weapon{
     /*Srike Laser, as used on Ch'Lonas ships*/
         public $name = "customStrikeLaser";
         public $displayName = "Strike Laser";
-        public $animation = "laser";
+		
+        //public $animation = "laser";
+		public $animation = "bolt";//a bolt, not a beam
         public $animationColor = array(255, 30, 30);
-        public $animationWidth = 4;
-        public $animationWidth2 = 0.5;
-        public $uninterceptable = true;
-        public $loadingtime = 3;
-        public $rangePenalty = 0.5;
+        public $animationExplosionScale = 0.45;
+		
         public $fireControl = array(0, 2, 2); // fighters, <mediums, <capitals
-        public $priority = 6;
-    
+        public $priority = 6; //heavy Standard weapon    
+        public $loadingtime = 3;
+        public $rangePenalty = 0.5; //-1/2 hexes
+		
+        public $uninterceptable = true;
 	    public $damageType = 'Standard'; 
     	public $weaponClass = "Laser"; 
 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
-		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-		if ( $maxhealth == 0 ){
-		    $maxhealth = 5;
-		}
-		if ( $powerReq == 0 ){
-		    $powerReq = 4;
-		}
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ){
+				$maxhealth = 5;
+			}
+			if ( $powerReq == 0 ){
+				$powerReq = 4;
+			}
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 

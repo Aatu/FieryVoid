@@ -14,7 +14,8 @@ class Weapon extends ShipSystem
     public $priorityAF = 0; //array must be set explicitly - otherwise it will be generated, ignoring this variable! 
     public $priorityAFArray = array();
 
-    public $animation = "none";
+    public $animation = "none"; //options: "laser" (continuus beam), "torpedo" (a glowing oscillating ball), "bolt" (a bolt of energy - or something ;) )
+	 //any other value equals "bolt"
     public $animationArray = array();
     public $animationImg = null;
     public $animationImgArray = array();
