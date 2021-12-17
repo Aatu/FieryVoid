@@ -45,14 +45,14 @@ class Shargoti extends BaseShip{
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 240, 360));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
-        $this->addFrontSystem(new NeutronLaser(4, 10, 6, 300, 60));
-        $this->addFrontSystem(new ElectroPulseGun(2, 6, 3, 300, 60));
+        $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
+        $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
+        $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 0, 120));
-        $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
-        $this->addFrontSystem(new ElectroPulseGun(2, 6, 3, 300, 60));
         $this->addFrontSystem(new NeutronLaser(4, 10, 6, 300, 60));
-        $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
-        $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
+        $this->addFrontSystem(new NeutronLaser(4, 10, 6, 300, 60));
+        $this->addFrontSystem(new ElectroPulseGun(2, 6, 3, 300, 60));
+        $this->addFrontSystem(new ElectroPulseGun(2, 6, 3, 300, 60));
         $this->addFrontSystem(new GraviticThruster(4, 14, 0, 5, 1));
 
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
