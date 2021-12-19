@@ -31,9 +31,9 @@ class PeregrineOld extends BaseShipNoAft{
         $this->addPrimarySystem(new Scanner(4, 16, 4, 6));
         $this->addPrimarySystem(new Engine(4, 15, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(3, 13));
-        $this->addPrimarySystem(new JumpEngine(4, 12, 3, 38));
-        $this->addPrimarySystem(new Thruster(4, 12, 0, 4, 2));
-		$this->addPrimarySystem(new Thruster(4, 12, 0, 4, 2));
+        $this->addAftSystem(new JumpEngine(4, 12, 3, 38));
+        $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
+		$this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
 	    
 		$this->addFrontSystem(new StdParticleBeam(3, 4, 1, 240, 60));
         $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));
@@ -59,9 +59,9 @@ class PeregrineOld extends BaseShipNoAft{
 	$this->hitChart = array(
         		0=> array(
         				8=> "Structure",
-        				10=> "Thruster",
+        				10=> "2:Thruster",
         				12=> "Scanner",
-						14=> "Jump Engine",
+						14=> "2:Jump Engine",
         				16=> "Engine",
         				18=> "Hangar",
         				19=> "Reactor",

@@ -31,9 +31,9 @@ class wlcChlonasXerEnthain extends BaseShipNoAft
 		$this->addPrimarySystem(new CnC(6, 18, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 16, 6, 8));
 		$this->addPrimarySystem(new Engine(5, 20, 0, 12, 3));
-		$this->addPrimarySystem(new JumpEngine(5, 10, 5, 40));
+		$this->addAftSystem(new JumpEngine(5, 10, 5, 40));
 		$this->addPrimarySystem(new Hangar(4, 26));
-		$this->addPrimarySystem(new Thruster(5, 24, 0, 12, 2));
+		$this->addAftSystem(new Thruster(5, 24, 0, 12, 2));
 
 		$this->addFrontSystem(new AssaultLaser(4, 6, 4, 240, 360));
 		$this->addFrontSystem(new CustomGatlingMattergunHeavy(5, 0, 0, 300, 60));
@@ -69,42 +69,42 @@ class wlcChlonasXerEnthain extends BaseShipNoAft
 		$this->hitChart = array(
 
 		0=> array(
-		8 => "Structure",
-		9 => "Jump Engine",
-		11 => "Thruster",
-		13 => "Scanner",
-		15 => "Hangar",
-		17 => "Engine",
-		19 => "Reactor",
-		20 => "C&C",
+			7 => "Structure",
+			8 => "2:Jump Engine",
+			11 => "2:Thruster",
+			13 => "Scanner",
+			15 => "Hangar",
+			17 => "Engine",
+			19 => "Reactor",
+			20 => "C&C",
 		),
 		1=> array(
-		4 => "Thruster",
-		7 => "Heavy Gatling Mattergun",
-		8 => "Pulsar Laser",
-		10 => "Assault Laser",
-		18 => "Structure",
-		20 => "Primary",
+			4 => "Thruster",
+			7 => "Heavy Gatling Mattergun",
+			8 => "Pulsar Laser",
+			10 => "Assault Laser",
+			18 => "Structure",
+			20 => "Primary",
 		),
 		3=> array(
-		3 => "Thruster",
-		5 => "Matter Stream",
-		7 => "Pulsar Laser",
-		9 => "Gatling Mattergun",
-		10 => "Strike Laser",
-		12 => "Light Gatling Mattergun",
-		18 => "Structure",
-		20 => "Primary",
+			3 => "Thruster",
+			5 => "Matter Stream",
+			7 => "Pulsar Laser",
+			9 => "Gatling Mattergun",
+			10 => "Strike Laser",
+			12 => "Light Gatling Mattergun",
+			18 => "Structure",
+			20 => "Primary",
 		),
 		4=> array(
-		3 => "Thruster",
-		5 => "Matter Stream",
-		7 => "Pulsar Laser",
-		9 => "Gatling Mattergun",
-		10 => "Strike Laser",
-		12 => "Light Gatling Mattergun",
-		18 => "Structure",
-		20 => "Primary",
+			3 => "Thruster",
+			5 => "Matter Stream",
+			7 => "Pulsar Laser",
+			9 => "Gatling Mattergun",
+			10 => "Strike Laser",
+			12 => "Light Gatling Mattergun",
+			18 => "Structure",
+			20 => "Primary",
 		),
 		);
 	}

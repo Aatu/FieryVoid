@@ -30,10 +30,10 @@ class Stormfalcon extends BaseShipNoAft{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 15, 6, 8));
         $this->addPrimarySystem(new Engine(5, 15, 0, 8, 3));
-        $this->addPrimarySystem(new JumpEngine(5, 10, 0, 5, 36));
+        $this->addAftSystem(new JumpEngine(5, 10, 0, 5, 36));
         $this->addPrimarySystem(new Hangar(4, 14));
-        $this->addPrimarySystem(new Catapult(5, 6,1));
-        $this->addPrimarySystem(new Thruster(5, 21, 0, 8, 2));
+        $this->addPrimarySystem(new Catapult(5, 6, 1));
+        $this->addAftSystem(new Thruster(5, 21, 0, 8, 2));
 
         $this->addFrontSystem(new ParticleRepeater(3, 6, 4, 240, 0));
         $this->addFrontSystem(new SolarCannon(4, 7, 3, 300, 60));
@@ -62,8 +62,8 @@ class Stormfalcon extends BaseShipNoAft{
             $this->hitChart = array(
         		0=> array(
         				8 => "Structure",
-        				9 => "Jump Engine",
-        				11 => "Thruster",
+        				9 => "2:Jump Engine",
+        				11 => "2:Thruster",
         				13 => "Scanner",
         				15 => "Engine",
         				17 => "Hangar",

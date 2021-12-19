@@ -170,7 +170,7 @@
         public $projectilespeed = 11;
         public $animationWidth = 10;
         public $trailLength = 10;
-        public $priority = 1; //Flash! should strike first (?)
+        public $priority = 1; //Flash! should strike first 
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -193,6 +193,7 @@
 				$this->data["Special"] .= '<br>';
 			}
 			$this->data["Special"] .= "Ignores half of armor.";
+			$this->data["Special"] .= "<br>Ballistic weapon that can use offensive EW.";
 		}
         
         
