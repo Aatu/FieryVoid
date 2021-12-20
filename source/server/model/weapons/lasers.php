@@ -5,7 +5,7 @@
         public $priority = 8;
         public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClass = "Laser"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
-        public $animationExplosionScale = 0.5; //appropriate for heavy Raking weapons
+        //public $animationExplosionScale = 0.5; //appropriate for heavy Raking weapons
         
         public $firingModes = array( 1 => "Raking");
         
