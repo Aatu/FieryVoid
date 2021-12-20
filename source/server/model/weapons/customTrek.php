@@ -99,17 +99,17 @@ class TrekImpulseDrive extends Engine{
 }//endof class TrekImpulseDrive
 
 
+class TrekPhaserBase extends Raking { //common Phaser things like color
+        public $animation = "laser";
+        public $animationColor = array(225, 0, 0);	
+}
 
 
-class TrekLtPhaseCannon extends Raking{
+class TrekLtPhaseCannon extends TrekPhaserBase{
 		public $name = "TrekLtPhaseCannon";
         public $displayName = "Light Phase Cannon";
         public $iconPath = "TrekLightPhaseCannon.png";
-        public $animation = "laser";
-        public $animationColor = array(225, 0, 0);
-		public $animationExplosionScale = 0.25;
-		public $animationWidth = 3;
-		public $animationWidth2 = 0.2;
+        public $animationExplosionScale = 0.2;
 
         public $raking = 6;
         
@@ -146,16 +146,13 @@ class TrekLtPhaseCannon extends Raking{
 
 
 /*super-heavy fighter weapon*/
-    class TrekFtrPhaseCannon extends Raking{
+    class TrekFtrPhaseCannon extends TrekPhaserBase{
         public $name = "TrekFtrPhaseCannon";
         public $displayName = "Light Phase Cannon";
         public $iconPath = "TrekLightPhaseCannon.png";
-        public $animation = "laser";
-        public $animationColor = array(225, 0, 0);
-        public $animationWidth = 3;
-        public $animationWidth2 = 0.2;
+        public $animationExplosionScale = 0.2;
 
-        public $loadingtime = 1;
+        public $loadingtime = 2;
         public $raking = 6;
 //        public $exclusive = true;
         public $intercept = 2;
@@ -172,12 +169,7 @@ class TrekLtPhaseCannon extends Raking{
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 
-/*
-		public function setSystemDataWindow($turn){
-			parent::setSystemDataWindow($turn);
-				$this->data["Special"] = "Does 6 damage per rake.";
-		}
-  */      
+	    
         public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
         public function setMinDamage(){   return  $this->minDamage = 5 ;      }
         public function setMaxDamage(){   return  $this->maxDamage = 14 ;      }
@@ -185,15 +177,11 @@ class TrekLtPhaseCannon extends Raking{
     }  //end of class Trek Fighter Light Phase Cannon
 
 
-class TrekPhaseCannon extends Raking{
+class TrekPhaseCannon extends TrekPhaserBase{
 		public $name = "TrekPhaseCannon";
         public $displayName = "Phase Cannon";
         public $iconPath = "TrekPhaseCannon.png";
-        public $animation = "laser";
-        public $animationColor = array(225, 0, 0);
-		public $animationExplosionScale = 0.25;
-		public $animationWidth = 4;
-		public $animationWidth2 = 0.3;
+        public $animationExplosionScale = 0.3;
 
         public $raking = 8;
         
@@ -280,15 +268,11 @@ class TrekPhaseCannon extends Raking{
 
 
 
-class TrekHvyPhaseCannon extends Raking{
+class TrekHvyPhaseCannon extends TrekPhaserBase{
 		public $name = "TrekHvyPhaseCannon";
         public $displayName = "Heavy Phase Cannon";
         public $iconPath = "TrekHeavyPhaseCannon.png";
-        public $animation = "laser";
-        public $animationColor = array(225, 0, 0);
-		public $animationExplosionScale = 0.25;
-		public $animationWidth = 5;
-		public $animationWidth2 = 0.4;
+        public $animationExplosionScale = 0.35;
 
         public $raking = 10;
         
@@ -372,15 +356,11 @@ class TrekHvyPhaseCannon extends Raking{
 
 
 
-class TrekPhaser extends Raking{
+class TrekPhaser extends TrekPhaserBase{
 		public $name = "TrekPhaser";
         public $displayName = "Phaser";
         public $iconPath = "mediumLaser.png"; //Laser icon - just so it's clear it needs to be changed!
-        public $animation = "laser";
-        public $animationColor = array(225, 0, 0);
-		public $animationExplosionScale = 0.3;
-		public $animationWidth = 4;
-		public $animationWidth2 = 0.3;
+        public $animationExplosionScale = 0.3;
 
         public $raking = 10;
         
@@ -468,15 +448,13 @@ class TrekPhaser extends Raking{
 
 
 
-class TrekPhaserLance extends Raking{
+class TrekPhaserLance extends TrekPhaserBase{
 		public $name = "TrekPhaserLance";
         public $displayName = "Phaser Lance";
         public $iconPath = "heavyLaser.png"; //Laser icon - just so it's clear it needs to be changed!
         public $animation = "laser";
-        public $animationColor = array(225, 0, 0);
-		public $animationExplosionScale = 0.3;
-		public $animationWidth = 4;
-		public $animationWidth2 = 0.3;
+        public $animationExplosionScale = 0.4;
+	public $animationExplosionScaleArray = array(1=>0.4, 2=>0.3); 
 
         public $raking = 10;
         
@@ -562,11 +540,9 @@ class TrekPhaserLance extends Raking{
         public $name = "TrekPlasmaBurst";
         public $displayName = "Plasma Burst";
         public $animation = "trail";
-        public $animationColor = array(75, 250, 90);
-        public $trailColor = array(75, 250, 90);
-        public $animationWidth = 2;
+        //public $animationColor = array(75, 250, 90);
         public $animationExplosionScale = 0.15;
-    	public $trailLength = 10;
+	    
     	public $rangeDamagePenalty = 1;
 
         public $intercept = 0;
@@ -674,13 +650,9 @@ class TrekSpatialTorp extends Torpedo{
         public $displayName = "Spatial Torpedo";
 		    public $iconPath = "EWRocketLauncher.png";
 			
-        public $animation = "trail";
-        //public $trailColor = array(211, 0, 0); ///doesn't seem to matter...
+        public $animation = "bolt";
         public $animationColor = array(100, 100, 100); //color of projectile
-        public $animationExplosionScale = 0.4; //indicates projectile size
-        //public $projectilespeed = 10; //doesn't seem to matter
-        //public $animationWidth = 6; //doesn't seem to matter
-        //public $trailLength = 10; //doesn't seem to matter
+        public $animationExplosionScale = 0.2; //indicates projectile size
 
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile
@@ -692,7 +664,7 @@ class TrekSpatialTorp extends Torpedo{
         public $rangePenalty = 0;
         public $fireControl = array(1, 1, 1); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
-	public $priority = 4; //Standard weapon
+	public $priority = 4; //light Standard weapon
 	    
 	public $firingMode = 'Ballistic'; //firing mode - just a name essentially
 	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
@@ -734,11 +706,7 @@ class TrekPhotonicTorp extends Torpedo{
 		
         public $animation = "torpedo";
         public $animationColor = array(255, 188, 0); //let's make it yellowish
-        //public $trailColor = array(0, 255, 0); /doesn't seem to matter
         public $animationExplosionScale = 0.2;
-        //public $projectilespeed = 10;//doesn't seem to matter
-        //public $animationWidth = 8;//doesn't seem to matter
-        //public $trailLength = 10; //doesn't seem to matter
 		
 
         public $useOEW = true; //torpedo
@@ -793,7 +761,7 @@ class TrekPhotonTorp extends Torpedo{
 			
 			public $animation = "torpedo";
         public $animationColor = array(255, 188, 0); //let's make it yellowish
-        public $animationExplosionScale = 0.3;
+        public $animationExplosionScale = 0.35;
 
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile
@@ -804,7 +772,7 @@ class TrekPhotonTorp extends Torpedo{
         public $rangePenalty = 0;
         public $fireControl = array(1, 1, 2); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
-	public $priority = 4; //Standard weapon
+	public $priority = 5; //Standard Medium weapon; maybe even heavy...
 	    
 	public $firingMode = 'Ballistic'; //firing mode - just a name essentially
 	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
@@ -827,10 +795,9 @@ class TrekPhotonTorp extends Torpedo{
 			$this->data["Special"] .= 'Benefits from offensive EW.';			
         }
         
-        public function getDamage($fireOrder){ 
-		
-			return Dice::d(6, 3)+6;   
-		}
+        public function getDamage($fireOrder){ 		
+		return Dice::d(6, 3)+6;   
+	}
 
         public function setMinDamage(){     $this->minDamage = 9;      }
         public function setMaxDamage(){     $this->maxDamage = 24;      }
@@ -840,15 +807,14 @@ class TrekPhotonTorp extends Torpedo{
 
 
 class HvyPlasmaProjector extends Raking{
-
 	public $name = "HvyPlasmaProjector";
 	public $displayName = "Heavy Plasma Projector";
 	public $iconPath = "HeavyPlasmaProjector.png";
 	public $animation = "laser";
 	public $animationColor = array(75, 250, 90);
-    public $animationWidth = 5;
-    public $animationWidth2 = 0.3;
-	public $priority = 7;
+        public $animationExplosionScale = 0.5; 
+	
+	public $priority = 7; //heavy Raking weapon
 
 	public $rangeDamagePenalty = 0.25;
 	public $loadingtime = 4;
@@ -891,8 +857,8 @@ class LtPlasmaProjector extends Raking{
 	public $iconPath = "LightPlasmaProjector.png";
 	public $animation = "laser";
 	public $animationColor = array(75, 250, 90);
-    public $animationWidth = 3;
-    public $animationWidth2 = 0.1;
+        public $animationExplosionScale = 0.3;
+	
 	public $priority = 5;
 
 	public $rangeDamagePenalty = 0.5;
