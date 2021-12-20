@@ -2399,7 +2399,7 @@ spl_autoload_register(
 
 				//Star Trek conversions
 				//weapons
-				'trekphaser' => '/server/model/weapons/customTrek.php',
+				'trekphaserbase' => '/server/model/weapons/customTrek.php',
 				'trekftrphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekltphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekphasecannon' => '/server/model/weapons/customTrek.php',
