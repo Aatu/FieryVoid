@@ -45,12 +45,13 @@ var CustomGatlingMattergunHeavy = function CustomGatlingMattergunHeavy(json, shi
 CustomGatlingMattergunHeavy.prototype = Object.create(Weapon.prototype);
 CustomGatlingMattergunHeavy.prototype.constructor = CustomGatlingMattergunHeavy;
 
-
+/*moved to official lasers
 var CustomStrikeLaser = function CustomStrikeLaser(json, ship) {
     Weapon.call(this, json, ship);
 };
 CustomStrikeLaser.prototype = Object.create(Weapon.prototype);
 CustomStrikeLaser.prototype.constructor = CustomStrikeLaser;
+*/
 
 var CustomPulsarLaser = function CustomPulsarLaser(json, ship) {
     Weapon.call(this, json, ship);
@@ -202,3 +203,16 @@ var GromeHvyRailgun = function GromeHvyRailgun(json, ship) {
 };
 GromeHvyRailgun.prototype = Object.create(Weapon.prototype);
 GromeHvyRailgun.prototype.constructor = GromeHvyRailgun;
+
+
+var CustomLtParticleCutter = function CustomLtParticleCutter(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CustomLtParticleCutter.prototype = Object.create(Weapon.prototype);
+CustomLtParticleCutter.prototype.constructor = CustomLtParticleCutter;
+
+var CustomEarlyLtParticleCutter = function CustomEarlyLtParticleCutter(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CustomEarlyLtParticleCutter.prototype = Object.create(Weapon.prototype);
+CustomEarlyLtParticleCutter.prototype.constructor = CustomEarlyLtParticleCutter;

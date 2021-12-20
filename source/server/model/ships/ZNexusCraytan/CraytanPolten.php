@@ -34,8 +34,8 @@ class CraytanPolten extends FighterFlight{
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
 			
-			$armour = array(1, 1, 1, 1);
-			$fighter = new Fighter("Polten", $armour, 15, $this->id);
+			$armour = array(2, 2, 2, 2);
+			$fighter = new Fighter("Polten", $armour, 12, $this->id);
 			$fighter->displayName = "Polten";
 			$fighter->imagePath = "img/ships/Nexus/CraytanPolten.png";
 			$fighter->iconPath = "img/ships/Nexus/CraytanPolten_large.png";

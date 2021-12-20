@@ -337,6 +337,11 @@ shipManager.movement = {
             value: 0
         };
     },
+	
+	/*just move ahead using all remaining movement*/
+	doMoveFully: function doMoveFully(ship) {
+		while (shipManager.movement.getRemainingMovement(ship) > 0) shipManager.movement.doMove(ship);
+	},
 
     
     canSlip: function canSlip(ship, right) {
@@ -689,9 +694,11 @@ shipManager.movement = {
             if (movement.type == "pivotleft" && pivoting == "right" && movement.preturn == false) {
                 pivoting = "no";
             }
+			/* this fragment seems to be unsuccessful attempt at recognizing turning into pivot; it DOES so (for not-gravitic ship at least), but doesn't stop pivoting itself...
             if (!ship.gravitic && shipManager.movement.isTurn(movement) && pivoting != "no") {
                 pivoting = "no";
             }
+			*/
         }
         return pivoting;
     },

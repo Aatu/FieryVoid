@@ -30,9 +30,9 @@ class Eyehawk extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new ElintScanner(4, 6, 2, 4));
         $this->addPrimarySystem(new Engine(5, 11, 0, 10, 2));
         $this->addPrimarySystem(new Hangar(4, 2));
-        $this->addPrimarySystem(new JumpEngine(4, 16, 4, 36));
-        $this->addPrimarySystem(new Thruster(4, 15, 0, 5, 1));
-        $this->addPrimarySystem(new Thruster(5, 21, 0, 10, 2));
+        $this->addAftSystem(new JumpEngine(4, 16, 4, 36));
+        $this->addAftSystem(new Thruster(4, 15, 0, 5, 1));
+        $this->addAftSystem(new Thruster(5, 21, 0, 10, 2));
 
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
         $this->addLeftSystem(new StdParticleBeam(4, 4, 1, 240, 60));
@@ -50,8 +50,8 @@ class Eyehawk extends HeavyCombatVesselLeftRight{
             $this->hitChart = array(
         		0=> array(
         				6 => "Structure",
-        				9 => "Thruster",
-					11 => "Jump Engine",
+        				9 => "2:Thruster",
+					11 => "2:Jump Engine",
         				14 => "Scanner",
         				16 => "Engine",
         				17 => "Hangar",

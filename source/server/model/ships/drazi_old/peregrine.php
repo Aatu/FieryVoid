@@ -30,9 +30,9 @@ class Peregrine extends BaseShipNoAft{
         $this->addPrimarySystem(new Scanner(4, 16, 4, 7));
         $this->addPrimarySystem(new Engine(4, 15, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(3, 13));
-        $this->addPrimarySystem(new JumpEngine(4, 12, 3, 38));
-        $this->addPrimarySystem(new Thruster(4, 12, 0, 4, 2));
-	      $this->addPrimarySystem(new Thruster(4, 12, 0, 4, 2));
+        $this->addAftSystem(new JumpEngine(4, 12, 3, 38));
+        $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
+	      $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
   
         $this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
         $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 240, 120));
@@ -56,35 +56,35 @@ class Peregrine extends BaseShipNoAft{
     
         $this->hitChart = array(
         		0=> array(
-        				8=> "Structure",
-        				10=> "Thruster",
-        				12=> "Scanner",
-					14=> "Jump Engine",
-        				16=> "Engine",
-        				18=> "Hangar",
-        				19=> "Reactor",
-        				20=> "C&C",
+					8=> "Structure",
+					10=> "2:Thruster",
+					12=> "Scanner",
+					14=> "2:Jump Engine",
+					16=> "Engine",
+					18=> "Hangar",
+					19=> "Reactor",
+					20=> "C&C",
         		),
         		1=> array(
-        				5=> "Thruster",
-        				8=> "Particle Cannon",
-        				9=> "Standard Particle Beam",
-        				18=> "Structure",
-        				20=> "Primary",
+					5=> "Thruster",
+					8=> "Particle Cannon",
+					9=> "Standard Particle Beam",
+					18=> "Structure",
+					20=> "Primary",
         		),
         		3=> array(
-        				5=> "Thruster",
-        				7=> "Standard Particle Beam",
-        				9=> "Repeater Gun",
-        				18=> "Structure",
-        				20=> "Primary",
+					5=> "Thruster",
+					7=> "Standard Particle Beam",
+					9=> "Repeater Gun",
+					18=> "Structure",
+					20=> "Primary",
         		),
         		4=> array(
-        				5=> "Thruster",
-        				7=> "Standard Particle Beam",
-        				9=> "Repeater Gun",
-        				18=> "Structure",
-        				20=> "Primary",
+					5=> "Thruster",
+					7=> "Standard Particle Beam",
+					9=> "Repeater Gun",
+					18=> "Structure",
+					20=> "Primary",
         		),
         );
     }

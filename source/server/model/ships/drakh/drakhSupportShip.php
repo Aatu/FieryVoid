@@ -39,7 +39,7 @@ class DrakhSupportShip extends HeavyCombatVessel{
         //$this->addPrimarySystem(new Scanner(5, 16, 6, 10));
         $this->addPrimarySystem(new Engine(5, 14, 0, 8, 3));
         $this->addPrimarySystem(new JumpEngine(5, 15, 4, 36));
-	$this->addPrimarySystem(new Hangar(4, 6, 1));
+	$this->addPrimarySystem(new Hangar(4, 6, 6)); //6 Shuttles
         $this->addPrimarySystem(new GraviticThruster(3, 13, 0, 5, 3));
         $this->addPrimarySystem(new GraviticThruster(3, 13, 0, 5, 4));
   
@@ -60,10 +60,10 @@ class DrakhSupportShip extends HeavyCombatVessel{
 	$this->addAftSystem(new customMedPolarityPulsar(3, 0, 0, 120, 240));
 	$this->addAftSystem(new customLtPolarityPulsar(2, 0, 0, 60, 240));
 	$this->addAftSystem(new AbsorbtionShield(2,6,4,2,90,270) );
-        $this->addAftSystem(new Catapult(4, 4));
-        $this->addAftSystem(new Catapult(4, 4));
-        $this->addAftSystem(new Catapult(4, 4));
-        $this->addAftSystem(new Catapult(4, 4));
+        $this->addAftSystem(new Catapult(4, 4, 1));
+        $this->addAftSystem(new Catapult(4, 4, 1));
+        $this->addAftSystem(new Catapult(4, 4, 1));
+        $this->addAftSystem(new Catapult(4, 4, 1));
        
 	    
         

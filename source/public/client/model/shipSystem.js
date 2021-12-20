@@ -172,21 +172,24 @@ Weapon.prototype.changeFiringMode = function () {
 	if (!mathlib.arrayIsEmpty(this.doNotInterceptArray)) this.hextarget = this.doNotInterceptArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.uninterceptableArray)) this.hextarget = this.uninterceptableArray[this.firingMode];		
 
-	//firing animation related...
-	if (!mathlib.arrayIsEmpty(this.animationArray)) this.animation = this.animationArray[this.firingMode];
+	
+		/*not used any more!
 	if (!mathlib.arrayIsEmpty(this.animationImgArray)) this.animationImg = this.animationImgArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.animationImgSpriteArray)) this.animationImgSprite = this.animationImgSpriteArray[this.firingMode];
-	if (!mathlib.arrayIsEmpty(this.animationColorArray)) this.animationColor = this.animationColorArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.animationColor2Array)) this.animationColor2 = this.animationColor2Array[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.animationWidthArray)) this.animationWidth = this.animationWidthArray[this.firingMode];
-	if (!mathlib.arrayIsEmpty(this.animationExplosionScaleArray)) this.animationExplosionScale = this.animationExplosionScaleArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.animationExplosionTypeArray)) this.animationExplosionType = this.animationExplosionTypeArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.explosionColorArray)) this.explosionColor = this.explosionColorArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.trailLengthArray)) this.trailLength = this.trailLengthArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.trailColorArray)) this.trailColor = this.trailColorArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.projectilespeedArray)) this.projectilespeed = this.projectilespeedArray[this.firingMode];
-	if (!mathlib.arrayIsEmpty(this.hextargetArray)) this.hextarget = this.hextargetArray[this.firingMode];		
-	
+	if (!mathlib.arrayIsEmpty(this.hextargetArray)) this.hextarget = this.hextargetArray[this.firingMode];				
+		*/
+	//firing animation related...
+	if (!mathlib.arrayIsEmpty(this.animationArray)) this.animation = this.animationArray[this.firingMode];
+	if (!mathlib.arrayIsEmpty(this.animationColorArray)) this.animationColor = this.animationColorArray[this.firingMode];
+	if (!mathlib.arrayIsEmpty(this.animationExplosionScaleArray)) this.animationExplosionScale = this.animationExplosionScaleArray[this.firingMode];
+		
 	if (!mathlib.arrayIsEmpty(this.startArcArray)) this.startArc = this.startArcArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.endArcArray)) this.endArc = this.endArcArray[this.firingMode];		
 	

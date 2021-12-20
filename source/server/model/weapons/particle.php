@@ -198,7 +198,7 @@
         public $trailColor = array(255, 163, 26);
 
         public $name = "heavyArray";
-        public $displayName = "Heavy array";
+        public $displayName = "Heavy Array";
         public $animation = "trail";
         public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.25;
@@ -378,7 +378,7 @@
         public $displayName = "Particle Cutter";
 	public $animation = "laser";
         public $animationColor = array(255, 153, 102);
-        public $animationExplosionScale = 0.25;
+        public $animationExplosionScale = 0.45;
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
 	    

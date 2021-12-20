@@ -38,9 +38,12 @@ class Ammo extends Weapon
     public function setMinDamage(){     $this->minDamage = $this->damage;      }
     public function setMaxDamage(){     $this->maxDamage = $this->damage;      }    
     
+	/*not used anywhere
     public function setRangeMod($rangeMod){
         $this->range = $this->range + $rangeMod;
+        $this->distanceRange = $this->distanceRange + $rangeMod;
     }
+	*/
     
     /*no longer needed?
     public function getRange($fireOrder)

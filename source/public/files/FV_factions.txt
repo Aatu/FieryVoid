@@ -553,7 +553,7 @@ Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort o
 without any restrictions, but they cannot boost their sensors.
 
 
-zNEXUS PLAYTEST SAL-BEZ  (custom, alternate universe faction)
+zNEXUS SAL-BEZ  (custom, alternate universe faction)
 The Sal-bez Coalition is the first anti-spinward faction from Nexus to be brought into Fiery Void. This insectoid race started as a typical queen / worker arrangement, but during the Enlightenment of Fire, 
 the Sal-bez won their freedom. They are now a fiercly individualistic society. The Coalition did not have a traditional military upon reaching for the stars and their early units are exclusively civilian
 designs using industrial systems as makeshift weapons. As the Sal-bez grew (and discovered several technology caches from a previous power), they quickly began to field purpose-built combat vessels that 

@@ -4,7 +4,7 @@ class DalithornOSAT extends OSAT{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 200;
+		$this->pointCost = 220;
 		$this->faction = 'ZNexus Dalithorn';
         $this->phpclass = "DalithornOSAT";
         $this->imagePath = "img/ships/Nexus/DalithornOSAT.png";
@@ -13,7 +13,7 @@ class DalithornOSAT extends OSAT{
 //	    $this->variantOf = "Brixadii Weapons Platform";
 //		$this->limited = 33;
 		$this->unofficial = true;
-		$this->isd = 1908;
+		$this->isd = 2043;
         
         $this->forwardDefense = 10;
         $this->sideDefense = 10;
@@ -25,13 +25,13 @@ class DalithornOSAT extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
-        $this->addPrimarySystem(new NexusCoilgun(2, 10, 4, 300, 60));
+        $this->addPrimarySystem(new NexusHeavyCoilgun(2, 12, 5, 300, 60));
         $this->addPrimarySystem(new NexusLightGasGun(2, 5, 1, 180, 60));
         $this->addPrimarySystem(new NexusShatterGun(1, 2, 1, 0, 360));
         $this->addPrimarySystem(new NexusLightGasGun(2, 5, 1, 300, 180));
-        $this->addPrimarySystem(new NexusCoilgun(2, 10, 4, 300, 60));
+        $this->addPrimarySystem(new NexusHeavyCoilgun(2, 12, 5, 300, 60));
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 10, 2, 3));
+        $this->addPrimarySystem(new Scanner(4, 10, 3, 5));
 		$this->addPrimarySystem(new CargoBay(4, 12));
         $this->addPrimarySystem(new Thruster(3, 8, 0, 0, 2));
                 
@@ -43,7 +43,7 @@ class DalithornOSAT extends OSAT{
 				7 => "Structure",
 				9 => "Cargo Bay",
 				10 => "Thruster",
-				13 => "Coilgun",
+				13 => "Heavy Coilgun",
 				14 => "Shatter Gun",
 				16 => "Light Gas Gun",
 				18 => "Scanner",

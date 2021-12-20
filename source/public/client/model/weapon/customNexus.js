@@ -107,6 +107,12 @@ var NexusCoilgun = function NexusCoilgun(json, ship) {
 NexusCoilgun.prototype = Object.create(Weapon.prototype);
 NexusCoilgun.prototype.constructor = NexusCoilgun;
 
+var NexusHeavyCoilgun = function NexusHeavyCoilgun(json, ship) {
+	Weapon.call(this, json, ship);
+};
+NexusHeavyCoilgun.prototype = Object.create(Weapon.prototype);
+NexusHeavyCoilgun.prototype.constructor = NexusHeavyCoilgun;
+
 var NexusDualSlugCannon = function NexusDualSlugCannon(json, ship) {
 	Weapon.call(this, json, ship);
 };
@@ -455,6 +461,12 @@ var NexusSwarmTorpedo = function  NexusSwarmTorpedo(json, ship) {
 NexusSwarmTorpedo.prototype = Object.create(Weapon.prototype);
 NexusSwarmTorpedo.prototype.constructor =  NexusSwarmTorpedo;
 
+var NexusRangedSwarmTorpedo = function  NexusRangedSwarmTorpedo(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusRangedSwarmTorpedo.prototype = Object.create(Weapon.prototype);
+NexusRangedSwarmTorpedo.prototype.constructor =  NexusRangedSwarmTorpedo;
+
 var NexusHeavySwarmTorpedo = function  NexusHeavySwarmTorpedo(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -729,6 +741,18 @@ var NexusEarlyPlasmaWave = function  NexusEarlyPlasmaWave(json, ship) {
 NexusEarlyPlasmaWave.prototype = Object.create(Weapon.prototype);
 NexusEarlyPlasmaWave.prototype.constructor =  NexusEarlyPlasmaWave;
 
+var NexusRangedEarlyPlasmaWave = function  NexusRangedEarlyPlasmaWave(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusRangedEarlyPlasmaWave.prototype = Object.create(Weapon.prototype);
+NexusRangedEarlyPlasmaWave.prototype.constructor =  NexusRangedEarlyPlasmaWave;
+
+var NexusRangedPlasmaWave = function  NexusRangedPlasmaWave(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusRangedPlasmaWave.prototype = Object.create(Weapon.prototype);
+NexusRangedPlasmaWave.prototype.constructor =  NexusRangedPlasmaWave;
+
 var NexusParticleGrid = function  NexusParticleGrid(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -752,6 +776,12 @@ var NexusBoltTorpedo = function  NexusBoltTorpedo(json, ship) {
 };
 NexusBoltTorpedo.prototype = Object.create(Weapon.prototype);
 NexusBoltTorpedo.prototype.constructor =  NexusBoltTorpedo;
+
+var NexusRangedBoltTorpedo = function  NexusRangedBoltTorpedo(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusRangedBoltTorpedo.prototype = Object.create(Weapon.prototype);
+NexusRangedBoltTorpedo.prototype.constructor =  NexusRangedBoltTorpedo;
 
 var NexusLightIndustrialLaser = function  NexusLightIndustrialLaser(json, ship) {
     Weapon.call(this, json, ship);
@@ -777,6 +807,11 @@ var NexusAutogun = function NexusAutogun(json, ship) {
 NexusAutogun.prototype = Object.create(Weapon.prototype);
 NexusAutogun.prototype.constructor = NexusAutogun;
 
+var NexusLaserMissile = function NexusLaserMissile(json, ship) {
+	Weapon.call(this, json, ship);
+};
+NexusLaserMissile.prototype = Object.create(Weapon.prototype);
+NexusLaserMissile.prototype.constructor = NexusLaserMissile;
 
 
 

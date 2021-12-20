@@ -14,7 +14,7 @@ class Brostilli extends SmallStarBaseFourSections
 		$this->shipClass = "Brostilli Warbase";
 		$this->imagePath = "img/ships/Brostilli.png";
 		$this->canvasSize = 300;
-		$this->fighters = array("light" => 24, "superheavy" => 16);
+		$this->fighters = array("light" => 24, "superheavy" => 4); //4 hangars for 6 fighters each, 4 catapults for 1 SHF each
 		$this->isd = 2234;
 
 		$this->shipSizeClass = 3;

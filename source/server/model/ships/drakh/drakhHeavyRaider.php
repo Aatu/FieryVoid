@@ -30,8 +30,7 @@ class DrakhHeavyRaider extends LCV{
 		$this->hangarRequired = "Raiders"; //Heavy Raiders can use regular Raider catapults
 		$this->unitSize = 0.5; //they require twice as much space, though!
 	    
-	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
-	    
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance   
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
@@ -43,7 +42,9 @@ class DrakhHeavyRaider extends LCV{
 		$this->addPrimarySystem($sensors);
 	//$this->addPrimarySystem(new Scanner(4, 12, 4, 6));
 	$this->addPrimarySystem(new Engine(4, 12, 0, 7, 2));
+	
 	$this->addFrontSystem(new customPhaseDisruptor(3, 0, 0, 300, 60));
+	
 	$this->addPrimarySystem(new AbsorbtionShield(2,6,4,1,0,360));
 	$this->addPrimarySystem(new Structure( 4, 30));
 	    

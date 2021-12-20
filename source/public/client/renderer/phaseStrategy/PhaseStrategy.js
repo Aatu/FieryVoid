@@ -629,7 +629,11 @@ window.PhaseStrategy = function () {
             this.showSystemInfo(ship, this.systemInfoState.system, this.systemInfoState.element, this.systemInfoState.menu);
         }
 
-        if (system && system.ballistic) {
+        if ( system 
+		  && ( system.ballistic
+		    || system.hextarget //same for direct fire hextarget weapons - they use ballistic highlight...
+		  )
+		) {
             this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
         }
 

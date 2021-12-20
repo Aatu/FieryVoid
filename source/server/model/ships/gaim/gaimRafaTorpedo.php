@@ -43,7 +43,8 @@ class gaimRafaTorpedo extends LCV{
 	$this->addPrimarySystem(new Engine(4, 11, 0, 6, 1));
 
 	$this->addPrimarySystem(new PacketTorpedo(3, 6, 5, 300, 60));
-	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 180, 360));
+	//NOT moving to front due to Bulkhead interaction!
+	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 180, 360)); 
 	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 180));
 	$this->addPrimarySystem(new Bulkhead(0, 1));
 	$this->addPrimarySystem(new Bulkhead(0, 1));

@@ -34,13 +34,13 @@ class Corumai extends BaseShip{
         $this->addPrimarySystem(new JumpEngine(5, 12, 4, 28));
 		$this->addPrimarySystem(new Hangar(5, 4));
    
+        $this->addFrontSystem(new GraviticThruster(5, 15, 0, 4, 1));
+        $this->addFrontSystem(new GraviticThruster(5, 15, 0, 4, 1));
+        $this->addFrontSystem(new GravitonBeam(5, 8, 8, 300, 60));
+        $this->addFrontSystem(new GravitonBeam(5, 8, 8, 300, 60));
         $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 240, 60));
-        $this->addFrontSystem(new GravitonBeam(5, 8, 8, 300, 60));
         $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 270, 90));
-        $this->addFrontSystem(new GravitonBeam(5, 8, 8, 300, 60));
         $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 300, 120));
-        $this->addFrontSystem(new GraviticThruster(5, 15, 0, 4, 1));
-        $this->addFrontSystem(new GraviticThruster(5, 15, 0, 4, 1));
 
         $this->addAftSystem(new GravitonBeam(5, 8, 8, 120, 240));
         $this->addAftSystem(new GraviticThruster(5, 10, 0, 4, 2));
@@ -48,17 +48,18 @@ class Corumai extends BaseShip{
         $this->addAftSystem(new GraviticThruster(5, 10, 0, 4, 2));
         $this->addAftSystem(new GraviticThruster(5, 10, 0, 4, 2));
 
+        $this->addLeftSystem(new GraviticThruster(5, 20, 0, 6, 3));
         $this->addLeftSystem(new GravitonPulsar(3, 5, 2, 180, 0));
         $this->addLeftSystem(new GravitonBeam(5, 8, 8, 300, 0));
         $this->addLeftSystem(new GravitonBeam(5, 8, 8, 300, 0));
-        $this->addLeftSystem(new GraviticThruster(5, 20, 0, 6, 3));
         $this->addLeftSystem(new GravitonBeam(5, 8, 8, 180, 240));
 
+        $this->addRightSystem(new GraviticThruster(5, 20, 0, 6, 4));
         $this->addRightSystem(new GravitonPulsar(3, 5, 2, 0, 180));
         $this->addRightSystem(new GravitonBeam(5, 8, 8, 0, 60));
         $this->addRightSystem(new GravitonBeam(5, 8, 8, 0, 60));
-        $this->addRightSystem(new GraviticThruster(5, 20, 0, 6, 4));
         $this->addRightSystem(new GravitonBeam(5, 8, 8, 120, 180));
+        $this->addRightSystem(new GraviticThruster(5, 20, 0, 6, 4));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(5, 54));

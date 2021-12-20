@@ -72,11 +72,11 @@ var TacLaser = function TacLaser(json, ship) {
 TacLaser.prototype = Object.create(Laser.prototype);
 TacLaser.prototype.constructor = TacLaser;
 
-var StrikeLaser = function StrikeLaser(json, ship) {
+var CustomStrikeLaser = function CustomStrikeLaser(json, ship) {
     Laser.call(this, json, ship);
 };
-StrikeLaser.prototype = Object.create(Laser.prototype);
-StrikeLaser.prototype.constructor = StrikeLaser;
+CustomStrikeLaser.prototype = Object.create(Laser.prototype);
+CustomStrikeLaser.prototype.constructor = CustomStrikeLaser;
 
 var ImperialLaser = function ImperialLaser(json, ship) {
     Laser.call(this, json, ship);
