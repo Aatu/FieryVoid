@@ -438,9 +438,9 @@ class CustomPulsarLaser extends Pulse{
 } //customPulsarLaser
 
 
-
+/* moved to official Lasers!
 class CustomStrikeLaser extends Weapon{
-    /*Srike Laser, as used on Ch'Lonas ships*/
+    //Strike Laser, as used on Ch'Lonas ships
         public $name = "customStrikeLaser";
         public $displayName = "Strike Laser";
 		
@@ -475,6 +475,7 @@ class CustomStrikeLaser extends Weapon{
         public function setMinDamage(){ $this->minDamage = 10 ; }
         public function setMaxDamage(){ $this->maxDamage = 28 ; }
 }//CustomStrikeLaser
+*/
 
 
 class HLPA extends Weapon{ 

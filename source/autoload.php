@@ -198,7 +198,7 @@ spl_autoload_register(
                 'custommphasedbeamacc' => '/server/model/weapons/customs.php',
                 'customphasedisruptor' => '/server/model/weapons/customs.php',
                 'custompulsarlaser' => '/server/model/weapons/customs.php',
-                'customstrikelaser' => '/server/model/weapons/customs.php',
+                'customstrikelaser' => '/server/model/weapons/lasers.php',
                 'daggaden' => '/server/model/ships/llort/daggaden.php',
                 'daggadenpod' => '/server/model/ships/llort/daggadenPod.php',
                 'dagkar' => '/server/model/ships/narn/dagkar.php',
@@ -933,7 +933,6 @@ spl_autoload_register(
                 'strikebird' => '/server/model/ships/drazi/strikebird.php',
                 'strikecarrier' => '/server/model/ships/raiders/strikeCarrier.php',
                 'strikehawk' => '/server/model/ships/drazi/strikehawk.php',
-                'strikelaser' => '/server/model/weapons/lasers.php',
                 'structure' => '/server/model/systems/baseSystems.php',
                 'stunbeam' => '/server/model/weapons/specialWeapons.php',
                 //'subreactor' => '/server/model/systems/baseSystems.php', //obsoleted!

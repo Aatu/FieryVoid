@@ -14,21 +14,15 @@ class Weapon extends ShipSystem
     public $priorityAF = 0; //array must be set explicitly - otherwise it will be generated, ignoring this variable! 
     public $priorityAFArray = array();
 
-    public $animation = "none"; //options: "laser" (continuus beam), "torpedo" (a glowing oscillating ball), "bolt" (a bolt of energy - or something ;) )
-	 //any other value equals "bolt"
-    public $animationArray = array();
+	/*not used any more
     public $animationImg = null;
     public $animationImgArray = array();
     public $animationImgSprite = 0;
     public $animationImgSpriteArray = array();
-    public $animationColor = null;
-    public $animationColorArray = array();
     public $animationColor2 = array(255, 255, 255);
     public $animationColor2Array = array();
     public $animationWidth = 3;
     public $animationWidthArray = array();
-    public $animationExplosionScale = 0.25;
-    public $animationExplosionScaleArray = array();
     public $animationExplosionType = "normal";
     public $animationExplosionTypeArray = array();
     public $explosionColor = array(250, 230, 80);
@@ -39,6 +33,15 @@ class Weapon extends ShipSystem
     public $trailColorArray = array();
     public $projectilespeed = 17;
     public $projectilespeedArray = array();
+	*/
+
+    public $animation = "none"; //options: "laser" (continuous beam), "torpedo" (a glowing oscillating ball), "bolt" (a discrete bolt/projectile of elongated shape), "AoE" (area of effect - simply a sphere (well, circle), with radius equal to number of hexes to be encompassed)
+	 //any other value equals "bolt"
+    public $animationArray = array();
+    public $animationColor = null;
+    public $animationColorArray = array();
+    public $animationExplosionScale = 0.25; //irrelevant for laser animation
+    public $animationExplosionScaleArray = array();
 
 	public $doubleRangeIfNoLock = false; //in case of no lock-on default procedure is to double range penalty; some weapons (notably most Antimatter ones) double range itself instead
     public $rangePenalty = 0;
@@ -1686,18 +1689,21 @@ full Advanced Armor effects (by rules) for reference:
 			$this->priorityAF = 0;
 		}
 
+		/*not used any more!
         if (isset($this->animationArray[$i])) $this->animation = $this->animationArray[$i];
         if (isset($this->animationImgArray[$i])) $this->animationImg = $this->animationImgArray[$i];
         if (isset($this->animationImgSpriteArray[$i])) $this->animationImgSprite = $this->animationImgSpriteArray[$i];
-        if (isset($this->animationColorArray[$i])) $this->animationColor = $this->animationColorArray[$i];
         if (isset($this->animationColor2Array[$i])) $this->animationColor2 = $this->animationColor2Array[$i];
         if (isset($this->animationWidthArray[$i])) $this->animationWidth = $this->animationWidthArray[$i];
-        if (isset($this->animationExplosionScaleArray[$i])) $this->animationExplosionScale = $this->animationExplosionScaleArray[$i];
         if (isset($this->animationExplosionTypeArray[$i])) $this->animationExplosionType = $this->animationExplosionTypeArray[$i];
         if (isset($this->explosionColorArray[$i])) $this->explosionColor = $this->explosionColorArray[$i];
         if (isset($this->trailLengthArray[$i])) $this->trailLength = $this->trailLengthArray[$i];
         if (isset($this->trailColorArray[$i])) $this->trailColor = $this->trailColorArray[$i];
         if (isset($this->projectilespeedArray[$i])) $this->projectilespeed = $this->projectilespeedArray[$i];
+		*/
+
+        if (isset($this->animationColorArray[$i])) $this->animationColor = $this->animationColorArray[$i];
+        if (isset($this->animationExplosionScaleArray[$i])) $this->animationExplosionScale = $this->animationExplosionScaleArray[$i];
 
         if (isset($this->rangePenaltyArray[$i])) $this->rangePenalty = $this->rangePenaltyArray[$i];
         if (isset($this->rangeDamagePenaltyArray[$i])) $this->rangeDamagePenalty = $this->rangeDamagePenaltyArray[$i];

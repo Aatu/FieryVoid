@@ -370,9 +370,9 @@ const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffL
 const canOnline = (ship, system) => gamedata.gamephase === 1 && shipManager.power.isOffline(ship, system);
 
 //change December 2021: can start overloading even if no Power is available, to be balanced at end of turn
-const canOverload = (ship, system) => !shipManager.power.isOffline(ship, system) && system.weapon && system.overloadable && !shipManager.power.isOverloading(ship, system) /*&& shipManager.power.canOverload(ship, system)*/; 
+const canOverload = (ship, system) => gamedata.gamephase === 1 && !shipManager.power.isOffline(ship, system) && system.weapon && system.overloadable && !shipManager.power.isOverloading(ship, system) /*&& shipManager.power.canOverload(ship, system)*/; 
 
-const canStopOverload = (ship, system) => system.weapon && system.overloadable && shipManager.power.isOverloading(ship, system);
+const canStopOverload = (ship, system) => gamedata.gamephase === 1 && system.weapon && system.overloadable && shipManager.power.isOverloading(ship, system);
 
 const canBoost = (ship, system) => system.boostable && gamedata.gamephase === 1 && shipManager.power.canBoost(ship, system) && (!system.isScanner() || system.id == shipManager.power.getHighestSensorsId(ship));
 

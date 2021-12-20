@@ -40171,11 +40171,11 @@ var canOnline = function canOnline(ship, system) {
 
 //change December 2021: can start overloading even if no Power is available, to be balanced at end of turn
 var canOverload = function canOverload(ship, system) {
-	return !shipManager.power.isOffline(ship, system) && system.weapon && system.overloadable && !shipManager.power.isOverloading(ship, system);
+	return gamedata.gamephase === 1 && !shipManager.power.isOffline(ship, system) && system.weapon && system.overloadable && !shipManager.power.isOverloading(ship, system);
 } /*&& shipManager.power.canOverload(ship, system)*/;
 
 var canStopOverload = function canStopOverload(ship, system) {
-	return system.weapon && system.overloadable && shipManager.power.isOverloading(ship, system);
+	return gamedata.gamephase === 1 && system.weapon && system.overloadable && shipManager.power.isOverloading(ship, system);
 };
 
 var canBoost = function canBoost(ship, system) {

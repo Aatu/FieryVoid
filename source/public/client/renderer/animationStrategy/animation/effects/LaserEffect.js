@@ -42,8 +42,9 @@ window.LaserEffect = function () {
 
         //adding width depending on animation size:
         //this.lasers = [createLaser.call(this, this.color, 0.5, 10), createLaser.call(this, new THREE.Color(1, 1, 1), 0.6, 3)];
-        var beamWidth = this.size; 
-        this.lasers = [createLaser.call(this, this.color, 0.5, beamWidth), createLaser.call(this, new THREE.Color(1, 1, 1), 0.6, 3)];
+        var beamWidth = Math.ceil(this.size/3); 
+        var haloWidth = this.size; 
+        this.lasers = [createLaser.call(this, this.color, 0.5, haloWidth), createLaser.call(this, new THREE.Color(1, 1, 1), 0.6, beamWidth)];
         
         this.lasers.forEach(function (laser) {
             laser.multiplyOpacity(0);
