@@ -35,8 +35,9 @@ class Weapon extends ShipSystem
     public $projectilespeedArray = array();
 	*/
 
-    public $animation = "none"; //options: "laser" (continuous beam), "torpedo" (a glowing oscillating ball), "bolt" (a discrete bolt/projectile of elongated shape), "AoE" (area of effect - simply a sphere (well, circle), with radius equal to number of hexes to be encompassed)
+    public $animation = "none"; //options: "laser" (continuous beam), "torpedo" (a glowing oscillating ball), "bolt" (a discrete bolt/projectile of elongated shape), "ball" (area of effect - simply a sphere (well, circle), with radius equal to number of hexes to be encompassed)
 	 //any other value equals "bolt"
+	 //unless weapon is hextargeted, in which case any entry equals "ball"...
     public $animationArray = array();
     public $animationColor = null;
     public $animationColorArray = array();
