@@ -167,7 +167,6 @@ class Weapon extends ShipSystem
 
         $this->startArc = (int)$startArc;
         $this->endArc = (int)$endArc;
-	if($this-animationExplosionScale <=0) $this->animationExplosionScale = $this->dynamicScale(0);
 	    
         //things that are calculated and can change with mode (and are displayed in GUI) - for all modes...
         foreach ($this->firingModes as $i => $modeName) {
@@ -181,23 +180,23 @@ class Weapon extends ShipSystem
 			$this->setPriorityAF(); 
 			$this->priorityAFArray[$i] = $this->priorityAF;
 		
-		//...and scale!
-		if (!isset($this->animationExplosionScaleArray[$i]) || ($this->animationExplosionScaleArray[$i]<=0)){
-			if($i==1){ //base value - copy from default
-				$this->animationExplosionScaleArray[$i] = $this->animationExplosionScale;
-			}else{ //further values - calculate from scratch
-				$this->animationExplosionScaleArray[$i] = $this->dynamicScale(0);
+			//...and scale!
+			if (!isset($this->animationExplosionScaleArray[$i]) || ($this->animationExplosionScaleArray[$i]<=0)){
+				if($this->animationExplosionScale>0){ //default exists - use it!
+					$this->animationExplosionScaleArray[$i] = $this->animationExplosionScale;
+				}else{ //no default - calculate from scratch
+					$this->animationExplosionScaleArray[$i] = $this->dynamicScale(0);
+				}
 			}
-		}
         }
         $this->changeFiringMode(1); //reset mode to basic
     }
 
-	//dynamic estimation of animation scale
+	//dynamic assignment of animation scale - based on damage dealt
 	public function dynamicScale($avgDmg){
-		$toReturn = 0.15;
+		$toReturn = 0.15;		
 		if($avgDmg<=0){ //no damage passed - calculate average!
-			$avgDmg = ($this->minDamage+$this->maxDamage) /2;
+			$avgDmg = $this->getAvgDamage();
 		
 			//modify by mode!
 			if( ($this->damageType == 'Raking') || ($this->damageType == 'Piercing') ){ //Raking weapons usually have higher yield than comparable Standard weapons, tone this down
@@ -207,11 +206,11 @@ class Weapon extends ShipSystem
 				$avgDmg = $avgDmg*1.25; 
 			}
 			//low Raking mode indicates weaker weapon/thinner beam than damage would suggest, while high Raking mode larger one!
-			if($raking <10){
+			if($this->raking <10){
 				$avgDmg = $avgDmg*0.9; 
-			}elseif($raking >10){
+			}elseif($this->raking >10){
 				$avgDmg = $avgDmg*1.1; 
-			}		
+			}
 			//Matter weapons score relatively low damage, but ignore armor - make them more notable ;)
 			if($this->weaponClass == 'Matter') {
 				$avgDmg = $avgDmg+4; 

@@ -44,7 +44,7 @@
         public $displayName = "Heavy Laser";
         public $animation = "laser";
         public $animationColor = array(179, 45, 0);
-        public $animationExplosionScale = 0.5;
+        //public $animationExplosionScale = 0.5;
         //public $animationWidth = 4;
         //public $animationWidth2 = 0.2;
 
@@ -76,7 +76,7 @@
         public $displayName = "Medium Laser";
         public $animation = "laser";
         public $animationColor = array(255, 79, 15);
-        public $animationExplosionScale = 0.4;
+        //public $animationExplosionScale = 0.4;
         //public $animationWidth = 3;
         //public $animationWidth2 = 0.3;
         public $priority = 8;
@@ -103,7 +103,7 @@
         public $displayName = "Light Laser";
         public $animation = "laser";
         public $animationColor = array(255, 79, 15);
-        public $animationExplosionScale = 0.3;
+        //public $animationExplosionScale = 0.3;
         //public $animationWidth = 2;
         //public $animationWidth2 = 0.2;
         
@@ -130,7 +130,7 @@
         public $displayName = "Battle Laser";
         public $animation = "laser";
         public $animationColor = array(255, 58, 31);
-        public $animationExplosionScale = 0.45;
+        //public $animationExplosionScale = 0.45;
         //public $animationWidth = 4;
         //public $animationWidth2 = 0.2;
         
@@ -175,7 +175,7 @@
         public $displayName = "Assault Laser";
         public $animation = "laser";
         public $animationColor = array(255, 58, 31);//same as Battle Laser
-        public $animationExplosionScale = 0.3;
+        //public $animationExplosionScale = 0.3;
         //public $animationWidth = 3;
         //public $animationWidth2 = 0.35;
         public $priority = 8;
@@ -199,7 +199,7 @@
         public $name = "advancedAssaultLaser";
         public $displayName = "Adv. Assault Laser";
         public $animation = "laser";
-        public $animationColor = array(255, 11, 115);
+        //public $animationColor = array(255, 11, 115);
         //public $animationWidth = 4;
         //public $animationWidth2 = 0.4;
         public $animationExplosionScale = 0.35;
@@ -226,7 +226,7 @@
             public $animationColor = array(175, 225, 175);
             //public $animationWidth = 4;
             //public $animationWidth2 = 0.4;
-        public $animationExplosionScale = 0.5;
+        //public $animationExplosionScale = 0.5;
 
             public $loadingtime = 3;
             public $overloadable = true;
@@ -266,7 +266,7 @@
         public $animationColor = array(175, 225, 175);
         //public $animationWidth = 5;
         //public $animationWidth2 = 0.5;
-        public $animationExplosionScale = 0.5;
+        //public $animationExplosionScale = 0.5;
 
         public $loadingtime = 3;
         public $overloadable = true;
@@ -304,8 +304,8 @@
         public $animation = "laser";
         public $animationColor = array(220, 100, 11);
         //public $animationWidth = 3;
-       // public $animationWidth2 = 0.3;
-        public $animationExplosionScale = 0.35;
+        // public $animationWidth2 = 0.3;
+        //public $animationExplosionScale = 0.35;
         public $priority = 8;
         public $priorityArray = array(1=>8, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
 
@@ -340,7 +340,7 @@
         public $displayName = "Heavy Laser Lance";
         //public $animationWidth = 4;
         //public $animationWidth2 = 0.6;
-        public $animationExplosionScale = 0.45;
+        //public $animationExplosionScale = 0.45;
 
         public $loadingtime = 4;
 
@@ -376,7 +376,7 @@
         public $animationColor = array(220, 60, 120);
         //public $animationWidth = 3;
         //public $animationWidth2 = 0.2;
-        public $animationExplosionScale = 0.25;
+        //public $animationExplosionScale = 0.25;
         public $priority = 8;
 
         public $loadingtime = 2;
@@ -405,7 +405,7 @@ class CustomStrikeLaser extends Weapon{
         //public $animation = "laser";
 		public $animation = "bolt";//a bolt, not a beam
         public $animationColor = array(255, 30, 30);
-        public $animationExplosionScale = 0.4;
+        //public $animationExplosionScale = 0.4;
 		
         public $fireControl = array(0, 2, 2); // fighters, <mediums, <capitals
         public $priority = 6; //heavy Standard weapon    
@@ -442,9 +442,10 @@ class CustomStrikeLaser extends Weapon{
         public $displayName = "Imperial Laser";
         public $animation = "laser";
         public $animationColor = array(172, 0, 230);
-        public $animationExplosionScale = 0.45;
+        //public $animationExplosionScale = 0.45;
         //public $animationWidth = 5;
         //public $animationWidth2 = 0.5;
+		
         public $priority = 7;
 
         public $loadingtime = 4;
@@ -470,9 +471,10 @@ class CustomStrikeLaser extends Weapon{
         public $name = "BlastLaser";
         public $displayName = "Blast Laser";
         public $iconPath = "improvedBlastLaser.png"; //can have the same icon all right
+		
         public $animationColor = array(255, 30, 30);
         public $animation = "bolt"; //a bolt, not beam
-        public $animationExplosionScale = 0.5;
+        //public $animationExplosionScale = 0.5;
         //public $projectilespeed = 17;
         //public $animationWidth = 25;
         //public $trailLength = 25;
@@ -512,12 +514,14 @@ class CustomStrikeLaser extends Weapon{
         public $name = "improvedBlastLaser";
         public $displayName = "Improved Blast Laser";
         public $iconPath = "improvedBlastLaser.png";
+		
         public $animationColor = array(255, 30, 30);
         public $animation = "beam"; //a bolt, not beam
-        public $animationExplosionScale = 0.6;
+        //public $animationExplosionScale = 0.6;
         //public $projectilespeed = 17;
         //public $animationWidth = 30;
         //public $trailLength = 30;
+		
         public $priority = 6; //heavy Standard weapons
 		
 		public $noPrimaryHits = true;//cannot penetrate to PRIMARY on outer hits
@@ -558,9 +562,10 @@ class CustomStrikeLaser extends Weapon{
         public $name = "CombatLaser";
         public $displayName = "Combat Laser";        
 	    public $iconPath = "battleLaser.png";
+		
         public $animation = "laser";
         public $animationColor = array(255, 58, 31);//same as Battle Laser
-        public $animationExplosionScale = 0.45;
+        //public $animationExplosionScale = 0.45;
         //public $animationWidth = 3;
         //public $animationWidth2 = 0.2;
         
@@ -610,7 +615,7 @@ class CustomStrikeLaser extends Weapon{
 	    
         public $animation = "laser";
         public $animationColor = array(255, 91, 91);
-        public $animationExplosionScale = 0.35;
+        //public $animationExplosionScale = 0.35;
         //public $animationWidth = 3;
         //public $animationWidth2 = 0.3;
 		
@@ -647,7 +652,7 @@ class LaserAccelerator extends Laser{
         public $iconPath = "LaserAccelerator.png";
         public $animation = "laser";
         public $animationColor = array(230, 0, 0);
-        public $animationExplosionScale = 0.5;
+        //public $animationExplosionScale = 0.5;
 		//public $animationWidth = 4;
 		//public $animationWidth2 = 0.2;
         
@@ -748,7 +753,7 @@ class LaserAccelerator extends Laser{
         public $animation = "laser";
         //public $animationColor = array(240, 90, 90);
         public $animationColor = array(100, 30, 15);
-        public $animationExplosionScale = 0.2;
+        //public $animationExplosionScale = 0.2;
         //public $animationWidth = 3;
         //public $animationWidth2 = 0.3;
 		
@@ -812,7 +817,7 @@ class LaserAccelerator extends Laser{
         public $animationColor = array(255, 79, 15);
         //public $animationWidth = 5;
         //public $animationWidth2 = 0.3;
-        public $animationExplosionScale = 0.75;
+        //public $animationExplosionScale = 0.75;
 
         public $loadingtime = 5;
         public $overloadable = true;

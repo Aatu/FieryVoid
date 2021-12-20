@@ -1851,7 +1851,7 @@ class GromeLgtRailgun extends Weapon{
 	    public $iconPath = "LightRailgun.png";
 	
 	public $animation = "bolt";
-	/public $animationColor = array(250, 250, 190);
+	public $animationColor = array(250, 250, 190);
 		//public $animationArray = array(1=>'trail', 2=>'trail', 3=>'trail', 4=>'trail');	
         //public $animationColorArray = array(1=>array(250, 250, 190), 2=>array(250, 250, 190), 3=>array(250, 250, 190), 4=>array(250, 250, 190));
 	/*
@@ -1980,7 +1980,7 @@ class GromeMedRailgun extends Weapon{
 	    public $iconPath = "Railgun.png";
 	
 	public $animation = "bolt";
-	/public $animationColor = array(250, 250, 190);
+	public $animationColor = array(250, 250, 190);
 		//public $animationArray = array(1=>'trail', 2=>'trail', 3=>'trail', 4=>'trail', 5=>'trail');
         //public $animationColorArray = array(1=>array(250, 250, 190), 2=>array(250, 250, 190), 3=>array(250, 250, 190), 4=>array(250, 250, 190), 5=>array(250, 250, 190));
         /*
