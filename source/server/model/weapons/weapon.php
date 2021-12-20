@@ -1526,13 +1526,6 @@ class Weapon extends ShipSystem
         return true;
     }
 
-
-    public function isInDistanceRange($shooter, $target, $fireOrder)
-    {
-        // gameData and fireOrder is needed to check if target has jammers
-        return true;
-    }
-
 	
     /* returns armor protection of system 
     */
@@ -1723,6 +1716,24 @@ full Advanced Armor effects (by rules) for reference:
 			$this->ammunition = $amount;
 		}
 	}
+
+
+        public function isInDistanceRange($shooter, $target, $fireOrder)
+        {
+			if(!$this->ballistic) return true; //non-ballistic weapons don't risk target moving out of range
+            $distanceRange = max($this->range, $this->distanceRange); //just in case distanceRange is not filled! Then it's assumed to be the same as launch range
+            if($distanceRange <=0 ) return true; //0 means unlimited range
+
+
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            if(mathlib::getDistanceHex($movement->position,  $target) > $distanceRange )
+            {
+                $fireOrder->pubnotes .= " FIRING SHOT: Target moved out of distance range.";
+                return false;
+            }
+
+            return true;
+        }
 
 
     /*allow changing of basic parameters for different firing modes...
