@@ -226,10 +226,10 @@ class SWDirectWeapon extends Pulse{
 		if($this->fireControl[1]!==null) $this->fireControl[1] += floor($nrOfShots/3);
 		if($this->fireControl[2]!==null) $this->fireControl[2] += floor($nrOfShots/3);
 		
-		//let's dynamically set scale depending on damage!
+		//let's dynamically set scale depending on damage! - or actuallly not, as default constructor does this
 		//$avgDmg = ($this->minDamage+$this->maxDamage) /2;
 		//$this->animationExplosionScale = $this->dynamicScale($avgDmg);
-		$this->animationExplosionScale = $this->dynamicScale(0); //average damage will be calculated appropriately
+		//$this->animationExplosionScale = $this->dynamicScale(0); //average damage will be calculated appropriately
 						
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	}    
@@ -285,7 +285,7 @@ class SWDirectWeapon extends Pulse{
 				$this->setPriorityAF(); 
 				$this->priorityAFArray[$i] = $this->priorityAF;
 			}			
-			//visual scaling recalculation
+			//visual scaling recalculation!
 			//$avgDmg = ($this->minDamage+$this->maxDamage) /2;
 			//$this->animationExplosionScaleArray[$i] = $this->dynamicScale($avgDmg);
 			$this->animationExplosionScaleArray[$i] = $this->dynamicScale(0); //average damage will be calculated appropriately	
@@ -1198,7 +1198,7 @@ class SWTractorBeam extends SWDirectWeapon{
 		$this->iconPath = "tractorBeam.png";
 		
 		parent::__construct($armor, 6, 4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
-		$this->addSalvoMode();
+		//$this->addSalvoMode(); //no salvo mode for Tractor!
 	}    
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //target is held critical on PRIMARY Structure!
