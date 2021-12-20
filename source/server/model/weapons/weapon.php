@@ -204,11 +204,14 @@ class Weapon extends ShipSystem
 		if( ($this->damageType == 'Raking') || ($this->damageType == 'Piercing') ){ //Raking weapons usually have higher yield than comparable Standard weapons, tone this down
 			$avgDmg = $avgDmg*0.75; 
 		}
+		if($this->damageType == 'Flash'){ //make Flash bigger!
+			$avgDmg = $avgDmg*1.25; 
+		}
 		//low Raking mode indicates weaker weapon/thinner beam than damage would suggest, while high Raking mode larger one!
 		if($raking <10){
-			$avgDmg = $avgDmg*0.8; 
+			$avgDmg = $avgDmg*0.9; 
 		}elseif($raking >10){
-			$avgDmg = $avgDmg*1.2; 
+			$avgDmg = $avgDmg*1.1; 
 		}		
 		//Matter weapons score relatively low damage, but ignore armor - make them more notable ;)
 		if($this->weaponClass == 'Matter') {
