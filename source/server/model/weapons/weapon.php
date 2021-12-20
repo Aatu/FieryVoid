@@ -198,24 +198,24 @@ class Weapon extends ShipSystem
 		$toReturn = 0.15;
 		if($avgDmg<=0){ //no damage passed - calculate average!
 			$avgDmg = ($this->minDamage+$this->maxDamage) /2;
-		}
 		
-		//modify by mode!
-		if( ($this->damageType == 'Raking') || ($this->damageType == 'Piercing') ){ //Raking weapons usually have higher yield than comparable Standard weapons, tone this down
-			$avgDmg = $avgDmg*0.75; 
-		}
-		if($this->damageType == 'Flash'){ //make Flash bigger!
-			$avgDmg = $avgDmg*1.25; 
-		}
-		//low Raking mode indicates weaker weapon/thinner beam than damage would suggest, while high Raking mode larger one!
-		if($raking <10){
-			$avgDmg = $avgDmg*0.9; 
-		}elseif($raking >10){
-			$avgDmg = $avgDmg*1.1; 
-		}		
-		//Matter weapons score relatively low damage, but ignore armor - make them more notable ;)
-		if($this->weaponClass == 'Matter') {
-			$avgDmg = $avgDmg+4; 
+			//modify by mode!
+			if( ($this->damageType == 'Raking') || ($this->damageType == 'Piercing') ){ //Raking weapons usually have higher yield than comparable Standard weapons, tone this down
+				$avgDmg = $avgDmg*0.75; 
+			}
+			if($this->damageType == 'Flash'){ //make Flash bigger!
+				$avgDmg = $avgDmg*1.25; 
+			}
+			//low Raking mode indicates weaker weapon/thinner beam than damage would suggest, while high Raking mode larger one!
+			if($raking <10){
+				$avgDmg = $avgDmg*0.9; 
+			}elseif($raking >10){
+				$avgDmg = $avgDmg*1.1; 
+			}		
+			//Matter weapons score relatively low damage, but ignore armor - make them more notable ;)
+			if($this->weaponClass == 'Matter') {
+				$avgDmg = $avgDmg+4; 
+			}
 		}
 		
 		//assign correct size
