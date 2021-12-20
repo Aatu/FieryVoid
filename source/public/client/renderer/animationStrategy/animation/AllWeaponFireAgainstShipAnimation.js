@@ -220,7 +220,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         switch (animationType) {
             case "laser":
                 return new LaserEffect(this.shipIconContainer.getByShip(incomingFire.shooter), getShipPositionAtTime.call(this, this.shipIcon, startLocationTime), this.scene, {
-                    size: 300 * weapon.animationExplosionScale,	//using same multiplier as bolt animation does		
+                    size: 100 * weapon.animationExplosionScale,		
                     color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     hit: hit,
                     time: startTime,
