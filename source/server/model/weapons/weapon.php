@@ -216,7 +216,7 @@ class Weapon extends ShipSystem
 		}
 		
 		//assign correct size
-		if($avgDmg<8){ //very light
+		if($avgDmg<7.4){ //very light - less than d6+4
 			$toReturn = 0.15; 
 		}elseif($avgDmg<10){ //light
 			$toReturn = 0.2;
