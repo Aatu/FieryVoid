@@ -109,7 +109,7 @@ class TrekLtPhaseCannon extends TrekPhaserBase{
 		public $name = "TrekLtPhaseCannon";
         public $displayName = "Light Phase Cannon";
         public $iconPath = "TrekLightPhaseCannon.png";
-        public $animationExplosionScale = 0.2;
+        //public $animationExplosionScale = 0.2;
 
         public $raking = 6;
         
@@ -150,7 +150,7 @@ class TrekLtPhaseCannon extends TrekPhaserBase{
         public $name = "TrekFtrPhaseCannon";
         public $displayName = "Light Phase Cannon";
         public $iconPath = "TrekLightPhaseCannon.png";
-        public $animationExplosionScale = 0.2;
+        //public $animationExplosionScale = 0.2;
 
         public $loadingtime = 2;
         public $raking = 6;
@@ -181,7 +181,7 @@ class TrekPhaseCannon extends TrekPhaserBase{
 		public $name = "TrekPhaseCannon";
         public $displayName = "Phase Cannon";
         public $iconPath = "TrekPhaseCannon.png";
-        public $animationExplosionScale = 0.3;
+        //public $animationExplosionScale = 0.3;
 
         public $raking = 8;
         
@@ -272,7 +272,7 @@ class TrekHvyPhaseCannon extends TrekPhaserBase{
 		public $name = "TrekHvyPhaseCannon";
         public $displayName = "Heavy Phase Cannon";
         public $iconPath = "TrekHeavyPhaseCannon.png";
-        public $animationExplosionScale = 0.35;
+        //public $animationExplosionScale = 0.35;
 
         public $raking = 10;
         
@@ -360,7 +360,7 @@ class TrekPhaser extends TrekPhaserBase{
 		public $name = "TrekPhaser";
         public $displayName = "Phaser";
         public $iconPath = "mediumLaser.png"; //Laser icon - just so it's clear it needs to be changed!
-        public $animationExplosionScale = 0.3;
+        //public $animationExplosionScale = 0.3;
 
         public $raking = 10;
         
@@ -453,8 +453,8 @@ class TrekPhaserLance extends TrekPhaserBase{
         public $displayName = "Phaser Lance";
         public $iconPath = "heavyLaser.png"; //Laser icon - just so it's clear it needs to be changed!
         public $animation = "laser";
-        public $animationExplosionScale = 0.4;
-	public $animationExplosionScaleArray = array(1=>0.4, 2=>0.3); 
+        //public $animationExplosionScale = 0.4;
+	//public $animationExplosionScaleArray = array(1=>0.4, 2=>0.3); 
 
         public $raking = 10;
         
@@ -541,7 +541,7 @@ class TrekPhaserLance extends TrekPhaserBase{
         public $displayName = "Plasma Burst";
         public $animation = "trail";
         //public $animationColor = array(75, 250, 90);
-        public $animationExplosionScale = 0.15;
+        //public $animationExplosionScale = 0.15;
 	    
     	public $rangeDamagePenalty = 1;
 
@@ -652,7 +652,7 @@ class TrekSpatialTorp extends Torpedo{
 			
         public $animation = "bolt";
         public $animationColor = array(100, 100, 100); //color of projectile
-        public $animationExplosionScale = 0.2; //indicates projectile size
+        //public $animationExplosionScale = 0.2; //indicates projectile size
 
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile
@@ -706,7 +706,7 @@ class TrekPhotonicTorp extends Torpedo{
 		
         public $animation = "torpedo";
         public $animationColor = array(255, 188, 0); //let's make it yellowish
-        public $animationExplosionScale = 0.2;
+        //public $animationExplosionScale = 0.2;
 		
 
         public $useOEW = true; //torpedo
@@ -761,7 +761,7 @@ class TrekPhotonTorp extends Torpedo{
 			
 			public $animation = "torpedo";
         public $animationColor = array(255, 188, 0); //let's make it yellowish
-        public $animationExplosionScale = 0.35;
+        //public $animationExplosionScale = 0.35;
 
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile
@@ -812,7 +812,7 @@ class HvyPlasmaProjector extends Raking{
 	public $iconPath = "HeavyPlasmaProjector.png";
 	public $animation = "laser";
 	public $animationColor = array(75, 250, 90);
-        public $animationExplosionScale = 0.5; 
+        //public $animationExplosionScale = 0.5; 
 	
 	public $priority = 7; //heavy Raking weapon
 
@@ -857,7 +857,7 @@ class LtPlasmaProjector extends Raking{
 	public $iconPath = "LightPlasmaProjector.png";
 	public $animation = "laser";
 	public $animationColor = array(75, 250, 90);
-        public $animationExplosionScale = 0.3;
+        //public $animationExplosionScale = 0.3;
 	
 	public $priority = 5;
 
