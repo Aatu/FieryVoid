@@ -51,8 +51,8 @@ class SWRayShield extends Shield implements DefensiveSystem{
 		//Ballistic, Matter, SWIon - passes through!
 		//if($weapon->weaponClass == 'Ballistic' || $weapon->weaponClass == 'Matter' || $weapon->weaponClass == 'SWIon' || $weapon->weaponClass == 'Ramming') $output = 0;
 		//BALANCE CHANGE - Matter weapons are affected at half efficiency (important vs eg. Orieni and Belt Alliance)
+		$output += $this->outputMod; //outputMod itself is negative!
 		if($weapon->weaponClass == 'Ballistic' || $weapon->weaponClass == 'SWIon' || $weapon->weaponClass == 'Ramming') $output = 0;
-			$output += $this->outputMod; //outputMod itself is negative!
 		if($weapon->weaponClass == 'Matter') $output = ceil($output/2);
 		if($weapon->damageType == 'Raking') $output = 2*$output;//Raking - double effect!
 		$output=max(0,$output); //no less than 0!
