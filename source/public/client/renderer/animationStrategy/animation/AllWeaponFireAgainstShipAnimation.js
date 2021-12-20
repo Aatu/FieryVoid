@@ -220,6 +220,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         switch (animationType) {
             case "laser":
                 return new LaserEffect(this.shipIconContainer.getByShip(incomingFire.shooter), getShipPositionAtTime.call(this, this.shipIcon, startLocationTime), this.scene, {
+                    size: 300 * weapon.animationExplosionScale,	//using same multiplier as bolt animation does		
                     color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     hit: hit,
                     time: startTime,
@@ -239,7 +240,8 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     damagedNames: damagedNames,
                     systemDestroyedEffect: this.systemDestroyedEffect
                 });
-            case "beam":
+            //case "beam": //Marcin Sawicki: to me, beam would be the same as laser - calling this animation "bolt" instead! No actual in game change, "beam" will still lead here by "default" option
+		case "bolt":
             case "trail":
             default:
                 return new BoltEffect(this.particleEmitterContainer, {
