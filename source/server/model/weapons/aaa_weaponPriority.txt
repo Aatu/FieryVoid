@@ -37,6 +37,7 @@ Anti-fighter priority: can be set by creator if desired. Default algorithm will 
 
 Explosion scale: below is proposed standarization for weapons that don't have their own special requirements for explosion size (...like EMine or Spark Field do!):
 (AoE are left out as they will usually just cover a given area)
+actually I have modified weapon constructor to do so automatically, unless overridden (do override for AoE and weapons whose animation should NOT be proportional to damage done!)
 0.15: very light weapons (priority 3, both ship and fighter)
 0.2: regular light weapons (priority 4)
 0.25: large fighter weapons (priority 5 fighters), very light Raking weapons
