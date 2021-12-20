@@ -198,7 +198,7 @@
         public $trailColor = array(255, 163, 26);
 
         public $name = "heavyArray";
-        public $displayName = "Heavy array";
+        public $displayName = "Heavy Array";
         public $animation = "trail";
         public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.25;
