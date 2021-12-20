@@ -6,7 +6,7 @@
 		public $animationColor = array(0, 184, 230);
         //public $projectilespeed = 10;
         //public $animationWidth = 1;
-        public $animationExplosionScale = 0.3;
+        //public $animationExplosionScale = 0.3;
         //public $trailLength = 5;
 		
 		public $doubleRangeIfNoLock = true; //if no lock-on is achieved - double the range instead of range penalty
