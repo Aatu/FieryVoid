@@ -2,12 +2,12 @@
 
 	//common  functionality of Antimatter weapons
 	class AntimatterWeapon extends Weapon{   
-        public $animation = "beam";     
+        public $animation = "bolt";     
 		public $animationColor = array(0, 184, 230);
-        public $projectilespeed = 10;
-        public $animationWidth = 1;
-        public $animationExplosionScale = 0.20;
-        public $trailLength = 5;
+        //public $projectilespeed = 10;
+        //public $animationWidth = 1;
+        public $animationExplosionScale = 0.3;
+        //public $trailLength = 5;
 		
 		public $doubleRangeIfNoLock = true; //if no lock-on is achieved - double the range instead of range penalty
 		public $specialRangeCalculation = true; //to inform front end that it should use weapon-specific range penalty calculation - such a method should be present in .js!
@@ -78,13 +78,13 @@
     class AntimatterConverter extends Weapon{ //deliberately NOT extending AntimatterWeapon class, AMConverter mostly uses regular calculations        
         public $name = "antimatterConverter";
         public $displayName = "Antimatter Converter";
-        public $animation = "beam";
+        public $animation = "bolt";
 		public $animationColor = array(0, 184, 230); //let's make it the same as Antimatter weapons!
         //public $animationColor = array(175, 225, 175);
-        public $projectilespeed = 10;
-        public $animationWidth = 4;
-        public $animationExplosionScale = 0.90;
-        public $trailLength = 20;
+        //public $projectilespeed = 10;
+        //public $animationWidth = 4;
+        public $animationExplosionScale = 0.75;
+        //public $trailLength = 20;
         public $priority = 2; //fire early due to potential Flash damage
         public $loadingtime = 3;
         public $rangePenalty = 1;
@@ -119,11 +119,8 @@
     class AntimatterConverter extends AntimatterWeapon{ 
         public $name = "antimatterConverter";
         public $displayName = "Antimatter Converter";
-        public $animation = "beam";
-        public $projectilespeed = 10;
-        public $animationWidth = 4;
-        public $animationExplosionScale = 0.90;
-        public $trailLength = 20;
+        public $animation = "bolt";
+        public $animationExplosionScale = 0.75;
 		
         public $priority = 2; //fire early due to potential Flash damage
         public $loadingtime = 3;
@@ -161,11 +158,12 @@
     } //endof class AntimatterConverter
 
 
-	class AntiprotonGun extends AntimatterWeapon{        
+class AntiprotonGun extends AntimatterWeapon{        
         public $name = "AntiprotonGun";
         public $displayName = "Antiproton Gun";
 		public $iconPath = "AntiprotonGun.png";
         public $priority = 6; //X+12 easily qualifies for heavy Standard weapon
+        public $animationExplosionScale = 0.4;
 
         public $intercept = 2;
         public $loadingtime = 1;
@@ -204,9 +202,7 @@
         public $displayName = "Antimatter Cannon";
 		public $iconPath = "AntimatterCannon.png";
         public $animation = "laser";
-        //public $animationColor = array(0, 184, 230); //let's inherit from Antimatter...
-        public $animationWidth = 4;
-        public $animationWidth2 = 0.2;
+        public $animationExplosionScale = 0.5;
 		
         public $priority = 7; //that's heavy Raking hit!
 		public $priorityArray = array(1=>7, 2=>2); //heavy Raking in primary mode, Piercing in alternate mode
@@ -252,7 +248,8 @@
         public $name = "AntiprotonDefender";
         public $displayName = "Antiproton Defender";
 		public $iconPath = "AntiprotonDefender.png";
-        public $priority = 5; //that's Standard Heavy hit!
+        public $priority = 5; //that's Standard Medium hit!
+        public $animationExplosionScale = 0.3;
 
         public $intercept = 3;
         public $loadingtime = 1;
@@ -289,13 +286,13 @@
         public $name = "AntimatterTorpedo";
         public $displayName = "Antimatter Torpedo";
 		public $iconPath = "AntimatterTorpedo.png";
-        public $trailColor = array(0, 184, 230);
         public $animation = "torpedo";
-        public $animationColor = array(30, 170, 255);
-        public $animationExplosionScale = 0.25;
-        public $projectilespeed = 12;
-        public $animationWidth = 7;
-        public $trailLength = 7;
+        public $animationExplosionScale = 0.3;
+        //public $animationColor = array(30, 170, 255);
+        //public $animationExplosionScale = 0.25;
+        //public $projectilespeed = 12;
+        //public $animationWidth = 7;
+        //public $trailLength = 7;
         public $priority = 5;
         
         public $ballistic = true;
@@ -333,12 +330,13 @@
 	class LightAntiprotonGun extends LinkedWeapon{  //deliberately NOT extending AntimatterWeapon class, uses regular calculations 
 		public $name = "LightAntiprotonGun";
 		public $displayName = "Light Antiproton Gun";
-		public $animation = "trail";
-		public $animationColor = array(0, 184, 230);
-		public $animationExplosionScale = 0.10;
-		public $projectilespeed = 12;
-		public $animationWidth = 2;
-		public $trailLength = 10;
+		public $animation = "bolt";
+        	public $animationExplosionScale = 0.2;
+		//public $animationColor = array(0, 184, 230);
+		//public $animationExplosionScale = 0.10;
+		//public $projectilespeed = 12;
+		//public $animationWidth = 2;
+		//public $trailLength = 10;
 
 		public $priority = 4;
 
@@ -378,13 +376,14 @@
 		public $iconPath = "LightAntimatterCannon.png";
         public $name = "LtAntimatterCannon";
         public $displayName = "Light Antimatter Cannon";
-        public $animation = "trail";
-        public $animationColor = array(0, 184, 230);
-        public $trailColor = array(0, 184, 230);
-        public $projectilespeed = 11;
-        public $animationWidth = 4;
-        public $trailLength = 12;
-        public $animationExplosionScale = 0.25;
+        public $animation = "bolt";
+        public $animationExplosionScale = 0.35; //this is borderline heavy weapon in its own right...
+        //public $animationColor = array(0, 184, 230);
+        //public $trailColor = array(0, 184, 230);
+        //public $projectilespeed = 11;
+       // public $animationWidth = 4;
+        //public $trailLength = 12;
+        //public $animationExplosionScale = 0.25;
                 
         public $loadingtime = 2;
 		public $priority = 6;
@@ -416,14 +415,15 @@
         public $name = "AntimatterShredder";
         public $displayName = "Antimatter Shredder";
 		public $iconPath = "AntimatterShredder.png";
- 	    public $animation = "trail";
-        public $animationArray = array(1=>"trail", 2=>"laser", 3=>"laser");
-        public $projectilespeed = 7;
-        public $animationWidth = 3;
-        public $trailLength = 10;       
+ 	    public $animation = "bolt";
+        public $animationArray = array(1=>"bolt", 2=>"laser", 3=>"laser");
+        //public $projectilespeed = 7;
+        //public $animationWidth = 3;
+        //public $trailLength = 10;       
         //public $animationColor = array(0, 184, 230); //let's inherit from Antimatter...
-        public $animationWidth2 = 0.2;
-		public $animationExplosionScale = 0.2;                   
+        //public $animationWidth2 = 0.2;
+        public $animationExplosionScale = 0.35;        
+        public $animationExplosionScaleArray = array(1=>0.35, 2=>0.5, 3=>0.5); //Shredder bolt isn't quite a heavy hit... while AM Cannon definitely is!      
 		
         public $priority = 2; 
 		public $priorityArray = array(1=>2, 2=>7, 3=>2); //Shredder affects every unit in range, while Piercing affects all sections in its path - both should be fired very early
