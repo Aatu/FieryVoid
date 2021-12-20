@@ -40,7 +40,7 @@ class Weapon extends ShipSystem
     public $animationArray = array();
     public $animationColor = null;
     public $animationColorArray = array();
-    public $animationExplosionScale = 0.25; //irrelevant for laser animation
+    public $animationExplosionScale = 0; //irrelevant for laser animation; 0 means it will be set automatically by standard constructor, based on average damage yield
     public $animationExplosionScaleArray = array();
 
 	public $doubleRangeIfNoLock = false; //in case of no lock-on default procedure is to double range penalty; some weapons (notably most Antimatter ones) double range itself instead
@@ -167,7 +167,8 @@ class Weapon extends ShipSystem
 
         $this->startArc = (int)$startArc;
         $this->endArc = (int)$endArc;
-
+	if($this-animationExplosionScale <=0) $this->animationExplosionScale = $this->dynamicScale(0);
+	    
         //things that are calculated and can change with mode (and are displayed in GUI) - for all modes...
         foreach ($this->firingModes as $i => $modeName) {
             $this->changeFiringMode($i);
@@ -179,10 +180,57 @@ class Weapon extends ShipSystem
 			//set AF priority, too!
 			$this->setPriorityAF(); 
 			$this->priorityAFArray[$i] = $this->priorityAF;
+		
+		//...and scale!
+		if (!isset($this->animationExplosionScaleArray[$i]) || ($this->animationExplosionScaleArray[$i]<=0)){
+			if($i==1){ //base value - copy from default
+				$this->animationExplosionScaleArray[$i] = $this->animationExplosionScale;
+			}else{ //further values - calculate from scratch
+				$this->animationExplosionScaleArray[$i] = $this->dynamicScale(0);
+			}
+		}
         }
         $this->changeFiringMode(1); //reset mode to basic
     }
 
+	//dynamic estimation of animation scale
+	public function dynamicScale($avgDmg){
+		$toReturn = 0.15;
+		if($avgDmg<=0){ //no damage passed - calculate average!
+			$avgDmg = ($this->minDamage+$this->maxDamage) /2;
+		}
+		
+		//modify by mode!
+		if( ($this->damageType == 'Raking') || ($this->damageType == 'Piercing') ){ //Raking weapons usually have higher yield than comparable Standard weapons, tone this down
+			$avgDmg = $avgDmg*0.75; 
+		}
+		//low Raking mode indicates weaker weapon/thinner beam than damage would suggest, while high Raking mode larger one!
+		if($raking <10){
+			$avgDmg = $avgDmg*0.8; 
+		}elseif($raking >10){
+			$avgDmg = $avgDmg*1.2; 
+		}		
+		//Matter weapons score relatively low damage, but ignore armor - make them more notable ;)
+		if($this->weaponClass == 'Matter') {
+			$avgDmg = $avgDmg+4; 
+		}
+		
+		//assign correct size
+		if($avgDmg<8){ //very light
+			$toReturn = 0.15; 
+		}elseif($avgDmg<10){ //light
+			$toReturn = 0.2;
+		}elseif($avgDmg<12){ //light/medium
+			$toReturn = 0.25;
+		}elseif($avgDmg<14){ //medium
+			$toReturn = 0.3;
+		}elseif($avgDmg<17){ //medium/heavy
+			$toReturn = 0.35;
+		}else{ //heavy and very heavy
+			$toReturn = 0.3+(0.1*floor($avgDmg/10)); //0.3 +1 per every full 10 points of average damage
+		}
+		return $toReturn;
+	}//endof function dynamicScale()
     
     public function stripForJson() {
         $strippedSystem = parent::stripForJson();
