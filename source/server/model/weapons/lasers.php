@@ -194,10 +194,10 @@
         public function setMaxDamage(){     $this->maxDamage = 34 ;      }
     }
     
-
+//CUSTOM weapon
     class AdvancedAssaultLaser extends Laser{        
         public $name = "advancedAssaultLaser";
-        public $displayName = "Adv. Assault Laser";
+        public $displayName = "Advanced Assault Laser";
         public $animation = "laser";
         //public $animationColor = array(255, 11, 115);
         //public $animationWidth = 4;
