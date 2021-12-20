@@ -36,7 +36,7 @@ Fighter weapon priority:
 Anti-fighter priority: can be set by creator if desired. Default algorithm will leave 1,2,10 in place (as weapons that should have special position in firing order), and will try to order others with heavy hitters going first: so first Raking, then heavy Standard, then Matter, then remaining ones in reverse order.
 
 Explosion scale: below is proposed standarization for weapons that don't have their own special requirements for explosion size (...like EMine or Spark Field do!):
-Raking weapons are ignored here, as this animation isn't scaled...
+(AoE are left out as they will usually just cover a given area)
 0.15: very light weapons (priority 3, both ship and fighter)
 0.2: regular light weapons (priority 4)
 0.25: large fighter weapons (priority 5 fighters), very light Raking weapons
