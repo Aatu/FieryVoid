@@ -227,8 +227,9 @@ class SWDirectWeapon extends Pulse{
 		if($this->fireControl[2]!==null) $this->fireControl[2] += floor($nrOfShots/3);
 		
 		//let's dynamically set scale depending on damage!
-		$avgDmg = ($this->minDamage+$this->maxDamage) /2;
-		$this->animationExplosionScale = $this->dynamicScale($avgDmg);
+		//$avgDmg = ($this->minDamage+$this->maxDamage) /2;
+		//$this->animationExplosionScale = $this->dynamicScale($avgDmg);
+		$this->animationExplosionScale = $this->dynamicScale(0); //average damage will be calculated appropriately
 						
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	}    
@@ -285,8 +286,9 @@ class SWDirectWeapon extends Pulse{
 				$this->priorityAFArray[$i] = $this->priorityAF;
 			}			
 			//visual scaling recalculation
-			$avgDmg = ($this->minDamage+$this->maxDamage) /2;
-			$this->animationExplosionScaleArray[$i] = $this->dynamicScale($avgDmg);			
+			//$avgDmg = ($this->minDamage+$this->maxDamage) /2;
+			//$this->animationExplosionScaleArray[$i] = $this->dynamicScale($avgDmg);
+			$this->animationExplosionScaleArray[$i] = $this->dynamicScale(0); //average damage will be calculated appropriately	
 		}				
 		
 		$this->changeFiringMode(1); //reset mode to basic
