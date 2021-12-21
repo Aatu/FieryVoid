@@ -38,35 +38,39 @@ class BrixadiiPoliceFrigate2108 extends LCV{
   
 		$this->addPrimarySystem(new Reactor(4, 7, 0, 0));
 		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-        $this->addPrimarySystem(new AntiquatedScanner(4, 9, 2, 4));
+//        $this->addPrimarySystem(new AntiquatedScanner(4, 9, 2, 4));
+    	$sensors = new Scanner(4, 9, 2, 4);
+			$sensors->markLCV();
+			$this->addPrimarySystem($sensors);
 		$this->addPrimarySystem(new Engine(3, 10, 0, 8, 3));
-		$this->addPrimarySystem(new ScatterPulsar(2, 4, 2, 180, 360));
-		$this->addPrimarySystem(new EnergyPulsar(2, 6, 3, 270, 90));
-		$this->addPrimarySystem(new ScatterPulsar(2, 4, 2, 0, 180));
+
+		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 180, 360));
+		$this->addFrontSystem(new EnergyPulsar(2, 6, 3, 270, 90));
+		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 0, 180));
 	    
         $this->addPrimarySystem(new Structure(4, 27));
 	    
         $this->hitChart = array(
         		0=> array( 
         				11 => "Structure",
-						13 => "Scatter Pulsar",
-        				15 => "Energy Pulsar",
-        				18 => "Engine",
-        				19 => "Reactor",
-        				20 => "Scanner",
+						13 => "1:Scatter Pulsar",
+        				15 => "1:Energy Pulsar",
+        				18 => "0:Engine",
+        				19 => "0:Reactor",
+        				20 => "0:Scanner",
         		),
         		1=> array( //redirect to PRIMARY
-        				11 => "0:Structure",
-						13 => "0:Scatter Pulsar",
-        				15 => "0:Energy Pulsar",
+        				11 => "Structure",
+						13 => "1:Scatter Pulsar",
+        				15 => "1:Energy Pulsar",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
 				),
         		2=> array( //redirect to PRIMARY
-        				11 => "0:Structure",
-						13 => "0:Scatter Pulsar",
-        				15 => "0:Energy Pulsar",
+        				11 => "Structure",
+						13 => "1:Scatter Pulsar",
+        				15 => "1:Energy Pulsar",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

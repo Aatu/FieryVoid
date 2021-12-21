@@ -36,36 +36,40 @@ class BrixadiiPoliceFrigateBase extends LCV{
   
 		$this->addPrimarySystem(new Reactor(4, 7, 0, 0));
 		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-        $this->addPrimarySystem(new AntiquatedScanner(4, 9, 2, 3));
+//        $this->addPrimarySystem(new AntiquatedScanner(4, 9, 2, 3));
+    	$sensors = new Scanner(4, 9, 2, 3);
+			$sensors->markLCV();
+			$this->addPrimarySystem($sensors);
 		$this->addPrimarySystem(new Engine(3, 10, 0, 6, 3));
-		$this->addPrimarySystem(new LightParticleProjector(2, 3, 1, 240, 60));
-		$this->addPrimarySystem(new NexusProjectorArray(2, 6, 1, 270, 90));
-		$this->addPrimarySystem(new NexusProjectorArray(2, 6, 1, 270, 90));
-		$this->addPrimarySystem(new LightParticleProjector(2, 3, 1, 300, 120));
+
+		$this->addFrontSystem(new LightParticleProjector(2, 3, 1, 240, 60));
+		$this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 270, 90));
+		$this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 270, 90));
+		$this->addFrontSystem(new LightParticleProjector(2, 3, 1, 300, 120));
 	    
         $this->addPrimarySystem(new Structure(3, 27));
 	    
         $this->hitChart = array(
         		0=> array( 
         				11 => "Structure",
-						13 => "Light Particle Projector",
-        				15 => "Projector Array",
-        				18 => "Engine",
-        				19 => "Reactor",
-        				20 => "Scanner",
+						13 => "1:Light Particle Projector",
+        				15 => "1:Projector Array",
+        				18 => "0:Engine",
+        				19 => "0:Reactor",
+        				20 => "0:Scanner",
         		),
         		1=> array( //redirect to PRIMARY
-        				11 => "0:Structure",
-						13 => "0:Light Particle Projector",
-        				15 => "0:Projector Array",
+        				11 => "Structure",
+						13 => "1:Light Particle Projector",
+        				15 => "1:Projector Array",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		2=> array( //redirect to PRIMARY
-        				11 => "0:Structure",
-						13 => "0:Light Particle Projector",
-        				15 => "0:Projector Array",
+        				11 => "Structure",
+						13 => "1:Light Particle Projector",
+        				15 => "1:Projector Array",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
