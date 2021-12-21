@@ -193,11 +193,17 @@ class Weapon extends ShipSystem
         $this->changeFiringMode(1); //reset mode to basic
     }
 
-	//dynamic assignment of animation scale - based on damage dealt
-	public function dynamicScale($avgDmg){
+	/*dynamic assignment of animation scale - based on damage dealt
+	  $avgDmg - average damage of weapon 
+	   - if provided - function will just use it directly (not modifying it in any way)
+	   - if provided as 0 - function will look for it on its own, taking weapon properties into account
+	  $multiplier - additional modifier for damage calculation (will be used only if $avgDmg is 0
+	
+	*/
+	public function dynamicScale($avgDmg, $multiplier = 1){
 		$toReturn = 0.15;		
 		if($avgDmg<=0){ //no damage passed - calculate average!
-			$avgDmg = $this->getAvgDamage();
+			$avgDmg = $this->getAvgDamage() * $multiplier;
 		
 			//modify by mode!
 			if( ($this->damageType == 'Raking') || ($this->damageType == 'Piercing') ){ //Raking weapons usually have higher yield than comparable Standard weapons, tone this down
@@ -214,12 +220,14 @@ class Weapon extends ShipSystem
 			}
 			//Matter weapons score relatively low damage, but ignore armor - make them more notable ;)
 			if($this->weaponClass == 'Matter') {
-				$avgDmg = $avgDmg+4; 
+				$avgDmg = min($avgDmg+6, $avgDmg*1.5); //half of base, but no more than +6 
 			}
 		}
 		
 		//assign correct size
-		if($avgDmg<7.4){ //very light - less than d6+4
+		if($avgDmg<4.5){ //REALLY light - evenless than d6+1!
+			$toReturn = 0.1; 
+		elseif($avgDmg<7.5){ //very light - less than d6+4
 			$toReturn = 0.15; 
 		}elseif($avgDmg<10){ //light
 			$toReturn = 0.2;
