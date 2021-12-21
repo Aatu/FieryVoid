@@ -16,7 +16,7 @@ class Gquell extends BaseShip{
 	    $this->isd = 2245;
 		$this->unofficial = true;
 
-	    $this->notes = 'Custom GQuan with energy mines replaced with medium pulse cannons.';
+	    $this->notes = 'Custom no-EMine variant.';
 		
         $this->forwardDefense = 15;
         $this->sideDefense = 17;

@@ -20,7 +20,7 @@ USEFUL TRIVIA
  - r-click on defensive fire - enable defensive fire on all similar UNDECLARED weapons
  - r-click on cancel move button - cancels entire current batch of moves for indicated unit
  - r-click on cancel firing order button - cancels firing orders on all similar weapons on this unit
-
+ - r-click on move forward button - move forward using all remaining movement
 
 GAMEPLAY GENERAL IDEAS
  - As much as possible was automated. This means that player has somewhat less control over things he does, but things are way streamlined for computer game. This is especially visible in firing (You'll see in details).
@@ -36,7 +36,7 @@ GAMEPLAY GENERAL IDEAS
 MOVEMENT
  - Snap turn: it's implemented as consecutive but still separate turns. Turn delay is taken from first one only (so if You wan to shorten snap turn, shorten its first segment). This means even thrust allocation is checked for each hexside separately, not for combined turn.
  - Fighters don't get auto-return from pivot.
- - Turn into pivot does not stop pivoting itself.
+ - Turn into pivot does not stop pivoting itself. BUT - stopping a pivot right after turning into pivot is free :) (player just has to remember about it...).
 
 
 ELECTRONIC WARFARE
@@ -68,6 +68,7 @@ FIRING AND WEAPONS
  - Piercing attacks have quirky way of finding whether damage should be split into 2 or 3 parts - essentially split to 2 if shot enters and exits through the same section.
  - Piercing damage vs MCVs is reduced by 10% (instead of -2/die).
  - Piercing attacks can be made without special requirements regarding EW - appropriate penalty is always included in fire control. 
+ - Relative position of units on the same hex is not correctly resolved if units start turn on the same hex. As a compensation for this, all targets at range 0 are considered valid for ballistics launch.
  
 
 OTHERS

@@ -1,7 +1,7 @@
 <?php
-class DrakhHeavyRaiderEscort extends MediumShip{
+class DrakhHeavyRaiderEscort extends LCV{
 	/*Drakh Heavy Raider LCV*/
-	/*approximated as MCV, no EW restrictions*/
+	/*no EW restrictions*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
@@ -33,8 +33,7 @@ class DrakhHeavyRaiderEscort extends MediumShip{
 		$this->hangarRequired = "Raiders"; //Heavy Raiders can use regular Raider catapults
 		$this->unitSize = 0.5; //they require twice as much space, though!
 	    
-	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
-	    
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance	    
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
@@ -45,15 +44,17 @@ class DrakhHeavyRaiderEscort extends MediumShip{
 		$sensors->markImproved();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(4, 12, 0, 7, 2));
-	$this->addPrimarySystem(new customLtPhaseDisruptorShip(3, 0, 0, 240, 30));
-	$this->addPrimarySystem(new customLtPhaseDisruptorShip(3, 0, 0, 330, 120));
+	
+	$this->addFrontSystem(new customLtPhaseDisruptorShip(3, 0, 0, 240, 30));
+	$this->addFrontSystem(new customLtPhaseDisruptorShip(3, 0, 0, 330, 120));
+	
 	$this->addPrimarySystem(new AbsorbtionShield(2,6,4,1,0,360));
 	$this->addPrimarySystem(new Structure( 4, 30));
 	    
         $this->hitChart = array(
         		0=> array( //should never happen
         				10 => "Structure",
-        				12 => "Light Phase Disruptor",
+        				12 => "1:Light Phase Disruptor",
         				14 => "Absorption Shield",
         				16 => "Engine",
         				18 => "Reactor",
@@ -61,7 +62,7 @@ class DrakhHeavyRaiderEscort extends MediumShip{
         		),
         		1=> array( //PRIMARY hit table, effectively
         				10 => "Structure",
-        				12 => "0:Light Phase Disruptor",
+        				12 => "1:Light Phase Disruptor",
         				14 => "0:Absorption Shield",
         				16 => "0:Engine",
         				18 => "0:Reactor",
@@ -69,7 +70,7 @@ class DrakhHeavyRaiderEscort extends MediumShip{
         		),
         		2=> array( //PRIMARY hit table, effectively
         				10 => "Structure",
-        				12 => "0:Light Phase Disruptor",
+        				12 => "1:Light Phase Disruptor",
         				14 => "0:Absorption Shield",
         				16 => "0:Engine",
         				18 => "0:Reactor",

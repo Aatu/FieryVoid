@@ -15,7 +15,6 @@ class Ruffian1972 extends BaseShip{
         $this->fighters = array("normal"=>18);
         
 		$this->notes = "Generic raider unit.";
-		$this->notes .= "<br> ";
 
 		$this->isd = 1972;
         
@@ -39,8 +38,8 @@ class Ruffian1972 extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(3, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(3, 6, 0, 2, 1));
+		$this->addFrontSystem(new CustomStrikeLaser(2, 7, 4, 240, 120));
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
-		$this->addFrontSystem(new StrikeLaser(2, 7, 4, 240, 120));
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
         
         $this->addAftSystem(new Thruster(3, 10, 0, 3, 2));

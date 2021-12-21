@@ -1,7 +1,6 @@
 <?php
 class LiberatorCannon extends LCV{
 	/*Deneth Liberator LCV, from Raiders-2*/
-	/*approximated as MCV, no EW restrictions*/
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -34,7 +33,7 @@ class LiberatorCannon extends LCV{
 	$this->iniativebonus = 14 *5;
 
 
-	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
@@ -47,9 +46,9 @@ class LiberatorCannon extends LCV{
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(4, 13, 0, 6, 1));
 
-	$this->addPrimarySystem(new TwinArray(2, 6, 2, 180, 0));
-	$this->addPrimarySystem(new ParticleCannon(3, 8, 7, 300, 60));
-	$this->addPrimarySystem(new TwinArray(2, 6, 2, 0, 180));
+	$this->addFrontSystem(new TwinArray(2, 6, 2, 180, 0));
+	$this->addFrontSystem(new TwinArray(2, 6, 2, 0, 180));
+	$this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
 
 
 	$this->addPrimarySystem(new Structure( 5, 31));
@@ -59,24 +58,24 @@ class LiberatorCannon extends LCV{
         $this->hitChart = array(
         		0=> array( 
         				11 => "Structure",
-        				13 => "Particle Cannon",
-        				16 => "Twin Array",
+        				13 => "1:Particle Cannon",
+        				16 => "1:Twin Array",
         				18 => "Engine",
         				19 => "Reactor",
         				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				11 => "Structure",
-        				13 => "0:Particle Cannon",
-        				16 => "0:Twin Array",
+        				13 => "1:Particle Cannon",
+        				16 => "1:Twin Array",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		2=> array( //same as Fwd
         				11 => "Structure",
-        				13 => "0:Particle Cannon",
-        				16 => "0:Twin Array",
+        				13 => "1:Particle Cannon",
+        				16 => "1:Twin Array",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

@@ -43,12 +43,14 @@ class ColonialPythonMk3 extends FighterFlight{
             $fighter->imagePath = "img/ships/BSG/pythonMk3.png";
             $fighter->iconPath = "img/ships/BSG/pythonMk3_Large.png";
 
-            $frontGun = new BSGKineticEnergyWeapon(330, 30, 3, 4);
-            $frontGun->displayName = "Kinetic Energy Cannon";
+//            $frontGun = new BSGKineticEnergyWeapon(330, 30, 3, 4);
+//            $frontGun->displayName = "Kinetic Energy Cannon";
+            $frontGun = new BSGLtKineticEnergyWeaponVA(345, 15, 15, 3, 4);//narower arc (from/to), difference between narrow and wide arc, damage bonus, number of shots
+            $fighter->addFrontSystem($frontGun);
+
+
 			$hvyGun = new BSGHvyKineticEnergyWeapon(330, 30, 1); //$startArc, $endArc, $nrOfShots
 			$hvyGun->displayName = "Heavy Kinetic Energy Cannon";
-
-            $fighter->addFrontSystem($frontGun);
 			$fighter->addFrontSystem($hvyGun);
 
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			

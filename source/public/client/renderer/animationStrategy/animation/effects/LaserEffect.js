@@ -20,6 +20,8 @@ window.LaserEffect = function () {
         };
 
         this.damage = args.damage || 0;
+        
+        this.size = args.size || 10;
 
         this.target = target;
         if (!this.hit) {
@@ -38,7 +40,12 @@ window.LaserEffect = function () {
             y: Math.random() * 0.01 * offsetVelocityFactor - 0.005 * offsetVelocityFactor
         };
 
-        this.lasers = [createLaser.call(this, this.color, 0.5, 10), createLaser.call(this, new THREE.Color(1, 1, 1), 0.6, 3)];
+        //adding width depending on animation size:
+        //this.lasers = [createLaser.call(this, this.color, 0.5, 10), createLaser.call(this, new THREE.Color(1, 1, 1), 0.6, 3)];
+        var beamWidth = Math.ceil(this.size/3); 
+        var haloWidth = this.size; 
+        this.lasers = [createLaser.call(this, this.color, 0.5, haloWidth), createLaser.call(this, new THREE.Color(1, 1, 1), 0.6, beamWidth)];
+        
         this.lasers.forEach(function (laser) {
             laser.multiplyOpacity(0);
             this.scene.add(laser.mesh);
@@ -48,7 +55,7 @@ window.LaserEffect = function () {
 
         if (this.hit) {
             new Explosion(this.particleEmitter, {
-                size: 16,
+                size: 22, //16, - scaling up a bit!
                 position: { x: 0, y: 0 },
                 type: "glow",
                 color: args.color,
@@ -60,7 +67,7 @@ window.LaserEffect = function () {
 
             while (amount--) {
                 new Explosion(this.particleEmitter, {
-                    size: 16,
+                    size: 22, //16, - scaling up a bit!
                     position: { x: 0, y: 0 },
                     type: ["gas", "pillar"][Math.round(Math.random() * 2)],
                     time: this.time + Math.random() * this.duration

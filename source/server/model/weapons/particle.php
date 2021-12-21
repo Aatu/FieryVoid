@@ -198,7 +198,7 @@
         public $trailColor = array(255, 163, 26);
 
         public $name = "heavyArray";
-        public $displayName = "Heavy array";
+        public $displayName = "Heavy Array";
         public $animation = "trail";
         public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.25;
@@ -378,7 +378,7 @@
         public $displayName = "Particle Cutter";
 	public $animation = "laser";
         public $animationColor = array(255, 153, 102);
-        public $animationExplosionScale = 0.25;
+        public $animationExplosionScale = 0.45;
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
 	    
@@ -1747,7 +1747,7 @@ class LightParticleAccelerator extends LinkedWeapon{
 
 
 /*handles creation of firing orders for Interdictors*/
-class InterdictorHandler{
+/*class InterdictorHandler{
 	public $name = "InterdictorHandler";
 	private static $interdictors = array();
 	private static $firingDeclared = false;
@@ -1799,31 +1799,6 @@ class InterdictorHandler{
 
 
 
-		
-
-
-
-
-
-	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 		//table of units that are already targeted
 		$alreadyTargeted = array();
 		//create firing order for each weapon (target self)
@@ -1832,6 +1807,11 @@ class InterdictorHandler{
 	}//endof function getInterceptionMod
 	
 }//endof class InterdictorHandler
+
+*/
+
+
+
 
     class Interdictor extends Weapon{
         public $name = "Interdictor";

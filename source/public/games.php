@@ -62,22 +62,16 @@ if (isset($_SESSION["user"])) {
         <br>
 -->        
 		
-		---------- <b>LATEST NEWS - November 2021</b> ----------	
-	    <br><b><u>Vree have arrived</u></b> - for a second time - but this time in (hopefully) final form!
-	    <br><b>Vree games are crashed</b> - as per warning (new ones created after this point should be safe)
-	    <br><b>Trek shielding was reworked</b> - Star Trek ship shields now work differently - hopefully as intended!
-	    <br><b>Babylon 5 station was built</b> - courtesy of Geoffrey!
-		---------- <b>update 8th of November/b> ----------
-	    <br><b>Out of range calulated</b> - target moving out of range of launched ballistic weapon will immediately see appropriate drop in hit chance
-	    <br><b>Full missile launcher fixed</b> - now distance range is calculated properly instead of being fixed 
-	    <br><b>Light Antiproton Gun fixed</b> - now it doesn't lose damage with distance
-	    <br><b>Vree hit tables updated</b> - call them improved :)
-	    <br><b>Arc calculation fixed</b> - shields on the edge won't be ignored now and then... hopefully
-	    <br><b>EMine-less Narn mainline ships</b> - don't ask for more variants before tournament please :P (courtesy of Geoffrey)
-	    <br><b>BSG marine assault fixed</b> - now Marines can't be freely tossed across the map!
-	    <br><b>BDEW fixed</b> - now it works again...
+		---------- <b>LATEST NEWS - December 2021</b> ----------	
+	    <br><b>Sustaining even without Power available</b> - just like boosting
+	    <br><b>Containment Breach</b> - Reactor won't temporatily shut down due to critical roll now. It will become unstable and might explode though!
+	    <br><b>All ahead full</b> - r-click on "move forward" arrow will cause unit to use all remaining movement on moving straight ahead
+	    <br><b>Side-by-side layout update</b> - weapons moved forward, thrusters aft (to reduce visual clutter) - for Drazi and Ch'Lonas
 	    
-        <br><br>
+		<!-- <br><br>---------- <b>update 8th of November</b> ---------- 
+		-->
+	    
+        <br><br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
 
         

@@ -99,17 +99,17 @@ class TrekImpulseDrive extends Engine{
 }//endof class TrekImpulseDrive
 
 
+class TrekPhaserBase extends Raking { //common Phaser things like color
+        public $animation = "laser";
+        public $animationColor = array(225, 0, 0);	
+}
 
 
-class TrekLtPhaseCannon extends Raking{
+class TrekLtPhaseCannon extends TrekPhaserBase{
 		public $name = "TrekLtPhaseCannon";
         public $displayName = "Light Phase Cannon";
         public $iconPath = "TrekLightPhaseCannon.png";
-        public $animation = "laser";
-        public $animationColor = array(225, 0, 0);
-		public $animationExplosionScale = 0.25;
-		public $animationWidth = 3;
-		public $animationWidth2 = 0.2;
+        //public $animationExplosionScale = 0.2;
 
         public $raking = 6;
         
@@ -146,16 +146,13 @@ class TrekLtPhaseCannon extends Raking{
 
 
 /*super-heavy fighter weapon*/
-    class TrekFtrPhaseCannon extends Raking{
+    class TrekFtrPhaseCannon extends TrekPhaserBase{
         public $name = "TrekFtrPhaseCannon";
         public $displayName = "Light Phase Cannon";
         public $iconPath = "TrekLightPhaseCannon.png";
-        public $animation = "laser";
-        public $animationColor = array(225, 0, 0);
-        public $animationWidth = 3;
-        public $animationWidth2 = 0.2;
+        //public $animationExplosionScale = 0.2;
 
-        public $loadingtime = 1;
+        public $loadingtime = 2;
         public $raking = 6;
 //        public $exclusive = true;
         public $intercept = 2;
@@ -172,12 +169,7 @@ class TrekLtPhaseCannon extends Raking{
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 
-/*
-		public function setSystemDataWindow($turn){
-			parent::setSystemDataWindow($turn);
-				$this->data["Special"] = "Does 6 damage per rake.";
-		}
-  */      
+	    
         public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
         public function setMinDamage(){   return  $this->minDamage = 5 ;      }
         public function setMaxDamage(){   return  $this->maxDamage = 14 ;      }
@@ -185,15 +177,11 @@ class TrekLtPhaseCannon extends Raking{
     }  //end of class Trek Fighter Light Phase Cannon
 
 
-class TrekPhaseCannon extends Raking{
+class TrekPhaseCannon extends TrekPhaserBase{
 		public $name = "TrekPhaseCannon";
         public $displayName = "Phase Cannon";
         public $iconPath = "TrekPhaseCannon.png";
-        public $animation = "laser";
-        public $animationColor = array(225, 0, 0);
-		public $animationExplosionScale = 0.25;
-		public $animationWidth = 4;
-		public $animationWidth2 = 0.3;
+        //public $animationExplosionScale = 0.3;
 
         public $raking = 8;
         
@@ -280,15 +268,11 @@ class TrekPhaseCannon extends Raking{
 
 
 
-class TrekHvyPhaseCannon extends Raking{
+class TrekHvyPhaseCannon extends TrekPhaserBase{
 		public $name = "TrekHvyPhaseCannon";
         public $displayName = "Heavy Phase Cannon";
         public $iconPath = "TrekHeavyPhaseCannon.png";
-        public $animation = "laser";
-        public $animationColor = array(225, 0, 0);
-		public $animationExplosionScale = 0.25;
-		public $animationWidth = 5;
-		public $animationWidth2 = 0.4;
+        //public $animationExplosionScale = 0.35;
 
         public $raking = 10;
         
@@ -372,15 +356,11 @@ class TrekHvyPhaseCannon extends Raking{
 
 
 
-class TrekPhaser extends Raking{
+class TrekPhaser extends TrekPhaserBase{
 		public $name = "TrekPhaser";
         public $displayName = "Phaser";
         public $iconPath = "mediumLaser.png"; //Laser icon - just so it's clear it needs to be changed!
-        public $animation = "laser";
-        public $animationColor = array(225, 0, 0);
-		public $animationExplosionScale = 0.3;
-		public $animationWidth = 4;
-		public $animationWidth2 = 0.3;
+        //public $animationExplosionScale = 0.3;
 
         public $raking = 10;
         
@@ -468,15 +448,13 @@ class TrekPhaser extends Raking{
 
 
 
-class TrekPhaserLance extends Raking{
+class TrekPhaserLance extends TrekPhaserBase{
 		public $name = "TrekPhaserLance";
         public $displayName = "Phaser Lance";
         public $iconPath = "heavyLaser.png"; //Laser icon - just so it's clear it needs to be changed!
         public $animation = "laser";
-        public $animationColor = array(225, 0, 0);
-		public $animationExplosionScale = 0.3;
-		public $animationWidth = 4;
-		public $animationWidth2 = 0.3;
+        //public $animationExplosionScale = 0.4;
+	//public $animationExplosionScaleArray = array(1=>0.4, 2=>0.3); 
 
         public $raking = 10;
         
@@ -562,11 +540,9 @@ class TrekPhaserLance extends Raking{
         public $name = "TrekPlasmaBurst";
         public $displayName = "Plasma Burst";
         public $animation = "trail";
-        public $animationColor = array(75, 250, 90);
-        public $trailColor = array(75, 250, 90);
-        public $animationWidth = 2;
-        public $animationExplosionScale = 0.15;
-    	public $trailLength = 10;
+        //public $animationColor = array(75, 250, 90);
+        //public $animationExplosionScale = 0.15;
+	    
     	public $rangeDamagePenalty = 1;
 
         public $intercept = 0;
@@ -674,13 +650,9 @@ class TrekSpatialTorp extends Torpedo{
         public $displayName = "Spatial Torpedo";
 		    public $iconPath = "EWRocketLauncher.png";
 			
-        public $animation = "trail";
-        //public $trailColor = array(211, 0, 0); ///doesn't seem to matter...
+        public $animation = "bolt";
         public $animationColor = array(100, 100, 100); //color of projectile
-        public $animationExplosionScale = 0.4; //indicates projectile size
-        //public $projectilespeed = 10; //doesn't seem to matter
-        //public $animationWidth = 6; //doesn't seem to matter
-        //public $trailLength = 10; //doesn't seem to matter
+        //public $animationExplosionScale = 0.2; //indicates projectile size
 
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile
@@ -692,7 +664,7 @@ class TrekSpatialTorp extends Torpedo{
         public $rangePenalty = 0;
         public $fireControl = array(1, 1, 1); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
-	public $priority = 4; //Standard weapon
+	public $priority = 4; //light Standard weapon
 	    
 	public $firingMode = 'Ballistic'; //firing mode - just a name essentially
 	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
@@ -734,11 +706,7 @@ class TrekPhotonicTorp extends Torpedo{
 		
         public $animation = "torpedo";
         public $animationColor = array(255, 188, 0); //let's make it yellowish
-        //public $trailColor = array(0, 255, 0); /doesn't seem to matter
-        public $animationExplosionScale = 0.2;
-        //public $projectilespeed = 10;//doesn't seem to matter
-        //public $animationWidth = 8;//doesn't seem to matter
-        //public $trailLength = 10; //doesn't seem to matter
+        //public $animationExplosionScale = 0.2;
 		
 
         public $useOEW = true; //torpedo
@@ -793,7 +761,7 @@ class TrekPhotonTorp extends Torpedo{
 			
 			public $animation = "torpedo";
         public $animationColor = array(255, 188, 0); //let's make it yellowish
-        public $animationExplosionScale = 0.3;
+        //public $animationExplosionScale = 0.35;
 
         public $useOEW = true; //torpedo
         public $ballistic = true; //missile
@@ -804,7 +772,7 @@ class TrekPhotonTorp extends Torpedo{
         public $rangePenalty = 0;
         public $fireControl = array(1, 1, 2); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
-	public $priority = 4; //Standard weapon
+	public $priority = 5; //Standard Medium weapon; maybe even heavy...
 	    
 	public $firingMode = 'Ballistic'; //firing mode - just a name essentially
 	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
@@ -827,10 +795,9 @@ class TrekPhotonTorp extends Torpedo{
 			$this->data["Special"] .= 'Benefits from offensive EW.';			
         }
         
-        public function getDamage($fireOrder){ 
-		
-			return Dice::d(6, 3)+6;   
-		}
+        public function getDamage($fireOrder){ 		
+		return Dice::d(6, 3)+6;   
+	}
 
         public function setMinDamage(){     $this->minDamage = 9;      }
         public function setMaxDamage(){     $this->maxDamage = 24;      }
@@ -840,15 +807,14 @@ class TrekPhotonTorp extends Torpedo{
 
 
 class HvyPlasmaProjector extends Raking{
-
 	public $name = "HvyPlasmaProjector";
 	public $displayName = "Heavy Plasma Projector";
 	public $iconPath = "HeavyPlasmaProjector.png";
 	public $animation = "laser";
 	public $animationColor = array(75, 250, 90);
-    public $animationWidth = 5;
-    public $animationWidth2 = 0.3;
-	public $priority = 7;
+        //public $animationExplosionScale = 0.5; 
+	
+	public $priority = 7; //heavy Raking weapon
 
 	public $rangeDamagePenalty = 0.25;
 	public $loadingtime = 4;
@@ -891,8 +857,8 @@ class LtPlasmaProjector extends Raking{
 	public $iconPath = "LightPlasmaProjector.png";
 	public $animation = "laser";
 	public $animationColor = array(75, 250, 90);
-    public $animationWidth = 3;
-    public $animationWidth2 = 0.1;
+        //public $animationExplosionScale = 0.3;
+	
 	public $priority = 5;
 
 	public $rangeDamagePenalty = 0.5;
@@ -952,13 +918,7 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
     
     function __construct($armor, $maxhealth, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$this->iconPath = 'TrekShieldProjection' . $side . '.png';
-		//parent::__construct($armor, $maxhealth, 0, $rating);
 		parent::__construct($armor, $maxhealth, 0, $rating, $startArc, $endArc);
-		/*
-        $this->startArc = (int)$startArc;
-        $this->endArc = (int)$endArc;
-		*/
-		
 		$this->output=$rating;//output is displayed anyway, make it show something useful... in this case - number of points absorbed per hit
 	}
 	
@@ -976,7 +936,7 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);  
-/*		
+		/*		
 		if (!isset($this->data["Special"])) {
 			$this->data["Special"] = '';
 		}else{
@@ -984,8 +944,8 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 		}
 		*/
 		$this->data["Special"] = "Defensive system absorbing damage from hits before projectile touches actual hull.";
-		$this->data["Special"] .= "<br>Can absorb up to " .$this->output ." damage points per hit. ";
-		$this->data["Special"] .= ", including " . $this->armour . " without reducing capacity for further absorption.";
+		$this->data["Special"] .= "<br>Can absorb up to " .$this->output ." damage points per hit, ";
+		$this->data["Special"] .= "including " . $this->armour . " without reducing capacity for further absorption.";
 		$this->data["Special"] .= "<br>Protects from every separate impact (eg. every rake!) separately.";
 		$this->data["Special"] .= "<br>System's health represents damage capacity. If it is reduced to zero system will cease to function.";
 		$this->data["Special"] .= "<br>Will not fall on its own unless its structure block is destroyed.";
@@ -1047,66 +1007,7 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 		
 		return $returnValues;
 	} //endof function doProtect
-	
-	/*first attempt
-	//function estimating how good this system is at stopping damage;
-	//in case of shield projection, its effectiveness equals largest shot it can stop, with tiebreaker equal to remaining capacity
-	//this is for recognizing it as system capable of affecting damage resolution and choosing best one if multiple Diffusers can protect
-	public function doesReduceImpactDamage($expectedDmg) {
-		$remainingCapacity = $this->getRemainingCapacity();
-		$protectionValue = 0;
-		if($remainingCapacity>0){
-			$protectionValue = max($remainingCapacity+$this->armour,$this->output); //this is actually more than this system can protect from - but allows to balance load between systems in arc
-		}
-		return $protectionValue;
-	}
-	//actual protection - should return modified $effectiveDamage value
-	public function doReduceImpactDamage($gamedata, $fireOrder, $target, $shooter, $weapon, $effectiveDamage){ 
-		$returnValue = $effectiveDamage;
-		$remainingCapacity = $this->getRemainingCapacity();
-		$absorbedDamage = 0;
-		
-		$remainingCapacity = $this->getRemainingCapacity();
-		if($remainingCapacity>0) { //else projection does not protect
-			$reduction = 0;
-			//first, armor takes part
-			$reduction = min($this->armour, $returnValue);
-			$returnValue += -$reduction;
-			//next, actual absorbtion
-			$reduction = min($this->output - $this->armour, $remainingCapacity, $returnValue ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
-			$returnValue += -$reduction;
-			$absorbedDamage += $reduction;
-			$remainingCapacity -= $reduction;
-			//for Raking hit: repeat steps above for every expected FULL rake beyond first - but at half the value of parameters! (do not round, this will be done last)
-			if ($weapon->damageType == 'Raking'){
-				$fullRakes = floor($effectiveDamage/($weapon->raking))-1;
-				$fullRakes = max(0,$fullRakes);
-				while($fullRakes>0){
-					$fullRakes--;
-					//first, armor takes part
-					$reduction = min($this->armour/2, $returnValue);
-					$returnValue += -$reduction;
-					//next, actual absorbtion
-					$reduction = min(($this->output - $this->armour)/2, $remainingCapacity, $returnValue ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
-					$returnValue += -$reduction;
-					$absorbedDamage += $reduction;
-					$remainingCapacity -= $reduction;
-					if($remainingCapacity<=0) $fullRakes = 0; //do not continue after shield is brought down to 0
-				}
-				//round damage UP and absorbed values DOWN
-				$returnValue = ceil($returnValue);
-				$absorbedDamage = floor($absorbedDamage);
-			}
-			if($absorbedDamage>0){ //mark!
-				$this->absorbDamage($target,$gamedata,$absorbedDamage);
-			}
-		}
-		
-		return $returnValue;
-	}		
-	*/
-	
-    
+	    
 	function addProjector($projector){
 		if($projector) $this->projectorList[] = $projector;
 	}
@@ -1166,10 +1067,7 @@ class TrekShieldProjector  extends Shield implements DefensiveSystem { //defensi
     
     function __construct($armor, $maxhealth, $power, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$this->iconPath = 'TrekShieldProjector' . $side . '.png';
-		//parent::__construct($armor, $maxhealth, $power, $rating);
 		parent::__construct($armor, $maxhealth, $power, $rating, $startArc, $endArc);
-        //$this->startArc = (int)$startArc;
-        //$this->endArc = (int)$endArc;
 		$this->baseOutput = $rating;
 		$this->maxBoostLevel = $rating; //maximum double effect		
 	}
@@ -1208,6 +1106,172 @@ class TrekShieldProjector  extends Shield implements DefensiveSystem { //defensi
 		return $boostLevel;
 	}
 } //endof class TrekShieldProjector
+
+
+
+//fighter systems don't get damaged - so fighter tendrils need to store damage by way of notes
+class TrekShieldFtr extends ShipSystem{
+    public $name = "TrekShieldFtr";
+    public $displayName = "Shield Projection";
+	public $iconPath = "TrekShieldProjectionF.png";
+	
+	private $recharge = 0; //recharge rate
+	private $usedCapacityTotal=0;
+	private $thisTurnEntries=array();
+    
+	//Diffuser Tendrils cannot be repaired at all!
+	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+
+
+
+    function __construct($armor,$maxhealth, $rating, $recharge){ 
+		parent::__construct($armor, $maxhealth, 0, 360);
+		$this->recharge = $recharge;
+		$this->output=$rating;//output is displayed anyway, make it show something useful...
+	}
+
+    
+	public function setSystemDataWindow($turn){
+		//add information about damage stored - ships do have visual reminder about it, but fighters do not!
+		parent::setSystemDataWindow($turn); 
+		
+		$this->data["Capacity available/max"] = $this->getRemainingCapacity() . '/' . $this->maxhealth;
+		$this->data["Armor"] = $this->armour;
+		$this->data["Recharge"] = $this->recharge;
+		
+		$this->data["Special"] = "Defensive system absorbing damage from hits before projectile touches actual hull.";
+		$this->data["Special"] .= "<br>Can absorb up to " .$this->output ." damage points per hit, ";
+		$this->data["Special"] .= "including " . $this->armour . " without reducing capacity for further absorption.";
+		$this->data["Special"] .= "<br>Regenerates at end of turn, after firing. Regeneration rate is doubled if fighter doesn't use its direct fire weapons.";
+	}	
+	
+	/*always redefine $this->data due to current capacity info*/
+	public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->data = $this->data;		
+        return $strippedSystem;
+    }
+	
+	
+	public function getRemainingCapacity(){
+		return $this->maxhealth - $this->usedCapacityTotal;
+	}
+	
+	public function getUsedCapacity(){
+		return $this->usedCapacityTotal;
+	}
+	
+	public function absorbDamage($ship,$gamedata,$value){ //or dissipate, with negative value
+		$this->usedCapacityTotal += $value; //running count
+		$this->thisTurnEntries[] = $value; //mark for database
+	}
+
+
+
+	//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
+		if($damageWasDealt) return 0; //does not protect from overkill damage, just first impact
+		
+		$remainingCapacity = $this->getRemainingCapacity();
+		$protectionValue = 0;
+		if($remainingCapacity>0){
+			$protectionValue = $remainingCapacity+$this->armour; //this is actually more than this system can protect from - but allows to balance load between systems in arc
+		}
+		return $protectionValue;
+	}
+	//actual protection
+	public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $systemProtected, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
+		$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
+		$damageToAbsorb=$effectiveDamage; //shield works BEFORE armor
+		$damageAbsorbed=0;
+		
+		if($damageToAbsorb<=0) return $returnValues; //nothing to absorb
+		
+		$remainingCapacity = $this->getRemainingCapacity();
+		$absorbedDamage = 0;
+		
+		if($remainingCapacity>0) { //else projection does not protect
+			$absorbedFreely = 0;
+			//first, armor takes part
+			$absorbedFreely = min($this->armour, $damageToAbsorb);
+			$damageToAbsorb += -$absorbedFreely;
+			//next, actual absorbtion
+			$absorbedDamage = min($this->output - $this->armour, $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
+			$damageToAbsorb += -$absorbedDamage;
+			if($absorbedDamage>0){ //mark!
+				$this->absorbDamage($target,$gamedata,$absorbedDamage);
+			}
+			$returnValues['dmg'] = $damageToAbsorb;
+			$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
+		}
+		
+		return $returnValues;
+	} //endof function doProtect
+
+
+
+	//effects that happen in Critical phase (after criticals are rolled) - shield recharge
+	public function criticalPhaseEffects($ship, $gamedata){
+		if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
+		
+		$flight = $this->getUnit(); 
+		$fighter = $flight->getFighterBySystem($this->id);
+		
+		//recharge
+		$needed = $this->getUsedCapacity();
+		if($needed <=0) return; //no need to recharge anything
+		$rechargeRate = $this->recharge;
+		if($rechargeRate <=0) return;//some fighters might have shield that doesn't regenerate in combat 
+		//if fighter didn't fire direct fire weapons this turn - double recharge rate!
+		$fireOrders = $flight->getFighterFireOrders($fighter, $gamedata->turn);
+		$didFire = false;
+		foreach($fireOrders as $fireOrder) if ($fireOrder->type != 'ballistic'){ 
+			$didFire = true;
+		}
+		if(!$didFire) $rechargeRate += $rechargeRate;
+		$rechargeActual = min($needed, $rechargeRate);
+		$this->absorbDamage($ship,$gamedata,-$rechargeActual);		
+	} //endof function criticalPhaseEffects
+
+	
+	/* this method generates additional non-standard informaction in the form of individual system notes
+	in this case: 
+	 - Firing phase: add information on stored/dissipated energy (every entry separately)
+	*/
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+		switch($gameData->phase){
+				case 4: //firing phase
+					foreach($this->thisTurnEntries as $tte){					
+						$notekey = 'absorb';
+						$noteHuman = 'Trek Shield absorbed or dissipated';
+						$noteValue = $tte;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					}
+					break;
+		}
+	} //endof function generateIndividualNotes
+	
+	/*act on notes just loaded - to be redefined by systems as necessary
+	here:
+	 - fill $usedCapacityTotal value
+	*/
+	public function onIndividualNotesLoaded($gamedata){
+		$this->usedCapacityTotal = 0;
+		foreach ($this->individualNotes as $currNote){ //assume ASCENDING sorting 
+			$explodedKey = explode ( ';' , $currNote->notekey ) ;//split into array: [area;value] where area denotes action, value - damage type (typically) 
+			switch($currNote->notekey){
+				case 'absorb': //absorbtion or dissipation of energy
+					$this->usedCapacityTotal += $currNote->notevalue;
+					break;		
+			}
+		}
+		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+		$this->individualNotes = array();
+	} //endof function onIndividualNotesLoaded
+
+}//endof class TrekShieldFtr
+
 
 
 ?>

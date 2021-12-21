@@ -14,20 +14,15 @@ class Weapon extends ShipSystem
     public $priorityAF = 0; //array must be set explicitly - otherwise it will be generated, ignoring this variable! 
     public $priorityAFArray = array();
 
-    public $animation = "none";
-    public $animationArray = array();
+	/*not used any more
     public $animationImg = null;
     public $animationImgArray = array();
     public $animationImgSprite = 0;
     public $animationImgSpriteArray = array();
-    public $animationColor = null;
-    public $animationColorArray = array();
     public $animationColor2 = array(255, 255, 255);
     public $animationColor2Array = array();
     public $animationWidth = 3;
     public $animationWidthArray = array();
-    public $animationExplosionScale = 0.25;
-    public $animationExplosionScaleArray = array();
     public $animationExplosionType = "normal";
     public $animationExplosionTypeArray = array();
     public $explosionColor = array(250, 230, 80);
@@ -38,6 +33,16 @@ class Weapon extends ShipSystem
     public $trailColorArray = array();
     public $projectilespeed = 17;
     public $projectilespeedArray = array();
+	*/
+
+    public $animation = "none"; //options: "laser" (continuous beam), "torpedo" (a glowing oscillating ball), "bolt" (a discrete bolt/projectile of elongated shape), "ball" (area of effect - simply a sphere (well, circle), with radius equal to number of hexes to be encompassed)
+	 //any other value equals "bolt"
+	 //unless weapon is hextargeted, in which case any entry equals "ball"...
+    public $animationArray = array();
+    public $animationColor = null;
+    public $animationColorArray = array();
+    public $animationExplosionScale = 0; //irrelevant for laser animation; 0 means it will be set automatically by standard constructor, based on average damage yield
+    public $animationExplosionScaleArray = array();
 
 	public $doubleRangeIfNoLock = false; //in case of no lock-on default procedure is to double range penalty; some weapons (notably most Antimatter ones) double range itself instead
     public $rangePenalty = 0;
@@ -77,6 +82,7 @@ class Weapon extends ShipSystem
     public $uninterceptableArray = array();
     public $canInterceptUninterceptable = false; //able to intercept shots that are normally uninterceptable, eg. Lasers
     public $noInterceptDegradation = false; //if true, this weapon will be intercepted without degradation!
+	public $doInterceptDegradation = false; //if true, this weapon will be intercepted with normal degradation, even if a ballistic
     public $intercept = 0; //intercept rating
     public $freeintercept = false;  //can intercept fire directed at other unit?
     public $freeinterceptspecial = false;  //has its own routine for handling decision whether it's capable of interception - for freeintercept only?
@@ -120,7 +126,7 @@ class Weapon extends ShipSystem
     public $noOverkill = false; //this will let simplify entire Matter line enormously!
     public $doOverkill = false; //opposite of $noOverkill - allows Piercing shots to overkill (eg. Shadow Heavy Molecular Slicer Beam has such ability)
     protected $noOverkillArray = array();
-    public $ballistic = false; //this is a ballictic weapon, not direct fire
+    public $ballistic = false; //this is a ballistic weapon, not direct fire
     public $ballisticIntercept = false; //can intercept, but only ballistics
     public $hextarget = false; //this weapon is targeted on hex, not unit
    		public $hextargetArray = array(); //For AntimatterShredder		
@@ -162,7 +168,7 @@ class Weapon extends ShipSystem
 
         $this->startArc = (int)$startArc;
         $this->endArc = (int)$endArc;
-
+	    
         //things that are calculated and can change with mode (and are displayed in GUI) - for all modes...
         foreach ($this->firingModes as $i => $modeName) {
             $this->changeFiringMode($i);
@@ -174,10 +180,60 @@ class Weapon extends ShipSystem
 			//set AF priority, too!
 			$this->setPriorityAF(); 
 			$this->priorityAFArray[$i] = $this->priorityAF;
+		
+			//...and scale!
+			if (!isset($this->animationExplosionScaleArray[$i]) || ($this->animationExplosionScaleArray[$i]<=0)){
+				if($this->animationExplosionScale>0){ //default exists - use it!
+					$this->animationExplosionScaleArray[$i] = $this->animationExplosionScale;
+				}else{ //no default - calculate from scratch
+					$this->animationExplosionScaleArray[$i] = $this->dynamicScale(0);
+				}
+			}
         }
         $this->changeFiringMode(1); //reset mode to basic
     }
 
+	//dynamic assignment of animation scale - based on damage dealt
+	public function dynamicScale($avgDmg){
+		$toReturn = 0.15;		
+		if($avgDmg<=0){ //no damage passed - calculate average!
+			$avgDmg = $this->getAvgDamage();
+		
+			//modify by mode!
+			if( ($this->damageType == 'Raking') || ($this->damageType == 'Piercing') ){ //Raking weapons usually have higher yield than comparable Standard weapons, tone this down
+				$avgDmg = $avgDmg*0.75; 
+			}
+			if($this->damageType == 'Flash'){ //make Flash bigger!
+				$avgDmg = $avgDmg*1.25; 
+			}
+			//low Raking mode indicates weaker weapon/thinner beam than damage would suggest, while high Raking mode larger one!
+			if($this->raking <10){
+				$avgDmg = $avgDmg*0.9; 
+			}elseif($this->raking >10){
+				$avgDmg = $avgDmg*1.1; 
+			}
+			//Matter weapons score relatively low damage, but ignore armor - make them more notable ;)
+			if($this->weaponClass == 'Matter') {
+				$avgDmg = $avgDmg+4; 
+			}
+		}
+		
+		//assign correct size
+		if($avgDmg<7.4){ //very light - less than d6+4
+			$toReturn = 0.15; 
+		}elseif($avgDmg<10){ //light
+			$toReturn = 0.2;
+		}elseif($avgDmg<12){ //light/medium
+			$toReturn = 0.25;
+		}elseif($avgDmg<14){ //medium
+			$toReturn = 0.3;
+		}elseif($avgDmg<17){ //medium/heavy
+			$toReturn = 0.35;
+		}else{ //heavy and very heavy
+			$toReturn = 0.3+(0.1*floor($avgDmg/10)); //0.3 +1 per every full 10 points of average damage
+		}
+		return $toReturn;
+	}//endof function dynamicScale()
     
     public function stripForJson() {
         $strippedSystem = parent::stripForJson();
@@ -401,6 +457,13 @@ class Weapon extends ShipSystem
                 $interceptMod -= 1; //-1 for each already intercepting weapon
             }
         }
+
+		if( ($interceptedWeapon->doInterceptDegradation) || (!($interceptedWeapon->ballistic || $interceptedWeapon->noInterceptDegradation)) ) {//target is neither ballistic weapon nor has lifted degradatoin, so apply degradation!
+            for ($i = 0; $i < $intercepted->numInterceptors; $i++) {
+                $interceptMod -= 1; //-1 for each already intercepting weapon
+			}
+		}
+ 
         $interceptMod = max(0, $interceptMod) * 5;//*5: d20->d100
         return $interceptMod;
     }//endof  getInterceptionMod
@@ -1463,13 +1526,6 @@ class Weapon extends ShipSystem
         return true;
     }
 
-
-    public function isInDistanceRange($shooter, $target, $fireOrder)
-    {
-        // gameData and fireOrder is needed to check if target has jammers
-        return true;
-    }
-
 	
     /* returns armor protection of system 
     */
@@ -1662,6 +1718,24 @@ full Advanced Armor effects (by rules) for reference:
 	}
 
 
+        public function isInDistanceRange($shooter, $target, $fireOrder)
+        {
+			if(!$this->ballistic) return true; //non-ballistic weapons don't risk target moving out of range
+            $distanceRange = max($this->range, $this->distanceRange); //just in case distanceRange is not filled! Then it's assumed to be the same as launch range
+            if($distanceRange <=0 ) return true; //0 means unlimited range
+
+
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            if(mathlib::getDistanceHex($movement->position,  $target) > $distanceRange )
+            {
+                $fireOrder->pubnotes .= " FIRING SHOT: Target moved out of distance range.";
+                return false;
+            }
+
+            return true;
+        }
+
+
     /*allow changing of basic parameters for different firing modes...
         called in method fire()
     */
@@ -1677,18 +1751,21 @@ full Advanced Armor effects (by rules) for reference:
 			$this->priorityAF = 0;
 		}
 
+		/*not used any more!
         if (isset($this->animationArray[$i])) $this->animation = $this->animationArray[$i];
         if (isset($this->animationImgArray[$i])) $this->animationImg = $this->animationImgArray[$i];
         if (isset($this->animationImgSpriteArray[$i])) $this->animationImgSprite = $this->animationImgSpriteArray[$i];
-        if (isset($this->animationColorArray[$i])) $this->animationColor = $this->animationColorArray[$i];
         if (isset($this->animationColor2Array[$i])) $this->animationColor2 = $this->animationColor2Array[$i];
         if (isset($this->animationWidthArray[$i])) $this->animationWidth = $this->animationWidthArray[$i];
-        if (isset($this->animationExplosionScaleArray[$i])) $this->animationExplosionScale = $this->animationExplosionScaleArray[$i];
         if (isset($this->animationExplosionTypeArray[$i])) $this->animationExplosionType = $this->animationExplosionTypeArray[$i];
         if (isset($this->explosionColorArray[$i])) $this->explosionColor = $this->explosionColorArray[$i];
         if (isset($this->trailLengthArray[$i])) $this->trailLength = $this->trailLengthArray[$i];
         if (isset($this->trailColorArray[$i])) $this->trailColor = $this->trailColorArray[$i];
         if (isset($this->projectilespeedArray[$i])) $this->projectilespeed = $this->projectilespeedArray[$i];
+		*/
+
+        if (isset($this->animationColorArray[$i])) $this->animationColor = $this->animationColorArray[$i];
+        if (isset($this->animationExplosionScaleArray[$i])) $this->animationExplosionScale = $this->animationExplosionScaleArray[$i];
 
         if (isset($this->rangePenaltyArray[$i])) $this->rangePenalty = $this->rangePenaltyArray[$i];
         if (isset($this->rangeDamagePenaltyArray[$i])) $this->rangeDamagePenalty = $this->rangeDamagePenaltyArray[$i];

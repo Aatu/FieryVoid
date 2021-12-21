@@ -25,7 +25,7 @@ class JorthunA extends LCV{
 	$this->pivotcost = 1;
 	$this->iniativebonus = 14 *5;
   
-	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
@@ -36,29 +36,31 @@ class JorthunA extends LCV{
 		$sensors->markLCV();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(1, 11, 0, 6, 2));
-	$this->addPrimarySystem(new LightPlasma(1, 4, 2, 240, 60));
-	$this->addPrimarySystem(new LightPlasma(1, 4, 2, 300, 120));
-	$this->addPrimarySystem(new LightPlasma(1, 4, 5, 270, 90));
+	
+	$this->addFrontSystem(new LightPlasma(1, 4, 2, 240, 60));
+	$this->addFrontSystem(new LightPlasma(1, 4, 5, 270, 90));
+	$this->addFrontSystem(new LightPlasma(1, 4, 2, 300, 120));
+	
 	$this->addPrimarySystem(new Structure(3, 26));
   
         $this->hitChart = array(
         		0=> array( //should never happen (...but actually sometimes does!)
         				12 => "Structure",
-        				16 => "Light Plasma Cannon",
+        				16 => "1:Light Plasma Cannon",
         				18 => "Engine",
         				19 => "Reactor",
         				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				12 => "0:Structure",
-        				16 => "0:Light Plasma Cannon",
+        				16 => "1:Light Plasma Cannon",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		2=> array( //same as Fwd
         				12 => "0:Structure",
-        				16 => "0:Light Plasma Cannon",
+        				16 => "1:Light Plasma Cannon",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

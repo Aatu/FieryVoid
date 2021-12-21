@@ -5,15 +5,18 @@
         public $ballistic = true;
         public $damageType = "Standard"; 
         public $weaponClass = "Ballistic"; 
+		
+		
+        public $animation = "torpedo";
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-
-        
-        
+       
+        /*moving to Weapon class - this is generally useful!
         public function isInDistanceRange($shooter, $target, $fireOrder)
         {
+			if(!$this->ballistic) return true; //non-ballistic weapons don't risk target moving out of range
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $distanceRange = max($this->range, $this->distanceRange); //just in case distanceRange is not filled! Then it's assumed to be the same as launch range
             if($distanceRange <=0 ) return true; //0 means unlimited range
@@ -26,6 +29,8 @@
 
             return true;
         }
+		*/
+		
        
         
         public function setSystemDataWindow($turn){
@@ -45,13 +50,17 @@
         
         public $fireControl = array(-4, 1, 3); // fighters, <mediums, <capitals 
         
-        public $trailColor = array(141, 240, 255);
         public $animation = "torpedo";
         public $animationColor = array(30, 170, 255);
+		/*
+        public $trailColor = array(141, 240, 255);
         public $animationExplosionScale = 0.25;
         public $projectilespeed = 12;
         public $animationWidth = 10;
         public $trailLength = 10;
+		*/
+		
+		
         public $priority = 6;
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -80,11 +89,13 @@
         
         public $trailColor = array(141, 240, 255);
         public $animation = "trail";
+		/*
         public $animationColor = array(227, 148, 55);
         public $animationExplosionScale = 0.25;
         public $projectilespeed = 12;
         public $animationWidth = 4;
         public $trailLength = 40;
+		*/
         public $priority = 5;
         
         public $grouping = 20;
@@ -163,14 +174,16 @@
         
         public $fireControl = array(null, 0, 2); // fighters, <mediums, <capitals 
         
-        public $trailColor = array(75, 230, 90);
         public $animation = "torpedo";
         public $animationColor = array(75, 230, 90);
+		/*
+        public $trailColor = array(75, 230, 90);
         public $animationExplosionScale = 0.3;
         public $projectilespeed = 11;
         public $animationWidth = 10;
         public $trailLength = 10;
-        public $priority = 1; //Flash! should strike first (?)
+		*/
+        public $priority = 1; //Flash! should strike first 
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -193,6 +206,7 @@
 				$this->data["Special"] .= '<br>';
 			}
 			$this->data["Special"] .= "Ignores half of armor.";
+			$this->data["Special"] .= "<br>Ballistic weapon that can use offensive EW.";
 		}
         
         
@@ -210,22 +224,24 @@
         public $iconPath = "packetTorpedo.png";
         public $range = 50;  
         public $loadingtime = 2;
-	public $specialRangeCalculation = true; //to inform front end that it should use weapon-specific range penalty calculation - such a method should be present in .js!
+		public $specialRangeCalculation = true; //to inform front end that it should use weapon-specific range penalty calculation - such a method should be present in .js!
         
         public $weaponClass = "Ballistic"; 
         public $damageType = "Standard"; 
         
         
         public $fireControl = array(-6, 3, 3); // fighters, <mediums, <capitals 
-	public $rangePenalty = 0.5; //-1/2 hexes - BUT ONLY AFTER 10 HEXES
+		public $rangePenalty = 0.5; //-1/2 hexes - BUT ONLY AFTER 10 HEXES
         
-        public $trailColor = array(191, 200, 215);
         public $animation = "torpedo";
         public $animationColor = array(130, 170, 255);
+		/*
+        public $trailColor = array(191, 200, 215);
         public $animationExplosionScale = 0.25;
         public $projectilespeed = 14;
         public $animationWidth = 11;
         public $trailLength = 16;
+		*/
         public $priority = 6; //heavy Standard
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){

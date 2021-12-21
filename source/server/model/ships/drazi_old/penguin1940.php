@@ -32,10 +32,10 @@ class Penguin1940 extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 10, 3, 5));
         $this->addPrimarySystem(new Engine(4, 10, 0, 6, 3));
         $this->addPrimarySystem(new Hangar(3, 7));
-        $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 240, 60));
-        $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 300, 120));
-        $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 1));
-        $this->addPrimarySystem(new Thruster(4, 16, 0, 6, 2));
+        $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 60));
+        $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 120));
+        $this->addAftSystem(new Thruster(3, 10, 0, 4, 1));
+        $this->addAftSystem(new Thruster(4, 16, 0, 6, 2));
 
         $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 240, 360));
         $this->addLeftSystem(new Thruster(4, 11, 0, 3, 3));
@@ -52,8 +52,8 @@ class Penguin1940 extends HeavyCombatVesselLeftRight{
         $this->hitChart = array(
         		0=> array(
         				8 => "Structure",
-        				11 => "Thruster",
-               			12 => "Standard Particle Beam",
+        				11 => "2:Thruster",
+               			12 => "1:Standard Particle Beam",
         				14 => "Scanner",
         				16 => "Engine",
         				18 => "Hangar",

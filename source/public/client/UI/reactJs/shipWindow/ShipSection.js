@@ -98,7 +98,7 @@ const filterStructure = systems => systems.filter(system => !(system instanceof 
 const orderSystems = (systems, location) => {
     systems = filterStructure(systems);
 
-    if ([4, 41, 41].includes(location)) {
+    if ([4, 41, 42].includes(location)) {
         return orderSystemsThreeWide(systems);
     } else if ([3, 31, 32].includes(location)) {
         return reverseRowsOfThree(orderSystemsThreeWide(systems));
@@ -145,10 +145,10 @@ const orderSystemsFourWide = (systems) => {
 
     let list = [];
 
-
+	//4 equal systems
     while(true) {
 
-        const {picked, remaining} = pick(systems, 4);
+        const {picked, remaining} = pickOuter(systems, 4);
 
         if(picked.length === 0) {
             break;
@@ -158,10 +158,12 @@ const orderSystemsFourWide = (systems) => {
 
         list = list.concat(picked);
     }
+	
 
+	//2 systems, plus optionally 2 other systems in the middle
     while(true) {
 
-        const {picked, remaining} = pick(systems, 2);
+        const {picked, remaining} = pickOuter(systems, 2);
 
         if(picked.length === 0) {
             break;
@@ -170,7 +172,7 @@ const orderSystemsFourWide = (systems) => {
         
         systems = remaining;
 
-        const secondPick = pick(systems, 2);
+        const secondPick = pickOuter(systems, 2);
 
         if (secondPick.picked.length > 0) {
             systems = secondPick.remaining;
@@ -228,12 +230,21 @@ const findFriendForTwo = (two, systems) => {
 
     const onePick = pick(systems, 1);
     
+	/* singleton in the middle - does not look that good on the sides! changing to singleton on the inside
     if (onePick.picked.length === 1) {
         return {three: [two[0], onePick.picked[0], two[1]], remainingSystems: onePick.remaining}
     }
 
     if (systems.length > 0) {
         return {three: [two[0], systems.pop(), two[1]], remainingSystems: systems}
+    }
+	*/
+	if (onePick.picked.length === 1) {
+        return {three: [onePick.picked[0], two[0], two[1] ], remainingSystems: onePick.remaining}
+    }
+
+    if (systems.length > 0) {
+        return {three: [systems.pop(), two[0], two[1] ], remainingSystems: systems}
     }
 
     return {three: [two[0], two[1]], remainingSystems: systems}
@@ -261,6 +272,7 @@ const pick = (systems, amount = 3) => {
     }
 
     let picked = [];
+	// this gets first X...
     const remaining = systems.filter(otherSystem => {
         if (otherSystem.name === one.name && amount > 0) {
             amount--;
@@ -273,5 +285,55 @@ const pick = (systems, amount = 3) => {
 
     return {picked, remaining};
 }
+
+
+//like pick(), but instead of picking first X elements - picks outer X elements
+const pickOuter = (systems, amount = 3) => {
+    const one = systems.find(system => {
+        const count = systems.reduce((all, otherSystem) => {
+            if (otherSystem.name === system.name) {
+                return all+1;
+            }
+
+            return all;
+        }, 0)
+
+        if (amount === 1) {
+            return count === amount;
+        } else {
+            return count >= amount;
+        }
+    });
+
+    if (!one) {
+        return {picked: [], remaining: systems};
+    }
+	
+    let picked = [];
+    let picked2 = [];
+	// this gets outer X...
+    const remaining = systems.filter(otherSystem => {
+        if (otherSystem.name === one.name /*&& amount > 0*/) {
+            //amount--;
+            picked2.push(otherSystem);
+            return false;
+        }
+
+        return true;
+    })
+	
+	var fromBeginning = Math.ceil(amount/2);
+	var fromEnding = Math.floor(amount/2);
+	for(var i = 0;i<picked2.length;i++){
+		if ((i<fromBeginning) || (i>=(picked2.length-fromEnding))){ //elements from beginning and end get picked
+			picked.push(picked2[i]);
+		}else{//remaining elements (from the middle) get returned to the pool
+			remaining.unshift(picked2[i]); //return to the beginning - so they're picked first in next row!
+		}
+	}
+
+    return {picked, remaining};
+}
+
 
 export default ShipSection;

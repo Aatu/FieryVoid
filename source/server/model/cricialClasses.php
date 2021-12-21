@@ -14,7 +14,7 @@ class Critical{
 	public $turnend = 0; //last turn when critical is in efect; 0 = indefinitely
 	public $repairCost = 1; //how many self repair points are needed to repair it;
 	//official: all crits cost 1, except C&C cost 4; FV: except C&C and nastier Reactor crits, cost 2; no partial repairs!
-	public $repairPriority = 4;//lower = higher priority, 0 means it's irrepairable
+	public $repairPriority = 4;//0-9; lower = lower priority, 0 means it's irrepairable
 	
 		
     public function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $param = null){
@@ -67,7 +67,7 @@ class OutputReduced extends Critical{
 }
 
 class OutputReducedOneTurn extends Critical{
-    public $description = "Critical Shutdown.";
+    public $description = "Output reduced.";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
         //$this->description = $this->description." ".($turn+1).".";
 		if($turnend == 0) $turnend = $turn + 1;
@@ -199,6 +199,13 @@ class AmmoExplosion extends Critical{
     }
 }
 
+class CommunicationsDisruptedOneTurn extends Critical{
+    public $description = "Communications disrupted. -5 initiative.";
+    public $oneturn = true;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
 
 class CommunicationsDisrupted extends Critical{
     public $description = "Communications disrupted. -5 initiative.";
@@ -207,8 +214,25 @@ class CommunicationsDisrupted extends Critical{
     }
 }
 
+class PenaltyToHitOneTurn extends Critical{
+    public $description = "-1 penalty to hit for all weapons.";
+    public $oneturn = true;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
 class PenaltyToHit extends Critical{
     public $description = "-1 penalty to hit for all weapons.";
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
+class RestrictedEWOneTurn extends Critical{
+    public $description = "-2 EW. May use no more than half of its EW offensively.";
+    public $oneturn = true;
+//	public $priority = 1; //probably the nastiest C&C crit, to be fixed at first priority
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
@@ -375,5 +399,16 @@ class ChargeEmpty extends Critical{ //charge emptied - instant effect, to be rec
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
 		$turnend=$turn;//ALWAYS - immediate end of effect! 
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
+//for Reactor - it will check for explosion every turn (including turn the critical was added, as officially this is done at start of turn; in FV there is no option to voluntarily shut down the Reactor to prevent that)
+//-10 Power that comes with the crit officially will be applied as a separate critical
+class ContainmentBreach extends Critical{
+     public $description = "Containment Breach!";
+	public $repairCost = 2;
+	public $repairPriority = 9; //it's REALLY important to prevent reactor explosion :)
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
 }

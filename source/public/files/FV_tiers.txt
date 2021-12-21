@@ -26,6 +26,7 @@ This is default power level of show era major factions ('Big 4') - what I consid
  - Narn (barring massed EMines)
  - Orieni (very tricky - may feel superior due to raw damage output of Hunter-Killers and massed RGRs, while remaining vulnerable against sharp handling by expert oponent; if You don't consider Yourself an expert, You may treat Orieni as a Superior faction)
  - Torata 
+ - Vree (warning: their high resilence coupled with all-around, accurate firepower is very daunting! Not recommended to face them until You feel You have solid command of the game)
 
 
 SECOND TIER
@@ -49,7 +50,7 @@ Factions that point for point will have uphill battle against First Tier, yet ot
  - Kastan (custom faction - Escalation Wars universe)
  - Markab
  - Raiders (note plethora of background-driven options - Raiders often use a hodgepodge of units and formal FV fleet selection rules don't always do them justice!)
- - Sal-bez (custom faction - Nexus universe, in playtest currently)
+ - Sal-bez (custom faction - Nexus universe)
  - Sshel'ath (custom faction - Escalation Wars universe)
  - Star Wars (custom faction (or rather factions), Star Wars universe - with VERY different playstyle, consider them difficult to fly!)
  - Velrax (custom faction - Nexus universe)
@@ -77,6 +78,7 @@ This group is inherently unbalanced, even against each other!
  - Abbai (WotCR)
  - Alacan (Small Races)
  - Chouka Raiders (custom faction - Escalation Wars universe)
+ - Craytan Union (custom faction - Nexus universe, in playtest currently)
  - EA (early) (predominantly semi-official, custom units armed with blast cannons and much weaker defenses)
  - Grome
  - Hurr

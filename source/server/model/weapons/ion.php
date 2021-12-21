@@ -6,12 +6,15 @@ class IonBolt extends Weapon{
 
     public $name = "ionBolt";
     public $displayName = "Ion Bolt";
-    public $animation = "trail";
+    public $animation = "bolt";
     public $animationColor = array(127, 0, 255);
+	/*
     public $animationExplosionScale = 0.15;
     public $projectilespeed = 12;
     public $animationWidth = 3;
     public $trailLength = 20;
+    */
+	
     public $priority = 6; //very heavy fighter weapon... even if borderline!
 
     public $loadingtime = 2;
@@ -27,8 +30,7 @@ class IonBolt extends Weapon{
     function __construct($startArc, $endArc){
         parent::__construct(0, 1, 0, $startArc, $endArc);
 
-    }
-    
+    }    
 
     public function getDamage($fireOrder){        return Dice::d(6, 3);  }
     public function setMinDamage(){     $this->minDamage = 3 ;      }
@@ -38,20 +40,21 @@ class IonBolt extends Weapon{
 
 
 class IonCannon extends Raking{
-    public $trailColor = array(30, 170, 255);
-
     public $name = "ionCannon";
     public $displayName = "Ion Cannon";
     //public $animation = "trail";
     public $animation = "laser"; //more fitting for Raking, and faster at long range
     public $animationColor = array(127, 0, 255);
+	/*
     public $animationExplosionScale = 0.25;
     public $animationWidth = 3;//4;
     public $animationWidth2 = 0.3;
     public $trailLength = 24;
-    public $intercept = 1;
-    public $priority = 8;
+    */
+	
+    public $priority = 8; //light Raking weapon
     
+    public $intercept = 1;
     public $loadingtime = 2;
     public $shots = 1;
 
@@ -61,9 +64,7 @@ class IonCannon extends Raking{
     public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     public $weaponClass = "Ion"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
-        public $firingModes = array( 1 => "Raking");
-
-    
+        public $firingModes = array( 1 => "Raking");  
     
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
     {
@@ -76,17 +77,18 @@ class IonCannon extends Raking{
 }
 
 
-
+//CUSTOM weapon
 class ImprovedIonCannon extends Raking{
-    public $trailColor = array(30, 170, 255);
-
     public $name = "improvedIonCannon";
-    public $displayName = "Imp. Ion Cannon";   
+    public $displayName = "Improved Ion Cannon";   
     public $animation = "laser"; //more fitting for Raking, and faster at long range
     public $animationColor = array(127, 0, 255);
+	/*
     public $animationExplosionScale = 0.25;
     public $animationWidth = 3;//4;
     public $animationWidth2 = 0.3;
+    */
+	
     public $intercept = 1;
     public $priority = 8;
 
@@ -105,8 +107,7 @@ class ImprovedIonCannon extends Raking{
     {
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
     }
-    
-    
+        
     public function getDamage($fireOrder){        return Dice::d(10, 2)+15;  }
     public function setMinDamage(){     $this->minDamage = 17 ;      }
     public function setMaxDamage(){     $this->maxDamage = 35 ;      }
@@ -119,12 +120,15 @@ class ImprovedIonCannon extends Raking{
         public $iconPath = "ionizer2.png";
         public $displayName = "Ionizer";        
         
-        public $animation = "laser"; //deals Standard damage, but that's due to beam having short duration - it's a laser beam in nature
+        public $animation = "laser"; //deals Standard damage, but that's due to beam having short duration - it's a laser beam in nature; 
+	    //most such weapons do use Bolt animation, but her it serves to make them stand out!
         public $animationColor = array(160, 0, 255);
+	    /*
         public $animationExplosionScale = 0.1;
         public $animationWidth = 2;
         public $animationWidth2 = 0.2;
-        
+        */
+	    
         public $priority = 3; //rather light weapons!
         public $intercept = 0; //Lasers cannot intercept!
         public $loadingtime = 1;
@@ -174,13 +178,14 @@ class ImprovedIonCannon extends Raking{
         public $displayName = "Ionic Laser";
         public $animation = "laser";
         public $animationColor = array(160, 0, 255);
+	    /*
         public $animationExplosionScale = 0.18;
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
+	*/
+	
         public $priority = 8; //light Raking
-        
         public $loadingtime = 2;
-        
         public $raking = 10;
         
         public $rangePenalty = 0.5;
@@ -222,11 +227,13 @@ class ImprovedIonCannon extends Raking{
         
         public $animation = "trail";
         public $animationColor = array(127, 0, 255);
+	    /*
         public $animationExplosionScale = 0.2;
         public $projectilespeed = 16;
         public $animationWidth = 3;
         public $trailLength = 3;
-        
+        */
+	    
         public $priority = 3; //damage output 8 is very light
         public $loadingtime = 1;
         public $intercept = 2;

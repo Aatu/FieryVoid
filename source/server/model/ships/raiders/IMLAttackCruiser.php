@@ -7,7 +7,7 @@ class IMLAttackCruiser extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 450;
 	$this->faction = "Raiders";
         $this->phpclass = "IMLAttackCruiser";
-        $this->imagePath = "img/ships/drazi/warbird.png";
+        $this->imagePath = "img/ships/drazi/DraziWarbird.png";
         $this->shipClass = "IML Attack Cruiser";
 	    $this->isd = 2234;
         $this->canvasSize = 256;

@@ -32,9 +32,9 @@ class Heron extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 12, 5, 6));
         $this->addPrimarySystem(new Engine(4, 12, 0, 7, 3));
         $this->addPrimarySystem(new Hangar(3, 1));
-        $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 1));
-        $this->addPrimarySystem(new Thruster(4, 16, 0, 7, 2));
-        $this->addPrimarySystem(new RepeaterGun(3, 6, 4, 300, 60));
+        $this->addAftSystem(new Thruster(3, 10, 0, 4, 1));
+        $this->addAftSystem(new Thruster(4, 16, 0, 7, 2));
+        $this->addFrontSystem(new RepeaterGun(3, 6, 4, 300, 60));
 
         $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 240, 60));
         $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 240, 0));
@@ -53,30 +53,30 @@ class Heron extends HeavyCombatVesselLeftRight{
         $this->addRightSystem(new Structure(4, 36));
                 
         $this->hitChart = array(
-        		0=> array(
-        				8 => "Structure",
-        				11 => "Thruster",
-					12 => "Repeater Gun",
-        				14 => "Scanner",
-        				16 => "Engine",
-        				17 => "Hangar",
-        				19 => "Reactor",
-        				20 => "C&C",
-        		),
-        		3=> array(
-        				5 => "Thruster",
-                    			7 => "Standard Particle Beam",
-        				9 => "Hangar",
-        				18 => "Structure",
-        				20 => "Primary",
-        		),
-        		4=> array(
-        				5 => "Thruster",
-                    			7 => "Standard Particle Beam",
-        				9 => "Hangar",
-        				18 => "Structure",
-        				20 => "Primary",
-        		),
+			0=> array(
+				8 => "Structure",
+				11 => "2:Thruster",
+				12 => "1:Repeater Gun",
+				14 => "Scanner",
+				16 => "Engine",
+				17 => "Hangar",
+				19 => "Reactor",
+				20 => "C&C",
+			),
+			3=> array(
+				5 => "Thruster",
+				7 => "Standard Particle Beam",
+				9 => "Hangar",
+				18 => "Structure",
+				20 => "Primary",
+			),
+			4=> array(
+				5 => "Thruster",
+				7 => "Standard Particle Beam",
+				9 => "Hangar",
+				18 => "Structure",
+				20 => "Primary",
+			),
         );
         
     }

@@ -4,6 +4,7 @@ class Plasma extends Weapon{
 	public $priority = 6;
 	public $damageType = "Standard"; 
 	public $weaponClass = "Plasma"; 
+        public $animationColor = array(75, 250, 90);
 
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);

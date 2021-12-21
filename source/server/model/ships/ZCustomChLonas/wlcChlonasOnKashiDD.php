@@ -34,9 +34,9 @@ class wlcChlonasOnKashiDD extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 13, 4, 6));
         $this->addPrimarySystem(new Engine(5, 11, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(3, 10)); //for a flight of light fighters
-        $this->addPrimarySystem(new Thruster(4, 15, 0, 4, 1));
-        $this->addPrimarySystem(new Thruster(4, 21, 0, 8, 2));
-        $this->addPrimarySystem(new CustomGatlingMattergunMedium(4, 0, 0, 270, 90));
+        $this->addAftSystem(new Thruster(4, 15, 0, 4, 1));
+        $this->addAftSystem(new Thruster(4, 21, 0, 8, 2));
+        $this->addFrontSystem(new CustomGatlingMattergunMedium(4, 0, 0, 270, 90));
         
         $this->addLeftSystem(new Thruster(4, 15, 0, 4, 3));
         $this->addLeftSystem(new CustomGatlingMattergunMedium(3, 0, 0, 240, 360));
@@ -65,8 +65,8 @@ class wlcChlonasOnKashiDD extends HeavyCombatVesselLeftRight{
 			
 			0=> array(
 				5 => "Structure",
-				7 => "Gatling Mattergun",
-				11 => "Thruster",
+				7 => "1:Gatling Mattergun",
+				11 => "2:Thruster",
 				13 => "Scanner",
 				15 => "Engine",
 				17 => "Hangar",

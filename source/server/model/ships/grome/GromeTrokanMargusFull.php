@@ -12,8 +12,8 @@ The costs before rounding the final value are:
 			Heavy railgun ~36 points
 			Railgun ~24 points
 			Light railgun ~12 points
-		Estimated cost is 1300 + (5x36) + (4x24) = 1576 -> rounded to 1550*/        
-	$this->pointCost = 1550; //plus boosted by 100 due to less severe unreliable traits
+		Estimated cost is 1200 + (5x36) + (4x24) = 1476 -> rounded to 1475*/        
+	$this->pointCost = 1475; 
 	$this->faction = "Grome";
         $this->phpclass = "GromeTrokanMargusFull";
         $this->imagePath = "img/ships/GromeTrokan.png";
@@ -31,6 +31,15 @@ The costs before rounding the final value are:
         $this->fighters = array("normal"=>12);
 
 		$this->isd = 2260;
+
+		$this->enhancementOptionsDisabled[] = 'IMPR_REA';
+		$this->enhancementOptionsDisabled[] = 'IMPR_ENG';
+		$this->enhancementOptionsDisabled[] = 'IMPR_SENS';
+		
+		$this->notes = "Engine fluctuations. Rolls for engine critical every turn with +5% penalty. Effect lasts one turn.";
+		$this->notes .= "<br>Power fluctuations. Rolls for reactor critical every turn with +5% penalty. Effect lasts one turn.";
+		$this->notes .= "<br>Sensor fluctuations. Rolls for sensor critical every turn with +5% penalty. Effect lasts one turn.";
+		$this->notes .= "<br>Communications problems. Rolls for C&C critical every turn with +5% penalty. Effect lasts one turn.";
         
         $this->forwardDefense = 18;
         $this->sideDefense = 19;
@@ -42,10 +51,19 @@ The costs before rounding the final value are:
         $this->pivotcost = 4;
         $this->iniativebonus = -15; //
         
-        $this->addPrimarySystem(new Reactor(5, 33, 0, -8));  //power deficit for power fluctuations (likely deactivat Flak Cannons, therefore covers poor defensive targeting)
-        $this->addPrimarySystem(new CnC(4, 30, 0, 0));
-        $this->addPrimarySystem(new CnC(5, 12, 0, 0));
-        $this->addPrimarySystem(new AntiquatedScanner(4, 24, 6, 6)); //kept at 6 for sensor fluctuations
+		$reactor = new Reactor(5, 33, 0, 0);
+			$reactor->markPowerFlux();
+			$this->addPrimarySystem($reactor);
+//        $this->addPrimarySystem(new Reactor(5, 33, 0, 0));  
+		$cnc = new CnC(4, 42, 0, 0);
+			$cnc->markCommsFlux();
+			$this->addPrimarySystem($cnc);
+//        $this->addPrimarySystem(new CnC(4, 30, 0, 0));
+//        $this->addPrimarySystem(new CnC(5, 12, 0, 0));
+		$sensor = new AntiquatedScanner(4, 24, 6, 7);
+			$sensor->markAntSensorFlux();
+			$this->addPrimarySystem($sensor);
+//        $this->addPrimarySystem(new AntiquatedScanner(4, 24, 6, 6)); //kept at 6 for sensor fluctuations
 		$targetingArray = new AntiquatedScanner(2, 6, 2, 1);
 			$targetingArray->displayName = 'Targeting Array';
 			$targetingArray->iconPath = "TargetingArray.png";
@@ -54,7 +72,10 @@ The costs before rounding the final value are:
 			$targetingArray->displayName = 'Targeting Array';
 			$targetingArray->iconPath = "TargetingArray.png";
 			$this->addPrimarySystem($targetingArray);
-        $this->addPrimarySystem(new Engine(4, 36, 0, 10, 4)); //kept at 10 for engine fluctuations
+		$engine = new Engine(4, 36, 0, 12, 4);
+			$engine->markEngineFlux();
+			$this->addPrimarySystem($engine);
+//        $this->addPrimarySystem(new Engine(4, 36, 0, 10, 4)); 
 		$this->addPrimarySystem(new Hangar(3, 14));
 		$this->addPrimarySystem(new JumpEngine(5, 20, 4, 36));
 		
