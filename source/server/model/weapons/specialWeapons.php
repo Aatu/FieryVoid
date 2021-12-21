@@ -22,14 +22,17 @@ class WeaponEM  {
 class PlasmaStream extends Raking{
 	public $name = "plasmaStream";
 	public $displayName = "Plasma Stream";
-	public $animation = "beam";
+	
+	public $animation = "laser";
 	public $animationColor = array(75, 250, 90);
+	/*
 	public $trailColor = array(75, 250, 90);
 	public $projectilespeed = 20;
 	public $animationWidth = 3;
 	public $animationExplosionScale = 0.25;
 	public $trailLength = 400;
-	public $priority = 1;
+	*/
+	public $priority = 2; //early, due to armor reduction effect
 		        
 	public $raking = 5;
 	public $loadingtime = 2;
@@ -61,9 +64,6 @@ class PlasmaStream extends Raking{
 	    $this->data["Special"] .= "<br>Ignores half of armor.";	 //now handled by standard routines
 	    $this->data["Special"] .= "<br>Does not ignore already pierced armor (eg. every rake needs to pierce armor anew, even to the same location).";
 	}
-		 
-	
-	
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
@@ -82,8 +82,6 @@ class PlasmaStream extends Raking{
 		$fireOrder->armorIgnored = array(); //clear armorIgnored array - next rake should be met with full armor value!
 	}
 	
-		
-		
 	public function getDamage($fireOrder){        return Dice::d(10,3)+4;   }
 	public function setMinDamage(){     $this->minDamage = 7 ;/*- $this->dp;*/      }
 	public function setMaxDamage(){     $this->maxDamage = 34 /*- $this->dp*/;      }
@@ -91,18 +89,21 @@ class PlasmaStream extends Raking{
 
 
 
-
 class ShockCannon extends Weapon{
         public $name = "shockCannon";
         public $displayName = "Shock Cannon";
-        public $animation = "laser";
+	
+        public $animation = "bolt"; //originally Laser, but Bolt seems more appropriate
         public $animationColor = array(175, 225, 175);
+        public $animationExplosionScale = 0.35; //will be rescaled automatically, too
+	/*
         public $trailColor = array(175, 225, 175);
         public $projectilespeed = 15;
         public $animationWidth = 2;
         public $animationWidth2 = 0.2;
         public $animationExplosionScale = 0.15;
         public $trailLength = 30;
+	*/
         public $priority = 3; //dropout effect on fighters
 
         public $loadingtime = 2;
@@ -115,6 +116,7 @@ class ShockCannon extends Weapon{
 	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		$this->animationExplosionScale = $this->dynamicScale(0,2);//scale weapon using double damage output - due to additional effects it seems appropriate
         }
 
         public function setSystemDataWindow($turn){
@@ -181,14 +183,18 @@ class ShockCannon extends Weapon{
 class BurstBeam extends Weapon{
 	public $name = "burstBeam";
 	public $displayName = "Burst Beam";
-	public $animation = "laser";
+	
+	public $animation = "bolt"; //originally Laser, but Bolt seems more appropriate
 	public $animationColor = array(158, 240, 255);
+	public $animationExplosionScale = 0.30;
+	/*
 	public $trailColor = array(158, 240, 255);
 	public $projectilespeed = 15;
 	public $animationWidth = 2;
 	public $animationWidth2 = 0.2;
 	public $animationExplosionScale = 0.10;
 	public $trailLength = 30;
+	*/
 	public $noOverkill = true;
 		        
 	public $loadingtime = 1;
@@ -219,8 +225,7 @@ class BurstBeam extends Weapon{
 		$this->data["Special"] .= "<br> - Fighter: immediate dropout (excluding superheavy)."; 
 		$this->data["Special"] .= "<br>Automatically hits EM shield if interposed.";
 		$this->data["Special"] .= "<br>Does not affect units protected by Advanced Armor.";  	
-	}
-	
+	}	
 	
 	//Burst Beams ignore armor; advanced armor halves effect (due to weapon being Electromagnetic)
 	public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
@@ -305,20 +310,23 @@ class BurstPulseCannon extends Pulse {
 	public $name = "burstPulseCannon";
         public $displayName = "Burst Pulse Cannon";
 
+        public $animation = "bolt";
         public $animationColor = array(158, 240, 255);
+        public $animationExplosionScale = 0.3; //does no damage, so needs scale indicator
+	/*
 	public $trailColor = array(158, 240, 255);
-
         public $animation = "trail";
         public $trailLength = 2;
         public $animationWidth = 4;
         public $projectilespeed = 17;
         public $animationExplosionScale = 0.05;
-        public $rof = 5;
+	*/
+        public $rof = 4;
         public $grouping = 25;
         public $maxpulses = 6;
 		        
 	public $loadingtime = 2;
-        public $priority = 9;
+        public $priority = 9; //late due to dropout/disable effect
         
 	    public $damageType = "Pulse"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
@@ -412,6 +420,8 @@ class MediumBurstBeam extends BurstBeam{
 	public $name = "mediumBurstBeam";
 	public $displayName = "Medium Burst Beam";
 
+	public $animationExplosionScale = 0.4;
+	/*
 	public $animationColor = array(158, 240, 255);
 	public $trailColor = array(158, 240, 255);
 	public $projectilespeed = 12;
@@ -419,7 +429,7 @@ class MediumBurstBeam extends BurstBeam{
 	public $animationWidth2 = 0.4;
 	public $animationExplosionScale = 0.20;
 	public $trailLength = 40;
-
+*/
 	public $loadingtime = 2;
 	public $priority = 9;
 
@@ -501,6 +511,8 @@ class HeavyBurstBeam extends BurstBeam{
 	public $name = "heavyBurstBeam";
 	public $displayName = "Heavy Burst Beam";
 
+	public $animationExplosionScale = 0.6;
+	/*
 	public $animationColor = array(158, 240, 255);
 	public $trailColor = array(158, 240, 255);
 	public $projectilespeed = 10;
@@ -508,7 +520,7 @@ class HeavyBurstBeam extends BurstBeam{
 	public $animationWidth2 = 0.5;
 	public $animationExplosionScale = 0.30;
 	public $trailLength = 50;
-
+*/
 	public $loadingtime = 3;
 	public $priority = 9;
 
@@ -531,8 +543,7 @@ class HeavyBurstBeam extends BurstBeam{
 		      $this->data["Special"] .= "<br> - Any fighter: 5d6 damage (ignoring armor).";
 		      $this->data["Special"] .= "<br>Automatically hits EM shield if interposed.";
 		      $this->data["Special"] .= "<br>Effects other than direct damage do not affect units protected by Advanced Armor.";  	
-	}//a lot of the above handled by methods inherited from BurstBeam
-	    
+	}//a lot of the above handled by methods inherited from BurstBeam	    
 		
 	public function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		$dmgToReturn = $damage;
@@ -602,15 +613,19 @@ class TractorBeam extends ShipSystem{
 class ElectroPulseGun extends Weapon{
 	public $name = "electroPulseGun";
 	public $displayName = "Electro-Pulse Gun";
-	public $animation = "laser";
+	
+	public $animation = "bolt"; //originally Laser, but Bolt seems more appropriate
 	public $animationColor = array(158, 240, 255);
+	public $animationExplosionScale = 0.25; //does no damage, but quite large animation seems appropriate ;)
+	/*
 	public $trailColor = array(158, 240, 255);
 	public $projectilespeed = 15;
 	public $animationWidth = 2;
 	public $animationWidth2 = 0.2;
 	public $animationExplosionScale = 0.10;
 	public $trailLength = 30;
-	public $priority = 1;
+	*/
+	public $priority = 1; //flat dropout
 
 	public $loadingtime = 2;
 	public $rangePenalty = 3;
@@ -661,7 +676,6 @@ class ElectroPulseGun extends Weapon{
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 	}
 
-
 	public function getDamage($fireOrder){        return 0;   }
 	public function setMinDamage(){     $this->minDamage = 0;      }
 	public function setMaxDamage(){     $this->maxDamage = 0;      }
@@ -673,15 +687,19 @@ class StunBeam extends Weapon{
 	public $name = "StunBeam";
 	public $displayName = "Stun Beam";
 	public  $iconPath = "stunBeam.png";
-	public $animation = "laser";
+	
+	public $animation = "bolt"; //originally laser, but bolt seems more appropriate
 	public $animationColor = array(158, 240, 255);
+	public $animationExplosionScale = 0.25;
+	/*
 	public $trailColor = array(158, 240, 255);
 	public $projectilespeed = 15;
 	public $animationWidth = 2;
 	public $animationWidth2 = 0.2;
 	public $animationExplosionScale = 0.10;
 	public $trailLength = 30;
-		        
+	*/
+	
 	public $loadingtime = 2;
 	public $priority = 9; //as antiship weapon; as antifighter should go first...
 
@@ -729,13 +747,23 @@ class StunBeam extends Weapon{
 
 
 
-
 class CommDisruptor extends Weapon{
     /*Abbai weapon - does no damage, but limits target's Initiative and Sensors next turn
     */
     public $name = "CommDisruptor";
     public $displayName = "Comm Disruptor";
 	public $iconPath = "commDIsruptor.png";
+	
+	//let's animate this as a very wide beam...
+	public $animation = "laser";
+        public $animationColor = array(150, 150, 220);
+        public $animationExplosionScale = 0.55;
+	/*
+        public $animationColor2 = array(170, 170, 250);
+        public $animationExplosionScale = 0.45;
+        public $animationWidth = 15;
+        public $animationWidth2 = 0.5;
+	*/
 	
     public $priority = 10; //let's fire last, order not all that important here!
     public $loadingtime = 3;
@@ -745,15 +773,7 @@ class CommDisruptor extends Weapon{
 	
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
-   
-	   
-	//let's animate this as a very wide beam...
-	public $animation = "laser";
-        public $animationColor = array(150, 150, 220);
-        public $animationColor2 = array(170, 170, 250);
-        public $animationExplosionScale = 0.45;
-        public $animationWidth = 15;
-        public $animationWidth2 = 0.5;
+   	   
 	
  	public $possibleCriticals = array( //no point in damage reduced crit
             14=>"ReducedRange"
@@ -846,10 +866,13 @@ class CommJammer extends Weapon{
 	//let's animate this as a very wide beam...
 	public $animation = "laser";
         public $animationColor = array(150, 150, 220);
+        public $animationExplosionScale = 0.35;
+	/*
         public $animationColor2 = array(160, 160, 240);
         public $animationExplosionScale = 0.25;
         public $animationWidth = 10;
         public $animationWidth2 = 0.5;
+	*/
 	
  	public $possibleCriticals = array( //no point in damage reduced crit
             14=>"ReducedRange"
@@ -938,10 +961,12 @@ class SensorSpear extends Weapon{
 	//let's animate this as a very wide beam...
 	public $animation = "laser";
         public $animationColor = array(150, 150, 220);
+        public $animationExplosionScale = 0.35;
+	/*
         public $animationColor2 = array(160, 160, 240);
-        public $animationExplosionScale = 0.25;
         public $animationWidth = 10;
         public $animationWidth2 = 0.5;
+	*/
 	
  	public $possibleCriticals = array( //no point in damage reduced crit
             14=>"ReducedRange"
@@ -1054,12 +1079,14 @@ class EmBolter extends Weapon{
         public $displayName = "EM Bolter";
 	public $iconPath = "EMBolter.png";
 	
-        public $animation = "trail";
+        public $animation = "bolt";
         public $animationColor = array(100, 100, 250);
+	/*
         public $projectilespeed = 14;
         public $animationWidth = 5;
         public $animationExplosionScale = 0.45;
-        public $priority = 6;
+        */
+	public $priority = 6;
       
         public $loadingtime = 1;
         
@@ -1102,18 +1129,8 @@ class EmBolter extends Weapon{
 		$crit = new ForcedOfflineForTurns(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $turnEndEffect);
 		$crit->updated = true;
 		$this->criticals[] = $crit;
-		/*replaced by ForTurns crit above
-		for($i = 1; $i<=$this->cooldown;$i++){		
-			$trgtTurn = $gamedata->turn+$i-1;//start on current turn rather than next!
-			$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
-			$crit->updated = true;
-			$crit->newCrit = true; //force save even if crit is not for current turn
-			$this->criticals[] =  $crit;
-		}	
-		*/
 	} //endof function fire
-	
-	
+		
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $aftFacing=false)
         {
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -1237,10 +1254,10 @@ class SparkField extends Weapon implements DefensiveSystem{
         public $animationColor = array(1, 1, 255);
         public $animationExplosionScale = 2;
         public $animationExplosionType = "AoE";
-        public $explosionColor = array(165, 165, 255);
-        public $projectilespeed = 20;
-        public $animationWidth = 1;
-        public $trailLength = 1;
+        //public $explosionColor = array(165, 165, 255);
+        //public $projectilespeed = 20;
+        //public $animationWidth = 1;
+        //public $trailLength = 1;
 	
 	public $boostable = true;
         public $boostEfficiency = 2;
@@ -1462,11 +1479,12 @@ class SurgeCannon extends Raking{
 	
 	public $animation = "laser";
 	public $animationColor = array(165, 165, 255);
+	/*
 	public $animationWidth = 2;
 	public $animationWidthArray = array(1=>2, 2=>3, 3=>4, 4=>5, 5=>6);
 	public $animationWidth2 = 0.4;
 	public $animationExplosionScaleArray = array(1=>0.1, 2=>0.2, 3=>0.3, 4=>0.5, 5=>0.6);
-
+*/
       
         public $loadingtime = 1;
 	public $intercept = 2; //intercept rating -2
@@ -1682,11 +1700,13 @@ class SurgeLaser extends Raking{
 	
 	public $animation = "laser";
 	public $animationColor = array(165, 165, 255);
+	/*
 	public $animationWidth = 2;
 	public $animationWidthArray = array(1=>2, 2=>3);
 	public $animationWidth2 = 0.4;
 	public $animationExplosionScaleArray = array(1=>0.1, 2=>0.2);
-      
+      */
+	
 	public $loadingtime = 1;
 	public $intercept = 1; //intercept rating -1
         
@@ -1778,12 +1798,16 @@ class LtSurgeBlaster extends LinkedWeapon{
 	public $name = "LtSurgeBlaster";
 	public $displayName = "Light Surge Blaster";
 	public  $iconPath = "lightParticleBeam.png";
-	public $animation = "trail";
+	
+	public $animation = "bolt";
 	public $animationColor =  array(145, 145, 245);
+	/*
 	public $animationExplosionScale = 0.10;
 	public $projectilespeed = 10;
 	public $animationWidth = 2;
 	public $trailLength = 10;
+	*/
+	
 	public $intercept = 2;
 	public $loadingtime = 1;
 	public $shots = 2;
@@ -1809,7 +1833,6 @@ class LtSurgeBlaster extends LinkedWeapon{
 		parent::__construct(0, 1, 0, $startArc, $endArc);
 	}
 
-
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 		$this->data["Special"] = "+1 to Crit/Dropout rolls per hit.";
@@ -1834,13 +1857,16 @@ class EmPulsar extends Pulse{
 	public $name = "EmPulsar";
 	public $displayName = "EM Pulsar";
 	public $iconPath = "EmPulsar.png";
+	
 	public $animationColor = array(100, 100, 255);
-	public $animation = "trail";
+	public $animation = "bolt";
+	/*
 	public $animationWidth = 3;
 	public $projectilespeed = 10;
 	public $animationExplosionScale = 0.15;
 	public $trailLength = 10;
-
+*/
+	
 	public $loadingtime = 1;
 	public $priority = 3;
 
@@ -1868,7 +1894,6 @@ class EmPulsar extends Pulse{
 		$this->data["Special"] .= "<br>Cooldown period: 1 turn.";  
 	}
 	 
-	 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
 		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
@@ -1878,7 +1903,6 @@ class EmPulsar extends Pulse{
 		if ($ship instanceof FighterFlight) $mod++;		
 		$system->critRollMod += $mod; 
 	} //endof function onDamagedSystem
-	
 	
 	public function fire($gamedata, $fireOrder){
 		// If fired, this weapon needs 1 turn cooldown period (=forced shutdown)
@@ -1917,10 +1941,12 @@ class ResonanceGenerator extends Weapon{
 	
 	public $animation = "laser"; //described as beam in nature, standard damage is resonance effect and not direct
 	public $animationColor = array(125, 125, 230);
+	public $animationExplosionScale = 0.6; //make it look really large - while singular damage is low, it's repeated on every structure block - eg. all-encompassing
+	/*
 	public $animationWidth = 10;
 	public $animationWidth2 = 0.4;
 	public $animationExplosionScaleArray = array(1=>0.25);
-      
+      */
 	public $loadingtime = 1;
 	
 	public $rangePenalty = 1; //-1/hex
@@ -1951,8 +1977,7 @@ class ResonanceGenerator extends Weapon{
 			$this->iconPath = "ResonanceGeneratorAft.png";
 		}
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-	}
-	
+	}	
 	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);  
@@ -1960,9 +1985,6 @@ class ResonanceGenerator extends Weapon{
 		$this->data["Special"] .= "<br>Attacks all sections (so a capital ship will sufer 5 attacks, while MCV only 1).";  //MCV should suffer 2, but for technical reasons I opted for going for Section = Structure block		    
 		$this->data["Special"] .= "<br>Ignores armor."; 
 	}
-		
-	
-	
 	
 	public function fire($gamedata, $fireOrder){
 		// If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
@@ -1980,8 +2002,7 @@ class ResonanceGenerator extends Weapon{
 		$crit = new ForcedOfflineForTurns (-1, $fireOrder->shooterid, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $turnEndEffect);
 		$crit->updated = true;
 		$this->criticals[] = $crit;
-	} //endof function fire
-	
+	} //endof function fire	
 	
 	//ignore armor; advanced armor halves effect (due to this weapon being Electromagnetic)
 	public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
@@ -2017,19 +2038,19 @@ class ResonanceGenerator extends Weapon{
 
 
 
-
-
 class SurgeBlaster extends Weapon{
     /*Surge Blaster - Ipsha weapon*/
 	public $name = "SurgeBlaster";
 	public $displayName = "Surge Blaster";
 	public $iconPath = "SurgeBlaster.png";
 	
-	public $animation = "trail";
+	public $animation = "bolt";
 	public $animationColor =  array(165, 165, 255);
+	/*
 	public $projectilespeed = 14;
 	public $animationWidth = 4;
 	public $animationExplosionScale = 0.4;
+	*/
 	public $priority = 6;
   
 	public $loadingtime = 1;
@@ -2124,9 +2145,12 @@ class RammingAttack extends Weapon{
 	//animation irrelevant really (range 0), but needs to be fast!
 	public $animation = "trail";
 	public $animationColor =  array(1, 1, 1);
+	public $animationExplosionScale = 0.1; //very small bolt; explosion itself is scaled by damage done anyway!
+	/*
 	public $projectilespeed = 24;
 	public $animationWidth = 1;
 	public $animationExplosionScale = 0.4;
+	*/
 	public $priority = 1;
 	
 	public $doNotIntercept = true; //unit hurls itself at the enemy - this cannot be intercepted!
@@ -2334,12 +2358,16 @@ class LtEMWaveDisruptor extends LinkedWeapon{
 	public $trailColor = array(50, 50, 200);
 	public $name = "LtEMWaveDisruptor";
 	public $displayName = "Light EM Wave Disruptor";
-	public $animation = "trail";
+	
+	public $animation = "bolt";
 	public $animationColor =  array(145, 145, 245);
+	public $animationExplosionScale = 0.2;//relatively large, despite doing no damage... although it's irrelevant as there is no offensive mode
+	/*
 	public $animationExplosionScale = 0.10;
 	public $projectilespeed = 10;
 	public $animationWidth = 2;
 	public $trailLength = 10;
+	*/
 	public $intercept = 3; //very good interception
 	public $loadingtime = 1;
 	public $shots = 2;
@@ -2360,7 +2388,6 @@ class LtEMWaveDisruptor extends LinkedWeapon{
 		parent::__construct(0, 1, 0, $startArc, $endArc);
 	}
 
-
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 		$this->data["Special"] = "No offensive mode.";
@@ -2380,13 +2407,15 @@ class RadCannon extends Weapon{
 	public $displayName = "Rad Cannon";
 	public $iconPath = "RadCannon.png";
 	
-	public $animation = "beam";//behaves like a bolt, I think beam animation is fitting
+	public $animation = "bolt";//behaves like a bolt
 	public $animationColor = array(150, 10, 10); //make it deep red...
-	public $animationExplosionScale = 0.3;
+	public $animationExplosionScale = 0.3; //will be recalculated anyway
+	/*
 	public $projectilespeed = 15;
 	public $animationWidth = 8;
 	public $trailLength = 20;
-  
+  */
+	
 	public $loadingtime = 2;
 	public $noOverkill = true; //does not overkill
         
@@ -2406,6 +2435,8 @@ class RadCannon extends Weapon{
 		if ( $maxhealth == 0 ) $maxhealth = 8;
 		if ( $powerReq == 0 ) $powerReq = 6;
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		
+		$this->animationExplosionScale = $this->dynamicScale(24);//scale weapon using Heavy Bolter damage output - this seems appropriate (effect is lesser but, let's say, encompassing, deserves recognition)
 	}
 	
 	
@@ -2552,11 +2583,13 @@ class IonFieldGenerator extends Weapon{
 	public $animationColor = array(30, 170, 255);
 	public $animationExplosionScale = 2; //covers 2 hexes away from explosion center
 	public $animationExplosionType = "AoE";
+	/*useless
 	public $explosionColor = array(30, 170, 255);
 	public $projectilespeed = 12;
 	public $animationWidth = 14;
 	public $trailLength = 10;
-	    
+	    */
+	
 	public $firingModes = array(
 		1 => "IonStorm"
 	);
@@ -2727,26 +2760,26 @@ class VortexDisruptor extends Weapon{
 	public $loadingtime = 3;
     public $rangePenalty = 1;//-1/hex
 	
-	public $trailColor = array(245, 90, 90);
 	public $animation = "ball";
 	public $animationColor = array(245, 90, 90);
 	public $animationExplosionScale = 0.5; //single hex explosion
 	public $animationExplosionType = "AoE";
+	/*useless
+	public $trailColor = array(245, 90, 90);
 	public $explosionColor = array(255, 0, 0);
 	public $projectilespeed = 10;
 	public $animationWidth = 14;
 	public $trailLength = 10;
-	    
+	    */
+	
 	public $firingModes = array(
 		1 => "Disruption"
 	);
 		
-		
-	
+			
 	//in pickup play it's essentially a power source - and Shadows don't have all that much use for extra power. Very low repair priority,although maybe above Hangars ;)
 	public $repairPriority = 2;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-    	
-		
+    		
 		
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);  
@@ -2823,14 +2856,15 @@ class ParticleConcentrator extends Raking{
 	public $iconPath = "ParticleConcentrator.png";
 	
 	public $animation = "laser";
-        public $animationColor = array(255, 250, 230);
+        public $animationColor = array(255, 163, 26); //should be the same as Particle Cannon
+	/*
 	public $trailColor = array(30, 170, 255);	
 	public $animationWidth = 4;
 	public $animationWidthArray = array(1=>4, 2=>5, 3=>6, 4=>7, 5=>8, 6=>10);
 	public $animationWidth2 = 0.3;
         public $animationExplosionScale = 0.25;
 	public $animationExplosionScaleArray = array(1=>0.25, 2=>0.35, 3=>0.45, 4=>0.55, 5=>0.70, 6=>0.85);
-      
+      */
         public $loadingtime = 2;
 	public $intercept = 1; //intercept rating -1     
 	
@@ -2990,14 +3024,16 @@ class VorlonDischargeGun extends Weapon{
 	public $name = "VorlonDischargeGun";
 	public $displayName = "Discharge Gun";
 	public $iconPath = "VorlonDischargeGun.png";
+	
 	public $animation = "laser";
-	public $animationColor = array(175, 225, 175);
+	public $animationColor = array(175, 255, 225);
+	/*
 	public $trailColor = array(175, 225, 175);
 	public $projectilespeed = 15;
 	public $animationWidth = 4;
 	public $animationExplosionScale = 0.25;
 	public $trailLength = 30;
-	
+	*/
 	public $loadingtime = 1;
 	public $normalload = 2;
 		
@@ -3179,13 +3215,16 @@ class VorlonLightningCannon extends Weapon{
 	public $name = "VorlonLightningCannon";
 	public $displayName = "Lightning Cannon";
 	//public $iconPath = "VorlonDischargeGun.png";
+	
 	public $animation = "laser";
 	public $animationColor = array(195, 235, 195);
+	/*
 	public $trailColor = array(175, 225, 175);
 	public $projectilespeed = 15;
 	public $animationWidth = 4;
 	public $animationExplosionScale = 0.3;
 	public $trailLength = 30;
+	*/
 	
 	//technical variables for combined shot
 	public $isCombined = false;
@@ -3451,14 +3490,17 @@ class VorlonLightningCannon extends Weapon{
         public $name = "VorlonLtDischargeGun";
         public $displayName = "Light Discharge Gun";
 	    public $iconPath = "VorlonLtDischargeGun.png";
-        public $animation = "trail";
-		public $animationColor = array(175, 225, 175);
+	    
+        public $animation = "bolt";
+		public $animationColor = array(175, 255, 225);
+	    /*
 		public $trailColor = array(175, 225, 175);
         public $animationExplosionScale = 0.15;
         public $projectilespeed = 10;
         public $animationWidth = 2;
         public $trailLength = 10;
-        public $intercept = 1; //not very good ant intercepting things... I am going with default as nothing is marged on control card
+	*/
+        public $intercept = 1; //not very good ant intercepting things... I am going with default as nothing is marged on control card (except default allows merging multiple shots for interception purposes, too)
         public $loadingtime = 1;
         public $shots = 1;
 	    public $guns = 2;
@@ -3555,13 +3597,16 @@ class VorlonDischargeCannon extends Weapon{
 	public $name = "VorlonDischargeCannon";
 	public $displayName = "Discharge Cannon";
 	public $iconPath = "VorlonDischargeCannon.png";
+	
 	public $animation = "laser";
-	public $animationColor = array(175, 225, 175);
+	public $animationColor = array(175, 255, 225);
+	/*
 	public $trailColor = array(175, 225, 175);
 	public $projectilespeed = 15;
 	public $animationWidth = 5;
 	public $animationExplosionScale = 0.45;
 	public $trailLength = 30;
+	*/
 	
 	public $loadingtime = 1;
 	public $normalload = 2;
