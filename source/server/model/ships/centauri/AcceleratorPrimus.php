@@ -16,6 +16,7 @@ class AcceleratorPrimus extends BaseShip{
         $this->isd = 2090;
         $this->occurence = "uncommon";
         $this->variantOf = "Primus Battlecruiser";
+		$this->critRollMod = 1; //vulnerable to criticals - after 2205, but let's skip this detail!
         
         $this->forwardDefense = 16;
         $this->sideDefense = 17;

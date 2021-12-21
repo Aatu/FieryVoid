@@ -1,7 +1,7 @@
 <?php
 class DrakhHeavyRaider extends LCV{
 	/*Drakh Heavy Raider LCV*/
-	/*approximated as MCV, no EW restrictions*/
+	/*no EW restrictions*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
@@ -30,8 +30,7 @@ class DrakhHeavyRaider extends LCV{
 		$this->hangarRequired = "Raiders"; //Heavy Raiders can use regular Raider catapults
 		$this->unitSize = 0.5; //they require twice as much space, though!
 	    
-	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
-	    
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance   
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
@@ -43,14 +42,16 @@ class DrakhHeavyRaider extends LCV{
 		$this->addPrimarySystem($sensors);
 	//$this->addPrimarySystem(new Scanner(4, 12, 4, 6));
 	$this->addPrimarySystem(new Engine(4, 12, 0, 7, 2));
-	$this->addPrimarySystem(new customPhaseDisruptor(3, 0, 0, 300, 60));
+	
+	$this->addFrontSystem(new customPhaseDisruptor(3, 0, 0, 300, 60));
+	
 	$this->addPrimarySystem(new AbsorbtionShield(2,6,4,1,0,360));
 	$this->addPrimarySystem(new Structure( 4, 30));
 	    
         $this->hitChart = array(
         		0=> array( //should never happen (but it will!)
         				10 => "Structure",
-        				12 => "Phase Disruptor",
+        				12 => "1:Phase Disruptor",
         				14 => "Absorption Shield",
         				16 => "Engine",
         				18 => "Reactor",
@@ -58,7 +59,7 @@ class DrakhHeavyRaider extends LCV{
         		),
         		1=> array( //PRIMARY hit table, effectively
         				10 => "Structure",
-        				12 => "0:Phase Disruptor",
+        				12 => "1:Phase Disruptor",
         				14 => "0:Absorption Shield",
         				16 => "0:Engine",
         				18 => "0:Reactor",
@@ -66,7 +67,7 @@ class DrakhHeavyRaider extends LCV{
         		),
         		2=> array( //PRIMARY hit table, effectively
         				10 => "Structure",
-        				12 => "0:Phase Disruptor",
+        				12 => "1:Phase Disruptor",
         				14 => "0:Absorption Shield",
         				16 => "0:Engine",
         				18 => "0:Reactor",

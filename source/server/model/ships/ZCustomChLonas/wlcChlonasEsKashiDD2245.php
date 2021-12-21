@@ -33,9 +33,9 @@ class wlcChlonasEsKashiDD2245 extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 13, 4, 6));
         $this->addPrimarySystem(new Engine(5, 11, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(4, 2));
-        $this->addPrimarySystem(new Thruster(4, 15, 0, 4, 1));
-        $this->addPrimarySystem(new Thruster(4, 21, 0, 8, 2));
-        $this->addPrimarySystem(new customHeavyMatterCannon(4, 0, 0, 300, 60));
+        $this->addAftSystem(new Thruster(4, 15, 0, 4, 1));
+        $this->addAftSystem(new Thruster(4, 21, 0, 8, 2));
+        $this->addFrontSystem(new customHeavyMatterCannon(4, 0, 0, 300, 60));
         
         $this->addLeftSystem(new Thruster(4, 15, 0, 4, 3));
         $this->addLeftSystem(new AssaultLaser(3, 6, 4, 240, 60));
@@ -64,8 +64,8 @@ class wlcChlonasEsKashiDD2245 extends HeavyCombatVesselLeftRight{
 		
 		0=> array(
 			5 => "Structure",
-			7 => "Heavy Matter Cannon",
-			11 => "Thruster",
+			7 => "1:Heavy Matter Cannon",
+			11 => "2:Thruster",
 			13 => "Scanner",
 			15 => "Engine",
 			17 => "Hangar",

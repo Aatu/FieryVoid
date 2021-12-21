@@ -33,16 +33,16 @@ class Deathfalcon2230 extends BaseShipNoAft{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 14, 5, 7));
         $this->addPrimarySystem(new Engine(5, 15, 0, 8, 3));
-        $this->addPrimarySystem(new JumpEngine(5, 10, 5, 36));
-        $this->addPrimarySystem(new Hangar(4, 12));
+        $this->addAftSystem(new JumpEngine(5, 10, 5, 36));
+        $this->addPrimarySystem(new Hangar(4, 14, 12));
         $this->addPrimarySystem(new HvyParticleCannon(5, 12, 9, 330, 30));
-        $this->addPrimarySystem(new Thruster(5, 21, 0, 8, 2));
+        $this->addAftSystem(new Thruster(5, 21, 0, 8, 2));
 
-        $this->addFrontSystem(new RepeaterGun(2, 6, 4, 240, 0));
-        $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 60));        
-        $this->addFrontSystem(new RepeaterGun(2, 6, 4, 0, 120));
-        $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 60));        
-        $this->addFrontSystem(new RepeaterGun(2, 6, 4, 300, 60));
+        $this->addFrontSystem(new RepeaterGun(2, 6, 4, 240, 0));    
+        $this->addFrontSystem(new RepeaterGun(2, 6, 4, 300, 60));     
+        $this->addFrontSystem(new RepeaterGun(2, 6, 4, 0, 120));   
+        $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 60));  
+        $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 60));  
         $this->addFrontSystem(new Thruster(4, 13, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 13, 0, 4, 1));
 
@@ -65,8 +65,8 @@ class Deathfalcon2230 extends BaseShipNoAft{
         $this->hitChart = array(
         		0=> array(
         				8 => "Structure",
-        				9 => "Jump Engine",
-        				11 => "Thruster",
+        				9 => "2:Jump Engine",
+        				11 => "2:Thruster",
         				13 => "Scanner",
         				15 => "Engine",
         				17 => "Hangar",

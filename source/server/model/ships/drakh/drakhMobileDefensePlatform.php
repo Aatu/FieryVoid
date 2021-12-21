@@ -36,8 +36,7 @@ class DrakhMobileDefensePlatform extends MediumShip{
 	$this->pivotcost = 2;
 	$this->iniativebonus = 12 *5;
 	    
-	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
-	    
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance	    
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
@@ -48,17 +47,19 @@ class DrakhMobileDefensePlatform extends MediumShip{
 		$sensors->markImproved();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(4, 9, 0, 4, 3));
-	$this->addPrimarySystem(new customPhaseDisruptor(3, 0, 0, 240, 30));
-	$this->addPrimarySystem(new customPhaseDisruptor(3, 0, 0, 330, 120));
-	$this->addPrimarySystem(new customLtPolarityPulsar(2, 0, 0, 0,360));  
+	
+	$this->addFrontSystem(new customPhaseDisruptor(3, 0, 0, 240, 30));
+	$this->addFrontSystem(new customPhaseDisruptor(3, 0, 0, 330, 120));
+	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 0,360));  
+	
 	$this->addPrimarySystem(new AbsorbtionShield(2,6,4,1,0,360));
 	$this->addPrimarySystem(new Structure( 4, 30));
 	    
         $this->hitChart = array(
         		0=> array( 
         				10 => "Structure",
-        				12 => "Phase Disruptor",
-		    			13 => "Light Polarity Pulsar",
+        				12 => "1:Phase Disruptor",
+		    			13 => "1:Light Polarity Pulsar",
         				15 => "Absorption Shield",
         				16 => "Engine",
         				18 => "Reactor",
@@ -66,8 +67,8 @@ class DrakhMobileDefensePlatform extends MediumShip{
         		),
         		1=> array( //PRIMARY hit table, effectively
         				10 => "Structure",
-        				12 => "0:Phase Disruptor",
-		    			13 => "0:Light Polarity Pulsar",
+        				12 => "1:Phase Disruptor",
+		    			13 => "1:Light Polarity Pulsar",
         				15 => "0:Absorption Shield",
         				16 => "0:Engine",
         				18 => "0:Reactor",
@@ -75,8 +76,8 @@ class DrakhMobileDefensePlatform extends MediumShip{
         		),
         		2=> array( //PRIMARY hit table, effectively
         				10 => "Structure",
-        				12 => "0:Phase Disruptor",
-		    			13 => "0:Light Polarity Pulsar",
+        				12 => "1:Phase Disruptor",
+		    			13 => "1:Light Polarity Pulsar",
         				15 => "0:Absorption Shield",
         				16 => "0:Engine",
         				18 => "0:Reactor",
@@ -88,9 +89,9 @@ class DrakhMobileDefensePlatform extends MediumShip{
 	
 	
         public function getInitiativebonus($gamedata){
-	    $iniBonus = parent::getInitiativebonus($gamedata);
+			$iniBonus = parent::getInitiativebonus($gamedata);
             //may be boosted by  Raider Controller...
-	    $iniBonus += DrakhRaiderController::getIniBonus($this);
+			$iniBonus += DrakhRaiderController::getIniBonus($this);
             return $iniBonus;
         }
 	

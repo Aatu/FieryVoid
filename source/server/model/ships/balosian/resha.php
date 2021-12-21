@@ -33,10 +33,10 @@ class Resha extends MediumShip{
 		$this->addPrimarySystem(new Thruster(3, 11, 0, 4, 4));
 
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
-        $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 180, 0));
-        $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 180, 0));
 		$this->addFrontSystem(new IonCannon(4, 6, 4, 240, 0));
 		$this->addFrontSystem(new IonCannon(4, 6, 4, 0, 120));
+        $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 180, 0));
+        $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 180, 0));
         $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 0, 180));
         $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 0, 180));
 		

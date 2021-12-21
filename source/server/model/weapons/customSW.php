@@ -51,8 +51,8 @@ class SWRayShield extends Shield implements DefensiveSystem{
 		//Ballistic, Matter, SWIon - passes through!
 		//if($weapon->weaponClass == 'Ballistic' || $weapon->weaponClass == 'Matter' || $weapon->weaponClass == 'SWIon' || $weapon->weaponClass == 'Ramming') $output = 0;
 		//BALANCE CHANGE - Matter weapons are affected at half efficiency (important vs eg. Orieni and Belt Alliance)
+		$output += $this->outputMod; //outputMod itself is negative!
 		if($weapon->weaponClass == 'Ballistic' || $weapon->weaponClass == 'SWIon' || $weapon->weaponClass == 'Ramming') $output = 0;
-			$output += $this->outputMod; //outputMod itself is negative!
 		if($weapon->weaponClass == 'Matter') $output = ceil($output/2);
 		if($weapon->damageType == 'Raking') $output = 2*$output;//Raking - double effect!
 		$output=max(0,$output); //no less than 0!
@@ -99,8 +99,9 @@ class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launch
     public $rangeMod = 0;
     public $firingMode = 1;
     public $maxAmount = 0;
-    public $priority = 4;
+    public $priority = 5;
     public $firingModes = array( 1 => "Spread");  
+        public $animationExplosionScale = 0.25;
 	
     
 	public $damageType = 'Pulse'; 
@@ -166,7 +167,7 @@ class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launch
 
 class SWFtrMissile extends MissileFB //generic class; this is AMMO for SWFtrProtonTorpedoLauncher
 {
-    public $priority = 4;
+    public $priority = 5;
 	public $damageType = 'Pulse'; 
     	public $weaponClass = "Ballistic"; 
 	
@@ -196,14 +197,10 @@ class SWDirectWeapon extends Pulse{
     public $damageType = "Pulse"; //and this should remain!
     public $weaponClass = "Particle"; //and may be easily overridden
    
-	//animation for fighter laser - bigger guns need to change size and speed attributes :)
-	public $animation = "beam";
-        public $animationColor = array(225, 0, 0); //I aim ar bright red here... Blue for Ion, green for Blasters
-	public $trailColor = array(225, 0, 0);
-        public $animationExplosionScale = 0.1;
-        public $projectilespeed = 11;
-	public $animationWidth = 3;
-	public $trailLength = 8;
+	//animation for fighter laser - bigger guns need to change scale :)
+	public $animation = "bolt";
+        public $animationColor = array(225, 0, 0); //I aim at bright red here... Blue for Ion, green for Blasters
+        public $animationExplosionScale = 0.15; //will be set dynamically anyway!
 	
 	protected $damagebonus = 0;
 	protected $damagebonusArray = array();
@@ -228,18 +225,21 @@ class SWDirectWeapon extends Pulse{
 		if($this->fireControl[0]!==null) $this->fireControl[0] += floor($nrOfShots/2);
 		if($this->fireControl[1]!==null) $this->fireControl[1] += floor($nrOfShots/3);
 		if($this->fireControl[2]!==null) $this->fireControl[2] += floor($nrOfShots/3);
-				
+		
+		//let's dynamically set scale depending on damage! - or actuallly not, as default constructor does this
+		//$avgDmg = ($this->minDamage+$this->maxDamage) /2;
+		//$this->animationExplosionScale = $this->dynamicScale($avgDmg);
+		//$this->animationExplosionScale = $this->dynamicScale(0); //average damage will be calculated appropriately
+						
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	}    
-	
 	
         public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 			$this->data["Special"] = 'Burst mode: 0..1 +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
 			$this->data["Special"] .= '<br>Minimum of 1 pulse.';
 			$this->data["Special"] .= '<br>Alternate firing mode: Salvo: single shot with increased damage but lowered FC (all weapons in battery fire together instead of sequentially).';
-        }
-	
+        }	
     
 	public function rollPulses($turn, $needed, $rolled){
 		$pulses = $this->getPulses($turn); //$this->useDie usually
@@ -254,16 +254,10 @@ class SWDirectWeapon extends Pulse{
 	  to be called in create function where needed
 	  AFTER calling parent::__construct! (else variables like maxpulses may be not yet filled correctly
 	*/
-	public function addSalvoMode(){
-		
+	public function addSalvoMode(){		
 		if($this->defaultShots <2) return; //no point
 		$this->firingModes[2] = 'Salvo';
-		$new = ceil($this->animationExplosionScale*1.25);
-		$this->animationExplosionScaleArray = array(1=>$this->animationExplosionScale, 2=>$new);
-		$new = ceil($this->animationWidth*1.25);
-		$this->animationWidthArray = array(1=>$this->animationWidth, 2=>$new);
-		$new = ceil($this->trailLength*1.25);
-		$this->trailLengthArray = array(1=>$this->trailLength, 2=>$new);
+		$this->animationExplosionScaleArray = array(1=>$this->animationExplosionScale, 2=>$this->animationExplosionScale); //will be recalculated in a moment anyway!
 		$this->maxpulsesArray = array(1=>$this->maxpulses, 2=>1);
 		$this->defaultShotsArray = array(1=>$this->defaultShots, 2=>1);
 		$new = min(10,$this->priority+1);//system doesn't accept more than 10 for now
@@ -290,8 +284,13 @@ class SWDirectWeapon extends Pulse{
 				$this->priorityAF = 0; //so setPriorityAF works correctly
 				$this->setPriorityAF(); 
 				$this->priorityAFArray[$i] = $this->priorityAF;
-			}
-		}
+			}			
+			//visual scaling recalculation!
+			//$avgDmg = ($this->minDamage+$this->maxDamage) /2;
+			//$this->animationExplosionScaleArray[$i] = $this->dynamicScale($avgDmg);
+			$this->animationExplosionScaleArray[$i] = $this->dynamicScale(0); //average damage will be calculated appropriately	
+		}				
+		
 		$this->changeFiringMode(1); //reset mode to basic
 		
 	}
@@ -324,13 +323,8 @@ class SWBallisticWeapon extends Torpedo{
 	public $noPrimaryHits = true; //cannot hit PRIMARY from outer table
    
 	//animation for capital concussion missile - others need to change things
-        public $trailColor = array(141, 240, 255);
-        public $animation = "trail";
+        public $animation = "torpedo";
         public $animationColor = array(90, 170, 190);
-        public $animationExplosionScale = 0.3;
-        public $projectilespeed = 10;
-        public $animationWidth = 5;
-        public $trailLength = 12;	
 		
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $nrOfShots){
@@ -353,6 +347,10 @@ class SWBallisticWeapon extends Torpedo{
 		if($this->fireControl[1]!==null) $this->fireControl[1] += floor($nrOfShots/3);
 		if($this->fireControl[2]!==null) $this->fireControl[2] += floor($nrOfShots/3);
 				
+		//let's dynamically set scale depending on damage!
+		$avgDmg = ($this->minDamage+$this->maxDamage) /2;
+		$this->animationExplosionScale = $this->dynamicScale($avgDmg);
+		
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	}    
 	
@@ -376,8 +374,7 @@ class SWBallisticWeapon extends Torpedo{
         {
             return floor(($needed - $rolled) / ($this->grouping));
         }
-	
-    
+	    
 	public function rollPulses($turn, $needed, $rolled){
 		$pulses = $this->getPulses($turn); //$this->useDie usually
 		$pulses -= 1;
@@ -386,7 +383,6 @@ class SWBallisticWeapon extends Torpedo{
 		$pulses=max($pulses,1); //no less than 1
 		return $pulses;
 	}
-
 	
 	//these will ned to be overridden for each particular weapon!
 	//public function getDamage($fireOrder){        return ??;   }
@@ -406,18 +402,7 @@ class SWIon extends SWDirectWeapon{
  
     public $weaponClass = "SWIon"; //weapon class
 	  
-    //public $systemKiller = true; //let's not go overhead - do NOT use $systemKiller...
-
-    //animation for fighter gun - bigger guns need to change size and speed attributes :)
-    public $animation = "beam";
-    public $projectilespeed = 9;
-    public $animationExplosionScale = 0.15;
-    public $animationWidth = 3;
-    public $trailLength = 8;
-    public $animationColor =  array( 80, 150, 250);
-    public $trailColor = array( 80, 150, 250);
-	
-
+    public $animationColor =  array( 80, 150, 250); //scale is derived from damage
 	
 	
     public function setSystemDataWindow($turn){
@@ -430,6 +415,10 @@ class SWIon extends SWDirectWeapon{
       $this->data["Special"] .= "Damage may cause power shortages.";      
       $this->data["Special"] .= "<br>Increased chance of critical on systems damaged."; 
     }
+		
+	function dynamicScale($avgDmg){ //Ion damage is small compared to weapon size - that's because of non-damaging effects involved; derive scale from larger damage yield - one that would be expected from comparable Laser weapon!
+		return parent::dynamicScale($avgDmg*1.75);
+	}
 	
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //make vulnerable to next critical
 	if ($system->advancedArmor) return;
@@ -505,10 +494,7 @@ class SWFighterLaser extends SWDirectWeapon{
     public $loadingtime = 1;
     public $rangePenalty = 2;
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
-
-	protected $damagebonus = 0;
-
-   
+	protected $damagebonus = 0;   
     
 	function __construct($startArc, $endArc, $damagebonus, $nrOfShots){
 		$this->damagebonus = $damagebonus;
@@ -521,7 +507,6 @@ class SWFighterLaser extends SWDirectWeapon{
 		if($damagebonus > 2) $this->priority++;
 		if($damagebonus > 4) $this->priority++;		
 		if($damagebonus > 6) $this->priority++;
-		
 		
 		parent::__construct(0, 1, 0, $startArc, $endArc, $nrOfShots);
 		$this->addSalvoMode();
@@ -559,12 +544,9 @@ class SWFighterIon extends SWIon{
 		$nr = min(4, $nrOfShots); //images are not unlimited
 		$this->iconPath = "starwars/mjsIonFtr".$nr.".png";
 			
-
 		parent::__construct(0, 1, 0, $startArc, $endArc, $nrOfShots);
 		$this->addSalvoMode();
-	}    
-
-			  
+	}    	  
     
     public function getDamage($fireOrder){        return Dice::d(4)+$this->damagebonus;   }
     public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
@@ -642,6 +624,7 @@ class SWFtrConcMissileLauncher extends SWFtrBallisticLauncher //this is launcher
     public $maxAmount = 0;
     public $priority = 3; //that's really light missile
     public $fireControl = array(2, 1, 0); // fighters, <mediums, <capitals 
+        public $animationExplosionScale = 0.15;
 	
     function __construct($maxAmount, $startArc, $endArc, $noOfShots){
 	//appropriate icon (number of barrels)...
@@ -669,6 +652,7 @@ class SWFtrConcMissile extends SWFtrMissile //this is AMMO for SWFtrConcMissileL
     public $priority = 2;
 	public $damageType = 'Pulse'; 
     	public $weaponClass = "Ballistic"; 
+        public $animationExplosionScale = 0.15;
 	
     function __construct($startArc, $endArc, $noOfShots, $fireControl = null){
         parent::__construct($startArc, $endArc, $noOfShots, $fireControl);
@@ -729,12 +713,7 @@ class SWMediumLaser extends SWDirectWeapon{
     public $loadingtime = 1;
     public $rangePenalty = 1.5; // 3 per 2 hexes
     public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals
-   
-        public $animationExplosionScale = 0.15;
-        public $projectilespeed = 12;
-	public $animationWidth = 3;
-	public $trailLength = 10;
-    
+       
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		$this->intercept = floor($nrOfShots*0.9); //this gives distinctly worse interception than light laser
 
@@ -764,12 +743,6 @@ class SWHeavyLaser extends SWDirectWeapon{
     public $loadingtime = 2;
     public $rangePenalty = 1; 
     public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals
-	
-        public $animationExplosionScale = 0.2;
-        public $projectilespeed = 13;
-	public $animationWidth = 4;
-	public $trailLength = 12;
-   
     
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		$this->intercept = floor($nrOfShots*0.5); //this gives very poor interception, but still interception is possible
@@ -801,12 +774,7 @@ class SWMediumLaserAF extends SWDirectWeapon{
     public $loadingtime = 1;
     public $rangePenalty = 1.5; // 3 per 2 hexes
     public $fireControl = array(6, 2, 0); // fighters, <mediums, <capitals
-   
-        public $animationExplosionScale = 0.15;
-        public $projectilespeed = 12;
-	public $animationWidth = 3;
-	public $trailLength = 10;
-    
+      
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		$this->intercept = floor($nrOfShots*1); //this gives distinctly worse interception than light laser
 
@@ -840,12 +808,7 @@ class SWLightTLaser extends SWDirectWeapon{
     public $rangePenalty = 1;
     public $fireControl = array(-1, 2, 3); // fighters, <mediums, <capitals
 	public $animationColor = array(245, 0, 0); //let's make it brighter than regular lasers :)
-	public $trailColor = array(245, 0, 0);
-   
-        public $animationExplosionScale = 0.2;
-        public $projectilespeed = 15;
-	public $animationWidth = 4;
-	public $trailLength = 12;
+	
 	
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		$this->intercept = 0;
@@ -877,12 +840,7 @@ class SWMediumTLaser extends SWDirectWeapon{
     public $rangePenalty = 0.5;
     public $fireControl = array(-3, 1, 3); // fighters, <mediums, <capitals
 	public $animationColor = array(245, 0, 0); //let's make it brighter than regular lasers :)
-	public $trailColor = array(245, 0, 0);
-   
-        public $animationExplosionScale = 0.25;
-        public $projectilespeed = 15;
-	public $animationWidth = 5;
-	public $trailLength = 14;
+	
     
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		$this->intercept = 0;
@@ -914,14 +872,7 @@ class SWHeavyTLaser extends SWDirectWeapon{
     public $loadingtime = 3;
     public $rangePenalty = 0.33;
     public $fireControl = array(-6, 0, 3); // fighters, <mediums, <capitals
-	public $animationColor = array(245, 0, 0); //let's make it brighter than regular lasers :)
-	public $trailColor = array(245, 0, 0);
-	
-        public $animationExplosionScale = 0.3;
-        public $projectilespeed = 16;
-	public $animationWidth = 6;
-	public $trailLength = 18;
-   
+	public $animationColor = array(245, 0, 0); //let's make it brighter than regular lasers :)   
     
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		$this->intercept = 0;
@@ -1006,8 +957,7 @@ class SWMediumTLaserE extends SWMediumTLaser{
     public $priority = 4;
     public $loadingtime = 3;
     public $rangePenalty = 0.6;
-    public $fireControl = array(-4, 1, 3); // fighters, <mediums, <capitals
-    
+    public $fireControl = array(-4, 1, 3); // fighters, <mediums, <capitals    
 	
 	public function getDamage($fireOrder){ return  Dice::d(8)+6 +$this->damagebonus;   }
 	public function setMinDamage(){     $this->minDamage = 7+$this->damagebonus ;      }
@@ -1041,12 +991,7 @@ class SWLightIon extends SWIon{
     public $loadingtime = 2;
     public $rangePenalty = 0.75; //-3/4 hexes
     public $fireControl = array(-4, 1, 2); // fighters, <mediums, <capitals
-   
-        public $animationExplosionScale = 0.15;
-        public $projectilespeed = 12;
-	public $animationWidth = 4;
-	public $trailLength = 12;
-	
+   	
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		$this->intercept = 0;
 
@@ -1076,12 +1021,7 @@ class SWMediumIon extends SWIon{
     public $loadingtime = 3;
     public $rangePenalty = 0.33; //-1/3 hexes
     public $fireControl = array(-6, 0, 2); // fighters, <mediums, <capitals
-   
-        public $animationExplosionScale = 0.2;
-        public $projectilespeed = 13;
-	public $animationWidth = 5;
-	public $trailLength = 14;
-    
+       
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		$this->intercept = 0;
 
@@ -1113,13 +1053,6 @@ class SWHeavyIon extends SWIon{
     public $rangePenalty = 0.25; //-1/4 hexes!
     public $fireControl = array(null, -1, 1); // fighters, <mediums, <capitals
 	
-	
-        public $animationExplosionScale = 0.35;
-        public $projectilespeed = 13;
-	public $animationWidth = 6;
-	public $trailLength = 18;
-   
-    
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		$this->intercept = 0;
 
@@ -1177,12 +1110,8 @@ class SWCapitalProton extends SWBallisticWeapon{
         
         public $fireControl = array(-8, 0, 1); // fighters, <mediums, <capitals 
 
-        public $trailColor = array(171, 240, 255);
         public $animationColor = array(150, 190, 230);
-        public $animationExplosionScale = 0.4;
-        public $projectilespeed = 11;
-        public $animationWidth = 6;
-        public $trailLength = 12;
+	
 	
 	function __construct($armor, $startArc, $endArc, $noOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		//appropriate icon (number of barrels)...
@@ -1210,12 +1139,6 @@ class SWAntifighterConcussion extends SWBallisticWeapon{
         public $loadingtime = 1;
 	public $priority = 3;
 	
-	//color etc from base ballistic class
-        public $animationExplosionScale = 0.15;
-        public $projectilespeed = 12;
-        public $animationWidth = 3;
-        public $trailLength = 7;	
-        
         public $fireControl = array(2, 1, 0); // fighters, <mediums, <capitals 
 
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
@@ -1251,10 +1174,8 @@ class SWTractorBeam extends SWDirectWeapon{
 	//let's animate this as a very wide beam...
 	public $animation = "laser";
         public $animationColor = array(55, 55, 55);
-        public $animationColor2 = array(100, 100, 100);
-        public $animationExplosionScale = 0.45;
-        public $animationWidth = 15;
-        public $animationWidth2 = 0.5;
+        public $animationExplosionScale = 0.8; //make animation really large!
+	
 	
  	public $possibleCriticals = array( //no point in damage reduced crit
             14=>"ReducedRange"
@@ -1277,7 +1198,7 @@ class SWTractorBeam extends SWDirectWeapon{
 		$this->iconPath = "tractorBeam.png";
 		
 		parent::__construct($armor, 6, 4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
-		$this->addSalvoMode();
+		//$this->addSalvoMode(); //no salvo mode for Tractor!
 	}    
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //target is held critical on PRIMARY Structure!

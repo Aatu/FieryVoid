@@ -49,8 +49,11 @@ class ColonialAssaultRaptor extends SuperHeavyFighter{
 			$fighter->imagePath = "img/ships/BSG/raptor.png";
 			$fighter->iconPath = "img/ships/BSG/raptor_large.png";
 
-			$frontGun = new BSGKineticEnergyWeapon(330, 30, 2, 4);
-			$frontGun->displayName = "Kinetic Energy Cannon";
+//			$frontGun = new BSGKineticEnergyWeapon(330, 30, 2, 4);
+//			$frontGun->displayName = "Kinetic Energy Cannon";
+
+            $frontGun = new BSGLtKineticEnergyWeaponVA(345, 15, 15, 3, 4);//narower arc (from/to), difference between narrow and wide arc, damage bonus, number of shots
+            $fighter->addFrontSystem($frontGun);
 			$hvyGun = new BSGHvyKineticEnergyWeapon(330, 30, 1); //$startArc, $endArc, $nrOfShots
 			$hvyGun->displayName = "Heavy Kinetic Energy Cannon";
 			$missile1 = new FighterMissileRack(3, 330, 30);
@@ -58,7 +61,7 @@ class ColonialAssaultRaptor extends SuperHeavyFighter{
 			$missile2 = new FighterMissileRack(3, 330, 30);
 			$missile2->displayName = "Missile Pod";
 
-			$fighter->addFrontSystem($frontGun);
+//			$fighter->addFrontSystem($frontGun);
 			$fighter->addFrontSystem($hvyGun);
 
 			$fighter->addAftSystem($missile1);

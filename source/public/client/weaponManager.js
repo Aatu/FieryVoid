@@ -1707,6 +1707,8 @@ window.weaponManager = {
 
     getAllFireOrdersForAllShipsForTurn: function getAllFireOrdersForAllShipsForTurn(turn, type) {
         var fires = [];
+		var toReturn = false;
+		
         gamedata.ships.forEach(function (ship) {
             fires = fires.concat(weaponManager.getAllFireOrders(ship));
         });
@@ -1716,8 +1718,18 @@ window.weaponManager = {
         });
 
         if (type) {
-            fires = fires.filter(function (fireOrder) {
-                return fireOrder.type == type;
+            fires = fires.filter(function (fireOrder) { 
+				//attempt to show hex-targeted non-ballistics as well
+				toReturn = false;
+				if ( fireOrder.type == type) {
+					toReturn = true;
+				}
+				//show hex-targeted direct fire as ballistics, too
+				if ((!toReturn) && (type == 'ballistic') && (fireOrder.type == 'normal') && (fireOrder.targetid == -1)) {
+					toReturn = true;
+				}
+				return toReturn;
+                //return fireOrder.type == type;
             });
         }
 

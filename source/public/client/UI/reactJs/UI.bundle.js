@@ -37615,7 +37615,7 @@ var filterStructure = function filterStructure(systems) {
 var orderSystems = function orderSystems(systems, location) {
     systems = filterStructure(systems);
 
-    if ([4, 41, 41].includes(location)) {
+    if ([4, 41, 42].includes(location)) {
         return orderSystemsThreeWide(systems);
     } else if ([3, 31, 32].includes(location)) {
         return reverseRowsOfThree(orderSystemsThreeWide(systems));
@@ -37662,10 +37662,11 @@ var orderSystemsFourWide = function orderSystemsFourWide(systems) {
 
     var list = [];
 
+    //4 equal systems
     while (true) {
-        var _pick = pick(systems, 4),
-            picked = _pick.picked,
-            remaining = _pick.remaining;
+        var _pickOuter = pickOuter(systems, 4),
+            picked = _pickOuter.picked,
+            remaining = _pickOuter.remaining;
 
         if (picked.length === 0) {
             break;
@@ -37676,10 +37677,11 @@ var orderSystemsFourWide = function orderSystemsFourWide(systems) {
         list = list.concat(picked);
     }
 
+    //2 systems, plus optionally 2 other systems in the middle
     while (true) {
-        var _pick2 = pick(systems, 2),
-            _picked = _pick2.picked,
-            _remaining = _pick2.remaining;
+        var _pickOuter2 = pickOuter(systems, 2),
+            _picked = _pickOuter2.picked,
+            _remaining = _pickOuter2.remaining;
 
         if (_picked.length === 0) {
             break;
@@ -37687,7 +37689,7 @@ var orderSystemsFourWide = function orderSystemsFourWide(systems) {
 
         systems = _remaining;
 
-        var secondPick = pick(systems, 2);
+        var secondPick = pickOuter(systems, 2);
 
         if (secondPick.picked.length > 0) {
             systems = secondPick.remaining;
@@ -37711,9 +37713,9 @@ var orderSystemsThreeWide = function orderSystemsThreeWide(systems) {
     var list = [];
 
     while (true) {
-        var _pick3 = pick(systems, 3),
-            picked = _pick3.picked,
-            remaining = _pick3.remaining;
+        var _pick = pick(systems, 3),
+            picked = _pick.picked,
+            remaining = _pick.remaining;
 
         if (picked.length === 0) {
             break;
@@ -37725,9 +37727,9 @@ var orderSystemsThreeWide = function orderSystemsThreeWide(systems) {
     }
 
     while (true) {
-        var _pick4 = pick(systems, 2),
-            _picked2 = _pick4.picked,
-            _remaining2 = _pick4.remaining;
+        var _pick2 = pick(systems, 2),
+            _picked2 = _pick2.picked,
+            _remaining2 = _pick2.remaining;
 
         if (_picked2.length === 0) {
             break;
@@ -37751,12 +37753,21 @@ var findFriendForTwo = function findFriendForTwo(two, systems) {
 
     var onePick = pick(systems, 1);
 
+    /* singleton in the middle - does not look that good on the sides! changing to singleton on the inside
+       if (onePick.picked.length === 1) {
+           return {three: [two[0], onePick.picked[0], two[1]], remainingSystems: onePick.remaining}
+       }
+    
+       if (systems.length > 0) {
+           return {three: [two[0], systems.pop(), two[1]], remainingSystems: systems}
+       }
+    */
     if (onePick.picked.length === 1) {
-        return { three: [two[0], onePick.picked[0], two[1]], remainingSystems: onePick.remaining };
+        return { three: [onePick.picked[0], two[0], two[1]], remainingSystems: onePick.remaining };
     }
 
     if (systems.length > 0) {
-        return { three: [two[0], systems.pop(), two[1]], remainingSystems: systems };
+        return { three: [systems.pop(), two[0], two[1]], remainingSystems: systems };
     }
 
     return { three: [two[0], two[1]], remainingSystems: systems };
@@ -37786,6 +37797,7 @@ var pick = function pick(systems) {
     }
 
     var picked = [];
+    // this gets first X...
     var remaining = systems.filter(function (otherSystem) {
         if (otherSystem.name === one.name && amount > 0) {
             amount--;
@@ -37795,6 +37807,58 @@ var pick = function pick(systems) {
 
         return true;
     });
+
+    return { picked: picked, remaining: remaining };
+};
+
+//like pick(), but instead of picking first X elements - picks outer X elements
+var pickOuter = function pickOuter(systems) {
+    var amount = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 3;
+
+    var one = systems.find(function (system) {
+        var count = systems.reduce(function (all, otherSystem) {
+            if (otherSystem.name === system.name) {
+                return all + 1;
+            }
+
+            return all;
+        }, 0);
+
+        if (amount === 1) {
+            return count === amount;
+        } else {
+            return count >= amount;
+        }
+    });
+
+    if (!one) {
+        return { picked: [], remaining: systems };
+    }
+
+    var picked = [];
+    var picked2 = [];
+    // this gets outer X...
+    var remaining = systems.filter(function (otherSystem) {
+        if (otherSystem.name === one.name /*&& amount > 0*/) {
+                //amount--;
+                picked2.push(otherSystem);
+                return false;
+            }
+
+        return true;
+    });
+
+    var fromBeginning = Math.ceil(amount / 2);
+    var fromEnding = Math.floor(amount / 2);
+    for (var i = 0; i < picked2.length; i++) {
+        if (i < fromBeginning || i >= picked2.length - fromEnding) {
+            //elements from beginning and end get picked
+            picked.push(picked2[i]);
+        } else {
+            //remaining elements (from the middle) get returned to the pool
+            remaining.unshift(picked2[i]); //return to the beginning - so they're picked first in next row!
+        }
+    }
 
     return { picked: picked, remaining: remaining };
 };
@@ -40105,12 +40169,13 @@ var canOnline = function canOnline(ship, system) {
 	return gamedata.gamephase === 1 && shipManager.power.isOffline(ship, system);
 };
 
+//change December 2021: can start overloading even if no Power is available, to be balanced at end of turn
 var canOverload = function canOverload(ship, system) {
-	return !shipManager.power.isOffline(ship, system) && system.weapon && system.overloadable && !shipManager.power.isOverloading(ship, system) && shipManager.power.canOverload(ship, system);
-};
+	return gamedata.gamephase === 1 && !shipManager.power.isOffline(ship, system) && system.weapon && system.overloadable && !shipManager.power.isOverloading(ship, system);
+} /*&& shipManager.power.canOverload(ship, system)*/;
 
 var canStopOverload = function canStopOverload(ship, system) {
-	return system.weapon && system.overloadable && shipManager.power.isOverloading(ship, system);
+	return gamedata.gamephase === 1 && system.weapon && system.overloadable && shipManager.power.isOverloading(ship, system);
 };
 
 var canBoost = function canBoost(ship, system) {

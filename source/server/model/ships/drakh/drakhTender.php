@@ -43,7 +43,7 @@ class DrakhTender extends BaseShip{
         $this->addPrimarySystem(new Engine(4, 15, 0, 8, 4));
         $this->addPrimarySystem(new CargoBay(4, 18));
         $this->addPrimarySystem(new JumpEngine(5, 15, 4, 24));
-	$this->addPrimarySystem(new Hangar(4, 6, 2));
+	$this->addPrimarySystem(new Hangar(4, 6, 6)); //6 shuttles
  		
         $this->addFrontSystem(new GraviticThruster(3, 8, 0, 4, 1));
         $this->addFrontSystem(new GraviticThruster(3, 8, 0, 4, 1));
@@ -59,15 +59,15 @@ class DrakhTender extends BaseShip{
 	$this->addLeftSystem(new AbsorbtionShield(3,6,4,2,180,0)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
         $this->addLeftSystem(new CargoBay(4, 20));
         $this->addLeftSystem(new CargoBay(4, 20));
-        $this->addLeftSystem(new Catapult(4, 4));
-        $this->addLeftSystem(new Catapult(4, 4));			
+        $this->addLeftSystem(new Catapult(4, 4, 1));
+        $this->addLeftSystem(new Catapult(4, 4, 1));			
 	    
 	$this->addRightSystem(new GraviticThruster(3, 10, 0, 5, 4));
 	$this->addRightSystem(new AbsorbtionShield(3,6,4,2,0,180)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
         $this->addRightSystem(new CargoBay(4, 20));
         $this->addRightSystem(new CargoBay(4, 20)); 
-        $this->addRightSystem(new Catapult(4, 4));	
-        $this->addRightSystem(new Catapult(4, 4));	  
+        $this->addRightSystem(new Catapult(4, 4, 1));	
+        $this->addRightSystem(new Catapult(4, 4, 1));	  
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 36));

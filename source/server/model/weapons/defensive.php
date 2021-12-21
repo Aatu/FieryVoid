@@ -9,7 +9,7 @@
         public $animation = "trail";
         public $iconPath = "interceptor.png";
         public $animationColor = array(30, 170, 255);
-        public $animationExplosionScale = 0.15;
+        //public $animationExplosionScale = 0.15;
         public $priority = 4;
 
         public $animationWidth = 1;
@@ -91,7 +91,7 @@
     class InterceptorPrototype extends InterceptorMkI{
         public $name = "interceptorPrototype";
         public $displayName = "Interceptor Prototype";
-        public $priority = 4;
+        public $priority = 3;
         
         public $output = 2;
         public $intercept = 2;
@@ -115,11 +115,8 @@
         public $displayName = "Guardian Array";
         public $animation = "laser";
         public $animationColor = array(30, 170, 255);
-        public $animationExplosionScale = 0.15;
+        //public $animationExplosionScale = 0.15;
         public $priority = 4;
-
-        public $animationWidth = 1;
-        public $animationWidth2 = 0;
             
         public $intercept = 3;
              
@@ -159,10 +156,8 @@
         public $displayName = "Sentinel Point Defense";
         public $animation = "laser";
         public $animationColor = array(30, 170, 255);
-        public $animationExplosionScale = 0.15;
+        public $animationExplosionScale = 0.15; //irrelevant with no offensive mode...
 
-        public $animationWidth = 1;
-        public $animationWidth2 = 0;
             
         public $intercept = 3;
              
@@ -197,9 +192,7 @@
 	    
         public $animation = "laser";
         public $animationColor = array(160, 160, 160);
-        public $animationExplosionScale = 0.15;
-        public $animationWidth = 2;
-        public $animationWidth2 = 0;
+        public $animationExplosionScale = 0.15; //irrelevant with no offensive mode...
 	    
 	    
         public $priority = 1; //will never fire anyway except defensively, purely a defensive system
@@ -385,8 +378,7 @@ class FtrShield extends Shield implements DefensiveSystem{
     public $iconPath = "shield.png";
     public $boostable = false;
     public $baseOutput = 0; //base output, before boost
-	
-	
+		
  	public $possibleCriticals = array( //irrelevant for fighter system
             16=>"OutputReduced1"
 	);
@@ -410,7 +402,6 @@ class FtrShield extends Shield implements DefensiveSystem{
     public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ 
             return $this->output;
     }
-
 	
     public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
 	    return $this->output;
@@ -433,7 +424,7 @@ class HeavyInterceptorBattery extends InterceptorMkI{
         public $name = "HeavyInterceptorBattery";
         public $displayName = "Heavy Interceptor Battery";
         public $iconPath = "HeavyInterceptor.png";        
-        public $priority = 4;
+        public $priority = 6; //that's heavy weapon damage output!
         
         public $output = 4;
         public $intercept = 4;

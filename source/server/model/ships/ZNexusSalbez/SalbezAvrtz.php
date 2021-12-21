@@ -5,7 +5,7 @@ class SalbezAvrtz extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 675;
-		$this->faction = "ZNexus Playtest Sal-bez";
+		$this->faction = "ZNexus Sal-bez";
         $this->phpclass = "SalbezAvrtz";
         $this->imagePath = "img/ships/Nexus/salbez_bevtun.png";
         $this->shipClass = "Av'rtz Explorer";
@@ -31,7 +31,7 @@ class SalbezAvrtz extends BaseShip{
         
         $this->addPrimarySystem(new Reactor(3, 28, 0, 0));
         $this->addPrimarySystem(new CnC(3, 24, 0, 0));
-        $this->addPrimarySystem(new ELINTScanner(3, 25, 7, 6));
+        $this->addPrimarySystem(new ELINTScanner(3, 25, 7, 8));
         $this->addPrimarySystem(new Engine(3, 20, 0, 8, 4));
 		$this->addPrimarySystem(new Hangar(2, 18));
 		

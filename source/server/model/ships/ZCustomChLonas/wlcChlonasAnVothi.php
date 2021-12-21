@@ -30,7 +30,7 @@ class wlcChlonasAnVothi extends BaseShipNoAft
 		$this->addPrimarySystem(new Scanner(4, 17, 5, 7));
 		$this->addPrimarySystem(new Engine(4, 14, 0, 10, 3));
 		$this->addPrimarySystem(new Hangar(4, 14));
-		$this->addPrimarySystem(new Thruster(4, 22, 0, 10, 2));
+		$this->addAftSystem(new Thruster(4, 22, 0, 10, 2));
 		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
 		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
 		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
@@ -66,7 +66,7 @@ class wlcChlonasAnVothi extends BaseShipNoAft
 			0=> array(
 				6 => "Structure",
 				8 => "Light Particle Beam",
-				11 => "Thruster",
+				11 => "2:Thruster",
 				13 => "Scanner",
 				15 => "Hangar",
 				17 => "Engine",

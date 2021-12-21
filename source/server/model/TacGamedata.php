@@ -201,8 +201,23 @@ class TacGamedata {
         $this->ships = $ships;
     }
     
-    public static function sortShips($a, $b){
-        
+    public static function sortShips($a, $b){	    
+        if ($a->iniative > $b->iniative) return 1;
+
+        if ($a->iniative < $b->iniative) return -1;
+
+            if ($a->iniativebonus > $b->iniativebonus) return 1;
+
+            if ($b->iniativebonus > $a->iniativebonus) return -1;
+
+	    if ($a->id>$b->id) {
+		return 1;
+	    } else{
+		return -1;    
+	    }
+	    
+	    
+	    /* remade to make sure order is the same as in front end
         if ($a->iniative == $b->iniative){
             if ($a->iniativebonus == $b->iniativebonus){
                 if ($a->id > $b->id)
@@ -217,8 +232,9 @@ class TacGamedata {
         }else if ($a->iniative < $b->iniative){
             return -1;
         }
+	*/
         
-        return 1;
+        return 1; //should never reach here
     }
     
     

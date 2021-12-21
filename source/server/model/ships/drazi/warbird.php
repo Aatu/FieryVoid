@@ -27,9 +27,9 @@ class Warbird extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 13, 4, 8));
         $this->addPrimarySystem(new Engine(5, 11, 0, 8, 2));
         $this->addPrimarySystem(new Hangar(4, 1));
-        $this->addPrimarySystem(new ParticleRepeater(4, 6, 4, 240, 120));
-        $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 1));
-        $this->addPrimarySystem(new Thruster(5, 19, 0, 8, 2));
+        $this->addFrontSystem(new ParticleRepeater(4, 6, 4, 240, 120));
+        $this->addAftSystem(new Thruster(4, 13, 0, 4, 1));
+        $this->addAftSystem(new Thruster(5, 19, 0, 8, 2));
 
         $this->addLeftSystem(new ParticleCannon(4, 8, 7, 240, 0));
         $this->addLeftSystem(new ParticleCannon(4, 8, 7, 240, 0));
@@ -49,8 +49,8 @@ class Warbird extends HeavyCombatVesselLeftRight{
             $this->hitChart = array(
         		0=> array(
         				8 => "Structure",
-        				11 => "Thruster",
-					12 => "Particle Repeater",
+        				11 => "2:Thruster",
+					12 => "1:Particle Repeater",
         				14 => "Scanner",
         				16 => "Engine",
         				17 => "Hangar",

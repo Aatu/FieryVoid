@@ -9,6 +9,9 @@ class DalithornHeavyDreadnought extends BaseShip{
         $this->phpclass = "DalithornHeavyDreadnought";
         $this->imagePath = "img/ships/Nexus/DalithornDreadnought.png";
         $this->shipClass = "Heavy Dreadnought";
+// NOTE: As an updated version of the Dreadnought, the Dalithorn have
+// perfected their construction techniques. As such, the hull no longer has
+// the limited 33% availability restriction.
 		$this->shipSizeClass = 3;
 		$this->canvasSize = 175; //img has 200px per side
 		$this->unofficial = true;
@@ -29,7 +32,7 @@ class DalithornHeavyDreadnought extends BaseShip{
         
         $this->addPrimarySystem(new Reactor(4, 19, 0, 0));
         $this->addPrimarySystem(new CnC(4, 20, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 16, 5, 5));
+        $this->addPrimarySystem(new Scanner(3, 16, 5, 6));
         $this->addPrimarySystem(new Engine(3, 18, 0, 8, 3));
 		$this->addPrimarySystem(new Hangar(1, 2));
 		$this->addPrimarySystem(new CargoBay(4, 16));

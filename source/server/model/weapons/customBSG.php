@@ -1178,4 +1178,83 @@ class BSGLtKineticEnergyWeaponVA extends Pulse{
 
 
 
+//fighter weapon with variable firing arc
+class BSGHypergunVA extends Pulse{
+
+        public $name = "BSGHypergunVA";
+        public $displayName = "Hypergun";
+        public $iconPath = "starwars/swFighter4.png"; 		
+		
+        public $animation = "trail";
+        public $animationColor = array(217, 11, 41);
+        public $trailLength = 5;
+        public $animationWidth = 4;
+        public $projectilespeed = 18;
+        public $animationExplosionScale = 0.10;
+//           public $defaultShots = 1;
+//           public $shots = 1;
+
+	protected $useDie = 2; //die used for base number of hits
+		public $grouping = 15;
+		public $maxpulses = 5;
+        
+        public $loadingtime = 1;
+        public $intercept = 2;
+		public $ballisticIntercept = true; //can intercept ballistic weapons only
+        public $priority = 5; 
+		public $damagebonus = 0;
+        
+        public $rangePenalty = 2; //-2/hex
+        public $fireControl = array(-1, 0, 0); // fighters, <mediums, <capitals
+		public $fireControlArray = array(1=>array(-1, 0, 0), 2=>array(1, 0, 0)); 
+	
+	
+        public $firingModes = array(
+            1 => "Angled",
+            2 => "Focused"
+        );
+        
+        public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Matter";
+	
+    public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "Alternate mode available - with narrower arc, but FC bonus vs fighters."; 
+		$this->data["Special"] .= "<br>Can intercept ballistic weapons only."; 
+	}
+	
+	function __construct($startNarrowArc, $endNarrowArc, $widen, $damagebonus, $nrOfShots){ //narower arc (from/to), difference between narrow and wide arc, damage bonus, number of shots
+		$this->maxpulses = $nrOfShots;
+		$this->defaultShots = $nrOfShots;
+		$this->intercept = $nrOfShots; 
+		$this->damagebonus = $damagebonus;
+		$this->grouping = 30-5*$nrOfShots; //more guns means better grouping!
+		$this->grouping = max(10,$this->grouping); //but no better than +1 per 10!
+		
+            parent::__construct(0, 1, 0, $startNarrowArc-$widen, $endNarrowArc+$widen);		
+		$this->startArcArray = array(1=>$this->startArc, 2=>$startNarrowArc); 
+		$this->endArcArray = array(1=>$this->endArc, 2=>$endNarrowArc); 		
+		
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/swFighter".$nr.".png";
+		
+		if($damagebonus > 2) $this->priority++;
+		if($damagebonus > 4) $this->priority++;		
+		if($damagebonus > 6) $this->priority++;
+        }
+		
+        public function getDamage($fireOrder){ return 3+$this->damagebonus;  }
+        public function setMinDamage(){ $this->minDamage = 3+$this->damagebonus ; }
+        public function setMaxDamage(){ $this->maxDamage = 3+$this->damagebonus ; }		
+		
+    } // endof BSGHypergunVA	
+
+
+
+
 ?>
