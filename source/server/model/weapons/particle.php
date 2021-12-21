@@ -794,7 +794,7 @@
 			$this->data["Special"] .= "No overkill.<br>Reduce armor by 2 (on ships only)."; //tabletop: facing armor on a fighter as well!
 			$this->data["Special"] .= "<br>Damage scored is repeated on appropriate Structure.";
 		
-		$animationExplosionScale = $this->dynamicScale(0,2);//scale weapon using double damage output - as base damage output is low-ish, but it's repeated on Structure for overall impressive total
+		$this->animationExplosionScale = $this->dynamicScale(0,2);//scale weapon using double damage output - as base damage output is low-ish, but it's repeated on Structure for overall impressive total
         }
 		
 		/*actually repeating damage scored on appropriate Structure*/
