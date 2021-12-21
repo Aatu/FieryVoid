@@ -2,6 +2,9 @@
     class Particle extends Weapon{
         public $damageType = "Standard"; 
         public $weaponClass = "Particle"; 
+	    
+        public $animation = "bolt";
+        public $animationColor = array(255, 102, 0); 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -18,25 +21,23 @@
 
 
     class StdParticleBeam extends Particle{ 
-
-        public $trailColor = array(255, 102, 0);
-
         public $name = "stdParticleBeam";
         public $displayName = "Standard Particle Beam";
-        public $animation = "beam";
+        public $animation = "bolt";
+	    /*
         public $animationColor = array(255, 102, 0);
+        public $trailColor = array(255, 102, 0);
         public $animationExplosionScale = 0.15;
         public $projectilespeed = 12;
         public $animationWidth = 3;
         public $trailLength = 10;
-
+*/
         public $intercept = 2;
         public $loadingtime = 1;
 
-
         public $rangePenalty = 1;
         public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals
-        public $priority = 5;
+        public $priority = 5; //it's medium weapon already
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    if ( $maxhealth == 0 ) $maxhealth = 4;
@@ -54,8 +55,8 @@
     class QuadParticleBeam extends StdParticleBeam {
         public $name = "quadParticleBeam";
         public $displayName = "Quad Particle Beam";
-        public $guns = 4;
 	   public  $iconPath = "quadParticleBeam.png";
+        public $guns = 4;
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    if ( $maxhealth == 0 ) $maxhealth = 8;
@@ -66,16 +67,18 @@
 
 
     class ParticleBlaster extends Particle{
-        public $trailColor = array(255, 102, 0);
 
         public $name = "particleBlaster";
         public $displayName = "Particle Blaster";
-        public $animation = "trail";
+        public $animation = "bolt";
+	    /*
         public $animationColor = array(255, 102, 0);
+        public $trailColor = array(255, 102, 0);
         public $animationExplosionScale = 0.25;
         public $projectilespeed = 15;
         public $animationWidth = 5;
         public $trailLength = 10;
+	*/
         public $priority = 6;
 
         public $loadingtime = 2;
@@ -98,25 +101,25 @@
 
 /*fighter-mounted variant*/
     class ParticleBlasterFtr extends Particle{
-        public $trailColor = array(255, 102, 0);
 
         public $name = "particleBlasterFtr";
         public $displayName = "Particle Blaster";
         public $iconPath = "particleBlaster.png";
-        public $animation = "trail";
+        public $animation = "bolt";
+	    /*
         public $animationColor = array(255, 102, 0);
+        public $trailColor = array(255, 102, 0);
         public $animationExplosionScale = 0.25;
         public $projectilespeed = 12;
         public $animationWidth = 5;
         public $trailLength = 10;
+	*/
         public $priority = 6;
 
         public $loadingtime = 3;
 
-
         public $rangePenalty = 1;
         public $fireControl = array(-4, 0, 0); // fighters, <mediums, <capitals
-
 
 	function __construct($startArc, $endArc, $nrOfShots = 1){
             $this->defaultShots = $nrOfShots;
@@ -132,17 +135,18 @@
 
 
     class AdvParticleBeam extends Particle{
-        public $trailColor = array(255, 102, 0);
-
         public $name = "advParticleBeam";
         public $displayName = "Advanced Particle Beam";
         public $animation = "beam";
+	    /*
         public $animationColor = array(255, 102, 0);
+        public $trailColor = array(255, 102, 0);
         public $animationExplosionScale = 0.20;
         public $projectilespeed = 14;
         public $animationWidth = 5;
         public $trailLength = 10;
         public $iconPath = "stdParticleBeam.png";
+	*/
         public $priority = 5;
 
         public $intercept = 2;
@@ -157,23 +161,22 @@
         public function getDamage($fireOrder){        return Dice::d(10)+8;   }
         public function setMinDamage(){     $this->minDamage = 9 ;      }
         public function setMaxDamage(){     $this->maxDamage = 18 ;      }
-
     }
 
 
 
     class TwinArray extends Particle{
-        public $trailColor = array(255, 163, 26);
-
         public $name = "twinArray";
         public $displayName = "Twin Array";
-        public $animation = "trail";
+        public $animation = "bolt";
+	    /*
         public $animationColor = array(255, 163, 26);
+        public $trailColor = array(255, 163, 26);
         public $animationExplosionScale = 0.15;
         public $projectilespeed = 12;
         public $animationWidth = 3;
         public $trailLength = 10;
-
+*/
         public $intercept = 2;
 
         public $loadingtime = 1;
@@ -185,6 +188,8 @@
 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+		if ( $powerReq == 0 ) $powerReq = 4;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
@@ -195,17 +200,18 @@
     }
 
     class HeavyArray extends Particle{
-        public $trailColor = array(255, 163, 26);
-
         public $name = "heavyArray";
         public $displayName = "Heavy Array";
-        public $animation = "trail";
+	   
+        public $animation = "bolt";
+	    /*
         public $animationColor = array(255, 163, 26);
+        public $trailColor = array(255, 163, 26);
         public $animationExplosionScale = 0.25;
         public $projectilespeed = 20;
         public $animationWidth = 4;
         public $trailLength = 15;
-
+*/
         public $intercept = 2;
 
         public $loadingtime = 1;
@@ -217,6 +223,8 @@
 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		if ( $maxhealth == 0 ) $maxhealth = 8;
+		if ( $powerReq == 0 ) $powerReq = 4;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
@@ -228,13 +236,17 @@
 
 
 
-    class HeavyParticleBeam extends Particle{
-        public $trailColor = array(255, 163, 26);
-
+//half a Heavy Array ;)
+    class HeavyParticleBeam extends HeavyArray{
         public $name = "HeavyParticleBeam";
         public $displayName = "Heavy Particle Beam";
-        public $animation = "trail";
+	    
+        public $guns = 1; //main difference - single mount
+	    
+	    /* inherited
+        public $animation = "bolt";
         public $animationColor = array(255, 163, 26);
+        public $trailColor = array(255, 163, 26);
         public $animationExplosionScale = 0.25;
         public $projectilespeed = 20;
         public $animationWidth = 4;
@@ -247,30 +259,35 @@
 
         public $rangePenalty = 1;
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals
+	*/
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		if ( $maxhealth == 0 ) $maxhealth = 4;
+		if ( $powerReq == 0 ) $powerReq = 2;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
+	    /* inherited
         public function getDamage($fireOrder){        return Dice::d(10, 2)+6;   }
         public function setMinDamage(){     $this->minDamage = 8 ;      }
         public function setMaxDamage(){     $this->maxDamage = 26 ;      }
-
+*/
     }
 
 
 
     class ParticleCannon extends Raking{
-        public $trailColor = array(255, 163, 26);
-
         public $name = "particleCannon";
         public $displayName = "Particle Cannon";
+	    
 	public $animation = "laser";
         public $animationColor = array(255, 163, 26);
+	    /*
+        public $trailColor = array(255, 163, 26);
         public $animationExplosionScale = 0.25;
         public $animationWidth = 4;
         public $animationWidth2 = 0.3;
-
+*/
         public $intercept = 1;
         public $loadingtime = 2;
         public $priority = 8;
@@ -299,16 +316,17 @@
 
 
     class LightParticleCannon extends Raking{
-        public $trailColor = array(255, 163, 26);
 
         public $name = "lightParticleCannon";
         public $displayName = "Light Particle Cannon";
 	public $animation = "laser";
         public $animationColor = array(255, 163, 26);
+	    /*
+        public $trailColor = array(255, 163, 26);
         public $animationExplosionScale = 0.2;
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
-
+*/
         public $intercept = 2;
         public $loadingtime = 2;
         public $priority = 8;
@@ -336,15 +354,17 @@
 
 
     class HvyParticleCannon extends Raking{
-        public $trailColor = array(255, 163, 26);
 
         public $name = "hvyParticleCannon";
         public $displayName = "Heavy Particle Cannon";
         public $animation = "laser";
         public $animationColor = array(255, 163, 26);
+	    /*
         public $animationColor2 = array(255, 163, 26);
+        public $trailColor = array(255, 163, 26);
         public $animationExplosionScale = 0.45;
         public $animationWidth = 7;
+	*/
         public $priority = 7;
 
         public $loadingtime = 6;
@@ -372,16 +392,17 @@
 
 
     class ParticleCutter extends Raking{
-        public $trailColor = array(255, 153, 102);
-
         public $name = "particleCutter";
         public $displayName = "Particle Cutter";
+	    
 	public $animation = "laser";
         public $animationColor = array(255, 153, 102);
+	    /*
+        public $trailColor = array(255, 153, 102);
         public $animationExplosionScale = 0.45;
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
-	    
+	    */
         public $firingModes = array( 1 => "Sustained");
         
         public $damageType = "Raking"; 
@@ -425,16 +446,18 @@
 
 
     class ParticleRepeater extends Particle{
-        public $trailColor = array(255, 163, 26);
         public $name = "particleRepeater";
         public $displayName = "Particle Repeater";
-        public $animation = "trail";
+	    
+        public $animation = "bolt";
         public $animationColor = array(255, 163, 26);
+	    /*
+        public $trailColor = array(255, 163, 26);
         public $animationExplosionScale = 0.40;
         public $projectilespeed = 40;
         public $animationWidth = 4;
         public $trailLength = 30;
-        
+        */
         public $loadingtime = 1;
         public $boostable = true;
         public $boostEfficiency = 1;
@@ -444,8 +467,7 @@
         public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals
         
         private $hitChanceMod = 0;
-        private $previousHit = true;
-        
+        private $previousHit = true;       
        
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -551,16 +573,19 @@
     
 	
     class RepeaterGun extends Particle{
-        public $trailColor = array(255, 163, 26);
         public $name = "repeaterGun";
         public $displayName = "Repeater Gun";
-        public $animation = "trail";
+	    
+        public $animation = "bolt";
         public $animationColor = array(255, 163, 26);
+	    /*
+        public $trailColor = array(255, 163, 26);
         public $animationExplosionScale = 0.30;
         public $projectilespeed = 20;
         public $animationWidth = 4;
         public $trailLength = 30;
-        
+        */
+	    
         public $loadingtime = 1;
         public $boostable = true;
         public $boostEfficiency = 2;
@@ -572,7 +597,6 @@
         private $hitChanceMod = 0;
         private $previousHit = true;
         
-       
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -678,16 +702,17 @@
 
 
     class PairedParticleGun extends LinkedWeapon{
-        public $trailColor = array(255, 163, 26);
-
         public $name = "pairedParticleGun";
         public $displayName = "Particle Gun"; //it's not 'paired' in any way, except being usually mounted twin linked - like most fighter weapons...
-        public $animation = "trail";
+        public $animation = "bolt";
         public $animationColor = array(255, 163, 26);
+	    /*
+        public $trailColor = array(255, 163, 26);
         public $animationExplosionScale = 0.10;
         public $projectilespeed = 12;
         public $animationWidth = 2;
         public $trailLength = 10;
+	*/
         public $intercept = 2;
 
         public $loadingtime = 1;
@@ -736,12 +761,16 @@
     class SolarCannon extends Particle{
         public $name = "solarCannon";
         public $displayName = "Solar Cannon";
-        public $animation = "beam";
+	    
+        public $animation = "bolt";
         public $animationColor = array(204, 204, 0);
+	    public $animationExplosionScale = 0.5;//re-scaled automatically in constructor!
+	    /*
         public $animationExplosionScale = 0.45;
         public $projectilespeed = 15;
         public $animationWidth = 8;
         public $trailLength = 14;
+	*/
         public $priority = 6;
 
         public $loadingtime = 3;
@@ -764,54 +793,9 @@
 			}
 			$this->data["Special"] .= "No overkill.<br>Reduce armor by 2 (on ships only)."; //tabletop: facing armor on a fighter as well!
 			$this->data["Special"] .= "<br>Damage scored is repeated on appropriate Structure.";
+		
+		$this->animationExplosionScale = $this->dynamicScale(0,2);//scale weapon using double damage output - as base damage output is low-ish, but it's repeated on Structure for overall impressive total
         }
-
-
-
-        /*actually doDamage as standard seems all right, it's onDamagedSystem that needs to be redefined - to this function will never be called, but just in case I don't remove it yet!*/
-        protected function doDamageOBSOLETE($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
-            /*repeat damage on structure (ignoring armor); 
-              system hit will have its armor reduced by 2
-              for non-fighter targets
-              */
-            parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
-			if(!$target instanceof FighterFlight){
-				$damageWasDealt=true; //if structure is already destroyed, no further overkill will happen
-				//$struct = $target->getStructureSystem($system->location);
-				//reduce damage by armor of system hit - as it would be (was!) during actual damage-dealing procedure
-				//do NOT acount for special defensive systems (Energy Diffuser, Bulkheads...) - they will kick in (or not) separately on Structure
-				$damage = $damage - $this->getSystemArmourComplete($target, $system, $gamedata, $fireOrder);
-				//reduce armor of system hit
-				if (!$system->advancedArmor) { //Advanced Armor prevents armor reduction
-					$crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
-					$crit->updated = true;
-					$crit->inEffect = false; //in effect only on next turn
-					if ( $system != null ){
-						$system->criticals[] = $crit;
-						$system->criticals[] = $crit;
-					}
-				}
-				//repeat damage on structure this system is mounted to
-				/* disabled, instead new approach to damage dealing - with assignDamageReturnOverkill!
-				$damage = $damage + $this->getSystemArmourStandard($target, $struct, $gamedata, $fireOrder) + $this->getSystemArmourInvulnerable($target, $struct, $gamedata, $fireOrder);
-				parent::doDamage($target, $shooter, $struct, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location); 
-				*/
-				/*doesn't exactly work correctly, and damage should just be "marked" anyway
-				//effective armor of 0
-				$effects = $system->assignDamageReturnOverkill($target, $shooter, $this, $gamedata, $fireOrder, $damage, 0, $pos); //here $effects are irrelevant, no overkill of any kind happens
-				*/
-				$struct = $target->getStructureSystem($system->location);
-				if($struct && (!$struct->isDestroyed())){
-					$destroyed = false;
-					$remHealth = $struct->getRemainingHealth();
-					$dmgToDo = min($damage,$remHealth);			
-					if($dmgToDo >= $remHealth) $destroyed = true;
-					$damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $struct->id, $dmgToDo, 0, 0, $fireOrder->id, $destroyed, false, "", $this->weaponClass, $shooter->id, $this->id);
-					$damageEntry->updated = true;
-					$system->damage[] = $damageEntry;
-				}
-			}
-		} //endof function doDamageOBSOLETE
 		
 		/*actually repeating damage scored on appropriate Structure*/
 		private function doRepeatDamageOnStructure($fireOrder,$target,$systemHit,$damageToRepeat){
@@ -856,23 +840,6 @@
 				//repeat damage on structure this system is mounted to
 				$damageToRepeat = $damage-$armour;
 				$this->doRepeatDamageOnStructure($fireOrder,$target,$system,$damageToRepeat);
-				/*
-				$struct = null;
-				if($system instanceof Structure){
-					$struct = $system;
-				}else{
-					$struct = $target->getStructureSystem($system->location);
-				}
-				if($struct && (!$struct->isDestroyed())){
-					$destroyed = false;
-					$remHealth = $struct->getRemainingHealth();
-					$dmgToDo = min(($damage-$armour),$remHealth);			
-					if($dmgToDo >= $remHealth) $destroyed = true;
-					$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $struct->id, $dmgToDo, 0, 0, $fireOrder->id, $destroyed, false, "", $this->weaponClass, $fireOrder->shooterid, $this->id);
-					$damageEntry->updated = true;
-					$struct->damage[] = $damageEntry;
-				}
-				*/
 			}
 		}//endof onDamagedSystem
 		
@@ -911,18 +878,18 @@
 
 
     class LightParticleBlaster extends LinkedWeapon{
-        public $trailColor = array(230, 115, 0);
-
         public $name = "lightParticleBlaster";
         public $displayName = "Light Particle Blaster";
-        public $animation = "trail";
+        public $animation = "bolt";
         public $animationColor = array(230, 115, 0);
+	    /*
+        public $trailColor = array(230, 115, 0);
         public $animationExplosionScale = 0.10;
         public $projectilespeed = 12;
         public $animationWidth = 2;
         public $trailLength = 10;
-
-        public $intercept = 3;
+*/
+        public $intercept = 2;
 
         public $loadingtime = 1;
         public $shots = 2;
@@ -973,19 +940,20 @@
 
 
     class LightParticleBeam extends LinkedWeapon{
-        public $trailColor = array(230, 115, 0);
-
         public $name = "lightParticleBeam";
         public $iconPath = "lightParticleBeam.png";
         public $displayName = "Light Particle Beam";
-        public $animation = "trail";
+        public $animation = "bolt";
         public $animationColor = array(230, 115, 0);
+	    /*
+        public $trailColor = array(230, 115, 0);
         public $animationExplosionScale = 0.10;
         public $projectilespeed = 12;
         public $animationWidth = 2;
         public $trailLength = 10;
+	*/
+	    
         public $priority = 3;
-
         public $intercept = 2;
 
         public $loadingtime = 1;
@@ -1034,16 +1002,17 @@
     class HeavyBolter extends Particle{
         public $name = "heavyBolter";
         public $displayName = "Heavy Bolter";
-        public $animation = "trail";
+        public $animation = "bolt";
         public $animationColor = array(204, 122, 0);
+	    /*
         public $animationExplosionScale = 0.5;
         public $projectilespeed = 12;
         public $animationWidth = 6;
         public $trailLength = 6;
+	*/
+	    
         public $priority = 6;
-
         public $loadingtime = 3;
-
 
         public $rangePenalty = 0.33;
         public $fireControl = array(-1, 2, 3); // fighters, <mediums, <capitals
@@ -1065,14 +1034,16 @@
     class MediumBolter extends Particle{
         public $name = "mediumBolter";
         public $displayName = "Medium Bolter";
-        public $animation = "trail";
+        public $animation = "bolt";
         public $animationColor = array(204, 122, 0);
+	    /*
         public $animationExplosionScale = 0.4;
         public $projectilespeed = 14;
         public $animationWidth = 4;
         public $trailLength = 4;
-        public $priority = 6;
+	*/
 
+	    public $priority = 6;
         public $loadingtime = 2;
 
         public $intercept = 1;
@@ -1093,16 +1064,17 @@
     class LightBolter extends Particle{
         public $name = "lightBolter";
         public $displayName = "Light Bolter";
-        public $animation = "trail";
+        public $animation = "bolt";
         public $animationColor = array(204, 122, 0);
+	    /*
         public $animationExplosionScale = 0.3;
         public $projectilespeed = 16;
         public $animationWidth = 3;
         public $trailLength = 3;
-        public $priority = 5;
-
+	*/
+	    
+        public $priority = 5;  
         public $loadingtime = 1;
-
         public $intercept = 1;
 
         public $rangePenalty = 1;
@@ -1120,13 +1092,13 @@
     
 
     class LightParticleBeamShip extends StdParticleBeam{
-        public $trailColor = array(255, 153, 51);
-
         public $name = "lightParticleBeamShip";
         public $displayName = "Light Particle Beam";
         public $iconPath = "lightParticleBeamShip.png";
+	    /*inherited
         public $animation = "beam";
         public $animationColor = array(255, 153, 51);
+        public $trailColor = array(255, 153, 51);
         public $animationExplosionScale = 0.12;
         public $projectilespeed = 12;
         public $animationWidth = 3;
@@ -1134,14 +1106,17 @@
 
         public $intercept = 2;
         public $loadingtime = 1;
+	*/
         public $priority = 4;
 
         public $rangePenalty = 2;
         public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals
 
+	    /*
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
+	*/
 
         public function getDamage($fireOrder){        return Dice::d(10)+4;   }
         public function setMinDamage(){     $this->minDamage = 5 ;      }
@@ -1149,57 +1124,22 @@
     }
 
 
-/*AoG did only Particle Projector. Nexus custom ships use other weights of this line as well.
-EDIT: other weapons in the line do indeed exist, on Usuuth ships.
-Nonetheless two copies of Particle Projector lines now exist in FV, in customNexus and particle files. They should be have the same properties.
-*/
-    class ParticleProjector extends Particle{
-        public $trailColor = array(255, 163, 26);
-
-        public $name = "particleProjector";
-        public $displayName = "Particle Projector";
-        public $animation = "beam";
-        public $animationColor = array(255, 163, 26);
-        public $animationExplosionScale = 0.15;
-        public $projectilespeed = 12;
-        public $animationWidth = 4;
-        public $trailLength = 10;
-
-        public $intercept = 2;
-        public $loadingtime = 2;
-        public $priority = 4;
-
-        public $rangePenalty = 1;
-        public $fireControl = array(1, 2, 2); // fighters, <mediums, <capitals
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            if ( $maxhealth == 0 ) $maxhealth = 6;
-            if ( $powerReq == 0 ) $powerReq = 1;		
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-
-        public function getDamage($fireOrder){ return Dice::d(10, 1)+4;   }
-        public function setMinDamage(){     $this->minDamage = 5 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
-    }
-
-
-
-    class BAInterceptorMkI extends Particle{
         /*Belt Alliance version of Mk I Interceptor - identical to EA one, but without EWeb*/
-        public $trailColor = array(255, 163, 26);
+    class BAInterceptorMkI extends Particle{
         public $name = "BAInterceptorMkI";
         public $displayName = "BA Interceptor I";
-        
-        public $animation = "trail";
         public $iconPath = "interceptor.png";
+        
+        public $animation = "bolt";
         public $animationColor = array(255, 163, 26);
+	    /*
+        public $trailColor = array(255, 163, 26);
         public $animationExplosionScale = 0.15;
-        public $priority = 4;
         public $animationWidth = 1;
-            
+            */
+	    
+        public $priority = 4;	    
         public $intercept = 3;
-             
         public $loadingtime = 1;
   
         public $rangePenalty = 2;
@@ -1226,25 +1166,25 @@ Nonetheless two copies of Particle Projector lines now exist in FV, in customNex
     }
 
 
-
+        /*Abbai weapon - Twin Array on steroids and with overheating problems*/
     class QuadArray extends Particle{
-        /*Abbai weapon - Twin Array on steroinds and with overheating problems*/
         public $name = "quadArray";
         public $displayName = "Quad Array";
         public $iconPath = "quadParticleBeam.png";//"quadArray.png";
-        public $animation = "trail";
+        public $animation = "bolt";
+	    /*
         public $animationColor = array(255, 163, 26);
         public $animationExplosionScale = 0.15;
         public $trailColor = array(255, 163, 26);
         public $projectilespeed = 12;
         public $animationWidth = 3;
         public $trailLength = 10;
-
+*/
         public $intercept = 2;
+        public $priority = 4;
 
         public $loadingtime = 1;
         public $guns = 4;
-        public $priority = 4;
         public $rangePenalty = 2;
         public $fireControl = array(6, 5, 4); // fighters, <mediums, <capitals
 
@@ -1304,20 +1244,24 @@ Nonetheless two copies of Particle Projector lines now exist in FV, in customNex
     } //endof class QuadArray
 	
 
-    class ParticleHammer extends Particle{        
-        public $trailColor = array(255, 163, 26);
+    class ParticleHammer extends Particle{     
         
         public $name = "particleHammer";
         public $displayName = "Particle Hammer";
         public $iconPath = "ParticleHammer.png";
 
-        public $animation = "beam";
-        public $animationColor = array(255, 163, 26);
+        public $animation = "bolt";
+        public $animationColor = array(255, 163, 26);   
+	    /*
+        public $trailColor = array(255, 163, 26);
         public $animationExplosionScale = 0.5;
         public $projectilespeed = 12;
         public $animationWidth = 10;
-        
-        public $loadingtime = 4;        
+        */
+        public $loadingtime = 4;
+	    
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle"; 
         
         public $rangePenalty = 0.33;
         public $fireControl = array(-2, 1, 3); // fighters, <mediums, <capitals
@@ -1336,18 +1280,52 @@ Nonetheless two copies of Particle Projector lines now exist in FV, in customNex
     }//End of Particle Hammer
 	
 
-    class HvyParticleProjector extends Particle{        
+/*AoG did only Particle Projector. Nexus custom ships use other weights of this line as well.
+EDIT: other weapons in the line do indeed exist, on Usuuth ships.
+Nonetheless two copies of Particle Projector lines now exist in FV, in customNexus and particle files. They should be have the same properties.
+*/
+    class ParticleProjector extends Particle{
+        public $name = "particleProjector";
+        public $displayName = "Particle Projector";
+        public $animation = "beam";
+        public $animationColor = array(255, 163, 26);
+	    /*
         public $trailColor = array(255, 163, 26);
-        
+        public $animationExplosionScale = 0.15;
+        public $projectilespeed = 12;
+        public $animationWidth = 4;
+        public $trailLength = 10;
+*/
+        public $intercept = 2;
+        public $loadingtime = 2;
+        public $priority = 4;
+
+        public $rangePenalty = 1;
+        public $fireControl = array(1, 2, 2); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 1;		
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 1)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+    }
+
+    class HvyParticleProjector extends Particle{        
         public $name = "hvyParticleProjector";
         public $displayName = "Heavy Particle Projector";
         public $iconPath = "HeavyParticleProjector.png";
         public $animation = "beam";
-        public $animationColor = array(255, 163, 26);
+        public $animationColor = array(255, 163, 26);    
+	    /*
+        public $trailColor = array(255, 163, 26);
         public $animationExplosionScale = 0.4;
         public $projectilespeed = 15;
         public $animationWidth = 4;
-        
+        */
         public $intercept = 1;
         
         public $loadingtime = 3;
@@ -1370,18 +1348,18 @@ Nonetheless two copies of Particle Projector lines now exist in FV, in customNex
     
 	
     class LightParticleProjector extends Particle{        
-        public $trailColor = array(255, 163, 26);
-        
         public $name = "lightParticleProjector";
         public $displayName = "Light Particle Projector";
         public $iconPath = "LightParticleProjector.png";       
         public $animation = "trail";
-        public $animationColor = array(255, 163, 26);
+        public $animationColor = array(255, 163, 26);  
+	    /*
+        public $trailColor = array(255, 163, 26);
         public $animationExplosionScale = 0.15;
         public $projectilespeed = 12;
         public $animationWidth = 1;
         public $trailLength = 5;
-        
+        */
         public $loadingtime = 1;
         public $intercept = 2;
         
@@ -1409,9 +1387,11 @@ class PentagonArray extends Raking{
 	public $iconPath = "PentagonArray.png";
 	public $animation = "laser";
 	public $animationColor = array(255, 153, 51);
+	/*
 	public $animationWidth = 3;	
 	public $animationWidth2 = 0.2;
 	public $animationExplosionScale = 0.2;
+	*/
 
 	public $rakes = array();
 	public $priority = 8; //light Raking weapon, effectively
@@ -1524,12 +1504,14 @@ class ParticleAccelerator extends Raking{
 		public $name = "ParticleAccelerator";
         public $displayName = "Particle Accelerator";
         public $iconPath = "ParticleAccelerator.png";
+	
         public $animation = "laser";
         public $animationColor = array(255, 163, 26);
+	/*
 		public $animationExplosionScale = 0.25;
 		public $animationWidth = 4;
 		public $animationWidth2 = 0.3;
-        
+        */
         public $intercept = 2;
 		public $priority = 8; //light Raking		
 		
@@ -1622,11 +1604,12 @@ class LightParticleAccelerator extends LinkedWeapon{
 		public $iconPath = "LightParticleAccelerator.png";
 		public $animation = "trail";
 		public $trailColor = array(255, 163, 26);
+	/*
 		public $animationColor = array(255, 163, 26);
 		public $animationExplosionScaleArray = array(1=>0.10, 2=>0.15);
 		public $animationWidthArray = array(1=>2, 2=>3);
 		public $trailLengthArray = array(1=>10, 2=>15);
-        
+        */
 		
         public $loadingtime = 1;
 		public $normalload = 2;
@@ -1704,9 +1687,7 @@ class LightParticleAccelerator extends LinkedWeapon{
 			$strippedSystem->maxDamage = $this->maxDamage;
 			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
 			return $strippedSystem;
-		}
-
-			
+		}			
 }//end of class Light Particle Accelerator	
 
 
@@ -1716,10 +1697,12 @@ class LightParticleAccelerator extends LinkedWeapon{
    		public $iconPath = "LightParticleBolt.png";
         public $animation = "trail";
         public $animationColor = array(255, 163, 26);
+	    /*
         public $animationExplosionScale = 0.2;
         public $projectilespeed = 16;
         public $animationWidth = 2;
         public $trailLength = 2;
+	*/
         public $priority = 5;
 
         public $loadingtime = 1;

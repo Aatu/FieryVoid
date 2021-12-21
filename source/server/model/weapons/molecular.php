@@ -15,16 +15,17 @@
     class FusionCannon extends Molecular{
         public $name = "fusionCannon";
         public $displayName = "Fusion Cannon";
-        public $animation = "beam";
+        public $animation = "bolt";
         public $animationColor =  array(175, 225, 175);
+	    /*
         public $trailColor = array(110, 225, 110);
         public $animationExplosionScale = 0.20;
         public $projectilespeed = 12;
         public $animationWidth = 6;
         public $trailLength = 16;
-
+*/
         public $intercept = 2;
-        public $priority = 6;
+        public $priority = 6; //that's heavy hitting power
 
 
         public $loadingtime = 1;
@@ -48,13 +49,14 @@
     class HeavyFusionCannon extends FusionCannon{
         public $name = "heavyFusionCannon";
         public $displayName = "Heavy Fusion Cannon";
+	    
+	    /*
         public $animation = "beam";
-
         public $animationExplosionScale = 0.30;
         public $projectilespeed = 10;
         public $animationWidth = 9;
         public $trailLength = 25;
-
+*/
         public $loadingtime = 2;
         public $intercept = 1;
         public $priority = 6;
@@ -70,17 +72,18 @@
 
 
     class LightFusionCannon extends LinkedWeapon{
-        public $trailColor = array(30, 170, 255);
-
         public $name = "lightfusionCannon";
         public $displayName = "Light Fusion Cannon";
-        public $animation = "trail";
+        public $animation = "bolt";
+	public $animationColor = array(175, 225, 175);//changing to the same as Fusion Cannon
+	    /*
         public $animationColor = array(30, 170, 255);
+        public $trailColor = array(30, 170, 255);
         public $animationExplosionScale = 0.10;
         public $projectilespeed = 12;
         public $animationWidth = 2;
         public $trailLength = 10;
-
+*/
         public $intercept = 0;
         public $loadingtime = 1;
 
@@ -123,13 +126,15 @@
     {
         public $name = "molecularDisruptor";
         public $displayName = "Molecular Disruptor";
-        public $animation = "trail";
+        public $animation = "laser"; //it's Raking weapon after all
         public $animationColor = array(30, 170, 255);
+	    /*
         public $trailColor = array(30, 170, 255);
         public $animationExplosionScale = 0.35;
         public $projectilespeed = 12;
         public $animationWidth = 10;
         public $trailLength = 25;
+	*/
         public $priority = 7;
         public $priorityArray = array(1=>7, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
 
@@ -150,8 +155,7 @@
         public $damageType = "Raking"; 
         public $damageTypeArray = array(1=>'Raking', 2=>'Piercing');
         public $weaponClass = "Molecular"; 
-                
-        
+                        
         private $alreadyReduced = false;
         
 
@@ -196,18 +200,18 @@
 
 
     class DestabilizerBeam extends Molecular{
-        public $trailColor = array(30, 170, 255);
-
         public $name = "destabilizerBeam";
         public $displayName = "Destabilizer Beam";
         public $animation = "laser";
         public $animationColor = array(100, 100, 255);
+	    /*
+        public $trailColor = array(30, 170, 255);
         public $animationWidth = 4.5;
         public $animationWidth2 = 0.3;
-        public $priority = 2; 
-
         public $animationExplosionScale = 0.35;
-
+	*/
+	    
+        public $priority = 2; 
         public $intercept = 0;
         public $loadingtime = 4;
 
@@ -237,11 +241,14 @@
         public $displayName = "Molecular Flayer";
         public $animation = "trail";
         public $animationColor = array(0, 200, 200);
+        public $animationExplosionScale = 0.7; //needed, as weapon does no damage
+	    /*
         public $trailColor = array(0, 200, 200);
         public $animationExplosionScale = 0.50;
         public $projectilespeed = 15;
         public $animationWidth = 6;
         public $trailLength = 15;
+	*/
         public $priority = 1;
 
         public $intercept = 0;
@@ -250,16 +257,19 @@
         public $firingModes = array(
             1 => "Flaying"
         );
+	    
+        public $damageType = "Standard"; //simplest
+        public $weaponClass = "Molecular"; 
         
         public $rangePenalty = 0.33;
         public $fireControl = array(null, 0, 4); // fighters, <mediums, <capitals
         private $alreadyFlayed = false; //to avoid doing this multiple times
 
+	    
         public function setSystemDataWindow($turn){
             $this->data["Special"] = "Reduces armor of facing section (structure and all systems).";
             parent::setSystemDataWindow($turn);
         }
-
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -288,22 +298,22 @@
 
 
     class FusionAgitator extends Raking{
-        public $trailColor = array(30, 170, 255);
-
         public $name = "fusionAgitator";
         public $displayName = "Fusion Agitator";
         public $animation = "laser";
         public $animationColor = array(0, 200, 200);
+        public $animationExplosionScale = 0.35; //make it thin, despite high damage potential!
+	    /*
+        public $trailColor = array(30, 170, 255);
         public $animationWidth = 2;
         public $animationWidth2 = 0.3;
-
         public $animationExplosionScale = 0.15;
-
+*/
         public $intercept = 0;
         public $loadingtime = 3;
         public $raking = 6;
         public $addedDice;
-        public $priority = 8;
+        public $priority = 8; //damage dealing mode means it's not very effective as stripping systems, and should be fired late despite high damage potential
 
         public $boostable = true;
         public $boostEfficiency = 4;
@@ -370,7 +380,6 @@
             }
             return $boostLevel;
         }
-
  
         public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos=null){ //standard part of armor - reduce by 1!
             $armour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
@@ -378,8 +387,7 @@
             $armour = max(0,$armour);
             return $armour;
         }
-            
-            
+                        
         public function getDamage($fireOrder){
             $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
             $dmg = Dice::d(10, (5 + $add)) +10;
@@ -396,13 +404,11 @@
             return $avg;
         }
 
-
         public function setMinDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
             $this->minDamage = 5 + ($boost * 1) + 10;
         }   
-
 
         public function setMaxDamage(){
             $turn = TacGamedata::$currentTurn;
@@ -410,19 +416,19 @@
             $this->maxDamage = 50 + ($boost * 10) + 10;
         }  
    }
-
         
-        
+        //Yolu heavy fighter weapon
     class LightMolecularDisruptor extends Raking{
         public $name = "molecularDisruptor";
         public $displayName = "Light Molecular Distruptor";
-        public $animation = "trail";
+        public $animation = "laser";
         public $animationColor = array(30, 170, 255);
+	    /*
         public $animationExplosionScale = 0.20;
         public $projectilespeed = 10;
         public $animationWidth = 5;
         public $trailLength = 12;
-        
+        */
         public $loadingtime = 3;
         public $raking = 10;
         public $exclusive = true;
@@ -473,7 +479,6 @@
 
     class LightMolecularDisrupterHandler{
         private static $hits = array();
-
         
         /* checks if armor reduction should occur (returns true if so)
             increases internal counters needed to do so
@@ -516,11 +521,13 @@
         public $displayName = "Polarity Cannon";
         public $animation = "trail";
         public $animationColor = array(45, 180, 255);
+	    /*
         public $trailColor = array(45, 180, 255);
         public $animationExplosionScale = 0.15;
         public $projectilespeed = 12;
         public $animationWidth = 2;
         public $trailLength = 10;
+	*/
 		public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
 
         public $intercept = 1; //weapon can (..probably...) intercept at default rules... probably intended as a single shot of -2/-3 - but in FV these shots are separate, so that's a lot of separate -1s
@@ -539,7 +546,7 @@
             $this->shots = $shots;
             $this->defaultShots = $shots;
             //$this->intercept = $shots;
-            /* ATM no special graphics for multi-barrel weapons, as they do to exist
+            /* ATM no special graphics for multi-barrel weapons, as they do not exist
             $ns = min(3,$shots); //no graphics for more than 3 weapons
             $this->iconPath = "lightfusionCannon$ns.png";
 			*/
@@ -584,8 +591,10 @@
 		
         public $animation = "laser";
         public $animationColor = array(213, 0, 255); //thick, purple beam
+	    /*
         public $animationWidth = 4.5;
         public $animationWidth2 = 0.8;
+	*/
 		public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
         
 		
@@ -604,13 +613,11 @@
 
 		public $raking = 10;
         public $damageType = "Raking"; 
-        public $weaponClass = "Molecular"; 
-		
+        public $weaponClass = "Molecular"; 		
 		
 		//Slicers are usually THE weapons of SHadow ships - hence higher repair priority
 		public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-    
-		
+    		
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){			
             if ( $maxhealth == 0 ) $maxhealth = 10;
@@ -962,9 +969,11 @@
         public $displayName = "Light Multiphased Cutter";
         public $animation = "laser";
         public $animationColor = array(9, 0, 255); //animate as a dark blue beam, like from Shadow Omega light weapons fire in the show
+	    /*
         public $animationExplosionScale = 0.18;
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
+	*/
         public $priority = 5; //medium Standard, with average dmg of 13
 		public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
         
@@ -1005,10 +1014,6 @@
             if ( $powerReq == 0 ) $powerReq = 4;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-                
-        public function getDamage($fireOrder){        return Dice::d(10, 2)+2;   }
-        public function setMinDamage(){     $this->minDamage = 4 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 22 ;      }    
     }//endof class MultiphasedCutter
 
 
