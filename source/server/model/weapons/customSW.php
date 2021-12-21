@@ -415,9 +415,9 @@ class SWIon extends SWDirectWeapon{
       $this->data["Special"] .= "Damage may cause power shortages.";      
       $this->data["Special"] .= "<br>Increased chance of critical on systems damaged."; 
     }
-		
-	function dynamicScale($avgDmg){ //Ion damage is small compared to weapon size - that's because of non-damaging effects involved; derive scale from larger damage yield - one that would be expected from comparable Laser weapon!
-		return parent::dynamicScale($avgDmg,1.75);
+	
+	function dynamicScale($avgDmg, $multiplier = 1){ //Ion damage is small compared to weapon size - that's because of non-damaging effects involved; derive scale from larger damage yield - one that would be expected from comparable Laser weapon!
+		return parent::dynamicScale($avgDmg,max(1.75,$multiplier)); //multiplier of no less than 1.75 
 	}
 	
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //make vulnerable to next critical
