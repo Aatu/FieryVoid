@@ -41,7 +41,7 @@ class Weapon extends ShipSystem
     public $animationArray = array();
     public $animationColor = null;
     public $animationColorArray = array();
-    public $animationExplosionScale = 0; //irrelevant for laser animation; 0 means it will be set automatically by standard constructor, based on average damage yield
+    public $animationExplosionScale = 0; //0 means it will be set automatically by standard constructor, based on average damage yield
     public $animationExplosionScaleArray = array();
 
 	public $doubleRangeIfNoLock = false; //in case of no lock-on default procedure is to double range penalty; some weapons (notably most Antimatter ones) double range itself instead
