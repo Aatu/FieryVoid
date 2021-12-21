@@ -30,9 +30,10 @@ class Jia extends VreeCapital{
 		$this->sideDefense = 17;
 		
         $this->iniativebonus = -7;
-        $this->critRollMod = 1;
+        $this->critRollMod += 1;
        	$this->enhancementOptionsDisabled[] = 'SLUGGISH';
-		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';		
+		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
+		$this->enhancementOptionsDisabled[] = 'IMPR_ENG';				
 
 		$this->imagePath = "img/ships/VreeXeecra.png";
 		$this->canvasSize = 200;
@@ -43,7 +44,9 @@ class Jia extends VreeCapital{
 		$this->addPrimarySystem(new Hangar(5, 2));				
 		$this->addPrimarySystem(new CnC(5, 16, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 10, 6, 5));
-        $this->addPrimarySystem(new Engine(5, 11, 0, 6, 6));
+		$engine = new Engine(5, 11, 0, 6, 6);
+			$engine->markEngineFlux();
+			$this->addPrimarySystem($engine);
 		$this->addPrimarySystem(new CargoBay(4, 25));
         $this->addPrimarySystem(new JumpEngine(4, 10, 5, 36));		
 		$this->addPrimarySystem(new TractorBeam(4, 4, 0, 0));

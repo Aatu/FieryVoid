@@ -28,7 +28,7 @@ class Scorota extends BaseShip{
         $this->pivotcost = 3;
         
         $this->iniativebonus = -7;
-        $this->critRollMod = 1;
+		$this->critRollMod += 1;
 		$this->enhancementOptionsDisabled[] = 'SLUGGISH';
 		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
 
