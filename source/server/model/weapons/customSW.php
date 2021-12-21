@@ -417,7 +417,7 @@ class SWIon extends SWDirectWeapon{
     }
 		
 	function dynamicScale($avgDmg){ //Ion damage is small compared to weapon size - that's because of non-damaging effects involved; derive scale from larger damage yield - one that would be expected from comparable Laser weapon!
-		return parent::dynamicScale($avgDmg*1.75);
+		return parent::dynamicScale($avgDmg,1.75);
 	}
 	
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //make vulnerable to next critical
