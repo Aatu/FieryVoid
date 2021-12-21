@@ -172,8 +172,9 @@ Weapon.prototype.changeFiringMode = function () {
 	if (!mathlib.arrayIsEmpty(this.doNotInterceptArray)) this.hextarget = this.doNotInterceptArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.uninterceptableArray)) this.hextarget = this.uninterceptableArray[this.firingMode];		
 
+	if (!mathlib.arrayIsEmpty(this.hextargetArray)) this.hextarget = this.hextargetArray[this.firingMode];
 	
-		/*not used any more!
+		/*old animation-related variables - not used any more!
 	if (!mathlib.arrayIsEmpty(this.animationImgArray)) this.animationImg = this.animationImgArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.animationImgSpriteArray)) this.animationImgSprite = this.animationImgSpriteArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.animationColor2Array)) this.animationColor2 = this.animationColor2Array[this.firingMode];
@@ -182,8 +183,7 @@ Weapon.prototype.changeFiringMode = function () {
 	if (!mathlib.arrayIsEmpty(this.explosionColorArray)) this.explosionColor = this.explosionColorArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.trailLengthArray)) this.trailLength = this.trailLengthArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.trailColorArray)) this.trailColor = this.trailColorArray[this.firingMode];
-	if (!mathlib.arrayIsEmpty(this.projectilespeedArray)) this.projectilespeed = this.projectilespeedArray[this.firingMode];
-	if (!mathlib.arrayIsEmpty(this.hextargetArray)) this.hextarget = this.hextargetArray[this.firingMode];				
+	if (!mathlib.arrayIsEmpty(this.projectilespeedArray)) this.projectilespeed = this.projectilespeedArray[this.firingMode];	
 		*/
 	//firing animation related...
 	if (!mathlib.arrayIsEmpty(this.animationArray)) this.animation = this.animationArray[this.firingMode];
