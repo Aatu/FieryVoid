@@ -220,14 +220,14 @@ class Weapon extends ShipSystem
 			}
 			//Matter weapons score relatively low damage, but ignore armor - make them more notable ;)
 			if($this->weaponClass == 'Matter') {
-				$avgDmg = min($avgDmg+6, $avgDmg*1.5); //half of base, but no more than +6 
+				$avgDmg = min($avgDmg+6, $avgDmg*1.5); //multiply by 1.5, but no more than +6 
 			}
 		}
 		
 		//assign correct size
-		if($avgDmg<4.5){ //REALLY light - evenless than d6+1!
+		if($avgDmg<4.5){ //REALLY light - even less than d6+1!
 			$toReturn = 0.1; 
-		elseif($avgDmg<7.5){ //very light - less than d6+4
+		}elseif($avgDmg<7.5){ //very light - less than d6+4
 			$toReturn = 0.15; 
 		}elseif($avgDmg<10){ //light
 			$toReturn = 0.2;
