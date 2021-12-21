@@ -29,9 +29,9 @@ class Auk1935 extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 12, 3, 5));
         $this->addPrimarySystem(new Engine(4, 12, 0, 7, 3));
         $this->addPrimarySystem(new Hangar(3, 1));
-        $this->addPrimarySystem(new HeavyPlasma(3, 8, 5, 300, 60));
-        $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 1));
-        $this->addPrimarySystem(new Thruster(4, 16, 0, 7, 2));
+        $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));
+        $this->addAftSystem(new Thruster(3, 10, 0, 4, 1));
+        $this->addAftSystem(new Thruster(4, 16, 0, 7, 2));
 
         $this->addLeftSystem(new HeavyPlasma(3, 8, 5, 300, 360));
         $this->addLeftSystem(new MediumPlasma(2, 5, 3, 240, 360));
@@ -49,8 +49,8 @@ class Auk1935 extends HeavyCombatVesselLeftRight{
         $this->hitChart = array(
         		0=> array(
         				8 => "Structure",
-        				11 => "Thruster",
-				        12 => "Heavy Plasma Cannon",
+        				11 => "2:Thruster",
+				        12 => "1:Heavy Plasma Cannon",
         				14 => "Scanner",
         				16 => "Engine",
         				17 => "Hangar",

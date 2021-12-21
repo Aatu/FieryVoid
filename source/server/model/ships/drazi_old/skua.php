@@ -30,9 +30,9 @@ class Skua extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 12, 3, 6));
         $this->addPrimarySystem(new Engine(4, 12, 0, 7, 3));
         $this->addPrimarySystem(new Hangar(3, 1));
-        $this->addPrimarySystem(new RepeaterGun(3, 6, 4, 300, 60));
-        $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 1));
-        $this->addPrimarySystem(new Thruster(4, 16, 0, 7, 2));
+        $this->addFrontSystem(new RepeaterGun(3, 6, 4, 300, 60));
+        $this->addAftSystem(new Thruster(3, 10, 0, 4, 1));
+        $this->addAftSystem(new Thruster(4, 16, 0, 7, 2));
 
         $this->addLeftSystem(new RepeaterGun(3, 8, 7, 240, 0));
         $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 240, 60));
@@ -52,8 +52,8 @@ class Skua extends HeavyCombatVesselLeftRight{
         $this->hitChart = array(
         		0=> array(
         				8 => "Structure",
-        				11 => "Thruster",
-					    12 => "Repeater Gun",
+        				11 => "2:Thruster",
+					    12 => "1:Repeater Gun",
         				14 => "Scanner",
         				16 => "Engine",
         				17 => "Hangar",

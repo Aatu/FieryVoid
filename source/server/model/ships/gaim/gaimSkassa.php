@@ -18,7 +18,8 @@ class gaimSkassa extends BaseShip{
 		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
 		$this->enhancementOptionsDisabled[] = 'IMPR_ENG';
 		
-		$this->notes = "Engine fluctuations. Rolls for engine critical every turn with +5% penalty. Effect lasts one turn.";
+		//header will be added automatically
+		//$this->notes = "Engine fluctuations. Rolls for engine critical every turn with +5% penalty. Effect lasts one turn.";
         
         $this->turncost = 1;
         $this->turndelaycost = 0.66;

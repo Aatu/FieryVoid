@@ -337,6 +337,11 @@ shipManager.movement = {
             value: 0
         };
     },
+	
+	/*just move ahead using all remaining movement*/
+	doMoveFully: function doMoveFully(ship) {
+		while (shipManager.movement.getRemainingMovement(ship) > 0) shipManager.movement.doMove(ship);
+	},
 
     
     canSlip: function canSlip(ship, right) {

@@ -34,10 +34,10 @@ class wlcChlonasFenFahraFFE extends MediumShipLeftRight{
 		$this->addPrimarySystem(new Scanner(4, 10, 3, 5));
 		$this->addPrimarySystem(new Engine(5, 10, 0, 5, 2));
 		$this->addPrimarySystem(new Hangar(4, 1));
-		$this->addPrimarySystem(new Thruster(3, 10, 0, 3, 1));
-		$this->addPrimarySystem(new Thruster(3, 14, 0, 5, 2));
-		$this->addPrimarySystem(new CustomGatlingMattergunMedium(3, 0, 0, 270, 90));
-		$this->addPrimarySystem(new CustomGatlingMattergunLight(3, 0, 0, 240, 120));
+		$this->addAftSystem(new Thruster(3, 10, 0, 3, 1));
+		$this->addAftSystem(new Thruster(3, 14, 0, 5, 2));
+		$this->addFrontSystem(new CustomGatlingMattergunMedium(3, 0, 0, 270, 90));
+		$this->addFrontSystem(new CustomGatlingMattergunLight(3, 0, 0, 240, 120));
 
 		
         $this->addLeftSystem(new Thruster(3, 11, 0, 3, 3));
@@ -55,9 +55,9 @@ class wlcChlonasFenFahraFFE extends MediumShipLeftRight{
 	$this->hitChart = array(
 		
 		0=> array(
-			9 => "Thruster",
-			11 => "Gatling Mattergun",
-			12 => "Light Gatling Mattergun",
+			8 => "2:Thruster",
+			10 => "1:Gatling Mattergun",
+			12 => "1:Light Gatling Mattergun",
 			14 => "Scanner",
 			16 => "Engine",
 			17 => "Hangar",

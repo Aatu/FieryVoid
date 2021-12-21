@@ -621,9 +621,9 @@ shipManager.power = {
 	setOverloading: function setOverloading(ship, system) {
 
 		if (shipManager.power.isOverloading(ship, system)) return;
-
+		/* power is now checked elsewhere - do overload even if power for it is not available
 		if (!shipManager.power.canOverload(ship, system)) return;
-
+		*/
 		system.power.push({ id: null, shipid: ship.id, systemid: system.id, type: 3, turn: gamedata.turn, amount: 0 });
 	},
 
