@@ -113,7 +113,7 @@
         
         public $name = "guardianArray";
         public $displayName = "Guardian Array";
-        public $animation = "laser";
+        public $animation = "bolt"; //originally Laser, but bolt seems more appropriate
         public $animationColor = array(30, 170, 255);
         //public $animationExplosionScale = 0.15;
         public $priority = 4;
