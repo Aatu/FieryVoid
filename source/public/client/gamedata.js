@@ -261,6 +261,7 @@ window.gamedata = {
             var selfDestructing = [];
 			var notLaunching = [];
 			var notSetAA = [];//available Adaptive Armor points remaining! 
+		var powerSurplus = [];//power surplus
 
             for (var ship in myShips) {
                 if (!myShips[ship].flight) {
@@ -283,6 +284,12 @@ window.gamedata = {
                     if (shipManager.isDisabled(myShips[ship])) {
                         continue;
                     }
+			
+			//checking for power surplus
+			if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor"))>0){
+				powerSurplus.push(myShips[ship]);
+			}
+			
                     if (gamedata.turn == 1) {
                         if (myShips[ship].EW.length == 0) {
                             hasNoEW.push(myShips[ship]);
@@ -411,6 +418,15 @@ window.gamedata = {
                 html += "<br>";
                 for (var ship in notSetAA) {
                     html += notSetAA[ship].name + " (" + notSetAA[ship].shipClass + ")";
+                    html += "<br>";
+                }
+                html += "<br>";
+            }
+            if (powerSurplus.length > 0) {
+                html += "Followed ships have unassigned Power reserves: ";
+                html += "<br>";
+                for (var ship in powerSurplus) {
+                    html += powerSurplus[ship].name + " (" + powerSurplus[ship].shipClass + ") - <b>" + shipManager.systems.getSystemByName(powerSurplus[ship], "reactor") + '</b>';
                     html += "<br>";
                 }
                 html += "<br>";
