@@ -742,7 +742,6 @@ window.gamedata = {
 	
 
     constructFleetList: function constructFleetList() {
-
         var slotid = gamedata.selectedSlot;
         var selectedSlot = playerManager.getSlotById(slotid);
 
@@ -778,7 +777,6 @@ window.gamedata = {
     },
 
     calculateFleet: function calculateFleet() {
-
         var slotid = gamedata.selectedSlot;
         if (!slotid) return;
 
@@ -1113,14 +1111,34 @@ window.gamedata = {
     clickTakeslot: function clickTakeslot() {
         var slot = $(".slot").has($(this));
         var slotid = slot.data("slotid");
+	    
+	//block if player already has confirmed fleet (in any slot)
+	for (var i in gamedata.slots)  { //check all slots
+		var checkSlot = gamedata.slots[i];
+		if (checkSlot.lastphase == "-2") { //this slot has ready fleet
+			var player = playerManager.getPlayerInSlot(checkSlot);
+			if (player.id == gamedata.thisplayer){
+				window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
+				return;
+			}
+		}
+	}
+	    
         ajaxInterface.submitSlotAction("takeslot", slotid);
     },
 
     onLeaveSlotClicked: function onLeaveSlotClicked() {
         var slot = $(".slot").has($(this));
         var slotid = slot.data("slotid");
-		ajaxInterface.submitSlotAction("leaveslot", slotid);
-		window.location = "games.php";
+	    
+	//block if player already has confirmed fleet (in this slot)
+	if (slot.lastphase == "-2") { 
+		window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
+		return;
+	}
+	    
+	ajaxInterface.submitSlotAction("leaveslot", slotid);
+	window.location = "games.php";
     },
 
     enableBuy: function enableBuy() {
@@ -1339,7 +1357,7 @@ window.gamedata = {
     getShip: function getShip(phpclass, faction) {
     	var actPhpclass;
     	var actFaction;
-    	if (faction != null ){ //faftion provided
+    	if (faction != null ){ //faction provided
 			actPhpclass = phpclass;
 			actFaction = faction;
 			gamedata.displayedShip = phpclass;
