@@ -144,9 +144,11 @@ window.gamedata = {
 
     /*Marcin Sawicki: re-created so there are no dumps during replay...*/
     //TODO: remove this function AND ALL CALLS TO IT (delete or replace by new approach, as appropriate)
+	/*commenting out...
     getActiveShip: function getActiveShip() {
         return null;
     },
+    */
     
     getActiveShips: function getActiveShips() {
 
@@ -669,10 +671,12 @@ window.gamedata = {
     },
 
     onCancelClicked: function onCancelClicked(e) {
+	    /* no longer valid
         if (gamedata.gamephase == 2) {
             var ship = gamedata.getActiveShip();
             shipManager.movement.deleteMove(ship);
         }
+	*/
 
         if (gamedata.gamephase == 3) {
             var ship = gamedata.getSelectedShip();
@@ -680,12 +684,13 @@ window.gamedata = {
         }
     },
 
+	    /*no longer valid
     getActiveShipName: function getActiveShipName() {
         var ship = gamedata.getActiveShip();
         if (ship) return ship.name;
-
         return "";
     },
+    */
 
     getPlayerTeam: function getPlayerTeam() {
         for (var i in gamedata.slots) {
