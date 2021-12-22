@@ -426,7 +426,8 @@ window.gamedata = {
                 html += "Followed ships have unassigned Power reserves: ";
                 html += "<br>";
                 for (var ship in powerSurplus) {
-                    html += powerSurplus[ship].name + " (" + powerSurplus[ship].shipClass + ") - <b>" + shipManager.systems.getSystemByName(powerSurplus[ship], "reactor") + '</b>';
+			//show actual surplus, too - like: Surplusser (PowerShip) - <10>
+                    html += powerSurplus[ship].name + " (" + powerSurplus[ship].shipClass + ") - <b>&#60;" + shipManager.systems.getSystemByName(powerSurplus[ship], "reactor") + '&#62;</b>';
                     html += "<br>";
                 }
                 html += "<br>";
