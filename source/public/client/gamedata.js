@@ -288,7 +288,7 @@ window.gamedata = {
                     }
 			
 			//checking for power surplus
-			if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor"))>0){
+			if (shipManager.power.getReactorPower(myShips[ship], shipManager.systems.getSystemByName(myShips[ship], "reactor"))>0){
 				powerSurplus.push(myShips[ship]);
 			}
 			
@@ -429,7 +429,8 @@ window.gamedata = {
                 html += "<br>";
                 for (var ship in powerSurplus) {
 			//show actual surplus, too - like: Surplusser (PowerShip) - <10>
-                    html += powerSurplus[ship].name + " (" + powerSurplus[ship].shipClass + ") - <b>&#60;" + shipManager.systems.getSystemByName(powerSurplus[ship], "reactor") + '&#62;</b>';
+					var surplusVal = shipManager.power.getReactorPower(powerSurplus[ship], shipManager.systems.getSystemByName(powerSurplus[ship], "reactor"));
+                    html += powerSurplus[ship].name + " (" + powerSurplus[ship].shipClass + "): <b>&#60;" + surplusVal + '&#62;</b>';
                     html += "<br>";
                 }
                 html += "<br>";

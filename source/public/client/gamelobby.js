@@ -1309,7 +1309,7 @@ window.gamedata = {
         var points = gamedata.calculateFleet();
 
         if (points == 0) {
-            window.confirm.error("You have to buy atleast one ship!", function () {});
+            window.confirm.error("You have to buy at least one ship!", function () {});
             return;
         }
 
