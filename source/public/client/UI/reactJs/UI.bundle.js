@@ -38800,6 +38800,9 @@ var System = _styledComponents2.default.div.withConfig({
         return '#e06f01'; //orange
     } else if (props.boosted) {
         return '#cca300'; //darkyellow
+    } else if (props.loading && props.loadedAlternate) {
+        //weapon not ready in current mode, but  alternate mode is ready
+        return '#CD9E9E'; //pale red
     } else {
         return 'black';
     }
@@ -38956,7 +38959,8 @@ var SystemIcon = function (_React$Component) {
                     background: getBackgroundImage(system),
                     offline: isOffline(ship, system),
                     loading: isLoading(system),
-                    selected: isSelected(system),
+                    loadedAlternate: isLoadedAlternate(system) //alternate mode ready while primary is not
+                    , selected: isSelected(system),
                     firing: isFiring(ship, system),
                     boosted: isBoosted(ship, system)
                 },
@@ -38979,6 +38983,10 @@ var isFiring = function isFiring(ship, system) {
 
 var isLoading = function isLoading(system) {
     return system.weapon && !weaponManager.isLoaded(system);
+};
+
+var isLoadedAlternate = function isLoadedAlternate(system) {
+    return system.weapon && weaponManager.isLoadedAlternate(system);
 };
 
 var isOffline = function isOffline(ship, system) {
