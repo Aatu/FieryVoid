@@ -1700,6 +1700,7 @@ window.weaponManager = {
         return weapon;
     },
 
+	/*no longer used!
     canRam: function canRam(ship) {
         if (ship.hasOwnProperty("hunterkiller")) {}
     },
@@ -1716,6 +1717,7 @@ window.weaponManager = {
             }
         });
     },
+    */
 
     getAllFireOrdersForAllShipsForTurn: function getAllFireOrdersForAllShipsForTurn(turn, type) {
         var fires = [];
