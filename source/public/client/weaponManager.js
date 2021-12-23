@@ -1669,9 +1669,7 @@ window.weaponManager = {
 
     isLoaded: function isLoaded(weapon) {
         return weapon.loadingtime <= weapon.turnsloaded || weapon.loadingtime <= weapon.overloadturns;
-    },
-	
-	
+    },	
     isLoadedAlternate: function isLoaded(weapon) {
 		//check if ANY mode's loading time is satisfied
 		var shortestLoad = 999;
