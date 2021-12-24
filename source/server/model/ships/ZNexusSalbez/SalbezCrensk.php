@@ -15,7 +15,6 @@ class SalbezCrensk extends LCV{
 
         $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
 	    $this->notes = 'May deploy independently.';
-//	    $this->notes .= '<br>Antiquated Sensors.';
         
         $this->forwardDefense = 8;
         $this->sideDefense = 11;
@@ -45,7 +44,7 @@ class SalbezCrensk extends LCV{
 		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 240));
     
-        $this->addPrimarySystem(new Structure(4, 36));
+        $this->addPrimarySystem(new Structure(4, 32));
 	    
         $this->hitChart = array(
         		0=> array( 

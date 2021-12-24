@@ -35,34 +35,35 @@ class Baroon extends LCV{
 		    $sensors->markLCV();
 		    $this->addPrimarySystem($sensors);
         $this->addPrimarySystem(new Engine(4, 12, 0, 6, 1));
-        $this->addPrimarySystem(new ParticleProjector(2, 6, 1, 300, 60));
-        $this->addPrimarySystem(new ParticleProjector(2, 6, 1, 300, 60));
-        $this->addPrimarySystem(new LightParticleProjector(2, 3, 1, 180, 360));
-        $this->addPrimarySystem(new LightParticleProjector(2, 3, 1, 0, 180));
+
+        $this->addFrontSystem(new ParticleProjector(2, 6, 1, 300, 60));
+        $this->addFrontSystem(new ParticleProjector(2, 6, 1, 300, 60));
+        $this->addFrontSystem(new LightParticleProjector(2, 3, 1, 180, 360));
+        $this->addFrontSystem(new LightParticleProjector(2, 3, 1, 0, 180));
         
         $this->addPrimarySystem(new Structure(5, 30));   
         
         $this->hitChart = array(
             0=> array( //should never happen
                 11 => "Structure",
-                13 => "Light Particle Projector",
-                16 => "Particle Projector",
-                18 => "Engine",
-                19 => "Reactor",
-                20 => "Scanner",
+                13 => "1:Light Particle Projector",
+                16 => "1:Particle Projector",
+                18 => "0:Engine",
+                19 => "0:Reactor",
+                20 => "0:Scanner",
             ),
             1=> array( //PRIMARY hit table, effectively
                 11 => "Structure",
-                13 => "0:Light Particle Projector",
-                16 => "0:Particle Projector",
+                13 => "1:Light Particle Projector",
+                16 => "1:Particle Projector",
                 18 => "0:Engine",
                 19 => "0:Reactor",
                 20 => "0:Scanner",
             ),
             2=> array( //same as Fwd
                 11 => "Structure",
-                13 => "0:Light Particle Projector",
-                16 => "0:Particle Projector",
+                13 => "1:Light Particle Projector",
+                16 => "1:Particle Projector",
                 18 => "0:Engine",
                 19 => "0:Reactor",
                 20 => "0:Scanner",

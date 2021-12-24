@@ -19,7 +19,7 @@ class CircasianIlostaLaser extends HeavyCombatVessel{
 		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
 		$this->enhancementOptionsDisabled[] = 'IMPR_REA';
 		
-		$this->notes = "Power fluctuations. Rolls for reactor critical every turn with +5% penalty. Effect lasts one turn.";
+//		$this->notes = "Power fluctuations. Rolls for reactor critical every turn with +5% penalty. Effect lasts one turn.";
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;

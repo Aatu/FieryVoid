@@ -36,32 +36,34 @@ class DtarnAttack extends LCV{
 		$sensors->markLCV();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(3, 9, 0, 8, 2));
-	$this->addPrimarySystem(new TwinArray(2, 6, 2, 240, 60));
-	$this->addPrimarySystem(new MediumLaser(3, 6, 5, 300, 60));
-	$this->addPrimarySystem(new TwinArray(2, 6, 2, 300, 120));
+
+	$this->addFrontSystem(new TwinArray(2, 6, 2, 240, 60));
+	$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
+	$this->addFrontSystem(new TwinArray(2, 6, 2, 300, 120));
+
 	$this->addPrimarySystem(new Structure(3, 36));
   
         $this->hitChart = array(
         		0=> array( //should never happen (...but actually sometimes does!)
         				10 => "Structure",
-        				12 => "Medium Laser",
-        				15 => "Twin Array",
-        				17 => "Engine",
-        				19 => "Reactor",
-        				20 => "Scanner",
+        				12 => "1:Medium Laser",
+        				15 => "1:Twin Array",
+        				17 => "0:Engine",
+        				19 => "0:Reactor",
+        				20 => "0:Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
-        				10 => "0:Structure",
-        				12 => "0:Medium Laser",
-        				15 => "0:Twin Array",
+        				10 => "Structure",
+        				12 => "1:Medium Laser",
+        				15 => "1:Twin Array",
         				17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		2=> array( //same as Fwd
-        				10 => "0:Structure",
-        				12 => "0:Medium Laser",
-        				15 => "0:Twin Array",
+        				10 => "Structure",
+        				12 => "1:Medium Laser",
+        				15 => "1:Twin Array",
         				17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

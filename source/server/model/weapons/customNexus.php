@@ -1578,10 +1578,10 @@ class NexusChaffLauncher extends Weapon{
         public $animationWidth = 2;
         public $trailLength = 35;
 
-        public $loadingtime = 1;
-        public $priority = 6;
+        public $loadingtime = 2;
+        public $priority = 8;
 
-        public $rangePenalty = 1.0 ; //-1 / hex
+        public $rangePenalty = 1.5 ; // -3/2 hexes
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
 
 	function __construct($startArc, $endArc, $nrOfShots = 1){
@@ -1625,8 +1625,8 @@ class NexusChaffLauncher extends Weapon{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return Dice::d(10, 1)+12;   }
-        public function setMinDamage(){     $this->minDamage = 13 ;      }
+        public function getDamage($fireOrder){ return Dice::d(10, 2)+2;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
         public function setMaxDamage(){     $this->maxDamage = 22 ;      }
 	}// endof NexusGasGun
 
@@ -2036,11 +2036,11 @@ class NexusAutocannonFtr extends Matter{
         public $projectilespeed = 10;
         public $animationWidth = 2;
         public $trailLength = 35;
-        public $loadingtime = 1;
+        public $loadingtime = 2;
 		public $guns = 1;
-        public $priority = 5;
+        public $priority = 8;
 
-        public $rangePenalty = 1; //
+        public $rangePenalty = 1.5; //
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
 
 	function __construct($startArc, $endArc, $nrOfShots = 1){
@@ -3012,9 +3012,9 @@ class NexusHeavyCoilgun extends Matter{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return Dice::d(10, 2)+2;   }
-        public function setMinDamage(){     $this->minDamage = 4 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
+        public function getDamage($fireOrder){ return Dice::d(10, 3)+3;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 33 ;      }
 }
 
 // endof NexusHeavyCoilgun
@@ -3048,9 +3048,9 @@ class NexusCoilgun extends Matter{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return Dice::d(10, 2)+2;   }
-        public function setMinDamage(){     $this->minDamage = 4 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
+        public function getDamage($fireOrder){ return Dice::d(10, 3)+3;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 33 ;      }
 }// endof NexusCoilgun
 
 
@@ -4382,7 +4382,7 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
 
         public $raking = 8;
 
-        public $rangePenalty = 0.67;
+        public $rangePenalty = 0.66;
         public $fireControl = array(-4, 2, 2); // fighters, <mediums, <capitals
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){

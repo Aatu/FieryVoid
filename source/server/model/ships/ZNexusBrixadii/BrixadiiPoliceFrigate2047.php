@@ -18,7 +18,6 @@ class BrixadiiPoliceFrigate2047 extends LCV{
 
         $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
 	    $this->notes = 'May deploy independently.';
-	    $this->notes .= '<br>Antiquated Sensors.';
         
         $this->forwardDefense = 9;
         $this->sideDefense = 11;
