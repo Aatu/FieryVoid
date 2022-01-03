@@ -2423,6 +2423,8 @@ spl_autoload_register(
                 'trekshieldftr' => '/server/model/weapons/customTrek.php',
 				
 				//ships
+				
+				//United Federation of Planets
 				'trekfederationnxcruiserv2' => '/server/model/ships/ZTrekFederation/TrekFederationNXCruiserV2.php',
 				'trekfederationconstitutioncl' => '/server/model/ships/ZTrekFederation/TrekFederationConstitutionCL.php',
 				'trekfederationconstitutioncmdcl' => '/server/model/ships/ZTrekFederation/TrekFederationConstitutionCmdCL.php',
@@ -2436,10 +2438,12 @@ spl_autoload_register(
 				'vulcandkyr' => '/server/model/ships/ZTrekFederation/VulcanDKyr.php',
 				'vulcandvahl' => '/server/model/ships/ZTrekFederation/VulcanDVahl.php',
 				'vulcanshran' => '/server/model/ships/ZTrekFederation/VulcanShran.php',
-				'vulcanshuttle' => '/server/model/ships/ZTrekFederation/VulcanShuttle.php',
 				'vulcansurak' => '/server/model/ships/ZTrekFederation/VulcanSurak.php',
 				'vulcantimur' => '/server/model/ships/ZTrekFederation/VulcanTimur.php',
-				'vulcanvahklas' => '/server/model/ships/ZTrekFederation/VulcanVahklas.php',				
+				'vulcanvahklas' => '/server/model/ships/ZTrekFederation/VulcanVahklas.php',	
+				'vulcanlander' => '/server/model/ships/ZTrekFederation/VulcanLander.php',	
+				'vulcanshuttle' => '/server/model/ships/ZTrekFederation/VulcanShuttle.php',
+				'vulcantribuneflt' => '/server/model/ships/ZTrekFederation/VulcanTribuneFlt.php',			
 				
 				'andorianthyzon' => '/server/model/ships/ZTrekFederation/AndorianThyzon.php',
 				'andorianthymasescort' => '/server/model/ships/ZTrekFederation/AndorianThymasEscort.php',
@@ -2453,6 +2457,10 @@ spl_autoload_register(
 				'trekfederationsarajevo' => '/server/model/ships/ZTrekFederation/TrekFederationSarajevo.php',
 				'trekfederationjclass' => '/server/model/ships/ZTrekFederation/TrekFederationJClass.php',
 				'trekfederationyclass' => '/server/model/ships/ZTrekFederation/TrekFederationYClass.php',
+				
+				//other factions
+				'nausicaanvandal' => '/server/model/ships/ZTrekOther/NausicaanVandal.php',
+				
 				
 
 				//Hyach conversions

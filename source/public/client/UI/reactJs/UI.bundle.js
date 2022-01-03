@@ -40100,7 +40100,7 @@ var SystemInfoButtons = function (_React$Component) {
 			return React.createElement(
 				Container,
 				null,
-				canOnline(ship, system) && React.createElement(Button, { title: "power on (R = mass for weapons)", onClick: this.online.bind(this), onContextMenu: this.allOnline.bind(this), img: "./img/on.png" }),
+				canOnline(ship, system) && React.createElement(Button, { title: "power on (R = mass)", onClick: this.online.bind(this), onContextMenu: this.allOnline.bind(this), img: "./img/on.png" }),
 				canOffline(ship, system) && React.createElement(Button, { title: "power off (R = mass for weapons)", onClick: this.offline.bind(this), onContextMenu: this.allOffline.bind(this), img: "./img/off.png" }),
 				canOverload(ship, system) && React.createElement(Button, { title: "overload", onClick: this.overload.bind(this), img: "./img/overload.png" }),
 				canStopOverload(ship, system) && React.createElement(Button, { title: "stop overload", nClick: this.stopOverload.bind(this), img: "./img/overloading.png" }),

@@ -943,12 +943,21 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 			$this->data["Special"] .= '<br>';
 		}
 		*/
+		/*
 		$this->data["Special"] = "Defensive system absorbing damage from hits before projectile touches actual hull.";
 		$this->data["Special"] .= "<br>Can absorb up to " .$this->output ." damage points per hit, ";
 		$this->data["Special"] .= "including " . $this->armour . " without reducing capacity for further absorption.";
 		$this->data["Special"] .= "<br>Protects from every separate impact (eg. every rake!) separately.";
 		$this->data["Special"] .= "<br>System's health represents damage capacity. If it is reduced to zero system will cease to function.";
 		$this->data["Special"] .= "<br>Will not fall on its own unless its structure block is destroyed.";
+		$this->data["Special"] .= "<br>This is NOT a shield as far as any shield-related interactions go.";
+		*/
+		$absorb = $this->output - $this->armour;
+		$this->data["Special"] = "Defensive system which absorbs damage from incoming shots before they damage ship hull.";
+		$this->data["Special"] .= "<br>Can absorb up to " . $absorb . " damage points per hit after projection armour is applied, ";
+		$this->data["Special"] .= "<br>Protects from every separate impact (e.g. every rake!) separately.";
+		$this->data["Special"] .= "<br>System's structure represents damage capacity. If it is reduced to zero system will cease to function.";
+		$this->data["Special"] .= "<br>Cannot not be destroyed unless associated structure block is also destroyed.";
 		$this->data["Special"] .= "<br>This is NOT a shield as far as any shield-related interactions go.";
 	}	
 	
@@ -1085,7 +1094,7 @@ class TrekShieldProjector  extends Shield implements DefensiveSystem { //defensi
 
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn); 
-		$this->data["Special"] = "Shield projector - replenishes appropriate projection by its rating at end of turn.";
+		$this->data["Special"] = "Shield projector - replenishes structure of appropriate Shield Projection by Projector's rating at end of turn.";
 		$this->data["Special"] .= "<br>Can be boosted.";
 	}	
 	
@@ -1139,10 +1148,21 @@ class TrekShieldFtr extends ShipSystem{
 		$this->data["Armor"] = $this->armour;
 		$this->data["Recharge"] = $this->recharge;
 		
+		/*
 		$this->data["Special"] = "Defensive system absorbing damage from hits before projectile touches actual hull.";
 		$this->data["Special"] .= "<br>Can absorb up to " .$this->output ." damage points per hit, ";
 		$this->data["Special"] .= "including " . $this->armour . " without reducing capacity for further absorption.";
 		$this->data["Special"] .= "<br>Regenerates at end of turn, after firing. Regeneration rate is doubled if fighter doesn't use its direct fire weapons.";
+		*/
+		
+		$absorb = $this->output - $this->armour;
+		$this->data["Special"] = "Defensive system which absorbs damage from incoming shots before they damage ship hull.";
+		$this->data["Special"] .= "<br>Can absorb up to " . $absorb . " damage points per hit after projection armour is applied, ";
+		$this->data["Special"] .= "<br>Protects from every separate impact (e.g. every rake!) separately.";
+		$this->data["Special"] .= "<br>System's structure represents damage capacity. If it is reduced to zero system will cease to function.";
+		$this->data["Special"] .= "<br>Cannot not be destroyed unless associated structure block is also destroyed.";
+		$this->data["Special"] .= "<br>Recharges at end of turn, after firing. Recharge rate is doubled if fighter doesn't use its direct fire weapons.";
+		$this->data["Special"] .= "<br>This is NOT a shield as far as any shield-related interactions go.";
 	}	
 	
 	/*always redefine $this->data due to current capacity info*/

@@ -314,7 +314,7 @@ class SystemInfoButtons extends React.Component {
 		
         return (
             <Container>
-				{canOnline(ship, system) && <Button title="power on (R = mass for weapons)" onClick={this.online.bind(this)} onContextMenu={this.allOnline.bind(this)} img="./img/on.png"></Button>}
+				{canOnline(ship, system) && <Button title="power on (R = mass)" onClick={this.online.bind(this)} onContextMenu={this.allOnline.bind(this)} img="./img/on.png"></Button>}
                 {canOffline(ship, system) && <Button title="power off (R = mass for weapons)" onClick={this.offline.bind(this)} onContextMenu={this.allOffline.bind(this)} img="./img/off.png"></Button>}
                 {canOverload(ship, system) && <Button title="overload" onClick={this.overload.bind(this)} img="./img/overload.png"></Button>}
                 {canStopOverload(ship, system) && <Button title="stop overload" nClick={this.stopOverload.bind(this)} img="./img/overloading.png"></Button>}
