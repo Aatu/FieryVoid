@@ -158,7 +158,8 @@ class TrekLtPhaseCannon extends TrekPhaserBase{
         public $intercept = 2;
         public $priority = 8; //Raking weapon
         
-        public $rangePenalty = 1;
+        //public $rangePenalty = 1;
+		public $rangePenalty = 1.5; // -3 per 2 hexes
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
  
 		public $damageType = 'Raking'; 
@@ -170,9 +171,12 @@ class TrekLtPhaseCannon extends TrekPhaserBase{
         }
 
 	    
-        public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
-        public function setMinDamage(){   return  $this->minDamage = 5 ;      }
-        public function setMaxDamage(){   return  $this->maxDamage = 14 ;      }
+        public function getDamage($fireOrder){        
+			//return Dice::d(10, 1)+4;   //original damage
+			return Dice::d(6, 2)+4;
+		}
+        public function setMinDamage(){   return  $this->minDamage = 6 ;      }
+        public function setMaxDamage(){   return  $this->maxDamage = 16 ;      }
 		
     }  //end of class Trek Fighter Light Phase Cannon
 
@@ -957,7 +961,7 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 		$this->data["Special"] .= "<br>Can absorb up to " . $absorb . " damage points per hit after projection armour is applied, ";
 		$this->data["Special"] .= "<br>Protects from every separate impact (e.g. every rake!) separately.";
 		$this->data["Special"] .= "<br>System's structure represents damage capacity. If it is reduced to zero system will cease to function.";
-		$this->data["Special"] .= "<br>Cannot not be destroyed unless associated structure block is also destroyed.";
+		$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
 		$this->data["Special"] .= "<br>This is NOT a shield as far as any shield-related interactions go.";
 	}	
 	
@@ -1158,9 +1162,7 @@ class TrekShieldFtr extends ShipSystem{
 		$absorb = $this->output - $this->armour;
 		$this->data["Special"] = "Defensive system which absorbs damage from incoming shots before they damage ship hull.";
 		$this->data["Special"] .= "<br>Can absorb up to " . $absorb . " damage points per hit after projection armour is applied, ";
-		$this->data["Special"] .= "<br>Protects from every separate impact (e.g. every rake!) separately.";
-		$this->data["Special"] .= "<br>System's structure represents damage capacity. If it is reduced to zero system will cease to function.";
-		$this->data["Special"] .= "<br>Cannot not be destroyed unless associated structure block is also destroyed.";
+		$this->data["Special"] .= "<br>If damage capacity it is reduced to zero system will cease to function.";
 		$this->data["Special"] .= "<br>Recharges at end of turn, after firing. Recharge rate is doubled if fighter doesn't use its direct fire weapons.";
 		$this->data["Special"] .= "<br>This is NOT a shield as far as any shield-related interactions go.";
 	}	

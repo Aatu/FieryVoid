@@ -368,11 +368,10 @@
 	    
 	    public $noOverkill = true;	    
 	    public $priority = 4;//more or less equivalent of d6+4, due to Matter properties
-		
 	    
 	    public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     	public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!  
-	 
+	  
 
         function __construct($startArc, $endArc){
             parent::__construct(0, 1, 0, $startArc, $endArc);
