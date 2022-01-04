@@ -450,7 +450,8 @@ window.gamedata = {
 		var currHull = shipTable[j];
 		checkResult += " <i>" + currHull.name + "</i><br>";			
 		checkResult +=  " - Total: " + currHull.Total;
-		if ((!currHull.isFtr) && (!currHull.hangarRequired)){ //fighter total is not limited; also, let's not limit units requiring hangar slots! (this isn't in the rules but I think LCV logic demands it)
+		//if ((!currHull.isFtr) && (!currHull.hangarRequired)){ //fighter total is not limited; also, let's not limit units requiring hangar slots! (this isn't in the rules but I think LCV logic demands it)
+		if (!currHull.hangarRequired){ //actually there MAY be hangarless fighters - they should be limited per hull (well, per flight) just like ships!
 		    	checkResult +=  " (allowed " +limitPerHull+ ")";
 			if (currHull.Total>limitPerHull ){
 				checkResult += " TOO MANY!";
