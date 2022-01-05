@@ -16,7 +16,6 @@ class DoubleV extends FighterFlight{
 		$this->offensivebonus = 4;
 		$this->jinkinglimit = 8;
 		$this->turncost = 0.33;
-		$this->unitSize = 0.5; 		
 		
         $this->notes = 'Needs 2 rail slots.';
 		$this->enhancementOptionsEnabled[] = 'NAVIGATOR'; //this flight can take Navigator enhancement option	

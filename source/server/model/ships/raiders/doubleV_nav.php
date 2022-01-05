@@ -19,7 +19,6 @@ class DoubleV_Nav extends FighterFlight{
 		$this->jinkinglimit = 8;
 		$this->turncost = 0.33;
 		$this->hasNavigator = true;
-		$this->unitSize = 0.5; 			
 		
         $this->notes = 'Needs 2 rail slots.';
 
