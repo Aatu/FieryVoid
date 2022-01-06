@@ -1718,7 +1718,7 @@ class EWGraviticTractingRod extends SWDirectWeapon{
 		if ($system->powerReq > 0 || $system->canOffLine){
 			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
 		}
-		$system->criticalRollMod += 4;
+		$system->critRollMod += 4;
 	}
 		
         public function getDamage($fireOrder){        return Dice::d(10, 2);   }
@@ -1773,7 +1773,7 @@ class EWGraviticTractingRod extends SWDirectWeapon{
 		if ($system->powerReq > 0 || $system->canOffLine){
 			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
 		}
-		$system->criticalRollMod += 3;
+		$system->critRollMod += 3;
 	}
 		
         public function getDamage($fireOrder){        return Dice::d(10, 5);   }
