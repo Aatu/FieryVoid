@@ -26,12 +26,10 @@ class CircasianRotarraRailgun extends LCV{
 	$this->pivotcost = 1;
 	$this->iniativebonus = 14 *5;
 
-
 	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
-
 
 	$this->addPrimarySystem(new Reactor(3, 8, 0, 0));
 	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
@@ -40,36 +38,33 @@ class CircasianRotarraRailgun extends LCV{
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(3, 7, 0, 4, 1));
 
-	$this->addPrimarySystem(new NexusUltralightRailgun(1, 3, 2, 270, 90));
-	$this->addPrimarySystem(new EWRocketLauncher(1, 4, 1, 240, 60));
-	$this->addPrimarySystem(new EWRocketLauncher(1, 4, 1, 300, 120));
-
+	$this->addFrontSystem(new NexusUltralightRailgun(1, 3, 2, 270, 90));
+	$this->addFrontSystem(new EWRocketLauncher(1, 4, 1, 240, 60));
+	$this->addFrontSystem(new EWRocketLauncher(1, 4, 1, 300, 120));
 
 	$this->addPrimarySystem(new Structure( 3, 30));
-
-
 
         $this->hitChart = array(
         		0=> array( 
         				11 => "Structure",
-        				13 => "Ultralight Railgun",
-						15 => "Rocket Launcher",
-        				17 => "Engine",
-        				19 => "Reactor",
-        				20 => "Scanner",
+        				13 => "1:Ultralight Railgun",
+						15 => "1:Rocket Launcher",
+        				17 => "0:Engine",
+        				19 => "0:Reactor",
+        				20 => "0:Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				11 => "Structure",
-        				13 => "0:Ultralight Railgun",
-						15 => "0:Rocket Launcher",
+        				13 => "1:Ultralight Railgun",
+						15 => "1:Rocket Launcher",
         				17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		2=> array( //same as Fwd
         				11 => "Structure",
-        				13 => "0:Ultralight Railgun",
-						15 => "0:Rocket Launcher",
+        				13 => "1:Ultralight Railgun",
+						15 => "1:Rocket Launcher",
         				17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

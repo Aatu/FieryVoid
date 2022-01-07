@@ -18,7 +18,6 @@ class gaimRafaTorpedo extends LCV{
 	$this->forwardDefense = 10;
 	$this->sideDefense = 11;
 
-
 	$this->isd = 2250;
 
 	$this->turncost = 0.25;
@@ -28,12 +27,10 @@ class gaimRafaTorpedo extends LCV{
 	$this->pivotcost = 1;
 	$this->iniativebonus = 14 *5;
 
-
 	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
-
 
 	$this->addPrimarySystem(new Reactor(4, 9, 0, 0));
 	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
@@ -41,27 +38,24 @@ class gaimRafaTorpedo extends LCV{
 		$sensors->markLCV();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(4, 11, 0, 6, 1));
+	$this->addPrimarySystem(new Bulkhead(0, 1));
+	$this->addPrimarySystem(new Bulkhead(0, 1));
 
 	$this->addPrimarySystem(new PacketTorpedo(3, 6, 5, 300, 60));
 	//NOT moving to front due to Bulkhead interaction!
 	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 180, 360)); 
 	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 180));
-	$this->addPrimarySystem(new Bulkhead(0, 1));
-	$this->addPrimarySystem(new Bulkhead(0, 1));
-
 
 	$this->addPrimarySystem(new Structure( 5, 30));
-
-
 
         $this->hitChart = array(
         		0=> array( 
         				11 => "Structure",
-        				13 => "Packet Torpedo",
-        				16 => "Standard Particle Beam",
-        				18 => "Engine",
-        				19 => "Reactor",
-        				20 => "Scanner",
+        				13 => "0:Packet Torpedo",
+        				16 => "0:Standard Particle Beam",
+        				18 => "0:Engine",
+        				19 => "0:Reactor",
+        				20 => "0:Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				11 => "Structure",

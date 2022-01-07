@@ -1,5 +1,5 @@
 <?php
-class ColonialRaptor extends SuperHeavyFighter{
+class ColonialRaptor extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -27,6 +27,7 @@ class ColonialRaptor extends SuperHeavyFighter{
 		$this->hangarRequired = 'superheavy'; //for fleet check
         $this->iniativebonus = 70;
         $this->hasNavigator = true;
+    	$this->superheavy = true;
         $this->maxFlightSize = 3;//this is a superheavy fighter originally intended as single unit, limit flight size to 3
 
 		$this->populate();

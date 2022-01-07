@@ -201,6 +201,12 @@ var EWLaserBolt = function  EWLaserBolt(json, ship) {
 EWLaserBolt.prototype = Object.create(Weapon.prototype);
 EWLaserBolt.prototype.constructor =  EWLaserBolt;
 
+var EWDualLaserBolt = function  EWDualLaserBolt(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWDualLaserBolt.prototype = Object.create(Weapon.prototype);
+EWDualLaserBolt.prototype.constructor =  EWDualLaserBolt;
+
 var EWRoyalLaser = function  EWRoyalLaser(json, ship) {
     Weapon.call(this, json, ship);
 };

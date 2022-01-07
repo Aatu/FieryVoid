@@ -26,7 +26,6 @@ class BALightGunboatEscort extends LCV{
         $this->rollcost = 1;
         $this->pivotcost = 1;
         $this->iniativebonus = 70;
-    
  
 	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
@@ -39,33 +38,35 @@ class BALightGunboatEscort extends LCV{
 		    $sensors->markLCV();
 		    $this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(4, 11, 0, 4, 1));
-	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 180, 60));
-	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 300, 180));
-	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 270, 90));
-	$this->addPrimarySystem(new BAInterceptorMkI(2, 0, 0, 0, 360));
+
+	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 180, 60));
+	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 180));
+	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 270, 90));
+	$this->addFrontSystem(new BAInterceptorMkI(2, 0, 0, 0, 360));
+
 	$this->addPrimarySystem(new Structure( 5, 30));
   
         $this->hitChart = array(
         		0=> array( //should never happen
         				11 => "Structure",
-        				15 => "Standard Particle Beam",
-        				17 => "BA Interceptor I",
-        				18 => "Engine",
-        				19 => "Reactor",
-        				20 => "Scanner",
+        				15 => "1:Standard Particle Beam",
+        				17 => "1:BA Interceptor I",
+        				18 => "0:Engine",
+        				19 => "0:Reactor",
+        				20 => "0:Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				11 => "Structure",
-        				15 => "0:Standard Particle Beam",
-        				17 => "0:BA Interceptor I",
+        				15 => "1:Standard Particle Beam",
+        				17 => "1:BA Interceptor I",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		2=> array( //same as Fwd
         				11 => "Structure",
-        				15 => "0:Standard Particle Beam",
-        				17 => "0:BA Interceptor I",
+        				15 => "1:Standard Particle Beam",
+        				17 => "1:BA Interceptor I",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
