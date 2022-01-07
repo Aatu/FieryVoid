@@ -34,9 +34,11 @@ class lupaEscort extends LCV{
 		$sensors->markLCV();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(4, 8, 0, 6, 1));
+	
 	$this->addFrontSystem(new TwinArray(3, 6, 2, 240, 60));
 	$this->addFrontSystem(new TwinArray(3, 6, 2, 270, 90));
 	$this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
+	
 	$this->addPrimarySystem(new Structure(4, 30));
   
         $this->hitChart = array(
