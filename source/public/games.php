@@ -56,17 +56,22 @@ if (isset($_SESSION["user"])) {
     <!-- <div id="newsHeader">Latest News - September 2020</div> -->
     <div id="newsEntry">
         
-<!--	    
+	    
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
         <h4>may our games be fiery and our lives peaceful</h4>
         <br>
--->        
+       
 		
 		---------- <b>LATEST NEWS - December 2021</b> ----------	
 	    <br><b>Sustaining even without Power available</b> - just like boosting
 	    <br><b>Containment Breach</b> - Reactor won't temporatily shut down due to critical roll now. It will become unstable and might explode though!
 	    <br><b>All ahead full</b> - r-click on "move forward" arrow will cause unit to use all remaining movement on moving straight ahead
 	    <br><b>Side-by-side layout update</b> - weapons moved forward, thrusters aft (to reduce visual clutter) - for Drazi and Ch'Lonas
+	    
+	    <br><br>---------- <b>update 16th of December</b> ---------- 
+	    <br><b>proper Unreliable traits</b> - complete with Gaim Skassa, courtesy of Geoffrey
+	    <br><b>Engine criticals remade</b> - more chance of shutdown, less of permanent thrust reduction
+	    <br><b>Belt Alliance LCV Carrier</b> - completely unofficial, but allows fielding proper Belters in pickup battles without additional allowances	    
 	    
 		<!-- <br><br>---------- <b>update 8th of November</b> ---------- 
 		-->
