@@ -21,7 +21,7 @@ class TalvanUpgrade extends BaseShip{
 		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
 		$this->enhancementOptionsDisabled[] = 'IMPR_ENG';
 		
-		$this->notes = "Engine fluctuations. Rolls for engine critical every turn with +5% penalty. Effect lasts one turn.";
+//		$this->notes = "Engine fluctuations. Rolls for engine critical every turn with +5% penalty. Effect lasts one turn.";
         
         $this->turncost = 1;
         $this->turndelaycost = 0.66;

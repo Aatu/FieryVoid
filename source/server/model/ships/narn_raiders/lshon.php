@@ -35,35 +35,38 @@ class Lshon extends LCV{
 		$sensors->markLCV();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(2, 6, 0, 4, 1));
-	$this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 300, 360));
-	$this->addPrimarySystem(new MediumPlasma(2, 5, 3, 300, 60));
-	$this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 0, 60));
+
+	$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 300, 360));
+	$this->addFrontSystem(new MediumPlasma(2, 5, 3, 300, 60));
+	$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 0, 60));
+
 	$this->addPrimarySystem(new Structure(2, 28));
   
         $this->hitChart = array(
         		0=> array( //should never happen (...but actually sometimes does!)
         				11 => "Structure",
-        				13 => "Medium Plasma Cannon",
-        				16 => "Light Particle Beam",
-        				18 => "Engine",
-        				19 => "Reactor",
-        				20 => "Scanner",
+        				13 => "1:Medium Plasma Cannon",
+        				16 => "1:Light Particle Beam",
+        				18 => "0:Engine",
+        				19 => "0:Reactor",
+        				20 => "0:Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
-        				11 => "0:Structure",
-        				13 => "0:Medium Plasma Cannon",
-        				16 => "0:Light Particle Beam",
+        				11 => "Structure",
+        				13 => "1:Medium Plasma Cannon",
+        				16 => "1:Light Particle Beam",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		2=> array( //same as Fwd
-        				11 => "0:Structure",
-        				13 => "0:Medium Plasma Cannon",
-        				16 => "0:Light Particle Beam",
+        				11 => "Structure",
+        				13 => "1:Medium Plasma Cannon",
+        				16 => "1:Light Particle Beam",
         				18 => "0:Engine",
         				19 => "0:Reactor",
-        				20 => "0:Scanner",        		),
+        				20 => "0:Scanner",
+				),
         		
         ); //end of hit chart
     }

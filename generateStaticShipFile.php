@@ -24,7 +24,6 @@ foreach ($ships as $faction) {
         }
     }
 }
-
 file_put_contents('./source/public/static/ships.js', 'window.staticShips = ' . json_encode($data));
 */
 

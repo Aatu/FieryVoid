@@ -35,13 +35,13 @@ class KastanDullknife extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 9, 0, 3, 4));        
         
 		$this->addFrontSystem(new CargoBay(2, 15));
-        $this->addFrontSystem(new EWLaserBolt(1, 4, 2, 240, 120));
+        $this->addFrontSystem(new EWLaserBolt(2, 4, 2, 240, 120));
 		$this->addFrontSystem(new CargoBay(2, 15));
         $this->addFrontSystem(new Thruster(2, 6, 0, 4, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 4, 1));
 	    
-		$this->addAftSystem(new EWLaserBolt(1, 4, 2, 60, 300));
-		$this->addAftSystem(new EWLaserBolt(1, 4, 2, 60, 300));
+		$this->addAftSystem(new EWLaserBolt(2, 4, 2, 60, 300));
+		$this->addAftSystem(new EWLaserBolt(2, 4, 2, 60, 300));
         $this->addAftSystem(new Thruster(2, 12, 0, 10, 2));    
        
         $this->addPrimarySystem(new Structure(3, 30));
