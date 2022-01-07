@@ -28,7 +28,7 @@ class LiberatorEscort extends LCV{
 	$this->pivotcost = 1;
 	$this->iniativebonus = 14 *5;
   
-	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
@@ -39,30 +39,31 @@ class LiberatorEscort extends LCV{
 		$sensors->markLCV();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(4, 13, 0, 6, 1));
-	$this->addPrimarySystem(new TwinArray(2, 6, 2, 180, 0));
-	$this->addPrimarySystem(new TwinArray(2, 6, 2, 0, 360));
-	$this->addPrimarySystem(new TwinArray(2, 6, 2, 0, 180));
+	
+	$this->addFrontSystem(new TwinArray(2, 6, 2, 180, 0));
+	$this->addFrontSystem(new TwinArray(2, 6, 2, 0, 360));
+	$this->addFrontSystem(new TwinArray(2, 6, 2, 0, 180));
   
 	$this->addPrimarySystem(new Structure( 5, 31));
   
         $this->hitChart = array(
         		0=> array( 
         				11 => "Structure",
-        				16 => "Twin Array",
+        				16 => "1:Twin Array",
         				18 => "Engine",
         				19 => "Reactor",
         				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				11 => "Structure",
-        				16 => "0:Twin Array",
+        				16 => "1:Twin Array",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		2=> array( //same as Fwd
         				11 => "Structure",
-        				16 => "0:Twin Array",
+        				16 => "1:Twin Array",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

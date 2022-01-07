@@ -37,7 +37,7 @@ class DrakhMobileBeamPlatform extends MediumShip{
 	$this->pivotcost = 2;
 	$this->iniativebonus = 12 *5;
 	    
-	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 	    
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
@@ -49,18 +49,20 @@ class DrakhMobileBeamPlatform extends MediumShip{
 		$sensors->markImproved();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(4, 9, 0, 4, 3));
-	$this->addPrimarySystem(new customMphasedBeamAcc(3, 0, 0, 300, 60)); 
-	$this->addPrimarySystem(new customLtPhaseDisruptorShip(3, 0, 0, 240, 120));
-	$this->addPrimarySystem(new customLtPolarityPulsar(2, 0, 0, 0,360));
+	
+	$this->addFrontSystem(new customMphasedBeamAcc(3, 0, 0, 300, 60)); 
+	$this->addFrontSystem(new customLtPhaseDisruptorShip(3, 0, 0, 240, 120));
+	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 0,360));
+	
 	$this->addPrimarySystem(new AbsorbtionShield(2,6,4,1,0,360));
 	$this->addPrimarySystem(new Structure( 4, 30));
 	    
         $this->hitChart = array(
         		0=> array( //should never happen
         				8 => "Structure",
-        				10 => "Multiphased Beam Accelerator",
-		    			11 => "Light Phase Disruptor",
-		    			12 => "Light Polarity Pulsar",
+        				10 => "1:Multiphased Beam Accelerator",
+		    			11 => "1:Light Phase Disruptor",
+		    			12 => "1:Light Polarity Pulsar",
 		    			14 => "Absorption Shield",
         				16 => "Engine",
         				18 => "Reactor",
@@ -68,9 +70,9 @@ class DrakhMobileBeamPlatform extends MediumShip{
         		),
         		1=> array( //PRIMARY hit table, effectively
         				8 => "Structure",
-        				10 => "0:Multiphased Beam Accelerator",
-		    			11 => "0:Light Phase Disruptor",
-		    			12 => "0:Light Polarity Pulsar",
+        				10 => "1:Multiphased Beam Accelerator",
+		    			11 => "1:Light Phase Disruptor",
+		    			12 => "1:Light Polarity Pulsar",
 		    			14 => "0:Absorption Shield",
         				16 => "0:Engine",
         				18 => "0:Reactor",
@@ -78,9 +80,9 @@ class DrakhMobileBeamPlatform extends MediumShip{
         		),
         		2=> array( //PRIMARY hit table, effectively
         				8 => "Structure",
-        				10 => "0:Multiphased Beam Accelerator",
-		    			11 => "0:Light Phase Disruptor",
-		    			12 => "0:Light Polarity Pulsar",
+        				10 => "1:Multiphased Beam Accelerator",
+		    			11 => "1:Light Phase Disruptor",
+		    			12 => "1:Light Polarity Pulsar",
 		    			14 => "0:Absorption Shield",
         				16 => "0:Engine",
         				18 => "0:Reactor",

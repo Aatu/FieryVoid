@@ -4,6 +4,8 @@ class Plasma extends Weapon{
 	public $priority = 6;
 	public $damageType = "Standard"; 
 	public $weaponClass = "Plasma"; 
+        public $animation = "bolt";
+        public $animationColor = array(75, 250, 90);
 
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -28,6 +30,7 @@ class Plasma extends Weapon{
     class PlasmaAccelerator extends Plasma{
 		public $name = "plasmaAccelerator";
         public $displayName = "Plasma Accelerator";
+	    /*
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
 		public $trailColor = array(75, 250, 90);
@@ -35,6 +38,7 @@ class Plasma extends Weapon{
         public $animationWidth = 4;
 		public $animationExplosionScale = 0.40;
 		public $trailLength = 30;
+		*/
 		public $rangeDamagePenalty = 1;
         
         public $loadingtime = 1;
@@ -47,7 +51,6 @@ class Plasma extends Weapon{
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-	
 	    
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);   
@@ -61,7 +64,6 @@ class Plasma extends Weapon{
 		$this->data["Special"] .= "<br> - 2 turns: 2d10+8"; 
 		$this->data["Special"] .= "<br> - 3 turns (full): 4d10+12"; 
 	}
-		
 
 	public function getDamage($fireOrder){
             switch($this->turnsloaded){
@@ -118,18 +120,19 @@ class Plasma extends Weapon{
 
 }//endof class PlasmaAccelerator
 
-
 	
 class MagGun extends Plasma{
 	public $name = "magGun";
 	public $displayName = "Mag Gun";
-	public $animation = "trail";
+	public $animation = "bolt";
 	public $animationColor = array(255, 105, 0);
+	/*
 	public $trailColor = array(255, 140, 60);
 	public $projectilespeed = 10;
 	public $animationWidth = 6;
 	public $animationExplosionScale = 0.90;
 	public $trailLength = 30;
+	*/
 	public $priority = 2;
 		        
 	public $loadingtime = 3;
@@ -141,6 +144,7 @@ class MagGun extends Plasma{
 	public $weaponClass = "Plasma"; 
 	public $firingModes = array( 1 => "Flash"); 
 
+	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	}
@@ -148,7 +152,6 @@ class MagGun extends Plasma{
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 	}
-	
 		
 	public function getDamage($fireOrder){   
 		return Dice::d(10,8)+10;   
@@ -162,6 +165,7 @@ class MagGun extends Plasma{
 class HeavyPlasma extends Plasma{
     	public $name = "heavyPlasma";
         public $displayName = "Heavy Plasma Cannon";
+	/*
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
     	public $trailColor = array(75, 250, 90);
@@ -169,6 +173,7 @@ class HeavyPlasma extends Plasma{
         public $animationWidth = 5;
     	public $animationExplosionScale = 0.30;
     	public $trailLength = 20;
+	*/
     	public $rangeDamagePenalty = 0.5;
     		        
         public $loadingtime = 3;
@@ -189,10 +194,10 @@ class HeavyPlasma extends Plasma{
 }
     
     
-    
 class MediumPlasma extends Plasma{
     	public $name = "mediumPlasma";
         public $displayName = "Medium Plasma Cannon";
+	/*
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
     	public $trailColor = array(75, 250, 90);
@@ -200,6 +205,7 @@ class MediumPlasma extends Plasma{
         public $animationWidth = 4;
     	public $animationExplosionScale = 0.25;
     	public $trailLength = 16;
+	*/
     	public $rangeDamagePenalty = 0.5;
 		        
         public $loadingtime = 3;
@@ -212,7 +218,6 @@ class MediumPlasma extends Plasma{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
-		
     	public function getDamage($fireOrder){        return Dice::d(10,3)+4;   }
         public function setMinDamage(){     $this->minDamage = 7 /*- $this->dp*/;      }
         public function setMaxDamage(){     $this->maxDamage = 34 /*- $this->dp*/;      }
@@ -221,9 +226,9 @@ class MediumPlasma extends Plasma{
 
 
 class LightPlasma extends Plasma{
-
     	public $name = "lightPlasma";
         public $displayName = "Light Plasma Cannon";
+	/*
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
     	public $trailColor = array(75, 250, 90);
@@ -231,7 +236,8 @@ class LightPlasma extends Plasma{
         public $animationWidth = 3;
     	public $trailLength = 12;
         public $animationExplosionScale = 0.20;
-    	public $rangeDamagePenalty = 0.5;
+    	*/
+	public $rangeDamagePenalty = 0.5;
 		        
         public $loadingtime = 2;
 			
@@ -245,15 +251,14 @@ class LightPlasma extends Plasma{
     	public function getDamage($fireOrder){        return Dice::d(10,2)+2;   }
         public function setMinDamage(){     $this->minDamage = 4 /*- $this->dp*/;      }
         public function setMaxDamage(){     $this->maxDamage = 22 /*- $this->dp*/;      }
-
 }
-
 
 
 class PlasmaTorch extends Plasma{
     	public $iconPath = "plasmaTorch.png";
 	public $name = "PlasmaTorch";
         public $displayName = "Plasma Torch";
+	/*
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
     	public $trailColor = array(75, 250, 90);
@@ -261,18 +266,18 @@ class PlasmaTorch extends Plasma{
         public $animationWidth = 5;
     	public $animationExplosionScale = 0.4;
     	public $trailLength = 10;
-    	public $rangeDamagePenalty = 1;
+    	*/
+	public $rangeDamagePenalty = 1;
 		        
         public $loadingtime = 1;
 			
         public $rangePenalty = 2;
         public $fireControl = array(null, 0, 2); // fighters, <=mediums, <=capitals 
-
+	
 
     	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-		
 		
     	public function getDamage($fireOrder){        return Dice::d(10,2)+10;   }
         public function setMinDamage(){     $this->minDamage = 12 ;      }
@@ -320,6 +325,7 @@ class PlasmaTorch extends Plasma{
 class PairedPlasmaBlaster extends LinkedWeapon{
 	public $name = "pairedPlasmaBlaster";
 	public $displayName = "Plasma Blaster"; //it's not 'paired' in any way, except being usually mounted twin linked - like most fighter weapons...
+	/*
 	public $animation = "trail";
 	public $animationColor = array(75, 250, 90);
 	public $trailColor = array(75, 250, 90);
@@ -327,7 +333,7 @@ class PairedPlasmaBlaster extends LinkedWeapon{
 	public $animationWidth = 2;
 	public $trailLength = 10;
 	public $animationExplosionScale = 0.1;
-
+*/
 	public $intercept = 2;
 	public $priority = 4; //eqivalent of d6+3, on account of armor piercing properties of Plasma
 
@@ -342,6 +348,7 @@ class PairedPlasmaBlaster extends LinkedWeapon{
 	public $damageType = "Standard"; 
 	public $weaponClass = "Plasma"; 
 
+	
 	function __construct($startArc, $endArc, $nrOfShots = 2){ 
 		$this->shots = $nrOfShots;
 		$this->defaultShots = $nrOfShots;
@@ -357,9 +364,7 @@ class PairedPlasmaBlaster extends LinkedWeapon{
 		
 		parent::__construct(0, 1, 0, $startArc, $endArc);
 	}
-
 	
-
 	public function setSystemDataWindow($turn){    
 		parent::setSystemDataWindow($turn);
 		if (!isset($this->data["Special"])) {
@@ -371,17 +376,16 @@ class PairedPlasmaBlaster extends LinkedWeapon{
 		$this->data["Special"] .= "<br>Ignores half of armor."; //handled by standard routines for Plasma weapons now
 	}
 
-
 	public function getDamage($fireOrder){        return Dice::d(3)+2;   }
 	public function setMinDamage(){     $this->minDamage = 3 ;      }
 	public function setMaxDamage(){     $this->maxDamage = 5 ;      }
-
 }
 
 
 class PlasmaGun extends Plasma{
         public $name = "plasmaGun";
         public $displayName = "Plasma Gun";
+	/*
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
         public $trailColor = array(75, 250, 90);
@@ -389,7 +393,8 @@ class PlasmaGun extends Plasma{
         public $animationWidth = 4;
         public $trailLength = 12;
         public $animationExplosionScale = 0.25;
-        public $rangeDamagePenalty = 1;
+        */
+	public $rangeDamagePenalty = 1;
                 
         public $loadingtime = 2;
         public $exlusive = true;
@@ -405,7 +410,6 @@ class PlasmaGun extends Plasma{
             
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }   
-
         
         public function getDamage($fireOrder){        return Dice::d(3)+6;   }
         public function setMinDamage(){     $this->minDamage = 4 ;      }
@@ -419,7 +423,7 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
 	/*weapon of Rogolon fighters - very nasty!*/
         public $name = "RogolonLtPlasmaGun";
         public $displayName = "Light Plasma Gun";
-	
+	/*
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
         public $trailColor = array(75, 250, 90);
@@ -427,7 +431,8 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
         public $animationWidth = 4;
         public $trailLength = 12;
         public $animationExplosionScale = 0.25;
-
+*/
+	
         public $intercept = 0; //no interception for this weapon!
         public $loadingtime = 1;
         public $shots = 2;
@@ -449,7 +454,7 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
         if($nrOfShots === 1){
 			$this->iconPath = "lightPlasma.png";
 		}
-		if($nrOfShots === 2){
+		if($nrOfShots >= 2){
 			$this->iconPath = "lightPlasmalinked.png";
 							}    
            
@@ -479,7 +484,7 @@ class RogolonLtPlasmaCannon extends LinkedWeapon{
         public $name = "RogolonLtPlasmaCannon";
         public $displayName = "Light Plasma Cannon";
 	public $iconPath = "mediumPlasma.png";
-	
+	/*
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
         public $trailColor = array(75, 250, 90);
@@ -487,7 +492,7 @@ class RogolonLtPlasmaCannon extends LinkedWeapon{
         public $animationWidth = 4;
         public $trailLength = 13;
         public $animationExplosionScale = 0.23;
-
+*/
 
         public $intercept = 0; //no interception for this weapon!
         public $loadingtime = 2;
@@ -527,11 +532,11 @@ class RogolonLtPlasmaCannon extends LinkedWeapon{
 
 
 
-
 class LightPlasmaAccelerator extends LinkedWeapon{		
 		public $name = "LightPlasmaAccelerator";
 		public $displayName = "Light Plasma Accelerator";
 		public $iconPath = "LightPlasmaAccelerator.png";
+	/*
 		public $animation = "trail";
 		public $trailColor = array(75, 250, 90);
 		public $animationColor = array(75, 250, 90);
@@ -539,8 +544,9 @@ class LightPlasmaAccelerator extends LinkedWeapon{
 		public $animationExplosionScalearray = array(1=>0.10, 2=>0.20);
 		public $animationWidtharray = array(1=>2, 2=>3);
 		public $trailLengtharray = array(1=>10, 2=>15);
-        
-        public $intercept = 2;
+        */
+	
+        public $intercept = 2; //this weapon can intercept, surprisingly...
 		public $priority = 5;
         public $priorityArray = array(1=>5, 2=>6); //even standard shot can deal high damage due to being Plasma; charged shot is devastating
         
@@ -626,16 +632,17 @@ class LightPlasmaAccelerator extends LinkedWeapon{
 
 
 class HeavyPlasmaBolter extends Plasma{
-
 	public $name = "heavyPlasmaBolter";
 	public $displayName = "Heavy Plasma Bolter";
 	public $iconPath = "HeavyPlasmaBolter.png";
+	/*
 	public $animation = "trail";
 	public $animationColor = array(75, 250, 90);
 	public $animationExplosionScale = 0.5;
 	public $projectilespeed = 12;
 	public $animationWidth = 4;
 	public $trailLength = 4;
+	*/
 	public $priority = 6;
 	
 	public $rangeDamagePenalty = 0;
@@ -688,16 +695,17 @@ class HeavyPlasmaBolter extends Plasma{
 
 
 class MediumPlasmaBolter extends Plasma{
-
 	public $name = "mediumPlasmaBolter";
 	public $displayName = "Medium Plasma Bolter";
 	public $iconPath = "MediumPlasmaBolter.png";
+	/*
 	public $animation = "trail";
 	public $animationColor = array(75, 250, 90);
 	public $animationExplosionScale = 0.4;
 	public $projectilespeed = 14;
 	public $animationWidth = 2;
 	public $trailLength = 2;
+	*/
 	public $priority = 6;
 	
 	public $rangeDamagePenalty = 0;
@@ -744,21 +752,21 @@ class MediumPlasmaBolter extends Plasma{
         public function getDamage($fireOrder){        return 16;   }
         public function setMinDamage(){     $this->minDamage = 16 ;      }
         public function setMaxDamage(){     $this->maxDamage = 16 ;      }
-    
+}// End of class MediumPlasmaBolter
 
-}// End of class MediumPlasmaBolter	
 
 class LightPlasmaBolter extends Plasma{
-
 	public $name = "lightPlasmaBolter";
 	public $displayName = "Light Plasma Bolter";
 	public $iconPath = "LightPlasmaBolter.png";
+	/*
 	public $animation = "trail";
 	public $animationColor = array(75, 250, 90);
 	public $animationExplosionScale = 0.3;
 	public $projectilespeed = 16;
 	public $animationWidth = 1;
 	public $trailLength = 1;
+	*/
 	public $priority = 5;
 	
 	public $rangeDamagePenalty = 0;
@@ -805,17 +813,14 @@ class LightPlasmaBolter extends Plasma{
         public function getDamage($fireOrder){        return 10;   }
         public function setMinDamage(){     $this->minDamage = 10 ;      }
         public function setMaxDamage(){     $this->maxDamage = 10 ;      }
-    
-
 }// End of class LightPlasmaBolter
 
 
 class LightPlasmaBolterFighter extends LinkedWeapon{
-
 	public $name = "LightPlasmaBolterFighter";
 	public $displayName = "Light Plasma Bolter";
 	public $iconPath = "LightPlasmaBolterFighter.png";
-
+/*
     public $animation = "trail";
     public $animationColor = array(75, 250, 90);
     public $trailColor = array(75, 250, 90);
@@ -823,7 +828,7 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
     public $animationWidth = 4;
     public $trailLength = 12;
     public $animationExplosionScale = 0.25;
-	
+*/	
     public $intercept = 0; //no interception for this weapon!
 	public $loadingtime = 1;
 	public $shots = 2;
@@ -887,6 +892,7 @@ class DualPlasmaCannon extends Plasma{
         public $displayName = "Dual Plasma Cannon";
 	    public $iconPath = "dualplasmacannon.png";
 	
+	/*
 	public $animationArray = array(1=>'trail', 2=>'trail');
         public $animationColor = array(75, 250, 90);
         public $animationWidthArray = array(1=>6, 2=>4);
@@ -894,7 +900,8 @@ class DualPlasmaCannon extends Plasma{
     	public $projectilespeed = 14;	
     	public $trailColor = array(75, 250, 90);
     	public $trailLength = 18;
-   	    	      
+   	  */
+	
 	//actual weapons data
     	public $rangeDamagePenalty = 0.5;
    		public $priorityArray = array(1=>7, 2=>5);
@@ -950,10 +957,10 @@ class DualPlasmaCannon extends Plasma{
         public function setMaxDamage(){
 		switch($this->firingMode){
 			case 1:
-				$this->maxDamage = 58; //Gravitic Lance
+				$this->maxDamage = 58; //Lance (...DualPlasma)
 				break;
 			case 2:
-				$this->maxDamage = 34; //Graviton Beam
+				$this->maxDamage = 34; //Medium Plasma
 				break;	
 		}
 		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
@@ -966,6 +973,7 @@ class MegaPlasma extends Plasma{
     	public $name = "MegaPlasma";
         public $displayName = "Mega Plasma Cannon";
 		public $iconPath = "MegaPlasma.png";
+	/*
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
     	public $trailColor = array(75, 250, 90);
@@ -974,7 +982,7 @@ class MegaPlasma extends Plasma{
     	public $animationExplosionScale = 0.35;
     	public $trailLength = 24;
     	public $rangeDamagePenalty = 0.5;
-    		        
+    	*/	        
         public $loadingtime = 4;
 			
         public $rangePenalty = 0.50;
@@ -995,14 +1003,15 @@ class MegaPlasma extends Plasma{
 
 
 class PlasmaProjector extends Raking{
-
 	public $name = "PlasmaProjector";
 	public $displayName = "Plasma Projector";
 	public $iconPath = "PlasmaProjector.png";
 	public $animation = "laser";
+	/*
 	public $animationColor = array(75, 250, 90);
     public $animationWidth = 4;
     public $animationWidth2 = 0.2;
+    */
 	public $priority = 6;
 
 	public $rangeDamagePenalty = 0.25;
@@ -1040,15 +1049,15 @@ class PlasmaBlast extends Weapon{
         public $displayName = "Plasma Blast";
 		public $iconPath = "PlasmaWeb.png";
 		
-        public $trailColor = array(192,192,192);
         public $animation = "ball";
         public $animationColor = array(192,192,192);
+        //public $trailColor = array(192,192,192);
         public $animationExplosionScale = 0.5;
         public $animationExplosionType = "AoE";
-        public $explosionColor = array(235,235,235);
-        public $projectilespeed = 12;
-        public $animationWidth = 10;
-        public $trailLength = 10;
+        //public $explosionColor = array(235,235,235);
+        //public $projectilespeed = 12;
+        //public $animationWidth = 10;
+        //public $trailLength = 10;
 
         public $ballistic = false;
         public $hextarget = false; //for technical reasons this proved hard to do

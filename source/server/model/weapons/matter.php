@@ -5,6 +5,10 @@
         public $noOverkill = true;//Matter weapons do not overkill
     	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     	public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!  
+        public $priority = 9;     //most Matter weapons are best fired late in the queue, when systems are already stripped by other weapons
+	    	    
+        public $animation = "bolt";
+        public $animationColor = array(250, 250, 190);
 	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
@@ -12,7 +16,6 @@
         }
 
 		//Matter ignores armor! - now this is hadled by default routines, $weaponClass= 'Matter' is enough
-
 	/*no need due to noOverkill trait
         protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata)
         {
@@ -27,10 +30,7 @@
             parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "Ignores armor, does not overkill.";
         }
-
-        public $priority = 9;
     } //endof class Matter
-
 
 
 
@@ -38,12 +38,14 @@
     {
         public $name = "matterCannon";
         public $displayName = "Matter Cannon";
+	    /*
         public $animation = "trail";
         public $animationColor = array(250, 250, 190);
         public $projectilespeed = 25;
         public $animationWidth = 4;
         public $animationExplosionScale = 0.20;
-        
+        */
+	    
         public $loadingtime = 2;
 		
         public $rangePenalty = 0.5;
@@ -64,13 +66,14 @@
     {
         public $name = "heavyRailGun";
         public $displayName = "Heavy Railgun";
-        public $animation = "trail";
         public $iconPath = "HeavyRailgun.png";
+	    /*
+        public $animation = "trail";
         public $animationColor = array(250, 250, 190);
         public $projectilespeed = 20;
         public $animationWidth = 6;
         public $animationExplosionScale = 0.30;
-
+*/
         public $loadingtime = 4;
 
         public $rangePenalty = 0.33;
@@ -91,13 +94,14 @@
     {
         public $name = "railGun";
         public $displayName = "Railgun";
-        public $animation = "trail";
         public $iconPath = "Railgun.png";
+	    /*
+        public $animation = "trail";
         public $animationColor = array(250, 250, 190);
         public $projectilespeed = 25;
         public $animationWidth = 5;
         public $animationExplosionScale = 0.25;
-        
+        */
         public $loadingtime = 3;
 		
         public $rangePenalty = 0.5;
@@ -118,14 +122,16 @@
     {
         public $name = "lightRailGun";
         public $displayName = "Light Railgun";
-        public $animation = "trail";
         public $iconPath = "LightRailgun.png";
+	    /*
+        public $animation = "trail";
         public $animationColor = array(250, 250, 190);
         public $projectilespeed = 30;
         public $animationWidth = 4;
         public $animationExplosionScale = 0.20;
-        public $priority = 6;
-        
+	*/
+	    
+        public $priority = 5;    //small enough damage that it's worth firing earlier - together with regular Medium weapons, I think    
         public $loadingtime = 2;
 		
         public $rangePenalty = 1.0;
@@ -147,11 +153,13 @@
     {
         public $name = "massDriver";
         public $displayName = "Mass Driver";
+	    /*
         public $animation = "trail";
         public $animationColor = array(250, 250, 190);
         public $projectilespeed = 10;
         public $animationWidth = 6;
         public $animationExplosionScale = 0.90;
+	*/
 		public $noInterceptDegradation = true;
         //public $targetImmobile = true;
         
@@ -222,15 +230,16 @@
     {
         public $name = "gaussCannon";
         public $displayName = "Gauss Cannon";
+	    /*
         public $animation = "trail";
         public $animationColor = array(250, 250, 190);
         public $projectilespeed = 28;
         public $animationWidth = 4;
         public $animationExplosionScale = 0.20;
         public $trailLength = 8;
-        
-        public $loadingtime = 2;
-        
+        */
+	    
+        public $loadingtime = 2;        
         public $rangePenalty = 1;
         public $fireControl = array(-3, 1, 2); // fighters, <mediums, <capitals 
 
@@ -248,13 +257,14 @@
     class HeavyGaussCannon extends GaussCannon{
         public $name = "heavyGaussCannon";
         public $displayName = "Heavy Gauss Cannon";
+	    /*
         public $animation = "trail";
         public $animationColor = array(250, 250, 190);
         public $projectilespeed = 25;
         public $animationWidth = 5;
         public $animationExplosionScale = 0.30;
         public $trailLength = 12;
-        
+        */
         public $loadingtime = 3;
         
         public $rangePenalty = 0.66;
@@ -274,6 +284,8 @@
     class RapidGatling extends Matter{
         public $name = "rapidGatling";
         public $displayName = "Rapid Gatling Railgun";
+        public $iconPath = "rapidGatling.png";
+	    /*
         public $animation = "trail";
         public $trailColor = array(225, 255, 150);
         public $animationColor = array(225, 225, 150);
@@ -281,11 +293,12 @@
         public $animationWidth = 2;
         public $trailLength = 40;
         public $animationExplosionScale = 0.15;
+	*/
         public $guns = 2;
         public $intercept = 1;
         public $loadingtime = 1;
         public $ballisticIntercept = true;
-        public $priority = 6;
+        public $priority = 5; //low damage, worth firing early!
         
         public $rangePenalty = 2;
         public $fireControl = array(4, 2, 0); // fighters, <mediums, <capitals 
@@ -315,6 +328,7 @@
     	/*RapidGatling's predecessor*/ 
         public $displayName = "Gatling Railgun";
     	public $guns = 1;
+	    /*
     	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -323,6 +337,7 @@
         public function getDamage($fireOrder){        return Dice::d(6, 2);   }
         public function setMinDamage(){     $this->minDamage = 2 ;      }
         public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+	*/
     }
 
     
@@ -332,17 +347,25 @@
         public $displayName = "Paired Gatling Guns";
         public $animation = "trail";
         public $animationColor = array(250, 250, 190);
+	    /*
         public $projectilespeed = 24;
         public $animationWidth = 2;
         public $trailLength = 12;
         public $animationExplosionScale = 0.15;
+	*/
+	    
         public $shots = 2;
         public $defaultShots = 2;
-        public $ammunition = 6;
-	    
-        
+        public $ammunition = 6;        
         public $loadingtime = 1;
-
+	    
+		/* multi-mode ammo use tests 	
+        public $firingModes = array(
+            1 => "First",
+            2 => "Second"
+        );
+		*/
+		
         public $intercept = 2;
         public $ballisticIntercept = true;
 
@@ -350,27 +373,22 @@
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         private $damagebonus = 0;
 	    
-	    public $noOverkill = true;
-	    
-	    public $priority = 4;//equivalent of d6+4, due to Matter properties 
-		
+	    public $noOverkill = true;	    
+	    public $priority = 4;//more or less equivalent of d6+4, due to Matter properties
 	    
 	    public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     	public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!  
-	 
+	  
 
         function __construct($startArc, $endArc){
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 
         public function stripForJson() {
-            $strippedSystem = parent::stripForJson();
-    
-            $strippedSystem->ammunition = $this->ammunition;
-           
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->ammunition = $this->ammunition;           
             return $strippedSystem;
-        }
-        
+        }        
 	    
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
@@ -379,12 +397,9 @@
             $this->data["Ammunition"] = $this->ammunition;
         }
 
-
         public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
             return 0; //Matter ignores armor!
         }
-
-
 
         public function setAmmo($firingMode, $amount){
             $this->ammunition = $amount;
@@ -395,7 +410,7 @@
         	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
             $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
         }
     
         public function getDamage($fireOrder){
@@ -444,11 +459,13 @@ for friendly units.*/
 2. Option to switch to offensive, anti-fighter mode.
 3. If nothing is done, it will follow, automated intercept routines.*/
 
-
         public $name = "FlakCannon";
         public $displayName = "Flak Cannon";
 	    public  $iconPath = "FlakCannon.png";
 
+	 public $animation = "bolt";
+        public $animationColor = array(255, 250, 230);
+	   /*
 		public $animationArray = array(1=>'trail', 2=>'trail');
         public $animationColorArray = array(1=>array(255, 250, 230), 2=>array(255, 250, 230));
         public $animationWidthArray = array(1=>2, 2=>4);
@@ -456,6 +473,7 @@ for friendly units.*/
         public $trailLength = 5;
         public $projectilespeed = 10;
         public $animationExplosionScaleArray = array(1=>0.6, 2=>0.6);//not used for Laser animation?...
+	*/
 
 	//actual weapons data
         public $priorityArray = array(1=>1, 2=>1);
@@ -642,10 +660,12 @@ for friendly units.*/
         public $displayName = "Slug Cannon";
         public $animation = "trail";
         public $animationColor = array(250, 250, 190);
+	    /*
         public $projectilespeed = 24;
         public $animationWidth = 2;
         public $trailLength = 12;
         public $animationExplosionScale = 0.15;
+	*/
         public $shots = 2;
         public $defaultShots = 2;
         public $ammunition = 6;
@@ -653,8 +673,8 @@ for friendly units.*/
         
         public $loadingtime = 1;
 
-        public $intercept = 2;
-//        public $ballisticIntercept = true;
+        public $intercept = 2; //"fighter mounted railgun" - and these don't generally intercept... more advanced Orieni designs can intercept ballistics, so let's allow that here too, as guidelines aren't clear...
+        public $ballisticIntercept = true;
 
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
@@ -672,23 +692,23 @@ for friendly units.*/
         }
 
         public function stripForJson() {
-            $strippedSystem = parent::stripForJson();
-    
-            $strippedSystem->ammunition = $this->ammunition;
-           
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->ammunition = $this->ammunition;           
             return $strippedSystem;
         }
 	    
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Special"] = "Ignores armor, does not overkill.";
-//            $this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
+            $this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
             $this->data["Ammunition"] = $this->ammunition;
         }
 
+	    /*no longer needed
         public function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
             return 0; //Matter ignores armor!
         }
+	*/
 
         public function setAmmo($firingMode, $amount){
             $this->ammunition = $amount;

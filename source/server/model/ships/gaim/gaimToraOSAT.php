@@ -25,12 +25,13 @@ class gaimToraOSAT extends OSAT{
 		
         $this->addPrimarySystem(new Reactor(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 7, 2, 6)); 
-        $this->addPrimarySystem(new Thruster(3, 6, 0, 0, 2)); 
-        $this->addPrimarySystem(new PacketTorpedo(3, 6, 5, 270, 90)); 
-        $this->addPrimarySystem(new PacketTorpedo(3, 6, 5, 270, 90)); 
-        $this->addPrimarySystem(new ParticleConcentrator(3, 9, 7, 300, 60)); 
-        $this->addPrimarySystem(new ScatterGun(2, 8, 3, 180, 360)); 
-        $this->addPrimarySystem(new ScatterGun(2, 8, 3, 0, 180));
+        $this->addAftSystem(new Thruster(3, 6, 0, 0, 2)); 
+		
+        $this->addFrontSystem(new PacketTorpedo(3, 6, 5, 270, 90)); 
+        $this->addFrontSystem(new PacketTorpedo(3, 6, 5, 270, 90)); 
+        $this->addFrontSystem(new ParticleConcentrator(3, 9, 7, 300, 60)); 
+        $this->addFrontSystem(new ScatterGun(2, 8, 3, 180, 360)); 
+        $this->addFrontSystem(new ScatterGun(2, 8, 3, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         
@@ -40,10 +41,10 @@ class gaimToraOSAT extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 					9 => "Structure",
-					11 => "Thruster",
-					12 => "Particle Concentrator",
-					14 => "Packet Torpedo",
-					16 => "Scattergun",
+					11 => "2:Thruster",
+					12 => "1:Particle Concentrator",
+					14 => "1:Packet Torpedo",
+					16 => "1:Scattergun",
 					18 => "Scanner",
 					20 => "Reactor",
 			)

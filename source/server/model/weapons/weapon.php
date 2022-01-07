@@ -14,20 +14,15 @@ class Weapon extends ShipSystem
     public $priorityAF = 0; //array must be set explicitly - otherwise it will be generated, ignoring this variable! 
     public $priorityAFArray = array();
 
-    public $animation = "none";
-    public $animationArray = array();
+	/*not used any more
     public $animationImg = null;
     public $animationImgArray = array();
     public $animationImgSprite = 0;
     public $animationImgSpriteArray = array();
-    public $animationColor = null;
-    public $animationColorArray = array();
     public $animationColor2 = array(255, 255, 255);
     public $animationColor2Array = array();
     public $animationWidth = 3;
     public $animationWidthArray = array();
-    public $animationExplosionScale = 0.25;
-    public $animationExplosionScaleArray = array();
     public $animationExplosionType = "normal";
     public $animationExplosionTypeArray = array();
     public $explosionColor = array(250, 230, 80);
@@ -38,6 +33,16 @@ class Weapon extends ShipSystem
     public $trailColorArray = array();
     public $projectilespeed = 17;
     public $projectilespeedArray = array();
+	*/
+
+    public $animation = "none"; //options: "laser" (continuous beam), "torpedo" (a glowing oscillating ball), "bolt" (a discrete bolt/projectile of elongated shape), "ball" (area of effect - simply a sphere (well, circle), with radius equal to number of hexes to be encompassed)
+	 //any other value equals "bolt"
+	 //unless weapon is hextargeted, in which case any entry equals "ball"...
+    public $animationArray = array();
+    public $animationColor = null;
+    public $animationColorArray = array();
+    public $animationExplosionScale = 0; //0 means it will be set automatically by standard constructor, based on average damage yield
+    public $animationExplosionScaleArray = array();
 
 	public $doubleRangeIfNoLock = false; //in case of no lock-on default procedure is to double range penalty; some weapons (notably most Antimatter ones) double range itself instead
     public $rangePenalty = 0;
@@ -163,7 +168,7 @@ class Weapon extends ShipSystem
 
         $this->startArc = (int)$startArc;
         $this->endArc = (int)$endArc;
-
+	    
         //things that are calculated and can change with mode (and are displayed in GUI) - for all modes...
         foreach ($this->firingModes as $i => $modeName) {
             $this->changeFiringMode($i);
@@ -175,10 +180,68 @@ class Weapon extends ShipSystem
 			//set AF priority, too!
 			$this->setPriorityAF(); 
 			$this->priorityAFArray[$i] = $this->priorityAF;
+		
+			//...and scale!
+			if (!isset($this->animationExplosionScaleArray[$i]) || ($this->animationExplosionScaleArray[$i]<=0)){
+				if($this->animationExplosionScale>0){ //default exists - use it!
+					$this->animationExplosionScaleArray[$i] = $this->animationExplosionScale;
+				}else{ //no default - calculate from scratch
+					$this->animationExplosionScaleArray[$i] = $this->dynamicScale(0);
+				}
+			}
         }
         $this->changeFiringMode(1); //reset mode to basic
     }
 
+	/*dynamic assignment of animation scale - based on damage dealt
+	  $avgDmg - average damage of weapon 
+	   - if provided - function will just use it directly (not modifying it in any way)
+	   - if provided as 0 - function will look for it on its own, taking weapon properties into account
+	  $multiplier - additional modifier for damage calculation (will be used only if $avgDmg is 0
+	
+	*/
+	public function dynamicScale($avgDmg, $multiplier = 1){
+		$toReturn = 0.15;		
+		if($avgDmg<=0){ //no damage passed - calculate average!
+			$avgDmg = $this->getAvgDamage() * $multiplier;
+		
+			//modify by mode!
+			if( ($this->damageType == 'Raking') || ($this->damageType == 'Piercing') ){ //Raking weapons usually have higher yield than comparable Standard weapons, tone this down
+				$avgDmg = $avgDmg*0.75; 
+			}
+			if($this->damageType == 'Flash'){ //make Flash bigger!
+				$avgDmg = $avgDmg*1.25; 
+			}
+			//low Raking mode indicates weaker weapon/thinner beam than damage would suggest, while high Raking mode larger one!
+			if($this->raking <10){
+				$avgDmg = $avgDmg*0.9; 
+			}elseif($this->raking >10){
+				$avgDmg = $avgDmg*1.1; 
+			}
+			//Matter weapons score relatively low damage, but ignore armor - make them more notable ;)
+			if($this->weaponClass == 'Matter') {
+				$avgDmg = min($avgDmg+6, $avgDmg*1.5); //multiply by 1.5, but no more than +6 
+			}
+		}
+		
+		//assign correct size
+		if($avgDmg<4.5){ //REALLY light - even less than d6+1!
+			$toReturn = 0.1; 
+		}elseif($avgDmg<7.5){ //very light - less than d6+4
+			$toReturn = 0.15; 
+		}elseif($avgDmg<10){ //light
+			$toReturn = 0.2;
+		}elseif($avgDmg<12){ //light/medium
+			$toReturn = 0.25;
+		}elseif($avgDmg<14){ //medium
+			$toReturn = 0.3;
+		}elseif($avgDmg<17){ //medium/heavy
+			$toReturn = 0.35;
+		}else{ //heavy and very heavy
+			$toReturn = 0.3+(0.1*floor($avgDmg/10)); //0.3 +1 per every full 10 points of average damage
+		}
+		return $toReturn;
+	}//endof function dynamicScale()
     
     public function stripForJson() {
         $strippedSystem = parent::stripForJson();
@@ -1471,13 +1534,6 @@ class Weapon extends ShipSystem
         return true;
     }
 
-
-    public function isInDistanceRange($shooter, $target, $fireOrder)
-    {
-        // gameData and fireOrder is needed to check if target has jammers
-        return true;
-    }
-
 	
     /* returns armor protection of system 
     */
@@ -1670,6 +1726,24 @@ full Advanced Armor effects (by rules) for reference:
 	}
 
 
+        public function isInDistanceRange($shooter, $target, $fireOrder)
+        {
+			if(!$this->ballistic) return true; //non-ballistic weapons don't risk target moving out of range
+            $distanceRange = max($this->range, $this->distanceRange); //just in case distanceRange is not filled! Then it's assumed to be the same as launch range
+            if($distanceRange <=0 ) return true; //0 means unlimited range
+
+
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            if(mathlib::getDistanceHex($movement->position,  $target) > $distanceRange )
+            {
+                $fireOrder->pubnotes .= " FIRING SHOT: Target moved out of distance range.";
+                return false;
+            }
+
+            return true;
+        }
+
+
     /*allow changing of basic parameters for different firing modes...
         called in method fire()
     */
@@ -1685,18 +1759,21 @@ full Advanced Armor effects (by rules) for reference:
 			$this->priorityAF = 0;
 		}
 
+		/*not used any more!
         if (isset($this->animationArray[$i])) $this->animation = $this->animationArray[$i];
         if (isset($this->animationImgArray[$i])) $this->animationImg = $this->animationImgArray[$i];
         if (isset($this->animationImgSpriteArray[$i])) $this->animationImgSprite = $this->animationImgSpriteArray[$i];
-        if (isset($this->animationColorArray[$i])) $this->animationColor = $this->animationColorArray[$i];
         if (isset($this->animationColor2Array[$i])) $this->animationColor2 = $this->animationColor2Array[$i];
         if (isset($this->animationWidthArray[$i])) $this->animationWidth = $this->animationWidthArray[$i];
-        if (isset($this->animationExplosionScaleArray[$i])) $this->animationExplosionScale = $this->animationExplosionScaleArray[$i];
         if (isset($this->animationExplosionTypeArray[$i])) $this->animationExplosionType = $this->animationExplosionTypeArray[$i];
         if (isset($this->explosionColorArray[$i])) $this->explosionColor = $this->explosionColorArray[$i];
         if (isset($this->trailLengthArray[$i])) $this->trailLength = $this->trailLengthArray[$i];
         if (isset($this->trailColorArray[$i])) $this->trailColor = $this->trailColorArray[$i];
         if (isset($this->projectilespeedArray[$i])) $this->projectilespeed = $this->projectilespeedArray[$i];
+		*/
+
+        if (isset($this->animationColorArray[$i])) $this->animationColor = $this->animationColorArray[$i];
+        if (isset($this->animationExplosionScaleArray[$i])) $this->animationExplosionScale = $this->animationExplosionScaleArray[$i];
 
         if (isset($this->rangePenaltyArray[$i])) $this->rangePenalty = $this->rangePenaltyArray[$i];
         if (isset($this->rangeDamagePenaltyArray[$i])) $this->rangeDamagePenalty = $this->rangeDamagePenaltyArray[$i];

@@ -3,13 +3,17 @@
 class MissileLauncher extends Weapon{
     public $useOEW = false;
     public $ballistic = true;
-    public $trailColor = array(141, 240, 255);
+	
     public $animation = "trail";
     public $animationColor = array(50, 50, 50);
+	
+	/*
+    public $trailColor = array(141, 240, 255);
     public $animationExplosionScale = 0.6; //more visually impressive weapons - which missiles should be given their power!
     public $projectilespeed = 8;
     public $animationWidth = 4;
     public $trailLength = 100;
+	*/
     public $distanceRange = 0;
     public $firingMode = 1;
     public $rangeMod = 0;
@@ -21,7 +25,7 @@ class MissileLauncher extends Weapon{
     
     protected $distanceRangeMod = 0;
     
-    private $rackExplosionDamage = 70; //how much damage will this weapon do in case of catastrophic explosion
+    private $rackExplosionDamage = 70; //how much damage will this weapon do in case of catastrophic explosion; officially "every missile remaining", here in FV it's severely reduced - but still a major threat
     private $rackExplosionThreshold = 19; //how high roll is needed for rack explosion
     
     public $firingModes = array(
@@ -34,11 +38,18 @@ class MissileLauncher extends Weapon{
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 
 		//Stabilized missiles should have triple the range, not double - Geoffrey (06 September 2021)
+		//modified by Marcin on 20th of December
+		
         if ($base){ //mounted on base - triple the launch range
+		/*
             $this->rangeMod = $this->rangeMod + ($this->range * 2); 
 			$this->range = $this->range * 3;            }
 //GTS            $this->rangeMod = $this->rangeMod + $this->range; 
-//GTS            $this->range = $this->range *2;                    }
+//GTS            $this->range = $this->range *2;      
+*/
+			$this->range = $this->distanceRange; //much simplified!
+		}
+
 
         $MissileB = new MissileB($startArc, $endArc, $this->fireControl);
         $this->missileArray = array(
@@ -62,6 +73,7 @@ class MissileLauncher extends Weapon{
         parent::setSystemDataWindow($turn);
     }
     
+	/*moving to Weapon class - this is generally useful!
     public function isInDistanceRange($shooter, $target, $fireOrder){
         $movement = $shooter->getLastTurnMovement($fireOrder->turn);
     
@@ -72,6 +84,7 @@ class MissileLauncher extends Weapon{
         }
         return true;
     }
+	*/
     
     
     
@@ -145,6 +158,7 @@ class MissileLauncher extends Weapon{
         $this->criticals[] =  $crit;
     }
     
+	
 } //endof class MissileLauncher      
 
 
@@ -219,22 +233,6 @@ class LMissileRack extends MissileLauncher
     protected $distanceRangeMod = 10;
 
     public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals 
-
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $base = false){
-
-        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-
-// Updated by Geoffrey Stano (13 October 21) to have B-Launchers fire at the correct range when stabilized.
-        if ($base){
-			$this->range = 20;
-			$this->distanceRange = 60;
-			$this->rangeMod = 10;
-            $this->rangeMod = $this->rangeMod + ($this->range * 2); 
-			$this->range = $this->range * 3;            
-			$this->distanceRange = $this->distanceRange + 10;
-        }		
-
-    }
     
     public function getDamage($fireOrder)
     {
@@ -253,27 +251,14 @@ class LHMissileRack extends MissileLauncher
     public $distanceRange = 70;
     public $loadingtime = 1;
     public $iconPath = "missile2.png";
+	/*
     public $rangeMod = 10;
     protected $distanceRangeMod = 10;
+	*/
     private $rackExplosionDamage = 0; //this rack directs explosion damage outwards - is itself destroyed, but does not damage ship beyond that
     
     public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals 
     
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $base = false){
-
-        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-
-// Updated by Geoffrey Stano (13 October 21) to have B-Launchers fire at the correct range when stabilized.
-        if ($base){
-			$this->range = 20;
-			$this->distanceRange = 60;
-			$this->rangeMod = 10;
-            $this->rangeMod = $this->rangeMod + ($this->range * 2); 
-			$this->range = $this->range * 3;            
-			$this->distanceRange = $this->distanceRange + 10;
-        }		
-
-    }
     
     public function getDamage($fireOrder)
     {
@@ -299,24 +284,6 @@ class BMissileRack extends MissileLauncher {
     
     public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals 
     
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $base = false){
-
-        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-
-/*        if ($base){
-            $this->range = 60;
-            $this->rangeMod = 30;
-        }
-*/		
-
-// Updated by Geoffrey Stano (13 October 21) to have B-Launchers fire at the correct range when stabilized.
-        if ($base){
-            $this->rangeMod = $this->rangeMod + ($this->range * 2); 
-			$this->range = $this->range * 3;            
-			$this->distanceRange = $this->distanceRange + 10;
-        }		
-
-    }
 
     public function getDamage($fireOrder){
         return 20;
@@ -335,20 +302,11 @@ class AMissileRack extends MissileLauncher{
     public $distanceRange = 45;
     public $loadingtime = 1;
     public $iconPath = "missile1.png";
+	
+    private $rackExplosionDamage = 45; //using much less potent missiles than standard class-S launcher
 
     public $fireControl = array(10, 3, 3); // fighters, <mediums, <capitals 
 
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $base = false){
-
-        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-
-// Updated by Geoffrey Stano (13 October 21) to have A-Launchers fire at the correct range when stabilized.
-        if ($base){
-            $this->rangeMod = 25; 
-			$this->range = 45;
-        }		
-
-    }
     
     public function getDamage($fireOrder)
     {
@@ -392,10 +350,12 @@ class FighterMissileRack extends MissileLauncher
     public $firingMode = 1;
     public $maxAmount = 0;
     public $ballistic = true;
+	/*
     public $animationExplosionScale = 0.15;
     public $projectilespeed = 10;
     public $animationWidth = 2;
     public $trailLength = 60;
+	*/
     //protected $distanceRangeMod = 0;
     public $priority = 5; //large fighter weapon
 
@@ -442,7 +402,6 @@ class FighterMissileRack extends MissileLauncher
             $counter++;
         } 
     }
-
 
     
     public function addAmmo($missileClass, $amount){
@@ -520,6 +479,9 @@ class FighterTorpedoLauncher extends FighterMissileRack
     protected $distanceRangeMod = 0;
     public $priority = 4; //priority: typical fighter weapon (correct for Light Ballistic Torpedo's 2d6)
 
+
+    public $animation = "torpedo";
+
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
     
     public $firingModes = array(
@@ -565,11 +527,11 @@ class ReloadRack extends MissileLauncher //ShipSystem
 		$this->data["Special"] = 'Additional missile magazine for actual combat launchers. No actual effect in FV, but may violently explode if damaged in battle.';
     }
 	
-        public function getDamage($fireOrder){ return 0; }
-        public function setMinDamage(){ 
+	public function getDamage($fireOrder){ return 0; }
+	public function setMinDamage(){ 
 		$this->minDamage = 0; 
 	}
-        public function setMaxDamage(){
+	public function setMaxDamage(){
 		$this->maxDamage = 0; 
 	}	
 } //endof class ReloadRack
@@ -584,13 +546,15 @@ class MultiMissileLauncher extends Weapon{
         public $displayName = "ToBeSetInConstructor";
     public $useOEW = false;
     public $ballistic = true;
-    public $trailColor = array(141, 240, 255);
     public $animation = "trail";
     public $animationColor = array(50, 50, 50);
+	/*
+    public $trailColor = array(141, 240, 255);
     public $animationExplosionScale = 0.6;
     public $projectilespeed = 8;
     public $animationWidth = 4;
     public $trailLength = 100;
+	*/
     public $range = 20;
     public $distanceRange = 60;
     public $firingMode = 1;
@@ -769,6 +733,7 @@ class MultiMissileLauncher extends Weapon{
 		parent::setSystemDataWindow($turn);
         }
     
+	/*moving to Weapon class - this is generally useful!
     public function isInDistanceRange($shooter, $target, $fireOrder){
         $movement = $shooter->getLastTurnMovement($fireOrder->turn);    
         if(mathlib::getDistanceHex($movement->position,  $target) > $this->distanceRange)
@@ -778,6 +743,7 @@ class MultiMissileLauncher extends Weapon{
         }
         return true;
     }
+	*/
     
     
     public function testCritical($ship, $gamedata, $crits, $add = 0){ //add testing for ammo explosion!
@@ -833,13 +799,15 @@ class MultiBombRack extends Weapon{
         public $displayName = "Bomb Rack";
     public $useOEW = false;
     public $ballistic = true;
-    public $trailColor = array(141, 240, 255);
     public $animation = "trail";
     public $animationColor = array(50, 50, 50);
+	/*
+    public $trailColor = array(141, 240, 255);
     public $animationExplosionScale = 0.4;
     public $projectilespeed = 8;
     public $animationWidth = 4;
     public $trailLength = 100;
+	*/
     public $range = 20;
     public $distanceRange = 60;
     public $firingMode = 1;

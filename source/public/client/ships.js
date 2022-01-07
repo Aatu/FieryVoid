@@ -711,11 +711,15 @@ window.shipManager = {
 
             if (b.iniativebonus > a.iniativebonus) return false;
 
+	    return (a.id>b.id); //lower ID wins, if all else fails
+	    
+	    /*
             for (var i in gamedata.ships) {
                 if (gamedata.ships[i] == a) return false;
 
                 if (gamedata.ships[i] == b) return true;
             }
+	    */
         //}
 
         return 0; //shouldn't get here

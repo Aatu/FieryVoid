@@ -38,11 +38,11 @@ class Deathfalcon2230 extends BaseShipNoAft{
         $this->addPrimarySystem(new HvyParticleCannon(5, 12, 9, 330, 30));
         $this->addAftSystem(new Thruster(5, 21, 0, 8, 2));
 
-        $this->addFrontSystem(new RepeaterGun(2, 6, 4, 240, 0));
-        $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 60));        
-        $this->addFrontSystem(new RepeaterGun(2, 6, 4, 0, 120));
-        $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 60));        
-        $this->addFrontSystem(new RepeaterGun(2, 6, 4, 300, 60));
+        $this->addFrontSystem(new RepeaterGun(2, 6, 4, 240, 0));    
+        $this->addFrontSystem(new RepeaterGun(2, 6, 4, 300, 60));     
+        $this->addFrontSystem(new RepeaterGun(2, 6, 4, 0, 120));   
+        $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 60));  
+        $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 60));  
         $this->addFrontSystem(new Thruster(4, 13, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 13, 0, 4, 1));
 

@@ -23,12 +23,15 @@
     {
         public $name = "gravitonPulsar";
         public $displayName = "Graviton Pulsar";
-        public $animation = "trail";
-        public $trailColor = array(99, 255, 00);
+        public $animation = "bolt";
         public $animationColor = array(99, 255, 00);
+	    /*
+        public $trailColor = array(99, 255, 00);
         public $projectilespeed = 12;
         public $animationWidth = 3;
         public $animationExplosionScale = 0.15;
+	*/
+	    
         public $boostable = true;
         public $boostEfficiency = 2;
         public $maxBoostLevel = 2;
@@ -42,8 +45,7 @@
 	    
         public $grouping = 20;
 
-
-	    //private $useDie = 3; //die used for base number of hits
+	    //private $useDie = 3; //die used for base number of hits - here it will not be used!
 	public $damageType = 'Pulse'; 
     	public $weaponClass = "Gravitic"; 
         
@@ -180,12 +182,14 @@ class GraviticBolt extends Gravitic
     {
         public $name = "graviticBolt";
         public $displayName = "Gravitic Bolt";
-        public $animation = "trail";
-        public $trailColor = array(99, 255, 00);
+        public $animation = "bolt";
         public $animationColor = array(99, 255, 00);
+	/*
+        public $trailColor = array(99, 255, 00);
         public $projectilespeed = 12;
         public $animationWidth = 3;
         public $animationExplosionScale = 0.20;
+	*/
         public $boostable = true;
         public $boostEfficiency = 2;
         public $maxBoostLevel = 2;
@@ -332,8 +336,8 @@ class GraviticBolt extends Gravitic
         public $displayName = "Graviton Beam";
         public $animation = "laser";
         public $animationColor = array(99, 255, 00);
-        public $animationWidth = 4;
-        public $animationWidth2 = 0.4;
+        //public $animationWidth = 4;
+        //public $animationWidth2 = 0.4;
         public $priority = 7;
         
         public $loadingtime = 4;
@@ -365,17 +369,18 @@ class GraviticBolt extends Gravitic
         public $name = "graviticCannon";
         public $displayName = "Gravitic Cannon";
         public $animation = "trail";
-        public $trailColor = array(99, 255, 00);
         public $animationColor = array(99, 255, 00);
+	    /*
+        public $trailColor = array(99, 255, 00);
         public $projectilespeed = 15;
         public $animationWidth = 2;
         public $animationExplosionScale = 0.15;
+	*/
         public $loadingtime = 1;
         public $priority = 5;
 
 	public $damageType = 'Standard'; 
     	public $weaponClass = "Gravitic"; 
-
 		
         public $rangePenalty = 0.33;
         public $fireControl = array(-1, 2, 2); // fighters, <mediums, <capitals 
@@ -395,18 +400,18 @@ class GraviticBolt extends Gravitic
 
 /*fighter weapon*/
     class LightGraviticBolt extends LinkedWeapon{
-
-        public $trailColor = array(99, 255, 00);
-
         public $name = "lightGraviticBolt";
         public $displayName = "Light Gravitic Bolt";
         public $iconPath = "lightGraviticBolt.png";
         public $animation = "trail";
         public $animationColor = array(99, 255, 00);
+	    /*
+        public $trailColor = array(99, 255, 00);
         public $animationExplosionScale = 0.10;
         public $projectilespeed = 12;
         public $animationWidth = 2;
         public $trailLength = 10;
+*/
 
         public $intercept = 2;
         public $loadingtime = 1;
@@ -440,19 +445,19 @@ class GraviticBolt extends Gravitic
 
 
     class UltraLightGraviticBolt extends LinkedWeapon{
-
-        public $trailColor = array(99, 255, 00);
-
         public $name = "ultraLightGraviticBolt";
         public $displayName = "Ultra Light Gravitic Bolt";
         public $iconPath = "lightGraviticBolt.png";
         public $animation = "trail";
         public $animationColor = array(99, 255, 00);
+	    /*
+        public $trailColor = array(99, 255, 00);
         public $animationExplosionScale = 0.10;
         public $projectilespeed = 12;
         public $animationWidth = 2;
         public $trailLength = 10;
-
+*/
+	    
         public $intercept = 2;
         public $loadingtime = 1;
         public $shots = 2;
@@ -473,8 +478,7 @@ class GraviticBolt extends Gravitic
 			$this->intercept = $shots;
             
             parent::__construct(0, 1, 0, $startArc, $endArc);
-        }
-        
+        }        
 
         public function getDamage($fireOrder){        return 5;   }
         public function setMinDamage(){     $this->minDamage = 5 ;      }
@@ -489,8 +493,8 @@ class GraviticBolt extends Gravitic
         public $displayName = "Light Graviton Beam";
         public $animation = "laser";
         public $animationColor = array(99, 255, 00);
-        public $animationWidth = 1;
-        public $animationWidth2 = 0;
+        //public $animationWidth = 1;
+        //public $animationWidth2 = 0;
         
         public $loadingtime = 3;
         public $raking = 10;
@@ -524,10 +528,11 @@ class GraviticLance extends Raking{
 	//visual display - will it be enough to ensure correct animations?...
 	public $animationArray = array(1=>'laser', 2=>'laser');
         public $animationColor = array(99, 255, 00);
+	/*
         public $animationWidthArray = array(1=>6, 2=>4);
         public $animationWidth2 = 0.5;
         public $animationExplosionScale = 0.35;
-	
+	*/
 	
 	//actual weapons data
 	public $raking = 10; 
@@ -545,14 +550,11 @@ class GraviticLance extends Raking{
 	
 	public $intercept = 0; 
 	
-	
-	
         public $overloadable = true;
         public $alwaysoverloading = true;
         public $extraoverloadshots = 2;
         public $overloadturns = 4;
-	
-	
+		
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
 			//maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -611,17 +613,14 @@ class GraviticLance extends Raking{
 } //endof GraviticLance
 
 
-
-
-/*new version*/
-    class GraviticCutter extends Raking
+class GraviticCutter extends Raking
     {
         public $name = "graviticCutter";
         public $displayName = "Gravitic Cutter";
         public $animation = "laser";
-        public $animationColor = array(99, 255, 00);
-        public $animationWidth = 2;
-        public $animationWidth2 = 0.2;
+        public $animationColor = array(99, 255, 00);	
+        //public $animationWidth = 2;
+        //public $animationWidth2 = 0.2;
         public $priority = 8;
         
         public $raking = 6;
