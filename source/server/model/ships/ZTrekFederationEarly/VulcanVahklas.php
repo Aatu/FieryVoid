@@ -4,12 +4,13 @@ class VulcanVahklas extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 325;
-        $this->faction = "ZTrek Playtest Federation";
+        $this->pointCost = 290;
+        $this->faction = "ZTrek Federation (early)";
         $this->phpclass = "VulcanVahklas";
         $this->imagePath = "img/ships/StarTrek/VulcanVahklas.png";
         $this->shipClass = "Vulcan Vah'Klas Frigate";
 		
+		$this->notes = "Does not require hangar.";
 
 	$this->unofficial = true;
         $this->canvasSize = 100;

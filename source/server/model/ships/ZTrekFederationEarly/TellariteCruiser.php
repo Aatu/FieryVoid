@@ -5,7 +5,7 @@ class TellariteCruiser extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 380;
-	$this->faction = "ZTrek Playtest Federation";
+	$this->faction = "ZTrek Federation (early)";
         $this->phpclass = "TellariteCruiser";
         $this->imagePath = "img/ships/StarTrek/TellariteCruiser.png";
         $this->shipClass = "Tellarite Cruiser";
@@ -15,6 +15,7 @@ class TellariteCruiser extends HeavyCombatVessel{
 
 
 	$this->fighters = array("Shuttlecraft"=>3);
+		$this->customFighter = array("Tellarite small craft"=>3); //can deploy small craft with Tellarite crew
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;

@@ -4,8 +4,8 @@ class AndorianThymasEscort extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 425;
-        $this->faction = "ZTrek Playtest Federation";
+        $this->pointCost = 375;
+        $this->faction = "ZTrek Federation (early)";
         $this->phpclass = "AndorianThymasEscort";
         $this->imagePath = "img/ships/StarTrek/AndorianThyzon.png";
         $this->shipClass = "Andorian Thymas Escort Frigate";
@@ -17,6 +17,7 @@ class AndorianThymasEscort extends MediumShip{
 	    $this->variantOf = "Andorian Thyzon Frigate";
 
 	$this->fighters = array("Shuttlecraft"=>1);
+		$this->customFighter = array("Andorian small craft"=>1); //can deploy small craft with Andorian crew
         
         $this->forwardDefense = 11;
         $this->sideDefense = 14;

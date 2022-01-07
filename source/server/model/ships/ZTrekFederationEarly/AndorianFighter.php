@@ -4,13 +4,15 @@ class AndorianFighter extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 40 *6;
-        $this->faction = "ZTrek Playtest Federation";
+        $this->pointCost = 38 *6;
+        $this->faction = "ZTrek Federation (early)";
         $this->phpclass = "AndorianFighter";
         $this->shipClass = "Andorian Medium Fighters";
 	    $this->imagePath = "img/ships/StarTrek/AndorianFighter.png";
 	    $this->isd = 2150;
-		$this->hangarRequired = "medium"; //Initiative suggests it's heavy fighter, but it's in fact medium
+		
+		$this->hangarRequired = "medium"; //Initiative and jinking limit suggests it's heavy fighter, but it's in fact medium
+        $this->customFtrName = "Andorian small craft"; //requires hangar space on Andorian ships
         
         $this->forwardDefense = 6;
         $this->sideDefense = 8;

@@ -659,7 +659,7 @@ window.gamedata = {
 						} 
 					}
 					if (match == false) {
-						checkResult +=  " - " + totalSpecialFighters[i][0] + " Fighters: " + totalSpecialFighters[i][1];
+						checkResult +=  " - " + totalSpecialFighters[i][0] + ": " + totalSpecialFighters[i][1];
 						checkResult +=  " (allowed up to 0) FAILURE! <br>";
 						problemFound = true;
 					}

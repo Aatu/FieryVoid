@@ -52,7 +52,8 @@ class zzftrbwingmk2 extends FighterFlight{
             $fighter->iconPath = "img/starwars/bWing_large.png"; 
             
             $frontGun = new SWFighterLaser(300, 60, 1, 3); //fwd triple Autoblasters
-			$frontGun->displayName = "Autoblasters";
+				$frontGun->displayName = "Autoblasters";
+				$frontGun->animationColor = array(55, 195, 70); //make blasters green, to be distinct from lasers
             $fighter->addFrontSystem($frontGun);
             
             $frontGun = new SWFighterIon(330, 30, 3, 3); //fwd triple Ion Cannons

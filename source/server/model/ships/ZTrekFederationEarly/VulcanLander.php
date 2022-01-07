@@ -5,11 +5,12 @@ class VulcanLander extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 180;
-        $this->faction = "ZTrek Playtest Federation";
+        $this->faction = "ZTrek Federation (early)";
         $this->phpclass = "VulcanLander";
         $this->imagePath = "img/ships/StarTrek/VulcanLander.png";
         $this->shipClass = "Vulcan T'Plana-Hath Lander";
 		
+		$this->notes = 'No hangar required.'; 
 
 	$this->unofficial = true;
         $this->canvasSize = 100;

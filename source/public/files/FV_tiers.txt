@@ -53,6 +53,7 @@ Factions that point for point will have uphill battle against First Tier, yet ot
  - Sal-bez (custom faction - Nexus universe)
  - Sshel'ath (custom faction - Escalation Wars universe)
  - Star Wars (custom faction (or rather factions), Star Wars universe - with VERY different playstyle, consider them difficult to fly!)
+ - Trek Federation (early) (custom faction - Star Trek universe)
  - Velrax (custom faction - Nexus universe)
 
 

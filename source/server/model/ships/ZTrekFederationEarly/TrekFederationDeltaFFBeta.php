@@ -4,11 +4,12 @@ class TrekFederationDeltaFFBeta extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 200;
-        $this->faction = "ZTrek Playtest Federation";
+        $this->pointCost = 180;
+        $this->faction = "ZTrek Federation (early)";
         $this->phpclass = "TrekFederationDeltaFFBeta";
         $this->imagePath = "img/ships/StarTrek/DeltaClass.png";
         $this->shipClass = "Delta Frigate Beta";
+	$this->variantOf = "Delta Frigate Alpha";
 
 	$this->unofficial = true;
         $this->canvasSize = 100;
@@ -17,7 +18,7 @@ class TrekFederationDeltaFFBeta extends LCV{
         $this->forwardDefense = 11;
         $this->sideDefense = 11;
 
-	$this->variantOf = "Delta Frigate Alpha";
+		$this->notes = "Does not require hangar.";
 
         $this->gravitic = true;    
         $this->turncost = 0.33;

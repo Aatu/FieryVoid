@@ -4,8 +4,8 @@ class AndorianKumari extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 480;
-	$this->faction = "ZTrek Playtest Federation";
+	$this->pointCost = 465;
+	$this->faction = "ZTrek Federation (early)";
         $this->phpclass = "AndorianKumari";
         $this->imagePath = "img/ships/StarTrek/AndorianCruiser.png";
         $this->shipClass = "Andorian Kumari Cruiser";
@@ -14,6 +14,7 @@ class AndorianKumari extends HeavyCombatVesselLeftRight{
 	    $this->isd = '2145';
 
 	$this->fighters = array("Shuttlecraft"=>3);
+		$this->customFighter = array("Andorian small craft"=>3); //can deploy small craft with Andorian crew
 
         $this->forwardDefense = 13;
         $this->sideDefense = 13;

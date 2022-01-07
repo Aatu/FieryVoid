@@ -640,7 +640,7 @@ class TrekPhaserLance extends TrekPhaserBase{
 		
             // If fully boosted: force a critical roll (with hefty penalty)
             if($currBoostlevel === $this->maxBoostLevel){
-				$this->criticalRollMod += 10;
+				$this->critRollMod += 10;
             	$this->forceCriticalRoll = true;
             }
         }

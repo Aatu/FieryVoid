@@ -5,7 +5,7 @@ class VulcanShuttle extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 25 *6; //for 6
-        $this->faction = "ZTrek Playtest Federation";
+        $this->faction = "ZTrek Federation (early)";
         $this->phpclass = "VulcanShuttle";
         $this->shipClass = "Vulcan Shuttle flight";
         $this->imagePath = "img/ships/StarTrek/VulcanShuttle.png";
@@ -22,6 +22,7 @@ class VulcanShuttle extends FighterFlight{
 		
 		
 		$this->hangarRequired = "Shuttlecraft"; //I took category name from ST wikis
+        $this->customFtrName = "Vulcan small craft"; //requires hangar space on Vulcan ships
 		$this->unitSize = 1; //counted as singles
         
        	$this->iniativebonus = 15 *5;

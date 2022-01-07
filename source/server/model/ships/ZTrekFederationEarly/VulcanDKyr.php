@@ -4,8 +4,8 @@ class VulcanDkyr extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 650;
-	$this->faction = "ZTrek Playtest Federation";
+	$this->pointCost = 625;
+	$this->faction = "ZTrek Federation (early)";
         $this->phpclass = "VulcanDkyr";
         $this->imagePath = "img/ships/StarTrek/VulcanDKyr.png";
         $this->shipClass = "Vulcan D'Kyr Heavy Cruiser";
@@ -15,6 +15,7 @@ class VulcanDkyr extends BaseShip{
 
 
 	$this->fighters = array("Shuttlecraft"=>4);
+		$this->customFighter = array("Vulcan small craft"=>4); //can deploy small craft with Vulcan crew
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;

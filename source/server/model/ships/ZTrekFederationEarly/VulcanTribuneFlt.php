@@ -5,7 +5,7 @@ class VulcanTribuneFlt extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 90 *6; //for 6; a bit add-on for not requiring carrier
-        $this->faction = "ZTrek Playtest Federation";
+        $this->faction = "ZTrek Federation (early)";
         $this->phpclass = "VulcanTribuneFlt";
         $this->shipClass = "Vulcan Tribune flight";
         $this->imagePath = "img/ships/StarTrek/VulcanTribune.png";
@@ -14,7 +14,7 @@ class VulcanTribuneFlt extends FighterFlight{
         $this->isd = 2151;
 		$this->notes = "Warp Engine";
 		$this->notes .= "<br>No hangar required";
-        $this->limited = 10; //Restricted 10% - to go with no hangar requirements
+        $this->limited = 10; //Restricted 10% - to go with no hangar requirements; to be decided later whether such a limitation is necessary; "ships per hull" limitation will apply (at flight level)
 		$this->hangarRequired = ""; //NO hangar required
 
         $this->forwardDefense = 9;

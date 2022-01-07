@@ -5,11 +5,13 @@ class TellariteAttackVessel extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 180;
-		$this->faction = "ZTrek Playtest Federation";
+		$this->faction = "ZTrek Federation (early)";
         $this->phpclass = "TellariteAttackVessel";
         $this->imagePath = "img/ships/StarTrek/TellariteAttackVessel.png";
         $this->shipClass = "Tellarite Attack Vessel";
 
+		$this->notes = "Does not require hangar.";
+		
 		$this->unofficial = true;
         $this->canvasSize = 100;
 		$this->isd = 2142;
@@ -28,8 +30,8 @@ class TellariteAttackVessel extends LCV{
 		$this->hangarRequired = ''; //no hangar required!
 
 
-		$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
+		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
 
