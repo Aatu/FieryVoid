@@ -39,12 +39,13 @@ class KastanIronshearRefit extends HeavyCombatVessel{
 		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 240, 60));
 		$this->addFrontSystem(new EWRoyalLaser(3, 6, 4, 300, 60));
 		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 300, 120));
-		$this->addFrontSystem(new CargoBay(2, 20));
-		$this->addFrontSystem(new CargoBay(2, 20));
+		$this->addFrontSystem(new CargoBay(2, 24));
+		$this->addFrontSystem(new CargoBay(2, 24));
                 
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 15, 0, 5, 2));
+        $this->addAftSystem(new EWLaserBolt(2, 4, 2, 90, 270));
         $this->addAftSystem(new EWLaserBolt(2, 4, 2, 90, 270));
 		$this->addAftSystem(new CargoBay(2, 30));
 		$this->addAftSystem(new CargoBay(2, 30));

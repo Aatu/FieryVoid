@@ -1240,6 +1240,7 @@ spl_autoload_register(
 				'ewgravitictractingrod' => '/server/model/weapons/customEscalation.php',
 			//EW laser weapons
 				'ewdefenselaser' => '/server/model/weapons/customEscalation.php',
+				'ewduallaserbolt' => '/server/model/weapons/customEscalation.php',
 				'ewlaserbolt' => '/server/model/weapons/customEscalation.php',
 				'ewlaserboltftr' => '/server/model/weapons/customEscalation.php',
 				'ewprotomedlaser' => '/server/model/weapons/customEscalation.php',

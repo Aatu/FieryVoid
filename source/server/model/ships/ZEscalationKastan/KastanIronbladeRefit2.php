@@ -4,7 +4,7 @@ class KastanIronbladeRefit2 extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 525;
+	$this->pointCost = 550;
 	$this->faction = "ZEscalation Kastan Monarchy";
         $this->phpclass = "KastanIronbladeRefit2";
         $this->imagePath = "img/ships/EscalationWars/KastanIronblade.png";
@@ -32,21 +32,21 @@ class KastanIronbladeRefit2 extends BaseShip{
         $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 15, 3, 7));
-        $this->addPrimarySystem(new Engine(4, 18, 0, 12, 2));
+        $this->addPrimarySystem(new Engine(4, 18, 0, 12, 3));
 		$this->addPrimarySystem(new Hangar(4, 8));
 		$this->addPrimarySystem(new JumpEngine(4, 15, 4, 24));
 		
         $this->addFrontSystem(new Thruster(3, 13, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 13, 0, 4, 1));
-		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 240, 60));
+		$this->addFrontSystem(new EWDualLaserBolt(2, 6, 4, 240, 60));
 		$this->addFrontSystem(new EWSovereignLaser(4, 12, 6, 300, 60));
-		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 300, 120));
+		$this->addFrontSystem(new EWDualLaserBolt(2, 6, 4, 300, 120));
 
         $this->addAftSystem(new Thruster(3, 15, 0, 6, 2));
         $this->addAftSystem(new Thruster(3, 15, 0, 6, 2));
-        $this->addAftSystem(new EWLaserBolt(2, 4, 2, 90, 270));
+        $this->addAftSystem(new EWDualLaserBolt(2, 6, 4, 90, 270));
         $this->addAftSystem(new EWRoyalLaser(2, 6, 4, 90, 270));
-        $this->addAftSystem(new EWLaserBolt(2, 4, 2, 90, 270));
+        $this->addAftSystem(new EWDualLaserBolt(2, 6, 4, 90, 270));
 
         $this->addLeftSystem(new ImperialLaser(4, 8, 5, 240, 360));
         $this->addLeftSystem(new EWRoyalLaser(2, 6, 4, 180, 360));
@@ -78,14 +78,14 @@ class KastanIronbladeRefit2 extends BaseShip{
 			1=> array(
 					4 => "Thruster",
 					7 => "Sovereign Laser",
-					9 => "Laser Bolt",
+					9 => "Dual Laser Bolt",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
 					6 => "Thruster",
 					8 => "Royal Laser",
-					10 => "Laser Bolt",
+					10 => "Dual Laser Bolt",
 					18 => "Structure",
 					20 => "Primary",
 			),

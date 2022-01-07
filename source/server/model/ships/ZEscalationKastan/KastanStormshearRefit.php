@@ -39,15 +39,16 @@ class KastanStormshearRefit extends HeavyCombatVessel{
 		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 240, 60));
 		$this->addFrontSystem(new EWRoyalLaser(3, 6, 4, 300, 60));
 		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 300, 120));
-		$this->addFrontSystem(new EWOMissileRack(2, 6, 0, 240, 60));
-		$this->addFrontSystem(new EWOMissileRack(2, 6, 0, 300, 120));
+		$this->addFrontSystem(new SoMissileRack(2, 6, 0, 240, 60));
+		$this->addFrontSystem(new SoMissileRack(2, 6, 0, 300, 120));
                 
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 15, 0, 5, 2));
         $this->addAftSystem(new EWLaserBolt(2, 4, 2, 90, 270));
-		$this->addAftSystem(new EWOMissileRack(2, 6, 0, 180, 360));
-		$this->addAftSystem(new EWOMissileRack(2, 6, 0, 0, 180));
+        $this->addAftSystem(new EWLaserBolt(2, 4, 2, 90, 270));
+		$this->addAftSystem(new SoMissileRack(2, 6, 0, 180, 360));
+		$this->addAftSystem(new SoMissileRack(2, 6, 0, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 40));
@@ -68,14 +69,14 @@ class KastanStormshearRefit extends HeavyCombatVessel{
                     4 => "Thruster",
                     5 => "Royal Laser",
 					7 => "Laser Bolt",
-					9 => "Class-O Missile Rack",
+					9 => "Class-SO Missile Rack",
 					18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     6 => "Thruster",
 					7 => "Laser Bolt",
-					11 => "Class-O Missile Rack",
+					11 => "Class-SO Missile Rack",
                     18 => "Structure",
                     20 => "Primary",
             ),
