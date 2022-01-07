@@ -359,6 +359,13 @@
         public $ammunition = 6;        
         public $loadingtime = 1;
 	    
+		/* multi-mode ammo use tests 	
+        public $firingModes = array(
+            1 => "First",
+            2 => "Second"
+        );
+		*/
+		
         public $intercept = 2;
         public $ballisticIntercept = true;
 
@@ -394,8 +401,6 @@
             return 0; //Matter ignores armor!
         }
 
-
-
         public function setAmmo($firingMode, $amount){
             $this->ammunition = $amount;
         }
@@ -405,7 +410,7 @@
         	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
             $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
         }
     
         public function getDamage($fireOrder){
