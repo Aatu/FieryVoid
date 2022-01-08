@@ -423,6 +423,7 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
 	/*weapon of Rogolon fighters - very nasty!*/
         public $name = "RogolonLtPlasmaGun";
         public $displayName = "Light Plasma Gun";
+    public $animationColor = array(75, 250, 90); //...it's not inheriting from Plasma, so needs to have proper color declared
 	/*
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
@@ -484,6 +485,7 @@ class RogolonLtPlasmaCannon extends LinkedWeapon{
         public $name = "RogolonLtPlasmaCannon";
         public $displayName = "Light Plasma Cannon";
 	public $iconPath = "mediumPlasma.png";
+    public $animationColor = array(75, 250, 90); //...it's not inheriting from Plasma, so needs to have proper color declared
 	/*
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
@@ -536,6 +538,7 @@ class LightPlasmaAccelerator extends LinkedWeapon{
 		public $name = "LightPlasmaAccelerator";
 		public $displayName = "Light Plasma Accelerator";
 		public $iconPath = "LightPlasmaAccelerator.png";
+    public $animationColor = array(75, 250, 90); //...it's not inheriting from Plasma, so needs to have proper color declared
 	/*
 		public $animation = "trail";
 		public $trailColor = array(75, 250, 90);
@@ -1051,7 +1054,7 @@ class PlasmaBlast extends Weapon{
         public $displayName = "Plasma Blast";
 		public $iconPath = "PlasmaWeb.png";
 		
-        public $animation = "ball";    
+        public $animation = "ball";
     public $animationColor = array(75, 250, 90); //needed as this doesn't inherit from Plasma... //make it greenish, as it's Plasma ;)
         //public $animationColor = array(192,192,192);
         //public $trailColor = array(192,192,192);
