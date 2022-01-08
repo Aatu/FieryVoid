@@ -39025,7 +39025,10 @@ var isSelected = function isSelected(system) {
 };
 
 var getText = function getText(ship, system) {
-    if (system.weapon) {
+    if (system.outputDisplay != '') {
+        //some systems have very specific visual output, rather than generic
+        return system.outputDisplay;
+    } else if (system.weapon) {
 
         var firing = weaponManager.hasFiringOrder(ship, system);
 
