@@ -2492,6 +2492,8 @@ spl_autoload_register(
 				
 				//TEMPORARY layout changes and such - old versions	    
                 'halikold' => '/server/model/ships/brakiri/halikOld.php',
+                'shargotiold' => '/server/model/ships/minbari/shargotiOld.php',
+                'tradanaold' => '/server/model/ships/minbari/tradanaOld.php',
 				
 						
 				
