@@ -36,31 +36,32 @@ class thirsta extends LCV{
 		    $sensors->markLCV();
 		    $this->addPrimarySystem($sensors);
         $this->addPrimarySystem(new Engine(3, 12, 0, 6, 1));
-        $this->addPrimarySystem(new ParticleProjector(2, 6, 1, 180, 360));
-        $this->addPrimarySystem(new ParticleProjector(2, 6, 1, 240, 360));
-        $this->addPrimarySystem(new ParticleProjector(2, 6, 1, 0, 120));
-        $this->addPrimarySystem(new ParticleProjector(2, 6, 1, 0, 180));
+
+        $this->addFrontSystem(new ParticleProjector(2, 6, 1, 180, 360));
+        $this->addFrontSystem(new ParticleProjector(2, 6, 1, 240, 360));
+        $this->addFrontSystem(new ParticleProjector(2, 6, 1, 0, 120));
+        $this->addFrontSystem(new ParticleProjector(2, 6, 1, 0, 180));
         
         $this->addPrimarySystem(new Structure(4, 24));   
         
         $this->hitChart = array(
             0=> array( //should never happen
                 11 => "Structure",
-                15 => "Particle Projector",
-                17 => "Engine",
-                19 => "Reactor",
-                20 => "Scanner",
+                15 => "1:Particle Projector",
+                17 => "0:Engine",
+                19 => "0:Reactor",
+                20 => "0:Scanner",
             ),
             1=> array( //PRIMARY hit table, effectively
                 11 => "Structure",
-                15 => "0:Particle Projector",
+                15 => "1:Particle Projector",
                 17 => "0:Engine",
                 19 => "0:Reactor",
                 20 => "0:Scanner",
             ),
             2=> array( //same as Fwd
                 11 => "Structure",
-                15 => "0:Particle Projector",
+                15 => "1:Particle Projector",
                 17 => "0:Engine",
                 19 => "0:Reactor",
                 20 => "0:Scanner",

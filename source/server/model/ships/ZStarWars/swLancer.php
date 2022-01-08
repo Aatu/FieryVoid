@@ -53,10 +53,12 @@ class swLancer extends MediumShip{
         $this->addAftSystem(new Thruster(3, 8, 0, 4, 2));
    	$this->addAftSystem(new Thruster(3, 8, 0, 4, 2));
 	$this->addAftSystem(new SWRayShield(2,6,3,1,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addAftSystem(new SWMediumLaserAF(1, 180, 360, 4));
 	$this->addAftSystem(new SWMediumLaserAF(1, 150, 330, 4));
-	$this->addAftSystem(new SWMediumLaserAF(1, 180, 360, 4));   
+	$this->addAftSystem(new SWMediumLaserAF(1, 30, 210, 4));
 	$this->addAftSystem(new SWMediumLaserAF(1, 0, 180, 4));   
-	$this->addAftSystem(new SWMediumLaserAF(1, 30, 210, 4));       
+	
+	
         $this->addPrimarySystem(new Structure(4, 35));
 	    
 	    

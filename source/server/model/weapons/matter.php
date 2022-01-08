@@ -359,6 +359,13 @@
         public $ammunition = 6;        
         public $loadingtime = 1;
 	    
+		/* multi-mode ammo use tests 	
+        public $firingModes = array(
+            1 => "First",
+            2 => "Second"
+        );
+		*/
+		
         public $intercept = 2;
         public $ballisticIntercept = true;
 
@@ -368,11 +375,10 @@
 	    
 	    public $noOverkill = true;	    
 	    public $priority = 4;//more or less equivalent of d6+4, due to Matter properties
-		
 	    
 	    public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     	public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!  
-	 
+	  
 
         function __construct($startArc, $endArc){
             parent::__construct(0, 1, 0, $startArc, $endArc);
@@ -395,8 +401,6 @@
             return 0; //Matter ignores armor!
         }
 
-
-
         public function setAmmo($firingMode, $amount){
             $this->ammunition = $amount;
         }
@@ -406,7 +410,7 @@
         	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
             $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
         }
     
         public function getDamage($fireOrder){

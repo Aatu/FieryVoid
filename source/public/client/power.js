@@ -713,9 +713,9 @@ shipManager.power = {
 
 		for (var i = 0; i < ship.systems.length; i++) {
 			if (system.displayName === ship.systems[i].displayName) {
-				if (system.weapon) {
+				//if (system.weapon) { //make this work for non-weapons too
 					array.push(ship.systems[i]);
-				}
+				//}
 			}
 		}
 
@@ -794,9 +794,9 @@ shipManager.power = {
 
 		for (var i = 0; i < ship.systems.length; i++) {
 			if (system.displayName === ship.systems[i].displayName) {
-				if (system.weapon) {
+				//if (system.weapon) { //make this work for non-weapons too
 					array.push(ship.systems[i]);
-				}
+				//}
 			}
 		}
 

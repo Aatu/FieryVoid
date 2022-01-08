@@ -94,14 +94,16 @@ class Scoravarefitted extends BaseShip{
 			),
 			3=> array(
 				4 => "Thruster",
-				7 => "Medium Plasma Bolter",
+				6 => "Medium Plasma Bolter",
+				7 => "Class-S Missile Rack", //missing on original SCS!
 				9 => "Light Particle Beam",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
 				4 => "Thruster",
-				7 => "Medium Plasma Bolter",
+				6 => "Medium Plasma Bolter",
+				7 => "Class-S Missile Rack", //missing on original SCS!
 				9 => "Light Particle Beam",
 				18 => "Structure",
 				20 => "Primary",

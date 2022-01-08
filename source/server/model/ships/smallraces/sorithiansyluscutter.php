@@ -25,7 +25,6 @@ class SorithianSylusCutter extends LCV{
         $this->rollcost = 1;
         $this->pivotcost = 1;
         $this->iniativebonus = 70;
-    
  
 	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
@@ -38,32 +37,32 @@ class SorithianSylusCutter extends LCV{
 		    $sensors->markLCV();
 		    $this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(2, 6, 0, 4, 1));
-	$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 300, 360));
-	$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 330, 30));
-	$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 330, 30));
-	$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 60));  
-	    
+
+	$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 360));
+	$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 330, 30));
+	$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 330, 30));
+	$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 0, 60));  
 	    
         $this->addPrimarySystem(new Structure(3, 24));
 	    
         $this->hitChart = array(
         		0=> array( //should never happen
         				11 => "Structure",
-        				14 => "Light Particle Beam",
-        				16 => "Engine",
-        				18 => "Reactor",
-        				20 => "Scanner",
+        				14 => "1:Light Particle Beam",
+        				16 => "0:Engine",
+        				18 => "0:Reactor",
+        				20 => "0:Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				11 => "Structure",
-        				14 => "0:Light Particle Beam",
+        				14 => "1:Light Particle Beam",
         				16 => "0:Engine",
         				18 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		2=> array( //same as Fwd
         				11 => "Structure",
-        				14 => "0:Light Particle Beam",
+        				14 => "1:Light Particle Beam",
         				16 => "0:Engine",
         				18 => "0:Reactor",
         				20 => "0:Scanner",

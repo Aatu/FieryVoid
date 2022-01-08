@@ -37,32 +37,34 @@ class RaiderGunboat extends LCV{
 		$sensors->markLCV();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(4, 11, 0, 6, 1));
-	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 180, 0));
-	$this->addPrimarySystem(new ParticleCannon(3, 8, 7, 300, 60));
-	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 180));
+
+	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 180, 0));
+	$this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
+	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 0, 180));
+
 	$this->addPrimarySystem(new Structure( 5, 30));
   
         $this->hitChart = array(
         		0=> array( //should never happen (...but actually sometimes does!)
         				11 => "Structure",
-        				13 => "Particle Cannon",
-        				16 => "Standard Particle Beam",
-        				18 => "Engine",
-        				19 => "Reactor",
-        				20 => "Scanner",
+        				13 => "1:Particle Cannon",
+        				16 => "1:Standard Particle Beam",
+        				18 => "0:Engine",
+        				19 => "0:Reactor",
+        				20 => "0:Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				11 => "Structure",
-        				13 => "0:Particle Cannon",
-        				16 => "0:Standard Particle Beam",
+        				13 => "1:Particle Cannon",
+        				16 => "1:Standard Particle Beam",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		2=> array( //same as Fwd
         				11 => "Structure",
-        				13 => "0:Particle Cannon",
-        				16 => "0:Standard Particle Beam",
+        				13 => "1:Particle Cannon",
+        				16 => "1:Standard Particle Beam",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

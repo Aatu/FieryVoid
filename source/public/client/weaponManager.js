@@ -1669,6 +1669,16 @@ window.weaponManager = {
 
     isLoaded: function isLoaded(weapon) {
         return weapon.loadingtime <= weapon.turnsloaded || weapon.loadingtime <= weapon.overloadturns;
+    },	
+    isLoadedAlternate: function isLoaded(weapon) {
+		//check if ANY mode's loading time is satisfied
+		var shortestLoad = 999;
+		for (var currTime in weapon.loadingtimeArray){
+			if(shortestLoad > weapon.loadingtimeArray[currTime]){
+				shortestLoad = weapon.loadingtimeArray[currTime];
+			}
+		}
+        return shortestLoad <= weapon.turnsloaded ;
     },
 
     getFireOrderById: function getFireOrderById(id) {
@@ -1688,6 +1698,7 @@ window.weaponManager = {
         return weapon;
     },
 
+	/*no longer used!
     canRam: function canRam(ship) {
         if (ship.hasOwnProperty("hunterkiller")) {}
     },
@@ -1704,6 +1715,7 @@ window.weaponManager = {
             }
         });
     },
+    */
 
     getAllFireOrdersForAllShipsForTurn: function getAllFireOrdersForAllShipsForTurn(turn, type) {
         var fires = [];

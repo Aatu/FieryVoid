@@ -37,32 +37,34 @@ class LegionAugustus extends LCV{
 		$sensors->markLCV();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(4, 13, 0, 6, 1));
-	$this->addPrimarySystem(new FusionCannon(2, 8, 1, 180, 0));
-	$this->addPrimarySystem(new MediumLaser(3, 6, 5, 300, 60));
-	$this->addPrimarySystem(new FusionCannon(2, 8, 1, 0, 180));
+
+	$this->addFrontSystem(new FusionCannon(2, 8, 1, 180, 0));
+	$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
+	$this->addFrontSystem(new FusionCannon(2, 8, 1, 0, 180));
+
 	$this->addPrimarySystem(new Structure( 5, 31));
   
         $this->hitChart = array(
         		0=> array( //should never happen (...but actually sometimes does!)
         				11 => "Structure",
-        				13 => "Medium Laser",
-        				16 => "Fusion Cannon",
-        				18 => "Engine",
-        				19 => "Reactor",
-        				20 => "Scanner",
+        				13 => "1:Medium Laser",
+        				16 => "1:Fusion Cannon",
+        				18 => "0:Engine",
+        				19 => "0:Reactor",
+        				20 => "0:Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				11 => "Structure",
-        				13 => "0:Medium Laser",
-        				16 => "0:Fusion Cannon",
+        				13 => "1:Medium Laser",
+        				16 => "1:Fusion Cannon",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		2=> array( //same as Fwd
         				11 => "Structure",
-        				13 => "0:Medium Laser",
-        				16 => "0:Fusion Cannon",
+        				13 => "1:Medium Laser",
+        				16 => "1:Fusion Cannon",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

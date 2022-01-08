@@ -23,8 +23,8 @@ class lupaEscort extends LCV{
 	$this->pivotcost = 1;
 	$this->iniativebonus = 14 *5;
   
-	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
   
@@ -34,29 +34,31 @@ class lupaEscort extends LCV{
 		$sensors->markLCV();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(4, 8, 0, 6, 1));
-	$this->addPrimarySystem(new TwinArray(3, 6, 2, 240, 60));
-	$this->addPrimarySystem(new TwinArray(3, 6, 2, 270, 90));
-	$this->addPrimarySystem(new TwinArray(3, 6, 2, 300, 120));
+	
+	$this->addFrontSystem(new TwinArray(3, 6, 2, 240, 60));
+	$this->addFrontSystem(new TwinArray(3, 6, 2, 270, 90));
+	$this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
+	
 	$this->addPrimarySystem(new Structure(4, 30));
   
         $this->hitChart = array(
         		0=> array( //should never happen (...but actually sometimes does!)
         				10 => "Structure",
-        				15 => "Twin Array",
+        				15 => "1:Twin Array",
         				17 => "Engine",
         				19 => "Reactor",
         				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				10 => "0:Structure",
-        				15 => "0:Twin Array",
+        				15 => "1:Twin Array",
         				17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		2=> array( //same as Fwd
         				10 => "0:Structure",
-        				15 => "0:Twin Array",
+        				15 => "1:Twin Array",
         				17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

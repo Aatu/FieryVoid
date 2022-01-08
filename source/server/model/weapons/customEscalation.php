@@ -662,6 +662,47 @@ class EWHeavyGatlingLaser extends Pulse{
     } //endof EWLaserBolt
 
 
+    class EWDualLaserBolt extends Weapon{
+     
+        public $name = "EWDualLaserBolt";
+        public $displayName = "Dual Laser Bolt";  
+	    public $iconPath = "EWDualLaserBolt.png";
+	    
+        public $animation = "trail";
+        public $animationColor = array(220, 60, 120);
+		public $trailColor = array(220, 60, 120);
+        public $animationExplosionScale = 0.16;
+        public $animationWidth = 3;
+//        public $animationWidth2 = 0.3;
+		public $trailLength = 10;
+        public $priority = 4;
+        public $loadingtime = 1;
+        public $guns = 2;
+        
+        public $rangePenalty = 1.0; //-1 / hex
+        public $fireControl = array(3, 2, 0); // fighters, <mediums, <capitals 
+
+		public $firingMode = "Standard";
+        public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        public $weaponClass = "Laser";
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 6;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 4;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+    } //endof EWLaserBolt
+
+
     class EWDefenseLaser extends Weapon{
         public $name = "EWDefenseLaser";
         public $displayName = "Defense Laser";
@@ -1718,7 +1759,7 @@ class EWGraviticTractingRod extends SWDirectWeapon{
 		if ($system->powerReq > 0 || $system->canOffLine){
 			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
 		}
-		$system->criticalRollMod += 4;
+		$system->critRollMod += 4;
 	}
 		
         public function getDamage($fireOrder){        return Dice::d(10, 2);   }
@@ -1773,7 +1814,7 @@ class EWGraviticTractingRod extends SWDirectWeapon{
 		if ($system->powerReq > 0 || $system->canOffLine){
 			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
 		}
-		$system->criticalRollMod += 3;
+		$system->critRollMod += 3;
 	}
 		
         public function getDamage($fireOrder){        return Dice::d(10, 5);   }

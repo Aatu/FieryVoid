@@ -450,7 +450,8 @@ window.gamedata = {
 		var currHull = shipTable[j];
 		checkResult += " <i>" + currHull.name + "</i><br>";			
 		checkResult +=  " - Total: " + currHull.Total;
-		if ((!currHull.isFtr) && (!currHull.hangarRequired)){ //fighter total is not limited; also, let's not limit units requiring hangar slots! (this isn't in the rules but I think LCV logic demands it)
+		//if ((!currHull.isFtr) && (!currHull.hangarRequired)){ //fighter total is not limited; also, let's not limit units requiring hangar slots! (this isn't in the rules but I think LCV logic demands it)
+		if (!currHull.hangarRequired){ //actually there MAY be hangarless fighters - they should be limited per hull (well, per flight) just like ships!
 		    	checkResult +=  " (allowed " +limitPerHull+ ")";
 			if (currHull.Total>limitPerHull ){
 				checkResult += " TOO MANY!";
@@ -658,7 +659,7 @@ window.gamedata = {
 						} 
 					}
 					if (match == false) {
-						checkResult +=  " - " + totalSpecialFighters[i][0] + " Fighters: " + totalSpecialFighters[i][1];
+						checkResult +=  " - " + totalSpecialFighters[i][0] + ": " + totalSpecialFighters[i][1];
 						checkResult +=  " (allowed up to 0) FAILURE! <br>";
 						problemFound = true;
 					}
@@ -742,7 +743,6 @@ window.gamedata = {
 	
 
     constructFleetList: function constructFleetList() {
-
         var slotid = gamedata.selectedSlot;
         var selectedSlot = playerManager.getSlotById(slotid);
 
@@ -778,7 +778,6 @@ window.gamedata = {
     },
 
     calculateFleet: function calculateFleet() {
-
         var slotid = gamedata.selectedSlot;
         if (!slotid) return;
 
@@ -1113,14 +1112,34 @@ window.gamedata = {
     clickTakeslot: function clickTakeslot() {
         var slot = $(".slot").has($(this));
         var slotid = slot.data("slotid");
+	    
+	//block if player already has confirmed fleet (in any slot)
+	for (var i in gamedata.slots)  { //check all slots
+		var checkSlot = gamedata.slots[i];
+		if (checkSlot.lastphase == "-2") { //this slot has ready fleet
+			var player = playerManager.getPlayerInSlot(checkSlot);
+			if (player.id == gamedata.thisplayer){
+				window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
+				return;
+			}
+		}
+	}
+	    
         ajaxInterface.submitSlotAction("takeslot", slotid);
     },
 
     onLeaveSlotClicked: function onLeaveSlotClicked() {
         var slot = $(".slot").has($(this));
         var slotid = slot.data("slotid");
-		ajaxInterface.submitSlotAction("leaveslot", slotid);
-		window.location = "games.php";
+	    
+	//block if player already has confirmed fleet (in this slot)
+	if (slot.lastphase == "-2") { 
+		window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
+		return;
+	}
+	    
+	ajaxInterface.submitSlotAction("leaveslot", slotid);
+	window.location = "games.php";
     },
 
     enableBuy: function enableBuy() {
@@ -1291,7 +1310,7 @@ window.gamedata = {
         var points = gamedata.calculateFleet();
 
         if (points == 0) {
-            window.confirm.error("You have to buy atleast one ship!", function () {});
+            window.confirm.error("You have to buy at least one ship!", function () {});
             return;
         }
 
@@ -1339,7 +1358,7 @@ window.gamedata = {
     getShip: function getShip(phpclass, faction) {
     	var actPhpclass;
     	var actFaction;
-    	if (faction != null ){ //faftion provided
+    	if (faction != null ){ //faction provided
 			actPhpclass = phpclass;
 			actFaction = faction;
 			gamedata.displayedShip = phpclass;
