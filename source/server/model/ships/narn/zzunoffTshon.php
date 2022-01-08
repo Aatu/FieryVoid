@@ -9,7 +9,7 @@ class zzunoffTShon extends BaseShip{
 		$this->faction = "Narn";
         $this->phpclass = "zzunoffTShon";
         $this->imagePath = "img/ships/tloth.png";
-        $this->shipClass = "T'Shon Explorer";
+        $this->shipClass = "T'Shon Early Explorer";
         //$this->fighters = array("normal"=>12); //12 Assault Shuttles in standared configuration
         
 

@@ -21,8 +21,8 @@ class CircasianDolinarP extends BaseShip{
 		$this->enhancementOptionsDisabled[] = 'IMPR_REA';
 		$this->enhancementOptionsDisabled[] = 'IMPR_ENG';
 		
-		$this->notes = "Engine fluctuations. Rolls for engine critical every turn with +5% penalty. Effect lasts one turn.";
-		$this->notes .= "<br>Power fluctuations. Rolls for reactor critical every turn with +5% penalty. Effect lasts one turn.";
+//		$this->notes = "Engine fluctuations. Rolls for engine critical every turn with +5% penalty. Effect lasts one turn.";
+//		$this->notes .= "<br>Power fluctuations. Rolls for reactor critical every turn with +5% penalty. Effect lasts one turn.";
         
         $this->forwardDefense = 15;
         $this->sideDefense = 16;

@@ -213,7 +213,7 @@ class NexusAdvKineticBoxLauncher extends Weapon{
 
 
 
-class NexusLaserMissile extends Weapon{
+class NexusLaserMissile extends Laser{
         public $name = "NexusLaserMissile";
         public $displayName = "Laser Missile";
 		    public $iconPath = "NexusLaserMissile.png";
@@ -224,7 +224,8 @@ class NexusLaserMissile extends Weapon{
         public $projectilespeed = 10;
         public $animationWidth = 5;
         public $trailLength = 100;    
-
+        public $uninterceptable = false; 
+		
 		public $doInterceptDegradation = true; //Will be intercepted with normal degradation even though a ballistic
         public $useOEW = false; //missile
         public $ballistic = true; //missile
@@ -234,14 +235,14 @@ class NexusLaserMissile extends Weapon{
 	    
         public $loadingtime = 2; // 1/2 turns
         public $rangePenalty = 0;
-        public $fireControl = array(null, 0, 0); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $fireControl = array(null, 2, 2); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
         public $raking = 8;
 		public $priority = 8; //Matter weapon
 	    
 		public $firingMode = 'Ballistic'; //firing mode - just a name essentially
 		public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+//    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
 	 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -264,10 +265,6 @@ class NexusLaserMissile extends Weapon{
             $this->data["Ammunition"] = $this->ammunition;
         }
         
-        public function getDamage($fireOrder){
-            $dmg = 24;
-            return $dmg;
-       }
         public function setAmmo($firingMode, $amount){
             $this->ammunition = $amount;
         }
@@ -277,8 +274,9 @@ class NexusLaserMissile extends Weapon{
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
         }
     
-        public function setMinDamage(){     $this->minDamage = 24;      }
-        public function setMaxDamage(){     $this->maxDamage = 24;      }
+        public function getDamage($fireOrder){ return Dice::d(10, 2)+2;   }
+        public function setMinDamage(){     $this->minDamage = 4;      }
+        public function setMaxDamage(){     $this->maxDamage = 22;      }
 		
 }//endof NexusLaserMissile
 
@@ -1435,83 +1433,147 @@ class NexusChaffLauncher extends Weapon{
 	}// endof NexusLightProjectorArray
 	
 
-    class NexusShatterGun extends Pulse{
-//        public $trailColor = array(30, 170, 255);
+class NexusShatterGun extends Weapon{
 
         public $name = "NexusShatterGun";
         public $displayName = "Shatter Gun";
-		public $iconPath = "NexusShattergun.png";
-	    
-        public $animation = "trail";
-        public $animationColor = array(245, 245, 44);
+        public $iconPath = "NexusShatterGun.png"; 		
+		
+        public $animationArray = array(1=>'trail', 2=>'trail');
+        public $animationColorArray = array(1=>array(245, 245, 44), 2=>array(245, 245, 44));
         public $trailLength = 5;
         public $animationWidth = 4;
         public $projectilespeed = 18;
         public $animationExplosionScale = 0.10;
 
-	protected $useDie = 3; //die used for base number of hits
-		public $rof = 3;
-        public $grouping = 25;
-        public $maxpulses = 3;
-		
-		public $intercept = 1;
+	protected $useDie = 2; //die used for base number of hits
+//		public $rof = 3;
+		public $groupingArray = array(1=>25, 2=>0);
+		public $maxpulses = 4;
+        public $priorityArray = array(1=>5, 2=>7); // Matter weapon
+	public $defaultShotsArray = array(1=>4, 2=>1); //for Pulse mode it should be equal to maxpulses
+        
+        public $loadingtimeArray = array(1=>1, 2=>1);
+        public $rangePenaltyArray = array(1=>2, 2=>2);
+        public $intercept = 1;
 		public $ballisticIntercept = true;
-		public $noOverkill = true; //Matter weapon
-
-        public $loadingtime = 1;
-        public $priority = 4;
-
-        public $rangePenalty = 2 ; //-2 / hexes
-        public $fireControl = array(2, 1, 1); // fighters, <mediums, <capitals
-		public $weaponClass = "Matter";
+		public $firingModes = array(1 =>'Standard', 2=>'Concentrated');
+        
+        public $fireControlArray = array(1=>array(2, 1, 1), 2=>array(0, -1, -1)); // fighters, <mediums, <capitals
+        
+        public $damageTypeArray = array(1=>"Pulse", 2=>"Standard"); //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        public $weaponClassArray = array(1=>'Matter', 2=>'Matter');
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
+			$this->data["Special"] = "Ignores armor, does not overkill.";
+			$this->data["Special"] .= "<br>Standard mode: 1d2 +1/25% pulses (max 4) of 3 damage.";
+			$this->data["Special"] .= "<br>Concentrated mode:  1d2*4 damage but -10 fire control.";
 		}
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		//maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ) $maxhealth = 2;
             if ( $powerReq == 0 ) $powerReq = 1;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return 3;   }
-        public function setMinDamage(){     $this->minDamage = 3 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 3 ;      }
-	}// endof NexusShatterGun
+		public function getDamage($fireOrder){
+        	switch($this->firingMode){ 
+            	case 1:
+                	return 3;
+			    			break;
+            	case 2:
+            	   	return Dice::d(2, 1)*4;
+			    			break;
+        	}
+		}
+
+		public function setMinDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->minDamage = 3;
+								break;
+						case 2:
+								$this->minDamage = 3;
+								break;
+				}
+				$this->minDamageArray[$this->firingMode] = $this->minDamage;
+		}							
+		
+		public function setMaxDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->maxDamage = 3;
+								break;
+						case 2:
+								$this->maxDamage = 6;
+								break;
+				}
+				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+		}
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+
+			return $strippedSystem;
+		}
+
+	//necessary for Pulse mode
+        protected function getPulses($turn)
+        {
+            return Dice::d(2);
+        }
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return floor(($needed - $rolled) / ($this->grouping));
+        }
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn);
+		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses);
+		return $pulses;
+	}
+		
+    } // endof NexusShatterGun	
 
 
 /*fighter-mounted variant*/
-    class NexusShatterGunFtr extends Pulse{
-//        public $trailColor = array(30, 170, 255);
+class NexusShatterGunFtr extends Weapon{
 
         public $name = "NexusShatterGunFtr";
-        public $displayName = "Shatter Gun";
-		public $iconPath = "NexusShattergun.png";
-	    
-        public $animation = "trail";
-        public $animationColor = array(245, 245, 44);
-        public $animationExplosionScale = 0.10;
-        public $projectilespeed = 18;
-        public $animationWidth = 4;
-        public $trailLength = 5;
-
-	protected $useDie = 3; //die used for base number of hits
-		public $rof = 3;
-        public $grouping = 25;
-        public $maxpulses = 3;
+        public $displayName = "Fighter Shatter Gun";
+        public $iconPath = "NexusShattergun.png"; 		
 		
-		public $intercept = 1;
+        public $animationArray = array(1=>'trail', 2=>'trail');
+        public $animationColorArray = array(1=>array(245, 245, 44), 2=>array(245, 245, 44));
+        public $trailLength = 5;
+        public $animationWidth = 4;
+        public $projectilespeed = 18;
+        public $animationExplosionScale = 0.10;
+        public $ammunition = 12;
+
+	protected $useDie = 2; //die used for base number of hits
+//		public $rof = 3;
+		public $groupingArray = array(1=>0, 2=>0);
+		public $maxpulses = 2;
+        public $priorityArray = array(1=>5, 2=>7); // Matter weapon
+	public $defaultShotsArray = array(1=>2, 2=>1); //for Pulse mode it should be equal to maxpulses
+        
+        public $loadingtimeArray = array(1=>1, 2=>1);
+        public $rangePenaltyArray = array(1=>2, 2=>2);
+        public $intercept = 1;
 		public $ballisticIntercept = true;
-
-        public $loadingtime = 1;
-        public $priority = 4;
-
-        public $rangePenalty = 2 ; //-2 / hexes
-        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
-		public $weaponClass = "Matter";
+		public $firingModes = array(1 =>'Standard', 2=>'Concentrated');
+        
+        public $fireControlArray = array(1=>array(0, 0, 0), 2=>array(-2, -2, -2)); // fighters, <mediums, <capitals
+        
+        public $damageTypeArray = array(1=>"Pulse", 2=>"Standard"); //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        public $weaponClassArray = array(1=>'Matter', 2=>'Matter');
 
 	function __construct($startArc, $endArc, $nrOfShots = 1){
             $this->defaultShots = $nrOfShots;
@@ -1521,14 +1583,89 @@ class NexusChaffLauncher extends Weapon{
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
+			$this->data["Special"] = "Ignores armor, does not overkill.";
+			$this->data["Special"] .= "<br>Standard mode: 1d2 pulses of 3 damage.";
+			$this->data["Special"] .= "<br>Concentrated mode:  3*d2 damage but -10 fire control.";
+            $this->data["Ammunition"] = $this->ammunition;
 		}
 		
-        public function getDamage($fireOrder){ return 3;   }
-        public function setMinDamage(){     $this->minDamage = 3 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 3 ;      }
-	}// endof NexusShatterGunFtr
-	
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+        	//debug::log("fire function");
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
+
+		public function getDamage($fireOrder){
+        	switch($this->firingMode){ 
+            	case 1:
+                	return 3;
+			    			break;
+            	case 2:
+            	   	return Dice::d(2, 1)*3;
+			    			break;
+        	}
+		}
+
+		public function setMinDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->minDamage = 3;
+								break;
+						case 2:
+								$this->minDamage = 3;
+								break;
+				}
+				$this->minDamageArray[$this->firingMode] = $this->minDamage;
+		}							
+		
+		public function setMaxDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->maxDamage = 3;
+								break;
+						case 2:
+								$this->maxDamage = 6;
+								break;
+				}
+				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+		}
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+
+            $strippedSystem->ammunition = $this->ammunition;
+
+			return $strippedSystem;
+		}
+
+	//necessary for Pulse mode
+        protected function getPulses($turn)
+        {
+            return Dice::d(2);
+        }
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return floor(($needed - $rolled) / ($this->grouping));
+        }
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn);
+//		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses);
+		return $pulses;
+	}
+		
+    } // endof NexusShatterGunFtr		
+
 
     class NexusLightGasGun extends Matter{
 //        public $trailColor = array(30, 170, 255);
@@ -1568,7 +1705,7 @@ class NexusChaffLauncher extends Weapon{
 //        public $trailColor = array(30, 170, 255);
 
         public $name = "NexusLightGasGunFtr";
-        public $displayName = "Light Gas Gun";
+        public $displayName = "Fighter Gas Gun";
 		public $iconPath = "NexusLightGasGun.png";
 	    
         public $animation = "trail";
@@ -1578,11 +1715,36 @@ class NexusChaffLauncher extends Weapon{
         public $animationWidth = 2;
         public $trailLength = 35;
 
-        public $loadingtime = 1;
-        public $priority = 6;
+        public $loadingtime = 2;
+        public $priority = 8;
+        public $ammunition = 6;
 
-        public $rangePenalty = 1.0 ; //-1 / hex
+        public $rangePenalty = 1.5 ; // -3/2 hexes
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();
+    
+            $strippedSystem->ammunition = $this->ammunition;
+           
+            return $strippedSystem;
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Ammunition"] = $this->ammunition;
+        }
+
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+        	//debug::log("fire function");
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
 
 	function __construct($startArc, $endArc, $nrOfShots = 1){
             $this->defaultShots = $nrOfShots;
@@ -1625,9 +1787,9 @@ class NexusChaffLauncher extends Weapon{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return Dice::d(10, 1)+12;   }
-        public function setMinDamage(){     $this->minDamage = 13 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
+        public function getDamage($fireOrder){ return Dice::d(10, 1)+8;   }
+        public function setMinDamage(){     $this->minDamage = 9 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 18 ;      }
 	}// endof NexusGasGun
 
 
@@ -2027,7 +2189,7 @@ class NexusAutocannonFtr extends Matter{
         public $trailColor = array(206, 206, 83);
 
         public $name = "NexusAutocannonFtr";
-        public $displayName = "Autocannon";
+        public $displayName = "Fighter Autocannon";
 		public $iconPath = "NexusAutocannon.png";
 	    
         public $animation = "trail";
@@ -2036,12 +2198,37 @@ class NexusAutocannonFtr extends Matter{
         public $projectilespeed = 10;
         public $animationWidth = 2;
         public $trailLength = 35;
-        public $loadingtime = 1;
+        public $loadingtime = 2;
 		public $guns = 1;
-        public $priority = 5;
+        public $priority = 8;
+        public $ammunition = 6;
 
-        public $rangePenalty = 1; //
+        public $rangePenalty = 1.5; //
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();
+    
+            $strippedSystem->ammunition = $this->ammunition;
+           
+            return $strippedSystem;
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Ammunition"] = $this->ammunition;
+        }
+
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+        	//debug::log("fire function");
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
 
 	function __construct($startArc, $endArc, $nrOfShots = 1){
             $this->defaultShots = $nrOfShots;
@@ -2052,7 +2239,8 @@ class NexusAutocannonFtr extends Matter{
         public function getDamage($fireOrder){ return 6;   }
         public function setMinDamage(){     $this->minDamage = 6 ;      }
         public function setMaxDamage(){     $this->maxDamage = 6 ;      }
-}// endof NexusAutocannon
+		
+}// endof NexusAutocannonFtr
 
 
 
@@ -2565,40 +2753,42 @@ class NexusImprovedParticleBeam extends Particle{
 }// endof NexusImprovedParticleBeam
 
 
-class NexusMinigun extends Pulse{
+class NexusMinigun extends Weapon{
 
         public $name = "NexusMinigun";
         public $displayName = "Minigun";
         public $iconPath = "NexusMinigun.png"; 		
 		
-        public $animation = "trail";
-        public $animationColor = array(245, 245, 44);
+        public $animationArray = array(1=>'trail', 2=>'trail');
+        public $animationColorArray = array(1=>array(245, 245, 44), 2=>array(245, 245, 44));
         public $trailLength = 5;
         public $animationWidth = 4;
         public $projectilespeed = 18;
         public $animationExplosionScale = 0.10;
 
-	protected $useDie = 3; //die used for base number of hits
-		public $rof = 3;
-		public $grouping = 15;
+	protected $useDie = 4; //die used for base number of hits
+//		public $rof = 3;
+		public $groupingArray = array(1=>25, 2=>0);
 		public $maxpulses = 6;
+        public $priorityArray = array(1=>5, 2=>7); // Matter weapon
+	public $defaultShotsArray = array(1=>6, 2=>1); //for Pulse mode it should be equal to maxpulses
         
-        public $loadingtime = 1;
+        public $loadingtimeArray = array(1=>1, 2=>1);
+        public $rangePenaltyArray = array(1=>2, 2=>2);
         public $intercept = 1;
 		public $ballisticIntercept = true;
-        public $priority = 3; // Matter weapon
+		public $firingModes = array(1 =>'Standard', 2=>'Concentrated');
         
-		public $noOverkill = true; //Matter weapon
-        public $rangePenalty = 2;
-        public $fireControl = array(3, 2, 2); // fighters, <mediums, <capitals
+        public $fireControlArray = array(1=>array(3, 2, 2), 2=>array(1, 0, 0)); // fighters, <mediums, <capitals
         
-//        public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-        public $weaponClass = "Matter";
+        public $damageTypeArray = array(1=>"Pulse", 2=>"Standard"); //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        public $weaponClassArray = array(1=>'Matter', 2=>'Matter');
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
-			$this->data["Special"] .= "<br>Ballistic intercept only.";
+			$this->data["Special"] = "Ignores armor, does not overkill.";
+			$this->data["Special"] .= "<br>Standard mode: 1d4 +1/25% pulses (max 6) of 3 damage.";
+			$this->data["Special"] .= "<br>Concentrated mode:  1d3*4 damage but -10 fire control.";
 		}
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -2606,42 +2796,103 @@ class NexusMinigun extends Pulse{
             if ( $powerReq == 0 ) $powerReq = 1;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
+
+		public function getDamage($fireOrder){
+        	switch($this->firingMode){ 
+            	case 1:
+                	return 3;
+			    			break;
+            	case 2:
+            	   	return Dice::d(3, 1)*4;
+			    			break;
+        	}
+		}
+
+		public function setMinDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->minDamage = 3;
+								break;
+						case 2:
+								$this->minDamage = 4;
+								break;
+				}
+				$this->minDamageArray[$this->firingMode] = $this->minDamage;
+		}							
 		
-        public function getDamage($fireOrder){ return 3; }
-        public function setMinDamage(){ $this->minDamage = 3 ; }
-        public function setMaxDamage(){ $this->maxDamage = 3 ; }		
+		public function setMaxDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->maxDamage = 3;
+								break;
+						case 2:
+								$this->maxDamage = 12;
+								break;
+				}
+				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+		}
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+
+			return $strippedSystem;
+		}
+
+	//necessary for Pulse mode
+        protected function getPulses($turn)
+        {
+            return Dice::d(4);
+        }
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return floor(($needed - $rolled) / ($this->grouping));
+        }
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn);
+		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses);
+		return $pulses;
+	}
 		
-    } // endof NexusMinigun
+    } // endof NexusMinigun	
 
 /*fighter-mounted variant*/
-class NexusMinigunFtr extends Pulse{
+class NexusMinigunFtr extends Weapon{
 
         public $name = "NexusMinigunFtr";
-        public $displayName = "Minigun";
+        public $displayName = "Fighter Minigun";
         public $iconPath = "NexusMinigun.png"; 		
 		
-        public $animation = "trail";
-        public $animationColor = array(245, 245, 44);
+        public $animationArray = array(1=>'trail', 2=>'trail');
+        public $animationColorArray = array(1=>array(245, 245, 44), 2=>array(245, 245, 44));
         public $trailLength = 5;
         public $animationWidth = 4;
         public $projectilespeed = 18;
         public $animationExplosionScale = 0.10;
+        public $ammunition = 12;
 
 	protected $useDie = 3; //die used for base number of hits
-		public $rof = 3;
-		public $grouping = 15;
-		public $maxpulses = 6;
+//		public $rof = 3;
+		public $groupingArray = array(1=>0, 2=>0);
+		public $maxpulses = 3;
+        public $priorityArray = array(1=>5, 2=>7); // Matter weapon
+	public $defaultShotsArray = array(1=>3, 2=>1); //for Pulse mode it should be equal to maxpulses
         
-        public $loadingtime = 1;
+        public $loadingtimeArray = array(1=>1, 2=>1);
+        public $rangePenaltyArray = array(1=>2, 2=>2);
         public $intercept = 1;
 		public $ballisticIntercept = true;
-        public $priority = 3; // Matter weapon
+		public $firingModes = array(1 =>'Standard', 2=>'Concentrated');
         
-        public $rangePenalty = 2;
-        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        public $fireControlArray = array(1=>array(0, 0, 0), 2=>array(-2, -2, -2)); // fighters, <mediums, <capitals
         
-//        public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-        public $weaponClass = "Matter";
+        public $damageTypeArray = array(1=>"Pulse", 2=>"Standard"); //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        public $weaponClassArray = array(1=>'Matter', 2=>'Matter');
 
 	function __construct($startArc, $endArc, $nrOfShots = 1){
             $this->defaultShots = $nrOfShots;
@@ -2651,12 +2902,86 @@ class NexusMinigunFtr extends Pulse{
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
+			$this->data["Special"] = "Ignores armor, does not overkill.";
+			$this->data["Special"] .= "<br>Standard mode: 1d3 pulses of 3 damage.";
+			$this->data["Special"] .= "<br>Concentrated mode:  6 damage but -10 fire control.";
+            $this->data["Ammunition"] = $this->ammunition;
 		}
 		
-        public function getDamage($fireOrder){ return 3; }
-        public function setMinDamage(){ $this->minDamage = 3 ; }
-        public function setMaxDamage(){ $this->maxDamage = 3 ; }		
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+        	//debug::log("fire function");
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
+
+		public function getDamage($fireOrder){
+        	switch($this->firingMode){ 
+            	case 1:
+                	return 3;
+			    			break;
+            	case 2:
+            	   	return 6;
+			    			break;
+        	}
+		}
+
+		public function setMinDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->minDamage = 3;
+								break;
+						case 2:
+								$this->minDamage = 6;
+								break;
+				}
+				$this->minDamageArray[$this->firingMode] = $this->minDamage;
+		}							
+		
+		public function setMaxDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->maxDamage = 3;
+								break;
+						case 2:
+								$this->maxDamage = 6;
+								break;
+				}
+				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+		}
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+
+            $strippedSystem->ammunition = $this->ammunition;
+
+			return $strippedSystem;
+		}
+
+	//necessary for Pulse mode
+        protected function getPulses($turn)
+        {
+            return Dice::d(3);
+        }
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return floor(($needed - $rolled) / ($this->grouping));
+        }
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn);
+//		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses);
+		return $pulses;
+	}
 		
     } // endof NexusMinigunFtr	
 	
@@ -3012,9 +3337,9 @@ class NexusHeavyCoilgun extends Matter{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return Dice::d(10, 2)+2;   }
-        public function setMinDamage(){     $this->minDamage = 4 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
+        public function getDamage($fireOrder){ return Dice::d(10, 3)+3;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 33 ;      }
 }
 
 // endof NexusHeavyCoilgun
@@ -3048,9 +3373,9 @@ class NexusCoilgun extends Matter{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return Dice::d(10, 2)+2;   }
-        public function setMinDamage(){     $this->minDamage = 4 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
+        public function getDamage($fireOrder){ return Dice::d(10, 3)+3;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 33 ;      }
 }// endof NexusCoilgun
 
 
@@ -4382,7 +4707,7 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
 
         public $raking = 8;
 
-        public $rangePenalty = 0.67;
+        public $rangePenalty = 0.66;
         public $fireControl = array(-4, 2, 2); // fighters, <mediums, <capitals
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){

@@ -8,7 +8,7 @@ class Vakar extends BaseShip{
         $this->faction = "Narn";
         $this->phpclass = "Vakar";
         $this->imagePath = "img/ships/varkar.png";
-        $this->shipClass = "Va'Kar";
+        $this->shipClass = "Va'Kar Long-Range Scout";
         $this->shipSizeClass = 3;
         $this->fighters = array("medium"=>6);
         $this->limited = 33;
