@@ -1,12 +1,12 @@
 <?php
-class Shargoti extends BaseShip{
+class ShargotiOld extends BaseShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 2500;
 		$this->faction = "Minbari";
-        $this->phpclass = "Shargoti";
+        $this->phpclass = "ShargotiOld";
         $this->imagePath = "img/ships/sharlin.png";
         $this->shipClass = "Shargoti Battlecruiser";
         $this->shipSizeClass = 3;
@@ -15,6 +15,11 @@ class Shargoti extends BaseShip{
         $this->fighters = array("normal"=>24);
         $this->limited = 10;
 
+		
+		
+        $this->variantOf = "TO BE DELETED";
+		
+        
 		$this->notes .= "<br>Official Shargoti Battlecruiser with Gravity Nets replaced by Fusion Cannons"; 
 		$this->unofficial = true;
 
