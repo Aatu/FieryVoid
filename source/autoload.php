@@ -2489,6 +2489,10 @@ spl_autoload_register(
 				'variablehangarsize' => '/server/model/ships/customs/VariableHangarSize.php',
 				'ltviper' => '/server/model/ships/customs/LtViper.php',
 				'medviper' => '/server/model/ships/customs/medViper.php',
+				
+				//TEMPORARY layout changes and such - old versions	    
+                'halikold' => '/server/model/ships/brakiri/halikOld.php',
+				
 						
 				
 				//let's end this with unit enhancement class...		    
