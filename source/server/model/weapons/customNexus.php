@@ -1494,7 +1494,7 @@ class NexusShatterGun extends Weapon{
 								$this->minDamage = 3;
 								break;
 						case 2:
-								$this->minDamage = 4;
+								$this->minDamage = 3;
 								break;
 				}
 				$this->minDamageArray[$this->firingMode] = $this->minDamage;
@@ -1506,7 +1506,7 @@ class NexusShatterGun extends Weapon{
 								$this->maxDamage = 3;
 								break;
 						case 2:
-								$this->maxDamage = 8;
+								$this->maxDamage = 6;
 								break;
 				}
 				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
@@ -1570,7 +1570,7 @@ class NexusShatterGunFtr extends Weapon{
 		public $ballisticIntercept = true;
 		public $firingModes = array(1 =>'Standard', 2=>'Concentrated');
         
-        public $fireControlArray = array(1=>array(0, 0, 0), 2=>array(-3, -3, -3)); // fighters, <mediums, <capitals
+        public $fireControlArray = array(1=>array(0, 0, 0), 2=>array(-2, -2, -2)); // fighters, <mediums, <capitals
         
         public $damageTypeArray = array(1=>"Pulse", 2=>"Standard"); //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClassArray = array(1=>'Matter', 2=>'Matter');
@@ -1585,7 +1585,7 @@ class NexusShatterGunFtr extends Weapon{
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "Ignores armor, does not overkill.";
 			$this->data["Special"] .= "<br>Standard mode: 1d2 pulses of 3 damage.";
-			$this->data["Special"] .= "<br>Concentrated mode:  3*d2 damage but -15 fire control.";
+			$this->data["Special"] .= "<br>Concentrated mode:  3*d2 damage but -10 fire control.";
             $this->data["Ammunition"] = $this->ammunition;
 		}
 		
@@ -1705,7 +1705,7 @@ class NexusShatterGunFtr extends Weapon{
 //        public $trailColor = array(30, 170, 255);
 
         public $name = "NexusLightGasGunFtr";
-        public $displayName = "Light Gas Gun";
+        public $displayName = "Fight Gas Gun";
 		public $iconPath = "NexusLightGasGun.png";
 	    
         public $animation = "trail";
@@ -1717,9 +1717,34 @@ class NexusShatterGunFtr extends Weapon{
 
         public $loadingtime = 2;
         public $priority = 8;
+        public $ammunition = 6;
 
         public $rangePenalty = 1.5 ; // -3/2 hexes
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();
+    
+            $strippedSystem->ammunition = $this->ammunition;
+           
+            return $strippedSystem;
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Ammunition"] = $this->ammunition;
+        }
+
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+        	//debug::log("fire function");
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
 
 	function __construct($startArc, $endArc, $nrOfShots = 1){
             $this->defaultShots = $nrOfShots;
@@ -2164,7 +2189,7 @@ class NexusAutocannonFtr extends Matter{
         public $trailColor = array(206, 206, 83);
 
         public $name = "NexusAutocannonFtr";
-        public $displayName = "Autocannon";
+        public $displayName = "Fighter Autocannon";
 		public $iconPath = "NexusAutocannon.png";
 	    
         public $animation = "trail";
@@ -2864,7 +2889,7 @@ class NexusMinigunFtr extends Weapon{
 		public $ballisticIntercept = true;
 		public $firingModes = array(1 =>'Standard', 2=>'Concentrated');
         
-        public $fireControlArray = array(1=>array(0, 0, 0), 2=>array(-3, -3, -3)); // fighters, <mediums, <capitals
+        public $fireControlArray = array(1=>array(0, 0, 0), 2=>array(-2, -2, -2)); // fighters, <mediums, <capitals
         
         public $damageTypeArray = array(1=>"Pulse", 2=>"Standard"); //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClassArray = array(1=>'Matter', 2=>'Matter');
