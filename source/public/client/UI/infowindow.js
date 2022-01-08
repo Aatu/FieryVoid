@@ -34,7 +34,7 @@ window.infowindow = {
             }
 
             if (gamedata.gamephase == 2) {
-                h.html("TURN " + gamedata.turn + ", " + gamedata.getPhasename() + " " + gamedata.getActiveShipName());
+                h.html("TURN " + gamedata.turn + ", " + gamedata.getPhasename());// + " " + gamedata.getActiveShipName());
             }
 
             if (gamedata.gamephase == 1) {

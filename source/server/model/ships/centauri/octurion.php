@@ -37,13 +37,13 @@ class Octurion extends BaseShip{
 	$this->addFrontSystem(new MatterCannon(4, 7, 4, 0, 120));
 	$this->addFrontSystem(new TwinArray(3, 6, 2, 240, 60));
 	$this->addFrontSystem(new TwinArray(3, 6, 2, 240, 60));
-	$this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
-        $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
 	$this->addFrontSystem(new TwinArray(3, 6, 2, 240, 60));
 	$this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
+	$this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
 	$this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
 	$this->addFrontSystem(new Thruster(6, 15, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
 
 		
     

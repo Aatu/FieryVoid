@@ -67,7 +67,6 @@
             }
             
             gamedata.parseServerData(<?php print($serverdataJSON); ?>);
-            //shipWindowManager.createShipWindow(gamedata.getActiveShip());
             
 			if (gamedata.thisplayer == -1){
 				$(".notlogged").show();

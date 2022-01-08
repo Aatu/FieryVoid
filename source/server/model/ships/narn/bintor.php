@@ -18,7 +18,7 @@ class Bintor extends BaseShip{
 	    $this->isd = 2245;
 		$this->unofficial = true;
 
-	    $this->notes = 'Custom Bintak with energy mines replaced with medium laser cannons.';
+	    $this->notes = 'Custom no-EMine variant.';
 		
         $this->forwardDefense = 16;
         $this->sideDefense = 18;
@@ -111,7 +111,7 @@ class Bintor extends BaseShip{
 				5 => "Heavy Laser",
 				6 => "Light Pulse Cannon",
 				8 => "Twin Array",
-				9 => "Ion torpedo",
+				9 => "Ion Torpedo",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -120,7 +120,7 @@ class Bintor extends BaseShip{
 				5 => "Heavy Laser",
 				6 => "Light Pulse Cannon",
 				8 => "Twin Array",
-				9 => "Ion torpedo",
+				9 => "Ion Torpedo",
 				18 => "Structure",
 				20 => "Primary",
 			),

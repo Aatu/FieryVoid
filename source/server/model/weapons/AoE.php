@@ -150,16 +150,17 @@ public function calculateHit($gamedata, $fireOrder){
         public $priority = 1;
         
             
-        public $trailColor = array(141, 240, 255);
         public $animation = "ball";
         public $animationColor = array(141, 240, 255);
         public $animationExplosionScale = 1;
+		/*
+        public $trailColor = array(141, 240, 255);
         public $animationExplosionType = "AoE";
         public $explosionColor = array(141, 240, 255);
         public $projectilespeed = 12;
         public $animationWidth = 10;
         public $trailLength = 10;
-	    
+	    */
 	public $firingModes = array(
 		1 => "AoE"
 	);
@@ -214,7 +215,10 @@ class LightEnergyMine extends AoE{
         public $flashDamage = true;
         public $priority = 1;
         
-            
+        public $animation = "ball";
+        public $animationColor = array(141, 240, 255);
+        public $animationExplosionScale = 1;
+		/*
         public $trailColor = array(141, 240, 255);
         public $animation = "ball";
         public $animationColor = array(141, 240, 255);
@@ -224,7 +228,7 @@ class LightEnergyMine extends AoE{
         public $projectilespeed = 10;
         public $animationWidth = 10;
         public $trailLength = 10;
-	    
+	    */
 	public $firingModes = array(
 		1 => "AoE"
 	);
