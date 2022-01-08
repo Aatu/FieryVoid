@@ -478,7 +478,7 @@ class QuadPulsar extends Pulse{
     }
 
 
-/* new Scatter Pulsar - it was initially made as Pulse weapon, only later brought to correctness
+/* new ScatterGun - it was initially made as Pulse weapon, only later brought to correctness
 	number of shots is rolled after firing declaration (eg. after declaring offensive fire but before assigning interceptions)
 */
     class ScatterGun extends Weapon //this is NOT a Pulse weapon, disregard Pulse-specific settings...

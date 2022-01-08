@@ -1315,7 +1315,7 @@ class LightScattergun extends Pulse{
     public $weaponClass = "Particle";
    
 	public $animation = "bolt";
-	public $animationColor = array(30, 170, 255);
+	public $animationColor = array(190, 75, 20);
 	
 	public $intercept = 2;	
 	public $rangePenalty = 2; //-2/hex	
