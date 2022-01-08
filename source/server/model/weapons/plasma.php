@@ -820,6 +820,7 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
 	public $name = "LightPlasmaBolterFighter";
 	public $displayName = "Light Plasma Bolter";
 	public $iconPath = "LightPlasmaBolterFighter.png";
+    public $animationColor = array(75, 250, 90); //needed as this doesn't inherit from Plasma...
 /*
     public $animation = "trail";
     public $animationColor = array(75, 250, 90);
@@ -1007,6 +1008,7 @@ class PlasmaProjector extends Raking{
 	public $displayName = "Plasma Projector";
 	public $iconPath = "PlasmaProjector.png";
 	public $animation = "laser";
+    public $animationColor = array(75, 250, 90); //needed as this doesn't inherit from Plasma...
 	/*
 	public $animationColor = array(75, 250, 90);
     public $animationWidth = 4;
@@ -1049,8 +1051,9 @@ class PlasmaBlast extends Weapon{
         public $displayName = "Plasma Blast";
 		public $iconPath = "PlasmaWeb.png";
 		
-        public $animation = "ball";
-        public $animationColor = array(192,192,192);
+        public $animation = "ball";    
+    public $animationColor = array(75, 250, 90); //needed as this doesn't inherit from Plasma... //make it greenish, as it's Plasma ;)
+        //public $animationColor = array(192,192,192);
         //public $trailColor = array(192,192,192);
         public $animationExplosionScale = 0.5;
         public $animationExplosionType = "AoE";
