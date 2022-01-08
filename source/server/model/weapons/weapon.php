@@ -39,7 +39,7 @@ class Weapon extends ShipSystem
 	 //any other value equals "bolt"
 	 //unless weapon is hextargeted, in which case any entry equals "ball"...
     public $animationArray = array();
-    public $animationColor = null;
+    public $animationColor = array(0, 0, 0); //if not redefined - make it completely black, just to suggest something is wrong ;)
     public $animationColorArray = array();
     public $animationExplosionScale = 0; //0 means it will be set automatically by standard constructor, based on average damage yield
     public $animationExplosionScaleArray = array();
