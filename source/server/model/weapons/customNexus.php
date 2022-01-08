@@ -1705,7 +1705,7 @@ class NexusShatterGunFtr extends Weapon{
 //        public $trailColor = array(30, 170, 255);
 
         public $name = "NexusLightGasGunFtr";
-        public $displayName = "Fight Gas Gun";
+        public $displayName = "Fighter Gas Gun";
 		public $iconPath = "NexusLightGasGun.png";
 	    
         public $animation = "trail";

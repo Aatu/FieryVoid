@@ -580,10 +580,10 @@ without any restrictions, but they cannot boost their sensors.
 	
 	
 	
-zSTARTREK (custom, alternate universe faction)
-Star Wars units, as designed by Wolfgang Lackner-Warton and Marcin Sawicki, based on original conversion by Tyrel Lohr.
+zSTARTREK (custom, alternate universe set of factions)
+Star Trek units, as designed by Wolfgang Lackner-Warton and Marcin Sawicki, based on original conversion by Tyrel Lohr.
 We tried to make it playable against B5 fleets as well.
-Due to vast timeline (and technology) differences between the series, every faction is (or at least might be) split into 3 sub-factions, representing distinct arbitrary "eras": early (eg. Enterprise series), TOS (eg. original series) and TNG (eg. The Next Generation series).
+Due to vast timeline (and technology) differences between the series, every faction is (or at least might be) split into 3 sub-factions, representing distinct arbitrary "eras": early (eg. Enterprise series), TOS (eg. original series) and TNG (eg. The Next Generation, Voyager, Deep Space Nine...).
 StarTrek units utilize a common set of concepts and technologies, which make them behave differently from their B5 universe counterparts. 
  - Impulse Drive: StarTrek units utilize distinct method of generating and using thrust for performing maneuvers. While they do possess an engine (which may get damaged or destroyed as usual, and which allows for overthrusting), its base output is very low (even 0 in some cases). However, each Warp Nacelle also generates thrust - with their output being summed up and displayed as Engine output for player. Application of said thrust is free (eg. no thrusters are required) - FV ships do posses thrusters (which have unlimited capacity and cannot be damaged in any way) for technical reasons only. Besides generating thrust, Warp Nacelles are also jump drive equivalents (so essentially every ST ship - and some small craft as well - can perform FTL travel on their own). Nacelle criticals cannot reduce their output below 0, but Engine criticals can - also, if Engine is destroyed, entire maneuvering system ceases to function (even if Nacelles are still operational).
  - Shields: StarTrek units utilize energy fields (represented by Shield Projection system) that absorb damage from incoming fire. These fields reduce incoming damage by a bit "for free" (call it armor), then some more at the cost of their own health. Absorption is applied to every impact separately (with every rake - and in general every non-overkill damage allocation - being treated as a separate impact). If shield projection is brought to 0 points of health, it stops functioning (does not weaken incoming shots any more, in any way). The system doesn't get destroyed however, and can start functioning again if replenished. ONLY destruction of associated structure block causes destruction of shield projection. 
@@ -596,7 +596,7 @@ Shield mechanics mean that (besides necessary adaptation of tactics) in very sma
  - Self-reliable LCVs: most StarTrek LCV-sized ships are fully capable of operating on their own, do not require hangars and have regular sensors (rather than restricted B5 "LCV Sensors").
  - Militarized shuttles: most StarTrek factions don't use dedicated fighters. However, their shuttles are usually armed and combat capable if necessary. Ships of these factions do have shuttle capacity listed (which is usually omitted in FV) and have combat shuttle designs available. Combat shuttles are not fighters, and as such are not necessary if player doesn't wish to deploy them.
 
-zSTARTREK FEDERATION
+zSTARTREK FEDERATION (custom, alternate universe faction)
 United Federation of Planets is a conglomerate of multiple separate species. They remain independent enough to operate their own warships, built to different specifications - which is marked in fleet list. This is NOT, however, intended as a fleet composition restriction - Federation fleet on a field of battle may use any mix of units desired (although small craft should be based on carrier of the same species). 
   
 
