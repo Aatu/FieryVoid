@@ -1,21 +1,14 @@
 <?php
 
-
  class CustomERLightPBeam extends Particle{
         public $name = "CustomERLightPBeam";
         public $displayName = "Extended Range Light Particle Beam";
 		public $iconPath = "lightParticleBeamShip.png";
-        public $animation = "beam";
+        public $animation = "bolt";
         public $animationColor = array(255, 250, 230);
-        public $animationExplosionScale = 0.15;
-        public $projectilespeed = 12;
-        public $animationWidth = 3;
-        public $trailLength = 10;
-        public $trailColor = array(30, 170, 255);
         
         public $intercept = 2;
-        public $loadingtime = 1;
-      
+        public $loadingtime = 1;      
         
         public $rangePenalty = 1;
         public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals 
@@ -39,13 +32,10 @@ class CustomLightMatterCannon extends Matter {
     /*Light Matter Cannon, as used on Ch'Lonas ships*/
         public $name = "customLightMatterCannon";
         public $displayName = "Light Matter Cannon";
-        public $animation = "trail";
-        public $animationColor = array(250, 250, 190);
-        public $projectilespeed = 25;
-        public $animationWidth = 3;
-        public $animationExplosionScale = 0.15;
-        public $priority = 6;
 	public $iconPath = "customLightMatterCannon.png";
+        public $animation = "bolt";
+        public $animationColor = array(250, 250, 190);
+        public $priority = 6;
 
         public $loadingtime = 2;
         
@@ -72,13 +62,10 @@ class CustomLightMatterCannonF extends Matter {
     /*limited ammo*/
         public $name = "customLightMatterCannonF";
         public $displayName = "Light Matter Cannon";
+	public $iconPath = "customLightMatterCannon.png";
         public $animation = "trail";
         public $animationColor = array(250, 250, 190);
-        public $projectilespeed = 18;
-        public $animationWidth = 2;
-        public $animationExplosionScale = 0.10;
         public $priority = 9; //Matter weapon
-		public $iconPath = "customLightMatterCannon.png";
         
         public $loadingtime = 3;
         public $ammunition = 6; //limited ammo!
@@ -91,13 +78,10 @@ class CustomLightMatterCannonF extends Matter {
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 	
-	
-	
 	public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Ammunition"] = $this->ammunition;
-        }
-	
+        }	
 	
         public function stripForJson() {
             $strippedSystem = parent::stripForJson();    
@@ -125,13 +109,10 @@ class CustomHeavyMatterCannon extends Matter{
     /*Heavy Matter Cannon, as used on Ch'Lonas ships*/
         public $name = "customHeavyMatterCannon";
         public $displayName = "Heavy Matter Cannon";
-        public $animation = "trail";
+		public $iconPath = "customHeavyMatterCannon.png";   
+        public $animation = "bolt";
         public $animationColor = array(250, 250, 190);
-        public $projectilespeed = 25;
-        public $animationWidth = 4;
-        public $animationExplosionScale = 0.25;
-        public $priority = 9;
-		public $iconPath = "customHeavyMatterCannon.png";      
+        public $priority = 9;   
 
         public $loadingtime = 3;
         
@@ -162,15 +143,12 @@ class CustomMatterStream extends Matter {
     /*Matter Stream, as used on Ch'Lonas ships*/
         public $name = "customMatterStream";
         public $displayName = "Matter Stream";
+	public $iconPath = "customMatterStream.png";
         public $animation = "laser";
         public $animationColor = array(60, 60, 45);
-        public $projectilespeed = 25;
-        public $animationWidth = 3;
-        public $animationWidth2 = 0.3;
-        public $animationExplosionScale = 0.15;
+        public $animationExplosionScale = 0.45; //deliberate, make it larger than automatically calculated
         public $priority = 7; //Matter Raking mode, but with low damage per rake so before other Matter weapons - together with heavy Raking weapons (I assume this weapon will be relatively lightly mitigated by multiple systems)
-	public $iconPath = "customMatterStream.png";
-
+	
         public $loadingtime = 3;
         
         public $rangePenalty = 0.66; //-2 per 3 hexes
@@ -220,12 +198,7 @@ class CustomGatlingMattergunLight extends Pulse{
         public $displayName = "Light Gatling Mattergun";
 		public $iconPath = "customGatlingMattergunLight.png";
         public $animation = "trail";
-        public $trailColor = array(225, 255, 150);
         public $animationColor = array(225, 225, 150);
-        public $projectilespeed = 16;
-        public $animationWidth = 2;
-        public $trailLength = 40;
-        public $animationExplosionScale = 0.15;
         public $priority = 3; //very light weapons; at this damage output there's no point worrying about overkill lost, and this weapon should be great system sweeper
 
         public $grouping = 25; //+1 per 5
@@ -247,7 +220,7 @@ class CustomGatlingMattergunLight extends Pulse{
    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
-			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ){
                 $maxhealth = 4;
             }
@@ -262,8 +235,7 @@ class CustomGatlingMattergunLight extends Pulse{
             parent::setSystemDataWindow($turn);
 			$this->data["Special"] .= "<br>Ignores armor, does not overkill.";
 			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
-        }
-        
+        }        
         
         public function getDamage($fireOrder){        return Dice::d(6, 1);   }
         public function setMinDamage(){     $this->minDamage = 1 ;      }
@@ -279,12 +251,7 @@ class CustomGatlingMattergunMedium extends Pulse{
         public $displayName = "Gatling Mattergun";
 		public $iconPath = "customGatlingMattergunMedium.png";
         public $animation = "trail";
-        public $trailColor = array(225, 255, 150);
         public $animationColor = array(225, 225, 150);
-        public $projectilespeed = 19;
-        public $animationWidth = 4;
-        public $trailLength = 50;
-        public $animationExplosionScale = 0.25;
         public $priority = 5; //medium STandard weapons; their low and random damage output per shot doesn't qualify them for Matter damage step
 
         public $grouping = 20; //+1 per 4
@@ -338,12 +305,7 @@ class CustomGatlingMattergunHeavy extends Pulse{
         public $displayName = "Heavy Gatling Mattergun";
 		public $iconPath = "customGatlingMattergunHeavy.png";
         public $animation = "trail";
-        public $trailColor = array(225, 255, 150);
         public $animationColor = array(225, 225, 150);
-        public $projectilespeed = 25;
-        public $animationWidth = 5;
-        public $trailLength = 60;
-        public $animationExplosionScale = 0.5;
         public $priority = 9; //Matter weapons
 
         public $grouping = 20; //+1 per 4
@@ -394,19 +356,8 @@ class CustomPulsarLaser extends Pulse{
     /*Pulsar Laser, as used on Ch'Lonas ships*/
         public $name = "customPulsarLaser";
         public $displayName = "Pulsar Laser";
-	/* maybe it'll be better as bolt animation!
-        public $animation = "laser";
-        public $animationColor = array(255, 58, 31);
-        public $animationWidth = 3;
-        public $animationWidth2 = 0.5;
-	*/
 	public $animationColor = array(255, 58, 31);
-        public $animation = "beam"; //a bolt, not beam
-        public $animationExplosionScale = 0.3;
-        public $projectilespeed = 17;
-        public $animationWidth = 25;
-        public $trailLength = 25;
-	
+        public $animation = "bolt"; 	
 	
         public $uninterceptable = true;
         public $priority = 5;
@@ -438,34 +389,36 @@ class CustomPulsarLaser extends Pulse{
 } //customPulsarLaser
 
 
-
+/* moved to official Lasers!
 class CustomStrikeLaser extends Weapon{
-    /*Srike Laser, as used on Ch'Lonas ships*/
+    //Strike Laser, as used on Ch'Lonas ships
         public $name = "customStrikeLaser";
         public $displayName = "Strike Laser";
-        public $animation = "laser";
+		
+        //public $animation = "laser";
+		public $animation = "bolt";//a bolt, not a beam
         public $animationColor = array(255, 30, 30);
-        public $animationWidth = 4;
-        public $animationWidth2 = 0.5;
-        public $uninterceptable = true;
-        public $loadingtime = 3;
-        public $rangePenalty = 0.5;
+        public $animationExplosionScale = 0.45;
+		
         public $fireControl = array(0, 2, 2); // fighters, <mediums, <capitals
-        public $priority = 6;
-    
+        public $priority = 6; //heavy Standard weapon    
+        public $loadingtime = 3;
+        public $rangePenalty = 0.5; //-1/2 hexes
+		
+        public $uninterceptable = true;
 	    public $damageType = 'Standard'; 
     	public $weaponClass = "Laser"; 
 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
-		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-		if ( $maxhealth == 0 ){
-		    $maxhealth = 5;
-		}
-		if ( $powerReq == 0 ){
-		    $powerReq = 4;
-		}
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ){
+				$maxhealth = 5;
+			}
+			if ( $powerReq == 0 ){
+				$powerReq = 4;
+			}
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
@@ -473,6 +426,7 @@ class CustomStrikeLaser extends Weapon{
         public function setMinDamage(){ $this->minDamage = 10 ; }
         public function setMaxDamage(){ $this->maxDamage = 28 ; }
 }//CustomStrikeLaser
+*/
 
 
 class HLPA extends Weapon{ 
@@ -482,14 +436,9 @@ class HLPA extends Weapon{
 	    public $iconPath = "hlpa.png";
 	
 	//visual display - will it be enough to ensure correct animations?...
-	public $animationArray = array(1=>'laser', 2=>'trail');
+	public $animationArray = array(1=>'laser', 2=>'bolt');
         public $animationColorArray = array(1=>array(255, 11, 11), 2=>array(190, 75, 20));
-        public $animationWidthArray = array(1=>4, 2=>5);
-        public $animationWidth2 = 0.2; //not used for Trail animation?...
-	public $trailColor = array(190, 75, 20); //not used for Laser animation?...
-        public $trailLength = 20;//not used for Laser animation?...
-        public $projectilespeed = 12;//not used for Laser animation?...
-        public $animationExplosionScale = 0.20;//not used for Laser animation?...
+        //public $animationExplosionScale = 0.20;//not used for Laser animation?...
 	
 	
 	//actual weapons data
@@ -592,15 +541,8 @@ class MLPA extends Weapon{
 	    public $iconPath = "mlpa.png";
 	
 	//visual display - will it be enough to ensure correct animations?...
-	public $animationArray = array(1=>'laser', 2=>'trail');
-        public $animationColorArray = array(1=>array(255, 11, 11), 2=>array(190, 75, 20));
-        public $animationWidthArray = array(1=>4, 2=>5);
-        public $animationWidth2 = 0.2; //not used for Trail animation?...
-	public $trailColor = array(190, 75, 20); //not used for Laser animation?...
-        public $trailLength = 20;//not used for Laser animation?...
-        public $projectilespeed = 10;//not used for Laser animation?...
-        public $animationExplosionScale = 0.20;//not used for Laser animation?...
-	
+	public $animationArray = array(1=>'laser', 2=>'bolt');
+        public $animationColorArray = array(1=>array(255, 11, 11), 2=>array(190, 75, 20));	
 	
 	//actual weapons data
         public $groupingArray = array(1=>0, 2=>20);
@@ -784,8 +726,6 @@ class customPhaseDisruptor extends Raking{
 	 public $iconPath = "PhaseDisruptor.png";
         public $animation = "laser";
         public $animationColor = array(50, 125, 210);
-        public $animationWidth = 4;
-        public $animationWidth2 = 0.7;
         public $uninterceptable = false;
         public $loadingtime = 2;
         public $rangePenalty = 0.5;
@@ -885,8 +825,6 @@ class customLtPhaseDisruptorShip extends Raking{
 	 public $iconPath = "LtPhaseDisruptor.png";
         public $animation = "laser";
         public $animationColor = array(50, 125, 210);
-        public $animationWidth = 4;
-        public $animationWidth2 = 0.5;
         public $uninterceptable = false;
         public $loadingtime = 1;
         public $rangePenalty = 1;
@@ -980,20 +918,16 @@ class customLtPhaseDisruptorShip extends Raking{
 class customLtPolarityPulsar extends Pulse{
         public $name = "customLtPolarityPulsar";
         public $displayName = "Light Polarity Pulsar";
-	public $weaponClass = "Molecular"; 
-        public $animation = "trail";
-        public $animationWidth = 3;
-        public $projectilespeed = 10;
-        public $animationExplosionScale = 0.15;
-        public $rof = 2;
-        public $trailLength = 10;
-        
 	public $iconPath = "LightPolarityPulsar.png";
-        public $trailColor = array(255,140,0); //let's make Polarity Pulsars orange...
+        
         public $animationColor = array(255,140,0);
+        public $animation = "trail";
 		
+	public $weaponClass = "Molecular"; 
+	
         public $loadingtime = 1;
         public $priority = 4;
+        public $rof = 2;
 	        
         public $rangePenalty = 2;
         public $fireControl = array(4, 3, 3); // fighters, <mediums, <capitals 
@@ -1026,21 +960,16 @@ class customLtPolarityPulsar extends Pulse{
 class customMedPolarityPulsar extends Pulse{
         public $name = "customMedPolarityPulsar";
         public $displayName = "Medium Polarity Pulsar";
-	public $weaponClass = "Molecular"; 
-        public $animation = "trail";
-        public $rof = 2;
-        public $trailLength = 15;
-        public $animationWidth = 4;
-        public $projectilespeed = 15;
-        public $animationExplosionScale = 0.17;
-        
 	public $iconPath = "MediumPolarityPulsar.png";
-        public $trailColor = array(255,140,0); //let's make Polarity Pulsars orange...
+        
         public $animationColor = array(255,140,0);
+        public $animation = "trail";
 
 		
         public $loadingtime = 2;
         public $priority = 5;
+	public $weaponClass = "Molecular"; 
+        public $rof = 2;
 	        
         public $rangePenalty = 1; // -1 hex
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals 
@@ -1073,21 +1002,15 @@ class customMedPolarityPulsar extends Pulse{
 class customHeavyPolarityPulsar extends Pulse{
         public $name = "customHeavyPolarityPulsar";
         public $displayName = "Heavy Polarity Pulsar";
-	public $weaponClass = "Molecular"; 
-        public $animation = "trail";
-        public $rof = 2;
-        public $trailLength = 17;
-        public $animationWidth = 5;
-        public $projectilespeed = 15;
-        public $animationExplosionScale = 0.2;
-        
 	public $iconPath = "HeavyPolarityPulsar.png";
-        public $trailColor = array(255,140,0); //let's make Polarity Pulsars orange...
+        
         public $animationColor = array(255,140,0);
-
+        public $animation = "trail";
 		
         public $loadingtime = 3;
         public $priority = 6;
+	public $weaponClass = "Molecular"; 
+        public $rof = 2;
 	        
         public $rangePenalty = 0.5; //-1/2 hexes
         public $fireControl = array(0, 3, 5); // fighters, <mediums, <capitals 
@@ -1098,8 +1021,7 @@ class customHeavyPolarityPulsar extends Pulse{
         public $intercept = 1;
 	
 		public $factionAge = 2; //Middle-born
-		
-	
+			
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -1122,16 +1044,16 @@ class customHeavyPolarityPulsar extends Pulse{
 class customMphasedBeamAcc extends Weapon{
 	public $name = "customMphasedBeamAcc";
         public $displayName = "Multiphased Beam Accelerator";
-	public $animation = "laser";
-        public $animationColor = array(225,130,0);
-        public $animationWidth = 6;
-        public $animationWidth2 = 1.2;
 	    public $iconPath = "MultiphasedBeamAccelerator.png";
 	    
+	public $animation = "laser";
+        public $animationColor = array(225,130,0);
+	
         public $raking = 10;
 	    
 	    public $damageType = 'Raking'; 
 	public $weaponClass = "Molecular"; 
+	
         public $priority = 7;
         public $priorityArray = array(1=>7, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
         public $firingModes = array(
@@ -1261,10 +1183,7 @@ class customMphasedBeamAcc extends Weapon{
 	   public  $iconPath = "LtPhaseDisruptor.png";
         public $animation = "trail";
         public $animationColor = array(255, 170, 10);
-        public $animationExplosionScale = 0.10;
-        public $projectilespeed = 10;
-        public $animationWidth = 2;
-        public $trailLength = 10;
+	    
         public $intercept = 1;
         public $loadingtime = 1;
         public $shots = 1;
@@ -1285,8 +1204,7 @@ class customMphasedBeamAcc extends Weapon{
         public $rangePenaltyArray = array(1=>2, 2=>1.5); //-2/hex and -3/2 hexes
 		
 		public $factionAge = 2; //Middle-born
-	    
-        
+	            
         function __construct($startArc, $endArc){
 			$this->isLinked = false; //shots are separate, not linked! 
             parent::__construct(0, 1, 0, $startArc, $endArc);
@@ -1298,7 +1216,6 @@ class customMphasedBeamAcc extends Weapon{
             $this->data["Special"] = "Primary mode of fire: 3 shots, 2d6 damage, -10/hex (antifighter)";
             $this->data["Special"] .= "<br> alternate: 1 shot, 3d6+2 damage, -7.5/hex (antiship)";
         }
-	
 	    
         public function getDamage($fireOrder){
 			switch($this->firingMode){
@@ -1336,20 +1253,13 @@ class customMphasedBeamAcc extends Weapon{
     } //endof class customLtPhaseDisruptor
 
 
-
-
 /*Drakh fighter weapon - interception and dogfight oriented*/
     class customPhaseSweeper extends Weapon{
         public $trailColor = array(255, 170, 10);
         public $name = "customPhaseSweeper";
         public $displayName = "Phase Sweeper";
 	   public  $iconPath = "LtPhaseDisruptor.png";
-        public $animation = "trail";
-        public $animationColor = array(255, 170, 10);
-        public $animationExplosionScale = 0.10;
-        public $projectilespeed = 10;
-        public $animationWidth = 2;
-        public $trailLength = 10;
+	    
         public $intercept = 2;
         public $loadingtime = 1;
         public $shots = 1;
@@ -1358,6 +1268,10 @@ class customMphasedBeamAcc extends Weapon{
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
 	    public $priority = 4;
+	    
+	    
+        public $animation = "trail";
+        public $animationColor = array(255, 170, 10);
         
         public $damageType = "Standard"; 
         public $weaponClass = "Molecular"; 
@@ -1386,43 +1300,34 @@ class customMphasedBeamAcc extends Weapon{
 
 class LightScattergun extends Pulse{
     /*Markab fighter weapon - d3 shots (here treated as a single Pulse shot, no grouping bonus)*/
-       public $shots = 2;
+       public $shots = 2; //overridden by Pulse, but still used for estimation of threat for interception
 	public  $iconPath = "scatterGun.png";
 	
 	//for Pulse mode
 	public $grouping = 2500; //NO GROUPING BONUS
-	public $maxpulses = 2;	
+	public $maxpulses = 3;	
 	protected $useDie = 3; //die used for base number of hits
  
+	public $name = "LightScattergun";
+	public $displayName = "Light Scattergun";
+	
     public $damageType = "Pulse"; 
     public $weaponClass = "Particle";
    
-	//animation for fighter laser - bigger guns need to change size and speed attributes :)
-	public $name = "LightScattergun";
-	public $displayName = "Light Scattergun";
-	public $animation = "trail";
-	public $animationColor = array(30, 170, 255);
-	public $animationExplosionScale = 0.10;
-	public $projectilespeed = 12;
-	public $animationWidth = 2;
-	public $trailLength = 10;
+	public $animation = "bolt";
+	public $animationColor = array(190, 75, 20);
 	
-	public $intercept = 2;
-	
-	public $rangePenalty = 2;
-	
+	public $intercept = 2;	
+	public $rangePenalty = 2; //-2/hex	
 	public $priority = 4;
-
 	
-    
 	function __construct($startArc, $endArc){//more than a single emplacement not supported!
 		$this->maxpulses = 3;
 		$this->defaultShots = 2;	
 						
 		parent::__construct(0, 1, 0, $startArc, $endArc);
 	}    
-	
-	
+		
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 		$this->data["Special"] = 'does always d3 pulses, no grouping bonus';
@@ -1450,12 +1355,6 @@ class CustomBPALight extends Weapon{
 	//visual display
 	public $animationArray = array(1=>'trail', 2=>'trail');
         public $animationColorArray = array(1=>array(255, 11, 11), 2=>array(255, 250, 230));
-        public $animationWidthArray = array(1=>3, 2=>3);
-        public $animationWidth2 = 0.2; //not used for Trail animation?...
-	public $trailColor = array(190, 75, 20); //not used for Laser animation?...
-        public $trailLength = 5;//not used for Laser animation?...
-        public $projectilespeed = 15;//not used for Laser animation?...
-        public $animationExplosionScale = 0.30;//not used for Laser animation?...
 		
 	//actual weapons data
         public $groupingArray = array(1=>0, 2=>20);
@@ -1527,8 +1426,6 @@ class CustomBPALight extends Weapon{
 		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 	}
 	
-	
-	
 	//necessary for Pulse mode
         protected function getPulses($turn)
         {
@@ -1556,14 +1453,7 @@ class CustomBPAMedium extends Weapon{
 	
 	//visual display
 	public $animationArray = array(1=>'trail', 2=>'trail');
-        public $animationColorArray = array(1=>array(255, 11, 11), 2=>array(255, 250, 230));
-        public $animationWidthArray = array(1=>4, 2=>4);
-        public $animationWidth2 = 0.2; //not used for Trail animation?...
-	public $trailColor = array(190, 75, 20); //not used for Laser animation?...
-        public $trailLength = 10;//not used for Laser animation?...
-        public $projectilespeed = 20;//not used for Laser animation?...
-        public $animationExplosionScale = 0.20;//not used for Laser animation?...
-	
+        public $animationColorArray = array(1=>array(255, 11, 11), 2=>array(255, 250, 230));	
 	
 	//actual weapons data
         public $groupingArray = array(1=>0, 2=>20);
@@ -1664,14 +1554,7 @@ class CustomBPAHeavy extends Weapon{
 	
 	//visual display
 	public $animationArray = array(1=>'trail', 2=>'trail');
-        public $animationColorArray = array(1=>array(255, 11, 11), 2=>array(255, 250, 230));
-        public $animationWidthArray = array(1=>6, 2=>5);
-        public $animationWidth2 = 0.2; //not used for Trail animation?...
-	public $trailColor = array(190, 75, 20); //not used for Laser animation?...
-        public $trailLength = 20;//not used for Laser animation?...
-        public $projectilespeed = 20;//not used for Laser animation?...
-        public $animationExplosionScale = 0.50;//not used for Laser animation?...
-	
+        public $animationColorArray = array(1=>array(255, 11, 11), 2=>array(255, 250, 230));	
 	
 	//actual weapons data
         public $groupingArray = array(1=>0, 2=>20);
@@ -1799,12 +1682,9 @@ class CustomIndustrialGrappler extends Weapon {
     class CustomMiningCutter extends Laser{
         public $name = "customMiningCutter";
         public $displayName = "Mining Cutter";
+	public $iconPath = "miningCutter.png";
         public $animation = "laser";
         public $animationColor = array(255, 250, 230);
-        public $animationExplosionScale = 0.15;
-        public $animationWidth = 2;
-        public $animationWidth2 = 0.2;
-	public $iconPath = "miningCutter.png";
 	    
         public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClass = "Particle"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
@@ -1837,10 +1717,6 @@ class CustomLightSoMissileRack extends MissileLauncher{
         public $animation = "trail";
         public $trailColor = array(141, 240, 255);
         public $animationColor = array(50, 50, 50);
-        public $animationExplosionScale = 0.2;
-        public $projectilespeed = 10;
-        public $animationWidth = 4;
-        public $trailLength = 100;    
 
         public $useOEW = false; //missile
         public $ballistic = true; //missile
@@ -1903,17 +1779,12 @@ class CustomLightSMissileRack extends Weapon{
         public $animation = "trail";
         public $trailColor = array(141, 240, 255);
         public $animationColor = array(50, 50, 50);
-        public $animationExplosionScale = 0.2;
-        public $projectilespeed = 10;
-        public $animationWidth = 4;
-        public $trailLength = 100;    
 
         public $useOEW = false; //missile
         public $ballistic = true; //missile
         public $range = 15;
         public $distanceRange = 45;
-        public $ammunition = 20; //limited number of shots
-	    
+        public $ammunition = 20; //limited number of shots	    
         
         public $loadingtime = 2; // 1/2 turns
         public $rangePenalty = 0;
@@ -1979,13 +1850,17 @@ class GromeLgtRailgun extends Weapon{
         public $displayName = "Light Railgun";
 	    public $iconPath = "LightRailgun.png";
 	
-		public $animationArray = array(1=>'trail', 2=>'trail', 3=>'trail', 4=>'trail');
-        public $animationColorArray = array(1=>array(250, 250, 190), 2=>array(250, 250, 190), 3=>array(250, 250, 190), 4=>array(250, 250, 190));
+	public $animation = "bolt";
+	public $animationColor = array(250, 250, 190);
+		//public $animationArray = array(1=>'trail', 2=>'trail', 3=>'trail', 4=>'trail');	
+        //public $animationColorArray = array(1=>array(250, 250, 190), 2=>array(250, 250, 190), 3=>array(250, 250, 190), 4=>array(250, 250, 190));
+	/*
         public $animationWidthArray = array(1=>4, 2=>4, 3=>4, 4=>4);
 		public $trailColor = array(190, 75, 20); 
         public $trailLength = 3;//not used for Laser animation?...
         public $projectilespeed = 30;//not used for Laser animation?...
         public $animationExplosionScaleArray = array(1=>0.2, 2=>0.4, 3=>0.3, 4=>0.3);
+	*/
 	
 		//actual weapons data
 		public $groupingArray = array(1=>0, 2=>0, 3=>0, 4=>25);
@@ -2104,13 +1979,17 @@ class GromeMedRailgun extends Weapon{
         public $displayName = "Medium Railgun";
 	    public $iconPath = "Railgun.png";
 	
-		public $animationArray = array(1=>'trail', 2=>'trail', 3=>'trail', 4=>'trail', 5=>'trail');
-        public $animationColorArray = array(1=>array(250, 250, 190), 2=>array(250, 250, 190), 3=>array(250, 250, 190), 4=>array(250, 250, 190), 5=>array(250, 250, 190));
-        public $animationWidthArray = array(1=>5, 2=>5, 3=>5, 4=>5, 5=>5);
+	public $animation = "bolt";
+	public $animationColor = array(250, 250, 190);
+		//public $animationArray = array(1=>'trail', 2=>'trail', 3=>'trail', 4=>'trail', 5=>'trail');
+        //public $animationColorArray = array(1=>array(250, 250, 190), 2=>array(250, 250, 190), 3=>array(250, 250, 190), 4=>array(250, 250, 190), 5=>array(250, 250, 190));
+        /*
+	public $animationWidthArray = array(1=>5, 2=>5, 3=>5, 4=>5, 5=>5);
 		public $trailColor = array(190, 75, 20); 
         public $trailLength = 3;//not used for Laser animation?...
         public $projectilespeed = 25;//not used for Laser animation?...
         public $animationExplosionScaleArray = array(1=>0.25, 2=>0.45, 3=>0.35, 4=>0.35, 5=>0.2);
+	*/
 	
 		//actual weapons data
 		public $groupingArray = array(1=>0, 2=>0, 3=>0, 4=>25, 5=>0);
@@ -2242,13 +2121,18 @@ class GromeHvyRailgun extends Weapon{
         public $displayName = "Heavy Railgun";
 	    public $iconPath = "HeavyRailgun.png";
 	
+	public $animation = "bolt";
+	public $animationColor = array(250, 250, 190);
+	/*
 		public $animationArray = array(1=>'trail', 2=>'trail', 3=>'trail', 4=>'trail', 5=>'trail', 6=>'trail');
         public $animationColorArray = array(1=>array(250, 250, 190), 2=>array(250, 250, 190), 3=>array(250, 250, 190), 4=>array(250, 250, 190), 5=>array(250, 250, 190), 6=>array(250, 250, 190));
+	
         public $animationWidthArray = array(1=>6, 2=>6, 3=>6, 4=>6, 5=>6, 6=>6);
 		public $trailColor = array(190, 75, 20); 
         public $trailLength = 3;//not used for Laser animation?...
         public $projectilespeed = 25;//not used for Laser animation?...
         public $animationExplosionScaleArray = array(1=>0.3, 2=>0.5, 3=>0.4, 4=>0.4, 5=>0.25, 6=>0.2);
+	*/
 	
 		//actual weapons data
 		public $groupingArray = array(1=>0, 2=>0, 3=>0, 4=>25, 5=>0, 6=>0);
@@ -2387,9 +2271,6 @@ class GromeHvyRailgun extends Weapon{
 	    public $iconPath = "customLtParticleCutter.png";
 		public $animation = "laser";
         public $animationColor = array(255, 153, 102);
-        public $animationExplosionScale = 0.35;
-        public $animationWidth = 3;
-        public $animationWidth2 = 0.3;
 	    
         public $firingModes = array( 1 => "Sustained");
         

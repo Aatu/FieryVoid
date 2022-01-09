@@ -45,12 +45,13 @@ var CustomGatlingMattergunHeavy = function CustomGatlingMattergunHeavy(json, shi
 CustomGatlingMattergunHeavy.prototype = Object.create(Weapon.prototype);
 CustomGatlingMattergunHeavy.prototype.constructor = CustomGatlingMattergunHeavy;
 
-
+/*moved to official lasers
 var CustomStrikeLaser = function CustomStrikeLaser(json, ship) {
     Weapon.call(this, json, ship);
 };
 CustomStrikeLaser.prototype = Object.create(Weapon.prototype);
 CustomStrikeLaser.prototype.constructor = CustomStrikeLaser;
+*/
 
 var CustomPulsarLaser = function CustomPulsarLaser(json, ship) {
     Weapon.call(this, json, ship);
