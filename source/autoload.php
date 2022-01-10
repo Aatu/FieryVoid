@@ -1609,7 +1609,7 @@ spl_autoload_register(
 //                'craytancorvette2089' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2089.php',					
 //                'craytancorvette2126' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2126.php',					
                 'craytanepiron' => '/server/model/ships/ZNexusCraytan/CraytanEpiron.php',					
-//                'craytanepiron2101' => '/server/model/ships/ZNexusCraytan/CraytanEpiron2101.php',					
+                'craytanepironrefit' => '/server/model/ships/ZNexusCraytan/CraytanEpironRefit.php',					
                 'craytanhelis' => '/server/model/ships/ZNexusCraytan/CraytanHelis.php',					
                 'craytanhepron' => '/server/model/ships/ZNexusCraytan/CraytanHepron.php',					
  //               'craytanhepron2085' => '/server/model/ships/ZNexusCraytan/CraytanHepron2085.php',					
