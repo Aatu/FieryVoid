@@ -56,22 +56,25 @@ if (isset($_SESSION["user"])) {
     <!-- <div id="newsHeader">Latest News - September 2020</div> -->
     <div id="newsEntry">
         
-	    
+	    <!--
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
         <h4>may our games be fiery and our lives peaceful</h4>
         <br>
+-->
        
 		
-		---------- <b>LATEST NEWS - December 2021</b> ----------	
-	    <br><b>Sustaining even without Power available</b> - just like boosting
-	    <br><b>Containment Breach</b> - Reactor won't temporatily shut down due to critical roll now. It will become unstable and might explode though!
-	    <br><b>All ahead full</b> - r-click on "move forward" arrow will cause unit to use all remaining movement on moving straight ahead
-	    <br><b>Side-by-side layout update</b> - weapons moved forward, thrusters aft (to reduce visual clutter) - for Drazi and Ch'Lonas
-	    
-	    <br><br>---------- <b>update 16th of December</b> ---------- 
-	    <br><b>proper Unreliable traits</b> - complete with Gaim Skassa, courtesy of Geoffrey
-	    <br><b>Engine criticals remade</b> - more chance of shutdown, less of permanent thrust reduction
-	    <br><b>Belt Alliance LCV Carrier</b> - completely unofficial, but allows fielding proper Belters in pickup battles without additional allowances	    
+		---------- <b>LATEST NEWS - January 2022</b> ----------	
+	    <br><b>Ship layouts modified</b> - primarily for designers, but some changes will be visible for players too
+	    <br><b>Bulkhead behavior modified</b> - will protect important systems even if they're not threatened with destruction (important for PRIMARY bulkheads)
+	    <br><b>Only weapons are offensive</b> - non-weapons on fighters no longer display OB value
+	    <br><b>Wide Lasers</b> - beam weapon animations are now scaled with weapon size, like other firing visuals - for (I hope) better visual appeal :) 
+	    <br><b>Leaving game blocked</b> - cannot change slot when fleet is already confirmed (this led to games being broken at creation stage)
+	    <br><b>Surplus Power warning</b> - ships with unassigned Power reserves will get a warning at Initial orders confirmation 
+	    <br><b>Initiative tiebreaking</b> - in case of simmultaneous movement onto the same hex, units should be considered to move in order displayed in OoB window
+	    <br><b>Alternate mode readiness</b> - charging weapon will change background shade if alternate mode can already be used
+	    <br><b>Power on/off</b> - mass change (r-click) now works for non-weapons too
+	    <br><b>Coming of the Federation</b> - first Star Trek faction has passed tests and is now released as Tier 2
+	    <br><b>Dalithorn rehearsed</b> - issues detected during tournament round 1 now stand (hopefully) corrected
 	    
 		<!-- <br><br>---------- <b>update 8th of November</b> ---------- 
 		-->

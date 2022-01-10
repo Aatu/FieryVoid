@@ -31,14 +31,14 @@ class Torotha extends MediumShip{
         $this->addPrimarySystem(new Jammer(4, 8, 5));
 
         $this->addFrontSystem(new GraviticThruster(4, 12, 0, 5, 1));
-        $this->addFrontSystem(new FusionCannon(3, 8, 1, 240, 360));
         $this->addFrontSystem(new MolecularDisruptor(3, 8, 6, 240, 360));
-        $this->addFrontSystem(new ElectroPulseGun(2, 6, 3, 300, 60));
         $this->addFrontSystem(new MolecularDisruptor(3, 8, 6, 0, 120));
+        $this->addFrontSystem(new FusionCannon(3, 8, 1, 240, 360));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 0, 120));
+        $this->addFrontSystem(new ElectroPulseGun(2, 6, 3, 300, 60));
 
-        $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
         $this->addAftSystem(new GraviticThruster(4, 21, 0, 8, 2));
+        $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
 
         $this->addPrimarySystem(new Structure( 6, 60));

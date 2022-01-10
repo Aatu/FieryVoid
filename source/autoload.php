@@ -198,7 +198,7 @@ spl_autoload_register(
                 'custommphasedbeamacc' => '/server/model/weapons/customs.php',
                 'customphasedisruptor' => '/server/model/weapons/customs.php',
                 'custompulsarlaser' => '/server/model/weapons/customs.php',
-                'customstrikelaser' => '/server/model/weapons/customs.php',
+                'customstrikelaser' => '/server/model/weapons/lasers.php',
                 'daggaden' => '/server/model/ships/llort/daggaden.php',
                 'daggadenpod' => '/server/model/ships/llort/daggadenPod.php',
                 'dagkar' => '/server/model/ships/narn/dagkar.php',
@@ -933,7 +933,6 @@ spl_autoload_register(
                 'strikebird' => '/server/model/ships/drazi/strikebird.php',
                 'strikecarrier' => '/server/model/ships/raiders/strikeCarrier.php',
                 'strikehawk' => '/server/model/ships/drazi/strikehawk.php',
-                'strikelaser' => '/server/model/weapons/lasers.php',
                 'structure' => '/server/model/systems/baseSystems.php',
                 'stunbeam' => '/server/model/weapons/specialWeapons.php',
                 //'subreactor' => '/server/model/systems/baseSystems.php', //obsoleted!
@@ -2401,6 +2400,7 @@ spl_autoload_register(
 
 				//Star Trek conversions
 				//weapons
+				'trekphaserbase' => '/server/model/weapons/customTrek.php',
 				'trekftrphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekltphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekphasecannon' => '/server/model/weapons/customTrek.php',
@@ -2424,36 +2424,50 @@ spl_autoload_register(
                 'trekshieldftr' => '/server/model/weapons/customTrek.php',
 				
 				//ships
-				'trekfederationnxcruiserv2' => '/server/model/ships/ZTrekFederation/TrekFederationNXCruiserV2.php',
-				'trekfederationconstitutioncl' => '/server/model/ships/ZTrekFederation/TrekFederationConstitutionCL.php',
-				'trekfederationconstitutioncmdcl' => '/server/model/ships/ZTrekFederation/TrekFederationConstitutionCmdCL.php',
-				'trekfederationnxwarcruiser' => '/server/model/ships/ZTrekFederation/TrekFederationNXWarCruiser.php',
-				'trekfederationnxwarcruiserupg' => '/server/model/ships/ZTrekFederation/TrekFederationNXWarCruiserUpg.php',
-				'trekfederationintrepid' => '/server/model/ships/ZTrekFederation/TrekFederationIntrepid.php',
-				'trekfederationdeltaffalpha' => '/server/model/ships/ZTrekFederation/TrekFederationDeltaFFAlpha.php',
-				'trekfederationdeltaffbeta' => '/server/model/ships/ZTrekFederation/TrekFederationDeltaFFBeta.php',
-				'nxshuttlepod' => '/server/model/ships/ZTrekFederation/NXShuttlepod.php',		    
+				
+				//United Federation of Planets
+				//Early - Enterprise series
+				'trekfederationnxcruiserv2' => '/server/model/ships/ZTrekFederationEarly/TrekFederationNXCruiserV2.php',
+				'trekfederationnxwarcruiser' => '/server/model/ships/ZTrekFederationEarly/TrekFederationNXWarCruiser.php',
+				'trekfederationnxwarcruiserupg' => '/server/model/ships/ZTrekFederationEarly/TrekFederationNXWarCruiserUpg.php',
+				'trekfederationintrepid' => '/server/model/ships/ZTrekFederationEarly/TrekFederationIntrepid.php',
+				'trekfederationdeltaffalpha' => '/server/model/ships/ZTrekFederationEarly/TrekFederationDeltaFFAlpha.php',
+				'trekfederationdeltaffbeta' => '/server/model/ships/ZTrekFederationEarly/TrekFederationDeltaFFBeta.php',
+				'nxshuttlepod' => '/server/model/ships/ZTrekFederationEarly/NXShuttlepod.php',		    
 		    
-				'vulcandkyr' => '/server/model/ships/ZTrekFederation/VulcanDKyr.php',
-				'vulcandvahl' => '/server/model/ships/ZTrekFederation/VulcanDVahl.php',
-				'vulcanshran' => '/server/model/ships/ZTrekFederation/VulcanShran.php',
-				'vulcanshuttle' => '/server/model/ships/ZTrekFederation/VulcanShuttle.php',
-				'vulcansurak' => '/server/model/ships/ZTrekFederation/VulcanSurak.php',
-				'vulcantimur' => '/server/model/ships/ZTrekFederation/VulcanTimur.php',
-				'vulcanvahklas' => '/server/model/ships/ZTrekFederation/VulcanVahklas.php',				
+				'vulcandkyr' => '/server/model/ships/ZTrekFederationEarly/VulcanDKyr.php',
+				'vulcandvahl' => '/server/model/ships/ZTrekFederationEarly/VulcanDVahl.php',
+				'vulcanshran' => '/server/model/ships/ZTrekFederationEarly/VulcanShran.php',
+				'vulcansurak' => '/server/model/ships/ZTrekFederationEarly/VulcanSurak.php',
+				'vulcantimur' => '/server/model/ships/ZTrekFederationEarly/VulcanTimur.php',
+				'vulcanvahklas' => '/server/model/ships/ZTrekFederationEarly/VulcanVahklas.php',	
+				'vulcanlander' => '/server/model/ships/ZTrekFederationEarly/VulcanLander.php',	
+				'vulcanshuttle' => '/server/model/ships/ZTrekFederationEarly/VulcanShuttle.php',
+				'vulcantribuneflt' => '/server/model/ships/ZTrekFederationEarly/VulcanTribuneFlt.php',			
 				
-				'andorianthyzon' => '/server/model/ships/ZTrekFederation/AndorianThyzon.php',
-				'andorianthymasescort' => '/server/model/ships/ZTrekFederation/AndorianThymasEscort.php',
-				'andoriankumari' => '/server/model/ships/ZTrekFederation/AndorianKumari.php',
-				'andorianfighter' => '/server/model/ships/ZTrekFederation/AndorianFighter.php',
-				'andorianchimesh' => '/server/model/ships/ZTrekFederation/AndorianChimesh.php',
+				'andorianthyzon' => '/server/model/ships/ZTrekFederationEarly/AndorianThyzon.php',
+				'andorianthymasescort' => '/server/model/ships/ZTrekFederationEarly/AndorianThymasEscort.php',
+				'andoriankumari' => '/server/model/ships/ZTrekFederationEarly/AndorianKumari.php',
+				'andorianfighter' => '/server/model/ships/ZTrekFederationEarly/AndorianFighter.php',
+				'andorianchimesh' => '/server/model/ships/ZTrekFederationEarly/AndorianChimesh.php',
 				
-				'tellariteattackvessel' => '/server/model/ships/ZTrekFederation/TellariteAttackVessel.php',
-				'tellaritecruiser' => '/server/model/ships/ZTrekFederation/TellariteCruiser.php',
+				'tellariteattackvessel' => '/server/model/ships/ZTrekFederationEarly/TellariteAttackVessel.php',
+				'tellaritecruiser' => '/server/model/ships/ZTrekFederationEarly/TellariteCruiser.php',
 				    		
-				'trekfederationsarajevo' => '/server/model/ships/ZTrekFederation/TrekFederationSarajevo.php',
-				'trekfederationjclass' => '/server/model/ships/ZTrekFederation/TrekFederationJClass.php',
-				'trekfederationyclass' => '/server/model/ships/ZTrekFederation/TrekFederationYClass.php',
+				'trekfederationsarajevo' => '/server/model/ships/ZTrekFederationEarly/TrekFederationSarajevo.php',
+				'trekfederationjclass' => '/server/model/ships/ZTrekFederationEarly/TrekFederationJClass.php',
+				'trekfederationyclass' => '/server/model/ships/ZTrekFederationEarly/TrekFederationYClass.php',
+								
+				//TOS (Original Series)
+				'trekfederationconstitutioncl' => '/server/model/ships/ZTrekFederationTOS/TrekFederationConstitutionCL.php',
+				'trekfederationconstitutioncmdcl' => '/server/model/ships/ZTrekFederationTOS/TrekFederationConstitutionCmdCL.php',
+				
+				//TNG (Next Generation, Deep Space Nine, Voyager)
+				
+				
+				//other factions
+				'nausicaanvandal' => '/server/model/ships/ZTrekOther/NausicaanVandal.php',
+				
 				
 
 				//Hyach conversions
@@ -2475,6 +2489,12 @@ spl_autoload_register(
 				'variablehangarsize' => '/server/model/ships/customs/VariableHangarSize.php',
 				'ltviper' => '/server/model/ships/customs/LtViper.php',
 				'medviper' => '/server/model/ships/customs/medViper.php',
+				
+				//TEMPORARY layout changes and such - old versions	    
+                'halikold' => '/server/model/ships/brakiri/halikOld.php',
+                'shargotiold' => '/server/model/ships/minbari/shargotiOld.php',
+                'tradanaold' => '/server/model/ships/minbari/tradanaOld.php',
+				
 						
 				
 				//let's end this with unit enhancement class...		    

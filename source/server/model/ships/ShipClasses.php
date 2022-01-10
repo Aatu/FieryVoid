@@ -1661,6 +1661,19 @@ class BaseShip {
 		
         
         public static function hasBetterIniative($a, $b){
+			if ($a->iniative > $b->iniative) return true;
+			if ($a->iniative < $b->iniative) return false;
+
+				if ($a->iniativebonus > $b->iniativebonus) return true;
+				if ($b->iniativebonus > $a->iniativebonus) return false;
+
+			if ($a->id > $b->id) {
+				return true;
+			} else{
+				return false;    
+			}
+		
+			/* replaced by changed logic above, to unify among various places in game
             if ($a->iniative > $b->iniative)
                 return true;
             
@@ -1685,8 +1698,8 @@ class BaseShip {
                 if ($a->id > $b->id)
                     return true;
             }
-            
-            return false;
+            */
+            return true; //should never reach here
         }
         
         public function getAllFireOrders($turn = -1)

@@ -38,9 +38,9 @@ class gaimMoor extends HeavyCombatVessel{
         $this->addFrontSystem(new Bulkhead(0, 3));
         $this->addFrontSystem(new PacketTorpedo(3, 6, 5, 240, 0));
         $this->addFrontSystem(new PacketTorpedo(3, 6, 5, 240, 0));
-        $this->addFrontSystem(new PacketTorpedo(3, 6, 5, 0, 120));
-        $this->addFrontSystem(new PacketTorpedo(3, 6, 5, 0, 120));
         $this->addFrontSystem(new PacketTorpedo(3, 6, 5, 300, 60));
+        $this->addFrontSystem(new PacketTorpedo(3, 6, 5, 0, 120));
+        $this->addFrontSystem(new PacketTorpedo(3, 6, 5, 0, 120));
         
 		
         $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));

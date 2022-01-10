@@ -17,11 +17,11 @@ class TalvanUpgrade extends BaseShip{
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
 
-		$this->critRollMod += 1;
+		$this->critRollMod = 1;
 		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
 		$this->enhancementOptionsDisabled[] = 'IMPR_ENG';
 		
-//		$this->notes = "Engine fluctuations. Rolls for engine critical every turn with +5% penalty. Effect lasts one turn.";
+		//$this->notes = "Engine fluctuations. Rolls for engine critical every turn with +5% penalty. Effect lasts one turn."; //comment will be automatic
         
         $this->turncost = 1;
         $this->turndelaycost = 0.66;

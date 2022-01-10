@@ -23,7 +23,9 @@ class wlcChlonasWyLeraA extends OSAT{
         $this->iniativebonus = 60;
         $this->addPrimarySystem(new Reactor(4, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 6, 2, 4)); 
+		
         $this->addAftSystem(new Thruster(3, 6, 0, 0, 2)); 
+		
         $this->addFrontSystem(new TacLaser(3, 5, 4, 300, 60));
         $this->addFrontSystem(new CustomLightMatterCannon(2, 0, 0, 180, 360));
 		$this->addFrontSystem(new CustomLightMatterCannon(2, 0, 0, 0, 180));

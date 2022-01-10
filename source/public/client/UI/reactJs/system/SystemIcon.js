@@ -55,6 +55,8 @@ const System = styled.div`
             return '#e06f01'; //orange
         } else if (props.boosted) {
             return '#cca300'; //darkyellow
+		} else if (props.loading && props.loadedAlternate) { //weapon not ready in current mode, but  alternate mode is ready
+			return '#CD9E9E'; //pale red
         } else {
             return 'black';
         }
@@ -202,6 +204,7 @@ class SystemIcon extends React.Component{
                 background={getBackgroundImage(system)}
                 offline={isOffline(ship, system)}
                 loading={isLoading(system)}
+                loadedAlternate={isLoadedAlternate(system)} //alternate mode ready while primary is not
                 selected={isSelected(system)}
                 firing={isFiring(ship, system)}
                 boosted={isBoosted(ship, system)}
@@ -216,6 +219,8 @@ class SystemIcon extends React.Component{
 const isFiring = (ship, system) => weaponManager.hasFiringOrder(ship, system);
 
 const isLoading = (system) => system.weapon && !weaponManager.isLoaded(system);
+
+const isLoadedAlternate = (system) => system.weapon && weaponManager.isLoadedAlternate(system);
 
 const isOffline = (ship, system) => shipManager.power.isOffline(ship, system);
 
@@ -240,7 +245,9 @@ const hasCriticals = (system) => shipManager.criticals.hasCriticals(system)
 const isSelected = (system) => weaponManager.isSelectedWeapon(system)
 
 const getText = (ship, system) => {
-    if (system.weapon) {
+	if (system.outputDisplay != '') { //some systems have very specific visual output, rather than generic
+		return system.outputDisplay;
+	} else if (system.weapon) {
         
         const firing = weaponManager.hasFiringOrder(ship, system);
 

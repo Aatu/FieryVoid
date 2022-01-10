@@ -25,11 +25,11 @@ class LegionB extends OSAT{
 
         $this->addPrimarySystem(new Reactor(4, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 6, 3, 6)); 
-        $this->addPrimarySystem(new Thruster(3, 4, 0, 0, 2)); 
+        $this->addAftSystem(new Thruster(3, 4, 0, 0, 2)); 
 
-        $this->addPrimarySystem(new ImperialLaser(3, 8, 5, 270, 90));
-        $this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
-        $this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
+        $this->addFrontSystem(new ImperialLaser(3, 8, 5, 270, 90));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         
@@ -40,9 +40,9 @@ class LegionB extends OSAT{
 	$this->hitChart = array(		
 		0=> array(
 			9 => "Structure",
-			11 => "Thruster",
-			14 => "Imperial Laser",
-			16 => "Light Particle Beam",
+			11 => "2:Thruster",
+			14 => "1:Imperial Laser",
+			16 => "1:Light Particle Beam",
 			18 => "Scanner",
 			30 => "Reactor",
 		),

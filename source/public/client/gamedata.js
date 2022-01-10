@@ -144,9 +144,11 @@ window.gamedata = {
 
     /*Marcin Sawicki: re-created so there are no dumps during replay...*/
     //TODO: remove this function AND ALL CALLS TO IT (delete or replace by new approach, as appropriate)
+	/*commenting out...
     getActiveShip: function getActiveShip() {
         return null;
     },
+    */
     
     getActiveShips: function getActiveShips() {
 
@@ -261,6 +263,7 @@ window.gamedata = {
             var selfDestructing = [];
 			var notLaunching = [];
 			var notSetAA = [];//available Adaptive Armor points remaining! 
+		var powerSurplus = [];//power surplus
 
             for (var ship in myShips) {
                 if (!myShips[ship].flight) {
@@ -283,6 +286,12 @@ window.gamedata = {
                     if (shipManager.isDisabled(myShips[ship])) {
                         continue;
                     }
+			
+			//checking for power surplus
+			if (shipManager.power.getReactorPower(myShips[ship], shipManager.systems.getSystemByName(myShips[ship], "reactor"))>0){
+				powerSurplus.push(myShips[ship]);
+			}
+			
                     if (gamedata.turn == 1) {
                         if (myShips[ship].EW.length == 0) {
                             hasNoEW.push(myShips[ship]);
@@ -411,6 +420,17 @@ window.gamedata = {
                 html += "<br>";
                 for (var ship in notSetAA) {
                     html += notSetAA[ship].name + " (" + notSetAA[ship].shipClass + ")";
+                    html += "<br>";
+                }
+                html += "<br>";
+            }
+            if (powerSurplus.length > 0) {
+                html += "Followed ships have unassigned Power reserves: ";
+                html += "<br>";
+                for (var ship in powerSurplus) {
+			//show actual surplus, too - like: Surplusser (PowerShip) - <10>
+					var surplusVal = shipManager.power.getReactorPower(powerSurplus[ship], shipManager.systems.getSystemByName(powerSurplus[ship], "reactor"));
+                    html += powerSurplus[ship].name + " (" + powerSurplus[ship].shipClass + "): <b>&#60;" + surplusVal + '&#62;</b>';
                     html += "<br>";
                 }
                 html += "<br>";
@@ -652,10 +672,12 @@ window.gamedata = {
     },
 
     onCancelClicked: function onCancelClicked(e) {
+	    /* no longer valid
         if (gamedata.gamephase == 2) {
             var ship = gamedata.getActiveShip();
             shipManager.movement.deleteMove(ship);
         }
+	*/
 
         if (gamedata.gamephase == 3) {
             var ship = gamedata.getSelectedShip();
@@ -663,12 +685,13 @@ window.gamedata = {
         }
     },
 
+	    /*no longer valid
     getActiveShipName: function getActiveShipName() {
         var ship = gamedata.getActiveShip();
         if (ship) return ship.name;
-
         return "";
     },
+    */
 
     getPlayerTeam: function getPlayerTeam() {
         for (var i in gamedata.slots) {
