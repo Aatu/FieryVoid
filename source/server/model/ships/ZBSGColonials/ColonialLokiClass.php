@@ -38,8 +38,8 @@ class ColonialLokiClass extends MediumShip{
 			$this->addPrimarySystem($hyperdrive);
 
 		$this->addFrontSystem(new BSGMedBattery(4, 7, 4, 180, 360));
-		$this->addFrontSystem(new BSGMedBattery(4, 7, 4, 0, 180));
         $this->addFrontSystem(new BSGMedBattery(4, 7, 4, 300, 60));
+		$this->addFrontSystem(new BSGMedBattery(4, 7, 4, 0, 180));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
 		$this->addFrontSystem(new Bulkhead(0, 3));
