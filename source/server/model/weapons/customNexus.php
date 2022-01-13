@@ -1437,7 +1437,7 @@ class NexusShatterGun extends Weapon{
 
         public $name = "NexusShatterGun";
         public $displayName = "Shatter Gun";
-        public $iconPath = "NexusShatterGun.png"; 		
+        public $iconPath = "NexusShattergun.png"; 		
 		
         public $animationArray = array(1=>'trail', 2=>'trail');
         public $animationColorArray = array(1=>array(245, 245, 44), 2=>array(245, 245, 44));
@@ -1457,7 +1457,7 @@ class NexusShatterGun extends Weapon{
         public $rangePenaltyArray = array(1=>2, 2=>2);
         public $intercept = 1;
 		public $ballisticIntercept = true;
-		public $firingModes = array(1 =>'Standard', 2=>'Concentrated');
+		public $firingModes = array(1 =>'Burst', 2=>'Concentrated');
         
         public $fireControlArray = array(1=>array(2, 1, 1), 2=>array(0, -1, -1)); // fighters, <mediums, <capitals
         
@@ -1467,8 +1467,9 @@ class NexusShatterGun extends Weapon{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "Ignores armor, does not overkill.";
-			$this->data["Special"] .= "<br>Standard mode: 1d2 +1/25% pulses (max 4) of 3 damage.";
+			$this->data["Special"] .= "<br>Burst mode: 1d2 +1/25% pulses (max 4) of 3 damage.";
 			$this->data["Special"] .= "<br>Concentrated mode:  1d2*4 damage but -10 fire control.";
+			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
 		}
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -1483,7 +1484,7 @@ class NexusShatterGun extends Weapon{
                 	return 3;
 			    			break;
             	case 2:
-            	   	return Dice::d(2, 1)*4;
+            	   	return Dice::d(2, 1)*3;
 			    			break;
         	}
 		}
@@ -1568,7 +1569,7 @@ class NexusShatterGunFtr extends Weapon{
         public $rangePenaltyArray = array(1=>2, 2=>2);
         public $intercept = 1;
 		public $ballisticIntercept = true;
-		public $firingModes = array(1 =>'Standard', 2=>'Concentrated');
+		public $firingModes = array(1 =>'Burst', 2=>'Concentrated');
         
         public $fireControlArray = array(1=>array(0, 0, 0), 2=>array(-2, -2, -2)); // fighters, <mediums, <capitals
         
@@ -1584,8 +1585,9 @@ class NexusShatterGunFtr extends Weapon{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "Ignores armor, does not overkill.";
-			$this->data["Special"] .= "<br>Standard mode: 1d2 pulses of 3 damage.";
+			$this->data["Special"] .= "<br>Burst mode: 1d2 pulses of 3 damage.";
 			$this->data["Special"] .= "<br>Concentrated mode:  3*d2 damage but -10 fire control.";
+			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
             $this->data["Ammunition"] = $this->ammunition;
 		}
 		
@@ -2777,7 +2779,7 @@ class NexusMinigun extends Weapon{
         public $rangePenaltyArray = array(1=>2, 2=>2);
         public $intercept = 1;
 		public $ballisticIntercept = true;
-		public $firingModes = array(1 =>'Standard', 2=>'Concentrated');
+		public $firingModes = array(1 =>'Burst', 2=>'Concentrated');
         
         public $fireControlArray = array(1=>array(3, 2, 2), 2=>array(1, 0, 0)); // fighters, <mediums, <capitals
         
@@ -2787,8 +2789,9 @@ class NexusMinigun extends Weapon{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "Ignores armor, does not overkill.";
-			$this->data["Special"] .= "<br>Standard mode: 1d4 +1/25% pulses (max 6) of 3 damage.";
+			$this->data["Special"] .= "<br>Burst mode: 1d4 +1/25% pulses (max 6) of 3 damage.";
 			$this->data["Special"] .= "<br>Concentrated mode:  1d3*4 damage but -10 fire control.";
+			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
 		}
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -2887,7 +2890,7 @@ class NexusMinigunFtr extends Weapon{
         public $rangePenaltyArray = array(1=>2, 2=>2);
         public $intercept = 1;
 		public $ballisticIntercept = true;
-		public $firingModes = array(1 =>'Standard', 2=>'Concentrated');
+		public $firingModes = array(1 =>'Burst', 2=>'Concentrated');
         
         public $fireControlArray = array(1=>array(0, 0, 0), 2=>array(-2, -2, -2)); // fighters, <mediums, <capitals
         
@@ -2903,8 +2906,9 @@ class NexusMinigunFtr extends Weapon{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "Ignores armor, does not overkill.";
-			$this->data["Special"] .= "<br>Standard mode: 1d3 pulses of 3 damage.";
+			$this->data["Special"] .= "<br>Burst mode: 1d3 pulses of 3 damage.";
 			$this->data["Special"] .= "<br>Concentrated mode:  6 damage but -10 fire control.";
+			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
             $this->data["Ammunition"] = $this->ammunition;
 		}
 		
