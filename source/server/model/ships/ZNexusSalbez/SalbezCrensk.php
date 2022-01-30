@@ -15,7 +15,6 @@ class SalbezCrensk extends LCV{
 
         $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
 	    $this->notes = 'May deploy independently.';
-	    $this->notes .= '<br>Antiquated Sensors.';
         
         $this->forwardDefense = 8;
         $this->sideDefense = 11;
@@ -35,35 +34,39 @@ class SalbezCrensk extends LCV{
   
 		$this->addPrimarySystem(new Reactor(4, 10, 0, 0));
 		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-        $this->addPrimarySystem(new AntiquatedScanner(4, 12, 4, 4));
+//        $this->addPrimarySystem(new AntiquatedScanner(4, 12, 4, 4));
+    	$sensors = new Scanner(4, 12, 4, 4);
+			$sensors->markLCV();
+			$this->addPrimarySystem($sensors);
 		$this->addPrimarySystem(new Engine(4, 12, 0, 8, 3));
-		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 120, 60));
-		$this->addPrimarySystem(new MediumLaser(3, 6, 5, 300, 60));
-		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 300, 240));
+
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 120, 60));
+		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 240));
     
-        $this->addPrimarySystem(new Structure(4, 36));
+        $this->addPrimarySystem(new Structure(4, 32));
 	    
         $this->hitChart = array(
         		0=> array( 
         				11 => "Structure",
-        				13 => "Medium Laser",
-        				15 => "Light Particle Beam",
-						17 => "Engine",
-        				19 => "Reactor",
-        				20 => "Scanner",
+        				13 => "1:Medium Laser",
+        				15 => "1:Light Particle Beam",
+						17 => "0:Engine",
+        				19 => "0:Reactor",
+        				20 => "0:Scanner",
         		),
         		1=> array( //redirect to PRIMARY
-        				11 => "0:Structure",
-        				13 => "0:Medium Laser",
-        				15 => "0:Light Particle Beam",
+        				11 => "Structure",
+        				13 => "1:Medium Laser",
+        				15 => "1:Light Particle Beam",
 						17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		2=> array( //redirect to PRIMARY
-        				11 => "0:Structure",
-        				13 => "0:Medium Laser",
-        				15 => "0:Light Particle Beam",
+        				11 => "Structure",
+        				13 => "1:Medium Laser",
+        				15 => "1:Light Particle Beam",
 						17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

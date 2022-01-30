@@ -38800,6 +38800,9 @@ var System = _styledComponents2.default.div.withConfig({
         return '#e06f01'; //orange
     } else if (props.boosted) {
         return '#cca300'; //darkyellow
+    } else if (props.loading && props.loadedAlternate) {
+        //weapon not ready in current mode, but  alternate mode is ready
+        return '#CD9E9E'; //pale red
     } else {
         return 'black';
     }
@@ -38956,7 +38959,8 @@ var SystemIcon = function (_React$Component) {
                     background: getBackgroundImage(system),
                     offline: isOffline(ship, system),
                     loading: isLoading(system),
-                    selected: isSelected(system),
+                    loadedAlternate: isLoadedAlternate(system) //alternate mode ready while primary is not
+                    , selected: isSelected(system),
                     firing: isFiring(ship, system),
                     boosted: isBoosted(ship, system)
                 },
@@ -38979,6 +38983,10 @@ var isFiring = function isFiring(ship, system) {
 
 var isLoading = function isLoading(system) {
     return system.weapon && !weaponManager.isLoaded(system);
+};
+
+var isLoadedAlternate = function isLoadedAlternate(system) {
+    return system.weapon && weaponManager.isLoadedAlternate(system);
 };
 
 var isOffline = function isOffline(ship, system) {
@@ -39017,7 +39025,10 @@ var isSelected = function isSelected(system) {
 };
 
 var getText = function getText(ship, system) {
-    if (system.weapon) {
+    if (system.outputDisplay != '') {
+        //some systems have very specific visual output, rather than generic
+        return system.outputDisplay;
+    } else if (system.weapon) {
 
         var firing = weaponManager.hasFiringOrder(ship, system);
 
@@ -40092,7 +40103,7 @@ var SystemInfoButtons = function (_React$Component) {
 			return React.createElement(
 				Container,
 				null,
-				canOnline(ship, system) && React.createElement(Button, { title: "power on (R = mass for weapons)", onClick: this.online.bind(this), onContextMenu: this.allOnline.bind(this), img: "./img/on.png" }),
+				canOnline(ship, system) && React.createElement(Button, { title: "power on (R = mass)", onClick: this.online.bind(this), onContextMenu: this.allOnline.bind(this), img: "./img/on.png" }),
 				canOffline(ship, system) && React.createElement(Button, { title: "power off (R = mass for weapons)", onClick: this.offline.bind(this), onContextMenu: this.allOffline.bind(this), img: "./img/off.png" }),
 				canOverload(ship, system) && React.createElement(Button, { title: "overload", onClick: this.overload.bind(this), img: "./img/overload.png" }),
 				canStopOverload(ship, system) && React.createElement(Button, { title: "stop overload", nClick: this.stopOverload.bind(this), img: "./img/overloading.png" }),

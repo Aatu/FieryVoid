@@ -158,7 +158,8 @@ class TrekLtPhaseCannon extends TrekPhaserBase{
         public $intercept = 2;
         public $priority = 8; //Raking weapon
         
-        public $rangePenalty = 1;
+        //public $rangePenalty = 1;
+		public $rangePenalty = 1.5; // -3 per 2 hexes
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
  
 		public $damageType = 'Raking'; 
@@ -170,9 +171,12 @@ class TrekLtPhaseCannon extends TrekPhaserBase{
         }
 
 	    
-        public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
-        public function setMinDamage(){   return  $this->minDamage = 5 ;      }
-        public function setMaxDamage(){   return  $this->maxDamage = 14 ;      }
+        public function getDamage($fireOrder){        
+			//return Dice::d(10, 1)+4;   //original damage
+			return Dice::d(6, 2)+4;
+		}
+        public function setMinDamage(){   return  $this->minDamage = 6 ;      }
+        public function setMaxDamage(){   return  $this->maxDamage = 16 ;      }
 		
     }  //end of class Trek Fighter Light Phase Cannon
 
@@ -636,7 +640,7 @@ class TrekPhaserLance extends TrekPhaserBase{
 		
             // If fully boosted: force a critical roll (with hefty penalty)
             if($currBoostlevel === $this->maxBoostLevel){
-				$this->criticalRollMod += 10;
+				$this->critRollMod += 10;
             	$this->forceCriticalRoll = true;
             }
         }
@@ -920,7 +924,7 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 		$this->iconPath = 'TrekShieldProjection' . $side . '.png';
 		parent::__construct($armor, $maxhealth, 0, $rating, $startArc, $endArc);
 		$this->output=$rating;//output is displayed anyway, make it show something useful... in this case - number of points absorbed per hit
-	}
+			}
 	
 	
     public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
@@ -943,6 +947,7 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 			$this->data["Special"] .= '<br>';
 		}
 		*/
+		/*
 		$this->data["Special"] = "Defensive system absorbing damage from hits before projectile touches actual hull.";
 		$this->data["Special"] .= "<br>Can absorb up to " .$this->output ." damage points per hit, ";
 		$this->data["Special"] .= "including " . $this->armour . " without reducing capacity for further absorption.";
@@ -950,6 +955,16 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 		$this->data["Special"] .= "<br>System's health represents damage capacity. If it is reduced to zero system will cease to function.";
 		$this->data["Special"] .= "<br>Will not fall on its own unless its structure block is destroyed.";
 		$this->data["Special"] .= "<br>This is NOT a shield as far as any shield-related interactions go.";
+		*/
+		$absorb = $this->output - $this->armour;
+		$this->data["Special"] = "Defensive system which absorbs damage from incoming shots before they damage ship hull.";
+		$this->data["Special"] .= "<br>Can absorb up to " . $absorb . " damage points per hit after projection armour is applied, ";
+		$this->data["Special"] .= "<br>Protects from every separate impact (e.g. every rake!) separately.";
+		$this->data["Special"] .= "<br>System's structure represents damage capacity. If it is reduced to zero system will cease to function.";
+		$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
+		$this->data["Special"] .= "<br>This is NOT a shield as far as any shield-related interactions go.";
+		
+		$this->outputDisplay = $this->armour . '/' . $absorb . '/' . $this->getRemainingCapacity();//override on-icon display default
 	}	
 	
 	public function getRemainingCapacity(){
@@ -1040,6 +1055,13 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 		}
 	} //endof function criticalPhaseEffects
 	
+	public function stripForJson() {
+        $strippedSystem = parent::stripForJson();
+
+		$strippedSystem->outputDisplay = $this->outputDisplay;
+		
+        return $strippedSystem;
+	}
 }//endof class TrekShieldProjection
 
 
@@ -1085,7 +1107,7 @@ class TrekShieldProjector  extends Shield implements DefensiveSystem { //defensi
 
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn); 
-		$this->data["Special"] = "Shield projector - replenishes appropriate projection by its rating at end of turn.";
+		$this->data["Special"] = "Shield projector - replenishes structure of appropriate Shield Projection by Projector's rating at end of turn.";
 		$this->data["Special"] .= "<br>Can be boosted.";
 	}	
 	
@@ -1105,6 +1127,7 @@ class TrekShieldProjector  extends Shield implements DefensiveSystem { //defensi
 		}
 		return $boostLevel;
 	}
+		
 } //endof class TrekShieldProjector
 
 
@@ -1128,6 +1151,7 @@ class TrekShieldFtr extends ShipSystem{
 		parent::__construct($armor, $maxhealth, 0, 360);
 		$this->recharge = $recharge;
 		$this->output=$rating;//output is displayed anyway, make it show something useful...
+		
 	}
 
     
@@ -1139,10 +1163,21 @@ class TrekShieldFtr extends ShipSystem{
 		$this->data["Armor"] = $this->armour;
 		$this->data["Recharge"] = $this->recharge;
 		
+		/*
 		$this->data["Special"] = "Defensive system absorbing damage from hits before projectile touches actual hull.";
 		$this->data["Special"] .= "<br>Can absorb up to " .$this->output ." damage points per hit, ";
 		$this->data["Special"] .= "including " . $this->armour . " without reducing capacity for further absorption.";
 		$this->data["Special"] .= "<br>Regenerates at end of turn, after firing. Regeneration rate is doubled if fighter doesn't use its direct fire weapons.";
+		*/
+		
+		$absorb = $this->output - $this->armour;
+		$this->data["Special"] = "Defensive system which absorbs damage from incoming shots before they damage ship hull.";
+		$this->data["Special"] .= "<br>Can absorb up to " . $absorb . " damage points per hit after projection armour is applied, ";
+		$this->data["Special"] .= "<br>If damage capacity it is reduced to zero system will cease to function.";
+		$this->data["Special"] .= "<br>Recharges at end of turn, after firing. Recharge rate is doubled if fighter doesn't use its direct fire weapons.";
+		$this->data["Special"] .= "<br>This is NOT a shield as far as any shield-related interactions go.";
+		
+		$this->outputDisplay = $this->armour . '/' . $absorb . '/' . $this->getRemainingCapacity();//override on-icon display default
 	}	
 	
 	/*always redefine $this->data due to current capacity info*/

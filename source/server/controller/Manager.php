@@ -288,8 +288,10 @@ class Manager{
         }
     }
     
-    public static function updateAmmoInfo($shipid, $systemid, $gameid, $firingmode, $ammoAmount, $turn){
-        self::$dbManager->submitAmmo($shipid, $systemid, $gameid, $firingmode, $ammoAmount, $turn);
+    public static function updateAmmoInfo($shipid, $systemid, $gameid, $firingmode, $ammoAmount, $turn){		
+		//as there is no separate ammo tracks - assume always first mode is used for ammo tracking purposes
+        //self::$dbManager->submitAmmo($shipid, $systemid, $gameid, $firingmode, $ammoAmount, $turn);
+		self::$dbManager->submitAmmo($shipid, $systemid, $gameid, 1, $ammoAmount, $turn);
     }
     
     public static function getTacGamedataJSON($gameid, $userid, $turn, $phase, $activeship, $force = false){

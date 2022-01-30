@@ -36,10 +36,10 @@ The costs before rounding the final value are:
 		$this->enhancementOptionsDisabled[] = 'IMPR_ENG';
 		$this->enhancementOptionsDisabled[] = 'IMPR_SENS';
 		
-		$this->notes = "Engine fluctuations. Rolls for engine critical every turn with +5% penalty. Effect lasts one turn.";
-		$this->notes .= "<br>Power fluctuations. Rolls for reactor critical every turn with +5% penalty. Effect lasts one turn.";
-		$this->notes .= "<br>Sensor fluctuations. Rolls for sensor critical every turn with +5% penalty. Effect lasts one turn.";
-		$this->notes .= "<br>Communications problems. Rolls for C&C critical every turn with +5% penalty. Effect lasts one turn.";
+//		$this->notes = "Engine fluctuations. Rolls for engine critical every turn with +5% penalty. Effect lasts one turn.";
+//		$this->notes .= "<br>Power fluctuations. Rolls for reactor critical every turn with +5% penalty. Effect lasts one turn.";
+//		$this->notes .= "<br>Sensor fluctuations. Rolls for sensor critical every turn with +5% penalty. Effect lasts one turn.";
+//		$this->notes .= "<br>Communications problems. Rolls for C&C critical every turn with +5% penalty. Effect lasts one turn.";
         
         $this->forwardDefense = 18;
         $this->sideDefense = 19;
