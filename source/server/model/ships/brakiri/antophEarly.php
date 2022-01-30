@@ -8,9 +8,9 @@ class AntophEarly extends HeavyCombatVessel{
         $this->faction = "Brakiri";
         $this->phpclass = "AntophEarly";
         $this->imagePath = "img/ships/antoph.png";
-        $this->shipClass = "Antoph Light Cruiser (early)";
+        $this->shipClass = "Antoph Light Cruiser (Early)";
 			$this->occurence = "common";
-			$this->variantOf = 'Antoph Light Cruiser (upgrade)';
+			$this->variantOf = 'Antoph Light Cruiser (Upgraded)';
                 
 		$this->notes = 'Ak-Habil Conglomerate';//Corporation producing the design
 		$this->notes .= '<br>Does not have a gravitic drive';

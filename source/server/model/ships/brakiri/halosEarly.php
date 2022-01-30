@@ -8,7 +8,7 @@ class HalosEarly extends BaseShip{
 	$this->faction = "Brakiri";
         $this->phpclass = "HalosEarly";
         $this->imagePath = "img/ships/halos.png";
-        $this->shipClass = "Halos Heavy Scout (early)";
+        $this->shipClass = "Halos Heavy Scout (Early)";
         $this->shipSizeClass = 3;
         $this->occurence = "rare";
 	    $this->variantOf = "Avioki Heavy Cruiser";

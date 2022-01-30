@@ -8,7 +8,7 @@ class IkortaEarly extends HeavyCombatVesselLeftRight{
 	$this->faction = "Brakiri";
         $this->phpclass = "IkortaEarly";
         $this->imagePath = "img/ships/ikorta.png";
-        $this->shipClass = "Ikorta Light Assault Cruiser (early)";
+        $this->shipClass = "Ikorta Light Assault Cruiser (Early)";
 			$this->occurence = "common";
 			$this->variantOf = "Ikorta Light Assault Cruiser";
 	    $this->fighters = array("assault shuttles"=>6);
