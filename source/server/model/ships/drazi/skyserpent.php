@@ -11,7 +11,7 @@ class SkySerpent extends SuperHeavyFighter{
 		$this->variantOf = "TO BE DELETED";
         $this->imagePath = "img/ships/drazi/DraziSkyserpent.png";
 	    $this->isd = 2220;
-        $this->canvasSize = 64;
+        $this->canvasSize = 60;
 
         $this->forwardDefense = 10;
         $this->sideDefense = 9;
