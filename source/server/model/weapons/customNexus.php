@@ -217,31 +217,31 @@ class NexusLaserMissile extends Laser{
         public $name = "NexusLaserMissile";
         public $displayName = "Laser Missile";
 		    public $iconPath = "NexusLaserMissile.png";
-        public $animation = "laser";
+        public $animationArray = array(1=>'laser', 2=>'laser');
         public $trailColor = array(141, 240, 255);
-        public $animationColor = array(220, 60, 120);
+        public $animationColorArray = array(1=>array(220, 60, 120), array(220, 60, 120));
         public $animationExplosionScale = 0.5;
         public $projectilespeed = 10;
         public $animationWidth = 5;
         public $trailLength = 100;    
-        public $uninterceptable = false; 
+        public $uninterceptableArray = array(1=>false, 2=>false); 
 		
 		public $doInterceptDegradation = true; //Will be intercepted with normal degradation even though a ballistic
         public $useOEW = false; //missile
         public $ballistic = true; //missile
-        public $range = 20;
-        public $distanceRange = 30;
+        public $rangeArray = array(1=>20, 2=>10);
+        public $distanceRangeArray = array(1=>30, 2=>15);
         public $ammunition = 20; //limited number of shots
 	    
-        public $loadingtime = 2; // 1/2 turns
-        public $rangePenalty = 0;
-        public $fireControl = array(null, 2, 2); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $loadingtimeArray = array(1=>2, 2=>2); // 1/2 turns
+        public $rangePenaltyArray = array(1=>0, 2=>0);
+        public $fireControlArray = array(1=>array(null, 2, 2), 2=>array(null, 2, 2)); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
         public $raking = 8;
-		public $priority = 8; //Matter weapon
+		public $priorityArray = array(1=>8, 2=>8); 
 	    
-		public $firingMode = 'Ballistic'; //firing mode - just a name essentially
-		public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+		public $firingModes = array(1=>'Long-range', 2=>'Short-range'); //firing mode - just a name essentially
+		public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 //    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
 	 
 
@@ -262,6 +262,8 @@ class NexusLaserMissile extends Laser{
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Special"] = "Bomb-pumped laser. Ballistic weapon that scores raking (8) damage.";
+            $this->data["Special"] .= "<br>Long-range: 20 hex launch and 30 hex max range, 2d10+2 damage.";
+            $this->data["Special"] .= "<br>Short-range: 10 hex launch and 15 hex max range, 3d10+4 damage.";
             $this->data["Ammunition"] = $this->ammunition;
         }
         
@@ -273,10 +275,43 @@ class NexusLaserMissile extends Laser{
             $this->ammunition--;
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
         }
+
+        public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1:
+				return Dice::d(10, 2)+2; //Light Chemical Laser
+				break;
+			case 2:
+				return Dice::d(10, 3)+4; //Medium Chemical Laser
+				break;	
+		}
+	}
+        public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 4; //Light Chemical Laser
+				break;
+			case 2:
+				$this->minDamage = 7; //Medium Chemical Laser
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 22; //Light Chemical Laser
+				break;
+			case 2:
+				$this->maxDamage = 34; //Medium Chemical Laser
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
     
-        public function getDamage($fireOrder){ return Dice::d(10, 2)+2;   }
-        public function setMinDamage(){     $this->minDamage = 4;      }
-        public function setMaxDamage(){     $this->maxDamage = 22;      }
+//        public function getDamage($fireOrder){ return Dice::d(10, 2)+2;   }
+//        public function setMinDamage(){     $this->minDamage = 4;      }
+//        public function setMaxDamage(){     $this->maxDamage = 22;      }
 		
 }//endof NexusLaserMissile
 
