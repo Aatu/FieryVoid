@@ -2067,7 +2067,7 @@ class NexusShatterGunFtr extends Weapon{
         public function setSystemDataWindow($turn){            
             parent::setSystemDataWindow($turn);		
 			$this->data["Special"] = "Fires d6 separate shots (actual number rolled at firing resolution).";
-			$this->data["Special"] .= "<br>When fired defensively, a single Scattergun cannot engage the same incoming shot twice (even ballistic one).";
+			$this->data["Special"] .= "<br>When fired defensively, a single ACIDS cannot engage the same incoming shot twice (even ballistic one).";
 			$this->data["Special"] .= "<br>Ignores armor.";
         }
 	    

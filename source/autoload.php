@@ -830,6 +830,7 @@ spl_autoload_register(
                 'sellac1910' => '/server/model/ships/abbai_old/sellac1910.php',
                 'seltat' => '/server/model/ships/centauri/seltat.php',
                 'senschuka' => '/server/model/ships/dilgar/senschuka.php',
+                'sensorloss' => '/server/model/cricialClasses.php',
                 'sensorspear' => '/server/model/weapons/specialWeapons.php',
                 'sensorspike' => '/server/model/weapons/specialWeapons.php',
                 'sentinelpointdefense' => '/server/model/weapons/defensive.php',
@@ -907,7 +908,7 @@ spl_autoload_register(
 		'sparkfield' => '/server/model/weapons/specialWeapons.php',
                 'sparkfieldhandler' => '/server/model/weapons/specialWeapons.php',
                 'specialability' => '/server/model/systems/baseSystems.php',
-                'spinallaser' => '/server/model/weapons/laser.php',
+                'spinallaser' => '/server/model/weapons/lasers.php',
                 'starbase' => '/server/model/ships/ShipClasses.php',
                 'starbasefivesections' => '/server/model/ships/ShipClasses.php',
                 'starbasesixsections' => '/server/model/ships/ShipClasses.php',
@@ -1916,6 +1917,7 @@ spl_autoload_register(
 				'cylonbasestar' => '/server/model/ships/ZBSGCylons/CylonBasestar.php',				
 				'cylonsparrowraider' => '/server/model/ships/ZBSGCylons/CylonSparrowRaider.php',				
 
+                'bsghybrid' => '/server/model/systems/baseSystems.php',
 
 
 
@@ -2177,6 +2179,8 @@ spl_autoload_register(
 				'maggravreactortechnical' => '/server/model/systems/baseSystems.php',
 				'vorlondischargegun' => '/server/model/weapons/specialWeapons.php',
 				'vorlonlightningcannon' => '/server/model/weapons/specialWeapons.php',
+//				'vorlonlightninggun' => '/server/model/weapons/specialWeapons.php',
+//				'vorlondischargepulsar' => '/server/model/weapons/specialWeapons.php',
 				'vorlonltdischargegun' => '/server/model/weapons/specialWeapons.php',
 				'vorlondischargecannon' => '/server/model/weapons/specialWeapons.php',
 								
@@ -2193,6 +2197,7 @@ spl_autoload_register(
 				'vorlonheavycarrier' => '/server/model/ships/vorlons/vorlonHeavyCarrier.php',
 				'vorlondreadnought' => '/server/model/ships/vorlons/vorlonDreadnought.php',
 				'vorlonheavydestroyer' => '/server/model/ships/vorlons/vorlonHeavyDestroyer.php',
+//				'vorlonstrikecruiser' => '/server/model/ships/vorlons/vorlonstrikecruiser.php',
 				
 				//old versions of capital ships, to be deleted when games are over
 				/*
@@ -2470,15 +2475,18 @@ spl_autoload_register(
 				
 				
 
-				//Hyach conversions
-				//systems
-//               'hyachscanner' => '/server/model/systems/baseSystems.php',
-//               'hyachelintscanner' => '/server/model/systems/baseSystems.php',
-				
+				//Hyach
 				
 				//weapons
-//                'interdictorhandler' => '/server/model/weapons/particle.php',
-//                'interdictor' => '/server/model/weapons/particle.php',
+//                'ftrinterdictor' => '/server/model/weapons/particle.php',
+                'interdictor' => '/server/model/weapons/particle.php',
+                'ltblastlaser' => '/server/model/weapons/lasers.php',
+
+				//units
+//				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
+//				'hyachdartha' => '/server/model/ships/hyach/HyachDartha.php',
+//				'hyachdoskva' => '/server/model/ships/hyach/HyachDoskva.php',
+//				'hyachirokaikam' => '/server/model/ships/hyach/HyachIrokaiKam.php',
 				
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
