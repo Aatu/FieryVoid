@@ -1640,6 +1640,8 @@ spl_autoload_register(
                 'dalithornlightcruiser' => '/server/model/ships/ZNexusDalithorn/DalithornLightCruiser.php',					
                 'dalithornmicrosat' => '/server/model/ships/ZNexusDalithorn/DalithornMicrosat.php',					
                 'dalithornmicrosatrefit' => '/server/model/ships/ZNexusDalithorn/DalithornMicrosatRefit.php',					
+                'dalithornmissilecruiser' => '/server/model/ships/ZNexusDalithorn/DalithornMissileCruiser.php',					
+                'dalithornnewmissilecruiser' => '/server/model/ships/ZNexusDalithorn/DalithornNewMissileCruiser.php',					
                 'dalithornosat' => '/server/model/ships/ZNexusDalithorn/DalithornOSAT.php',					
                 'dalithornosatearly' => '/server/model/ships/ZNexusDalithorn/DalithornOSATEarly.php',					
                 'dalithornosatrefit' => '/server/model/ships/ZNexusDalithorn/DalithornOSATRefit.php',					

@@ -4,12 +4,12 @@ class RultharLRack extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 450;
+        $this->pointCost = 500;
         $this->faction = "Descari";
         $this->phpclass = "RultharLRack";
         $this->imagePath = "img/ships/DescariRulpa.png";
-        $this->shipClass = "Rulthar Missile Destroyer (L-Racks)";
-		$this->occurence = "common";
+        $this->shipClass = "Rulthar Long-Range Missile Destroyer";
+		$this->occurence = "uncommon";
 	    $this->isd = 2237;
         $this->variantOf = "Rulthar Missile Destroyer";
 		$this->unofficial = true;
