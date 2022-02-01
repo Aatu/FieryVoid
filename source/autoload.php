@@ -2219,6 +2219,7 @@ spl_autoload_register(
 				'lightparticlebolt' => '/server/model/weapons/particle.php',
 				'rulpa' => '/server/model/ships/descari/Rulpa.php',
 				'rulthar' => '/server/model/ships/descari/Rulthar.php',
+				'rultharlrack' => '/server/model/ships/descari/RultharLRack.php',
 				'rulpassa' => '/server/model/ships/descari/Rulpassa.php',
 				'scorava' => '/server/model/ships/descari/Scorava.php',
 				'lightplasmabolterfighter' => '/server/model/weapons/plasma.php',
