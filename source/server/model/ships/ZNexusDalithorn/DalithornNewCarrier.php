@@ -1,21 +1,21 @@
 <?php
-class DalithornNewMissileCruiser extends HeavyCombatVessel{
+class DalithornNewCarrier extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 475;
+        $this->pointCost = 380;
         $this->faction = "ZNexus Dalithorn";
-        $this->phpclass = "DalithornNewMissileCruiser";
+        $this->phpclass = "DalithornNewCarrier";
         $this->imagePath = "img/ships/Nexus/DailthornNewMissileCruiser.png";
 		$this->canvasSize = 115; //img has 200px per side
-        $this->shipClass = "New Missile Cruiser";
+        $this->shipClass = "New Carrier";
 			$this->variantOf = "Light Cruiser";
-			$this->occurence = "rare";
+			$this->occurence = "uncommon";
 		$this->unofficial = true;
-        $this->isd = 2112;
+        $this->isd = 2113;
 
-//        $this->fighters = array("superheavy"=>1);
+        $this->fighters = array("superheavy"=>2);
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
@@ -33,13 +33,13 @@ class DalithornNewMissileCruiser extends HeavyCombatVessel{
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(1, 2));
 		$this->addPrimarySystem(new CargoBay(2, 12));
-//		$this->addPrimarySystem(new Catapult(1, 6));
+		$this->addPrimarySystem(new Catapult(1, 6));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));
       
         $this->addFrontSystem(new Thruster(3, 10, 0, 2, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 2, 1));
-        $this->addFrontSystem(new NexusLaserMissile(2, 6, 1, 300, 60));
+        $this->addFrontSystem(new Catapult(2, 6));
         $this->addFrontSystem(new NexusAutocannon(2, 4, 1, 240, 360));
         $this->addFrontSystem(new NexusAutocannon(2, 4, 1, 0, 120));
         $this->addFrontSystem(new NexusProtector(2, 4, 1, 180, 60));
@@ -48,8 +48,8 @@ class DalithornNewMissileCruiser extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(2, 4, 0, 2, 2));
         $this->addAftSystem(new Thruster(2, 4, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 13, 0, 4, 2));
-        $this->addAftSystem(new NexusLaserMissile(2, 6, 1, 300, 60));
-        $this->addAftSystem(new NexusLaserMissile(2, 6, 1, 300, 60));
+        $this->addAftSystem(new NexusGasGun(2, 7, 2, 300, 60));
+        $this->addAftSystem(new NexusGasGun(2, 7, 2, 300, 60));
         $this->addAftSystem(new NexusMinigun(2, 4, 1, 120, 360));
         $this->addAftSystem(new NexusMinigun(2, 4, 1, 0, 240));
         
@@ -60,8 +60,8 @@ class DalithornNewMissileCruiser extends HeavyCombatVessel{
 		
         $this->hitChart = array(
             0=> array(
-                    9 => "Structure",
-//					9 => "Catapult",
+                    8 => "Structure",
+					9 => "Catapult",
 					11 => "Cargo Bay",
                     13 => "Thruster",
                     15 => "Scanner",
@@ -72,7 +72,7 @@ class DalithornNewMissileCruiser extends HeavyCombatVessel{
             ),
             1=> array(
                     4 => "Thruster",
-                    7 => "Laser Missile",
+                    7 => "Catapult",
                     9 => "Autocannon",
 					11 => "Protector",
 					18 => "Structure",
@@ -81,7 +81,7 @@ class DalithornNewMissileCruiser extends HeavyCombatVessel{
             2=> array(
                     6 => "Thruster",
 					8 => "Minigun",
-                    10 => "Laser Missile",
+                    10 => "Gas Gun",
                     18 => "Structure",
                     20 => "Primary",
             ),
