@@ -7,7 +7,7 @@ class DalithornMissileCruiser extends HeavyCombatVessel{
         $this->pointCost = 450;
         $this->faction = "ZNexus Dalithorn";
         $this->phpclass = "DalithornMissileCruiser";
-        $this->imagePath = "img/ships/Nexus/DalithornScout.png";
+        $this->imagePath = "img/ships/Nexus/DailthornMissileCruiser.png";
 		$this->canvasSize = 115; //img has 200px per side
         $this->shipClass = "Missile Cruiser";
 			$this->variantOf = "Flag Cruiser";
