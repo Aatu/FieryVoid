@@ -40,15 +40,15 @@ class ChoukaGrandInquisitor extends BaseShip{
 		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
 		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
 		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 270, 90));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 270, 90));
 		
 		$this->addAftSystem(new Thruster(2, 6, 0, 1, 2));
 		$this->addAftSystem(new Thruster(2, 8, 0, 2, 2));
 		$this->addAftSystem(new Thruster(2, 8, 0, 2, 2));
 		$this->addAftSystem(new Thruster(2, 6, 0, 1, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 6, 2));
-		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
-		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
+		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
+		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
 
         $this->addLeftSystem(new LightPlasma(1, 4, 2, 240, 360));
         $this->addLeftSystem(new EWOMissileRack(2, 6, 3, 180, 360));

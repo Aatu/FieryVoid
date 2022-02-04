@@ -59,11 +59,8 @@ class technicalTargetDrone extends BaseShip{
 //		$this->addFrontSystem(new PlasmaWeb(2, 4, 2, 0, 360));
 
 //		$this->addFrontSystem(new PlasmaBlast(2, 4, 2, 0, 360));
-		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
-		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
-		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
-		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
-		$this->addFrontSystem(new Maser(2, 6, 3, 300, 60));
+		$this->addFrontSystem(new TrekLightPhaser(2, 4, 2, 300, 60));
+		$this->addFrontSystem(new TrekLightPhaserLance(2, 6, 4, 300, 60));
 		$sensors = new Scanner(6, 23, 4, 20);
 			$sensors->markHyach();
 			$this->addFrontSystem($sensors); 

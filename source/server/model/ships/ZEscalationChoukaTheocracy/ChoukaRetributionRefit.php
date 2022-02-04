@@ -35,7 +35,7 @@ class ChoukaRetributionRefit extends BaseShip{
 		$this->addPrimarySystem(new Hangar(3, 4));
 		
         $this->addFrontSystem(new Thruster(3, 16, 0, 6, 1));
-		$this->addFrontSystem(new EWHeavyPointPlasmaGun(2, 7, 2, 240, 120));
+		$this->addFrontSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 240, 120));
 		$this->addFrontSystem(new EWTwinLaserCannon(2, 8, 5, 300, 60));
 		$this->addFrontSystem(new EWTwinLaserCannon(2, 8, 5, 300, 60));
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 240, 360));
@@ -51,13 +51,13 @@ class ChoukaRetributionRefit extends BaseShip{
 		$this->addAftSystem(new JumpEngine(3, 16, 4, 40));
 
         $this->addLeftSystem(new MediumPlasma(2, 5, 3, 240, 360));
-		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
-		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
+		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
+		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
         $this->addLeftSystem(new Thruster(3, 13, 0, 6, 3));
 
         $this->addRightSystem(new MediumPlasma(2, 5, 3, 0, 120));
-		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
-		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
+		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
+		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
         $this->addRightSystem(new Thruster(3, 13, 0, 6, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

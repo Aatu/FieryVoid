@@ -100,6 +100,18 @@ var TrekPhaserLance = function TrekPhaserLance(json, ship) {
 TrekPhaserLance.prototype = Object.create(Weapon.prototype);
 TrekPhaserLance.prototype.constructor = TrekPhaserLance;
 
+var TrekLightPhaser = function TrekLightPhaser(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekLightPhaser.prototype = Object.create(Weapon.prototype);
+TrekLightPhaser.prototype.constructor = TrekLightPhaser;
+
+var TrekLightPhaserLance = function TrekLightPhaserLance(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekLightPhaserLance.prototype = Object.create(Weapon.prototype);
+TrekLightPhaserLance.prototype.constructor = TrekLightPhaserLance;
+
 var HvyPlasmaProjector = function HvyPlasmaProjector(json, ship) {
     Weapon.call(this, json, ship);
 };

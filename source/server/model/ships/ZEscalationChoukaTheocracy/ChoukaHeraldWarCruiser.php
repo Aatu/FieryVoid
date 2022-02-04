@@ -43,15 +43,15 @@ class ChoukaHeraldWarCruiser extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
 		$this->addFrontSystem(new EWTwinLaserCannon(2, 8, 5, 300, 60));
 		$this->addFrontSystem(new EWTwinLaserCannon(2, 8, 5, 300, 60));
-		$this->addFrontSystem(new EWHeavyPointPlasmaGun(2, 7, 2, 240, 60));
-		$this->addFrontSystem(new EWHeavyPointPlasmaGun(2, 7, 2, 300, 120));
-		$this->addFrontSystem(new EWHeavyPointPlasmaGun(2, 7, 2, 270, 90));
+		$this->addFrontSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 240, 60));
+		$this->addFrontSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 300, 120));
+		$this->addFrontSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 270, 90));
 
         $this->addAftSystem(new Thruster(3, 24, 0, 8, 2));
-		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 2, 180, 360));
-		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 2, 180, 360));
-		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 2, 0, 180));
-		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 2, 0, 180));
+		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 180, 360));
+		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 180, 360));
+		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 0, 180));
+		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 0, 180));
 
 		$this->addLeftSystem(new MediumPlasma(2, 5, 3, 180, 300));
 		$this->addLeftSystem(new MediumPlasma(2, 5, 3, 180, 300));

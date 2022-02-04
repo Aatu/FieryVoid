@@ -34,12 +34,11 @@ class ChoukaRaiderCruiser extends BaseShip{
         $this->addPrimarySystem(new Scanner(3, 13, 4, 6));
         $this->addPrimarySystem(new Engine(3, 14, 0, 9, 5));
 		$this->addPrimarySystem(new Hangar(3, 14));
-		
    
         $this->addFrontSystem(new Thruster(2, 15, 0, 4, 1));
 		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 240, 60));
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 300, 120));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 240, 60));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 300, 120));
 
         $this->addAftSystem(new Thruster(1, 3, 0, 2, 2));
         $this->addAftSystem(new Thruster(1, 3, 0, 2, 2));
@@ -47,21 +46,21 @@ class ChoukaRaiderCruiser extends BaseShip{
 		$this->addAftSystem(new CargoBay(1, 18));
 		$this->addAftSystem(new Hangar(2, 6));
 		$this->addAftSystem(new Hangar(2, 6));
-		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 1, 120, 300));
-		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 1, 60, 240));
+		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 120, 300));
+		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 60, 240));
 
 
         $this->addLeftSystem(new MediumPlasma(3, 5, 3, 240, 360));
         $this->addLeftSystem(new LightPlasma(1, 4, 2, 240, 60));
         $this->addLeftSystem(new Thruster(2, 11, 0, 4, 3));
-		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
+		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
 		$this->addLeftSystem(new CargoBay(1, 24));
 		
 		
         $this->addRightSystem(new MediumPlasma(3, 5, 3, 0, 120));
         $this->addRightSystem(new LightPlasma(1, 4, 2, 300, 120));
         $this->addRightSystem(new Thruster(2, 11, 0, 4, 4));
-		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
+		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
 		$this->addRightSystem(new CargoBay(1, 24));		
 
 

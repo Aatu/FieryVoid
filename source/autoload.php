@@ -2415,6 +2415,8 @@ spl_autoload_register(
 				'trekltphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekhvyphasecannon' => '/server/model/weapons/customTrek.php',
+				'treklightphaser' => '/server/model/weapons/customTrek.php',
+				'treklightphaserlance' => '/server/model/weapons/customTrek.php',
 				'trekspatialtorp' => '/server/model/weapons/customTrek.php',
 				'trekphotonictorp' => '/server/model/weapons/customTrek.php',
 				'trekphotontorp' => '/server/model/weapons/customTrek.php',

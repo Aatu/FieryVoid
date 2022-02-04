@@ -884,7 +884,7 @@ class EWPointPlasmaGun extends Plasma{
     	public $trailLength = 10;
         public $priority = 4;
     	public $rangeDamagePenalty = 1;
-        public $guns = 1;
+        public $guns = 2;
 
         public $intercept = 1;
 		public $ballisticIntercept = true;
@@ -901,7 +901,7 @@ class EWPointPlasmaGun extends Plasma{
                 $maxhealth = 3;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 1;
+                $powerReq = 2;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -943,7 +943,7 @@ class EWHeavyPointPlasmaGun extends Plasma{
                 $maxhealth = 7;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 2;
+                $powerReq = 3;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }

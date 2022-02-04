@@ -36,12 +36,12 @@ class ChoukaPriestDestroyer extends HeavyCombatVessel{
 		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
 		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
 		$this->addFrontSystem(new LightPlasma(1, 4, 2, 270, 90));
-		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 1, 240, 60));
-		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 1, 300, 120));
+		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 2, 240, 60));
+		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 2, 300, 120));
                 
         $this->addAftSystem(new Thruster(2, 18, 0, 8, 2));
-        $this->addAftSystem(new EWPointPlasmaGun(1, 3, 1, 120, 300));
-        $this->addAftSystem(new EWPointPlasmaGun(1, 3, 1, 60, 240));
+        $this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 120, 300));
+        $this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 60, 240));
         $this->addAftSystem(new LightPlasma(1, 4, 2, 90, 270));
         $this->addAftSystem(new LightPlasma(1, 4, 2, 90, 270));
 

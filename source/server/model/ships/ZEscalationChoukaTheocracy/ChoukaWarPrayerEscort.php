@@ -25,7 +25,6 @@ class ChoukaWarPrayerEscort extends MediumShip{
         $this->rollcost = 1;
         $this->pivotcost = 1;
         $this->iniativebonus = 60;
-        
          
         $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
@@ -35,19 +34,18 @@ class ChoukaWarPrayerEscort extends MediumShip{
         $this->addPrimarySystem(new Thruster(1, 11, 0, 2, 3));
         $this->addPrimarySystem(new Thruster(1, 11, 0, 2, 4));        
         
-        $this->addFrontSystem(new EWHeavyPointPlasmaGun(2, 7, 2, 270, 90));
-        $this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 240, 60));
-        $this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 240, 60));
-        $this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 300, 120));
-        $this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 300, 120));
+        $this->addFrontSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 270, 90));
+        $this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 240, 60));
+        $this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 240, 60));
+        $this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 300, 120));
+        $this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 300, 120));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
 	    
-		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 1, 90, 270));
+		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 90, 270));
         $this->addAftSystem(new Thruster(2, 14, 0, 5, 2));    
        
         $this->addPrimarySystem(new Structure(3, 46));
-
 
 	//d20 hit chart
 	$this->hitChart = array(
