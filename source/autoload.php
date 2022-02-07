@@ -1482,7 +1482,8 @@ spl_autoload_register(
 				'nexuscoilgun' => '/server/model/weapons/customNexus.php',
 				'nexusheavycoilgun' => '/server/model/weapons/customNexus.php',
 				'nexusheavysentrygun' => '/server/model/weapons/customNexus.php',
-				'nexussentrygun' => '/server/model/weapons/customNexus.php',
+				'nexusmedsentrygun' => '/server/model/weapons/customNexus.php',
+				'nexuslightsentrygun' => '/server/model/weapons/customNexus.php',
 				'nexuslightcoilgun' => '/server/model/weapons/customNexus.php',
 				'nexuslightgasgun' => '/server/model/weapons/customNexus.php',
 				'nexuslightgasgunftr' => '/server/model/weapons/customNexus.php',
@@ -1606,15 +1607,18 @@ spl_autoload_register(
 				//Nexus ships - Craytan
 //                'craytanbromin' => '/server/model/ships/ZNexusCraytan/CraytanBromin.php',					
                 'craytanmaprin' => '/server/model/ships/ZNexusCraytan/CraytanMaprin.php',					
+                'craytanmaprinrefit' => '/server/model/ships/ZNexusCraytan/CraytanMaprinRefit.php',					
 //                'craytancorvette2089' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2089.php',					
 //                'craytancorvette2126' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2126.php',					
                 'craytanepiron' => '/server/model/ships/ZNexusCraytan/CraytanEpiron.php',					
                 'craytanepironrefit' => '/server/model/ships/ZNexusCraytan/CraytanEpironRefit.php',					
                 'craytanhelis' => '/server/model/ships/ZNexusCraytan/CraytanHelis.php',					
+                'craytanhelisrefit' => '/server/model/ships/ZNexusCraytan/CraytanHelisRefit.php',					
                 'craytanhepron' => '/server/model/ships/ZNexusCraytan/CraytanHepron.php',					
- //               'craytanhepron2085' => '/server/model/ships/ZNexusCraytan/CraytanHepron2085.php',					
+                'craytanhepron2085' => '/server/model/ships/ZNexusCraytan/CraytanHepron2085.php',					
  //               'craytanhepron2126' => '/server/model/ships/ZNexusCraytan/CraytanHepron2126.php',					
                 'craytanpolten' => '/server/model/ships/ZNexusCraytan/CraytanPolten.php',					
+                'craytanpoltenrefit' => '/server/model/ships/ZNexusCraytan/CraytanPoltenRefit.php',					
 
 
 

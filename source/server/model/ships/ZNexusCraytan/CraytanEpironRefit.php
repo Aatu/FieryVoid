@@ -4,7 +4,7 @@ class CraytanEpironRefit extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 500;
+	$this->pointCost = 525;
 	$this->faction = "ZNexus Playtest Craytan";
         $this->phpclass = "CraytanEpironRefit";
         $this->imagePath = "img/ships/Nexus/CraytanEpiron.png";
@@ -30,7 +30,7 @@ class CraytanEpironRefit extends BaseShip{
         $this->pivotcost = 3;
         $this->iniativebonus = 0;
         
-        $this->addPrimarySystem(new Reactor(4, 24, 0, 0));
+        $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 4, 6));
         $this->addPrimarySystem(new Engine(4, 18, 0, 8, 3));
@@ -39,11 +39,11 @@ class CraytanEpironRefit extends BaseShip{
 		
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
-		$this->addFrontSystem(new NexusSentryGun(2, 5, 1, 240, 60));
+		$this->addFrontSystem(new LightPlasma(2, 4, 2, 240, 60));
 		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 240, 360));
 		$this->addFrontSystem(new NexusCIDS(2, 4, 2, 300, 60));
 		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 0, 120));
-		$this->addFrontSystem(new NexusSentryGun(2, 5, 1, 300, 120));
+		$this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 120));
 
         $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
@@ -51,19 +51,19 @@ class CraytanEpironRefit extends BaseShip{
         $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
 		$this->addAftSystem(new NexusLightAssaultCannon(3, 6, 3, 180, 300));
 		$this->addAftSystem(new NexusLightAssaultCannon(3, 6, 3, 60, 180));
-		$this->addAftSystem(new NexusSentryGun(2, 5, 1, 120, 300));
-		$this->addAftSystem(new NexusSentryGun(2, 5, 1, 60, 240));
+		$this->addAftSystem(new LightPlasma(2, 4, 2, 120, 300));
+		$this->addAftSystem(new LightPlasma(2, 4, 2, 60, 240));
 
         $this->addLeftSystem(new NexusAssaultCannon(4, 8, 5, 300, 360));
 		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 180, 360));
-		$this->addLeftSystem(new NexusSentryGun(2, 5, 1, 180, 360));
-		$this->addLeftSystem(new CargoBay(2, 16));
+		$this->addLeftSystem(new LightPlasma(2, 4, 2, 180, 360));
+		$this->addLeftSystem(new CargoBay(2, 12));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
         $this->addRightSystem(new NexusAssaultCannon(4, 8, 5, 0, 60));
 		$this->addRightSystem(new NexusCIDS(2, 4, 2, 0, 180));
-		$this->addRightSystem(new NexusSentryGun(2, 5, 1, 0, 180));
-		$this->addRightSystem(new CargoBay(2, 16));
+		$this->addRightSystem(new LightPlasma(2, 4, 2, 0, 180));
+		$this->addRightSystem(new CargoBay(2, 12));
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -86,28 +86,33 @@ class CraytanEpironRefit extends BaseShip{
 			1=> array(
 					5 => "Thruster",
 					8 => "Heavy Plasma Cannon",
-					10 => "Close-In Defense System",
+					10 => "Light Plasma Cannon",
+					11 => "Close-In Defense System",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
-					8 => "Thruster",
-					10 => "Heavy Plasma Cannon",
+					6 => "Thruster",
+					8 => "Light Assault Cannon",
+					10 => "Light Plasma Cannon",
+					11 => "Close-In Defense System",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
-					5 => "Thruster",
-					7 => "Plasma Bomb Rack",
-					8 => "Advanced Close-In Defense System",
+					4 => "Thruster",
+					6 => "Cargo Bay",
+					7 => "Close-In Defense System",
+					8 => "Light Plasma Cannon",
 					10 => "Assault Cannon",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
-					5 => "Thruster",
-					7 => "Plasma Bomb Rack",
-					8 => "Advanced Close-In Defense System",
+					4 => "Thruster",
+					6 => "Cargo Bay",
+					7 => "Close-In Defense System",
+					8 => "Light Plasma Cannon",
 					10 => "Assault Cannon",
 					18 => "Structure",
 					20 => "Primary",
