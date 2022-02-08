@@ -2233,7 +2233,8 @@ spl_autoload_register(
 				'norvaii' => '/server/model/ships/descari/NorvaII.php',
 				'carrana' => '/server/model/ships/descari/Carrana.php',
 				'hemsar' => '/server/model/ships/descari/Hemsar.php',
-				'hemros' => '/server/model/ships/descari/Hemros.php',   
+				'hemros' => '/server/model/ships/descari/Hemros.php',
+				'rulnato' => '/server/model/ships/descari/Rulnato.php',				   
 		    
 		    	//Random Ships which don't require new mechanics to add
 		    	'zzunofftlorr' => '/server/model/ships/narn/zzunoffTlorr.php',
