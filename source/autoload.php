@@ -2510,10 +2510,7 @@ spl_autoload_register(
 				'ltviper' => '/server/model/ships/customs/LtViper.php',
 				'medviper' => '/server/model/ships/customs/medViper.php',
 				
-				//TEMPORARY layout changes and such - old versions	    
-                'halikold' => '/server/model/ships/brakiri/halikOld.php',
-                'shargotiold' => '/server/model/ships/minbari/shargotiOld.php',
-                'tradanaold' => '/server/model/ships/minbari/tradanaOld.php',
+				//TEMPORARY layout changes and such - old versions	
 				
 						
 				
