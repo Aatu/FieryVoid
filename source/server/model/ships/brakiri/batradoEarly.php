@@ -8,7 +8,7 @@ class BatradoEarly extends BaseShip{
 	$this->faction = "Brakiri";
         $this->phpclass = "BatradoEarly";
         $this->imagePath = "img/ships/avioki.png";
-        $this->shipClass = "Batrado Armed Transport (early)";
+        $this->shipClass = "Batrado Armed Transport (Early)";
 			$this->occurence = "uncommon";
 			$this->variantOf = 'Avioki Heavy Cruiser';
         $this->shipSizeClass = 3;

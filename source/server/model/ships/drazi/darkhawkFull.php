@@ -12,7 +12,7 @@ class DarkhawkFull extends HeavyCombatVesselLeftRight{
 	        $this->unofficial = true;
 	    $this->variantOf = "Sunhawk Battlecruiser";
         $this->isd = 2214;
-        $this->canvasSize = 180;
+        $this->canvasSize = 200;
         $this->forwardDefense = 14;
         $this->sideDefense = 13; 
         

@@ -10,7 +10,7 @@ class Antoph extends HeavyCombatVessel{
         $this->imagePath = "img/ships/antoph.png";
         $this->shipClass = "Antoph Light Cruiser";
 			$this->occurence = "common";
-			$this->variantOf = 'Antoph Light Cruiser (upgrade)';
+			$this->variantOf = 'Antoph Light Cruiser (Upgraded)';
                 
 		$this->notes = 'Ak-Habil Conglomerate';//Corporation producing the design
 		$this->isd = 2220;

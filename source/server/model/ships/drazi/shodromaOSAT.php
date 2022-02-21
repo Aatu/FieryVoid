@@ -10,6 +10,7 @@ class ShodromaOSAT extends OSAT{
         $this->imagePath = "img/ships/drazi/DraziShodroma.png";
         $this->shipClass = 'Shodroma Armed Satellite';
 	    $this->isd = 2226;
+        $this->canvasSize = 100;	    
         
         $this->forwardDefense = 10;
         $this->sideDefense = 10;
