@@ -171,8 +171,7 @@ class TrekLtPhaseCannon extends TrekPhaserBase{
         }
 
 	    
-        public function getDamage($fireOrder){        
-			//return Dice::d(10, 1)+4;   //original damage
+        public function getDamage($fireOrder){   
 			return Dice::d(6, 2)+4;
 		}
         public function setMinDamage(){   return  $this->minDamage = 6 ;      }

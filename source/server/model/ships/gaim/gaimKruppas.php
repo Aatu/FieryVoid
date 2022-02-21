@@ -40,8 +40,8 @@ class gaimKruppas extends HeavyCombatVessel{
 		
        
 		$this->addAftSystem(new TwinArray(3, 6, 2, 120, 360));  
-		$this->addAftSystem(new TwinArray(3, 6, 2, 0, 240));  
 		$this->addAftSystem(new TwinArray(3, 6, 2, 60, 300));  
+		$this->addAftSystem(new TwinArray(3, 6, 2, 0, 240));  
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));

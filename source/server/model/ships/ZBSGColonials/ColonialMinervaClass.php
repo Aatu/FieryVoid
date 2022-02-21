@@ -56,7 +56,7 @@ class ColonialMinervaClass extends BaseShip{
         $this->addAftSystem(new BSGFlakBattery(5, 6, 2, 120, 240));
 		$this->addAftSystem(new BSGFlakBattery(5, 6, 2, 120, 240));
     
-        $this->addLeftSystem(new Thruster(5, 20, 0, 3, 3));
+        $this->addLeftSystem(new Thruster(5, 20, 0, 4, 3));
         $this->addLeftSystem(new BSGMainBattery(5, 9, 6, 240, 300));
         $this->addLeftSystem(new BSGFlakBattery(5, 6, 2, 210, 330));
         $this->addLeftSystem(new BSGFlakBattery(5, 6, 2, 210, 330));
@@ -66,7 +66,7 @@ class ColonialMinervaClass extends BaseShip{
         $this->addLeftSystem(new SMissileRack(5, 6, 0, 210, 330));
         $this->addLeftSystem(new Hangar(5, 7));
 
-        $this->addRightSystem(new Thruster(5, 20, 0, 3, 4));
+        $this->addRightSystem(new Thruster(5, 20, 0, 4, 4));
         $this->addRightSystem(new BSGMainBattery(5, 9, 6, 60, 120));
         $this->addRightSystem(new BSGFlakBattery(5, 6, 2, 30, 150));
         $this->addRightSystem(new BSGFlakBattery(5, 6, 2, 30, 150));
