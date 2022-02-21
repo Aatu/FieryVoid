@@ -39,8 +39,8 @@ class CraytanEpiron extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
 		$this->addFrontSystem(new NexusLightAssaultCannon(3, 6, 3, 240, 360));
 		$this->addFrontSystem(new NexusLightAssaultCannon(3, 6, 3, 0, 120));
-		$this->addFrontSystem(new NexusSentryGun(2, 5, 1, 240, 60));
-		$this->addFrontSystem(new NexusSentryGun(2, 5, 1, 300, 120));
+		$this->addFrontSystem(new NexusLightSentryGun(2, 5, 1, 240, 60));
+		$this->addFrontSystem(new NexusLightSentryGun(2, 5, 1, 300, 120));
 
         $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
@@ -48,18 +48,18 @@ class CraytanEpiron extends BaseShip{
         $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
 		$this->addAftSystem(new NexusLightAssaultCannon(3, 6, 3, 180, 300));
 		$this->addAftSystem(new NexusLightAssaultCannon(3, 6, 3, 60, 180));
-		$this->addAftSystem(new NexusSentryGun(2, 5, 1, 120, 300));
-		$this->addAftSystem(new NexusSentryGun(2, 5, 1, 60, 240));
+		$this->addAftSystem(new NexusLightSentryGun(2, 5, 1, 120, 300));
+		$this->addAftSystem(new NexusLightSentryGun(2, 5, 1, 60, 240));
 
         $this->addLeftSystem(new NexusAssaultCannon(4, 8, 5, 300, 360));
 		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 180, 360));
-		$this->addLeftSystem(new NexusSentryGun(2, 5, 1, 180, 360));
+		$this->addLeftSystem(new NexusLightSentryGun(2, 5, 1, 180, 360));
 		$this->addLeftSystem(new CargoBay(2, 16));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
         $this->addRightSystem(new NexusAssaultCannon(4, 8, 5, 0, 60));
 		$this->addRightSystem(new NexusCIDS(2, 4, 2, 0, 180));
-		$this->addRightSystem(new NexusSentryGun(2, 5, 1, 0, 180));
+		$this->addRightSystem(new NexusLightSentryGun(2, 5, 1, 0, 180));
 		$this->addRightSystem(new CargoBay(2, 16));
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
 
@@ -83,14 +83,14 @@ class CraytanEpiron extends BaseShip{
 			1=> array(
 					5 => "Thruster",
 					8 => "Light Assault Cannon",
-					10 => "Sentry Gun",
+					10 => "Light Sentry Gun",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
 					6 => "Thruster",
 					8 => "Light Assault Cannon",
-					10 => "Sentry Gun",
+					10 => "Light Sentry Gun",
 					18 => "Structure",
 					20 => "Primary",
 			),
@@ -98,7 +98,7 @@ class CraytanEpiron extends BaseShip{
 					4 => "Thruster",
 					6 => "Cargo Bay",
 					7 => "Close-In Defense System",
-					8 => "Sentry Gun",
+					8 => "Light Sentry Gun",
 					10 => "Assault Cannon",
 					18 => "Structure",
 					20 => "Primary",
@@ -107,7 +107,7 @@ class CraytanEpiron extends BaseShip{
 					4 => "Thruster",
 					6 => "Cargo Bay",
 					7 => "Close-In Defense System",
-					8 => "Sentry Gun",
+					8 => "Light Sentry Gun",
 					10 => "Assault Cannon",
 					18 => "Structure",
 					20 => "Primary",

@@ -37,14 +37,14 @@ class ChoukaPledgeMinelayer extends MediumShip{
 		$this->addFrontSystem(new LightEnergyMine(3, 3, 2, 300, 60));
 		$this->addFrontSystem(new LightEnergyMine(3, 3, 2, 300, 60));
         $this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 60));	
-		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 1, 180, 360));
-		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 1, 0, 180));
+		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 2, 180, 360));
+		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 2, 0, 180));
         $this->addFrontSystem(new Thruster(2, 13, 0, 3, 1));
 
 		$this->addAftSystem(new LightEnergyMine(3, 3, 2, 120, 240));
 		$this->addAftSystem(new LightEnergyMine(3, 3, 2, 120, 240));
-		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 1, 180, 360));
-		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 1, 0, 180));
+		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 180, 360));
+		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 0, 180));
         $this->addAftSystem(new Thruster(2, 18, 0, 6, 2));    
        
         $this->addPrimarySystem(new Structure(3, 56));

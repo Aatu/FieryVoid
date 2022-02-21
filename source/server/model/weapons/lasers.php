@@ -824,7 +824,7 @@ class LaserAccelerator extends Laser{
         public $extraoverloadshots = 2;
 
         public $raking = 10;
-        public $priority = 8;
+        public $priority = 9;
         
         public $rangePenalty = 0.2;
         public $fireControl = array(null, 2, 4); // fighters, <mediums, <capitals 
@@ -846,5 +846,45 @@ class LaserAccelerator extends Laser{
         
         
     } // endof Spinal Laser
+
+
+	//Fighter-sized blast laser
+    class LtBlastLaser extends Weapon{  //this is NOT a Pulse weapon at all...
+        public $name = "LtBlastLaser";
+        public $displayName = "Light Blast Laser";
+        public $iconPath = "improvedBlastLaser.png";
+
+        public $animationColor = array(255, 30, 30);
+        public $animation = "bolt"; //a bolt, not beam
+        public $uninterceptable = true;
+		
+		public $noPrimaryHits = true;//cannot penetrate to PRIMARY on outer hits
+//	    public $rof = 1;
+        
+        public $loadingtime = 1;
+		public $priority = 6;//VERY large fighter weapon
+        
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+        public $damageType = "Standard";
+        public $weaponClass = "Laser"; 
+
+		public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Uninterceptable.'; 
+			$this->data["Special"] .= '<br>Cannot penetrate to PRIMARY when hitting outer section.';
+		}
+
+        function __construct($startArc, $endArc){
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(6,2)+5;   }
+        public function setMinDamage(){     $this->minDamage = 7 /*- $this->dp*/;      }
+        public function setMaxDamage(){     $this->maxDamage = 17 /*- $this->dp*/;      }
+
+    }
+
+
 
 ?>

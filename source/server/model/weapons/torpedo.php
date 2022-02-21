@@ -229,6 +229,7 @@
         public $weaponClass = "Ballistic"; 
         public $damageType = "Standard"; 
         
+		public $hidetarget = true;
         
         public $fireControl = array(-6, 3, 3); // fighters, <mediums, <capitals 
 		public $rangePenalty = 0.5; //-1/2 hexes - BUT ONLY AFTER 10 HEXES

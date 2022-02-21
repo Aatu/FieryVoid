@@ -49,13 +49,13 @@ class ChoukaRetributionBattlecruiser extends BaseShip{
 		$this->addAftSystem(new JumpEngine(3, 16, 4, 40));
 
         $this->addLeftSystem(new MediumPlasma(2, 5, 3, 240, 360));
-		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
-		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
+		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
+		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
         $this->addLeftSystem(new Thruster(3, 13, 0, 6, 3));
 
         $this->addRightSystem(new MediumPlasma(2, 5, 3, 0, 120));
-		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
-		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
+		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
+		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
         $this->addRightSystem(new Thruster(3, 13, 0, 6, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

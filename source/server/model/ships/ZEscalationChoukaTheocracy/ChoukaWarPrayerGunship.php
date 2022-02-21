@@ -23,7 +23,6 @@ class ChoukaWarPrayerGunship extends MediumShip{
         $this->rollcost = 1;
         $this->pivotcost = 1;
         $this->iniativebonus = 60;
-        
          
         $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
@@ -45,7 +44,6 @@ class ChoukaWarPrayerGunship extends MediumShip{
         $this->addAftSystem(new Thruster(2, 14, 0, 5, 2));    
        
         $this->addPrimarySystem(new Structure(3, 46));
-
 
 	//d20 hit chart
 	$this->hitChart = array(

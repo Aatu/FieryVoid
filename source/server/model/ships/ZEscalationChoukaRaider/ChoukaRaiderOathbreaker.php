@@ -14,7 +14,6 @@ class ChoukaRaiderOathbreaker extends HeavyCombatVessel{
         $this->isd = 1938;
 		
         $this->fighters = array("normal"=>12);
-		
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
@@ -25,7 +24,6 @@ class ChoukaRaiderOathbreaker extends HeavyCombatVessel{
         $this->rollcost = 3;
         $this->pivotcost = 4;
         $this->iniativebonus = 4*5;
-        
          
         $this->addPrimarySystem(new Reactor(3, 13, 0, 0));
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));
@@ -42,12 +40,11 @@ class ChoukaRaiderOathbreaker extends HeavyCombatVessel{
 		$this->addFrontSystem(new LightPlasma(1, 4, 2, 300, 120));
                 
         $this->addAftSystem(new Thruster(1, 18, 0, 6, 2));
-        $this->addAftSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
-        $this->addAftSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
-        $this->addAftSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
-        $this->addAftSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
+        $this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
+        $this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
+        $this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
+        $this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
 		$this->addAftSystem(new LightPlasma(1, 4, 2, 120, 240));
-
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 40));

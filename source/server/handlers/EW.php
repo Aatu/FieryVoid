@@ -53,6 +53,11 @@
             		$CnC = $ship->getSystemByName("CnC");
 			if ($CnC && $CnC->hasCritical("RestrictedEW"))
 				$output -= 2*$CnC->hasCritical("RestrictedEW");	
+//GTS 13Jan22
+            		$BSGHybrid = $ship->getSystemByName("BSGHybrid");
+			if ($BSGHybrid && $BSGHybrid->hasCritical("SensorLoss"))
+				$output -= 3*$BSGHybrid->hasCritical("SensorLoss");	
+
 			
 			    if ($output < 0)
 				$output = 0;
