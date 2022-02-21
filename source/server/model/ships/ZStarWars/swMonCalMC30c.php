@@ -30,7 +30,7 @@ class swMonCalMC30c extends HeavyCombatVesselLeftRight{
         
 	$this->addAftSystem(new Thruster(2, 8, 0, 4, 1));
 	$this->addAftSystem(new Thruster(2, 8, 0, 4, 1));
-	$this->addPrimarySystem(new SWRayShield(3,8,4,2,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addFrontSystem(new SWRayShield(3,8,4,2,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Reactor(3, 14, 0, 0));
         $this->addPrimarySystem(new SWScanner(3, 12, 6, 6));
@@ -39,7 +39,7 @@ class swMonCalMC30c extends HeavyCombatVesselLeftRight{
 	$hyperdrive = new JumpEngine(3, 14, 5, 15);
 	$hyperdrive->displayName = 'Hyperdrive';
 	$this->addAftSystem($hyperdrive);
-	$this->addAftSystem(new SWRayShield(3,8,4,2,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addFrontSystem(new SWRayShield(3,8,4,2,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addAftSystem(new Thruster(2, 8, 0, 4, 2));
 	$this->addAftSystem(new Thruster(2, 8, 0, 4, 2));
 	$this->addAftSystem(new Thruster(2, 8, 0, 4, 2));
@@ -76,7 +76,7 @@ class swMonCalMC30c extends HeavyCombatVesselLeftRight{
         $this->hitChart = array(
         		0=> array(
 					8 => "Structure",
-        				10 => "Ray Shield",
+        				10 => "1:Ray Shield",
         				13 => "2:Thruster",
 		        		14 => "2:Hyperdrive",
         				16 => "Scanner",

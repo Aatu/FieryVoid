@@ -8,7 +8,7 @@ class AviokiEarly extends BaseShip{
 	$this->faction = "Brakiri";
         $this->phpclass = "AviokiEarly";
         $this->imagePath = "img/ships/avioki.png";
-        $this->shipClass = "Avioki Heavy Cruiser (early)";
+        $this->shipClass = "Avioki Heavy Cruiser (Early)";
 			$this->occurence = "common";
 			$this->variantOf = 'Avioki Heavy Cruiser';
         $this->shipSizeClass = 3;

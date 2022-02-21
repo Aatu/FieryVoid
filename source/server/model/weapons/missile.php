@@ -41,15 +41,14 @@ class MissileLauncher extends Weapon{
 		//modified by Marcin on 20th of December
 		
         if ($base){ //mounted on base - triple the launch range
-		/*
+		
             $this->rangeMod = $this->rangeMod + ($this->range * 2); 
-			$this->range = $this->range * 3;            }
+			$this->range = $this->range * 3;
 //GTS            $this->rangeMod = $this->rangeMod + $this->range; 
 //GTS            $this->range = $this->range *2;      
-*/
-			$this->range = $this->distanceRange; //much simplified!
-		}
 
+			//$this->range = $this->distanceRange; //much simplified! ...but not working due to weapon/ammo interaction :(
+		}
 
         $MissileB = new MissileB($startArc, $endArc, $this->fireControl);
         $this->missileArray = array(
