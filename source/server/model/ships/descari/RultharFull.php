@@ -1,14 +1,14 @@
 <?php
-class RultharLRack extends HeavyCombatVessel{
+class RultharFull extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 500;
+        $this->pointCost = 550;
         $this->faction = "Descari";
-        $this->phpclass = "RultharLRack";
+        $this->phpclass = "RultharFull";
         $this->imagePath = "img/ships/DescariRulpa.png";
-        $this->shipClass = "Rulthar Long-Range Missile Destroyer";
+        $this->shipClass = "Rulthar Missile Destroyer (Full)";
 		$this->occurence = "uncommon";
 	    $this->isd = 2237;
         $this->variantOf = "Rulthar Missile Destroyer";
@@ -36,10 +36,10 @@ class RultharLRack extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));        
-        $this->addFrontSystem(new LMissileRack(3, 6, 0, 180, 60));
-        $this->addFrontSystem(new LMissileRack(3, 6, 0, 240, 360));
-        $this->addFrontSystem(new LMissileRack(3, 6, 0, 0, 120));
-        $this->addFrontSystem(new LMissileRack(3, 6, 0, 300, 180));
+	$this->addFrontSystem(new MultiMissileLauncher(3, 'S', 180, 60));
+	$this->addFrontSystem(new MultiMissileLauncher(3, 'S',240, 360));
+  	$this->addFrontSystem(new MultiMissileLauncher(3, 'S', 0, 120));
+ 	$this->addFrontSystem(new MultiMissileLauncher(3, 'S', 300, 180));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 60));
 	
@@ -71,7 +71,7 @@ class RultharLRack extends HeavyCombatVessel{
 			),
 			1=> array(
 				5 => "Thruster",
-				10 => "Class-L Missile Rack",
+				10 => "Class-S Missile Rack",
 				12 => "Light Particle Beam",
 				18 => "Structure",
 				20 => "Primary",
