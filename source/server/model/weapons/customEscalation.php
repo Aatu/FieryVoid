@@ -11,8 +11,8 @@ class EWParticleLance extends Raking{
 	
 	public $animationArray = array(1=>'laser', 2=>'laser');
         public $animationColor = array(255, 250, 230);
-        public $animationWidthArray = array(1=>5, 2=>3);
-        public $animationExplosionScale = 0.25;
+//        public $animationWidthArray = array(1=>5, 2=>3);
+//        public $animationExplosionScale = 0.25;
    	    	      
 	//actual weapons data
    		public $priorityArray = array(1=>8, 2=>8);
@@ -350,9 +350,9 @@ class EWHeavyGatlingLaser extends Pulse{
         public $displayName = "Light Laser Beam";
         public $animation = "laser";
         public $animationColor = array(220, 100, 30);
-        public $animationExplosionScale = 0.1;
-        public $animationWidth = 1;
-        public $animationWidth2 = 0.2;
+//        public $animationExplosionScale = 0.1;
+//        public $animationWidth = 1;
+//        public $animationWidth2 = 0.2;
         public $priority = 3;
         public $uninterceptable = true; // This is a laser        
 		
@@ -473,9 +473,9 @@ class EWHeavyGatlingLaser extends Pulse{
 	    
         public $animation = "laser";
         public $animationColor = array(255, 91, 91);
-        public $animationExplosionScale = 0.16;
-        public $animationWidth = 3;
-        public $animationWidth2 = 0.3;
+//        public $animationExplosionScale = 0.16;
+//        public $animationWidth = 3;
+//        public $animationWidth2 = 0.3;
         public $priority = 8;
         public $loadingtime = 2;
         
@@ -511,9 +511,9 @@ class EWHeavyGatlingLaser extends Pulse{
 	    
         public $animation = "laser";
         public $animationColor = array(255, 91, 91);
-        public $animationExplosionScale = 0.16;
-        public $animationWidth = 3;
-        public $animationWidth2 = 0.3;
+//        public $animationExplosionScale = 0.16;
+//        public $animationWidth = 3;
+//        public $animationWidth2 = 0.3;
         public $priority = 8;
         public $loadingtime = 3;
         
@@ -550,8 +550,8 @@ class EWHeavyGatlingLaser extends Pulse{
 
         public $animation = "laser";
         public $animationColor = array(220, 60, 120);
-        public $animationWidth = 4;
-        public $animationWidth2 = 0.2;
+//        public $animationWidth = 4;
+//        public $animationWidth2 = 0.2;
 
         public $loadingtime = 3;
 
@@ -590,8 +590,8 @@ class EWHeavyGatlingLaser extends Pulse{
 
         public $animation = "laser";
         public $animationColor = array(220, 60, 120);
-        public $animationWidth = 6;
-        public $animationWidth2 = 0.6;
+//        public $animationWidth = 6;
+//        public $animationWidth2 = 0.6;
 
         public $loadingtime = 5;
 
@@ -884,7 +884,7 @@ class EWPointPlasmaGun extends Plasma{
     	public $trailLength = 10;
         public $priority = 4;
     	public $rangeDamagePenalty = 1;
-        public $guns = 1;
+        public $guns = 2;
 
         public $intercept = 1;
 		public $ballisticIntercept = true;
@@ -901,7 +901,7 @@ class EWPointPlasmaGun extends Plasma{
                 $maxhealth = 3;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 1;
+                $powerReq = 2;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -943,7 +943,7 @@ class EWHeavyPointPlasmaGun extends Plasma{
                 $maxhealth = 7;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 2;
+                $powerReq = 3;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -1048,8 +1048,8 @@ class EWPlasmaArc extends Raking{
 	public $animationColor = array(75, 250, 90);
 	public $trailColor = array(75, 250, 90);
 	public $projectilespeed = 20;
-	public $animationWidth = 2;
-	public $animationExplosionScale = 0.15;
+//	public $animationWidth = 2;
+//	public $animationExplosionScale = 0.15;
 	public $trailLength = 300;
 	public $priority = 1;
 		        

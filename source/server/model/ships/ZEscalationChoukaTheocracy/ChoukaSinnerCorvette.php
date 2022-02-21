@@ -32,15 +32,15 @@ class ChoukaSinnerCorvette extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));        
         
-		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 1, 240, 60));
+		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 2, 240, 60));
         $this->addFrontSystem(new EWHeavyPlasmaGun(2, 5, 3, 240, 360));
         $this->addFrontSystem(new EWHeavyPlasmaGun(2, 5, 3, 0, 120));
-		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 1, 300, 120));
+		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 2, 300, 120));
         $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));
 	    
-		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 1, 120, 300));
-		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 1, 60, 240));
+		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 120, 300));
+		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 60, 240));
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));    
         $this->addAftSystem(new Thruster(2, 12, 0, 4, 2));    
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));    

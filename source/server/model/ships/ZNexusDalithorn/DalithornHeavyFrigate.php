@@ -30,8 +30,8 @@ class DalithornHeavyFrigate extends MediumShip{
         $this->addPrimarySystem(new Engine(4, 12, 0, 8, 2));
         $this->addPrimarySystem(new Hangar(1, 1));
 		$this->addPrimarySystem(new CargoBay(2, 10));
-        $this->addPrimarySystem(new Thruster(2, 14, 0, 4, 3));
-        $this->addPrimarySystem(new Thruster(2, 14, 0, 4, 4));        
+        $this->addPrimarySystem(new Thruster(2, 14, 0, 5, 3));
+        $this->addPrimarySystem(new Thruster(2, 14, 0, 5, 4));        
         
 		$this->addFrontSystem(new NexusGasGun(3, 7, 2, 300, 60));
 		$this->addFrontSystem(new NexusMinigun(2, 4, 1, 240, 60));

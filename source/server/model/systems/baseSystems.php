@@ -1051,7 +1051,7 @@ class CnC extends ShipSystem implements SpecialAbility {
 		15=>"RestrictedEW", 
 		18=>array("ReducedIniativeOneTurn","ReducedIniative"), 
 		21=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative"), 
-		24=>array("RestrictedEW","ReducedIniative","ShipDisabledOneTurn")
+		24=>array("RestrictedEW","ReducedIniative","ShipDisabledOneTurn") 
     );
         
     function __construct($armour, $maxhealth, $powerReq, $output ){
@@ -1995,6 +1995,9 @@ class DiffuserTendril extends ShipSystem{
 			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= "Used to store absorbed energy from hits.<br>It is here for visual (and technical) purposes only. It's part of Energy Diffuser system.";
+		
+		$freeCapacity = $this->maxhealth - $this->getUsedCapacity();
+		$this->outputDisplay = $freeCapacity . '/' . $this->maxhealth;//override on-icon display default
 	}	
 	
 	public function getRemainingCapacity(){
@@ -2031,6 +2034,8 @@ class DiffuserTendrilFtr extends DiffuserTendril{
 		$freeCapacity = $this->maxhealth - $this->getUsedCapacity();
 		//$this->data["Capacity"] = $this->getUsedCapacity() . '/' . $this->maxhealth;
 		$this->data["Capacity available/max"] = $freeCapacity . '/' . $this->maxhealth;
+		
+		$this->outputDisplay = $freeCapacity . '/' . $this->maxhealth;//override on-icon display default
 	}	
 	
 	/*always redefine $this->data due to current capacity info*/
@@ -3269,6 +3274,19 @@ class StructureTechnical extends ShipSystem{
 }//endof VreeStructurePlaceholder	
 
 
+class BSGHybrid extends ShipSystem {
+    public $name = "BSGHybrid";
+    public $displayName = "Cylon Hybrid";
+	public $iconPath = "ShadowPilot.png";
+
+    public $possibleCriticals = array(
+		1=>"SensorLoss"
+    );
+
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+    }
+}
 
 
 

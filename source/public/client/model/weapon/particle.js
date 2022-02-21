@@ -319,3 +319,9 @@ var Interdictor = function Interdictor(json, ship) {
 };
 Interdictor.prototype = Object.create(Weapon.prototype);
 Interdictor.prototype.constructor = Interdictor;
+
+var FtrInterdictor = function FtrInterdictor(json, ship) {
+    Weapon.call(this, json, ship);
+};
+FtrInterdictor.prototype = Object.create(Weapon.prototype);
+FtrInterdictor.prototype.constructor = FtrInterdictor;

@@ -830,6 +830,7 @@ spl_autoload_register(
                 'sellac1910' => '/server/model/ships/abbai_old/sellac1910.php',
                 'seltat' => '/server/model/ships/centauri/seltat.php',
                 'senschuka' => '/server/model/ships/dilgar/senschuka.php',
+                'sensorloss' => '/server/model/cricialClasses.php',
                 'sensorspear' => '/server/model/weapons/specialWeapons.php',
                 'sensorspike' => '/server/model/weapons/specialWeapons.php',
                 'sentinelpointdefense' => '/server/model/weapons/defensive.php',
@@ -907,7 +908,7 @@ spl_autoload_register(
 		'sparkfield' => '/server/model/weapons/specialWeapons.php',
                 'sparkfieldhandler' => '/server/model/weapons/specialWeapons.php',
                 'specialability' => '/server/model/systems/baseSystems.php',
-                'spinallaser' => '/server/model/weapons/laser.php',
+                'spinallaser' => '/server/model/weapons/lasers.php',
                 'starbase' => '/server/model/ships/ShipClasses.php',
                 'starbasefivesections' => '/server/model/ships/ShipClasses.php',
                 'starbasesixsections' => '/server/model/ships/ShipClasses.php',
@@ -1481,7 +1482,8 @@ spl_autoload_register(
 				'nexuscoilgun' => '/server/model/weapons/customNexus.php',
 				'nexusheavycoilgun' => '/server/model/weapons/customNexus.php',
 				'nexusheavysentrygun' => '/server/model/weapons/customNexus.php',
-				'nexussentrygun' => '/server/model/weapons/customNexus.php',
+				'nexusmedsentrygun' => '/server/model/weapons/customNexus.php',
+				'nexuslightsentrygun' => '/server/model/weapons/customNexus.php',
 				'nexuslightcoilgun' => '/server/model/weapons/customNexus.php',
 				'nexuslightgasgun' => '/server/model/weapons/customNexus.php',
 				'nexuslightgasgunftr' => '/server/model/weapons/customNexus.php',
@@ -1605,20 +1607,24 @@ spl_autoload_register(
 				//Nexus ships - Craytan
 //                'craytanbromin' => '/server/model/ships/ZNexusCraytan/CraytanBromin.php',					
                 'craytanmaprin' => '/server/model/ships/ZNexusCraytan/CraytanMaprin.php',					
+                'craytanmaprinrefit' => '/server/model/ships/ZNexusCraytan/CraytanMaprinRefit.php',					
 //                'craytancorvette2089' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2089.php',					
 //                'craytancorvette2126' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2126.php',					
                 'craytanepiron' => '/server/model/ships/ZNexusCraytan/CraytanEpiron.php',					
-//                'craytanepiron2101' => '/server/model/ships/ZNexusCraytan/CraytanEpiron2101.php',					
+                'craytanepironrefit' => '/server/model/ships/ZNexusCraytan/CraytanEpironRefit.php',					
                 'craytanhelis' => '/server/model/ships/ZNexusCraytan/CraytanHelis.php',					
+                'craytanhelisrefit' => '/server/model/ships/ZNexusCraytan/CraytanHelisRefit.php',					
                 'craytanhepron' => '/server/model/ships/ZNexusCraytan/CraytanHepron.php',					
- //               'craytanhepron2085' => '/server/model/ships/ZNexusCraytan/CraytanHepron2085.php',					
+                'craytanhepron2085' => '/server/model/ships/ZNexusCraytan/CraytanHepron2085.php',					
  //               'craytanhepron2126' => '/server/model/ships/ZNexusCraytan/CraytanHepron2126.php',					
                 'craytanpolten' => '/server/model/ships/ZNexusCraytan/CraytanPolten.php',					
+                'craytanpoltenrefit' => '/server/model/ships/ZNexusCraytan/CraytanPoltenRefit.php',					
 
 
 
 
 				//Nexus ships - Dalithorn
+                'dalithorncarrier' => '/server/model/ships/ZNexusDalithorn/DalithornCarrier.php',					
                 'dalithorncutter' => '/server/model/ships/ZNexusDalithorn/DalithornCutter.php',					
                 'dalithorncutterrefit' => '/server/model/ships/ZNexusDalithorn/DalithornCutterRefit.php',					
                 'dalithorndreadnought' => '/server/model/ships/ZNexusDalithorn/DalithornDreadnought.php',					
@@ -1639,6 +1645,9 @@ spl_autoload_register(
                 'dalithornlightcruiser' => '/server/model/ships/ZNexusDalithorn/DalithornLightCruiser.php',					
                 'dalithornmicrosat' => '/server/model/ships/ZNexusDalithorn/DalithornMicrosat.php',					
                 'dalithornmicrosatrefit' => '/server/model/ships/ZNexusDalithorn/DalithornMicrosatRefit.php',					
+                'dalithornmissilecruiser' => '/server/model/ships/ZNexusDalithorn/DalithornMissileCruiser.php',					
+                'dalithornnewcarrier' => '/server/model/ships/ZNexusDalithorn/DalithornNewCarrier.php',					
+                'dalithornnewmissilecruiser' => '/server/model/ships/ZNexusDalithorn/DalithornNewMissileCruiser.php',					
                 'dalithornosat' => '/server/model/ships/ZNexusDalithorn/DalithornOSAT.php',					
                 'dalithornosatearly' => '/server/model/ships/ZNexusDalithorn/DalithornOSATEarly.php',					
                 'dalithornosatrefit' => '/server/model/ships/ZNexusDalithorn/DalithornOSATRefit.php',					
@@ -1916,6 +1925,7 @@ spl_autoload_register(
 				'cylonbasestar' => '/server/model/ships/ZBSGCylons/CylonBasestar.php',				
 				'cylonsparrowraider' => '/server/model/ships/ZBSGCylons/CylonSparrowRaider.php',				
 
+                'bsghybrid' => '/server/model/systems/baseSystems.php',
 
 
 
@@ -2177,6 +2187,8 @@ spl_autoload_register(
 				'maggravreactortechnical' => '/server/model/systems/baseSystems.php',
 				'vorlondischargegun' => '/server/model/weapons/specialWeapons.php',
 				'vorlonlightningcannon' => '/server/model/weapons/specialWeapons.php',
+//				'vorlonlightninggun' => '/server/model/weapons/specialWeapons.php',
+//				'vorlondischargepulsar' => '/server/model/weapons/specialWeapons.php',
 				'vorlonltdischargegun' => '/server/model/weapons/specialWeapons.php',
 				'vorlondischargecannon' => '/server/model/weapons/specialWeapons.php',
 								
@@ -2193,6 +2205,7 @@ spl_autoload_register(
 				'vorlonheavycarrier' => '/server/model/ships/vorlons/vorlonHeavyCarrier.php',
 				'vorlondreadnought' => '/server/model/ships/vorlons/vorlonDreadnought.php',
 				'vorlonheavydestroyer' => '/server/model/ships/vorlons/vorlonHeavyDestroyer.php',
+//				'vorlonstrikecruiser' => '/server/model/ships/vorlons/vorlonstrikecruiser.php',
 				
 				//old versions of capital ships, to be deleted when games are over
 				/*
@@ -2214,6 +2227,7 @@ spl_autoload_register(
 				'lightparticlebolt' => '/server/model/weapons/particle.php',
 				'rulpa' => '/server/model/ships/descari/Rulpa.php',
 				'rulthar' => '/server/model/ships/descari/Rulthar.php',
+				'rultharlrack' => '/server/model/ships/descari/RultharLRack.php',
 				'rulpassa' => '/server/model/ships/descari/Rulpassa.php',
 				'scorava' => '/server/model/ships/descari/Scorava.php',
 				'lightplasmabolterfighter' => '/server/model/weapons/plasma.php',
@@ -2396,7 +2410,7 @@ spl_autoload_register(
 				//other				
 				'apollostrike' => '/server/model/ships/EA/apollostrike.php',
                 'swerrantventure' => '/server/model/ships/ZStarWars/swErrantVenture.php',
-			
+				'unevenbasefoursections' => '/server/model/ships/ShipClasses.php',
 
 
 				//Star Trek conversions
@@ -2406,6 +2420,8 @@ spl_autoload_register(
 				'trekltphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekhvyphasecannon' => '/server/model/weapons/customTrek.php',
+				'treklightphaser' => '/server/model/weapons/customTrek.php',
+				'treklightphaserlance' => '/server/model/weapons/customTrek.php',
 				'trekspatialtorp' => '/server/model/weapons/customTrek.php',
 				'trekphotonictorp' => '/server/model/weapons/customTrek.php',
 				'trekphotontorp' => '/server/model/weapons/customTrek.php',
@@ -2471,15 +2487,18 @@ spl_autoload_register(
 				
 				
 
-				//Hyach conversions
-				//systems
-//               'hyachscanner' => '/server/model/systems/baseSystems.php',
-//               'hyachelintscanner' => '/server/model/systems/baseSystems.php',
-				
+				//Hyach
 				
 				//weapons
-//                'interdictorhandler' => '/server/model/weapons/particle.php',
-//                'interdictor' => '/server/model/weapons/particle.php',
+//                'ftrinterdictor' => '/server/model/weapons/particle.php',
+                'interdictor' => '/server/model/weapons/particle.php',
+                'ltblastlaser' => '/server/model/weapons/lasers.php',
+
+				//units
+//				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
+//				'hyachdartha' => '/server/model/ships/hyach/HyachDartha.php',
+//				'hyachdoskva' => '/server/model/ships/hyach/HyachDoskva.php',
+//				'hyachirokaikam' => '/server/model/ships/hyach/HyachIrokaiKam.php',
 				
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
@@ -2491,10 +2510,7 @@ spl_autoload_register(
 				'ltviper' => '/server/model/ships/customs/LtViper.php',
 				'medviper' => '/server/model/ships/customs/medViper.php',
 				
-				//TEMPORARY layout changes and such - old versions	    
-                'halikold' => '/server/model/ships/brakiri/halikOld.php',
-                'shargotiold' => '/server/model/ships/minbari/shargotiOld.php',
-                'tradanaold' => '/server/model/ships/minbari/tradanaOld.php',
+				//TEMPORARY layout changes and such - old versions	
 				
 						
 				

@@ -43,8 +43,8 @@ class ColonialJanusCruiser extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(6, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(6, 8, 0, 3, 1));
 		$this->addFrontSystem(new BSGMainBattery(6, 9, 6, 300, 360));
-		$this->addFrontSystem(new BSGMainBattery(6, 9, 6, 0, 60)); 
 		$this->addFrontSystem(new BSGMainBattery(6, 9, 6, 330, 30)); 
+		$this->addFrontSystem(new BSGMainBattery(6, 9, 6, 0, 60)); 
 		$this->addFrontSystem(new SMissileRack(5, 6, 0, 300, 60));
 		$this->addFrontSystem(new Bulkhead(0, 5));
 		$this->addFrontSystem(new Bulkhead(0, 5));

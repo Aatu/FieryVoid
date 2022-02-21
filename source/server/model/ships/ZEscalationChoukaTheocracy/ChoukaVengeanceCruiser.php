@@ -35,8 +35,8 @@ class ChoukaVengeanceCruiser extends BaseShip{
    
         $this->addFrontSystem(new Thruster(3, 15, 0, 6, 1));
 		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 240, 60));
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 300, 120));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 240, 60));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 300, 120));
 
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
@@ -44,20 +44,20 @@ class ChoukaVengeanceCruiser extends BaseShip{
 		$this->addAftSystem(new JumpEngine(3, 10, 4, 40));
 		$this->addAftSystem(new MediumPlasma(3, 5, 3, 120, 240));
 		$this->addAftSystem(new MediumPlasma(3, 5, 3, 120, 240));
-		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 1, 120, 300));
-		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 1, 60, 240));
+		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 120, 300));
+		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 60, 240));
 
         $this->addLeftSystem(new HeavyPlasma(3, 8, 5, 240, 360));
         $this->addLeftSystem(new LightPlasma(2, 4, 2, 240, 60));
         $this->addLeftSystem(new Thruster(2, 13, 0, 4, 3));
-		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
-		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
+		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
+		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
 		
         $this->addRightSystem(new HeavyPlasma(3, 8, 5, 0, 120));
         $this->addRightSystem(new LightPlasma(2, 4, 2, 300, 120));
         $this->addRightSystem(new Thruster(2, 13, 0, 4, 4));
-		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
-		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));		
+		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
+		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));		
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(4, 40));

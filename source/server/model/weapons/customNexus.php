@@ -217,31 +217,31 @@ class NexusLaserMissile extends Laser{
         public $name = "NexusLaserMissile";
         public $displayName = "Laser Missile";
 		    public $iconPath = "NexusLaserMissile.png";
-        public $animation = "laser";
+        public $animationArray = array(1=>'laser', 2=>'laser');
         public $trailColor = array(141, 240, 255);
-        public $animationColor = array(220, 60, 120);
-        public $animationExplosionScale = 0.5;
+        public $animationColorArray = array(1=>array(220, 60, 120), array(220, 60, 120));
+//        public $animationExplosionScale = 0.5;
         public $projectilespeed = 10;
-        public $animationWidth = 5;
+//        public $animationWidth = 5;
         public $trailLength = 100;    
-        public $uninterceptable = false; 
+        public $uninterceptableArray = array(1=>false, 2=>false); 
 		
 		public $doInterceptDegradation = true; //Will be intercepted with normal degradation even though a ballistic
         public $useOEW = false; //missile
         public $ballistic = true; //missile
-        public $range = 20;
-        public $distanceRange = 30;
+        public $rangeArray = array(1=>20, 2=>10);
+        public $distanceRangeArray = array(1=>30, 2=>15);
         public $ammunition = 20; //limited number of shots
 	    
-        public $loadingtime = 2; // 1/2 turns
-        public $rangePenalty = 0;
-        public $fireControl = array(null, 2, 2); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $loadingtimeArray = array(1=>2, 2=>2); // 1/2 turns
+        public $rangePenaltyArray = array(1=>0, 2=>0);
+        public $fireControlArray = array(1=>array(null, 2, 2), 2=>array(null, 2, 2)); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
         public $raking = 8;
-		public $priority = 8; //Matter weapon
+		public $priorityArray = array(1=>8, 2=>8); 
 	    
-		public $firingMode = 'Ballistic'; //firing mode - just a name essentially
-		public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+		public $firingModes = array(1=>'Long-range', 2=>'Short-range'); //firing mode - just a name essentially
+		public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 //    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
 	 
 
@@ -257,11 +257,12 @@ class NexusLaserMissile extends Laser{
             $strippedSystem->ammunition = $this->ammunition;           
             return $strippedSystem;
         }
-        
 	    
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Special"] = "Bomb-pumped laser. Ballistic weapon that scores raking (8) damage.";
+            $this->data["Special"] .= "<br>Long-range: 20 hex launch and 30 hex max range, 2d10+2 damage.";
+            $this->data["Special"] .= "<br>Short-range: 10 hex launch and 15 hex max range, 3d10+4 damage.";
             $this->data["Ammunition"] = $this->ammunition;
         }
         
@@ -273,10 +274,43 @@ class NexusLaserMissile extends Laser{
             $this->ammunition--;
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
         }
+
+        public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1:
+				return Dice::d(10, 2)+2; //Light Chemical Laser
+				break;
+			case 2:
+				return Dice::d(10, 3)+4; //Medium Chemical Laser
+				break;	
+		}
+	}
+        public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 4; //Light Chemical Laser
+				break;
+			case 2:
+				$this->minDamage = 7; //Medium Chemical Laser
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 22; //Light Chemical Laser
+				break;
+			case 2:
+				$this->maxDamage = 34; //Medium Chemical Laser
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
     
-        public function getDamage($fireOrder){ return Dice::d(10, 2)+2;   }
-        public function setMinDamage(){     $this->minDamage = 4;      }
-        public function setMaxDamage(){     $this->maxDamage = 22;      }
+//        public function getDamage($fireOrder){ return Dice::d(10, 2)+2;   }
+//        public function setMinDamage(){     $this->minDamage = 4;      }
+//        public function setMaxDamage(){     $this->maxDamage = 22;      }
 		
 }//endof NexusLaserMissile
 
@@ -1437,7 +1471,7 @@ class NexusShatterGun extends Weapon{
 
         public $name = "NexusShatterGun";
         public $displayName = "Shatter Gun";
-        public $iconPath = "NexusShatterGun.png"; 		
+        public $iconPath = "NexusShattergun.png"; 		
 		
         public $animationArray = array(1=>'trail', 2=>'trail');
         public $animationColorArray = array(1=>array(245, 245, 44), 2=>array(245, 245, 44));
@@ -1457,7 +1491,7 @@ class NexusShatterGun extends Weapon{
         public $rangePenaltyArray = array(1=>2, 2=>2);
         public $intercept = 1;
 		public $ballisticIntercept = true;
-		public $firingModes = array(1 =>'Standard', 2=>'Concentrated');
+		public $firingModes = array(1 =>'Burst', 2=>'Concentrated');
         
         public $fireControlArray = array(1=>array(2, 1, 1), 2=>array(0, -1, -1)); // fighters, <mediums, <capitals
         
@@ -1467,8 +1501,9 @@ class NexusShatterGun extends Weapon{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "Ignores armor, does not overkill.";
-			$this->data["Special"] .= "<br>Standard mode: 1d2 +1/25% pulses (max 4) of 3 damage.";
+			$this->data["Special"] .= "<br>Burst mode: 1d2 +1/25% pulses (max 4) of 3 damage.";
 			$this->data["Special"] .= "<br>Concentrated mode:  1d2*4 damage but -10 fire control.";
+			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
 		}
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -1483,7 +1518,7 @@ class NexusShatterGun extends Weapon{
                 	return 3;
 			    			break;
             	case 2:
-            	   	return Dice::d(2, 1)*4;
+            	   	return Dice::d(2, 1)*3;
 			    			break;
         	}
 		}
@@ -1568,7 +1603,7 @@ class NexusShatterGunFtr extends Weapon{
         public $rangePenaltyArray = array(1=>2, 2=>2);
         public $intercept = 1;
 		public $ballisticIntercept = true;
-		public $firingModes = array(1 =>'Standard', 2=>'Concentrated');
+		public $firingModes = array(1 =>'Burst', 2=>'Concentrated');
         
         public $fireControlArray = array(1=>array(0, 0, 0), 2=>array(-2, -2, -2)); // fighters, <mediums, <capitals
         
@@ -1584,8 +1619,9 @@ class NexusShatterGunFtr extends Weapon{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "Ignores armor, does not overkill.";
-			$this->data["Special"] .= "<br>Standard mode: 1d2 pulses of 3 damage.";
+			$this->data["Special"] .= "<br>Burst mode: 1d2 pulses of 3 damage.";
 			$this->data["Special"] .= "<br>Concentrated mode:  3*d2 damage but -10 fire control.";
+			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
             $this->data["Ammunition"] = $this->ammunition;
 		}
 		
@@ -2065,7 +2101,7 @@ class NexusShatterGunFtr extends Weapon{
         public function setSystemDataWindow($turn){            
             parent::setSystemDataWindow($turn);		
 			$this->data["Special"] = "Fires d6 separate shots (actual number rolled at firing resolution).";
-			$this->data["Special"] .= "<br>When fired defensively, a single Scattergun cannot engage the same incoming shot twice (even ballistic one).";
+			$this->data["Special"] .= "<br>When fired defensively, a single ACIDS cannot engage the same incoming shot twice (even ballistic one).";
 			$this->data["Special"] .= "<br>Ignores armor.";
         }
 	    
@@ -2261,7 +2297,11 @@ class NexusAutogun extends Matter{
         public $loadingtime = 1;
 		public $guns = 1;
         public $priority = 5;
+        public $ammunition = 6;
 
+//        public $intercept = 2;
+//        public $ballisticIntercept = true;
+		
         public $rangePenalty = 2; //
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
 
@@ -2269,6 +2309,29 @@ class NexusAutogun extends Matter{
             $this->defaultShots = $nrOfShots;
             $this->shots = $nrOfShots;
             parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Ammunition"] = $this->ammunition;
+        }
+
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->ammunition = $this->ammunition;           
+            return $strippedSystem;
+        }        
+
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+
+
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+        	//debug::log("fire function");
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
         }
 
         public function getDamage($fireOrder){ return Dice::d(3, 2);   }
@@ -2285,7 +2348,7 @@ class NexusHeavySentryGun extends Matter{
 
         public $name = "NexusHeavySentryGun";
         public $displayName = "Heavy Sentry Gun";
-		public $iconPath = "NexusHeavyAutocannon.png";
+		public $iconPath = "NexusHeavySentryGun.png";
 	    
         public $animation = "trail";
         public $animationColor = array(245, 245, 44);
@@ -2293,10 +2356,43 @@ class NexusHeavySentryGun extends Matter{
         public $projectilespeed = 10;
         public $animationWidth = 2;
         public $trailLength = 35;
-        public $loadingtime = 2;
+        public $loadingtime = 3;
         public $priority = 8;
 
         public $rangePenalty = 0.66; // -2 / 3 hexes
+        public $fireControl = array(-2, 1, 2); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 7;
+            if ( $powerReq == 0 ) $powerReq = 3;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(6, 4);   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 24 ;      }
+		
+}// endof NexusHeavySentryGun
+
+
+class NexusMedSentryGun extends Matter{
+        public $trailColor = array(206, 206, 83);
+
+        public $name = "NexusMedSentryGun";
+        public $displayName = "Medium Sentry Gun";
+		public $iconPath = "NexusMedSentryGun.png";
+	    
+        public $animation = "trail";
+        public $animationColor = array(245, 245, 44);
+        public $animationExplosionScale = 0.10;
+        public $projectilespeed = 10;
+        public $animationWidth = 2;
+        public $trailLength = 35;
+        public $loadingtime = 3;
+        public $priority = 8;
+
+        public $rangePenalty = 1.0;
         public $fireControl = array(-2, 1, 2); // fighters, <mediums, <capitals
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -2310,15 +2406,16 @@ class NexusHeavySentryGun extends Matter{
         public function setMinDamage(){     $this->minDamage = 3 ;      }
         public function setMaxDamage(){     $this->maxDamage = 18 ;      }
 		
-}// endof NexusHeavySentryGun
+}// endof NexusMedSentryGun
 
 
-class NexusSentryGun extends Matter{
+
+class NexusLightSentryGun extends Matter{
         public $trailColor = array(206, 206, 83);
 
-        public $name = "NexusSentryGun";
-        public $displayName = "Sentry Gun";
-		public $iconPath = "NexusAutocannon.png";
+        public $name = "NexusLightSentryGun";
+        public $displayName = "Light Sentry Gun";
+		public $iconPath = "NexusLightSentryGun.png";
 	    
         public $animation = "trail";
         public $animationColor = array(245, 245, 44);
@@ -2326,11 +2423,11 @@ class NexusSentryGun extends Matter{
         public $projectilespeed = 10;
         public $animationWidth = 2;
         public $trailLength = 35;
-        public $loadingtime = 1;
+        public $loadingtime = 2;
         public $priority = 8;
 
         public $rangePenalty = 1; 
-        public $fireControl = array(-1, 2, 2); // fighters, <mediums, <capitals
+        public $fireControl = array(-1, 1, 2); // fighters, <mediums, <capitals
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -2777,7 +2874,7 @@ class NexusMinigun extends Weapon{
         public $rangePenaltyArray = array(1=>2, 2=>2);
         public $intercept = 1;
 		public $ballisticIntercept = true;
-		public $firingModes = array(1 =>'Standard', 2=>'Concentrated');
+		public $firingModes = array(1 =>'Burst', 2=>'Concentrated');
         
         public $fireControlArray = array(1=>array(3, 2, 2), 2=>array(1, 0, 0)); // fighters, <mediums, <capitals
         
@@ -2787,8 +2884,9 @@ class NexusMinigun extends Weapon{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "Ignores armor, does not overkill.";
-			$this->data["Special"] .= "<br>Standard mode: 1d4 +1/25% pulses (max 6) of 3 damage.";
+			$this->data["Special"] .= "<br>Burst mode: 1d4 +1/25% pulses (max 6) of 3 damage.";
 			$this->data["Special"] .= "<br>Concentrated mode:  1d3*4 damage but -10 fire control.";
+			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
 		}
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -2887,7 +2985,7 @@ class NexusMinigunFtr extends Weapon{
         public $rangePenaltyArray = array(1=>2, 2=>2);
         public $intercept = 1;
 		public $ballisticIntercept = true;
-		public $firingModes = array(1 =>'Standard', 2=>'Concentrated');
+		public $firingModes = array(1 =>'Burst', 2=>'Concentrated');
         
         public $fireControlArray = array(1=>array(0, 0, 0), 2=>array(-2, -2, -2)); // fighters, <mediums, <capitals
         
@@ -2903,8 +3001,9 @@ class NexusMinigunFtr extends Weapon{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "Ignores armor, does not overkill.";
-			$this->data["Special"] .= "<br>Standard mode: 1d3 pulses of 3 damage.";
+			$this->data["Special"] .= "<br>Burst mode: 1d3 pulses of 3 damage.";
 			$this->data["Special"] .= "<br>Concentrated mode:  6 damage but -10 fire control.";
+			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
             $this->data["Ammunition"] = $this->ammunition;
 		}
 		
@@ -4370,9 +4469,9 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
         public $animation = "laser";
         //public $animationColor = array(240, 90, 90);
         public $animationColor = array(100, 30, 15);
-        public $animationExplosionScale = 0.16;
-        public $animationWidth = 3;
-        public $animationWidth2 = 0.3;
+//        public $animationExplosionScale = 0.16;
+//        public $animationWidth = 3;
+//        public $animationWidth2 = 0.3;
         public $priority = 8;
 
         public $loadingtime = 3;
@@ -4670,8 +4769,8 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
         public $iconPath = "NexusLightChemicalLaser.png"; 		
         public $animation = "laser";
         public $animationColor = array(220, 60, 120);
-        public $animationWidth = 5;
-        public $animationWidth2 = 0.5;
+//        public $animationWidth = 5;
+//        public $animationWidth2 = 0.5;
         public $priority = 8;
 
         public $loadingtime = 2;
@@ -4693,14 +4792,14 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
     } // endof NexusLightChemicalLaser
 	
 	
-	    class NexusMediumChemicalLaser extends Laser{
+	class NexusMediumChemicalLaser extends Laser{
         public $name = "NexusMediumChemicalLaser";
         public $displayName = "Medium Chemical Laser";
         public $iconPath = "NexusMediumChemicalLaser.png"; 		
         public $animation = "laser";
         public $animationColor = array(220, 60, 120);
-        public $animationWidth = 5;
-        public $animationWidth2 = 0.5;
+//        public $animationWidth = 5;
+//        public $animationWidth2 = 0.5;
         public $priority = 8;
 
         public $loadingtime = 3;
@@ -4719,6 +4818,7 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
         public function getDamage($fireOrder){ return Dice::d(10, 3)+4; }
         public function setMinDamage(){ $this->minDamage = 7 ; }
         public function setMaxDamage(){ $this->maxDamage = 34 ; }
+
     } // endof NexusMediumChemicalLaser
 
 
@@ -4728,8 +4828,8 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
         public $iconPath = "NexusHeavyChemicalLaser.png"; 		
         public $animation = "laser";
         public $animationColor = array(220, 60, 120);
-        public $animationWidth = 5;
-        public $animationWidth2 = 0.5;
+//        public $animationWidth = 5;
+//        public $animationWidth2 = 0.5;
         public $priority = 8;
 
         public $loadingtime = 4;
@@ -4759,9 +4859,9 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
 	    
         public $animation = "laser";
         public $animationColor = array(255, 91, 91);
-        public $animationExplosionScale = 0.16;
-        public $animationWidth = 3;
-        public $animationWidth2 = 0.3;
+//        public $animationExplosionScale = 0.16;
+//        public $animationWidth = 3;
+//        public $animationWidth2 = 0.3;
         public $priority = 8;
         
         public $loadingtime = 2;
@@ -4796,9 +4896,9 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
 	    
         public $animation = "laser";
         public $animationColor = array(255, 91, 91);
-        public $animationExplosionScale = 0.16;
-        public $animationWidth = 3;
-        public $animationWidth2 = 0.3;
+//        public $animationExplosionScale = 0.16;
+//        public $animationWidth = 3;
+//        public $animationWidth2 = 0.3;
         public $priority = 8;
         
         public $loadingtime = 4;
@@ -4976,8 +5076,8 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
 	    public $iconPath = "NexusLaserSpear.png";
         public $animation = "laser";
         public $animationColor = array(64, 123, 168);
-        public $animationWidth = 3;
-        public $animationWidth2 = 0.3;
+//        public $animationWidth = 3;
+//        public $animationWidth2 = 0.3;
         public $priority = 8;
         public $priorityArray = array(1=>8, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
 
@@ -5015,8 +5115,8 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
 	    public $iconPath = "NexusHeavyLaserSpear.png";
         public $animation = "laser";
         public $animationColor = array(64, 123, 168);
-        public $animationWidth = 3;
-        public $animationWidth2 = 0.3;
+//        public $animationWidth = 3;
+//        public $animationWidth2 = 0.3;
         public $priority = 8;
         public $priorityArray = array(1=>8, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
 
@@ -5056,9 +5156,9 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
 	    
         public $animation = "laser";
         public $animationColor = array(255, 91, 91);
-        public $animationExplosionScale = 0.16;
-        public $animationWidth = 3;
-        public $animationWidth2 = 0.3;
+//        public $animationExplosionScale = 0.16;
+//        public $animationWidth = 3;
+//        public $animationWidth2 = 0.3;
         public $priority = 7;
         
         public $loadingtime = 3;
@@ -5094,9 +5194,9 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
 	    
         public $animation = "laser";
         public $animationColor = array(255, 91, 91);
-        public $animationExplosionScale = 0.16;
-        public $animationWidth = 3;
-        public $animationWidth2 = 0.3;
+//        public $animationExplosionScale = 0.16;
+//        public $animationWidth = 3;
+//        public $animationWidth2 = 0.3;
         public $priority = 7;
         
         public $loadingtime = 2;
@@ -5266,7 +5366,7 @@ class NexusChargedPlasmaGun extends Plasma{
 
 		public $rangeDamagePenaltyHCPG = 0.33;  // -1 / 3 hexes, but only after 6 hexes!
 
-		public $priority = 2; //Flash weapon
+		public $priority = 1; //Flash weapon
 		
 		public $addedDice;
 
@@ -5427,7 +5527,7 @@ class NexusHeavyChargedPlasmaGun extends Plasma{
 
 		public $rangeDamagePenaltyHCPG = 0.5;  // -1 / 2 hexes, but only after 10 hexes!
 
-		public $priority = 2; //Flash weapon
+		public $priority = 1; //Flash weapon
 		
 		public $addedDice;
 
@@ -5746,9 +5846,9 @@ class NexusIonBeam extends Raking{
 	public $iconPath = "NexusIonBeam.png";
     public $animation = "laser"; //more fitting for Raking, and faster at long range
     public $animationColor = array(127, 0, 255);
-    public $animationExplosionScale = 0.25;
-    public $animationWidth = 3;//4;
-    public $animationWidth2 = 0.3;
+//    public $animationExplosionScale = 0.25;
+//    public $animationWidth = 3;//4;
+//    public $animationWidth2 = 0.3;
     public $trailLength = 24;
     public $priority = 8;
     

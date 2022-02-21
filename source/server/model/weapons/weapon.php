@@ -225,6 +225,7 @@ class Weapon extends ShipSystem
 		}
 		
 		//assign correct size
+		/*values changed after discussion with Douglas
 		if($avgDmg<4.5){ //REALLY light - even less than d6+1!
 			$toReturn = 0.1; 
 		}elseif($avgDmg<7.5){ //very light - less than d6+4
@@ -240,6 +241,23 @@ class Weapon extends ShipSystem
 		}else{ //heavy and very heavy
 			$toReturn = 0.3+(0.1*floor($avgDmg/10)); //0.3 +1 per every full 10 points of average damage
 		}
+		*/		
+		if($avgDmg<4.5){ //REALLY light - even less than d6+1!
+			$toReturn = 0.08; 
+		}elseif($avgDmg<7.5){ //very light - less than d6+4
+			$toReturn = 0.12; 
+		}elseif($avgDmg<10){ //light
+			$toReturn = 0.15;
+		}elseif($avgDmg<12){ //light/medium
+			$toReturn = 0.2;
+		}elseif($avgDmg<14){ //medium
+			$toReturn = 0.25;
+		}elseif($avgDmg<17){ //medium/heavy
+			$toReturn = 0.3;
+		}else{ //heavy and very heavy
+			$toReturn = 0.25+(0.1*floor($avgDmg/10)); //0.3 +1 per every full 10 points of average damage
+		}
+		
 		return $toReturn;
 	}//endof function dynamicScale()
     
@@ -1513,7 +1531,7 @@ class Weapon extends ShipSystem
             }
             if ($this->isLinked) { //further linked weapons will hit the exact same system!
                 $fireOrder->linkedHit = $system;
-            }
+            }			
             $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $launchPos, $gamedata, false, $tmpLocation);
 			//Flash weapon will cause collateral damage to other fighters in flight hit (collateral damage to other units was already handled) 
 			if( ($this->damageType=='Flash') && ($target instanceof FighterFlight) ){ 

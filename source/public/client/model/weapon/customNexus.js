@@ -789,11 +789,17 @@ var NexusLightIndustrialLaser = function  NexusLightIndustrialLaser(json, ship) 
 NexusLightIndustrialLaser.prototype = Object.create(Weapon.prototype);
 NexusLightIndustrialLaser.prototype.constructor =  NexusLightIndustrialLaser;
 
-var NexusSentryGun = function  NexusSentryGun(json, ship) {
+var NexusLightSentryGun = function  NexusLightSentryGun(json, ship) {
     Weapon.call(this, json, ship);
 };
-NexusSentryGun.prototype = Object.create(Weapon.prototype);
-NexusSentryGun.prototype.constructor =  NexusSentryGun;
+NexusLightSentryGun.prototype = Object.create(Weapon.prototype);
+NexusLightSentryGun.prototype.constructor =  NexusLightSentryGun;
+
+var NexusMedSentryGun = function  NexusMedSentryGun(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusMedSentryGun.prototype = Object.create(Weapon.prototype);
+NexusMedSentryGun.prototype.constructor =  NexusMedSentryGun;
 
 var NexusHeavySentryGun = function NexusHeavySentryGun(json, ship) {
 	Weapon.call(this, json, ship);

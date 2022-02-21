@@ -34,8 +34,8 @@ class ChoukaBrimstoneHeavyOSAT extends OSAT
 		$this->addPrimarySystem(new EWTwinLaserCannon(2, 8, 4, 270, 90));
    		$this->addPrimarySystem(new HeavyPlasma(3, 8, 5, 300, 60)); 
        	$this->addPrimarySystem(new HeavyPlasma(3, 8, 5, 300, 60)); 
-		$this->addPrimarySystem(new EWHeavyPointPlasmaGun(2, 7, 2, 0, 360));
-		$this->addPrimarySystem(new EWHeavyPointPlasmaGun(2, 7, 2, 0, 360));
+		$this->addPrimarySystem(new EWHeavyPointPlasmaGun(2, 7, 3, 0, 360));
+		$this->addPrimarySystem(new EWHeavyPointPlasmaGun(2, 7, 3, 0, 360));
 		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 0, 120, true));
 		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 0, 120, true));
 

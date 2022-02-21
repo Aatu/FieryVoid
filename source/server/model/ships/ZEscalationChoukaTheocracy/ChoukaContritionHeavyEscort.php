@@ -34,17 +34,17 @@ class ChoukaContritionHeavyEscort extends MediumShip{
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));        
         
         $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));	
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
-		$this->addFrontSystem(new EWHeavyPointPlasmaGun(2, 7, 2, 270, 90));
-		$this->addFrontSystem(new EWHeavyPointPlasmaGun(2, 7, 2, 270, 90));
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
+		$this->addFrontSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 270, 90));
+		$this->addFrontSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 270, 90));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	    
-		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 2, 180, 360));
-		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 2, 0, 180));
+		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 180, 360));
+		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 0, 180));
         $this->addAftSystem(new Thruster(3, 18, 0, 8, 2));    
        
         $this->addPrimarySystem(new Structure(4, 64));

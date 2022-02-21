@@ -38,24 +38,24 @@ class ChoukaTribunalMissileCruiserRefit extends BaseShip{
 		$this->addFrontSystem(new SoMissileRack(3, 6, 0, 240, 120));
 		$this->addFrontSystem(new SoMissileRack(3, 6, 0, 240, 120));
 		$this->addFrontSystem(new SoMissileRack(3, 6, 0, 240, 120));
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 270, 90));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 270, 90));
 		
 		$this->addAftSystem(new Thruster(2, 6, 0, 1, 2));
 		$this->addAftSystem(new Thruster(2, 6, 0, 1, 2));
 		$this->addAftSystem(new Thruster(2, 6, 0, 1, 2));
 		$this->addAftSystem(new Thruster(2, 6, 0, 1, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 5, 2));
-		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
-		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
+		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
+		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
 
         $this->addLeftSystem(new LightPlasma(1, 4, 2, 240, 360));
         $this->addLeftSystem(new LightPlasma(1, 4, 2, 180, 300));
-		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
+		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
         $this->addLeftSystem(new Thruster(3, 11, 0, 3, 3));
 
         $this->addRightSystem(new LightPlasma(1, 4, 2, 0, 120));
         $this->addRightSystem(new LightPlasma(1, 4, 2, 60, 180));
-		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
+		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
         $this->addRightSystem(new Thruster(3, 11, 0, 3, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

@@ -35,8 +35,8 @@ class ChoukaRaiderHighwaymanB extends MediumShip{
         $this->addPrimarySystem(new Thruster(1, 8, 0, 5, 4));     
 		$this->addPrimarySystem(new CargoBay(1, 14));
 		$this->addPrimarySystem(new CargoBay(1, 14));
-		$this->addPrimarySystem(new EWPointPlasmaGun(1, 3, 1, 240, 60));
-		$this->addPrimarySystem(new EWPointPlasmaGun(1, 3, 1, 300, 120));
+		$this->addPrimarySystem(new EWPointPlasmaGun(1, 3, 2, 240, 60));
+		$this->addPrimarySystem(new EWPointPlasmaGun(1, 3, 2, 300, 120));
 
         
         $this->addFrontSystem(new LightParticleCannon(1, 6, 5, 240, 60));

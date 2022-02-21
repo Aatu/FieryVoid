@@ -4,7 +4,7 @@ class CraytanHelis extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 175;
+        $this->pointCost = 150;
         $this->faction = "ZNexus Playtest Craytan";
         $this->phpclass = "CraytanHelis";
         $this->imagePath = "img/ships/Nexus/CraytanHelis.png";
@@ -35,14 +35,14 @@ class CraytanHelis extends LCV{
 		$this->addPrimarySystem(new Reactor(3, 7, 0, 0));
 		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
 //        $this->addPrimarySystem(new AntiquatedScanner(3, 12, 2, 4));
-    	$sensors = new Scanner(3, 12, 2, 4);
+    	$sensors = new Scanner(3, 12, 2, 3);
 			$sensors->markLCV();
 			$this->addPrimarySystem($sensors);
 		$this->addPrimarySystem(new Engine(3, 12, 0, 6, 2));
 
-		$this->addFrontSystem(new NexusSentryGun(2, 5, 1, 240, 60));
+		$this->addFrontSystem(new NexusCIDS(2, 4, 2, 240, 60));
 		$this->addFrontSystem(new NexusHeavySentryGun(2, 6, 2, 270, 90));
-		$this->addFrontSystem(new NexusSentryGun(2, 5, 1, 300, 120));
+		$this->addFrontSystem(new NexusCIDS(2, 4, 2, 300, 120));
 	    
         $this->addPrimarySystem(new Structure(3, 32));
 	    
@@ -50,7 +50,7 @@ class CraytanHelis extends LCV{
         		0=> array( 
         				11 => "Structure",
         				13 => "1:Heavy Sentry Gun",
-        				16 => "1:Sentry Gun",
+        				16 => "1:Close-In Defense System",
 						18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -58,7 +58,7 @@ class CraytanHelis extends LCV{
         		1=> array( //redirect to PRIMARY
         				11 => "Structure",
         				13 => "1:Heavy Sentry Gun",
-        				16 => "1:Sentry Gun",
+        				16 => "1:Close-In Defense System",
 						18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -66,7 +66,7 @@ class CraytanHelis extends LCV{
         		2=> array( //redirect to PRIMARY
         				11 => "Structure",
         				13 => "1:Heavy Sentry Gun",
-        				16 => "1:Sentry Gun",
+        				16 => "1:Close-In Defense System",
 						18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

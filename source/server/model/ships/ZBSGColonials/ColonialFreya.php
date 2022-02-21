@@ -12,7 +12,7 @@ class ColonialFreya extends BaseShip{
 			$this->occurence = "rare";
 			$this->variantOf = "Odin Battlestar";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 160; //img has 140px per side
+		$this->canvasSize = 160; //img has 160px per side
 //		$this->unlimited 
 		$this->unofficial = true;
 

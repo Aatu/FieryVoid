@@ -34,8 +34,8 @@ class ChoukaScriptureScout extends BaseShip{
    
         $this->addFrontSystem(new Thruster(3, 13, 0, 5, 1));
 		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
 
         $this->addAftSystem(new Thruster(3, 15, 0, 10, 2));
 		$this->addAftSystem(new LightLaser(1, 4, 3, 180, 360));
@@ -43,11 +43,11 @@ class ChoukaScriptureScout extends BaseShip{
         $this->addAftSystem(new JumpEngine(3, 10, 3, 36));
 
         $this->addLeftSystem(new LightPlasma(2, 4, 2, 240, 360));
-		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
+		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
         $this->addLeftSystem(new Thruster(3, 11, 0, 3, 3));
 
         $this->addRightSystem(new LightPlasma(2, 4, 2, 0, 120));
-		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
+		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
         $this->addRightSystem(new Thruster(3, 11, 0, 3, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

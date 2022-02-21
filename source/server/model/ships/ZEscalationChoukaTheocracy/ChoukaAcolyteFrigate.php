@@ -39,15 +39,15 @@ class ChoukaAcolyteFrigate extends HeavyCombatVessel{
 		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 270, 90));
 		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 270, 90));
 		$this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 60));
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
                 
         $this->addAftSystem(new Thruster(2, 10, 0, 5, 2));
         $this->addAftSystem(new Thruster(2, 10, 0, 5, 2));
 		$this->addAftSystem(new Hangar(3, 8));
         $this->addAftSystem(new LightPlasma(2, 4, 2, 120, 240));
         $this->addAftSystem(new LightPlasma(2, 4, 2, 120, 240));
-		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 2, 0, 360));
+		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 0, 360));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 30));

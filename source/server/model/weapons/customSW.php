@@ -54,7 +54,7 @@ class SWRayShield extends Shield implements DefensiveSystem{
 		$output += $this->outputMod; //outputMod itself is negative!
 		if($weapon->weaponClass == 'Ballistic' || $weapon->weaponClass == 'SWIon' || $weapon->weaponClass == 'Ramming') $output = 0;
 		if($weapon->weaponClass == 'Matter') $output = ceil($output/2);
-		if($weapon->damageType == 'Raking') $output = 2*$output;//Raking - double effect!
+		if( ($weapon->damageType == 'Raking') && !($this->unit instanceof FighterFlight) ) $output = 2*$output;//Raking - double effect! Feb 2022 - but not vs fighters (due to rule "Raking vs fighters is resolved as Standard)
 		$output=max(0,$output); //no less than 0!
         return $output;
     }
@@ -101,7 +101,7 @@ class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launch
     public $maxAmount = 0;
     public $priority = 5;
     public $firingModes = array( 1 => "Spread");  
-        public $animationExplosionScale = 0.25;
+        //public $animationExplosionScale = 0.25;
 	
     
 	public $damageType = 'Pulse'; 
@@ -200,7 +200,7 @@ class SWDirectWeapon extends Pulse{
 	//animation for fighter laser - bigger guns need to change scale :)
 	public $animation = "bolt";
         public $animationColor = array(225, 0, 0); //I aim at bright red here... Blue for Ion, green for Blasters
-        public $animationExplosionScale = 0.15; //will be set dynamically anyway!
+        //public $animationExplosionScale = 0.15; //will be set dynamically anyway!
 	
 	protected $damagebonus = 0;
 	protected $damagebonusArray = array();
@@ -624,7 +624,7 @@ class SWFtrConcMissileLauncher extends SWFtrBallisticLauncher //this is launcher
     public $maxAmount = 0;
     public $priority = 3; //that's really light missile
     public $fireControl = array(2, 1, 0); // fighters, <mediums, <capitals 
-        public $animationExplosionScale = 0.15;
+        //public $animationExplosionScale = 0.15;
 	
     function __construct($maxAmount, $startArc, $endArc, $noOfShots){
 	//appropriate icon (number of barrels)...
@@ -652,7 +652,7 @@ class SWFtrConcMissile extends SWFtrMissile //this is AMMO for SWFtrConcMissileL
     public $priority = 2;
 	public $damageType = 'Pulse'; 
     	public $weaponClass = "Ballistic"; 
-        public $animationExplosionScale = 0.15;
+        //public $animationExplosionScale = 0.15;
 	
     function __construct($startArc, $endArc, $noOfShots, $fireControl = null){
         parent::__construct($startArc, $endArc, $noOfShots, $fireControl);

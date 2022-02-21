@@ -63,18 +63,13 @@ if (isset($_SESSION["user"])) {
 -->
        
 		
-		---------- <b>LATEST NEWS - January 2022</b> ----------	
-	    <br><b>Ship layouts modified</b> - primarily for designers, but some changes will be visible for players too
-	    <br><b>Bulkhead behavior modified</b> - will protect important systems even if they're not threatened with destruction (important for PRIMARY bulkheads)
-	    <br><b>Only weapons are offensive</b> - non-weapons on fighters no longer display OB value
-	    <br><b>Wide Lasers</b> - beam weapon animations are now scaled with weapon size, like other firing visuals - for (I hope) better visual appeal :) 
-	    <br><b>Leaving game blocked</b> - cannot change slot when fleet is already confirmed (this led to games being broken at creation stage)
-	    <br><b>Surplus Power warning</b> - ships with unassigned Power reserves will get a warning at Initial orders confirmation 
-	    <br><b>Initiative tiebreaking</b> - in case of simmultaneous movement onto the same hex, units should be considered to move in order displayed in OoB window
-	    <br><b>Alternate mode readiness</b> - charging weapon will change background shade if alternate mode can already be used
-	    <br><b>Power on/off</b> - mass change (r-click) now works for non-weapons too
-	    <br><b>Coming of the Federation</b> - first Star Trek faction has passed tests and is now released as Tier 2
-	    <br><b>Dalithorn rehearsed</b> - issues detected during tournament round 1 now stand (hopefully) corrected
+		---------- <b>LATEST NEWS - February 2022</b> ----------	
+	    <br><b>Drakh/StarWars fighter shields no longer double Raking protection</b> - as Raking should be considered Standard vs fighters
+	    <br><b>Graphics updates</b> - courtesy of Lunara, Douglas and Geoffrey
+	    <br><b>Weapons animations fine tuning</b> - mostly scaling down a bit
+	    <br><b>Packet Torpedo target is now hidden</b> - only on main screen though (Declarations pane will be modified when time allows)
+	    <br><b>Descari custom ships</b> - allowing for more variety in fleet design (courtesy of Geoffrey)
+
 	    
 		<!-- <br><br>---------- <b>update 8th of November</b> ---------- 
 		-->

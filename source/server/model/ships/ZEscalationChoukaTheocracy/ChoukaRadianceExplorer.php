@@ -16,7 +16,6 @@ class ChoukaRadianceExplorer extends BaseShip{
 
         $this->fighters = array("normal"=>6);
 
-
 	$this->isd = 1936;
         
         $this->forwardDefense = 14;
@@ -48,14 +47,13 @@ class ChoukaRadianceExplorer extends BaseShip{
 
         $this->addLeftSystem(new LightLaser(2, 4, 3, 180, 360));
         $this->addLeftSystem(new LightLaser(2, 4, 3, 180, 360));
-        $this->addLeftSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
+        $this->addLeftSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
         $this->addLeftSystem(new Thruster(2, 13, 0, 6, 3));
 
         $this->addRightSystem(new LightLaser(2, 4, 3, 0, 180));
         $this->addRightSystem(new LightLaser(2, 4, 3, 0, 180));
-        $this->addRightSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
+        $this->addRightSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
         $this->addRightSystem(new Thruster(2, 13, 0, 6, 4));
-
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(3, 70));
