@@ -681,9 +681,9 @@ class AbsorbtionShield extends Shield implements DefensiveSystem{
     public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
         if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn()) return 0; //destroyed shield gives no protection
         $output = $this->output + $this->getBoostLevel($turn);
-	$output += $this->outputMod; //outputMod itself is negative!
-	if($weapon->damageType == 'Raking') $output = 2*$output;//Raking - double effect!
-	$output=max(0,$output); //no less than 0!
+		$output += $this->outputMod; //outputMod itself is negative!
+		if( ($weapon->damageType == 'Raking') && !($this->unit instanceof FighterFlight) ) $output = 2*$output;//Raking - double effect! Feb 2022 - but not vs fighters (due to rule "Raking vs fighters is resolved as Standard)
+		$output=max(0,$output); //no less than 0!
         return $output;
     }
 	

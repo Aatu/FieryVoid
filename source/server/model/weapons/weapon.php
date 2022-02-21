@@ -1531,7 +1531,7 @@ class Weapon extends ShipSystem
             }
             if ($this->isLinked) { //further linked weapons will hit the exact same system!
                 $fireOrder->linkedHit = $system;
-            }
+            }			
             $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $launchPos, $gamedata, false, $tmpLocation);
 			//Flash weapon will cause collateral damage to other fighters in flight hit (collateral damage to other units was already handled) 
 			if( ($this->damageType=='Flash') && ($target instanceof FighterFlight) ){ 

@@ -54,7 +54,7 @@ class SWRayShield extends Shield implements DefensiveSystem{
 		$output += $this->outputMod; //outputMod itself is negative!
 		if($weapon->weaponClass == 'Ballistic' || $weapon->weaponClass == 'SWIon' || $weapon->weaponClass == 'Ramming') $output = 0;
 		if($weapon->weaponClass == 'Matter') $output = ceil($output/2);
-		if($weapon->damageType == 'Raking') $output = 2*$output;//Raking - double effect!
+		if( ($weapon->damageType == 'Raking') && !($this->unit instanceof FighterFlight) ) $output = 2*$output;//Raking - double effect! Feb 2022 - but not vs fighters (due to rule "Raking vs fighters is resolved as Standard)
 		$output=max(0,$output); //no less than 0!
         return $output;
     }

@@ -18,7 +18,7 @@ class StormFront1874 extends MediumShip{
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
-        
+
         $this->turncost = 0.5;
         $this->turndelaycost = 0.5;
         $this->accelcost = 3;
