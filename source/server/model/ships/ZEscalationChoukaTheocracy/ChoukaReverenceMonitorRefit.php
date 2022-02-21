@@ -58,18 +58,18 @@ class ChoukaReverenceMonitorRefit extends BaseShip{
         $this->addLeftSystem(new MediumPlasma(3, 5, 3, 240, 360));
 		$this->addLeftSystem(new SoMissileRack(3, 6, 0, 180, 60));
 		$this->addLeftSystem(new SoMissileRack(3, 6, 0, 180, 60));
-        $this->addLeftSystem(new EWPointPlasmaGun(1, 3, 1, 180, 360));
-        $this->addLeftSystem(new EWPointPlasmaGun(1, 3, 1, 180, 360));
-        $this->addLeftSystem(new EWPointPlasmaGun(1, 3, 1, 180, 360));
+        $this->addLeftSystem(new EWPointPlasmaGun(1, 3, 2, 180, 360));
+        $this->addLeftSystem(new EWPointPlasmaGun(1, 3, 2, 180, 360));
+        $this->addLeftSystem(new EWPointPlasmaGun(1, 3, 2, 180, 360));
         $this->addLeftSystem(new Thruster(3, 15, 0, 4, 3));
 
         $this->addRightSystem(new MediumPlasma(3, 5, 3, 0, 120));
         $this->addRightSystem(new MediumPlasma(3, 5, 3, 0, 120));
 		$this->addRightSystem(new SoMissileRack(3, 6, 0, 300, 180));
 		$this->addRightSystem(new SoMissileRack(3, 6, 0, 300, 180));
-        $this->addRightSystem(new EWPointPlasmaGun(1, 3, 1, 0, 180));
-        $this->addRightSystem(new EWPointPlasmaGun(1, 3, 1, 0, 180));
-        $this->addRightSystem(new EWPointPlasmaGun(1, 3, 1, 0, 180));
+        $this->addRightSystem(new EWPointPlasmaGun(1, 3, 2, 0, 180));
+        $this->addRightSystem(new EWPointPlasmaGun(1, 3, 2, 0, 180));
+        $this->addRightSystem(new EWPointPlasmaGun(1, 3, 2, 0, 180));
         $this->addRightSystem(new Thruster(3, 15, 0, 4, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

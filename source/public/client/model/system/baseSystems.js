@@ -618,3 +618,9 @@ PowerCapacitor.prototype.doIndividualNotesTransfer = function () { //prepare ind
 	this.individualNotesTransfer.push(powerRemaining);
 	return true;
 };
+
+var BSGHybrid = function BSGHybrid(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+BSGHybrid.prototype = Object.create(ShipSystem.prototype);
+BSGHybrid.prototype.constructor = BSGHybrid;

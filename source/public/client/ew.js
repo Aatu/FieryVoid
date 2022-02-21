@@ -23,6 +23,11 @@ window.ew = {
             if (primary && shipManager.criticals.hasCritical(primary, "RestrictedEW")) {
                 ret -= 2 * shipManager.criticals.hasCritical(primary, "RestrictedEW"); //-2 does stack!
             }
+//GTS
+            if (shipManager.criticals.hasCritical("SensorLoss")) {
+                ret -= 3 * shipManager.criticals.hasCritical("SensorLoss"); //-2 does stack!
+            }
+
             if (primary) {
                 ret -= shipManager.criticals.hasCritical(primary, "tmpsensordown"); //Sensors reduced
             }

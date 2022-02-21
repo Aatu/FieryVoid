@@ -8,7 +8,7 @@ class AntophUpgrade extends HeavyCombatVessel{
         $this->faction = "Brakiri";
         $this->phpclass = "AntophUpgrade";
         $this->imagePath = "img/ships/antoph.png";
-        $this->shipClass = "Antoph Light Cruiser (upgrade)";
+        $this->shipClass = "Antoph Light Cruiser (Upgraded)";
                 
 		$this->notes = 'Ak-Habil Conglomerate';//Corporation producing the design
 		$this->isd = 2250;

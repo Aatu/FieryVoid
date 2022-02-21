@@ -12,7 +12,7 @@ class Eyehawk extends HeavyCombatVesselLeftRight{
         $this->occurence = "rare";
 	    $this->variantOf = "Sunhawk Battlecruiser";
 	    $this->isd = 2228;
-        $this->canvasSize = 180;
+        $this->canvasSize = 200;
 
         $this->forwardDefense = 14;
         $this->sideDefense = 13;

@@ -31,7 +31,7 @@ class ChoukaPenanceBase extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Scanner(4, 12, 6, 6));
 		$this->addPrimarySystem(new Hangar(4, 16));
 
-		$this->addFrontSystem(new EWHeavyPointPlasmaGun(3, 7, 2, 270, 90));
+		$this->addFrontSystem(new EWHeavyPointPlasmaGun(3, 7, 3, 270, 90));
 		$this->addFrontSystem(new SMissileRack(3, 6, 0, 270, 90, true));
 		$this->addFrontSystem(new SMissileRack(3, 6, 0, 270, 90, true));
 		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 270, 90));
@@ -39,7 +39,7 @@ class ChoukaPenanceBase extends SmallStarBaseFourSections{
 		$this->addFrontSystem(new CargoBay(3, 15));
 		$this->addFrontSystem(new CargoBay(3, 15));
 
-		$this->addAftSystem(new EWHeavyPointPlasmaGun(3, 7, 2, 90, 270));
+		$this->addAftSystem(new EWHeavyPointPlasmaGun(3, 7, 3, 90, 270));
 		$this->addAftSystem(new SMissileRack(3, 6, 0, 90, 270, true));
 		$this->addAftSystem(new SMissileRack(3, 6, 0, 90, 270, true));
 		$this->addAftSystem(new MediumPlasma(3, 5, 3, 90, 270));
@@ -47,7 +47,7 @@ class ChoukaPenanceBase extends SmallStarBaseFourSections{
 		$this->addAftSystem(new CargoBay(3, 15));
 		$this->addAftSystem(new CargoBay(3, 15));
 
-		$this->addLeftSystem(new EWHeavyPointPlasmaGun(3, 7, 2, 180, 360));
+		$this->addLeftSystem(new EWHeavyPointPlasmaGun(3, 7, 3, 180, 360));
 		$this->addLeftSystem(new SMissileRack(3, 6, 0, 180, 360, true));
 		$this->addLeftSystem(new SMissileRack(3, 6, 0, 180, 360, true));
 		$this->addLeftSystem(new MediumPlasma(3, 5, 3, 180, 360));
@@ -55,7 +55,7 @@ class ChoukaPenanceBase extends SmallStarBaseFourSections{
 		$this->addLeftSystem(new CargoBay(3, 15));
 		$this->addLeftSystem(new CargoBay(3, 15));
 
-		$this->addRightSystem(new EWHeavyPointPlasmaGun(3, 7, 2, 0, 180));
+		$this->addRightSystem(new EWHeavyPointPlasmaGun(3, 7, 3, 0, 180));
 		$this->addRightSystem(new SMissileRack(3, 6, 0, 0, 180, true));
 		$this->addRightSystem(new SMissileRack(3, 6, 0, 0, 180, true));
 		$this->addRightSystem(new MediumPlasma(3, 5, 3, 0, 180));

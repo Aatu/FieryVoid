@@ -412,3 +412,13 @@ class ContainmentBreach extends Critical{
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
 }
+
+class SensorLoss extends Critical{
+	//Used by the Cylon Hybrid
+    public $description = "Sensor loss: -3 EW.";
+	public $priority = 1; //probably the nastiest C&C crit, to be fixed at first priority
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+

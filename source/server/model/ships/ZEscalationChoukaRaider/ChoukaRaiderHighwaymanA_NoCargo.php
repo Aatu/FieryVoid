@@ -25,7 +25,6 @@ class ChoukaRaiderHighwaymanA_NoCargo extends MediumShip{
         $this->rollcost = 1;
         $this->pivotcost = 1;
         $this->iniativebonus = 60;
-        
          
         $this->addPrimarySystem(new Reactor(2, 10, 0, 2));
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));
@@ -37,17 +36,16 @@ class ChoukaRaiderHighwaymanA_NoCargo extends MediumShip{
         
         $this->addFrontSystem(new MediumPlasma(1, 5, 3, 240, 60));
         $this->addFrontSystem(new MediumPlasma(1, 5, 3, 300, 120));
-		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 1, 270, 90));
-		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 1, 270, 90));
+		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 2, 270, 90));
+		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 2, 270, 90));
         $this->addFrontSystem(new Thruster(1, 5, 0, 3, 1));
         $this->addFrontSystem(new Thruster(1, 5, 0, 3, 1));
 	    
-		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 1, 90, 270));
+		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 90, 270));
         $this->addAftSystem(new Thruster(1, 7, 0, 5, 2));    
         $this->addAftSystem(new Thruster(1, 7, 0, 5, 2));    
        
         $this->addPrimarySystem(new Structure(2, 32));
-
 
 	//d20 hit chart
 	$this->hitChart = array(

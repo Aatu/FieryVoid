@@ -31,13 +31,13 @@ class DalithornFrigateRefit extends MediumShip{
         $this->addPrimarySystem(new Engine(3, 12, 0, 6, 3));
         $this->addPrimarySystem(new Hangar(1, 1));
 		$this->addPrimarySystem(new CargoBay(2, 10));
-        $this->addPrimarySystem(new Thruster(2, 10, 0, 3, 3));
-        $this->addPrimarySystem(new Thruster(2, 10, 0, 3, 4));        
+        $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
+        $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));        
         
 		$this->addFrontSystem(new NexusGasGun(2, 7, 2, 300, 60));
 		$this->addFrontSystem(new NexusLightGasGun(2, 5, 1, 240, 360));
 		$this->addFrontSystem(new NexusLightGasGun(2, 5, 1, 0, 120));
-        $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(2, 8, 0, 4, 1));
 	    
         $this->addAftSystem(new Thruster(1, 4, 0, 1, 2));    
         $this->addAftSystem(new Thruster(1, 4, 0, 1, 2));    

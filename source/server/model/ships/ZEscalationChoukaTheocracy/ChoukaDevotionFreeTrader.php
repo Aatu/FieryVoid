@@ -22,7 +22,6 @@ class ChoukaDevotionFreeTrader extends MediumShip{
         $this->rollcost = 2;
         $this->pivotcost = 4;
         $this->iniativebonus = 0;
-        
          
         $this->addPrimarySystem(new Reactor(3, 8, 0, 0));
         $this->addPrimarySystem(new CnC(3, 5, 0, 0));

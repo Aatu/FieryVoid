@@ -37,15 +37,15 @@ class ChoukaPenitentPatrolShip extends MediumShip{
 		$this->addFrontSystem(new CustomIndustrialGrappler(2, 5, 0, 300, 60));
 		$this->addFrontSystem(new CustomIndustrialGrappler(2, 5, 0, 300, 60));
         $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));	
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	    
-		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 2, 180, 360));
-		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 2, 0, 180));
+		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 180, 360));
+		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 0, 180));
         $this->addAftSystem(new Thruster(3, 18, 0, 8, 2));    
        
         $this->addPrimarySystem(new Structure(4, 64));

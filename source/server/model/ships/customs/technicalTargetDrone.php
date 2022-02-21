@@ -21,20 +21,20 @@ class technicalTargetDrone extends BaseShip{
 		$this->rollcost = 3;
 		$this->pivotcost = 4;
 
-		$this->critRollMod += 1;
-		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
+//		$this->critRollMod += 1;
+//		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
 		
 		$this->notes = "DO NOT USE, prone to change!";
 		
-		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 180, 360));
-		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 0, 180));
+//		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 180, 360));
+//		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 0, 180));
 		$reactor = new Reactor(6, 35, 0, 0);
 			$reactor->markPowerFlux();
 			$this->addPrimarySystem($reactor);
 //		$this->addPrimarySystem(new Reactor(6, 35, 0, 0));
-		$cnc = new CnC(5, 20, 0, 0);
-			$cnc->markCommsFlux();
-			$this->addPrimarySystem($cnc);
+//		$cnc = new CnC(5, 20, 0, 0);
+//			$cnc->markCommsFlux();
+//			$this->addPrimarySystem($cnc);
 //		$this->addPrimarySystem(new CnC(5, 20, 0, 0));
 		$engine = new Engine(5, 20, 0, 20, 3);
 			$engine->markEngineFlux();
@@ -46,8 +46,10 @@ class technicalTargetDrone extends BaseShip{
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
 		
 //        $this->addFrontSystem(new AntiquatedScanner(3, 20, 6, 6));
+		$this->addFrontSystem(new CnC(6, 40, 0, 0));
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
+		$this->addFrontSystem(new BSGHybrid(0, 20, 0, 0));
 		//$this->addFrontSystem(new Hangar(4, 6));
 		
 		//new weapon showcase
@@ -57,16 +59,17 @@ class technicalTargetDrone extends BaseShip{
 //		$this->addFrontSystem(new PlasmaWeb(2, 4, 2, 0, 360));
 
 //		$this->addFrontSystem(new PlasmaBlast(2, 4, 2, 0, 360));
-//		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
-//		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
-//		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
-//		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
+		$this->addFrontSystem(new TrekLightPhaser(2, 4, 2, 300, 60));
+		$this->addFrontSystem(new TrekLightPhaserLance(2, 6, 4, 300, 60));
+		$sensors = new Scanner(6, 23, 4, 20);
+			$sensors->markHyach();
+			$this->addFrontSystem($sensors); 
 /*		$sensors = new ELINTScanner(6, 23, 4, 20);
 			$sensors->markHyachELINT();
 			$this->addFrontSystem($sensors); */
-		$sensors = new Scanner(6, 23, 4, 20);
+/*		$sensors = new Scanner(6, 23, 4, 20);
 			$sensors->markSensorFlux();
-			$this->addFrontSystem($sensors);
+			$this->addFrontSystem($sensors); */
 
 
 		$this->addPrimarySystem(new SpinalLaser(5, 12, 12, 330, 30));
@@ -111,11 +114,11 @@ class technicalTargetDrone extends BaseShip{
 		*/
 		$this->addLeftSystem(new Thruster(4, 14, 0, 5, 3));
 		$this->addLeftSystem(new ImperialLaser(3, 8, 5, 300, 0));
-		$this->addLeftSystem(new TwinArray(3, 6, 2, 180, 0));
+//		$this->addLeftSystem(new TwinArray(3, 6, 2, 180, 0));
 		
 		$this->addRightSystem(new Thruster(4, 14, 0, 5, 4));
 		$this->addRightSystem(new ImperialLaser(3, 8, 5, 0, 60));
-		$this->addRightSystem(new TwinArray(3, 6, 2, 0, 180));
+//		$this->addRightSystem(new TwinArray(3, 6, 2, 0, 180));
 		
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
 		$this->addFrontSystem(new Structure( 7, 100));

@@ -8,7 +8,7 @@ class CalortaEarly extends HeavyCombatVesselLeftRight{
 	$this->faction = "Brakiri";
         $this->phpclass = "CalortaEarly";
         $this->imagePath = "img/ships/calorta.png";
-        $this->shipClass = "Calorta Elint Cruiser (early)";
+        $this->shipClass = "Calorta Elint Cruiser (Early)";
         $this->occurence = "uncommon";
         $this->limited = 33;
         $this->variantOf = "Ikorta Light Assault Cruiser";
