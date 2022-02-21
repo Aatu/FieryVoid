@@ -14,7 +14,6 @@ class ChoukaRaiderHeresy extends HeavyCombatVessel{
         $this->isd = 1943;
 		
         $this->fighters = array("normal"=>6);
-		
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
@@ -25,7 +24,6 @@ class ChoukaRaiderHeresy extends HeavyCombatVessel{
         $this->rollcost = 3;
         $this->pivotcost = 4;
         $this->iniativebonus = 4*5;
-        
          
         $this->addPrimarySystem(new Reactor(3, 10, 0, 0));
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));
@@ -41,15 +39,14 @@ class ChoukaRaiderHeresy extends HeavyCombatVessel{
 		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 0, 120));
                 
         $this->addAftSystem(new Thruster(1, 18, 0, 6, 2));
-        $this->addAftSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
-        $this->addAftSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
-        $this->addAftSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
-        $this->addAftSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
+        $this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
+        $this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
+        $this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
+        $this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
 		$this->addAftSystem(new CargoBay(2, 12));
 		$this->addAftSystem(new CargoBay(2, 12));
 		$this->addAftSystem(new LightPlasma(1, 4, 2, 180, 300));
 		$this->addAftSystem(new LightPlasma(2, 4, 2, 60, 180));
-
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 40));

@@ -37,15 +37,15 @@ class ChoukaReverendEscort extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(2, 6, 0, 3, 1));
 		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
 		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
-		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 1, 240, 60));
-		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 1, 300, 120));
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 240, 120));
+		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 2, 240, 60));
+		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 2, 300, 120));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 240, 120));
                 
         $this->addAftSystem(new Thruster(2, 18, 0, 8, 2));
-        $this->addAftSystem(new EWPointPlasmaGun(1, 3, 1, 120, 300));
-        $this->addAftSystem(new EWPointPlasmaGun(1, 3, 1, 90, 270));
-        $this->addAftSystem(new EWPointPlasmaGun(1, 3, 1, 90, 270));
-        $this->addAftSystem(new EWPointPlasmaGun(1, 3, 1, 60, 240));
+        $this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 120, 300));
+        $this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 90, 270));
+        $this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 90, 270));
+        $this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 60, 240));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 38));

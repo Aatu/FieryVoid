@@ -38,14 +38,14 @@ class ChoukaClergy extends HeavyCombatVessel{
 		$this->addFrontSystem(new LightLaser(3, 4, 3, 300, 60));
 		$this->addFrontSystem(new LightLaser(3, 4, 3, 300, 60));
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 270, 90));
-		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 1, 240, 60));
-		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 1, 300, 120));
+		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 2, 240, 60));
+		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 2, 300, 120));
                 
         $this->addAftSystem(new Thruster(2, 18, 0, 8, 2));
-        $this->addAftSystem(new EWPointPlasmaGun(1, 3, 1, 120, 300));
+        $this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 120, 300));
         $this->addAftSystem(new LightLaser(2, 4, 3, 90, 270));
         $this->addAftSystem(new LightLaser(2, 4, 3, 90, 270));
-        $this->addAftSystem(new EWPointPlasmaGun(1, 3, 1, 60, 240));
+        $this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 60, 240));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 38));

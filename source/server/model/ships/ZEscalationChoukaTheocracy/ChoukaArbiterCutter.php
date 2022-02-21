@@ -23,7 +23,6 @@ class ChoukaArbiterCutter extends MediumShip{
         $this->rollcost = 2;
         $this->pivotcost = 2;
         $this->iniativebonus = 60;
-        
          
         $this->addPrimarySystem(new Reactor(3, 10, 0, 0));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
@@ -38,13 +37,13 @@ class ChoukaArbiterCutter extends MediumShip{
 		$this->addFrontSystem(new CustomIndustrialGrappler(2, 5, 0, 300, 60));
         $this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 60));
         $this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 60));
-		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 1, 270, 90));
-		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 1, 270, 90));
+		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 2, 270, 90));
+		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 2, 270, 90));
         $this->addFrontSystem(new Thruster(1, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(1, 6, 0, 2, 1));
 	    
-		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 1, 180, 360));
-		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 1, 0, 180));
+		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 180, 360));
+		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 0, 180));
         $this->addAftSystem(new Thruster(2, 13, 0, 6, 2));    
        
         $this->addPrimarySystem(new Structure(3, 40));

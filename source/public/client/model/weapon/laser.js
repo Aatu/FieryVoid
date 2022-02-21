@@ -126,3 +126,9 @@ var SpinalLaser = function SpinalLaser(json, ship) {
 };
 SpinalLaser.prototype = Object.create(Laser.prototype);
 SpinalLaser.prototype.constructor = SpinalLaser;
+
+var LtBlastLaser = function LtBlastLaser(json, ship) {
+    Laser.call(this, json, ship);
+};
+LtBlastLaser.prototype = Object.create(Laser.prototype);
+LtBlastLaser.prototype.constructor = LtBlastLaser;

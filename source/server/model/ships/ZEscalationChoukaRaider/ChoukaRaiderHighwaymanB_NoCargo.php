@@ -25,7 +25,6 @@ class ChoukaRaiderHighwaymanB_NoCargo extends MediumShip{
         $this->rollcost = 1;
         $this->pivotcost = 1;
         $this->iniativebonus = 60;
-        
          
         $this->addPrimarySystem(new Reactor(2, 10, 0, 0));
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));

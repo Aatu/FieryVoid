@@ -56,8 +56,8 @@ class ChoukaCitadel extends StarBaseSixSections{
 			$systems = array(
 				new HeavyPlasma(4, 8, 5, $min, $max),
 				new HeavyPlasma(4, 8, 5, $min, $max),
-				new EWHeavyPointPlasmaGun(4, 7, 2, $min, $max),
-				new EWHeavyPointPlasmaGun(4, 7, 2, $min, $max),
+				new EWHeavyPointPlasmaGun(4, 7, 3, $min, $max),
+				new EWHeavyPointPlasmaGun(4, 7, 3, $min, $max),
 				new EWTwinLaserCannon(4, 8, 5, $min, $max),
 				new EWTwinLaserCannon(4, 8, 5, $min, $max),
 				new SMissileRack(4, 6, 0, $min, $max, true),

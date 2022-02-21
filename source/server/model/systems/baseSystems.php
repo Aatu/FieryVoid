@@ -1051,7 +1051,7 @@ class CnC extends ShipSystem implements SpecialAbility {
 		15=>"RestrictedEW", 
 		18=>array("ReducedIniativeOneTurn","ReducedIniative"), 
 		21=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative"), 
-		24=>array("RestrictedEW","ReducedIniative","ShipDisabledOneTurn")
+		24=>array("RestrictedEW","ReducedIniative","ShipDisabledOneTurn") 
     );
         
     function __construct($armour, $maxhealth, $powerReq, $output ){
@@ -3269,6 +3269,19 @@ class StructureTechnical extends ShipSystem{
 }//endof VreeStructurePlaceholder	
 
 
+class BSGHybrid extends ShipSystem {
+    public $name = "BSGHybrid";
+    public $displayName = "Cylon Hybrid";
+	public $iconPath = "ShadowPilot.png";
+
+    public $possibleCriticals = array(
+		1=>"SensorLoss"
+    );
+
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+    }
+}
 
 
 

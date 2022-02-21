@@ -1726,80 +1726,13 @@ class LightParticleAccelerator extends LinkedWeapon{
 	
 
 
-
-
-
-/*handles creation of firing orders for Interdictors*/
-/*class InterdictorHandler{
-	public $name = "InterdictorHandler";
-	private static $interdictors = array();
-	private static $firingDeclared = false;
-	
-	//should be called by every Interdictor on creation!
-	public static function addInterdictor($weapon){
-		InterdictorHandler::$interdictors[] = $weapon;		
-	}
-
-
-	public static function getInterceptionMod($gamedata, $intercepted) {
-
-		if (InterdictorHandler::$firingDeclared) return; //already done!
-		InterdictorHandler::$firingDeclared = true;
-		
-		//apparently ships may be loaded multiple times... make sure fields in array belong to current gamedata!
-		$tmpFields = array();
-		foreach(InterdictorHandler::$interdictors as $field){
-			$shooter = $field->getUnit();
-			//if($field->isDestroyed($gamedata->turn-1)) continue; //destroyed weapons can be safely left out
-			if($field->isDestroyed($gamedata->turn)) continue; //actually at this stage - CURRENT turn should be indicated!
-			//is this unit defined in current gamedata? (particular instance!)
-			$belongs = $gamedata->shipBelongs($shooter);
-			if ($belongs){
-				$tmpFields[] = $field;
-			}			
-		}
-		IndterdictorHandler::$interdictors = $tmpFields;
-	
-		$wasIntercepted = false;
-		$interceptMod = 0;
-
-		foreach(InterdictorHandler::$interdictors as $field){			
-			if ($field->isDestroyed($gamedata->turn-1)) continue; //destroyed field does not attack
-			if ($field->isOfflineOnTurn($gamedata->turn)) continue; //disabled field does not attack
-
-			foreach($this->alreadyIntercepted as $alreadyAssignedAgainst){
-					if ($alreadyAssignedAgainst->id == $intercepted->id){ //this fire order was already intercepted by this weapon, this Scattergun cannot do so again
-						$wasIntercepted = true;
-						break;
-					}
-				
-			}
-			if(!$wasIntercepted) $interceptMod = parent::getInterceptionMod($gamedata, $intercepted);
-			
-			$fire->addToDB = true;
-			$field->fireOrders[] = $fire;			
-		} //endof foreach Interdictor
-
-
-
-		//table of units that are already targeted
-		$alreadyTargeted = array();
-		//create firing order for each weapon (target self)
-		//for each weapon find possible targets and add them to weapons' target list
-		//strongest weapons fire first, and only 1 field affects particular ship	
-	}//endof function getInterceptionMod
-	
-}//endof class InterdictorHandler
-
-*/
-
-
-
-
     class Interdictor extends Weapon{
         public $name = "Interdictor";
         public $displayName = "Interdictor";
 		public $iconPath = "Interdictor.png";
+
+        public $freeintercept = true; //can intercept fire directed at different unit
+        public $freeinterceptspecial = true; //has own custom routine for deciding whether third party interception is legal
 
         public $loadingtime = 1;
         public $priority = 1; //will never fire anyway except defensively, purely a defensive system
@@ -1813,6 +1746,7 @@ class LightParticleAccelerator extends LinkedWeapon{
     	public $weaponClass = "Particle"; //not important really
         
         public $intercept = 4;
+		private static $alreadyIntercepted = array(); //Only one Interdictor can intercept any shot, including ballistics.
 
      	public $possibleCriticals = array( //different than usual B5Wars weapon
             16=>"ForcedOfflineOneTurn"
@@ -1829,22 +1763,174 @@ class LightParticleAccelerator extends LinkedWeapon{
             if ( $maxhealth == 0 ) $maxhealth = 4;
             if ( $powerReq == 0 ) $powerReq = 1;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-			InterdictorHandler::addInterdictor($this);//so all Interdictors are accessible together, and firing orders can be uniformly created
+//			InterdictorHandler::addInterdictor($this);//so all Interdictors are accessible together, and firing orders can be uniformly created
         }
 
-//		InterdictorHandler::$firingDeclared;
-
-		//find units in range (other than self), create attacks vs them
-		public function beforeFiringOrderResolution($gamedata){
-			InterdictorHandler::getInterceptionMod($gamedata, $intercepted);		
+		public function canFreeInterceptShot($gamedata, $fireOrder, $shooter, $target, $interceptingShip, $firingWeapon){
+			//target must be within 5 hexes
+			$distance = mathlib::getDistanceHex($interceptingShip, $target);
+			if ($distance > 5) return false;
+			
+			//both source and target of fire must be in arc
+			//first check target
+			$targetBearing = $interceptingShip->getBearingOnUnit($target);
+			if (!mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) return false;
+			//check on source - launch hex for ballistics, current position for direct fire
+			if ($firingWeapon->ballistic){
+				$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+				$pos = mathlib::hexCoToPixel($movement->position); //launch hex
+				$sourceBearing = $interceptingShip->getBearingOnPos($pos);				
+			}else{ //direct fire
+				$sourceBearing = $interceptingShip->getBearingOnUnit($shooter);
+			}
+			if (!mathlib::isInArc($sourceBearing, $this->startArc, $this->endArc)) return false;
+						
+			return true;
 		}
 
+	    /*return 0 if given fire order was already intercepted by this weapon - this should prevent such assignment*/
+	public function getInterceptionMod($gamedata, $intercepted)
+	{
+		$wasIntercepted = false;
+		$interceptMod = 0;
+		foreach(Interdictor::$alreadyIntercepted as $alreadyAssignedAgainst){
+			if ($alreadyAssignedAgainst->id == $intercepted->id){ //this fire order was already intercepted by this weapon, this Scattergun cannot do so again
+				$wasIntercepted = true;
+				break;//foreach
+			}
+		}
+		if(!$wasIntercepted) $interceptMod = parent::getInterceptionMod($gamedata, $intercepted);
+		return $interceptMod;
+	}//endof  getInterceptionMod
+        
+	//on weapon being ordered to intercept - note which shot (fireorder, actually) was intercepted!
+	public function fireDefensively($gamedata, $interceptedWeapon)
+	{
+		parent::fireDefensively($gamedata, $interceptedWeapon);
+		Interdictor::$alreadyIntercepted[] = $interceptedWeapon;
+	}	    
 		
         public function getDamage($fireOrder){        return 0;   }
         public function setMinDamage(){     $this->minDamage = 0 ;      }
         public function setMaxDamage(){     $this->maxDamage = 0 ;      }
-    }
+
+    }  // end of class Interdictor
 	
+
+
+
+/*fighter-mounted variant*/
+    class FtrInterdictor extends Weapon{
+//        public $trailColor = array(30, 170, 255);
+
+        public $name = "FtrInterdictor";
+        public $displayName = "Light Interdictor";
+		public $iconPath = "Interdictor.png";
+
+		public $animation = "ball";
+		public $trailColor = array(255, 250, 230);
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.3;
+        public $animationExplosionType = "AoE";
+        public $explosionColor = array(255,250,230);
+        public $projectilespeed = 12;
+        public $animationWidth = 10;
+        public $trailLength = 10;
+
+		public $uninterceptable = true;
+		public $doNotIntercept = true;
+	    
+        public $freeintercept = true; //can intercept fire directed at different unit
+        public $freeinterceptspecial = true; //has own custom routine for deciding whether third party interception is legal
+
+		public $range = 10; //
+
+		private static $alreadyIntercepted = array(); //Only one Interdictor can intercept any shot, including ballistics.
+
+		public $firingMode = 'Intercept';
+		public $damageType = 'Standard'; //indicates that this weapon does damage in Pulse mode
+    	public $weaponClass = 'Particle'; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+
+        public $intercept = 3;
+        public $loadingtime = 1;
+        public $priority = 1;
+
+        public $rangePenalty = 0;
+        public $fireControl = array(50, null, null); // fighters, <mediums, <capitals 
+
+		function __construct($startArc, $endArc, $nrOfShots = 1){
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+		public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 3 hexes.";
+            $this->data["Special"] .= "<br>Only one interdictor can be applied to any incoming shot, including ballistics.";
+            $this->data["Special"] .= "<br>Alternate anti-fighter intercept mode: If used on an enemy fighter flight, all fighters have their chance to hit reduced by 15 for non-ballistics.";
+        }
+
+		public function canFreeInterceptShot($gamedata, $fireOrder, $shooter, $target, $interceptingShip, $firingWeapon){
+			//target must be within 3 hexes
+			$distance = mathlib::getDistanceHex($interceptingShip, $target);
+			if ($distance > 3) return false;
+			
+			//both source and target of fire must be in arc
+			//first check target
+			$targetBearing = $interceptingShip->getBearingOnUnit($target);
+			if (!mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) return false;
+			//check on source - launch hex for ballistics, current position for direct fire
+			if ($firingWeapon->ballistic){
+				$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+				$pos = mathlib::hexCoToPixel($movement->position); //launch hex
+				$sourceBearing = $interceptingShip->getBearingOnPos($pos);				
+			}else{ //direct fire
+				$sourceBearing = $interceptingShip->getBearingOnUnit($shooter);
+			}
+			if (!mathlib::isInArc($sourceBearing, $this->startArc, $this->endArc)) return false;
+						
+			return true;
+		}
+
+
+
+
+
+
+
+
+
+
+	    /*return 0 if given fire order was already intercepted by this weapon - this should prevent such assignment*/
+	public function getInterceptionMod($gamedata, $intercepted)
+	{
+		$wasIntercepted = false;
+		$interceptMod = 0;
+		foreach(FtrInterdictor::$alreadyIntercepted as $alreadyAssignedAgainst){
+			if ($alreadyAssignedAgainst->id == $intercepted->id){ //this fire order was already intercepted by this weapon, this Scattergun cannot do so again
+				$wasIntercepted = true;
+				break;//foreach
+			}
+		}
+		if(!$wasIntercepted) $interceptMod = parent::getInterceptionMod($gamedata, $intercepted);
+		return $interceptMod;
+	}//endof  getInterceptionMod
+        
+	//on weapon being ordered to intercept - note which shot (fireorder, actually) was intercepted!
+	public function fireDefensively($gamedata, $interceptedWeapon)
+	{
+		parent::fireDefensively($gamedata, $interceptedWeapon);
+		FtrInterdictor::$alreadyIntercepted[] = $interceptedWeapon;
+	}	    
+
+        public function getDamage($fireOrder){        return 0;   }
+        public function setMinDamage(){     $this->minDamage = 0 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+
+	}// endof FtrInterdictor
+
+
 	
 	
 	

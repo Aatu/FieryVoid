@@ -18,7 +18,6 @@ class ChoukaHolylandAssault extends BaseShip{
 		
         $this->fighters = array("assault shuttles"=>6);
 
-
 	$this->isd = 1944;
         
         $this->forwardDefense = 13;
@@ -39,8 +38,8 @@ class ChoukaHolylandAssault extends BaseShip{
    
         $this->addFrontSystem(new Thruster(3, 13, 0, 5, 1));
 		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 180, 360));
-		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 1, 0, 180));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
+		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
 
         $this->addAftSystem(new Thruster(3, 15, 0, 10, 2));
 		$this->addAftSystem(new LightLaser(1, 4, 3, 180, 360));

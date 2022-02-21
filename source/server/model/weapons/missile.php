@@ -251,10 +251,8 @@ class LHMissileRack extends MissileLauncher
     public $distanceRange = 70;
     public $loadingtime = 1;
     public $iconPath = "missile2.png";
-	/*
     public $rangeMod = 10;
     protected $distanceRangeMod = 10;
-	*/
     private $rackExplosionDamage = 0; //this rack directs explosion damage outwards - is itself destroyed, but does not damage ship beyond that
     
     public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals 
