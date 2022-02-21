@@ -8,7 +8,7 @@ class CorumaiEarly extends BaseShip{
 	$this->faction = "Brakiri";
         $this->phpclass = "CorumaiEarly";
         $this->imagePath = "img/ships/corumai.png";
-        $this->shipClass = "Corumai Dreadnought (early)";
+        $this->shipClass = "Corumai Dreadnought (Early)";
 			$this->occurence = "common";
 			$this->variantOf = 'Corumai Dreadnought';
         $this->shipSizeClass = 3;

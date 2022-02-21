@@ -245,7 +245,9 @@ const hasCriticals = (system) => shipManager.criticals.hasCriticals(system)
 const isSelected = (system) => weaponManager.isSelectedWeapon(system)
 
 const getText = (ship, system) => {
-    if (system.weapon) {
+	if (system.outputDisplay != '') { //some systems have very specific visual output, rather than generic
+		return system.outputDisplay;
+	} else if (system.weapon) {
         
         const firing = weaponManager.hasFiringOrder(ship, system);
 
