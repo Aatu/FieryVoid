@@ -10,7 +10,7 @@ class ColonialOdinClass extends BaseShip{
         $this->imagePath = "img/ships/BSG/ColonialOdin2.png";
         $this->shipClass = "Odin Battlestar";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 160; //img has 140px per side
+		$this->canvasSize = 160; //img has 160px per side
 //		$this->unlimited 
 		$this->unofficial = true;
 

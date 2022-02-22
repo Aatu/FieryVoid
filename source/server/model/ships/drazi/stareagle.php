@@ -10,7 +10,7 @@ class Stareagle extends MediumShipLeftRight{
         $this->imagePath = "img/ships/drazi/DraziStareagle.png";
         $this->shipClass = "Stareagle Frigate";
         $this->agile = true;
-        $this->canvasSize = 110;
+        $this->canvasSize = 100;
 		$this->isd = 2118;
         
         $this->forwardDefense = 12;

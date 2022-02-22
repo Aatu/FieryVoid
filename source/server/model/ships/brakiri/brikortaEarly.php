@@ -8,7 +8,7 @@ class BrikortaEarly extends HeavyCombatVesselLeftRight{
 	$this->faction = "Brakiri";
         $this->phpclass = "BrikortaEarly";
         $this->imagePath = "img/ships/ikorta.png";
-        $this->shipClass = "Brikorta Light Carrier (early)";
+        $this->shipClass = "Brikorta Light Carrier (Early)";
         $this->variantOf = "Ikorta Light Assault Cruiser";
         $this->occurence = "uncommon";
         $this->fighters = array("light"=>12);

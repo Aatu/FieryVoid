@@ -10,6 +10,7 @@ class Terillon extends MediumShip{
         $this->imagePath = "img/ships/LlortTerillon.png";
         $this->shipClass = "Terillon Patrol Frigate";
         $this->agile = true;
+		$this->canvasSize = 100;        
         
         $this->forwardDefense = 13;
         $this->sideDefense = 11;

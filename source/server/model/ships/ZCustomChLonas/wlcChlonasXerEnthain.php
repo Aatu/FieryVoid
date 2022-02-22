@@ -8,7 +8,7 @@ class wlcChlonasXerEnthain extends BaseShipNoAft
 		$this->pointCost = 1050;
 		$this->phpclass = "wlcChlonasXerEnthain";
 		$this->imagePath = "img/ships/ChlonasXerEnthain.png";
-		$this->canvasSize = 200;
+		$this->canvasSize = 280;
 		$this->shipClass = "Xer'Enthain Battlecruiser";
 		$this->fighters = array("heavy" => 24);
 		$this->forwardDefense = 16;

@@ -15,7 +15,7 @@ class Firefalcon extends BaseShipNoAft{
         $this->variantOf = 'Stormfalcon Heavy Cruiser';
         $this->limited = 33;
         $this->isd = 2255;
-        $this->canvasSize = 180;
+        $this->canvasSize = 200;
 
         $this->forwardDefense = 15;
         $this->sideDefense = 14;

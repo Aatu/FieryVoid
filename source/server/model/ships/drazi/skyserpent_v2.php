@@ -10,7 +10,7 @@ class SkySerpent_v2 extends SuperHeavyFighter{
         $this->shipClass = "Sky Serpent Heavy Assault Fighters";
         $this->imagePath = "img/ships/drazi/DraziSkyserpent.png";
 	    $this->isd = 2220;
-        $this->canvasSize = 64;
+        $this->canvasSize = 60;
 
         $this->forwardDefense = 10;
         $this->sideDefense = 9;
