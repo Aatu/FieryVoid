@@ -2250,7 +2250,8 @@ spl_autoload_register(
 				'norvaii' => '/server/model/ships/descari/NorvaII.php',
 				'carrana' => '/server/model/ships/descari/Carrana.php',
 				'hemsar' => '/server/model/ships/descari/Hemsar.php',
-				'hemros' => '/server/model/ships/descari/Hemros.php',   
+				'hemros' => '/server/model/ships/descari/Hemros.php',
+				'rulnato' => '/server/model/ships/descari/Rulnato.php',				   
 		    
 		    	//Random Ships which don't require new mechanics to add
 		    	'zzunofftlorr' => '/server/model/ships/narn/zzunoffTlorr.php',
@@ -2412,7 +2413,7 @@ spl_autoload_register(
 				//other				
 				'apollostrike' => '/server/model/ships/EA/apollostrike.php',
                 'swerrantventure' => '/server/model/ships/ZStarWars/swErrantVenture.php',
-			
+				'unevenbasefoursections' => '/server/model/ships/ShipClasses.php',
 
 
 				//Star Trek conversions
@@ -2538,10 +2539,7 @@ spl_autoload_register(
 				'ltviper' => '/server/model/ships/customs/LtViper.php',
 				'medviper' => '/server/model/ships/customs/medViper.php',
 				
-				//TEMPORARY layout changes and such - old versions	    
-                'halikold' => '/server/model/ships/brakiri/halikOld.php',
-                'shargotiold' => '/server/model/ships/minbari/shargotiOld.php',
-                'tradanaold' => '/server/model/ships/minbari/tradanaOld.php',
+				//TEMPORARY layout changes and such - old versions	
 				
 						
 				

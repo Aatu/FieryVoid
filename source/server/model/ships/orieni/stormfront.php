@@ -18,12 +18,12 @@ class StormFront extends MediumShip{
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
-        
+
         $this->turncost = 0.5;
         $this->turndelaycost = 0.5;
-        $this->accelcost = 2;
-        $this->rollcost = 1;
-        $this->pivotcost = 2;
+        $this->accelcost = 3;
+        $this->rollcost = 2;
+        $this->pivotcost = 3;
 		$this->iniativebonus = 60;
         
          

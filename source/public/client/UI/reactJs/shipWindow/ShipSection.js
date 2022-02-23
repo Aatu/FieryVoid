@@ -14,8 +14,8 @@ const ShipSectionContainer = styled.div`
             default:
                 return '30%'
         }
-    }};
-    align-items: end;
+    }};	
+    align-items: end;	
     justify-content: space-around;
     overflow: hidden;
     box-sizing: border-box;
@@ -69,7 +69,6 @@ const StructureContainer = styled.div`
 `;
 
 class ShipSection extends React.Component {
-
     render() {
         const {ship, systems, location} = this.props;
 
