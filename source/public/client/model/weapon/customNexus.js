@@ -861,6 +861,11 @@ var NexusTestBlaster = function  NexusTestBlaster(json, ship) {
 NexusTestBlaster.prototype = Object.create(Weapon.prototype);
 NexusTestBlaster.prototype.constructor =  NexusTestBlaster;
 
+//var Enveloper = function  Enveloper(json, ship) {
+//    Weapon.call(this, json, ship);
+//};
+//Enveloper.prototype = Object.create(Weapon.prototype);
+//Enveloper.prototype.constructor =  Enveloper;
 
 
 

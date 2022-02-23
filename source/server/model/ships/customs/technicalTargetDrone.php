@@ -8,7 +8,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
 //		$this->imagePath = "img/ships/BASurveyShip.png";
-		$this->imagePath = "img/ships/GaimSkassa.png";
+		$this->imagePath = "img/starwars/CloneWars/Venator.png";
 		$this->shipClass = "Target Drone - DO NOT USE";
 		$this->shipSizeClass = 3;
 //		$this->canvasSize = 75; //img has 125px per side
@@ -59,8 +59,8 @@ class technicalTargetDrone extends BaseShip{
 //		$this->addFrontSystem(new PlasmaWeb(2, 4, 2, 0, 360));
 
 //		$this->addFrontSystem(new PlasmaBlast(2, 4, 2, 0, 360));
-		$this->addFrontSystem(new TrekLightPhaser(2, 4, 2, 300, 60));
-		$this->addFrontSystem(new TrekLightPhaserLance(2, 6, 4, 300, 60));
+//		$this->addFrontSystem(new TrekLightPhaser(2, 4, 2, 300, 60));
+//		$this->addFrontSystem(new TrekLightPhaserLance(2, 6, 4, 300, 60));
 		$sensors = new Scanner(6, 23, 4, 20);
 			$sensors->markHyach();
 			$this->addFrontSystem($sensors); 
@@ -92,6 +92,7 @@ class technicalTargetDrone extends BaseShip{
 
 		$this->addFrontSystem(new NexusLaserMissile(1, 6, 1, 0, 360));
 		$this->addFrontSystem(new NexusLaserMissile(1, 6, 1, 0, 360));
+		$this->addFrontSystem(new Enveloper(3, 8, 6, 300, 60));
 
 		/*
 		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));

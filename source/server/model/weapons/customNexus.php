@@ -7077,7 +7077,80 @@ class NexusTestBlaster extends Weapon{
 }// endof NexusTestBlaster
 
 
+class Enveloper extends Weapon{
+    /*Testing the creation of an enveloping weapon that does not damage the primary section.*/
+	/*Using the Ipsha Resonance Generator as the template*/
+	public $name = "Enveloper";
+	public $displayName = "Enveloper";
+	public $iconPath = "ResonanceGenerator.png";
+	
+	public $animation = "laser"; //described as beam in nature, standard damage is resonance effect and not direct
+	public $animationColor = array(125, 125, 230);
+	public $animationExplosionScale = 0.6; //make it look really large - while singular damage is low, it's repeated on every structure block - eg. all-encompassing
 
+	public $loadingtime = 1;
+	
+	public $rangePenalty = 1; //-1/hex
+	public $fireControl = array(null, 2, 2); // fighters, <mediums, <capitals 
+	
+	public $intercept = 0;
+	public $priority = 1;// as it attacks every section, should go first!
+	
+	public $noPrimaryHits = true; //outer section hit will NOT be able to roll PRIMARY result!
+	
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $aftFacing=false)
+	{
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+			$maxhealth = 8;
+		}
+		if ( $powerReq == 0 ){
+			$powerReq = 6;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}	
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);  
+		$this->data["Special"] = "Attacks all sections (so a capital ship will sufer 5 attacks, while MCV only 1).";  //MCV should suffer 2, but for technical reasons I opted for going for Section = Structure block		    
+		$this->data["Special"] .= "<br>Ignores armor."; 
+	}
+
+	//ignore armor; advanced armor halves effect (due to this weapon being Electromagnetic)
+	public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
+		if (WeaponEM::isTargetEMResistant($target,$system)){
+			$returnArmour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
+			$returnArmour = floor($returnArmour/2);
+			return $returnArmour;
+		}else{
+			return 0;
+		}
+	}
+	
+	public function isTargetAmbiguous($gamedata, $fireOrder){//targat always ambiguous - just so enveloping weapon is not used to decide target section!
+		return true;
+	}
+	
+	/*attacks every not destroyed (as of NOW!) ship section*/
+	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
+		//fighters are untargetable, so we know it's a ship
+		if ($target->isDestroyed()) return; //no point allocating
+		$activeStructures = $target->getSystemsByName("Structure",false);//list of non-destroyed Structure blocks
+		foreach($activeStructures as $struct){
+			$fireOrder->chosenLocation = $struct->location;			
+			$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
+			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage, false);//force PRIMARY location!
+		}
+	}//endof function beforeDamage
+		
+	public function getDamage($fireOrder){       return 10;   }
+	public function setMinDamage(){     $this->minDamage = 10 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 10 ;      }
+	
+} //endof class Enveloper
 
 
 ?>

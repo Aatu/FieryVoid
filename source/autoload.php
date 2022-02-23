@@ -1553,6 +1553,7 @@ spl_autoload_register(
 //				'plasmablast' => '/server/model/weapons/customNexus.php',
 //				'testgun' => '/server/model/weapons/customNexus.php',
 //                'plasmabattery' => '/server/model/systems/baseSystems.php',
+//				'enveloper' => '/server/model/weapons/customNexus.php',
 
 
 
@@ -1571,6 +1572,8 @@ spl_autoload_register(
 
                 'brixadiijumpscout' => '/server/model/ships/ZNexusBrixadii/BrixadiiJumpScout.php',		
                 'brixadiijumpscout2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiJumpScout2108.php',		
+
+                'brixadiiplasmadestroyer' => '/server/model/ships/ZNexusBrixadii/BrixadiiPlasmaDestroyer.php',	
 	
 				'brixadiiassaultship' => '/server/model/ships/ZNexusBrixadii/BrixadiiAssaultShip.php',
 	
@@ -2498,11 +2501,37 @@ spl_autoload_register(
 //				'hyachdartha' => '/server/model/ships/hyach/HyachDartha.php',
 //				'hyachdoskva' => '/server/model/ships/hyach/HyachDoskva.php',
 //				'hyachirokaikam' => '/server/model/ships/hyach/HyachIrokaiKam.php',
+
+
+				//Star Wars - Clone Wars testing
+
+				//weapons
+/*                'cwheavyturbolaser' => '/server/model/weapons/customCW.php',
+                'cwtwinheavyturbolaser' => '/server/model/weapons/customCW.php',
+                'cwquadheavyturbolaser' => '/server/model/weapons/customCW.php',
+                'cwturbolaser' => '/server/model/weapons/customCW.php',
+                'cwtwinturbolaser' => '/server/model/weapons/customCW.php',
+                'cwquadturbolaser' => '/server/model/weapons/customCW.php',
+                'cwlasercannon' => '/server/model/weapons/customCW.php',
+                'cwtwinlasercannon' => '/server/model/weapons/customCW.php',
+                'cwquadlasercannon' => '/server/model/weapons/customCW.php',
+                'cwpointdefenselaser' => '/server/model/weapons/customCW.php',
+                'cwconcussionmissile' => '/server/model/weapons/customCW.php',
+                'cwprotontorpedo' => '/server/model/weapons/customCW.php',
+                'cwioncannon' => '/server/model/weapons/customCW.php',
+                'cwheavyioncannon' => '/server/model/weapons/customCW.php',
+                'cwshield' => '/server/model/weapons/customCW.php',
 				
+				//units
+				'venator' => '/server/model/ships/ZStarWarsCloneWars/Venator.php',
+*/				
+
+
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
 				
+
 
 				//TEMPORARY variable hangar size testing
 				'variablehangarsize' => '/server/model/ships/customs/VariableHangarSize.php',
