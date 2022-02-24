@@ -92,7 +92,7 @@ class technicalTargetDrone extends BaseShip{
 
 		$this->addFrontSystem(new NexusLaserMissile(1, 6, 1, 0, 360));
 		$this->addFrontSystem(new NexusLaserMissile(1, 6, 1, 0, 360));
-		$this->addFrontSystem(new Enveloper(3, 8, 6, 300, 60));
+//		$this->addFrontSystem(new Enveloper(3, 8, 6, 300, 60));
 
 		/*
 		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));

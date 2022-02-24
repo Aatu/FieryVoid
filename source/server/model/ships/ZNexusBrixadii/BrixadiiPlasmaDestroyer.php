@@ -7,7 +7,7 @@ class BrixadiiPlasmaDestroyer extends HeavyCombatVessel{
         $this->pointCost = 460;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiPlasmaDestroyer";
-        $this->imagePath = "img/ships/Nexus/BrixadiiBattleDestroyer.png";
+        $this->imagePath = "img/ships/Nexus/BrixadiiPlasmaDestroyer.png";
 			$this->canvasSize = 120; //img has 200px per side
         $this->shipClass = "Plasma Destroyer";
 			$this->variantOf = "Battle Destroyer";
