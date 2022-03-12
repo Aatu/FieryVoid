@@ -1002,6 +1002,7 @@ spl_autoload_register(
                 'tacit1990' => '/server/model/ships/centauri_old/tacit1990.php',
                 'taclaser' => '/server/model/weapons/lasers.php',
                 'taileagle' => '/server/model/ships/drazi/taileagle.php',
+                'takalaas' => '/server/model/ships/brakiri/takalaAS.php',
                 'talafat' => '/server/model/ships/markab/talafat.php',
                 'tankertug' => '/server/model/ships/civilians/tankerTug.php',
                 'tantalus' => '/server/model/ships/EA/tantalus.php',
