@@ -11,6 +11,7 @@ class XotiB extends OSAT
 		$this->phpclass = "XotiB";
 		$this->shipClass = "Xoti Orbital Satellite B";
 		$this->imagePath = "img/ships/VreeXoti.png";
+	    $this->variantOf = 'Xoti Orbital Satellite A';		
 		$this->canvasSize = 80;
 		$this->isd = 2260;
 
