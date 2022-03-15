@@ -28,10 +28,11 @@ class XotiA extends OSAT
 		$this->addPrimarySystem(new Scanner(4, 7, 2, 7));
 		$this->addPrimarySystem(new Thruster(4, 6, 0, 0, 2));
 		$this->addPrimarySystem(new AntimatterCannon(4, 9, 8, 270, 90));
-		$this->addPrimarySystem(new AntiprotonGun(3, 8, 4, 270, 90));
-		$this->addPrimarySystem(new AntiprotonGun(3, 8, 4, 270, 90));
 		$this->addPrimarySystem(new AntiprotonDefender(2, 4, 3, 180, 360));
 		$this->addPrimarySystem(new AntiprotonDefender(2, 4, 3, 0, 180));
+		$this->addPrimarySystem(new AntiprotonGun(3, 8, 4, 270, 90));
+		$this->addPrimarySystem(new AntiprotonGun(3, 8, 4, 270, 90));
+
 
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
 

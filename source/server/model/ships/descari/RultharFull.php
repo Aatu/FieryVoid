@@ -9,7 +9,6 @@ class RultharFull extends HeavyCombatVessel{
         $this->phpclass = "RultharFull";
         $this->imagePath = "img/ships/DescariRulpa.png";
         $this->shipClass = "Rulthar Missile Destroyer (Full)";
-		$this->occurence = "uncommon";
 	    $this->isd = 2237;
         $this->variantOf = "Rulthar Missile Destroyer";
 		$this->unofficial = true;
