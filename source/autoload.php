@@ -2400,7 +2400,9 @@ spl_autoload_register(
 				'jia' => '/server/model/ships/raiders/Jia.php',
 				'vastar' => '/server/model/ships/raiders/Vastar.php',
 				'vasy' => '/server/model/ships/raiders/Vasy.php',
-				'vyshesh' => '/server/model/ships/civilians/Vyshesh.php',								
+				'vyshesh' => '/server/model/ships/civilians/Vyshesh.php',
+				'xotia' => '/server/model/ships/vree/XotiA.php',
+				'xotib' => '/server/model/ships/vree/XotiB.php',												
 												
 				//antimatter-specific criticals
                 'reducedrangeantimatter' => '/server/model/cricialClasses.php',
