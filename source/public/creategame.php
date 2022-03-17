@@ -66,12 +66,12 @@
 				<textarea id="description" name="description" rows="10" cols="100">
 DEFAULT SCENARIO DESCRIPTION
 ----------------------------
-REQUIREMENTS: please pass the fleet checker :)
-CUSTOM FACTIONS: not allowed
-CUSTOM UNITS IN OFFICIAL FACTIONS: not allowed
-ENHANCEMENTS: allowed but don't overdo it (up to 100 points)
-EXPECTED POWER LEVEL: similar to Big 4
-FORBIDDEN FACTIONS: none 
+REQUIREMENTS: Please pass the Fleet Checker :)
+CUSTOM FACTIONS: Not Allowed
+CUSTOM UNITS IN OFFICIAL FACTIONS: Not Allowed
+ENHANCEMENTS: Allowed but don't overdo it (up to 100 points)
+EXPECTED POWER LEVEL: E.g. similar to Big 4?
+FORBIDDEN FACTIONS: None e.g. no Ancients? 
 ------------------------
 				</textarea>
 				
