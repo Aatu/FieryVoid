@@ -103,7 +103,7 @@ FORBIDDEN FACTIONS: none
                 <div id="simultaenousMovement" class="subpanel movementspacecontainer">
                     <div class="slot" >
                         <div>
-                            <input id="movementcheck" type="checkbox" name="movementcheck">USE SIMULTAENOUS MOVEMENT
+                            <input id="movementcheck" type="checkbox" name="movementcheck">USE SIMULTANEOUS MOVEMENT
                         </div>
                     </div>
                 </div>
