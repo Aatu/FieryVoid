@@ -1116,7 +1116,7 @@ class BSGLtKineticEnergyWeaponVA extends Pulse{
            public $defaultShots = 1;
            public $shots = 1;
 
-	protected $useDie = 1; //die used for base number of hits
+	protected $useDie = 2; //die used for base number of hits
 		public $grouping = 25;
 		public $maxpulses = 2;
         
@@ -1156,7 +1156,7 @@ class BSGLtKineticEnergyWeaponVA extends Pulse{
 		$this->intercept = $nrOfShots; 
 		$this->damagebonus = $damagebonus;
 		$this->grouping = 30-5*$nrOfShots; //more guns means better grouping!
-		$this->grouping = max(15,$this->grouping); //but no better than +1 per 10!
+		$this->grouping = max(10,$this->grouping); //but no better than +1 per 10!
 		
             parent::__construct(0, 1, 0, $startNarrowArc-$widen, $endNarrowArc+$widen);		
 		$this->startArcArray = array(1=>$this->startArc, 2=>$startNarrowArc); 
@@ -1173,7 +1173,7 @@ class BSGLtKineticEnergyWeaponVA extends Pulse{
         public function getDamage($fireOrder){ return Dice::d(6)+$this->damagebonus;  }
         public function setMinDamage(){ $this->minDamage = 1+$this->damagebonus ; }
         public function setMaxDamage(){ $this->maxDamage = 6+$this->damagebonus ; }		
-		
+			
     } // endof BSGLtKineticEnergyWeaponVA	
 
 
