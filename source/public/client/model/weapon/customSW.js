@@ -76,6 +76,12 @@ var SWHeavyTLaser = function SWHeavyTLaser(json, ship) {
 SWHeavyTLaser.prototype = Object.create(Weapon.prototype);
 SWHeavyTLaser.prototype.constructor = SWHeavyTLaser;
 
+var SWHeavyTLaserBattery = function SWHeavyTLaserBattery(json, ship) {
+    Weapon.call(this, json, ship);
+};
+SWHeavyTLaserBattery.prototype = Object.create(Weapon.prototype);
+SWHeavyTLaserBattery.prototype.constructor = SWHeavyTLaserBattery;
+
 var SWLightLaserE = function SWLightLaserE(json, ship) {
     Weapon.call(this, json, ship);
 };

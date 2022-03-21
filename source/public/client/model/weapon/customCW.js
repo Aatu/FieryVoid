@@ -81,3 +81,15 @@ var CWHeavyIonCannon = function CWHeavyIonCannon(json, ship) {
 };
 CWHeavyIonCannon.prototype = Object.create(Weapon.prototype);
 CWHeavyIonCannon.prototype.constructor = CWHeavyIonCannon;
+
+var CWLaserCannonsFtr = function CWLaserCannonsFtr(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CWLaserCannonsFtr.prototype = Object.create(Weapon.prototype);
+CWLaserCannonsFtr.prototype.constructor = CWLaserCannonsFtr;
+
+/*var CWFtrConcussion = function CWFtrConcussion(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CWFtrConcussion.prototype = Object.create(Weapon.prototype);
+CWFtrConcussion.prototype.constructor = CWFtrConcussion; */

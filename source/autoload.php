@@ -968,9 +968,11 @@ spl_autoload_register(
                 'swheavylaser' => '/server/model/weapons/customSW.php',
                 'swheavylasere' => '/server/model/weapons/customSW.php',
                 'swheavytlaser' => '/server/model/weapons/customSW.php',
+                'swheavytlaserbattery' => '/server/model/weapons/customSW.php',
                 'swheavytlasere' => '/server/model/weapons/customSW.php',
                 'swift' => '/server/model/ships/drazi_old/swift.php',
                 'swimperialsd' => '/server/model/ships/ZStarWars/swImperialSD.php',
+                'swimperialsd2' => '/server/model/ships/ZStarWars/swImperialSD2.php',
                 'swion' => '/server/model/weapons/customSW.php',
                 'swionhandler' => '/server/model/weapons/customSW.php',
                 'swlancer' => '/server/model/ships/ZStarWars/swLancer.php',
@@ -1279,6 +1281,7 @@ spl_autoload_register(
 				'choukabelieverfrigate' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBelieverFrigate.php',
 				'choukabishopwarship' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBishopWarship.php',
 				'choukabloodfirefighter' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBloodfireFighter.php',
+				'choukabloodhoundfighter' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBloodhoundFighter.php',
 				'choukabloodlustfighter' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBloodlustFighter.php',
 				'choukabrimstoneheavyosat' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBrimstoneHeavyOSAT.php',
 //				'choukacitadel' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaCitadel.php',
@@ -1691,6 +1694,7 @@ spl_autoload_register(
                 'salbezreshkenrefit' => '/server/model/ships/ZNexusSalbez/SalbezReshkenRefit.php',					
                 'salbezresktan' => '/server/model/ships/ZNexusSalbez/SalbezResktan.php',					
                 'salbezrevtan' => '/server/model/ships/ZNexusSalbez/SalbezRevtan.php',					
+                'salbezrevtanrefit' => '/server/model/ships/ZNexusSalbez/SalbezRevtanRefit.php',					
                 'salbezshvrak' => '/server/model/ships/ZNexusSalbez/SalbezShvrak.php',					
 //                'salbezshvrakrefit' => '/server/model/ships/ZNexusSalbez/SalbezShvrakRefit.php',					
                 'salbezshvrez' => '/server/model/ships/ZNexusSalbez/SalbezShvrez.php',					
@@ -2523,8 +2527,15 @@ spl_autoload_register(
                 'cwioncannon' => '/server/model/weapons/customCW.php',
                 'cwheavyioncannon' => '/server/model/weapons/customCW.php',
                 'cwshield' => '/server/model/weapons/customCW.php',
+
+                'cwlasercannonsftr' => '/server/model/weapons/customCW.php',
+//                'cwftrconcussion' => '/server/model/weapons/customCW.php',
+
 				
 				//units
+				'acclamator' => '/server/model/ships/ZStarWarsCloneWars/Acclamator.php',
+				'consular' => '/server/model/ships/ZStarWarsCloneWars/Consular.php',
+				'ftrtorrent' => '/server/model/ships/ZStarWarsCloneWars/ftrTorrent.php',
 				'venator' => '/server/model/ships/ZStarWarsCloneWars/Venator.php',
 */				
 

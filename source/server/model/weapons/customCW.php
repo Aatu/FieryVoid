@@ -88,7 +88,7 @@
      
         public $name = "CWQuadHeavyTurbolaser";
         public $displayName = "Quad Heavy Turbolaser";  
-	    public $iconPath = "heavyArray.png";
+	    public $iconPath = "quadParticleBeam.png";
 	    
         public $animation = "trail";
         public $animationColor = array(245, 0, 0);
@@ -213,7 +213,7 @@
      
         public $name = "CWQuadTurbolaser";
         public $displayName = "Quad Turbolaser";  
-	    public $iconPath = "quadParticleBeam.png";
+	    public $iconPath = "starwars/clonewars/quad_turbolaser.png";
 	    
         public $animation = "trail";
         public $animationColor = array(245, 0, 0);
@@ -780,6 +780,108 @@ class CWShield extends Shield implements DefensiveSystem{
 //        }
 	
 } //endof class CWShield
+
+
+
+
+    class CWLaserCannonsFtr extends LinkedWeapon{
+
+        public $name = "CWLaserCannonsFtr";
+        public $iconPath = "EWLightLaserBeam.png";
+        public $displayName = "Laser Cannons";
+		
+        public $animation = "trail";
+        public $animationColor = array(220, 60, 120);
+		public $trailColor = array(220, 60, 120);
+        public $animationExplosionScale = 0.1;
+        public $animationWidth = 3;
+//        public $animationWidth2 = 0.3;
+		public $trailLength = 10;
+        public $uninterceptable = true; // This is a laser        
+        public $intercept = 2;
+		public $ballisticIntercept = true;
+		
+        public $priority = 3;
+
+        public $loadingtime = 1;
+        public $shots = 2;
+        public $defaultShots = 2;
+
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+
+        public $damageType = "Standard"; 
+        public $weaponClass = "Laser"; 
+        
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            $this->intercept = $nrOfShots;
+
+            if ($damagebonus >= 3) $this->priority++; //heavier varieties fire later in the queue
+            if ($damagebonus >= 5) $this->priority++;
+            if ($damagebonus >= 7) $this->priority++;
+			
+            if($nrOfShots === 1){
+                $this->iconPath = "EWLightLaserBeamSingle.png";
+            }
+            if($nrOfShots >2){//no special icon for more than 3 linked weapons
+                $this->iconPath = "lightParticleBeam3.png";
+            }
+			
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Laser. Uninterceptable. Able to intercept ballistics.';
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
+        public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
+        public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
+
+    }  // endof CWLaserCannonsFtr
+
+
+/* class CWFtrConcussion extends FighterMissileRack
+{
+    public $name = "CWFtrConcussion";
+    public $displayName = "Concussion Missile Launcher";
+    public $loadingtime = 1;
+    public $iconPath = "starwars/mjsLightConcussion1.png";
+    public $rangeMod = 0;
+    public $firingMode = 1;
+    public $maxAmount = 0;
+    public $cost = 8;
+    public $damage = 12;
+    public $amount = 0;
+    public $range = 8;
+    protected $distanceRangeMod = 0;
+
+    public $priority = 3; //priority: typical fighter weapon (correct for Light Ballistic Torpedo's 2d6)
+
+    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+    
+    public $firingModes = array(
+        1 => "Con"
+    );
+    
+    function __construct($maxAmount, $startArc, $endArc){
+        parent::__construct($maxAmount, $startArc, $endArc);
+        
+        $ConM = new CWFtrConcussion($startArc, $endArc, $this->fireControl);
+        
+        $this->missileArray = array(
+            1 => $ConM
+        );
+        
+        $this->maxAmount = $maxAmount;
+    }
+    
+} */
+
 
 
 
