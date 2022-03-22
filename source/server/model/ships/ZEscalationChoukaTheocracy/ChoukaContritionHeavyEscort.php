@@ -12,7 +12,7 @@ class ChoukaContritionHeavyEscort extends MediumShip{
 			$this->variantOf = "Penitent Patrol Ship";
 			$this->occurence = "rare";		
 		$this->unofficial = true;
-        $this->canvasSize = 75;
+        $this->canvasSize = 95;
 	    $this->isd = 1968;
         
         $this->forwardDefense = 12;
