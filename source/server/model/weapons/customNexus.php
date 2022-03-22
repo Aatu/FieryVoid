@@ -4158,7 +4158,7 @@ class NexusLightAssaultCannonBattery extends Weapon{
         public $animationWidth = 2;
         public $trailLength = 10;
 
-        public $loadingtime = 3;
+        public $loadingtime = 4;
         public $priority = 2;  //Piercing shots go early
 
         public $firingModes = array(
