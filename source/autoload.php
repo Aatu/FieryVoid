@@ -2476,8 +2476,21 @@ spl_autoload_register(
 				'trekfederationyclass' => '/server/model/ships/ZTrekFederationEarly/TrekFederationYClass.php',
 								
 				//TOS (Original Series)
+				'trekfederationarco' => '/server/model/ships/ZTrekFederationTOS/TrekFederationArco.php',
+				'trekfederationtychointerceptors' => '/server/model/ships/ZTrekFederationTOS/TrekFederationTychoInterceptors.php',
+				'trekfederationtype6shuttles' => '/server/model/ships/ZTrekFederationTOS/TrekFederationType6Shuttles.php',
+				'trekfederationtypecshuttles' => '/server/model/ships/ZTrekFederationTOS/TrekFederationTypeCShuttles.php',
+				
 				'trekfederationconstitutioncl' => '/server/model/ships/ZTrekFederationTOS/TrekFederationConstitutionCL.php',
 				'trekfederationconstitutioncmdcl' => '/server/model/ships/ZTrekFederationTOS/TrekFederationConstitutionCmdCL.php',
+				'trekfederationexcelsiorearly' => '/server/model/ships/ZTrekFederationTOS/TrekFederationExcelsiorEarly.php',
+				'trekfederationdreadnought' => '/server/model/ships/ZTrekFederationTOS/TrekFederationDreadnought.php',
+				'trekfederationmiranda' => '/server/model/ships/ZTrekFederationTOS/TrekFederationMiranda.php',
+				'trekfederationmirandatransport' => '/server/model/ships/ZTrekFederationTOS/TrekFederationMirandaTransport.php',
+				'trekfederationsoyuz' => '/server/model/ships/ZTrekFederationTOS/TrekFederationSoyuz.php',
+				'trekfederationsaladin' => '/server/model/ships/ZTrekFederationTOS/TrekFederationSaladin.php',
+				'trekfederationyamato' => '/server/model/ships/ZTrekFederationTOS/TrekFederationYamato.php',
+				
 				
 				//TNG (Next Generation, Deep Space Nine, Voyager)
 				

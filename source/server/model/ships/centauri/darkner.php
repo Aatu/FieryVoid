@@ -34,8 +34,8 @@ class Darkner extends HeavyCombatVessel{
         
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
-        $this->addFrontSystem(new BattleLaser(4, 6, 2, 240, 0));
-        $this->addFrontSystem(new BattleLaser(4, 6, 2, 0, 120));
+        $this->addFrontSystem(new BattleLaser(4, 6, 6, 240, 0));
+        $this->addFrontSystem(new BattleLaser(4, 6, 6, 0, 120));
         $this->addFrontSystem(new MatterCannon(4, 7, 4, 240, 0));
         $this->addFrontSystem(new MatterCannon(4, 7, 4, 0, 120));
         
