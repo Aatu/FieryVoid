@@ -402,6 +402,13 @@ class QuadPulsar extends Pulse{
             if ($damagebonus >= 3) $this->priority++; //heavier varieties fire later in the queue
             if ($damagebonus >= 5) $this->priority++;
             if ($damagebonus >= 7) $this->priority++;
+
+            if($nrOfShots === 1){
+                $this->iconPath = "particleGun.png";
+            }
+            if($nrOfShots >2){//no special icon for more than 3 linked weapons
+                $this->iconPath = "pairedParticleGun3.png";
+            }
 			
             parent::__construct(0, 1, 0, $startArc, $endArc);
 

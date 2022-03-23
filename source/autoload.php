@@ -662,6 +662,7 @@ spl_autoload_register(
                 'ochlavitam' => '/server/model/ships/dilgar/ochlavitaM.php',
                 'octurion' => '/server/model/ships/centauri/octurion.php',
                 'offsetcoordinate' => '/server/model/OffsetCoordinate.php',
+                'olgata' => '/server/model/ships/dilgar/olgata.php',
                 'olympus' => '/server/model/ships/EA/olympus.php',
                 'olympusalpha' => '/server/model/ships/EA/olympusAlpha.php',
                 'olympusalpha_early' => '/server/model/ships/EA_old/olympusAlpha_early.php',
