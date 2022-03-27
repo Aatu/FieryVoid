@@ -4273,6 +4273,54 @@ class NexusLightAssaultCannonBattery extends Weapon{
 */
 
 
+
+
+    class NexusMedAssaultCannon extends Particle{
+        public $trailColor = array(190, 75, 20);
+
+        public $name = "NexusMedAssaultCannon";
+        public $displayName = "Medium Assault Cannon";
+		public $iconPath = "NexusMedAssaultCannon.png";
+	    
+        public $animation = "trail";
+        public $animationColor = array(255, 11, 11);
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 12;
+        public $animationWidth = 2;
+        public $trailLength = 8;
+
+        public $loadingtime = 3;
+        public $priority = 2;  //Piercing shots go early
+
+        public $firingModes = array(
+            1 => "Piercing"
+        );
+        public $damageType = 'Piercing';
+        public $weaponClass = "Particle"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+        public $rangePenalty = 0.5; 
+        public $fireControl = array(null, 1, 2); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 7;
+            if ( $powerReq == 0 ) $powerReq = 4;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 2)+20;   }
+        public function setMinDamage(){     $this->minDamage = 22 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 40 ;      }
+
+    } //endof class NexusMedAssaultCannon
+
+
+
+
+
+
+
+
 class NexusHeavyAssaultCannon extends Weapon{ 
 /*Dual mode weapon based off the EA Heavy Laser-Pulse Array code*/	
         public $name = "NexusHeavyAssaultCannon";

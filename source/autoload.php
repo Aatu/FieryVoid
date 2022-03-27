@@ -1511,6 +1511,7 @@ spl_autoload_register(
 				'nexusfighterarray' => '/server/model/weapons/customNexus.php', 
 				'nexusheavyparticlearray' => '/server/model/weapons/customNexus.php',
 				'nexuslightassaultcannon' => '/server/model/weapons/customNexus.php', 
+				'nexusmedassaultcannon' => '/server/model/weapons/customNexus.php', 
 				'nexusmauler' => '/server/model/weapons/customNexus.php', 
 				'nexusparticleagitator' => '/server/model/weapons/customNexus.php', 
 				'nexusprojectorarray' => '/server/model/weapons/customNexus.php',
@@ -1632,6 +1633,7 @@ spl_autoload_register(
  //               'craytanhepron2126' => '/server/model/ships/ZNexusCraytan/CraytanHepron2126.php',					
                 'craytanpolten' => '/server/model/ships/ZNexusCraytan/CraytanPolten.php',					
                 'craytanpoltenrefit' => '/server/model/ships/ZNexusCraytan/CraytanPoltenRefit.php',					
+                'craytantopren' => '/server/model/ships/ZNexusCraytan/CraytanTopren.php',					
 
 
 
