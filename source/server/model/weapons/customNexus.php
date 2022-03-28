@@ -19,7 +19,7 @@ class NexusKineticBoxLauncher extends Weapon{
         public $useOEW = false; //missile
         public $ballistic = true; //missile
         public $range = 15;
-        public $distanceRange = 20;
+        public $distanceRange = 30;
         public $ammunition = 4; //limited number of shots
 	    
         
@@ -89,7 +89,7 @@ class NexusRangedKineticBoxLauncher extends Weapon{
         public $useOEW = false; //missile
         public $ballistic = true; //missile
         public $range = 30;
-        public $distanceRange = 40;
+        public $distanceRange = 60;
         public $ammunition = 10; //limited number of shots
         
         public $loadingtime = 2; // 1/2 turns
@@ -139,7 +139,7 @@ class NexusRangedKineticBoxLauncher extends Weapon{
     
         public function setMinDamage(){     $this->minDamage = 8;      }
         public function setMaxDamage(){     $this->maxDamage = 8;      }
-}//endof NexusKineticBoxLauncher
+}//endof NexusRangedKineticBoxLauncher
 
 
 
@@ -157,8 +157,8 @@ class NexusAdvKineticBoxLauncher extends Weapon{
 
         public $useOEW = false; //missile
         public $ballistic = true; //missile
-        public $range = 16;
-        public $distanceRange = 22;
+        public $range = 15;
+        public $distanceRange = 30;
         public $ammunition = 5; //limited number of shots
 	    
         
