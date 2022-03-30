@@ -2227,7 +2227,7 @@ spl_autoload_register(
 				'lightparticlebolt' => '/server/model/weapons/particle.php',
 				'rulpa' => '/server/model/ships/descari/Rulpa.php',
 				'rulthar' => '/server/model/ships/descari/Rulthar.php',
-				'rultharlrack' => '/server/model/ships/descari/RultharLRack.php',
+				'rultharfull' => '/server/model/ships/descari/RultharFull.php',
 				'rulpassa' => '/server/model/ships/descari/Rulpassa.php',
 				'scorava' => '/server/model/ships/descari/Scorava.php',
 				'lightplasmabolterfighter' => '/server/model/weapons/plasma.php',
@@ -2400,7 +2400,9 @@ spl_autoload_register(
 				'jia' => '/server/model/ships/raiders/Jia.php',
 				'vastar' => '/server/model/ships/raiders/Vastar.php',
 				'vasy' => '/server/model/ships/raiders/Vasy.php',
-				'vyshesh' => '/server/model/ships/civilians/Vyshesh.php',								
+				'vyshesh' => '/server/model/ships/civilians/Vyshesh.php',
+				'xotia' => '/server/model/ships/vree/XotiA.php',
+				'xotib' => '/server/model/ships/vree/XotiB.php',												
 												
 				//antimatter-specific criticals
                 'reducedrangeantimatter' => '/server/model/cricialClasses.php',
