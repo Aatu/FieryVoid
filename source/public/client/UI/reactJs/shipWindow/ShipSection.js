@@ -175,10 +175,11 @@ const orderSystemsFourWide = (systems) => {
 
         if (secondPick.picked.length > 0) {
             systems = secondPick.remaining;
-            list = list.concat([picked[0], secondPick.picked[0], secondPick.picked[1], picked[1]])
+            list = list.concat([picked[0], secondPick.picked[0], secondPick.picked[1], picked[1]]);
         } else {
-            list = list.concat([picked[0], systems.pop(), systems.pop(), picked[1]])
-            list = list.filter(system => system)
+            //list = list.concat([picked[0], systems.pop(), systems.pop(), picked[1]]) //use shift so system order is not reversed
+			list = list.concat([picked[0], systems.shift(), systems.shift(), picked[1]]);
+            list = list.filter(system => system);
         }
     }
 
@@ -243,7 +244,8 @@ const findFriendForTwo = (two, systems) => {
     }
 
     if (systems.length > 0) {
-        return {three: [systems.pop(), two[0], two[1] ], remainingSystems: systems}
+        /*return {three: [systems.pop(), two[0], two[1] ], remainingSystems: systems}*/ //use shift so system order is not reversed
+		return {three: [systems.shift(), two[0], two[1] ], remainingSystems: systems}
     }
 
     return {three: [two[0], two[1]], remainingSystems: systems}

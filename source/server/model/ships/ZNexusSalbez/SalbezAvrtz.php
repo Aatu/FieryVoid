@@ -24,7 +24,7 @@ class SalbezAvrtz extends BaseShip{
         
         $this->turncost = 1.5;
         $this->turndelaycost = 1.5;
-        $this->accelcost = 4;
+        $this->accelcost = 6;
         $this->rollcost = 3;
         $this->pivotcost = 4;
         $this->iniativebonus = 0;

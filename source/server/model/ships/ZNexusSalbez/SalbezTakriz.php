@@ -7,8 +7,8 @@ class SalbezTakriz extends OSAT{
 		$this->pointCost = 80;
 		$this->faction = 'ZNexus Sal-bez';
         $this->phpclass = "SalbezTakriz";
-        $this->imagePath = "img/ships/Nexus/salbez_takriz.png";
-			$this->canvasSize = 50; //img has 100px per side
+        $this->imagePath = "img/ships/Nexus/salbez_takriz_v2.png";
+			$this->canvasSize = 80; //img has 100px per side
         $this->shipClass = "Tak'riz Early OSAT";
 //	    $this->variantOf = "Brixadii Weapons Platform";
 //		$this->limited = 33;

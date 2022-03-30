@@ -63,12 +63,11 @@ if (isset($_SESSION["user"])) {
 -->
        
 		
-		---------- <b>LATEST NEWS - February 2022</b> ----------	
-	    <br><b>Drakh/StarWars fighter shields no longer double Raking protection</b> - as Raking should be considered Standard vs fighters
-	    <br><b>Graphics updates</b> - courtesy of Lunara, Douglas and Geoffrey
-	    <br><b>Weapons animations fine tuning</b> - mostly scaling down a bit
-	    <br><b>Packet Torpedo target is now hidden</b> - only on main screen though (Declarations pane will be modified when time allows)
-	    <br><b>Descari custom ships</b> - allowing for more variety in fleet design (courtesy of Geoffrey)
+		---------- <b>LATEST NEWS - March 2022</b> ----------	
+	    <br><b>Mode change bug fixed</b> - Flak Cannons should now work correctly
+	    <br><b>Star Trek TOS era</b> - playtest fleet has arrived :)
+	    <br><b>Visual highlight</b> - underlying circles (ship about to move, DEW/CCEW...) size increased by half
+	    <br><b>Nexus/Escalation updates</b> - polishing, fixing, shining and balancing, courtesy of Geoffrey
 
 	    
 		<!-- <br><br>---------- <b>update 8th of November</b> ---------- 

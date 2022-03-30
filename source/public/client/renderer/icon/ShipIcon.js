@@ -208,22 +208,22 @@ window.ShipIcon = function () {
         this.mesh.add(this.shipDirectionOfMovementSprite.mesh);
         this.shipDirectionOfMovementSprite.hide();
 		
-
-        this.shipSprite = new window.webglSprite(imagePath, { width: this.size / 2, height: this.size / 2 }, 1);
+		//29.03.2022: people called for more visible circles - change from the same as ship image to half again as large (original: this.size / 2, new: this.size*0.75 ); unit icon and arrows size left as previously
+        this.shipSprite = new window.webglSprite(imagePath, { width: this.size/2, height: this.size/2 }, 1);
         this.shipSprite.setOverlayColor(this.mine ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) : new THREE.Color(255 / 255, 40 / 255, 40 / 255));
         this.mesh.add(this.shipSprite.mesh);
 
-        this.shipEWSprite = new window.ShipEWSprite({ width: this.size / 2, height: this.size / 2 }, -1);
+        this.shipEWSprite = new window.ShipEWSprite({ width: this.size*0.75, height: this.size*0.75 }, -1);
         this.mesh.add(this.shipEWSprite.mesh);
         this.shipEWSprite.hide();
 
-        this.ShipSelectedSprite = new window.ShipSelectedSprite({ width: this.size / 2, height: this.size / 2 }, -2, this.mine ? 'ally' : 'enemy', true).hide();
+        this.ShipSelectedSprite = new window.ShipSelectedSprite({ width: this.size*0.75, height: this.size*0.75 }, -2, this.mine ? 'ally' : 'enemy', true).hide();
         this.mesh.add(this.ShipSelectedSprite.mesh);
 
-        this.ShipSideSprite = new window.ShipSelectedSprite({ width: this.size / 2, height: this.size / 2 }, -2, this.mine ? 'ally' : 'enemy', false).hide();
+        this.ShipSideSprite = new window.ShipSelectedSprite({ width: this.size*0.75, height: this.size*0.75 }, -2, this.mine ? 'ally' : 'enemy', false).hide();
         this.mesh.add(this.ShipSideSprite.mesh);
 
-        this.NotMovedSprite = new window.ShipSelectedSprite({ width: this.size / 2, height: this.size / 2 }, -2, 'neutral', false).hide();
+        this.NotMovedSprite = new window.ShipSelectedSprite({ width: this.size*0.75, height: this.size*0.75 }, -2, 'neutral', false).hide();
         this.mesh.add(this.NotMovedSprite.mesh);
 
         scene.add(this.mesh);
