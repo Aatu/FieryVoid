@@ -100,6 +100,7 @@
         <script src="client/model/weapon/customEscalation.js"></script>		
         <script src="client/model/weapon/customBSG.js"></script>		
         <script src="client/model/weapon/customTrek.js"></script>		
+        <script src="client/model/weapon/customCW.js"></script>		
 		<script>
 			
             window.weaponManager = 

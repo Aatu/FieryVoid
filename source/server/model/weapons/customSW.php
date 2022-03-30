@@ -73,7 +73,7 @@ class SWRayShield extends Shield implements DefensiveSystem{
 		$this->data["Special"] = "Reduces damage done by incoming shots (by shield rating), but does not decrease profile."; 
 		$this->data["Special"] .= "<br>Cannot be flown under."; 
 		$this->data["Special"] .= "<br>Does not protect from Ramming, Ballistic, StarWars Ion damage."; 
-		$this->data["Special"] .= "<br>Doubly effective vs Raking weapons."; 
+		if (!($this->unit instanceof FighterFlight)) $this->data["Special"] .= "<br>Doubly effective vs Raking weapons."; //Raking vs Fighters should be resolved as Standard
 		$this->data["Special"] .= "<br>Half efficiency (round up) vs Matter weapons (game balance, irrelevant in-universe)."; 
 		$this->data["Special"] .= "<br>Can be boosted."; 
 	}
@@ -895,6 +895,39 @@ class SWHeavyTLaser extends SWDirectWeapon{
 
 
 
+class SWHeavyTLaserBattery extends SWDirectWeapon{
+    /*StarWars heavy turbolaser - excellent if slow-firing andiship weapon
+    */
+    public $name = "SWHeavyTLaserBattery";
+    public $displayName = "Heavy Turbolaser Battery";
+	
+    public $priority = 6;
+    public $loadingtime = 4;
+    public $rangePenalty = 0.25;
+    public $fireControl = array(-8, -1, 3); // fighters, <mediums, <capitals
+	public $animationColor = array(245, 0, 0); //let's make it brighter than regular lasers :)   
+    
+	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
+		$this->intercept = 0;
+
+		//appropriate icon (number of barrels)...
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/newTLaserHvy".$nr.".png";
+
+		parent::__construct($armor, 7, 4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+		$this->addSalvoMode();
+	}    
+	
+	public function getDamage($fireOrder){ return  Dice::d(10,2)+7 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 9+$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 27+$this->damagebonus ;      }
+
+} //end of class SWHeavyTLaserBattery
+
+
+
+
+
 
 class SWLightLaserE extends SWLightLaser{
     public $name = "SWLightLaserE";
@@ -1189,8 +1222,8 @@ class SWTractorBeam extends SWDirectWeapon{
 			$this->data["Special"] .= '<br>';
 		}
       $this->data["Special"] .= "Does no damage, but holds target next turn";      
-      $this->data["Special"] .= "<br>limiting its maneuvering options"; 
-      $this->data["Special"] .= "<br>(-1 thrust and -20 Initiative next turn).";  
+      $this->data["Special"] .= " limiting its maneuvering options"; 
+      $this->data["Special"] .= " (-1 thrust and -20 Initiative next turn).";  
     }	
     
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!

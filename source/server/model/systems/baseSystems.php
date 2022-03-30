@@ -415,14 +415,18 @@ class Reactor extends ShipSystem implements SpecialAbility {
 		//try to make actual attack to show in log - use Ramming Attack system!	- even if there is no explosion			
 		$rammingSystem = $ship->getSystemByName("RammingAttack");
 		$newFireOrder=null;
-		if($rammingSystem){ //actually exists! - it should on every ship!				
+		if($rammingSystem){ //actually exists! - it should on every ship!
+			$shotsHit = 0;
+			if ($explodeRoll <= $chance) { //actual explosion
+				$shotsHit = 1;
+			}
 			$newFireOrder = new FireOrder(
 				-1, "normal", $ship->id, $ship->id,
 				$rammingSystem->id, -1, $gamedata->turn, 1, 
-				$chance, $explodeRoll, 1, 1, 0,
+				$chance, $explodeRoll, 1, $shotsHit, 0,
 				0,0,'ContainmentBreach',10000
 			);
-			$newFireOrder->pubnotes = "Containment Breach - reactor explosion! Chance $chance %, roll $explodeRoll.";
+			$newFireOrder->pubnotes = "Containment Breach - reactor explosion. Chance $chance %, roll $explodeRoll.";
 			$newFireOrder->addToDB = true;
 			$rammingSystem->fireOrders[] = $newFireOrder;
 		}

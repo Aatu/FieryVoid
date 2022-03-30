@@ -30,10 +30,6 @@ class swImperialSD extends BaseShip{
         $this->rollcost = 5;
         $this->pivotcost = 8;
 	$this->iniativebonus = -2 *5; //really large Cap, but not Enormous unit
-		
-	    
-     
-	    
 	    
 	$this->addPrimarySystem(new CnC(6, 36, 0, 0));
         $this->addPrimarySystem(new Reactor(6, 60, 0, 0));
@@ -43,11 +39,9 @@ class swImperialSD extends BaseShip{
 	$hyperdrive->displayName = 'Hyperdrive';
 	$this->addPrimarySystem($hyperdrive);
 	$this->addPrimarySystem(new Hangar(3, 60, 12));
-         
-        
 		
-        $this->addFrontSystem(new Thruster(3, 22, 0, 5, 1));
-        $this->addFrontSystem(new Thruster(3, 22, 0, 5, 1));
+    $this->addFrontSystem(new Thruster(3, 22, 0, 5, 1));
+    $this->addFrontSystem(new Thruster(3, 22, 0, 5, 1));
 	$this->addFrontSystem(new SWRayShield(3,20,12,4,330,30)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addFrontSystem(new SWMediumIon(3, 300, 60, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWMediumIon(3, 300, 60, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
@@ -58,18 +52,16 @@ class swImperialSD extends BaseShip{
 	$this->addFrontSystem(new SWHeavyTLaser(3, 300, 60, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWHeavyTLaser(3, 300, 60, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	    
-	    
-        $this->addAftSystem(new Thruster(2, 24, 0, 5, 2));
+    $this->addAftSystem(new Thruster(2, 24, 0, 5, 2));
 	$this->addAftSystem(new Thruster(2, 24, 0, 5, 2));
 	$this->addAftSystem(new Thruster(2, 24, 0, 5, 2));
-        $this->addAftSystem(new SWScanner(3, 18, 8, 4)); //split to Primary, too
-        $this->addAftSystem(new Engine(4, 20, 0, 6, 8)); //split to Primary, too
+    $this->addAftSystem(new SWScanner(3, 18, 8, 4)); //split to Primary, too
+    $this->addAftSystem(new Engine(4, 20, 0, 6, 8)); //split to Primary, too
 	$this->addAftSystem(new SWRayShield(2,18,8,3,150,210)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addAftSystem(new SWMediumIon(3, 120, 240, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWMediumIon(3, 120, 240, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWMediumIon(3, 120, 240, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-        
-	    
+ 	    
 	$this->addLeftSystem(new Thruster(3, 22, 0, 5, 3));
 	$this->addLeftSystem(new SWRayShield(3,20,12,4,210,330)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addLeftSystem(new SWHeavyTLaser(3, 270, 30, 4));
@@ -83,7 +75,6 @@ class swImperialSD extends BaseShip{
 	$this->addLeftSystem(new SWTractorBeam(2,240,0,1));
 	$this->addLeftSystem(new SWTractorBeam(2,240,0,1));
 	$this->addLeftSystem(new SWTractorBeam(2,240,0,1));
-		
 	    
 	$this->addRightSystem(new Thruster(3, 22, 0, 5, 4));
 	$this->addRightSystem(new SWRayShield(3,20,12,4,30,150)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
@@ -98,7 +89,6 @@ class swImperialSD extends BaseShip{
 	$this->addRightSystem(new SWTractorBeam(2,0,120,1));
 	$this->addRightSystem(new SWTractorBeam(2,0,120,1));
 	$this->addRightSystem(new SWTractorBeam(2,0,120,1));
-	    
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 5, 80));
@@ -106,7 +96,6 @@ class swImperialSD extends BaseShip{
         $this->addLeftSystem(new Structure( 4, 80));
         $this->addRightSystem(new Structure( 4, 80));
         $this->addPrimarySystem(new Structure( 5, 80));
-	    
 	    
             $this->hitChart = array(
             0=> array(

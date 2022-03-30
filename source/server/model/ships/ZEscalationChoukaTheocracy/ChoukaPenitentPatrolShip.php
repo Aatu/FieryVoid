@@ -10,7 +10,7 @@ class ChoukaPenitentPatrolShip extends MediumShip{
         $this->imagePath = "img/ships/EscalationWars/ChoukaPenitent.png";
         $this->shipClass = "Penitent Patrol Ship";
 		$this->unofficial = true;
-        $this->canvasSize = 75;
+        $this->canvasSize = 95;
 	    $this->isd = 1964;
         
         $this->forwardDefense = 12;

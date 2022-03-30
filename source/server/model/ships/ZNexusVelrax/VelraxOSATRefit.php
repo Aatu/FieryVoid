@@ -7,7 +7,7 @@ class VelraxOSATRefit extends OSAT{
 		$this->pointCost = 210;
 		$this->faction = 'ZNexus Velrax';
         $this->phpclass = "VelraxOSATRefit";
-        $this->imagePath = "img/ships/Nexus/VelraxOSAT.png";
+        $this->imagePath = "img/ships/Nexus/VelraxOSAT_v2.png";
 			$this->canvasSize = 80; //img has 100px per side
         $this->shipClass = "Standard OSAT (2112 refit)";
 			$this->variantOf = "Standard OSAT";

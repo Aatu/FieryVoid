@@ -14,7 +14,7 @@ class KastanStormshearRefit extends HeavyCombatVessel{
 			$this->occurence = "uncommon";
 		$this->unofficial = true;
 
-        $this->isd = 1852;
+        $this->isd = 1890;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;

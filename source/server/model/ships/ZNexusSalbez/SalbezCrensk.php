@@ -11,7 +11,7 @@ class SalbezCrensk extends LCV{
 			$this->canvasSize = 55; //img has 200px per side
         $this->shipClass = "Cre-nsk Combat Cutter";
 		$this->unofficial = true;
-			$this->isd = 2120;
+			$this->isd = 2127;
 
         $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
 	    $this->notes = 'May deploy independently.';

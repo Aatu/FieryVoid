@@ -13,7 +13,7 @@ class DalithornCarrier extends HeavyCombatVessel{
 			$this->variantOf = "Flag Cruiser";
 			$this->occurence = "uncommon";
 		$this->unofficial = true;
-        $this->isd = 2048;
+        $this->isd = 2038;
 
         $this->fighters = array("superheavy"=>2);
         

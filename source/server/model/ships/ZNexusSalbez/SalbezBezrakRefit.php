@@ -15,7 +15,7 @@ class SalbezBezrakRefit extends SmallStarBaseFourSections{
 		$this->imagePath = "img/ships/Nexus/salbez_combatBase.png";
 		$this->canvasSize = 175; 
 		$this->unofficial = true;
-		$this->isd = 2114;
+		$this->isd = 2131;
 
 		$this->shipSizeClass = 3; 
 		$this->Enormous = false;
