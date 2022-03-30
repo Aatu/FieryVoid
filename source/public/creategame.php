@@ -66,12 +66,12 @@
 				<textarea id="description" name="description" rows="10" cols="100">
 DEFAULT SCENARIO DESCRIPTION
 ----------------------------
-REQUIREMENTS: please pass the fleet checker :)
-CUSTOM FACTIONS: not allowed
-CUSTOM UNITS IN OFFICIAL FACTIONS: not allowed
-ENHANCEMENTS: allowed but don't overdo it (up to 100 points)
-EXPECTED POWER LEVEL: similar to Big 4
-FORBIDDEN FACTIONS: none 
+REQUIREMENTS: Please pass the fleet checker :)
+CUSTOM FACTIONS: Not allowed
+CUSTOM UNITS IN OFFICIAL FACTIONS: Not allowed
+ENHANCEMENTS: Allowed but don't overdo it (up to 100 points)
+EXPECTED POWER LEVEL: Similar to Big 4
+FORBIDDEN FACTIONS: None 
 ------------------------
 				</textarea>
 				
@@ -103,7 +103,7 @@ FORBIDDEN FACTIONS: none
                 <div id="simultaenousMovement" class="subpanel movementspacecontainer">
                     <div class="slot" >
                         <div>
-                            <input id="movementcheck" type="checkbox" name="movementcheck">USE SIMULTAENOUS MOVEMENT
+                            <input id="movementcheck" type="checkbox" name="movementcheck">USE SIMULTANEOUS MOVEMENT
                         </div>
                     </div>
                 </div>

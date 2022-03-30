@@ -41,8 +41,8 @@ class Llartol extends BaseShip{
 
 		
         $this->addAftSystem(new SMissileRack(3, 6, 0, 180, 360));	
-        $this->addAftSystem(new SMissileRack(3, 6, 0, 0, 180));
         $this->addAftSystem(new SMissileRack(3, 6, 0, 120, 240));
+        $this->addAftSystem(new SMissileRack(3, 6, 0, 0, 180));
         $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
         $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
         $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));

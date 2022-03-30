@@ -700,7 +700,7 @@ class AbsorbtionShield extends Shield implements DefensiveSystem{
 		*/
 		$this->data["Special"] = "Reduces damage done by incoming shots (by shield rating), but does not decrease profile."; 
 		$this->data["Special"] .= "<br>Cannot be flown under."; 
-		$this->data["Special"] .= "<br>Doubly effective vs Raking weapons."; 
+		if (!($this->unit instanceof FighterFlight)) $this->data["Special"] .= "<br>Doubly effective vs Raking weapons."; //Raking vs Fighters should be resolved as Standard
 		$this->data["Special"] .= "<br>Can be boosted."; 
     }
 	  
