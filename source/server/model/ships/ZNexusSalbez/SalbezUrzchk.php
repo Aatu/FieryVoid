@@ -11,7 +11,7 @@ class SalbezUrzchk extends FighterFlight{
         $this->imagePath = "img/ships/Nexus/salbez_urzchk.png";
 		$this->unofficial = true;
 
-        $this->isd = 2041;
+        $this->isd = 2063;
         
         $this->forwardDefense = 9;
         $this->sideDefense = 9;

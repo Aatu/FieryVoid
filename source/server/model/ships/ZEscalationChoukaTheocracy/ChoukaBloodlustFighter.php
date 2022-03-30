@@ -16,7 +16,7 @@ class ChoukaBloodlustFighter extends FighterFlight{
         
         $this->forwardDefense = 9;
         $this->sideDefense = 7;
-        $this->freethrust = 6;
+        $this->freethrust = 7;
         $this->offensivebonus = 5;
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;

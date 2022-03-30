@@ -37695,7 +37695,8 @@ var orderSystemsFourWide = function orderSystemsFourWide(systems) {
             systems = secondPick.remaining;
             list = list.concat([_picked[0], secondPick.picked[0], secondPick.picked[1], _picked[1]]);
         } else {
-            list = list.concat([_picked[0], systems.pop(), systems.pop(), _picked[1]]);
+            //list = list.concat([picked[0], systems.pop(), systems.pop(), picked[1]]) //use shift so system order is not reversed
+            list = list.concat([_picked[0], systems.shift(), systems.shift(), _picked[1]]);
             list = list.filter(function (system) {
                 return system;
             });
@@ -37767,7 +37768,8 @@ var findFriendForTwo = function findFriendForTwo(two, systems) {
     }
 
     if (systems.length > 0) {
-        return { three: [systems.pop(), two[0], two[1]], remainingSystems: systems };
+        /*return {three: [systems.pop(), two[0], two[1] ], remainingSystems: systems}*/ //use shift so system order is not reversed
+        return { three: [systems.shift(), two[0], two[1]], remainingSystems: systems };
     }
 
     return { three: [two[0], two[1]], remainingSystems: systems };

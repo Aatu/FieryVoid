@@ -508,9 +508,9 @@ for friendly units.*/
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "Can intercept lasers.";
 			$this->data["Special"] .= "<br>May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 5 hexes. Friendly intercept only engages individual shots.";
-			$this->data["Special"] .= "<br>If manually targeted in Intercept (I) mode, will intercept all fire from targeted ship  (except ballistics), with usual intercept degredation, at the Flak Cannon-firing ship.";
-			$this->data["Special"] .= "<br>Offensiver, Anti-fighter mode (A) targets fighters only, but as a matter weapon doing damage in flash mode.";
-			$this->data["Special"] .= "<br>Offensiver mode fire control is +20/--/--. Damage is 1d10+2 as Matter (Flash).";
+			$this->data["Special"] .= "<br>If manually targeted in Intercept (I) mode, will intercept all fire from targeted ship (except ballistics), with usual intercept degredation, at the Flak Cannon-firing ship.";
+			$this->data["Special"] .= "<br>Offensive, Anti-fighter mode (A) targets fighters only, but as Matter weapon doing damage in flash mode.";
+			$this->data["Special"] .= "<br>Offensive mode fire control is +20/--/--. Damage is 1d10+2 as Matter (Flash).";
 		}
 
 		//hit chance always 100 - so it always hits and is correctly animated
@@ -524,9 +524,11 @@ for friendly units.*/
 				$fireOrder->needed = 100; //auto hit!
 				$fireOrder->updated = true;
 		
-				//while we're at it - we may add appropriate interception orders!		
+		
+				//while we're at it - we may add appropriate interception orders!	
+				if ($fireOrder->targetid >= 0) {//actual target is chosen...				
 				$targetShip = $gamedata->getShipById($fireOrder->targetid);
-
+				
 //				$shipsInRange = $gamedata->getShipsInDistance($targetShip); //all units on target hex
 //				foreach ($shipsInRange as $affectedShip) {
 					$allOrders = $targetShip->getAllFireOrders($gamedata->turn);
@@ -548,11 +550,13 @@ for friendly units.*/
 		
 				//retarget at hex - this will affect how the weapon is animated/displayed in firing log!
 					//insert correct target coordinates: CURRENT target position
+					/* actually animating this at SHIP seems better
 					$pos = $targetShip->getHexPos();
 					$fireOrder->x = $pos->q;
 					$fireOrder->y = $pos->r;
 					$fireOrder->targetid = -1; //correct the error
-
+*/
+				}
 				break;
 		
 			case 2:

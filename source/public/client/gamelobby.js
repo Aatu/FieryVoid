@@ -587,11 +587,12 @@ window.gamedata = {
 		}
 
 		if ( specialFighters.length > 0 ){ //do not show if there are no fighters that require special hangars
+			/*let's show details even if there are no hangars at all
 			if (specialHangars.length == 0){
 				checkResult += "No special hangars for special fighters. FAILURE!";
 				checkResult += "<br>";
 				problemFound = true;
-			}else{ //calculate total amount and type of special fighters
+			}else*/{ //calculate total amount and type of special fighters
 				var totalSpecialFighters = [];
 				specialFighters.sort();
 				var idx = 0;
@@ -646,7 +647,7 @@ window.gamedata = {
 					var match = false;
 					for (j=0;j<totalSpecialHangars.length;j++) {
 						if (totalSpecialFighters[i][0] == totalSpecialHangars[j][0]) {
-							checkResult +=  " - " + totalSpecialFighters[i][0] + " Fighters: " + totalSpecialFighters[i][1];
+							checkResult +=  " - " + totalSpecialFighters[i][0] + ": " + totalSpecialFighters[i][1];
 							checkResult +=  " (allowed up to " + totalSpecialHangars[j][1] + ")";
 							if (totalSpecialFighters[i][1] > totalSpecialHangars[j][1]){ //fighter total is not within limits
 								checkResult += " FAILURE!";

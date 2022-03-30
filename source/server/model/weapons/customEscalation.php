@@ -559,7 +559,7 @@ class EWHeavyGatlingLaser extends Pulse{
         public $priority = 8;
         
         public $rangePenalty = 0.5;
-        public $fireControl = array(-5, 1, 2); // fighters, <mediums, <capitals 
+        public $fireControl = array(-5, 2, 3); // fighters, <mediums, <capitals 
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -572,9 +572,9 @@ class EWHeavyGatlingLaser extends Pulse{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        public function getDamage($fireOrder){        return Dice::d(10, 2)+6;   }
-        public function setMinDamage(){     $this->minDamage = 8 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 26 ;      }
+        public function getDamage($fireOrder){        return Dice::d(10, 3)+6;   }
+        public function setMinDamage(){     $this->minDamage = 9 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 36 ;      }
         
         
     }  //endof EWRoyalLaser
@@ -593,10 +593,10 @@ class EWHeavyGatlingLaser extends Pulse{
 //        public $animationWidth = 6;
 //        public $animationWidth2 = 0.6;
 
-        public $loadingtime = 5;
+        public $loadingtime = 4;
 
         public $raking = 10;
-        public $priority = 7;
+        public $priority = 9;
         
         public $rangePenalty = 0.25;
         public $fireControl = array(-5, 3, 4); // fighters, <mediums, <capitals 

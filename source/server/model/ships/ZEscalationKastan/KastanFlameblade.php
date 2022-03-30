@@ -33,6 +33,7 @@ class KastanFlameblade extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 15, 3, 6));
         $this->addPrimarySystem(new Engine(4, 18, 0, 10, 3));
+		$this->addPrimarySystem(new SoMissileRack(4, 6, 0, 0, 360));
 		$this->addPrimarySystem(new Hangar(4, 16));
 		$this->addPrimarySystem(new JumpEngine(4, 15, 4, 24));
 		
@@ -67,10 +68,11 @@ class KastanFlameblade extends BaseShip{
 		
 		$this->hitChart = array(
 			0=> array(
-					8 => "Structure",
+					10 => "Structure",
 					11 => "Jump Engine",
-					13 => "Scanner",
-					15 => "Engine",
+                    12 => "Class-SO Missile Rack",
+					14 => "Scanner",
+					16 => "Engine",
 					17 => "Hangar",
 					19 => "Reactor",
 					20 => "C&C",

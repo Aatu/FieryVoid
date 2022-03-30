@@ -20,7 +20,7 @@ class BrixadiiLightEscortFrigate extends MediumShip{
 		$this->sideDefense = 12;
         $this->turncost = 0.33;
         $this->turndelaycost = 0.50;
-        $this->accelcost = 1;
+        $this->accelcost = 2;
         $this->rollcost = 1;
         $this->pivotcost = 1;
         $this->iniativebonus = 14*5;

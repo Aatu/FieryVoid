@@ -29,7 +29,7 @@ class ChoukaWarPrayerEscort extends MediumShip{
         $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 5, 5));
-        $this->addPrimarySystem(new Engine(3, 9, 0, 5, 2));
+        $this->addPrimarySystem(new Engine(3, 9, 0, 7, 2));
         $this->addPrimarySystem(new Hangar(2, 1));
         $this->addPrimarySystem(new Thruster(1, 11, 0, 2, 3));
         $this->addPrimarySystem(new Thruster(1, 11, 0, 2, 4));        
@@ -42,8 +42,8 @@ class ChoukaWarPrayerEscort extends MediumShip{
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
 	    
-		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 90, 270));
-        $this->addAftSystem(new Thruster(2, 14, 0, 5, 2));    
+		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 0, 360));
+        $this->addAftSystem(new Thruster(2, 14, 0, 7, 2));    
        
         $this->addPrimarySystem(new Structure(3, 46));
 
@@ -69,7 +69,7 @@ class ChoukaWarPrayerEscort extends MediumShip{
 
 		2=> array(
 			6 => "Thruster",
-			8 => "Point Plasma Gun",
+			8 => "Heavy Point Plasma Gun",
 			17 => "Structure",
 			20 => "Primary",
 		),

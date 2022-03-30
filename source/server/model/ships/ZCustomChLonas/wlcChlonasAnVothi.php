@@ -43,8 +43,8 @@ class wlcChlonasAnVothi extends BaseShipNoAft
 		$this->addFrontSystem(new Thruster(4, 12, 0, 3, 1));
 		$this->addFrontSystem(new Thruster(4, 12, 0, 3, 1));
 
-		$this->addLeftSystem(new AssaultLaser(3, 6, 4, 180, 300));
 		$this->addLeftSystem(new AssaultLaser(3, 6, 4, 240, 0));
+		$this->addLeftSystem(new AssaultLaser(3, 6, 4, 180, 300));
 		$this->addLeftSystem(new CustomPulsarLaser(4, 0, 0, 240, 60));
 		$this->addLeftSystem(new CustomGatlingMattergunLight(2, 0, 0, 180, 360));
 		$this->addLeftSystem(new Thruster(4, 16, 0, 5, 3));

@@ -7,8 +7,8 @@ class DalithornOSATRefit extends OSAT{
 		$this->pointCost = 225;
 		$this->faction = 'ZNexus Dalithorn';
         $this->phpclass = "DalithornOSATRefit";
-        $this->imagePath = "img/ships/Nexus/DalithornOSAT.png";
-			$this->canvasSize = 80; //img has 100px per side
+        $this->imagePath = "img/ships/Nexus/DalithornOSAT_v2.png";
+			$this->canvasSize = 100; //img has 100px per side
         $this->shipClass = "Coilgun OSAT (2111 refit)";
 			$this->variantOf = "Coilgun OSAT";
 			$this->occurence = "common";

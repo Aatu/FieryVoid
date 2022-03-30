@@ -25,7 +25,7 @@ window.ew = {
             }
 //GTS
             if (shipManager.criticals.hasCritical("SensorLoss")) {
-                ret -= 3 * shipManager.criticals.hasCritical("SensorLoss"); //-2 does stack!
+                ret -= 3 * shipManager.criticals.hasCritical("SensorLoss"); //-3 does stack!
             }
 
             if (primary) {

@@ -26,7 +26,7 @@ class SalbezBevtun extends BaseShip{
         
         $this->turncost = 1.5;
         $this->turndelaycost = 1.5;
-        $this->accelcost = 4;
+        $this->accelcost = 6;
         $this->rollcost = 3;
         $this->pivotcost = 4;
         $this->iniativebonus = 0;
@@ -38,8 +38,8 @@ class SalbezBevtun extends BaseShip{
 		$this->addPrimarySystem(new Hangar(2, 18));
 		$this->addPrimarySystem(new CargoBay(2, 30));
 		
-        $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
-        $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(2, 15, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(2, 15, 0, 4, 1));
 		$this->addFrontSystem(new NexusIndustrialLaser(2, 6, 3, 300, 60));
 		$this->addFrontSystem(new NexusIndustrialLaser(2, 6, 3, 300, 60));
 		$this->addFrontSystem(new NexusParticleGrid(1, 3, 1, 240, 60));
