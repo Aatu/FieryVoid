@@ -9,6 +9,8 @@ class SalbezResktan extends MediumShip{
         $this->phpclass = "SalbezResktan";
         $this->imagePath = "img/ships/Nexus/salbez_mining_frigate.png";
         $this->shipClass = "Resk'tan Frigate";
+			$this->variantOf = "Shv'rak Mining Frigate";
+			$this->occurence = "common";
 		$this->unofficial = true;
         $this->canvasSize = 65;
 	    $this->isd = 2092;
@@ -23,9 +25,9 @@ class SalbezResktan extends MediumShip{
         $this->pivotcost = 2;
         $this->iniativebonus = 60;
          
-        $this->addPrimarySystem(new Reactor(3, 9, 0, 0));
+        $this->addPrimarySystem(new Reactor(3, 11, 0, 0));
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 9, 3, 4));
+        $this->addPrimarySystem(new Scanner(3, 9, 4, 5));
         $this->addPrimarySystem(new Engine(3, 9, 0, 6, 2));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 4));        

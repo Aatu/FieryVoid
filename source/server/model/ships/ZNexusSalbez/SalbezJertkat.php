@@ -15,6 +15,7 @@ class SalbezJertkat extends BaseShip{
 //        $this->limited = 33;
 
         $this->fighters = array("normal"=>6);
+        $this->notes = 'Only 4 in service through 2124.';
 
 		$this->isd = 2113;
         

@@ -13,7 +13,7 @@ class DalithornNewMissileCruiser extends HeavyCombatVessel{
 			$this->variantOf = "Light Cruiser";
 			$this->occurence = "rare";
 		$this->unofficial = true;
-        $this->isd = 2112;
+        $this->isd = 2115;
 
 //        $this->fighters = array("superheavy"=>1);
         

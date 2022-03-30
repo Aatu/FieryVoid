@@ -7,7 +7,7 @@ class Liner extends BaseShip{
         $this->pointCost = 160;
         $this->faction = "Civilians";
         $this->phpclass = "Liner";
-        $this->imagePath = "img/ships/battlewagon.png"; //need to change
+        $this->imagePath = "img/ships/LuxuryLiner.png";
         $this->shipClass = "Luxury Liner";
         $this->shipSizeClass = 3;
         

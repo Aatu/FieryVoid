@@ -14,6 +14,8 @@ class CraytanHepron2126 extends HeavyCombatVessel{
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->isd = 2126;
+
+        $this->fighters = array("assault shuttles"=>4);
 		
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

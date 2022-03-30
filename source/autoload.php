@@ -319,6 +319,7 @@ spl_autoload_register(
                 'fangedserpent_v2' => '/server/model/ships/drazi/fangedserpent_v2.php',
                 'fastfreighter' => '/server/model/ships/civilians/fastFreighter.php',
                 'felucca' => '/server/model/ships/raiders/felucca.php',
+                'faskurspy' => '/server/model/ships/dilgar/faskurSpy.php',
                 'fetula' => '/server/model/ships/abbai/fetula.php',
                 'fieldfluctuations' => '/server/model/cricialClasses.php',
                 'fighter' => '/server/model/systems/fighter.php',
@@ -450,12 +451,16 @@ spl_autoload_register(
                 'ioncannon' => '/server/model/weapons/ion.php',
                 'iontorpedo' => '/server/model/weapons/torpedo.php',
                 'jammer' => '/server/model/systems/baseSystems.php',
+                'jannakaqship' => '/server/model/ships/dilgar/jannakaQship.php',
+                'jannakarefit' => '/server/model/ships/dilgar/jannakaRefit.php',
                 'jashakar' => '/server/model/ships/dilgar/jashakar.php',
                 'jashakare' => '/server/model/ships/dilgar/jashakarE.php',
                 'jashakarn' => '/server/model/ships/dilgar/jashakarN.php',
                 'jashakarp' => '/server/model/ships/dilgar/jashakarP.php',
                 'jastat' => '/server/model/ships/narn/jastat.php',
                 'jenas' => '/server/model/ships/centauri_old/jenas.php',
+                'jonkurfreighter' => '/server/model/ships/dilgar/jonkurFreighter.php',
+                'jonkurrefit' => '/server/model/ships/dilgar/jonkurRefit.php',
                 'jorthuna' => '/server/model/ships/dilgar/jorthunA.php',
                 'jorthunk' => '/server/model/ships/dilgar/jorthunK.php',
                 'jorthunl' => '/server/model/ships/dilgar/jorthunL.php',
@@ -657,6 +662,7 @@ spl_autoload_register(
                 'ochlavitam' => '/server/model/ships/dilgar/ochlavitaM.php',
                 'octurion' => '/server/model/ships/centauri/octurion.php',
                 'offsetcoordinate' => '/server/model/OffsetCoordinate.php',
+                'olgata' => '/server/model/ships/dilgar/olgata.php',
                 'olympus' => '/server/model/ships/EA/olympus.php',
                 'olympusalpha' => '/server/model/ships/EA/olympusAlpha.php',
                 'olympusalpha_early' => '/server/model/ships/EA_old/olympusAlpha_early.php',
@@ -968,9 +974,11 @@ spl_autoload_register(
                 'swheavylaser' => '/server/model/weapons/customSW.php',
                 'swheavylasere' => '/server/model/weapons/customSW.php',
                 'swheavytlaser' => '/server/model/weapons/customSW.php',
+                'swheavytlaserbattery' => '/server/model/weapons/customSW.php',
                 'swheavytlasere' => '/server/model/weapons/customSW.php',
                 'swift' => '/server/model/ships/drazi_old/swift.php',
                 'swimperialsd' => '/server/model/ships/ZStarWars/swImperialSD.php',
+                'swimperialsd2' => '/server/model/ships/ZStarWars/swImperialSD2.php',
                 'swion' => '/server/model/weapons/customSW.php',
                 'swionhandler' => '/server/model/weapons/customSW.php',
                 'swlancer' => '/server/model/ships/ZStarWars/swLancer.php',
@@ -1002,6 +1010,7 @@ spl_autoload_register(
                 'tacit1990' => '/server/model/ships/centauri_old/tacit1990.php',
                 'taclaser' => '/server/model/weapons/lasers.php',
                 'taileagle' => '/server/model/ships/drazi/taileagle.php',
+                'takalaas' => '/server/model/ships/brakiri/takalaAS.php',
                 'talafat' => '/server/model/ships/markab/talafat.php',
                 'tankertug' => '/server/model/ships/civilians/tankerTug.php',
                 'tantalus' => '/server/model/ships/EA/tantalus.php',
@@ -1278,6 +1287,7 @@ spl_autoload_register(
 				'choukabelieverfrigate' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBelieverFrigate.php',
 				'choukabishopwarship' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBishopWarship.php',
 				'choukabloodfirefighter' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBloodfireFighter.php',
+				'choukabloodhoundfighter' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBloodhoundFighter.php',
 				'choukabloodlustfighter' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBloodlustFighter.php',
 				'choukabrimstoneheavyosat' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBrimstoneHeavyOSAT.php',
 //				'choukacitadel' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaCitadel.php',
@@ -1501,6 +1511,7 @@ spl_autoload_register(
 				'nexusfighterarray' => '/server/model/weapons/customNexus.php', 
 				'nexusheavyparticlearray' => '/server/model/weapons/customNexus.php',
 				'nexuslightassaultcannon' => '/server/model/weapons/customNexus.php', 
+				'nexusmedassaultcannon' => '/server/model/weapons/customNexus.php', 
 				'nexusmauler' => '/server/model/weapons/customNexus.php', 
 				'nexusparticleagitator' => '/server/model/weapons/customNexus.php', 
 				'nexusprojectorarray' => '/server/model/weapons/customNexus.php',
@@ -1553,6 +1564,7 @@ spl_autoload_register(
 //				'plasmablast' => '/server/model/weapons/customNexus.php',
 //				'testgun' => '/server/model/weapons/customNexus.php',
 //                'plasmabattery' => '/server/model/systems/baseSystems.php',
+//				'enveloper' => '/server/model/weapons/customNexus.php',
 
 
 
@@ -1571,6 +1583,8 @@ spl_autoload_register(
 
                 'brixadiijumpscout' => '/server/model/ships/ZNexusBrixadii/BrixadiiJumpScout.php',		
                 'brixadiijumpscout2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiJumpScout2108.php',		
+
+                'brixadiiplasmadestroyer' => '/server/model/ships/ZNexusBrixadii/BrixadiiPlasmaDestroyer.php',	
 	
 				'brixadiiassaultship' => '/server/model/ships/ZNexusBrixadii/BrixadiiAssaultShip.php',
 	
@@ -1619,6 +1633,7 @@ spl_autoload_register(
  //               'craytanhepron2126' => '/server/model/ships/ZNexusCraytan/CraytanHepron2126.php',					
                 'craytanpolten' => '/server/model/ships/ZNexusCraytan/CraytanPolten.php',					
                 'craytanpoltenrefit' => '/server/model/ships/ZNexusCraytan/CraytanPoltenRefit.php',					
+                'craytantopren' => '/server/model/ships/ZNexusCraytan/CraytanTopren.php',					
 
 
 
@@ -1687,6 +1702,7 @@ spl_autoload_register(
                 'salbezreshkenrefit' => '/server/model/ships/ZNexusSalbez/SalbezReshkenRefit.php',					
                 'salbezresktan' => '/server/model/ships/ZNexusSalbez/SalbezResktan.php',					
                 'salbezrevtan' => '/server/model/ships/ZNexusSalbez/SalbezRevtan.php',					
+                'salbezrevtanrefit' => '/server/model/ships/ZNexusSalbez/SalbezRevtanRefit.php',					
                 'salbezshvrak' => '/server/model/ships/ZNexusSalbez/SalbezShvrak.php',					
 //                'salbezshvrakrefit' => '/server/model/ships/ZNexusSalbez/SalbezShvrakRefit.php',					
                 'salbezshvrez' => '/server/model/ships/ZNexusSalbez/SalbezShvrez.php',					
@@ -2514,11 +2530,44 @@ spl_autoload_register(
 //				'hyachdartha' => '/server/model/ships/hyach/HyachDartha.php',
 //				'hyachdoskva' => '/server/model/ships/hyach/HyachDoskva.php',
 //				'hyachirokaikam' => '/server/model/ships/hyach/HyachIrokaiKam.php',
+
+
+				//Star Wars - Clone Wars testing
+
+				//weapons
+/*                'cwheavyturbolaser' => '/server/model/weapons/customCW.php',
+                'cwtwinheavyturbolaser' => '/server/model/weapons/customCW.php',
+                'cwquadheavyturbolaser' => '/server/model/weapons/customCW.php',
+                'cwturbolaser' => '/server/model/weapons/customCW.php',
+                'cwtwinturbolaser' => '/server/model/weapons/customCW.php',
+                'cwquadturbolaser' => '/server/model/weapons/customCW.php',
+                'cwlasercannon' => '/server/model/weapons/customCW.php',
+                'cwtwinlasercannon' => '/server/model/weapons/customCW.php',
+                'cwquadlasercannon' => '/server/model/weapons/customCW.php',
+                'cwpointdefenselaser' => '/server/model/weapons/customCW.php',
+                'cwconcussionmissile' => '/server/model/weapons/customCW.php',
+                'cwprotontorpedo' => '/server/model/weapons/customCW.php',
+                'cwioncannon' => '/server/model/weapons/customCW.php',
+                'cwheavyioncannon' => '/server/model/weapons/customCW.php',
+                'cwshield' => '/server/model/weapons/customCW.php',
+
+                'cwlasercannonsftr' => '/server/model/weapons/customCW.php',
+//                'cwftrconcussion' => '/server/model/weapons/customCW.php',
+
 				
+				//units
+				'acclamator' => '/server/model/ships/ZStarWarsCloneWars/Acclamator.php',
+				'consular' => '/server/model/ships/ZStarWarsCloneWars/Consular.php',
+				'ftrtorrent' => '/server/model/ships/ZStarWarsCloneWars/ftrTorrent.php',
+				'venator' => '/server/model/ships/ZStarWarsCloneWars/Venator.php',
+*/				
+
+
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
 				
+
 
 				//TEMPORARY variable hangar size testing
 				'variablehangarsize' => '/server/model/ships/customs/VariableHangarSize.php',

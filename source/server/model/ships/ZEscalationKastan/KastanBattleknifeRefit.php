@@ -34,14 +34,14 @@ class KastanBattleknifeRefit extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 9, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 9, 0, 3, 4));        
         
-		$this->addFrontSystem(new EWRoyalLaser(2, 6, 4, 240, 360));
+		$this->addFrontSystem(new EWRoyalLaser(2, 6, 4, 240, 60));
         $this->addFrontSystem(new EWLaserBolt(2, 4, 2, 240, 120));
-        $this->addFrontSystem(new EWRoyalLaser(2, 6, 4, 0, 120));
+        $this->addFrontSystem(new EWRoyalLaser(2, 6, 4, 300, 120));
         $this->addFrontSystem(new Thruster(2, 6, 0, 4, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 4, 1));
 	    
-		$this->addAftSystem(new EWLaserBolt(2, 4, 2, 60, 300));
-		$this->addAftSystem(new EWLaserBolt(2, 4, 2, 60, 300));
+		$this->addAftSystem(new EWLaserBolt(2, 4, 2, 180, 60));
+		$this->addAftSystem(new EWLaserBolt(2, 4, 2, 300, 180));
         $this->addAftSystem(new Thruster(2, 12, 0, 10, 2));    
        
         $this->addPrimarySystem(new Structure(3, 30));

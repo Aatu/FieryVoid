@@ -11,7 +11,7 @@ class SalbezNarken extends HeavyCombatVessel{
 			$this->canvasSize = 115; //img has 200px per side
         $this->shipClass = "Nar-ken Early Scout";
 			$this->variantOf = "Nav-ren Prospector";
-			$this->occurence = "common";
+			$this->occurence = "uncommon";
 			$this->unofficial = true;
         $this->limited = 33;
         $this->isd = 2050;
