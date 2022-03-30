@@ -14,6 +14,8 @@ class CraytanHepron2085 extends HeavyCombatVessel{
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->isd = 2085;
+
+        $this->fighters = array("assault shuttles"=>4);
 		
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
@@ -70,7 +72,7 @@ class CraytanHepron2085 extends HeavyCombatVessel{
                     3 => "Thruster",
                     6 => "Heavy Plasma Cannon",
                     8 => "Medium Plasma Cannon",
-					10 => "Close-In Defense System",
+					10 => "Advanced Close-In Defense System",
 					18 => "Structure",
                     20 => "Primary",
             ),

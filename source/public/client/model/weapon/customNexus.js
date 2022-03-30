@@ -221,6 +221,12 @@ var NexusLightAssaultCannon = function NexusLightAssaultCannon(json, ship) {
 NexusLightAssaultCannon.prototype = Object.create(Weapon.prototype);
 NexusLightAssaultCannon.prototype.constructor = NexusLightAssaultCannon;
 
+var NexusMedAssaultCannon = function NexusMedAssaultCannon(json, ship) {
+	Weapon.call(this, json, ship);
+};
+NexusMedAssaultCannon.prototype = Object.create(Weapon.prototype);
+NexusMedAssaultCannon.prototype.constructor = NexusMedAssaultCannon;
+
 var NexusLightAssaultCannonBattery = function NexusLightAssaultCannonBattery(json, ship) {
 	Weapon.call(this, json, ship);
 };
@@ -861,6 +867,11 @@ var NexusTestBlaster = function  NexusTestBlaster(json, ship) {
 NexusTestBlaster.prototype = Object.create(Weapon.prototype);
 NexusTestBlaster.prototype.constructor =  NexusTestBlaster;
 
+//var Enveloper = function  Enveloper(json, ship) {
+//    Weapon.call(this, json, ship);
+//};
+//Enveloper.prototype = Object.create(Weapon.prototype);
+//Enveloper.prototype.constructor =  Enveloper;
 
 
 

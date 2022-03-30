@@ -13,7 +13,7 @@ class SalbezUshkrit extends BaseShipNoAft{
 			$this->variantOf = "Fel-riz Patrol Cruiser";
 			$this->occurence = "rare";
 		$this->unofficial = true;
-		$this->isd = 2063;
+		$this->isd = 2078;
          
         $this->fighters = array("heavy"=>6);
 

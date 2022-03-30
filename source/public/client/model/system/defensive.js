@@ -103,6 +103,22 @@ Swrayshield.prototype.getMaxBoost = function () {
     return this.maxBoostLevel;
 };
 
+var CWShield = function CWShield(json, ship) {
+    ShipSystem.call(this, json, ship);
+    this.defensiveType = "Shield";
+};
+CWShield.prototype = Object.create(ShipSystem.prototype);
+CWShield.prototype.constructor = CWShield;
+CWShield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
+    return 0; //Ray shield does not affect hit chance
+};
+CWShield.prototype.hasMaxBoost = function () {
+    return true;
+};
+CWShield.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
 var Absorbtionshield = function Absorbtionshield(json, ship) {
     ShipSystem.call(this, json, ship);
     this.defensiveType = "Shield";

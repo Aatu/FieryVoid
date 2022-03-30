@@ -11,9 +11,9 @@ class SalbezVasken extends HeavyCombatVessel{
 			$this->canvasSize = 115; //img has 200px per side
         $this->shipClass = "Vas-ken Scout Destroyer";
 			$this->variantOf = "Vas-ren Destroyer";
-			$this->occurence = "common";
+			$this->occurence = "uncommon";
 			$this->unofficial = true;
-        $this->limited = 10;
+        $this->limited = 33;
        $this->isd = 2120;
 		
         $this->forwardDefense = 12;

@@ -11,7 +11,7 @@ class SalbezShvrez extends MediumShip{
         $this->shipClass = "Shv'rez Frigate";
 		$this->unofficial = true;
         $this->canvasSize = 75;
-	    $this->isd = 2121;
+	    $this->isd = 2125;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
@@ -26,7 +26,7 @@ class SalbezShvrez extends MediumShip{
         $this->addPrimarySystem(new Reactor(4, 15, 0, 0));
         $this->addPrimarySystem(new CnC(3, 10, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 4, 6));
-        $this->addPrimarySystem(new Engine(3, 12, 0, 10, 3));
+        $this->addPrimarySystem(new Engine(3, 12, 0, 8, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4));        
         $this->addPrimarySystem(new Hangar(2, 2));
@@ -42,8 +42,8 @@ class SalbezShvrez extends MediumShip{
 		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 60, 300));
 		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 60, 300));
 		$this->addAftSystem(new LightLaser(2, 4, 3, 90, 270));
-        $this->addAftSystem(new Thruster(3, 10, 0, 5, 2));    
-        $this->addAftSystem(new Thruster(3, 10, 0, 5, 2));    
+        $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));    
+        $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));    
        
         $this->addPrimarySystem(new Structure(4, 49));
 
