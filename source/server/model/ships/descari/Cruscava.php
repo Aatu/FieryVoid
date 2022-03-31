@@ -34,8 +34,8 @@ class Cruscava extends MediumShip
 		$this->addPrimarySystem(new Thruster(3, 13, 0, 4, 4));
 		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
 		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
-		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
 		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
+		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
 		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
 		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
 

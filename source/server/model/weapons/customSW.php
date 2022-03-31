@@ -73,7 +73,7 @@ class SWRayShield extends Shield implements DefensiveSystem{
 		$this->data["Special"] = "Reduces damage done by incoming shots (by shield rating), but does not decrease profile."; 
 		$this->data["Special"] .= "<br>Cannot be flown under."; 
 		$this->data["Special"] .= "<br>Does not protect from Ramming, Ballistic, StarWars Ion damage."; 
-		$this->data["Special"] .= "<br>Doubly effective vs Raking weapons."; 
+		if (!($this->unit instanceof FighterFlight)) $this->data["Special"] .= "<br>Doubly effective vs Raking weapons."; //Raking vs Fighters should be resolved as Standard
 		$this->data["Special"] .= "<br>Half efficiency (round up) vs Matter weapons (game balance, irrelevant in-universe)."; 
 		$this->data["Special"] .= "<br>Can be boosted."; 
 	}
@@ -1222,8 +1222,8 @@ class SWTractorBeam extends SWDirectWeapon{
 			$this->data["Special"] .= '<br>';
 		}
       $this->data["Special"] .= "Does no damage, but holds target next turn";      
-      $this->data["Special"] .= "<br>limiting its maneuvering options"; 
-      $this->data["Special"] .= "<br>(-1 thrust and -20 Initiative next turn).";  
+      $this->data["Special"] .= " limiting its maneuvering options"; 
+      $this->data["Special"] .= " (-1 thrust and -20 Initiative next turn).";  
     }	
     
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!

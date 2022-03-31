@@ -4,7 +4,7 @@ class TellariteCruiser extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 380;
+	$this->pointCost = 325;
 	$this->faction = "ZTrek Federation (early)";
         $this->phpclass = "TellariteCruiser";
         $this->imagePath = "img/ships/StarTrek/TellariteCruiser.png";

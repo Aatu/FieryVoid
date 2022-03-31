@@ -6,7 +6,7 @@ class Rulnato extends HeavyCombatVessel{
         
         $this->pointCost = 485;
         $this->faction = "Descari";
-        $this->phpclass = "Rulnata";
+        $this->phpclass = "Rulnato";
         $this->imagePath = "img/ships/DescariRulnata.png";
         $this->shipClass = "Rulnato Jump Scout";
 	    $this->isd = 2245;
