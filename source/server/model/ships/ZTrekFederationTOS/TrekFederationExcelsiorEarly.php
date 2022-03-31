@@ -31,8 +31,8 @@ class TrekFederationExcelsiorEarly extends BaseShipNoAft{
         $this->addPrimarySystem(new Reactor(5, 30, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 18, 7, 7));
 	$this->addPrimarySystem(new Hangar(4, 6, 6));
-	$this->addPrimarySystem(new TrekPhotonTorp(3, 0, 0, 120, 240));
-	$this->addPrimarySystem(new TrekPhaserLance(3, 0, 0, 120, 240)); 
+	$this->addAftSystem(new TrekPhotonTorp(3, 0, 0, 120, 240));
+	$this->addAftSystem(new TrekPhaserLance(3, 0, 0, 120, 240)); 
 
   
 	$impulseDrive = new TrekImpulseDrive(5,30,0,3,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
@@ -101,8 +101,8 @@ class TrekFederationExcelsiorEarly extends BaseShipNoAft{
         $this->hitChart = array(
             0=> array(
 				7 => "Structure",
-				9 => "Phaser Lance",
-				10 => "Photon Torpedo",
+				9 => "2:Phaser Lance",
+				10 => "2:Photon Torpedo",
 				13 => "Scanner",
 				16 => "Engine",
 				17 => "Hangar",
