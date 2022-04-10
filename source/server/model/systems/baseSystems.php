@@ -3293,5 +3293,172 @@ class BSGHybrid extends ShipSystem {
 }
 
 
+class PlasmaBattery extends ShipSystem{ 
+ 	public $name = "PlasmaBattery";
+    public $displayName = "Plasma Battery";
+//    public $primary = true; 
+	public $isPrimaryTargetable = false;
+    public $iconPath = "plasmabattery.png";
+
+	public $powerCurr = 0;
+//	public $capacityBonus = 0; //additional capacity - potentially set by enhancements
+	public $powerReceivedFromFrontEnd = 0; //communication variable	
+	public $powerReceivedFromBackEnd = 0; //communication variable
+	public $nominalOutput = 0;//output to be used in front end display!
+	
+    public $boostable = true; //changed to True if a given ship has Petals! 
+    public $maxBoostLevel = 4;
+    public $boostEfficiency = 1; 
+    
+/*
+	1-12: No effect.
+	13+: The battery is completely emptied.
+*/        
+
+    public $possibleCriticals = array(
+		13=>"ChargeEmpty",
+	); 
+
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+            if ( $maxhealth == 0 ) $maxhealth = 4;      	
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+	}
+ 
+ 	public function getMaxCapacity(){ //maximum capacity = health remaining
+		$capacity = $this->getRemainingHealth();
+//		$capacity += $this->capacityBonus ;
+		return $capacity;
+	}
+ 
+ 	public function setPowerHeld($newValue){ //cut off by maximum capacity
+		//$this->powerCurr = min($newValue, $this->getMaxCapacity() ); //cutting off at this point interacts badly with enhancements... moving to FRONT END!
+		$this->powerCurr = $newValue;
+	}
+ 
+     public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+		switch($gameData->phase){
+				case -1: //deployment phase 
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise two copies of initial data are written
+						$this->setPowerHeld($this->getMaxCapacity());
+						//AND PREPARE APPROPRIATE NOTES!		
+						$notekey = 'powerStored';
+						$noteHuman = 'Plasma Battery - stored power';
+						$noteValue = $this->powerCurr;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					}
+					break;
+								
+				case 1: //Initial phase
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+						//load existing data first - at this point ship is rudimentary, without data from database!
+						/*in this case - result from front end completely replaces current value, so it's NOT necessary to read old notes!
+						$listNotes = $dbManager->getIndividualNotesForShip($gameData, $gameData->turn, $ship->id);	
+						foreach ($listNotes as $currNote){
+							if($currNote->systemid==$this->id){//note is intended for this system!
+								$this->addIndividualNote($currNote);
+							}
+						}
+						$this->onIndividualNotesLoaded($gameData);
+						*/
+						$this->setPowerHeld($this->powerReceivedFromFrontEnd); 
+						//AND PREPARE APPROPRIATE NOTES!		
+						$notekey = 'powerStored';
+						$noteHuman = 'Plasma Battery - stored power';
+						$noteValue = $this->powerCurr;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					}
+					break;
+				
+				case 4: //firing phase
+					//take what front end reports, and add what back end calculated (basically weapons fire cost)
+					//$this->setPowerHeld($this->powerReceivedFromFrontEnd + $this->powerReceivedFromBackEnd); 
+					//or perhaps disregard what front end says - in this phase it's cost of firing... and this is better calculated by back end (firing _declaration_ doesn't equal actual firing, especially for Ligntning Cannons!
+					$this->setPowerHeld($this->powerCurr - $this->powerReceivedFromBackEnd); 
+					//apply critical eefects: halve charge/empty charge
+					if($this->hasCritical("ChargeEmpty")){
+						$this->setPowerHeld(0); 
+				//	}else if ($this->hasCritical("ChargeHalve")){
+				//		$this->setPowerHeld(floor($this->powerCurr/2)); 
+					}
+					//AND PREPARE APPROPRIATE NOTES!		
+					$notekey = 'powerStored';
+					$noteHuman = 'Plasma Battery - stored power';
+					$noteValue = $this->powerCurr ;
+					$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					break;
+		}
+	} //endof function generateIndividualNotes
+ 
+	public function canDrawPower($powerNeeded){
+		if(($this->powerCurr - $this->powerReceivedFromBackEnd) >= $powerNeeded){ ///MARCIN - How to add scanner exception???
+			return true; //drawing such power is possible
+		}else{
+			return false; //cannot draw so much power!
+		}
+	} 
+ 
+ 	//it should not happen, but technically it's possible to actually draw more power than Battery holds...
+	public function doDrawPower($powerDrawn){
+		$this->powerReceivedFromBackEnd += $powerDrawn;
+	}
+	
+	/*act on notes just loaded - to be redefined by systems as necessary
+	 - set power held
+	*/
+	public function onIndividualNotesLoaded($gamedata){
+		foreach ($this->individualNotes as $currNote){ //assume ASCENDING sorting - so enact all changes as is
+			switch($currNote->notekey){
+				case 'powerStored': //power that should be stored at this moment
+					$this->setPowerHeld($currNote->notevalue);
+					break;			
+			}
+		}
+	} //endof function onIndividualNotesLoaded
+ 
+     public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn); 
+		$this->powerMax = $this->getMaxCapacity(); //do cut off overflow here as well!
+		$this->powerCurr =min($this->powerCurr, $this->powerMax);
+		$this->data["Power stored/max"] =  $this->powerCurr . '/' . $this->powerMax;
+		$this->data["Power regeneration"] =  'Initial phase only';
+        $this->data["Special"] = "This system is responsible for storing extra power which can be used for charging weapons (including  Plasma Nets in Firing phase) and boosting engine thrust.";	   
+		$this->data["Special"] .= "<br>You may boost this system during Initial Orders to recharge spent power so long as the battery has spare capacity.";
+    }
+	
+	
+        private function getBoostLevel($turn, $capacity  ){ //CHECK - I've tried to add to this to prevent damaged plasma batteries getting boosted beyond their remaining health.
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn)
+                            continue;
+                    if ($i->type >= $capacity)
+                    		continue;
+                    if ($i->type == 1){
+                            $boostLevel += $i->amount;
+                    }
+            }
+            return $boostLevel;
+        }		
+	
+    public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->data = $this->data;
+        $strippedSystem->powerCurr = max($this->powerCurr,0); //power less than 0 would block the game in case of this system
+	    $strippedSystem->powerMax = $this->getMaxCapacity();
+		$strippedSystem->nominalOutput = $this->output;
+		//$strippedSystem->powerReceivedFromFrontEnd = $this->powerReceivedFromFrontEnd;
+		$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer;
+        return $strippedSystem;
+    }
+	
+	public function doIndividualNotesTransfer(){
+		//data received in variable individualNotesTransfer, further functions will look for it in powerReceivedFromFrontEnd
+		//in this case it should be just one entry, power remaining
+		if(is_array($this->individualNotesTransfer)) foreach($this->individualNotesTransfer as $powerLeft)  $this->powerReceivedFromFrontEnd = $powerLeft;
+		$this->individualNotesTransfer = array(); //empty, just in case
+	}		
+							
+} //endof PlasmaBattery.php
 
 ?>

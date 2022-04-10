@@ -2516,7 +2516,8 @@ spl_autoload_register(
 				//other factions
 				'nausicaanvandal' => '/server/model/ships/ZTrekOther/NausicaanVandal.php',
 				
-				
+				//Pakmara
+				'plasmabattery' => '/server/model/systems/baseSystems.php',
 
 				//Hyach
 				
