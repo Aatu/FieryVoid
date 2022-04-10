@@ -2518,6 +2518,8 @@ spl_autoload_register(
 				
 				//Pakmara
 				'plasmabattery' => '/server/model/systems/baseSystems.php',
+				'ptest' => '/server/model/ships/customs/PTest.php',				
+				
 
 				//Hyach
 				
