@@ -661,7 +661,7 @@ PlasmaBattery.prototype.initializationUpdate = function () {
 	this.data["Power regeneration"] = regeneration;
 	var boostCount = shipManager.power.getBoost(this);	
 	if(boostCount > 0){//boosted!
-		regeneration -= boostCount; //system will automatically add boostlevel to output display in this case...
+		regeneration = this.boostCount; //system will automatically add boostlevel to output display in this case...
 	}
 	this.output = regeneration;
 	if (gamedata.gamephase > 1){//later phases - actually ADD power used by other systems - that's boosts that are already subtracted from power held!
@@ -677,10 +677,10 @@ PlasmaBattery.prototype.initializationUpdate = function () {
     return this;
 };
 PlasmaBattery.prototype.getRegeneration = function () {
-//	var regeneration = this.nominalOutput; //No nomial output.
+	var regeneration = this.nominalOutput; //No nomial output.
 	var boostCount = shipManager.power.getBoost(this);	
 	if(boostCount > 0){//boosted!
-		regeneration += boostCount; //regenerates power available by amount boosted.
+		regeneration += this.boostCount; //regenerates power available by amount boosted.
 	}
 	return regeneration;
 };

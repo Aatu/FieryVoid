@@ -5,7 +5,7 @@ class PTest extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 750;
-		$this->faction = 'customs';
+		$this->faction = "Custom Ships";
 		$this->phpclass = "PTest";
 		$this->imagePath = "img/ships/GaimShamor.png";
 		$this->shipClass = "Battery Testbed";
@@ -37,7 +37,7 @@ class PTest extends BaseShip{
 		$this->addFrontSystem(new TwinArray(2, 6, 2, 180, 360));
 		$this->addFrontSystem(new TwinArray(2, 6, 2, 0, 180));
 		$this->addFrontSystem(new TwinArray(2, 6, 2, 270, 90));
-		$this->addFrontSystem(new PlasmaBattery(0, 3));
+		$this->addFrontSystem(new PlasmaBattery(2, 4, 0, 4));//armor, structure, power req, output 
 
 
 		$this->addAftSystem(new Thruster(4, 13, 0, 5, 2));
@@ -45,19 +45,19 @@ class PTest extends BaseShip{
 		$this->addAftSystem(new TwinArray(2, 6, 2, 90, 270));
 		$this->addAftSystem(new Hangar(3, 6,6));
 		$this->addAftSystem(new Hangar(3, 6,6));
-		$this->addAftSystem(new PlasmaBattery(0, 2));
+		$this->addAftSystem(new PlasmaBattery(2, 4, 0, 4));//armor, structure, power req, output 
 
 
 		$this->addLeftSystem(new Thruster(4, 13, 0, 5, 3));
 		$this->addLeftSystem(new BattleLaser(3, 6, 6, 240, 360));
 		$this->addLeftSystem(new ScatterGun(2, 8, 3, 180, 360));
-		$this->addLeftSystem(new PlasmaBattery(0, 4));
+		$this->addLeftSystem(new PlasmaBattery(2, 4, 0, 4));//armor, structure, power req, output 
 
 
 		$this->addRightSystem(new Thruster(4, 13, 0, 5, 4));
 		$this->addRightSystem(new BattleLaser(3, 6, 6, 0, 120));
 		$this->addRightSystem(new ScatterGun(2, 8, 3, 0, 180));
-		$this->addRightSystem(new PlasmaBattery(0, 4));
+		$this->addRightSystem(new PlasmaBattery(2, 4, 0, 4));//armor, structure, power req, output 
 
         
         $this->addFrontSystem(new Structure( 4, 36));
