@@ -631,65 +631,45 @@ var PlasmaBattery = function PlasmaBattery(json, ship) {
 };
 PlasmaBattery.prototype = Object.create(ShipSystem.prototype);
 PlasmaBattery.prototype.constructor = PlasmaBattery;
-/*old version - regenerating power IN initial phase
-PowerCapacitor.prototype.initializationUpdate = function () {
-    // Needed because it can change during initial phase  
-    var effectiveOutput = this.powerCurr;
-	if (gamedata.gamephase == 1){//in Initial phase - add output to power available
-		effectiveOutput += this.output;
-		var boostCount = shipManager.power.getBoost(this);	
-		if(boostCount > 0){//boosted!
-			effectiveOutput += Math.round(this.output *0.5);
-		}
-	}else if (gamedata.gamephase > 1){//later phases - actually ADD power used by other systems - that's boosts that are already subtracted from power held!
-		//ACTUALLY only Engine and Sensors (if this can be arranged) can have meaningful boosts; still, check everything except obvious exceptions
-		this.ship.systems.forEach(function (systemToCheck) {
-			if ( (systemToCheck.name != 'powerCapacitor') && (systemToCheck.name != 'reactor') ){ //checking these might end badly!
-				effectiveOutput += shipManager.power.countBoostPowerUsed(this.ship, systemToCheck);
-			}
-		}, this);
-	}
-	//can be more than maximum - but cannot HOLD more than maximum after Initial phase (server end takes care of that)
-    this.powerReq =  - effectiveOutput; //NEGATIVE VALUE - this system adds power to Reactor :)
-    return this;
-};
-*/
+
 PlasmaBattery.prototype.initializationUpdate = function () {
     // Needed because it can change during initial phase  
     var effectiveOutput = this.powerCurr;
-	var regeneration = this.getRegeneration();
-	this.data["Power regeneration"] = regeneration;
-	var boostCount = shipManager.power.getBoost(this);	
-	if(boostCount > 0){//boosted!
-		regeneration = this.boostCount; //system will automatically add boostlevel to output display in this case...
-	}
-	this.output = regeneration;
-	if (gamedata.gamephase > 1){//later phases - actually ADD power used by other systems - that's boosts that are already subtracted from power held!
+//	var regeneration = this.getRegeneration();
+//	this.data["Power regeneration"] = regeneration;
+//	var boostCount = shipManager.power.getBoost(this);	
+//	if(boostCount > 0){//boosted!
+//		regeneration = this.boostCount; //system will automatically add boostlevel to output display in this case...
+//}
+//this.output = regeneration;
+//	if (gamedata.gamephase > 1){//later phases - actually ADD power used by other systems - that's boosts that are already subtracted from power held!
 		//ACTUALLY only Engine and Sensors can have meaningful boosts; still, check everything except obvious exceptions
-		this.ship.systems.forEach(function (systemToCheck) {
-			if ( (systemToCheck.name != 'PlasmaBattery') && (systemToCheck.name != 'reactor') ){ //checking these might end badly!
-				effectiveOutput += shipManager.power.countBoostPowerUsed(this.ship, systemToCheck);
-			}
-		}, this);
-	}
+//		this.ship.systems.forEach(function (systemToCheck) {
+//			if ( (systemToCheck.name != 'PlasmaBattery') && (systemToCheck.name != 'reactor') ){ //checking these might end badly!
+//				effectiveOutput += shipManager.power.countBoostPowerUsed(this.ship, systemToCheck);
+//			}
+//		}, this);
+//	}
 	//can be more than maximum - but cannot HOLD more than maximum after Initial phase (server end takes care of that)
-    this.powerReq =  - effectiveOutput; //NEGATIVE VALUE - this system adds power to Reactor :)
-    return this;
-};
-PlasmaBattery.prototype.getRegeneration = function () {
-	var regeneration = this.nominalOutput; //No nomial output.
-	var boostCount = shipManager.power.getBoost(this);	
-	if(boostCount > 0){//boosted!
-		regeneration += this.boostCount; //regenerates power available by amount boosted.
-	}
-	return regeneration;
-};
-PlasmaBattery.prototype.hasMaxBoost = function () {
-    return true;
-};
-PlasmaBattery.prototype.getMaxBoost = function () {
-    return this.maxBoostLevel;
-};
+//    this.powerReq =  - effectiveOutput; //NEGATIVE VALUE - this system adds power to Reactor :)
+//    return this;
+//};
+//PlasmaBattery.prototype.getRegeneration = function () {
+//	var regeneration = this.nominalOutput; //No nomial output.
+//	var boostCount = shipManager.power.getBoost(this);	
+//	if(boostCount > 0){//boosted!
+//		regeneration += this.boostCount; //regenerates power available by amount boosted.
+//	}
+//	return regeneration;
+//};
+
+//PlasmaBattery.prototype.hasMaxBoost = function () {
+//    return true;
+//};
+//PlasmaBattery.prototype.getMaxBoost = function () {
+//    return this.maxBoostLevel;
+//};
+
 PlasmaBattery.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
 	this.individualNotesTransfer = Array();
 	//note power currently remaining ON REACTOR as charge held
