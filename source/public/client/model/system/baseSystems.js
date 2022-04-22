@@ -668,7 +668,7 @@ PlasmaBattery.prototype.initializationUpdate = function () {
 //};
 //PlasmaBattery.prototype.getMaxBoost = function () {
 //    return this.maxBoostLevel;
-//};
+};
 
 PlasmaBattery.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
 	this.individualNotesTransfer = Array();
