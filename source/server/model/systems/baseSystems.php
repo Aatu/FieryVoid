@@ -3385,10 +3385,7 @@ class PlasmaBattery extends ShipSystem{
 	} //endof function onIndividualNotesLoaded
  
  
- 
- 
- 
-     public function setSystemDataWindow($turn){
+      public function setSystemDataWindow($turn){
 		$this->output =  $this->getOutput();
         $this->powerCurr =$this->output;
         parent::setSystemDataWindow($turn); 
