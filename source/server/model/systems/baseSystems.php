@@ -3335,25 +3335,6 @@ class PlasmaBattery extends ShipSystem{
 		return $capacity;
 	}
 
- 	public function setPowerHeld($newValue){ //cut off by maximum capacity
-		//$this->powerCurr = min($newValue, $this->getMaxCapacity() ); //cutting off at this point interacts badly with enhancements... moving to FRONT END!
-		$this->powerCurr = $newValue;
-	}
-
-    private function getBoostLevel($turn, $capacity  ){ //CHECK - I've tried to add to this to prevent damaged plasma batteries getting boosted beyond their remaining health.
-            $boostLevel = 0;
-            foreach ($this->power as $i){
-                    if ($i->turn != $turn)
-                            continue;
-                    if ($i->type >= $capacity)
-                    		continue;
-                    if ($i->type == 1){
-                            $boostLevel += $i->amount;
-                    }
-            }
-            return $boostLevel;
-        }	
-	
  public function stripForJson(){
         $strippedSystem = parent::stripForJson();
 		$strippedSystem->data = $this->data; 

@@ -632,9 +632,9 @@ var PlasmaBattery = function PlasmaBattery(json, ship) {
 PlasmaBattery.prototype = Object.create(ShipSystem.prototype);
 PlasmaBattery.prototype.constructor = PlasmaBattery;
 
-PlasmaBattery.prototype.initializationUpdate = function () {
+//PlasmaBattery.prototype.initializationUpdate = function () {
     // Needed because it can change during initial phase  
-    var effectiveOutput = this.powerCurr;
+//    var effectiveOutput = this.powerCurr;
 //	var regeneration = this.getRegeneration();
 //	this.data["Power regeneration"] = regeneration;
 //	var boostCount = shipManager.power.getBoost(this);	
@@ -668,14 +668,14 @@ PlasmaBattery.prototype.initializationUpdate = function () {
 //};
 //PlasmaBattery.prototype.getMaxBoost = function () {
 //    return this.maxBoostLevel;
-};
+//};
 
-PlasmaBattery.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
-	this.individualNotesTransfer = Array();
+//PlasmaBattery.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+//	this.individualNotesTransfer = Array();
 	//note power currently remaining ON REACTOR as charge held
-	var powerRemaining = shipManager.power.getReactorPower(this.ship, this);
-	powerRemaining = powerRemaining + this.getRegeneration();
-	powerRemaining = Math.min(powerRemaining,this.powerMax);
-	this.individualNotesTransfer.push(powerRemaining);
-	return true;
-}; //end of Plasma Battery 
+//	var powerRemaining = shipManager.power.getReactorPower(this.ship, this);
+//	powerRemaining = powerRemaining + this.getRegeneration();
+//	powerRemaining = Math.min(powerRemaining,this.powerMax);
+//	this.individualNotesTransfer.push(powerRemaining);
+//	return true;
+//}; //end of Plasma Battery 
