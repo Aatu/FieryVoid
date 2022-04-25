@@ -656,7 +656,7 @@ PlasmaBattery.prototype.doIndividualNotesTransfer = function () { //prepare indi
        var chargeHeld = 0;
        chargeHeld = 0;
        capacity = shipManager.systems.getRemainingHealth(this);
-       while ((chargeHeld < capacity) && (PlasmaBattery.DrawPowerOnTurn(gamedata.turn) == true)){
+       while ((chargeHeld < capacity) && (this.DrawPowerOnTurn(gamedata.turn) == true)){
           chargeHeld++;
        }
     this.individualNotesTransfer.push(chargeHeld);
