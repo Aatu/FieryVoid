@@ -3378,7 +3378,7 @@ class PlasmaBattery extends ShipSystem{
 		foreach ($this->individualNotes as $currNote){ //assume ASCENDING sorting - so enact all changes as is
 			switch($currNote->notekey){
 				case 'powerStored': //power that should be stored at this moment
-				$this->powerCurr = $currNote->notevalue
+				$this->powerCurr = $currNote->notevalue;
 					break;			
 			}
 		}
