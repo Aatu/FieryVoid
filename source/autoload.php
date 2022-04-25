@@ -2508,13 +2508,19 @@ spl_autoload_register(
 				'trekfederationsoyuz' => '/server/model/ships/ZTrekFederationTOS/TrekFederationSoyuz.php',
 				'trekfederationsaladin' => '/server/model/ships/ZTrekFederationTOS/TrekFederationSaladin.php',
 				'trekfederationyamato' => '/server/model/ships/ZTrekFederationTOS/TrekFederationYamato.php',
+								
+				'trekvulcandkyrtos' => '/server/model/ships/ZTrekFederationTOS/TrekVulcanDKyrTOS.php',
 				
 				
 				//TNG (Next Generation, Deep Space Nine, Voyager)
 				
 				
 				//other factions
-				'nausicaanvandal' => '/server/model/ships/ZTrekOther/NausicaanVandal.php',
+				'trekmazeriteship' => '/server/model/ships/ZTrekOther/TrekMazeriteShip.php',
+				'trekmazeriteshuttles' => '/server/model/ships/ZTrekOther/TrekMazeriteShuttles.php',
+				'treknausicaanglidersshf' => '/server/model/ships/ZTrekOther/TrekNausicaanGlidersSHF.php',
+				'treknausicaanheavyglider' => '/server/model/ships/ZTrekOther/TrekNausicaanHeavyGlider.php',
+				'treknausicaanvandal' => '/server/model/ships/ZTrekOther/TrekNausicaanVandal.php',
 				
 				
 
