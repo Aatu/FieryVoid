@@ -632,6 +632,38 @@ var PlasmaBattery = function PlasmaBattery(json, ship) {
 PlasmaBattery.prototype = Object.create(ShipSystem.prototype);
 PlasmaBattery.prototype.constructor = PlasmaBattery;
 
+PlasmaBattery.prototype.DrawPowerOnTurn = function ( nrOfTurn ) { //running power surplus for a given turn
+  var turn = 0;
+  var powerAvailable = 0;
+
+  if (turn != nrOrTurn) { //wrong turn, set appropriate power (and turn)
+    turn = nrOfTurn;
+    powerAvailable = shipManager.power.getReactorPower(this.ship, this);
+  }
+
+  if (powerAvailable > 0) {
+    powerAvailable--;
+    return true;
+  } else {
+    return false;
+  }
+}; 
+
+PlasmaBattery.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+    this.individualNotesTransfer = Array();
+    //note power currently remaining ON REACTOR as charge held, but no more than remaining structure - and split between batteries
+       var capacity = 0;
+       var chargeHeld = 0;
+       chargeHeld = 0;
+       capacity = shipManager.systems.getRemainingHealth(this);
+       while ((chargeHeld < capacity) && (PlasmaBattery.DrawPowerOnTurn(gamedata.turn) == true)){
+          chargeHeld++;
+       }
+    this.individualNotesTransfer.push(chargeHeld);
+    return true;
+}; 
+ //end of Plasma Battery 
+
 //PlasmaBattery.prototype.initializationUpdate = function () {
     // Needed because it can change during initial phase  
 //    var effectiveOutput = this.powerCurr;
@@ -670,12 +702,4 @@ PlasmaBattery.prototype.constructor = PlasmaBattery;
 //    return this.maxBoostLevel;
 //};
 
-//PlasmaBattery.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
-//	this.individualNotesTransfer = Array();
-	//note power currently remaining ON REACTOR as charge held
-//	var powerRemaining = shipManager.power.getReactorPower(this.ship, this);
-//	powerRemaining = powerRemaining + this.getRegeneration();
-//	powerRemaining = Math.min(powerRemaining,this.powerMax);
-//	this.individualNotesTransfer.push(powerRemaining);
-//	return true;
-//}; //end of Plasma Battery 
+ //end of Plasma Battery 
