@@ -3309,8 +3309,7 @@ class PlasmaBattery extends ShipSystem{
     public $boostable = true;
     public $maxBoostLevel = 4;
     public $boostEfficiency = 1; 
-    public $frontEndCalculated = false;
-    public $frontEndValue = 0;    
+ 
     
 /*
 	1-12: No effect.

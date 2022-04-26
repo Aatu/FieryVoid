@@ -632,34 +632,22 @@ var PlasmaBattery = function PlasmaBattery(json, ship) {
 PlasmaBattery.prototype = Object.create(ShipSystem.prototype);
 PlasmaBattery.prototype.constructor = PlasmaBattery;
 
-PlasmaBattery.prototype.DrawPower = function ( ) { //running power surplus
-  if (this.frontEndCalculated != true) { //power surplus not calculated yet
-    this.frontEndCalculated = true;
-    this.frontEndValue = shipManager.power.getReactorPower(this.ship, this);
-  }
-
-  if (this.frontEndValue > 0) {
-    this.frontEndValue--;
-    this.powerReq++;
-    return true;
-  } else {
-    return false;
-  }
-}; 
 
 PlasmaBattery.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
     this.individualNotesTransfer = Array();
     //note power currently remaining ON REACTOR as charge held, but no more than remaining structure - and split between batteries
-       var capacity = 0;
+       var capacity = shipManager.systems.getRemainingHealth(this);
        var chargeHeld = 0;
-       chargeHeld = 0;
-       capacity = shipManager.systems.getRemainingHealth(this);
-       while ((chargeHeld < capacity) && (this.DrawPowerOnTurn(gamedata.turn) == true)){
-          chargeHeld++;
+       var reactorSurplus = shipManager.power.getReactorPower(this.ship, this);
+
+       while ((chargeHeld < capacity) && (reactorSurplus > 0)){
+          chargeHeld++; //increase charge
+          reactorSurplus--; //note reduced surplus
+          this.powerReq++; //mark as increased power usage, for further Batteries (if any)
        }
     this.individualNotesTransfer.push(chargeHeld);
     return true;
-}; 
+};
  //end of Plasma Battery 
 
 //PlasmaBattery.prototype.initializationUpdate = function () {
