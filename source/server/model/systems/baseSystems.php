@@ -3384,7 +3384,14 @@ class PlasmaBattery extends ShipSystem{
 		}
 	} //endof function onIndividualNotesLoaded
  
+    public function doIndividualNotesTransfer(){
+        //data received in variable individualNotesTransfer, further functions will look for it in powerReceivedFromFrontEnd
+        //in this case it should be just one entry, power remaining
+        if(is_array($this->individualNotesTransfer)) foreach($this->individualNotesTransfer as $powerLeft)  $this->powerReceivedFromFrontEnd = $powerLeft;
+        $this->individualNotesTransfer = array(); //empty, just in case
+    }
  
+   
       public function setSystemDataWindow($turn){
 		$this->output =  $this->getOutput();
         $this->powerCurr =$this->output;
