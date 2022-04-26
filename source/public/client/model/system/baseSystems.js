@@ -632,17 +632,15 @@ var PlasmaBattery = function PlasmaBattery(json, ship) {
 PlasmaBattery.prototype = Object.create(ShipSystem.prototype);
 PlasmaBattery.prototype.constructor = PlasmaBattery;
 
-PlasmaBattery.prototype.DrawPowerOnTurn = function ( nrOfTurn ) { //running power surplus for a given turn
-  var turn = 0;
-  var powerAvailable = 0;
-
-  if (turn != nrOrTurn) { //wrong turn, set appropriate power (and turn)
-    turn = nrOfTurn;
-    powerAvailable = shipManager.power.getReactorPower(this.ship, this);
+PlasmaBattery.prototype.DrawPower = function ( ) { //running power surplus
+  if (this.frontEndCalculated != true) { //power surplus not calculated yet
+    this.frontEndCalculated = true;
+    this.frontEndValue = shipManager.power.getReactorPower(this.ship, this);
   }
 
-  if (powerAvailable > 0) {
-    powerAvailable--;
+  if (this.frontEndValue > 0) {
+    this.frontEndValue--;
+    this.powerReq++;
     return true;
   } else {
     return false;

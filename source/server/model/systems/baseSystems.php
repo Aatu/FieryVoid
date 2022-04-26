@@ -3309,12 +3309,13 @@ class PlasmaBattery extends ShipSystem{
     public $boostable = true;
     public $maxBoostLevel = 4;
     public $boostEfficiency = 1; 
+    public $frontEndCalculated = false;
+    public $frontEndValue = 0;    
     
 /*
 	1-12: No effect.
 	13+: The battery is completely emptied.
 */        
-
     public $possibleCriticals = array(
 		13=>"ChargeEmpty",
 	); 
