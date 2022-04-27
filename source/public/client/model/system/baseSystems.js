@@ -638,11 +638,12 @@ PlasmaBattery.prototype.doIndividualNotesTransfer = function () { //prepare indi
     //note power currently remaining ON REACTOR as charge held, but no more than remaining structure - and split between batteries
        var capacity = shipManager.systems.getRemainingHealth(this);
        var reactorSurplus = shipManager.power.getReactorPower(this.ship, this);
-   	   var system = this.ship.systems[s];
-
+       for (var s in this.ship.systems) {
+       var system = this.ship.systems[s];
             if(system.displayName=="PlasmaBattery"){ //no point checking other systems
                            reactorSurplus -= system.powerStoredFront;
             }
+        }
         
        while ((this.powerStoredFront < capacity) && (reactorSurplus > 0)){
           this.powerStoredFront++; //increase charge
