@@ -640,7 +640,7 @@ PlasmaBattery.prototype.doIndividualNotesTransfer = function () { //prepare indi
        var reactorSurplus = shipManager.power.getReactorPower(this.ship, this);
        for (var s in this.ship.systems) {
        var system = this.ship.systems[s];
-            if(system.displayName=="PlasmaBattery"){ //no point checking other systems
+            if(system.displayName=="Plasma Battery"){ //no point checking other systems
                            reactorSurplus -= system.powerStoredFront;
             }
         }
