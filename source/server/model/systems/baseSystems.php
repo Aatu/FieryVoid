@@ -362,7 +362,17 @@ class Reactor extends ShipSystem implements SpecialAbility {
     {
         return $this->specialAbilityValue;
     }
-	
+
+	public function effectCriticals()
+	{
+		parent::effectCriticals();
+
+		//account for Plasma Batteries present (if any)
+		foreach ($this->unit->systems as $system)
+			if ($system instanceof PlasmaBattery){
+			$this->outputMod -= $system->getOutput(); //outputMod is SUBTRACTED from base output, hence going for negative value here
+		}
+	}	
 	
 	public function criticalPhaseEffects($ship, $gamedata) {		
 		//as effects are getting complicate - call them separately
