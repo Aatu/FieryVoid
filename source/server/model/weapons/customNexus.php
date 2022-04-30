@@ -88,7 +88,7 @@ class NexusRangedKineticBoxLauncher extends Weapon{
 
         public $useOEW = false; //missile
         public $ballistic = true; //missile
-        public $range = 30;
+        public $range = 45;
         public $distanceRange = 60;
         public $ammunition = 10; //limited number of shots
         
@@ -278,7 +278,7 @@ class NexusLaserMissile extends Laser{
         public function getDamage($fireOrder){ 
 		switch($this->firingMode){
 			case 1:
-				return Dice::d(10, 2)+2; //Light Chemical Laser
+				return Dice::d(10, 2)+3; //Light Chemical Laser
 				break;
 			case 2:
 				return Dice::d(10, 3)+4; //Medium Chemical Laser
@@ -288,7 +288,7 @@ class NexusLaserMissile extends Laser{
         public function setMinDamage(){ 
 		switch($this->firingMode){
 			case 1:
-				$this->minDamage = 4; //Light Chemical Laser
+				$this->minDamage = 5; //Light Chemical Laser
 				break;
 			case 2:
 				$this->minDamage = 7; //Medium Chemical Laser
@@ -299,7 +299,7 @@ class NexusLaserMissile extends Laser{
         public function setMaxDamage(){
 		switch($this->firingMode){
 			case 1:
-				$this->maxDamage = 22; //Light Chemical Laser
+				$this->maxDamage = 23; //Light Chemical Laser
 				break;
 			case 2:
 				$this->maxDamage = 34; //Medium Chemical Laser
@@ -309,8 +309,8 @@ class NexusLaserMissile extends Laser{
 	}
     
 //        public function getDamage($fireOrder){ return Dice::d(10, 2)+2;   }
-//        public function setMinDamage(){     $this->minDamage = 4;      }
-//        public function setMaxDamage(){     $this->maxDamage = 22;      }
+//        public function setMinDamage(){     $this->minDamage = 5;      }
+//        public function setMaxDamage(){     $this->maxDamage = 23;      }
 		
 }//endof NexusLaserMissile
 
@@ -6869,7 +6869,7 @@ class TestGun extends Particle{
 
         public $name = "TestGun";
         public $displayName = "Test Gun";
-		public $iconPath = "TestGun.png";
+		public $iconPath = "tacLaser.png";
 	    
         public $animation = "trail";
         public $animationColor = array(255, 250, 230);

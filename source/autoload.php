@@ -2083,6 +2083,8 @@ spl_autoload_register(
                 'microsat' => '/server/model/ships/FighterFlight.php',
                 'dovarum' => '/server/model/ships/usuuth/dovarum.php',
                 'genericmicrosat' => '/server/model/ships/civilians/genericMicroSat.php',
+//                'mineclass' => '/server/model/ships/FighterFlight.php',
+//                'testmine' => '/server/model/ships/customs/testMine.php',
 		    
 				//AdaptiveArmor rework		    
                 'adaptivearmorcontroller' => '/server/model/systems/baseSystems.php',    

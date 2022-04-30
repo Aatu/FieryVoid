@@ -28,13 +28,13 @@ class CircasianToltara extends HeavyCombatVessel{
         $this->addPrimarySystem(new Scanner(3, 9, 4, 5));
         $this->addPrimarySystem(new Engine(3, 9, 0, 10, 4));
         $this->addPrimarySystem(new Hangar(3, 2));
+		$this->addPrimarySystem(new EWDualRocketLauncher(3, 6, 2, 270, 90));
+		$this->addPrimarySystem(new EWDualRocketLauncher(3, 6, 2, 270, 90));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 3, 4));
       
         $this->addFrontSystem(new Thruster(2, 6, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 3, 1));
-		$this->addFrontSystem(new EWDualRocketLauncher(3, 6, 2, 270, 90));
-		$this->addFrontSystem(new EWDualRocketLauncher(3, 6, 2, 270, 90));
 		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 240, 60));
 		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 240, 60));
 		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 300, 120));
@@ -52,18 +52,18 @@ class CircasianToltara extends HeavyCombatVessel{
 		
         $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-                    11 => "Thruster",
-                    13 => "Scanner",
-                    15 => "Engine",
+                    7 => "Structure",
+					9 => "Dual Rocket Launcher",
+                    12 => "Thruster",
+                    14 => "Scanner",
+                    16 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",
             ),
             1=> array(
-                    4 => "Thruster",
-                    7 => "Dual Rocket Launcher",
-					10 => "Light Particle Beam",
+                    5 => "Thruster",
+					9 => "Light Particle Beam",
 					18 => "Structure",
                     20 => "Primary",
             ),

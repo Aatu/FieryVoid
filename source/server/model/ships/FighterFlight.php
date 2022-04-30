@@ -574,4 +574,18 @@ class MicroSAT extends SuperHeavyFighter{
     }
 }
 
+
+class MineClass extends SuperHeavyFighter{
+    public $shipSizeClass = 1; //0:Light, 1:Medium, 2:Heavy, 3:Capital, 4:Enormous
+	public $osat = true;
+	public $accelcost = 100; //not supposed to actually move anywhere, may move/pivot normally
+//    public $jinkinglimit = 4; //they are actually allowed to jink!!! Can't imagine how (without being able to seriously accelerate away), but sure useful in game
+	
+	function __construct($id, $userid, $name, $slot)
+    {
+        parent::__construct($id, $userid, $name, $slot);
+    }
+}
+
+
 ?>
