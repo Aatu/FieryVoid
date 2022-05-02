@@ -1399,7 +1399,7 @@ class PlasmaBlast extends Weapon{
 					if($craft && $craft->isDestroyed()) return;//the shot is dedicated to this one fighter, cannot be retargeted on another - skip resolution
 				}
 			}
-			//Antimatter Cannon OR direct Shredder attack - default routine will do! CHANGE THIS
+			//Antimatter Cannon OR direct Shredder attack - default routine will do! CHANGE THIS???
 			parent::fire($gamedata, $fireOrder);
 		}
 	
