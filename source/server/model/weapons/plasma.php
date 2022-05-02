@@ -1179,4 +1179,267 @@ class PlasmaBlast extends Weapon{
 }//endof PlasmaBlast
 
 
+class PakmaraPlasmaWeb extends Weapon{
+        public $name = "PakmaraPlasmaWeb";
+        public $displayName = "Plasma Web";
+		public $iconPath = "PlasmaWeb.png";
+		
+        public $animation = "ball";
+ 	    public $animationColor = array(75, 250, 90); //needed as this doesn't inherit from Plasma... //make it greenish, as it's Plasma ;)
+        //public $animationColor = array(192,192,192);
+        //public $trailColor = array(192,192,192);
+        public $animationExplosionScale = 0.5;
+        public $animationExplosionType = "AoE";
+        //public $explosionColor = array(235,235,235);
+        //public $projectilespeed = 12;
+        //public $animationWidth = 10;
+        //public $trailLength = 10;
+
+        public $ballistic = false;
+        public $hextarget = false; //for technical reasons this proved hard to do
+        public $hidetarget = false;
+        public $priority = 1; //to show effect quickly
+        public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
+        public $doNotIntercept = true; //do not intercept this weapon, period
+		public $canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
+	
+        public $useOEW = false; //not important, really	    
+        
+		public $range = 3;
+        public $loadingtime = 1; 
+        public $rangePenalty = 0;
+        public $fireControl = array(200, null, null); // fighters, <mediums, <capitals; just so the weapon is targetable
+//		public $intercept = 2; //intercept rating -2	    
+	    
+		public $firingMode = 'AoE'; //firing mode - just a name essentially
+		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Plasma"; //not important really
+	 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 2;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Fired at hex (although You technically have to pick an unit). Defensive Mode Will apply interception to all fire from target hex to Plasma Web-protected ship.";
+            $this->data["Special"] .= "<br>Will affect uninterceptable weapons e.g. lasers.";
+        }
+        
+	//hit chance always 100 - so it always hits and is correctly animated
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		$fireOrder->needed = 100; //auto hit!
+		$fireOrder->updated = true;
+		
+		//while we're at it - we may add appropriate interception orders!		
+		$targetShip = $gamedata->getShipById($fireOrder->targetid);
+		
+		$shipsInRange = $gamedata->getShipsInDistance($targetShip); //all units on target hex
+		
+		//retarget at hex - this will affect how the weapon is animated/displayed in firing log!
+		    //insert correct target coordinates: CURRENT target position
+		    $pos = $targetShip->getHexPos();
+		    $fireOrder->x = $pos->q;
+		    $fireOrder->y = $pos->r;
+		    $fireOrder->targetid = -1; //correct the error
+
+	}//endof function calculateHitBase
+	   
+	
+	public function fire($gamedata, $fireOrder)
+	{ //sadly here it really has to be completely redefined... or at least I see no option to avoid this
+		$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		/** @var MovementOrder $movement */
+		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+		$posLaunch = $movement->position;//at moment of launch!!!		
+		//$this->calculateHit($gamedata, $fireOrder); //already calculated!
+		$rolled = Dice::d(100);
+		$fireOrder->rolled = $rolled; ///and auto-hit ;)
+		$fireOrder->shotshit++;
+	//	$fireOrder->pubnotes = "Interception applied to all weapons at target hex that are firing at Chaff-launching ship. "; //just information for player, actual applying was done in calculateHitBase method
+
+		//deal damage!
+        $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+        $ships1 = $gamedata->getShipsInDistance($target); //all ships on target hex
+        foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
+
+            $this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
+//		$fireOrder->pubnotes .= "<br>Hit a fighter."; //just information for player, actual applying was done in calculateHitBase method
+
+        }
+
+		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
+		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
+	} //endof function fire
+
+//and now actual damage dealing - and we already know fighter is hit (fire()) doesn't pass anything else)
+//source hex will be taken from firing unit, damage will be individually rolled for each fighter hit
+ public function AOEdamage($target, $shooter, $fireOrder, $gamedata)
+    {
+        if ($target->isDestroyed()) return; //no point allocating
+            foreach ($target->systems as $fighter) {
+                if ($fighter == null || $fighter->isDestroyed()) {
+                    continue;
+                }
+         //roll (and modify as appropriate) damage for this particular fighter:
+        $damage = $this->getDamage($fireOrder);
+        $damage = $this->getDamageMod($damage, $shooter, $target, null, $gamedata);
+        $damage -= $target->getDamageMod($shooter, null, $gamedata->turn, $this);
+
+                $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
+
+		}
+	}
+
+
+	
+        public function getDamage($fireOrder){
+            return Dice::d(6, 1)+2; 
+        }
+        public function setMinDamage(){     $this->minDamage = 3;      }
+        public function setMaxDamage(){     $this->maxDamage = 8;      }
+
+}//endof PakmaraPlasmaWeb
+
+ -/* 
+class Nexus extends Weapon implements DefensiveSystem{
+        public $name = "PlasmaWeb";
+        public $displayName = "Plasma Web";
+		public $iconPath = "PlasmaWeb.png";
+	
+        public $trailColor = array(192,192,192);
+        public $animation = "ball";
+        public $animationColor = array(192,192,192);
+        public $animationExplosionScale = 0.5;
+        public $animationExplosionType = "AoE";
+        public $explosionColor = array(235,235,235);
+        public $projectilespeed = 12;
+        public $animationWidth = 10;
+        public $trailLength = 10;
+
+        public $ballistic = false;
+        public $hextarget = false; //for technical reasons this proved hard to do
+        public $hidetarget = false;
+        public $priority = 1; //to show effect quickly
+        public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
+        public $doNotIntercept = true; //do not intercept this weapon, period
+		public $canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
+	
+        public $useOEW = false; //not important, really	    
+        
+        public $loadingtime = 1;
+		public $range = 100; //let's put maximum range here, but generous one
+        public $rangePenalty = 0;
+        public $fireControl = array(100, 100, 100); // fighters, <mediums, <capitals; just so the weapon is targetable
+		public $intercept = 2; //intercept rating -2	    
+	    
+		public $firingMode = 'Intercept'; //firing mode - just a name essentially
+		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Particle"; //not important really
+	 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Fired at hex (although You technically have to pick an unit). Will apply interception to all fire from target hex to Chaff-protected ship.";
+            $this->data["Special"] .= "<br>Will affect uninterceptable weapons.";
+        }
+
+
+	//Defensive system functions
+
+    public function getDefensiveType()
+    {
+       return "Interceptor";
+    }
+
+    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
+            return 0;
+    }
+
+    public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
+		$output = 0;
+		//Affects only Antimatter, Laser, and Particle weapons
+		if($weapon->weaponClass == 'Laser' || $weapon->weaponClass == 'Particle' || $weapon->weaponClass == 'Antimatter') $output = 2;
+        return $output;
+    }
+
+	//end Defensive system functions
+
+
+	        
+	//hit chance always 100 - so it always hits and is correctly animated
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		$fireOrder->needed = 100; //auto hit!
+		$fireOrder->updated = true;
+		
+		//while we're at it - we may add appropriate interception orders!		
+		$targetShip = $gamedata->getShipById($fireOrder->targetid);
+		
+		$shipsInRange = $gamedata->getShipsInDistance($targetShip); //all units on target hex
+		foreach ($shipsInRange as $affectedShip) {
+			$allOrders = $affectedShip->getAllFireOrders($gamedata->turn);
+			foreach($allOrders as $subOrder) {
+				if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->shooterid) ){ //something is firing at protected unit - and is affected!
+					//uninterceptable are affected all right, just those that outright cannot be intercepted - like ramming or mass driver - will not be affected
+					$subWeapon = $affectedShip->getSystemById($subOrder->weaponid);
+					if( $subWeapon->doNotIntercept != true ){
+						//apply interception! Note that this weapon is technically not marked as firing defensively - it is marked as firing offensively though! (already)
+						//like firing.php addToInterceptionTotal
+						$subOrder->totalIntercept += $this->getInterceptionMod($gamedata, $subOrder);
+        				$subOrder->numInterceptors++;
+					}
+				}
+			}
+		}
+		
+		//retarget at hex - this will affect how the weapon is animated/displayed in firing log!
+		    //insert correct target coordinates: CURRENT target position
+		    $pos = $targetShip->getHexPos();
+		    $fireOrder->x = $pos->q;
+		    $fireOrder->y = $pos->r;
+		    $fireOrder->targetid = -1; //correct the error
+
+	}//endof function calculateHitBase
+	   
+	   
+	public function fire($gamedata, $fireOrder)
+	{ //sadly here it really has to be completely redefined... or at least I see no option to avoid this
+		$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+
+		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+		$posLaunch = $movement->position;//at moment of launch!!!		
+		//$this->calculateHit($gamedata, $fireOrder); //already calculated!
+		$rolled = Dice::d(100);
+		$fireOrder->rolled = $rolled; ///and auto-hit ;)
+		$fireOrder->shotshit++;
+		$fireOrder->pubnotes .= "Interception applied to all weapons at target hex that are firing at Chaff-launching ship. "; //just information for player, actual applying was done in calculateHitBase method
+
+		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
+		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
+	} //endof function fire
+
+        public function getDamage($fireOrder){
+            return 0; //this weapon does no damage, in case it actually hits something!
+        }
+        public function setMinDamage(){     $this->minDamage = 0;      }
+        public function setMaxDamage(){     $this->maxDamage = 0;      }
+		
+}//endof PlasmaWeb	*/
+
 ?>

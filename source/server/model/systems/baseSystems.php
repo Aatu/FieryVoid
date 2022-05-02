@@ -3410,7 +3410,7 @@ class PlasmaBattery extends ShipSystem{
         $this->data["Power stored/max"] =  $this->powerCurr . '/' . $this->getMaxCapacity();
 		$this->data["Special"] = "This system is responsible for storing extra power.";
         $this->data["Special"] .= "<br>Power stored is accounted for in Reactor output. Surplus after Initial phase is stored back in Battery.";
-        $this->data["Special"] .= "<br>Stored Plasma Battery power is necessary to use offensive mode of Plasma Web.";
+        $this->data["Special"] .= "<br>Stored power is necessary to use offensive mode of Plasma Web in Firing Phase.";
     }
 	
 							
