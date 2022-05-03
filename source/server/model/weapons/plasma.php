@@ -1193,14 +1193,19 @@ class PlasmaBlast extends Weapon{
         
         
         
-        public $animationExplosionScale = 0.35;        
-        public $animationExplosionScaleArray = array(1=>0.35, 2=>0.5, 3=>0.5); //Shredder bolt isn't quite a heavy hit... while AM Cannon definitely is!      
+        public $animationExplosionScale = 0.2;        
+//        public $animationExplosionScaleArray = array(1=>0.2, 2=>0.2); //Shredder bolt isn't quite a heavy hit... while AM Cannon definitely is!      
 		
         public $priority = 1; 
 		public $priorityArray = array(1=>1, 2=>1); //Both modes should be fired very early???
         public $loadingtime = 1;
 		public $rangePenalty = 0; //-1/hex base penalty
-        public $intercept = 2;        
+        public $intercept = 2;   
+        
+        
+        public $boostable = true;
+        public $boostEfficiency = 1;
+        public $maxBoostLevel = 1;     
 		
 		public $firingMode = "Defensive";
         public $firingModes = array(
@@ -1239,7 +1244,7 @@ class PlasmaBlast extends Weapon{
 			$this->data["Special"] .= 'Defensive mode is aimed at hex, and applies intercept rating against all invoming fire from that hex against firing ship';
 			$this->data["Special"] .= 'Offensive Mode targets a hex within 3 hexes of firing unit and deals D6+2 damage to all fighters in that hex.';
 			$this->data["Special"] .= '<br>Offensive Mode requires 1 extra power either from bossting in initial Orders phaseor from space capacity stored in plasma batteries.';
-			$this->data["Special"] .= '<br>Multiple Plasma Webs are NOT cumulative, and neither mode is interceptable.'; //uninterceptability is due to technical reasons - with no fire order ID, interception will not be applied properly
+			$this->data["Special"] .= '<br>Multiple Plasma Webs are NOT cumulative, and neither mode can be intercepted.'; //uninterceptability is due to technical reasons - with no fire order ID, interception will not be applied properly
 	 }
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -1313,19 +1318,19 @@ class PlasmaBlast extends Weapon{
 						
 						if ($targetUnit === $shooter) continue; //do not target self
 						if ($targetUnit->isDestroyed()) continue; //no point engaging dead ships
-						if (isset(AntimatterShredder::$alreadyEngaged[$targetUnit->id])) continue; //unit already engaged
+						if (isset(PakmaraPlasmaWeb::$alreadyEngaged[$targetUnit->id])) continue; //unit already engaged
 						$relativeBearing = $shooter->getBearingOnUnit($targetUnit);
 						if (mathlib::getDistance($shooter->getCoPos(), $targetUnit->getCoPos()) > 0){ //check arc only if target  is not on the same hex!
 							if (!(mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc))) continue; //must be in arc
 						}
-						AntimatterShredder::$alreadyEngaged[$targetUnit->id] = true;//mark engaged
-						$this->prepareShredderOrders($shooter, $targetUnit, $gamedata, $fireOrder); //actually declare appropriate number of attacks!				
+						PakmaraPlasmaWeb::$alreadyEngaged[$targetUnit->id] = true;//mark engaged
+						$this->prepareShredderOrders($shooter, $targetUnit, $gamedata, $fireOrder); //actually declare appropriate number of attacks!	CHange to normal fire function???			
 					}					
 				}
 			}
 		} //endof function beforeFiringOrderResolution
 		
-/*
+
 		//1 attack on every fighter, d3 on MCV/HCVs, d6 on Caps, d6+3 on Enormous
 		private function prepareShredderOrders($shooter, $target, $gamedata, $fireOrder){
 			$numberOfAttacks = 1;
@@ -1366,7 +1371,7 @@ class PlasmaBlast extends Weapon{
 				}
 			}			
 		}//endof function prepareShredderOrders
-*/
+
 		
 		public function calculateHitBase($gamedata, $fireOrder)  //REPLACE WITH GEOFFREY CODE
 		{
