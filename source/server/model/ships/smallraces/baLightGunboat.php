@@ -13,7 +13,7 @@ class BALightGunboat extends LCV{
 
 	$this->canvasSize = 100;
 	$this->agile = true;
-        $this->isd = 2192;
+        $this->isd = 2235;
         
         $this->forwardDefense = 11;
         $this->sideDefense = 11;
