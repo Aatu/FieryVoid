@@ -1190,18 +1190,20 @@ class PlasmaBlast extends Weapon{
         //public $trailLength = 10;       
         //public $animationColor = array(0, 184, 230); //let's inherit from Antimatter...
         //public $animationWidth2 = 0.2;
-        
-        
-        
         public $animationExplosionScale = 0.2;        
-//        public $animationExplosionScaleArray = array(1=>0.2, 2=>0.2); //Shredder bolt isn't quite a heavy hit... while AM Cannon definitely is!      
 		
-        public $priority = 1; 
+        public $ballistic = false;
+        public $hextarget = false; //for technical reasons this proved hard to do
+        public $hidetarget = false;
+        public $priority = 1; //to show effect quickly
+        public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
+        public $doNotIntercept = true; //do not intercept this weapon, period
+		public $canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
+		
 		public $priorityArray = array(1=>1, 2=>1); //Both modes should be fired very early???
         public $loadingtime = 1;
 		public $rangePenalty = 0; //-1/hex base penalty
         public $intercept = 2;   
-        
         
         public $boostable = true;
         public $boostEfficiency = 1;
@@ -1212,25 +1214,19 @@ class PlasmaBlast extends Weapon{
             1 => "Defensive",
 			2 => "Offensive",			
         );
-		
     
         public $damageTypeArray = array(1=> 'Standard', 2=>'Plasma');
 	
-        public $ignoreAllEW = true; //Shredder completely ignores EW (and lock-ons)
-//		public $ignoreAllEWArray = array(1=>true, 2=>false, 3=>false); 
-        public $ignoreJinking = true; //Shredder completely ignores jinking when calculating hit chance 
-//		public $ignoreJinkingArray = array(1=>true, 2=>false, 3=>false); 
+//        public $ignoreAllEW = true; //Not sure I need these values, due to auto-hit
+//		public $ignoreAllEWArray = array(1=>true, 2=>false); 
+//        public $ignoreJinking = true;
+//		public $ignoreJinkingArray = array(1=>true, 2=>false); 
 		
         public $fireControlArray = array( 1=>array(0,0,0), 2=>array(200, null, null)); // fighters, <mediums, <capitals 
 		
 		
 		public $range = 3;
         public $rangeArray = array(1=>0, 2=>3); //range is unlimited for Defensive, but limited for Offensive.
-		public $hextarget = true;
-//		public $hextargetArray = array(1=>true, 2=>false, 3=>false);
-		
-		
-		public $calledShotMod = 0; //Shredder shots vs fighters are technically called shots, but shouldn't be penalized as such; other modes don't allow called shots
 		
 		private static $alreadyEngaged = array(); //units that were already engaged by Shredder this turn (multiple Shredders do not stack)
 		
@@ -1241,7 +1237,7 @@ class PlasmaBlast extends Weapon{
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= 'Defensive mode is aimed at hex, and applies intercept rating against all invoming fire from that hex against firing ship';
+			$this->data["Special"] .= 'The default Defensive mode is aimed at an enemy unit and automatically hits its target, it then applies intercept rating against all invoming enemy fire from that hex ';
 			$this->data["Special"] .= 'Offensive Mode targets a hex within 3 hexes of firing unit and deals D6+2 damage to all fighters in that hex.';
 			$this->data["Special"] .= '<br>Offensive Mode requires 1 extra power either from bossting in initial Orders phaseor from space capacity stored in plasma batteries.';
 			$this->data["Special"] .= '<br>Multiple Plasma Webs are NOT cumulative, and neither mode can be intercepted.'; //uninterceptability is due to technical reasons - with no fire order ID, interception will not be applied properly
@@ -1254,159 +1250,41 @@ class PlasmaBlast extends Weapon{
         }
         
        	public function getDamage($fireOrder){
-	//		$damage = 0;
-	//        $X = $this->getX($fireOrder);
 			if($this->firingMode ==2){
 				return Dice::d(6, 1)+2;  //Offensive
 			}
 			else{
 					$damage = 0;
-					return $damage ; //Defensive
+					return $damage ; //Defensive - this mode does no damage, in case it actually hits something!
 			}		
 			return $damage ;
 		}
 
         public function setMinDamage(){     
 			switch($this->firingMode){
-				case 2:
-					$this->minDamage = 3; //Offensive
+				case 1:
+					$this->minDamage = 0; //Defensive - this mode does no damage, in case it actually hits something!
 					break;
-				default:
-					$this->minDamage = 0; //Defensive
+				case 2:
+					$this->minDamage = 3; //Offensive  
 					break;	
 			}     
 		}
         public function setMaxDamage(){    
 			switch($this->firingMode){
-				case 2:
-					$this->maxDamage = 8; //Shredder
+				case 1:
+					$this->maxDamage = 0;  //Defensive - this mode does no damage, in case it actually hits something!
 					break;
-				default:
-					$this->maxDamage = 0; //Defensive
+				case 2:
+					$this->maxDamage = 8; //Offensive 
 					break;	
 			}
 		}
 		
-		
-		
-		//find units in range, create attacks vs them - if this weapon is being fired in Shredder mode, that is!
-		public function beforeFiringOrderResolution($gamedata){
-			$firingOrders = $this->getFireOrders($gamedata->turn);
-			foreach($firingOrders as $fireOrder){
-				if (($fireOrder->type == 'normal') && ($fireOrder->firingMode == 1) ) { //exists!
-					//if it's targeted on unit - retarget on hex
-					if ($fireOrder->targetid != -1) {
-						$targetship = $gamedata->getShipById($fireOrder->targetid);
-						//insert correct target coordinates: last turns' target position
-						$targetPos = $targetship->getHexPos();
-						$fireOrder->x = $targetPos->q;
-						$fireOrder->y = $targetPos->r;
-						$fireOrder->targetid = -1; //correct the error
-						$fireOrder->calledid = -1; //just in case
-					}			
-						
-					//find all units in target area, declare appropriate number of firing orders vs them...
-					$shooter = $gamedata->getShipById($fireOrder->shooterid);
-					$targetLocation = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
-			
-					$unitsInRange = $gamedata->getShipsInDistance($targetLocation, 1);
-					foreach ($unitsInRange as $targetUnit) {
-						//just for debugging purposes - range to target					
-						$dist = mathlib::getDistanceHex($shooter, $targetUnit);
-						$fireOrder->notes .= $targetUnit->phpclass . ": $dist;";		
-						$fireOrder->updated = true;						
-						
-						if ($targetUnit === $shooter) continue; //do not target self
-						if ($targetUnit->isDestroyed()) continue; //no point engaging dead ships
-						if (isset(PakmaraPlasmaWeb::$alreadyEngaged[$targetUnit->id])) continue; //unit already engaged
-						$relativeBearing = $shooter->getBearingOnUnit($targetUnit);
-						if (mathlib::getDistance($shooter->getCoPos(), $targetUnit->getCoPos()) > 0){ //check arc only if target  is not on the same hex!
-							if (!(mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc))) continue; //must be in arc
-						}
-						PakmaraPlasmaWeb::$alreadyEngaged[$targetUnit->id] = true;//mark engaged
-						$this->prepareShredderOrders($shooter, $targetUnit, $gamedata, $fireOrder); //actually declare appropriate number of attacks!	CHange to normal fire function???			
-					}					
-				}
-			}
-		} //endof function beforeFiringOrderResolution
-		
-
-		//1 attack on every fighter, d3 on MCV/HCVs, d6 on Caps, d6+3 on Enormous
-		private function prepareShredderOrders($shooter, $target, $gamedata, $fireOrder){
-			$numberOfAttacks = 1;
-			if ($target instanceOf FighterFlight){ //fighter
-				$numberOfAttacks = 1;
-			} else if ($target->shipSizeClass < 3){//MCV/HCV
-				$numberOfAttacks = Dice::d(3);
-			} else if ($target->Enormous){ //Enormous
-				$numberOfAttacks = Dice::d(6)+3;
-			}else{ //Capital
-				$numberOfAttacks = Dice::d(6);
-			}
-			
-			for($i = 1; $i<=$numberOfAttacks;$i++){ //actually declare as appropriate
-				if($target instanceOf FighterFlight){ //one attack against every fighter!
-					foreach ($target->systems as $fighter) {
-						if ($fighter == null || $fighter->isDestroyed()) {
-							continue;
-						}
-						$newFireOrder = new FireOrder(
-							-1, "normal", $shooter->id, $target->id,
-							$this->id, $fighter->id, $gamedata->turn, 1, 
-							0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
-							0,0,$this->weaponClass,-1 //X, Y, damageclass, resolutionorder
-						);		
-						$newFireOrder->addToDB = true;
-						$this->fireOrders[] = $newFireOrder;
-					}
-				}else{
-					$newFireOrder = new FireOrder(
-						-1, "normal", $shooter->id, $target->id,
-						$this->id, -1, $gamedata->turn, 1, 
-						0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
-						0,0,$this->weaponClass,-1 //X, Y, damageclass, resolutionorder
-					);		
-					$newFireOrder->addToDB = true;
-					$this->fireOrders[] = $newFireOrder;
-				}
-			}			
-		}//endof function prepareShredderOrders
 
 		
-		public function calculateHitBase($gamedata, $fireOrder)  //REPLACE WITH GEOFFREY CODE
-		{
-			$this->changeFiringMode($fireOrder->firingMode);
-			if($this->firingMode ==1) { //Shredder
-				//against hex - it shouldn't even be resolved
-				if ($fireOrder->targetid == -1) {				
-					$fireOrder->needed = 0;	//just so no one tries to intercept it				
-					$fireOrder->updated = true;
-					$fireOrder->notes .= 'Antimatter Shredder aiming shot, not resolved.';
-					return;
-				} 
-				//set range to 11 - so targets out of nominal range aren't missed!
-				$this->range = 11;
-				$this->rangeArray[1] = 11;
-				$this->hextarget = false; //otherwise it won't get intercepted - temporarily make it unit-targeted!
-				$this->hextargetArray[1] = false;
-			} 
-			//Antimatter Cannon or Shredder direct shot - default routine will do!
-			parent::calculateHitBase($gamedata, $fireOrder);
-		}		
-			
-		public function fire($gamedata, $fireOrder){
-			if(($this->firingMode == 1) && ($fireOrder->targetid == -1)) { //initial "tareting location" Shredder shot should not actually be resolved
-				return;
-			} else if(($this->firingMode ==1) &&($fireOrder->calledid >= 0)){ //in case of direct Shredder attack - skip it if target fighter is already destroyed!
-				$target = $gamedata->getShipById($fireOrder->targetid);
-				if($target instanceOf FighterFlight) { //it should be so, check is just in case
-					$craft = $target->getFighterBySystem($fireOrder->calledid);
-					if($craft && $craft->isDestroyed()) return;//the shot is dedicated to this one fighter, cannot be retargeted on another - skip resolution
-				}
-			}
-			//Antimatter Cannon OR direct Shredder attack - default routine will do! CHANGE THIS???
-			parent::fire($gamedata, $fireOrder);
-		}
+		
+
 	
 	} //end of class PakmaraPlasmaWeb
 	
