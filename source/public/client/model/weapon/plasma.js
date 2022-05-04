@@ -125,3 +125,9 @@ var PlasmaBlast = function PlasmaBlast(json, ship) {
 };
 PlasmaBlast.prototype = Object.create(Weapon.prototype);
 PlasmaBlast.prototype.constructor = PlasmaBlast;
+
+var PakmaraPlasmaWeb = function  PakmaraPlasmaWeb(json, ship) {
+    Weapon.call(this, json, ship);
+};
+PakmaraPlasmaWeb.prototype = Object.create(Weapon.prototype);
+PakmaraPlasmaWeb.prototype.constructor =  PakmaraPlasmaWeb;
