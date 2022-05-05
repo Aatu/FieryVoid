@@ -78,7 +78,15 @@ class ZShadowXonn extends VreeCapital{
         $this->addLeftFrontSystem($diffuser);	
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));	
 				
-		$this->addRightFrontSystem(new StructureTechnical(0, 0, 0, 0));	
+				
+        $diffuser = new EnergyDiffuser(4, 9, 2, 180, 300);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+          $tendril=new DiffuserTendril(10,'L');//absorbtion capacity,side
+          $diffuser->addTendril($tendril);
+          $this->addLeftAftSystem($tendril);
+          $tendril=new DiffuserTendril(10,'L');//absorbtion capacity,side
+          $diffuser->addTendril($tendril);
+          $this->addLeftAftSystem($tendril);
+        $this->addLeftAftSystem($diffuser);	
 		$this->addLeftAftSystem(new GraviticThruster(5, 20, 0, 10, 3));
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
 		
@@ -93,7 +101,15 @@ class ZShadowXonn extends VreeCapital{
         $this->addRightFrontSystem($diffuser);	
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
 				
-		$this->addRightFrontSystem(new StructureTechnical(0, 0, 0, 0));	
+				
+        $diffuser = new EnergyDiffuser(4, 9, 2, 60, 180);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+          $tendril=new DiffuserTendril(10,'R');//absorbtion capacity,side
+          $diffuser->addTendril($tendril);
+          $this->addRightAftSystem($tendril);
+          $tendril=new DiffuserTendril(10,'R');//absorbtion capacity,side
+          $diffuser->addTendril($tendril);
+          $this->addRightAftSystem($tendril);
+        $this->addRightAftSystem($diffuser);	
 		$this->addRightAftSystem(new GraviticThruster(5, 20, 0, 10, 4));	
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
 		
