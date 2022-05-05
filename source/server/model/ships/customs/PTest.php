@@ -49,13 +49,13 @@ class PTest extends BaseShip{
 
 
 		$this->addLeftSystem(new Thruster(4, 13, 0, 5, 3));
-		$this->addLeftSystem(new PakmaraPlasmaWeb(3, 0, 0, 240, 360));
+		$this->addLeftSystem(new BattleLaser(3, 6, 6, 240, 360));
 		$this->addLeftSystem(new ScatterGun(2, 8, 3, 180, 360));
 		$this->addLeftSystem(new PlasmaBattery(2, 4, 0, 4));//armor, structure, power req, output 
 
 
 		$this->addRightSystem(new Thruster(4, 13, 0, 5, 4));
-		$this->addRightSystem(new PakmaraPlasmaWeb(3, 0, 0, 0, 120));
+		$this->addRightSystem(new BattleLaser(3, 6, 6, 0, 120));
 		$this->addRightSystem(new ScatterGun(2, 8, 3, 0, 180));
 		$this->addRightSystem(new PlasmaBattery(2, 4, 0, 4));//armor, structure, power req, output 
 
