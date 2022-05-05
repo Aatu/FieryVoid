@@ -1236,8 +1236,9 @@ class PlasmaBlast extends Weapon{
        					break;
 				case 2:
 		return;	       			   //IS THIS OK?
-    }
-
+    	}
+	}
+	
     public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
 			switch($this->firingMode){
 				case 1:
