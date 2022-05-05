@@ -1179,7 +1179,7 @@ class PlasmaBlast extends Weapon{
 }//endof PlasmaBlast
 
 
-	class PakmaraPlasmaWeb extends Plasma{        
+	class PakmaraPlasmaWeb extends Weapon{        
         public $name = "PakmaraPlasmaWeb";
         public $displayName = "Plasma Web";
 		public $iconPath = "PlasmaWeb.png";
@@ -1203,7 +1203,7 @@ class PlasmaBlast extends Weapon{
 		
 		public $priorityArray = array(1=>1, 2=>1); //Both modes should be fired very early???
         public $loadingtime = 1;
-		public $rangePenalty = 0; //-1/hex base penalty
+		public $rangePenaltyArray = array(1=>1, 2=>1); //no range penalty in either mode
         public $intercept = 2; 
 
         public $useOEW = false; //not important, really        
@@ -1216,6 +1216,7 @@ class PlasmaBlast extends Weapon{
         public $maxBoostLevel = 1;     
 		
     	public $weaponClass = "Plasma"; //not important really
+		public $damageTypeArray = array(1=>'Standard', 2=>'Flash'); //indicates that this weapon does Plasma damage in Offensive mode    	
     	public $firingMode = "Defensive";
         public $firingModes = array(
             1 => "Defensive",
@@ -1223,45 +1224,55 @@ class PlasmaBlast extends Weapon{
         );
     
         public $damageTypeArray = array(1=> 'Standard', 2=>'Plasma');
-        public $fireControlArray = array( 1=>array(0,0,0), 2=>array(200, null, null)); // fighters, <mediums, <capitals 
+        public $fireControlArray = array( 1=>array(100,100,100), 2=>array(100, null, null)); // fighters, <mediums, <capitals 
 		
-		private static $alreadyEngaged = array(); //units that were already engaged by a Plasma Web this turn (multiple Webs do not stack) CHECK THIS AGAINST SHREDDER CODE
+		private static $alreadyEngaged = array(); //units that were already engaged by a Plasma Web this turn (multiple Webs do not stack).
 
-	//Defensive system functions
-
-    public function getDefensiveType() {
-			switch($this->firingMode){
-				case 1:	    	
-       return "Interceptor";
-       					break;
-				case 2:
-		return;	       			   //IS THIS OK?
-    	}
-	}
-	
-    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
-			switch($this->firingMode){
-				case 1:
-					return 0;
-       					break;
-				case 2:
-					return;	       			   //IS THIS OK?
-  		  }            
-    }
-
-    public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
-			switch($this->firingMode){
-				case 1:    	
-					$output = 2;
-    			case 2:
-					return;	       			   //IS THIS OK?
-  		  }     
-  	}
-
-	//end Defensive system functions
+	//Borrowing this from Shredder code so that Plasma Webs do not stack effects.  Hopefully won't affect Calculate or Fire code.
+	public function beforeFiringOrderResolution($gamedata){
+			$firingOrders = $this->getFireOrders($gamedata->turn);
+			foreach($firingOrders as $fireOrder){
+				if (($fireOrder->type == 'normal') ) { //exists!
+					//if it's targeted on unit - retarget on hex
+					if ($fireOrder->targetid != -1) {
+						$targetship = $gamedata->getShipById($fireOrder->targetid);
+						//insert correct target coordinates: last turns' target position
+						$targetPos = $targetship->getHexPos();
+						$fireOrder->x = $targetPos->q;
+						$fireOrder->y = $targetPos->r;
+						$fireOrder->targetid = -1; //correct the error
+						$fireOrder->calledid = -1; //just in case
+					}			
+						
+					//find all units in target area, declare appropriate number of firing orders vs them...
+					$shooter = $gamedata->getShipById($fireOrder->shooterid);
+					$targetLocation = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+			
+					$unitsInRange = $gamedata->getShipsInDistance($targetLocation, 0);
+					foreach ($unitsInRange as $targetUnit) {
+						//just for debugging purposes - range to target					
+						$dist = mathlib::getDistanceHex($shooter, $targetUnit);
+						$fireOrder->notes .= $targetUnit->phpclass . ": $dist;";		
+						$fireOrder->updated = true;						
+						
+				//		if ($targetUnit === $shooter) continue; //do not target self
+						if ($targetUnit->isDestroyed()) continue; //no point engaging dead ships
+						if (isset(PakmaraPlasmaWeb::$alreadyEngaged[$targetUnit->id])) continue; //unit already engaged
+						$relativeBearing = $shooter->getBearingOnUnit($targetUnit);
+						if (mathlib::getDistance($shooter->getCoPos(), $targetUnit->getCoPos()) > 0){ //check arc only if target  is not on the same hex!
+							if (!(mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc))) continue; //must be in arc
+						}
+						PakmaraPlasmaWeb::$alreadyEngaged[$targetUnit->id] = true;//mark engaged
+		//				$this->prepareShredderOrders($shooter, $targetUnit, $gamedata, $fireOrder); //actually declare appropriate number of attacks!				
+					}					
+				}
+			}
+		} //endof function beforeFiringOrderResolution			
 
 	//hit chance always 100 - so it always hits and is correctly animated		
 		public function calculateHitBase($gamedata, $fireOrder){
+			$this->changeFiringMode($fireOrder->firingMode);  //needs to be outside the switch routine
+			
 			switch($this->firingMode){
 				case 1:	
 					$fireOrder->needed = 100; //auto hit!
@@ -1283,9 +1294,9 @@ class PlasmaBlast extends Weapon{
 									$subOrder->totalIntercept += $this->getInterceptionMod($gamedata, $subOrder);
 			        				$subOrder->numInterceptors++;
 										}
+									}
 								}
-							}
-					}		
+							}		
 					//retarget at hex - this will affect how the weapon is animated/displayed in firing log!
 					    //insert correct target coordinates: CURRENT target position
 					    $pos = $targetShip->getHexPos();
@@ -1342,7 +1353,6 @@ class PlasmaBlast extends Weapon{
 		$rolled = Dice::d(100);
 		$fireOrder->rolled = $rolled; ///and auto-hit ;)
 		$fireOrder->shotshit++;
-	//	$fireOrder->pubnotes = "Interception applied to all weapons at target hex that are firing at Chaff-launching ship. "; //just information for player, actual applying was done in calculateHitBase method
 
 		//deal damage!
         $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
