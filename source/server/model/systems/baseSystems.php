@@ -370,7 +370,7 @@ class Reactor extends ShipSystem implements SpecialAbility {
 		//account for Plasma Batteries present (if any)
 		foreach ($this->unit->systems as $system)
 			if ($system instanceof PlasmaBattery){
-			$this->outputMod -= $system->getOutput(); //outputMod is SUBTRACTED from base output, hence going for negative value here
+			$this->outputMod += $system->getOutput(); //outputMod is SUBTRACTED from base output, hence going for negative value here
 		}
 	}	
 	
