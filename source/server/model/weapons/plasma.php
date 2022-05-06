@@ -1203,13 +1203,12 @@ class PlasmaBlast extends Weapon{
 		
 		public $priorityArray = array(1=>1, 2=>1); //Both modes should be fired very early???
         public $loadingtime = 1;
-		public $rangePenaltyArray = array(1=>1, 2=>1); //no range penalty in either mode
         public $intercept = 2; 
 
-        public $useOEW = false; //not important, really        
-		
+        public $useOEW = false; //not important, really 		
 		public $range = 3;
-        public $rangeArray = array(1=>100, 2=>3); //range is unlimited for Defensive, but limited for Offensive.          
+        public $rangeArray = array(1=>100, 2=>3); //range is unlimited for Defensive, but limited for Offensive.
+		public $rangePenaltyArray = array(1=>0, 2=>0); //no range penalty in either mode                  
         
         public $boostable = true;
         public $boostEfficiency = 1;
