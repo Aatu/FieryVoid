@@ -367,6 +367,9 @@ class Reactor extends ShipSystem implements SpecialAbility {
 	{
 		parent::effectCriticals();
 
+		if ($gameData->phase <= 1) { 
+		   (...current loop...)
+		}
 		//account for Plasma Batteries present (if any)
 		foreach ($this->unit->systems as $system)
 			if ($system instanceof PlasmaBattery){
