@@ -291,6 +291,14 @@ class ReducedRangeAntimatter extends Critical{
     }
 }
 
+//PlasmaWeb has special ReducedRange critical
+class ReducedRangePlasmaWeb extends Critical{
+    public $description = "Offensive mode range reduced.";//decrease range by 2
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
 //Antimatter has special ReducedDamage critical
 class ReducedDamageAntimatter extends Critical{
     public $description = "Damage reduced."; //reduce X by 2 (not below 0)

@@ -131,3 +131,7 @@ var PakmaraPlasmaWeb = function  PakmaraPlasmaWeb(json, ship) {
 };
 PakmaraPlasmaWeb.prototype = Object.create(Weapon.prototype);
 PakmaraPlasmaWeb.prototype.constructor =  PakmaraPlasmaWeb;
+PakmaraPlasmaWeb.prototype.calculateSpecialRangePenalty = function (distance) {
+	var range = range - 2*shipManager.criticals.hasCritical(this, 'ReducedRangePlasmaWeb');//account for range reduced critical(s)
+    return range;
+};    

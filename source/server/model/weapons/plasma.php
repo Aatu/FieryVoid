@@ -1230,7 +1230,6 @@ class PlasmaBlast extends Weapon{
  //           17=>array("ReducedRange", "DamageReductionRemoved"));  /Need to create two unique critical effects for Web, reduce intercept rating by 1, and reduced range of offensive mode by 2.
 
 //Defensive system functions
-
     public function getDefensiveType(){ 	
        return "Interceptor";
     }
