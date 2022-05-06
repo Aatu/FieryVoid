@@ -1216,15 +1216,14 @@ class PlasmaBlast extends Weapon{
         public $maxBoostLevel = 1;     
 		
     	public $weaponClass = "Plasma"; //not important really
-		public $damageTypeArray = array(1=>'Standard', 2=>'Flash'); //indicates that this weapon does Plasma damage in Offensive mode    	
+		public $damageTypeArray = array(1=>'Standard', 2=>'Plasma'); //indicates that this weapon does Plasma damage in Offensive mode    	
     	public $firingMode = "Defensive";
         public $firingModes = array(
             1 => "Defensive",
 			2 => "Offensive",			
         );
     
-        public $damageTypeArray = array(1=> 'Standard', 2=>'Plasma');
-        public $fireControlArray = array( 1=>array(100,100,100), 2=>array(100, null, null)); // fighters, <mediums, <capitals 
+        public $fireControlArray = array( 1=>array(50,50,50), 2=>array(50, null, null)); // fighters, <mediums, <capitals 
 		
 		private static $alreadyEngaged = array(); //units that were already engaged by a Plasma Web this turn (multiple Webs do not stack).
 
