@@ -131,7 +131,7 @@ var PakmaraPlasmaWeb = function  PakmaraPlasmaWeb(json, ship) {
 };
 PakmaraPlasmaWeb.prototype = Object.create(Weapon.prototype);
 PakmaraPlasmaWeb.prototype.constructor =  PakmaraPlasmaWeb;
-/*
+/* First attempt at adding new type of crit to Plasma Web
 PakmaraPlasmaWeb.prototype.calculateSpecialRangePenalty = function (distance) {
 	var range = 3
 	var range = range - 2*shipManager.criticals.hasCritical(this, 'ReducedRangePlasmaWeb');//account for range reduced critical(s)
