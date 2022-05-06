@@ -3409,8 +3409,8 @@ class PlasmaBattery extends ShipSystem{
         $this->powerCurr =$this->output;
         parent::setSystemDataWindow($turn); 
         $this->data["Power stored/max"] =  $this->powerCurr . '/' . $this->getMaxCapacity();
-		$this->data["Special"] = "This system is responsible for storing extra power.";
-        $this->data["Special"] .= "<br>Power stored is accounted for in Reactor output. Surplus after Initial phase is stored back in Battery.";
+		$this->data["Special"] = "This system is only responsible for STORING extra power.  It does not GENERATE new power each turn.";
+        $this->data["Special"] .= "<br>Power stored is shown for in Reactor output during Initial Orders. Surplus AFTER Initial phase is moved back into Batteries and may therefore show as a negative value in Reactor during Move/Fire phases.";
         $this->data["Special"] .= "<br>Stored power is necessary to use offensive mode of Plasma Web in Firing Phase.";
     }
 	
