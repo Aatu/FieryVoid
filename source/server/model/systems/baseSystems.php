@@ -366,7 +366,7 @@ class Reactor extends ShipSystem implements SpecialAbility {
 	public function effectCriticals(){
 		parent::effectCriticals();
 
-	if (TacGamedata::$phase <= 1) { 
+	if (TacGamedata::$currentPhase <= 1) { 
 		//account for Plasma Batteries present (if any)
 		foreach ($this->unit->systems as $system)
 			if ($system instanceof PlasmaBattery){
