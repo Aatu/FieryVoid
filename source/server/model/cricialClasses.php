@@ -291,7 +291,7 @@ class ReducedRangeAntimatter extends Critical{
     }
 }
 
-//PlasmaWeb has special ReducedRange critical
+//PlasmaWeb has special ReducedRange critical, code is probably fine but not been activated in plasma.js yet...
 /*
 class ReducedRangePlasmaWeb extends Critical{
     public $description = "Offensive mode range reduced.";//decrease range by 2
