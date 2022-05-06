@@ -1179,7 +1179,7 @@ class PlasmaBlast extends Weapon{
 }//endof PlasmaBlast
 
 
-	class PakmaraPlasmaWeb extends Weapon{        
+	class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{        
         public $name = "PakmaraPlasmaWeb";
         public $displayName = "Plasma Web";
 		public $iconPath = "PlasmaWeb.png";
@@ -1229,6 +1229,28 @@ class PlasmaBlast extends Weapon{
  //   public $possibleCriticals = array(
  //           17=>array("ReducedRange", "DamageReductionRemoved"));  /Need to create two unique critical effects for Web, reduce intercept rating by 1, and reduced range of offensive mode by 2.
 
+//Defensive system functions
+
+    public function getDefensiveType(){ 	
+       return "Interceptor";
+    }
+
+    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
+				            return 0;
+    }
+
+    public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
+			switch($this->firingMode){
+				case 1:					
+						$output = 2;
+				        return $output;
+			break;
+				case 2:	
+						$output = 0;
+				        return $output;	        
+   				 }
+			}
+//end Defensive system functions
 
 
 	//Borrowing this from Shredder code so that Plasma Webs do not stack effects.  Hopefully won't affect Calculate or Fire code.
