@@ -363,14 +363,15 @@ class Reactor extends ShipSystem implements SpecialAbility {
         return $this->specialAbilityValue;
     }
 
-	public function effectCriticals()
-	{
+	public function effectCriticals(){
 		parent::effectCriticals();
 
+	if (TacGamedata::$phase <= 1) { 
 		//account for Plasma Batteries present (if any)
 		foreach ($this->unit->systems as $system)
 			if ($system instanceof PlasmaBattery){
 			$this->outputMod += $system->getOutput(); //outputMod is SUBTRACTED from base output, hence going for negative value here
+			}
 		}
 	}	
 	
