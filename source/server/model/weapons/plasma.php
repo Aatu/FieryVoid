@@ -1226,6 +1226,11 @@ class PlasmaBlast extends Weapon{
 		
 		private static $alreadyEngaged = array(); //units that were already engaged by a Plasma Web this turn (multiple Webs do not stack).
 
+ //   public $possibleCriticals = array(
+ //           17=>array("ReducedRange", "DamageReductionRemoved"));  /Need to create two unique critical effects for Web, reduce intercept rating by 1, and reduced range of offensive mode by 2.
+
+
+
 	//Borrowing this from Shredder code so that Plasma Webs do not stack effects.  Hopefully won't affect Calculate or Fire code.
 	public function beforeFiringOrderResolution($gamedata){
 			$firingOrders = $this->getFireOrders($gamedata->turn);
