@@ -1379,14 +1379,14 @@ class PlasmaBlast extends Weapon{
 		$rolled = Dice::d(100);
 		$fireOrder->rolled = $rolled; ///and auto-hit ;)
 		$fireOrder->shotshit++;
+		$fireOrder->pubnotes .= "All fighters in target hex take damage"; //just information for player, actual applying was done in calculateHitBase method		
 
 		//deal damage!
         $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
         $ships1 = $gamedata->getShipsInDistance($target); //all ships on target hex
         foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
-
             $this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
-		$fireOrder->pubnotes .= "All fighters in target hex take damage"; //just information for player, actual applying was done in calculateHitBase method
+
 
         }
 
