@@ -1330,28 +1330,29 @@ class PlasmaBlast extends Weapon{
 	
 		break;
 				case 2:		
-					$fireOrder->needed = 100; //auto hit!
-					$fireOrder->updated = true;
-					
-					//while we're at it - we may add appropriate interception orders!		
-					$targetShip = $gamedata->getShipById($fireOrder->targetid);
-					
-					$shipsInRange = $gamedata->getShipsInDistance($targetShip); //all units on target hex
-					
-					//retarget at hex - this will affect how the weapon is animated/displayed in firing log!
-					    //insert correct target coordinates: CURRENT target position
-					    $pos = $targetShip->getHexPos();
-					    $fireOrder->x = $pos->q;
-					    $fireOrder->y = $pos->r;
-					    $fireOrder->targetid = -1; //correct the error
-					}
+				$fireOrder->needed = 100; //auto hit!
+				$fireOrder->updated = true;
+				
+				//while we're at it - we may add appropriate interception orders!		
+				$targetShip = $gamedata->getShipById($fireOrder->targetid);
+				
+				$shipsInRange = $gamedata->getShipsInDistance($targetShip); //all units on target hex
+				
+				//retarget at hex - this will affect how the weapon is animated/displayed in firing log!
+				    //insert correct target coordinates: CURRENT target position
+				    $pos = $targetShip->getHexPos();
+				    $fireOrder->x = $pos->q;
+				    $fireOrder->y = $pos->r;
+				    $fireOrder->targetid = -1; //correct the error
 	}//endof function calculateHitBase
 		
 		
 	public function fire($gamedata, $fireOrder){
+			$this->changeFiringMode($fireOrder->firingMode);  //needs to be outside the switch routine
+			
 			switch($this->firingMode){
 				case 1:	
-			$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
+	//		$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
 			$shooter = $gamedata->getShipById($fireOrder->shooterid);
 
 			$movement = $shooter->getLastTurnMovement($fireOrder->turn);
@@ -1368,9 +1369,9 @@ class PlasmaBlast extends Weapon{
 				
 					break;
 				case 2:		
-		$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
+//		$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
-
+		/** @var MovementOrder $movement */
 		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
 		$posLaunch = $movement->position;//at moment of launch!!!		
 		//$this->calculateHit($gamedata, $fireOrder); //already calculated!
@@ -1382,13 +1383,16 @@ class PlasmaBlast extends Weapon{
         $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
         $ships1 = $gamedata->getShipsInDistance($target); //all ships on target hex
         foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
+
             $this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
 //		$fireOrder->pubnotes .= "<br>Hit a fighter."; //just information for player, actual applying was done in calculateHitBase method
-		  }
+
+        }
+
 		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
 		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
 		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
-		}
+			}
 	} //endof function fire		
 
 
@@ -1416,10 +1420,10 @@ class PlasmaBlast extends Weapon{
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= 'The default Defensive mode is aimed at an enemy unit and automatically hits its target, it then applies intercept rating against all invoming enemy fire from that hex.';
+			$this->data["Special"] .= 'Defensive mode automatically hits an enemy unit, it then applies -10 intercept rating and 2 damage reduction against ALL invoming enemy fire from that hex.';
 			$this->data["Special"] .= '<br>Offensive Mode targets a hex within 3 hexes of firing unit and deals D6+2 damage to all fighters in that hex.';
-			$this->data["Special"] .= '<br>Offensive Mode requires 1 extra power either from bossting in initial Orders phaseor from space capacity stored in plasma batteries.';
-			$this->data["Special"] .= '<br>Multiple Plasma Webs are NOT cumulative, and neither mode can be intercepted.'; //uninterceptability is due to technical reasons - with no fire order ID, interception will not be applied properly
+			$this->data["Special"] .= '<br>Offensive Mode requires 1 additional power either from boosting in Initial Orders phase or from space capacity stored in plasma batteries in Firing Phase.';
+			$this->data["Special"] .= '<br>Multiple Plasma Webs do not apply their effects cumulatively.'; //uninterceptability is due to technical reasons - with no fire order ID, interception will not be applied properly
 	 }
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
