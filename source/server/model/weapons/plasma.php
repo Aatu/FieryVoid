@@ -1251,12 +1251,12 @@ class PlasmaBlast extends Weapon{
 			}
 //end Defensive system functions
 
-
-	//Borrowing this from Shredder code so that Plasma Webs do not stack effects.  Hopefully won't affect Calculate or Fire code.
+/*
+	//Borrowing this from Shredder code so that Plasma Webs do not stack effects.  DIDN'T WORK :(
 	public function beforeFiringOrderResolution($gamedata){
 			$firingOrders = $this->getFireOrders($gamedata->turn);
 			foreach($firingOrders as $fireOrder){
-	/*			if (($fireOrder->type == 'normal') ) { //exists!
+			if (($fireOrder->type == 'normal') ) { //exists!
 					//if it's targeted on unit - retarget on hex
 					if ($fireOrder->targetid != -1) {
 						$targetship = $gamedata->getShipById($fireOrder->targetid);
@@ -1271,7 +1271,7 @@ class PlasmaBlast extends Weapon{
 					//find all units in target area, declare appropriate number of firing orders vs them...
 					$shooter = $gamedata->getShipById($fireOrder->shooterid);
 					$targetLocation = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
-			*/
+			
 					$unitsInRange = $gamedata->getShipsInDistance($targetLocation, 0);
 					foreach ($unitsInRange as $targetUnit) {
 						//just for debugging purposes - range to target					
@@ -1279,20 +1279,20 @@ class PlasmaBlast extends Weapon{
 						$fireOrder->notes .= $targetUnit->phpclass . ": $dist;";		
 						$fireOrder->updated = true;						
 						
-				//		if ($targetUnit === $shooter) continue; //do not target self
-				//		if ($targetUnit->isDestroyed()) continue; //no point engaging dead ships
+						if ($targetUnit === $shooter) continue; //do not target self
+						if ($targetUnit->isDestroyed()) continue; //no point engaging dead ships
 						if (isset(PakmaraPlasmaWeb::$alreadyEngaged[$targetUnit->id])) continue; //unit already engaged
-				//		$relativeBearing = $shooter->getBearingOnUnit($targetUnit);
-				//		if (mathlib::getDistance($shooter->getCoPos(), $targetUnit->getCoPos()) > 0){ //check arc only if target  is not on the same hex!
-				//			if (!(mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc))) continue; //must be in arc
+						$relativeBearing = $shooter->getBearingOnUnit($targetUnit);
+						if (mathlib::getDistance($shooter->getCoPos(), $targetUnit->getCoPos()) > 0){ //check arc only if target  is not on the same hex!
+							if (!(mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc))) continue; //must be in arc
 						}
 						PakmaraPlasmaWeb::$alreadyEngaged[$targetUnit->id] = true;//mark engaged
-		//				$this->prepareShredderOrders($shooter, $targetUnit, $gamedata, $fireOrder); //actually declare appropriate number of attacks!				
-		//			}					
-		//		}
+						$this->prepareShredderOrders($shooter, $targetUnit, $gamedata, $fireOrder); //actually declare appropriate number of attacks!				
+					}					
+				}
 			}
 		} //endof function beforeFiringOrderResolution			
-
+*/
 	//hit chance always 100 - so it always hits and is correctly animated		
 		public function calculateHitBase($gamedata, $fireOrder){
 			$this->changeFiringMode($fireOrder->firingMode);  //needs to be outside the switch routine
@@ -1360,7 +1360,7 @@ class PlasmaBlast extends Weapon{
 			$rolled = Dice::d(100);
 			$fireOrder->rolled = $rolled; ///and auto-hit ;)
 			$fireOrder->shotshit++;
-			$fireOrder->pubnotes .= "Interception applied to all weapons at target hex that are firing at Plasma Web-launching ship. "; //just information for player, actual applying was done in calculateHitBase method
+			$fireOrder->pubnotes .= "Interception and damage reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. "; //just information for player, actual applying was done in calculateHitBase method
 
 			$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
 			TacGamedata::$lastFiringResolutionNo++;    //note for further shots
