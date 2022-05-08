@@ -1179,7 +1179,139 @@ class PlasmaBlast extends Weapon{
 }//endof PlasmaBlast
 
 
-	class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{        
+
+class Fuser extends Plasma{
+	
+	public $name = "Fuser";
+    public $displayName = "Fuser";
+    public $animation = "trail";
+    public $animationColor = array(255, 105, 0);
+	public $trailColor = array(255, 140, 60);
+	public $projectilespeed = 15;
+    public $animationWidth = 6;
+	public $animationExplosionScale = 0.80;
+	public $trailLength = 30;
+    public $priority = 2;
+    public $rangeDamagePenalty = 1;
+		        
+    public $loadingtime = 5;			
+    public $rangePenalty = 0.33;
+    public $fireControl = array(null, 3, 5); // fighters, <=mediums, <=capitals 
+
+	public $damageType = "Flash"; 
+	public $weaponClass = "Plasma"; 
+	public $firingModes = array( 1 => "Flash"); 
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+		}
+	
+		
+	public function getDamage($fireOrder){        return Dice::d(10,9)+20;   }
+        public function setMinDamage(){     $this->minDamage = 29 /*- $this->dp*/;      }
+        public function setMaxDamage(){     $this->maxDamage = 110 /*- $this->dp*/;      }
+
+}//end of class Fuser
+
+
+class RangedFuser extends Plasma{
+	
+	public $name = "RangedFuser";
+    public $displayName = "Ranged Fuser";
+    public $animation = "trail";
+    public $animationColor = array(255, 105, 0);
+	public $trailColor = array(255, 140, 60);
+	public $projectilespeed = 15;
+    public $animationWidth = 6;
+	public $animationExplosionScale = 0.70;
+	public $trailLength = 30;
+    public $priority = 2;
+    public $rangeDamagePenalty = 0.25;
+		        
+    public $loadingtime = 5;			
+    public $rangePenalty = 0.25;
+    public $fireControl = array(null, 3, 5);
+
+	public $damageType = "Flash"; 
+	public $weaponClass = "Plasma"; 
+	public $firingModes = array( 1 => "Flash"); 
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+		}
+	
+		
+	public function getDamage($fireOrder){        return Dice::d(10,6)+12;   }
+        public function setMinDamage(){     $this->minDamage = 18 /*- $this->dp*/;      }
+        public function setMaxDamage(){     $this->maxDamage = 72 /*- $this->dp*/;      }
+
+}//endof class RangedFuser
+
+
+class DualPlasmaStream extends Raking{
+	public $name = "DualPlasmaStream";
+	public $displayName = "Dual Plasma Stream";
+	public $animation = "beam";
+	public $animationColor = array(75, 250, 90);
+	public $trailColor = array(75, 250, 90);
+	public $projectilespeed = 20;
+	public $animationWidth = 4;
+	public $animationExplosionScale = 0.30;
+	public $trailLength = 400;
+	public $priority = 1;
+		        
+	public $raking = 5;
+	public $loadingtime = 2;
+	public $rangeDamagePenalty = 2;	
+	public $rangePenalty = 1;
+	public $fireControl = array(-4, 2, 2);
+	
+	public $damageType = "Raking"; 
+	public $weaponClass = "Plasma";
+
+	public $firingModes = array(1 => "Raking");
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+	
+	public function setSystemDataWindow($turn){		
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+	    $this->data["Special"] .= "Damage reduced by 2 points per hex.";
+	    $this->data["Special"] .= "<br>Reduces armor of systems hit.";	
+	    $this->data["Special"] .= "<br>Ignores half of armor.";
+	}
+		 
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+		if (!$system->advancedArmor){//advanced armor prevents effect 
+			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
+			$crit->updated = true;
+			    $crit->inEffect = false;
+			    $system->criticals[] =  $crit;
+		}
+	}
+		
+	public function getDamage($fireOrder){        return Dice::d(10,6)+8;   }
+	public function setMinDamage(){     $this->minDamage = 14 ;/*- $this->dp;*/      }
+	public function setMaxDamage(){     $this->maxDamage = 68 /*- $this->dp*/;      }
+	
+}//endof class DualPlasmaStream
+
+class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{        
         public $name = "PakmaraPlasmaWeb";
         public $displayName = "Plasma Web";
 		public $iconPath = "PlasmaWeb.png";
@@ -1251,48 +1383,6 @@ class PlasmaBlast extends Weapon{
 			}
 //end Defensive system functions
 
-/*
-	//Borrowing this from Shredder code so that Plasma Webs do not stack effects.  DIDN'T WORK :(
-	public function beforeFiringOrderResolution($gamedata){
-			$firingOrders = $this->getFireOrders($gamedata->turn);
-			foreach($firingOrders as $fireOrder){
-			if (($fireOrder->type == 'normal') ) { //exists!
-					//if it's targeted on unit - retarget on hex
-					if ($fireOrder->targetid != -1) {
-						$targetship = $gamedata->getShipById($fireOrder->targetid);
-						//insert correct target coordinates: last turns' target position
-						$targetPos = $targetship->getHexPos();
-						$fireOrder->x = $targetPos->q;
-						$fireOrder->y = $targetPos->r;
-						$fireOrder->targetid = -1; //correct the error
-						$fireOrder->calledid = -1; //just in case
-					}			
-						
-					//find all units in target area, declare appropriate number of firing orders vs them...
-					$shooter = $gamedata->getShipById($fireOrder->shooterid);
-					$targetLocation = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
-			
-					$unitsInRange = $gamedata->getShipsInDistance($targetLocation, 0);
-					foreach ($unitsInRange as $targetUnit) {
-						//just for debugging purposes - range to target					
-						$dist = mathlib::getDistanceHex($shooter, $targetUnit);
-						$fireOrder->notes .= $targetUnit->phpclass . ": $dist;";		
-						$fireOrder->updated = true;						
-						
-						if ($targetUnit === $shooter) continue; //do not target self
-						if ($targetUnit->isDestroyed()) continue; //no point engaging dead ships
-						if (isset(PakmaraPlasmaWeb::$alreadyEngaged[$targetUnit->id])) continue; //unit already engaged
-						$relativeBearing = $shooter->getBearingOnUnit($targetUnit);
-						if (mathlib::getDistance($shooter->getCoPos(), $targetUnit->getCoPos()) > 0){ //check arc only if target  is not on the same hex!
-							if (!(mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc))) continue; //must be in arc
-						}
-						PakmaraPlasmaWeb::$alreadyEngaged[$targetUnit->id] = true;//mark engaged
-						$this->prepareShredderOrders($shooter, $targetUnit, $gamedata, $fireOrder); //actually declare appropriate number of attacks!				
-					}					
-				}
-			}
-		} //endof function beforeFiringOrderResolution			
-*/
 	//hit chance always 100 - so it always hits and is correctly animated		
 		public function calculateHitBase($gamedata, $fireOrder){
 			$this->changeFiringMode($fireOrder->firingMode);  //needs to be outside the switch routine
@@ -1466,5 +1556,6 @@ class PlasmaBlast extends Weapon{
 		}
 
 	} //end of class PakmaraPlasmaWeb
+
 	
 ?>

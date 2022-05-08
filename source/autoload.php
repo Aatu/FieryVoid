@@ -2519,7 +2519,10 @@ spl_autoload_register(
 				//Pakmara
 				'plasmabattery' => '/server/model/systems/baseSystems.php',
 				'ptest' => '/server/model/ships/customs/PTest.php',	
-				'pakmaraplasmaweb' => '/server/model/weapons/plasma.php',			
+				'pakmaraplasmaweb' => '/server/model/weapons/plasma.php',
+				'fuser' => '/server/model/weapons/plasma.php',
+				'rangedfuser' => '/server/model/weapons/plasma.php',
+				'dualplasmastream' => '/server/model/weapons/plasma.php',															
 				
 
 				//Hyach

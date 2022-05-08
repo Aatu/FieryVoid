@@ -126,6 +126,25 @@ var PlasmaBlast = function PlasmaBlast(json, ship) {
 PlasmaBlast.prototype = Object.create(Weapon.prototype);
 PlasmaBlast.prototype.constructor = PlasmaBlast;
 
+var Fuser = function Fuser(json, ship) {
+    Weapon.call(this, json, ship);
+};
+Fuser.prototype = Object.create(Weapon.prototype);
+Fuser.prototype.constructor = Fuser;
+
+var RangedFuser = function RangedFuser(json, ship) {
+    Weapon.call(this, json, ship);
+};
+RangedFuser.prototype = Object.create(Weapon.prototype);
+RangedFuser.prototype.constructor = RangedFuser;
+
+var DualPlasmaStream = function DualPlasmaStream(json, ship) {
+    Weapon.call(this, json, ship);
+};
+DualPlasmaStream.prototype = Object.create(Weapon.prototype);
+DualPlasmaStream.prototype.constructor = DualPlasmaStream;
+
+
 var PakmaraPlasmaWeb = function  PakmaraPlasmaWeb(json, ship) {
     Weapon.call(this, json, ship);
 };
