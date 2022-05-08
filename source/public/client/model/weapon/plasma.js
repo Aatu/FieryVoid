@@ -131,6 +131,14 @@ var PakmaraPlasmaWeb = function  PakmaraPlasmaWeb(json, ship) {
 };
 PakmaraPlasmaWeb.prototype = Object.create(Weapon.prototype);
 PakmaraPlasmaWeb.prototype.constructor =  PakmaraPlasmaWeb;
+
+PakmaraPlasmaWeb.prototype.hasMaxBoost = function(){
+    return true;
+}
+PakmaraPlasmaWeb.prototype.getMaxBoost = function(){
+    return this.maxBoostLevel;
+}
+
 /* First attempt at adding new type of crit to Plasma Web
 PakmaraPlasmaWeb.prototype.calculateSpecialRangePenalty = function (distance) {
 	var range = 3
