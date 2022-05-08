@@ -1267,7 +1267,7 @@ class DualPlasmaStream extends Raking{
 	public $animationWidth = 4;
 	public $animationExplosionScale = 0.30;
 	public $trailLength = 400;
-	public $priority = 1;
+	public $priority = 2;
 		        
 	public $raking = 5;
 	public $loadingtime = 2;
