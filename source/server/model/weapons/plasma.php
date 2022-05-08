@@ -1344,6 +1344,7 @@ class PlasmaBlast extends Weapon{
 				    $fireOrder->x = $pos->q;
 				    $fireOrder->y = $pos->r;
 				    $fireOrder->targetid = -1; //correct the error
+		}
 	}//endof function calculateHitBase
 		
 		
