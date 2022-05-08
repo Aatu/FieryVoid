@@ -1290,7 +1290,7 @@ class PlasmaBlast extends Weapon{
 		//				$this->prepareShredderOrders($shooter, $targetUnit, $gamedata, $fireOrder); //actually declare appropriate number of attacks!				
 		//			}					
 		//		}
-		//	}
+			}
 		} //endof function beforeFiringOrderResolution			
 
 	//hit chance always 100 - so it always hits and is correctly animated		
