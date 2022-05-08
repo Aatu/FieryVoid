@@ -1271,14 +1271,14 @@ class PlasmaBlast extends Weapon{
 					//find all units in target area, declare appropriate number of firing orders vs them...
 					$shooter = $gamedata->getShipById($fireOrder->shooterid);
 					$targetLocation = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
-			
+			*/
 					$unitsInRange = $gamedata->getShipsInDistance($targetLocation, 0);
 					foreach ($unitsInRange as $targetUnit) {
 						//just for debugging purposes - range to target					
 						$dist = mathlib::getDistanceHex($shooter, $targetUnit);
 						$fireOrder->notes .= $targetUnit->phpclass . ": $dist;";		
 						$fireOrder->updated = true;						
-						*/
+						
 				//		if ($targetUnit === $shooter) continue; //do not target self
 				//		if ($targetUnit->isDestroyed()) continue; //no point engaging dead ships
 						if (isset(PakmaraPlasmaWeb::$alreadyEngaged[$targetUnit->id])) continue; //unit already engaged
