@@ -1386,7 +1386,7 @@ class PlasmaBlast extends Weapon{
         foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
 
             $this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
-//		$fireOrder->pubnotes .= "<br>Hit a fighter."; //just information for player, actual applying was done in calculateHitBase method
+		$fireOrder->pubnotes .= "All fighters in target hex take damage"; //just information for player, actual applying was done in calculateHitBase method
 
         }
 
