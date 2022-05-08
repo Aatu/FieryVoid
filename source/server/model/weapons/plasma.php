@@ -1184,6 +1184,7 @@ class Fuser extends Plasma{
 	
 	public $name = "Fuser";
     public $displayName = "Fuser";
+		public $iconPath = "Fuser.png";    
     public $animation = "trail";
     public $animationColor = array(255, 105, 0);
 	public $trailColor = array(255, 140, 60);
@@ -1222,6 +1223,7 @@ class RangedFuser extends Plasma{
 	
 	public $name = "RangedFuser";
     public $displayName = "Ranged Fuser";
+		public $iconPath = "RangedFuser.png";     
     public $animation = "trail";
     public $animationColor = array(255, 105, 0);
 	public $trailColor = array(255, 140, 60);
@@ -1259,6 +1261,7 @@ class RangedFuser extends Plasma{
 class DualPlasmaStream extends Raking{
 	public $name = "DualPlasmaStream";
 	public $displayName = "Dual Plasma Stream";
+		public $iconPath = "DualPlasmaStream.png"; 	
 	public $animation = "beam";
 	public $animationColor = array(75, 250, 90);
 	public $trailColor = array(75, 250, 90);
