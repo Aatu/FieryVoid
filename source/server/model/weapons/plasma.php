@@ -1207,7 +1207,7 @@ class PlasmaBlast extends Weapon{
 
         public $useOEW = false; //not important, really 		
 		public $range = 3;
-        public $rangeArray = array(1=>100, 2=>3); //range is unlimited for Defensive, but limited for Offensive.
+        public $rangeArray = array(1=>100, 2=>3); //range is essentially for Defensive, but limited for Offensive.
 		public $rangePenaltyArray = array(1=>0, 2=>0); //no range penalty in either mode                  
         
         public $boostable = true;
@@ -1416,8 +1416,8 @@ class PlasmaBlast extends Weapon{
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= 'The default Defensive mode is aimed at an enemy unit and automatically hits its target, it then applies intercept rating against all invoming enemy fire from that hex ';
-			$this->data["Special"] .= 'Offensive Mode targets a hex within 3 hexes of firing unit and deals D6+2 damage to all fighters in that hex.';
+			$this->data["Special"] .= 'The default Defensive mode is aimed at an enemy unit and automatically hits its target, it then applies intercept rating against all invoming enemy fire from that hex.';
+			$this->data["Special"] .= '<br>Offensive Mode targets a hex within 3 hexes of firing unit and deals D6+2 damage to all fighters in that hex.';
 			$this->data["Special"] .= '<br>Offensive Mode requires 1 extra power either from bossting in initial Orders phaseor from space capacity stored in plasma batteries.';
 			$this->data["Special"] .= '<br>Multiple Plasma Webs are NOT cumulative, and neither mode can be intercepted.'; //uninterceptability is due to technical reasons - with no fire order ID, interception will not be applied properly
 	 }
