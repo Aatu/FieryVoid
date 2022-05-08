@@ -1256,7 +1256,7 @@ class PlasmaBlast extends Weapon{
 	public function beforeFiringOrderResolution($gamedata){
 			$firingOrders = $this->getFireOrders($gamedata->turn);
 			foreach($firingOrders as $fireOrder){
-				if (($fireOrder->type == 'normal') ) { //exists!
+	/*			if (($fireOrder->type == 'normal') ) { //exists!
 					//if it's targeted on unit - retarget on hex
 					if ($fireOrder->targetid != -1) {
 						$targetship = $gamedata->getShipById($fireOrder->targetid);
@@ -1278,19 +1278,19 @@ class PlasmaBlast extends Weapon{
 						$dist = mathlib::getDistanceHex($shooter, $targetUnit);
 						$fireOrder->notes .= $targetUnit->phpclass . ": $dist;";		
 						$fireOrder->updated = true;						
-						
+						*/
 				//		if ($targetUnit === $shooter) continue; //do not target self
-						if ($targetUnit->isDestroyed()) continue; //no point engaging dead ships
+				//		if ($targetUnit->isDestroyed()) continue; //no point engaging dead ships
 						if (isset(PakmaraPlasmaWeb::$alreadyEngaged[$targetUnit->id])) continue; //unit already engaged
-						$relativeBearing = $shooter->getBearingOnUnit($targetUnit);
-						if (mathlib::getDistance($shooter->getCoPos(), $targetUnit->getCoPos()) > 0){ //check arc only if target  is not on the same hex!
-							if (!(mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc))) continue; //must be in arc
+				//		$relativeBearing = $shooter->getBearingOnUnit($targetUnit);
+				//		if (mathlib::getDistance($shooter->getCoPos(), $targetUnit->getCoPos()) > 0){ //check arc only if target  is not on the same hex!
+				//			if (!(mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc))) continue; //must be in arc
 						}
 						PakmaraPlasmaWeb::$alreadyEngaged[$targetUnit->id] = true;//mark engaged
 		//				$this->prepareShredderOrders($shooter, $targetUnit, $gamedata, $fireOrder); //actually declare appropriate number of attacks!				
-					}					
-				}
-			}
+		//			}					
+		//		}
+		//	}
 		} //endof function beforeFiringOrderResolution			
 
 	//hit chance always 100 - so it always hits and is correctly animated		
