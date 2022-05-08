@@ -1180,11 +1180,10 @@ class PlasmaBlast extends Weapon{
 
 
 
-class Fuser extends Plasma{
-	
+class Fuser extends Plasma{	
 	public $name = "Fuser";
     public $displayName = "Fuser";
-		public $iconPath = "Fuser.png";    
+	public $iconPath = "Fuser.png";    
     public $animation = "trail";
     public $animationColor = array(255, 105, 0);
 	public $trailColor = array(255, 140, 60);
@@ -1213,17 +1212,16 @@ class Fuser extends Plasma{
 	
 		
 	public function getDamage($fireOrder){        return Dice::d(10,9)+20;   }
-        public function setMinDamage(){     $this->minDamage = 29 /*- $this->dp*/;      }
-        public function setMaxDamage(){     $this->maxDamage = 110 /*- $this->dp*/;      }
+        public function setMinDamage(){     $this->minDamage = 29;      }
+        public function setMaxDamage(){     $this->maxDamage = 110;      }
 
 }//end of class Fuser
 
 
-class RangedFuser extends Plasma{
-	
+class RangedFuser extends Plasma{	
 	public $name = "RangedFuser";
     public $displayName = "Ranged Fuser";
-		public $iconPath = "RangedFuser.png";     
+	public $iconPath = "RangedFuser.png";     
     public $animation = "trail";
     public $animationColor = array(255, 105, 0);
 	public $trailColor = array(255, 140, 60);
@@ -1252,8 +1250,8 @@ class RangedFuser extends Plasma{
 	
 		
 	public function getDamage($fireOrder){        return Dice::d(10,6)+12;   }
-        public function setMinDamage(){     $this->minDamage = 18 /*- $this->dp*/;      }
-        public function setMaxDamage(){     $this->maxDamage = 72 /*- $this->dp*/;      }
+        public function setMinDamage(){     $this->minDamage = 18;      }
+        public function setMaxDamage(){     $this->maxDamage = 72;      }
 
 }//endof class RangedFuser
 
@@ -1261,7 +1259,7 @@ class RangedFuser extends Plasma{
 class DualPlasmaStream extends Raking{
 	public $name = "DualPlasmaStream";
 	public $displayName = "Dual Plasma Stream";
-		public $iconPath = "DualPlasmaStream.png"; 	
+	public $iconPath = "DualPlasmaStream.png"; 	
 	public $animation = "beam";
 	public $animationColor = array(75, 250, 90);
 	public $trailColor = array(75, 250, 90);
@@ -1309,8 +1307,8 @@ class DualPlasmaStream extends Raking{
 	}
 		
 	public function getDamage($fireOrder){        return Dice::d(10,6)+8;   }
-	public function setMinDamage(){     $this->minDamage = 14 ;/*- $this->dp;*/      }
-	public function setMaxDamage(){     $this->maxDamage = 68 /*- $this->dp*/;      }
+	public function setMinDamage(){     $this->minDamage = 14;     }
+	public function setMaxDamage(){     $this->maxDamage = 68;      }
 	
 }//endof class DualPlasmaStream
 
