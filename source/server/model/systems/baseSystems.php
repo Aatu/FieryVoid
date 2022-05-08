@@ -3331,8 +3331,7 @@ class PlasmaBattery extends ShipSystem{
 		13=>"ChargeEmpty",
 	); 
 
-    function __construct($armour, $maxhealth, $powerReq, $output ){
-            if ( $maxhealth == 0 ) $maxhealth = 4;      	
+    function __construct($armour, $maxhealth, $powerReq, $output ){  	
         parent::__construct($armour, $maxhealth, $powerReq, $output );
 	}
  
