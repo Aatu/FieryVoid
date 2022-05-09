@@ -1403,10 +1403,20 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			$this->changeFiringMode($fireOrder->firingMode);
 	//		if($this->firingMode ==1) { //Shredder
 				//against hex - it shouldn't even be resolved
+					if ($fireOrder->targetid != -1) {
+						$targetship = $gamedata->getShipById($fireOrder->targetid);
+						//insert correct target coordinates: last turns' target position
+						$targetPos = $targetship->getHexPos();
+						$fireOrder->x = $targetPos->q;
+						$fireOrder->y = $targetPos->r;
+						$fireOrder->targetid = -1; //correct the error
+						$fireOrder->calledid = -1; //just in case
+					}	
+									
 				if ($fireOrder->targetid == -1) {				
 					$fireOrder->needed = 0;	//just so no one tries to intercept it				
 					$fireOrder->updated = true;
-					$fireOrder->notes .= 'Antimatter Shredder aiming shot, not resolved.';
+					$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
 					return;
 				} 
 				//set range - so targets out of nominal range aren't missed!
@@ -1420,11 +1430,10 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		
 		
 	public function fire($gamedata, $fireOrder){
-//			$this->changeFiringMode($fireOrder->firingMode);  //needs to be outside the switch routine
+//			$this->changeFiringMode($fireOrder->firingMode);  //Already called in calculateHitBase
 			
 			switch($this->firingMode){
 				case 1:	
-	//		$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
 			$shooter = $gamedata->getShipById($fireOrder->shooterid);
 
 			$movement = $shooter->getLastTurnMovement($fireOrder->turn);
@@ -1441,9 +1450,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 				
 					break;
 				case 2:		
-//		$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
-		/** @var MovementOrder $movement */
+		// @var MovementOrder $movement 
 		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
 		$posLaunch = $movement->position;//at moment of launch!!!		
 		//$this->calculateHit($gamedata, $fireOrder); //already calculated!
