@@ -1373,6 +1373,12 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         }
 
 //Defensive system functions
+
+    public function getDefensiveType()
+    {
+        return "Shield";
+    }
+    
     public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
 			switch($this->firingMode){
 				case 1:					
