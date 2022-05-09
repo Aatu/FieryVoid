@@ -1327,7 +1327,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         public $animationExplosionType = "AoE";               
 		
         public $ballistic = false;
-        public $hextarget = false; //for technical reasons this proved hard to do
+        public $hextarget = true;
         public $hidetarget = false;
         public $priority = 1; //to show effect quickly
         public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
@@ -1336,18 +1336,18 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		
 		public $priorityArray = array(1=>1, 2=>1); //Both modes should be fired very early???
         public $loadingtime = 1;
-        public $intercept = 2; 
+        public $intercept = 0; 
 
         public $useOEW = false; //not important, really 		
 		public $range = 3;
-        public $rangeArray = array(1=>100, 2=>3); //range is essentially for Defensive, but limited for Offensive.
+        public $rangeArray = array(1=>100, 2=>3); //range is essentially unlimited for Defensive, but limited for Offensive.
 		public $rangePenaltyArray = array(1=>0, 2=>0); //no range penalty in either mode                  
         
         public $boostable = true;
         public $boostEfficiency = 1;
         public $maxBoostLevel = 1;     
 		
-    	public $weaponClass = "Plasma"; //not important really
+    	public $weaponClass = "Plasma";
 		public $damageTypeArray = array(1=>'Standard', 2=>'Plasma'); //indicates that this weapon does Plasma damage in Offensive mode    	
     	public $firingMode = "Defensive";
         public $firingModes = array(
@@ -1363,13 +1363,19 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
  //           17=>array("ReducedRange", "DamageReductionRemoved"));  /Need to create two unique critical effects for Web, reduce intercept rating by 1, and reduced range of offensive mode by 2.
 
 //Defensive system functions
-    public function getDefensiveType(){ 	
-       return "Interceptor";
-    }
+
 
     public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
-				            return 0;
-    }
+			switch($this->firingMode){
+				case 1:					
+						$output = 2;
+				        return $output;
+			break;
+				case 2:	
+						$output = 0;
+				        return $output;	        
+   				 }
+			}
 
     public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
 			switch($this->firingMode){
@@ -1524,36 +1530,39 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-       	public function getDamage($fireOrder){
-			if($this->firingMode ==2){
-				return Dice::d(6, 1)+2;  //Offensive
-			}
-			else{
-					$damage = 0;
-					return $damage ; //Defensive - this mode does no damage, in case it actually hits something!
-			}		
-			return $damage ;
+		public function getDamage($fireOrder){
+        	switch($this->firingMode){ 
+            	case 1:
+                	return 0; 
+			    			break;
+            	case 2:
+            	   	return Dice::d(6,1)+2;
+			    			break;
+        	}
 		}
 
-        public function setMinDamage(){     
-			switch($this->firingMode){
-				case 1:
-					$this->minDamage = 0; //Defensive - this mode does no damage, in case it actually hits something!
-					break;
-				case 2:
-					$this->minDamage = 3; //Offensive  
-					break;	
-			}     
-		}
-        public function setMaxDamage(){    
-			switch($this->firingMode){
-				case 1:
-					$this->maxDamage = 0;  //Defensive - this mode does no damage, in case it actually hits something!
-					break;
-				case 2:
-					$this->maxDamage = 8; //Offensive 
-					break;	
-			}
+		public function setMinDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->minDamage = 0;
+								break;
+						case 2:
+								$this->minDamage = 3;
+								break;
+				}
+				$this->minDamageArray[$this->firingMode] = $this->minDamage;
+		}							
+		
+		public function setMaxDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->maxDamage = 0;
+								break;
+						case 2:
+								$this->maxDamage = 8;
+								break;
+				}
+				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 		}
 
 	} //end of class PakmaraPlasmaWeb
