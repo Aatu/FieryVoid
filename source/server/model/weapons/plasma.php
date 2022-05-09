@@ -1363,8 +1363,6 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
  //           17=>array("ReducedRange", "DamageReductionRemoved"));  /Need to create two unique critical effects for Web, reduce intercept rating by 1, and reduced range of offensive mode by 2.
 
 //Defensive system functions
-
-
     public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
 			switch($this->firingMode){
 				case 1:					
@@ -1390,63 +1388,29 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			}
 //end Defensive system functions
 
-	//hit chance always 100 - so it always hits and is correctly animated		
-		public function calculateHitBase($gamedata, $fireOrder){
-			$this->changeFiringMode($fireOrder->firingMode);  //needs to be outside the switch routine
-			
-			switch($this->firingMode){
-				case 1:	
-					$fireOrder->needed = 100; //auto hit!
+		public function calculateHitBase($gamedata, $fireOrder)
+		{
+			$this->changeFiringMode($fireOrder->firingMode);
+	//		if($this->firingMode ==1) { //Shredder
+				//against hex - it shouldn't even be resolved
+				if ($fireOrder->targetid == -1) {				
+					$fireOrder->needed = 0;	//just so no one tries to intercept it				
 					$fireOrder->updated = true;
-					
-					//while we're at it - we may add appropriate interception orders!		
-					$targetShip = $gamedata->getShipById($fireOrder->targetid);
-					
-					$shipsInRange = $gamedata->getShipsInDistance($targetShip); //all units on target hex
-					foreach ($shipsInRange as $affectedShip) {
-						$allOrders = $affectedShip->getAllFireOrders($gamedata->turn);
-						foreach($allOrders as $subOrder) {
-							if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->shooterid) ){ //something is firing at protected unit - and is affected!
-								//uninterceptable are affected all right, just those that outright cannot be intercepted - like ramming or mass driver - will not be affected
-								$subWeapon = $affectedShip->getSystemById($subOrder->weaponid);
-								if( $subWeapon->doNotIntercept != true ){
-									//apply interception! Note that this weapon is technically not marked as firing defensively - it is marked as firing offensively though! (already)
-									//like firing.php addToInterceptionTotal
-									$subOrder->totalIntercept += $this->getInterceptionMod($gamedata, $subOrder);
-			        				$subOrder->numInterceptors++;
-										}
-									}
-								}
-							}		
-					//retarget at hex - this will affect how the weapon is animated/displayed in firing log!
-					    //insert correct target coordinates: CURRENT target position
-					    $pos = $targetShip->getHexPos();
-					    $fireOrder->x = $pos->q;
-					    $fireOrder->y = $pos->r;
-					    $fireOrder->targetid = -1; //correct the error
-	
-		break;
-				case 2:		
-				$fireOrder->needed = 100; //auto hit!
-				$fireOrder->updated = true;
-				
-				//while we're at it - we may add appropriate interception orders!		
-				$targetShip = $gamedata->getShipById($fireOrder->targetid);
-				
-				$shipsInRange = $gamedata->getShipsInDistance($targetShip); //all units on target hex
-				
-				//retarget at hex - this will affect how the weapon is animated/displayed in firing log!
-				    //insert correct target coordinates: CURRENT target position
-				    $pos = $targetShip->getHexPos();
-				    $fireOrder->x = $pos->q;
-				    $fireOrder->y = $pos->r;
-				    $fireOrder->targetid = -1; //correct the error
-		}
-	}//endof function calculateHitBase
+					$fireOrder->notes .= 'Antimatter Shredder aiming shot, not resolved.';
+					return;
+				} 
+				//set range - so targets out of nominal range aren't missed!
+				$this->range = 100;
+				$this->rangeArray = array(1=>100, 2=>3);
+				$this->hextarget = false; //otherwise it won't get intercepted - temporarily make it unit-targeted!
+				$this->hextargetArray = false;
+	//		} 
+
+		}		
 		
 		
 	public function fire($gamedata, $fireOrder){
-			$this->changeFiringMode($fireOrder->firingMode);  //needs to be outside the switch routine
+//			$this->changeFiringMode($fireOrder->firingMode);  //needs to be outside the switch routine
 			
 			switch($this->firingMode){
 				case 1:	
