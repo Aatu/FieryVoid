@@ -1330,15 +1330,19 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         public $hextarget = true;
         public $hidetarget = false;
         public $priority = 1; //to show effect quickly
+                
         public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
         public $doNotIntercept = true; //do not intercept this weapon, period
 		public $canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
-		
+        public $useOEW = false; //not important, really
+        		
 		public $priorityArray = array(1=>1, 2=>1); //Both modes should be fired very early???
         public $loadingtime = 1;
         public $intercept = 0; 
 
-        public $useOEW = false; //not important, really 		
+	    public $tohitPenalty = 0;
+	    public $damagePenalty = 0;        
+         		
 		public $range = 3;
         public $rangeArray = array(1=>100, 2=>3); //range is essentially unlimited for Defensive, but limited for Offensive.
 		public $rangePenaltyArray = array(1=>0, 2=>0); //no range penalty in either mode                  
@@ -1361,6 +1365,12 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 
  //   public $possibleCriticals = array(
  //           17=>array("ReducedRange", "DamageReductionRemoved"));  /Need to create two unique critical effects for Web, reduce intercept rating by 1, and reduced range of offensive mode by 2.
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 2;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
 
 //Defensive system functions
     public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
@@ -1487,13 +1497,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			$this->data["Special"] .= '<br>Offensive Mode requires 1 additional power either from boosting in Initial Orders phase or from space capacity stored in plasma batteries in Firing Phase.';
 			$this->data["Special"] .= '<br>Multiple Plasma Webs do not apply their effects cumulatively.'; //uninterceptability is due to technical reasons - with no fire order ID, interception will not be applied properly
 	 }
-        
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-			if ( $maxhealth == 0 ) $maxhealth = 4;
-            if ( $powerReq == 0 ) $powerReq = 2;            
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-        
+               
 		public function getDamage($fireOrder){
         	switch($this->firingMode){ 
             	case 1:
