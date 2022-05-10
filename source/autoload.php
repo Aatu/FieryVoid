@@ -1513,6 +1513,9 @@ spl_autoload_register(
 			//Nexus particle weapons
 				'gatlinggunftr' => '/server/model/weapons/customNexus.php', 
 				'lightparticlebeamftr' => '/server/model/weapons/customNexus.php', 
+				'mattercannonftr' => '/server/model/weapons/customNexus.php', 
+				'medplasmacannonftr' => '/server/model/weapons/customNexus.php', 
+				'stdparticlebeamftr' => '/server/model/weapons/customNexus.php', 
 				'nexusdefensepulsar' => '/server/model/weapons/customNexus.php', 
 				'nexusfighterarray' => '/server/model/weapons/customNexus.php', 
 				'nexusheavyparticlearray' => '/server/model/weapons/customNexus.php',
@@ -1531,6 +1534,7 @@ spl_autoload_register(
 				'nexusparticlegridftr' => '/server/model/weapons/customNexus.php',
 				'nexusprotector' => '/server/model/weapons/customNexus.php',
 				'nexustestblaster' => '/server/model/weapons/customNexus.php',
+				'twinarrayftr' => '/server/model/weapons/customNexus.php',
 			//Nexus ballistic weapons
 				'nexusbolttorpedo' => '/server/model/weapons/customNexus.php',
 				'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php', 

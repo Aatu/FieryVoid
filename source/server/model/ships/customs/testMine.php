@@ -38,6 +38,23 @@ class testMine extends MineClass{
             $fighter->displayName = "Test Mine";
             $fighter->imagePath = "img/ships/UsuuthDovarum.png";
             $fighter->iconPath = "img/ships/UsuuthDovarum_large.png"; 
+
+			$LPB = new LightParticleBeamFtr(300, 60, 1);
+			$fighter->addFrontSystem($LPB);
+
+			$SPB = new StdParticleBeamFtr(300, 60, 1);
+			$fighter->addFrontSystem($SPB);
+
+			$TA = new TwinArrayFtr(300, 60, 1);
+			$fighter->addFrontSystem($TA);
+
+			$MC = new MatterCannonFtr(300, 60, 1);
+			$fighter->addAftSystem($MC);
+
+			$MPC = new MedPlasmaCannonFtr(300, 60, 1);
+			$fighter->addAftSystem($MPC);
+
+
 		            
 //			$hvyGun = new HvyParticleProjector(0, 1, 0, 330, 30); 
 //			$hvyGun->fireControl = array(-4, 0, 0); // fighters, <mediums, <capitals	
