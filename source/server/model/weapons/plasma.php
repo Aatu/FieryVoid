@@ -1326,7 +1326,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         public $animationExplosionScale = 0.2; 
         public $animationExplosionType = "AoE";               
 		
-        public $ballistic = false;
+  //      public $ballistic = false;
         public $hextarget = true;
         public $hidetarget = false;
         public $priority = 1; //to show effect quickly
