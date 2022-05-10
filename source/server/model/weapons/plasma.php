@@ -1429,7 +1429,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 				if ($fireOrder->targetid == -1) {				
 					$fireOrder->needed = 0;	//just so no one tries to intercept it				
 					$fireOrder->updated = true;
-					$fireOrder->pubnotes .= "Interception and damage reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. ";
+					$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
 					return;
 				} 
 				//set range - so targets out of nominal range aren't missed!
