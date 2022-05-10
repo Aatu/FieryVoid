@@ -985,8 +985,9 @@ class MegaPlasma extends Plasma{
         public $animationWidth = 6;
     	public $animationExplosionScale = 0.35;
     	public $trailLength = 24;
+    	    	*/
     	public $rangeDamagePenalty = 0.5;
-    	*/	        
+	        
         public $loadingtime = 4;
 			
         public $rangePenalty = 0.50;
@@ -1184,13 +1185,15 @@ class Fuser extends Plasma{
 	public $name = "Fuser";
     public $displayName = "Fuser";
 	public $iconPath = "Fuser.png";    
-    public $animation = "trail";
+/*  
+	  public $animation = "trail";
     public $animationColor = array(255, 105, 0);
 	public $trailColor = array(255, 140, 60);
 	public $projectilespeed = 15;
     public $animationWidth = 6;
 	public $animationExplosionScale = 0.80;
 	public $trailLength = 30;
+  */
     public $priority = 2;
     public $rangeDamagePenalty = 1;
 		        
@@ -1222,6 +1225,7 @@ class RangedFuser extends Plasma{
 	public $name = "RangedFuser";
     public $displayName = "Ranged Fuser";
 	public $iconPath = "RangedFuser.png";     
+    /*
     public $animation = "trail";
     public $animationColor = array(255, 105, 0);
 	public $trailColor = array(255, 140, 60);
@@ -1229,6 +1233,7 @@ class RangedFuser extends Plasma{
     public $animationWidth = 6;
 	public $animationExplosionScale = 0.70;
 	public $trailLength = 30;
+    */
     public $priority = 2;
     public $rangeDamagePenalty = 0.25;
 		        
@@ -1260,6 +1265,7 @@ class DualPlasmaStream extends Raking{
 	public $name = "DualPlasmaStream";
 	public $displayName = "Dual Plasma Stream";
 	public $iconPath = "DualPlasmaStream.png"; 	
+	/*
 	public $animation = "beam";
 	public $animationColor = array(75, 250, 90);
 	public $trailColor = array(75, 250, 90);
@@ -1267,6 +1273,7 @@ class DualPlasmaStream extends Raking{
 	public $animationWidth = 4;
 	public $animationExplosionScale = 0.30;
 	public $trailLength = 400;
+	*/
 	public $priority = 2;
 		        
 	public $raking = 5;
@@ -1323,8 +1330,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         //public $trailLength = 10;       
         //public $animationColor = array(0, 184, 230);
         //public $animationWidth2 = 0.2;
-        public $animationExplosionScale = 0.2; 
-        public $animationExplosionType = "AoE";               
+  //      public $animationExplosionScale = 0.2; 
+  //      public $animationExplosionType = "AoE";               
 		
   //      public $ballistic = false;
         public $hextarget = true;
