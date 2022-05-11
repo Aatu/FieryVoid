@@ -1333,7 +1333,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
   //      public $animationExplosionScale = 0.2; 
   //      public $animationExplosionType = "AoE";               
 		
-  //      public $ballistic = false;
+        public $ballistic = false;
         public $hextarget = true;
         public $hidetarget = false;
         public $priority = 1; //to show effect quickly
@@ -1411,34 +1411,72 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			}
 //end Defensive system functions
 
+
 		public function calculateHitBase($gamedata, $fireOrder)
 		{
-			$this->changeFiringMode($fireOrder->firingMode);
+	//		$this->changeFiringMode($fireOrder->firingMode);
 	//		if($this->firingMode ==1) {
 				//against hex - it shouldn't even be resolved
+					if ($fireOrder->targetid == -1) {				
+					$fireOrder->needed = 100;			
+					$fireOrder->updated = true;
+			//		$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
+					return;
+				} 	
+	
 					if ($fireOrder->targetid != -1) {
 						$targetship = $gamedata->getShipById($fireOrder->targetid);
 						//insert correct target coordinates: last turns' target position
-						$targetPos = $targetship->getHexPos();
+					//	$targetPos = $targetship->getHexPos();
+		    			$pos = $targetShip->getHexPos();					
 						$fireOrder->x = $targetPos->q;
 						$fireOrder->y = $targetPos->r;
 						$fireOrder->targetid = -1; //correct the error
 						$fireOrder->calledid = -1; //just in case
 					
 									
-				if ($fireOrder->targetid == -1) {				
-					$fireOrder->needed = 100;			
-					$fireOrder->updated = true;
-			//		$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
-					return;
-				} 
+
 			} 
 
-		}		
+		}	
+		/*	Code from Nexus Plasma Web calculateHitBase below
+
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		$fireOrder->needed = 100; //auto hit!
+		$fireOrder->updated = true;
 		
+		//while we're at it - we may add appropriate interception orders!		
+		$targetShip = $gamedata->getShipById($fireOrder->targetid);
+		
+		$shipsInRange = $gamedata->getShipsInDistance($targetShip); //all units on target hex
+		foreach ($shipsInRange as $affectedShip) {
+			$allOrders = $affectedShip->getAllFireOrders($gamedata->turn);
+			foreach($allOrders as $subOrder) {
+				if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->shooterid) ){ //something is firing at protected unit - and is affected!
+					//uninterceptable are affected all right, just those that outright cannot be intercepted - like ramming or mass driver - will not be affected
+					$subWeapon = $affectedShip->getSystemById($subOrder->weaponid);
+					if( $subWeapon->doNotIntercept != true ){
+						//apply interception! Note that this weapon is technically not marked as firing defensively - it is marked as firing offensively though! (already)
+						//like firing.php addToInterceptionTotal
+						$subOrder->totalIntercept += $this->getInterceptionMod($gamedata, $subOrder);
+        				$subOrder->numInterceptors++;
+					}
+				}
+			}
+		}
+		
+		//retarget at hex - this will affect how the weapon is animated/displayed in firing log!
+		    //insert correct target coordinates: CURRENT target position
+		    $pos = $targetShip->getHexPos();
+		    $fireOrder->x = $pos->q;
+		    $fireOrder->y = $pos->r;
+		    $fireOrder->targetid = -1; //correct the error
+
+	}//endof function calculateHitBase		*/
 		
 	public function fire($gamedata, $fireOrder){
-//			$this->changeFiringMode($fireOrder->firingMode);  //Already called in calculateHitBase
+			$this->changeFiringMode($fireOrder->firingMode);  //Already called in calculateHitBase
 			
 			switch($this->firingMode){
 				case 1:	
