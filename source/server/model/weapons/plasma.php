@@ -1429,7 +1429,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			//	if ($fireOrder->targetid == -1) {				
 					$fireOrder->needed = 100;			
 					$fireOrder->updated = true;
-					$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
+			//		$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
 					return;
 		//		} 
 			} 
@@ -1445,7 +1445,11 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			$rolled = Dice::d(100);
             $fireOrder->rolled = $rolled; ///and auto-hit 😉
             $fireOrder->shotshit++;
-            $fireOrder->pubnotes .= "Interception and damage reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. "; //just information for player
+            
+            $fireOrder->notes .= " Interception and damage reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. "; //just information for player
+            $fireOrder->rolled = $rolled; //might be useful for weapon itself, too - like counting damage for Anti-Matter
+            
+  //          $fireOrder->pubnotes .= "Interception and damage reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. "; //just information for player
             TacGamedata::$lastFiringResolutionNo++;    //note for further shots
             $fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!				
 				
