@@ -1416,22 +1416,24 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			$this->changeFiringMode($fireOrder->firingMode);
 	//		if($this->firingMode ==1) {
 				//against hex - it shouldn't even be resolved
+		//		if ($fireOrder->targetid == -1) {				
+					$fireOrder->needed = 100;			
+					$fireOrder->updated = true;
+			//		$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
+		//			return;
+		//		} 				
+				
+				
 					if ($fireOrder->targetid != -1) {
 						$targetship = $gamedata->getShipById($fireOrder->targetid);
 						//insert correct target coordinates: last turns' target position
-						$targetPos = $targetship->getHexPos();
+ 						$pos = $targetShip->getHexPos();
 						$fireOrder->x = $targetPos->q;
 						$fireOrder->y = $targetPos->r;
 						$fireOrder->targetid = -1; //correct the error
 						$fireOrder->calledid = -1; //just in case
-					
-									
-				if ($fireOrder->targetid == -1) {				
-					$fireOrder->needed = 100;			
-					$fireOrder->updated = true;
-			//		$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
-					return;
-				} 
+								
+
 			} 
 
 		}		
@@ -1440,17 +1442,18 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 	public function fire($gamedata, $fireOrder){
 //			$this->changeFiringMode($fireOrder->firingMode);  //Already called in calculateHitBase
 			
-			switch($this->firingMode){
-				case 1:	
+	switch($this->firingMode){
+		case 1:	
 
 			$rolled = Dice::d(100);
             $fireOrder->rolled = $rolled; ///and auto-hit 😉
             $fireOrder->shotshit++;
-            $fireOrder->pubnotes .= "Damage and hit chance reduction applied to all weapons fired from target hex that are targeting Plasma Web-launching ship. "; //just information for player
+            $fireOrder->pubnotes .= "Damage and hit chance reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. "; //just information for player
             TacGamedata::$lastFiringResolutionNo++;    //note for further shots
             $fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
-					break;
-				case 2:		
+					
+					break;			
+		case 2:		
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 	
 //You define firing location as that from beginning of turn, like for ballistics (so incorrectly here). Using current ship location would be appropriate for direct fire.		
