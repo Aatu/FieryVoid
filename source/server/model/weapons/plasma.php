@@ -1442,17 +1442,13 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			
 			switch($this->firingMode){
 				case 1:	
+
 			$rolled = Dice::d(100);
             $fireOrder->rolled = $rolled; ///and auto-hit 😉
             $fireOrder->shotshit++;
-            
-            $fireOrder->pubnotes .= " Interception and damage reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. " . . ($i + 1) . ": rolled: $rolled, needed: $needed\n"; //just information for player
-            $fireOrder->rolled = $rolled; //might be useful for weapon itself, too - like counting damage for Anti-Matter
-            
-  //          $fireOrder->pubnotes .= "Interception and damage reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. "; //just information for player
+            $fireOrder->pubnotes .= "Damage and hit chance reduction applied to all weapons fired from target hex that are targeting Plasma Web-launching ship. "; //just information for player
             TacGamedata::$lastFiringResolutionNo++;    //note for further shots
-            $fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!				
-				
+            $fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
 					break;
 				case 2:		
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
