@@ -1350,7 +1350,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 	    public $tohitPenalty = 0;
 	    public $damagePenalty = 0;        
          		
-		public $range = 3;
+		public $range = 100;
         public $rangeArray = array(1=>100, 2=>3); //range is essentially unlimited for Defensive, but limited for Offensive.
 		public $rangePenaltyArray = array(1=>0, 2=>0); //no range penalty in either mode                  
         
@@ -1424,20 +1424,15 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 						$fireOrder->y = $targetPos->r;
 						$fireOrder->targetid = -1; //correct the error
 						$fireOrder->calledid = -1; //just in case
-					}	
+					
 									
-				if ($fireOrder->targetid == -1) {				
-					$fireOrder->needed = 0;	//just so no one tries to intercept it				
+			//	if ($fireOrder->targetid == -1) {				
+					$fireOrder->needed = 100;			
 					$fireOrder->updated = true;
 					$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
 					return;
-				} 
-				//set range - so targets out of nominal range aren't missed!
-				$this->range = 100;
-				$this->rangeArray = array(1=>100, 2=>3);
-				$this->hextarget = false; //otherwise it won't get intercepted - temporarily make it unit-targeted!
-				$this->hextargetArray = false;
-	//		} 
+		//		} 
+			} 
 
 		}		
 		
@@ -1448,9 +1443,12 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			switch($this->firingMode){
 				case 1:	
 			$shooter = $gamedata->getShipById($fireOrder->shooterid);
-
-			$movement = $shooter->getLastTurnMovement($fireOrder->turn);
-			$posLaunch = $movement->position;//at moment of launch!!!		
+       		$target = $gamedata->getShipById($fireOrder->targetid);
+			$pos = null;
+//You define firing location as that from beginning of turn, like for ballistics (so incorrectly here). Using current ship location would be appropriate for direct fire.
+//			$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+//			$posLaunch = $movement->position;//at moment of launch!!!
+					
 			//$this->calculateHit($gamedata, $fireOrder); //already calculated!
 			$rolled = Dice::d(100);
 			$fireOrder->rolled = $rolled; ///and auto-hit ;)
@@ -1464,9 +1462,13 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 					break;
 				case 2:		
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
-		// @var MovementOrder $movement 
+
+		
+//You define firing location as that from beginning of turn, like for ballistics (so incorrectly here). Using current ship location would be appropriate for direct fire.		
 		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
-		$posLaunch = $movement->position;//at moment of launch!!!		
+		$posLaunch = $movement->position;//at moment of launch!!!	
+		
+			
 		//$this->calculateHit($gamedata, $fireOrder); //already calculated!
 		$rolled = Dice::d(100);
 		$fireOrder->rolled = $rolled; ///and auto-hit ;)
