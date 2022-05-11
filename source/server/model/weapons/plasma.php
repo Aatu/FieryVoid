@@ -1414,7 +1414,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		public function calculateHitBase($gamedata, $fireOrder)
 		{
 			$this->changeFiringMode($fireOrder->firingMode);
-	//		if($this->firingMode ==1) { //Shredder
+	//		if($this->firingMode ==1) {
 				//against hex - it shouldn't even be resolved
 					if ($fireOrder->targetid != -1) {
 						$targetship = $gamedata->getShipById($fireOrder->targetid);
@@ -1442,9 +1442,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			
 			switch($this->firingMode){
 				case 1:	
-			$shooter = $gamedata->getShipById($fireOrder->shooterid);
-       		$target = $gamedata->getShipById($fireOrder->targetid);
-			$pos = null;
+//	        $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+//	        $ships1 = $gamedata->getShipsInDistance($target); //all ships on target hex
 //You define firing location as that from beginning of turn, like for ballistics (so incorrectly here). Using current ship location would be appropriate for direct fire.
 //			$movement = $shooter->getLastTurnMovement($fireOrder->turn);
 //			$posLaunch = $movement->position;//at moment of launch!!!
@@ -1480,8 +1479,6 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         $ships1 = $gamedata->getShipsInDistance($target); //all ships on target hex
         foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
             $this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
-
-
         }
 
 		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
