@@ -1441,8 +1441,10 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		
 		
 	public function fire($gamedata, $fireOrder){
-//			$this->changeFiringMode($fireOrder->firingMode);  //Already called in calculateHitBase
-			$this->changeFiringMode($fireOrder->firingMode);			
+
+			$this->changeFiringMode($fireOrder->firingMode);
+			
+						
 	switch($this->firingMode){
 		case 1:	
 
