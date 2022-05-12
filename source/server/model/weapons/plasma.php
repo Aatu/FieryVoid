@@ -1413,13 +1413,13 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 
 		public function calculateHitBase($gamedata, $fireOrder)
 		{
-			$this->changeFiringMode($fireOrder->firingMode);
+
 	//		if($this->firingMode ==1) {
 				//against hex - it shouldn't even be resolved
 		//		if ($fireOrder->targetid == -1) {				
 					$fireOrder->needed = 100;			
 					$fireOrder->updated = true;
-		$fireOrder->shots = 1;				
+					$fireOrder->shots = 1;				
 			//		$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
 		//			return;
 		//		} 				
@@ -1442,7 +1442,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		
 	public function fire($gamedata, $fireOrder){
 //			$this->changeFiringMode($fireOrder->firingMode);  //Already called in calculateHitBase
-			
+			$this->changeFiringMode($fireOrder->firingMode);			
 	switch($this->firingMode){
 		case 1:	
 
