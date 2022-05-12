@@ -1419,6 +1419,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		//		if ($fireOrder->targetid == -1) {				
 					$fireOrder->needed = 100;			
 					$fireOrder->updated = true;
+		$fireOrder->shots = 1;				
 			//		$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
 		//			return;
 		//		} 				
@@ -1465,7 +1466,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		$rolled = Dice::d(100);
 		$fireOrder->rolled = $rolled; ///and auto-hit ;)
 		$fireOrder->shotshit++;
-		$fireOrder->pubnotes .= "All fighters in target hex take damage". ($i + 1) . ": rolled: $rolled, needed: $needed\n"; //just information for player, actual applying was done in calculateHitBase method		
+		$fireOrder->pubnotes .= "All fighters in target hex take damage"; //just information for player, actual applying was done in calculateHitBase method		
 
 		//deal damage!
         $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
