@@ -1448,7 +1448,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			$rolled = Dice::d(100);
             $fireOrder->rolled = $rolled; ///and auto-hit 😉
             $fireOrder->shotshit++;
-            $fireOrder->pubnotes .= "Damage and hit chance reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. "; //just information for player
+            $fireOrder->pubnotes .= "Damage and hit chance reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. ". ($i + 1) . ": rolled: $rolled, needed: $needed\n"; //just information for player
             TacGamedata::$lastFiringResolutionNo++;    //note for further shots
             $fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
 					
