@@ -1419,7 +1419,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		//		if ($fireOrder->targetid == -1) {				
 					$fireOrder->needed = 100;			
 					$fireOrder->updated = true;
-		//			$fireOrder->notes .= "Damage and hit chance reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. ";
+					$fireOrder->notes .= "Damage and hit chance reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. ";
 		//			return;
 		//		} 				
 				
