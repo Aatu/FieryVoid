@@ -1343,7 +1343,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		public $canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
         public $useOEW = false; //not important, really
         		
-		public $priorityArray = array(1=>1, 2=>1); //Both modes should be fired very early???
+//		public $priorityArray = array(1=>1, 2=>1); //Both modes should be fired very early???
         public $loadingtime = 1;
         public $intercept = 0; 
 
@@ -1352,6 +1352,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
          		
 		public $range = 100;
         public $rangeArray = array(1=>100, 2=>3); //range is essentially unlimited for Defensive, but limited for Offensive.
+		public $rangePenalty= 0;
 		public $rangePenaltyArray = array(1=>0, 2=>0); //no range penalty in either mode                  
         
         public $boostable = true;
@@ -1414,36 +1415,36 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		public function calculateHitBase($gamedata, $fireOrder)
 		{
 
-	//		if($this->firingMode ==1) {
-				//against hex - it shouldn't even be resolved
-		//		if ($fireOrder->targetid == -1) {				
-					$fireOrder->needed = 100;			
+			//	if ($fireOrder->targetid == -1) {				
+					$fireOrder->needed = 100;	//just so no one tries to intercept it				
 					$fireOrder->updated = true;
-					$fireOrder->shots = 1;				
-			//		$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
-		//			return;
-		//		} 				
-				
+					$fireOrder->shots = 1;					
+					$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
+			//		return;
+			//	} 	
+			
+		//			From Vortex disruptor		
+		//			$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		//			$firingPos = $shooter->getHexPos();
 				
 					if ($fireOrder->targetid != -1) {
 						$targetship = $gamedata->getShipById($fireOrder->targetid);
 						//insert correct target coordinates: last turns' target position
- 						$pos = $targetShip->getHexPos();
+ 						$targetpos = $targetShip->getHexPos();
 						$fireOrder->x = $targetPos->q;
 						$fireOrder->y = $targetPos->r;
 						$fireOrder->targetid = -1; //correct the error
 						$fireOrder->calledid = -1; //just in case
-								
-
-			} 
-
+						} 
+	//	$targetPos = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+	//	$fireOrder->notes .=  "shooter: " . $firingPos->q . "," . $firingPos->r . " target: " . $targetPos->q . "," . $targetPos->r ;		
+		
 		}		
 		
 		
 	public function fire($gamedata, $fireOrder){
 
 			$this->changeFiringMode($fireOrder->firingMode);
-			
 						
 	switch($this->firingMode){
 		case 1:	
@@ -1451,6 +1452,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			$rolled = Dice::d(100);
             $fireOrder->rolled = $rolled; ///and auto-hit 😉
             $fireOrder->shotshit++;
+							            
             $fireOrder->pubnotes .= "Damage and hit chance reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. "; //just information for player
             TacGamedata::$lastFiringResolutionNo++;    //note for further shots
             $fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
@@ -1468,7 +1470,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		$rolled = Dice::d(100);
 		$fireOrder->rolled = $rolled; ///and auto-hit ;)
 		$fireOrder->shotshit++;
-		$fireOrder->pubnotes .= "All fighters in target hex take damage"; //just information for player, actual applying was done in calculateHitBase method		
+		$fireOrder->pubnotes .= "All fighters in target hex take damage" ; //just information for player, actual applying was done in calculateHitBase method		
 
 		//deal damage!
         $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
