@@ -1323,7 +1323,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         public $name = "PakmaraPlasmaWeb";
         public $displayName = "Plasma Web";
 		public $iconPath = "PlasmaWeb.png";
- 	    public $animation = "bolt";
+ 	    public $animation = "ball";
    //     public $animationArray = array(1=>"bolt", 2=>"laser", 3=>"laser");
         //public $projectilespeed = 7;
         //public $animationWidth = 3;
@@ -1369,7 +1369,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
     
         public $fireControlArray = array( 1=>array(50,50,50), 2=>array(50, null, null)); // fighters, <mediums, <capitals 
 		
-		private static $alreadyEngaged = array(); //units that were already engaged by a Plasma Web this turn (multiple Webs do not stack).
+	//	private static $alreadyEngaged = array(); //units that were already engaged by a Plasma Web this turn (multiple Webs do not stack).
 
  //   public $possibleCriticals = array(
  //           17=>array("ReducedRange", "DamageReductionRemoved"));  /Need to create two unique critical effects for Web, reduce intercept rating by 1, and reduced range of offensive mode by 2.
@@ -1454,8 +1454,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
             $fireOrder->shotshit++;
 							            
             $fireOrder->pubnotes .= "Damage and hit chance reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. "; //just information for player
-            TacGamedata::$lastFiringResolutionNo++;    //note for further shots
-            $fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
+    //        TacGamedata::$lastFiringResolutionNo++;    //note for further shots
+    //        $fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
 					
 					break;			
 		case 2:		
@@ -1479,10 +1479,15 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
             $this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
         }
 
-		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
-		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
-		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
+//		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+	//	TacGamedata::$lastFiringResolutionNo++;    //note for further shots
+	//	$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
 			}
+		
+		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
+		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!		
+		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+					
 	} //endof function fire		
 
 
@@ -1510,9 +1515,9 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= 'Defensive mode automatically hits an enemy unit, it then applies -10 intercept rating and 2 damage reduction against ALL invoming enemy fire from that hex.';
+			$this->data["Special"] .= 'Defensive mode automatically hits an enemy unit, it then applies -10 intercept rating and 2 damage reduction against ALL incoming enemy fire from that hex.';
 			$this->data["Special"] .= '<br>Offensive Mode targets a hex within 3 hexes of firing unit and deals D6+2 damage to all fighters in that hex.';
-			$this->data["Special"] .= '<br>Offensive Mode requires 1 additional power either from boosting in Initial Orders phase or from space capacity stored in plasma batteries in Firing Phase.';
+			$this->data["Special"] .= '<br>Offensive Mode requires 1 additional power either from boosting in Initial Orders phase or from power currently stored in plasma batteries during Firing Phase.';
 			$this->data["Special"] .= '<br>Multiple Plasma Webs do not apply their effects cumulatively.'; //uninterceptability is due to technical reasons - with no fire order ID, interception will not be applied properly
 	 }
                
