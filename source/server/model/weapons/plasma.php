@@ -1330,7 +1330,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         //public $trailLength = 10;       
         //public $animationColor = array(0, 184, 230);
         //public $animationWidth2 = 0.2;
-  //      public $animationExplosionScale = 0.2; 
+        public $animationExplosionScale = 0.5;
+        public $animationColor = array(75, 250, 90);         
   //      public $animationExplosionType = "AoE";               
 		
   //      public $ballistic = false;
