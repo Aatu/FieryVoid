@@ -1332,10 +1332,9 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         //public $animationWidth2 = 0.2;
         public $animationExplosionScale = 0.5;
         public $animationColor = array(0, 0, 0);   //Don't really want to see a projectile, so let's make it have no colour.
-        public $explosionColor = array(75, 250, 90);   //Tried to make explosion green, but I don't think this variable actually works...             
-  //      public $animationExplosionType = "AoE";               
+        public $explosionColor = array(75, 250, 90);   //Tried to make explosion green, but I don't think this variable actually works...                         
 		
-  //      public $ballistic = false;
+        public $ballistic = false;
         public $hextarget = true;
         public $hidetarget = false;
         public $priority = 1; //to show effect quickly
@@ -1470,7 +1469,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		$fireOrder->pubnotes .= "All fighters in target hex take damage" ; //just information for player, actual applying was done in calculateHitBase method		
 
 		//deal damage!
-        $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+   //     $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
         $ships1 = $gamedata->getShipsInDistance($target); //all ships on target hex
         foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
             $this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
