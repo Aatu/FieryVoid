@@ -1319,7 +1319,7 @@ class DualPlasmaStream extends Raking{
 	
 }//endof class DualPlasmaStream
 
-class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{        
+class PakmaraPlasmaWeb extends AoE implements DefensiveSystem{        
         public $name = "PakmaraPlasmaWeb";
         public $displayName = "Plasma Web";
 		public $iconPath = "PlasmaWeb.png";
