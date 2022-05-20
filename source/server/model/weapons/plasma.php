@@ -1331,7 +1331,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         //public $animationColor = array(0, 184, 230);
         //public $animationWidth2 = 0.2;
         public $animationExplosionScale = 0.5;
-        public $animationColor = array(75, 250, 90);         
+        public $animationColor = array(0, 0, 0);   //Don't really want to see a projectile, so let's make it have no colour.
+        public $explosionColor = array(75, 250, 90);   //Tried to make explosion green, but I don't think this variable actually works...             
   //      public $animationExplosionType = "AoE";               
 		
   //      public $ballistic = false;
@@ -1360,7 +1361,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         public $boostEfficiency = 1;
         public $maxBoostLevel = 1;     
 		
-    	public $weaponClass = "Plasma";
+		public $weaponClassArray = array(1=>'Standard', 2=>'Plasma');
 		public $damageTypeArray = array(1=>'Standard', 2=>'Plasma'); //indicates that this weapon does Plasma damage in Offensive mode    	
     	public $firingMode = "Defensive";
         public $firingModes = array(
@@ -1415,12 +1416,12 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 
 		public function calculateHitBase($gamedata, $fireOrder)
 		{
-
+			$this->changeFiringMode($fireOrder->firingMode);
 			//	if ($fireOrder->targetid == -1) {				
 					$fireOrder->needed = 100;	//just so no one tries to intercept it				
 					$fireOrder->updated = true;
 					$fireOrder->shots = 1;					
-					$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
+			//		$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
 			//		return;
 			//	} 	
 			
@@ -1444,8 +1445,6 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		
 		
 	public function fire($gamedata, $fireOrder){
-
-			$this->changeFiringMode($fireOrder->firingMode);
 						
 	switch($this->firingMode){
 		case 1:	
