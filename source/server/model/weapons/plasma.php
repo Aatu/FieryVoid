@@ -1421,13 +1421,13 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 					$fireOrder->needed = 100;	//just so no one tries to intercept it				
 					$fireOrder->updated = true;
 					$fireOrder->shots = 1;					
-			//		$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
+					$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
 			//		return;
 			//	} 	
 			
-		//			From Vortex disruptor		
-		//			$shooter = $gamedata->getShipById($fireOrder->shooterid);
-		//			$firingPos = $shooter->getHexPos();
+		/*			From Vortex disruptor		
+					$shooter = $gamedata->getShipById($fireOrder->shooterid);
+					$firingPos = $shooter->getHexPos();    */
 				
 					if ($fireOrder->targetid != -1) {
 						$targetship = $gamedata->getShipById($fireOrder->targetid);
@@ -1448,22 +1448,19 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 						
 	switch($this->firingMode){
 		case 1:	
-
 			$rolled = Dice::d(100);
             $fireOrder->rolled = $rolled; ///and auto-hit 😉
             $fireOrder->shotshit++;
 							            
-            $fireOrder->pubnotes .= "Damage and hit chance reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. "; //just information for player
-    //        TacGamedata::$lastFiringResolutionNo++;    //note for further shots
-    //        $fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
-					
-					break;			
+            $fireOrder->pubnotes .= "Damage and hit chance reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. "; //just information for player				
+					break;
+								
 		case 2:		
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 	
-//You define firing location as that from beginning of turn, like for ballistics (so incorrectly here). Using current ship location would be appropriate for direct fire.		
-//		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
-//		$posLaunch = $movement->position;//at moment of launch!!!	
+/*You define firing location as that from beginning of turn, like for ballistics (so incorrectly here). Using current ship location would be appropriate for direct fire.		
+		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+		$posLaunch = $movement->position;//at moment of launch!!!	*/
 		
 			
 		//$this->calculateHit($gamedata, $fireOrder); //already calculated!
@@ -1477,14 +1474,13 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         $ships1 = $gamedata->getShipsInDistance($target); //all ships on target hex
         foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
             $this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
-        }
-
-//		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
-	//	TacGamedata::$lastFiringResolutionNo++;    //note for further shots
-	//	$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
-			}
-		
+        		}
+/*		
+		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
 		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
+		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!   */
+			}  
+				TacGamedata::$lastFiringResolutionNo++;    //note for further shots
 		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!		
 		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
 					
