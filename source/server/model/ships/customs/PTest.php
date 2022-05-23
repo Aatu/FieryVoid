@@ -5,7 +5,7 @@ class PTest extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 750;
-		$this->faction = "Custom Ships";
+	//	$this->faction = "Custom Ships";
 		$this->phpclass = "PTest";
 		$this->imagePath = "img/ships/GaimShamor.png";
 		$this->shipClass = "Battery Testbed";
@@ -94,7 +94,7 @@ class PTest extends BaseShip{
                 3=> array(
                         1 => "Plasma Battery",
                         4 => "Thruster",
-						6 => "Battle Laser",
+						6 => "Plasma Web",
 						8 => "Scattergun",
                         18 => "Structure",
                         20 => "Primary",
@@ -102,7 +102,7 @@ class PTest extends BaseShip{
                 4=> array(
                         1 => "Plasma Battery",
                         4 => "Thruster",
-						6 => "Battle Laser",
+						6 => "Plasma Web",
 						8 => "Scattergun",
                         18 => "Structure",
                         20 => "Primary",
