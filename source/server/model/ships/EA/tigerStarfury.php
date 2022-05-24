@@ -31,7 +31,7 @@ class TigerStarfury extends FighterFlight{
         $toAdd = $new - $current;
 
         for ($i = 0; $i < $toAdd; $i++){
-            $armour = array(2, 2, 2, 2);
+            $armour = array(2, 1, 2, 2);
             $fighter = new Fighter("tigerStarfury", $armour, 11, $this->id);
             $fighter->displayName = "Tiger";
             $fighter->imagePath = "img/ships/tigerStarfury2.png";

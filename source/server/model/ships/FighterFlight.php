@@ -369,6 +369,7 @@ class FighterFlight extends BaseShip
 
     public function getFireControlIndex()
     {
+		
         return 0;
 
     }
@@ -573,5 +574,24 @@ class MicroSAT extends SuperHeavyFighter{
         parent::__construct($id, $userid, $name, $slot);
     }
 }
+
+
+class MineClass extends SuperHeavyFighter{
+//    public $shipSizeClass = 1; //0:Light, 1:Medium, 2:Heavy, 3:Capital, 4:Enormous
+	public $mine = true;
+	public $accelcost = 100; //not supposed to actually move anywhere, may move/pivot normally
+    public $jinkinglimit = 0; //they cannot jink
+
+    public function getFireControlIndex()
+    {
+        return 1;
+    }
+	
+	function __construct($id, $userid, $name, $slot)
+    {
+        parent::__construct($id, $userid, $name, $slot);
+    }
+}
+
 
 ?>

@@ -24,6 +24,7 @@ class Shafab extends BaseShip{
         $this->addPrimarySystem(new Scanner(4, 18, 8, 8));
         $this->addPrimarySystem(new Engine(4, 12, 0, 6, 2));
         $this->addPrimarySystem(new Hangar(4, 16));
+		
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new ParticleCannon(4, 8, 7, 300, 60));
@@ -34,10 +35,12 @@ class Shafab extends BaseShip{
         $this->addAftSystem(new Thruster(4, 13, 0, 4, 2));
         $this->addAftSystem(new ScatterGun(2, 8, 3, 120, 360));
         $this->addAftSystem(new ScatterGun(2, 8, 3, 0, 240));
+		
         $this->addLeftSystem(new Thruster(4, 13, 0, 3, 3));
         $this->addLeftSystem(new StunBeam(3, 6, 5, 300, 360));
         $this->addLeftSystem(new HeavyPlasma(4, 8, 5, 240, 360));
         $this->addLeftSystem(new ScatterGun(2, 8, 3, 180, 60));
+		
         $this->addRightSystem(new Thruster(4, 13, 0, 3, 4));
         $this->addRightSystem(new StunBeam(3, 6, 5, 0, 60));
         $this->addRightSystem(new HeavyPlasma(4, 8, 5, 0, 120));
@@ -75,14 +78,16 @@ class Shafab extends BaseShip{
             ),
             3=> array(
                     4 => "Thruster",
-                    6 => "Heavy Plasma Cannon",
+                    6 => "Stun Beam",
+                    8 => "Heavy Plasma Cannon",
                     10 => "Scattergun",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array(
                     4 => "Thruster",
-                    6 => "Heavy Plasma Cannon",
+                    6 => "Stun Beam",
+                    8 => "Heavy Plasma Cannon",
                     10 => "Scattergun",
                     18 => "Structure",
                     20 => "Primary",

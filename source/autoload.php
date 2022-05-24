@@ -62,17 +62,22 @@ spl_autoload_register(
                 'babylon5' => '/server/model/ships/EA/babylon5.php',
                 'babylon5refit' => '/server/model/ships/EA/babylon5refit.php',
                 'bacloseescort' => '/server/model/ships/smallraces/baCloseEscort.php',
+                'bacloseescortearly' => '/server/model/ships/smallraces/baCloseEscortEarly.php',
                 'badgerstarfury' => '/server/model/ships/EA/badgerStarfury.php',
                 'baescortcarrier' => '/server/model/ships/smallraces/baEscortCarrier.php',
+                'baescortcarrierearly' => '/server/model/ships/smallraces/baEscortCarrierEarly.php',
                 'baescortcarrierrefit' => '/server/model/ships/smallraces/baEscortCarrierRefit.php',
                 'baheavygunboat' => '/server/model/ships/smallraces/baHeavyGunboat.php',
+                'baheavygunboatearly' => '/server/model/ships/smallraces/baHeavyGunboatEarly.php',
                 'baheavygunboatpulse' => '/server/model/ships/smallraces/baHeavyGunboatPulse.php',
                 'bainterceptormki' => '/server/model/weapons/particle.php',
+                'bainterceptorprototype' => '/server/model/weapons/particle.php',
                 'balcirax' => '/server/model/ships/centauri_old/balcirax.php',
                 'balciron' => '/server/model/ships/centauri_old/balciron.php',
                 'balciron1850' => '/server/model/ships/centauri_old/balciron1850.php',
                 'balciron1985' => '/server/model/ships/centauri_old/balciron1985.php',
                 'balightgunboat' => '/server/model/ships/smallraces/baLightGunboat.php',
+                'balightgunboatearly' => '/server/model/ships/smallraces/baLightGunboatEarly.php',
                 'balightgunboatescort' => '/server/model/ships/smallraces/baLightGunboatEscort.php',
                 'balightgunboatpulse' => '/server/model/ships/smallraces/baLightGunboatPulse.php',
                 'ballistic' => '/server/model/BaseClasses.php',
@@ -81,6 +86,7 @@ spl_autoload_register(
                 'balvarin' => '/server/model/ships/centauri/balvarin.php',
                 'balvarix' => '/server/model/ships/centauri/balvarix.php',
                 'bamediumgunboat' => '/server/model/ships/smallraces/baMediumGunboat.php',
+                'bamediumgunboatearly' => '/server/model/ships/smallraces/baMediumGunboatEarly.php',
                 'bamediumgunboatpulse' => '/server/model/ships/smallraces/baMediumGunboatPulse.php',
                 'barque' => '/server/model/ships/raiders/barque.php',
                 'bascoutcarrier' => '/server/model/ships/smallraces/baScoutCarrier.php',
@@ -1507,6 +1513,9 @@ spl_autoload_register(
 			//Nexus particle weapons
 				'gatlinggunftr' => '/server/model/weapons/customNexus.php', 
 				'lightparticlebeamftr' => '/server/model/weapons/customNexus.php', 
+				'mattercannonftr' => '/server/model/weapons/customNexus.php', 
+				'medplasmacannonftr' => '/server/model/weapons/customNexus.php', 
+				'stdparticlebeamftr' => '/server/model/weapons/customNexus.php', 
 				'nexusdefensepulsar' => '/server/model/weapons/customNexus.php', 
 				'nexusfighterarray' => '/server/model/weapons/customNexus.php', 
 				'nexusheavyparticlearray' => '/server/model/weapons/customNexus.php',
@@ -1525,6 +1534,7 @@ spl_autoload_register(
 				'nexusparticlegridftr' => '/server/model/weapons/customNexus.php',
 				'nexusprotector' => '/server/model/weapons/customNexus.php',
 				'nexustestblaster' => '/server/model/weapons/customNexus.php',
+				'twinarrayftr' => '/server/model/weapons/customNexus.php',
 			//Nexus ballistic weapons
 				'nexusbolttorpedo' => '/server/model/weapons/customNexus.php',
 				'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php', 
@@ -2083,6 +2093,8 @@ spl_autoload_register(
                 'microsat' => '/server/model/ships/FighterFlight.php',
                 'dovarum' => '/server/model/ships/usuuth/dovarum.php',
                 'genericmicrosat' => '/server/model/ships/civilians/genericMicroSat.php',
+                'mineclass' => '/server/model/ships/FighterFlight.php',
+                'testmine' => '/server/model/ships/customs/testMine.php',
 		    
 				//AdaptiveArmor rework		    
                 'adaptivearmorcontroller' => '/server/model/systems/baseSystems.php',    
@@ -2418,7 +2430,9 @@ spl_autoload_register(
 				'vasy' => '/server/model/ships/raiders/Vasy.php',
 				'vyshesh' => '/server/model/ships/civilians/Vyshesh.php',
 				'xotia' => '/server/model/ships/vree/XotiA.php',
-				'xotib' => '/server/model/ships/vree/XotiB.php',												
+				'xotib' => '/server/model/ships/vree/XotiB.php',	
+		    						
+				'zshadowxonn' => '/server/model/ships/vree/ZShadowXonn.php', //tournament prize
 												
 				//antimatter-specific criticals
                 'reducedrangeantimatter' => '/server/model/cricialClasses.php',
@@ -2522,6 +2536,13 @@ spl_autoload_register(
 				'treknausicaanheavyglider' => '/server/model/ships/ZTrekOther/TrekNausicaanHeavyGlider.php',
 				'treknausicaanvandal' => '/server/model/ships/ZTrekOther/TrekNausicaanVandal.php',
 				
+				//Pakmara
+				'plasmabattery' => '/server/model/systems/baseSystems.php',
+				'ptest' => '/server/model/ships/customs/PTest.php',	
+				'pakmaraplasmaweb' => '/server/model/weapons/plasma.php',
+				'fuser' => '/server/model/weapons/plasma.php',
+				'rangedfuser' => '/server/model/weapons/plasma.php',
+				'dualplasmastream' => '/server/model/weapons/plasma.php',															
 				
 
 				//Hyach

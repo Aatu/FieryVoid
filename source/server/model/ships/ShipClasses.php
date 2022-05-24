@@ -35,6 +35,7 @@ class BaseShip {
     public $smallBase = false;
 	public $nonRotating = false; //some bases do not rotate - this attribute is used in combination with $base or $smallBase
 	public $osat = false; //true if object is OSAT (this includes MicroSATs and mines)
+	public $mine = false;
     public $SixSidedShip = false;
 
 	
