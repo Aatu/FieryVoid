@@ -12,7 +12,7 @@ class BAHeavyGunboat extends HeavyCombatVessel{
         $this->occurence = "common";
         $this->fighters = array("heavy"=>6); //external racks 
 
-        $this->isd = 2213;
+        $this->isd = 2235;
         $this->limited = 33;
         
         $this->forwardDefense = 14;

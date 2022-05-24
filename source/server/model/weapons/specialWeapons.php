@@ -1709,6 +1709,7 @@ class SurgeLaser extends Raking{
 	
 	public $loadingtime = 1;
 	public $intercept = 1; //intercept rating -1
+        public $uninterceptable = true;
         
 	public $priority = 3; //technically it's Raking weapon, but so light it's essentially light Standard
 	public $priorityArray = array(1=>3, 2=>8); //...but Combined shot is much nastier, light Raking all right
@@ -1725,12 +1726,12 @@ class SurgeLaser extends Raking{
 	public $gunsArray = array(1=>2,2=>1);//basic 2 shots, combined 1 shot
 		
 	public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	public $weaponClass = "Laser"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 	
 	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);  
-		$this->data["Special"] = "+2 per rake to critical/dropout rolls on system(s) hit this turn.";  //original rule is more fancy
+		$this->data["Special"] = "Uninterceptable.<br>+2 per rake to critical/dropout rolls on system(s) hit this turn.";  //original rule is more fancy
 		$this->data["Special"] .= "Basic firing mode is 2 shots with FC 20/10/10 (d10+2 dmg), combined 1 shot with FC 10/10/20 (2d10+3 dmg).";  //original rule is more fancy
 	}	
 	

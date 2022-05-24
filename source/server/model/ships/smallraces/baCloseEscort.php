@@ -10,7 +10,7 @@ class BACloseEscort extends MediumShip{
         $this->imagePath = "img/ships/BACloseEscort.png";
         $this->shipClass = "BA Close Escort";
 
-        $this->isd = 2226;
+        $this->isd = 2235;
 
 	$this->canvasSize = 100;
 	$this->agile = true;

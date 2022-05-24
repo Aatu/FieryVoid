@@ -72,10 +72,11 @@ class TrekFederationDreadnought extends HeavyCombatVessel{
 		$projection->addProjector($projector);
 		$this->addAftSystem($projector);
 	$this->addAftSystem($projection);
+	
         $this->addAftSystem(new Scanner(4, 12, 3, 3));
-        $this->addAftSystem(new TrekPhotonTorp(3, 0, 0, 120, 140));
+        $this->addAftSystem(new TrekPhotonTorp(3, 0, 0, 120, 240));
+        $this->addAftSystem(new TrekPhotonTorp(3, 0, 0, 120, 240));
 	$this->addAftSystem(new TrekPhaserLance(3, 0, 0, 120, 240));
-        $this->addAftSystem(new TrekPhotonTorp(3, 0, 0, 120, 140));
 
 	//$this->addAftSystem(new SWTractorBeam(2,120,240,1));
 

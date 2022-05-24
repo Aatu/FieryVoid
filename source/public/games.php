@@ -63,11 +63,11 @@ if (isset($_SESSION["user"])) {
 -->
        
 		
-		---------- <b>LATEST NEWS - March 2022</b> ----------	
-	    <br><b>Mode change bug fixed</b> - Flak Cannons should now work correctly
-	    <br><b>Star Trek TOS era</b> - playtest fleet has arrived :)
-	    <br><b>Visual highlight</b> - underlying circles (ship about to move, DEW/CCEW...) size increased by half
-	    <br><b>Nexus/Escalation updates</b> - polishing, fixing, shining and balancing, courtesy of Geoffrey
+		---------- <b>LATEST NEWS - May 2022</b> ----------	
+	    <br><b>Streib weapon fix</b> - Blast and Surge Lasers corrected
+	    <br><b>layout fixes</b> - Tiger Starfury, Shafab, Shofab...
+	    <br><b>new units</b> - courtesy of Douglas and Geoffrey
+	    <br><b>prize ship</b> - MrMordensGhost's prize monster is ready, <b>JohnGurnett</b> - I am waiting for contact from You!
 
 	    
 		<!-- <br><br>---------- <b>update 8th of November</b> ---------- 
