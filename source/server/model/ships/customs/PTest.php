@@ -5,7 +5,7 @@ class PTest extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 750;
-	//	$this->faction = "Custom Ships";
+		$this->faction = "Custom Ships";
 		$this->phpclass = "PTest";
 		$this->imagePath = "img/ships/GaimShamor.png";
 		$this->shipClass = "Battery Testbed";
