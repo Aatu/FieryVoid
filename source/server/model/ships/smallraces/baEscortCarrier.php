@@ -12,7 +12,7 @@ class BAEscortCarrier extends HeavyCombatVessel{
         $this->occurence = "common";
         $this->fighters = array("normal"=>12, "heavy"=>12); //"heavy" are external racks
 
-        $this->isd = 2185;
+        $this->isd = 2235;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;

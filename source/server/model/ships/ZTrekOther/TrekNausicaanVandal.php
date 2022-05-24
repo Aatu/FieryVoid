@@ -1,12 +1,12 @@
 <?php
-class NausicaanVandal extends MediumShip{
+class TrekNausicaanVandal extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 450;
         $this->faction = "ZTrek Playtest Other Factions";
-        $this->phpclass = "NausicaanVandal";
+        $this->phpclass = "TrekNausicaanVandal";
         $this->imagePath = "img/ships/StarTrek/NausicaanVandal.png";
         $this->shipClass = "Nausicaan Vandal Destroyer";
 
@@ -14,6 +14,7 @@ class NausicaanVandal extends MediumShip{
         $this->canvasSize = 100;
 	$this->isd = 2160;
 	$this->fighters = array("light"=>6,"Shuttlecraft"=>1);
+		$this->customFighter = array("Nausicaan small craft"=>7); //can deploy small craft with Nausicaan crew
         
         $this->forwardDefense = 11;
         $this->sideDefense = 15;
@@ -41,12 +42,12 @@ class NausicaanVandal extends MediumShip{
 			$projection->addProjector($projector);
 			$this->addFrontSystem($projector);
 		$this->addFrontSystem($projection);
-		$this->addFrontSystem(new PlasmaProjector(4, 8, 5, 240, 0));
+		$this->addFrontSystem(new PlasmaProjector(4, 8, 5, 300, 60));
 		$this->addFrontSystem(new EWDualRocketLauncher(3, 6, 2, 270, 90));
 		$this->addFrontSystem(new LtPlasmaProjector(2, 6, 3, 240, 120));
 
-		$this->addAftSystem(new LtPlasmaProjector(2, 6, 3, 0, 180));
 		$this->addAftSystem(new LtPlasmaProjector(2, 6, 3, 180, 360));
+		$this->addAftSystem(new LtPlasmaProjector(2, 6, 3, 0, 180));
 		$this->addAftSystem(new EWDualRocketLauncher(3, 6, 2, 240, 60));
 		$this->addAftSystem(new EWDualRocketLauncher(3, 6, 2, 300, 120));
 		$warpNacelle = new TrekWarpDrive(3, 15, 0, 4); //armor, structure, power usage, impulse output

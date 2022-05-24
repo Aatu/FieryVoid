@@ -4,7 +4,7 @@ class KobolRaptorSupport extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 600;
+        $this->pointCost = 570;
         $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
         $this->phpclass = "KobolRaptorSupport";
         $this->shipClass = "Raptor Fire Support (Alpha prototype)";
@@ -54,12 +54,12 @@ class KobolRaptorSupport extends FighterFlight{
 			$torp = new FighterTorpedoLauncher(3, 330, 30);
 			$torp->displayName = "Light Ballistic Torpedo";
 //            $fighter->addFrontSystem(new FighterTorpedoLauncher(3, 330, 30));
-            $missile = new FighterMissileRack(2, 330, 30);
-			$missile->displayName = "Basic Fighter Missile";
+//            $missile = new FighterMissileRack(2, 330, 30);
+//			$missile->displayName = "Basic Fighter Missile";
 
             $fighter->addFrontSystem($frontGun);
             $fighter->addFrontSystem($torp);
-            $fighter->addFrontSystem($missile);
+//            $fighter->addFrontSystem($missile);
 
 //            $fighter->addFrontSystem(new FighterMissileRack(2, 330, 30));
 

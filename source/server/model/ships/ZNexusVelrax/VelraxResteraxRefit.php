@@ -6,7 +6,7 @@ class VelraxResteraxRefit extends FighterFlight{
         
         $this->pointCost = 43*6;
         $this->faction = "ZNexus Velrax";
-        $this->phpclass = "VelraxResteraxFighter";
+        $this->phpclass = "VelraxResteraxRefit";
         $this->shipClass = "Resterax-B Assault flight";
 			$this->variantOf = "Resterax Assault flight";
 			$this->occurence = "common";
