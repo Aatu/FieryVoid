@@ -88,7 +88,7 @@ class NexusRangedKineticBoxLauncher extends Weapon{
 
         public $useOEW = false; //missile
         public $ballistic = true; //missile
-        public $range = 30;
+        public $range = 45;
         public $distanceRange = 60;
         public $ammunition = 10; //limited number of shots
         
@@ -278,7 +278,7 @@ class NexusLaserMissile extends Laser{
         public function getDamage($fireOrder){ 
 		switch($this->firingMode){
 			case 1:
-				return Dice::d(10, 2)+2; //Light Chemical Laser
+				return Dice::d(10, 2)+3; //Light Chemical Laser
 				break;
 			case 2:
 				return Dice::d(10, 3)+4; //Medium Chemical Laser
@@ -288,7 +288,7 @@ class NexusLaserMissile extends Laser{
         public function setMinDamage(){ 
 		switch($this->firingMode){
 			case 1:
-				$this->minDamage = 4; //Light Chemical Laser
+				$this->minDamage = 5; //Light Chemical Laser
 				break;
 			case 2:
 				$this->minDamage = 7; //Medium Chemical Laser
@@ -299,7 +299,7 @@ class NexusLaserMissile extends Laser{
         public function setMaxDamage(){
 		switch($this->firingMode){
 			case 1:
-				$this->maxDamage = 22; //Light Chemical Laser
+				$this->maxDamage = 23; //Light Chemical Laser
 				break;
 			case 2:
 				$this->maxDamage = 34; //Medium Chemical Laser
@@ -309,8 +309,8 @@ class NexusLaserMissile extends Laser{
 	}
     
 //        public function getDamage($fireOrder){ return Dice::d(10, 2)+2;   }
-//        public function setMinDamage(){     $this->minDamage = 4;      }
-//        public function setMaxDamage(){     $this->maxDamage = 22;      }
+//        public function setMinDamage(){     $this->minDamage = 5;      }
+//        public function setMaxDamage(){     $this->maxDamage = 23;      }
 		
 }//endof NexusLaserMissile
 
@@ -6869,7 +6869,7 @@ class TestGun extends Particle{
 
         public $name = "TestGun";
         public $displayName = "Test Gun";
-		public $iconPath = "TestGun.png";
+		public $iconPath = "tacLaser.png";
 	    
         public $animation = "trail";
         public $animationColor = array(255, 250, 230);
@@ -6964,6 +6964,158 @@ class TestGun extends Particle{
         public function setMinDamage(){     $this->minDamage = 2 ;      }
         public function setMaxDamage(){     $this->maxDamage = 11 ;      }
 	}// endof NexusParticleGridFtr
+
+
+/*fighter-mounted variant*/
+    class StdParticleBeamFtr extends Particle{
+//        public $trailColor = array(30, 170, 255);
+
+        public $name = "StdParticleBeamFtr";
+        public $displayName = "Standard Particle Beam";
+		public $iconPath = "stdParticleBeam.png";
+	    
+        public $animation = "bolt";
+        public $animationColor = array(255, 102, 0);
+        public $animationExplosionScale = 0.15;
+        public $projectilespeed = 12;
+        public $animationWidth = 3;
+        public $trailLength = 10;
+
+        public $intercept = 2;
+        public $loadingtime = 1;
+        public $priority = 5;
+
+        public $rangePenalty = 1 ; 
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+
+	function __construct($startArc, $endArc, $nrOfShots = 1){
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 1)+6;   }
+        public function setMinDamage(){     $this->minDamage = 7 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 16 ;      }
+	}// endof StdParticleBeamFtr
+
+
+/*fighter-mounted variant*/
+    class TwinArrayFtr extends Particle{
+//        public $trailColor = array(30, 170, 255);
+
+        public $name = "TwinArrayFtr";
+        public $displayName = "Twin Array";
+		public $iconPath = "twinArray.png";
+	    
+        public $animation = "bolt";
+        public $animationColor = array(255, 163, 26);
+        public $animationExplosionScale = 0.15;
+        public $projectilespeed = 12;
+        public $animationWidth = 3;
+        public $trailLength = 10;
+
+        public $intercept = 2;
+        public $loadingtime = 1;
+		public $guns = 2;
+        public $priority = 4;
+
+        public $rangePenalty = 2 ; 
+        public $fireControl = array(6, 5, 4); // fighters, <mediums, <capitals
+
+	function __construct($startArc, $endArc, $nrOfShots = 1){
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 1)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+	}// endof TwinArrayFtr
+
+
+/*fighter-mounted variant*/
+class MedPlasmaCannonFtr extends LinkedWeapon{
+	/*dedicated anti-ship weapon for mines*/
+        public $name = "MedPlasmaCannonFtr";
+        public $displayName = "Medium Plasma Cannon";
+	public $iconPath = "mediumPlasma.png";
+    public $animationColor = array(75, 250, 90); //...it's not inheriting from Plasma, so needs to have proper color declared
+	/*
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+        public $trailColor = array(75, 250, 90);
+        public $projectilespeed = 10;
+        public $animationWidth = 4;
+        public $trailLength = 13;
+        public $animationExplosionScale = 0.23;
+*/
+
+        public $intercept = 0; //no interception for this weapon!
+        public $loadingtime = 3;
+        public $shots = 1;
+        public $defaultShots = 1;
+        public $rangePenalty = 1;
+        public $fireControl = array(-5, 0, 0); // fighters, <mediums, <capitals
+        public $rangeDamagePenalty = 0.5; //-1/2 hexes!
+		public $priority = 6;
+
+    	public $damageType = "Standard"; 
+    	public $weaponClass = "Plasma"; 
+
+        function __construct($startArc, $endArc, $shots = 1){
+            $this->shots = $shots;
+            $this->defaultShots = $shots;
+            
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){    
+            parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
+			$this->data["Special"] .= "<br>Ignores half of armor."; //handled by standard routines for Plasma weapons now
+        }
+
+
+        public function getDamage($fireOrder){        return Dice::d(10,3)+4;   }
+        public function setMinDamage(){     $this->minDamage = 7 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 34 ;      }
+    } //endof MedPlasmaCannonFtr
+
+
+class MatterCannonFtr extends Matter {
+    /*fighter version of Matter Cannon*/
+    /*NOT done as linked weapon!*/
+    /*limited ammo*/
+        public $name = "MatterCannonFtr";
+        public $displayName = "Matter Cannon";
+	public $iconPath = "matterCannon.png";
+        public $animation = "bolt";
+        public $animationColor = array(250, 250, 190);
+        public $priority = 9; //Matter weapon
+        
+        public $loadingtime = 2;
+        public $exclusive = false; //this is not an exclusive weapon!
+        
+        public $rangePenalty = 0.5;
+        public $fireControl = array(-2, 0, 0); // fighters, <mediums, <capitals 
+
+        function __construct($startArc, $endArc){
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+	
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+2;   }
+        public function setMinDamage(){   return  $this->minDamage = 4 ;      }
+        public function setMaxDamage(){   return  $this->maxDamage = 22 ;      }
+}//MatterCannonFtr
+
+
 
 
 /*fighter-mounted variant*/

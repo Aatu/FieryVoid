@@ -446,7 +446,7 @@
 the Grome Flak Cannon to operate more as it did in the table top verion. The previous attempt 
 worked fine offensively. Defensively, this had friendly intercept and intercepted lasers, 
 but it only intercepted a single shot; not all fire from a single unit. After feedback from
-the Fiery Void community, I aim giving the Flak Cannon the option to manually target a unit
+the Fiery Void community, I am giving the Flak Cannon the option to manually target a unit
 in order to provide intercept against all shots from that unit. I need the Laser-Pulse Array
 format so that the offensive mode against fighters is available. Lastly, the friendly intercept
 function will remain. If the Flak Cannon is not fired offensively and is not fired defensively

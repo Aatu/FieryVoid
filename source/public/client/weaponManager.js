@@ -863,6 +863,9 @@ window.weaponManager = {
         if (target.shipSizeClass >= 0) {
             return weapon.fireControl[1];
         }
+		if (target.mine == true) {
+			return weapon.fireControl[1];
+		}
 
         return weapon.fireControl[0];
     },
