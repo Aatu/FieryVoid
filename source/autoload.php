@@ -2430,7 +2430,9 @@ spl_autoload_register(
 				'vasy' => '/server/model/ships/raiders/Vasy.php',
 				'vyshesh' => '/server/model/ships/civilians/Vyshesh.php',
 				'xotia' => '/server/model/ships/vree/XotiA.php',
-				'xotib' => '/server/model/ships/vree/XotiB.php',												
+				'xotib' => '/server/model/ships/vree/XotiB.php',	
+		    						
+				'zshadowxonn' => '/server/model/ships/vree/ZShadowXonn.php', //tournament prize
 												
 				//antimatter-specific criticals
                 'reducedrangeantimatter' => '/server/model/cricialClasses.php',
@@ -2520,14 +2522,27 @@ spl_autoload_register(
 				'trekfederationsoyuz' => '/server/model/ships/ZTrekFederationTOS/TrekFederationSoyuz.php',
 				'trekfederationsaladin' => '/server/model/ships/ZTrekFederationTOS/TrekFederationSaladin.php',
 				'trekfederationyamato' => '/server/model/ships/ZTrekFederationTOS/TrekFederationYamato.php',
+								
+				'trekvulcandkyrtos' => '/server/model/ships/ZTrekFederationTOS/TrekVulcanDKyrTOS.php',
 				
 				
 				//TNG (Next Generation, Deep Space Nine, Voyager)
 				
 				
 				//other factions
-				'nausicaanvandal' => '/server/model/ships/ZTrekOther/NausicaanVandal.php',
+				'trekmazeriteship' => '/server/model/ships/ZTrekOther/TrekMazeriteShip.php',
+				'trekmazeriteshuttles' => '/server/model/ships/ZTrekOther/TrekMazeriteShuttles.php',
+				'treknausicaanglidersshf' => '/server/model/ships/ZTrekOther/TrekNausicaanGlidersSHF.php',
+				'treknausicaanheavyglider' => '/server/model/ships/ZTrekOther/TrekNausicaanHeavyGlider.php',
+				'treknausicaanvandal' => '/server/model/ships/ZTrekOther/TrekNausicaanVandal.php',
 				
+				//Pakmara
+				'plasmabattery' => '/server/model/systems/baseSystems.php',
+				'ptest' => '/server/model/ships/customs/PTest.php',	
+				'pakmaraplasmaweb' => '/server/model/weapons/plasma.php',
+				'fuser' => '/server/model/weapons/plasma.php',
+				'rangedfuser' => '/server/model/weapons/plasma.php',
+				'dualplasmastream' => '/server/model/weapons/plasma.php',															
 				
 
 				//Hyach

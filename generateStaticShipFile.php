@@ -53,6 +53,9 @@ foreach($allFactions as $factionName){
 		}
 	}
 	
+	
+	$shipsCurr = ''; //just clear memory...
+	
 	$factionNo++;
 	$fileName = $fileBase . $factionNo . '.js';
 	$varBase = "window.staticShips";

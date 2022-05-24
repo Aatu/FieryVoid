@@ -487,7 +487,9 @@ class CustomStrikeLaser extends Weapon{
         public $fireControl = array(0, 2, 4); // fighters, <mediums, <capitals
 
         public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-        public $weaponClass = "Laser";
+        public $weaponClass = "Laser";		
+		
+        public $uninterceptable = true;
         
         
 
@@ -534,6 +536,7 @@ class CustomStrikeLaser extends Weapon{
         public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClass = "Laser";
         
+        public $uninterceptable = true;
         
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){

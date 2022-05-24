@@ -38,10 +38,12 @@ class Shofab extends BaseShip{
         $this->addAftSystem(new ScatterGun(2, 8, 3, 120, 360));
         $this->addAftSystem(new ScatterGun(2, 8, 3, 0, 240));
         $this->addAftSystem(new JumpEngine(4, 16, 4, 24));
+		
 		$this->addLeftSystem(new ScatterGun(3, 0, 0, 240, 60));
         $this->addLeftSystem(new Thruster(4, 15, 0, 4, 3));
         $this->addLeftSystem(new HeavyPlasma(4, 8, 5, 240, 360));
         $this->addLeftSystem(new ScatterGun(2, 8, 3, 180, 60));
+		
         $this->addRightSystem(new ScatterGun(3, 0, 0, 300, 120));
         $this->addRightSystem(new Thruster(4, 15, 0, 4, 4));
         $this->addRightSystem(new HeavyPlasma(4, 8, 5, 0, 120));
@@ -75,19 +77,17 @@ class Shofab extends BaseShip{
             		9 => "Scattergun",
                     18 => "Structure",
                     20 => "Primary",
-            ),
+            ),			
             3=> array(
                     4 => "Thruster",
-                    6 => "Stun Beam",
-                    8 => "Heavy Plasma Cannon",
+                    6 => "Heavy Plasma Cannon",
                     10 => "Scattergun",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array(
                     4 => "Thruster",
-                    6 => "Stun Beam",
-                    8 => "Heavy Plasma Cannon",
+                    6 => "Heavy Plasma Cannon",
                     10 => "Scattergun",
                     18 => "Structure",
                     20 => "Primary",
