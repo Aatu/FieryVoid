@@ -985,8 +985,9 @@ class MegaPlasma extends Plasma{
         public $animationWidth = 6;
     	public $animationExplosionScale = 0.35;
     	public $trailLength = 24;
+    	    	*/
     	public $rangeDamagePenalty = 0.5;
-    	*/	        
+	        
         public $loadingtime = 4;
 			
         public $rangePenalty = 0.50;
@@ -1179,4 +1180,378 @@ class PlasmaBlast extends Weapon{
 }//endof PlasmaBlast
 
 
+
+class Fuser extends Plasma{	
+	public $name = "Fuser";
+    public $displayName = "Fuser";
+	public $iconPath = "Fuser.png";    
+/*  
+	  public $animation = "trail";
+    public $animationColor = array(255, 105, 0);
+	public $trailColor = array(255, 140, 60);
+	public $projectilespeed = 15;
+    public $animationWidth = 6;
+	public $animationExplosionScale = 0.80;
+	public $trailLength = 30;
+  */
+    public $priority = 2;
+    public $rangeDamagePenalty = 1;
+		        
+    public $loadingtime = 5;			
+    public $rangePenalty = 0.33;
+    public $fireControl = array(null, 3, 5); // fighters, <=mediums, <=capitals 
+
+	public $damageType = "Flash"; 
+	public $weaponClass = "Plasma"; 
+	public $firingModes = array( 1 => "Flash"); 
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+		}
+	
+		
+	public function getDamage($fireOrder){        return Dice::d(10,9)+20;   }
+        public function setMinDamage(){     $this->minDamage = 29;      }
+        public function setMaxDamage(){     $this->maxDamage = 110;      }
+
+}//end of class Fuser
+
+
+class RangedFuser extends Plasma{	
+	public $name = "RangedFuser";
+    public $displayName = "Ranged Fuser";
+	public $iconPath = "RangedFuser.png";     
+    /*
+    public $animation = "trail";
+    public $animationColor = array(255, 105, 0);
+	public $trailColor = array(255, 140, 60);
+	public $projectilespeed = 15;
+    public $animationWidth = 6;
+	public $animationExplosionScale = 0.70;
+	public $trailLength = 30;
+    */
+    public $priority = 2;
+    public $rangeDamagePenalty = 0.25;
+		        
+    public $loadingtime = 5;			
+    public $rangePenalty = 0.25;
+    public $fireControl = array(null, 3, 5);
+
+	public $damageType = "Flash"; 
+	public $weaponClass = "Plasma"; 
+	public $firingModes = array( 1 => "Flash"); 
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+		}
+	
+		
+	public function getDamage($fireOrder){        return Dice::d(10,6)+12;   }
+        public function setMinDamage(){     $this->minDamage = 18;      }
+        public function setMaxDamage(){     $this->maxDamage = 72;      }
+
+}//endof class RangedFuser
+
+
+class DualPlasmaStream extends Raking{
+	public $name = "DualPlasmaStream";
+	public $displayName = "Dual Plasma Stream";
+	public $iconPath = "DualPlasmaStream.png"; 	
+	/*
+	public $animation = "beam";
+	public $animationColor = array(75, 250, 90);
+	public $trailColor = array(75, 250, 90);
+	public $projectilespeed = 20;
+	public $animationWidth = 4;
+	public $animationExplosionScale = 0.30;
+	public $trailLength = 400;
+	*/
+	public $priority = 2;
+		        
+	public $raking = 5;
+	public $loadingtime = 2;
+	public $rangeDamagePenalty = 2;	
+	public $rangePenalty = 1;
+	public $fireControl = array(-4, 2, 2);
+	
+	public $damageType = "Raking"; 
+	public $weaponClass = "Plasma";
+
+	public $firingModes = array(1 => "Raking");
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+	
+	public function setSystemDataWindow($turn){		
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+	    $this->data["Special"] .= "Damage reduced by 2 points per hex.";
+	    $this->data["Special"] .= "<br>Reduces armor of systems hit.";	
+	    $this->data["Special"] .= "<br>Ignores half of armor.";
+	}
+		 
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+		if (!$system->advancedArmor){//advanced armor prevents effect 
+			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
+			$crit->updated = true;
+			    $crit->inEffect = false;
+			    $system->criticals[] =  $crit;
+		}
+	}
+		
+	public function getDamage($fireOrder){        return Dice::d(10,6)+8;   }
+	public function setMinDamage(){     $this->minDamage = 14;     }
+	public function setMaxDamage(){     $this->maxDamage = 68;      }
+	
+}//endof class DualPlasmaStream
+
+class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{        
+        public $name = "PakmaraPlasmaWeb";
+        public $displayName = "Plasma Web";
+		public $iconPath = "PlasmaWeb.png";
+ 	    public $animation = "ball";
+   //     public $animationArray = array(1=>"bolt", 2=>"laser", 3=>"laser");
+        //public $projectilespeed = 7;
+        //public $animationWidth = 3;
+        //public $trailLength = 10;       
+        //public $animationColor = array(0, 184, 230);
+        //public $animationWidth2 = 0.2;
+        public $animationExplosionScale = 0.5;
+        public $animationColor = array(0, 0, 0);   //Don't really want to see a projectile, so let's make it have no colour.
+        public $explosionColor = array(75, 250, 90);   //Tried to make explosion green, but I don't think this variable actually works...                         
+		
+        public $ballistic = false;
+        public $hextarget = true;
+        public $hidetarget = false;
+        public $priority = 1; //to show effect quickly
+                
+        public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
+        public $doNotIntercept = true; //do not intercept this weapon, period
+		public $canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
+        public $useOEW = false; //not important, really
+        		
+//		public $priorityArray = array(1=>1, 2=>1); //Both modes should be fired very early???
+        public $loadingtime = 1;
+        public $intercept = 0; 
+
+	    public $tohitPenalty = 0;
+	    public $damagePenalty = 0;        
+         		
+		public $range = 100;
+        public $rangeArray = array(1=>100, 2=>3); //range is essentially unlimited for Defensive, but limited for Offensive.
+		public $rangePenalty= 0;
+		public $rangePenaltyArray = array(1=>0, 2=>0); //no range penalty in either mode                  
+        
+        public $boostable = true;
+        public $boostEfficiency = 1;
+        public $maxBoostLevel = 1;     
+		
+		public $weaponClassArray = array(1=>'Standard', 2=>'Plasma');
+		public $damageTypeArray = array(1=>'Standard', 2=>'Plasma'); //indicates that this weapon does Plasma damage in Offensive mode    	
+    	public $firingMode = "Defensive";
+        public $firingModes = array(
+            1 => "Defensive",
+			2 => "Offensive",			
+        );
+    
+        public $fireControlArray = array( 1=>array(50,50,50), 2=>array(50, null, null)); // fighters, <mediums, <capitals 
+		
+	//	private static $alreadyEngaged = array(); //units that were already engaged by a Plasma Web this turn (multiple Webs do not stack).
+
+ //   public $possibleCriticals = array(
+ //           17=>array("ReducedRange", "DamageReductionRemoved"));  /Need to create two unique critical effects for Web, reduce intercept rating by 1, and reduced range of offensive mode by 2.
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 2;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+//Defensive system functions
+
+    public function getDefensiveType()
+    {
+        return "Shield";
+    }
+    
+    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
+			switch($this->firingMode){
+				case 1:					
+						$output = 2;
+				        return $output;
+			break;
+				case 2:	
+						$output = 0;
+				        return $output;	        
+   				 }
+			}
+
+    public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
+			switch($this->firingMode){
+				case 1:					
+						$output = 2;
+				        return $output;
+			break;
+				case 2:	
+						$output = 0;
+				        return $output;	        
+   				 }
+			}
+//end Defensive system functions
+
+		public function calculateHitBase($gamedata, $fireOrder)
+		{
+			$this->changeFiringMode($fireOrder->firingMode);
+			//	if ($fireOrder->targetid == -1) {				
+					$fireOrder->needed = 100;	//just so no one tries to intercept it				
+					$fireOrder->updated = true;
+					$fireOrder->shots = 1;					
+					$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
+			//		return;
+			//	} 	
+			
+		/*			From Vortex disruptor		
+					$shooter = $gamedata->getShipById($fireOrder->shooterid);
+					$firingPos = $shooter->getHexPos();    */
+				
+					if ($fireOrder->targetid != -1) {
+						$targetship = $gamedata->getShipById($fireOrder->targetid);
+						//insert correct target coordinates: last turns' target position
+ 						$targetpos = $targetShip->getHexPos();
+						$fireOrder->x = $targetPos->q;
+						$fireOrder->y = $targetPos->r;
+						$fireOrder->targetid = -1; //correct the error
+						$fireOrder->calledid = -1; //just in case
+						} 
+	//	$targetPos = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+	//	$fireOrder->notes .=  "shooter: " . $firingPos->q . "," . $firingPos->r . " target: " . $targetPos->q . "," . $targetPos->r ;		
+		
+		}		
+		
+		
+	public function fire($gamedata, $fireOrder){
+						
+	switch($this->firingMode){
+		case 1:	
+			$rolled = Dice::d(100);
+            $fireOrder->rolled = $rolled; ///and auto-hit 😉
+            $fireOrder->shotshit++;
+							            
+            $fireOrder->pubnotes .= "Damage and hit chance reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. "; //just information for player				
+					break;
+								
+		case 2:		
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+	
+/*You define firing location as that from beginning of turn, like for ballistics (so incorrectly here). Using current ship location would be appropriate for direct fire.		
+		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+		$posLaunch = $movement->position;//at moment of launch!!!	*/
+		
+			
+		//$this->calculateHit($gamedata, $fireOrder); //already calculated!
+		$rolled = Dice::d(100);
+		$fireOrder->rolled = $rolled; ///and auto-hit ;)
+		$fireOrder->shotshit++;
+		$fireOrder->pubnotes .= "All fighters in target hex take damage" ; //just information for player, actual applying was done in calculateHitBase method		
+
+		//deal damage!
+   //     $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+        $ships1 = $gamedata->getShipsInDistance($target); //all ships on target hex
+        foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
+            $this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
+        		}
+/*		
+		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
+		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!   */
+			}  
+				TacGamedata::$lastFiringResolutionNo++;    //note for further shots
+		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!		
+		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+					
+	} //endof function fire		
+
+
+//and now actual damage dealing for Offensive Mode - and we already know fighter is hit (fire()) doesn't pass anything else)
+//source hex will be taken from firing unit, damage will be individually rolled for each fighter hit
+ public function AOEdamage($target, $shooter, $fireOrder, $gamedata)    {
+        if ($target->isDestroyed()) return; //no point allocating
+            foreach ($target->systems as $fighter) {
+                if ($fighter == null || $fighter->isDestroyed()) {
+                    continue;
+                }
+         //roll (and modify as appropriate) damage for this particular fighter:
+        $damage = $this->getDamage($fireOrder);
+        $damage = $this->getDamageMod($damage, $shooter, $target, null, $gamedata);
+        $damage -= $target->getDamageMod($shooter, null, $gamedata->turn, $this);
+
+                $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
+			}
+		}
+		
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= 'Defensive mode automatically hits an enemy unit, it then applies -10 intercept rating and 2 damage reduction against ALL incoming enemy fire from that hex.';
+			$this->data["Special"] .= '<br>Offensive Mode targets a hex within 3 hexes of firing unit and deals D6+2 damage to all fighters in that hex.';
+			$this->data["Special"] .= '<br>Offensive Mode requires 1 additional power either from boosting in Initial Orders phase or from power currently stored in plasma batteries during Firing Phase.';
+			$this->data["Special"] .= '<br>Multiple Plasma Webs do not apply their effects cumulatively.'; //uninterceptability is due to technical reasons - with no fire order ID, interception will not be applied properly
+	 }
+               
+		public function getDamage($fireOrder){
+        	switch($this->firingMode){ 
+            	case 1:
+                	return 0; 
+			    			break;
+            	case 2:
+            	   	return Dice::d(6,1)+2;
+			    			break;
+        	}
+		}
+
+		public function setMinDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->minDamage = 0;
+								break;
+						case 2:
+								$this->minDamage = 3;
+								break;
+				}
+				$this->minDamageArray[$this->firingMode] = $this->minDamage;
+		}							
+		
+		public function setMaxDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->maxDamage = 0;
+								break;
+						case 2:
+								$this->maxDamage = 8;
+								break;
+				}
+				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+		}
+
+	} //end of class PakmaraPlasmaWeb
+
+	
 ?>

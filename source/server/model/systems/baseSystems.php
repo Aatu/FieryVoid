@@ -362,7 +362,18 @@ class Reactor extends ShipSystem implements SpecialAbility {
     {
         return $this->specialAbilityValue;
     }
-	
+
+	public function effectCriticals(){
+		parent::effectCriticals();
+
+	if (TacGamedata::$currentPhase <= 1) { 
+		//account for Plasma Batteries present (if any)
+		foreach ($this->unit->systems as $system)
+			if ($system instanceof PlasmaBattery){
+			$this->outputMod += $system->getOutput(); //outputMod is SUBTRACTED from base output, hence going for negative value here
+			}
+		}
+	}	
 	
 	public function criticalPhaseEffects($ship, $gamedata) {		
 		//as effects are getting complicate - call them separately
@@ -3293,5 +3304,116 @@ class BSGHybrid extends ShipSystem {
 }
 
 
+class PlasmaBattery extends ShipSystem{ 
+ 	public $name = "PlasmaBattery";
+    public $displayName = "Plasma Battery";
+//    public $primary = true; 
+	public $isPrimaryTargetable = false;
+    public $iconPath = "plasmabattery.png";
+
+	public $powerCurr = 0;
+//	public $capacityBonus = 0; //additional capacity - potentially set by enhancements
+	public $powerReceivedFromFrontEnd = 0; //communication variable	
+	public $powerReceivedFromBackEnd = 0; //communication variable
+//	public $nominalOutput = 0;//output to be used in front end display!
+	
+    public $boostable = true;
+    public $maxBoostLevel = 4;
+    public $boostEfficiency = 1; 
+	public $powerStoredFront = 0;    
+ 
+    
+/*
+	1-12: No effect.
+	13+: The battery is completely emptied.
+*/        
+    public $possibleCriticals = array(
+		13=>"ChargeEmpty",
+	); 
+
+    function __construct($armour, $maxhealth, $powerReq, $output ){  	
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+	}
+ 
+ public function getOutput(){
+        $output = min($this->powerCurr, $this->getRemainingHealth()); //output cannot be higher than remaining health
+        return $output;
+    }
+
+ 	public function getMaxCapacity(){ //maximum capacity = health remaining
+		$capacity = $this->getRemainingHealth();
+//		$capacity += $this->capacityBonus ;
+		return $capacity;
+	}
+
+ public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+		$strippedSystem->data = $this->data; 
+		$strippedSystem->output = $this->getOutput();
+        return $strippedSystem;
+    } 
+	
+ public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+        $ship = $this->getUnit();
+        switch($gameData->phase){
+                case -1: //deployment phase 
+                    if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise two copies of initial data are written
+                        $this->powerCurr = $this->maxhealth;
+                        //AND PREPARE APPROPRIATE NOTES!
+                        $notekey = 'powerStored';
+                        $noteHuman = 'Plasma Battery - stored power';
+                        $noteValue = $this->powerCurr;
+                        $this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+                    }
+                    break;
+
+                case 1: //Initial phase
+                    if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+//...no need to load earlier notes, as new value overrides the old one!
+                        $this->powerCurr = $this->powerReceivedFromFrontEnd; 
+                        //AND PREPARE APPROPRIATE NOTES!
+                        $notekey = 'powerStored';
+                        $noteHuman = 'Plasma Battery - stored power';
+                        $noteValue = $this->powerCurr;
+                        $this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+                    }
+                    break;
+
+        }
+    } //endof function generateIndividualNotes	
+ 	
+ 	/*act on notes just loaded - to be redefined by systems as necessary
+	 - set power held
+	*/
+	public function onIndividualNotesLoaded($gamedata){
+		foreach ($this->individualNotes as $currNote){ //assume ASCENDING sorting - so enact all changes as is
+			switch($currNote->notekey){
+				case 'powerStored': //power that should be stored at this moment
+				$this->powerCurr = $currNote->notevalue;
+					break;			
+			}
+		}
+	} //endof function onIndividualNotesLoaded
+ 
+    public function doIndividualNotesTransfer(){
+        //data received in variable individualNotesTransfer, further functions will look for it in powerReceivedFromFrontEnd
+        //in this case it should be just one entry, power remaining
+        if(is_array($this->individualNotesTransfer)) foreach($this->individualNotesTransfer as $powerLeft)  $this->powerReceivedFromFrontEnd = $powerLeft;
+        $this->individualNotesTransfer = array(); //empty, just in case
+    }
+ 
+   
+      public function setSystemDataWindow($turn){
+		$this->output =  $this->getOutput();
+        $this->powerCurr =$this->output;
+        parent::setSystemDataWindow($turn); 
+        $this->data["Power stored/max"] =  $this->powerCurr . '/' . $this->getMaxCapacity();
+		$this->data["Special"] = "This system is only responsible for STORING extra power.  It does not GENERATE new power each turn.";
+        $this->data["Special"] .= "<br>Power stored is shown for in Reactor output during Initial Orders. Surplus AFTER Initial phase is moved back into Batteries and may therefore show as a negative value in Reactor during Move/Fire phases.";
+        $this->data["Special"] .= "<br>Stored power is necessary to use offensive mode of Plasma Web in Firing Phase.";
+    }
+	
+							
+} //endof PlasmaBattery.php
 
 ?>
