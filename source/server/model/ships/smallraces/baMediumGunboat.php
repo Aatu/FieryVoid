@@ -10,7 +10,7 @@ class BAMediumGunboat extends MediumShip{
         $this->imagePath = "img/ships/BAMediumGunboat.png";
         $this->shipClass = "BA Medium Gunboat";
 
-        $this->isd = 2188;
+        $this->isd = 2235;
 
 	$this->canvasSize = 100;
         

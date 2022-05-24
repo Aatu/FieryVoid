@@ -1166,6 +1166,50 @@
     }
 
 
+
+        /*Belt Alliance version of Interceptor Prototype - identical to EA one, but without EWeb*/
+    class BAInterceptorPrototype extends Particle{
+        public $name = "BAInterceptorPrototype";
+        public $displayName = "BA Interceptor Prototype";
+        public $iconPath = "interceptor.png";
+        
+        public $animation = "bolt";
+        public $animationColor = array(255, 163, 26);
+	    /*
+        public $trailColor = array(255, 163, 26);
+        public $animationExplosionScale = 0.15;
+        public $animationWidth = 1;
+            */
+	    
+        public $priority = 3;	    
+        public $intercept = 2;
+        public $loadingtime = 1;
+  
+        public $rangePenalty = 2;
+        public $fireControl = array(4, null, null); // fighters, <mediums, <capitals 
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle";
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 4;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 1;
+            }	
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10)+3;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 13 ;      }
+        
+    }
+
+
+
         /*Abbai weapon - Twin Array on steroids and with overheating problems*/
     class QuadArray extends Particle{
         public $name = "quadArray";
