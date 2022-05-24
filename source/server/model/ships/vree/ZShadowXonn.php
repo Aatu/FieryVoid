@@ -12,6 +12,7 @@ class ZShadowXonn extends VreeCapital{
 		$this->isd = 'not known';
         $this->limited = 10; //Restricted Deployment
 	    $this->unofficial = true;
+        $this->enhancementOptionsDisabled[] = 'SHAD_DIFF'; //no diffuser upgrades for EA ships - they don't have know how to tamper with Shadow systems to that extent!
 
 		$this->shipSizeClass = 3;
 		$this->iniativebonus = 0;
@@ -32,7 +33,9 @@ class ZShadowXonn extends VreeCapital{
 		$this->addPrimarySystem(new Reactor(6, 25, 0, 0));
 		$this->addPrimarySystem(new Hangar(6, 3));
 		$this->addPrimarySystem(new CnC(7, 16, 0, 0));
-		$this->addPrimarySystem(new Scanner(6, 18, 9, 10));
+		$scanner = new Scanner(6, 18, 9, 10);   
+		$scanner->markImproved();
+        $this->addPrimarySystem($scanner);
     $this->addPrimarySystem(new Engine(6, 18, 0, 10, 3));
 		$this->addPrimarySystem(new JumpEngine(7, 16, 6, 24));
     
