@@ -624,3 +624,32 @@ var BSGHybrid = function BSGHybrid(json, ship) {
 };
 BSGHybrid.prototype = Object.create(ShipSystem.prototype);
 BSGHybrid.prototype.constructor = BSGHybrid;
+
+
+var PlasmaBattery = function PlasmaBattery(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+PlasmaBattery.prototype = Object.create(ShipSystem.prototype);
+PlasmaBattery.prototype.constructor = PlasmaBattery;
+
+
+PlasmaBattery.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+    this.individualNotesTransfer = Array();
+    //note power currently remaining ON REACTOR as charge held, but no more than remaining structure - and split between batteries
+       var capacity = shipManager.systems.getRemainingHealth(this);
+       var reactorSurplus = shipManager.power.getReactorPower(this.ship, this);
+       for (var s in this.ship.systems) {
+       var system = this.ship.systems[s];
+            if(system.displayName=="Plasma Battery"){ //no point checking other systems
+                           reactorSurplus -= system.powerStoredFront;
+            }
+        }
+        
+       while ((this.powerStoredFront < capacity) && (reactorSurplus > 0)){
+          this.powerStoredFront++; //increase charge
+          reactorSurplus--; //note reduced surplus
+          this.powerReq++; //mark as increased power usage, for further Batteries (if any)
+       }
+    this.individualNotesTransfer.push(this.powerStoredFront);
+    return true;
+};
