@@ -12,7 +12,7 @@ class ZShadowXonn extends VreeCapital{
 		$this->isd = 'not known';
         $this->limited = 10; //Restricted Deployment
 	    $this->unofficial = true;
-        $this->enhancementOptionsDisabled[] = 'SHAD_DIFF'; //no diffuser upgrades for EA ships - they don't have know how to tamper with Shadow systems to that extent!
+        $this->enhancementOptionsDisabled[] = 'SHAD_DIFF'; //no diffuser upgrades for Young ships - they don't have know how to tamper with Shadow systems to that extent!
 
 		$this->shipSizeClass = 3;
 		$this->iniativebonus = 0;
@@ -144,6 +144,7 @@ class ZShadowXonn extends VreeCapital{
                     7 => "0:Antimatter Shredder",                    
                     8 => "0:Light Slicer Beam",                  
                     9 => "0:Multiphased Cutter",
+                    11 => "Energy Diffuser",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
@@ -153,6 +154,7 @@ class ZShadowXonn extends VreeCapital{
                     7 => "0:Antimatter Shredder",                    
                     8 => "0:Light Slicer Beam",                  
                     9 => "0:Multiphased Cutter",
+                    11 => "Energy Diffuser",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
@@ -162,6 +164,7 @@ class ZShadowXonn extends VreeCapital{
                     7 => "0:Antimatter Shredder",                    
                     8 => "0:Light Slicer Beam",                  
                     9 => "0:Multiphased Cutter",
+                    11 => "Energy Diffuser",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
@@ -171,6 +174,7 @@ class ZShadowXonn extends VreeCapital{
                     7 => "0:Antimatter Shredder",                    
                     8 => "0:Light Slicer Beam",                  
                     9 => "0:Multiphased Cutter",
+                    11 => "Energy Diffuser",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
@@ -180,6 +184,7 @@ class ZShadowXonn extends VreeCapital{
                     7 => "0:Antimatter Shredder",                    
                     8 => "0:Light Slicer Beam",                  
                     9 => "0:Multiphased Cutter",
+                    11 => "Energy Diffuser",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
@@ -189,6 +194,7 @@ class ZShadowXonn extends VreeCapital{
                     7 => "0:Antimatter Shredder",                    
                     8 => "0:Light Slicer Beam",                  
                     9 => "0:Multiphased Cutter",
+                    11 => "Energy Diffuser",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
