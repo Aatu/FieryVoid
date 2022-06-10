@@ -56,8 +56,8 @@ class ZShadowXonn extends VreeCapital{
           $this->addFrontSystem($tendril);
         $this->addFrontSystem($diffuser);		
         $this->addFrontSystem(new GraviticThruster(5, 20, 0, 10, 1));
-        $this->addLeftSystem(new MultiphasedCutterL(3, 0, 0, 300, 60));
-        $this->addLeftSystem(new MultiphasedCutterL(3, 0, 0, 300, 60));
+        $this->addFrontSystem(new MultiphasedCutterL(3, 0, 0, 300, 60));
+        $this->addFrontSystem(new MultiphasedCutterL(3, 0, 0, 300, 60));
 		 
     
         $diffuser = new EnergyDiffuser(4, 13, 3, 120, 240);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
