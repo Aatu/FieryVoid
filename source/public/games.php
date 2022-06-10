@@ -63,11 +63,9 @@ if (isset($_SESSION["user"])) {
 -->
        
 		
-		---------- <b>LATEST NEWS - May 2022</b> ----------	
-	    <br><b>Streib weapon fix</b> - Blast and Surge Lasers corrected
-	    <br><b>layout fixes</b> - Tiger Starfury, Shafab, Shofab...
-	    <br><b>new units</b> - courtesy of Douglas and Geoffrey
-	    <br><b>prize ship</b> - MrMordensGhost's prize monster is ready, <b>JohnGurnett</b> - I am waiting for contact from You!
+		---------- <b>LATEST NEWS - June 2022</b> ----------	
+	    <br><b>Tournament prizes</b> - Shadow Xonn updated, Hyperion Iota added
+	    <br><b>new Trekkies</b> - some more ship designs to round out existing fleets
 
 	    
 		<!-- <br><br>---------- <b>update 8th of November</b> ---------- 
