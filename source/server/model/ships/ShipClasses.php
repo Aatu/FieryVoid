@@ -1104,7 +1104,14 @@ class BaseShip {
 
 
     public function getFireControlIndex(){
-        return 2;
+		//actually derive fire control index from ship size, like front end!
+		if ($this->$shipSizeClass < 2){ //0:Light, 1:Medium, 2:Heavy, 3:Capital, 4:Enormous
+			return 1; //MCV fire control
+		}else{
+			return 2; //Capital fire control
+		}
+		//original version:
+        //return 2;
     }
 
 
@@ -1871,9 +1878,11 @@ class MediumShip extends BaseShip{
         parent::__construct($id, $userid, $name, $slot);
     }
 
+/* not actually needed, BaseShip routine will now handle it
     public function getFireControlIndex(){
         return 1;
     }
+*/	
 
     public function getLocations(){
         $locs = array();
@@ -1935,11 +1944,12 @@ class LightShip extends BaseShip{ //is this used anywhere?...
     function __construct($id, $userid, $name, $slot){
         parent::__construct($id, $userid, $name, $slot);
     }
-
+	
+/* not actually needed, BaseShip routine will now handle it
     public function getFireControlIndex(){
         return 1;
-
     }
+*/	
 
 } //end of class LightShip
 
