@@ -1319,6 +1319,8 @@ class DualPlasmaStream extends Raking{
 	
 }//endof class DualPlasmaStream
 
+
+
 class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{        
         public $name = "PakmaraPlasmaWeb";
         public $displayName = "Plasma Web";
@@ -1436,7 +1438,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 						$fireOrder->y = $targetPos->r;
 						$fireOrder->targetid = -1; //correct the error
 						$fireOrder->calledid = -1; //just in case
-						} 
+					} 
 	//	$targetPos = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
 	//	$fireOrder->notes .=  "shooter: " . $firingPos->q . "," . $firingPos->r . " target: " . $targetPos->q . "," . $targetPos->r ;		
 		
@@ -1444,51 +1446,71 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		
 		
 	public function fire($gamedata, $fireOrder){
-						
-	switch($this->firingMode){
-		case 1:	
-			$rolled = Dice::d(100);
-            $fireOrder->rolled = $rolled; ///and auto-hit 😉
-            $fireOrder->shotshit++;
-							            
-            $fireOrder->pubnotes .= "Damage and hit chance reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. "; //just information for player				
-					break;
-								
-		case 2:		
-		$shooter = $gamedata->getShipById($fireOrder->shooterid);
-	
-/*You define firing location as that from beginning of turn, like for ballistics (so incorrectly here). Using current ship location would be appropriate for direct fire.		
-		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
-		$posLaunch = $movement->position;//at moment of launch!!!	*/
-		
+							
+		switch($this->firingMode){
+			case 1:	
+				$rolled = Dice::d(100);
+				$fireOrder->rolled = $rolled; ///and auto-hit 😉
+				$fireOrder->shotshit++;
+											
+				$fireOrder->pubnotes .= "Damage and hit chance reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. "; //just information for player				
+						break;
+									
+			case 2:		
+				$shooter = $gamedata->getShipById($fireOrder->shooterid);
 			
-		//$this->calculateHit($gamedata, $fireOrder); //already calculated!
-		$rolled = Dice::d(100);
-		$fireOrder->rolled = $rolled; ///and auto-hit ;)
-		$fireOrder->shotshit++;
-		$fireOrder->pubnotes .= "All fighters in target hex take damage" ; //just information for player, actual applying was done in calculateHitBase method		
+		/*You define firing location as that from beginning of turn, like for ballistics (so incorrectly here). Using current ship location would be appropriate for direct fire.		
+				$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+				$posLaunch = $movement->position;//at moment of launch!!!	*/
+				
+					
+				//$this->calculateHit($gamedata, $fireOrder); //already calculated!
+				$rolled = Dice::d(100);
+				$fireOrder->rolled = $rolled; ///and auto-hit ;)
+				$fireOrder->shotshit++;
+				$fireOrder->pubnotes .= "All fighters in target hex take damage" ; //just information for player, actual applying was done in calculateHitBase method		
 
-		//deal damage!
-   //     $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
-        $ships1 = $gamedata->getShipsInDistance($target); //all ships on target hex
-        foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
-            $this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
-        		}
-/*		
-		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+				//deal damage!
+				$target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+				$ships1 = $gamedata->getShipsInDistance($target); //all ships on target hex
+				foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
+					$this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
+				}
+	/*		
+			$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+			TacGamedata::$lastFiringResolutionNo++;    //note for further shots
+			$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!   */
+			
+				//draw power from batteries - unless the weapon was boosted
+				if ($this->getBoostLevel(TacGamedata::$currentTurn) <=0 ) { //not boosted...
+					PlasmaBattery::shipDrawPower($this->unit);
+				}
+				break;
+		}  
+		
 		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
-		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!   */
-			}  
-				TacGamedata::$lastFiringResolutionNo++;    //note for further shots
 		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!		
 		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
-					
+			
+						
 	} //endof function fire		
 
 
+	private function getBoostLevel($turn){
+		$boostLevel = 0;
+		foreach ($this->power as $i){
+				if ($i->turn != $turn) continue;
+				if ($i->type == 2){
+						$boostLevel += $i->amount;
+				}
+		}
+		return $boostLevel;
+	}
+	
+
 //and now actual damage dealing for Offensive Mode - and we already know fighter is hit (fire()) doesn't pass anything else)
 //source hex will be taken from firing unit, damage will be individually rolled for each fighter hit
- public function AOEdamage($target, $shooter, $fireOrder, $gamedata)    {
+	public function AOEdamage($target, $shooter, $fireOrder, $gamedata)    {
         if ($target->isDestroyed()) return; //no point allocating
             foreach ($target->systems as $fighter) {
                 if ($fighter == null || $fighter->isDestroyed()) {
