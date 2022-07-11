@@ -429,7 +429,8 @@ spl_autoload_register(
                 'hlpa' => '/server/model/weapons/customs.php',
                 'hvyblastcannon' => '/server/model/weapons/pulse.php',
                 'hvyparticlecannon' => '/server/model/weapons/particle.php',
-                'hyperion' => '/server/model/ships/EA/hyperion.php',
+                'hyperion' => '/server/model/ships/EA/hyperion.php',				
+                'hyperioniota' => '/server/model/ships/EA/hyperionIota.php',
                 'hyperionalpha' => '/server/model/ships/EA/hyperionAlpha.php',
                 'hyperionassault' => '/server/model/ships/EA/hyperionAssault.php',
                 'hyperioncommand' => '/server/model/ships/EA/hyperionCommand.php',
@@ -2507,6 +2508,11 @@ spl_autoload_register(
 				'trekfederationjclass' => '/server/model/ships/ZTrekFederationEarly/TrekFederationJClass.php',
 				'trekfederationyclass' => '/server/model/ships/ZTrekFederationEarly/TrekFederationYClass.php',
 								
+				'trekfederationdaedalusff' => '/server/model/ships/ZTrekFederationEarly/TrekFederationDaedalusFF.php',
+				'trekfederationfreedomff' => '/server/model/ships/ZTrekFederationEarly/TrekFederationFreedomFF.php',
+								
+								
+								
 				//TOS (Original Series)
 				'trekfederationarco' => '/server/model/ships/ZTrekFederationTOS/TrekFederationArco.php',
 				'trekfederationtychointerceptors' => '/server/model/ships/ZTrekFederationTOS/TrekFederationTychoInterceptors.php',
@@ -2522,6 +2528,7 @@ spl_autoload_register(
 				'trekfederationsoyuz' => '/server/model/ships/ZTrekFederationTOS/TrekFederationSoyuz.php',
 				'trekfederationsaladin' => '/server/model/ships/ZTrekFederationTOS/TrekFederationSaladin.php',
 				'trekfederationyamato' => '/server/model/ships/ZTrekFederationTOS/TrekFederationYamato.php',
+				'trekfederationillustrious' => '/server/model/ships/ZTrekFederationTOS/TrekFederationIllustrious.php',
 								
 				'trekvulcandkyrtos' => '/server/model/ships/ZTrekFederationTOS/TrekVulcanDKyrTOS.php',
 				

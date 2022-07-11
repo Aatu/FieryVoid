@@ -63,11 +63,9 @@ if (isset($_SESSION["user"])) {
 -->
        
 		
-		---------- <b>LATEST NEWS - May 2022</b> ----------	
-	    <br><b>Streib weapon fix</b> - Blast and Surge Lasers corrected
-	    <br><b>layout fixes</b> - Tiger Starfury, Shafab, Shofab...
-	    <br><b>new units</b> - courtesy of Douglas and Geoffrey
-	    <br><b>prize ship</b> - MrMordensGhost's prize monster is ready, <b>JohnGurnett</b> - I am waiting for contact from You!
+		---------- <b>LATEST NEWS - July 2022</b> ----------	
+	    <br><b>Minbari Flyer images</b> - courtesy of Wolfgang
+	    <br><b>FC used correction</b> - Large Shadow ships should now be fired upon using correct FC
 
 	    
 		<!-- <br><br>---------- <b>update 8th of November</b> ---------- 
