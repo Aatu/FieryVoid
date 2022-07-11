@@ -63,9 +63,9 @@ if (isset($_SESSION["user"])) {
 -->
        
 		
-		---------- <b>LATEST NEWS - June 2022</b> ----------	
-	    <br><b>Tournament prizes</b> - Shadow Xonn updated, Hyperion Iota added
-	    <br><b>new Trekkies</b> - some more ship designs to round out existing fleets
+		---------- <b>LATEST NEWS - July 2022</b> ----------	
+	    <br><b>Minbari Flyer images</b> - courtesy of Wolfgang
+	    <br><b>FC used correction</b> - Large Shadow ships should now be fired upon using correct FC
 
 	    
 		<!-- <br><br>---------- <b>update 8th of November</b> ---------- 
