@@ -157,10 +157,3 @@ PakmaraPlasmaWeb.prototype.hasMaxBoost = function(){
 PakmaraPlasmaWeb.prototype.getMaxBoost = function(){
     return this.maxBoostLevel;
 }
-
-/* First attempt at adding new type of crit to Plasma Web
-PakmaraPlasmaWeb.prototype.calculateSpecialRangePenalty = function (distance) {
-	var range = 3
-	var range = range - 2*shipManager.criticals.hasCritical(this, 'ReducedRangePlasmaWeb');//account for range reduced critical(s)
-    return range;
-};  */  
