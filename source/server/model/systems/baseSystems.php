@@ -3321,6 +3321,8 @@ class PlasmaBattery extends ShipSystem{
     public $maxBoostLevel = 4;
     public $boostEfficiency = 1; 
 	public $powerStoredFront = 0;    
+	
+	public $powerDrawnAtFiring = 0;
  
     
 /*
@@ -3379,6 +3381,18 @@ class PlasmaBattery extends ShipSystem{
                     }
                     break;
 
+				case 4: //firing phase
+					//reduce charge by power used by weapons in firing phase (Plasma Webs, basically)
+					if($this->powerDrawnAtFiring > 0){
+						$this->powerCurr -= $this->powerDrawnAtFiring;
+						//AND PREPARE APPROPRIATE NOTES!		
+						$notekey = 'powerStored';
+						$noteHuman = 'Plasma Battery - stored power';
+						$noteValue = $this->powerCurr;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					}
+					break;
+					
         }
     } //endof function generateIndividualNotes	
  	
@@ -3413,6 +3427,24 @@ class PlasmaBattery extends ShipSystem{
         $this->data["Special"] .= "<br>Stored power is necessary to use offensive mode of Plasma Web in Firing Phase.";
     }
 	
+	//draw power, return information if the action was successful
+	public function doDrawPower(){
+		if($this->isDestroyed()) return false;
+		if($this->powerCurr > $this->powerDrawnAtFiring) { //battery still stores power reserves
+			$this->powerDrawnAtFiring++;
+			return true;
+		} else { //cannot draw power from this battery
+			return false;
+		}
+	}
+	
+	public static function shipDrawPower($ship){
+		foreach ($ship->systems as $battery) if ($battery instanceOf PlasmaBattery) {
+			if($battery->doDrawPower()){
+				return; //power successfully drawn - do not look further
+			}
+		}
+	}
 							
 } //endof PlasmaBattery.php
 
