@@ -13,7 +13,7 @@ class Nathor extends FighterFlight{
         $this->isd = 2096;
 		
 		$this->forwardDefense = 10;
-		$this->sideDefense = 10
+		$this->sideDefense = 10;
 		$this->freethrust = 8;
 		$this->offensivebonus = 3;
 		$this->jinkinglimit = 0;
