@@ -1105,7 +1105,7 @@ class BaseShip {
 
     public function getFireControlIndex(){
 		//actually derive fire control index from ship size, like front end!
-		if ($this->$shipSizeClass < 2){ //0:Light, 1:Medium, 2:Heavy, 3:Capital, 4:Enormous
+		if ($this->shipSizeClass < 2){ //0:Light, 1:Medium, 2:Heavy, 3:Capital, 4:Enormous
 			return 1; //MCV fire control
 		}else{
 			return 2; //Capital fire control
