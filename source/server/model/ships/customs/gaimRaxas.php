@@ -8,7 +8,7 @@ class gaimRaxas extends BaseShip{
 		$this->faction = 'Custom Ships';
 		$this->phpclass = "gaimRaxas";
 		$this->imagePath = "img/ships/GaimRaxas.png";
-		$this->shipClass = "Raxas Experimental PLatform";
+		$this->shipClass = "Raxas Experimental Platform";
 		$this->shipSizeClass = 3;
 		$this->fighters = array("normal"=>12);
 		$this->occurence = "unique";
@@ -62,8 +62,6 @@ class gaimRaxas extends BaseShip{
         		
 
 		$this->addFrontSystem(new Thruster(4, 20, 0, 5, 1));
-		$this->addFrontSystem(new ParticleConcentrator(4, 9, 7, 300, 60));
-		$this->addFrontSystem(new ParticleConcentrator(4, 9, 7, 300, 60));
 		$this->addFrontSystem(new MolecularSlicerBeamL(4, 12, 10, 300, 60));
 		$this->addFrontSystem(new MolecularSlicerBeamL(4, 12, 10, 300, 60));
 		$this->addFrontSystem(new PhasingPulseCannonH(4, 9, 5, 240, 60));
@@ -76,6 +74,24 @@ class gaimRaxas extends BaseShip{
 		$this->addAftSystem(new PhasingPulseCannonH(4, 9, 5, 120, 240));
 		$this->addAftSystem(new Bulkhead(0, 2));
 		$this->addAftSystem(new Bulkhead(0, 2));
+		
+		$diffuserPort = new EnergyDiffuser(4, 9, 2, 180, 270);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+		$tendril=new DiffuserTendril(10,'L');//absorbtion capacity,side
+		$diffuserPort->addTendril($tendril);
+		$this->addAftSystem($tendril);
+		$tendril=new DiffuserTendril(10,'L');//absorbtion capacity,side
+		$diffuserPort->addTendril($tendril);
+		$this->addAftSystem($tendril);
+        $this->addAftSystem($diffuserPort);		
+		
+		$diffuserStbd = new EnergyDiffuser(4, 9, 2, 90, 180);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+		$tendril=new DiffuserTendril(10,'R');//absorbtion capacity,side
+		$diffuserStbd->addTendril($tendril);
+		$this->addAftSystem($tendril);
+		$tendril=new DiffuserTendril(10,'R');//absorbtion capacity,side
+		$diffuserStbd->addTendril($tendril);
+		$this->addAftSystem($tendril);
+        $this->addAftSystem($diffuserStbd);		
 
 		$this->addLeftSystem(new Thruster(4, 15, 0, 3, 3));
 		$this->addLeftSystem(new MultiphasedCutter(4, 8, 3, 180, 360));

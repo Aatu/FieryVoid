@@ -655,7 +655,7 @@ window.gamedata = {
                 return false;
             }
 
-			var shipNames = shipManager.power.getPakmaraPlasmaWebShipsNegativePower();
+	/*		var shipNames = shipManager.power.getPakmaraPlasmaWebShipsNegativePower();
             if (shipNames.length > 0) {
                 var negPowerError = "The following ships have insufficient plasma battery power:<br>";
                 for (var index in shipNames) {
@@ -665,7 +665,7 @@ window.gamedata = {
                 negPowerError += "You need to reduce your number of offensive plasma web declarations before you can commit the turn.";
                 window.confirm.error(negPowerError, function () {});
                 return false;
-            }
+            }  */
 		
             ajaxInterface.submitGamedata();
         } else if (gamedata.gamephase == 4) {
