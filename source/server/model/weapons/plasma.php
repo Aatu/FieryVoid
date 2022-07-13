@@ -1340,13 +1340,13 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         public $hextarget = true;
         public $hidetarget = false;
         public $priority = 1; //to show effect quickly
+ 	   	public $priorityArray = array(1=>1, 2=>2);        
                 
         public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
         public $doNotIntercept = true; //do not intercept this weapon, period
 		public $canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
         public $useOEW = false; //not important, really
         		
-//		public $priorityArray = array(1=>1, 2=>1); //Both modes should be fired very early???
         public $loadingtime = 1;
         public $intercept = 0; 
 

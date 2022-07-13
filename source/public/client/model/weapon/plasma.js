@@ -151,6 +151,17 @@ var PakmaraPlasmaWeb = function  PakmaraPlasmaWeb(json, ship) {
 PakmaraPlasmaWeb.prototype = Object.create(Weapon.prototype);
 PakmaraPlasmaWeb.prototype.constructor =  PakmaraPlasmaWeb;
 
+GraviticBolt.prototype.clearBoost = function () {
+    for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
+        if (power.type == 2) {
+            system.power.splice(i, 1);
+            return;
+        }
+    }
+};
+
 PakmaraPlasmaWeb.prototype.hasMaxBoost = function(){
     return true;
 }
