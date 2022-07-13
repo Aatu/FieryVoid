@@ -21,9 +21,7 @@ class OmegaEpsilon  extends BaseShip{
 		//$this->variantOf = 'Omega Destroyer (Alpha)'; //by SCS it's NOT an Omega variant, but a separate hull!
 		//$this->occurence = 'common'; 
 		$this->unofficial = true; //this is OFFICIAL AoG unit, but its deployment requires opponent consent - which is essentially the same as custom unit...
-
-		$this->advancedArmor = true;          
-		
+     	
 		$this->enhancementOptionsDisabled[] = 'SHAD_DIFF'; //no diffuser upgrades for EA ships - they don't have know how to tabper with Shadow systems to that extent!
 		
         $this->forwardDefense = 15;
