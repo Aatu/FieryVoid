@@ -1468,7 +1468,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 				$rolled = Dice::d(100);
 				$fireOrder->rolled = $rolled; ///and auto-hit ;)
 				$fireOrder->shotshit++;
-				$fireOrder->pubnotes .= "All fighters in target hex take damage" ; //just information for player, actual applying was done in calculateHitBase method		
+				$fireOrder->pubnotes .= "All fighters in target hex take damage, unless previously hit by a Plasma Web this turn" ; //just information for player, actual applying was done in calculateHitBase method		
 
 				//deal damage!
 				$target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
@@ -1515,7 +1515,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 	public function AOEdamage($target, $shooter, $fireOrder, $gamedata)    {
         if ($target->isDestroyed()) return; //no point allocating
         	
-        if (isset(PakmaraPlasmaWeb::$alreadyEngaged[$targetUnit->id])) return; //hex already engaged by a previous Plasma Web
+        if (isset(PakmaraPlasmaWeb::$alreadyEngaged[$target->id])) return; //hex already engaged by a previous Plasma Web
         	
             foreach ($target->systems as $fighter) {
                 if ($fighter == null || $fighter->isDestroyed()) {
@@ -1526,9 +1526,9 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         $damage = $this->getDamageMod($damage, $shooter, $target, null, $gamedata);
         $damage -= $target->getDamageMod($shooter, null, $gamedata->turn, $this);
 
-                $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
+              $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
                 
-        PakmaraPlasmaWeb::$alreadyEngaged[$targetUnit->id] = true;//mark engaged        
+        PakmaraPlasmaWeb::$alreadyEngaged[$target->id] = true;//mark engaged        
 			}
 		}
 		
