@@ -24,6 +24,7 @@ class OmegaEpsilon  extends BaseShip{
         
 		
 		$this->enhancementOptionsDisabled[] = 'SHAD_DIFF'; //no diffuser upgrades for EA ships - they don't have know how to tabper with Shadow systems to that extent!
+		$this->advancedArmor = true;   
 		
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
