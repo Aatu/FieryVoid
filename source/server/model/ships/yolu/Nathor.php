@@ -20,8 +20,9 @@ class Nathor extends FighterFlight{
 		$this->turncost = 0.33;
 		$this->iniativebonus = 9*5;
 		
-//		$this->gravitic = true; 
-//		$this->dropOutBonus = -2; 
+		$this->gravitic = true; //not 100% clear from SCS if these ships are gravitic, but every other Yolu ship is so seems safe to assume.
+//		$this->dropOutBonus = -2; //Less easier to argue they should get the same bonus ro dropout rolls that the Utan gets
+		 
         $this->populate();
     }
 
