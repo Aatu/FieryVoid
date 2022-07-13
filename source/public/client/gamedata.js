@@ -650,7 +650,7 @@ window.gamedata = {
                     var name = shipNames[index];
                     negPowerError += "- " + name + "<br>";
                 }
-                negPowerError += "You need to reduce Your firing declarations before you can commit the turn.";
+                negPowerError += "You need to reduce your firing declarations before you can commit the turn.";
                 window.confirm.error(negPowerError, function () {});
                 return false;
             }
