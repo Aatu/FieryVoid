@@ -1372,7 +1372,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
     
         public $fireControlArray = array( 1=>array(50,50,50), 2=>array(50, null, null)); // fighters, <mediums, <capitals 
 		
-	//	private static $alreadyEngaged = array(); //units that were already engaged by a Plasma Web this turn (multiple Webs do not stack).
+		private static $alreadyEngaged = array(); //units that were already engaged by a Plasma Web this turn (multiple Webs do not stack).
 
     public $possibleCriticals = array(
             17=>array("OutputReduced1", "ReducedDamage"));  //Provding Outputreduced1 works then replace reduced range from TT with reduced damage for Offensive mode
@@ -1488,6 +1488,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 				break;
 		}  
 		
+
+				
 		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
 		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!		
 		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
@@ -1512,6 +1514,9 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 //source hex will be taken from firing unit, damage will be individually rolled for each fighter hit
 	public function AOEdamage($target, $shooter, $fireOrder, $gamedata)    {
         if ($target->isDestroyed()) return; //no point allocating
+        	
+        if (isset(PakmaraPlasmaWeb::$alreadyEngaged[$targetUnit->id])) return; //hex already engaged by a previous Plasma Web
+        	
             foreach ($target->systems as $fighter) {
                 if ($fighter == null || $fighter->isDestroyed()) {
                     continue;
@@ -1522,6 +1527,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         $damage -= $target->getDamageMod($shooter, null, $gamedata->turn, $this);
 
                 $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
+                
+        PakmaraPlasmaWeb::$alreadyEngaged[$targetUnit->id] = true;//mark engaged        
 			}
 		}
 		
