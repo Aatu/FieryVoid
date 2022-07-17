@@ -2550,7 +2550,9 @@ spl_autoload_register(
 				'pakmaraplasmaweb' => '/server/model/weapons/plasma.php',
 				'fuser' => '/server/model/weapons/plasma.php',
 				'rangedfuser' => '/server/model/weapons/plasma.php',
-				'dualplasmastream' => '/server/model/weapons/plasma.php',															
+				'dualplasmastream' => '/server/model/weapons/plasma.php',	
+				'reshkasu' => '/server/model/ships/pakmara/Reshkasu.php',
+				'shobogna' => '/server/model/ships/pakmara/Shobogna.php',																			
 				
 
 				//Hyach
