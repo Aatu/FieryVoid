@@ -8,7 +8,7 @@ class Reshkasu extends BaseShip{
 		$this->faction = "Pakmara";
 		$this->phpclass = "Reshkasu";
 		$this->imagePath = "img/ships/PakmaraReshkasu.png";
-		$this->shipClass = "Resh'kas'u Light Carrier ";
+		$this->shipClass = "Resh'kas'u Light Carrier";
 		$this->shipSizeClass = 3;
 
 		$this->fighters = array("medium"=>12);
@@ -26,8 +26,7 @@ class Reshkasu extends BaseShip{
 
 		$this->iniativebonus = -1*5;
 		
-   		$this->critRollMod = -10; //to compensate Pakmara ships for combing two C&C systems into one.
-   				
+  				
 
 		$this->addPrimarySystem(new Reactor(5, 23, 0, 0));
 		$this->addPrimarySystem(new JumpEngine(4, 15, 4, 48));
@@ -40,7 +39,7 @@ class Reshkasu extends BaseShip{
 		$this->addFrontSystem(new Thruster(4, 13, 0, 4, 1));
 		$this->addFrontSystem(new PakmaraPlasmaWeb(2, 4, 2, 240, 60));
 		$this->addFrontSystem(new PakmaraPlasmaWeb(2, 4, 2, 300, 120));
-		$this->addFrontSystem(new PlasmaAccelerator(2, 6, 2, 270, 90));
+		$this->addFrontSystem(new PlasmaAccelerator(2, 6, 2, 300, 60));
 		$this->addFrontSystem(new PlasmaBattery(2, 2, 0, 2));//armor, structure, power req, output 
 		$this->addFrontSystem(new PlasmaBattery(2, 2, 0, 2));	
 
@@ -55,13 +54,13 @@ class Reshkasu extends BaseShip{
 		$this->addLeftSystem(new Thruster(4, 13, 0, 5, 3));
 		$this->addLeftSystem(new HeavyPlasma(3, 8, 5, 300, 60));
 		$this->addLeftSystem(new MediumPlasma(2, 5, 3, 180, 360));
-		$this->addLeftSystem(new CargoBay(2, 8, 0, 0));
+		$this->addLeftSystem(new CargoBay(2, 8));
 
 
 		$this->addRightSystem(new Thruster(4, 13, 0, 5, 4));
 		$this->addRightSystem(new HeavyPlasma(3, 8, 5, 300, 60));
 		$this->addRightSystem(new MediumPlasma(2, 5, 3, 0, 180));
-		$this->addRightSystem(new CargoBay(2, 8, 0, 4));
+		$this->addRightSystem(new CargoBay(2, 8));
 
         
         $this->addFrontSystem(new Structure( 4, 36));
