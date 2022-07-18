@@ -642,7 +642,7 @@ window.gamedata = {
         } else if (gamedata.gamephase == 3) { //firing phase
 		
 			//prevent Vorlons from borrowing future power for firing 
-			//Capacitor-equipped ships ONLY cannot commit firing with negative power balance (they're only ones that actiely use power in this phase, AND they don't have any legal option of achieving negative balance by other means)
+			//Capacitor-equipped ships cannot commit firing with negative power balance (they actively use power in this phase, AND they don't have any legal option of achieving negative balance by other means)
 			var shipNames = shipManager.power.getCapacitorShipsNegativePower();
             if (shipNames.length > 0) {
                 var negPowerError = "The following ships have insufficient power:<br>";
@@ -655,17 +655,18 @@ window.gamedata = {
                 return false;
             }
 
-	/*		var shipNames = shipManager.power.getPakmaraPlasmaWebShipsNegativePower();
-            if (shipNames.length > 0) {
-                var negPowerError = "The following ships have insufficient plasma battery power:<br>";
-                for (var index in shipNames) {
-                    var name = shipNames[index];
+			//Likewise, Plasma Battery-equipped ships cannot commit firing with negative power balance (they actively use power in this phase for Plasma Webs, AND they don't have any legal option of achieving negative balance by other means)
+			var batteryShips = shipManager.power.getPakmaraPlasmaWebShipsNegativePower();
+            if (batteryShips.length > 0) {
+                var negPowerError = "The following ships have insufficient battery power:<br>";
+                for (var index in batteryShips) {
+                    var name = batteryShips[index];
                     negPowerError += "- " + name + "<br>";
                 }
-                negPowerError += "You need to reduce your number of offensive plasma web declarations before you can commit the turn.";
+                negPowerError += "You need to reduce your number of Plasma Webs firing in Offensive Mode before you can commit the Firing turn.";
                 window.confirm.error(negPowerError, function () {});
                 return false;
-            }  */
+            }  
 		
             ajaxInterface.submitGamedata();
         } else if (gamedata.gamephase == 4) {
