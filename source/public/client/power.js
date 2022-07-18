@@ -220,6 +220,25 @@ shipManager.power = {
 		return shipNames;
 	},	//endof getCapacitorShipsNegativePower
 
+	//like getShipsNegativePower BUT only looks for PlasmaBattery-equipped ships
+	getPlasmaBatteryShipsNegativePower: function getPlasmaBatteryShipsNegativePower() {
+		var batteryShips = new Array();
+		var counter = 0;
+		for (var i in gamedata.ships) {
+			var ship = gamedata.ships[i];
+			if (ship.unavailable) continue;
+			if (ship.flight) continue;
+			if (ship.userid != gamedata.thisplayer) continue;			
+			if (!(shipManager.systems.getSystemByName(ship, "powerCapacitor"))) continue;
+			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
+			if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) < 0) {
+				batteryShips[counter] = ship.name;
+				counter++;
+			}
+		}
+		return batteryShips;
+	},	//endof getPlasmaBatteryShipsNegativePower
+
 	getPowerNeedForSection: function getPowerNeedForSection(ship, loc) {
 		var power = 0;
 
