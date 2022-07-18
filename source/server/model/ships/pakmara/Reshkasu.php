@@ -25,10 +25,13 @@ class Reshkasu extends BaseShip{
 		$this->pivotcost = 4;
 
 		$this->iniativebonus = -1*5;
+		
+   		$this->critRollMod = -10; //to compensate Pakmara ships for combing two C&C systems into one.
+   				
 
 		$this->addPrimarySystem(new Reactor(5, 23, 0, 0));
 		$this->addPrimarySystem(new JumpEngine(4, 15, 4, 48));
-		$this->addPrimarySystem(new CnC(6, 12, 0, 0));
+		$this->addPrimarySystem(new ProtectedCnC(6, 12, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 12, 6, 7));
 		$this->addPrimarySystem(new Engine(5, 18, 0, 12, 3));
 		$this->addPrimarySystem(new Hangar(3, 15));
