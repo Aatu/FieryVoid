@@ -20,7 +20,7 @@ class Porfatis extends FighterFlight{
         $this->turncost = 0.33;
 		$this->turndelay = 0;
         
-        $this->iniativebonus = 17*5
+        $this->iniativebonus = 17*5;
         $this->populate();       
 
     }
