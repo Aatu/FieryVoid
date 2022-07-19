@@ -2557,7 +2557,9 @@ spl_autoload_register(
 				'porfatis' => '/server/model/ships/pakmara/Porfatis.php',
 				'pshulshi' => '/server/model/ships/pakmara/Pshulshi.php',
 				'pshultau' => '/server/model/ships/pakmara/Pshultau.php',
-				'trashuli' => '/server/model/ships/pakmara/Trashuli.php',																			
+				'trashuli' => '/server/model/ships/pakmara/Trashuli.php',
+				'urikhal' => '/server/model/ships/pakmara/Urikhal.php',	
+				'tharnotak' => '/server/model/ships/pakmara/Tharnotak.php',																										
 				
 
 				//Hyach
