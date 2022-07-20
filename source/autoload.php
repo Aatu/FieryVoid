@@ -2559,7 +2559,11 @@ spl_autoload_register(
 				'pshultau' => '/server/model/ships/pakmara/Pshultau.php',
 				'trashuli' => '/server/model/ships/pakmara/Trashuli.php',
 				'urikhal' => '/server/model/ships/pakmara/Urikhal.php',	
-				'tharnotak' => '/server/model/ships/pakmara/Tharnotak.php',																										
+				'tharnotak' => '/server/model/ships/pakmara/Tharnotak.php',								'padashar' => '/server/model/ships/pakmara/Padashar.php',
+				'artees' => '/server/model/ships/pakmara/Artees.php',
+				'simsalle' => '/server/model/ships/pakmara/Simsalle.php',
+				'trashue' => '/server/model/ships/civilians/Trashue.php',
+				'plasalle' => '/server/model/ships/civilians/Plasalle.php',																																							
 				
 
 				//Hyach
