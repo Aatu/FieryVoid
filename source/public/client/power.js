@@ -203,38 +203,62 @@ shipManager.power = {
 
 	//like getShipsNegativePower BUT only looks for PowerCapacitor-equipped ships
 	getCapacitorShipsNegativePower: function getCapacitorShipsNegativePower() {
-		var shipNames = new Array();
-		var counter = 0;
-		for (var i in gamedata.ships) {
-			var ship = gamedata.ships[i];
-			if (ship.unavailable) continue;
-			if (ship.flight) continue;
-			if (ship.userid != gamedata.thisplayer) continue;			
-			if (!(shipManager.systems.getSystemByName(ship, "powerCapacitor"))) continue;
-			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
-			if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) < 0) {
-				shipNames[counter] = ship.name;
-				counter++;
+			var shipNames = new Array();
+		//	var counter = 0;
+			for (var i in gamedata.ships) {
+				var ship = gamedata.ships[i];
+				if (ship.unavailable) continue;
+				if (ship.flight) continue;
+				if (ship.userid != gamedata.thisplayer) continue;			
+				if (!(shipManager.systems.getSystemByName(ship, "powerCapacitor"))) continue;
+				if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
+				if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) < 0) {
+					shipNames[counter] = ship.name;
+					counter++;
+				}
 			}
-		}
-		return shipNames;
-	},	//endof getCapacitorShipsNegativePower
+			return shipNames;
+		},	//endof getCapacitorShipsNegativePower
 
 	//like getShipsNegativePower BUT only looks for PlasmaBattery-equipped ships
 	getPlasmaBatteryShipsNegativePower: function getPlasmaBatteryShipsNegativePower() {
-		var batteryShips = new Array();
-		var counter = 0;
-		for (var i in gamedata.ships) {
-			var ship = gamedata.ships[i];
-			if (ship.unavailable) continue;
-			if (ship.flight) continue;
-			if (ship.userid != gamedata.thisplayer) continue;			
-			if (!(shipManager.systems.getSystemByName(ship, "powerCapacitor"))) continue;
-			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
-			if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) < 0) {
-				batteryShips[counter] = ship.name;
-				counter++;
+			var batteryShips = new Array();
+	//		var counter = 0;
+			for (var i in gamedata.ships) {
+	  var ship = gamedata.ships[i];
+	            if (ship.unavailable) continue;
+	            if (ship.flight) continue;
+	            if (ship.userid != gamedata.thisplayer) continue;
+	            if (!(shipManager.systems.getSystemByName(ship, "PlasmaBattery"))) continue;
+	            if (shipManager.isDestroyed(ship)) continue;
+
+var batteryPowerAvailable = 0;
+//YOUR TASK: calculate battery power available (find all batteries that are not destroyed, sum up their contents)
+
+                   for (var i = 0; i < ship.systems.length; i++) {
+                        var currBattery = ship.systems[i];
+              	         if (currBattery.name == "PlasmaBattery"){ //only Plasma Batteries  are of interest 
+							batteryPowerAvailable += shipManager.systems.getOutput(ship, currBattery);                                                              
+				}
+			}	
+                          
+var batteryPowerRequired = 0;
+//YOUR TASK: calculate battery power required (find all Plasma Webs that are firing offensively without being boosted)			
+					for (var i = 0; i < ship.systems.length; i++) {
+                        var currWeb = ship.systems[i];
+ 						if(currWeb.name == "PakmaraPlasmaWeb"){ //only Plasma Webs  are of interest 
+ 							for (var k = 0; k < currWeb.fireOrders.length; k++)
+ 							var currFireOrder = currWeb.fireOrders[k];
+							if ((currWeb.firingmode == "2") && (shipManager.power.getBoost(currWeb) > 0)) {				 	
+  						 	batteryPowerRequired += 1;      
+		                	}
+						}         	
+					
 			}
+            if (batteryPowerAvailable < batteryPowerRequired) {
+                batteryShips[counter] = ship.name;
+                counter++;
+            }
 		}
 		return batteryShips;
 	},	//endof getPlasmaBatteryShipsNegativePower
