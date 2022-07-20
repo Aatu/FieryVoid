@@ -5,7 +5,7 @@ class Urikhal extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 445;
-		$this->faction = "Pakmara";
+		$this->faction = "Pak'ma'ra";
         $this->phpclass = "Urikhal";
         $this->imagePath = "img/ships/PakmaraUrikhal.png";
         $this->shipClass = "Urik'hal Fast Destroyer";

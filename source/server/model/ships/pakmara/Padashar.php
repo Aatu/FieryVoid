@@ -1,17 +1,19 @@
 <?php
-class Trashuli extends MediumShip{
+class Padashar extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 315;
+		$this->pointCost = 350;
 		$this->faction = "Pak'ma'ra";
-        $this->phpclass = "Trashuli";
+        $this->phpclass = "Padashar";
         $this->imagePath = "img/ships/PakmaraTrashuli.png";
-        $this->shipClass = "Tra'shu'li Armed Liner";
+        $this->shipClass = "Pa'da'shar Troop Liner";
         $this->canvasSize = 100;
+			$this->variantOf = "Tra'shu'li Armed Liner";
+			$this->occurence = "uncommon";	        
 
-        $this->isd = 2195;
+        $this->isd = 2231;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 14;
@@ -27,17 +29,16 @@ class Trashuli extends MediumShip{
         $this->addPrimarySystem(new Scanner(3, 6, 4, 5));
 		$this->addPrimarySystem(new ProtectedCnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Engine(3, 11, 0, 10, 2));
-        $this->addPrimarySystem(new Hangar(2, 4));
+        $this->addPrimarySystem(new Hangar(2, 8));
 		$this->addPrimarySystem(new Thruster(4, 10, 0, 4, 3));
 		$this->addPrimarySystem(new Thruster(4, 10, 0, 4, 4));
-		$this->addPrimarySystem(new Quarters(2, 9));
-		$this->addPrimarySystem(new Quarters(2, 9));	
-		$this->addPrimarySystem(new CargoBay(2, 8));			
+		$this->addPrimarySystem(new Quarters(2, 18));
+		$this->addPrimarySystem(new Quarters(2, 18));			
 		
         $this->addFrontSystem(new Thruster(3, 8, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 4, 1));
 		$this->addFrontSystem(new PlasmaBattery(2, 2, 0, 2));
-		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));	                
+		$this->addFrontSystem(new PlasmaAccelerator(3, 10, 5, 300, 60));	                
 		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 240, 60));
 		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 300, 120));		
 		
@@ -51,7 +52,6 @@ class Trashuli extends MediumShip{
         $this->hitChart = array(
         		0=> array(
         				7 => "Thruster",
-						9 => "Cargo Bay",
 						12 => "Quarters",
 						14 => "Scanner",
 						16 => "Engine",
@@ -62,7 +62,7 @@ class Trashuli extends MediumShip{
         		1=> array(
         				5 => "Thruster",
                         6 => "Plasma Battery",
-        				7 => "Heavy Plasma Cannon",                      		
+        				7 => "Plasma Accelerator",                      		
         				9 => "Medium Plasma Cannon",
         				17 => "Structure",
         				20 => "Primary",

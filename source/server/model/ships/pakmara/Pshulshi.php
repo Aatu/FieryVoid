@@ -5,7 +5,7 @@ class Pshulshi extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 850;
-		$this->faction = "Pakmara";
+		$this->faction = "Pak'ma'ra";
 		$this->phpclass = "Pshulshi";
 		$this->imagePath = "img/ships/PakmaraPshulshi.png";
 		$this->shipClass = "Pshul'shi Dreadnought";

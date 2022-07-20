@@ -5,7 +5,7 @@ class Orshilti extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 30*6;
-        $this->faction = "Pakmara";
+        $this->faction = "Pak'ma'ra";
         $this->phpclass = "Orshilti";
         $this->shipClass = "Or'shil'ti Assault Shuttles";
         $this->imagePath = "img/ships/PakmaraOrshilti.png";
