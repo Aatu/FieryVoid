@@ -10,6 +10,7 @@ class Tharnotak extends BaseShip{
 		$this->imagePath = "img/ships/PakmaraTharnotak.png";
 		$this->shipClass = "Thar'not'ak Plasma Cruiser";
 		$this->shipSizeClass = 3;
+		$this->limited = 10;		
 	    
         $this->isd = 2248;
 

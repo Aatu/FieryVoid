@@ -63,7 +63,7 @@ class Pshultau extends BaseShip{
 
 
 		$this->addRightSystem(new Thruster(4, 15, 0, 6, 4));
-		$this->addRightSystem(new HeavyPlasma(5, 8, 5, 300, 60));
+		$this->addRightSystem(new HeavyPlasma(5, 8, 5, 0, 60));
 		$this->addRightSystem(new MediumPlasma(2, 5, 3, 0, 120));
 		$this->addRightSystem(new MediumPlasma(2, 5, 3, 60, 180));
 		$this->addRightSystem(new PakmaraPlasmaWeb(2, 4, 2, 0, 180));				

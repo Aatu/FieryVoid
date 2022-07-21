@@ -44,7 +44,7 @@ class Artees extends MediumShip{
         $this->addAftSystem(new Thruster(2, 10, 0, 5, 2));
         $this->addAftSystem(new Thruster(2, 10, 0, 5, 2));
 		$this->addAftSystem(new PakmaraPlasmaWeb(2, 4, 2, 0, 360));   
-		$this->addAftSystem(new PakmaraPlasmaWeb(2, 4, 2, 90, 180));				
+		$this->addAftSystem(new PakmaraPlasmaWeb(2, 4, 2, 90, 270));				
        
         $this->addPrimarySystem(new Structure( 3, 54));
         

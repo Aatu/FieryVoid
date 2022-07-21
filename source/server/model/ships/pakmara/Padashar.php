@@ -45,7 +45,7 @@ class Padashar extends MediumShip{
         $this->addAftSystem(new Thruster(2, 10, 0, 5, 2));
         $this->addAftSystem(new Thruster(2, 10, 0, 5, 2));
 		$this->addAftSystem(new PakmaraPlasmaWeb(2, 4, 2, 0, 360));   
-		$this->addAftSystem(new MediumPlasma(2, 5, 3, 90, 180));				
+		$this->addAftSystem(new MediumPlasma(2, 5, 3, 90, 270));				
        
         $this->addPrimarySystem(new Structure( 3, 54));
         
