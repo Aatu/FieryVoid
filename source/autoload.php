@@ -1092,6 +1092,7 @@ spl_autoload_register(
                 'ultralightgraviticbolt' => '/server/model/weapons/gravitic.php',
                 'upgtorotha' => '/server/model/ships/minbari/upgTorotha.php',
                 'utan' => '/server/model/ships/yolu/utan.php',
+                'nathor' => '/server/model/ships/yolu/Nathor.php',
                 'vakar' => '/server/model/ships/narn/vakar.php',
                 'valtor' => '/server/model/ships/centauri_old/valtor.php',
                 'valtor1870' => '/server/model/ships/centauri_old/valtor1870.php',
@@ -2600,6 +2601,7 @@ spl_autoload_register(
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
+				'gaimraxas' => '/server/model/ships/customs/gaimRaxas.php',
 				
 
 

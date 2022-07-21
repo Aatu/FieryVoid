@@ -151,16 +151,20 @@ var PakmaraPlasmaWeb = function  PakmaraPlasmaWeb(json, ship) {
 PakmaraPlasmaWeb.prototype = Object.create(Weapon.prototype);
 PakmaraPlasmaWeb.prototype.constructor =  PakmaraPlasmaWeb;
 
+PakmaraPlasmaWeb.prototype.clearBoost = function () {
+    for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
+        if (power.type == 2) {
+            system.power.splice(i, 1);
+            return;
+        }
+    }
+};
+
 PakmaraPlasmaWeb.prototype.hasMaxBoost = function(){
     return true;
 }
 PakmaraPlasmaWeb.prototype.getMaxBoost = function(){
     return this.maxBoostLevel;
 }
-
-/* First attempt at adding new type of crit to Plasma Web
-PakmaraPlasmaWeb.prototype.calculateSpecialRangePenalty = function (distance) {
-	var range = 3
-	var range = range - 2*shipManager.criticals.hasCritical(this, 'ReducedRangePlasmaWeb');//account for range reduced critical(s)
-    return range;
-};  */  

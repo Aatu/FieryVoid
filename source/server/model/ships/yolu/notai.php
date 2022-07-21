@@ -10,6 +10,7 @@ class Notai extends BaseShip{
         $this->imagePath = "img/ships/notali.png";
         $this->shipClass = "Notai Assault Carrier";
         $this->gravitic = true;
+        $this->fighters = array("assault shuttles"=>18);        
 
         $this->isd = 2096;
 

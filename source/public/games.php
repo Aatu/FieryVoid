@@ -63,11 +63,9 @@ if (isset($_SESSION["user"])) {
 -->
        
 		
-		---------- <b>LATEST NEWS - March 2022</b> ----------	
-	    <br><b>Mode change bug fixed</b> - Flak Cannons should now work correctly
-	    <br><b>Star Trek TOS era</b> - playtest fleet has arrived :)
-	    <br><b>Visual highlight</b> - underlying circles (ship about to move, DEW/CCEW...) size increased by half
-	    <br><b>Nexus/Escalation updates</b> - polishing, fixing, shining and balancing, courtesy of Geoffrey
+		---------- <b>LATEST NEWS - July 2022</b> ----------	
+	    <br><b>Minbari Flyer images</b> - courtesy of Wolfgang
+	    <br><b>FC used correction</b> - Large Shadow ships should now be fired upon using correct FC
 
 	    
 		<!-- <br><br>---------- <b>update 8th of November</b> ---------- 
