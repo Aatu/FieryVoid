@@ -266,6 +266,16 @@ Strike Force - Orieni military is split into a few branches. Of interest for fle
 	In-game checker does not take this rule into account.
 	
 
+PAK'MA'RA
+Pak'ma' ra ships are quick, with excellent thrust and engine power, but are not maneouverable.  They depend on a heavy armament of plasma-based weapons with wide firing arcs to win battles.  Their unique plasma battery systems allow them to store power for opportune moments whilst their plasma webs provide both defensive cover and close-range anti-fighter protection.
+
+Differences from B5W Tabletop:
+	Plasma Webs fired in Offensive modes do not persist in the targetted hex for the following turn, meaning they will not damage any fighter units that move through them on the subsequent turn.
+	As it is not possible to implement two CnC systems on ships in FV Pakmara ships instead have these are combined into a single CnC sytem with the combined health of both TT CnCs and improved armour / critical hit chart.  Note, Pakmara ships still suffer double the intiative penalty on CnC as they do in Tabletop.
+	The fleet-wide intiative penalty for Pak'ma'ra fleets of three ships or more is not implemented in FV.
+
+
+
 RAIDERS & PRIVATEERS
 The Raiders are not a single faction with a standardized force list. The Raiders "faction" represents all kinds of pirates, privateers, and wanderers in the Babylon 5
 universe. Specific raider factions will be listed in the unit name, such as "Centauri Privateer". Any unit without a specific faction name is a generic raider and can be fielded by any Raider faction. It is impossible to generate 
