@@ -88,6 +88,64 @@ class PlasmaStream extends Raking{
 }//endof class PlasmaStream
 
 
+class DualPlasmaStream extends Raking{
+	public $name = "DualPlasmaStream";
+	public $displayName = "Dual Plasma Stream";
+	public $iconPath = "DualPlasmaStream.png"; 	
+	/*
+	public $animation = "beam";
+	public $animationColor = array(75, 250, 90);
+	public $trailColor = array(75, 250, 90);
+	public $projectilespeed = 20;
+	public $animationWidth = 4;
+	public $animationExplosionScale = 0.30;
+	public $trailLength = 400;
+	*/
+	public $priority = 2;
+		        
+	public $raking = 5;
+	public $loadingtime = 2;
+	public $rangeDamagePenalty = 2;	
+	public $rangePenalty = 1;
+	public $fireControl = array(-4, 2, 2);
+	
+	public $damageType = "Raking"; 
+	public $weaponClass = "Plasma";
+
+	public $firingModes = array(1 => "Raking");
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+	
+	public function setSystemDataWindow($turn){		
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+	    $this->data["Special"] .= "Damage reduced by 2 points per hex.";
+	    $this->data["Special"] .= "<br>Reduces armor of systems hit.";	
+	    $this->data["Special"] .= "<br>Ignores half of armor.";
+	}
+		 
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+		if (!$system->advancedArmor){//advanced armor prevents effect 
+			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
+			$crit->updated = true;
+			    $crit->inEffect = false;
+			    $system->criticals[] =  $crit;
+		}
+	}
+		
+	public function getDamage($fireOrder){        return Dice::d(10,6)+8;   }
+	public function setMinDamage(){     $this->minDamage = 14;     }
+	public function setMaxDamage(){     $this->maxDamage = 68;      }
+	
+}//endof class DualPlasmaStream
+
 
 class ShockCannon extends Weapon{
         public $name = "shockCannon";

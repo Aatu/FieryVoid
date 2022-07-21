@@ -24,7 +24,7 @@ class Simsalle extends BaseShip{
 
 		$this->iniativebonus = -1*5;
 
-		$this->addPrimarySystem(new Reactor(5, 18, 0, 2));
+		$this->addPrimarySystem(new Reactor(4, 18, 0, 2));
 		$this->addPrimarySystem(new ProtectedCnC(5, 12, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 12, 6, 6));
 		$this->addPrimarySystem(new Engine(4, 14, 0, 10, 3));
@@ -36,7 +36,7 @@ class Simsalle extends BaseShip{
 		$this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
 		$this->addFrontSystem(new PakmaraPlasmaWeb(2, 4, 2, 180, 360));
 		$this->addFrontSystem(new PakmaraPlasmaWeb(2, 4, 2, 0, 180));	
-		$this->addFrontSystem(new PlasmaBattery(2, 2, 0, 2));//armor, structure, power req, output 
+		$this->addFrontSystem(new PlasmaBattery(2, 2, 0, 2)); 
 		$this->addFrontSystem(new PlasmaBattery(2, 2, 0, 2));	
 
 

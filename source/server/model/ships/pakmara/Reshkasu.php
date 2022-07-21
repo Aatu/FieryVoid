@@ -39,8 +39,8 @@ class Reshkasu extends BaseShip{
 		$this->addFrontSystem(new Thruster(4, 13, 0, 4, 1));
 		$this->addFrontSystem(new PakmaraPlasmaWeb(2, 4, 2, 240, 60));
 		$this->addFrontSystem(new PakmaraPlasmaWeb(2, 4, 2, 300, 120));
-		$this->addFrontSystem(new PlasmaAccelerator(2, 6, 2, 300, 60));
-		$this->addFrontSystem(new PlasmaBattery(2, 2, 0, 2));//armor, structure, power req, output 
+		$this->addFrontSystem(new PlasmaAccelerator(4, 10, 5, 300, 60));
+		$this->addFrontSystem(new PlasmaBattery(2, 2, 0, 2));
 		$this->addFrontSystem(new PlasmaBattery(2, 2, 0, 2));	
 
 

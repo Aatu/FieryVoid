@@ -219,11 +219,12 @@ shipManager.power = {
 			}
 			return shipNames;
 		},	//endof getCapacitorShipsNegativePower
+		
 
 	//like getShipsNegativePower BUT only looks for PlasmaBattery-equipped ships
 	getPlasmaBatteryShipsNegativePower: function getPlasmaBatteryShipsNegativePower() {
 			var batteryShips = new Array();
-	//		var counter = 0;
+			var counter = 0;
 			for (var i in gamedata.ships) {
 	  var ship = gamedata.ships[i];
 	            if (ship.unavailable) continue;
@@ -233,7 +234,7 @@ shipManager.power = {
 	            if (shipManager.isDestroyed(ship)) continue;
 
 var batteryPowerAvailable = 0;
-//YOUR TASK: calculate battery power available (find all batteries that are not destroyed, sum up their contents)
+//alculate battery power available (find all batteries that are not destroyed, sum up their contents)
 
                    for (var i = 0; i < ship.systems.length; i++) {
                         var currBattery = ship.systems[i];
@@ -243,17 +244,17 @@ var batteryPowerAvailable = 0;
 			}	
                           
 var batteryPowerRequired = 0;
-//YOUR TASK: calculate battery power required (find all Plasma Webs that are firing offensively without being boosted)			
+//Calculate battery power required (find all Plasma Webs that are firing offensively without being boosted)			
 					for (var i = 0; i < ship.systems.length; i++) {
                         var currWeb = ship.systems[i];
  						if(currWeb.name == "PakmaraPlasmaWeb"){ //only Plasma Webs  are of interest 
- 							for (var k = 0; k < currWeb.fireOrders.length; k++)
- 							var currFireOrder = currWeb.fireOrders[k];
-							if ((currWeb.firingmode == "2") && (shipManager.power.getBoost(currWeb) > 0)) {				 	
-  						 	batteryPowerRequired += 1;      
-		                	}
-						}         	
-					
+ 							for (var k = 0; k < currWeb.fireOrders.length; k++) {
+                            var currFireOrder = currWeb.fireOrders[k];
+                            if ((currFireOrder.firingMode == "2") && (shipManager.power.getBoost(currWeb) == 0)) {
+                               batteryPowerRequired += 1;
+                            }
+					}       	
+				}	
 			}
             if (batteryPowerAvailable < batteryPowerRequired) {
                 batteryShips[counter] = ship.name;
@@ -262,6 +263,7 @@ var batteryPowerRequired = 0;
 		}
 		return batteryShips;
 	},	//endof getPlasmaBatteryShipsNegativePower
+	
 
 	getPowerNeedForSection: function getPowerNeedForSection(ship, loc) {
 		var power = 0;
