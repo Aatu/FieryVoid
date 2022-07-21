@@ -8,7 +8,7 @@ class Trashue extends MediumShip{
 		$this->faction = "Civilians";
         $this->phpclass = "Trashue";
         $this->imagePath = "img/ships/PakmaraTrashuli.png";
-        $this->shipClass = "Tra'shu'e Freighter";
+        $this->shipClass = "Pak'ma'ra Tra'shu'e Freighter";
         $this->canvasSize = 100;
 
         $this->isd = 2195;
