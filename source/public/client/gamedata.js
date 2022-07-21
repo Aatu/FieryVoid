@@ -658,12 +658,12 @@ window.gamedata = {
 			//Likewise, Plasma Battery-equipped ships cannot commit firing with negative power balance (they actively use power in this phase for Plasma Webs, AND they don't have any legal option of achieving negative balance by other means)
 			var batteryShips = shipManager.power.getPlasmaBatteryShipsNegativePower();
             if (batteryShips.length > 0) {
-                var negPowerError = "The following ships have insufficient battery power:<br>";
+                var negPowerError = "The following ships have insufficient plasma battery power:<br>";
                 for (var index in batteryShips) {
                     var name = batteryShips[index];
                     negPowerError += "- " + name + "<br>";
                 }
-                negPowerError += "You need to reduce your number of Plasma Webs firing in Offensive Mode before you can commit the Firing turn.";
+                negPowerError += "You need to reduce the number of Plasma Webs firing in Offensive Mode before you can commit the turn.";
                 window.confirm.error(negPowerError, function () {});
                 return false;
             }  
