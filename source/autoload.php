@@ -2499,6 +2499,8 @@ spl_autoload_register(
 				'andorianthyzon' => '/server/model/ships/ZTrekFederationEarly/AndorianThyzon.php',
 				'andorianthymasescort' => '/server/model/ships/ZTrekFederationEarly/AndorianThymasEscort.php',
 				'andoriankumari' => '/server/model/ships/ZTrekFederationEarly/AndorianKumari.php',
+				'andoriankumaricommand' => '/server/model/ships/ZTrekFederationEarly/AndorianKumariCommand.php',
+				'andoriankumarigunship' => '/server/model/ships/ZTrekFederationEarly/AndorianKumariGunship.php',
 				'andorianfighter' => '/server/model/ships/ZTrekFederationEarly/AndorianFighter.php',
 				'andorianchimesh' => '/server/model/ships/ZTrekFederationEarly/AndorianChimesh.php',
 				
