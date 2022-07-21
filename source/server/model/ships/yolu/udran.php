@@ -25,6 +25,7 @@ class Udran extends BaseShip{
         $this->rollcost = 4;
         $this->pivotcost = 4;
         $this->iniativebonus = 0;
+	    $this->notes = "Provides +5 Initiative for all friendly Yolu units";        
 
 
         $this->addPrimarySystem(new Reactor(7, 25, 0, 4));

@@ -650,10 +650,22 @@ window.gamedata = {
                     var name = shipNames[index];
                     negPowerError += "- " + name + "<br>";
                 }
-                negPowerError += "You need to reduce Your firing declarations before you can commit the turn.";
+                negPowerError += "You need to reduce your firing declarations before you can commit the turn.";
                 window.confirm.error(negPowerError, function () {});
                 return false;
             }
+
+	/*		var shipNames = shipManager.power.getPakmaraPlasmaWebShipsNegativePower();
+            if (shipNames.length > 0) {
+                var negPowerError = "The following ships have insufficient plasma battery power:<br>";
+                for (var index in shipNames) {
+                    var name = shipNames[index];
+                    negPowerError += "- " + name + "<br>";
+                }
+                negPowerError += "You need to reduce your number of offensive plasma web declarations before you can commit the turn.";
+                window.confirm.error(negPowerError, function () {});
+                return false;
+            }  */
 		
             ajaxInterface.submitGamedata();
         } else if (gamedata.gamephase == 4) {

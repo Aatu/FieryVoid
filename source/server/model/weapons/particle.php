@@ -1429,7 +1429,7 @@ class PentagonArray extends Raking{
 	public $name = "PentagonArray";
 	public $displayName = "Pentagon Array";
 	public $iconPath = "PentagonArray.png";
-	public $animation = "laser";
+	public $animation = "bolt";
 	public $animationColor = array(255, 153, 51);
 	/*
 	public $animationWidth = 3;	

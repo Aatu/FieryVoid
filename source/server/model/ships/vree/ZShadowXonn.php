@@ -27,8 +27,8 @@ class ZShadowXonn extends VreeCapital{
 		$this->forwardDefense = 16;
 		$this->sideDefense = 16;
 
-		$this->imagePath = "img/ships/VreeXonn.png";
-		$this->canvasSize = 200;
+		$this->imagePath = "img/ships/XonnShadow.png";
+		$this->canvasSize = 280;
 
 		$this->addPrimarySystem(new Reactor(6, 25, 0, 0));
 		$this->addPrimarySystem(new Hangar(6, 3));
