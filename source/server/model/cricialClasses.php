@@ -261,6 +261,21 @@ class ReducedIniative extends Critical{
     }
 }
 
+class ReducedIniative2OneTurn extends Critical{
+    public $description = "-20 iniative.";
+    public $oneturn = true;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
+class ReducedIniative2 extends Critical{
+    public $description = "-20 iniative.";
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
 class ShipDisabledOneTurn extends Critical{
     public $description = "Ship disabled for ";
     public $oneturn = true;

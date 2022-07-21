@@ -27,7 +27,7 @@ class Padashar extends MediumShip{
 		
         $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 6, 4, 5));
-		$this->addPrimarySystem(new ProtectedCnC(4, 8, 0, 0));
+		$this->addPrimarySystem(new PakmaraCnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Engine(3, 11, 0, 10, 2));
         $this->addPrimarySystem(new Hangar(2, 8));
 		$this->addPrimarySystem(new Thruster(4, 10, 0, 4, 3));

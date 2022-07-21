@@ -29,7 +29,7 @@ class Simtorka extends BaseShip{
 
 		$this->addPrimarySystem(new Reactor(4, 18, 0, 4));
 		$this->addPrimarySystem(new JumpEngine(4, 15, 4, 48));		
-		$this->addPrimarySystem(new ProtectedCnC(5, 12, 0, 0));
+		$this->addPrimarySystem(new PakmaraCnC(5, 12, 0, 0));
 		$this->addPrimarySystem(new ElintScanner(4, 20, 6, 11));
 		$this->addPrimarySystem(new Engine(4, 14, 0, 10, 3));
 		$this->addPrimarySystem(new Hangar(2, 8));

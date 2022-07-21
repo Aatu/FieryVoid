@@ -30,7 +30,7 @@ class Reshkasu extends BaseShip{
 
 		$this->addPrimarySystem(new Reactor(5, 23, 0, 0));
 		$this->addPrimarySystem(new JumpEngine(4, 15, 4, 48));
-		$this->addPrimarySystem(new ProtectedCnC(6, 12, 0, 0));
+		$this->addPrimarySystem(new PakmaraCnC(6, 12, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 12, 6, 7));
 		$this->addPrimarySystem(new Engine(5, 18, 0, 12, 3));
 		$this->addPrimarySystem(new Hangar(3, 15));

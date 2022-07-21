@@ -1166,6 +1166,28 @@ class ProtectedCnC extends CnC{
 	
 }//endof class ProtectedCnC
 	
+class PakmaraCnC extends CnC{
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= 'This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
+	}
+	
+	public $possibleCriticals = array(
+		8=>"CommunicationsDisrupted", 
+		16=>"PenaltyToHit", 
+		20=>"RestrictedEW", 
+		24=>array("ReducedIniative2OneTurn","ReducedIniative2"), 
+		32=>array("RestrictedEW","ReducedIniative2OneTurn","ReducedIniative2"), 
+		40=>array("RestrictedEW","ReducedIniative2","ShipDisabledOneTurn")
+    );
+	
+}//endof class PakmaraCnC
 
 
 class CargoBay extends ShipSystem{

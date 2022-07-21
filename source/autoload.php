@@ -2544,8 +2544,9 @@ spl_autoload_register(
 				'treknausicaanheavyglider' => '/server/model/ships/ZTrekOther/TrekNausicaanHeavyGlider.php',
 				'treknausicaanvandal' => '/server/model/ships/ZTrekOther/TrekNausicaanVandal.php',
 				
-				//Pakmara
+				//Pak'ma'ra
 				'plasmabattery' => '/server/model/systems/baseSystems.php',
+				'pakmaraCnC' => '/server/model/systems/baseSystems.php',				
 				'ptest' => '/server/model/ships/customs/PTest.php',	
 				'pakmaraplasmaweb' => '/server/model/weapons/plasma.php',
 				'fuser' => '/server/model/weapons/plasma.php',
