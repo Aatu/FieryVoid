@@ -2546,7 +2546,7 @@ spl_autoload_register(
 				
 				//Pak'ma'ra
 				'plasmabattery' => '/server/model/systems/baseSystems.php',
-				'pakmaraCnC' => '/server/model/systems/baseSystems.php',				
+				'pakmaracnc' => '/server/model/systems/baseSystems.php',				
 				'pakmaraplasmaweb' => '/server/model/weapons/plasma.php',
 				'fuser' => '/server/model/weapons/plasma.php',
 				'rangedfuser' => '/server/model/weapons/plasma.php',
