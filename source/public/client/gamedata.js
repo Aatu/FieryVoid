@@ -663,7 +663,7 @@ window.gamedata = {
                     var name = batteryShips[index];
                     negPowerError += "- " + name + "<br>";
                 }
-                negPowerError += "You need to reduce the number of Plasma Webs firing in Offensive Mode before you can commit the turn.";
+                negPowerError += "You need to reduce the number of unboosted Plasma Webs firing in Offensive Mode before you can commit the turn.";
                 window.confirm.error(negPowerError, function () {});
                 return false;
             }  
