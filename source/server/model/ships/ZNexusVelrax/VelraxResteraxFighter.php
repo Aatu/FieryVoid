@@ -10,7 +10,6 @@ class VelraxResteraxFighter extends FighterFlight{
         $this->shipClass = "Resterax Assault flight";
         $this->imagePath = "img/ships/Nexus/VelraxResterax_v2.png";
 		$this->unofficial = true;
-        $this->canvasSize = 5;
 
         $this->isd = 2062;
         

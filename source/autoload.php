@@ -2323,6 +2323,12 @@ spl_autoload_register(
                 'zzftrbwingmk2' => '/server/model/ships/ZStarWars/zzftrBWingMk2.php', 
                 'zzftrbwingprototype' => '/server/model/ships/ZStarWars/zzftrBWingPrototype.php',
 				
+				//new SW - July 2022
+                'swarquitenscommandcruiser' => '/server/model/ships/ZStarWars/swArquitensCommandCruiser.php',
+                'swraidercorvette' => '/server/model/ships/ZStarWars/swRaiderCorvette.php',
+                'swstrikecruiser' => '/server/model/ships/ZStarWars/swStrikeCruiser.php',
+				
+				
 				
 				//Gaim systems
                 'subreactoruniversal' => '/server/model/systems/baseSystems.php',
