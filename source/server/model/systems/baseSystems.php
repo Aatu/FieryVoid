@@ -1138,7 +1138,18 @@ class CnC extends ShipSystem implements SpecialAbility {
 		}
 		
 	}	
-	
+
+	public function markPakmara(){		
+	    	$this->specialAbilities[] = "PakmaraCnC";
+			$this->specialAbilityValue = true; //so it is actually recognized as special ability!
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+		$this->data["Special"] .= 'This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
+	}
+			
 } //endof class CnC
 
 /*Protected CnC - as compensation for ships lacking two C&Cs, these systems get different (lighter) critical table 
@@ -1167,28 +1178,24 @@ class ProtectedCnC extends CnC{
 }//endof class ProtectedCnC
 	
 class PakmaraCnC extends CnC{
+    public $name = "PakmaraCnC";
 	
-	public function setSystemDataWindow($turn){
-		parent::setSystemDataWindow($turn);     
-		if (!isset($this->data["Special"])) {
-			$this->data["Special"] = '';
-		}else{
-			$this->data["Special"] .= '<br>';
-		}
-		$this->data["Special"] .= 'This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
-	}
-	
-	public $possibleCriticals = array(
-		8=>"CommunicationsDisrupted", 
-		16=>"PenaltyToHit", 
-		20=>"RestrictedEW", 
-		24=>array("ReducedIniative2OneTurn","ReducedIniative2"), 
-		32=>array("RestrictedEW","ReducedIniative2OneTurn","ReducedIniative2"), 
-		40=>array("RestrictedEW","ReducedIniative2","ShipDisabledOneTurn")
-    );
-	
-}//endof class PakmaraCnC
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+	$this->markPakmara();
+    }
 
+			public $possibleCriticals = array(
+				8=>array("CommunicationsDisrupted","CommunicationsDisrupted"), 
+				16=>"PenaltyToHit", 
+				20=>"RestrictedEW", 
+				24=>array("ReducedIniativeOneTurn","ReducedIniative","ReducedIniativeOneTurn","ReducedIniative"), 
+				32=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative","ReducedIniativeOneTurn","ReducedIniative"), 
+				40=>array("RestrictedEW","ReducedIniative","ReducedIniative","ShipDisabledOneTurn")
+		    );	
+
+
+}
 
 class CargoBay extends ShipSystem{
     public $name = "cargoBay";
