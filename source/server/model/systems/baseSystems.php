@@ -1138,17 +1138,6 @@ class CnC extends ShipSystem implements SpecialAbility {
 		}
 		
 	}	
-
-	public function markPakmara(){		
-	    	$this->specialAbilities[] = "PakmaraCnC";
-			$this->specialAbilityValue = true; //so it is actually recognized as special ability!
-			if (!isset($this->data["Special"])) {
-				$this->data["Special"] = '';
-			}else{
-				$this->data["Special"] .= '<br>';
-			}
-		$this->data["Special"] .= 'This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
-	}
 			
 } //endof class CnC
 
@@ -1178,12 +1167,16 @@ class ProtectedCnC extends CnC{
 }//endof class ProtectedCnC
 	
 class PakmaraCnC extends CnC{
-    public $name = "PakmaraCnC";
 	
-    function __construct($armour, $maxhealth, $powerReq, $output ){
-        parent::__construct($armour, $maxhealth, $powerReq, $output );
-	$this->markPakmara();
-    }
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= 'This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead. Initiative penalties for critical hits are doubled.';
+	}
 
 			public $possibleCriticals = array(
 				8=>array("CommunicationsDisrupted","CommunicationsDisrupted"), 
