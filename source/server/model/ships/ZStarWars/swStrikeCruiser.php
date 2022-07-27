@@ -4,7 +4,7 @@ class swStrikeCruiser extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 650;
+	$this->pointCost = 600;
 	$this->faction = "ZStarWars";
         $this->phpclass = "swStrikeCruiser";
         $this->imagePath = "img/starwars/StrikeCruiser.png";
@@ -14,7 +14,7 @@ class swStrikeCruiser extends HeavyCombatVessel{
 		$this->isd = "late Galactic Civil War";
 		$this->notes = "Primary users: Galactic Empire, New Republic";
 		
-	$this->fighters = array("fighter flights"=>2);
+	$this->fighters = array("fighter flights"=>1);
 	    
 	$this->unofficial = true;
         
@@ -34,11 +34,10 @@ class swStrikeCruiser extends HeavyCombatVessel{
         $this->addPrimarySystem(new Engine(3, 28, 0, 12, 3));
 	$this->addPrimarySystem(new Thruster(3, 15, 0, 5, 3));
 	$this->addPrimarySystem(new Thruster(3, 15, 0, 5, 4));
-	$this->addPrimarySystem(new Hangar(3, 18));      
+	$this->addPrimarySystem(new Hangar(3, 8));      
 
         $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
         $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
-	$this->addFrontSystem(new Hangar(1, 14));        
 	$this->addFrontSystem(new SWRayShield(3,16,7,3,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addFrontSystem(new SWMediumTLaser(2, 240, 360, 4)); //armor, arc and number of weapon in common housing!
 	$this->addFrontSystem(new SWHeavyTLaser(3, 270, 30, 2)); //armor, arc and number of weapon in common housing!

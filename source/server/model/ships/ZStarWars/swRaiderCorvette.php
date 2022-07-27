@@ -4,7 +4,7 @@ class swRaiderCorvette extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 475;
+	$this->pointCost = 380;
 	$this->faction = "ZStarWars";
         $this->phpclass = "swRaiderCorvette";
         $this->imagePath = "img/starwars/RaiderClassCorvette.png";
