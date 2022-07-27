@@ -2327,6 +2327,8 @@ spl_autoload_register(
                 'swarquitenscommandcruiser' => '/server/model/ships/ZStarWars/swArquitensCommandCruiser.php',
                 'swraidercorvette' => '/server/model/ships/ZStarWars/swRaiderCorvette.php',
                 'swstrikecruiser' => '/server/model/ships/ZStarWars/swStrikeCruiser.php',
+                'zzftrtieadvanced' => '/server/model/ships/ZStarWars/zzftrTIEAdvanced.php',
+                'zzftrtieavenger' => '/server/model/ships/ZStarWars/zzftrTIEAvenger.php',
 				
 				
 				
