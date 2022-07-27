@@ -49,6 +49,7 @@ Factions that point for point will have uphill battle against First Tier, yet ot
  - Ipsha  
  - Kastan (custom faction - Escalation Wars universe)
  - Markab
+ - Pak'ma'ra (Estimated power level pending more playtesting)
  - Raiders (note plethora of background-driven options - Raiders often use a hodgepodge of units and formal FV fleet selection rules don't always do them justice!)
  - Sal-bez (custom faction - Nexus universe)
  - Sshel'ath (custom faction - Escalation Wars universe)

@@ -1261,77 +1261,12 @@ class RangedFuser extends Plasma{
 }//endof class RangedFuser
 
 
-class DualPlasmaStream extends Raking{
-	public $name = "DualPlasmaStream";
-	public $displayName = "Dual Plasma Stream";
-	public $iconPath = "DualPlasmaStream.png"; 	
-	/*
-	public $animation = "beam";
-	public $animationColor = array(75, 250, 90);
-	public $trailColor = array(75, 250, 90);
-	public $projectilespeed = 20;
-	public $animationWidth = 4;
-	public $animationExplosionScale = 0.30;
-	public $trailLength = 400;
-	*/
-	public $priority = 2;
-		        
-	public $raking = 5;
-	public $loadingtime = 2;
-	public $rangeDamagePenalty = 2;	
-	public $rangePenalty = 1;
-	public $fireControl = array(-4, 2, 2);
-	
-	public $damageType = "Raking"; 
-	public $weaponClass = "Plasma";
-
-	public $firingModes = array(1 => "Raking");
-	
-	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-	}
-	
-	public function setSystemDataWindow($turn){		
-		parent::setSystemDataWindow($turn);
-		if (!isset($this->data["Special"])) {
-			$this->data["Special"] = '';
-		}else{
-			$this->data["Special"] .= '<br>';
-		}
-	    $this->data["Special"] .= "Damage reduced by 2 points per hex.";
-	    $this->data["Special"] .= "<br>Reduces armor of systems hit.";	
-	    $this->data["Special"] .= "<br>Ignores half of armor.";
-	}
-		 
-	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
-		if (!$system->advancedArmor){//advanced armor prevents effect 
-			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
-			$crit->updated = true;
-			    $crit->inEffect = false;
-			    $system->criticals[] =  $crit;
-		}
-	}
-		
-	public function getDamage($fireOrder){        return Dice::d(10,6)+8;   }
-	public function setMinDamage(){     $this->minDamage = 14;     }
-	public function setMaxDamage(){     $this->maxDamage = 68;      }
-	
-}//endof class DualPlasmaStream
-
-
 
 class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{        
         public $name = "PakmaraPlasmaWeb";
         public $displayName = "Plasma Web";
 		public $iconPath = "PlasmaWeb.png";
  	    public $animation = "ball";
-   //     public $animationArray = array(1=>"bolt", 2=>"laser", 3=>"laser");
-        //public $projectilespeed = 7;
-        //public $animationWidth = 3;
-        //public $trailLength = 10;       
-        //public $animationColor = array(0, 184, 230);
-        //public $animationWidth2 = 0.2;
         public $animationExplosionScale = 0.5;
         public $animationColor = array(0, 0, 0);   //Don't really want to see a projectile, so let's make it have no colour.
         public $explosionColor = array(75, 250, 90);   //Tried to make explosion green, but I don't think this variable actually works...                         
@@ -1423,12 +1358,6 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 					$fireOrder->updated = true;
 					$fireOrder->shots = 1;					
 					$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
-			//		return;
-			//	} 	
-			
-		/*			From Vortex disruptor		
-					$shooter = $gamedata->getShipById($fireOrder->shooterid);
-					$firingPos = $shooter->getHexPos();    */
 				
 					if ($fireOrder->targetid != -1) {
 						$targetship = $gamedata->getShipById($fireOrder->targetid);
@@ -1438,10 +1367,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 						$fireOrder->y = $targetPos->r;
 						$fireOrder->targetid = -1; //correct the error
 						$fireOrder->calledid = -1; //just in case
-					} 
-	//	$targetPos = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
-	//	$fireOrder->notes .=  "shooter: " . $firingPos->q . "," . $firingPos->r . " target: " . $targetPos->q . "," . $targetPos->r ;		
-		
+					} 		
 		}		
 		
 		
@@ -1471,10 +1397,6 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 				foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
 					$this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
 				}
-	/*		
-			$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
-			TacGamedata::$lastFiringResolutionNo++;    //note for further shots
-			$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!   */
 			
 				//draw power from batteries - unless the weapon was boosted
 				if ($this->getBoostLevel(TacGamedata::$currentTurn) <=0 ) { //not boosted...
