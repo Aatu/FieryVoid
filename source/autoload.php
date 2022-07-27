@@ -2554,13 +2554,29 @@ spl_autoload_register(
 				'treknausicaanheavyglider' => '/server/model/ships/ZTrekOther/TrekNausicaanHeavyGlider.php',
 				'treknausicaanvandal' => '/server/model/ships/ZTrekOther/TrekNausicaanVandal.php',
 				
-				//Pakmara
+				//Pak'ma'ra
 				'plasmabattery' => '/server/model/systems/baseSystems.php',
-				'ptest' => '/server/model/ships/customs/PTest.php',	
+				'pakmaracnc' => '/server/model/systems/baseSystems.php',				
 				'pakmaraplasmaweb' => '/server/model/weapons/plasma.php',
 				'fuser' => '/server/model/weapons/plasma.php',
 				'rangedfuser' => '/server/model/weapons/plasma.php',
-				'dualplasmastream' => '/server/model/weapons/plasma.php',															
+				'dualplasmastream' => '/server/model/weapons/specialWeapons.php',	
+				'reshkasu' => '/server/model/ships/pakmara/Reshkasu.php',
+				'shobogna' => '/server/model/ships/pakmara/Shobogna.php',																			
+				'orshilti' => '/server/model/ships/pakmara/Orshilti.php',
+				'porfatis' => '/server/model/ships/pakmara/Porfatis.php',
+				'pshulshi' => '/server/model/ships/pakmara/Pshulshi.php',
+				'pshultau' => '/server/model/ships/pakmara/Pshultau.php',
+				'trashuli' => '/server/model/ships/pakmara/Trashuli.php',
+				'urikhal' => '/server/model/ships/pakmara/Urikhal.php',	
+				'tharnotak' => '/server/model/ships/pakmara/Tharnotak.php',								'padashar' => '/server/model/ships/pakmara/Padashar.php',
+				'artees' => '/server/model/ships/pakmara/Artees.php',
+				'simsalle' => '/server/model/ships/pakmara/Simsalle.php',
+				'trashue' => '/server/model/ships/civilians/Trashue.php',
+				'plasalle' => '/server/model/ships/pakmara/Plasalle.php',
+				'sashulkur' => '/server/model/ships/pakmara/Sashulkur.php',
+				'simtorka' => '/server/model/ships/pakmara/Simtorka.php',
+				'uriktal' => '/server/model/ships/pakmara/Uriktal.php',																																																				
 				
 
 				//Hyach

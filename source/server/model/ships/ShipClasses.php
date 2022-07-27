@@ -119,9 +119,9 @@ class BaseShip {
                 if ($CnC){
 			    $mod += -5*($CnC->hasCritical("CommunicationsDisrupted", $gamedata->turn));
 			    $mod += -10*($CnC->hasCritical("ReducedIniativeOneTurn", $gamedata->turn));
-			    $mod += -10*($CnC->hasCritical("ReducedIniative", $gamedata->turn));
+			    $mod += -10*($CnC->hasCritical("ReducedIniative", $gamedata->turn));		    
 				//additional: SWTargetHeld (ship being held by Tractor Beam - reduces Initiative
-	    			$mod += -20*($CnC->hasCritical("swtargetheld", $gamedata->turn)); //-4 Ini per hit
+	    		$mod += -20*($CnC->hasCritical("swtargetheld", $gamedata->turn)); //-4 Ini per hit
 				//additional: tmpinidown (temporary Ini reduction - Abbai weapon scan do so!
 				$mod += -5*($CnC->hasCritical("tmpinidown", $gamedata->turn)); //-1 Ini per crit
 				//additional: ShadowPilotPain						
