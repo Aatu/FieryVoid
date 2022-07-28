@@ -1261,77 +1261,12 @@ class RangedFuser extends Plasma{
 }//endof class RangedFuser
 
 
-class DualPlasmaStream extends Raking{
-	public $name = "DualPlasmaStream";
-	public $displayName = "Dual Plasma Stream";
-	public $iconPath = "DualPlasmaStream.png"; 	
-	/*
-	public $animation = "beam";
-	public $animationColor = array(75, 250, 90);
-	public $trailColor = array(75, 250, 90);
-	public $projectilespeed = 20;
-	public $animationWidth = 4;
-	public $animationExplosionScale = 0.30;
-	public $trailLength = 400;
-	*/
-	public $priority = 2;
-		        
-	public $raking = 5;
-	public $loadingtime = 2;
-	public $rangeDamagePenalty = 2;	
-	public $rangePenalty = 1;
-	public $fireControl = array(-4, 2, 2);
-	
-	public $damageType = "Raking"; 
-	public $weaponClass = "Plasma";
-
-	public $firingModes = array(1 => "Raking");
-	
-	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-	}
-	
-	public function setSystemDataWindow($turn){		
-		parent::setSystemDataWindow($turn);
-		if (!isset($this->data["Special"])) {
-			$this->data["Special"] = '';
-		}else{
-			$this->data["Special"] .= '<br>';
-		}
-	    $this->data["Special"] .= "Damage reduced by 2 points per hex.";
-	    $this->data["Special"] .= "<br>Reduces armor of systems hit.";	
-	    $this->data["Special"] .= "<br>Ignores half of armor.";
-	}
-		 
-	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
-		if (!$system->advancedArmor){//advanced armor prevents effect 
-			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
-			$crit->updated = true;
-			    $crit->inEffect = false;
-			    $system->criticals[] =  $crit;
-		}
-	}
-		
-	public function getDamage($fireOrder){        return Dice::d(10,6)+8;   }
-	public function setMinDamage(){     $this->minDamage = 14;     }
-	public function setMaxDamage(){     $this->maxDamage = 68;      }
-	
-}//endof class DualPlasmaStream
-
-
 
 class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{        
         public $name = "PakmaraPlasmaWeb";
         public $displayName = "Plasma Web";
 		public $iconPath = "PlasmaWeb.png";
  	    public $animation = "ball";
-   //     public $animationArray = array(1=>"bolt", 2=>"laser", 3=>"laser");
-        //public $projectilespeed = 7;
-        //public $animationWidth = 3;
-        //public $trailLength = 10;       
-        //public $animationColor = array(0, 184, 230);
-        //public $animationWidth2 = 0.2;
         public $animationExplosionScale = 0.5;
         public $animationColor = array(0, 0, 0);   //Don't really want to see a projectile, so let's make it have no colour.
         public $explosionColor = array(75, 250, 90);   //Tried to make explosion green, but I don't think this variable actually works...                         
@@ -1340,13 +1275,13 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         public $hextarget = true;
         public $hidetarget = false;
         public $priority = 1; //to show effect quickly
+ 	   	public $priorityArray = array(1=>1, 2=>2);        
                 
         public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
         public $doNotIntercept = true; //do not intercept this weapon, period
 		public $canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
         public $useOEW = false; //not important, really
         		
-//		public $priorityArray = array(1=>1, 2=>1); //Both modes should be fired very early???
         public $loadingtime = 1;
         public $intercept = 0; 
 
@@ -1372,10 +1307,10 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
     
         public $fireControlArray = array( 1=>array(50,50,50), 2=>array(50, null, null)); // fighters, <mediums, <capitals 
 		
-	//	private static $alreadyEngaged = array(); //units that were already engaged by a Plasma Web this turn (multiple Webs do not stack).
+		private static $alreadyEngaged = array(); //units that were already engaged by a Plasma Web this turn (multiple Webs do not stack).
 
- //   public $possibleCriticals = array(
- //           17=>array("ReducedRange", "DamageReductionRemoved"));  /Need to create two unique critical effects for Web, reduce intercept rating by 1, and reduced range of offensive mode by 2.
+    public $possibleCriticals = array(
+            17=>array("OutputReduced1", "ReducedDamage"));  //Provding Outputreduced1 works then replace reduced range from TT with reduced damage for Offensive mode
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 			if ( $maxhealth == 0 ) $maxhealth = 4;
@@ -1423,12 +1358,6 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 					$fireOrder->updated = true;
 					$fireOrder->shots = 1;					
 					$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
-			//		return;
-			//	} 	
-			
-		/*			From Vortex disruptor		
-					$shooter = $gamedata->getShipById($fireOrder->shooterid);
-					$firingPos = $shooter->getHexPos();    */
 				
 					if ($fireOrder->targetid != -1) {
 						$targetship = $gamedata->getShipById($fireOrder->targetid);
@@ -1438,10 +1367,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 						$fireOrder->y = $targetPos->r;
 						$fireOrder->targetid = -1; //correct the error
 						$fireOrder->calledid = -1; //just in case
-					} 
-	//	$targetPos = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
-	//	$fireOrder->notes .=  "shooter: " . $firingPos->q . "," . $firingPos->r . " target: " . $targetPos->q . "," . $targetPos->r ;		
-		
+					} 		
 		}		
 		
 		
@@ -1457,18 +1383,13 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 						break;
 									
 			case 2:		
-				$shooter = $gamedata->getShipById($fireOrder->shooterid);
-			
-		/*You define firing location as that from beginning of turn, like for ballistics (so incorrectly here). Using current ship location would be appropriate for direct fire.		
-				$movement = $shooter->getLastTurnMovement($fireOrder->turn);
-				$posLaunch = $movement->position;//at moment of launch!!!	*/
-				
+				$shooter = $gamedata->getShipById($fireOrder->shooterid);			
 					
 				//$this->calculateHit($gamedata, $fireOrder); //already calculated!
 				$rolled = Dice::d(100);
 				$fireOrder->rolled = $rolled; ///and auto-hit ;)
 				$fireOrder->shotshit++;
-				$fireOrder->pubnotes .= "All fighters in target hex take damage" ; //just information for player, actual applying was done in calculateHitBase method		
+				$fireOrder->pubnotes .= "All fighters in target hex take damage, unless previously hit by a Plasma Web this turn" ; //just information for player, actual applying was done in calculateHitBase method		
 
 				//deal damage!
 				$target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
@@ -1476,10 +1397,6 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 				foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
 					$this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
 				}
-	/*		
-			$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
-			TacGamedata::$lastFiringResolutionNo++;    //note for further shots
-			$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!   */
 			
 				//draw power from batteries - unless the weapon was boosted
 				if ($this->getBoostLevel(TacGamedata::$currentTurn) <=0 ) { //not boosted...
@@ -1488,6 +1405,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 				break;
 		}  
 		
+
+				
 		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
 		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!		
 		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
@@ -1512,6 +1431,9 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 //source hex will be taken from firing unit, damage will be individually rolled for each fighter hit
 	public function AOEdamage($target, $shooter, $fireOrder, $gamedata)    {
         if ($target->isDestroyed()) return; //no point allocating
+        	
+        if (isset(PakmaraPlasmaWeb::$alreadyEngaged[$target->id])) return; //hex already engaged by a previous Plasma Web
+        	
             foreach ($target->systems as $fighter) {
                 if ($fighter == null || $fighter->isDestroyed()) {
                     continue;
@@ -1521,7 +1443,9 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         $damage = $this->getDamageMod($damage, $shooter, $target, null, $gamedata);
         $damage -= $target->getDamageMod($shooter, null, $gamedata->turn, $this);
 
-                $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
+              $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
+                
+        PakmaraPlasmaWeb::$alreadyEngaged[$target->id] = true;//mark engaged        
 			}
 		}
 		
