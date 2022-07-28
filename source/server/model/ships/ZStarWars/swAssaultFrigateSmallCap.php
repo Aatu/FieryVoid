@@ -4,7 +4,7 @@ class swAssaultFrigateSmallCap extends BaseShipNoAft{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 775;
+	$this->pointCost = 750;
 	$this->faction = "ZStarWars";
         $this->phpclass = "swAssaultFrigateSmallCap";
         $this->imagePath = "img/starwars/assaultfrigate.png";

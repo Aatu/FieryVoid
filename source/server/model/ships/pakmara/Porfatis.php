@@ -17,8 +17,8 @@ class Porfatis extends FighterFlight{
         $this->freethrust = 15;
         $this->offensivebonus = 7;
         $this->jinkinglimit = 8;
-        $this->turncost = 0.33;
-		$this->turndelay = 0;
+        $this->turncost = 0.5;
+		$this->turndelay = 0.33;
         
         $this->iniativebonus = 17*5;
         $this->populate();       

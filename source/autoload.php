@@ -2323,6 +2323,14 @@ spl_autoload_register(
                 'zzftrbwingmk2' => '/server/model/ships/ZStarWars/zzftrBWingMk2.php', 
                 'zzftrbwingprototype' => '/server/model/ships/ZStarWars/zzftrBWingPrototype.php',
 				
+				//new SW - July 2022
+                'swarquitenscommandcruiser' => '/server/model/ships/ZStarWars/swArquitensCommandCruiser.php',
+                'swraidercorvette' => '/server/model/ships/ZStarWars/swRaiderCorvette.php',
+                'swstrikecruiser' => '/server/model/ships/ZStarWars/swStrikeCruiser.php',
+                'zzftrtieadvanced' => '/server/model/ships/ZStarWars/zzftrTIEAdvanced.php',
+                'zzftrtieavenger' => '/server/model/ships/ZStarWars/zzftrTIEAvenger.php',
+				
+				
 				
 				//Gaim systems
                 'subreactoruniversal' => '/server/model/systems/baseSystems.php',
@@ -2499,6 +2507,8 @@ spl_autoload_register(
 				'andorianthyzon' => '/server/model/ships/ZTrekFederationEarly/AndorianThyzon.php',
 				'andorianthymasescort' => '/server/model/ships/ZTrekFederationEarly/AndorianThymasEscort.php',
 				'andoriankumari' => '/server/model/ships/ZTrekFederationEarly/AndorianKumari.php',
+				'andoriankumaricommand' => '/server/model/ships/ZTrekFederationEarly/AndorianKumariCommand.php',
+				'andoriankumarigunship' => '/server/model/ships/ZTrekFederationEarly/AndorianKumariGunship.php',
 				'andorianfighter' => '/server/model/ships/ZTrekFederationEarly/AndorianFighter.php',
 				'andorianchimesh' => '/server/model/ships/ZTrekFederationEarly/AndorianChimesh.php',
 				

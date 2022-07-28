@@ -12,7 +12,9 @@ class ZShadowXonn extends VreeCapital{
 		$this->isd = 'not known';
         $this->limited = 10; //Restricted Deployment
 	    $this->unofficial = true;
+		
         $this->enhancementOptionsDisabled[] = 'SHAD_DIFF'; //no diffuser upgrades for Young ships - they don't have know how to tamper with Shadow systems to that extent!
+		$this->advancedArmor = true;   
 
 		$this->shipSizeClass = 3;
 		$this->iniativebonus = 0;

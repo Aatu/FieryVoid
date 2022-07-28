@@ -275,6 +275,7 @@ Plasma Webs
 CnC Systems and Initiative
 	- As it is not possible to implement two CnC systems on ships in FV Pakmara ships instead have these are combined into a single CnC sytem with the combined health of both TT CnCs and improved armour / critical hit chart.  Note, Pakmara ships still suffer double the intiative penalty on CnC as they do in Tabletop.
 	- The fleet-wide intiative penalty for Pak'ma'ra fleets of three ships or more is not implemented in FV.
+	- Pak'ma'ra fighters have inherent turn delay - but FV does not provide turn shortening for fighters, which further limits their maneuvrability. They're still Agile though :) . 
 
 
 
