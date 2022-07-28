@@ -18,11 +18,11 @@ class zzftrtieavenger extends FighterFlight{
         $this->unofficial = true;
         
         $this->forwardDefense = 6;
-        $this->sideDefense = 6;
+        $this->sideDefense = 7;
         $this->freethrust = 12;
         $this->offensivebonus = 4;
         $this->jinkinglimit = 8;
-        $this->turncost = 0.33;
+        $this->turncost = 0.25;
         
         $this->pivotcost = 2; //SW fighters have higher pivot cost - only elite pilots perform such maneuvers on screen!
 		$this->enhancementOptionsEnabled[] = 'ELITE_SW'; //this flight can have Elite Pilot (SW) enhancement option	

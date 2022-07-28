@@ -27,7 +27,7 @@ class zzftrtieadvanced extends FighterFlight{
         $this->pivotcost = 2; //SW fighters have higher pivot cost - only elite pilots perform such maneuvers on screen!
 		$this->enhancementOptionsEnabled[] = 'ELITE_SW'; //this flight can have Elite Pilot (SW) enhancement option	
         
-    	$this->iniativebonus = 17 *5; //really heavy but with superior electronics?
+    	$this->iniativebonus = 17 *5; //really heavy but with superior electronics
         
 		
 		$this->hangarRequired = "Fighter Squadrons"; //SW small craft are handled on squadron basis
