@@ -53,18 +53,18 @@ class Pshulshi extends BaseShip{
 
 
 		$this->addLeftSystem(new Thruster(4, 15, 0, 6, 3));
-		$this->addLeftSystem(new MegaPlasma(5, 10, 8, 0, 360));
-		$this->addLeftSystem(new MediumPlasma(2, 5, 3, 240, 360));
-		$this->addLeftSystem(new MediumPlasma(2, 5, 3, 180, 360));
-		$this->addLeftSystem(new MediumPlasma(2, 5, 3, 180, 300));				
+		$this->addLeftSystem(new MegaPlasma(5, 10, 8, 300, 360));
+		$this->addLeftSystem(new MediumPlasma(2, 5, 3, 180, 300));
+		$this->addLeftSystem(new MediumPlasma(2, 5, 3, 180, 360));		
+		$this->addLeftSystem(new MediumPlasma(2, 5, 3, 240, 360));		
 		$this->addLeftSystem(new CargoBay(3, 12));
 
 
 		$this->addRightSystem(new Thruster(4, 15, 0, 6, 4));
-		$this->addRightSystem(new MegaPlasma(5, 10, 8, 300, 60));
-		$this->addRightSystem(new MediumPlasma(2, 5, 3, 0, 120));
+		$this->addRightSystem(new MegaPlasma(5, 10, 8, 0, 60));
+		$this->addRightSystem(new MediumPlasma(2, 5, 3, 60, 180));
 		$this->addRightSystem(new MediumPlasma(2, 5, 3, 0, 180));
-		$this->addRightSystem(new MediumPlasma(2, 5, 3, 60, 180));				
+		$this->addRightSystem(new MediumPlasma(2, 5, 3, 0, 120));				
 		$this->addRightSystem(new CargoBay(3, 12));
 
         
