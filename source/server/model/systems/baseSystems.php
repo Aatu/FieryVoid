@@ -3503,10 +3503,10 @@ class AmmoMagazine extends ShipSystem {
 	    //add information about currently stored ammo!
 	    $this->data["Special"] .= "<br>Total rounds: " . $this->remainingOrdnance . "/" . $this->capacity; 
 	    foreach($this->ammoArray as $currAmmo){
-	    	$this->data["Special"] .= "<br>" $currAmmo->name . ": ". $currAmmo->count;
-		if($currAmmo->size != 1){ //non-standard ordnance size: inform player
-			$this->data["Special"] .= " (size: " . $currAmmo->size . ")";
-		}		    
+	    	$this->data["Special"] .= "<br>" . $currAmmo->name . ": ". $currAmmo->count;
+			if($currAmmo->size != 1){ //non-standard ordnance size: inform player
+				$this->data["Special"] .= " (size: " . $currAmmo->size . ")";
+			}
 	    }
 	}
     
