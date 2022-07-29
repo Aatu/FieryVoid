@@ -3470,4 +3470,95 @@ class PlasmaBattery extends ShipSystem{
 							
 } //endof PlasmaBattery.php
 
+
+
+
+/* Ammunition magazine
+technical system, storing information about available (and used) consumable weapons (primarily ballistic ones)
+*/
+class AmmoMagazine extends ShipSystem {    
+    public $name = "AmmoMagazine";
+    public $displayName = "Ammunition Magazine";
+    public $iconPath = "AmmunitionMagazineTechnical.png";
+    public $primary = true;
+	public $isPrimaryTargetable = false; //shouldn't be targetable at all, in fact!
+	public $isTargetable = false; //cannot be targeted ever!
+	
+	public $capacity = 0;
+	public $remainingAmmo = 0;
+	
+	private $ammoArray = array();	
+	
+    
+    function __construct($capacity, $baseAmmo, $ammoLoaded){ //magazine capacity, primary ammo to be used (CLASS INSTANCE!), ammo loaded initially
+        parent::__construct(0, 1, 0, 1);
+	$this->capacity = $capacity;
+	$roundsToAdd = 0;
+	if($ammoLoaded == true) $roundsToAdd = $capacity;
+	$this->addOrdnance($baseAmmo, $roundsToAdd, false);
+    }
+    
+    public function setSystemDataWindow($turn){
+	    $this->data["Special"] = "Technical system, keeping track of consumable ammo."; 
+	    //add information about currently stored ammo!
+	    $this->data["Special"] .= "<br>Total rounds: " . $this->remainingOrdnance . "/" . $this->capacity; 
+	    foreach($this->ammoArray as $currAmmo){
+	    	$this->data["Special"] .= "<br>" $currAmmo->name . ": ". $currAmmo->count;
+		if($currAmmo->size != 1){ //non-standard ordnance size: inform player
+			$this->data["Special"] .= " (size: " . $currAmmo->size . ")";
+		}		    
+	    }
+	}
+    
+	
+    //add new kind of ordnance: ammo to be used (CLASS INSTANCE!), number of rounds to add (number), whether appropriate enhancement option should be added (true/false)
+    public function addOrdnance($ammoClass, $ammoCount, $addOption){
+	    $ammoClass->count = $ammoCount;
+	    $ammoArray[] = $ammoClass;
+	    $remainingAmmo += $ammoCount * $ammoClass->size;
+	    $remainingAmmo = max($this->remainingAmmo, $this->capacity);
+	    
+	    if($addOption == true){
+		$this->unit->enhancementOptionsEnabled[] = $ammoClass->enhancementName;
+	    }
+    }
+	
+	
+	public function getAmmo($modeName){
+		$toReturn = null;
+		foreach($this->ammoArray as $currAmmo){
+			if($currAmmo->modeName == $modeName){
+				$toReturn = $currAmmo;
+				break; //foreach
+			}
+		}		
+		return $toReturn;
+	}
+} //endof AmmoMagazine
+
+
+//ammunition for AmmoMagazine - Class B Missile (for official Missile Racks)
+class AmmoMissileB{	
+	public $count = 0; //actual current count
+	
+	public $name = 'Basic Missile';
+	public $modeName = 'BasicMissile';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_B'; //enhancement name to be enabled
+	
+	public $rangeMod = 0; //MODIFIER for weapon range
+	public $distanceRangeMod = 0; //MODIFIER for weapon range
+	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
+	public $minDamage = 20;
+	public $maxDamage = 20;	
+	
+	
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 20;
+    }		
+	
+} //endof class AmmoMissileB
+
+
 ?>
