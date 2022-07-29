@@ -3472,12 +3472,12 @@ class PlasmaBattery extends ShipSystem{
 
 
 
-
+/*UNDER CONSTRUCTION*/
 /* Ammunition magazine
 technical system, storing information about available (and used) consumable weapons (primarily ballistic ones)
 */
 class AmmoMagazine extends ShipSystem {    
-    public $name = "AmmoMagazine";
+    public $name = "ammoMagazine";
     public $displayName = "Ammunition Magazine";
     public $iconPath = "AmmunitionMagazineTechnical.png";
     public $primary = true;
@@ -3609,7 +3609,8 @@ class AmmoMagazine extends ShipSystem {
 
 //ammunition for AmmoMagazine - Class B Missile (for official Missile Racks)
 class AmmoMissileB{	
-	public $name = 'Basic Missile';
+	public $name = 'ammoMissileB';
+	public $displayName = 'Basic Missile';
 	public $modeName = 'Basic';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_B'; //enhancement name to be enabled
@@ -3620,6 +3621,7 @@ class AmmoMissileB{
 	public $minDamage = 20;
 	public $maxDamage = 20;	
 	public $damageType = 'Standard';//mode of dealing damage
+	public $priority = 6;
 	
 	
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
@@ -3632,7 +3634,8 @@ class AmmoMissileB{
 
 //ammunition for AmmoMagazine - Class L Missile (for official Missile Racks)
 class AmmoMissileL{	
-	public $name = 'Long Range Missile';
+	public $name = 'ammoMissileL';
+	public $displayName = 'Long Range Missile';
 	public $modeName = 'LongRange';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_L'; //enhancement name to be enabled
@@ -3643,6 +3646,7 @@ class AmmoMissileL{
 	public $minDamage = 15;
 	public $maxDamage = 15;	
 	public $damageType = 'Standard';//mode of dealing damage
+	public $priority = 6;
 		
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
@@ -3654,7 +3658,8 @@ class AmmoMissileL{
 
 //ammunition for AmmoMagazine - Class P Missile (for official Missile Racks)
 class AmmoMissileP{	
-	public $name = 'Piercing Missile';
+	public $name = 'ammoMissileP';
+	public $displayName = 'Piercing Missile';
 	public $modeName = 'Piercing';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_P'; //enhancement name to be enabled
@@ -3665,6 +3670,7 @@ class AmmoMissileP{
 	public $minDamage = 30;
 	public $maxDamage = 30;	
 	public $damageType = 'Piercing';//mode of dealing damage
+	public $priority = 2;
 		
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
