@@ -13,6 +13,8 @@ class Pshultau extends BaseShip{
 		$this->limited = 33;
 			$this->variantOf = "Pshul'shi Dreadnought";
 			$this->occurence = "rare";		
+			
+		$this->fighters = array("medium"=>24);
 	    
         $this->isd = 2245;
 
