@@ -962,9 +962,67 @@ class MultiBombRack extends Weapon{
         $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
         $crit->updated = true;
         $this->criticals[] =  $crit;
-    }    
-    
+    }   
  
 } //endof class MultiBombRack
+
+
+
+/*UNDER CONSTRUCTION*/
+/*weapon that looks at central magazine to determine available firing modes - and also number of actual rounds available
+*/
+class AmmoMissileRackS extends Weapon{
+	public $name = "ammoMissileRackS";
+        public $displayName = "Class-S Missile Rack";
+    public $useOEW = false;
+    public $ballistic = true;
+    public $animation = "trail";
+    public $animationColor = array(50, 50, 50);
+    public $range = 20;
+    public $distanceRange = 60;
+    public $firingMode = 1;
+    public $rangeMod = 0;
+    public $priority = 6;
+    public $loadingtime = 2;
+    public $iconPath = "missile1.png";    
+
+    private $rackExplosionDamage = 70; //how much damage will this weapon do in case of catastrophic explosion
+    private $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+    
+    public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    public $weaponClass = "Ballistic"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+	
+	
+	public $firingModes = array(); //equals to available missiles
+	public $damageTypeArray = array(); //indicates that this weapon does damage in Pulse mode
+    public $fireControlArray = array(); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
+    //typical (class-S) launcher is FC 3/3/3 and warhead +3 - which would mean 6/6/6!
+    public $rangeArray = array(); 
+	public $distanceRangeArray = array(); 
+
+	//private $ammoClassesArray = array( new AmmoMissileB, new AmmoMissileL, new AmmoMissileP );//classes representing available ammo - so firing modes are always shown in the same order
+	
+	
+	
+    /*ATYPICAL constructor: doesn't take power usage and structure, but DOES take central magazine system and information about being fitted to base*/
+	//on construction, just add first class from the list; as further (or different) ones are added, appropriate tables will get refreshed
+        function __construct($armour, $launcherType, $startArc, $endArc, $base=false)
+        {
+			$basicFC=array(3,3,3);
+			$basicRange=20;
+			$basicDistanceRange = 60;
+			if($base){
+				$basicRange = $basicDistanceRange;
+			}
+		
+		
+		
+		
+			parent::__construct($armour, $maxhealth, 0, $startArc, $endArc);
+        }
+	
+ 
+} //endof class AmmoMissileRackS
+
 
 ?>
