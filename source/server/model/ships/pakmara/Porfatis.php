@@ -6,7 +6,7 @@ class Porfatis extends FighterFlight{
         
         $this->pointCost = 50*6;
         $this->faction = "Pak'ma'ra";
-        $this->phpclass = "Porfatis";
+        $this->phpclass = "Porfatis"; 
         $this->shipClass = "Por'fa'tis Medium flight";
         $this->imagePath = "img/ships/PakmaraPorfatis.png";
 		

@@ -8,7 +8,7 @@ class WarlockMlpaFull extends BaseShip{
 		$this->imagePath = "img/ships/warlock.png";
 		$this->shipClass = "Warlock (full)";
 	    		$this->unofficial = true;
-		//$this->variantOf = "Warlock";
+		//$this->variantOf = "Warlock"; 
 		$this->shipSizeClass = 3;
 		$this->canvasSize= 400;
 		$this->limited = 10;

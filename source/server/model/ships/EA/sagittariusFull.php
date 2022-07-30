@@ -11,7 +11,7 @@ class SagittariusFull extends BaseShip{
         $this->shipClass = "Sagittarius Missile Cruiser (Beta Model, full)";
 	        $this->unofficial = true;
         //$this->variantOf = "Sagittarius Missile Cruiser (Beta Model)";
-        $this->shipSizeClass = 3;
+        $this->shipSizeClass = 3; 
         $this->limited = 33;
 
         $this->forwardDefense = 14;

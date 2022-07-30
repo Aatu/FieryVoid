@@ -8,7 +8,7 @@ class ApolloFull extends BaseShip{
         $this->faction = "EA (full missile loads)";
         $this->phpclass = "ApolloFull";
         //$this->variantOf = "Apollo Bombardment Cruiser";
-        $this->imagePath = "img/ships/apollo.png";
+        $this->imagePath = "img/ships/apollo.png"; 
         $this->shipClass = "Apollo Bombardment Cruiser (full)";
         $this->shipSizeClass = 3;
         $this->canvasSize = 200;

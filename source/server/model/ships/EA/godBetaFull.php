@@ -7,7 +7,7 @@ class GODBetaFull extends OSAT{
 		$this->pointCost = 700+4*100;
 		$this->faction = 'EA (full missile loads)';
         $this->phpclass = "GODBetaFull";
-        $this->imagePath = "img/ships/god.png";
+        $this->imagePath = "img/ships/god.png"; 
         $this->shipClass = "GOD Heavy Satellite (Beta, full)";
 	    //$this->variantOf = "GOD Heavy Satellite (Alpha)";
 	    		$this->unofficial = true;

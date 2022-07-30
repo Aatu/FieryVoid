@@ -9,7 +9,7 @@ class HectorFull extends OSAT{
         $this->phpclass = "HectorFull";
         $this->imagePath = "img/ships/hector.png";
         $this->shipClass = 'Hector Satellite (full)';
-        //$this->variantOf = 'Hector Satellite';
+        //$this->variantOf = 'Hector Satellite'; 
         $this->unofficial = true;
 
 	    $this->isd = 2247;
