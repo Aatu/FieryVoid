@@ -18,7 +18,8 @@ class Porfatis extends FighterFlight{
         $this->offensivebonus = 7;
         $this->jinkinglimit = 8;
         $this->turncost = 0.5;
-		$this->turndelay = 0.33;
+		$this->turndelaycost = 0.33;
+		$this->hangarRequired = "medium"; //their Ini classifies them as heavies!
         
         $this->iniativebonus = 17*5;
         $this->populate();       
