@@ -1000,22 +1000,25 @@ class AmmoMissileRackS extends Weapon{
     public $rangeArray = array(); 
 	public $distanceRangeArray = array(); 
 
-	private $ammoClassesArray = array( new(AmmoMissileB), new(AmmoMissileL), new(AmmoMissileP) );//classes representing available ammo
+	//private $ammoClassesArray = array( new AmmoMissileB, new AmmoMissileL, new AmmoMissileP );//classes representing available ammo - so firing modes are always shown in the same order
+	
+	
 	
     /*ATYPICAL constructor: doesn't take power usage and structure, but DOES take central magazine system and information about being fitted to base*/
+	//on construction, just add first class from the list; as further (or different) ones are added, appropriate tables will get refreshed
         function __construct($armour, $launcherType, $startArc, $endArc, $base=false)
         {
-		$basicFC=array(3,3,3);
-		$basicRange=20;
-		$basicDistanceRange = 60;
-		if($base){
-			$basicRange = $basicDistanceRange;
-		}
+			$basicFC=array(3,3,3);
+			$basicRange=20;
+			$basicDistanceRange = 60;
+			if($base){
+				$basicRange = $basicDistanceRange;
+			}
 		
 		
 		
 		
-		parent::__construct($armour, $maxhealth, 0, $startArc, $endArc);
+			parent::__construct($armour, $maxhealth, 0, $startArc, $endArc);
         }
 	
  
