@@ -25,6 +25,7 @@ class Udran extends BaseShip{
         $this->rollcost = 4;
         $this->pivotcost = 4;
         $this->iniativebonus = 0;
+	    $this->notes = "Provides +5 Initiative for all friendly Yolu units";        
 
 
         $this->addPrimarySystem(new Reactor(7, 25, 0, 4));
@@ -47,20 +48,20 @@ class Udran extends BaseShip{
         $this->addLeftSystem(new GraviticThruster(5, 20, 0, 6, 3));
         $this->addLeftSystem(new HeavyFusionCannon(4, 8, 6, 240, 0));
         $this->addLeftSystem(new MolecularFlayer(5, 8, 4, 300, 360));
-        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 60));
-        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 60));
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 120, 300));
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 120, 300));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 360));
-        $this->addLeftSystem(new FusionCannon(3, 8, 1, 120, 300));
-        $this->addLeftSystem(new FusionCannon(3, 8, 1, 120, 300));
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 60));
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 60));
 
         $this->addRightSystem(new GraviticThruster(5, 20, 0, 6, 4));
         $this->addRightSystem(new HeavyFusionCannon(4, 8, 6, 0, 120));
         $this->addRightSystem(new MolecularFlayer(5, 8, 4, 0, 60));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 300, 120));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 300, 120));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 240));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 240));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 180));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 240));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 240));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 300, 120));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 300, 120));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 6, 72));

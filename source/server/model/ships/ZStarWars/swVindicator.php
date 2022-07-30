@@ -4,7 +4,7 @@ class swVindicator extends BaseShipNoFwd{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 600;
+	$this->pointCost = 550;
 	$this->faction = "ZStarWars";
         $this->phpclass = "swVindicator";
         $this->imagePath = "img/starwars/vindicator.png";

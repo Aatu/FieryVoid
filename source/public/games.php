@@ -63,13 +63,21 @@ if (isset($_SESSION["user"])) {
 -->
        
 		
-		---------- <b>LATEST NEWS - June 2022</b> ----------	
-	    <br><b>Tournament prizes</b> - Shadow Xonn updated, Hyperion Iota added
-	    <br><b>new Trekkies</b> - some more ship designs to round out existing fleets
+		---------- <b>LATEST NEWS - July 2022</b> ----------	
+	    <br><b>Minbari Flyer images</b> - courtesy of Wolfgang
+	    <br><b>FC used correction</b> - Large Shadow ships should now be fired upon using correct FC
 
 	    
-		<!-- <br><br>---------- <b>update 8th of November</b> ---------- 
-		-->
+		 <br><br>---------- <b>update 28th of July</b> ---------- 
+	    <br><b><u><big>Pak'ma'ra</big> have arrived</u></b> - courtesy of Douglas, driven by popular demand :) . All hail Plasma!
+	    <br><b>FC correction</b> - ships with MCV layout but HCV+ size should now actually use correct FC (relevant primarily for Shadows and Star Trek).
+	    <br><b>Minor layout corrections</b> - Yolu
+	    <br><b>Graphics updates</b> - courtesy of Douglas and Wolfgang
+	    <br><b>New B5 units</b> - courtesy of Douglas
+	    <br><b>New Star Trek units</b> - courtesy of Wolfgang
+	    <br><b>New Star Wars units</b> - courtesy of Wolfgang
+	    <br><b>Star Wars balance changes</b> - Light Turbolasers range is increased, and some vessels are now cheaper as well
+		
 	    
         <br><br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.

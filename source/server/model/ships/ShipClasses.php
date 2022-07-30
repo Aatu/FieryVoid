@@ -119,9 +119,9 @@ class BaseShip {
                 if ($CnC){
 			    $mod += -5*($CnC->hasCritical("CommunicationsDisrupted", $gamedata->turn));
 			    $mod += -10*($CnC->hasCritical("ReducedIniativeOneTurn", $gamedata->turn));
-			    $mod += -10*($CnC->hasCritical("ReducedIniative", $gamedata->turn));
+			    $mod += -10*($CnC->hasCritical("ReducedIniative", $gamedata->turn));		    
 				//additional: SWTargetHeld (ship being held by Tractor Beam - reduces Initiative
-	    			$mod += -20*($CnC->hasCritical("swtargetheld", $gamedata->turn)); //-4 Ini per hit
+	    		$mod += -20*($CnC->hasCritical("swtargetheld", $gamedata->turn)); //-4 Ini per hit
 				//additional: tmpinidown (temporary Ini reduction - Abbai weapon scan do so!
 				$mod += -5*($CnC->hasCritical("tmpinidown", $gamedata->turn)); //-1 Ini per crit
 				//additional: ShadowPilotPain						
@@ -1104,7 +1104,14 @@ class BaseShip {
 
 
     public function getFireControlIndex(){
-        return 2;
+		//actually derive fire control index from ship size, like front end!
+		if ($this->shipSizeClass < 2){ //0:Light, 1:Medium, 2:Heavy, 3:Capital, 4:Enormous
+			return 1; //MCV fire control
+		}else{
+			return 2; //Capital fire control
+		}
+		//original version:
+        //return 2;
     }
 
 
@@ -1871,9 +1878,11 @@ class MediumShip extends BaseShip{
         parent::__construct($id, $userid, $name, $slot);
     }
 
+/* not actually needed, BaseShip routine will now handle it
     public function getFireControlIndex(){
         return 1;
     }
+*/	
 
     public function getLocations(){
         $locs = array();
@@ -1935,11 +1944,12 @@ class LightShip extends BaseShip{ //is this used anywhere?...
     function __construct($id, $userid, $name, $slot){
         parent::__construct($id, $userid, $name, $slot);
     }
-
+	
+/* not actually needed, BaseShip routine will now handle it
     public function getFireControlIndex(){
         return 1;
-
     }
+*/	
 
 } //end of class LightShip
 
