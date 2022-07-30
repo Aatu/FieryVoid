@@ -6,7 +6,7 @@ class Porfatis extends FighterFlight{
         
         $this->pointCost = 50*6;
         $this->faction = "Pak'ma'ra";
-        $this->phpclass = "Porfatis";
+        $this->phpclass = "Porfatis"; 
         $this->shipClass = "Por'fa'tis Medium flight";
         $this->imagePath = "img/ships/PakmaraPorfatis.png";
 		
@@ -18,7 +18,8 @@ class Porfatis extends FighterFlight{
         $this->offensivebonus = 7;
         $this->jinkinglimit = 8;
         $this->turncost = 0.5;
-		$this->turndelay = 0.33;
+		$this->turndelaycost = 0.33;
+		$this->hangarRequired = "medium"; //their Ini classifies them as heavies!
         
         $this->iniativebonus = 17*5;
         $this->populate();       

@@ -5,13 +5,13 @@ class SagittariusFull extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 700+8*35;
-        $this->faction = "EA";
+        $this->faction = "EA (full missile loads)";
         $this->phpclass = "SagittariusFull";
         $this->imagePath = "img/ships/sagittarius.png";
         $this->shipClass = "Sagittarius Missile Cruiser (Beta Model, full)";
 	        $this->unofficial = true;
-        $this->variantOf = "Sagittarius Missile Cruiser (Beta Model)";
-        $this->shipSizeClass = 3;
+        //$this->variantOf = "Sagittarius Missile Cruiser (Beta Model)";
+        $this->shipSizeClass = 3; 
         $this->limited = 33;
 
         $this->forwardDefense = 14;
