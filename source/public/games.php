@@ -77,6 +77,7 @@ if (isset($_SESSION["user"])) {
 	    <br><b>New Star Trek units</b> - courtesy of Wolfgang
 	    <br><b>New Star Wars units</b> - courtesy of Wolfgang
 	    <br><b>Star Wars balance changes</b> - Light Turbolasers range is increased, and some vessels are now cheaper as well
+	    <br><b>EA split</b> - full missile load variants are moved to separate directory (so main one can actually be opened)
 		
 	    
         <br><br><br>
