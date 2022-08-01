@@ -1004,8 +1004,9 @@ class AmmoMissileRackS extends Weapon{
     public $rangeArray = array(); 
 	public $distanceRangeArray = array(); 
 
-	private $ammoClassesArray = array( new AmmoMissileB, new AmmoMissileL, new AmmoMissileP );//classes representing available ammo - so firing modes are always shown in the same order
+	private $ammoClassesArray = array( new AmmoMissileB(), new AmmoMissileL(), new AmmoMissileP() );//classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
 	private $ammoMagazine; //reference to ammo magazine
+	
 	
 	
     /*ATYPICAL constructor: doesn't take power usage and structure, but DOES take central magazine system and information about being fitted to base*/
@@ -1025,9 +1026,43 @@ class AmmoMissileRackS extends Weapon{
 		if magazine holds no ammo - still list first entry on the list (weapon has to have SOME data!)
 	*/
  	public function recompileFiringModes(){
+		//clear existing arrays
+		$this->firingModes = array(); //equals to available missiles
+		$this->damageTypeArray = array(); //indicates that this weapon does damage in Pulse mode
+    		$this->fireControlArray = array(); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
+    		$this->rangeArray = array(); 
+		$this->distanceRangeArray = array();
+		$this->priorityArray = array();
+		$this->priorityAFArray = array();
+		$this->dpArray = array();
+		$this->damageTypeArray = array();
+		$this->weaponClassArray = array();
+		$this->noOverkillArray = array();
+		$this->minDamageArray = array();
+		$this->maxDamageArray = array();
 		
 		
+		//add data for all modes to arrays
+		$currMode = 0;
+		foreach ($this->ammoClassesArray as $currAmmo){
+			$isPresent = $this->magazine->getAmmoPresence($currAmmo->modeName);//does such ammo exist in magazine?
+			if($isPresent){
+				$currMode++;
+				//fill all arrays for indicated mode
+				
+			}
+		}
+			
+		//if there is no ammo available - add entry for first ammo on the list... or don't, just fill firingModes (this one is necessary) - assume basic weapons data resemble something like basic desired mode
+		if ($currMode) < 1){
+			$this->FiringModes[$currMode] = 'NoAmmunitionAvailable'
+		}
+			
+		//change mode to 1, to call all appropriate routines connected with mode change
+		$this->changeFiringMode(1);		
+		//remember about effecting criticals, too!
 		
+			
 	}//endof function recompileFiringModes
 	
 	
