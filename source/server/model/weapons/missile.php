@@ -1029,6 +1029,7 @@ class AmmoMissileRackS extends Weapon{
 		//clear existing arrays
 		$this->firingModes = array(); //equals to available missiles
 		$this->damageTypeArray = array(); //indicates that this weapon does damage in Pulse mode
+		$this->weaponClassArray = array();
     		$this->fireControlArray = array(); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
     		$this->rangeArray = array(); 
 		$this->distanceRangeArray = array();
@@ -1049,7 +1050,40 @@ class AmmoMissileRackS extends Weapon{
 			if($isPresent){
 				$currMode++;
 				//fill all arrays for indicated mode
+				$this->firingModes[$currMode] = $currAmmo->modeName;
+				$this->damageTypeArray[$currMode] = $currAmmo->damageType; 
+				$this->weaponClassArray[$currMode] = $currAmmo->weaponClass; 	
 				
+				$fc0 = 0;
+				if($this->basicFC[0] === null) || ($currAmmo->fireControlMod[0]===null)) {
+					$fc0 = null;
+				}else{
+					$fc0 = $this->basicFC[0] + $currAmmo->fireControlMod[0];
+				}
+				$fc1 = $this->basicFC[1];
+				if($this->basicFC[1] === null) || ($currAmmo->fireControlMod[1]===null)) {
+					$fc1 = null;
+				}else{
+					$fc1 = $this->basicFC[1] + $currAmmo->fireControlMod[1];
+				}
+				$fc2 = $this->basicFC[2];
+				if($this->basicFC[2] === null) || ($currAmmo->fireControlMod[2]===null)) {
+					$fc2 = null;
+				}else{
+					$fc2 = $this->basicFC[2] + $currAmmo->fireControlMod[2];
+				}
+				$this->fireControlArray[$currMode] = array($fc0, $fc1, $fc2); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
+				
+				$this->rangeArray = array(); 
+				$this->distanceRangeArray = array();
+				$this->priorityArray = array();
+				$this->priorityAFArray = array();
+				$this->dpArray = array();
+				$this->damageTypeArray = array();
+				$this->weaponClassArray = array();
+				$this->noOverkillArray = array();
+				$this->minDamageArray = array();
+				$this->maxDamageArray = array();
 			}
 		}
 			
@@ -1061,8 +1095,7 @@ class AmmoMissileRackS extends Weapon{
 		//change mode to 1, to call all appropriate routines connected with mode change
 		$this->changeFiringMode(1);		
 		//remember about effecting criticals, too!
-		
-			
+		$this->effectCriticals();			
 	}//endof function recompileFiringModes
 	
 	
