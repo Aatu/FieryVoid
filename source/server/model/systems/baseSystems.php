@@ -3621,6 +3621,7 @@ class AmmoMissileB{
 	public $minDamage = 20;
 	public $maxDamage = 20;	
 	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
 	public $priority = 6;
 	
 	
@@ -3646,6 +3647,7 @@ class AmmoMissileL{
 	public $minDamage = 15;
 	public $maxDamage = 15;	
 	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
 	public $priority = 6;
 		
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
@@ -3670,6 +3672,7 @@ class AmmoMissileP{
 	public $minDamage = 30;
 	public $maxDamage = 30;	
 	public $damageType = 'Piercing';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
 	public $priority = 2;
 		
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
