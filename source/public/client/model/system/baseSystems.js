@@ -95,6 +95,12 @@ var ProtectedCnC = function ProtectedCnC(json, ship) {
 ProtectedCnC.prototype = Object.create(CnC.prototype);
 ProtectedCnC.prototype.constructor = ProtectedCnC;
 
+var PakmaraCnC = function PakmaraCnC(json, ship) {
+    CnC.call(this, json, ship);
+};
+PakmaraCnC.prototype = Object.create(CnC.prototype);
+PakmaraCnC.prototype.constructor = PakmaraCnC;
+
 var Thruster = function Thruster(json, ship) {
     ShipSystem.call(this, json, ship);
     this.channeled = 0;

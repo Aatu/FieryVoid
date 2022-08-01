@@ -429,7 +429,8 @@ spl_autoload_register(
                 'hlpa' => '/server/model/weapons/customs.php',
                 'hvyblastcannon' => '/server/model/weapons/pulse.php',
                 'hvyparticlecannon' => '/server/model/weapons/particle.php',
-                'hyperion' => '/server/model/ships/EA/hyperion.php',
+                'hyperion' => '/server/model/ships/EA/hyperion.php',				
+                'hyperioniota' => '/server/model/ships/EA/hyperionIota.php',
                 'hyperionalpha' => '/server/model/ships/EA/hyperionAlpha.php',
                 'hyperionassault' => '/server/model/ships/EA/hyperionAssault.php',
                 'hyperioncommand' => '/server/model/ships/EA/hyperionCommand.php',
@@ -1091,6 +1092,7 @@ spl_autoload_register(
                 'ultralightgraviticbolt' => '/server/model/weapons/gravitic.php',
                 'upgtorotha' => '/server/model/ships/minbari/upgTorotha.php',
                 'utan' => '/server/model/ships/yolu/utan.php',
+                'nathor' => '/server/model/ships/yolu/Nathor.php',
                 'vakar' => '/server/model/ships/narn/vakar.php',
                 'valtor' => '/server/model/ships/centauri_old/valtor.php',
                 'valtor1870' => '/server/model/ships/centauri_old/valtor1870.php',
@@ -2321,6 +2323,14 @@ spl_autoload_register(
                 'zzftrbwingmk2' => '/server/model/ships/ZStarWars/zzftrBWingMk2.php', 
                 'zzftrbwingprototype' => '/server/model/ships/ZStarWars/zzftrBWingPrototype.php',
 				
+				//new SW - July 2022
+                'swarquitenscommandcruiser' => '/server/model/ships/ZStarWars/swArquitensCommandCruiser.php',
+                'swraidercorvette' => '/server/model/ships/ZStarWars/swRaiderCorvette.php',
+                'swstrikecruiser' => '/server/model/ships/ZStarWars/swStrikeCruiser.php',
+                'zzftrtieadvanced' => '/server/model/ships/ZStarWars/zzftrTIEAdvanced.php',
+                'zzftrtieavenger' => '/server/model/ships/ZStarWars/zzftrTIEAvenger.php',
+				
+				
 				
 				//Gaim systems
                 'subreactoruniversal' => '/server/model/systems/baseSystems.php',
@@ -2497,6 +2507,8 @@ spl_autoload_register(
 				'andorianthyzon' => '/server/model/ships/ZTrekFederationEarly/AndorianThyzon.php',
 				'andorianthymasescort' => '/server/model/ships/ZTrekFederationEarly/AndorianThymasEscort.php',
 				'andoriankumari' => '/server/model/ships/ZTrekFederationEarly/AndorianKumari.php',
+				'andoriankumaricommand' => '/server/model/ships/ZTrekFederationEarly/AndorianKumariCommand.php',
+				'andoriankumarigunship' => '/server/model/ships/ZTrekFederationEarly/AndorianKumariGunship.php',
 				'andorianfighter' => '/server/model/ships/ZTrekFederationEarly/AndorianFighter.php',
 				'andorianchimesh' => '/server/model/ships/ZTrekFederationEarly/AndorianChimesh.php',
 				
@@ -2506,6 +2518,11 @@ spl_autoload_register(
 				'trekfederationsarajevo' => '/server/model/ships/ZTrekFederationEarly/TrekFederationSarajevo.php',
 				'trekfederationjclass' => '/server/model/ships/ZTrekFederationEarly/TrekFederationJClass.php',
 				'trekfederationyclass' => '/server/model/ships/ZTrekFederationEarly/TrekFederationYClass.php',
+								
+				'trekfederationdaedalusff' => '/server/model/ships/ZTrekFederationEarly/TrekFederationDaedalusFF.php',
+				'trekfederationfreedomff' => '/server/model/ships/ZTrekFederationEarly/TrekFederationFreedomFF.php',
+								
+								
 								
 				//TOS (Original Series)
 				'trekfederationarco' => '/server/model/ships/ZTrekFederationTOS/TrekFederationArco.php',
@@ -2522,6 +2539,7 @@ spl_autoload_register(
 				'trekfederationsoyuz' => '/server/model/ships/ZTrekFederationTOS/TrekFederationSoyuz.php',
 				'trekfederationsaladin' => '/server/model/ships/ZTrekFederationTOS/TrekFederationSaladin.php',
 				'trekfederationyamato' => '/server/model/ships/ZTrekFederationTOS/TrekFederationYamato.php',
+				'trekfederationillustrious' => '/server/model/ships/ZTrekFederationTOS/TrekFederationIllustrious.php',
 								
 				'trekvulcandkyrtos' => '/server/model/ships/ZTrekFederationTOS/TrekVulcanDKyrTOS.php',
 				
@@ -2536,13 +2554,29 @@ spl_autoload_register(
 				'treknausicaanheavyglider' => '/server/model/ships/ZTrekOther/TrekNausicaanHeavyGlider.php',
 				'treknausicaanvandal' => '/server/model/ships/ZTrekOther/TrekNausicaanVandal.php',
 				
-				//Pakmara
+				//Pak'ma'ra
 				'plasmabattery' => '/server/model/systems/baseSystems.php',
-				'ptest' => '/server/model/ships/customs/PTest.php',	
+				'pakmaracnc' => '/server/model/systems/baseSystems.php',				
 				'pakmaraplasmaweb' => '/server/model/weapons/plasma.php',
 				'fuser' => '/server/model/weapons/plasma.php',
 				'rangedfuser' => '/server/model/weapons/plasma.php',
-				'dualplasmastream' => '/server/model/weapons/plasma.php',															
+				'dualplasmastream' => '/server/model/weapons/specialWeapons.php',	
+				'reshkasu' => '/server/model/ships/pakmara/Reshkasu.php',
+				'shobogna' => '/server/model/ships/pakmara/Shobogna.php',																			
+				'orshilti' => '/server/model/ships/pakmara/Orshilti.php',
+				'porfatis' => '/server/model/ships/pakmara/Porfatis.php',
+				'pshulshi' => '/server/model/ships/pakmara/Pshulshi.php',
+				'pshultau' => '/server/model/ships/pakmara/Pshultau.php',
+				'trashuli' => '/server/model/ships/pakmara/Trashuli.php',
+				'urikhal' => '/server/model/ships/pakmara/Urikhal.php',	
+				'tharnotak' => '/server/model/ships/pakmara/Tharnotak.php',								'padashar' => '/server/model/ships/pakmara/Padashar.php',
+				'artees' => '/server/model/ships/pakmara/Artees.php',
+				'simsalle' => '/server/model/ships/pakmara/Simsalle.php',
+				'trashue' => '/server/model/ships/civilians/Trashue.php',
+				'plasalle' => '/server/model/ships/pakmara/Plasalle.php',
+				'sashulkur' => '/server/model/ships/pakmara/Sashulkur.php',
+				'simtorka' => '/server/model/ships/pakmara/Simtorka.php',
+				'uriktal' => '/server/model/ships/pakmara/Uriktal.php',																																																				
 				
 
 				//Hyach
@@ -2593,6 +2627,7 @@ spl_autoload_register(
 		    
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
+				'gaimraxas' => '/server/model/ships/customs/gaimRaxas.php',
 				
 
 

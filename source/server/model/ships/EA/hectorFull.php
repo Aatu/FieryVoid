@@ -5,11 +5,11 @@ class HectorFull extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 250+2*100;
-		$this->faction = 'EA';//"EA defenses";
+		$this->faction = 'EA (full missile loads)';
         $this->phpclass = "HectorFull";
         $this->imagePath = "img/ships/hector.png";
         $this->shipClass = 'Hector Satellite (full)';
-        $this->variantOf = 'Hector Satellite';
+        //$this->variantOf = 'Hector Satellite'; 
         $this->unofficial = true;
 
 	    $this->isd = 2247;

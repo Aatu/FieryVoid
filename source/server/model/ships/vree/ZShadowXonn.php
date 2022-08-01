@@ -5,14 +5,16 @@ class ZShadowXonn extends VreeCapital{
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
-		$this->pointCost = 2900;
+		$this->pointCost = 2750;
 		$this->faction = "Vree";
 		$this->phpclass = "ZShadowXonn";
 		$this->shipClass = "Shadow Xonn Dreadnought";
 		$this->isd = 'not known';
         $this->limited = 10; //Restricted Deployment
 	    $this->unofficial = true;
-        $this->enhancementOptionsDisabled[] = 'SHAD_DIFF'; //no diffuser upgrades for EA ships - they don't have know how to tamper with Shadow systems to that extent!
+		
+        $this->enhancementOptionsDisabled[] = 'SHAD_DIFF'; //no diffuser upgrades for Young ships - they don't have know how to tamper with Shadow systems to that extent!
+		$this->advancedArmor = true;   
 
 		$this->shipSizeClass = 3;
 		$this->iniativebonus = 0;
@@ -27,8 +29,8 @@ class ZShadowXonn extends VreeCapital{
 		$this->forwardDefense = 16;
 		$this->sideDefense = 16;
 
-		$this->imagePath = "img/ships/VreeXonn.png";
-		$this->canvasSize = 200;
+		$this->imagePath = "img/ships/XonnShadow.png";
+		$this->canvasSize = 280;
 
 		$this->addPrimarySystem(new Reactor(6, 25, 0, 0));
 		$this->addPrimarySystem(new Hangar(6, 3));
@@ -47,74 +49,80 @@ class ZShadowXonn extends VreeCapital{
     						
 
      
-        $diffuser = new EnergyDiffuser(4, 9, 2, 300, 60);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
-          $tendril=new DiffuserTendril(10,'L');//absorbtion capacity,side
+        $diffuser = new EnergyDiffuser(4, 13, 3, 300, 60);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+          $tendril=new DiffuserTendril(12,'L');//absorbtion capacity,side
           $diffuser->addTendril($tendril);
           $this->addFrontSystem($tendril);
-          $tendril=new DiffuserTendril(10,'R');//absorbtion capacity,side
+          $tendril=new DiffuserTendril(12,'R');//absorbtion capacity,side
           $diffuser->addTendril($tendril);
           $this->addFrontSystem($tendril);
         $this->addFrontSystem($diffuser);		
-        $this->addFrontSystem(new GraviticThruster(5, 20, 0, 10, 1));  
-        $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 300, 60));
+        $this->addFrontSystem(new GraviticThruster(5, 20, 0, 10, 1));
+        $this->addFrontSystem(new MultiphasedCutterL(3, 0, 0, 300, 60));
+        $this->addFrontSystem(new MultiphasedCutterL(3, 0, 0, 300, 60));
 		 
     
-        $diffuser = new EnergyDiffuser(4, 9, 2, 120, 240);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
-          $tendril=new DiffuserTendril(10,'L');//absorbtion capacity,side
+        $diffuser = new EnergyDiffuser(4, 13, 3, 120, 240);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+          $tendril=new DiffuserTendril(12,'L');//absorbtion capacity,side
           $diffuser->addTendril($tendril);
           $this->addAftSystem($tendril);
-          $tendril=new DiffuserTendril(10,'R');//absorbtion capacity,side
+          $tendril=new DiffuserTendril(12,'R');//absorbtion capacity,side
           $diffuser->addTendril($tendril);
           $this->addAftSystem($tendril);
         $this->addAftSystem($diffuser);		
         $this->addAftSystem(new GraviticThruster(5, 20, 0, 10, 2));   
-        $this->addAftSystem(new AntiprotonGun(3, 0, 0, 120, 240));     
+        $this->addAftSystem(new MultiphasedCutterL(3, 0, 0, 120, 240));
+        $this->addAftSystem(new MultiphasedCutterL(3, 0, 0, 120, 240));
     
     
-        $diffuser = new EnergyDiffuser(4, 9, 2, 240, 360);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
-          $tendril=new DiffuserTendril(10,'L');//absorbtion capacity,side
+        $diffuser = new EnergyDiffuser(4, 13, 3, 240, 360);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+          $tendril=new DiffuserTendril(12,'L');//absorbtion capacity,side
           $diffuser->addTendril($tendril);
           $this->addLeftFrontSystem($tendril);
-          $tendril=new DiffuserTendril(10,'L');//absorbtion capacity,side
+          $tendril=new DiffuserTendril(12,'L');//absorbtion capacity,side
           $diffuser->addTendril($tendril);
           $this->addLeftFrontSystem($tendril);
         $this->addLeftFrontSystem($diffuser);	
-		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));	
+		$this->addLeftFrontSystem(new MultiphasedCutterL(3, 0, 0, 240, 360));	
+		$this->addLeftFrontSystem(new MultiphasedCutterL(3, 0, 0, 240, 360));	
 				
 				
-        $diffuser = new EnergyDiffuser(4, 9, 2, 180, 300);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
-          $tendril=new DiffuserTendril(10,'L');//absorbtion capacity,side
+        $diffuser = new EnergyDiffuser(4, 13, 3, 180, 300);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+          $tendril=new DiffuserTendril(12,'L');//absorbtion capacity,side
           $diffuser->addTendril($tendril);
           $this->addLeftAftSystem($tendril);
-          $tendril=new DiffuserTendril(10,'L');//absorbtion capacity,side
+          $tendril=new DiffuserTendril(12,'L');//absorbtion capacity,side
           $diffuser->addTendril($tendril);
           $this->addLeftAftSystem($tendril);
         $this->addLeftAftSystem($diffuser);	
 		$this->addLeftAftSystem(new GraviticThruster(5, 20, 0, 10, 3));
-		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
+		$this->addLeftAftSystem(new MultiphasedCutterL(3, 0, 0, 180, 300));
+		$this->addLeftAftSystem(new MultiphasedCutterL(3, 0, 0, 180, 300));
 		
     
-        $diffuser = new EnergyDiffuser(4, 9, 2, 0, 120);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
-          $tendril=new DiffuserTendril(10,'R');//absorbtion capacity,side
+        $diffuser = new EnergyDiffuser(4, 13, 3, 0, 120);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+          $tendril=new DiffuserTendril(12,'R');//absorbtion capacity,side
           $diffuser->addTendril($tendril);
           $this->addRightFrontSystem($tendril);
-          $tendril=new DiffuserTendril(10,'R');//absorbtion capacity,side
+          $tendril=new DiffuserTendril(12,'R');//absorbtion capacity,side
           $diffuser->addTendril($tendril);
           $this->addRightFrontSystem($tendril);
         $this->addRightFrontSystem($diffuser);	
-		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
+		$this->addRightFrontSystem(new MultiphasedCutterL(3, 0, 0, 0, 120));
+		$this->addRightFrontSystem(new MultiphasedCutterL(3, 0, 0, 0, 120));
 				
 				
-        $diffuser = new EnergyDiffuser(4, 9, 2, 60, 180);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
-          $tendril=new DiffuserTendril(10,'R');//absorbtion capacity,side
+        $diffuser = new EnergyDiffuser(4, 13, 3, 60, 180);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+          $tendril=new DiffuserTendril(12,'R');//absorbtion capacity,side
           $diffuser->addTendril($tendril);
           $this->addRightAftSystem($tendril);
-          $tendril=new DiffuserTendril(10,'R');//absorbtion capacity,side
+          $tendril=new DiffuserTendril(12,'R');//absorbtion capacity,side
           $diffuser->addTendril($tendril);
           $this->addRightAftSystem($tendril);
         $this->addRightAftSystem($diffuser);	
-		$this->addRightAftSystem(new GraviticThruster(5, 20, 0, 10, 4));	
-		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
+		$this->addRightAftSystem(new GraviticThruster(5, 20, 0, 10, 4));
+		$this->addRightAftSystem(new MultiphasedCutterL(3, 0, 0, 60, 180));
+		$this->addRightAftSystem(new MultiphasedCutterL(3, 0, 0, 60, 180));
 		
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -140,55 +148,61 @@ class ZShadowXonn extends VreeCapital{
            		 ),
             1=> array(
                     4 => "Thruster",
-                    6 => "Antiproton Gun",
+                    6 => "Light Multiphased Cutter",
                     7 => "0:Antimatter Shredder",                    
                     8 => "0:Light Slicer Beam",                  
                     9 => "0:Multiphased Cutter",
+                    11 => "Energy Diffuser",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             2=> array(
                     4 => "Thruster",
-                    6 => "Antiproton Gun",
+                    6 => "Light Multiphased Cutter",
                     7 => "0:Antimatter Shredder",                    
                     8 => "0:Light Slicer Beam",                  
                     9 => "0:Multiphased Cutter",
+                    11 => "Energy Diffuser",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             31=> array(
                     4 => "32:Thruster",
-                    6 => "Antiproton Gun",
+                    6 => "Light Multiphased Cutter",
                     7 => "0:Antimatter Shredder",                    
                     8 => "0:Light Slicer Beam",                  
                     9 => "0:Multiphased Cutter",
+                    11 => "Energy Diffuser",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
                     4 => "Thruster",
-                    6 => "Antiproton Gun",
+                    6 => "Light Multiphased Cutter",
                     7 => "0:Antimatter Shredder",                    
                     8 => "0:Light Slicer Beam",                  
                     9 => "0:Multiphased Cutter",
+                    11 => "Energy Diffuser",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
                     4 => "42:Thruster",
-                    6 => "Antiproton Gun",
+                    6 => "Light Multiphased Cutter",
                     7 => "0:Antimatter Shredder",                    
                     8 => "0:Light Slicer Beam",                  
                     9 => "0:Multiphased Cutter",
+                    11 => "Energy Diffuser",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
                     4 => "Thruster",
-                    6 => "Antiproton Gun",
+                    6 => "Light Multiphased Cutter",
                     7 => "0:Antimatter Shredder",                    
                     8 => "0:Light Slicer Beam",                  
                     9 => "0:Multiphased Cutter",
+                    11 => "Energy Diffuser",
                     17 => "Structure",
                     20 => "Primary",
            		 ),

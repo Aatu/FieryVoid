@@ -805,8 +805,10 @@ class SWLightTLaser extends SWDirectWeapon{
 	
     public $priority = 4;
     public $loadingtime = 2;
-    public $rangePenalty = 1;
-    public $fireControl = array(-1, 2, 3); // fighters, <mediums, <capitals
+    //public $rangePenalty = 1; //21.07.2022: changed to -2/3hexes as per Wolfgang's request
+	public $rangePenalty = 0.66;
+    //public $fireControl = array(-1, 2, 3); // fighters, <mediums, <capitals
+	public $fireControl = array(-2, 2, 3); // AF FC cut down when range was increased
 	public $animationColor = array(245, 0, 0); //let's make it brighter than regular lasers :)
 	
 	
