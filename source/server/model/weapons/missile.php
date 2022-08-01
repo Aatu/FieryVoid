@@ -992,6 +992,10 @@ class AmmoMissileRackS extends Weapon{
     public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     public $weaponClass = "Ballistic"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
 	
+	//basic launcher data, before being modified by actual missiles
+	public $basicFC=array(3,3,3);
+	public $basicRange=20;
+	public $basicDistanceRange = 60;
 	
 	public $firingModes = array(); //equals to available missiles
 	public $damageTypeArray = array(); //indicates that this weapon does damage in Pulse mode
@@ -1000,28 +1004,58 @@ class AmmoMissileRackS extends Weapon{
     public $rangeArray = array(); 
 	public $distanceRangeArray = array(); 
 
-	//private $ammoClassesArray = array( new AmmoMissileB, new AmmoMissileL, new AmmoMissileP );//classes representing available ammo - so firing modes are always shown in the same order
-	
+	private $ammoClassesArray = array( new AmmoMissileB, new AmmoMissileL, new AmmoMissileP );//classes representing available ammo - so firing modes are always shown in the same order
+	private $ammoMagazine; //reference to ammo magazine
 	
 	
     /*ATYPICAL constructor: doesn't take power usage and structure, but DOES take central magazine system and information about being fitted to base*/
 	//on construction, just add first class from the list; as further (or different) ones are added, appropriate tables will get refreshed
-        function __construct($armour, $launcherType, $startArc, $endArc, $base=false)
+        function __construct($armour, $magazine, $startArc, $endArc, $base=false)
         {
-			$basicFC=array(3,3,3);
-			$basicRange=20;
-			$basicDistanceRange = 60;
-			if($base){
-				$basicRange = $basicDistanceRange;
-			}
-		
-		
-		
-		
-			parent::__construct($armour, $maxhealth, 0, $startArc, $endArc);
+		$this->ammoMagazine = $magazine;
+		if($base){
+			$this->basicRange = $this->basicDistanceRange;
+		}
+		$this->recompileFiringModes();
+		parent::__construct($armour, 6, 0, $startArc, $endArc); //class-S launcher: structure 6, power usage 0
         }
 	
- 
+	
+	/*prepare firing modes - in order as indicated by $ammoCLassesArray (so every time the order is the same and classes aren't mixed), but use only classes actually held by magazine (no matter the count - 0 rounds is fine)
+		if magazine holds no ammo - still list first entry on the list (weapon has to have SOME data!)
+	*/
+ 	public function recompileFiringModes(){
+		
+		
+		
+	}//endof function recompileFiringModes
+	
+	
+	
+    public function ammoExplosion($ship, $gamedata, $damage){
+        //first, destroy self if not yet done...
+        if (!$this->isDestroyed()){
+            $this->noOverkill = true;
+            $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 'standard', 100, 1, 1, 1, 0, null, null, 'ballistic');
+            $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
+            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, $pos, $gamedata, true, $this->location);
+        }        
+        //then apply damage potential as a hit...
+        if($damage>0){
+            $this->noOverkill = false;
+            $this->damageType = 'Flash'; //should be Raking by the rules, but Flash is much easier to do - and very fitting for explosion!
+            $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 'flash', 100, 1, 1, 1, 0, null, null, 'ballistic');
+            $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->location); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
+        }
+    }
+    public function addMissileCritOnSelf($shipid, $phpclass, $gamedata){
+        $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
+        $crit->updated = true;
+        $this->criticals[] =  $crit;
+    }   
+	
 } //endof class AmmoMissileRackS
 
 
