@@ -3493,12 +3493,14 @@ class AmmoMagazine extends ShipSystem {
 	public $ammoSizeArray = array();
 	
     
-    function __construct($capacity, $baseAmmo, $ammoLoaded){ //magazine capacity, primary ammo to be used (CLASS INSTANCE!), ammo loaded initially
-        parent::__construct(0, 1, 0, 1);
+    function __construct($capacity){ //magazine capacity
+        parent::__construct(0, 1, 0, 1); //technical system, armor and structure don't really matter
 	$this->capacity = $capacity;
+	    /*
 	$roundsToAdd = 0;
 	if($ammoLoaded == true) $roundsToAdd = $capacity;
 	$this->addAmmoEntry($baseAmmo, $roundsToAdd, false);
+	*/
     }
     
     public function setSystemDataWindow($turn){
@@ -3534,7 +3536,16 @@ class AmmoMagazine extends ShipSystem {
 	    }
     }
 	
-	
+	public function getAmmoPresence($modeName){
+		$toReturn = false;
+		foreach($this->ammoArray as $currAmmo){
+			if($currAmmo->modeName == $modeName){
+				$toReturn = true;
+				break; //foreach
+			}
+		}		
+		return $toReturn;
+	}
 	public function getAmmo($modeName){
 		$toReturn = null;
 		foreach($this->ammoArray as $currAmmo){
