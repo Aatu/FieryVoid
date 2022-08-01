@@ -3555,10 +3555,12 @@ class AmmoMagazine extends ShipSystem {
 			}
 		}		
 		return $toReturn;
-	}
-	
+	}	
 	public function getAmmoArray(){
 		return $this->ammoArray;
+	}
+	public function getAmmoArrayCount(){
+		return count($this->ammoArray);
 	}
 	
 	public function addRounds($modeName, $ammoCount){ //additional rounds for already existing entry
