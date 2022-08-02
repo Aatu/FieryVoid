@@ -2636,7 +2636,14 @@ spl_autoload_register(
 				'ltviper' => '/server/model/ships/customs/LtViper.php',
 				'medviper' => '/server/model/ships/customs/medViper.php',
 				
-				//TEMPORARY layout changes and such - old versions	
+				//AmmoMagazine and related classes
+                		'ammomagazine' => '/server/model/systems/baseSystems.php', //ammo magazine itself
+		    
+                		'ammomissileb' => '/server/model/systems/baseSystems.php', //ammunition for missile racks
+                		'ammomissilel' => '/server/model/systems/baseSystems.php',
+                		'ammomissilep' => '/server/model/systems/baseSystems.php',
+		    
+                		'ammomissileracks' => '/server/model/weapons/missile.php', //missile racks
 				
 						
 				
