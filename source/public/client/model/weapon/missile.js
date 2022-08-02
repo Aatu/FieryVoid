@@ -141,7 +141,7 @@ AmmoMagazine.prototype = Object.create(ShipSystem.prototype);
 AmmoMagazine.prototype.constructor = AmmoMagazine;
 AmmoMagazine.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
     //transfer every round used as a separate entry, by mode name
-	this.individualNotesTransfer = Array();
+	this.individualNotesTransfer = [];
     var ammoKeysArray = Object.keys(this.ammoUseArray);
     for (var i = 0; i < ammoKeysArray.length; i++) {
 		var currAmmoKey = ammoKeysArray[i];
@@ -155,7 +155,7 @@ AmmoMagazine.prototype.doIndividualNotesTransfer = function () { //prepare indiv
 AmmoMagazine.prototype.doVerifyAmmoUsage = function (currShip) { //verify whether desired ammo usage is sustainable by rounds actually present in magazine
     var toReturn = true;
     var totalAmmoRequired = 0;
-    this.ammoUseArray = array();
+    this.ammoUseArray = [];
     //loop through all weapons for current ship (appropriate to phase) - and check for ammo usage
     for (var i in currShip.systems) {
         var currWeapon = currShip.systems[i];

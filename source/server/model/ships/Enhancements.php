@@ -389,24 +389,33 @@ class Enhancements{
 	  if ($magazineCapacity > 0){ //otherwise no point
 		  $enhID = 'AMMO_B'; //Basic Missiles - actually most ships have these fitted as standard
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
-			  $enhName = 'Basic Missile (always available)';
-			  $enhLimit = $magazineCapacity; //effectively limited by magazine capacity	
+				$ammoClass = new AmmoMissileB();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity; //effectively limited by magazine capacity	
 			  $enhPrice = 1; //fixed, very low value - officially 0 (included in rack/ship cost), but enhancement will actually only be present when they're NOT included!
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
 		  $enhID = 'AMMO_L'; //Long Range Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
-			  $enhName = 'Long Range Missile (avail. 2225)';
-			  $enhLimit = $magazineCapacity;	
+				$ammoClass = new AmmoMissileL();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;	
 			  $enhPrice = 6; //fixed value
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
 		  $enhID = 'AMMO_P'; //Piercing Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
-			  $enhName = 'Piercing Missile (avail. 2244)';
-			  $enhLimit = $magazineCapacity;	
+				$ammoClass = new AmmoMissileP();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;	
 			  $enhPrice = 16; //fixed value
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
@@ -893,13 +902,13 @@ class Enhancements{
 						
 					//consumable ammunition
 					case 'AMMO_B': //Basic Missile						
-						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new(AmmoMissileB()), $enhCount);
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileB(), $enhCount, true); //do notify dependent weapons, too!
 						break;
 					case 'AMMO_L': //Long Range Missile
-						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new(AmmoMissileL()), $enhCount);
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileL(), $enhCount, true); //do notify dependent weapons, too!
 						break;
-					case 'AMMO_P': //Long Range Missile
-						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new(AmmoMissileL()), $enhCount);
+					case 'AMMO_P': //Piercing Missile
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileP(), $enhCount, true); //do notify dependent weapons, too!
 						break;
 						
 				}

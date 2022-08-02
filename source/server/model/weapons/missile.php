@@ -995,9 +995,9 @@ class AmmoMissileRackS extends Weapon{
     public $weaponClass = "Ballistic"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
 	
 	//basic launcher data, before being modified by actual missiles
-	public $basicFC=array(3,3,3);
-	public $basicRange=20;
-	public $basicDistanceRange = 60;
+	private $basicFC=array(3,3,3);
+	private $basicRange=20;
+	private $basicDistanceRange = 60;
 	
 	public $firingModes = array(); //equals to available missiles
 	public $damageTypeArray = array(); //indicates that this weapon does damage in Pulse mode
@@ -1006,7 +1006,8 @@ class AmmoMissileRackS extends Weapon{
     public $rangeArray = array(); 
 	public $distanceRangeArray = array(); 
 
-	private $ammoClassesArray = array( new AmmoMissileB(), new AmmoMissileL(), new AmmoMissileP() );//classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
+	private $ammoClassesArray = array();//FILLED IN CONSTRUCTOR! classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
+	
 	private $ammoMagazine; //reference to ammo magazine
 	private $ammoClassesUsed = array();
 	
@@ -1014,8 +1015,12 @@ class AmmoMissileRackS extends Weapon{
 	
     /*ATYPICAL constructor: doesn't take power usage and structure, but DOES take central magazine system and information about being fitted to base*/
 	//on construction, just add first class from the list; as further (or different) ones are added, appropriate tables will get refreshed
-        function __construct($armour, $magazine, $startArc, $endArc, $base=false)
-        {
+	function __construct($armour, $magazine, $startArc, $endArc, $base=false)
+	{
+		//VERY IMPORTANT: fill $ammoClassesArray (cannot be done as constants!
+		//classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
+		$this->ammoClassesArray = array( new AmmoMissileB(), new AmmoMissileL(), new AmmoMissileP() );
+	
 		$this->ammoMagazine = $magazine;
 		if($base){
 			$this->basicRange = $this->basicDistanceRange;
@@ -1023,8 +1028,12 @@ class AmmoMissileRackS extends Weapon{
 		$this->recompileFiringModes();
 		parent::__construct($armour, 6, 0, $startArc, $endArc); //class-S launcher: structure 6, power usage 0
 		$magazine->subscribe($this); //subscribe to any further changes in ammo availability
-        }
-	
+	}	
+    
+	public function setSystemDataWindow($turn){
+		$this->data["Special"] = 'Available firing modes depend on ammo bought as unit enhancements. Ammunition available is tracked by central Ammunition Magazine system.';
+		parent::setSystemDataWindow($turn);
+	}
 	
 	/*prepare firing modes - in order as indicated by $ammoCLassesArray (so every time the order is the same and classes aren't mixed), but use only classes actually held by magazine (no matter the count - 0 rounds is fine)
 		if magazine holds no ammo - still list first entry on the list (weapon has to have SOME data!)
@@ -1051,7 +1060,7 @@ class AmmoMissileRackS extends Weapon{
 		//add data for all modes to arrays
 		$currMode = 0;
 		foreach ($this->ammoClassesArray as $currAmmo){
-			$isPresent = $this->magazine->getAmmoPresence($currAmmo->modeName);//does such ammo exist in magazine?
+			$isPresent = $this->ammoMagazine->getAmmoPresence($currAmmo->modeName);//does such ammo exist in magazine?
 			if($isPresent){
 				$currMode++;
 				//fill all arrays for indicated mode
@@ -1061,19 +1070,19 @@ class AmmoMissileRackS extends Weapon{
 				$this->weaponClassArray[$currMode] = $currAmmo->weaponClass; 	
 				
 				$fc0 = 0;
-				if($this->basicFC[0] === null) || ($currAmmo->fireControlMod[0]===null)) {
+				if(($this->basicFC[0] === null) || ($currAmmo->fireControlMod[0]===null)) {
 					$fc0 = null;
 				}else{
 					$fc0 = $this->basicFC[0] + $currAmmo->fireControlMod[0];
 				}
 				$fc1 = $this->basicFC[1];
-				if($this->basicFC[1] === null) || ($currAmmo->fireControlMod[1]===null)) {
+				if(($this->basicFC[1] === null) || ($currAmmo->fireControlMod[1]===null)) {
 					$fc1 = null;
 				}else{
 					$fc1 = $this->basicFC[1] + $currAmmo->fireControlMod[1];
 				}
 				$fc2 = $this->basicFC[2];
-				if($this->basicFC[2] === null) || ($currAmmo->fireControlMod[2]===null)) {
+				if(($this->basicFC[2] === null) || ($currAmmo->fireControlMod[2]===null)) {
 					$fc2 = null;
 				}else{
 					$fc2 = $this->basicFC[2] + $currAmmo->fireControlMod[2];
@@ -1084,8 +1093,6 @@ class AmmoMissileRackS extends Weapon{
 				$this->distanceRangeArray[$currMode] = $this->basicDistanceRange + $currAmmo->distanceRangeMod; 
 				$this->priorityArray[$currMode] = $currAmmo->priority;
 				$this->priorityAFArray[$currMode] = $currAmmo->priorityAF;
-				$this->damageTypeArray[$currMode] = $currAmmo->damageType;
-				$this->weaponClassArray[$currMode] = $currAmmo->weaponClass;
 				$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
 				$this->minDamageArray[$currMode] = $currAmmo->minDamage;
 				$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
@@ -1093,8 +1100,8 @@ class AmmoMissileRackS extends Weapon{
 		}
 			
 		//if there is no ammo available - add entry for first ammo on the list... or don't, just fill firingModes (this one is necessary) - assume basic weapons data resemble something like basic desired mode
-		if ($currMode) < 1){
-			$this->FiringModes[$currMode] = 'NoAmmunitionAvailable'
+		if ($currMode < 1){
+			$this->FiringModes[1] = 'NoAmmunitionAvailable';
 		}
 			
 		//change mode to 1, to call all appropriate routines connected with mode change
@@ -1104,18 +1111,39 @@ class AmmoMissileRackS extends Weapon{
 	}//endof function recompileFiringModes
 	
 	
+	
+ 	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		$strippedSystem->firingModes = $this->firingModes; 
+		$strippedSystem->damageTypeArray = $this->damageTypeArray; 
+		$strippedSystem->weaponClassArray = $this->weaponClassArray; 
+		$strippedSystem->fireControlArray = $this->fireControlArray; 
+		$strippedSystem->rangeArray = $this->rangeArray; 
+		$strippedSystem->distanceRangeArray = $this->distanceRangeArray; 
+		$strippedSystem->priorityArray = $this->priorityArray; 
+		$strippedSystem->priorityAFArray = $this->priorityAFArray; 
+		$strippedSystem->dpArray = $this->dpArray; 
+		$strippedSystem->noOverkillArray = $this->noOverkillArray; 
+		$strippedSystem->minDamageArray = $this->minDamageArray; 
+		$strippedSystem->maxDamageArray = $this->maxDamageArray; 
+		return $strippedSystem;
+	} 
+	
 	//actually use getDamage() method of ammo!
     public function getDamage($fireOrder)
     {
+		$currAmmo = null;
         //find appropriate ammo
-	$currAmmo = $this->ammoClassesUsed[$currMode];
+		if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
+			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
+		}
 	    
-	//execute getDamage()
-	if($currAmmo){
-		return $currAmmo->getDamage($fireOrder);
-	}else{
-		return 0;	
-	}
+		//execute getDamage()
+		if($currAmmo){
+			return $currAmmo->getDamage($fireOrder);
+		}else{
+			return 0;	
+		}
     }
 	
 	

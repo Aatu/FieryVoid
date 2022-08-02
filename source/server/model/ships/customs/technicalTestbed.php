@@ -32,11 +32,11 @@ class TechnicalTestbed extends MediumShip{
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4)); 
 	    
 	//ammo magazine itself
-	$ammoMagazine = new AmmoMagazine(5); //pass magazine capacity 
+	$ammoMagazine = new AmmoMagazine(6); //pass magazine capacity 
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-	    $ammoMagazine->addAmmoEntry(new(), 200); //add full load of basic missiles
-	    $this->unit->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
-	    $this->unit->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 200); //add full load of basic missiles
+	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+	    $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
         
         
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));

@@ -3486,6 +3486,7 @@ class AmmoMagazine extends ShipSystem {
 	
 	public $capacity = 0;
 	public $remainingAmmo = 0;
+	private $ammoUsedTotal = array(); //ammo marked as used by notes
 	
 	private $ammoArray = array();	
 	private $ammoJustUsed = array(); //temporary array - ammo usage information received from front end, to be saved to database
@@ -3494,6 +3495,7 @@ class AmmoMagazine extends ShipSystem {
 	public $ammoCountArray = array();
 	public $ammoSizeArray = array();
 	public $ammoUseArray = array(); //to be used in front end to track actual ammo usage
+	public $output = 0;
 	
     
     function __construct($capacity){ //magazine capacity
@@ -3507,14 +3509,22 @@ class AmmoMagazine extends ShipSystem {
     }
     
     public function setSystemDataWindow($turn){
+		//count remaining ammo total
+		foreach($this->ammoArray as $currAmmo){
+			$count = $this->ammoUsedTotal[$currAmmo->modeName];
+			$size = $currAmmo->size;
+			$this->remainingAmmo -= $count * $size;			
+		}
+		
+		$this->output = $this->remainingAmmo; //just to always show on a glance how many rounds total remain!
 	    $this->data["Special"] = "Technical system, keeping track of consumable ammo."; 
 	    //add information about currently stored ammo!
-	    $this->data["Special"] .= "<br>Total rounds: " . $this->remainingOrdnance . "/" . $this->capacity; 
+	    $this->data["Special"] .= "<br>Total rounds: " . $this->remainingAmmo . "/" . $this->capacity; 
 	    foreach($this->ammoArray as $currAmmo){
-	    	$this->data["Special"] .= "<br>" . $currAmmo->name . ": ". $currAmmo->count;
+	    	$this->data["Special"] .= "<br> - " . $currAmmo->displayName . ": ". $this->ammoCountArray[$currAmmo->modeName];
 			if($currAmmo->size != 1){ //non-standard ordnance size: inform player
 				$this->data["Special"] .= " (size: " . $currAmmo->size . ")";
-			}
+			}		
 	    }
 	}
     
@@ -3522,20 +3532,29 @@ class AmmoMagazine extends ShipSystem {
  	public function stripForJson(){
 		$strippedSystem = parent::stripForJson();
 		$strippedSystem->data = $this->data; 
+		//$strippedSystem->data['Special'] = $this->data['Special']; 
 		$strippedSystem->remainingAmmo = $this->remainingAmmo;
 		$strippedSystem->ammoCountArray = $this->ammoCountArray;
 		$strippedSystem->ammoSizeArray = $this->ammoSizeArray;
+		$strippedSystem->output = $this->output;
 		return $strippedSystem;
-	    } 
+	} 
 	
     //add new kind of ordnance: ammo to be used (CLASS INSTANCE!), number of rounds to add (number)
 	//to be called only AFTER AmmoMagazine itself is fitted to unit!
     public function addAmmoEntry($ammoClass, $ammoCount, $notify = false){
-	    $ammoCountArray[$ammoClass->modeName] = $ammoCount;
-	    $ammoSizeArray[$ammoClass->modeName] = $ammoClass->size;
-	    $ammoArray[] = $ammoClass;
-	    $remainingAmmo += $ammoCount * $ammoClass->size;
-	    $remainingAmmo = max($this->remainingAmmo, $this->capacity);
+		if (!array_key_exists($ammoClass->modeName,$this->ammoCountArray)){
+			$this->ammoCountArray[$ammoClass->modeName] = $ammoCount;
+		}else{
+			$this->ammoCountArray[$ammoClass->modeName] += $ammoCount;			
+		}
+	    $this->ammoSizeArray[$ammoClass->modeName] = $ammoClass->size;
+	    $this->ammoArray[] = $ammoClass;
+	    $this->remainingAmmo += $ammoCount * $ammoClass->size;
+	    $this->remainingAmmo = min($this->remainingAmmo, $this->capacity);
+		if (!array_key_exists($ammoClass->modeName,$this->ammoUsedTotal)){
+			$this->ammoUsedTotal[$ammoClass->modeName] = 0;
+		}			
 	    if($notify) $this->notifyWeapons(); //weapons need to update their stats - if this is a new entry after creation
     }
 	
@@ -3555,7 +3574,7 @@ class AmmoMagazine extends ShipSystem {
 				$toReturn = true;
 				break; //foreach
 			}
-		}		
+		}
 		return $toReturn;
 	}
 	public function getAmmo($modeName){
@@ -3567,18 +3586,21 @@ class AmmoMagazine extends ShipSystem {
 			}
 		}		
 		return $toReturn;
-	}	
+	}
+/*	
 	public function getAmmoArray(){
 		return $this->ammoArray;
 	}
-	
+	*/
+	/*
 	public function addRounds($modeName, $ammoCount){ //additional rounds for already existing entry
 		$ammoClass = $this->getAmmo($modeName);
 		if ($ammoClass==null) return;
 		$this->ammoCountArray[$modeName] += $ammoCount;
-		$remainingAmmo += $ammoCount * $ammoClass->size;
-		$remainingAmmo = max($this->remainingAmmo, $this->capacity);
+		$this->remainingAmmo += $ammoCount * $ammoClass->size;
+		$this->remainingAmmo = min($this->remainingAmmo, $this->capacity);
 	}
+	*/
 	
 	
 		
@@ -3587,16 +3609,16 @@ class AmmoMagazine extends ShipSystem {
         switch($gameData->phase){
 			//both Initial and Firing phase will behave the same - save to database data about current usage, received from front end (to enable ammo counting for both ballistic and direct fire weapons)
                 case 1: //Initial phase - ballistic weapons
-		case 4: //firing phase - direct fire weapons
+				case 4: //firing phase - direct fire weapons
                     if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
-			    foreach($this->ammoJustUsed as $modeName){
-				//AND PREPARE APPROPRIATE NOTES!
-				$notekey = 'AmmoUsed';
-				$noteHuman = 'Ammunition Magazine - a round is drawn';
-				$noteValue = $modeName;
-				$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
-			    }
-			    $this->ammoJustUsed = array(); 
+						foreach($this->ammoJustUsed as $modeName){
+							//AND PREPARE APPROPRIATE NOTES!
+							$notekey = 'AmmoUsed';
+							$noteHuman = 'Ammunition Magazine - a round is drawn';
+							$noteValue = $modeName;
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+						}
+						$this->ammoAlreadyUsed = array(); 
                     }
                     break;					
         }
@@ -3608,10 +3630,20 @@ class AmmoMagazine extends ShipSystem {
 	public function onIndividualNotesLoaded($gamedata){
 		foreach ($this->individualNotes as $currNote){ //assume ASCENDING sorting - so enact all changes as is
 			switch($currNote->notekey){
-				case 'AmmoUsed': //mode name for ammmunition type that was expended					
+				case 'AmmoUsed': //mode name for ammmunition type that was expended
+					///entry may not exist yet! due to when enhancements and notes are loaded - in this case initialize them - values will get negative for a moment, but it's not a problem
+					if (!array_key_exists($currNote->notevalue,$this->ammoCountArray)){	
+						$this->ammoCountArray[$currNote->notevalue] = 0;
+					}				
+					if (!array_key_exists($currNote->notevalue,$this->ammoUsedTotal)){
+						$this->ammoUsedTotal[$currNote->notevalue] = 0;
+					}	
 					$this->ammoCountArray[$currNote->notevalue] -= 1;
+					$this->ammoUsedTotal[$currNote->notevalue] += 1;
+					/*
 					$ammoSize = $this->ammoSizeArray[$currNote->notevalue];
-					$remainingAmmo -= $ammoSize;
+					$this->remainingAmmo -= $ammoSize;
+					*/
 					break;			
 			}
 		}
@@ -3636,6 +3668,7 @@ class AmmoMissileB{
 	public $modeName = 'Basic';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_B'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Basic Missile'; //enhancement description
 	
 	public $rangeMod = 0; //MODIFIER for launch range
 	public $distanceRangeMod = 0; //MODIFIER for distance range
@@ -3648,6 +3681,8 @@ class AmmoMissileB{
 	public $priorityAF = 4;
 	public $noOverkill = false;
 	
+	
+    function __construct(){}
 	
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
@@ -3664,6 +3699,7 @@ class AmmoMissileL{
 	public $modeName = 'LongRange';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_L'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) LongRange Missile (2225)'; //enhancement description
 	
 	public $rangeMod = 10; //MODIFIER for launch range
 	public $distanceRangeMod = 10; //MODIFIER for distance range
@@ -3691,6 +3727,7 @@ class AmmoMissileP{
 	public $modeName = 'Piercing';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_P'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Piercing Missile (2244)'; //enhancement description
 	
 	public $rangeMod = 0; //MODIFIER for launch range
 	public $distanceRangeMod = 0; //MODIFIER for distance range
