@@ -3526,18 +3526,15 @@ class AmmoMagazine extends ShipSystem {
 		return $strippedSystem;
 	    } 
 	
-    //add new kind of ordnance: ammo to be used (CLASS INSTANCE!), number of rounds to add (number), whether appropriate enhancement option should be added (true/false)
+    //add new kind of ordnance: ammo to be used (CLASS INSTANCE!), number of rounds to add (number)
 	//to be called only AFTER AmmoMagazine itself is fitted to unit!
-    public function addAmmoEntry($ammoClass, $ammoCount, $addOption){
+    public function addAmmoEntry($ammoClass, $ammoCount){
 	    $ammoCountArray[$ammoClass->modeName] = $ammoCount;
 	    $ammoSizeArray[$ammoClass->modeName] = $ammoClass->size;
 	    $ammoArray[] = $ammoClass;
 	    $remainingAmmo += $ammoCount * $ammoClass->size;
 	    $remainingAmmo = max($this->remainingAmmo, $this->capacity);
 	    
-	    if($addOption == true){
-		$this->unit->enhancementOptionsEnabled[] = $ammoClass->enhancementName;
-	    }
     }
 	
 	public function getAmmoPresence($modeName){
