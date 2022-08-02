@@ -1022,6 +1022,7 @@ class AmmoMissileRackS extends Weapon{
 		}
 		$this->recompileFiringModes();
 		parent::__construct($armour, 6, 0, $startArc, $endArc); //class-S launcher: structure 6, power usage 0
+		$magazine->subscribe($this); //subscribe to any further changes in ammo availability
         }
 	
 	
