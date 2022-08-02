@@ -3489,6 +3489,8 @@ class AmmoMagazine extends ShipSystem {
 	
 	private $ammoArray = array();	
 	private $ammoJustUsed = array(); //temporary array - ammo usage information received from front end, to be saved to database
+	private $weaponsServed = array(); //list of weapons served by this weapon - used to notify them of ammo availability updates
+	
 	public $ammoCountArray = array();
 	public $ammoSizeArray = array();
 	public $ammoUseArray = array(); //to be used in front end to track actual ammo usage
@@ -3528,14 +3530,23 @@ class AmmoMagazine extends ShipSystem {
 	
     //add new kind of ordnance: ammo to be used (CLASS INSTANCE!), number of rounds to add (number)
 	//to be called only AFTER AmmoMagazine itself is fitted to unit!
-    public function addAmmoEntry($ammoClass, $ammoCount){
+    public function addAmmoEntry($ammoClass, $ammoCount, $notify = false){
 	    $ammoCountArray[$ammoClass->modeName] = $ammoCount;
 	    $ammoSizeArray[$ammoClass->modeName] = $ammoClass->size;
 	    $ammoArray[] = $ammoClass;
 	    $remainingAmmo += $ammoCount * $ammoClass->size;
 	    $remainingAmmo = max($this->remainingAmmo, $this->capacity);
-	    
+	    if($notify) $this->notifyWeapons(); //weapons need to update their stats - if this is a new entry after creation
     }
+	
+	private function notifyWeapons() { //notify weapons that something changed and they need to update themselves
+		foreach($this->weaponsServed as $weapon){
+			$weapon->recompileFiringModes();	
+		}
+	}
+	public function subscribe($weapon){
+		$this->weaponsServed[] = $weapon;
+	}
 	
 	public function getAmmoPresence($modeName){
 		$toReturn = false;
