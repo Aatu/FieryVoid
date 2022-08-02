@@ -3559,9 +3559,6 @@ class AmmoMagazine extends ShipSystem {
 	public function getAmmoArray(){
 		return $this->ammoArray;
 	}
-	public function getAmmoArrayCount(){
-		return count($this->ammoArray);
-	}
 	
 	public function addRounds($modeName, $ammoCount){ //additional rounds for already existing entry
 		$ammoClass = $this->getAmmo($modeName);
@@ -3634,7 +3631,10 @@ class AmmoMissileB{
 	public $minDamage = 20;
 	public $maxDamage = 20;	
 	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
 	public $priority = 6;
+	public $priorityAF = 4;
+	public $noOverkill = false;
 	
 	
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
@@ -3659,7 +3659,10 @@ class AmmoMissileL{
 	public $minDamage = 15;
 	public $maxDamage = 15;	
 	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
 	public $priority = 6;
+	public $priorityAF = 5;
+	public $noOverkill = false;
 		
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
@@ -3683,7 +3686,10 @@ class AmmoMissileP{
 	public $minDamage = 30;
 	public $maxDamage = 30;	
 	public $damageType = 'Piercing';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
 	public $priority = 2;
+	public $priorityAF = 5;//moot, as this missile cannot be fired at fighters
+	public $noOverkill = true;
 		
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
