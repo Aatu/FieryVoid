@@ -974,6 +974,9 @@ class MultiBombRack extends Weapon{
 class AmmoMissileRackS extends Weapon{
 	public $name = "ammoMissileRackS";
         public $displayName = "Class-S Missile Rack";
+	public $checkAmmoMagazine = true;
+    public $iconPath = "missile1.png";    
+	
     public $useOEW = false;
     public $ballistic = true;
     public $animation = "trail";
@@ -984,7 +987,6 @@ class AmmoMissileRackS extends Weapon{
     public $rangeMod = 0;
     public $priority = 6;
     public $loadingtime = 2;
-    public $iconPath = "missile1.png";    
 
     private $rackExplosionDamage = 70; //how much damage will this weapon do in case of catastrophic explosion
     private $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
