@@ -1006,6 +1006,7 @@ class AmmoMissileRackS extends Weapon{
 
 	private $ammoClassesArray = array( new AmmoMissileB(), new AmmoMissileL(), new AmmoMissileP() );//classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
 	private $ammoMagazine; //reference to ammo magazine
+	private $ammoClassesUsed = array();
 	
 	
 	
@@ -1041,6 +1042,7 @@ class AmmoMissileRackS extends Weapon{
 		$this->noOverkillArray = array();
 		$this->minDamageArray = array();
 		$this->maxDamageArray = array();
+		$this->ammoClassesUsed = array();
 		
 		
 		//add data for all modes to arrays
@@ -1050,6 +1052,7 @@ class AmmoMissileRackS extends Weapon{
 			if($isPresent){
 				$currMode++;
 				//fill all arrays for indicated mode
+				$this->ammoClassesUsed[$currMode] = $currAmmo;
 				$this->firingModes[$currMode] = $currAmmo->modeName;
 				$this->damageTypeArray[$currMode] = $currAmmo->damageType; 
 				$this->weaponClassArray[$currMode] = $currAmmo->weaponClass; 	
@@ -1074,16 +1077,15 @@ class AmmoMissileRackS extends Weapon{
 				}
 				$this->fireControlArray[$currMode] = array($fc0, $fc1, $fc2); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
 				
-				$this->rangeArray = array(); 
-				$this->distanceRangeArray = array();
-				$this->priorityArray = array();
-				$this->priorityAFArray = array();
-				$this->dpArray = array();
-				$this->damageTypeArray = array();
-				$this->weaponClassArray = array();
-				$this->noOverkillArray = array();
-				$this->minDamageArray = array();
-				$this->maxDamageArray = array();
+				$this->rangeArray[$currMode] = $this->basicRange + $currAmmo->rangeMod; 
+				$this->distanceRangeArray[$currMode] = $this->basicDistanceRange + $currAmmo->distanceRangeMod; 
+				$this->priorityArray[$currMode] = $currAmmo->priority;
+				$this->priorityAFArray[$currMode] = $currAmmo->priorityAF;
+				$this->damageTypeArray[$currMode] = $currAmmo->damageType;
+				$this->weaponClassArray[$currMode] = $currAmmo->weaponClass;
+				$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
+				$this->minDamageArray[$currMode] = $currAmmo->minDamage;
+				$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
 			}
 		}
 			
@@ -1098,6 +1100,20 @@ class AmmoMissileRackS extends Weapon{
 		$this->effectCriticals();			
 	}//endof function recompileFiringModes
 	
+	
+	//actually use getDamage() method of ammo!
+    public function getDamage($fireOrder)
+    {
+        //find appropriate ammo
+	$currAmmo = $this->ammoClassesUsed[$currMode];
+	    
+	//execute getDamage()
+	if($currAmmo){
+		return $currAmmo->getDamage($fireOrder);
+	}else{
+		return 0;	
+	}
+    }
 	
 	
     public function ammoExplosion($ship, $gamedata, $damage){
