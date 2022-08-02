@@ -3491,6 +3491,7 @@ class AmmoMagazine extends ShipSystem {
 	private $ammoJustUsed = array(); //temporary array - ammo usage information received from front end, to be saved to database
 	public $ammoCountArray = array();
 	public $ammoSizeArray = array();
+	public $ammoUseArray = array(); //to be used in front end to track actual ammo usage
 	
     
     function __construct($capacity){ //magazine capacity
@@ -3519,6 +3520,9 @@ class AmmoMagazine extends ShipSystem {
  	public function stripForJson(){
 		$strippedSystem = parent::stripForJson();
 		$strippedSystem->data = $this->data; 
+		$strippedSystem->remainingAmmo = $this->remainingAmmo;
+		$strippedSystem->ammoCountArray = $this->ammoCountArray;
+		$strippedSystem->ammoSizeArray = $this->ammoSizeArray;
 		return $strippedSystem;
 	    } 
 	
