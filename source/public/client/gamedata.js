@@ -584,7 +584,21 @@ window.gamedata = {
                     }
                 }
             }
+		
+		//ammo usage check - AmmoMagazine equipped units
+		var ammoMagazineError = [];
+		for (var shipID in myShips) { //actually this will check for fighters, too
+			var currShip = myShips[shipID];
+			//check for every magazine on board!
+			for (var i in currShip.systems) if(currShip.systems[i].name == 'ammoMagazine') {
+        			var currMagazine = currShip.systems[i];
+				var checkResult = currMagazine.doVerifyAmmoUsage(currShip);
+				if(!checkResult) ammoMagazineError.push(currShip);
+			}
+		}
+		
 
+		//EW correctness check
 	    var EWIncorrect = []; //too many EW points set
 	    var EWRestrictedIncorrect = [];//RestrictedEW critical circumvented
 	    var EWLCVIncorrect = [];//LCV set too many EW to tasks other than OEW
@@ -628,6 +642,17 @@ window.gamedata = {
                 }
                 errorText += "<br>";
             }
+		
+		
+            if (ammoMagazineError.length > 0) {
+                errorText += "Following units are trying to launch more ordnance than available (see Ammunition Magazine):<br>";
+                for (var shipID in ammoMagazineError) {
+                    errorText += ammoMagazineError[shipID].name + " (" + ammoMagazineError[shipID].shipClass + ")";
+                    errorText += "<br>";
+                }
+                errorText += "<br>";
+            }		
+		
 		
 	    if (errorText != ''){
             	window.confirm.error(errorText, function () {});
