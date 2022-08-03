@@ -1325,7 +1325,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         return "Shield";
     }
     
-    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
+    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
 			switch($this->firingMode){
 				case 1:					
 						$output = 2;
@@ -1340,7 +1340,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
     public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
 			switch($this->firingMode){
 				case 1:					
-						$output = 2;
+						$output = 0;
+						if($weapon->weaponClass == 'Laser' || $weapon->weaponClass == 'Antimatter' || $weapon->weaponClass == 'Particle') $output = 2; //Damage reduction only works against three type sof weapon.
 				        return $output;
 			break;
 				case 2:	
@@ -1379,7 +1380,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 				$fireOrder->rolled = $rolled; ///and auto-hit 😉
 				$fireOrder->shotshit++;
 											
-				$fireOrder->pubnotes .= "Damage and hit chance reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. "; //just information for player				
+				$fireOrder->pubnotes .= "Damage and hit chance reduction applied to appropriate weapons fired at Plasma Web-launching ship from target hex. "; //just information for player				
 						break;
 									
 			case 2:		
@@ -1456,10 +1457,10 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= 'Defensive mode automatically hits an enemy unit, it then applies -10 intercept rating and 2 damage reduction against ALL incoming enemy fire from that hex.';
+			$this->data["Special"] .= 'Defensive mode automatically hits an enemy unit, it then applies -10 intercept rating against incoming enemy fire from target hex, and 2 damage reduction against Laser, Antimatter and Particle weapons attacks.';
 			$this->data["Special"] .= '<br>Offensive Mode targets a hex within 3 hexes of firing unit and deals D6+2 damage to all fighters in that hex.';
 			$this->data["Special"] .= '<br>Offensive Mode requires 1 additional power either from boosting in Initial Orders phase or from power currently stored in plasma batteries during Firing Phase.';
-			$this->data["Special"] .= '<br>Multiple Plasma Webs do not apply their effects cumulatively.'; //uninterceptability is due to technical reasons - with no fire order ID, interception will not be applied properly
+			$this->data["Special"] .= '<br>Plasma hexes are not cumulative with each other. If more than one is present in a hex, there is no additional effect'; 
 	 }
                
 		public function getDamage($fireOrder){
