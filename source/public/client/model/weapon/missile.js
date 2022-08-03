@@ -197,3 +197,9 @@ var AmmoMissileRackS = function AmmoMissileRackS(json, ship) {
 };
 AmmoMissileRackS.prototype = Object.create(Ballistic.prototype);
 AmmoMissileRackS.prototype.constructor = AmmoMissileRackS;
+
+var AmmoMissileRackL = function AmmoMissileRackL(json, ship) {
+    Ballistic.call(this, json, ship);
+};
+AmmoMissileRackL.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackL.prototype.constructor = AmmoMissileRackL;
