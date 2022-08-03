@@ -501,7 +501,7 @@ class FighterTorpedoLauncher extends FighterMissileRack
 
 
 /*implements weapon because it can do damage like one - on rack explosion*/
-class ReloadRack extends MissileLauncher //ShipSystem
+class ReloadRack extends Weapon //ShipSystem
 {
     public $name = "ReloadRack";
     public $displayName = "Reload Rack";
@@ -509,17 +509,22 @@ class ReloadRack extends MissileLauncher //ShipSystem
 	
     public $fireControl = array(null, null, null); // this is a weapon in name only, it cannot actually fire!
     
+    //public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
+    //public $isTargetable = false; //false means it cannot be targeted at all by called shots! - good for technical systems :)
    
     //it can explode, too...
-    public $weapon = false; //well, it can't be actually fired
+    //public $weapon = false; //well, it can't be actually fired BUT if marked, explosions will not be shown in log!
     public $damageType = 'Flash'; //needed to simulate that it's a weapon
     public $weaponClass = 'Ballistic';
-    private $rackExplosionDamage = 150; //how much damage will this weapon do in case of catastrophic explosion
-    private $rackExplosionThreshold = 19; //how high roll is needed for rack explosion
-    
+    private $rackExplosionDamage = 300; //how much damage will this weapon do in case of catastrophic explosion (80 missiles... that's devastating)
+    private $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+	
+		public $possibleCriticals = array(); //Reload Rack does not suffer any criticals (barring catastrophic explosion)
+		
+	
     function __construct($armour, $maxhealth){
         //parent::__construct($armour, $maxhealth, 0, 0); //that's for extending ShipSystem
-        parent::__construct($armour, $maxhealth, 0, 0, 0);//that's for extending MissileLauncher
+        parent::__construct($armour, $maxhealth, 0, 0, 0);//that's for extending Weapon
 		
 		$this->data["Special"] = 'Additional missile magazine for actual combat launchers. No actual effect in FV, but may violently explode if damaged in battle.';
     }
@@ -531,6 +536,42 @@ class ReloadRack extends MissileLauncher //ShipSystem
 	public function setMaxDamage(){
 		$this->maxDamage = 0; 
 	}	
+	
+	
+	public function criticalPhaseEffects($ship, $gamedata){ //add testing for ammo explosion!
+		if(!$this->isDamagedOnTurn($gamedata->turn)) return; //if there is no damage this turn, then no testing for explosion
+        $explodes = false;
+        $roll = Dice::d(20);
+        if ($roll >= $this->rackExplosionThreshold) $explodes = true;
+        		
+        if($explodes){
+            $this->ammoExplosion($ship, $gamedata, $this->rackExplosionDamage, $roll);  
+        }
+    } //endof function testCritical
+    public function ammoExplosion($ship, $gamedata, $damage, $roll){
+        //first, destroy self if not yet done...
+        if (!$this->isDestroyed()){
+            $this->noOverkill = true;
+            $fireOrder =  new FireOrder(-1, "normal", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 1, 100, 1, 1, 1, 0, null, null, 'ballistic');//needed, rolled, shots, shotshit, intercepted
+			$fireOrder->addToDB = true;
+			$fireOrder->pubnotes = "Missile magazine explosion (roll $roll)!";
+			$this->fireOrders[] = $fireOrder;							
+            $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
+            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, null, $gamedata, true, $this->location);
+        }        
+        //then apply damage potential as a hit... should be Raking by the rules, let's do it as Flash instead (not quite the same, but easier to do)
+        if($damage>0){
+            $this->noOverkill = false;
+            $this->damageType = 'Flash'; //should be Raking by the rules, but Flash is much easier to do - and very fitting for explosion!
+            $fireOrder =  new FireOrder(-1, "normal", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 1, 100, 1, 1, 1, 0, null, null, 'ballistic');
+			$fireOrder->addToDB = true;
+			$fireOrder->pubnotes = "Missile magazine explosion (roll $roll)!";
+			$this->fireOrders[] = $fireOrder;					
+            $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->location); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
+        }
+    }
 } //endof class ReloadRack
 
 
@@ -766,7 +807,7 @@ class MultiMissileLauncher extends Weapon{
             $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
                     $gamedata->turn, 'standard', 100, 1, 1, 1, 0, null, null, 'ballistic');
             $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
-            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, $pos, $gamedata, true, $this->location);
+            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, null, $gamedata, true, $this->location);
         }
         
         //then apply damage potential as a hit...
@@ -945,7 +986,7 @@ class MultiBombRack extends Weapon{
             $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
                     $gamedata->turn, 'standard', 100, 1, 1, 1, 0, null, null, 'ballistic');
             $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
-            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, $pos, $gamedata, true, $this->location);
+            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, null, $gamedata, true, $this->location);
         }
         
         //then apply damage potential as a hit...
@@ -962,9 +1003,268 @@ class MultiBombRack extends Weapon{
         $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
         $crit->updated = true;
         $this->criticals[] =  $crit;
-    }    
-    
+    }   
  
 } //endof class MultiBombRack
+
+
+
+
+/*Class-S Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
+*/
+class AmmoMissileRackS extends Weapon{
+	public $name = "ammoMissileRackS";
+        public $displayName = "Class-S Missile Rack";
+    public $iconPath = "missile1.png";    
+		
+	public $checkAmmoMagazine = true;
+	
+    public $useOEW = false;
+    public $ballistic = true;
+    public $animation = "trail";
+    public $animationColor = array(50, 50, 50);
+    public $range = 20;
+    public $distanceRange = 60;
+    public $firingMode = 1;
+    public $priority = 6;
+    public $loadingtime = 2;
+
+    protected $rackExplosionDamage = 75; //how much damage will this weapon do in case of catastrophic explosion
+	//officially it's a quarter of total power of warheads in magazine; but in FV this number is fixed (as missiles in magazine are not tracked)
+	// estimated warheads in magazine: 400 (20 missiles, dmg 20 each - assuming Basic missiles)
+	// a quarter of the above: 100
+	// reduce somewhat by expected expendientures (say, *0.75): 75
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+    
+    public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    public $weaponClass = "Ballistic"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+	
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(3,3,3);
+	protected $basicRange=20;
+	protected $basicDistanceRange = 60;
+	
+	public $firingModes = array(); //equals to available missiles
+	public $damageTypeArray = array(); //indicates that this weapon does damage in Pulse mode
+    public $fireControlArray = array(); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
+    //typical (class-S) launcher is FC 3/3/3 and warhead +3 - which would mean 6/6/6!
+    public $rangeArray = array(); 
+	public $distanceRangeArray = array(); 
+
+	private $ammoClassesArray = array();//FILLED IN CONSTRUCTOR! classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
+	
+	private $ammoMagazine; //reference to ammo magazine
+	private $ammoClassesUsed = array();
+	
+	
+	
+    /*ATYPICAL constructor: takes ammo magazine class and (optionally) information about being fitted to stable platform*/
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		//VERY IMPORTANT: fill $ammoClassesArray (cannot be done as constants!
+		//classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
+		//remember that appropriate enhancements need to be enabled on ehip itself, too!
+		$this->ammoClassesArray[] = new AmmoMissileB();
+		$this->ammoClassesArray[] = new AmmoMissileL();
+		$this->ammoClassesArray[] =  new AmmoMissileH();
+		$this->ammoClassesArray[] =  new AmmoMissileF();
+		$this->ammoClassesArray[] =  new AmmoMissileA();
+		$this->ammoClassesArray[] =  new AmmoMissileP();
+	
+		$this->ammoMagazine = $magazine;
+		if($base){
+			$this->basicRange = $this->basicDistanceRange;
+		}
+		$this->recompileFiringModes();
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 0;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc); //class-S launcher: structure 6, power usage 0
+		$magazine->subscribe($this); //subscribe to any further changes in ammo availability
+	}
+    
+	public function setSystemDataWindow($turn){
+		$this->data["Special"] = 'Available firing modes depend on ammo bought as unit enhancements. Ammunition available is tracked by central Ammunition Magazine system.';
+		parent::setSystemDataWindow($turn);
+	}
+	
+	/*prepare firing modes - in order as indicated by $ammoCLassesArray (so every time the order is the same and classes aren't mixed), but use only classes actually held by magazine (no matter the count - 0 rounds is fine)
+		if magazine holds no ammo - still list first entry on the list (weapon has to have SOME data!)
+	*/
+ 	public function recompileFiringModes(){
+		//clear existing arrays
+		$this->firingModes = array(); //equals to available missiles
+		$this->damageTypeArray = array(); //indicates that this weapon does damage in Pulse mode
+		$this->weaponClassArray = array();
+    		$this->fireControlArray = array(); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
+    		$this->rangeArray = array(); 
+		$this->distanceRangeArray = array();
+		$this->priorityArray = array();
+		$this->priorityAFArray = array();
+		$this->dpArray = array();
+		$this->damageTypeArray = array();
+		$this->weaponClassArray = array();
+		$this->noOverkillArray = array();
+		$this->minDamageArray = array();
+		$this->maxDamageArray = array();
+		$this->ammoClassesUsed = array();
+		
+		
+		//add data for all modes to arrays
+		$currMode = 0;
+		foreach ($this->ammoClassesArray as $currAmmo){
+			$isPresent = $this->ammoMagazine->getAmmoPresence($currAmmo->modeName);//does such ammo exist in magazine?
+			if($isPresent){
+				$currMode++;
+				//fill all arrays for indicated mode
+				$this->ammoClassesUsed[$currMode] = $currAmmo;
+				$this->firingModes[$currMode] = $currAmmo->modeName;
+				$this->damageTypeArray[$currMode] = $currAmmo->damageType; 
+				$this->weaponClassArray[$currMode] = $currAmmo->weaponClass; 	
+				
+				$fc0 = 0;
+				if(($this->basicFC[0] === null) || ($currAmmo->fireControlMod[0]===null)) {
+					$fc0 = null;
+				}else{
+					$fc0 = $this->basicFC[0] + $currAmmo->fireControlMod[0];
+				}
+				$fc1 = $this->basicFC[1];
+				if(($this->basicFC[1] === null) || ($currAmmo->fireControlMod[1]===null)) {
+					$fc1 = null;
+				}else{
+					$fc1 = $this->basicFC[1] + $currAmmo->fireControlMod[1];
+				}
+				$fc2 = $this->basicFC[2];
+				if(($this->basicFC[2] === null) || ($currAmmo->fireControlMod[2]===null)) {
+					$fc2 = null;
+				}else{
+					$fc2 = $this->basicFC[2] + $currAmmo->fireControlMod[2];
+				}
+				$this->fireControlArray[$currMode] = array($fc0, $fc1, $fc2); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
+				
+				$this->rangeArray[$currMode] = $this->basicRange + $currAmmo->rangeMod; 
+				$this->distanceRangeArray[$currMode] = $this->basicDistanceRange + $currAmmo->distanceRangeMod; 
+				$this->priorityArray[$currMode] = $currAmmo->priority;
+				$this->priorityAFArray[$currMode] = $currAmmo->priorityAF;
+				$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
+				$this->minDamageArray[$currMode] = $currAmmo->minDamage;
+				$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
+			}
+		}
+			
+		//if there is no ammo available - add entry for first ammo on the list... or don't, just fill firingModes (this one is necessary) - assume basic weapons data resemble something like basic desired mode
+		if ($currMode < 1){
+			$this->FiringModes[1] = 'NoAmmunitionAvailable';
+		}
+			
+		//change mode to 1, to call all appropriate routines connected with mode change
+		$this->changeFiringMode(1);		
+		//remember about effecting criticals, too!
+		$this->effectCriticals();			
+	}//endof function recompileFiringModes
+	
+	
+	
+ 	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		$strippedSystem->firingModes = $this->firingModes; 
+		$strippedSystem->damageTypeArray = $this->damageTypeArray; 
+		$strippedSystem->weaponClassArray = $this->weaponClassArray; 
+		$strippedSystem->fireControlArray = $this->fireControlArray; 
+		$strippedSystem->rangeArray = $this->rangeArray; 
+		$strippedSystem->distanceRangeArray = $this->distanceRangeArray; 
+		$strippedSystem->priorityArray = $this->priorityArray; 
+		$strippedSystem->priorityAFArray = $this->priorityAFArray; 
+		$strippedSystem->dpArray = $this->dpArray; 
+		$strippedSystem->noOverkillArray = $this->noOverkillArray; 
+		$strippedSystem->minDamageArray = $this->minDamageArray; 
+		$strippedSystem->maxDamageArray = $this->maxDamageArray; 
+		return $strippedSystem;
+	} 
+	
+	//actually use getDamage() method of ammo!
+    public function getDamage($fireOrder)
+    {
+		$currAmmo = null;
+        //find appropriate ammo
+		if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
+			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
+		}
+	    
+		//execute getDamage()
+		if($currAmmo){
+			return $currAmmo->getDamage($fireOrder);
+		}else{
+			return 0;	
+		}
+    }
+	
+	
+	
+	public function criticalPhaseEffects($ship, $gamedata){ //add testing for ammo explosion!
+		if(!$this->isDamagedOnTurn($gamedata->turn)) return; //if there is no damage this turn, then no testing for explosion
+        $explodes = false;
+        $roll = Dice::d(20);
+        if ($roll >= $this->rackExplosionThreshold) $explodes = true;
+        		
+        if($explodes){
+            $this->ammoExplosion($ship, $gamedata, $this->rackExplosionDamage, $roll);  
+        }
+    } //endof function testCritical
+    public function ammoExplosion($ship, $gamedata, $damage, $roll){
+        //first, destroy self if not yet done...
+        if (!$this->isDestroyed()){
+            $this->noOverkill = true;
+            $fireOrder =  new FireOrder(-1, "normal", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 1, 100, 1, 1, 1, 0, null, null, 'ballistic');//needed, rolled, shots, shotshit, intercepted
+			$fireOrder->addToDB = true;
+			$fireOrder->pubnotes = "Missile magazine explosion (roll $roll)!";
+			$this->fireOrders[] = $fireOrder;							
+            $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
+            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, null, $gamedata, true, $this->location);
+        }        
+        //then apply damage potential as a hit... should be Raking by the rules, let's do it as Flash instead (not quite the same, but easier to do)
+        if($damage>0){
+            $this->noOverkill = false;
+            $this->damageType = 'Flash'; //should be Raking by the rules, but Flash is much easier to do - and very fitting for explosion!
+            $fireOrder =  new FireOrder(-1, "normal", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 1, 100, 1, 1, 1, 0, null, null, 'ballistic');
+			$fireOrder->addToDB = true;
+			$fireOrder->pubnotes = "Missile magazine explosion (roll $roll)!";
+			$this->fireOrders[] = $fireOrder;					
+            $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->location); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
+        }
+    }
+	
+} //endof class AmmoMissileRackS
+
+
+/*Class-L Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
+	all functionality prepared in standard class-S rack
+*/
+class AmmoMissileRackL extends AmmoMissileRackS{
+	public $name = "ammoMissileRackL";
+        public $displayName = "Class-L Missile Rack";
+    public $iconPath = "missile1.png";    
+	
+    public $range = 30;
+    public $distanceRange = 70;
+    public $firingMode = 1;
+    public $priority = 6;
+    public $loadingtime = 2;
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(3,3,3);
+	protected $basicRange=30;
+	protected $basicDistanceRange = 70;
+
+    protected $rackExplosionDamage = 75; //how much damage will this weapon do in case of catastrophic explosion
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 0;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+	}
+} //endof class AmmoMissileRackL
 
 ?>

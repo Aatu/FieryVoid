@@ -52,8 +52,8 @@ class Benevolent1791 extends BaseShip{
         $this->addLeftSystem(new OrieniGatlingRG(1, 4, 1, 180, 360));
 		$this->addLeftSystem(new Thruster(4, 20, 0, 6, 3));
 	    
-        $this->addRightSystem(new RapidGatling(1, 4, 1, 0, 180));
-        $this->addRightSystem(new RapidGatling(1, 4, 1, 0, 180));
+        $this->addRightSystem(new OrieniGatlingRG(1, 4, 1, 0, 180));
+        $this->addRightSystem(new OrieniGatlingRG(1, 4, 1, 0, 180));
         $this->addRightSystem(new Thruster(4, 20, 0, 6, 4));
 	    
 		//structures

@@ -63,13 +63,14 @@ if (isset($_SESSION["user"])) {
 -->
        
 		
-		---------- <b>LATEST NEWS - July 2022</b> ----------	
-	    <br><b>Minbari Flyer images</b> - courtesy of Wolfgang
-	    <br><b>FC used correction</b> - Large Shadow ships should now be fired upon using correct FC
+		---------- <b>LATEST NEWS - August 2022</b> ----------	
+	    <br><b><u><big>Pak'ma'ra</big> have arrived</u></b> - ...they did so last month, but hey - they're still new and shiny!
+	    <br><b>Nexus updates</b> - courtesy of Geoffrey
 
-	    
-		<!-- <br><br>---------- <b>update 8th of November</b> ---------- 
-		-->
+	    <!--
+		 <br><br>---------- <b>update 28th of July</b> ---------- 
+-->
+		
 	    
         <br><br><br>
         Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
