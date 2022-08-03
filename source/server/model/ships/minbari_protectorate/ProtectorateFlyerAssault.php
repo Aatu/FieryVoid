@@ -9,7 +9,7 @@ class ProtectorateFlyerAssault extends FighterFlight{
     	$this->faction = "Minbari Protectorate";
         $this->phpclass = "ProtectorateFlyerAssault";
         $this->shipClass = "Assault Flyers";
-    	$this->imagePath = "img/ships/nial.png"; //need Minbari Flyer image!
+    	$this->imagePath = "img/ships/MinbariFlyer.png"; 
 		
         $this->forwardDefense = 9;
         $this->sideDefense = 7;
