@@ -394,7 +394,7 @@ class Enhancements{
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
 			  $enhLimit = $actualCapacity; //effectively limited by magazine capacity	
-			  $enhPrice = 1; //fixed, very low value - officially 0 (included in rack/ship cost), but enhancement will actually only be present when they're NOT included!
+			  $enhPrice = $ammoClass->enhancementPrice; 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
@@ -404,8 +404,41 @@ class Enhancements{
 				$ammoSize = $ammoClass->size;
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
-			  $enhLimit = $actualCapacity;	
-			  $enhPrice = 6; //fixed value
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+		  $enhID = 'AMMO_H'; //Heavy Missiles
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileH();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+		  $enhID = 'AMMO_F'; //Flash Missiles
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileF();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+		  $enhID = 'AMMO_A'; //Antifighter Missiles
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileA();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->enhancementPrice; 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
@@ -415,8 +448,8 @@ class Enhancements{
 				$ammoSize = $ammoClass->size;
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
-			  $enhLimit = $actualCapacity;	
-			  $enhPrice = 16; //fixed value
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->enhancementPrice; 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
@@ -905,6 +938,15 @@ class Enhancements{
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileB(), $enhCount, true); //do notify dependent weapons, too!
 						break;
 					case 'AMMO_L': //Long Range Missile
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileL(), $enhCount, true); //do notify dependent weapons, too!
+						break;
+					case 'AMMO_H': //Heavy Missile
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileH(), $enhCount, true); //do notify dependent weapons, too!
+						break;
+					case 'AMMO_F': //Flash Missile
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileL(), $enhCount, true); //do notify dependent weapons, too!
+						break;
+					case 'AMMO_A': //Antifighter Missile
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileL(), $enhCount, true); //do notify dependent weapons, too!
 						break;
 					case 'AMMO_P': //Piercing Missile
