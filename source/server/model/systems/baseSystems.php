@@ -3496,7 +3496,7 @@ class AmmoMagazine extends ShipSystem {
 	public $ammoSizeArray = array();
 	public $ammoUseArray = array(); //to be used in front end to track actual ammo usage
 	public $output = 0;
-	
+		
     
     function __construct($capacity){ //magazine capacity
         parent::__construct(0, 1, 0, 1); //technical system, armor and structure don't really matter

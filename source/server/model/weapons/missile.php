@@ -501,7 +501,7 @@ class FighterTorpedoLauncher extends FighterMissileRack
 
 
 /*implements weapon because it can do damage like one - on rack explosion*/
-class ReloadRack extends MissileLauncher //ShipSystem
+class ReloadRack extends Weapon //ShipSystem
 {
     public $name = "ReloadRack";
     public $displayName = "Reload Rack";
@@ -509,17 +509,22 @@ class ReloadRack extends MissileLauncher //ShipSystem
 	
     public $fireControl = array(null, null, null); // this is a weapon in name only, it cannot actually fire!
     
+    //public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
+    //public $isTargetable = false; //false means it cannot be targeted at all by called shots! - good for technical systems :)
    
     //it can explode, too...
-    public $weapon = false; //well, it can't be actually fired
+    //public $weapon = false; //well, it can't be actually fired BUT if marked, explosions will not be shown in log!
     public $damageType = 'Flash'; //needed to simulate that it's a weapon
     public $weaponClass = 'Ballistic';
-    private $rackExplosionDamage = 150; //how much damage will this weapon do in case of catastrophic explosion
-    private $rackExplosionThreshold = 19; //how high roll is needed for rack explosion
-    
+    private $rackExplosionDamage = 300; //how much damage will this weapon do in case of catastrophic explosion (80 missiles... that's devastating)
+    private $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+	
+		public $possibleCriticals = array(); //Reload Rack does not suffer any criticals (barring catastrophic explosion)
+		
+	
     function __construct($armour, $maxhealth){
         //parent::__construct($armour, $maxhealth, 0, 0); //that's for extending ShipSystem
-        parent::__construct($armour, $maxhealth, 0, 0, 0);//that's for extending MissileLauncher
+        parent::__construct($armour, $maxhealth, 0, 0, 0);//that's for extending Weapon
 		
 		$this->data["Special"] = 'Additional missile magazine for actual combat launchers. No actual effect in FV, but may violently explode if damaged in battle.';
     }
@@ -531,6 +536,42 @@ class ReloadRack extends MissileLauncher //ShipSystem
 	public function setMaxDamage(){
 		$this->maxDamage = 0; 
 	}	
+	
+	
+	public function criticalPhaseEffects($ship, $gamedata){ //add testing for ammo explosion!
+		if(!$this->isDamagedOnTurn($gamedata->turn)) return; //if there is no damage this turn, then no testing for explosion
+        $explodes = false;
+        $roll = Dice::d(20);
+        if ($roll >= $this->rackExplosionThreshold) $explodes = true;
+        		
+        if($explodes){
+            $this->ammoExplosion($ship, $gamedata, $this->rackExplosionDamage, $roll);  
+        }
+    } //endof function testCritical
+    public function ammoExplosion($ship, $gamedata, $damage, $roll){
+        //first, destroy self if not yet done...
+        if (!$this->isDestroyed()){
+            $this->noOverkill = true;
+            $fireOrder =  new FireOrder(-1, "normal", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 1, 100, 1, 1, 1, 0, null, null, 'ballistic');//needed, rolled, shots, shotshit, intercepted
+			$fireOrder->addToDB = true;
+			$fireOrder->pubnotes = "Missile magazine explosion (roll $roll)!";
+			$this->fireOrders[] = $fireOrder;							
+            $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
+            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, null, $gamedata, true, $this->location);
+        }        
+        //then apply damage potential as a hit... should be Raking by the rules, let's do it as Flash instead (not quite the same, but easier to do)
+        if($damage>0){
+            $this->noOverkill = false;
+            $this->damageType = 'Flash'; //should be Raking by the rules, but Flash is much easier to do - and very fitting for explosion!
+            $fireOrder =  new FireOrder(-1, "normal", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 1, 100, 1, 1, 1, 0, null, null, 'ballistic');
+			$fireOrder->addToDB = true;
+			$fireOrder->pubnotes = "Missile magazine explosion (roll $roll)!";
+			$this->fireOrders[] = $fireOrder;					
+            $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->location); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
+        }
+    }
 } //endof class ReloadRack
 
 
@@ -766,7 +807,7 @@ class MultiMissileLauncher extends Weapon{
             $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
                     $gamedata->turn, 'standard', 100, 1, 1, 1, 0, null, null, 'ballistic');
             $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
-            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, $pos, $gamedata, true, $this->location);
+            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, null, $gamedata, true, $this->location);
         }
         
         //then apply damage potential as a hit...
@@ -945,7 +986,7 @@ class MultiBombRack extends Weapon{
             $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
                     $gamedata->turn, 'standard', 100, 1, 1, 1, 0, null, null, 'ballistic');
             $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
-            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, $pos, $gamedata, true, $this->location);
+            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, null, $gamedata, true, $this->location);
         }
         
         //then apply damage potential as a hit...
@@ -988,7 +1029,11 @@ class AmmoMissileRackS extends Weapon{
     public $priority = 6;
     public $loadingtime = 2;
 
-    protected $rackExplosionDamage = 70; //how much damage will this weapon do in case of catastrophic explosion
+    protected $rackExplosionDamage = 75; //how much damage will this weapon do in case of catastrophic explosion
+	//officially it's a quarter of total power of warheads in magazine; but in FV this number is fixed (as missiles in magazine are not tracked)
+	// estimated warheads in magazine: 400 (20 missiles, dmg 20 each - assuming Basic missiles)
+	// a quarter of the above: 100
+	// reduce somewhat by expected expendientures (say, *0.75): 75
     protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
     
     public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
@@ -1154,29 +1199,41 @@ class AmmoMissileRackS extends Weapon{
     }
 	
 	
-    public function ammoExplosion($ship, $gamedata, $damage){
+	
+	public function criticalPhaseEffects($ship, $gamedata){ //add testing for ammo explosion!
+		if(!$this->isDamagedOnTurn($gamedata->turn)) return; //if there is no damage this turn, then no testing for explosion
+        $explodes = false;
+        $roll = Dice::d(20);
+        if ($roll >= $this->rackExplosionThreshold) $explodes = true;
+        		
+        if($explodes){
+            $this->ammoExplosion($ship, $gamedata, $this->rackExplosionDamage, $roll);  
+        }
+    } //endof function testCritical
+    public function ammoExplosion($ship, $gamedata, $damage, $roll){
         //first, destroy self if not yet done...
         if (!$this->isDestroyed()){
             $this->noOverkill = true;
-            $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
-                    $gamedata->turn, 'standard', 100, 1, 1, 1, 0, null, null, 'ballistic');
+            $fireOrder =  new FireOrder(-1, "normal", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 1, 100, 1, 1, 1, 0, null, null, 'ballistic');//needed, rolled, shots, shotshit, intercepted
+			$fireOrder->addToDB = true;
+			$fireOrder->pubnotes = "Missile magazine explosion (roll $roll)!";
+			$this->fireOrders[] = $fireOrder;							
             $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
-            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, $pos, $gamedata, true, $this->location);
+            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, null, $gamedata, true, $this->location);
         }        
-        //then apply damage potential as a hit...
+        //then apply damage potential as a hit... should be Raking by the rules, let's do it as Flash instead (not quite the same, but easier to do)
         if($damage>0){
             $this->noOverkill = false;
             $this->damageType = 'Flash'; //should be Raking by the rules, but Flash is much easier to do - and very fitting for explosion!
-            $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
-                    $gamedata->turn, 'flash', 100, 1, 1, 1, 0, null, null, 'ballistic');
+            $fireOrder =  new FireOrder(-1, "normal", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 1, 100, 1, 1, 1, 0, null, null, 'ballistic');
+			$fireOrder->addToDB = true;
+			$fireOrder->pubnotes = "Missile magazine explosion (roll $roll)!";
+			$this->fireOrders[] = $fireOrder;					
             $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->location); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
         }
     }
-    public function addMissileCritOnSelf($shipid, $phpclass, $gamedata){
-        $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
-        $crit->updated = true;
-        $this->criticals[] =  $crit;
-    }   
 	
 } //endof class AmmoMissileRackS
 
@@ -1194,8 +1251,12 @@ class AmmoMissileRackL extends AmmoMissileRackS{
     public $firingMode = 1;
     public $priority = 6;
     public $loadingtime = 2;
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(3,3,3);
+	protected $basicRange=30;
+	protected $basicDistanceRange = 70;
 
-    protected $rackExplosionDamage = 70; //how much damage will this weapon do in case of catastrophic explosion
+    protected $rackExplosionDamage = 75; //how much damage will this weapon do in case of catastrophic explosion
     protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)

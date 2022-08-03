@@ -944,10 +944,10 @@ class Enhancements{
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileH(), $enhCount, true); //do notify dependent weapons, too!
 						break;
 					case 'AMMO_F': //Flash Missile
-						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileL(), $enhCount, true); //do notify dependent weapons, too!
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileF(), $enhCount, true); //do notify dependent weapons, too!
 						break;
 					case 'AMMO_A': //Antifighter Missile
-						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileL(), $enhCount, true); //do notify dependent weapons, too!
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileA(), $enhCount, true); //do notify dependent weapons, too!
 						break;
 					case 'AMMO_P': //Piercing Missile
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileP(), $enhCount, true); //do notify dependent weapons, too!

@@ -22,23 +22,23 @@ class SagittariusAM extends BaseShip{
         $this->rollcost = 2;
         $this->pivotcost = 2;
 
-
         //ammo magazine itself (AND its missile options)
         $ammoMagazine = new AmmoMagazine(240); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
         $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 40); //add full load of basic missiles
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 240); //add full load of basic missiles
         $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
       
+
+        $this->addPrimarySystem(new ReloadRack(5, 9)); 
         $this->addPrimarySystem(new Reactor(5, 20, 0, 6));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 3, 6));
         $this->addPrimarySystem(new Engine(5, 16, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(5, 2));
-        $this->addPrimarySystem(new ReloadRack(5, 9));
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
 
