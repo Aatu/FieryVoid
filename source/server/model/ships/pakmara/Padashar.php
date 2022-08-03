@@ -11,7 +11,8 @@ class Padashar extends MediumShip{
         $this->shipClass = "Pa'da'shar Troop Liner";
         $this->canvasSize = 100;
 			$this->variantOf = "Tra'shu'li Armed Liner";
-			$this->occurence = "uncommon";	        
+			$this->occurence = "uncommon";
+        $this->fighters = array("assault shuttles"=>6); 				        
 
         $this->isd = 2231;
         
