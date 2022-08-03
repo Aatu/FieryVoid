@@ -1,6 +1,6 @@
 <?php
 class OlympusAM extends HeavyCombatVessel{
-  //Olympus equipped with variable ammo launchers
+  //Olympus equipped with actual working Ammunition Magazine
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
