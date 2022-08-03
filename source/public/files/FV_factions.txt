@@ -532,8 +532,7 @@ therefore rely on their rapid firing weapons, wide arcs, and light combat vessel
 The Brixadii are part of the Nexus Universe setting and are designed by Jeremy and Geoffrey Stano.
 If You want interesting low tech faction then by all means use it, just be warned :)
 Chaff Launcher - technically fired at enemy ship, it will always hit (causing no damage or adverse effects) and apply interception to ALL fire from target hex at chaff-protected unit (including nominally uninterceptable weapons).
-Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently and field Antiquated Sensors. This allows them to use EW 
-without any restrictions, but they cannot boost their sensors.
+Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently.
 
 
 zNEXUS PLAYTEST CRAYTAN (custom, alternate universe faction)
@@ -548,8 +547,7 @@ Assault Cannon - This is a massive, converted weapon found only on large vessels
 Close-In Defense System - Also know as a CIDS, this weapon operates much like a Scattergun. Its 1d4 shots, ballisitc only intercept, and only allowing one shot to intercept a single incoming shot 
 represents the CIDS firing a tremendous volume of small projectiles. It relies on volume of fire over specifically aiming at a target.
 Sentry Gun and Heavy Sentry Gun - These operate on a similar principle of the CIDS but focus on specifically targeting an opponent, providing improved range and damage concentration.
-Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently and field Antiquated Sensors. This allows them to use EW 
-without any restrictions, but they cannot boost their sensors.
+Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently.
 
 
 zNEXUS DALITHORN  (custom, alternate universe faction)
@@ -562,8 +560,7 @@ Fiery Void currently has their basic, early units for three tech level eras.
 Protector - Given their ships were already using a variety of ammunition-based weapons, necessitating the primary cargo bay, the Dalithorn had no issue creating a flak-style system to defend their ships.
 Although not designed to engage targets, the Protector is capable of intercepting any weapon, including lasers, and intercepting for a friendly unit as long as the friendly unit is in arc and 3 hexs and
 the firing ship is in arc. 
-Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently and field Antiquated Sensors. This allows them to use EW 
-without any restrictions, but they cannot boost their sensors.
+Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently.
 
 
 zNEXUS SAL-BEZ  (custom, alternate universe faction)
@@ -573,8 +570,7 @@ designs using industrial systems as makeshift weapons. As the Sal-bez grew (and 
 would ultimately lead to the Coalition becoming one of the most powerful of the Nexus factions.
 Swarm Torpedo - This is perhaps one of the most iconic systems developed by the Sal-bez for their later generation of ships. It fires multiple, small ballistics at a target, which has led to its common name of swarm torpedo. This system provides
 both long-range firepower and can strip systems off a target to enable more effective laser hits.
-Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently and field Antiquated Sensors. This allows them to use EW 
-without any restrictions, but they cannot boost their sensors.
+Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently.
 
 
 zNEXUS VELRAX  (custom, alternate universe faction)
@@ -588,8 +584,7 @@ Fiery Void currently has their basic, early units from three tech level eras.
 Plasma Arc - Small, raking plasma weapon that is designed to strip armor from their target.
 Dart/Streak Interceptors - These are small torpedoes that can accept OEW and used to engage enemy fighters.
 Laser Spear - A precursor to the laser lances the Velrax eventually field.
-Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently and field Antiquated Sensors. This allows them to use EW 
-without any restrictions, but they cannot boost their sensors.
+Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently.
 	
 	
 	
