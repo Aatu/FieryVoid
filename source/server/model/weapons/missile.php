@@ -968,14 +968,15 @@ class MultiBombRack extends Weapon{
 
 
 
-/*UNDER CONSTRUCTION*/
-/*weapon that looks at central magazine to determine available firing modes - and also number of actual rounds available
+
+/*Class-S Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
 */
 class AmmoMissileRackS extends Weapon{
 	public $name = "ammoMissileRackS";
         public $displayName = "Class-S Missile Rack";
-	public $checkAmmoMagazine = true;
     public $iconPath = "missile1.png";    
+		
+	public $checkAmmoMagazine = true;
 	
     public $useOEW = false;
     public $ballistic = true;
@@ -984,20 +985,19 @@ class AmmoMissileRackS extends Weapon{
     public $range = 20;
     public $distanceRange = 60;
     public $firingMode = 1;
-    public $rangeMod = 0;
     public $priority = 6;
     public $loadingtime = 2;
 
-    private $rackExplosionDamage = 70; //how much damage will this weapon do in case of catastrophic explosion
-    private $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+    protected $rackExplosionDamage = 70; //how much damage will this weapon do in case of catastrophic explosion
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
     
     public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     public $weaponClass = "Ballistic"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
 	
 	//basic launcher data, before being modified by actual missiles
-	private $basicFC=array(3,3,3);
-	private $basicRange=20;
-	private $basicDistanceRange = 60;
+	protected $basicFC=array(3,3,3);
+	protected $basicRange=20;
+	protected $basicDistanceRange = 60;
 	
 	public $firingModes = array(); //equals to available missiles
 	public $damageTypeArray = array(); //indicates that this weapon does damage in Pulse mode
@@ -1015,18 +1015,26 @@ class AmmoMissileRackS extends Weapon{
 	
     /*ATYPICAL constructor: doesn't take power usage and structure, but DOES take central magazine system and information about being fitted to base*/
 	//on construction, just add first class from the list; as further (or different) ones are added, appropriate tables will get refreshed
-	function __construct($armour, $magazine, $startArc, $endArc, $base=false)
+	function __construct($armour, $maxhealth, $powerReq, $magazine, $startArc, $endArc, $base=false)
 	{
 		//VERY IMPORTANT: fill $ammoClassesArray (cannot be done as constants!
 		//classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
-		$this->ammoClassesArray = array( new AmmoMissileB(), new AmmoMissileL(), new AmmoMissileP() );
+		//remember that appropriate enhancements need to be enabled on ehip itself, too!
+		$this->ammoClassesArray[] = new AmmoMissileB();
+		$this->ammoClassesArray[] = new AmmoMissileL();
+		$this->ammoClassesArray[] =  new AmmoMissileH();
+		$this->ammoClassesArray[] =  new AmmoMissileF();
+		$this->ammoClassesArray[] =  new AmmoMissileA();
+		$this->ammoClassesArray[] =  new AmmoMissileP();
 	
 		$this->ammoMagazine = $magazine;
 		if($base){
 			$this->basicRange = $this->basicDistanceRange;
 		}
 		$this->recompileFiringModes();
-		parent::__construct($armour, 6, 0, $startArc, $endArc); //class-S launcher: structure 6, power usage 0
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 0;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc); //class-S launcher: structure 6, power usage 0
 		$magazine->subscribe($this); //subscribe to any further changes in ammo availability
 	}	
     
@@ -1173,5 +1181,23 @@ class AmmoMissileRackS extends Weapon{
 	
 } //endof class AmmoMissileRackS
 
+
+/*Class-L Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
+	all functionality prepared in standard class-S rack
+*/
+class AmmoMissileRackL extends AmmoMissileRackS{
+	public $name = "ammoMissileRackL";
+        public $displayName = "Class-L Missile Rack";
+    public $iconPath = "missile1.png";    
+	
+    public $range = 30;
+    public $distanceRange = 70;
+    public $firingMode = 1;
+    public $priority = 6;
+    public $loadingtime = 2;
+
+    protected $rackExplosionDamage = 70; //how much damage will this weapon do in case of catastrophic explosion
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+} //endof class AmmoMissileRackL
 
 ?>
