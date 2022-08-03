@@ -34,8 +34,8 @@ class ProtectorateFlyerAssault extends FighterFlight{
             $armour = array(1, 1, 1, 1);
             $fighter = new Fighter("FlyerAssault", $armour, 16, $this->id);
             $fighter->displayName = "Assault Flyer";
-            $fighter->imagePath = "img/ships/nial.png";
-            $fighter->iconPath = "img/ships/nial-large.png";
+            $fighter->imagePath = "img/ships/MinbariFlyer.png";
+            $fighter->iconPath = "img/ships/MinbariFlyer_Large.png";
 			
             $fighter->addFrontSystem(new LightFusionCannon(330, 30, 4, 1));
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
