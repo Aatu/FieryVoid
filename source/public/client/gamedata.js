@@ -693,6 +693,39 @@ window.gamedata = {
                 return false;
             }  
 		
+		
+		//check ammo magazine		
+		//ammo usage check - AmmoMagazine equipped units
+		var myShips = [];
+		    for (var ship in gamedata.ships) {
+			if (gamedata.ships[ship].userid == gamedata.thisplayer) {
+			    if (!shipManager.isDestroyed(gamedata.ships[ship])) {
+				myShips.push(gamedata.ships[ship]);
+			    }
+			}
+		    }				
+		var ammoMagazineError = [];
+		for (var shipID in myShips) { //actually this will check for fighters, too
+			var currShip = myShips[shipID];
+			//check for every magazine on board!
+			for (var i in currShip.systems) if(currShip.systems[i].name == 'ammoMagazine') {
+        			var currMagazine = currShip.systems[i];
+				var checkResult = currMagazine.doVerifyAmmoUsage(currShip);
+				if(!checkResult) ammoMagazineError.push(currShip);
+			}
+		}
+		if (ammoMagazineError.length > 0) {
+			var ammoMagError = "Following units are trying to fire more ordnance than available (see Ammunition Magazine):<br>";
+			for (var shipID in ammoMagazineError) {
+			    ammoMagError += ammoMagazineError[shipID].name + " (" + ammoMagazineError[shipID].shipClass + ")";
+			    ammoMagError += "<br>";
+			}
+                	ammoMagErro += "You need to reduce number of shots (or change mode) before you can commit the turn.";
+			window.confirm.error(ammoMagError, function () {});
+			return false;
+		    }  
+		
+		
             ajaxInterface.submitGamedata();
         } else if (gamedata.gamephase == 4) {
             ajaxInterface.submitGamedata();
