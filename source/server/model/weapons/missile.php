@@ -1013,9 +1013,8 @@ class AmmoMissileRackS extends Weapon{
 	
 	
 	
-    /*ATYPICAL constructor: doesn't take power usage and structure, but DOES take central magazine system and information about being fitted to base*/
-	//on construction, just add first class from the list; as further (or different) ones are added, appropriate tables will get refreshed
-	function __construct($armour, $maxhealth, $powerReq, $magazine, $startArc, $endArc, $base=false)
+    /*ATYPICAL constructor: takes ammo magazine class and (optionally) information about being fitted to stable platform*/
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
 		//VERY IMPORTANT: fill $ammoClassesArray (cannot be done as constants!
 		//classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
@@ -1036,7 +1035,7 @@ class AmmoMissileRackS extends Weapon{
             	if ( $powerReq == 0 ) $powerReq = 0;
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc); //class-S launcher: structure 6, power usage 0
 		$magazine->subscribe($this); //subscribe to any further changes in ammo availability
-	}	
+	}
     
 	public function setSystemDataWindow($turn){
 		$this->data["Special"] = 'Available firing modes depend on ammo bought as unit enhancements. Ammunition available is tracked by central Ammunition Magazine system.';
@@ -1198,6 +1197,13 @@ class AmmoMissileRackL extends AmmoMissileRackS{
 
     protected $rackExplosionDamage = 70; //how much damage will this weapon do in case of catastrophic explosion
     protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 0;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+	}
 } //endof class AmmoMissileRackL
 
 ?>
