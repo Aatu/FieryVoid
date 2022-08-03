@@ -3501,11 +3501,6 @@ class AmmoMagazine extends ShipSystem {
     function __construct($capacity){ //magazine capacity
         parent::__construct(0, 1, 0, 1); //technical system, armor and structure don't really matter
 	$this->capacity = $capacity;
-	    /*
-	$roundsToAdd = 0;
-	if($ammoLoaded == true) $roundsToAdd = $capacity;
-	$this->addAmmoEntry($baseAmmo, $roundsToAdd, false);
-	*/
     }
     
     public function setSystemDataWindow($turn){
@@ -3587,21 +3582,6 @@ class AmmoMagazine extends ShipSystem {
 		}		
 		return $toReturn;
 	}
-/*	
-	public function getAmmoArray(){
-		return $this->ammoArray;
-	}
-	*/
-	/*
-	public function addRounds($modeName, $ammoCount){ //additional rounds for already existing entry
-		$ammoClass = $this->getAmmo($modeName);
-		if ($ammoClass==null) return;
-		$this->ammoCountArray[$modeName] += $ammoCount;
-		$this->remainingAmmo += $ammoCount * $ammoClass->size;
-		$this->remainingAmmo = min($this->remainingAmmo, $this->capacity);
-	}
-	*/
-	
 	
 		
  public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
@@ -3609,7 +3589,7 @@ class AmmoMagazine extends ShipSystem {
         switch($gameData->phase){
 			//both Initial and Firing phase will behave the same - save to database data about current usage, received from front end (to enable ammo counting for both ballistic and direct fire weapons)
                 case 1: //Initial phase - ballistic weapons
-				case 4: //firing phase - direct fire weapons
+				case 3: //firing DECLARATION phase - direct fire weapons
                     if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
 						foreach($this->ammoJustUsed as $modeName){
 							//AND PREPARE APPROPRIATE NOTES!
@@ -3669,6 +3649,7 @@ class AmmoMissileB{
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_B'; //enhancement name to be enabled
 	public $enhancementDescription = '(ammo) Basic Missile'; //enhancement description
+	public $enhancementPrice = 1;//officially 0, but if it was 0 then there would be no reason not to load it
 	
 	public $rangeMod = 0; //MODIFIER for launch range
 	public $distanceRangeMod = 0; //MODIFIER for distance range
@@ -3678,7 +3659,7 @@ class AmmoMissileB{
 	public $damageType = 'Standard';//mode of dealing damage
 	public $weaponClass = 'Ballistic';//weapon class
 	public $priority = 6;
-	public $priorityAF = 4;
+	public $priorityAF = 5;
 	public $noOverkill = false;
 	
 	
@@ -3700,10 +3681,99 @@ class AmmoMissileL{
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_L'; //enhancement name to be enabled
 	public $enhancementDescription = '(ammo) LongRange Missile (2225)'; //enhancement description
+	public $enhancementPrice = 6;
 	
 	public $rangeMod = 10; //MODIFIER for launch range
 	public $distanceRangeMod = 10; //MODIFIER for distance range
 	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
+	public $minDamage = 15;
+	public $maxDamage = 15;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 6;
+	public $noOverkill = false;
+		
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 15;
+    }		
+	
+} //endof class AmmoMissileL
+
+
+//ammunition for AmmoMagazine - Class H Missile (for official Missile Racks)
+class AmmoMissileH{	
+	public $name = 'ammoMissileH';
+	public $displayName = 'Heavy Missile';
+	public $modeName = 'Heavy';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_H'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Heavy Missile (2225)'; //enhancement description
+	public $enhancementPrice = 4;
+	
+	public $rangeMod = -10; //MODIFIER for launch range
+	public $distanceRangeMod = -10; //MODIFIER for distance range
+	public $fireControlMod = array(0, 3, 3); //MODIFIER for weapon fire control!
+	public $minDamage = 30;
+	public $maxDamage = 30;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	public $noOverkill = false;
+		
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 30;
+    }		
+	
+} //endof class AmmoMissileH
+
+
+//ammunition for AmmoMagazine - Class F Missile (for official Missile Racks)
+class AmmoMissileF{	
+	public $name = 'ammoMissileF';
+	public $displayName = 'Flash Missile';
+	public $modeName = 'Flash';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_F'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Flash Missile (2225)'; //enhancement description
+	public $enhancementPrice = 6;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
+	public $minDamage = 20;
+	public $maxDamage = 20;	
+	public $damageType = 'Flash';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	public $noOverkill = false;
+		
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 20;
+    }		
+	
+} //endof class AmmoMissileF
+
+
+
+//ammunition for AmmoMagazine - Class A Missile (for official Missile Racks)
+class AmmoMissileA{	
+	public $name = 'ammoMissileA';
+	public $displayName = 'Antifighter Missile';
+	public $modeName = 'Antifighter';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_A'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Antifighter Missile (2231)'; //enhancement description
+	public $enhancementPrice = 4;
+	
+	public $rangeMod = -5; //MODIFIER for launch range
+	public $distanceRangeMod = -5; //MODIFIER for distance range
+	public $fireControlMod = array(6, 3, 3); //MODIFIER for weapon fire control!
 	public $minDamage = 15;
 	public $maxDamage = 15;	
 	public $damageType = 'Standard';//mode of dealing damage
@@ -3717,7 +3787,7 @@ class AmmoMissileL{
         return 15;
     }		
 	
-} //endof class AmmoMissileL
+} //endof class AmmoMissileA
 
 
 //ammunition for AmmoMagazine - Class P Missile (for official Missile Racks)
@@ -3728,6 +3798,7 @@ class AmmoMissileP{
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_P'; //enhancement name to be enabled
 	public $enhancementDescription = '(ammo) Piercing Missile (2244)'; //enhancement description
+	public $enhancementPrice = 16;
 	
 	public $rangeMod = 0; //MODIFIER for launch range
 	public $distanceRangeMod = 0; //MODIFIER for distance range
@@ -3737,7 +3808,7 @@ class AmmoMissileP{
 	public $damageType = 'Piercing';//mode of dealing damage
 	public $weaponClass = 'Ballistic';//weapon class
 	public $priority = 2;
-	public $priorityAF = 5;//moot, as this missile cannot be fired at fighters
+	public $priorityAF = 2;//moot, as this missile cannot be fired at fighters
 	public $noOverkill = true;
 		
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
