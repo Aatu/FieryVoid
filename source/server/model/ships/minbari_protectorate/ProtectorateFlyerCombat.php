@@ -10,7 +10,7 @@ class ProtectorateFlyerCombat extends FighterFlight{
         $this->phpclass = "ProtectorateFlyerCombat";
         $this->shipClass = "Combat Flyers";
         $this->variantOf = "Assault Flyers";
-    	$this->imagePath = "img/ships/nial.png"; //need Minbari Flyer image!
+    	$this->imagePath = "img/ships/MinbariFlyer.png";
         
 		$this->notes = "Usually housed in common shuttle bays (not mentioned in FV). Most ships can take a pair.";
 		
@@ -38,8 +38,8 @@ class ProtectorateFlyerCombat extends FighterFlight{
             $armour = array(1, 1, 1, 1);
             $fighter = new Fighter("FlyerCombat", $armour, 16, $this->id);
             $fighter->displayName = "Combat Flyer";
-            $fighter->imagePath = "img/ships/nial.png";
-            $fighter->iconPath = "img/ships/nial-large.png";
+            $fighter->imagePath = "img/ships/MinbariFlyer.png";
+            $fighter->iconPath = "img/ships/MinbariFlyer_Large.png";
 			
             $fighter->addFrontSystem(new LightFusionCannon(300, 0, 4, 1));
             $fighter->addFrontSystem(new LightFusionCannon(0, 60, 4, 1));
