@@ -2636,7 +2636,7 @@ spl_autoload_register(
 				'ltviper' => '/server/model/ships/customs/LtViper.php',
 				'medviper' => '/server/model/ships/customs/medViper.php',
 				
-				//AmmoMagazine and related classes
+				// ~~~ AmmoMagazine ~~~ and related classes
                 		'ammomagazine' => '/server/model/systems/baseSystems.php', //ammo magazine itself
 		    
                 		'ammomissileb' => '/server/model/systems/baseSystems.php', //ammunition for missile racks
@@ -2646,8 +2646,11 @@ spl_autoload_register(
                 		'ammomissilea' => '/server/model/systems/baseSystems.php',
                 		'ammomissilep' => '/server/model/systems/baseSystems.php',
 		    
-                		'ammomissileracks' => '/server/model/weapons/missile.php', //missile racks
-                		'ammomissilerackl' => '/server/model/weapons/missile.php', //missile racks
+                		'ammomissileracks' => '/server/model/weapons/missile.php', //missile racks themselves
+                		'ammomissilerackl' => '/server/model/weapons/missile.php', 	    
+		    
+                		'sagittariusam' => '/server/model/ships/EA/sagittariusam.php', //ships using new style launchers (and magazine of course)
+		    		'olympusam' => '/server/model/ships/EA/olympusam.php',
 				
 						
 				
