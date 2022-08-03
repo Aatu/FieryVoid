@@ -49,12 +49,12 @@ class Ulana extends BaseShip{
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 60));
 
         $this->addRightSystem(new GraviticThruster(5, 20, 0, 6, 4));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 300, 120));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 300, 120));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 240));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 240));
         $this->addRightSystem(new MolecularFlayer(5, 8, 4, 0, 60));
         $this->addRightSystem(new MolecularDisruptor(4, 8, 6, 0, 120));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 240));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 240));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 300, 120));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 300, 120));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 6, 72));

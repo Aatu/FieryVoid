@@ -350,7 +350,7 @@ class Enhancements{
 	Cost: 20x new recharge rate
 	Limit: 6*/
 	  $enhID = 'VOR_CRIMS';
-	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is not disabled
+	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
 		  $enhName = 'Crimson Skin Coloring';
 		  $capacitor = $ship->getSystemByName("PowerCapacitor");//find Power Capacitor
 		  if($capacitor){
@@ -373,6 +373,89 @@ class Enhancements{
 		  $enhPriceStep = 0; //flat rate
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 	  }
+	  
+	  
+	  
+	  
+	  //consumable ammunition
+	  //find magazine capacity to set appropriate limits!
+	  //ASSUMING either single magazine (for ships), or mltiple but equal ones (for fighter flights) (no magazine is fine too)
+	  //availablility in name - for EA and other factions respectably - just in case someone wishes for in-universe accurate availability
+	  $magazineCapacity = 0;
+	  foreach($ship->systems as $magazine) if($magazine->name == 'ammoMagazine'){
+		  $magazineCapacity = $magazine->capacity;
+		  break; //foreach
+	  }
+	  if ($magazineCapacity > 0){ //otherwise no point
+		  $enhID = 'AMMO_B'; //Basic Missiles - actually most ships have these fitted as standard
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileB();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity; //effectively limited by magazine capacity	
+			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+		  $enhID = 'AMMO_L'; //Long Range Missiles
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileL();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+		  $enhID = 'AMMO_H'; //Heavy Missiles
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileH();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+		  $enhID = 'AMMO_F'; //Flash Missiles
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileF();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+		  $enhID = 'AMMO_A'; //Antifighter Missiles
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileA();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+		  $enhID = 'AMMO_P'; //Piercing Missiles
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileP();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+	  } //end of magazine-requiring options
+	  
+	  
   } //endof function setEnhancementOptionsShip
 	
 	
@@ -570,6 +653,13 @@ class Enhancements{
 	   /*enhancements for ships - actual applying of chosen enhancements
 	   */
 	   private static function setEnhancementsShip($ship){
+		//ammo magazine is necessary for some options
+		$ammoMagazine = null;
+		foreach($ship->systems as $magazine) if($magazine->name == 'ammoMagazine'){
+			  $ammoMagazine = $magazine;
+			  break; //foreach
+		}
+		   
 	   	foreach($ship->enhancementOptions as $entry){
 			//ID,readableName,numberTaken,limit,price,priceStep
 			$enhID = $entry[0];
@@ -841,6 +931,28 @@ class Enhancements{
 						//fixed values
 						$ship->critRollMod += $enhCount;
 						break;
+						
+						
+					//consumable ammunition
+					case 'AMMO_B': //Basic Missile						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileB(), $enhCount, true); //do notify dependent weapons, too!
+						break;
+					case 'AMMO_L': //Long Range Missile
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileL(), $enhCount, true); //do notify dependent weapons, too!
+						break;
+					case 'AMMO_H': //Heavy Missile
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileH(), $enhCount, true); //do notify dependent weapons, too!
+						break;
+					case 'AMMO_F': //Flash Missile
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileF(), $enhCount, true); //do notify dependent weapons, too!
+						break;
+					case 'AMMO_A': //Antifighter Missile
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileA(), $enhCount, true); //do notify dependent weapons, too!
+						break;
+					case 'AMMO_P': //Piercing Missile
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileP(), $enhCount, true); //do notify dependent weapons, too!
+						break;
+						
 				}
 			}
 			
