@@ -2641,9 +2641,13 @@ spl_autoload_register(
 		    
                 		'ammomissileb' => '/server/model/systems/baseSystems.php', //ammunition for missile racks
                 		'ammomissilel' => '/server/model/systems/baseSystems.php',
+                		'ammomissileh' => '/server/model/systems/baseSystems.php',
+                		'ammomissilef' => '/server/model/systems/baseSystems.php',
+                		'ammomissilea' => '/server/model/systems/baseSystems.php',
                 		'ammomissilep' => '/server/model/systems/baseSystems.php',
 		    
                 		'ammomissileracks' => '/server/model/weapons/missile.php', //missile racks
+                		'ammomissilerackl' => '/server/model/weapons/missile.php', //missile racks
 				
 						
 				
