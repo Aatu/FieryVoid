@@ -7,127 +7,98 @@ class TechnicalTestbed extends MediumShip{
 		$this->pointCost = 325;
 		$this->faction = "Custom Ships";
         $this->phpclass = "TechnicalTestbed";
-        $this->imagePath = "img/ships/ShadowCruiser.png";
         $this->shipClass = "New Technology Testbed";
-        $this->canvasSize = 200;
-	    $this->isd = 9999;
-        $this->shipSizeClass = 2; //it's actually a HCV using MCV layout
-        $this->agile = true;
-		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
-		$this->halfPhaseThrust = 6; //needed for half phasing; equal to thrust from two BioThrusters on a given ship
-        
-        $this->forwardDefense = 20;
-        $this->sideDefense = 20;
-        
-        $this->turncost = 0.50;
-        $this->turndelaycost = 0.33;
-        $this->accelcost = 3;
-        $this->rollcost = 3;
-        $this->pivotcost = 3;
-		$this->iniativebonus = 6 *5;
-		
-		$this->fighters = array("normal"=>12);
-        
-		
-		$this->enhancementOptionsEnabled[] = 'SHAD_FTRL'; //can launch Shadow fighters (IF hangar capacity allows!)
-		$this->enhancementOptionsDisabled[] = 'POOR_CREW'; //no crew ;)
-		$this->enhancementOptionsDisabled[] = 'ELITE_CREW'; //no crew ;)
-		$this->enhancementOptionsDisabled[] = 'IMPR_ENG'; //no Engine ;)
-		
-         
-        $this->addPrimarySystem(new MagGravReactorTechnical(3, 12, 0, 0));
-		$this->addPrimarySystem(new PowerCapacitor( 4, 40, 0, 4, true));//armor, structure, power req, output, has petals    
+        $this->imagePath = "img/ships/olympus.png";
+        //$this->canvasSize = 200;
 	    
-        $this->addPrimarySystem(new CnC(5, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 14, 0, 6));
-		$this->addPrimarySystem(new JumpEngine(4, 16, 3, 24));		
-		$this->addPrimarySystem(new Hangar(3, 1));
-        $this->addPrimarySystem(new SelfRepair(5, 6, 3)); //armor, structure, output
-        $this->addPrimarySystem(new SelfRepair(5, 6, 3)); //armor, structure, output
-		
-		
-		
-		
-		//BioDrive
-		$bioDrive = new BioDrive();
-		
-		$bioThruster = new BioThruster(4,10,3); //armour, health, output
-		$bioDrive->addThruster($bioThruster);
-		$this->addAftSystem($bioThruster);
-		
-		$bioThruster = new BioThruster(4,10,3); //armour, health, output
-		$bioDrive->addThruster($bioThruster);
-		$this->addAftSystem($bioThruster);
-		
-		$bioThruster = new BioThruster(4,10,3); //armour, health, output
-		$bioDrive->addThruster($bioThruster);
-		$this->addAftSystem($bioThruster);
-				
-		$bioThruster = new BioThruster(4,10,3); //armour, health, output
-		$bioDrive->addThruster($bioThruster);
-		$this->addAftSystem($bioThruster);
-		
-        $this->addPrimarySystem($bioDrive);
-		
-		
-		
-		
-		//weapons - Forward for visual reasons!
-        $this->addFrontSystem(new VorlonDischargeGun(3, 0, 0, 240, 120));
-        $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 240, 120));
-        $this->addFrontSystem(new StdParticleBeam(3, 1, 1, 240, 120));
+	    
+        $this->forwardDefense = 15;
+        $this->sideDefense = 15;
         
+        $this->turncost = 0.66;
+        $this->turndelaycost = 1;
+        $this->accelcost = 2;
+        $this->rollcost = 2;
+        $this->pivotcost = 2;
+        $this->iniativebonus = 30;
+        
+         
+        $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
+        $this->addPrimarySystem(new CnC(6, 16, 0, 0));
+        $this->addPrimarySystem(new Scanner(5, 16, 4, 7));
+        $this->addPrimarySystem(new Engine(5, 15, 0, 8, 2));
+        $this->addPrimarySystem(new Hangar(5, 2));
+        $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
+        $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4)); 
+	    
+	//ammo magazine itself
+	$ammoMagazine = new AmmoMagazine(6); //pass magazine capacity 
+	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 200); //add full load of basic missiles
+	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
+	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
+	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
+	    $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+        
+        
+        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
+        $this->addFrontSystem(new MediumPulse(3, 6, 3, 240, 0));
+        $this->addFrontSystem(new MediumPulse(3, 6, 3, 240, 0));
+        $this->addFrontSystem(new MediumPulse(3, 6, 3, 0, 120));
+        $this->addFrontSystem(new MediumPulse(3, 6, 3, 0, 120));
+        $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 270, 90));
+        $this->addFrontSystem(new RailGun(4, 9, 6, 0, 0));
 		
-		//technical thrusters - unlimited, like for MCVs		
-		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
-		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
-		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
-		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
-
-       	   
-	    //Structure
-        $this->addFrontSystem(new Structure( 3, 80));
-        $this->addAftSystem(new Structure( 3, 80));
-        $this->addPrimarySystem(new Structure( 3, 80));
-		
-				
-	
-		$this->hitChart = array(
-			0=> array(
-				5 => "1:Burst Beam",
-				7 => "1:Medium Pulse Cannon",
-				14 => "Energy Diffuser",
-				15 => "Scanner",
-				16 => "2:BioThruster",
-				17 => "Hangar",
-				18 => "Reactor",
-				20 => "C&C",
-			),
-			1=> array(
-			/*
-				5 => "1:Burst Beam",
-				7 => "1:Medium Pulse Cannon",
-				14 => "0:Energy Diffuser",
-				15 => "0:Scanner",
-				16 => "2:BioThruster",
-				17 => "0:Hangar",
-				18 => "0:Reactor",
-				20 => "Primary",
-				*/
-				20 => "0:Jump Engine",
-			),
-			2=> array(
-				5 => "1:Burst Beam",
-				7 => "1:Medium Pulse Cannon",
-				14 => "0:Energy Diffuser",
-				15 => "0:Scanner",
-				16 => "2:BioThruster",
-				17 => "0:Hangar",
-				18 => "0:Reactor",
-				20 => "Primary",
-			),
-		);				
+        $this->addAftSystem(new RailGun(4, 9, 6, 0, 0));   
+        $this->addAftSystem(new InterceptorMkI(2, 4, 1, 90, 270));
+        $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
+        $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
+        $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
+        $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
+	    //new launchers - using ammo	    
+        $this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 0, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 0, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 0, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 0, 360, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        
+	    
+        //0:primary, 1:front, 2:rear, 3:left, 4:right;
+        $this->addFrontSystem(new Structure( 5, 48));
+        $this->addAftSystem(new Structure( 4, 42));
+        $this->addPrimarySystem(new Structure( 5, 50));
+        
+        
+        $this->hitChart = array(
+                0=> array(
+                        8 => "Structure",
+                        11 => "Thruster",
+                        13 => "Scanner",
+                        15 => "Engine",
+                        16 => "Hangar",
+                        19 => "Reactor",
+                        20 => "C&C",
+                ),
+                1=> array(
+                        3 => "Thruster",
+                        5 => "Medium Pulse Cannon",
+                        7 => "Railgun",
+                        9 => "Interceptor MK I",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+                2=> array(
+                        6 => "Thruster",
+                        8 => "Class-S Missile Rack",
+                        10 => "Railgun",
+                        12 => "Interceptor MK I",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+        );
     }
+
 }
 
 

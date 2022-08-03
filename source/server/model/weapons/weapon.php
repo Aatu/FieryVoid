@@ -13,6 +13,8 @@ class Weapon extends ShipSystem
     public $priorityArray = array();
     public $priorityAF = 0; //array must be set explicitly - otherwise it will be generated, ignoring this variable! 
     public $priorityAFArray = array();
+	
+	public $checkAmmoMagazine = false; //does this weapon require actual ammunition in AmmoMagazine to fire?
 
 	/*not used any more
     public $animationImg = null;
