@@ -36,6 +36,9 @@ class TechnicalTestbed extends MediumShip{
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 200); //add full load of basic missiles
 	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
+	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
+	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
 	    $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
         
         
@@ -55,11 +58,10 @@ class TechnicalTestbed extends MediumShip{
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
 	    //new launchers - using ammo	    
-        $this->addAftSystem(new AmmoMissileRackS(3, $ammoMagazine, 0, 360, false)); //$armour, $magazine, $startArc, $endArc, $base=false
-        $this->addAftSystem(new AmmoMissileRackS(3, $ammoMagazine, 0, 360, false)); //$armour, $magazine, $startArc, $endArc, $base=false
-        $this->addAftSystem(new AmmoMissileRackS(3, $ammoMagazine, 0, 360, false)); //$armour, $magazine, $startArc, $endArc, $base=false
-	    //let's mark one launcher as fitted to stable launch platform!
-        $this->addAftSystem(new AmmoMissileRackS(3, $ammoMagazine, 0, 360, true)); //$armour, $magazine, $startArc, $endArc, $base=false
+        $this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 0, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 0, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 0, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 0, 360, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         
 	    
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
