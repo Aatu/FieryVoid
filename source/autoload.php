@@ -2647,10 +2647,17 @@ spl_autoload_register(
                 		'ammomissilep' => '/server/model/systems/baseSystems.php',
 		    
                 		'ammomissileracks' => '/server/model/weapons/missile.php', //missile racks themselves
-                		'ammomissilerackl' => '/server/model/weapons/missile.php', 	    
+                		'ammomissilerackso' => '/server/model/weapons/missile.php',
+                		'ammomissileracka' => '/server/model/weapons/missile.php',
+                		'ammomissilerackb' => '/server/model/weapons/missile.php',
+                		'ammomissilerackl' => '/server/model/weapons/missile.php',
+                		'ammomissileracklh' => '/server/model/weapons/missile.php',
+                		'ammomissilerackr' => '/server/model/weapons/missile.php',
+                		'ammobombrack' => '/server/model/weapons/missile.php',
 		    
                 		'sagittariusam' => '/server/model/ships/EA/sagittariusAM.php', //ships using new style launchers (and magazine of course)
-		    		'olympusam' => '/server/model/ships/EA/olympusAM.php',
+						'olympusam' => '/server/model/ships/EA/olympusAM.php',
+                		'apolloam' => '/server/model/ships/EA/apolloAM.php',
 				
 						
 				

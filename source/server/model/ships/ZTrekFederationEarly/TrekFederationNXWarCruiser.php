@@ -9,9 +9,10 @@ class TrekFederationNXWarCruiser extends MediumShip{
         $this->phpclass = "TrekFederationNXWarCruiser";
         $this->imagePath = "img/ships/StarTrek/EnterpriseNX.png";
         $this->shipClass = "NX War Cruiser";
+		/*
 			$this->occurence = "common";
 			$this->variantOf = "NX Cruiser";
-
+*/
 		$this->unofficial = true;
         $this->canvasSize = 100;
 	    $this->isd = 2152;

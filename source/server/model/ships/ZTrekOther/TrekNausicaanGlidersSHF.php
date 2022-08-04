@@ -4,7 +4,7 @@ class TrekNausicaanGlidersSHF extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 80 *6; //for 6
+        $this->pointCost = 50 *6; //for 6
         $this->faction = "ZTrek Playtest Other Factions";
         $this->phpclass = "TrekNausicaanGlidersSHF";
         $this->imagePath = "img/ships/StarTrek/NausicaanGlider.png";
@@ -13,7 +13,7 @@ class TrekNausicaanGlidersSHF extends FighterFlight{
 		
         $this->isd = 2145;
 		$this->notes = "Warp Engine";
-		$this->notes .= "<br>Takes up two fighter slots.";
+		$this->notes .= "<br>Takes up two regular fighter slots.";
 
 	$this->hangarRequired = "heavy"; //Nausicaan smaller Gliders require hangar space just like heavy fighters
 	$this->unitSize = 0.5; //one craft requires 2 hangar slots
@@ -29,7 +29,6 @@ class TrekNausicaanGlidersSHF extends FighterFlight{
 		
         $this->pivotcost = 2;
 
-	//$this->unitSize = 3; //number of craft in squadron
     	$this->superheavy = true;
         $this->maxFlightSize = 3;//this is a superheavy fighter originally intended as single unit, limit flight size to 3
         
@@ -53,7 +52,7 @@ class TrekNausicaanGlidersSHF extends FighterFlight{
 			$fighter->addFrontSystem(new PairedPlasmaBlaster(240, 360));
 		        $largeGun = new PlasmaGun(330, 30); 
             		$fighter->addFrontSystem($largeGun);
-			$fighter->addFrontSystem(new PairedPlasmaBlaster(0, 120));		
+			$fighter->addFrontSystem(new PairedPlasmaBlaster(0, 120));
 
 			$fighter->addAftSystem(new TrekShieldFtr(1, 4, 3, 1) ); //armor, health, rating, recharge
 			
