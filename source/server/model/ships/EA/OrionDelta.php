@@ -12,7 +12,7 @@ class OrionDelta extends StarBaseSixSections{
 		$this->fighters = array("heavy"=>36); 
 		
 		$this->occurence = "common";
-		$this->variantOf = 'Orion Battle Station';
+		//$this->variantOf = 'Orion Battle Station';
         $this->isd = 2240;
 
 		$this->shipSizeClass = 3;
