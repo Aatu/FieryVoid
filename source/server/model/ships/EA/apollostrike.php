@@ -13,7 +13,7 @@ class apollostrike extends BaseShip{
         $this->shipSizeClass = 3;
         $this->canvasSize = 200;
         $this->occurence = "uncommon";
-        $this->variantOf = "Apollo Bombardment Cruiser";
+        //$this->variantOf = "Apollo Bombardment Cruiser";
 		$this->unofficial = true;                
         $this->fighters = array("normal"=>6);
 		$this->customFighter = array("Thunderbolt"=>6);        
