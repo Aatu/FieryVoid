@@ -9,8 +9,8 @@ class TrekFederationNXWarCruiserUpg extends MediumShip{
         $this->phpclass = "TrekFederationNXWarCruiserUpg";
         $this->imagePath = "img/ships/StarTrek/EnterpriseNX.png";
         $this->shipClass = "NX War Cruiser (upgraded)";
-			$this->occurence = "rare";
-			$this->variantOf = "NX Cruiser";
+			$this->occurence = "common";
+			$this->variantOf = "NX War Cruiser";
 
 		$this->unofficial = true;
         $this->canvasSize = 100;
@@ -40,7 +40,7 @@ class TrekFederationNXWarCruiserUpg extends MediumShip{
 	$impulseDrive = new TrekImpulseDrive(3,20,0,1,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 
 
-		$projection = new TrekShieldProjection(1, 8, 3, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+		$projection = new TrekShieldProjection(1, 12, 3, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projector = new TrekShieldProjector(0, 4, 1, 2, 270, 90, 'F'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projection->addProjector($projector);
 			$this->addFrontSystem($projector);
@@ -65,7 +65,7 @@ class TrekFederationNXWarCruiserUpg extends MediumShip{
 		$this->addAftSystem(new TrekPhaseCannon(2, 6, 4, 90, 270));
 		$this->addAftSystem(new TrekPhotonicTorp(2, 6, 1, 120, 240));
 
-		$projection = new TrekShieldProjection(1, 8, 3, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+		$projection = new TrekShieldProjection(1, 12, 3, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projector = new TrekShieldProjector(0, 4, 1, 2, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projection->addProjector($projector);
 			$this->addAftSystem($projector);

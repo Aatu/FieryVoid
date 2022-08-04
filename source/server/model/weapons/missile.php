@@ -1426,7 +1426,7 @@ class AmmoMissileRackA extends AmmoMissileRackS{
             	if ( $powerReq == 0 ) $powerReq = 0;
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
 		//reset missile availability! (Parent sets way too much)
-		$this->ammoClassesArray = new array();
+		$this->ammoClassesArray = array();
 		$this->ammoClassesArray[] =  new AmmoMissileA();
 		$this->recompileFiringModes();
 	}
@@ -1461,7 +1461,7 @@ class AmmoBombRack extends AmmoMissileRackS{
             	if ( $powerReq == 0 ) $powerReq = 0;
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
 		//reset missile availability! (Parent sets way too much)
-		$this->ammoClassesArray = new array();
+		$this->ammoClassesArray = array();
 		$this->ammoClassesArray[] =  new AmmoMissileB();
 		$this->ammoClassesArray[] =  new AmmoMissileF();
 		$this->recompileFiringModes();

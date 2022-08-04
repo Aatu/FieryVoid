@@ -9,6 +9,8 @@ class TrekFederationNXCruiserV2 extends MediumShip{
         $this->phpclass = "TrekFederationNXCruiserV2";
         $this->imagePath = "img/ships/StarTrek/EnterpriseNX.png";
         $this->shipClass = "NX Cruiser";
+			$this->occurence = "unique";
+			$this->variantOf = "NX War Cruiser";
 
 	$this->fighters = array("Shuttlecraft"=>2);
 		$this->customFighter = array("Human small craft"=>2); //can deploy small craft with Human crew
@@ -44,7 +46,7 @@ class TrekFederationNXCruiserV2 extends MediumShip{
 			$polarizedhullplating->displayName = "Polarized Hull Plating";
 			$this->addFrontSystem($polarizedhullplating);
 			*/			
-		$projection = new TrekShieldProjection(1, 6, 3, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+		$projection = new TrekShieldProjection(1, 8, 3, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projection->displayName = "Polarized Hull Plating";
 		$this->addFrontSystem($projection);
 		
@@ -70,7 +72,7 @@ class TrekFederationNXCruiserV2 extends MediumShip{
 		$polarizedhullplating = new AbsorbtionShield(2,4,3,1,90,270);  //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 			$polarizedhullplating->displayName = "Polarized Hull Plating";
 			$this->addAftSystem($polarizedhullplating);*/
-		$projection = new TrekShieldProjection(1, 6, 3, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+		$projection = new TrekShieldProjection(1, 8, 3, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projection->displayName = "Polarized Hull Plating";
 		$this->addAftSystem($projection);
 
