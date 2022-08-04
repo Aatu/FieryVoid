@@ -1581,7 +1581,10 @@ spl_autoload_register(
 
 
 				//Nexus ships - Brixadii
+                'brixadiisupportbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiSupportBase.php',					
+                'brixadiisupportbaserefit' => '/server/model/ships/ZNexusBrixadii/BrixadiiSupportBaseRefit.php',					
                 'brixadiibase2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiBase2108.php',					
+
                 'brixadiibattledestroyerbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerBase.php',					
                 'brixadiibattledestroyer2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyer2057.php',		
                 'brixadiibattledestroyer2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyer2108.php',	
@@ -1614,6 +1617,7 @@ spl_autoload_register(
 
                 'brixadiilightescortfrigate' => '/server/model/ships/ZNexusBrixadii/BrixadiiLightEscortFrigate.php',
 
+                'brixadiipoliceescort' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceEscort.php',
                 'brixadiipolicefrigatebase' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigateBase.php',
                 'brixadiipolicefrigate2047' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2047.php',
 				'brixadiipolicefrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2108.php',
