@@ -1011,6 +1011,7 @@ class MultiBombRack extends Weapon{
 
 
 /*Class-S Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
+	holds 20 missiles
 */
 class AmmoMissileRackS extends Weapon{
 	public $name = "ammoMissileRackS";
@@ -1240,6 +1241,7 @@ class AmmoMissileRackS extends Weapon{
 
 /*Class-L Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
 	all functionality prepared in standard class-S rack
+	holds 20 missiles
 */
 class AmmoMissileRackL extends AmmoMissileRackS{
 	public $name = "ammoMissileRackL";
@@ -1270,6 +1272,7 @@ class AmmoMissileRackL extends AmmoMissileRackS{
 
 /*Class-LH Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
 	all functionality prepared in standard class-S rack
+	holds 20 missiles
 */
 class AmmoMissileRackLH extends AmmoMissileRackS{
 	public $name = "ammoMissileRackLH";
@@ -1301,6 +1304,7 @@ class AmmoMissileRackLH extends AmmoMissileRackS{
 
 /*Class-B Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
 	all functionality prepared in standard class-S rack
+	holds 60 missiles
 */
 class AmmoMissileRackB extends AmmoMissileRackS{
 	public $name = "ammoMissileRackB";
@@ -1332,6 +1336,7 @@ class AmmoMissileRackB extends AmmoMissileRackS{
 
 /*Class-R Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
 	all functionality prepared in standard class-S rack
+	holds 20 missiles
 */
 class AmmoMissileRackR extends AmmoMissileRackS{
 	public $name = "ammoMissileRackR";
@@ -1363,6 +1368,7 @@ class AmmoMissileRackR extends AmmoMissileRackS{
 
 /*Class-SO Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
 	all functionality prepared in standard class-S rack
+	holds 12 missiles (as it's often fitted to old ships - check munitions reasonably available!)
 */
 class AmmoMissileRackSO extends AmmoMissileRackS{
 	public $name = "ammoMissileRackSO";
@@ -1394,6 +1400,7 @@ class AmmoMissileRackSO extends AmmoMissileRackS{
 
 /*Class-A Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
 	all functionality prepared in standard class-S rack
+	holds 20 missiles (Antifighter Missiles ONLY, at no additional price)
 */
 class AmmoMissileRackA extends AmmoMissileRackS{
 	public $name = "ammoMissileRackA";
@@ -1420,6 +1427,37 @@ class AmmoMissileRackA extends AmmoMissileRackS{
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
 	}
 } //endof class AmmoMissileRackA
+
+
+/*Bomb Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
+	all functionality prepared in standard class-S rack
+	holds 8 missiles (Basic Missiles by default at no price (unless filled with bombs), the only other option is Flash missiles)
+*/
+class AmmoBombRack extends AmmoMissileRackS{
+	public $name = "ammoBombRack";
+        public $displayName = "Bomb Rack";
+    public $iconPath = "bombRack.png";    
+	
+    public $range = 20;
+    public $distanceRange = 60;
+    public $firingMode = 1;
+    public $priority = 6;
+    public $loadingtime = 1;
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(1,2,3);
+	protected $basicRange=20;
+	protected $basicDistanceRange = 60;
+
+    protected $rackExplosionDamage = 30; //how much damage will this weapon do in case of catastrophic explosion
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 0;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+	}
+} //endof class AmmoBombRack
 
 
 ?>
