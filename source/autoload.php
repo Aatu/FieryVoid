@@ -2656,8 +2656,15 @@ spl_autoload_register(
                 		'ammobombrack' => '/server/model/weapons/missile.php',
 		    
                 		'sagittariusam' => '/server/model/ships/EA/sagittariusAM.php', //ships using new style launchers (and magazine of course)
-						'olympusam' => '/server/model/ships/EA/olympusAM.php',
-                		'apolloam' => '/server/model/ships/EA/apolloAM.php',
+                		'sagittariusalphaam' => '/server/model/ships/EA/sagittariusAlphaAM.php',
+				'olympusam' => '/server/model/ships/EA/olympusAM.php',
+				'olympusalphaam' => '/server/model/ships/EA/olympusAlphaAM.php',
+                		'apolloam' => '/server/model/ships/EA/apolloAM.php',  
+				'apollostrikeam' => '/server/model/ships/EA/apolloStrikeAM.php',
+		    
+				'orionam' => '/server/model/ships/EA/orionAM.php', //fixed defenses using new style launchers (and magazine of course)
+				'oriondeltaam' => '/server/model/ships/EA/orionDeltaAM.php',
+				'oriongammaam' => '/server/model/ships/EA/orionGammaAM.php',
 				
 						
 				
