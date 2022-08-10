@@ -402,7 +402,15 @@ window.weaponManager = {
     canWeaponCall: function canWeaponCall(weapon) {
         //is this weapon eleigible for calling precision shot?...
         //Standard or Pulse, not Ballistic!
-        if (weapon.ballistic || weapon.hextarget) return false;
+		//NOTE: The first line below was added as part of enabling the Kor-Lyan Limpet Bore Torpedo,
+		//which has a type of called shot in the table top. In FV, it is being given a more traditional
+		//called shot ability, with a later effort to call non-facing systems. Note that this approach 
+		//did not allow all ballistics, only those with 'Matter' damage. This is to ensure that standard
+		//ballistics remain incapable of called shots. However, this check supports the Limpet Bore Torpedo
+		//but also the various forms of the Brixadii Kinetic Box Launcher, and the Orieni Kinetic Kill 
+		//Missile that will be introduced later. Note added by GTS on 07 August 2022
+//		if (weapon.ballistic && weaponClass == 'Matter') return true   // GTS 07aug22
+        if (weapon.ballistic && !weapon.LimpetBoreTorp || weapon.hextarget) return false;
         if (weapon.damageType == 'Standard' || weapon.damageType == 'Pulse') return true;
         return false;
     },
@@ -1171,7 +1179,9 @@ window.weaponManager = {
                 continue;
             }
 
-            if (weapon.ballistic && system) {
+//NOTE: Added && !weapon.LimpetBoreTorp to line below to allow this to make a called shot
+//GTS - 09 August 2022
+            if (weapon.ballistic && !weapon.LimpetBoreTorp && system) {
                 debug && console.log("trying to call shot with ballistic");
                 continue;
             }

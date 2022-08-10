@@ -628,6 +628,7 @@ spl_autoload_register(
                 'moleculardisruptor' => '/server/model/weapons/molecular.php',
                 'molecularflayer' => '/server/model/weapons/molecular.php',
                 'molecularpulsar' => '/server/model/weapons/pulse.php',
+                'monsoon' => '/server/model/ships/EA/Monsoon.php',
                 'morshin' => '/server/model/ships/minbari/morshin.php',
                 'motenai' => '/server/model/ships/abbai_old/motenai.php',
                 'motenai1935' => '/server/model/ships/abbai_old/motenai1935.php',
@@ -2595,6 +2596,17 @@ spl_autoload_register(
 //				'hyachdartha' => '/server/model/ships/hyach/HyachDartha.php',
 //				'hyachdoskva' => '/server/model/ships/hyach/HyachDoskva.php',
 //				'hyachirokaikam' => '/server/model/ships/hyach/HyachIrokaiKam.php',
+
+
+
+
+				//Kor-Lyan
+//         		'ammomissilerackf' => '/server/model/weapons/customNexus.php', //missile racks themselves
+				'koskova' => '/server/model/ships/korlyan/Koskova.php',
+         		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
+         		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
+         		'proximitylaser' => '/server/model/weapons/customNexus.php', 
+
 
 
 				//Star Wars - Clone Wars testing

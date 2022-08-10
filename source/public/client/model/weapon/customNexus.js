@@ -898,7 +898,22 @@ NexusTestBlaster.prototype.constructor =  NexusTestBlaster;
 //Enveloper.prototype.constructor =  Enveloper;
 
 
+//Kor-Lyan testing systems
 
+var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+MultiDefenseLauncher.prototype = Object.create(Weapon.prototype);
+MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;
 
+var LimpetBoreTorp = function  LimpetBoreTorp(json, ship) {
+    Weapon.call(this, json, ship);
+};
+LimpetBoreTorp.prototype = Object.create(Weapon.prototype);
+LimpetBoreTorp.prototype.constructor =  LimpetBoreTorp;
 
-
+var ProximityLaser = function  ProximityLaser(json, ship) {
+    Weapon.call(this, json, ship);
+};
+ProximityLaser.prototype = Object.create(Weapon.prototype);
+ProximityLaser.prototype.constructor =  ProximityLaser;

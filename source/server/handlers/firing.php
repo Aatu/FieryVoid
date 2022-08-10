@@ -39,7 +39,8 @@ class Firing
             foreach ($ship->systems as $fighter) {
                 if ($fighter->isDestroyed()) continue;
                 foreach ($fighter->systems as $weapon) {
-                    if (($weapon instanceof Weapon) && ($weapon->ballistic != true)) {
+//                    if (($weapon instanceof Weapon) && ($weapon->ballistic != true)) {
+                    if (($weapon instanceof Weapon)) {  //Changed line to allow ballistics to intercept  //GTS 07 Aug 2022
                         if (($weapon->exclusive) && $weapon->firedOnTurn($currTurn)) {
                             $exclusiveWasFired = true;
                             continue;
@@ -55,7 +56,8 @@ class Firing
         } else { //proper ship
             if (!(($ship->unavailable === true) || $ship->isDisabled())) { //ship itself can fight this turn
                 foreach ($ship->systems as $weapon) {
-                    if ((!($weapon instanceof Weapon)) || ($weapon->ballistic)) continue; //not a weapon, or a ballistic weapon
+//                    if ((!($weapon instanceof Weapon)) || ($weapon->ballistic)) continue; //not a weapon, or a ballistic weapon   NOTE: changed to allow ballistics to intercept GTS 07 Aug 2022
+                    if ((!($weapon instanceof Weapon))) continue; //not a weapon, or a ballistic weapon
                     if ((!$weapon->firedOnTurn($currTurn)) && ($weapon->intercept > 0)) {
                         if (self::isValidInterceptor($gamedata, $weapon)) {//not fired this turn, intercept-capable, and valid interceptor
                             $toReturn[] = $weapon;
