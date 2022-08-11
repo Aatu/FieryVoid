@@ -41,9 +41,9 @@ class AthraskalaC extends BaseShip{
         $this->addFrontSystem(new QuadPulsar(3, 10, 4, 300, 60));
 
         $this->addAftSystem(new SMissileRack(1, 6, 0, 300, 60));
+        $this->addAftSystem(new SMissileRack(1, 6, 0, 120, 240));
+        $this->addAftSystem(new SMissileRack(1, 6, 0, 120, 240));
         $this->addAftSystem(new SMissileRack(1, 6, 0, 300, 60));
-        $this->addAftSystem(new SMissileRack(1, 6, 0, 120, 240));
-        $this->addAftSystem(new SMissileRack(1, 6, 0, 120, 240));
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
