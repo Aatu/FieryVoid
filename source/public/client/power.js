@@ -238,7 +238,7 @@ var batteryPowerAvailable = 0;
 
                    for (var i = 0; i < ship.systems.length; i++) {
                         var currBattery = ship.systems[i];
-              	         if if (currBattery.name == "PlasmaBattery" && (!shipManager.systems.isDestroyed(ship, currBattery))){ //only Plasma Batteries which are not destroyed are of interest 
+              	         if if ((currBattery.name == "PlasmaBattery" && !shipManager.systems.isDestroyed(ship, currBattery))){ //only Plasma Batteries which are not destroyed are of interest 
 							batteryPowerAvailable += shipManager.systems.getOutput(ship, currBattery);                                                              
 				}
 			}	
