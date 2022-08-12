@@ -2602,7 +2602,27 @@ spl_autoload_register(
 
 				//Kor-Lyan
 //         		'ammomissilerackf' => '/server/model/weapons/customNexus.php', //missile racks themselves
-				'koskova' => '/server/model/ships/korlyan/Koskova.php',
+/*				'axor' => '/server/model/ships/korlyan/Axor.php',
+				'cokra' => '/server/model/ships/korlyan/Cokra.php',
+				'fenja' => '/server/model/ships/korlyan/Fenja.php',
+				'kalavar' => '/server/model/ships/korlyan/Kalavar.php',
+				'kalti' => '/server/model/ships/korlyan/Kalti.php',
+				'kolosk' => '/server/model/ships/korlyan/Kolosk.php',
+				'kosha' => '/server/model/ships/korlyan/Kosha.php',
+				'koshaearly' => '/server/model/ships/korlyan/KoshaEarly.php',
+				'koskovaearly' => '/server/model/ships/korlyan/KoskovaEarly.php',
+				'leklantearly' => '/server/model/ships/korlyan/LeklantEarly.php',
+				'lekra' => '/server/model/ships/korlyan/Lekra.php',
+				'merkul' => '/server/model/ships/korlyan/Merkul.php',
+				'merkularmed' => '/server/model/ships/korlyan/MerkulArmed.php',
+				'merkulmissile' => '/server/model/ships/korlyan/MerkulMissile.php',
+				'raklavi' => '/server/model/ships/korlyan/Raklavi.php',
+				'solyrn' => '/server/model/ships/korlyan/Solyrn.php',
+				'soska' => '/server/model/ships/korlyan/Soska.php',
+				'talokiearly' => '/server/model/ships/korlyan/TalokiEarly.php',
+				'talokioriginal' => '/server/model/ships/korlyan/TalokiOriginal.php',
+				'vaklar' => '/server/model/ships/korlyan/Vaklar.php',
+*/
          		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
          		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
          		'proximitylaser' => '/server/model/weapons/customNexus.php', 

@@ -1,89 +1,86 @@
 <?php
-class Koskova extends BaseShip{
+class Leklant extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 775;
+	$this->pointCost = 700;
 		$this->faction = "Kor-Lyan";
 //	$this->faction = "Custom Ships";
-        $this->phpclass = "Koskova";
-        $this->imagePath = "img/ships/korlyan_koskova2.png";
-        $this->shipClass = "Koskova Battlecruiser (early)";
+        $this->phpclass = "Leklant";
+        $this->imagePath = "img/ships/korlyan_leklant.png";
+        $this->shipClass = "Leklant Scout Cruiser (early)";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; //img has 200px per side
 
-		$this->isd = 2235;
-        $this->fighters = array("assault shuttles"=>2);
+        $this->limited = 33;
+
+		$this->isd = 2222;
+        $this->fighters = array("assault shuttles"=>4);
 
 	    $this->notes = 'Atmospheric Capable.';
         
-        $this->forwardDefense = 14;
-        $this->sideDefense = 17;
+        $this->forwardDefense = 13;
+        $this->sideDefense = 15;
         
         $this->turncost = 1.0;
         $this->turndelaycost = 1.0;
-        $this->accelcost = 5;
-        $this->rollcost = 1;
-        $this->pivotcost = 3;
+        $this->accelcost = 4;
+        $this->rollcost = 2;
+        $this->pivotcost = 2;
         $this->iniativebonus = 0;
 
         //ammo magazine itself (AND its missile options)
-        $ammoMagazine = new AmmoMagazine(80); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
+        $ammoMagazine = new AmmoMagazine(40); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
         $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 80); //add full load of basic missiles
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 60); //add full load of basic missiles
         $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
         
-        $this->addPrimarySystem(new Reactor(6, 25, 0, 1));
-        $this->addPrimarySystem(new CnC(6, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(6, 16, 4, 6));
-        $this->addPrimarySystem(new Engine(6, 20, 0, 10, 4));
-		$this->addPrimarySystem(new Hangar(6, 2));
-        $this->addPrimarySystem(new ReloadRack(4, 9));
-        $this->addPrimarySystem(new StdParticleBeam(4, 4, 1, 0, 360));
-        $this->addPrimarySystem(new StdParticleBeam(4, 4, 1, 0, 360));
+        $this->addPrimarySystem(new Reactor(5, 21, 0, 0));
+        $this->addPrimarySystem(new CnC(5, 16, 0, 0));
+        $this->addPrimarySystem(new ElintScanner(5, 20, 7, 9));
+        $this->addPrimarySystem(new Engine(5, 18, 0, 8, 4));
+		$this->addPrimarySystem(new Hangar(4, 4));
         $this->addPrimarySystem(new JumpEngine(4, 20, 4, 30));
    
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
-        $this->addFrontSystem(new AmmoMissileRackL(3, 0, 0, 240, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-		$this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
-		$this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
-		$this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
-        $this->addFrontSystem(new AmmoMissileRackL(3, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addFrontSystem(new MultiDefenseLauncher(2, 'D', 300, 60, false));
+        $this->addFrontSystem(new LimpetBoreTorp(3, 5, 3, 300, 60));
+        $this->addFrontSystem(new MultiDefenseLauncher(2, 'D', 300, 60, false));
 
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
-        $this->addAftSystem(new Thruster(4, 16, 0, 6, 2));
+        $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
         $this->addAftSystem(new MultiDefenseLauncher(3, 'D', 120, 300, false));
         $this->addAftSystem(new MultiDefenseLauncher(3, 'D', 60, 240, false));
 
-        $this->addLeftSystem(new MultiDefenseLauncher(3, 'D', 240, 60, false));
-        $this->addLeftSystem(new ProximityLaser(4, 6, 3, 240, 60));
+        $this->addLeftSystem(new MultiDefenseLauncher(2, 'D', 240, 60, false));
         $this->addLeftSystem(new AmmoMissileRackL(3, 0, 0, 180, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 180, 360));
+        $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 180, 360));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
-        $this->addRightSystem(new MultiDefenseLauncher(3, 'D', 300, 120, false));
-        $this->addRightSystem(new ProximityLaser(4, 6, 3, 300, 120));
+        $this->addRightSystem(new MultiDefenseLauncher(2, 'D', 300, 120, false));
         $this->addRightSystem(new AmmoMissileRackL(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addRightSystem(new StdParticleBeam(3, 4, 1, 0, 180));
+        $this->addRightSystem(new StdParticleBeam(3, 4, 1, 0, 180));
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure(5, 48));
-        $this->addAftSystem(new Structure(5, 45));
-        $this->addLeftSystem(new Structure(5, 55));
-        $this->addRightSystem(new Structure(5, 55));
-        $this->addPrimarySystem(new Structure(6, 60));
+        $this->addFrontSystem(new Structure(5, 40));
+        $this->addAftSystem(new Structure(5, 39));
+        $this->addLeftSystem(new Structure(5, 45));
+        $this->addRightSystem(new Structure(5, 45));
+        $this->addPrimarySystem(new Structure(5, 48));
 		
 		$this->hitChart = array(
 			0=> array(
-					6 => "Structure",
-					8 => "Reload Rack",
-					10 => "Standard Particle Beam",
+					10 => "Structure",
 					12 => "Jump Engine",
 					14 => "Scanner",
 					16 => "Engine",
@@ -92,9 +89,9 @@ class Koskova extends BaseShip{
 					20 => "C&C",
 			),
 			1=> array(
-					4 => "Thruster",
-					7 => "Particle Cannon",
-					10 => "Class-L Missile Rack",
+					5 => "Thruster",
+					6 => "Limpet Bore Torpedo",
+					9 => "Class-D Missile Launcher",
 					18 => "Structure",
 					20 => "Primary",
 			),
@@ -107,16 +104,16 @@ class Koskova extends BaseShip{
 			3=> array(
 					5 => "Thruster",
 					7 => "Class-L Missile Rack",
-					9 => "Proximity Laser",
-					11 => "Class-D Missile Launcher",
+					9 => "Class-D Missile Launcher",
+					11 => "Standard Particle Beam",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					5 => "Thruster",
 					7 => "Class-L Missile Rack",
-					9 => "Proximity Laser",
-					11 => "Class-D Missile Launcher",
+					9 => "Class-D Missile Launcher",
+					11 => "Standard Particle Beam",
 					18 => "Structure",
 					20 => "Primary",
 			),

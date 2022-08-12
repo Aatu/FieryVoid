@@ -1,19 +1,21 @@
 <?php
-class Koskova extends BaseShip{
+class Kolosk extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 775;
+	$this->pointCost = 850;
 		$this->faction = "Kor-Lyan";
 //	$this->faction = "Custom Ships";
-        $this->phpclass = "Koskova";
+        $this->phpclass = "Kolosk";
         $this->imagePath = "img/ships/korlyan_koskova2.png";
-        $this->shipClass = "Koskova Battlecruiser (early)";
+        $this->shipClass = "Kolosk Proximity Cruiser";
+			$this->occurence = "uncommon";
+			$this->variantOf = 'Koskova Battlecruiser (early)';
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; //img has 200px per side
 
-		$this->isd = 2235;
+		$this->isd = 2258;
         $this->fighters = array("assault shuttles"=>2);
 
 	    $this->notes = 'Atmospheric Capable.';
@@ -38,7 +40,7 @@ class Koskova extends BaseShip{
         $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
         
-        $this->addPrimarySystem(new Reactor(6, 25, 0, 1));
+        $this->addPrimarySystem(new Reactor(6, 25, 0, 4));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 16, 4, 6));
         $this->addPrimarySystem(new Engine(6, 20, 0, 10, 4));
@@ -51,9 +53,9 @@ class Koskova extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new AmmoMissileRackL(3, 0, 0, 240, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-		$this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
-		$this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
-		$this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
+        $this->addFrontSystem(new ProximityLaser(3, 6, 6, 300, 60));
+        $this->addFrontSystem(new ProximityLaser(3, 6, 6, 300, 60));
+        $this->addFrontSystem(new ProximityLaser(3, 6, 6, 300, 60));
         $this->addFrontSystem(new AmmoMissileRackL(3, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
@@ -62,13 +64,13 @@ class Koskova extends BaseShip{
         $this->addAftSystem(new MultiDefenseLauncher(3, 'D', 120, 300, false));
         $this->addAftSystem(new MultiDefenseLauncher(3, 'D', 60, 240, false));
 
-        $this->addLeftSystem(new MultiDefenseLauncher(3, 'D', 240, 60, false));
-        $this->addLeftSystem(new ProximityLaser(4, 6, 3, 240, 60));
+        $this->addLeftSystem(new MultiDefenseLauncher(3, 'D', 0, 360, false));
+        $this->addLeftSystem(new ProximityLaser(4, 6, 6, 240, 60));
         $this->addLeftSystem(new AmmoMissileRackL(3, 0, 0, 180, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
-        $this->addRightSystem(new MultiDefenseLauncher(3, 'D', 300, 120, false));
-        $this->addRightSystem(new ProximityLaser(4, 6, 3, 300, 120));
+        $this->addRightSystem(new MultiDefenseLauncher(3, 'D', 0, 360, false));
+        $this->addRightSystem(new ProximityLaser(4, 6, 6, 300, 120));
         $this->addRightSystem(new AmmoMissileRackL(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
         
@@ -93,7 +95,7 @@ class Koskova extends BaseShip{
 			),
 			1=> array(
 					4 => "Thruster",
-					7 => "Particle Cannon",
+					7 => "Proximity Laser",
 					10 => "Class-L Missile Rack",
 					18 => "Structure",
 					20 => "Primary",

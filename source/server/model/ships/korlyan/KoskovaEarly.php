@@ -1,5 +1,5 @@
 <?php
-class Koskova extends BaseShip{
+class KoskovaEarly extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -7,7 +7,7 @@ class Koskova extends BaseShip{
 	$this->pointCost = 775;
 		$this->faction = "Kor-Lyan";
 //	$this->faction = "Custom Ships";
-        $this->phpclass = "Koskova";
+        $this->phpclass = "KoskovaEarly";
         $this->imagePath = "img/ships/korlyan_koskova2.png";
         $this->shipClass = "Koskova Battlecruiser (early)";
         $this->shipSizeClass = 3;

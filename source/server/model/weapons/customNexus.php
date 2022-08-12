@@ -7807,39 +7807,36 @@ class LimpetBoreTorp extends Weapon{
 class ProximityLaser extends Laser{
         public $name = "ProximityLaser";
         public $displayName = "ProximityLaser";
-		    public $iconPath = "ProximityLaser.png";
-        public $animationArray = array(1=>'laser', 2=>'laser');
+	    public $iconPath = "ProximityLaser.png";
+        public $animation = "laser";
         public $trailColor = array(141, 240, 255);
-        public $animationColorArray = array(1=>array(220, 60, 120), array(220, 60, 120));
-//        public $animationExplosionScale = 0.5;
-        public $projectilespeed = 10;
-//        public $animationWidth = 5;
+        public $animationColor = array(220, 60, 120);
+
         public $trailLength = 100;    
-        public $uninterceptableArray = array(1=>false, 2=>false); 
+        public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
+        public $doNotIntercept = true; //do not intercept this weapon, period
+		public $hidetarget = true;
 		
-		public $doInterceptDegradation = true; //Will be intercepted with normal degradation even though a ballistic
         public $useOEW = false; //missile
         public $ballistic = true; //missile
-        public $rangeArray = array(1=>20, 2=>10);
-        public $distanceRangeArray = array(1=>30, 2=>15);
-        public $ammunition = 20; //limited number of shots
+        public $range = 50;
+        public $ammunition = 10; //limited number of shots
 	    
-        public $loadingtimeArray = array(1=>2, 2=>2); // 1/2 turns
-        public $rangePenaltyArray = array(1=>0, 2=>0);
-        public $fireControlArray = array(1=>array(null, 2, 2), 2=>array(null, 2, 2)); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $loadingtime = 2;
+        public $rangePenalty = 0.5;
+        public $fireControl = array(null, 3, 3); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
-        public $raking = 8;
-		public $priorityArray = array(1=>8, 2=>8); 
+        public $raking = 10;
+		public $priority = 8; 
 	    
-		public $firingModes = array(1=>'Long-range', 2=>'Short-range'); //firing mode - just a name essentially
-		public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-//    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+        public $weaponClass = "Ballistic"; 
+        public $damageType = "Laser"; 
 	 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ) $maxhealth = 6;
-            if ( $powerReq == 0 ) $powerReq = 1;
+            if ( $powerReq == 0 ) $powerReq = 6;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
@@ -7866,38 +7863,11 @@ class ProximityLaser extends Laser{
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
         }
 
-        public function getDamage($fireOrder){ 
-		switch($this->firingMode){
-			case 1:
-				return Dice::d(10, 2)+3; //Light Chemical Laser
-				break;
-			case 2:
-				return Dice::d(10, 3)+4; //Medium Chemical Laser
-				break;	
-		}
-	}
-        public function setMinDamage(){ 
-		switch($this->firingMode){
-			case 1:
-				$this->minDamage = 5; //Light Chemical Laser
-				break;
-			case 2:
-				$this->minDamage = 7; //Medium Chemical Laser
-				break;	
-		}
-		$this->minDamageArray[$this->firingMode] = $this->minDamage;
-	}
-        public function setMaxDamage(){
-		switch($this->firingMode){
-			case 1:
-				$this->maxDamage = 23; //Light Chemical Laser
-				break;
-			case 2:
-				$this->maxDamage = 34; //Medium Chemical Laser
-				break;	
-		}
-		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
-	}
+        public function getDamage($fireOrder){
+            return Dice::d(10, 3)+8;
+       }
+        public function setMinDamage(){     $this->minDamage = 11;      }
+        public function setMaxDamage(){     $this->maxDamage = 38;      }
     
 		
 }//endof ProximityLaser
