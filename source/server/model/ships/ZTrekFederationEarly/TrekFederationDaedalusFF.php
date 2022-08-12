@@ -4,7 +4,7 @@ class TrekFederationDaedalusFF extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 235;
+        $this->pointCost = 225;
         $this->faction = "ZTrek Federation (early)";
         $this->phpclass = "TrekFederationDaedalusFF";
         $this->imagePath = "img/ships/StarTrek/FederationDaedalusFF.png";
