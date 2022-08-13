@@ -7803,34 +7803,30 @@ class LimpetBoreTorp extends Weapon{
 }//endof LimpetBoreTorp
 
 
-
 class ProximityLaser extends Laser{
         public $name = "ProximityLaser";
-        public $displayName = "ProximityLaser";
+        public $displayName = "Proximity Laser";
 	    public $iconPath = "ProximityLaser.png";
-        public $animation = "laser";
-        public $trailColor = array(141, 240, 255);
+        public $animation = 'laser';
         public $animationColor = array(220, 60, 120);
-
-        public $trailLength = 100;    
-        public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
-        public $doNotIntercept = true; //do not intercept this weapon, period
-		public $hidetarget = true;
 		
         public $useOEW = false; //missile
         public $ballistic = true; //missile
-        public $range = 50;
+        public $range = 30;
+//        public $distanceRangeArray = array(1=>30, 2=>15);
         public $ammunition = 10; //limited number of shots
+		public $hidetarget = true;
 	    
-        public $loadingtime = 2;
-        public $rangePenalty = 0.5;
-        public $fireControl = array(null, 3, 3); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $loadingtime = 2; // 1/2 turns
+        public $rangePenalty = 0;
+        public $fireControl = array(null, 0, 0); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
         public $raking = 10;
 		public $priority = 8; 
 	    
-        public $weaponClass = "Ballistic"; 
-        public $damageType = "Laser"; 
+		public $firingMode = 'Ballistic'; //firing mode - just a name essentially
+		public $damageType = 'Raking'; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+//    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
 	 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -7863,15 +7859,11 @@ class ProximityLaser extends Laser{
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
         }
 
-        public function getDamage($fireOrder){
-            return Dice::d(10, 3)+8;
-       }
+        public function getDamage($fireOrder){ return Dice::d(10, 3)+8;   }
         public function setMinDamage(){     $this->minDamage = 11;      }
         public function setMaxDamage(){     $this->maxDamage = 38;      }
-    
 		
 }//endof ProximityLaser
-
 
 
 ?>

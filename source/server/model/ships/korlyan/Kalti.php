@@ -8,7 +8,7 @@ class Kalti extends FighterFlight{
 		$this->faction = "Kor-Lyan";
 		$this->phpclass = "Kalti";
 		$this->shipClass = "Kalti Interceptor Flight";
-		$this->imagePath = "img/ships/korlyanKalti.png";
+		$this->imagePath = "img/ships/korlyanKalti_v2.png";
 
 		$this->forwardDefense = 7;
 		$this->sideDefense = 8;
@@ -33,7 +33,7 @@ class Kalti extends FighterFlight{
 		$armour = array(3, 1, 1, 1);
 		$fighter = new Fighter("Kalti", $armour, 10, $this->id);
 		$fighter->displayName = "Kalti";
-		$fighter->imagePath = "img/ships/korlyanKalti.png";
+		$fighter->imagePath = "img/ships/korlyanKalti_v2.png";
 		$fighter->iconPath = "img/ships/korlyanKalti_large.png";
 			
 		$fighter->addFrontSystem(new LightParticleBeam(330, 30, 3));

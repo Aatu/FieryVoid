@@ -50,10 +50,10 @@ class Solyrn extends HeavyCombatVessel{
         
         $this->addFrontSystem(new Thruster(4, 18, 0, 6, 1));
         $this->addFrontSystem(new MultiDefenseLauncher(2, 'D', 240, 60, false));
-//        $this->addFrontSystem(new AmmoMissileRackR(3, 0, 0, 240, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addFrontSystem(new AmmoMissileRackR(3, 0, 0, 240, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addFrontSystem(new AmmoMissileRackL(3, 0, 0, 240, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addFrontSystem(new AmmoMissileRackL(3, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-//        $this->addFrontSystem(new AmmoMissileRackR(3, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addFrontSystem(new AmmoMissileRackR(3, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addFrontSystem(new MultiDefenseLauncher(2, 'D', 300, 120, false));
 		
         $this->addAftSystem(new MultiDefenseLauncher(3, 'D', 120, 300, false));

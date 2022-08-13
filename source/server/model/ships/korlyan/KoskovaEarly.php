@@ -63,12 +63,12 @@ class KoskovaEarly extends BaseShip{
         $this->addAftSystem(new MultiDefenseLauncher(3, 'D', 60, 240, false));
 
         $this->addLeftSystem(new MultiDefenseLauncher(3, 'D', 240, 60, false));
-        $this->addLeftSystem(new ProximityLaser(4, 6, 3, 240, 60));
+        $this->addLeftSystem(new ProximityLaser(4, 6, 1, 240, 60));
         $this->addLeftSystem(new AmmoMissileRackL(3, 0, 0, 180, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
         $this->addRightSystem(new MultiDefenseLauncher(3, 'D', 300, 120, false));
-        $this->addRightSystem(new ProximityLaser(4, 6, 3, 300, 120));
+        $this->addRightSystem(new ProximityLaser(4, 6, 1, 300, 120));
         $this->addRightSystem(new AmmoMissileRackL(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
         
