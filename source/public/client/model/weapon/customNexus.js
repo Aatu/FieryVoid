@@ -912,8 +912,20 @@ var LimpetBoreTorp = function  LimpetBoreTorp(json, ship) {
 LimpetBoreTorp.prototype = Object.create(Weapon.prototype);
 LimpetBoreTorp.prototype.constructor =  LimpetBoreTorp;
 
+var LimpetBoreBase = function  LimpetBoreBase(json, ship) {
+    Weapon.call(this, json, ship);
+};
+LimpetBoreBase.prototype = Object.create(Weapon.prototype);
+LimpetBoreBase.prototype.constructor =  LimpetBoreBase;
+
 var ProximityLaser = function  ProximityLaser(json, ship) {
     Weapon.call(this, json, ship);
 };
 ProximityLaser.prototype = Object.create(Weapon.prototype);
 ProximityLaser.prototype.constructor =  ProximityLaser;
+
+var FMissileRack = function  FMissileRack(json, ship) {
+    Weapon.call(this, json, ship);
+};
+FMissileRack.prototype = Object.create(Weapon.prototype);
+FMissileRack.prototype.constructor =  FMissileRack;

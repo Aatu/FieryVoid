@@ -2602,15 +2602,19 @@ spl_autoload_register(
 
 				//Kor-Lyan
 //         		'ammomissilerackf' => '/server/model/weapons/customNexus.php', //missile racks themselves
-/*				'axor' => '/server/model/ships/korlyan/Axor.php',
+				'axor' => '/server/model/ships/korlyan/Axor.php',
 				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 				'fenja' => '/server/model/ships/korlyan/Fenja.php',
 				'kalavar' => '/server/model/ships/korlyan/Kalavar.php',
+				'kalavarearly' => '/server/model/ships/korlyan/KalavarEarly.php',
 				'kalti' => '/server/model/ships/korlyan/Kalti.php',
 				'kolosk' => '/server/model/ships/korlyan/Kolosk.php',
+				'koloskearly' => '/server/model/ships/korlyan/KoloskEarly.php',
 				'kosha' => '/server/model/ships/korlyan/Kosha.php',
 				'koshaearly' => '/server/model/ships/korlyan/KoshaEarly.php',
+				'koskova' => '/server/model/ships/korlyan/Koskova.php',
 				'koskovaearly' => '/server/model/ships/korlyan/KoskovaEarly.php',
+				'leklant' => '/server/model/ships/korlyan/Leklant.php',
 				'leklantearly' => '/server/model/ships/korlyan/LeklantEarly.php',
 				'lekra' => '/server/model/ships/korlyan/Lekra.php',
 				'merkul' => '/server/model/ships/korlyan/Merkul.php',
@@ -2619,13 +2623,15 @@ spl_autoload_register(
 				'raklavi' => '/server/model/ships/korlyan/Raklavi.php',
 				'solyrn' => '/server/model/ships/korlyan/Solyrn.php',
 				'soska' => '/server/model/ships/korlyan/Soska.php',
+				'taloki' => '/server/model/ships/korlyan/Taloki.php',
 				'talokiearly' => '/server/model/ships/korlyan/TalokiEarly.php',
 				'talokioriginal' => '/server/model/ships/korlyan/TalokiOriginal.php',
 				'vaklar' => '/server/model/ships/korlyan/Vaklar.php',
-*/
+
          		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
          		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
          		'proximitylaser' => '/server/model/weapons/customNexus.php', 
+         		'fmissilerack' => '/server/model/weapons/customNexus.php', 
 
 
 

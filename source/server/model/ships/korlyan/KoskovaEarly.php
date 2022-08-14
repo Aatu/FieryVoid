@@ -10,6 +10,8 @@ class KoskovaEarly extends BaseShip{
         $this->phpclass = "KoskovaEarly";
         $this->imagePath = "img/ships/korlyan_koskova2.png";
         $this->shipClass = "Koskova Battlecruiser (early)";
+			$this->occurence = "common";
+			$this->variantOf = 'Koskova Battlecruiser';
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; //img has 200px per side
 

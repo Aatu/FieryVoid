@@ -9,7 +9,7 @@ class Leklant extends BaseShip{
 //	$this->faction = "Custom Ships";
         $this->phpclass = "Leklant";
         $this->imagePath = "img/ships/korlyan_leklant.png";
-        $this->shipClass = "Leklant Scout Cruiser (early)";
+        $this->shipClass = "Leklant Scout Cruiser";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; //img has 200px per side
 
@@ -30,16 +30,6 @@ class Leklant extends BaseShip{
         $this->pivotcost = 2;
         $this->iniativebonus = 0;
 
-        //ammo magazine itself (AND its missile options)
-        $ammoMagazine = new AmmoMagazine(40); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
-        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 60); //add full load of basic missiles
-        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
-        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
-        $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
-        $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
-        $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
-        
         $this->addPrimarySystem(new Reactor(5, 21, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new ElintScanner(5, 20, 7, 9));
@@ -60,13 +50,13 @@ class Leklant extends BaseShip{
         $this->addAftSystem(new MultiDefenseLauncher(3, 'D', 60, 240, false));
 
         $this->addLeftSystem(new MultiDefenseLauncher(2, 'D', 240, 60, false));
-        $this->addLeftSystem(new AmmoMissileRackL(3, 0, 0, 180, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addLeftSystem(new FMissileRack(3, 'F', 180, 360, false)); 
         $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 180, 360));
         $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 180, 360));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
         $this->addRightSystem(new MultiDefenseLauncher(2, 'D', 300, 120, false));
-        $this->addRightSystem(new AmmoMissileRackL(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addRightSystem(new FMissileRack(3, 'F', 0, 180, false)); 
         $this->addRightSystem(new StdParticleBeam(3, 4, 1, 0, 180));
         $this->addRightSystem(new StdParticleBeam(3, 4, 1, 0, 180));
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
@@ -103,7 +93,7 @@ class Leklant extends BaseShip{
 			),
 			3=> array(
 					5 => "Thruster",
-					7 => "Class-L Missile Rack",
+					7 => "Class-F Missile Rack",
 					9 => "Class-D Missile Launcher",
 					11 => "Standard Particle Beam",
 					18 => "Structure",
@@ -111,7 +101,7 @@ class Leklant extends BaseShip{
 			),
 			4=> array(
 					5 => "Thruster",
-					7 => "Class-L Missile Rack",
+					7 => "Class-F Missile Rack",
 					9 => "Class-D Missile Launcher",
 					11 => "Standard Particle Beam",
 					18 => "Structure",
