@@ -2602,7 +2602,7 @@ spl_autoload_register(
 
 				//Kor-Lyan
 //         		'ammomissilerackf' => '/server/model/weapons/customNexus.php', //missile racks themselves
-				'axor' => '/server/model/ships/korlyan/Axor.php',
+/*				'axor' => '/server/model/ships/korlyan/Axor.php',
 				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 				'fenja' => '/server/model/ships/korlyan/Fenja.php',
 				'kalavar' => '/server/model/ships/korlyan/Kalavar.php',
@@ -2627,7 +2627,7 @@ spl_autoload_register(
 				'talokiearly' => '/server/model/ships/korlyan/TalokiEarly.php',
 				'talokioriginal' => '/server/model/ships/korlyan/TalokiOriginal.php',
 				'vaklar' => '/server/model/ships/korlyan/Vaklar.php',
-
+*/
          		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
          		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
          		'proximitylaser' => '/server/model/weapons/customNexus.php', 
