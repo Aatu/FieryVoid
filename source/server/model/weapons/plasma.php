@@ -1326,30 +1326,63 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
     }
     
     public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
-			switch($this->firingMode){
-				case 1:					
-						$output = 2;
-				        return $output;
-			break;
-				case 2:	
-						$output = 0;
-				        return $output;	        
-   				 }
+    	
+	//	$targetship = $gamedata->getShipById($fireOrder->targetid);
+ //		$shooterpos = $shooter->getHexPos();   
+ 
+ //		$ballisticshot = $shooter->getLastTurnMovement($fireOrder->turn);
+  //      $posLaunch = $ballisticshot->position;	
+          $output = 0;
+          $targetpos = $target->getHexPos(); 
+		 
+		    if($pos === null){
+		   	$pos = $shooter->getHexPos();
+			}	
+                		
+	    foreach ($this->fireOrders as $fire) 
+            if ($fire->firingMode == '1' && $fire->turn == $turn) {
+                $output = 2;
+              }  
+  		          
+  //   if ($this->output == 0) return 0;  //No point doing location checks if output already 0   
+     	   	
+	 if ($this->pos != $this->targetpos) $output = 0;		
+//	if ($weapon->weapon != 'Ballistic' && ($this->pos != $this->targetpos)) $output = 0;	
+			
+	return $output;					
 			}
 
+
+
     public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
-			switch($this->firingMode){
-				case 1:					
-						$output = 0;
-						if($weapon->weaponClass == 'Laser' || $weapon->weaponClass == 'Antimatter' || $weapon->weaponClass == 'Particle') $output = 2; //Damage reduction only works against three type sof weapon.
-				        return $output;
-			break;
-				case 2:	
-						$output = 0;
-				        return $output;	        
-   				 }
+	//	$targetship = $gamedata->getShipById($fireOrder->targetid);
+ //		$shooterpos = $shooter->getHexPos();   
+ 
+ //		$ballisticshot = $shooter->getLastTurnMovement($fireOrder->turn);
+  //      $posLaunch = $ballisticshot->position;
+          $output = 0;
+          $targetpos = $target->getHexPos(); 
+		 
+		    if($pos === null){
+		   	$pos = $shooter->getHexPos();
+			}	
+				        		               		
+	    foreach ($this->fireOrders as $fire) 
+            if ($fire->firingMode == '1' && $fire->turn == $turn) {
+                $output = 2;
+              }  
+ 
+        if($weapon->weaponClass != 'Laser' && $weapon->weaponClass != 'Antimatter' && $weapon->weaponClass != 'Particle') return 0;  //Plasma Web damage reduction only works against three types of weapon.
+  	
+ //       if ($this->output == 0) return 0;  //No point doing location checks if output already zero   
+        	   
+ 		if ($this->pos != $this->targetpos) $output = 0;		
+//	if ($weapon->weapon != 'Ballistic' && ($this->pos != $this->targetpos)) $output = 0;	
+			
+	return $output;					
 			}
 //end Defensive system functions
+
 
 		public function calculateHitBase($gamedata, $fireOrder)
 		{
