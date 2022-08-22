@@ -315,6 +315,105 @@ class NexusLaserMissile extends Laser{
 }//endof NexusLaserMissile
 
 
+class NexusHeavyLaserMissile extends Laser{
+        public $name = "NexusHeavyLaserMissile";
+        public $displayName = "Heavy Laser Missile";
+		    public $iconPath = "NexusHeavyLaserMissile.png";
+        public $animationArray = array(1=>'laser', 2=>'laser');
+        public $trailColor = array(141, 240, 255);
+        public $animationColorArray = array(1=>array(220, 60, 120), array(220, 60, 120));
+//        public $animationExplosionScale = 0.5;
+        public $projectilespeed = 10;
+//        public $animationWidth = 5;
+        public $trailLength = 100;    
+        public $uninterceptableArray = array(1=>false, 2=>false); 
+		
+		public $doInterceptDegradation = true; //Will be intercepted with normal degradation even though a ballistic
+        public $useOEW = false; //missile
+        public $ballistic = true; //missile
+        public $rangeArray = array(1=>50, 2=>20);
+        public $distanceRangeArray = array(1=>60, 2=>30);
+        public $ammunition = 30; //limited number of shots
+	    
+        public $loadingtimeArray = array(1=>2, 2=>2); // 1/2 turns
+        public $rangePenaltyArray = array(1=>0, 2=>0);
+        public $fireControlArray = array(1=>array(null, 2, 2), 2=>array(null, 2, 2)); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+	    
+        public $raking = 8;
+		public $priorityArray = array(1=>8, 2=>8); 
+	    
+		public $firingModes = array(1=>'Long-range', 2=>'Short-range'); //firing mode - just a name essentially
+		public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+//    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+	 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 3;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->ammunition = $this->ammunition;           
+            return $strippedSystem;
+        }
+	    
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Bomb-pumped laser. Ballistic weapon that scores raking (8) damage.";
+            $this->data["Special"] .= "<br>Long-range: 50 hex launch and 60 hex max range, 2d10+2 damage.";
+            $this->data["Special"] .= "<br>Short-range: 20 hex launch and 30 hex max range, 3d10+4 damage.";
+            $this->data["Ammunition"] = $this->ammunition;
+        }
+        
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
+
+        public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1:
+				return Dice::d(10, 2)+3; //Light Chemical Laser
+				break;
+			case 2:
+				return Dice::d(10, 3)+4; //Medium Chemical Laser
+				break;	
+		}
+	}
+        public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 5; //Light Chemical Laser
+				break;
+			case 2:
+				$this->minDamage = 7; //Medium Chemical Laser
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 23; //Light Chemical Laser
+				break;
+			case 2:
+				$this->maxDamage = 34; //Medium Chemical Laser
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
+    
+		
+}//endof NexusHeavyLaserMissile
+
+
 
 class NexusLargeRocket extends Weapon{
         public $name = "NexusLargeRocket";
@@ -1581,7 +1680,7 @@ class NexusShatterGun extends Weapon{
 class NexusShatterGunFtr extends Weapon{
 
         public $name = "NexusShatterGunFtr";
-        public $displayName = "Fighter Shatter Gun";
+        public $displayName = "Light Shatter Gun";
         public $iconPath = "NexusShattergun.png"; 		
 		
         public $animationArray = array(1=>'trail', 2=>'trail');
@@ -2225,7 +2324,7 @@ class NexusAutocannonFtr extends Matter{
         public $trailColor = array(206, 206, 83);
 
         public $name = "NexusAutocannonFtr";
-        public $displayName = "Fighter Autocannon";
+        public $displayName = "Light Autocannon";
 		public $iconPath = "NexusAutocannon.png";
 	    
         public $animation = "trail";
@@ -2963,7 +3062,7 @@ class NexusMinigun extends Weapon{
 class NexusMinigunFtr extends Weapon{
 
         public $name = "NexusMinigunFtr";
-        public $displayName = "Fighter Minigun";
+        public $displayName = "Light Minigun";
         public $iconPath = "NexusMinigun.png"; 		
 		
         public $animationArray = array(1=>'trail', 2=>'trail');
@@ -3495,19 +3594,20 @@ class NexusLightCoilgun extends Matter{
 		public $guns = 1;
         public $priority = 9;
 
-        public $rangePenalty = 1; //-1 / hexes
+        public $rangePenalty = 0.5; // -1 per 2 hexes
         public $fireControl = array(-4, 2, 2); // fighters, <mediums, <capitals
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ) $maxhealth = 7;
-            if ( $powerReq == 0 ) $powerReq = 2;
+            if ( $powerReq == 0 ) $powerReq = 3;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return Dice::d(10, 1)+5;   }
-        public function setMinDamage(){     $this->minDamage = 6 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 15 ;      }
+        public function getDamage($fireOrder){ return Dice::d(10, 2)+2;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
+		
 }// endof NexusLightCoilgun
 
 
@@ -7743,6 +7843,8 @@ class LimpetBoreTorp extends Weapon{
         public $animationWidth = 4;
         public $trailLength = 100;    
 
+		public $overrideCallingRestricions = true; //flag looked for in weaponManager.js to allow a ballistic called shot
+
         public $useOEW = false; //missile
         public $ballistic = true; //missile
         public $range = 30;
@@ -7760,7 +7862,7 @@ class LimpetBoreTorp extends Weapon{
 	public $noOverkill = true; //Matter weapon
 	public $priority = 9; //Matter weapon
 	    
-	public $firingMode = 'Called Shot'; //firing mode - just a name essentially
+//	public $firingMode = 'Called Shot'; //firing mode - just a name essentially
 	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     	public $weaponClass = "Matter"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
 	 

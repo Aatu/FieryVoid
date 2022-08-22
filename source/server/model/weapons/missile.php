@@ -1020,7 +1020,7 @@ class AmmoMissileRackS extends Weapon{
 		
 	public $checkAmmoMagazine = true;
 	
-    public $useOEW = false;
+//    public $useOEW = false;
     public $ballistic = true;
     public $animation = "trail";
     public $animationColor = array(50, 50, 50);
@@ -1108,7 +1108,6 @@ class AmmoMissileRackS extends Weapon{
 		$this->minDamageArray = array();
 		$this->maxDamageArray = array();
 		$this->ammoClassesUsed = array();
-		
 		
 		//add data for all modes to arrays
 		$currMode = 0;

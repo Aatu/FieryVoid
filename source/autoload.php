@@ -1546,6 +1546,7 @@ spl_autoload_register(
 				'nexusstreakinterceptor' => '/server/model/weapons/customNexus.php',
 				'nexusdartinterceptor' => '/server/model/weapons/customNexus.php',
 				'nexusearlyplasmawave' => '/server/model/weapons/customNexus.php',
+				'nexusheavylasermissile' => '/server/model/weapons/customNexus.php',
 				'nexuslasermissile' => '/server/model/weapons/customNexus.php',
 				'nexusrangedbolttorpedo' => '/server/model/weapons/customNexus.php',
 				'nexusrangedearlyplasmawave' => '/server/model/weapons/customNexus.php',
@@ -1657,6 +1658,8 @@ spl_autoload_register(
 
 				//Nexus ships - Dalithorn
                 'dalithorncarrier' => '/server/model/ships/ZNexusDalithorn/DalithornCarrier.php',					
+                'dalithorncommandfrigate' => '/server/model/ships/ZNexusDalithorn/DalithornCommandFrigate.php',					
+                'dalithorncommandfrigaterefit' => '/server/model/ships/ZNexusDalithorn/DalithornCommandFrigateRefit.php',					
                 'dalithorncutter' => '/server/model/ships/ZNexusDalithorn/DalithornCutter.php',					
                 'dalithorncutterrefit' => '/server/model/ships/ZNexusDalithorn/DalithornCutterRefit.php',					
                 'dalithorndreadnought' => '/server/model/ships/ZNexusDalithorn/DalithornDreadnought.php',					
@@ -1670,10 +1673,13 @@ spl_autoload_register(
                 'dalithornfrigaterefit' => '/server/model/ships/ZNexusDalithorn/DalithornFrigateRefit.php',					
                 'dalithorngunboat' => '/server/model/ships/ZNexusDalithorn/DalithornGunboat.php',					
                 'dalithorngunboatrefit' => '/server/model/ships/ZNexusDalithorn/DalithornGunboatRefit.php',					
+                'dalithornheavycommandfrigate' => '/server/model/ships/ZNexusDalithorn/DalithornHeavyCommandFrigate.php',					
                 'dalithornheavydreadnought' => '/server/model/ships/ZNexusDalithorn/DalithornHeavyDreadnought.php',					
                 'dalithornheavyfrigate' => '/server/model/ships/ZNexusDalithorn/DalithornHeavyFrigate.php',					
                 'dalithornjumpdreadnought' => '/server/model/ships/ZNexusDalithorn/DalithornJumpDreadnought.php',					
                 'dalithornheavyjumpdreadnought' => '/server/model/ships/ZNexusDalithorn/DalithornHeavyJumpDreadnought.php',					
+                'dalithornhlasermissileosat' => '/server/model/ships/ZNexusDalithorn/DalithornHLaserMissileOSAT.php',					
+                'dalithornlasermissileosat' => '/server/model/ships/ZNexusDalithorn/DalithornLaserMissileOSAT.php',					
                 'dalithornlightcruiser' => '/server/model/ships/ZNexusDalithorn/DalithornLightCruiser.php',					
                 'dalithornmicrosat' => '/server/model/ships/ZNexusDalithorn/DalithornMicrosat.php',					
                 'dalithornmicrosatrefit' => '/server/model/ships/ZNexusDalithorn/DalithornMicrosatRefit.php',					
@@ -2627,12 +2633,12 @@ spl_autoload_register(
 				'talokiearly' => '/server/model/ships/korlyan/TalokiEarly.php',
 				'talokioriginal' => '/server/model/ships/korlyan/TalokiOriginal.php',
 				'vaklar' => '/server/model/ships/korlyan/Vaklar.php',
-*/
+
          		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
          		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
          		'proximitylaser' => '/server/model/weapons/customNexus.php', 
          		'fmissilerack' => '/server/model/weapons/customNexus.php', 
-
+*/
 
 
 				//Star Wars - Clone Wars testing
