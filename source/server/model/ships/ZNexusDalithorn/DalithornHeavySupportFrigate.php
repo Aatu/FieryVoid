@@ -1,20 +1,21 @@
 <?php
-class DalithornHeavyCommandFrigate extends MediumShip{
+class DalithornHeavySupportFrigate extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 295;
+        $this->pointCost = 285;
         $this->faction = "ZNexus Dalithorn";
-        $this->phpclass = "DalithornHeavyCommandFrigate";
-        $this->imagePath = "img/ships/Nexus/DalithornCommandFrigate.png";
-        $this->shipClass = "Heavy Command Frigate";
+        $this->phpclass = "DalithornHeavySupportFrigate";
+        $this->imagePath = "img/ships/Nexus/DalithornSupportFrigate.png";
+        $this->shipClass = "Heavy Support Frigate";
 			$this->variantOf = "Heavy Frigate";
 			$this->occurence = "uncommon";
-        $this->limited = 10;
 		$this->unofficial = true;
         $this->canvasSize = 80;
-	    $this->isd = 2109;
+	    $this->isd = 2108;
+
+        $this->fighters = array("superheavy"=>1);
         
         $this->forwardDefense = 10;
         $this->sideDefense = 12;
@@ -24,11 +25,10 @@ class DalithornHeavyCommandFrigate extends MediumShip{
         $this->accelcost = 2;
         $this->rollcost = 1;
         $this->pivotcost = 1;
-        $this->iniativebonus = 65;
-        
+        $this->iniativebonus = 60;
          
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
-        $this->addPrimarySystem(new CnC(4, 14, 0, 0));
+        $this->addPrimarySystem(new CnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 3, 5));
         $this->addPrimarySystem(new Engine(4, 12, 0, 8, 2));
         $this->addPrimarySystem(new Hangar(1, 1));
@@ -36,7 +36,7 @@ class DalithornHeavyCommandFrigate extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 14, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(2, 14, 0, 5, 4));        
         
-		$this->addFrontSystem(new NexusLightCoilgun(3, 7, 3, 300, 60));
+		$this->addFrontSystem(new Catapult(1, 6));
 		$this->addFrontSystem(new NexusMinigun(2, 4, 1, 240, 60));
 		$this->addFrontSystem(new NexusMinigun(2, 4, 1, 300, 120));
         $this->addFrontSystem(new Thruster(3, 12, 0, 4, 1));
@@ -67,7 +67,7 @@ class DalithornHeavyCommandFrigate extends MediumShip{
 
 		1=> array(
 			6 => "Thruster",
-			8 => "Light Coilgun",
+			8 => "Catapult",
 			10 => "Minigun",
 			17 => "Structure",
 			20 => "Primary",

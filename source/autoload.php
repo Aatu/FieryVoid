@@ -1676,6 +1676,7 @@ spl_autoload_register(
                 'dalithornheavycommandfrigate' => '/server/model/ships/ZNexusDalithorn/DalithornHeavyCommandFrigate.php',					
                 'dalithornheavydreadnought' => '/server/model/ships/ZNexusDalithorn/DalithornHeavyDreadnought.php',					
                 'dalithornheavyfrigate' => '/server/model/ships/ZNexusDalithorn/DalithornHeavyFrigate.php',					
+                'dalithornheavysupportfrigate' => '/server/model/ships/ZNexusDalithorn/DalithornHeavySupportFrigate.php',					
                 'dalithornjumpdreadnought' => '/server/model/ships/ZNexusDalithorn/DalithornJumpDreadnought.php',					
                 'dalithornheavyjumpdreadnought' => '/server/model/ships/ZNexusDalithorn/DalithornHeavyJumpDreadnought.php',					
                 'dalithornhlasermissileosat' => '/server/model/ships/ZNexusDalithorn/DalithornHLaserMissileOSAT.php',					
@@ -1696,6 +1697,7 @@ spl_autoload_register(
                 'dalithornsmallscoutrefit' => '/server/model/ships/ZNexusDalithorn/DalithornSmallScoutRefit.php',					
                 'dalithornstation' => '/server/model/ships/ZNexusDalithorn/DalithornStation.php',					
                 'dalithornstationearly' => '/server/model/ships/ZNexusDalithorn/DalithornStationEarly.php',					
+                'dalithornsupportfrigate' => '/server/model/ships/ZNexusDalithorn/DalithornSupportFrigate.php',					
                 'dalithornwarstation' => '/server/model/ships/ZNexusDalithorn/DalithornWarStation.php',					
 
 
