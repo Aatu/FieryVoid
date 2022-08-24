@@ -35,7 +35,7 @@ class DalithornCommandFrigateRefit extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));        
         
-		$this->addFrontSystem(new NexusLightCoilgun(2, 7, 3, 330, 30));
+		$this->addFrontSystem(new NexusLightCoilgun(3, 7, 3, 330, 30));
 		$this->addFrontSystem(new NexusLightGasGun(2, 5, 1, 240, 360));
 		$this->addFrontSystem(new NexusLightGasGun(2, 5, 1, 0, 120));
         $this->addFrontSystem(new Thruster(2, 8, 0, 4, 1));
