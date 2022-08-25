@@ -11,7 +11,7 @@ class Athasa extends HeavyCombatVessel{
         $this->shipClass = "Athasa Scout";
         $this->variantOf = "Esthasa Destroyer";
         $this->occurence = "rare";
-        $this->fighters = array("medium"=>6);
+        $this->fighters = array("medium"=>6);//this is intentional - it's Centauri-built ship, and at the time of acquiring it Balosians did not use heavy fighters, so they didn't rearrange
 		$this->isd = 2218;
                 
         $this->forwardDefense = 14;
