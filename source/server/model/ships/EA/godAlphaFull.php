@@ -5,7 +5,8 @@ class GODALphaFull extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 700+4*100;
-		$this->faction = 'EA (full missile loads)';
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "GODAlphaFull"; 
         $this->imagePath = "img/ships/god.png";
         $this->shipClass = "GOD Heavy Satellite (Alpha, full)";

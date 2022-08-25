@@ -419,7 +419,6 @@ spl_autoload_register(
                 'helpmanager' => '/server/controller/HelpManager.php',
                 'hermes' => '/server/model/ships/EA/hermes.php',
                 'hephaestus' => '/server/model/ships/EA/hephaestus.php',
-                'hermes_early' => '/server/model/ships/EA_old/hermes_early.php',
                 'heron' => '/server/model/ships/drazi_old/heron.php',
                 'heron1940' => '/server/model/ships/drazi_old/heron1940.php',
                 'hightemplar' => '/server/model/ships/orieni/hightemplar.php',
@@ -1855,7 +1854,6 @@ spl_autoload_register(
                 'epimetheusdelta' => '/server/model/ships/EA_old/epimetheusDelta.php',
                 'epimetheusepsilon' => '/server/model/ships/EA_old/epimetheusEpsilon.php',
                 'flyingfoxstarfury' => '/server/model/ships/EA_old/flyingfoxStarfury.php',
-                'hermesalpha' => '/server/model/ships/EA_old/hermesAlpha.php',
                 'laertesalpha' => '/server/model/ships/EA_old/laertesAlpha.php',
                 'laertesbeta' => '/server/model/ships/EA_old/laertesBeta.php',
                 'laertesdelta' => '/server/model/ships/EA/laertesDelta.php',
@@ -2645,6 +2643,7 @@ spl_autoload_register(
                 		'ammomissilef' => '/server/model/systems/baseSystems.php',
                 		'ammomissilea' => '/server/model/systems/baseSystems.php',
                 		'ammomissilep' => '/server/model/systems/baseSystems.php',
+                		'ammomissiled' => '/server/model/systems/baseSystems.php',
 		    
                 		'ammomissileracks' => '/server/model/weapons/missile.php', //missile racks themselves
                 		'ammomissilerackso' => '/server/model/weapons/missile.php',
@@ -2657,10 +2656,27 @@ spl_autoload_register(
 		    
                 		'sagittariusam' => '/server/model/ships/EA/sagittariusAM.php', //ships using new style launchers (and magazine of course)
                 		'sagittariusalphaam' => '/server/model/ships/EA/sagittariusAlphaAM.php',
-				'olympusam' => '/server/model/ships/EA/olympusAM.php',
-				'olympusalphaam' => '/server/model/ships/EA/olympusAlphaAM.php',
+						'olympusam' => '/server/model/ships/EA/olympusAM.php',
+						'olympusalphaam' => '/server/model/ships/EA/olympusAlphaAM.php',
                 		'apolloam' => '/server/model/ships/EA/apolloAM.php',  
-				'apollostrikeam' => '/server/model/ships/EA/apolloStrikeAM.php',
+                		'apollostrikeam' => '/server/model/ships/EA/apolloStrikeAM.php',  
+						'warlockam' => '/server/model/ships/EA/warlockAM.php',
+						'athenaam' => '/server/model/ships/EA/athenaAM.php',
+                		'hyperionmissileam' => '/server/model/ships/EA/hyperionMissileAM.php',
+                		'oraclescoutam' => '/server/model/ships/EA/oracleScoutAM.php',
+                		'tethysmissileam' => '/server/model/ships/EA/tethysMissileAM.php',
+                		'hephaestusam' => '/server/model/ships/EA/hephaestusAM.php',
+                		'hectoram' => '/server/model/ships/EA/hectorAM.php',
+                		'godalphaam' => '/server/model/ships/EA/godAlphaAM.php',
+                		'godbetaam' => '/server/model/ships/EA/godBetaAM.php',
+                		'hermesam' => '/server/model/ships/EA/hermesAM.php',
+                		'hermesfastbeta' => '/server/model/ships/EA/hermesFastBeta.php',
+						
+						
+						'hermesoldfastalpha' => '/server/model/ships/EA_old/hermesOldFastAlpha.php',
+						'hermesoldfastbeta' => '/server/model/ships/EA_old/hermesOldFastBeta.php',
+				
+				
 		    
 				'orionam' => '/server/model/ships/EA/orionAM.php', //fixed defenses using new style launchers (and magazine of course)
 				'oriondeltaam' => '/server/model/ships/EA/orionDeltaAM.php',

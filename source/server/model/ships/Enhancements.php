@@ -453,6 +453,17 @@ class Enhancements{
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
+		  $enhID = 'AMMO_D'; //Light Missiles
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileD();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
 	  } //end of magazine-requiring options
 	  
 	  
@@ -951,6 +962,9 @@ class Enhancements{
 						break;
 					case 'AMMO_P': //Piercing Missile
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileP(), $enhCount, true); //do notify dependent weapons, too!
+						break;
+					case 'AMMO_D': //Light Missile						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileB(), $enhCount, true); //do notify dependent weapons, too!
 						break;
 						
 				}
