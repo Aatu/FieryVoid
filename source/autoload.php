@@ -2665,22 +2665,30 @@ spl_autoload_register(
                 		'hyperionmissileam' => '/server/model/ships/EA/hyperionMissileAM.php',
                 		'oraclescoutam' => '/server/model/ships/EA/oracleScoutAM.php',
                 		'tethysmissileam' => '/server/model/ships/EA/tethysMissileAM.php',
+						'orionam' => '/server/model/ships/EA/orionAM.php', 
+						'oriondeltaam' => '/server/model/ships/EA/orionDeltaAM.php',
+						'oriongammaam' => '/server/model/ships/EA/orionGammaAM.php',
                 		'hephaestusam' => '/server/model/ships/EA/hephaestusAM.php',
                 		'hectoram' => '/server/model/ships/EA/hectorAM.php',
                 		'godalphaam' => '/server/model/ships/EA/godAlphaAM.php',
                 		'godbetaam' => '/server/model/ships/EA/godBetaAM.php',
                 		'hermesam' => '/server/model/ships/EA/hermesAM.php',
                 		'hermesfastbeta' => '/server/model/ships/EA/hermesFastBeta.php',
-						
-						
+												
 						'hermesoldfastalpha' => '/server/model/ships/EA_old/hermesOldFastAlpha.php',
 						'hermesoldfastbeta' => '/server/model/ships/EA_old/hermesOldFastBeta.php',
+						'olympusalphaam_early' => '/server/model/ships/EA_old/olympusAlphaAM_early.php',
+						'oraclescoutbetaam' => '/server/model/ships/EA_old/oracleScoutBetaAM.php',
+                		'epimetheusbetaam' => '/server/model/ships/EA_old/epimetheusBetaAM.php',
+                		'epimetheusgammaam' => '/server/model/ships/EA_old/epimetheusGammaAM.php',
+                		'epimetheusdeltaam' => '/server/model/ships/EA_old/epimetheusDeltaAM.php',
+                		'orionalphaam' => '/server/model/ships/EA_old/OrionAlphaAM.php',
+                		'orionbetaam' => '/server/model/ships/EA_old/OrionBetaAM.php',
+                		'leonidasbetaam' => '/server/model/ships/EA_old/leonidasBetaAM.php',
+                		'leonidasgammaam' => '/server/model/ships/EA_old/leonidasGammaAM.php',
 				
 				
 		    
-				'orionam' => '/server/model/ships/EA/orionAM.php', //fixed defenses using new style launchers (and magazine of course)
-				'oriondeltaam' => '/server/model/ships/EA/orionDeltaAM.php',
-				'oriongammaam' => '/server/model/ships/EA/orionGammaAM.php',
 				
 						
 				
