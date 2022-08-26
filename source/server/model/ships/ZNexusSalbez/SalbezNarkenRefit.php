@@ -39,7 +39,6 @@ class SalbezNarkenRefit extends HeavyCombatVessel{
         $this->addFrontSystem(new ELINTScanner(3, 10, 3, 4));
         $this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 270, 90));
         $this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 270, 90));
-		$this->addFrontSystem(new CargoBay(1, 16));
                 
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
@@ -67,8 +66,7 @@ class SalbezNarkenRefit extends HeavyCombatVessel{
             1=> array(
                     5 => "Thruster",
 					8 => "ELINT Scanner",
-                    10 => "Cargo Bay",
-					12 => "Light Particle Beam",
+					10 => "Light Particle Beam",
 					18 => "Structure",
                     20 => "Primary",
             ),

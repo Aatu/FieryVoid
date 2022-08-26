@@ -38,8 +38,8 @@ class SalbezReshken extends BaseShip{
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-		$this->addFrontSystem(new MediumLaser(2, 6, 5, 300, 360));
-		$this->addFrontSystem(new MediumLaser(2, 6, 5, 0, 60));
+		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 360));
+		$this->addFrontSystem(new MediumLaser(3, 6, 5, 0, 60));
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 270, 90));
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 270, 90));
 
@@ -52,14 +52,14 @@ class SalbezReshken extends BaseShip{
 		$this->addAftSystem(new JumpEngine(4, 15, 4, 36));
 
         $this->addLeftSystem(new MediumLaser(3, 6, 5, 240, 360));
-        $this->addLeftSystem(new NexusSwarmTorpedo(3, 4, 2, 240, 360));
+        $this->addLeftSystem(new NexusSwarmTorpedo(3, 5, 2, 240, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 120, 300));
         $this->addLeftSystem(new Thruster(3, 15, 0, 4, 3));
 
         $this->addRightSystem(new MediumLaser(3, 6, 5, 0, 120));
-        $this->addRightSystem(new NexusSwarmTorpedo(3, 4, 2, 0, 120));
+        $this->addRightSystem(new NexusSwarmTorpedo(3, 5, 2, 0, 120));
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 60, 240));

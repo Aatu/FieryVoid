@@ -44,8 +44,8 @@ class SalbezShvrezRefit extends MediumShip{
 		$this->addAftSystem(new NexusImprovedParticleBeam(2, 3, 1, 60, 300));
 		$this->addAftSystem(new NexusImprovedParticleBeam(2, 3, 1, 60, 300));
 		$this->addAftSystem(new LightLaser(2, 4, 3, 90, 270));
-        $this->addAftSystem(new Thruster(3, 10, 0, 5, 2));    
-        $this->addAftSystem(new Thruster(3, 10, 0, 5, 2));    
+        $this->addAftSystem(new Thruster(3, 13, 0, 5, 2));    
+        $this->addAftSystem(new Thruster(3, 13, 0, 5, 2));    
        
         $this->addPrimarySystem(new Structure(4, 45));
 
