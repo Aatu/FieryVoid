@@ -1,0 +1,54 @@
+CUSTOM reevaluation of Cascor
+by myself (Zero_1627) with second opinions of a few others; forum consensus seems to be that Cascor ships are too pricy in general, though.
+
+
+My take is that players in general find Cascor underperforming. I think that's because while their interceptors are very good, their strike fighters are abysmal - and their ships seriously overpriced. IMO fixing that price has a good chance of fixing the faction.
+WHen done by the way of enhancements - we'd have fully official Cascor in game, but also an option to take them as custom faction with different prices. I hope it would be appealing to many players - and should net us one more competitive Tier 2 faction at little effort.
+
+To that end, I'd like to get a second opinion about prices proposed 🙂 . In general most Cascor ships do look nice (besides being horribly costly), with low to medium level of firepower (but fast-firing long range guns, which counts), but also combining lowish durability with very large profiles, making them easy targets.
+Also, in line with faction idea, they can generally maneuver decently for their size, but have major problems changing speed - so are essentially forced to remain at the same speed all game, cannt perform quick bursts of acceleration.
+
+Qoccata Supercarrier: 950->825
+Very large carriers do tend to be very pricy, so I'm wary of cutting her down too much! Still - that's one big TARGET 🙂 
+
+Coquari Scout: 750->600
+750 is Covran bracket... which Coquari definitely isn't.  Defensively 5 Doal Ion Bolters isn't out of line of average scouts, offensively four Ion Field Generators are a lot of fun (and some control effects) but actually little in the way of firepower. 
+I took Sho'Kar (575) as comparision - she has the same Sensors and lacks offensive firepower, but is also smaller AND better defended, which counts for a lot in scout (so it can actually perform its function without dying immediately). Va'Kar (650) actually has some offensive firepower and is pricier - but also even more elusive and maneuvrable.
+
+Norsca BC: 700->625
+Not a bad ship, as far as Cascor go 🙂 - but with all the drawbacks of Cascor (low firepower, easy target). I cut it down to G'Quan points level and hope she'll perform adequately.
+
+Norscator Gunship: 825->585
+Actually, I have no idea why it's officially considered more valuable than Norsca. Technically has slightly more firepower (Ionic Laser offers a token better damage output than Ion Cannon), but at double the range penalty - and loses torpedoes as well. Gains Aft guns, which is of little utility in a ship that needs to get close to opponent to actually do something. Loses half the fighter capacity to do so, too. Also, has no extra tools to actually survive closing with opponent...
+Overall I consider her to be a downgrade to base Norsca, and set point value accordingly.
+
+Nesacc Explorer: 700->625
+well, she's an explorer, not a strictly combat ship, so maybe that 700 is explained by economic cost... I'm still tempted to cut her down at least a bit; I'm keeping official line of "the same as Norsca" 🙂 .
+
+Quoricc DD: 500->400
+Nice firepower and carrier capacity... but short ranged, woefully vulnerable AND with low thrust to boot (that last point actually unexpected for Cascor ship...).
+Overall - a brawler that can't close to brawling range on its own, and can't survive if it does either.
+The closest analog I can find is Dilgar Abrithi (400) - actually Abrithi seems even worse - but it's also a scenario piece technically (an assault ship). 
+
+Drocca Torpedo Destroyer: 600->540
+When armed with long-range ballistic weapons, Quoricc drawbacks actually aren't much exposed, so that's a lot of value gained right there. Nice fire support unit. Uncommon, so can't take more than one without a few of actual Quoricc, though!
+
+Crocti Patrol Carrier: 420->400
+What can I say, a small (by Cascor standard) carrier that's semi-combat capable. Actually her price isn't unreasonable, considering she has token long range guns too...
+
+Tacacci Strike Frigate: 440->420
+She can almost hold her own as is. As a medium ship that can stay at range and reach, she offers surprisingly good staying power, and lack of acceleration is a secondary consideration.
+
+Talacca Frigate Leader: 500->475
+a straight (and meaningful) upgrade of Tacacci, what's not to like? I cut her down by a token only as well.
+Calaq Assault Fighter: 60->45
+She has a weapon that can reliably engage ships from outside of CCEW range... and a whole lot of drawbacks. Technically a heavy fighter, she's more fragile than half the Mediums around - but all other stats are proper for a large Heavy... her light weapon is a single one as well (rather than the usual twin mount), and with heavy one being Exclusive it's not really anything more than (poor) attempt at self defense. SHe retains poor Cascor acceleration, too, despite having overall low thrust...
+...Actually Sitara seems to be overall better despite having no light weapon at all!!! I cut the price down to Sitara level, this way she becomes just costly for what she can do...
+
+Caltus Torpedo Fighter: 65->42
+All the drawbacks of Calaq (actually profile is even bigger), and it needs to pay extra to have any useful weapons... at least Navigator is included. Currently, fully loaded Caltus costs 113 points... and that's WAY too high price for 3 torpedo salvoes (once torpedoes are launched her remaining weapons aren't much worth mentioning). 
+Phalan-M costs 35 points even with full price paid for Navigator, and it's very costly for what it does... Caltus at least has twin launchers AND longer ranged ordnance, which counts - but still I cut the base price to lower than Calaq...
+
+
+Tiquincc is fine (especially with boosted Aft weapon it's nice superiority fighter, actually offers at least some staying power too), and so is Caccar (pricy, but VERY difficult to catch - a harasser straight from hell).
+I feel no need to touch fixed structures either (the osat actually looks cheap, as a surprise).
