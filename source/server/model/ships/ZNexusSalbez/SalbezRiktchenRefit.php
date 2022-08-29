@@ -37,11 +37,11 @@ class SalbezRiktchenRefit extends BaseShip{
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 2, 1, 270, 90));
-		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 2, 1, 270, 90));
+		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 270, 90));
+		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 270, 90));
 		$this->addFrontSystem(new Hangar(3, 6));
-		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 2, 1, 270, 90));
-		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 2, 1, 270, 90));
+		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 270, 90));
+		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 270, 90));
 
         $this->addAftSystem(new Thruster(3, 10, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 2, 2));
@@ -52,16 +52,16 @@ class SalbezRiktchenRefit extends BaseShip{
 
         $this->addLeftSystem(new MediumLaser(3, 6, 5, 240, 360));
         $this->addLeftSystem(new NexusSwarmTorpedo(3, 5, 2, 240, 360));
-		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 2, 1, 240, 60));
-		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 2, 1, 240, 60));
-		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 2, 1, 120, 300));
+		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 60));
+		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 60));
+		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 120, 300));
         $this->addLeftSystem(new Thruster(3, 15, 0, 4, 3));
 
         $this->addRightSystem(new MediumLaser(3, 6, 5, 0, 120));
         $this->addRightSystem(new NexusSwarmTorpedo(3, 5, 2, 0, 120));
-		$this->addRightSystem(new NexusImprovedParticleBeam(2, 2, 1, 300, 120));
-		$this->addRightSystem(new NexusImprovedParticleBeam(2, 2, 1, 300, 120));
-		$this->addRightSystem(new NexusImprovedParticleBeam(2, 2, 1, 60, 240));
+		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 300, 120));
+		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 300, 120));
+		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 60, 240));
         $this->addRightSystem(new Thruster(3, 15, 0, 4, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

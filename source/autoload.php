@@ -1737,6 +1737,8 @@ spl_autoload_register(
                 'salbezshvrezrefit' => '/server/model/ships/ZNexusSalbez/SalbezShvrezRefit.php',					
                 'salbeztakriz' => '/server/model/ships/ZNexusSalbez/SalbezTakriz.php',					
                 'salbeztakrizrefit' => '/server/model/ships/ZNexusSalbez/SalbezTakrizRefit.php',					
+                'salbeztarsk' => '/server/model/ships/ZNexusSalbez/SalbezTarsk.php',					
+                'salbeztarskrefit' => '/server/model/ships/ZNexusSalbez/SalbezTarskRefit.php',					
                 'salbeztavertez' => '/server/model/ships/ZNexusSalbez/SalbezTavertez.php',					
                 'salbezvasken' => '/server/model/ships/ZNexusSalbez/SalbezVasken.php',					
                 'salbezvaskenrefit' => '/server/model/ships/ZNexusSalbez/SalbezVaskenRefit.php',					

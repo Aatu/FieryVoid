@@ -1,20 +1,21 @@
 <?php
-class SalbezVaskenRefit extends HeavyCombatVessel{
+class SalbezTarskRefit extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 525;
+        $this->pointCost = 410;
         $this->faction = "ZNexus Sal-bez";
-        $this->phpclass = "SalbezVaskenRefit";
-        $this->imagePath = "img/ships/Nexus/salbez_destroyer.png";
+        $this->phpclass = "SalbezTarskRefit";
+        $this->imagePath = "img/ships/Nexus/salbez_tarsk.png";
 			$this->canvasSize = 115; //img has 200px per side
-        $this->shipClass = "Vas-ken Scout Destroyer (2145 refit)";
+        $this->shipClass = "Ta'rsk Light Carrier (2145 refit)";
 			$this->variantOf = "Vas-ren Destroyer";
 			$this->occurence = "uncommon";
 			$this->unofficial = true;
-        $this->limited = 33;
-        $this->isd = 2145;
+       $this->isd = 2145;
+
+        $this->fighters = array("heavy"=>6);
 		
         $this->forwardDefense = 12;
         $this->sideDefense = 14;
@@ -28,7 +29,7 @@ class SalbezVaskenRefit extends HeavyCombatVessel{
          
         $this->addPrimarySystem(new Reactor(5, 16, 0, 0));
         $this->addPrimarySystem(new CnC(5, 14, 0, 0));
-        $this->addPrimarySystem(new ELINTScanner(4, 20, 8, 10));
+        $this->addPrimarySystem(new Scanner(4, 14, 5, 6));
         $this->addPrimarySystem(new Engine(4, 18, 0, 10, 3));
         $this->addPrimarySystem(new Hangar(2, 2));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 5, 3));
@@ -36,17 +37,19 @@ class SalbezVaskenRefit extends HeavyCombatVessel{
       
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
-        $this->addFrontSystem(new NexusSwarmTorpedo(3, 5, 2, 300, 60));
+        $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 60));
         $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 60));
         $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 270, 90));
+		$this->addFrontSystem(new Hangar(3, 6));
         $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 270, 90));
+        $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 300, 120));
         $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 300, 120));
                 
         $this->addAftSystem(new Thruster(4, 28, 0, 10, 2));
-        $this->addAftSystem(new NexusImprovedParticleBeam(3, 6, 5, 240, 360));
+        $this->addAftSystem(new LightLaser(2, 4, 3, 180, 360));
         $this->addAftSystem(new NexusImprovedParticleBeam(2, 3, 1, 90, 270));
         $this->addAftSystem(new NexusImprovedParticleBeam(2, 3, 1, 90, 270));
-        $this->addAftSystem(new NexusImprovedParticleBeam(3, 6, 5, 0, 120));
+        $this->addAftSystem(new LightLaser(2, 4, 3, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 35));
@@ -57,7 +60,7 @@ class SalbezVaskenRefit extends HeavyCombatVessel{
             0=> array(
                     8 => "Structure",
                     11 => "Thruster",
-                    13 => "ELINT Scanner",
+                    13 => "Scanner",
                     16 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",
@@ -65,14 +68,15 @@ class SalbezVaskenRefit extends HeavyCombatVessel{
             ),
             1=> array(
                     5 => "Thruster",
-                    7 => "Swarm Torpedo",
-					9 => "Improved Particle Beam",
+                    8 => "Hangar",
+					10 => "Improved Particle Beam",
 					18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     6 => "Thruster",
-					8 => "Light Laser",
+					8 => "Medium Laser",
+					10 => "Light Laser",
 					11 => "Improved Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
