@@ -1257,6 +1257,83 @@ class BSGHypergunVA extends Pulse{
 
 
 
+    class LtGuidedMissile extends Torpedo{
+    
+        public $name = "LtGuidedMissile";
+        public $displayName = "Light Guided Missile";
+        public $iconPath = "starwars/swFighter4.png"; 		
+
+        public $range = 10;
+        public $loadingtime = 1;
+        
+        public $fireControl = array(-4, 1, 3); // fighters, <mediums, <capitals 
+        
+        public $animation = "torpedo";
+        public $animationColor = array(30, 170, 255);
+		
+        public $priority = 5;
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return 10;   }
+        public function setMinDamage(){     $this->minDamage = 10; /*- $this->dp;*/      }
+        public function setMaxDamage(){     $this->maxDamage = 10 ;/*- $this->dp;*/      }
+    
+    }//endof class LightGuidedMissile
+
+    class MedGuidedMissile extends Torpedo{
+    
+        public $name = "MedGuidedMissile";
+        public $displayName = "Meadium Guided Missile";
+        public $iconPath = "starwars/swFighter4.png"; 		
+
+        public $range = 30;
+        public $loadingtime = 2;
+        
+        public $fireControl = array(-4, 1, 3); // fighters, <mediums, <capitals 
+        
+        public $animation = "torpedo";
+        public $animationColor = array(30, 170, 255);
+		
+        public $priority = 6;
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return 15;   }
+        public function setMinDamage(){     $this->minDamage = 15; /*- $this->dp;*/      }
+        public function setMaxDamage(){     $this->maxDamage = 15 ;/*- $this->dp;*/      }
+    
+    }//endof class MedGuidedMissile
+
+    class HvyGuidedMissile extends Torpedo{
+    
+        public $name = "HvyGuidedMissile";
+        public $displayName = "Heavy Guided Missile";
+        public $iconPath = "starwars/swFighter4.png"; 		
+
+        public $range = 50;
+        public $loadingtime = 3;
+        
+        public $fireControl = array(-4, 1, 3); // fighters, <mediums, <capitals 
+        
+        public $animation = "torpedo";
+        public $animationColor = array(30, 170, 255);
+		
+        public $priority = 7;
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return 20;   }
+        public function setMinDamage(){     $this->minDamage = 20; /*- $this->dp;*/      }
+        public function setMaxDamage(){     $this->maxDamage = 20 ;/*- $this->dp;*/      }
+    
+    }//endof class HvyGuidedMissile
 
 
 
