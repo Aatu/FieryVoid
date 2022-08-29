@@ -383,38 +383,38 @@ class Enhancements{
 		  $enhPriceStep = 0; //flat rate
 		  $enhPrice = 0;
 		  
-		  case($ship->phpclass){
-			  when 'Qoccata': //Cascor Qoccata Supercarrier: 950->825
+		  switch($ship->phpclass){
+			  case 'Qoccata': //Cascor Qoccata Supercarrier: 950->825
 				  $enhPrice = -125;
 				  break;
-			  when 'Coqari': //Cascor Coqari Scout: 750->600
+			  case 'Coqari': //Cascor Coqari Scout: 750->600
 				  $enhPrice = -150;
 				  break;
-			  when 'Norsca': //Cascor Norsca Battlecruiser: 700->625
+			  case 'Norsca': //Cascor Norsca Battlecruiser: 700->625
 				  $enhPrice = -75;
 				  break;
-			  when 'Norscator': //Cascor Norscator Gunship: 825->585
+			  case 'Norscator': //Cascor Norscator Gunship: 825->585
 				  $enhPrice = -240;
 				  break;
-			  when 'Nesacc': //Cascor Nesacc Explorer: 700->625
+			  case 'Nesacc': //Cascor Nesacc Explorer: 700->625
 				  $enhPrice = -75;
 				  break;
-			  when 'Qoricc': //Cascor Qoricc Destroyer: 500->400
+			  case 'Qoricc': //Cascor Qoricc Destroyer: 500->400
 				  $enhPrice = -100;
 				  break;
-			  when 'Drocca': //Cascor Drocca Torpedo Destroyer: 600->540
+			  case 'Drocca': //Cascor Drocca Torpedo Destroyer: 600->540
 				  $enhPrice = -60;
 				  break;
-			  when 'Crocti': //Cascor Crocti Patrol Carrier: 420->400
+			  case 'Crocti': //Cascor Crocti Patrol Carrier: 420->400
 				  $enhPrice = -20;
 				  break;
-			  when 'Tacacci': //Cascor Tacacci Strike Frigate: 440->420
+			  case 'Tacacci': //Cascor Tacacci Strike Frigate: 440->420
 				  $enhPrice = -20;
 				  break;
-			  when 'Talacca': //Cascor Talacca Frigate Leader: 500->475
+			  case 'Talacca': //Cascor Talacca Frigate Leader: 500->475
 				  $enhPrice = -25;
 				  break;			  
-			  when others:
+			  default:
 				  $enhPrice = 0;
 				  break;
 		  }
@@ -633,26 +633,26 @@ class Enhancements{
 	  
 	  //REEVALUATION - for official units that got CUSTOM reevaluation
  	  $enhID = 'RE-EVAL';
-	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
+	  if(!in_array($enhID, $flight->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'CUSTOM price reevaluation';
 		  $enhLimit = 1;
 		  $enhPriceStep = 0; //flat rate
 		  $enhPrice = 0;
 		  
-		  case($ship->phpclass){
-			  when 'Calaq': //Cascor Calaq Assault Fighter: 60->45
+		  switch($flight->phpclass){
+			  case 'Calaq': //Cascor Calaq Assault Fighter: 60->45
 				  $enhPrice = -15;
 				  break;
-			  when 'Caltus': //Cascor Caltus Torpedo Fighter: 65->42
+			  case 'Caltus': //Cascor Caltus Torpedo Fighter: 65->42
 				  $enhPrice = -23;
 				  break;	  
-			  when others:
+			  default:
 				  $enhPrice = 0;
 				  break;
 		  }
 		  
 		  if ($enhPrice != 0){
-		  	$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  	$flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
 	  }
 	  
