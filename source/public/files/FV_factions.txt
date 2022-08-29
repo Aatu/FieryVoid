@@ -61,6 +61,9 @@ Poor acceleration - for ships it's just that, very high acceleration cost. For f
 Ultralight fighters - smallest Cascor fighters are of Ultralight type, which allows them to efficiently fit into hangar space inended for larger fighters.
 Tiqincc - medium Cascor fighters have tail gun. In tabletop, this gun has -2 penalty when fired together with main gun. In FV it does not.
 
+After being actually fielded in Fiery Void for some time, consensus of players was that this faction (and its ships in particular) is too pricy to be competitive. In order to correct this perceived drawback, I have added option of using modified point values - by way of adding appropriate enhancement to unit (which does nothing but modify its price). Hopefully, this will make the faction more playable and actually balanced against other competitive small factions (eg. Tier 2). Note that using these enhancements turns the fleet into CUSTOM one!
+Actual values used are set by Zero_1627 and are NOT result of consensus of players.
+
 CENTAURI REPUBLIC
 Ballistic Torpedo - in tabletop this weapon is able to target multiple units. In FV it's lacking this ability. Also, way to fire this weapon is very peculiar (You need to fire, THEN on the weapon itself indicate number of missiles launched).
 Plasma Stream - weapon that permanently reduces armor of systems hit (in FV - every system hit, in tabletop - only those hit by full rakes). Also, counts full armor for every rake, despite Raking mode. 
