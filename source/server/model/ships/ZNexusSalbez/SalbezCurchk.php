@@ -1,17 +1,19 @@
 <?php
-class SalbezZefjem extends HeavyCombatVessel{
+class SalbezCurchk extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 360;
+        $this->pointCost = 375;
         $this->faction = "ZNexus Sal-bez";
-        $this->phpclass = "SalbezZefjem";
-        $this->imagePath = "img/ships/Nexus/salbez_zefjem.png";
+        $this->phpclass = "SalbezCurchk";
+        $this->imagePath = "img/ships/Nexus/salbez_curchk.png";
 			$this->canvasSize = 115; //img has 200px per side
-        $this->shipClass = "Zef'jem Heavy Frigate";
+        $this->shipClass = "Cur-chk Support Frigate";
+			$this->variantOf = "Zef'jem Heavy Frigate";
+			$this->occurence = "rare";
 			$this->unofficial = true;
-        $this->isd = 2090;
+        $this->isd = 2103;
 		
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
@@ -40,11 +42,11 @@ class SalbezZefjem extends HeavyCombatVessel{
                 
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
-        $this->addAftSystem(new LaserCutter(2, 6, 4, 300, 360));
+        $this->addAftSystem(new NexusBoltTorpedo(2, 5, 2, 240, 360));
         $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 120, 300));
         $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 60, 240));
-        $this->addAftSystem(new LaserCutter(2, 6, 4, 0, 60));
-        
+        $this->addAftSystem(new NexusBoltTorpedo(2, 5, 2, 0, 120));
+       
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 33));
         $this->addAftSystem(new Structure( 3, 33));
@@ -62,15 +64,15 @@ class SalbezZefjem extends HeavyCombatVessel{
             ),
             1=> array(
                     6 => "Thruster",
-                    8 => "Laser Cutter",
-                    9 => "Bolt Torpedo",
+					8 => "Laser Cutter",
+					9 => "Bolt Torpedo",
 					11 => "Light Particle Beam",
 					18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     6 => "Thruster",
-                    8 => "Laser Cutter",
+                    8 => "Bolt Torpedo",
 					10 => "Light Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
