@@ -5,14 +5,16 @@ class Scoravarefitted extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 550;
-		$this->faction = "Descari";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+
         $this->phpclass = "Scoravarefitted";
         $this->imagePath = "img/ships/DescariScorava.png";
         $this->shipClass = "Scorava Cruiser (Refit)";
         $this->shipSizeClass = 3;
         $this->fighters = array("medium"=>24, "normal"=>6);  
 	    $this->isd = 2242;
-	    $this->variantOf = "Scorava Cruiser";	//Listed as separate hull in Showdowns 6 but made a variant here for tidier fleet selection.        
+	    //$this->variantOf = "Scorava Cruiser";	//Listed as separate hull in Showdowns 6 but made a variant here for tidier fleet selection.        
         $this->occurence = "common";   
 		
         $this->forwardDefense = 16;

@@ -2690,19 +2690,21 @@ spl_autoload_register(
                 		'leonidasgammaam' => '/server/model/ships/EA_old/leonidasGammaAM.php',
 						
 						//Corillani
-				//'conosti' => '/server/model/ships/corillani/Conosti.php',
 						'garundaam' => '/server/model/ships/corillani/GarundaAM.php',
 						'llartolam' => '/server/model/ships/corillani/LlartolAM.php',
 						'mollantaam' => '/server/model/ships/corillani/MollantaAM.php',
-				//'botral' => '/server/model/ships/corillani/Botral.php',
 						'intonaam' => '/server/model/ships/corillani/IntonaAM.php',
-				//'ortana' => '/server/model/ships/corillani/Ortana.php',
-				//'nollita' => '/server/model/ships/corillani/Nollita.php',
-				//'dovota' => '/server/model/ships/corillani/Dovota.php',
-				//'vaconi' => '/server/model/ships/corillani/Vaconi.php',
-				//'judanna' => '/server/model/ships/corillani/Judanna.php',
-				//'orrono' => '/server/model/ships/corillani/Orrono.php',
-				//'drolla' => '/server/model/ships/corillani/Drolla.php',
+						
+						//Descari
+						'rultharam' => '/server/model/ships/descari/RultharAM.php',
+						'scoravarefittedam' => '/server/model/ships/descari/ScoravarefittedAM.php',
+						'scoravalaseram' => '/server/model/ships/descari/ScoravalaserAM.php',
+						'scorotaam' => '/server/model/ships/descari/ScorotaAM.php',
+						'rulnataam' => '/server/model/ships/descari/RulnataAM.php',
+						'rulnatoam' => '/server/model/ships/descari/RulnatoAM.php',
+						'carranaam' => '/server/model/ships/descari/CarranaAM.php',
+						'hemrosam' => '/server/model/ships/descari/HemrosAM.php',
+						
 						
 						
 						
