@@ -2654,6 +2654,7 @@ spl_autoload_register(
                 		'ammomissilerackr' => '/server/model/weapons/missile.php',
                 		'ammobombrack' => '/server/model/weapons/missile.php',
 		    
+						//EA
                 		'sagittariusam' => '/server/model/ships/EA/sagittariusAM.php', //ships using new style launchers (and magazine of course)
                 		'sagittariusalphaam' => '/server/model/ships/EA/sagittariusAlphaAM.php',
 						'olympusam' => '/server/model/ships/EA/olympusAM.php',
@@ -2674,7 +2675,8 @@ spl_autoload_register(
                 		'godbetaam' => '/server/model/ships/EA/godBetaAM.php',
                 		'hermesam' => '/server/model/ships/EA/hermesAM.php',
                 		'hermesfastbeta' => '/server/model/ships/EA/hermesFastBeta.php',
-												
+						
+						//EA (early)
 						'hermesoldfastalpha' => '/server/model/ships/EA_old/hermesOldFastAlpha.php',
 						'hermesoldfastbeta' => '/server/model/ships/EA_old/hermesOldFastBeta.php',
 						'olympusalphaam_early' => '/server/model/ships/EA_old/olympusAlphaAM_early.php',
@@ -2686,6 +2688,22 @@ spl_autoload_register(
                 		'orionbetaam' => '/server/model/ships/EA_old/OrionBetaAM.php',
                 		'leonidasbetaam' => '/server/model/ships/EA_old/leonidasBetaAM.php',
                 		'leonidasgammaam' => '/server/model/ships/EA_old/leonidasGammaAM.php',
+						
+						//Corillani
+				//'conosti' => '/server/model/ships/corillani/Conosti.php',
+						'garundaam' => '/server/model/ships/corillani/GarundaAM.php',
+						'llartolam' => '/server/model/ships/corillani/LlartolAM.php',
+						'mollantaam' => '/server/model/ships/corillani/MollantaAM.php',
+				//'botral' => '/server/model/ships/corillani/Botral.php',
+						'intonaam' => '/server/model/ships/corillani/IntonaAM.php',
+				//'ortana' => '/server/model/ships/corillani/Ortana.php',
+				//'nollita' => '/server/model/ships/corillani/Nollita.php',
+				//'dovota' => '/server/model/ships/corillani/Dovota.php',
+				//'vaconi' => '/server/model/ships/corillani/Vaconi.php',
+				//'judanna' => '/server/model/ships/corillani/Judanna.php',
+				//'orrono' => '/server/model/ships/corillani/Orrono.php',
+				//'drolla' => '/server/model/ships/corillani/Drolla.php',
+						
 						
 						
 				
