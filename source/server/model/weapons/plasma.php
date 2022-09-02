@@ -1359,7 +1359,7 @@ public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon
  
 //if Web is ordered to intercept somewhere else - cannot intercept this shot
     if ($pos != $targetpos) $output = 0;			
-    			
+ 			
 //return actual value
     return $output;
             } //end of getDefensiveHitChangeMod
@@ -1373,7 +1373,7 @@ public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
           $targetpos = null;
 
 		//Plasma Web damage reduction only works against three types of weapon.
-        if($weapon->weaponClass != 'Laser' && $weapon->weaponClass != 'Antimatter' && $weapon->weaponClass != 'Particle') return 0;
+        if($weapon->weaponClass != 'Laser' && $weapon->weaponClass != 'Antimatter' && $weapon->weaponClass != 'Particle' && $weapon->name != 'AntimatterTorpedo') return 0;
         	  
 		//checking whether the weapon is actually ordered to intercept		        		               		
 	    foreach ($this->fireOrders as $fire) 
@@ -1395,7 +1395,7 @@ public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
 	        	   
 	 	//if Web is ordered to intercept somewhere else - cannot intercept this shot
 	 	if ($pos != $targetpos) $output = 0;			
-				
+					
 		//return actual value
 		return $output;					
 				} //End of getDefensiveDamageMod

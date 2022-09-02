@@ -40,8 +40,8 @@ class gaimSkassa extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new BattleLaser(4, 6, 6, 300, 60));
 		$this->addFrontSystem(new TwinArray(3, 6, 2, 180, 60));
-		$this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
 		$this->addFrontSystem(new TwinArray(3, 6, 2, 300, 180));
+		$this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
 		$this->addFrontSystem(new Bulkhead(0, 2));
 		$this->addFrontSystem(new Bulkhead(0, 2));
 		
