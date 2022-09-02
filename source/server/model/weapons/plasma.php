@@ -1320,77 +1320,85 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 
 //Defensive system functions
 
-    public function getDefensiveType()
+public function getDefensiveType()
     {
         return "Shield";
     }
     
-    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
-    	
-	//	$targetship = $gamedata->getShipById($fireOrder->targetid);
- //		$shooterpos = $shooter->getHexPos();   
- 
- //		$ballisticshot = $shooter->getLastTurnMovement($fireOrder->turn);
-  //      $posLaunch = $ballisticshot->position;	
+public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
+
+//variable initialization    	
           $output = 0;
           $targetpos = null;
-		 
-		    if($pos === null){
-		   	$pos = $shooter->getHexPos();
-			}	
-                		
-	    foreach ($this->fireOrders as $fire) 
+		                		
+//checking whether the weapon is actually ordered to intercept
+        foreach ($this->fireOrders as $fire) 
             if ($fire->firingMode == "1" && $fire->turn == $turn) {
-            	$targetpos = new OffsetCoordinate($fire->x, $fire->y);
+                $targetpos = new OffsetCoordinate($fire->x, $fire->y);
                 $output = 2;
               } 
-  		          
-     if ($output == 0) return 0;  //No point doing location checks if output already 0   
-     
-    $errorText = 'Pos of FIRING: (';
-	$errorText .= $pos->q . ', ' . $pos->r;
-	$errorText .= '); Pos of Web SHOT: (';
-	$errorText .= $targetpos->q . ', ' . $targetpos->r;
-	$errorText .= ')';
-	throw new Error($errorText);
-     
-     	   	
-	 if ($pos != $targetpos) $output = 0;			
-			
-	return $output;					
-			} //end of getDefensiveHitChangeMod
-
-
-
-    public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
-	//	$targetship = $gamedata->getShipById($fireOrder->targetid);
- //		$shooterpos = $shooter->getHexPos();   
+//No point doing location checks if output already 0                 	 		          
+     if ($output == 0) return 0;  
+	
+//Determining position the shot is coming from
+  	if(!$weapon->ballistic){ //direct fire
+		$pos = $shooter->getHexPos();
+		} else { //ballistic
+		   	$movement = $shooter->getLastTurnMovement($fire->turn); 
+		    $pos = $movement->position;
+				}
+				
+  /* Old method of trying to convert $pos into same format of coordinates as $targetpos, saved in case useful at a later point.
+    		 if($pos === null){
+                $pos = $shooter->getHexPos();
+                	}
+                else{ //change format
+                $pos = Mathlib::pixelCoToHex($pos["x"], $pos["y"]);
+                $pos = new OffsetCoordinate($pos["x"], $pos["y"]); 
+                	}  */
  
- //		$ballisticshot = $shooter->getLastTurnMovement($fireOrder->turn);
-  //      $posLaunch = $ballisticshot->position;
+//if Web is ordered to intercept somewhere else - cannot intercept this shot
+    if ($pos != $targetpos) $output = 0;			
+    			
+//return actual value
+    return $output;
+            } //end of getDefensiveHitChangeMod
+
+
+
+public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
+
+		//variable initialization
           $output = 0;
           $targetpos = null;
-		 
-		    if($pos === null){
-		   	$pos = $shooter->getHexPos();
-			}	
 
-        if($weapon->weaponClass != 'Laser' && $weapon->weaponClass != 'Antimatter' && $weapon->weaponClass != 'Particle') return 0;  //Plasma Web damage reduction only works against three types of weapon.
-				        		               		
+		//Plasma Web damage reduction only works against three types of weapon.
+        if($weapon->weaponClass != 'Laser' && $weapon->weaponClass != 'Antimatter' && $weapon->weaponClass != 'Particle') return 0;
+        	  
+		//checking whether the weapon is actually ordered to intercept		        		               		
 	    foreach ($this->fireOrders as $fire) 
             if ($fire->firingMode == "1" && $fire->turn == $turn) {
             	$targetpos = new OffsetCoordinate($fire->x, $fire->y);
                 $output = 2;
               }  
- 
+            
+		//No point doing location checks if output already 0   	
+        if ($output == 0) return 0;  //No point doing location checks if output already zero  
 
-  	
-        if ($output == 0) return 0;  //No point doing location checks if output already zero   
-        	   
- 		if ($pos != $targetpos) $output = 0;			
-			
-	return $output;					
-			} //End of getDefensiveDamageMod
+	//Determining position the shot is coming from        	
+	  	if(!$weapon->ballistic){ //direct fire
+			$pos = $shooter->getHexPos();
+			} else { //ballistic
+			   	$movement = $shooter->getLastTurnMovement($fire->turn); 
+			    $pos = $movement->position;
+					}        
+	        	   
+	 	//if Web is ordered to intercept somewhere else - cannot intercept this shot
+	 	if ($pos != $targetpos) $output = 0;			
+				
+		//return actual value
+		return $output;					
+				} //End of getDefensiveDamageMod
 			
 //end Defensive system functions
 
@@ -1501,11 +1509,11 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= 'Defensive mode automatically hits an enemy unit, it then applies -10 intercept rating against incoming enemy fire from target hex, and 2 damage reduction against Antimatter, Laser and Particle weapons attacks.';
-			$this->data["Special"] .= '<br>To reduce the hit chance of ballistic weapons you should target the hex from where the shot was fired.';			
+			$this->data["Special"] .= 'Defensive mode automatically hits all units in target hex, it then applies -10 intercept rating against all incoming enemy fire and 2 damage reduction against Antimatter, Laser and Particle weapons attacks from that hex.';
+			$this->data["Special"] .= '<br>To reduce the hit chance of ballistic weapons target the hex from where the shot was launched.';			
 			$this->data["Special"] .= '<br>Offensive Mode targets a hex within 3 hexes of firing unit and deals D6+2 damage to all fighters in that hex.';
 			$this->data["Special"] .= '<br>Offensive Mode requires 1 additional power either from boosting in Initial Orders phase or from power currently stored in plasma batteries during Firing Phase.';
-			$this->data["Special"] .= '<br>Plasma hexes are not cumulative with each other. If more than one is present in a hex, there is no additional effect'; 
+			$this->data["Special"] .= '<br>Plasma Webs are not cumulative with each other. If more than one is targeted at the same hex, only one will apply its effects'; 
 	 }
                
 		public function getDamage($fireOrder){
