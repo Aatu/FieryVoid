@@ -1976,7 +1976,7 @@ spl_autoload_register(
                 'medguidedmissile' => '/server/model/weapons/customBSG.php',
                 'hvyguidedmissile' => '/server/model/weapons/customBSG.php',
 
-				'cylonbasestar' => '/server/model/ships/ZBSGCylons/CylonBasestar.php',				
+//				'cylonbasestar' => '/server/model/ships/ZBSGCylons/CylonBasestar.php',				
 				'cylonsparrowraider' => '/server/model/ships/ZBSGCylons/CylonSparrowRaider.php',				
 
                 'bsghybrid' => '/server/model/systems/baseSystems.php',
