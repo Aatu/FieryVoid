@@ -2068,6 +2068,7 @@ spl_autoload_register(
                 'ionizer' => '/server/model/weapons/ion.php',
                 'ioniclaser' => '/server/model/weapons/ion.php',
                 'dualionbolter' => '/server/model/weapons/ion.php',
+                'ionizerhvy' => '/server/model/weapons/ion.php', //custom weapon
 		    
                 //Cascor Ships
                 'caracti' => '/server/model/ships/cascor/caracti.php',
@@ -2088,6 +2089,7 @@ spl_autoload_register(
                 'calaq' => '/server/model/ships/cascor/calaq.php',
                 'caltus' => '/server/model/ships/cascor/caltus.php',
                 'tiqincc' => '/server/model/ships/cascor/tiqincc.php',    
+                'tiqus' => '/server/model/ships/cascor/tiqus.php', //CUSTOM fighter
 		    
 				//new batch				
                 'microsat' => '/server/model/ships/FighterFlight.php',

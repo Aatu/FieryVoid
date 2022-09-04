@@ -384,23 +384,23 @@ class Enhancements{
 		  $enhPrice = 0;
 		  
 		  switch($ship->phpclass){
-			  case 'Qoccata': //Cascor Qoccata Supercarrier: 950->825
-				  $enhPrice = -125;
+			  case 'Qoccata': //Cascor Qoccata Supercarrier: 950->875
+				  $enhPrice = -75;
 				  break;
-			  case 'Coqari': //Cascor Coqari Scout: 750->600
-				  $enhPrice = -150;
+			  case 'Coqari': //Cascor Coqari Scout: 750->650
+				  $enhPrice = -100;
 				  break;
 			  case 'Norsca': //Cascor Norsca Battlecruiser: 700->625
 				  $enhPrice = -75;
 				  break;
-			  case 'Norscator': //Cascor Norscator Gunship: 825->585
-				  $enhPrice = -240;
+			  case 'Norscator': //Cascor Norscator Gunship: 825->650
+				  $enhPrice = -175;
 				  break;
-			  case 'Nesacc': //Cascor Nesacc Explorer: 700->625
+			  case 'Nesacc': //Cascor Nesacc Explorer: 700->650
+				  $enhPrice = -50;
+				  break;
+			  case 'Qoricc': //Cascor Qoricc Destroyer: 500->425
 				  $enhPrice = -75;
-				  break;
-			  case 'Qoricc': //Cascor Qoricc Destroyer: 500->400
-				  $enhPrice = -100;
 				  break;
 			  case 'Drocca': //Cascor Drocca Torpedo Destroyer: 600->540
 				  $enhPrice = -60;
@@ -411,8 +411,8 @@ class Enhancements{
 			  case 'Tacacci': //Cascor Tacacci Strike Frigate: 440->420
 				  $enhPrice = -20;
 				  break;
-			  case 'Talacca': //Cascor Talacca Frigate Leader: 500->475
-				  $enhPrice = -25;
+			  case 'Talacca': //Cascor Talacca Frigate Leader: 500->480
+				  $enhPrice = -20;
 				  break;			  
 			  default:
 				  $enhPrice = 0;
@@ -643,8 +643,8 @@ class Enhancements{
 			  case 'Calaq': //Cascor Calaq Assault Fighter: 60->45
 				  $enhPrice = -15;
 				  break;
-			  case 'Caltus': //Cascor Caltus Torpedo Fighter: 65->42
-				  $enhPrice = -23;
+			  case 'Caltus': //Cascor Caltus Torpedo Fighter: 65->40
+				  $enhPrice = -25;
 				  break;	  
 			  default:
 				  $enhPrice = 0;
