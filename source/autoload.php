@@ -1972,6 +1972,10 @@ spl_autoload_register(
                 'kobolvipermk7' => '/server/model/ships/ZBSGKobol/KobolViperMk7.php',
 
 				//Battlestar Galactic - Cylons
+                'ltguidedmissile' => '/server/model/weapons/customBSG.php',
+                'medguidedmissile' => '/server/model/weapons/customBSG.php',
+                'hvyguidedmissile' => '/server/model/weapons/customBSG.php',
+
 				'cylonbasestar' => '/server/model/ships/ZBSGCylons/CylonBasestar.php',				
 				'cylonsparrowraider' => '/server/model/ships/ZBSGCylons/CylonSparrowRaider.php',				
 
@@ -2627,6 +2631,7 @@ spl_autoload_register(
 				'kalti' => '/server/model/ships/korlyan/Kalti.php',
 				'kolosk' => '/server/model/ships/korlyan/Kolosk.php',
 				'koloskearly' => '/server/model/ships/korlyan/KoloskEarly.php',
+				'koloskova' => '/server/model/ships/korlyan/Koloskova.php',
 				'kosha' => '/server/model/ships/korlyan/Kosha.php',
 				'koshaearly' => '/server/model/ships/korlyan/KoshaEarly.php',
 				'koskova' => '/server/model/ships/korlyan/Koskova.php',
@@ -2650,6 +2655,14 @@ spl_autoload_register(
          		'proximitylaser' => '/server/model/weapons/customNexus.php', 
          		'fmissilerack' => '/server/model/weapons/customNexus.php', 
 */
+
+
+//         		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
+//         		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
+//				'cokra' => '/server/model/ships/korlyan/Cokra.php',
+//				'koloskova' => '/server/model/ships/korlyan/Koloskova.php',
+//				'lekra' => '/server/model/ships/korlyan/Lekra.php',
+
 
 
 				//Star Wars - Clone Wars testing

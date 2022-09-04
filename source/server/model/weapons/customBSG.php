@@ -1261,38 +1261,40 @@ class BSGHypergunVA extends Pulse{
     
         public $name = "LtGuidedMissile";
         public $displayName = "Light Guided Missile";
-        public $iconPath = "starwars/swFighter4.png"; 		
+        public $iconPath = "NexusSmallEarlyRocket.png"; 		
 
         public $range = 10;
         public $loadingtime = 1;
         
-        public $fireControl = array(-4, 1, 3); // fighters, <mediums, <capitals 
+        public $fireControl = array(3, 1, 0); // fighters, <mediums, <capitals 
         
         public $animation = "torpedo";
         public $animationColor = array(30, 170, 255);
 		
-        public $priority = 5;
+        public $priority = 4;
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            if ( $maxhealth == 0 ) $maxhealth = 3;
+            if ( $powerReq == 0 ) $powerReq = 2;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-        
+ 
         public function getDamage($fireOrder){        return 10;   }
-        public function setMinDamage(){     $this->minDamage = 10; /*- $this->dp;*/      }
-        public function setMaxDamage(){     $this->maxDamage = 10 ;/*- $this->dp;*/      }
-    
-    }//endof class LightGuidedMissile
+        public function setMinDamage(){     $this->minDamage = 10;       }
+        public function setMaxDamage(){     $this->maxDamage = 10 ;      }
+
+    }//endof class LtGuidedMissile
 
     class MedGuidedMissile extends Torpedo{
     
         public $name = "MedGuidedMissile";
-        public $displayName = "Meadium Guided Missile";
-        public $iconPath = "starwars/swFighter4.png"; 		
+        public $displayName = "Medium Guided Missile";
+        public $iconPath = "NexusEarlyRocket.png"; 		
 
         public $range = 30;
         public $loadingtime = 2;
         
-        public $fireControl = array(-4, 1, 3); // fighters, <mediums, <capitals 
+        public $fireControl = array(1, 2, 2); // fighters, <mediums, <capitals 
         
         public $animation = "torpedo";
         public $animationColor = array(30, 170, 255);
@@ -1300,6 +1302,9 @@ class BSGHypergunVA extends Pulse{
         public $priority = 6;
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 5;
+            if ( $powerReq == 0 ) $powerReq = 4;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
@@ -1313,7 +1318,7 @@ class BSGHypergunVA extends Pulse{
     
         public $name = "HvyGuidedMissile";
         public $displayName = "Heavy Guided Missile";
-        public $iconPath = "starwars/swFighter4.png"; 		
+        public $iconPath = "NexusLargeEarlyRocket.png"; 		
 
         public $range = 50;
         public $loadingtime = 3;
@@ -1326,6 +1331,9 @@ class BSGHypergunVA extends Pulse{
         public $priority = 7;
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 7;
+            if ( $powerReq == 0 ) $powerReq = 6;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
@@ -1334,6 +1342,94 @@ class BSGHypergunVA extends Pulse{
         public function setMaxDamage(){     $this->maxDamage = 20 ;/*- $this->dp;*/      }
     
     }//endof class HvyGuidedMissile
+
+
+
+    class EMMissile extends Torpedo{
+        public $name = "EMMissile";
+        public $displayName = "EM Missile";
+        public $iconPath = "EWEMTorpedo.png";
+
+        public $loadingtime = 1;
+        
+        public $weaponClass = "Electromagnetic"; //deals Electromagnetic, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
+        public $damageType = "Flash"; 
+        
+        public $fireControl = array(-6, 1, 3); // fighters, <mediums, <capitals 
+        
+        public $trailColor = array(75, 230, 90);
+        public $animation = "torpedo";
+        public $animationColor = array(75, 230, 90);
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 11;
+        public $animationWidth = 10;
+        public $trailLength = 10;
+        public $priority = 10; 
+		
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 6;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 5;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "Ignores armor and deactivates power using systems.";
+			$this->data["Special"] .= "<br>+4 to criticals and +2 to dropout rolls";
+			$this->data["Special"] .= "<br>This weapon suffers range penalty (like direct fire weapons do), but only after first 20 hexes of distance.";
+		}
+
+		public $rangePenalty = 1; //-1 hex - BUT ONLY AFTER 20 HEXES
+
+	    //override standard to skip first 20 hexes when calculating range penalty
+	    /*public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
+	    {
+			$targetPos = $target->getHexPos();
+			$dis = mathlib::getDistanceHex($pos, $targetPos);
+			$dis = max(0,$dis-20);//first 20 hexes are "free"
+
+			$rangePenalty = ($this->rangePenalty * $dis);
+			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
+			return Array("rp" => $rangePenalty, "notes" => $notes);
+	    }*/	
+		public function calculateRangePenalty($distance){
+			$rangePenalty = 0;//base penalty
+			$rangePenalty += $this->rangePenalty * max(0,$distance-20); //everything above X hexes receives range penalty
+			return $rangePenalty;
+		}
+
+	//ignore armor; advanced armor halves effect (due to this weapon being Electromagnetic)
+	public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
+		if (WeaponEM::isTargetEMResistant($target,$system)){
+			$returnArmour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
+			$returnArmour = floor($returnArmour/2);
+			return $returnArmour;
+		}else{
+			return 0;
+		}
+	}
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		$crit = null;
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return;
+		if ($ship instanceof FighterFlight) 2;
+		if ($system->powerReq > 0 || $system->canOffLine){
+			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+		}
+		$system->critRollMod += 4;
+	}
+		
+        public function getDamage($fireOrder){        return Dice::d(10, 2);   }
+        public function setMinDamage(){     $this->minDamage = 2;      }
+        public function setMaxDamage(){     $this->maxDamage = 20;      }
+    
+    }//endof class EMMissile
+
 
 
 
