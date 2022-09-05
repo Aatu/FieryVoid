@@ -627,7 +627,7 @@ spl_autoload_register(
                 'moleculardisruptor' => '/server/model/weapons/molecular.php',
                 'molecularflayer' => '/server/model/weapons/molecular.php',
                 'molecularpulsar' => '/server/model/weapons/pulse.php',
-                'monsoon' => '/server/model/ships/EA/Monsoon.php',
+                'monsoon' => '/server/model/ships/EA/monsoon.php',
                 'morshin' => '/server/model/ships/minbari/morshin.php',
                 'motenai' => '/server/model/ships/abbai_old/motenai.php',
                 'motenai1935' => '/server/model/ships/abbai_old/motenai1935.php',
