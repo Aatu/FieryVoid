@@ -34,7 +34,8 @@ class BrixadiiBattleDestroyerLeader2108 extends HeavyCombatVessel{
         $this->addPrimarySystem(new Thruster(3, 14, 0, 6, 3));
         $this->addPrimarySystem(new Thruster(3, 14, 0, 6, 4));
 
-        $this->addFrontSystem(new Thruster(3, 14, 0, 6, 1));
+        $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
     	$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 240, 0));
         $this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 0, 120));
 		$this->addFrontSystem(new NexusKineticBoxLauncher(0, 4, 0, 300, 60));

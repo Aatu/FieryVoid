@@ -43,16 +43,16 @@ class SalbezEsver extends LCV{
 			$this->addPrimarySystem($sensors);
 		$this->addPrimarySystem(new Engine(3, 12, 0, 6, 3));
 
-		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 120, 60));
+		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 150, 30));
 		$this->addFrontSystem(new LaserCutter(1, 6, 4, 300, 60));
-		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 300, 240));
+		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 330, 210));
 	    
         $this->addPrimarySystem(new Structure(3, 30));
 	    
         $this->hitChart = array(
         		0=> array( 
         				11 => "Structure",
-        				13 => "1Laser Cutter",
+        				13 => "1:Laser Cutter",
         				15 => "1:Light Particle Beam",
 						17 => "0:Engine",
         				19 => "0:Reactor",
@@ -60,7 +60,7 @@ class SalbezEsver extends LCV{
         		),
         		1=> array( //redirect to PRIMARY
         				11 => "Structure",
-        				13 => "1Laser Cutter",
+        				13 => "1:Laser Cutter",
         				15 => "1:Light Particle Beam",
 						17 => "0:Engine",
         				19 => "0:Reactor",
@@ -68,7 +68,7 @@ class SalbezEsver extends LCV{
         		),
         		2=> array( //redirect to PRIMARY
         				11 => "Structure",
-        				13 => "1Laser Cutter",
+        				13 => "1:Laser Cutter",
         				15 => "1:Light Particle Beam",
 						17 => "0:Engine",
         				19 => "0:Reactor",

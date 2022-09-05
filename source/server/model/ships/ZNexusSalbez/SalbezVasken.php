@@ -28,9 +28,9 @@ class SalbezVasken extends HeavyCombatVessel{
          
         $this->addPrimarySystem(new Reactor(5, 16, 0, 0));
         $this->addPrimarySystem(new CnC(5, 14, 0, 0));
-        $this->addPrimarySystem(new ELINTScanner(4, 21, 8, 9));
+        $this->addPrimarySystem(new ELINTScanner(4, 20, 8, 9));
         $this->addPrimarySystem(new Engine(4, 18, 0, 10, 3));
-        $this->addPrimarySystem(new Hangar(2, 1));
+        $this->addPrimarySystem(new Hangar(2, 2));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 5, 4));
       
@@ -43,10 +43,12 @@ class SalbezVasken extends HeavyCombatVessel{
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
                 
         $this->addAftSystem(new Thruster(4, 28, 0, 10, 2));
+        $this->addAftSystem(new LightLaser(2, 4, 3, 180, 360));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 240, 360));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 90, 270));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 90, 270));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 120));
+        $this->addAftSystem(new LightLaser(2, 4, 3, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 35));
@@ -66,13 +68,14 @@ class SalbezVasken extends HeavyCombatVessel{
             1=> array(
                     5 => "Thruster",
                     7 => "Swarm Torpedo",
-					0 => "Light Particle Beam",
+					9 => "Light Particle Beam",
 					18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     6 => "Thruster",
-					9 => "Light Particle Beam",
+					8 => "Light Laser",
+					11 => "Light Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),
