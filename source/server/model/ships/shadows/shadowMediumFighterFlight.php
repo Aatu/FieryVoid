@@ -73,8 +73,9 @@ class ShadowMediumFighterFlight extends FighterFlight{
     }//endof function populate
 
 
+/*RENAME TO _OLD - actually current state of default hit handling should be able to handle Shadow fighter just as well*/
 	/*remaking damage allocation routine - this fighter is special enough (no dropouts, Diffuser) that it should actually have different priorities when handling damage allocation*/
-    public function getHitSystem($shooter, $fire, $weapon, $gamedata, $location = null)
+    public function getHitSystem_old($shooter, $fire, $weapon, $gamedata, $location = null)
     {
 		return parent::getHitSystem($shooter, $fire, $weapon, $gamedata, $location);/*core routines were modified to handle protected fighters!*/
 		//...and nothing below matters due to the above, but I'm leaving the code just in case
