@@ -20,6 +20,7 @@ class Orshilti extends FighterFlight{
         $this->turncost = 0.33;
 		$this->turndelay = 0;
         
+        $this->hangarRequired = 'assault shuttles'; //for fleet check
         $this->iniativebonus = 9*5;
         $this->populate();       
 

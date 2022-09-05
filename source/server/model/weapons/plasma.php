@@ -1320,35 +1320,88 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 
 //Defensive system functions
 
-    public function getDefensiveType()
+public function getDefensiveType()
     {
         return "Shield";
     }
     
-    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
-			switch($this->firingMode){
-				case 1:					
-						$output = 2;
-				        return $output;
-			break;
-				case 2:	
-						$output = 0;
-				        return $output;	        
-   				 }
-			}
+public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
 
-    public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
-			switch($this->firingMode){
-				case 1:					
-						$output = 2;
-				        return $output;
-			break;
-				case 2:	
-						$output = 0;
-				        return $output;	        
-   				 }
-			}
+//variable initialization    	
+          $output = 0;
+          $targetpos = null;
+		                		
+//checking whether the weapon is actually ordered to intercept
+        foreach ($this->fireOrders as $fire) 
+            if ($fire->firingMode == "1" && $fire->turn == $turn) {
+                $targetpos = new OffsetCoordinate($fire->x, $fire->y);
+                $output = 2;
+              } 
+//No point doing location checks if output already 0                 	 		          
+     if ($output == 0) return 0;  
+	
+//Determining position the shot is coming from
+  	if(!$weapon->ballistic){ //direct fire
+		$pos = $shooter->getHexPos();
+		} else { //ballistic
+		   	$movement = $shooter->getLastTurnMovement($fire->turn); 
+		    $pos = $movement->position;
+				}
+				
+  /* Old method of trying to convert $pos into same format of coordinates as $targetpos, saved in case useful at a later point.
+    		 if($pos === null){
+                $pos = $shooter->getHexPos();
+                	}
+                else{ //change format
+                $pos = Mathlib::pixelCoToHex($pos["x"], $pos["y"]);
+                $pos = new OffsetCoordinate($pos["x"], $pos["y"]); 
+                	}  */
+ 
+//if Web is ordered to intercept somewhere else - cannot intercept this shot
+    if ($pos != $targetpos) $output = 0;			
+ 			
+//return actual value
+    return $output;
+            } //end of getDefensiveHitChangeMod
+
+
+
+public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
+
+		//variable initialization
+          $output = 0;
+          $targetpos = null;
+
+		//Plasma Web damage reduction only works against three types of weapon.
+        if($weapon->weaponClass != 'Laser' && $weapon->weaponClass != 'Antimatter' && $weapon->weaponClass != 'Particle' && $weapon->name != 'AntimatterTorpedo') return 0;
+        	  
+		//checking whether the weapon is actually ordered to intercept		        		               		
+	    foreach ($this->fireOrders as $fire) 
+            if ($fire->firingMode == "1" && $fire->turn == $turn) {
+            	$targetpos = new OffsetCoordinate($fire->x, $fire->y);
+                $output = 2;
+              }  
+            
+		//No point doing location checks if output already 0   	
+        if ($output == 0) return 0;  //No point doing location checks if output already zero  
+
+	//Determining position the shot is coming from        	
+	  	if(!$weapon->ballistic){ //direct fire
+			$pos = $shooter->getHexPos();
+			} else { //ballistic
+			   	$movement = $shooter->getLastTurnMovement($fire->turn); 
+			    $pos = $movement->position;
+					}        
+	        	   
+	 	//if Web is ordered to intercept somewhere else - cannot intercept this shot
+	 	if ($pos != $targetpos) $output = 0;			
+					
+		//return actual value
+		return $output;					
+				} //End of getDefensiveDamageMod
+			
 //end Defensive system functions
+
 
 		public function calculateHitBase($gamedata, $fireOrder)
 		{
@@ -1379,7 +1432,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 				$fireOrder->rolled = $rolled; ///and auto-hit 😉
 				$fireOrder->shotshit++;
 											
-				$fireOrder->pubnotes .= "Damage and hit chance reduction applied to all weapons at target hex that are firing at Plasma Web-launching ship. "; //just information for player				
+				$fireOrder->pubnotes .= "Damage and hit chance reduction applied to appropriate weapons fired at Plasma Web-launching ship from target hex. "; //just information for player				
 						break;
 									
 			case 2:		
@@ -1456,10 +1509,11 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= 'Defensive mode automatically hits an enemy unit, it then applies -10 intercept rating and 2 damage reduction against ALL incoming enemy fire from that hex.';
-			$this->data["Special"] .= '<br>Offensive Mode targets a hex within 3 hexes of firing unit and deals D6+2 damage to all fighters in that hex.';
+			$this->data["Special"] .= 'Defensive mode automatically hits target hex and applies -10 intercept rating against all incoming enemy fire, and 2 damage reduction against Antimatter, Laser and Particle weapons attacks from that hex.';
+			$this->data["Special"] .= '<br>To reduce the hit chance of ballistic weapons with Defensive Mode, target the hex from where the shot was launched.';			
+			$this->data["Special"] .= '<br>Offensive Mode targets a hex within 3 hexes of firing unit and deals D6+2 plasma damage to all fighters in that hex.';
 			$this->data["Special"] .= '<br>Offensive Mode requires 1 additional power either from boosting in Initial Orders phase or from power currently stored in plasma batteries during Firing Phase.';
-			$this->data["Special"] .= '<br>Multiple Plasma Webs do not apply their effects cumulatively.'; //uninterceptability is due to technical reasons - with no fire order ID, interception will not be applied properly
+			$this->data["Special"] .= '<br>Plasma Webs are not cumulative. If several are targeted at the same hex in the same mode, only one will apply its effects'; 
 	 }
                
 		public function getDamage($fireOrder){

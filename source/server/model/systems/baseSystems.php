@@ -3329,7 +3329,7 @@ class PlasmaBattery extends ShipSystem{
  	public $name = "PlasmaBattery";
     public $displayName = "Plasma Battery";
 //    public $primary = true; 
-	public $isPrimaryTargetable = false;
+	public $isPrimaryTargetable = true;
     public $iconPath = "plasmabattery.png";
 
 	public $powerCurr = 0;
