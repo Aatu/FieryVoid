@@ -63,9 +63,18 @@ if (isset($_SESSION["user"])) {
 -->
        
 		
-		---------- <b>LATEST NEWS - August 2022</b> ----------	
-	    <br><b><u><big>Pak'ma'ra</big> have arrived</u></b> - ...they did so last month, but hey - they're still new and shiny!
-	    <br><b>Nexus updates</b> - courtesy of Geoffrey
+		---------- <b>LATEST NEWS - September 2022</b> ----------
+	    <br><b><u>Variable missile loadouts operational</u></b> - and in full use for EA, Corillani and Descari (other factions will be converted later, it takes time)
+	    <br><b><u>Cascor reevaluated</u></b> - fleetwide CUSTOM enhancement intended to push Cascor to the top of tier (as Custom faction). Details in Factions file. 
+	    <br><b>Balosian medium hangar space checked</b> - and is intentional, so no need to worry :)
+	    <br><b>Diffuser issue fixed</b> - no longer causing pain on ships with no Pilot :) 
+	    <br><b>Incoming weapons warning enhanced</b> - onmouseover information about incoming ballistics now contains firing unit's name and weapon's mode
+	    <br><b>fighter damage allocation modified</b> - will better balance damage among fighters with special protections (ablative shields, Diffusers)
+	    <br><b>Plasma Web fixed</b> - now it should no longer stop everything :) (courtesy of Douglas)
+	    <br><b>Pak'ma'ra general fixing and polishing</b> - courtesy of Douglas
+	    <br><b>Nexus universe fixes and polishing</b> - Brixadii, Dalithorn, Sal-bez (courtesy of Geoffrey)
+	    <br><b>Monsoon</b> - CUSTOM advanced EA MCV, anyone? (courtesy of Geoffrey)
+	    
 
 	    <!--
 		 <br><br>---------- <b>update 28th of July</b> ---------- 
