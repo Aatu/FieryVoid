@@ -5,11 +5,11 @@ class OlympusAlpha_early extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 500;
-        $this->faction = "EA (early)";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "OlympusAlpha_early";
         $this->imagePath = "img/ships/olympus.png";
         $this->shipClass = "Olympus Corvette (Alpha)";
-//        $this->variantOf = "Olympus Corvette (Delta)";
 	    $this->isd = 2200;
                 
         $this->forwardDefense = 15;

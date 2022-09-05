@@ -5,7 +5,8 @@ class Hector extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 250;
-		$this->faction = 'EA';//"EA defenses";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "Hector";
         $this->imagePath = "img/ships/hector.png";
         $this->shipClass = 'Hector Satellite';

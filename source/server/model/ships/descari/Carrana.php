@@ -5,7 +5,9 @@ class Carrana extends SmallStarBaseThreeSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 750;
-		$this->faction = "Descari";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+
 		$this->phpclass = "Carrana";
 		$this->shipClass = "Carrana Base";
 		$this->fighters = array("heavy"=>18); 

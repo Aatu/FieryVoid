@@ -526,7 +526,12 @@ class ReloadRack extends Weapon //ShipSystem
         //parent::__construct($armour, $maxhealth, 0, 0); //that's for extending ShipSystem
         parent::__construct($armour, $maxhealth, 0, 0, 0);//that's for extending Weapon
 		
-		$this->data["Special"] = 'Additional missile magazine for actual combat launchers. No actual effect in FV, but may violently explode if damaged in battle.';
+		$this->data["Special"] = 'Additional missile magazine for actual combat launchers. No actual effect in FV.';
+		
+		if ($this->rackExplosionThreshold < 21) { //can explode - inform player!
+			$chance = (21 - $this->rackExplosionThreshold) * 5; //percentage chance of explosion
+			$this->data["Special"] .= '<br>Can explode if damaged or destroyed, dealing ' . $this->rackExplosionDamage . ' damage in Flash mode (' . $chance . '% chance).';
+		}
     }
 	
 	public function getDamage($fireOrder){ return 0; }
@@ -1035,7 +1040,8 @@ class AmmoMissileRackS extends Weapon{
 	// estimated warheads in magazine: 400 (20 missiles, dmg 20 each - assuming Basic missiles)
 	// a quarter of the above: 100
 	// reduce somewhat by expected expendientures (say, *0.75): 75
-    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+	// also, official rules expect Raking mode, not Flash - but it's somewhat of a washout (Flash offers higher chance of destroying section, but lower of damage penetrating deeper)
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion (d20)
     
     public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     public $weaponClass = "Ballistic"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
@@ -1071,6 +1077,7 @@ class AmmoMissileRackS extends Weapon{
 		$this->ammoClassesArray[] =  new AmmoMissileF();
 		$this->ammoClassesArray[] =  new AmmoMissileA();
 		$this->ammoClassesArray[] =  new AmmoMissileP();
+		$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
 	
 		$this->ammoMagazine = $magazine;
 		if($base){
@@ -1085,6 +1092,10 @@ class AmmoMissileRackS extends Weapon{
     
 	public function setSystemDataWindow($turn){
 		$this->data["Special"] = 'Available firing modes depend on ammo bought as unit enhancements. Ammunition available is tracked by central Ammunition Magazine system.';
+		if ($this->rackExplosionThreshold < 21) { //can explode - inform player!
+			$chance = (21 - $this->rackExplosionThreshold) * 5; //percentage chance of explosion
+			$this->data["Special"] .= '<br>Can explode if damaged or destroyed, dealing ' . $this->rackExplosionDamage . ' damage in Flash mode (' . $chance . '% chance).';
+		}	
 		parent::setSystemDataWindow($turn);
 	}
 	
@@ -1379,7 +1390,7 @@ class AmmoMissileRackSO extends AmmoMissileRackS{
     public $distanceRange = 60;
     public $firingMode = 1;
     public $priority = 6;
-    public $loadingtime = 1;
+    public $loadingtime = 2;
 	//basic launcher data, before being modified by actual missiles
 	protected $basicFC=array(2,2,2);
 	protected $basicRange=20;
@@ -1407,7 +1418,7 @@ class AmmoMissileRackA extends AmmoMissileRackS{
         public $displayName = "Class-A Missile Rack";
     public $iconPath = "missile2.png";    
 	
-    public $range = 20;
+    public $range = 20; //antifighter missile itself will reduce it - this way the same missile fits all racks
     public $distanceRange = 60;
     public $firingMode = 1;
     public $priority = 6;

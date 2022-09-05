@@ -30,6 +30,12 @@ var Ionizer = function Ionizer(json, ship) {
 Ionizer.prototype = Object.create(Ion.prototype);
 Ionizer.prototype.constructor = Ionizer;
 
+var IonizerHvy = function IonizerHvy(json, ship) {
+    Ion.call(this, json, ship);
+};
+IonizerHvy.prototype = Object.create(Ion.prototype);
+IonizerHvy.prototype.constructor = IonizerHvy;
+
 var DualIonBolter = function DualIonBolter(json, ship) {
     Ion.call(this, json, ship);
 };

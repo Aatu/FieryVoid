@@ -5,14 +5,16 @@ class Scoravalaser extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 525;
-		$this->faction = "Descari";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+
         $this->phpclass = "Scoravalaser";
         $this->imagePath = "img/ships/DescariScorava.png";
         $this->shipClass = "Scorava Laser Cruiser";
         $this->shipSizeClass = 3;
         $this->fighters = array("medium"=>24);  
 	    $this->isd = 2242;
-	    $this->variantOf = "Scorava Cruiser";	    
+	    //$this->variantOf = "Scorava Cruiser";	    
         $this->occurence = "uncommon";   
 		
         $this->forwardDefense = 16;
