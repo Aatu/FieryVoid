@@ -66,9 +66,7 @@ if (isset($_SESSION["user"])) {
 		---------- <b>LATEST NEWS - August 2022</b> ----------	
 	    <br><b><u><big>Pak'ma'ra</big> have arrived</u></b> - ...they did so last month, but hey - they're still new and shiny!
 	    <br><b>Nexus updates</b> - courtesy of Geoffrey
-	    <br><b>Early Star Trek balancing</b> - courtesy of Wolfgang
-	    <br><b>Experimental missile ships</b> - in Custom Ships directory You can find playtest versions of Olympus, Sagittarius and Apollo - for which You can buy missiles individually instead of choosing between baseline and full loadouts as is currently the case
-	    
+
 	    <!--
 		 <br><br>---------- <b>update 28th of July</b> ---------- 
 -->
