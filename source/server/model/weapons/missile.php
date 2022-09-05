@@ -526,7 +526,12 @@ class ReloadRack extends Weapon //ShipSystem
         //parent::__construct($armour, $maxhealth, 0, 0); //that's for extending ShipSystem
         parent::__construct($armour, $maxhealth, 0, 0, 0);//that's for extending Weapon
 		
-		$this->data["Special"] = 'Additional missile magazine for actual combat launchers. No actual effect in FV, but may violently explode if damaged in battle.';
+		$this->data["Special"] = 'Additional missile magazine for actual combat launchers. No actual effect in FV.';
+		
+		if ($this->rackExplosionThreshold < 21) { //can explode - inform player!
+			$chance = (21 - $this->rackExplosionThreshold) * 5; //percentage chance of explosion
+			$this->data["Special"] .= '<br>Can explode if damaged or destroyed, dealing ' . $this->rackExplosionDamage . ' damage in Flash mode (' . $chance . '% chance).';
+		}
     }
 	
 	public function getDamage($fireOrder){ return 0; }
@@ -1011,6 +1016,7 @@ class MultiBombRack extends Weapon{
 
 
 /*Class-S Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
+	holds 20 missiles
 */
 class AmmoMissileRackS extends Weapon{
 	public $name = "ammoMissileRackS";
@@ -1019,7 +1025,7 @@ class AmmoMissileRackS extends Weapon{
 		
 	public $checkAmmoMagazine = true;
 	
-    public $useOEW = false;
+//    public $useOEW = false;
     public $ballistic = true;
     public $animation = "trail";
     public $animationColor = array(50, 50, 50);
@@ -1034,7 +1040,8 @@ class AmmoMissileRackS extends Weapon{
 	// estimated warheads in magazine: 400 (20 missiles, dmg 20 each - assuming Basic missiles)
 	// a quarter of the above: 100
 	// reduce somewhat by expected expendientures (say, *0.75): 75
-    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+	// also, official rules expect Raking mode, not Flash - but it's somewhat of a washout (Flash offers higher chance of destroying section, but lower of damage penetrating deeper)
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion (d20)
     
     public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     public $weaponClass = "Ballistic"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
@@ -1070,6 +1077,7 @@ class AmmoMissileRackS extends Weapon{
 		$this->ammoClassesArray[] =  new AmmoMissileF();
 		$this->ammoClassesArray[] =  new AmmoMissileA();
 		$this->ammoClassesArray[] =  new AmmoMissileP();
+		$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
 	
 		$this->ammoMagazine = $magazine;
 		if($base){
@@ -1084,6 +1092,10 @@ class AmmoMissileRackS extends Weapon{
     
 	public function setSystemDataWindow($turn){
 		$this->data["Special"] = 'Available firing modes depend on ammo bought as unit enhancements. Ammunition available is tracked by central Ammunition Magazine system.';
+		if ($this->rackExplosionThreshold < 21) { //can explode - inform player!
+			$chance = (21 - $this->rackExplosionThreshold) * 5; //percentage chance of explosion
+			$this->data["Special"] .= '<br>Can explode if damaged or destroyed, dealing ' . $this->rackExplosionDamage . ' damage in Flash mode (' . $chance . '% chance).';
+		}	
 		parent::setSystemDataWindow($turn);
 	}
 	
@@ -1107,7 +1119,6 @@ class AmmoMissileRackS extends Weapon{
 		$this->minDamageArray = array();
 		$this->maxDamageArray = array();
 		$this->ammoClassesUsed = array();
-		
 		
 		//add data for all modes to arrays
 		$currMode = 0;
@@ -1240,6 +1251,7 @@ class AmmoMissileRackS extends Weapon{
 
 /*Class-L Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
 	all functionality prepared in standard class-S rack
+	holds 20 missiles
 */
 class AmmoMissileRackL extends AmmoMissileRackS{
 	public $name = "ammoMissileRackL";
@@ -1266,5 +1278,205 @@ class AmmoMissileRackL extends AmmoMissileRackS{
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
 	}
 } //endof class AmmoMissileRackL
+
+
+/*Class-LH Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
+	all functionality prepared in standard class-S rack
+	holds 20 missiles
+*/
+class AmmoMissileRackLH extends AmmoMissileRackS{
+	public $name = "ammoMissileRackLH";
+        public $displayName = "Class-LH Missile Rack";
+    public $iconPath = "missile2.png";    
+	
+    public $range = 30;
+    public $distanceRange = 70;
+    public $firingMode = 1;
+    public $priority = 6;
+    public $loadingtime = 2;
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(4,4,4);
+	protected $basicRange=30;
+	protected $basicDistanceRange = 70;
+
+    protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
+    protected $rackExplosionThreshold = 21; //how high roll is needed for rack explosion    
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 8;
+            	if ( $powerReq == 0 ) $powerReq = 0;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+	}
+} //endof class AmmoMissileRackLH
+
+
+
+/*Class-B Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
+	all functionality prepared in standard class-S rack
+	holds 60 missiles
+*/
+class AmmoMissileRackB extends AmmoMissileRackS{
+	public $name = "ammoMissileRackB";
+        public $displayName = "Class-B Missile Rack";
+    public $iconPath = "missile3.png";    
+	
+    public $range = 30;
+    public $distanceRange = 70;
+    public $firingMode = 1;
+    public $priority = 6;
+    public $loadingtime = 1;
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(3,3,3);
+	protected $basicRange=30;
+	protected $basicDistanceRange = 70;
+
+    protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
+    protected $rackExplosionThreshold = 21; //how high roll is needed for rack explosion    
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 9;
+            	if ( $powerReq == 0 ) $powerReq = 0;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+	}
+} //endof class AmmoMissileRackB
+
+
+
+/*Class-R Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
+	all functionality prepared in standard class-S rack
+	holds 20 missiles
+*/
+class AmmoMissileRackR extends AmmoMissileRackS{
+	public $name = "ammoMissileRackR";
+        public $displayName = "Class-R Missile Rack";
+    public $iconPath = "missile2.png";    
+	
+    public $range = 20;
+    public $distanceRange = 60;
+    public $firingMode = 1;
+    public $priority = 6;
+    public $loadingtime = 1;
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(3,3,3);
+	protected $basicRange=20;
+	protected $basicDistanceRange = 60;
+
+    protected $rackExplosionDamage = 75; //how much damage will this weapon do in case of catastrophic explosion
+    protected $rackExplosionThreshold = 19; //how high roll is needed for rack explosion    
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 0;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+	}
+} //endof class AmmoMissileRackR
+
+
+
+/*Class-SO Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
+	all functionality prepared in standard class-S rack
+	holds 12 missiles (as it's often fitted to old ships - check munitions reasonably available!)
+*/
+class AmmoMissileRackSO extends AmmoMissileRackS{
+	public $name = "ammoMissileRackSO";
+        public $displayName = "Class-SO Missile Rack";
+    public $iconPath = "missile1.png";    
+	
+    public $range = 20;
+    public $distanceRange = 60;
+    public $firingMode = 1;
+    public $priority = 6;
+    public $loadingtime = 2;
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(2,2,2);
+	protected $basicRange=20;
+	protected $basicDistanceRange = 60;
+
+    protected $rackExplosionDamage = 45; //how much damage will this weapon do in case of catastrophic explosion (Class-SO launcher has smaller magazine than Class-S)
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 0;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+	}
+} //endof class AmmoMissileRackSO
+
+
+
+/*Class-A Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
+	all functionality prepared in standard class-S rack
+	holds 20 missiles (Antifighter Missiles ONLY, at no additional price)
+*/
+class AmmoMissileRackA extends AmmoMissileRackS{
+	public $name = "ammoMissileRackA";
+        public $displayName = "Class-A Missile Rack";
+    public $iconPath = "missile2.png";    
+	
+    public $range = 20; //antifighter missile itself will reduce it - this way the same missile fits all racks
+    public $distanceRange = 60;
+    public $firingMode = 1;
+    public $priority = 6;
+    public $loadingtime = 1;
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(4,0,0);
+	protected $basicRange=20;
+	protected $basicDistanceRange = 60;
+
+    protected $rackExplosionDamage = 56; //how much damage will this weapon do in case of catastrophic explosion
+    protected $rackExplosionThreshold = 19; //how high roll is needed for rack explosion    
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 0;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+		//reset missile availability! (Parent sets way too much)
+		$this->ammoClassesArray = array();
+		$this->ammoClassesArray[] =  new AmmoMissileA();
+		$this->recompileFiringModes();
+	}
+} //endof class AmmoMissileRackA
+
+
+/*Bomb Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
+	all functionality prepared in standard class-S rack
+	holds 8 missiles (Basic Missiles by default at no price (unless filled with actual bombs), the only other option is Flash missiles)
+*/
+class AmmoBombRack extends AmmoMissileRackS{
+	public $name = "ammoBombRack";
+        public $displayName = "Bomb Rack";
+    public $iconPath = "bombRack.png";    
+	
+    public $range = 20;
+    public $distanceRange = 60;
+    public $firingMode = 1;
+    public $priority = 6;
+    public $loadingtime = 1;
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(1,2,3);
+	protected $basicRange=20;
+	protected $basicDistanceRange = 60;
+
+    protected $rackExplosionDamage = 30; //how much damage will this weapon do in case of catastrophic explosion
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 0;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+		//reset missile availability! (Parent sets way too much)
+		$this->ammoClassesArray = array();
+		$this->ammoClassesArray[] =  new AmmoMissileB();
+		$this->ammoClassesArray[] =  new AmmoMissileF();
+		$this->recompileFiringModes();
+	}
+} //endof class AmmoBombRack
+
 
 ?>

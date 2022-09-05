@@ -5,14 +5,15 @@ class apollostrike extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 875;
-        $this->faction = "EA";
+        $this->faction = "Custom Ships";
+	    $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "apollostrike";
         $this->imagePath = "img/ships/apollo.png";
         $this->shipClass = "Apollo Strike Cruiser";
         $this->shipSizeClass = 3;
         $this->canvasSize = 200;
         $this->occurence = "uncommon";
-        $this->variantOf = "Apollo Bombardment Cruiser";
+        //$this->variantOf = "Apollo Bombardment Cruiser";
 		$this->unofficial = true;                
         $this->fighters = array("normal"=>6);
 		$this->customFighter = array("Thunderbolt"=>6);        

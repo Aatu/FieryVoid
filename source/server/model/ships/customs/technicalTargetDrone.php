@@ -25,6 +25,19 @@ class technicalTargetDrone extends BaseShip{
 //		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
 		
 		$this->notes = "DO NOT USE, prone to change!";
+
+
+	//ammo magazine itself (AND its missile options)
+	$ammoMagazine = new AmmoMagazine(120); //pass magazine capacity 
+	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 120); //add full load of basic missiles
+	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
+	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
+	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
+	    $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+
+
 		
 //		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 180, 360));
 //		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 0, 180));
@@ -90,10 +103,9 @@ class technicalTargetDrone extends BaseShip{
 */
 		
 
+        $this->addFrontSystem(new AmmoMissileRackR(3, 0, 0, 240, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addFrontSystem(new AmmoMissileRackR(3, 0, 0, 240, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addFrontSystem(new NexusLaserMissile(1, 6, 1, 0, 360));
-		$this->addFrontSystem(new NexusLaserMissile(1, 6, 1, 0, 360));
-		$this->addFrontSystem(new TestGun(1, 2, 1, 0, 360));
-		$this->addFrontSystem(new TestGun(1, 4, 2, 0, 360));
 		$this->addFrontSystem(new TestGun(1, 6, 3, 0, 360));
 //		$this->addFrontSystem(new Enveloper(3, 8, 6, 300, 60));
 

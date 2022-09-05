@@ -4,7 +4,7 @@ class TrekFederationIntrepid extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 220;
+        $this->pointCost = 180;
         $this->faction = "ZTrek Federation (early)";
         $this->phpclass = "TrekFederationIntrepid";
         $this->imagePath = "img/ships/StarTrek/Intrepid.png";

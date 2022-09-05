@@ -28,7 +28,7 @@ class TrekMazeriteShip extends MediumShip{
 
         $this->addPrimarySystem(new Reactor(4, 16, 0, 2));
         $this->addPrimarySystem(new CnC(4, 9, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 10, 4, 3));
+        $this->addPrimarySystem(new Scanner(4, 10, 4, 4));
         $this->addPrimarySystem(new Hangar(3, 2));
 	$impulseDrive = new TrekImpulseDrive(4,18,0,0,2); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 

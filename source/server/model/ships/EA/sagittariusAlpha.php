@@ -5,11 +5,12 @@ class SagittariusAlpha extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 650;
-        $this->faction = "EA";
+        $this->faction = "Custom Ships";
+	    $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "SagittariusAlpha";
         $this->imagePath = "img/ships/sagittarius.png";
         $this->shipClass = "Sagittarius Missile Cruiser (Alpha Model)";
-			$this->variantOf = "Sagittarius Missile Cruiser (Beta Model)";
+			//$this->variantOf = "Sagittarius Missile Cruiser (Beta Model)";
 			$this->occurence = "common";
  		$this->unofficial = true;
         $this->shipSizeClass = 3;

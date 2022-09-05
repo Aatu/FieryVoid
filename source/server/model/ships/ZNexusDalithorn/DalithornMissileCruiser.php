@@ -15,7 +15,7 @@ class DalithornMissileCruiser extends HeavyCombatVessel{
 		$this->unofficial = true;
         $this->isd = 2058;
 
-//        $this->fighters = array("superheavy"=>1);
+        $this->fighters = array("superheavy"=>1);
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
@@ -33,7 +33,7 @@ class DalithornMissileCruiser extends HeavyCombatVessel{
         $this->addPrimarySystem(new Engine(3, 16, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(1, 2));
 		$this->addPrimarySystem(new CargoBay(2, 12));
-//		$this->addPrimarySystem(new Catapult(1, 6));
+		$this->addPrimarySystem(new Catapult(1, 6));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
       
@@ -46,8 +46,8 @@ class DalithornMissileCruiser extends HeavyCombatVessel{
         $this->addFrontSystem(new NexusShatterGun(1, 2, 1, 300, 180));
                 
         $this->addAftSystem(new Thruster(1, 4, 0, 2, 2));
-        $this->addAftSystem(new Thruster(1, 4, 0, 2, 2));
         $this->addAftSystem(new Thruster(2, 13, 0, 4, 2));
+        $this->addAftSystem(new Thruster(1, 4, 0, 2, 2));
         $this->addAftSystem(new NexusLaserMissile(2, 6, 1, 300, 60));
         $this->addAftSystem(new NexusLaserMissile(2, 6, 1, 300, 60));
         $this->addAftSystem(new NexusLightGasGun(2, 5, 1, 120, 300));
@@ -60,8 +60,8 @@ class DalithornMissileCruiser extends HeavyCombatVessel{
 		
         $this->hitChart = array(
             0=> array(
-                    9 => "Structure",
-//					9 => "Catapult",
+                    8 => "Structure",
+					9 => "Catapult",
 					11 => "Cargo Bay",
                     13 => "Thruster",
                     15 => "Scanner",

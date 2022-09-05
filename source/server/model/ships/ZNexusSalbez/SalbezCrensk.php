@@ -40,9 +40,9 @@ class SalbezCrensk extends LCV{
 			$this->addPrimarySystem($sensors);
 		$this->addPrimarySystem(new Engine(4, 12, 0, 8, 3));
 
-		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 120, 60));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 150, 30));
 		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
-		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 240));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 330, 210));
     
         $this->addPrimarySystem(new Structure(4, 32));
 	    

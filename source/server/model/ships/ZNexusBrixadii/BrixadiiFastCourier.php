@@ -26,7 +26,7 @@ class BrixadiiFastCourier extends BaseShipNoAft{
 		$this->iniativebonus = 5;
          
         $this->addPrimarySystem(new Reactor(5, 18, 0, 0));
-        $this->addPrimarySystem(new CnC(5, 20, 0, 0));
+        $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 5, 6));
         $this->addPrimarySystem(new Engine(4, 18, 0, 10, 4));
 		$this->addPrimarySystem(new Hangar(2, 4));
@@ -36,8 +36,8 @@ class BrixadiiFastCourier extends BaseShipNoAft{
 
         $this->addFrontSystem(new Thruster(3, 14, 0, 5, 1));
         $this->addFrontSystem(new Thruster(3, 14, 0, 5, 1));
-		$this->addFrontSystem(new NexusProjectorArray(3, 6, 1, 240, 60));
-		$this->addFrontSystem(new NexusProjectorArray(3, 6, 1, 300, 120));
+		$this->addFrontSystem(new EnergyPulsar(3, 6, 3, 240, 60));
+		$this->addFrontSystem(new EnergyPulsar(3, 6, 3, 300, 120));
 		$this->addFrontSystem(new CargoBay(2, 16));
 		$this->addFrontSystem(new CargoBay(2, 16));
         
@@ -73,7 +73,7 @@ class BrixadiiFastCourier extends BaseShipNoAft{
             1=> array(
                     5 => "Thruster",
 					10 => "Cargo Bay",
-					12 => "Projector Array",
+					12 => "Energy Pulsar",
 					18 => "Structure",
                     20 => "Primary",
             ),

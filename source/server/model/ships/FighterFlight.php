@@ -438,6 +438,7 @@ class FighterFlight extends BaseShip
 		$armor = $weapon->getSystemArmourComplete($this, $craft, $gamedata, $fire);		
 		//modify by defensive system (like Diffuser)! 
 		$protection=0;
+		
 		$protectingSystem = $this->getSystemProtectingFromDamage($shooter, null, $gamedata->turn, $weapon, $craft,$dmgPotential);//let's find biggest one!
 		if($protectingSystem){ //may be unavailable, eg. already filled
 			$protection = $protectingSystem->doesProtectFromDamage($dmgPotential, $craft);
@@ -469,7 +470,9 @@ class FighterFlight extends BaseShip
 		if (($minRemainingHP<$dropoutThreshold) && ($alreadyDropoutSubject==false)) $canBeDroppedOut = true;
 		$canBeKilled = false;
 		if ($minRemainingHP<1) $canBeKilled = true;
-		$singleCraft = array("id"=>$craft->id, "hp"=>$remainingHP, "canDrop"=>$canBeDroppedOut, "canDie"=>$canBeKilled, "fighter"=>$craft);
+		//$singleCraft = array("id"=>$craft->id, "hp"=>$remainingHP, "canDrop"=>$canBeDroppedOut, "canDie"=>$canBeKilled, "fighter"=>$craft);
+		//let's add non-armor resistance to list of priorities - these are usually depletable but do regenerate...
+		$singleCraft = array("id"=>$craft->id, "hp"=>$remainingHP, "canDrop"=>$canBeDroppedOut, "canDie"=>$canBeKilled, "fighter"=>$craft, "protection"=>$protection);
 		$craftWithData[] = $singleCraft;
 	}
 	    
@@ -482,8 +485,15 @@ class FighterFlight extends BaseShip
 		} else if (($a["canDie"] == true) && ($b["canDie"] == false)){ //prefer craft with no death chance
 		    return 1;	
 		} else if (($b["canDie"] == true) && ($a["canDie"] == false)){ 
+		    return -1;
+			
+		//prefer better protected craft - even before more durable one (as long as there is no threat of dropout...)
+		} else if ($a["protection"] < $b["protection"]){ //prefer best protected craft!
+		    return 1;
+		} else if ($b["protection"] < $a["protection"]){ 
 		    return -1;	
-		} else if ($a["hp"] < $b["hp"]){ //prefer already damaged craft
+			
+		} else if ($a["hp"] < $b["hp"]){ //prefer most durable craft!
 		    return 1;
 		} else if ($b["hp"] < $a["hp"]){ 
 		    return -1;	
@@ -498,7 +508,7 @@ class FighterFlight extends BaseShip
 	return $craftWithData[0]["fighter"];
 
         //return $systems[(Dice::d(sizeof($systems)) - 1)];
-    }
+    }//endof function 
 
 
     public function getAllFireOrders($turn = -1)
@@ -522,7 +532,6 @@ class FighterFlight extends BaseShip
         foreach ($this->systems as $fighter) if ($fighter->id == $craft->id){//only for indicated craft
             foreach ($fighter->systems as $system) {
                 $orders = array_merge($orders, $system->getFireOrders($turn));
-                //$orders = array_merge($orders, $system->fireOrders); //old version
             }
         }
 

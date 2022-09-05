@@ -46,8 +46,8 @@ class DalithornCarrier extends HeavyCombatVessel{
         $this->addFrontSystem(new NexusShatterGun(1, 2, 1, 300, 180));
                 
         $this->addAftSystem(new Thruster(1, 4, 0, 2, 2));
-        $this->addAftSystem(new Thruster(1, 4, 0, 2, 2));
         $this->addAftSystem(new Thruster(2, 13, 0, 4, 2));
+        $this->addAftSystem(new Thruster(1, 4, 0, 2, 2));
         $this->addAftSystem(new NexusGasGun(2, 7, 2, 300, 60));
         $this->addAftSystem(new NexusGasGun(2, 7, 2, 300, 60));
         $this->addAftSystem(new NexusLightGasGun(2, 5, 1, 120, 300));

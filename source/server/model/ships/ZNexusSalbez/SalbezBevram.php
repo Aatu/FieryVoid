@@ -28,7 +28,7 @@ class SalbezBevram extends SmallStarBaseFourSections{
 
 		$this->addPrimarySystem(new Reactor(3, 17, 0, 0));
 		$this->addPrimarySystem(new CnC(3, 10, 0, 0));
-		$this->addPrimarySystem(new Scanner(3, 10, 4, 4));
+		$this->addPrimarySystem(new Scanner(3, 10, 5, 5));
 		$this->addPrimarySystem(new Hangar(3, 12));
 		$this->addPrimarySystem(new CargoBay(3, 40));
 		

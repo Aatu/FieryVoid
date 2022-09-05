@@ -8,7 +8,7 @@ class SalbezReshkenRefit extends BaseShip{
 	$this->faction = "ZNexus Sal-bez";
         $this->phpclass = "SalbezReshkenRefit";
         $this->imagePath = "img/ships/Nexus/salbez_reshken.png";
-        $this->shipClass = "Resh-ken Command Cruiser (2150 refit)";
+        $this->shipClass = "Resh-ken Command Cruiser (2143 refit)";
 			$this->variantOf = "Jer't'kat Heavy Cruiser";
 			$this->occurence = "rare";
         $this->shipSizeClass = 3;
@@ -18,7 +18,7 @@ class SalbezReshkenRefit extends BaseShip{
 
         $this->fighters = array("normal"=>6);
 
-		$this->isd = 2150;
+		$this->isd = 2143;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
@@ -52,14 +52,14 @@ class SalbezReshkenRefit extends BaseShip{
 		$this->addAftSystem(new JumpEngine(4, 15, 4, 36));
 
         $this->addLeftSystem(new MediumLaser(3, 6, 5, 240, 360));
-        $this->addLeftSystem(new NexusSwarmTorpedo(3, 4, 2, 240, 360));
+        $this->addLeftSystem(new NexusSwarmTorpedo(3, 5, 2, 240, 360));
 		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 2, 1, 240, 60));
 		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 2, 1, 240, 60));
 		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 2, 1, 120, 300));
         $this->addLeftSystem(new Thruster(3, 15, 0, 4, 3));
 
         $this->addRightSystem(new MediumLaser(3, 6, 5, 0, 120));
-        $this->addRightSystem(new NexusSwarmTorpedo(3, 4, 2, 0, 120));
+        $this->addRightSystem(new NexusSwarmTorpedo(3, 5, 2, 0, 120));
 		$this->addRightSystem(new NexusImprovedParticleBeam(2, 2, 1, 300, 120));
 		$this->addRightSystem(new NexusImprovedParticleBeam(2, 2, 1, 300, 120));
 		$this->addRightSystem(new NexusImprovedParticleBeam(2, 2, 1, 60, 240));
@@ -70,7 +70,7 @@ class SalbezReshkenRefit extends BaseShip{
         $this->addAftSystem(new Structure(4, 40));
         $this->addLeftSystem(new Structure(4, 40));
         $this->addRightSystem(new Structure(4, 40));
-        $this->addPrimarySystem(new Structure(4, 40));
+        $this->addPrimarySystem(new Structure(5, 40));
 		
 		$this->hitChart = array(
 			0=> array(

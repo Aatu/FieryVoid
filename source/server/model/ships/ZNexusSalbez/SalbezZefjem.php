@@ -69,9 +69,9 @@ class SalbezZefjem extends HeavyCombatVessel{
                     20 => "Primary",
             ),
             2=> array(
-                    8 => "Thruster",
-                    10 => "Laser Cutter",
-					12 => "Light Particle Beam",
+                    6 => "Thruster",
+                    8 => "Laser Cutter",
+					10 => "Light Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),
