@@ -42,7 +42,7 @@ class SalbezCrevnen extends FighterFlight{
 	        $light = new NexusParticleGridFtr(270, 90, 1); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($light);
 			
-			$aft = new LightParticleBeam(150, 210, 1, 1);
+			$aft = new PairedParticleGun(150, 210, 1, 1);
 			$fighter->addAftSystem($aft);
 			
 //			$missile = new NexusDartFtr(2, 330, 30);

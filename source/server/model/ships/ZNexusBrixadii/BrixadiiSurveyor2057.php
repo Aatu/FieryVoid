@@ -37,8 +37,8 @@ class BrixadiiSurveyor2057 extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(3, 14, 0, 6, 1));
     	$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 240, 0));
         $this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 0, 120));
-        $this->addFrontSystem(new NexusDefensePulsar(2, 4, 2, 180, 60));
-        $this->addFrontSystem(new NexusDefensePulsar(2, 4, 2, 300, 180));
+        $this->addFrontSystem(new NexusDefensePulsar(1, 4, 2, 180, 60));
+        $this->addFrontSystem(new NexusDefensePulsar(1, 4, 2, 300, 180));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));

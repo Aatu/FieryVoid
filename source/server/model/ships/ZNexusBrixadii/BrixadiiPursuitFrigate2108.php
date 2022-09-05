@@ -34,7 +34,8 @@ class BrixadiiPursuitFrigate2108 extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 14, 0, 6, 3));
         $this->addPrimarySystem(new Thruster(2, 14, 0, 6, 4));
       
-        $this->addFrontSystem(new Thruster(3, 14, 0, 6, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 		$this->addFrontSystem(new EnergyPulsar(2, 6, 3, 240, 60));
 		$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 300, 60));
 		$this->addFrontSystem(new EnergyPulsar(2, 6, 3, 300, 120));

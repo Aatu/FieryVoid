@@ -38,7 +38,7 @@ class DalithornWarStation extends SmallStarBaseFourSections{
 		
 		$this->addFrontSystem(new NexusHeavyCoilgun(4, 12, 5, 300, 60));
 		$this->addFrontSystem(new NexusGasGun(4, 7, 2, 270, 90));
-		$this->addFrontSystem(new NexusGasGun(4, 7, 2, 270, 90));
+		$this->addFrontSystem(new NexusHeavyLaserMissile(4, 6, 3, 270, 90));
 		$this->addFrontSystem(new NexusAutocannon(4, 4, 1, 270, 90));
 		$this->addFrontSystem(new NexusAutocannon(4, 4, 1, 270, 90));
 		$this->addFrontSystem(new NexusMinigun(4, 4, 1, 270, 90));
@@ -47,7 +47,7 @@ class DalithornWarStation extends SmallStarBaseFourSections{
 
 		$this->addAftSystem(new NexusHeavyCoilgun(4, 12, 5, 120, 240));
 		$this->addAftSystem(new NexusGasGun(4, 7, 2, 90, 270));
-		$this->addAftSystem(new NexusGasGun(4, 7, 2, 90, 270));
+		$this->addAftSystem(new NexusHeavyLaserMissile(4, 6, 3, 90, 270));
 		$this->addAftSystem(new NexusAutocannon(4, 4, 1, 90, 270));
 		$this->addAftSystem(new NexusAutocannon(4, 4, 1, 90, 270));
 		$this->addAftSystem(new NexusMinigun(4, 4, 1, 90, 270));
@@ -56,7 +56,7 @@ class DalithornWarStation extends SmallStarBaseFourSections{
 			
 		$this->addLeftSystem(new NexusHeavyCoilgun(4, 12, 5, 210, 330));
 		$this->addLeftSystem(new NexusGasGun(4, 7, 2, 180, 360));
-		$this->addLeftSystem(new NexusGasGun(4, 7, 2, 180, 360));
+		$this->addLeftSystem(new NexusHeavyLaserMissile(4, 6, 3, 180, 360));
 		$this->addLeftSystem(new NexusAutocannon(4, 4, 1, 180, 360));
 		$this->addLeftSystem(new NexusAutocannon(4, 4, 1, 180, 360));
 		$this->addLeftSystem(new NexusMinigun(4, 4, 1, 180, 360));
@@ -65,7 +65,7 @@ class DalithornWarStation extends SmallStarBaseFourSections{
 
 		$this->addRightSystem(new NexusHeavyCoilgun(4, 12, 5, 30, 150));
 		$this->addRightSystem(new NexusGasGun(4, 7, 2, 0, 180));
-		$this->addRightSystem(new NexusGasGun(4, 7, 2, 0, 180));
+		$this->addRightSystem(new NexusHeavyLaserMissile(4, 6, 3, 0, 180));
 		$this->addRightSystem(new NexusAutocannon(4, 4, 1, 0, 180));
 		$this->addRightSystem(new NexusAutocannon(4, 4, 1, 0, 180));
 		$this->addRightSystem(new NexusMinigun(4, 4, 1, 0, 180));
@@ -93,8 +93,9 @@ class DalithornWarStation extends SmallStarBaseFourSections{
 				5 => "Autocannon",
 				7 => "Catapult",
 				9 => "Gas Gun",
-				10 => "Minigun",
-				11 => "Cargo Bay",
+				11 => "Heavy Laser Missile",
+				12 => "Minigun",
+				13 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -103,8 +104,9 @@ class DalithornWarStation extends SmallStarBaseFourSections{
 				5 => "Autocannon",
 				7 => "Catapult",
 				9 => "Gas Gun",
-				10 => "Minigun",
-				11 => "Cargo Bay",
+				11 => "Heavy Laser Missile",
+				12 => "Minigun",
+				13 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),	
@@ -113,8 +115,9 @@ class DalithornWarStation extends SmallStarBaseFourSections{
 				5 => "Autocannon",
 				7 => "Catapult",
 				9 => "Gas Gun",
-				10 => "Minigun",
-				11 => "Cargo Bay",
+				11 => "Heavy Laser Missile",
+				12 => "Minigun",
+				13 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -123,8 +126,9 @@ class DalithornWarStation extends SmallStarBaseFourSections{
 				5 => "Autocannon",
 				7 => "Catapult",
 				9 => "Gas Gun",
-				10 => "Minigun",
-				11 => "Cargo Bay",
+				11 => "Heavy Laser Missile",
+				12 => "Minigun",
+				13 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),

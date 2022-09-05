@@ -30,7 +30,7 @@ class BrixadiiSentinelPlatform2107 extends OSAT{
         $this->addPrimarySystem(new HvyParticleProjector(3, 8, 4, 300, 60));
         $this->addPrimarySystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
         $this->addPrimarySystem(new ScatterPulsar(1, 4, 2, 0, 360));
-        $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
+        $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 6, 3, 5));   
         $this->addPrimarySystem(new Thruster(3, 6, 0, 0, 2));
                 

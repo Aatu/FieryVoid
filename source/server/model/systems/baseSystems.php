@@ -3660,7 +3660,7 @@ class AmmoMissileB{
 	public $priority = 6;
 	public $priorityAF = 5;
 	public $noOverkill = false;
-	
+	public $useOEW = false;
 	
     function __construct(){}
 	
@@ -3692,6 +3692,7 @@ class AmmoMissileL{
 	public $priority = 6;
 	public $priorityAF = 6;
 	public $noOverkill = false;
+    public $useOEW = false;
 		
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
@@ -3721,6 +3722,7 @@ class AmmoMissileH{
 	public $priority = 6;
 	public $priorityAF = 5;
 	public $noOverkill = false;
+    public $useOEW = false;
 		
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
@@ -3750,6 +3752,7 @@ class AmmoMissileF{
 	public $priority = 6;
 	public $priorityAF = 5;
 	public $noOverkill = false;
+    public $useOEW = false;
 		
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
@@ -3780,6 +3783,7 @@ class AmmoMissileA{
 	public $priority = 6;
 	public $priorityAF = 5;
 	public $noOverkill = false;
+    public $useOEW = false;
 		
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
@@ -3809,6 +3813,7 @@ class AmmoMissileP{
 	public $priority = 2;
 	public $priorityAF = 2;//moot, as this missile cannot be fired at fighters
 	public $noOverkill = true;
+    public $useOEW = false;
 		
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {

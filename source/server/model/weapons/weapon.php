@@ -97,13 +97,15 @@ class Weapon extends ShipSystem
 	public $raking = 10;//size of rake (for Raking weapons only)
 	public $rakingArray = array();//size of rake (for multi-mode weapons with variable rake size)
 
+	public $overrideCallingRestricions = false; //when set to true and checked for, can override a base setting (e.g., make a ballistic do a called shot)
+
     public $shots = 1;
     public $shotsArray = array();
     public $defaultShots = 1;
     public $defaultShotsArray = array();
 
     public $rof = 1; 
-
+	
 
     public $grouping = 0;
     public $groupingArray = array();
