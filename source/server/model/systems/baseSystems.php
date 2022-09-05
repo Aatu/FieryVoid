@@ -3825,11 +3825,33 @@ class AmmoMissileP{
 
 
 
-
-
-
-
-
+//ammunition for AmmoMagazine - Class D Missile (for official Missile Racks)
+class AmmoMissileD{	
+	public $name = 'ammoMissileD';
+	public $displayName = 'Light Missile';
+	public $modeName = 'Light';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_D'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Light Missile (2178)'; //enhancement description
+	public $enhancementPrice = 1; //nominally 0 - included in ship price
+	
+	public $rangeMod = -5; //MODIFIER for launch range
+	public $distanceRangeMod = -15; //MODIFIER for distance range
+	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
+	public $minDamage = 12;
+	public $maxDamage = 12;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	public $noOverkill = false;
+		
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 12;
+    }		
+	
+} //endof class AmmoMissileD
 
 
 ?>
