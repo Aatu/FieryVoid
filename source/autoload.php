@@ -627,6 +627,7 @@ spl_autoload_register(
                 'moleculardisruptor' => '/server/model/weapons/molecular.php',
                 'molecularflayer' => '/server/model/weapons/molecular.php',
                 'molecularpulsar' => '/server/model/weapons/pulse.php',
+                'monsoon' => '/server/model/ships/EA/Monsoon.php',
                 'morshin' => '/server/model/ships/minbari/morshin.php',
                 'motenai' => '/server/model/ships/abbai_old/motenai.php',
                 'motenai1935' => '/server/model/ships/abbai_old/motenai1935.php',
@@ -1544,6 +1545,7 @@ spl_autoload_register(
 				'nexusstreakinterceptor' => '/server/model/weapons/customNexus.php',
 				'nexusdartinterceptor' => '/server/model/weapons/customNexus.php',
 				'nexusearlyplasmawave' => '/server/model/weapons/customNexus.php',
+				'nexusheavylasermissile' => '/server/model/weapons/customNexus.php',
 				'nexuslasermissile' => '/server/model/weapons/customNexus.php',
 				'nexusrangedbolttorpedo' => '/server/model/weapons/customNexus.php',
 				'nexusrangedearlyplasmawave' => '/server/model/weapons/customNexus.php',
@@ -1580,7 +1582,10 @@ spl_autoload_register(
 
 
 				//Nexus ships - Brixadii
+                'brixadiisupportbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiSupportBase.php',					
+                'brixadiisupportbaserefit' => '/server/model/ships/ZNexusBrixadii/BrixadiiSupportBaseRefit.php',					
                 'brixadiibase2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiBase2108.php',					
+
                 'brixadiibattledestroyerbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerBase.php',					
                 'brixadiibattledestroyer2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyer2057.php',		
                 'brixadiibattledestroyer2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyer2108.php',	
@@ -1613,6 +1618,7 @@ spl_autoload_register(
 
                 'brixadiilightescortfrigate' => '/server/model/ships/ZNexusBrixadii/BrixadiiLightEscortFrigate.php',
 
+                'brixadiipoliceescort' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceEscort.php',
                 'brixadiipolicefrigatebase' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigateBase.php',
                 'brixadiipolicefrigate2047' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2047.php',
 				'brixadiipolicefrigate2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceFrigate2108.php',
@@ -1651,6 +1657,8 @@ spl_autoload_register(
 
 				//Nexus ships - Dalithorn
                 'dalithorncarrier' => '/server/model/ships/ZNexusDalithorn/DalithornCarrier.php',					
+                'dalithorncommandfrigate' => '/server/model/ships/ZNexusDalithorn/DalithornCommandFrigate.php',					
+                'dalithorncommandfrigaterefit' => '/server/model/ships/ZNexusDalithorn/DalithornCommandFrigateRefit.php',					
                 'dalithorncutter' => '/server/model/ships/ZNexusDalithorn/DalithornCutter.php',					
                 'dalithorncutterrefit' => '/server/model/ships/ZNexusDalithorn/DalithornCutterRefit.php',					
                 'dalithorndreadnought' => '/server/model/ships/ZNexusDalithorn/DalithornDreadnought.php',					
@@ -1664,10 +1672,14 @@ spl_autoload_register(
                 'dalithornfrigaterefit' => '/server/model/ships/ZNexusDalithorn/DalithornFrigateRefit.php',					
                 'dalithorngunboat' => '/server/model/ships/ZNexusDalithorn/DalithornGunboat.php',					
                 'dalithorngunboatrefit' => '/server/model/ships/ZNexusDalithorn/DalithornGunboatRefit.php',					
+                'dalithornheavycommandfrigate' => '/server/model/ships/ZNexusDalithorn/DalithornHeavyCommandFrigate.php',					
                 'dalithornheavydreadnought' => '/server/model/ships/ZNexusDalithorn/DalithornHeavyDreadnought.php',					
                 'dalithornheavyfrigate' => '/server/model/ships/ZNexusDalithorn/DalithornHeavyFrigate.php',					
+                'dalithornheavysupportfrigate' => '/server/model/ships/ZNexusDalithorn/DalithornHeavySupportFrigate.php',					
                 'dalithornjumpdreadnought' => '/server/model/ships/ZNexusDalithorn/DalithornJumpDreadnought.php',					
                 'dalithornheavyjumpdreadnought' => '/server/model/ships/ZNexusDalithorn/DalithornHeavyJumpDreadnought.php',					
+                'dalithornhlasermissileosat' => '/server/model/ships/ZNexusDalithorn/DalithornHLaserMissileOSAT.php',					
+                'dalithornlasermissileosat' => '/server/model/ships/ZNexusDalithorn/DalithornLaserMissileOSAT.php',					
                 'dalithornlightcruiser' => '/server/model/ships/ZNexusDalithorn/DalithornLightCruiser.php',					
                 'dalithornmicrosat' => '/server/model/ships/ZNexusDalithorn/DalithornMicrosat.php',					
                 'dalithornmicrosatrefit' => '/server/model/ships/ZNexusDalithorn/DalithornMicrosatRefit.php',					
@@ -1684,6 +1696,7 @@ spl_autoload_register(
                 'dalithornsmallscoutrefit' => '/server/model/ships/ZNexusDalithorn/DalithornSmallScoutRefit.php',					
                 'dalithornstation' => '/server/model/ships/ZNexusDalithorn/DalithornStation.php',					
                 'dalithornstationearly' => '/server/model/ships/ZNexusDalithorn/DalithornStationEarly.php',					
+                'dalithornsupportfrigate' => '/server/model/ships/ZNexusDalithorn/DalithornSupportFrigate.php',					
                 'dalithornwarstation' => '/server/model/ships/ZNexusDalithorn/DalithornWarStation.php',					
 
 
@@ -1698,6 +1711,8 @@ spl_autoload_register(
                 'salbezcrensk' => '/server/model/ships/ZNexusSalbez/SalbezCrensk.php',					
                 'salbezcrenskrefit' => '/server/model/ships/ZNexusSalbez/SalbezCrenskRefit.php',					
                 'salbezcrevnen' => '/server/model/ships/ZNexusSalbez/SalbezCrevnen.php',					
+                'salbezcurchk' => '/server/model/ships/ZNexusSalbez/SalbezCurchk.php',					
+                'salbezcurchkrefit' => '/server/model/ships/ZNexusSalbez/SalbezCurchkRefit.php',					
                 'salbezdrazchk' => '/server/model/ships/ZNexusSalbez/SalbezDrazchk.php',					
                 'salbezesver' => '/server/model/ships/ZNexusSalbez/SalbezEsver.php',					
                 'salbezevsk' => '/server/model/ships/ZNexusSalbez/SalbezEvsk.php',					
@@ -1706,6 +1721,7 @@ spl_autoload_register(
 //                'salbezfelrizrefit2' => '/server/model/ships/ZNexusSalbez/SalbezFelrizRefit2.php',					
                 'salbezjertkat' => '/server/model/ships/ZNexusSalbez/SalbezJertkat.php',					
                 'salbezjertkatrefit' => '/server/model/ships/ZNexusSalbez/SalbezJertkatRefit.php',					
+                'salbezkretck' => '/server/model/ships/ZNexusSalbez/SalbezKretck.php',					
                 'salbeznarken' => '/server/model/ships/ZNexusSalbez/SalbezNarken.php',					
                 'salbeznarkenrefit' => '/server/model/ships/ZNexusSalbez/SalbezNarkenRefit.php',					
                 'salbeznavren' => '/server/model/ships/ZNexusSalbez/SalbezNavren.php',					
@@ -1714,13 +1730,19 @@ spl_autoload_register(
                 'salbezresktan' => '/server/model/ships/ZNexusSalbez/SalbezResktan.php',					
                 'salbezrevtan' => '/server/model/ships/ZNexusSalbez/SalbezRevtan.php',					
                 'salbezrevtanrefit' => '/server/model/ships/ZNexusSalbez/SalbezRevtanRefit.php',					
+                'salbezriktchen' => '/server/model/ships/ZNexusSalbez/SalbezRiktchen.php',					
+                'salbezriktchenrefit' => '/server/model/ships/ZNexusSalbez/SalbezRiktchenRefit.php',					
                 'salbezshvrak' => '/server/model/ships/ZNexusSalbez/SalbezShvrak.php',					
 //                'salbezshvrakrefit' => '/server/model/ships/ZNexusSalbez/SalbezShvrakRefit.php',					
                 'salbezshvrez' => '/server/model/ships/ZNexusSalbez/SalbezShvrez.php',					
                 'salbezshvrezrefit' => '/server/model/ships/ZNexusSalbez/SalbezShvrezRefit.php',					
                 'salbeztakriz' => '/server/model/ships/ZNexusSalbez/SalbezTakriz.php',					
                 'salbeztakrizrefit' => '/server/model/ships/ZNexusSalbez/SalbezTakrizRefit.php',					
+                'salbeztarsk' => '/server/model/ships/ZNexusSalbez/SalbezTarsk.php',					
+                'salbeztarskrefit' => '/server/model/ships/ZNexusSalbez/SalbezTarskRefit.php',					
                 'salbeztavertez' => '/server/model/ships/ZNexusSalbez/SalbezTavertez.php',					
+                'salbezvaschk' => '/server/model/ships/ZNexusSalbez/SalbezVaschk.php',					
+                'salbezvaschkrefit' => '/server/model/ships/ZNexusSalbez/SalbezVaschkRefit.php',					
                 'salbezvasken' => '/server/model/ships/ZNexusSalbez/SalbezVasken.php',					
                 'salbezvaskenrefit' => '/server/model/ships/ZNexusSalbez/SalbezVaskenRefit.php',					
                 'salbezurzchk' => '/server/model/ships/ZNexusSalbez/SalbezUrzchk.php',					
@@ -1948,7 +1970,11 @@ spl_autoload_register(
                 'kobolvipermk7' => '/server/model/ships/ZBSGKobol/KobolViperMk7.php',
 
 				//Battlestar Galactic - Cylons
-				'cylonbasestar' => '/server/model/ships/ZBSGCylons/CylonBasestar.php',				
+                'ltguidedmissile' => '/server/model/weapons/customBSG.php',
+                'medguidedmissile' => '/server/model/weapons/customBSG.php',
+                'hvyguidedmissile' => '/server/model/weapons/customBSG.php',
+
+//				'cylonbasestar' => '/server/model/ships/ZBSGCylons/CylonBasestar.php',				
 				'cylonsparrowraider' => '/server/model/ships/ZBSGCylons/CylonSparrowRaider.php',				
 
                 'bsghybrid' => '/server/model/systems/baseSystems.php',
@@ -2591,6 +2617,52 @@ spl_autoload_register(
 //				'hyachdartha' => '/server/model/ships/hyach/HyachDartha.php',
 //				'hyachdoskva' => '/server/model/ships/hyach/HyachDoskva.php',
 //				'hyachirokaikam' => '/server/model/ships/hyach/HyachIrokaiKam.php',
+
+
+
+
+				//Kor-Lyan
+//         		'ammomissilerackf' => '/server/model/weapons/customNexus.php', //missile racks themselves
+/*				'axor' => '/server/model/ships/korlyan/Axor.php',
+				'cokra' => '/server/model/ships/korlyan/Cokra.php',
+				'fenja' => '/server/model/ships/korlyan/Fenja.php',
+				'kalavar' => '/server/model/ships/korlyan/Kalavar.php',
+				'kalavarearly' => '/server/model/ships/korlyan/KalavarEarly.php',
+				'kalti' => '/server/model/ships/korlyan/Kalti.php',
+				'kolosk' => '/server/model/ships/korlyan/Kolosk.php',
+				'koloskearly' => '/server/model/ships/korlyan/KoloskEarly.php',
+				'koloskova' => '/server/model/ships/korlyan/Koloskova.php',
+				'kosha' => '/server/model/ships/korlyan/Kosha.php',
+				'koshaearly' => '/server/model/ships/korlyan/KoshaEarly.php',
+				'koskova' => '/server/model/ships/korlyan/Koskova.php',
+				'koskovaearly' => '/server/model/ships/korlyan/KoskovaEarly.php',
+				'leklant' => '/server/model/ships/korlyan/Leklant.php',
+				'leklantearly' => '/server/model/ships/korlyan/LeklantEarly.php',
+				'lekra' => '/server/model/ships/korlyan/Lekra.php',
+				'merkul' => '/server/model/ships/korlyan/Merkul.php',
+				'merkularmed' => '/server/model/ships/korlyan/MerkulArmed.php',
+				'merkulmissile' => '/server/model/ships/korlyan/MerkulMissile.php',
+				'raklavi' => '/server/model/ships/korlyan/Raklavi.php',
+				'solyrn' => '/server/model/ships/korlyan/Solyrn.php',
+				'soska' => '/server/model/ships/korlyan/Soska.php',
+				'taloki' => '/server/model/ships/korlyan/Taloki.php',
+				'talokiearly' => '/server/model/ships/korlyan/TalokiEarly.php',
+				'talokioriginal' => '/server/model/ships/korlyan/TalokiOriginal.php',
+				'vaklar' => '/server/model/ships/korlyan/Vaklar.php',
+
+         		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
+         		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
+         		'proximitylaser' => '/server/model/weapons/customNexus.php', 
+         		'fmissilerack' => '/server/model/weapons/customNexus.php', 
+*/
+
+
+//         		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
+//         		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
+//				'cokra' => '/server/model/ships/korlyan/Cokra.php',
+//				'koloskova' => '/server/model/ships/korlyan/Koloskova.php',
+//				'lekra' => '/server/model/ships/korlyan/Lekra.php',
+
 
 
 				//Star Wars - Clone Wars testing

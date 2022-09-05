@@ -37,8 +37,8 @@ class SalbezJertkat extends BaseShip{
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-		$this->addFrontSystem(new MediumLaser(2, 6, 5, 300, 360));
-		$this->addFrontSystem(new MediumLaser(2, 6, 5, 0, 60));
+		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 360));
+		$this->addFrontSystem(new MediumLaser(3, 6, 5, 0, 60));
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
 

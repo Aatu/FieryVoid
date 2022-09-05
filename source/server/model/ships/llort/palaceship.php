@@ -8,7 +8,7 @@ class PalaceShip extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 1100;
-        $this->faction = "Llort";
+        $this->faction = "Custom Ships";
         $this->phpclass = "palaceship";
         $this->shipClass = "Mi'Ma'Tau Palace Ship";
         $this->fighters = array("heavy"=>24); 

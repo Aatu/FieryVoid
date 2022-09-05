@@ -47,8 +47,8 @@ class DalithornScoutCruiser extends HeavyCombatVessel{
         $this->addFrontSystem(new NexusProtector(2, 4, 1, 300, 180));
                 
         $this->addAftSystem(new Thruster(2, 4, 0, 2, 2));
-        $this->addAftSystem(new Thruster(2, 4, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 13, 0, 4, 2));
+        $this->addAftSystem(new Thruster(2, 4, 0, 2, 2));
         $this->addAftSystem(new NexusAutocannon(2, 4, 1, 300, 60));
         $this->addAftSystem(new NexusAutocannon(2, 4, 1, 300, 60));
         $this->addAftSystem(new NexusMinigun(2, 4, 1, 120, 360));

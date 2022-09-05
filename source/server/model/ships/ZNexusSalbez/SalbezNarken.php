@@ -39,7 +39,6 @@ class SalbezNarken extends HeavyCombatVessel{
         $this->addFrontSystem(new ELINTScanner(3, 10, 3, 3));
         $this->addFrontSystem(new NexusParticleGrid(1, 3, 1, 270, 90));
         $this->addFrontSystem(new NexusParticleGrid(1, 3, 1, 270, 90));
-		$this->addFrontSystem(new CargoBay(1, 16));
                 
         $this->addAftSystem(new Thruster(3, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 3, 2));
@@ -67,8 +66,7 @@ class SalbezNarken extends HeavyCombatVessel{
             1=> array(
                     5 => "Thruster",
 					8 => "ELINT Scanner",
-                    10 => "Cargo Bay",
-					12 => "Particle Grid",
+					10 => "Particle Grid",
 					18 => "Structure",
                     20 => "Primary",
             ),

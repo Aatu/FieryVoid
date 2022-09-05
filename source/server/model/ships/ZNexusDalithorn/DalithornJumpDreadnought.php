@@ -46,8 +46,8 @@ class DalithornJumpDreadnought extends BaseShip{
 		$this->addFrontSystem(new JumpEngine(4, 20, 8, 45));
 
         $this->addAftSystem(new Thruster(2, 10, 0, 1, 2));
-        $this->addAftSystem(new Thruster(2, 10, 0, 1, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
+        $this->addAftSystem(new Thruster(2, 10, 0, 1, 2));
 		$this->addAftSystem(new NexusLightGasGun(2, 5, 1, 180, 300));
 		$this->addAftSystem(new NexusLightGasGun(2, 5, 1, 60, 180));
         $this->addAftSystem(new Catapult(1, 6));
