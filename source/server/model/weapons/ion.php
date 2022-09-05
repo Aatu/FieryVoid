@@ -171,6 +171,63 @@ class ImprovedIonCannon extends Raking{
 
 
 
+    /*CUSTOM Cascor fighter antiship weapon*/
+    class IonizerHvy extends LinkedWeapon{
+        public $name = "IonizerHvy";
+        public $iconPath = "ionizerHvy2.png";
+        public $displayName = "Heavy Ionizer";        
+        
+        public $animation = "laser"; //deals Standard damage, but that's due to beam having short duration - it's a laser beam in nature; 
+	    //most such weapons do use Bolt animation, but her it serves to make them stand out!
+        public $animationColor = array(160, 0, 255);
+	    /*
+        public $animationExplosionScale = 0.1;
+        public $animationWidth = 2;
+        public $animationWidth2 = 0.2;
+        */
+	    
+        public $priority = 5; //rather heavy weapons!
+        public $intercept = 0; //Lasers cannot intercept!
+        public $loadingtime = 2; //RoF 1/2turns
+        public $shots = 2;
+        public $defaultShots = 2;
+        public $rangePenalty = 2;
+        public $fireControl = array(-3, 0, 0); // fighters, <mediums, <capitals
+		public $exclusive = true; //exclusive weapon
+        public $uninterceptable = true;//not-interceptable weapon - described as Ion+Laser originally
+        public $damageType = "Standard"; 
+        public $weaponClass = "Ion"; 
+        
+        function __construct($startArc, $endArc, $nrOfShots = 2){
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            //$this->intercept = $nrOfShots; //Lasers cannot intercept!
+            if($nrOfShots === 1){
+                $this->iconPath = "ionizerHvy1.png";
+            }
+            if($nrOfShots >2){//no special icon for more than 3 linked weapons
+                $this->iconPath = "ionizerHvy3.png";
+            }
+			
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+        
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            }	    
+            $this->data["Special"] .= "Uninterceptable."; 
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(3,3)+3;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+    }
+
+
     /*Cascor weapon*/
     class IonicLaser extends Laser{        
         public $name = "IonicLaser";

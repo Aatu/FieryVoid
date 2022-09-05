@@ -375,6 +375,54 @@ class Enhancements{
 	  }
 	  
 	  
+	  //REEVALUATION - for official units that got CUSTOM reevaluation
+ 	  $enhID = 'RE-EVAL';
+	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
+		  $enhName = 'CUSTOM price reevaluation';
+		  $enhLimit = 1;
+		  $enhPriceStep = 0; //flat rate
+		  $enhPrice = 0;
+		  
+		  switch($ship->phpclass){
+			  case 'Qoccata': //Cascor Qoccata Supercarrier: 950->875
+				  $enhPrice = -75;
+				  break;
+			  case 'Coqari': //Cascor Coqari Scout: 750->650
+				  $enhPrice = -100;
+				  break;
+			  case 'Norsca': //Cascor Norsca Battlecruiser: 700->625
+				  $enhPrice = -75;
+				  break;
+			  case 'Norscator': //Cascor Norscator Gunship: 825->650
+				  $enhPrice = -175;
+				  break;
+			  case 'Nesacc': //Cascor Nesacc Explorer: 700->650
+				  $enhPrice = -50;
+				  break;
+			  case 'Qoricc': //Cascor Qoricc Destroyer: 500->425
+				  $enhPrice = -75;
+				  break;
+			  case 'Drocca': //Cascor Drocca Torpedo Destroyer: 600->540
+				  $enhPrice = -60;
+				  break;
+			  case 'Crocti': //Cascor Crocti Patrol Carrier: 420->400
+				  $enhPrice = -20;
+				  break;
+			  case 'Tacacci': //Cascor Tacacci Strike Frigate: 440->420
+				  $enhPrice = -20;
+				  break;
+			  case 'Talacca': //Cascor Talacca Frigate Leader: 500->480
+				  $enhPrice = -20;
+				  break;			  
+			  default:
+				  $enhPrice = 0;
+				  break;
+		  }
+		  
+		  if ($enhPrice != 0){
+		  	$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+	  }
 	  
 	  
 	  //consumable ammunition
@@ -445,6 +493,17 @@ class Enhancements{
 		  $enhID = 'AMMO_P'; //Piercing Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
 				$ammoClass = new AmmoMissileP();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+		  $enhID = 'AMMO_D'; //Light Missiles
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileD();
 				$ammoSize = $ammoClass->size;
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
@@ -570,6 +629,31 @@ class Enhancements{
 		  $enhPriceStep = 20*$count;
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		}
+	  }
+	  
+	  //REEVALUATION - for official units that got CUSTOM reevaluation
+ 	  $enhID = 'RE-EVAL';
+	  if(!in_array($enhID, $flight->enhancementOptionsDisabled)){ //option is not disabled
+		  $enhName = 'CUSTOM price reevaluation';
+		  $enhLimit = 1;
+		  $enhPriceStep = 0; //flat rate
+		  $enhPrice = 0;
+		  
+		  switch($flight->phpclass){
+			  case 'Calaq': //Cascor Calaq Assault Fighter: 60->45
+				  $enhPrice = -15;
+				  break;
+			  case 'Caltus': //Cascor Caltus Torpedo Fighter: 65->40
+				  $enhPrice = -25;
+				  break;	  
+			  default:
+				  $enhPrice = 0;
+				  break;
+		  }
+		  
+		  if ($enhPrice != 0){
+		  	$flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
 	  }
 	  
 	  
@@ -951,6 +1035,9 @@ class Enhancements{
 						break;
 					case 'AMMO_P': //Piercing Missile
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileP(), $enhCount, true); //do notify dependent weapons, too!
+						break;
+					case 'AMMO_D': //Light Missile						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileB(), $enhCount, true); //do notify dependent weapons, too!
 						break;
 						
 				}

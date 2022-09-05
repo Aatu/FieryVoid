@@ -5,13 +5,14 @@ class OrionDelta extends StarBaseSixSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 2400;
-		$this->faction = 'EA';
+        $this->faction = "Custom Ships";
+	    $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 		$this->phpclass = "OrionDelta";
 		$this->shipClass = "Orion Battle Station (Delta)";
 		$this->fighters = array("heavy"=>36); 
 		
 		$this->occurence = "common";
-		$this->variantOf = 'Orion Battle Station';
+		//$this->variantOf = 'Orion Battle Station';
         $this->isd = 2240;
 
 		$this->shipSizeClass = 3;

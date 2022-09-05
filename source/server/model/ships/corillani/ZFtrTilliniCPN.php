@@ -11,7 +11,7 @@ class ZFtrTilliniCPN extends FighterFlight
 		$this->phpclass = "ZFtrTilliniCPN";
 		$this->shipClass = "Tillini Medium Fighters [CPN]";
 		$this->imagePath = "img/ships/CorillaniTilliniCPN.png";
-		$this->notes = 'The Corillani Peoples Navy (CPN) version of the Tillini fighter';
+		$this->notes = "The Corillani People's Navy (CPN) version of the Tillini fighter";
 				
 		$this->isd = 2230;
 

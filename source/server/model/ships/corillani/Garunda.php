@@ -5,7 +5,8 @@ class Garunda extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 525;
-        $this->faction = "Corillani";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "Garunda";
         $this->imagePath = "img/ships/CorillaniGarunda.png";
         $this->shipClass = "Garunda Destroyer";

@@ -36,7 +36,8 @@ Factions that point for point will have uphill battle against First Tier, yet ot
  - Belt Alliance (Small Races)
  - Blood Sword Raiders (custom faction - Escalation Wars universe - small unit selection)
  - Brixadii (custom faction - Nexus universe)
- - Cascor
+ - Cascor (official)
+ - Cascor (Custom)
  - Centauri (WotCR)
  - Ch'Lonas (custom faction)
  - Chouka (custom faction - Escalation Wars universe)

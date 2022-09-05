@@ -31,12 +31,12 @@ class SalbezBevtun extends BaseShip{
         $this->pivotcost = 4;
         $this->iniativebonus = 0;
         
-        $this->addPrimarySystem(new Reactor(3, 20, 0, 0));
+        $this->addPrimarySystem(new Reactor(3, 24, 0, 0));
         $this->addPrimarySystem(new CnC(3, 16, 0, 0));
-        $this->addPrimarySystem(new ELINTScanner(3, 25, 6, 5));
+        $this->addPrimarySystem(new ELINTScanner(3, 25, 6, 6));
         $this->addPrimarySystem(new Engine(3, 18, 0, 8, 4));
 		$this->addPrimarySystem(new Hangar(2, 18));
-		$this->addPrimarySystem(new CargoBay(2, 30));
+		$this->addPrimarySystem(new CargoBay(2, 20));
 		
         $this->addFrontSystem(new Thruster(2, 15, 0, 4, 1));
         $this->addFrontSystem(new Thruster(2, 15, 0, 4, 1));
@@ -54,7 +54,7 @@ class SalbezBevtun extends BaseShip{
 		$this->addAftSystem(new NexusIndustrialLaser(2, 6, 3, 120, 240));
 		$this->addAftSystem(new NexusIndustrialLaser(2, 6, 3, 120, 240));
 		$this->addAftSystem(new CargoBay(2, 50));
-		$this->addAftSystem(new JumpEngine(4, 20, 5, 50));
+		$this->addAftSystem(new JumpEngine(3, 20, 5, 50));
 
         $this->addLeftSystem(new NexusIndustrialLaser(2, 6, 3, 240, 360));
 		$this->addLeftSystem(new NexusParticleGrid(1, 3, 1, 180, 360));

@@ -28,9 +28,9 @@ class SalbezVaskenRefit extends HeavyCombatVessel{
          
         $this->addPrimarySystem(new Reactor(5, 16, 0, 0));
         $this->addPrimarySystem(new CnC(5, 14, 0, 0));
-        $this->addPrimarySystem(new ELINTScanner(4, 21, 8, 10));
+        $this->addPrimarySystem(new ELINTScanner(4, 20, 8, 10));
         $this->addPrimarySystem(new Engine(4, 18, 0, 10, 3));
-        $this->addPrimarySystem(new Hangar(2, 1));
+        $this->addPrimarySystem(new Hangar(2, 2));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 5, 4));
       
@@ -66,13 +66,14 @@ class SalbezVaskenRefit extends HeavyCombatVessel{
             1=> array(
                     5 => "Thruster",
                     7 => "Swarm Torpedo",
-					0 => "Improved Particle Beam",
+					9 => "Improved Particle Beam",
 					18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     6 => "Thruster",
-					9 => "Improved Particle Beam",
+					8 => "Light Laser",
+					11 => "Improved Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),

@@ -4,7 +4,7 @@ class BrixadiiBase2108 extends SmallStarBaseFourSections{
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
-		$this->pointCost = 825;
+		$this->pointCost = 750;
 		$this->base = true;
 		$this->smallBase = true;
 		$this->faction = "ZNexus Brixadii";
@@ -114,8 +114,12 @@ class BrixadiiBase2108 extends SmallStarBaseFourSections{
 				20 => "Primary",
 			),
 			4=> array(
-				6 => "Ion Cannon",
-				9 => "Standard Particle Beam",
+				1 => "Chaff Launcher",
+				3 => "Heavy Particle Projector",
+				6 => "Cargo Bay",
+				8 => "Energy Pulsar",
+				9 => "Ranged Kinetic Box Launcher",
+				11 => "Quarters",
 				18 => "Structure",
 				20 => "Primary",
 			),

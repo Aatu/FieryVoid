@@ -10,7 +10,7 @@ class Estnassa extends HeavyCombatVessel{
         $this->imagePath = "img/ships/esthasa.png";
         $this->shipClass = "Estnassa Destroyer";
         $this->variantOf = "Esthasa Destroyer";
-        $this->fighters = array("medium"=>6);
+        $this->fighters = array("medium"=>6);//this is intentional - it's Centauri-built ship, and at the time of acquiring it Balosians did not use heavy fighters, so they didn't rearrange
 		$this->isd = 2232;
                 
         $this->forwardDefense = 14;

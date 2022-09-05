@@ -5,14 +5,16 @@ class Mollanta extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 775;
-		$this->faction = "Corillani";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+
         $this->phpclass = "Mollanta";
         $this->imagePath = "img/ships/CorillaniMollanta.png";
         $this->shipClass = "Mollanta Heavy Cruiser";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);
 	    $this->isd = 2230;
-		$this->notes = 'Corillani Peoples Navy (CPN)';	    
+		$this->notes = "Corillani People's Navy (CPN)";	    
 		
         $this->forwardDefense = 13;
         $this->sideDefense = 18;

@@ -47,8 +47,8 @@ class DalithornHeavyDreadnought extends BaseShip{
 		$this->addFrontSystem(new NexusCoilgun(2, 10, 4, 330, 30));
 
         $this->addAftSystem(new Thruster(3, 10, 0, 2, 2));
-        $this->addAftSystem(new Thruster(3, 10, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
+        $this->addAftSystem(new Thruster(3, 10, 0, 2, 2));
 		$this->addAftSystem(new NexusAutocannon(3, 4, 1, 120, 300));
 		$this->addAftSystem(new NexusAutocannon(3, 4, 1, 60, 240));
 		$this->addAftSystem(new NexusMinigun(2, 4, 1, 120, 300));
