@@ -5,7 +5,9 @@ class Rulnata extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 475;
-        $this->faction = "Descari";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+
         $this->phpclass = "Rulnata";
         $this->imagePath = "img/ships/DescariRulnata.png";
         $this->shipClass = "Rulnata Scout";

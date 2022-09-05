@@ -5,13 +5,14 @@ class OrionGamma extends StarBaseSixSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 1900;
-		$this->faction = 'EA';
+        $this->faction = "Custom Ships";
+	    $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 		$this->phpclass = "OrionGamma";
 		$this->shipClass = "Orion Battle Station (Gamma)";
 		$this->fighters = array("heavy"=>36); 
 		
 		$this->occurence = "common";
-		$this->variantOf = 'Orion Battle Station';
+		//$this->variantOf = 'Orion Battle Station';
  		$this->unofficial = true;
         $this->isd = 2230;
 

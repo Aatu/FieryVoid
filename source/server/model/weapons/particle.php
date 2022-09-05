@@ -138,6 +138,7 @@
         public $name = "advParticleBeam";
         public $displayName = "Advanced Particle Beam";
         public $animation = "beam";
+        public $iconPath = "advParticleBeam.png";        
 	    /*
         public $animationColor = array(255, 102, 0);
         public $trailColor = array(255, 102, 0);

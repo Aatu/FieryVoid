@@ -2208,7 +2208,7 @@ by 4.
 		
 		$ship = $this->getUnit();
 		$pilot = $ship->getSystemByName("CnC");
-		
+				
 		//1. if THIS TURN TendrilDestroyed critical was added - mark last tendril destroyed
 		foreach ($this->criticals as $crit) if(($crit instanceof TendrilDestroyed) && ($crit->turn==$gamedata->turn)) {
 			$lastTendril = null;
@@ -2221,7 +2221,7 @@ by 4.
 				$lastTendril->damage[] = $damageEntry;
 				
 				//add pain to pilot, too!				
-				if($pilot){
+				if($pilot && ($pilot instanceOf ShadowPilot) ){//check whether it's actually a Pilot - Young races use ships equipped with Shadowtech, but without Pilots (so can't feel pain)
 					$onePainPer = 10; //1 point of pain per how many damage points?
 					if ($ship->factionAge > 3) { //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 						$onePainPer = 20;//slow-grown Primordial ships are more resistant to pain		
@@ -2246,8 +2246,7 @@ by 4.
 				//dissipation == undamage
 				$tendril->absorbDamage($ship,$gamedata,-$toDissipate);
 			}
-		}
-		
+		}		
 		
 	} //endof function criticalPhaseEffects
 	
@@ -3330,7 +3329,7 @@ class PlasmaBattery extends ShipSystem{
  	public $name = "PlasmaBattery";
     public $displayName = "Plasma Battery";
 //    public $primary = true; 
-	public $isPrimaryTargetable = false;
+	public $isPrimaryTargetable = true;
     public $iconPath = "plasmabattery.png";
 
 	public $powerCurr = 0;
@@ -3775,7 +3774,7 @@ class AmmoMissileA{
 	public $enhancementPrice = 4;
 	
 	public $rangeMod = -5; //MODIFIER for launch range
-	public $distanceRangeMod = -5; //MODIFIER for distance range
+	public $distanceRangeMod = -15; //MODIFIER for distance range
 	public $fireControlMod = array(6, 3, 3); //MODIFIER for weapon fire control!
 	public $minDamage = 15;
 	public $maxDamage = 15;	

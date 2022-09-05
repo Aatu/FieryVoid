@@ -5,11 +5,12 @@ class LeonidasBeta extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 130;
-		$this->faction = 'EA (early)';//"EA defenses";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "LeonidasBeta";
         $this->imagePath = "img/ships/hector.png";
         $this->shipClass = 'Leonidas Satellite (Beta)';
-			$this->variantOf = "Leonidas Satellite (Alpha)";
+			//$this->variantOf = "Leonidas Satellite (Alpha)";
 			$this->occurence = "common";
  		$this->unofficial = true;
 

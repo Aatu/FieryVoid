@@ -5,12 +5,14 @@ class RultharFull extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 550;
-        $this->faction = "Descari";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+
         $this->phpclass = "RultharFull";
         $this->imagePath = "img/ships/DescariRulpa.png";
         $this->shipClass = "Rulthar Missile Destroyer (Full)";
 	    $this->isd = 2237;
-        $this->variantOf = "Rulthar Missile Destroyer";
+        //$this->variantOf = "Rulthar Missile Destroyer";
 		$this->unofficial = true;
         
         $this->forwardDefense = 12;

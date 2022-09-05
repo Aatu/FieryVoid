@@ -1327,7 +1327,8 @@ class TrekShieldFtr extends ShipSystem{
 		$remainingCapacity = $this->getRemainingCapacity();
 		$protectionValue = 0;
 		if($remainingCapacity>0){
-			$protectionValue = $remainingCapacity+$this->armour; //this is actually more than this system can protect from - but allows to balance load between systems in arc
+			$protectionValue = min($remainingCapacity,$this->output - $this->armour)+$this->armour ; //this is how much system can actually absorb
+			$protectionValue += $remainingCapacity/100;//this is a fraction of point to represent remaining shield capacity and help balance load
 		}
 		return $protectionValue;
 	}

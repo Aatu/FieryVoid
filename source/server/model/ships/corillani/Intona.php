@@ -5,7 +5,8 @@ class Intona extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 600;
-		$this->faction = "Corillani";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "Intona";
         $this->imagePath = "img/ships/CorillaniIntona.png";
         $this->shipClass = "Intona Strike Cruiser";

@@ -12,7 +12,7 @@ class Thosalsi extends BaseShip{
         $this->shipClass = "Thosalsi Heavy Carrier";
         $this->shipSizeClass = 3;
         $this->limited = 10;
-        $this->fighters = array("medium"=>36);
+        $this->fighters = array("medium"=>36); //this is intentional - it's Centauri-built ship, and at the time of acquiring it Balosians did not use heavy fighters, so they didn't rearrange
 		$this->isd = 2223;
         
         $this->forwardDefense = 16;

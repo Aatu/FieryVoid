@@ -5,13 +5,14 @@ class TethysMissile extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 375;
-		$this->faction = "EA";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 		$this->phpclass = "TethysMissile";
 		$this->imagePath = "img/ships/tethys.png";
 		$this->shipClass = "Tethys Missile Boat (Zeta)";
 		$this->canvasSize = 100;
 		$this->occurence = "rare";
-	        $this->variantOf = 'Tethys Police Cutter (Kappa)';
+	        //$this->variantOf = 'Tethys Police Cutter (Kappa)';
 	        $this->isd = 2212;
 
 		$this->forwardDefense = 13;

@@ -25,7 +25,9 @@ window.ShipTooltipBallisticsMenu = function () {
         let listObject = {};
 
         ballistics.forEach(ballistic => {
-            const key = ballistic.shooter.id + '-' +  ballistic.weapon.displayName + '-' + weaponManager.calculataBallisticHitChange(getBallisticEntry.call(this, ballistic));
+            //const key = ballistic.shooter.id + '-' +  ballistic.weapon.displayName + '-' + weaponManager.calculataBallisticHitChange(getBallisticEntry.call(this, ballistic));
+			//let's differentiate by mode as well!
+			const key = ballistic.shooter.id + '-' +  ballistic.weapon.displayName + '-' +  ballistic.fireOrder.firingMode +'-' + weaponManager.calculataBallisticHitChange(getBallisticEntry.call(this, ballistic));
      
             if (listObject[key]) {
                 listObject[key].amount++;
@@ -59,8 +61,14 @@ window.ShipTooltipBallisticsMenu = function () {
 
             var ballisticEntry = getBallisticEntry.call(this, ball)
 
-            jQuery(".weapon", ballElement).html(amount ? amount + 'x ' + ball.weapon.displayName : ball.weapon.displayName);
-            jQuery(".hitchange", ballElement).html('- Approx: ' + weaponManager.calculataBallisticHitChange(ballisticEntry) + '%');
+            //jQuery(".weapon", ballElement).html(amount ? amount + 'x ' + ball.weapon.displayName : ball.weapon.displayName); //replaced by more compliated text below
+			var textToDisplay = ball.weapon.displayName;
+			if (amount > 1) textToDisplay = amount + 'x ' + ball.weapon.displayName;
+			textToDisplay = ball.shooter.name + ', ' + textToDisplay + ' (' + ball.weapon.firingModes[ball.fireOrder.firingMode] + ') ';
+			jQuery(".weapon", ballElement).html(textToDisplay);
+			
+            //jQuery(".weapon", ballElement).html(' ' + ball.weapon.firingModes[ball.fireOrder.firingMode] + ' '); //display mode name as well
+            jQuery(".hitchange", ballElement).html('- Approx: ' + weaponManager.calculataBallisticHitChange(ballisticEntry) + '%' ); 
 
             /*
             if (this.allowIntercept) {
