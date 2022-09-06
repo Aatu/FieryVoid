@@ -5,11 +5,12 @@ class EpimetheusBeta extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 480;
-        $this->faction = "EA (early)";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "EpimetheusBeta";
         $this->imagePath = "img/ships/epimetheus.png";
         $this->shipClass = "Epimetheus Jump Cruiser (Beta)";
-			$this->variantOf = "Epimetheus Jump Cruiser (Alpha)";
+			//$this->variantOf = "Epimetheus Jump Cruiser (Alpha)";
 			$this->occurence = "common";
         $this->shipSizeClass = 3;
 //			$this->canvasSize = 175; //img has 200px per side

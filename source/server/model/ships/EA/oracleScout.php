@@ -5,7 +5,9 @@ class OracleScout extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 600;
-	$this->faction = "EA";
+	$this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+        
         $this->phpclass = "OracleScout";
         $this->imagePath = "img/ships/oracle.png";
         $this->shipClass = "Oracle Scout Cruiser (Gamma)";

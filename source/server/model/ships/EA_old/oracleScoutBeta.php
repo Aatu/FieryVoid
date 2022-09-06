@@ -5,12 +5,13 @@ class OracleScoutBeta extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 475;
-	$this->faction = "EA (early)";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "OracleScoutBeta";
         $this->imagePath = "img/ships/oracle.png";
         $this->shipClass = "Oracle Armed Explorer (Beta)";
 			$this->occurence = "common";
-	        $this->variantOf = "Oracle Explorer (Alpha)";
+	        //$this->variantOf = "Oracle Explorer (Alpha)";
 			$this->limited = 33;
 		$this->unofficial = true;
         $this->shipSizeClass = 3;

@@ -7,7 +7,8 @@ class Hephaestus extends SmallStarBaseFourSections{
 		$this->pointCost = 1000;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "EA";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 		$this->phpclass = "Hephaestus";
 		$this->shipClass = "Hephaestus Small Base (Zeta)";
 		$this->imagePath = "img/ships/orion.png";

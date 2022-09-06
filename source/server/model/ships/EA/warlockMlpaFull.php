@@ -3,7 +3,8 @@ class WarlockMlpaFull extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 		$this->pointCost = 1800+2*35+2*70;
-		$this->faction = "EA (full missile loads)";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 		$this->phpclass = "WarlockMlpaFull";
 		$this->imagePath = "img/ships/warlock.png";
 		$this->shipClass = "Warlock (full)";

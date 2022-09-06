@@ -5,13 +5,14 @@ class HyperionMissile extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 650;
-        $this->faction = "EA";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "HyperionMissile";
         $this->imagePath = "img/ships/hyperion.png";
         $this->shipClass = "Hyperion Missile Cruiser (Beta)";
         
         $this->occurence = "uncommon";
-        $this->variantOf = 'Hyperion Heavy Cruiser (Theta)';
+        //$this->variantOf = 'Hyperion Heavy Cruiser (Theta)';
         $this->isd = 2217;
 
         $this->forwardDefense = 14;
