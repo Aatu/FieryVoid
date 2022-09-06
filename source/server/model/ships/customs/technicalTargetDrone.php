@@ -103,6 +103,10 @@ class technicalTargetDrone extends BaseShip{
 */
 		
 
+		$this->addFrontSystem(new EMMissile(1, 6, 1, 0, 360));
+		$this->addFrontSystem(new EMMissile(1, 6, 1, 0, 360));
+
+
         $this->addFrontSystem(new AmmoMissileRackR(3, 0, 0, 240, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addFrontSystem(new AmmoMissileRackR(3, 0, 0, 240, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addFrontSystem(new NexusLaserMissile(1, 6, 1, 0, 360));
