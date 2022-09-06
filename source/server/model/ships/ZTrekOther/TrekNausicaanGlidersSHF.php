@@ -55,7 +55,6 @@ class TrekNausicaanGlidersSHF extends FighterFlight{
 			$fighter->addFrontSystem(new PairedPlasmaBlaster(0, 120));
 
 			$fighter->addAftSystem(new TrekShieldFtr(1, 4, 3, 1) ); //armor, health, rating, recharge
-			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 		
             $this->addSystem($fighter);

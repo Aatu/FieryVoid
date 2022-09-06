@@ -5,7 +5,8 @@ class OrionBeta extends StarBaseSixSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 1500;
-		$this->faction = 'EA (early)';
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 		$this->phpclass = "OrionBeta";
 		$this->shipClass = "Orion Starbase (Beta)";
 		$this->fighters = array("heavy"=>36); 

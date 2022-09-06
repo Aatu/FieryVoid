@@ -3,12 +3,13 @@ class Athena extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 		$this->pointCost = 1900;
-		$this->faction = "EA";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 		$this->phpclass = "Athena";
 		$this->imagePath = "img/ships/warlock.png";
 		$this->shipClass = "Athena Battleship";
 	    	$this->unofficial = true;
-		$this->variantOf = "Warlock";
+		//$this->variantOf = "Warlock Advanced Destroyer";
 
 		$this->shipSizeClass = 3;
 		$this->canvasSize= 400;

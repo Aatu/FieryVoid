@@ -419,7 +419,6 @@ spl_autoload_register(
                 'helpmanager' => '/server/controller/HelpManager.php',
                 'hermes' => '/server/model/ships/EA/hermes.php',
                 'hephaestus' => '/server/model/ships/EA/hephaestus.php',
-                'hermes_early' => '/server/model/ships/EA_old/hermes_early.php',
                 'heron' => '/server/model/ships/drazi_old/heron.php',
                 'heron1940' => '/server/model/ships/drazi_old/heron1940.php',
                 'hightemplar' => '/server/model/ships/orieni/hightemplar.php',
@@ -628,7 +627,7 @@ spl_autoload_register(
                 'moleculardisruptor' => '/server/model/weapons/molecular.php',
                 'molecularflayer' => '/server/model/weapons/molecular.php',
                 'molecularpulsar' => '/server/model/weapons/pulse.php',
-                'monsoon' => '/server/model/ships/EA/Monsoon.php',
+                'monsoon' => '/server/model/ships/EA/monsoon.php',
                 'morshin' => '/server/model/ships/minbari/morshin.php',
                 'motenai' => '/server/model/ships/abbai_old/motenai.php',
                 'motenai1935' => '/server/model/ships/abbai_old/motenai1935.php',
@@ -1877,7 +1876,6 @@ spl_autoload_register(
                 'epimetheusdelta' => '/server/model/ships/EA_old/epimetheusDelta.php',
                 'epimetheusepsilon' => '/server/model/ships/EA_old/epimetheusEpsilon.php',
                 'flyingfoxstarfury' => '/server/model/ships/EA_old/flyingfoxStarfury.php',
-                'hermesalpha' => '/server/model/ships/EA_old/hermesAlpha.php',
                 'laertesalpha' => '/server/model/ships/EA_old/laertesAlpha.php',
                 'laertesbeta' => '/server/model/ships/EA_old/laertesBeta.php',
                 'laertesdelta' => '/server/model/ships/EA/laertesDelta.php',
@@ -2097,6 +2095,7 @@ spl_autoload_register(
                 'ionizer' => '/server/model/weapons/ion.php',
                 'ioniclaser' => '/server/model/weapons/ion.php',
                 'dualionbolter' => '/server/model/weapons/ion.php',
+                'ionizerhvy' => '/server/model/weapons/ion.php', //custom weapon
 		    
                 //Cascor Ships
                 'caracti' => '/server/model/ships/cascor/caracti.php',
@@ -2117,6 +2116,7 @@ spl_autoload_register(
                 'calaq' => '/server/model/ships/cascor/calaq.php',
                 'caltus' => '/server/model/ships/cascor/caltus.php',
                 'tiqincc' => '/server/model/ships/cascor/tiqincc.php',    
+                'tiqus' => '/server/model/ships/cascor/tiqus.php', //CUSTOM fighter
 		    
 				//new batch				
                 'microsat' => '/server/model/ships/FighterFlight.php',
@@ -2718,6 +2718,7 @@ spl_autoload_register(
                 		'ammomissilef' => '/server/model/systems/baseSystems.php',
                 		'ammomissilea' => '/server/model/systems/baseSystems.php',
                 		'ammomissilep' => '/server/model/systems/baseSystems.php',
+                		'ammomissiled' => '/server/model/systems/baseSystems.php',
 		    
                 		'ammomissileracks' => '/server/model/weapons/missile.php', //missile racks themselves
                 		'ammomissilerackso' => '/server/model/weapons/missile.php',
@@ -2728,9 +2729,63 @@ spl_autoload_register(
                 		'ammomissilerackr' => '/server/model/weapons/missile.php',
                 		'ammobombrack' => '/server/model/weapons/missile.php',
 		    
+						//EA
                 		'sagittariusam' => '/server/model/ships/EA/sagittariusAM.php', //ships using new style launchers (and magazine of course)
+                		'sagittariusalphaam' => '/server/model/ships/EA/sagittariusAlphaAM.php',
 						'olympusam' => '/server/model/ships/EA/olympusAM.php',
-                		'apolloam' => '/server/model/ships/EA/apolloAM.php',
+						'olympusalphaam' => '/server/model/ships/EA/olympusAlphaAM.php',
+                		'apolloam' => '/server/model/ships/EA/apolloAM.php',  
+                		'apollostrikeam' => '/server/model/ships/EA/apolloStrikeAM.php',  
+						'warlockam' => '/server/model/ships/EA/warlockAM.php',
+						'athenaam' => '/server/model/ships/EA/athenaAM.php',
+                		'hyperionmissileam' => '/server/model/ships/EA/hyperionMissileAM.php',
+                		'oraclescoutam' => '/server/model/ships/EA/oracleScoutAM.php',
+                		'tethysmissileam' => '/server/model/ships/EA/tethysMissileAM.php',
+						'orionam' => '/server/model/ships/EA/orionAM.php', 
+						'oriondeltaam' => '/server/model/ships/EA/orionDeltaAM.php',
+						'oriongammaam' => '/server/model/ships/EA/orionGammaAM.php',
+                		'hephaestusam' => '/server/model/ships/EA/hephaestusAM.php',
+                		'hectoram' => '/server/model/ships/EA/hectorAM.php',
+                		'godalphaam' => '/server/model/ships/EA/godAlphaAM.php',
+                		'godbetaam' => '/server/model/ships/EA/godBetaAM.php',
+                		'hermesam' => '/server/model/ships/EA/hermesAM.php',
+                		'hermesfastbeta' => '/server/model/ships/EA/hermesFastBeta.php',
+						
+						//EA (early)
+						'hermesoldfastalpha' => '/server/model/ships/EA_old/hermesOldFastAlpha.php',
+						'hermesoldfastbeta' => '/server/model/ships/EA_old/hermesOldFastBeta.php',
+						'olympusalphaam_early' => '/server/model/ships/EA_old/olympusAlphaAM_early.php',
+						'oraclescoutbetaam' => '/server/model/ships/EA_old/oracleScoutBetaAM.php',
+                		'epimetheusbetaam' => '/server/model/ships/EA_old/epimetheusBetaAM.php',
+                		'epimetheusgammaam' => '/server/model/ships/EA_old/epimetheusGammaAM.php',
+                		'epimetheusdeltaam' => '/server/model/ships/EA_old/epimetheusDeltaAM.php',
+                		'orionalphaam' => '/server/model/ships/EA_old/OrionAlphaAM.php',
+                		'orionbetaam' => '/server/model/ships/EA_old/OrionBetaAM.php',
+                		'leonidasbetaam' => '/server/model/ships/EA_old/leonidasBetaAM.php',
+                		'leonidasgammaam' => '/server/model/ships/EA_old/leonidasGammaAM.php',
+						
+						//Corillani
+						'garundaam' => '/server/model/ships/corillani/GarundaAM.php',
+						'llartolam' => '/server/model/ships/corillani/LlartolAM.php',
+						'mollantaam' => '/server/model/ships/corillani/MollantaAM.php',
+						'intonaam' => '/server/model/ships/corillani/IntonaAM.php',
+						
+						//Descari
+						'rultharam' => '/server/model/ships/descari/RultharAM.php',
+						'scoravarefittedam' => '/server/model/ships/descari/ScoravarefittedAM.php',
+						'scoravalaseram' => '/server/model/ships/descari/ScoravalaserAM.php',
+						'scorotaam' => '/server/model/ships/descari/ScorotaAM.php',
+						'rulnataam' => '/server/model/ships/descari/RulnataAM.php',
+						'rulnatoam' => '/server/model/ships/descari/RulnatoAM.php',
+						'carranaam' => '/server/model/ships/descari/CarranaAM.php',
+						'hemrosam' => '/server/model/ships/descari/HemrosAM.php',
+						
+						
+						
+						
+				
+				
+		    
 				
 						
 				

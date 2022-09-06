@@ -5,7 +5,8 @@ class OrionAlpha extends StarBaseSixSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 1250;
-		$this->faction = 'EA (early)';
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 		$this->phpclass = "OrionAlpha";
 		$this->shipClass = "Orion Starbase (Alpha)";
 		$this->fighters = array("heavy"=>36); 

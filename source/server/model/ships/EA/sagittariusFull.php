@@ -5,7 +5,8 @@ class SagittariusFull extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 700+8*35;
-        $this->faction = "EA (full missile loads)";
+        $this->faction = "Custom Ships";
+	    $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "SagittariusFull";
         $this->imagePath = "img/ships/sagittarius.png";
         $this->shipClass = "Sagittarius Missile Cruiser (Beta Model, full)";

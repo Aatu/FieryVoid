@@ -5,7 +5,8 @@ class Llartol extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 750;
-		$this->faction = "Corillani";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "Llartol";
         $this->imagePath = "img/ships/CorillaniMollanta.png";
         $this->shipClass = "Llartol Assault Cruiser";
@@ -14,7 +15,7 @@ class Llartol extends BaseShip{
 	    $this->isd = 2242;
 		$this->notes = 'Corillani Peoples Navy (CPN)';	    
         $this->occurence = "uncommon";
-		$this->variantOf = "Mollanta Heavy Cruiser";	    
+		//$this->variantOf = "Mollanta Heavy Cruiser";	    
 		
         $this->forwardDefense = 13;
         $this->sideDefense = 18;
