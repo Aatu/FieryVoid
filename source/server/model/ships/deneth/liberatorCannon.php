@@ -1,6 +1,6 @@
 <?php
 class LiberatorCannon extends LCV{
-	/*Deneth Liberator LCV, from Raiders-2*/
+	/*Deneth Liberator LCV, from Raiders-2*/ 
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
