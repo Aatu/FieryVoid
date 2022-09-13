@@ -76,9 +76,10 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Monsoon</b> - CUSTOM advanced EA MCV, anyone? (courtesy of Geoffrey)
 	    
 
-	    <!--
+	    
 		 <br><br>---------- <b>update 28th of July</b> ---------- 
--->
+	    <br><b>class-LH missile rack</b> - new incarnation fixed to 1/turn weapon (will not affect ongoing games though)
+
 		
 	    
         <br><br><br>
