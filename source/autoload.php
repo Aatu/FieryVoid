@@ -855,6 +855,7 @@ spl_autoload_register(
                 'severeburnout' => '/server/model/cricialClasses.php',
                 'shadrak' => '/server/model/ships/markab/shadrak.php',
                 'shadras' => '/server/model/ships/balosian/shadras.php',
+                'tortra' => '/server/model/ships/balosian/Tortra.php',                
                 'shafab' => '/server/model/ships/markab/shafab.php',
                 'shantavi' => '/server/model/ships/minbari/shantavi.php',
                 'shanteen' => '/server/model/ships/minbari/shanteen.php',
