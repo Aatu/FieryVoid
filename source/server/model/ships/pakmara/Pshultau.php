@@ -39,9 +39,9 @@ class Pshultau extends BaseShip{
 		$this->addPrimarySystem(new Hangar(4, 27));
 
 		$this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-		$this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
+		$this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
 		$this->addFrontSystem(new Thruster(3, 6, 0, 2, 1));
-		$this->addFrontSystem(new Thruster(3, 6, 0, 2, 1));		
+		$this->addFrontSystem(new Thruster(3, 6, 0, 3, 1));		
 		$this->addFrontSystem(new PakmaraPlasmaWeb(2, 4, 2, 240, 60));
 		$this->addFrontSystem(new PakmaraPlasmaWeb(2, 4, 2, 300, 120));
 		$this->addFrontSystem(new MegaPlasma(3, 10, 8, 300, 60));
