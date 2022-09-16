@@ -7536,7 +7536,32 @@ class MultiDefenseLauncher extends Weapon implements DefensiveSystem {
     }
     
     public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
-			switch($this->firingMode){
+
+	//variable initialization
+		$output = 0;
+		$targetpos = null;
+
+		foreach ($this->fireOrders as $fire)
+			if ($fire->firingMode == "2" && $fire->turn == $turn) {
+				$targetpos = new OffsetCoordinate($fire->x, $fire->y);
+				$output = 3;
+			}
+			
+		if ($output == 0) return 0;
+		
+	//Determining position the shot is coming from
+		if(!$weapon->ballistic) { //direct fire
+			$pos = $shooter->getHexPos();
+		}
+
+	//if Web is ordered to intercept somewhere else - cannot intercept this shot
+		if ($pos != $targetpos) $output = 0;
+		
+		return $output;
+		
+	}
+
+/*			switch($this->firingMode){
 				//Anti-missile missile 'interceptor'
 				case 1:					
 						$output = 0;
@@ -7560,6 +7585,8 @@ class MultiDefenseLauncher extends Weapon implements DefensiveSystem {
 				break;	
    				 }
 			}
+*/
+
 
 //end Chaff system functions
 
@@ -8166,6 +8193,161 @@ class FMissileRack extends Weapon{
 } //endof class FMissileRack  
 
 
+
+
+class ChaffMissile extends Weapon{
+	public $name = "ChaffMissile";
+    public $displayName = "Chaff Missile";
+    public $useOEW = false;
+    public $ballistic = true;
+    public $animation = "trail";
+    public $animationColor = array(50, 50, 50);
+
+    public $range = 20;
+    public $distanceRange = 60;
+    public $rangeMod = 0;
+    public $priority = 1;
+    public $loadingtime = 1;
+    public $iconPath = "ClassFMissileRack.png";    
+
+	private static $alreadyEngaged = array(); //units that were already engaged by a Chaff Missile this turn (multiple Chaff Missiles do not stack).
+
+    public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    public $weaponClass = "Ballistic"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+	
+	public $firingMode = 'Chaff';
+    public $fireControl = array(6, 6, 6); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 0;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+
+
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+//		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
+
+//Need to check if fired weapons are ballistics or not
+
+		$targetUnit = $gamedata->getShipById($fireOrder->targetid);
+
+        if (isset(ChaffMissile::$alreadyEngaged[$targetUnit->id])) return; //target already engaged by a previous Chaff Missile
+
+		$effectHit = 3; 
+		$effectHit5 = $effectHit * 5;
+		$fireOrder->pubnotes .= "<br> All non-ballistic weapon's fire by target reduced by $effectHit5 percent.";
+
+		$allFire = $ship->getAllFireOrders($gamedata->turn);
+		foreach($allFire as $fireOrder) {
+			if ($fireOrder->type == 'normal') {
+				if ($fireOrder->rolled > 0) {
+				}else{
+					$fireOrder->needed -= 3 *5; //$needed works on d100
+					$fireOrder->pubnotes .= "; Chaff Missile impact, -15% to hit."; //note why hit chance does not match
+					ChaffMissile::$alreadyEngaged[$targetUnit] = true;
+				}
+			}
+		}
+
+
+
+
+
+
+
+//		$effectIni = Dice::d(6,1);//strength of effect: 1d6
+//		$effectSensors = Dice::d(6,1);//strength of effect: 1d6
+//		$effectIni5 = $effectIni * 5;
+		
+		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
+			$firstFighter = $ship->getSampleFighter();
+			ChaffMissile::$alreadyEngaged[$targetUnit->id] = true;//mark engaged        
+			if($firstFighter){
+				for($i=1; $i<=$effectHit;$i++){
+					$crit = new tmphitreduction(-1, $ship->id, $firstFighter->id, 'tmphitreduction', $gamedata->turn, $gamedata->turn); 
+					$crit->updated = true;
+			        	$firstFighter->criticals[] =  $crit;
+				}
+			}
+		}else{ //ship - place effcet on C&C!   */
+			$CnC = $ship->getSystemByName("CnC");
+			ChaffMissile::$alreadyEngaged[$targetUnit->id] = true;//mark engaged        
+			if($CnC){
+				for($i=0; $i<=$effectHit;$i++){
+					$crit = new tmphitreduction(-1, $ship->id, $CnC->id, 'tmphitreduction', $gamedata->turn, $gamedata->turn); 
+//					$crit->inEffect = true;
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+				}
+			}
+		}
+	} //endof function onDamagedSystem
+
+
+    
+        public function getDamage($fireOrder){ return 0;   }
+        public function setMinDamage(){     $this->minDamage = 0;      }
+        public function setMaxDamage(){     $this->maxDamage = 0;      }
+    
+	public function setSystemDataWindow($turn){
+		$this->data["Range"] = $this->range . '/' . $this->distanceRange;
+		$this->data["Special"] = 'Causes a -3 to hit on target on turn it is fired.';
+		parent::setSystemDataWindow($turn);
+        }
+    
+ 
+} //endof class ChaffMissile  
+
+
+
+
+class StealthMissile extends Weapon{
+	public $name = "StealthMissile";
+    public $displayName = "Stealth Missile";
+    public $useOEW = false;
+    public $ballistic = true;
+    public $animation = "trail";
+    public $animationColor = array(50, 50, 50);
+
+    public $range = 20;
+    public $distanceRange = 60;
+    public $rangeMod = 0;
+    public $priority = 1;
+    public $loadingtime = 1;
+    public $iconPath = "ClassFMissileRack.png";    
+
+	public $hidetarget = true;
+
+    public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    public $weaponClass = "Ballistic"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+	
+	public $firingMode = 'Ballistic';
+    public $fireControl = array(6, 6, 6); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 0;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+    
+        public function getDamage($fireOrder){ return 10;   }
+        public function setMinDamage(){     $this->minDamage = 10;      }
+        public function setMaxDamage(){     $this->maxDamage = 10;      }
+    
+	public function setSystemDataWindow($turn){
+		$this->data["Range"] = $this->range . '/' . $this->distanceRange;
+		$this->data["Special"] = 'Causes a -3 to hit on target on turn it is fired.';
+		parent::setSystemDataWindow($turn);
+        }
+    
+ 
+} //endof class StealthMissile  
 
 
 ?>

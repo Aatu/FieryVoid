@@ -934,3 +934,15 @@ var FMissileRack = function  FMissileRack(json, ship) {
 };
 FMissileRack.prototype = Object.create(Weapon.prototype);
 FMissileRack.prototype.constructor =  FMissileRack;
+
+var ChaffMissile = function  ChaffMissile(json, ship) {
+    Weapon.call(this, json, ship);
+};
+ChaffMissile.prototype = Object.create(Weapon.prototype);
+ChaffMissile.prototype.constructor =  ChaffMissile;
+
+var StealthMissile = function  StealthMissile(json, ship) {
+    Weapon.call(this, json, ship);
+};
+StealthMissile.prototype = Object.create(Weapon.prototype);
+StealthMissile.prototype.constructor =  StealthMissile;

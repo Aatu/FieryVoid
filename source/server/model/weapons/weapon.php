@@ -1166,6 +1166,7 @@ class Weapon extends ShipSystem
         if (!($shooter instanceof FighterFlight) && !($shooter instanceof OSAT)) {//leaving instanceof OSAT here - MicroSATs will be omitted as they're SHFs
             $CnC = $shooter->getSystemByName("CnC");
             $mod -= ($CnC->hasCritical("PenaltyToHit", $gamedata->turn - 1));
+            $mod -= ($CnC->hasCritical("tmphitreduction", $gamedata->turn, $gamedata->turn));
             $mod -= ($CnC->hasCritical("ShadowPilotPain", $gamedata->turn));
         }
         $firecontrol = $this->fireControl[$target->getFireControlIndex()];
