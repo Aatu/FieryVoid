@@ -89,6 +89,7 @@ class Weapon extends ShipSystem
     public $freeintercept = false;  //can intercept fire directed at other unit?
     public $freeinterceptspecial = false;  //has its own routine for handling decision whether it's capable of interception - for freeintercept only?
     public $hidetarget = false;
+	public $hidetargetArray = array();  //for weapons that do not show their target
     public $duoWeapon = false;
     public $dualWeapon = false;
     public $canChangeShots = false;
@@ -1835,6 +1836,8 @@ full Advanced Armor effects (by rules) for reference:
 	    
         if (isset($this->startArcArray[$i])) $this->startArc = $this->startArcArray[$i];
         if (isset($this->endArcArray[$i])) $this->endArc = $this->endArcArray[$i];
+		
+		if (isset($this->hidetargetArray[$i])) $this->hidetarget = $this->hidetargetArray[$i];  // GTS
 	    
     }//endof function changeFiringMode
 

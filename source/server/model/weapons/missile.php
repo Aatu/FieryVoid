@@ -1078,6 +1078,7 @@ class AmmoMissileRackS extends Weapon{
 		$this->ammoClassesArray[] =  new AmmoMissileA();
 		$this->ammoClassesArray[] =  new AmmoMissileP();
 		$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
+		$this->ammoClassesArray[] =  new AmmoMissileS(); //only used by Kor-Lyans
 	
 		$this->ammoMagazine = $magazine;
 		if($base){
@@ -1119,6 +1120,7 @@ class AmmoMissileRackS extends Weapon{
 		$this->minDamageArray = array();
 		$this->maxDamageArray = array();
 		$this->ammoClassesUsed = array();
+		$this->hidetargetArray = array();  // GTS
 		
 		//add data for all modes to arrays
 		$currMode = 0;
@@ -1159,6 +1161,7 @@ class AmmoMissileRackS extends Weapon{
 				$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
 				$this->minDamageArray[$currMode] = $currAmmo->minDamage;
 				$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
+				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;   // GTS
 			}
 		}
 			
@@ -1189,6 +1192,7 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->noOverkillArray = $this->noOverkillArray; 
 		$strippedSystem->minDamageArray = $this->minDamageArray; 
 		$strippedSystem->maxDamageArray = $this->maxDamageArray; 
+		$strippedSystem->hidetargetArray = $this->hidetargetArray; // GTS
 		return $strippedSystem;
 	} 
 	
@@ -1477,6 +1481,271 @@ class AmmoBombRack extends AmmoMissileRackS{
 		$this->recompileFiringModes();
 	}
 } //endof class AmmoBombRack
+
+
+
+
+
+// Uses MultiMissileLauncher code
+
+class MultiDefenseLauncher extends Weapon {
+	public $name = "MultiDefenseLauncher";
+    public $displayName = "ToBeSetInConstructor";
+    public $useOEW = false;
+    public $ballistic = true;
+    public $trailColor = array(141, 240, 255);
+    public $animation = "trail";
+    public $animationColor = array(50, 50, 50);
+    public $animationExplosionScale = 0.4;
+    public $projectilespeed = 8;
+    public $animationWidth = 4;
+    public $trailLength = 100;
+//    public $range = 20;
+//    public $distanceRange = 60;
+    public $firingMode = 1;
+    public $rangeMod = 0;
+//    public $priority = 6;
+    public $priorityArray = array(1=>1, 2=>1, 3=>4);
+//	public $hits = array();
+    public $loadingtimeArray = array(1=>1, 2=>1, 3=>1); //mode 1 should be the one with longest loading time
+//    public $loadingtime = 1;
+    public $iconPath = "ClassDMissileRack.png";    
+
+    public $intercept = 6;
+    public $ballisticIntercept = true;
+
+    private $rackExplosionDamage = 50; //how much damage will this weapon do in case of catastrophic explosion
+    private $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+
+	private static $alreadyEngaged = array(); //units that were already engaged by a Chaff Missile	this turn (multiple Webs do not stack).
+    
+    public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    public $weaponClass = "Ballistic"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+
+//NOTE: The 'Intercceptor' mode, while only serving as an anti-missile misile if you do nothing
+//needs to be listed as its own mode. Otherwise, it takes out the defensive shield characteristic
+//of the chaff missile and allows it to provider intercept against more than one incoming missile.	
+	public $firingModes = array(1=>'Interceptor', 2=>'Chaff', 3=>'AntiFighter'); //equals to available missiles; data is basic - if launcher is special, constructor will modify it
+	public $damageTypeArray = array(1=>'Standard', 2=>'Standard', 3=>'Standard'); //indicates that this weapon does damage in Pulse mode
+    public $fireControlArray = array( 1=>array(null, null, null), 2=>array(6, 6, 6), 3=>array(9, 6, 6) ); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
+    public $rangeArray = array(1=>20, 2=>20, 3=>15); //distanceRange remains fixed, as it's improbable that anyone gets out of missile range and this would need more coding
+	public $distanceRangeArray = array(1=>60, 2=>60, 3=>45);
+    //typical (class-S) launcher is FC 3/3/3 and warhead +3 - which would mean 6/6/6!
+    
+    /*ATYPICAL constructor: doesn't take health and power usage, but takes desired launcher type - and does appropriate modifications*/
+        function __construct($armour, $launcherType, $startArc, $endArc, $base=false)
+        {
+		switch($launcherType){ //modifications dependent on launcher type...
+			default: 
+				$this->displayName = "Class-D Missile Rack";
+				$maxhealth = 6;
+				$this->iconPath = "ClassDMissileRack.png";
+				$this->loadingtime = 1; //fires every turn
+				$this->rackExplosionThreshold = 20; //how high roll is needed for rack explosion 
+				break;	
+		}
+		
+		if ($base){ //mounted on base (or other stable platform): +40 launch range (launch range = distance range)
+			foreach ($this->rangeArray as $key=>$rng) {
+		    		$this->rangeArray[$key] += 40; 
+			}         
+		}
+		
+		$this->range = $this->rangeArray[1]; //base range = first range
+		
+		parent::__construct($armour, $maxhealth, 0, $startArc, $endArc);
+        }
+
+
+
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+//		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
+
+//		$allFire = $ship->getAllFireOrders($gamedata->turn);
+
+		$this->changeFiringMode($fireOrder->firingMode);  //needs to be outside the switch routine
+
+		switch($this->firingMode){
+
+		case 1:
+
+			break;
+
+		case 2:
+
+			if (isset(MultiDefenseLauncher::$alreadyEngaged[$ship->id])) return; //target already engaged by a previous Chaff Missile
+
+			$effectHit = 3; 
+			$effectHit5 = $effectHit * 5;
+			$fireOrder->pubnotes .= "<br> All non-ballistic weapon's fire by target reduced by $effectHit5 percent.";
+
+			$allFire = $ship->getAllFireOrders($gamedata->turn);
+			foreach($allFire as $fireOrder) {
+				if ($fireOrder->type == 'normal') {
+					if ($fireOrder->rolled > 0) {
+					}else{
+						$fireOrder->needed -= 3 *5; //$needed works on d100
+						$fireOrder->pubnotes .= "; Chaff Missile impact, -15% to hit."; //note why hit chance does not match
+						MultiDefenseLauncher::$alreadyEngaged[$ship->id] = true;
+					}
+				}
+			}
+		
+			if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
+				$firstFighter = $ship->getSampleFighter();
+				MultiDefenseLauncher::$alreadyEngaged[$ship->id] = true;//mark engaged        
+				if($firstFighter){
+					for($i=1; $i<=$effectHit;$i++){
+						$crit = new tmphitreduction(-1, $ship->id, $firstFighter->id, 'tmphitreduction', $gamedata->turn, $gamedata->turn); 
+						$crit->updated = true;
+							$firstFighter->criticals[] =  $crit;
+					}
+				}
+			}else{ //ship - place effcet on C&C!   */
+				$CnC = $ship->getSystemByName("CnC");
+				MultiDefenseLauncher::$alreadyEngaged[$ship->id] = true;//mark engaged        
+				if($CnC){
+					for($i=0; $i<=$effectHit;$i++){
+						$crit = new tmphitreduction(-1, $ship->id, $CnC->id, 'tmphitreduction', $gamedata->turn, $gamedata->turn); 
+						$crit->updated = true;
+							$CnC->criticals[] =  $crit;
+					}
+				}
+			}
+		
+			break;
+		
+		case 3:
+
+			break;
+		}
+		
+	} //endof function onDamagedSystem
+
+
+
+
+	
+	public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1: //Anti-missile
+				return 0; 
+				break;
+			case 2: //Chaff
+				return 0; 
+				break;
+			case 3: //Anti-Fighter
+				return 15; 
+				break;
+			default: 
+				return 0; 
+				break;	
+		}
+	}
+	public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1: //Anti-missile
+				$this->minDamage = 0; 
+				break;
+			case 2: //Chaff
+				$this->minDamage = 0; 
+				break;
+			case 3: //Anti-Fighter
+				$this->minDamage = 15; 
+				break;
+
+			default: 
+				$this->minDamage = 0; 
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+	public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1: //Anti-missile
+				$this->maxDamage = 0; 
+				break;
+			case 2: //Chaff
+				$this->maxDamage = 0; 
+				break;
+			case 3: //Anti-Fighter
+				$this->maxDamage = 15; 
+				break;
+
+			default: 
+				$this->maxDamage = 0; 
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
+    
+	public function setSystemDataWindow($turn){
+		$this->data["Range"] = $this->range . '/' . $this->distanceRange;
+		$this->data["Special"] = 'Multiple munitions available. This weapon may explode when damaged.';
+		$this->data["Special"] .= '<br>Available munitions:';
+		$this->data["Special"] .= '<br> - Anti-missile: Default mode, -30 intercept against ballistics.';
+		$this->data["Special"] .= '<br> - Chaff: Range 20, Target has -15% to hit for all non-ballistics. Not cumulative.';
+		$this->data["Special"] .= '<br> - Anti-Fighter: range 15, +15 FC vs fighters, dmg 15';
+		parent::setSystemDataWindow($turn);
+        }
+    
+    public function isInDistanceRange($shooter, $target, $fireOrder){
+        $movement = $shooter->getLastTurnMovement($fireOrder->turn);    
+        if(mathlib::getDistanceHex($movement->position,  $target) > $this->distanceRange)
+        {
+            $fireOrder->pubnotes .= " FIRING SHOT: Target moved out of distance range.";
+            return false;
+        }
+        return true;
+    }
+    
+    
+    public function testCritical($ship, $gamedata, $crits, $add = 0){ //add testing for ammo explosion!
+        $explodes = false;
+        $roll = Dice::d(20);
+        if ($roll >= $this->rackExplosionThreshold) $explodes = true;
+        
+        if($explodes){
+            $this->ammoExplosion($ship, $gamedata, $this->rackExplosionDamage);            
+            $this->addMissileCritOnSelf($ship->id, "AmmoExplosion", $gamedata);
+        }else{
+            $crits = parent::testCritical($ship, $gamedata, $crits, $add);
+        }
+        
+        return $crits;
+    } //endof function testCritical
+    
+
+    public function ammoExplosion($ship, $gamedata, $damage){
+        //first, destroy self if not yet done...
+        if (!$this->isDestroyed()){
+            $this->noOverkill = true;
+            $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 'standard', 100, 1, 1, 1, 0, null, null, 'ballistic');
+            $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
+            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, $pos, $gamedata, true, $this->location);
+        }
+        
+        //then apply damage potential as a hit...
+        if($damage>0){
+            $this->noOverkill = false;
+            $this->damageType = 'Flash'; //should be Raking by the rules, but Flash is much easier to do - and very fitting for explosion!
+            $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 'flash', 100, 1, 1, 1, 0, null, null, 'ballistic');
+            $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->location); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
+        }
+    }
+    
+    public function addMissileCritOnSelf($shipid, $phpclass, $gamedata){
+        $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
+        $crit->updated = true;
+        $this->criticals[] =  $crit;
+    }        
+ 
+} //endof class MultiDefenseLauncher  
+
+
 
 
 ?>

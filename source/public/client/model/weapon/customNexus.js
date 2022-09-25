@@ -905,11 +905,6 @@ NexusTestBlaster.prototype.constructor =  NexusTestBlaster;
 
 //Kor-Lyan testing systems
 
-var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {
-    Weapon.call(this, json, ship);
-};
-MultiDefenseLauncher.prototype = Object.create(Weapon.prototype);
-MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;
 
 var LimpetBoreTorp = function  LimpetBoreTorp(json, ship) {
     Weapon.call(this, json, ship);
@@ -946,3 +941,9 @@ var StealthMissile = function  StealthMissile(json, ship) {
 };
 StealthMissile.prototype = Object.create(Weapon.prototype);
 StealthMissile.prototype.constructor =  StealthMissile;
+
+var TestMissile = function  TestMissile(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TestMissile.prototype = Object.create(Weapon.prototype);
+TestMissile.prototype.constructor =  TestMissile;

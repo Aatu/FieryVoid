@@ -38,13 +38,13 @@ class VelraxSivrinRefit extends HeavyCombatVesselLeftRight{
         $this->addLeftSystem(new NexusHeavyLaserSpear(3, 6, 4, 240, 360));
         $this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 240, 360));
         $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 180, 360));
-        $this->addLeftSystem(new MediumPlasma(3, 5, 3, 180, 360));
+        $this->addLeftSystem(new HeavyPlasma(3, 8, 5, 180, 360));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 
         $this->addRightSystem(new NexusHeavyLaserSpear(3, 6, 4, 0, 120));
         $this->addRightSystem(new NexusLaserSpear(3, 5, 3, 0, 120));
         $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 0, 180));
-        $this->addRightSystem(new MediumPlasma(3, 5, 3, 0, 180));
+        $this->addRightSystem(new HeavyPlasma(3, 8, 5, 0, 180));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -68,7 +68,7 @@ class VelraxSivrinRefit extends HeavyCombatVesselLeftRight{
         				6 => "Twin Ion Gun",
         				8 => "Heavy Laser Spear",
 						10 => "Laser Spear",
-						12 => "Medium Plasma Cannon",
+						12 => "Heavy Plasma Cannon",
         				18 => "Structure",
         				20 => "Primary",
         		),
@@ -77,7 +77,7 @@ class VelraxSivrinRefit extends HeavyCombatVesselLeftRight{
         				6 => "Twin Ion Gun",
         				8 => "Heavy Laser Spear",
 						10 => "Laser Spear",
-						12 => "Medium Plasma Cannon",
+						12 => "Heavy Plasma Cannon",
         				18 => "Structure",
         				20 => "Primary",
         		),

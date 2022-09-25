@@ -1576,6 +1576,7 @@ spl_autoload_register(
 				'plasmaweb' => '/server/model/weapons/customNexus.php',
 //				'plasmablast' => '/server/model/weapons/customNexus.php',
 //				'testgun' => '/server/model/weapons/customNexus.php',
+				'testmissile' => '/server/model/weapons/customNexus.php',
 //                'plasmabattery' => '/server/model/systems/baseSystems.php',
 //				'enveloper' => '/server/model/weapons/customNexus.php',
 
@@ -2657,16 +2658,17 @@ spl_autoload_register(
          		'fmissilerack' => '/server/model/weapons/customNexus.php', 
 */
 
+				'solyrn' => '/server/model/ships/korlyan/Solyrn.php',
                 'tmphitreduction' => '/server/model/cricialClasses.php',
 
          		'chaffmissile' => '/server/model/weapons/customNexus.php', 
          		'proximitylaser' => '/server/model/weapons/customNexus.php', 
          		'fmissilerack' => '/server/model/weapons/customNexus.php', 
          		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
-         		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
-//				'cokra' => '/server/model/ships/korlyan/Cokra.php',
+         		'multidefenselauncher' => '/server/model/weapons/missile.php', //missile racks themselves
+				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 //				'koloskova' => '/server/model/ships/korlyan/Koloskova.php',
-//				'lekra' => '/server/model/ships/korlyan/Lekra.php',
+				'lekra' => '/server/model/ships/korlyan/Lekra.php',
 				'koskova' => '/server/model/ships/korlyan/Koskova.php',
 
 
@@ -2724,6 +2726,7 @@ spl_autoload_register(
                 		'ammomissilea' => '/server/model/systems/baseSystems.php',
                 		'ammomissilep' => '/server/model/systems/baseSystems.php',
                 		'ammomissiled' => '/server/model/systems/baseSystems.php',
+                		'ammomissiles' => '/server/model/systems/baseSystems.php',
 		    
                 		'ammomissileracks' => '/server/model/weapons/missile.php', //missile racks themselves
                 		'ammomissilerackso' => '/server/model/weapons/missile.php',
