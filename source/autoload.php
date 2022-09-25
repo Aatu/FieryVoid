@@ -2658,7 +2658,7 @@ spl_autoload_register(
          		'fmissilerack' => '/server/model/weapons/customNexus.php', 
 */
 
-				'solyrn' => '/server/model/ships/korlyan/Solyrn.php',
+//				'solyrn' => '/server/model/ships/korlyan/Solyrn.php',
                 'tmphitreduction' => '/server/model/cricialClasses.php',
 
          		'chaffmissile' => '/server/model/weapons/customNexus.php', 
@@ -2666,10 +2666,10 @@ spl_autoload_register(
          		'fmissilerack' => '/server/model/weapons/customNexus.php', 
          		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
          		'multidefenselauncher' => '/server/model/weapons/missile.php', //missile racks themselves
-				'cokra' => '/server/model/ships/korlyan/Cokra.php',
+//				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 //				'koloskova' => '/server/model/ships/korlyan/Koloskova.php',
-				'lekra' => '/server/model/ships/korlyan/Lekra.php',
-				'koskova' => '/server/model/ships/korlyan/Koskova.php',
+//				'lekra' => '/server/model/ships/korlyan/Lekra.php',
+//				'koskova' => '/server/model/ships/korlyan/Koskova.php',
 
 
 
