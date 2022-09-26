@@ -10,7 +10,8 @@ class DarkhawkFull extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/drazi/DraziDarkhawk.png";
         $this->shipClass = "Darkhawk Missile Cruiser (full)";
 	        $this->unofficial = true;
-	    $this->variantOf = "Sunhawk Battlecruiser";
+	    //$this->variantOf = "Sunhawk Battlecruiser";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->isd = 2214;
         $this->canvasSize = 200;
         $this->forwardDefense = 14;

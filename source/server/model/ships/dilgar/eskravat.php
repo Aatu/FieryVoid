@@ -10,6 +10,7 @@ class Eskravat extends BaseShip{
         $this->phpclass = "Eskravat";
         $this->imagePath = "img/ships/athraskala.png";
         $this->shipClass = "Eskravat Refueling Barge";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->shipSizeClass = 3;
         $this->isd = 2229;
 

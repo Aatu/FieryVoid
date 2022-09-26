@@ -1034,6 +1034,8 @@ class AmmoMissileRackS extends Weapon{
     public $firingMode = 1;
     public $priority = 6;
     public $loadingtime = 2;
+	
+	protected $availableAmmoAlreadySet = false; //set to true if calling constructor from derived weapon that sets different ammo options
 
     protected $rackExplosionDamage = 75; //how much damage will this weapon do in case of catastrophic explosion
 	//officially it's a quarter of total power of warheads in magazine; but in FV this number is fixed (as missiles in magazine are not tracked)
@@ -1058,7 +1060,7 @@ class AmmoMissileRackS extends Weapon{
     public $rangeArray = array(); 
 	public $distanceRangeArray = array(); 
 
-	private $ammoClassesArray = array();//FILLED IN CONSTRUCTOR! classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
+	protected $ammoClassesArray = array();//FILLED IN CONSTRUCTOR! classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
 	
 	private $ammoMagazine; //reference to ammo magazine
 	private $ammoClassesUsed = array();
@@ -1071,13 +1073,17 @@ class AmmoMissileRackS extends Weapon{
 		//VERY IMPORTANT: fill $ammoClassesArray (cannot be done as constants!
 		//classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
 		//remember that appropriate enhancements need to be enabled on ehip itself, too!
-		$this->ammoClassesArray[] = new AmmoMissileB();
-		$this->ammoClassesArray[] = new AmmoMissileL();
-		$this->ammoClassesArray[] =  new AmmoMissileH();
-		$this->ammoClassesArray[] =  new AmmoMissileF();
-		$this->ammoClassesArray[] =  new AmmoMissileA();
-		$this->ammoClassesArray[] =  new AmmoMissileP();
-		$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
+		
+		if(!$this->availableAmmoAlreadySet){
+			$this->ammoClassesArray[] = new AmmoMissileB();
+			$this->ammoClassesArray[] = new AmmoMissileL();
+			$this->ammoClassesArray[] =  new AmmoMissileH();
+			$this->ammoClassesArray[] =  new AmmoMissileF();
+			$this->ammoClassesArray[] =  new AmmoMissileA();
+			$this->ammoClassesArray[] =  new AmmoMissileP();
+			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
+			$this->availableAmmoAlreadySet = true;
+		}
 	
 		$this->ammoMagazine = $magazine;
 		if($base){
@@ -1433,12 +1439,15 @@ class AmmoMissileRackA extends AmmoMissileRackS{
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
 		if ( $maxhealth == 0 ) $maxhealth = 6;
-            	if ( $powerReq == 0 ) $powerReq = 0;
-		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+		if ( $powerReq == 0 ) $powerReq = 0;
+
 		//reset missile availability! (Parent sets way too much)
-		$this->ammoClassesArray = array();
-		$this->ammoClassesArray[] =  new AmmoMissileA();
-		$this->recompileFiringModes();
+		if(!$this->availableAmmoAlreadySet){
+			$this->ammoClassesArray = array();
+			$this->ammoClassesArray[] =  new AmmoMissileA();
+			$this->availableAmmoAlreadySet = true;
+		}						
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
 	}
 } //endof class AmmoMissileRackA
 
@@ -1468,13 +1477,16 @@ class AmmoBombRack extends AmmoMissileRackS{
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
 		if ( $maxhealth == 0 ) $maxhealth = 6;
-            	if ( $powerReq == 0 ) $powerReq = 0;
-		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+		if ( $powerReq == 0 ) $powerReq = 0;
+		
 		//reset missile availability! (Parent sets way too much)
-		$this->ammoClassesArray = array();
-		$this->ammoClassesArray[] =  new AmmoMissileB();
-		$this->ammoClassesArray[] =  new AmmoMissileF();
-		$this->recompileFiringModes();
+		if(!$this->availableAmmoAlreadySet){
+			$this->ammoClassesArray = array();
+			$this->ammoClassesArray[] =  new AmmoMissileB();
+			$this->ammoClassesArray[] =  new AmmoMissileF();
+			$this->availableAmmoAlreadySet = true;
+		}		
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
 	}
 } //endof class AmmoBombRack
 
