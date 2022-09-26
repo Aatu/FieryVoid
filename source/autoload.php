@@ -2778,11 +2778,22 @@ spl_autoload_register(
 						'rulnatoam' => '/server/model/ships/descari/RulnatoAM.php',
 						'carranaam' => '/server/model/ships/descari/CarranaAM.php',
 						'hemrosam' => '/server/model/ships/descari/HemrosAM.php',
+												
+						//Dilgar
+						'koratylam' => '/server/model/ships/dilgar/koratylAM.php',
+						'mishakuram' => '/server/model/ships/dilgar/mishakurAM.php',
+						'mishakurdam' => '/server/model/ships/dilgar/mishakurDAM.php',
+						'athraskalaam' => '/server/model/ships/dilgar/athraskalaAM.php',
+						'athraskalacam' => '/server/model/ships/dilgar/athraskalaCAM.php',
+						'targathcam' => '/server/model/ships/dilgar/targathCAM.php',
+						'eskravatam' => '/server/model/ships/dilgar/eskravatAM.php',
+						'delegor' => '/server/model/ships/dilgar/delegor.php',
 						
+						//Drazi						
+						'darkhawkam' => '/server/model/ships/drazi/darkhawkAM.php', 
 						
-						
-						
-				
+						//Llort						
+						'kaedashkadaam' => '/server/model/ships/llort/KaedashkadaAM.php',
 				
 		    
 				

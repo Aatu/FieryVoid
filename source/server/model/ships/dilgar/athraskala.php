@@ -8,6 +8,7 @@ class Athraskala extends BaseShip{
         $this->pointCost = 600;
         $this->faction = "Dilgar";
         $this->phpclass = "Athraskala";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->imagePath = "img/ships/athraskala.png";
         $this->shipClass = "Athraskala Heavy Bomber";
         $this->shipSizeClass = 3;

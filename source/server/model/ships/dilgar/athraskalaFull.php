@@ -8,8 +8,9 @@ class AthraskalaFull extends BaseShip{
         $this->phpclass = "AthraskalaFull";
         $this->imagePath = "img/ships/athraskala.png";
         $this->shipClass = "Athraskala Heavy Bomber (full)";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 	    $this->unofficial = true;
-        $this->variantOf = "Athraskala Heavy Bomber";
+        //$this->variantOf = "Athraskala Heavy Bomber";
         $this->shipSizeClass = 3;
         $this->isd = 2229;
         $this->forwardDefense = 15;

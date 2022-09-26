@@ -23,7 +23,8 @@ class TargathC extends BaseShip{
         $this->pivotcost = 4;
         
         $this->occurence = "rare";
-        $this->variantOf = "Targath Strike Cruiser";
+        //$this->variantOf = "Targath Strike Cruiser";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 
         $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
         $this->addPrimarySystem(new CnC(5, 21, 0, 0));
