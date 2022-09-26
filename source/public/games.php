@@ -74,12 +74,13 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Pak'ma'ra general fixing and polishing</b> - courtesy of Douglas
 	    <br><b>Nexus universe fixes and polishing</b> - Brixadii, Dalithorn, Sal-bez (courtesy of Geoffrey)
 	    <br><b>Monsoon</b> - CUSTOM advanced EA MCV, anyone? (courtesy of Geoffrey)
-	    
-
-	    
-		 <br><br>---------- <b>update 28th of July</b> ---------- 
 	    <br><b>class-LH missile rack</b> - new incarnation fixed to 1/turn weapon (will not affect ongoing games though)
-
+	    
+	    
+		 <br><br>---------- <b>update 26th of September</b> ---------- 
+	    <br><b>Variable missile loads</b> - new factions are in (Dilgar, Drazi)
+	    <br><b>Suicidal Dilgar</b> - Delegor added (scenario unit)
+	    
 		
 	    
         <br><br><br>
