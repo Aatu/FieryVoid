@@ -2701,6 +2701,7 @@ spl_autoload_register(
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
 				'gaimraxas' => '/server/model/ships/customs/gaimRaxas.php',
+				'prototype' => '/server/model/ships/customs/Prototype.php',
 				
 
 
