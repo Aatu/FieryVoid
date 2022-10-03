@@ -33,7 +33,7 @@ class TrekFederationTypeCShuttles extends FighterFlight{
         $new = $this->flightSize;
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){   
-            $armour = array(2, 2, 2, 1);
+            $armour = array(2, 1, 2, 2);
             $fighter = new Fighter("TrekFederationTypeCShuttles", $armour, 10, $this->id);
             $fighter->displayName = "Type C Shuttle";
 			

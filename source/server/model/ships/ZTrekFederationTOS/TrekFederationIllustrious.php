@@ -34,7 +34,7 @@ class TrekFederationIllustrious extends HeavyCombatVessel{
 	$this->addPrimarySystem(new CnC(4, 10, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 6, 6));
-	$this->addPrimarySystem(new Hangar(3, 14, 6));
+	$this->addPrimarySystem(new Hangar(3, 14, 14));
 
 	$impulseDrive = new TrekImpulseDrive(4,26,0,1,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 		

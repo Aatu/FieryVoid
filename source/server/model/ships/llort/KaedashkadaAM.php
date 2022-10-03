@@ -28,9 +28,9 @@ class KaedashkadaAM extends UnevenBaseFourSections
 
 
         //ammo magazine itself (AND its missile options)
-        $ammoMagazine = new AmmoMagazine(120); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $ammoMagazine = new AmmoMagazine(200); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
         $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 120); //add full load of basic missiles
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 200); //add full load of basic missiles
         $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
         $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F

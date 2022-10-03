@@ -1,19 +1,17 @@
 <?php
-class govallFull extends HeavyCombatVessel{
+class govallAM extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 700+4*35+50;  //4x class-L, 1x class-R
+        $this->pointCost = 700;
         $this->faction = "Llort";
-        $this->phpclass = "govallFull";
+        $this->phpclass = "govallAM";
         $this->imagePath = "img/ships/LlortGovall.png";
-        $this->shipClass = "Govall Bombardment Destroyer (full)";
+        $this->shipClass = "Govall Bombardment Destroyer";
  
         $this->limited = 33; 
         $this->isd = 2241;
-       // $this->variantOf = "Govall Bombardment Destroyer";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
@@ -25,21 +23,32 @@ class govallFull extends HeavyCombatVessel{
         $this->pivotcost = 2;
         $this->iniativebonus = 30;
         
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(100); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 100); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+        $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
+        $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+        $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+		
         $this->addPrimarySystem(new Reactor(4, 15, 0, 0));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 6));
 	$this->addPrimarySystem(new Engine(4, 12, 0, 8, 2));
         $this->addPrimarySystem(new Thruster(3, 8, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4));
+
         $this->addFrontSystem(new Thruster(2, 5, 0, 2, 3));
         $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
 	$this->addFrontSystem(new IonTorpedo(4, 5, 4, 240, 60));
 	$this->addFrontSystem(new IonTorpedo(4, 5, 4, 240, 60));
-        $this->addFrontSystem(new MultiMissileLauncher(4, 'R', 300, 60));
+		$this->addFrontSystem(new AmmoMissileRackL(4, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackL(4, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackR(4, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addFrontSystem(new TwinArray(4, 6, 2, 0, 180));
-        $this->addFrontSystem(new MultiMissileLauncher(4, 'L', 300, 120));
-        $this->addFrontSystem(new MultiMissileLauncher(4, 'L', 300, 120));
         
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
@@ -47,8 +56,8 @@ class govallFull extends HeavyCombatVessel{
 	$this->addAftSystem(new Hangar(4, 4));
         $this->addAftSystem(new ScatterGun(3, 8, 3, 180, 360));
         $this->addAftSystem(new ScatterGun(3, 8, 3, 180, 360));
-        $this->addAftSystem(new MultiMissileLauncher(4, 'L', 300, 120));
-        $this->addAftSystem(new MultiMissileLauncher(4, 'L', 300, 120));
+		$this->addAftSystem(new AmmoMissileRackL(4, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addAftSystem(new AmmoMissileRackL(4, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 48));

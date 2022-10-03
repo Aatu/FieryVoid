@@ -2792,8 +2792,10 @@ spl_autoload_register(
 						//Drazi						
 						'darkhawkam' => '/server/model/ships/drazi/darkhawkAM.php', 
 						
-						//Llort						
+						//Llort
 						'kaedashkadaam' => '/server/model/ships/llort/KaedashkadaAM.php',
+						'fwellgonam' => '/server/model/ships/llort/fwellgonAM.php',
+						'govallam' => '/server/model/ships/llort/govallAM.php',
 				
 		    
 				
