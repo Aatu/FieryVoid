@@ -112,9 +112,10 @@ class TrekFederationDreadnought extends HeavyCombatVessel{
             ),
             2=> array(
 				2 => "Shield Projector",
-				8 => "Nacelle",
-				10 => "Phaser Lance",
-				12 => "Photon Torpedo",
+				7 => "Nacelle",
+                    		9 => "Scanner",
+				11 => "Phaser Lance",
+				13 => "Photon Torpedo",
 				18 => "Structure",
 				20 => "Primary",
             ),
