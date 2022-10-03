@@ -2484,7 +2484,6 @@ spl_autoload_register(
 				//Star Trek conversions
 				//weapons
 				'trekphaserbase' => '/server/model/weapons/customTrek.php',
-				'trekftrphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekltphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekhvyphasecannon' => '/server/model/weapons/customTrek.php',
@@ -2500,6 +2499,8 @@ spl_autoload_register(
 				'ltplasmaprojector' => '/server/model/weapons/customTrek.php',
 				'customltparticlecutter' => '/server/model/weapons/customs.php',
 				'customearlyltparticlecutter' => '/server/model/weapons/customs.php',
+				'trekftrphaser' => '/server/model/weapons/customTrek.php',
+				'trekftrphasecannon' => '/server/model/weapons/customTrek.php',
 				
 				//systems
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php', //nacelle

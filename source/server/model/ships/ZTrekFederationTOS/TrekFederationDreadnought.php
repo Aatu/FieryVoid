@@ -37,7 +37,7 @@ class TrekFederationDreadnought extends HeavyCombatVessel{
 	$impulseDrive = new TrekImpulseDrive(4,26,0,1,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 		
   
-	$projection = new TrekShieldProjection(2, 30, 6, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+	$projection = new TrekShieldProjection(2, 28, 6, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projector = new TrekShieldProjector(2, 8, 2, 3, 270, 90, 'F'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
 		$this->addFrontSystem($projector);
@@ -64,16 +64,16 @@ class TrekFederationDreadnought extends HeavyCombatVessel{
 	$impulseDrive->addThruster($warpNacelle);
 	$this->addAftSystem($warpNacelle);
 		
-	$projection = new TrekShieldProjection(2, 30, 6, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
-		$projector = new TrekShieldProjector(2, 8, 2, 3, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+	$projection = new TrekShieldProjection(2, 24, 6, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+		$projector = new TrekShieldProjector(2, 6, 2, 2, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
 		$this->addAftSystem($projector);
-		$projector = new TrekShieldProjector(2, 8, 2, 3, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+		$projector = new TrekShieldProjector(2, 6, 2, 2, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
 		$this->addAftSystem($projector);
 	$this->addAftSystem($projection);
 	
-        $this->addAftSystem(new Scanner(4, 12, 3, 3));
+        $this->addAftSystem(new Scanner(4, 10, 2, 2));
         $this->addAftSystem(new TrekPhotonTorp(3, 0, 0, 120, 240));
         $this->addAftSystem(new TrekPhotonTorp(3, 0, 0, 120, 240));
 	$this->addAftSystem(new TrekPhaserLance(3, 0, 0, 120, 240));
@@ -95,8 +95,9 @@ class TrekFederationDreadnought extends HeavyCombatVessel{
 	    
         $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-                    11 => "Scanner",
+                    7 => "Structure",
+					9 => "2:Nacelle",
+                    12 => "Scanner",
                     14 => "Engine",
                     16 => "Hangar",
                     18 => "Reactor",
@@ -104,8 +105,8 @@ class TrekFederationDreadnought extends HeavyCombatVessel{
             ),
             1=> array(
 				2 => "Shield Projector",
-				5 => "Photon Torpedo",
-				9 => "Phaser Lance",
+				6 => "Phaser Lance",
+				9 => "Photon Torpedo",
 				10 => "Tractor Beam",
 				18 => "Structure",
 				20 => "Primary",
@@ -113,7 +114,7 @@ class TrekFederationDreadnought extends HeavyCombatVessel{
             2=> array(
 				2 => "Shield Projector",
 				7 => "Nacelle",
-                    		9 => "Scanner",
+				9 => "Scanner",
 				11 => "Phaser Lance",
 				13 => "Photon Torpedo",
 				18 => "Structure",

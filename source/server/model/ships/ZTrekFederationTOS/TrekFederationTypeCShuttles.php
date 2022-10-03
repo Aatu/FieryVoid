@@ -39,9 +39,11 @@ class TrekFederationTypeCShuttles extends FighterFlight{
 			
             $fighter->imagePath = "img/ships/StarTrek/TypeCShuttle.png";
             $fighter->iconPath = "img/ships/StarTrek/TypeCShuttle_Large.png";
-			
+			/*
             $frontGun = new LightParticleBeam(330, 30, 3, 2);
             $frontGun->displayName = "Dual Phaser Beams";
+			*/
+			$frontGun = new TrekFtrPhaser(330, 30, 3, 2);
             $fighter->addFrontSystem($frontGun);
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack

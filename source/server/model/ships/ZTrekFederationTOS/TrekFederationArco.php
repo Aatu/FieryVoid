@@ -46,8 +46,9 @@ class TrekFederationArco extends FighterFlight{
         $microtorpedo->displayName = "Micro Torpedo";
         $fighter->addFrontSystem($microtorpedo);	
 		
-        $frontGun = new PairedParticleGun(330, 30, 1, 2);
-        $frontGun->displayName = "Ultralight Phaser Beam";
+        /*$frontGun = new PairedParticleGun(330, 30, 1, 2);
+        $frontGun->displayName = "Ultralight Phaser Beam";*/
+			$frontGun = new TrekFtrPhaser(330, 30, 1, 2);
         $fighter->addFrontSystem($frontGun);
 		
         $microtorpedo = new FighterMissileRack(3, 330, 30);
