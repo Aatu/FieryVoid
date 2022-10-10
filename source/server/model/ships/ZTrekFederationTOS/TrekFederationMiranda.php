@@ -4,7 +4,7 @@ class TrekFederationMiranda extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 400;
+        $this->pointCost = 450;
         $this->faction = "ZTrek Playtest Federation (TOS)";
         $this->phpclass = "TrekFederationMiranda";
         $this->imagePath = "img/ships/StarTrek/FederationMiranda.png";
@@ -34,7 +34,7 @@ class TrekFederationMiranda extends MediumShip{
         $this->addPrimarySystem(new Hangar(4, 3));
 	$impulseDrive = new TrekImpulseDrive(4,24,0,1,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 
-	$projection = new TrekShieldProjection(2, 20, 6, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+	$projection = new TrekShieldProjection(2, 16, 6, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projector = new TrekShieldProjector(2, 6, 2, 2, 270, 90, 'F'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
 		$this->addFrontSystem($projector);
@@ -57,7 +57,7 @@ class TrekFederationMiranda extends MediumShip{
 		$impulseDrive->addThruster($warpNacelle);
 		$this->addAftSystem($warpNacelle);
 
-	$projection = new TrekShieldProjection(2, 20, 6, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+	$projection = new TrekShieldProjection(2, 16, 6, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projector = new TrekShieldProjector(2, 6, 2, 2, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
 		$this->addAftSystem($projector);

@@ -10,6 +10,12 @@ var TrekFtrPhaseCannon = function TrekFtrPhaseCannon(json, ship) {
 TrekFtrPhaseCannon.prototype = Object.create(Weapon.prototype);
 TrekFtrPhaseCannon.prototype.constructor = TrekFtrPhaseCannon;
 
+var TrekFtrPhaser = function TrekFtrPhaser(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekFtrPhaser.prototype = Object.create(Weapon.prototype);
+TrekFtrPhaser.prototype.constructor = TrekFtrPhaser;
+
 var TrekPhaseCannon = function TrekPhaseCannon(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -165,3 +171,19 @@ TrekPlasmaBurst.prototype.initBoostableInfo = function () {
     }
     return this;
 };
+
+
+var TrekFtrPhotonTorpedo = function TrekFtrPhotonTorpedo(json, ship) {
+    FighterMissileRack.call(this, json, ship);
+};
+TrekFtrPhotonTorpedo.prototype = Object.create(FighterMissileRack.prototype);
+TrekFtrPhotonTorpedo.prototype.constructor = TrekFtrPhotonTorpedo;
+
+var TrekFtrPhotonTorpedoAmmo = function TrekFtrPhotonTorpedoAmmo(json, ship) {
+    Ammo.call(this, json, ship);
+    this.range = 10;
+    this.distanceRange = 20;
+    this.hitChanceMod = 0;
+};
+TrekFtrPhotonTorpedoAmmo.prototype = Object.create(Ammo.prototype);
+TrekFtrPhotonTorpedoAmmo.prototype.constructor = TrekFtrPhotonTorpedoAmmo;

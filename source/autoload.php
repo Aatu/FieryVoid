@@ -2484,7 +2484,6 @@ spl_autoload_register(
 				//Star Trek conversions
 				//weapons
 				'trekphaserbase' => '/server/model/weapons/customTrek.php',
-				'trekftrphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekltphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekhvyphasecannon' => '/server/model/weapons/customTrek.php',
@@ -2500,6 +2499,10 @@ spl_autoload_register(
 				'ltplasmaprojector' => '/server/model/weapons/customTrek.php',
 				'customltparticlecutter' => '/server/model/weapons/customs.php',
 				'customearlyltparticlecutter' => '/server/model/weapons/customs.php',
+				'trekftrphaser' => '/server/model/weapons/customTrek.php',
+				'trekftrphasecannon' => '/server/model/weapons/customTrek.php',
+				'trekftrphotontorpedo' => '/server/model/weapons/customTrek.php',
+				'trekftrphotontorpedoammo' => '/server/model/weapons/customTrek.php',
 				
 				//systems
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php', //nacelle
@@ -2792,8 +2795,10 @@ spl_autoload_register(
 						//Drazi						
 						'darkhawkam' => '/server/model/ships/drazi/darkhawkAM.php', 
 						
-						//Llort						
+						//Llort
 						'kaedashkadaam' => '/server/model/ships/llort/KaedashkadaAM.php',
+						'fwellgonam' => '/server/model/ships/llort/fwellgonAM.php',
+						'govallam' => '/server/model/ships/llort/govallAM.php',
 				
 		    
 				
