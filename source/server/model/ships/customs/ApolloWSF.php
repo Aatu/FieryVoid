@@ -12,7 +12,8 @@ class ApolloWSF extends BaseShip{
         $this->shipSizeClass = 3;
         $this->canvasSize = 200;
         $this->limited = 33;
-  	    $this->isd = 2263;        
+  	    $this->isd = 2263;
+	    $this->notes .= "<br>This is a custom ship only intended for use in a specific scenario, please do not use unless you've agreed it with your opponent first!";  	            
 
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
