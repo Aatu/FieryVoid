@@ -20,7 +20,7 @@ class TrekFederationSaladin extends MediumShip{
         $this->forwardDefense = 11;
         $this->sideDefense = 12;
  
-        $this->agile = true;       
+        //$this->agile = true; //NOT agile after all       
         $this->gravitic = true;  
         $this->turncost = 0.33;
         $this->turndelaycost = 0.33;

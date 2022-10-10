@@ -4,7 +4,7 @@ class TrekFederationTypeCShuttles extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 30 *6; //for 6
+        $this->pointCost = 33 *6; //for 6
         $this->faction = "ZTrek Playtest Federation (TOS)";
         $this->phpclass = "TrekFederationTypeCShuttles";
         $this->shipClass = "Type C Shuttle Flight";

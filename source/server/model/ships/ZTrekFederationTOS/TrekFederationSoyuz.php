@@ -31,9 +31,9 @@ class TrekFederationSoyuz extends MediumShip{
         $this->pivotcost = 2;
         $this->iniativebonus = 13 *5;
 
-        $this->addPrimarySystem(new Reactor(4, 16, 0, 2));
+        $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(4, 10, 0, 0));
-        $this->addPrimarySystem(new ElintScanner(4, 16, 4, 6));
+        $this->addPrimarySystem(new ElintScanner(4, 13, 6, 5));
         $this->addPrimarySystem(new Hangar(4, 3));
 	$impulseDrive = new TrekImpulseDrive(4,24,0,1,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 
@@ -68,7 +68,7 @@ class TrekFederationSoyuz extends MediumShip{
 		$projection->addProjector($projector);
 		$this->addAftSystem($projector);
 	$this->addAftSystem($projection);
-	$this->addAftSystem(new ElintScanner(3, 9, 2, 3));
+	$this->addAftSystem(new ElintScanner(3, 6, 4, 2));
 	$this->addAftSystem(new TrekLightPhaser(3, 0, 0, 90, 270));
 	$this->addAftSystem(new TrekLightPhaser(3, 0, 0, 90, 270));
 		

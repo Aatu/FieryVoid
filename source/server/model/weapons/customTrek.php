@@ -1480,12 +1480,80 @@ class TrekShieldFtr extends ShipSystem{
         }
 
 	    
-        public function getDamage($fireOrder){   
+        public function getDamage($fireOrder){
 			return Dice::d(6, 2)+4;
 		}
         public function setMinDamage(){   return  $this->minDamage = 6 ;      }
         public function setMaxDamage(){   return  $this->maxDamage = 16 ;      }
 		
     }  //end of class Trek Fighter Light Phase Cannon
+
+
+
+
+class TrekFtrPhotonTorpedo extends FighterMissileRack
+{
+    public $name = "TrekFtrPhotonTorpedo";
+    public $displayName = "Light Photon Torpedo";
+    public $loadingtime = 1;
+    public $iconPath = "TrekPhotonicTorpedo.png";
+    public $rangeMod = 0;
+    public $firingMode = 1;
+    public $maxAmount = 0;
+    protected $distanceRangeMod = 0;
+    public $priority = 5; //priority: strong fighter weapon (similar damage output to basic fighter missiles)
+
+
+    public $animation = "torpedo";
+
+    public $fireControl = array(0, 1, 2); // fighters, <mediums, <capitals 
+    
+    public $firingModes = array(
+        1 => "PhotonTorpedo"
+    );
+    
+    function __construct($maxAmount, $startArc, $endArc){
+        parent::__construct($maxAmount, $startArc, $endArc);
+        
+        $ammo = new TrekFtrPhotonTorpedoAmmo($startArc, $endArc, $this->fireControl);
+        
+        $this->missileArray = array(
+            1 => $ammo
+        );
+        
+        $this->maxAmount = $maxAmount;
+		$this->fireControl = array(0, 1, 2);
+    }    
+}
+class TrekFtrPhotonTorpedoAmmo extends MissileFB
+{
+    public $name = "TrekFtrPhotonTorpedoAmmo";
+    public $missileClass = "PhotonTorpedo";
+    public $displayName = "Light Photon Torpedo";
+    public $cost = 6;//definitely worse than basic fighter missile - but packing about the same puch (less reliable though, with much less distance range (fighters will often be able to evade, possibly agile MCVs as well - and with less FC)
+    //public $damage = 10;
+    public $amount = 0;
+    public $range = 10;
+    public $distanceRange = 18;
+    public $hitChanceMod = 0;
+    public $priority = 5;
+    public $iconPath = "TrekPhotonicTorpedo.png";
+	
+	 //data below is overridden for some reason :(
+	public $fireControl = array(0, 1, 2);	
+    public $animation = "torpedo";
+        public $animationColor = array(255, 188, 0); //same as Photon Torpedo line
+    
+    function __construct($startArc, $endArc, $fireControl = null){
+        parent::__construct($startArc, $endArc, $fireControl);
+    }
+
+    public function getDamage($fireOrder){ 
+			return Dice::d(6, 2)+3;
+	}
+    public function setMinDamage(){     $this->minDamage = 5;      }
+    public function setMaxDamage(){     $this->maxDamage = 15;      }        
+}
+
 
 ?>

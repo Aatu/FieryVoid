@@ -2501,6 +2501,8 @@ spl_autoload_register(
 				'customearlyltparticlecutter' => '/server/model/weapons/customs.php',
 				'trekftrphaser' => '/server/model/weapons/customTrek.php',
 				'trekftrphasecannon' => '/server/model/weapons/customTrek.php',
+				'trekftrphotontorpedo' => '/server/model/weapons/customTrek.php',
+				'trekftrphotontorpedoammo' => '/server/model/weapons/customTrek.php',
 				
 				//systems
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php', //nacelle
