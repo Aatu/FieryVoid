@@ -1,6 +1,6 @@
 <?php
 class LiberatorEscort extends LCV{
-	/*Deneth Liberator LCV, from Raiders-2*/
+	/*Deneth Liberator LCV, from Raiders-2*/ 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
@@ -28,8 +28,8 @@ class LiberatorEscort extends LCV{
 	$this->pivotcost = 1;
 	$this->iniativebonus = 14 *5;
   
-	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
   

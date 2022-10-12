@@ -20,7 +20,7 @@ class TrekFederationSaladin extends MediumShip{
         $this->forwardDefense = 11;
         $this->sideDefense = 12;
  
-        $this->agile = true;       
+        //$this->agile = true; //NOT agile after all       
         $this->gravitic = true;  
         $this->turncost = 0.33;
         $this->turndelaycost = 0.33;
@@ -32,10 +32,10 @@ class TrekFederationSaladin extends MediumShip{
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new CnC(4, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 5, 5));
-        $this->addPrimarySystem(new Hangar(3, 1));
+        $this->addPrimarySystem(new Hangar(3, 1, 1));
 	$impulseDrive = new TrekImpulseDrive(3,18,0,3,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 
-	$projection = new TrekShieldProjection(2, 15, 6, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+	$projection = new TrekShieldProjection(2, 12, 6, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projector = new TrekShieldProjector(2, 6, 2, 2, 270, 90, 'F'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
 		$this->addFrontSystem($projector);
@@ -54,7 +54,7 @@ class TrekFederationSaladin extends MediumShip{
 		$impulseDrive->addThruster($warpNacelle);
 		$this->addAftSystem($warpNacelle);
 
-	$projection = new TrekShieldProjection(2, 15, 6, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+	$projection = new TrekShieldProjection(2, 12, 6, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projector = new TrekShieldProjector(2, 6, 2, 2, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
 		$this->addAftSystem($projector);

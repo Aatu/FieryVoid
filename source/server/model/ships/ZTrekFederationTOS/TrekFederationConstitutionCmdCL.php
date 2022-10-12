@@ -4,7 +4,7 @@ class TrekFederationConstitutionCmdCL extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 525;
+	$this->pointCost = 540;
 	$this->faction = "ZTrek Playtest Federation (TOS)";
         $this->phpclass = "TrekFederationConstitutionCmdCL";
         $this->imagePath = "img/ships/StarTrek/Constitution.png";
@@ -38,7 +38,7 @@ class TrekFederationConstitutionCmdCL extends HeavyCombatVessel{
 	$impulseDrive = new TrekImpulseDrive(4,26,0,1,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 		
   
-	$projection = new TrekShieldProjection(2, 24, 6, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+	$projection = new TrekShieldProjection(2, 28, 6, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projector = new TrekShieldProjector(1, 6, 2, 2, 270, 90, 'F'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
 		$this->addFrontSystem($projector);

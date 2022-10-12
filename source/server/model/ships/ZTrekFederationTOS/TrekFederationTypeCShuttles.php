@@ -4,7 +4,7 @@ class TrekFederationTypeCShuttles extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 30 *6; //for 6
+        $this->pointCost = 33 *6; //for 6
         $this->faction = "ZTrek Playtest Federation (TOS)";
         $this->phpclass = "TrekFederationTypeCShuttles";
         $this->shipClass = "Type C Shuttle Flight";
@@ -33,15 +33,17 @@ class TrekFederationTypeCShuttles extends FighterFlight{
         $new = $this->flightSize;
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){   
-            $armour = array(2, 2, 2, 1);
+            $armour = array(2, 1, 2, 2);
             $fighter = new Fighter("TrekFederationTypeCShuttles", $armour, 10, $this->id);
             $fighter->displayName = "Type C Shuttle";
 			
             $fighter->imagePath = "img/ships/StarTrek/TypeCShuttle.png";
             $fighter->iconPath = "img/ships/StarTrek/TypeCShuttle_Large.png";
-			
+			/*
             $frontGun = new LightParticleBeam(330, 30, 3, 2);
             $frontGun->displayName = "Dual Phaser Beams";
+			*/
+			$frontGun = new TrekFtrPhaser(330, 30, 3, 2);
             $fighter->addFrontSystem($frontGun);
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack

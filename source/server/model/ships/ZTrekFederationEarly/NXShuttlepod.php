@@ -40,8 +40,9 @@ class NXShuttlepod extends FighterFlight{
             $fighter->imagePath = "img/ships/StarTrek/NXShuttlepod.png";
             $fighter->iconPath = "img/ships/StarTrek/NXShuttlepod_Large.png";
 			
-            $frontGun = new LightParticleBeam(330, 30, 1, 2);
-            $frontGun->displayName = "Dual Beams";
+            /*$frontGun = new LightParticleBeam(330, 30, 1, 2);
+            $frontGun->displayName = "Dual Beams";*/
+			$frontGun = new TrekFtrPhaser(330, 30, 1, 2,"Phase Cannon");
             $fighter->addFrontSystem($frontGun);
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack

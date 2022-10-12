@@ -38,8 +38,8 @@ class MitocJomic extends MediumShip{
                 
         $this->addAftSystem(new Thruster(4, 18, 0, 6, 2));
         $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
-        $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 0, 180));
         $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 90, 270));
+        $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 0, 180));
  
 		$this->addPrimarySystem(new Structure(5, 44));
  

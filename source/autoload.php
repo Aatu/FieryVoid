@@ -2484,7 +2484,6 @@ spl_autoload_register(
 				//Star Trek conversions
 				//weapons
 				'trekphaserbase' => '/server/model/weapons/customTrek.php',
-				'trekftrphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekltphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekhvyphasecannon' => '/server/model/weapons/customTrek.php',
@@ -2500,6 +2499,10 @@ spl_autoload_register(
 				'ltplasmaprojector' => '/server/model/weapons/customTrek.php',
 				'customltparticlecutter' => '/server/model/weapons/customs.php',
 				'customearlyltparticlecutter' => '/server/model/weapons/customs.php',
+				'trekftrphaser' => '/server/model/weapons/customTrek.php',
+				'trekftrphasecannon' => '/server/model/weapons/customTrek.php',
+				'trekftrphotontorpedo' => '/server/model/weapons/customTrek.php',
+				'trekftrphotontorpedoammo' => '/server/model/weapons/customTrek.php',
 				
 				//systems
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php', //nacelle
@@ -2778,11 +2781,24 @@ spl_autoload_register(
 						'rulnatoam' => '/server/model/ships/descari/RulnatoAM.php',
 						'carranaam' => '/server/model/ships/descari/CarranaAM.php',
 						'hemrosam' => '/server/model/ships/descari/HemrosAM.php',
+												
+						//Dilgar
+						'koratylam' => '/server/model/ships/dilgar/koratylAM.php',
+						'mishakuram' => '/server/model/ships/dilgar/mishakurAM.php',
+						'mishakurdam' => '/server/model/ships/dilgar/mishakurDAM.php',
+						'athraskalaam' => '/server/model/ships/dilgar/athraskalaAM.php',
+						'athraskalacam' => '/server/model/ships/dilgar/athraskalaCAM.php',
+						'targathcam' => '/server/model/ships/dilgar/targathCAM.php',
+						'eskravatam' => '/server/model/ships/dilgar/eskravatAM.php',
+						'delegor' => '/server/model/ships/dilgar/delegor.php',
 						
+						//Drazi						
+						'darkhawkam' => '/server/model/ships/drazi/darkhawkAM.php', 
 						
-						
-						
-				
+						//Llort
+						'kaedashkadaam' => '/server/model/ships/llort/KaedashkadaAM.php',
+						'fwellgonam' => '/server/model/ships/llort/fwellgonAM.php',
+						'govallam' => '/server/model/ships/llort/govallAM.php',
 				
 		    
 				

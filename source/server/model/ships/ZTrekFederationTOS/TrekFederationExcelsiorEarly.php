@@ -4,7 +4,7 @@ class TrekFederationExcelsiorEarly extends BaseShipNoAft{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 750;
+	$this->pointCost = 825;
 	$this->faction = "ZTrek Playtest Federation (TOS)";
         $this->phpclass = "TrekFederationExcelsiorEarly";
         $this->imagePath = "img/ships/StarTrek/FederationExcelsior.png";
@@ -52,7 +52,7 @@ class TrekFederationExcelsiorEarly extends BaseShipNoAft{
 	$this->addFrontSystem(new SWTractorBeam(4,0,360,2)); 
 
 
-	$projection = new TrekShieldProjection(3, 30, 7, 180, 300, 'L');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+	$projection = new TrekShieldProjection(2, 30, 6, 180, 300, 'L');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projector = new TrekShieldProjector(2, 8, 2, 3, 180, 300, 'L'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
 		$this->addLeftSystem($projector);
@@ -67,7 +67,7 @@ class TrekFederationExcelsiorEarly extends BaseShipNoAft{
 	$this->addLeftSystem($warpNacelle);
 
 
-	$projection = new TrekShieldProjection(3, 30, 7, 60, 180, 'R');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+	$projection = new TrekShieldProjection(2, 30, 6, 60, 180, 'R');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projector = new TrekShieldProjector(2, 8, 2, 3, 60, 180, 'R'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
 		$this->addRightSystem($projector);

@@ -7,6 +7,7 @@ class Koratyl extends StarBaseSixSections{
 		$this->pointCost = 2700;
 		$this->faction = "Dilgar";
 		$this->phpclass = "Koratyl";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 		$this->shipClass = "Koratyl Defense Base";
 		$this->fighters = array("heavy"=>36); 
 		$this->isd = 2227;

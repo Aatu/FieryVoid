@@ -14,7 +14,8 @@ class MishakurD extends BaseShip{
         $this->isd = 2231;
                 
         $this->occurence = "unique";
-        $this->variantOf = "Mishakur Dreadnought";        
+        //$this->variantOf = "Mishakur Dreadnought";   
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list     
         $this->limited = 10;
 
         $this->forwardDefense = 16;
