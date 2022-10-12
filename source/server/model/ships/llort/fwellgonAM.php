@@ -1,16 +1,15 @@
 <?php
-class fwellgon extends HeavyCombatVessel{
+class fwellgonAM extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 700;  //Original price (800) assumes ship gives +1 comand bonus. No command bonus here, price reduced.
         $this->faction = "Llort";
-        $this->phpclass = "fwellgon";
+        $this->phpclass = "fwellgonAM";
         $this->imagePath = "img/ships/LlortGovall.png";
         $this->shipClass = "Fwellgon Raiding Scout";
         $this->limited = 33; 
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
  
         $this->isd = 2227;
         
@@ -24,6 +23,16 @@ class fwellgon extends HeavyCombatVessel{
         $this->pivotcost = 2;
         $this->iniativebonus = 30;
         
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(40); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 40); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+        $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
+        $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+        $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+		
         $this->addPrimarySystem(new Reactor(4, 15, 0, 0));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new ElintScanner(4, 12, 4, 6));
@@ -46,8 +55,8 @@ class fwellgon extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(3, 8, 0, 2, 2));
 	$this->addAftSystem(new Hangar(3, 3));
         $this->addAftSystem(new ScatterGun(3, 8, 3, 180, 360));
-        $this->addAftSystem(new SMissileRack(4, 6, 0, 300, 120));
-        $this->addAftSystem(new SMissileRack(4, 6, 0, 300, 120));
+		$this->addAftSystem(new AmmoMissileRackS(4, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addAftSystem(new AmmoMissileRackS(4, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addAftSystem(new JumpEngine(4, 11, 4, 36));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

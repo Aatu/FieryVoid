@@ -1,13 +1,12 @@
 <?php
-class Koratyl extends StarBaseSixSections{
+class KoratylAM extends StarBaseSixSections{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 2700;
 		$this->faction = "Dilgar";
-		$this->phpclass = "Koratyl";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+		$this->phpclass = "KoratylAM";
 		$this->shipClass = "Koratyl Defense Base";
 		$this->fighters = array("heavy"=>36); 
 		$this->isd = 2227;
@@ -37,7 +36,18 @@ class Koratyl extends StarBaseSixSections{
 		);
 
 
-		$this->addPrimarySystem(new Reactor(5, 25, 0, 0));
+
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(240); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 240); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+        $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
+        $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+        //$this->enhancementOptionsEnabled[] = 'AMMO_P';//Dilgar were wiped out before Piercing missile was devised
+
+		$this->addPrimarySystem(new Reactor(5, 25, 0, 0)); 
 		//$this->addPrimarySystem(new CnC(5, 15, 0, 0)); 
 		$this->addPrimarySystem(new ProtectedCnC(6, 30, 0, 0)); //instead of 2 5x15 C&C, make it 1 6x30
 		$this->addPrimarySystem(new Scanner(5, 20, 5, 8));
@@ -62,8 +72,8 @@ class Koratyl extends StarBaseSixSections{
 				new MediumLaser(4, 6, 5, $min, $max),
 				new ScatterPulsar(4, 4, 2, $min, $max),
 				new ScatterPulsar(4, 4, 2, $min, $max),
-				new SMissileRack(4, 6, 0, $min, $max, true),
-				new SMissileRack(4, 6, 0, $min, $max, true),
+				new AmmoMissileRackS(4, 0, 0, $min, $max, $ammoMagazine, true), //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+				new AmmoMissileRackS(4, 0, 0, $min, $max, $ammoMagazine, true), //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 				new SubReactorUniversal(4, 25, 0, 0),
 				new Hangar(4, 6, 6),
 				new CargoBay(4, 25),

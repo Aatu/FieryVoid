@@ -9,6 +9,7 @@ class govall extends HeavyCombatVessel{
         $this->phpclass = "govall";
         $this->imagePath = "img/ships/LlortGovall.png";
         $this->shipClass = "Govall Bombardment Destroyer";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
  
         $this->limited = 33; 
         $this->isd = 2241;

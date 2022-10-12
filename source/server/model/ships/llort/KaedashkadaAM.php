@@ -1,5 +1,5 @@
 <?php
-class Kaedashkada extends UnevenBaseFourSections 
+class KaedashkadaAM extends UnevenBaseFourSections 
 {
 
 	function __construct($id, $userid, $name,  $slot)
@@ -10,9 +10,8 @@ class Kaedashkada extends UnevenBaseFourSections
 		$this->base = true;
 		$this->smallBase = true; //small = four sections
 		$this->faction = "Llort";
-		$this->phpclass = "Kaedashkada";
+		$this->phpclass = "KaedashkadaAM";
 		$this->shipClass = "Kaedashkada Starbase";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 		$this->imagePath = "img/ships/LlortKaedashkada.png";
 		$this->canvasSize = 300;
 		$this->fighters = array("normal"=>36);
@@ -28,7 +27,16 @@ class Kaedashkada extends UnevenBaseFourSections
 		$this->sideDefense = 25;
 
 
-
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(200); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 200); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+        $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
+        $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+        $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+		
 		$this->addPrimarySystem(new Reactor(5, 20, 0, 0));
 		$this->addPrimarySystem(new CnC(5, 30, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 16, 5, 7));
@@ -36,8 +44,8 @@ class Kaedashkada extends UnevenBaseFourSections
 		$this->addPrimarySystem(new Hangar(5, 6));
         $this->addPrimarySystem(new ReloadRack(5, 6));	
         $this->addPrimarySystem(new CargoBay(5, 40));	
-		$this->addPrimarySystem(new LMissileRack(5, 6, 0, 0, 360, true));
-		$this->addPrimarySystem(new LMissileRack(5, 6, 0, 0, 360, true));
+		$this->addPrimarySystem(new AmmoMissileRackL(5, 0, 0, 0, 360, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addPrimarySystem(new AmmoMissileRackL(5, 0, 0, 0, 360, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addPrimarySystem(new StdParticleBeam(5, 4, 1, 0, 360));
 		$this->addPrimarySystem(new StdParticleBeam(5, 4, 1, 0, 360));
 
@@ -45,7 +53,7 @@ class Kaedashkada extends UnevenBaseFourSections
 		$this->addFrontSystem(new Hangar(3, 6));
 		$this->addFrontSystem(new CargoBay(4, 25));
 		$this->addFrontSystem(new SubReactorUniversal(4, 24, 0, 0));
-		$this->addFrontSystem(new LMissileRack(4, 6, 0, 300, 60, true));
+		$this->addFrontSystem(new AmmoMissileRackL(4, 0, 0, 300, 60, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addFrontSystem(new ParticleCannon(4, 8, 7, 300, 60));
 		$this->addFrontSystem(new ScatterGun(3, 8, 3, 240, 60));
 		$this->addFrontSystem(new ScatterGun(3, 8, 3, 240, 60));
@@ -56,7 +64,7 @@ class Kaedashkada extends UnevenBaseFourSections
 		$this->addAftSystem(new Hangar(4, 6));		
 		$this->addAftSystem(new CargoBay(4, 25));
 		$this->addAftSystem(new SubReactorUniversal(4, 31, 0, 0));
-		$this->addAftSystem(new LMissileRack(4, 6, 0, 120, 240, true));
+		$this->addAftSystem(new AmmoMissileRackL(4, 0, 0, 120, 240, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addAftSystem(new ParticleCannon(4, 8, 7, 120, 240));
 		$this->addAftSystem(new StdParticleBeam(4, 4, 1, 120, 240));
 		$this->addAftSystem(new StdParticleBeam(4, 4, 1, 120, 240));
@@ -69,7 +77,7 @@ class Kaedashkada extends UnevenBaseFourSections
 		$this->addLeftSystem(new Hangar(4, 6));
 		$this->addLeftSystem(new CargoBay(4, 25));
 		$this->addLeftSystem(new SubReactorUniversal(4, 23, 0, 0));
-		$this->addLeftSystem(new LMissileRack(4, 6, 0, 180, 300, true));
+		$this->addLeftSystem(new AmmoMissileRackL(4, 0, 0, 180, 300, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addLeftSystem(new ParticleCannon(4, 8, 7, 180, 360));
 		$this->addLeftSystem(new StdParticleBeam(4, 4, 1, 180, 300));
 		$this->addLeftSystem(new StdParticleBeam(4, 4, 1, 180, 300));
@@ -80,7 +88,7 @@ class Kaedashkada extends UnevenBaseFourSections
 		$this->addRightSystem(new Hangar(4, 6));		
 		$this->addRightSystem(new CargoBay(4, 25));
 		$this->addRightSystem(new SubReactorUniversal(4, 23, 0, 0));
-		$this->addRightSystem(new LMissileRack(4, 6, 0, 0, 180, true));
+		$this->addRightSystem(new AmmoMissileRackL(4, 0, 0, 0, 180, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addRightSystem(new ParticleCannon(4, 8, 7, 0, 120));
 		$this->addRightSystem(new StdParticleBeam(4, 4, 1, 0, 180));
 		$this->addRightSystem(new StdParticleBeam(4, 4, 1, 0, 180));

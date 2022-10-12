@@ -1,14 +1,13 @@
 <?php
 
-class Mishakur extends BaseShip{
+class MishakurAM extends BaseShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 975;
         $this->faction = "Dilgar";
-        $this->phpclass = "Mishakur";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+        $this->phpclass = "MishakurAM";
         $this->imagePath = "img/ships/mishakur.png";
         $this->shipClass = "Mishakur Dreadnought";
         $this->shipSizeClass = 3;
@@ -26,6 +25,16 @@ class Mishakur extends BaseShip{
         $this->rollcost = 2;
         $this->pivotcost = 4;
 
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(40); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 40); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+        $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
+        $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+        //$this->enhancementOptionsEnabled[] = 'AMMO_P';//Dilgar were wiped out before Piercing missile was devised
+		
         $this->addPrimarySystem(new Reactor(5, 25, 0, 0));
         $this->addPrimarySystem(new CnC(6, 25, 0, 2));
         $this->addPrimarySystem(new Scanner(5, 16, 3, 9));
@@ -56,14 +65,14 @@ class Mishakur extends BaseShip{
         $this->addLeftSystem(new QuadPulsar(3, 10, 4, 300, 360));
         $this->addLeftSystem(new PlasmaTorch(1, 4, 2, 240, 360));
         $this->addLeftSystem(new HeavyBolter(3, 10, 6, 300, 360));
-        $this->addLeftSystem(new SMissileRack(2, 6, 0, 240, 120));
+		$this->addLeftSystem(new AmmoMissileRackS(2, 0, 0, 240, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addLeftSystem(new Thruster(3, 15, 0, 5, 3));
 
         $this->addRightSystem(new ScatterPulsar(1, 4, 2, 300, 180));
         $this->addRightSystem(new QuadPulsar(3, 10, 4, 0, 60));
         $this->addRightSystem(new PlasmaTorch(1, 4, 2, 0, 120));
         $this->addRightSystem(new HeavyBolter(3, 10, 6, 0, 60));
-        $this->addRightSystem(new SMissileRack(2, 6, 0, 240, 120));
+		$this->addRightSystem(new AmmoMissileRackS(2, 0, 0, 240, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addRightSystem(new Thruster(3, 15, 0, 5, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
