@@ -32,7 +32,7 @@ class TrekFederationSaladin extends MediumShip{
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new CnC(4, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 5, 5));
-        $this->addPrimarySystem(new Hangar(3, 1));
+        $this->addPrimarySystem(new Hangar(3, 1, 1));
 	$impulseDrive = new TrekImpulseDrive(3,18,0,3,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 
 	$projection = new TrekShieldProjection(2, 12, 6, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
