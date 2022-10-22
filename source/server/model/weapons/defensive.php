@@ -208,15 +208,15 @@
 	
         
         public $boostable = true; //can be boosted for additional effect
-	    public $boostEfficiency = 3; //cost to boost by 1
-        public $maxBoostLevel = 4; //maximum boost allowed
+	    public $boostEfficiency = 0; //cost to boost by 1 - FREE (it will impact EW instead)
+        public $maxBoostLevel = 20; //maximum boost allowed - just technical limitation, rules dont set any maximum; 20 seems close enough to "unlimited" :)
         public $canInterceptUninterceptable = true; //can intercept weapons that are normally uninterceptable
         
         public $tohitPenalty = 0;
         public $damagePenalty = 0;
         public $damageType = "Standard"; 
         public $weaponClass = "Particle";
-     	public $possibleCriticals = array( //different than usual B5Wars weapon
+     	public $possibleCriticals = array( //different than usual B5Wars weapon - simplification
             16=>"ForcedOfflineOneTurn"
 	);
 	    
@@ -246,8 +246,8 @@
         }
         public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
             if ($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn)) return 0;
-            
-            if (!($shooter instanceof FighterFlight)) return 0;//affects fighters only!
+            //now it affects everything, as per rules :)
+            //if (!($shooter instanceof FighterFlight)) return 0;//affects fighters only!
             $output = $this->getBoostLevel($turn);
             $output -= $this->outputMod;
             return $output;
@@ -265,9 +265,11 @@
   
         public function setSystemDataWindow($turn){
 	    $this->data["Boostlevel"] = $this->getBoostLevel($turn);
-            $this->data["Special"] = "Can intercept uninterceptable weapons.<br>";
-            $this->data["Special"] .= "Can be boosted for increased intercept rating (5% per step, up to +" . $this->maxBoostLevel . " steps).<br>";
-            $this->data["Special"] .= "Additionally, boost itself reduces fighter hit chance.";
+            $this->data["Special"] = "Can intercept uninterceptable weapons.";
+            $this->data["Special"] .= "<br>Can be boosted for increased intercept rating (5% per step, up to +" . $this->maxBoostLevel . " steps).";
+            $this->data["Special"] .= "<br>Boost means channeling EW through Impeder - it does not cost Power, but EW available."; //this effect is handled by EW routines in front end! - function getEWLeft
+            $this->data["Special"] .= "<br>Boost itself reduces hit chance of all incoming fire (shield-like, but cumulative with regular shields). Impeder cannot be flown under.";
+			$this->data["Special"] .= "<br>Does not reduce damage.";
             parent::setSystemDataWindow($turn);
             
             $this->intercept = $this->getInterceptRating($turn);
