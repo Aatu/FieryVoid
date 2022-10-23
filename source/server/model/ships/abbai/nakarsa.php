@@ -27,9 +27,9 @@ class Nakarsa extends BaseShip{
         $this->iniativebonus = +5;   
 	    $this->notes = "Provides +5 Initiative for all friendly Abbai units";
         
-        $this->addPrimarySystem(new Reactor(5, 20, 0, 10));
+        $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 18, 6, 9));
+        $this->addPrimarySystem(new Scanner(5, 18, 6, 10));
         $this->addPrimarySystem(new Engine(5, 16, 0, 10, 3));
  	      $this->addPrimarySystem(new Hangar(5, 8));
         $this->addPrimarySystem(new ShieldGenerator(5, 16, 5, 4));
