@@ -13,6 +13,9 @@ jQuery(function ($) {
     $("#gamespacecheck").on("click", createGame.doGameSpaceCheck);
     $("#gamespacecheck").on("click", createGame.doFlightCheck);
     $("#movementcheck").on("click", createGame.doMovementCheck);
+    
+    $(".setsizeknifefight").on("click", createGame.doSwitchSizeKnifeFight);
+    $(".setsizestandard").on("click", createGame.doGameSpaceCheck);
 
     createGame.createSlotsFromArray();
 });
