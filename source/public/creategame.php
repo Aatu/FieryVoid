@@ -80,7 +80,7 @@ FORBIDDEN FACTIONS: None
                 <div id="gamespace" class="subpanel gamespacecontainer">
                     <div class="slot" >
                         <div>
-                            <input id="gamespacecheck" type="checkbox" name="fixedgamespace">USE LIMITED GAME SPACE
+                            <input id="gamespacecheck" type="checkbox" name="fixedgamespace" checked>USE LIMITED GAME SPACE
                         </div>
                         <div class="gamespacedefinition" style="height:24px;vertical-align:middle;position:relative">
                             <span class="smallSize headerSpan">GAME SPACE SIZE:</span>
