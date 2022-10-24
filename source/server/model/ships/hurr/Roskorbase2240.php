@@ -16,6 +16,8 @@ class Roskorbase2240 extends SmallStarBaseFourSections
 		$this->canvasSize = 200;
 		$this->fighters = array("normal"=>48);
 		$this->isd = 2240;
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+ 
 
 		$this->shipSizeClass = 3;
 		$this->Enormous = true;

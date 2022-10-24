@@ -2800,8 +2800,19 @@ spl_autoload_register(
 						'fwellgonam' => '/server/model/ships/llort/fwellgonAM.php',
 						'govallam' => '/server/model/ships/llort/govallAM.php',
 				
-		    
-				
+						//Hurr
+						'roskorbase2215am' => '/server/model/ships/hurr/Roskorbase2215AM.php',
+						'roskorbase2240am' => '/server/model/ships/hurr/Roskorbase2240AM.php',
+						'hurrmissileosat2220am' => '/server/model/ships/hurr/HurrmissileOSAT2220AM.php',
+						'hurrmissileosat2240am' => '/server/model/ships/hurr/HurrmissileOSAT2240AM.php',
+						'borocaam' => '/server/model/ships/hurr/borocaAM.php',
+						'borocadaam' => '/server/model/ships/hurr/borocadaAM.php',
+						'norekam' => '/server/model/ships/hurr/norekAM.php',
+						'anoroam' => '/server/model/ships/hurr/anoroAM.php',
+						
+						
+						
+						
 						
 				
 				//let's end this with unit enhancement class...		    

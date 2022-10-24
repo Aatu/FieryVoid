@@ -14,7 +14,8 @@ class HurrmissileOSAT2220 extends OSAT
 		$this->canvasSize = 80;
 		$this->isd = 2220;
 		$this->occurence = "common";
-		$this->variantOf = "Missile Satellite (2240)";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+		//$this->variantOf = "Missile Satellite (2240)";
 
 		$this->forwardDefense = 10;
 		$this->sideDefense = 10;
