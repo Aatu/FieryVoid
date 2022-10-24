@@ -63,10 +63,19 @@ if (isset($_SESSION["user"])) {
 -->
        
 		
+
 		---------- <b>LATEST NEWS - October 2022</b> ----------
 	    <br><b>text tutorial for new players</b> - courtesy of Douglas
 	    <br><b>Variable missile loads</b> - new factions are in (Llort)
 	    <br><b>Trek (Federation TOS) rebalanced</b> - still in playtest phase
+	    
+	    	<br><br>---------- <b>update 24th of October</b> ---------- 
+	    <br><b>Variable missile loads</b> - Hurr
+	    <br><b>Particle Impeder made kosher</b> - now it's boosted with EW rather than Power (and boost stops all incoming fire rather than just fighters)
+	    <br><b>Abbai made kosher</b> - with proper Impeder available, Abbai regained their rightful EW, while losing matching Power surplus. Now they can be even better protected... but not all around :)
+	    <br><b>Fixed map as default</b> - when creating new game, default choice is now fixed map of standard size
+	    <br><b>Map size switches</b> - as knife fights seem popular lately, I have added buttons to set proper map dimensions and deployment zones for such a fight (and back to standard size, too) with a single click
+
 	    
 <!--	    
 		 <br><br>---------- <b>update 26th of September</b> ---------- 
