@@ -146,6 +146,33 @@ window.createGame = {
         }
     },
 
+
+    doSwitchSizeKnifeFight: function doSwitchSizeKnifeFight(data) {
+        $(".spacex").val(30);
+        $(".spacey").val(30);
+        $(".deptype").val("box");
+        $("#team1 .depx").val(-13);
+        $("#team2 .depx").val(12);
+        $("#team1 .depy").val(0);
+        $("#team2 .depy").val(0);
+        $("#team1 .depwidth").val(7);
+        $("#team2 .depwidth").val(7);
+        $("#team1 .depheight").val(30);
+        $("#team2 .depheight").val(30);
+        createGame.slots[0].depx = -13;
+        createGame.slots[1].depx = 12;
+        createGame.slots[0].depy = 0;
+        createGame.slots[1].depy = 0;
+        createGame.slots[0].depwidth = 7;
+        createGame.slots[1].depwidth = 7;
+        createGame.slots[0].depheight = 30;
+        createGame.slots[1].depheight = 30;
+        createGame.slots[0].deptype = "box";
+        createGame.slots[1].deptype = "box";
+        createGame.slots[0].depavailable = 0;
+        createGame.slots[1].depavailable = 0;
+    },
+    
     createSlotsFromArray: function createSlotsFromArray() {
         for (var i in createGame.slots) {
             createGame.createSlot(createGame.slots[i]);
