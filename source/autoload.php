@@ -2800,8 +2800,13 @@ spl_autoload_register(
 						'fwellgonam' => '/server/model/ships/llort/fwellgonAM.php',
 						'govallam' => '/server/model/ships/llort/govallAM.php',
 				
-		    
-				
+						//Hurr
+						'roskorbase2215am' => '/server/model/ships/hurr/Roskorbase2215AM.php',
+						'roskorbase2240am' => '/server/model/ships/hurr/Roskorbase2240AM.php',
+						
+						
+						
+						
 						
 				
 				//let's end this with unit enhancement class...		    
