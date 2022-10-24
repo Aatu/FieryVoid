@@ -80,7 +80,7 @@ FORBIDDEN FACTIONS: None
                 <div id="gamespace" class="subpanel gamespacecontainer">
                     <div class="slot" >
                         <div>
-                            <input id="gamespacecheck" type="checkbox" name="fixedgamespace">USE LIMITED GAME SPACE
+                            <input id="gamespacecheck" type="checkbox" name="fixedgamespace" checked>USE LIMITED GAME SPACE
                         </div>
                         <div class="gamespacedefinition" style="height:24px;vertical-align:middle;position:relative">
                             <span class="smallSize headerSpan">GAME SPACE SIZE:</span>
@@ -91,7 +91,10 @@ FORBIDDEN FACTIONS: None
                                 <span>Width:</span>
                                 <input class ="spacex tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacex" value="0">
                                 <span>Height:</span>
-                                <input class ="spacey tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacey" value="0">                
+                                <input class ="spacey tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacey" value="0">   
+				    &nbsp;&nbsp;
+				    <span class="clickable setsizeknifefight">Resize: Knife Fight</span> <!-- button switching map dimensions -->
+				    <span class="clickable setsizestandard">Resize: Standard</span> <!-- button switching map dimensions -->
                             </span>
                         </div>
                       <!---      <input id="flightSizeCheck" style="margin-top:20px;margin-bottom:10px;" type="checkbox" name="variableFlights">increased Flight size (up to 12 units per flight)
@@ -154,7 +157,9 @@ FORBIDDEN FACTIONS: None
                         <span>Width:</span>
                         <input class ="spacex tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacex" value="0">
                         <span>Height:</span>
-                        <input class ="spacey tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacey" value="0">                
+                        <input class ="spacey tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacey" value="0">     
+	   
+
                     </span>
                 </div>
             </div>
