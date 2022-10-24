@@ -1,21 +1,17 @@
 <?php
-class borocada extends BaseShip{
+class borocaAM extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 525;
+        $this->pointCost = 500;
         $this->faction = "Hurr";
-        $this->phpclass = "borocada";
+        $this->phpclass = "borocaAM";
         $this->imagePath = "img/ships/hurrBoroca.png";
-        $this->shipClass = "Borocada Particle Gunship";
+        $this->shipClass = "Boroca Gunship";
         $this->shipSizeClass = 3;
 
-        $this->occurence = "rare";
-        //$this->variantOf = 'Boroca Gunship';
-        $this->isd = 2242;
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
- 
+        $this->isd = 2225;
         
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
@@ -26,29 +22,44 @@ class borocada extends BaseShip{
         $this->rollcost = 4;
         $this->pivotcost = 4;
          
-        $this->addPrimarySystem(new Reactor(4, 25, 0, 0));
+		 
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(40); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 40); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+        $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
+        $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+        //$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+		//Hurr developed their missiles from Dilgar tech - they have L,H,F and A missiles (even if only after Dilgar War)
+		//they developed P missiles as well (just before Show era), but they remain very rare (tabletop limit of 1 per ship (2 per dedicated missile ship)). I opted to skip these missiles instead. 
+		
+		
+        $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
         $this->addPrimarySystem(new CnC(5, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 4, 5));
         $this->addPrimarySystem(new Hangar(2, 2));
    
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	$this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-	$this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 60));
-        $this->addFrontSystem(new ParticleCannon(4, 8, 7, 300, 0));
-        $this->addFrontSystem(new ParticleCannon(4, 8, 7, 0, 60));
-	$this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 60));
+        $this->addFrontSystem(new HeavyPlasma(4, 8, 5, 300, 0));
+        $this->addFrontSystem(new HeavyPlasma(4, 8, 5, 0, 60));
+		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         
 	$this->addAftSystem(new Thruster(3, 16, 0, 4, 2));
-	$this->addAftSystem(new Engine(4, 14, 0, 4, 5));
-	$this->addAftSystem(new SMissileRack(3, 6, 0, 120, 240));
-	$this->addAftSystem(new Engine(4, 14, 0, 4, 5));
 	$this->addAftSystem(new Thruster(3, 16, 0, 4, 2));
+	$this->addAftSystem(new Engine(4, 14, 0, 4, 5));
+	$this->addAftSystem(new Engine(4, 14, 0, 4, 5));
+       	$this->addAftSystem(new JumpEngine(4, 20, 4, 36));
                 
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 	$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 270, 90)); 
 	$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 270, 90)); 
 	$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 90, 270)); 
 	$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 90, 270));  
+
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 	$this->addRightSystem(new StdParticleBeam(2, 4, 1, 270, 90)); 
 	$this->addRightSystem(new StdParticleBeam(2, 4, 1, 270, 90)); 
@@ -73,14 +84,14 @@ class borocada extends BaseShip{
         		),
         		1=> array(
         				4 => "Thruster",
-                                	8 => "Particle Cannon",
+                                	8 => "Heavy Plasma Cannon",
                         		11 => "Class-S Missile Rack",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		2=> array(
         				6 => "Thruster",
-                        		8 => "Class-S Missile Rack",
+                        		8 => "Jump Engine",
                         		13 => "Engine",
         				18 => "Structure",
         				20 => "Primary",
@@ -100,4 +111,6 @@ class borocada extends BaseShip{
         );
     }
 }
+
+
 ?>
