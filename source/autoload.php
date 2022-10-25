@@ -473,6 +473,7 @@ spl_autoload_register(
                 'jorthunq' => '/server/model/ships/dilgar/jorthunQ.php',
                 'jumpengine' => '/server/model/systems/baseSystems.php',
                 'jumpgate' => '/server/model/ships/civilians/jumpgate.php',
+                'shipyard' => '/server/model/ships/civilians/Shipyard.php',
                 'jumphawk' => '/server/model/ships/drazi/jumphawk.php',
                 'kabrik' => '/server/model/ships/brakiri/kabrik.php',
                 'kaliva' => '/server/model/ships/brakiri/kaliva.php',
@@ -2478,6 +2479,7 @@ spl_autoload_register(
 
 				//other				
 				'apollostrike' => '/server/model/ships/EA/apollostrike.php',
+				'Apollowsf' => '/server/model/ships/EA/ApolloWSF.php',				
                 'swerrantventure' => '/server/model/ships/ZStarWars/swErrantVenture.php',
 				'unevenbasefoursections' => '/server/model/ships/ShipClasses.php',
 
