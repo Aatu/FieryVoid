@@ -29,9 +29,9 @@ class VelraxVersissScout extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new ELINTScanner(3, 16, 6, 6));
         $this->addPrimarySystem(new Engine(4, 20, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(2, 2));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 5, 1));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 2));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 2));
+        $this->addAftSystem(new Thruster(3, 12, 0, 5, 1));
+        $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
+        $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
 
         $this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 300, 60));
         $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 180, 60));
@@ -53,8 +53,8 @@ class VelraxVersissScout extends HeavyCombatVesselLeftRight{
             $this->hitChart = array(
         		0=> array(
         				9 => "Structure",
-        				12 => "Thruster",
-        				14 => "Scanner",
+        				12 => "2:Thruster",
+        				14 => "ELINT Scanner",
         				16 => "Engine",
 						17 => "Hangar",
         				19 => "Reactor",
