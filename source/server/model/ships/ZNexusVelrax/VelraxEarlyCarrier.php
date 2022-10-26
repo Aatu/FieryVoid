@@ -4,7 +4,7 @@ class VelraxEarlyCarrier extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 385;
+	$this->pointCost = 400;
 	$this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxEarlyCarrier";
         $this->imagePath = "img/ships/Nexus/VelraxDraskar.png";
@@ -37,8 +37,8 @@ class VelraxEarlyCarrier extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new NexusTwinIonGun(2, 4, 4, 240, 60));
-        $this->addFrontSystem(new NexusEarlyPlasmaWave(2, 7, 4, 300, 60));
-        $this->addFrontSystem(new NexusEarlyPlasmaWave(2, 7, 4, 300, 60));
+        $this->addFrontSystem(new PlasmaWaveTorpedo(2, 7, 4, 300, 60));
+        $this->addFrontSystem(new PlasmaWaveTorpedo(2, 7, 4, 300, 60));
         $this->addFrontSystem(new NexusTwinIonGun(2, 4, 4, 300, 120));
 
         $this->addAftSystem(new Thruster(3, 14, 0, 3, 2));

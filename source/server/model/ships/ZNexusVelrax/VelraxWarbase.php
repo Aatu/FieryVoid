@@ -45,7 +45,7 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 		$this->addFrontSystem(new CargoBay(4, 24));
 
 		$this->addAftSystem(new LaserLance(4, 6, 4, 90, 270));
-		$this->addAftSystem(new NexusRangedPlasmaWave(4, 7, 4, 270, 270));
+		$this->addAftSystem(new NexusRangedPlasmaWave(4, 7, 4, 90, 270));
 		$this->addAftSystem(new DualIonBolter(4, 4, 4, 90, 270));
 		$this->addAftSystem(new DualIonBolter(4, 4, 4, 90, 270));
 		$this->addAftSystem(new Hangar(4, 6));
