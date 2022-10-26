@@ -2737,7 +2737,7 @@ class BioDrive extends Engine{
 		$this->data["Efficiency"] = $this->boostEfficiency;
 		$this->data["Special"] = "BioDrive - basically an Engine with basic output calculated from BioThruster outputs.";      
 		$this->data["Special"] .= "<br>Will never be damaged.";  
-		$this->data["Special"] .= "<br>Cannot but extra thrust."; //rules say BioThrusters CAN buy extra thrust, with rating provided on SCS... But rating on SCS is N/A...
+		$this->data["Special"] .= "<br>Cannot buy extra thrust."; //rules say BioThrusters CAN buy extra thrust, with rating provided on SCS... But rating on SCS is N/A...
 	}
 	
 	

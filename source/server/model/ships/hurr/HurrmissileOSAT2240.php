@@ -13,6 +13,7 @@ class HurrmissileOSAT2240 extends OSAT
 		$this->imagePath = "img/ships/HurrOSAT.png";
 		$this->canvasSize = 80;
 		$this->isd = 2240;
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 
 		$this->forwardDefense = 10;
 		$this->sideDefense = 10;

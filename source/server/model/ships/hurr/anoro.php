@@ -11,8 +11,10 @@ class anoro extends HeavyCombatVessel{
         $this->shipClass = "Anoro Assault Frigate";
    
         $this->occurence = "common";
-        $this->variantOf = 'Orak Frigate';
-        $this->isd = 2230;
+        //$this->variantOf = 'Orak Frigate';
+        $this->isd = 2230; 
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+ 
 
         $this->fighters = array("assault shuttles"=>6);
         

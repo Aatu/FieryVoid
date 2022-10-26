@@ -13,7 +13,7 @@ class Miliani extends BaseShip{
         $this->fighters = array("normal"=>24);
         
 	//$this->occurence = "uncommon";
-        //$this->variantOf = 'Milani Carrier';
+        //$this->variantOf = 'Miliani Carrier';
 	$this->isd = 2230;
         
         $this->forwardDefense = 16;
@@ -26,9 +26,9 @@ class Miliani extends BaseShip{
         $this->pivotcost = 3;
         $this->iniativebonus = 0;
         
-        $this->addPrimarySystem(new Reactor(4, 17, 0, 8));
+        $this->addPrimarySystem(new Reactor(4, 17, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 14, 6, 7));
+        $this->addPrimarySystem(new Scanner(4, 14, 6, 8));
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 3));
         $this->addPrimarySystem(new ShieldGenerator(4, 14, 4, 4));
    

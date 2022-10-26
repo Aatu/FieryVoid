@@ -26,9 +26,9 @@ class Fetula extends MediumShip{
         $this->pivotcost = 1;
 	$this->iniativebonus = +60;
 		
-        $this->addPrimarySystem(new Reactor(4, 12, 0, 8));
+        $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new CnC(5, 9, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 14, 6, 7));
+        $this->addPrimarySystem(new Scanner(4, 14, 6, 8));
         $this->addPrimarySystem(new Engine(4, 12, 0, 9, 2));
 	$this->addPrimarySystem(new Hangar(2, 6));
         $this->addPrimarySystem(new ShieldGenerator(4, 10, 3, 3));

@@ -13,7 +13,7 @@ class Marata extends BaseShip{
         $this->fighters = array("normal"=>12);
         
 	$this->occurence = "rare";
-        $this->variantOf = 'Milani Carrier';
+        $this->variantOf = 'Miliani Carrier';
 	$this->isd = 2233;
         
         $this->forwardDefense = 16;
@@ -26,9 +26,9 @@ class Marata extends BaseShip{
         $this->pivotcost = 3;
         $this->iniativebonus = 5;
         
-        $this->addPrimarySystem(new Reactor(5, 20, 0, 12));
+        $this->addPrimarySystem(new Reactor(5, 20, 0, 2));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 16, 7, 9));
+        $this->addPrimarySystem(new Scanner(5, 16, 7, 10));
         $this->addPrimarySystem(new Engine(5, 18, 0, 9, 3));
         $this->addPrimarySystem(new ShieldGenerator(5, 16, 4, 5));
 		$cA = new CargoBay(5, 12);
