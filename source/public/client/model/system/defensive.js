@@ -160,7 +160,6 @@ Particleimpeder.prototype.getMaxBoost = function () {
 };
 Particleimpeder.prototype.initBoostableInfo = function () {
     // Needed because it can chance during initial phase
-    // because of adding extra power.
     if (window.weaponManager.isLoaded(this)) {} else {
         var count = shipManager.power.getBoost(this);
         for (var i = 0; i < count; i++) {
@@ -171,6 +170,14 @@ Particleimpeder.prototype.initBoostableInfo = function () {
     this.intercept = this.getInterceptRating();
     this.data.Intercept = this.getInterceptRating() * -5;
     this.data.Boostlevel = shipManager.power.getBoost(this);
+
+	//display current boost as output - because that is actual shield rating from Impeder!
+	if (this.data.Boostlevel > 0) {
+		this.outputDisplay = this.data.Boostlevel;
+	} else {
+		this.outputDisplay = '-'; //'0' is not shown!
+	}
+	
 
     return this;
 };

@@ -264,7 +264,7 @@
 	    
   
         public function setSystemDataWindow($turn){
-	    $this->data["Boostlevel"] = $this->getBoostLevel($turn);
+			$this->data["Boostlevel"] = $this->getBoostLevel($turn);
             $this->data["Special"] = "Can intercept uninterceptable weapons.";
             $this->data["Special"] .= "<br>Can be boosted for increased intercept rating (5% per step, up to +" . $this->maxBoostLevel . " steps).";
             $this->data["Special"] .= "<br>Boost means channeling EW through Impeder - it does not cost Power, but EW available."; //this effect is handled by EW routines in front end! - function getEWLeft
@@ -273,6 +273,11 @@
             parent::setSystemDataWindow($turn);
             
             $this->intercept = $this->getInterceptRating($turn);
+			if ($this->data["Boostlevel"] > 0) {
+				$this->outputDisplay = $this->data["Boostlevel"]; //display boost level on weapon - this equals to shield rating, which is important - while arming status is irrelevant for 1/turn weapon
+			}else{
+				$this->outputDisplay = '-'; //because '0' is interpreted as empty and display resets to default!
+			}
         }
           
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
