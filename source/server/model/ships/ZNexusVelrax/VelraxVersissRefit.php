@@ -4,7 +4,7 @@ class VelraxVersissRefit extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 410;
+	$this->pointCost = 445;
 	$this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxVersissRefit";
         $this->imagePath = "img/ships/Nexus/VelraxVersiss.png";
@@ -27,7 +27,7 @@ class VelraxVersissRefit extends HeavyCombatVesselLeftRight{
         $this->iniativebonus = 30;
 
         $this->addPrimarySystem(new Reactor(4, 18, 0, 0));
-        $this->addPrimarySystem(new CnC(4, 16, 0, 0));
+        $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new ELINTScanner(3, 16, 6, 6));
         $this->addPrimarySystem(new Engine(4, 20, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(2, 2));

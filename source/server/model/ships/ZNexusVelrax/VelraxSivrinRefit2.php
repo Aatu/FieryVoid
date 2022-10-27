@@ -26,9 +26,9 @@ class VelraxSivrinRefit2 extends HeavyCombatVesselLeftRight{
         $this->pivotcost = 2;
         $this->iniativebonus = 30;
 
-        $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
-        $this->addPrimarySystem(new CnC(4, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 12, 5, 7));
+        $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
+        $this->addPrimarySystem(new CnC(4, 12, 0, 0));
+        $this->addPrimarySystem(new Scanner(4, 12, 7, 7));
         $this->addPrimarySystem(new Engine(4, 13, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(1, 2));
 		$this->addPrimarySystem(new MediumPlasma(3, 5, 3, 300, 60));
@@ -65,17 +65,17 @@ class VelraxSivrinRefit2 extends HeavyCombatVesselLeftRight{
         		),
         		3=> array(
         				5 => "Thruster",
-        				6 => "Dual Ion Bolter",
-						9 => "Laser Lance",
-						11 => "Heavy Plasma Cannon",
+        				7 => "Dual Ion Bolter",
+						10 => "Laser Lance",
+						12 => "Heavy Plasma Cannon",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		4=> array(
         				5 => "Thruster",
-        				6 => "Dual Ion Bolter",
-						9 => "Laser Lance",
-						11 => "Heavy Plasma Cannon",
+        				7 => "Dual Ion Bolter",
+						10 => "Laser Lance",
+						12 => "Heavy Plasma Cannon",
         				18 => "Structure",
         				20 => "Primary",
         		),
