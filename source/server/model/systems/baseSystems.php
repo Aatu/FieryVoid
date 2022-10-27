@@ -2050,6 +2050,12 @@ class DiffuserTendril extends ShipSystem{
 		$damageEntry->updated = true;
 		$this->damage[] = $damageEntry;
 	}
+	
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->outputDisplay = $this->outputDisplay; //make sure that actual output is actually sent to front end...				
+			return $strippedSystem;
+		}	
 }//endof class DiffuserTendril
 
 
