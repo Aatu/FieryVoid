@@ -203,6 +203,22 @@ VorlonDischargeGun.prototype.initializationUpdate = function() {
     return this;
 };
 
+var VorlonDischargeCannon = function VorlonDischargeCannon(json, ship) {
+    Weapon.call(this, json, ship);
+};
+VorlonDischargeCannon.prototype = Object.create(Weapon.prototype);
+VorlonDischargeCannon.prototype.constructor = VorlonDischargeCannon;
+VorlonDischargeCannon.prototype.initializationUpdate = function() {
+    // Needed because it can change power consumption during firing phase, depending on power and number of shots being changed
+	this.powerReq = 0;
+	var isFiring = weaponManager.hasFiringOrder(this.ship, this);
+    if (isFiring) {
+		var firing = weaponManager.getFiringOrder(this.ship, this);
+		this.powerReq = this.powerRequiredArray[firing.firingMode][1]; //element is array Number of prongs/Power)		
+	}
+    return this;
+};
+
 var VorlonLightningCannon = function VorlonLightningCannon(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -218,6 +234,13 @@ VorlonLightningCannon.prototype.initializationUpdate = function() {
 	}
     return this;
 };
+
+
+var VorlonLtDischargeGun = function VorlonLtDischargeGun(json, ship) {
+    Weapon.call(this, json, ship);
+};
+VorlonLtDischargeGun.prototype = Object.create(Weapon.prototype);
+VorlonLtDischargeGun.prototype.constructor = VorlonLtDischargeGun;
 
 var VorlonLightningGun = function VorlonLightningGun(json, ship) {
     Weapon.call(this, json, ship);
@@ -235,20 +258,21 @@ VorlonLightningGun.prototype.initializationUpdate = function() {
     return this;
 };
 
-var VorlonLtDischargeGun = function VorlonLtDischargeGun(json, ship) {
-    Weapon.call(this, json, ship);
-};
-VorlonLtDischargeGun.prototype = Object.create(Weapon.prototype);
-VorlonLtDischargeGun.prototype.constructor = VorlonLtDischargeGun;
 
-var VorlonDischargeCannon = function VorlonDischargeCannon(json, ship) {
-    Weapon.call(this, json, ship);
-};
-VorlonDischargeCannon.prototype = Object.create(Weapon.prototype);
-VorlonDischargeCannon.prototype.constructor = VorlonDischargeCannon;
 
 var VorlonDischargePulsar = function VorlonDischargePulsar(json, ship) {
     Weapon.call(this, json, ship);
 };
 VorlonDischargePulsar.prototype = Object.create(Weapon.prototype);
 VorlonDischargePulsar.prototype.constructor = VorlonDischargePulsar;
+VorlonDischargePulsar.prototype.initializationUpdate = function() {
+    // Needed because it can change power consumption during firing phase, depending on power and number of shots being changed
+	this.powerReq = 0;
+	var isFiring = weaponManager.hasFiringOrder(this.ship, this);
+    if (isFiring) {
+		var firing = weaponManager.getFiringOrder(this.ship, this);
+		this.powerReq = this.powerRequiredArray[firing.firingMode][1]; //element is array Number of prongs/Power)		
+	}
+    return this;
+};
+
