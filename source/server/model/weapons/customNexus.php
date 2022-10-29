@@ -3359,6 +3359,7 @@ class NexusMauler extends Particle{
         public $trailLength = 10;
 
         public $loadingtime = 2;
+        public $exclusive = true;
         public $priority = 4; 
         
         public $rangePenalty = 1;

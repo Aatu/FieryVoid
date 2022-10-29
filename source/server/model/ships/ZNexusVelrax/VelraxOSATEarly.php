@@ -41,7 +41,7 @@ class VelraxOSATEarly extends OSAT{
 			0=> array(
 				8 => "Structure",
 				10 => "Laser Spear",
-				12 => "Ranged Early Plasma Wave",
+				12 => "Ranged Plasma Wave",
 				14 => "Twin Ion Gun",
 				16 => "Thruster",
 				18 => "Scanner",

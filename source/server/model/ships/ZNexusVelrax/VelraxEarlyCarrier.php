@@ -79,7 +79,7 @@ class VelraxEarlyCarrier extends BaseShip{
 			1=> array(
 					6 => "Thruster",
 					8 => "Twin Ion Gun",
-					10 => "Early Plasma Wave",
+					10 => "Plasma Wave",
 					18 => "Structure",
 					20 => "Primary",
 			),

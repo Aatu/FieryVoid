@@ -9,7 +9,7 @@ class VelraxLaserGunboatRefit extends LCV{
         $this->phpclass = "VelraxLaserGunboatRefit";
         $this->imagePath = "img/ships/Nexus/VelraxGunboat.png";
 			$this->canvasSize = 55; //img has 200px per side
-        $this->shipClass = "Nashran Laser Gunboat (2064 Refit)";
+        $this->shipClass = "Liviss Gunboat (2064 Refit)";
 			$this->variantOf = "Nashran Gunboat";
 			$this->occurence = "common";
 		$this->unofficial = true;
@@ -46,7 +46,7 @@ class VelraxLaserGunboatRefit extends LCV{
 		$this->addFrontSystem(new NexusLaserSpear(2, 5, 3, 300, 60));
 		$this->addFrontSystem(new NexusIonGun(2, 2, 2, 300, 120));
 	    
-        $this->addPrimarySystem(new Structure(3, 33));
+        $this->addPrimarySystem(new Structure(3, 32));
 	    
         $this->hitChart = array(
         		0=> array( 
