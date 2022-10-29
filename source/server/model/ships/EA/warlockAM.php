@@ -100,7 +100,7 @@ class WarlockAM extends BaseShip{
 		$this->hitChart = array(
                 0=> array(
                         9 => "Structure",
-                        11 => "Jump Drive",
+                        11 => "Jump Engine",
                         13 => "Scanner",
                         15 => "Engine",
                         17 => "Hangar",
