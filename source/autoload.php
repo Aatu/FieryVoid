@@ -1715,6 +1715,7 @@ spl_autoload_register(
                 'salbezcurchk' => '/server/model/ships/ZNexusSalbez/SalbezCurchk.php',					
                 'salbezcurchkrefit' => '/server/model/ships/ZNexusSalbez/SalbezCurchkRefit.php',					
                 'salbezdrazchk' => '/server/model/ships/ZNexusSalbez/SalbezDrazchk.php',					
+                'salbezdrevnan' => '/server/model/ships/ZNexusSalbez/SalbezDrevnan.php',					
                 'salbezesver' => '/server/model/ships/ZNexusSalbez/SalbezEsver.php',					
                 'salbezevsk' => '/server/model/ships/ZNexusSalbez/SalbezEvsk.php',					
                 'salbezfelriz' => '/server/model/ships/ZNexusSalbez/SalbezFelriz.php',					
