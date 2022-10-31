@@ -86,7 +86,7 @@ class Poseidon extends BaseShip{
 		$this->hitChart = array(
                 0=> array(
                         10 => "Structure",
-                        12 => "Jump Drive",
+                        12 => "Jump Engine",
                         14 => "Scanner",
                         16 => "Engine",
                         17 => "Hangar",

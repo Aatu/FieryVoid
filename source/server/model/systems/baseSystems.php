@@ -2662,7 +2662,7 @@ class SelfRepair extends ShipSystem{
 	public function stripForJson(){
         $strippedSystem = parent::stripForJson();
         $strippedSystem->data = $this->data;		
-        $strippedSystem->output = $this->getOutput();		
+		//$strippedSystem->output = $this->getOutput();	//actual output is constant, and outputMod is correctly shown in front end!	
         $strippedSystem->priorityChanges = $this->priorityChanges;	
         return $strippedSystem;
     }
