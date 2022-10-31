@@ -5,7 +5,7 @@ class Prototype extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 3500;
-        $this->faction = "Custom Ships";
+  //      $this->faction = "Custom Ships";
         $this->phpclass = "Prototype";
         $this->imagePath = "img/ships/Prototype.png";
         $this->shipClass = "Regime Prototype";

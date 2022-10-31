@@ -192,6 +192,9 @@ class BaseShip {
 			if($this->faction == "Raiders"){
                 return $this->doRaidersInitiativeBonus($gamedata);
             }
+            if(($this->faction == "Pak'ma'ra") && (!($this instanceof FighterFlight))	){
+                return $this->doPakmaraInitiativeBonus($gamedata);
+            }
             return $this->iniativebonus;
         }
         
@@ -329,7 +332,36 @@ class BaseShip {
         }
         //    debug::log($this->phpclass."- bonus: ".$mod);
         return $this->iniativebonus + $mod*5;
-    }
+    } //end of doDilgarInitiativeBonus  
+    
+    
+        private function doPakmaraInitiativeBonus($gamedata){
+        	
+        $mod = 0;
+
+        if($gamedata->turn > 0 && $gamedata->phase >= 0 ){
+     //       $pixPos = $this->getCoPos();
+            //TODO: Better distance calculation
+            $ships = $gamedata->getPlayerShips();                      
+
+            foreach($ships as $ship){  
+                if( !$ship->isDestroyed()
+                    && ($ship->faction == "Pak'ma'ra")
+                    && ($this->userid == $ship->userid)
+    //                && ($ship->shipSizeClass == 3)	
+                    && ($this->id != $ship->id)){
+            			$teamships = $gamedata->getPlayerShips();             	
+                        $fleetsize = count($teamships);    	//number of friendly ships
+                        $minus = floor(($fleetsize)/3); //Divide by three and round down
+                   if ($minus > $mod){
+                        $mod = $minus;
+                    } else continue;     
+                }
+            }
+        }
+        //    debug::log($this->phpclass."- bonus: ".$mod);
+        return $this->iniativebonus - $mod*5;
+    } //end of doPakmaraInitiativeBonus    
 	
 	/*saves individual notes systems might have generated*/
 	public function saveIndividualNotes(DBManager $dbManager) {

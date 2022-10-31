@@ -439,15 +439,15 @@ class TacGamedata {
         return $ships;
     }
 
-    public function getTeamShipsInDistance($pos, $dis = 0){
+    public function getPlayerShips(){
 
-        if ($pos instanceof BaseShip) {
-            $pos = $pos->getHexPos();
-        }
+   //     if ($pos instanceof BaseShip) {
+  //          $pos = $pos->getHexPos();
+  //      }
 
-        if (! ($pos instanceof OffsetCoordinate)) {
-            throw new Exception("only OffsetCoordinate supported");
-        }
+  //      if (! ($pos instanceof OffsetCoordinate)) {
+  //          throw new Exception("only OffsetCoordinate supported");
+  //      }
 
         $ships = array();
         foreach ($this->ships as $ship){
@@ -460,10 +460,10 @@ class TacGamedata {
             if ($ship->userid != $this->forPlayer)
             	continue;
             
-  			if ( $ship->getHexPos()->distanceTo($pos) <= $dis){
+  	//		if ( $ship->getHexPos()->distanceTo($pos) <= $dis){
                 $ships[$ship->id] = $ship; 
 				continue;          
-            }
+      //      }
         }
 
         return $ships;
