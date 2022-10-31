@@ -111,3 +111,9 @@ var HvyGuidedMissile = function HvyGuidedMissile(json, ship) {
 };
 HvyGuidedMissile.prototype = Object.create(Weapon.prototype);
 HvyGuidedMissile.prototype.constructor = HvyGuidedMissile;
+
+var EMMissile = function EMMissile(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EMMissile.prototype = Object.create(Weapon.prototype);
+EMMissile.prototype.constructor = EMMissile;

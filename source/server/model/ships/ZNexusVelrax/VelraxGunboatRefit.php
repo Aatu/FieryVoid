@@ -46,7 +46,7 @@ class VelraxGunboatRefit extends LCV{
 		$this->addFrontSystem(new EWPlasmaArc(2, 5, 4, 300, 60));
 		$this->addFrontSystem(new NexusIonGun(2, 2, 2, 300, 120));
 	    
-        $this->addPrimarySystem(new Structure(3, 33));
+        $this->addPrimarySystem(new Structure(3, 32));
 	    
         $this->hitChart = array(
         		0=> array( 

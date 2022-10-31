@@ -26,9 +26,9 @@ class VelraxSivrinRefit2 extends HeavyCombatVesselLeftRight{
         $this->pivotcost = 2;
         $this->iniativebonus = 30;
 
-        $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
-        $this->addPrimarySystem(new CnC(4, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 12, 5, 7));
+        $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
+        $this->addPrimarySystem(new CnC(4, 12, 0, 0));
+        $this->addPrimarySystem(new Scanner(4, 12, 7, 7));
         $this->addPrimarySystem(new Engine(4, 13, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(1, 2));
 		$this->addPrimarySystem(new MediumPlasma(3, 5, 3, 300, 60));
@@ -37,13 +37,13 @@ class VelraxSivrinRefit2 extends HeavyCombatVesselLeftRight{
 
         $this->addLeftSystem(new LaserLance(3, 6, 4, 240, 360));
         $this->addLeftSystem(new LaserLance(3, 6, 4, 240, 360));
-        $this->addLeftSystem(new MediumPlasma(3, 5, 3, 180, 360));
+        $this->addLeftSystem(new HeavyPlasma(3, 8, 5, 180, 360));
         $this->addLeftSystem(new DualIonBolter(2, 4, 4, 180, 360));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 
         $this->addRightSystem(new LaserLance(3, 6, 4, 0, 120));
         $this->addRightSystem(new LaserLance(3, 6, 4, 0, 120));
-        $this->addRightSystem(new MediumPlasma(3, 5, 3, 0, 180));
+        $this->addRightSystem(new HeavyPlasma(3, 8, 5, 0, 180));
         $this->addRightSystem(new DualIonBolter(2, 4, 4, 0, 180));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 
@@ -65,17 +65,17 @@ class VelraxSivrinRefit2 extends HeavyCombatVesselLeftRight{
         		),
         		3=> array(
         				5 => "Thruster",
-        				6 => "Dual Ion Bolter",
-						9 => "Laser Lance",
-						11 => "Medium Plasma Cannon",
+        				7 => "Dual Ion Bolter",
+						10 => "Laser Lance",
+						12 => "Heavy Plasma Cannon",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		4=> array(
         				5 => "Thruster",
-        				6 => "Dual Ion Bolter",
-						9 => "Laser Lance",
-						11 => "Medium Plasma Cannon",
+        				7 => "Dual Ion Bolter",
+						10 => "Laser Lance",
+						12 => "Heavy Plasma Cannon",
         				18 => "Structure",
         				20 => "Primary",
         		),

@@ -39445,8 +39445,11 @@ var SystemInfo = function (_React$Component) {
                         specialEntry[i]
                     );
                 }),
+// NOTE: Adding another check for the first game phase to enable ballistic called shots. GTS 05oct22
+//                Object.keys(system.critData).length > 0 && getCriticals(system),
+//                !gamedata.isMyShip(ship) && gamedata.gamephase == 3 && gamedata.waiting == false && gamedata.selectedSystems.length > 0 && selectedShip && getCalledShot(ship, selectedShip, system)
                 Object.keys(system.critData).length > 0 && getCriticals(system),
-                !gamedata.isMyShip(ship) && gamedata.gamephase == 3 && gamedata.waiting == false && gamedata.selectedSystems.length > 0 && selectedShip && getCalledShot(ship, selectedShip, system)
+                !gamedata.isMyShip(ship) && (gamedata.gamephase == 3 ||  gamedata.gamephase == 1) && gamedata.waiting == false && gamedata.selectedSystems.length > 0 && selectedShip && getCalledShot(ship, selectedShip, system)
             );
         }
     }]);

@@ -83,7 +83,10 @@ class SystemInfo extends React.Component {
 
                 {Object.keys(system.critData).length > 0 && getCriticals(system)}
 
-                {(!gamedata.isMyShip(ship) && gamedata.gamephase == 3 && gamedata.waiting == false && gamedata.selectedSystems.length > 0 && selectedShip) && getCalledShot(ship, selectedShip, system)}
+// NOTE: The commented out line was the original. This is being edited below to have a called shot check during the initial phase for ballistics. GTS 03oct22
+//                {(!gamedata.isMyShip(ship) && gamedata.gamephase == 3 && gamedata.waiting == false && gamedata.selectedSystems.length > 0 && selectedShip) && getCalledShot(ship, selectedShip, system)}
+// NOTE: The line below is the edited version of the one above to enable ballistic called shots.
+				{(!gamedata.isMyShip(ship) &&  (gamedata.gamephase == 3 ||  gamedata.gamephase == 1) && gamedata.waiting == false && gamedata.selectedSystems.length > 0 && selectedShip) && getCalledShot(ship, selectedShip, system)}
             </SystemInfoTooltip>
         )
     }

@@ -31,10 +31,10 @@ class VelraxVersytheExplorer extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new ELINTScanner(3, 16, 5, 5));
         $this->addPrimarySystem(new Engine(3, 20, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(2, 2));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 1));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 2));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 2));
-		$this->addPrimarySystem(new JumpEngine(3, 20, 5, 35));
+        $this->addAftSystem(new Thruster(3, 12, 0, 4, 1));
+        $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
+        $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
+		$this->addFrontSystem(new JumpEngine(3, 20, 5, 35));
 
         $this->addLeftSystem(new MediumPlasma(3, 5, 3, 300, 60));
         $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 180, 60));
@@ -60,9 +60,9 @@ class VelraxVersytheExplorer extends HeavyCombatVesselLeftRight{
             $this->hitChart = array(
         		0=> array(
         				7 => "Structure",
-        				10 => "Thruster",
-						12 => "Jump Engine",
-        				14 => "Scanner",
+        				10 => "2:Thruster",
+						12 => "1:Jump Engine",
+        				14 => "ELINT Scanner",
         				16 => "Engine",
 						17 => "Hangar",
         				19 => "Reactor",

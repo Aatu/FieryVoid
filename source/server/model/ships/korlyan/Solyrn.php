@@ -12,7 +12,7 @@ class Solyrn extends HeavyCombatVessel{
         $this->shipClass = "Solyrn Missile Destroyer";
 	    $this->isd = 2237;
 
-		$this->canvasSize = 110; 
+		$this->canvasSize = 130; 
 
 	    $this->notes = 'Atmospheric Capable.';
         $this->fighters = array("assault shuttles"=>2);
@@ -37,6 +37,7 @@ class Solyrn extends HeavyCombatVessel{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
 	    $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-P
          
         $this->addPrimarySystem(new Reactor(4, 11, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));

@@ -4,7 +4,7 @@ class VelraxVersissScout extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 380;
+	$this->pointCost = 420;
 	$this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxVersissScout";
         $this->imagePath = "img/ships/Nexus/VelraxVersiss.png";
@@ -25,13 +25,13 @@ class VelraxVersissScout extends HeavyCombatVesselLeftRight{
         $this->iniativebonus = 30;
 
         $this->addPrimarySystem(new Reactor(4, 18, 0, 0));
-        $this->addPrimarySystem(new CnC(4, 16, 0, 0));
+        $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new ELINTScanner(3, 16, 6, 6));
         $this->addPrimarySystem(new Engine(4, 20, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(2, 2));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 5, 1));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 2));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 2));
+        $this->addAftSystem(new Thruster(3, 12, 0, 5, 1));
+        $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
+        $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
 
         $this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 300, 60));
         $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 180, 60));
@@ -53,8 +53,8 @@ class VelraxVersissScout extends HeavyCombatVesselLeftRight{
             $this->hitChart = array(
         		0=> array(
         				9 => "Structure",
-        				12 => "Thruster",
-        				14 => "Scanner",
+        				12 => "2:Thruster",
+        				14 => "ELINT Scanner",
         				16 => "Engine",
 						17 => "Hangar",
         				19 => "Reactor",
