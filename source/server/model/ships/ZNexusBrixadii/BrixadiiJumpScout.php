@@ -61,7 +61,7 @@ class BrixadiiJumpScout extends BaseShipNoAft{
         $this->hitChart = array(
             0=> array(
                     8 => "Structure",
-                    10 => "JumpEngine",
+                    10 => "Jump Engine",
                     12 => "Thruster",
 					14 => "ELINT Scanner",
                     16 => "Engine",
