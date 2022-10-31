@@ -232,6 +232,29 @@ shipManager.systems = {
 
         return null;
     },
+	
+
+    getSystemListByName: function getSystemByName(ship, name) {
+		var toReturn = Array();
+        for (var i in ship.systems) {
+            var system = ship.systems[i];
+            if (system.fighter) {
+                for (var a in system.systems) {
+                    var figsys = system.systems[a];
+
+                    if ((figsys.name == name)
+						&& (!shipManager.systems.isDestroyed(ship,figsys)) ) { //only on alive fighters!
+                        toReturn.push(figsys);
+                    }
+                }
+            }
+            if (system.name == name) {
+                toReturn.push(system);
+            }
+        }
+
+        return toReturn;
+    },
 
     getSystemByNameInLoc: function getSystemByNameInLoc(ship, name, loc) {
         for (var i in ship.systems) {

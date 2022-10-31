@@ -25,9 +25,9 @@ class Skiatha extends BaseShip{
         $this->pivotcost = 2;
         $this->iniativebonus = 0;
         
-        $this->addPrimarySystem(new Reactor(5, 15, 0, 13));
+        $this->addPrimarySystem(new Reactor(5, 15, 0, 0));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
-        $this->addPrimarySystem(new ELINTScanner(5, 20, 9, 12));
+        $this->addPrimarySystem(new ELINTScanner(5, 20, 9, 13));
         $this->addPrimarySystem(new Engine(5, 18, 0, 10, 2));
         $this->addPrimarySystem(new ShieldGenerator(5, 16, 4, 3));
         $this->addPrimarySystem(new Hangar(5, 15));

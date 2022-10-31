@@ -142,12 +142,15 @@ var Particleimpeder = function Particleimpeder(json, ship) {
 Particleimpeder.prototype = Object.create(Weapon.prototype);
 Particleimpeder.prototype.constructor = Particleimpeder;
 Particleimpeder.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
+	return shipManager.systems.getOutput(target, this);
+	/* now it affects everything!
     if (shooter.flight) {
         //only affects fighters
         return shipManager.systems.getOutput(target, this);
     } else {
         return 0;
     }
+	*/
 };
 Particleimpeder.prototype.hasMaxBoost = function () {
     return true;

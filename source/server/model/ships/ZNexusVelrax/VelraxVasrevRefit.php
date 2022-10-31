@@ -29,19 +29,19 @@ class VelraxVasrevRefit extends MediumShip{
         $this->addPrimarySystem(new Reactor(4, 10, 0, 0));
         $this->addPrimarySystem(new CnC(4, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 14, 5, 5));
-        $this->addPrimarySystem(new Engine(3, 12, 0, 10, 3));
+        $this->addPrimarySystem(new Engine(3, 12, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(1, 2));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 5, 3));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 5, 4));        
+        $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 3));
+        $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 4));        
         
 		$this->addFrontSystem(new EWPlasmaArc(3, 5, 4, 300, 60));
 		$this->addFrontSystem(new EWPlasmaArc(3, 5, 4, 300, 60));
-		$this->addFrontSystem(new DualIonBolter(2, 4, 4, 300, 60));
+		$this->addFrontSystem(new DualIonBolter(2, 4, 4, 270, 90));
 		$this->addFrontSystem(new DualIonBolter(2, 4, 4, 270, 90));
         $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
 	    
-        $this->addAftSystem(new Thruster(3, 9, 0, 5, 2));    
-        $this->addAftSystem(new Thruster(3, 9, 0, 5, 2));    
+        $this->addAftSystem(new Thruster(3, 9, 0, 4, 2));    
+        $this->addAftSystem(new Thruster(3, 9, 0, 4, 2));    
 		$this->addAftSystem(new DualIonBolter(2, 4, 4, 120, 360));
 		$this->addAftSystem(new DualIonBolter(2, 4, 4, 0, 240));
        
@@ -62,7 +62,7 @@ class VelraxVasrevRefit extends MediumShip{
 		1=> array(
 			6 => "Thruster",
 			8 => "Plasma Arc",
-			9 => "Dual Ion Bolter",
+			10 => "Dual Ion Bolter",
 			17 => "Structure",
 			20 => "Primary",
 		),
