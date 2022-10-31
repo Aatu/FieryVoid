@@ -77,6 +77,12 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Map size switches</b> - as knife fights seem popular lately, I have added buttons to set proper map dimensions and deployment zones for such a fight (and back to standard size, too) with a single click
 
 	    
+	    	<br><br>---------- <b>update 31st of October</b> ----------
+	    <br><b>Particle Impeder display</b> - now shows boost level (=shield rating) rather than weapon default arming status (irrelevant with 1/turn weapon). 
+	    <br><b>Ballistics calculations corrected</b> - hit chance calculations for ballistics were corrected (somehow they took current rather than launch position to determine angle of impact...)
+ 	    <br><b>Vorlon Discharge Cannon corrected</b> - now it should correctly draw power
+ 	    <br><b>Jump Engine hit table corrected</b> - I've found some entries calling for Jump Drive or JumpEngine hits - those were corrected to Jump Engine that's actually the correct system name in FV
+	    
 <!--	    
 		 <br><br>---------- <b>update 26th of September</b> ---------- 
 	    <br><b>Variable missile loads</b> - new factions are in (Dilgar, Drazi)
