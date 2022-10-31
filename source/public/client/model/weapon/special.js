@@ -171,14 +171,6 @@ var IonFieldGenerator = function(json, ship)
 IonFieldGenerator.prototype = Object.create( Weapon.prototype );
 IonFieldGenerator.prototype.constructor = IonFieldGenerator;
 
-/* moved to systems!
-var SelfRepair = function(json, ship)
-{
-    Weapon.call( this, json, ship);
-}
-SelfRepair.prototype = Object.create( Weapon.prototype );
-SelfRepair.prototype.constructor = SelfRepair;
-*/
 
 var ParticleConcentrator = function(json, ship)
 {
@@ -214,7 +206,7 @@ VorlonDischargeCannon.prototype.initializationUpdate = function() {
 	var isFiring = weaponManager.hasFiringOrder(this.ship, this);
     if (isFiring) {
 		var firing = weaponManager.getFiringOrder(this.ship, this);
-		this.powerReq = this.powerRequiredArray[firing.firingMode][1]; //element is array Number of prongs/Power)		
+		this.powerReq = 5*firing.shots*firing.firingMode;		
 	}
     return this;
 };
@@ -242,6 +234,8 @@ var VorlonLtDischargeGun = function VorlonLtDischargeGun(json, ship) {
 VorlonLtDischargeGun.prototype = Object.create(Weapon.prototype);
 VorlonLtDischargeGun.prototype.constructor = VorlonLtDischargeGun;
 
+
+
 var VorlonLightningGun = function VorlonLightningGun(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -258,8 +252,6 @@ VorlonLightningGun.prototype.initializationUpdate = function() {
     return this;
 };
 
-
-
 var VorlonDischargePulsar = function VorlonDischargePulsar(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -267,12 +259,6 @@ VorlonDischargePulsar.prototype = Object.create(Weapon.prototype);
 VorlonDischargePulsar.prototype.constructor = VorlonDischargePulsar;
 VorlonDischargePulsar.prototype.initializationUpdate = function() {
     // Needed because it can change power consumption during firing phase, depending on power and number of shots being changed
-	this.powerReq = 0;
-	var isFiring = weaponManager.hasFiringOrder(this.ship, this);
-    if (isFiring) {
-		var firing = weaponManager.getFiringOrder(this.ship, this);
-		this.powerReq = this.powerRequiredArray[firing.firingMode][1]; //element is array Number of prongs/Power)		
-	}
-    return this;
+//TO BE ACTUALLY IMPLEMENTED!!!!!!!
 };
 
