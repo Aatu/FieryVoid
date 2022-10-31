@@ -78,6 +78,7 @@ if (isset($_SESSION["user"])) {
 
 	    
 	    	<br><br>---------- <b>update 31st of October</b> ----------
+	    <br><b>Nexus universe polising</b> - courtesy of Geoffrey
 	    <br><b>Particle Impeder display</b> - now shows boost level (=shield rating) rather than weapon default arming status (irrelevant with 1/turn weapon). 
 	    <br><b>Ballistics calculations corrected</b> - hit chance calculations for ballistics were corrected (somehow they took current rather than launch position to determine angle of impact...)
  	    <br><b>Vorlon Discharge Cannon corrected</b> - now it should correctly draw power
