@@ -43,7 +43,7 @@ class VelraxCommandBase extends SmallStarBaseFourSections{
 		$this->addFrontSystem(new CargoBay(3, 24));
 
 		$this->addAftSystem(new NexusHeavyLaserSpear(3, 6, 4, 90, 270));
-		$this->addAftSystem(new NexusRangedPlasmaWave(3, 7, 4, 270, 270));
+		$this->addAftSystem(new NexusRangedPlasmaWave(3, 7, 4, 90, 270));
 		$this->addAftSystem(new NexusTwinIonGun(3, 4, 4, 90, 270));
 		$this->addAftSystem(new NexusTwinIonGun(3, 4, 4, 90, 270));
 		$this->addAftSystem(new Hangar(3, 6));

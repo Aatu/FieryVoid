@@ -4,7 +4,7 @@ class VelraxArcCorvette extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 260;
+        $this->pointCost = 270;
         $this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxArcCorvette";
         $this->imagePath = "img/ships/Nexus/VelraxMassken.png";
@@ -32,9 +32,9 @@ class VelraxArcCorvette extends MediumShip{
         
 		$this->addFrontSystem(new EWPlasmaArc(2, 5, 4, 300, 60));
 		$this->addFrontSystem(new NexusIonGun(1, 2, 2, 180, 60));
-		$this->addFrontSystem(new NexusIonGun(1, 2, 2, 300, 180));
 		$this->addFrontSystem(new NexusIonGun(2, 2, 2, 240, 60));
 		$this->addFrontSystem(new NexusIonGun(2, 2, 2, 300, 120));
+		$this->addFrontSystem(new NexusIonGun(1, 2, 2, 300, 180));
         $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
 	    
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    
