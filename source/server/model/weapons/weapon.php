@@ -1043,7 +1043,7 @@ class Weapon extends ShipSystem
         }
 
         if ($this->ballistic) { //getHitChanceMod should get explicit position only if it cannot be derived from shooter - otherwise results at rng 0 are incorrect!
-            $posmod = $pos;
+            $posmod = $launchPos; //$pos;
         } else {
             $posmod = null;
         }

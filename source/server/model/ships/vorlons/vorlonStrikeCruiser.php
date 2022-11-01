@@ -8,7 +8,7 @@ class VorlonStrikeCruiser extends VorlonCapitalShip{
 		$this->faction = "Vorlons";
         $this->phpclass = "VorlonStrikeCruiser";
         $this->shipClass = "Strike Cruiser";
-        //$this->variantOf = "Battle Destroyer";
+				$this->variantOf = "UNDER CONSTRUCTION";
         $this->imagePath = "img/ships/VorlonHeavyCruiser.png";
         $this->canvasSize = 250;
 	    $this->isd = 'Ancient';
@@ -106,7 +106,7 @@ class VorlonStrikeCruiser extends VorlonCapitalShip{
 			),
 			2=> array( //Aft
 				6 => "Thruster",
-				8 => "Jump Drive",
+				8 => "Jump Engine",
 				10 => "EM Shield",
 				18 => "Structure",
 				20 => "Primary",

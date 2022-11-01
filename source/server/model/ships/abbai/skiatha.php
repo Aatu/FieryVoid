@@ -89,7 +89,7 @@ class Skiatha extends BaseShip{
 					2 => "Gravitic Shield",
 					7 => "Thruster",
 					9 => "Quad Array",
-					11 => "Jump Drive",
+					11 => "Jump Engine",
 					17 => "Structure",
 					20 => "Primary",
 			),
