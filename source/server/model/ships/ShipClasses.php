@@ -342,10 +342,10 @@ class BaseShip {
 			
 			foreach($gamedata->ships as $ship){
                 if(
-                     ($ship->faction == "Pak'ma'ra") //Pak
+                     ($ship->faction == "Pak'ma'ra") //Correct faction
                     && ($this->userid == $ship->userid) //of same player
                     && (!($ship instanceOf FighterFlight)) //actually a ship
-                    && ($this->id != $ship->id) //not current ship
+     //               && ($this->id != $ship->id) //not current ship
                     && (!$ship->isDestroyed()) //alive
                    ){
                             $alivePakShips++;
