@@ -10,6 +10,7 @@ class fwellgon extends HeavyCombatVessel{
         $this->imagePath = "img/ships/LlortGovall.png";
         $this->shipClass = "Fwellgon Raiding Scout";
         $this->limited = 33; 
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
  
         $this->isd = 2227;
         

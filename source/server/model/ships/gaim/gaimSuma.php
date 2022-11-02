@@ -39,8 +39,8 @@ class gaimSuma extends MediumShip{
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new AssaultLaser(3, 6, 4, 240, 60));
-		$this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 120));		
         $this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 60));
+		$this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 120));
 		$this->addFrontSystem(new Bulkhead(0, 2));
 		
 		

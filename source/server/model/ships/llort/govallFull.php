@@ -12,7 +12,8 @@ class govallFull extends HeavyCombatVessel{
  
         $this->limited = 33; 
         $this->isd = 2241;
-        $this->variantOf = "Govall Bombardment Destroyer";
+       // $this->variantOf = "Govall Bombardment Destroyer";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;

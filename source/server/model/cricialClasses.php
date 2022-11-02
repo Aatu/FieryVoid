@@ -370,6 +370,14 @@ class tmppowerdown extends Critical{ /*next turn target Power is down by 1 - pla
 }
 
 
+class tmphitreduction extends Critical{ /*immediate reduction in target's chance to hit for all fire*/
+    public $description = "-3 chance to hit to all fire, except ballistics.";
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
+
 
 class TendrilDestroyed extends Critical{
     public $description = "Tendril destroyed.";
@@ -425,7 +433,6 @@ class ContainmentBreach extends Critical{
 class SensorLoss extends Critical{
 	//Used by the Cylon Hybrid
     public $description = "Sensor loss: -3 EW.";
-	public $priority = 1; //probably the nastiest C&C crit, to be fixed at first priority
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }

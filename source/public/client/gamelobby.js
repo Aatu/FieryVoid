@@ -437,7 +437,7 @@ window.gamedata = {
 	    checkResult += "<br><br>";
 	    
 	    //variant restrictions
-	    checkResult += "<br>><u><b>Variant restrictions:</b></u><br><br>";
+	    checkResult += "<br><u><b>Variant restrictions:</b></u><br><br>";
 	    var limitPerHull = Math.floor(selectedSlot.points/1100); //turnament rules: 3, but it's for 3500 points
 		if (ancientUnitPresent){ //Ancients have way fewer total units...
 			limitPerHull = Math.floor(selectedSlot.points/3000);
@@ -543,7 +543,24 @@ window.gamedata = {
 			checkResult += " OK";
 		}
 		checkResult += "<br>";	    
-				
+	
+		totalFtrCurr = (totalFtrXL/2)+totalFtrL+totalFtrM+totalFtrH;
+		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
+			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL + (totalHangarXL/2);
+			checkResult +=  " - Ultralight/Light/Medium/Heavy Fighters: " + totalFtrCurr;
+			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
+			if((totalFtrXL>0) || (totalHangarXL>0)){ //add disclaimer because sums will not add up straight
+				checkResult += " <i>(ultralights counted as half)</i>";
+			}			
+			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
+				checkResult += " TOO MANY!";
+				problemFound = true;
+			}else{
+				checkResult += " OK";
+			}
+			checkResult += "<br>";
+		}
+	    
 		totalFtrCurr = totalFtrL+totalFtrM+totalFtrH;
 		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
 			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL;

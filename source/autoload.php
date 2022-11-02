@@ -1578,6 +1578,7 @@ spl_autoload_register(
 				'plasmaweb' => '/server/model/weapons/customNexus.php',
 //				'plasmablast' => '/server/model/weapons/customNexus.php',
 //				'testgun' => '/server/model/weapons/customNexus.php',
+				'testmissile' => '/server/model/weapons/customNexus.php',
 //                'plasmabattery' => '/server/model/systems/baseSystems.php',
 //				'enveloper' => '/server/model/weapons/customNexus.php',
 
@@ -1716,6 +1717,7 @@ spl_autoload_register(
                 'salbezcurchk' => '/server/model/ships/ZNexusSalbez/SalbezCurchk.php',					
                 'salbezcurchkrefit' => '/server/model/ships/ZNexusSalbez/SalbezCurchkRefit.php',					
                 'salbezdrazchk' => '/server/model/ships/ZNexusSalbez/SalbezDrazchk.php',					
+                'salbezdrevnan' => '/server/model/ships/ZNexusSalbez/SalbezDrevnan.php',					
                 'salbezesver' => '/server/model/ships/ZNexusSalbez/SalbezEsver.php',					
                 'salbezevsk' => '/server/model/ships/ZNexusSalbez/SalbezEvsk.php',					
                 'salbezfelriz' => '/server/model/ships/ZNexusSalbez/SalbezFelriz.php',					
@@ -1790,7 +1792,7 @@ spl_autoload_register(
                 'velraxresteraxrefit' => '/server/model/ships/ZNexusVelrax/VelraxResteraxRefit.php',					
                 'velraxsathrinfrigate' => '/server/model/ships/ZNexusVelrax/VelraxSathrinFrigate.php',					
                 'velraxsathrinrefit' => '/server/model/ships/ZNexusVelrax/VelraxSathrinRefit.php',					
-                'velraxsathrinrefit2' => '/server/model/ships/ZNexusVelrax/VelraxSathrinRefit2.php',					
+//                'velraxsathrinrefit2' => '/server/model/ships/ZNexusVelrax/VelraxSathrinRefit2.php',					
                 'velraxsevashcarrier' => '/server/model/ships/ZNexusVelrax/VelraxSevashCarrier.php',					
                 'velraxsevashrefit' => '/server/model/ships/ZNexusVelrax/VelraxSevashRefit.php',					
                 'velraxsivringunship' => '/server/model/ships/ZNexusVelrax/VelraxSivrinGunship.php',					
@@ -1805,7 +1807,7 @@ spl_autoload_register(
                 'velraxthristencorvetterefit2' => '/server/model/ships/ZNexusVelrax/VelraxThristenCorvetteRefit2.php',					
                 'velraxvasrevescort' => '/server/model/ships/ZNexusVelrax/VelraxVasrevEscort.php',					
                 'velraxvasrevrefit' => '/server/model/ships/ZNexusVelrax/VelraxVasrevRefit.php',					
-                'velraxvasrevrefit2' => '/server/model/ships/ZNexusVelrax/VelraxVasrevRefit2.php',					
+//                'velraxvasrevrefit2' => '/server/model/ships/ZNexusVelrax/VelraxVasrevRefit2.php',					
                 'velraxversissscout' => '/server/model/ships/ZNexusVelrax/VelraxVersissScout.php',					
                 'velraxversissrefit' => '/server/model/ships/ZNexusVelrax/VelraxVersissRefit.php',					
                 'velraxversytheexplorer' => '/server/model/ships/ZNexusVelrax/VelraxVersytheExplorer.php',					
@@ -1975,6 +1977,7 @@ spl_autoload_register(
                 'ltguidedmissile' => '/server/model/weapons/customBSG.php',
                 'medguidedmissile' => '/server/model/weapons/customBSG.php',
                 'hvyguidedmissile' => '/server/model/weapons/customBSG.php',
+                'emmissile' => '/server/model/weapons/customBSG.php',
 
 //				'cylonbasestar' => '/server/model/ships/ZBSGCylons/CylonBasestar.php',				
 				'cylonsparrowraider' => '/server/model/ships/ZBSGCylons/CylonSparrowRaider.php',				
@@ -2487,7 +2490,6 @@ spl_autoload_register(
 				//Star Trek conversions
 				//weapons
 				'trekphaserbase' => '/server/model/weapons/customTrek.php',
-				'trekftrphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekltphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekhvyphasecannon' => '/server/model/weapons/customTrek.php',
@@ -2503,6 +2505,10 @@ spl_autoload_register(
 				'ltplasmaprojector' => '/server/model/weapons/customTrek.php',
 				'customltparticlecutter' => '/server/model/weapons/customs.php',
 				'customearlyltparticlecutter' => '/server/model/weapons/customs.php',
+				'trekftrphaser' => '/server/model/weapons/customTrek.php',
+				'trekftrphasecannon' => '/server/model/weapons/customTrek.php',
+				'trekftrphotontorpedo' => '/server/model/weapons/customTrek.php',
+				'trekftrphotontorpedoammo' => '/server/model/weapons/customTrek.php',
 				
 				//systems
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php', //nacelle
@@ -2659,12 +2665,18 @@ spl_autoload_register(
          		'fmissilerack' => '/server/model/weapons/customNexus.php', 
 */
 
+//				'solyrn' => '/server/model/ships/korlyan/Solyrn.php',
+//                'tmphitreduction' => '/server/model/cricialClasses.php',
 
+//         		'chaffmissile' => '/server/model/weapons/customNexus.php', 
+//         		'proximitylaser' => '/server/model/weapons/customNexus.php', 
+//         		'fmissilerack' => '/server/model/weapons/customNexus.php', 
 //         		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
-//         		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
+//         		'multidefenselauncher' => '/server/model/weapons/missile.php', //missile racks themselves
 //				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 //				'koloskova' => '/server/model/ships/korlyan/Koloskova.php',
 //				'lekra' => '/server/model/ships/korlyan/Lekra.php',
+//				'koskova' => '/server/model/ships/korlyan/Koskova.php',
 
 
 
@@ -2722,6 +2734,7 @@ spl_autoload_register(
                 		'ammomissilea' => '/server/model/systems/baseSystems.php',
                 		'ammomissilep' => '/server/model/systems/baseSystems.php',
                 		'ammomissiled' => '/server/model/systems/baseSystems.php',
+                		'ammomissiles' => '/server/model/systems/baseSystems.php',
 		    
                 		'ammomissileracks' => '/server/model/weapons/missile.php', //missile racks themselves
                 		'ammomissilerackso' => '/server/model/weapons/missile.php',
@@ -2782,14 +2795,38 @@ spl_autoload_register(
 						'rulnatoam' => '/server/model/ships/descari/RulnatoAM.php',
 						'carranaam' => '/server/model/ships/descari/CarranaAM.php',
 						'hemrosam' => '/server/model/ships/descari/HemrosAM.php',
+												
+						//Dilgar
+						'koratylam' => '/server/model/ships/dilgar/koratylAM.php',
+						'mishakuram' => '/server/model/ships/dilgar/mishakurAM.php',
+						'mishakurdam' => '/server/model/ships/dilgar/mishakurDAM.php',
+						'athraskalaam' => '/server/model/ships/dilgar/athraskalaAM.php',
+						'athraskalacam' => '/server/model/ships/dilgar/athraskalaCAM.php',
+						'targathcam' => '/server/model/ships/dilgar/targathCAM.php',
+						'eskravatam' => '/server/model/ships/dilgar/eskravatAM.php',
+						'delegor' => '/server/model/ships/dilgar/delegor.php',
 						
+						//Drazi						
+						'darkhawkam' => '/server/model/ships/drazi/darkhawkAM.php', 
 						
-						
-						
+						//Llort
+						'kaedashkadaam' => '/server/model/ships/llort/KaedashkadaAM.php',
+						'fwellgonam' => '/server/model/ships/llort/fwellgonAM.php',
+						'govallam' => '/server/model/ships/llort/govallAM.php',
 				
-				
-		    
-				
+						//Hurr
+						'roskorbase2215am' => '/server/model/ships/hurr/Roskorbase2215AM.php',
+						'roskorbase2240am' => '/server/model/ships/hurr/Roskorbase2240AM.php',
+						'hurrmissileosat2220am' => '/server/model/ships/hurr/HurrmissileOSAT2220AM.php',
+						'hurrmissileosat2240am' => '/server/model/ships/hurr/HurrmissileOSAT2240AM.php',
+						'borocaam' => '/server/model/ships/hurr/borocaAM.php',
+						'borocadaam' => '/server/model/ships/hurr/borocadaAM.php',
+						'norekam' => '/server/model/ships/hurr/norekAM.php',
+						'anoroam' => '/server/model/ships/hurr/anoroAM.php',
+						
+						
+						
+						
 						
 				
 				//let's end this with unit enhancement class...		    

@@ -27,15 +27,15 @@ Gravitic Shield - most Abbai units are equipped with Gravitic Shield. Active shi
 Quad Array - 4 separate weapons in a single housing that's prone to overheating. Using more than 2 shots can cause forced shutdown for a turn, to cool down. Number of shots is changed by using alternate firing modes. Defensive fire is always safe. (this is somewhat changed from tabletop arrangement, where a regular critical is rolled instead - with defensive fire too).
 Comm Disruptor - weapon reducing target's EW and Initiative for next turn. 
 Particle Impeder - purely defensive weapon, capable of intercepting weapons with "uninterceptable" trait (typically that means Lasers :) ).
-	In tabletop, Impeder output can be boosted by channeling DEW - increasing intercept rating, acting as regular DEW (but only in Impeder arc) and reducing fighters' hit chance - effectively gaining interesting bonuses in Impeder arc as a tradeoff for leaving remaining arc with much reduced defenses.
-	In Fiery Void this effect was difficult to achieve. It was changed to accept regular power instead (eg. it can be boosted similarly to other weapons), with boost giving similar properties as original DEW channel (increased intercept rating + reducing fighter hit chance). Ship Sensors output is reduced by 1 point, with appropriate extra power to play with instead.
-	In effect, FV solution is more flexible (can boost Impeder without sacrificing protection in other arcs, can use power elsewhere), but weaker (in practice achievable boost is much lower, and requires forfeiting that point of EW), for hopefully similar overall power and playstyle.
-
+	In addition, it can be boosted by sarificing EW rather than usual Power. Such a boost, in addition to increasing intercept rating of the Impeder, counts as special kind of shielding, reducing hit chance of all incoming weapons (fighter fire included), that can't be flown under and is cumulative with regular shields.
+	It is (by background as well as effect) DEW channeled to a specific arc, that has the added advantage of affecting fighters.
+	
 
 ABBAI MATRIARCHATE (WotCR)
 Abbai fleet a few hundred years before the show era, representing Wars of the Centauri Republic period.
 They have Gravitic Shielding much like modern Abbai (although much weaker), and weapons being precursors to modern Comm Disruptor (Comm Jammer and Sensor Spike).
 Mine Launcher - weapon that can deploy mines during combat. Not implemented in FV, unit that has it (Motenai Mine Layer) is present in game but equipped with missile launchers instead.
+
 
 BALOSIAN UNDERDWELLERS
 No notable special systems/rules.
@@ -55,14 +55,17 @@ Gravitic Mines - ballistic, hex-targeted weapon that can move units hit.
 	Not implemented in FV.
 
 
-CASCOR COMMONWEALTH
+CASCOR COMMONWEALTH (official)
 Ionizer - Laser-based primary fighter weapon. Unlike more typical fighter weapons it's uninterceptable, but also cannot itself intercept.
 Ion Field Generator - area-of effect weapon, targeted on a hex rather than ship. Units caught in area of effect have capabilities reduced next turn (reduced Initiative, Power, EW, OB, and has a chance to force shutdown a system).
 Poor acceleration - for ships it's just that, very high acceleration cost. For fighters, it's double acceleration cost - but medium and lighter fighters have unusually high thrust ratings, too. In effect they can't accelerate very well, but are exceptionally maneuvrable even at high speed.
 Ultralight fighters - smallest Cascor fighters are of Ultralight type, which allows them to efficiently fit into hangar space inended for larger fighters.
 Tiqincc - medium Cascor fighters have tail gun. In tabletop, this gun has -2 penalty when fired together with main gun. In FV it does not.
 
-After being actually fielded in Fiery Void for some time, consensus of players was that this faction (and its ships in particular) is too pricy to be competitive. In order to correct this perceived drawback, I have added option of using modified point values - by way of adding appropriate enhancement to unit (which does nothing but modify its price). Hopefully, this will make the faction more playable and actually balanced against other competitive small factions (eg. about the top of Tier 2, rather than bottom of that tier). Note that using these enhancements turns the fleet into CUSTOM one!
+
+CASCOR COMMONWEALTH (custom)
+After being actually fielded in Fiery Void for some time, consensus of players was that this faction (and its ships in particular) is too pricy to be competitive. In order to correct this perceived drawback, I have added option of using modified point values - by way of adding appropriate enhancement to unit (which does nothing but modify its price). Hopefully, this will make the faction more playable and actually balanced against other competitive small factions (eg. about the top of Tier 2, rather than bottom of that tier). There is a new attack fighter available, too. 
+Note that using these enhancements turns the fleet into CUSTOM one!
 Actual values used are set by Zero_1627 and are NOT result of consensus of players.
 
 

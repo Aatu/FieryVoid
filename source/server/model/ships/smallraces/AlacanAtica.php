@@ -35,8 +35,8 @@ class AlacanAtica extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new CombatLaser(3, 7, 7, 240, 0));
-        $this->addFrontSystem(new CombatLaser(3, 7, 7, 0, 120));
         $this->addFrontSystem(new CombatLaser(3, 7, 7, 300, 60));
+        $this->addFrontSystem(new CombatLaser(3, 7, 7, 0, 120));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
 

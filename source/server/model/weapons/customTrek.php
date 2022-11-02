@@ -145,39 +145,6 @@ class TrekLtPhaseCannon extends TrekPhaserBase{
 }//end of class Trek Light Phase Cannon
 
 
-/*super-heavy fighter weapon*/
-    class TrekFtrPhaseCannon extends TrekPhaserBase{
-        public $name = "TrekFtrPhaseCannon";
-        public $displayName = "Light Phase Cannon";
-        public $iconPath = "TrekLightPhaseCannon.png";
-        //public $animationExplosionScale = 0.2;
-
-        public $loadingtime = 2;
-        public $raking = 6;
-//        public $exclusive = true;
-        public $intercept = 2;
-        public $priority = 8; //Raking weapon
-        
-        //public $rangePenalty = 1;
-		public $rangePenalty = 1.5; // -3 per 2 hexes
-        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
- 
-		public $damageType = 'Raking'; 
-		public $weaponClass = "Particle";  
-		public $firingModes = array( 1 => "Raking");
-	    
-        function __construct($startArc, $endArc, $damagebonus){
-            parent::__construct(0, 1, 0, $startArc, $endArc);
-        }
-
-	    
-        public function getDamage($fireOrder){   
-			return Dice::d(6, 2)+4;
-		}
-        public function setMinDamage(){   return  $this->minDamage = 6 ;      }
-        public function setMaxDamage(){   return  $this->maxDamage = 16 ;      }
-		
-    }  //end of class Trek Fighter Light Phase Cannon
 
 
 class TrekPhaseCannon extends TrekPhaserBase{
@@ -362,7 +329,7 @@ class TrekHvyPhaseCannon extends TrekPhaserBase{
 class TrekPhaser extends TrekPhaserBase{
 		public $name = "TrekPhaser";
         public $displayName = "Phaser";
-        public $iconPath = "mediumLaser.png"; //Laser icon - just so it's clear it needs to be changed!
+        public $iconPath = "TrekPhaserM.png"; 
         //public $animationExplosionScale = 0.3;
 
         public $raking = 10;
@@ -454,7 +421,7 @@ class TrekPhaser extends TrekPhaserBase{
 class TrekPhaserLance extends TrekPhaserBase{
 		public $name = "TrekPhaserLance";
         public $displayName = "Phaser Lance";
-        public $iconPath = "heavyLaser.png"; //Laser icon - just so it's clear it needs to be changed!
+        public $iconPath = "TrekPhaserLanceM.png"; 
         public $animation = "laser";
         //public $animationExplosionScale = 0.4;
 	//public $animationExplosionScaleArray = array(1=>0.4, 2=>0.3); 
@@ -541,7 +508,7 @@ class TrekPhaserLance extends TrekPhaserBase{
 class TrekLightPhaser extends TrekPhaserBase{
 		public $name = "TrekLightPhaser";
         public $displayName = "Light Phaser";
-        public $iconPath = "lightLaser.png"; //Laser icon - just so it's clear it needs to be changed!
+        public $iconPath = "TrekPhaserL.png"; 
         //public $animationExplosionScale = 0.3;
 
         public $raking = 8;
@@ -574,7 +541,7 @@ class TrekLightPhaser extends TrekPhaserBase{
 class TrekLightPhaserLance extends TrekPhaserBase{
 		public $name = "TrekLightPhaserLance";
         public $displayName = "Light Phaser Lance";
-        public $iconPath = "mediumLaser.png"; //Laser icon - just so it's clear it needs to be changed!
+        public $iconPath = "TrekPhaserLanceL.png";
         public $animation = "laser";
         //public $animationExplosionScale = 0.4;
 	//public $animationExplosionScaleArray = array(1=>0.4, 2=>0.3); 
@@ -1425,6 +1392,168 @@ class TrekShieldFtr extends ShipSystem{
 
 }//endof class TrekShieldFtr
 
+
+
+    class TrekFtrPhaser extends LinkedWeapon{
+        public $name = "TrekFtrPhaser";
+        public $displayName = "Phaser"; 
+        public $animation = "bolt";
+        public $animationColor = array(225, 0, 0);
+        public $intercept = 2;
+
+        public $loadingtime = 1;
+        public $shots = 2;
+        public $defaultShots = 2;
+		public $priority = 3; //correct for d6+2 and lighter
+
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        private $damagebonus = 0;
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle";         
+
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots, $nameBase = 'Phaser'){ //just so it can be easily renamed to eg. Phase Cannon
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            $this->intercept = $nrOfShots;		
+			$this->displayName = $nameBase;
+
+			if($damagebonus<=2){
+				$this->displayName = 'Ultralight ' . $nameBase;
+			}
+            if ($damagebonus >= 3) {
+				$this->priority++; //heavier varieties fire later in the queue	
+				$this->displayName = 'Light ' . $nameBase;//...and go no further up - full-bore "Phaser" (or "Phase Cannon") is shipborne weapon, or superheavy fighter weapon)		
+			}
+            if ($damagebonus >= 5) {
+				$this->priority++;
+			}
+            if ($damagebonus >= 7) $this->priority++;
+
+            if($nrOfShots == 1){
+                $this->iconPath = "TrekFtrPhaser1.png";
+            }else if ($nrOfShots == 2){
+                $this->iconPath = "TrekFtrPhaser2.png";
+			}else{ //more than 2
+                $this->iconPath = "TrekFtrPhaser3.png";
+            }
+
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
+        public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
+        public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
+    } //endof TrekFtrPhaser
+
+
+
+/*super-heavy fighter weapon*/
+    class TrekFtrPhaseCannon extends TrekPhaserBase{
+        public $name = "TrekFtrPhaseCannon";
+        public $displayName = "Phase Cannon";
+        public $iconPath = "TrekLightPhaseCannon.png";
+        //public $animationExplosionScale = 0.2;
+
+        public $loadingtime = 2;
+        public $raking = 6;
+//        public $exclusive = true;
+        public $intercept = 2;
+        public $priority = 8; //Raking weapon
+        
+        //public $rangePenalty = 1;
+		public $rangePenalty = 1.5; // -3 per 2 hexes
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+ 
+		public $damageType = 'Raking'; 
+		public $weaponClass = "Particle";  
+		public $firingModes = array( 1 => "Raking");
+	    
+        function __construct($startArc, $endArc, $damagebonus){
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+	    
+        public function getDamage($fireOrder){
+			return Dice::d(6, 2)+4;
+		}
+        public function setMinDamage(){   return  $this->minDamage = 6 ;      }
+        public function setMaxDamage(){   return  $this->maxDamage = 16 ;      }
+		
+    }  //end of class Trek Fighter Light Phase Cannon
+
+
+
+
+class TrekFtrPhotonTorpedo extends FighterMissileRack
+{
+    public $name = "TrekFtrPhotonTorpedo";
+    public $displayName = "Light Photon Torpedo";
+    public $loadingtime = 1;
+    public $iconPath = "TrekPhotonicTorpedo.png";
+    public $rangeMod = 0;
+    public $firingMode = 1;
+    public $maxAmount = 0;
+    protected $distanceRangeMod = 0;
+    public $priority = 5; //priority: strong fighter weapon (similar damage output to basic fighter missiles)
+
+
+    public $animation = "torpedo";
+
+    public $fireControl = array(0, 1, 2); // fighters, <mediums, <capitals 
+    
+    public $firingModes = array(
+        1 => "PhotonTorpedo"
+    );
+    
+    function __construct($maxAmount, $startArc, $endArc){
+        parent::__construct($maxAmount, $startArc, $endArc);
+        
+        $ammo = new TrekFtrPhotonTorpedoAmmo($startArc, $endArc, $this->fireControl);
+        
+        $this->missileArray = array(
+            1 => $ammo
+        );
+        
+        $this->maxAmount = $maxAmount;
+		$this->fireControl = array(0, 1, 2);
+    }    
+}
+class TrekFtrPhotonTorpedoAmmo extends MissileFB
+{
+    public $name = "TrekFtrPhotonTorpedoAmmo";
+    public $missileClass = "PhotonTorpedo";
+    public $displayName = "Light Photon Torpedo";
+    public $cost = 6;//definitely worse than basic fighter missile - but packing about the same puch (less reliable though, with much less distance range (fighters will often be able to evade, possibly agile MCVs as well - and with less FC)
+    //public $damage = 10;
+    public $amount = 0;
+    public $range = 10;
+    public $distanceRange = 18;
+    public $hitChanceMod = 0;
+    public $priority = 5;
+    public $iconPath = "TrekPhotonicTorpedo.png";
+	
+	 //data below is overridden for some reason :(
+	public $fireControl = array(0, 1, 2);	
+    public $animation = "torpedo";
+        public $animationColor = array(255, 188, 0); //same as Photon Torpedo line
+    
+    function __construct($startArc, $endArc, $fireControl = null){
+        parent::__construct($startArc, $endArc, $fireControl);
+    }
+
+    public function getDamage($fireOrder){ 
+			return Dice::d(6, 2)+3;
+	}
+    public function setMinDamage(){     $this->minDamage = 5;      }
+    public function setMaxDamage(){     $this->maxDamage = 15;      }        
+}
 
 
 ?>

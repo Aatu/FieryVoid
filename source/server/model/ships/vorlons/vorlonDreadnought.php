@@ -115,7 +115,7 @@ class VorlonDreadnought extends VorlonCapitalShip{
 			),
 			2=> array( //Aft
 				6 => "Thruster",
-				8 => "Jump Drive",
+				8 => "Jump Engine",
 				9 => "Discharge Gun",
 				12 => "EM Shield",
 				18 => "Structure",

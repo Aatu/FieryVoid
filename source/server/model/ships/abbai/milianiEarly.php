@@ -28,9 +28,9 @@ class MilianiEarly extends BaseShip{
         $this->pivotcost = 3;
         $this->iniativebonus = 0;
         
-        $this->addPrimarySystem(new Reactor(4, 15, 0, 8));
+        $this->addPrimarySystem(new Reactor(4, 15, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 14, 6, 7));
+        $this->addPrimarySystem(new Scanner(4, 14, 6, 8));
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 3));
         $this->addPrimarySystem(new ShieldGenerator(4, 14, 4, 4));
    

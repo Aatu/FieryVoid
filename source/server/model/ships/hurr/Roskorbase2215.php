@@ -17,7 +17,8 @@ class Roskorbase2215 extends SmallStarBaseFourSections
 		$this->fighters = array("normal"=>48);
 		$this->isd = 2215;
 		$this->occurence = "common";
-		$this->variantOf = "Roskor Command Post (2240)";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+		//$this->variantOf = "Roskor Command Post (2240)";
 
 		$this->shipSizeClass = 3;
 		$this->Enormous = true;

@@ -958,11 +958,11 @@ class BaseShip {
         //if the system has arcs, check that the position is on arc
         if(is_int($system->startArc) && is_int($system->endArc)){
             //get bearing on incoming fire...
-            if($pos!=null){ //firing position is explicitly declared
+            if($pos!==null){ //firing position is explicitly declared
                 $relativeBearing = $this->getBearingOnPos($pos);
             }else{ //check from shooter...
                 $relativeBearing = $this->getBearingOnUnit($shooter);
-            }
+            }			
 
             //if not on arc, continue!
             if (!mathlib::isInArc($relativeBearing, $system->startArc, $system->endArc)){

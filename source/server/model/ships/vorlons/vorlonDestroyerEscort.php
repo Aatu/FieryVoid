@@ -95,7 +95,7 @@ class VorlonDestroyerEscort extends HeavyCombatVessel{
 			),
 			2=> array( //Aft
 				6 => "Thruster",
-				8 => "Jump Drive",
+				8 => "Jump Engine",
 				10 => "EM Shield",
 				18 => "Structure",
 				20 => "Primary",

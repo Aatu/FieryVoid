@@ -69,6 +69,7 @@ FIRING AND WEAPONS
  - Piercing damage vs MCVs is reduced by 10% (instead of -2/die).
  - Piercing attacks can be made without special requirements regarding EW - appropriate penalty is always included in fire control. 
  - Relative position of units on the same hex is not correctly resolved if units start turn on the same hex. As a compensation for this, all targets at range 0 are considered valid for ballistics launch.
+ - mode used is always visible in FV. This means, among other things, that opponent immediately knows what kind of missile is launched (in tabletop only a few special missiles disclosed that information before attack phase).
  
 
 OTHERS

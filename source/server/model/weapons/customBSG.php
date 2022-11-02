@@ -1346,87 +1346,160 @@ class BSGHypergunVA extends Pulse{
 
 
     class EMMissile extends Torpedo{
+
         public $name = "EMMissile";
         public $displayName = "EM Missile";
         public $iconPath = "EWEMTorpedo.png";
 
-        public $loadingtime = 1;
-        
-        public $weaponClass = "Electromagnetic"; //deals Electromagnetic, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
-        public $damageType = "Flash"; 
-        
-        public $fireControl = array(-6, 1, 3); // fighters, <mediums, <capitals 
-        
-        public $trailColor = array(75, 230, 90);
-        public $animation = "torpedo";
-        public $animationColor = array(75, 230, 90);
-        public $animationExplosionScale = 0.3;
-        public $projectilespeed = 11;
-        public $animationWidth = 10;
-        public $trailLength = 10;
-        public $priority = 10; 
-		
+		public $animationArray = array(1=>'trail', 2=>'trail');
+		public $animationColorArray = array(1=>array(75, 230, 90), 2=>array(75,230, 90));
+		public $trailLength = 5;
+		public $animationWidth = 4;
+		public $projectilespeed = 18;
+		public $animationExplosionScale = 0.1;
+
+        public $priority = 10; //No damage, have it hit last
+	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ){
                 $maxhealth = 6;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 5;
+                $powerReq = 1;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-        
+
+		public $loadingtimeArray = array(1=>1, 2=>1, 3=>1);
+		public $rangeArray = array(1=>30, 2=>30, 3=>30);
+		public $distanceRangeArray = array(1=>60, 2=>60, 3=>60);
+		public $damageTypeArray = array(1=>'Standard', 2=>'Standard', 3=>'Standard');
+		public $fireControlArray = array(1=>array(3, 3, 3), 2=>array(3, 3, 3), 3=>array(3, 3, 3));
+		public $weaponClassArray = array(1=>'Electromagnetic', 2=>'Electromagnetic', 3=>'Electromagnetic');
+		public $firingModes = array(1=>'Sensor', 2=>'Initiative', 3=>'Power');
+		
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-			$this->data["Special"] = "Ignores armor and deactivates power using systems.";
-			$this->data["Special"] .= "<br>+4 to criticals and +2 to dropout rolls";
-			$this->data["Special"] .= "<br>This weapon suffers range penalty (like direct fire weapons do), but only after first 20 hexes of distance.";
+			$this->data["Special"] = "Three modes of fire.";
+			$this->data["Special"] .= "<br>Anti-sensor, Initiative reduction, and Power reduction.";
 		}
 
-		public $rangePenalty = 1; //-1 hex - BUT ONLY AFTER 20 HEXES
+/*		public function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+			$dmgToReturn = 0;
 
-	    //override standard to skip first 20 hexes when calculating range penalty
-	    /*public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
-	    {
-			$targetPos = $target->getHexPos();
-			$dis = mathlib::getDistanceHex($pos, $targetPos);
-			$dis = max(0,$dis-20);//first 20 hexes are "free"
+		switch($this->firingMode){
+			case 1:
+				return;
+			break;
+			case 2:
+				return;
+			break;
+			case 3:
 
-			$rangePenalty = ($this->rangePenalty * $dis);
-			$notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
-			return Array("rp" => $rangePenalty, "notes" => $notes);
-	    }*/	
-		public function calculateRangePenalty($distance){
-			$rangePenalty = 0;//base penalty
-			$rangePenalty += $this->rangePenalty * max(0,$distance-20); //everything above X hexes receives range penalty
-			return $rangePenalty;
+//				if ($system instanceof Structure){
+//					$dmgToReturn = 0; //no Structure damage
+					if (!WeaponEM::isTargetEMResistant($ship,$system)){ //advanced armor prevents non-damaging EM effects
+						$reactor = $ship->getSystemByName("Reactor");
+						$outputMod = 2;
+						if($outputMod < 0){
+							$crit = new OutputReduced(-1, $ship->id, $reactor->id, "OutputReduced", $gamedata->turn, $outputMod);
+							$crit->updated = true;
+							$reactor->criticals[] =  $crit;
+						}
+					}
+//				}
+			return $dmgToReturn;
+			break;
 		}
-
-	//ignore armor; advanced armor halves effect (due to this weapon being Electromagnetic)
-	public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
-		if (WeaponEM::isTargetEMResistant($target,$system)){
-			$returnArmour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
-			$returnArmour = floor($returnArmour/2);
-			return $returnArmour;
-		}else{
-			return 0;
 		}
-	}
+*/
 
-	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-		$crit = null;
-		if (WeaponEM::isTargetEMResistant($ship,$system)) return;
-		if ($ship instanceof FighterFlight) 2;
-		if ($system->powerReq > 0 || $system->canOffLine){
-			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
-		}
-		$system->critRollMod += 4;
-	}
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
+
+
+		switch($this->firingMode){
+			case 1:
+
+				$effectSensors = Dice::d(3,1);//strength of effect: 1d3
+				$fireOrder->pubnotes .= "<br> Sensors reduced by $effectSensors.";
 		
-        public function getDamage($fireOrder){        return Dice::d(10, 2);   }
-        public function setMinDamage(){     $this->minDamage = 2;      }
-        public function setMaxDamage(){     $this->maxDamage = 20;      }
+				if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
+					$firstFighter = $ship->getSampleFighter();
+					if($firstFighter){
+						for($i=1; $i<=$effectSensors;$i++){
+							$crit = new tmpsensordown(-1, $ship->id, $firstFighter->id, 'tmpsensordown', $gamedata->turn); 
+							$crit->updated = true;
+								$firstFighter->criticals[] =  $crit;
+						}
+					}
+				}else{ //ship - place effcet on C&C!
+					$CnC = $ship->getSystemByName("CnC");
+					if($CnC){
+						for($i=1; $i<=$effectSensors;$i++){
+							$crit = new tmpsensordown(-1, $ship->id, $CnC->id, 'tmpsensordown', $gamedata->turn); 
+							$crit->updated = true;
+								$CnC->criticals[] =  $crit;
+						}
+					}
+				}
+				break;
+				
+			case 2:
+
+				$effectIni = Dice::d(6,1);//strength of effect: 1d6
+				$effectIni5 = $effectIni * 5;
+				$fireOrder->pubnotes .= "<br> Initiative reduced by $effectIni5.";
+		
+				if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
+					$firstFighter = $ship->getSampleFighter();
+					if($firstFighter){
+						for($i=1; $i<=$effectIni;$i++){
+							$crit = new tmpinidown(-1, $ship->id, $firstFighter->id, 'tmpinidown', $gamedata->turn); 
+							$crit->updated = true;
+								$firstFighter->criticals[] =  $crit;
+						}
+					}
+				}else{ //ship - place effcet on C&C!
+					$CnC = $ship->getSystemByName("CnC");
+					if($CnC){
+						for($i=1; $i<=$effectIni;$i++){
+							$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
+							$crit->updated = true;
+								$CnC->criticals[] =  $crit;
+						}
+					}
+				}
+				break;
+				
+			case 3:
+
+				if ($system instanceof Fighter && !($ship->superheavy)){
+					$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = true;
+					$system->criticals[] =  $crit;
+					$fireOrder->pubnotes .= " DROPOUT! ";
+				}else {
+					$reactor = $ship->getSystemByName("Reactor");
+					$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
+					$crit->updated = true;
+					$reactor->criticals[] =  $crit;
+				}
+				
+				break;
+		}
+	} //endof function onDamagedSystem
+
+
+
+
+
+        public function getDamage($fireOrder){        return 0;   }
+        public function setMinDamage(){     $this->minDamage = 0;      }
+        public function setMaxDamage(){     $this->maxDamage = 0;      }
     
     }//endof class EMMissile
 

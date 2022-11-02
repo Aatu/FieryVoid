@@ -36,8 +36,11 @@ class TrekFederationTychoInterceptors extends FighterFlight{
 		$fighter->imagePath = "img/ships/StarTrek/FederationTycho.png";
 		$fighter->iconPath = "img/ships/StarTrek/FederationTycho_Large.png";
 			
+			/*
         $frontGun = new PairedParticleGun(330, 30, 1);
         $frontGun->displayName = "Ultralight Phaser Beam";
+		*/
+			$frontGun = new TrekFtrPhaser(330, 30, 1, 2);
         $fighter->addFrontSystem($frontGun);
 			
 		$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack

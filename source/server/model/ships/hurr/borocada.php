@@ -12,8 +12,10 @@ class borocada extends BaseShip{
         $this->shipSizeClass = 3;
 
         $this->occurence = "rare";
-        $this->variantOf = 'Boroca Gunship';
+        //$this->variantOf = 'Boroca Gunship';
         $this->isd = 2242;
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+ 
         
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
