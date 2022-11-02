@@ -340,7 +340,7 @@ class BaseShip {
         $mod = 0;
 		$alivePakShips = 0;
 			
-			foreach($ships as $ship){
+			foreach($gamedata->ships as $ship){
                 if(
                      ($ship->faction == "Pak'ma'ra") //Pak
                     && ($this->userid == $ship->userid) //of same player
