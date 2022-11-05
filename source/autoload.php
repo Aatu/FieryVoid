@@ -2482,7 +2482,7 @@ spl_autoload_register(
 
 				//other				
 				'apollostrike' => '/server/model/ships/EA/apollostrike.php',
-	//			'apollowsf' => '/server/model/ships/customs/ApolloWSF.php',				
+		//		'apollowsf' => '/server/model/ships/customs/ApolloWSF.php',				
                 'swerrantventure' => '/server/model/ships/ZStarWars/swErrantVenture.php',
 				'unevenbasefoursections' => '/server/model/ships/ShipClasses.php',
 
@@ -2715,7 +2715,7 @@ spl_autoload_register(
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
 				'gaimraxas' => '/server/model/ships/customs/gaimRaxas.php',
-		//		'prototype' => '/server/model/ships/customs/Prototype.php',
+			//	'prototype' => '/server/model/ships/customs/Prototype.php',
 				
 
 
