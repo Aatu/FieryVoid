@@ -12,7 +12,7 @@ class IMLAttackCruiserLaser extends HeavyCombatVesselLeftRight{
 			$this->occurence = "common";
 			$this->variantOf = "IML Attack Cruiser";
 	    $this->isd = 2234;
-        $this->canvasSize = 256;
+        $this->canvasSize = 200;
 
 		$this->notes = "Used only by the Independent Mercenaries League";
 
