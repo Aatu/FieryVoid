@@ -52,7 +52,9 @@ class technicalTargetDrone extends BaseShip{
 		$engine = new Engine(5, 20, 0, 20, 3);
 			$engine->markEngineFlux();
 			$this->addPrimarySystem($engine);
-//		$this->addPrimarySystem(new Engine(5, 20, 0, 20, 3));
+		$this->addPrimarySystem(new Engine(5, 50, 0, 20, 3));
+		$this->addPrimarySystem(new Engine(5, 50, 0, 20, 3));
+		$this->addPrimarySystem(new Engine(5, 50, 0, 20, 3));
 		$this->addPrimarySystem(new Hangar(6, 100));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
@@ -133,11 +135,11 @@ class technicalTargetDrone extends BaseShip{
 		$this->addAftSystem(new TwinArray(2, 16, 2, 0, 240));
 		*/
 		$this->addLeftSystem(new Thruster(4, 14, 0, 5, 3));
-		$this->addLeftSystem(new ImperialLaser(3, 8, 5, 300, 0));
+		$this->addLeftSystem(new LimpetBoreTorp(3, 8, 5, 0, 360));
 //		$this->addLeftSystem(new TwinArray(3, 6, 2, 180, 0));
 		
 		$this->addRightSystem(new Thruster(4, 14, 0, 5, 4));
-		$this->addRightSystem(new ImperialLaser(3, 8, 5, 0, 60));
+		$this->addRightSystem(new LimpetBoreTorp(3, 8, 5, 0, 360));
 //		$this->addRightSystem(new TwinArray(3, 6, 2, 0, 180));
 		
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -162,7 +164,7 @@ class technicalTargetDrone extends BaseShip{
 				*/
 			),
 			1=> array(
-				20 => "Targeting Array",
+				20 => "0:Engine",
 				/*
 				5 => "Plasma Wave",
 				10 => "Stun Beam",

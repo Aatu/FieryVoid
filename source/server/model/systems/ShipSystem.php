@@ -193,6 +193,7 @@ class ShipSystem {
     }
     
     public function setCritical($critical, $turn){
+		/* obsolete now that Criticals are considered with turn restriction
         if ($critical->param){            
             $currentTurn = TacGamedata::$currentTurn;
             if ($currentTurn > $critical->turn + $critical->param){
@@ -200,6 +201,7 @@ class ShipSystem {
             }
         }        
         if (!$critical->oneturn || ($critical->oneturn && $critical->turn >= $turn-1))
+			*/
             $this->criticals[] = $critical; 
     }
     
@@ -238,40 +240,40 @@ class ShipSystem {
 		//now with advent of self repair - system ID might get important...
 		$this->data["ID"] = $this->id;
 		
-	if($this->startArc !== null){
-		$this->data["Arc"] = $this->startArc . ".." . $this->endArc;
-	}
+		if($this->startArc !== null){
+			$this->data["Arc"] = $this->startArc . ".." . $this->endArc;
+		}
+			
+		if($this->powerReq > 0){
+			$this->data["Power used"] = $this->powerReq;
+		} else {
+			$this->data["Power used"] = 'none';
+		}
 	    
-	if($this->powerReq > 0){
-		$this->data["Power used"] = $this->powerReq;
-	} else {
-		$this->data["Power used"] = 'none';
-	}
-	    
-	    /* no longer needed, info available in Notes
-	if($this->advancedArmor == true){
-		$this->data["Others"] = "Advanced Armor";
-	}
-	*/
+		/* no longer needed, info available in Notes
+			if($this->advancedArmor == true){
+				$this->data["Others"] = "Advanced Armor";
+			}
+		*/
 	    
         $counts = array();
         
-        foreach ($this->criticals as $crit){
+        foreach ($this->criticals as $crit)
+		{
             if (isset($counts[$crit->phpclass])){
                 $counts[$crit->phpclass]++;
             }else{
                 $counts[$crit->phpclass] = 1;
-            }
-            
+            }            
             
             $forturn = "";
             if ($crit->oneturn && $crit->turn == $turn)
-                $forturn = "next turn.";
+                $forturn = " next turn.";
             
             if ($crit->oneturn && $crit->turn+1 == $turn)
-                $forturn = "this turn.";
+                $forturn = " this turn.";
                 
-            $this->critData[$crit->phpclass] = $crit->description .$forturn;
+            $this->critData[$crit->phpclass] = $crit->description .$forturn ;
         }
     }
     

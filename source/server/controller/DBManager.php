@@ -1525,12 +1525,15 @@ class DBManager
         );
 
         if ($criticalStmt) {
-            $criticalStmt->bind_param('iii', $gamedata->id, $fetchTurn, $fetchTurn);
-            $criticalStmt->bind_result($id, $shipid, $systemid, $type, $turn, $turnend, $param);
+			$turnEnd = 0;
+			$turnBefore = $fetchTurn - 1;//expanded to turn before - explicitly for functionality of getting force-disabled systems back up!
+            //$criticalStmt->bind_param('iii', $gamedata->id, $fetchTurn, $fetchTurn);
+			$criticalStmt->bind_param('iii', $gamedata->id, $fetchTurn, $turnBefore);
+            $criticalStmt->bind_result($id, $shipid, $systemid, $type, $turn, $turnEnd, $param);
             $criticalStmt->execute();
             while ($criticalStmt->fetch()) {
                 $gamedata->getShipById($shipid)->getSystemById($systemid)->setCritical(
-                    new $type($id, $shipid, $systemid, $type, $turn, $turnend, $param),
+                    new $type($id, $shipid, $systemid, $type, $turn, $turnEnd, $param),
                     $gamedata->turn
                 );
             }
