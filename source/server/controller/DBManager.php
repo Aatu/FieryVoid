@@ -148,6 +148,10 @@ class DBManager
 
     public function submitShip($gameid, $ship, $userid)
     {
+		/*it turned out that empty ship name is plain problematic... force change it to SOMETHING!*/
+		if($ship->name == ''){
+				$ship->name = 'NAMELESS UNIT' ;
+		}
         $sql = "INSERT INTO `B5CGM`.`tac_ship` VALUES(null, $userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot)";
         //   Debug::log($sql);
         $id = $this->insert($sql);
