@@ -1025,7 +1025,7 @@ class AmmoMissileRackS extends Weapon{
 		
 	public $checkAmmoMagazine = true;
 	
-//    public $useOEW = false;
+    public $useOEW = false; //missiles are NOT using OEW in any form; they do have built-in seeking head instead (in FieryVoid merged into Fire Control for simplicity)
     public $ballistic = true;
     public $animation = "trail";
     public $animationColor = array(50, 50, 50);

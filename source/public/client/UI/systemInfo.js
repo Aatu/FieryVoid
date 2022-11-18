@@ -1,6 +1,7 @@
 "use strict";
 
 window.systemInfo = {
+			//THIS FILE IS USED ONLY IN FLEET SELECTION - in game, see SystemInfo.js in reactJs instead
 
 	showSystemInfo: function showSystemInfo(element, system, ship, selectedShip) {
 		system = shipManager.systems.initializeSystem(system);
@@ -33,17 +34,20 @@ window.systemInfo = {
 		}
 
 		if (Object.keys(system.critData).length > 0) {
+			var currentCrits = shipManager.criticals.getAllCriticals(system,gamedata.turn); //system.criticals may contain crits that are not current
 			h += "<div><span>DAMAGE:</span></div><ul>";
-
 			for (var i in system.critData) {
 				var noOfCrits = 0;
-				for (var j in system.criticals) {
-					if (system.criticals[j].phpclass == i) noOfCrits++;
+				//for (var j in system.criticals) {			
+				//	if (system.criticals[j].phpclass == i) noOfCrits++;
+				for (var j in currentCrits) {					
+					if (currentCrits[j].phpclass == i) noOfCrits++;
 				}
+				
 				if (noOfCrits > 1) {
 					//display multiplier too
 					h += "<li class='crit'>(" + noOfCrits + "x) " + system.critData[i] + "</li>";
-				} else {
+				} else if (noOfCrits == 1) {
 					//just crit name
 					h += "<li class='crit'>" + system.critData[i] + "</li>";
 				}

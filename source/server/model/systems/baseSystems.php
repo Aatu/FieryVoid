@@ -642,6 +642,7 @@ class Engine extends ShipSystem implements SpecialAbility {
     
     public $possibleCriticals = array(
 	//official: 15-20 -2, 21-27 either all ahead full or shutdown, 28+ both
+        1=>"ForcedOfflineOneTurn",
         15=>"OutputReduced2",
         21=>"ForcedOfflineOneTurn",
         28=>array("ForcedOfflineOneTurn", "OutputReduced2")

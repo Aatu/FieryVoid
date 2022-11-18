@@ -18,6 +18,21 @@ shipManager.power = {
 	copyLastTurnPower: function copyLastTurnPower(ship, system) {
 		if (shipManager.systems.isDestroyed(ship, system)) return;
 
+		//if system WAS forcibly shut down last turn but is NOT forced to shut down any longer - it should get back online without player input!
+		var wasShutDown = false;
+		var isShutDown = false;
+		if ( (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")) || (shipManager.criticals.hasCritical(system, "ForcedOfflineForTurns")) )
+		{
+			isShutDown = true;
+		}else{
+			if ( (shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineOneTurn", gamedata.turn - 1)) 
+				|| (shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineForTurns", gamedata.turn - 1)) 
+			) {
+				wasShutDown = true;
+			}
+		}
+		
+		//copy last turn power 
 		var powers = Array();
 		for (var i in system.power) {
 			var power = system.power[i];
@@ -26,9 +41,13 @@ shipManager.power = {
 				newPower.turn = gamedata.turn;
 				powers.push(newPower);
 			}
-		}
+		}		
 
 		system.power = system.power.concat(powers);
+		
+		if (wasShutDown && (!isShutDown)){ //was forced to shut down, but is no longer - power up!
+			shipManager.power.setOnline(ship, system, true); //do skip message to player - if system cannot be powered up, it won't be powered up and that's it
+		}
 	},
 
 	setPowerClasses: function setPowerClasses(ship, system, systemwindow) {
@@ -457,7 +476,7 @@ var batteryPowerRequired = 0;
 		return shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn);
 	},
 
-	setOnline: function setOnline(ship, system) {
+	setOnline: function setOnline(ship, system, skipMessage = false) {
 		if (system.name == "graviticShield") {
 			if (ship.checkShieldGenerator()) {
 				for (var i in ship.systems) {
@@ -465,12 +484,12 @@ var batteryPowerRequired = 0;
 
 					if (syst.name == "shieldGenerator") {
 						if (syst.destroyed) {
-							window.confirm.error("You cannot activate shields. Your shield generator has been destroyed.");
+							if (!skipMessage) window.confirm.error("You cannot activate shields. Your shield generator has been destroyed.");
 							return;
 						}
 
 						if (shipManager.power.isOffline(ship, syst)) {
-							window.confirm.error("You cannot activate shields. Power up your shield generator first.");
+							if (!skipMessage) window.confirm.error("You cannot activate shields. Power up your shield generator first.");
 							return;
 						}
 					}
