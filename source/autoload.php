@@ -811,9 +811,10 @@ spl_autoload_register(
                 'rogolontovin' => '/server/model/ships/smallraces/rogolonTovin.php',
                 'rogolonvasturshf' => '/server/model/ships/smallraces/rogolonVasturSHF.php',
                 'rogolonvostorshf' => '/server/model/ships/smallraces/rogolonVostorSHF.php',
+				/* I am commenting out entries, as I do not see the files...
                 'rogolontasco' => '/server/model/ships/smallraces/rogolonTasco.php',
                 'rogolonshogalovbase' => '/server/model/ships/smallraces/rogolonShogalovBase.php',
-				
+				*/
 				
 				
                 'rolentha' => '/server/model/ships/minbari/rolentha.php',
@@ -2823,6 +2824,11 @@ spl_autoload_register(
 						'borocadaam' => '/server/model/ships/hurr/borocadaAM.php',
 						'norekam' => '/server/model/ships/hurr/norekAM.php',
 						'anoroam' => '/server/model/ships/hurr/anoroAM.php',
+						
+						//Small Races - Rogolon						
+						'rogolonrogonam' => '/server/model/ships/smallraces/rogolonRogonAM.php',
+						'rogolontolovam' => '/server/model/ships/smallraces/rogolonTolovAM.php',
+						'rogolontovinam' => '/server/model/ships/smallraces/rogolonTovinAM.php',
 						
 						
 						

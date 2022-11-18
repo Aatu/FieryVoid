@@ -11,6 +11,8 @@ class RogolonTolov extends BaseShip{
         $this->shipClass = "Rogolon Tolov Warship";
         $this->occurence = "common";
         $this->fighters = array("normal" => 12, "superheavy" => 1);
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+ 
 
         $this->isd = 1975;
 
