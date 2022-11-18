@@ -10,7 +10,7 @@ class IMLAttackCruiser extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/drazi/DraziWarbird.png";
         $this->shipClass = "IML Attack Cruiser";
 	    $this->isd = 2234;
-        $this->canvasSize = 256;
+        $this->canvasSize = 200;
 
 		$this->notes = "Used only by the Independent Mercenaries League";
 

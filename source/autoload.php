@@ -473,6 +473,7 @@ spl_autoload_register(
                 'jorthunq' => '/server/model/ships/dilgar/jorthunQ.php',
                 'jumpengine' => '/server/model/systems/baseSystems.php',
                 'jumpgate' => '/server/model/ships/civilians/jumpgate.php',
+                'shipyard' => '/server/model/ships/civilians/Shipyard.php',
                 'jumphawk' => '/server/model/ships/drazi/jumphawk.php',
                 'kabrik' => '/server/model/ships/brakiri/kabrik.php',
                 'kaliva' => '/server/model/ships/brakiri/kaliva.php',
@@ -856,6 +857,7 @@ spl_autoload_register(
                 'severeburnout' => '/server/model/cricialClasses.php',
                 'shadrak' => '/server/model/ships/markab/shadrak.php',
                 'shadras' => '/server/model/ships/balosian/shadras.php',
+                'tortra' => '/server/model/ships/balosian/Tortra.php',                
                 'shafab' => '/server/model/ships/markab/shafab.php',
                 'shantavi' => '/server/model/ships/minbari/shantavi.php',
                 'shanteen' => '/server/model/ships/minbari/shanteen.php',
@@ -2480,7 +2482,7 @@ spl_autoload_register(
 
 
 				//other				
-				'apollostrike' => '/server/model/ships/EA/apollostrike.php',
+				'apollostrike' => '/server/model/ships/EA/apollostrike.php',			
                 'swerrantventure' => '/server/model/ships/ZStarWars/swErrantVenture.php',
 				'unevenbasefoursections' => '/server/model/ships/ShipClasses.php',
 
@@ -2713,6 +2715,8 @@ spl_autoload_register(
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
 				'gaimraxas' => '/server/model/ships/customs/gaimRaxas.php',
+				'apollowsf' => '/server/model/ships/customs/ApolloWSF.php',					
+			//	'prototype' => '/server/model/ships/customs/Prototype.php',
 				
 
 

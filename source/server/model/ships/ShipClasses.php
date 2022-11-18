@@ -192,6 +192,9 @@ class BaseShip {
 			if($this->faction == "Raiders"){
                 return $this->doRaidersInitiativeBonus($gamedata);
             }
+            if(($this->faction == "Pak'ma'ra") && (!($this instanceof FighterFlight))	){
+                return $this->doPakmaraInitiativeBonus($gamedata);
+            }
             return $this->iniativebonus;
         }
         
@@ -329,7 +332,29 @@ class BaseShip {
         }
         //    debug::log($this->phpclass."- bonus: ".$mod);
         return $this->iniativebonus + $mod*5;
-    }
+    } //end of doDilgarInitiativeBonus  
+    
+    
+        private function doPakmaraInitiativeBonus($gamedata){
+        	
+        $mod = 0;
+		$alivePakShips = 0;
+			
+			foreach($gamedata->ships as $ship){
+                if(
+                     ($ship->faction == "Pak'ma'ra") //Correct faction
+                    && ($this->userid == $ship->userid) //of same player
+                    && (!($ship instanceOf FighterFlight)) //actually a ship
+                    && (!$ship->isDestroyed()) //alive
+                   ){
+                            $alivePakShips++;
+                    }
+					$mod = floor(($alivePakShips)/3); //Divide by three and round down
+                    }
+                
+        //    debug::log($this->phpclass."- bonus: ".$mod);
+        return $this->iniativebonus - $mod*5;
+    } //end of doPakmaraInitiativeBonus    
 	
 	/*saves individual notes systems might have generated*/
 	public function saveIndividualNotes(DBManager $dbManager) {
