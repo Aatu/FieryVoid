@@ -1,18 +1,16 @@
 <?php
-class RogolonTolov extends BaseShip{
+class RogolonTolovAM extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 575;
         $this->faction = "Small Races";
-        $this->phpclass = "RogolonTolov";
+        $this->phpclass = "RogolonTolovAM";
         $this->imagePath = "img/ships/RogolonTolov.png";
         $this->shipClass = "Rogolon Tolov Warship";
         $this->occurence = "common";
         $this->fighters = array("normal" => 12, "superheavy" => 1);
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
- 
 
         $this->isd = 1975;
 
@@ -26,6 +24,14 @@ class RogolonTolov extends BaseShip{
         $this->pivotcost = 4;
         $this->iniativebonus = 0;
         
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(80); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 80); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+		//Rogolons have ONLY Heavy Missiles available (besides Basic)
+		
+		
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 6));
@@ -35,8 +41,8 @@ class RogolonTolov extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
 	$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 240, 0));
-	$this->addFrontSystem(new Catapult(3, 6));
 	$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 0, 120));
+	$this->addFrontSystem(new Catapult(3, 6));
 
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
@@ -47,14 +53,14 @@ class RogolonTolov extends BaseShip{
         $this->addLeftSystem(new Thruster(4, 15, 0, 4, 3));
 	$this->addLeftSystem(new Hangar(4, 6));
 	$this->addLeftSystem(new HeavyPlasma(3, 8, 5, 240, 0));
-        $this->addLeftSystem(new SMissileRack(3, 6, 0, 180, 0));
-        $this->addLeftSystem(new SMissileRack(3, 6, 0, 180, 0));
+		$this->addLeftSystem(new AmmoMissileRackS(3, 0, 0, 180, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addLeftSystem(new AmmoMissileRackS(3, 0, 0, 180, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 
         $this->addRightSystem(new Thruster(4, 15, 0, 4, 4));
 	$this->addRightSystem(new Hangar(4, 6));
 	$this->addRightSystem(new HeavyPlasma(3, 8, 5, 0, 120));
-        $this->addRightSystem(new SMissileRack(3, 6, 0, 0, 180));
-        $this->addRightSystem(new SMissileRack(3, 6, 0, 0, 180));
+		$this->addRightSystem(new AmmoMissileRackS(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addRightSystem(new AmmoMissileRackS(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

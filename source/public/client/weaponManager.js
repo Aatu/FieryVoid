@@ -701,18 +701,24 @@ window.weaponManager = {
         var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter, weapon);
 		
 
-        var soew = ew.getSupportedOEW(shooter, target);
-        var dist = ew.getDistruptionEW(shooter);
-
+        var soew = 0;
+        var dist = 0;
         var oew = 0;
 
         if (weapon.useOEW) {
             oew = ew.getTargetingEW(shooter, target);
+			soew = ew.getSupportedOEW(shooter, target);
+			dist = ew.getDistruptionEW(shooter);
             oew -= dist;
-            if (oew <= 0) {
-				oew = 0;
+            if (oew < 1) { //1 point requires to get a lock on target
 				soew = 0;//no lock-on negates SOEW!
-			}
+			} 
+            if (oew < 0) {
+				oew = 0;//OEW cannot be negative
+			} 			
+		} else {
+			oew = 0;
+			soew = 0;
         }
 
         var mod = 0;
