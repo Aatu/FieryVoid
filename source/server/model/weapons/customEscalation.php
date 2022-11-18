@@ -1102,9 +1102,9 @@ class EWPlasmaArc extends Raking{
 		$fireOrder->armorIgnored = array(); //clear armorIgnored array - next rake should be met with full armor value!
 	}
 	
-    	public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
-        public function setMinDamage(){     $this->minDamage = 5;      }
-        public function setMaxDamage(){     $this->maxDamage = 14;      }
+    	public function getDamage($fireOrder){        return Dice::d(10, 2)+4;   }
+        public function setMinDamage(){     $this->minDamage = 6;      }
+        public function setMaxDamage(){     $this->maxDamage = 24;      }
 		
 }//endof class EWPlasmaArc
 

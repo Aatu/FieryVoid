@@ -11,8 +11,10 @@ class norek extends HeavyCombatVessel{
         $this->shipClass = "Norek Missile Frigate";
    
         $this->occurence = "uncommon";
-        $this->variantOf = 'Orak Frigate';
+        //$this->variantOf = 'Orak Frigate';
         $this->isd = 2230;
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+ 
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;

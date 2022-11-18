@@ -24,9 +24,9 @@ class Lyata extends MediumShip{
         $this->pivotcost = 1;
 	$this->iniativebonus = +70;
 		
-        $this->addPrimarySystem(new Reactor(4, 10, 0, 7));
+        $this->addPrimarySystem(new Reactor(4, 10, 0, 0));
         $this->addPrimarySystem(new CnC(4, 9, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 10, 4, 6));
+        $this->addPrimarySystem(new Scanner(4, 10, 4, 7));
         $this->addPrimarySystem(new Engine(4, 11, 0, 8, 2));
 	$this->addPrimarySystem(new Hangar(4, 1));
         $this->addPrimarySystem(new ShieldGenerator(4, 8, 3, 1));

@@ -44,9 +44,9 @@ class NorvaII extends LCV{
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(3, 9, 0, 8, 2));
 
-	$this->addPrimarySystem(new MediumPlasmaBolter(3, 0, 0, 300, 60));
-	$this->addPrimarySystem(new LightPlasmaBolter(3, 0, 0, 300, 60));
-	$this->addPrimarySystem(new LightPlasmaBolter(3, 0, 0, 300, 60));
+	$this->addFrontSystem(new MediumPlasmaBolter(3, 0, 0, 300, 60));
+	$this->addFrontSystem(new LightPlasmaBolter(3, 0, 0, 300, 60));
+	$this->addFrontSystem(new LightPlasmaBolter(3, 0, 0, 300, 60));
 
 
 	$this->addPrimarySystem(new Structure( 4, 36));
@@ -56,24 +56,24 @@ class NorvaII extends LCV{
         $this->hitChart = array(
         		0=> array( 
         				9 => "Structure",
-        				11 => "Medium Plasma Bolter",
-        				14 => "Light Plasma Bolter",
+        				11 => "1:Medium Plasma Bolter",
+        				14 => "1:Light Plasma Bolter",
         				17 => "Engine",
         				19 => "Reactor",
         				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				9 => "Structure",
-        				11 => "0:Medium Plasma Bolter",
-        				14 => "0:Light Plasma Bolter",
+        				11 => "1:Medium Plasma Bolter",
+        				14 => "1:Light Plasma Bolter",
         				17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		2=> array( //same as Fwd
         				9 => "Structure",
-        				11 => "0:Medium Plasma Bolter",
-        				14 => "0:Light Plasma Bolter",
+        				11 => "1:Medium Plasma Bolter",
+        				14 => "1:Light Plasma Bolter",
         				17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

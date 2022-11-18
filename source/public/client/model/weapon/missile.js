@@ -233,3 +233,9 @@ var AmmoBombRack = function AmmoBombRack(json, ship) {
 };
 AmmoBombRack.prototype = Object.create(Ballistic.prototype);
 AmmoBombRack.prototype.constructor = AmmoBombRack;
+
+var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+MultiDefenseLauncher.prototype = Object.create(Weapon.prototype);
+MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;

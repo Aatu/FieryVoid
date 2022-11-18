@@ -4,11 +4,11 @@ class ApolloWSF extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
-        $this->pointCost = 900;
-  //      $this->faction = "Custom Ships";
+        $this->pointCost = 20;
+        $this->faction = "Custom Ships";
         $this->phpclass = "ApolloWSF";
         $this->imagePath = "img/ships/apollo.png";
-        $this->shipClass = "Apollo Bombardment Cruiser (Beta)";
+        $this->shipClass = "Apollo Bombardment Cruiser (Gamma)";
         $this->shipSizeClass = 3;
         $this->canvasSize = 200;
         $this->limited = 33;

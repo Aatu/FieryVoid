@@ -56,7 +56,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->addPrimarySystem(new Hangar(6, 100));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
-		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
+		$this->addPrimarySystem(new TestMissile(2, 6, 1, 0, 360));
 		
 //        $this->addFrontSystem(new AntiquatedScanner(3, 20, 6, 6));
 		$this->addFrontSystem(new CnC(6, 40, 0, 0));
@@ -102,6 +102,10 @@ class technicalTargetDrone extends BaseShip{
         $this->addPrimarySystem(new RMissileRack(3, 6, 0, 0, 360));
 */
 		
+
+		$this->addFrontSystem(new EMMissile(1, 6, 1, 0, 360));
+		$this->addFrontSystem(new EMMissile(1, 6, 1, 0, 360));
+
 
         $this->addFrontSystem(new AmmoMissileRackR(3, 0, 0, 240, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addFrontSystem(new AmmoMissileRackR(3, 0, 0, 240, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base

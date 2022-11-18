@@ -75,7 +75,7 @@ class ArcticAlpha extends BaseShip{
 		$this->hitChart = array(
                 0=> array(
                         7 => "Structure",
-                        9 => "Jump Drive",
+                        9 => "Jump Engine",
 			11 => "Standard Particle Beam",
                         13 => "Scanner",
                         15 => "Engine",

@@ -13,8 +13,12 @@ jQuery(function ($) {
     $("#gamespacecheck").on("click", createGame.doGameSpaceCheck);
     $("#gamespacecheck").on("click", createGame.doFlightCheck);
     $("#movementcheck").on("click", createGame.doMovementCheck);
+    
+    $(".setsizeknifefight").on("click", createGame.doSwitchSizeKnifeFight);
+    $(".setsizestandard").on("click", createGame.doSwitchSizeStandard);
 
     createGame.createSlotsFromArray();
+	createGame.doGameSpaceCheck(); //let's run proper map size setting right at the start - to match marking fixed map as defailt
 });
 
 window.createGame = {
@@ -24,7 +28,6 @@ window.createGame = {
     slotid: 2,
 
     mapSelect: function mapSelect() {
-
         $("#default_option").remove();
         var val = $("#mapselect").val();
         $("body").css("background-image", "url(img/maps/" + val + ")");
@@ -146,6 +149,66 @@ window.createGame = {
         }
     },
 
+
+    doSwitchSizeKnifeFight: function doSwitchSizeKnifeFight(data) {
+		createGame.gamespace_data.width = 30;
+		createGame.gamespace_data.height = 30;		
+        $(".spacex").val(30);
+        $(".spacey").val(30);
+        $(".deptype").val("box");
+        $("#team1 .depx").val(-13);
+        $("#team2 .depx").val(12);
+        $("#team1 .depy").val(0);
+        $("#team2 .depy").val(0);
+        $("#team1 .depwidth").val(7);
+        $("#team2 .depwidth").val(7);
+        $("#team1 .depheight").val(30);
+        $("#team2 .depheight").val(30);
+        createGame.slots[0].depx = -12;
+        createGame.slots[1].depx = 11;
+        createGame.slots[0].depy = 0;
+        createGame.slots[1].depy = 0;
+        createGame.slots[0].depwidth = 7;
+        createGame.slots[1].depwidth = 7;
+        createGame.slots[0].depheight = 30;
+        createGame.slots[1].depheight = 30;
+        createGame.slots[0].deptype = "box";
+        createGame.slots[1].deptype = "box";
+        createGame.slots[0].depavailable = 0;
+        createGame.slots[1].depavailable = 0;
+    },
+	
+	
+    doSwitchSizeStandard: function doSwitchSizeKnifeFight(data) {
+		createGame.gamespace_data.width = 42;
+		createGame.gamespace_data.height = 30;		
+        $(".spacex").val(42);
+        $(".spacey").val(30);
+        $(".deptype").val("box");
+        $("#team1 .depx").val(-19);
+        $("#team2 .depx").val(18);
+        $("#team1 .depy").val(0);
+        $("#team2 .depy").val(0);
+        $("#team1 .depwidth").val(5);
+        $("#team2 .depwidth").val(5);
+        $("#team1 .depheight").val(30);
+        $("#team2 .depheight").val(30);
+        createGame.slots[0].depx = -19;
+        createGame.slots[1].depx = 18;
+        createGame.slots[0].depy = 0;
+        createGame.slots[1].depy = 0;
+        createGame.slots[0].depwidth = 5;
+        createGame.slots[1].depwidth = 5;
+        createGame.slots[0].depheight = 30;
+        createGame.slots[1].depheight = 30;
+        createGame.slots[0].deptype = "box";
+        createGame.slots[1].deptype = "box";
+        createGame.slots[0].depavailable = 0;
+        createGame.slots[1].depavailable = 0;
+    },
+    
+	
+	
     createSlotsFromArray: function createSlotsFromArray() {
         for (var i in createGame.slots) {
             createGame.createSlot(createGame.slots[i]);

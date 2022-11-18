@@ -10,6 +10,8 @@ class boroca extends BaseShip{
         $this->imagePath = "img/ships/hurrBoroca.png";
         $this->shipClass = "Boroca Gunship";
         $this->shipSizeClass = 3;
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+ 
 
         $this->isd = 2225;
         

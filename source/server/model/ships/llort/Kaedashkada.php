@@ -12,6 +12,7 @@ class Kaedashkada extends UnevenBaseFourSections
 		$this->faction = "Llort";
 		$this->phpclass = "Kaedashkada";
 		$this->shipClass = "Kaedashkada Starbase";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 		$this->imagePath = "img/ships/LlortKaedashkada.png";
 		$this->canvasSize = 300;
 		$this->fighters = array("normal"=>36);

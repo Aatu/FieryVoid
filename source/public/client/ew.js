@@ -227,6 +227,20 @@ window.ew = {
 				usedEW += entry.amount;
 			}
         }
+		
+/*22.10.2022: count Particle Impeder boost as used EW!*/
+		var impederList = shipManager.systems.getSystemListByName(ship, "Particleimpeder");
+		for (var i in impederList) {
+			var currImpeder = impederList[i];
+			//is it alive and powered up?
+			if (shipManager.systems.isDestroyed(ship, currImpeder)) continue;
+			if (shipManager.power.isOffline(ship, currImpeder)) continue;			
+			//current boost
+			var currBoost = shipManager.power.getBoost(currImpeder);
+			if (currBoost > 0) usedEW += currBoost;
+		}
+/*end of Impeder impact*/		
+		
 		var totalAvailable = ew.getScannerOutput(ship);
 		var leftEW = totalAvailable-usedEW;
 		return leftEW;
