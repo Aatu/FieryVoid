@@ -7,7 +7,7 @@ class Tulati extends MediumShip{
 	$this->pointCost = 300;
 	$this->faction = "Abbai";
         $this->phpclass = "Tulati";
-        $this->imagePath = "img/ships/AbbaiLyata.png";
+        $this->imagePath = "img/ships/AbbaiTulati.png";
         $this->shipClass = "Tulati Frigate";
         $this->canvasSize = 100;
 	    

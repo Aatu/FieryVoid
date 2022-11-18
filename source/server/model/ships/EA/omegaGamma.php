@@ -28,7 +28,7 @@ class OmegaGamma  extends BaseShip{
         $this->rollcost = 2;
         $this->pivotcost = 3;
 	    
-	$this->initiative = 1*5; 
+	$this->iniativebonus = 1*5; 
          
         $this->addPrimarySystem(new Reactor(6, 25, 0, 0));
         $this->addPrimarySystem(new ProtectedCnC(7, 20, 0, 0)); //One armor 6/str16 and a second one 4/4
