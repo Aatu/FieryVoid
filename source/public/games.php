@@ -64,25 +64,15 @@ if (isset($_SESSION["user"])) {
        
 		
 
-		---------- <b>LATEST NEWS - October 2022</b> ----------
-	    <br><b>text tutorial for new players</b> - courtesy of Douglas
-	    <br><b>Variable missile loads</b> - new factions are in (Llort)
-	    <br><b>Trek (Federation TOS) rebalanced</b> - still in playtest phase
+		---------- <b>LATEST NEWS - November 2022</b> ----------
+	    <br><b>Variable missile loads</b> - Rogolons (not that their loads have much variability...)
+	    <br><b>Auto-recover from shutdown</b> - now systems forced to shut down will automatically recover when forced inactivity is over
+	    <br><b>Autonaming</b> - if You manage to enter an empty unit name... You will be given a placeholder. Empty-named units are a pain to select from lists, not to mention recognize in logs ;)
+	    <br><b>Missiles bug corrected</b> - new missile launchers weren't marked as not using OEW... corrected now
+	    <br><b>Missiles bug corrected</b> - SOEW was affecting hit chance of missiles (incorrectly), corrected now
+	    <br><b>PakMaRa Ini changed</b> - they're now properly unable to cope with complicated tactical situations (courtesy of Douglas)
+	    <br><b>Visual updates</b> - new ship silhouettes (courtesy of Douglas)	  
 	    
-	    	<br><br>---------- <b>update 24th of October</b> ---------- 
-	    <br><b>Variable missile loads</b> - Hurr
-	    <br><b>Particle Impeder made kosher</b> - now it's boosted with EW rather than Power (and boost stops all incoming fire rather than just fighters)
-	    <br><b>Abbai made kosher</b> - with proper Impeder available, Abbai regained their rightful EW, while losing matching Power surplus. Now they can be even better protected... but not all around :)
-	    <br><b>Fixed map as default</b> - when creating new game, default choice is now fixed map of standard size
-	    <br><b>Map size switches</b> - as knife fights seem popular lately, I have added buttons to set proper map dimensions and deployment zones for such a fight (and back to standard size, too) with a single click
-
-	    
-	    	<br><br>---------- <b>update 31st of October</b> ----------
-	    <br><b>Nexus universe polising</b> - courtesy of Geoffrey
-	    <br><b>Particle Impeder display</b> - now shows boost level (=shield rating) rather than weapon default arming status (irrelevant with 1/turn weapon). 
-	    <br><b>Ballistics calculations corrected</b> - hit chance calculations for ballistics were corrected (somehow they took current rather than launch position to determine angle of impact...)
- 	    <br><b>Vorlon Discharge Cannon corrected</b> - now it should correctly draw power
- 	    <br><b>Jump Engine hit table corrected</b> - I've found some entries calling for Jump Drive or JumpEngine hits - those were corrected to Jump Engine that's actually the correct system name in FV
 	    
 <!--	    
 		 <br><br>---------- <b>update 26th of September</b> ---------- 
