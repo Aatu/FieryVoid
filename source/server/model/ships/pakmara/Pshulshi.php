@@ -35,9 +35,9 @@ class Pshulshi extends BaseShip{
 		$this->addPrimarySystem(new Hangar(3, 3));
 
 		$this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-		$this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
+		$this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
 		$this->addFrontSystem(new Thruster(3, 6, 0, 2, 1));
-		$this->addFrontSystem(new Thruster(3, 6, 0, 2, 1));		
+		$this->addFrontSystem(new Thruster(3, 6, 0, 3, 1));		
 		$this->addFrontSystem(new PakmaraPlasmaWeb(2, 4, 2, 240, 60));
 		$this->addFrontSystem(new PakmaraPlasmaWeb(2, 4, 2, 300, 120));
 		$this->addFrontSystem(new Fuser(3, 18, 12, 300, 60));

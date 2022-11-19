@@ -1008,13 +1008,13 @@ class Weapon extends ShipSystem
         $dew = $target->getDEW($gamedata->turn);
         $bdew = EW::getBlanketDEW($gamedata, $target);
         $sdew = EW::getSupportedDEW($gamedata, $target);
-        $dist = EW::getDistruptionEW($gamedata, $shooter);
         if ($this->useOEW) {
-            $soew = EW::getSupportedOEW($gamedata, $shooter, $target);
             $oew = $shooter->getOEW($target, $gamedata->turn);
+            $soew = EW::getSupportedOEW($gamedata, $shooter, $target);
+			$dist = EW::getDistruptionEW($gamedata, $shooter);
             $oew -= $dist;
-            if ($oew <= 0) {
-				$oew = 0; //OEW cannot be negative
+            if ($oew <= 1) { //less than required for a lock-on
+				$oew = max(0,$oew); //OEW cannot be negative
 				$soew = 0; //no lock-on negates SOEW, if any
 			}
         } else {
@@ -1094,7 +1094,7 @@ class Weapon extends ShipSystem
                     }
                 }
             }
-			if($oew == 0) $soew = 0;//if OEW is negated, so is SOEW
+			if($oew <1) $soew = 0;//if OEW is negated, so is SOEW
         }
 	
 		/* replaced by code allowing partial locks
