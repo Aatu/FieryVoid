@@ -39446,9 +39446,12 @@ var SystemInfo = function (_React$Component) {
                     );
                 }),
                 Object.keys(system.critData).length > 0 && getCriticals(system),
+<<<<<<< HEAD
                 "// NOTE: The commented out line was the original. This is being edited below to have a called shot check during the initial phase for ballistics. GTS 03oct22 //                ",
                 !gamedata.isMyShip(ship) && gamedata.gamephase == 3 && gamedata.waiting == false && gamedata.selectedSystems.length > 0 && selectedShip && getCalledShot(ship, selectedShip, system),
                 "// NOTE: The line below is the edited version of the one above to enable ballistic called shots.",
+=======
+>>>>>>> faaf9885a976e17bb48e846b0b63a9d2d796e377
                 !gamedata.isMyShip(ship) && (gamedata.gamephase == 3 || gamedata.gamephase == 1) && gamedata.waiting == false && gamedata.selectedSystems.length > 0 && selectedShip && getCalledShot(ship, selectedShip, system)
             );
         }
@@ -39549,16 +39552,19 @@ var getCriticals = function getCriticals(system) {
 
         for (var j in system.criticals) {
             if (system.criticals[j].phpclass == i) {
-                noOfCrits++;
-                if (noOfCrits == 1) {
-                    endEffectMin = system.criticals[j].turnend;
-                    endEffectMax = system.criticals[j].turnend;
-                    infinitePresent = system.criticals[j].turnend == 0; //0 means infinite
+                if (system.criticals[j].turn <= gamedata.turn && ( /*check whether it's actually a current critical*/
+                system.criticals[j].turnend == 0 || system.criticals[j].turnend >= gamedata.turn)) {
+                    noOfCrits++;
+                    if (noOfCrits == 1) {
+                        endEffectMin = system.criticals[j].turnend;
+                        endEffectMax = system.criticals[j].turnend;
+                        infinitePresent = system.criticals[j].turnend == 0; //0 means infinite
+                    }
+                    if (system.criticals[j].turnend > 0) {
+                        if (system.criticals[j].turnend > endEffectMax) endEffectMax = system.criticals[j].turnend;
+                        if (system.criticals[j].turnend < endEffectMin || endEffectMin == 0) endEffectMin = system.criticals[j].turnend;
+                    } else infinitePresent = true;
                 }
-                if (system.criticals[j].turnend > 0) {
-                    if (system.criticals[j].turnend > endEffectMax) endEffectMax = system.criticals[j].turnend;
-                    if (system.criticals[j].turnend < endEffectMin || endEffectMin == 0) endEffectMin = system.criticals[j].turnend;
-                } else infinitePresent = true;
             }
         }
 
@@ -39583,7 +39589,7 @@ var getCriticals = function getCriticals(system) {
                 " ",
                 wearsOffText
             );
-        } else {
+        } else if (noOfCrits == 1) {
             return React.createElement(
                 Entry,
                 { key: "critical-" + i },
