@@ -70,7 +70,7 @@ class NexusKineticBoxLauncher extends Weapon{
     
         public function setMinDamage(){     $this->minDamage = 8;      }
         public function setMaxDamage(){     $this->maxDamage = 8;      }
-}//endof NexusKineticBoxLauncher
+}  //endof NexusKineticBoxLauncher
 
 
 
@@ -7632,174 +7632,6 @@ class ProximityLaser extends Laser{
 
 
 
-class FMissileRack extends Weapon{
-	public $name = "FMissileRack";
-        public $displayName = "ToBeSetInConstructor";
-    public $useOEW = false;
-    public $ballistic = true;
-    public $animation = "trail";
-    public $animationColor = array(50, 50, 50);
-
-    public $range = 20;
-    public $distanceRange = 60;
-    public $firingMode = 1;
-    public $rangeMod = 0;
-    public $priority = 6;
-    public $hits = array();
-    public $loadingtime = 2;
-    public $iconPath = "ClassFMissileRack.png";    
-
-    private $rackExplosionDamage = 70; //how much damage will this weapon do in case of catastrophic explosion
-    private $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
-    
-    public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-    public $weaponClass = "Ballistic"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
-	
-    public $loadingtimeArray = array(1=>2, 2=>2, 3=>1); //mode 1 should be the one with longest loading time
-	public $firingModes = array(1=>'Standard', 2=>'Long-range', 3=>'Rapid-fire'); //equals to available missiles; data is basic - if launcher is special, constructor will modify it
-	public $damageTypeArray = array(1=>'Standard', 2=>'Standard', 3=>'Standard'); //indicates that this weapon does damage in Pulse mode
-    public $fireControlArray = array(1=>array(6, 6, 6), 2=>array(4, 4, 4), 3=>array(4, 4, 4)); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
-    //typical (class-S) launcher is FC 3/3/3 and warhead +3 - which would mean 6/6/6!
-    public $rangeArray = array(1=>20, 2=>35, 3=>15); 
-	public $distanceRangeArray = array(1=>60, 2=>75, 3=>45); 
-    
-    /*ATYPICAL constructor: doesn't take health and power usage, but takes desired launcher type - and does appropriate modifications*/
-        function __construct($armour, $launcherType, $startArc, $endArc, $base=false)
-        {
-		switch($launcherType){ //modifications dependent on launcher type...
-			case 'F': //standard old: lesser FC, holds less missiles (= lesser crit potential!)
-				$this->displayName = "Class-F Missile Rack";
-				$maxhealth = 6;
-				$this->iconPath = "ClassFMissileRack.png";  
-				break;
-			default: //this includes class-S, which is pretty default :)
-				$this->displayName = "Class-S Missile Rack";
-				$maxhealth = 6;
-				$this->iconPath = "ClassFMissileRack.png";  
-				//range, rangeArray, distanceRange, loadingtime, fireControlArray, rackExplosionDamage, rackExplosionThreshold - standard
-				break;
-		}
-		
-		if ($base){ //mounted on base: launch range = distance range
-			foreach ($this->rangeArray as $key=>$rng) {
-		    		$this->rangeArray[$key] = $this->distanceRangeArray[$key]; 
-			}         
-		}
-		
-		$this->range = $this->rangeArray[1]; //base range = first range
-		$this->distanceRange = $this->distanceRangeArray[1]; //base range = first range
-		
-		parent::__construct($armour, $maxhealth, 0, $startArc, $endArc);
-        }
-	
-	
-	public function getDamage($fireOrder){ 
-		switch($this->firingMode){
-			case 1: //Standard
-				return 20; 
-				break;
-			case 2: //Long-Range
-				return 20; 
-				break;
-			case 3: //Rapid-fire
-				return 20; 
-				break;
-			default: //most missiles do the same damage
-				return 20; 
-				break;	
-		}
-	}
-	public function setMinDamage(){ 
-		switch($this->firingMode){
-			case 1: //Standard
-				$this->minDamage = 20; 
-				break;
-			case 2: //Long-Range
-				$this->minDamage = 20; 
-				break;
-			case 3: //Rapid-fire
-				$this->minDamage = 20; 
-				break;
-			default: //most missiles do the same damage
-				$this->minDamage = 20; 
-				break;	
-		}
-		$this->minDamageArray[$this->firingMode] = $this->minDamage;
-	}
-	public function setMaxDamage(){
-		switch($this->firingMode){
-			case 2: //Standard
-				$this->maxDamage = 20; 
-				break;
-			case 3: //Long-Range
-				$this->maxDamage = 20; 
-				break;
-			case 5: //Rapid-fire
-				$this->maxDamage = 20; 
-				break;
-			default: //most missiles do the same damage
-				$this->maxDamage = 20; 
-				break;	
-		}
-		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
-	}
-    
-	public function setSystemDataWindow($turn){
-		$this->data["Range"] = $this->range . '/' . $this->distanceRange;
-		$this->data["Special"] = 'Multiple firing modes available.';
-		$this->data["Special"] .= '<br>Currently, can only use basic missiles.';
-		$this->data["Special"] .= '<br> - Standard: Uses basic missile stats.';
-		$this->data["Special"] .= '<br> - Long-range: +15 range, -2 fire control.';
-		$this->data["Special"] .= '<br> - Rapid-fire: -5 range, -2 fire control, may fire every turn.';
-		parent::setSystemDataWindow($turn);
-        }
-    
-    public function testCritical($ship, $gamedata, $crits, $add = 0){ //add testing for ammo explosion!
-        $explodes = false;
-        $roll = Dice::d(20);
-        if ($roll >= $this->rackExplosionThreshold) $explodes = true;
-        
-        if($explodes){
-            $this->ammoExplosion($ship, $gamedata, $this->rackExplosionDamage);            
-            $this->addMissileCritOnSelf($ship->id, "AmmoExplosion", $gamedata);
-        }else{
-            $crits = parent::testCritical($ship, $gamedata, $crits, $add);
-        }
-        
-        return $crits;
-    } //endof function testCritical
-
-    public function ammoExplosion($ship, $gamedata, $damage){
-        //first, destroy self if not yet done...
-        if (!$this->isDestroyed()){
-            $this->noOverkill = true;
-            $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
-                    $gamedata->turn, 'standard', 100, 1, 1, 1, 0, null, null, 'ballistic');
-            $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
-            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, null, $gamedata, true, $this->location);
-        }
-        
-        //then apply damage potential as a hit...
-        if($damage>0){
-            $this->noOverkill = false;
-            $this->damageType = 'Flash'; //should be Raking by the rules, but Flash is much easier to do - and very fitting for explosion!
-            $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
-                    $gamedata->turn, 'flash', 100, 1, 1, 1, 0, null, null, 'ballistic');
-            $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->location); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
-        }
-    }
-    
-    public function addMissileCritOnSelf($shipid, $phpclass, $gamedata){
-        $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
-        $crit->updated = true;
-        $this->criticals[] =  $crit;
-    }        
- 
-} //endof class FMissileRack  
-
-
-
-
 class ChaffMissile extends Weapon{
 	public $name = "ChaffMissile";
     public $displayName = "Chaff Missile";
@@ -8052,6 +7884,377 @@ class TestMissile extends Laser{
 } //endof TestMissile
 
 
+// Uses MultiMissileLauncher code
 
+class MultiDefenseLauncher extends Weapon implements DefensiveSystem {
+	public $name = "MultiDefenseLauncher";
+    public $displayName = "ToBeSetInConstructor";
+    public $useOEW = false;
+    public $ballistic = true;
+    public $trailColor = array(141, 240, 255);
+    public $animation = "trail";
+    public $animationColor = array(50, 50, 50);
+    public $animationExplosionScale = 0.4;
+    public $projectilespeed = 8;
+    public $animationWidth = 4;
+    public $trailLength = 100;
+    public $range = 20;
+    public $distanceRange = 60;
+    public $firingMode = 1;
+    public $rangeMod = 0;
+//    public $priority = 6;
+    public $priorityArray = array(1=>1, 2=>4);
+	public $hits = array();
+    public $loadingtime = 1;
+    public $iconPath = "ClassDMissileRack.png";    
+
+    public $intercept = 6;
+    public $ballisticIntercept = true;
+
+    private $rackExplosionDamage = 50; //how much damage will this weapon do in case of catastrophic explosion
+    private $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+	private static $alreadyEngaged = array(); //units that were already engaged by a Chaff Missile	this turn (multiple Webs do not stack).
+    
+    public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    public $weaponClass = "Ballistic"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+
+
+//NOTE: The 'Intercceptor' mode, while only serving as an anti-missile misile if you do nothing
+//needs to be listed as its own mode. Otherwise, it takes out the defensive shield characteristic
+//of the chaff missile and allows it to provider intercept against more than one incoming missile.	
+	public $firingModes = array(1=>'Interceptor', 2=>'Chaff', 3=>'AntiFighter'); //equals to available missiles; data is basic - if launcher is special, constructor will modify it
+	public $damageTypeArray = array(1=>'Standard', 2=>'Standard', 3=>'Standard'); //indicates that this weapon does damage in Pulse mode
+    public $fireControlArray = array( 1=>array(null, null, null), 2=>array(20, 20, 20), 3=>array(9,6,6) ); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
+    public $rangeArray = array(1=>20, 2=>20, 3=>15); //distanceRange remains fixed, as it's improbable that anyone gets out of missile range and this would need more coding
+    //typical (class-S) launcher is FC 3/3/3 and warhead +3 - which would mean 6/6/6!
+    
+    /*ATYPICAL constructor: doesn't take health and power usage, but takes desired launcher type - and does appropriate modifications*/
+        function __construct($armour, $launcherType, $startArc, $endArc, $base=false)
+        {
+		switch($launcherType){ //modifications dependent on launcher type...
+			default: //Rapid fire: RoF 1/turn, increased explosion chance
+				$this->displayName = "Class-D Missile Rack";
+				$maxhealth = 6;
+				$this->iconPath = "ClassDMissileRack.png";
+				$this->loadingtime = 1; //fires every turn
+				$this->rackExplosionThreshold = 20; //how high roll is needed for rack explosion 
+				break;	
+		}
+		
+		if ($base){ //mounted on base (or other stable platform): +40 launch range (launch range = distance range)
+			foreach ($this->rangeArray as $key=>$rng) {
+		    		$this->rangeArray[$key] += 40; 
+			}         
+		}
+		
+		$this->range = $this->rangeArray[1]; //base range = first range
+		
+		parent::__construct($armour, $maxhealth, 0, $startArc, $endArc);
+        }
+
+
+
+
+//Chaff system functions
+
+    public function getDefensiveType()
+    {
+        return "Shield";
+    }
+    
+    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
+			switch($this->firingMode){
+				//Anti-missile missile 'interceptor'
+				case 1:					
+						$output = 0;
+				        return $output;
+			break;
+				//Chaff missile
+				case 2:					
+					if($weapon->weaponClass == 'Ballistic') {
+						$output = 0;
+					}else{
+						$output = 3;
+					}
+				        return $output;
+			break;
+				//Anti-fighter missile
+				case 3:	
+						$output = 0;
+				        return $output;	  
+			default: 
+				return 0; 
+				break;	
+   				 }
+			}
+
+//end Chaff system functions
+
+//Needed for "DefensiveSystem", but no weapons damage is affected by the Class-D Launcher
+    public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
+			switch($this->firingMode){
+				//Anti-missile missile 'interceptor'
+				case 1:					
+						$output = 0;
+				        return $output;
+			break;
+				//Chaff missile
+				case 2:					
+						$output = 0;
+				        return $output;
+			break;
+				//Anti-fighter missile
+				case 3:	
+						$output = 0;
+				        return $output;	        
+			default: 
+				return 0; 
+				break;	
+   				 }
+			}
+//end Defensive system functions
+
+
+
+
+
+	public function calculateHitBase($gamedata, $fireOrder){
+
+
+
+			$this->changeFiringMode($fireOrder->firingMode);  //needs to be outside the switch routine
+
+			switch($this->firingMode){
+
+			case 1:
+		
+				parent::calculateHitBase($gamedata, $fireOrder);
+				break;
+
+				case 2:
+
+
+
+
+		if ($fireOrder->firingMode == 1){ //Accounting for the chaff missile effects
+
+				$targetShip = $gamedata->getShipById($fireOrder->targetid);
+				$canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
+		
+//				foreach ($shipsInRange as $affectedShip) {
+					$allOrders = $targetShip->getAllFireOrders($gamedata->turn);
+					foreach($allOrders as $subOrder) {
+						if (($subOrder->type == 'normal')){ //affects all non-ballistic fire from the target!
+							//uninterceptable are affected all right, just those that outright cannot be intercepted - like ramming or mass driver - will not be affected
+							$subWeapon = $targetShip->getSystemById($subOrder->weaponid);
+							if( $subWeapon->doNotIntercept != true ){
+								//apply interception! Note that this weapon is technically not marked as firing defensively - it is marked as firing offensively though! (already)
+								//like firing.php addToInterceptionTotal
+								$subOrder->totalIntercept += $this->getInterceptionMod($gamedata, $subOrder);
+								$subOrder->numInterceptors++;
+							}
+						}
+					}
+//				}
+		}
+
+
+			case 3:
+		
+				parent::calculateHitBase($gamedata, $fireOrder);
+				break;
+			}
+
+
+
+
+
+//		parent::calculateHitBase($gamedata, $fireOrder);
+	}//endof function calculateHitBase
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// This is only for the chaff missile
+/*		
+	public function calculateHitBase($gamedata, $fireOrder) {
+		switch($this->firingMode){
+			case 1: // Chaff
+				//while we're at it - we may add appropriate interception orders!		
+				$targetShip = $gamedata->getShipById($fireOrder->targetid);
+
+//				public $canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
+		
+//				foreach ($shipsInRange as $affectedShip) {
+					$allOrders = $targetShip->getAllFireOrders($gamedata->turn);
+					foreach($allOrders as $subOrder) {
+						if (($subOrder->type == 'normal')){ //affects all non-ballistic fire from the target!
+							//uninterceptable are affected all right, just those that outright cannot be intercepted - like ramming or mass driver - will not be affected
+							$subWeapon = $targetShip->getSystemById($subOrder->weaponid);
+							if( $subWeapon->doNotIntercept != true ){
+								//apply interception! Note that this weapon is technically not marked as firing defensively - it is marked as firing offensively though! (already)
+								//like firing.php addToInterceptionTotal
+								$subOrder->totalIntercept += $this->getInterceptionMod($gamedata, $subOrder);
+								$subOrder->numInterceptors++;
+//								if (totalIntercept > 3){
+//									$subOrder->totalIntercept = 3;
+//								}
+							}
+						}
+					}
+//				}
+		}
+		
+		//retarget at hex - this will affect how the weapon is animated/displayed in firing log!
+		    //insert correct target coordinates: CURRENT target position
+		    $pos = $targetShip->getHexPos();
+		    $fireOrder->x = $pos->q;
+		    $fireOrder->y = $pos->r;
+		    $fireOrder->targetid = -1; //correct the error
+
+	}//endof function calculateHitBase  
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1: //Anti-missile
+				return 0; 
+				break;
+			case 2: //Chaff
+				return 0; 
+				break;
+			case 3: //Anti-Fighter
+				return 15; 
+				break;
+			default: 
+				return 0; 
+				break;	
+		}
+	}
+	public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1: //Anti-missile
+				$this->minDamage = 0; 
+				break;
+			case 2: //Chaff
+				$this->minDamage = 0; 
+				break;
+			case 3: //Anti-Fighter
+				$this->minDamage = 15; 
+				break;
+
+			default: 
+				$this->minDamage = 0; 
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+	public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1: //Anti-missile
+				$this->maxDamage = 0; 
+				break;
+			case 2: //Chaff
+				$this->maxDamage = 0; 
+				break;
+			case 3: //Anti-Fighter
+				$this->maxDamage = 15; 
+				break;
+
+			default: 
+				$this->maxDamage = 0; 
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
+    
+	public function setSystemDataWindow($turn){
+		$this->data["Range"] = $this->range . '/' . $this->distanceRange;
+		$this->data["Special"] = 'Multiple munitions available. This weapon may explode when damaged.';
+		$this->data["Special"] .= '<br>Available munitions:';
+		$this->data["Special"] .= '<br> - Chaff: Range 20, Target has -3 to hit';
+		$this->data["Special"] .= '<br> - Anti-Fighter: rng 15, +3 FC vs fighters, dmg 15';
+		parent::setSystemDataWindow($turn);
+        }
+    
+    public function isInDistanceRange($shooter, $target, $fireOrder){
+        $movement = $shooter->getLastTurnMovement($fireOrder->turn);    
+        if(mathlib::getDistanceHex($movement->position,  $target) > $this->distanceRange)
+        {
+            $fireOrder->pubnotes .= " FIRING SHOT: Target moved out of distance range.";
+            return false;
+        }
+        return true;
+    }
+    
+    
+    public function testCritical($ship, $gamedata, $crits, $add = 0){ //add testing for ammo explosion!
+        $explodes = false;
+        $roll = Dice::d(20);
+        if ($roll >= $this->rackExplosionThreshold) $explodes = true;
+        
+        if($explodes){
+            $this->ammoExplosion($ship, $gamedata, $this->rackExplosionDamage);            
+            $this->addMissileCritOnSelf($ship->id, "AmmoExplosion", $gamedata);
+        }else{
+            $crits = parent::testCritical($ship, $gamedata, $crits, $add);
+        }
+        
+        return $crits;
+    } //endof function testCritical
+    
+
+    public function ammoExplosion($ship, $gamedata, $damage){
+        //first, destroy self if not yet done...
+        if (!$this->isDestroyed()){
+            $this->noOverkill = true;
+            $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 'standard', 100, 1, 1, 1, 0, null, null, 'ballistic');
+            $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
+            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, $pos, $gamedata, true, $this->location);
+        }
+        
+        //then apply damage potential as a hit...
+        if($damage>0){
+            $this->noOverkill = false;
+            $this->damageType = 'Flash'; //should be Raking by the rules, but Flash is much easier to do - and very fitting for explosion!
+            $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 'flash', 100, 1, 1, 1, 0, null, null, 'ballistic');
+            $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->location); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
+        }
+    }
+    
+    public function addMissileCritOnSelf($shipid, $phpclass, $gamedata){
+        $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
+        $crit->updated = true;
+        $this->criticals[] =  $crit;
+    }        
+ 
+} //endof class MultiDefenseLauncher  
 
 ?>
