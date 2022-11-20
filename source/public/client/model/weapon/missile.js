@@ -239,10 +239,3 @@ var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {
 };
 MultiDefenseLauncher.prototype = Object.create(Weapon.prototype);
 MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;
-
-var FMissileRack = function  FMissileRack(json, ship) {
-    Weapon.call(this, json, ship);
-};
-FMissileRack.prototype = Object.create(Weapon.prototype);
-FMissileRack.prototype.constructor =  FMissileRack;
-

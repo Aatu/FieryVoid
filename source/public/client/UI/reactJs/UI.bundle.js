@@ -39446,12 +39446,6 @@ var SystemInfo = function (_React$Component) {
                     );
                 }),
                 Object.keys(system.critData).length > 0 && getCriticals(system),
-<<<<<<< HEAD
-                "// NOTE: The commented out line was the original. This is being edited below to have a called shot check during the initial phase for ballistics. GTS 03oct22 //                ",
-                !gamedata.isMyShip(ship) && gamedata.gamephase == 3 && gamedata.waiting == false && gamedata.selectedSystems.length > 0 && selectedShip && getCalledShot(ship, selectedShip, system),
-                "// NOTE: The line below is the edited version of the one above to enable ballistic called shots.",
-=======
->>>>>>> faaf9885a976e17bb48e846b0b63a9d2d796e377
                 !gamedata.isMyShip(ship) && (gamedata.gamephase == 3 || gamedata.gamephase == 1) && gamedata.waiting == false && gamedata.selectedSystems.length > 0 && selectedShip && getCalledShot(ship, selectedShip, system)
             );
         }
