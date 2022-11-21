@@ -482,7 +482,7 @@ class ShipSystem {
             }
         }
         
-		/* no longer needed... I think...
+		/* no longer needed... I think... 
         if ($this->hasCritical("ForcedOfflineOneTurn", $turn-1)){
             return true;
         }*/
