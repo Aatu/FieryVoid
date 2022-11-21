@@ -2830,6 +2830,16 @@ spl_autoload_register(
 						'rogolontolovam' => '/server/model/ships/smallraces/rogolonTolovAM.php',
 						'rogolontovinam' => '/server/model/ships/smallraces/rogolonTovinAM.php',
 						
+						//Orieni
+						'penitentam' => '/server/model/ships/orieni/penitentAM.php',
+						'penitent1782am' => '/server/model/ships/orieni/penitent1782AM.php',
+						'penitent2003am' => '/server/model/ships/orieni/penitent2003AM.php',
+						'highguardaam' => '/server/model/ships/orieni/HighguardAAM.php',
+						'highguarda2003am' => '/server/model/ships/orieni/HighguardA2003AM.php',
+						'highguarda2007am' => '/server/model/ships/orieni/HighguardA2007AM.php',
+						'skywatcham' => '/server/model/ships/orieni/skywatchAM.php',
+						'skywatch1810am' => '/server/model/ships/orieni/skywatch1810AM.php',
+						'skywatch2003am' => '/server/model/ships/orieni/skywatch2003AM.php',
 						
 						
 						
