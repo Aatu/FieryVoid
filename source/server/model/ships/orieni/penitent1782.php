@@ -9,7 +9,8 @@ class penitent1782 extends SmallStarBaseFourSections{
 		$this->faction = "Orieni";
 		$this->phpclass = "penitent1782";
 		$this->shipClass = "Penitent Station (1782)";
-			$this->variantOf = "Penitent Station";
+			//$this->variantOf = "Penitent Station";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 			$this->occurence = "common";
 		$this->imagePath = "img/ships/penitent.png";
 		$this->canvasSize = 280; 

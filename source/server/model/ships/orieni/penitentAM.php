@@ -1,5 +1,5 @@
 <?php
-class penitent extends SmallStarBaseFourSections{
+class penitentAM extends SmallStarBaseFourSections{
 		function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
@@ -7,7 +7,7 @@ class penitent extends SmallStarBaseFourSections{
 		$this->base = true;
 		$this->smallBase = true;
 		$this->faction = "Orieni";
-		$this->phpclass = "penitent";
+		$this->phpclass = "penitentAM";
 		$this->shipClass = "Penitent Station";
 		$this->imagePath = "img/ships/penitent.png";
 		$this->canvasSize = 280; 
@@ -20,7 +20,6 @@ class penitent extends SmallStarBaseFourSections{
 		$this->forwardDefense = 22;
 		$this->sideDefense = 22;
 		$this->isd = 2007;
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 		
 		$this->addFrontSystem(new Structure(5, 132));
 		$this->addAftSystem(new Structure(5, 132));
@@ -28,9 +27,20 @@ class penitent extends SmallStarBaseFourSections{
 		$this->addRightSystem(new Structure(5, 132));
 		$this->addPrimarySystem(new Structure(5, 150));
 		
+		
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(160); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 160); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+        $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+		//By the Book Orieni should haveaccess to missie types: KK, B, A, H, L, C
+		//KK and C missiles are not present in FV however
+		
 		$this->addPrimarySystem(new Reactor(5, 44, 0, 0));
-        $this->addPrimarySystem(new CnC(5, 21, 0, 0));
-        $this->addPrimarySystem(new CnC(5, 21, 0, 0));
+        $this->addPrimarySystem(new ProtectedCnC(6, 42, 0, 0));
+        //$this->addPrimarySystem(new CnC(5, 21, 0, 0)); //2 C&Cs do not work in FV - merging into one larger and better protected system!
 		$this->addPrimarySystem(new Scanner(5, 28, 4, 8));
 		$this->addPrimarySystem(new Scanner(5, 28, 4, 8));
 		$this->addPrimarySystem(new Hangar(5, 14));
@@ -43,8 +53,8 @@ class penitent extends SmallStarBaseFourSections{
 
    		$this->addFrontSystem(new HeavyGausscannon(5, 10, 4, 270, 90));
    		$this->addFrontSystem(new HeavyGausscannon(5, 10, 4, 270, 90));
-        $this->addFrontSystem(new SMissileRack(5, 6, 0, 270, 90, true));
-        $this->addFrontSystem(new SMissileRack(5, 6, 0, 270, 90, true));
+		$this->addFrontSystem(new AmmoMissileRackS(5, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackS(5, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addFrontSystem(new RapidGatling(5, 4, 1, 270, 90));
 		$this->addFrontSystem(new RapidGatling(5, 4, 1, 270, 90));
 		$this->addFrontSystem(new RapidGatling(5, 4, 1, 270, 90));
@@ -57,8 +67,8 @@ class penitent extends SmallStarBaseFourSections{
 
         $this->addAftSystem(new HeavyGausscannon(5, 10, 4, 90, 270));
         $this->addAftSystem(new HeavyGausscannon(5, 10, 4, 90, 270));
-        $this->addAftSystem(new SMissileRack(5, 6, 0, 90, 270, true));
-        $this->addAftSystem(new SMissileRack(5, 6, 0, 90, 270, true));
+		$this->addAftSystem(new AmmoMissileRackS(5, 0, 0, 90, 270, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addAftSystem(new AmmoMissileRackS(5, 0, 0, 90, 270, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addAftSystem(new RapidGatling(5, 4, 1, 90, 270));
 		$this->addAftSystem(new RapidGatling(5, 4, 1, 90, 270));
 		$this->addAftSystem(new RapidGatling(5, 4, 1, 90, 270));
@@ -71,8 +81,8 @@ class penitent extends SmallStarBaseFourSections{
 
         $this->addLeftSystem(new HeavyGausscannon(5, 10, 4, 180, 360));
         $this->addLeftSystem(new HeavyGausscannon(5, 10, 4, 180, 360));
-        $this->addLeftSystem(new SMissileRack(5, 6, 0, 180, 360, true));
-        $this->addLeftSystem(new SMissileRack(5, 6, 0, 180, 360, true));
+		$this->addLeftSystem(new AmmoMissileRackS(5, 0, 0, 180, 360, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addLeftSystem(new AmmoMissileRackS(5, 0, 0, 180, 360, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addLeftSystem(new RapidGatling(5, 4, 1, 180, 360));
 		$this->addLeftSystem(new RapidGatling(5, 4, 1, 180, 360));
 		$this->addLeftSystem(new RapidGatling(5, 4, 1, 180, 360));
@@ -85,8 +95,8 @@ class penitent extends SmallStarBaseFourSections{
 
         $this->addRightSystem(new HeavyGausscannon(5, 10, 4, 0, 180));
         $this->addRightSystem(new HeavyGausscannon(5, 10, 4, 0, 180));
-        $this->addRightSystem(new SMissileRack(5, 6, 0, 0, 180, true));
-        $this->addRightSystem(new SMissileRack(5, 6, 0, 0, 180, true));
+		$this->addRightSystem(new AmmoMissileRackS(5, 0, 0, 0, 180, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addRightSystem(new AmmoMissileRackS(5, 0, 0, 0, 180, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addRightSystem(new RapidGatling(5, 4, 1, 0, 180));
 		$this->addRightSystem(new RapidGatling(5, 4, 1, 0, 180));
 		$this->addRightSystem(new RapidGatling(5, 4, 1, 0, 180));
