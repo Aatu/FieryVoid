@@ -13,6 +13,7 @@ class skywatch extends OSAT
 		$this->imagePath = "img/ships/OrieniSkywatchOSAT.png";
 		$this->canvasSize = 150;
 		$this->isd = 2007;
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 
         $this->fighters = array("medium"=>6);
 		$this->notes = "Hunter-killer fighters only.";
@@ -26,6 +27,7 @@ class skywatch extends OSAT
 		$this->rollcost = 0;
 		$this->pivotcost = 0;
 		$this->iniativebonus = 60;
+		
 		
 		$this->addPrimarySystem(new Reactor(4, 16, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 12, 3, 6));

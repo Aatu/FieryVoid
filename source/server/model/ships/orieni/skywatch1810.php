@@ -10,7 +10,8 @@ class skywatch1810 extends OSAT
 		$this->faction = "Orieni";
 		$this->phpclass = "skywatch1810";
 		$this->shipClass = "Skywatch Heavy Orbital Satellite (Early)";
-			$this->variantOf = "Skywatch Heavy Orbital Satellite";		
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+			//$this->variantOf = "Skywatch Heavy Orbital Satellite";		
 		$this->imagePath = "img/ships/OrieniSkywatchOSAT.png";
 		$this->canvasSize = 150;
 		$this->isd = 1810;
