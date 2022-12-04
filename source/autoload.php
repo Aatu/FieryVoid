@@ -2715,7 +2715,7 @@ spl_autoload_register(
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
 				'gaimraxas' => '/server/model/ships/customs/gaimRaxas.php',
 				'apollowsf' => '/server/model/ships/customs/ApolloWSF.php',					
-			//	'prototype' => '/server/model/ships/customs/Prototype.php',
+				'prototype' => '/server/model/ships/customs/Prototype.php',
 				
 
 
