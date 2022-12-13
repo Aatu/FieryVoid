@@ -9,7 +9,9 @@ class Righteous extends BaseShip{
         $this->phpclass = "Righteous";
         $this->imagePath = "img/ships/righteous.png";
         $this->shipClass = "Righteous Missile Support Ship";
-	    $this->variantOf = "Vigilant Combat Support Ship";	    
+	    $this->variantOf = "Vigilant Combat Support Ship";	
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+     
         $this->limited = 10;
         $this->occurence = "rare";
 	    $this->isd = 2007;

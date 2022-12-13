@@ -11,7 +11,8 @@ class OchlavitaFull extends HeavyCombatVessel{
         $this->imagePath = "img/ships/ochlavita.png";
         $this->shipClass = "Ochlavita Destroyer (full)";
 	    $this->unofficial = true;
-        $this->variantOf = "Ochlavita Destroyer";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+        //$this->variantOf = "Ochlavita Destroyer";
                 $this->isd = 2227;
         
         $this->forwardDefense = 13;

@@ -10,6 +10,8 @@ class Prophet extends BaseShip{
         $this->imagePath = "img/ships/prophet.png";
         $this->canvasSize = 280;
         $this->shipClass = "Prophet Command Ship";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+ 
 	    $this->isd = 2007;
         $this->limited = 33;
         $this->shipSizeClass = 3;

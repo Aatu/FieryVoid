@@ -9,6 +9,7 @@ class OchlavitaM extends HeavyCombatVessel{
         $this->phpclass = "OchlavitaM";
         $this->imagePath = "img/ships/ochlavita_m.png";
         $this->shipClass = "Ochlavita-M Missile Destroyer";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
                 $this->isd = 2228;
         
         $this->forwardDefense = 13;
@@ -22,7 +23,7 @@ class OchlavitaM extends HeavyCombatVessel{
         $this->iniativebonus = 35;
         
         $this->occurence = "rare";
-        $this->variantOf = "Ochlavita Destroyer";
+        //$this->variantOf = "Ochlavita Destroyer";
 
 	$this->addPrimarySystem(new Reactor(4, 20, 0, 0));
 	$this->addPrimarySystem(new CnC(5, 15, 0, 0));
