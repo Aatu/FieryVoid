@@ -8,7 +8,7 @@ class Prototype extends BaseShip{
         $this->faction = "Custom Ships";
         $this->phpclass = "Prototype";
  //       $this->imagePath = "img/ships/Prototype.png";
-        $this->shipClass = "Regime Prototype";
+        $this->shipClass = "Advanced Cruiser Prototype";
         $this->shipSizeClass = 3;
         $this->canvasSize = 280;
         $this->fighters = array("normal"=>30);
