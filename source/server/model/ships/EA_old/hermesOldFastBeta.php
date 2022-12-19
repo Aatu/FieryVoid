@@ -64,9 +64,9 @@ class HermesOldFastBeta extends HeavyCombatVessel{
         $this->addAftSystem(new InterceptorMkI(2, 4, 1, 90, 270));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 3, 36));
-        $this->addAftSystem(new Structure( 3, 36));
-        $this->addPrimarySystem(new Structure( 4, 41));
+        $this->addFrontSystem(new Structure( 4, 40));
+        $this->addAftSystem(new Structure( 6, 38));
+        $this->addPrimarySystem(new Structure( 4, 36));
         
         $this->hitChart = array(
                 0=> array(
