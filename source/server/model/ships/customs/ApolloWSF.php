@@ -42,8 +42,8 @@ class ApolloWSF extends BaseShip{
         $this->addPrimarySystem(new Hangar(4, 4));
         $this->addPrimarySystem(new JumpEngine(5, 20, 5, 24));
 
-        $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
-        $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(4, 10, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(4, 10, 0, 2, 1));
 
         $this->addFrontSystem(new MassDriver(5, 18, 9, 330, 30));
         $this->addFrontSystem(new InterceptorMkII(2, 4, 2, 270, 90));

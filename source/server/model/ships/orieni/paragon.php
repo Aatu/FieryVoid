@@ -10,7 +10,8 @@ class Paragon extends BaseShip{
         $this->imagePath = "img/ships/prophet.png";
         $this->canvasSize = 280;
         $this->shipClass = "Paragon Strike Force Command Ship";
-        $this->variantOf = "Prophet Command Ship";
+        //$this->variantOf = "Prophet Command Ship";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->occurence = "rare";
         $this->limited = 33;
 	    $this->isd = 2007;
