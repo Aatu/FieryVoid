@@ -2765,7 +2765,7 @@ spl_autoload_register(
                 		'godalphaam' => '/server/model/ships/EA/godAlphaAM.php',
                 		'godbetaam' => '/server/model/ships/EA/godBetaAM.php',
                 		'hermesam' => '/server/model/ships/EA/hermesAM.php',
-                		'hermesfastbeta' => '/server/model/ships/EA/hermesFastBeta.php',
+                		'hermesfastalphaam' => '/server/model/ships/EA/hermesFastAlphaAM.php',
 						
 						//EA (early)
 						'hermesoldfastalpha' => '/server/model/ships/EA_old/hermesOldFastAlpha.php',

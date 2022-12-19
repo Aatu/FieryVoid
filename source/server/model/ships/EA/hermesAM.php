@@ -11,7 +11,7 @@ class HermesAM extends HeavyCombatVessel{
         $this->shipClass = "Hermes Priority Transport (Beta)";
         $this->isd = 2168; //RBax explanations (which make A LOT of sense suggest that Priority variant is actually much later - nonetheless 2168 is official
         
-        $this->fighters = array("heavy" => 6);
+        $this->fighters = array("normal" => 6);
         
         $this->forwardDefense = 14;
         $this->sideDefense = 14;
@@ -62,7 +62,7 @@ class HermesAM extends HeavyCombatVessel{
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 40));
-        $this->addAftSystem(new Structure( 4, 38));
+        $this->addAftSystem(new Structure( 6, 38));
         $this->addPrimarySystem(new Structure( 4, 36));
         
         $this->hitChart = array(
