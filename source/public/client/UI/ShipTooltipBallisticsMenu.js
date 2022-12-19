@@ -59,7 +59,16 @@ window.ShipTooltipBallisticsMenu = function () {
             const amount = grouped[key].amount;
             var ballElement = jQuery(template);
 
-            var ballisticEntry = getBallisticEntry.call(this, ball)
+            var ballisticEntry = getBallisticEntry.call(this, ball);
+			
+			//set correct firing mode, ensuring correct hit chance calculation!
+			var modeIteration = 0;
+			modeIteration = ball.fireOrder.firingMode; //change weapons data to reflect mode actually used
+			if(modeIteration != ball.weapon.firingMode){
+				while(modeIteration != ball.weapon.firingMode){ //will loop until correct mode is found
+					ball.weapon.changeFiringMode();
+				}
+			}
 
             //jQuery(".weapon", ballElement).html(amount ? amount + 'x ' + ball.weapon.displayName : ball.weapon.displayName); //replaced by more compliated text below
 			var textToDisplay = ball.weapon.displayName;

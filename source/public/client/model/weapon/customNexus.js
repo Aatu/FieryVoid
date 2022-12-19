@@ -961,9 +961,16 @@ var TestMissile2 = function  TestMissile2(json, ship) {
 };
 TestMissile2.prototype = Object.create(Weapon.prototype);
 TestMissile2.prototype.constructor =  TestMissile2;
-
+/*
 var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {
     Ballistic.call(this, json, ship);
 };
 MultiDefenseLauncher.prototype = Object.create(Ballistic.prototype);
+MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;
+*/
+
+var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+MultiDefenseLauncher.prototype = Object.create(Weapon.prototype);
 MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;

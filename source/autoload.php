@@ -2566,6 +2566,8 @@ spl_autoload_register(
 				'trekfederationtychointerceptors' => '/server/model/ships/ZTrekFederationTOS/TrekFederationTychoInterceptors.php',
 				'trekfederationtype6shuttles' => '/server/model/ships/ZTrekFederationTOS/TrekFederationType6Shuttles.php',
 				'trekfederationtypecshuttles' => '/server/model/ships/ZTrekFederationTOS/TrekFederationTypeCShuttles.php',
+				'trekvulcanshuttletos' => '/server/model/ships/ZTrekFederationTOS/TrekVulcanShuttleTOS.php',
+				'trekvulcantribunetos' => '/server/model/ships/ZTrekFederationTOS/TrekVulcanTribuneTOS.php',	
 				
 				'trekfederationconstitutioncl' => '/server/model/ships/ZTrekFederationTOS/TrekFederationConstitutionCL.php',
 				'trekfederationconstitutioncmdcl' => '/server/model/ships/ZTrekFederationTOS/TrekFederationConstitutionCmdCL.php',
