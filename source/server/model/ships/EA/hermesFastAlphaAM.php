@@ -14,7 +14,7 @@ class hermesFastAlphaAM extends HeavyCombatVessel{
 	    $this->unofficial = true;
         $this->isd = 2168;
         
-        $this->fighters = array("heavy" => 6);
+        $this->fighters = array("normal" => 6);
         
         $this->forwardDefense = 14;
         $this->sideDefense = 14;

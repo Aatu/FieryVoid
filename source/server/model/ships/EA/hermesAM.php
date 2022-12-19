@@ -9,7 +9,7 @@ class HermesAM extends HeavyCombatVessel{
         $this->phpclass = "HermesAM";
         $this->imagePath = "img/ships/hermes.png";
         $this->shipClass = "Hermes Priority Transport (Beta)";
-        $this->isd = 2168; //RBax explanations (which make A LOT of sense suggest that Priority variant is actually much later - nonetheless 2168 is official
+        $this->isd = 2195; //RBax explanations (which make A LOT of sense suggest that Priority variant is actually much later - nonetheless 2168 is official
         
         $this->fighters = array("normal" => 6);
         
