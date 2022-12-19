@@ -20,6 +20,7 @@ class penitent extends SmallStarBaseFourSections{
 		$this->forwardDefense = 22;
 		$this->sideDefense = 22;
 		$this->isd = 2007;
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 		
 		$this->addFrontSystem(new Structure(5, 132));
 		$this->addAftSystem(new Structure(5, 132));

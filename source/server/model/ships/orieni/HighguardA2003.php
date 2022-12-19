@@ -13,7 +13,9 @@ class HighguardA2003 extends OSAT
 		$this->imagePath = "img/ships/OrieniHighguardOSAT.png";
 		$this->canvasSize = 80;
 		$this->isd = 2003;
-        $this->variantOf = "Highguard-A Orbital Satellite";		
+        //$this->variantOf = "Highguard-A Orbital Satellite";		
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+ 
 
 		$this->forwardDefense = 9;
 		$this->sideDefense = 9;

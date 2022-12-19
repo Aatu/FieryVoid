@@ -9,11 +9,13 @@ class HighguardA2007 extends OSAT
 		$this->pointCost = 195;
 		$this->faction = "Orieni";
 		$this->phpclass = "HighguardA2007";
-		$this->shipClass = "Highguard-A Orbital Satellite (2007)";
+		$this->shipClass = "Highguard-A Orbital Satellite";
 		$this->imagePath = "img/ships/OrieniHighguardOSAT.png";
 		$this->canvasSize = 80;
 		$this->isd = 2007;
-        $this->variantOf = "Highguard-A Orbital Satellite";		
+        //$this->variantOf = "Highguard-A Orbital Satellite";	
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+ 	
 
 		$this->forwardDefense = 9;
 		$this->sideDefense = 9;

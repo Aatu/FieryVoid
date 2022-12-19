@@ -56,22 +56,20 @@ if (isset($_SESSION["user"])) {
     <!-- <div id="newsHeader">Latest News - September 2020</div> -->
     <div id="newsEntry">
         
-	    <!--
+	    
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
         <h4>may our games be fiery and our lives peaceful</h4>
         <br>
--->
+
        
 		
 
-		---------- <b>LATEST NEWS - November 2022</b> ----------
-	    <br><b>Variable missile loads</b> - Rogolons (not that their loads have much variability...)
-	    <br><b>Auto-recover from shutdown</b> - now systems forced to shut down will automatically recover when forced inactivity is over
-	    <br><b>Autonaming</b> - if You manage to enter an empty unit name... You will be given a placeholder. Empty-named units are a pain to select from lists, not to mention recognize in logs ;)
-	    <br><b>Missiles bug corrected</b> - new missile launchers weren't marked as not using OEW... corrected now
-	    <br><b>Missiles bug corrected</b> - SOEW was affecting hit chance of missiles (incorrectly), corrected now
-	    <br><b>PakMaRa Ini changed</b> - they're now properly unable to cope with complicated tactical situations (courtesy of Douglas)
-	    <br><b>Visual updates</b> - new ship silhouettes (courtesy of Douglas)	  
+		---------- <b>LATEST NEWS - December 2022</b> ----------
+	    <br><b>Variable missile loads</b> - Orieni capital ships, and Ochlavita (somehow I missed her earlier ;) )
+	    <br><b>Minor bugfixes</b> - there's always more bugs to kill!
+	    <br><b>Pak'ma'ra polishing</b> - courtesy of Douglas
+	    <br><b>Image updates</b> - courtesy of Douglas
+	    <br><b>Nexus polishing</b> - courtesy of Geoffrey
 	    
 	    
 <!--	    

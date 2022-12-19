@@ -45,10 +45,7 @@ class VulcanTribuneFlt extends FighterFlight{
             $fighter->imagePath = "img/ships/StarTrek/VulcanTribune.png";
             $fighter->iconPath = "img/ships/StarTrek/VulcanTribuneLarge.png";
 			
-			/*
-            $frontGun = new LightParticleBeam(210, 30, 2, 1);
-            $frontGun->displayName = "Ultralight Phase Cannon";
-			*/
+			
 			$frontGun1 = new TrekFtrPhaser(210, 30, 2, 1,"Phase Cannon");
             $fighter->addFrontSystem($frontGun1);
 
@@ -57,10 +54,6 @@ class VulcanTribuneFlt extends FighterFlight{
 			//should NOT be exclusive
             $fighter->addFrontSystem($frontGun);
 
-/*
-            $frontGun = new LightParticleBeam(330, 150, 2, 1);
-            $frontGun->displayName = "Ultralight Phase Cannon";
-*/			
 			$frontGun2 = new TrekFtrPhaser(330, 150, 2, 1,"Phase Cannon");
             $fighter->addFrontSystem($frontGun2);
 
