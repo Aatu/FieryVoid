@@ -2321,20 +2321,20 @@ spl_autoload_register(
 		    	'roskorbase2215' => '/server/model/ships/hurr/Roskorbase2215.php',
 		    	'roskorbase2240' => '/server/model/ships/hurr/Roskorbase2240.php',
 		    	'highguarda' => '/server/model/ships/orieni/HighguardA.php',
-		    	'highguarda2003' => '/server/model/ships/orieni/HighguardA2003.php',
+		    	//'highguarda2003' => '/server/model/ships/orieni/HighguardA2003.php',
 		    	'highguarda2007' => '/server/model/ships/orieni/HighguardA2007.php',
 		    	'highguardb' => '/server/model/ships/orieni/HighguardB.php',
 		    	'highguardb2003' => '/server/model/ships/orieni/HighguardB2003.php',
 		    	'highguardb2007' => '/server/model/ships/orieni/HighguardB2007.php',
                 'penitent' => '/server/model/ships/orieni/penitent.php',
-                'penitent1782' => '/server/model/ships/orieni/penitent1782.php',
+                //'penitent1782' => '/server/model/ships/orieni/penitent1782.php',
                 'penitent2003' => '/server/model/ships/orieni/penitent2003.php',
 		    	'resolute' => '/server/model/ships/orieni/resolute.php',
 		    	'resolutehk' => '/server/model/ships/orieni/resoluteHK.php',
 		    	'resolute2007' => '/server/model/ships/orieni/resolute2007.php',
 		    	'resolutehk2007' => '/server/model/ships/orieni/resoluteHK2007.php',
 		    	'skywatch' => '/server/model/ships/orieni/skywatch.php',
-		    	'skywatch1810' => '/server/model/ships/orieni/skywatch1810.php',
+		    	//'skywatch1810' => '/server/model/ships/orieni/skywatch1810.php',
 		    	'skywatch2003' => '/server/model/ships/orieni/skywatch2003.php',
 		    	'kaedashkada' => '/server/model/ships/llort/Kaedashkada.php',
 		    	'brostilli' => '/server/model/ships/drazi/Brostilli.php',
@@ -2722,9 +2722,9 @@ spl_autoload_register(
 
 
 				//TEMPORARY variable hangar size testing
-				'variablehangarsize' => '/server/model/ships/customs/VariableHangarSize.php',
-				'ltviper' => '/server/model/ships/customs/LtViper.php',
-				'medviper' => '/server/model/ships/customs/medViper.php',
+				//'variablehangarsize' => '/server/model/ships/customs/VariableHangarSize.php',
+				//'ltviper' => '/server/model/ships/customs/LtViper.php',
+				//'medviper' => '/server/model/ships/customs/medViper.php',
 				
 				// ~~~ AmmoMagazine ~~~ and related classes
                 		'ammomagazine' => '/server/model/systems/baseSystems.php', //ammo magazine itself

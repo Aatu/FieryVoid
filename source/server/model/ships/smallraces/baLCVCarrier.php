@@ -4,7 +4,7 @@ class BALCVCarrier extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 300;
+        $this->pointCost = 320;
         $this->faction = "Small Races";
         $this->phpclass = "BALCVCarrier";
         $this->imagePath = "img/ships/BASurveyShip.png";
