@@ -7,7 +7,7 @@ class Prototype extends BaseShip{
         $this->pointCost = 20;
         $this->faction = "Custom Ships";
         $this->phpclass = "Prototype";
- //       $this->imagePath = "img/ships/Prototype.png";
+        $this->imagePath = "img/ships/Prototype.png";
         $this->shipClass = "Advanced Cruiser Prototype";
         $this->shipSizeClass = 3;
         $this->canvasSize = 280;
