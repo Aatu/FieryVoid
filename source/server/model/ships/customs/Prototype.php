@@ -42,7 +42,7 @@ class Prototype extends BaseShip{
 		$this->addPrimarySystem($sensors);        
         $this->addPrimarySystem(new Engine(6, 28, 0, 12, 3));
 		$this->addPrimarySystem(new Hangar(6, 34));
-        $this->addPrimarySystem(new JumpEngine(6, 20, 3, 24));
+        $this->addPrimarySystem(new JumpEngine(6, 24, 3, 24));
 	    
 		
 		
@@ -64,22 +64,24 @@ class Prototype extends BaseShip{
 		$this->addFrontSystem($tendril);
         $this->addFrontSystem($diffuserStbd);
 		
-        $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
-        $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(4, 15, 0, 5, 1));
+        $this->addFrontSystem(new Thruster(4, 15, 0, 5, 1));
 		$this->addFrontSystem(new MolecularSlicerBeamL(5, 0, 0, 300, 0));
-		$this->addFrontSystem(new MolecularSlicerBeamL(5, 0, 0, 0, 60));
-		$this->addFrontSystem(new MolecularSlicerBeamL(5, 0, 0, 330, 30));		
+		$this->addFrontSystem(new MolecularSlicerBeamL(5, 0, 0, 330, 30));
+		$this->addFrontSystem(new MolecularSlicerBeamL(5, 0, 0, 0, 60));		
 		$this->addFrontSystem(new PhasingPulseCannonH(4, 0, 0, 300, 0));
 		$this->addFrontSystem(new PhasingPulseCannonH(4, 0, 0, 0, 60));
         $this->addFrontSystem(new InterceptorMkII(2, 4, 2, 240, 60));
         $this->addFrontSystem(new InterceptorMkII(2, 4, 2, 300, 120));
 	    
-        $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
+
 		$this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
-        $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
 		$this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 7, 0, 2, 2));
 		$this->addAftSystem(new Thruster(3, 7, 0, 2, 2));		
+        $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
+		$this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
+		
 		$this->addAftSystem(new MolecularSlicerBeamL(5, 0, 0, 150, 210));
 		$this->addAftSystem(new PhasingPulseCannonH(4, 0, 0, 180, 240));
 		$this->addAftSystem(new PhasingPulseCannonH(4, 0, 0, 120, 180));
