@@ -1580,6 +1580,7 @@ spl_autoload_register(
 //				'plasmablast' => '/server/model/weapons/customNexus.php',
 //				'testgun' => '/server/model/weapons/customNexus.php',
 				'testmissile' => '/server/model/weapons/customNexus.php',
+				'testmissile2' => '/server/model/weapons/customNexus.php',
 //                'plasmabattery' => '/server/model/systems/baseSystems.php',
 //				'enveloper' => '/server/model/weapons/customNexus.php',
 
@@ -2663,20 +2664,22 @@ spl_autoload_register(
          		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
          		'proximitylaser' => '/server/model/weapons/customNexus.php', 
          		'fmissilerack' => '/server/model/weapons/customNexus.php', 
+         		'dmissilerack' => '/server/model/weapons/customNexus.php', 
 */
 
 //				'solyrn' => '/server/model/ships/korlyan/Solyrn.php',
-//                'tmphitreduction' => '/server/model/cricialClasses.php',
+                'tmphitreduction' => '/server/model/cricialClasses.php',
 
 //         		'chaffmissile' => '/server/model/weapons/customNexus.php', 
-//         		'proximitylaser' => '/server/model/weapons/customNexus.php', 
-//         		'fmissilerack' => '/server/model/weapons/customNexus.php', 
+         		'proximitylaser' => '/server/model/weapons/customNexus.php', 
+         		'fmissilerack' => '/server/model/weapons/customNexus.php', 
+         		'dmissilerack' => '/server/model/weapons/customNexus.php', 
 //         		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
-//         		'multidefenselauncher' => '/server/model/weapons/missile.php', //missile racks themselves
+         		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
 //				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 //				'koloskova' => '/server/model/ships/korlyan/Koloskova.php',
 //				'lekra' => '/server/model/ships/korlyan/Lekra.php',
-//				'koskova' => '/server/model/ships/korlyan/Koskova.php',
+				'koskovatestbed' => '/server/model/ships/korlyan/KoskovaTestbed.php',
 
 
 
@@ -2830,6 +2833,16 @@ spl_autoload_register(
 						'rogolontolovam' => '/server/model/ships/smallraces/rogolonTolovAM.php',
 						'rogolontovinam' => '/server/model/ships/smallraces/rogolonTovinAM.php',
 						
+						//Orieni
+						'penitentam' => '/server/model/ships/orieni/penitentAM.php',
+						'penitent1782am' => '/server/model/ships/orieni/penitent1782AM.php',
+						'penitent2003am' => '/server/model/ships/orieni/penitent2003AM.php',
+						'highguardaam' => '/server/model/ships/orieni/HighguardAAM.php',
+						'highguarda2003am' => '/server/model/ships/orieni/HighguardA2003AM.php',
+						'highguarda2007am' => '/server/model/ships/orieni/HighguardA2007AM.php',
+						'skywatcham' => '/server/model/ships/orieni/skywatchAM.php',
+						'skywatch1810am' => '/server/model/ships/orieni/skywatch1810AM.php',
+						'skywatch2003am' => '/server/model/ships/orieni/skywatch2003AM.php',
 						
 						
 						

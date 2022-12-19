@@ -9,7 +9,8 @@ class HighguardB extends OSAT
 		$this->pointCost = 140;
 		$this->faction = "Orieni";
 		$this->phpclass = "HighguardB";
-		$this->shipClass = "Highguard-B Orbital Satellite";
+		$this->shipClass = "Highguard-B Orbital Satellite (1803)";
+			$this->variantOf = "Highguard-B Orbital Satellite";		
 		$this->imagePath = "img/ships/OrieniHighguardOSAT.png";
 		$this->canvasSize = 80;
 		$this->isd = 1803;
@@ -27,10 +28,10 @@ class HighguardB extends OSAT
 		$this->addPrimarySystem(new Reactor(4, 6, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 4, 2, 4));
 		$this->addPrimarySystem(new Thruster(4, 4, 0, 0, 2));
-		$this->addPrimarySystem(new LaserLance(3, 6, 0, 270, 90));
-		$this->addPrimarySystem(new LaserLance(3, 6, 0, 270, 90));
-		$this->addPrimarySystem(new OrieniGatlingRG(1, 4, 1, 180, 360));
-		$this->addPrimarySystem(new OrieniGatlingRG(1, 4, 1, 0, 180));
+		$this->addFrontSystem(new LaserLance(3, 6, 0, 270, 90));
+		$this->addFrontSystem(new LaserLance(3, 6, 0, 270, 90));
+		$this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 180, 360));
+		$this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 0, 180));
 
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
 
@@ -40,8 +41,8 @@ class HighguardB extends OSAT
                 0=> array(
                         9 => "Structure",
                         11 => "Thruster",
-						14 => "Laser Lance",
-						16 => "Gatling Railgun",
+						14 => "1:Laser Lance",
+						16 => "1:Gatling Railgun",
 						18 => "Scanner",
                         20 => "Reactor",
                 ),

@@ -71,9 +71,9 @@ EWLightLaserBeam.prototype = Object.create(Weapon.prototype);
 EWLightLaserBeam.prototype.constructor =  EWLightLaserBeam;
 
 var EWOMissileRack = function  EWOMissileRack(json, ship) {
-    Weapon.call(this, json, ship);
+    MissileLauncher.call(this, json, ship);
 };
-EWOMissileRack.prototype = Object.create(Weapon.prototype);
+EWOMissileRack.prototype = Object.create(MissileLauncher.prototype);
 EWOMissileRack.prototype.constructor =  EWOMissileRack;
 
 var EWGatlingLaser = function  EWGatlingLaser(json, ship) {
