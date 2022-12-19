@@ -1,17 +1,15 @@
 <?php
-class Righteous extends BaseShip{
+class RighteousAM extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 815;
 		$this->faction = "Orieni";
-        $this->phpclass = "Righteous";
+        $this->phpclass = "RighteousAM";
         $this->imagePath = "img/ships/righteous.png";
         $this->shipClass = "Righteous Missile Support Ship";
-	    $this->variantOf = "Vigilant Combat Support Ship";	
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
-     
+	    $this->variantOf = "Vigilant Combat Support Ship";	    
         $this->limited = 10;
         $this->occurence = "rare";
 	    $this->isd = 2007;
@@ -28,18 +26,31 @@ class Righteous extends BaseShip{
         $this->rollcost = 3;
         $this->pivotcost = 3;
         
+		
+		        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(260); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 260); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+        $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+		//By the Book Orieni should have access to missie types: KK, B, A, H, L, C
+		//KK and C missiles are not present in FV however
+		
+		
+        
         $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 25, 5, 6));
         $this->addPrimarySystem(new Engine(5, 25, 0, 9, 4));
-        $this->addPrimarySystem(new Hangar(4, 14, 6));
+        $this->addPrimarySystem(new Hangar(4, 14));
         $this->addPrimarySystem(new JumpEngine(5, 30, 6, 25));
         $this->addPrimarySystem(new ReloadRack(6, 9, 0, 0));
-        $this->addPrimarySystem(new SMissileRack(5, 6, 0, 0, 360));
+		$this->addPrimarySystem(new AmmoMissileRackS(5, 0, 0, 0, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         
-        $this->addFrontSystem(new SMissileRack(5, 6, 0, 240, 60));
-        $this->addFrontSystem(new SMissileRack(5, 6, 0, 270, 90));
-        $this->addFrontSystem(new SMissileRack(5, 6, 0, 300, 120));
+		$this->addFrontSystem(new AmmoMissileRackS(5, 0, 0, 240, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackS(5, 0, 0, 270, 90, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackS(5, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
         $this->addFrontSystem(new Thruster(3, 12, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 12, 0, 3, 1));
@@ -50,16 +61,16 @@ class Righteous extends BaseShip{
         $this->addAftSystem(new Thruster(3, 15, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 15, 0, 3, 2));
 		
-        $this->addLeftSystem(new SMissileRack(3, 6, 0, 180, 360));
-        $this->addLeftSystem(new SMissileRack(3, 6, 0, 180, 360));
-        $this->addLeftSystem(new SMissileRack(3, 6, 0, 180, 360));
+		$this->addLeftSystem(new AmmoMissileRackS(3, 0, 0, 180, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addLeftSystem(new AmmoMissileRackS(3, 0, 0, 180, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addLeftSystem(new AmmoMissileRackS(3, 0, 0, 180, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
         $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
         $this->addLeftSystem(new Thruster(4, 20, 0, 6, 3));
 
-        $this->addRightSystem(new SMissileRack(3, 6, 0, 0, 180));
-        $this->addRightSystem(new SMissileRack(3, 6, 0, 0, 180));
-        $this->addRightSystem(new SMissileRack(3, 6, 0, 0, 180));
+		$this->addRightSystem(new AmmoMissileRackS(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addRightSystem(new AmmoMissileRackS(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addRightSystem(new AmmoMissileRackS(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
         $this->addRightSystem(new Thruster(4, 20, 0, 6, 4));

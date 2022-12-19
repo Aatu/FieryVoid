@@ -1,16 +1,15 @@
 <?php
-class Enlightenment1712 extends BaseShip{
+class Enlightenment1712AM extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 600;
 		$this->faction = "Orieni";
-        $this->phpclass = "Enlightenment1712";
+        $this->phpclass = "Enlightenment1712AM";
         $this->imagePath = "img/ships/enlightenment.png";
         $this->shipClass = "Enlightenment Invader (early)";
-        //$this->variantOf = "Enlightenment Invader";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+        $this->variantOf = "Enlightenment Invader";
         $this->shipSizeClass = 3;
 	    $this->isd = 1712;
         $this->fighters = array("light"=>12, "assault shuttles"=>24);
@@ -25,6 +24,18 @@ class Enlightenment1712 extends BaseShip{
         $this->rollcost = 3;
         $this->pivotcost = 3;
         
+		
+		//ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(128); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 128); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+        $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+		//By the Book Orieni should have access to missie types: KK, B, A, H, L, C
+		//KK and C missiles are not present in FV however
+		
+		
         $this->addPrimarySystem(new Reactor(5, 30, 0, 0));
         $this->addPrimarySystem(new CnC(5, 25, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 25, 4, 6));
@@ -48,16 +59,16 @@ class Enlightenment1712 extends BaseShip{
         $this->addAftSystem(new Thruster(2, 12, 0, 2, 2));
         $this->addAftSystem(new Thruster(2, 12, 0, 2, 2));
 		
-        $this->addLeftSystem(new SoMissileRack(3, 6, 0, 240, 360));
-        $this->addLeftSystem(new SoMissileRack(3, 6, 0, 180, 300));
+		$this->addLeftSystem(new AmmoMissileRackSO(3, 0, 0, 180, 300, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addLeftSystem(new AmmoMissileRackSO(3, 0, 0, 240, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addLeftSystem(new OrieniGatlingRG(1, 4, 1, 180, 360));
         $this->addLeftSystem(new OrieniGatlingRG(1, 4, 1, 180, 360));
         $this->addLeftSystem(new Hangar(3, 14));        
         $this->addLeftSystem(new CargoBay(2, 30));    
         $this->addLeftSystem(new Thruster(4, 20, 0, 6, 3));
 	    
-        $this->addRightSystem(new SoMissileRack(3, 6, 0, 0, 120));
-        $this->addRightSystem(new SoMissileRack(3, 6, 0, 60, 180));
+		$this->addRightSystem(new AmmoMissileRackSO(3, 0, 0, 0, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addRightSystem(new AmmoMissileRackSO(3, 0, 0, 60, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addRightSystem(new OrieniGatlingRG(1, 4, 1, 0, 180));
         $this->addRightSystem(new OrieniGatlingRG(1, 4, 1, 0, 180));
         $this->addRightSystem(new Hangar(3, 14));        

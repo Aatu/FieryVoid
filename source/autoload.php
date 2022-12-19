@@ -65,6 +65,7 @@ spl_autoload_register(
                 'bacloseescortearly' => '/server/model/ships/smallraces/baCloseEscortEarly.php',
                 'badgerstarfury' => '/server/model/ships/EA/badgerStarfury.php',
                 'baescortcarrier' => '/server/model/ships/smallraces/baEscortCarrier.php',
+                'baescortcarrierlcv' => '/server/model/ships/smallraces/baEscortCarrierLCV.php',
                 'baescortcarrierearly' => '/server/model/ships/smallraces/baEscortCarrierEarly.php',
                 'baescortcarrierrefit' => '/server/model/ships/smallraces/baEscortCarrierRefit.php',
                 'baheavygunboat' => '/server/model/ships/smallraces/baHeavyGunboat.php',
@@ -292,8 +293,8 @@ spl_autoload_register(
                 'energymine' => '/server/model/weapons/AoE.php',
                 'energypulsar' => '/server/model/weapons/pulse.php',
                 'engine' => '/server/model/systems/baseSystems.php',
-                'enlightenment' => '/server/model/ships/orieni/enlightenment.php',
-                'enlightenment1712' => '/server/model/ships/orieni/enlightenment1712.php',
+                //'enlightenment' => '/server/model/ships/orieni/enlightenment.php',
+                //'enlightenment1712' => '/server/model/ships/orieni/enlightenment1712.php',
                 'equata' => '/server/model/ships/centauri_old/equata.php',
                 'erlassan' => '/server/model/ships/balosian/erlassan.php',
                 'erlorra' => '/server/model/ships/llort/erlorra.php',
@@ -797,8 +798,8 @@ spl_autoload_register(
                 'restrictedew' => '/server/model/cricialClasses.php',
                 'restrictedewoneturn' => '/server/model/cricialClasses.php',
                 'retlata' => '/server/model/ships/minbari/retlata.php',
-                'righteous' => '/server/model/ships/orieni/righteous.php',
-                'righteous1894' => '/server/model/ships/orieni/righteous1894.php',
+                //'righteous' => '/server/model/ships/orieni/righteous.php',
+                //'righteous1894' => '/server/model/ships/orieni/righteous1894.php',
                 'rishekar' => '/server/model/ships/dilgar/rishekar.php',
                 'rmissilerack' => '/server/model/weapons/missile.php',
 				
@@ -1108,8 +1109,8 @@ spl_autoload_register(
                 'vengeful2003' => '/server/model/ships/orieni/vengeful2003.php',
                 'ventrus' => '/server/model/ships/centauri_old/ventrus.php',
                 'ventrus2007' => '/server/model/ships/centauri_old/ventrus2007.php',
-                'vigilant' => '/server/model/ships/orieni/vigilant.php',
-                'vigilant1704' => '/server/model/ships/orieni/vigilant1704.php',
+                //'vigilant' => '/server/model/ships/orieni/vigilant.php',
+                //'vigilant1704' => '/server/model/ships/orieni/vigilant1704.php',
                 'vindicatorca' => '/server/model/ships/deneth/vindicatorCA.php',
                 'virtue' => '/server/model/ships/orieni/virtue.php',
                 'virtue1783' => '/server/model/ships/orieni/virtue1783.php',
@@ -2320,20 +2321,20 @@ spl_autoload_register(
 		    	'roskorbase2215' => '/server/model/ships/hurr/Roskorbase2215.php',
 		    	'roskorbase2240' => '/server/model/ships/hurr/Roskorbase2240.php',
 		    	'highguarda' => '/server/model/ships/orieni/HighguardA.php',
-		    	'highguarda2003' => '/server/model/ships/orieni/HighguardA2003.php',
+		    	//'highguarda2003' => '/server/model/ships/orieni/HighguardA2003.php',
 		    	'highguarda2007' => '/server/model/ships/orieni/HighguardA2007.php',
 		    	'highguardb' => '/server/model/ships/orieni/HighguardB.php',
 		    	'highguardb2003' => '/server/model/ships/orieni/HighguardB2003.php',
 		    	'highguardb2007' => '/server/model/ships/orieni/HighguardB2007.php',
                 'penitent' => '/server/model/ships/orieni/penitent.php',
-                'penitent1782' => '/server/model/ships/orieni/penitent1782.php',
+                //'penitent1782' => '/server/model/ships/orieni/penitent1782.php',
                 'penitent2003' => '/server/model/ships/orieni/penitent2003.php',
 		    	'resolute' => '/server/model/ships/orieni/resolute.php',
 		    	'resolutehk' => '/server/model/ships/orieni/resoluteHK.php',
 		    	'resolute2007' => '/server/model/ships/orieni/resolute2007.php',
 		    	'resolutehk2007' => '/server/model/ships/orieni/resoluteHK2007.php',
 		    	'skywatch' => '/server/model/ships/orieni/skywatch.php',
-		    	'skywatch1810' => '/server/model/ships/orieni/skywatch1810.php',
+		    	//'skywatch1810' => '/server/model/ships/orieni/skywatch1810.php',
 		    	'skywatch2003' => '/server/model/ships/orieni/skywatch2003.php',
 		    	'kaedashkada' => '/server/model/ships/llort/Kaedashkada.php',
 		    	'brostilli' => '/server/model/ships/drazi/Brostilli.php',
@@ -2721,9 +2722,9 @@ spl_autoload_register(
 
 
 				//TEMPORARY variable hangar size testing
-				'variablehangarsize' => '/server/model/ships/customs/VariableHangarSize.php',
-				'ltviper' => '/server/model/ships/customs/LtViper.php',
-				'medviper' => '/server/model/ships/customs/medViper.php',
+				//'variablehangarsize' => '/server/model/ships/customs/VariableHangarSize.php',
+				//'ltviper' => '/server/model/ships/customs/LtViper.php',
+				//'medviper' => '/server/model/ships/customs/medViper.php',
 				
 				// ~~~ AmmoMagazine ~~~ and related classes
                 		'ammomagazine' => '/server/model/systems/baseSystems.php', //ammo magazine itself
@@ -2807,6 +2808,10 @@ spl_autoload_register(
 						'eskravatam' => '/server/model/ships/dilgar/eskravatAM.php',
 						'delegor' => '/server/model/ships/dilgar/delegor.php',
 						
+						'ochlavitaam' => '/server/model/ships/dilgar/ochlavitaAM.php',
+						'ochlavitamam' => '/server/model/ships/dilgar/ochlavitaMAM.php',
+						'ochlavitadam' => '/server/model/ships/dilgar/ochlavitaDAM.php',
+						
 						//Drazi						
 						'darkhawkam' => '/server/model/ships/drazi/darkhawkAM.php', 
 						
@@ -2841,7 +2846,21 @@ spl_autoload_register(
 						'skywatch1810am' => '/server/model/ships/orieni/skywatch1810AM.php',
 						'skywatch2003am' => '/server/model/ships/orieni/skywatch2003AM.php',
 						
-						
+						'prophetam' => '/server/model/ships/orieni/prophetAM.php',
+						'prophet1780am' => '/server/model/ships/orieni/prophet1780AM.php',
+						'prophet2003am' => '/server/model/ships/orieni/prophet2003AM.php',
+						'paragonam' => '/server/model/ships/orieni/paragonAM.php',
+						'paragon1782am' => '/server/model/ships/orieni/paragon1782AM.php',
+						'paragon2003am' => '/server/model/ships/orieni/paragon2003AM.php',
+						'benevolentam' => '/server/model/ships/orieni/benevolentAM.php',
+						'benevolent1791am' => '/server/model/ships/orieni/benevolent1791AM.php',						
+						'pariaham' => '/server/model/ships/orieni/pariahAM.php',
+						'enlightenmentam' => '/server/model/ships/orieni/enlightenmentAM.php',
+						'enlightenment1712am' => '/server/model/ships/orieni/enlightenment1712AM.php',
+						'vigilantam' => '/server/model/ships/orieni/vigilantAM.php',
+						'vigilant1704am' => '/server/model/ships/orieni/vigilant1704AM.php',
+						'righteousam' => '/server/model/ships/orieni/righteousAM.php',
+						'righteous1894am' => '/server/model/ships/orieni/righteous1894AM.php',
 						
 						
 				

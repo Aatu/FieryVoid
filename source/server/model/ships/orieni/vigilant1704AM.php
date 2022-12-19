@@ -1,17 +1,15 @@
 <?php
-class Vigilant1704 extends BaseShip{
+class Vigilant1704AM extends BaseShip{
     /*Orieni Vigilant Combat Support Ship, variant ISD 1704 (WoCR)*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 575;
 		$this->faction = "Orieni";
-        $this->phpclass = "Vigilant1704";
+        $this->phpclass = "Vigilant1704AM";
         $this->imagePath = "img/ships/vigilant.png";
         $this->shipClass = "Vigilant Combat Support Ship (early)";
-        //$this->variantOf = "Vigilant Combat Support Ship";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
- 
+        $this->variantOf = "Vigilant Combat Support Ship";
 	    $this->isd = 1704;
         $this->shipSizeClass = 3;
         $this->fighters = array("light"=>6, "minesweeping shuttles"=>6);
@@ -26,24 +24,37 @@ class Vigilant1704 extends BaseShip{
         $this->rollcost = 3;
         $this->pivotcost = 3;
         $this->limited = 10;
+		
+		
+		        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(96); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 96); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+        $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+		//By the Book Orieni should have access to missie types: KK, B, A, H, L, C
+		//KK and C missiles are not present in FV however
+		
+		
         
         $this->addPrimarySystem(new Reactor(5, 20, 0, 4));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 25, 5, 6));//+4 minesweeping bonus
         $this->addPrimarySystem(new Engine(5, 25, 0, 9, 4));
-        $this->addPrimarySystem(new Hangar(4, 14, 6));
+        $this->addPrimarySystem(new Hangar(4, 14, 12));
         $this->addPrimarySystem(new JumpEngine(5, 30, 6, 25));
         $this->addPrimarySystem(new HKControlNode(5, 12, 1, 1));
-        $this->addPrimarySystem(new SoMissileRack(5, 6, 0, 0, 360));
+		$this->addPrimarySystem(new AmmoMissileRackSO(5, 0, 0, 0, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addPrimarySystem(new ReloadRack(6, 9));
         
         $this->addFrontSystem(new Thruster(3, 12, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 12, 0, 3, 1));
-        $this->addFrontSystem(new SoMissileRack(5, 6, 0, 240, 60));
         $this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 240, 120));
         $this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 240, 120));
         $this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 240, 120));
-        $this->addFrontSystem(new SoMissileRack(5, 6, 0, 300, 120));
+		$this->addFrontSystem(new AmmoMissileRackSO(5, 0, 0, 240, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackSO(5, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 
         $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 60, 300));
         $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 60, 300));

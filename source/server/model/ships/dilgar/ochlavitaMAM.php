@@ -1,15 +1,14 @@
 <?php
-class OchlavitaM extends HeavyCombatVessel{
+class OchlavitaMAM extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 525;
 	$this->faction = "Dilgar";
-        $this->phpclass = "OchlavitaM";
+        $this->phpclass = "OchlavitaMAM";
         $this->imagePath = "img/ships/ochlavita_m.png";
         $this->shipClass = "Ochlavita-M Missile Destroyer";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
                 $this->isd = 2228;
         
         $this->forwardDefense = 13;
@@ -23,7 +22,19 @@ class OchlavitaM extends HeavyCombatVessel{
         $this->iniativebonus = 35;
         
         $this->occurence = "rare";
-        //$this->variantOf = "Ochlavita Destroyer";
+        $this->variantOf = "Ochlavita Destroyer";
+
+
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(120); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 120); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+        $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
+        $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+        //$this->enhancementOptionsEnabled[] = 'AMMO_P';//Dilgar were wiped out before Piercing missile was devised
+
 
 	$this->addPrimarySystem(new Reactor(4, 20, 0, 0));
 	$this->addPrimarySystem(new CnC(5, 15, 0, 0));
@@ -35,23 +46,24 @@ class OchlavitaM extends HeavyCombatVessel{
 	  
 	$this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	$this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
+		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 240, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 270, 90, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 270, 90, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 	$this->addFrontSystem(new ScatterPulsar(1, 4, 2, 240, 60));
-	$this->addFrontSystem(new SMissileRack(3, 6, 0, 240, 60));
-	$this->addFrontSystem(new SMissileRack(3, 6, 0, 270, 90));
 	$this->addFrontSystem(new ScatterPulsar(1, 4, 2, 300, 120));
-	$this->addFrontSystem(new SMissileRack(3, 6, 0, 270, 90));
-	$this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 120));
 	$this->addFrontSystem(new ScatterPulsar(1, 4, 2, 270, 90));
 
-	$this->addAftSystem(new ScatterPulsar(1, 4, 2, 120, 300));
-	$this->addAftSystem(new SMissileRack(3, 6, 0, 90, 270));
 	$this->addAftSystem(new Thruster(2, 4, 0, 2, 2));
 	$this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
 	$this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
 	$this->addAftSystem(new Thruster(2, 4, 0, 2, 2));
 	$this->addAftSystem(new Engine(3, 9, 0, 4, 2));
-	$this->addAftSystem(new SMissileRack(3, 6, 0, 90, 270));
+	$this->addAftSystem(new ScatterPulsar(1, 4, 2, 120, 300));
 	$this->addAftSystem(new ScatterPulsar(1, 4, 2, 60, 240));
+		$this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 90, 270, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 60, 240, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+ 
  
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(5, 40));

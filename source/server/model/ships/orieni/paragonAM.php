@@ -1,17 +1,16 @@
 <?php
-class Paragon extends BaseShip{
+class ParagonAM extends BaseShip{
     /*Paragon Strike Force Command Ship, variant ISD 2007; WoCR*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 1160;
 		$this->faction = "Orieni";
-        $this->phpclass = "Paragon";
+        $this->phpclass = "ParagonAM";
         $this->imagePath = "img/ships/prophet.png";
         $this->canvasSize = 280;
         $this->shipClass = "Paragon Strike Force Command Ship";
-        //$this->variantOf = "Prophet Command Ship";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+        $this->variantOf = "Prophet Command Ship";
         $this->occurence = "rare";
         $this->limited = 33;
 	    $this->isd = 2007;
@@ -28,61 +27,72 @@ class Paragon extends BaseShip{
         $this->rollcost = 4;
         $this->pivotcost = 3;
         
+		        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(120); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 120); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+        $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+		//By the Book Orieni should have access to missie types: KK, B, A, H, L, C
+		//KK and C missiles are not present in FV however
+		
+		
         $this->addPrimarySystem(new Reactor(5, 42, 0, 0));
         $this->addPrimarySystem(new CnC(6, 30, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 30, 5, 8));
         $this->addPrimarySystem(new Engine(5, 30, 0, 8, 4));
-        $this->addPrimarySystem(new Hangar(5, 38, 30));
+        $this->addPrimarySystem(new Hangar(5, 38, 36));
         $this->addPrimarySystem(new JumpEngine(5, 40, 6, 25));
         $this->addPrimarySystem(new HKControlNode(5, 24, 3, 3));
         $this->addPrimarySystem(new HeavyLaserLance(5, 6, 4, 0, 360));
-        $this->addPrimarySystem(new SMissileRack(5, 6, 0, 0, 360));
         $this->addPrimarySystem(new HeavyLaserLance(5, 6, 4, 0, 360));
+		$this->addPrimarySystem(new AmmoMissileRackS(5, 0, 0, 0, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         
+        $this->addFrontSystem(new Thruster(3, 15, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(3, 15, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(3, 15, 0, 2, 1));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
-        $this->addFrontSystem(new SMissileRack(5, 6, 0, 270, 90));
-        $this->addFrontSystem(new SMissileRack(5, 6, 0, 270, 90));
         $this->addFrontSystem(new HeavyGausscannon(4, 10, 4, 270, 90));
         $this->addFrontSystem(new HeavyGausscannon(4, 10, 4, 270, 90));
-        $this->addFrontSystem(new Thruster(3, 15, 0, 2, 1));
-        $this->addFrontSystem(new Thruster(3, 15, 0, 2, 1));
-        $this->addFrontSystem(new Thruster(3, 15, 0, 2, 1));
+		$this->addFrontSystem(new AmmoMissileRackS(5, 0, 0, 270, 90, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackS(5, 0, 0, 270, 90, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 
-        $this->addAftSystem(new SMissileRack(5, 6, 0, 90, 270));
+        $this->addAftSystem(new Thruster(3, 15, 0, 2, 2));
+        $this->addAftSystem(new Thruster(3, 15, 0, 2, 2));
+        $this->addAftSystem(new Thruster(3, 15, 0, 2, 2));
+        $this->addAftSystem(new Thruster(3, 15, 0, 2, 2));
+        $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 300));
+        $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 300));
+        $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 300));
+        $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 300));
         $this->addAftSystem(new HeavyGausscannon(2, 10, 4, 90, 270));
         $this->addAftSystem(new HeavyGausscannon(2, 10, 4, 90, 270));
-        $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 300));
-        $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 300));
-        $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 300));
-        $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 300));
-        $this->addAftSystem(new Thruster(3, 15, 0, 2, 2));
-        $this->addAftSystem(new Thruster(3, 15, 0, 2, 2));
-        $this->addAftSystem(new Thruster(3, 15, 0, 2, 2));
-        $this->addAftSystem(new Thruster(3, 15, 0, 2, 2));
+		$this->addAftSystem(new AmmoMissileRackS(5, 0, 0, 90, 270, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		
 
-        $this->addLeftSystem(new HeavyLaserLance(3, 6, 4, 180, 360));
-        $this->addLeftSystem(new HeavyLaserLance(3, 6, 4, 180, 360));
-        $this->addLeftSystem(new HeavyGausscannon(3, 10, 4, 180, 360));
-        $this->addLeftSystem(new HeavyGausscannon(3, 10, 4, 180, 360));
-        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
-        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
-        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
-        $this->addLeftSystem(new SMissileRack(5, 6, 0, 240, 60));
         $this->addLeftSystem(new Thruster(4, 25, 0, 6, 3));
+        $this->addLeftSystem(new HeavyLaserLance(3, 6, 4, 180, 360));
+        $this->addLeftSystem(new HeavyLaserLance(3, 6, 4, 180, 360));
+        $this->addLeftSystem(new HeavyGausscannon(3, 10, 4, 180, 360));
+        $this->addLeftSystem(new HeavyGausscannon(3, 10, 4, 180, 360));
+        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
+        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
+        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
+		$this->addLeftSystem(new AmmoMissileRackS(5, 0, 0, 240, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 
-        $this->addRightSystem(new HeavyLaserLance(3, 6, 4, 0, 180));
-        $this->addRightSystem(new HeavyLaserLance(3, 6, 4, 0, 180));
-        $this->addRightSystem(new HeavyGausscannon(3, 10, 4, 0, 180));
-        $this->addRightSystem(new HeavyGausscannon(3, 10, 4, 0, 180));
-        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
-        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
-        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
-        $this->addRightSystem(new SMissileRack(5, 6, 0, 300, 120));
         $this->addRightSystem(new Thruster(4, 25, 0, 6, 4));
+        $this->addRightSystem(new HeavyLaserLance(3, 6, 4, 0, 180));
+        $this->addRightSystem(new HeavyLaserLance(3, 6, 4, 0, 180));
+        $this->addRightSystem(new HeavyGausscannon(3, 10, 4, 0, 180));
+        $this->addRightSystem(new HeavyGausscannon(3, 10, 4, 0, 180));
+        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
+        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
+        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
+		$this->addRightSystem(new AmmoMissileRackS(5, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 
 
 		//structures

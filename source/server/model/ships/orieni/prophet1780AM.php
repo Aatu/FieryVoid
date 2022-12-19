@@ -1,17 +1,16 @@
 <?php
-class Prophet1780 extends BaseShip{
+class Prophet1780AM extends BaseShip{
      /*Orieni Prophet Command Ship, variant ISD 1780 (WoCR)*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 725;
 		$this->faction = "Orieni";
-        $this->phpclass = "Prophet1780";
+        $this->phpclass = "Prophet1780AM";
         $this->imagePath = "img/ships/prophet.png";
         $this->canvasSize = 280;
         $this->shipClass = "Prophet Command Ship (early)";
-        //$this->variantOf = "Prophet Command Ship";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+        $this->variantOf = "Prophet Command Ship";
 	    $this->isd = 1780;
         $this->limited = 33;
         $this->shipSizeClass = 3;
@@ -26,17 +25,31 @@ class Prophet1780 extends BaseShip{
         $this->rollcost = 4;
         $this->pivotcost = 3;
         $this->limited = 33;
+		
+		
+		        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(60); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 60); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+        $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+		//By the Book Orieni should have access to missie types: KK, B, A, H, L, C
+		//KK and C missiles are not present in FV however
+		
+		
+        
         
         $this->addPrimarySystem(new Reactor(5, 34, 0, 0));
         $this->addPrimarySystem(new CnC(6, 30, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 30, 4, 6));
         $this->addPrimarySystem(new Engine(5, 30, 0, 8, 4));
-        $this->addPrimarySystem(new Hangar(5, 38, 30));
+        $this->addPrimarySystem(new Hangar(5, 38, 36));
         $this->addPrimarySystem(new JumpEngine(5, 40, 6, 25));
         $this->addPrimarySystem(new HKControlNode(5, 24, 3, 3));
         
-        $this->addFrontSystem(new SoMissileRack(5, 6, 0, 270, 90));
-        $this->addFrontSystem(new SoMissileRack(5, 6, 0, 270, 90));
+		$this->addFrontSystem(new AmmoMissileRackSO(5, 0, 0, 270, 90, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackSO(5, 0, 0, 270, 90, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addFrontSystem(new GaussCannon(2, 10, 4, 270, 90));
         $this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 240, 120));
         $this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 240, 120));
@@ -46,18 +59,18 @@ class Prophet1780 extends BaseShip{
         $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
         
-	$this->addAftSystem(new SoMissileRack(5, 6, 0, 90, 270));
-        $this->addAftSystem(new GaussCannon(4, 10, 4, 90, 270));
-        $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 60, 300));
-        $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 60, 300));
-        $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 60, 300));
         $this->addAftSystem(new CargoBay(2, 25));
         $this->addAftSystem(new Thruster(2, 15, 0, 2, 2));
         $this->addAftSystem(new Thruster(2, 15, 0, 2, 2));
         $this->addAftSystem(new Thruster(2, 15, 0, 2, 2));
         $this->addAftSystem(new Thruster(2, 15, 0, 2, 2));
+		$this->addAftSystem(new AmmoMissileRackSO(5, 0, 0, 90, 270, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addAftSystem(new GaussCannon(4, 10, 4, 90, 270));
+        $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 60, 300));
+        $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 60, 300));
+        $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 60, 300));
 		
-        $this->addLeftSystem(new SoMissileRack(5, 6, 0, 240, 60));
+		$this->addLeftSystem(new AmmoMissileRackSO(5, 0, 0, 240, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addLeftSystem(new GaussCannon(2, 10, 4, 180, 360));
         $this->addLeftSystem(new LaserLance(2, 6, 4, 180, 360));
         $this->addLeftSystem(new LaserLance(2, 6, 4, 180, 360));
@@ -67,7 +80,7 @@ class Prophet1780 extends BaseShip{
         $this->addLeftSystem(new CargoBay(2, 25));
         $this->addLeftSystem(new Thruster(4, 25, 0, 6, 3));
 
-        $this->addRightSystem(new SoMissileRack(5, 6, 0, 300, 120));
+		$this->addRightSystem(new AmmoMissileRackSO(5, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addRightSystem(new GaussCannon(2, 10, 4, 0, 180));    
         $this->addRightSystem(new LaserLance(2, 6, 4, 0, 180));
         $this->addRightSystem(new LaserLance(2, 6, 4, 0, 180));
@@ -75,7 +88,7 @@ class Prophet1780 extends BaseShip{
         $this->addRightSystem(new OrieniGatlingRG(1, 4, 1, 0, 180));
         $this->addRightSystem(new OrieniGatlingRG(1, 4, 1, 0, 180));
         $this->addRightSystem(new CargoBay(2, 25));    
-	$this->addRightSystem(new Thruster(4, 25, 0, 6, 4));
+		$this->addRightSystem(new Thruster(4, 25, 0, 6, 4));
 		
 	//structures
         $this->addFrontSystem(new Structure(4, 60));
@@ -148,3 +161,4 @@ class Prophet1780 extends BaseShip{
 
     }
 }
+?>

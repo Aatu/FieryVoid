@@ -1,22 +1,21 @@
 <?php
-class OchlavitaD extends HeavyCombatVessel{
+class OchlavitaDAM extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 550;
 	$this->faction = "Dilgar";
-        $this->phpclass = "OchlavitaD";
+        $this->phpclass = "OchlavitaDAM";
         $this->imagePath = "img/ships/ochlavita.png";
         $this->shipClass = "Ochlavita-D Destroyer Leader";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
                 $this->isd = 2230;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
         
         $this->occurence = "rare";
-        //$this->variantOf = "Ochlavita Destroyer";
+        $this->variantOf = "Ochlavita Destroyer";
         
         $this->turncost = 0.5;
         $this->turndelaycost = 0.5;
@@ -25,6 +24,19 @@ class OchlavitaD extends HeavyCombatVessel{
         $this->pivotcost = 2;
         $this->iniativebonus = 35;
 
+
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(8); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 8); //add full load of basic missiles
+        //$this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+        //$this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+        $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
+        //$this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+        //$this->enhancementOptionsEnabled[] = 'AMMO_P';//Dilgar were wiped out before Piercing missile was devised
+		//Bomb Rack has only Basic and Flash missiles available for bomb racks!
+		
+		
 	$this->addPrimarySystem(new Reactor(4, 20, 0, 2));
 	$this->addPrimarySystem(new CnC(5, 17, 0, 0));
 	$this->addPrimarySystem(new Scanner(5, 12, 4, 8));
@@ -35,25 +47,24 @@ class OchlavitaD extends HeavyCombatVessel{
 	  
 	$this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
 	$this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-	$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 240, 360));
-	$this->addFrontSystem(new QuadPulsar(3, 10, 4, 240, 360));	
 	$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
-        $bombrack1 = new BombRack(2, 6, 0, 300, 60);
-        //$bombrack1->addAmmo("B", 8);
-	$this->addFrontSystem($bombrack1);
-	$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));	
-	$this->addFrontSystem(new QuadPulsar(3, 10, 4, 0, 120));	
+	$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
+	$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 240, 360));
 	$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 0, 120));
-
-	$this->addAftSystem(new ScatterPulsar(1, 4, 2, 120, 300));
-	$this->addAftSystem(new MediumBolter(3, 8, 4, 120, 240));        
+	$this->addFrontSystem(new QuadPulsar(3, 10, 4, 240, 360));
+	$this->addFrontSystem(new QuadPulsar(3, 10, 4, 0, 120));
+		$this->addFrontSystem(new AmmoBombRack(2, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+     
 	$this->addAftSystem(new Thruster(2, 4, 0, 2, 2));
 	$this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
 	$this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
 	$this->addAftSystem(new Thruster(2, 4, 0, 2, 2));
 	$this->addAftSystem(new Engine(3, 9, 0, 4, 2));
-	$this->addAftSystem(new MediumBolter(3, 8, 4, 120, 240));        
+	$this->addAftSystem(new ScatterPulsar(1, 4, 2, 120, 300));
 	$this->addAftSystem(new ScatterPulsar(1, 4, 2, 60, 240));
+	$this->addAftSystem(new MediumBolter(3, 8, 4, 120, 240));
+	$this->addAftSystem(new MediumBolter(3, 8, 4, 120, 240));
+ 
  
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(5, 40));

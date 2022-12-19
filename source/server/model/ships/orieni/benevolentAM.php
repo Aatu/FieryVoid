@@ -1,15 +1,14 @@
 <?php
-class Benevolent extends BaseShip{
+class BenevolentAM extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 660;
 		$this->faction = "Orieni";
-        $this->phpclass = "Benevolent";
+        $this->phpclass = "BenevolentAM";
         $this->imagePath = "img/ships/benevolent.png";
         $this->shipClass = "Benevolent Heavy Scout";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 	    $this->isd = 2007;
         $this->shipSizeClass = 3;
         $this->fighters = array("light"=>6, "medium"=>6);
@@ -26,13 +25,25 @@ class Benevolent extends BaseShip{
 
         $this->limited = 33;
 
+		
+		//ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(20); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 20); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+        $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+		//By the Book Orieni should have access to missie types: KK, B, A, H, L, C
+		//KK and C missiles are not present in FV however
+		
+		
         $this->addPrimarySystem(new Reactor(5, 24, 0, 0));
         $this->addPrimarySystem(new CnC(6, 25, 0, 0));
         $this->addPrimarySystem(new ElintScanner(5, 25, 8, 9));
         $this->addPrimarySystem(new Engine(5, 25, 0, 9, 4));
         $this->addPrimarySystem(new Hangar(4, 14, 12));
         $this->addPrimarySystem(new JumpEngine(5, 30, 6, 25));
-        $this->addPrimarySystem(new SMissileRack(5, 6, 0, 0, 360));
+		$this->addPrimarySystem(new AmmoMissileRackS(5, 0, 0, 0, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         
         $this->addFrontSystem(new HeavyLaserLance(3, 6, 4, 240, 60));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
