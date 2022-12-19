@@ -1581,6 +1581,7 @@ spl_autoload_register(
 //				'plasmablast' => '/server/model/weapons/customNexus.php',
 //				'testgun' => '/server/model/weapons/customNexus.php',
 				'testmissile' => '/server/model/weapons/customNexus.php',
+				'testmissile2' => '/server/model/weapons/customNexus.php',
 //                'plasmabattery' => '/server/model/systems/baseSystems.php',
 //				'enveloper' => '/server/model/weapons/customNexus.php',
 
@@ -2664,20 +2665,22 @@ spl_autoload_register(
          		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
          		'proximitylaser' => '/server/model/weapons/customNexus.php', 
          		'fmissilerack' => '/server/model/weapons/customNexus.php', 
+         		'dmissilerack' => '/server/model/weapons/customNexus.php', 
 */
 
 //				'solyrn' => '/server/model/ships/korlyan/Solyrn.php',
-//                'tmphitreduction' => '/server/model/cricialClasses.php',
+                'tmphitreduction' => '/server/model/cricialClasses.php',
 
 //         		'chaffmissile' => '/server/model/weapons/customNexus.php', 
-//         		'proximitylaser' => '/server/model/weapons/customNexus.php', 
-//         		'fmissilerack' => '/server/model/weapons/customNexus.php', 
+         		'proximitylaser' => '/server/model/weapons/customNexus.php', 
+         		'fmissilerack' => '/server/model/weapons/customNexus.php', 
+         		'dmissilerack' => '/server/model/weapons/customNexus.php', 
 //         		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
-//         		'multidefenselauncher' => '/server/model/weapons/missile.php', //missile racks themselves
+         		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
 //				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 //				'koloskova' => '/server/model/ships/korlyan/Koloskova.php',
 //				'lekra' => '/server/model/ships/korlyan/Lekra.php',
-//				'koskova' => '/server/model/ships/korlyan/Koskova.php',
+				'koskovatestbed' => '/server/model/ships/korlyan/KoskovaTestbed.php',
 
 
 
