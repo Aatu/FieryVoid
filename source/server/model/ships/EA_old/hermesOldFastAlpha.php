@@ -48,7 +48,7 @@ class HermesOldFastAlpha extends HeavyCombatVessel{
         $this->addPrimarySystem(new AmmoMissileRackSO(3, 0, 0, 0, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addPrimarySystem(new AmmoMissileRackSO(3, 0, 0, 0, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         
-        $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 270, 90));
+        $this->addFrontSystem(new InterceptorPrototype(2, 4, 1, 270, 90));
         $this->addFrontSystem(new Thruster(3, 7, 0, 2, 1));
         $this->addFrontSystem(new Thruster(3, 7, 0, 2, 1));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 360));
@@ -60,7 +60,7 @@ class HermesOldFastAlpha extends HeavyCombatVessel{
 		$this->addAftSystem(new CargoBay(3, 30));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
-        $this->addAftSystem(new InterceptorMkI(2, 4, 1, 90, 270));
+        $this->addAftSystem(new InterceptorPrototype(2, 4, 1, 90, 270));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 36));

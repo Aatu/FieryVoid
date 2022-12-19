@@ -1581,6 +1581,7 @@ spl_autoload_register(
 //				'plasmablast' => '/server/model/weapons/customNexus.php',
 //				'testgun' => '/server/model/weapons/customNexus.php',
 				'testmissile' => '/server/model/weapons/customNexus.php',
+				'testmissile2' => '/server/model/weapons/customNexus.php',
 //                'plasmabattery' => '/server/model/systems/baseSystems.php',
 //				'enveloper' => '/server/model/weapons/customNexus.php',
 
@@ -2565,6 +2566,8 @@ spl_autoload_register(
 				'trekfederationtychointerceptors' => '/server/model/ships/ZTrekFederationTOS/TrekFederationTychoInterceptors.php',
 				'trekfederationtype6shuttles' => '/server/model/ships/ZTrekFederationTOS/TrekFederationType6Shuttles.php',
 				'trekfederationtypecshuttles' => '/server/model/ships/ZTrekFederationTOS/TrekFederationTypeCShuttles.php',
+				'trekvulcanshuttletos' => '/server/model/ships/ZTrekFederationTOS/TrekVulcanShuttleTOS.php',
+				'trekvulcantribunetos' => '/server/model/ships/ZTrekFederationTOS/TrekVulcanTribuneTOS.php',	
 				
 				'trekfederationconstitutioncl' => '/server/model/ships/ZTrekFederationTOS/TrekFederationConstitutionCL.php',
 				'trekfederationconstitutioncmdcl' => '/server/model/ships/ZTrekFederationTOS/TrekFederationConstitutionCmdCL.php',
@@ -2664,20 +2667,22 @@ spl_autoload_register(
          		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
          		'proximitylaser' => '/server/model/weapons/customNexus.php', 
          		'fmissilerack' => '/server/model/weapons/customNexus.php', 
+         		'dmissilerack' => '/server/model/weapons/customNexus.php', 
 */
 
 //				'solyrn' => '/server/model/ships/korlyan/Solyrn.php',
-//                'tmphitreduction' => '/server/model/cricialClasses.php',
+                'tmphitreduction' => '/server/model/cricialClasses.php',
 
 //         		'chaffmissile' => '/server/model/weapons/customNexus.php', 
-//         		'proximitylaser' => '/server/model/weapons/customNexus.php', 
-//         		'fmissilerack' => '/server/model/weapons/customNexus.php', 
+         		'proximitylaser' => '/server/model/weapons/customNexus.php', 
+         		'fmissilerack' => '/server/model/weapons/customNexus.php', 
+         		'dmissilerack' => '/server/model/weapons/customNexus.php', 
 //         		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
-//         		'multidefenselauncher' => '/server/model/weapons/missile.php', //missile racks themselves
+         		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
 //				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 //				'koloskova' => '/server/model/ships/korlyan/Koloskova.php',
 //				'lekra' => '/server/model/ships/korlyan/Lekra.php',
-//				'koskova' => '/server/model/ships/korlyan/Koskova.php',
+				'koskovatestbed' => '/server/model/ships/korlyan/KoskovaTestbed.php',
 
 
 
@@ -2717,7 +2722,7 @@ spl_autoload_register(
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
 				'gaimraxas' => '/server/model/ships/customs/gaimRaxas.php',
 				'apollowsf' => '/server/model/ships/customs/ApolloWSF.php',					
-			//	'prototype' => '/server/model/ships/customs/Prototype.php',
+				'prototype' => '/server/model/ships/customs/Prototype.php',
 				
 
 
@@ -2767,7 +2772,7 @@ spl_autoload_register(
                 		'godalphaam' => '/server/model/ships/EA/godAlphaAM.php',
                 		'godbetaam' => '/server/model/ships/EA/godBetaAM.php',
                 		'hermesam' => '/server/model/ships/EA/hermesAM.php',
-                		'hermesfastbeta' => '/server/model/ships/EA/hermesFastBeta.php',
+                		'hermesfastalphaam' => '/server/model/ships/EA/hermesFastAlphaAM.php',
 						
 						//EA (early)
 						'hermesoldfastalpha' => '/server/model/ships/EA_old/hermesOldFastAlpha.php',

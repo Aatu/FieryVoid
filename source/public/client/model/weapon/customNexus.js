@@ -930,6 +930,14 @@ var FMissileRack = function  FMissileRack(json, ship) {
 FMissileRack.prototype = Object.create(Weapon.prototype);
 FMissileRack.prototype.constructor =  FMissileRack;
 
+/*
+var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+MultiDefenseLauncher.prototype = Object.create(Weapon.prototype);
+MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;
+*/
+
 var ChaffMissile = function  ChaffMissile(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -947,3 +955,22 @@ var TestMissile = function  TestMissile(json, ship) {
 };
 TestMissile.prototype = Object.create(Weapon.prototype);
 TestMissile.prototype.constructor =  TestMissile;
+
+var TestMissile2 = function  TestMissile2(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TestMissile2.prototype = Object.create(Weapon.prototype);
+TestMissile2.prototype.constructor =  TestMissile2;
+/*
+var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {
+    Ballistic.call(this, json, ship);
+};
+MultiDefenseLauncher.prototype = Object.create(Ballistic.prototype);
+MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;
+*/
+
+var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+MultiDefenseLauncher.prototype = Object.create(Weapon.prototype);
+MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;
