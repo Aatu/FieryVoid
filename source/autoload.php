@@ -2720,7 +2720,7 @@ spl_autoload_register(
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
 				'gaimraxas' => '/server/model/ships/customs/gaimRaxas.php',
 				'apollowsf' => '/server/model/ships/customs/ApolloWSF.php',					
-			//	'prototype' => '/server/model/ships/customs/Prototype.php',
+				'prototype' => '/server/model/ships/customs/Prototype.php',
 				
 
 
@@ -2770,7 +2770,7 @@ spl_autoload_register(
                 		'godalphaam' => '/server/model/ships/EA/godAlphaAM.php',
                 		'godbetaam' => '/server/model/ships/EA/godBetaAM.php',
                 		'hermesam' => '/server/model/ships/EA/hermesAM.php',
-                		'hermesfastbeta' => '/server/model/ships/EA/hermesFastBeta.php',
+                		'hermesfastalphaam' => '/server/model/ships/EA/hermesFastAlphaAM.php',
 						
 						//EA (early)
 						'hermesoldfastalpha' => '/server/model/ships/EA_old/hermesOldFastAlpha.php',

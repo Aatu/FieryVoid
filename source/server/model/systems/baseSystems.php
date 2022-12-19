@@ -3344,9 +3344,9 @@ class PlasmaBattery extends ShipSystem{
 	public $powerReceivedFromBackEnd = 0; //communication variable
 //	public $nominalOutput = 0;//output to be used in front end display!
 	
-    public $boostable = true;
-    public $maxBoostLevel = 4;
-    public $boostEfficiency = 1; 
+//    public $boostable = true;
+//    public $maxBoostLevel = 4;
+//    public $boostEfficiency = 1; 
 	public $powerStoredFront = 0;    
 	
 	public $powerDrawnAtFiring = 0;

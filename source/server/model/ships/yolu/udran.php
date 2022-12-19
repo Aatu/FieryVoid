@@ -42,11 +42,11 @@ class Udran extends BaseShip{
         $this->addFrontSystem(new DestabilizerBeam(4, 8, 6, 300, 60));
 
         $this->addAftSystem(new GraviticThruster(6, 30, 0, 12, 2));
-        $this->addAftSystem(new HeavyFusionCannon(4, 8, 6, 120, 240));
-        $this->addAftSystem(new HeavyFusionCannon(4, 8, 6, 120, 240));
+        $this->addAftSystem(new HeavyFusionCannon(4, 8, 4, 120, 240));
+        $this->addAftSystem(new HeavyFusionCannon(4, 8, 4, 120, 240));
 
         $this->addLeftSystem(new GraviticThruster(5, 20, 0, 6, 3));
-        $this->addLeftSystem(new HeavyFusionCannon(4, 8, 6, 240, 0));
+        $this->addLeftSystem(new HeavyFusionCannon(4, 8, 4, 240, 0));
         $this->addLeftSystem(new MolecularFlayer(5, 8, 4, 300, 360));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 120, 300));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 120, 300));
@@ -55,7 +55,7 @@ class Udran extends BaseShip{
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 60));
 
         $this->addRightSystem(new GraviticThruster(5, 20, 0, 6, 4));
-        $this->addRightSystem(new HeavyFusionCannon(4, 8, 6, 0, 120));
+        $this->addRightSystem(new HeavyFusionCannon(4, 8, 4, 0, 120));
         $this->addRightSystem(new MolecularFlayer(5, 8, 4, 0, 60));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 240));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 240));
