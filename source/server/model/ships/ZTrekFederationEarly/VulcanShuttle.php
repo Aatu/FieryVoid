@@ -39,10 +39,6 @@ class VulcanShuttle extends FighterFlight{
 			
             $fighter->imagePath = "img/ships/StarTrek/VulcanShuttle.png";
             $fighter->iconPath = "img/ships/StarTrek/VulcanShuttle_Large.png";
-			/*
-            $frontGun = new LightParticleBeam(300, 60, 2, 1);
-            $frontGun->displayName = "Ultralight Phase Cannon";
-			*/
 			
 			$frontGun = new TrekFtrPhaser(300, 60, 2, 1,"Phase Cannon");
             $fighter->addFrontSystem($frontGun);

@@ -7,8 +7,8 @@ class Prototype extends BaseShip{
         $this->pointCost = 20;
         $this->faction = "Custom Ships";
         $this->phpclass = "Prototype";
- //       $this->imagePath = "img/ships/Prototype.png";
-        $this->shipClass = "Regime Prototype";
+        $this->imagePath = "img/ships/Prototype.png";
+        $this->shipClass = "Advanced Cruiser Prototype";
         $this->shipSizeClass = 3;
         $this->canvasSize = 280;
         $this->fighters = array("normal"=>30);
@@ -16,7 +16,7 @@ class Prototype extends BaseShip{
 	    $this->notes = 'Thunderbolt capable.';
 	    $this->notes .= "<br>This is a custom ship only intended for use in a specific scenario, please do not use unless you've agreed it with your opponent first!";
 	    
-		$this->isd = 2263;
+		$this->isd = 2262;
 		$this->unofficial = true; 
         
 		
@@ -35,15 +35,18 @@ class Prototype extends BaseShip{
 		$this->initiative = 1*5; 
          
         $this->addPrimarySystem(new Reactor(7, 36, 0, 0));
-        $this->addPrimarySystem(new CnC(9, 24, 0, 0));
+        $this->addPrimarySystem(new CnC(8, 24, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 24, 5, 9));
+		$sensors = new Scanner(6, 24, 5, 9);
+		$sensors->markImproved();
+		$this->addPrimarySystem($sensors);        
         $this->addPrimarySystem(new Engine(6, 28, 0, 12, 3));
-		$this->addPrimarySystem(new Hangar(6, 36, 24));
-        $this->addPrimarySystem(new JumpEngine(6, 20, 4, 24));
+		$this->addPrimarySystem(new Hangar(6, 34));
+        $this->addPrimarySystem(new JumpEngine(6, 24, 3, 24));
 	    
 		
 		
-		$diffuserPort = new EnergyDiffuser(5, 12, 3, 270, 0);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+		$diffuserPort = new EnergyDiffuser(5, 12, 4, 270, 0);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
 		$tendril=new DiffuserTendril(20,'L');//absorbtion capacity,side
 		$diffuserPort->addTendril($tendril);
 		$this->addFrontSystem($tendril);
@@ -52,7 +55,7 @@ class Prototype extends BaseShip{
 		$this->addFrontSystem($tendril);
         $this->addFrontSystem($diffuserPort);		
 		
-		$diffuserStbd = new EnergyDiffuser(5, 12, 3, 0, 90);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+		$diffuserStbd = new EnergyDiffuser(5, 12, 4, 0, 90);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
 		$tendril=new DiffuserTendril(20,'R');//absorbtion capacity,side
 		$diffuserStbd->addTendril($tendril);
 		$this->addFrontSystem($tendril);
@@ -61,29 +64,31 @@ class Prototype extends BaseShip{
 		$this->addFrontSystem($tendril);
         $this->addFrontSystem($diffuserStbd);
 		
-        $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
-        $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(4, 15, 0, 5, 1));
+        $this->addFrontSystem(new Thruster(4, 15, 0, 5, 1));
 		$this->addFrontSystem(new MolecularSlicerBeamL(5, 0, 0, 300, 0));
-		$this->addFrontSystem(new MolecularSlicerBeamL(5, 0, 0, 0, 60));
-		$this->addFrontSystem(new MolecularSlicerBeamL(5, 0, 0, 330, 30));		
+		$this->addFrontSystem(new MolecularSlicerBeamL(5, 0, 0, 330, 30));
+		$this->addFrontSystem(new MolecularSlicerBeamL(5, 0, 0, 0, 60));		
 		$this->addFrontSystem(new PhasingPulseCannonH(4, 0, 0, 300, 0));
 		$this->addFrontSystem(new PhasingPulseCannonH(4, 0, 0, 0, 60));
         $this->addFrontSystem(new InterceptorMkII(2, 4, 2, 240, 60));
         $this->addFrontSystem(new InterceptorMkII(2, 4, 2, 300, 120));
 	    
-        $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
+
 		$this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
-        $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
 		$this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 7, 0, 2, 2));
 		$this->addAftSystem(new Thruster(3, 7, 0, 2, 2));		
+        $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
+		$this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
+		
 		$this->addAftSystem(new MolecularSlicerBeamL(5, 0, 0, 150, 210));
 		$this->addAftSystem(new PhasingPulseCannonH(4, 0, 0, 180, 240));
 		$this->addAftSystem(new PhasingPulseCannonH(4, 0, 0, 120, 180));
         $this->addAftSystem(new InterceptorMkII(2, 4, 2, 120, 300));
         $this->addAftSystem(new InterceptorMkII(2, 4, 2, 60, 240));
 				
-		$diffuserPort = new EnergyDiffuser(5, 12, 3, 180, 270);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+		$diffuserPort = new EnergyDiffuser(5, 12, 4, 180, 270);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
 		$tendril=new DiffuserTendril(20,'L');//absorbtion capacity,side
 		$diffuserPort->addTendril($tendril);
 		$this->addAftSystem($tendril);
@@ -92,7 +97,7 @@ class Prototype extends BaseShip{
 		$this->addAftSystem($tendril);
         $this->addAftSystem($diffuserPort);		
 		
-		$diffuserStbd = new EnergyDiffuser(5, 12, 3, 90, 180);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+		$diffuserStbd = new EnergyDiffuser(5, 12, 4, 90, 180);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
 		$tendril=new DiffuserTendril(20,'R');//absorbtion capacity,side
 		$diffuserStbd->addTendril($tendril);
 		$this->addAftSystem($tendril);

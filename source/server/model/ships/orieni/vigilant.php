@@ -9,6 +9,8 @@ class Vigilant extends BaseShip{
         $this->phpclass = "Vigilant";
         $this->imagePath = "img/ships/vigilant.png";
         $this->shipClass = "Vigilant Combat Support Ship";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+ 
 	    $this->isd = 2007;
         $this->shipSizeClass = 3;
         $this->fighters = array("light"=>6, "minesweeping shuttles"=>6);

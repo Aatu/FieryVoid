@@ -9,6 +9,7 @@ class Benevolent extends BaseShip{
         $this->phpclass = "Benevolent";
         $this->imagePath = "img/ships/benevolent.png";
         $this->shipClass = "Benevolent Heavy Scout";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 	    $this->isd = 2007;
         $this->shipSizeClass = 3;
         $this->fighters = array("light"=>6, "medium"=>6);

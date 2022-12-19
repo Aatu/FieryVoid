@@ -11,7 +11,9 @@ class Artees extends MediumShip{
         $this->shipClass = "Ar'tees Battle Transport";
         $this->canvasSize = 100;
 			$this->variantOf = "Tra'shu'li Armed Liner";
-			$this->occurence = "uncommon";	
+			$this->occurence = "uncommon";
+			
+		$this->fighters = array("normal"=>6);				
 			
         $this->isd = 2195;
         
