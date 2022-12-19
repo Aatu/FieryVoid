@@ -9,7 +9,7 @@ class HermesOldFastBeta extends HeavyCombatVessel{
         $this->faction = "EA (early)";
         $this->phpclass = "HermesOldFastBeta";
         $this->imagePath = "img/ships/hermes.png";
-        $this->shipClass = "Hermes Fast Transport (Beta)";
+        $this->shipClass = "Hermes Priority Transport (Beta)";
         $this->variantOf = "Hermes Fast Transport (Alpha)";
 	    $this->unofficial = true;
         $this->isd = 2195;
