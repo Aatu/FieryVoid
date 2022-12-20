@@ -1,17 +1,15 @@
 <?php
-class Crusader extends MediumShip{
+class CrusaderAM extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 490;
         $this->faction = "Orieni";
-        $this->phpclass = "Crusader";
+        $this->phpclass = "CrusaderAM";
         $this->imagePath = "img/ships/commune.png";
         $this->shipClass = "Crusader Heavy Frigate";
-        //$this->variantOf = "Commune Battle Leader";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
- 
+        $this->variantOf = "Commune Battle Leader";
             $this->isd = 2007; 
 
         $this->canvasSize = 100;
@@ -29,6 +27,18 @@ class Crusader extends MediumShip{
         $this->occurence = "uncommon";
         $this->limited = 33; //not present on SCS, but for Commune it isn't either - and it's a Limited hull by WotCR book...
          
+        
+		        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(20); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 20); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+        $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+		//By the Book Orieni should have access to missie types: KK, B, A, H, L, C
+		//KK and C missiles are not present in FV however
+		
+		
         $this->addPrimarySystem(new Reactor(5, 18, 0, 0));
         $this->addPrimarySystem(new CnC(5, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 3, 6));
@@ -37,14 +47,13 @@ class Crusader extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 10, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 5, 4));        
         
-
-        $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
-        $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new HeavyGaussCannon(3, 10, 4, 240, 60));
         $this->addFrontSystem(new HeavyGaussCannon(3, 10, 4, 300, 120));
-        $this->addFrontSystem(new SMissileRack(3, 6, 0, 270, 90));
-        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
+        $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
+        $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
+		$this->addFrontSystem(new AmmoMissileRackS(5, 0, 0, 270, 90, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 
         $this->addAftSystem(new RapidGatling(2, 4, 1, 120, 360)); 
         $this->addAftSystem(new RapidGatling(2, 4, 1, 0, 240)); 
