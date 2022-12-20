@@ -72,6 +72,10 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Nexus polishing</b> - courtesy of Geoffrey
 	    
 	    
+		 <br><br>---------- <b>update 20th of December</b> ---------- 
+	    <br><b>Variable missile loads</b> - Orieni are in... and that's all of them! Next in line: missile loads for fighters (but that's for next year)
+
+	    
 <!--	    
 		 <br><br>---------- <b>update 26th of September</b> ---------- 
 	    <br><b>Variable missile loads</b> - new factions are in (Dilgar, Drazi)
