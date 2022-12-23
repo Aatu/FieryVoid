@@ -2865,6 +2865,10 @@ spl_autoload_register(
 						'vigilant1704am' => '/server/model/ships/orieni/vigilant1704AM.php',
 						'righteousam' => '/server/model/ships/orieni/righteousAM.php',
 						'righteous1894am' => '/server/model/ships/orieni/righteous1894AM.php',
+						'stormfrontam' => '/server/model/ships/orieni/stormfrontAM.php',
+						'stormfront1874am' => '/server/model/ships/orieni/stormfront1874AM.php',
+						'crusaderam' => '/server/model/ships/orieni/crusaderAM.php',
+						'crusader2003am' => '/server/model/ships/orieni/crusader2003AM.php',
 						
 						
 				
