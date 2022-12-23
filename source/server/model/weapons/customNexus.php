@@ -7657,70 +7657,99 @@ class FMissileRack extends Weapon {
 		public $hits = array();
 		
         public $rangePenalty = 0;
-        public $fireControl = array(6, 6, 6);
+        public $fireControlArray = array(1=>array(6, 6, 6), 2=>array(4, 4, 4));
+		public $firingModes = array(1=>'Standard', 2=>'Long-range'); //equals to available missiles; data is basic - if launcher is special, constructor will modify it
+		public $damageTypeArray = array(1=>'Standard', 2=>'Standard'); //indicates that this weapon does damage in Pulse mode
+
+		public $rangeArray = array(1=>20, 2=>35, 3=>15); 
+		public $distanceRangeArray = array(1=>60, 2=>75, 3=>45); 
 
         public $damageType = "Standard";
 		public $weaponClass = "Ballistic";
-		public $firingModes = array( 1 => "Standard");
-
-/*
-	 	public function getInterceptRating($turn){
-			if ($this->turnsloaded == 1)
-			{
-				return 2;
-			}
-			else
-			{
-				return 1;
-			}
-		}
-*/
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
 			if ( $maxhealth == 0 ) $maxhealth = 6;
 			if ( $powerReq == 0 ) $powerReq = 0;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+
+			if ($this->turnsloaded == 1) {
+				$basicFC = $this->fireControlArray[1]; //get current default values
+				$basicFC[0] = $basicFC[0] -2; //antifighter FC
+				$basicFC[1] = $basicFC[1] -2; //antimedium FC
+				$basicFC[2] = $basicFC[2] -2; //antiheavy FC 
+				$this->fireControlArray[1] = $basicFC;
+				$longFC = array(null, null, null); //LR FC is nullified as cannot fire in rapid mode immediately after long-range mode
+				$this->fireControlArray[2] = $longFC;
+				$this->changeFiringMode(1);    //recompile current values from arrays
+			}
+
+
+
+//        	switch($this->turnsloaded){
+//				case 1:
+					/*
+	                foreach ($this->fireControlArray as $key=>$FCarray){  //Rapid fire reduces the FC by 2
+                    $this->fireControlArray[$key][0] -= 2; //fighter
+                    $this->fireControlArray[$key][1] -= 2; //medium
+                    $this->fireControlArray[$key][2] -= 2; //Cap
+					}
+					*/
+//					$this->fireControlArray = array(1=>array(4, 4, 4), 2=>array(null, null, null));
+//				$this->range[$key][0] -= 5; //Rapid fire reduces the range by 5
+//                }
         }
 
         public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);   
-			$this->data["Special"] = "Can fire accelerated ROF with -5 range and -10 FC:";  
+			$this->data["Special"] = $this->fireControlArray;  
+//			$this->data["Special"] = "Can fire accelerated ROF with -5 range and -10 FC:";  
 //			$this->data["Special"] .= "<br> - 1 turn: 1d10+6, intercept -10"; 
 		}
 	
-		public function getDamage($fireOrder){
-        	switch($this->turnsloaded){
-            	case 0:
-            	case 1:
-                	return 20;
-			    	break;
-            	default:
-                	return 20;
-			    	break;
-        	}
+	public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1: //Standard
+				return 20; 
+				break;
+			case 2: //Long-Range
+				return 20; 
+				break;
+			default: //most missiles do the same damage
+				return 20; 
+				break;	
 		}
+	}
+	
+	public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1: //Standard
+				$this->minDamage = 20; 
+				break;
+			case 2: //Long-Range
+				$this->minDamage = 20; 
+				break;
+			default: //most missiles do the same damage
+				$this->minDamage = 20; 
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+	
+	public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1: //Standard
+				$this->maxDamage = 20; 
+				break;
+			case 2: //Long-Range
+				$this->maxDamage = 20; 
+				break;
+			default: //most missiles do the same damage
+				$this->maxDamage = 20; 
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
 
- 		public function setMinDamage(){
-            switch($this->turnsloaded){
-                case 1:
-                    $this->minDamage = 20 ;
-                    break;
-                default:
-                    $this->minDamage = 20 ;  
-                    break;
-            }
-		}
-             
-        public function setMaxDamage(){
-            switch($this->turnsloaded){
-                case 1:
-                    $this->maxDamage = 20 ;
-                    break;
-                default:
-                    $this->maxDamage = 20 ;  
-                    break;
-            }
-		}
 
 		public function stripForJson(){
 			$strippedSystem = parent::stripForJson();
@@ -7728,7 +7757,9 @@ class FMissileRack extends Weapon {
 			$strippedSystem->minDamage = $this->minDamage;
 			$strippedSystem->minDamageArray = $this->minDamageArray;
 			$strippedSystem->maxDamage = $this->maxDamage;
-			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;		
+			$strippedSystem->fireControlArray = $this->fireControlArray;
+			$strippedSystem->range = $this->range;
 			return $strippedSystem;
 		}
 
