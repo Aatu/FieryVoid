@@ -10,6 +10,8 @@ class RogolonTovin extends HeavyCombatVessel{
         $this->imagePath = "img/ships/RogolonSmallWarship.png";
         $this->shipClass = "Rogolon Tovin Small Warship";
         $this->occurence = "common";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+ 
 
         $this->isd = 1966;
         

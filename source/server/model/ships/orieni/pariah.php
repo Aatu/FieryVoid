@@ -9,7 +9,9 @@ class Pariah extends BaseShip{
         $this->phpclass = "Pariah";
         $this->imagePath = "img/ships/enlightenment.png";
         $this->shipClass = "Pariah Light Command Ship";
-        $this->variantOf = "Enlightenment Invader";
+        //$this->variantOf = "Enlightenment Invader";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+ 
         $this->occurence = "uncommon";
 	    $this->isd = 2009;
 	    

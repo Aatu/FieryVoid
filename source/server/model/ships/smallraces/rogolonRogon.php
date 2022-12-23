@@ -11,6 +11,8 @@ class RogolonRogon extends BaseShip{
         $this->shipClass = "Rogolon Rogon Large Warship";
         $this->limited = 33;
         $this->fighters = array("normal" => 24, "superheavy" => 2);
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+ 
 
         $this->isd = 1987;
 
