@@ -658,7 +658,12 @@ class Engine extends ShipSystem implements SpecialAbility {
         $this->thrustused = (int)$thrustused;
         $this->boostEfficiency = (int)$boostEfficiency;
     }
-
+	
+    public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);   
+		$this->data["Own thrust"] = $this->output;
+    }
+	
     public function markEngineFlux(){
         $this->specialAbilities[] = "EngineFlux";
         $this->specialAbilityValue = true; //so it is actually recognized as special ability!
@@ -1426,7 +1431,7 @@ class JumpEngine extends ShipSystem{
 	
      public function setSystemDataWindow($turn){
         $this->data["Special"] = "SHOULD NOT be shut down for power (unless damaged >50% or in desperate circumstances).";
-	parent::setSystemDataWindow($turn);     
+		parent::setSystemDataWindow($turn);     
     }
 }
 
