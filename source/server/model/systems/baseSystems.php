@@ -46,6 +46,7 @@ class Jammer extends ShipSystem implements SpecialAbility{
     }
 
     public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
         $this->data["Special"] = "Denies a hostile OEW-lock versus this ship.";
         $this->data["Special"] .= "<br>Doesn't work ws own faction (eg. Minbari Jammer won't work against hostile Minbari).";
 		$this->data["Special"] .= "<br>Enabling/Disabling Jammer will affect enemy missile launches on NEXT turn!";	     
@@ -106,8 +107,8 @@ class Fighterimprsensors extends ShipSystem implements SpecialAbility{
     }
     
     public function setSystemDataWindow($turn){
-            $this->data["Special"] = "Halves effectiveness of enemy Jammer (not that of advanced races)."; //not that of advanced races
-        }
+		$this->data["Special"] = "Halves effectiveness of enemy Jammer (not that of advanced races)."; //not that of advanced races
+	}
     
     public function getSpecialAbilityValue($args)
     {     
@@ -178,6 +179,7 @@ class Shield extends ShipSystem implements DefensiveSystem{
     }
     
     public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
 		$damageReduction = $this->output;
 		$profileReduction = $this->output *5;
 		$this->data["Special"] = "Reduces damage done by incoming shots by $damageReduction."; 
