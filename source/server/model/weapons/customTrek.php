@@ -114,7 +114,7 @@ class TrekLtPhaseCannon extends TrekPhaserBase{
         public $raking = 6;
         
         public $intercept = 2;
-		public $priority = 6; //light Raking		
+		public $priority = 8; //light Raking		
 		
         public $loadingtime = 1;
 		
@@ -156,7 +156,8 @@ class TrekPhaseCannon extends TrekPhaserBase{
         public $raking = 8;
         
         public $intercept = 2;
-		public $priority = 8; //light Raking		
+		public $priority = 8; //light Raking	
+		public $priorityAF = 3; //as heavy Raking vs fighters!		
 		
         public $loadingtime = 1;
 		public $normalload = 2;
@@ -192,7 +193,6 @@ class TrekPhaseCannon extends TrekPhaserBase{
 	
 		public function getDamage($fireOrder){
         	switch($this->turnsloaded){
-            	case 0:
             	case 1:
                 	return Dice::d(10)+3;
 			    	break;
@@ -247,7 +247,8 @@ class TrekHvyPhaseCannon extends TrekPhaserBase{
         public $raking = 10;
         
         public $intercept = 1;
-		public $priority = 8; 		
+		public $priority = 7; //technically light Raking, but they're heaviest Raking guns that early Federation has - and stand out in the context of Federation fleet  	
+		public $priorityAF = 3; //as heavy Raking vs fighters!		
 		
         public $loadingtime = 2;
 		public $normalload = 3;
@@ -279,7 +280,6 @@ class TrekHvyPhaseCannon extends TrekPhaserBase{
 	
 		public function getDamage($fireOrder){
         	switch($this->turnsloaded){
-            	case 0:
             	case 1:
                 	return Dice::d(10,2)+8;
 			    	break;
@@ -335,7 +335,8 @@ class TrekPhaser extends TrekPhaserBase{
         public $raking = 10;
         
         public $intercept = 2;
-		public $priority = 8; //light Raking		
+		public $priority = 8; //light Raking	
+		public $priorityAF = 3; //as heavy Raking vs fighters!		
 		
         public $loadingtime = 1;
 		public $normalload = 2;
@@ -429,7 +430,9 @@ class TrekPhaserLance extends TrekPhaserBase{
         public $raking = 10;
         
         public $intercept = 2;
-		public $priority = 8; //light Raking		
+		public $priority = 7; //technically light Raking, but borderline - and they're by far heaviest weapons that Federation has - hence 'heavy Raking' status
+		public $priorityArray = array(1=>7, 2=>8);		
+		public $priorityAF = 3; //both Lance and full Phaser are treated as heavy vs fighters
 		
         public $loadingtime = 2;
     	public $gunsArray = array(1=>1, 2=>2); //one Lance, but two Beam shots!
@@ -551,6 +554,8 @@ class TrekLightPhaserLance extends TrekPhaserBase{
         public $intercept = 2;
 		public $priority = 8; //light Raking		
     	public $gunsArray = array(1=>1, 2=>2); //one Lance, but two Beam shots!
+		public $priorityAF = 3; //heavy Raking vs fighters!	
+		public $priorityAFArray = array(1=>3, 2=>4); ///...but regular Light Phasers are light vs fighters as well
 		
         public $loadingtime = 1;
 		
@@ -1044,6 +1049,7 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 		$this->data["Special"] = "Defensive system which absorbs damage from incoming shots before they damage ship hull.";
 		$this->data["Special"] .= "<br>Can absorb up to " . $absorb . " damage points per hit after projection armour is applied, ";
 		$this->data["Special"] .= "<br>Protects from every separate impact (e.g. every rake!) separately.";
+		$this->data["Special"] .= "<br>Projection armour cannot absorb more than half of any impact.";
 		$this->data["Special"] .= "<br>System's structure represents damage capacity. If it is reduced to zero system will cease to function.";
 		$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
 		$this->data["Special"] .= "<br>This is NOT a shield as far as any shield-related interactions go.";
@@ -1092,7 +1098,7 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 		if($remainingCapacity>0) { //else projection does not protect
 			$absorbedFreely = 0;
 			//first, armor takes part
-			$absorbedFreely = min($this->armour, $damageToAbsorb);
+			$absorbedFreely = min($this->armour, (floor($damageToAbsorb/2)));
 			$damageToAbsorb += -$absorbedFreely;
 			//next, actual absorbtion
 			$absorbedDamage = min($this->output - $this->armour, $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
@@ -1257,6 +1263,7 @@ class TrekShieldFtr extends ShipSystem{
 		$absorb = $this->output - $this->armour;
 		$this->data["Special"] = "Defensive system which absorbs damage from incoming shots before they damage ship hull.";
 		$this->data["Special"] .= "<br>Can absorb up to " . $absorb . " damage points per hit after projection armour is applied, ";
+		$this->data["Special"] .= "<br>Projection armour cannot absorb more than half of any impact.";
 		$this->data["Special"] .= "<br>If damage capacity it is reduced to zero system will cease to function.";
 		$this->data["Special"] .= "<br>Recharges at end of turn, after firing. Recharge rate is doubled if fighter doesn't use its direct fire weapons.";
 		$this->data["Special"] .= "<br>This is NOT a shield as far as any shield-related interactions go.";
@@ -1313,7 +1320,7 @@ class TrekShieldFtr extends ShipSystem{
 		if($remainingCapacity>0) { //else projection does not protect
 			$absorbedFreely = 0;
 			//first, armor takes part
-			$absorbedFreely = min($this->armour, $damageToAbsorb);
+			$absorbedFreely = min($this->armour, (floor($damageToAbsorb/2)));
 			$damageToAbsorb += -$absorbedFreely;
 			//next, actual absorbtion
 			$absorbedDamage = min($this->output - $this->armour, $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
