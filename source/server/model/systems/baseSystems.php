@@ -1175,7 +1175,8 @@ class PakmaraCnC extends CnC{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= 'This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead. Initiative penalties for critical hits are doubled.';
+		$this->data["Special"] .= "Pak'ma'ra C&C: Initiative penalties for critical hits are doubled.";
+		$this->data["Special"] .= '<br>This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
 	}
 
 			public $possibleCriticals = array(

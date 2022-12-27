@@ -92,13 +92,13 @@ class Tharnotak extends BaseShip{
                 ),
                 3=> array(
                         4 => "Thruster",
-                        7 => "Heavy Plasma Cannon",
+                        7 => "Mega Plasma Cannon",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 4=> array(
                         4 => "Thruster",
-                        7 => "Heavy Plasma Cannon",
+                        7 => "Mega Plasma Cannon",
                         18 => "Structure",
                         20 => "Primary",
                 ),

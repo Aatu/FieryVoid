@@ -1455,6 +1455,54 @@ class TrekShieldFtr extends ShipSystem{
 
 
 /*super-heavy fighter weapon*/
+ class TrekFtrPhaseCannon extends Raking{
+        public $name = "TrekFtrPhaseCannon";
+        public $displayName = "Phaser"; 
+        public $animation = "laser";
+        public $animationColor = array(225, 0, 0);
+        public $iconPath = "TrekLightPhaseCannon.png";
+
+        public $loadingtime = 2;
+        public $raking = 6;
+        public $shots = 2;
+        public $defaultShots = 2;
+		public $priority = 8; //Raking weapon
+        public $intercept = 2;
+
+        public $rangePenalty = 1.5; //-3 per 2 hexes
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        private $damagebonus = 0;
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle";         
+
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots, $raking, $nameBase = 'Phaser'){ //just so it can be easily renamed to eg. Phase Cannon
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            $this->intercept = $nrOfShots;		
+            $this->raking = $raking;	
+			$this->displayName = 'Fighter Heavy ' . $nameBase;
+
+
+            if($nrOfShots == 1){
+                $this->iconPath = "TrekLightPhaseCannon1.png";
+			}else{ //more than 1
+                $this->iconPath = "TrekLightPhaseCannon2.png";
+            }
+
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(6,2)+$this->damagebonus;   }
+        public function setMinDamage(){     $this->minDamage = 2+$this->damagebonus ;      }
+        public function setMaxDamage(){     $this->maxDamage = 12+$this->damagebonus ;      }
+    } 
+/*old version
     class TrekFtrPhaseCannon extends TrekPhaserBase{
         public $name = "TrekFtrPhaseCannon";
         public $displayName = "Phase Cannon";
@@ -1486,7 +1534,9 @@ class TrekShieldFtr extends ShipSystem{
         public function setMinDamage(){   return  $this->minDamage = 6 ;      }
         public function setMaxDamage(){   return  $this->maxDamage = 16 ;      }
 		
-    }  //end of class Trek Fighter Light Phase Cannon
+    }  
+*/	
+//end of class Trek Fighter Light Phase Cannon
 
 
 
