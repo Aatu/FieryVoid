@@ -7632,66 +7632,80 @@ class ProximityLaser extends Laser{
 
 
 
-class FMissileRack extends Weapon{
-	public $name = "FMissileRack";
-        public $displayName = "ToBeSetInConstructor";
-    public $useOEW = false;
-    public $ballistic = true;
-    public $animation = "trail";
-    public $animationColor = array(50, 50, 50);
 
-    public $range = 20;
-    public $distanceRange = 60;
-    public $firingMode = 1;
-    public $rangeMod = 0;
-    public $priority = 6;
-    public $hits = array();
-    public $loadingtime = 2;
-    public $iconPath = "ClassFMissileRack.png";    
 
-    private $rackExplosionDamage = 70; //how much damage will this weapon do in case of catastrophic explosion
-    private $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
-    
-    public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-    public $weaponClass = "Ballistic"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+class FMissileRack extends Weapon {
+		public $name = "FMissileRack";
+        public $displayName = "Class-F Missile Rack";
+        public $iconPath = "ClassFMissileRack.png";
+
+		public $useOEW = false;
+		public $ballistic = true;
 	
-    public $loadingtimeArray = array(1=>2, 2=>2, 3=>1); //mode 1 should be the one with longest loading time
-	public $firingModes = array(1=>'Standard', 2=>'Long-range', 3=>'Rapid-fire'); //equals to available missiles; data is basic - if launcher is special, constructor will modify it
-	public $damageTypeArray = array(1=>'Standard', 2=>'Standard', 3=>'Standard'); //indicates that this weapon does damage in Pulse mode
-    public $fireControlArray = array(1=>array(6, 6, 6), 2=>array(4, 4, 4), 3=>array(4, 4, 4)); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
-    //typical (class-S) launcher is FC 3/3/3 and warhead +3 - which would mean 6/6/6!
-    public $rangeArray = array(1=>20, 2=>35, 3=>15); 
-	public $distanceRangeArray = array(1=>60, 2=>75, 3=>45); 
-    
-    /*ATYPICAL constructor: doesn't take health and power usage, but takes desired launcher type - and does appropriate modifications*/
-        function __construct($armour, $launcherType, $startArc, $endArc, $base=false)
-        {
-		switch($launcherType){ //modifications dependent on launcher type...
-			case 'F': //standard old: lesser FC, holds less missiles (= lesser crit potential!)
-				$this->displayName = "Class-F Missile Rack";
-				$maxhealth = 6;
-				$this->iconPath = "ClassFMissileRack.png";  
-				break;
-			default: //this includes class-S, which is pretty default :)
-				$this->displayName = "Class-S Missile Rack";
-				$maxhealth = 6;
-				$this->iconPath = "ClassFMissileRack.png";  
-				//range, rangeArray, distanceRange, loadingtime, fireControlArray, rackExplosionDamage, rackExplosionThreshold - standard
-				break;
-		}
+        public $animation = "trail";
+        public $animationColor = array(50, 50, 50);
+
+        public $intercept = 0;
+		public $priority = 6; 		
 		
-		if ($base){ //mounted on base: launch range = distance range
-			foreach ($this->rangeArray as $key=>$rng) {
-		    		$this->rangeArray[$key] = $this->distanceRangeArray[$key]; 
-			}         
-		}
+        public $loadingtime = 1;
+		public $normalload = 2;
+
+		public $range = 20;
+		public $distanceRange = 60;
+		public $rangeMod = 0;
+		public $hits = array();
 		
-		$this->range = $this->rangeArray[1]; //base range = first range
-		$this->distanceRange = $this->distanceRangeArray[1]; //base range = first range
-		
-		parent::__construct($armour, $maxhealth, 0, $startArc, $endArc);
+        public $rangePenalty = 0;
+        public $fireControlArray = array(1=>array(6, 6, 6), 2=>array(4, 4, 4));
+		public $firingModes = array(1=>'Standard', 2=>'Long-range'); //equals to available missiles; data is basic - if launcher is special, constructor will modify it
+		public $damageTypeArray = array(1=>'Standard', 2=>'Standard'); //indicates that this weapon does damage in Pulse mode
+
+		public $rangeArray = array(1=>20, 2=>35); //, 3=>15); 
+		public $distanceRangeArray = array(1=>60, 2=>75); //, 3=>45); 
+
+        public $damageType = "Standard";
+		public $weaponClass = "Ballistic";
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 6;
+			if ( $powerReq == 0 ) $powerReq = 0;
+			if ($this->turnsloaded == 1) {
+				$basicFC = $this->fireControlArray[1]; //get current default values
+				$basicFC[0] = $basicFC[0] -2; //antifighter FC
+				$basicFC[1] = $basicFC[1] -2; //antimedium FC
+				$basicFC[2] = $basicFC[2] -2; //antiheavy FC 
+				$this->fireControlArray[1] = $basicFC;
+				$longFC = array(null, null, null); //LR FC is nullified as cannot fire in rapid mode immediately after long-range mode
+				$this->fireControlArray[2] = $longFC;
+				$this->changeFiringMode(1);    //recompile current values from arrays
+			}
+
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+
+
+
+
+//        	switch($this->turnsloaded){
+//				case 1:
+					/*
+	                foreach ($this->fireControlArray as $key=>$FCarray){  //Rapid fire reduces the FC by 2
+                    $this->fireControlArray[$key][0] -= 2; //fighter
+                    $this->fireControlArray[$key][1] -= 2; //medium
+                    $this->fireControlArray[$key][2] -= 2; //Cap
+					}
+					*/
+//					$this->fireControlArray = array(1=>array(4, 4, 4), 2=>array(null, null, null));
+//				$this->range[$key][0] -= 5; //Rapid fire reduces the range by 5
+//                }
         }
-	
+
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);   
+			$this->data["Special"] = $this->fireControlArray;  
+//			$this->data["Special"] = "Can fire accelerated ROF with -5 range and -10 FC:";  
+//			$this->data["Special"] .= "<br> - 1 turn: 1d10+6, intercept -10"; 
+		}
 	
 	public function getDamage($fireOrder){ 
 		switch($this->firingMode){
@@ -7701,14 +7715,12 @@ class FMissileRack extends Weapon{
 			case 2: //Long-Range
 				return 20; 
 				break;
-			case 3: //Rapid-fire
-				return 20; 
-				break;
 			default: //most missiles do the same damage
 				return 20; 
 				break;	
 		}
 	}
+	
 	public function setMinDamage(){ 
 		switch($this->firingMode){
 			case 1: //Standard
@@ -7717,24 +7729,19 @@ class FMissileRack extends Weapon{
 			case 2: //Long-Range
 				$this->minDamage = 20; 
 				break;
-			case 3: //Rapid-fire
-				$this->minDamage = 20; 
-				break;
 			default: //most missiles do the same damage
 				$this->minDamage = 20; 
 				break;	
 		}
 		$this->minDamageArray[$this->firingMode] = $this->minDamage;
 	}
+	
 	public function setMaxDamage(){
 		switch($this->firingMode){
-			case 2: //Standard
+			case 1: //Standard
 				$this->maxDamage = 20; 
 				break;
-			case 3: //Long-Range
-				$this->maxDamage = 20; 
-				break;
-			case 5: //Rapid-fire
+			case 2: //Long-Range
 				$this->maxDamage = 20; 
 				break;
 			default: //most missiles do the same damage
@@ -7743,60 +7750,23 @@ class FMissileRack extends Weapon{
 		}
 		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 	}
-    
-	public function setSystemDataWindow($turn){
-		$this->data["Range"] = $this->range . '/' . $this->distanceRange;
-		$this->data["Special"] = 'Multiple firing modes available.';
-		$this->data["Special"] .= '<br>Currently, can only use basic missiles.';
-		$this->data["Special"] .= '<br> - Standard: Uses basic missile stats.';
-		$this->data["Special"] .= '<br> - Long-range: +15 range, -2 fire control.';
-		$this->data["Special"] .= '<br> - Rapid-fire: -5 range, -2 fire control, may fire every turn.';
-		parent::setSystemDataWindow($turn);
-        }
-    
-    public function testCritical($ship, $gamedata, $crits, $add = 0){ //add testing for ammo explosion!
-        $explodes = false;
-        $roll = Dice::d(20);
-        if ($roll >= $this->rackExplosionThreshold) $explodes = true;
-        
-        if($explodes){
-            $this->ammoExplosion($ship, $gamedata, $this->rackExplosionDamage);            
-            $this->addMissileCritOnSelf($ship->id, "AmmoExplosion", $gamedata);
-        }else{
-            $crits = parent::testCritical($ship, $gamedata, $crits, $add);
-        }
-        
-        return $crits;
-    } //endof function testCritical
 
-    public function ammoExplosion($ship, $gamedata, $damage){
-        //first, destroy self if not yet done...
-        if (!$this->isDestroyed()){
-            $this->noOverkill = true;
-            $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
-                    $gamedata->turn, 'standard', 100, 1, 1, 1, 0, null, null, 'ballistic');
-            $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
-            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, null, $gamedata, true, $this->location);
-        }
-        
-        //then apply damage potential as a hit...
-        if($damage>0){
-            $this->noOverkill = false;
-            $this->damageType = 'Flash'; //should be Raking by the rules, but Flash is much easier to do - and very fitting for explosion!
-            $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
-                    $gamedata->turn, 'flash', 100, 1, 1, 1, 0, null, null, 'ballistic');
-            $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->location); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
-        }
-    }
-    
-    public function addMissileCritOnSelf($shipid, $phpclass, $gamedata){
-        $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
-        $crit->updated = true;
-        $this->criticals[] =  $crit;
-    }        
- 
-} //endof class FMissileRack  
 
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;		
+			$strippedSystem->fireControl = $this->fireControl;
+			$strippedSystem->fireControlArray = $this->fireControlArray;
+//			$strippedSystem->range = $this->range;
+			return $strippedSystem;
+		}
+
+}//end of class FMissileRack
+	
 
 
 
@@ -8200,9 +8170,6 @@ class MultiDefenseLauncher extends Weapon {
 		parent::__construct($armour, $maxhealth, 0, $startArc, $endArc);
         }
 
-
-
-
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 //		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
 
@@ -8266,10 +8233,6 @@ class MultiDefenseLauncher extends Weapon {
 		}
 
 	} //endof function onDamagedSystem
-
-
-
-
 
 	public function getDamage($fireOrder){ 
 		switch($this->firingMode){
@@ -8344,7 +8307,6 @@ class MultiDefenseLauncher extends Weapon {
         return true;
     }
 
-
     public function testCritical($ship, $gamedata, $crits, $add = 0){ //add testing for ammo explosion!
         $explodes = false;
         $roll = Dice::d(20);
@@ -8359,7 +8321,6 @@ class MultiDefenseLauncher extends Weapon {
 
         return $crits;
     } //endof function testCritical
-
 
     public function ammoExplosion($ship, $gamedata, $damage){
         //first, destroy self if not yet done...

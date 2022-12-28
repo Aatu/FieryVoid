@@ -1,17 +1,15 @@
 <?php
-class StormFront extends MediumShip{
+class StormFrontAM extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 390;
 		$this->faction = "Orieni";
-        $this->phpclass = "StormFront";
+        $this->phpclass = "StormFrontAM";
         $this->imagePath = "img/ships/stormFront.png";
         $this->shipClass = "Storm Front Missile Corvette";
-		//$this->variantOf = "Steadfast Escort Corvette";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
- 
+		$this->variantOf = "Steadfast Escort Corvette";
 		$this->isd = 2007;	    
 		$this->occurence = "uncommon";
 	    
@@ -27,6 +25,19 @@ class StormFront extends MediumShip{
         $this->rollcost = 2;
         $this->pivotcost = 3;
 		$this->iniativebonus = 60;
+		
+		
+		        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(60); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 60); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+        $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+		//By the Book Orieni should have access to missie types: KK, B, A, H, L, C
+		//KK and C missiles are not present in FV however
+		
+		
         
          
         $this->addPrimarySystem(new Reactor(4, 15, 0, 2));
@@ -37,9 +48,9 @@ class StormFront extends MediumShip{
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 5, 3));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 5, 4));        
 		
-        $this->addFrontSystem(new SMissileRack(3, 6, 0, 240, 60));
-        $this->addFrontSystem(new SMissileRack(3, 6, 0, 270, 90));
-        $this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 120));
+		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 240, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 270, 90, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addFrontSystem(new Thruster(1, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(1, 6, 0, 2, 1));
