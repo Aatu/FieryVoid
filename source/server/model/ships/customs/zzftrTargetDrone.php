@@ -45,9 +45,8 @@ class zzftrTargetDrone extends FighterFlight{
             $fighter->iconPath = "img/ships/tigerStarfury2_large.png"; 
 		            
        		
-            $frontGun = new TrekFtrPhaseCannon(330, 30, 0);
-//            $frontGun->displayName = "Uni-Pulse Cannon";
-            $fighter->addFrontSystem($frontGun);
+			$frontGun1 = new TrekFtrPhaser(210, 30, 2, 1,"Phase Cannon");
+            $fighter->addFrontSystem($frontGun1);
 
 //            $frontGun = new SWFighterIon(300, 60, 2, 3); //fwd triple Ion Cannons
 //            $fighter->addFrontSystem($frontGun);

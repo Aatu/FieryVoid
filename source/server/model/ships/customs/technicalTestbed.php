@@ -23,7 +23,7 @@ class TechnicalTestbed extends MediumShip{
         $this->iniativebonus = 30;
         
          
-        $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
+        $this->addPrimarySystem(new Reactor(5, 20, 0, -30));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 4, 7));
         $this->addPrimarySystem(new Engine(5, 15, 0, 8, 2));
@@ -44,14 +44,16 @@ class TechnicalTestbed extends MediumShip{
         
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
+		/*
         $this->addFrontSystem(new MediumPulse(3, 6, 3, 240, 0));
         $this->addFrontSystem(new MediumPulse(3, 6, 3, 240, 0));
         $this->addFrontSystem(new MediumPulse(3, 6, 3, 0, 120));
         $this->addFrontSystem(new MediumPulse(3, 6, 3, 0, 120));
+		*/
         $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 270, 90));
-        $this->addFrontSystem(new RailGun(4, 9, 6, 0, 0));
+        //$this->addFrontSystem(new RailGun(4, 9, 6, 0, 0));
 		
-        $this->addAftSystem(new RailGun(4, 9, 6, 0, 0));   
+        //$this->addAftSystem(new RailGun(4, 9, 6, 0, 0));   
         $this->addAftSystem(new InterceptorMkI(2, 4, 1, 90, 270));
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
