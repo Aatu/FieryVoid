@@ -7661,8 +7661,8 @@ class FMissileRack extends Weapon {
 		public $firingModes = array(1=>'Standard', 2=>'Long-range'); //equals to available missiles; data is basic - if launcher is special, constructor will modify it
 		public $damageTypeArray = array(1=>'Standard', 2=>'Standard'); //indicates that this weapon does damage in Pulse mode
 
-		public $rangeArray = array(1=>20, 2=>35, 3=>15); 
-		public $distanceRangeArray = array(1=>60, 2=>75, 3=>45); 
+		public $rangeArray = array(1=>20, 2=>35); //, 3=>15); 
+		public $distanceRangeArray = array(1=>60, 2=>75); //, 3=>45); 
 
         public $damageType = "Standard";
 		public $weaponClass = "Ballistic";
@@ -7670,8 +7670,6 @@ class FMissileRack extends Weapon {
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
 			if ( $maxhealth == 0 ) $maxhealth = 6;
 			if ( $powerReq == 0 ) $powerReq = 0;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-
 			if ($this->turnsloaded == 1) {
 				$basicFC = $this->fireControlArray[1]; //get current default values
 				$basicFC[0] = $basicFC[0] -2; //antifighter FC
@@ -7682,6 +7680,9 @@ class FMissileRack extends Weapon {
 				$this->fireControlArray[2] = $longFC;
 				$this->changeFiringMode(1);    //recompile current values from arrays
 			}
+
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+
 
 
 
@@ -7758,8 +7759,9 @@ class FMissileRack extends Weapon {
 			$strippedSystem->minDamageArray = $this->minDamageArray;
 			$strippedSystem->maxDamage = $this->maxDamage;
 			$strippedSystem->maxDamageArray = $this->maxDamageArray;		
+			$strippedSystem->fireControl = $this->fireControl;
 			$strippedSystem->fireControlArray = $this->fireControlArray;
-			$strippedSystem->range = $this->range;
+//			$strippedSystem->range = $this->range;
 			return $strippedSystem;
 		}
 
