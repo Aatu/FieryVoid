@@ -1215,7 +1215,7 @@
     class QuadArray extends Particle{
         public $name = "quadArray";
         public $displayName = "Quad Array";
-        public $iconPath = "quadParticleBeam.png";//"quadArray.png";
+        public $iconPath = "quadArray.png";
         public $animation = "bolt";
 	    /*
         public $animationColor = array(255, 163, 26);
