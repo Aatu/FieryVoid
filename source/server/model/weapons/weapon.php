@@ -796,6 +796,32 @@ class Weapon extends ShipSystem
         return new WeaponLoading($this->getTurnsloaded(), $this->overloadshots, $this->getLoadedAmmo(), $this->overloadturns, $this->getLoadingTime(), $this->firingMode);
     }
 
+	
+	//returns $turnsloaded if >0 and weapon is enabled; 
+	//if weapon is disabled, returns 0
+	//if $turnsloaded is 0 and weapon is enabled (meaning it has just been fired) - returns time that passed from most recent shot (or being disabled)
+	//..for some reason does not work - possibly loaded date does not contain proper historical firing references...
+	/*
+	public function getLoadingBeforeCurrentShot()
+	{
+		if ($this->turnsloaded >=1 ) return $this->turnsloaded;
+		if ($this->isOfflineOnTurn(TacGamedata::$currentTurn)) return 0;
+		//weapon is enabled and has just been fired... calculate time that passed from most recent shot
+		$turnsArmed = 1; //current turn, at the very least
+		for($turnToCheck = TacGamedata::$currentTurn -1; $turnToCheck >= 0; $turnToCheck--){
+			if ($turnToCheck == 0) { //start of game - meaning weapon is fully charged
+				$turnsArmed = $this->loadingtime;
+				break;
+			}
+			if ($this->isOfflineOnTurn($turnToCheck)) break; //weapon was disabled
+			if ($this->firedOnTurn($turnToCheck)) break; //weapon was fired
+			$turnsArmed++; //weapon was armed, increase loading time
+			if($turnsArmed >= $this->loadingtime) break; //full loading time reached, no point checking further
+		}
+		return $turnsArmed;
+	} //endof function getLoadingBeforeCurrentShot
+	*/
+	
     public function beforeTurn($ship, $turn, $phase)
     {
         parent::beforeTurn($ship, $turn, $phase);

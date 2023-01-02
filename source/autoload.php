@@ -2676,7 +2676,6 @@ spl_autoload_register(
 //         		'chaffmissile' => '/server/model/weapons/customNexus.php', 
          		'proximitylaser' => '/server/model/weapons/customNexus.php', 
          		'fmissilerack' => '/server/model/weapons/customNexus.php', 
-         		'dmissilerack' => '/server/model/weapons/customNexus.php', 
 //         		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
          		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
 //				'cokra' => '/server/model/ships/korlyan/Cokra.php',
@@ -2751,6 +2750,8 @@ spl_autoload_register(
                 		'ammomissileracklh' => '/server/model/weapons/missile.php',
                 		'ammomissilerackr' => '/server/model/weapons/missile.php',
                 		'ammobombrack' => '/server/model/weapons/missile.php',
+						
+						
 		    
 						//EA
                 		'sagittariusam' => '/server/model/ships/EA/sagittariusAM.php', //ships using new style launchers (and magazine of course)
