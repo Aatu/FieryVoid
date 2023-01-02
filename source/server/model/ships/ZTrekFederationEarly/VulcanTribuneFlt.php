@@ -49,9 +49,7 @@ class VulcanTribuneFlt extends FighterFlight{
 			$frontGun1 = new TrekFtrPhaser(210, 30, 2, 1,"Phase Cannon");
             $fighter->addFrontSystem($frontGun1);
 
-            $frontGun = new TrekFtrPhaseCannon(330, 30, 2, 1);
-            //$frontGun->displayName = "Light Phase Cannon"; //no need to rename
-			//should NOT be exclusive
+            $frontGun = new TrekFtrPhaseCannon(330, 30, 4, 1, 6, "Phase Cannon"); //arc from/to, damage bonus, number of shots, rake size, base weapon name
             $fighter->addFrontSystem($frontGun);
 
 			$frontGun2 = new TrekFtrPhaser(330, 150, 2, 1,"Phase Cannon");

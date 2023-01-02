@@ -46,6 +46,7 @@ class Jammer extends ShipSystem implements SpecialAbility{
     }
 
     public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
         $this->data["Special"] = "Denies a hostile OEW-lock versus this ship.";
         $this->data["Special"] .= "<br>Doesn't work ws own faction (eg. Minbari Jammer won't work against hostile Minbari).";
 		$this->data["Special"] .= "<br>Enabling/Disabling Jammer will affect enemy missile launches on NEXT turn!";	     
@@ -106,8 +107,8 @@ class Fighterimprsensors extends ShipSystem implements SpecialAbility{
     }
     
     public function setSystemDataWindow($turn){
-            $this->data["Special"] = "Halves effectiveness of enemy Jammer (not that of advanced races)."; //not that of advanced races
-        }
+		$this->data["Special"] = "Halves effectiveness of enemy Jammer (not that of advanced races)."; //not that of advanced races
+	}
     
     public function getSpecialAbilityValue($args)
     {     
@@ -178,6 +179,7 @@ class Shield extends ShipSystem implements DefensiveSystem{
     }
     
     public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
 		$damageReduction = $this->output;
 		$profileReduction = $this->output *5;
 		$this->data["Special"] = "Reduces damage done by incoming shots by $damageReduction."; 
@@ -658,7 +660,12 @@ class Engine extends ShipSystem implements SpecialAbility {
         $this->thrustused = (int)$thrustused;
         $this->boostEfficiency = (int)$boostEfficiency;
     }
-
+	
+    public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);   
+		$this->data["Own thrust"] = $this->output;
+    }
+	
     public function markEngineFlux(){
         $this->specialAbilities[] = "EngineFlux";
         $this->specialAbilityValue = true; //so it is actually recognized as special ability!
@@ -1175,7 +1182,8 @@ class PakmaraCnC extends CnC{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= 'This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead. Initiative penalties for critical hits are doubled.';
+		$this->data["Special"] .= "Pak'ma'ra C&C: Initiative penalties for critical hits are doubled.";
+		$this->data["Special"] .= '<br>This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
 	}
 
 			public $possibleCriticals = array(
@@ -1425,7 +1433,7 @@ class JumpEngine extends ShipSystem{
 	
      public function setSystemDataWindow($turn){
         $this->data["Special"] = "SHOULD NOT be shut down for power (unless damaged >50% or in desperate circumstances).";
-	parent::setSystemDataWindow($turn);     
+		parent::setSystemDataWindow($turn);     
     }
 }
 

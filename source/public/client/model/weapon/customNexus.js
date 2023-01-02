@@ -929,6 +929,17 @@ var FMissileRack = function  FMissileRack(json, ship) {
 };
 FMissileRack.prototype = Object.create(Weapon.prototype);
 FMissileRack.prototype.constructor =  FMissileRack;
+FMissileRack.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+	//here: transfer information about firing in Rapid mode
+	// (eg. weapon is being fired after 1 turn of arming)
+	var toReturn = false;
+    this.individualNotesTransfer = Array();	
+	if ((this.turnsloaded == 1) && (this.fireOrders.length > 0)) {
+		this.individualNotesTransfer.push('X');
+		toReturn = true;
+	}
+    return toReturn;
+};
 
 /*
 var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {

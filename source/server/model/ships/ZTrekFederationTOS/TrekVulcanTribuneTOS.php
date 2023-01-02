@@ -7,7 +7,6 @@ class TrekVulcanTribuneTOS extends FighterFlight{
         $this->pointCost = 125 *6; //for 6
         $this->faction = "ZTrek Playtest Federation (TOS)";
         $this->phpclass = "TrekVulcanTribuneTOS";
-			$this->variantOf = 'AWAITING CONFIRMATION';
         $this->shipClass = "Vulcan Tribune Short Range Craft";
         $this->imagePath = "img/ships/StarTrek/VulcanTribune.png";
 		$this->unofficial = true;
@@ -47,11 +46,12 @@ class TrekVulcanTribuneTOS extends FighterFlight{
             $fighter->imagePath = "img/ships/StarTrek/VulcanTribune.png";
             $fighter->iconPath = "img/ships/StarTrek/VulcanTribuneLarge.png";
 
-			$frontGun1 = new TrekFtrPhaser(210, 30, 2, 2,"Phaser");
-            $fighter->addFrontSystem($frontGun1);
-			
-			$frontGun = new TrekFtrPhaser(300, 60, 2, 2,"Point Defense Phaser");
+            $frontGun = new TrekFtrPhaseCannon(330, 30, 4, 2, 8, "Phaser"); //arc from/to, damage bonus, number of shots, rake size, base weapon name
             $fighter->addFrontSystem($frontGun);
+			
+			$pdGun = new TrekFtrPhaser(240, 120, 2, 2,"Point Defense Phaser");
+            $pdGun->displayName = "Point Defense Phaser";
+            $fighter->addFrontSystem($pdGun);
 			
 			$fighter->addAftSystem(new TrekShieldFtr(2, 6, 4, 2) ); //armor, health, rating, recharge
 			

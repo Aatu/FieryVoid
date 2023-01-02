@@ -17,6 +17,7 @@ class InitialOrdersGamePhase implements Phase
             $dbManager->setPlayerWaitingStatus($ship->userid, $gameData->id, false);
             $gameData->setActiveship($ship->id);
         }
+				
         $dbManager->updateGamedata($gameData);
 
     }
@@ -74,7 +75,7 @@ class InitialOrdersGamePhase implements Phase
                 throw new Exception("Failed to validate Ballistic firing orders");
             }
         }
-		
+				
 
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn);
         $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);

@@ -7657,12 +7657,15 @@ class FMissileRack extends Weapon {
 		public $hits = array();
 		
         public $rangePenalty = 0;
-        public $fireControlArray = array(1=>array(6, 6, 6), 2=>array(4, 4, 4));
+        public $fireControlArray = array(1=>array(6, 6, 6), 2=>array(6, 6, 6)); //missile OEW directly added to weapon FC
+        private $baseFireControlArray = null; //base values of fire control - copy necessary due to necessity of recalculation now and then!
+		private $firedInRapidMode = false; //was this weapon fired in rapid mode (this turn)?
+		
 		public $firingModes = array(1=>'Standard', 2=>'Long-range'); //equals to available missiles; data is basic - if launcher is special, constructor will modify it
 		public $damageTypeArray = array(1=>'Standard', 2=>'Standard'); //indicates that this weapon does damage in Pulse mode
 
-		public $rangeArray = array(1=>20, 2=>35); //, 3=>15); 
-		public $distanceRangeArray = array(1=>60, 2=>75); //, 3=>45); 
+		public $rangeArray = array(1=>20, 2=>30); 
+		public $distanceRangeArray = array(1=>60, 2=>70); 
 
         public $damageType = "Standard";
 		public $weaponClass = "Ballistic";
@@ -7670,44 +7673,78 @@ class FMissileRack extends Weapon {
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
 			if ( $maxhealth == 0 ) $maxhealth = 6;
 			if ( $powerReq == 0 ) $powerReq = 0;
-			if ($this->turnsloaded == 1) {
-				$basicFC = $this->fireControlArray[1]; //get current default values
-				$basicFC[0] = $basicFC[0] -2; //antifighter FC
-				$basicFC[1] = $basicFC[1] -2; //antimedium FC
-				$basicFC[2] = $basicFC[2] -2; //antiheavy FC 
-				$this->fireControlArray[1] = $basicFC;
-				$longFC = array(null, null, null); //LR FC is nullified as cannot fire in rapid mode immediately after long-range mode
-				$this->fireControlArray[2] = $longFC;
-				$this->changeFiringMode(1);    //recompile current values from arrays
-			}
-
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-
-
-
-
-//        	switch($this->turnsloaded){
-//				case 1:
-					/*
-	                foreach ($this->fireControlArray as $key=>$FCarray){  //Rapid fire reduces the FC by 2
-                    $this->fireControlArray[$key][0] -= 2; //fighter
-                    $this->fireControlArray[$key][1] -= 2; //medium
-                    $this->fireControlArray[$key][2] -= 2; //Cap
-					}
-					*/
-//					$this->fireControlArray = array(1=>array(4, 4, 4), 2=>array(null, null, null));
-//				$this->range[$key][0] -= 5; //Rapid fire reduces the range by 5
-//                }
         }
 
-        public function setSystemDataWindow($turn){
-			parent::setSystemDataWindow($turn);   
-			$this->data["Special"] = $this->fireControlArray;  
-//			$this->data["Special"] = "Can fire accelerated ROF with -5 range and -10 FC:";  
-//			$this->data["Special"] .= "<br> - 1 turn: 1d10+6, intercept -10"; 
+        public function setSystemDataWindow($turn){	
+			$this->recalculateFireControl(); //necessary for correct Initial data
+			$this->data["Special"] = 'This weapon can fire either as regular missile launcher, or Long Range launcher. ';
+			$this->data["Special"] .= '<br>It can also fire in Rapid mode (with reduced Fire Control values, but after only 1 turn of charging) - though not right after using Long Range mode.';
+			parent::setSystemDataWindow($turn);	
 		}
 	
-	public function getDamage($fireOrder){ 
+	//recalculates fire control as appropriate for current loading time!
+	private function recalculateFireControl(){
+		if (($this->turnsloaded == 1) || ($this->firedInRapidMode)) { //after only 1 turn of charging: Standard mode becomes Rapid (with reduced fire control), Long Range mode is not available
+			if ($this->baseFireControlArray === null){ //base values haven't been copied yet
+				$this->baseFireControlArray = $this->fireControlArray;
+			}
+			$basicFC = $this->baseFireControlArray[1]; //get current default values
+			$basicFC[0] = $basicFC[0] -2; //antifighter FC
+			$basicFC[1] = $basicFC[1] -2; //antimedium FC
+			$basicFC[2] = $basicFC[2] -2; //antiheavy FC 
+			$this->fireControlArray[1] = $basicFC;
+			$nullFC = array(null, null, null);
+			$this->fireControlArray[2] = $nullFC; //long-range mode unavailable after 1 turn of charging
+			$this->changeFiringMode(1);    //recompile current values from arrays
+		}	
+	}
+	
+	
+	/* this method generates additional non-standard informaction in the form of individual system notes
+	*/
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+		switch($gameData->phase){								
+				case 1: //Initial phase 
+					//if weapon is marked as firing in Rapid mode, make a note of it!
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+						if($this->firedInRapidMode){
+							$notekey = 'RapidFire';
+							$noteHuman = 'fired in Rapid mode';
+							$noteValue = 'X';
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+						}
+					}
+					
+				break;
+				
+		}
+	} //endof function generateIndividualNotes
+	
+	/*act on notes just loaded - to be redefined by systems as necessary
+	 - mark $firedInRapidMode
+	*/
+	public function onIndividualNotesLoaded($gamedata){
+		foreach ($this->individualNotes as $currNote) if($currNote->turn == $gamedata->turn) if ($currNote->notevalue == 'X'){ //only current round matters!
+			$this->firedInRapidMode = true;			
+			$this->recalculateFireControl(); //necessary for the variable to affect actual firing
+		}
+		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+		$this->individualNotes = array();
+	} //endof function onIndividualNotesLoaded
+	
+	
+	public function doIndividualNotesTransfer(){
+		//data received in variable individualNotesTransfer, further functions will look for variable firedInRapidMode
+		if(is_array($this->individualNotesTransfer)) foreach($this->individualNotesTransfer as $entry) {
+			if ($entry == 'X') $this->firedInRapidMode = true;
+		}
+		$this->individualNotesTransfer = array(); //empty, just in case
+	}		
+	
+	
+	public function getDamage($fireOrder){
 		switch($this->firingMode){
 			case 1: //Standard
 				return 20; 
