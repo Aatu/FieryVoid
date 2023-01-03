@@ -4403,10 +4403,10 @@ class ThirdspacePsychicField extends SparkField{
                     if ($i->type == 2){
                             $boostLevel += $i->amount;
                     }
-            }
+			}
             return $boostLevel;
-        }	
-	
+       	
+	}
 	
 	//find units in range (other than self), create attacks vs them
 	public function beforeFiringOrderResolution($gamedata){
@@ -4457,7 +4457,7 @@ class ThirdspacePsychicField extends SparkField{
 					$crit->updated = true;
 			        	$firstFighter->criticals[] =  $crit;
 				}
-			}
+		
 		}else{ //ship - place effcet on C&C!
 			$CnC = $ship->getSystemByName("CnC");
 			if($CnC){
@@ -4467,8 +4467,7 @@ class ThirdspacePsychicField extends SparkField{
 			        	$CnC->criticals[] =  $crit;
 		
 			}
-		}
-	} //endof function onDamagedSystem	
+		} //endof function onDamagedSystem	
 
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
 	{
@@ -4527,19 +4526,10 @@ class ThirdspacePsychicField extends SparkField{
 	}    
 	Does not function defensively */
 	
-	public function getDamage($fireOrder){        
-		$damageRolled = Dice::d(6, 1)+1;
-		$boostlevel = $this->getBoostLevel($fireOrder->turn);
-		$damageRolled -= $boostlevel; //-1 per level of boost
-		$damageRolled = max(0,$damageRolled); //cannot do less than 0	
-		return $damageRolled;   
-	}
-        public function setMinDamage(){    
-		$this->minDamage = 0 ;	      		
-	}
-        public function setMaxDamage(){   
-		$this->maxDamage = 0 ;	    
-	}
+	public function getDamage($fireOrder){ return  0;   }
+	public function setMinDamage(){   $this->minDamage =  0 ;      }
+	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
+	
 } //endof class ThirdspacePsychicField 
 
 ?>
