@@ -202,3 +202,31 @@ var HeavyInterceptorBattery = function HeavyInterceptorBattery(json, ship) {
 };
 HeavyInterceptorBattery.prototype = Object.create(InterceptorMkI.prototype);
 HeavyInterceptorBattery.prototype.constructor = HeavyInterceptorBattery;
+
+var ThirdspaceShieldProjection = function ThirdspaceShieldProjection(json, ship) {
+    ShipSystem.call(this, json, ship);
+    this.defensiveType = "none";
+};
+ThirdspaceShieldProjection.prototype = Object.create(ShipSystem.prototype);
+ThirdspaceShieldProjection.prototype.constructor = ThirdspaceShieldProjection;
+ThirdspaceShieldProjection.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
+    //this is made to be a shield just to display arc visually, no actual protection
+    return 0;
+};
+
+var ThirdspaceShieldProjection = function ThirdspaceShieldProjection(json, ship) {
+    ShipSystem.call(this, json, ship);
+    this.defensiveType = "none";
+};
+ThirdspaceShieldProjector.prototype = Object.create(ShipSystem.prototype);
+ThirdspaceShieldProjector.prototype.constructor = ThirdspaceShieldProjector;
+ThirdspaceShieldProjector.prototype.hasMaxBoost = function () {
+    return true;
+};
+ThirdspaceShieldProjector.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+ThirdspaceShieldProjector.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
+    //this is made to be a shield just to display arc visually, no actual protection
+    return 0;
+};

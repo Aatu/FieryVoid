@@ -2868,6 +2868,12 @@ spl_autoload_register(
 						'righteous1894am' => '/server/model/ships/orieni/righteous1894AM.php',
 						
 						
+						//Thirdspace
+						'thirdspacepsychicfield' => '/server/model/weapons/specialWeapons.php',
+      			        'psychicfieldhandler' => '/server/model/weapons/specialWeapons.php',
+      			        'thirdspaceshieldprojection' =>	'/server/model/weapons/defensive.php',
+      			        'thirdspaceshieldprojector' =>	'/server/model/weapons/defensive.php',						
+						
 				
 				//let's end this with unit enhancement class...		    
 				'enhancements' => '/server/model/ships/Enhancements.php'
