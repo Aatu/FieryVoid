@@ -64,13 +64,13 @@
 				</select>
 				<div><span>Scenario description:</span></div>
 				<textarea id="description" name="description" rows="10" cols="100">
-DEFAULT SCENARIO DESCRIPTION
+*** BELOW ARE COMMON PICKUP BATTLE OPTIONS - PICK YOUR OWN, OR FILL IN SOMETHING ELSE! ***
 ----------------------------
-REQUIREMENTS: Please pass the fleet checker :)
-CUSTOM FACTIONS: Not allowed
-CUSTOM UNITS IN OFFICIAL FACTIONS: Not allowed
-ENHANCEMENTS: Allowed but don't overdo it (up to 100 points)
-EXPECTED POWER LEVEL: Similar to Big 4
+REQUIREMENTS: Pass the fleet checker / something else
+CUSTOM FACTIONS: Allowed / Not allowed
+CUSTOM UNITS IN OFFICIAL FACTIONS: Allowed / Not allowed
+ENHANCEMENTS: Allowed / Allowed up to 100 points / Not allowed
+EXPECTED POWER LEVEL: Tier 1 / Tier 2 / something else
 FORBIDDEN FACTIONS: None 
 ------------------------
 				</textarea>
