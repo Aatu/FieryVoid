@@ -4283,4 +4283,263 @@ class VorlonDischargeCannon extends Weapon{
 }//endof class VorlonDischargeCannon
 
 
+class ThirdspacePsychicField extends SparkField{
+    /*Spark Field - Ipsha weapon
+    	with custom enhancement (Spark Curtain) - anti-ballistic EWeb :)
+    */
+        public $name = "ThirdspacePsychicField";
+        public $displayName = "Psychic Field";
+	public $iconPath = "ThirdspacePsychicField.png";
+	
+	//let's make animation more or less invisible, and effect very large
+	public $trailColor = array(141, 240, 255);
+        public $animation = "ball";
+        public $animationColor = array(1, 1, 255);
+        public $animationExplosionScale = 2;
+        public $animationExplosionType = "AoE";
+        //public $explosionColor = array(165, 165, 255);
+        //public $projectilespeed = 20;
+        //public $animationWidth = 1;
+        //public $trailLength = 1;
+	
+	public $boostable = true;
+        public $boostEfficiency = 2;
+        public $maxBoostLevel = 4;
+	
+	public $output = 0;
+	public $baseOutput = 2;//base output WITH Spark Curtain
+	public $defensiveType = "SparkCurtain"; //needs to be set to recognize as defensive system
+      
+        public $priority = 2; //should attack very early
+	
+        public $loadingtime = 1;
+	public $autoFireOnly = true; //this weapon cannot be fired by player
+	public $doNotIntercept = true; //this weapon is a field, "attacks" are just for technical reason
+        
+        public $rangePenalty = 0; //no range penalty, but range itself is limited
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals ; not relevant really!
+	
+	public $boostlevel = 0;
+		
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+    	public $firingModes = array( 1 => "Field"); //just a convenient name for firing mode
+	public $hextarget = true;
+	
+	protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by SparkFieldHandler!
+	
+	
+ //	public $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
+ //           14=>"ReducedDamage"
+//	);
+	
+	
+	
+	public function addTarget($newTarget){
+		$this->targetList[] = $newTarget;
+	}
+
+	
+	    public function setSystemDataWindow($turn){
+		    $boostlevel = $this->getBoostLevel($turn);
+	//	    $this->minDamage = 2-$boostlevel;
+	//	    $this->maxDamage = 7-$boostlevel;
+	//	    $this->minDamage = max(0,$this->minDamage);
+		    $this->animationExplosionScale = $this->getAoE($turn);
+		    $this->range = $this->getAoE($turn);
+		      parent::setSystemDataWindow($turn);  
+		      //$this->data["AoE"] = $this->getAoE($turn);
+		      $this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.";  
+		      $this->data["Special"] .= "<br>It should not be fired manually."; 
+	//	      $this->data["Special"] .= "<br>Ignores armor, but cannot damage ship structure.";  
+		      $this->data["Special"] .= "<br>Affected ships have their initiative reduced by 5 to 30 points.";  
+		      $this->data["Special"] .= "<br>Can be boosted, for +2 AoE range per level."; 
+		      $this->data["Special"] .= "<br>Multiple overlapping Psychic Fields will only cause 1 (strongest) attack on a particular target."; 
+	//	      $this->data["Special"] .= "<br>With CUSTOM Spark Curtain enhancement acts as anti-Ballistic shield (reducing hit chance only, by 2+boost)."; 
+	    }	//endof function setSystemDataWindow
+	
+	
+	
+	public function getAoE($turn){
+		$boostlevel = $this->getBoostLevel($turn);
+		$aoe = 2+(2*$boostlevel);
+		return $aoe;
+	}
+	
+	
+	public function calculateHitBase($gamedata, $fireOrder){
+		//parent::calculateHitBase($gamedata, $fireOrder);
+	        $fireOrder->updated = true;
+		$fireOrder->chosenLocation = 0;//so it's recalculated later every time! - as location chosen here is completely incorrect for target 
+		$fireOrder->needed = 100; //hit is automatic
+	}
+	
+	public function fire($gamedata, $fireOrder){
+		//parent::fire($gamedata, $fireOrder);
+		//actually fire at units from target list - and fill fire order data appropriately
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$fireOrder->rolled = 1; //just to mark that there was a roll!
+		$fireOrder->shotshit = 1; //always hit, technically
+		
+		//actual damage dealing...
+		foreach($this->targetList as $target){
+			$this->beforeDamage($target, $shooter, $fireOrder, null, $gamedata);			
+		}
+        	$notes = "This weapon hits automatically"; //replace usual note
+		$fireOrder->notes = $notes;
+		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
+		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
+	}
+	
+	public function calculateBoostLevel($turn){
+		$this->boostlevel = $this->getBoostLevel($turn);
+	}
+	
+        private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn)
+                            continue;
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
+            }
+            return $boostLevel;
+        }	
+	
+	
+	//find units in range (other than self), create attacks vs them
+	public function beforeFiringOrderResolution($gamedata){
+		SparkFieldHandler::createFiringOrders($gamedata);		
+	}
+	
+/*	
+	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
+		if (!($target instanceof FighterFlight)){ //ship - as usual
+			$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
+			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
+		}else{//fighter flight - separate hit on each fighter!
+			foreach ($target->systems as $fighter){
+				if ($fighter == null || $fighter->isDestroyed()){
+				    continue;
+				}
+				$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
+				$this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
+                    	}
+		}
+	}	Can remove since effects fighters at flight level? */
+
+/*
+	public function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		$dmgToReturn = $damage;
+		if ($system instanceof Structure) $dmgToReturn = 0; //will not harm Structure!
+		return $dmgToReturn;
+	} can remove since no damage? */
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+	
+		
+		$effectIni = Dice::d(6,1);//strength of effect: 1d6
+	//	$effectSensors = Dice::d(6,1);//strength of effect: 1d6
+		$effectIni5 = $effectIni * 5;
+		$fireOrder->pubnotes .= "<br> Initiative reduced by $effectIni5.";
+		
+		if (WeaponEM::isTargetEMResistant($ship,$system)){ //no effect on Advanced Armor
+			$effectIni = floor($effectIni/2);
+			return $effectIni;		
+		}
+				
+		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
+			$firstFighter = $ship->getSampleFighter();
+			if($firstFighter){
+				for($i=1; $i<=$effectIni;$i++)
+					$crit = new tmpinidown(-1, $ship->id, $firstFighter->id, 'tmpinidown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$firstFighter->criticals[] =  $crit;
+				}
+			}
+		}else{ //ship - place effcet on C&C!
+			$CnC = $ship->getSystemByName("CnC");
+			if($CnC){
+				for($i=1; $i<=$effectIni;$i++)
+					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+		
+			}
+		}
+	} //endof function onDamagedSystem	
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+	{
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+			$maxhealth = 20;
+		}
+		if ( $powerReq == 0 ){
+			$powerReq = 2;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		SparkFieldHandler::addSparkField($this);//so all Spark Fields are accessible together, and firing orders can be uniformly created
+	}
+	
+	// ignore armor; advanced armor halves effect (due to weapon being Electromagnetic)
+	/*
+	public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
+		if (WeaponEM::isTargetEMResistant($target,$system)){
+			$returnArmour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
+			$returnArmour = floor($returnArmour/2);
+			return $returnArmour;
+		}else{
+			return 0;
+		}
+	}
+	Remove, as advanced armour does not apply, altho possible reduce effect against ancients anyway?*/
+/*
+	public function onConstructed($ship, $turn, $phase){
+		parent::onConstructed($ship, $turn, $phase);
+	$this->tohitPenalty = $this->getOutput();
+		$this->damagePenalty = 0;
+	}
+	public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
+		if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn)) return 0;
+	if(!$weapon->ballistic) return 0;//only ballistic weapons are affected!
+	$output = $this->getOutput();
+		return $output;
+	}
+	public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
+		return 0; //does not reduce damage
+	}
+	public function getDefensiveType()
+	{
+		return "SparkCurtain";
+	}    
+	public function getOutput(){
+		$output = 0;
+		if($this->output == 0) return 0; //if base output is not enhanced this means there is no effect
+		foreach ($this->power as $power){
+		    if ($power->turn == TacGamedata::$currentTurn && $power->type == 2){
+				$output += $power->amount;
+		    }        
+		}        
+		$output = $output + $this->baseOutput; //strength = 2+boostlevel
+		return $output;        
+	}    
+	Does not function defensively */
+	
+	public function getDamage($fireOrder){        
+		$damageRolled = Dice::d(6, 1)+1;
+		$boostlevel = $this->getBoostLevel($fireOrder->turn);
+		$damageRolled -= $boostlevel; //-1 per level of boost
+		$damageRolled = max(0,$damageRolled); //cannot do less than 0	
+		return $damageRolled;   
+	}
+        public function setMinDamage(){    
+		$this->minDamage = 0 ;	      		
+	}
+        public function setMaxDamage(){   
+		$this->maxDamage = 0 ;	    
+	}
+} //endof class ThirdspacePsychicField 
+
 ?>
