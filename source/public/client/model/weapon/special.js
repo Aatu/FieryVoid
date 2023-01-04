@@ -262,13 +262,13 @@ VorlonDischargePulsar.prototype.initializationUpdate = function() {
 //TO BE ACTUALLY IMPLEMENTED!!!!!!!
 };
 
-var ThirdspacePsychicField = function(json, ship)
+var PsychicField = function(json, ship)
 {
     Weapon.call( this, json, ship);
 }
-ThirdspacePsychicField.prototype = Object.create( Weapon.prototype );
-ThirdspacePsychicField.prototype.constructor = ThirdspacePsychicField;
-ThirdspacePsychicField.prototype.initBoostableInfo = function(){
+PsychicField.prototype = Object.create( Weapon.prototype );
+PsychicField.prototype.constructor = PsychicField;
+PsychicField.prototype.initBoostableInfo = function(){
     // Needed because it can change during initial phase
     // because of adding extra power.
     if(window.weaponManager.isLoaded(this)){
@@ -287,7 +287,7 @@ ThirdspacePsychicField.prototype.initBoostableInfo = function(){
     }
     return this;
 }
-ThirdspacePsychicField.prototype.clearBoost = function(){
+PsychicField.prototype.clearBoost = function(){
         for (var i in system.power){
                 var power = system.power[i];
                 if (power.turn != gamedata.turn) continue;
@@ -297,10 +297,10 @@ ThirdspacePsychicField.prototype.clearBoost = function(){
                 }
         }
 }
-ThirdspacePsychicField.prototype.hasMaxBoost = function(){
+PsychicField.prototype.hasMaxBoost = function(){
     return true;
 }
-ThirdspacePsychicField.prototype.getMaxBoost = function(){
+PsychicField.prototype.getMaxBoost = function(){
     return this.maxBoostLevel;
 };
 

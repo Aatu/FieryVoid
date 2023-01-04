@@ -1064,6 +1064,17 @@
             $this->data["Boostlevel"] = $boost;
         }
 
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 24;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 12;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
 
         private function getExtraDicebyBoostlevel($turn){
             $add = 0;
@@ -1174,6 +1185,17 @@
             $this->data["Boostlevel"] = $boost;
         }
 
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 15;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 8;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
 
         private function getExtraDicebyBoostlevel($turn){
             $add = 0;

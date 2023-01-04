@@ -4283,10 +4283,7 @@ class VorlonDischargeCannon extends Weapon{
 }//endof class VorlonDischargeCannon
 
 
-class ThirdspacePsychicField extends SparkField{
-    /*Spark Field - Ipsha weapon
-    	with custom enhancement (Spark Curtain) - anti-ballistic EWeb :)
-    */
+class PsychicField extends Weapon{ //Operates similar to Spark Field, but debilitating enemies in range, not damage them.
         public $name = "ThirdspacePsychicField";
         public $displayName = "Psychic Field";
 	public $iconPath = "ThirdspacePsychicField.png";
@@ -4668,7 +4665,7 @@ class PsychicFieldHandler{
 				$alreadyTargeted[] = $target->id; //add to list of already targeted units
 				$field->addTarget($target);
 			}
-		} //endof foreach SparkField
+		} //endof foreach sychicField
 	}//endof function createFiringOrders
 	
 }//endof class PsychicFieldHandler
