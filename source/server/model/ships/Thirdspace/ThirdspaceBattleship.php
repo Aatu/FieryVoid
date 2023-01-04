@@ -11,7 +11,13 @@ class ThirdspaceBattleship extends BaseShip{
         $this->shipClass = "Harbringer Battleship";
         $this->shipSizeClass = 3;
 	    $this->isd = 'Ancient';
-		$this->fighters = array("LCVs" => 6);	    
+		$this->factionAge = 4;
+		$this->limited = 33;			    
+	    
+		$this->fighters = array("LCVs" => 6);	
+		
+        $this->gravitic = true;
+		$this->advancedArmor = true; 		    
 		
         $this->forwardDefense = 18;
         $this->sideDefense = 19;
@@ -21,6 +27,8 @@ class ThirdspaceBattleship extends BaseShip{
         $this->accelcost = 5;
         $this->rollcost = 6;
         $this->pivotcost = 4;
+       
+		$this->iniativebonus = 2 *5;        
 
         
         $this->addPrimarySystem(new AdvancedSingularityDrive(8, 60, 0, 100+8+5));
