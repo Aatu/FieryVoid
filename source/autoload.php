@@ -2873,7 +2873,8 @@ spl_autoload_register(
 						'thirdspacepsychicfield' => '/server/model/weapons/specialWeapons.php',
       			        'psychicfieldhandler' => '/server/model/weapons/specialWeapons.php',
       			        'thirdspaceshieldprojection' =>	'/server/model/weapons/defensive.php',
-      			        'thirdspaceshieldprojector' =>	'/server/model/weapons/defensive.php',						
+      			        'thirdspaceshieldprojector' =>	'/server/model/weapons/defensive.php',
+      			        'psionicconcentrator' => '/server/model/weapons/specialWeapons.php',						
 						
 				
 				//let's end this with unit enhancement class...		    

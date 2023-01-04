@@ -4445,11 +4445,16 @@ class ThirdspacePsychicField extends SparkField{
 		$fireOrder->pubnotes .= "<br> Initiative reduced by $effectIni5.";
 		
 		if (WeaponEM::isTargetEMResistant($ship,$system)){
-			$effectIni = floor($effectIni/2);  	//Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens.		
-			return $effectIni;
-	//		$effectPower = floor($effectPower/2); //Let's say Ancients unaffected by power drain, to prevent Shadows etc from having to power down only weapon etc
-	//		return $effectPower;		
+			$effectIni = floor($effectIni/2);  	//Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens.	
+			$effectPower = 0; //Let's say Ancients unaffected by power drain, to prevent Shadows etc from having to power down only weapon etc	
+			$result = array($effectIni, $effectPower)
+			return $result;	
 		}
+		
+	//	if (WeaponEM::isTargetEMResistant($ship,$system)){
+	//		$effectPower = 0; //Let's say Ancients unaffected by power drain, to prevent Shadows etc from having to power down only weapon etc
+	//		return $effectPower;
+	//	}
 				
 		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
 			$firstFighter = $ship->getSampleFighter();
@@ -4509,7 +4514,7 @@ class ThirdspacePsychicField extends SparkField{
 			return 0;
 		}
 	}
-	Remove, as advanced armour does not apply, altho possible reduce effect against ancients anyway?*/
+	Remove, as advanced armour does not apply, altho reduce effect against ancients anyway?*/
 	
 /*
 	public function onConstructed($ship, $turn, $phase){
@@ -4636,14 +4641,21 @@ class PsychicFieldHandler{
 	
 }//endof class PsychicFieldHandler
 
+
+
+
+
+
+
+
 class PsionicConcentrator extends Raking{
     /*Particle Concentrator - Gaim weapon*/
-	public $name = "ParticleConcentrator";
-	public $displayName = "Particle Concentrator";
-	public $iconPath = "ParticleConcentrator.png";
+	public $name = "PsionicConcentrator";
+	public $displayName = "Psionic Concentrator";
+	public $iconPath = "PsionicConcentrator.png";
 	
-	public $animation = "laser";
-        public $animationColor = array(255, 163, 26); //should be the same as Particle Cannon
+	public $animation = "bolt";
+        public $animationColor = array(153, 0, 0); //should be the same as Particle Cannon
 	/*
 	public $trailColor = array(30, 170, 255);	
 	public $animationWidth = 4;
@@ -4652,11 +4664,11 @@ class PsionicConcentrator extends Raking{
         public $animationExplosionScale = 0.25;
 	public $animationExplosionScaleArray = array(1=>0.25, 2=>0.35, 3=>0.45, 4=>0.55, 5=>0.70, 6=>0.85);
       */
-        public $loadingtime = 2;
-	public $intercept = 1; //intercept rating -1     
+        public $loadingtime = 1;
+	public $intercept = 2; //intercept rating -1     
 	
-        public $priority = 8;
-        public $priorityArray = array(1=>8, 2=>7, 3=>7, 4=>7, 5=>7); //weakest mode is light Raking weapon, heavier ones are heavy raking weapons
+        public $priority = 6;
+        public $priorityArray = array(1=>6, 2=>5, 3=>5, 4=>5, 5=>4, 6=>4); //weakest mode is light Raking weapon, heavier ones are heavy raking weapons
 	public $firingMode = 1;	
             public $firingModes = array(
                 1 => "Single",
@@ -4668,13 +4680,14 @@ class PsionicConcentrator extends Raking{
             );
         public $rangePenalty = 0.5; //-1/2 hexes - and this stays constant!
             //public $rangePenaltyArray = array( 1=>2, 2=>1, 3=>0.5, 4=>0.33, 5=>0.25 ); //Raking and Piercing mode
-        public $fireControl = array(2, 4, 5); // fighters, <mediums, <capitals 
-            public $fireControlArray = array( 1=>array(2, 4, 5), 2=>array(4, 6, 7), 3=>array(6, 8, 9), 4=>array(8, 10, 11), 5=>array(10, 12, 13), 6=>array(12, 14, 15) ); //+2 to hit per every additional combining weapon
+        public $fireControl = array(6, 5, 5); // fighters, <mediums, <capitals 
+            public $fireControlArray = array( 1=>array(6, 5, 5), 2=>array(7, 6, 6), 3=>array(8, 7, 7), 4=>array(9, 8, 8), 5=>array(10, 9, 9), 6=>array(11, 10, 10) ); //+1 fire control the more concentrators are used to hit per every additional combining weapon
 	
 	
 	
-	    public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-	    public $weaponClass = "Particle"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+  		public $damageTypeArray = array(1=>"Standard", 2=>"Raking", 3=>"Raking", 4=>"Raking", 5=>"Raking", 6=>"Raking");	    
+	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
 	
 	public $isCombined = false; //is being combined with other weapon
@@ -4684,8 +4697,8 @@ class PsionicConcentrator extends Raking{
 	
 	    public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Can combine multiple Particle Concentrator into one concentrated shot - for +2 Fire Control and +1d10 damage per additional weapon (up to 5 additional weapon can be added).";  
-		      $this->data["Special"] .= "<br>If You allocate multiple Particle Concentrators in higher mode of fire at the same target, they will be combined."; 
+		      $this->data["Special"] = "Can combine multiple Psionic Concentrator into one concentrated shot - for +1 Fire Control and +1d10 damage per additional weapon (up to 5 additional weapon can be added).";  
+		      $this->data["Special"] .= "<br>If You allocate multiple Psionic Concentrators in higher mode of fire at the same target, they will be combined."; 
 		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in highest actually possible mode instead.";  
 		      $this->data["Special"] .= "<br>Concentrators do not need to be on the same ship, but need to be on the same hex to combine."; //tabletop: within 1 hex  			  
 		      $this->data["Special"] .= "<br>Hit chance will be average of all weapons combining.";//tabletop: use average EW, best range, worst criticals and no lock-on if ANY weapon lacks lock-on
@@ -4780,24 +4793,24 @@ class PsionicConcentrator extends Raking{
         {
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ){
-                $maxhealth = 9;
+                $maxhealth = 8;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 7;
+                $powerReq = ;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 	
 	
     public function getDamage($fireOrder){
-		return Dice::d(10, 1+$this->firingMode)+15; //2d10+15 +1d10 per every additional weapon
+		return Dice::d(10, 1+$this->firingMode)+5; //2d10+5 +1d10 per every additional weapon
 	}
 	public function setMinDamage(){    
-		$this->minDamage = 1+$this->firingMode+15;
+		$this->minDamage = 1+$this->firingMode+5;
 		$this->minDamageArray[$this->firingMode] = $this->minDamage;
 	}
 	public function setMaxDamage(){
-		$this->maxDamage = 10*(1+$this->firingMode)+15;
+		$this->maxDamage = 10*(1+$this->firingMode)+5;
 		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;  
 	}
 } //endof class PsionicConcentrator

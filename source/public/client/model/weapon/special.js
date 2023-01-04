@@ -304,3 +304,8 @@ ThirdspacePsychicField.prototype.getMaxBoost = function(){
     return this.maxBoostLevel;
 };
 
+var PsionicConcentrator = function PsionicConcentrator(json, ship) {
+    Weapon.call(this, json, ship);
+};
+PsionicConcentrator.prototype = Object.create(Weapon.prototype);
+PsionicConcentrator.prototype.constructor = PsionicConcentrator;
