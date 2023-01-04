@@ -4687,7 +4687,7 @@ class PsionicConcentrator extends Raking{
 	
 	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
   		public $damageTypeArray = array(1=>"Standard", 2=>"Raking", 3=>"Raking", 4=>"Raking", 5=>"Raking", 6=>"Raking");	    
-	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	    public $weaponClass = "Molecular"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
 	
 	public $isCombined = false; //is being combined with other weapon
@@ -4697,7 +4697,7 @@ class PsionicConcentrator extends Raking{
 	
 	    public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Can combine multiple Psionic Concentrator into one concentrated shot - for +1 Fire Control and +1d10 damage per additional weapon (up to 5 additional weapon can be added).";  
+		      $this->data["Special"] = "Can combine multiple Psionic Concentrator into one concentrated raking shot - for +1 Fire Control and +1d10 damage per additional weapon (up to 5 additional weapon can be added).";  
 		      $this->data["Special"] .= "<br>If You allocate multiple Psionic Concentrators in higher mode of fire at the same target, they will be combined."; 
 		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in highest actually possible mode instead.";  
 		      $this->data["Special"] .= "<br>Concentrators do not need to be on the same ship, but need to be on the same hex to combine."; //tabletop: within 1 hex  			  
@@ -4796,7 +4796,7 @@ class PsionicConcentrator extends Raking{
                 $maxhealth = 8;
             }
             if ( $powerReq == 0 ){
-                $powerReq = ;
+                $powerReq = 4;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
