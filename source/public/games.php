@@ -56,33 +56,21 @@ if (isset($_SESSION["user"])) {
     <!-- <div id="newsHeader">Latest News - September 2020</div> -->
     <div id="newsEntry">
         
-	    <!--
+	    
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
         <h4>may our games be fiery and our lives peaceful</h4>
         <br>
--->
+
        
 		
 
-		---------- <b>LATEST NEWS - October 2022</b> ----------
-	    <br><b>text tutorial for new players</b> - courtesy of Douglas
-	    <br><b>Variable missile loads</b> - new factions are in (Llort)
-	    <br><b>Trek (Federation TOS) rebalanced</b> - still in playtest phase
+		---------- <b>LATEST NEWS - December 2022</b> ----------
+	    <br><b>Variable missile loads</b> - Orieni capital ships, and Ochlavita (somehow I missed her earlier ;) )
+	    <br><b>Minor bugfixes</b> - there's always more bugs to kill!
+	    <br><b>Pak'ma'ra polishing</b> - courtesy of Douglas
+	    <br><b>Image updates</b> - courtesy of Douglas
+	    <br><b>Nexus polishing</b> - courtesy of Geoffrey
 	    
-	    	<br><br>---------- <b>update 24th of October</b> ---------- 
-	    <br><b>Variable missile loads</b> - Hurr
-	    <br><b>Particle Impeder made kosher</b> - now it's boosted with EW rather than Power (and boost stops all incoming fire rather than just fighters)
-	    <br><b>Abbai made kosher</b> - with proper Impeder available, Abbai regained their rightful EW, while losing matching Power surplus. Now they can be even better protected... but not all around :)
-	    <br><b>Fixed map as default</b> - when creating new game, default choice is now fixed map of standard size
-	    <br><b>Map size switches</b> - as knife fights seem popular lately, I have added buttons to set proper map dimensions and deployment zones for such a fight (and back to standard size, too) with a single click
-
-	    
-	    	<br><br>---------- <b>update 31st of October</b> ----------
-	    <br><b>Nexus universe polising</b> - courtesy of Geoffrey
-	    <br><b>Particle Impeder display</b> - now shows boost level (=shield rating) rather than weapon default arming status (irrelevant with 1/turn weapon). 
-	    <br><b>Ballistics calculations corrected</b> - hit chance calculations for ballistics were corrected (somehow they took current rather than launch position to determine angle of impact...)
- 	    <br><b>Vorlon Discharge Cannon corrected</b> - now it should correctly draw power
- 	    <br><b>Jump Engine hit table corrected</b> - I've found some entries calling for Jump Drive or JumpEngine hits - those were corrected to Jump Engine that's actually the correct system name in FV
 	    
 <!--	    
 		 <br><br>---------- <b>update 26th of September</b> ---------- 

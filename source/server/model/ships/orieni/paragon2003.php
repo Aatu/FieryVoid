@@ -10,7 +10,8 @@ class Paragon2003 extends BaseShip{
         $this->imagePath = "img/ships/prophet.png";
         $this->canvasSize = 280;
         $this->shipClass = "Paragon Strike Force Command Ship (2003)";
-        $this->variantOf = "Prophet Command Ship";
+        //$this->variantOf = "Prophet Command Ship";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 	    $this->isd = 2003;
         $this->occurence = "rare";
         $this->limited = 33;
@@ -45,7 +46,7 @@ class Paragon2003 extends BaseShip{
         $this->addFrontSystem(new SoMissileRack(5, 6, 0, 270, 90));
         $this->addFrontSystem(new SoMissileRack(5, 6, 0, 270, 90));
         $this->addFrontSystem(new HeavyGausscannon(3, 10, 4, 270, 90));
-        $this->addFrontSystem(new HeavyGausscannon(3, 10, 4, 270, 90));        
+        $this->addFrontSystem(new HeavyGausscannon(3, 10, 4, 270, 90));
         $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
         $this->addFrontSystem(new Thruster(3, 15, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));

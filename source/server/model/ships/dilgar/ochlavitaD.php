@@ -9,13 +9,14 @@ class OchlavitaD extends HeavyCombatVessel{
         $this->phpclass = "OchlavitaD";
         $this->imagePath = "img/ships/ochlavita.png";
         $this->shipClass = "Ochlavita-D Destroyer Leader";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
                 $this->isd = 2230;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
         
         $this->occurence = "rare";
-        $this->variantOf = "Ochlavita Destroyer";
+        //$this->variantOf = "Ochlavita Destroyer";
         
         $this->turncost = 0.5;
         $this->turndelaycost = 0.5;

@@ -28,10 +28,10 @@ class HighguardB2003 extends OSAT
 		$this->addPrimarySystem(new Reactor(4, 6, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 4, 2, 4));
 		$this->addPrimarySystem(new Thruster(4, 4, 0, 0, 2));
-		$this->addPrimarySystem(new HeavyLaserLance(4, 6, 0, 270, 90));
-		$this->addPrimarySystem(new HeavyLaserLance(4, 6, 0, 270, 90));
-		$this->addPrimarySystem(new OrieniGatlingRG(1, 4, 1, 180, 360));
-		$this->addPrimarySystem(new OrieniGatlingRG(1, 4, 1, 0, 180));
+		$this->addFrontSystem(new HeavyLaserLance(4, 6, 0, 270, 90));
+		$this->addFrontSystem(new HeavyLaserLance(4, 6, 0, 270, 90));
+		$this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 180, 360));
+		$this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 0, 180));
 
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
 
@@ -41,8 +41,8 @@ class HighguardB2003 extends OSAT
                 0=> array(
                         9 => "Structure",
                         11 => "Thruster",
-						14 => "Heavy Laser Lance",
-						16 => "Gatling Railgun",
+						14 => "1:Heavy Laser Lance",
+						16 => "1:Gatling Railgun",
 						18 => "Scanner",
                         20 => "Reactor",
                 ),

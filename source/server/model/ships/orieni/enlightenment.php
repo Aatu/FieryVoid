@@ -9,6 +9,7 @@ class Enlightenment extends BaseShip{
         $this->phpclass = "Enlightenment";
         $this->imagePath = "img/ships/enlightenment.png";
         $this->shipClass = "Enlightenment Invader";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->shipSizeClass = 3;
 	    $this->isd = 2007;
         $this->fighters = array("light"=>12, "assault shuttles"=>24);
