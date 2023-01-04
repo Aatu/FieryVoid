@@ -192,3 +192,57 @@ HeavyPsionicLance.prototype.initBoostableInfo = function () {
     return this;
 };
 
+var PsionicLance = function PsionicLance(json, ship) {
+    Molecular.call(this, json, ship);
+};
+PsionicLance.prototype = Object.create(Molecular.prototype);
+PsionicLance.prototype.constructor = PsionicLance;
+
+PsionicLance.prototype.clearBoost = function () {
+    for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
+
+        if (power.type == 2) {
+            system.power.splice(i, 1);
+
+            return;
+        }
+    }
+};
+
+PsionicLance.prototype.hasMaxBoost = function () {
+    return true;
+};
+
+PsionicLance.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
+PsionicLance.prototype.initBoostableInfo = function () {
+    switch (shipManager.power.getBoost(this)) {
+        case 0:
+            this.data["Damage"] = '19 - 55';
+            this.data["Boostlevel"] = '0';
+            break;
+        case 1:
+            this.data["Damage"] = '20 - 65';
+            this.data["Boostlevel"] = '1';
+            break;
+        case 2:
+            this.data["Damage"] = '21 - 75';
+            this.data["Boostlevel"] = '2';
+            break;
+        case 3:
+            this.data["Damage"] = '22 - 85';
+            this.data["Boostlevel"] = '3';
+            break;
+        default:
+            this.data["Damage"] = '19 - 55';
+            this.data["Boostlevel"] = '0';
+            break;
+    }
+    return this;
+};
+
+

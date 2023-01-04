@@ -1032,7 +1032,7 @@
         public $loadingtime = 2;
         public $raking = 20;
         public $addedDice;
-        public $priority = 3; //damage dealing mode means it's not very effective as stripping systems, and should be fired late despite high damage potential
+        public $priority = 2; //damage dealing mode means it's not very effective as stripping systems, and should be fired late despite high damage potential
 
         public $boostable = true;
         public $boostEfficiency = 6;
@@ -1126,5 +1126,114 @@
         }  
    }
 
+    class PsionicLance extends Raking{
+        public $name = "PsionicLance";
+        public $displayName = "Psionic Lance";
+        public $animation = "laser";
+        public $animationColor = array(153, 0, 0);
+  //      public $animationExplosionScale = 0.35; //make it thin, despite high damage potential!
+	    /*
+        public $trailColor = array(30, 170, 255);
+        public $animationWidth = 2;
+        public $animationWidth2 = 0.3;
+        public $animationExplosionScale = 0.15;
+*/
+        public $intercept = 0;
+        public $loadingtime = 2;
+        public $raking = 15;
+        public $addedDice;
+        public $priority = 4;
+
+        public $boostable = true;
+        public $boostEfficiency = 4;
+        public $maxBoostLevel = 3;
+
+        public $firingModes = array(
+            1 => "Raking"
+        );
+
+        public $rangePenalty = 0.33;
+        public $fireControl = array(null, 6, 6); // fighters, <mediums, <capitals
+        //private $damagebonus = 10;
+
+        public $damageType = "Raking"; 
+        public $weaponClass = "Molecular"; 
+
+
+        public function setSystemDataWindow($turn){
+            $boost = $this->getExtraDicebyBoostlevel($turn);            
+            parent::setSystemDataWindow($turn);
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            } 
+            //Raking(20) is already described in Raking class
+            $this->data["Special"] .= '<br>Can be boosted for increased dmg output (+1d10 per 4 power added, up to 3 times).';
+            $this->data["Boostlevel"] = $boost;
+        }
+
+
+        private function getExtraDicebyBoostlevel($turn){
+            $add = 0;
+            switch($this->getBoostLevel($turn)){
+                case 1:
+                    $add = 1;
+                    break;
+                case 2:
+                    $add = 2;
+                    break;
+                case 3:
+                    $add = 3;
+                    break;
+
+                default:
+                    break;
+            }
+            return $add;
+        }
+
+
+         private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                if ($i->turn != $turn){
+                   continue;
+                }
+                if ($i->type == 2){
+                    $boostLevel += $i->amount;
+                }
+            }
+            return $boostLevel;
+        }
+                       
+        public function getDamage($fireOrder){
+            $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
+            $dmg = Dice::d(10, (4 + $add)) +15;
+            return $dmg;
+        }
+
+        public function getAvgDamage(){
+            $this->setMinDamage();
+            $this->setMaxDamage();
+
+            $min = $this->minDamage;
+            $max = $this->maxDamage;
+            $avg = round(($min+$max)/2);
+            return $avg;
+        }
+
+        public function setMinDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->minDamage = 4 + ($boost * 1) + 15;
+        }   
+
+        public function setMaxDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->maxDamage = 40 + ($boost * 10) + 15;
+        }  
+   }
 
 ?>

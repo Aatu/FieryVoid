@@ -497,6 +497,32 @@ class MagGravReactorTechnical extends MagGravReactor{
 	}		
 }//endof MagGravReactor		
 
+class AdvancedSingularityDrive extends Reactor{
+/*Advanced version of Mag-Gravitic Reactor, used by custom Thirdspace faction;
+	provides fixed power regardless of systems;
+	techical implementation: count as Power minus power required by all systems enabled
+*/	
+	public $possibleCriticals = array( //different set of criticals than standard Reactor
+		13=>"FieldFluctuations",
+		20=>array("FieldFluctuations"),
+		25=>array("FieldFluctuations", "FieldFluctuations"),
+		30=>array("FieldFluctuations", "FieldFluctuations", "FieldFluctuations")
+	);
+	
+	function __construct($armour, $maxhealth, $powerReq, $output ){
+		parent::__construct($armour, $maxhealth, $powerReq, $output );    
+		$this->fixedPower = true;
+	}
+	
+	public function setSystemDataWindow($turn){
+		$this->data["Output"] = $this->output;
+		parent::setSystemDataWindow($turn);     
+		$this->data["Special"] .= "<br>Advanced Mag-Gravitic Reactor: provides fixed total power, regardless of destroyed systems.";
+	}	
+	
+}//endof AdvancedSingularityDrive		
+
+
 //warning: needs external code to function properly. Intended for starbases only.
 /* let's disable it - all use changed to SubReactorUniversal!
 class SubReactor extends ShipSystem{	

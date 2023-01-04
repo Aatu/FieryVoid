@@ -4787,7 +4787,15 @@ class PsionicConcentrator extends Raking{
 			$fireOrder->notes .= 'Modified as average of concentrating shots! ';
 		}
 	}//endof function calculateHitBase
-	
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor		
+		//+1 to crit roll, +2 to dropout roll
+		$mod = 1;
+		if ($ship instanceof FighterFlight) $mod++;		
+		$system->critRollMod += $mod; 
+	} //endof function onDamagedSystem	
 	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
