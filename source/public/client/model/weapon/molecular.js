@@ -139,3 +139,56 @@ var MultiphasedCutter = function MultiphasedCutter(json, ship) {
 MultiphasedCutter.prototype = Object.create(Weapon.prototype);
 MultiphasedCutter.prototype.constructor = MultiphasedCutter;
 
+var HeavyPsionicLance = function HeavyPsionicLance(json, ship) {
+    Molecular.call(this, json, ship);
+};
+HeavyPsionicLance.prototype = Object.create(Molecular.prototype);
+HeavyPsionicLance.prototype.constructor = HeavyPsionicLance;
+
+HeavyPsionicLance.prototype.clearBoost = function () {
+    for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
+
+        if (power.type == 2) {
+            system.power.splice(i, 1);
+
+            return;
+        }
+    }
+};
+
+HeavyPsionicLance.prototype.hasMaxBoost = function () {
+    return true;
+};
+
+HeavyPsionicLance.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
+HeavyPsionicLance.prototype.initBoostableInfo = function () {
+    switch (shipManager.power.getBoost(this)) {
+        case 0:
+            this.data["Damage"] = '30 - 120';
+            this.data["Boostlevel"] = '0';
+            break;
+        case 1:
+            this.data["Damage"] = '32 - 140';
+            this.data["Boostlevel"] = '1';
+            break;
+        case 2:
+            this.data["Damage"] = '34 - 160';
+            this.data["Boostlevel"] = '2';
+            break;
+        case 3:
+            this.data["Damage"] = '36 - 180';
+            this.data["Boostlevel"] = '3';
+            break;
+        default:
+            this.data["Damage"] = '30 - 120';
+            this.data["Boostlevel"] = '0';
+            break;
+    }
+    return this;
+};
+
