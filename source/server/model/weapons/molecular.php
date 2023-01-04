@@ -1016,6 +1016,7 @@
         }
     }//endof class MultiphasedCutter
 
+
     class HeavyPsionicLance extends Raking{
         public $name = "HeavyPsionicLance";
         public $displayName = "Heavy Psionic Lance";

@@ -4440,14 +4440,16 @@ class ThirdspacePsychicField extends SparkField{
 	
 		
 		$effectIni = Dice::d(6,1);//strength of effect: 1d6
-		$effectPower = Dice::d(8,1);//strength of effect: 1d6
+//		$effectPower = Dice::d(8,1);//strength of effect: 1d6
+		$effecttohit = Dice::d(3,1);
 		$effectIni5 = $effectIni * 5;
 		$fireOrder->pubnotes .= "<br> Initiative reduced by $effectIni5.";
 		
 		if (WeaponEM::isTargetEMResistant($ship,$system)){
-			$effectIni = floor($effectIni/2);  	//Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens.	
-			$effectPower = 0; //Let's say Ancients unaffected by power drain, to prevent Shadows etc from having to power down only weapon etc	
-			$result = array($effectIni, $effectPower)
+			$effectIni = ceil($effectIni/2);  	//Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens.	
+			$effecttohit = ceil($effecttohit/2);
+//			$effectPower = 0; //Let's say Ancients unaffected by power drain, to prevent Shadows etc from having to power down only weapon etc	
+			$result = array($effectIni, $effecttohit)
 			return $result;	
 		}
 		
@@ -4455,7 +4457,37 @@ class ThirdspacePsychicField extends SparkField{
 	//		$effectPower = 0; //Let's say Ancients unaffected by power drain, to prevent Shadows etc from having to power down only weapon etc
 	//		return $effectPower;
 	//	}
-				
+		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
+			$firstFighter = $ship->getSampleFighter();
+			if($firstFighter){
+				for($i=1; $i<=$effecttohit;$i++){
+					$crit = new PenaltyToHitOneTurn(-1, $ship->id, $firstFighter->id, 'PenaltyToHitOneTurn', $gamedata->turn); 
+					$crit->updated = true;
+			        	$firstFighter->criticals[] =  $crit;
+				}
+				for($i=1; $i<=$effectIni;$i++){
+					$crit = new tmpinidown(-1, $ship->id, $firstFighter->id, 'tmpinidown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$firstFighter->criticals[] =  $crit;
+				}
+			}
+		}else{ //ship - place effect on C&C!
+			$CnC = $ship->getSystemByName("CnC");
+			if($CnC){
+				for($i=1; $i<=$effecttohit;$i++){
+					$crit = new PenaltyToHitOneTurn(-1, $ship->id, $CnC->id, 'PenaltyToHitOneTurn', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+				}
+				for($i=1; $i<=$effectIni;$i++){
+					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+				}
+			}
+		}
+
+/*		Old code when using power drain instead of to hit chance		
 		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
 			$firstFighter = $ship->getSampleFighter();
 			if($firstFighter){
@@ -4471,15 +4503,15 @@ class ThirdspacePsychicField extends SparkField{
 				}
 			}
 		}else{ //ship - place effcet on C&C!
-			$reactor = $ship->getSystemByName("Reactor")
+	//		$reactor = $ship->getSystemByName("Reactor")
 			$CnC = $ship->getSystemByName("CnC");
 			
-			if($reactor){
-				for($i=1; $i<=$effectPower;$i++){
-					$crit = new tmppowerdown(-1, $ship->id, $CnC->id, 'tmppowerdown', $gamedata->turn); 
-					$crit->updated = true;
-			        	$CnC->criticals[] =  $crit;
-				}
+	//		if($reactor){
+	//			for($i=1; $i<=$effectPower;$i++){
+	//				$crit = new tmppowerdown(-1, $ship->id, $CnC->id, 'tmppowerdown', $gamedata->turn); 
+	//				$crit->updated = true;
+	//		        	$CnC->criticals[] =  $crit;
+	//			}
 			if($CnC){
 				for($i=1; $i<=$effectIni;$i++){
 					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
@@ -4487,7 +4519,7 @@ class ThirdspacePsychicField extends SparkField{
 			        	$CnC->criticals[] =  $crit;
 				}
 			}
-		}
+		} */
 	} //endof function onDamagedSystem	
 
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
@@ -4599,11 +4631,11 @@ class PsychicFieldHandler{
 				$tmpFields[] = $field;
 			}			
 		}
-		PsychicFieldHandler::$psychicFields = $tmpFields;
+		PsychicFieldHandler::$psychicFields = $tmpFields; 
 		
 		
 		//make sure boost level for all weapons is calculated
-		foreach(SparkFieldHandler::$sparkFields as $field){
+		foreach(PsychicFieldHandler::$psychicFields as $field){
 			$field->calculateBoostLevel($gamedata->turn);
 		}
 		
@@ -4640,12 +4672,6 @@ class PsychicFieldHandler{
 	}//endof function createFiringOrders
 	
 }//endof class PsychicFieldHandler
-
-
-
-
-
-
 
 
 class PsionicConcentrator extends Raking{
@@ -4702,6 +4728,7 @@ class PsionicConcentrator extends Raking{
 		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in highest actually possible mode instead.";  
 		      $this->data["Special"] .= "<br>Concentrators do not need to be on the same ship, but need to be on the same hex to combine."; //tabletop: within 1 hex  			  
 		      $this->data["Special"] .= "<br>Hit chance will be average of all weapons combining.";//tabletop: use average EW, best range, worst criticals and no lock-on if ANY weapon lacks lock-on
+		       $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";
 	    }	
 	
 		

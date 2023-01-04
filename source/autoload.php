@@ -2877,7 +2877,7 @@ spl_autoload_register(
       			        'advancedsingularitydrive' => '/server/model/systems/baseSystems.php',
       			        'psionicconcentrator' => '/server/model/weapons/specialWeapons.php',
       			        'heavypsioniclance' => 	'/server/model/weapons/molecular.php',
-      			        					
+      			        'psioniclance' => 	'/server/model/weapons/molecular.php',					
 						
 				
 				//let's end this with unit enhancement class...		    
