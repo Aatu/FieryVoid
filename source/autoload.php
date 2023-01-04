@@ -2474,7 +2474,8 @@ spl_autoload_register(
 				'vasy' => '/server/model/ships/raiders/Vasy.php',
 				'vyshesh' => '/server/model/ships/civilians/Vyshesh.php',
 				'xotia' => '/server/model/ships/vree/XotiA.php',
-				'xotib' => '/server/model/ships/vree/XotiB.php',	
+				'xotib' => '/server/model/ships/vree/XotiB.php',
+				'tyllz'	=> '/server/model/ships/vree/Tyllz.php',
 		    						
 				'zshadowxonn' => '/server/model/ships/vree/ZShadowXonn.php', //tournament prize
 												
