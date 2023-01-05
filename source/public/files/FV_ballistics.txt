@@ -1,0 +1,29 @@
+Variable missile launcher uses way more options than can be described in weapon itself without causing clutter. Hence this file - describing options available. These are standard weapons - custom factions might well have different options.
+Missiles (and Navigators, for fighters) are bought as enhancements despite being standard options (for technical reasons).
+
+General notes: ships usually come preloaded with missiles (usually Basic), and any missiles You buy is on top of that. Also, while amount of any given missile You can buy is limited by magazine size, total amount of missiles is not. 
+This means Your missile magazine may show more missiles available than it can actually hold. However, You cannot actually LAUNCH more missiles than magazine can hold - total number of launches is tracked. So extra missiles will provide You with extra variety (at a price ;) ), but not actual extra missiles.
+This is particularly important for fighters (as ships' cavernous magazines are unlikely to run out during a battle). You are encouraged to observetotal amount of missiles a fighter can have, but if You do not (hether by omission or intentionally) - You will get extra missile variety, but no extra missiles.
+Note that fighters usually start with empty magazine (although some missile entry is present, for technical reasons).
+
+Not all tabletop missiles made it to Fiery VOi - some proved just too difficult to implement!
+
+Shipborne missiles' built-in guidance package is often combined into weapons' Fire control, rather than being kept separate.
+
+Enhancement names for ammo usually contain year available (for primary and other races, if this differs - with primary usually bein Kor-Lyan ;) ). Game does not enforce anything in regard to this information it's up to player to refrain from using anachronic weapons (or not).
+
+SHIPBORNE MISSILES
+ - class B - Basic Missile - the name says it all, default loadout present on most ships. All other shipborne missiles have the same data except attributes specifically indicated. Damage 20, Standard mode, launch range 20/distance range 60, built-in guidance of +3/+3/+3 (but does not use firing ships' OEW).
+ - class A - Antifighter Missile - -5 range and -15 distance range, as well as doing 15 points of damage. +3 Fire Control vs fighers. It's classified as light missile - which is meaningless for regular shipborne launchers, but means it's usable by light launchers (...which is the whole point).
+ - class D - Light Missile - 12 damage, -5 range/-15 distance range. Essentially used only by factions without access to Basic missile (Alacans, early Narn).
+ - class F - Flash Missile - does damage in Flash mode.
+ - class H - Heavy Missile - -10 range and -3 antifighter fire control, but damage 30. 
+ - class L - Long Range Missile - +10 range, but damage 15.
+ - class P - Piercing Missile - damage 30, mode Piercing, cannot be fired at fighters.
+ 
+FIGHTERBORNE MISSILES
+ - class FB - Basic Fighter Missile - all other shipborne missiles have the same data except attributes specifically indicated. Damage 10, Standard mode, launch range 10/distance range 30, built-in guidance of +3/+3/+3.
+ - class FD - Dropout Missile - 6 damage and FC of 3/1/1, but adds cumulative dropout penalty of -6 on target hit (-3 on superheavy fighters). Does not force a roll, just increases chance of dropout if it's rolled under regular rules.
+ - class FH - Heavy Fighter Missile - -5 range/distance range and FC of 1/3/3, but damage 15. Limited to 1 per fighter (2 per SHF).
+ - class FL - Long Range Fighter Missile - +5 range/distance range, but damage 8.
+ - class FY - Dogfight Missile - -2 range/distance range, damage 6. In tabletop it can be snap fired in direct fire phase, but this ability is not present in FV.
