@@ -10,6 +10,7 @@ class BaseShip {
 	public $customFighter = array(); //array for fighters with special hangar requirements - see Balvarix/Rutarian for usage
     public $hitChart = array();
     public $notes = '';//notes to be displayed on fleet selection screen
+	public $unofficial = false; //false - official AoG design; true - custom design; 'S' - semi-custom - design that isn't quite official (and so is appropriately marked), but enjoys similar status in Fiery Void
 
     public $occurence = "common";
     public $variantOf = ''; //variant of what? - MUST be the same as $shipClass of base unit, or this unit will not be displayed on fleet selection screen!
