@@ -405,7 +405,7 @@
                 }
                 $this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
             }
-        }
+      
                
 /*		//for last segment of Sustained shot - force shutdown!
 		$newExtraShots = $this->overloadshots - 1; 	
@@ -474,11 +474,11 @@
                     $crit->updated = true;
                     $crit->inEffect = false;
                     $system->criticals[] = $crit;
-                }
-            }
-		} //end of function onDamagedSystem
-
-
+          	      }
+        	    }
+			} 
+		}
+	} //end of function onDamagedSystem
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {

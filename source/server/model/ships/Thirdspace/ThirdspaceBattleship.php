@@ -33,7 +33,7 @@ class ThirdspaceBattleship extends BaseShip{
         
         $this->addPrimarySystem(new AdvancedSingularityDrive(8, 60, 0, 120+8+5));
         $this->addPrimarySystem(new CnC(8, 24, 0, 0));
-        $this->addPrimarySystem(new Scanner(7, 28, 8, 15));
+        $scanner = new Scanner(7, 28, 8, 15);
 		$scanner->markAdvanced();
 		$this->addPrimarySystem($scanner);	        
         $this->addPrimarySystem(new Engine(7, 36, 0, 20, 3));
@@ -103,7 +103,7 @@ class ThirdspaceBattleship extends BaseShip{
 		$this->hitChart = array(
 			0=> array( //PRIMARY
 				9 => "Structure",
-				11 => "Psychic Field"
+				11 => "Psychic Field",
 				12 => "Self Repair",
 				14 => "Scanner",
 				16 => "Engine",

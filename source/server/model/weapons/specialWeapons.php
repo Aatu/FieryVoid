@@ -4444,7 +4444,7 @@ class PsychicField extends Weapon{ //Operates similar to Spark Field, but debili
 		if (WeaponEM::isTargetEMResistant($ship,$system)){
 			$effectIni = ceil($effectIni/2);  	//Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens.	
 			$effecttohit = ceil($effecttohit/2);
-			$result = array($effectIni, $effecttohit)
+			$result = array($effectIni, $effecttohit);
 			return $result;	
 		}
 		
@@ -4452,6 +4452,7 @@ class PsychicField extends Weapon{ //Operates similar to Spark Field, but debili
 	//		$effectPower = 0; //Let's say Ancients unaffected by power drain, to prevent Shadows etc from having to power down only weapon etc
 	//		return $effectPower;
 	//	}
+	
 		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
             foreach ($target->systems as $fighter) {
                 if ($fighter == null || $fighter->isDestroyed()) {

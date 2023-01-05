@@ -1,5 +1,5 @@
 <?php
-class Tyllz extends SmallStarBaseFourSections
+class Tyllz extends StarBase
 {
 
 	function __construct($id, $userid, $name,  $slot)
@@ -30,9 +30,12 @@ class Tyllz extends SmallStarBaseFourSections
 		$this->addPrimarySystem(new ProtectedCnC(6, 32, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 18, 5, 9));
 		$this->addPrimarySystem(new Scanner(5, 18, 5, 9));
-		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));	         				$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));	         				$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));	         				$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));     							
+		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));	         				
+		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));
+		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));	         				
+		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));
+		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));	         				
+		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));     							
 
 		$this->addFrontSystem(new CargoBay(4, 48));
 		$this->addFrontSystem(new SubReactorUniversal(4, 23, 0, 0));
@@ -56,26 +59,26 @@ class Tyllz extends SmallStarBaseFourSections
         $this->addLeftFrontSystem(new AntiprotonGun(4, 0, 0, 240, 360));
         $this->addLeftFrontSystem(new AntiprotonGun(4, 0, 0, 240, 360)); 				
 
-		$this->addLeftFrontSystem(new CargoBay(4, 48));
-		$this->addLeftFrontSystem(new SubReactorUniversal(4, 23, 0, 0));
-		$this->addLeftFrontSystem(new AntimatterTorpedo(4, 0, 0, 180, 300)); 
-		$this->addLeftFrontSystem(new AntimatterTorpedo(4, 0, 0, 180, 300)); 				  
-        $this->addLeftFrontSystem(new AntiprotonGun(4, 0, 0, 180, 300));
-        $this->addLeftFrontSystem(new AntiprotonGun(4, 0, 0, 180, 300)); 			
+		$this->addLeftAftSystem(new CargoBay(4, 48));
+		$this->addLeftAftSystem(new SubReactorUniversal(4, 23, 0, 0));
+		$this->addLeftAftSystem(new AntimatterTorpedo(4, 0, 0, 180, 300)); 
+		$this->addLeftAftSystem(new AntimatterTorpedo(4, 0, 0, 180, 300)); 				  
+        $this->addLeftAftSystem(new AntiprotonGun(4, 0, 0, 180, 300));
+        $this->addLeftAftSystem(new AntiprotonGun(4, 0, 0, 180, 300)); 			
 		
-		$this->addLeftFrontSystem(new CargoBay(4, 48));
-		$this->addLeftFrontSystem(new SubReactorUniversal(4, 23, 0, 0));
-		$this->addLeftFrontSystem(new AntimatterTorpedo(4, 0, 0, 0, 120)); 
-		$this->addLeftFrontSystem(new AntimatterTorpedo(4, 0, 0, 0, 120)); 				  
-        $this->addLeftFrontSystem(new AntiprotonGun(4, 0, 0, 0, 120));
-        $this->addLeftFrontSystem(new AntiprotonGun(4, 0, 0, 0, 120)); 			
+		$this->addRightFrontSystem(new CargoBay(4, 48));
+		$this->addRightFrontSystem(new SubReactorUniversal(4, 23, 0, 0));
+		$this->addRightFrontSystem(new AntimatterTorpedo(4, 0, 0, 0, 120)); 
+		$this->addRightFrontSystem(new AntimatterTorpedo(4, 0, 0, 0, 120)); 				  
+        $this->addRightFrontSystem(new AntiprotonGun(4, 0, 0, 0, 120));
+        $this->addRightFrontSystem(new AntiprotonGun(4, 0, 0, 0, 120)); 			
 
-		$this->addLeftFrontSystem(new CargoBay(4, 48));
-		$this->addLeftFrontSystem(new SubReactorUniversal(4, 23, 0, 0));
-		$this->addLeftFrontSystem(new AntimatterTorpedo(4, 0, 0, 60, 180)); 
-		$this->addLeftFrontSystem(new AntimatterTorpedo(4, 0, 0, 60, 180)); 				  
-        $this->addLeftFrontSystem(new AntiprotonGun(4, 0, 0, 60, 180));
-        $this->addLeftFrontSystem(new AntiprotonGun(4, 0, 0, 60, 180)); 		
+		$this->addRightAftSystem(new CargoBay(4, 48));
+		$this->addRightAftSystem(new SubReactorUniversal(4, 23, 0, 0));
+		$this->addRightAftSystem(new AntimatterTorpedo(4, 0, 0, 60, 180)); 
+		$this->addRightAftSystem(new AntimatterTorpedo(4, 0, 0, 60, 180)); 				  
+        $this->addRightAftSystem(new AntiprotonGun(4, 0, 0, 60, 180));
+        $this->addRightAftSystem(new AntiprotonGun(4, 0, 0, 60, 180)); 		
 		
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
