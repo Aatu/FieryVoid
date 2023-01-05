@@ -448,7 +448,7 @@ class HeavyInterceptorBattery extends InterceptorMkI{
    
 }  //end of class HeavyInterceptorBattery
 
-//Adding Thirdspace as unique systems to use different icon and allow modifictions from the Trek systems if necessary
+//Adding Thirdspace as unique systems to use different icon and allow modifictions from the Trek systems
 class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //defensive values of zero, but still formally there to display arcs!
     public $name = "ThirdspaceShieldProjection";
     public $displayName = "Shield Projection";
