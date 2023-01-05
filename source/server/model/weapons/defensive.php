@@ -448,14 +448,14 @@ class HeavyInterceptorBattery extends InterceptorMkI{
    
 }  //end of class HeavyInterceptorBattery
 
-//Adding Thirdspace unique systems to use different icon and allow modifictions to Trek systems if necessary
+//Adding Thirdspace as unique systems to use different icon and allow modifictions from the Trek systems if necessary
 class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //defensive values of zero, but still formally there to display arcs!
     public $name = "ThirdspaceShieldProjection";
     public $displayName = "Shield Projection";
     public $primary = true;
 	public $isPrimaryTargetable = false; //shouldn't be targetable at all, in fact!
 	public $isTargetable = false; //cannot be targeted ever!
-    public $iconPath = "ThirdspaceShieldProjection.png"; //overridden anyway - to indicate proper direction
+    public $iconPath = "TrekShieldProjectionF.png"; //overridden anyway - to indicate proper direction
     
 	public $possibleCriticals = array(); //no criticals possible
 	
@@ -619,7 +619,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
     public $name = "ThirdspaceShieldProjector";
     public $displayName = "Shield Projector";
 	public $isPrimaryTargetable = false; //projector can be targeted even on PRIMARY, like a weapon!
-    public $iconPath = "ThirdspaceShieldProjector.png"; //overridden anyway - to indicate proper direction
+    public $iconPath = "TrekShieldProjectorF.png"; //overridden anyway - to indicate proper direction
     public $boostable = true; //$this->boostEfficiency and $this->maxBoostLevel in __construct()  
 	public $boostEfficiency = 2;
     public $baseOutput = 0; //base output, before boost
@@ -633,7 +633,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 
     
     function __construct($armor, $maxhealth, $power, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
-		$this->iconPath = 'ThirdspaceShieldProjector' . $side . '.png';
+		$this->iconPath = 'TrekShieldProjectorF' . $side . '.png';
 		parent::__construct($armor, $maxhealth, $power, $rating, $startArc, $endArc);
 		$this->baseOutput = $rating;
 		$this->maxBoostLevel = $rating; //maximum double effect		

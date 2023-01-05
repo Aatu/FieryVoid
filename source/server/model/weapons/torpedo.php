@@ -291,8 +291,7 @@
     
     }//endof class PacketTorpedo
 
-    class PsionicTorpedo extends Torpedo{ //Powerful Thirspace weapon that detonates as AoE and reduces armour of targets.
-    
+    class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonates as AoE and reduces armour of targets.  
         public $name = "PsionicTorpedo";
         public $displayName = "Psionic Torpedo";
         public $iconPath = "PsionicTorpedo.png";        
@@ -326,9 +325,6 @@
 			$this->data["Special"] .= "<br>Hits target and all other units on hex for $dmgDirect damage, all units on nearby hexes are hit for $dmgNear. In case of flight level units every craft is damaged separately.";  
 			$this->data["Special"] .= "<br>Causes power disruptions on enemy ships.";  
 	        }		
-
-
-
 
     public function fire($gamedata, $fireOrder)
     {
@@ -375,7 +371,6 @@
                     $fireOrder->intercepted += 1;
                 }
             }
-
 
             $fireOrder->notes .= " FIRING SHOT " . ($i + 1) . ": rolled: $rolled, needed: $needed\n";
             $fireOrder->rolled = $rolled; //might be useful for weapon itself, too - like counting damage for Anti-Matter
@@ -446,9 +441,7 @@
         }
     }  
 
-	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
-	
-		
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!	
 		$effectArmor = Dice::d(3,1);//strength of effect: 1d6
 		$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor.";
 		
