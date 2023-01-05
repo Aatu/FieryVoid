@@ -502,6 +502,8 @@ class AdvancedSingularityDrive extends Reactor{
 	provides fixed power regardless of systems;
 	techical implementation: count as Power minus power required by all systems enabled
 */	
+    public $iconPath = "AdvancedSingularityDrive.png";
+    
 	public $possibleCriticals = array( //different set of criticals than standard Reactor
 		13=>"FieldFluctuations",
 		20=>array("FieldFluctuations"),

@@ -295,6 +295,7 @@
     
         public $name = "PsionicTorpedo";
         public $displayName = "Psionic Torpedo";
+        public $iconPath = "PsionicTorpedo.png";        
         public $range = 60;
         public $loadingtime = 2;
         
