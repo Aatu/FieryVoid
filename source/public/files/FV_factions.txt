@@ -23,6 +23,7 @@ General notes: ships usually come preloaded with missiles (usually Basic), and a
 This means Your missile magazine may show more missiles available than it can actually hold. However, You cannot actually LAUNCH more missiles than magazine can hold - total number of launches is tracked. So extra missiles will provide You with extra variety (at a price ;) ), but not actual extra missiles.
 This is particularly important for fighters (as ships' cavernous magazines are unlikely to run out during a battle). You are encouraged to observetotal amount of missiles a fighter can have, but if You do not (hether by omission or intentionally) - You will get extra missile variety, but no extra missiles.
 Note that fighters usually start with empty magazine (although some missile entry is present, for technical reasons).
+Any missile available in magazine can be fired by any launcher (that is capable of firing it), missiles are not directly tied to particular mounts. This is different for weapons that do store ammo directly on mount - but such weapons usually can only hold one kind of ammo.
 Missiles (and Navigators, for fighters) are bought as enhancements despite being standard options (for technical reasons).
 
 Not all tabletop missiles made it to Fiery VOi - some proved just too difficult to implement!
