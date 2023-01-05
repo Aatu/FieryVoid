@@ -4437,7 +4437,6 @@ class PsychicField extends Weapon{ //Operates similar to Spark Field, but debili
 	
 		
 		$effectIni = Dice::d(6,1);//strength of effect: 1d6
-//		$effectPower = Dice::d(8,1);//strength of effect: 1d6
 		$effecttohit = Dice::d(3,1);
 		$effectIni5 = $effectIni * 5;
 		$fireOrder->pubnotes .= "<br> Initiative reduced by $effectIni5.";
@@ -4445,7 +4444,6 @@ class PsychicField extends Weapon{ //Operates similar to Spark Field, but debili
 		if (WeaponEM::isTargetEMResistant($ship,$system)){
 			$effectIni = ceil($effectIni/2);  	//Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens.	
 			$effecttohit = ceil($effecttohit/2);
-//			$effectPower = 0; //Let's say Ancients unaffected by power drain, to prevent Shadows etc from having to power down only weapon etc	
 			$result = array($effectIni, $effecttohit)
 			return $result;	
 		}
@@ -4455,13 +4453,24 @@ class PsychicField extends Weapon{ //Operates similar to Spark Field, but debili
 	//		return $effectPower;
 	//	}
 		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
+            foreach ($target->systems as $fighter) {
+                if ($fighter == null || $fighter->isDestroyed()) {
+                    continue;
+                }
+                for($i=1; $i<=$effecttohit;$i++){
+					$crit = new PenaltyToHitOneTurn(-1, $ship->id, $firstFighter->id, 'PenaltyToHitOneTurn', $gamedata->turn); 
+					$crit->updated = true;
+			        $fighter->criticals[] =  $crit;
+				}
+            }
+			
 			$firstFighter = $ship->getSampleFighter();
 			if($firstFighter){
-				for($i=1; $i<=$effecttohit;$i++){
+	/*			for($i=1; $i<=$effecttohit;$i++){
 					$crit = new PenaltyToHitOneTurn(-1, $ship->id, $firstFighter->id, 'PenaltyToHitOneTurn', $gamedata->turn); 
 					$crit->updated = true;
 			        	$firstFighter->criticals[] =  $crit;
-				}
+				} */
 				for($i=1; $i<=$effectIni;$i++){
 					$crit = new tmpinidown(-1, $ship->id, $firstFighter->id, 'tmpinidown', $gamedata->turn); 
 					$crit->updated = true;
@@ -4483,40 +4492,6 @@ class PsychicField extends Weapon{ //Operates similar to Spark Field, but debili
 				}
 			}
 		}
-
-/*		Old code when using power drain instead of to hit chance		
-		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
-			$firstFighter = $ship->getSampleFighter();
-			if($firstFighter){
-	//			for($i=1; $i<=$effecttohit;$i++){
-	//				$crit = new tmpsensordown(-1, $ship->id, $firstFighter->id, 'tmpsensordown', $gamedata->turn); //CHANGE CRIT
-	//				$crit->updated = true;
-	//		        	$firstFighter->criticals[] =  $crit;
-	//			}
-				for($i=1; $i<=$effectIni;$i++){
-					$crit = new tmpinidown(-1, $ship->id, $firstFighter->id, 'tmpinidown', $gamedata->turn); 
-					$crit->updated = true;
-			        	$firstFighter->criticals[] =  $crit;
-				}
-			}
-		}else{ //ship - place effcet on C&C!
-	//		$reactor = $ship->getSystemByName("Reactor")
-			$CnC = $ship->getSystemByName("CnC");
-			
-	//		if($reactor){
-	//			for($i=1; $i<=$effectPower;$i++){
-	//				$crit = new tmppowerdown(-1, $ship->id, $CnC->id, 'tmppowerdown', $gamedata->turn); 
-	//				$crit->updated = true;
-	//		        	$CnC->criticals[] =  $crit;
-	//			}
-			if($CnC){
-				for($i=1; $i<=$effectIni;$i++){
-					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
-					$crit->updated = true;
-			        	$CnC->criticals[] =  $crit;
-				}
-			}
-		} */
 	} //endof function onDamagedSystem	
 
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
@@ -4581,7 +4556,7 @@ class PsychicField extends Weapon{ //Operates similar to Spark Field, but debili
 	public function setMinDamage(){   $this->minDamage =  0 ;      }
 	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
 	
-} //endof class ThirdspacePsychicField 
+} //endof class PsychicField 
 
 
 
@@ -4678,7 +4653,8 @@ class PsionicConcentrator extends Raking{
 	public $iconPath = "PsionicConcentrator.png";
 	
 	public $animation = "bolt";
-        public $animationColor = array(153, 0, 0); //should be the same as Particle Cannon
+	    public $animationArray = array( 1=>bolt, 2=>bolt, 3=>laser, 4=>laser);
+    public $animationColor = array(153, 0, 0);
 	/*
 	public $trailColor = array(30, 170, 255);	
 	public $animationWidth = 4;
@@ -4688,29 +4664,27 @@ class PsionicConcentrator extends Raking{
 	public $animationExplosionScaleArray = array(1=>0.25, 2=>0.35, 3=>0.45, 4=>0.55, 5=>0.70, 6=>0.85);
       */
         public $loadingtime = 1;
-	public $intercept = 2; //intercept rating -1     
+	public $intercept = 3; //intercept rating -1     
 	
         public $priority = 6;
-        public $priorityArray = array(1=>6, 2=>5, 3=>5, 4=>5, 5=>4, 6=>4); //weakest mode is light Raking weapon, heavier ones are heavy raking weapons
+        public $priorityArray = array(1=>6, 2=>5, 3=>5, 4=>4); //weakest mode is light Raking weapon, heavier ones are heavy raking weapons
 	public $firingMode = 1;	
             public $firingModes = array(
                 1 => "Single",
                 2 => "2combined",
                 3 => "3combined",
-                4 => "4combined",
-                5 => "5combined",
-                6 => "6combined"
+                4 => "4combined"
             );
         public $rangePenalty = 0.5; //-1/2 hexes - and this stays constant!
-            //public $rangePenaltyArray = array( 1=>2, 2=>1, 3=>0.5, 4=>0.33, 5=>0.25 ); //Raking and Piercing mode
+            public $rangePenaltyArray = array( 1=>0.5, 2=>1, 3=>0.33, 4=>0.25); //Raking and Piercing mode
         public $fireControl = array(6, 5, 5); // fighters, <mediums, <capitals 
-            public $fireControlArray = array( 1=>array(6, 5, 5), 2=>array(7, 6, 6), 3=>array(8, 7, 7), 4=>array(9, 8, 8), 5=>array(10, 9, 9), 6=>array(11, 10, 10) ); //+1 fire control the more concentrators are used to hit per every additional combining weapon
+            public $fireControlArray = array( 1=>array(6, 5, 5), 2=>array(7, 6, 6), 3=>array(8, 7, 7), 4=>array(9, 8, 8)); //+1 fire control the more concentrators are used to hit per every additional combining weapon
 	
 	
 	
 	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-  		public $damageTypeArray = array(1=>"Standard", 2=>"Raking", 3=>"Raking", 4=>"Raking", 5=>"Raking", 6=>"Raking");	    
-	    public $weaponClass = "Molecular"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+  		public $damageTypeArray = array(1=>"Standard", 2=>"Standard", 3=>"Raking", 4=>"Raking");	    
+	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
 	
 	public $isCombined = false; //is being combined with other weapon
@@ -4720,12 +4694,11 @@ class PsionicConcentrator extends Raking{
 	
 	    public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Can combine multiple Psionic Concentrator into one concentrated raking shot - for +1 Fire Control and +1d10 damage per additional weapon (up to 5 additional weapon can be added).";  
-		      $this->data["Special"] .= "<br>If You allocate multiple Psionic Concentrators in higher mode of fire at the same target, they will be combined."; 
-		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in highest actually possible mode instead.";  
-		      $this->data["Special"] .= "<br>Concentrators do not need to be on the same ship, but need to be on the same hex to combine."; //tabletop: within 1 hex  			  
-		      $this->data["Special"] .= "<br>Hit chance will be average of all weapons combining.";//tabletop: use average EW, best range, worst criticals and no lock-on if ANY weapon lacks lock-on
-		       $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";
+		      $this->data["Special"] = "Can combine multiple Psionic Concentrator on a ship into one concentrated shot - for +1 Fire Control and +1d10 damage per additional weapon (up to 5 additional weapon can be added).";
+		      $this->data["Special"] .= "<br>Two concentrators will deliver a high power Standard shot with shorter range.  Three or four combined will fire a longer ranged raking shot";		        
+		      $this->data["Special"] .= "<br>If You allocate multiple Psionic Concentrators in higher mode of fire at the same target, they will be combined.";		       
+		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in highest actually possible mode instead.";  		  
+		      $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";
 	    }	
 	
 		
@@ -4740,11 +4713,6 @@ class PsionicConcentrator extends Raking{
 	//if already combining - do not fire at all (eg. set hit chance at 0, make self completely uninterceptable and number of shots at 0)
 	public function calculateHitBase($gamedata, $fireOrder){
 		$this->alreadyConsidered = true;
-		$combinedChance = 0;
-		if ($this->testRun){ //calculate nominal, skipping concentration issues - for subordinate weapon to calculate average hit chance
-			parent::calculateHitBase($gamedata, $fireOrder);
-			return;
-		}
 		if ($this->isCombined){  //this weapon is being used as subordinate combination weapon! 
 			$notes = "technical fire order - weapon combined into another shot";
 			$fireOrder->chosenLocation = 0; //tylko techniczne i tak
@@ -4756,60 +4724,36 @@ class PsionicConcentrator extends Raking{
 			return;
 		}
 		if ($fireOrder->firingMode > 1){ //for single fire there's nothing special
-			$firingShip = $gamedata->getShipById($fireOrder->shooterid);	
-			$srcPos = $firingShip->getCoPos();			
-			$shipsSameHex = $gamedata->getShipsInDistance($firingShip, 0);//all ships on the same hex can potentially combine!
+			$firingShip = $gamedata->getShipById($fireOrder->shooterid);
 			$subordinateOrders = array();
 			$subordinateOrdersNo = 0;
-			foreach($shipsSameHex as $otherShip) {			
-				//look for firing orders from same hex at same target in same mode - and make sure it's same type of weapon
-				$allOrders = $otherShip->getAllFireOrders($gamedata->turn);
-				foreach($allOrders as $subOrder) {
-					if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->targetid) && ($subOrder->calledid == $fireOrder->calledid) && ($subOrder->firingMode == $fireOrder->firingMode) ){ 
-						//order data fits - is weapon another Particle Concentrator?...
-						$subWeapon = $otherShip->getSystemById($subOrder->weaponid);
-						if ($subWeapon instanceof ParticleConcentrator){
-							if (!$subWeapon->alreadyConsidered){ //ok, can be combined then!
-								$subordinateOrdersNo++;
-								$subordinateOrders[] = $subOrder;
-							}
+			//look for firing orders from same ship at same target (and same called id as well) in same mode - and make sure it's same type of weapon
+			$allOrders = $firingShip->getAllFireOrders($gamedata->turn);
+			foreach($allOrders as $subOrder) {
+				if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->targetid) && ($subOrder->calledid == $fireOrder->calledid) && ($subOrder->firingMode == $fireOrder->firingMode) ){ 
+					//order data fits - is weapon another Surge Cannon?...
+					$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
+					if ($subWeapon instanceof PsionicConcentrator){
+						if (!$subWeapon->alreadyConsidered){ //ok, can be combined then!
+							$subordinateOrdersNo++;
+							$subordinateOrders[] = $subOrder;
 						}
 					}
-					if ($subordinateOrdersNo>=($fireOrder->firingMode-1)) break;//enough subordinate weapons found! - exit loop
 				}
 				if ($subordinateOrdersNo>=($fireOrder->firingMode-1)) break;//enough subordinate weapons found! - exit loop
-			}
-			//if not enough weapons to combine in desired mode - combine still, just in appropriately lesser mode
-			if ($subordinateOrdersNo < ($fireOrder->firingMode-1)){ 
-				$fireOrder->firingMode = $subordinateOrdersNo +1; //worst case it's single fire ;)
-			}			
-			//combining - set other combining weapons/fire orders to technical status! (and change their firing mode to the same as base weapon, also just in case ;)
-			foreach($subordinateOrders as $subOrder){
-				$otherShip = $gamedata->getShipById($subOrder->shooterid);	
-				$subWeapon = $otherShip->getSystemById($subOrder->weaponid);
-				$subWeapon->isCombined = true;
-				$subWeapon->alreadyConsidered = true;
-				$subWeapon->doNotIntercept = true;
-				$subOrder->pubnotes .= 'Combined into another shot. ';
-				$subOrder->firingMode = $fireOrder->firingMode;
-				
-				//get nominal hit chance...
-				$subWeapon->testRun = true;
-				$subWeapon->calculateHitBase($gamedata, $subOrder);
-				$combinedChance += $subOrder->needed;
-				//and now nullify  hit chance...
-				$subWeapon->testRun = false;
-				$notes = "Technical fire order - weapon combined into another shot. ";
-				$subOrder->needed = 0;
-				$subOrder->notes = $notes;
+			}						
+			if ($subordinateOrdersNo == ($fireOrder->firingMode-1)){ //combining - set other combining weapons/fire orders to technical status!
+				foreach($subordinateOrders as $subOrder){
+					$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
+					$subWeapon->isCombined = true;
+					$subWeapon->alreadyConsidered = true;
+					$subWeapon->doNotIntercept = true;
+				}
+			}else{//not enough weapons to combine in this mode - set self to single fire
+				$fireOrder->firingMode = 1;
 			}
 		}
 		parent::calculateHitBase($gamedata, $fireOrder);
-		if($fireOrder->firingMode > 1){ //for concentrated shot - hit chance is average of hit chances of all weapons
-			$combinedChance += $fireOrder->needed;
-			$fireOrder->needed = round($combinedChance/$fireOrder->firingMode);
-			$fireOrder->notes .= 'Modified as average of concentrating shots! ';
-		}
 	}//endof function calculateHitBase
 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!

@@ -39,8 +39,8 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addPrimarySystem(new Engine(7, 36, 0, 20, 3));
 		$this->addPrimarySystem(new Hangar(7, 20));
 	//	$this->addPrimarySystem(new PsychicField(7, 0, 0, 0, 360));		
-        $this->addPrimarySystem(new SelfRepair(7, 12, 5)); //armor, structure, output
-        $this->addPrimarySystem(new SelfRepair(7, 12, 5)); //armor, structure, output        		
+        $this->addPrimarySystem(new SelfRepair(7, 10, 5)); //armor, structure, output
+        $this->addPrimarySystem(new SelfRepair(7, 10, 5)); //armor, structure, output        		
         
  //       $this->addFrontSystem(new HeavyPsionicLance(6, 0, 12, 330, 30));
  //       $this->addFrontSystem(new PsionicLance(6, 0, 8, 300, 60));
