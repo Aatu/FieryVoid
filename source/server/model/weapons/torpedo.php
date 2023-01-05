@@ -302,6 +302,8 @@
         
         public $animation = "torpedo";
         public $animationColor = array(153, 0, 0);
+        public $animationExplosionType = "AoE"; 
+        public $animationExplosionScale = 1;               
 		/*
         public $trailColor = array(141, 240, 255);
         public $animationExplosionScale = 0.25;
