@@ -621,7 +621,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 	public $isPrimaryTargetable = false; //projector can be targeted even on PRIMARY, like a weapon!
     public $iconPath = "TrekShieldProjectorF.png"; //overridden anyway - to indicate proper direction
     public $boostable = true; //$this->boostEfficiency and $this->maxBoostLevel in __construct()  
-	public $boostEfficiency = 2;
+	public $boostEfficiency = 1;
     public $baseOutput = 0; //base output, before boost
     
 	

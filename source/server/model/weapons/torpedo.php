@@ -309,7 +309,9 @@
         public $animationWidth = 10;
         public $trailLength = 10;
 		*/
-
+		public $firingModes = array(
+		1 => "AoE"
+	);
  	   	public $damageType = "Flash";
         public $priority = 1; 	   
 
@@ -490,7 +492,7 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        public function getDamage($fireOrder){        return 18;   }
+        public function getDamage($fireOrder){        return 20;   }
         public function setMinDamage(){     $this->minDamage = 10; /*- $this->dp;*/      }
         public function setMaxDamage(){     $this->maxDamage = 20 ;/*- $this->dp;*/      }
     
