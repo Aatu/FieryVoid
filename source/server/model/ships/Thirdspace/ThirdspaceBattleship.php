@@ -64,10 +64,10 @@ class ThirdspaceBattleship extends BaseShip{
   //      $this->addAftSystem(new PsionicConcentrator(5, 0, 0, 120, 240)); 
  //       $this->addAftSystem(new PsionicConcentrator(5, 0, 0, 120, 240)); 
 //		$projection = new ThirdspaceShieldProjection(0, 200, 200, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
-//		$projector = new ThirdspaceShieldProjector(6, 24, 10, 6, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
+//		$projector = new ThirdspaceShieldProjector(6, 24, 15, 6, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 //		$projection->addProjector($projector);
 //		$this->addAftSystem($projector);
-//		$projector = new ThirdspaceShieldProjector(6, 24, 10, 6, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
+//		$projector = new ThirdspaceShieldProjector(6, 24, 15, 6, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 //		$projection->addProjector($projector);
 //		$this->addAftSystem($projector);
 //		$this->addAftSystem($projection);
