@@ -7664,7 +7664,7 @@ class FMissileRack extends Weapon {
 		public $firingModes = array(1=>'Standard', 2=>'Long-range'); //equals to available missiles; data is basic - if launcher is special, constructor will modify it
 		public $damageTypeArray = array(1=>'Standard', 2=>'Standard'); //indicates that this weapon does damage in Pulse mode
 
-		public $rangeArray = array(1=>20, 2=>30); 
+		public $rangeArray = array(1=>20, 2=>35); 
 		public $distanceRangeArray = array(1=>60, 2=>70); 
 
         public $damageType = "Standard";
@@ -7798,7 +7798,8 @@ class FMissileRack extends Weapon {
 			$strippedSystem->maxDamageArray = $this->maxDamageArray;		
 			$strippedSystem->fireControl = $this->fireControl;
 			$strippedSystem->fireControlArray = $this->fireControlArray;
-//			$strippedSystem->range = $this->range;
+			$strippedSystem->range = $this->range;
+			$strippedSystem->rangeArray = $this->rangeArray;
 			return $strippedSystem;
 		}
 
