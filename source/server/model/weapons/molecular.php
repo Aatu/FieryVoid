@@ -1020,6 +1020,7 @@
     class HeavyPsionicLance extends Raking{
         public $name = "HeavyPsionicLance";
         public $displayName = "Heavy Psionic Lance";
+        public $iconPath = "HeavyPsionicLance.png";        
         public $animation = "laser";
         public $animationColor = array(153, 0, 0);
   //      public $animationExplosionScale = 0.35; //make it thin, despite high damage potential!
@@ -1141,6 +1142,7 @@
     class PsionicLance extends Raking{
         public $name = "PsionicLance";
         public $displayName = "Psionic Lance";
+        public $iconPath = "PsionicLance.png";         
         public $animation = "laser";
         public $animationColor = array(153, 0, 0);
   //      public $animationExplosionScale = 0.35; //make it thin, despite high damage potential!

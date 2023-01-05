@@ -4284,9 +4284,9 @@ class VorlonDischargeCannon extends Weapon{
 
 
 class PsychicField extends Weapon{ //Operates similar to Spark Field, but debilitating enemies in range, not damage them.
-        public $name = "ThirdspacePsychicField";
+        public $name = "PsychicField";
         public $displayName = "Psychic Field";
-	public $iconPath = "ThirdspacePsychicField.png";
+	public $iconPath = "PsychicField.png";
 	
 	//let's make animation more or less invisible, and effect very large
 	public $trailColor = array(141, 240, 255);
