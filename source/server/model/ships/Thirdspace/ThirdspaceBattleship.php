@@ -32,12 +32,13 @@ class ThirdspaceBattleship extends BaseShip{
 
         
         $this->addPrimarySystem(new AdvancedSingularityDrive(8, 60, 0, 120+8+5));
-        $this->addPrimarySystem(new CnC(8, 24, 0, 0));
+        $this->addPrimarySystem(new ProtectedCnC(8, 24, 0, 0));
         $scanner = new Scanner(7, 28, 8, 15);
 		$scanner->markAdvanced();
 		$this->addPrimarySystem($scanner);	        
         $this->addPrimarySystem(new Engine(7, 36, 0, 20, 3));
 		$this->addPrimarySystem(new Hangar(7, 20));
+		$this->addPrimarySystem(new JumpEngine(6, 28, 5, 6));    //Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.    		
 	//	$this->addPrimarySystem(new PsychicField(7, 0, 0, 0, 360));		
         $this->addPrimarySystem(new SelfRepair(7, 12, 6)); //armor, structure, output
         $this->addPrimarySystem(new SelfRepair(7, 12, 6)); //armor, structure, output        		
@@ -47,14 +48,14 @@ class ThirdspaceBattleship extends BaseShip{
   //      $this->addFrontSystem(new PsionicLance(6, 0, 0, 300, 60));
  //       $this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 60));
  //       $this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 60));        
-//		$projection = new ThirdspaceShieldProjection(0, 200, 200, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
-//		$projector = new ThirdspaceShieldProjector(6, 24, 15, 6, 270, 90, 'F'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
-//		$projection->addProjector($projector);
-//		$this->addFrontSystem($projector);
-//		$projector = new ThirdspaceShieldProjector(6, 24, 15, 6, 270, 90, 'F'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
-//		$projection->addProjector($projector);
-//		$this->addFrontSystem($projector);
-//		$this->addFrontSystem($projection);
+		$projection = new ThirdspaceShieldProjection(0, 200, 200, 270, 90, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+		$projector = new ThirdspaceShieldProjector(6, 24, 6, 15, 270, 90, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
+		$projection->addProjector($projector);
+		$this->addFrontSystem($projector);
+		$projector = new ThirdspaceShieldProjector(6, 24, 6, 15, 270, 90, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
+		$projection->addProjector($projector);
+		$this->addFrontSystem($projector);		
+		$this->addFrontSystem($projection);
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));   
 			
@@ -63,19 +64,18 @@ class ThirdspaceBattleship extends BaseShip{
  //       $this->addAftSystem(new PsionicConcentrator(5, 0, 0, 120, 240)); 
   //      $this->addAftSystem(new PsionicConcentrator(5, 0, 0, 120, 240)); 
  //       $this->addAftSystem(new PsionicConcentrator(5, 0, 0, 120, 240)); 
-//		$projection = new ThirdspaceShieldProjection(0, 200, 200, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
-//		$projector = new ThirdspaceShieldProjector(6, 24, 15, 6, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
-//		$projection->addProjector($projector);
-//		$this->addAftSystem($projector);
-//		$projector = new ThirdspaceShieldProjector(6, 24, 15, 6, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
-//		$projection->addProjector($projector);
-//		$this->addAftSystem($projector);
-//		$this->addAftSystem($projection);
-		$this->addAftSystem(new JumpEngine(6, 28, 5, 6));    //Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.    
-        $this->addAftSystem(new GraviticThruster(6, 20, 0, 8, 2));
-        $this->addAftSystem(new GraviticThruster(6, 20, 0, 8, 2));
-        $this->addAftSystem(new GraviticThruster(6, 20, 0, 8, 2));
-        $this->addAftSystem(new GraviticThruster(6, 20, 0, 8, 2));       
+		$projection = new ThirdspaceShieldProjection(0, 200, 200, 90, 270, 'A');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+		$projector = new ThirdspaceShieldProjector(6, 24, 6, 15, 90, 270, 'A'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
+		$projection->addProjector($projector);
+		$this->addAftSystem($projector);
+		$projector = new ThirdspaceShieldProjector(6, 24, 6, 15, 90, 270, 'A'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
+		$projection->addProjector($projector);
+		$this->addAftSystem($projector);
+		$this->addAftSystem($projection);
+        $this->addAftSystem(new GraviticThruster(6, 24, 0, 8, 2));
+        $this->addAftSystem(new GraviticThruster(6, 24, 0, 8, 2));
+        $this->addAftSystem(new GraviticThruster(6, 24, 0, 8, 2));
+        $this->addAftSystem(new GraviticThruster(6, 24, 0, 8, 2));       
        
 //        $this->addLeftSystem(new PsionicLance(6, 0, 0, 240, 360));
 //        $this->addLeftSystem(new PsionicTorpedo(6, 0, 0, 240, 360));
@@ -94,7 +94,7 @@ class ThirdspaceBattleship extends BaseShip{
 		
 		//structures
         $this->addFrontSystem(new Structure(6, 96));
-        $this->addAftSystem(new Structure(6, 88));
+        $this->addAftSystem(new Structure(6, 120));
         $this->addLeftSystem(new Structure(6, 120));
         $this->addRightSystem(new Structure(6, 120));
         $this->addPrimarySystem(new Structure(7, 108));

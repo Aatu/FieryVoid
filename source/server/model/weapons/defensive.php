@@ -455,7 +455,7 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
     public $primary = true;
 	public $isPrimaryTargetable = false; //shouldn't be targetable at all, in fact!
 	public $isTargetable = false; //cannot be targeted ever!
-    public $iconPath = "TrekShieldProjectionF.png"; //overridden anyway - to indicate proper direction
+    public $iconPath = "TrekShieldProjection.png"; //overridden anyway - to indicate proper direction
     
 	public $possibleCriticals = array(); //no criticals possible
 	
@@ -466,7 +466,7 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 	
     
     function __construct($armor, $maxhealth, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
-		$this->iconPath = 'ThirdspaceShieldProjection' . $side . '.png';
+		$this->iconPath = 'TrekShieldProjection' . $side . '.png';
 		parent::__construct($armor, $maxhealth, 0, $rating, $startArc, $endArc);
 		$this->output=$rating;//output is displayed anyway, make it show something useful... in this case - number of points absorbed per hit
 			}
@@ -504,12 +504,11 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 		$absorb = $this->output - $this->armour;
 		$this->data["Special"] = "Defensive system which absorbs damage from incoming shots before they damage ship hull.";
 		$this->data["Special"] .= "<br>Can absorb up to its maximum capacity before allowing damage to ship.";
-		$this->data["Special"] .= "<br>Protects from every separate impact (e.g. every rake!) separately.";
-		$this->data["Special"] .= "<br>Shield system's structure represents damage capacity. If it is reduced to zero system will cease to function.";
+		$this->data["Special"] .= "<br>Shield system's structure represents damage capacity, if it is reduced to zero system will cease to function.";
 		$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
-		$this->data["Special"] .= "<br>This is NOT a B5 shield as far as normal shield-related interactions go e.g. damage reduction per hit, or reduced hit chance.";
+		$this->data["Special"] .= "<br>Cannot be flown under, and does not reduce the damage dealt or hit chance of enemy weapons.";
 		
-		$this->outputDisplay = $this->armour . '/' . $absorb . '/' . $this->getRemainingCapacity();//override on-icon display default
+		$this->outputDisplay = $this->getRemainingCapacity() . '/' . $absorb;//override on-icon display default
 	}	
 	
 	public function getRemainingCapacity(){
@@ -633,7 +632,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 
     
     function __construct($armor, $maxhealth, $power, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
-		$this->iconPath = 'TrekShieldProjectorF' . $side . '.png';
+		$this->iconPath = 'TrekShieldProjector' . $side . '.png';
 		parent::__construct($armor, $maxhealth, $power, $rating, $startArc, $endArc);
 		$this->baseOutput = $rating;
 		$this->maxBoostLevel = $rating; //maximum double effect		

@@ -214,7 +214,7 @@ ThirdspaceShieldProjection.prototype.getDefensiveHitChangeMod = function (target
     return 0;
 };
 
-var ThirdspaceShieldProjection = function ThirdspaceShieldProjection(json, ship) {
+var ThirdspaceShieldProjector = function ThirdspaceShieldProjector(json, ship) {
     ShipSystem.call(this, json, ship);
     this.defensiveType = "none";
 };
