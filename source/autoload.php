@@ -322,7 +322,7 @@ spl_autoload_register(
                 'falenna' => '/server/model/ships/centauri_old/falenna.php',
                 'falenna1975' => '/server/model/ships/centauri_old/falenna1975.php',
                 'falkosi' => '/server/model/ships/brakiri/falkosi.php',
-                'fangedserpent' => '/server/model/ships/drazi/fangedserpent.php',
+                //'fangedserpent' => '/server/model/ships/drazi/fangedserpent.php',
                 'fangedserpent_v2' => '/server/model/ships/drazi/fangedserpent_v2.php',
                 'fastfreighter' => '/server/model/ships/civilians/fastFreighter.php',
                 'felucca' => '/server/model/ships/raiders/felucca.php',
@@ -901,7 +901,7 @@ spl_autoload_register(
                 'skiff' => '/server/model/ships/raiders/skiff.php',
                 'skua' => '/server/model/ships/drazi_old/skua.php',
                 'skylark' => '/server/model/ships/civilians/skylark.php',
-                'skyserpent' => '/server/model/ships/drazi/skyserpent.php',
+                //'skyserpent' => '/server/model/ships/drazi/skyserpent.php',
                 'skyserpent_v2' => '/server/model/ships/drazi/skyserpent_v2.php',
                 'sleekbird' => '/server/model/ships/drazi/sleekbird.php',
                 'sloop' => '/server/model/ships/raiders/sloop.php',
@@ -2733,7 +2733,8 @@ spl_autoload_register(
 				// ~~~ AmmoMagazine ~~~ and related classes
                 		'ammomagazine' => '/server/model/systems/baseSystems.php', //ammo magazine itself
 		    
-                		'ammomissileb' => '/server/model/systems/baseSystems.php', //ammunition for missile racks
+						'ammomissiletemplate' => '/server/model/systems/baseSystems.php', //ammunition for missile racks
+                		'ammomissileb' => '/server/model/systems/baseSystems.php', 
                 		'ammomissilel' => '/server/model/systems/baseSystems.php',
                 		'ammomissileh' => '/server/model/systems/baseSystems.php',
                 		'ammomissilef' => '/server/model/systems/baseSystems.php',
@@ -2741,6 +2742,12 @@ spl_autoload_register(
                 		'ammomissilep' => '/server/model/systems/baseSystems.php',
                 		'ammomissiled' => '/server/model/systems/baseSystems.php',
                 		'ammomissiles' => '/server/model/systems/baseSystems.php',
+						
+                		'ammomissilefb' => '/server/model/systems/baseSystems.php',
+                		'ammomissilefl' => '/server/model/systems/baseSystems.php',
+                		'ammomissilefh' => '/server/model/systems/baseSystems.php',
+                		'ammomissilefy' => '/server/model/systems/baseSystems.php',
+                		'ammomissilefd' => '/server/model/systems/baseSystems.php',
 		    
                 		'ammomissileracks' => '/server/model/weapons/missile.php', //missile racks themselves
                 		'ammomissilerackso' => '/server/model/weapons/missile.php',
@@ -2750,6 +2757,7 @@ spl_autoload_register(
                 		'ammomissileracklh' => '/server/model/weapons/missile.php',
                 		'ammomissilerackr' => '/server/model/weapons/missile.php',
                 		'ammobombrack' => '/server/model/weapons/missile.php',
+                		'ammofighterrack' => '/server/model/weapons/missile.php',
 						
 						
 		    
@@ -2820,6 +2828,9 @@ spl_autoload_register(
 						
 						//Drazi						
 						'darkhawkam' => '/server/model/ships/drazi/darkhawkAM.php', 
+						
+						'skyserpentam' => '/server/model/ships/drazi/skyserpentAM.php',
+						'fangedserpentam' => '/server/model/ships/drazi/fangedserpentAM.php',
 						
 						//Llort
 						'kaedashkadaam' => '/server/model/ships/llort/KaedashkadaAM.php',
