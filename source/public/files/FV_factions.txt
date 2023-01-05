@@ -6,12 +6,19 @@ notable technologies, special rules, differences from official version (if appli
 
 GENERAL NOTES
 -------------
-Custom designs - some units are marked as "custom". This means they're not official designs released by AoG. This means they may not be evaluated as well as official ones, as well as they may not fit into the faction as originally designed.
+	Custom designs - some units are marked as "custom". This means they're not official designs released by AoG. This means they may not be evaluated as well as official ones, as well as they may not fit into the faction as originally designed.
 	Before using custom units it's good practice to make sure that Your opponent allows that (and if You create a game with such units allowed - say so explicitly in game description!)
-Unit enhancements - Fiery Void allows players to add enhancements to their ships (full list is available in separate file). Keep in mind that unit enhancements are originally optional rule, and enhancements may not be evaluated as well as base hulls (although they're generally pricy compared to their effect!). 
+	
+	Semi-custom designs - some units are marked as "semi-custom". This means they're not official designs released by AoG, but for some reason are not considered custom units and can be used in "official only" matches. Common reasons for such units' classification include:
+ - official units that could not be faithfully ported into FV for technical reasons, but were nonetheless considered important and are present with some changes (eg. Brakiri Tashkat and Shakara)
+ - units that notably expand fleet build options of faction while keeping close to official designs (eg. Ipsha Jumpsphere allowing tournament-legal fleets not centered on an ElInt, and a few Belt Alliance designs allowing to bring LCVs to the table while conforming to these rules)
+ - units that were released by AoG in expansion released after the company ceased to produce B5Wars related materials, but developed earlier (eg. sourcebook Variants-6)
+	
+	Unit enhancements - Fiery Void allows players to add enhancements to their ships (full list is available in separate file). Keep in mind that unit enhancements are originally optional rule, and enhancements may not be evaluated as well as base hulls (although they're generally pricy compared to their effect!). 
 	Before using enhancements for more than rounding out remaining points it's good practice to make sure that Your opponent agrees with that (and if You create a game with enhancements allowed - say so explicitly in game description!).
-	Note that some options listed as "Enhancements" are such only technically, as they're regularly available unit options (eg. fighter navigator). This is noted in enhancements list as well.
-Fleet checker - tool that performs automatic check of fleet composition. Game does not enforce its use, but these restrictions are aimed at creation of balanced and interesting fleets so it's encouraged :) . It's SUBJECTIVELY extrapolated from official tournament rules.
+	Note that some options listed as "Enhancements" are such only technically, as they're regularly available unit options (eg. variable missile loadouts or Navigators). This is noted in enhancements list as well.
+	
+	Fleet checker - tool that performs automatic check of fleet composition. Game does not enforce its use, but these restrictions are aimed at creation of balanced and interesting fleets so it's encouraged :) . It's SUBJECTIVELY extrapolated from official tournament rules.
 
 
 
