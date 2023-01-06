@@ -4820,7 +4820,7 @@ class PsionicConcentrator extends Raking{
         );
 
         public $rangePenalty = 0.25;
-        public $fireControl = array(null, 6, 6); // fighters, <mediums, <capitals
+        public $fireControl = array(null, 6, 8); // fighters, <mediums, <capitals
         //private $damagebonus = 10;
 
         public $damageType = "Raking"; 

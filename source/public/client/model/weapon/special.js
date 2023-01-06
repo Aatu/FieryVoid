@@ -311,9 +311,9 @@ PsionicConcentrator.prototype = Object.create(Weapon.prototype);
 PsionicConcentrator.prototype.constructor = PsionicConcentrator;
 
 var HeavyPsionicLance = function HeavyPsionicLance(json, ship) {
-    Molecular.call(this, json, ship);
+    Weapon.call(this, json, ship);
 };
-HeavyPsionicLance.prototype = Object.create(Molecular.prototype);
+HeavyPsionicLance.prototype = Object.create(Weapon.prototype);
 HeavyPsionicLance.prototype.constructor = HeavyPsionicLance;
 
 HeavyPsionicLance.prototype.clearBoost = function () {
@@ -364,9 +364,9 @@ HeavyPsionicLance.prototype.initBoostableInfo = function () {
 };
 
 var PsionicLance = function PsionicLance(json, ship) {
-    Molecular.call(this, json, ship);
+    Weapon.call(this, json, ship);
 };
-PsionicLance.prototype = Object.create(Molecular.prototype);
+PsionicLance.prototype = Object.create(Weapon.prototype);
 PsionicLance.prototype.constructor = PsionicLance;
 
 PsionicLance.prototype.clearBoost = function () {

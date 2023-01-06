@@ -508,7 +508,7 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 			$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
 			$this->data["Special"] .= "<br>Cannot be flown under, and does not reduce the damage dealt or hit chance of enemy weapons.";
 			
-			$this->outputDisplay = $this->getRemainingCapacity() . '/' . $absorb;//override on-icon display default
+			$this->outputDisplay = $this->getRemainingCapacity();// . '/' . $absorb;//override on-icon display default
 		}	
 		
 		public function getRemainingCapacity(){
@@ -553,9 +553,9 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 				$absorbedFreely = 0;
 				//first, armor takes part
 				$absorbedFreely = min($this->armour, $damageToAbsorb);
-				$damageToAbsorb += -$absorbedFreely;
+	//			$damageToAbsorb += -$absorbedFreely;
 				//next, actual absorbtion
-				$absorbedDamage = min($this->output - $this->armour, $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
+				$absorbedDamage = min($this->output - $this->armour , $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
 				$damageToAbsorb += -$absorbedDamage;
 				if($absorbedDamage>0){ //mark!
 					$this->absorbDamage($target,$gamedata,$absorbedDamage);
@@ -618,7 +618,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 		public $isPrimaryTargetable = false; //projector can be targeted even on PRIMARY, like a weapon!
 	    public $iconPath = "TrekShieldProjectorF.png"; //overridden anyway - to indicate proper direction
 	    public $boostable = true; //$this->boostEfficiency and $this->maxBoostLevel in __construct()  
-		public $boostEfficiency = 1;
+		public $boostEfficiency = 3;
 	    public $baseOutput = 0; //base output, before boost
 	    
 		
@@ -649,12 +649,12 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn); 
-			$this->data["Special"] = "Shield projector - replenishes structure of appropriate Shield Projection by Projector's rating at end of turn.";
+			$this->data["Special"] = "Shield projector - replenishes 3 structure of appropriate Shield Projection per point of Projector's rating at end of turn.";
 			$this->data["Special"] .= "<br>Can be boosted.";
 		}	
 		
 	    public function getOutputOnTurn($turn){
-	        $output = $this->getOutput() + $this->getBoostLevel($turn);
+	        $output = ($this->getOutput() + $this->getBoostLevel($turn))*3;
 	        return $output;
 	    }
 		
