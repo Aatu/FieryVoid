@@ -485,22 +485,6 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);  
-			/*		
-			if (!isset($this->data["Special"])) {
-				$this->data["Special"] = '';
-			}else{
-				$this->data["Special"] .= '<br>';
-			}
-			*/
-			/*
-			$this->data["Special"] = "Defensive system absorbing damage from hits before projectile touches actual hull.";
-			$this->data["Special"] .= "<br>Can absorb up to " .$this->output ." damage points per hit, ";
-			$this->data["Special"] .= "including " . $this->armour . " without reducing capacity for further absorption.";
-			$this->data["Special"] .= "<br>Protects from every separate impact (eg. every rake!) separately.";
-			$this->data["Special"] .= "<br>System's health represents damage capacity. If it is reduced to zero system will cease to function.";
-			$this->data["Special"] .= "<br>Will not fall on its own unless its structure block is destroyed.";
-			$this->data["Special"] .= "<br>This is NOT a shield as far as any shield-related interactions go.";
-			*/
 			$absorb = $this->output - $this->armour;
 			$this->data["Special"] = "Defensive system which absorbs damage from incoming shots before they damage ship hull.";
 			$this->data["Special"] .= "<br>Can absorb up to its maximum capacity before allowing damage to ship.";
@@ -508,7 +492,7 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 			$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
 			$this->data["Special"] .= "<br>Cannot be flown under, and does not reduce the damage dealt or hit chance of enemy weapons.";
 			
-			$this->outputDisplay = $this->getRemainingCapacity();// . '/' . $absorb;//override on-icon display default
+			$this->outputDisplay = $this->getRemainingCapacity();//override on-icon display default
 		}	
 		
 		public function getRemainingCapacity(){
@@ -540,8 +524,8 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 		}
 		//actual protection
 		public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $systemProtected, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
-			$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
-			$damageToAbsorb=$effectiveDamage; //shield works BEFORE armor
+			$returnValues=array('dmg'=>$effectiveDamage);
+			$damageToAbsorb=$effectiveDamage; //shield works BEFORE system/structure armor
 			$damageAbsorbed=0;
 			
 			if($damageToAbsorb<=0) return $returnValues; //nothing to absorb
@@ -552,16 +536,16 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 			if($remainingCapacity>0) { //else projection does not protect
 				$absorbedFreely = 0;
 				//first, armor takes part
-				$absorbedFreely = min($this->armour, $damageToAbsorb);
-	//			$damageToAbsorb += -$absorbedFreely;
+//				$absorbedFreely = min($this->armour, $damageToAbsorb);
+//				$damageToAbsorb += -$absorbedFreely;
 				//next, actual absorbtion
-				$absorbedDamage = min($this->output - $this->armour , $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
+				$absorbedDamage = min($this->output/* - $this->armour*/, $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
 				$damageToAbsorb += -$absorbedDamage;
 				if($absorbedDamage>0){ //mark!
 					$this->absorbDamage($target,$gamedata,$absorbedDamage);
 				}
 				$returnValues['dmg'] = $damageToAbsorb;
-				$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
+	//			$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
 			}
 			
 			return $returnValues;
