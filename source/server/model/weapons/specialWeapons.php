@@ -4939,7 +4939,7 @@ class PsionicConcentrator extends Raking{
         public $animationExplosionScale = 0.15;
 */
         public $intercept = 0;
-        public $loadingtime = 2;
+        public $loadingtime = 1;
         public $raking = 15;
         public $addedDice;
         public $priority = 4;
