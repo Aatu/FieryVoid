@@ -4792,4 +4792,269 @@ class PsionicConcentrator extends Raking{
 	}
 } //endof class PsionicConcentrator
 
+   class HeavyPsionicLance extends Raking{
+        public $name = "HeavyPsionicLance";
+        public $displayName = "Heavy Psionic Lance";
+        public $iconPath = "HeavyPsionicLance.png";        
+        public $animation = "laser";
+        public $animationColor = array(153, 0, 0);
+  //      public $animationExplosionScale = 0.35; //make it thin, despite high damage potential!
+	    /*
+        public $trailColor = array(30, 170, 255);
+        public $animationWidth = 2;
+        public $animationWidth2 = 0.3;
+        public $animationExplosionScale = 0.15;
+*/
+        public $intercept = 0;
+        public $loadingtime = 2;
+        public $raking = 20;
+        public $addedDice;
+        public $priority = 2; //damage dealing mode means it's not very effective as stripping systems, and should be fired late despite high damage potential
+
+        public $boostable = true;
+        public $boostEfficiency = 6;
+        public $maxBoostLevel = 3;
+
+        public $firingModes = array(
+            1 => "Raking"
+        );
+
+        public $rangePenalty = 0.25;
+        public $fireControl = array(null, 6, 6); // fighters, <mediums, <capitals
+        //private $damagebonus = 10;
+
+        public $damageType = "Raking"; 
+        public $weaponClass = "Electromagnetic"; 
+
+
+        public function setSystemDataWindow($turn){
+            $boost = $this->getExtraDicebyBoostlevel($turn);            
+            parent::setSystemDataWindow($turn);
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            } 
+            //Raking(20) is already described in Raking class
+            $this->data["Special"] .= '<br>Can be boosted for increased dmg output (+2d10 per 6 power added, up to 3 times).';
+		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";            
+            $this->data["Boostlevel"] = $boost;
+        }
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 24;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 12;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        private function getExtraDicebyBoostlevel($turn){
+            $add = 0;
+            switch($this->getBoostLevel($turn)){
+                case 1:
+                    $add = 2;
+                    break;
+                case 2:
+                    $add = 4;
+                    break;
+                case 3:
+                    $add = 6;
+                    break;
+
+                default:
+                    break;
+            }
+            return $add;
+        }
+
+
+         private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                if ($i->turn != $turn){
+                   continue;
+                }
+                if ($i->type == 2){
+                    $boostLevel += $i->amount;
+                }
+            }
+            return $boostLevel;
+        }
+ 
+		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //Unlikely to matter at Raking 20, but keep it in for thematic reasons!
+			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
+			if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor		
+			//+1 to crit roll, +2 to dropout roll
+			$mod = 1;
+			if ($ship instanceof FighterFlight) $mod++;		
+			$system->critRollMod += $mod; 
+		} //endof function onDamagedSystem	               
+                        
+        public function getDamage($fireOrder){
+            $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
+            $dmg = Dice::d(10, (8 + $add)) +40;
+            return $dmg;
+        }
+
+        public function getAvgDamage(){
+            $this->setMinDamage();
+            $this->setMaxDamage();
+
+            $min = $this->minDamage;
+            $max = $this->maxDamage;
+            $avg = round(($min+$max)/2);
+            return $avg;
+        }
+
+        public function setMinDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->minDamage = 8 + ($boost * 2) + 40;
+        }   
+
+        public function setMaxDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->maxDamage = 80 + ($boost * 20) + 40;
+        }  
+   } //end of class HeavyPsionicLance
+   
+
+    class PsionicLance extends Raking{
+        public $name = "PsionicLance";
+        public $displayName = "Psionic Lance";
+        public $iconPath = "PsionicLance.png";         
+        public $animation = "laser";
+        public $animationColor = array(153, 0, 0);
+  //      public $animationExplosionScale = 0.35; //make it thin, despite high damage potential!
+	    /*
+        public $trailColor = array(30, 170, 255);
+        public $animationWidth = 2;
+        public $animationWidth2 = 0.3;
+        public $animationExplosionScale = 0.15;
+*/
+        public $intercept = 0;
+        public $loadingtime = 2;
+        public $raking = 15;
+        public $addedDice;
+        public $priority = 4;
+
+        public $boostable = true;
+        public $boostEfficiency = 3;
+        public $maxBoostLevel = 3;
+
+        public $firingModes = array(
+            1 => "Raking"
+        );
+
+        public $rangePenalty = 0.33;
+        public $fireControl = array(null, 6, 6); // fighters, <mediums, <capitals
+        //private $damagebonus = 10;
+
+        public $damageType = "Raking"; 
+        public $weaponClass = "Electromagnetic"; 
+
+
+        public function setSystemDataWindow($turn){
+            $boost = $this->getExtraDicebyBoostlevel($turn);            
+            parent::setSystemDataWindow($turn);
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            } 
+            //Raking(20) is already described in Raking class
+            $this->data["Special"] .= '<br>Can be boosted for increased dmg output (+1d10 per 3 power added, up to 3 times).';
+		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";               
+            $this->data["Boostlevel"] = $boost;
+        }
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 15;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 8;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        private function getExtraDicebyBoostlevel($turn){
+            $add = 0;
+            switch($this->getBoostLevel($turn)){
+                case 1:
+                    $add = 1;
+                    break;
+                case 2:
+                    $add = 2;
+                    break;
+                case 3:
+                    $add = 3;
+                    break;
+
+                default:
+                    break;
+            }
+            return $add;
+        }
+
+
+         private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                if ($i->turn != $turn){
+                   continue;
+                }
+                if ($i->type == 2){
+                    $boostLevel += $i->amount;
+                }
+            }
+            return $boostLevel;
+        }
+
+		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+				parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
+				if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor		
+				//+1 to crit roll, +2 to dropout roll
+				$mod = 1;
+				if ($ship instanceof FighterFlight) $mod++;		
+				$system->critRollMod += $mod; 
+			} //endof function onDamagedSystem	 
+                       
+        public function getDamage($fireOrder){
+            $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
+            $dmg = Dice::d(10, (3 + $add)) +25;
+            return $dmg;
+        }
+
+        public function getAvgDamage(){
+            $this->setMinDamage();
+            $this->setMaxDamage();
+
+            $min = $this->minDamage;
+            $max = $this->maxDamage;
+            $avg = round(($min+$max)/2);
+            return $avg;
+        }
+
+        public function setMinDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->minDamage = 3 + ($boost * 1) + 25;
+        }   
+
+        public function setMaxDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->maxDamage = 30 + ($boost * 10) + 25;
+        }  
+   }
+
 ?>

@@ -1193,6 +1193,28 @@ class ProtectedCnC extends CnC{
     );
 	
 }//endof class ProtectedCnC
+
+class ThirdspaceCnC extends CnC{
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+	}
+	
+	public $possibleCriticals = array(
+		10=>"CommunicationsDisrupted", 
+		17=>"PenaltyToHit", 
+		21=>"RestrictedEW", 
+		25=>array("ReducedIniativeOneTurn","ReducedIniative"), 
+		33=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative"), 
+		40=>array("RestrictedEW","ReducedIniative","PenaltyToHit")
+    );
+	
+}//endof class ThirdspaceCnC
 	
 class PakmaraCnC extends CnC{
 	

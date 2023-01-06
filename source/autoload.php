@@ -2876,10 +2876,11 @@ spl_autoload_register(
       			        'thirdspaceshieldprojector' =>	'/server/model/weapons/defensive.php',
       			        'advancedsingularitydrive' => '/server/model/systems/baseSystems.php',
       			        'psionicconcentrator' => '/server/model/weapons/specialWeapons.php',
-      			        'heavypsioniclance' => 	'/server/model/weapons/molecular.php',
-      			        'psioniclance' => 	'/server/model/weapons/molecular.php',
+      			        'heavypsioniclance' => 	'/server/model/weapons/specialWeapons.php',
+      			        'psioniclance' => 	'/server/model/weapons/specialWeapons.php',
       			        'psionictorpedo' => '/server/model/weapons/specialWeapons.php',    
-      			        'thirdspacebattleship' => '/server/model/ships/thirdspace/ThirdspaceBattleship.php',					
+      			        'thirdspacebattleship' => '/server/model/ships/thirdspace/ThirdspaceBattleship.php',
+      			        'thirdspacecnc' => '/server/model/systems/baseSystems.php',					
 						
 				
 				//let's end this with unit enhancement class...		    
