@@ -529,7 +529,7 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 		
 		//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
 		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
-			if($damageWasDealt) return 0; //does not protect from overkill damage, just first impact
+	//		if($damageWasDealt) return 0; //does not protect from overkill damage, just first impact
 			
 			$remainingCapacity = $this->getRemainingCapacity();
 			$protectionValue = 0;

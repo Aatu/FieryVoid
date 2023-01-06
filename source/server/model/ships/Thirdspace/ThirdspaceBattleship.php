@@ -23,10 +23,10 @@ class ThirdspaceBattleship extends BaseShip{
         $this->forwardDefense = 18;
         $this->sideDefense = 19;
         
-        $this->turncost = 1.33;
-        $this->turndelaycost = 1.33;
-        $this->accelcost = 5;
-        $this->rollcost = 6;
+        $this->turncost = 1.5;
+        $this->turndelaycost = 1.5;
+        $this->accelcost = 6;
+        $this->rollcost = 8;
         $this->pivotcost = 4;
        
 		$this->iniativebonus = 2 *5;        
