@@ -449,15 +449,8 @@
 		$effectArmor = Dice::d(3,1);//strength of effect: 1d6
 		$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor.";
 		
-		if (WeaponEM::isTargetEMResistant($ship,$system)){
-			$effectArmor = ceil($effectArmor/2);  	//Ancients are somewhat resistant to attacks from Thirdspace Aliens.	
-			return $effectArmor;	
-		}
-		
-	//	if (WeaponEM::isTargetEMResistant($ship,$system)){
-	//		$effectPower = 0; //Let's say Ancients unaffected by power drain, to prevent Shadows etc from having to power down only weapon etc
-	//		return $effectPower;
-	//	}
+		if ($system->advancedArmor) return;
+
 		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!			
 			$firstFighter = $ship->getSampleFighter();
 			if($firstFighter){
@@ -489,7 +482,7 @@
                 $maxhealth = 12;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 6;
+                $powerReq = 8;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }

@@ -4441,7 +4441,7 @@ class PsychicField extends Weapon{ //Operates similar to Spark Field, but debili
 		$effectIni5 = $effectIni * 5;
 		$fireOrder->pubnotes .= "<br> Initiative reduced by $effectIni5.";
 		
-		if (WeaponEM::isTargetEMResistant($ship,$system)){
+		if ($system->advancedArmor){
 			$effectIni = ceil($effectIni/2);  	//Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens.	
 			$effecttohit = ceil($effecttohit/2);
 			$result = array($effectIni, $effecttohit);
@@ -4759,7 +4759,7 @@ class PsionicConcentrator extends Raking{
 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
-		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor		
+		if ($system->advancedArmor) return; //no effect on Advanced Armor		
 		//+1 to crit roll, +2 to dropout roll
 		$mod = 1;
 		if ($ship instanceof FighterFlight) $mod++;		
@@ -4888,7 +4888,7 @@ class PsionicConcentrator extends Raking{
  
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //Unlikely to matter at Raking 20, but keep it in for thematic reasons!
 			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
-			if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor		
+			if ($system->advancedArmor) return; //no effect on Advanced Armor but Ipsha still get wrecked.
 			//+1 to crit roll, +2 to dropout roll
 			$mod = 1;
 			if ($ship instanceof FighterFlight) $mod++;		
@@ -4981,7 +4981,7 @@ class PsionicConcentrator extends Raking{
                 $maxhealth = 15;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 8;
+                $powerReq = 6;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -5021,7 +5021,7 @@ class PsionicConcentrator extends Raking{
 
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 				parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
-				if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor		
+				if ($system->advancedArmor) return; //no effect on Advanced Armor		
 				//+1 to crit roll, +2 to dropout roll
 				$mod = 1;
 				if ($ship instanceof FighterFlight) $mod++;		
