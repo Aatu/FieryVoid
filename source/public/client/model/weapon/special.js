@@ -340,23 +340,23 @@ HeavyPsionicLance.prototype.getMaxBoost = function () {
 HeavyPsionicLance.prototype.initBoostableInfo = function () {
     switch (shipManager.power.getBoost(this)) {
         case 0:
-            this.data["Damage"] = '48 - 120';
+            this.data["Damage"] = '53 - 125';
             this.data["Boostlevel"] = '0';
             break;
         case 1:
-            this.data["Damage"] = '50 - 140';
+            this.data["Damage"] = '55 - 145';
             this.data["Boostlevel"] = '1';
             break;
         case 2:
-            this.data["Damage"] = '52 - 160';
+            this.data["Damage"] = '57 - 165';
             this.data["Boostlevel"] = '2';
             break;
         case 3:
-            this.data["Damage"] = '54 - 180';
+            this.data["Damage"] = '59 - 185';
             this.data["Boostlevel"] = '3';
             break;
         default:
-            this.data["Damage"] = '48 - 120';
+            this.data["Damage"] = '53 - 125';
             this.data["Boostlevel"] = '0';
             break;
     }

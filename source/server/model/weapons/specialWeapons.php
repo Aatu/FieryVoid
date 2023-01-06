@@ -4914,13 +4914,13 @@ class PsionicConcentrator extends Raking{
         public function setMinDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->minDamage = 8 + ($boost * 2) + 40;
+            $this->minDamage = 8 + ($boost * 2) + 45;
         }   
 
         public function setMaxDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->maxDamage = 80 + ($boost * 20) + 40;
+            $this->maxDamage = 80 + ($boost * 20) + 45;
         }  
    } //end of class HeavyPsionicLance
    
