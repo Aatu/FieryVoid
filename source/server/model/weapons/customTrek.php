@@ -120,7 +120,7 @@ class TrekLtPhaseCannon extends TrekPhaserBase{
         public $loadingtime = 1;
 		
         public $rangePenalty = 1;
-        public $fireControl = array(3, 3, 3);
+        public $fireControl = array(3, 3, 2);
 
         public $damageType = "Raking";
 		public $weaponClass = "Particle";
