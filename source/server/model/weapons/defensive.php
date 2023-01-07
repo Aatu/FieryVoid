@@ -513,7 +513,7 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 		
 		//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
 		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
-	//		if($damageWasDealt) return 0; //does not protect from overkill damage, just first impact
+	//		if($damageWasDealt) return 0; //Thirdspace shields do protect from overkill
 			
 			$remainingCapacity = $this->getRemainingCapacity();
 			$protectionValue = 0;
@@ -524,8 +524,8 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 		}
 		//actual protection
 		public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $systemProtected, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
-			$returnValues=array('dmg'=>$effectiveDamage);
-			$damageToAbsorb=$effectiveDamage; //shield works BEFORE system/structure armor
+			$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
+			$damageToAbsorb=$effectiveDamage; //shield works BEFORE armor
 			$damageAbsorbed=0;
 			
 			if($damageToAbsorb<=0) return $returnValues; //nothing to absorb
@@ -536,16 +536,16 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 			if($remainingCapacity>0) { //else projection does not protect
 				$absorbedFreely = 0;
 				//first, armor takes part
-//				$absorbedFreely = min($this->armour, $damageToAbsorb);
-//				$damageToAbsorb += -$absorbedFreely;
+				$absorbedFreely = min($this->armour, $damageToAbsorb);
+	//			$damageToAbsorb += -$absorbedFreely;
 				//next, actual absorbtion
-				$absorbedDamage = min($this->output/* - $this->armour*/, $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
+				$absorbedDamage = min($this->output - $this->armour , $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
 				$damageToAbsorb += -$absorbedDamage;
 				if($absorbedDamage>0){ //mark!
 					$this->absorbDamage($target,$gamedata,$absorbedDamage);
 				}
 				$returnValues['dmg'] = $damageToAbsorb;
-	//			$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
+				$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
 			}
 			
 			return $returnValues;
