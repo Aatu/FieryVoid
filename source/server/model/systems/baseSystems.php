@@ -505,8 +505,7 @@ class AdvancedSingularityDrive extends Reactor{
     public $iconPath = "AdvancedSingularityDrive.png";
     
 	public $possibleCriticals = array( //different set of criticals than standard Reactor
-		13=>"FieldFluctuations",
-		20=>array("FieldFluctuations"),
+		20=>"FieldFluctuations",
 		25=>array("FieldFluctuations", "FieldFluctuations"),
 		30=>array("FieldFluctuations", "FieldFluctuations", "FieldFluctuations")
 	);

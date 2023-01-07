@@ -4919,7 +4919,7 @@ class PsionicConcentrator extends Raking{
 	public $iconPath = "PsionicConcentrator.png";
 	
 	public $animation = "bolt";
-	    public $animationArray = array( 1=>bolt, 2=>bolt, 3=>laser, 4=>laser);
+	    public $animationArray = array( 1=>"bolt", 2=>"bolt", 3=>"laser", 4=>"laser");
     public $animationColor = array(153, 0, 0);
 	/*
 	public $trailColor = array(30, 170, 255);	
@@ -4930,7 +4930,7 @@ class PsionicConcentrator extends Raking{
 	public $animationExplosionScaleArray = array(1=>0.25, 2=>0.35, 3=>0.45, 4=>0.55, 5=>0.70, 6=>0.85);
       */
         public $loadingtime = 1;
-	public $intercept = 3; //intercept rating -1     
+	public $intercept = 2; //intercept rating -1     
 	
         public $priority = 6;
         public $priorityArray = array(1=>6, 2=>4, 3=>5, 4=>4); //weakest mode is light standard weapon, heavier ones are heavy raking weapons
