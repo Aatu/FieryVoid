@@ -20,7 +20,7 @@ class ThirdspaceBattleship extends BaseShip{
         $this->gravitic = true;
 		$this->advancedArmor = true; 		    
 		
-        $this->forwardDefense = 18;
+        $this->forwardDefense = 16;
         $this->sideDefense = 19;
         
         $this->turncost = 1.5;
