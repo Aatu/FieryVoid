@@ -51,6 +51,7 @@ And actual rules are as below. Due to huge individual costs (and small numbers) 
   -- (Young) One per full 1100 points (with minimum of 2)
   -- (Ancient) One per full 3000 points (with minimum of 2)
  - static objects (bases, OSATs) are not allowed
+ - presence of non-standard elements (enhancements, custom units, Special variants) is called for player attention (but doesn't mark the fleet as incorrect)
 
  
 VARIANT RESTRICTIONS

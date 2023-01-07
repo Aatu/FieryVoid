@@ -115,6 +115,7 @@ class TrekLtPhaseCannon extends TrekPhaserBase{
         
         public $intercept = 2;
 		public $priority = 8; //light Raking		
+		public $priorityAF = 7; //Standard
 		
         public $loadingtime = 1;
 		
@@ -517,12 +518,13 @@ class TrekLightPhaser extends TrekPhaserBase{
         public $raking = 8;
         
         public $intercept = 2;
-		public $priority = 8; //light Raking		
+		public $priority = 8; //light Raking	
+		public $priorityAF = 7; //...Standard vs fighters
 		
         public $loadingtime = 1;
 		
         public $rangePenalty = 1.0;
-        public $fireControl = array(4, 4, 4);
+        public $fireControl = array(4, 3, 2);
 
         public $damageType = "Raking";
 		public $weaponClass = "Particle";
@@ -555,12 +557,12 @@ class TrekLightPhaserLance extends TrekPhaserBase{
 		public $priority = 8; //light Raking		
     	public $gunsArray = array(1=>1, 2=>2); //one Lance, but two Beam shots!
 		public $priorityAF = 3; //heavy Raking vs fighters!	
-		public $priorityAFArray = array(1=>3, 2=>4); ///...but regular Light Phasers are light vs fighters as well
+		public $priorityAFArray = array(1=>3, 2=>7); ///...but regular Light Phasers are effectively medium Standard vs fighters
 		
         public $loadingtime = 1;
 		
         public $rangePenaltyArray = array(1=>1.0, 2=>1.0);
-        public $fireControlArray = array( 1=>array(4, 4, 4), 2=>array(4, 4, 4) ); 
+        public $fireControlArray = array( 1=>array(3, 3, 3), 2=>array(4, 3, 2) ); 
 
         public $damageType = "Raking";
 		public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); 
