@@ -25,7 +25,7 @@ class FangedSerpentAM extends SuperHeavyFighter{
 		$this->turndelaycost = 0.25;
         
 		$this->hangarRequired = 'superheavy'; //for fleet check
-	    $this->iniativebonus = 15 *5;
+	    $this->iniativebonus = 15 *5; //...and +1 on top of that for Navigator
         $this->hasNavigator = true;
         $this->maxFlightSize = 3;//this is a superheavy fighter originally intended as single unit, limit flight size to 3
 	

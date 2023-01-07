@@ -33,7 +33,7 @@ SECOND TIER
 Factions that point for point will have uphill battle against First Tier, yet otherwise are balanced and competitive. Should be interesting to play against each other, and if given some extra PV allowance - against First Tier as well. Most of these factions do not offer fleet build flexibility of major ones, but may offer very distinct playstyle instead.
  - Abbai
  - Balosian
- - Belt Alliance (Small Races)
+ - Belt Alliance
  - Blood Sword Raiders (custom faction - Escalation Wars universe - small unit selection)
  - Brixadii (custom faction - Nexus universe)
  - Cascor (official)
@@ -81,8 +81,8 @@ This group is inherently unbalanced, even against each other!
  - Abbai (WotCR)
  - Alacan (Small Races)
  - Chouka Raiders (custom faction - Escalation Wars universe)
- - Craytan Union (custom faction - Nexus universe, in playtest currently)
- - EA (early) (predominantly semi-official, custom units armed with blast cannons and much weaker defenses)
+ - Craytan Union (PLAYTEST custom faction - Nexus universe)
+ - EA (early)
  - Grome
  - Hurr
  - Mitoc (Small Races - only one MCV-class vessel)

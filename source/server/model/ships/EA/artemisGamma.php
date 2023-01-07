@@ -13,6 +13,7 @@ class ArtemisGamma extends HeavyCombatVessel{
         
         $this->variantOf = "Artemis Heavy Frigate (Beta)";
         $this->occurence = "uncommon";
+ 		$this->unofficial = 'S'; //design released after AoG demise
         
         
         $this->forwardDefense = 14;

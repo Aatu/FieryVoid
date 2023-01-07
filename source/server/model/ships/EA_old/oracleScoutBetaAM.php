@@ -12,7 +12,7 @@ class OracleScoutBetaAM extends BaseShip{
 			$this->occurence = "common";
 	        $this->variantOf = "Oracle Explorer (Alpha)";
 			$this->limited = 33;
-		$this->unofficial = true;
+ 		$this->unofficial = 'S'; //HRT design released after AoG demise
         $this->shipSizeClass = 3;
 	    
 		$this->isd = 2168;

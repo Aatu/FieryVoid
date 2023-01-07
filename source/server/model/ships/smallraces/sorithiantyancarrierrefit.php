@@ -15,7 +15,7 @@ class SorithianTyanCarrierRefit extends BaseShip{
         $this->fighters = array("medium"=>24);
 	    
         $this->isd = 2225;
-        $this->unofficial = true;
+ 		$this->unofficial = 'S'; //design released after AoG demise
 
 	    $this->notes = 'Uses Basic missiles.';
 	

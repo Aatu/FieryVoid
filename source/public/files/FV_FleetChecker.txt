@@ -40,7 +40,7 @@ And actual rules are as below. Due to huge individual costs (and small numbers) 
   -- (Young) 1 per 5000 points (no capital ship is required below 3000 points)
   -- (Ancient) 1 per 15000 points (no capital ship is required below 5000 points)
  - most units of LCV size or smaller need to have hangars present (there are exceptions, especially for custom factions from other universes)
- - at least half of fighter hangars need to be filled (this rule is only relevant for actual fighters, not for other craft like assault shuttles or LCVs)
+ - at least half of fighter hangars need to be filled (this rule is only relevant for regular fighters, not for other craft like assault shuttles, LCVs or even SHFs)
  - deployment restrictions observed 
  - variant restrictions observed 
  - Uncommon/Rare units are limited at fleet level (on top of Variant Restrictions above) to at most:

@@ -14,7 +14,7 @@ class JorthunL extends LCV{
 	$this->canvasSize = 90;
 	$this->agile = true;
 
-	$this->unofficial = true;
+ 		$this->unofficial = 'S'; //design released after AoG demise
 
 	$this->forwardDefense = 10;
 	$this->sideDefense = 10;
