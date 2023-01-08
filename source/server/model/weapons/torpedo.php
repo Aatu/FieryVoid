@@ -367,22 +367,22 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 
 
             //armor may be ignored for some reason... usually because of Raking mode :)
-            $armourIgnored = 0;
+    /*        $armourIgnored = 0;
             if (isset($fireOrder->armorIgnored[$system->id])) {
                 $armourIgnored = $fireOrder->armorIgnored[$system->id];
                 $armour = $armour - $armourIgnored;
             }
-            $armour = max($armour, 0);
+            $armour = max($armour, 0); */
 
 			//returned array: dmgDealt, dmgRemaining, armorPierced	
 			$damage = $this->beforeDamagedSystem($target, $system, $damage, $armour, $gamedata, $fireOrder);
 			$effects = $system->assignDamageReturnOverkill($target, $shooter, $this, $gamedata, $fireOrder, $damage, $armour, $pos, $damageWasDealt);
 			$this->onDamagedSystem($target, $system, $effects["dmgDealt"], $effects["armorPierced"], $gamedata, $fireOrder);//weapons that do effects on hitting something
 			$damage = $effects["dmgRemaining"];
-			if ($this->damageType == 'Raking'){ //note armor already pierced so further rakes have it easier
-				$armourIgnored = $armourIgnored + $effects["armorPierced"];
-				$fireOrder->armorIgnored[$system->id] = $armourIgnored;
-			}			
+//			if ($this->damageType == 'Raking'){ //note armor already pierced so further rakes have it easier
+//				$armourIgnored = $armourIgnored + $effects["armorPierced"];
+//				$fireOrder->armorIgnored[$system->id] = $armourIgnored;
+//			}			
 			
             $damageWasDealt = true; //actual damage was done! might be relevant for overkill allocation
         }
@@ -392,8 +392,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
             if ($overkillSystem != null)
                 $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
         }     
-          
-          
+                  
             //$location is guaranteed to be filled in this case!     
             if($this->alreadyFlayed) return;
             $this->alreadyFlayed = true; //avoid doing that multiple times
