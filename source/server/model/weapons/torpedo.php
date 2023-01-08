@@ -332,36 +332,68 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 /*
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!	
 		if ($system->advancedArmor) return;
+		if ($ship instanceof FighterFlight) return;
+        if($this->alreadyFlayed) return;
+        $this->alreadyFlayed = true; //avoid doing that multiple times						
 
 		$effectArmor = Dice::d(3,1);//strength of effect: 1d6
 		$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor.";
 		
-
-
-		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!			
-			$firstFighter = $ship->getSampleFighter();
-			if($firstFighter){
-				for($i=1; $i<=$effectArmor;$i++){
-					$crit = new ArmorReduced(-1, $ship->id, $firstFighter->id, 'ArmorReduced', $gamedata->turn); 
-					$crit->updated = true;
-			        $firstFighter->criticals[] =  $crit;
-				}
-			}
-		}else{ 
-   //             if ($system->advancedArmor) return;
+			
+        foreach ($target->systems as $system){
                 if ($target->shipSizeClass<=1 || $system->location === $location){ //MCVs and smaller ships are one huge section technically
-                for($i=1; $i<=$effectArmor;$i++){	
-                    $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
-                    $crit->updated = true;
-                    $crit->inEffect = false;
-                    $system->criticals[] = $crit;
-          	      }
-        	    }
-			 
-		}
+	             	for($i=1; $i<=$effectArmor;$i++){
+	                    $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
+	                    $crit->updated = true;
+	                    $crit->inEffect = false;
+	                    $system->criticals[] = $crit;
+	                }
+	            }
+			} 
 	} //end of function onDamagedSystem   */
 	
-        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
+
+   protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
+    {
+        /*$pos ONLY relevant for FIGHTER armor if damage source position is different than one from weapon itself*/
+        /*otherwise best leave null BUT fill $location!*/
+        /*damageWasDealt indicates whether this hit already caused damage - important for overkill for some damage modes*/
+        //if (!$system->isDestroyed()) { //else system was already destroyed, proceed to overkill
+		if ($system->getRemainingHealth() > 0) { //Vree Structure systems are considered not there despite not being formally destroyed
+            $damage = floor($damage);//make sure damage is a whole number, without fractions!
+            $armour = $this->getSystemArmourComplete($target, $system, $gamedata, $fireOrder, $pos); //handles standard and Adaptive armor, as well as Advanced armor and weapon class modifiers
+			// ...if armor-related modifications are needed, they should extend appropriate method (Complete or Base, as Adaptive should not be affected)
+			// ...and doDamage should always call Complete
+
+
+            //armor may be ignored for some reason... usually because of Raking mode :)
+            $armourIgnored = 0;
+            if (isset($fireOrder->armorIgnored[$system->id])) {
+                $armourIgnored = $fireOrder->armorIgnored[$system->id];
+                $armour = $armour - $armourIgnored;
+            }
+            $armour = max($armour, 0);
+
+			//returned array: dmgDealt, dmgRemaining, armorPierced	
+			$damage = $this->beforeDamagedSystem($target, $system, $damage, $armour, $gamedata, $fireOrder);
+			$effects = $system->assignDamageReturnOverkill($target, $shooter, $this, $gamedata, $fireOrder, $damage, $armour, $pos, $damageWasDealt);
+			$this->onDamagedSystem($target, $system, $effects["dmgDealt"], $effects["armorPierced"], $gamedata, $fireOrder);//weapons that do effects on hitting something
+			$damage = $effects["dmgRemaining"];
+			if ($this->damageType == 'Raking'){ //note armor already pierced so further rakes have it easier
+				$armourIgnored = $armourIgnored + $effects["armorPierced"];
+				$fireOrder->armorIgnored[$system->id] = $armourIgnored;
+			}			
+			
+            $damageWasDealt = true; //actual damage was done! might be relevant for overkill allocation
+        }
+
+        if (($damage > 0) || (!$damageWasDealt)) {//overkilling!
+            $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location);
+            if ($overkillSystem != null)
+                $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+        }     
+          
+          
             //$location is guaranteed to be filled in this case!     
             if($this->alreadyFlayed) return;
             $this->alreadyFlayed = true; //avoid doing that multiple times
@@ -380,7 +412,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 	                }
 	            }
 			} 
-        } //endof function doDamage	
+        } //endof function doDamage	 
 
     	
 		public function setSystemDataWindow($turn){
@@ -395,7 +427,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 		}
         
         
-        public function getDamage($fireOrder){        return Dice::d(10, 3);   }
+        public function getDamage($fireOrder){         return 20;   }
         public function setMinDamage(){     $this->minDamage = 20;      }
         public function setMaxDamage(){     $this->maxDamage = 20;      }
     
