@@ -397,7 +397,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
             if($this->alreadyFlayed) return;
             $this->alreadyFlayed = true; //avoid doing that multiple times
             
-	        $effectArmor = Dice::d(3,1);//strength of effect: 1d6
+	        $effectArmor = Dice::d(4,1);//strength of effect: 1d6
 			$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor.";
 		
             foreach ($target->systems as $system){
