@@ -392,26 +392,33 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
             if ($overkillSystem != null)
                 $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
         }     
-                  
-            //$location is guaranteed to be filled in this case!     
-            if($this->alreadyFlayed) return;
-            $this->alreadyFlayed = true; //avoid doing that multiple times
+            
+                 
+            //$location is guaranteed to be filled in this case!
+			$unitsInHex = $gamedata->getShipsInDistance($target); 
+			foreach ($unitsInHex as $targetUnit){
+             
+			if (isset($this->alreadyFlayed[$targetUnit->id])) return;         	
+			$this->alreadyFlayed[$targetUnit->id] = true;//mark engaged         	              
             
 	        $effectArmor = Dice::d(4,1);//strength of effect: 1d6
 			$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor unless Advanced Armor.";
 		
             foreach ($target->systems as $system){
-                if ($system->advancedArmor) return;
-    //            if ($this instanceof FighterFlight) return;	//Tried to ignore fighters, but didn't work.  I can live with it affecting them too.
+                if ($system->advancedArmor) return;              	
+ 				if ($target instanceof FighterFlight) return;	//To ignore fighters.
+	         	if($this->alreadyFlayed) return;
+	           	$this->alreadyFlayed = true; //avoid flaying same system multiple times.   					
                 if ($target->shipSizeClass<=1 || $system->location === $location){ //MCVs and smaller ships are one huge section technically
 	             	for($i=1; $i<=$effectArmor;$i++){
 	                    $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
 	                    $crit->updated = true;
 	                    $crit->inEffect = false;
 	                    $system->criticals[] = $crit;
-	                }
-	            }
-			} 
+		                }
+		            }
+				}
+			}	 
         } //endof function doDamage	 
 
     	
