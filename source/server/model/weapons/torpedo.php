@@ -403,6 +403,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 		
             foreach ($target->systems as $system){
                 if ($system->advancedArmor) return;
+    //            if ($this instanceof FighterFlight) return;	//Tried to ignore fighters, but didn't work.  I can live with it affecting them too.
                 if ($target->shipSizeClass<=1 || $system->location === $location){ //MCVs and smaller ships are one huge section technically
 	             	for($i=1; $i<=$effectArmor;$i++){
 	                    $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
