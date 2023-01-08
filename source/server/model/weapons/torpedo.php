@@ -379,10 +379,10 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 			$effects = $system->assignDamageReturnOverkill($target, $shooter, $this, $gamedata, $fireOrder, $damage, $armour, $pos, $damageWasDealt);
 			$this->onDamagedSystem($target, $system, $effects["dmgDealt"], $effects["armorPierced"], $gamedata, $fireOrder);//weapons that do effects on hitting something
 			$damage = $effects["dmgRemaining"];
-//			if ($this->damageType == 'Raking'){ //note armor already pierced so further rakes have it easier
-//				$armourIgnored = $armourIgnored + $effects["armorPierced"];
-//				$fireOrder->armorIgnored[$system->id] = $armourIgnored;
-//			}			
+			if ($this->damageType == 'Raking'){ //note armor already pierced so further rakes have it easier
+				$armourIgnored = $armourIgnored + $effects["armorPierced"];
+				$fireOrder->armorIgnored[$system->id] = $armourIgnored;
+			}			
 			
             $damageWasDealt = true; //actual damage was done! might be relevant for overkill allocation
         }
@@ -398,7 +398,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
             $this->alreadyFlayed = true; //avoid doing that multiple times
             
 	        $effectArmor = Dice::d(4,1);//strength of effect: 1d6
-			$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor.";
+			$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor unless Advanced Armor.";
 		
             foreach ($target->systems as $system){
                 if ($system->advancedArmor) return;
