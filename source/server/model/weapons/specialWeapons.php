@@ -1307,9 +1307,9 @@ class SparkField extends Weapon implements DefensiveSystem{
 	public $iconPath = "SparkField.png";
 	
 	//let's make animation more or less invisible, and effect very large
-	public $trailColor = array(141, 240, 255);
+	public $trailColor = array(0, 0, 0);
         public $animation = "ball";
-        public $animationColor = array(1, 1, 255);
+        public $animationColor = array(0, 0, 0);
         public $animationExplosionScale = 2;
         public $animationExplosionType = "AoE";
         //public $explosionColor = array(165, 165, 255);
@@ -4289,9 +4289,9 @@ class PsychicField extends Weapon{ //Operates similar to Spark Field, but debili
 	public $iconPath = "PsychicField.png";
 	
 	//let's make animation more or less invisible, and effect very large
-	public $trailColor = array(141, 240, 255);
+	public $trailColor = array(0, 0, 0); //hide projectile
         public $animation = "ball";
-        public $animationColor = array(1, 1, 255);
+        public $animationColor = array(0, 0, 0); //hide projectile
         public $animationExplosionScale = 2;
         public $animationExplosionType = "AoE";
         //public $explosionColor = array(165, 165, 255);
@@ -4652,7 +4652,7 @@ class PsychicFieldHandler{
         public $displayName = "Heavy Psionic Lance";
         public $iconPath = "HeavyPsionicLance.png";        
         public $animation = "laser";
-        public $animationColor = array(153, 0, 0);
+        public $animationColor = array(128, 0, 0);
   //      public $animationExplosionScale = 0.35; //make it thin, despite high damage potential!
 	    /*
         public $trailColor = array(30, 170, 255);
@@ -4680,6 +4680,8 @@ class PsychicFieldHandler{
 
         public $damageType = "Raking"; 
         public $weaponClass = "Electromagnetic"; 
+        
+        public $uninterceptable = true;        
 
 
         public function setSystemDataWindow($turn){
@@ -4691,7 +4693,8 @@ class PsychicFieldHandler{
                 $this->data["Special"] .= '<br>';
             } 
             //Raking(20) is already described in Raking class
-            $this->data["Special"] .= '<br>Can be boosted for increased dmg output (+2d10 per 6 power added, up to 3 times).';
+            $this->data["Special"] .= "Uninterceptable.";  
+            $this->data["Special"] .= "<br>Can be boosted for increased dmg output (+2d10 per 6 power added, up to 3 times).";
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";            
             $this->data["Boostlevel"] = $boost;
         }
@@ -4780,12 +4783,12 @@ class PsychicFieldHandler{
    } //end of class HeavyPsionicLance
    
 
-    class PsionicLance extends Raking{
+class PsionicLance extends Raking{
         public $name = "PsionicLance";
         public $displayName = "Psionic Lance";
         public $iconPath = "PsionicLance.png";         
         public $animation = "laser";
-        public $animationColor = array(153, 0, 0);
+        public $animationColor = array(128, 0, 0);
   //      public $animationExplosionScale = 0.35; //make it thin, despite high damage potential!
 	    /*
         public $trailColor = array(30, 170, 255);
@@ -4812,7 +4815,9 @@ class PsychicFieldHandler{
         //private $damagebonus = 10;
 
         public $damageType = "Raking"; 
-        public $weaponClass = "Electromagnetic"; 
+        public $weaponClass = "Electromagnetic";
+        
+        public $uninterceptable = true;         
 
 
         public function setSystemDataWindow($turn){
@@ -4824,6 +4829,7 @@ class PsychicFieldHandler{
                 $this->data["Special"] .= '<br>';
             } 
             //Raking(20) is already described in Raking class
+            $this->data["Special"] .= "Uninterceptable.";              
             $this->data["Special"] .= '<br>Can be boosted for increased dmg output (+1d10 per 3 power added, up to 3 times).';
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";               
             $this->data["Boostlevel"] = $boost;
@@ -4920,7 +4926,7 @@ class PsionicConcentrator extends Raking{
 	
 	public $animation = "bolt";
 	    public $animationArray = array( 1=>"bolt", 2=>"bolt", 3=>"laser", 4=>"laser");
-    public $animationColor = array(153, 0, 0);
+    public $animationColor = array(128, 0, 0);
 	/*
 	public $trailColor = array(30, 170, 255);	
 	public $animationWidth = 4;
@@ -4945,6 +4951,9 @@ class PsionicConcentrator extends Raking{
             public $rangePenaltyArray = array( 1=>0.5, 2=>1, 3=>0.33, 4=>0.33); //Standard and Raking modes
         public $fireControl = array(6, 5, 5); // fighters, <mediums, <capitals 
             public $fireControlArray = array( 1=>array(6, 5, 5), 2=>array(7, 6, 6), 3=>array(8, 7, 7), 4=>array(9, 8, 8)); //+1 fire control the more concentrators are used to hit per every additional combining weapon
+            
+    public $uninterceptable = false;
+    public $uninterceptableArray = array(1=>false, 2=>false, 3=>true, 4=>true);            
 	
 	
 	
@@ -4960,9 +4969,9 @@ class PsionicConcentrator extends Raking{
 	
 	    public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Can combine multiple Psionic Concentrator on a ship into one concentrated shot - for +1 Fire Control and +1d10 damage per additional weapon (up to 5 additional weapon can be added).";
-		      $this->data["Special"] .= "<br>Two concentrators will deliver a high power Standard shot with shorter range.  Three or four combined will fire a longer ranged raking shot";		        
-		      $this->data["Special"] .= "<br>If You allocate multiple Psionic Concentrators in the same higher mode of fire at the same target, they will be combined.";		       
+		      $this->data["Special"] = "Can combine multiple Psionic Concentrator on a ship into one concentrated shot - for +1 Fire Control and +1d10 damage per additional weapon (up to 4 Concentrators can be combined).";
+		      $this->data["Special"] .= "<br>Two Concentrators will deliver a Standard damage shot with shorter range.  Three or four combined will fire a longer ranged, uninterceptable raking shot";		        
+		      $this->data["Special"] .= "<br>If You allocate multiple Concentrators in the same higher mode of fire at the same target, they will be combined.";		       
 		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in highest actually possible mode instead.";  		  
 		      $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";
 	    }	

@@ -1207,9 +1207,8 @@ class ThirdspaceCnC extends CnC{
 	public $possibleCriticals = array(
 		10=>"CommunicationsDisrupted", 
 		17=>"PenaltyToHit", 
-		21=>"RestrictedEW", 
 		25=>array("ReducedIniativeOneTurn","ReducedIniative"), 
-		33=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative"), 
+		33=>array("RestrictedEWOneTurn","ReducedIniativeOneTurn","ReducedIniative"), 
 		40=>array("RestrictedEW","ReducedIniative","PenaltyToHit")
     );
 	

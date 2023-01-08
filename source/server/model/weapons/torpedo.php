@@ -291,19 +291,14 @@
     
     }//endof class PacketTorpedo
 
-    class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonates as AoE and reduces armour of targets.  
+class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonates and reduces armour of targets.  
         public $name = "PsionicTorpedo";
         public $displayName = "Psionic Torpedo";
-        public $iconPath = "PsionicTorpedo.png";        
-        public $range = 60;
-        public $loadingtime = 2;
-        
-        public $fireControl = array(-4, 4, 5); // fighters, <mediums, <capitals 
-        
+        public $iconPath = "PsionicTorpedo.png";                
         public $animation = "torpedo";
-        public $animationColor = array(153, 0, 0);
-        public $animationExplosionType = "AoE"; 
-        public $animationExplosionScale = 1;               
+        public $animationColor = array(128, 0, 0);
+//        public $animationExplosionType = "AoE"; 
+//        public $animationExplosionScale = 1;               
 		/*
         public $trailColor = array(141, 240, 255);
         public $animationExplosionScale = 0.25;
@@ -311,145 +306,37 @@
         public $animationWidth = 10;
         public $trailLength = 10;
 		*/
-		public $firingModes = array(
-		1 => "AoE"
-	);
- 	   	public $damageType = "Flash";
-        public $priority = 1; 	   
+//		public $firingModes = array(	1 => "AoE");
 
-		public function setSystemDataWindow($turn){
-			parent::setSystemDataWindow($turn); 
-			if (!isset($this->data["Special"])) {
-				$this->data["Special"] = '';
-			}else{
-				$this->data["Special"] .= '<br>';
-			}	    
-			$dmgDirect = $this->maxDamage;
-			$dmgNear = $this->minDamage; 
-			$this->data["Special"] .= "<br>Hits target and all other units on hex for $dmgDirect damage, all units on nearby hexes are hit for $dmgNear. In case of flight level units every craft is damaged separately.";  
-			$this->data["Special"] .= "<br>Causes power disruptions on enemy ships.";  
-	        }		
-
-    public function fire($gamedata, $fireOrder)
-    {
-        $shooter = $gamedata->getShipById($fireOrder->shooterid);
-        $target = $gamedata->getShipById($fireOrder->targetid);
-
-        $fireOrder->needed -= $fireOrder->totalIntercept;
-        $notes = "Interception: " . $fireOrder->totalIntercept . " sources:" . $fireOrder->numInterceptors . ", final to hit: " . $fireOrder->needed;
-        $fireOrder->notes .= $notes;
-
-        $pos = null; //functions will properly calculate from firing unit, which is important at range 0
-        //$pos = $shooter->getCoPos();
-        if ($this->ballistic) {
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $pos = $movement->position;
+        public $range = 60;
+        public $loadingtime = 2;
+        
+        public $weaponClass = "Electromagnetic"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
+        public $damageType = "Flash"; 
+        
+        
+        public $fireControl = array(-4, 3, 4); // fighters, <mediums, <capitals 
+        public $priority = 1; //Flash! should strike first 
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 12;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 6;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        $shotsFired = $fireOrder->shots; //number of actual shots fired
- /*       if ($this->damageType == 'Pulse') {//Pulse mode always fires one shot of weapon - while 	$fireOrder->shots marks number of pulses for display purposes
-            $shotsFired = 1;
-			$fireOrder->shots = $this->maxpulses;
-        } 			*/
-        for ($i = 0; $i < $shotsFired; $i++) {
-            $needed = $fireOrder->needed;
-/*            if ($this->damageType != 'Pulse') {//non-Pulse weapons may use $grouping, too!
-                $needed = $fireOrder->needed - $this->getShotHitChanceMod($i);
-            } 		*/
-            
 /*
-            //for linked shot: further shots will do the same as first!
-            if ($i == 0) { //clear variables that may be relevant for further shots in line
-                $fireOrder->linkedHit = null;
-            }
-            $rolled = Dice::d(100);
-            if ($this->isLinked && $i > 0) { //linked shot - number rolled (and effect) for furthr shots will be just the same as for first
-                $rolled = $fireOrder->rolled;
-            } 		*/
-
-            //interception?
-            if ($rolled > $needed && $rolled <= $needed + ($fireOrder->totalIntercept * 5)) { //$fireOrder->pubnotes .= "Shot intercepted. ";
-                if ($this->damageType == 'Pulse') {
-                    $fireOrder->intercepted += $this->maxpulses;
-                } else {
-                    $fireOrder->intercepted += 1;
-                }
-            }
-
-            $fireOrder->notes .= " FIRING SHOT " . ($i + 1) . ": rolled: $rolled, needed: $needed\n";
-            $fireOrder->rolled = $rolled; //might be useful for weapon itself, too - like counting damage for Anti-Matter
-
-            //hit?
-            if ($rolled <= $needed) {
-                $hitsRemaining = 1;
-
-                if ($this->damageType == 'Pulse') { //possibly more than 1 hit from a shot
-                    $hitsRemaining = $this->rollPulses($gamedata->turn, $needed, $rolled); //this takes care of all details
-                }
-
-                while ($hitsRemaining > 0) {
-                    $hitsRemaining--;
-                    $fireOrder->shotshit++;
-                    $this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
-                }
-            }
-        }  
-	                //do damage to ships in range...
-            $ships1 = $gamedata->getShipsInDistance($target);
-            $ships2 = $gamedata->getShipsInDistance($target, 1);
-            foreach ($ships2 as $targetShip) {
-                if (isset($ships1[$targetShip->id])) { //ship on target hex!
-                    $sourceHex = $posLaunch;
-                    $damage = $this->maxDamage;
-                } else { //ship at range 1!
-                    $sourceHex = $target;
-                    $damage = $this->minDamage;
-                }
-                $this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
-            }
-      
-               
-/*		//for last segment of Sustained shot - force shutdown!
-		$newExtraShots = $this->overloadshots - 1; 	
-		if( $newExtraShots == 0 ) {
-			$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
-			$crit->updated = true;
-			$crit->newCrit = true; //force save even if crit is not for current turn
-			$this->criticals[] =  $crit;
-		} */
-
-        $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
-		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
-		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
-	    
-    } //endof fire
-
-
-
-    public function AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata)
-    {
-        if ($target->isDestroyed()) return; //no point allocating
-        $damage = $this->getDamageMod($damage, $shooter, $target, $sourceHex, $gamedata);
-        $damage -= $target->getDamageMod($shooter, $sourceHex, $gamedata->turn, $this);
-        if ($target instanceof FighterFlight) {
-            foreach ($target->systems as $fighter) {
-                if ($fighter == null || $fighter->isDestroyed()) {
-                    continue;
-                }
-                $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, $sourceHex, $gamedata, false);
-            }
-        } else {
-            $tmpLocation = $target->getHitSectionPos(Mathlib::hexCoToPixel($sourceHex), $fireOrder->turn);
-            $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $tmpLocation);
-            $this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, false, $tmpLocation);
-        }
-    }  
-
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!	
+		if ($system->advancedArmor) return;
+
 		$effectArmor = Dice::d(3,1);//strength of effect: 1d6
 		$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor.";
 		
-		if ($system->advancedArmor) return;
+
 
 		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!			
 			$firstFighter = $ship->getSampleFighter();
@@ -460,8 +347,7 @@
 			        $firstFighter->criticals[] =  $crit;
 				}
 			}
-		}else{ //ship - place effect on C&C!
-            foreach ($target->systems as $system){
+		}else{ 
    //             if ($system->advancedArmor) return;
                 if ($target->shipSizeClass<=1 || $system->location === $location){ //MCVs and smaller ships are one huge section technically
                 for($i=1; $i<=$effectArmor;$i++){	
@@ -471,25 +357,47 @@
                     $system->criticals[] = $crit;
           	      }
         	    }
-			} 
+			 
 		}
-	} //end of function onDamagedSystem
+	} //end of function onDamagedSystem   */
+	
+        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
+            //$location is guaranteed to be filled in this case!     
+            if($this->alreadyFlayed) return;
+            $this->alreadyFlayed = true; //avoid doing that multiple times
+            
+	        $effectArmor = Dice::d(3,1);//strength of effect: 1d6
+			$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor.";
+		
+            foreach ($target->systems as $system){
+                if ($system->advancedArmor) return;
+                if ($target->shipSizeClass<=1 || $system->location === $location){ //MCVs and smaller ships are one huge section technically
+	             	for($i=1; $i<=$effectArmor;$i++){
+	                    $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
+	                    $crit->updated = true;
+	                    $crit->inEffect = false;
+	                    $system->criticals[] = $crit;
+	                }
+	            }
+			} 
+        } //endof function doDamage	
+
+    	
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Reduces armor of facing section (structure and all systems).";
+			$this->data["Special"] .= "<br>Ballistic weapon that can use offensive EW.";
+		}
         
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
-            //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ){
-                $maxhealth = 12;
-            }
-            if ( $powerReq == 0 ){
-                $powerReq = 8;
-            }
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
         
-        public function getDamage($fireOrder){        return 20;   }
-        public function setMinDamage(){     $this->minDamage = 10; /*- $this->dp;*/      }
-        public function setMaxDamage(){     $this->maxDamage = 20 ;/*- $this->dp;*/      }
+        public function getDamage($fireOrder){        return Dice::d(10, 3);   }
+        public function setMinDamage(){     $this->minDamage = 20;      }
+        public function setMaxDamage(){     $this->maxDamage = 20;      }
     
     }//endof class PsionicTorpedo
 ?>
