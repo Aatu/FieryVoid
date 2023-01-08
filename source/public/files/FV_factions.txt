@@ -650,6 +650,7 @@ Shield mechanics mean that (besides necessary adaptation of tactics) in very sma
  - Independent fighters: while most StarTrek fighters/shuttles require hangar slots to be deployed (just like their B5 counterparts do), some of them possess Warp Drive of their own, as well as high endurance. Such craft do not require hangars, despite being fighter-sized. They are affected by "number of ships on a given hull limit" (whith each flight counted as one "ship"), and usually are marked as Restricted Deployment
  - Self-reliable LCVs: most StarTrek LCV-sized ships are fully capable of operating on their own, do not require hangars and have regular sensors (rather than restricted B5 "LCV Sensors").
  - Militarized shuttles: most StarTrek factions don't use dedicated fighters. However, their shuttles are usually armed and combat capable if necessary. Ships of these factions do have shuttle capacity listed (which is usually omitted in FV) and have combat shuttle designs available. Combat shuttles are not fighters, and as such are not necessary if player doesn't wish to deploy them.
+ 
 
 zSTARTREK FEDERATION (custom, alternate universe faction)
 United Federation of Planets is a conglomerate of multiple separate species. They remain independent enough to operate their own warships, built to different specifications - which is marked in fleet list. This is NOT, however, intended as a fleet composition restriction - Federation fleet on a field of battle may use any mix of units desired (although small craft should be based on carrier of the same species). 

@@ -439,7 +439,7 @@ class TrekPhaserLance extends TrekPhaserBase{
     	public $gunsArray = array(1=>1, 2=>2); //one Lance, but two Beam shots!
 		
         public $rangePenaltyArray = array(1=>0.33, 2=>0.5);
-        public $fireControlArray = array( 1=>array(0, 4, 4), 2=>array(3, 3, 3) ); 
+        public $fireControlArray = array( 1=>array(0, 4, 4), 2=>array(2, 3, 3) ); 
 	
 
         public $damageType = "Raking";

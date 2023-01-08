@@ -5,7 +5,7 @@ class AndorianChimesh extends BaseShipNoAft{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 575;
-	$this->faction = "ZTrek Federation (early)";
+	$this->faction = "ZStarTrek Federation (early)";
         $this->phpclass = "AndorianChimesh";
         $this->imagePath = "img/ships/StarTrek/AndorianChimesh.png";
         $this->shipClass = "Andorian Chimesh Battlecarrier";

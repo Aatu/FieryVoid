@@ -5,7 +5,7 @@ class TellariteAttackVessel extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 180;
-		$this->faction = "ZTrek Federation (early)";
+		$this->faction = "ZStarTrek Federation (early)";
         $this->phpclass = "TellariteAttackVessel";
         $this->imagePath = "img/ships/StarTrek/TellariteAttackVessel.png";
         $this->shipClass = "Tellarite Attack Vessel";

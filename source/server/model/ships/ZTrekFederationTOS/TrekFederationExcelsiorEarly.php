@@ -4,8 +4,8 @@ class TrekFederationExcelsiorEarly extends BaseShipNoAft{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 825;
-	$this->faction = "ZTrek Playtest Federation (TOS)";
+	$this->pointCost = 865;
+	$this->faction = "ZStarTrek Federation (TOS)";
         $this->phpclass = "TrekFederationExcelsiorEarly";
         $this->imagePath = "img/ships/StarTrek/FederationExcelsior.png";
         $this->shipClass = "Excelsior Early Cruiser";
