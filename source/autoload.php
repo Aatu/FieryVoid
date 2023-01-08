@@ -2878,7 +2878,7 @@ spl_autoload_register(
       			        'psionicconcentrator' => '/server/model/weapons/specialWeapons.php',
       			        'heavypsioniclance' => 	'/server/model/weapons/specialWeapons.php',
       			        'psioniclance' => 	'/server/model/weapons/specialWeapons.php',
-      			        'psionictorpedo' => '/server/model/weapons/specialWeapons.php',    
+      			        'psionictorpedo' => '/server/model/weapons/torpedo.php',    
       			        'thirdspacebattleship' => '/server/model/ships/thirdspace/ThirdspaceBattleship.php',
       			        'thirdspacecnc' => '/server/model/systems/baseSystems.php',					
 						
