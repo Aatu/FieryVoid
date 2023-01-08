@@ -367,12 +367,12 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 
 
             //armor may be ignored for some reason... usually because of Raking mode :)
-    /*        $armourIgnored = 0;
+            $armourIgnored = 0;
             if (isset($fireOrder->armorIgnored[$system->id])) {
                 $armourIgnored = $fireOrder->armorIgnored[$system->id];
                 $armour = $armour - $armourIgnored;
-            }
-            $armour = max($armour, 0); */
+            } 
+            $armour = max($armour, 0); 
 
 			//returned array: dmgDealt, dmgRemaining, armorPierced	
 			$damage = $this->beforeDamagedSystem($target, $system, $damage, $armour, $gamedata, $fireOrder);
