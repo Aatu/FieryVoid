@@ -4440,23 +4440,14 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Operates similar
 		$effecttohit5 = $effecttohit * 5;	
 		$fireOrder->pubnotes .= "<br> Initiative reduced by $effectIni5, and hit chance reduced by $effecttohit5 %.";
 		
+//		if ($ship->faction = "Thirdspace") return;
+		
 		if ($system->advancedArmor){
 			$effectIni = ceil($effectIni/2);  	//Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens.	
 			$effecttohit = ceil($effecttohit/2);
 		}
 	
-		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
-  /*          foreach ($target->systems as $fighter) {
-                if ($fighter == null || $fighter->isDestroyed()) {
-                    continue;
-                }
-                for($i=1; $i<=$effecttohit;$i++){
-					$crit = new PenaltyToHitOneTurn(-1, $ship->id, $firstFighter->id, 'PenaltyToHitOneTurn', $gamedata->turn); 
-					$crit->updated = true;
-			        $fighter->criticals[] =  $crit;
-				}
-            } */
-			
+		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!			
 			$firstFighter = $ship->getSampleFighter();
 			if($firstFighter){
 				for($i=1; $i<=$effecttohit;$i++){

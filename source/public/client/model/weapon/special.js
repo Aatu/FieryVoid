@@ -415,6 +415,7 @@ PsychicField.prototype.hasMaxBoost = function(){
 PsychicField.prototype.getMaxBoost = function(){
     return this.maxBoostLevel;
 }
+/*
 //needed for Spark Curtain upgrade
 PsychicField.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
     if (!weapon.ballistic) return 0;//only ballistic weapons are affected
