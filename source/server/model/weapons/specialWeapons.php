@@ -4444,9 +4444,9 @@ class PsychicField extends Weapon{ //Operates similar to Spark Field, but debili
 		
 		if ($system->advancedArmor){
 			$effectIni = ceil($effectIni/2);  	//Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens.	
-			$effecttohit = ceil($effecttohit/2);
-			$result = array($effectIni, $effecttohit);
-			return $result;	
+//			$effecttohit = ceil($effecttohit/2);
+	//		$result = array($effectIni, $effecttohit);
+			return $effectIni;	
 		}
 		
 	//	if (WeaponEM::isTargetEMResistant($ship,$system)){
