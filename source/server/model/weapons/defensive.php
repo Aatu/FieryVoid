@@ -602,7 +602,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 		public $isPrimaryTargetable = false; //projector can be targeted even on PRIMARY, like a weapon!
 	    public $iconPath = "TrekShieldProjectorF.png"; //overridden anyway - to indicate proper direction
 	    public $boostable = true; //$this->boostEfficiency and $this->maxBoostLevel in __construct()  
-		public $boostEfficiency = 2;
+		public $boostEfficiency = 4;
 	    public $baseOutput = 0; //base output, before boost
 	    
 		
@@ -610,7 +610,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 	            19=>"OutputReduced1",
 	            28=>"OutputReduced2" );
 		
-		public $repairPriority = 4;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+		public $repairPriority = 9;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 
 	    
 	    function __construct($armor, $maxhealth, $power, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
@@ -633,12 +633,12 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn); 
-			$this->data["Special"] = "Shield projector - replenishes 2 structure of appropriate Shield Projection per point of Projector's rating at end of turn.";
+			$this->data["Special"] = "Shield projector - replenishes 4 structure of appropriate Shield Projection per point of Projector's rating at end of turn.";
 			$this->data["Special"] .= "<br>Can be boosted.";
 		}	
 		
 	    public function getOutputOnTurn($turn){
-	        $output = ($this->getOutput() + $this->getBoostLevel($turn))*2;
+	        $output = ($this->getOutput() + $this->getBoostLevel($turn))*4;
 	        return $output;
 	    }
 		

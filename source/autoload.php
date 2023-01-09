@@ -2609,7 +2609,8 @@ spl_autoload_register(
 				'pshultau' => '/server/model/ships/pakmara/Pshultau.php',
 				'trashuli' => '/server/model/ships/pakmara/Trashuli.php',
 				'urikhal' => '/server/model/ships/pakmara/Urikhal.php',	
-				'tharnotak' => '/server/model/ships/pakmara/Tharnotak.php',								'padashar' => '/server/model/ships/pakmara/Padashar.php',
+				'tharnotak' => '/server/model/ships/pakmara/Tharnotak.php',								
+				'padashar' => '/server/model/ships/pakmara/Padashar.php',
 				'artees' => '/server/model/ships/pakmara/Artees.php',
 				'simsalle' => '/server/model/ships/pakmara/Simsalle.php',
 				'trashue' => '/server/model/ships/civilians/Trashue.php',
@@ -2880,7 +2881,8 @@ spl_autoload_register(
       			        'psioniclance' => 	'/server/model/weapons/specialWeapons.php',
       			        'psionictorpedo' => '/server/model/weapons/torpedo.php',    
       			        'thirdspacebattleship' => '/server/model/ships/thirdspace/ThirdspaceBattleship.php',
-      			        'thirdspacecnc' => '/server/model/systems/baseSystems.php',					
+      			        'thirdspacecnc' => '/server/model/systems/baseSystems.php',		
+      			        'thirdspacefighter' => '/server/model/ships/thirdspace/ThirdspaceFighter.php',			
 						
 				
 				//let's end this with unit enhancement class...		    
