@@ -4433,9 +4433,7 @@ class PsychicField extends Weapon{ //Operates similar to Spark Field, but debili
 		return $dmgToReturn;
 	} can remove since no damage? */
 
-	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
-	
-		
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!		
 		$effectIni = Dice::d(6,1);//strength of effect: 1d6
 		$effecttohit = Dice::d(3,1);
 		$effectIni5 = $effectIni * 5;
@@ -4444,18 +4442,11 @@ class PsychicField extends Weapon{ //Operates similar to Spark Field, but debili
 		
 		if ($system->advancedArmor){
 			$effectIni = ceil($effectIni/2);  	//Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens.	
-//			$effecttohit = ceil($effecttohit/2);
-	//		$result = array($effectIni, $effecttohit);
-			return $effectIni;	
+			$effecttohit = ceil($effecttohit/2);
 		}
-		
-	//	if (WeaponEM::isTargetEMResistant($ship,$system)){
-	//		$effectPower = 0; //Let's say Ancients unaffected by power drain, to prevent Shadows etc from having to power down only weapon etc
-	//		return $effectPower;
-	//	}
 	
 		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
-            foreach ($target->systems as $fighter) {
+  /*          foreach ($target->systems as $fighter) {
                 if ($fighter == null || $fighter->isDestroyed()) {
                     continue;
                 }
@@ -4464,15 +4455,15 @@ class PsychicField extends Weapon{ //Operates similar to Spark Field, but debili
 					$crit->updated = true;
 			        $fighter->criticals[] =  $crit;
 				}
-            }
+            } */
 			
 			$firstFighter = $ship->getSampleFighter();
 			if($firstFighter){
-	/*			for($i=1; $i<=$effecttohit;$i++){
+				for($i=1; $i<=$effecttohit;$i++){
 					$crit = new PenaltyToHitOneTurn(-1, $ship->id, $firstFighter->id, 'PenaltyToHitOneTurn', $gamedata->turn); 
 					$crit->updated = true;
 			        	$firstFighter->criticals[] =  $crit;
-				} */
+				} 
 				for($i=1; $i<=$effectIni;$i++){
 					$crit = new tmpinidown(-1, $ship->id, $firstFighter->id, 'tmpinidown', $gamedata->turn); 
 					$crit->updated = true;
