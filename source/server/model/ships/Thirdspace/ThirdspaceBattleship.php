@@ -32,7 +32,7 @@ class ThirdspaceBattleship extends BaseShip{
 		$this->iniativebonus = 2 *5;        
 
         
-        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 60, 0, 136+8+5));
+        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 60, 0, 142+8+5));
         $this->addPrimarySystem(new ThirdspaceCnC(8, 32, 0, 0));
         $scanner = new Scanner(7, 28, 8, 15);
 		$scanner->markAdvanced();
@@ -44,7 +44,7 @@ class ThirdspaceBattleship extends BaseShip{
 //		$this->addPrimarySystem($projector);  Did not work to heal external shields, will just use overlap instead.
 		
 				  		
-	//	$this->addPrimarySystem(new PsychicField(7, 0, 0, 0, 360));		
+		$this->addPrimarySystem(new PsychicField(7, 0, 0, 0, 360));		
         $this->addPrimarySystem(new SelfRepair(7, 24, 12)); //armor, structure, output    		
         
       
@@ -69,10 +69,10 @@ class ThirdspaceBattleship extends BaseShip{
 		$projection->addProjector($projector);
 		$this->addAftSystem($projector);
 		$this->addAftSystem($projection);	
-        $this->addAftSystem(new PsionicConcentrator(5, 0, 4, 60, 300)); 
-        $this->addAftSystem(new PsionicConcentrator(5, 0, 0, 60, 300)); 
-        $this->addAftSystem(new PsionicConcentrator(5, 0, 0, 60, 300)); 
-        $this->addAftSystem(new PsionicConcentrator(5, 0, 0, 60, 300)); 
+        $this->addAftSystem(new PsionicConcentrator(5, 0, 4, 120, 240)); 
+        $this->addAftSystem(new PsionicConcentrator(5, 0, 0, 120, 240)); 
+        $this->addAftSystem(new PsionicConcentrator(5, 0, 0, 120, 240)); 
+        $this->addAftSystem(new PsionicConcentrator(5, 0, 0, 120, 240)); 
         $this->addAftSystem(new GraviticThruster(6, 24, 0, 8, 2));
         $this->addAftSystem(new GraviticThruster(6, 24, 0, 8, 2));
         $this->addAftSystem(new GraviticThruster(6, 24, 0, 8, 2));
@@ -85,10 +85,10 @@ class ThirdspaceBattleship extends BaseShip{
 		$this->addLeftSystem($projection);
 		$this->addLeftSystem(new PsionicLance(5, 0, 0, 240, 360));
         $this->addLeftSystem(new PsionicTorpedo(6, 0, 0, 240, 360));
-        $this->addLeftSystem(new PsionicConcentrator(5, 0, 0, 180, 60)); 
-        $this->addLeftSystem(new PsionicConcentrator(5, 0, 0, 180, 60)); 
-        $this->addLeftSystem(new PsionicConcentrator(5, 0, 0, 180, 60));
-        $this->addLeftSystem(new PsionicConcentrator(5, 0, 0, 180, 60));                                 
+        $this->addLeftSystem(new PsionicConcentrator(5, 1, 0, 180, 60)); 
+        $this->addLeftSystem(new PsionicConcentrator(5, 2, 0, 180, 60)); 
+        $this->addLeftSystem(new PsionicConcentrator(5, 3, 0, 180, 60));
+        $this->addLeftSystem(new PsionicConcentrator(5, 4, 0, 180, 60));                                 
         $this->addLeftSystem(new GraviticThruster(6, 36, 0, 10, 3)); 
         $LCVRail = new Catapult(5, 18, 3);
         $LCVRail->displayName = "LCV Rail";        

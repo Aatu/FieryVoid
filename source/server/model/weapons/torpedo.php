@@ -392,23 +392,16 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
             if ($overkillSystem != null)
                 $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
         }     
-            
-                 
-            //$location is guaranteed to be filled in this case!
-			$unitsInHex = $gamedata->getShipsInDistance($target); 
-			foreach ($unitsInHex as $targetUnit){
              
-			if (isset($this->alreadyFlayed[$targetUnit->id])) return;         	
-			$this->alreadyFlayed[$targetUnit->id] = true;//mark engaged         	              
+			if (isset($this->alreadyFlayed[$target->id])) return;         	
+			$this->alreadyFlayed[$target->id] = true;//mark engaged         	              
             
-	        $effectArmor = Dice::d(4,1);//strength of effect: 1d6
+	        $effectArmor = Dice::d(3,1);//strength of effect: 1d3
 			$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor unless Advanced Armor.";
 		
             foreach ($target->systems as $system){
                 if ($system->advancedArmor) return;              	
- 				if ($target instanceof FighterFlight) return;	//To ignore fighters.
-	         	if($this->alreadyFlayed) return;
-	           	$this->alreadyFlayed = true; //avoid flaying same system multiple times.   					
+ 				if ($target instanceof FighterFlight) return;	//To ignore fighters if I want to.					
                 if ($target->shipSizeClass<=1 || $system->location === $location){ //MCVs and smaller ships are one huge section technically
 	             	for($i=1; $i<=$effectArmor;$i++){
 	                    $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
@@ -417,10 +410,17 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 	                    $system->criticals[] = $crit;
 		                }
 		            }
-				}
-			}	 
+				} 
         } //endof function doDamage	 
 
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
+		if ($system->advancedArmor) return; //no effect on Advanced Armor		
+		//+1 to crit roll, +2 to dropout roll
+		$mod = 1;
+		if ($ship instanceof FighterFlight) $mod++;		
+		$system->critRollMod += $mod; 
+	} //endof function onDamagedSystem	
     	
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
