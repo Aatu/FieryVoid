@@ -4283,7 +4283,7 @@ class VorlonDischargeCannon extends Weapon{
 }//endof class VorlonDischargeCannon
 
 
-class PsychicField extends Weapon{ //Operates similar to Spark Field, but debilitating enemies in range, not damage them.
+class PsychicField extends Weapon implements DefensiveSystem{ //Operates similar to Spark Field, but debilitating enemies in range, not damage them.
         public $name = "PsychicField";
         public $displayName = "Psychic Field";
 	public $iconPath = "PsychicField.png";
@@ -4434,7 +4434,7 @@ class PsychicField extends Weapon{ //Operates similar to Spark Field, but debili
 	} can remove since no damage? */
 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!		
-		$effectIni = Dice::d(6,1);//strength of effect: 1d6
+		$effectIni = Dice::d(4,1);//strength of effect: 1d6
 		$effecttohit = Dice::d(3,1);
 		$effectIni5 = $effectIni * 5;
 		$effecttohit5 = $effecttohit * 5;	
@@ -4460,7 +4460,7 @@ class PsychicField extends Weapon{ //Operates similar to Spark Field, but debili
 			$firstFighter = $ship->getSampleFighter();
 			if($firstFighter){
 				for($i=1; $i<=$effecttohit;$i++){
-					$crit = new PenaltyToHitOneTurn(-1, $ship->id, $firstFighter->id, 'PenaltyToHitOneTurn', $gamedata->turn); 
+					$crit = new tmpsensordown(-1, $ship->id, $firstFighter->id, 'tmpsensordown', $gamedata->turn); 
 					$crit->updated = true;
 			        	$firstFighter->criticals[] =  $crit;
 				} 
@@ -4514,37 +4514,28 @@ class PsychicField extends Weapon{ //Operates similar to Spark Field, but debili
 	}
 	Remove, as advanced armour does not apply, altho reduce effect against ancients anyway?*/
 	
-/*
+
 	public function onConstructed($ship, $turn, $phase){
 		parent::onConstructed($ship, $turn, $phase);
-	$this->tohitPenalty = $this->getOutput();
+		$this->tohitPenalty = $this->getOutput();
 		$this->damagePenalty = 0;
 	}
-	public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
-		if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn)) return 0;
-	if(!$weapon->ballistic) return 0;//only ballistic weapons are affected!
-	$output = $this->getOutput();
-		return $output;
-	}
+		
+	public function getDefensiveType(){
+		return "SparkCurtain";
+	}    
+	
 	public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
 		return 0; //does not reduce damage
 	}
-	public function getDefensiveType()
-	{
-		return "SparkCurtain";
-	}    
+	
+	public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
+		return 0;//does not reduce hit chance
+	}
+		
 	public function getOutput(){
-		$output = 0;
-		if($this->output == 0) return 0; //if base output is not enhanced this means there is no effect
-		foreach ($this->power as $power){
-		    if ($power->turn == TacGamedata::$currentTurn && $power->type == 2){
-				$output += $power->amount;
-		    }        
-		}        
-		$output = $output + $this->baseOutput; //strength = 2+boostlevel
-		return $output;        
+		return 0;     
 	}    
-	Does not function defensively */
 	
 	public function getDamage($fireOrder){ return  0;   }
 	public function setMinDamage(){   $this->minDamage =  0 ;      }

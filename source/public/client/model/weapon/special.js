@@ -262,48 +262,6 @@ VorlonDischargePulsar.prototype.initializationUpdate = function() {
 //TO BE ACTUALLY IMPLEMENTED!!!!!!!
 };
 
-var PsychicField = function(json, ship)
-{
-    Weapon.call( this, json, ship);
-}
-PsychicField.prototype = Object.create( Weapon.prototype );
-PsychicField.prototype.constructor = PsychicField;
-PsychicField.prototype.initBoostableInfo = function(){
-    // Needed because it can change during initial phase
-    // because of adding extra power.
-    if(window.weaponManager.isLoaded(this)){
-        this.range = 2 + 2*shipManager.power.getBoost(this);
-        this.data["Range"] = this.range;
-  //      this.minDamage = 2 - shipManager.power.getBoost(this);
-  //      this.minDamage = Math.max(0,this.minDamage);
-  //      this.maxDamage =  7 - shipManager.power.getBoost(this);
-  //      this.data["Damage"] = "" + this.minDamage + "-" + this.maxDamage;
-    }
-    else{
-        var count = shipManager.power.getBoost(this);
-        for(var i = 0; i < count; i++){
-            shipManager.power.unsetBoost(null, this);
-        }
-    }
-    return this;
-}
-PsychicField.prototype.clearBoost = function(){
-        for (var i in system.power){
-                var power = system.power[i];
-                if (power.turn != gamedata.turn) continue;
-                if (power.type == 2){
-                    system.power.splice(i, 1);
-                    return;
-                }
-        }
-}
-PsychicField.prototype.hasMaxBoost = function(){
-    return true;
-}
-PsychicField.prototype.getMaxBoost = function(){
-    return this.maxBoostLevel;
-};
-
 var PsionicConcentrator = function PsionicConcentrator(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -414,4 +372,55 @@ PsionicLance.prototype.initBoostableInfo = function () {
             break;
     }
     return this;
+};
+
+var PsychicField = function(json, ship)
+{
+    Weapon.call( this, json, ship);
+}
+PsychicField.prototype = Object.create( Weapon.prototype );
+PsychicField.prototype.constructor = PsychicField;
+PsychicField.prototype.initBoostableInfo = function(){
+    // Needed because it can change during initial phase
+    // because of adding extra power.
+    if(window.weaponManager.isLoaded(this)){
+        this.range = 2 + 2*shipManager.power.getBoost(this);
+        this.data["Range"] = this.range;
+ //       this.minDamage = 2 - shipManager.power.getBoost(this);
+ //       this.minDamage = Math.max(0,this.minDamage);
+ //       this.maxDamage =  7 - shipManager.power.getBoost(this);
+ //       this.data["Damage"] = "" + this.minDamage + "-" + this.maxDamage;
+    }
+    else{
+        var count = shipManager.power.getBoost(this);
+        for(var i = 0; i < count; i++){
+            shipManager.power.unsetBoost(null, this);
+        }
+    }
+    return this;
+}
+PsychicField.prototype.clearBoost = function(){
+        for (var i in system.power){
+                var power = system.power[i];
+                if (power.turn != gamedata.turn) continue;
+                if (power.type == 2){
+                    system.power.splice(i, 1);
+                    return;
+                }
+        }
+}
+PsychicField.prototype.hasMaxBoost = function(){
+    return true;
+}
+PsychicField.prototype.getMaxBoost = function(){
+    return this.maxBoostLevel;
+}
+//needed for Spark Curtain upgrade
+PsychicField.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
+    if (!weapon.ballistic) return 0;//only ballistic weapons are affected
+	var out = shipManager.systems.getOutput(target, this);
+	if (shipManager.power.getBoost(this) >= out){ //if boost is equal to output - this means base output is 0 = no Spark Curtain mod!
+		out = 0;
+	}
+	return out;
 };
