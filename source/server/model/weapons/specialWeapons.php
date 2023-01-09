@@ -4594,7 +4594,7 @@ class PsychicFieldHandler{
 		
 		//apparently ships may be loaded multiple times... make sure fields in array belong to current gamedata!
 		$tmpFields = array();
-		foreach(PsychicFieldHandler::$sparkFields as $field){
+		foreach(PsychicFieldHandler::$psychicFields as $field){
 			$shooter = $field->getUnit();
 			//if($field->isDestroyed($gamedata->turn-1)) continue; //destroyed weapons can be safely left out
 			if($field->isDestroyed($gamedata->turn)) continue; //actually at this stage - CURRENT turn should be indicated!
@@ -4620,7 +4620,7 @@ class PsychicFieldHandler{
 		//create firing order for each weapon (target self)
 		//for each weapon find possible targets and add them to weapons' target list
 		//strongest weapons fire first, and only 1 field affects particular ship	
-		foreach(PsychicFieldHandler::$sparkFields as $field){			
+		foreach(PsychicFieldHandler::$psychicFields as $field){			
 			if ($field->isDestroyed($gamedata->turn-1)) continue; //destroyed field does not attack
 			if ($field->isOfflineOnTurn($gamedata->turn)) continue; //disabled field does not attack
 			$shooter = $field->getUnit();      
