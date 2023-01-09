@@ -374,12 +374,13 @@ PsionicLance.prototype.initBoostableInfo = function () {
     return this;
 };
 
-var PsychicField = function(json, ship)
+var PsychicField = function PsychicField(json, ship)
 {
     Weapon.call( this, json, ship);
 }
 PsychicField.prototype = Object.create( Weapon.prototype );
 PsychicField.prototype.constructor = PsychicField;
+
 PsychicField.prototype.initBoostableInfo = function(){
     // Needed because it can change during initial phase
     // because of adding extra power.
@@ -415,7 +416,7 @@ PsychicField.prototype.hasMaxBoost = function(){
 PsychicField.prototype.getMaxBoost = function(){
     return this.maxBoostLevel;
 }
-/*
+
 //needed for Spark Curtain upgrade
 PsychicField.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
     if (!weapon.ballistic) return 0;//only ballistic weapons are affected
@@ -424,4 +425,4 @@ PsychicField.prototype.getDefensiveHitChangeMod = function (target, shooter, wea
 		out = 0;
 	}
 	return out;
-};
+}; 
