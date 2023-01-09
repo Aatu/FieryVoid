@@ -4439,7 +4439,8 @@ class PsychicField extends Weapon{ //Operates similar to Spark Field, but debili
 		$effectIni = Dice::d(6,1);//strength of effect: 1d6
 		$effecttohit = Dice::d(3,1);
 		$effectIni5 = $effectIni * 5;
-		$fireOrder->pubnotes .= "<br> Initiative reduced by $effectIni5.";
+		$effecttohit5 = $effecttohit * 5;	
+		$fireOrder->pubnotes .= "<br> Initiative reduced by $effectIni5, and hit chance reduced by $effecttohit5 %.";
 		
 		if ($system->advancedArmor){
 			$effectIni = ceil($effectIni/2);  	//Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens.	
@@ -4490,6 +4491,7 @@ class PsychicField extends Weapon{ //Operates similar to Spark Field, but debili
 					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
 					$crit->updated = true;
 			        	$CnC->criticals[] =  $crit;
+	//		        $fireOrder->pubnotes .= "<br> TEST NOTE";	
 				}
 			}
 		}
