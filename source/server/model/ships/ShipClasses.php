@@ -196,6 +196,9 @@ class BaseShip {
             if(($this->faction == "Pak'ma'ra") && (!($this instanceof FighterFlight))	){
                 return $this->doPakmaraInitiativeBonus($gamedata);
             }
+//			if(($this->faction == "Gaim") && ($this instanceOf gaimMoas)){  //GTS
+//                return $this->doGaimInitiativeBonus($gamedata);
+//            }
             return $this->iniativebonus;
         }
         
@@ -356,6 +359,39 @@ class BaseShip {
         //    debug::log($this->phpclass."- bonus: ".$mod);
         return $this->iniativebonus - $mod*5;
     } //end of doPakmaraInitiativeBonus    
+
+
+
+		//GTS
+		/*
+        private function doGaimInitiativeBonus($gamedata){
+
+        $mod = 0;
+
+        if($gamedata->turn > 0 && $gamedata->phase >= 0 ){
+            $pixPos = $this->getCoPos();
+            //TODO: Better distance calculation
+            $ships = $gamedata->getShipsInDistance($this, 10);
+
+            foreach($ships as $ship){
+                if( !$ship->isDestroyed()
+                    && ($ship->faction == "Gaim")
+                    && ($this->userid == $ship->userid)
+                    && ($ship instanceOf gaimMearc)
+                    && ($this->id != $ship->id)){
+                    $cnc = $ship->getSystemByName("CnC");
+                    $bonus = $cnc->output;
+                    if ($bonus > $mod){
+                        $mod = $bonus;
+                    } else continue;
+                }
+            }
+        }
+        //    debug::log($this->phpclass."- bonus: ".$mod);
+        return $this->iniativebonus + $mod*5;
+    }
+	*/
+
 	
 	/*saves individual notes systems might have generated*/
 	public function saveIndividualNotes(DBManager $dbManager) {

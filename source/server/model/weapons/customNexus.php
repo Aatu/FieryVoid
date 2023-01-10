@@ -7657,7 +7657,7 @@ class FMissileRack extends Weapon {
 		public $hits = array();
 		
         public $rangePenalty = 0;
-        public $fireControlArray = array(1=>array(6, 6, 6), 2=>array(6, 6, 6)); //missile OEW directly added to weapon FC
+        public $fireControlArray = array(1=>array(6, 6, 6), 2=>array(4, 4, 4)); //missile OEW directly added to weapon FC
         private $baseFireControlArray = null; //base values of fire control - copy necessary due to necessity of recalculation now and then!
 		private $firedInRapidMode = false; //was this weapon fired in rapid mode (this turn)?
 		
