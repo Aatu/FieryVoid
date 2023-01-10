@@ -1409,6 +1409,7 @@ spl_autoload_register(
 				'circasiantorminbeta' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianTorminBeta.php',
 //				'circasiantratha' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianTratha.php',
 				'circasiantrathascout' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianTrathaScout.php',
+				'circasiantyrafighter' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianTyraFighter.php',
 				'circasianxandar' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianXandar.php',
 				'circasianvestas' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianVestas.php',
 				'circasianyollana' => '/server/model/ships/ZEscalationCircasianEmpire/CircasianYollana.php',
