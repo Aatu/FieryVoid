@@ -15,7 +15,7 @@ class zzunoffShoKan extends BaseShip{
         $this->variantOf = "Sho'Kar Light Scout Cruiser";
 	$this->occurence = "common";
 	$this->isd = 2216;
-	$this->unofficial = true;
+ 		$this->unofficial = 'S'; //design released after AoG demise
 
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

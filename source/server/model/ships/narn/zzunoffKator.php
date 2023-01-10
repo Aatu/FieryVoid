@@ -14,7 +14,7 @@ class zzunoffKaTor extends HeavyCombatVessel{
 	$this->occurence = "common";
 	    $this->variantOf = "Ka'Toc Battle Destroyer";
 	$this->isd = 2234;
-	$this->unofficial = true;
+ 		$this->unofficial = 'S'; //design released after AoG demise
 
         $this->forwardDefense = 12;
         $this->sideDefense = 15;

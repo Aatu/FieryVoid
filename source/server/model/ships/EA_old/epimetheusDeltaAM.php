@@ -13,7 +13,7 @@ class EpimetheusDeltaAM extends BaseShip{
 			$this->occurence = "common";
         $this->shipSizeClass = 3;
 //			$this->canvasSize = 175; //img has 200px per side
- 		$this->unofficial = true;
+ 		$this->unofficial = 'S'; //HRT design released after AoG demise
        
         $this->isd = 2184;
 

@@ -46,6 +46,33 @@ class Laertes_early extends MediumShip{
         $this->addAftSystem(new StdParticleBeam(2, 4, 1, 0, 180));
 	
         $this->addPrimarySystem(new Structure( 4, 40));
+		
+        $this->hitChart = array(
+            0=> array(
+                    11 => "Thruster",
+                    14 => "Scanner",
+					16 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    5 => "Thruster",
+					7 => "Medium Plasma Cannon",
+					8 => "Interceptor Prototype",
+                    10 => "Standard Particle Beam",
+					17 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    6 => "Thruster",
+					8 => "Standard Particle Beam",
+					9 => "Interceptor Prototype",
+                    10 => "Engine",
+                    17 => "Structure",
+                    20 => "Primary",
+            ),
+        );				
+		
     }
 
 }

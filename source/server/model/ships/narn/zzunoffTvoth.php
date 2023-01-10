@@ -16,7 +16,7 @@ class zzunoffTVoth extends BaseShip{
 	$this->variantOf = "T'Loth Assault Cruiser";
 	$this->occurence = "rare";
 	$this->isd = 2231;
-	$this->unofficial = true;
+ 		$this->unofficial = 'S'; //design released after AoG demise
 
 
         $this->forwardDefense = 16;

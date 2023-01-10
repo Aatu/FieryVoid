@@ -15,7 +15,7 @@ class zzunoffDagkur extends MediumShip{
 	    $this->variantOf = "Dag'Kar Missile Frigate";
         $this->limited = 33;
 	$this->isd = 2218;
-	$this->unofficial = true;
+ 		$this->unofficial = 'S'; //design released after AoG demise
 
         $this->turncost = 0.50;
         $this->turndelaycost = 0.50;

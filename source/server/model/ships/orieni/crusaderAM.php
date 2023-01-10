@@ -12,6 +12,8 @@ class CrusaderAM extends MediumShip{
         $this->variantOf = "Commune Battle Leader";
             $this->isd = 2007; 
 
+ 		$this->unofficial = 'S'; //design released after AoG demise
+		
         $this->canvasSize = 100;
         
         $this->forwardDefense = 14;

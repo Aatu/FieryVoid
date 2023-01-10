@@ -11,8 +11,9 @@ class Torushka extends FighterFlight{
         $this->shipClass = "Torushka Stingfighters";
         $this->imagePath = "img/ships/Torushka.png";
 		$this->isd = 2210;
+ 		$this->unofficial = 'S'; //design released after AoG demise
 				
-        $this->notes = '+5 Initiative bonu as long as flight leader is alive and uninjured.';
+        $this->notes = '+5 Initiative bonus as long as flight leader is alive and uninjured.';
 
         $this->forwardDefense = 7;
         $this->sideDefense = 6;

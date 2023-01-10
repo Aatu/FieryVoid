@@ -13,7 +13,7 @@ class SorithianFylonFrigate extends MediumShip{
         $this->isd = 2209;
 	$this->canvasSize = 100;
 	
-	$this->unofficial = true;
+ 		$this->unofficial = 'S'; //design released after AoG demise
         
         $this->forwardDefense = 11;
         $this->sideDefense = 11;

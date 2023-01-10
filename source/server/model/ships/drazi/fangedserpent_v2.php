@@ -10,7 +10,8 @@ class FangedSerpent_v2 extends SuperHeavyFighter{
         $this->shipClass = "Fanged Serpent Command Fighters";
 	    $this->imagePath = "img/ships/drazi/DraziSkyserpent.png";
         $this->occurence = "rare";
-	    $this->variantOf = "Sky Serpent Heavy Assault Fighters";
+	    //$this->variantOf = "Sky Serpent Heavy Assault Fighters";
+			$this->variantOf = 'OBSOLETE'; //awaiting to be deleted after it's no longer present in games
 	    $this->isd = 2231;
         $this->canvasSize = 64;
 

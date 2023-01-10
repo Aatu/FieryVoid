@@ -5,7 +5,7 @@ class TrekFederationSoyuz extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 475;
-        $this->faction = "ZTrek Playtest Federation (TOS)";
+        $this->faction = "ZStarTrek Federation (TOS)";
         $this->phpclass = "TrekFederationSoyuz";
         $this->imagePath = "img/ships/StarTrek/FederationMiranda.png";
         $this->shipClass = "Soyuz Scout";

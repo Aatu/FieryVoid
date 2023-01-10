@@ -14,7 +14,7 @@ class zzunoffTlorr extends HeavyCombatVessel{
         
 		$this->variantOf = "T'Rakk Frigate";
 		$this->occurence = "common";
-		$this->unofficial = true;
+ 		$this->unofficial = 'S'; //design released after AoG demise
         
         $this->forwardDefense = 10;
         $this->sideDefense = 16;
