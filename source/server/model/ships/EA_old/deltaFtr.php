@@ -10,7 +10,7 @@ class DeltaFtr extends FighterFlight{
         $this->shipClass = "EA/BA Delta Multi-Role Light Fighters";
 	$this->imagePath = "img/ships/deltaV.png";
 	    $this->isd = 2158;
- 		$this->unofficial = true;
+ 		$this->unofficial = 'S'; //HRT design released after AoG demise
         
         $this->forwardDefense = 5;
         $this->sideDefense = 5;

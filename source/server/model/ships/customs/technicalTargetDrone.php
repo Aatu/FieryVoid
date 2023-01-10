@@ -69,15 +69,7 @@ class technicalTargetDrone extends BaseShip{
 		//$this->addFrontSystem(new Hangar(4, 6));
 		
 		//new weapon showcase
-
-//		$this->addFrontSystem(new PlasmaWeb(2, 4, 2, 0, 360));
-//		$this->addFrontSystem(new PlasmaWeb(2, 4, 2, 0, 360));
-//		$this->addFrontSystem(new PlasmaWeb(2, 4, 2, 0, 360));
-
-//		$this->addFrontSystem(new PlasmaBlast(2, 4, 2, 0, 360));
-//		$this->addFrontSystem(new TrekLightPhaser(2, 4, 2, 300, 60));
-//		$this->addFrontSystem(new TrekLightPhaserLance(2, 6, 4, 300, 60));
-		$sensors = new Scanner(6, 23, 4, 20);
+		$sensors = new Scanner(6, 103, 4, 10);
 			$sensors->markHyach();
 			$this->addFrontSystem($sensors); 
 /*		$sensors = new ELINTScanner(6, 23, 4, 20);
@@ -86,62 +78,35 @@ class technicalTargetDrone extends BaseShip{
 /*		$sensors = new Scanner(6, 23, 4, 20);
 			$sensors->markSensorFlux();
 			$this->addFrontSystem($sensors); */
+        $this->addPrimarySystem(new SelfRepair(5, 6, 4)); //armor, structure, output
 
 
 		$this->addPrimarySystem(new SpinalLaser(5, 12, 12, 330, 30));
 //		$this->addPrimarySystem(new Stealth(1,1,0));
 		
-/*		$this->addPrimarySystem(new AMissileRack(5, 6, 0, 0, 360));
-		$this->addPrimarySystem(new BMissileRack(6, 9, 0, 0, 360));
-        $this->addPrimarySystem(new MultiMissileLauncher(3, 'B', 0, 360));
-		$this->addPrimarySystem(new LMissileRack(5, 6, 0, 0, 360));
-        $this->addPrimarySystem(new MultiMissileLauncher(3, 'L', 0, 360));
-		$this->addPrimarySystem(new LHMissileRack(5, 6, 0, 0, 360));
-        $this->addPrimarySystem(new MultiMissileLauncher(3, 'LH', 0, 360));
-        $this->addPrimarySystem(new SoMissileRack(3, 6, 0, 0, 360));
-        $this->addPrimarySystem(new SMissileRack(3, 6, 0, 0, 360));
-		$this->addPrimarySystem(new MultiMissileLauncher(3, 'S', 0, 360));
-        $this->addPrimarySystem(new EWOMissileRack(3, 6, 0, 0, 360));
-        $this->addPrimarySystem(new RMissileRack(3, 6, 0, 0, 360));
-*/
 		
 
 		$this->addFrontSystem(new EMMissile(1, 6, 1, 0, 360));
 		$this->addFrontSystem(new EMMissile(1, 6, 1, 0, 360));
 
 
+        $this->addFrontSystem(new Jammer(4, 180, 7));
+		
         $this->addFrontSystem(new AmmoMissileRackR(3, 0, 0, 240, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addFrontSystem(new AmmoMissileRackR(3, 0, 0, 240, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addFrontSystem(new NexusLaserMissile(1, 6, 1, 0, 360));
 		$this->addFrontSystem(new TestGun(1, 6, 3, 0, 360));
 //		$this->addFrontSystem(new Enveloper(3, 8, 6, 300, 60));
 
-		/*
-		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));
-		$this->addAftSystem(new CommJammer(3, 0, 0, 0, 360));		
-		$this->addAftSystem(new ImpCommJammer(3, 0, 0, 0, 360));
-		$this->addAftSystem(new SensorSpear(3, 0, 0, 0, 360));
-		$this->addAftSystem(new SensorSpike(3, 0, 0, 0, 360));		
-		$this->addAftSystem(new CombatLaser(3, 0, 0, 0, 360));	
-		$this->addAftSystem(new LaserCutter(3, 0, 0, 0, 360));
-		*/
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
 		$this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
 		$this->addAftSystem(new JumpEngine(5, 20, 3, 20));
-		/*
-		$this->addAftSystem(new AssaultLaser(3, 6, 4, 180, 300));
-		$this->addAftSystem(new AssaultLaser(3, 6, 4, 60, 180));
-		$this->addAftSystem(new TwinArray(2, 16, 2, 120, 0));
-		$this->addAftSystem(new TwinArray(2, 16, 2, 0, 240));
-		*/
 		$this->addLeftSystem(new Thruster(4, 14, 0, 5, 3));
 		$this->addLeftSystem(new LimpetBoreTorp(3, 8, 5, 0, 360));
-//		$this->addLeftSystem(new TwinArray(3, 6, 2, 180, 0));
 		
 		$this->addRightSystem(new Thruster(4, 14, 0, 5, 4));
 		$this->addRightSystem(new LimpetBoreTorp(3, 8, 5, 0, 360));
-//		$this->addRightSystem(new TwinArray(3, 6, 2, 0, 180));
 		
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
 		$this->addFrontSystem(new Structure( 7, 100));
@@ -165,7 +130,7 @@ class technicalTargetDrone extends BaseShip{
 				*/
 			),
 			1=> array(
-				20 => "0:Engine",
+				20 => "Scanner",
 				/*
 				5 => "Plasma Wave",
 				10 => "Stun Beam",

@@ -14,6 +14,10 @@ class Weapon extends ShipSystem
     public $priorityAF = 0; //array must be set explicitly - otherwise it will be generated, ignoring this variable! 
     public $priorityAFArray = array();
 	
+	protected $usesOrdnance = false;//indicates that onboardFC should be shown!
+	public $onboardFC = array(0,0,0); //for fighter missiles, really - where separate missile guidance is necessary
+	public $onboardFCArray = array();
+	
 	public $checkAmmoMagazine = false; //does this weapon require actual ammunition in AmmoMagazine to fire?
 
 	/*not used any more
@@ -536,7 +540,7 @@ class Weapon extends ShipSystem
         return false;
     }
 
-    private function formatFCValue($fc)
+    public function formatFCValue($fc)
     {
         if ($fc === null)
             return "-";
@@ -583,7 +587,14 @@ class Weapon extends ShipSystem
         $fcmed = $this->formatFCValue($this->fireControl[1]);
         $fccap = $this->formatFCValue($this->fireControl[2]);
         $this->data["Fire control (fighter/med/cap)"] = "$fcfight/$fcmed/$fccap";
-
+		
+		if($this->usesOrdnance){
+			$fcfight = $this->formatFCValue($this->onboardFC[0]);
+			$fcmed = $this->formatFCValue($this->onboardFC[1]);
+			$fccap = $this->formatFCValue($this->onboardFC[2]);
+			$this->data["Ordnance FC (ftr/med/cap)"] = "$fcfight/$fcmed/$fccap";
+		}
+		
         if ($this->guns > 1) {
             $this->data["Number of guns"] = $this->guns;
         }
@@ -796,6 +807,32 @@ class Weapon extends ShipSystem
         return new WeaponLoading($this->getTurnsloaded(), $this->overloadshots, $this->getLoadedAmmo(), $this->overloadturns, $this->getLoadingTime(), $this->firingMode);
     }
 
+	
+	//returns $turnsloaded if >0 and weapon is enabled; 
+	//if weapon is disabled, returns 0
+	//if $turnsloaded is 0 and weapon is enabled (meaning it has just been fired) - returns time that passed from most recent shot (or being disabled)
+	//..for some reason does not work - possibly loaded date does not contain proper historical firing references...
+	/*
+	public function getLoadingBeforeCurrentShot()
+	{
+		if ($this->turnsloaded >=1 ) return $this->turnsloaded;
+		if ($this->isOfflineOnTurn(TacGamedata::$currentTurn)) return 0;
+		//weapon is enabled and has just been fired... calculate time that passed from most recent shot
+		$turnsArmed = 1; //current turn, at the very least
+		for($turnToCheck = TacGamedata::$currentTurn -1; $turnToCheck >= 0; $turnToCheck--){
+			if ($turnToCheck == 0) { //start of game - meaning weapon is fully charged
+				$turnsArmed = $this->loadingtime;
+				break;
+			}
+			if ($this->isOfflineOnTurn($turnToCheck)) break; //weapon was disabled
+			if ($this->firedOnTurn($turnToCheck)) break; //weapon was fired
+			$turnsArmed++; //weapon was armed, increase loading time
+			if($turnsArmed >= $this->loadingtime) break; //full loading time reached, no point checking further
+		}
+		return $turnsArmed;
+	} //endof function getLoadingBeforeCurrentShot
+	*/
+	
     public function beforeTurn($ship, $turn, $phase)
     {
         parent::beforeTurn($ship, $turn, $phase);
@@ -1838,6 +1875,8 @@ full Advanced Armor effects (by rules) for reference:
         if (isset($this->endArcArray[$i])) $this->endArc = $this->endArcArray[$i];
 		
 		if (isset($this->hidetargetArray[$i])) $this->hidetarget = $this->hidetargetArray[$i];  // GTS
+		
+        if (isset($this->onboardFCArray[$i])) $this->onboardFC = $this->onboardFCArray[$i];
 	    
     }//endof function changeFiringMode
 

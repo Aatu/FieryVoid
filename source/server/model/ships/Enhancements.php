@@ -442,7 +442,7 @@ class Enhancements{
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
 			  $enhLimit = $actualCapacity; //effectively limited by magazine capacity	
-			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
@@ -453,7 +453,7 @@ class Enhancements{
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
 			  $enhLimit = $actualCapacity;		
-			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
@@ -464,7 +464,7 @@ class Enhancements{
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
 			  $enhLimit = $actualCapacity;		
-			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
@@ -475,7 +475,7 @@ class Enhancements{
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
 			  $enhLimit = $actualCapacity;		
-			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
@@ -486,7 +486,7 @@ class Enhancements{
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
 			  $enhLimit = $actualCapacity;		
-			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
@@ -497,7 +497,7 @@ class Enhancements{
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
 			  $enhLimit = $actualCapacity;		
-			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
@@ -508,7 +508,7 @@ class Enhancements{
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
 			  $enhLimit = $actualCapacity;		
-			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
@@ -519,7 +519,7 @@ class Enhancements{
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
 			  $enhLimit = $actualCapacity / 10;		//10% limit
-			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
 		  }
@@ -668,6 +668,81 @@ class Enhancements{
 	  }
 	  
 	  
+
+	  //consumable ammunition
+	  //find magazine capacity to set appropriate limits!
+	  //ASSUMING multiple but equal magazines (for fighter flights) (no magazine is fine too)
+	  //availablility in name - for EA and other factions respectably - just in case someone wishes for in-universe accurate availability
+	  $magazineCapacity = 0;
+	  foreach($flight->getSampleFighter()->systems as $magazine) if($magazine->name == 'ammoMagazine'){
+		  $magazineCapacity = $magazine->capacity;
+		  break; //foreach
+	  }
+	  if ($magazineCapacity > 0){ //otherwise no point
+		  $enhID = 'AMMO_FB'; //Basic Fighter Missiles
+		  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileFB();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity; //effectively limited by magazine capacity	
+			  $enhPrice = $ammoClass->getPrice($flight); 
+			  $enhPriceStep = 0; //flat rate
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+		  $enhID = 'AMMO_FL'; //Long Range Fighter Missiles
+		  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileFL();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($flight); 
+			  $enhPriceStep = 0; //flat rate
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+		  $enhID = 'AMMO_FH'; //Heavy FighterMissiles
+		  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileFH();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+				
+				//limited to 2 per SHF, or 1 per lighter craft
+				$maxLimit = 1;
+				if($flight->superheavy) $maxLimit = 2;
+				$actualCapacity = min($actualCapacity,$maxLimit);
+				
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($flight); 
+			  $enhPriceStep = 0; //flat rate
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+		  $enhID = 'AMMO_FY'; //Dogfight FighterMissiles
+		  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileFY();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($flight); 
+			  $enhPriceStep = 0; //flat rate
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+		  $enhID = 'AMMO_FD'; //Dropout FighterMissiles
+		  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileFD();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;
+			  $enhPrice = $ammoClass->getPrice($flight); 
+			  $enhPriceStep = 0; //flat rate
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  }
+	  } //end of magazine-requiring options
+	  
+	  
   } //endof function setEnhancementOptionsFighter
 	    
     
@@ -700,7 +775,7 @@ class Enhancements{
 			if($enhCount > 0) {
 				if($flight->enhancementTooltip != "") $flight->enhancementTooltip .= "<br>";
 				$flight->enhancementTooltip .= "$enhDescription";
-				if ($enhCount>1) $ship->enhancementTooltip .= " (x$enhCount)";
+				if ($enhCount>1) $flight->enhancementTooltip .= " (x$enhCount)";
 				switch ($enhID) { 
 					case 'ELITE_SW': //Elite Pilot (SW): pivot cost 1, Ini +1, OB +1, Profiles -1
 						$flight->pivotcost = 1;
@@ -738,7 +813,35 @@ class Enhancements{
 							$sys->output += $enhCount;
 						}
 						break;
-							
+						
+						
+					//consumable ammunition - add to ALL missile magazines on flight!
+					case 'AMMO_FB': //Basic Fighter Missile
+						foreach($flight->systems as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
+							$ftrAM->addAmmoEntry(new AmmoMissileFB(), $enhCount, true); //do notify dependent weapons, too!
+						}
+						break;
+					case 'AMMO_FH': //Heavy Fighter Missile
+						foreach($flight->systems as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
+							$ftrAM->addAmmoEntry(new AmmoMissileFH(), $enhCount, true); //do notify dependent weapons, too!
+						}
+						break;
+					case 'AMMO_FL': //Long Range Fighter Missile
+						foreach($flight->systems as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
+							$ftrAM->addAmmoEntry(new AmmoMissileFL(), $enhCount, true); //do notify dependent weapons, too!
+						}
+						break;
+					case 'AMMO_FY': //Dogfight Fighter Missile
+						foreach($flight->systems as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
+							$ftrAM->addAmmoEntry(new AmmoMissileFY(), $enhCount, true); //do notify dependent weapons, too!
+						}
+						break;
+					case 'AMMO_FD': //Dropout Fighter Missile
+						foreach($flight->systems as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
+							$ftrAM->addAmmoEntry(new AmmoMissileFD(), $enhCount, true); //do notify dependent weapons, too!
+						}
+						break;
+						
 				}
 			}			
 		}

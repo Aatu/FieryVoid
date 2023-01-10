@@ -9,7 +9,9 @@ class StormFront1874 extends MediumShip{
         $this->phpclass = "StormFront1874";
         $this->imagePath = "img/ships/stormFront.png";
         $this->shipClass = "Storm Front Missile Corvette (early)";
-		$this->variantOf = "Steadfast Escort Corvette";
+		//$this->variantOf = "Steadfast Escort Corvette";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+ 
 		$this->isd = 1874;	    
 		$this->occurence = "uncommon";
 	    

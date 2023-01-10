@@ -9,7 +9,9 @@ class Crusader extends MediumShip{
         $this->phpclass = "Crusader";
         $this->imagePath = "img/ships/commune.png";
         $this->shipClass = "Crusader Heavy Frigate";
-        $this->variantOf = "Commune Battle Leader";
+        //$this->variantOf = "Commune Battle Leader";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+ 
             $this->isd = 2007; 
 
         $this->canvasSize = 100;

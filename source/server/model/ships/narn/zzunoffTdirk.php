@@ -10,7 +10,7 @@ class zzunoffTdirk extends OSAT{
         $this->imagePath = "img/ships/tgan.png";
         $this->shipClass = "T'Dirk Early Satellite";
 		$this->isd = 2213;
-		$this->unofficial = true;
+ 		$this->unofficial = 'S'; //design released after AoG demise
 
 	    $this->notes = 'Only fires Class-D light missiles.';
         

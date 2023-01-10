@@ -5,7 +5,7 @@ class TrekFederationSaladin extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 350;
-        $this->faction = "ZTrek Playtest Federation (TOS)";
+        $this->faction = "ZStarTrek Federation (TOS)";
         $this->phpclass = "TrekFederationSaladin";
         $this->imagePath = "img/ships/StarTrek/FederationSaladin.png";
         $this->shipClass = "Saladin Escort Destroyer";

@@ -114,12 +114,13 @@ class TrekLtPhaseCannon extends TrekPhaserBase{
         public $raking = 6;
         
         public $intercept = 2;
-		public $priority = 6; //light Raking		
+		public $priority = 8; //light Raking		
+		public $priorityAF = 7; //Standard
 		
         public $loadingtime = 1;
 		
         public $rangePenalty = 1;
-        public $fireControl = array(3, 3, 3);
+        public $fireControl = array(3, 3, 2);
 
         public $damageType = "Raking";
 		public $weaponClass = "Particle";
@@ -156,7 +157,8 @@ class TrekPhaseCannon extends TrekPhaserBase{
         public $raking = 8;
         
         public $intercept = 2;
-		public $priority = 8; //light Raking		
+		public $priority = 8; //light Raking	
+		public $priorityAF = 3; //as heavy Raking vs fighters!		
 		
         public $loadingtime = 1;
 		public $normalload = 2;
@@ -192,7 +194,6 @@ class TrekPhaseCannon extends TrekPhaserBase{
 	
 		public function getDamage($fireOrder){
         	switch($this->turnsloaded){
-            	case 0:
             	case 1:
                 	return Dice::d(10)+3;
 			    	break;
@@ -247,7 +248,8 @@ class TrekHvyPhaseCannon extends TrekPhaserBase{
         public $raking = 10;
         
         public $intercept = 1;
-		public $priority = 8; 		
+		public $priority = 7; //technically light Raking, but they're heaviest Raking guns that early Federation has - and stand out in the context of Federation fleet  	
+		public $priorityAF = 3; //as heavy Raking vs fighters!		
 		
         public $loadingtime = 2;
 		public $normalload = 3;
@@ -279,7 +281,6 @@ class TrekHvyPhaseCannon extends TrekPhaserBase{
 	
 		public function getDamage($fireOrder){
         	switch($this->turnsloaded){
-            	case 0:
             	case 1:
                 	return Dice::d(10,2)+8;
 			    	break;
@@ -335,7 +336,8 @@ class TrekPhaser extends TrekPhaserBase{
         public $raking = 10;
         
         public $intercept = 2;
-		public $priority = 8; //light Raking		
+		public $priority = 8; //light Raking	
+		public $priorityAF = 3; //as heavy Raking vs fighters!		
 		
         public $loadingtime = 1;
 		public $normalload = 2;
@@ -429,13 +431,15 @@ class TrekPhaserLance extends TrekPhaserBase{
         public $raking = 10;
         
         public $intercept = 2;
-		public $priority = 8; //light Raking		
+		public $priority = 7; //technically light Raking, but borderline - and they're by far heaviest weapons that Federation has - hence 'heavy Raking' status
+		public $priorityArray = array(1=>7, 2=>8);		
+		public $priorityAF = 3; //both Lance and full Phaser are treated as heavy vs fighters
 		
         public $loadingtime = 2;
     	public $gunsArray = array(1=>1, 2=>2); //one Lance, but two Beam shots!
 		
         public $rangePenaltyArray = array(1=>0.33, 2=>0.5);
-        public $fireControlArray = array( 1=>array(0, 4, 4), 2=>array(3, 3, 3) ); 
+        public $fireControlArray = array( 1=>array(0, 4, 4), 2=>array(2, 3, 3) ); 
 	
 
         public $damageType = "Raking";
@@ -514,12 +518,13 @@ class TrekLightPhaser extends TrekPhaserBase{
         public $raking = 8;
         
         public $intercept = 2;
-		public $priority = 8; //light Raking		
+		public $priority = 8; //light Raking	
+		public $priorityAF = 7; //...Standard vs fighters
 		
         public $loadingtime = 1;
 		
         public $rangePenalty = 1.0;
-        public $fireControl = array(4, 4, 4);
+        public $fireControl = array(4, 3, 2);
 
         public $damageType = "Raking";
 		public $weaponClass = "Particle";
@@ -551,11 +556,13 @@ class TrekLightPhaserLance extends TrekPhaserBase{
         public $intercept = 2;
 		public $priority = 8; //light Raking		
     	public $gunsArray = array(1=>1, 2=>2); //one Lance, but two Beam shots!
+		public $priorityAF = 3; //heavy Raking vs fighters!	
+		public $priorityAFArray = array(1=>3, 2=>7); ///...but regular Light Phasers are effectively medium Standard vs fighters
 		
         public $loadingtime = 1;
 		
         public $rangePenaltyArray = array(1=>1.0, 2=>1.0);
-        public $fireControlArray = array( 1=>array(4, 4, 4), 2=>array(4, 4, 4) ); 
+        public $fireControlArray = array( 1=>array(3, 3, 3), 2=>array(4, 3, 2) ); 
 
         public $damageType = "Raking";
 		public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); 
@@ -1044,6 +1051,7 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 		$this->data["Special"] = "Defensive system which absorbs damage from incoming shots before they damage ship hull.";
 		$this->data["Special"] .= "<br>Can absorb up to " . $absorb . " damage points per hit after projection armour is applied, ";
 		$this->data["Special"] .= "<br>Protects from every separate impact (e.g. every rake!) separately.";
+		$this->data["Special"] .= "<br>Projection armour cannot absorb more than half of any impact.";
 		$this->data["Special"] .= "<br>System's structure represents damage capacity. If it is reduced to zero system will cease to function.";
 		$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
 		$this->data["Special"] .= "<br>This is NOT a shield as far as any shield-related interactions go.";
@@ -1092,7 +1100,7 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 		if($remainingCapacity>0) { //else projection does not protect
 			$absorbedFreely = 0;
 			//first, armor takes part
-			$absorbedFreely = min($this->armour, $damageToAbsorb);
+			$absorbedFreely = min($this->armour, (floor($damageToAbsorb/2)));
 			$damageToAbsorb += -$absorbedFreely;
 			//next, actual absorbtion
 			$absorbedDamage = min($this->output - $this->armour, $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
@@ -1257,6 +1265,7 @@ class TrekShieldFtr extends ShipSystem{
 		$absorb = $this->output - $this->armour;
 		$this->data["Special"] = "Defensive system which absorbs damage from incoming shots before they damage ship hull.";
 		$this->data["Special"] .= "<br>Can absorb up to " . $absorb . " damage points per hit after projection armour is applied, ";
+		$this->data["Special"] .= "<br>Projection armour cannot absorb more than half of any impact.";
 		$this->data["Special"] .= "<br>If damage capacity it is reduced to zero system will cease to function.";
 		$this->data["Special"] .= "<br>Recharges at end of turn, after firing. Recharge rate is doubled if fighter doesn't use its direct fire weapons.";
 		$this->data["Special"] .= "<br>This is NOT a shield as far as any shield-related interactions go.";
@@ -1313,7 +1322,7 @@ class TrekShieldFtr extends ShipSystem{
 		if($remainingCapacity>0) { //else projection does not protect
 			$absorbedFreely = 0;
 			//first, armor takes part
-			$absorbedFreely = min($this->armour, $damageToAbsorb);
+			$absorbedFreely = min($this->armour, (floor($damageToAbsorb/2)));
 			$damageToAbsorb += -$absorbedFreely;
 			//next, actual absorbtion
 			$absorbedDamage = min($this->output - $this->armour, $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
@@ -1455,6 +1464,54 @@ class TrekShieldFtr extends ShipSystem{
 
 
 /*super-heavy fighter weapon*/
+ class TrekFtrPhaseCannon extends Raking{
+        public $name = "TrekFtrPhaseCannon";
+        public $displayName = "Phaser"; 
+        public $animation = "laser";
+        public $animationColor = array(225, 0, 0);
+        public $iconPath = "TrekLightPhaseCannon.png";
+
+        public $loadingtime = 2;
+        public $raking = 6;
+        public $shots = 2;
+        public $defaultShots = 2;
+		public $priority = 8; //Raking weapon
+        public $intercept = 2;
+
+        public $rangePenalty = 1.5; //-3 per 2 hexes
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        private $damagebonus = 0;
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle";         
+
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots, $raking, $nameBase = 'Phaser'){ //just so it can be easily renamed to eg. Phase Cannon
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            $this->intercept = $nrOfShots;		
+            $this->raking = $raking;	
+			$this->displayName = 'Fighter Heavy ' . $nameBase;
+
+
+            if($nrOfShots == 1){
+                $this->iconPath = "TrekLightPhaseCannon1.png";
+			}else{ //more than 1
+                $this->iconPath = "TrekLightPhaseCannon2.png";
+            }
+
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(6,2)+$this->damagebonus;   }
+        public function setMinDamage(){     $this->minDamage = 2+$this->damagebonus ;      }
+        public function setMaxDamage(){     $this->maxDamage = 12+$this->damagebonus ;      }
+    } 
+/*old version
     class TrekFtrPhaseCannon extends TrekPhaserBase{
         public $name = "TrekFtrPhaseCannon";
         public $displayName = "Phase Cannon";
@@ -1486,7 +1543,9 @@ class TrekShieldFtr extends ShipSystem{
         public function setMinDamage(){   return  $this->minDamage = 6 ;      }
         public function setMaxDamage(){   return  $this->maxDamage = 16 ;      }
 		
-    }  //end of class Trek Fighter Light Phase Cannon
+    }  
+*/	
+//end of class Trek Fighter Light Phase Cannon
 
 
 

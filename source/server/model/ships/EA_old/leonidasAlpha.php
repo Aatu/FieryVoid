@@ -9,7 +9,7 @@ class LeonidasAlpha extends OSAT{
         $this->phpclass = "LeonidasAlpha";
         $this->imagePath = "img/ships/hector.png";
         $this->shipClass = 'Leonidas Satellite (Alpha)';
- 		$this->unofficial = true;
+ 		$this->unofficial = 'S'; //HRT design released after AoG demise
 
 	    $this->isd = 2128;
         

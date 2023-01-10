@@ -12,7 +12,7 @@ class LaertesBeta extends MediumShip{
 			$this->variantOf = "Laertes Police Corvette (Gamma)";
 			$this->occurence = "common";
         $this->canvasSize = 100;
- 		$this->unofficial = true;
+ 		$this->unofficial = 'S'; //HRT design released after AoG demise
         
         $this->isd = 2154;
 
