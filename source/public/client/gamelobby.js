@@ -314,7 +314,7 @@ window.gamedata = {
 			}
 		}
 		if (lship.shipSizeClass >= 3) capitalShips++;
-		if (lship.unofficial){
+		if (lship.unofficial == true){ //as opposed to eg. 'S'
 			customShipPresent = true;
 			warningFound = true;
 		}
@@ -932,8 +932,10 @@ window.gamedata = {
 		}		
 		if((ship.limited>0) && (ship.limited < 100)){ //else no such info necessary
 			addOn = addOn +' '+ ship.limited + '%';
-		}		
-		if(ship.unofficial == true){
+		}	
+		if (ship.unofficial == 'S') {
+			addOn = addOn +' '+'SEMI-CUSTOM';
+		} else if(ship.unofficial == true){
 			addOn = addOn +' '+'CUSTOM';
 		}
 		

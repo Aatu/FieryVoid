@@ -15,6 +15,8 @@ class HighTemplar extends FighterFlight{
         $this->occurence = "uncommon";
         $this->isd = 2008;
 
+ 		$this->unofficial = 'S'; //design released after AoG demise
+		
         $this->forwardDefense = 7;
         $this->sideDefense = 6;
         $this->freethrust = 12;

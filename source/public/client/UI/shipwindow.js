@@ -390,8 +390,11 @@ window.shipWindowManager = {
 				notes.push("&nbsp;in service: " + ship.isd);
 			}
 
-			if (ship.unofficial == true) {
-				notes.push("&nbsp;<b><i>CUSTOM UNIT</i></b>");
+
+			if (ship.unofficial == 'S') {
+				notes.push("&nbsp;<b><i>SEMI-CUSTOM</i></b>");
+			} else if (ship.unofficial == true) {
+				notes.push("&nbsp;<b><i>CUSTOM</i></b>");
 			}
 		}
 

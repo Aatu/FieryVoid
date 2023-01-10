@@ -17,7 +17,7 @@ class zzunoffNaSton extends BaseShip{
 	//$this->occurence = "rare";
 	$this->limited = 33;
 	$this->isd = 2221;
-	$this->unofficial = true;
+ 		$this->unofficial = 'S'; //design released after AoG demise
 
 
         $this->forwardDefense = 17;

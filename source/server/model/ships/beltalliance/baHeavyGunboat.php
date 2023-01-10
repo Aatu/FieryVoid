@@ -5,7 +5,7 @@ class BAHeavyGunboat extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 475;
-        $this->faction = "Small Races";
+        $this->faction = "Belt Alliance";
         $this->phpclass = "BAHeavyGunboat";
         $this->imagePath = "img/ships/BAHeavyGunboat.png";
         $this->shipClass = "BA Heavy Gunboat";

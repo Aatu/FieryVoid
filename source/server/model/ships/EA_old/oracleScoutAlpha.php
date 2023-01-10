@@ -12,7 +12,7 @@ class OracleScoutAlpha extends BaseShip{
 //			$this->occurence = "common";
 //	        $this->variantOf = "Oracle Scout Cruiser (Gamma)";
 			$this->limited = 10;
-		$this->unofficial = true;
+ 		$this->unofficial = 'S'; //HRT design released after AoG demise
         $this->shipSizeClass = 3;
 	    
 		$this->isd = 2163;

@@ -20,7 +20,7 @@ class ShipJumpsphere extends BaseShip{
 		$this->variantOf = "Warsphere";     
 		$this->occurence = 'rare'; 
 	    
-	    $this->unofficial = true;
+	    $this->unofficial = 'S'; //Semi-official - added to Ipsha fleet list to allow tournament-legal fleets without an ElInt 
 	    	    
         $this->shipSizeClass = 3;
         //$this->fighters = array("heavy"=>6);

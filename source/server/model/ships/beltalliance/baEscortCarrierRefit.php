@@ -1,18 +1,19 @@
 <?php
-class BAEscortCarrier extends HeavyCombatVessel{
+class BAEscortCarrierRefit extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 350;
-        $this->faction = "Small Races";
-        $this->phpclass = "BAEscortCarrier";
+        $this->pointCost = 320;
+        $this->faction = "Belt Alliance";
+        $this->phpclass = "BAEscortCarrierRefit";
         $this->imagePath = "img/ships/BAEscortCarrier.png";
-        $this->shipClass = "BA Escort Carrier";
-        $this->occurence = "common";
+        $this->shipClass = "BA Escort Carrier (refit)";
         $this->fighters = array("normal"=>12, "heavy"=>12); //"heavy" are external racks
 
-        $this->isd = 2235;
+        $this->occurence = "uncommon";
+        $this->variantOf = 'BA Escort Carrier';
+        $this->isd = 2251;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
@@ -35,8 +36,8 @@ class BAEscortCarrier extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
-	$this->addFrontSystem(new MedBlastCannon(3, 0, 0, 240, 60));
-	$this->addFrontSystem(new MedBlastCannon(3, 0, 0, 300, 120));
+	$this->addFrontSystem(new LightPulse(3, 4, 2, 240, 60));
+	$this->addFrontSystem(new LightPulse(3, 4, 2, 300, 120));
         $this->addFrontSystem(new BAInterceptorMkI(3, 4, 1, 270, 90));    
 	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 60));
 	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 120)); 
@@ -65,7 +66,7 @@ class BAEscortCarrier extends HeavyCombatVessel{
         	),
         	1=> array(
         		6 => "Thruster",
-        		8 => "Medium Blast Cannon",
+        		8 => "Light Pulse Cannon",
         		10 => "Standard Particle Beam",
         		11 => "BA Interceptor I",
         		18 => "Structure",

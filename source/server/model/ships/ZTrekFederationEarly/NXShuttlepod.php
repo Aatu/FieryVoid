@@ -5,7 +5,7 @@ class NXShuttlepod extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 20 *6; //for 6
-        $this->faction = "ZTrek Federation (early)";
+        $this->faction = "ZStarTrek Federation (early)";
         $this->phpclass = "NXShuttlepod";
         $this->shipClass = "Shuttlepod Flight";
         $this->imagePath = "img/ships/StarTrek/NXShuttlepod.png";

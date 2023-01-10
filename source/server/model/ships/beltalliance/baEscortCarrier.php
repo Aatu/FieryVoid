@@ -1,23 +1,19 @@
 <?php
-class BAEscortCarrierLCV extends HeavyCombatVessel{
+class BAEscortCarrier extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 350;
-        $this->faction = "Small Races";
-        $this->phpclass = "BAEscortCarrierLCV";
+        $this->faction = "Belt Alliance";
+        $this->phpclass = "BAEscortCarrier";
         $this->imagePath = "img/ships/BAEscortCarrier.png";
-        $this->shipClass = "BA Escort LCV Carrier";
-			$this->variantOf = "BA Escort Carrier";
+        $this->shipClass = "BA Escort Carrier";
         $this->occurence = "common";
-        $this->fighters = array("LCVs"=>2, "heavy"=>12); //"heavy" are external racks
+        $this->fighters = array("normal"=>12, "heavy"=>12); //"heavy" are external racks
 
         $this->isd = 2235;
         
-		$this->notes = "This ship is intended to allow Belters to field LCVs in pickup battle."; //by the fluff such a ship is not needed for them! as they don't project power beyond areas where LCVs can get on their own
-		$this->unofficial = true;    
-		
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
       
@@ -34,22 +30,16 @@ class BAEscortCarrierLCV extends HeavyCombatVessel{
         $this->addPrimarySystem(new Engine(4, 18, 0, 9, 2));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 5, 4));
-		$this->addPrimarySystem(new Hangar(4, 2));
-        $LCVRail = new Catapult(3, 8);
-        $LCVRail->displayName = "LCV Rail";
-        $this->addPrimarySystem($LCVRail);
-        $LCVRail = new Catapult(3, 8);
-        $LCVRail->displayName = "LCV Rail";
-        $this->addPrimarySystem($LCVRail);
+	$this->addPrimarySystem(new Hangar(4, 14));
         
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
-		$this->addFrontSystem(new MedBlastCannon(3, 0, 0, 240, 60));
-		$this->addFrontSystem(new MedBlastCannon(3, 0, 0, 300, 120));
+	$this->addFrontSystem(new MedBlastCannon(3, 0, 0, 240, 60));
+	$this->addFrontSystem(new MedBlastCannon(3, 0, 0, 300, 120));
         $this->addFrontSystem(new BAInterceptorMkI(3, 4, 1, 270, 90));    
-		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 60));
-		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 120)); 
+	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 60));
+	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 120)); 
 
         $this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
@@ -66,11 +56,10 @@ class BAEscortCarrierLCV extends HeavyCombatVessel{
         $this->hitChart = array(
         	0=> array(
         		5 => "Thruster",
-        		10 => "Structure",
-        		12 => "Engine",
-        		14 => "Scanner",
-        		15 => "Hangar",
-                17 => "LCV Rail",
+        		11 => "Structure",
+        		13 => "Engine",
+        		15 => "Scanner",
+        		17 => "Hangar",
         		19 => "Reactor",
         		20 => "C&C",	
         	),

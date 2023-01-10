@@ -12,7 +12,7 @@ class ShepherdAlpha extends MediumShip{
 //			$this->variantOf = "Laertes Police Corvette (Gamma)";
 //			$this->occurence = "common";
         $this->canvasSize = 80;
- 		$this->unofficial = true;
+ 		$this->unofficial = 'S'; //HRT design released after AoG demise
 
 		$this->fighters = array("normal"=>6); 
         

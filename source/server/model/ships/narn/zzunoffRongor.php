@@ -15,7 +15,7 @@ class zzunoffRongor extends HeavyCombatVessel{
 	    $this->variantOf = "Rongoth Destroyer";
 	$this->occurence = "uncommon";
 	$this->isd = 2233;
-	$this->unofficial = true;
+ 		$this->unofficial = 'S'; //design released after AoG demise
 
         $this->forwardDefense = 12;
         $this->sideDefense = 14;
