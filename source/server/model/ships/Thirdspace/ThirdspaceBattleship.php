@@ -46,7 +46,7 @@ class ThirdspaceBattleship extends BaseShip{
 	
         
       
-		$projection = new ThirdspaceShieldProjection(0, 100, 100, 300, 60, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+		$projection = new ThirdspaceShieldProjection(0, 120, 120, 300, 60, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
 		$projector = new ThirdspaceShieldProjector(6, 24, 6, 5, 300, 60, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addFrontSystem($projector);		
@@ -62,7 +62,7 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));           
 			
 		
-		$projection = new ThirdspaceShieldProjection(0, 100, 100, 120, 240, 'A');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+		$projection = new ThirdspaceShieldProjection(0, 120, 120, 120, 240, 'A');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
 		$projector = new ThirdspaceShieldProjector(6, 24, 6, 5, 120, 240, 'A'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addAftSystem($projector);
@@ -76,7 +76,7 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addAftSystem(new GraviticThruster(6, 24, 0, 8, 2));
         $this->addAftSystem(new GraviticThruster(6, 24, 0, 8, 2));       
        
-        $projection = new ThirdspaceShieldProjection(0, 100, 100, 240, 0, 'L');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+        $projection = new ThirdspaceShieldProjection(0, 120, 120, 240, 0, 'L');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
 		$projector = new ThirdspaceShieldProjector(6, 24, 6, 5, 240, 0, 'L'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addLeftSystem($projector);		
@@ -93,7 +93,7 @@ class ThirdspaceBattleship extends BaseShip{
         $LCVRail->displayName = "LCV Rail";        
         $this->addLeftSystem($LCVRail);                      
             
-        $projection = new ThirdspaceShieldProjection(0, 100, 100, 0, 120, 'R');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+        $projection = new ThirdspaceShieldProjection(0, 120, 120, 0, 120, 'R');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
 		$projector = new ThirdspaceShieldProjector(6, 24, 6, 5, 0, 120, 'R'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addRightSystem($projector);		

@@ -41,7 +41,7 @@ class ThirdspaceFighter extends LCV{ //Actually an LCV.
 	$sensors = new Scanner(6, 12, 4, 10);
 		$sensors->markAdvanced();
 		$this->addPrimarySystem($sensors);
-	$this->addPrimarySystem(new JumpEngine(5, 10, 5, 8));//Added a small jump drive, how they travel is unknown but if White Star can house a jump drive it's not unfeasible Thirdspace aliens would have  FTL drive on their smaller craft.
+	$this->addPrimarySystem(new JumpEngine(5, 10, 4, 8));//Added a small jump drive, how they travel is unknown but if White Star can house a jump drive it's not unfeasible Thirdspace aliens would have  FTL drive on their smaller craft.
 	$this->addPrimarySystem(new Engine(6, 18, 0, 14, 2));
     $this->addPrimarySystem(new SelfRepair(5, 10, 2)); //armor, structure, output 	
 
@@ -51,7 +51,7 @@ class ThirdspaceFighter extends LCV{ //Actually an LCV.
 	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 180));
 			
 	$projection = new ThirdspaceShieldProjection(0, 50, 50, 0, 360, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
-	$projector = new ThirdspaceShieldProjector(5, 10, 4, 4, 0, 360, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R
+	$projector = new ThirdspaceShieldProjector(5, 10, 4, 5, 0, 360, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R
 	$projection->addProjector($projector);
 	$this->addFrontSystem($projector);
 	$this->addFrontSystem($projection);
