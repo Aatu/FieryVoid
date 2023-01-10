@@ -5,7 +5,7 @@ class VulcanTribuneFlt extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 90 *6; //for 6; a bit add-on for not requiring carrier
-        $this->faction = "ZTrek Federation (early)";
+        $this->faction = "ZStarTrek Federation (early)";
         $this->phpclass = "VulcanTribuneFlt";
         $this->shipClass = "Vulcan Tribune flight";
         $this->imagePath = "img/ships/StarTrek/VulcanTribune.png";
@@ -49,9 +49,7 @@ class VulcanTribuneFlt extends FighterFlight{
 			$frontGun1 = new TrekFtrPhaser(210, 30, 2, 1,"Phase Cannon");
             $fighter->addFrontSystem($frontGun1);
 
-            $frontGun = new TrekFtrPhaseCannon(330, 30, 2, 1);
-            //$frontGun->displayName = "Light Phase Cannon"; //no need to rename
-			//should NOT be exclusive
+            $frontGun = new TrekFtrPhaseCannon(330, 30, 4, 1, 6, "Phase Cannon"); //arc from/to, damage bonus, number of shots, rake size, base weapon name
             $fighter->addFrontSystem($frontGun);
 
 			$frontGun2 = new TrekFtrPhaser(330, 150, 2, 1,"Phase Cannon");

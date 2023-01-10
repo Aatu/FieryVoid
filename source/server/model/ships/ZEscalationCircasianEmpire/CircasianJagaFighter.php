@@ -12,7 +12,7 @@ class CircasianJagaFighter extends FighterFlight{
 		$this->unofficial = true;
 		
 		
-        $this->isd = 1963;
+        $this->isd = 1978;
         
         $this->forwardDefense = 7;
         $this->sideDefense = 7;

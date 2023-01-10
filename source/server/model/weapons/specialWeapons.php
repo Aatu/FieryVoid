@@ -2239,6 +2239,15 @@ class RammingAttack extends Weapon{
 	
 	 public $possibleCriticals = array(); //shouldn't be hit ever, but if it is, should not suffer any criticals
 	
+	//preventing double ramming
+	private $alreadyRammed = array();
+	public function checkAlreadyRammed($targetID){
+		foreach($this->alreadyRammed as $rammedID) if ($rammedID == $targetID) return true;
+		return false;
+	}
+	public function setAlreadyRammed($targetID){
+		$this->alreadyRammed[] = $targetID;
+	}
 	
 	public function setSystemDataWindow($turn){
 		$this->setMinDamage(); //just in case it's not set correctly in the beginning!
@@ -2299,8 +2308,19 @@ class RammingAttack extends Weapon{
 	public function fire($gamedata, $fireOrder){
 		// If hit, firing unit itself suffers damage, too (based on ramming factor of target)!
 		$this->gamedata = $gamedata;
+		
+		//preventing double hit on the same target!
+		if($this->checkAlreadyRammed($fireOrder->targetid)){
+			$fireOrder->shotshit = 0;
+			$fireOrder->needed = 0;
+			$fireOrder->rolled = 100;
+			$fireOrder->pubnotes .= "TECHNICAL MISS (this collision already happened!)\n";
+			return;
+		}
+		
 		parent::fire($gamedata, $fireOrder);
 		if($fireOrder->shotshit > 0){
+			$this->setAlreadyRammed($fireOrder->targetid); //prevent repeating
 			$pos = null;
 			//$shooter = $gamedata->getShipById($fireOrder->targetid);
 			$shooter = $this->unit; //technically this unit after all
@@ -2348,7 +2368,7 @@ class RammingAttack extends Weapon{
 	
 
 	
-	private function getRammingFactor(){
+	public function getRammingFactor(){
 		$dmg = 0;
 		if ($this->designDamage > 0){
 			$dmg = 	$this->designDamage;
@@ -2360,7 +2380,8 @@ class RammingAttack extends Weapon{
 		}
 		return $dmg;
 	}
-        public function getDamage($fireOrder){  	
+	
+	public function getDamage($fireOrder){  	
 		//modifier: +1 if greater Ini than target, +1 if head on, +1 if target is head on also
 		$modifier = 0;
 		$shooter = $this->unit;
@@ -2368,9 +2389,9 @@ class RammingAttack extends Weapon{
 		$target = $gd->getShipById($fireOrder->targetid);
 		if ($shooter->iniative > $target->iniative) $modifier++;
 		$bearing = abs($shooter->getBearingOnUnit($target));
-		if ($bearing < 10) $modifier++;//should be 0, but at rage 0 there may be a few degrees off...
+		if ($bearing < 10) $modifier++;//should be 0, but at range 0 there may be a few degrees off...
 		$bearing = abs($target->getBearingOnUnit($shooter));
-		if ($bearing < 10) $modifier++;//should be 0, but at rage 0 there may be a few degrees off...
+		if ($bearing < 10) $modifier++;//should be 0, but at range 0 there may be a few degrees off...
 		
 		//roll and consult table
 		$rfactor = $this->getRammingFactor();
@@ -2390,11 +2411,20 @@ class RammingAttack extends Weapon{
 		$fireOrder->notes .= "mod = " . $this->damageModRolled . " rammingfactor: $rfactor damage: $damage" ;		
 		return $damage;			     
 	}//endof function getDamage
-        public function getReturnDamage($fireOrder){    //damage that ramming unit suffers itself - using same modifier as actual attack! (already set)   
+
+	public function getReturnDamage($fireOrder){    //damage that ramming unit suffers itself - using same modifier as actual attack! (already set)   
 		$gd = $this->gamedata;
 		$target = $gd->getShipById($fireOrder->targetid);
 		$shooter = $this->unit;
-		$rfactor =  $target->getRammingFactor();
+		
+		$rfactor = 0;
+		$rammingSystem = $target->getSystemByName("RammingAttack");
+		if($rammingSystem){
+			$rfactor =  $rammingSystem->getRammingFactor();
+			$rammingSystem->setAlreadyRammed($fireOrder->shooterid); //prevent repeating
+		}else{ //no ramming system present... 
+			$rfactor =  $target->getRammingFactor();
+		}
 		$damage = ceil($this->damageModRolled * $rfactor);			
 		if ((!($target instanceof FighterFlight)) && ($shooter instanceof FighterFlight)) $damage = 1000;  //fighter colliding with ship will always be destroyed
 		$damage += $this->selfDestroy;//unit will suffer additional damage on a successful attack

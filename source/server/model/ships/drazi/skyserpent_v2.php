@@ -8,6 +8,7 @@ class SkySerpent_v2 extends SuperHeavyFighter{
         $this->faction = "Drazi";
         $this->phpclass = "SkySerpent_v2";
         $this->shipClass = "Sky Serpent Heavy Assault Fighters";
+			$this->variantOf = 'OBSOLETE'; //awaiting to be deleted after it's no longer present in games
         $this->imagePath = "img/ships/drazi/DraziSkyserpent.png";
 	    $this->isd = 2220;
         $this->canvasSize = 60;

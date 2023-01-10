@@ -1448,7 +1448,21 @@ window.weaponManager = {
 
 	    
     shipHasFiringOrder: function shipHasFiringOrder(ship) {
-        //TODO:implement
+		for (var i in ship.systems) {
+            if (ship.flight) {
+                var fighter = ship.systems[i];
+                for (var a in fighter.systems) {
+                    var system = fighter.systems[a];
+                    var hasOrder = weaponManager.hasFiringOrder(ship, system);
+                    if (hasOrder) return true;
+                }
+            } else {
+                var system = ship.systems[i];
+				var hasOrder = weaponManager.hasFiringOrder(ship, system);
+				if (hasOrder) return true;
+            }
+        }
+		return false;
     },
 
 	    

@@ -5,7 +5,7 @@ class VulcanSurak extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 340;
-        $this->faction = "ZTrek Federation (early)";
+        $this->faction = "ZStarTrek Federation (early)";
         $this->phpclass = "VulcanSurak";
         $this->imagePath = "img/ships/StarTrek/VulcanSurak.png";
         $this->shipClass = "Vulcan Surak Light Cruiser";

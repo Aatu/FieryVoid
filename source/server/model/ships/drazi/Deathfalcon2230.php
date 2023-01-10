@@ -16,7 +16,7 @@ class Deathfalcon2230 extends BaseShipNoAft{
         $this->isd = 2234;
         $this->limited = 33;
         $this->canvasSize = 200;
-	    $this->unofficial = true;        
+ 		$this->unofficial = 'S'; //design released after AoG demise       
 
         $this->forwardDefense = 15;
         $this->sideDefense = 14;

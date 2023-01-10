@@ -12,7 +12,7 @@ class OrionAlphaAM extends StarBaseSixSections{
 		
 //		$this->occurence = "common";
 //		$this->variantOf = 'Orion Battle Station';
- 		$this->unofficial = true;
+ 		$this->unofficial = 'S'; //HRT design released after AoG demise
         $this->isd = 2168;
 
 		$this->shipSizeClass = 3;

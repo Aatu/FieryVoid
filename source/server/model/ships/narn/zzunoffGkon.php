@@ -16,7 +16,7 @@ class zzunoffGkon extends BaseShip{
       	$this->occurence = "common";
 	$this->variantOf = "G'Quan Heavy Cruiser";
       	$this->isd = 2228;
-      	$this->unofficial = true;
+ 		$this->unofficial = 'S'; //design released after AoG demise
 		
         $this->forwardDefense = 15;
         $this->sideDefense = 17;

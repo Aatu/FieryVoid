@@ -5,7 +5,7 @@ class AndorianThyzon extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 340;
-        $this->faction = "ZTrek Federation (early)";
+        $this->faction = "ZStarTrek Federation (early)";
         $this->phpclass = "AndorianThyzon";
         $this->imagePath = "img/ships/StarTrek/AndorianThyzon.png";
         $this->shipClass = "Andorian Thyzon Frigate";

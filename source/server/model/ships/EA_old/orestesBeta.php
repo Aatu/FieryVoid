@@ -11,7 +11,7 @@ class OrestesBeta extends BaseShip{
 		$this->shipClass = "Orestes System Monitor (Beta)";
 	        $this->variantOf = "Orestes System Monitor (Alpha)";
 			$this->occurence = "common";
- 		$this->unofficial = true;
+ 		$this->unofficial = 'S'; //HRT design released after AoG demise
         $this->shipSizeClass = 3;
         $this->limited = 33;
 

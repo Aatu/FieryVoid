@@ -12,7 +12,7 @@ class AtlasStarfuryRefit extends FighterFlight{
 			$this->occurence = "uncommon";
         $this->imagePath = "img/ships/aries.png";
 	    $this->isd = 2234;
- 		$this->unofficial = true;
+ 		$this->unofficial = 'S'; //HRT design released after AoG demise
 	    
 	    $this->notes = 'Non-atmospheric and 1/2 turn cost.';
         
