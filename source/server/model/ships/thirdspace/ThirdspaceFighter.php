@@ -43,7 +43,7 @@ class ThirdspaceFighter extends LCV{ //Actually an LCV.
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new JumpEngine(5, 10, 4, 8));//Added a small jump drive, how they travel is unknown but if White Star can house a jump drive it's not unfeasible Thirdspace aliens would have  FTL drive on their smaller craft.
 	$this->addPrimarySystem(new Engine(6, 14, 0, 12, 2));
-    $this->addPrimarySystem(new SelfRepair(5, 10, 2)); //armor, structure, output 	
+    $this->addPrimarySystem(new SelfRepair(5, 24, 2)); //armor, structure, output 	
 
 	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 180, 60));
 	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 180, 60));
