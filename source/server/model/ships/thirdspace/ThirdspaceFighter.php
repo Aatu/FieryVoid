@@ -11,7 +11,7 @@ class ThirdspaceFighter extends LCV{ //Actually an LCV.
 	$this->phpclass = "ThirdspaceFighter";
 	$this->shipClass = "Thirdspace Fighter";
 	$this->imagePath = "img/ships/ThirdspaceFighter.png";
-	$this->canvasSize = 100;
+	$this->canvasSize = 80;
 
 	$this->unofficial = true;
     $this->gravitic = true;
@@ -38,11 +38,11 @@ class ThirdspaceFighter extends LCV{ //Actually an LCV.
 	$this->addPrimarySystem(new ThirdspaceCnC(99, 99, 0, 0)); //C&C should be unhittable anyway
 		    
     $this->addPrimarySystem(new AdvancedSingularityDrive(6, 15, 0, 20+4+5));
-	$sensors = new Scanner(6, 12, 4, 10);
+	$sensors = new Scanner(6, 16, 4, 10);
 		$sensors->markAdvanced();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new JumpEngine(5, 10, 4, 8));//Added a small jump drive, how they travel is unknown but if White Star can house a jump drive it's not unfeasible Thirdspace aliens would have  FTL drive on their smaller craft.
-	$this->addPrimarySystem(new Engine(6, 18, 0, 14, 2));
+	$this->addPrimarySystem(new Engine(6, 14, 0, 12, 2));
     $this->addPrimarySystem(new SelfRepair(5, 10, 2)); //armor, structure, output 	
 
 	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 180, 60));
@@ -56,7 +56,7 @@ class ThirdspaceFighter extends LCV{ //Actually an LCV.
 	$this->addFrontSystem($projector);
 	$this->addFrontSystem($projection);
 				
-	$this->addPrimarySystem(new Structure( 6, 30));
+	$this->addPrimarySystem(new Structure( 6, 36));
 	    
         $this->hitChart = array(
         		0=> array( //should never happen (but it will!)
