@@ -1,5 +1,5 @@
 <?php
-class ThirdspaceFighter extends LCV{
+class ThirdspaceFighter extends LCV{ //Actually an LCV.
 	/*Drakh Heavy Raider LCV*/
 	/*no EW restrictions*/
     function __construct($id, $userid, $name,  $slot){
@@ -10,7 +10,7 @@ class ThirdspaceFighter extends LCV{
 	$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	$this->phpclass = "ThirdspaceFighter";
 	$this->shipClass = "Thirdspace Fighter";
-	$this->imagePath = "img/ships/ThirdspaceLCV.png";
+	$this->imagePath = "img/ships/ThirdspaceFighter.png";
 	$this->canvasSize = 100;
 
 	$this->unofficial = true;
@@ -71,8 +71,8 @@ class ThirdspaceFighter extends LCV{
         		),
         		1=> array( //PRIMARY hit table, effectively
         				7 => "Structure",
-        				10 => "1:Psionic Concentrator",
-        				12 => "1:Shield Projector",
+        				10 => "Psionic Concentrator",
+        				12 => "Shield Projector",
 						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",
         				16 => "0:Engine",
