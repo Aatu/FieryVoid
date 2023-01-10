@@ -35,13 +35,12 @@ If You're looking for a balanced game with these rules, it's advisable to use:
  - both players use fleets of similar power level (see Faction Descriptions file - it contains subjective grouping of available fleets into "power levels" suitable for balanced pickup battles)
 
 And actual rules are as below. Due to huge individual costs (and small numbers) of Ancient vessels, if You have picked at least one it's assumed You're creating Ancient fleet - some numbers are different for Young and Ancient fleets.
-WARNING: numbers for Ancients are still untested and prone to change!
  - at least one Jump Drive is required
  - Capital Ships required (minimum number, You can take more):
   -- (Young) 1 per 5000 points (no capital ship is required below 3000 points)
   -- (Ancient) 1 per 15000 points (no capital ship is required below 5000 points)
  - most units of LCV size or smaller need to have hangars present (there are exceptions, especially for custom factions from other universes)
- - at least half of fighter hangars need to be filled (this rule is only relevant for actual fighters, not for other craft like assault shuttles or LCVs)
+ - at least half of fighter hangars need to be filled (this rule is only relevant for regular fighters, not for other craft like assault shuttles, LCVs or even SHFs)
  - deployment restrictions observed 
  - variant restrictions observed 
  - Uncommon/Rare units are limited at fleet level (on top of Variant Restrictions above) to at most:
@@ -52,6 +51,7 @@ WARNING: numbers for Ancients are still untested and prone to change!
   -- (Young) One per full 1100 points (with minimum of 2)
   -- (Ancient) One per full 3000 points (with minimum of 2)
  - static objects (bases, OSATs) are not allowed
+ - presence of non-standard elements (enhancements, custom units, Special variants) is called for player attention (but doesn't mark the fleet as incorrect)
 
  
 VARIANT RESTRICTIONS
@@ -89,14 +89,14 @@ There are two additional rules though:
 
 
 GAME OPTIONS AVAILABLE
-Background: You can put an image underneath hex grid. Some people like it (as it brings flavor), others don't (as it makes picking actual ships more difficult). Try a few different backgrounds and see what fits you (default is just flat black, but you can find images from subdued stars and moons to bright and aggressive blood-red hyperspace to choose from). 
-Game title: so You (and Your opponent) can quickly recognize which game is this.
-Game description: by default a generic pickup game description is put here, and rather conservative one. If you have different ideas - replace the text (or just fragments of it) with description of Your desired battle conditions!
-Standard or Simultaneous movement: Standard movement is how the game was designed, with one unit moving at a time. Simultaneous movement divides units into up to 6 groups with similar Initiative, and entire group (for all players) moves together. This loses some detail, but makes for quicker game (especially at large point values).
+	Background: You can put an image underneath hex grid. Some people like it (as it brings flavor), others don't (as it makes picking actual ships more difficult). Try a few different backgrounds and see what fits you (default is just flat black, but you can find images from subdued stars and moons to bright and aggressive blood-red hyperspace to choose from). 
+	Game title: so You (and Your opponent) can quickly recognize which game is this.
+	Game description: by default a generic pickup game description is put here, and rather conservative one. If you have different ideas - replace the text (or just fragments of it) with description of Your desired battle conditions!
+	Standard or Simultaneous movement: Standard movement is how the game was designed, with one unit moving at a time. Simultaneous movement divides units into up to 6 groups with similar Initiative, and entire group (for all players) moves together. This loses some detail, but makes for quicker game (especially at large point values).
 	My personal suggestion would be to keep to Standard movement up to game size of 5-6k points and switch to Simultaneous for larger battles (for Young fleets), balancing time requirements and detail achieved - but ultimately it's dictated by players' preferences.
-Map size: game offers choice of open map (eg. without any boundaries) or fixed map (defaulted to tournament-sized, but you may change it at will). You can tailor deployment zones appropriately, too (although getting it right requires a few tries).
-	I'd suggest fixed map for balance reasons (that's how units were evaluated), but if you want it different the option is there. Gamer does NOT track whether units are on map or not, just displays the boundaries - everything else is up to players.
-Deployment zones: You may stick to default deployment zones, which are predefined for both open and standard-sized fixed map. If You want something more tailored to Your scenario (or want to resize the map) You'll have to manually reshape deployment zones as well.
+	Map size: game offers choice of open map (eg. without any boundaries) or fixed map (defaulted to tournament-sized, but you may change it at will). You can tailor deployment zones appropriately, too (although getting it right requires a few tries).
+	I'd suggest fixed map for balance reasons (that's how units were evaluated), but if you want it different the option is there. Game does NOT track whether units are on map or not, just displays the boundaries - everything else is up to players.
+	Deployment zones: You may stick to default deployment zones, which are predefined for both open and standard-sized fixed map. If You want something more tailored to Your scenario (or want to resize the map) You'll have to manually reshape deployment zones as well.
 	Default deployment zone shape ("box") represents a rectangle. Its width/height (in hexes) defines size, while X/Y coordinates locate its central point. Consider coordinates 0/0 to be center of the map (which is why, by default numbers, one player has them positive and the other negative).
 	Other options are not available at the moment.
 Please do not touch "Turn available" setting.	

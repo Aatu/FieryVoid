@@ -12,7 +12,7 @@ class ShepherdBeta extends MediumShip{
 			$this->variantOf = "Shepherd Fighter Transport (Alpha)";
 			$this->occurence = "common";
         $this->canvasSize = 80;
- 		$this->unofficial = true;
+ 		$this->unofficial = 'S'; //HRT design released after AoG demise
 
 		$this->fighters = array("normal"=>6); 
         

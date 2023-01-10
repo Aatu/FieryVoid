@@ -162,6 +162,8 @@ window.combatLog = {
 
             html += "</ul>";
         }
+		
+		
 
         var element = $(html).appendTo("#log");
 

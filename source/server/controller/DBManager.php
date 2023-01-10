@@ -1536,10 +1536,17 @@ class DBManager
             $criticalStmt->bind_result($id, $shipid, $systemid, $type, $turn, $turnEnd, $param);
             $criticalStmt->execute();
             while ($criticalStmt->fetch()) {
-                $gamedata->getShipById($shipid)->getSystemById($systemid)->setCritical(
-                    new $type($id, $shipid, $systemid, $type, $turn, $turnEnd, $param),
-                    $gamedata->turn
-                );
+				
+				//actually the only crit needed from earlier turn is forced shutdown - and others prove to be troublesome due to current turn being set to currrent turn rather than fetched turn...
+				$doAddCrit = false;
+				if(($turnEnd ==0) || ($turnEnd >=$fetchTurn)) $doAddCrit = true;
+				if(($type=='ForcedOfflineOneTurn') || ($type=='ForcedOfflineForTurns')) $doAddCrit = true;
+				if($doAddCrit){				
+					$gamedata->getShipById($shipid)->getSystemById($systemid)->setCritical(
+						new $type($id, $shipid, $systemid, $type, $turn, $turnEnd, $param),
+						$gamedata->turn
+					);
+				}
             }
             $criticalStmt->close();
         }

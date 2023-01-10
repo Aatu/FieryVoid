@@ -10,7 +10,7 @@ class AriesStarfury extends FighterFlight{
         $this->shipClass = "Starfury: Aries Heavy flight";
         $this->imagePath = "img/ships/aries.png";
 	    $this->isd = 2168;
- 		$this->unofficial = true;
+ 		$this->unofficial = 'S'; //HRT design released after AoG demise
 	    
 	    $this->notes = 'Non-atmospheric and 1/2 turn cost.';
         

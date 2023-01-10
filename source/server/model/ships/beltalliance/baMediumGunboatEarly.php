@@ -5,7 +5,7 @@ class BAMediumGunboatEarly extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 340;
-        $this->faction = "Small Races";
+        $this->faction = "Belt Alliance";
         $this->phpclass = "BAMediumGunboatEarly";
         $this->imagePath = "img/ships/BAMediumGunboat.png";
         $this->shipClass = "BA Medium Gunboat (early)";

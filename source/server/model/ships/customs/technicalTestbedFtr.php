@@ -14,6 +14,7 @@ class TechnicalTestbedFtr extends FighterFlight{
 		$this->factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
         
 		
+		$this->advancedArmor = true;
 		
 		$this->forwardDefense = 70;
 		$this->sideDefense = 50;
@@ -24,7 +25,7 @@ class TechnicalTestbedFtr extends FighterFlight{
         
 		
         $this->gravitic = true;
-		$this->critRollMod = -100; //cannot drop out 
+		$this->critRollMod = -100; 
 		
 		$this->iniativebonus = 90;
 		$this->populate();
@@ -39,7 +40,7 @@ class TechnicalTestbedFtr extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
 			
 			$armour = array(2, 2, 2, 2);
-			$fighter = new Fighter("TechnicalTestbedFtr", $armour, 50, $this->id);
+			$fighter = new Fighter("TechnicalTestbedFtr", $armour, 10, $this->id);
 			$fighter->displayName = "Testbed Fighter";
 			$fighter->imagePath = "img/ships/ShadowFighter.png";
 			$fighter->iconPath = "img/ships/ShadowFighter_LARGE.png";
@@ -52,7 +53,7 @@ class TechnicalTestbedFtr extends FighterFlight{
 			//$fighter->addFrontSystem(new LightPlasmaAccelerator(330, 30, 1));//arcfrom, arcto, numberofguns		
 			
 			//Trek-style shielding
-			$fighter->addAftSystem(new TrekShieldFtr(2, 20, 4, 1) ); //armor, health, rating, recharge
+			//$fighter->addAftSystem(new TrekShieldFtr(2, 20, 4, 1) ); //armor, health, rating, recharge
 					
 			
 			

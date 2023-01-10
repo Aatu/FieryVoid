@@ -190,6 +190,44 @@ AmmoMagazine.prototype.doVerifyAmmoUsage = function (currShip) { //verify whethe
     }
     return toReturn;
 };
+AmmoMagazine.prototype.doVerifyAmmoUsageFighter = function (currFighter) { //verify whether desired ammo usage is sustainable by rounds actually present in magazine
+    var toReturn = true;
+    var totalAmmoRequired = 0;
+    this.ammoUseArray = [];
+    //loop through all weapons for current ship (appropriate to phase) - and check for ammo usage
+    for (var i in currFighter.systems) {
+        var currWeapon = currFighter.systems[i];
+        if ( (currWeapon.checkAmmoMagazine) //this confirms both that it is a weapon and that it requires ammo
+            && ( ((gamedata.gamephase == 1) && (currWeapon.ballistic)) || ((gamedata.gamephase == 3) && (!currWeapon.ballistic)) ) //appropriate phase - Initial for ballistics, Firing Declaration for direct fire
+        ) {
+            //loop through firing orders
+            for (var fo = 0; fo < currWeapon.fireOrders.length; fo++) {
+                var currFireOrder = currWeapon.fireOrders[fo];
+                var modeName = currWeapon.firingModes[currFireOrder.firingMode];
+                //mark ammo drawn (particular ammo)
+                if(this.ammoUseArray[modeName]){
+                    this.ammoUseArray[modeName] += 1;
+                }else{
+                    this.ammoUseArray[modeName] = 1;
+                }
+                //mark ammo drawn (total capacity)
+                var ammoSize = this.ammoSizeArray[modeName];
+                totalAmmoRequired += ammoSize;
+            }
+        }
+    }
+    //check total usage
+    if (totalAmmoRequired > this.remainingAmmo) toReturn = false;
+    //check every individual kind of missile, too
+    var ammoKeysArray = Object.keys(this.ammoUseArray);
+    for (var a = 0; a < ammoKeysArray.length; a++) {
+        var currAmmoKey = ammoKeysArray[a];
+        var ammoPresent = this.ammoCountArray[currAmmoKey];
+        var ammoRequired = this.ammoUseArray[currAmmoKey];
+        if (ammoPresent < ammoRequired) toReturn = false;
+    }
+    return toReturn;
+};
 
 
 var AmmoMissileRackS = function AmmoMissileRackS(json, ship) {
@@ -233,6 +271,12 @@ var AmmoBombRack = function AmmoBombRack(json, ship) {
 };
 AmmoBombRack.prototype = Object.create(Ballistic.prototype);
 AmmoBombRack.prototype.constructor = AmmoBombRack;
+
+var AmmoFighterRack = function AmmoFighterRack(json, ship) {
+    Ballistic.call(this, json, ship);
+};
+AmmoFighterRack.prototype = Object.create(Ballistic.prototype);
+AmmoFighterRack.prototype.constructor = AmmoFighterRack;
 
 /*var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {
     Weapon.call(this, json, ship);

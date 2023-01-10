@@ -5,7 +5,7 @@ class VulcanTimur extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 380;
-        $this->faction = "ZTrek Federation (early)";
+        $this->faction = "ZStarTrek Federation (early)";
         $this->phpclass = "VulcanTimur";
         $this->imagePath = "img/ships/StarTrek/VulcanSurak.png";
         $this->shipClass = "Vulcan Ti'Mur Science Vessel";

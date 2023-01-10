@@ -16,7 +16,7 @@ class SorithianZolorI extends FighterFlight{
         $this->jinkinglimit = 8;
         $this->turncost = 0.33;
         
-        $this->unofficial = true;
+ 		$this->unofficial = 'S'; //design released after AoG demise
 
         $this->isd = 2204;
         

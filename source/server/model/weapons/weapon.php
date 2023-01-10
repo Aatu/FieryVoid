@@ -14,6 +14,10 @@ class Weapon extends ShipSystem
     public $priorityAF = 0; //array must be set explicitly - otherwise it will be generated, ignoring this variable! 
     public $priorityAFArray = array();
 	
+	protected $usesOrdnance = false;//indicates that onboardFC should be shown!
+	public $onboardFC = array(0,0,0); //for fighter missiles, really - where separate missile guidance is necessary
+	public $onboardFCArray = array();
+	
 	public $checkAmmoMagazine = false; //does this weapon require actual ammunition in AmmoMagazine to fire?
 
 	/*not used any more
@@ -536,7 +540,7 @@ class Weapon extends ShipSystem
         return false;
     }
 
-    private function formatFCValue($fc)
+    public function formatFCValue($fc)
     {
         if ($fc === null)
             return "-";
@@ -583,7 +587,14 @@ class Weapon extends ShipSystem
         $fcmed = $this->formatFCValue($this->fireControl[1]);
         $fccap = $this->formatFCValue($this->fireControl[2]);
         $this->data["Fire control (fighter/med/cap)"] = "$fcfight/$fcmed/$fccap";
-
+		
+		if($this->usesOrdnance){
+			$fcfight = $this->formatFCValue($this->onboardFC[0]);
+			$fcmed = $this->formatFCValue($this->onboardFC[1]);
+			$fccap = $this->formatFCValue($this->onboardFC[2]);
+			$this->data["Ordnance FC (ftr/med/cap)"] = "$fcfight/$fcmed/$fccap";
+		}
+		
         if ($this->guns > 1) {
             $this->data["Number of guns"] = $this->guns;
         }
@@ -1864,6 +1875,8 @@ full Advanced Armor effects (by rules) for reference:
         if (isset($this->endArcArray[$i])) $this->endArc = $this->endArcArray[$i];
 		
 		if (isset($this->hidetargetArray[$i])) $this->hidetarget = $this->hidetargetArray[$i];  // GTS
+		
+        if (isset($this->onboardFCArray[$i])) $this->onboardFC = $this->onboardFCArray[$i];
 	    
     }//endof function changeFiringMode
 

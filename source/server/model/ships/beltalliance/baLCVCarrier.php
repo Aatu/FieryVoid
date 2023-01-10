@@ -5,7 +5,7 @@ class BALCVCarrier extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 320;
-        $this->faction = "Small Races";
+        $this->faction = "Belt Alliance";
         $this->phpclass = "BALCVCarrier";
         $this->imagePath = "img/ships/BASurveyShip.png";
         $this->shipClass = "BA LCV Carrier";
@@ -19,7 +19,7 @@ class BALCVCarrier extends BaseShip{
 		
 		
 		$this->notes = "This ship is intended to allow Belters to field LCVs in pickup battle."; //by the fluff such a power projection ship is not needed for them!
-		$this->unofficial = true;    
+	    $this->unofficial = 'S'; //Semi-official - added as reasonably close to official ship, while expanding Belters options in regards to fielding LCVs
         
         $this->forwardDefense = 15;
         $this->sideDefense = 18;

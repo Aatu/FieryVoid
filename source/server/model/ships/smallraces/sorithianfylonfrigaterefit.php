@@ -14,7 +14,7 @@ class SorithianFylonFrigateRefit extends MediumShip{
         $this->isd = 2225;
 	$this->canvasSize = 100;
 	
-	$this->unofficial = true;
+ 		$this->unofficial = 'S'; //design released after AoG demise
 	
 	    $this->notes = 'Uses Basic missiles.';
         

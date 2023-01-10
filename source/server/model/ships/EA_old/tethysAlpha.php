@@ -12,7 +12,7 @@ class TethysAlpha extends MediumShip{
 //			$this->variantOf = "Tethys Police Cutter (Kappa)";
 //			$this->occurence = "common";
         $this->canvasSize = 100;
-		$this->unofficial = true;
+ 		$this->unofficial = 'S'; //HRT design released after AoG demise
 	    
 	    $this->isd = 2147;
         

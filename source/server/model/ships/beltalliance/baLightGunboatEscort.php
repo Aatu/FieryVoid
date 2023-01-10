@@ -5,7 +5,7 @@ class BALightGunboatEscort extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 175;
-        $this->faction = "Small Races";
+        $this->faction = "Belt Alliance";
         $this->phpclass = "BALightGunboatEscort";
         $this->imagePath = "img/ships/BALightGunboat.png";
         $this->shipClass = "BA Light Gunboat (Escort)";

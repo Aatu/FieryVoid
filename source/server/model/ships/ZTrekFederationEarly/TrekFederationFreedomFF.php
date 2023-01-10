@@ -5,7 +5,7 @@ class TrekFederationFreedomFF extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 150;
-        $this->faction = "ZTrek Federation (early)";
+        $this->faction = "ZStarTrek Federation (early)";
         $this->phpclass = "TrekFederationFreedomFF";
         $this->imagePath = "img/ships/StarTrek/FederationFreedomFF.png";
         $this->shipClass = "Freedom Frigate (Early)";

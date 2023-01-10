@@ -1,21 +1,19 @@
 <?php
-class BAScoutCarrier extends BaseShip{
+class BASurveyShip extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 430;
-        $this->faction = "Small Races";
-        $this->phpclass = "BAScoutCarrier";
+        $this->pointCost = 400;
+        $this->faction = "Belt Alliance";
+        $this->phpclass = "BASurveyShip";
         $this->imagePath = "img/ships/BASurveyShip.png";
-        $this->shipClass = "BA Scout Carrier";
+        $this->shipClass = "BA Survey Ship";
         $this->shipSizeClass = 3;
-        $this->fighters = array("medium"=>12);
-	    
-		$this->variantOf = 'BA Survey Ship';
-        $this->isd = 2234;
+
+        $this->isd = 2234;        
         $this->limited = 33;
-        
+
         $this->forwardDefense = 15;
         $this->sideDefense = 18;
         

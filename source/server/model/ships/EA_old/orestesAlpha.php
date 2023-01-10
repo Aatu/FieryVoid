@@ -11,7 +11,7 @@ class OrestesAlpha extends BaseShip{
 		$this->shipClass = "Orestes System Monitor (Alpha)";
 //	        $this->variantOf = "Orestes System Monitor (Epsilon)";
 //			$this->occurence = "common";
- 		$this->unofficial = true;
+ 		$this->unofficial = 'S'; //HRT design released after AoG demise
         $this->shipSizeClass = 3;
         $this->limited = 10;
 
