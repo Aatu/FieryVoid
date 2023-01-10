@@ -45,16 +45,16 @@ class ThirdspaceFighter extends LCV{
 	$this->addPrimarySystem(new Engine(6, 18, 0, 14, 2));
     $this->addPrimarySystem(new SelfRepair(5, 10, 2)); //armor, structure, output 	
 
-	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 180));
-	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 180));
 	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 180, 60));
-	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 180, 60));			
-
-		$projection = new ThirdspaceShieldProjection(0, 50, 50, 0, 360, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
-		$projector = new ThirdspaceShieldProjector(5, 10, 4, 4, 0, 360, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
-		$projection->addProjector($projector);
-		$this->addFrontSystem($projector);
-		$this->addFrontSystem($projection);
+	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 180, 60));
+	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 180));
+	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 180));
+			
+	$projection = new ThirdspaceShieldProjection(0, 50, 50, 0, 360, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+	$projector = new ThirdspaceShieldProjector(5, 10, 4, 4, 0, 360, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R
+	$projection->addProjector($projector);
+	$this->addFrontSystem($projector);
+	$this->addFrontSystem($projection);
 				
 	$this->addPrimarySystem(new Structure( 6, 30));
 	    
