@@ -12,6 +12,7 @@ class Caracti extends HeavyCombatVessel{
 		$this->canvasSize = 200;
         $this->shipClass = "Cascor Caracti Q-Ship";
         $this->isd = 2229;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 		
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
