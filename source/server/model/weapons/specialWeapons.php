@@ -4376,13 +4376,12 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Operates similar
 		    $this->range = $this->getAoE($turn);
 		      parent::setSystemDataWindow($turn);  
 		      //$this->data["AoE"] = $this->getAoE($turn);
-		      $this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.";  
-		      $this->data["Special"] .= "<br>It should not be fired manually."; 
-	//	      $this->data["Special"] .= "<br>Ignores armor, but cannot damage ship structure.";  
-		      $this->data["Special"] .= "<br>Affected ships have their initiative reduced by 5 to 30 points.";  
+		      $this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.  It should not be fired manually."; 
+	//	      $this->data["Special"] .= "<br>"; 
+		      $this->data["Special"] .= "<br>Affected ships have their initiative reduced by 5 to 30 points, and their hit chance reduced by 5 - 15% for 1 turn.";  
 		      $this->data["Special"] .= "<br>Can be boosted, for +2 AoE range per level."; 
-		      $this->data["Special"] .= "<br>Multiple overlapping Psychic Fields will only cause 1 (strongest) attack on a particular target."; 
-	//	      $this->data["Special"] .= "<br>With CUSTOM Spark Curtain enhancement acts as anti-Ballistic shield (reducing hit chance only, by 2+boost)."; 
+		      $this->data["Special"] .= "<br>Multiple overlapping Psychic Fields will only cause 1 (strongest) attack on a particular target.";
+		      $this->data["Special"] .= "<br>Does no affect other Thirdspace units, and is only 50% effective against other Ancients.";  		       
 	    }	//endof function setSystemDataWindow
 	
 	
@@ -4471,12 +4470,13 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Operates similar
 		$fireOrder->pubnotes .= "<br> Initiative reduced by $effectIni5, and hit chance reduced by $effecttohit5 %.";
 						
 		if ($system->advancedArmor){
-			if ($ship->faction = "Thirdspace"){
+			if ($ship->faction == "Thirdspace"){
 			$effectIni = 0;  //Doesn't affect other Thirdspace aliens.
 			$effecttohit = 0;
-		}else	
+		}else{	
 			$effectIni = ceil($effectIni/2);  	//Other Ancients are only somewhat resistant to pyschic attack from Thirdspace Aliens.	
 			$effecttohit = ceil($effecttohit/2);
+			}
 		}
 	
 		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!			
@@ -4956,8 +4956,8 @@ class PsionicConcentrator extends Raking{
             );
         public $rangePenalty = 0.5; //-1/2 hexes
             public $rangePenaltyArray = array( 1=>0.5, 2=>1, 3=>0.33, 4=>0.33); //Standard and Raking modes
-        public $fireControl = array(6, 5, 5); // fighters, <mediums, <capitals 
-            public $fireControlArray = array( 1=>array(6, 5, 5), 2=>array(7, 6, 6), 3=>array(8, 7, 7), 4=>array(9, 8, 8)); //+1 fire control the more concentrators are used to hit per every additional combining weapon
+        public $fireControl = array(6, 4, 4); // fighters, <mediums, <capitals 
+            public $fireControlArray = array( 1=>array(6, 4, 4), 2=>array(7, 5, 5), 3=>array(7, 5, 5), 4=>array(8, 6, 6)); //+1 fire control the more concentrators are used to hit per every additional combining weapon
             
     public $uninterceptable = false;
     public $uninterceptableArray = array(1=>false, 2=>false, 3=>true, 4=>true);            
@@ -4967,6 +4967,10 @@ class PsionicConcentrator extends Raking{
 	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
   		public $damageTypeArray = array(1=>"Standard", 2=>"Standard", 3=>"Raking", 4=>"Raking");	    
 	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	    
+	//rake size array
+	public $raking = 10;//more in higher modes
+	public $rakingArray = array( 1=>10, 2=>10, 3=>10, 4=>15);	    
 
 	
 	public $isCombined = false; //is being combined with other weapon
@@ -4976,8 +4980,8 @@ class PsionicConcentrator extends Raking{
 	
 	    public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Can combine multiple Psionic Concentrator on a ship into one concentrated shot - for +1 Fire Control and +1d10 damage per additional weapon (up to 4 Concentrators can be combined).";
-		      $this->data["Special"] .= "<br>Two Concentrators will deliver a Standard damage shot with shorter range.  Three or four combined will fire a longer ranged, uninterceptable raking shot";		        
+		      $this->data["Special"] = "Can combine multiple Psionic Concentrator on a ship into one concentrated shot -with improved Fire Control and +1d10 damage per additional weapon (up to 4 Concentrators can be combined).";
+		      $this->data["Special"] .= "<br>Two Concentrators will deliver a Standard damage shot with shorter range.  Three or four combined will fire a longer ranged, uninterceptable raking shot at 10 and 15 point rakes respectively.";		        
 		      $this->data["Special"] .= "<br>If You allocate multiple Concentrators in the same higher mode of fire at the same target, they will be combined.";		       
 		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in highest actually possible mode instead.";  		  
 		      $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";
@@ -5061,14 +5065,14 @@ class PsionicConcentrator extends Raking{
 	
 	
     public function getDamage($fireOrder){
-		return Dice::d(10, 1+$this->firingMode)+5; //2d10+5 +1d10 per every additional weapon
+		return Dice::d(10, 1+$this->firingMode)+($this->firingMode*3); //2d10+5 +1d10 per every additional weapon
 	}
 	public function setMinDamage(){    
-		$this->minDamage = 1+$this->firingMode+5;
+		$this->minDamage = 1+$this->firingMode+($this->firingMode*3);
 		$this->minDamageArray[$this->firingMode] = $this->minDamage;
 	}
 	public function setMaxDamage(){
-		$this->maxDamage = 10*(1+$this->firingMode)+5;
+		$this->maxDamage = 10*(1+$this->firingMode)+($this->firingMode*3);
 		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;  
 	}
 } //endof class PsionicConcentrator

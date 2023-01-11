@@ -38,7 +38,7 @@ class ThirdspaceFighter extends LCV{ //Actually an LCV.
 	$this->addPrimarySystem(new ThirdspaceCnC(99, 99, 0, 0)); //C&C should be unhittable anyway
 		    
     $this->addPrimarySystem(new AdvancedSingularityDrive(6, 15, 0, 23+4+5));
-	$sensors = new Scanner(6, 16, 4, 10);
+	$sensors = new Scanner(6, 16, 4, 9);
 		$sensors->markAdvanced();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new JumpEngine(5, 10, 4, 8));//Added a small jump drive, how they travel is unknown but if White Star can house a jump drive it's not unfeasible Thirdspace aliens would have  FTL drive on their smaller craft.

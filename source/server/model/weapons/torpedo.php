@@ -431,6 +431,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 			}
 			$this->data["Special"] .= "Reduces armor of facing section (structure and all systems).";
 			$this->data["Special"] .= "<br>Ballistic weapon that can use offensive EW.";
+		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";			
 		}
         
         

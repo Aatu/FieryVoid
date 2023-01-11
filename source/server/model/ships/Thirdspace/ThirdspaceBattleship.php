@@ -100,8 +100,8 @@ class ThirdspaceBattleship extends BaseShip{
 		$this->addRightSystem($projector);		
 		$this->addRightSystem($projection);
         $this->addRightSystem(new PsionicConcentrator(5, 1, 0, 300, 180));   
-        $this->addRightSystem(new PsionicTorpedo(6, 0, 0, 0, 120));
-        $this->addRightSystem(new PsionicTorpedo(6, 0, 0, 0, 120));         
+        $this->addRightSystem(new PsionicTorpedo(6, 0, 0, 1, 120));
+        $this->addRightSystem(new PsionicTorpedo(6, 0, 0, 2, 120));         
         $this->addRightSystem(new PsionicConcentrator(5, 2, 0, 300, 180)); 
         $this->addRightSystem(new PsionicConcentrator(5, 3, 0, 300, 180)); 
         $this->addRightSystem(new PsionicConcentrator(5, 4, 0, 300, 180));
