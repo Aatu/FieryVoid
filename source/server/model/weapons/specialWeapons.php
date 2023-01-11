@@ -4464,7 +4464,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Operates similar
 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!		
 		$effectIni = Dice::d(4,1);//strength of effect: 1d6
-		$effecttohit = Dice::d(3,1);
+		$effecttohit = Dice::d(3,1);//strength of effect: 1d3
 		$effectIni5 = $effectIni * 5;
 		$effecttohit5 = $effecttohit * 5;	
 		$fireOrder->pubnotes .= "<br> Initiative reduced by $effectIni5, and hit chance reduced by $effecttohit5%.";
