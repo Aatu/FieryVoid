@@ -5,9 +5,10 @@ class Thira extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 90;
-        $this->faction = "Usuuth";
+        //$this->faction = "Usuuth";
+	    $this->faction = "Civilians";
         $this->phpclass = "Thira";
-        $this->shipClass = "Thira Freighter";
+        $this->shipClass = "Usuuth Thira Freighter";
         $this->imagePath = "img/ships/UsuuthBaroon.png";
         $this->canvasSize = 100;
         $this->agile = true;
@@ -19,7 +20,7 @@ class Thira extends LCV{
         
         $this->occurence = "common";
         $this->isd = 1955;
-        $this->variantOf = "Baroon Escort Cutter";
+        //$this->variantOf = "Baroon Escort Cutter";
         $this->hangarRequired = ''; //LCV-sized, but designed as cargo ship for interstellar trade - with less raw power, more independence
         
         $this->turncost = 0.5;
