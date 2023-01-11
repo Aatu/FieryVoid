@@ -80,11 +80,12 @@ if (isset($_SESSION["user"])) {
 	    
 	    
 	    
-<!--	    
-		 <br><br>---------- <b>update 26th of September</b> ---------- 
-	    <br><b>Variable missile loads</b> - new factions are in (Dilgar, Drazi)
-	    <br><b>Suicidal Dilgar</b> - Delegor added (scenario unit)
--->
+    
+		 <br><br>---------- <b>update 11th of January - Fleet Checker</b> ---------- 
+	    <br><b>Options highlighted</b> - now enhancement entries representing regular options are highlighted as such (and Fleet Checker does not warn about them)
+	    <br><b>Non-combat units blocked</b> - Fleet Checker now checks non-combat ship presence (like for fixed defenses)
+	    <br><b>Small flights blocked</b> - Fleet Checker now checks flight smaller than 6 craft
+
 	    
 		
 	    
