@@ -9,6 +9,7 @@ class TrekFederationYClass extends MediumShip{
         $this->phpclass = "TrekFederationYClass";
         $this->imagePath = "img/ships/StarTrek/YClassFreighter.png";
         $this->shipClass = "Y-Class Freighter";
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 
 	$this->unofficial = true;
         $this->canvasSize = 100;
