@@ -395,13 +395,13 @@ window.gamedata = {
 	    
 	    //Static structures present?
 	    if (staticPresent){
-		   checkResult += "Static structures present! They're not allowed in pickup battle."; 
+		   checkResult += "Static structures present! They're not allowed in pickup battle.<br>"; 
 		   problemFound = true;
 	    }
 	    	    
 	    //non-combat units present?
 	    if (nonCombatPresent){
-		   checkResult += "Non-combat units present! They're not allowed in pickup battle."; 
+		   checkResult += "Non-combat units present! They're not allowed in pickup battle.<br>"; 
 		   problemFound = true;
 	    }
 	    
@@ -609,6 +609,18 @@ window.gamedata = {
 			}
 			checkResult += "<br>";
 		}
+		
+		//small flights (do not show if there aren't any!)
+		if (noSmallFlights > 0){
+			checkResult +=  " - small flights (<6 craft): " + noSmallFlights;
+			if (noSmallFlights>1){ //fighter total is not within limits
+				checkResult += " TOO MANY! (up to 1 allowed)";
+				problemFound = true;
+			}else{
+				checkResult += " OK";
+			}
+			checkResult += "<br>";
+		}
 
 		if ( specialFighters.length > 0 ){ //do not show if there are no fighters that require special hangars
 			/*let's show details even if there are no hangars at all
@@ -662,10 +674,12 @@ window.gamedata = {
 						}
 					}
 				}
+				/*
 				console.log('Total Fighters');
 				console.table(totalSpecialFighters);
 				console.log('Total Hangars');
 				console.table(totalSpecialHangars);
+				*/
 				//determine if there is enough special hangars for each type of special fighter
 				for (i=0;i<totalSpecialFighters.length;i++) {
 					var match = false;
@@ -689,20 +703,7 @@ window.gamedata = {
 						problemFound = true;
 					}
 				}
-			}
-			
-			//small flights - do not show if there aren't any!
-			if (noSmallFlights > 0){
-				checkResult +=  " - small flights (<6 craft): " + noSmallFlights;
-				if (noSmallFlights>1){ //fighter total is not within limits
-					checkResult += " TOO MANY! (up to 1 allowed)";
-					problemFound = true;
-				}else{
-					checkResult += " OK";
-				}
-				checkResult += "<br>";
-			}
-			
+			}	
 		}
 		
 		//make list of small craft in fleet contain only unique values...

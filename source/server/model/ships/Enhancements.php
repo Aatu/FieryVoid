@@ -4,15 +4,16 @@ Most enhancements made are based on official ones, but they're changed and/or re
 */
 class Enhancements{
     public static function compareEnhancements($enhA, $enhB)//to set them in order
+	//REVERSE order, as they're effectively reversed in front end too
     {
         if ($enhA[6] && (!$enhB[6])) { //Options first
-            return -1;
+            return 1;
         } else if ($enhB[6] && (!$enhA[6])) {
-            return 1;
-        } else if ( $enhA[1] < $enhB[1] ) { //by name, ascending
             return -1;
-        } else if ($enhA[1] > $enhB[1] ) {
+        } else if ( $enhA[1] < $enhB[1] ) { //by name, ascending
             return 1;
+        } else if ($enhA[1] > $enhB[1] ) {
+            return -1;
         } else {
             return 0;
         }
