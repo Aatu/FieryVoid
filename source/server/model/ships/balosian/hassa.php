@@ -10,6 +10,7 @@ class Hassa extends MediumShip{
         $this->imagePath = "img/ships/Hassa.png";
         $this->shipClass = "Balosian Hassa Freighter";
         $this->canvasSize = 200;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
         $this->forwardDefense = 12;
         $this->sideDefense = 17;
