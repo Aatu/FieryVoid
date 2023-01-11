@@ -31,13 +31,13 @@ class ThirdspaceFighter extends LCV{ //Actually an LCV.
 		
 	$this->hangarRequired = "LCVs";
 	    
-	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance   
-	$this->addPrimarySystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance   
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
-	$this->addPrimarySystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
 	$this->addPrimarySystem(new ThirdspaceCnC(99, 99, 0, 0)); //C&C should be unhittable anyway
 		    
-    $this->addPrimarySystem(new AdvancedSingularityDrive(6, 15, 0, 20+4+5));
+    $this->addPrimarySystem(new AdvancedSingularityDrive(6, 15, 0, 23+4+5));
 	$sensors = new Scanner(6, 16, 4, 10);
 		$sensors->markAdvanced();
 		$this->addPrimarySystem($sensors);

@@ -13,7 +13,8 @@ class ThirdspaceBattleship extends BaseShip{
 	    $this->isd = 'Ancient';
 		$this->factionAge = 4;
 //		$this->limited = 33;
-		$this->unofficial = true;					    
+		$this->unofficial = true;
+		$this->canvasSize = 300;							    
 	    
 		$this->fighters = array("LCVs" => 6);	
 		
@@ -31,7 +32,7 @@ class ThirdspaceBattleship extends BaseShip{
        
 		$this->iniativebonus = 2 *5;        
         
-        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 60, 0, 142+8+5));
+        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 60, 0, 154+8+5));
         $this->addPrimarySystem(new ThirdspaceCnC(8, 32, 0, 0));
         $scanner = new Scanner(7, 28, 8, 15);
 		$scanner->markAdvanced();
