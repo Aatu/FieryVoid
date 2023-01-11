@@ -38,6 +38,12 @@ class BaseShip {
 	public $osat = false; //true if object is OSAT (this includes MicroSATs and mines)
 	public $mine = false;
     public $SixSidedShip = false;
+	public $isCombatUnit = true; //is this a combat unit (as opposed to non-combat - transport, freighter, civilian, explorer, diplomatic ship, yacht...)
+	//non-combat ships cannot be taken in pickup battles by standard tourtnament rules
+	//rule of thumb is that if it has cargo bays, then it's not a combat ship - but it's far from proof
+	//eg. Pak'ma'ra and Orini capital ships (combat ones) do have cargo bays, while eg. EMperor's transport or Grey Sharlin (non-combat ships) do not
+	//by core definition, combat ship is one that is intended to be present in fleet sent into combat zone.
+	
 
 	
     public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for all systems)
