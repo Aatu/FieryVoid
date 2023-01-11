@@ -9,6 +9,7 @@ class TrekFederationSarajevo extends MediumShip{
         $this->phpclass = "TrekFederationSarajevo";
         $this->imagePath = "img/ships/StarTrek/Sarajevo.png";
         $this->shipClass = "Sarajevo Transport";
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 
 	$this->unofficial = true;
         $this->canvasSize = 100;
