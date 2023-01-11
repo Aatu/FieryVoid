@@ -9,7 +9,8 @@ class PassengerLiner extends HeavyCombatVessel{
         $this->phpclass = "passengerliner";
         $this->imagePath = "img/ships/civilianFreighter.png";
         $this->shipClass = "Passenger Liner";
-        $this->isd = 2198;       
+        $this->isd = 2198;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
         $this->forwardDefense = 13;
         $this->sideDefense = 16;
