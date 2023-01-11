@@ -401,7 +401,7 @@ window.gamedata = {
 	    	    
 	    //non-combat units present?
 	    if (nonCombatPresent){
-		   checkResult += "Non-combat units present! They're not allowed in pickup battle.<br>"; 
+		   checkResult += "Non-Combat units present! They're not allowed in pickup battle.<br>"; 
 		   problemFound = true;
 	    }
 	    
