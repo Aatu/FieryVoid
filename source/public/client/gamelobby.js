@@ -321,7 +321,7 @@ window.gamedata = {
 		if ((lship.base == true) || (lship.osat == true)) staticPresent = true;		
 			//check for presence of enhancements
 			if (!enhancementPresent){ //if already found - no point in checking
-				for (var enhNo in lship.enhancementOptions){
+				for (var enhNo in lship.enhancementOptions) if (!lship.enhancementOptions[enhNo][6]){ //only if enhancement isn't really an option
 					if (lship.enhancementOptions[enhNo][2] > 0){
 							enhancementPresent = true;
 					}						
