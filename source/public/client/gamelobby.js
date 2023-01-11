@@ -100,6 +100,7 @@ window.gamedata = {
 		var ancientUnitPresent = false;
 		var specialVariantPresent = false;
 	    var staticPresent = false;
+	    var nonCombatPresent = false;
 	    var shipTable = []; 
 	    var noSmallFlights = 0;
 	    
@@ -316,7 +317,8 @@ window.gamedata = {
 			customShipPresent = true;
 			warningFound = true;
 		}
-		if ((lship.base == true) || (lship.osat == true)) staticPresent = true;		
+		if ((lship.base == true) || (lship.osat == true)) staticPresent = true;	
+		if (lship.isCombatUnit != true)  nonCombatPresent = true;	
 			//check for presence of enhancements
 			if (!enhancementPresent){ //if already found - no point in checking
 				for (var enhNo in lship.enhancementOptions) if (!lship.enhancementOptions[enhNo][6]){ //only if enhancement isn't really an option
@@ -396,6 +398,13 @@ window.gamedata = {
 		   checkResult += "Static structures present! They're not allowed in pickup battle."; 
 		   problemFound = true;
 	    }
+	    	    
+	    //non-combat units present?
+	    if (nonCombatPresent){
+		   checkResult += "Non-combat units present! They're not allowed in pickup battle."; 
+		   problemFound = true;
+	    }
+	    
 	    checkResult += "<br>";
 	    
 	    
