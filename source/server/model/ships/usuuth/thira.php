@@ -14,8 +14,8 @@ class Thira extends LCV{
         
         $this->forwardDefense = 11;
         $this->sideDefense = 12;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 		
-		$this->notes = "Civilian unit.";
         
         $this->occurence = "common";
         $this->isd = 1955;
