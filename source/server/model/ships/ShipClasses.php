@@ -612,6 +612,8 @@ class BaseShip {
 					$this->notes .= 'Unit size not identified!';	
 					break;
 			}//unit size described, which also guarantees existence of previous entries!
+			//mark if not a combat unit!
+			if(!$this->isCombatUnit) $this->notes .= '<br>Non-combatant!';
 			//required hangar
 			if($this->hangarRequired!='') { 
 				$this->notes .= '<br>Requires hangar space: ' . $this->hangarRequired;			
