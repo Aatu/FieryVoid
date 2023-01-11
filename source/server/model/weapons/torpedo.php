@@ -429,15 +429,16 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= "Reduces armor of facing section (structure and all systems).";
+			$this->data["Special"] .= "Applies Flash damage, reduces armor of facing section (structure and all systems) by D3.";
+			$this->data["Special"] .= "<br>No effect on Advanced Armor.";			
 			$this->data["Special"] .= "<br>Ballistic weapon that can use offensive EW.";
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";			
 		}
         
         
-        public function getDamage($fireOrder){         return 20;   }
-        public function setMinDamage(){     $this->minDamage = 20;      }
-        public function setMaxDamage(){     $this->maxDamage = 20;      }
+        public function getDamage($fireOrder){         return 18;   }
+        public function setMinDamage(){     $this->minDamage = 18;      }
+        public function setMaxDamage(){     $this->maxDamage = 18;      }
     
     }//endof class PsionicTorpedo
 ?>

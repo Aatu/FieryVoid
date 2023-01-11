@@ -4313,7 +4313,7 @@ class VorlonDischargeCannon extends Weapon{
 }//endof class VorlonDischargeCannon
 
 
-class PsychicField extends Weapon implements DefensiveSystem{ //Operates similar to Spark Field, but debilitating enemies in range, not damage them.
+class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapons that operates similar to Spark Field, but debilitating enemies in range, not damage them.
         public $name = "PsychicField";
         public $displayName = "Psychic Field";
 	public $iconPath = "PsychicField.png";
@@ -4379,9 +4379,9 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Operates similar
 		      $this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.  It should not be fired manually."; 
 	//	      $this->data["Special"] .= "<br>"; 
 		      $this->data["Special"] .= "<br>Affected ships have their initiative reduced by 5 to 30 points, and their hit chance reduced by 5 - 15% for 1 turn.";  
-		      $this->data["Special"] .= "<br>Can be boosted, for +2 AoE range per level."; 
-		      $this->data["Special"] .= "<br>Multiple overlapping Psychic Fields will only cause 1 (strongest) attack on a particular target.";
-		      $this->data["Special"] .= "<br>Does no affect other Thirdspace units, and is only 50% effective against other Ancients.";  		       
+		      $this->data["Special"] .= "<br>Can be boosted, for +2 AoE range per level to maximum of 12 hexes."; 
+		      $this->data["Special"] .= "<br>Multiple overlapping Psychic Fields will only cause 1 (the strongest) attack on a particular target.";
+		      $this->data["Special"] .= "<br>Does no affect other Thirdspace units, and is only 50% effective against Advanced Armor.";  		       
 	    }	//endof function setSystemDataWindow
 	
 	
@@ -4438,29 +4438,6 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Operates similar
 	public function beforeFiringOrderResolution($gamedata){
 		PsychicFieldHandler::createFiringOrders($gamedata);		
 	}
-	
-/*	
-	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
-		if (!($target instanceof FighterFlight)){ //ship - as usual
-			$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
-			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
-		}else{//fighter flight - separate hit on each fighter!
-			foreach ($target->systems as $fighter){
-				if ($fighter == null || $fighter->isDestroyed()){
-				    continue;
-				}
-				$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
-				$this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
-                    	}
-		}
-	}	Can remove since effects fighters at flight level? */
-
-/*
-	public function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-		$dmgToReturn = $damage;
-		if ($system instanceof Structure) $dmgToReturn = 0; //will not harm Structure!
-		return $dmgToReturn;
-	} can remove since no damage? */
 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!		
 		$effectIni = Dice::d(4,1);//strength of effect: 1d6
@@ -4521,21 +4498,8 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Operates similar
 			$powerReq = 2;
 		}
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-		PsychicFieldHandler::addPsychicField($this);//so all Spark Fields are accessible together, and firing orders can be uniformly created
+		PsychicFieldHandler::addPsychicField($this);//so all Psychic Fields are accessible together, and firing orders can be uniformly created
 	}
-	
-	// ignore armor; advanced armor halves effect (due to weapon being Electromagnetic)
-	/*
-	public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
-		if (WeaponEM::isTargetEMResistant($target,$system)){
-			$returnArmour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
-			$returnArmour = floor($returnArmour/2);
-			return $returnArmour;
-		}else{
-			return 0;
-		}
-	}
-	Remove, as advanced armour does not apply, altho reduce effect against ancients anyway?*/
 	
 
 	public function onConstructed($ship, $turn, $phase){
@@ -4671,7 +4635,7 @@ class PsychicFieldHandler{
         public $loadingtime = 2;
         public $raking = 20;
         public $addedDice;
-        public $priority = 2; //damage dealing mode means it's not very effective as stripping systems, and should be fired late despite high damage potential
+        public $priority = 2;
 
         public $boostable = true;
         public $boostEfficiency = 6;
