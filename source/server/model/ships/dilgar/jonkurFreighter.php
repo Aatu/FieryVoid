@@ -11,6 +11,7 @@ class JonkurFreighter extends MediumShip{
         $this->shipClass = "Dilgar Jonkur Freighter";
         $this->canvasSize = 100;
         $this->isd = 2208;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
         $this->forwardDefense = 11;
         $this->sideDefense = 16;
