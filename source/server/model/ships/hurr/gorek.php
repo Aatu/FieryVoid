@@ -10,6 +10,7 @@ class gorek extends HeavyCombatVessel{
         $this->imagePath = "img/ships/hurrOrak.png";
         $this->shipClass = " Hurr Gorek Freighter";
         $this->occurence = "common";
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
    
         $this->isd = 2230;
         

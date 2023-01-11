@@ -12,6 +12,7 @@ class Calacca extends HeavyCombatVessel{
 		$this->canvasSize = 200;
         $this->shipClass = "Cascor Calacca Freighter";
         $this->isd = 2225;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;

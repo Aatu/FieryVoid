@@ -12,7 +12,8 @@ class Delegor extends MediumShip{
         $this->canvasSize = 100;
                 $this->isd = 2232;
 				
-	    $this->notes = 'CANNOT be taken if Dilgar are not allowed to ram.';
+	    $this->occurence = 'special'; //common, but can only be taken in specific scenario circumstances!
+	    $this->notes = 'CANNOT be taken if Dilgar are not allowed to ram. Otherwise common.';
 	    $this->notes .= "<br>+20 ramming hit bonus.";
 	    
 	    

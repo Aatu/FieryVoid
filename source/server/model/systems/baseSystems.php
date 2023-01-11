@@ -3959,7 +3959,8 @@ class AmmoMissileS extends AmmoMissileTemplate{
 //ammunition for AmmoMagazine - Class FB Missile (Fighter Basic Missile)
 class AmmoMissileFB extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileFB';
-	public $displayName = 'Fighter Basic Missile';
+	//public $displayName = 'Fighter Basic Missile';
+	public $displayName = 'Basic Missile'; //as we're in fighter context, adding 'Fighter' to name is unnecessary clutter
 	public $modeName = 'Basic';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_FB'; //enhancement name to be enabled
@@ -3986,7 +3987,8 @@ class AmmoMissileFB extends AmmoMissileTemplate{
 //ammunition for AmmoMagazine - Class FL Missile (Fighter Long Range)
 class AmmoMissileFL extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileFL';
-	public $displayName = 'Fighter Long Range Missile';
+	//public $displayName = 'Fighter Long Range Missile';
+	public $displayName = 'Long Range Missile'; //as we're in fighter context, adding 'Fighter' to name is unnecessary clutter
 	public $modeName = 'LongRange';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_FL'; //enhancement name to be enabled
@@ -4019,7 +4021,8 @@ class AmmoMissileFL extends AmmoMissileTemplate{
 //NOTE: up to 1 per fighter (2 for SHFs)
 class AmmoMissileFH extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileFH';
-	public $displayName = 'Fighter Heavy Missile';
+	//public $displayName = 'Fighter Heavy Missile';
+	public $displayName = 'Heavy Missile'; //as we're in fighter context, adding 'Fighter' to name is unnecessary clutter
 	public $modeName = 'Heavy';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_FH'; //enhancement name to be enabled

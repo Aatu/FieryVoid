@@ -10,6 +10,7 @@ class Trashue extends MediumShip{
         $this->imagePath = "img/ships/PakmaraTrashuli.png";
         $this->shipClass = "Pak'ma'ra Tra'shu'e Freighter";
         $this->canvasSize = 100;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 
         $this->isd = 2195;
         

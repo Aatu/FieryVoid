@@ -11,6 +11,7 @@ class Marata extends BaseShip{
         $this->shipClass = "Marata Diplomatic Transport";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
 	$this->occurence = "rare";
         $this->variantOf = 'Miliani Carrier';

@@ -20,7 +20,7 @@ class wlcTigata extends BaseShip{
         $this->rollcost = 3;
         $this->pivotcost = 4;
         $this->iniativebonus = 5;
-        $this->unofficial = true;
+        $this->unofficial = 'S'; //it's custom, but not very far from standard - and greatly enhances options for early Minbari
         $this->isd = 1870;
         $this->variantOf ="Tigara Attack Cruiser";
 		

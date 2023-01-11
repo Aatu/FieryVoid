@@ -12,6 +12,7 @@ class resoluteHK2007 extends MediumShip{
 			$this->variantOf = "Resolute Military Freighter";
         $this->canvasSize = 100;
 	    $this->isd = 2007;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 
         $this->fighters = array("normal"=>6);
         $this->notes = 'Carries 6 hunter-killers in pods. Note, no hunter-killer controller.';

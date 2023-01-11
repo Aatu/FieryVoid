@@ -20,6 +20,8 @@ class Kowart extends BaseShip{
         $this->variantOf = 'Mafka Transport Cruiser';
         $this->occurence = "rare";
         $this->iniativebonus -15;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+		//actually a very, very special humanitarian ship - see Varians 3 for details
         
         $this->addPrimarySystem(new Reactor(4, 15, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));

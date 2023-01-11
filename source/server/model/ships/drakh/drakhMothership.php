@@ -17,8 +17,9 @@ class DrakhMothership extends BaseShip{
 	$this->advancedArmor = true;   
         $this->Enormous = true;
         $this->limited = 10;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 		
-		$this->notes = "Not a military ship, not eligible for pickup battles."; //more akin to worldship
+		$this->notes = "Not a military ship - more akin to craftworld."; //more akin to worldship
        
 	$this->isd = 2200;
         

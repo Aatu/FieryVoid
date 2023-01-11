@@ -3,10 +3,13 @@ Unit enhancements are in general pointed quite high - but it's not always the ca
 For pickup battles - I suggest remembering they're optional, and using them requires opponent agreement. A single enhancement to round out points is probably fine, but if You want to seriously enhance Your fleet - check with opponent if that's acceptable.
 Their main intent is to be scenario option, or a campaign tool where they can represent units accumulating experience.
 
-NOTE: some FV enhancements represent regular unit options rather than proper enhancements. Fighter Navigator is good example.
+NOTE: some FV enhancements represent regular unit options rather than proper enhancements. Fighter Navigator is good example, as well as variable missile loads.
 
 
 SHIP ENHANCEMENTS:
+
+(ammo) * : various missiles that can be bought. Total number of missiles that can be fired will not be higher than magazine capacity, even if more missiles are bought.
+This is an option rather than enhancement.
 
 Elite Crew (entire ship):
 	Effect: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results
@@ -46,6 +49,9 @@ Vulnerable to criticals (entire ship):
 
 
 FIGHTER ENHANCEMENTS (all costs per craft):
+
+(ammo) * : various missiles that can be bought. Total number of missiles that can be fired will not be higher than magazine capacity, even if more missiles are bought.
+This is an option rather than enhancement.
 
 Expert Motivator (this is a skill one of pilots possesses, rather than a aseparate person):
 	Effect: -2 modifier to dropout rolls
