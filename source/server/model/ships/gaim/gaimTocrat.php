@@ -11,6 +11,7 @@ class gaimTocrat extends BaseShip{
 		$this->shipClass = "Tocrat Supply Barge";
 		$this->shipSizeClass = 3;
 		$this->fighters = array("light"=>12);
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 	    
         $this->isd = 2251;
 

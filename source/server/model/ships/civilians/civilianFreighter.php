@@ -10,6 +10,7 @@ class CivilianFreighter extends MediumShip{
         $this->imagePath = "img/ships/civilianFreighter.png";
         $this->shipClass = "Commercial Freighter";
         $this->canvasSize = 100;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;

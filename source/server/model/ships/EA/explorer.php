@@ -14,13 +14,13 @@ class Explorer extends BaseShip{
 			$this->occurence = "common";
 			$this->limited = 10;
 		$this->isd = 2253;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 	    
 	    
         $this->Enormous = true;
         $this->forwardDefense = 18;
         $this->sideDefense = 20;
 		
-		$this->notes = "Not a combat ship (->not eligible for pickup battles)";
         
         $this->turncost = 2;
         $this->turndelaycost = 2;

@@ -14,6 +14,7 @@ class CottenBeta extends BaseShip{
         $this->shipSizeClass = 3;
 //			$this->canvasSize = 175; //img has 200px per side
  		$this->unofficial = true;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
        
         $this->isd = 2225;
 

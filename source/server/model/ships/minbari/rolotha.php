@@ -20,6 +20,7 @@ class Rolotha extends MediumShip{
 		$this->iniativebonus = 0;
 		$this->canvasSize = 115; 
 		$this->isd = 1990;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 
         $this->addPrimarySystem(new Reactor(5, 17, 0, 4));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));

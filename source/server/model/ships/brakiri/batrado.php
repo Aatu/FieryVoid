@@ -12,6 +12,7 @@ class Batrado extends BaseShip{
 			$this->occurence = "uncommon";
 			$this->variantOf = 'Avioki Heavy Cruiser';
         $this->shipSizeClass = 3;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 		
 		$this->notes = 'Tor-Sikar LogTech';//Corporation producing the design
 		$this->isd = 2250;

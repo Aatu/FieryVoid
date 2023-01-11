@@ -12,9 +12,10 @@ class EmperorsTransport extends BaseShip{
         $this->occurence = "special";
         $this->fighters = array("normal"=>12);
 	    $this->isd = 2202;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 	    
 	    
-	    $this->notes = "Emperor's personal transport, scenario unit only";
+	    $this->notes = "Emperor's personal transport";
         
         $this->forwardDefense = 16;
         $this->sideDefense = 17;

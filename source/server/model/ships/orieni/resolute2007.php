@@ -12,6 +12,7 @@ class resolute2007 extends MediumShip{
 			$this->variantOf = "Resolute Military Freighter";
         $this->canvasSize = 100;
 	    $this->isd = 2007;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
         $this->forwardDefense = 15;
         $this->sideDefense = 13;

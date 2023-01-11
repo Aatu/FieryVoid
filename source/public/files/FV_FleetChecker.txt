@@ -41,6 +41,7 @@ And actual rules are as below. Due to huge individual costs (and small numbers) 
   -- (Ancient) 1 per 15000 points (no capital ship is required below 5000 points)
  - most units of LCV size or smaller need to have hangars present (there are exceptions, especially for custom factions from other universes)
  - at least half of fighter hangars need to be filled (this rule is only relevant for regular fighters, not for other craft like assault shuttles, LCVs or even SHFs)
+ - at most 1 flight smaller than 6 craft (checked only for craft with maximum flight size of 6 or more)
  - deployment restrictions observed 
  - variant restrictions observed 
  - Uncommon/Rare units are limited at fleet level (on top of Variant Restrictions above) to at most:
@@ -51,6 +52,7 @@ And actual rules are as below. Due to huge individual costs (and small numbers) 
   -- (Young) One per full 1100 points (with minimum of 2)
   -- (Ancient) One per full 3000 points (with minimum of 2)
  - static objects (bases, OSATs) are not allowed
+ - non-combat units (freighters, exploration ships, VIP transports...) are not allowed
  - presence of non-standard elements (enhancements, custom units, Special variants) is called for player attention (but doesn't mark the fleet as incorrect)
 
  

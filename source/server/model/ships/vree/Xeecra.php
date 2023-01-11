@@ -10,7 +10,8 @@ class Xeecra extends VreeCapital{
 		$this->shipClass = "Xeecra Trading Post";
 		$this->isd = 2262;
 		$this->locations = array(41, 42, 2, 32, 31, 1);	
-        $this->fighters = array("normal"=>12);			
+        $this->fighters = array("normal"=>12);	
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup		
 
 		$this->shipSizeClass = 3;
 		$this->iniativebonus = 0;

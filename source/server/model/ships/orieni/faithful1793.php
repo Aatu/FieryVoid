@@ -13,6 +13,8 @@ class Faithful1793 extends BaseShip{
         $this->variantOf = "Faithful Search Explorer";
 	    $this->isd = 1793;
         $this->shipSizeClass = 3;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+	    //explorer, not combat ElInt
 	    
         $this->fighters = array("light"=>12);
 		

@@ -10,6 +10,7 @@ class MarkabLiner extends MediumShip{
         $this->imagePath = "img/ships/sloop.png"; //change
         $this->shipClass = "Markab Liner";
         $this->canvasSize = 100;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 	    
 	    $this->isd = 2120;
         

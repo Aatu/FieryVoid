@@ -10,6 +10,7 @@ class CustomMiningVessel extends MediumShip{
         $this->imagePath = "img/ships/sloop.png";
         $this->shipClass = "Mining Vessel";
         $this->canvasSize = 100;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
         $this->forwardDefense = 9;
         $this->sideDefense = 9;

@@ -11,7 +11,8 @@ class HighTemplar extends FighterFlight{
         $this->shipClass = "High Templar Interceptor flight";
         $this->imagePath = "img/ships/highTemplar.png";
         
-        $this->variantOf = "Templar Interceptor flight";
+        //$this->variantOf = "Templar Interceptor flight";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->occurence = "uncommon";
         $this->isd = 2008;
 
