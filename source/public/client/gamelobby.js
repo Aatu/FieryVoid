@@ -101,6 +101,7 @@ window.gamedata = {
 		var specialVariantPresent = false;
 	    var staticPresent = false;
 	    var shipTable = []; 
+	    var noSmallFlights = 0;
 	    
 		var specialFighters = [];
 		var specialHangars = [];
@@ -201,8 +202,8 @@ window.gamedata = {
 			ancientUnitPresent = true;
 		}
 		if(!lship.flight){
-	        totalShips++;
-	        //check for custom hangars
+	        	totalShips++;			
+	        	//check for custom hangars
 			if(lship.customFighter){
 				for (var h in lship.customFighter){
 					specialHgrName = h;
@@ -253,6 +254,10 @@ window.gamedata = {
 			}
 		}else{//note presence of fighters
 	            totalShips++; //well, total units anyway... rules say "one other unit present" and indicate that unit may be a fighter flight as well
+			
+			//check for presence of small flights: if for something flight size of 6 is allowed, then anything less counts as small flight
+			if ((lship.flightSize<6)&&(lship.maxFlightSize>=6)) noSmallFlights++;
+			
 			var smallCraftSize = '';			
 			if (lship.hangarRequired != 'fighters' ) { //classify based on explicit info from craft
 				smallCraftSize = lship.hangarRequired;
@@ -270,18 +275,11 @@ window.gamedata = {
 				}
 			}
 			//now translate size into hangar space used...
-			if(smallCraftSize !=''){
-				
+			if(smallCraftSize !=''){				
 				if(lship.customFtrName){
 					specialFtrAmt = lship.flightSize/lship.unitSize;
 					specialFtrName = lship.customFtrName;
 					specialFighters.push([specialFtrName,specialFtrAmt]);
-					//console.table(specialFighters);
-					//totalFtrC += lship.flightSize;
-					//var specialFtrName = lship.specialFtrName;
-					//console.log('lship.specialFtrName = ', lship.specialFtrName);
-					//console.log('specialFtrName = ', specialFtrName);
-					//console.log('Custom Fighters : ',totalFtrC);
 				}
 				
 				if(smallCraftSize =="heavy"){
@@ -683,17 +681,18 @@ window.gamedata = {
 					}
 				}
 			}
-
-/*			checkResult +=  " - " + specialFtrName + " Fighters: " + totalFtrC;
-				checkResult +=  " (allowed up to " + totalHangarC + ")";
-			if (totalFtrC > totalHangarC){ //fighter total is not within limits
-				checkResult += " FAILURE!";
-				problemFound = true;
-			}else{
-				checkResult += " OK";
+			
+			//small flights - do not show if there aren't any!
+			if (noSmallFlights > 0){
+				checkResult +=  " - small flights (<6 craft): " + noSmallFlights;
+				if (noSmallFlights>1){ //fighter total is not within limits
+					checkResult += " TOO MANY! (up to 1 allowed)";
+					problemFound = true;
+				}else{
+					checkResult += " OK";
+				}
+				checkResult += "<br>";
 			}
-			checkResult += "<br>";
-*/
 			
 		}
 		
