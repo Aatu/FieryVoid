@@ -4,7 +4,7 @@ class ThirdspaceBattleship extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 640;
+	$this->pointCost = 6400;
 	$this->faction = "Thirdspace";
         $this->phpclass = "ThirdspaceBattleship";
         $this->imagePath = "img/ships/ThirdspaceBattleship.png";
