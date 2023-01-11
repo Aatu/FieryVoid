@@ -11,6 +11,7 @@ class Pelican extends HeavyCombatVesselLeftRight{
         $this->shipClass = "Pelican Military Freighter";
         $this->isd = 1941;
         $this->canvasSize = 160;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;

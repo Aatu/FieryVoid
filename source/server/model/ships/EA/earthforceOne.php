@@ -13,7 +13,8 @@ class EarthforceOne  extends BaseShip{
         $this->canvasSize = 180;
         $this->fighters = array("normal"=>12);
 		$this->customFighter = array("Thunderbolt"=>12);
-        $this->occurence = "unique"; 
+        $this->occurence = "unique";
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup 
 	    
 	    $this->isd = 2251;
 	    $this->notes = 'Thunderbolt capable.';

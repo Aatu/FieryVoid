@@ -100,7 +100,9 @@ window.gamedata = {
 		var ancientUnitPresent = false;
 		var specialVariantPresent = false;
 	    var staticPresent = false;
+	    var nonCombatPresent = false;
 	    var shipTable = []; 
+	    var noSmallFlights = 0;
 	    
 		var specialFighters = [];
 		var specialHangars = [];
@@ -201,8 +203,8 @@ window.gamedata = {
 			ancientUnitPresent = true;
 		}
 		if(!lship.flight){
-	        totalShips++;
-	        //check for custom hangars
+	        	totalShips++;			
+	        	//check for custom hangars
 			if(lship.customFighter){
 				for (var h in lship.customFighter){
 					specialHgrName = h;
@@ -253,6 +255,10 @@ window.gamedata = {
 			}
 		}else{//note presence of fighters
 	            totalShips++; //well, total units anyway... rules say "one other unit present" and indicate that unit may be a fighter flight as well
+			
+			//check for presence of small flights: if for something flight size of 6 is allowed, then anything less counts as small flight
+			if ((lship.flightSize<6)&&(lship.maxFlightSize>=6)) noSmallFlights++;
+			
 			var smallCraftSize = '';			
 			if (lship.hangarRequired != 'fighters' ) { //classify based on explicit info from craft
 				smallCraftSize = lship.hangarRequired;
@@ -270,18 +276,11 @@ window.gamedata = {
 				}
 			}
 			//now translate size into hangar space used...
-			if(smallCraftSize !=''){
-				
+			if(smallCraftSize !=''){				
 				if(lship.customFtrName){
 					specialFtrAmt = lship.flightSize/lship.unitSize;
 					specialFtrName = lship.customFtrName;
 					specialFighters.push([specialFtrName,specialFtrAmt]);
-					//console.table(specialFighters);
-					//totalFtrC += lship.flightSize;
-					//var specialFtrName = lship.specialFtrName;
-					//console.log('lship.specialFtrName = ', lship.specialFtrName);
-					//console.log('specialFtrName = ', specialFtrName);
-					//console.log('Custom Fighters : ',totalFtrC);
 				}
 				
 				if(smallCraftSize =="heavy"){
@@ -318,10 +317,11 @@ window.gamedata = {
 			customShipPresent = true;
 			warningFound = true;
 		}
-		if ((lship.base == true) || (lship.osat == true)) staticPresent = true;		
+		if ((lship.base == true) || (lship.osat == true)) staticPresent = true;	
+		if (lship.isCombatUnit != true)  nonCombatPresent = true;	
 			//check for presence of enhancements
 			if (!enhancementPresent){ //if already found - no point in checking
-				for (var enhNo in lship.enhancementOptions){
+				for (var enhNo in lship.enhancementOptions) if (!lship.enhancementOptions[enhNo][6]){ //only if enhancement isn't really an option
 					if (lship.enhancementOptions[enhNo][2] > 0){
 							enhancementPresent = true;
 					}						
@@ -395,9 +395,16 @@ window.gamedata = {
 	    
 	    //Static structures present?
 	    if (staticPresent){
-		   checkResult += "Static structures present! They're not allowed in pickup battle."; 
+		   checkResult += "Static structures present! They're not allowed in pickup battle.<br>"; 
 		   problemFound = true;
 	    }
+	    	    
+	    //non-combat units present?
+	    if (nonCombatPresent){
+		   checkResult += "Non-combat units present! They're not allowed in pickup battle.<br>"; 
+		   problemFound = true;
+	    }
+	    
 	    checkResult += "<br>";
 	    
 	    
@@ -602,6 +609,18 @@ window.gamedata = {
 			}
 			checkResult += "<br>";
 		}
+		
+		//small flights (do not show if there aren't any!)
+		if (noSmallFlights > 0){
+			checkResult +=  " - small flights (<6 craft): " + noSmallFlights;
+			if (noSmallFlights>1){ //fighter total is not within limits
+				checkResult += " TOO MANY! (up to 1 allowed)";
+				problemFound = true;
+			}else{
+				checkResult += " OK";
+			}
+			checkResult += "<br>";
+		}
 
 		if ( specialFighters.length > 0 ){ //do not show if there are no fighters that require special hangars
 			/*let's show details even if there are no hangars at all
@@ -655,10 +674,12 @@ window.gamedata = {
 						}
 					}
 				}
+				/*
 				console.log('Total Fighters');
 				console.table(totalSpecialFighters);
 				console.log('Total Hangars');
 				console.table(totalSpecialHangars);
+				*/
 				//determine if there is enough special hangars for each type of special fighter
 				for (i=0;i<totalSpecialFighters.length;i++) {
 					var match = false;
@@ -682,19 +703,7 @@ window.gamedata = {
 						problemFound = true;
 					}
 				}
-			}
-
-/*			checkResult +=  " - " + specialFtrName + " Fighters: " + totalFtrC;
-				checkResult +=  " (allowed up to " + totalHangarC + ")";
-			if (totalFtrC > totalHangarC){ //fighter total is not within limits
-				checkResult += " FAILURE!";
-				problemFound = true;
-			}else{
-				checkResult += " OK";
-			}
-			checkResult += "<br>";
-*/
-			
+			}	
 		}
 		
 		//make list of small craft in fleet contain only unique values...

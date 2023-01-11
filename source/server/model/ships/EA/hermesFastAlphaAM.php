@@ -13,6 +13,7 @@ class hermesFastAlphaAM extends HeavyCombatVessel{
         $this->variantOf = "Hermes Priority Transport (Beta)";        
 	    $this->unofficial = true;
         $this->isd = 2168;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
         $this->fighters = array("normal" => 6);
         

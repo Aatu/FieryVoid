@@ -10,6 +10,7 @@ class Ore extends BaseShip{
         $this->imagePath = "img/ships/battlewagon.png"; //need to change
         $this->shipClass = "Ore Barge";
         $this->shipSizeClass = 3;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;

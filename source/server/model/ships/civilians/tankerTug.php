@@ -10,6 +10,7 @@ class TankerTug extends MediumShip{
 		$this->imagePath = "img/ships/civilianFreighter.png"; //need to change
 		$this->shipClass = "Tanker Tug";
 		$this->canvasSize = 100;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 
 		$this->forwardDefense = 12;
 		$this->sideDefense = 12;

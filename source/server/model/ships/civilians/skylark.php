@@ -10,6 +10,7 @@ class Skylark extends MediumShip{
 	$this->shipClass = "Skylark Transport";
 	$this->imagePath = "img/ships/LlortDaggaden.png"; //sure why not :-)
 	$this->canvasSize = 100;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 
 	$this->agile = true;
 	$this->forwardDefense = 10;

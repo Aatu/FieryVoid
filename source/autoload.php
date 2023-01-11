@@ -2887,6 +2887,8 @@ spl_autoload_register(
 						'crusaderam' => '/server/model/ships/orieni/crusaderAM.php',
 						'crusader2003am' => '/server/model/ships/orieni/crusader2003AM.php',
 						
+						'hightemplaram' => '/server/model/ships/orieni/hightemplarAM.php',
+						
 						
 						//Thirdspace
 						'psychicfield' => '/server/model/weapons/specialWeapons.php',

@@ -20,6 +20,7 @@ class ProtectorateRetlata extends HeavyCombatVessel{
         $this->pivotcost = 4;
         $this->iniativebonus = 15;
         $this->isd = 2006;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 
         $this->addPrimarySystem(new FusionCannon(3, 8, 1, 180, 0));
         $this->addPrimarySystem(new CargoBay(3, 35));

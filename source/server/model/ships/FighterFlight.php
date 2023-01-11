@@ -67,7 +67,18 @@ class FighterFlight extends BaseShip
         $this->userid = (int)$userid;
         $this->name = $name;
         $this->slot = $slot;
+		
+		//set flight size limit if not explicitly set!
+		if($this->maxFlightSize < 1){
+		    if ($this->jinkinglimit > 9) { //Medium and smaller
+				$this->maxFlightSize = 12;
+		    } else { //Heavy fighters
+				$this->maxFlightSize = 9;
+			}
+		}			
     }
+
+
 
     public function stripForJson() {
         $strippedShip = parent::stripForJson();
