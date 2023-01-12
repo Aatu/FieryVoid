@@ -4381,7 +4381,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 		      $this->data["Special"] .= "<br>Affected ships have their initiative reduced by 5 to 30 points, and their hit chance reduced by 5 - 15% for 1 turn.";  
 		      $this->data["Special"] .= "<br>Can be boosted, for +2 AoE range per level to maximum of 12 hexes."; 
 		      $this->data["Special"] .= "<br>Multiple overlapping Psychic Fields will only cause 1 (the strongest) attack on a particular target.";
-		      $this->data["Special"] .= "<br>Does no affect other Thirdspace units, and is only 50% effective against Advanced Armor.";  		       
+		      $this->data["Special"] .= "<br>Does not affect other Thirdspace units, and is only 50% effective against Advanced Armor.";  		       
 	    }	//endof function setSystemDataWindow
 	
 	
