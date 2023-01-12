@@ -4444,7 +4444,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 		$effecttohit = Dice::d(3,1);//strength of effect: 1d3
 		$effectIni5 = $effectIni * 5;
 		$effecttohit5 = $effecttohit * 5;	
-		$fireOrder->pubnotes .= "<br> Initiative reduced by $effectIni5, and hit chance reduced by $effecttohit5%.";
+		$fireOrder->pubnotes .= "<br> Initiative reduced by $effectIni5, and hit chance reduced by $effecttohit5%, unless Thirdspace units.";
 						
 		if ($system->advancedArmor){
 			if ($ship->faction == "Thirdspace"){

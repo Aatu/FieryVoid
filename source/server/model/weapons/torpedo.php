@@ -315,7 +315,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         public $damageType = "Flash"; 
         private $alreadyFlayed = false; //to avoid doing this multiple times      
                 
-        public $fireControl = array(-4, 3, 4); // fighters, <mediums, <capitals 
+        public $fireControl = array(-4, 3, 5); // fighters, <mediums, <capitals 
         public $priority = 1; //Flash! should strike first 
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -351,7 +351,18 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 	            }
 			} 
 	} //end of function onDamagedSystem   */
-	
+		
+		
+		//Ignores armor, nasty for flash damage on fighters.
+		public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos=null){
+		if ($system->advancedArmor){ //only ignores 50% of Advanced armor.
+            $armour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
+            $armour = floor($armour/2);
+            return $armour;
+		}else{					
+			return 0;
+        }
+	}    	
 
    protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
     {
@@ -429,8 +440,8 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= "Applies Flash damage, reduces armor of facing section (structure and all systems) by D3.";
-			$this->data["Special"] .= "<br>No effect on Advanced Armor.";			
+			$this->data["Special"] .= "<br>Ignores armor when dealing damage (ignores 50% on Advanced Armor).";	
+			$this->data["Special"] .= "Applies Flash damage and reduces armor of facing section (structure and all systems) by D3 (except Advanced Armor).";		
 			$this->data["Special"] .= "<br>Ballistic weapon that can use offensive EW.";
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";			
 		}
