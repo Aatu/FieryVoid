@@ -355,9 +355,9 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 		
 		//Ignores armor, nasty for flash damage on fighters.
 		public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos=null){
-		if ($system->advancedArmor){ //only ignores 50% of Advanced armor.
+		if ($system->advancedArmor){ //Negates Advanced armor's bonus against ballistics and reduces by a further 2.
             $armour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
-            $armour = floor($armour/2);
+            $armour = $armour-4;
             return $armour;
 		}else{					
 			return 0;
@@ -405,20 +405,23 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         }     
              
 			if (isset($this->alreadyFlayed[$target->id])) return;         	
-			$this->alreadyFlayed[$target->id] = true;//mark engaged         	              
-            
+			$this->alreadyFlayed[$target->id] = true;//mark engaged 
+			
+ 			if ($target instanceof FighterFlight) return;	//To ignore fighters if I want to.				
+			
+			        	                         
 	        $effectArmor = Dice::d(3,1);//strength of effect: 1d3
-			$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor unless Advanced Armor.";
+			$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor unless Advanced Armor.";	        
+
 		
             foreach ($target->systems as $system){
-                if ($system->advancedArmor) return;              	
- 				if ($target instanceof FighterFlight) return;	//To ignore fighters if I want to.					
+                if ($system->advancedArmor) return;              					
                 if ($target->shipSizeClass<=1 || $system->location === $location){ //MCVs and smaller ships are one huge section technically
 	             	for($i=1; $i<=$effectArmor;$i++){
 	                    $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
 	                    $crit->updated = true;
 	                    $crit->inEffect = false;
-	                    $system->criticals[] = $crit;
+	                    $system->criticals[] = $crit;                 
 		                }
 		            }
 				} 
@@ -440,8 +443,8 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= "<br>Ignores armor when dealing damage (ignores 50% on Advanced Armor).";	
-			$this->data["Special"] .= "Applies Flash damage and reduces armor of facing section (structure and all systems) by D3 (except Advanced Armor).";		
+			$this->data["Special"] .= "<br>Ignores armor when dealing damage (Advanced Armor is treated as 2 points less).";	
+			$this->data["Special"] .= "Deals Flash damage and reduces armor of facing section (structure and all systems) by D3 points (Advanced Armor is immune).";		
 			$this->data["Special"] .= "<br>Ballistic weapon that can use offensive EW.";
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";			
 		}

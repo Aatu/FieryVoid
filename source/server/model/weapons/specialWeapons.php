@@ -4451,7 +4451,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 			$effectIni = 0;  //Doesn't affect other Thirdspace aliens.
 			$effecttohit = 0;
 		}else{	
-			$effectIni = ceil($effectIni/2);  	//Other Ancients are only somewhat resistant to pyschic attack from Thirdspace Aliens, 50% effect.	
+			$effectIni = ceil($effectIni/2);  	//Other Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens, 50% effect.	
 			$effecttohit = ceil($effecttohit/2);
 			}
 		}
