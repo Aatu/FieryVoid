@@ -4,8 +4,8 @@ class ThirdspaceBattleship extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 6400;
-	$this->faction = "Thirdspace";
+		$this->pointCost = 6400;
+		$this->faction = "Thirdspace";
         $this->phpclass = "ThirdspaceBattleship";
         $this->imagePath = "img/ships/ThirdspaceBattleship.png";
         $this->shipClass = "Thirdspace Battleship";
@@ -27,7 +27,7 @@ class ThirdspaceBattleship extends BaseShip{
         $this->turncost = 1.5;
         $this->turndelaycost = 1.5;
         $this->accelcost = 6;
-        $this->rollcost = 8;
+        $this->rollcost = 6;
         $this->pivotcost = 4;
        
 		$this->iniativebonus = 2 *5;        
@@ -38,12 +38,9 @@ class ThirdspaceBattleship extends BaseShip{
 		$scanner->markAdvanced();
 		$this->addPrimarySystem($scanner);	        
         $this->addPrimarySystem(new Engine(7, 36, 0, 20, 3));
-		$this->addPrimarySystem(new JumpEngine(6, 28, 5, 5));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.  
 		$this->addPrimarySystem(new PsychicField(7, 0, 0, 0, 360));		
         $this->addPrimarySystem(new SelfRepair(7, 24, 12)); //armor, structure, output 
-//		$projector = new ThirdspaceShieldProjector(6, 24, 12, 10, 0, 360, 'F'); 
-//		$projection->addProjector($projector);
-//		$this->addPrimarySystem($projector);  Did not work to heal external shields, will just use overlap instead.			  		
+		$this->addPrimarySystem(new JumpEngine(6, 28, 5, 5));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
 	
         
       
@@ -59,8 +56,8 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 60));
         $this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 60));
         $this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 60));  	          		
-        $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));
-        $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));           
+        $this->addFrontSystem(new GraviticThruster(6, 24, 0, 8, 1));
+        $this->addFrontSystem(new GraviticThruster(6, 24, 0, 8, 1));           
 			
 		
 		$projection = new ThirdspaceShieldProjection(0, 120, 120, 120, 240, 'A');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
@@ -72,10 +69,10 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addAftSystem(new PsionicConcentrator(5, 0, 0, 120, 240)); 
         $this->addAftSystem(new PsionicConcentrator(5, 0, 0, 120, 240)); 
         $this->addAftSystem(new PsionicConcentrator(5, 0, 0, 120, 240)); 
-        $this->addAftSystem(new GraviticThruster(6, 24, 0, 8, 2));
-        $this->addAftSystem(new GraviticThruster(6, 24, 0, 8, 2));
-        $this->addAftSystem(new GraviticThruster(6, 24, 0, 8, 2));
-        $this->addAftSystem(new GraviticThruster(6, 24, 0, 8, 2));       
+        $this->addAftSystem(new GraviticThruster(6, 20, 0, 8, 2));
+        $this->addAftSystem(new GraviticThruster(6, 20, 0, 8, 2));
+        $this->addAftSystem(new GraviticThruster(6, 20, 0, 8, 2));
+        $this->addAftSystem(new GraviticThruster(6, 20, 0, 8, 2));       
        
        
         $projection = new ThirdspaceShieldProjection(0, 120, 120, 240, 0, 'L');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
@@ -90,8 +87,8 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addLeftSystem(new PsionicConcentrator(5, 0, 0, 180, 60)); 
         $this->addLeftSystem(new PsionicConcentrator(5, 0, 0, 180, 60));
         $this->addLeftSystem(new PsionicTorpedo(6, 0, 0, 240, 360));                              
-        $this->addLeftSystem(new GraviticThruster(6, 36, 0, 10, 3)); 
-        $LCVRail = new Catapult(5, 18, 3);
+        $this->addLeftSystem(new GraviticThruster(6, 32, 0, 10, 3)); 
+        $LCVRail = new Catapult(4, 12, 3);
         $LCVRail->displayName = "LCV Rail";        
         $this->addLeftSystem($LCVRail);                      
             
@@ -108,8 +105,8 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addRightSystem(new PsionicConcentrator(5, 0, 0, 300, 180)); 
         $this->addRightSystem(new PsionicConcentrator(5, 0, 0, 300, 180));
 		$this->addRightSystem(new PsionicTorpedo(6, 0, 0, 0, 120));                  
-        $this->addRightSystem(new GraviticThruster(6, 36, 0, 10, 4)); 
-        $LCVRail = new Catapult(5, 18, 3);		
+        $this->addRightSystem(new GraviticThruster(6, 32, 0, 10, 4)); 
+        $LCVRail = new Catapult(4, 12, 3);		
         $LCVRail->displayName = "LCV Rail";							  	
         $this->addRightSystem($LCVRail); 			                      
               			          

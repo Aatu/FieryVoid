@@ -2604,7 +2604,7 @@ spl_autoload_register(
 				'rangedfuser' => '/server/model/weapons/plasma.php',
 				'dualplasmastream' => '/server/model/weapons/specialWeapons.php',	
 				'reshkasu' => '/server/model/ships/pakmara/Reshkasu.php',
-				'shobogna' => '/server/model/ships/pakmara/Shobogna.php',																			
+				'shobogna' => '/server/model/ships/pakmara/Shobogna.php',										
 				'orshilti' => '/server/model/ships/pakmara/Orshilti.php',
 				'porfatis' => '/server/model/ships/pakmara/Porfatis.php',
 				'pshulshi' => '/server/model/ships/pakmara/Pshulshi.php',
@@ -2619,7 +2619,8 @@ spl_autoload_register(
 				'plasalle' => '/server/model/ships/pakmara/Plasalle.php',
 				'sashulkur' => '/server/model/ships/pakmara/Sashulkur.php',
 				'simtorka' => '/server/model/ships/pakmara/Simtorka.php',
-				'uriktal' => '/server/model/ships/pakmara/Uriktal.php',																																																				
+				'uriktal' => '/server/model/ships/pakmara/Uriktal.php',
+				'thorkaosat' => '/server/model/ships/pakmara/ThorkaOSAT.php',																																																				
 				
 
 				//Hyach
