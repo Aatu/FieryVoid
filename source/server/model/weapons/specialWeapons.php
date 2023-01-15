@@ -4378,7 +4378,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 		      //$this->data["AoE"] = $this->getAoE($turn);
 		      $this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.  It should not be fired manually."; 
 	//	      $this->data["Special"] .= "<br>"; 
-		      $this->data["Special"] .= "<br>Affected ships have their initiative reduced by 5 to 30 points, and their hit chance reduced by 5 - 15% for 1 turn.";  
+		      $this->data["Special"] .= "<br>Affected ships have their initiative reduced by 5 to 20 points, and their hit chance reduced by 5 - 15% for 1 turn.";  
 		      $this->data["Special"] .= "<br>Can be boosted, for +2 AoE range per level to maximum of 12 hexes."; 
 		      $this->data["Special"] .= "<br>Multiple overlapping Psychic Fields will only cause 1 (the strongest) attack on a particular target.";
 		      $this->data["Special"] .= "<br>Does not affect other Thirdspace units, and is only 50% effective against Advanced Armor.";  		       
@@ -4910,7 +4910,7 @@ class PsionicConcentrator extends Raking{
 	public $intercept = 2; //intercept rating -1     
 	
         public $priority = 6;
-        public $priorityArray = array(1=>6, 2=>4, 3=>5, 4=>4); //weakest mode is light standard weapon, heavier ones are heavy raking weapons
+        public $priorityArray = array(1=>6, 2=>4, 3=>5, 4=>4); //weakest mode is standard weapon, heavier ones are raking weapons
 	public $firingMode = 1;	
             public $firingModes = array(
                 1 => "Single",
@@ -4918,10 +4918,10 @@ class PsionicConcentrator extends Raking{
                 3 => "3combined",
                 4 => "4combined"
             );
-        public $rangePenalty = 0.5; //-1/2 hexes
-            public $rangePenaltyArray = array( 1=>0.5, 2=>1, 3=>0.33, 4=>0.33); //Standard and Raking modes
+        public $rangePenalty = 1;
+            public $rangePenaltyArray = array( 1=>1, 2=>0.5, 3=>0.33, 4=>0.33); //Standard and Raking modes
         public $fireControl = array(6, 4, 4); // fighters, <mediums, <capitals 
-            public $fireControlArray = array( 1=>array(6, 4, 4), 2=>array(7, 5, 5), 3=>array(7, 5, 5), 4=>array(8, 6, 6)); //+1 fire control the more concentrators are used to hit per every additional combining weapon
+            public $fireControlArray = array( 1=>array(6, 4, 4), 2=>array(4, 4, 5), 3=>array(2, 5, 4), 4=>array(2, 4, 5)); //+1 fire control the more concentrators are used to hit per every additional combining weapon
             
     public $uninterceptable = false;
     public $uninterceptableArray = array(1=>false, 2=>false, 3=>true, 4=>true);            
@@ -4944,8 +4944,8 @@ class PsionicConcentrator extends Raking{
 	
 	    public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Can combine multiple Psionic Concentrator on a ship into one concentrated shot -with improved Fire Control and +1d10 damage per additional weapon (up to 4 Concentrators can be combined).";
-		      $this->data["Special"] .= "<br>Two Concentrators will deliver a Standard damage shot with shorter range.  Three or four combined will fire a longer ranged, uninterceptable raking shot at 10 and 15 point rakes respectively.";		        
+		      $this->data["Special"] = "Can combine multiple Psionic Concentrator on a ship into one concentrated shot with adapted Fire Control and an additional 1d10+3 damage per additional weapon (up to 4 Concentrators can be combined).";
+		      $this->data["Special"] .= "<br>Two Concentrators will deliver a Standard damage shot with longer range.  Three or four combined will fire a long-ranged, uninterceptable raking shot at 10 and 15 point rakes respectively.";		        
 		      $this->data["Special"] .= "<br>If You allocate multiple Concentrators in the same higher mode of fire at the same target, they will be combined.";		       
 		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in highest actually possible mode instead.";  		  
 		      $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";
@@ -5014,8 +5014,9 @@ class PsionicConcentrator extends Raking{
 		if ($ship instanceof FighterFlight) $mod++;		
 		$system->critRollMod += $mod; 
 	} //endof function onDamagedSystem	
+
 	
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ){
@@ -5029,7 +5030,7 @@ class PsionicConcentrator extends Raking{
 	
 	
     public function getDamage($fireOrder){
-		return Dice::d(10, 1+$this->firingMode)+($this->firingMode*3); //2d10+5 +1d10 per every additional weapon
+		return Dice::d(10, 1+$this->firingMode)+($this->firingMode*3); //2d10+3 +1d10+3 per every additional weapon
 	}
 	public function setMinDamage(){    
 		$this->minDamage = 1+$this->firingMode+($this->firingMode*3);
