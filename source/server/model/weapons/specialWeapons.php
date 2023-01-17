@@ -4919,9 +4919,9 @@ class PsionicConcentrator extends Raking{
                 4 => "4combined"
             );
         public $rangePenalty = 1;
-            public $rangePenaltyArray = array( 1=>1, 2=>0.5, 3=>0.33, 4=>0.33); //Standard and Raking modes
+            public $rangePenaltyArray = array( 1=>1, 2=>0.5, 3=>0.5, 4=>0.5); //Standard and Raking modes
         public $fireControl = array(6, 4, 4); // fighters, <mediums, <capitals 
-            public $fireControlArray = array( 1=>array(6, 4, 4), 2=>array(4, 4, 5), 3=>array(2, 5, 4), 4=>array(2, 4, 5)); //+1 fire control the more concentrators are used to hit per every additional combining weapon
+            public $fireControlArray = array( 1=>array(6, 4, 4), 2=>array(4, 4, 5), 3=>array(2, 4, 3), 4=>array(2, 3, 4)); //+1 fire control the more concentrators are used to hit per every additional combining weapon
             
     public $uninterceptable = false;
     public $uninterceptableArray = array(1=>false, 2=>false, 3=>true, 4=>true);            
@@ -4945,7 +4945,7 @@ class PsionicConcentrator extends Raking{
 	    public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
 		      $this->data["Special"] = "Can combine multiple Psionic Concentrator on a ship into one concentrated shot with adapted Fire Control and an additional 1d10+3 damage per additional weapon (up to 4 Concentrators can be combined).";
-		      $this->data["Special"] .= "<br>Two Concentrators will deliver a Standard damage shot with longer range.  Three or four combined will fire a long-ranged, uninterceptable raking shot at 10 and 15 point rakes respectively.";		        
+		      $this->data["Special"] .= "<br>Two Concentrators will deliver a Standard damage shot with longer range.  Three or four combined will fire an uninterceptable raking shot at 10 and 15 point rakes respectively.";		        
 		      $this->data["Special"] .= "<br>If You allocate multiple Concentrators in the same higher mode of fire at the same target, they will be combined.";		       
 		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in highest actually possible mode instead.";  		  
 		      $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";
