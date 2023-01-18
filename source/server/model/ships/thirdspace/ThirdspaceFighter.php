@@ -27,7 +27,7 @@ class ThirdspaceFighter extends LCV{ //Actually an LCV.
 	$this->accelcost = 2;
 	$this->rollcost = 1;
 	$this->pivotcost = 1;
-	$this->iniativebonus = 14 *5;
+	$this->iniativebonus = 15 *5;
 		
 	$this->hangarRequired = "LCVs";
 	    
@@ -41,7 +41,7 @@ class ThirdspaceFighter extends LCV{ //Actually an LCV.
 	$sensors = new Scanner(6, 16, 4, 9);
 		$sensors->markAdvanced();
 		$this->addPrimarySystem($sensors);
-	$this->addPrimarySystem(new JumpEngine(5, 10, 4, 8));//Added a small jump drive, how they travel is unknown but if White Star can house a jump drive it's not unfeasible Thirdspace aliens would have  FTL drive on their smaller craft.
+	$this->addPrimarySystem(new JumpEngine(5, 10, 4, 8));//Added a small jump drive, how they travel is unknown but if White Star can house a jump drive it's not unfeasible Thirdspace aliens would have a FTL drive on their smaller craft.
 	$this->addPrimarySystem(new Engine(6, 14, 0, 12, 2));
     $this->addPrimarySystem(new SelfRepair(5, 24, 2)); //armor, structure, output 	
 
