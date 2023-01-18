@@ -4910,7 +4910,7 @@ class PsionicConcentrator extends Raking{
 	public $intercept = 2; //intercept rating -1     
 	
         public $priority = 6;
-        public $priorityArray = array(1=>6, 2=>4); //weakest mode is standard weapon, heavier ones are raking weapons
+        public $priorityArray = array(1=>6, 2=>4);
 	public $firingMode = 1;	
             public $firingModes = array(
                 1 => "Single",
