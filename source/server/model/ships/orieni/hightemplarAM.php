@@ -52,10 +52,11 @@ class HighTemplarAM extends FighterFlight{
 			//OPTIONS are: nothing (they started to use fighter missiles late in the war, and didn't have time to develop anything beyond basics)
 			//or similar to shipborne ones (they could develop the same alterations to basic missile frame as they did for shipborne missiles simultaneously, and have them available).
 			//I decided to go with the latter reasoning - fighter missiles are pricy, and High Templar is not a very good missile platform, so it should not be destabilizing, and options are always interesting).
+			//as for Dogfight missiles - their availability is generally the same as Basic missiles, so I'm allowing them too!
 			$this->enhancementOptionsEnabled[] = 'AMMO_FB';//add enhancement options for missiles - Class-FB
 			$this->enhancementOptionsEnabled[] = 'AMMO_FL';//add enhancement options for missiles - Class-FL
 			$this->enhancementOptionsEnabled[] = 'AMMO_FH';//add enhancement options for missiles - Class-FH
-			//$this->enhancementOptionsEnabled[] = 'AMMO_FY';//add enhancement options for missiles - Class-FY
+			$this->enhancementOptionsEnabled[] = 'AMMO_FY';//add enhancement options for missiles - Class-FY
 			//$this->enhancementOptionsEnabled[] = 'AMMO_FD';//add enhancement options for missiles - Class-FD
 
             $fighter->addFrontSystem(new PairedGatlingGun(330, 30));
