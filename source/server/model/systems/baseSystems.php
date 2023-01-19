@@ -3673,7 +3673,6 @@ class AmmoMissileTemplate{
 	public $rangeMod = 0; //MODIFIER for launch range
 	public $distanceRangeMod = 0; //MODIFIER for distance range
 	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
-	public $onboardFC = array(0, 0, 0); //for fighter missiles putting everything into weapon FC would be incorrect - as FC is not used if out of arc... 
 	public $minDamage = 0;
 	public $maxDamage = 0;	
 	public $damageType = 'Standard';//mode of dealing damage
@@ -3969,7 +3968,7 @@ class AmmoMissileFB extends AmmoMissileTemplate{
 	
 	public $rangeMod = 0; //MODIFIER for launch range
 	public $distanceRangeMod = 0; //MODIFIER for distance range
-	public $onboardFC = array(3, 3, 3); //for fighter missiles putting everything into weapon FC would be incorrect - as FC is not used if out of arc... 
+	public $fireControlMod = array(3, 3, 3); 
 	public $minDamage = 10;
 	public $maxDamage = 10;	
 	public $damageType = 'Standard';//mode of dealing damage
@@ -3997,7 +3996,7 @@ class AmmoMissileFL extends AmmoMissileTemplate{
 	
 	public $rangeMod = 5; //MODIFIER for launch range
 	public $distanceRangeMod = 5; //MODIFIER for distance range
-	public $onboardFC = array(3, 3, 3); //for fighter missiles putting everything into weapon FC would be incorrect - as FC is not used if out of arc... 
+	public $fireControlMod = array(3, 3, 3); //for fighter missiles putting everything into weapon FC would be incorrect - as FC is not used if out of arc... 
 	public $minDamage = 8;
 	public $maxDamage = 8;	
 	public $damageType = 'Standard';//mode of dealing damage
@@ -4031,7 +4030,7 @@ class AmmoMissileFH extends AmmoMissileTemplate{
 	
 	public $rangeMod = -5; //MODIFIER for launch range
 	public $distanceRangeMod = -5; //MODIFIER for distance range
-	public $onboardFC = array(1, 3, 3); //for fighter missiles putting everything into weapon FC would be incorrect - as FC is not used if out of arc... 
+	public $fireControlMod = array(1, 3, 3); //for fighter missiles putting everything into weapon FC would be incorrect - as FC is not used if out of arc... 
 	public $minDamage = 15;
 	public $maxDamage = 15;	
 	public $damageType = 'Standard';//mode of dealing damage
@@ -4064,7 +4063,7 @@ class AmmoMissileFY extends AmmoMissileTemplate{
 	
 	public $rangeMod = -2; //MODIFIER for launch range
 	public $distanceRangeMod = -2; //MODIFIER for distance range
-	public $onboardFC = array(3, 3, 3); //for fighter missiles putting everything into weapon FC would be incorrect - as FC is not used if out of arc... 
+	public $fireControlMod = array(3, 3, 3); //for fighter missiles putting everything into weapon FC would be incorrect - as FC is not used if out of arc... 
 	public $minDamage = 6;
 	public $maxDamage = 6;	
 	public $damageType = 'Standard';//mode of dealing damage
@@ -4091,7 +4090,7 @@ class AmmoMissileFD extends AmmoMissileTemplate{
 	public $enhancementDescription = '(ammo) Dropout Missile (2221/2245)'; 
 	public $enhancementPrice = 10; //PV per missile; originally it's 8 for Kor-Lyan and 10 for everyone else
 	
-	public $onboardFC = array(3, 1, 1); //for fighter missiles putting everything into weapon FC would be incorrect - as FC is not used if out of arc... 
+	public $fireControlMod = array(3, 1, 1); //for fighter missiles putting everything into weapon FC would be incorrect - as FC is not used if out of arc... 
 	public $minDamage = 6;
 	public $maxDamage = 6;	
 	public $damageType = 'Standard';//mode of dealing damage

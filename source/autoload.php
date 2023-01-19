@@ -2822,11 +2822,12 @@ spl_autoload_register(
 						'athraskalacam' => '/server/model/ships/dilgar/athraskalaCAM.php',
 						'targathcam' => '/server/model/ships/dilgar/targathCAM.php',
 						'eskravatam' => '/server/model/ships/dilgar/eskravatAM.php',
-						'delegor' => '/server/model/ships/dilgar/delegor.php',
-						
+						'delegor' => '/server/model/ships/dilgar/delegor.php',						
 						'ochlavitaam' => '/server/model/ships/dilgar/ochlavitaAM.php',
 						'ochlavitamam' => '/server/model/ships/dilgar/ochlavitaMAM.php',
 						'ochlavitadam' => '/server/model/ships/dilgar/ochlavitaDAM.php',
+						
+						'thorunheavyam' => '/server/model/ships/dilgar/thorunHeavyAM.php',
 						
 						//Drazi						
 						'darkhawkam' => '/server/model/ships/drazi/darkhawkAM.php', 
@@ -2848,6 +2849,8 @@ spl_autoload_register(
 						'borocadaam' => '/server/model/ships/hurr/borocadaAM.php',
 						'norekam' => '/server/model/ships/hurr/norekAM.php',
 						'anoroam' => '/server/model/ships/hurr/anoroAM.php',
+						
+						'koetham' => '/server/model/ships/hurr/koethAM.php',
 						
 						//Small Races - Rogolon						
 						'rogolonrogonam' => '/server/model/ships/smallraces/rogolonRogonAM.php',
