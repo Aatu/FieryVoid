@@ -4896,7 +4896,7 @@ class PsionicConcentrator extends Raking{
 	public $iconPath = "PsionicConcentrator.png";
 	
 	public $animation = "bolt";
-	    public $animationArray = array( 1=>"bolt", 2=>"bolt", 3=>"laser", 4=>"laser");
+	    public $animationArray = array( 1=>"bolt", 2=>"bolt");
     public $animationColor = array(128, 0, 0);
 	/*
 	public $trailColor = array(30, 170, 255);	
@@ -4914,7 +4914,7 @@ class PsionicConcentrator extends Raking{
 	public $firingMode = 1;	
             public $firingModes = array(
                 1 => "Single",
-                2 => "Double",
+                2 => "Double"
   //              3 => "3combined",
  //               4 => "4combined"
             );
@@ -4944,7 +4944,7 @@ class PsionicConcentrator extends Raking{
 	
 	    public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Can combine two Psionic Concentrators into longer-ranged, concentrated shot with improved Fire Control against ships and an additional 1d10+3 damage.";
+		      $this->data["Special"] = "Can combine two Psionic Concentrators into longer-ranged, concentrated shot with improved Fire Control against ships and an additional 1d10+4 damage.";
 //		      $this->data["Special"] .= "<br>Two Concentrators will deliver a Standard damage shot with longer range.  Three or four combined will fire an uninterceptable Raking shot inflicting 10 and 15 point rakes respectively.";		      
 		      $this->data["Special"] .= "<br>If You allocate multiple Concentrators to the same Double mode of fire at the same target, they will be combined.";		       
 		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in Single mode instead.";  		  
@@ -5030,14 +5030,14 @@ class PsionicConcentrator extends Raking{
 	
 	
     public function getDamage($fireOrder){
-		return Dice::d(10, 1+$this->firingMode)+($this->firingMode*3); //2d10+3 +1d10+3 per every additional weapon
+		return Dice::d(10, 1+$this->firingMode)+($this->firingMode*4); //2d10+3 +1d10+3 per every additional weapon
 	}
 	public function setMinDamage(){    
-		$this->minDamage = 1+$this->firingMode+($this->firingMode*3);
+		$this->minDamage = 1+$this->firingMode+($this->firingMode*4);
 		$this->minDamageArray[$this->firingMode] = $this->minDamage;
 	}
 	public function setMaxDamage(){
-		$this->maxDamage = 10*(1+$this->firingMode)+($this->firingMode*3);
+		$this->maxDamage = 10*(1+$this->firingMode)+($this->firingMode*4);
 		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;  
 	}
 } //endof class PsionicConcentrator
