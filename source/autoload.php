@@ -2678,7 +2678,8 @@ spl_autoload_register(
 //         		'chaffmissile' => '/server/model/weapons/customNexus.php', 
          		'proximitylaser' => '/server/model/weapons/customNexus.php', 
          		'fmissilerack' => '/server/model/weapons/customNexus.php', 
-//         		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
+         		'ammomissilerackf' => '/server/model/weapons/customNexus.php', 
+         		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
          		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
 //				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 //				'koloskova' => '/server/model/ships/korlyan/Koloskova.php',

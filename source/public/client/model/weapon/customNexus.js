@@ -907,9 +907,9 @@ NexusTestBlaster.prototype.constructor =  NexusTestBlaster;
 
 
 var LimpetBoreTorp = function  LimpetBoreTorp(json, ship) {
-    Weapon.call(this, json, ship);
+    Ballistic.call(this, json, ship);
 };
-LimpetBoreTorp.prototype = Object.create(Weapon.prototype);
+LimpetBoreTorp.prototype = Object.create(Ballistic.prototype);
 LimpetBoreTorp.prototype.constructor =  LimpetBoreTorp;
 
 var LimpetBoreBase = function  LimpetBoreBase(json, ship) {
@@ -985,3 +985,9 @@ var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {
 };
 MultiDefenseLauncher.prototype = Object.create(Weapon.prototype);
 MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;
+
+var AmmoMissileRackF = function AmmoMissileRackF(json, ship) {
+    Ballistic.call(this, json, ship);
+};
+AmmoMissileRackF.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackF.prototype.constructor = AmmoMissileRackF;
