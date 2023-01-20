@@ -83,7 +83,7 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Options highlighted</b> - now enhancement entries representing regular options are highlighted as such (and Fleet Checker does not warn about them)
 	    <br><b>Non-combat units blocked</b> - Fleet Checker now checks non-combat ship presence (like for fixed defenses)
 	    <br><b>Small flights blocked</b> - Fleet Checker now checks flight smaller than 6 craft
-
+ 
 		 <br><br>---------- <b>update 20th of January</b> ---------- 
 	    <br><b><u><big>Thirdspace</big></u> arrived</b> - custom faction by Douglas
 	    <br><b>Ammo Magazine for fighters</b> - Dilgar, Hurr
