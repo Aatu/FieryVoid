@@ -177,8 +177,8 @@ window.createGame = {
         $(".spacex").val(30);
         $(".spacey").val(30);
         $(".deptype").val("box");
-        $("#team1 .depx").val(-13);
-        $("#team2 .depx").val(12);
+        $("#team1 .depx").val(-12);
+        $("#team2 .depx").val(11);
         $("#team1 .depy").val(0);
         $("#team2 .depy").val(0);
         $("#team1 .depwidth").val(7);
