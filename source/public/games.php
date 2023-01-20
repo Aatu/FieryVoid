@@ -92,7 +92,7 @@ if (isset($_SESSION["user"])) {
 		
 	    
         <br><br><br>
-        Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
+        Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>)</big> <b>whenever something weird happens</b></font>.
 
         
 		
