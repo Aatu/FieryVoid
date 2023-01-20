@@ -448,7 +448,213 @@ class HeavyInterceptorBattery extends InterceptorMkI{
    
 }  //end of class HeavyInterceptorBattery
 
+//Adding Thirdspace as unique systems to use different icon and allow modifictions from the Trek systems
+class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //defensive values of zero, but still formally there to display arcs!
+	    public $name = "ThirdspaceShieldProjection";
+	    public $displayName = "Shield Projection";
+	    public $primary = true;
+		public $isPrimaryTargetable = false; //shouldn't be targetable at all, in fact!
+		public $isTargetable = false; //cannot be targeted ever!
+	    public $iconPath = "TrekShieldProjection.png"; //overridden anyway - to indicate proper direction
+	    
+		public $possibleCriticals = array(); //no criticals possible
+		
+		//Shield Projections cannot be repaired at all!
+		public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 
+		private $projectorList = array();
+		
+	    
+	    function __construct($armor, $maxhealth, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$this->iconPath = 'TrekShieldProjection' . $side . '.png';
+			parent::__construct($armor, $maxhealth, 0, $rating, $startArc, $endArc);
+			$this->output=$rating;//output is displayed anyway, make it show something useful... in this case - number of points absorbed per hit
+				}
+		
+		
+	    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
+	            return 0;
+	    }
+		public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){ //no shield-like damage reduction
+			return 0;
+		}
+	    private function checkIsFighterUnderShield($target, $shooter, $weapon){ //no flying under shield
+	        return false;
+	    }
+		
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);  
+			$absorb = $this->output - $this->armour;
+			$this->data["Special"] = "Defensive system which absorbs damage from incoming shots before they damage ship hull.";
+			$this->data["Special"] .= "<br>Can absorb up to its maximum capacity before allowing damage to ship.";
+			$this->data["Special"] .= "<br>Shield system's structure represents damage capacity, if it is reduced to zero system will cease to function.";
+			$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
+			$this->data["Special"] .= "<br>Cannot be flown under, and does not reduce the damage dealt or hit chance of enemy weapons.";
+			
+			$this->outputDisplay = $this->getRemainingCapacity();//override on-icon display default
+		}	
+		
+		public function getRemainingCapacity(){
+			return $this->getRemainingHealth();
+		}
+		
+		public function getUsedCapacity(){
+			return $this->getTotalDamage();
+		}
+		
+		public function absorbDamage($ship,$gamedata,$value){ //or dissipate, with negative value
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, -1, false, false, "Absorb/Regenerate!", "ThirdspaceShieldProjection");
+			$damageEntry->updated = true;
+			$this->damage[] = $damageEntry;
+		}
+		
+		
+		
+		//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
+		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
+	//		if($damageWasDealt) return 0; //Thirdspace shields do protect from overkill
+			
+			$remainingCapacity = $this->getRemainingCapacity();
+			$protectionValue = 0;
+			if($remainingCapacity>0){
+				$protectionValue = $remainingCapacity+$this->armour; //this is actually more than this system can protect from - but allows to balance load between systems in arc
+			}
+			return $protectionValue;
+		}
+		//actual protection
+		public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $systemProtected, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
+			$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
+			$damageToAbsorb=$effectiveDamage; //shield works BEFORE armor
+			$damageAbsorbed=0;
+			
+			if($damageToAbsorb<=0) return $returnValues; //nothing to absorb
+			
+			$remainingCapacity = $this->getRemainingCapacity();
+			$absorbedDamage = 0;
+			
+			if($remainingCapacity>0) { //else projection does not protect
+				$absorbedFreely = 0;
+				//first, armor takes part
+				$absorbedFreely = min($this->armour, $damageToAbsorb);
+	//			$damageToAbsorb += -$absorbedFreely;
+				//next, actual absorbtion
+				$absorbedDamage = min($this->output - $this->armour , $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
+				$damageToAbsorb += -$absorbedDamage;
+				if($absorbedDamage>0){ //mark!
+					$this->absorbDamage($target,$gamedata,$absorbedDamage);
+				}
+				$returnValues['dmg'] = $damageToAbsorb;
+				$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
+			}
+			
+			return $returnValues;
+		} //endof function doProtect
+		    
+		function addProjector($projector){
+			if($projector) $this->projectorList[] = $projector;
+		}
+		
+		//effects that happen in Critical phase (after criticals are rolled) - replenishment from active projectors 
+		public function criticalPhaseEffects($ship, $gamedata){
+			if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
+			
+			$activeProjectors = 0;
+			$projectorOutput = 0;
+			$toReplenish = 0;
+			
+			foreach($this->projectorList as $projector){
+				if ( ($projector->isDestroyed($gamedata->turn))
+				     || ($projector->isOfflineOnTurn($gamedata->turn))
+				) continue;
+				$activeProjectors++;
+				$projectorOutput += $projector->getOutputOnTurn($gamedata->turn);
+			}
+			/*after all - shield will NOT fall!
+			if($activeProjectors <= 0){ //no active projectors - shield is falling!
+				$toReplenish = -$this->getRemainingCapacity();	
+				*/
+			if($activeProjectors > 0){ //active projectors present - reinforce shield!
+				$toReplenish = min($projectorOutput,$this->getUsedCapacity());		
+			}
+			
+			if($toReplenish != 0){ //something changes!
+				$this->absorbDamage($ship,$gamedata,-$toReplenish);
+			}
+		} //endof function criticalPhaseEffects
+		
+		public function stripForJson() {
+	        $strippedSystem = parent::stripForJson();
+
+			$strippedSystem->outputDisplay = $this->outputDisplay;
+			
+	        return $strippedSystem;
+		}
+}//endof class ThirdspaceProjection
+
+
+/* ThirdspaceShieldProjector: reinforces shield projection (and prevents it from falling)
+ actual reinforcing (and falling) is done from Projection's own end, Projector just is (needs to be plugged into appropriate projection at design stage
+*/
+class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //defensive values of zero, but still formally there to display arcs!
+	    public $name = "ThirdspaceShieldProjector";
+	    public $displayName = "Shield Projector";
+		public $isPrimaryTargetable = false; //projector can be targeted even on PRIMARY, like a weapon!
+	    public $iconPath = "TrekShieldProjectorF.png"; //overridden anyway - to indicate proper direction
+	    public $boostable = true; //$this->boostEfficiency and $this->maxBoostLevel in __construct()  
+		public $boostEfficiency = 4;
+	    public $baseOutput = 0; //base output, before boost
+	    
+		
+	    public $possibleCriticals = array(
+	            19=>"OutputReduced1",
+	            28=>"OutputReduced2" );
+		
+		public $repairPriority = 9;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+
+	    
+	    function __construct($armor, $maxhealth, $power, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$this->iconPath = 'TrekShieldProjector' . $side . '.png';
+			parent::__construct($armor, $maxhealth, $power, $rating, $startArc, $endArc);
+			$this->baseOutput = $rating;
+			$this->maxBoostLevel = $rating; //maximum double effect		
+		}
+		
+		
+	    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
+	            return 0;
+	    }
+		public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){ //no shield-like damage reduction
+			return 0;
+		}
+	    private function checkIsFighterUnderShield($target, $shooter){ //no flying under shield
+	        return false;
+	    }
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn); 
+			$this->data["Special"] = "Shield projector - replenishes 4 structure of appropriate Shield Projection per point of Projector's rating at end of turn.";
+			$this->data["Special"] .= "<br>Can be boosted.";
+		}	
+		
+	    public function getOutputOnTurn($turn){
+	        $output = ($this->getOutput() + $this->getBoostLevel($turn))*4;
+	        return $output;
+	    }
+		
+		
+		private function getBoostLevel($turn){
+			$boostLevel = 0;
+			foreach ($this->power as $i){
+					if ($i->turn != $turn) continue;
+					if ($i->type == 2){
+							$boostLevel += $i->amount;
+					}
+			}
+			return $boostLevel;
+		}
+		
+} //endof class ThirdspaceShieldProjector
 
 
 ?>

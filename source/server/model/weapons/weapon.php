@@ -167,7 +167,7 @@ class Weapon extends ShipSystem
 
 
 
-	//Weapons are repaired before "avarage system", but after really important things! 
+	//Weapons are repaired before "average system", but after really important things! 
 	public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
 

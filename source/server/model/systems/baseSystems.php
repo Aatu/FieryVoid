@@ -499,6 +499,33 @@ class MagGravReactorTechnical extends MagGravReactor{
 	}		
 }//endof MagGravReactor		
 
+class AdvancedSingularityDrive extends Reactor{
+/*Advanced version of Mag-Gravitic Reactor, used by custom Thirdspace faction;
+	provides fixed power regardless of systems;
+	techical implementation: count as Power minus power required by all systems enabled
+*/	
+    public $iconPath = "AdvancedSingularityDrive.png";
+    
+	public $possibleCriticals = array( //different set of criticals than standard Reactor
+		20=>"FieldFluctuations",
+		25=>array("FieldFluctuations", "FieldFluctuations"),
+		30=>array("FieldFluctuations", "FieldFluctuations", "FieldFluctuations")
+	);
+	
+	function __construct($armour, $maxhealth, $powerReq, $output ){
+		parent::__construct($armour, $maxhealth, $powerReq, $output );    
+		$this->fixedPower = true;
+	}
+	
+	public function setSystemDataWindow($turn){
+		$this->data["Output"] = $this->output;
+		parent::setSystemDataWindow($turn);     
+		$this->data["Special"] .= "<br>Advanced Mag-Gravitic Reactor: provides fixed total power, regardless of destroyed systems.";
+	}	
+	
+}//endof AdvancedSingularityDrive		
+
+
 //warning: needs external code to function properly. Intended for starbases only.
 /* let's disable it - all use changed to SubReactorUniversal!
 class SubReactor extends ShipSystem{	
@@ -1172,6 +1199,27 @@ class ProtectedCnC extends CnC{
     );
 	
 }//endof class ProtectedCnC
+
+class ThirdspaceCnC extends CnC{
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+	}
+	
+	public $possibleCriticals = array(
+		10=>"CommunicationsDisrupted", 
+		17=>"PenaltyToHit", 
+		25=>array("ReducedIniativeOneTurn","ReducedIniative"), 
+		33=>array("RestrictedEWOneTurn","ReducedIniativeOneTurn","ReducedIniative"), 
+		40=>array("RestrictedEW","ReducedIniative","PenaltyToHit")
+    );
+	
+}//endof class ThirdspaceCnC
 	
 class PakmaraCnC extends CnC{
 	
