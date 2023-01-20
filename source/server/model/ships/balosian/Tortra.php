@@ -37,7 +37,7 @@ class Tortra extends FighterFlight{
             $fighter = new Fighter("Tortra", $armour, 12, $this->id);
             $fighter->displayName = "Tortra";
             $fighter->imagePath = "img/ships/Tortra.png";
-            $fighter->iconPath = "img/ships/Tortra_Large.png";
+            $fighter->iconPath = "img/ships/Tortra_large.png";
 
 		$gun = new LightParticleBeam(330, 30, 1);
 		$gun->displayName = "Ultralight Particle Beam";

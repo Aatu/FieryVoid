@@ -15,7 +15,9 @@ class ThorunHeavy extends FighterFlight{
 
 
         $this->occurence = "rare";
-        $this->variantOf = "Thorun Dartfighters";
+        //$this->variantOf = "Thorun Dartfighters";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+
 		
 		$this->enhancementOptionsEnabled[] = 'NAVIGATOR'; //this flight can take Navigator enhancement option	
         

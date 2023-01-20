@@ -1024,7 +1024,6 @@ class AmmoMissileRackS extends Weapon{
     public $iconPath = "missile1.png";    
 		
 	public $checkAmmoMagazine = true;
-	protected $usesOrdnance = true; //indicates that onboardFC should be shown!
 	
     public $useOEW = false; //missiles are NOT using OEW in any form; they do have built-in seeking head instead (in FieryVoid merged into Fire Control for simplicity)
     public $ballistic = true;
@@ -1128,7 +1127,6 @@ class AmmoMissileRackS extends Weapon{
 		$this->minDamageArray = array();
 		$this->maxDamageArray = array();
 		$this->ammoClassesUsed = array();
-		$this->onboardFCArray = array();
 		
 		//add data for all modes to arrays
 		$currMode = 0;
@@ -1141,7 +1139,6 @@ class AmmoMissileRackS extends Weapon{
 				$this->firingModes[$currMode] = $currAmmo->modeName;
 				$this->damageTypeArray[$currMode] = $currAmmo->damageType; 
 				$this->weaponClassArray[$currMode] = $currAmmo->weaponClass; 	
-				$this->onboardFCArray[$currMode] = $currAmmo->onboardFC; 	
 				
 				$fc0 = 0;
 				if(($this->basicFC[0] === null) || ($currAmmo->fireControlMod[0]===null)) {
@@ -1201,7 +1198,6 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->noOverkillArray = $this->noOverkillArray; 
 		$strippedSystem->minDamageArray = $this->minDamageArray; 
 		$strippedSystem->maxDamageArray = $this->maxDamageArray; 
-		$strippedSystem->onboardFCArray = $this->onboardFCArray; 
 		return $strippedSystem;
 	} 
 	

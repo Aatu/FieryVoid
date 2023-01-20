@@ -11,7 +11,7 @@ class Thorun extends FighterFlight{
         $this->imagePath = "img/ships/thorun.png";
         $this->isd = 2226;
 				
-        $this->notes = '+5 Initiative bonu as long as flight leader is alive and uninjured.';
+        $this->notes = '+5 Initiative bonus as long as flight leader is alive and uninjured.';
 
         $this->forwardDefense = 8;
         $this->sideDefense = 7;

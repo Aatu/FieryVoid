@@ -139,3 +139,4 @@ var MultiphasedCutter = function MultiphasedCutter(json, ship) {
 MultiphasedCutter.prototype = Object.create(Weapon.prototype);
 MultiphasedCutter.prototype.constructor = MultiphasedCutter;
 
+

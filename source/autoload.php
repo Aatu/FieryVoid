@@ -2476,7 +2476,8 @@ spl_autoload_register(
 				'vasy' => '/server/model/ships/raiders/Vasy.php',
 				'vyshesh' => '/server/model/ships/civilians/Vyshesh.php',
 				'xotia' => '/server/model/ships/vree/XotiA.php',
-				'xotib' => '/server/model/ships/vree/XotiB.php',	
+				'xotib' => '/server/model/ships/vree/XotiB.php',
+				'tyllz'	=> '/server/model/ships/vree/Tyllz.php',
 		    						
 				'zshadowxonn' => '/server/model/ships/vree/ZShadowXonn.php', //tournament prize
 												
@@ -2603,21 +2604,23 @@ spl_autoload_register(
 				'rangedfuser' => '/server/model/weapons/plasma.php',
 				'dualplasmastream' => '/server/model/weapons/specialWeapons.php',	
 				'reshkasu' => '/server/model/ships/pakmara/Reshkasu.php',
-				'shobogna' => '/server/model/ships/pakmara/Shobogna.php',																			
+				'shobogna' => '/server/model/ships/pakmara/Shobogna.php',										
 				'orshilti' => '/server/model/ships/pakmara/Orshilti.php',
 				'porfatis' => '/server/model/ships/pakmara/Porfatis.php',
 				'pshulshi' => '/server/model/ships/pakmara/Pshulshi.php',
 				'pshultau' => '/server/model/ships/pakmara/Pshultau.php',
 				'trashuli' => '/server/model/ships/pakmara/Trashuli.php',
 				'urikhal' => '/server/model/ships/pakmara/Urikhal.php',	
-				'tharnotak' => '/server/model/ships/pakmara/Tharnotak.php',								'padashar' => '/server/model/ships/pakmara/Padashar.php',
+				'tharnotak' => '/server/model/ships/pakmara/Tharnotak.php',								
+				'padashar' => '/server/model/ships/pakmara/Padashar.php',
 				'artees' => '/server/model/ships/pakmara/Artees.php',
 				'simsalle' => '/server/model/ships/pakmara/Simsalle.php',
 				'trashue' => '/server/model/ships/civilians/Trashue.php',
 				'plasalle' => '/server/model/ships/pakmara/Plasalle.php',
 				'sashulkur' => '/server/model/ships/pakmara/Sashulkur.php',
 				'simtorka' => '/server/model/ships/pakmara/Simtorka.php',
-				'uriktal' => '/server/model/ships/pakmara/Uriktal.php',																																																				
+				'uriktal' => '/server/model/ships/pakmara/Uriktal.php',
+				'thorkaosat' => '/server/model/ships/pakmara/ThorkaOSAT.php',																																																				
 				
 
 				//Hyach
@@ -2822,11 +2825,12 @@ spl_autoload_register(
 						'athraskalacam' => '/server/model/ships/dilgar/athraskalaCAM.php',
 						'targathcam' => '/server/model/ships/dilgar/targathCAM.php',
 						'eskravatam' => '/server/model/ships/dilgar/eskravatAM.php',
-						'delegor' => '/server/model/ships/dilgar/delegor.php',
-						
+						'delegor' => '/server/model/ships/dilgar/delegor.php',						
 						'ochlavitaam' => '/server/model/ships/dilgar/ochlavitaAM.php',
 						'ochlavitamam' => '/server/model/ships/dilgar/ochlavitaMAM.php',
 						'ochlavitadam' => '/server/model/ships/dilgar/ochlavitaDAM.php',
+						
+						'thorunheavyam' => '/server/model/ships/dilgar/thorunHeavyAM.php',
 						
 						//Drazi						
 						'darkhawkam' => '/server/model/ships/drazi/darkhawkAM.php', 
@@ -2848,6 +2852,8 @@ spl_autoload_register(
 						'borocadaam' => '/server/model/ships/hurr/borocadaAM.php',
 						'norekam' => '/server/model/ships/hurr/norekAM.php',
 						'anoroam' => '/server/model/ships/hurr/anoroAM.php',
+						
+						'koetham' => '/server/model/ships/hurr/koethAM.php',
 						
 						//Small Races - Rogolon						
 						'rogolonrogonam' => '/server/model/ships/smallraces/rogolonRogonAM.php',
@@ -2887,6 +2893,20 @@ spl_autoload_register(
 						
 						'hightemplaram' => '/server/model/ships/orieni/hightemplarAM.php',
 						
+						
+						//Thirdspace
+						'psychicfield' => '/server/model/weapons/specialWeapons.php',
+      			        'psychicfieldhandler' => '/server/model/weapons/specialWeapons.php',
+      			        'thirdspaceshieldprojection' =>	'/server/model/weapons/defensive.php',
+      			        'thirdspaceshieldprojector' =>	'/server/model/weapons/defensive.php',
+      			        'advancedsingularitydrive' => '/server/model/systems/baseSystems.php',
+      			        'psionicconcentrator' => '/server/model/weapons/specialWeapons.php',
+      			        'heavypsioniclance' => 	'/server/model/weapons/specialWeapons.php',
+      			        'psioniclance' => 	'/server/model/weapons/specialWeapons.php',
+      			        'psionictorpedo' => '/server/model/weapons/torpedo.php',    
+      			        'thirdspacebattleship' => '/server/model/ships/thirdspace/ThirdspaceBattleship.php',
+      			        'thirdspacecnc' => '/server/model/systems/baseSystems.php',		
+      			        'thirdspacefighter' => '/server/model/ships/thirdspace/ThirdspaceFighter.php',			
 						
 				
 				//let's end this with unit enhancement class...		    
