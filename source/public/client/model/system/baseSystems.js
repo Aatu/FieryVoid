@@ -27,6 +27,14 @@ MagGravReactorTechnical.prototype.hasMaxBoost = function () {
     return true;
 };
 
+var AdvancedSingularityDrive = function AdvancedSingularityDrive(json, ship) {
+    Reactor.call(this, json, ship);
+};
+AdvancedSingularityDrive.prototype = Object.create(Reactor.prototype);
+AdvancedSingularityDrive.prototype.constructor = AdvancedSingularityDrive;
+AdvancedSingularityDrive.prototype.hasMaxBoost = function () {
+    return true;
+};
 
 var SubReactorUniversal = function(json, ship)
 {

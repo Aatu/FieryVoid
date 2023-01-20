@@ -291,5 +291,168 @@
     
     }//endof class PacketTorpedo
 
+class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonates and reduces armour of targets.  
+        public $name = "PsionicTorpedo";
+        public $displayName = "Psionic Torpedo";
+        public $iconPath = "PsionicTorpedo.png";                
+        public $animation = "torpedo";
+        public $animationColor = array(128, 0, 0);
+//        public $animationExplosionType = "AoE"; 
+//        public $animationExplosionScale = 1;               
+		/*
+        public $trailColor = array(141, 240, 255);
+        public $animationExplosionScale = 0.25;
+        public $projectilespeed = 12;
+        public $animationWidth = 10;
+        public $trailLength = 10;
+		*/
+//		public $firingModes = array(	1 => "AoE");
 
+        public $range = 60;
+        public $loadingtime = 2;
+        
+        public $weaponClass = "Electromagnetic"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
+        public $damageType = "Flash"; 
+        private $alreadyFlayed = false; //to avoid doing this multiple times      
+                
+        public $fireControl = array(-4, 3, 5); // fighters, <mediums, <capitals 
+        public $priority = 1; //Flash! should strike first 
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 12;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 6;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+/*
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!	
+		if ($system->advancedArmor) return;
+		if ($ship instanceof FighterFlight) return;
+        if($this->alreadyFlayed) return;
+        $this->alreadyFlayed = true; //avoid doing that multiple times						
+
+		$effectArmor = Dice::d(3,1);//strength of effect: 1d6
+		$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor.";
+		
+			
+        foreach ($target->systems as $system){
+                if ($target->shipSizeClass<=1 || $system->location === $location){ //MCVs and smaller ships are one huge section technically
+	             	for($i=1; $i<=$effectArmor;$i++){
+	                    $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
+	                    $crit->updated = true;
+	                    $crit->inEffect = false;
+	                    $system->criticals[] = $crit;
+	                }
+	            }
+			} 
+	} //end of function onDamagedSystem   */
+		
+		
+		//Ignores armor, nasty for flash damage on fighters.
+		public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos=null){
+		if ($system->advancedArmor){ //Negates Advanced armor's bonus against ballistics and reduces by a further 2.
+            $armour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
+            $armour = $armour-4;
+            return $armour;
+		}else{					
+			return 0;
+        }
+	}    	
+
+   protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
+    {
+        /*$pos ONLY relevant for FIGHTER armor if damage source position is different than one from weapon itself*/
+        /*otherwise best leave null BUT fill $location!*/
+        /*damageWasDealt indicates whether this hit already caused damage - important for overkill for some damage modes*/
+        //if (!$system->isDestroyed()) { //else system was already destroyed, proceed to overkill
+		if ($system->getRemainingHealth() > 0) { //Vree Structure systems are considered not there despite not being formally destroyed
+            $damage = floor($damage);//make sure damage is a whole number, without fractions!
+            $armour = $this->getSystemArmourComplete($target, $system, $gamedata, $fireOrder, $pos); //handles standard and Adaptive armor, as well as Advanced armor and weapon class modifiers
+			// ...if armor-related modifications are needed, they should extend appropriate method (Complete or Base, as Adaptive should not be affected)
+			// ...and doDamage should always call Complete
+
+
+            //armor may be ignored for some reason... usually because of Raking mode :)
+            $armourIgnored = 0;
+            if (isset($fireOrder->armorIgnored[$system->id])) {
+                $armourIgnored = $fireOrder->armorIgnored[$system->id];
+                $armour = $armour - $armourIgnored;
+            } 
+            $armour = max($armour, 0); 
+
+			//returned array: dmgDealt, dmgRemaining, armorPierced	
+			$damage = $this->beforeDamagedSystem($target, $system, $damage, $armour, $gamedata, $fireOrder);
+			$effects = $system->assignDamageReturnOverkill($target, $shooter, $this, $gamedata, $fireOrder, $damage, $armour, $pos, $damageWasDealt);
+			$this->onDamagedSystem($target, $system, $effects["dmgDealt"], $effects["armorPierced"], $gamedata, $fireOrder);//weapons that do effects on hitting something
+			$damage = $effects["dmgRemaining"];
+			if ($this->damageType == 'Raking'){ //note armor already pierced so further rakes have it easier
+				$armourIgnored = $armourIgnored + $effects["armorPierced"];
+				$fireOrder->armorIgnored[$system->id] = $armourIgnored;
+			}			
+			
+            $damageWasDealt = true; //actual damage was done! might be relevant for overkill allocation
+        }
+
+        if (($damage > 0) || (!$damageWasDealt)) {//overkilling!
+            $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location);
+            if ($overkillSystem != null)
+                $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+        }     
+             
+			if (isset($this->alreadyFlayed[$target->id])) return;         	
+			$this->alreadyFlayed[$target->id] = true;//mark engaged 
+			
+ 			if ($target instanceof FighterFlight) return;	//To ignore fighters if I want to.				
+			
+			        	                         
+	        $effectArmor = Dice::d(3,1);//strength of effect: 1d3
+			$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor unless Advanced Armor.";	        
+
+		
+            foreach ($target->systems as $system){
+                if ($system->advancedArmor) return;              					
+                if ($target->shipSizeClass<=1 || $system->location === $location){ //MCVs and smaller ships are one huge section technically
+	             	for($i=1; $i<=$effectArmor;$i++){
+	                    $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
+	                    $crit->updated = true;
+	                    $crit->inEffect = false;
+	                    $system->criticals[] = $crit;                 
+		                }
+		            }
+				} 
+        } //endof function doDamage	 
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
+		if ($system->advancedArmor) return; //no effect on Advanced Armor		
+		//+1 to crit roll, +2 to dropout roll
+		$mod = 1;
+		if ($ship instanceof FighterFlight) $mod++;		
+		$system->critRollMod += $mod; 
+	} //endof function onDamagedSystem	
+    	
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "<br>Ignores armor when dealing damage (Advanced Armor is treated as 2 points less).";	
+			$this->data["Special"] .= "Deals Flash damage and reduces armor of facing section (structure and all systems) by D3 points (Advanced Armor is immune).";		
+			$this->data["Special"] .= "<br>Ballistic weapon that can use offensive EW.";
+		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";			
+		}
+        
+        
+        public function getDamage($fireOrder){         return 18;   }
+        public function setMinDamage(){     $this->minDamage = 18;      }
+        public function setMaxDamage(){     $this->maxDamage = 18;      }
+    
+    }//endof class PsionicTorpedo
 ?>

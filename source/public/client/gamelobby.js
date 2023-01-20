@@ -401,7 +401,7 @@ window.gamedata = {
 	    	    
 	    //non-combat units present?
 	    if (nonCombatPresent){
-		   checkResult += "Non-combat units present! They're not allowed in pickup battle.<br>"; 
+		   checkResult += "Non-Combat units present! They're not allowed in pickup battle.<br>"; 
 		   problemFound = true;
 	    }
 	    
@@ -612,7 +612,7 @@ window.gamedata = {
 		
 		//small flights (do not show if there aren't any!)
 		if (noSmallFlights > 0){
-			checkResult +=  " - small flights (<6 craft): " + noSmallFlights;
+			checkResult +=  " - Small Flights (<6 craft): " + noSmallFlights;
 			if (noSmallFlights>1){ //fighter total is not within limits
 				checkResult += " TOO MANY! (up to 1 allowed)";
 				problemFound = true;
