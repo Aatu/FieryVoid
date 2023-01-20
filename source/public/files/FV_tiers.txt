@@ -24,7 +24,7 @@ This is default power level of show era major factions ('Big 4') - what I consid
  - Minbari (warning: Jammer is very daunting, expecially to new players - it's easy to feel overwhelmed; at the same time flying Minbari is not easy either. Not recommended (on either side of the table) until You feel You have solid command of the game!)
  - Minbari Protectorate (whlie lacking Jammers, they still field quite capable units, but their fleet selection is limited)
  - Narn (barring massed EMines; opinions about what 'massed' means vary, but let's call 6 launchers as upper limit acceptable for Tier 1 - just to have an explicit borderline)
- - Orieni (very tricky - may feel superior due to raw damage output of Hunter-Killers and massed RGRs, while remaining vulnerable against sharp handling by expert oponent; if You don't consider Yourself an expert, You may treat Orieni as a Superior faction)
+ - Orieni (very tricky - may feel superior due to raw damage output of Hunter-Killers and massed RGRs, while remaining vulnerable against sharp handling by expert oponent)
  - Torata 
  - Vree (warning: their high resilence coupled with all-around, accurate firepower is very daunting! Not recommended to face them until You feel You have solid command of the game)
 
@@ -66,7 +66,7 @@ This group is inherently unbalanced, even against each other!
  - EA using Warlock
  - ISA (eg. all-White Star fleet - note that it's difficult to fly, too!)
  - Narn using massed EMines 
- - Thirdspace
+ - Thirdspace (custom faction)
  - Yolu
 
 

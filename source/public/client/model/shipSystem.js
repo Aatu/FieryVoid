@@ -145,10 +145,6 @@ Weapon.prototype.changeFiringMode = function () {
 		this.data["Fire control (fighter/med/cap)"] = this.translateFCtoD100txt(this.fireControl);
 		//this.fireControl[0]+'/'+this.fireControl[1]+'/'+this.fireControl[2];
 	}
-	if (!mathlib.arrayIsEmpty(this.onboardFCArray)) {
-		this.onboardFC = this.onboardFCArray[this.firingMode];
-		this.data["Ordnance FC (ftr/med/cap)"] = this.translateFCtoD100txt(this.onboardFC);
-	}
 	if (!mathlib.arrayIsEmpty(this.loadingtimeArray)) this.loadingtime = this.loadingtimeArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.turnsloadedArray)) this.turnsloaded = this.turnsloadedArray[this.firingMode];
 	this.data["Loading"] = this.turnsloaded + '/' + this.loadingtime;
