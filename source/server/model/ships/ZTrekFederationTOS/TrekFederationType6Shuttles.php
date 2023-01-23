@@ -5,7 +5,7 @@ class TrekFederationType6Shuttles extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 20 *6; //for 6
-        $this->faction = "ZTrek Playtest Federation (TOS)";
+        $this->faction = "ZStarTrek Federation (TOS)";
         $this->phpclass = "TrekFederationType6Shuttles";
         $this->shipClass = "Type 6 Shuttle Flight";
         $this->imagePath = "img/ships/StarTrek/Type6Shuttle.png";

@@ -5,10 +5,11 @@ class TrekFederationMirandaTransport extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 425;
-        $this->faction = "ZTrek Playtest Federation (TOS)";
+        $this->faction = "ZStarTrek Federation (TOS)";
         $this->phpclass = "TrekFederationMirandaTransport";
         $this->imagePath = "img/ships/StarTrek/FederationMiranda.png";
         $this->shipClass = "Miranda Fast Transport";
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 
 	$this->occurence = "common";
 	$this->variantOf = "Miranda Frigate";

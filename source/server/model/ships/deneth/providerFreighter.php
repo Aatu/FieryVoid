@@ -10,6 +10,7 @@ class ProviderFreighter extends MediumShip{
         $this->imagePath = "img/ships/DenethProvider.png";
         $this->shipClass = "Deneth Provider Freighter";
         $this->canvasSize = 200;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 	    
 	$this->isd = 2210;
         

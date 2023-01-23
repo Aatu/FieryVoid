@@ -19,8 +19,11 @@ class DrakhMobileDefensePlatform extends MediumShip{
         $this->limited = 10; //Restricted Deployment
 	$this->isd = 2255;
 	    	    
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+	    //actually this particular craft IS a combat unit, but shouldn't be present in a mobile fleet anyway (and automatic checks won't catch that it's kind of OSAT!)
+	    
 	    $this->notes = "Boosted by Raider Controller.";
-	    $this->notes .= "<br>Not eligible for pickup games (equivalent of OSAT).";
+	    $this->notes .= "<br>Equivalent of OSAT, not a mobile unit.";
 		
 		
 		$this->hangarRequired = "Raiders"; //Heavy Raiders can use regular Raider catapults

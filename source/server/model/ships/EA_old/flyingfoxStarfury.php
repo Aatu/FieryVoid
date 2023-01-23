@@ -10,7 +10,7 @@ class FlyingFoxStarfury extends FighterFlight{
         $this->shipClass = "Starfury: Flying Fox Heavy flight";
         $this->imagePath = "img/ships/aries.png";
 	    $this->isd = 2180;
- 		$this->unofficial = true;
+ 		$this->unofficial = 'S'; //HRT design released after AoG demise
 	    
 	    $this->notes = 'Non-atmospheric and 1/2 turn cost.';
         

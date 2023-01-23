@@ -5,7 +5,7 @@ class TrekFederationArco extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 30 *6;
-		$this->faction = "ZTrek Playtest Federation (TOS)";
+		$this->faction = "ZStarTrek Federation (TOS)";
         $this->phpclass = "TrekFederationArco";
         $this->shipClass = "Arco Attack Sleds";
 		$this->imagePath = "img/ships/StarTrek/FederationArco.png";

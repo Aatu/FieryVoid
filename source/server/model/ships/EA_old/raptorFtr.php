@@ -10,7 +10,7 @@ class RaptorFtr extends FighterFlight{
         $this->shipClass = "Raptor Aerospace Fighter";
 		$this->imagePath = "img/ships/raptor.png";
 	    $this->isd = 2130;
- 		$this->unofficial = true;
+ 		$this->unofficial = 'S'; //HRT design released after AoG demise
         
         $this->forwardDefense = 5;
         $this->sideDefense = 5;

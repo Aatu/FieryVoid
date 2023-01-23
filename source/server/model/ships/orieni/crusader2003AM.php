@@ -13,6 +13,8 @@ class Crusader2003AM extends MediumShip{
             $this->isd = 2003; 
         $this->canvasSize = 100;
         
+ 		$this->unofficial = 'S'; //design released after AoG demise
+		
         $this->forwardDefense = 14;
         $this->sideDefense = 14;
         

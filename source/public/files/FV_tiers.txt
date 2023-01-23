@@ -23,8 +23,8 @@ This is default power level of show era major factions ('Big 4') - what I consid
  - Llort
  - Minbari (warning: Jammer is very daunting, expecially to new players - it's easy to feel overwhelmed; at the same time flying Minbari is not easy either. Not recommended (on either side of the table) until You feel You have solid command of the game!)
  - Minbari Protectorate (whlie lacking Jammers, they still field quite capable units, but their fleet selection is limited)
- - Narn (barring massed EMines)
- - Orieni (very tricky - may feel superior due to raw damage output of Hunter-Killers and massed RGRs, while remaining vulnerable against sharp handling by expert oponent; if You don't consider Yourself an expert, You may treat Orieni as a Superior faction)
+ - Narn (barring massed EMines; opinions about what 'massed' means vary, but let's call 6 launchers as upper limit acceptable for Tier 1 - just to have an explicit borderline)
+ - Orieni (very tricky - may feel superior due to raw damage output of Hunter-Killers and massed RGRs, while remaining vulnerable against sharp handling by expert oponent)
  - Torata 
  - Vree (warning: their high resilence coupled with all-around, accurate firepower is very daunting! Not recommended to face them until You feel You have solid command of the game)
 
@@ -33,7 +33,7 @@ SECOND TIER
 Factions that point for point will have uphill battle against First Tier, yet otherwise are balanced and competitive. Should be interesting to play against each other, and if given some extra PV allowance - against First Tier as well. Most of these factions do not offer fleet build flexibility of major ones, but may offer very distinct playstyle instead.
  - Abbai
  - Balosian
- - Belt Alliance (Small Races)
+ - Belt Alliance
  - Blood Sword Raiders (custom faction - Escalation Wars universe - small unit selection)
  - Brixadii (custom faction - Nexus universe)
  - Cascor (official)
@@ -55,6 +55,7 @@ Factions that point for point will have uphill battle against First Tier, yet ot
  - Sal-bez (custom faction - Nexus universe)
  - Sshel'ath (custom faction - Escalation Wars universe)
  - Star Trek Federation (early) (custom faction - Star Trek universe)
+ - Star Trek Federation (TOS) (custom faction - Star Trek universe)
  - Star Wars (custom faction (or rather factions), Star Wars universe - with VERY different playstyle, consider them difficult to fly!)
  - Velrax (custom faction - Nexus universe)
 
@@ -65,6 +66,7 @@ This group is inherently unbalanced, even against each other!
  - EA using Warlock
  - ISA (eg. all-White Star fleet - note that it's difficult to fly, too!)
  - Narn using massed EMines 
+ - Thirdspace (custom faction)
  - Yolu
 
 
@@ -81,8 +83,8 @@ This group is inherently unbalanced, even against each other!
  - Abbai (WotCR)
  - Alacan (Small Races)
  - Chouka Raiders (custom faction - Escalation Wars universe)
- - Craytan Union (custom faction - Nexus universe, in playtest currently)
- - EA (early) (predominantly semi-official, custom units armed with blast cannons and much weaker defenses)
+ - Craytan Union (PLAYTEST custom faction - Nexus universe)
+ - EA (early)
  - Grome
  - Hurr
  - Mitoc (Small Races - only one MCV-class vessel)

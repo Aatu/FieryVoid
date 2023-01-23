@@ -215,8 +215,16 @@ window.confirm = {
 		target.data("count", newCount);
 		target.html(newCount);
 		var cost = enhPrice + (noTaken*enhPriceStep); //base value, plus additional price charged for further levels
-		var newCost = target.data("enhCost")+cost;		
+		var newCost = target.data("enhCost")+cost;	
 		target.data("enhCost", newCost);
+		
+		//options cost - remembering they're included in enhancements cost as well!
+		if (target.data("enhIsOption")){
+			cost = enhPrice + (noTaken*enhPriceStep); //base value, plus additional price charged for further levels
+			newCost = target.data("enhOptionCost")+cost;		
+			target.data("enhOptionCost", newCost);
+		}
+		
 		confirm.getTotalCost();
 	}
     },
@@ -240,6 +248,14 @@ window.confirm = {
 		var cost = enhPrice + (newCount*enhPriceStep); //base value, plus additional price charged for further levels
 		var newCost = target.data("enhCost")-cost;		
 		target.data("enhCost", newCost);
+		
+		//options cost - remembering they're included in enhancements cost as well!
+		if (target.data("enhIsOption")){
+			cost = enhPrice + (newCount*enhPriceStep); //base value, plus additional price charged for further levels
+			newCost = target.data("enhOptionCost")-cost;		
+			target.data("enhOptionCost", newCost);
+		}
+		
 		confirm.getTotalCost();
 	}
     },
@@ -292,6 +308,7 @@ window.confirm = {
             var enhLimit = enhancement[3];		
             var enhPrice = enhancement[4];
             var enhPriceStep = enhancement[5];
+		var enhIsOption = enhancement[6];
 
             var template = $(".missileSelectItem");
                     var item = template.clone(true).prependTo(e);
@@ -310,6 +327,7 @@ window.confirm = {
                 //selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
                 //selectAmountItem.data("firingMode", i);
 
+		if(enhIsOption) enhName = ' <i>(O)</i> ' + enhName; //add (O) at the beginning of name of options (to differentiate them from enhancements)
             var nameExpanded = enhName + ' (';
 			if(enhLimit>1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
 			nameExpanded += enhPrice + 'PV ';
@@ -331,7 +349,7 @@ window.confirm = {
             $(".plusButton", item).on("click",confirm.doOnPlusEnhancement);
             $(".minusButton", item).on("click",confirm.doOnMinusEnhancement);
         }
-        $('<div class="missileselect"><label>You may select optional enhancements. Please be sensible.<br></label>').prependTo(e);
+        $('<div class="missileselect"><label>You may select options (marked with <i>(O)</i>) and enhancements. In case of fighter flights, all fighters in flight will be similarly outfitted.<br></label>').prependTo(e);
         
 
         // Do lots of stuff to account for possible buying of missiles.

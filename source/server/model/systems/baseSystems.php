@@ -499,6 +499,33 @@ class MagGravReactorTechnical extends MagGravReactor{
 	}		
 }//endof MagGravReactor		
 
+class AdvancedSingularityDrive extends Reactor{
+/*Advanced version of Mag-Gravitic Reactor, used by custom Thirdspace faction;
+	provides fixed power regardless of systems;
+	techical implementation: count as Power minus power required by all systems enabled
+*/	
+    public $iconPath = "AdvancedSingularityDrive.png";
+    
+	public $possibleCriticals = array( //different set of criticals than standard Reactor
+		20=>"FieldFluctuations",
+		25=>array("FieldFluctuations", "FieldFluctuations"),
+		30=>array("FieldFluctuations", "FieldFluctuations", "FieldFluctuations")
+	);
+	
+	function __construct($armour, $maxhealth, $powerReq, $output ){
+		parent::__construct($armour, $maxhealth, $powerReq, $output );    
+		$this->fixedPower = true;
+	}
+	
+	public function setSystemDataWindow($turn){
+		$this->data["Output"] = $this->output;
+		parent::setSystemDataWindow($turn);     
+		$this->data["Special"] .= "<br>Advanced Mag-Gravitic Reactor: provides fixed total power, regardless of destroyed systems.";
+	}	
+	
+}//endof AdvancedSingularityDrive		
+
+
 //warning: needs external code to function properly. Intended for starbases only.
 /* let's disable it - all use changed to SubReactorUniversal!
 class SubReactor extends ShipSystem{	
@@ -1172,6 +1199,27 @@ class ProtectedCnC extends CnC{
     );
 	
 }//endof class ProtectedCnC
+
+class ThirdspaceCnC extends CnC{
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+	}
+	
+	public $possibleCriticals = array(
+		10=>"CommunicationsDisrupted", 
+		17=>"PenaltyToHit", 
+		25=>array("ReducedIniativeOneTurn","ReducedIniative"), 
+		33=>array("RestrictedEWOneTurn","ReducedIniativeOneTurn","ReducedIniative"), 
+		40=>array("RestrictedEW","ReducedIniative","PenaltyToHit")
+    );
+	
+}//endof class ThirdspaceCnC
 	
 class PakmaraCnC extends CnC{
 	
@@ -3489,7 +3537,7 @@ class PlasmaBattery extends ShipSystem{
 /* Ammunition magazine
 technical system, storing information about available (and used) consumable weapons (primarily ballistic ones)
 */
-class AmmoMagazine extends ShipSystem {    
+class AmmoMagazine extends ShipSystem {
     public $name = "ammoMagazine";
     public $displayName = "Ammunition Magazine";
     public $iconPath = "AmmunitionMagazineTechnical.png";
@@ -3513,7 +3561,7 @@ class AmmoMagazine extends ShipSystem {
     
     function __construct($capacity){ //magazine capacity
         parent::__construct(0, 1, 0, 1); //technical system, armor and structure don't really matter
-	$this->capacity = $capacity;
+		$this->capacity = $capacity;
     }
     
     public function setSystemDataWindow($turn){
@@ -3550,19 +3598,24 @@ class AmmoMagazine extends ShipSystem {
 	
     //add new kind of ordnance: ammo to be used (CLASS INSTANCE!), number of rounds to add (number)
 	//to be called only AFTER AmmoMagazine itself is fitted to unit!
-    public function addAmmoEntry($ammoClass, $ammoCount, $notify = false){
-		if (!array_key_exists($ammoClass->modeName,$this->ammoCountArray)){
+    public function addAmmoEntry($ammoClass, $ammoCount, $notify = false){		
+		$ammoEntryExists = false;
+		foreach($this->ammoArray as $existingAmmo){
+			if($existingAmmo->modeName ==$ammoClass->modeName) $ammoEntryExists = true;
+		}		
+		if (!$ammoEntryExists) //for some reason - apparently sometimes entry here does not exist despite ammoCountArray entry existing...
+			$this->ammoArray[] = $ammoClass;
+			
+		$keyExists = array_key_exists($ammoClass->modeName,$this->ammoCountArray);
+		if (!$keyExists){
 			$this->ammoCountArray[$ammoClass->modeName] = $ammoCount;
 		}else{
 			$this->ammoCountArray[$ammoClass->modeName] += $ammoCount;			
 		}
-	    $this->ammoSizeArray[$ammoClass->modeName] = $ammoClass->size;
-	    $this->ammoArray[] = $ammoClass;
+	    $this->ammoSizeArray[$ammoClass->modeName] = $ammoClass->size;		
 	    $this->remainingAmmo += $ammoCount * $ammoClass->size;
 	    $this->remainingAmmo = min($this->remainingAmmo, $this->capacity);
-		if (!array_key_exists($ammoClass->modeName,$this->ammoUsedTotal)){
-			$this->ammoUsedTotal[$ammoClass->modeName] = 0;
-		}			
+		if(!$keyExists) $this->ammoUsedTotal[$ammoClass->modeName] = 0;
 	    if($notify) $this->notifyWeapons(); //weapons need to update their stats - if this is a new entry after creation
     }
 	
@@ -3654,8 +3707,51 @@ class AmmoMagazine extends ShipSystem {
 } //endof AmmoMagazine
 
 
+
+//ammunition for AmmoMagazine - template; using template assures that all variables are filled even if a particular missile does not need them
+class AmmoMissileTemplate{	
+	public $name = 'AmmoMissileTemplate';
+	public $displayName = 'SOMEONE DID NOT OVERLOAD TEMPLATE FULLY!'; //should never be shown ;)
+	public $modeName = 'Template';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_TTTT'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) TEMPLATE'; //enhancement description
+	public $enhancementPrice = 1;//price per missile
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
+	public $minDamage = 0;
+	public $maxDamage = 0;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 1;
+	public $priorityAF = 1;
+	public $noOverkill = false;
+	public $useOEW = false;
+	public $hidetarget = false;
+	
+    function __construct(){}
+	
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 0;
+    }		
+	
+	function getPrice($unit) //some missiles might have different price depending on unit being fitted!
+	{
+		return $this->enhancementPrice;
+	}
+	
+	/*missiles with special effects affecting system hit will redefine this*/
+    public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder)
+    {
+        return;
+    }
+} //endof class AmmoMissileTemplate
+
 //ammunition for AmmoMagazine - Class B Missile (for official Missile Racks)
-class AmmoMissileB{	
+class AmmoMissileB extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileB';
 	public $displayName = 'Basic Missile';
 	public $modeName = 'Basic';
@@ -3688,7 +3784,7 @@ class AmmoMissileB{
 
 
 //ammunition for AmmoMagazine - Class L Missile (for official Missile Racks)
-class AmmoMissileL{	
+class AmmoMissileL extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileL';
 	public $displayName = 'Long Range Missile';
 	public $modeName = 'LongRange';
@@ -3709,17 +3805,17 @@ class AmmoMissileL{
 	public $noOverkill = false;
     public $useOEW = false;
 	public $hidetarget = false;
-		
+	
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
         return 15;
-    }		
+    }
 	
 } //endof class AmmoMissileL
 
 
 //ammunition for AmmoMagazine - Class H Missile (for official Missile Racks)
-class AmmoMissileH{	
+class AmmoMissileH extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileH';
 	public $displayName = 'Heavy Missile';
 	public $modeName = 'Heavy';
@@ -3750,7 +3846,7 @@ class AmmoMissileH{
 
 
 //ammunition for AmmoMagazine - Class F Missile (for official Missile Racks)
-class AmmoMissileF{	
+class AmmoMissileF extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileF';
 	public $displayName = 'Flash Missile';
 	public $modeName = 'Flash';
@@ -3782,7 +3878,7 @@ class AmmoMissileF{
 
 
 //ammunition for AmmoMagazine - Class A Missile (for official Missile Racks)
-class AmmoMissileA{	
+class AmmoMissileA extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileA';
 	public $displayName = 'Antifighter Missile';
 	public $modeName = 'Antifighter';
@@ -3813,7 +3909,7 @@ class AmmoMissileA{
 
 
 //ammunition for AmmoMagazine - Class P Missile (for official Missile Racks)
-class AmmoMissileP{	
+class AmmoMissileP extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileP';
 	public $displayName = 'Piercing Missile';
 	public $modeName = 'Piercing';
@@ -3845,7 +3941,7 @@ class AmmoMissileP{
 
 
 //ammunition for AmmoMagazine - Class D Missile (for official Missile Racks)
-class AmmoMissileD{	
+class AmmoMissileD extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileD';
 	public $displayName = 'Light Missile';
 	public $modeName = 'Light';
@@ -3876,7 +3972,7 @@ class AmmoMissileD{
 
 
 //ammunition for AmmoMagazine - Class S Missile (for official Missile Racks, Kor-Lyan only)
-class AmmoMissileS{	
+class AmmoMissileS extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileS';
 	public $displayName = 'Stealth Missile';
 	public $modeName = 'Stealth';
@@ -3905,5 +4001,175 @@ class AmmoMissileS{
 	
 } //endof class AmmoMissileS
 
+
+
+//ammunition for AmmoMagazine - Class FB Missile (Fighter Basic Missile)
+class AmmoMissileFB extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileFB';
+	//public $displayName = 'Fighter Basic Missile';
+	public $displayName = 'Basic Missile'; //as we're in fighter context, adding 'Fighter' to name is unnecessary clutter
+	public $modeName = 'Basic';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_FB'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Fighter Basic Missile (2165)'; //enhancement description
+	public $enhancementPrice = 8; //PV per missile
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(3, 3, 3); 
+	public $minDamage = 10;
+	public $maxDamage = 10;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 5;
+	public $priorityAF = 6;
+		
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 10;
+    }		
+	
+} //endof class AmmoMissileFB
+
+//ammunition for AmmoMagazine - Class FL Missile (Fighter Long Range)
+class AmmoMissileFL extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileFL';
+	//public $displayName = 'Fighter Long Range Missile';
+	public $displayName = 'Long Range Missile'; //as we're in fighter context, adding 'Fighter' to name is unnecessary clutter
+	public $modeName = 'LongRange';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_FL'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Fighter Long Range Missile (2226/2245)'; //2226 for Kor-Lyan, 2245 for everyone else 
+	public $enhancementPrice = 12; //PV per missile; originally it's 10 for Kor-Lyan and 12 for everyone else
+	
+	public $rangeMod = 5; //MODIFIER for launch range
+	public $distanceRangeMod = 5; //MODIFIER for distance range
+	public $fireControlMod = array(3, 3, 3); //for fighter missiles putting everything into weapon FC would be incorrect - as FC is not used if out of arc... 
+	public $minDamage = 8;
+	public $maxDamage = 8;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 4;
+	public $priorityAF = 7;
+		
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 8;
+    }		
+	
+	function getPrice($unit) //some missiles might have different price depending on unit being fitted!
+	{
+		if($unit->faction == 'Kor-Lyan') return 10;
+		return $this->enhancementPrice;
+	}
+} //endof class AmmoMissileFL
+
+//ammunition for AmmoMagazine - Class FH Missile (Fighter Heavy)
+//NOTE: up to 1 per fighter (2 for SHFs)
+class AmmoMissileFH extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileFH';
+	//public $displayName = 'Fighter Heavy Missile';
+	public $displayName = 'Heavy Missile'; //as we're in fighter context, adding 'Fighter' to name is unnecessary clutter
+	public $modeName = 'Heavy';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_FH'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Fighter Heavy Missile (2226/2245)'; //2226 for Kor-Lyan, 2245 for everyone else 
+	public $enhancementPrice = 12; //PV per missile; originally it's 10 for Kor-Lyan and 12 for everyone else
+	
+	public $rangeMod = -5; //MODIFIER for launch range
+	public $distanceRangeMod = -5; //MODIFIER for distance range
+	public $fireControlMod = array(1, 3, 3); //for fighter missiles putting everything into weapon FC would be incorrect - as FC is not used if out of arc... 
+	public $minDamage = 15;
+	public $maxDamage = 15;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+		
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 15;
+    }		
+	
+	function getPrice($unit) //some missiles might have different price depending on unit being fitted!
+	{
+		if($unit->faction == 'Kor-Lyan') return 10;
+		return $this->enhancementPrice;
+	}
+} //endof class AmmoMissileFH
+
+//ammunition for AmmoMagazine - Class FY Missile (Dogfight Missile)
+//NOTE: in tabletop it has snap fire option, which is not available in FV
+class AmmoMissileFY extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileFY';
+	public $displayName = 'Dogfight Missile';
+	public $modeName = 'Dogfight';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_FY'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Dogfight Missile (2165)'; 
+	public $enhancementPrice = 2; //PV per missile
+	
+	public $rangeMod = -2; //MODIFIER for launch range
+	public $distanceRangeMod = -2; //MODIFIER for distance range
+	public $fireControlMod = array(3, 3, 3); //for fighter missiles putting everything into weapon FC would be incorrect - as FC is not used if out of arc... 
+	public $minDamage = 6;
+	public $maxDamage = 6;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 4;
+	public $priorityAF = 8;
+		
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 6;
+    }		
+	
+} //endof class AmmoMissileFY
+
+
+//ammunition for AmmoMagazine - Class FD Missile (Dropout Missile)
+//NOTE: in tabletop it has snap fire option, which is not available in FV
+class AmmoMissileFD extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileFD';
+	public $displayName = 'Dropout Missile';
+	public $modeName = 'RDropout'; //R to differentiate from D - on mode change first letter is displayed!
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_FD'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Dropout Missile (2221/2245)'; 
+	public $enhancementPrice = 10; //PV per missile; originally it's 8 for Kor-Lyan and 10 for everyone else
+	
+	public $fireControlMod = array(3, 1, 1); //for fighter missiles putting everything into weapon FC would be incorrect - as FC is not used if out of arc... 
+	public $minDamage = 6;
+	public $maxDamage = 6;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 4;
+	public $priorityAF = 10; //at the very end of queue - to drop out fighters that actually survived other impacts
+		
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 6;
+    }
+	
+	function getPrice($unit) //some missiles might have different price depending on unit being fitted!
+	{
+		if($unit->faction == 'Kor-Lyan') return 8;
+		return $this->enhancementPrice;
+	}
+	
+	
+	/*dropout missile effect on hit: +3 dropout penalty for SHFs, +6 for other small craft*/
+    public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder)
+    {	
+		if(!($ship instanceOf FighterFlight)) return;
+		if($system->advancedArmor) return;
+		if($ship->superheavy){
+			$system->critRollMod+=3;
+		}else{
+			$system->critRollMod+=6;
+		}
+    }
+	
+} //endof class AmmoMissileFD
 
 ?>

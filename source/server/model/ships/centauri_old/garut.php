@@ -16,7 +16,7 @@ class Garut extends BaseShip{
         $this->fighters = array("heavy"=>18); 
 		$this->isd = 1966;
 		//$this->unofficial = true; //this is an official ship, just Enormous - no reason to call it unofficial!
-		$this->notes = "Not a combat ship (->not eligible for pickup battles)";
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 
         $this->shipSizeClass = 3; //Enormous is not implemented
         $this->forwardDefense = 19;

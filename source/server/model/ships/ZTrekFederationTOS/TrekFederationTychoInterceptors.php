@@ -5,7 +5,7 @@ class TrekFederationTychoInterceptors extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 25 *6;
-		$this->faction = "ZTrek Playtest Federation (TOS)";
+		$this->faction = "ZStarTrek Federation (TOS)";
         $this->phpclass = "TrekFederationTychoInterceptors";
         $this->shipClass = "Tycho Interceptors";
 		$this->imagePath = "img/ships/StarTrek/FederationTycho.png";

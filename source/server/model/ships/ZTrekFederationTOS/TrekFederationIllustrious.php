@@ -5,7 +5,7 @@ class TrekFederationIllustrious extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 500;
-	$this->faction = "ZTrek Playtest Federation (TOS)";
+	$this->faction = "ZStarTrek Federation (TOS)";
         $this->phpclass = "TrekFederationIllustrious";
         $this->imagePath = "img/ships/StarTrek/Constitution.png";
         $this->shipClass = "Illustrious Battle Carrier";

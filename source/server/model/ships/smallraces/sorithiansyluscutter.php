@@ -14,7 +14,7 @@ class SorithianSylusCutter extends LCV{
 	$this->canvasSize = 100;
 	$this->agile = true;
 	
-	$this->unofficial = true;
+ 		$this->unofficial = 'S'; //design released after AoG demise
         
         $this->forwardDefense = 9;
         $this->sideDefense = 9;

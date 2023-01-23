@@ -10,8 +10,9 @@ class HermesOldFastAlpha extends HeavyCombatVessel{
         $this->phpclass = "HermesOldFastAlpha";
         $this->imagePath = "img/ships/hermes.png";
         $this->shipClass = "Hermes Fast Transport (Alpha)";
-	    $this->unofficial = true;
+ 		$this->unofficial = 'S'; //HRT design released after AoG demise
         $this->isd = 2168;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
         $this->fighters = array("heavy" => 6);
         

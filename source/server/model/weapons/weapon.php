@@ -163,7 +163,7 @@ class Weapon extends ShipSystem
 
 
 
-	//Weapons are repaired before "avarage system", but after really important things! 
+	//Weapons are repaired before "average system", but after really important things! 
 	public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
 
@@ -536,7 +536,7 @@ class Weapon extends ShipSystem
         return false;
     }
 
-    private function formatFCValue($fc)
+    public function formatFCValue($fc)
     {
         if ($fc === null)
             return "-";
@@ -583,7 +583,7 @@ class Weapon extends ShipSystem
         $fcmed = $this->formatFCValue($this->fireControl[1]);
         $fccap = $this->formatFCValue($this->fireControl[2]);
         $this->data["Fire control (fighter/med/cap)"] = "$fcfight/$fcmed/$fccap";
-
+		
         if ($this->guns > 1) {
             $this->data["Number of guns"] = $this->guns;
         }
@@ -1864,6 +1864,7 @@ full Advanced Armor effects (by rules) for reference:
         if (isset($this->endArcArray[$i])) $this->endArc = $this->endArcArray[$i];
 		
 		if (isset($this->hidetargetArray[$i])) $this->hidetarget = $this->hidetargetArray[$i];  // GTS
+		
 	    
     }//endof function changeFiringMode
 

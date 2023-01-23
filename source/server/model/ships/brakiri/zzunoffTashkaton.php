@@ -16,7 +16,7 @@ class zzunoffTashkaton extends BaseShip{
 		$this->notes = 'Im-Rehsa Technologies';//Corporation producing the design
 		$this->notes .= "<br>official Tashkat Advanced Cruiser with Grav Shifters replaced by Grav Cannons"; 
 	      $this->isd = 2252;
-	      $this->unofficial = true;
+	    $this->unofficial = 'S'; //Semi-official - added as reasonably close to official Tashkat, while Grav Shifters are unavailable in FV
         
         $this->forwardDefense = 15;
         $this->sideDefense = 17;

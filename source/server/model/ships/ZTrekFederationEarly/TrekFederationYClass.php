@@ -5,10 +5,11 @@ class TrekFederationYClass extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 140;
-        $this->faction = "ZTrek Federation (early)";
+        $this->faction = "ZStarTrek Federation (early)";
         $this->phpclass = "TrekFederationYClass";
         $this->imagePath = "img/ships/StarTrek/YClassFreighter.png";
         $this->shipClass = "Y-Class Freighter";
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 
 	$this->unofficial = true;
         $this->canvasSize = 100;

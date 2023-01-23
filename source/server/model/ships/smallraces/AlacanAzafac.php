@@ -10,6 +10,7 @@ class AlacanAzafac extends HeavyCombatVessel{
         $this->imagePath = "img/ships/AlacanAzafac.png";
         $this->shipClass = "Alacan Azafac Armed Freighter";
 		$this->isd = 2208;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
         $this->forwardDefense = 18;
         $this->sideDefense = 18;

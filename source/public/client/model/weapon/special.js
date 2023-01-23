@@ -262,3 +262,167 @@ VorlonDischargePulsar.prototype.initializationUpdate = function() {
 //TO BE ACTUALLY IMPLEMENTED!!!!!!!
 };
 
+var PsionicConcentrator = function PsionicConcentrator(json, ship) {
+    Weapon.call(this, json, ship);
+};
+PsionicConcentrator.prototype = Object.create(Weapon.prototype);
+PsionicConcentrator.prototype.constructor = PsionicConcentrator;
+
+var HeavyPsionicLance = function HeavyPsionicLance(json, ship) {
+    Weapon.call(this, json, ship);
+};
+HeavyPsionicLance.prototype = Object.create(Weapon.prototype);
+HeavyPsionicLance.prototype.constructor = HeavyPsionicLance;
+
+HeavyPsionicLance.prototype.clearBoost = function () {
+    for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
+
+        if (power.type == 2) {
+            system.power.splice(i, 1);
+
+            return;
+        }
+    }
+};
+
+HeavyPsionicLance.prototype.hasMaxBoost = function () {
+    return true;
+};
+
+HeavyPsionicLance.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
+HeavyPsionicLance.prototype.initBoostableInfo = function () {
+    switch (shipManager.power.getBoost(this)) {
+        case 0:
+            this.data["Damage"] = '53 - 125';
+            this.data["Boostlevel"] = '0';
+            break;
+        case 1:
+            this.data["Damage"] = '55 - 145';
+            this.data["Boostlevel"] = '1';
+            break;
+        case 2:
+            this.data["Damage"] = '57 - 165';
+            this.data["Boostlevel"] = '2';
+            break;
+        case 3:
+            this.data["Damage"] = '59 - 185';
+            this.data["Boostlevel"] = '3';
+            break;
+        default:
+            this.data["Damage"] = '53 - 125';
+            this.data["Boostlevel"] = '0';
+            break;
+    }
+    return this;
+};
+
+var PsionicLance = function PsionicLance(json, ship) {
+    Weapon.call(this, json, ship);
+};
+PsionicLance.prototype = Object.create(Weapon.prototype);
+PsionicLance.prototype.constructor = PsionicLance;
+
+PsionicLance.prototype.clearBoost = function () {
+    for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
+
+        if (power.type == 2) {
+            system.power.splice(i, 1);
+
+            return;
+        }
+    }
+};
+
+PsionicLance.prototype.hasMaxBoost = function () {
+    return true;
+};
+
+PsionicLance.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
+PsionicLance.prototype.initBoostableInfo = function () {
+    switch (shipManager.power.getBoost(this)) {
+        case 0:
+            this.data["Damage"] = '28 - 55';
+            this.data["Boostlevel"] = '0';
+            break;
+        case 1:
+            this.data["Damage"] = '29 - 65';
+            this.data["Boostlevel"] = '1';
+            break;
+        case 2:
+            this.data["Damage"] = '30 - 75';
+            this.data["Boostlevel"] = '2';
+            break;
+        case 3:
+            this.data["Damage"] = '31 - 85';
+            this.data["Boostlevel"] = '3';
+            break;
+        default:
+            this.data["Damage"] = '28 - 55';
+            this.data["Boostlevel"] = '0';
+            break;
+    }
+    return this;
+};
+
+var PsychicField = function PsychicField(json, ship)
+{
+    Weapon.call( this, json, ship);
+}
+PsychicField.prototype = Object.create( Weapon.prototype );
+PsychicField.prototype.constructor = PsychicField;
+
+PsychicField.prototype.initBoostableInfo = function(){
+    // Needed because it can change during initial phase
+    // because of adding extra power.
+    if(window.weaponManager.isLoaded(this)){
+        this.range = 2 + 2*shipManager.power.getBoost(this);
+        this.data["Range"] = this.range;
+ //       this.minDamage = 2 - shipManager.power.getBoost(this);
+ //       this.minDamage = Math.max(0,this.minDamage);
+ //       this.maxDamage =  7 - shipManager.power.getBoost(this);
+ //       this.data["Damage"] = "" + this.minDamage + "-" + this.maxDamage;
+    }
+    else{
+        var count = shipManager.power.getBoost(this);
+        for(var i = 0; i < count; i++){
+            shipManager.power.unsetBoost(null, this);
+        }
+    }
+    return this;
+}
+PsychicField.prototype.clearBoost = function(){
+        for (var i in system.power){
+                var power = system.power[i];
+                if (power.turn != gamedata.turn) continue;
+                if (power.type == 2){
+                    system.power.splice(i, 1);
+                    return;
+                }
+        }
+}
+PsychicField.prototype.hasMaxBoost = function(){
+    return true;
+}
+PsychicField.prototype.getMaxBoost = function(){
+    return this.maxBoostLevel;
+}
+
+//needed for Spark Curtain upgrade
+PsychicField.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
+    if (!weapon.ballistic) return 0;//only ballistic weapons are affected
+	var out = shipManager.systems.getOutput(target, this);
+	if (shipManager.power.getBoost(this) >= out){ //if boost is equal to output - this means base output is 0 = no Spark Curtain mod!
+		out = 0;
+	}
+	return out;
+}; 

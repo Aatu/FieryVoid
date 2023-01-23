@@ -10,6 +10,7 @@ class Liner extends BaseShip{
         $this->imagePath = "img/ships/LuxuryLiner.png";
         $this->shipClass = "Luxury Liner";
         $this->shipSizeClass = 3;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
         $this->forwardDefense = 19;
         $this->sideDefense = 19;

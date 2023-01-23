@@ -12,7 +12,7 @@ class ThorunEarly extends FighterFlight{
         
         $this->variantOf = "Thorun Dartfighters";
 				
-        $this->notes = '+5 Initiative bonu as long as flight leader is alive and uninjured.';
+        $this->notes = '+5 Initiative bonus as long as flight leader is alive and uninjured.';
 
 
         $this->forwardDefense = 8;

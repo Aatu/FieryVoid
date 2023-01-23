@@ -1307,9 +1307,9 @@ class SparkField extends Weapon implements DefensiveSystem{
 	public $iconPath = "SparkField.png";
 	
 	//let's make animation more or less invisible, and effect very large
-	public $trailColor = array(141, 240, 255);
+	public $trailColor = array(0, 0, 0);
         public $animation = "ball";
-        public $animationColor = array(1, 1, 255);
+        public $animationColor = array(0, 0, 0);
         public $animationExplosionScale = 2;
         public $animationExplosionType = "AoE";
         //public $explosionColor = array(165, 165, 255);
@@ -2239,6 +2239,15 @@ class RammingAttack extends Weapon{
 	
 	 public $possibleCriticals = array(); //shouldn't be hit ever, but if it is, should not suffer any criticals
 	
+	//preventing double ramming
+	private $alreadyRammed = array();
+	public function checkAlreadyRammed($targetID){
+		foreach($this->alreadyRammed as $rammedID) if ($rammedID == $targetID) return true;
+		return false;
+	}
+	public function setAlreadyRammed($targetID){
+		$this->alreadyRammed[] = $targetID;
+	}
 	
 	public function setSystemDataWindow($turn){
 		$this->setMinDamage(); //just in case it's not set correctly in the beginning!
@@ -2299,8 +2308,19 @@ class RammingAttack extends Weapon{
 	public function fire($gamedata, $fireOrder){
 		// If hit, firing unit itself suffers damage, too (based on ramming factor of target)!
 		$this->gamedata = $gamedata;
+		
+		//preventing double hit on the same target!
+		if($this->checkAlreadyRammed($fireOrder->targetid)){
+			$fireOrder->shotshit = 0;
+			$fireOrder->needed = 0;
+			$fireOrder->rolled = 100;
+			$fireOrder->pubnotes .= "TECHNICAL MISS (this collision already happened!)\n";
+			return;
+		}
+		
 		parent::fire($gamedata, $fireOrder);
 		if($fireOrder->shotshit > 0){
+			$this->setAlreadyRammed($fireOrder->targetid); //prevent repeating
 			$pos = null;
 			//$shooter = $gamedata->getShipById($fireOrder->targetid);
 			$shooter = $this->unit; //technically this unit after all
@@ -2348,7 +2368,7 @@ class RammingAttack extends Weapon{
 	
 
 	
-	private function getRammingFactor(){
+	public function getRammingFactor(){
 		$dmg = 0;
 		if ($this->designDamage > 0){
 			$dmg = 	$this->designDamage;
@@ -2360,7 +2380,8 @@ class RammingAttack extends Weapon{
 		}
 		return $dmg;
 	}
-        public function getDamage($fireOrder){  	
+	
+	public function getDamage($fireOrder){  	
 		//modifier: +1 if greater Ini than target, +1 if head on, +1 if target is head on also
 		$modifier = 0;
 		$shooter = $this->unit;
@@ -2368,9 +2389,9 @@ class RammingAttack extends Weapon{
 		$target = $gd->getShipById($fireOrder->targetid);
 		if ($shooter->iniative > $target->iniative) $modifier++;
 		$bearing = abs($shooter->getBearingOnUnit($target));
-		if ($bearing < 10) $modifier++;//should be 0, but at rage 0 there may be a few degrees off...
+		if ($bearing < 10) $modifier++;//should be 0, but at range 0 there may be a few degrees off...
 		$bearing = abs($target->getBearingOnUnit($shooter));
-		if ($bearing < 10) $modifier++;//should be 0, but at rage 0 there may be a few degrees off...
+		if ($bearing < 10) $modifier++;//should be 0, but at range 0 there may be a few degrees off...
 		
 		//roll and consult table
 		$rfactor = $this->getRammingFactor();
@@ -2390,11 +2411,20 @@ class RammingAttack extends Weapon{
 		$fireOrder->notes .= "mod = " . $this->damageModRolled . " rammingfactor: $rfactor damage: $damage" ;		
 		return $damage;			     
 	}//endof function getDamage
-        public function getReturnDamage($fireOrder){    //damage that ramming unit suffers itself - using same modifier as actual attack! (already set)   
+
+	public function getReturnDamage($fireOrder){    //damage that ramming unit suffers itself - using same modifier as actual attack! (already set)   
 		$gd = $this->gamedata;
 		$target = $gd->getShipById($fireOrder->targetid);
 		$shooter = $this->unit;
-		$rfactor =  $target->getRammingFactor();
+		
+		$rfactor = 0;
+		$rammingSystem = $target->getSystemByName("RammingAttack");
+		if($rammingSystem){
+			$rfactor =  $rammingSystem->getRammingFactor();
+			$rammingSystem->setAlreadyRammed($fireOrder->shooterid); //prevent repeating
+		}else{ //no ramming system present... 
+			$rfactor =  $target->getRammingFactor();
+		}
 		$damage = ceil($this->damageModRolled * $rfactor);			
 		if ((!($target instanceof FighterFlight)) && ($shooter instanceof FighterFlight)) $damage = 1000;  //fighter colliding with ship will always be destroyed
 		$damage += $this->selfDestroy;//unit will suffer additional damage on a successful attack
@@ -4282,5 +4312,734 @@ class VorlonDischargeCannon extends Weapon{
 
 }//endof class VorlonDischargeCannon
 
+
+class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapons that operates similar to Spark Field, but debilitating enemies in range, not damage them.
+        public $name = "PsychicField";
+        public $displayName = "Psychic Field";
+	public $iconPath = "PsychicField.png";
+	
+	//let's make animation more or less invisible, and effect very large
+	public $trailColor = array(0, 0, 0); //hide projectile
+        public $animation = "ball";
+        public $animationColor = array(0, 0, 0); //hide projectile
+        public $animationExplosionScale = 2;
+        public $animationExplosionType = "AoE";
+        //public $explosionColor = array(165, 165, 255);
+        //public $projectilespeed = 20;
+        //public $animationWidth = 1;
+        //public $trailLength = 1;
+	
+	public $boostable = true;
+        public $boostEfficiency = 2;
+        public $maxBoostLevel = 5;
+	
+	public $output = 0;
+	public $baseOutput = 2;//base output WITH Spark Curtain
+	public $defensiveType = "SparkCurtain"; //needs to be set to recognize as defensive system
+      
+        public $priority = 2; //should attack very early
+	
+        public $loadingtime = 1;
+	public $autoFireOnly = true; //this weapon cannot be fired by player
+	public $doNotIntercept = true; //this weapon is a field, "attacks" are just for technical reason
+        
+        public $rangePenalty = 0; //no range penalty, but range itself is limited
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals ; not relevant really!
+	
+	public $boostlevel = 0;
+		
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+    	public $firingModes = array( 1 => "Field"); //just a convenient name for firing mode
+	public $hextarget = true;
+	
+	protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by PsychicField handler!
+	
+	
+ /*	public $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
+ //           14=>"ReducedDamage"
+	);  Should this have a crit? */
+	
+	
+	
+	public function addTarget($newTarget){
+		$this->targetList[] = $newTarget;
+	}
+
+	
+	    public function setSystemDataWindow($turn){
+		    $boostlevel = $this->getBoostLevel($turn);
+	//	    $this->minDamage = 2-$boostlevel;
+	//	    $this->maxDamage = 7-$boostlevel;
+	//	    $this->minDamage = max(0,$this->minDamage);
+		    $this->animationExplosionScale = $this->getAoE($turn);
+		    $this->range = $this->getAoE($turn);
+		      parent::setSystemDataWindow($turn);  
+		      //$this->data["AoE"] = $this->getAoE($turn);
+		      $this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.  It should not be fired manually."; 
+	//	      $this->data["Special"] .= "<br>"; 
+		      $this->data["Special"] .= "<br>Affected ships have their initiative reduced by 5 to 20 points, and their hit chance reduced by 5 - 15% for 1 turn.";  
+		      $this->data["Special"] .= "<br>Can be boosted, for +2 AoE range per level to maximum of 12 hexes."; 
+		      $this->data["Special"] .= "<br>Multiple overlapping Psychic Fields will only cause 1 (the strongest) attack on a particular target.";
+		      $this->data["Special"] .= "<br>Does not affect other Thirdspace units, and is only 50% effective against Advanced Armor.";  		       
+	    }	//endof function setSystemDataWindow
+	
+	
+	
+	public function getAoE($turn){
+		$boostlevel = $this->getBoostLevel($turn);
+		$aoe = 2+(2*$boostlevel);
+		return $aoe;
+	}
+	
+	
+	public function calculateHitBase($gamedata, $fireOrder){
+		//parent::calculateHitBase($gamedata, $fireOrder);
+	        $fireOrder->updated = true;
+		$fireOrder->chosenLocation = 0;//so it's recalculated later every time! - as location chosen here is completely incorrect for target 
+		$fireOrder->needed = 100; //hit is automatic
+	}
+	
+	public function fire($gamedata, $fireOrder){
+		//parent::fire($gamedata, $fireOrder);
+		//actually fire at units from target list - and fill fire order data appropriately
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$fireOrder->rolled = 1; //just to mark that there was a roll!
+		$fireOrder->shotshit = 1; //always hit, technically
+		
+		//actual damage dealing...
+		foreach($this->targetList as $target){
+			$this->beforeDamage($target, $shooter, $fireOrder, null, $gamedata);			
+		}
+        	$notes = "This weapon hits automatically"; //replace usual note
+		$fireOrder->notes = $notes;
+		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
+		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
+	}
+	
+	public function calculateBoostLevel($turn){
+		$this->boostlevel = $this->getBoostLevel($turn);
+	}
+	
+        private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn)
+                            continue;
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
+			}
+            return $boostLevel;
+       	
+	}
+	
+	//find units in range (other than self), create attacks vs them
+	public function beforeFiringOrderResolution($gamedata){
+		PsychicFieldHandler::createFiringOrders($gamedata);		
+	}
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!		
+		$effectIni = Dice::d(4,1);//strength of effect: 1d6
+		$effecttohit = Dice::d(3,1);//strength of effect: 1d3
+		$effectIni5 = $effectIni * 5;
+		$effecttohit5 = $effecttohit * 5;	
+		$fireOrder->pubnotes .= "<br> Initiative reduced by $effectIni5, and hit chance reduced by $effecttohit5%, unless Thirdspace units.";
+						
+		if ($system->advancedArmor){
+			if ($ship->faction == "Thirdspace"){
+			$effectIni = 0;  //Doesn't affect other Thirdspace aliens.
+			$effecttohit = 0;
+		}else{	
+			$effectIni = ceil($effectIni/2);  	//Other Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens, 50% effect.	
+			$effecttohit = ceil($effecttohit/2);
+			}
+		}
+	
+		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!			
+			$firstFighter = $ship->getSampleFighter();
+			if($firstFighter){
+				for($i=1; $i<=$effecttohit;$i++){
+					$crit = new tmpsensordown(-1, $ship->id, $firstFighter->id, 'tmpsensordown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$firstFighter->criticals[] =  $crit;
+				} 
+				for($i=1; $i<=$effectIni;$i++){
+					$crit = new tmpinidown(-1, $ship->id, $firstFighter->id, 'tmpinidown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$firstFighter->criticals[] =  $crit;
+				}
+			}
+		}else{ //ship - place effect on C&C!
+			$CnC = $ship->getSystemByName("CnC");
+			if($CnC){
+				for($i=1; $i<=$effecttohit;$i++){
+					$crit = new PenaltyToHitOneTurn(-1, $ship->id, $CnC->id, 'PenaltyToHitOneTurn', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+				}
+				for($i=1; $i<=$effectIni;$i++){
+					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+	//		        $fireOrder->pubnotes .= "<br> TEST NOTE";	
+				}
+			}
+		}
+	} //endof function onDamagedSystem	
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+	{
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+			$maxhealth = 20;
+		}
+		if ( $powerReq == 0 ){
+			$powerReq = 2;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		PsychicFieldHandler::addPsychicField($this);//so all Psychic Fields are accessible together, and firing orders can be uniformly created
+	}
+	
+
+	public function onConstructed($ship, $turn, $phase){
+		parent::onConstructed($ship, $turn, $phase);
+		$this->tohitPenalty = $this->getOutput();
+		$this->damagePenalty = 0;
+	}
+		
+	public function getDefensiveType(){
+		return "SparkCurtain";
+	}    
+	
+	public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
+		return 0; //does not reduce damage
+	}
+	
+	public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
+		return 0;//does not reduce hit chance
+	}
+		
+	public function getOutput(){
+		return 0;     
+	}    
+	
+	public function getDamage($fireOrder){ return  0;   }
+	public function setMinDamage(){   $this->minDamage =  0 ;      }
+	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
+	
+} //endof class PsychicField 
+
+
+
+
+/*handles creation of firing orders for Psychic Fields*/
+class PsychicFieldHandler{
+	public $name = "PsychicFieldHandler";
+	private static $psychicFields = array();
+	private static $firingDeclared = false;
+	
+	
+	//should be called by every SparkField on creation!
+	public static function addPsychicField($weapon){
+		PsychicFieldHandler::$psychicFields[] = $weapon;		
+	}
+	
+	//compares boost levels of fields
+	//	lowest boost first (will potentially do more damage)
+	//	owner irrelevant, as weapon will damage everything in range except firing unit itself
+	public static function sortByBoost($fieldA, $fieldB){	    
+		if ($fieldA->boostlevel < $fieldB->boostlevel){ //low boost level first
+		    return -1;
+		}else if ($fieldA->boostlevel > $fieldB->boostlevel){
+		    return 1;
+		}else{
+		    return 0;
+		}   
+	} //endof function sortByBoost
+	
+	
+	public static function createFiringOrders($gamedata){
+		if (PsychicFieldHandler::$firingDeclared) return; //already done!
+		PsychicFieldHandler::$firingDeclared = true;
+		
+		//apparently ships may be loaded multiple times... make sure fields in array belong to current gamedata!
+		$tmpFields = array();
+		foreach(PsychicFieldHandler::$psychicFields as $field){
+			$shooter = $field->getUnit();
+			//if($field->isDestroyed($gamedata->turn-1)) continue; //destroyed weapons can be safely left out
+			if($field->isDestroyed($gamedata->turn)) continue; //actually at this stage - CURRENT turn should be indicated!
+			//is this unit defined in current gamedata? (particular instance!)
+			$belongs = $gamedata->shipBelongs($shooter);
+			if ($belongs){
+				$tmpFields[] = $field;
+			}			
+		}
+		PsychicFieldHandler::$psychicFields = $tmpFields; 
+		
+		
+		//make sure boost level for all weapons is calculated
+		foreach(PsychicFieldHandler::$psychicFields as $field){
+			$field->calculateBoostLevel($gamedata->turn);
+		}
+		
+		//sort all fields by boost
+		usort(PsychicFieldHandler::$psychicFields, "self::sortByBoost");	
+	
+		//table of units that are already targeted
+		$alreadyTargeted = array();
+		//create firing order for each weapon (target self)
+		//for each weapon find possible targets and add them to weapons' target list
+		//strongest weapons fire first, and only 1 field affects particular ship	
+		foreach(PsychicFieldHandler::$psychicFields as $field){			
+			if ($field->isDestroyed($gamedata->turn-1)) continue; //destroyed field does not attack
+			if ($field->isOfflineOnTurn($gamedata->turn)) continue; //disabled field does not attack
+			$shooter = $field->getUnit();      
+			$targetPos = $shooter->getCoPos();
+			$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
+			$fire = new FireOrder(-1, 'normal', $shooter->id, -1, $field->id, -1, $gamedata->turn, 
+				1, 0, 0, 1, 0, 0, $movementThisTurn->position->q,  $movementThisTurn->position->r, $field->weaponClass
+			);
+			$fire->addToDB = true;
+			$field->fireOrders[] = $fire;			
+			$aoe = $field->getAoE($gamedata->turn);			
+			$inAoE = $gamedata->getShipsInDistance($shooter, $aoe);
+			foreach($inAoE as $targetID=>$target){		
+				if ($shooter->id == $target->id) continue;//does not threaten self!
+				if ($target->isDestroyed()) continue; //no point allocating				
+				if (in_array($target->id,$alreadyTargeted,true)) continue;//each target only once 
+				//add to target list
+				$alreadyTargeted[] = $target->id; //add to list of already targeted units
+				$field->addTarget($target);
+			}
+		} //endof foreach sychicField
+	}//endof function createFiringOrders
+	
+}//endof class PsychicFieldHandler
+
+
+   class HeavyPsionicLance extends Raking{
+        public $name = "HeavyPsionicLance";
+        public $displayName = "Heavy Psionic Lance";
+        public $iconPath = "HeavyPsionicLance.png";        
+        public $animation = "laser";
+        public $animationColor = array(128, 0, 0);
+  //      public $animationExplosionScale = 0.35; //make it thin, despite high damage potential!
+	    /*
+        public $trailColor = array(30, 170, 255);
+        public $animationWidth = 2;
+        public $animationWidth2 = 0.3;
+        public $animationExplosionScale = 0.15;
+*/
+        public $intercept = 0;
+        public $loadingtime = 2;
+        public $raking = 20;
+        public $addedDice;
+        public $priority = 2;
+
+        public $boostable = true;
+        public $boostEfficiency = 6;
+        public $maxBoostLevel = 3;
+
+        public $firingModes = array(
+            1 => "Raking"
+        );
+
+        public $rangePenalty = 0.25;
+        public $fireControl = array(null, 6, 8); // fighters, <mediums, <capitals
+        //private $damagebonus = 10;
+
+        public $damageType = "Raking"; 
+        public $weaponClass = "Electromagnetic"; 
+        
+        public $uninterceptable = true;        
+
+
+        public function setSystemDataWindow($turn){
+            $boost = $this->getExtraDicebyBoostlevel($turn);            
+            parent::setSystemDataWindow($turn);
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            } 
+            //Raking(20) is already described in Raking class
+            $this->data["Special"] .= "Uninterceptable.";  
+            $this->data["Special"] .= "<br>Can be boosted for increased dmg output (+2d10 per 6 power added, up to 3 times).";
+		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";            
+            $this->data["Boostlevel"] = $boost;
+        }
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 24;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 12;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        private function getExtraDicebyBoostlevel($turn){
+            $add = 0;
+            switch($this->getBoostLevel($turn)){
+                case 1:
+                    $add = 2;
+                    break;
+                case 2:
+                    $add = 4;
+                    break;
+                case 3:
+                    $add = 6;
+                    break;
+
+                default:
+                    break;
+            }
+            return $add;
+        }
+
+
+         private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                if ($i->turn != $turn){
+                   continue;
+                }
+                if ($i->type == 2){
+                    $boostLevel += $i->amount;
+                }
+            }
+            return $boostLevel;
+        }
+ 
+		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //Unlikely to matter at Raking 20, but keep it in for thematic reasons!
+			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
+			if ($system->advancedArmor) return; //no effect on Advanced Armor but Ipsha still get wrecked.
+			//+1 to crit roll, +2 to dropout roll
+			$mod = 1;
+			if ($ship instanceof FighterFlight) $mod++;		
+			$system->critRollMod += $mod; 
+		} //endof function onDamagedSystem	               
+                        
+        public function getDamage($fireOrder){
+            $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
+            $dmg = Dice::d(10, (8 + $add)) +40;
+            return $dmg;
+        }
+
+        public function getAvgDamage(){
+            $this->setMinDamage();
+            $this->setMaxDamage();
+
+            $min = $this->minDamage;
+            $max = $this->maxDamage;
+            $avg = round(($min+$max)/2);
+            return $avg;
+        }
+
+        public function setMinDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->minDamage = 8 + ($boost * 2) + 45;
+        }   
+
+        public function setMaxDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->maxDamage = 80 + ($boost * 20) + 45;
+        }  
+   } //end of class HeavyPsionicLance
+   
+
+class PsionicLance extends Raking{
+        public $name = "PsionicLance";
+        public $displayName = "Psionic Lance";
+        public $iconPath = "PsionicLance.png";         
+        public $animation = "laser";
+        public $animationColor = array(128, 0, 0);
+  //      public $animationExplosionScale = 0.35; //make it thin, despite high damage potential!
+	    /*
+        public $trailColor = array(30, 170, 255);
+        public $animationWidth = 2;
+        public $animationWidth2 = 0.3;
+        public $animationExplosionScale = 0.15;
+*/
+        public $intercept = 0;
+        public $loadingtime = 1;
+        public $raking = 15;
+        public $addedDice;
+        public $priority = 4;
+
+        public $boostable = true;
+        public $boostEfficiency = 3;
+        public $maxBoostLevel = 3;
+
+        public $firingModes = array(
+            1 => "Raking"
+        );
+
+        public $rangePenalty = 0.33;
+        public $fireControl = array(null, 6, 6); // fighters, <mediums, <capitals
+        //private $damagebonus = 10;
+
+        public $damageType = "Raking"; 
+        public $weaponClass = "Electromagnetic";
+        
+        public $uninterceptable = true;         
+
+
+        public function setSystemDataWindow($turn){
+            $boost = $this->getExtraDicebyBoostlevel($turn);            
+            parent::setSystemDataWindow($turn);
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            } 
+            //Raking(20) is already described in Raking class
+            $this->data["Special"] .= "Uninterceptable.";              
+            $this->data["Special"] .= '<br>Can be boosted for increased dmg output (+1d10 per 3 power added, up to 3 times).';
+		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";               
+            $this->data["Boostlevel"] = $boost;
+        }
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 15;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 6;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        private function getExtraDicebyBoostlevel($turn){
+            $add = 0;
+            switch($this->getBoostLevel($turn)){
+                case 1:
+                    $add = 1;
+                    break;
+                case 2:
+                    $add = 2;
+                    break;
+                case 3:
+                    $add = 3;
+                    break;
+
+                default:
+                    break;
+            }
+            return $add;
+        }
+
+
+         private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                if ($i->turn != $turn){
+                   continue;
+                }
+                if ($i->type == 2){
+                    $boostLevel += $i->amount;
+                }
+            }
+            return $boostLevel;
+        }
+
+		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+				parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
+				if ($system->advancedArmor) return; //no effect on Advanced Armor		
+				//+1 to crit roll, +2 to dropout roll
+				$mod = 1;
+				if ($ship instanceof FighterFlight) $mod++;		
+				$system->critRollMod += $mod; 
+			} //endof function onDamagedSystem	 
+                       
+        public function getDamage($fireOrder){
+            $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
+            $dmg = Dice::d(10, (3 + $add)) +25;
+            return $dmg;
+        }
+
+        public function getAvgDamage(){
+            $this->setMinDamage();
+            $this->setMaxDamage();
+
+            $min = $this->minDamage;
+            $max = $this->maxDamage;
+            $avg = round(($min+$max)/2);
+            return $avg;
+        }
+
+        public function setMinDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->minDamage = 3 + ($boost * 1) + 25;
+        }   
+
+        public function setMaxDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->maxDamage = 30 + ($boost * 10) + 25;
+        }  
+   }
+
+class PsionicConcentrator extends Raking{
+    /*Psionic Concentrator - Thirdspace weapon*/
+	public $name = "PsionicConcentrator";
+	public $displayName = "Psionic Concentrator";
+	public $iconPath = "PsionicConcentrator.png";
+	
+	public $animation = "bolt";
+	    public $animationArray = array( 1=>"bolt", 2=>"bolt");
+    public $animationColor = array(128, 0, 0);
+	/*
+	public $trailColor = array(30, 170, 255);	
+	public $animationWidth = 4;
+	public $animationWidthArray = array(1=>4, 2=>5, 3=>6, 4=>7, 5=>8, 6=>10);
+	public $animationWidth2 = 0.3;
+        public $animationExplosionScale = 0.25;
+	public $animationExplosionScaleArray = array(1=>0.25, 2=>0.35, 3=>0.45, 4=>0.55, 5=>0.70, 6=>0.85);
+      */
+        public $loadingtime = 1;
+	public $intercept = 2; //intercept rating -1     
+	
+        public $priority = 6;
+        public $priorityArray = array(1=>6, 2=>4);
+	public $firingMode = 1;	
+            public $firingModes = array(
+                1 => "Single",
+                2 => "Double"
+  //              3 => "3combined",
+ //               4 => "4combined"
+            );
+        public $rangePenalty = 1;
+            public $rangePenaltyArray = array( 1=>1, 2=>0.5); //Standard and Raking modes
+        public $fireControl = array(6, 4, 4); // fighters, <mediums, <capitals 
+            public $fireControlArray = array( 1=>array(6, 4, 4), 2=>array(2, 5, 5)); //+1 fire control the more concentrators are used to hit per every additional combining weapon
+            
+ //   public $uninterceptable = false;
+ //   public $uninterceptableArray = array(1=>false, 2=>false, 3=>true, 4=>true);            
+	
+	
+	
+	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+  		public $damageTypeArray = array(1=>"Standard", 2=>"Standard");	    
+	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	    
+	//rake size array
+//	public $raking = 10;//more in higher modes
+//	public $rakingArray = array( 1=>10, 2=>10, 3=>10, 4=>15);	    
+
+	
+	public $isCombined = false; //is being combined with other weapon
+	public $alreadyConsidered = false; //already considered - either being fired or combined
+	public $testRun = false;//testRun = true means hit chance is calculated nominal skipping concentration issues - for subordinate weapon to calculate average hit chance
+	
+	
+	    public function setSystemDataWindow($turn){
+		      parent::setSystemDataWindow($turn);  
+		      $this->data["Special"] = "Can combine two Psionic Concentrators into longer-ranged, concentrated shot with improved Fire Control against ships and an additional 1d10+4 damage.";
+//		      $this->data["Special"] .= "<br>Two Concentrators will deliver a Standard damage shot with longer range.  Three or four combined will fire an uninterceptable Raking shot inflicting 10 and 15 point rakes respectively.";		      
+		      $this->data["Special"] .= "<br>If You allocate multiple Concentrators to the same Double mode of fire at the same target, they will be combined.";		       
+		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in Single mode instead.";  		  
+		      $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";
+	    }	
+	
+		
+	public function fire($gamedata, $fireOrder){
+	    if ($this->isCombined) $fireOrder->shots = 0; //no actual shots from weapon that's firing as part of combined shot!
+	    parent::fire($gamedata, $fireOrder);
+	} //endof function fire	
+	
+	
+	//if fired in higher mode - combine with other weapons that are so fired!
+	//if already combining - do not fire at all (eg. set hit chance at 0, make self completely uninterceptable and number of shots at 0)
+	public function calculateHitBase($gamedata, $fireOrder){
+		$this->alreadyConsidered = true;
+		if ($this->isCombined){  //this weapon is being used as subordinate combination weapon! 
+			$notes = "technical fire order - weapon combined into another shot";
+			$fireOrder->chosenLocation = 0; //tylko techniczne i tak
+			$fireOrder->needed = 0;
+			$fireOrder->shots = 0;
+			$fireOrder->notes = $notes;
+			$fireOrder->updated = true;
+			$this->changeFiringMode($fireOrder->firingMode);
+			return;
+		}
+		if ($fireOrder->firingMode > 1){ //for single fire there's nothing special
+			$firingShip = $gamedata->getShipById($fireOrder->shooterid);
+			$subordinateOrders = array();
+			$subordinateOrdersNo = 0;
+			//look for firing orders from same ship at same target (and same called id as well) in same mode - and make sure it's same type of weapon
+			$allOrders = $firingShip->getAllFireOrders($gamedata->turn);
+			foreach($allOrders as $subOrder) {
+				if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->targetid) && ($subOrder->calledid == $fireOrder->calledid) && ($subOrder->firingMode == $fireOrder->firingMode) ){ 
+					//order data fits - is weapon another Concentrator?
+					$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
+					if ($subWeapon instanceof PsionicConcentrator){
+						if (!$subWeapon->alreadyConsidered){ //ok, can be combined then!
+							$subordinateOrdersNo++;
+							$subordinateOrders[] = $subOrder;
+						}
+					}
+				}
+				if ($subordinateOrdersNo>=($fireOrder->firingMode-1)) break;//enough subordinate weapons found! - exit loop
+			}						
+			if ($subordinateOrdersNo == ($fireOrder->firingMode-1)){ //combining - set other combining weapons/fire orders to technical status!
+				foreach($subordinateOrders as $subOrder){
+					$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
+					$subWeapon->isCombined = true;
+					$subWeapon->alreadyConsidered = true;
+					$subWeapon->doNotIntercept = true;
+				}
+			}else{//not enough weapons to combine in this mode - set self to single fire
+				$fireOrder->firingMode = 1;
+			}
+		}
+		parent::calculateHitBase($gamedata, $fireOrder);
+	}//endof function calculateHitBase
+
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
+		if ($system->advancedArmor) return; //no effect on Advanced Armor		
+		//+1 to crit roll, +2 to dropout roll
+		$mod = 1;
+		if ($ship instanceof FighterFlight) $mod++;		
+		$system->critRollMod += $mod; 
+	} //endof function onDamagedSystem	
+
+	
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 8;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 4;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+	
+    public function getDamage($fireOrder){
+		return Dice::d(10, 1+$this->firingMode)+($this->firingMode*4); //2d10+3 +1d10+3 per every additional weapon
+	}
+	public function setMinDamage(){    
+		$this->minDamage = 1+$this->firingMode+($this->firingMode*4);
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+	public function setMaxDamage(){
+		$this->maxDamage = 10*(1+$this->firingMode)+($this->firingMode*4);
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;  
+	}
+} //endof class PsionicConcentrator
 
 ?>

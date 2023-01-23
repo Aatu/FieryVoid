@@ -61,43 +61,43 @@ spl_autoload_register(
                 'aviokiearly' => '/server/model/ships/brakiri/aviokiEarly.php',
                 'babylon5' => '/server/model/ships/EA/babylon5.php',
                 'babylon5refit' => '/server/model/ships/EA/babylon5refit.php',
-                'bacloseescort' => '/server/model/ships/smallraces/baCloseEscort.php',
-                'bacloseescortearly' => '/server/model/ships/smallraces/baCloseEscortEarly.php',
+                'bacloseescort' => '/server/model/ships/beltalliance/baCloseEscort.php',
+                'bacloseescortearly' => '/server/model/ships/beltalliance/baCloseEscortEarly.php',
                 'badgerstarfury' => '/server/model/ships/EA/badgerStarfury.php',
-                'baescortcarrier' => '/server/model/ships/smallraces/baEscortCarrier.php',
-                'baescortcarrierlcv' => '/server/model/ships/smallraces/baEscortCarrierLCV.php',
-                'baescortcarrierearly' => '/server/model/ships/smallraces/baEscortCarrierEarly.php',
-                'baescortcarrierrefit' => '/server/model/ships/smallraces/baEscortCarrierRefit.php',
-                'baheavygunboat' => '/server/model/ships/smallraces/baHeavyGunboat.php',
-                'baheavygunboatearly' => '/server/model/ships/smallraces/baHeavyGunboatEarly.php',
-                'baheavygunboatpulse' => '/server/model/ships/smallraces/baHeavyGunboatPulse.php',
+                'baescortcarrier' => '/server/model/ships/beltalliance/baEscortCarrier.php',
+                'baescortcarrierlcv' => '/server/model/ships/beltalliance/baEscortCarrierLCV.php',
+                'baescortcarrierearly' => '/server/model/ships/beltalliance/baEscortCarrierEarly.php',
+                'baescortcarrierrefit' => '/server/model/ships/beltalliance/baEscortCarrierRefit.php',
+                'baheavygunboat' => '/server/model/ships/beltalliance/baHeavyGunboat.php',
+                'baheavygunboatearly' => '/server/model/ships/beltalliance/baHeavyGunboatEarly.php',
+                'baheavygunboatpulse' => '/server/model/ships/beltalliance/baHeavyGunboatPulse.php',
                 'bainterceptormki' => '/server/model/weapons/particle.php',
                 'bainterceptorprototype' => '/server/model/weapons/particle.php',
                 'balcirax' => '/server/model/ships/centauri_old/balcirax.php',
                 'balciron' => '/server/model/ships/centauri_old/balciron.php',
                 'balciron1850' => '/server/model/ships/centauri_old/balciron1850.php',
                 'balciron1985' => '/server/model/ships/centauri_old/balciron1985.php',
-                'balightgunboat' => '/server/model/ships/smallraces/baLightGunboat.php',
-                'balightgunboatearly' => '/server/model/ships/smallraces/baLightGunboatEarly.php',
-                'balightgunboatescort' => '/server/model/ships/smallraces/baLightGunboatEscort.php',
-                'balightgunboatpulse' => '/server/model/ships/smallraces/baLightGunboatPulse.php',
+                'balightgunboat' => '/server/model/ships/beltalliance/baLightGunboat.php',
+                'balightgunboatearly' => '/server/model/ships/beltalliance/baLightGunboatEarly.php',
+                'balightgunboatescort' => '/server/model/ships/beltalliance/baLightGunboatEscort.php',
+                'balightgunboatpulse' => '/server/model/ships/beltalliance/baLightGunboatPulse.php',
                 'ballistic' => '/server/model/BaseClasses.php',
                 'ballistictorpedo' => '/server/model/weapons/torpedo.php',
                 'balsavor' => '/server/model/ships/centauri_old/balsavor.php',
                 'balvarin' => '/server/model/ships/centauri/balvarin.php',
                 'balvarix' => '/server/model/ships/centauri/balvarix.php',
-                'bamediumgunboat' => '/server/model/ships/smallraces/baMediumGunboat.php',
-                'bamediumgunboatearly' => '/server/model/ships/smallraces/baMediumGunboatEarly.php',
-                'bamediumgunboatpulse' => '/server/model/ships/smallraces/baMediumGunboatPulse.php',
+                'bamediumgunboat' => '/server/model/ships/beltalliance/baMediumGunboat.php',
+                'bamediumgunboatearly' => '/server/model/ships/beltalliance/baMediumGunboatEarly.php',
+                'bamediumgunboatpulse' => '/server/model/ships/beltalliance/baMediumGunboatPulse.php',
                 'barque' => '/server/model/ships/raiders/barque.php',
-                'bascoutcarrier' => '/server/model/ships/smallraces/baScoutCarrier.php',
-                'balcvcarrier' => '/server/model/ships/smallraces/baLCVCarrier.php',
+                'bascoutcarrier' => '/server/model/ships/beltalliance/baScoutCarrier.php',
+                'balcvcarrier' => '/server/model/ships/beltalliance/baLCVCarrier.php',
                 'baseship' => '/server/model/ships/ShipClasses.php',
                 'baseshipnoaft' => '/server/model/ships/ShipClasses.php',
                 'baseshipnofwd' => '/server/model/ships/ShipClasses.php',
                 'bashnar' => '/server/model/ships/brakiri/bashnar.php',
-                'bastarfoxftr' => '/server/model/ships/smallraces/baStarfoxFtr.php',
-                'basurveyship' => '/server/model/ships/smallraces/baSurveyShip.php',
+                'bastarfoxftr' => '/server/model/ships/beltalliance/baStarfoxFtr.php',
+                'basurveyship' => '/server/model/ships/beltalliance/baSurveyShip.php',
                 'batrado' => '/server/model/ships/brakiri/batrado.php',
                 'batradoearly' => '/server/model/ships/brakiri/batradoEarly.php',
                 'battlelaser' => '/server/model/weapons/lasers.php',
@@ -322,7 +322,7 @@ spl_autoload_register(
                 'falenna' => '/server/model/ships/centauri_old/falenna.php',
                 'falenna1975' => '/server/model/ships/centauri_old/falenna1975.php',
                 'falkosi' => '/server/model/ships/brakiri/falkosi.php',
-                'fangedserpent' => '/server/model/ships/drazi/fangedserpent.php',
+                //'fangedserpent' => '/server/model/ships/drazi/fangedserpent.php',
                 'fangedserpent_v2' => '/server/model/ships/drazi/fangedserpent_v2.php',
                 'fastfreighter' => '/server/model/ships/civilians/fastFreighter.php',
                 'felucca' => '/server/model/ships/raiders/felucca.php',
@@ -901,7 +901,7 @@ spl_autoload_register(
                 'skiff' => '/server/model/ships/raiders/skiff.php',
                 'skua' => '/server/model/ships/drazi_old/skua.php',
                 'skylark' => '/server/model/ships/civilians/skylark.php',
-                'skyserpent' => '/server/model/ships/drazi/skyserpent.php',
+                //'skyserpent' => '/server/model/ships/drazi/skyserpent.php',
                 'skyserpent_v2' => '/server/model/ships/drazi/skyserpent_v2.php',
                 'sleekbird' => '/server/model/ships/drazi/sleekbird.php',
                 'sloop' => '/server/model/ships/raiders/sloop.php',
@@ -1867,8 +1867,8 @@ spl_autoload_register(
 
 				//Stano Customs
 				//Rich Bax Early Earth Alliance
-                'bagammaftr' => '/server/model/ships/smallraces/baGammaFtr.php',
-                'basentinelftr' => '/server/model/ships/smallraces/baSentinelFtr.php',
+                'bagammaftr' => '/server/model/ships/beltalliance/baGammaFtr.php',
+                'basentinelftr' => '/server/model/ships/beltalliance/baSentinelFtr.php',
 
                 'ariesstarfury' => '/server/model/ships/EA_old/ariesStarfury.php',
                 'atlasstarfury' => '/server/model/ships/EA_old/atlasStarfury.php',
@@ -2058,6 +2058,7 @@ spl_autoload_register(
                 'sarlon' => '/server/model/ships/usuuth/sarlon.php',
                 'sethrus' => '/server/model/ships/usuuth/sethrus.php',
                 'sinthon' => '/server/model/ships/usuuth/sinthon.php',
+                'sinthonlcv' => '/server/model/ships/usuuth/sinthonLCV.php',
                 'baroon' => '/server/model/ships/usuuth/baroon.php',
                 'thira' => '/server/model/ships/usuuth/thira.php',
                 'staroon' => '/server/model/ships/usuuth/staroon.php',
@@ -2475,7 +2476,8 @@ spl_autoload_register(
 				'vasy' => '/server/model/ships/raiders/Vasy.php',
 				'vyshesh' => '/server/model/ships/civilians/Vyshesh.php',
 				'xotia' => '/server/model/ships/vree/XotiA.php',
-				'xotib' => '/server/model/ships/vree/XotiB.php',	
+				'xotib' => '/server/model/ships/vree/XotiB.php',
+				'tyllz'	=> '/server/model/ships/vree/Tyllz.php',
 		    						
 				'zshadowxonn' => '/server/model/ships/vree/ZShadowXonn.php', //tournament prize
 												
@@ -2602,21 +2604,23 @@ spl_autoload_register(
 				'rangedfuser' => '/server/model/weapons/plasma.php',
 				'dualplasmastream' => '/server/model/weapons/specialWeapons.php',	
 				'reshkasu' => '/server/model/ships/pakmara/Reshkasu.php',
-				'shobogna' => '/server/model/ships/pakmara/Shobogna.php',																			
+				'shobogna' => '/server/model/ships/pakmara/Shobogna.php',										
 				'orshilti' => '/server/model/ships/pakmara/Orshilti.php',
 				'porfatis' => '/server/model/ships/pakmara/Porfatis.php',
 				'pshulshi' => '/server/model/ships/pakmara/Pshulshi.php',
 				'pshultau' => '/server/model/ships/pakmara/Pshultau.php',
 				'trashuli' => '/server/model/ships/pakmara/Trashuli.php',
 				'urikhal' => '/server/model/ships/pakmara/Urikhal.php',	
-				'tharnotak' => '/server/model/ships/pakmara/Tharnotak.php',								'padashar' => '/server/model/ships/pakmara/Padashar.php',
+				'tharnotak' => '/server/model/ships/pakmara/Tharnotak.php',								
+				'padashar' => '/server/model/ships/pakmara/Padashar.php',
 				'artees' => '/server/model/ships/pakmara/Artees.php',
 				'simsalle' => '/server/model/ships/pakmara/Simsalle.php',
 				'trashue' => '/server/model/ships/civilians/Trashue.php',
 				'plasalle' => '/server/model/ships/pakmara/Plasalle.php',
 				'sashulkur' => '/server/model/ships/pakmara/Sashulkur.php',
 				'simtorka' => '/server/model/ships/pakmara/Simtorka.php',
-				'uriktal' => '/server/model/ships/pakmara/Uriktal.php',																																																				
+				'uriktal' => '/server/model/ships/pakmara/Uriktal.php',
+				'thorkaosat' => '/server/model/ships/pakmara/ThorkaOSAT.php',																																																				
 				
 
 				//Hyach
@@ -2734,7 +2738,8 @@ spl_autoload_register(
 				// ~~~ AmmoMagazine ~~~ and related classes
                 		'ammomagazine' => '/server/model/systems/baseSystems.php', //ammo magazine itself
 		    
-                		'ammomissileb' => '/server/model/systems/baseSystems.php', //ammunition for missile racks
+						'ammomissiletemplate' => '/server/model/systems/baseSystems.php', //ammunition for missile racks
+                		'ammomissileb' => '/server/model/systems/baseSystems.php', 
                 		'ammomissilel' => '/server/model/systems/baseSystems.php',
                 		'ammomissileh' => '/server/model/systems/baseSystems.php',
                 		'ammomissilef' => '/server/model/systems/baseSystems.php',
@@ -2742,6 +2747,12 @@ spl_autoload_register(
                 		'ammomissilep' => '/server/model/systems/baseSystems.php',
                 		'ammomissiled' => '/server/model/systems/baseSystems.php',
                 		'ammomissiles' => '/server/model/systems/baseSystems.php',
+						
+                		'ammomissilefb' => '/server/model/systems/baseSystems.php',
+                		'ammomissilefl' => '/server/model/systems/baseSystems.php',
+                		'ammomissilefh' => '/server/model/systems/baseSystems.php',
+                		'ammomissilefy' => '/server/model/systems/baseSystems.php',
+                		'ammomissilefd' => '/server/model/systems/baseSystems.php',
 		    
                 		'ammomissileracks' => '/server/model/weapons/missile.php', //missile racks themselves
                 		'ammomissilerackso' => '/server/model/weapons/missile.php',
@@ -2751,6 +2762,7 @@ spl_autoload_register(
                 		'ammomissileracklh' => '/server/model/weapons/missile.php',
                 		'ammomissilerackr' => '/server/model/weapons/missile.php',
                 		'ammobombrack' => '/server/model/weapons/missile.php',
+                		'ammofighterrack' => '/server/model/weapons/missile.php',
 						
 						
 		    
@@ -2813,14 +2825,18 @@ spl_autoload_register(
 						'athraskalacam' => '/server/model/ships/dilgar/athraskalaCAM.php',
 						'targathcam' => '/server/model/ships/dilgar/targathCAM.php',
 						'eskravatam' => '/server/model/ships/dilgar/eskravatAM.php',
-						'delegor' => '/server/model/ships/dilgar/delegor.php',
-						
+						'delegor' => '/server/model/ships/dilgar/delegor.php',						
 						'ochlavitaam' => '/server/model/ships/dilgar/ochlavitaAM.php',
 						'ochlavitamam' => '/server/model/ships/dilgar/ochlavitaMAM.php',
 						'ochlavitadam' => '/server/model/ships/dilgar/ochlavitaDAM.php',
 						
+						'thorunheavyam' => '/server/model/ships/dilgar/thorunHeavyAM.php',
+						
 						//Drazi						
 						'darkhawkam' => '/server/model/ships/drazi/darkhawkAM.php', 
+						
+						'skyserpentam' => '/server/model/ships/drazi/skyserpentAM.php',
+						'fangedserpentam' => '/server/model/ships/drazi/fangedserpentAM.php',
 						
 						//Llort
 						'kaedashkadaam' => '/server/model/ships/llort/KaedashkadaAM.php',
@@ -2836,6 +2852,8 @@ spl_autoload_register(
 						'borocadaam' => '/server/model/ships/hurr/borocadaAM.php',
 						'norekam' => '/server/model/ships/hurr/norekAM.php',
 						'anoroam' => '/server/model/ships/hurr/anoroAM.php',
+						
+						'koetham' => '/server/model/ships/hurr/koethAM.php',
 						
 						//Small Races - Rogolon						
 						'rogolonrogonam' => '/server/model/ships/smallraces/rogolonRogonAM.php',
@@ -2873,6 +2891,22 @@ spl_autoload_register(
 						'crusaderam' => '/server/model/ships/orieni/crusaderAM.php',
 						'crusader2003am' => '/server/model/ships/orieni/crusader2003AM.php',
 						
+						'hightemplaram' => '/server/model/ships/orieni/hightemplarAM.php',
+						
+						
+						//Thirdspace
+						'psychicfield' => '/server/model/weapons/specialWeapons.php',
+      			        'psychicfieldhandler' => '/server/model/weapons/specialWeapons.php',
+      			        'thirdspaceshieldprojection' =>	'/server/model/weapons/defensive.php',
+      			        'thirdspaceshieldprojector' =>	'/server/model/weapons/defensive.php',
+      			        'advancedsingularitydrive' => '/server/model/systems/baseSystems.php',
+      			        'psionicconcentrator' => '/server/model/weapons/specialWeapons.php',
+      			        'heavypsioniclance' => 	'/server/model/weapons/specialWeapons.php',
+      			        'psioniclance' => 	'/server/model/weapons/specialWeapons.php',
+      			        'psionictorpedo' => '/server/model/weapons/torpedo.php',    
+      			        'thirdspacebattleship' => '/server/model/ships/thirdspace/ThirdspaceBattleship.php',
+      			        'thirdspacecnc' => '/server/model/systems/baseSystems.php',		
+      			        'thirdspacefighter' => '/server/model/ships/thirdspace/ThirdspaceFighter.php',			
 						
 				
 				//let's end this with unit enhancement class...		    

@@ -13,6 +13,8 @@ class Seeker extends MediumShip{
         $this->variantOf = "Steadfast Escort Corvette";
         	$this->occurence = "rare";
 	    $this->isd = 2007;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+	    //design for exploration groups
 	    
         $this->agile = true;        
         $this->forwardDefense = 13;

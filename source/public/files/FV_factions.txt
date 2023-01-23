@@ -6,14 +6,54 @@ notable technologies, special rules, differences from official version (if appli
 
 GENERAL NOTES
 -------------
-Custom designs - some units are marked as "custom". This means they're not official designs released by AoG. This means they may not be evaluated as well as official ones, as well as they may not fit into the faction as originally designed.
+	Custom designs - some units are marked as "custom". This means they're not official designs released by AoG. This means they may not be evaluated as well as official ones, as well as they may not fit into the faction as originally designed.
 	Before using custom units it's good practice to make sure that Your opponent allows that (and if You create a game with such units allowed - say so explicitly in game description!)
-Unit enhancements - Fiery Void allows players to add enhancements to their ships (full list is available in separate file). Keep in mind that unit enhancements are originally optional rule, and enhancements may not be evaluated as well as base hulls (although they're generally pricy compared to their effect!). 
+	
+	Semi-custom designs - some units are marked as "semi-custom". This means they're not official designs released by AoG, but for some reason are not considered custom units and can be used in "official only" matches. Common reasons for such units' classification include:
+ - official units that could not be faithfully ported into FV for technical reasons, but were nonetheless considered important and are present with some changes (eg. Brakiri Tashkat and Shakara)
+ - units that notably expand fleet build options of faction while keeping close to official designs (eg. Ipsha Jumpsphere allowing tournament-legal fleets not centered on an ElInt, and a few Belt Alliance designs allowing to bring LCVs to the table while conforming to these rules)
+ - units that were released by AoG in expansion released after the company ceased to produce B5Wars related materials, but developed earlier (eg. sourcebook Variants-6)
+	
+	Unit enhancements - Fiery Void allows players to add enhancements to their ships (full list is available in separate file). Keep in mind that unit enhancements are originally optional rule, and enhancements may not be evaluated as well as base hulls (although they're generally pricy compared to their effect!). 
 	Before using enhancements for more than rounding out remaining points it's good practice to make sure that Your opponent agrees with that (and if You create a game with enhancements allowed - say so explicitly in game description!).
-	Note that some options listed as "Enhancements" are such only technically, as they're regularly available unit options (eg. fighter navigator). This is noted in enhancements list as well.
-Fleet checker - tool that performs automatic check of fleet composition. Game does not enforce its use, but these restrictions are aimed at creation of balanced and interesting fleets so it's encouraged :) . It's SUBJECTIVELY extrapolated from official tournament rules.
+	Note that some options listed as "Enhancements" are such only technically, as they're regularly available unit options (eg. variable missile loadouts or Navigators). This is noted in enhancements list as well.
+	
+	Fleet checker - tool that performs automatic check of fleet composition. Game does not enforce its use, but these restrictions are aimed at creation of balanced and interesting fleets so it's encouraged :) . It's SUBJECTIVELY extrapolated from official tournament rules.
 
 
+
+MISSILES
+--------
+For starters - general decription of missiles, as a complictaed system that is common for multiple factions.
+
+General notes: ships usually come preloaded with missiles (usually Basic), and any missiles You buy is on top of that. Also, while amount of any given missile You can buy is limited by magazine size, total amount of missiles is not. 
+This means Your missile magazine may show more missiles available than it can actually hold. However, You cannot actually LAUNCH more missiles than magazine can hold - total number of launches is tracked. So extra missiles will provide You with extra variety (at a price ;) ), but not actual extra missiles.
+This is particularly important for fighters (as ships' cavernous magazines are unlikely to run out during a battle). You are encouraged to observetotal amount of missiles a fighter can have, but if You do not (hether by omission or intentionally) - You will get extra missile variety, but no extra missiles.
+Note that fighters usually start with empty magazine (although some missile entry is present, for technical reasons).
+Any missile available in magazine can be fired by any launcher (that is capable of firing it), missiles are not directly tied to particular mounts. This is different for weapons that do store ammo directly on mount - but such weapons usually can only hold one kind of ammo.
+Missiles (and Navigators, for fighters) are bought as enhancements despite being standard options (for technical reasons).
+
+Not all tabletop missiles made it to Fiery VOi - some proved just too difficult to implement!
+
+Shipborne missiles' built-in guidance package is often combined into weapons' Fire control, rather than being kept separate.
+
+Enhancement names for ammo usually contain year available (for primary and other races, if this differs - with primary usually bein Kor-Lyan ;) ). Game does not enforce anything in regard to this information it's up to player to refrain from using anachronic weapons (or not).
+
+SHIPBORNE MISSILES
+ - class B - Basic Missile - the name says it all, default loadout present on most ships. All other shipborne missiles have the same data except attributes specifically indicated. Damage 20, Standard mode, launch range 20/distance range 60, built-in guidance of +3/+3/+3 (but does not use firing ships' OEW).
+ - class A - Antifighter Missile - -5 range and -15 distance range, as well as doing 15 points of damage. +3 Fire Control vs fighers. It's classified as light missile - which is meaningless for regular shipborne launchers, but means it's usable by light launchers (...which is the whole point).
+ - class D - Light Missile - 12 damage, -5 range/-15 distance range. Essentially used only by factions without access to Basic missile (Alacans, early Narn).
+ - class F - Flash Missile - does damage in Flash mode.
+ - class H - Heavy Missile - -10 range/distance range and -3 antifighter fire control, but damage 30. 
+ - class L - Long Range Missile - +10 range/distance range, but damage 15.
+ - class P - Piercing Missile - damage 30, mode Piercing, cannot be fired at fighters.
+ 
+FIGHTERBORNE MISSILES
+ - class FB - Basic Fighter Missile - all other shipborne missiles have the same data except attributes specifically indicated. Damage 10, Standard mode, launch range 10/distance range 30, built-in guidance of +3/+3/+3.
+ - class FD - Dropout Missile - 6 damage and FC of 3/1/1, but adds cumulative dropout penalty of -6 on target hit (-3 on superheavy fighters). Does not force a roll, just increases chance of dropout if it's rolled under regular rules.
+ - class FH - Heavy Fighter Missile - -5 range/distance range and FC of 1/3/3, but damage 15. Limited to 1 per fighter (2 per SHF).
+ - class FL - Long Range Fighter Missile - +5 range/distance range, but damage 8.
+ - class FY - Dogfight Missile - -2 range/-6 distance range, damage 6. In tabletop it can be snap fired in direct fire phase, but this ability is not present in FV.
 
 
 
@@ -278,8 +318,8 @@ Pak'ma' ra ships are quick, with excellent thrust and engine power, but are not 
 
 Notes & Differences from B5W Tabletop:
 Plasma Webs
-	- Plasma Webs fired in Offensive modes do not persist in the targetted hex for the following turn, meaning they will not damage any fighter units that move through them on the subsequent turn.
-	- Plasma Webs fired in Offensive mode must use hex targetting icon to lock onto a hex.
+	- Plasma Webs fired in Offensive modes do not persist in the targeted hex for the following turn, meaning they will not damage any fighter units that move through them on the subsequent turn.
+	- Plasma Webs fired in Offensive mode must use hex targeting icon to lock onto a hex.
 CnC Systems and Initiative
 	- As it is not possible to implement two CnC systems on ships in FV Pakmara ships, these are instead combined into a single CnC sytem with the combined health of both TT CnCs and improved armour / critical hit chart.  Note, Pakmara ships still suffer double the intiative penalty on CnC as they do in Tabletop.
 	- Pak'ma'ra fighters have inherent turn delay - but FV does not provide turn shortening for fighters, which further limits their maneuvrability. They're still Agile though :) . 
@@ -394,6 +434,16 @@ Layout of their ships is atypical as well - highly assymetrical, with many core 
 Their design makes them a bit Ancient-like when it comes to balancing - they are very vulnerable in some situations and unbeatable in others. In particular they are essentially shut down if their opponent is resistant to Electromagnetic weapons (eg. Advanced Armor or EM Hardening).
 
 
+THIRDSPACE (unofficial faction)
+The "Thirdspace aliens" are a mysterious and terrifying race of malevolent telepathic beings from an alternate dimension, in possession of technology considered more advanced than even the Shadows or Vorlons.  While not indestructible, their ships are protected by an powerful energy shield that can absorb a significant amount of weapons fire before opponenets can inflict damage on their ships themselves.
+In FV, they have been created as a Custom faction (with thanks to Amras Arfeiniel for providing the original image for the Thirdspace Battleship) and some of their abilities have been described below:
+ - Thirdspace shield absorb all incoming damage in the arc that they cover.  Once these shields have been reduced to a rating 0 damage will start to be inflicted on their ships as usual, factoring in modifiers provided by Advanced Armour.  At the end of the turn Shield Projectors will restore their respective shields by an amount based on their current rating.
+ - Thirdspace have a number of electromagnetic weapons, which typically deal a large amount of damage and can fire frequently.  Many also have additional effects on Younger races such as an increased critical hit/fighter dropout chance or a reduction in ship armour.
+ - Third space capital ships produce a passive Psychic Field which affects all enemies within range (except other Thirdspace aliens), this attack debilitates opponenets by reducing their initiative and hit chances for the following turn, and even effects Ancients to lesser degree.
+ - Like teh Ipsha, Thirdspace ships use a reactor which produce a set amount of power, regardless of whether systems have been destroyed or not.  As Thirdspace ships utilise power management heavily, to boost a shield or increase Psionic Lance damage for example, this means they can continue to fight effectively even when taking heavy damage.
+ - The Thirdspace aliens also use a flexible Psionic Concentrator weapon, which is effective against fighters as a single weapon or can combine two Concentrators to deliver a powerful anti-ship shot each turn.
+
+
 TORATA REGENCY
 Torata extensively use Accelerator weapons, either allowing them to fire faster at the price of decreased damage output (most ship weapons) or store double charge to be able to deal massive damage if fire is held for a turn (fighter weapons).
 Accelerator weapons will NOT be used for interception without explicit order to do so - even fighter guns! Also, full-charge mode is specifically anti-ship (cannot be used vs fighters) - for this reason it's an actual alternate mode and will NOT be used without explicit order (You'll fire in basic mode by default).
@@ -402,7 +452,7 @@ Accelerator weapons will NOT be used for interception without explicit order to 
 USUUTH COALITION
 No very specific rules or technologies.
 Their fleet relies on LCVs but doesn't have a carrier for them (it's not needed when they operate within home system).
-	This challenges Usuuth fleets when deploy under standard tournament/pickup battle limitations, unless rules are changed or allowances for Usuuth are made. 
+ - This challenges Usuuth fleets when deploy under standard tournament/pickup battle limitations, unless rules are changed or allowances for Usuuth are made. 
 	
 	
 VORLONS
@@ -610,6 +660,7 @@ Shield mechanics mean that (besides necessary adaptation of tactics) in very sma
  - Independent fighters: while most StarTrek fighters/shuttles require hangar slots to be deployed (just like their B5 counterparts do), some of them possess Warp Drive of their own, as well as high endurance. Such craft do not require hangars, despite being fighter-sized. They are affected by "number of ships on a given hull limit" (whith each flight counted as one "ship"), and usually are marked as Restricted Deployment
  - Self-reliable LCVs: most StarTrek LCV-sized ships are fully capable of operating on their own, do not require hangars and have regular sensors (rather than restricted B5 "LCV Sensors").
  - Militarized shuttles: most StarTrek factions don't use dedicated fighters. However, their shuttles are usually armed and combat capable if necessary. Ships of these factions do have shuttle capacity listed (which is usually omitted in FV) and have combat shuttle designs available. Combat shuttles are not fighters, and as such are not necessary if player doesn't wish to deploy them.
+ 
 
 zSTARTREK FEDERATION (custom, alternate universe faction)
 United Federation of Planets is a conglomerate of multiple separate species. They remain independent enough to operate their own warships, built to different specifications - which is marked in fleet list. This is NOT, however, intended as a fleet composition restriction - Federation fleet on a field of battle may use any mix of units desired (although small craft should be based on carrier of the same species). 

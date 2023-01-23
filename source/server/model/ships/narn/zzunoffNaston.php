@@ -17,7 +17,9 @@ class zzunoffNaSton extends BaseShip{
 	//$this->occurence = "rare";
 	$this->limited = 33;
 	$this->isd = 2221;
-	$this->unofficial = true;
+ 		$this->unofficial = 'S'; //design released after AoG demise
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+		//exploration ship
 
 
         $this->forwardDefense = 17;

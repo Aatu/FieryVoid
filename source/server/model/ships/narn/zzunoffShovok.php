@@ -20,7 +20,7 @@ class zzunoffShovok extends MediumShip{
 	$this->variantOf = "Sho'Kos Patrol Cutter";
 	$this->occurence = "common";
 	$this->isd = 2211;
-	$this->unofficial = true;
+ 		$this->unofficial = 'S'; //design released after AoG demise
 
         
         $this->turncost = 0.50;

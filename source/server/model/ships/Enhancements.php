@@ -3,6 +3,22 @@
 Most enhancements made are based on official ones, but they're changed and/or repointed
 */
 class Enhancements{
+    public static function compareEnhancements($enhA, $enhB)//to set them in order
+	//REVERSE order, as they're effectively reversed in front end too
+    {
+        if ($enhA[6] && (!$enhB[6])) { //Options first
+            return 1;
+        } else if ($enhB[6] && (!$enhA[6])) {
+            return -1;
+        } else if ( $enhA[1] < $enhB[1] ) { //by name, ascending
+            return 1;
+        } else if ($enhA[1] > $enhB[1] ) {
+            return -1;
+        } else {
+            return 0;
+        }
+    } //endof function compareInterceptAbility	
+	
   /*sets enhancement options for a given ship
   called by setEnhancements if database is empty
   */
@@ -14,7 +30,9 @@ class Enhancements{
 		Enhancements::setEnhancementOptionsFighter($ship);
 	}else{
 		Enhancements::setEnhancementOptionsShip($ship);
-	}	
+	}
+	//sort enhancements - options first, then by name
+	usort($ship->enhancementOptions, "self::compareEnhancements");
   } //endof function setEnhancementOptions
   
   /* block all available enhancements (those that are by default enabled) - ADD ANY NEW STANDARD ENHANCEMENTS HERE!
@@ -83,7 +101,8 @@ class Enhancements{
 		  $enhLimit = 2;	
 		  $enhPrice = ceil($ship->pointCost*0.4); //+40%	  
 		  $enhPriceStep = ceil($ship->pointCost*0.2); //+20% of base, for total price of 60% for second level
-		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+		  //technical ID, human readable name, number taken, maximum number to take, price for one, price increase for each further, is an option (rather than enhancement)
 	  }	  
 	  
 	  //Improved Engine: +1 Thrust, cost: 12+4/turn cost, round up, limit: up to +50%
@@ -103,7 +122,7 @@ class Enhancements{
 			  $enhPrice = ceil(12+(4/($ship->turncost)));	  
 			  $enhPriceStep = 0; 
 			  $enhLimit = ceil($strongestValue/2);	  
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 	  }
 	  
@@ -135,7 +154,7 @@ class Enhancements{
 			  }
 			  $enhPriceStep = 0; 
 			  $enhLimit = 1;	  
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }		  
 	  }	  
 	  
@@ -163,7 +182,7 @@ class Enhancements{
 		  if($strongestValue > 0){ //Sensors actually exist to be enhanced!
 			  $enhPrice = max(1,($strongestValue+1)*5) * $multiplier;	  
 			  $enhPriceStep = 0;
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 	  }	  
 	  
@@ -187,7 +206,7 @@ class Enhancements{
 			  $enhPrice = ($outputTotal+$count)*100; //every self repair system increased by one
 			  $enhPriceStep = $count*100; //additional 100 points for every self-repair on ship
 			  $enhLimit = floor($outputMin/2);	  
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 	  }  	
 	    
@@ -199,7 +218,7 @@ class Enhancements{
 		  $enhLimit = 1;	
 		  $enhPrice = ceil($ship->pointCost*0.1); //+10%	
 		  $enhPriceStep = 0;
-		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);//this is NOT an enhancement - rather an OPTION
 	  }  	
 	  
 	  //Ipsha-specific - Essan Barony refit (available for generic Ipsha designs only, Essan-specific ones may have it already incorporated in some form)
@@ -209,7 +228,7 @@ class Enhancements{
 		  $enhLimit = 1;	
 		  $enhPrice = 0;
 		  $enhPriceStep = 0;
-		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);//this is NOT an enhancement - rather an OPTION
 	  }  	
 
 	  
@@ -221,7 +240,7 @@ class Enhancements{
 		  $enhLimit = 2;	
 		  $enhPrice = -ceil($ship->pointCost*0.15); //-15%	  
 		  $enhPriceStep = -ceil($enhPrice/3); //+5%, for total price of -10% for second level
-		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }
 	  
 	  //Increased Diffuser Capability: +1 output for every Energy Diffuser; cost: 2.5x new capability, step: 2.5x number of diffusers
@@ -241,7 +260,7 @@ class Enhancements{
 			  $enhPrice = round($output*2.5);
 			  $enhPriceStep = round($count*2.5);
 			  $enhLimit = 5;	  
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }		  
 	  }	  
 
@@ -258,7 +277,7 @@ class Enhancements{
 			  $enhPrice = 0;	  
 			  $enhPriceStep = 0; 
 			  $enhLimit = ceil($capacity);	  
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);//not an enhancement!
 		  }
 	  }	  
 	  
@@ -277,7 +296,7 @@ class Enhancements{
 			  $enhPrice = 40+$count*10;	
 			  $enhPriceStep = 0; 
 			  $enhLimit = 1;	  
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 	  }
 
@@ -290,7 +309,7 @@ class Enhancements{
 		  $enhLimit = 7;	
 		  $enhPrice = -6; //fixed, very low value
 		  $enhPriceStep = 0; //flat rate
-		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }
 	  
 
@@ -311,7 +330,7 @@ class Enhancements{
 			  $enhPrice = round($structureTotal*($AActrl->AAtotal+1)/5);	
 			  $enhPriceStep = round($structureTotal/5);
 			  $enhLimit = floor($AActrl->AAtotal/2);
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 	  }	  
 
@@ -341,7 +360,7 @@ class Enhancements{
 			  $enhPrice = $sizeFactor*$count*($rating+1);	
 			  $enhPriceStep = $sizeFactor*$count;
 			  $enhLimit = floor($rating/2);
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 	  }	  
 	  
@@ -357,7 +376,7 @@ class Enhancements{
 			  $enhPrice = ($capacitor->output+1) *20;	
 			  $enhPriceStep = 20;
 			  $enhLimit = 6;
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 	  }
 	
@@ -371,7 +390,7 @@ class Enhancements{
 		  $enhLimit = 4;	
 		  $enhPrice = -4; //fixed, very low value
 		  $enhPriceStep = 0; //flat rate
-		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }
 	  
 	  
@@ -420,7 +439,7 @@ class Enhancements{
 		  }
 		  
 		  if ($enhPrice != 0){
-		  	$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  	$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true); //this is NOT an enhancement - rather an OPTION (but for custom faction only)
 		  }
 	  }
 	  
@@ -442,9 +461,10 @@ class Enhancements{
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
 			  $enhLimit = $actualCapacity; //effectively limited by magazine capacity	
-			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  //special missiles are NOT enhancements
 		  }
 		  $enhID = 'AMMO_L'; //Long Range Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -453,9 +473,9 @@ class Enhancements{
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
 			  $enhLimit = $actualCapacity;		
-			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  }
 		  $enhID = 'AMMO_H'; //Heavy Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -464,9 +484,9 @@ class Enhancements{
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
 			  $enhLimit = $actualCapacity;		
-			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  }
 		  $enhID = 'AMMO_F'; //Flash Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -475,9 +495,9 @@ class Enhancements{
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
 			  $enhLimit = $actualCapacity;		
-			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  }
 		  $enhID = 'AMMO_A'; //Antifighter Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -486,9 +506,9 @@ class Enhancements{
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
 			  $enhLimit = $actualCapacity;		
-			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  }
 		  $enhID = 'AMMO_P'; //Piercing Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -497,9 +517,9 @@ class Enhancements{
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
 			  $enhLimit = $actualCapacity;		
-			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  }
 		  $enhID = 'AMMO_D'; //Light Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -508,9 +528,9 @@ class Enhancements{
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
 			  $enhLimit = $actualCapacity;		
-			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  }
 		  $enhID = 'AMMO_S'; //Stealth Missiles - Target is hidden
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -519,9 +539,9 @@ class Enhancements{
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
 			  $enhLimit = $actualCapacity / 10;		//10% limit
-			  $enhPrice = $ammoClass->enhancementPrice; 
+			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  }
 	  } //end of magazine-requiring options
 	  
@@ -543,7 +563,7 @@ class Enhancements{
 		  	$enhPrice = ceil(0.4*$flight->pointCost/6); //price per craft, while flight price is per 6-craft flight	  
 		  }  
 		  $enhPriceStep = 0;
-		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }  	  
 	  
 		//Expert Motivator: -2 dropout modifier, cost: 10% craft price (round up), limit: 1
@@ -557,7 +577,7 @@ class Enhancements{
 		  	$enhPrice = ceil($flight->pointCost/60); //price per craft, while flight price is per 6-craft flight	  
 		  }
 		  $enhPriceStep = 0;
-		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }
 	  
 	  //Improved Targeting Computer: +1 OB, cost: new rating *3, limit: 1
@@ -567,7 +587,7 @@ class Enhancements{
 		  $enhLimit = 1;	
 		  $enhPrice = max(1,($flight->offensivebonus+1)*3);	  
 		  $enhPriceStep = 0; //3; //limit is 1 but if anyone increases it - step is ready...or would be but the effect looks silly ;)
-		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }
 
 	  //Improved Thrust: +1 free thrust, cost: new rating, limit: 1
@@ -577,7 +597,7 @@ class Enhancements{
 		  $enhLimit = 1;	
 		  $enhPrice = max(1,$flight->freethrust+1);	  
 		  $enhPriceStep = 0;
-		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }
 
 	  //Navigator: missile guidance, +1(5) Ini, cost: 10, limit: 1
@@ -587,7 +607,7 @@ class Enhancements{
 		  $enhLimit = 1;	
 		  $enhPrice = 10;	  
 		  $enhPriceStep = 0;
-		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true); //NOT an enhancement!
 	  }  
 	  
 	  
@@ -605,7 +625,7 @@ class Enhancements{
 		  	$enhPrice = -ceil($flight->pointCost/60); //price per craft, while flight price is per 6-craft flight	  
 		  } 	  
 		  $enhPriceStep = 0;
-		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }
 	  
 	  //Shadow fighter deployed without carrier control: -2 OB, -3(15) Ini, cost: 0, limit: 1
@@ -615,7 +635,7 @@ class Enhancements{
 		  $enhLimit = 1;	
 		  $enhPrice = 0;	  
 		  $enhPriceStep = 0;
-		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true); //NOT an enhancement!
 	  }  
 	  
 	/* Vorlon Azure Skin Coloring:
@@ -638,7 +658,7 @@ class Enhancements{
 		  $enhLimit = floor($rating/2);
 		  $enhPrice = 20*$count*($rating+1);		  
 		  $enhPriceStep = 20*$count;
-		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		}
 	  }
 	  
@@ -663,9 +683,85 @@ class Enhancements{
 		  }
 		  
 		  if ($enhPrice != 0){
-		  	$flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep);
+		  	$flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 	  }
+	  
+	  
+
+	  //consumable ammunition
+	  //find magazine capacity to set appropriate limits!
+	  //ASSUMING multiple but equal magazines (for fighter flights) (no magazine is fine too)
+	  //availablility in name - for EA and other factions respectably - just in case someone wishes for in-universe accurate availability
+	  $magazineCapacity = 0;
+	  foreach($flight->getSampleFighter()->systems as $magazine) if($magazine->name == 'ammoMagazine'){
+		  $magazineCapacity = $magazine->capacity;
+		  break; //foreach
+	  }
+	  if ($magazineCapacity > 0){ //otherwise no point
+		  $enhID = 'AMMO_FB'; //Basic Fighter Missiles
+		  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileFB();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity; //effectively limited by magazine capacity	
+			  $enhPrice = $ammoClass->getPrice($flight); 
+			  $enhPriceStep = 0; //flat rate
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true );
+			  //variable missiles are NOT enhancements!
+		  }
+		  $enhID = 'AMMO_FL'; //Long Range Fighter Missiles
+		  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileFL();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($flight); 
+			  $enhPriceStep = 0; //flat rate
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }
+		  $enhID = 'AMMO_FH'; //Heavy FighterMissiles
+		  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileFH();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+				
+				//limited to 2 per SHF, or 1 per lighter craft
+				$maxLimit = 1;
+				if($flight->superheavy) $maxLimit = 2;
+				$actualCapacity = min($actualCapacity,$maxLimit);
+				
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($flight); 
+			  $enhPriceStep = 0; //flat rate
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }
+		  $enhID = 'AMMO_FY'; //Dogfight FighterMissiles
+		  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileFY();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($flight); 
+			  $enhPriceStep = 0; //flat rate
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }
+		  $enhID = 'AMMO_FD'; //Dropout FighterMissiles
+		  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileFD();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;
+			  $enhPrice = $ammoClass->getPrice($flight); 
+			  $enhPriceStep = 0; //flat rate
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }
+	  } //end of magazine-requiring options
 	  
 	  
   } //endof function setEnhancementOptionsFighter
@@ -700,7 +796,7 @@ class Enhancements{
 			if($enhCount > 0) {
 				if($flight->enhancementTooltip != "") $flight->enhancementTooltip .= "<br>";
 				$flight->enhancementTooltip .= "$enhDescription";
-				if ($enhCount>1) $ship->enhancementTooltip .= " (x$enhCount)";
+				if ($enhCount>1) $flight->enhancementTooltip .= " (x$enhCount)";
 				switch ($enhID) { 
 					case 'ELITE_SW': //Elite Pilot (SW): pivot cost 1, Ini +1, OB +1, Profiles -1
 						$flight->pivotcost = 1;
@@ -738,7 +834,35 @@ class Enhancements{
 							$sys->output += $enhCount;
 						}
 						break;
-							
+						
+						
+					//consumable ammunition - add to ALL missile magazines on flight!
+					case 'AMMO_FB': //Basic Fighter Missile
+						foreach($flight->systems as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
+							$ftrAM->addAmmoEntry(new AmmoMissileFB(), $enhCount, true); //do notify dependent weapons, too!
+						}
+						break;
+					case 'AMMO_FH': //Heavy Fighter Missile
+						foreach($flight->systems as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
+							$ftrAM->addAmmoEntry(new AmmoMissileFH(), $enhCount, true); //do notify dependent weapons, too!
+						}
+						break;
+					case 'AMMO_FL': //Long Range Fighter Missile
+						foreach($flight->systems as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
+							$ftrAM->addAmmoEntry(new AmmoMissileFL(), $enhCount, true); //do notify dependent weapons, too!
+						}
+						break;
+					case 'AMMO_FY': //Dogfight Fighter Missile
+						foreach($flight->systems as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
+							$ftrAM->addAmmoEntry(new AmmoMissileFY(), $enhCount, true); //do notify dependent weapons, too!
+						}
+						break;
+					case 'AMMO_FD': //Dropout Fighter Missile
+						foreach($flight->systems as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
+							$ftrAM->addAmmoEntry(new AmmoMissileFD(), $enhCount, true); //do notify dependent weapons, too!
+						}
+						break;
+						
 				}
 			}			
 		}

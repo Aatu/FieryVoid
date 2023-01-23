@@ -4,8 +4,8 @@ class TrekFederationYamato extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 740;
-        $this->faction = "ZTrek Playtest Federation (TOS)";
+	$this->pointCost = 760;
+        $this->faction = "ZStarTrek Federation (TOS)";
         $this->phpclass = "TrekFederationYamato";
         $this->imagePath = "img/ships/StarTrek/FederationCarrierYamato.png";
         $this->shipClass = "Yamato Carrier";

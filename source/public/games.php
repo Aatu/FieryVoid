@@ -56,36 +56,43 @@ if (isset($_SESSION["user"])) {
     <!-- <div id="newsHeader">Latest News - September 2020</div> -->
     <div id="newsEntry">
         
-	    
+<!--	    
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
         <h4>may our games be fiery and our lives peaceful</h4>
         <br>
-
+-->
        
 		
 
-		---------- <b>LATEST NEWS - December 2022</b> ----------
-	    <br><b>Variable missile loads</b> - Orieni capital ships, and Ochlavita (somehow I missed her earlier ;) )
-	    <br><b>Minor bugfixes</b> - there's always more bugs to kill!
-	    <br><b>Pak'ma'ra polishing</b> - courtesy of Douglas
-	    <br><b>Image updates</b> - courtesy of Douglas
-	    <br><b>Nexus polishing</b> - courtesy of Geoffrey
+		---------- <b>LATEST NEWS - January 2023</b> ----------
+	    <br><b>Derelict ships prevented from firing</b> - Initial phase will be blocked if derelict ship is trying to fire missiles.
+	    <br><b>Weapon icons refreshed</b> - a few weapon lines made more consistent
+	    <br><b>Engine data shows basic thrust rating</b> - useful for ships with multiple thrust sources (Dilgar, Trek)
+	    <br><b>Critical damage info missing fixed</b> - notably on Jammer and shields. If You see some more cases, report please!
+	    <br><b>Default game description modified</b> - now it shows options to delete, so if player ignores it, it should show ;)
+	    <br><b>Multislot functionality improved</b> - new slots should have proper deployment area, and resizing with buttons should affect them properly
+	    <br><b>Double ramming prevented</b> - if two units successfully ram each other, damage will be applied only once
+	    <br><b>Variable missile loads</b> - ready for fighters (for starters they can be found on Drazi Serpents)
+	    <br><b>Semi-custom ships</b> - selected ships classified as usable in "official only" games even though they are not official AoG designs 
+	    <br><b>Belt Alliance</b> - moved to their own directory
+	    <br><b><u>StarTrek Federation (TOS)</u></b> - released from Playtest status as Tier 2 faction! (after final round of polishing and balancing)
+	    <br><b>Critical effects lasting too long</b> - bug fixed
 	    
-	    
-		 <br><br>---------- <b>update 20th of December</b> ---------- 
-	    <br><b>Variable missile loads</b> - Orieni are in... and that's all of them! Next in line: missile loads for fighters (but that's for next year)
-
-	    
-<!--	    
-		 <br><br>---------- <b>update 26th of September</b> ---------- 
-	    <br><b>Variable missile loads</b> - new factions are in (Dilgar, Drazi)
-	    <br><b>Suicidal Dilgar</b> - Delegor added (scenario unit)
--->
+	        
+		 <br><br>---------- <b>update 11th of January - Fleet Checker</b> ---------- 
+	    <br><b>Options highlighted</b> - now enhancement entries representing regular options are highlighted as such (and Fleet Checker does not warn about them)
+	    <br><b>Non-combat units blocked</b> - Fleet Checker now checks non-combat ship presence (like for fixed defenses)
+	    <br><b>Small flights blocked</b> - Fleet Checker now checks flight smaller than 6 craft
+ 
+		 <br><br>---------- <b>update 20th of January</b> ---------- 
+	    <br><b><u><big>Thirdspace</big></u> arrived</b> - custom faction by Douglas
+	    <br><b>Ammo Magazine for fighters</b> - Dilgar, Hurr
+	    <br><b>Vree and Pak'ma'ra updated</b> - courtesy of Douglas
 	    
 		
 	    
         <br><br><br>
-        Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
+        Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>)</big> <b>whenever something weird happens</b></font>.
 
         
 		

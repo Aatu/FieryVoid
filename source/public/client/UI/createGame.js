@@ -131,6 +131,26 @@ window.createGame = {
             $("#team2 .depwidth").val(5);
             $("#team1 .depheight").val(30);
             $("#team2 .depheight").val(30);
+			//modify ALL SLOTS, rather than flat slots 0 and 1!
+			for (var slotID in createGame.slots) {
+				var slotData = createGame.slots[slotID];
+				if (slotData.team == 1){ //data for team 1
+					slotData.depx = $("#team1 .depx").val();
+					slotData.depy = $("#team1 .depy").val();
+					slotData.depwidth = $("#team1 .depwidth").val();
+					slotData.depheight = $("#team1 .depheight").val();
+					slotData.deptype = $(".deptype").val();
+					slotData.depavailable = 0;
+				} else { //data for team 2
+					slotData.depx = $("#team2 .depx").val();
+					slotData.depy = $("#team2 .depy").val();
+					slotData.depwidth = $("#team2 .depwidth").val();
+					slotData.depheight = $("#team2 .depheight").val();
+					slotData.deptype = $(".deptype").val();
+					slotData.depavailable = 0;
+				}
+			}
+			/*
             createGame.slots[0].depx = -19;
             createGame.slots[1].depx = 18;
             createGame.slots[0].depy = 0;
@@ -143,6 +163,7 @@ window.createGame = {
             createGame.slots[1].deptype = "box";
             createGame.slots[0].depavailable = 0;
             createGame.slots[1].depavailable = 0;
+			*/
         } else {
             $(".gamespacedefinition .unlimitedspace").removeClass("invisible");
             $(".gamespacedefinition .limitedspace").addClass("invisible");
@@ -156,14 +177,34 @@ window.createGame = {
         $(".spacex").val(30);
         $(".spacey").val(30);
         $(".deptype").val("box");
-        $("#team1 .depx").val(-13);
-        $("#team2 .depx").val(12);
+        $("#team1 .depx").val(-12);
+        $("#team2 .depx").val(11);
         $("#team1 .depy").val(0);
         $("#team2 .depy").val(0);
         $("#team1 .depwidth").val(7);
         $("#team2 .depwidth").val(7);
         $("#team1 .depheight").val(30);
         $("#team2 .depheight").val(30);
+		//modify ALL SLOTS, rather than flat slots 0 and 1!
+		for (var slotID in createGame.slots) {
+			var slotData = createGame.slots[slotID];
+			if (slotData.team == 1){ //data for team 1
+				slotData.depx = $("#team1 .depx").val();
+				slotData.depy = $("#team1 .depy").val();
+				slotData.depwidth = $("#team1 .depwidth").val();
+				slotData.depheight = $("#team1 .depheight").val();
+				slotData.deptype = $(".deptype").val();
+				slotData.depavailable = 0;
+			} else { //data for team 2
+				slotData.depx = $("#team2 .depx").val();
+				slotData.depy = $("#team2 .depy").val();
+				slotData.depwidth = $("#team2 .depwidth").val();
+				slotData.depheight = $("#team2 .depheight").val();
+				slotData.deptype = $(".deptype").val();
+				slotData.depavailable = 0;
+			}
+        }
+		/*
         createGame.slots[0].depx = -12;
         createGame.slots[1].depx = 11;
         createGame.slots[0].depy = 0;
@@ -176,6 +217,7 @@ window.createGame = {
         createGame.slots[1].deptype = "box";
         createGame.slots[0].depavailable = 0;
         createGame.slots[1].depavailable = 0;
+		*/
     },
 	
 	
@@ -193,6 +235,26 @@ window.createGame = {
         $("#team2 .depwidth").val(5);
         $("#team1 .depheight").val(30);
         $("#team2 .depheight").val(30);
+		//modify ALL SLOTS, rather than flat slots 0 and 1!
+		for (var slotID in createGame.slots) {
+			var slotData = createGame.slots[slotID];
+			if (slotData.team == 1){ //data for team 1
+				slotData.depx = $("#team1 .depx").val();
+				slotData.depy = $("#team1 .depy").val();
+				slotData.depwidth = $("#team1 .depwidth").val();
+				slotData.depheight = $("#team1 .depheight").val();
+				slotData.deptype = $(".deptype").val();
+				slotData.depavailable = 0;
+			} else { //data for team 2
+				slotData.depx = $("#team2 .depx").val();
+				slotData.depy = $("#team2 .depy").val();
+				slotData.depwidth = $("#team2 .depwidth").val();
+				slotData.depheight = $("#team2 .depheight").val();
+				slotData.deptype = $(".deptype").val();
+				slotData.depavailable = 0;
+			}
+        }
+		/*
         createGame.slots[0].depx = -19;
         createGame.slots[1].depx = 18;
         createGame.slots[0].depy = 0;
@@ -205,6 +267,7 @@ window.createGame = {
         createGame.slots[1].deptype = "box";
         createGame.slots[0].depavailable = 0;
         createGame.slots[1].depavailable = 0;
+		*/
     },
     
 	
@@ -242,6 +305,23 @@ window.createGame = {
         var team = $(this).hasClass("team1") ? 1 : 2;
         createGame.slotid++;
         var data = { id: createGame.slotid, team: team, name: "RED", points: 3500, depx: 0, depy: 0, deptype: "box", depwidth: 0, depheight: 0, depavailable: 0 };
+			//copy data from team data!
+			if (data.team == 1){ //data for team 1
+				data.depx = $("#team1 .depx").val();
+				data.depy = $("#team1 .depy").val();
+				data.depwidth = $("#team1 .depwidth").val();
+				data.depheight = $("#team1 .depheight").val();
+				data.deptype = $(".deptype").val();
+				data.depavailable = 0;
+			} else { //data for team 2
+				data.depx = $("#team2 .depx").val();
+				data.depy = $("#team2 .depy").val();
+				data.depwidth = $("#team2 .depwidth").val();
+				data.depheight = $("#team2 .depheight").val();
+				data.deptype = $(".deptype").val();
+				data.depavailable = 0;
+			}
+		
         createGame.slots.push(data);
         createGame.createSlot(data);
     },

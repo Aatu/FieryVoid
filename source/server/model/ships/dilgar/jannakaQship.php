@@ -11,6 +11,7 @@ class JannakaQship extends MediumShip{
         $this->shipClass = "Dilgar Jannaka Q-ship";
         $this->canvasSize = 100;
         $this->isd = 2212;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
         $this->forwardDefense = 11;
         $this->sideDefense = 16;

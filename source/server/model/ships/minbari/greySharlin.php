@@ -24,6 +24,8 @@ class GreySharlin extends BaseShip{
         $this->isd = 2058;
         $this->occurence = "unique";
         $this->variantOf = "Sharlin War Cruiser";
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+	    //this is dedicated transport for Grey Council, and they are not regularly brought into harms way
 
         // Ship system arguments: armor, health, power req, output
         $this->addPrimarySystem(new Reactor(6, 35, 0, 0));

@@ -1035,6 +1035,7 @@ class AmmoMissileRackS extends Weapon{
     public $priority = 6;
     public $loadingtime = 2;
 	
+	
 	protected $availableAmmoAlreadySet = false; //set to true if calling constructor from derived weapon that sets different ammo options
 
     protected $rackExplosionDamage = 75; //how much damage will this weapon do in case of catastrophic explosion
@@ -1097,12 +1098,13 @@ class AmmoMissileRackS extends Weapon{
 	}
     
 	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		
 		$this->data["Special"] = 'Available firing modes depend on ammo bought as unit enhancements. Ammunition available is tracked by central Ammunition Magazine system.';
 		if ($this->rackExplosionThreshold < 21) { //can explode - inform player!
 			$chance = (21 - $this->rackExplosionThreshold) * 5; //percentage chance of explosion
 			$this->data["Special"] .= '<br>Can explode if damaged or destroyed, dealing ' . $this->rackExplosionDamage . ' damage in Flash mode (' . $chance . '% chance).';
 		}	
-		parent::setSystemDataWindow($turn);
 	}
 	
 	/*prepare firing modes - in order as indicated by $ammoCLassesArray (so every time the order is the same and classes aren't mixed), but use only classes actually held by magazine (no matter the count - 0 rounds is fine)
@@ -1181,6 +1183,7 @@ class AmmoMissileRackS extends Weapon{
 	
 	
 	
+	
  	public function stripForJson(){
 		$strippedSystem = parent::stripForJson();
 		$strippedSystem->firingModes = $this->firingModes; 
@@ -1215,6 +1218,19 @@ class AmmoMissileRackS extends Weapon{
 		}
     }
 	
+
+	/*some missiles have special effects on impact*/
+    protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder)
+    {
+		$currAmmo = null;
+        //find appropriate ammo
+		if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
+			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
+		}
+		if ($currAmmo) $currAmmo->onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+		
+        parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+    }//endof function onDamagedSystem
 	
 	
 	public function criticalPhaseEffects($ship, $gamedata){ //add testing for ammo explosion!
@@ -1492,6 +1508,41 @@ class AmmoBombRack extends AmmoMissileRackS{
 
 
 
+/*fighter missile launcher using AmmoMagazine
+*/
+class AmmoFighterRack extends AmmoMissileRackS{
+	public $name = "ammoFighterRack";
+        public $displayName = "Missile";
+    public $iconPath = "fighterMissile.png";
+	
+    public $range = 10;
+    public $distanceRange = 30;
+    public $firingMode = 1;
+    public $priority = 6;
+    public $loadingtime = 1;
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(0,0,0);
+	protected $basicRange=10;
+	protected $basicDistanceRange = 30;
+
+    protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
+    protected $rackExplosionThreshold = 22; //how high roll is needed for rack explosion    
+	
+	function __construct($startArc, $endArc, $magazine, $base=false) //fighter-sized OSATs might benefit from being stable!
+	{		
+		//reset missile availability! (Parent is a shipborne launcher with different set of available missiles)
+		if(!$this->availableAmmoAlreadySet){
+			$this->ammoClassesArray = array();
+			$this->ammoClassesArray[] =  new AmmoMissileFB();
+			$this->ammoClassesArray[] =  new AmmoMissileFL();
+			$this->ammoClassesArray[] =  new AmmoMissileFH();
+			$this->ammoClassesArray[] =  new AmmoMissileFY();
+			$this->ammoClassesArray[] =  new AmmoMissileFD();
+			$this->availableAmmoAlreadySet = true;
+		}		
+		parent::__construct(0, 1, 0, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+	}
+} //endof class AmmoBombRack
 
 
 

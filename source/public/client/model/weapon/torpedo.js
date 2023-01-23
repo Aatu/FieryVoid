@@ -34,3 +34,9 @@ PacketTorpedo.prototype.calculateSpecialRangePenalty = function (distance) {
     var rangePenalty = this.rangePenalty * distancePenalized;
     return rangePenalty;
 };
+
+var PsionicTorpedo = function PsionicTorpedo(json, ship) {
+    Torpedo.call(this, json, ship);
+};
+PsionicTorpedo.prototype = Object.create(Torpedo.prototype);
+PsionicTorpedo.prototype.constructor = PsionicTorpedo;

@@ -589,11 +589,20 @@ window.gamedata = {
 		var ammoMagazineError = [];
 		for (var shipID in myShips) { //actually this will check for fighters, too
 			var currShip = myShips[shipID];
-			//check for every magazine on board!
-			for (var i in currShip.systems) if(currShip.systems[i].name == 'ammoMagazine') {
-        			var currMagazine = currShip.systems[i];
-				var checkResult = currMagazine.doVerifyAmmoUsage(currShip);
-				if(!checkResult) ammoMagazineError.push(currShip);
+			if (!currShip.flight) { //actual ship - check for every magazine on board!			
+				for (var i in currShip.systems) if(currShip.systems[i].name == 'ammoMagazine') {
+					var currMagazine = currShip.systems[i];
+					var checkResult = currMagazine.doVerifyAmmoUsage(currShip);
+					if(!checkResult) ammoMagazineError.push(currShip);
+				}
+			} else { //fighter flight - check for every fighter separately!
+				var flightCheckResult = true;
+				for (var j in currShip.systems) for (var i in currShip.systems[j].systems)	if(currShip.systems[j].systems[i].name == 'ammoMagazine') {
+					var currMagazine = currShip.systems[j].systems[i];
+					var checkResult = currMagazine.doVerifyAmmoUsageFighter(currShip.systems[j]);
+					if(!checkResult) flightCheckResult = false;
+				}
+				if (!flightCheckResult) ammoMagazineError.push(currShip); //at least one fighter uses nonexisting ammo
 			}
 		}
 		

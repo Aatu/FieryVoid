@@ -5,7 +5,7 @@ class TrekFederationMiranda extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 450;
-        $this->faction = "ZTrek Playtest Federation (TOS)";
+        $this->faction = "ZStarTrek Federation (TOS)";
         $this->phpclass = "TrekFederationMiranda";
         $this->imagePath = "img/ships/StarTrek/FederationMiranda.png";
         $this->shipClass = "Miranda Frigate";
