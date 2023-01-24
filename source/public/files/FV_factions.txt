@@ -1,0 +1,679 @@
+FACTIONS available in Fiery Void
+notable technologies, special rules, differences from official version (if applicable)
+
+
+
+
+GENERAL NOTES
+-------------
+	Custom designs - some units are marked as "custom". This means they're not official designs released by AoG. This means they may not be evaluated as well as official ones, as well as they may not fit into the faction as originally designed.
+	Before using custom units it's good practice to make sure that Your opponent allows that (and if You create a game with such units allowed - say so explicitly in game description!)
+	
+	Semi-custom designs - some units are marked as "semi-custom". This means they're not official designs released by AoG, but for some reason are not considered custom units and can be used in "official only" matches. Common reasons for such units' classification include:
+ - official units that could not be faithfully ported into FV for technical reasons, but were nonetheless considered important and are present with some changes (eg. Brakiri Tashkat and Shakara)
+ - units that notably expand fleet build options of faction while keeping close to official designs (eg. Ipsha Jumpsphere allowing tournament-legal fleets not centered on an ElInt, and a few Belt Alliance designs allowing to bring LCVs to the table while conforming to these rules)
+ - units that were released by AoG in expansion released after the company ceased to produce B5Wars related materials, but developed earlier (eg. sourcebook Variants-6)
+	
+	Unit enhancements - Fiery Void allows players to add enhancements to their ships (full list is available in separate file). Keep in mind that unit enhancements are originally optional rule, and enhancements may not be evaluated as well as base hulls (although they're generally pricy compared to their effect!). 
+	Before using enhancements for more than rounding out remaining points it's good practice to make sure that Your opponent agrees with that (and if You create a game with enhancements allowed - say so explicitly in game description!).
+	Note that some options listed as "Enhancements" are such only technically, as they're regularly available unit options (eg. variable missile loadouts or Navigators). This is noted in enhancements list as well.
+	
+	Fleet checker - tool that performs automatic check of fleet composition. Game does not enforce its use, but these restrictions are aimed at creation of balanced and interesting fleets so it's encouraged :) . It's SUBJECTIVELY extrapolated from official tournament rules.
+
+
+
+MISSILES
+--------
+For starters - general decription of missiles, as a complictaed system that is common for multiple factions.
+
+General notes: ships usually come preloaded with missiles (usually Basic), and any missiles You buy is on top of that. Also, while amount of any given missile You can buy is limited by magazine size, total amount of missiles is not. 
+This means Your missile magazine may show more missiles available than it can actually hold. However, You cannot actually LAUNCH more missiles than magazine can hold - total number of launches is tracked. So extra missiles will provide You with extra variety (at a price ;) ), but not actual extra missiles.
+This is particularly important for fighters (as ships' cavernous magazines are unlikely to run out during a battle). You are encouraged to observetotal amount of missiles a fighter can have, but if You do not (hether by omission or intentionally) - You will get extra missile variety, but no extra missiles.
+Note that fighters usually start with empty magazine (although some missile entry is present, for technical reasons).
+Any missile available in magazine can be fired by any launcher (that is capable of firing it), missiles are not directly tied to particular mounts. This is different for weapons that do store ammo directly on mount - but such weapons usually can only hold one kind of ammo.
+Missiles (and Navigators, for fighters) are bought as enhancements despite being standard options (for technical reasons).
+
+Not all tabletop missiles made it to Fiery VOi - some proved just too difficult to implement!
+
+Shipborne missiles' built-in guidance package is often combined into weapons' Fire control, rather than being kept separate.
+
+Enhancement names for ammo usually contain year available (for primary and other races, if this differs - with primary usually bein Kor-Lyan ;) ). Game does not enforce anything in regard to this information it's up to player to refrain from using anachronic weapons (or not).
+
+SHIPBORNE MISSILES
+ - class B - Basic Missile - the name says it all, default loadout present on most ships. All other shipborne missiles have the same data except attributes specifically indicated. Damage 20, Standard mode, launch range 20/distance range 60, built-in guidance of +3/+3/+3 (but does not use firing ships' OEW).
+ - class A - Antifighter Missile - -5 range and -15 distance range, as well as doing 15 points of damage. +3 Fire Control vs fighers. It's classified as light missile - which is meaningless for regular shipborne launchers, but means it's usable by light launchers (...which is the whole point).
+ - class D - Light Missile - 12 damage, -5 range/-15 distance range. Essentially used only by factions without access to Basic missile (Alacans, early Narn).
+ - class F - Flash Missile - does damage in Flash mode.
+ - class H - Heavy Missile - -10 range/distance range and -3 antifighter fire control, but damage 30. 
+ - class L - Long Range Missile - +10 range/distance range, but damage 15.
+ - class P - Piercing Missile - damage 30, mode Piercing, cannot be fired at fighters.
+ 
+FIGHTERBORNE MISSILES
+ - class FB - Basic Fighter Missile - all other shipborne missiles have the same data except attributes specifically indicated. Damage 10, Standard mode, launch range 10/distance range 30, built-in guidance of +3/+3/+3.
+ - class FD - Dropout Missile - 6 damage and FC of 3/1/1, but adds cumulative dropout penalty of -6 on target hit (-3 on superheavy fighters). Does not force a roll, just increases chance of dropout if it's rolled under regular rules.
+ - class FH - Heavy Fighter Missile - -5 range/distance range and FC of 1/3/3, but damage 15. Limited to 1 per fighter (2 per SHF).
+ - class FL - Long Range Fighter Missile - +5 range/distance range, but damage 8.
+ - class FY - Dogfight Missile - -2 range/-6 distance range, damage 6. In tabletop it can be snap fired in direct fire phase, but this ability is not present in FV.
+
+
+
+
+AVAILABLE FACTIONS
+------------------
+
+ABBAI MATRIARCHATE
+Gravitic Shield - most Abbai units are equipped with Gravitic Shield. Active shield reduces both hit chance and damage of incoming fire. At range 0 fighters are assumed to be able to come close enough to ignore ship shields.
+	Gravitic Shields are powered by separate generator, that can power up a limited number of them (usually not allowing a ship all-around protection unless generator output is boosted).
+Quad Array - 4 separate weapons in a single housing that's prone to overheating. Using more than 2 shots can cause forced shutdown for a turn, to cool down. Number of shots is changed by using alternate firing modes. Defensive fire is always safe. (this is somewhat changed from tabletop arrangement, where a regular critical is rolled instead - with defensive fire too).
+Comm Disruptor - weapon reducing target's EW and Initiative for next turn. 
+Particle Impeder - purely defensive weapon, capable of intercepting weapons with "uninterceptable" trait (typically that means Lasers :) ).
+	In addition, it can be boosted by sarificing EW rather than usual Power. Such a boost, in addition to increasing intercept rating of the Impeder, counts as special kind of shielding, reducing hit chance of all incoming weapons (fighter fire included), that can't be flown under and is cumulative with regular shields.
+	It is (by background as well as effect) DEW channeled to a specific arc, that has the added advantage of affecting fighters.
+	
+
+ABBAI MATRIARCHATE (WotCR)
+Abbai fleet a few hundred years before the show era, representing Wars of the Centauri Republic period.
+They have Gravitic Shielding much like modern Abbai (although much weaker), and weapons being precursors to modern Comm Disruptor (Comm Jammer and Sensor Spike).
+Mine Launcher - weapon that can deploy mines during combat. Not implemented in FV, unit that has it (Motenai Mine Layer) is present in game but equipped with missile launchers instead.
+
+
+BALOSIAN UNDERDWELLERS
+No notable special systems/rules.
+
+
+BRAKIRI SYNDICRACY
+Gravitic Drive - adds a few perks to movement, notably being able to do all maneuvers even while pivoted/pivoting (they use thrusters appropriate for current orientation when pivoted). Also, Gravitic Thrusters ignore first "Efficiency Reduced" reduced critical, increasing their resistance to damage.
+Corporations - Brakiri are split into competing corporations. On each unit it's noted which Corporation produces a given design (if not - it's assumed that all Corporations have equal access to it). This is irrelevant when fielding national Brakiri fleet, but You have option of fielding single Corporation as well. In this case, You have access only to that Corporation's designs (and common ones), but all restrictions (deployment & variant) are eased by one level. For Variant restrictions this means Rare->Uncommon->Common, for deployment Restricted(10%)->Limited->(33%)->Unlimited.
+	Corporations have access to slightly different technologies and heave their own areas of specialisation, so their individual fleets are usually lacking in some area but have excellent access to something else.
+	In-game checker does not take this rule into account.
+Gravitic Shield - see ABBAI entry
+Gravitic Bolt/Gravitic Pulsar - weapons that can have boosted output (damage and intercept rating), at the cost of (besides power) adverse effect if actually fired boosted - namely a cooldown period equal to boostlevel used. Additionally, if fired at maximum power, weapon can suffer critical damage.
+Gravitic Shifter - weapon that rotates target, fired in special firing step before regular fire.
+	Due to technical difficulties this weapon is NOT AVAILABLE in Fiery Void.
+	Ships utilizing this weapon that were deemed important for faction (Tashkat, Tashkava and Shakara) are added as custom designs (Tashkaton, Tashkavaton and Shakaraton, respectively), with Gravitic Cannons in place of original Shifters.
+Gravitic Mines - ballistic, hex-targeted weapon that can move units hit.
+	Not implemented in FV.
+
+
+CASCOR COMMONWEALTH (official)
+Ionizer - Laser-based primary fighter weapon. Unlike more typical fighter weapons it's uninterceptable, but also cannot itself intercept.
+Ion Field Generator - area-of effect weapon, targeted on a hex rather than ship. Units caught in area of effect have capabilities reduced next turn (reduced Initiative, Power, EW, OB, and has a chance to force shutdown a system).
+Poor acceleration - for ships it's just that, very high acceleration cost. For fighters, it's double acceleration cost - but medium and lighter fighters have unusually high thrust ratings, too. In effect they can't accelerate very well, but are exceptionally maneuvrable even at high speed.
+Ultralight fighters - smallest Cascor fighters are of Ultralight type, which allows them to efficiently fit into hangar space inended for larger fighters.
+Tiqincc - medium Cascor fighters have tail gun. In tabletop, this gun has -2 penalty when fired together with main gun. In FV it does not.
+
+
+CASCOR COMMONWEALTH (custom)
+After being actually fielded in Fiery Void for some time, consensus of players was that this faction (and its ships in particular) is too pricy to be competitive. In order to correct this perceived drawback, I have added option of using modified point values - by way of adding appropriate enhancement to unit (which does nothing but modify its price). Hopefully, this will make the faction more playable and actually balanced against other competitive small factions (eg. about the top of Tier 2, rather than bottom of that tier). There is a new attack fighter available, too. 
+Note that using these enhancements turns the fleet into CUSTOM one!
+Actual values used are set by Zero_1627 and are NOT result of consensus of players.
+
+
+CENTAURI REPUBLIC
+Ballistic Torpedo - in tabletop this weapon is able to target multiple units. In FV it's lacking this ability. Also, way to fire this weapon is very peculiar (You need to fire, THEN on the weapon itself indicate number of missiles launched).
+Plasma Stream - weapon that permanently reduces armor of systems hit (in FV - every system hit, in tabletop - only those hit by full rakes). Also, counts full armor for every rake, despite Raking mode. 
+Guardian Array - primarily defensive weapon that can intercept fire directed at third party, provided the weapon is between firing unit and it's target.
+	In tabletop, it needs to be shut down to switch between offensive (antifighter) and defensive modes.
+	There is no such requirement in Fiery Void, weapon can intercept or fire offensively at will.
+	Also, definition of "between" was changed. In FV weapon is "between" firing unit and its target if bearing difference on them is at least 120 degrees (2 hexsides).
+
+
+
+CENTAURI REPUBLIC (WotCR)
+Centauri fleet a few hundred years before the show era, representing Wars of the Centauri Republic period.
+Sentinel Point Defense - Guardian Array precursor, with the same comments (except it doesn't have offensive mode available at all).
+
+
+CH'LONAS (unofficial faction)
+Based on design by Charles "Danesti" Haught, published in BabCom.
+No very specific technologies - although they do have quite a lot of fancy weapons, they don't have individually atypical properties. 
+
+
+CIVILIANS
+Commonly available/generic civilian ships - or, if they're faction-specific civilians, they're noted as such in name.
+No very specific technologies (or technologies specific to base faction).
+
+
+CORILLANI THEOCRACY
+The Corillani are unusual in that they operate three independant navies, the Defenders of Corillan (DoC), the Corillani's People's Navy (CPN), and the Orillani Space Force (OSF).  Whilst these forces generally operate independently of one another they can, and will, fight alongside one another.  In practice, there is no restriction on mixing and matching ships from the three different sub-navies during fleet selection. However, when choosing fighters you must take the version of the Tillini which corresponds with the type of faction where hangar space is available i.e. DoC or OSF fighters could not be taken if the only hanger space available was on a CPN ship.
+The OSF use the unique Plasma Projector weapon which focuses plasma into tight beam, resulting in a longer range than most plasma weapons and with lower damage degradation.  It deals damage similar to a heavy plasma cannon, however this is applied in raking (8) mode rather than standard mode as with most other plasma weapons.
+
+
+CUSTOM SHIPS
+Units that, for some reason, were not fit for any faction. 
+Mostly a technical directory, not representing a playable faction.
+
+
+DENETH ASSEMBLY
+LCV Carrier - Deneth are the only official faction that have LCV carrier available, allowing these smallest ships to be fielded while conforming standard fleet composition rules. 
+
+
+DESCARI COMMITTEES
+The Descari possess unique Plasma Bolter weapons which combine features from both plasma and bolter weapon types.  These weapons do a set damage amount and do not suffer the damage reduction typical in plasma weapons up to a set range (which varies depending on the type of Plasma Bolter used).  
+Aside from this the Descari field a mixed of typical missile, laser, plasma and light particle weaponry.
+
+
+DILGAR IMPERIUM
+Pentacan Formation (Inverted Wedge Formation in AoG Wars) - Dilgar ships can benefit from using Pentacan formation. In FV the rules for it have been altered (mostly simplified).
+	Tabletop: Pentacan needs to be organized before battle begins (and there are strict requirements on number and size of ships in formation). Ships need to be within 10 hexes of Pentacan command ship to receive bonuses.
+		Bonuses are:
+		 - Initiative bonus provided by command ship (if any)
+		 - All units in Pentacan use one Initiative roll (this part is optional)
+	Fiery Void: only Initiative bonus is used (Initiative rolls are done in standard way, not "one for all"). Command bonus is applied to all ships within 10 hexes of command ship (not cumulative). Strict pentacans are not defined in any way. 		  
+Fighter formation - As long as flight leader (first craft in flight) is alive and uninjured (eg. received no damage), flight has +1 Initiative.
+Fighter pilot tenacity - Dilgar fighters have inherent -2 dropout bonus.
+Mass Driver - many Dilgar ships have Mass Driver fitted. This weapon is functional in FV, but is intended as planetary bombardment weapon of mass destruction and has limited use in space combat (can engage starbases and imobile Enormous ships). It's a Matter weapon that automatically hits Structure. It can be intercepted without degradation (like ballistic weapons are).
+Point Pulsar - dedicated weapon intended to make called shots - suffers only half of the regular penalty.
+
+
+DRAKH
+Custom fleet created by Wolfgang Lackner and Marcin Sawicki, based heavily upon BabCom-published designs by Roman Perner.
+Middle-born - they're Middle-born faction, with civilization far older than even Minbari or Yolu. This has no direct impact on game, unless a particular system treats such a faction differently.
+Shields - they have powerful shields, that can be boosted to be even stronger. They count double against Raking weapons. Cannot be flown under by fighters (unlike standard gravitic/EM shields). They don't decrease unit profile, only reduce damage (also unlike standard gravitic/EM shields). 
+Advanced Armor - gives a plethora of perks, generally reducing damage taken. It reduces or limits special effects of most weapons that have them, and counts as 2 points stronger against ballistics. Ignored by weapons made by Ancients.
+Gravitic Drive - see Brakiri.
+Improved Sensors - halve effectiveness of enemy Jammer.
+LCVs - Drakh LCVs use regular Sensors (that is, they're not bound by "all but 2 EW points need to be OEW" rule). 
+Hangar space - Drakh LCVs do require hangar space (like regular LCVs). They share it with Drakh fighters, although LCVs take twice as many slots.
+
+
+DRAZI FREEHOLD
+No very specific rules/technologies, although using alternate HCV layout is very notable and results in surprisingly resilient ships.
+
+
+DRAZI FREEHOLD (WotCR)
+Drazi fleet a few hundred years before the show era, representing Wars of the Centauri Republic period.
+No very specific rules/technologies.
+
+
+EARTH ALLIANCE
+Interceptor - dedicated defensive weapon. In tabletop, it needs to be shut down for a turn before switching between offensive (anti-fighter) and defensive (interception) modes. There is no such requirement in Fiery Void, weapon can intercept or fire offensively at will.
+Energy Web - defensive system integrated with Interceptor. Active Interceptor provides (in its arc) shield-like effect of reducing hit chance of all incoming fire by its Intercept Rating. EWeb cannot be flown under by fighters, and does NOT provide damage reduction.
+Shadow Omega - official Shadow Omega conversion by AoG is marked as unofficial because that's what official deployment restrictions sum up to (not tournament legal, opponent permission required). Actual fan-made conversions are present as well!
+
+
+EARTH ALLIANCE (early)
+The early Earth Alliance units are composed of semi-official custom designs that all were deployed before 2200. These units generally lack the better defenses of the later Earth designs and many use blast cannons. Some official units, like the Olympus Alpha are listed in 
+both the standard Earth Alliance fleet list as well as the early EA section. This is to represent their transitional nature from being high-end units in the early EA to very old units in the Dilgar War era. Although the more famous Starfuries (Tiger, Nova, Aurora) are unavailable 
+the early examples of the Starfury lineage (Flying Fox, Aries, and Atlas) formed the foundation of the fighter-heavy EA fleet in the future. 
+
+
+GAIM INTELLIGENCE
+Gaim are minor League race, but their ships are very good and their diversity is excellent - making them (in game, tactically ) in all respects equal to Big4 factions.
+Notable technologies:
+	Bulkheads - defensive system that can take damage first (after armor) when system is hit, which greatly increases resilience of Gaim systems. Bulkhead can protect systems on the same section, and structure it's mounted to (even if it's technically on different section, like on MCV). Note that PRIMARY systems are not protected by bulkheads. In FV decision whether to use bulkhead will be made automatically - Bulkheads will be used if they can prevent system destruction, when structure would be destroyed by the hit or when integrity of relevant Structure block remaining boxes fall too low. 
+	Particle Concentrator - multiple Concentrators firing from the same hex may combine into one more powerful (and more accurate!) shot, a bit similar to what Ipsha Surge Cannons do. Its hit chance is average of all weapons concentrating (as they may be fitted on different ships, with different EW, their chances may differ).
+		In tabletop it's more or less the same, except weapons within 1 hex can still participate and lock-on is denied if any participating weapon lacks lock-on.
+		Kind of "known bug" - on MCVs/LCVs all Bulkheads can protect Structure against any shot, even coming from different direction (so eg. Aft bulkhead may kick in if a ship is attacked from front - though it will protect only Structure in this case)
+	Packet Torpedo - ballistic weapon that has (besides range) a range penalty, just like direct fire weapons - with a twist that it kicks in only after first 10 hexes of travel.
+		In tabletop target of this weapon is not known to opponent until impact (not implemented in FV).
+	Scattergun - light weapon that fires random number of shots. When firing defensively (also random number of shots) those shots must be directed at separate threats.
+
+
+GROME AUTOCRACY
+The Grome a low-tech faction that prides itself in only using what they can build themselves. Their armament is made entirely of matter class weapons.
+Notable technologies:
+	Antiquated Sensors - These sensors cannot be boosted beyond their base state.
+	Connection Struts - While Grome vessels have huge structure blocks, they are very fragile. If a connection strut is hit, the damage to the structure is doubled.
+	Flak Cannons - This is key defensive weapon available to the Grome. It can only engage fighters, but scores damage in flash mode and the splash damage can damage anything. While effective in this role, the main ability is its defensive fire. It is capable of intercepting
+		all fire from a single unit at -3 and suffers degredation like normal interception. Therefore three Flak Cannons can generate a -6 to hit from all fire from a single unit. In addition, the Flak Cannon can intercept for friendly units. As long as the friendly unit is 
+		within 5 hexes and both the friendly and firing unit are in arc, it is able to engage. Lastly, the Flak Cannon can also intercept uninterceptable weapons like lasers. This is a little more effective in Fiery Void than on the table top.
+	Light and Heavy Railguns - These are smaller and larger versions, respectively, of the standard railgun.
+	Targeting Array - Currently, this system is being developed for Fiery Void. However, with are available and all other systems ready, the Grome are deploying with a modified version in Fiery Void. The Targeting Arrays are treated as 1 point Antiquated Sensors. This does 
+		enable the Grome to improve their defensive abilities, but the overall trade-off enables the Grome to become a playable faction.
+	Special Shells - Like missile armed vessels, the table top Grome had the ability to purchase special shells for their railguns. Currently, individual shells are not available. Therefore, the Grome have custom "full" variants of each of their units. These "full" variants
+	    have an increased points cost, but enable you to fire any shell type that is legal for the size railgun being fired.
+
+
+HURR REPUBLIC
+Low-tech faction. No very specific rules/technologies.
+
+
+IPSHA BARONIES
+Baronies - there is no Ipsha "national fleet". Ipsha species is split into "Baronies" (separate feudal-like states), and fielded fleet belongs to one of them. Player may use only generic designs in use by all Baronies and designs specific to one chosen Barony (it's indicated in unit notes). Similarly, some enhancements are Barony-specific.
+	In-game fleet checker does not take this rule into account.
+	Some "baronization" of ships is available through unit enhancements (eg. You can apply typical Essan changes to basic Ipsha design).
+Gravitic Drive - see Brakiri.
+Mag-Gravitic Reactor - Ipsha power source has fixed power output, rather than default relative (eg. "Power rating of 40" rather than "enough to enable all systems on ship"). This implies that destruction of systems does NOT cut into power produced (Reactor outpus stays the same) - so even though Power is usually negative for a fresh ship (eg. can't power everything), number of possible enabled systems does NOT go down with damage.
+Singularity Engine - Ipsha drive system is closely tied to Mag-Gravitic Reactor, which produces some quirks (notably Engine destructions destroyes the ship outright). This is not implemented in FV.
+EM Hardened - Ipsha units are especially resistant to Electromagnetic damage. This is cumulative with dropout bonus their fighters possess. 
+	Tabletop: Critical/drouputrolls caused by EM weapons are made with -2 bonus. In addition, this trait reduces effects of many EM weapons.
+	Fiery Void: ALL critical/dropout rolls are made with -1 bonus. In addition, EM weapons treat EM Hardened units as they would ones with Advanced Armor.
+Easy pivot - Ipsha ships have generally low pivot cost (even 0). Pivot-related penalties they suffer just like everyone else.
+Cooldown - all Ipsha weapons have recharge rate of 1 (eg. can fire immediately after being powered up). However, they usually do require a cooldown period (eg. forced shutdown) after firing.
+	Coupled with limited power available, this means Ipsha usually power up and fire some of their weapons, and while they are cooling down - rotate to bring freesh ones to bear.
+Surge Cannon - primary Ipsha weapon is extremely versatile due to being able to fire more powerful beam in combination with other weapons. Basically two, three, four or even five weapons can combine into one shot with increased range, damage and fire control (against ships - against fighters more powerful shots are less accurate).
+	To exercise this ability, just switch weapon to appropriate mode (2,3,4,5combined) and choose target. All weapons from the same ship sharing mode and target will combine into appropriate shot (or shots - eg. 4 weapons in 2combined mode would produce 2 shots).
+	If indicated combination is not possible (eg. 3 weapons declared to fire in 4Combined mode) weapons will fire separately (in single fire mode) instead (usually missing, but not requiring cooldown).
+	Each rake causes additional +2 on critical/dropout roll of system hit, too.
+Spark Field - weapon creating a field that causes damage to all nearby units, friend or foe alike (non-cumulative). This damage is low but still threatening to fighters. Active weapon will cause effects (eg. "fire") automatically, player does not declare it beyond enabling and setting power level (in Initial phase).
+Fancy weapons - many Ipsha weapons have complicated effects or modes of fire. Above are just most important/striking examples. Read weapon descriptions carefully.
+Jumpsphere - Ipsha have only one official jump-capable ship, Scout Wheel. This limits their legal fleet builds for tournament/pickup battle. To allow greater flexibility in this area a plausible custom jumpship design was added, a Warsphere exchanging fighter hangar for a jump drive.
+
+
+LLORT
+No very specific rules/technologies.
+It's worth noting that their ships are generally asymmetric and have atypical firing arcs and eclectic weapons sets.
+
+
+MARKAB THEOCRACY
+Scattergun - see Gaim 
+
+
+MINBARI FEDERATION
+Jammer - Minbari units are equipped with possibly the most powerful piece of defensive technology in game. It prevents lock-on (which means range penalties against Jammer-protected units are always doubled) and halves ballistic weapons launch range. Minbari themselves ignore Jammer.
+	Note that Jammer protection does not stack with jinking.
+Gravitic Drive - see Brakiri
+Antimatter Converter - weapon with theoretically infinite damage potential (no upper limit for damage dealt, it depends on how high can You make hit chance...). Does damage in Flash mode, so some damage is caused to other units on the same hex as target on a hit.
+White Star - the mainstay of Army of Light is available on Minbari fleet list. It's difficult to handle, but in skilled hands extremely potent unit, equipped with technologies nominally beyond reach of Young races (Adaptive Armor, EM Shields, in case of Command variant - even self repair).
+	These are not Minbari technologies (and are not available to Minbari as a whole, just this one ship).
+	White Stars may be used as ISA/Army of Light/White Star Fleet as well. Such a fleet is NOT tournament legal, and for good reason - but may be interesting scenario piece (or challenge). It's way too nasty to be used in regular pickup battle! 
+	When used in this way, only White Stars (and Combat Flyers they can carry, potentially) can be deployed, counting as Unlimited Deployment. Be warned - in skilled hands such a fleet is overwhelming. Playtesting suggests that fleet consisting fleet of 4 White Stars (nominally 3000PV) can fight as equal against 3400 points non-Minbari fleet tailored against them... just so You know ;) 
+EM Shield - works exactly as Gravitic Shield does (see Abbai), but doesn't require a separate Generator. Shield emitter itself is self-sufficient.
+Adaptive Armor - additional protection (increasing all armor ratings on ship or fighter) that is applied only to specific types of damage. Some points can be set at start of scenario (if ship design allows - White Star is not advanced enough) or after receiving damage from such a weapon in battle. Protection is limited both in total value and in value assigned to a particular kind of damage (in case of WS - up to 3 points can be allocated, but no more than 1 per damage type).
+	In-game control allows easy propagation of setting among entire fleet (if other units can receive it of course). 
+	Assigned points cannot be unassigned during battle.
+	Tabletop: a single point is unlocked for every volley that actually causes damage.
+	Fiery Void: a single point is unlocked for every "bit" of damage (a single system damaged by single subvolley), which may lead to easier unlocking of available protection (especially in case of Raking, Pulse or overkilling hits).
+Self-repair - see Ancients.
+Gravitic Net - weapon that moves target, fired before regular weapon declaration.
+	This weapon is not implemented in Fiery Void, and ships equipped with it are not present either.
+Electro-Pulse Gun - very short range, slow firing weapon that only affects fighters. However, it can make called shots at no penalty.
+
+
+MINBARI PROTECTORATE
+This is a part of the Minbari Federation, but consists of several non-Minbari members that are overseen by the Federation. They have a degree of autonomy, 
+including providing local defense to their worlds. The Protectorate uses older Minbari hulls. One notable difference is that Protectorate units have no 
+jammers. The Tinashi is their most modern hull along with a handful of Nials. The Protectorate generally uses the Tishat medium fighter. Their fleet options 
+are rather limited based on the number of hulls and lacking ways to bring fighters outside a Morshin carrier. Their one noted conflict is the Pseudo-War with 
+the Imperial Star Legion raider group.
+NOTE: No other Minbari units, other than those listed in the fleet selection screen, may be used by the Protectorate. Other Minbari units can only be included 
+if part of a joint force with the Minbari Federation.
+
+
+NARN REGIME
+Energy Mine - hex-targeted weapon, causing heavy damage to everything on hex hit and lighter to everything on adjacent hexes. 
+	Opponent does not see EMine target hexes (just the fact that they've been launched).
+	Not 100% accurate - a launched mine may scatter or fizzle.
+	Extremely disruptive to enemy fighters.
+Pulsar Mine - higly automated short-range weapon that fires at passing fighters in Movement phase.
+	In Fiery Void it is not implemented. Ships using it are also not present, bases have it replaced by other weapons.
+
+	
+ORIENI IMPERIUM
+Hunter-Killer - Orieni long-range weapon of choice, and probably their most outstanding feature. They're very large (fighter-sized) missiles, using fighter rules and attacking by ramming.
+	They're automated, which means their parameters (primarily Initiative) are very poor for such small craft. But they're intended to engage capital ships, not other fighters.
+	They're controlled by Hunter-Killer Control Nodes on Orieni ships. If there is no such control (or it's inadequate) HKs operate autonomously, which further limits their performance.
+	Tabletop: flight is either controlled or not. Uncontrolled flights lose some Initiative and have limitations regarding thrust usage. Also, their hit chance is reduced. HKs start scenario in hangar, not launched.
+	Fiery Void: control is exercised proportionally - eg. if there are 12 HKs on map and only 6 can be fully controlled, then all 12 receive half the penalties. There is very hefty Initiative penalty, but no other penalties. Also, HKs suffer additional Ini penalties during first 2 turns of the game (but start deployed like any other fighter).
+	Hunter-Killers receive penalty to their hit chance based on their own speed (the faster the worse).
+	Note that ramming attack happens before firing (in FV - in ship fire phase), so HKs that achieved ramming distance cannot be stopped before making attempt to ram.
+Light Gatling Railgun - Orieni fighter gun is Matter, which allows it to be a threat to even the biggest ships. But bulky ammunition means it's limited to 6 salvoes before running dry.	
+Strike Force - Orieni military is split into a few branches. Of interest for fleet composition rules is priority for the elite Strike Force - a few ships have different limitations when deployed as part of Strike Force detachment than when part of regular navy (Hand of the Blessed). Assume force led by Paragon to be Strike Force, while lesser command ships lead Hand of the Blessed.
+	In-game checker does not take this rule into account.
+	
+
+PAK'MA'RA
+Pak'ma' ra ships are quick, with excellent thrust and engine power, but are not maneouverable.  They depend on a heavy armament of plasma-based weapons with wide firing arcs to win battles.  Their unique plasma battery systems allow them to store power for opportune moments whilst their plasma webs provide both defensive cover and close-range anti-fighter protection.
+
+Notes & Differences from B5W Tabletop:
+Plasma Webs
+	- Plasma Webs fired in Offensive modes do not persist in the targeted hex for the following turn, meaning they will not damage any fighter units that move through them on the subsequent turn.
+	- Plasma Webs fired in Offensive mode must use hex targeting icon to lock onto a hex.
+CnC Systems and Initiative
+	- As it is not possible to implement two CnC systems on ships in FV Pakmara ships, these are instead combined into a single CnC sytem with the combined health of both TT CnCs and improved armour / critical hit chart.  Note, Pakmara ships still suffer double the intiative penalty on CnC as they do in Tabletop.
+	- Pak'ma'ra fighters have inherent turn delay - but FV does not provide turn shortening for fighters, which further limits their maneuvrability. They're still Agile though :) . 
+
+
+
+RAIDERS & PRIVATEERS
+The Raiders are not a single faction with a standardized force list. The Raiders "faction" represents all kinds of pirates, privateers, and wanderers in the Babylon 5
+universe. Specific raider factions will be listed in the unit name, such as "Centauri Privateer". Any unit without a specific faction name is a generic raider and can be fielded by any Raider faction. It is impossible to generate 
+a fleet checker for all of the various combinations. The factions below offer options to build a more customized force. Still, Raiders are so varied, there is no wrong way to build a force from the genericly available units.
+NOTE: Details for all known Raider factions are listed below. However, not all are fully implemented in Fiery Void. This will be evolving over the next few updates of Fiery Void. In addition to describing the faction, a brief
+summary of the generic units most commonly used by the faction are listed here.
+
+    - Imperial Star Legion (Legion): A raider group that supported the Army of Light, but had bigger plans for the future and wound up fighting the Minbari Protectorate.
+		The Legion has three unique hulls, the Starjammer, Gladius, and Augustus and is characterized by using heavy weapons and fielding fusion cannons. The Legion operated 
+		all of the generic raider units at various times in their existance. The Legion uses Delta-Vs and Double-Vs exclusively.
+	
+	- Junkyard Dogs (JYD): This group operates primarily within Centauri, Earth, and Narn space and in addition to generic raider hulls, operate versions of several 
+		hulls from the main powers including a Lias, two Tethys, a Kutai, a Mograth, two Vorchans, two Sho'Kos, and a Thentus. The Junkyard Dogs primarily used Armed
+		Shuttles, Delta-Vs, and Double-Vs but may also field a flight of Raziks or Goriths.
+		
+	- Independent Mercenaries League (IML): The IML formed during the Dilgar War, originally by Belt Alliance forces out of work. They have been supported since the War
+		by various Non-Aligned Worlds powers and typically have better access to technology than traditional raider groups. The IML fields three unique units, the Attack Cruiser, 
+		Armed Transport, and Missile Frigate along with variants of each. The IML may use Armed Shuttles and Delta-Vs almost exclusively, but have restricted access
+		to Star Snakes and Lellats.
+		
+	- Tirrith Free State (TFS): Born out of an EA base built in the Tirrith system from the Dilgar War, the raiders that took over the base ultimately formed an independent star
+		system at the confluence of multiple powers. The TFS is now less of a raider group and more a tiny nation. The TFS has three unique hulls including the Blockade Runner, 
+		System Monitor, and Freedom Base. Beyond this, the TFS will utilize any generic raider unit. The majority of TFS fighters are Delta-Vs, but they can field Armed Shuttles, 
+		Double-Vs, Goriths, Star Snakes, and Koists. The TFS only use Drazi Dudroma defense satellites.
+		
+	- Drazi Hunters: Derived from the Drazi penchant of hunting, it is typically assembled from Drazi disaffected with traditional Drazi society. The Hunters operate more as a raider
+		group than privateers, they are not officially endorsed by the Drazi. However, their members are welcome in Drazi space to a limited degree. They operate three units of Drazi 
+		design as well as as a few generic raider hulls. These are the Aspar (limited), Galleon, Hawk, Ma'Ri'e, Pinnace, and Wolf Raider (limited). Drazi Hunters only employ
+		Cobra and Delta-V fighters.
+	
+	- Centauri Privateers: Generally led by lesser nobles of the great houses or those from minor houses looking to advance, Centauri privateers have existed throughout the Centauri's
+		time in space. Originally, they operated against other Houses, but focused more on the edges of Centauri space as other powers were discovered. In additional to Centauri hulls, these
+		privateers use a limited selection of the generic raider hulls, including the Ma'Ri'e, Ma'Ri'u, Pinnace, Uid'Ac'e, Felucca, and Xebec. Centauri privateers use Delta-Vs almost exclusively,
+		but have restricted access to Razik fighters or older Centauri fighters like the Glaive and Phalen.
+	
+	- Narn Privateers: Formed out of Narn elements considered too radical or unrulely to integrate with the newly free Narn Regime, the Narn sent these privateers out to continue to strike
+		at the Centauri. The more organized groups received greater support from the Narn Regime and fulfilled many missions ranging from traditional raiding to intelligence gathering. The 
+		Narn privateers operate three specific Narn units as well as a selection of generic raider designs. These include the Brigantine (limited), Hawk, Ma'Ri'u, Pinnace, and Xebec. 
+		These privateers primarily use Delta-V and Double-V fighters and a restricted number of Goriths.
+		
+	- Brakiri Shokhan: The Shokhan grew out of various Brakiri groups that did not integrate into the modern Brakiri society. Many Shokhan operate purely as raiders, but it is suspected 
+		that some receive outside support from Brakiri corporations or other entities and fulfill the roll of privateers and sometimes mercenaries. The Shokhan have three Brakiri specific 
+		ships. They also operate a limited selection of generic raider units including the Aspar, Galleas, Hawk, Ma'Ri'e, Felucca, and Xebec. The Delta-V and Folshot-A are the two 
+		fighter designs operated by the Shokhan.
+
+
+SMALL RACES
+A few separate factions (both official and custom), connected only by the fact that they don't have many ship designs - as is fitting for such small organizations.
+Belt Alliance is somewhat notable for extensive use of Matter weapons (including as fighter guns - see Orieni) and EA Interceptors (although with no integrated Energy Web).
+BA also makes use of LCVs without a carrier for them, which they do not need being mostly intra-system force. This challenges their fleet when deploy under standard tournament/pickup battle limitations, unless rules are changed or allowances for Usuuth are made. 
+Last but not least - Belters can use (are original designers and manufacturers, in fact) Delta-V fighters, available in Raiders directory (not Double-Vs though!).
+Otherwise no very specific technologies.
+
+
+SHADOWS
+Ancient race, by definition complicated, very specific and not really on par with younger ones - tech difference is too high for proper balance. Ancient factions were officially not tournament legal.
+But with these caveats - have fun! Ancients should be balanced against each other, and if Your opponent knows what to expect/You're playing a scenario, go ahead with other pairings as well. Note that sky-high individual cost of Ancient units makes standard requirements based on total fleet value completely inadequate - so they have been modified for fleet checker.
+Below list of systems Shadows use, with short description of effect and design differences from original tabletop.
+Called shots - systems on Shadow ships cannot be targeted by called shots.
+Enhancements - Shadow ships use no crew, so cannot use rew-related enhancements. They can use enhancements relating to special officers (that would be ship pilot's skill in such case). They have their own faction-specific enhancements as well.
+Self-Repair - automated, but player can modify default priority of repairs. Damage and criticals suffered in current turn cannot be repaired. Cost of critical repair has been changed in places (in particular C&C criticals aren't that costly to fix), and there's no partial repair of crits. 
+	If Self-Repair is destroyed or damaged, unused repair points are NOT lost.
+Energy Diffuser - absorbs damage as it's being dealt (and diffuses it over time). In FV Diffuser always kicks in if possible, there's no option to withhold its use eg. waiting for more threatening damage and conserving resources. Diffuser can dissipate damage just absorbed. For visual reasons tendrils are shown as separate (untargetable) systems. Damage absorbed by ship tendrils is not shown in log.
+	Diffuser will not try to stop no-overkill damage that would kill system hit despite Diffuser interference. This is important for very strong Matter or Piercing shots.
+	Flash damage is treated in a special way - portion of damage enough to destroy system hit is treated as entire shot (which allows systems to be saved even if total damage of shot is very high).
+Bio-Drive - Shadow ships have omnidirectional thrusters that generate their own thrust. In FV, for technical reasons, there are also usual (untargetable) thrusters (with unlimited rating) and (also untargetable) engine (with rating being sum of biothruster ratings). Due to these technicalities thrust can be freely split, even from a single surviving biothruster.
+	Biothrusters have their own set of criticals (basically output reduced) in place of regular thruster criticals.
+	Bio-Drive cannot be boosted.
+Pilot - Shadow ships have no crew, but they do have Pilot. Pilot is shown on ship window as C&C, and main differences from regular C&C are: Pilot cannot suffer criticals, but feels pain when ship is damaged (temporary) or when (s)he's wounded (as long as wounds remain). Pilot cannot be repaired by self-repair system.
+	Telepathic attack on Shadow ships are not implemented.
+Half Phasing - during movement phase Shadow ship can become semi-immaterial (until end of turn). It becomes much more difficult to hit (-4 penalty to incoming gunfire, -8 to ballistic fire) and less accurate itself (-10 to hit). Cannot ram or get rammed at all, unless both ships are half-phasing.
+	Performing half-phasing costs full thrust from two undamaged BioThrusters (such BioThrusters must be present), as well as presence of undamaged (and enabled) Phasing Drive. Any damage to Phasing Drive during half-phasing destroys ship.
+Ship layout - even capital-sized Shadow ships use MCV ship layout.
+Shadow fighters - Shadow fighters are semi-autonomous slivers of their carriers. For this reason every Shadow fighter should take Uncontrolled enhancement (penalty for operating independently from carrier - for scenarios, really) or its carrier should take appropriate Fighter Launched enhancement (fighters are essentially part of carriers' Structure, and launch reduces that structure; this is the option to take in pickup battle). 
+	Game will not force player to do so. Also, controlled/uncontrolled status cannot change during game (so carrier destruction will not affect fighters in any way).
+	In tabletop, Shadow fighters cannot drop out. In FV they get a massive -100 dropout bonus instead - which means they'll pass all appropriate tests, but can be dropped out by weapons that explicitly cause such state without test. Note that most weapons that do so are Electromagnetic in nature, and therefore such effect is blocked by Advanced Armor. But technically some Ancient weapon causing such effect might force Shadow fighter to drop out. 
+	To take advantage of their resilience (combination of Energy Diffuser protection and dropout immunity) Shadow fighters have their own algorithm for hit allocation (preferring spreading damage among the flight). 
+	In tabletop fighters can be literally launched from their carrier - in FV that's not an option, as they have to start scenario deployed.
+	Their weapon is an accelerator, able to build up charge - for this reason it will NOT be used for interception without explicit order to do so!
+Battle Cruiser - this Primordial ship differs from modern quick-grown ones in a few ways, which mandated larger changes for FV:
+	- most important is primary weapon firing arc: in tabletop it's split into large forward arc (120 degres) and smaller aft arc (60 degrees). In FV such a split is not possible, so aft firing arc is not present - Forward arc is widened to 180 degrees as compensation.
+	- 6 separate Energy Diffusers would have been difficult to set up on PRIMARY in a clear way - therefore they've been moved to appropriate sides. This in turn affected hit table - each side's Diffusers have separate entry.
+Destroyer - by original design should have acceleration cost of 1.5, which is not possible in FV (set to 2 instead).
+Primordial variants - these are ships with Primordial and Additional Tendril enhancements added (neither of which is available in FV as actual enhancement).
+Molecular Slicer Beam - primary weapon of larger Shadow ships has quite a few traits, some of which has been simplified for Fiery Void.
+	First of all, it's uninterceptable - coupled with high FC and decent range it's quite accurate (as You'd expect from faction that uses small number of very potent weapons).
+	Second, it ignores armor. Coupled with high damage output this means immense damage - at higher arming levels literally cutting ships apart, like on the show, is fully possible.
+	Third, most powerful variety (Heavy, only found on Primordial ships - modern fast-grown ones don't get such power!) can use Piercing mode (in fact it's default mode for this weapon) - which CAN overkill (though only at full power), so its damage potential won't get wasted. Note that full power of the weapon will be appliet ONLY to Piercing shot (Raking damage is capped at 2-turns level)
+	Fourth - Raking shot can be split into multiple smaller shots, which is very useful against fighters. Here come the differences:
+	 - Tabletop: can fire at the same or different targets. FV: only one target for the weapon.
+	 - Tabletop: any number of shots. FV: preset number of shots (3/6 for Light weapon, 3/6/9 for heavier ones)
+	 - Tabletop: -1 penalty for every additional shot, cumulative. FV: ALL shots are penalized equally, at -1/-2/-3 appropriately.
+	 - Tabletop: assign dice and parts of fixed damage. FV: for every shot roll (separately) full damage and divide by number of shots taken (round down).  
+	 - Overall this means FV split fire is slightly weaker, slightly more accurate (on average; even much more accurate in case of large splits!), and less flexible (due to being unable to target multiple opponents simultaneously).
+Phasing Pulse Cannon - Pulse weapons that completely ignore any kind of shield or shield-like defense (of younger races only). Note that EM shields (like those on White Star) are treated as Ancient even when used on Young ship.
+Vortex Disruptor - weapon that destabilizes hyperspace vortexes, preventing enemy escape. As in FV there are no actual vortexes :) , weapon is purely scenario-related one - fired at hex where vortex opening is declared.
+	Game will mechanically resolve the shot (eg. calculate hit chance and report result in firing log). 
+	Hit chance will NOT be calculated when declaring.
+	Semi-trivia: Vortex Disruptor will not function properly while half-phased (will be able to fire, but not hit). 
+
+
+STREIB COLLECTORS
+A faction that has only one offically released ship (Collector), it was expanded a bit in BabCom by Paul Brown to create a playable faction.
+Streib are notable for their extremely tough armor (without any special properties though) and extensive use of energy draining/dropout causing weapons. 
+Layout of their ships is atypical as well - highly assymetrical, with many core systems placed on outer sections.
+Their design makes them a bit Ancient-like when it comes to balancing - they are very vulnerable in some situations and unbeatable in others. In particular they are essentially shut down if their opponent is resistant to Electromagnetic weapons (eg. Advanced Armor or EM Hardening).
+
+
+THIRDSPACE (unofficial faction)
+The "Thirdspace aliens" are a mysterious and terrifying race of malevolent telepathic beings from an alternate dimension, in possession of technology considered more advanced than even the Shadows or Vorlons.  While not indestructible, their ships are protected by an powerful energy shield that can absorb a significant amount of weapons fire before opponenets can inflict damage on their ships themselves.
+In FV, they have been created as a Custom faction (with thanks to Amras Arfeiniel for providing the original image for the Thirdspace Battleship) and some of their abilities have been described below:
+ - Thirdspace shield absorb all incoming damage in the arc that they cover.  Once these shields have been reduced to a rating 0 damage will start to be inflicted on their ships as usual, factoring in modifiers provided by Advanced Armour.  At the end of the turn Shield Projectors will restore their respective shields by an amount based on their current rating.
+ - Thirdspace have a number of electromagnetic weapons, which typically deal a large amount of damage and can fire frequently.  Many also have additional effects on Younger races such as an increased critical hit/fighter dropout chance or a reduction in ship armour.
+ - Third space capital ships produce a passive Psychic Field which affects all enemies within range (except other Thirdspace aliens), this attack debilitates opponenets by reducing their initiative and hit chances for the following turn, and even effects Ancients to lesser degree.
+ - Like teh Ipsha, Thirdspace ships use a reactor which produce a set amount of power, regardless of whether systems have been destroyed or not.  As Thirdspace ships utilise power management heavily, to boost a shield or increase Psionic Lance damage for example, this means they can continue to fight effectively even when taking heavy damage.
+ - The Thirdspace aliens also use a flexible Psionic Concentrator weapon, which is effective against fighters as a single weapon or can combine two Concentrators to deliver a powerful anti-ship shot each turn.
+
+
+TORATA REGENCY
+Torata extensively use Accelerator weapons, either allowing them to fire faster at the price of decreased damage output (most ship weapons) or store double charge to be able to deal massive damage if fire is held for a turn (fighter weapons).
+Accelerator weapons will NOT be used for interception without explicit order to do so - even fighter guns! Also, full-charge mode is specifically anti-ship (cannot be used vs fighters) - for this reason it's an actual alternate mode and will NOT be used without explicit order (You'll fire in basic mode by default).
+
+
+USUUTH COALITION
+No very specific rules or technologies.
+Their fleet relies on LCVs but doesn't have a carrier for them (it's not needed when they operate within home system).
+ - This challenges Usuuth fleets when deploy under standard tournament/pickup battle limitations, unless rules are changed or allowances for Usuuth are made. 
+	
+	
+VORLONS
+Ancient race, by definition complicated, very specific and not really on par with younger ones - tech difference is too high for proper balance. Ancient factions were officially not tournament legal.
+But with these caveats - have fun! Ancients should be balanced against each other, and if Your opponent knows what to expect/You're playing a scenario, go ahead with other pairings as well. Note that sky-high individual cost of Ancient units makes standard requirements based on total fleet value completely inadequate - so they have been modified for fleet checker.
+Below list of systems and rules Vorlons use, with short description of effect and design differences from original tabletop.
+Self-Repair - see Shadows. Vorlon sef-repair systems work the same way, although are usually more powerful.
+Power Capacitor: defines how much Power a Vorlon ship has available. Can hold Power between turns (up to Capacity).
+ - recharge occurs in Initial phase (tabletop - just before movement, which makes power not usable in Initial phase)
+ - opening petals reduces armor of all systems by 2 (tabletop - armor is reduced on PRIMARY only, but all profiles are increased by 1)
+ - cannot icrease recharge rate in any other way (tabletop - can shut down everything (weapons, shields) to increase by 100%)
+ - Capacitor destruction would leave ship powerless, but doesn't cause catastrophic explosion like Reactor destruction. In FV terms: it will leave ship powerless (as the Capacitor is the main power source on Vorlon ships), add Power reduction critical to Reactor (so ship goes out of control) and SelfRepair (so the damage isn't just repaired in a few turns ;) ).
+ - fighters do not get Open Petals option (tabletop: can increase profiles and decrease armor to gain thrust)
+Mag-Gravitic Reactor: for technical reasons Vorlons in FV are using Mag-Gravitic Reactor. This means destroying power-using systems will free appropriate power. Note that technically Vorlons in FV do not have power using systems :) .
+Scanner uses no power: it's operating cost are base hull feature and do not affect power usage.
+Jump Drive uses no power: it's operating cost are base hull feature and do not affect power usage. This differes a bit from tabletop where Jump Drive odes use power (...which is counted as nominal). The only actual difference is that You cannot shut down Jump Drive on Vorlon ships for power in FV.
+All Vorlon weapons have nominally 0 Power usage - they need Power to actually shoot, but that is only decided and drained at moment of firing.
+Discharge Gun (and Cannon):
+ - Accelerator property added just so weapon requires explicit permission to intercept
+ - increased power levels are implemented as firing modes.
+ - additional shots are handled as in Ballistic Torpedo, by changing number of shots fired AFTER declaration is made
+ - by default full rate of fire is used
+ - each shot is at the same power level
+Lightning Cannon:
+ - Accelerator property added just so weapon requires explicit permission to intercept
+ - can combine weapons for higher power shots. To do so, appropriate number of weapons must have same mode and target assigned (same mechanics as Ipsha Surge Cannons actually).
+ - if player mis-declares and not enough weapons are assigned for declared mode, shot is cancelled (technically: automatically misses) (and does not drain Power)
+ - interception shot is very effective, so weapon was not locked away from it - unassigned Lightning Cannons will try to intercept if applicable (and drain Power for it).
+Capital Ship layout:
+ - in tabletop, capital ships' Lightning Cannons are usually tied to TWO sections (Forward and appropriate side), to prevent them from easily falling off. This was not possible in FV.
+ - instead, they are fitted to virtual "Side-front" sections, that are not directly hittable and do not have actual structure system. They cannot fall off (at all).
+ - "Side-aft" sections are, for all intents and purposes, actual ship sides, and behave as such.
+ - Lightning Cannons are present on both Front and Side hit charts, as in tabletop - but Front has separate entries for Port and Stbd guns.
+ - weapons on pseudo-sections can be engaged by called shots from their own arc (instead of section arc)
+Adaptive Armor for fighters:
+ - every fighter can use different settings (tabletop: only superheavy fighters)
+ - for superheavy fighters only damage to particular craft counts towards unlocking AA points. For lighter craft AA points are unlocked for entire flight.
+Vorlon superheavy fighters use regular hangars - one SHF counts as two heavy fighters for fleet designhangar purposes. Also, for purposes of fleet selection, they are treated as Rare variant of Heavy Fighters (tabletop: Uncommon but counted as single Assault per flights of Heavy). In Primordial timeframe Assault Fighters are treated as base hull.
+Vorlon unit can pick only ONE Skin Color enhancement (game will not check this though, it's up to player to conform!). Detailed descriptions are available in enhancements list.
+ - Amethyst Skin Coloring: for individuals desiring flexibility, Adaptive Armor improvement
+ - Azure Skin Coloring: for those desiring exceptional protection, Shield improvement
+ - Crimson Skin Coloring: for warmongers, Power Capacitor improvement
+  -- bonus works regardless of damage (tabletop: damage to Capacitor disables the enhancement and it needs to be separately repaired)
+	
+
+VREE CONGLOMERATE
+The Vree are an advanced race within the League of Non-Aligned Worlds that use a distinctive 'saucer' designs on all of their ships.  The Vree use antimatter weapons almost exclusively, which deal increased damage based on the difference between the base to-hit chance and actual hit rolled.  As a result their weapons are powerful at close and medium range but typically less effective at longer distances.
+
+Below is a list of systems and rules Vree use, with short descriptions of effect and design differences in FV implementation from original tabletop.
+ - Vree capital ships have six outer hull sections, similar to starbases.  On Vree capital ships each section has it's own structure and largely functions the same as on normal four-sided capital ships, however destruction of an outer hull structure will not destroy any systems/weapons on that section. Thrusters have been placed on the side-aft sections of Vree capital ships for convenience but hit charts altho these to be hit by incoming shots to side-front sections too.
+ - Vree HCVs, like capitals, do not lose their systems when front or aft structures are destroyed.  
+ - On both Vree HCVs and Medium ships thrusters display the primary hull section, however these can be hit by shots to external hull sections and FV will prioritise hits based on which thrusters are in arc of the incoming shot(s).
+ - Unlike in tabletop rules, the Vree player is not able to select which weapon, thruster, structure is hit by incoming fire.  Instead, FV will randomly allocate hits based on which sections/systems are in arc of the firing ship, but unlike starbases, weapons fire from the same ship CAN hit different hull sections of a Vree ship to help maintain some of their durability in battle.
+ - Unlike in tabletop rules, single shot can't be split between multiple sections. This means Vree are much more vulnerable to Raking (and to lesser degree Pulse) weapons than in tabletop.
+ - In tabletop, Vree PRIMARY-fitted weapons are grouped into Turrets, which incurse some limitation (namely, all weapons in one turret have to enagage targets within 60 degrees of each other - and upon being hit, a turret may become locked). These Turrets (and their limitations) are not present in Fiery Void (all PRIMARY weapons have all-around arc of fire, without small print).
+ - Antimatter weapons calculate range penalty in non-standard way.  
+  -- For first few hexes they receive no penalty, then they receive normal penalty, and at further ranges - they receive double penalty. 
+  -- in case of no lock-on, range itself is doubled (rather than range penalty)
+  -- range-reduced critical doesn't affect range penalty itself. Rather, it adds 3 hexes to effective distance to target.
+ - Antimatter weapons calculate damage in non-standard way. 
+  -- rather than being randomized, difference between actual and needed to hit number is calculated. The difference is called X (every 5 points of difference translates into 1 point of X value).
+  -- damage equation incorporates X factor rather than die roll. Usually X value does have upper limit.
+  -- damage reduced critical, instead of standard damage reduction, reduces value of X by 2 (can't reduce below 0).
+ - The Antimatter Shredder is a hex targetted weapon, however it was not possible to code the target hex to highlight once you've locked in a firing order.  Players should therefore be careful when targetting to ensure the Antimatter Shredder system is scheduled to fire (i.e. highlighted orange) and that they selected the correct hex to target.  
+  -- The Antimatter Shredder rolls to hit on any enemy ships in the target hex and adjacent hexes, however the combat log will show attacks against targets as separate shots during replay due to how the FV code resolves firing for this weapon.
+  -- Note that only one Shredder may engage a target - if multiple ones are eligible, only one of them (chosen randomly) will actually fire. Also, Shredder engages any unit in target area, without discriminating friend or foe (won't engage firing ship itself).
+  -- Shredder completely ignores any and all EW (and EW-affecting systems like Jammer or Rutarian Stealth), as well as Jinking. 
+
+	
+YOLU THEOCRACY
+Light Molecular Disruptor - armor-stripping heavy fighter weapon.
+Fusion Agitator - Raking weapon that does damage in inefficient Raking(6) mode. However, it ignores a point of armor (which helps), its raw damage output is decent, and if extra power is thrown in to boost it - damage output can rise to extremely high. Make no mistake: this is a very dangerous weapon! 
+	Many Yolu weapons have special features, usually relating to target armor - see descriptions.
+	
+
+
+zESCALATION BLOOD SWORD RAIDERS (custom, alternate universe faction)
+The Blood Swords were a pirate group active during the Circasian "Raider Wars" time period. They were a serious threat to the trade routes near the Thaline node of the Outward sector trade routes due to the size and capabilities of their warships. The raiders were eventually defeated by the Circasians, and their defeat marked the unofficial end of the Raider Wars.
+- This faction uses ships acquired from the Kastan, and have access to the same technologies as that faction
+
+
+
+zESCALATION CHOUKA (custom, alternate universe faction)
+The Chouka Theocracy was a minor regional power in the Escalation Wars universe, and the Circasian's opponents in their first major interstellar war. The Chouka were more technologically advanced than the Circasians, but lacked the tactical experience and fleet assets to combat the more numerous and maneuverable Circasian fleet.
+The ships included here are the Chouka spacecraft that served during the Chouka War period. They are armed with a mix of plasma and laser weapons, with older Chouka ships relying on plasma weapons while their newer ships rely on lasers in the anti-shipping role. Plasma weapons continued to be used for anti-fighter work into the Chouka War period, however.
+As with the Circasians, the Chouka are best used against minor B5 powers (Alacans, Mitoc, Raiders), however some of their larger, more powerful units are roughly the equivalent of Dilgar-war era Earth Alliance. 
+Point Plasma Guns - These short range plasma weapons are the Chouka's primary anti-fighter weapons.
+Gravitic Tracting Rod - This rare device was only found on the Apostle Holy Cruiser. It was used to tractor on to smaller craft and draw them closer to dock with the ship for boarding. In Fiery Void, the Tracting Rod instead gives the target an initiative a thrust penalty.
+Twin Laser Cannon - This Chouka weapon is an advancement over the basic Light Laser Cannon using early gravitic technology to improve its range. 
+Light Energy Mine - This is a smaller version of the Energy Mine used by the Narn. It has shorter range (25 hexes) and does less damage (10/5) than the conventional Energy Mine. This weapon is being substituted for the Ballistic Mine Launchers these ships historically were deployed with.
+
+
+zESCALATION CHOUKA RAIDERS (custom, alternate universe faction)
+This group of raiders operated in and around Chouka controlled territories and were directly financed by the Chouka Theocracy. They were an early threat to the Circasian Empire as it expanded its own sphere of influence. 
+These raiders operate cast-off Chouka military and civilian ships and fighters. Their weapons are sourced from the Chouka, along with limited supplies from other black market sources.
+Because of their ties to the Chouka government, these raiders are fairly well armed compared to the Circasian and Chouka fleets and are comparable to other low tech raiders in the B5 universe.
+
+
+zESCALATION CIRCASIAN (custom, alternate universe faction)
+The Circasians are one of the two central powers in the Escalation Wars milieu. These Dilgar-like humanoids started as a small minor power surrounded by other, more established empires but through political manuevering and conquest they were able to eventually carve out a major imperium of their own.
+The ships included here are low tech units the Circasians used during the Chouka War period. These vessels are principally armed with light particle, plasma, and laser weapons. Anything more powerful is beyond their level of technology at the start of the war.
+They are capable opponents against the minor B5 powers (Alacans, Hurr, Usuuth) but will be completely overwhelmed by more capable units.
+Rockets - the Circasians made use of these primitive torpedo launchers on their early ships. These weapons are treated like Torpedoes and benefit from OEW.
+Particle Lance - an avenue of advanced R&D before the war, this weapon was an attempt to develop a heavier version of the Light Particle Cannon. Like the Gravitic Lance, this weapon is capable of firing as one more powerful weapon or as two weaker Light Particle Cannons.
+Particle Gun - an even weaker version of the Light Particle Beam that was used before that weapon was developed.
+The Circasian faction was created by Tyrel Lohr for his Escalation Wars setting.
+Fiery Void encoding done in collaboration with Geoffrey Stano.
+
+
+zESCALATION KASTAN (custom, alternate universe faction)
+The Kastan Imperial Monarchy inhabits a remote location of hyperspace deep within the Rapids of Rodirra, a treacherous section of hyperspace that makes travel to or from the Kastan territories difficult at best (and impossible at worst). Navigating the rapids has forced the Kastan to be superb pilots. The 
+Kastan have had limited interactions with their neighbors, although they do engage in trade and have been known to sell out their services as mercenaries. Most of their active political ambitions have focused on the coreward sectors, having fought back against an invasion by the Ingalli in recent history.
+- Plasma Cannons: older Kastan ships made heavy use of light, medium, and heavy plasma weapons
+- Missile Racks: older Kastan ships used a variety of basic missile racks
+- Imperial Laser: the Kastan make heavy use of this primitive laser weapon, and have developed a number of other related laser weapons (Royal Laser, Sovereign Laser) based on this technology
+- Laser Bolt: the Kastan developed an effective short range anti-fighter laser weapon for their ships
+- Pulse Torpedo: this weapon fires a number of small munitions at a target, designed to strip targets of weapons and external systems prior to closing to close range
+
+
+zESCALATION SSHEL'ATH (custom, alternate universe faction)
+The Sshel'ath Alliance was formed out of the civil war between the two largest Sshel'ath factions. The early Alliance focused on growth of the homeworld, as they were blocked by the more established Chouka Theocracy and Novon Trade Lords. Two conflicts with the Novon showed that action against this faction 
+was ill-advised. It wasn't until the later Circasian defeat of the Chouka that the Sshel'ath managed to expand into and capture several Chouka worlds. The Sshel'ath themselves are made of intertwined mass of rope-like elastic fibers, which allow for limited rearrangement of their body's form. Only their faces 
+are inelastic and they are highly resistant to radiation.
+Gatling Laser - Evolved from the basic light laser cannon, the gatling laser fires several short, discreet volleys in pulse mode.
+Electromagnetic Torpedo - The EM Torpedo was developed to counter Novon shields. This ballistic weapon releases a large electromagnetic pulse and can destroy or short out enemy systems.
+Electron Polarizer - A flash mode electromagnetic weapon, this can destroy or short out numerous systems on a target.
+
+
+zNEXUS BRIXADII (custom, alternate universe faction)
+The Brixadii Clans are a spinward power within the Nexus sector, having fought with the Dalithorn Commonwealth early on and having hostile relations with the Velrax Republic. The Brixadii's 
+technology is primarily focused around particle weapons. These are rugged, easy to repair, and low mass. The Clans have begun to specialize in pulsar technology as this affords superior mass to damage ratios. This last point is important as the key feature that defines the Clans are their extremely
+maneuverable ships. They have few longer-ranged weapons, but prefer high-speed firing passes or getting in close and using maneuverability to get advantageous shots. They do not field fighters and
+therefore rely on their rapid firing weapons, wide arcs, and light combat vessels to deal with fighters. The Brixadii have their basic designs for three tech level eras, which are fairly low tech.
+The Brixadii are part of the Nexus Universe setting and are designed by Jeremy and Geoffrey Stano.
+If You want interesting low tech faction then by all means use it, just be warned :)
+Chaff Launcher - technically fired at enemy ship, it will always hit (causing no damage or adverse effects) and apply interception to ALL fire from target hex at chaff-protected unit (including nominally uninterceptable weapons).
+Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently.
+
+
+zNEXUS PLAYTEST CRAYTAN (custom, alternate universe faction)
+Formally known as the Union of Craytan States, the Craytan are an early opponent of the Sal-bez Coalition due in part to a botched first contact by the Sal-bez. The Craytan share a lot in common with 
+the Dalithorn Commonwealth from a technilogical standpoint. Many of their systems are converted from air-breathing systems converted for use in space. These are quite basic, but the Craytan have found 
+these to be effective for their needs. Like the Dalithorn, the Craytan use a primary cargo bay to hold ammunition. The Craytan do not use fighters in the traditional sense. They initially focused on using 
+armed shuttles that is more akin to an assault shuttle. The Craytan's reasoning is that the shuttle will be used in non-combat situations far more than combat situations. As such, most Craytan ships are 
+allowed swap Polten Armed Shuttles in place of traditional shuttles. These will be fielded in traditional fligth groups when deployed in Fiery Void. The initial conflict with the Sal-bez would show the 
+limitations of the Polten, but the Craytan would choose to created a more advanced design rather than field a traditional fighter. The current Craytan deployment provides five basic units for an initial 
+systems playtest.
+Assault Cannon - This is a massive, converted weapon found only on large vessels, such as the Epiron Cruiser. It is designed to fire a small, dense projectile with enough velocity to generate a piercing effect.
+Close-In Defense System - Also know as a CIDS, this weapon operates much like a Scattergun. Its 1d4 shots, ballisitc only intercept, and only allowing one shot to intercept a single incoming shot 
+represents the CIDS firing a tremendous volume of small projectiles. It relies on volume of fire over specifically aiming at a target.
+Sentry Gun and Heavy Sentry Gun - These operate on a similar principle of the CIDS but focus on specifically targeting an opponent, providing improved range and damage concentration.
+Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently.
+
+
+zNEXUS DALITHORN  (custom, alternate universe faction)
+The Dalithorn Commonwealth are likely the lowest tech of the main Nexus powers. They managed to leverage their position across a major trade route to keep their sovereignty up to the later years of
+the First War of Control in the 2150s. They primarily use terrestrial weapons converted for use in space combat. While individually weak, many of the weapons are treated as matter weapons, allowing
+the Dalithorn to cause some damage. Also, while simple, a number of their weapons are still effective, such as the gas gun. The Commonwealth does not use fighters in the traditional sense. They only
+field super-heavy fighters, but these are typically slow. However, their size and armament allow them to serve as area of denial platforms against enemy fighters or as serviceable anti-ship units.
+The Dalithorn are part of the Nexus Universe setting and are designed by Geoffrey and Jeremy Stano.
+Fiery Void currently has their basic, early units for three tech level eras.
+Protector - Given their ships were already using a variety of ammunition-based weapons, necessitating the primary cargo bay, the Dalithorn had no issue creating a flak-style system to defend their ships.
+Although not designed to engage targets, the Protector is capable of intercepting any weapon, including lasers, and intercepting for a friendly unit as long as the friendly unit is in arc and 3 hexs and
+the firing ship is in arc. 
+Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently.
+
+
+zNEXUS SAL-BEZ  (custom, alternate universe faction)
+The Sal-bez Coalition is the first anti-spinward faction from Nexus to be brought into Fiery Void. This insectoid race started as a typical queen / worker arrangement, but during the Enlightenment of Fire, 
+the Sal-bez won their freedom. They are now a fiercly individualistic society. The Coalition did not have a traditional military upon reaching for the stars and their early units are exclusively civilian
+designs using industrial systems as makeshift weapons. As the Sal-bez grew (and discovered several technology caches from a previous power), they quickly began to field purpose-built combat vessels that 
+would ultimately lead to the Coalition becoming one of the most powerful of the Nexus factions.
+Swarm Torpedo - This is perhaps one of the most iconic systems developed by the Sal-bez for their later generation of ships. It fires multiple, small ballistics at a target, which has led to its common name of swarm torpedo. This system provides
+both long-range firepower and can strip systems off a target to enable more effective laser hits.
+Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently.
+
+
+zNEXUS VELRAX  (custom, alternate universe faction)
+The Velrax Republic is potentially the most aggressive, but not necessarily the most militarisitic faction within the Nexus setting. They have engaged both the Brixadii Clans and Dalithorn Commonwealth
+several times. In the chaos of the First War of Control, they did managed to conquer most of Dalithorn space. Unlike the Brixadii and Dalithorn, the Velrax are heavy fighter users and this plays into
+a rigid fleet structure. The Velrax field well armed "strike" carriers supported by anti-ship focused "gunships". Everything revolves around supporting their fighter operations. The carriers utilize plasma
+waves to break up enemy forces at range, and gunships with lasers to single out anti-fighter units. Also, some Velrax carry plasma arcs, which are smaller versions of the plasma stream. These are used to strip armor to
+make their weapons more effective, including the light fighter guns. Their heavy fighter mounts a potent anti-ship gun that was retrofitted to some of the interceptor fighters when they realized that
+their opponents did not use fighters to the degree they did.
+Fiery Void currently has their basic, early units from three tech level eras.
+Plasma Arc - Small, raking plasma weapon that is designed to strip armor from their target.
+Dart/Streak Interceptors - These are small torpedoes that can accept OEW and used to engage enemy fighters.
+Laser Spear - A precursor to the laser lances the Velrax eventually field.
+Nexus LCVs - Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently.
+	
+	
+	
+zSTARTREK (custom, alternate universe set of factions)
+Star Trek units, as designed by Wolfgang Lackner-Warton and Marcin Sawicki, based on original conversion by Tyrel Lohr.
+We tried to make it playable against B5 fleets as well.
+Due to vast timeline (and technology) differences between the series, every faction is (or at least might be) split into 3 sub-factions, representing distinct arbitrary "eras": early (eg. Enterprise series), TOS (eg. original series) and TNG (eg. The Next Generation, Voyager, Deep Space Nine...).
+StarTrek units utilize a common set of concepts and technologies, which make them behave differently from their B5 universe counterparts. 
+ - Impulse Drive: StarTrek units utilize distinct method of generating and using thrust for performing maneuvers. While they do possess an engine (which may get damaged or destroyed as usual, and which allows for overthrusting), its base output is very low (even 0 in some cases). However, each Warp Nacelle also generates thrust - with their output being summed up and displayed as Engine output for player. Application of said thrust is free (eg. no thrusters are required) - FV ships do posses thrusters (which have unlimited capacity and cannot be damaged in any way) for technical reasons only. Besides generating thrust, Warp Nacelles are also jump drive equivalents (so essentially every ST ship - and some small craft as well - can perform FTL travel on their own). Nacelle criticals cannot reduce their output below 0, but Engine criticals can - also, if Engine is destroyed, entire maneuvering system ceases to function (even if Nacelles are still operational).
+ - Shields: StarTrek units utilize energy fields (represented by Shield Projection system) that absorb damage from incoming fire. These fields reduce incoming damage by a bit "for free" (call it armor), then some more at the cost of their own health. Absorption is applied to every impact separately (with every rake - and in general every non-overkill damage allocation - being treated as a separate impact). If shield projection is brought to 0 points of health, it stops functioning (does not weaken incoming shots any more, in any way). The system doesn't get destroyed however, and can start functioning again if replenished. ONLY destruction of associated structure block causes destruction of shield projection. 
+Replenishment of shield happens at end of turn (after actual firing), by (surviving) Shield Projectors. Shield Projector will replenish only its associated projection, regardless of arc (which is used for things like called shots). Projectors are NOT necessary for Projection itself to function - they may be switched off (and power used elsewhere) and Projection will stay at current power (will not regenerate in case of damage though).
+Oldest ships use Polarized Hull Plating instead of Shield Projection - which technically behaves exactly the same, but doesn't have associated Projectors (so can't be regenerated during battle). 
+Fighter shields do not use separate Projectors either - they do regenerate on their own (at double rate if the fighter in question is not using its direct fire weapons).
+Note that while they are called "shields" (and are so by the lore), technically they're a different kind of system than B5 universe shields - any shield-related special property (like Phasing Pulse Cannon family ignoring shield) will not be taken into account when hitting Star Trek unit.
+Shield mechanics mean that (besides necessary adaptation of tactics) in very small battles/duels Star Trek ships may perform slightly above their price tag. 
+ - Independent fighters: while most StarTrek fighters/shuttles require hangar slots to be deployed (just like their B5 counterparts do), some of them possess Warp Drive of their own, as well as high endurance. Such craft do not require hangars, despite being fighter-sized. They are affected by "number of ships on a given hull limit" (whith each flight counted as one "ship"), and usually are marked as Restricted Deployment
+ - Self-reliable LCVs: most StarTrek LCV-sized ships are fully capable of operating on their own, do not require hangars and have regular sensors (rather than restricted B5 "LCV Sensors").
+ - Militarized shuttles: most StarTrek factions don't use dedicated fighters. However, their shuttles are usually armed and combat capable if necessary. Ships of these factions do have shuttle capacity listed (which is usually omitted in FV) and have combat shuttle designs available. Combat shuttles are not fighters, and as such are not necessary if player doesn't wish to deploy them.
+ 
+
+zSTARTREK FEDERATION (custom, alternate universe faction)
+United Federation of Planets is a conglomerate of multiple separate species. They remain independent enough to operate their own warships, built to different specifications - which is marked in fleet list. This is NOT, however, intended as a fleet composition restriction - Federation fleet on a field of battle may use any mix of units desired (although small craft should be based on carrier of the same species). 
+  
+
+
+zSTARWARS (custom, alternate universe faction)
+Star Wars units, as designed by Wolfgang Lackner-Warton and Marcin Sawicki.
+We tried to make it playable against B5 fleets as well.
+Due to nature of StarWars universe, essentially any faction can use almost any unit. Primary users are indicated in notes though.
+It's assumed that - for fleet design purposes - fighters do require hangars (even if they're hyperdrive equipped). It's also assumed that any fighter can use any hangar, taking more or less space - therefore small craft are grouped into "Fighter squadrons" and "Assault squadrons", and appropriately limited (with superheavy fighter squadron and light fighter squadron requiring the same hangar space, but the latter being composed of far more craft).
+	Fleet checker does properly account for SW small craft.
+We portrayed weapons to allow long range of fire, but for the fire to be wildly inaccurate. Hence Pulse mode with very low base number of hits. This allowed to keep very high weapon count of SW units manageable (they're grouped into batteries that are firing as single weapons in FV)
+Based on visuals and effects in movies - we call SW Laser/Turbolaser weapons to be Particle class, with all consequences.
+We portrayed SW units as quite durable for their size, and that durability is boosted by shields. Shields are difficult to take out, too (projectors have high HP count and low hit table profile). Shields have a number of exceptions to their protection based on how we see them to work (notably increased effectiveness vs Raking weapons, while SWIon, Ballistic and Matter weapons just bypass them).
+StarWars Sensors are portrayed to be generally of lower tech than B5 ones. This is portrayed by generally low output and limited boostability (notably ElInt boostability is not reduced though). However, LCV do have full-blown sensors, without B5 LCV Sensors limitations. 
