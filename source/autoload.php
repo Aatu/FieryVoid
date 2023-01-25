@@ -2667,6 +2667,7 @@ spl_autoload_register(
 				'talokiearly' => '/server/model/ships/korlyan/TalokiEarly.php',
 				'talokioriginal' => '/server/model/ships/korlyan/TalokiOriginal.php',
 				'vaklar' => '/server/model/ships/korlyan/Vaklar.php',
+
          		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
          		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
          		'proximitylaser' => '/server/model/weapons/customNexus.php', 
@@ -2707,8 +2708,10 @@ spl_autoload_register(
                 'cwioncannon' => '/server/model/weapons/customCW.php',
                 'cwheavyioncannon' => '/server/model/weapons/customCW.php',
                 'cwshield' => '/server/model/weapons/customCW.php',
+
                 'cwlasercannonsftr' => '/server/model/weapons/customCW.php',
 //                'cwftrconcussion' => '/server/model/weapons/customCW.php',
+
 				
 				//units
 				'acclamator' => '/server/model/ships/ZStarWarsCloneWars/Acclamator.php',
