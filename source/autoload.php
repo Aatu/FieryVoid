@@ -2921,6 +2921,4 @@ spl_autoload_register(
     true,
     false
 );
-
-
 // @codeCoverageIgnoreEnd
