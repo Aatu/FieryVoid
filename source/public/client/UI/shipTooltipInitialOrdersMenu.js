@@ -15,7 +15,7 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "addOEW", condition: [isEnemy, sourceNotFlight], action: addOEW, info: "Add OEW" }, 
         { className: "removeOEW", condition: [isEnemy, sourceNotFlight], action: removeOEW, info: "Remove OEW" }, 
         { className: "addDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" }, 
-        { className: "removeDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW], action: getRemoveOEW('DIST'), info: "Remove DIST" }, 
+        { className: "removeDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getRemoveOEW('DIST'), info: "Remove DIST" }, 
         { className: "addSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SOEW'), info: "Add SOEW" }, 
         { className: "removeSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getRemoveOEW('SOEW'), info: "Remove SOEW" }, 
         { className: "addSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SDEW'), info: "Add SDEW" }, 
