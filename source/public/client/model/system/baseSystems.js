@@ -53,6 +53,14 @@ Scanner.prototype.isScanner = function () {
     return true;
 };
 
+Scanner.prototype.hasMaxBoost = function () {
+	if (this.maxBoostLevel > 0){ 
+		return true;
+		}else{
+		return false;
+		}	
+};
+
 var SWScanner = function SWScanner(json, ship) {
     Scanner.call(this, json, ship);
 };
