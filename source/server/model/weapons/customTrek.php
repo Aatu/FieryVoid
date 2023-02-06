@@ -12,7 +12,7 @@ class TrekWarpDrive extends JumpEngine{
 	public $repairPriority = 7;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
 	
-    public $possibleCriticals = array( //reduced output reduces available thrust
+    protected $possibleCriticals = array( //reduced output reduces available thrust
         12=>"OutputReduced1",
         24=>"OutputReduced2"
 	);
@@ -46,7 +46,7 @@ class TrekImpulseDrive extends Engine{
 	private $warpDrives = array();
 	
 	
-    public $possibleCriticals = array( //as actual output is minima, so should be crits!	     
+    protected $possibleCriticals = array( //as actual output is minima, so should be crits!	     
         16=>"OutputReduced1",
         22=>"OutputReduced2",
         28=>"ForcedOfflineOneTurn"
@@ -1003,7 +1003,7 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 	public $isTargetable = false; //cannot be targeted ever!
     public $iconPath = "TrekShieldProjectionF.png"; //overridden anyway - to indicate proper direction
     
-	public $possibleCriticals = array(); //no criticals possible
+	protected $possibleCriticals = array(); //no criticals possible
 	
 	//Shield Projections cannot be repaired at all!
 	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -1172,7 +1172,7 @@ class TrekShieldProjector  extends Shield implements DefensiveSystem { //defensi
     public $baseOutput = 0; //base output, before boost
     
 	
-    public $possibleCriticals = array(
+    protected $possibleCriticals = array(
             16=>"OutputReduced1",
             25=>"OutputReduced2" );
 	

@@ -1637,7 +1637,7 @@ class EWGraviticTractingRod extends SWDirectWeapon{
         public $animationWidth = 15;
         public $animationWidth2 = 0.5;
 	
- 	public $possibleCriticals = array( //no point in damage reduced crit
+ 	protected $possibleCriticals = array( //no point in damage reduced crit
             14=>"ReducedRange"
 	);
 	

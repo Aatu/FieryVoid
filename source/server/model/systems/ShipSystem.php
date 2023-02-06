@@ -26,7 +26,7 @@ class ShipSystem {
     public $imagePath, $iconPath;
     public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for this system)
     
-    public $possibleCriticals = array();
+    protected $possibleCriticals = array();
 	
     public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
     public $isTargetable = true; //false means it cannot be targeted at all by called shots! - good for technical systems :)

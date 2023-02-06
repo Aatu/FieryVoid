@@ -9,7 +9,7 @@ class Jammer extends ShipSystem implements SpecialAbility{
 	//Jammer is very important, being the primary defensive system!
 	public $repairPriority = 10;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
-    public $possibleCriticals = array(16=>"PartialBurnout", 23=>"SevereBurnout");
+    protected $possibleCriticals = array(16=>"PartialBurnout", 23=>"SevereBurnout");
     
     function __construct($armour, $maxhealth, $powerReq){
         parent::__construct($armour, $maxhealth, $powerReq, 1);
@@ -165,7 +165,7 @@ class Shield extends ShipSystem implements DefensiveSystem{
 	
 	public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
     
-    public $possibleCriticals = array(
+    protected $possibleCriticals = array(
             16=>"OutputReduced1",
             20=>"DamageReductionRemoved",
             25=>array("OutputReduced1", "DamageReductionRemoved"));
@@ -291,7 +291,7 @@ class Reactor extends ShipSystem implements SpecialAbility {
     public $maxBoostLevel = 1;
     public $boostEfficiency = 0;
     
-    public $possibleCriticals = array(
+    protected $possibleCriticals = array(
         11=>"OutputReduced2",
         15=>"OutputReduced4",
         19=>"OutputReduced8",
@@ -466,7 +466,7 @@ class MagGravReactor extends Reactor{
 	provides fixed power regardless of systems;
 	techical implementation: count as Power minus power required by all systems enabled
 */	
-	public $possibleCriticals = array( //different set of criticals than standard Reactor
+	protected $possibleCriticals = array( //different set of criticals than standard Reactor
 		13=>"FieldFluctuations",
 		17=>array("FieldFluctuations", "FieldFluctuations"),
 		21=>array("FieldFluctuations", "FieldFluctuations", "FieldFluctuations"),
@@ -506,7 +506,7 @@ class AdvancedSingularityDrive extends Reactor{
 */	
     public $iconPath = "AdvancedSingularityDrive.png";
     
-	public $possibleCriticals = array( //different set of criticals than standard Reactor
+	protected $possibleCriticals = array( //different set of criticals than standard Reactor
 		20=>"FieldFluctuations",
 		25=>array("FieldFluctuations", "FieldFluctuations"),
 		30=>array("FieldFluctuations", "FieldFluctuations", "FieldFluctuations")
@@ -538,7 +538,7 @@ class SubReactor extends ShipSystem{
     public $outputType = "power";
     public $primary = false;
     
-    public $possibleCriticals = array(
+    protected $possibleCriticals = array(
         11=>"OutputReduced2",
         15=>"OutputReduced4",
         19=>"OutputReduced8",
@@ -576,7 +576,7 @@ class SubReactorUniversal extends ShipSystem{
 	//SubReactor is very important, though not as much as primary reactor itself!
 	public $repairPriority = 8;
     	
-    public $possibleCriticals = array(
+    protected $possibleCriticals = array(
         11=>"OutputReduced1", 
         14=>"OutputReduced2",
         17=>"OutputReduced3",
@@ -584,7 +584,7 @@ class SubReactorUniversal extends ShipSystem{
     );
 		
 	/*main reactor criticals for comparision
-    public $possibleCriticals = array(
+    protected $possibleCriticals = array(
         11=>"OutputReduced2",
         15=>"OutputReduced4",
         19=>"OutputReduced8",
@@ -669,7 +669,7 @@ class Engine extends ShipSystem implements SpecialAbility {
 	public $repairPriority = 7;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
     
-    public $possibleCriticals = array(
+    protected $possibleCriticals = array(
 	//official: 15-20 -2, 21-27 either all ahead full or shutdown, 28+ both
         15=>"OutputReduced2",
         21=>"ForcedOfflineOneTurn",
@@ -762,7 +762,7 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 	public $repairPriority = 7;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     public $specialAbilityValue = false; //changed by modifications marking Improved/Advanced Sensors!
     
-    public $possibleCriticals = array(
+    protected $possibleCriticals = array(
         15=>"OutputReduced1",
         19=>"OutputReduced2",
         23=>"OutputReduced3",
@@ -1092,7 +1092,7 @@ class CnC extends ShipSystem implements SpecialAbility {
 	public $repairPriority = 9;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
     
-    public $possibleCriticals = array(
+    protected $possibleCriticals = array(
     	//1=>"SensorsDisrupted", //not implemented! so I take it out 
 		1=>"CommunicationsDisrupted",   //this instead of SensorsDisrupted
 		9=>"CommunicationsDisrupted", 
@@ -1189,7 +1189,7 @@ class ProtectedCnC extends CnC{
 		$this->data["Special"] .= 'This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
 	}
 	
-	public $possibleCriticals = array(
+	protected $possibleCriticals = array(
 		8=>"CommunicationsDisrupted", 
 		16=>"PenaltyToHit", 
 		20=>"RestrictedEW", 
@@ -1211,7 +1211,7 @@ class ThirdspaceCnC extends CnC{
 		}
 	}
 	
-	public $possibleCriticals = array(
+	protected $possibleCriticals = array(
 		10=>"CommunicationsDisrupted", 
 		17=>"PenaltyToHit", 
 		25=>array("ReducedIniativeOneTurn","ReducedIniative"), 
@@ -1234,7 +1234,7 @@ class PakmaraCnC extends CnC{
 		$this->data["Special"] .= '<br>This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
 	}
 
-			public $possibleCriticals = array(
+			protected $possibleCriticals = array(
 				8=>array("CommunicationsDisrupted","CommunicationsDisrupted"), 
 				16=>"PenaltyToHit", 
 				20=>"RestrictedEW", 
@@ -1282,7 +1282,7 @@ class Thruster extends ShipSystem{
     public $thrustwasted = 0;
     public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?	
     
-    public $possibleCriticals = array(15=>"FirstThrustIgnored", 20=>"HalfEfficiency", 25=>array("FirstThrustIgnored","HalfEfficiency"));
+    protected $possibleCriticals = array(15=>"FirstThrustIgnored", 20=>"HalfEfficiency", 25=>array("FirstThrustIgnored","HalfEfficiency"));
     
     function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
@@ -1399,7 +1399,7 @@ class GraviticThruster extends Thruster{
 
 
 class MagGraviticThruster extends Thruster{ 
-	public $possibleCriticals = array(20=>"HalfEfficiency");
+	protected $possibleCriticals = array(20=>"HalfEfficiency");
 	
 	//Mag-Grav Thrusters are considerd Gravitic, complete with first crit ignored effect:
 	public function addCritical($shipid, $phpclass, $gamedata)
@@ -1610,7 +1610,7 @@ class HkControlNode extends ShipSystem{
 	public static $nodeList = array(); //array of nodes in game
 	public static $hkList = array(); // array of HK flights in game
     
-    public $possibleCriticals = array( //simplified from B5Wars!
+    protected $possibleCriticals = array( //simplified from B5Wars!
         15=>"OutputReduced1",
         21=>"OutputReduced2",
     );	
@@ -1809,7 +1809,7 @@ class AdaptiveArmorController extends ShipSystem{
 	
 	
     
-    public $possibleCriticals = array(); //no available criticals - in fact, this system is a technicality and should never be hit
+    protected $possibleCriticals = array(); //no available criticals - in fact, this system is a technicality and should never be hit
     
 	/*as this is a technical system, armor/health/power are always pre-set
 		settings defined by ship creator are: maxiumum total AA points, maximum AA points per weapon type, AA points pre-allocated		
@@ -2212,7 +2212,7 @@ class EnergyDiffuser extends ShipSystem{
 	//EnergyDiffuser has very high repair priority, being the core defensive system!
 	public $repairPriority = 9;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
-    public $possibleCriticals = array(
+    protected $possibleCriticals = array(
 		11=>"TendrilDestroyed",
 		16=>array("TendrilDestroyed", "OutputReduced1"),
 		20=>array("TendrilDestroyed", "OutputReduced2", "TendrilCapacityReduced"),
@@ -2411,7 +2411,7 @@ class SelfRepair extends ShipSystem{
 	public $repairPriority = 10;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
 	
- 	public $possibleCriticals = array( 
+ 	protected $possibleCriticals = array( 
             19=>"OutputHalved"
 	);
 
@@ -2748,7 +2748,7 @@ class BioThruster extends ShipSystem{
 	//BioThrusters are fairly important!
 	public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     	    
-    public $possibleCriticals = array(15=>"OutputReduced1", 24=>array("OutputReduced1","OutputReduced1"));//different than original
+    protected $possibleCriticals = array(15=>"OutputReduced1", 24=>array("OutputReduced1","OutputReduced1"));//different than original
     
     function __construct($armour, $maxhealth, $output ){
         parent::__construct($armour, $maxhealth, 0, $output );
@@ -2781,7 +2781,7 @@ class BioDrive extends Engine{
 	private $bioThrusters = array();
 	
     
-    public $possibleCriticals = array( ); //technical system, should never get damaged
+    protected $possibleCriticals = array( ); //technical system, should never get damaged
     
     function __construct(){
         parent::__construct(0, 1, 0, 0, 0 ); //($armour, $maxhealth, $powerReq, $output, $boostEfficiency
@@ -2858,7 +2858,7 @@ class ShadowPilot extends CnC{
 	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
     
-    public $possibleCriticals = array(
+    protected $possibleCriticals = array(
     );
         
     function __construct($armour, $maxhealth, $powerReq, $output ){
@@ -3002,7 +3002,7 @@ class Bulkhead extends ShipSystem{
 	
 	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
-    public $possibleCriticals = array( ); //no critical effect applicable	
+    protected $possibleCriticals = array( ); //no critical effect applicable	
 	
     function __construct($armour, $maxhealth){
         parent::__construct($armour, $maxhealth, 0, 0);
@@ -3136,7 +3136,7 @@ the energy it is currently holding.
 28+: -4 to recharge rate and the
 capacitor is completely emptied.
 */    
-    public $possibleCriticals = array(
+    protected $possibleCriticals = array(
 		18=>"OutputReduced1",
 		23=>array("OutputReduced2","ChargeHalve"), //multiple instances of OutputReduced - should scale fine with self-repair, rather than higher repair cost
 		28=>array("OutputReduced2", "OutputReduced2","ChargeEmpty")//multiple instances of OutputReduced - should scale fine with self-repair, rather than higher repair cost
@@ -3377,7 +3377,7 @@ class BSGHybrid extends ShipSystem {
     public $displayName = "Cylon Hybrid";
 	public $iconPath = "ShadowPilot.png";
 
-    public $possibleCriticals = array(
+    protected $possibleCriticals = array(
 		1=>"SensorLoss"
     );
 
@@ -3412,7 +3412,7 @@ class PlasmaBattery extends ShipSystem{
 	1-12: No effect.
 	13+: The battery is completely emptied.
 */        
-    public $possibleCriticals = array(
+    protected $possibleCriticals = array(
 		13=>"ChargeEmpty",
 	); 
 

@@ -905,7 +905,7 @@ class CommDisruptor extends Weapon{
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
    	   
 	
- 	public $possibleCriticals = array( //no point in damage reduced crit
+ 	protected $possibleCriticals = array( //no point in damage reduced crit
             14=>"ReducedRange"
 	);
 	
@@ -1004,7 +1004,7 @@ class CommJammer extends Weapon{
         public $animationWidth2 = 0.5;
 	*/
 	
- 	public $possibleCriticals = array( //no point in damage reduced crit
+ 	protected $possibleCriticals = array( //no point in damage reduced crit
             14=>"ReducedRange"
 	);
 	
@@ -1098,7 +1098,7 @@ class SensorSpear extends Weapon{
         public $animationWidth2 = 0.5;
 	*/
 	
- 	public $possibleCriticals = array( //no point in damage reduced crit
+ 	protected $possibleCriticals = array( //no point in damage reduced crit
             14=>"ReducedRange"
 	);
 	
@@ -1416,7 +1416,7 @@ class SparkField extends Weapon implements DefensiveSystem{
 	protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by SparkFieldHandler!
 	
 	
- 	public $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
+ 	protected $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
             14=>"ReducedDamage"
 	);
 	
@@ -2309,7 +2309,7 @@ class RammingAttack extends Weapon{
 
 	private $gamedata = null; //gamedata is needed in places normally unavailable - this variable will be filled before any calculations happen!
 	
-	 public $possibleCriticals = array(); //shouldn't be hit ever, but if it is, should not suffer any criticals
+	 protected $possibleCriticals = array(); //shouldn't be hit ever, but if it is, should not suffer any criticals
 	
 	//preventing double ramming
 	private $alreadyRammed = array();
@@ -4428,7 +4428,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 	protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by PsychicField handler!
 	
 	
- /*	public $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
+ /*	protected $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
  //           14=>"ReducedDamage"
 	);  Should this have a crit? */
 	
