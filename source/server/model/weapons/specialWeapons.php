@@ -4313,7 +4313,7 @@ class VorlonDischargeCannon extends Weapon{
 }//endof class VorlonDischargeCannon
 
 
-class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapons that operates similar to Spark Field, but debilitating enemies in range, not damage them.
+class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapons that operates similar to Spark Field, but debilitating enemies in range, not damaging them.
         public $name = "PsychicField";
         public $displayName = "Psychic Field";
 	public $iconPath = "PsychicField.png";
@@ -4441,20 +4441,15 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 	}
 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!		
-	if ($ship->faction == "Thirdspace") return;
+	if ($ship->faction == "Thirdspace") return; //No effect on other Thirdspace ships.
 		
 		$effectIni = Dice::d(3,1);//strength of effect: 1d6
 		$effecttohit = Dice::d(3,1);//strength of effect: 1d3
 		$effectIni5 = $effectIni * 5;
 		$effecttohit5 = $effecttohit * 5;	
-		$fireOrder->pubnotes .= "<br> Initiative and Offensive Bonus reduced for fighters, and non-Thirdspace ships suffer disruption based on where they are hit.";
+		$fireOrder->pubnotes .= "<br> Initiative and Offensive Bonus reduced for fighters, and non-Thirdspace ships suffer potential disruption.";
 						
-		if ($system->advancedArmor){
-/*			if ($ship->faction == "Thirdspace"){
-			$effectIni = 0;  //Doesn't affect other Thirdspace aliens.
-			$effecttohit = 0;
-		}else{  */
-			
+		if ($system->advancedArmor){		
 			$effectIni = ceil($effectIni/2);  	//Other Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens, 50% effect.	
 			$effecttohit = ceil($effecttohit/2);
 			}
@@ -4481,7 +4476,6 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 			        $CnC->criticals[] =  $crit;
 				}
 			} else { //force critical roll at +4 even on other Ancients
-//				if ($ship->faction != "Thirdspace"){ //But not on Thirdspace.
 				$system->forceCriticalRoll = true;
 				$system->critRollMod += 5;			
 					}			
@@ -4490,7 +4484,6 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 		
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
 	{
-		//maxhealth and power reqirement are fixed; left option to override with hand-written values
 		if ( $maxhealth == 0 ){
 			$maxhealth = 20;
 		}
@@ -4674,10 +4667,10 @@ class PsychicFieldHandler{
         {
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ){
-                $maxhealth = 24;
+                $maxhealth = 20;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 12;
+                $powerReq = 10;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -4717,7 +4710,7 @@ class PsychicFieldHandler{
  
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //Unlikely to matter at Raking 20, but keep it in for thematic reasons!
 			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
-			if ($system->advancedArmor) return; //no effect on Advanced Armor but Ipsha still get wrecked.
+			if ($system->advancedArmor) return; //no effect on Advanced Armor but Ipsha etc still get affected.
 			//+1 to crit roll, +2 to dropout roll
 			$mod = 1;
 			if ($ship instanceof FighterFlight) $mod++;		
@@ -4810,10 +4803,10 @@ class PsionicLance extends Raking{
         {
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ){
-                $maxhealth = 15;
+                $maxhealth = 12;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 7;
+                $powerReq = 6;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -4915,27 +4908,15 @@ class PsionicConcentrator extends Raking{
             public $firingModes = array(
                 1 => "Single",
                 2 => "Double"
-  //              3 => "3combined",
- //               4 => "4combined"
             );
         public $rangePenalty = 1;
             public $rangePenaltyArray = array( 1=>1, 2=>0.5); //Standard and Raking modes
         public $fireControl = array(8, 4, 4); // fighters, <mediums, <capitals 
-            public $fireControlArray = array( 1=>array(8, 4, 3), 2=>array(3, 5, 6)); //+1 fire control the more concentrators are used to hit per every additional combining weapon
-            
- //   public $uninterceptable = false;
- //   public $uninterceptableArray = array(1=>false, 2=>false, 3=>true, 4=>true);            
-	
-	
-	
+            public $fireControlArray = array( 1=>array(8, 4, 3), 2=>array(3, 5, 6));
+              
 	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
   		public $damageTypeArray = array(1=>"Standard", 2=>"Standard");	    
-	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
-	    
-	//rake size array
-//	public $raking = 10;//more in higher modes
-//	public $rakingArray = array( 1=>10, 2=>10, 3=>10, 4=>15);	    
-
+	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!    
 	
 	public $isCombined = false; //is being combined with other weapon
 	public $alreadyConsidered = false; //already considered - either being fired or combined
