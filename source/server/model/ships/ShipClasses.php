@@ -38,6 +38,12 @@ class BaseShip {
 	public $osat = false; //true if object is OSAT (this includes MicroSATs and mines)
 	public $mine = false;
     public $SixSidedShip = false;
+	public $isCombatUnit = true; //is this a combat unit (as opposed to non-combat - transport, freighter, civilian, explorer, diplomatic ship, yacht...)
+	//non-combat ships cannot be taken in pickup battles by standard tourtnament rules
+	//rule of thumb is that if it has cargo bays, then it's not a combat ship - but it's far from proof
+	//eg. Pak'ma'ra and Orini capital ships (combat ones) do have cargo bays, while eg. EMperor's transport or Grey Sharlin (non-combat ships) do not
+	//by core definition, combat ship is one that is intended to be present in fleet sent into combat zone.
+	
 
 	
     public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for all systems)
@@ -196,9 +202,9 @@ class BaseShip {
             if(($this->faction == "Pak'ma'ra") && (!($this instanceof FighterFlight))	){
                 return $this->doPakmaraInitiativeBonus($gamedata);
             }
-			if(($this->faction == "Gaim") && ($this instanceOf gaimMoas)){  //GTS
-                return $this->doGaimInitiativeBonus($gamedata);
-            }
+//			if(($this->faction == "Gaim") && ($this instanceOf gaimMoas)){  //GTS
+//                return $this->doGaimInitiativeBonus($gamedata);
+//            }
             return $this->iniativebonus;
         }
         
@@ -363,7 +369,7 @@ class BaseShip {
 
 
 		//GTS
-		
+		/*
         private function doGaimInitiativeBonus($gamedata){
 
         $mod = 0;
@@ -390,7 +396,7 @@ class BaseShip {
         //    debug::log($this->phpclass."- bonus: ".$mod);
         return $this->iniativebonus + $mod*5;
     }
-	
+	*/
 
 	
 	/*saves individual notes systems might have generated*/
@@ -606,6 +612,8 @@ class BaseShip {
 					$this->notes .= 'Unit size not identified!';	
 					break;
 			}//unit size described, which also guarantees existence of previous entries!
+			//mark if not a combat unit!
+			if(!$this->isCombatUnit) $this->notes .= '<br>Non-combatant!';
 			//required hangar
 			if($this->hangarRequired!='') { 
 				$this->notes .= '<br>Requires hangar space: ' . $this->hangarRequired;			

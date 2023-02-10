@@ -47,6 +47,7 @@ class CraytanMaprinRefit extends MediumShip{
 		$this->addAftSystem(new NexusLightSentryGun(2, 5, 1, 0, 180));
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));    
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));    
+		$this->addAftSystem(new Hangar(2, 2));
        
         $this->addPrimarySystem(new Structure(3, 40));
 
