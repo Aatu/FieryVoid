@@ -12,6 +12,7 @@ class EskravatAM extends BaseShip{
         $this->shipClass = "Eskravat Refueling Barge";
         $this->shipSizeClass = 3;
         $this->isd = 2229;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 
         $this->forwardDefense = 15;
         $this->sideDefense = 16;

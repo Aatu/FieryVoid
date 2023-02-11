@@ -9,6 +9,7 @@ class TrekFederationMirandaTransport extends MediumShip{
         $this->phpclass = "TrekFederationMirandaTransport";
         $this->imagePath = "img/ships/StarTrek/FederationMiranda.png";
         $this->shipClass = "Miranda Fast Transport";
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 
 	$this->occurence = "common";
 	$this->variantOf = "Miranda Frigate";

@@ -13,6 +13,7 @@ class FaskurSpy extends MediumShip{
 			$this->occurence = "rare";
         $this->canvasSize = 100;
         $this->isd = 2224;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
         $this->forwardDefense = 11;
         $this->sideDefense = 16;

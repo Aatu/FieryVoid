@@ -9,6 +9,7 @@ class BulkOreFreighter extends HeavyCombatVessel{
         $this->phpclass = "bulkOreFreighter";
         $this->imagePath = "img/ships/BulkOreFreighter.png";
         $this->shipClass = "Bulk Ore Freighter";
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 	    
         $this->isd = 2129;        
         $this->unofficial = true;

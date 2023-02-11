@@ -20,6 +20,7 @@ class FreeTrader extends MediumShip{
 	$this->rollcost = 1;
 	$this->pivotcost = 1;
 	$this->iniativebonus = 0;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 	
 	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance

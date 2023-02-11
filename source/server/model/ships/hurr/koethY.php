@@ -9,7 +9,8 @@ class koethy extends FighterFlight{
         $this->phpclass = "koethy";
         $this->shipClass = "Koeth Light Fighters (w/FY)";
         $this->imagePath = "img/ships/Hurrkoeth.png";
-	    $this->variantOf = "Koeth Light Fighters";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
+	    //$this->variantOf = "Koeth Light Fighters";
 
         $this->isd = 2230;
         

@@ -12,6 +12,7 @@ class CottenAlpha extends BaseShip{
         $this->shipSizeClass = 3;
 //			$this->canvasSize = 175; //img has 200px per side
  		$this->unofficial = 'S'; //HRT design released after AoG demise
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
        
         $this->isd = 2176;
 

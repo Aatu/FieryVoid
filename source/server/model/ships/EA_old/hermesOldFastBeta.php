@@ -13,6 +13,7 @@ class HermesOldFastBeta extends HeavyCombatVessel{
         $this->variantOf = "Hermes Fast Transport (Alpha)";
  		$this->unofficial = 'S'; //HRT design released after AoG demise
         $this->isd = 2195;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
         $this->fighters = array("heavy" => 6);
         

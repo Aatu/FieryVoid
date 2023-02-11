@@ -1269,6 +1269,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
  	    public $animation = "ball";
         public $animationExplosionScale = 0.5;
         public $animationColor = array(0, 0, 0);   //Don't really want to see a projectile, so let's make it have no colour.
+        public $animationExplosionType = "AoE";        
         public $explosionColor = array(75, 250, 90);   //Tried to make explosion green, but I don't think this variable actually works...                         
 		
         public $ballistic = false;

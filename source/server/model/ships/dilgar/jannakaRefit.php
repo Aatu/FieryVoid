@@ -13,6 +13,7 @@ class JannakaRefit extends MediumShip{
 			$this->occurence = "common";
        $this->canvasSize = 100;
         $this->isd = 2228;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
         $this->forwardDefense = 11;
         $this->sideDefense = 16;
