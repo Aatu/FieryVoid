@@ -46,7 +46,7 @@ class CraytanMaprin extends MediumShip{
         $this->addAftSystem(new Thruster(3, 10, 0, 3, 2));    
         $this->addAftSystem(new Thruster(3, 10, 0, 3, 2));    
 		$this->addAftSystem(new Hangar(2, 2));
-       
+        
         $this->addPrimarySystem(new Structure(3, 40));
 
 	//d20 hit chart
