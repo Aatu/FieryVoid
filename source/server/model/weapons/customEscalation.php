@@ -898,8 +898,8 @@ class EWPointPlasmaGun extends Plasma{
     	public $rangeDamagePenalty = 1;
         public $guns = 2;
 
-        public $intercept = 1;
-		public $ballisticIntercept = true;
+        public $intercept = 2;
+//		public $ballisticIntercept = true;
     		        
         public $loadingtime = 1;
 			
@@ -941,7 +941,7 @@ class EWHeavyPointPlasmaGun extends Plasma{
         public $guns = 2;
 
         public $intercept = 2;
-		public $ballisticIntercept = true;
+//		public $ballisticIntercept = true;
     		        
         public $loadingtime = 1;
 			
