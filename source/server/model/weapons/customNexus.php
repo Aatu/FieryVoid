@@ -6690,7 +6690,7 @@ class NexusDefensePulsar extends Pulse{
         public $priority = 3;
         
         public $rangePenalty = 2;
-        public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals
+        public $fireControl = array(3, 2, 1); // fighters, <mediums, <capitals
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             if ( $maxhealth == 0 ) $maxhealth = 4;
