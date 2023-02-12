@@ -7,7 +7,7 @@ class SalbezCrevnen extends FighterFlight{
         $this->pointCost = 17*6;
         $this->faction = "ZNexus Sal-bez";
         $this->phpclass = "SalbezCrevnen";
-        $this->shipClass = "Crev-nen Attack Shuttle Heavy Flight";
+        $this->shipClass = "Crev-nen Attack Shuttle";
         $this->imagePath = "img/ships/Nexus/salbez_crevnen.png";
 		$this->unofficial = true;
 

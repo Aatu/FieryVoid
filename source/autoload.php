@@ -1520,6 +1520,7 @@ spl_autoload_register(
 			//Nexus particle weapons
 				'gatlinggunftr' => '/server/model/weapons/customNexus.php', 
 				'lightparticlebeamftr' => '/server/model/weapons/customNexus.php', 
+				'hvyparticlegunftr' => '/server/model/weapons/customNexus.php', 
 				'mattercannonftr' => '/server/model/weapons/customNexus.php', 
 				'medplasmacannonftr' => '/server/model/weapons/customNexus.php', 
 				'stdparticlebeamftr' => '/server/model/weapons/customNexus.php', 

@@ -39,10 +39,10 @@ class SalbezDrazchk extends FighterFlight{
             $fighter->imagePath = "img/ships/Nexus/salbez_drazchk.png";
             $fighter->iconPath = "img/ships/Nexus/salbez_drazchk_large.png";
 
-	        $light = new LightParticleBeamFtr(300, 60, 1); //$startArc, $endArc, $nrOfShots
+	        $light = new HvyParticleGunFtr(300, 60, 1); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($light);
 
-			$aft = new LightParticleBeam(150, 210, 1, 1);
+			$aft = new PairedParticleGun(150, 210, 1, 1);
 			$fighter->addAftSystem($aft);
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			

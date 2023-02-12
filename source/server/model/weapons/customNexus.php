@@ -7031,6 +7031,41 @@ class TestGun extends Particle{
         public function setMinDamage(){     $this->minDamage = 5 ;      }
         public function setMaxDamage(){     $this->maxDamage = 14 ;      }
 	}// endof LightParticleBeamFtr
+
+
+/*fighter-mounted variant*/
+    class HvyParticleGunFtr extends Particle{
+//        public $trailColor = array(30, 170, 255);
+
+        public $name = "HvyParticleGunFtr";
+        public $displayName = "Heavy Particle Gun";
+		public $iconPath = "lightParticleBeamShip.png";
+	    
+        public $animation = "beam";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.12;
+        public $projectilespeed = 12;
+        public $animationWidth = 3;
+        public $trailLength = 8;
+
+        public $intercept = 2;
+        public $loadingtime = 1;
+        public $priority = 4;
+
+        public $rangePenalty = 2 ; //-2 / hex
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+
+	function __construct($startArc, $endArc, $nrOfShots = 1){
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 1)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+	}// endof LightParticleBeamFtr
+
 	
 
 /*fighter-mounted variant*/

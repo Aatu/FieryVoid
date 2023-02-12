@@ -860,6 +860,12 @@ var LightParticleBeamFtr = function  LightParticleBeamFtr(json, ship) {
 LightParticleBeamFtr.prototype = Object.create(Weapon.prototype);
 LightParticleBeamFtr.prototype.constructor =  LightParticleBeamFtr;
 
+var HvyParticleGunFtr = function  HvyParticleGunFtr(json, ship) {
+    Weapon.call(this, json, ship);
+};
+HvyParticleGunFtr.prototype = Object.create(Weapon.prototype);
+HvyParticleGunFtr.prototype.constructor =  HvyParticleGunFtr;
+
 var StdParticleBeamFtr = function  StdParticleBeamFtr(json, ship) {
     Weapon.call(this, json, ship);
 };
