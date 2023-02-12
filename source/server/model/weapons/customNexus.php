@@ -1152,7 +1152,7 @@ class NexusBoltTorpedo extends Weapon{
         public $rangePenalty = 0;
         public $fireControl = array(-1, 2, 2); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
-	public $priority = 5; //Standard weapon
+	public $priority = 4; //Standard weapon
 	    
 	public $firingMode = 'Ballistic'; //firing mode - just a name essentially
 	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
@@ -6523,7 +6523,7 @@ class NexusSwarmTorpedo extends Pulse{
         public $rof = 2;
         public $grouping = 25;
         public $maxpulses = 4;
-        public $priority = 6;
+        public $priority = 4;
 	protected $useDie = 2; //die used for base number of hits	
         
         public $loadingtime = 2;
@@ -6578,7 +6578,7 @@ class NexusRangedSwarmTorpedo extends Pulse{
         public $rof = 2;
         public $grouping = 25;
         public $maxpulses = 4;
-        public $priority = 6;
+        public $priority = 4;
 	protected $useDie = 2; //die used for base number of hits	
         
         public $loadingtime = 2;
@@ -6633,7 +6633,7 @@ class NexusHeavySwarmTorpedo extends Pulse{
         public $rof = 2;
         public $grouping = 25;
         public $maxpulses = 6;
-        public $priority = 6;
+        public $priority = 4;
 	protected $useDie = 3; //die used for base number of hits	
         
         public $loadingtime = 2;
