@@ -5011,14 +5011,14 @@ class PsionicConcentrator extends Raking{
 	
 	
     public function getDamage($fireOrder){
-		return Dice::d(10, 1+$this->firingMode)+($this->firingMode*5); //2d10+3 +1d10+3 per every additional weapon
+		return Dice::d(10, 1+$this->firingMode)+($this->firingMode*5); //2d10+6 +1d10+1 in Double mode.
 	}
 	public function setMinDamage(){    
-		$this->minDamage = 1+$this->firingMode+($this->firingMode*5);
-		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+		$this->minDamage = 1*(1+$this->firingMode)+($this->firingMode*5); //7 and 13
+		$this->minDamageArray[$this->firingMode] = $this->minDamage; 
 	}
 	public function setMaxDamage(){
-		$this->maxDamage = 10*(1+$this->firingMode)+($this->firingMode*5);
+		$this->maxDamage = 10*(1+$this->firingMode)+($this->firingMode*5); //25 and 40
 		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;  
 	}
 } //endof class PsionicConcentrator
