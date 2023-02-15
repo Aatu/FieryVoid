@@ -14,6 +14,7 @@ class KoshaEarlyAM extends BaseShip{
 			$this->variantOf = 'Kosha Light Cruiser';
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; //img has 200px per side
+ 		$this->unofficial = 'S'; //design released after AoG demise
 
 		$this->isd = 2190;
         $this->fighters = array("assault shuttles"=>2);

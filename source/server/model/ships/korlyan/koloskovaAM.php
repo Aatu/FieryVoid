@@ -10,6 +10,7 @@ class KoloskovaAM extends MediumShip{
         $this->imagePath = "img/ships/korlyan_koloskova.png";
         $this->shipClass = "Koloskova Battlecruiser";
         $this->canvasSize = 85;
+ 		$this->unofficial = 'S'; //design released after AoG demise
 	    
 	    $this->isd = 1972;
         $this->fighters = array("assault shuttles"=>1);

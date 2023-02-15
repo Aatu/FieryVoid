@@ -10,8 +10,8 @@ class VaklarAM extends HeavyCombatVessel{
         $this->imagePath = "img/ships/korlyan_vaklar.png";
         $this->shipClass = "Vaklar Logistics Frigate";
 	    $this->isd = 2208;
-
 		$this->canvasSize = 130; //Enormous Starbase
+ 		$this->unofficial = 'S'; //design released after AoG demise
 
 	    $this->notes = 'Atmospheric Capable.';
         
