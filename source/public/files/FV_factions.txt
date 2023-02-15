@@ -264,6 +264,7 @@ Class-F Launcher - F stands for flexible and can fire in three separate modes. N
 Proximity Laser - This deviates from the table top mode and will be upgraded at a future date. This is fired as a ballistic weapon, but hits as a laser during weapons fire originating from the launch hex.
 Limpet Bore Torpedo - This has been simplified from the table top version. Currently, this is fired during not-ballistic weapons fire, but is intercepted as a ballistic weapon. It can perform called shots 
      without any penalties. Future updates will allow it to fire as a true ballistic weapon and perform called shots on non-facing systems.
+NOTE: Ballistic mines are currently not implemented.
 Semi-custom "early" units - A few key Kor-Lyan units are not available until the 2240s or 2250s. This can make fielding an accurate force difficult. The semi-custom versions are units that follow the example 
      of the Toloki Starbase and replace the F-Launchers with L-Launchers. These early versions, using L-Launchers provide players an option to take these units and purchase  special missiles, which is not 
 	 currently possible with the F-Launchers.
