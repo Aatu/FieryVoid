@@ -40,23 +40,23 @@ class Leklant extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new MultiDefenseLauncher(2, 'D', 300, 60, false));
-        $this->addFrontSystem(new LimpetBoreTorp(3, 5, 3, 300, 60));
+        $this->addFrontSystem(new DirectLimpetBore(3, 5, 3, 300, 60));
         $this->addFrontSystem(new MultiDefenseLauncher(2, 'D', 300, 60, false));
 
-        $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
+        $this->addAftSystem(new Thruster(3, 7, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
-        $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
+        $this->addAftSystem(new Thruster(3, 7, 0, 2, 2));
         $this->addAftSystem(new MultiDefenseLauncher(3, 'D', 120, 300, false));
         $this->addAftSystem(new MultiDefenseLauncher(3, 'D', 60, 240, false));
 
         $this->addLeftSystem(new MultiDefenseLauncher(2, 'D', 240, 60, false));
-        $this->addLeftSystem(new FMissileRack(3, 'F', 180, 360, false)); 
+        $this->addLeftSystem(new FMissileRack(3, 6, 0, 180, 360, false)); 
         $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 180, 360));
         $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 180, 360));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
         $this->addRightSystem(new MultiDefenseLauncher(2, 'D', 300, 120, false));
-        $this->addRightSystem(new FMissileRack(3, 'F', 0, 180, false)); 
+        $this->addRightSystem(new FMissileRack(3, 6, 0, 0, 180, false)); 
         $this->addRightSystem(new StdParticleBeam(3, 4, 1, 0, 180));
         $this->addRightSystem(new StdParticleBeam(3, 4, 1, 0, 180));
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));

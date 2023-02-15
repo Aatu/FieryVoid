@@ -1263,7 +1263,7 @@ class NexusChaffLauncher extends Weapon{
 	
         public $useOEW = false; //not important, really	    
         
-        public $loadingtime = 2; // 1/2 turns
+        public $loadingtime = 1; // 1/2 turns
 		public $range = 100; //let's put maximum range here, but generous one
         public $rangePenalty = 0;
         public $fireControl = array(100, 100, 100); // fighters, <mediums, <capitals; just so the weapon is targetable
@@ -7495,6 +7495,110 @@ class Enveloper extends Weapon{
 
 
 
+class DirectLimpetBore extends Weapon{
+//Temporary version of the Limpet Bore Torpedo that operates as a direct
+//fire weapon. This is being done to release the Kor-Lyan sooner to support
+//Wolfgang's In Old Times campaign. This will be replaced by a true ballistic
+//weapon once being able to make a called-shot ballistic weapon.
+        public $name = "DirectLimpetBore";
+        public $displayName = "Limpet Bore Torpedo";
+		    public $iconPath = "LimpetBoreTorpedo.png";
+        public $animation = "trail";
+        public $trailColor = array(141, 240, 255);
+        public $animationColor = array(50, 50, 50);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 10;
+        public $animationWidth = 4;
+        public $trailLength = 100;    
+
+//		public $overrideCallingRestricions = true; //flag looked for in weaponManager.js to allow a ballistic called shot
+
+        public $useOEW = false; //missile
+//        public $ballistic = true; //missile
+        public $range = 30;
+//        public $distanceRange = 60;
+        public $ammunition = 5; //limited number of shots
+		public $noInterceptDegradation = true; //if true, this weapon will be intercepted without degradation!
+		public $noPrimaryHits = true; //cannot hit PRIMARY from outer table
+
+        public $calledShotMod = 0; //instead of usual -8
+        
+        public $loadingtime = 2; // 1/2 turns
+        public $rangePenalty = 0;
+        public $fireControl = array(null, 2, 4); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+	    
+		public $noOverkill = true; //Matter weapon
+		public $priority = 9; //Matter weapon
+	    
+//	public $firingMode = 'Called Shot'; //firing mode - just a name essentially
+		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Matter"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+	 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 5;
+            if ( $powerReq == 0 ) $powerReq = 3;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->ammunition = $this->ammunition;           
+            return $strippedSystem;
+        }
+        
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Ignores armor, no overkill (Ballistic+Matter weapon).";
+            $this->data["Ammunition"] = $this->ammunition;
+        }
+        
+        public function getDamage($fireOrder){
+            return Dice::d(10, 2)+10;
+       }
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
+    
+        public function setMinDamage(){     $this->minDamage = 12;      }
+        public function setMaxDamage(){     $this->maxDamage = 30;      }
+		
+}//endof DirectLimpetBore
+
+
+class DirectLimpetBoreBase extends DirectLimpetBore{
+        public $name = "DirectLimpetBoreBase";
+        public $displayName = "Base Limpet Bore Torpedo";
+		    public $iconPath = "LimpetBoreTorpedo.png";
+        public $animation = "trail";
+        public $trailColor = array(141, 240, 255);
+        public $animationColor = array(50, 50, 50);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 10;
+        public $animationWidth = 4;
+        public $trailLength = 100;    
+
+        public $range = 60;
+//        public $distanceRange = 60;
+        public $ammunition = 7; //limited number of shots
+		public $noInterceptDegradation = true; //if true, this weapon will be intercepted without degradation!
+		public $noPrimaryHits = true; //cannot hit PRIMARY from outer table
+
+        public $calledShotMod = 0; //instead of usual -8
+        
+        public $rangePenalty = 0;
+        public $fireControl = array(null, 2, 4); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+	    		
+}//endof LimpetBoreBase
+
+
+
 
 
 
@@ -7616,9 +7720,13 @@ class ProximityLaser extends Laser{
 //        public $distanceRangeArray = array(1=>30, 2=>15);
         public $ammunition = 10; //limited number of shots
 		public $hidetarget = true;
+        public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
 	    
         public $loadingtime = 3; // 1/3 turns
         public $rangePenalty = 0;
+		//NOTE: Per weapon description, the laser receives +3 offensive EW when it fires
+		//However, since it is not a true proximity weapon in FV just yet, I am leaving
+		//the fire control as +0 to represent the -1 per 2 hex range penalty
         public $fireControl = array(null, 0, 0); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
         public $raking = 10;
@@ -7644,20 +7752,30 @@ class ProximityLaser extends Laser{
 	    
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "Bomb-pumped laser. Ballistic weapon that scores raking (8) damage.";
-            $this->data["Special"] .= "<br>Long-range: 20 hex launch and 30 hex max range, 2d10+2 damage.";
-            $this->data["Special"] .= "<br>Short-range: 10 hex launch and 15 hex max range, 3d10+4 damage.";
+            $this->data["Special"] = "Ballistic weapon.";
+            $this->data["Special"] .= "<br>Scores damage as a laser as device focuses its explosion on the target.";
+            $this->data["Special"] .= "<br>Cannot engage fighters.";
             $this->data["Ammunition"] = $this->ammunition;
         }
         
         public function setAmmo($firingMode, $amount){
             $this->ammunition = $amount;
         }
-       public function fire($gamedata, $fireOrder){ //note ammo usage
+
+		public function fire($gamedata, $fireOrder){ //note ammo usage
+			$ammo = $this->ammunition;
+			if($ammo > 0){
+				$this->ammunition--;
+				Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+			}
+			else{
+				$fireOrder->notes = "No ammunition available.";
+				$fireOrder->updated = true;
+					return;
+			}
             parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
         }
+
 
         public function getDamage($fireOrder){ return Dice::d(10, 3)+8;   }
         public function setMinDamage(){     $this->minDamage = 11;      }
@@ -8296,6 +8414,206 @@ class SafeFMissileRack extends Weapon {
 
 
 
+class RangedFMissileRack extends Weapon {
+		public $name = "RangedFMissileRack";
+        public $displayName = "Stabilized Class-F Missile Rack";
+        public $iconPath = "ClassFMissileRack.png";
+
+		public $useOEW = false;
+		public $ballistic = true;
+	
+        public $animation = "trail";
+        public $animationColor = array(50, 50, 50);
+
+        public $intercept = 0;
+		public $priority = 6; 		
+		
+        public $loadingtime = 1;
+		public $normalload = 2;
+
+		public $range = 60;
+		public $distanceRange = 60;
+		public $rangeMod = 0;
+		public $hits = array();
+		
+        public $rangePenalty = 0;
+        public $fireControlArray = array(1=>array(6, 6, 6), 2=>array(4, 4, 4)); //missile OEW directly added to weapon FC
+        private $baseFireControlArray = null; //base values of fire control - copy necessary due to necessity of recalculation now and then!
+		private $firedInRapidMode = false; //was this weapon fired in rapid mode (this turn)?
+		private $baseRange = null; //base value of range - copy necessary due to necessity of recalculation now and then!
+		private $baseRangeArray = null; //base value of range - copy necessary due to necessity of recalculation now and then!
+		private $baseDistance = null; //base value of range - copy necessary due to necessity of recalculation now and then!
+		private $baseDistanceArray = null; //base value of range - copy necessary due to necessity of recalculation now and then!
+		
+		public $firingModes = array(1=>'Standard', 2=>'Long-range'); //equals to available missiles; data is basic - if launcher is special, constructor will modify it
+		public $damageTypeArray = array(1=>'Standard', 2=>'Standard'); //indicates that this weapon does damage in Pulse mode
+
+		public $rangeArray = array(1=>60, 2=>105); 
+		public $distanceRangeArray = array(1=>60, 2=>105); 
+
+		protected $rackExplosionDamage = 38; //how much damage will this weapon do in case of catastrophic explosion
+		//officially it's a quarter of total power of warheads in magazine; but in FV this number is fixed (as missiles in magazine are not tracked)
+		// estimated warheads in magazine: 200 (10 missiles, dmg 20 each - assuming Basic missiles)
+		// a quarter of the above: 50
+		// reduce somewhat by expected expendientures (say, *0.75): 38
+		// also, official rules expect Raking mode, not Flash - but it's somewhat of a washout (Flash offers higher chance of destroying section, but lower of damage penetrating deeper)
+		protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion (d20)
+  		
+        public $damageType = "Standard";
+		public $weaponClass = "Ballistic";
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 6;
+			if ( $powerReq == 0 ) $powerReq = 0;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){	
+			$this->recalculateFireControl(); //necessary for correct Initial data
+			$this->data["Special"] = 'This weapon can fire either as regular missile launcher, or Long Range launcher. ';
+			$this->data["Special"] .= '<br>It can also fire in Rapid mode (with reduced Fire Control values, but after only 1 turn of charging) - though not right after using Long Range mode.';
+			parent::setSystemDataWindow($turn);	
+		}
+	
+	//recalculates fire control as appropriate for current loading time!
+	private function recalculateFireControl(){
+		if (($this->turnsloaded == 1) || ($this->firedInRapidMode)) { //after only 1 turn of charging: Standard mode becomes Rapid (with reduced fire control), Long Range mode is not available
+			if ($this->baseFireControlArray === null){ //base values haven't been copied yet
+				$this->baseFireControlArray = $this->fireControlArray;
+			}
+			$basicFC = $this->baseFireControlArray[1]; //get current default values
+			$basicFC[0] = $basicFC[0] -2; //antifighter FC
+			$basicFC[1] = $basicFC[1] -2; //antimedium FC
+			$basicFC[2] = $basicFC[2] -2; //antiheavy FC 
+			$this->fireControlArray[1] = $basicFC;
+			$nullFC = array(null, null, null);
+			$this->fireControlArray[2] = $nullFC; //long-range mode unavailable after 1 turn of charging
+//			$this->changeFiringMode(1);    //recompile current values from arrays
+			if ($this->baseRangeArray === null){ //base values haven't been copied yet
+				$this->baseRangeArray = $this->rangeArray;
+			}
+			$basicRange = $this->baseRangeArray[1]; //get current default values
+			$basicRange = $basicRange -15;
+			$this->rangeArray[1] = $basicRange;
+			if ($this->baseDistanceArray === null){ //base values haven't been copied yet
+				$this->baseDistanceArray = $this->distanceRangeArray;
+			}
+			$basicDistance = $this->baseDistanceArray[1]; //get current default values
+			$basicDistance = $basicDistance -15; //distance range is 3 times range. Rapid fire has a -5 range for a -15 distance
+			$this->distanceRangeArray[1] = $basicDistance;
+			$this->changeFiringMode(1);
+		}	
+	}
+	
+	
+	/* this method generates additional non-standard informaction in the form of individual system notes
+	*/
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+		switch($gameData->phase){								
+				case 1: //Initial phase 
+					//if weapon is marked as firing in Rapid mode, make a note of it!
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+						if($this->firedInRapidMode){
+							$notekey = 'RapidFire';
+							$noteHuman = 'fired in Rapid mode';
+							$noteValue = 'X';
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+						}
+					}
+					
+				break;
+				
+		}
+	} //endof function generateIndividualNotes
+	
+	/*act on notes just loaded - to be redefined by systems as necessary
+	 - mark $firedInRapidMode
+	*/
+	public function onIndividualNotesLoaded($gamedata){
+		foreach ($this->individualNotes as $currNote) if($currNote->turn == $gamedata->turn) if ($currNote->notevalue == 'X'){ //only current round matters!
+			$this->firedInRapidMode = true;			
+			$this->recalculateFireControl(); //necessary for the variable to affect actual firing
+		}
+		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+		$this->individualNotes = array();
+	} //endof function onIndividualNotesLoaded
+	
+	
+	public function doIndividualNotesTransfer(){
+		//data received in variable individualNotesTransfer, further functions will look for variable firedInRapidMode
+		if(is_array($this->individualNotesTransfer)) foreach($this->individualNotesTransfer as $entry) {
+			if ($entry == 'X') $this->firedInRapidMode = true;
+		}
+		$this->individualNotesTransfer = array(); //empty, just in case
+	}		
+	
+	
+	public function getDamage($fireOrder){
+		switch($this->firingMode){
+			case 1: //Standard
+				return 20; 
+				break;
+			case 2: //Long-Range
+				return 20; 
+				break;
+			default: //most missiles do the same damage
+				return 20; 
+				break;	
+		}
+	}
+	
+	public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1: //Standard
+				$this->minDamage = 20; 
+				break;
+			case 2: //Long-Range
+				$this->minDamage = 20; 
+				break;
+			default: //most missiles do the same damage
+				$this->minDamage = 20; 
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+	
+	public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1: //Standard
+				$this->maxDamage = 20; 
+				break;
+			case 2: //Long-Range
+				$this->maxDamage = 20; 
+				break;
+			default: //most missiles do the same damage
+				$this->maxDamage = 20; 
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
+
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;		
+			$strippedSystem->fireControl = $this->fireControl;
+			$strippedSystem->fireControlArray = $this->fireControlArray;
+			$strippedSystem->range = $this->range;
+			$strippedSystem->rangeArray = $this->rangeArray;
+			return $strippedSystem;
+		}
+
+}//end of class RangedFMissileRack
+
+
+
+
+
 
 
 class ChaffMissile extends Weapon{
@@ -8637,8 +8955,8 @@ class MultiDefenseLauncher extends Weapon {
     public $animationWidth = 4;
     public $trailLength = 100;
 	*/
-    public $range = 20;
-    public $distanceRange = 60;
+//    public $range = 20;
+//    public $distanceRange = 60;
     public $firingMode = 1;
     public $rangeMod = 0;
     public $priority = 6;

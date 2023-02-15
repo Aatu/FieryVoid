@@ -1,12 +1,12 @@
 <?php
-class Koloskova extends MediumShip{
+class KoloskovaAM extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 325;
 		$this->faction = "Kor-Lyan";
-        $this->phpclass = "Koloskova";
+        $this->phpclass = "KoloskovaAM";
         $this->imagePath = "img/ships/korlyan_koloskova.png";
         $this->shipClass = "Koloskova Battlecruiser";
         $this->canvasSize = 85;

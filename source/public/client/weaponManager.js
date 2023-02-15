@@ -233,6 +233,26 @@ window.weaponManager = {
         return false;
     },
 
+
+	//checks whether a shipborne weapon has ran out of ammo
+	checkOutOfAmmo: function checkOutOfAmmoShip(ship, weapon) {
+        if (ship.flight) {
+            return weaponManager.checkOutOfAmmo(ship, weapon);
+        }
+
+        if (weapon.hasOwnProperty("ammunition")) {
+            if (weapon.ammunition > 0) {
+                return false;
+            } else {
+                confirm.error("This weapon is out of ammunition.");
+                return true;
+            }
+        }
+
+        return false;
+    },
+
+
     selectWeapon: function selectWeapon(ship, weapon) {
         if (weaponManager.checkOutOfAmmo(ship, weapon)) {
             return;

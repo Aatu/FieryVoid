@@ -1,16 +1,18 @@
 <?php
-class TalokiOriginal extends StarBaseSixSections{
+class TalokiOriginalAM extends StarBaseSixSections{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 3000;
 		$this->faction = 'Kor-Lyan';
-		$this->phpclass = "TalokiOriginal";
+		$this->phpclass = "TalokiOriginalAM";
 		$this->shipClass = "Taloki Starbase (2194)";
+			$this->occurence = "common";
+			$this->variantOf = 'Taloki Starbase (2240)';
 		$this->fighters = array("assault shuttles"=>4, "normal"=>24); 
 
-        $this->isd = 2220;
+        $this->isd = 2194;
 		$this->shipSizeClass = 3; //Enormous is not implemented
         $this->Enormous = true;
 		$this->iniativebonus = -200; //no voluntary movement anyway
