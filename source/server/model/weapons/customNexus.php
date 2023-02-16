@@ -2062,7 +2062,7 @@ class NexusShatterGunFtr extends Weapon{
         public $normalload = 1;	    
         public $priority = 6; 
         	    
-		public $ballisticIntercept = true;
+//		public $ballisticIntercept = true;
         public $intercept = 1; //as it should be, but here they CAN combine vs same shot!
 	    
 		public $rangePenalty = 2;
@@ -2175,7 +2175,7 @@ class NexusShatterGunFtr extends Weapon{
         public $normalload = 1;	    
         public $priority = 3; //very light weapon
         	    
-		public $ballisticIntercept = true;
+//		public $ballisticIntercept = true;
         public $intercept = 1; //as it should be, but here they CAN combine vs same shot!
 	    
 	public $rangePenalty = 2;
@@ -2397,6 +2397,7 @@ class NexusAutogun extends Matter{
 		public $guns = 1;
         public $priority = 5;
         public $ammunition = 6;
+        public $intercept = 1; //as it should be, but here they CAN combine vs same shot!
 
 //        public $intercept = 2;
 //        public $ballisticIntercept = true;
