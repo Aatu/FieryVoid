@@ -43,13 +43,15 @@ class BrixadiiWarshipPrototype extends BaseShipNoAft{
 		$this->addFrontSystem(new NexusProjectorArray(3, 6, 1, 300, 120));
 		$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 300, 60));
         
-		$this->addLeftSystem(new Thruster(3, 14, 0, 8, 3));
+		$this->addLeftSystem(new Thruster(3, 7, 0, 4, 3));
+		$this->addLeftSystem(new Thruster(3, 7, 0, 4, 3));
 		$this->addLeftSystem(new NexusDefensePulsar(2, 4, 2, 180, 360));
 		$this->addLeftSystem(new NexusProjectorArray(3, 6, 1, 180, 360));
 		$this->addLeftSystem(new NexusChaffLauncher(1, 2, 1, 180, 360));
 		$this->addLeftSystem(new HvyParticleProjector(3, 8, 4, 240, 360));
 
-		$this->addRightSystem(new Thruster(3, 14, 0, 8, 4));
+		$this->addRightSystem(new Thruster(3, 7, 0, 4, 4));
+		$this->addRightSystem(new Thruster(3, 7, 0, 4, 4));
 		$this->addRightSystem(new NexusDefensePulsar(2, 4, 2, 0, 180));
 		$this->addRightSystem(new NexusProjectorArray(3, 6, 1, 0, 180));
 		$this->addRightSystem(new NexusChaffLauncher(1, 2, 1, 0, 180));
