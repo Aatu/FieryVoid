@@ -1560,6 +1560,8 @@ spl_autoload_register(
 				'nexusrangedswarmtorpedo' => '/server/model/weapons/customNexus.php',
 			//Nexus plasma weapons
 				'nexusheavyplasmacharge' => '/server/model/weapons/customNexus.php',
+//				'nexusfightertorpedolauncher' => '/server/model/weapons/customNexus.php',
+//				'nexusltplasmabomb' => '/server/model/weapons/customNexus.php',
 //				'nexusheavychargedplasmagun' => '/server/model/weapons/customNexus.php',
 //				'nexuschargedplasmagun' => '/server/model/weapons/customNexus.php',
 			//Nexus laser weapons
@@ -1658,6 +1660,7 @@ spl_autoload_register(
  //               'craytanhepron2126' => '/server/model/ships/ZNexusCraytan/CraytanHepron2126.php',					
                 'craytanpolten' => '/server/model/ships/ZNexusCraytan/CraytanPolten.php',					
                 'craytanpoltenrefit' => '/server/model/ships/ZNexusCraytan/CraytanPoltenRefit.php',					
+                'craytantironftr' => '/server/model/ships/ZNexusCraytan/CraytanTironFtr.php',					
                 'craytantopren' => '/server/model/ships/ZNexusCraytan/CraytanTopren.php',					
                 'craytantoprenearly' => '/server/model/ships/ZNexusCraytan/CraytanToprenEarly.php',					
                 'craytanyupinarescort' => '/server/model/ships/ZNexusCraytan/CraytanYupinarEscort.php',					

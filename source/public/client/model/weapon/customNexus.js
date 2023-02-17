@@ -831,6 +831,17 @@ var NexusHeavyLaserMissile = function NexusHeavyLaserMissile(json, ship) {
 NexusHeavyLaserMissile.prototype = Object.create(Weapon.prototype);
 NexusHeavyLaserMissile.prototype.constructor = NexusHeavyLaserMissile;
 
+var NexusFighterTorpedoLauncher = function  NexusFighterTorpedoLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusFighterTorpedoLauncher.prototype = Object.create(Weapon.prototype);
+NexusFighterTorpedoLauncher.prototype.constructor =  NexusFighterTorpedoLauncher;
+
+var NexusLtPlasmaBomb = function  NexusLtPlasmaBomb(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusLtPlasmaBomb.prototype = Object.create(Weapon.prototype);
+NexusLtPlasmaBomb.prototype.constructor =  NexusLtPlasmaBomb;
 
 
 

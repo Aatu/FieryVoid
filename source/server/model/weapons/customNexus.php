@@ -678,6 +678,72 @@ class NexusPlasmaBombRack extends Plasma{
 
 
 
+class NexusFighterTorpedoLauncher extends FighterMissileRack
+{
+    public $name = "NexusFighterTorpedoLauncher";
+    public $displayName = "Fighter Torpedo Launcher";
+    public $loadingtime = 1;
+    public $iconPath = "fighterTorpedo.png";
+    public $rangeMod = 0;
+    public $firingMode = 1;
+    public $maxAmount = 0;
+    protected $distanceRangeMod = 0;
+	public $weaponClass = "Plasma";
+    public $priority = 4; //priority: typical fighter weapon (correct for Light Ballistic Torpedo's 2d6)
+
+    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+    
+    public $firingModes = array(
+        1 => "LPB"
+    );
+    
+    function __construct($maxAmount, $startArc, $endArc){
+        parent::__construct($maxAmount, $startArc, $endArc);
+        
+        $LPBomb = new NexusLtPlasmaBomb($startArc, $endArc, $this->fireControl);
+        
+        $this->missileArray = array(
+            1 => $LPBomb
+        );
+        
+        $this->maxAmount = $maxAmount;
+    }
+    
+}
+
+
+class NexusLtPlasmaBomb extends MissileFB
+{
+    public $name = "NexusLtPlasmaBomb";
+    public $missileClass = "LPB";
+    public $displayName = "Light Plasma Bomb";
+    public $cost = 8;
+    //public $surCharge = 0;
+	public $damage = 12;
+    public $amount = 0;
+    public $range = 15;
+    public $distanceRange = 15;
+    public $hitChanceMod = 0;
+    public $priority = 4;
+	public $damageType = "Standard";
+	public $weaponClass = "Plasma";
+	
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "Plasma. Ignores half of armor.";
+		}
+    
+    function __construct($startArc, $endArc, $fireControl=null){
+        parent::__construct($startArc, $endArc, $fireControl);
+    }
+
+    public function getDamage($fireOrder){        return 12;   }
+    public function setMinDamage(){     $this->minDamage = 12;      }
+    public function setMaxDamage(){     $this->maxDamage = 12;      }        
+} // end EWLightPlasmaMine
+
+
+
 
 class NexusDartInterceptor extends Weapon{
         public $name = "NexusDartInterceptor";
