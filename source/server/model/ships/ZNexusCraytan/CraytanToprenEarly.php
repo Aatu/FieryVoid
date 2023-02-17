@@ -1,17 +1,19 @@
 <?php
-class CraytanTopren extends HeavyCombatVessel{
+class CraytanToprenEarly extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 395;
+        $this->pointCost = 365;
         $this->faction = "ZNexus Playtest Craytan";
-        $this->phpclass = "CraytanTopren";
+        $this->phpclass = "CraytanToprenEarly";
         $this->imagePath = "img/ships/Nexus/CraytanTopren.png";
 		$this->canvasSize = 120; //img has 200px per side
-        $this->shipClass = "Topren Patrol Destroyer";
+        $this->shipClass = "Topren Prototype (2110)";
+			$this->variantOf = "Topren Patrol Destroyer";
+			$this->occurence = "common";
 		$this->unofficial = true;
-        $this->isd = 2118;
+        $this->isd = 2110;
 
         $this->fighters = array("assault shuttles"=>3);
 		
@@ -36,17 +38,17 @@ class CraytanTopren extends HeavyCombatVessel{
       
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-		$this->addFrontSystem(new LightPlasma(2, 4, 2, 240, 60));
+		$this->addFrontSystem(new NexusLightSentryGun(2, 5, 1, 240, 60));
 		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 240, 360));
 		$this->addFrontSystem(new NexusMedAssaultCannon(4, 7, 4, 330, 30));
 		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 0, 120));
-		$this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 120));
+		$this->addFrontSystem(new NexusLightSentryGun(2, 5, 1, 300, 120));
                 
         $this->addAftSystem(new Thruster(3, 13, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 13, 0, 4, 2));
 		$this->addAftSystem(new NexusACIDS(2, 6, 2, 120, 360));
-		$this->addAftSystem(new LightPlasma(2, 4, 2, 120, 300));
-		$this->addAftSystem(new LightPlasma(2, 4, 2, 60, 240));
+		$this->addAftSystem(new NexusLightSentryGun(2, 5, 1, 120, 300));
+		$this->addAftSystem(new NexusLightSentryGun(2, 5, 1, 60, 240));
 		$this->addAftSystem(new NexusACIDS(2, 6, 2, 0, 240));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -69,13 +71,13 @@ class CraytanTopren extends HeavyCombatVessel{
                     4 => "Thruster",
                     6 => "Medium Assault Cannon",
                     8 => "Heavy Plasma Cannon",
-					10 => "Light Plasma Cannon",
+					10 => "Light Sentry Gun",
 					18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     6 => "Thruster",
-                    8 => "Light Plasma Cannon",
+                    8 => "Light Sentry Gun",
 					10 => "Advanced Close-In Defense System",
                     18 => "Structure",
                     20 => "Primary",

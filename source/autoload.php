@@ -1659,6 +1659,8 @@ spl_autoload_register(
                 'craytanpolten' => '/server/model/ships/ZNexusCraytan/CraytanPolten.php',					
                 'craytanpoltenrefit' => '/server/model/ships/ZNexusCraytan/CraytanPoltenRefit.php',					
                 'craytantopren' => '/server/model/ships/ZNexusCraytan/CraytanTopren.php',					
+                'craytantoprenearly' => '/server/model/ships/ZNexusCraytan/CraytanToprenEarly.php',					
+                'craytanyupinarescort' => '/server/model/ships/ZNexusCraytan/CraytanYupinarEscort.php',					
 
 
 
