@@ -1560,8 +1560,8 @@ spl_autoload_register(
 				'nexusrangedswarmtorpedo' => '/server/model/weapons/customNexus.php',
 			//Nexus plasma weapons
 				'nexusheavyplasmacharge' => '/server/model/weapons/customNexus.php',
-//				'nexusfightertorpedolauncher' => '/server/model/weapons/customNexus.php',
-//				'nexusltplasmabomb' => '/server/model/weapons/customNexus.php',
+				'nexusfightertorpedolauncher' => '/server/model/weapons/customNexus.php',
+				'nexusltplasmabomb' => '/server/model/weapons/customNexus.php',
 //				'nexusheavychargedplasmagun' => '/server/model/weapons/customNexus.php',
 //				'nexuschargedplasmagun' => '/server/model/weapons/customNexus.php',
 			//Nexus laser weapons
