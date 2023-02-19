@@ -53,7 +53,7 @@ class TethysMissileAM extends MediumShip{
 		
         $this->addAftSystem(new Thruster(4, 8, 0, 4, 2));
         $this->addAftSystem(new Thruster(4, 8, 0, 4, 2));
-        $this->addAftSystem(new AmmoMissileRackS(2, 0, 0, 180, 0, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addAftSystem(new AmmoMissileRackS(2, 0, 0, 90, 270, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addAftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
         $this->addAftSystem(new StdParticleBeam(2, 4, 1, 0, 180));
         $this->addAftSystem(new InterceptorMkI(2, 4, 1, 90, 270));

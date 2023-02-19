@@ -126,11 +126,9 @@ class Weapon extends ShipSystem
 
     //damage type-related variables
     public $isLinked = false; //for linked weapons - they will all hit the exact same system!
-    public $systemKiller = false;    //for custom weapons - increased chance to hit system and not Structure
-    protected $systemKillerArray = array();
     public $noOverkill = false; //this will let simplify entire Matter line enormously!
-    public $doOverkill = false; //opposite of $noOverkill - allows Piercing shots to overkill (eg. Shadow Heavy Molecular Slicer Beam has such ability)
     protected $noOverkillArray = array();
+    public $doOverkill = false; //opposite of $noOverkill - allows Piercing shots to overkill (eg. Shadow Heavy Molecular Slicer Beam has such ability)
     public $ballistic = false; //this is a ballistic weapon, not direct fire
     public $ballisticIntercept = false; //can intercept, but only ballistics
     public $hextarget = false; //this weapon is targeted on hex, not unit
@@ -157,7 +155,7 @@ class Weapon extends ShipSystem
     public $calledShotMod = -8;
 	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 
-    public $possibleCriticals = array(14 => "ReducedRange", 19 => "ReducedDamage", 25 => array("ReducedRange", "ReducedDamage"));
+    protected $possibleCriticals = array(14 => "ReducedRange", 19 => "ReducedDamage", 25 => array("ReducedRange", "ReducedDamage"));
 
     protected $firedDefensivelyAlready = 0; //marker used for weapons capable of firing multiple defensive shots, but suffering backlash once
 
@@ -1847,7 +1845,6 @@ full Advanced Armor effects (by rules) for reference:
         if (isset($this->maxDamageArray[$i])) $this->maxDamage = $this->maxDamageArray[$i];
         if (isset($this->dpArray[$i])) $this->dp = $this->dpArray[$i];
 
-        if (isset($this->systemKillerArray[$i])) $this->systemKiller = $this->systemKillerArray[$i];
         if (isset($this->noOverkillArray[$i])) $this->noOverkill = $this->noOverkillArray[$i];
 				
         if (isset($this->rakingArray[$i])) $this->raking = $this->rakingArray[$i];

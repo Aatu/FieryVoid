@@ -19,7 +19,7 @@ class SWRayShield extends Shield implements DefensiveSystem{
     public $baseOutput = 0; //base output, before boost
 	
 	
- 	public $possibleCriticals = array( //different than usual B5Wars shield
+ 	protected $possibleCriticals = array( //different than usual B5Wars shield
             16=>"OutputReduced1",
             23=>array("OutputReduced1", "OutputReduced1")
 	);
@@ -1212,7 +1212,7 @@ class SWTractorBeam extends SWDirectWeapon{
         public $animationExplosionScale = 0.8; //make animation really large!
 	
 	
- 	public $possibleCriticals = array( //no point in damage reduced crit
+ 	protected $possibleCriticals = array( //no point in damage reduced crit
             14=>"ReducedRange"
 	);
 	

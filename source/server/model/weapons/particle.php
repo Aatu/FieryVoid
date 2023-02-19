@@ -1793,7 +1793,7 @@ class LightParticleAccelerator extends LinkedWeapon{
         public $intercept = 4;
 		private static $alreadyIntercepted = array(); //Only one Interdictor can intercept any shot, including ballistics.
 
-     	public $possibleCriticals = array( //different than usual B5Wars weapon
+     	protected $possibleCriticals = array( //different than usual B5Wars weapon
             16=>"ForcedOfflineOneTurn"
 		);
 
