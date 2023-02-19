@@ -120,8 +120,9 @@ class ImprovedIonCannon extends Raking{
         public $iconPath = "ionizer2.png";
         public $displayName = "Ionizer";        
         
-        public $animation = "laser"; //deals Standard damage, but that's due to beam having short duration - it's a laser beam in nature; 
+        //public $animation = "laser"; //deals Standard damage, but that's due to beam having short duration - it's a laser beam in nature; 
 	    //most such weapons do use Bolt animation, but her it serves to make them stand out!
+		public $animation = "bolt"; //let's make it Bolt after all - more fitting with other fighter weapons
         public $animationColor = array(160, 0, 255);
 	    /*
         public $animationExplosionScale = 0.1;
@@ -177,8 +178,9 @@ class ImprovedIonCannon extends Raking{
         public $iconPath = "ionizerHvy2.png";
         public $displayName = "Heavy Ionizer";        
         
-        public $animation = "laser"; //deals Standard damage, but that's due to beam having short duration - it's a laser beam in nature; 
+        //public $animation = "laser"; //deals Standard damage, but that's due to beam having short duration - it's a laser beam in nature; 
 	    //most such weapons do use Bolt animation, but her it serves to make them stand out!
+		public $animation = "bolt"; //let's make it Bolt after all - more fitting with other fighter weapons
         public $animationColor = array(160, 0, 255);
 	    /*
         public $animationExplosionScale = 0.1;
