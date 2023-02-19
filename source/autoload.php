@@ -1520,6 +1520,7 @@ spl_autoload_register(
 			//Nexus particle weapons
 				'gatlinggunftr' => '/server/model/weapons/customNexus.php', 
 				'lightparticlebeamftr' => '/server/model/weapons/customNexus.php', 
+				'hvyparticlegunftr' => '/server/model/weapons/customNexus.php', 
 				'mattercannonftr' => '/server/model/weapons/customNexus.php', 
 				'medplasmacannonftr' => '/server/model/weapons/customNexus.php', 
 				'stdparticlebeamftr' => '/server/model/weapons/customNexus.php', 
@@ -1559,6 +1560,8 @@ spl_autoload_register(
 				'nexusrangedswarmtorpedo' => '/server/model/weapons/customNexus.php',
 			//Nexus plasma weapons
 				'nexusheavyplasmacharge' => '/server/model/weapons/customNexus.php',
+//				'nexusfightertorpedolauncher' => '/server/model/weapons/customNexus.php',
+//				'nexusltplasmabomb' => '/server/model/weapons/customNexus.php',
 //				'nexusheavychargedplasmagun' => '/server/model/weapons/customNexus.php',
 //				'nexuschargedplasmagun' => '/server/model/weapons/customNexus.php',
 			//Nexus laser weapons
@@ -1657,7 +1660,10 @@ spl_autoload_register(
  //               'craytanhepron2126' => '/server/model/ships/ZNexusCraytan/CraytanHepron2126.php',					
                 'craytanpolten' => '/server/model/ships/ZNexusCraytan/CraytanPolten.php',					
                 'craytanpoltenrefit' => '/server/model/ships/ZNexusCraytan/CraytanPoltenRefit.php',					
+                'craytantironftr' => '/server/model/ships/ZNexusCraytan/CraytanTironFtr.php',					
                 'craytantopren' => '/server/model/ships/ZNexusCraytan/CraytanTopren.php',					
+                'craytantoprenearly' => '/server/model/ships/ZNexusCraytan/CraytanToprenEarly.php',					
+                'craytanyupinarescort' => '/server/model/ships/ZNexusCraytan/CraytanYupinarEscort.php',					
 
 
 
@@ -2641,34 +2647,35 @@ spl_autoload_register(
 
 				//Kor-Lyan
 //         		'ammomissilerackf' => '/server/model/weapons/customNexus.php', //missile racks themselves
-/*				'axor' => '/server/model/ships/korlyan/Axor.php',
+				'axor' => '/server/model/ships/korlyan/Axor.php',
 				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 				'fenja' => '/server/model/ships/korlyan/Fenja.php',
 				'kalavar' => '/server/model/ships/korlyan/Kalavar.php',
-				'kalavarearly' => '/server/model/ships/korlyan/KalavarEarly.php',
-				'kalti' => '/server/model/ships/korlyan/Kalti.php',
+				'kalavarearlyam' => '/server/model/ships/korlyan/KalavarEarlyAM.php',
+				'kalavaroriginalam' => '/server/model/ships/korlyan/KalavarOriginalAM.php',
+				'kaltiam' => '/server/model/ships/korlyan/KaltiAM.php',
 				'kolosk' => '/server/model/ships/korlyan/Kolosk.php',
-				'koloskearly' => '/server/model/ships/korlyan/KoloskEarly.php',
-				'koloskova' => '/server/model/ships/korlyan/Koloskova.php',
-				'kosha' => '/server/model/ships/korlyan/Kosha.php',
-				'koshaearly' => '/server/model/ships/korlyan/KoshaEarly.php',
+				'koloskearlyam' => '/server/model/ships/korlyan/KoloskEarlyAM.php',
+				'koloskovaam' => '/server/model/ships/korlyan/KoloskovaAM.php',
+				'koshaam' => '/server/model/ships/korlyan/KoshaAM.php',
+				'koshaearlyam' => '/server/model/ships/korlyan/KoshaEarlyAM.php',
 				'koskova' => '/server/model/ships/korlyan/Koskova.php',
-				'koskovaearly' => '/server/model/ships/korlyan/KoskovaEarly.php',
+				'koskovaearlyam' => '/server/model/ships/korlyan/KoskovaEarlyAM.php',
 				'leklant' => '/server/model/ships/korlyan/Leklant.php',
-				'leklantearly' => '/server/model/ships/korlyan/LeklantEarly.php',
+				'leklantearlyam' => '/server/model/ships/korlyan/LeklantEarlyAM.php',
 				'lekra' => '/server/model/ships/korlyan/Lekra.php',
 				'merkul' => '/server/model/ships/korlyan/Merkul.php',
 				'merkularmed' => '/server/model/ships/korlyan/MerkulArmed.php',
 				'merkulmissile' => '/server/model/ships/korlyan/MerkulMissile.php',
-				'raklavi' => '/server/model/ships/korlyan/Raklavi.php',
-				'solyrn' => '/server/model/ships/korlyan/Solyrn.php',
-				'soska' => '/server/model/ships/korlyan/Soska.php',
+				'raklaviam' => '/server/model/ships/korlyan/RaklaviAM.php',
+				'solyrnam' => '/server/model/ships/korlyan/SolyrnAM.php',
+				'soskaam' => '/server/model/ships/korlyan/SoskaAM.php',
 				'taloki' => '/server/model/ships/korlyan/Taloki.php',
-				'talokiearly' => '/server/model/ships/korlyan/TalokiEarly.php',
-				'talokioriginal' => '/server/model/ships/korlyan/TalokiOriginal.php',
-				'vaklar' => '/server/model/ships/korlyan/Vaklar.php',
+				'talokiearlyam' => '/server/model/ships/korlyan/TalokiEarlyAM.php',
+				'talokioriginalam' => '/server/model/ships/korlyan/TalokiOriginalAM.php',
+				'vaklaram' => '/server/model/ships/korlyan/VaklarAM.php',
 
-         		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
+/*         		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
          		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
          		'proximitylaser' => '/server/model/weapons/customNexus.php', 
          		'fmissilerack' => '/server/model/weapons/customNexus.php', 
@@ -2681,12 +2688,17 @@ spl_autoload_register(
 //         		'chaffmissile' => '/server/model/weapons/customNexus.php', 
          		'proximitylaser' => '/server/model/weapons/customNexus.php', 
          		'fmissilerack' => '/server/model/weapons/customNexus.php', 
-//         		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
+         		'rangedfmissilerack' => '/server/model/weapons/customNexus.php', 
+         		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
+         		'directlimpetbore' => '/server/model/weapons/customNexus.php', 
+         		'directlimpetborebase' => '/server/model/weapons/customNexus.php', 
          		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
 //				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 //				'koloskova' => '/server/model/ships/korlyan/Koloskova.php',
 //				'lekra' => '/server/model/ships/korlyan/Lekra.php',
 				'koskovatestbed' => '/server/model/ships/korlyan/KoskovaTestbed.php',
+//				'kaltiam' => '/server/model/ships/korlyan/KaltiAM.php',
+//				'taloki' => '/server/model/ships/korlyan/Taloki.php',
 
 
 

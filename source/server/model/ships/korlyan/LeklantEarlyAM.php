@@ -1,5 +1,5 @@
 <?php
-class LeklantEarly extends BaseShip{
+class LeklantEarlyAM extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -7,13 +7,14 @@ class LeklantEarly extends BaseShip{
 	$this->pointCost = 690;
 		$this->faction = "Kor-Lyan";
 //	$this->faction = "Custom Ships";
-        $this->phpclass = "LeklantEarly";
+        $this->phpclass = "LeklantEarlyAM";
         $this->imagePath = "img/ships/korlyan_leklant.png";
         $this->shipClass = "Leklant Scout Cruiser (early)";
 			$this->occurence = "common";
 			$this->variantOf = 'Leklant Scout Cruiser';
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; //img has 200px per side
+ 		$this->unofficial = 'S'; //design released after AoG demise
 
         $this->limited = 33;
 
@@ -52,12 +53,12 @@ class LeklantEarly extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new MultiDefenseLauncher(2, 'D', 240, 60, false));
-        $this->addFrontSystem(new LimpetBoreTorp(3, 5, 3, 300, 60));
+        $this->addFrontSystem(new DirectLimpetBore(3, 5, 3, 300, 60));
         $this->addFrontSystem(new MultiDefenseLauncher(2, 'D', 300, 120, false));
 
-        $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
+        $this->addAftSystem(new Thruster(3, 7, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
-        $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
+        $this->addAftSystem(new Thruster(3, 7, 0, 2, 2));
         $this->addAftSystem(new MultiDefenseLauncher(3, 'D', 120, 300, false));
         $this->addAftSystem(new MultiDefenseLauncher(3, 'D', 60, 240, false));
 

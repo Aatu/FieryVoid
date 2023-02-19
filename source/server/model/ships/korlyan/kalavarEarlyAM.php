@@ -1,17 +1,18 @@
 <?php
-class KalavarEarly extends OSAT{
+class KalavarEarlyAM extends OSAT{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 240;
 		$this->faction = "Kor-Lyan";
-        $this->phpclass = "KalavarEarly";
+        $this->phpclass = "KalavarEarlyAM";
         $this->imagePath = "img/ships/korlyan_kalavar.png";
-        $this->shipClass = "Kalavar Orbital Satellite (early)";
+        $this->shipClass = "Kalavar Orbital Satellite (2220)";
 			$this->occurence = "common";
-			$this->variantOf = 'Kalavar Orbital Satellite';
-        $this->isd = 2216;
+			$this->variantOf = 'Kalavar Orbital Satellite (2240)';
+        $this->isd = 2220;
+ 		$this->unofficial = 'S'; //design released after AoG demise
         
         $this->forwardDefense = 10;
         $this->sideDefense = 10;

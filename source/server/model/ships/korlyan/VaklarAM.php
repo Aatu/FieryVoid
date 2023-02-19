@@ -1,19 +1,20 @@
 <?php
-class Vaklar extends HeavyCombatVessel{
+class VaklarAM extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 450;
         $this->faction = "Kor-Lyan";
-        $this->phpclass = "Vaklar";
+        $this->phpclass = "VaklarAM";
         $this->imagePath = "img/ships/korlyan_vaklar.png";
         $this->shipClass = "Vaklar Logistics Frigate";
 	    $this->isd = 2208;
-
 		$this->canvasSize = 130; //Enormous Starbase
+ 		$this->unofficial = 'S'; //design released after AoG demise
 
 	    $this->notes = 'Atmospheric Capable.';
+		$this->notes .= "<br>Official Vaklar Logistics Frigate with Ballistic Mine replaced by Proximity Laser"; 
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
@@ -53,7 +54,7 @@ class Vaklar extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new MultiDefenseLauncher(2, 'D', 240, 60, false));
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 60));
-		$this->addFrontSystem(new ProximityLaser(4, 6, 6, 300, 60)); 
+		$this->addFrontSystem(new ProximityLaser(3, 6, 6, 300, 60)); 
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 120));
         $this->addFrontSystem(new MultiDefenseLauncher(2, 'D', 300, 120, false));
 		
@@ -65,7 +66,7 @@ class Vaklar extends HeavyCombatVessel{
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 36));
-        $this->addAftSystem(new Structure( 4, 42));
+        $this->addAftSystem(new Structure( 4, 36));
         $this->addPrimarySystem(new Structure( 4, 36));
         
         

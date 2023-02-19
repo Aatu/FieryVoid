@@ -31,8 +31,10 @@ class BrixadiiSurveyor2057 extends HeavyCombatVessel{
         $this->addPrimarySystem(new ElintScanner(4, 10, 5, 8));
         $this->addPrimarySystem(new Engine(4, 14, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(1, 2));
-        $this->addPrimarySystem(new Thruster(3, 14, 0, 6, 3));
-        $this->addPrimarySystem(new Thruster(3, 14, 0, 6, 4));
+        $this->addPrimarySystem(new Thruster(3, 7, 0, 3, 3));
+        $this->addPrimarySystem(new Thruster(3, 7, 0, 3, 3));
+        $this->addPrimarySystem(new Thruster(3, 7, 0, 3, 4));
+        $this->addPrimarySystem(new Thruster(3, 7, 0, 3, 4));
       
         $this->addFrontSystem(new Thruster(3, 14, 0, 6, 1));
     	$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 240, 0));

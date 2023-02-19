@@ -4,12 +4,12 @@ class CraytanHepron2085 extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 400;
+        $this->pointCost = 380;
         $this->faction = "ZNexus Playtest Craytan";
         $this->phpclass = "CraytanHepron2085";
         $this->imagePath = "img/ships/Nexus/CraytanHepron.png";
 		$this->canvasSize = 140; //img has 200px per side
-        $this->shipClass = "Hepron Early Cruiser (2085 refit)";
+        $this->shipClass = "Hepron Cruiser (2085 refit)";
 			$this->variantOf = "Hepron Early Cruiser";
 			$this->occurence = "common";
 		$this->unofficial = true;
@@ -37,12 +37,12 @@ class CraytanHepron2085 extends HeavyCombatVessel{
         $this->addPrimarySystem(new Thruster(2, 13, 0, 5, 4));
       
         $this->addFrontSystem(new Thruster(2, 15, 0, 6, 1));
-		$this->addFrontSystem(new NexusACIDS(2, 6, 2, 180, 60));
+		$this->addFrontSystem(new NexusCIDS(2, 6, 2, 180, 60));
 		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 240, 60));
 		$this->addFrontSystem(new HeavyPlasma(2, 8, 5, 300, 360));
 		$this->addFrontSystem(new HeavyPlasma(2, 8, 5, 0, 60));
 		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 300, 120));
-		$this->addFrontSystem(new NexusACIDS(2, 6, 2, 300, 180));
+		$this->addFrontSystem(new NexusCIDS(2, 6, 2, 300, 180));
                 
         $this->addAftSystem(new Thruster(2, 13, 0, 4, 2));
         $this->addAftSystem(new Thruster(2, 13, 0, 4, 2));

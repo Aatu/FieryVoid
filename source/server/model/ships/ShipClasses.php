@@ -202,9 +202,9 @@ class BaseShip {
             if(($this->faction == "Pak'ma'ra") && (!($this instanceof FighterFlight))	){
                 return $this->doPakmaraInitiativeBonus($gamedata);
             }
-//			if(($this->faction == "Gaim") && ($this instanceOf gaimMoas)){  //GTS
-//                return $this->doGaimInitiativeBonus($gamedata);
-//            }
+			if(($this->faction == "Gaim") && ($this instanceOf gaimMoas)){  //GTS
+                return $this->doGaimInitiativeBonus($gamedata);
+            }
             return $this->iniativebonus;
         }
         
@@ -369,7 +369,7 @@ class BaseShip {
 
 
 		//GTS
-		/*
+		
         private function doGaimInitiativeBonus($gamedata){
 
         $mod = 0;
@@ -396,7 +396,6 @@ class BaseShip {
         //    debug::log($this->phpclass."- bonus: ".$mod);
         return $this->iniativebonus + $mod*5;
     }
-	*/
 
 	
 	/*saves individual notes systems might have generated*/

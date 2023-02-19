@@ -1,21 +1,22 @@
 <?php
-class Soska extends BaseShip{
+class KoshaEarlyAM extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 575;
+	$this->pointCost = 500;
 		$this->faction = "Kor-Lyan";
 //	$this->faction = "Custom Ships";
-        $this->phpclass = "Soska";
-        $this->imagePath = "img/ships/korlyan_soska.png";
-        $this->shipClass = "Soska Missile Cruiser";
-			$this->occurence = "uncommon";
+        $this->phpclass = "KoshaEarlyAM";
+        $this->imagePath = "img/ships/korlyan_koshaEarly.png";
+        $this->shipClass = "Kosha Light Cruiser (early)";
+			$this->occurence = "common";
 			$this->variantOf = 'Kosha Light Cruiser';
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; //img has 200px per side
+ 		$this->unofficial = 'S'; //design released after AoG demise
 
-		$this->isd = 2230;
+		$this->isd = 2190;
         $this->fighters = array("assault shuttles"=>2);
 
 	    $this->notes = 'Atmospheric Capable.';
@@ -31,16 +32,16 @@ class Soska extends BaseShip{
         $this->iniativebonus = 0;
 
         //ammo magazine itself (AND its missile options)
-        $ammoMagazine = new AmmoMagazine(80); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
+        $ammoMagazine = new AmmoMagazine(60); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
         $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 80); //add full load of basic missiles
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 60); //add full load of basic missiles
         $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
         
-        $this->addPrimarySystem(new Reactor(5, 15, 0, 2));
+        $this->addPrimarySystem(new Reactor(5, 15, 0, 0));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 14, 4, 5));
         $this->addPrimarySystem(new Engine(5, 18, 0, 8, 4));
@@ -48,22 +49,22 @@ class Soska extends BaseShip{
    
         $this->addFrontSystem(new Thruster(4, 8, 0, 2, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 2, 1));
-        $this->addFrontSystem(new AmmoMissileRackL(3, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 360));
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 60));
         $this->addFrontSystem(new MultiDefenseLauncher(2, 'D', 270, 90, false));
-        $this->addFrontSystem(new AmmoMissileRackL(3, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new ParticleCannon(3, 8, 7, 0, 60));
 
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
-        $this->addAftSystem(new ReloadRack(3, 9));
-		
+        $this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 120, 240, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+
         $this->addLeftSystem(new MultiDefenseLauncher(2, 'D', 180, 360, false));
-        $this->addLeftSystem(new AmmoMissileRackL(3, 0, 0, 240, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addLeftSystem(new AmmoMissileRackS(3, 0, 0, 240, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addLeftSystem(new Thruster(4, 15, 0, 4, 3));
 
         $this->addRightSystem(new MultiDefenseLauncher(2, 'D', 0, 180, false));
-        $this->addRightSystem(new AmmoMissileRackL(3, 0, 0, 0, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addRightSystem(new AmmoMissileRackS(3, 0, 0, 0, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addRightSystem(new Thruster(4, 15, 0, 4, 4));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -84,7 +85,7 @@ class Soska extends BaseShip{
 			),
 			1=> array(
 					4 => "Thruster",
-					7 => "Class-S Missile Rack",
+					7 => "Particle Cannon",
 					8 => "Class-D Missile Launcher",
 					9 => "Standard Particle Beam",
 					18 => "Structure",
@@ -92,20 +93,20 @@ class Soska extends BaseShip{
 			),
 			2=> array(
 					7 => "Thruster",
-					9 => "Reload Rack",
+					9 => "Class-S Missile Rack",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
 					4 => "Thruster",
-					7 => "Class-L Missile Rack",
+					7 => "Class-S Missile Rack",
 					8 => "Class-D Missile Launcher",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					4 => "Thruster",
-					7 => "Class-L Missile Rack",
+					7 => "Class-S Missile Rack",
 					8 => "Class-D Missile Launcher",
 					18 => "Structure",
 					20 => "Primary",
