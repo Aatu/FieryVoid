@@ -400,7 +400,7 @@ class ShipSystem {
         return $totalDamage;    
     }
     
-	
+
     public function isDestroyed($turn = false){
 	    /*system is destroyed if it was destroyed directly, up to indicated turn*/
 	    /*or if it's Structure system is destroyed AT LEAST ONE TURN EARLIER*/
@@ -412,8 +412,14 @@ class ShipSystem {
 			$prevTurn = $currTurn-1; 
 		}
         
-        if ( (!($this instanceof Structure)) && $this->structureSystem && $this->structureSystem->isDestroyed($prevTurn))
-            return true;
+		/*18.02.2023: DO check base Structure for Structure, stopping at PRIMARY Structure :) */
+        //if ( (!($this instanceof Structure)) && $this->structureSystem && $this->structureSystem->isDestroyed($prevTurn)) return true;
+		if ( !($this instanceof Structure) ) { //not Structure
+			if ($this->structureSystem && $this->structureSystem->isDestroyed($prevTurn)) return true; //underlying Structure is destroyed
+		} else if ($this->location!=0) { //Structure (checked earlier) but not PRIMARY one
+			$primaryStruct = $this->unit->getStructureSystem(0);
+			if($primaryStruct && $primaryStruct->isDestroyed($prevTurn)) return true;
+		}
   
 		$isDestroyed=false;
         foreach ($this->damage as $damage){ //was actually destroyed up to indicated turn
@@ -424,7 +430,8 @@ class ShipSystem {
   
         return $isDestroyed;        
     }
-
+	
+	
 
     public function wasDestroyedThisTurn($turn){
         foreach ($this->damage as $damage){

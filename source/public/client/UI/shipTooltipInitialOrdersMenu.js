@@ -26,10 +26,6 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" }, 
         { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" }
     ];
-    /*lines replaced:    
-        { className: "addOEW", condition: [isEnemy, notFlight], action: addOEW, info: "Add OEW" }, 
-        { className: "removeOEW", condition: [isEnemy, notFlight], action: removeOEW, info: "Remove OEW" }, 
-    */
     
 
     ShipTooltipInitialOrdersMenu.prototype.getAllButtons = function () {

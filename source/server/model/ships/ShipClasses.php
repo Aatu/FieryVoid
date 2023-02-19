@@ -503,13 +503,9 @@ class BaseShip {
         $system->setId($i);
         $system->location = $loc;
         $system->setUnit($this);
-
-
-            $this->systems[$i] = $system;
-            
-            if ($system instanceof Structure)
-                $this->structures[$loc] = $system->id;
-        
+		$this->systems[$i] = $system;            
+		if ($system instanceof Structure)
+			$this->structures[$loc] = $system->id;
         }
         
         protected function addFrontSystem($system){
@@ -1187,14 +1183,14 @@ class BaseShip {
 
     public function isDestroyed($turn = false){
         foreach($this->systems as $system){
+			/*18.02.2023: now dying Reactor will destroy PRIMARY Structure as well, so no point in checking directly for Reactor destruction (this avoids infinite loops, too)
             if ($system instanceof Reactor && $system->isDestroyed($turn)){
                 return true;
             }
-
+			*/
             if ($system instanceof Structure && $system->location == 0 && $system->isDestroyed($turn)){
                 return true;
             }
-
         }
 
         return false;

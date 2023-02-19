@@ -381,6 +381,7 @@ class Reactor extends ShipSystem implements SpecialAbility {
 		//as effects are getting complicate - call them separately
 		$this->executeContainmentBreach($ship, $gamedata);	
 		$this->executeReactorFlux($ship, $gamedata);	
+		$this->destroyShipOnDestruction($ship, $gamedata); //destroy ship on Reactor destruction
 	}//endof function criticalPhaseEffects
 
 	public function executeReactorFlux($ship, $gamedata) {		
@@ -456,6 +457,59 @@ class Reactor extends ShipSystem implements SpecialAbility {
 			}
 		}
     } //endof function executeContainmentBreach
+	
+	
+
+	//destroy PRIMARY section if Reactor is destroyed
+	public function destroyShipOnDestruction($ship, $gamedata)
+    {
+		if (!$this->isDestroyed()) return; //Reactor is not destroyed, no need to act
+		if ($this->unit->isDestroyed()) return; //entire ship is already destroyed, no need to act
+	
+		//try to make actual attack to show in log - use Ramming Attack system!				
+		$rammingSystem = $ship->getSystemByName("RammingAttack");
+		if($rammingSystem){ //actually exists! - it should on every ship!	
+			//check whether firing order by RammingAttack vs own ship already exists!
+			$newFireOrder = null;
+			$fOrders = $rammingSystem->getFireOrders($gamedata->turn);
+			foreach($fOrders as $fOrderAct){
+				if($fOrderAct->targetid = $ship->id)
+				{
+					$newFireOrder = $fOrderAct;
+					break; //foreach
+				}
+			}		
+			if($newFireOrder){ //already exists, add to it!
+				$newFireOrder->pubnotes .= "<br>";
+			}else {//need actual new order!
+				$newFireOrder = new FireOrder(
+					-1, "normal", $ship->id, $ship->id,
+					$rammingSystem->id, -1, $gamedata->turn, 1, 
+					100, 100, 1, 1, 0,
+					0,0,'Reactor',10000
+				);
+				$newFireOrder->addToDB = true;
+				$rammingSystem->fireOrders[] = $newFireOrder;
+			}
+			$newFireOrder->pubnotes .= "Reactor destroyed - entire ship is immolated.";
+		}else{
+			$newFireOrder=null;
+		}
+
+		//destroy primary structure
+		$primaryStruct = $this->unit->getStructureSystem(0);
+		if($primaryStruct){			
+            $remaining = $primaryStruct->getRemainingHealth();
+            $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $primaryStruct->id, $remaining, 0, 0, -1, true, false, "", "Reactor");
+            $damageEntry->updated = true;
+            $primaryStruct->damage[] = $damageEntry;			
+			if($rammingSystem){ //add extra data to damage entry - so firing order can be identified!
+					$damageEntry->shooterid = $ship->id; //additional field
+					$damageEntry->weaponid = $rammingSystem->id; //additional field
+			}
+        }	
+    } //endof function criticalPhaseEffects	
+	
 	
 } //endof Reactor
 
