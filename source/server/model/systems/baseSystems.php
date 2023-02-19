@@ -508,7 +508,7 @@ class Reactor extends ShipSystem implements SpecialAbility {
 					$damageEntry->weaponid = $rammingSystem->id; //additional field
 			}
         }	
-    } //endof function criticalPhaseEffects	
+    } //endof function destroyShipOnDestruction
 	
 	
 } //endof Reactor
