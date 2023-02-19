@@ -202,9 +202,9 @@ class BaseShip {
             if(($this->faction == "Pak'ma'ra") && (!($this instanceof FighterFlight))	){
                 return $this->doPakmaraInitiativeBonus($gamedata);
             }
-//			if(($this->faction == "Gaim") && ($this instanceOf gaimMoas)){  //GTS
-//                return $this->doGaimInitiativeBonus($gamedata);
-//            }
+			if(($this->faction == "Gaim") && ($this instanceOf gaimMoas)){  //GTS
+                return $this->doGaimInitiativeBonus($gamedata);
+            }
             return $this->iniativebonus;
         }
         
@@ -369,9 +369,7 @@ class BaseShip {
 
 
 		//GTS
-		/*
-        private function doGaimInitiativeBonus($gamedata){
-
+	private function doGaimInitiativeBonus($gamedata){
         $mod = 0;
 
         if($gamedata->turn > 0 && $gamedata->phase >= 0 ){
@@ -395,8 +393,7 @@ class BaseShip {
         }
         //    debug::log($this->phpclass."- bonus: ".$mod);
         return $this->iniativebonus + $mod*5;
-    }
-	*/
+    }//end of doGaimInitiativeBonus
 
 	
 	/*saves individual notes systems might have generated*/
@@ -503,9 +500,13 @@ class BaseShip {
         $system->setId($i);
         $system->location = $loc;
         $system->setUnit($this);
+						   
+								 
 		$this->systems[$i] = $system;            
+
 		if ($system instanceof Structure)
 			$this->structures[$loc] = $system->id;
+			
         }
         
         protected function addFrontSystem($system){
@@ -1191,6 +1192,7 @@ class BaseShip {
             if ($system instanceof Structure && $system->location == 0 && $system->isDestroyed($turn)){
                 return true;
             }
+																									   
         }
 
         return false;
