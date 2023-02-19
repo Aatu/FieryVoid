@@ -17,6 +17,7 @@ class Shargoti extends BaseShip{
 
 		$this->notes .= "<br>Official Shargoti Battlecruiser with Gravity Nets replaced by Fusion Cannons"; 
 		$this->unofficial = true;
+ 		$this->unofficial = 'S'; //design released after AoG demise
 
 		
         $this->forwardDefense = 16;

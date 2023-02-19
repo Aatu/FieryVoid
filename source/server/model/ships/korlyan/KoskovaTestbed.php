@@ -46,6 +46,7 @@ class KoskovaTestbed extends BaseShip{
 		$this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
 		$this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
 //        $this->addFrontSystem(new FMissileRack(3, 'F', 300, 120, false));
+		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
         $this->addFrontSystem(new FMissileRack(3, 6, 0, 300, 120, false));
 
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
@@ -56,12 +57,12 @@ class KoskovaTestbed extends BaseShip{
 
         $this->addLeftSystem(new MultiDefenseLauncher(3, 'D', 240, 60, false));
         $this->addLeftSystem(new ProximityLaser(4, 6, 1, 240, 60));
-        $this->addLeftSystem(new FMissileRack(3, 'F', 180, 360, false));
+        $this->addLeftSystem(new FMissileRack(3, 6, 0, 180, 360, false));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
         $this->addRightSystem(new MultiDefenseLauncher(3, 'D', 300, 120, false));
         $this->addRightSystem(new ProximityLaser(4, 6, 1, 300, 120));
-        $this->addRightSystem(new FMissileRack(3, 'F', 0, 180, false));
+        $this->addRightSystem(new FMissileRack(3, 6, 0, 0, 180, false));
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

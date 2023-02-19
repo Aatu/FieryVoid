@@ -1,5 +1,5 @@
 <?php
-class Solyrn extends HeavyCombatVessel{
+class SolyrnAM extends HeavyCombatVessel{
   //Olympus equipped with actual working Ammunition Magazine
     
     function __construct($id, $userid, $name,  $slot){
@@ -7,7 +7,7 @@ class Solyrn extends HeavyCombatVessel{
         
         $this->pointCost = 650;
         $this->faction = "Kor-Lyan";
-        $this->phpclass = "Solyrn";
+        $this->phpclass = "SolyrnAM";
         $this->imagePath = "img/ships/korlyan_solyrn.png";
         $this->shipClass = "Solyrn Missile Destroyer";
 	    $this->isd = 2237;

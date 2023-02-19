@@ -15,7 +15,7 @@ class gaimMearc extends BaseShip{
 	    
         $this->isd = 2256;
 
-//		$this->notes = "Provides +5 initiative to all friendly Moas Gunships within 10 hexes.";
+		$this->notes = "Provides +5 initiative to all friendly Moas Gunships within 10 hexes.";
 
 		$this->forwardDefense = 15;
 		$this->sideDefense = 15;
@@ -29,8 +29,8 @@ class gaimMearc extends BaseShip{
 		$this->iniativebonus = 5;
 
 		$this->addPrimarySystem(new Reactor(4, 18, 0, 0));
-//		$this->addPrimarySystem(new CnC(5, 15, 0, 1));
-		$this->addPrimarySystem(new CnC(5, 15, 0, 0));
+		$this->addPrimarySystem(new CnC(5, 15, 0, 1));
+//		$this->addPrimarySystem(new CnC(5, 15, 0, 0));  //old C&C before missing Moas initiative added
 		$this->addPrimarySystem(new Scanner(4, 18, 8, 8));
 		$this->addPrimarySystem(new Engine(4, 14, 0, 10, 2));
 		$this->addPrimarySystem(new Hangar(4, 4));
