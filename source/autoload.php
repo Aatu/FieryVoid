@@ -2656,7 +2656,7 @@ spl_autoload_register(
 				'kaltiam' => '/server/model/ships/korlyan/KaltiAM.php',
 				'kolosk' => '/server/model/ships/korlyan/Kolosk.php',
 				'koloskearlyam' => '/server/model/ships/korlyan/KoloskEarlyAM.php',
-				'koloskovaam' => '/server/model/ships/korlyan/KoloskovaAM.php',
+				'koloskovaam' => '/server/model/ships/korlyan/koloskovaAM.php',
 				'koshaam' => '/server/model/ships/korlyan/KoshaAM.php',
 				'koshaearlyam' => '/server/model/ships/korlyan/KoshaEarlyAM.php',
 				'koskova' => '/server/model/ships/korlyan/Koskova.php',
