@@ -8,7 +8,7 @@ class Taloki extends StarBaseSixSections{
 		$this->faction = 'Kor-Lyan';
 		$this->phpclass = "Taloki";
 		$this->shipClass = "Taloki Starbase (2240)";
-		$this->fighters = array("assault shuttles"=>2, "normal"=>24);
+		$this->fighters = array("assault shuttles"=>4, "normal"=>24);
 
         $this->isd = 2240;
 		$this->shipSizeClass = 3; //Enormous is not implemented
@@ -35,16 +35,16 @@ class Taloki extends StarBaseSixSections{
 		$this->addPrimarySystem(new ReloadRack(4, 9));
 		$this->addPrimarySystem(new ReloadRack(4, 9));
 		$this->addPrimarySystem(new ReloadRack(4, 9));
-        $this->addPrimarySystem(new MultiDefenseLauncher(2, 'D', 0, 360, true));
-        $this->addPrimarySystem(new MultiDefenseLauncher(2, 'D', 0, 360, true));
-        $this->addPrimarySystem(new MultiDefenseLauncher(2, 'D', 0, 360, true));
-        $this->addPrimarySystem(new MultiDefenseLauncher(2, 'D', 0, 360, true));
+        $this->addPrimarySystem(new MultiDefenseLauncher(4, 'D', 0, 360, true));
+        $this->addPrimarySystem(new MultiDefenseLauncher(4, 'D', 0, 360, true));
+        $this->addPrimarySystem(new MultiDefenseLauncher(4, 'D', 0, 360, true));
+        $this->addPrimarySystem(new MultiDefenseLauncher(4, 'D', 0, 360, true));
 
 		$this->addFrontSystem(new Hangar(4, 14));
 		$this->addFrontSystem(new SubReactorUniversal(4, 20, 0, 0));
 		$this->addFrontSystem(new ParticleCannon(4, 8, 7, 270, 90));
 		$this->addFrontSystem(new ProximityLaser(4, 6, 6, 270, 90));
-		$this->addFrontSystem(new LimpetBoreBase(4, 5, 3, 270, 90));
+		$this->addFrontSystem(new DirectLimpetBoreBase(4, 5, 3, 270, 90));
 		$this->addFrontSystem(new ProximityLaser(4, 6, 6, 270, 90));
 		$this->addFrontSystem(new ParticleCannon(4, 8, 7, 270, 90));
 		
@@ -52,7 +52,7 @@ class Taloki extends StarBaseSixSections{
 		$this->addAftSystem(new SubReactorUniversal(4, 20, 0, 0));
 		$this->addAftSystem(new ParticleCannon(4, 8, 7, 90, 270));
 		$this->addAftSystem(new ProximityLaser(4, 6, 6, 90, 270));
-		$this->addAftSystem(new LimpetBoreBase(4, 5, 3, 90, 270));
+		$this->addAftSystem(new DirectLimpetBoreBase(4, 5, 3, 90, 270));
 		$this->addAftSystem(new ProximityLaser(4, 6, 6, 90, 270));
 		$this->addAftSystem(new ParticleCannon(4, 8, 7, 90, 270));
 		
@@ -63,10 +63,10 @@ class Taloki extends StarBaseSixSections{
         $this->addLeftFrontSystem(new StdParticleBeam(4, 4, 1, 240, 60));
         $this->addLeftFrontSystem(new StdParticleBeam(4, 4, 1, 240, 60));
         $this->addLeftFrontSystem(new StdParticleBeam(4, 4, 1, 240, 60));
-        $this->addLeftFrontSystem(new FMissileRack(3, 'F', 240, 60, true)); 
-        $this->addLeftFrontSystem(new FMissileRack(3, 'F', 240, 60, true)); 
-        $this->addLeftFrontSystem(new FMissileRack(3, 'F', 240, 60, true)); 
-        $this->addLeftFrontSystem(new FMissileRack(3, 'F', 240, 60, true)); 
+        $this->addLeftFrontSystem(new RangedFMissileRack(3, 6, 0, 240, 60, true)); 
+        $this->addLeftFrontSystem(new RangedFMissileRack(3, 6, 0, 240, 60, true)); 
+        $this->addLeftFrontSystem(new RangedFMissileRack(3, 6, 0, 240, 60, true)); 
+        $this->addLeftFrontSystem(new RangedFMissileRack(3, 6, 0, 240, 60, true)); 
 
 		$this->addLeftAftSystem(new SubReactorUniversal(4, 18, 0, 0));
         $this->addLeftAftSystem(new StdParticleBeam(4, 4, 1, 120, 300));
@@ -75,10 +75,10 @@ class Taloki extends StarBaseSixSections{
         $this->addLeftAftSystem(new StdParticleBeam(4, 4, 1, 120, 300));
         $this->addLeftAftSystem(new StdParticleBeam(4, 4, 1, 120, 300));
         $this->addLeftAftSystem(new StdParticleBeam(4, 4, 1, 120, 300));
-        $this->addLeftAftSystem(new FMissileRack(3, 'F', 120, 300, true)); 
-        $this->addLeftAftSystem(new FMissileRack(3, 'F', 120, 300, true)); 
-        $this->addLeftAftSystem(new FMissileRack(3, 'F', 120, 300, true)); 
-        $this->addLeftAftSystem(new FMissileRack(3, 'F', 120, 300, true)); 
+        $this->addLeftAftSystem(new RangedFMissileRack(3, 6, 0, 120, 300, true)); 
+        $this->addLeftAftSystem(new RangedFMissileRack(3, 6, 0, 120, 300, true)); 
+        $this->addLeftAftSystem(new RangedFMissileRack(3, 6, 0, 120, 300, true)); 
+        $this->addLeftAftSystem(new RangedFMissileRack(3, 6, 0, 120, 300, true)); 
 
 		$this->addRightFrontSystem(new SubReactorUniversal(4, 18, 0, 0));
         $this->addRightFrontSystem(new StdParticleBeam(4, 4, 1, 300, 120));
@@ -87,10 +87,10 @@ class Taloki extends StarBaseSixSections{
         $this->addRightFrontSystem(new StdParticleBeam(4, 4, 1, 300, 120));
         $this->addRightFrontSystem(new StdParticleBeam(4, 4, 1, 300, 120));
         $this->addRightFrontSystem(new StdParticleBeam(4, 4, 1, 300, 120));
-        $this->addRightFrontSystem(new FMissileRack(3, 'F', 300, 120, true)); 
-        $this->addRightFrontSystem(new FMissileRack(3, 'F', 300, 120, true)); 
-        $this->addRightFrontSystem(new FMissileRack(3, 'F', 300, 120, true)); 
-        $this->addRightFrontSystem(new FMissileRack(3, 'F', 300, 120, true)); 
+        $this->addRightFrontSystem(new RangedFMissileRack(3, 6, 0, 300, 120, true)); 
+        $this->addRightFrontSystem(new RangedFMissileRack(3, 6, 0, 300, 120, true)); 
+        $this->addRightFrontSystem(new RangedFMissileRack(3, 6, 0, 300, 120, true)); 
+        $this->addRightFrontSystem(new RangedFMissileRack(3, 6, 0, 300, 120, true)); 
 
 		$this->addRightAftSystem(new SubReactorUniversal(4, 18, 0, 0));
         $this->addRightAftSystem(new StdParticleBeam(4, 4, 1, 60, 240));
@@ -99,19 +99,19 @@ class Taloki extends StarBaseSixSections{
         $this->addRightAftSystem(new StdParticleBeam(4, 4, 1, 60, 240));
         $this->addRightAftSystem(new StdParticleBeam(4, 4, 1, 60, 240));
         $this->addRightAftSystem(new StdParticleBeam(4, 4, 1, 60, 240));
-        $this->addRightAftSystem(new FMissileRack(3, 'F', 60, 240, true)); 
-        $this->addRightAftSystem(new FMissileRack(3, 'F', 60, 240, true)); 
-        $this->addRightAftSystem(new FMissileRack(3, 'F', 60, 240, true)); 
-        $this->addRightAftSystem(new FMissileRack(3, 'F', 60, 240, true)); 
+        $this->addRightAftSystem(new RangedFMissileRack(3, 6, 0, 60, 240, true)); 
+        $this->addRightAftSystem(new RangedFMissileRack(3, 6, 0, 60, 240, true)); 
+        $this->addRightAftSystem(new RangedFMissileRack(3, 6, 0, 60, 240, true)); 
+        $this->addRightAftSystem(new RangedFMissileRack(3, 6, 0, 60, 240, true)); 
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 3, 130));
-        $this->addAftSystem(new Structure( 3, 130));
-        $this->addLeftFrontSystem(new Structure( 3, 150));
-        $this->addLeftAftSystem(new Structure( 3, 150));
-        $this->addRightFrontSystem(new Structure( 3, 150));
-        $this->addRightAftSystem(new Structure( 3, 150));        
-		$this->addPrimarySystem(new Structure( 4, 180));
+        $this->addFrontSystem(new Structure( 4, 150));
+        $this->addAftSystem(new Structure( 4, 136));
+        $this->addLeftFrontSystem(new Structure( 4, 180));
+        $this->addLeftAftSystem(new Structure( 4, 180));
+        $this->addRightFrontSystem(new Structure( 4, 180));
+        $this->addRightAftSystem(new Structure( 4, 180));        
+		$this->addPrimarySystem(new Structure( 4, 182));
 
 	//d20 hit chart
         $this->hitChart = array(
@@ -144,28 +144,28 @@ class Taloki extends StarBaseSixSections{
            		 ),
             31=> array(
                     3 => "Standard Particle Beam",
-                    7 => "Class-F Missile Rack",
+                    7 => "Stabilized Class-F Missile Rack",
 					8 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
                     3 => "Standard Particle Beam",
-                    7 => "Class-F Missile Rack",
+                    7 => "Stabilized Class-F Missile Rack",
 					8 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
                     3 => "Standard Particle Beam",
-                    7 => "Class-F Missile Rack",
+                    7 => "Stabilized Class-F Missile Rack",
 					8 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
                     3 => "Standard Particle Beam",
-                    7 => "Class-F Missile Rack",
+                    7 => "Stabilized Class-F Missile Rack",
 					8 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
