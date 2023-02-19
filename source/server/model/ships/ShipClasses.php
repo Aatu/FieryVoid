@@ -1576,15 +1576,17 @@ class BaseShip {
         //now choose system from chart...
         $roll = Dice::d($rngTotal);
         $name = '';
-        $isSystemKiller = $weapon->systemKiller;
+        //$isSystemKiller = $weapon->systemKiller;
         while ($name == ''){
             if (isset($hitChart[$roll])){
                 $name = $hitChart[$roll];
+				/* this ability was never used, I comment it out!
                 if($name == 'Structure' && $isSystemKiller) { //for systemKiller weapon, reroll Structure hits
                     $isSystemKiller = false; //don't do that again
                     $name = ''; //reset
                     $roll = Dice::d($rngTotal); //new location roll
                 }
+				*/
             }else{
                 $roll++;
                 if($roll>$rngTotal)//out of range already! return facing Structure... Should not happen.
@@ -1699,15 +1701,17 @@ class BaseShip {
 		//now choose system from chart...
 		$roll = Dice::d($rngTotal);
 		$name = '';
-		$isSystemKiller = $weapon->systemKiller;
+		//$isSystemKiller = $weapon->systemKiller;
 		while ($name == ''){
 			if (isset($hitChart[$roll])){
 				$name = $hitChart[$roll];
+				/* this ability was never used, commenting out
 				if($name == 'Structure' && $isSystemKiller) { //for systemKiller weapon, reroll Structure
 					$isSystemKiller = false; //don't do that again
 					$name = '';
 					$roll = Dice::d($rngTotal); //new location roll
 				}
+				*/
 			}else{
 				$roll++;
 				if($roll>$rngTotal)//out of range already!

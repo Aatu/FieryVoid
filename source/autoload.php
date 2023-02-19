@@ -37,8 +37,8 @@ spl_autoload_register(
                 'antophearly' => '/server/model/ships/brakiri/antophEarly.php',
                 'antophupgrade' => '/server/model/ships/brakiri/antophUpgrade.php',
                 'aoe' => '/server/model/weapons/AoE.php',
-                'apollo' => '/server/model/ships/EA/apollo.php',
-                'apollofull' => '/server/model/ships/EA/apolloFull.php',
+                //'apollo' => '/server/model/ships/EA/apollo.php',
+                //'apollofull' => '/server/model/ships/EA/apolloFull.php',
                 'armorreduced' => '/server/model/cricialClasses.php',
                 'artemisalpha' => '/server/model/ships/EA/artemisAlpha.php',
                 'artemisalpha_early' => '/server/model/ships/EA_old/artemisAlpha_early.php',
@@ -363,8 +363,8 @@ spl_autoload_register(
                 'gausscannon' => '/server/model/weapons/matter.php',
                 'glaive' => '/server/model/ships/centauri_old/glaive.php',
                 'glan' => '/server/model/ships/narn/glan.php',
-                'godalpha' => '/server/model/ships/EA/godAlpha.php',
-                'godbeta' => '/server/model/ships/EA/godBeta.php',
+                //'godalpha' => '/server/model/ships/EA/godAlpha.php',
+                //'godbeta' => '/server/model/ships/EA/godBeta.php',
                 'gorek' => '/server/model/ships/hurr/gorek.php',
                 'gorith' => '/server/model/ships/narn/gorith.php',
                 'govall' => '/server/model/ships/llort/govall.php',
@@ -415,11 +415,11 @@ spl_autoload_register(
                 'heavyrailgun' => '/server/model/weapons/matter.php',
                 'heavythentus' => '/server/model/ships/narn/HeavyThentus.php',
                 'hecatealpha' => '/server/model/ships/EA/hecateAlpha.php',
-                'hector' => '/server/model/ships/EA/hector.php',
-                'hectorfull' => '/server/model/ships/EA/hectorFull.php',
+                //'hector' => '/server/model/ships/EA/hector.php',
+                //'hectorfull' => '/server/model/ships/EA/hectorFull.php',
                 'helpmanager' => '/server/controller/HelpManager.php',
                 'hermes' => '/server/model/ships/EA/hermes.php',
-                'hephaestus' => '/server/model/ships/EA/hephaestus.php',
+                //'hephaestus' => '/server/model/ships/EA/hephaestus.php',
                 'heron' => '/server/model/ships/drazi_old/heron.php',
                 'heron1940' => '/server/model/ships/drazi_old/heron1940.php',
                 'hightemplar' => '/server/model/ships/orieni/hightemplar.php',
@@ -435,7 +435,7 @@ spl_autoload_register(
                 'hyperionassault' => '/server/model/ships/EA/hyperionAssault.php',
                 'hyperioncommand' => '/server/model/ships/EA/hyperionCommand.php',
 				'hyperioncommandpulse' => '/server/model/ships/EA/hyperionCommandPulse.php',
-                'hyperionmissile' => '/server/model/ships/EA/hyperionMissile.php',
+                //'hyperionmissile' => '/server/model/ships/EA/hyperionMissile.php',
                 'hyperionpatrol' => '/server/model/ships/EA/hyperionPatrol.php',
                 'hyperionpulse' => '/server/model/ships/EA/hyperionPulse.php',
                 'hyperionrail' => '/server/model/ships/EA/hyperionRail.php',
@@ -672,8 +672,8 @@ spl_autoload_register(
                 'octurion' => '/server/model/ships/centauri/octurion.php',
                 'offsetcoordinate' => '/server/model/OffsetCoordinate.php',
                 'olgata' => '/server/model/ships/dilgar/olgata.php',
-                'olympus' => '/server/model/ships/EA/olympus.php',
-                'olympusalpha' => '/server/model/ships/EA/olympusAlpha.php',
+                //'olympus' => '/server/model/ships/EA/olympus.php',
+                //'olympusalpha' => '/server/model/ships/EA/olympusAlpha.php',
                 'olympusalpha_early' => '/server/model/ships/EA_old/olympusAlpha_early.php',
                 'olympusbeta' => '/server/model/ships/EA/olympusBeta.php',
                 'omega' => '/server/model/ships/EA/omega.php',
@@ -685,7 +685,7 @@ spl_autoload_register(
                 'optine1966' => '/server/model/ships/centauri_old/optine1966.php',
                 'optine2005' => '/server/model/ships/centauri_old/optine2005.php',
                 'oracle' => '/server/model/ships/EA/oracle.php',
-                'oraclescout' => '/server/model/ships/EA/oracleScout.php',
+                //'oraclescout' => '/server/model/ships/EA/oracleScout.php',
                 'oraclescoutepsilon' => '/server/model/ships/EA/oracleScoutEpsilon.php',
                 'orak' => '/server/model/ships/hurr/orak.php',
                 'orano' => '/server/model/ships/hurr/orano.php',
@@ -827,7 +827,7 @@ spl_autoload_register(
                 'ruffian' => '/server/model/ships/raiders/ruffian.php',
                 'ruffian1972' => '/server/model/ships/raiders/ruffian1972.php',
                 'rutarian' => '/server/model/ships/centauri/rutarian.php',
-                'sagittarius' => '/server/model/ships/EA/sagittarius.php',
+                //'sagittarius' => '/server/model/ships/EA/sagittarius.php',
                 'sakar' => '/server/model/ships/centauri_old/sakar.php',
                 'sakar1980' => '/server/model/ships/centauri_old/sakar1980.php',
                 'sanctuarybase' => '/server/model/ships/raiders/sanctuarybase.php',
@@ -1055,7 +1055,7 @@ spl_autoload_register(
                 'throkan' => '/server/model/ships/drazi_raiders/throkan.php',
                 'thruster' => '/server/model/systems/baseSystems.php',
                 'thunderboltstarfury' => '/server/model/ships/EA/thunderboltStarfury.php',
-                'thunderboltstarfurynav' => '/server/model/ships/EA/thunderboltStarfuryNav.php',
+                //'thunderboltstarfurynav' => '/server/model/ships/EA/thunderboltStarfuryNav.php',
                 'tigara' => '/server/model/ships/minbari/tigara.php',
                 'tigarin' => '/server/model/ships/minbari/tigarin.php',
                 'tigerstarfury' => '/server/model/ships/EA/tigerStarfury.php',
@@ -1121,7 +1121,7 @@ spl_autoload_register(
                 'warbird' => '/server/model/ships/drazi/warbird.php',
                 'wardsat' => '/server/model/ships/deneth/wardSat.php',
                 'wareagle' => '/server/model/ships/drazi/wareagle.php',
-                'warlockmlpa' => '/server/model/ships/EA/warlockMlpa.php',
+                //'warlockmlpa' => '/server/model/ships/EA/warlockMlpa.php',
                 'wartalon' => '/server/model/ships/drazi/wartalon.php',
                 'watcher' => '/server/model/ships/deneth/watcher.php',
                 'watchtower' => '/server/model/ships/deneth/watchtower.php',
@@ -1221,7 +1221,7 @@ spl_autoload_register(
                 //'athena' => '/server/model/ships/EA/athena.php',  
 		    
                 //'warlockmlpafull' => '/server/model/ships/EA/warlockMlpaFull.php',  
-                'sagittariusfull' => '/server/model/ships/EA/sagittariusFull.php',   
+                //'sagittariusfull' => '/server/model/ships/EA/sagittariusFull.php',   
                 //'godalphafull' => '/server/model/ships/EA/godAlphaFull.php',   
                 //'godbetafull' => '/server/model/ships/EA/godBetaFull.php',
 		    
@@ -1897,12 +1897,12 @@ spl_autoload_register(
                 'orestesbeta' => '/server/model/ships/EA_old/orestesBeta.php',
                 'orionalpha' => '/server/model/ships/EA_old/OrionAlpha.php',
                 'orionbeta' => '/server/model/ships/EA_old/OrionBeta.php',
-                'oriongamma' => '/server/model/ships/EA/OrionGamma.php',
+                //'oriongamma' => '/server/model/ships/EA/OrionGamma.php',
                 'porcupinealpha' => '/server/model/ships/EA_old/porcupineAlpha.php',
                 'porcupinebeta' => '/server/model/ships/EA/porcupineBeta.php',
                 'raptorftr' => '/server/model/ships/EA_old/raptorFtr.php',
 //                'sabreftr' => '/server/model/ships/EA/sabreFtr.php',
-                'sagittariusalpha' => '/server/model/ships/EA/sagittariusAlpha.php',
+                //'sagittariusalpha' => '/server/model/ships/EA/sagittariusAlpha.php',
                 'shepherdalpha' => '/server/model/ships/EA_old/shepherdAlpha.php',
                 'shepherdbeta' => '/server/model/ships/EA_old/shepherdBeta.php',
                 'shepherdgamma' => '/server/model/ships/EA/shepherdGamma.php',
@@ -2178,7 +2178,7 @@ spl_autoload_register(
 				'wlcchlonashearpa' => '/server/model/ships/ZCustomChLonas/wlcChlonasHeArpa.php',    
 				'smallstarbasethreesections' => '/server/model/ships/ShipClasses.php', 
 				'wlcchlonasvalothar' => '/server/model/ships/ZCustomChLonas/wlcChlonasVaLothar.php',   		    
-				'oriondelta' => '/server/model/ships/EA/OrionDelta.php',
+				//'oriondelta' => '/server/model/ships/EA/OrionDelta.php',
 		    
 				//self-repair
 				'outputhalved' => '/server/model/cricialClasses.php',
@@ -2730,10 +2730,6 @@ spl_autoload_register(
 				
 
 
-				//TEMPORARY variable hangar size testing
-				//'variablehangarsize' => '/server/model/ships/customs/VariableHangarSize.php',
-				//'ltviper' => '/server/model/ships/customs/LtViper.php',
-				//'medviper' => '/server/model/ships/customs/medViper.php',
 				
 				// ~~~ AmmoMagazine ~~~ and related classes
                 		'ammomagazine' => '/server/model/systems/baseSystems.php', //ammo magazine itself
@@ -2765,9 +2761,10 @@ spl_autoload_register(
                 		'ammofighterrack' => '/server/model/weapons/missile.php',
 						
 						
-		    
+						//ships using new style launchers (and magazine of course) - by faction
+						
 						//EA
-                		'sagittariusam' => '/server/model/ships/EA/sagittariusAM.php', //ships using new style launchers (and magazine of course)
+                		'sagittariusam' => '/server/model/ships/EA/sagittariusAM.php', 
                 		'sagittariusalphaam' => '/server/model/ships/EA/sagittariusAlphaAM.php',
 						'olympusam' => '/server/model/ships/EA/olympusAM.php',
 						'olympusalphaam' => '/server/model/ships/EA/olympusAlphaAM.php',
@@ -2787,6 +2784,9 @@ spl_autoload_register(
                 		'godbetaam' => '/server/model/ships/EA/godBetaAM.php',
                 		'hermesam' => '/server/model/ships/EA/hermesAM.php',
                 		'hermesfastalphaam' => '/server/model/ships/EA/hermesFastAlphaAM.php',
+						
+						'thunderboltstarfuryam' => '/server/model/ships/EA/thunderboltStarfuryAM.php',
+						'badgerstarfuryam' => '/server/model/ships/EA/badgerStarfuryAM.php',
 						
 						//EA (early)
 						'hermesoldfastalpha' => '/server/model/ships/EA_old/hermesOldFastAlpha.php',
@@ -2894,19 +2894,21 @@ spl_autoload_register(
 						'hightemplaram' => '/server/model/ships/orieni/hightemplarAM.php',
 						
 						
-						//Thirdspace
-						'psychicfield' => '/server/model/weapons/specialWeapons.php',
-      			        'psychicfieldhandler' => '/server/model/weapons/specialWeapons.php',
-      			        'thirdspaceshieldprojection' =>	'/server/model/weapons/defensive.php',
-      			        'thirdspaceshieldprojector' =>	'/server/model/weapons/defensive.php',
-      			        'advancedsingularitydrive' => '/server/model/systems/baseSystems.php',
-      			        'psionicconcentrator' => '/server/model/weapons/specialWeapons.php',
-      			        'heavypsioniclance' => 	'/server/model/weapons/specialWeapons.php',
-      			        'psioniclance' => 	'/server/model/weapons/specialWeapons.php',
-      			        'psionictorpedo' => '/server/model/weapons/torpedo.php',    
-      			        'thirdspacebattleship' => '/server/model/ships/thirdspace/ThirdspaceBattleship.php',
-      			        'thirdspacecnc' => '/server/model/systems/baseSystems.php',		
-      			        'thirdspacefighter' => '/server/model/ships/thirdspace/ThirdspaceFighter.php',			
+						
+						
+				//new custom faction: Thirdspace
+				'psychicfield' => '/server/model/weapons/specialWeapons.php',
+				'psychicfieldhandler' => '/server/model/weapons/specialWeapons.php',
+				'thirdspaceshieldprojection' =>	'/server/model/weapons/defensive.php',
+				'thirdspaceshieldprojector' =>	'/server/model/weapons/defensive.php',
+				'advancedsingularitydrive' => '/server/model/systems/baseSystems.php',
+				'psionicconcentrator' => '/server/model/weapons/specialWeapons.php',
+				'heavypsioniclance' => 	'/server/model/weapons/specialWeapons.php',
+				'psioniclance' => 	'/server/model/weapons/specialWeapons.php',
+				'psionictorpedo' => '/server/model/weapons/torpedo.php',    
+				'thirdspacebattleship' => '/server/model/ships/thirdspace/ThirdspaceBattleship.php',
+				'thirdspacecnc' => '/server/model/systems/baseSystems.php',		
+				'thirdspacefighter' => '/server/model/ships/thirdspace/ThirdspaceFighter.php',			
 						
 				
 				//let's end this with unit enhancement class...		    
