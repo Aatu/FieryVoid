@@ -2910,7 +2910,8 @@ spl_autoload_register(
 						
 						'hightemplaram' => '/server/model/ships/orieni/hightemplarAM.php',
 						
-						
+						//Gaim						
+						'gaimkastafighteram' => '/server/model/ships/gaim/gaimKastaFighterAM.php',
 						
 						
 				//new custom faction: Thirdspace

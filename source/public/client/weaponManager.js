@@ -199,7 +199,7 @@ window.weaponManager = {
         if (ship.flight) {
             p = shipManager.systems.getFighterBySystem(ship, weapon.id);
         } else {
-            return false;
+            return weaponManager.checkOutOfAmmoShip(ship, weapon);
         }
 
         if (weapon.hasOwnProperty("ammunition")) {
@@ -235,7 +235,7 @@ window.weaponManager = {
 
 
 	//checks whether a shipborne weapon has ran out of ammo
-	checkOutOfAmmo: function checkOutOfAmmoShip(ship, weapon) {
+	checkOutOfAmmoShip: function checkOutOfAmmoShip(ship, weapon) {
         if (ship.flight) {
             return weaponManager.checkOutOfAmmo(ship, weapon);
         }
