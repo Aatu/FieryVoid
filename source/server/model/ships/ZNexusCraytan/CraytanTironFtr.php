@@ -38,12 +38,12 @@ class CraytanTironFtr extends FighterFlight{
 
             $fighter->addFrontSystem(new RogolonLtPlasmaGun(330, 30, 5, 2));
 			
-//			$torpedoLauncher = new NexusFighterTorpedoLauncher(1, 330, 30);
-//            $torpedoLauncher->firingModes = array( 1 => "LPB" );
-//            $torpedoLauncher->iconPath = "EWLightPlasmaMine.png";
-//           $torpedoLauncher->displayName = "Light Plasma Bomb"; //needed
-//            $torpedoLauncher->missileArray = array(1 => new NexusLtPlasmaBomb(330, 30));            	
-//            $fighter->addFrontSystem($torpedoLauncher);
+			$torpedoLauncher = new NexusFighterTorpedoLauncher(1, 330, 30);
+            $torpedoLauncher->firingModes = array( 1 => "LPB" );
+            $torpedoLauncher->iconPath = "EWLightPlasmaMine.png";
+           $torpedoLauncher->displayName = "Light Plasma Bomb"; //needed
+            $torpedoLauncher->missileArray = array(1 => new NexusLtPlasmaBomb(330, 30));            	
+            $fighter->addFrontSystem($torpedoLauncher);
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
             $this->addSystem($fighter);
