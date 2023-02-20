@@ -1583,7 +1583,8 @@ spl_autoload_register(
 //                'pakmarasimsalle2' => '/server/model/ships/pakmara/PakmaraSimSallE2.php',					
 				'plasmaweb' => '/server/model/weapons/customNexus.php',
 //				'plasmablast' => '/server/model/weapons/customNexus.php',
-//				'testgun' => '/server/model/weapons/customNexus.php',
+				'testgun' => '/server/model/weapons/customNexus.php',
+				'testgun2' => '/server/model/weapons/customNexus.php',
 				'testmissile' => '/server/model/weapons/customNexus.php',
 				'testmissile2' => '/server/model/weapons/customNexus.php',
 //                'plasmabattery' => '/server/model/systems/baseSystems.php',
@@ -2919,6 +2920,12 @@ spl_autoload_register(
       			        'thirdspacebattleship' => '/server/model/ships/thirdspace/ThirdspaceBattleship.php',
       			        'thirdspacecnc' => '/server/model/systems/baseSystems.php',		
       			        'thirdspacefighter' => '/server/model/ships/thirdspace/ThirdspaceFighter.php',			
+
+
+						//Satyra
+						'satyrashield' => '/server/model/weapons/customNexus.php',
+						'laserarray' => '/server/model/weapons/customNexus.php',
+      			        'satyramcvtest' => '/server/model/ships/Zsatyra/satyraMCVTest.php',		
 						
 				
 				//let's end this with unit enhancement class...		    

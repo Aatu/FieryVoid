@@ -865,6 +865,12 @@ var TestGun = function  TestGun(json, ship) {
 TestGun.prototype = Object.create(Weapon.prototype);
 TestGun.prototype.constructor =  TestGun;
 
+var TestGun2 = function  TestGun2(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TestGun2.prototype = Object.create(Weapon.prototype);
+TestGun2.prototype.constructor =  TestGun2;
+
 var LightParticleBeamFtr = function  LightParticleBeamFtr(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -1037,3 +1043,9 @@ var AmmoMissileRackF = function AmmoMissileRackF(json, ship) {
 };
 AmmoMissileRackF.prototype = Object.create(Ballistic.prototype);
 AmmoMissileRackF.prototype.constructor = AmmoMissileRackF;
+
+var LaserArray = function  LaserArray(json, ship) {
+    Weapon.call(this, json, ship);
+};
+LaserArray.prototype = Object.create(Weapon.prototype);
+LaserArray.prototype.constructor =  LaserArray;
