@@ -10,6 +10,7 @@ class SolyrnAM extends HeavyCombatVessel{
         $this->phpclass = "SolyrnAM";
         $this->imagePath = "img/ships/korlyan_solyrn.png";
         $this->shipClass = "Solyrn Missile Destroyer";
+        $this->limited = 10;
 	    $this->isd = 2237;
 
 		$this->canvasSize = 130; 

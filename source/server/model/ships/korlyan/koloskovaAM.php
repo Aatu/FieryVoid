@@ -8,7 +8,7 @@ class KoloskovaAM extends MediumShip{
 		$this->faction = "Kor-Lyan";
         $this->phpclass = "KoloskovaAM";
         $this->imagePath = "img/ships/korlyan_koloskova.png";
-        $this->shipClass = "Koloskova Battlecruiser";
+        $this->shipClass = "Koloskova Auxiliary Cruiser";
         $this->canvasSize = 85;
  		$this->unofficial = 'S'; //design released after AoG demise
 	    
