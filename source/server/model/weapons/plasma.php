@@ -1310,7 +1310,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		
 		private static $alreadyEngaged = array(); //units that were already engaged by a Plasma Web this turn (multiple Webs do not stack).
 
-    public $possibleCriticals = array(
+    protected $possibleCriticals = array(
             17=>array("OutputReduced1", "ReducedDamage"));  //Provding Outputreduced1 works then replace reduced range from TT with reduced damage for Offensive mode
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
