@@ -709,7 +709,7 @@ class CWShield extends Shield implements DefensiveSystem{
 //    public $baseOutput = 0; //base output, before boost
 	
 	
- 	public $possibleCriticals = array( //different than usual B5Wars shield
+ 	protected $possibleCriticals = array( //different than usual B5Wars shield
             16=>"OutputReduced1",
             23=>array("OutputReduced1", "OutputReduced1")
 	);

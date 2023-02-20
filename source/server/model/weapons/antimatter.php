@@ -30,7 +30,7 @@
 		// - for ranges above $rngNormalPenalty weapon suffers double range penalty
 		
 		//Antimatter weapons suffer distinct versions of criticals
-		public $possibleCriticals = array(14 => "ReducedRangeAntimatter", 19 => "ReducedDamageAntimatter", 25 => array("ReducedRangeAntimatter", "ReducedDamageAntimatter"));
+		protected $possibleCriticals = array(14 => "ReducedRangeAntimatter", 19 => "ReducedDamageAntimatter", 25 => array("ReducedRangeAntimatter", "ReducedDamageAntimatter"));
 		
 		
         public function setSystemDataWindow($turn){
@@ -441,7 +441,7 @@ class AntiprotonGun extends AntimatterWeapon{
 		
 		
 		//Range Reduced on Shredder would be quite awkward OR require additional custom coding - I went for givit it only ReducedDamage critical instead
-		public $possibleCriticals = array(14 => "ReducedDamageAntimatter", 25 => array("ReducedDamageAntimatter", "ReducedDamageAntimatter"));
+		protected $possibleCriticals = array(14 => "ReducedDamageAntimatter", 25 => array("ReducedDamageAntimatter", "ReducedDamageAntimatter"));
 		
        
         public $damageTypeArray = array(1=> 'Standard', 2=>'Raking', 3=>'Piercing');

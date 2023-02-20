@@ -19,19 +19,98 @@ class WeaponEM  {
 }
 
 
+class PlasmaStream extends Plasma{
+	public $name = "plasmaStream";
+	public $displayName = "Plasma Stream";
+	
+	public $animation = "laser";
+	public $priority = 2; //early, due to armor reduction effect
+		        
+	public $raking = 5;
+	public $loadingtime = 2;
+	public $rangeDamagePenalty = 1;	
+	public $rangePenalty = 1;
+	public $fireControl = array(-4, 2, 2); // fighters, <=mediums, <=capitals 
+	
+	public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Plasma"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+		public $firingModes = array(
+			1 => "Raking"
+		);
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		if ( $maxhealth == 0 ) $maxhealth = 9;
+		if ( $powerReq == 0 ) $powerReq = 7;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+        
+	
+	public function setSystemDataWindow($turn){		
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) { //Plasma class covers basic Plasma properties
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+	    $this->data["Special"] .= "Reduces armor of systems hit.";	
+	    $this->data["Special"] .= "<br>Does not ignore already pierced armor (eg. every rake needs to pierce armor anew, even to the same location).";
+	}
+	
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+		if (!$system->advancedArmor){//advanced armor prevents effect 
+			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
+			$crit->updated = true;
+			$crit->inEffect = true; //in effect immediately, affecting further damage in the same turn!
+			$system->criticals[] =  $crit;			
+			//and previous turn crit - to be NOT saved, but so crit is recognized as
+		}
+	}
+	
+	protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
+    {
+		parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+		$fireOrder->armorIgnored = array(); //clear armorIgnored array - next rake should be met with full armor value!
+	}
+	
+	public function getDamage($fireOrder){        return Dice::d(10,3)+4;   }
+	public function setMinDamage(){     $this->minDamage = 7 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 34 ;      }
+}//endof class PlasmaStream
+
+
+class DualPlasmaStream extends PlasmaStream{
+	public $name = "DualPlasmaStream";
+	public $displayName = "Dual Plasma Stream";
+	public $iconPath = "DualPlasmaStream.png"; 	
+	
+	//only properties differing form single Plasma Stream
+	public $rangeDamagePenalty = 2;	
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		if ( $maxhealth == 0 ) $maxhealth = 10;
+		if ( $powerReq == 0 ) $powerReq = 10;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+	
+		
+	public function getDamage($fireOrder){        return Dice::d(10,6)+8;   }
+	public function setMinDamage(){     $this->minDamage = 14;     }
+	public function setMaxDamage(){     $this->maxDamage = 68;      }
+	
+}//endof class DualPlasmaStream
+
+
+
+
+/* Plasma Streams reworked to be animated closer to regular Plasma!
 class PlasmaStream extends Raking{
 	public $name = "plasmaStream";
 	public $displayName = "Plasma Stream";
 	
 	public $animation = "laser";
 	public $animationColor = array(75, 250, 90);
-	/*
-	public $trailColor = array(75, 250, 90);
-	public $projectilespeed = 20;
-	public $animationWidth = 3;
-	public $animationExplosionScale = 0.25;
-	public $trailLength = 400;
-	*/
 	public $priority = 2; //early, due to armor reduction effect
 		        
 	public $raking = 5;
@@ -83,8 +162,8 @@ class PlasmaStream extends Raking{
 	}
 	
 	public function getDamage($fireOrder){        return Dice::d(10,3)+4;   }
-	public function setMinDamage(){     $this->minDamage = 7 ;/*- $this->dp;*/      }
-	public function setMaxDamage(){     $this->maxDamage = 34 /*- $this->dp*/;      }
+	public function setMinDamage(){     $this->minDamage = 7 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 34 ;      }
 }//endof class PlasmaStream
 
 
@@ -92,15 +171,7 @@ class DualPlasmaStream extends Raking{
 	public $name = "DualPlasmaStream";
 	public $displayName = "Dual Plasma Stream";
 	public $iconPath = "DualPlasmaStream.png"; 	
-	/*
-	public $animation = "beam";
-	public $animationColor = array(75, 250, 90);
-	public $trailColor = array(75, 250, 90);
-	public $projectilespeed = 20;
-	public $animationWidth = 4;
-	public $animationExplosionScale = 0.30;
-	public $trailLength = 400;
-	*/
+	
 	public $priority = 2;
 		        
 	public $raking = 5;
@@ -145,6 +216,7 @@ class DualPlasmaStream extends Raking{
 	public function setMaxDamage(){     $this->maxDamage = 68;      }
 	
 }//endof class DualPlasmaStream
+*/
 
 
 class ShockCannon extends Weapon{
@@ -833,7 +905,7 @@ class CommDisruptor extends Weapon{
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
    	   
 	
- 	public $possibleCriticals = array( //no point in damage reduced crit
+ 	protected $possibleCriticals = array( //no point in damage reduced crit
             14=>"ReducedRange"
 	);
 	
@@ -932,7 +1004,7 @@ class CommJammer extends Weapon{
         public $animationWidth2 = 0.5;
 	*/
 	
- 	public $possibleCriticals = array( //no point in damage reduced crit
+ 	protected $possibleCriticals = array( //no point in damage reduced crit
             14=>"ReducedRange"
 	);
 	
@@ -1026,7 +1098,7 @@ class SensorSpear extends Weapon{
         public $animationWidth2 = 0.5;
 	*/
 	
- 	public $possibleCriticals = array( //no point in damage reduced crit
+ 	protected $possibleCriticals = array( //no point in damage reduced crit
             14=>"ReducedRange"
 	);
 	
@@ -1344,7 +1416,7 @@ class SparkField extends Weapon implements DefensiveSystem{
 	protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by SparkFieldHandler!
 	
 	
- 	public $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
+ 	protected $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
             14=>"ReducedDamage"
 	);
 	
@@ -2237,7 +2309,7 @@ class RammingAttack extends Weapon{
 
 	private $gamedata = null; //gamedata is needed in places normally unavailable - this variable will be filled before any calculations happen!
 	
-	 public $possibleCriticals = array(); //shouldn't be hit ever, but if it is, should not suffer any criticals
+	 protected $possibleCriticals = array(); //shouldn't be hit ever, but if it is, should not suffer any criticals
 	
 	//preventing double ramming
 	private $alreadyRammed = array();
@@ -4356,7 +4428,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 	protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by PsychicField handler!
 	
 	
- /*	public $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
+ /*	protected $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
  //           14=>"ReducedDamage"
 	);  Should this have a crit? */
 	

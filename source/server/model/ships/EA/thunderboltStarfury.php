@@ -10,6 +10,7 @@ class ThunderboltStarfury extends FighterFlight{
         $this->shipClass = "Starfury: Thunderbolt Heavy flight";
         $this->imagePath = "img/ships/thunderboltStarfury.png";
         $this->customFtrName = "Thunderbolt";
+			$this->variantOf = 'OBSOLETE'; //awaiting to be deleted after it's no longer present in games
 		
         $this->isd = 2259;
         $this->notes = 'Needs updated hangars to handle.';
