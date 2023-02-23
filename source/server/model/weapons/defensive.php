@@ -618,7 +618,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 			$this->iconPath = 'TrekShieldProjector' . $side . '.png';
 			parent::__construct($armor, $maxhealth, $power, $rating, $startArc, $endArc);
 			$this->baseOutput = $rating;
-			$this->maxBoostLevel = $rating; //maximum double effect		
+			$this->maxBoostLevel = $rating + 2; //maximum double effect	+ 2	
 		}
 		
 		

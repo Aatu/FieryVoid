@@ -4625,13 +4625,13 @@ class PsychicFieldHandler{
         public $animationExplosionScale = 0.15;
 */
         public $intercept = 0;
-        public $loadingtime = 2;
+        public $loadingtime = 3;
         public $raking = 20;
         public $addedDice;
         public $priority = 2;
 
         public $boostable = true;
-        public $boostEfficiency = 6;
+        public $boostEfficiency = 0;
         public $maxBoostLevel = 3;
 
         public $firingModes = array(
@@ -4639,7 +4639,7 @@ class PsychicFieldHandler{
         );
 
         public $rangePenalty = 0.25;
-        public $fireControl = array(null, 5, 7); // fighters, <mediums, <capitals
+        public $fireControl = array(null, 6, 8); // fighters, <mediums, <capitals
         //private $damagebonus = 10;
 
         public $damageType = "Raking"; 
@@ -4657,8 +4657,9 @@ class PsychicFieldHandler{
                 $this->data["Special"] .= '<br>';
             } 
             //Raking(20) is already described in Raking class
-            $this->data["Special"] .= "Uninterceptable.";  
-            $this->data["Special"] .= "<br>Can be boosted for increased dmg output (+2d10 per 6 power added, up to 3 times).";
+            $this->data["Special"] .= "Can fire every 3 turns.";             
+            $this->data["Special"] .= "<br>Uninterceptable.";  
+            $this->data["Special"] .= "<br>Can be boosted using EW for increased dmg output (+3d10 per point of EW used, up to 3 times).";
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";            
             $this->data["Boostlevel"] = $boost;
         }
@@ -4670,7 +4671,7 @@ class PsychicFieldHandler{
                 $maxhealth = 20;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 10;
+                $powerReq = 12;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -4679,13 +4680,13 @@ class PsychicFieldHandler{
             $add = 0;
             switch($this->getBoostLevel($turn)){
                 case 1:
-                    $add = 2;
+                    $add = 3;
                     break;
                 case 2:
-                    $add = 4;
+                    $add = 6;
                     break;
                 case 3:
-                    $add = 6;
+                    $add = 9;
                     break;
 
                 default:
@@ -4736,13 +4737,13 @@ class PsychicFieldHandler{
         public function setMinDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->minDamage = 8 + ($boost * 2) + 45;
+            $this->minDamage = 8 + ($boost * 3) + 45;
         }   
 
         public function setMaxDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->maxDamage = 80 + ($boost * 20) + 45;
+            $this->maxDamage = 80 + ($boost * 30) + 45;
         }  
    } //end of class HeavyPsionicLance
    
@@ -4767,8 +4768,8 @@ class PsionicLance extends Raking{
         public $priority = 4;
 
         public $boostable = true;
-        public $boostEfficiency = 3;
-        public $maxBoostLevel = 3;
+        public $boostEfficiency = 0;
+        public $maxBoostLevel = 2;
 
         public $firingModes = array(
             1 => "Raking"
@@ -4792,9 +4793,9 @@ class PsionicLance extends Raking{
             }else{
                 $this->data["Special"] .= '<br>';
             } 
-            //Raking(20) is already described in Raking class
+            //Raking(15) is already described in Raking class
             $this->data["Special"] .= "Uninterceptable.";              
-            $this->data["Special"] .= '<br>Can be boosted for increased dmg output (+1d10 per 3 power added, up to 3 times).';
+            $this->data["Special"] .= '<br>Can be boosted with EW for increased dmg output (+2d10 per point of EW used, up to 2 times).';
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";               
             $this->data["Boostlevel"] = $boost;
         }
@@ -4815,14 +4816,14 @@ class PsionicLance extends Raking{
             $add = 0;
             switch($this->getBoostLevel($turn)){
                 case 1:
-                    $add = 1;
-                    break;
-                case 2:
                     $add = 2;
                     break;
-                case 3:
-                    $add = 3;
+                case 2:
+                    $add = 4;
                     break;
+    /*            case 3:
+                    $add = 3;
+                    break;   */
 
                 default:
                     break;
@@ -4872,13 +4873,13 @@ class PsionicLance extends Raking{
         public function setMinDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->minDamage = 3 + ($boost * 1) + 25;
+            $this->minDamage = 3 + ($boost * 2) + 25;
         }   
 
         public function setMaxDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->maxDamage = 30 + ($boost * 10) + 25;
+            $this->maxDamage = 30 + ($boost * 20) + 25;
         }  
    }
 

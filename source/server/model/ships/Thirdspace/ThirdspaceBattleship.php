@@ -31,7 +31,7 @@ class ThirdspaceBattleship extends BaseShip{
        
 		$this->iniativebonus = 2 *5;        
         
-        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 169+8+4));
+        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 180+8+4));
         $this->addPrimarySystem(new ThirdspaceCnC(8, 32, 0, 0));
         $scanner = new Scanner(7, 28, 8, 15);
 		$scanner->markThirdspace();
@@ -46,13 +46,15 @@ class ThirdspaceBattleship extends BaseShip{
 		$projection->addProjector($projector);
 		$this->addFrontSystem($projector);		
 		$this->addFrontSystem($projection);
-        $this->addFrontSystem(new HeavyPsionicLance(6, 0, 12, 330, 30));
+        $this->addFrontSystem(new HeavyPsionicLance(6, 0, 0, 330, 30));
         $this->addFrontSystem(new PsionicLance(6, 0, 0, 300, 60));
         $this->addFrontSystem(new PsionicLance(6, 0, 0, 300, 60));
-        $this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 240, 60));
-        $this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 240, 60));
-        $this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 120));
-        $this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 120));           	          		
+        $this->addFrontSystem(new PsionicConcentrator(5, 0, 1, 240, 60));
+        $this->addFrontSystem(new PsionicConcentrator(5, 0, 2, 240, 60));
+        $this->addFrontSystem(new PsionicConcentrator(5, 0, 4, 300, 120));
+        $this->addFrontSystem(new PsionicConcentrator(5, 0, 3, 240, 60));        
+        $this->addFrontSystem(new PsionicConcentrator(5, 0, 5, 300, 120)); 
+        $this->addFrontSystem(new PsionicConcentrator(5, 0, 6, 300, 120));                 	          	
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));           
 			
