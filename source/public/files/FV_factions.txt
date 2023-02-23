@@ -440,8 +440,8 @@ In FV, they have been created as a Custom faction (with thanks to Amras Arfeinie
  - Thirdspace shield absorb all incoming damage in the arc that they cover (note, the rear shield has a 36- degree arc so can cover all directions).  Once these shields have been reduced to a rating 0 damage will start to be inflicted on their ships as usual, factoring in the usual modifiers provided by Advanced Armour.  At the end of the turn Shield Projectors will restore their respective shields by an amount based on their current rating.
  - Thirdspace have a number of Electromagnetic weapons, which typically deal a large amount of damage and can fire frequently.  Many also have additional effects on Younger races such as an increased critical hit/fighter dropout chance or a reduction in ship armour.
  - Thirdspace capital ships produce a passive Psychic Field which affects all enemies within range (except other Thirdspace aliens), this attack debilitates opponenets by reducing fighter initiative and hit chances for the following turn and decreasing hit chance or causing possible critical hits on ships.  The field effects Ancients to lesser degree than Younger races.
- - Their Psionic Lances can be boosted with EW during Initial Orders phase to deal increased damage that turn.
- - The Thirdspace aliens also use a flexible Psionic Concentrator weapon, which is effective against fighters as a single weapon or can combine two Concentrators to deliver a powerful anti-ship shot each turn.
+ - Thirdspace heavy weapons, Psionic Lances, can be boosted with EW during Initial Orders phase to significantly increase their damage. 
+ - The Thirdspace aliens also use a flexible Psionic Concentrator weapon, which is effective against fighters as a single weapon or two Concentrators can be combined to deliver a powerful anti-ship shot each turn.
  - Like the Ipsha, Thirdspace ships use a singularity reactor which produce a set amount of power, regardless of whether systems have been destroyed or not.  As Thirdspace ships utilise power management heavily, to boost a shield or EW, meaning they can continue to fight effectively even when taking heavy damage.
 
 
