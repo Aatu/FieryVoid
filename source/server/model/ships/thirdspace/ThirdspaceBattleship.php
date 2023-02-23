@@ -1,6 +1,6 @@
 <?php
 class ThirdspaceBattleship extends BaseShip{
-    
+     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
