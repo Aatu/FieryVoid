@@ -635,7 +635,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn); 
 			$this->data["Special"] = "Regenerates 5 health for the associated Shield per point of Projector rating at the end of each turn .";
-			$this->data["Special"] .= "<br>Can be boosted three times.";
+			$this->data["Special"] .= "<br>Can be boosted five times.";
 		}	
 		
 	    public function getOutputOnTurn($turn){
