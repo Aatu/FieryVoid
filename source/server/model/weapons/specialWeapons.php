@@ -4658,7 +4658,7 @@ class PsychicFieldHandler{
             } 
             //Raking(20) is already described in Raking class           
             $this->data["Special"] .= "<br>Uninterceptable.";  
-            $this->data["Special"] .= "<br>Can be boosted using EW for increased dmg output (+3d10 per point of EW used, up to 3 times).";
+            $this->data["Special"] .= "<br>Can be boosted up to 3 times using EW for increased dmg output (2d10+10 extra damage per point of EW used).";
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";            
             $this->data["Boostlevel"] = $boost;
         }
@@ -4679,13 +4679,13 @@ class PsychicFieldHandler{
             $add = 0;
             switch($this->getBoostLevel($turn)){
                 case 1:
-                    $add = 3;
+                    $add = 2;
                     break;
                 case 2:
-                    $add = 6;
+                    $add = 4;
                     break;
                 case 3:
-                    $add = 9;
+                    $add = 6;
                     break;
 
                 default:
@@ -4719,7 +4719,7 @@ class PsychicFieldHandler{
                         
         public function getDamage($fireOrder){
             $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
-            $dmg = Dice::d(10, (8 + $add)) +40;
+            $dmg = Dice::d(10, (8 + $add)) + ($add *5) + 40;
             return $dmg;
         }
 
@@ -4736,13 +4736,13 @@ class PsychicFieldHandler{
         public function setMinDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->minDamage = 8 + ($boost * 3) + 45;
+            $this->minDamage = 8 + ($boost * 12) + 40;
         }   
 
         public function setMaxDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->maxDamage = 80 + ($boost * 30) + 45;
+            $this->maxDamage = 80 + ($boost * 30) + 40;
         }  
    } //end of class HeavyPsionicLance
    
@@ -4855,7 +4855,7 @@ class PsionicLance extends Raking{
                        
         public function getDamage($fireOrder){
             $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
-            $dmg = Dice::d(10, (3 + $add)) +25;
+            $dmg = Dice::d(10, (3 + $add)) +30;
             return $dmg;
         }
 
@@ -4872,13 +4872,13 @@ class PsionicLance extends Raking{
         public function setMinDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->minDamage = 3 + ($boost * 2) + 25;
+            $this->minDamage = 3 + ($boost * 2) + 30;
         }   
 
         public function setMaxDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->maxDamage = 30 + ($boost * 20) + 25;
+            $this->maxDamage = 30 + ($boost * 20) + 30;
         }  
    }
 
