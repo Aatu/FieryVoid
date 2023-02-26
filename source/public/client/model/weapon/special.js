@@ -327,10 +327,14 @@ HeavyPsionicLance.prototype.initBoostableInfo = function () {
             this.data["Boostlevel"] = '0';
             break;
 	}
-	if (this.data.Boostlevel > 0) {
+	
+	
+	if (!window.weaponManager.isLoaded(this)) {
+		this.outputDisplay = window.weaponManager.isLoaded(this);
+	} else if (this.data.Boostlevel > 0) {
 		this.outputDisplay = this.data.Boostlevel;
 	} else {
-		this.outputDisplay = window.weaponManager.isLoaded(this); //'0' is not shown!
+		this.outputDisplay = '-'; //'0' is not shown!
 	}    
     
     return this;
