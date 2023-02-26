@@ -4656,8 +4656,7 @@ class PsychicFieldHandler{
             }else{
                 $this->data["Special"] .= '<br>';
             } 
-            //Raking(20) is already described in Raking class
-            $this->data["Special"] .= "Can fire every 3 turns.";             
+            //Raking(20) is already described in Raking class           
             $this->data["Special"] .= "<br>Uninterceptable.";  
             $this->data["Special"] .= "<br>Can be boosted using EW for increased dmg output (+3d10 per point of EW used, up to 3 times).";
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";            
