@@ -2759,6 +2759,7 @@ spl_autoload_register(
                 		'ammomissilep' => '/server/model/systems/baseSystems.php',
                 		'ammomissiled' => '/server/model/systems/baseSystems.php',
                 		'ammomissiles' => '/server/model/systems/baseSystems.php',
+                		'ammomissilei' => '/server/model/systems/baseSystems.php',
 						
                 		'ammomissilefb' => '/server/model/systems/baseSystems.php',
                 		'ammomissilefl' => '/server/model/systems/baseSystems.php',
