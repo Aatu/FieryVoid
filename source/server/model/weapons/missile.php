@@ -1035,7 +1035,7 @@ class AmmoMissileRackS extends Weapon{
     public $priority = 6;
     public $loadingtime = 2;
 	public $hidetarget = false;
-//	public $hidetargetArray = array();	  
+	  
 	
 	
 	
