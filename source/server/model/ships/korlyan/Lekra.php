@@ -39,15 +39,15 @@ class Lekra extends MediumShip{
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addFrontSystem(new StdParticleBeam(1, 4, 1, 240, 60));
-		$this->addFrontSystem(new LimpetBoreTorp(2, 5, 3, 240, 60));
+		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 240, 60));
         $this->addFrontSystem(new MultiDefenseLauncher(2, 'D', 270, 90, false));
-		$this->addFrontSystem(new LimpetBoreTorp(2, 5, 3, 300, 120));
+		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 300, 120));
         $this->addFrontSystem(new StdParticleBeam(1, 4, 1, 300, 120));
 		
         $this->addAftSystem(new Thruster(3, 14, 0, 5, 2));
-		$this->addAftSystem(new LimpetBoreTorp(2, 5, 3, 240, 60));
+		$this->addAftSystem(new DirectLimpetBore(2, 5, 3, 240, 60));
         $this->addAftSystem(new MultiDefenseLauncher(2, 'D', 90, 270, false));
-		$this->addAftSystem(new LimpetBoreTorp(2, 5, 3, 300, 120));
+		$this->addAftSystem(new DirectLimpetBore(2, 5, 3, 300, 120));
 	
         $this->addPrimarySystem(new Structure( 3, 48));
         

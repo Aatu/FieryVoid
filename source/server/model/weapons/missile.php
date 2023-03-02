@@ -519,7 +519,7 @@ class ReloadRack extends Weapon //ShipSystem
     private $rackExplosionDamage = 300; //how much damage will this weapon do in case of catastrophic explosion (80 missiles... that's devastating)
     private $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
 	
-		public $possibleCriticals = array(); //Reload Rack does not suffer any criticals (barring catastrophic explosion)
+		protected $possibleCriticals = array(); //Reload Rack does not suffer any criticals (barring catastrophic explosion)
 		
 	
     function __construct($armour, $maxhealth){

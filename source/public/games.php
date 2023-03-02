@@ -64,21 +64,19 @@ if (isset($_SESSION["user"])) {
        
 		
 
-		---------- <b>LATEST NEWS - January 2023</b> ----------
-	    <br><b>Derelict ships prevented from firing</b> - Initial phase will be blocked if derelict ship is trying to fire missiles.
-	    <br><b>Weapon icons refreshed</b> - a few weapon lines made more consistent
-	    <br><b>Engine data shows basic thrust rating</b> - useful for ships with multiple thrust sources (Dilgar, Trek)
-	    <br><b>Critical damage info missing fixed</b> - notably on Jammer and shields. If You see some more cases, report please!
-	    <br><b>Default game description modified</b> - now it shows options to delete, so if player ignores it, it should show ;)
-	    <br><b>Multislot functionality improved</b> - new slots should have proper deployment area, and resizing with buttons should affect them properly
-	    <br><b>Double ramming prevented</b> - if two units successfully ram each other, damage will be applied only once
-	    <br><b>Variable missile loads</b> - ready for fighters (for starters they can be found on Drazi Serpents)
-	    <br><b>Semi-custom ships</b> - selected ships classified as usable in "official only" games even though they are not official AoG designs 
-	    <br><b>Belt Alliance</b> - moved to their own directory
-	    <br><b><u>StarTrek Federation (TOS)</u></b> - released from Playtest status as Tier 2 faction! (after final round of polishing and balancing)
-	    <br><b>Critical effects lasting too long</b> - bug fixed
+		---------- <b>LATEST NEWS - February 2023</b> ----------
+	    <br><b><big><u>Kor-Lyan have arrived!</u></big></b> - courtesy of Geoffrey
+	    <br><b>Ammo Magazine for fighters</b> - EA, Gaim (and that's it!)
+	    <br><b>Plasma Streams visuals</b> - now they actually resemble a stream o plasma ;)
+	    <br><b>Ionizer visuals</b> - changed to bolt animation, in line with other Standard fighter weapons
+	    <br><b>Tethys missile boat corrected</b> - Aft launcher firing arc fixed
+	    <br><b>Advanced Sensors and DIST</b> - non-Advanced Sensors cannot disrupt Advanced Sensors any longer
+	    <br><b>Zombie Spark Fields fixed</b> - may fire for one more turn, then will cease 
+	    <br><b>Gaim Mearc is a proper command ship</b> - provides Ini to nearby Moas
+	    <br><b>Nexus polishing</b> - courtesy of Geoffrey
+	    <br><b>Escalation Wars polishing</b> - courtesy of Geoffrey
 	    
-	        
+<!--	        
 		 <br><br>---------- <b>update 11th of January - Fleet Checker</b> ---------- 
 	    <br><b>Options highlighted</b> - now enhancement entries representing regular options are highlighted as such (and Fleet Checker does not warn about them)
 	    <br><b>Non-combat units blocked</b> - Fleet Checker now checks non-combat ship presence (like for fixed defenses)
@@ -88,11 +86,11 @@ if (isset($_SESSION["user"])) {
 	    <br><b><u><big>Thirdspace</big></u> arrived</b> - custom faction by Douglas
 	    <br><b>Ammo Magazine for fighters</b> - Dilgar, Hurr
 	    <br><b>Vree and Pak'ma'ra updated</b> - courtesy of Douglas
-	    
+-->	    
 		
 	    
         <br><br><br>
-        Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>) whenever something weird happens</font></big>.
+        Enjoy and report BUGS on FB. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>)</big> <b>whenever something weird happens</b></font>.
 
         
 		

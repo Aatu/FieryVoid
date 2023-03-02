@@ -251,6 +251,30 @@ Fancy weapons - many Ipsha weapons have complicated effects or modes of fire. Ab
 Jumpsphere - Ipsha have only one official jump-capable ship, Scout Wheel. This limits their legal fleet builds for tournament/pickup battle. To allow greater flexibility in this area a plausible custom jumpship design was added, a Warsphere exchanging fighter hangar for a jump drive.
 
 
+KOR-LYAN KINGDOMS
+The Kor-Lyan specialize in ballistics, using them as their primary offensive and defensive weaponry. This specialization leads to the Kor-Lyan having several unique systems.
+Class-D Launcher - This is the main defensive system for the Kor-Lyan. It has three modes.
+     * Anti-missile missile: If the launcher remains unfired, it will provid a -30% intercept to any incoming ballistics.
+	 * Anti-fighter missile: This is the standard anti-fighter missile that provides a +45% to target fighters.
+	 * Chaff missile: This is fired at a target and if hit, the tartget receives a -15% to all weapons fire. Multiple chaff missiles are not cumulative.
+Class-F Launcher - F stands for flexible and can fire in three separate modes. NOTE: As of 13 February 2023, the F-Launcher can only fire basic missiles. This will be updated later.
+	 * Standard mode: This is equivalent to an S-Launcher and the default mode with a range of 20 hexes.
+	 * Long-range mode: When selected, the missile gains +15 hexes, but loses -10% fire control. 
+	 * Rapid-fire mode: The F-Launcher typically fires every other turn. However, it can fire every turn with a -5 hex and -10% penalty. It cannot fire in this mode the turn after firing in long-range mode.
+Proximity Laser - This deviates from the table top mode and will be upgraded at a future date. This is fired as a ballistic weapon, but hits as a laser during weapons fire originating from the launch hex.
+Limpet Bore Torpedo - This has been simplified from the table top version. Currently, this is fired during not-ballistic weapons fire, but is intercepted as a ballistic weapon. It can perform called shots 
+     without any penalties. Future updates will allow it to fire as a true ballistic weapon and perform called shots on non-facing systems.
+NOTE: Ballistic mines are currently not implemented.
+Semi-custom "early" units - A few key Kor-Lyan units are not available until the 2240s or 2250s. This can make fielding an accurate force difficult. The semi-custom versions are units that follow the example 
+     of the Toloki Starbase and replace the F-Launchers with L-Launchers. These early versions, using L-Launchers provide players an option to take these units and purchase  special missiles, which is not 
+	 currently possible with the F-Launchers.
+Shuttles - Like all Babylon 5 ships, Kor-Lyan ships receive a number of shuttles for no additional points. However, the Kor-Lyan have  the option to take these shuttles and arm them with two basic fighter 
+     missiles. The only cost is the missiles. Additionally, the Kor-Lyan can replace their standard shuttles with armed shuttles. The most common one has a single fighter gun and two missile hard points. An 
+	 uncommon variant removes the gun, but allows the armed shuttle to hold up to six basic fighter missiles. The Kor-Lyan player is under no obligation to take any of these in a match, unlike fighters with 
+	 the half filled hangars requirement.
+	 
+	 
+
 LLORT
 No very specific rules/technologies.
 It's worth noting that their ships are generally asymmetric and have atypical firing arcs and eclectic weapons sets.

@@ -42,8 +42,8 @@ class MerkulMissile extends FighterFlight{
 			$fighter->imagePath = "img/ships/korlyanArmedMerkul.png";
 			$fighter->iconPath = "img/ships/korlyanArmedMerkul_large.png";
 			
-            $fighter->addFrontSystem(new FighterMissileRack(3, 330, 30));
-            $fighter->addFrontSystem(new FighterMissileRack(3, 330, 30));
+            $fighter->addFrontSystem(new FighterMissileRack(6, 330, 30));
+//            $fighter->addFrontSystem(new FighterMissileRack(3, 330, 30));
 
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			

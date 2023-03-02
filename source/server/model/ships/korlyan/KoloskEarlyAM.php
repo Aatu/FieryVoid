@@ -1,5 +1,5 @@
 <?php
-class KoloskEarly extends BaseShip{
+class KoloskEarlyAM extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -7,13 +7,14 @@ class KoloskEarly extends BaseShip{
 	$this->pointCost = 825;
 		$this->faction = "Kor-Lyan";
 //	$this->faction = "Custom Ships";
-        $this->phpclass = "KoloskEarly";
+        $this->phpclass = "KoloskEarlyAM";
         $this->imagePath = "img/ships/korlyan_koskova2.png";
         $this->shipClass = "Kolosk Proximity Cruiser (early)";
 			$this->occurence = "uncommon";
 			$this->variantOf = 'Koskova Battlecruiser';
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; //img has 200px per side
+ 		$this->unofficial = 'S'; //design released after AoG demise
 
 		$this->isd = 2239;
         $this->fighters = array("assault shuttles"=>2);
@@ -61,15 +62,15 @@ class KoloskEarly extends BaseShip{
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 16, 0, 6, 2));
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
-        $this->addAftSystem(new MultiDefenseLauncher(3, 'D', 120, 300, false));
-        $this->addAftSystem(new MultiDefenseLauncher(3, 'D', 60, 240, false));
+        $this->addAftSystem(new MultiDefenseLauncher(2, 'D', 120, 300, false));
+        $this->addAftSystem(new MultiDefenseLauncher(2, 'D', 60, 240, false));
 
-        $this->addLeftSystem(new MultiDefenseLauncher(3, 'D', 0, 360, false));
+        $this->addLeftSystem(new MultiDefenseLauncher(4, 'D', 240, 60, false));
         $this->addLeftSystem(new ProximityLaser(4, 6, 6, 240, 60));
         $this->addLeftSystem(new AmmoMissileRackL(3, 0, 0, 180, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
-        $this->addRightSystem(new MultiDefenseLauncher(3, 'D', 0, 360, false));
+        $this->addRightSystem(new MultiDefenseLauncher(4, 'D', 300, 120, false));
         $this->addRightSystem(new ProximityLaser(4, 6, 6, 300, 120));
         $this->addRightSystem(new AmmoMissileRackL(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));

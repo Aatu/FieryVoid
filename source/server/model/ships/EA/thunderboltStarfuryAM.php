@@ -1,16 +1,15 @@
 <?php
-class ThunderboltStarfury extends FighterFlight{
+class ThunderboltStarfuryAM extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 80*6;
         $this->faction = "EA";
-        $this->phpclass = "ThunderboltStarfury";
+        $this->phpclass = "ThunderboltStarfuryAM";
         $this->shipClass = "Starfury: Thunderbolt Heavy flight";
         $this->imagePath = "img/ships/thunderboltStarfury.png";
         $this->customFtrName = "Thunderbolt";
-			$this->variantOf = 'OBSOLETE'; //awaiting to be deleted after it's no longer present in games
 		
         $this->isd = 2259;
         $this->notes = 'Needs updated hangars to handle.';
@@ -41,9 +40,19 @@ class ThunderboltStarfury extends FighterFlight{
             $fighter->imagePath = "img/ships/thunderboltStarfury.png";
             $fighter->iconPath = "img/ships/thunderboltStarfury_large.png";
 
-            $fighter->addFrontSystem(new FighterMissileRack(3, 330, 30));
+			//ammo magazine itself (AND its missile options)
+			$ammoMagazine = new AmmoMagazine(6); //pass magazine capacity - actual number of rounds, NOT number of salvoes
+			$fighter->addAftSystem($ammoMagazine); //fit to ship immediately
+			$ammoMagazine->addAmmoEntry(new AmmoMissileFB(), 0); //add basic missile as an option - but do NOT load any actual missiles at this moment - so weapon data is actually filled with _something_!
+			$this->enhancementOptionsEnabled[] = 'AMMO_FB';//add enhancement options for missiles - Class-FB
+			$this->enhancementOptionsEnabled[] = 'AMMO_FL';//add enhancement options for missiles - Class-FL
+			$this->enhancementOptionsEnabled[] = 'AMMO_FH';//add enhancement options for missiles - Class-FH
+			$this->enhancementOptionsEnabled[] = 'AMMO_FY';//add enhancement options for missiles - Class-FY
+			$this->enhancementOptionsEnabled[] = 'AMMO_FD';//add enhancement options for missiles - Class-FD
+
             $fighter->addFrontSystem(new GatlingPulseCannon(330, 30));
-            $fighter->addFrontSystem(new FighterMissileRack(3, 330, 30));
+			$fighter->addFrontSystem(new AmmoFighterRack(330, 30, $ammoMagazine, false)); //$startArc, $endArc, $magazine, $base
+			$fighter->addFrontSystem(new AmmoFighterRack(330, 30, $ammoMagazine, false)); //$startArc, $endArc, $magazine, $base
 		
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack	
             

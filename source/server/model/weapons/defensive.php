@@ -216,7 +216,7 @@
         public $damagePenalty = 0;
         public $damageType = "Standard"; 
         public $weaponClass = "Particle";
-     	public $possibleCriticals = array( //different than usual B5Wars weapon - simplification
+     	protected $possibleCriticals = array( //different than usual B5Wars weapon - simplification
             16=>"ForcedOfflineOneTurn"
 	);
 	    
@@ -386,7 +386,7 @@ class FtrShield extends Shield implements DefensiveSystem{
     public $boostable = false;
     public $baseOutput = 0; //base output, before boost
 		
- 	public $possibleCriticals = array( //irrelevant for fighter system
+ 	protected $possibleCriticals = array( //irrelevant for fighter system
             16=>"OutputReduced1"
 	);
 	
@@ -457,7 +457,7 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 		public $isTargetable = false; //cannot be targeted ever!
 	    public $iconPath = "TrekShieldProjection.png"; //overridden anyway - to indicate proper direction
 	    
-		public $possibleCriticals = array(); //no criticals possible
+		protected $possibleCriticals = array(); //no criticals possible
 		
 		//Shield Projections cannot be repaired at all!
 		public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -607,7 +607,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 	    public $baseOutput = 0; //base output, before boost
 	    
 		
-	    public $possibleCriticals = array(
+	    protected $possibleCriticals = array(
 	            19=>"OutputReduced1",
 	            28=>"OutputReduced2" );
 		

@@ -8,7 +8,7 @@ class Kalavar extends OSAT{
 		$this->faction = "Kor-Lyan";
         $this->phpclass = "Kalavar";
         $this->imagePath = "img/ships/korlyan_kalavar.png";
-        $this->shipClass = "Kalavar Orbital Satellite";
+        $this->shipClass = "Kalavar Orbital Satellite (2240)";
         $this->isd = 2240;
         
         $this->forwardDefense = 10;
@@ -28,9 +28,9 @@ class Kalavar extends OSAT{
         $this->addAftSystem(new Thruster(4, 6, 0, 0, 2));
         $this->addAftSystem(new ProximityLaser(3, 6, 6, 0, 180));
         
-        $this->addFrontSystem(new FMissileRack(3, 'F', 270, 90, true)); 
+        $this->addFrontSystem(new RangedFMissileRack(3, 6, 0, 270, 90, true)); 
         $this->addFrontSystem(new MultiDefenseLauncher(2, 'D', 0, 360, true));
-        $this->addFrontSystem(new FMissileRack(3, 'F', 270, 90, true)); 
+        $this->addFrontSystem(new RangedFMissileRack(3, 6, 0, 270, 90, true)); 
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         
@@ -41,7 +41,7 @@ class Kalavar extends OSAT{
             0=> array(
                     9 => "Structure",
                     11 => "2:Thruster",
-		    		13 => "1:Class-F Missile Rack",
+		    		13 => "1:Stabilized Class-F Missile Rack",
 		    		15 => "2:Proximity Laser",
                     17 => "Scanner",
                     19 => "Reactor",
