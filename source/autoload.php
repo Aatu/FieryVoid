@@ -2926,7 +2926,7 @@ spl_autoload_register(
 				'psionictorpedo' => '/server/model/weapons/torpedo.php',    
 				'thirdspacebattleship' => '/server/model/ships/thirdspace/ThirdspaceBattleship.php',
 				'thirdspacecnc' => '/server/model/systems/baseSystems.php',		
-				'thirdspacefighter' => '/server/model/ships/thirdspace/ThirdspaceFighter.php',			
+				'thirdspaceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceAttackCraft.php',			
 						
 				
 				//let's end this with unit enhancement class...		    
