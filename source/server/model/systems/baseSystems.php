@@ -3748,6 +3748,7 @@ class AmmoMissileTemplate{
 	public $noOverkill = false;
 	public $useOEW = false;
 	public $hidetarget = false;
+
 	
     function __construct(){}
 	
@@ -3823,6 +3824,7 @@ class AmmoMissileL extends AmmoMissileTemplate{
 	public $noOverkill = false;
     public $useOEW = false;
 	public $hidetarget = false;
+
 	
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {

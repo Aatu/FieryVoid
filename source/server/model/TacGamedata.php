@@ -523,12 +523,15 @@ class TacGamedata {
             for ($i = sizeof($system->fireOrders)-1; $i>=0; $i--){
                 $fire = $system->fireOrders[$i]; 
                 $weapon = $ship->getSystemById($fire->weaponid);
+                
                 if ($fire->turn == $this->turn && !$weapon->ballistic && $this->phase == 3){
                     unset($system->fireOrders[$i]);
                 }
                 if ($fire->turn == $this->turn && $weapon->ballistic && $this->phase == 1){
                     unset($system->fireOrders[$i]);
                 }
+               
+				$weapon->changeFiringMode($fire->firingMode);                 
 
                 if ($fire->turn == $this->turn && $weapon->hidetarget && $this->phase < 4 && $ship->userid != $this->forPlayer){
                     $fire->targetid = -1;
