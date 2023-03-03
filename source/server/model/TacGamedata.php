@@ -531,7 +531,7 @@ class TacGamedata {
                     unset($system->fireOrders[$i]);
                 }
                
-				$weapon->changeFiringMode($fire->firingMode);                 
+				$weapon->changeFiringMode($fire->firingMode); //Select the current mode so the correct variables are considered, important for Stealth missile.                
 
                 if ($fire->turn == $this->turn && $weapon->hidetarget && $this->phase < 4 && $ship->userid != $this->forPlayer){
                     $fire->targetid = -1;
