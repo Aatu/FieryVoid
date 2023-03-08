@@ -1033,7 +1033,7 @@ class AmmoMissileRackS extends Weapon{
     public $distanceRange = 60;
     public $firingMode = 1;
     public $priority = 6;
-    public $loadingtime = 2;
+    public $loadingtime = 2;						
 	
 	
 	protected $availableAmmoAlreadySet = false; //set to true if calling constructor from derived weapon that sets different ammo options
@@ -1084,6 +1084,7 @@ class AmmoMissileRackS extends Weapon{
 			$this->ammoClassesArray[] =  new AmmoMissileP();
 			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
 			$this->ammoClassesArray[] =  new AmmoMissileI(); 
+			$this->ammoClassesArray[] =  new AmmoMissileS();
 			$this->availableAmmoAlreadySet = true;
 		}
 	
@@ -1128,6 +1129,7 @@ class AmmoMissileRackS extends Weapon{
 		$this->minDamageArray = array();
 		$this->maxDamageArray = array();
 		$this->ammoClassesUsed = array();
+		$this->hidetargetArray = array();	
 		
 		//add data for all modes to arrays
 		$currMode = 0;
@@ -1168,6 +1170,7 @@ class AmmoMissileRackS extends Weapon{
 				$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
 				$this->minDamageArray[$currMode] = $currAmmo->minDamage;
 				$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
+				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;	
 			}
 		}
 			
@@ -1199,6 +1202,7 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->noOverkillArray = $this->noOverkillArray; 
 		$strippedSystem->minDamageArray = $this->minDamageArray; 
 		$strippedSystem->maxDamageArray = $this->maxDamageArray; 
+		$strippedSystem->hidetargetArray = $this->hidetargetArray;
 		return $strippedSystem;
 	} 
 	
