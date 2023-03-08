@@ -64,7 +64,7 @@ if (isset($_SESSION["user"])) {
        
 		
 
-		---------- <b>LATEST NEWS - February 2023</b> ----------
+		---------- <b>LATEST NEWS - March 2023</b> ----------
 	    <br><b>Shock Cannon fixed</b> - now it actually doesn't crash vs Advanced Armor
 	    <br><b>Minor fixes</b> - layouts, hit charts, weapon visuals and such
 	    <br><b>Thirdspace development</b> - courtesy of Douglas
