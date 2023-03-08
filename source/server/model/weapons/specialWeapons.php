@@ -262,7 +262,7 @@ class ShockCannon extends Weapon{
 
         //ignore armor; advanced armor halves effect (due to this weapon being Electromagnetic)
         public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
-			if (WeaponEM::isTargetEMResistant($ship,$system)){
+			if (WeaponEM::isTargetEMResistant($target,$system)){
 				$returnArmour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
 				$returnArmour = floor($returnArmour/2);
 				return $returnArmour;
