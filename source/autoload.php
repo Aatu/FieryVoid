@@ -2931,7 +2931,7 @@ spl_autoload_register(
 						//Satyra (Wolfgang campaign)
 						'satyrashield' => '/server/model/weapons/customNexus.php',
 						'laserarray' => '/server/model/weapons/customNexus.php',
-      			        'satyramcvtest' => '/server/model/ships/Zsatyra/satyraMCVTest.php',	
+      			        'satyramcvtest' => '/server/model/ships/Zsatyra/SatyraMCVTest.php',	
 	
 				//let's end this with unit enhancement class...		    
 				'enhancements' => '/server/model/ships/Enhancements.php'
