@@ -70,8 +70,8 @@ class Hephaestus extends SmallStarBaseFourSections{
 		$this->addRightSystem(new SMissileRack(4, 6, 0, 0, 180, true));
 		$this->addRightSystem(new StdParticleBeam(4, 4, 1, 0, 180));
 		$this->addRightSystem(new StdParticleBeam(4, 4, 1, 0, 180));
-        $this->addFrontSystem(new InterceptorMkI(4, 4, 1, 0, 180));        
-        $this->addFrontSystem(new InterceptorMkI(4, 4, 1, 0, 180));        
+        $this->addRightSystem(new InterceptorMkI(4, 4, 1, 0, 180));        
+        $this->addRightSystem(new InterceptorMkI(4, 4, 1, 0, 180));        
 
 		$this->addFrontSystem(new Structure( 4, 80));
 		$this->addAftSystem(new Structure( 4, 80));

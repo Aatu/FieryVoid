@@ -1,16 +1,16 @@
 <?php
-class ThirdspaceFighter extends LCV{ //Actually an LCV.
+class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 	/*Drakh Heavy Raider LCV*/
 	/*no EW restrictions*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 600;
-        $this->faction = "Thirdspace";
+    $this->faction = "Thirdspace";
 	$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
-	$this->phpclass = "ThirdspaceFighter";
-	$this->shipClass = "Thirdspace Fighter";
-	$this->imagePath = "img/ships/ThirdspaceFighter.png";
+	$this->phpclass = "ThirdspaceAttackCraft";
+	$this->shipClass = "Thirdspace Attack Craft";
+	$this->imagePath = "img/ships/ThirdspaceAttackCraft.png";
 	$this->canvasSize = 80;
 
 	$this->unofficial = true;
@@ -18,8 +18,8 @@ class ThirdspaceFighter extends LCV{ //Actually an LCV.
 	$this->advancedArmor = true; 
 	  
 	$this->agile = true;
-	$this->forwardDefense = 11;
-	$this->sideDefense = 13;
+	$this->forwardDefense = 10;
+	$this->sideDefense = 12;
 	$this->isd = 'Ancient';
 	    
 	$this->turncost = 0.25;
@@ -37,31 +37,31 @@ class ThirdspaceFighter extends LCV{ //Actually an LCV.
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
 	$this->addPrimarySystem(new ThirdspaceCnC(99, 99, 0, 0)); //C&C should be unhittable anyway
 		    
-    $this->addPrimarySystem(new AdvancedSingularityDrive(6, 15, 0, 23+4+5));
-	$sensors = new Scanner(6, 16, 4, 9);
-		$sensors->markAdvanced();
+    $this->addPrimarySystem(new AdvancedSingularityDrive(6, 16, 0, 20+4+3));
+	$sensors = new Scanner(5, 12, 4, 9);
+		$sensors->markThirdspace();
 		$this->addPrimarySystem($sensors);
-	$this->addPrimarySystem(new JumpEngine(5, 10, 4, 8));//Added a small jump drive, how they travel is unknown but if White Star can house a jump drive it's not unfeasible Thirdspace aliens would have a FTL drive on their smaller craft.
-	$this->addPrimarySystem(new Engine(6, 14, 0, 12, 2));
-    $this->addPrimarySystem(new SelfRepair(5, 24, 2)); //armor, structure, output 	
+	$this->addPrimarySystem(new JumpEngine(5, 8, 3, 8));//Added a small jump drive, how they travel is unknown but if White Star can house a jump drive it's not unfeasible Thirdspace aliens would have a FTL drive on their smaller craft.
+	$this->addPrimarySystem(new Engine(5, 12, 0, 12, 2));
+    $this->addPrimarySystem(new SelfRepair(5, 8, 4)); //armor, structure, output 	
 
-	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 180, 60));
-	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 180, 60));
-	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 180));
-	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 180));
+	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 90));
+	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 90));
+	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 270, 150));
+	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 270, 150));
 			
-	$projection = new ThirdspaceShieldProjection(0, 50, 50, 0, 360, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
-	$projector = new ThirdspaceShieldProjector(5, 10, 4, 5, 0, 360, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R
+	$projection = new ThirdspaceShieldProjection(2, 60, 60, 0, 360, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+	$projector = new ThirdspaceShieldProjector(6, 12, 4, 3, 0, 360, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R
 	$projection->addProjector($projector);
 	$this->addFrontSystem($projector);
 	$this->addFrontSystem($projection);
 				
-	$this->addPrimarySystem(new Structure( 6, 36));
+	$this->addPrimarySystem(new Structure( 5, 36));
 	    
         $this->hitChart = array(
         		0=> array( //should never happen (but it will!)
-        				7 => "Structure",
-        				10 => "1:Psionic Concentrator",
+        				9 => "Structure",
+        				11 => "1:Psionic Concentrator",
         				12 => "1:Shield Projector",
 						13 => "Self Repair",        				
         				14 => "Jump Engine",
@@ -70,8 +70,8 @@ class ThirdspaceFighter extends LCV{ //Actually an LCV.
         				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
-        				7 => "Structure",
-        				10 => "Psionic Concentrator",
+        				9 => "Structure",
+        				11 => "Psionic Concentrator",
         				12 => "Shield Projector",
 						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",
@@ -80,8 +80,8 @@ class ThirdspaceFighter extends LCV{ //Actually an LCV.
         				20 => "0:Scanner",
         		),
         		2=> array( //PRIMARY hit table, effectively
-        				7 => "Structure",
-        				10 => "1:Psionic Concentrator",
+        				9 => "Structure",
+        				11 => "1:Psionic Concentrator",
         				12 => "1:Shield Projector",
 						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",

@@ -239,7 +239,33 @@ window.ew = {
 			var currBoost = shipManager.power.getBoost(currImpeder);
 			if (currBoost > 0) usedEW += currBoost;
 		}
-/*end of Impeder impact*/		
+/*end of Impeder impact*/	
+
+/*Count Psionic Lance boost as used EW!*/
+		var psilanceList = shipManager.systems.getSystemListByName(ship, "PsionicLance");
+		for (var i in psilanceList) {
+			var currPsilance = psilanceList[i];
+			//is it alive and powered up?
+			if (shipManager.systems.isDestroyed(ship, currPsilance)) continue;
+			if (shipManager.power.isOffline(ship, currPsilance)) continue;			
+			//current boost
+			var currBoost = shipManager.power.getBoost(currPsilance);
+			if (currBoost > 0) usedEW += currBoost;
+		}
+/*end of Psionic Lance impact*/	
+
+/*Count Heavy Psionic Lance boost as used EW!*/
+		var heavypsilanceList = shipManager.systems.getSystemListByName(ship, "HeavyPsionicLance");
+		for (var i in heavypsilanceList) {
+			var currHeavypsilance = heavypsilanceList[i];
+			//is it alive and powered up?
+			if (shipManager.systems.isDestroyed(ship, currHeavypsilance)) continue;
+			if (shipManager.power.isOffline(ship, currHeavypsilance)) continue;			
+			//current boost
+			var currBoost = shipManager.power.getBoost(currHeavypsilance);
+			if (currBoost > 0) usedEW += currBoost;
+		}
+/*end of Heavy Psionic Lance impact*/		
 		
 		var totalAvailable = ew.getScannerOutput(ship);
 		var leftEW = totalAvailable-usedEW;

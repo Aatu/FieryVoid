@@ -1034,6 +1034,7 @@ class AmmoMissileRackS extends Weapon{
     public $firingMode = 1;
     public $priority = 6;
     public $loadingtime = 2;						
+
 	
 	
 	protected $availableAmmoAlreadySet = false; //set to true if calling constructor from derived weapon that sets different ammo options
@@ -1065,6 +1066,7 @@ class AmmoMissileRackS extends Weapon{
 	
 	private $ammoMagazine; //reference to ammo magazine
 	private $ammoClassesUsed = array();
+ 
 	
 	
 	
@@ -1130,6 +1132,7 @@ class AmmoMissileRackS extends Weapon{
 		$this->maxDamageArray = array();
 		$this->ammoClassesUsed = array();
 		$this->hidetargetArray = array();	
+
 		
 		//add data for all modes to arrays
 		$currMode = 0;
@@ -1171,6 +1174,7 @@ class AmmoMissileRackS extends Weapon{
 				$this->minDamageArray[$currMode] = $currAmmo->minDamage;
 				$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
 				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;	
+
 			}
 		}
 			
@@ -1203,6 +1207,7 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->minDamageArray = $this->minDamageArray; 
 		$strippedSystem->maxDamageArray = $this->maxDamageArray; 
 		$strippedSystem->hidetargetArray = $this->hidetargetArray;
+
 		return $strippedSystem;
 	} 
 	
@@ -1290,6 +1295,8 @@ class AmmoMissileRackL extends AmmoMissileRackS{
     public $firingMode = 1;
     public $priority = 6;
     public $loadingtime = 2;
+																												
+																							
 	//basic launcher data, before being modified by actual missiles
 	protected $basicFC=array(3,3,3);
 	protected $basicRange=30;
