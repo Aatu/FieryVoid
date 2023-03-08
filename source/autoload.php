@@ -2928,7 +2928,11 @@ spl_autoload_register(
 				'thirdspacecnc' => '/server/model/systems/baseSystems.php',		
 				'thirdspaceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceAttackCraft.php',			
 						
-				
+						//Satyra (Wolfgang campaign)
+						'satyrashield' => '/server/model/weapons/customNexus.php',
+						'laserarray' => '/server/model/weapons/customNexus.php',
+      			        'satyramcvtest' => '/server/model/ships/Zsatyra/satyraMCVTest.php',	
+	
 				//let's end this with unit enhancement class...		    
 				'enhancements' => '/server/model/ships/Enhancements.php'
             );

@@ -4077,6 +4077,39 @@ class AmmoMissileS extends AmmoMissileTemplate{
 
 
 
+//GTS - 24feb23
+//ammunition for AmmoMagazine - Class I Missile (for official Missile Racks)
+class AmmoMissileI extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileI';
+	public $displayName = 'Interceptor Missile';
+	public $modeName = 'Interceptor';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_I'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Interceptor Missile (2250)'; //enhancement description
+	public $enhancementPrice = 0; //nominally 0 - included in ship price
+	
+	public $fireControlMod = array(null, null, null); //MODIFIER for weapon fire control!
+	public $minDamage = 0;
+	public $maxDamage = 0;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 1;
+	public $priorityAF = 1;
+	public $noOverkill = false;
+	public $hidetarget = false;
+	public $intercept = 6;
+	public $ballisticIntercept = true;
+		
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 0;
+    }		
+	
+} //endof class AmmoMissileI
+
+
+
+
 //ammunition for AmmoMagazine - Class FB Missile (Fighter Basic Missile)
 class AmmoMissileFB extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileFB';
