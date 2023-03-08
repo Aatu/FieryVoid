@@ -66,7 +66,7 @@ if (isset($_SESSION["user"])) {
 
 		---------- <b>LATEST NEWS - February 2023</b> ----------
 	    <br><b><big><u>Kor-Lyan have arrived!</u></big></b> - courtesy of Geoffrey
-	    <br><b>Ammo Magazine for fighters</b> - EA
+	    <br><b>Ammo Magazine for fighters</b> - EA, Gaim (and that's it!)
 	    <br><b>Plasma Streams visuals</b> - now they actually resemble a stream o plasma ;)
 	    <br><b>Ionizer visuals</b> - changed to bolt animation, in line with other Standard fighter weapons
 	    <br><b>Tethys missile boat corrected</b> - Aft launcher firing arc fixed
