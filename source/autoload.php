@@ -2759,6 +2759,7 @@ spl_autoload_register(
                 		'ammomissilep' => '/server/model/systems/baseSystems.php',
                 		'ammomissiled' => '/server/model/systems/baseSystems.php',
                 		'ammomissiles' => '/server/model/systems/baseSystems.php',
+																			
 						
                 		'ammomissilefb' => '/server/model/systems/baseSystems.php',
                 		'ammomissilefl' => '/server/model/systems/baseSystems.php',
@@ -2933,6 +2934,11 @@ spl_autoload_register(
 						'laserarray' => '/server/model/weapons/customNexus.php',
       			        'satyramcvtest' => '/server/model/ships/Zsatyra/satyraMCVTest.php',	
 	
+	  
+														 
+															
+			  
+		 
 				//let's end this with unit enhancement class...		    
 				'enhancements' => '/server/model/ships/Enhancements.php'
             );

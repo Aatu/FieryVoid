@@ -865,6 +865,12 @@ var TestGun = function  TestGun(json, ship) {
 TestGun.prototype = Object.create(Weapon.prototype);
 TestGun.prototype.constructor =  TestGun;
 
+var TestGun2 = function  TestGun2(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TestGun2.prototype = Object.create(Weapon.prototype);
+TestGun2.prototype.constructor =  TestGun2;
+
 var LightParticleBeamFtr = function  LightParticleBeamFtr(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -947,11 +953,22 @@ var DirectLimpetBoreBase = function  DirectLimpetBoreBase(json, ship) {
 DirectLimpetBoreBase.prototype = Object.create(Weapon.prototype);
 DirectLimpetBoreBase.prototype.constructor =  DirectLimpetBoreBase;
 
-var ProximityLaser = function  ProximityLaser(json, ship) {
-    Weapon.call(this, json, ship);
+var ProximityLaser = function ProximityLaser(json, ship) {
+    Torpedo.call(this, json, ship);
 };
-ProximityLaser.prototype = Object.create(Weapon.prototype);
-ProximityLaser.prototype.constructor =  ProximityLaser;
+ProximityLaser.prototype = Object.create(Torpedo.prototype);
+ProximityLaser.prototype.constructor = ProximityLaser;
+ProximityLaser.prototype.calculateSpecialRangePenalty = function (distance) {
+    var distancePenalized = Math.max(0,distance - 30); //ignore first 30 hexes
+    var rangePenalty = this.rangePenalty * distancePenalized;
+    return rangePenalty;
+};
+
+//var ProximityLaser = function  ProximityLaser(json, ship) {
+//    Weapon.call(this, json, ship);
+//};
+//ProximityLaser.prototype = Object.create(Weapon.prototype);
+//ProximityLaser.prototype.constructor =  ProximityLaser;
 
 var FMissileRack = function  FMissileRack(json, ship) {
     Weapon.call(this, json, ship);
@@ -1032,8 +1049,14 @@ var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {
 MultiDefenseLauncher.prototype = Object.create(Weapon.prototype);
 MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;
 
-var AmmoMissileRackF = function AmmoMissileRackF(json, ship) {
-    Ballistic.call(this, json, ship);
+//var AmmoMissileRackF = function AmmoMissileRackF(json, ship) {
+//    Ballistic.call(this, json, ship);
+//};
+//AmmoMissileRackF.prototype = Object.create(Ballistic.prototype);
+//AmmoMissileRackF.prototype.constructor = AmmoMissileRackF;
+
+var LaserArray = function  LaserArray(json, ship) {
+    Weapon.call(this, json, ship);
 };
-AmmoMissileRackF.prototype = Object.create(Ballistic.prototype);
-AmmoMissileRackF.prototype.constructor = AmmoMissileRackF;
+LaserArray.prototype = Object.create(Weapon.prototype);
+LaserArray.prototype.constructor =  LaserArray;

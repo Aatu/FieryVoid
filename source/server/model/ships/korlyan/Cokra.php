@@ -60,13 +60,13 @@ class Cokra extends MediumShip{
                 1=> array(
                         5 => "Thruster",
 						7 => "Standard Particle Beam",
-                        9 => "Class-D Missile Launcher",
+                        9 => "Class-D Missile Rack",
                         17 => "Structure",
                         20 => "Primary",
                 ),
                 2=> array(
                         6 => "Thruster",
-                        7 => "Class-D Missile Launcher",
+                        7 => "Class-D Missile Rack",
 						10 => "Cargo Bay",
                         17 => "Structure",
                         20 => "Primary",

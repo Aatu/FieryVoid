@@ -88,14 +88,14 @@ class RaklaviAM extends BaseShip{
 			),
 			1=> array(
 					4 => "Thruster",
-					7 => "Class-D Missile Launcher",
+					7 => "Class-D Missile Rack",
 					10 => "Class-L Missile Rack",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
 					6 => "Thruster",
-					8 => "Class-D Missile Launcher",
+					8 => "Class-D Missile Rack",
 					10 => "Class-L Missile Rack",
 					18 => "Structure",
 					20 => "Primary",

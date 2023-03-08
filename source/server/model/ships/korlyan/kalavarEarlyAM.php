@@ -58,7 +58,7 @@ class KalavarEarlyAM extends OSAT{
 		    		15 => "2:Proximity Laser",
                     17 => "Scanner",
                     19 => "Reactor",
-                    20 => "1:Class-D Missile Launcher",
+                    20 => "1:Class-D Missile Rack",
             )
         );
         
