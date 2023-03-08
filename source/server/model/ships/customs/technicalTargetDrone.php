@@ -89,6 +89,8 @@ class technicalTargetDrone extends BaseShip{
 		$this->addFrontSystem(new EMMissile(1, 6, 1, 0, 360));
 		$this->addFrontSystem(new EMMissile(1, 6, 1, 0, 360));
 
+		$this->addFrontSystem(new TestGun(4, 4, 1, 0, 360));
+		$this->addFrontSystem(new TestGun2(4, 4, 1, 0, 360));
 
         $this->addFrontSystem(new Jammer(4, 180, 7));
 		

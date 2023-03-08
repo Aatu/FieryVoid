@@ -854,6 +854,7 @@ window.weaponManager = {
 		}
 	   
 	   var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
+	   if (!weapon.noLockPenalty) { jammermod =0; noLockPenalty = 0; }
 	   /*and now nolock and jammer mods...*/
 	   if ((jammermod>0) || (noLockPenalty>0)){
 		   if (weapon.doubleRangeIfNoLock){//multiply range - eg. Antimatter!

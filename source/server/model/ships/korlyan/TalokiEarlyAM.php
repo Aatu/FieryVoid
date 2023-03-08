@@ -130,7 +130,7 @@ class TalokiEarlyAM extends StarBaseSixSections{
             0=> array(
                     10 => "Structure",
 					11 => "Reload Rack",
-					12 => "Class-D Missile Launcher",
+					12 => "Class-D Missile Rack",
                     14 => "Scanner",
 					18 => "Cargo Bay",
                     19 => "Reactor",
