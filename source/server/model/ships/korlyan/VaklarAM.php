@@ -86,7 +86,7 @@ class VaklarAM extends HeavyCombatVessel{
                 1=> array(
                         5 => "Thruster",
 						7 => "Standard Particle Beam",
-                        9 => "Class-D Missile Launcher",
+                        9 => "Class-D Missile Rack",
 						10 => "Proxmity Laser",
                         18 => "Structure",
                         20 => "Primary",

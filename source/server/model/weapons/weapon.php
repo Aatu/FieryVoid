@@ -97,6 +97,7 @@ class Weapon extends ShipSystem
 	public $isRammingAttack = false; //true means hit chance calculations are completely different, relying on speed
 	public $raking = 10;//size of rake (for Raking weapons only)
 	public $rakingArray = array();//size of rake (for multi-mode weapons with variable rake size)
+	public $noLockPenalty = true;
 
 	public $overrideCallingRestricions = false; //when set to true and checked for, can override a base setting (e.g., make a ballistic do a called shot)
 
@@ -1176,6 +1177,7 @@ class Weapon extends ShipSystem
 		}		
 		
 		$rngPenaltyMultiplier = max($noLockPenalty,$jammerValue);
+		if(!$this->noLockPenalty) $rngPenaltyMultiplier = 0;
 		if($rngPenaltyMultiplier > 0){			
 			if($this->doubleRangeIfNoLock){//double range (mostly Antimatter weapons)
 				$modifiedDistance = $distanceForPenalty * (1+$noLockPenalty);

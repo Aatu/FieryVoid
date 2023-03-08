@@ -325,6 +325,7 @@ class PlasmaTorch extends Plasma{
 class PairedPlasmaBlaster extends LinkedWeapon{
 	public $name = "pairedPlasmaBlaster";
 	public $displayName = "Plasma Blaster"; //it's not 'paired' in any way, except being usually mounted twin linked - like most fighter weapons...
+    public $animationColor = array(75, 250, 90); //...it's not inheriting from Plasma, so needs to have proper color declared
 	/*
 	public $animation = "trail";
 	public $animationColor = array(75, 250, 90);

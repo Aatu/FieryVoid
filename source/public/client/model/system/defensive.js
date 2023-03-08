@@ -119,6 +119,22 @@ CWShield.prototype.getMaxBoost = function () {
     return this.maxBoostLevel;
 };
 
+var SatyraShield = function SatyraShield(json, ship) {
+    ShipSystem.call(this, json, ship);
+    this.defensiveType = "Shield";
+};
+SatyraShield.prototype = Object.create(ShipSystem.prototype);
+SatyraShield.prototype.constructor = SatyraShield;
+SatyraShield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
+    return 0; //Ray shield does not affect hit chance
+};
+SatyraShield.prototype.hasMaxBoost = function () {
+    return true;
+};
+SatyraShield.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
 var Absorbtionshield = function Absorbtionshield(json, ship) {
     ShipSystem.call(this, json, ship);
     this.defensiveType = "Shield";

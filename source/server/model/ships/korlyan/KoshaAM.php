@@ -84,7 +84,7 @@ class KoshaAM extends BaseShip{
 			1=> array(
 					4 => "Thruster",
 					7 => "Particle Cannon",
-					8 => "Class-D Missile Launcher",
+					8 => "Class-D Missile Rack",
 					9 => "Standard Particle Beam",
 					18 => "Structure",
 					20 => "Primary",
@@ -98,14 +98,14 @@ class KoshaAM extends BaseShip{
 			3=> array(
 					4 => "Thruster",
 					7 => "Class-L Missile Rack",
-					8 => "Class-D Missile Launcher",
+					8 => "Class-D Missile Rack",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					4 => "Thruster",
 					7 => "Class-L Missile Rack",
-					8 => "Class-D Missile Launcher",
+					8 => "Class-D Missile Rack",
 					18 => "Structure",
 					20 => "Primary",
 			),
