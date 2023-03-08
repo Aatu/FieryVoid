@@ -33,6 +33,7 @@ spl_autoload_register(
                 'anoro' => '/server/model/ships/hurr/anoro.php',
                 'anroethas' => '/server/model/ships/hurr/anroethAS.php',
                 'antimatterconverter' => '/server/model/weapons/antimatter.php',
+                'alykent' => '/server/model/ships/brakiri/Alykent.php',
                 'antoph' => '/server/model/ships/brakiri/antoph.php',
                 'antophearly' => '/server/model/ships/brakiri/antophEarly.php',
                 'antophupgrade' => '/server/model/ships/brakiri/antophUpgrade.php',
