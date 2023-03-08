@@ -65,16 +65,10 @@ if (isset($_SESSION["user"])) {
 		
 
 		---------- <b>LATEST NEWS - February 2023</b> ----------
-	    <br><b><big><u>Kor-Lyan have arrived!</u></big></b> - courtesy of Geoffrey
-	    <br><b>Ammo Magazine for fighters</b> - EA, Gaim (and that's it!)
-	    <br><b>Plasma Streams visuals</b> - now they actually resemble a stream o plasma ;)
-	    <br><b>Ionizer visuals</b> - changed to bolt animation, in line with other Standard fighter weapons
-	    <br><b>Tethys missile boat corrected</b> - Aft launcher firing arc fixed
-	    <br><b>Advanced Sensors and DIST</b> - non-Advanced Sensors cannot disrupt Advanced Sensors any longer
-	    <br><b>Zombie Spark Fields fixed</b> - may fire for one more turn, then will cease 
-	    <br><b>Gaim Mearc is a proper command ship</b> - provides Ini to nearby Moas
-	    <br><b>Nexus polishing</b> - courtesy of Geoffrey
-	    <br><b>Escalation Wars polishing</b> - courtesy of Geoffrey
+	    <br><b>Shock Cannon fixed</b> - now it actually doesn't crash vs Advanced Armor
+	    <br><b>Minor fixes</b> - layouts, hit charts, weapon visuals and such
+	    <br><b>Thirdspace development</b> - courtesy of Douglas
+	    <br><b>Kor-Lyan polishing</b> - courtesy of Geoffrey and Douglas
 	    
 <!--	        
 		 <br><br>---------- <b>update 11th of January - Fleet Checker</b> ---------- 
