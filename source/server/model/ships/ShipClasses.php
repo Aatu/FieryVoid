@@ -202,9 +202,9 @@ class BaseShip {
             if(($this->faction == "Pak'ma'ra") && (!($this instanceof FighterFlight))	){
                 return $this->doPakmaraInitiativeBonus($gamedata);
             }
-//			if(($this->faction == "Gaim") && ($this instanceOf gaimMoas)){  //GTS
-//                return $this->doGaimInitiativeBonus($gamedata);
-//            }
+			if(($this->faction == "Gaim") && ($this instanceOf gaimMoas)){  //GTS
+                return $this->doGaimInitiativeBonus($gamedata);
+            }
             return $this->iniativebonus;
         }
         
@@ -369,9 +369,7 @@ class BaseShip {
 
 
 		//GTS
-		/*
-        private function doGaimInitiativeBonus($gamedata){
-
+	private function doGaimInitiativeBonus($gamedata){
         $mod = 0;
 
         if($gamedata->turn > 0 && $gamedata->phase >= 0 ){
@@ -395,8 +393,7 @@ class BaseShip {
         }
         //    debug::log($this->phpclass."- bonus: ".$mod);
         return $this->iniativebonus + $mod*5;
-    }
-	*/
+    }//end of doGaimInitiativeBonus
 
 	
 	/*saves individual notes systems might have generated*/
@@ -503,13 +500,13 @@ class BaseShip {
         $system->setId($i);
         $system->location = $loc;
         $system->setUnit($this);
+						   
+								 
+		$this->systems[$i] = $system;            
 
-
-            $this->systems[$i] = $system;
-            
-            if ($system instanceof Structure)
-                $this->structures[$loc] = $system->id;
-        
+		if ($system instanceof Structure)
+			$this->structures[$loc] = $system->id;
+			
         }
         
         protected function addFrontSystem($system){
@@ -1187,14 +1184,15 @@ class BaseShip {
 
     public function isDestroyed($turn = false){
         foreach($this->systems as $system){
+			/*18.02.2023: now dying Reactor will destroy PRIMARY Structure as well, so no point in checking directly for Reactor destruction (this avoids infinite loops, too)
             if ($system instanceof Reactor && $system->isDestroyed($turn)){
                 return true;
             }
-
+			*/
             if ($system instanceof Structure && $system->location == 0 && $system->isDestroyed($turn)){
                 return true;
             }
-
+																									   
         }
 
         return false;
@@ -1580,15 +1578,17 @@ class BaseShip {
         //now choose system from chart...
         $roll = Dice::d($rngTotal);
         $name = '';
-        $isSystemKiller = $weapon->systemKiller;
+        //$isSystemKiller = $weapon->systemKiller;
         while ($name == ''){
             if (isset($hitChart[$roll])){
                 $name = $hitChart[$roll];
+				/* this ability was never used, I comment it out!
                 if($name == 'Structure' && $isSystemKiller) { //for systemKiller weapon, reroll Structure hits
                     $isSystemKiller = false; //don't do that again
                     $name = ''; //reset
                     $roll = Dice::d($rngTotal); //new location roll
                 }
+				*/
             }else{
                 $roll++;
                 if($roll>$rngTotal)//out of range already! return facing Structure... Should not happen.
@@ -1703,15 +1703,17 @@ class BaseShip {
 		//now choose system from chart...
 		$roll = Dice::d($rngTotal);
 		$name = '';
-		$isSystemKiller = $weapon->systemKiller;
+		//$isSystemKiller = $weapon->systemKiller;
 		while ($name == ''){
 			if (isset($hitChart[$roll])){
 				$name = $hitChart[$roll];
+				/* this ability was never used, commenting out
 				if($name == 'Structure' && $isSystemKiller) { //for systemKiller weapon, reroll Structure
 					$isSystemKiller = false; //don't do that again
 					$name = '';
 					$roll = Dice::d($rngTotal); //new location roll
 				}
+				*/
 			}else{
 				$roll++;
 				if($roll>$rngTotal)//out of range already!
@@ -2474,4 +2476,3 @@ class VreeHCV extends HeavyCombatVessel{
 
     
 ?>
-

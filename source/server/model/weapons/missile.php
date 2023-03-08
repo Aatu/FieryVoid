@@ -519,7 +519,7 @@ class ReloadRack extends Weapon //ShipSystem
     private $rackExplosionDamage = 300; //how much damage will this weapon do in case of catastrophic explosion (80 missiles... that's devastating)
     private $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
 	
-		public $possibleCriticals = array(); //Reload Rack does not suffer any criticals (barring catastrophic explosion)
+		protected $possibleCriticals = array(); //Reload Rack does not suffer any criticals (barring catastrophic explosion)
 		
 	
     function __construct($armour, $maxhealth){
@@ -1034,6 +1034,9 @@ class AmmoMissileRackS extends Weapon{
     public $firingMode = 1;
     public $priority = 6;
     public $loadingtime = 2;
+	public $hidetarget = false;
+	  
+	
 	
 	
 	protected $availableAmmoAlreadySet = false; //set to true if calling constructor from derived weapon that sets different ammo options
@@ -1065,6 +1068,7 @@ class AmmoMissileRackS extends Weapon{
 	
 	private $ammoMagazine; //reference to ammo magazine
 	private $ammoClassesUsed = array();
+	public $hidetargetArray = array();		
 	
 	
 	
@@ -1082,7 +1086,8 @@ class AmmoMissileRackS extends Weapon{
 			$this->ammoClassesArray[] =  new AmmoMissileF();
 			$this->ammoClassesArray[] =  new AmmoMissileA();
 			$this->ammoClassesArray[] =  new AmmoMissileP();
-			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
+			$this->ammoClassesArray[] =  new AmmoMissileD();		 //...though only Alacans use those, as simple Basic missiles are far superior
+			$this->ammoClassesArray[] =  new AmmoMissileS();	
 			$this->availableAmmoAlreadySet = true;
 		}
 	
@@ -1127,6 +1132,7 @@ class AmmoMissileRackS extends Weapon{
 		$this->minDamageArray = array();
 		$this->maxDamageArray = array();
 		$this->ammoClassesUsed = array();
+		$this->hidetargetArray = array();		
 		
 		//add data for all modes to arrays
 		$currMode = 0;
@@ -1167,6 +1173,7 @@ class AmmoMissileRackS extends Weapon{
 				$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
 				$this->minDamageArray[$currMode] = $currAmmo->minDamage;
 				$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
+				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;				
 			}
 		}
 			
@@ -1198,6 +1205,7 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->noOverkillArray = $this->noOverkillArray; 
 		$strippedSystem->minDamageArray = $this->minDamageArray; 
 		$strippedSystem->maxDamageArray = $this->maxDamageArray; 
+		$strippedSystem->hidetargetArray = $this->hidetargetArray;
 		return $strippedSystem;
 	} 
 	
@@ -1284,7 +1292,9 @@ class AmmoMissileRackL extends AmmoMissileRackS{
     public $distanceRange = 70;
     public $firingMode = 1;
     public $priority = 6;
-    public $loadingtime = 2;
+    public $loadingtime = 2; 
+     
+    
 	//basic launcher data, before being modified by actual missiles
 	protected $basicFC=array(3,3,3);
 	protected $basicRange=30;

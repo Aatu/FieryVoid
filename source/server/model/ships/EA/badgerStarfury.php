@@ -9,6 +9,7 @@ class BadgerStarfury extends FighterFlight{
         $this->phpclass = "BadgerStarfury";
         $this->shipClass = "Starfury: Badger Heavy flight";
         $this->imagePath = "img/ships/badgerStarfury.png";
+			$this->variantOf = 'OBSOLETE'; //awaiting to be deleted after it's no longer present in games
 	    
 	    /*
 	$this->occurence = 'uncommon';//by original rules: not a variant, but special deployment restrictions (1 in 4 fighter flights)

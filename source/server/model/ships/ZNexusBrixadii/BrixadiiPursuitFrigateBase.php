@@ -30,8 +30,10 @@ class BrixadiiPursuitFrigateBase extends MediumShip{
         $this->addPrimarySystem(new Scanner(3, 10, 4, 5));
         $this->addPrimarySystem(new Engine(4, 9, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(1, 2));
-        $this->addPrimarySystem(new Thruster(2, 14, 0, 4, 3));
-        $this->addPrimarySystem(new Thruster(2, 14, 0, 4, 4));
+        $this->addPrimarySystem(new Thruster(2, 7, 0, 2, 3));
+        $this->addPrimarySystem(new Thruster(2, 7, 0, 2, 3));
+        $this->addPrimarySystem(new Thruster(2, 7, 0, 2, 4));
+        $this->addPrimarySystem(new Thruster(2, 7, 0, 2, 4));
       
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));

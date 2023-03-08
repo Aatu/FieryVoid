@@ -14,8 +14,8 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "removeCCEW", condition: [isSelf, notFlight], action: removeCCEW, info: "Remove CCEW" }, 
         { className: "addOEW", condition: [isEnemy, sourceNotFlight], action: addOEW, info: "Add OEW" }, 
         { className: "removeOEW", condition: [isEnemy, sourceNotFlight], action: removeOEW, info: "Remove OEW" }, 
-        { className: "addDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('DIST'), info: "Add DIST" }, 
-        { className: "removeDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW], action: getRemoveOEW('DIST'), info: "Remove DIST" }, 
+        { className: "addDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" }, 
+        { className: "removeDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getRemoveOEW('DIST'), info: "Remove DIST" }, 
         { className: "addSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SOEW'), info: "Add SOEW" }, 
         { className: "removeSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getRemoveOEW('SOEW'), info: "Remove SOEW" }, 
         { className: "addSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SDEW'), info: "Add SDEW" }, 
@@ -26,10 +26,6 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" }, 
         { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" }
     ];
-    /*lines replaced:    
-        { className: "addOEW", condition: [isEnemy, notFlight], action: addOEW, info: "Add OEW" }, 
-        { className: "removeOEW", condition: [isEnemy, notFlight], action: removeOEW, info: "Remove OEW" }, 
-    */
     
 
     ShipTooltipInitialOrdersMenu.prototype.getAllButtons = function () {
@@ -177,6 +173,10 @@ window.ShipTooltipInitialOrdersMenu = function () {
 
     function doesNotHaveOtherElintEWThanBDEW() {
         return ew.getEWByType("SDEW", this.selectedShip) === 0 && ew.getEWByType("DIST", this.selectedShip) === 0 && ew.getEWByType("SOEW", this.selectedShip) === 0;
+    }
+		
+    function advSensorsCheck() { /*check whether source ship has Advanced Sensors OR target ship does NOT have Advanced Sensors*/
+	return ( shipManager.hasSpecialAbility(this.selectedShip, "AdvancedSensors") || (!(shipManager.hasSpecialAbility(this.targetedShip, "AdvancedSensors"))) ) 
     }
 
     return ShipTooltipInitialOrdersMenu;

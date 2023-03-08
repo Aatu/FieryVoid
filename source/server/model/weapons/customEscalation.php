@@ -637,6 +637,7 @@ class EWHeavyGatlingLaser extends Pulse{
 		public $trailLength = 10;
         public $priority = 4;
         public $loadingtime = 1;
+        public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
         
         public $rangePenalty = 1.0; //-1 / hex
         public $fireControl = array(3, 2, 0); // fighters, <mediums, <capitals 
@@ -654,6 +655,11 @@ class EWHeavyGatlingLaser extends Pulse{
                 $powerReq = 2;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+		public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Uninterceptable.";
         }
         
         public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
@@ -678,6 +684,7 @@ class EWHeavyGatlingLaser extends Pulse{
         public $priority = 4;
         public $loadingtime = 1;
         public $guns = 2;
+        public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
         
         public $rangePenalty = 1.0; //-1 / hex
         public $fireControl = array(3, 2, 0); // fighters, <mediums, <capitals 
@@ -695,6 +702,11 @@ class EWHeavyGatlingLaser extends Pulse{
                 $powerReq = 4;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+		public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Uninterceptable.";
         }
         
         public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
@@ -886,8 +898,8 @@ class EWPointPlasmaGun extends Plasma{
     	public $rangeDamagePenalty = 1;
         public $guns = 2;
 
-        public $intercept = 1;
-		public $ballisticIntercept = true;
+        public $intercept = 2;
+//		public $ballisticIntercept = true;
     		        
         public $loadingtime = 1;
 			
@@ -929,7 +941,7 @@ class EWHeavyPointPlasmaGun extends Plasma{
         public $guns = 2;
 
         public $intercept = 2;
-		public $ballisticIntercept = true;
+//		public $ballisticIntercept = true;
     		        
         public $loadingtime = 1;
 			
@@ -1637,7 +1649,7 @@ class EWGraviticTractingRod extends SWDirectWeapon{
         public $animationWidth = 15;
         public $animationWidth2 = 0.5;
 	
- 	public $possibleCriticals = array( //no point in damage reduced crit
+ 	protected $possibleCriticals = array( //no point in damage reduced crit
             14=>"ReducedRange"
 	);
 	

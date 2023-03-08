@@ -216,7 +216,7 @@
         public $damagePenalty = 0;
         public $damageType = "Standard"; 
         public $weaponClass = "Particle";
-     	public $possibleCriticals = array( //different than usual B5Wars weapon - simplification
+     	protected $possibleCriticals = array( //different than usual B5Wars weapon - simplification
             16=>"ForcedOfflineOneTurn"
 	);
 	    
@@ -386,7 +386,7 @@ class FtrShield extends Shield implements DefensiveSystem{
     public $boostable = false;
     public $baseOutput = 0; //base output, before boost
 		
- 	public $possibleCriticals = array( //irrelevant for fighter system
+ 	protected $possibleCriticals = array( //irrelevant for fighter system
             16=>"OutputReduced1"
 	);
 	
@@ -457,7 +457,7 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 		public $isTargetable = false; //cannot be targeted ever!
 	    public $iconPath = "TrekShieldProjection.png"; //overridden anyway - to indicate proper direction
 	    
-		public $possibleCriticals = array(); //no criticals possible
+		protected $possibleCriticals = array(); //no criticals possible
 		
 		//Shield Projections cannot be repaired at all!
 		public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -486,11 +486,12 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);  
 			$absorb = $this->output - $this->armour;
-			$this->data["Special"] = "Defensive system which absorbs damage from incoming shots before they damage ship hull.";
-			$this->data["Special"] .= "<br>Can absorb up to its maximum capacity before allowing damage to ship.";
+			$this->data["Special"] = "Defensive system which absorbs damage from incoming shots wihtin its arc before they damage ship hull.";
+			$this->data["Special"] .= "<br>Can absorb up to its maximum capacity before allowing damage to ship.";		
 			$this->data["Special"] .= "<br>Shield system's structure represents damage capacity, if it is reduced to zero system will cease to function.";
 			$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
 			$this->data["Special"] .= "<br>Cannot be flown under, and does not reduce the damage dealt or hit chance of enemy weapons.";
+			$this->data["Special"] .= "<br>Has an Armor value of 2.";				
 			
 			$this->outputDisplay = $this->getRemainingCapacity();//override on-icon display default
 		}	
@@ -606,7 +607,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 	    public $baseOutput = 0; //base output, before boost
 	    
 		
-	    public $possibleCriticals = array(
+	    protected $possibleCriticals = array(
 	            19=>"OutputReduced1",
 	            28=>"OutputReduced2" );
 		
@@ -617,7 +618,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 			$this->iconPath = 'TrekShieldProjector' . $side . '.png';
 			parent::__construct($armor, $maxhealth, $power, $rating, $startArc, $endArc);
 			$this->baseOutput = $rating;
-			$this->maxBoostLevel = $rating; //maximum double effect		
+			$this->maxBoostLevel = $rating + 2; //maximum double effect	+ 2	
 		}
 		
 		
@@ -633,12 +634,12 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn); 
-			$this->data["Special"] = "Shield projector - replenishes 4 structure of appropriate Shield Projection per point of Projector's rating at end of turn.";
-			$this->data["Special"] .= "<br>Can be boosted.";
+			$this->data["Special"] = "Regenerates 5 health for the associated Shield per point of Projector rating at the end of each turn .";
+			$this->data["Special"] .= "<br>Can be boosted five times.";
 		}	
 		
 	    public function getOutputOnTurn($turn){
-	        $output = ($this->getOutput() + $this->getBoostLevel($turn))*4;
+	        $output = ($this->getOutput() + $this->getBoostLevel($turn))*5;
 	        return $output;
 	    }
 		

@@ -4,7 +4,7 @@ class SalbezUrzchk extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 35*6;
+        $this->pointCost = 37*6;
         $this->faction = "ZNexus Sal-bez";
         $this->phpclass = "SalbezUrzchk";
         $this->shipClass = "Urz'chk Heavy Flight";
@@ -39,7 +39,7 @@ class SalbezUrzchk extends FighterFlight{
             $fighter->imagePath = "img/ships/Nexus/salbez_urzchk.png";
             $fighter->iconPath = "img/ships/Nexus/salbez_urzchk_large.png";
 
-	        $light = new LightParticleBeamFtr(300, 60, 1); //$startArc, $endArc, $nrOfShots
+	        $light = new HvyParticleGunFtr(300, 60, 1); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($light);
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			
