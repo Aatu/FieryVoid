@@ -866,6 +866,24 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		$this->data["Special"] .= "<br>Ignores any defensive systems lowering enemy profile (shields, EWeb...)."; //not that of advanced races
 		$this->data["Special"] .= "<br>All of the above work as usual if operated by advanced races."; 
 	}	
+	
+	public function markThirdspace(){		
+    	$this->specialAbilities[] = "AdvancedSensors";
+		$this->specialAbilityValue = true; //so it is actually recognized as special ability!
+    	$this->boostEfficiency = 14; //Advanced Sensors are rarely lower than 13, so flat 14 boost cost is advantageous to output+1!
+    	$this->maxBoostLevel = 2; //Unlike Shadows/Vorlons Thirdspace ships have alot of spare power, so limit their max sensor boost for balance. 		
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= 'Advanced Sensors - ignores Jammer.';//not that of advanced races
+		$this->data["Special"] .= "<br>Ignores enemy BDEW and SDEW."; //not that of advanced races
+		$this->data["Special"] .= "<br>Ignores any defensive systems lowering enemy profile (shields, EWeb...)."; //not that of advanced races
+		$this->data["Special"] .= "<br>All of the above work as usual if operated by advanced races.";
+		$this->data["Special"] .= "<br>Can only be boosted twice.";	 
+	}	
+		
 	/*note: StarWarsSensors mark in itself doesn't do anything beyond being recognizable for ship description function
 		all actual effects are contained in attribute changes
 	*/
@@ -3784,6 +3802,7 @@ class AmmoMissileTemplate{
 	public $noOverkill = false;
 	public $useOEW = false;
 	public $hidetarget = false;
+
 	
     function __construct(){}
 	
@@ -3859,6 +3878,7 @@ class AmmoMissileL extends AmmoMissileTemplate{
 	public $noOverkill = false;
     public $useOEW = false;
 	public $hidetarget = false;
+
 	
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
@@ -4054,6 +4074,39 @@ class AmmoMissileS extends AmmoMissileTemplate{
     }		
 	
 } //endof class AmmoMissileS
+
+
+
+//GTS - 24feb23
+//ammunition for AmmoMagazine - Class I Missile (for official Missile Racks)
+class AmmoMissileI extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileI';
+	public $displayName = 'Interceptor Missile';
+	public $modeName = 'Interceptor';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_I'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Interceptor Missile (2250)'; //enhancement description
+	public $enhancementPrice = 0; //nominally 0 - included in ship price
+	
+	public $fireControlMod = array(null, null, null); //MODIFIER for weapon fire control!
+	public $minDamage = 0;
+	public $maxDamage = 0;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 1;
+	public $priorityAF = 1;
+	public $noOverkill = false;
+	public $hidetarget = false;
+	public $intercept = 6;
+	public $ballisticIntercept = true;
+		
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 0;
+    }		
+	
+} //endof class AmmoMissileI
+
 
 
 

@@ -296,28 +296,47 @@ HeavyPsionicLance.prototype.getMaxBoost = function () {
 };
 
 HeavyPsionicLance.prototype.initBoostableInfo = function () {
+   if (window.weaponManager.isLoaded(this)) {} else {
+        var count = shipManager.power.getBoost(this);
+        for (var i = 0; i < count; i++) {
+            shipManager.power.unsetBoost(null, this);
+        }
+    }	
+
+    this.data.Boostlevel = shipManager.power.getBoost(this);	
+	
     switch (shipManager.power.getBoost(this)) {
         case 0:
-            this.data["Damage"] = '53 - 125';
+            this.data["Damage"] = '48 - 120';
             this.data["Boostlevel"] = '0';
             break;
         case 1:
-            this.data["Damage"] = '55 - 145';
+            this.data["Damage"] = '60 - 150';
             this.data["Boostlevel"] = '1';
             break;
         case 2:
-            this.data["Damage"] = '57 - 165';
+            this.data["Damage"] = '72 - 180';
             this.data["Boostlevel"] = '2';
             break;
         case 3:
-            this.data["Damage"] = '59 - 185';
+            this.data["Damage"] = '84 - 210';
             this.data["Boostlevel"] = '3';
             break;
         default:
-            this.data["Damage"] = '53 - 125';
+            this.data["Damage"] = '48 - 120';
             this.data["Boostlevel"] = '0';
             break;
-    }
+	}
+	
+	
+	if (!window.weaponManager.isLoaded(this)) {
+		this.outputDisplay = window.weaponManager.isLoaded(this);
+	} else if (this.data.Boostlevel > 0) {
+		this.outputDisplay = this.data.Boostlevel;
+	} else {
+		this.outputDisplay = '-'; //'0' is not shown!
+	}    
+    
     return this;
 };
 
@@ -338,7 +357,7 @@ PsionicLance.prototype.clearBoost = function () {
             return;
         }
     }
-};
+}; 
 
 PsionicLance.prototype.hasMaxBoost = function () {
     return true;
@@ -349,28 +368,44 @@ PsionicLance.prototype.getMaxBoost = function () {
 };
 
 PsionicLance.prototype.initBoostableInfo = function () {
+    if (window.weaponManager.isLoaded(this)) {} else {
+        var count = shipManager.power.getBoost(this);
+        for (var i = 0; i < count; i++) {
+            shipManager.power.unsetBoost(null, this);
+        }
+    }	
+
+    this.data.Boostlevel = shipManager.power.getBoost(this);
+    	
     switch (shipManager.power.getBoost(this)) {
         case 0:
-            this.data["Damage"] = '28 - 55';
+            this.data["Damage"] = '33 - 60';
             this.data["Boostlevel"] = '0';
             break;
         case 1:
-            this.data["Damage"] = '29 - 65';
+            this.data["Damage"] = '35 - 80';
             this.data["Boostlevel"] = '1';
             break;
         case 2:
-            this.data["Damage"] = '30 - 75';
+            this.data["Damage"] = '37 - 100';
             this.data["Boostlevel"] = '2';
             break;
-        case 3:
+ /*       case 3:
             this.data["Damage"] = '31 - 85';
             this.data["Boostlevel"] = '3';
-            break;
+            break;   */
         default:
-            this.data["Damage"] = '28 - 55';
+            this.data["Damage"] = '33 - 60';
             this.data["Boostlevel"] = '0';
             break;
     }
+
+	if (this.data.Boostlevel > 0) {
+		this.outputDisplay = this.data.Boostlevel;
+	} else {
+		this.outputDisplay = '-'; //'0' is not shown!
+	}    
+    
     return this;
 };
 

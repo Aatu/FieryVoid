@@ -94,20 +94,20 @@ class LeklantEarlyAM extends BaseShip{
 			1=> array(
 					5 => "Thruster",
 					6 => "Limpet Bore Torpedo",
-					9 => "Class-D Missile Launcher",
+					9 => "Class-D Missile Rack",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
 					6 => "Thruster",
-					9 => "Class-D Missile Launcher",
+					9 => "Class-D Missile Rack",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
 					5 => "Thruster",
 					7 => "Class-L Missile Rack",
-					9 => "Class-D Missile Launcher",
+					9 => "Class-D Missile Rack",
 					11 => "Standard Particle Beam",
 					18 => "Structure",
 					20 => "Primary",
@@ -115,7 +115,7 @@ class LeklantEarlyAM extends BaseShip{
 			4=> array(
 					5 => "Thruster",
 					7 => "Class-L Missile Rack",
-					9 => "Class-D Missile Launcher",
+					9 => "Class-D Missile Rack",
 					11 => "Standard Particle Beam",
 					18 => "Structure",
 					20 => "Primary",

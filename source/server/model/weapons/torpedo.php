@@ -444,7 +444,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 				$this->data["Special"] .= '<br>';
 			}
 			$this->data["Special"] .= "<br>Ignores armor when dealing damage (Advanced Armor is treated as 2 points less).";	
-			$this->data["Special"] .= "Deals Flash damage and reduces armor of facing section (structure and all systems) by D3 points (Advanced Armor is immune).";		
+			$this->data["Special"] .= "<br>Deals Flash damage and reduces armor of facing section (structure and all systems) by D3 points (Advanced Armor is immune).";		
 			$this->data["Special"] .= "<br>Ballistic weapon that can use offensive EW.";
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";			
 		}
