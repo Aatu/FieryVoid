@@ -36,7 +36,7 @@ class Prototype extends BaseShip{
          
         $this->addPrimarySystem(new Reactor(7, 36, 0, 0));
         $this->addPrimarySystem(new CnC(8, 24, 0, 0));
-        $this->addPrimarySystem(new Scanner(6, 24, 5, 9));
+  //      $this->addPrimarySystem(new Scanner(6, 24, 5, 9));
 		$sensors = new Scanner(6, 24, 5, 9);
 		$sensors->markImproved();
 		$this->addPrimarySystem($sensors);        
