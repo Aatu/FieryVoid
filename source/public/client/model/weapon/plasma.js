@@ -161,10 +161,3 @@ PakmaraPlasmaWeb.prototype.clearBoost = function () {
         }
     }
 };
-/*
-PakmaraPlasmaWeb.prototype.hasMaxBoost = function(){
-    return true;
-}
-PakmaraPlasmaWeb.prototype.getMaxBoost = function(){
-    return this.maxBoostLevel;   
-}  */

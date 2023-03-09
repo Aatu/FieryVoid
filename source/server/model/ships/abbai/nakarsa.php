@@ -81,14 +81,15 @@ class Nakarsa extends BaseShip{
 			1=> array(
 					4 => "Thruster",
 					6 => "Gravitic Shield",
-					8 => "Combat Laser",
-					10 => "Quad Array",
+					9 => "Combat Laser",
+					11 => "Quad Array",
 					17 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
 					5 => "Thruster",
 					7 => "Gravitic Shield",	
+					8 => "Quad Array",
 					11 => "Jump Engine",
 					17 => "Structure",
 					20 => "Primary",
