@@ -58,8 +58,6 @@ class technicalTargetDrone extends BaseShip{
 		$this->addPrimarySystem(new Hangar(6, 100));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
-		$this->addPrimarySystem(new TestMissile(2, 6, 1, 0, 360));
-		$this->addPrimarySystem(new TestMissile2(2, 6, 0, 0, 360));
 		
 //        $this->addFrontSystem(new AntiquatedScanner(3, 20, 6, 6));
 		$this->addFrontSystem(new CnC(6, 40, 0, 0));
@@ -86,17 +84,10 @@ class technicalTargetDrone extends BaseShip{
 		
 		
 
-		$this->addFrontSystem(new EMMissile(1, 6, 1, 0, 360));
-		$this->addFrontSystem(new EMMissile(1, 6, 1, 0, 360));
-
-		$this->addFrontSystem(new TestGun(4, 4, 1, 0, 360));
-		$this->addFrontSystem(new TestGun2(4, 4, 1, 0, 360));
-
         $this->addFrontSystem(new Jammer(4, 180, 7));
 		
         $this->addFrontSystem(new AmmoMissileRackR(3, 0, 0, 240, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addFrontSystem(new AmmoMissileRackR(3, 0, 0, 240, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-		$this->addFrontSystem(new NexusLaserMissile(1, 6, 1, 0, 360));
 		$this->addFrontSystem(new TestGun(1, 6, 3, 0, 360));
 //		$this->addFrontSystem(new Enveloper(3, 8, 6, 300, 60));
 
@@ -105,10 +96,8 @@ class technicalTargetDrone extends BaseShip{
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
 		$this->addAftSystem(new JumpEngine(5, 20, 3, 20));
 		$this->addLeftSystem(new Thruster(4, 14, 0, 5, 3));
-		$this->addLeftSystem(new LimpetBoreTorp(3, 8, 5, 0, 360));
 		
 		$this->addRightSystem(new Thruster(4, 14, 0, 5, 4));
-		$this->addRightSystem(new LimpetBoreTorp(3, 8, 5, 0, 360));
 		
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
 		$this->addFrontSystem(new Structure( 7, 100));

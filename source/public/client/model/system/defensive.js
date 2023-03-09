@@ -118,7 +118,7 @@ CWShield.prototype.hasMaxBoost = function () {
 CWShield.prototype.getMaxBoost = function () {
     return this.maxBoostLevel;
 };
-
+/*
 var SatyraShield = function SatyraShield(json, ship) {
     ShipSystem.call(this, json, ship);
     this.defensiveType = "Shield";
@@ -134,7 +134,7 @@ SatyraShield.prototype.hasMaxBoost = function () {
 SatyraShield.prototype.getMaxBoost = function () {
     return this.maxBoostLevel;
 };
-
+*/
 var Absorbtionshield = function Absorbtionshield(json, ship) {
     ShipSystem.call(this, json, ship);
     this.defensiveType = "Shield";

@@ -3784,8 +3784,8 @@ class AmmoMissileTemplate{
 	public $noOverkill = false;
 	public $useOEW = false;
 	public $hidetarget = false;
-	public $intercept = 0;  //GTS - 24feb23
-	public $ballisticIntercept = true;  //GTS - 24feb23
+//	public $intercept = 0;  //GTS - 24feb23
+//	public $ballisticIntercept = true;  //GTS - 24feb23
 	
     function __construct(){}
 	

@@ -532,6 +532,7 @@ class Enhancements{
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  }
+/*
 		  $enhID = 'AMMO_I'; //Interceptor Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
 				$ammoClass = new AmmoMissileI();
@@ -554,6 +555,7 @@ class Enhancements{
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  }
+*/
 	  } //end of magazine-requiring options
 	  
 	  

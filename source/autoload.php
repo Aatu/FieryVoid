@@ -1579,13 +1579,10 @@ spl_autoload_register(
 				'nexustwiniongun' => '/server/model/weapons/customNexus.php',
 
 
-//                'pakmarasimsalle' => '/server/model/ships/pakmara/PakmaraSimSallE.php',					
-//                'pakmarasimsalle2' => '/server/model/ships/pakmara/PakmaraSimSallE2.php',					
-				'plasmaweb' => '/server/model/weapons/customNexus.php',
 //				'plasmablast' => '/server/model/weapons/customNexus.php',
 //				'testgun' => '/server/model/weapons/customNexus.php',
-				'testmissile' => '/server/model/weapons/customNexus.php',
-				'testmissile2' => '/server/model/weapons/customNexus.php',
+//				'testmissile' => '/server/model/weapons/customNexus.php',
+//				'testmissile2' => '/server/model/weapons/customNexus.php',
 //                'plasmabattery' => '/server/model/systems/baseSystems.php',
 //				'enveloper' => '/server/model/weapons/customNexus.php',
 
@@ -2646,7 +2643,6 @@ spl_autoload_register(
 
 
 				//Kor-Lyan
-//         		'ammomissilerackf' => '/server/model/weapons/customNexus.php', //missile racks themselves
 				'axor' => '/server/model/ships/korlyan/Axor.php',
 				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 				'fenja' => '/server/model/ships/korlyan/Fenja.php',
@@ -2661,6 +2657,7 @@ spl_autoload_register(
 				'koshaearlyam' => '/server/model/ships/korlyan/KoshaEarlyAM.php',
 				'koskova' => '/server/model/ships/korlyan/Koskova.php',
 				'koskovaearlyam' => '/server/model/ships/korlyan/KoskovaEarlyAM.php',
+				'koskovatestbed' => '/server/model/ships/korlyan/KoskovaTestbed.php',
 				'leklant' => '/server/model/ships/korlyan/Leklant.php',
 				'leklantearlyam' => '/server/model/ships/korlyan/LeklantEarlyAM.php',
 				'lekra' => '/server/model/ships/korlyan/Lekra.php',
@@ -2675,30 +2672,17 @@ spl_autoload_register(
 				'talokioriginalam' => '/server/model/ships/korlyan/TalokiOriginalAM.php',
 				'vaklaram' => '/server/model/ships/korlyan/VaklarAM.php',
 
-/*         		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
-         		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
-         		'proximitylaser' => '/server/model/weapons/customNexus.php', 
-         		'fmissilerack' => '/server/model/weapons/customNexus.php', 
-         		'dmissilerack' => '/server/model/weapons/customNexus.php', 
-*/
+                'tmphitreduction' => '/server/model/cricialClasses.php',  //for chaff missile effect
 
-//				'solyrn' => '/server/model/ships/korlyan/Solyrn.php',
-                'tmphitreduction' => '/server/model/cricialClasses.php',
-
+//         		'ammomissilerackf' => '/server/model/weapons/customNexus.php', //missile racks themselves
 //         		'chaffmissile' => '/server/model/weapons/customNexus.php', 
          		'proximitylaser' => '/server/model/weapons/customNexus.php', 
          		'fmissilerack' => '/server/model/weapons/customNexus.php', 
          		'rangedfmissilerack' => '/server/model/weapons/customNexus.php', 
-         		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
+//         		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
          		'directlimpetbore' => '/server/model/weapons/customNexus.php', 
          		'directlimpetborebase' => '/server/model/weapons/customNexus.php', 
          		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
-//				'cokra' => '/server/model/ships/korlyan/Cokra.php',
-//				'koloskova' => '/server/model/ships/korlyan/Koloskova.php',
-//				'lekra' => '/server/model/ships/korlyan/Lekra.php',
-				'koskovatestbed' => '/server/model/ships/korlyan/KoskovaTestbed.php',
-//				'kaltiam' => '/server/model/ships/korlyan/KaltiAM.php',
-//				'taloki' => '/server/model/ships/korlyan/Taloki.php',
 
 
 
@@ -2758,8 +2742,8 @@ spl_autoload_register(
                 		'ammomissilea' => '/server/model/systems/baseSystems.php',
                 		'ammomissilep' => '/server/model/systems/baseSystems.php',
                 		'ammomissiled' => '/server/model/systems/baseSystems.php',
-                		'ammomissiles' => '/server/model/systems/baseSystems.php',
-                		'ammomissilei' => '/server/model/systems/baseSystems.php',
+//                		'ammomissiles' => '/server/model/systems/baseSystems.php',
+//                		'ammomissilei' => '/server/model/systems/baseSystems.php',
 						
                 		'ammomissilefb' => '/server/model/systems/baseSystems.php',
                 		'ammomissilefl' => '/server/model/systems/baseSystems.php',
@@ -2930,9 +2914,9 @@ spl_autoload_register(
 				'thirdspacefighter' => '/server/model/ships/thirdspace/ThirdspaceFighter.php',			
 						
 						//Satyra
-						'satyrashield' => '/server/model/weapons/customNexus.php',
-						'laserarray' => '/server/model/weapons/customNexus.php',
-      			        'satyramcvtest' => '/server/model/ships/Zsatyra/satyraMCVTest.php',	
+//						'satyrashield' => '/server/model/weapons/customNexus.php',
+//						'laserarray' => '/server/model/weapons/customNexus.php',
+//     			        'satyramcvtest' => '/server/model/ships/Zsatyra/satyraMCVTest.php',	
 
 						
 				//let's end this with unit enhancement class...		    

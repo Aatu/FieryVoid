@@ -847,18 +847,6 @@ NexusLtPlasmaBomb.prototype.constructor =  NexusLtPlasmaBomb;
 
 
 
-var PlasmaWeb = function  PlasmaWeb(json, ship) {
-    Weapon.call(this, json, ship);
-};
-PlasmaWeb.prototype = Object.create(Weapon.prototype);
-PlasmaWeb.prototype.constructor =  PlasmaWeb;
-
-var PlasmaBlast = function  PlasmaBlast(json, ship) {
-    Weapon.call(this, json, ship);
-};
-PlasmaBlast.prototype = Object.create(Weapon.prototype);
-PlasmaBlast.prototype.constructor =  PlasmaBlast;
-
 var TestGun = function  TestGun(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -928,25 +916,25 @@ NexusTestBlaster.prototype.constructor =  NexusTestBlaster;
 
 //Kor-Lyan testing systems
 
-
+/*
 var LimpetBoreTorp = function  LimpetBoreTorp(json, ship) {
     Ballistic.call(this, json, ship);
 };
 LimpetBoreTorp.prototype = Object.create(Ballistic.prototype);
 LimpetBoreTorp.prototype.constructor =  LimpetBoreTorp;
-
+*/
 var DirectLimpetBore = function  DirectLimpetBore(json, ship) {
     Weapon.call(this, json, ship);
 };
 DirectLimpetBore.prototype = Object.create(Weapon.prototype);
 DirectLimpetBore.prototype.constructor =  DirectLimpetBore;
-
+/*
 var LimpetBoreBase = function  LimpetBoreBase(json, ship) {
     Weapon.call(this, json, ship);
 };
 LimpetBoreBase.prototype = Object.create(Weapon.prototype);
 LimpetBoreBase.prototype.constructor =  LimpetBoreBase;
-
+*/
 var DirectLimpetBoreBase = function  DirectLimpetBoreBase(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -963,12 +951,6 @@ ProximityLaser.prototype.calculateSpecialRangePenalty = function (distance) {
     var rangePenalty = this.rangePenalty * distancePenalized;
     return rangePenalty;
 };
-
-//var ProximityLaser = function  ProximityLaser(json, ship) {
-//    Weapon.call(this, json, ship);
-//};
-//ProximityLaser.prototype = Object.create(Weapon.prototype);
-//ProximityLaser.prototype.constructor =  ProximityLaser;
 
 var FMissileRack = function  FMissileRack(json, ship) {
     Weapon.call(this, json, ship);
@@ -1011,7 +993,7 @@ var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {
 MultiDefenseLauncher.prototype = Object.create(Weapon.prototype);
 MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;
 */
-
+/*
 var ChaffMissile = function  ChaffMissile(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -1023,18 +1005,8 @@ var StealthMissile = function  StealthMissile(json, ship) {
 };
 StealthMissile.prototype = Object.create(Weapon.prototype);
 StealthMissile.prototype.constructor =  StealthMissile;
+*/
 
-var TestMissile = function  TestMissile(json, ship) {
-    Weapon.call(this, json, ship);
-};
-TestMissile.prototype = Object.create(Weapon.prototype);
-TestMissile.prototype.constructor =  TestMissile;
-
-var TestMissile2 = function  TestMissile2(json, ship) {
-    Weapon.call(this, json, ship);
-};
-TestMissile2.prototype = Object.create(Weapon.prototype);
-TestMissile2.prototype.constructor =  TestMissile2;
 /*
 var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {
     Ballistic.call(this, json, ship);
@@ -1049,14 +1021,16 @@ var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {
 MultiDefenseLauncher.prototype = Object.create(Weapon.prototype);
 MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;
 
-//var AmmoMissileRackF = function AmmoMissileRackF(json, ship) {
-//    Ballistic.call(this, json, ship);
-//};
-//AmmoMissileRackF.prototype = Object.create(Ballistic.prototype);
-//AmmoMissileRackF.prototype.constructor = AmmoMissileRackF;
+var AmmoMissileRackF = function AmmoMissileRackF(json, ship) {
+    Ballistic.call(this, json, ship);
+};
+AmmoMissileRackF.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackF.prototype.constructor = AmmoMissileRackF;
 
+/*
 var LaserArray = function  LaserArray(json, ship) {
     Weapon.call(this, json, ship);
 };
 LaserArray.prototype = Object.create(Weapon.prototype);
 LaserArray.prototype.constructor =  LaserArray;
+*/
