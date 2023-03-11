@@ -42,7 +42,7 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 		$sensors->markThirdspace();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new JumpEngine(5, 8, 3, 8));//Added a small jump drive, how they travel is unknown but if White Star can house a jump drive it's not unfeasible Thirdspace aliens would have a FTL drive on their smaller craft.
-	$this->addPrimarySystem(new Engine(5, 12, 0, 12, 2));
+	$this->addPrimarySystem(new Engine(5, 12, 0, 10, 2));
     $this->addPrimarySystem(new SelfRepair(5, 8, 4)); //armor, structure, output 	
 
 	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 90));
