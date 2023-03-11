@@ -2627,7 +2627,8 @@ spl_autoload_register(
 				'sashulkur' => '/server/model/ships/pakmara/Sashulkur.php',
 				'simtorka' => '/server/model/ships/pakmara/Simtorka.php',
 				'uriktal' => '/server/model/ships/pakmara/Uriktal.php',
-				'thorkaosat' => '/server/model/ships/pakmara/ThorkaOSAT.php',																																																				
+				'thorkaosat' => '/server/model/ships/pakmara/ThorkaOSAT.php',
+				'urshtalu' => '/server/model/ships/pakmara/Urshtalu.php',																																																				
 				
 
 				//Hyach

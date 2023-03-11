@@ -1206,11 +1206,14 @@ class Fuser extends Plasma{
 	public $weaponClass = "Plasma"; 
 	public $firingModes = array( 1 => "Flash"); 
 
-	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 18;
+            if ( $powerReq == 0 ) $powerReq = 12;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
-		public function setSystemDataWindow($turn){
+	public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 		}
 	
@@ -1246,11 +1249,14 @@ class RangedFuser extends Plasma{
 	public $weaponClass = "Plasma"; 
 	public $firingModes = array( 1 => "Flash"); 
 
-	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 12;
+            if ( $powerReq == 0 ) $powerReq = 12;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
-		public function setSystemDataWindow($turn){
+	public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 		}
 	
