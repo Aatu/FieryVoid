@@ -1027,10 +1027,8 @@ var AmmoMissileRackF = function AmmoMissileRackF(json, ship) {
 AmmoMissileRackF.prototype = Object.create(Ballistic.prototype);
 AmmoMissileRackF.prototype.constructor = AmmoMissileRackF;
 
-/*
 var LaserArray = function  LaserArray(json, ship) {
     Weapon.call(this, json, ship);
 };
 LaserArray.prototype = Object.create(Weapon.prototype);
 LaserArray.prototype.constructor =  LaserArray;
-*/

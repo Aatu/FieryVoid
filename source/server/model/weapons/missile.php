@@ -1067,8 +1067,11 @@ class AmmoMissileRackS extends Weapon{
 	
 	private $ammoMagazine; //reference to ammo magazine
 	private $ammoClassesUsed = array();
- 
-	
+
+	// GTS
+    protected function getAmmoMagazine(){
+        return $this->ammoMagazine;
+    }	
 	
 	
     /*ATYPICAL constructor: takes ammo magazine class and (optionally) information about being fitted to stable platform*/
@@ -1087,7 +1090,7 @@ class AmmoMissileRackS extends Weapon{
 			$this->ammoClassesArray[] =  new AmmoMissileP();
 			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
 			$this->ammoClassesArray[] =  new AmmoMissileI(); 
-			$this->ammoClassesArray[] =  new AmmoMissileS();
+			$this->ammoClassesArray[] =  new AmmoMissileS(); //...only Kor-Lyan use these
 			$this->availableAmmoAlreadySet = true;
 		}
 	
@@ -1211,7 +1214,12 @@ class AmmoMissileRackS extends Weapon{
 				   
 		return $strippedSystem;
 	} 
-	
+
+	//Needed for the Class-F Launcher - GTS
+	public function recalculateFireControl(){
+		return;
+	}
+
 	//actually use getDamage() method of ammo!
     public function getDamage($fireOrder)
     {

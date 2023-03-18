@@ -7692,6 +7692,8 @@ class AmmoMissileRackF extends AmmoMissileRackS {
         public $loadingtime = 1;
 		public $normalload = 2;
 
+		protected $basicFC=array(3,3,3);
+
 ///		protected $availableAmmoAlreadySet = false; //set to true if calling constructor from derived weapon that sets different ammo options
 //		protected $usesOrdnance = true; //indicates that onboardFC should be shown!
 	
@@ -7718,8 +7720,8 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 
 ///		protected $ammoClassesArray = array();//FILLED IN CONSTRUCTOR! classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
 
-		private $ammoMagazine; //reference to ammo magazine
-		private $ammoClassesUsed = array();
+///		private $ammoMagazine; //reference to ammo magazine
+///		private $ammoClassesUsed = array();
 
 //		public $rangeMod = 0;
 //		public $hits = array();
@@ -7799,12 +7801,13 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 		$this->minDamageArray = array();
 		$this->maxDamageArray = array();
 		$this->ammoClassesUsed = array();
+		$this->hidetargetArray = array();	
 		
 		//add data for all modes to arrays
 		$currMode = 0;
 		
 		foreach ($this->ammoClassesArray as $currAmmo){ 
-			$isPresent = $this->ammoMagazine->getAmmoPresence($currAmmo->modeName);//does such ammo exist in magazine? 
+			$isPresent = $this->getAmmoMagazine()->getAmmoPresence($currAmmo->modeName);//does such ammo exist in magazine? 
 			if($isPresent){ 
 				for($twoModes = 0; $twoModes<=1; $twoModes++) { 
 					$currMode++;	
@@ -7844,6 +7847,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 						$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
 						$this->minDamageArray[$currMode] = $currAmmo->minDamage;
 						$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
+						$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;	
 
 						} else {
 
@@ -7879,6 +7883,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 						$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
 						$this->minDamageArray[$currMode] = $currAmmo->minDamage;
 						$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
+						$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;	
 						}
 //					}
 				}
@@ -7900,7 +7905,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 
 	
 	//recalculates fire control as appropriate for current loading time!
-	private function recalculateFireControl(){
+	public function recalculateFireControl(){
 		if (($this->turnsloaded == 1) || ($this->firedInRapidMode)) { //after only 1 turn of charging: Standard mode becomes Rapid (with reduced fire control), Long Range mode is not available
 			if ($this->baseFireControlArray === null){ //base values haven't been copied yet
 				$this->baseFireControlArray = $this->fireControlArray;
@@ -7908,7 +7913,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 
 		$currMode = 0;
 		
-		foreach ($this->ammoClassesArray as $currAmmo){ $isPresent = $this->ammoMagazine->getAmmoPresence($currAmmo->modeName);//does such ammo exist in magazine? 
+		foreach ($this->ammoClassesArray as $currAmmo){ $isPresent = $this->getAmmoMagazine()->getAmmoPresence($currAmmo->modeName);//does such ammo exist in magazine? 
 			if($isPresent){ 
 				for($twoModes = 0; $twoModes<=1; $twoModes++) { $currMode++;
 						//fill all arrays for indicated mode
@@ -7941,6 +7946,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 						$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
 						$this->minDamageArray[$currMode] = $currAmmo->minDamage;
 						$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
+						$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;	
 
 						} else {
 
@@ -7954,6 +7960,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 						$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
 						$this->minDamageArray[$currMode] = $currAmmo->minDamage;
 						$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
+						$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;	
 						
 						}
 //					}
@@ -7988,6 +7995,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 		$strippedSystem->basicFC = $this->basicFC;
 		$strippedSystem->basicRange = $this->basicRange;
 		$strippedSystem->basicDistanceRange = $this->basicDistanceRange;
+		$strippedSystem->hidetargetArray = $this->hidetargetArray;
 //		$strippedSystem->basicFireControlArray = $this->basicFireControlArray;
 		return $strippedSystem;
 	} 
@@ -8073,8 +8081,8 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 
 	
 	
-	/* this method generates additional non-standard informaction in the form of individual system notes
-	*/
+	/* this method generates additional non-standard informaction in the form of individual system notes*/
+/*
     public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
 		$ship = $this->getUnit();
 		switch($gameData->phase){								
@@ -8093,12 +8101,13 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 				
 		}
 	} //endof function generateIndividualNotes
-	
+*/	
 	
 	
 	/*act on notes just loaded - to be redefined by systems as necessary
 	 - mark $firedInRapidMode
 	*/
+/*
 	public function onIndividualNotesLoaded($gamedata){
 		foreach ($this->individualNotes as $currNote) if($currNote->turn == $gamedata->turn) if ($currNote->notevalue == 'X'){ //only current round matters!
 			$this->firedInRapidMode = true;			
@@ -8116,7 +8125,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 		}
 		$this->individualNotesTransfer = array(); //empty, just in case
 	}		
-
+*/
 
 	
 	
@@ -9486,7 +9495,7 @@ class MultiDefenseLauncher extends Weapon {
 
 
 
-/*
+
     class LaserArray extends Laser{
         public $name = "LaserArray";
         public $displayName = "Laser Array";
@@ -9513,14 +9522,14 @@ class MultiDefenseLauncher extends Weapon {
         public function setMaxDamage(){     $this->maxDamage = 20 ;      }
 
     } // end class LaserArray
-*/
+
 
 /*
 	The Satyra have specialized armor that affects only Laser and Electromagnetic weapons.
 	The best way to simulate this is with a shield that only reacts to these classe.
 	Since this is "armor", it cannot be flown under, boosted, or destroyed.
 */
-/*
+
 class SatyraShield extends Shield implements DefensiveSystem{
     public $name = "SatyraShield";
     public $displayName = "Satyra Armor";
@@ -9566,7 +9575,7 @@ class SatyraShield extends Shield implements DefensiveSystem{
 	}
 	
 } //endof class SatyraShield
-*/
+
 
 
 
