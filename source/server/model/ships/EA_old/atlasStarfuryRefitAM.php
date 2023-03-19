@@ -1,0 +1,62 @@
+<?php
+class AtlasStarfuryRefitAM extends FighterFlight{
+    
+    function __construct($id, $userid, $name,  $slot){
+        parent::__construct($id, $userid, $name,  $slot);
+        
+        $this->pointCost = 240;
+        $this->faction = "EA (early)";
+        $this->phpclass = "AtlasStarfuryRefitAM";
+        $this->shipClass = "Starfury: Atlas Heavy flight (2234)";
+			$this->variantOf = "Starfury: Flying Fox Heavy flight";
+			$this->occurence = "uncommon";
+        $this->imagePath = "img/ships/aries.png";
+	    $this->isd = 2234;
+ 		$this->unofficial = 'S'; //HRT design released after AoG demise
+	    
+	    $this->notes = 'Non-atmospheric and 1/2 turn cost.';
+        
+        $this->forwardDefense = 8;
+        $this->sideDefense = 9;
+        $this->freethrust = 8;
+        $this->offensivebonus = 3;
+        $this->jinkinglimit = 6;
+        $this->turncost = 0.5;
+        
+	$this->iniativebonus = 75;
+        $this->populate();
+    }
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
+            $armour = array(1, 1, 1, 1);
+            $fighter = new Fighter("AtlasStarfury", $armour, 13, $this->id);
+            $fighter->displayName = "Atlas";
+            $fighter->imagePath = "img/ships/aries.png";
+            $fighter->iconPath = "img/ships/aries_large.png";
+
+			//ammo magazine itself (AND its missile options)
+			$ammoMagazine = new AmmoMagazine(4); //pass magazine capacity - actual number of rounds, NOT number of salvoes
+			$fighter->addAftSystem($ammoMagazine); //fit to ship immediately
+			$ammoMagazine->addAmmoEntry(new AmmoMissileFB(), 0); //add basic missile as an option - but do NOT load any actual missiles at this moment - so weapon data is actually filled with _something_!
+			$this->enhancementOptionsEnabled[] = 'AMMO_FB';//add enhancement options for missiles - Class-FB
+			$this->enhancementOptionsEnabled[] = 'AMMO_FY';//add enhancement options for missiles - Class-FY
+
+            $frontGun = new PairedParticleGun(330, 30, 4);
+            $frontGun->displayName = "Uni-Pulse Cannon";
+
+            $fighter->addFrontSystem($frontGun);
+			$fighter->addFrontSystem(new AmmoFighterRack(330, 30, $ammoMagazine, false)); //$startArc, $endArc, $magazine, $base
+//            $fighter->addFrontSystem(new FighterMissileRack(4, 330, 30));
+
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack	
+            $this->addSystem($fighter);
+	}
+    }
+}
+?>

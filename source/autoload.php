@@ -1878,7 +1878,8 @@ spl_autoload_register(
 
                 'ariesstarfury' => '/server/model/ships/EA_old/ariesStarfury.php',
                 'atlasstarfury' => '/server/model/ships/EA_old/atlasStarfury.php',
-                'atlasstarfuryrefit' => '/server/model/ships/EA_old/atlasStarfuryRefit.php',
+//                'atlasstarfuryrefit' => '/server/model/ships/EA_old/atlasStarfuryRefit.php',
+                'atlasstarfuryrefitam' => '/server/model/ships/EA_old/atlasStarfuryRefitAM.php',
                 'avengeralpha' => '/server/model/ships/EA_old/avengerAlpha.php',
                 'cottenalpha' => '/server/model/ships/EA_old/cottenAlpha.php',
                 'cottenbeta' => '/server/model/ships/EA/cottenBeta.php',
@@ -1915,7 +1916,8 @@ spl_autoload_register(
                 'tethysalpha' => '/server/model/ships/EA_old/tethysAlpha.php',
                 'tethysbeta' => '/server/model/ships/EA_old/tethysBeta.php',
                 'tychealpha' => '/server/model/ships/EA_old/tycheAlpha.php',
-                'valkyrieftr' => '/server/model/ships/EA/valkyrieFtr.php',
+//                'valkyrieftr' => '/server/model/ships/EA/valkyrieFtr.php',
+                'valkyrieftram' => '/server/model/ships/EA/valkyrieFtrAM.php',
 
 
 				//Battlestar Galactica - Fred
