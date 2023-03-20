@@ -862,7 +862,7 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= 'Advanced Sensors - ignores Jammer, flat 14 boost cost.';//not that of advanced races
-		$this->data["Special"] .= "<br>Ignores enemy BDEW and SDEW."; //not that of advanced races
+		$this->data["Special"] .= "<br>Ignores enemy BDEW, SDEW and DIST."; //not that of advanced races
 		$this->data["Special"] .= "<br>Ignores any defensive systems lowering enemy profile (shields, EWeb...)."; //not that of advanced races
 		$this->data["Special"] .= "<br>All of the above work as usual if operated by advanced races."; 
 	}	
@@ -878,7 +878,7 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= 'Advanced Sensors - ignores Jammer.';//not that of advanced races
-		$this->data["Special"] .= "<br>Ignores enemy BDEW and SDEW."; //not that of advanced races
+		$this->data["Special"] .= "<br>Ignores enemy BDEW, SDEW and DIST."; //not that of advanced races
 		$this->data["Special"] .= "<br>Ignores any defensive systems lowering enemy profile (shields, EWeb...)."; //not that of advanced races
 		$this->data["Special"] .= "<br>All of the above work as usual if operated by advanced races.";
 		$this->data["Special"] .= "<br>Can only be boosted twice.";	 

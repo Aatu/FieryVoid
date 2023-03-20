@@ -885,7 +885,7 @@ class CommDisruptor extends Weapon{
 	public $iconPath = "commDIsruptor.png";
 	
 	//let's animate this as a very wide beam...
-	public $animation = "laser";
+	public $animation = "bolt";
         public $animationColor = array(150, 150, 220);
         public $animationExplosionScale = 0.55;
 	/*
