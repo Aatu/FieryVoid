@@ -62,7 +62,7 @@ class HyperionMissileAM extends BaseShip{
 
         $this->addRightSystem(new Thruster(3, 13, 0, 5, 4));
         $this->addRightSystem(new AmmoMissileRackS(4, 0, 0, 120, 240, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-        $this->addRightSystem(new AmmoMissileRackS(3, 0, 0, 180, 0, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addRightSystem(new AmmoMissileRackS(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addRightSystem(new AmmoMissileRackS(4, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
