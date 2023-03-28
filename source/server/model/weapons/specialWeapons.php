@@ -4982,7 +4982,7 @@ class PsionicConcentrator extends Raking{
                 2 => "Double"
             );
         public $rangePenalty = 1;
-            public $rangePenaltyArray = array( 1=>1, 2=>0.5); //Standard and Raking modes
+            public $rangePenaltyArray = array( 1=>1, 2=>0.66); //Standard and Raking modes
         public $fireControl = array(8, 5, 3); // fighters, <mediums, <capitals 
             public $fireControlArray = array( 1=>array(8, 4, 3), 2=>array(2, 4, 6));
               
