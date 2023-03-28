@@ -913,6 +913,12 @@ NexusTestBlaster.prototype.constructor =  NexusTestBlaster;
 //Enveloper.prototype = Object.create(Weapon.prototype);
 //Enveloper.prototype.constructor =  Enveloper;
 
+var NexusAntifighterLauncher = function  NexusAntifighterLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusAntifighterLauncher.prototype = Object.create(Weapon.prototype);
+NexusAntifighterLauncher.prototype.constructor =  NexusAntifighterLauncher;
+
 
 //Kor-Lyan testing systems
 
@@ -1026,6 +1032,12 @@ var AmmoMissileRackF = function AmmoMissileRackF(json, ship) {
 };
 AmmoMissileRackF.prototype = Object.create(Ballistic.prototype);
 AmmoMissileRackF.prototype.constructor = AmmoMissileRackF;
+
+var AmmoMissileRackD = function AmmoMissileRackD(json, ship) {
+    Ballistic.call(this, json, ship);
+};
+AmmoMissileRackD.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackD.prototype.constructor = AmmoMissileRackD;
 
 var LaserArray = function  LaserArray(json, ship) {
     Weapon.call(this, json, ship);

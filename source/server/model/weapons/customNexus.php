@@ -213,6 +213,74 @@ class NexusAdvKineticBoxLauncher extends Weapon{
 
 
 
+class NexusAntifighterLauncher extends Weapon{
+        public $name = "NexusAntifighterLauncher";
+        public $displayName = "Anti-fighter Launcher";
+	    public $iconPath = "NexusKineticBoxLauncher.png";
+        public $animation = "trail";
+        public $trailColor = array(11, 224, 255);
+        public $animationColor = array(50, 50, 50);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 12;
+        public $animationWidth = 4;
+        public $trailLength = 100;    
+
+        public $useOEW = true; //missile
+        public $ballistic = true; //missile
+        public $range = 8;
+        public $distanceRange = 24;
+        public $ammunition = 5; //limited number of shots
+        
+        public $loadingtime = 1; // 1/2 turns
+        public $rangePenalty = 0;
+        public $fireControl = array(3, null, null); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+	    
+		public $priority = 4; //Matter weapon
+	    
+		public $firingMode = 'Ballistic'; //firing mode - just a name essentially
+		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 5;
+            if ( $powerReq == 0 ) $powerReq = 0;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->ammunition = $this->ammunition;           
+            return $strippedSystem;
+        }
+	    
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Benefits from offensive EW.";
+            $this->data["Ammunition"] = $this->ammunition;
+        }
+        
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
+
+        public function getDamage($fireOrder){
+			return Dice::d(6, 1)+3;
+        }
+    
+        public function setMinDamage(){     $this->minDamage = 4;      }
+        public function setMaxDamage(){     $this->maxDamage = 9;      }
+		
+}//endof NexusAntifighterLauncher
+
+
+
+
 class NexusLaserMissile extends Laser{
         public $name = "NexusLaserMissile";
         public $displayName = "Laser Missile";
@@ -869,7 +937,7 @@ class NexusStreakInterceptor extends Weapon{
         public function setAmmo($firingMode, $amount){
             $this->ammunition = $amount;
         }
-       public function fire($gamedata, $fireOrder){ //note ammo usage
+        public function fire($gamedata, $fireOrder){ //note ammo usage
             parent::fire($gamedata, $fireOrder);
             $this->ammunition--;
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
@@ -1329,7 +1397,7 @@ class NexusChaffLauncher extends Weapon{
 	
         public $useOEW = false; //not important, really	    
         
-        public $loadingtime = 1; // 1/2 turns
+        public $loadingtime = 1; // 1 / turn
 		public $range = 100; //let's put maximum range here, but generous one
         public $rangePenalty = 0;
         public $fireControl = array(100, 100, 100); // fighters, <mediums, <capitals; just so the weapon is targetable
@@ -9236,6 +9304,55 @@ class RangedFMissileRack extends Weapon {
 
 
 
+/*Class-D Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
+	all functionality prepared in standard class-S rack
+	holds 20 missiles (only carries Interceptor (I - default), chaff (C), and anti-fighter (A) missiles)
+*/
+class AmmoMissileRackD extends AmmoMissileRackS{
+	public $name = "AmmoMissileRackD";
+    public $displayName = "Class-D Missile Rack";
+    public $iconPath = "ClassDMissileRack.png";    
+	
+    public $range = 20;
+    public $distanceRange = 60;
+    public $firingMode = 1;
+    public $priority = 6;
+    public $loadingtime = 2;
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(3,3,3);
+	protected $basicRange=20;
+	protected $basicDistanceRange = 60;
+
+    protected $rackExplosionDamage = 15; //Launcher defaults with Interceptor missiles that do no damage - Chaff do no damage as well
+	     //Assume 5 anti-fighter missiles.  15*5 = 75.  Take one-quarter = 18 and take 0.75 for expenditures and this is 15 damage
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+	
+    /*ATYPICAL constructor: takes ammo magazine class and (optionally) information about being fitted to stable platform*/
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		//VERY IMPORTANT: fill $ammoClassesArray (cannot be done as constants!
+		//classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
+		//remember that appropriate enhancements need to be enabled on ehip itself, too!
+		
+		if(!$this->availableAmmoAlreadySet){
+			$this->ammoClassesArray[] =  new AmmoMissileA();
+//			$this->ammoClassesArray[] =  new AmmoMissileI(); 
+//			$this->ammoClassesArray[] =  new AmmoMissileC(); //...only Kor-Lyan use these
+			$this->availableAmmoAlreadySet = true;
+		}
+	
+		$this->ammoMagazine = $magazine;
+		if($base){
+			$this->basicRange = $this->basicDistanceRange;
+		}
+		$this->recompileFiringModes();
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 0;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc); //class-S launcher: structure 6, power usage 0
+		$magazine->subscribe($this); //subscribe to any further changes in ammo availability
+	}
+	
+} //endof class AmmoMissileRackD
 
 
 

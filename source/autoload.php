@@ -1498,7 +1498,8 @@ spl_autoload_register(
 		//Nexus weapons
 			//Nexus matter weapons
 				'nexusacids' => '/server/model/weapons/customNexus.php',
-				'nexusautocannon' => '/server/model/weapons/customNexus.php',
+				'nexusacids' => '/server/model/weapons/customNexus.php',
+				'nexusantifighterlauncher' => '/server/model/weapons/customNexus.php',
 				'nexusautocannonftr' => '/server/model/weapons/customNexus.php',
 				'nexusautogun' => '/server/model/weapons/customNexus.php',
 				'nexuscids' => '/server/model/weapons/customNexus.php',
@@ -1972,6 +1973,7 @@ spl_autoload_register(
                 'commjammerftr' => '/server/model/weapons/customBSG.php',
                 'flakarray' => '/server/model/weapons/customBSG.php',
                 'flakarray2' => '/server/model/weapons/customBSG.php',
+                'bsgcenturions' => '/server/model/weapons/customBSG.php',
                 'bsgmarineassault' => '/server/model/weapons/customBSG.php',
                 'sensorspearftr' => '/server/model/weapons/customBSG.php',
                 'sensorspikeftr' => '/server/model/weapons/customBSG.php',
@@ -2003,8 +2005,10 @@ spl_autoload_register(
                 'hvyguidedmissile' => '/server/model/weapons/customBSG.php',
                 'emmissile' => '/server/model/weapons/customBSG.php',
 
-//				'cylonbasestar' => '/server/model/ships/ZBSGCylons/CylonBasestar.php',				
+				'cylonbasestar' => '/server/model/ships/ZBSGCylons/CylonBasestar.php',				
+				'cylonpillager' => '/server/model/ships/ZBSGCylons/CylonPillager.php',				
 				'cylonsparrowraider' => '/server/model/ships/ZBSGCylons/CylonSparrowRaider.php',				
+				'cylonturkeyraider' => '/server/model/ships/ZBSGCylons/CylonTurkeyRaider.php',				
 
                 'bsghybrid' => '/server/model/systems/baseSystems.php',
 
@@ -2661,6 +2665,7 @@ spl_autoload_register(
 
 				//Kor-Lyan
          		'ammomissilerackf' => '/server/model/weapons/customNexus.php', //missile racks themselves
+//         		'ammomissilerackd' => '/server/model/weapons/customNexus.php', //missile racks themselves
 				'axor' => '/server/model/ships/korlyan/Axor.php',
 				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 				'fenja' => '/server/model/ships/korlyan/Fenja.php',
