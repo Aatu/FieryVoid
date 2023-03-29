@@ -1304,9 +1304,9 @@ class BSGHypergunVA extends Pulse{
 
 
 
-    class SafeLtGuidedMissile extends Torpedo{
+    class LtGuidedMissile extends Torpedo{
     
-        public $name = "SafeLtGuidedMissile";
+        public $name = "LtGuidedMissile";
         public $displayName = "Light Guided Missile";
         public $iconPath = "NexusSmallEarlyRocket.png"; 		
 
@@ -1330,11 +1330,11 @@ class BSGHypergunVA extends Pulse{
         public function setMinDamage(){     $this->minDamage = 10;       }
         public function setMaxDamage(){     $this->maxDamage = 10 ;      }
 
-    }//endof class SafeLtGuidedMissile
+    }//endof class LtGuidedMissile
 
-    class SafeMedGuidedMissile extends Torpedo{
+    class MedGuidedMissile extends Torpedo{
     
-        public $name = "SafeMedGuidedMissile";
+        public $name = "MedGuidedMissile";
         public $displayName = "Medium Guided Missile";
         public $iconPath = "NexusEarlyRocket.png"; 		
 
@@ -1359,11 +1359,11 @@ class BSGHypergunVA extends Pulse{
         public function setMinDamage(){     $this->minDamage = 15; /*- $this->dp;*/      }
         public function setMaxDamage(){     $this->maxDamage = 15 ;/*- $this->dp;*/      }
     
-    }//endof class SafeMedGuidedMissile
+    }//endof class MedGuidedMissile
 
-    class SafeHvyGuidedMissile extends Torpedo{
+    class HvyGuidedMissile extends Torpedo{
     
-        public $name = "SafeHvyGuidedMissile";
+        public $name = "HvyGuidedMissile";
         public $displayName = "Heavy Guided Missile";
         public $iconPath = "NexusLargeEarlyRocket.png"; 		
 
@@ -1388,17 +1388,17 @@ class BSGHypergunVA extends Pulse{
         public function setMinDamage(){     $this->minDamage = 20; /*- $this->dp;*/      }
         public function setMaxDamage(){     $this->maxDamage = 20 ;/*- $this->dp;*/      }
     
-    }//endof class SafeHvyGuidedMissile
+    }//endof class HvyGuidedMissile
 
 
 
 
 
 
-    class LtGuidedMissile extends Torpedo{
+    class LtGuidedMissileS extends Torpedo{
     
-        public $name = "LtGuidedMissile";
-        public $displayName = "Light Guided Missile";
+        public $name = "LtGuidedMissileS";
+        public $displayName = "Special Light Guided Missile";
         public $iconPath = "NexusSmallEarlyRocket.png"; 		
 
         public $range = 10;
@@ -1533,12 +1533,12 @@ class BSGHypergunVA extends Pulse{
 			return $strippedSystem;
 		}
     
-    } //endof class MedGuidedMissile
+    } //endof class LtGuidedMissileS
 
-    class MedGuidedMissile extends Torpedo{
+    class MedGuidedMissileS extends Torpedo{
     
-        public $name = "MedGuidedMissile";
-        public $displayName = "Medium Guided Missile";
+        public $name = "MedGuidedMissileS";
+        public $displayName = "Special Medium Guided Missile";
         public $iconPath = "NexusEarlyRocket.png"; 		
 
         public $range = 30;
@@ -1700,12 +1700,12 @@ class BSGHypergunVA extends Pulse{
 
 
     
-    } //endof class MedGuidedMissile
+    } //endof class MedGuidedMissileS
 
-    class HvyGuidedMissile extends Torpedo{
+    class HvyGuidedMissileS extends Torpedo{
     
-        public $name = "HvyGuidedMissile";
-        public $displayName = "Heavy Guided Missile";
+        public $name = "HvyGuidedMissileS";
+        public $displayName = "Special Heavy Guided Missile";
         public $iconPath = "NexusLargeEarlyRocket.png"; 		
 
         public $range = 50;
@@ -1868,7 +1868,7 @@ class BSGHypergunVA extends Pulse{
 			return $strippedSystem;
 		}
     
-    } //endof class HvyGuidedMissile
+    } //endof class HvyGuidedMissileS
 
 
 

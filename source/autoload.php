@@ -2003,6 +2003,9 @@ spl_autoload_register(
                 'ltguidedmissile' => '/server/model/weapons/customBSG.php',
                 'medguidedmissile' => '/server/model/weapons/customBSG.php',
                 'hvyguidedmissile' => '/server/model/weapons/customBSG.php',
+                'ltguidedmissiles' => '/server/model/weapons/customBSG.php',
+                'medguidedmissiles' => '/server/model/weapons/customBSG.php',
+                'hvyguidedmissiles' => '/server/model/weapons/customBSG.php',
                 'emmissile' => '/server/model/weapons/customBSG.php',
 
 				'cylonbasestar' => '/server/model/ships/ZBSGCylons/CylonBasestar.php',				

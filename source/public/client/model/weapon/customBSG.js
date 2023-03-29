@@ -106,17 +106,35 @@ var LtGuidedMissile = function LtGuidedMissile(json, ship) {
 LtGuidedMissile.prototype = Object.create(Weapon.prototype);
 LtGuidedMissile.prototype.constructor = LtGuidedMissile;
 
+var LtGuidedMissileS = function LtGuidedMissileS(json, ship) {
+    Weapon.call(this, json, ship);
+};
+LtGuidedMissileS.prototype = Object.create(Weapon.prototype);
+LtGuidedMissileS.prototype.constructor = LtGuidedMissileS;
+
 var MedGuidedMissile = function MedGuidedMissile(json, ship) {
     Weapon.call(this, json, ship);
 };
 MedGuidedMissile.prototype = Object.create(Weapon.prototype);
 MedGuidedMissile.prototype.constructor = MedGuidedMissile;
 
+var MedGuidedMissileS = function MedGuidedMissileS(json, ship) {
+    Weapon.call(this, json, ship);
+};
+MedGuidedMissileS.prototype = Object.create(Weapon.prototype);
+MedGuidedMissileS.prototype.constructor = MedGuidedMissileS;
+
 var HvyGuidedMissile = function HvyGuidedMissile(json, ship) {
     Weapon.call(this, json, ship);
 };
 HvyGuidedMissile.prototype = Object.create(Weapon.prototype);
 HvyGuidedMissile.prototype.constructor = HvyGuidedMissile;
+
+var HvyGuidedMissileS = function HvyGuidedMissileS(json, ship) {
+    Weapon.call(this, json, ship);
+};
+HvyGuidedMissileS.prototype = Object.create(Weapon.prototype);
+HvyGuidedMissileS.prototype.constructor = HvyGuidedMissileS;
 
 var EMMissile = function EMMissile(json, ship) {
     Weapon.call(this, json, ship);
