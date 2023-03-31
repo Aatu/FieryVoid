@@ -4730,7 +4730,7 @@ class PsychicFieldHandler{
             } 
             //Raking(20) is already described in Raking class           
             $this->data["Special"] .= "<br>Uninterceptable.";  
-            $this->data["Special"] .= "<br>Can be boosted up to 3 times using EW for increased dmg output (2d10+10 extra damage per point of EW used).";
+            $this->data["Special"] .= '<br>Can be boosted with EW for increased dmg output (+2d10 per point of EW used, up to twice). This EW does not count towards your OEW lock on a target.';
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";            
             $this->data["Boostlevel"] = $boost;
         }
@@ -4866,7 +4866,7 @@ class PsionicLance extends Raking{
             } 
             //Raking(15) is already described in Raking class
             $this->data["Special"] .= "Uninterceptable.";              
-            $this->data["Special"] .= '<br>Can be boosted with EW for increased dmg output (+2d10 per point of EW used, up to twice).';
+            $this->data["Special"] .= '<br>Can be boosted with EW for increased dmg output (+2d10 per point of EW used, up to twice). This EW does not count towards your OEW lock on a target.';
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";               
             $this->data["Boostlevel"] = $boost;
         }
