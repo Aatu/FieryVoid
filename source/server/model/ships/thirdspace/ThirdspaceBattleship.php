@@ -32,13 +32,13 @@ class ThirdspaceBattleship extends BaseShip{
 		$this->iniativebonus = 2 *5;        
         
         $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 174+8+4));
-        $this->addPrimarySystem(new ThirdspaceCnC(8, 28, 0, 0));
-        $scanner = new Scanner(7, 28, 8, 15);
+        $this->addPrimarySystem(new ThirdspaceCnC(8, 36, 0, 0));
+        $scanner = new Scanner(7, 24, 8, 15);
 		$scanner->markThirdspace();
 		$this->addPrimarySystem($scanner);	        
         $this->addPrimarySystem(new Engine(7, 36, 0, 20, 3));
 		$this->addPrimarySystem(new PsychicField(6, 0, 0, 0, 360));		
-        $this->addPrimarySystem(new SelfRepair(7, 24, 14)); //armor, structure, output 
+        $this->addPrimarySystem(new SelfRepair(7, 24, 12)); //armor, structure, output 
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 5));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
       
 		$projection = new ThirdspaceShieldProjection(2, 120, 120, 330, 30, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
