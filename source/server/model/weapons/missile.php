@@ -1194,11 +1194,12 @@ $this->fixedBonusPulsesArray = array();
 				$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
 				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;	
 
-$this->groupingArray[$currMode] = $currAmmo->groupingArray;
-$this->maxpulsesArray[$currMode] = $currAmmo->maxpulsesArray;
-$this->rofArray[$currMode] = $currAmmo->rofArray;
-$this->useDieArray[$currMode] = $currAmmo->useDieArray;
-$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulsesArray;						
+
+$this->groupingArray[$currMode] = $currAmmo->grouping;
+$this->maxpulsesArray[$currMode] = $currAmmo->maxpulses;
+$this->rofArray[$currMode] = $currAmmo->rof;
+$this->useDieArray[$currMode] = $currAmmo->useDie;
+$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;						
 			}
 		}
 			
