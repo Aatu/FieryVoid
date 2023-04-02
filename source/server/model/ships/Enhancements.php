@@ -1202,8 +1202,8 @@ class Enhancements{
 					case 'AMMO_S': //Stealth Missile						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileS(), $enhCount, true); //do notify dependent weapons, too!
 						break;
-					case 'AMMO_K': //Stealth Missile						
-						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileS(), $enhCount, true); //do notify dependent weapons, too!
+					case 'AMMO_K': //Starburst Missile						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileK(), $enhCount, true); //do notify dependent weapons, too!
 						break;						
 						
 				}
