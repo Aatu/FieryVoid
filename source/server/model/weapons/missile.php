@@ -1033,9 +1033,16 @@ class AmmoMissileRackS extends Weapon{
     public $distanceRange = 60;
     public $firingMode = 1;
     public $priority = 6;
-    public $loadingtime = 2;						
- 
- 
+    public $loadingtime = 2;
+	public $hidetarget = false;
+
+
+public $grouping = 0;
+public $maxpulses = 0;
+public $rof = 0;
+public $useDie = 0; //die used for base number of hits
+public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	  
+	
 	
 	
 	protected $availableAmmoAlreadySet = false; //set to true if calling constructor from derived weapon that sets different ammo options
@@ -1067,7 +1074,13 @@ class AmmoMissileRackS extends Weapon{
 	
 	private $ammoMagazine; //reference to ammo magazine
 	private $ammoClassesUsed = array();
- 
+	public $hidetargetArray = array();
+	
+public $groupingArray = array();
+public $maxpulsesArray = array();
+public $rofArray = array();
+public $useDieArray = array();
+public $fixedBonusPulsesArray = array();		
 	
 	
 	
@@ -1085,9 +1098,9 @@ class AmmoMissileRackS extends Weapon{
 			$this->ammoClassesArray[] =  new AmmoMissileF();
 			$this->ammoClassesArray[] =  new AmmoMissileA();
 			$this->ammoClassesArray[] =  new AmmoMissileP();
-			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
-			$this->ammoClassesArray[] =  new AmmoMissileI(); 
+			$this->ammoClassesArray[] =  new AmmoMissileD();		 //...though only Alacans use those, as simple Basic missiles are far superior
 			$this->ammoClassesArray[] =  new AmmoMissileS();
+			$this->ammoClassesArray[] =  new AmmoMissileK();				
 			$this->availableAmmoAlreadySet = true;
 		}
 	
@@ -1132,8 +1145,13 @@ class AmmoMissileRackS extends Weapon{
 		$this->minDamageArray = array();
 		$this->maxDamageArray = array();
 		$this->ammoClassesUsed = array();
-		$this->hidetargetArray = array();	
-																											 
+		$this->hidetargetArray = array();
+		
+$this->groupingArray = array();
+$this->maxpulsesArray = array();
+$this->rofArray = array();
+$this->useDieArray = array();
+$this->fixedBonusPulsesArray = array();					
 		
 		//add data for all modes to arrays
 		$currMode = 0;
@@ -1175,7 +1193,12 @@ class AmmoMissileRackS extends Weapon{
 				$this->minDamageArray[$currMode] = $currAmmo->minDamage;
 				$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
 				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;	
-												   
+
+$this->groupingArray[$currMode] = $currAmmo->groupingArray;
+$this->maxpulsesArray[$currMode] = $currAmmo->maxpulsesArray;
+$this->rofArray[$currMode] = $currAmmo->rofArray;
+$this->useDieArray[$currMode] = $currAmmo->useDieArray;
+$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulsesArray;						
 			}
 		}
 			
@@ -1208,7 +1231,12 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->minDamageArray = $this->minDamageArray; 
 		$strippedSystem->maxDamageArray = $this->maxDamageArray; 
 		$strippedSystem->hidetargetArray = $this->hidetargetArray;
-				   
+		
+$strippedSystem->groupingArray = $this->groupingArray;
+$strippedSystem->maxpulsesArray = $this->maxpulsesArray;
+$strippedSystem->rofArray = $this->rofArray;
+$strippedSystem->useDieArray = $this->useDieArray;
+$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;				
 		return $strippedSystem;
 	} 
 	
@@ -1295,9 +1323,9 @@ class AmmoMissileRackL extends AmmoMissileRackS{
     public $distanceRange = 70;
     public $firingMode = 1;
     public $priority = 6;
-    public $loadingtime = 2;
-																												
-																							
+    public $loadingtime = 2; 
+     
+    
 	//basic launcher data, before being modified by actual missiles
 	protected $basicFC=array(3,3,3);
 	protected $basicRange=30;
