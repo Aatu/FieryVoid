@@ -4103,7 +4103,7 @@ class AmmoMissileK extends AmmoMissileTemplate{
 	public $modeName = 'K - Starburst';
 	public $size = 2; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_K'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Starburst Missile (2260)'; //enhancement description
+	public $enhancementDescription = '(ammo) Starburst Missile (2260/2264)'; //2260 for Kor-Lyan, 2264 for everyone else 
 	public $enhancementPrice = 30; //PV per missile; originally it's 20 for Kor-Lyan and 30 for everyone else
 	
 	public $rangeMod = 0; //MODIFIER for launch range
