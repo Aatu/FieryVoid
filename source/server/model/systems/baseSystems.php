@@ -3802,12 +3802,12 @@ class AmmoMissileTemplate{
 	public $noOverkill = false;
 	public $useOEW = false;
 	public $hidetarget = false;
-	
-public $grouping = 0;
-public $maxpulses = 0;
-public $rof = 0;
-public $useDie = 0; //die used for base number of hits
-public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	
+    //Adding Pulse variables for Starburst missiles	
+	public $grouping = 0;
+	public $maxpulses = 0;
+	public $rof = 0;
+	public $useDie = 0; //die used for base number of hits
+	public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	
 
 	
     function __construct(){}
@@ -3828,18 +3828,19 @@ public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse
         return;
     }
     
-        public function getPulses($turn)
+    //Adding Pulse functions for Starburst missiles
+        protected function getPulses($turn)
         {
-            return;
+            return 0;
         }
 	
-        public function getExtraPulses($needed, $rolled)
+        protected function getExtraPulses($needed, $rolled)
         {
-            return;
+            return 0;
         }
 	
 		public function rollPulses($turn, $needed, $rolled){
-		return;
+		return 0;
 	}
 	    
 } //endof class AmmoMissileTemplate
@@ -4126,20 +4127,20 @@ public $rof = 3;
 public $useDie = 3; //die used for base number of hits
 public $fixedBonusPulses=3;//for weapons doing dX+Y pulse
 
-        public function getPulses($turn)
+        protected function getPulses($turn)
         {
             return Dice::d($this->useDie) + $this->fixedBonusPulses;
         }
 	
-        public function getExtraPulses($needed, $rolled)
+        protected function getExtraPulses($needed, $rolled)
         {
             return 0;
         }
 	
 	public function rollPulses($turn, $needed, $rolled){
 		$pulses = $this->getPulses($turn);
-		$pulses+= $this->getExtraPulses($needed, $rolled);
-		$pulses=min($pulses,$this->maxpulses);
+//		$pulses+= $this->getExtraPulses($needed, $rolled);
+//		$pulses=min($pulses,$this->maxpulses);
 		return $pulses;
 	}
 	

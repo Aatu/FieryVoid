@@ -1075,12 +1075,12 @@ public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse
 	private $ammoMagazine; //reference to ammo magazine
 	private $ammoClassesUsed = array();
 	public $hidetargetArray = array();
-	
-public $groupingArray = array();
-public $maxpulsesArray = array();
-public $rofArray = array();
-public $useDieArray = array();
-public $fixedBonusPulsesArray = array();		
+    //Adding Pulse variables for Starburst missiles	
+	public $groupingArray = array();
+	public $maxpulsesArray = array();
+	public $rofArray = array();
+	public $useDieArray = array();
+	public $fixedBonusPulsesArray = array();		
 	
 	
 	
@@ -1146,12 +1146,12 @@ public $fixedBonusPulsesArray = array();
 		$this->maxDamageArray = array();
 		$this->ammoClassesUsed = array();
 		$this->hidetargetArray = array();
-		
-$this->groupingArray = array();
-$this->maxpulsesArray = array();
-$this->rofArray = array();
-$this->useDieArray = array();
-$this->fixedBonusPulsesArray = array();					
+    //Adding Pulse functions for Starburst missiles		
+		$this->groupingArray = array();
+		$this->maxpulsesArray = array();
+		$this->rofArray = array();
+		$this->useDieArray = array();
+		$this->fixedBonusPulsesArray = array();					
 		
 		//add data for all modes to arrays
 		$currMode = 0;
@@ -1192,14 +1192,13 @@ $this->fixedBonusPulsesArray = array();
 				$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
 				$this->minDamageArray[$currMode] = $currAmmo->minDamage;
 				$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
-				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;	
-
-
-$this->groupingArray[$currMode] = $currAmmo->grouping;
-$this->maxpulsesArray[$currMode] = $currAmmo->maxpulses;
-$this->rofArray[$currMode] = $currAmmo->rof;
-$this->useDieArray[$currMode] = $currAmmo->useDie;
-$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;						
+				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;
+			    //Adding Pulse functions for Starburst missiles									
+				$this->groupingArray[$currMode] = $currAmmo->grouping;
+				$this->maxpulsesArray[$currMode] = $currAmmo->maxpulses;
+				$this->rofArray[$currMode] = $currAmmo->rof;
+				$this->useDieArray[$currMode] = $currAmmo->useDie;
+				$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;						
 			}
 		}
 			
@@ -1231,13 +1230,13 @@ $this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;
 		$strippedSystem->noOverkillArray = $this->noOverkillArray; 
 		$strippedSystem->minDamageArray = $this->minDamageArray; 
 		$strippedSystem->maxDamageArray = $this->maxDamageArray; 
-		$strippedSystem->hidetargetArray = $this->hidetargetArray;
-		
-$strippedSystem->groupingArray = $this->groupingArray;
-$strippedSystem->maxpulsesArray = $this->maxpulsesArray;
-$strippedSystem->rofArray = $this->rofArray;
-$strippedSystem->useDieArray = $this->useDieArray;
-$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;				
+		$strippedSystem->hidetargetArray = $this->hidetargetArray;	
+	    //Adding Pulse functions for Starburst missiles	
+		$strippedSystem->groupingArray = $this->groupingArray;
+		$strippedSystem->maxpulsesArray = $this->maxpulsesArray;
+		$strippedSystem->rofArray = $this->rofArray;
+		$strippedSystem->useDieArray = $this->useDieArray;
+		$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;				
 		return $strippedSystem;
 	} 
 	
@@ -1307,20 +1306,54 @@ $strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;
             $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->location); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
         }
     }
-
-        public function getPulses($turn)
+    //Adding Pulse functions for Starburst missiles
+        protected function getPulses($turn)
         {
-            return;
-        }
-	
-        public function getExtraPulses($needed, $rolled)
-        {
-            return;
-        }
-	
-		public function rollPulses($turn, $needed, $rolled){
-		return;
-	}
+           $currAmmo = null;
+        //find appropriate ammo
+		if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
+			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
+		}
+	    
+		//execute getPulses()
+		if($currAmmo){
+			return $currAmmo->getPulses($turn);
+		}else{
+			return 0;	
+				};
+    	 }
+	    //Adding Pulse functions for Starburst missiles
+        protected function getExtraPulses($needed, $rolled)
+   		 {
+		$currAmmo = null;
+        //find appropriate ammo
+		if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
+			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
+		}
+	    
+		//execute getExtraPulses()
+		if($currAmmo){
+			return $currAmmo->getExtraPulses($needed, $rolled);
+		}else{
+			return 0;	
+			}
+	    }
+	    //Adding Pulse functions for Starburst missiles
+		public function rollPulses($turn, $needed, $rolled)
+	    {
+			$currAmmo = null;
+	        //find appropriate ammo
+			if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
+				$currAmmo = $this->ammoClassesUsed[$this->firingMode];
+			}
+		    
+			//execute rollPulses()
+			if($currAmmo){
+				return $currAmmo->rollPulses($turn, $needed, $rolled);
+			}else{
+				return 0;	
+			}
+	    }
 	
 } //endof class AmmoMissileRackS
 

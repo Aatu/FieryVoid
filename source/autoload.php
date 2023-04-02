@@ -2444,6 +2444,7 @@ spl_autoload_register(
 				'orrono' => '/server/model/ships/corillani/Orrono.php',
 				'drolla' => '/server/model/ships/corillani/Drolla.php',
 				'plasmablast' => '/server/model/weapons/plasma.php',
+				'corillanithorkaosat' => '/server/model/ships/corillani/CorillaniThorkaOSAT.php',
 				
 				//Vree
 				'sixsidedship' => '/server/model/ships/ShipClasses.php',
