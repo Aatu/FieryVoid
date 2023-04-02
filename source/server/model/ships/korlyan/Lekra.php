@@ -63,14 +63,14 @@ class Lekra extends MediumShip{
                 1=> array(
                         5 => "Thruster",
 						7 => "Standard Particle Beam",
-                        8 => "Class-D Missile Launcher",
+                        8 => "Class-D Missile Rack",
 						11 => "Limpet Bore Torpedo",
                         17 => "Structure",
                         20 => "Primary",
                 ),
                 2=> array(
                         6 => "Thruster",
-                        7 => "Class-D Missile Launcher",
+                        7 => "Class-D Missile Rack",
 						10 => "Limpet Bore Torpedo",
                         17 => "Structure",
                         20 => "Primary",

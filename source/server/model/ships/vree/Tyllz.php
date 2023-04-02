@@ -63,7 +63,7 @@ class Tyllz extends StarBaseSixSections
 				new AntimatterTorpedo(4, 0, 0, $min, $max),
 				new AntiprotonGun(4, 0, 0, $min, $max),
 				new AntiprotonGun(4, 0, 0, $min, $max),
-				new SubReactorUniversal(4, 48),
+				new SubReactorUniversal(4, 23),
 				new Structure( 4, 100)
 			);
 

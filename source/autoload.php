@@ -33,6 +33,7 @@ spl_autoload_register(
                 'anoro' => '/server/model/ships/hurr/anoro.php',
                 'anroethas' => '/server/model/ships/hurr/anroethAS.php',
                 'antimatterconverter' => '/server/model/weapons/antimatter.php',
+                'alykent' => '/server/model/ships/brakiri/Alykent.php',
                 'antoph' => '/server/model/ships/brakiri/antoph.php',
                 'antophearly' => '/server/model/ships/brakiri/antophEarly.php',
                 'antophupgrade' => '/server/model/ships/brakiri/antophUpgrade.php',
@@ -2626,7 +2627,8 @@ spl_autoload_register(
 				'sashulkur' => '/server/model/ships/pakmara/Sashulkur.php',
 				'simtorka' => '/server/model/ships/pakmara/Simtorka.php',
 				'uriktal' => '/server/model/ships/pakmara/Uriktal.php',
-				'thorkaosat' => '/server/model/ships/pakmara/ThorkaOSAT.php',																																																				
+				'thorkaosat' => '/server/model/ships/pakmara/ThorkaOSAT.php',
+				'urshtalu' => '/server/model/ships/pakmara/Urshtalu.php',																																																				
 				
 
 				//Hyach
@@ -2928,7 +2930,11 @@ spl_autoload_register(
 				'thirdspacecnc' => '/server/model/systems/baseSystems.php',		
 				'thirdspaceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceAttackCraft.php',			
 						
-				
+						//Satyra (Wolfgang campaign)
+						'satyrashield' => '/server/model/weapons/customNexus.php',
+						'laserarray' => '/server/model/weapons/customNexus.php',
+      			        'satyramcvtest' => '/server/model/ships/Zsatyra/SatyraMCVTest.php',	
+	
 				//let's end this with unit enhancement class...		    
 				'enhancements' => '/server/model/ships/Enhancements.php'
             );

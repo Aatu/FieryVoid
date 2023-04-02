@@ -262,7 +262,7 @@ class ShockCannon extends Weapon{
 
         //ignore armor; advanced armor halves effect (due to this weapon being Electromagnetic)
         public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
-			if (WeaponEM::isTargetEMResistant($ship,$system)){
+			if (WeaponEM::isTargetEMResistant($target,$system)){
 				$returnArmour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
 				$returnArmour = floor($returnArmour/2);
 				return $returnArmour;
@@ -885,7 +885,7 @@ class CommDisruptor extends Weapon{
 	public $iconPath = "commDIsruptor.png";
 	
 	//let's animate this as a very wide beam...
-	public $animation = "laser";
+	public $animation = "bolt";
         public $animationColor = array(150, 150, 220);
         public $animationExplosionScale = 0.55;
 	/*
@@ -4730,7 +4730,7 @@ class PsychicFieldHandler{
             } 
             //Raking(20) is already described in Raking class           
             $this->data["Special"] .= "<br>Uninterceptable.";  
-            $this->data["Special"] .= "<br>Can be boosted up to 3 times using EW for increased dmg output (2d10+10 extra damage per point of EW used).";
+            $this->data["Special"] .= '<br>Can be boosted with EW for increased dmg output (+2d10 per point of EW used, up to twice). This EW does not count towards your OEW lock on a target.';
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";            
             $this->data["Boostlevel"] = $boost;
         }
@@ -4866,7 +4866,7 @@ class PsionicLance extends Raking{
             } 
             //Raking(15) is already described in Raking class
             $this->data["Special"] .= "Uninterceptable.";              
-            $this->data["Special"] .= '<br>Can be boosted with EW for increased dmg output (+2d10 per point of EW used, up to twice).';
+            $this->data["Special"] .= '<br>Can be boosted with EW for increased dmg output (+2d10 per point of EW used, up to twice). This EW does not count towards your OEW lock on a target.';
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";               
             $this->data["Boostlevel"] = $boost;
         }
@@ -4982,9 +4982,9 @@ class PsionicConcentrator extends Raking{
                 2 => "Double"
             );
         public $rangePenalty = 1;
-            public $rangePenaltyArray = array( 1=>1, 2=>0.5); //Standard and Raking modes
-        public $fireControl = array(8, 4, 4); // fighters, <mediums, <capitals 
-            public $fireControlArray = array( 1=>array(8, 4, 3), 2=>array(3, 5, 6));
+            public $rangePenaltyArray = array( 1=>1, 2=>0.66); //Standard and Raking modes
+        public $fireControl = array(8, 5, 3); // fighters, <mediums, <capitals 
+            public $fireControlArray = array( 1=>array(6, 4, 4), 2=>array(2, 4, 6));
               
 	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
   		public $damageTypeArray = array(1=>"Standard", 2=>"Standard");	    
