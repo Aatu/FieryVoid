@@ -1076,7 +1076,6 @@ public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse
 	private $ammoClassesUsed = array();
 	public $hidetargetArray = array();
     //Adding Pulse variables for Starburst missiles	
-	public $groupingArray = array();
 	public $maxpulsesArray = array();
 	public $rofArray = array();
 	public $useDieArray = array();
@@ -1147,7 +1146,6 @@ public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse
 		$this->ammoClassesUsed = array();
 		$this->hidetargetArray = array();
     //Adding Pulse functions for Starburst missiles		
-		$this->groupingArray = array();
 		$this->maxpulsesArray = array();
 		$this->rofArray = array();
 		$this->useDieArray = array();
@@ -1194,7 +1192,6 @@ public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse
 				$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
 				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;
 			    //Adding Pulse functions for Starburst missiles									
-				$this->groupingArray[$currMode] = $currAmmo->grouping;
 				$this->maxpulsesArray[$currMode] = $currAmmo->maxpulses;
 				$this->rofArray[$currMode] = $currAmmo->rof;
 				$this->useDieArray[$currMode] = $currAmmo->useDie;
@@ -1232,7 +1229,6 @@ public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse
 		$strippedSystem->maxDamageArray = $this->maxDamageArray; 
 		$strippedSystem->hidetargetArray = $this->hidetargetArray;	
 	    //Adding Pulse functions for Starburst missiles	
-		$strippedSystem->groupingArray = $this->groupingArray;
 		$strippedSystem->maxpulsesArray = $this->maxpulsesArray;
 		$strippedSystem->rofArray = $this->rofArray;
 		$strippedSystem->useDieArray = $this->useDieArray;

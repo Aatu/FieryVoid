@@ -3803,7 +3803,6 @@ class AmmoMissileTemplate{
 	public $useOEW = false;
 	public $hidetarget = false;
     //Adding Pulse variables for Starburst missiles	
-	public $grouping = 0;
 	public $maxpulses = 0;
 	public $rof = 0;
 	public $useDie = 0; //die used for base number of hits
@@ -4119,13 +4118,10 @@ class AmmoMissileK extends AmmoMissileTemplate{
 	public $noOverkill = false;
 	public $useOEW = false;
 	public $hidetarget = false;
-	
-	
-//public $grouping = 200;
-public $maxpulses = 6;
-public $rof = 3;
-public $useDie = 3; //die used for base number of hits
-public $fixedBonusPulses=3;//for weapons doing dX+Y pulse
+	public $maxpulses = 6;
+	public $rof = 2;
+	public $useDie = 3; //die used for base number of hits
+	public $fixedBonusPulses=3;//for weapons doing dX+Y pulse
 
         protected function getPulses($turn)
         {
@@ -4139,8 +4135,7 @@ public $fixedBonusPulses=3;//for weapons doing dX+Y pulse
 	
 	public function rollPulses($turn, $needed, $rolled){
 		$pulses = $this->getPulses($turn);
-//		$pulses+= $this->getExtraPulses($needed, $rolled);
-//		$pulses=min($pulses,$this->maxpulses);
+		$pulses=min($pulses,$this->maxpulses);
 		return $pulses;
 	}
 	
@@ -4148,6 +4143,12 @@ public $fixedBonusPulses=3;//for weapons doing dX+Y pulse
     {
         return 10;
     }		
+
+	function getPrice($unit) //some missiles might have different price depending on unit being fitted!
+	{
+		if($unit->faction == 'Kor-Lyan') return 20;
+		return $this->enhancementPrice;
+	}
 	
 } //endof class AmmoMissileK
 
