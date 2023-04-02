@@ -3802,6 +3802,12 @@ class AmmoMissileTemplate{
 	public $noOverkill = false;
 	public $useOEW = false;
 	public $hidetarget = false;
+	
+public $grouping = 0;
+public $maxpulses = 0;
+public $rof = 0;
+public $useDie = 0; //die used for base number of hits
+public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	
 
 	
     function __construct(){}
@@ -4074,6 +4080,44 @@ class AmmoMissileS extends AmmoMissileTemplate{
     }		
 	
 } //endof class AmmoMissileS
+
+//ammunition for AmmoMagazine - Class K Missile (for official Missile Racks)
+class AmmoMissileK extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileK';
+	public $displayName = 'Starburst Missile';
+	public $modeName = 'Starburst';
+	public $size = 2; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_K'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Starburst Missile (2260)'; //enhancement description
+	public $enhancementPrice = 25; //PV per missile; originally it's 20 for Kor-Lyan and 30 for everyone else
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
+	public $minDamage = 10;
+	public $maxDamage = 10;	
+	public $damageType = 'Pulse';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 4;
+	public $priorityAF = 4;
+	public $noOverkill = false;
+	public $useOEW = false;
+	public $hidetarget = false;
+	
+	
+public $grouping = 0;
+public $maxpulses = 6;
+public $rof = 3;
+public $useDie = 3; //die used for base number of hits
+public $fixedBonusPulses=3;//for weapons doing dX+Y pulse
+	
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 10;
+    }		
+	
+} //endof class AmmoMissileS
+
 
 
 
