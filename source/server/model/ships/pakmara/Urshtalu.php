@@ -42,12 +42,12 @@ class Urshtalu extends StarBaseSixSections
 		$this->addPrimarySystem(new ProtectedCnC(8, 48, 0, 0)); //It actually has 3, so I gave +2 armour instead of the usual +1 when two CnCs are combined.
 		$this->addPrimarySystem(new Scanner(6, 18, 6, 8));
 		$this->addPrimarySystem(new Scanner(6, 18, 6, 8));
-		$this->addPrimarySystem(new MediumPlasma(6, 0, 0, 0, 360));	         				
-		$this->addPrimarySystem(new MediumPlasma(6, 0, 0, 0, 360));
-		$this->addPrimarySystem(new MediumPlasma(6, 0, 0, 0, 360));	         				
-		$this->addPrimarySystem(new MediumPlasma(6, 0, 0, 0, 360));
-		$this->addPrimarySystem(new MediumPlasma(6, 0, 0, 0, 360));	         				
-		$this->addPrimarySystem(new MediumPlasma(6, 0, 0, 0, 360));   
+		$this->addPrimarySystem(new MediumPlasma(6, 5, 3, 0, 360));	         				
+		$this->addPrimarySystem(new MediumPlasma(6, 5, 3, 0, 360));	 
+		$this->addPrimarySystem(new MediumPlasma(6, 5, 3, 0, 360));	          				
+		$this->addPrimarySystem(new MediumPlasma(6, 5, 3, 0, 360));	 
+		$this->addPrimarySystem(new MediumPlasma(6, 5, 3, 0, 360));	         				
+		$this->addPrimarySystem(new MediumPlasma(6, 5, 3, 0, 360));	   
 		
         $this->addPrimarySystem(new Structure(6, 100));
 
