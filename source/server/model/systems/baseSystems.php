@@ -3827,6 +3827,21 @@ public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse
     {
         return;
     }
+    
+        public function getPulses($turn)
+        {
+            return;
+        }
+	
+        public function getExtraPulses($needed, $rolled)
+        {
+            return;
+        }
+	
+		public function rollPulses($turn, $needed, $rolled){
+		return;
+	}
+	    
 } //endof class AmmoMissileTemplate
 
 //ammunition for AmmoMagazine - Class B Missile (for official Missile Racks)
@@ -4024,7 +4039,7 @@ class AmmoMissileP extends AmmoMissileTemplate{
 class AmmoMissileD extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileD';
 	public $displayName = 'Light Missile';
-	public $modeName = 'Light';
+	public $modeName = 'D - Light';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_D'; //enhancement name to be enabled
 	public $enhancementDescription = '(ammo) Light Missile (2178)'; //enhancement description
@@ -4085,11 +4100,11 @@ class AmmoMissileS extends AmmoMissileTemplate{
 class AmmoMissileK extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileK';
 	public $displayName = 'Starburst Missile';
-	public $modeName = 'Starburst';
+	public $modeName = 'K - Starburst';
 	public $size = 2; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_K'; //enhancement name to be enabled
 	public $enhancementDescription = '(ammo) Starburst Missile (2260)'; //enhancement description
-	public $enhancementPrice = 25; //PV per missile; originally it's 20 for Kor-Lyan and 30 for everyone else
+	public $enhancementPrice = 30; //PV per missile; originally it's 20 for Kor-Lyan and 30 for everyone else
 	
 	public $rangeMod = 0; //MODIFIER for launch range
 	public $distanceRangeMod = 0; //MODIFIER for distance range
@@ -4105,18 +4120,35 @@ class AmmoMissileK extends AmmoMissileTemplate{
 	public $hidetarget = false;
 	
 	
-public $grouping = 0;
+//public $grouping = 200;
 public $maxpulses = 6;
 public $rof = 3;
 public $useDie = 3; //die used for base number of hits
 public $fixedBonusPulses=3;//for weapons doing dX+Y pulse
+
+        public function getPulses($turn)
+        {
+            return Dice::d($this->useDie) + $this->fixedBonusPulses;
+        }
+	
+        public function getExtraPulses($needed, $rolled)
+        {
+            return 0;
+        }
+	
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn);
+		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses);
+		return $pulses;
+	}
 	
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
         return 10;
     }		
 	
-} //endof class AmmoMissileS
+} //endof class AmmoMissileK
 
 
 
