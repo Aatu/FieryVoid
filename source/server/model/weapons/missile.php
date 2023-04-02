@@ -1307,6 +1307,20 @@ $strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;
             $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->location); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
         }
     }
+
+        public function getPulses($turn)
+        {
+            return;
+        }
+	
+        public function getExtraPulses($needed, $rolled)
+        {
+            return;
+        }
+	
+		public function rollPulses($turn, $needed, $rolled){
+		return;
+	}
 	
 } //endof class AmmoMissileRackS
 
