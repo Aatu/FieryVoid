@@ -4164,7 +4164,7 @@ class AmmoMissileI extends AmmoMissileTemplate{
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_I'; //enhancement name to be enabled
 	public $enhancementDescription = '(ammo) Interceptor Missile (2250)'; //enhancement description
-	public $enhancementPrice = 0; //nominally 0 - included in ship price
+	public $enhancementPrice = 2; //PV per missile; originally it's 0 for Kor-Lyan and 2 for everyone else
 	
 	public $fireControlMod = array(null, null, null); //MODIFIER for weapon fire control!
 	public $minDamage = 0;
@@ -4182,6 +4182,12 @@ class AmmoMissileI extends AmmoMissileTemplate{
     {
         return 0;
     }		
+    
+    function getPrice($unit) //some missiles might have different price depending on unit being fitted!
+    {
+        if($unit->faction == 'Kor-Lyan') return 0;
+        return $this->enhancementPrice;
+    }    
 	
 } //endof class AmmoMissileI
 
