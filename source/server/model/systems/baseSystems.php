@@ -3807,7 +3807,6 @@ class AmmoMissileTemplate{
 	public $rof = 0;
 	public $useDie = 0; //die used for base number of hits
 	public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	
-	//For Chaff missile to mark hit targets	
 
 	
     function __construct(){}
