@@ -3807,6 +3807,7 @@ class AmmoMissileTemplate{
 	public $rof = 0;
 	public $useDie = 0; //die used for base number of hits
 	public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	
+	//For Chaff missile to mark hit targets	
 
 	
     function __construct(){}
@@ -4064,6 +4065,81 @@ class AmmoMissileD extends AmmoMissileTemplate{
 	
 } //endof class AmmoMissileD
 
+//ammunition for AmmoMagazine - Class C Missile (for official Missile Racks)
+class AmmoMissileC extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileC';
+	public $displayName = 'Chaff Missile';
+	public $modeName = 'Chaff';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_C'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Chaff Missile (2230)'; //enhancement description
+	public $enhancementPrice = 4;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
+	public $minDamage = 0;
+	public $maxDamage = 0;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 1;
+	public $priorityAF = 1;
+	public $noOverkill = false;
+	public $useOEW = false;
+	public $hidetarget = false;
+	private static $alreadyEngaged = array();	
+	
+    function __construct(){}
+	
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 0;
+    }		
+    
+ 	public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 
+
+	if (isset(AmmoMissileC::$alreadyEngaged[$ship->id])) return; //target already engaged by a previous Chaff Missile
+
+			$effectHit = 3; 
+			$effectHit5 = $effectHit * 5;
+			$fireOrder->pubnotes .= "<br> All non-ballistic weapon's fire by target reduced by $effectHit5 percent.";
+
+			$allFire = $ship->getAllFireOrders($gamedata->turn);
+			foreach($allFire as $fireOrder) {
+				if ($fireOrder->type == 'normal') {
+					if ($fireOrder->rolled > 0) {
+					}else{
+						$fireOrder->needed -= 3 *5; //$needed works on d100
+						$fireOrder->pubnotes .= "; Chaff Missile impact, -15% to hit."; //note why hit chance does not match
+						AmmoMissileC::$alreadyEngaged[$ship->id] = true;
+					}
+				}
+			}
+
+			if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
+				$firstFighter = $ship->getSampleFighter();
+				AmmoMissileC::$alreadyEngaged[$ship->id] = true;//mark engaged        
+				if($firstFighter){
+					for($i=1; $i<=$effectHit;$i++){
+						$crit = new tmphitreduction(-1, $ship->id, $firstFighter->id, 'tmphitreduction', $gamedata->turn, $gamedata->turn); 
+						$crit->updated = true;
+							$firstFighter->criticals[] =  $crit;
+					}
+				}
+			}else{ //ship - place effcet on C&C!   */
+				$CnC = $ship->getSystemByName("CnC");
+				AmmoMissileC::$alreadyEngaged[$ship->id] = true;//mark engaged        
+				if($CnC){
+					for($i=0; $i<=$effectHit;$i++){
+						$crit = new tmphitreduction(-1, $ship->id, $CnC->id, 'tmphitreduction', $gamedata->turn, $gamedata->turn); 
+						$crit->updated = true;
+							$CnC->criticals[] =  $crit;
+					}
+				}
+			}
+	} //endof function onDamagedSystem   
+
+} //endof class AmmoMissileC
 
 
 //ammunition for AmmoMagazine - Class S Missile (for official Missile Racks, Kor-Lyan only)

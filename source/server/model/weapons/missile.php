@@ -1034,14 +1034,12 @@ class AmmoMissileRackS extends Weapon{
     public $firingMode = 1;
     public $priority = 6;
     public $loadingtime = 2;
-	public $hidetarget = false;
-
-
-public $grouping = 0;
-public $maxpulses = 0;
-public $rof = 0;
-public $useDie = 0; //die used for base number of hits
-public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	  
+	public $hidetarget = false; //For Stealth missile
+    //Adding Pulse variables for Starburst missiles	
+	public $maxpulses = 0;
+	public $rof = 0;
+	public $useDie = 0; //die used for base number of hits
+	public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	  
 	
 	
 	
@@ -1074,7 +1072,7 @@ public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse
 	
 	private $ammoMagazine; //reference to ammo magazine
 	private $ammoClassesUsed = array();
-	public $hidetargetArray = array();
+	public $hidetargetArray = array();//For Stealth missile
     //Adding Pulse variables for Starburst missiles	
 	public $maxpulsesArray = array();
 	public $rofArray = array();
@@ -1091,13 +1089,14 @@ public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse
 		//remember that appropriate enhancements need to be enabled on ehip itself, too!
 		
 		if(!$this->availableAmmoAlreadySet){
-			$this->ammoClassesArray[] = new AmmoMissileB();
-			$this->ammoClassesArray[] = new AmmoMissileL();
+			$this->ammoClassesArray[] =  new AmmoMissileB();
+			$this->ammoClassesArray[] =  new AmmoMissileL();
 			$this->ammoClassesArray[] =  new AmmoMissileH();
 			$this->ammoClassesArray[] =  new AmmoMissileF();
 			$this->ammoClassesArray[] =  new AmmoMissileA();
 			$this->ammoClassesArray[] =  new AmmoMissileP();
-			$this->ammoClassesArray[] =  new AmmoMissileD();		 //...though only Alacans use those, as simple Basic missiles are far superior
+			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
+			$this->ammoClassesArray[] =  new AmmoMissileC();			
 			$this->ammoClassesArray[] =  new AmmoMissileS();
 			$this->ammoClassesArray[] =  new AmmoMissileK();				
 			$this->availableAmmoAlreadySet = true;
@@ -1149,7 +1148,8 @@ public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse
 		$this->maxpulsesArray = array();
 		$this->rofArray = array();
 		$this->useDieArray = array();
-		$this->fixedBonusPulsesArray = array();					
+		$this->fixedBonusPulsesArray = array();
+							
 		
 		//add data for all modes to arrays
 		$currMode = 0;
@@ -1195,7 +1195,7 @@ public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse
 				$this->maxpulsesArray[$currMode] = $currAmmo->maxpulses;
 				$this->rofArray[$currMode] = $currAmmo->rof;
 				$this->useDieArray[$currMode] = $currAmmo->useDie;
-				$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;						
+				$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;				
 			}
 		}
 			
@@ -1232,7 +1232,9 @@ public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse
 		$strippedSystem->maxpulsesArray = $this->maxpulsesArray;
 		$strippedSystem->rofArray = $this->rofArray;
 		$strippedSystem->useDieArray = $this->useDieArray;
-		$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;				
+		$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;
+		
+//		$strippedSystem->alreadyEngagedArray = $this->alreadyEngagedArray;				
 		return $strippedSystem;
 	} 
 	
@@ -1303,30 +1305,28 @@ public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse
         }
     }
     //Adding Pulse functions for Starburst missiles
-        protected function getPulses($turn)
+    protected function getPulses($turn)
         {
            $currAmmo = null;
         //find appropriate ammo
 		if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
 			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
-		}
-	    
+		} 
 		//execute getPulses()
 		if($currAmmo){
 			return $currAmmo->getPulses($turn);
 		}else{
 			return 0;	
-				};
+			}
     	 }
-	    //Adding Pulse functions for Starburst missiles
-        protected function getExtraPulses($needed, $rolled)
+    	 
+    protected function getExtraPulses($needed, $rolled)
    		 {
 		$currAmmo = null;
         //find appropriate ammo
 		if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
 			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
 		}
-	    
 		//execute getExtraPulses()
 		if($currAmmo){
 			return $currAmmo->getExtraPulses($needed, $rolled);
@@ -1334,15 +1334,14 @@ public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse
 			return 0;	
 			}
 	    }
-	    //Adding Pulse functions for Starburst missiles
-		public function rollPulses($turn, $needed, $rolled)
+
+	public function rollPulses($turn, $needed, $rolled)
 	    {
 			$currAmmo = null;
 	        //find appropriate ammo
 			if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
 				$currAmmo = $this->ammoClassesUsed[$this->firingMode];
 			}
-		    
 			//execute rollPulses()
 			if($currAmmo){
 				return $currAmmo->rollPulses($turn, $needed, $rolled);

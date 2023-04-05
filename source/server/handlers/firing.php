@@ -449,6 +449,8 @@ class Firing
                 if (!($weapon instanceof Weapon)){ //this isn't a weapon after all...
                     continue;
                 }		
+                
+		$weapon->changeFiringMode($fire->firingMode); //For Chaff Missile
 		    
                 $fire->priority = $weapon->priority;
 				//take different AF priority into account!
