@@ -1232,9 +1232,7 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->maxpulsesArray = $this->maxpulsesArray;
 		$strippedSystem->rofArray = $this->rofArray;
 		$strippedSystem->useDieArray = $this->useDieArray;
-		$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;
-		
-//		$strippedSystem->alreadyEngagedArray = $this->alreadyEngagedArray;				
+		$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;			
 		return $strippedSystem;
 	} 
 	
