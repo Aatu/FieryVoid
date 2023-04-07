@@ -8,7 +8,7 @@ class Adder extends FighterFlight{
 	$this->faction = "Raiders";
       $this->phpclass = "Adder";
        $this->shipClass = "Adder Light Fighters";
-	$this->imagePath = "img/ships/dragon.png"; //much earlier than Dragon, but still Drazi - closer to that silhouette than Delta-V
+	$this->imagePath = "img/ships/RaiderAdder.png"; //much earlier than Dragon, but still Drazi - closer to that silhouette than Delta-V
 
 		$this->notes = "Generic raider unit.";
 		$this->notes .= "<br> ";
@@ -36,8 +36,8 @@ class Adder extends FighterFlight{
 		$armour = array(1, 0, 1, 1);
 		$fighter = new Fighter("deltaV", $armour, 5, $this->id);
 		$fighter->displayName = "Adder";
-		$fighter->imagePath = "img/ships/dragon.png"; 
-		$fighter->iconPath = "img/ships/dragon_large.png"; 
+		$fighter->imagePath = "img/ships/RaiderAdder.png"; 
+		$fighter->iconPath = "img/ships/RaiderAdder_large.png"; 
 			
 		$fighter->addFrontSystem(new PairedParticleGun(330, 30, 2));
 	    	$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack

@@ -7,7 +7,7 @@ class IMLArmedTransport extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 450;
 	$this->faction = "Raiders";
         $this->phpclass = "IMLArmedTransport";
-        $this->imagePath = "img/ships/ikorta.png";
+        $this->imagePath = "img/ships/RaiderIMLTransport.png";
         $this->shipClass = "IML Armed Transport";
         
 		$this->notes = 'Used only by the Independent Mercenaries League';

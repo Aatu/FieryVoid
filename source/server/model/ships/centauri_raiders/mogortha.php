@@ -7,7 +7,7 @@ class Mogortha extends MediumShip{
 		$this->pointCost = 380;
 		$this->faction = "Raiders";
 		$this->phpclass = "Mogortha";
-		$this->imagePath = "img/ships/mograth.png";
+		$this->imagePath = "img/ships/CentauriPrivateerMogortha.png";
 		$this->shipClass = "Centauri Privateer Mogortha Frigate";
 		$this->agile = true;
 		$this->canvasSize = 100;

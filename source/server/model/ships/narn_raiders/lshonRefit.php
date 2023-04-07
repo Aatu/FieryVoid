@@ -10,7 +10,7 @@ class LshonRefit extends LCV{
 	$this->shipClass = "Narn Privateer L'Shon Gunboat (2244 refit)";
 			$this->occurence = "common";
 			$this->variantOf = "Narn Privateer L'Shon Gunboat";
-	$this->imagePath = "img/ships/dsharda.png";
+	$this->imagePath = "img/ships/NarnPrivateerLshon.png";
 	$this->canvasSize = 55;
 
 	$this->notes = "Used only by Narn privateers";

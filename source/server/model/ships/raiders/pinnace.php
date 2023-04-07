@@ -8,7 +8,7 @@ class Pinnace extends MediumShip{
 		$this->faction = "Raiders";
         $this->phpclass = "Pinnace";
 //        $this->imagePath = "img/ships/pinnace.png";
-        $this->imagePath = "img/ships/raider_pinnace.png";
+        $this->imagePath = "img/ships/RaiderGunboat.png";
         $this->shipClass = "Pinnace";
         $this->canvasSize = 85;
 
