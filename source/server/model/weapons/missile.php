@@ -1035,8 +1035,11 @@ class AmmoMissileRackS extends Weapon{
     public $priority = 6;
     public $loadingtime = 2;
 	public $hidetarget = false; //For Stealth missile
-    //Adding Pulse variables for Starburst missiles	
-	public $maxpulses = 0;
+
+	public $intercept = 0;	//Adding Intercept variables for Interceptor missiles	
+	public $ballisticIntercept = false;
+	
+	public $maxpulses = 0;    //Adding Pulse variables for Starburst missiles
 	public $rof = 0;
 	public $useDie = 0; //die used for base number of hits
 	public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	  
@@ -1073,8 +1076,11 @@ class AmmoMissileRackS extends Weapon{
 	private $ammoMagazine; //reference to ammo magazine
 	private $ammoClassesUsed = array();
 	public $hidetargetArray = array();//For Stealth missile
-    //Adding Pulse variables for Starburst missiles	
-	public $maxpulsesArray = array();
+	
+	public $interceptArray = array();     //Adding Intercept variables for Interceptor missiles	
+	public $ballisticInterceptArray = array();	
+	
+	public $maxpulsesArray = array();     //Adding Pulse variables for Starburst missiles	
 	public $rofArray = array();
 	public $useDieArray = array();
 	public $fixedBonusPulsesArray = array();		
@@ -1096,7 +1102,8 @@ class AmmoMissileRackS extends Weapon{
 			$this->ammoClassesArray[] =  new AmmoMissileA();
 			$this->ammoClassesArray[] =  new AmmoMissileP();
 			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
-			$this->ammoClassesArray[] =  new AmmoMissileC();			
+			$this->ammoClassesArray[] =  new AmmoMissileC();
+			$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers at this time.						
 			$this->ammoClassesArray[] =  new AmmoMissileS();
 			$this->ammoClassesArray[] =  new AmmoMissileK();				
 			$this->availableAmmoAlreadySet = true;
@@ -1144,8 +1151,9 @@ class AmmoMissileRackS extends Weapon{
 		$this->maxDamageArray = array();
 		$this->ammoClassesUsed = array();
 		$this->hidetargetArray = array();
-    //Adding Pulse functions for Starburst missiles		
-		$this->maxpulsesArray = array();
+//		$this->interceptArray = array();//Adding Intercept variables for Interceptor missiles	
+//		$this->ballisticInterceptArray = array();
+		$this->maxpulsesArray = array();//Adding Pulse functions for Starburst missiles	
 		$this->rofArray = array();
 		$this->useDieArray = array();
 		$this->fixedBonusPulsesArray = array();
@@ -1190,9 +1198,10 @@ class AmmoMissileRackS extends Weapon{
 				$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
 				$this->minDamageArray[$currMode] = $currAmmo->minDamage;
 				$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
-				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;
-			    //Adding Pulse functions for Starburst missiles									
-				$this->maxpulsesArray[$currMode] = $currAmmo->maxpulses;
+				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;//For Stealth missiles
+				$this->interceptArray[$currMode] = $currAmmo->intercept;//Adding Intercept variables for Interceptor missiles	
+//				$this->ballisticInterceptArray[$currMode] = $currAmmo->ballisticIntercept;				
+//				$this->maxpulsesArray[$currMode] = $currAmmo->maxpulses;//Adding Pulse functions for Starburst missiles	
 				$this->rofArray[$currMode] = $currAmmo->rof;
 				$this->useDieArray[$currMode] = $currAmmo->useDie;
 				$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;				
@@ -1227,9 +1236,10 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->noOverkillArray = $this->noOverkillArray; 
 		$strippedSystem->minDamageArray = $this->minDamageArray; 
 		$strippedSystem->maxDamageArray = $this->maxDamageArray; 
-		$strippedSystem->hidetargetArray = $this->hidetargetArray;	
-	    //Adding Pulse functions for Starburst missiles	
-		$strippedSystem->maxpulsesArray = $this->maxpulsesArray;
+		$strippedSystem->hidetargetArray = $this->hidetargetArray;	//For Stealth Missiles
+//		$strippedSystem->interceptArray = $this->interceptArray;//Adding Intercept variables for Interceptor missiles	
+//		$strippedSystem->ballisticInterceptArray = $this->ballisticInterceptArray;			
+		$strippedSystem->maxpulsesArray = $this->maxpulsesArray;//Adding Pulse functions for Starburst missiles	
 		$strippedSystem->rofArray = $this->rofArray;
 		$strippedSystem->useDieArray = $this->useDieArray;
 		$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;			
@@ -1548,6 +1558,47 @@ class AmmoMissileRackA extends AmmoMissileRackS{
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
 	}
 } //endof class AmmoMissileRackA
+
+//Class-D Missile Rack - holds 20 missiles (only carries Interceptor (I - default), chaff (C), and anti-fighter (A) missiles)
+class AmmoMissileRackD extends AmmoMissileRackS{
+	public $name = "AmmoMissileRackD";
+    public $displayName = "Class-D Missile Rack";
+    public $iconPath = "ClassDMissileRack.png";    
+
+    public $range = 20; //antifighter missile itself will reduce it - this way the same missile fits all racks
+    public $distanceRange = 60;
+    public $firingMode = 1;
+    public $priority = 6;
+    public $loadingtime = 1;
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(3, 3, 3);
+	protected $basicRange=20;
+	protected $basicDistanceRange = 60;
+	
+	public $intercept = 6;	//Hardcoding intercept values to launcher until I-missile is ready	
+	public $ballisticIntercept = true;	
+
+    protected $rackExplosionDamage = 15; //how much damage will this weapon do in case of catastrophic explosion
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+		if ( $powerReq == 0 ) $powerReq = 0;
+
+		//reset missile availability! (Parent sets way too much)
+		if(!$this->availableAmmoAlreadySet){
+			$this->ammoClassesArray = array();
+			$this->ammoClassesArray[] =  new AmmoMissileI(); 			
+			$this->ammoClassesArray[] =  new AmmoMissileA();
+			$this->ammoClassesArray[] =  new AmmoMissileC();			
+
+			$this->availableAmmoAlreadySet = true;
+		}						
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+	}
+	
+} //endof class AmmoMissileRackD
 
 
 /*Bomb Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)

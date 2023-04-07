@@ -1207,7 +1207,7 @@ class Enhancements{
 					case 'AMMO_D': //Light Missile						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileB(), $enhCount, true); //do notify dependent weapons, too!
 						break;
-					case 'AMMO_I': //Interceptor Missile						
+					case 'AMMO_I': //Interceptor Missile 						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileI(), $enhCount, true); //do notify dependent weapons, too!
 						break;
 					case 'AMMO_C': //Chaff Missile						

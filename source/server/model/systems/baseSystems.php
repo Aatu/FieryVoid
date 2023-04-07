@@ -3802,6 +3802,9 @@ class AmmoMissileTemplate{
 	public $noOverkill = false;
 	public $useOEW = false;
 	public $hidetarget = false;
+    //Adding Intercept variables for Interceptor missiles		
+	public $intercept = 0;
+	public $ballisticIntercept = false;	
     //Adding Pulse variables for Starburst missiles	
 	public $maxpulses = 0;
 	public $rof = 0;
@@ -4109,7 +4112,7 @@ class AmmoMissileC extends AmmoMissileTemplate{
 					if ($fireOrder->rolled > 0) {
 					}else{
 						$fireOrder->needed -= 3 *5; //$needed works on d100
-						$fireOrder->pubnotes .= "; Chaff Missile impact, -15% to hit."; //note why hit chance does not match
+	//					$fireOrder->pubnotes .= "; Chaff Missile impact, -15% to hit."; //note why hit chance does not match
 						AmmoMissileC::$alreadyEngaged[$ship->id] = true;
 					}
 				}
@@ -4139,6 +4142,42 @@ class AmmoMissileC extends AmmoMissileTemplate{
 	} //endof function onDamagedSystem   
 
 } //endof class AmmoMissileC
+
+
+//ammunition for AmmoMagazine - Class I Missile (for official Missile Racks)
+class AmmoMissileI extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileI';
+	public $displayName = 'Interceptor Missile';
+	public $modeName = 'Interceptor';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_I'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Interceptor Missile (2250)'; //enhancement description
+	public $enhancementPrice = 2; //PV per missile; originally it's 0 for Kor-Lyan and 2 for everyone else
+	
+	public $fireControlMod = array(null, null, null); //MODIFIER for weapon fire control!
+	public $minDamage = 0;
+	public $maxDamage = 0;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 1;
+	public $priorityAF = 1;
+	public $noOverkill = false;
+	public $hidetarget = false;
+	public $intercept = 0;
+	public $ballisticIntercept = false;
+		
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 0;
+    }		
+    
+    function getPrice($unit) //some missiles might have different price depending on unit being fitted!
+    {
+        if($unit->faction == 'Kor-Lyan') return 0;
+        return $this->enhancementPrice;
+    }    
+	
+} //endof class AmmoMissileI
 
 
 //ammunition for AmmoMagazine - Class S Missile (for official Missile Racks, Kor-Lyan only)
@@ -4226,47 +4265,6 @@ class AmmoMissileK extends AmmoMissileTemplate{
 	}
 	
 } //endof class AmmoMissileK
-
-
-
-
-//GTS - 24feb23
-//ammunition for AmmoMagazine - Class I Missile (for official Missile Racks)
-class AmmoMissileI extends AmmoMissileTemplate{	
-	public $name = 'ammoMissileI';
-	public $displayName = 'Interceptor Missile';
-	public $modeName = 'Interceptor';
-	public $size = 1; //how many store slots are required for a single round
-	public $enhancementName = 'AMMO_I'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Interceptor Missile (2250)'; //enhancement description
-	public $enhancementPrice = 2; //PV per missile; originally it's 0 for Kor-Lyan and 2 for everyone else
-	
-	public $fireControlMod = array(null, null, null); //MODIFIER for weapon fire control!
-	public $minDamage = 0;
-	public $maxDamage = 0;	
-	public $damageType = 'Standard';//mode of dealing damage
-	public $weaponClass = 'Ballistic';//weapon class
-	public $priority = 1;
-	public $priorityAF = 1;
-	public $noOverkill = false;
-	public $hidetarget = false;
-	public $intercept = 6;
-	public $ballisticIntercept = true;
-		
-    public function getDamage($fireOrder) //actual function to be called, as with weapon!
-    {
-        return 0;
-    }		
-    
-    function getPrice($unit) //some missiles might have different price depending on unit being fitted!
-    {
-        if($unit->faction == 'Kor-Lyan') return 0;
-        return $this->enhancementPrice;
-    }    
-	
-} //endof class AmmoMissileI
-
-
 
 
 //ammunition for AmmoMagazine - Class FB Missile (Fighter Basic Missile)
