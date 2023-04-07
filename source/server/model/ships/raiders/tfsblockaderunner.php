@@ -7,7 +7,7 @@ class tfsblockaderunner extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 320;
 	$this->faction = "Raiders";
         $this->phpclass = "tfsblockaderunner";
-        $this->imagePath = "img/ships/drazi/RaiderTFSBlockadeRunner.png";
+        $this->imagePath = "img/ships/RaiderTFSBlockadeRunner.png";
         $this->shipClass = "TFS Blockade Runner";
 	    $this->isd = 2249;
         $this->canvasSize = 256;

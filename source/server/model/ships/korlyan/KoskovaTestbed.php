@@ -6,7 +6,7 @@ class KoskovaTestbed extends BaseShip{
         
 	$this->pointCost = 800;
 
-//	$this->faction = "Custom Ships";
+	$this->faction = "Custom Ships";
         $this->phpclass = "KoskovaTestbed";
         $this->imagePath = "img/ships/korlyan_koskova2.png";
         $this->shipClass = "Koskova Testbed";
