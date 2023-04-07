@@ -2029,6 +2029,8 @@ spl_autoload_register(
                 'lshon' => '/server/model/ships/narn_raiders/lshon.php',
                 'lshonrefit' => '/server/model/ships/narn_raiders/lshonRefit.php',
                 'privateergorith' => '/server/model/ships/narn_raiders/Privateergorith.php',
+		    	'tlaca' => '/server/model/ships/narn_raiders/Tlaca.php',
+		    	'tlacaearly' => '/server/model/ships/narn_raiders/TlacaEarly.php',    		    	                
 
 
 
