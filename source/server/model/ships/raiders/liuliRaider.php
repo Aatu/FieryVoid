@@ -6,7 +6,7 @@ class LiuliRaider extends HeavyCombatVesselLeftRight{
     	$this->pointCost = 400;
         $this->faction = "Raiders";
         $this->phpclass = "LiuliRaider";
-        $this->imagePath = "img/ships/falenna.png"; //it's not based on Falenna hull but it's more or less similar in shape, I use it rather than create my own with meager skill
+        $this->imagePath = "img/ships/RaiderLiuli.png"; //it's not based on Falenna hull but it's more or less similar in shape, I use it rather than create my own with meager skill
         $this->shipClass = "Raider Liuli Destroyer";
         $this->isd = 1965;
         $this->variantOf = "Centauri Privateer Liuli Destroyer";

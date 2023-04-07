@@ -7,7 +7,7 @@ class Uidace extends BaseShip{
   $this->pointCost = 550;
   $this->faction = "Raiders";
         $this->phpclass = "RaiderUidace";
-        $this->imagePath = "img/ships/Uidace.png"; //Currently using Gaim version of this hull
+        $this->imagePath = "img/ships/RaiderUidace.png"; //Currently using Gaim version of this hull
         $this->shipClass = "Uid'Ac'e Cruiser";
 //        $this->shipSizeClass = 3;
 		$this->canvasSize = 175;
