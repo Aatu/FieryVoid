@@ -54,7 +54,6 @@ class Sloop extends MediumShip{
         		0=> array(
         				10 => "Thruster",
         				13 => "Cargo Bay",
-        				15 => "Scanner",
         				16 => "Scanner",
         				17 => "Hangar",
         				19 => "Reactor",
