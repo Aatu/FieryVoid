@@ -8,7 +8,7 @@ class Skiff extends MediumShip{
 	$this->faction = "Raiders";
         $this->phpclass = "Skiff";
 //        $this->imagePath = "img/ships/sloop.png"; //needs to be changed
-        $this->imagePath = "img/ships/skiff.png"; 
+        $this->imagePath = "img/ships/RaiderSkiff.png"; 
         $this->shipClass = "Skiff";
         $this->canvasSize = 70;
         
