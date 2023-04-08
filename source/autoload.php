@@ -686,7 +686,7 @@ spl_autoload_register(
                 'optine' => '/server/model/ships/centauri_old/optine.php',
                 'optine1966' => '/server/model/ships/centauri_old/optine1966.php',
                 'optine2005' => '/server/model/ships/centauri_old/optine2005.php',
-                'optineupgrade' => '/server/model/ships/centauri/optineUpgrade.php',
+//                'optineupgrade' => '/server/model/ships/centauri/optineUpgrade.php',
                 'oracle' => '/server/model/ships/EA/oracle.php',
                 //'oraclescout' => '/server/model/ships/EA/oracleScout.php',
                 'oraclescoutepsilon' => '/server/model/ships/EA/oracleScoutEpsilon.php',
