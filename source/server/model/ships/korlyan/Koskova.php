@@ -8,7 +8,7 @@ class Koskova extends BaseShip{
 		$this->faction = "Kor-Lyan";
 //	$this->faction = "Custom Ships";
         $this->phpclass = "Koskova";
-        $this->imagePath = "img/ships/korlyan_koskova2.png";
+        $this->imagePath = "img/ships/korlyan_koskova3.png";
         $this->shipClass = "Koskova Battlecruiser";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; //img has 200px per side

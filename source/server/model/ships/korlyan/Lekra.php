@@ -7,7 +7,7 @@ class Lekra extends MediumShip{
 		$this->pointCost = 400;
 		$this->faction = "Kor-Lyan";
         $this->phpclass = "Lekra";
-        $this->imagePath = "img/ships/korlyan_cokra.png";
+        $this->imagePath = "img/ships/korlyan_cokra2.png";
         $this->shipClass = "Lekra Torpedo Frigate";
 			$this->occurence = "rare";
 			$this->variantOf = 'Cokra Blockade Runner';

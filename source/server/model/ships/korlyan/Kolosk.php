@@ -8,7 +8,7 @@ class Kolosk extends BaseShip{
 		$this->faction = "Kor-Lyan";
 //	$this->faction = "Custom Ships";
         $this->phpclass = "Kolosk";
-        $this->imagePath = "img/ships/korlyan_koskova2.png";
+        $this->imagePath = "img/ships/korlyan_koskova3.png";
         $this->shipClass = "Kolosk Proximity Cruiser";
 			$this->occurence = "uncommon";
 			$this->variantOf = 'Koskova Battlecruiser';

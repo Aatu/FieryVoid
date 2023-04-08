@@ -331,3 +331,9 @@ var FtrInterdictor = function FtrInterdictor(json, ship) {
 };
 FtrInterdictor.prototype = Object.create(Weapon.prototype);
 FtrInterdictor.prototype.constructor = FtrInterdictor;
+
+var UnreliableTwinArray = function UnreliableTwinArray(json, ship) {
+    Particle.call(this, json, ship);
+};
+UnreliableTwinArray.prototype = Object.create(Particle.prototype);
+UnreliableTwinArray.prototype.constructor = UnreliableTwinArray;

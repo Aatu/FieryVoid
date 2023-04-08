@@ -21,7 +21,7 @@ class TalokiEarly extends StarBaseSixSections{
 		$this->forwardDefense = 21;
 		$this->sideDefense = 24;
 
-		$this->imagePath = "img/ships/korlyan_taloki.png";
+		$this->imagePath = "img/ships/korlyan_taloki2.png";
 		$this->canvasSize = 260; //Enormous Starbase
 
         //ammo magazine itself (AND its missile options)
@@ -33,6 +33,7 @@ class TalokiEarly extends StarBaseSixSections{
         $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-P
 
 		$this->locations = array(41, 42, 2, 32, 31, 1);
 

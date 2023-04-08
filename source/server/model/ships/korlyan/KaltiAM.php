@@ -34,7 +34,7 @@ class KaltiAM extends FighterFlight{
 		$fighter = new Fighter("Kalti", $armour, 10, $this->id);
 		$fighter->displayName = "Kalti";
 		$fighter->imagePath = "img/ships/korlyanKalti_v2.png";
-		$fighter->iconPath = "img/ships/korlyanKalti_large.png";
+		$fighter->iconPath = "img/ships/korlyanKalti_large2.png";
 
 		//ammo magazine itself (AND its missile options)
 		$ammoMagazine = new AmmoMagazine(4); //pass magazine capacity - actual number of rounds, NOT number of salvoes

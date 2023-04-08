@@ -34,6 +34,7 @@ class CylonPillager extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
 		$this->addFrontSystem(new MedGuidedMissile(3, 5, 4, 300, 60));
 		$this->addFrontSystem(new MedGuidedMissile(3, 5, 4, 300, 60));
+		$this->addFrontSystem(new MedGuidedMissileS(3, 5, 4, 300, 60));
 		$this->addFrontSystem(new HvyGuidedMissile(3, 7, 6, 300, 60));
         
 		$this->addAftSystem(new LtGuidedMissile(3, 3, 2, 120, 240));
@@ -63,6 +64,7 @@ class CylonPillager extends HeavyCombatVessel{
                 1=> array(
                     4 => "Thruster",
                     7 => "Heavy Guided Missile",
+                    9 => "Special Medium Guided Missile",
                     10 => "Medium Guided Missile",
                     18 => "Structure",
                     20 => "Primary",

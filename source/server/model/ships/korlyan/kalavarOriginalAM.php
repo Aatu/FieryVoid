@@ -7,7 +7,7 @@ class KalavarOriginalAM extends OSAT{
 		$this->pointCost = 210;
 		$this->faction = "Kor-Lyan";
         $this->phpclass = "KalavarOriginalAM";
-        $this->imagePath = "img/ships/korlyan_kalavar.png";
+        $this->imagePath = "img/ships/korlyan_kalavar2.png";
         $this->shipClass = "Kalavar Orbital Satellite (2194)";
 			$this->occurence = "common";
 			$this->variantOf = 'Kalavar Orbital Satellite (2240)';

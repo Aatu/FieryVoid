@@ -7,7 +7,7 @@ class Cokra extends MediumShip{
 		$this->pointCost = 280;
 		$this->faction = "Kor-Lyan";
         $this->phpclass = "Cokra";
-        $this->imagePath = "img/ships/korlyan_cokra.png";
+        $this->imagePath = "img/ships/korlyan_cokra2.png";
         $this->shipClass = "Cokra Blockade Runner";
         $this->canvasSize = 70;
 	    

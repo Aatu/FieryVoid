@@ -8,7 +8,7 @@ class SoskaAM extends BaseShip{
 		$this->faction = "Kor-Lyan";
 //	$this->faction = "Custom Ships";
         $this->phpclass = "SoskaAM";
-        $this->imagePath = "img/ships/korlyan_soska.png";
+        $this->imagePath = "img/ships/korlyan_soska2.png";
         $this->shipClass = "Soska Missile Cruiser";
 			$this->occurence = "uncommon";
 			$this->variantOf = 'Kosha Light Cruiser';
@@ -40,6 +40,7 @@ class SoskaAM extends BaseShip{
         $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-P
         
         $this->addPrimarySystem(new Reactor(5, 15, 0, 2));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
