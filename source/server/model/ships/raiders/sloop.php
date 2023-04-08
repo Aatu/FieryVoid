@@ -8,7 +8,7 @@ class Sloop extends MediumShip{
 		$this->faction = "Raiders";
         $this->phpclass = "Sloop";
         $this->imagePath = "img/ships/sloop.png";
-        $this->shipClass = "Sloop";
+        $this->shipClass = "Assault Sloop";
         $this->canvasSize = 100;
         
 		$this->notes = "Generic raider unit.";
