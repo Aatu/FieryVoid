@@ -2500,6 +2500,9 @@ spl_autoload_register(
 				'apollostrike' => '/server/model/ships/EA/apollostrike.php',			
                 'swerrantventure' => '/server/model/ships/ZStarWars/swErrantVenture.php',
 				'unevenbasefoursections' => '/server/model/ships/ShipClasses.php',
+				'dsharda' => '/server/model/ships/civilians/Dsharda.php',				
+				'dshardapulse' => '/server/model/ships/civilians/DshardaPulse.php',
+
 
 
 				//Star Trek conversions
@@ -2784,6 +2787,8 @@ spl_autoload_register(
 						'ammomissilerackd' => '/server/model/weapons/missile.php',
                 		'ammobombrack' => '/server/model/weapons/missile.php',
                 		'ammofighterrack' => '/server/model/weapons/missile.php',
+                		'klammomissileracks' => '/server/model/weapons/missile.php',
+                		
 						
 						
 						//ships using new style launchers (and magazine of course) - by faction
@@ -2923,7 +2928,7 @@ spl_autoload_register(
 						'gaimkastafighteram' => '/server/model/ships/gaim/gaimKastaFighterAM.php',
 						
 						
-				//new custom faction: Thirdspace
+				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',
 				'psychicfieldhandler' => '/server/model/weapons/specialWeapons.php',
 				'thirdspaceshieldprojection' =>	'/server/model/weapons/defensive.php',

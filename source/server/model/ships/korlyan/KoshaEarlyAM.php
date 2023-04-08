@@ -6,7 +6,6 @@ class KoshaEarlyAM extends BaseShip{
         
 	$this->pointCost = 500;
 		$this->faction = "Kor-Lyan";
-//	$this->faction = "Custom Ships";
         $this->phpclass = "KoshaEarlyAM";
         $this->imagePath = "img/ships/korlyan_koshaEarly.png";
         $this->shipClass = "Kosha Light Cruiser (early)";
@@ -62,14 +61,14 @@ class KoshaEarlyAM extends BaseShip{
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
-        $this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 120, 240, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addAftSystem(new KLAmmoMissileRackS(3, 0, 0, 120, 240, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 
         $this->addLeftSystem(new AmmoMissileRackD(2, 0, 0, 180, 360, $ammoMagazine, false));
-        $this->addLeftSystem(new AmmoMissileRackS(3, 0, 0, 240, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addLeftSystem(new KLAmmoMissileRackS(3, 0, 0, 240, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addLeftSystem(new Thruster(4, 15, 0, 4, 3));
 
         $this->addRightSystem(new AmmoMissileRackD(2, 0, 0, 0, 180, $ammoMagazine, false));
-        $this->addRightSystem(new AmmoMissileRackS(3, 0, 0, 0, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addRightSystem(new KLAmmoMissileRackS(3, 0, 0, 0, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addRightSystem(new Thruster(4, 15, 0, 4, 4));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
