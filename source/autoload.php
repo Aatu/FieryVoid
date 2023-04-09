@@ -2885,6 +2885,7 @@ spl_autoload_register(
 						'hurrmissileosat2220am' => '/server/model/ships/hurr/HurrmissileOSAT2220AM.php',
 						'hurrmissileosat2240am' => '/server/model/ships/hurr/HurrmissileOSAT2240AM.php',
 						'borocaam' => '/server/model/ships/hurr/borocaAM.php',
+						'borocaamearly' => '/server/model/ships/hurr/borocaAMEarly.php',												
 						'borocadaam' => '/server/model/ships/hurr/borocadaAM.php',
 						'norekam' => '/server/model/ships/hurr/norekAM.php',
 						'anoroam' => '/server/model/ships/hurr/anoroAM.php',

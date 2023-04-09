@@ -1,17 +1,20 @@
 <?php
-class borocaAM extends BaseShip{
+class borocaAMEarly extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 500;
+        $this->pointCost = 494;
         $this->faction = "Hurr";
-        $this->phpclass = "borocaAM";
+        $this->phpclass = "borocaAMEarly";
         $this->imagePath = "img/ships/hurrBoroca.png";
-        $this->shipClass = "Boroca Gunship";
+        $this->shipClass = "Boroca Gunship (Early)";
         $this->shipSizeClass = 3;
+        
+        $this->occurence = "common";
+        $this->variantOf = 'Boroca Gunship';        
 
-        $this->isd = 2240;
+        $this->isd = 2225;
         
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
@@ -24,9 +27,9 @@ class borocaAM extends BaseShip{
          
 		 
         //ammo magazine itself (AND its missile options)
-        $ammoMagazine = new AmmoMagazine(40); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $ammoMagazine = new AmmoMagazine(24); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
         $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 40); //add full load of basic missiles
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 24); //add full load of basic missiles
         $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
         $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
@@ -45,8 +48,8 @@ class borocaAM extends BaseShip{
 	$this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new HeavyPlasma(4, 8, 5, 300, 0));
         $this->addFrontSystem(new HeavyPlasma(4, 8, 5, 0, 60));
-		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackSO(3, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackSO(3, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         
 	$this->addAftSystem(new Thruster(3, 16, 0, 4, 2));
 	$this->addAftSystem(new Thruster(3, 16, 0, 4, 2));
