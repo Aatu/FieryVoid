@@ -2502,7 +2502,12 @@ spl_autoload_register(
 				'unevenbasefoursections' => '/server/model/ships/ShipClasses.php',
 				'dsharda' => '/server/model/ships/civilians/Dsharda.php',				
 				'dshardapulse' => '/server/model/ships/civilians/DshardaPulse.php',
-
+				'areko' => '/server/model/ships/brakiri_raiders/Areko.php',
+				'rava' => '/server/model/ships/brakiri_raiders/Rava.php',
+				'attackfrigate' => '/server/model/ships/brakiri_raiders/AttackFrigate.php',
+				'folshota' => '/server/model/ships/brakiri/FolshotA.php',
+				'folshotaraider' => '/server/model/ships/brakiri_raiders/FolshotARaider.php',									
+				
 
 
 				//Star Trek conversions
