@@ -12,6 +12,8 @@ class OptineUpgrade extends BaseShip{
         $this->shipSizeClass = 3;
 	    $this->isd = 2206;
 
+	    $this->notes .= '<br>Ablated armor.';
+	    $this->notes .= '<br>Pre-existing damage.';
 	    $this->notes .= '<br>Weapon misfires.';
 
         $this->forwardDefense = 16;
