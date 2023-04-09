@@ -5,8 +5,8 @@ class Areko extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 475;
-		$this->faction = "Areko";
-        $this->phpclass = "Ikorta";
+		$this->faction = "Raiders";
+        $this->phpclass = "Areko";
         $this->imagePath = "img/ships/RaiderShokanAreko.png";
         $this->shipClass = "Shokan Areko Light Cruiser";
 	    $this->fighters = array("normal"=>6);

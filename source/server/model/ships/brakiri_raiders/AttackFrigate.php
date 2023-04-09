@@ -40,7 +40,7 @@ class AttackFrigate extends MediumShip{
 		$this->addPrimarySystem(new GraviticThruster(4, 10, 0, 5, 3));
 		$this->addPrimarySystem(new GraviticThruster(4, 10, 0, 5, 4));
 		$this->addPrimarySystem(new StdParticleBeam(4, 4, 1, 180, 360));
-		$this->addPrimarySystem(new StdParticleBeam(4, 4, 1, 0, 360));
+		$this->addPrimarySystem(new StdParticleBeam(4, 4, 1, 0, 180));
 		
 
         $this->addFrontSystem(new MediumBolter(4, 8, 4, 240, 360));
