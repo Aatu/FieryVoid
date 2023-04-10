@@ -86,10 +86,15 @@ class technicalTargetDrone extends BaseShip{
 		
 
         $this->addFrontSystem(new Jammer(4, 180, 7));
+		$this->addFrontSystem(new TestGun(2, 4, 1, 0, 360));
+		$this->addFrontSystem(new TestGun2(2, 4, 1, 0, 360));
+		$this->addFrontSystem(new FlexPlasma(2, 11, 8, 270, 90));
+		$this->addFrontSystem(new FlexPlasma(2, 11, 8, 270, 90));
+		$this->addFrontSystem(new FlexPlasma(2, 11, 8, 270, 90));
+		$this->addFrontSystem(new FlexPlasma(2, 11, 8, 270, 90));
 		
         $this->addFrontSystem(new AmmoMissileRackR(3, 0, 0, 240, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addFrontSystem(new AmmoMissileRackR(3, 0, 0, 240, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-		$this->addFrontSystem(new TestGun(1, 6, 3, 0, 360));
 //		$this->addFrontSystem(new Enveloper(3, 8, 6, 300, 60));
 
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));

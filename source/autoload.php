@@ -1590,7 +1590,6 @@ spl_autoload_register(
 //                'pakmarasimsalle2' => '/server/model/ships/pakmara/PakmaraSimSallE2.php',					
 				'plasmaweb' => '/server/model/weapons/customNexus.php',
 //				'plasmablast' => '/server/model/weapons/customNexus.php',
-//				'testgun' => '/server/model/weapons/customNexus.php',
 				'testmissile' => '/server/model/weapons/customNexus.php',
 				'testmissile2' => '/server/model/weapons/customNexus.php',
 //                'plasmabattery' => '/server/model/systems/baseSystems.php',
@@ -2951,10 +2950,20 @@ spl_autoload_register(
 				'thirdspacecnc' => '/server/model/systems/baseSystems.php',		
 				'thirdspaceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceAttackCraft.php',			
 						
+						//Development systems
+						'testgun' => '/server/model/weapons/customDevelopment.php',
+						'testgun2' => '/server/model/weapons/customDevelopment.php',
+						'flexplasma' => '/server/model/weapons/customDevelopment.php',
+
+
 						//Satyra (Wolfgang campaign)
-						'satyrashield' => '/server/model/weapons/customNexus.php',
-						'laserarray' => '/server/model/weapons/customNexus.php',
+						'satyrashield' => '/server/model/weapons/customDevelopment.php',
+						'laserarray' => '/server/model/weapons/customDevelopment.php',
 						'satyramcvtest' => '/server/model/ships/Zsatyra/SatyraMCVTest.php',	
+
+						//Steve's no EW concept
+						'gquell_noew' => '/server/model/ships/customs/gquell_noew.php',	
+
 	
 				//let's end this with unit enhancement class...		    
 				'enhancements' => '/server/model/ships/Enhancements.php'
