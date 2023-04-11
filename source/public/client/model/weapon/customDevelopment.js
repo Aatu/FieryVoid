@@ -4,8 +4,8 @@ var LaserArray = function  LaserArray(json, ship) {
 LaserArray.prototype = Object.create(Weapon.prototype);
 LaserArray.prototype.constructor =  LaserArray;
 
-var FlexPlasma = function  FlexPlasma(json, ship) {
+var PlasmaSiegeCannon = function  PlasmaSiegeCannon(json, ship) {
     Weapon.call(this, json, ship);
 };
-FlexPlasma.prototype = Object.create(Weapon.prototype);
-FlexPlasma.prototype.constructor =  FlexPlasma;
+PlasmaSiegeCannon.prototype = Object.create(Weapon.prototype);
+PlasmaSiegeCannon.prototype.constructor =  PlasmaSiegeCannon;

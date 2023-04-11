@@ -2953,7 +2953,7 @@ spl_autoload_register(
 						//Development systems
 						'testgun' => '/server/model/weapons/customDevelopment.php',
 						'testgun2' => '/server/model/weapons/customDevelopment.php',
-						'flexplasma' => '/server/model/weapons/customDevelopment.php',
+						'plasmasiegecannon' => '/server/model/weapons/customDevelopment.php',
 
 
 						//Satyra (Wolfgang campaign)
