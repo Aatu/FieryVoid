@@ -173,19 +173,19 @@ class PlasmaSiegeCannon extends Weapon {
 	public $displayName = "Plasma Siege Cannon";
 	public $iconPath = "HeavyPlasmaProjector.png";
 	
-	public $animationArray = array(1=>'trail', 2=>'laser');
+	public $animationArray = array(1=>'laser', 2=>'trail');
 	public $animationColorArray = array(1=>array(75, 250, 90), 2=>array(75, 250, 90));
 
 	//actual weapon data
 	public $raking = 8; //only useful for Raking mode
-	public $priorityArray = array(1=>2, 2=>7);
-	public $loadingtimeArray = array(1=>5, 2=>4);  //mode 1 should be the one with longest loading time
-	public $rangePenaltyArray = array(1=>0.25, 2=>0.33);
+	public $priorityArray = array(1=>7, 2=>2);
+	public $loadingtimeArray = array(1=>4, 2=>4);  //mode 1 should be the one with longest loading time
+	public $rangePenaltyArray = array(1=>0.33, 2=>0.25);
 	public $rangeDamagePenaltyArray = array(1=>0.25, 2=>0.25);
-	public $fireControlArray = array(1=>array(null, 3, 5), 2=>array(null, 2, 4));
+	public $fireControlArray = array(1=>array(null, 2, 4), 2=>array(null, 3, 5));
 	
-	public $firingModes = array(1=>'Ranged Fuser', 2=>'Heavy Plasma Projector');
-	public $damageTypeArray = array(1=>'Flash', 2=>'Raking');
+	public $firingModes = array(1=>'Heavy Plasma Projector', 2=>'Siege Cannon');
+	public $damageTypeArray = array(1=>'Raking', 2=>'Flash');
 	public $weaponClassArray = array(1=>'Plasma', 2=>'Plasma');
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -201,16 +201,22 @@ class PlasmaSiegeCannon extends Weapon {
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= "Can fire as either Ranged Fuser or Heavy Plasma Projector.";
+			$this->data["Special"] .= "Can fire as either Heavy Plasma Projector or Range Fuser (Siege).";
 			$this->data["Special"] .= "<br>Damage reduced by 1 point per 4 hexes in either mode.";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
-			$this->data["Special"] .= "<br>Must be speed 0 to fire the Ranged Fuser.";
+			$this->data["Special"] .= "<br>Must be speed 0 to fire in Siege Cannon mode.";
 	}
 	
 	public function calculateHitBase($gamedata, $fireOrder){ //auto-miss if restrictions not met
 		$this->changeFiringMode($fireOrder->firingMode);  //needs to be outside the switch routine
 		switch($this->firingMode){
-			case 1: //Ranged Fuser, shooter speed 0 only
+			case 1: //Heavy Plasma Projector, no restrictions
+//				$canHit = true;
+//				if($canHit){
+					parent::calculateHitBase($gamedata, $fireOrder);
+//				}
+				break;
+			case 2: //Siege Cannon, shooter speed 0 only
 				$canHit = true;
 				$pubnotes = '';
 		
@@ -227,12 +233,6 @@ class PlasmaSiegeCannon extends Weapon {
 						$fireOrder->updated = true;
 				}
 				break;
-			case 2: //Heavy Plasma Projector, no restrictions
-//				$canHit = true;
-//				if($canHit){
-					parent::calculateHitBase($gamedata, $fireOrder);
-//				}
-				break;
 		}
 	}
 
@@ -242,7 +242,7 @@ class PlasmaSiegeCannon extends Weapon {
 				return Dice::d(10, 5)+10; //Heavy Plasma Projector
 				break;
 			case 2:
-				return Dice::d(10,6)+12;; //Ranged Fuser
+				return Dice::d(10,6)+12; //Siege Cannon
 				break;	
 		}
 	}
@@ -269,7 +269,7 @@ class PlasmaSiegeCannon extends Weapon {
 		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 	}
 
-}  //end class FlexPlasma
+}  //end class PlasmaSiegeCannon
 
 
 
