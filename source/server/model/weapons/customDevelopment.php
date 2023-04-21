@@ -272,7 +272,106 @@ class PlasmaSiegeCannon extends Weapon {
 }  //end class PlasmaSiegeCannon
 
 
+    class ImpHeavyLaser extends Laser{
+        public $name = "ImpHeavyLaser";
+        public $displayName = "Improved Heavy Laser";
+		public $iconPath = "heavyLaser.png";
+        public $animation = "laser";
+        public $animationColor = array(179, 45, 0);
+        //public $animationExplosionScale = 0.5;
+        //public $animationWidth = 4;
+        //public $animationWidth2 = 0.2;
 
+        public $loadingtime = 4;
+
+        // Set to make the weapon start already overloaded.
+        public $firingModes = array( 1 => "Sustained");
+        public $alwaysoverloading = true;
+        public $overloadturns = 2;
+        public $extraoverloadshots = 2;
+        public $overloadshots = 2;
+        public $priority = 8;
+
+        public $raking = 10;
+        
+        public $rangePenalty = 0.33;
+        public $fireControl = array(-4, 2, 3); // fighters, <mediums, <capitals 
+    
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 9;
+			if ( $powerReq == 0 ) $powerReq = 8;
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+
+        public function setSystemDataWindow($turn){			
+            parent::setSystemDataWindow($turn);        
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+            $this->data["Special"] .= "This weapon is always in sustained mode.";
+		}
+
+        public function isOverloadingOnTurn($turn = null){
+            return true;
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 4)+20;   }
+        public function setMinDamage(){     $this->minDamage = 24 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 60 ;      }
+        
+        
+    }
+
+
+
+class DirectEMine extends Weapon{
+        public $name = "DirectEMine";
+        public $displayName = "Direct Energy Mine";
+	    public $iconPath = "energyMine.png";
+
+        public $animation = "ball";
+        public $animationColor = array(141, 240, 255);
+        public $animationExplosionScale = 1;
+
+        public $range = 50;
+
+        public $loadingtime = 2; // 1/2 turns
+        public $rangePenalty = 0;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+	    
+		public $priority = 1; //Flash weapon
+	    
+//	public $firingMode = 'Called Shot'; //firing mode - just a name essentially
+    	public $weaponClass = "Plasma"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+        public $damageType = "Flash"; 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 5;
+            if ( $powerReq == 0 ) $powerReq = 4;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Ignores half of armor.";
+		}
+        
+        public function getDamage($fireOrder){
+            return Dice::d(10, 3);
+       }
+    
+        public function setMinDamage(){     $this->minDamage = 3;      }
+        public function setMaxDamage(){     $this->maxDamage = 30;      }
+		
+}//endof DirectEMine
 
 
 ?>

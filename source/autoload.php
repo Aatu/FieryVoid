@@ -1277,6 +1277,7 @@ spl_autoload_register(
 				'ewheavygatlinglaser' => '/server/model/weapons/customEscalation.php',
 				'ewroyallaser' => '/server/model/weapons/customEscalation.php',
 				'ewsovereignlaser' => '/server/model/weapons/customEscalation.php',
+				'ewhetlaser' => '/server/model/weapons/customEscalation.php',
 			//EW AoE weapons
 				'lightenergymine' => '/server/model/weapons/AoE.php',
 			//EW electromagnetic weapons
@@ -1577,6 +1578,7 @@ spl_autoload_register(
 				'nexusheavylaserspear' => '/server/model/weapons/customNexus.php',
 				'nexusindustriallaser' => '/server/model/weapons/customNexus.php',
 				'nexuslaserspear' => '/server/model/weapons/customNexus.php',
+				'nexuslightindustriallaser' => '/server/model/weapons/customNexus.php',
 				'nexuslightlasercutter' => '/server/model/weapons/customNexus.php',
 			//Nexus ion weapons
 				'nexusionblaster' => '/server/model/weapons/customNexus.php',
@@ -2954,6 +2956,8 @@ spl_autoload_register(
 						'testgun' => '/server/model/weapons/customDevelopment.php',
 						'testgun2' => '/server/model/weapons/customDevelopment.php',
 						'plasmasiegecannon' => '/server/model/weapons/customDevelopment.php',
+						'impheavylaser' => '/server/model/weapons/customDevelopment.php',
+						'directemine' => '/server/model/weapons/customDevelopment.php',
 
 
 						//Satyra (Wolfgang campaign)
@@ -2964,6 +2968,12 @@ spl_autoload_register(
 						//Steve's no EW concept
 						'gquell_noew' => '/server/model/ships/customs/gquell_noew.php',	
 
+
+						//What If - Alternative design concepts
+						'dagkar_wi' => '/server/model/ships/whatif/dagkar_WI.php',	
+						'gquan_wi' => '/server/model/ships/whatif/gquan_WI.php',	
+						'vorchan_wi' => '/server/model/ships/whatif/vorchan_WI.php',	
+						
 	
 				//let's end this with unit enhancement class...		    
 				'enhancements' => '/server/model/ships/Enhancements.php'
