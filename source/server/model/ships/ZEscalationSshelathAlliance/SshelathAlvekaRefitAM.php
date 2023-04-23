@@ -1,12 +1,12 @@
 <?php
-class SshelathAlvekaRefit extends BaseShip{
+class SshelathAlvekaRefitAM extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 415;
 	$this->faction = "ZEscalation Sshel'ath Alliance";
-        $this->phpclass = "SshelathAlvekaRefit";
+        $this->phpclass = "SshelathAlvekaRefitAM";
         $this->imagePath = "img/ships/EscalationWars/SshelathAlveka.png";
         $this->shipClass = "Alveka Scout (1960 Refit)";
 			$this->variantOf = "Alveka Scout";

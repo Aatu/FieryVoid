@@ -656,6 +656,11 @@ for friendly units.*/
     }	//endof class FlakCannon
 
 
+	class SingleSlugCannon extends SlugCannon{
+	    public $iconPath = 'GatlingGun.png';
+		public $shots = 1;
+		public $intercept = 1;
+	} //endof class SingleSlugCannon
 
 
 	/*Grome fighter weapon*/

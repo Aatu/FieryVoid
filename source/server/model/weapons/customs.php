@@ -1772,6 +1772,14 @@ class CustomLightSoMissileRack extends MissileLauncher{
 }//endof CustomLightSoMissileRack
 
 
+class CustomLightOMissileRack extends CustomLightSMissileRack{
+        public $name = "CustomLightOMissileRack";
+        public $displayName = "Light O-Missile Rack";
+        public $loadingtime = 3; // 1/3 turns
+        public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $ammunition = 8; //limited number of shots	    
+}
+
 class CustomLightSMissileRack extends Weapon{
         public $name = "CustomLightSMissileRack";
         public $displayName = "Light S-Missile Rack";

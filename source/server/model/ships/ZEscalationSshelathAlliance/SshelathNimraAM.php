@@ -1,12 +1,12 @@
 <?php
-class SshelathNimra extends BaseShip{
+class SshelathNimraAM extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 500;
 	$this->faction = "ZEscalation Sshel'ath Alliance";
-        $this->phpclass = "SshelathNimra";
+        $this->phpclass = "SshelathNimraAM";
         $this->imagePath = "img/ships/EscalationWars/SshelathNirte.png";
         $this->shipClass = "Nimra Command Cruiser";
 			$this->variantOf = "Nirte Medium Cruiser";
