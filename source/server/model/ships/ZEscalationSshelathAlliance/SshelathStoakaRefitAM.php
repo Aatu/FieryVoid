@@ -32,7 +32,6 @@ class SshelathStoakaRefitAM extends MediumShip{
         $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
         $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 36); //add full load of basic missiles
         $this->enhancementOptionsEnabled[] = 'AMMO_D';//add enhancement options for other missiles - Class-D
-        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
         
         $this->addPrimarySystem(new Reactor(3, 10, 0, 0));
         $this->addPrimarySystem(new CnC(3, 11, 0, 0));

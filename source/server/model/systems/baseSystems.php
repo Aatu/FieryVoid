@@ -4018,7 +4018,7 @@ class AmmoMissileP extends AmmoMissileTemplate{
 class AmmoMissileD extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileD';
 	public $displayName = 'Light Missile';
-	public $modeName = 'Light';
+	public $modeName = 'D-Light';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_D'; //enhancement name to be enabled
 	public $enhancementDescription = '(ammo) Light Missile (2178)'; //enhancement description
