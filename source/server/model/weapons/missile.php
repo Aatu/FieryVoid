@@ -1450,6 +1450,37 @@ class AmmoMissileRackSO extends AmmoMissileRackS{
 } //endof class AmmoMissileRackSO
 
 
+/*Class-O Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
+	all functionality prepared in standard class-S rack
+	holds 12 missiles (as it's often fitted to old ships - check munitions reasonably available!)
+*/
+class AmmoMissileRackO extends AmmoMissileRackS{
+	public $name = "AmmoMissileRackO";
+        public $displayName = "Class-O Missile Rack";
+    public $iconPath = "missile1.png";    
+	
+    public $range = 20;
+    public $distanceRange = 60;
+    public $firingMode = 1;
+    public $priority = 6;
+    public $loadingtime = 3;
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(1,1,1);
+	protected $basicRange=20;
+	protected $basicDistanceRange = 60;
+
+    protected $rackExplosionDamage = 30; //how much damage will this weapon do in case of catastrophic explosion (Class-O launcher has smaller magazine than Class-SO)
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 0;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+	}
+} //endof class AmmoMissileRackSO
+
+
 
 /*Class-A Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
 	all functionality prepared in standard class-S rack
