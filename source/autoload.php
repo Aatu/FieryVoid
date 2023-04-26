@@ -1378,7 +1378,8 @@ spl_autoload_register(
 				'choukaraiderreclumafighter' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderReclumAFighter.php',
 				'choukaraiderreclumbfighter' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderReclumBFighter.php',
 				'choukaraiderreclumcfighter' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderReclumCFighter.php',
-				'choukaraiderreclumdfighter' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderReclumDFighter.php',
+//				'choukaraiderreclumdfighter' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderReclumDFighter.php',
+				'choukaraiderreclumdfighteram' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderReclumDFighterAM.php',
 				'choukaraiderwrathwarship' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderWrathWarship.php',
 				
 
