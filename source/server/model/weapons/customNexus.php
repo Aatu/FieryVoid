@@ -216,7 +216,7 @@ class NexusAdvKineticBoxLauncher extends Weapon{
 class NexusAntifighterLauncher extends Weapon{
         public $name = "NexusAntifighterLauncher";
         public $displayName = "Anti-fighter Launcher";
-	    public $iconPath = "NexusKineticBoxLauncher.png";
+	    public $iconPath = "NexusDefenderMissile.png";
         public $animation = "trail";
         public $trailColor = array(11, 224, 255);
         public $animationColor = array(50, 50, 50);
@@ -229,11 +229,11 @@ class NexusAntifighterLauncher extends Weapon{
         public $ballistic = true; //missile
         public $range = 8;
         public $distanceRange = 24;
-        public $ammunition = 6; //limited number of shots
+        public $ammunition = 8; //limited number of shots
         
         public $loadingtime = 1; 
         public $rangePenalty = 0;
-        public $fireControl = array(3, null, null); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $fireControl = array(4, null, null); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
 		public $priority = 4; //Matter weapon
 	    
@@ -270,11 +270,11 @@ class NexusAntifighterLauncher extends Weapon{
         }
 
         public function getDamage($fireOrder){
-			return Dice::d(6, 1)+3;
+			return 8;
         }
     
-        public function setMinDamage(){     $this->minDamage = 4;      }
-        public function setMaxDamage(){     $this->maxDamage = 9;      }
+        public function setMinDamage(){     $this->minDamage = 8;      }
+        public function setMaxDamage(){     $this->maxDamage = 8;      }
 		
 }//endof NexusAntifighterLauncher
 

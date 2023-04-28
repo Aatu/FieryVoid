@@ -82,7 +82,7 @@ class BSGLtKineticEnergyWeapon extends Pulse{
         
 //        public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 
-	function __construct($startArc, $endArc, $nrOfShots = 1){
+		function __construct($startArc, $endArc, $nrOfShots = 1){
             $this->defaultShots = $nrOfShots;
             $this->shots = $nrOfShots;
             parent::__construct(0, 1, 0, $startArc, $endArc);
@@ -124,7 +124,7 @@ class BSGKineticEnergyWeapon extends Pulse{
         
 //        public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 
-	function __construct($startArc, $endArc, $nrOfShots = 1){
+		function __construct($startArc, $endArc, $nrOfShots = 1){
             $this->defaultShots = $nrOfShots;
             $this->shots = $nrOfShots;
             parent::__construct(0, 1, 0, $startArc, $endArc);
@@ -163,7 +163,7 @@ class BSGHvyKineticEnergyWeapon extends Pulse{
         
 //        public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 
-	function __construct($startArc, $endArc, $nrOfShots = 1){
+		function __construct($startArc, $endArc, $nrOfShots = 1){
             $this->defaultShots = $nrOfShots;
             $this->shots = $nrOfShots;
             parent::__construct(0, 1, 0, $startArc, $endArc);

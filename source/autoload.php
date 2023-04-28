@@ -1653,6 +1653,9 @@ spl_autoload_register(
 				
 				'brixadiibattledestroyerleader2051' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerLeader2051.php',
 				'brixadiibattledestroyerleader2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerLeader2108.php',
+
+				'brixadiidestroyerescort' => '/server/model/ships/ZNexusBrixadii/BrixadiiDestroyerEscort.php',
+				'brixadiidestroyerescortrefit' => '/server/model/ships/ZNexusBrixadii/BrixadiiDestroyerEscortRefit.php',
 				
                 'brixadiiwarshipbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiWarshipBase.php',		
                 'brixadiiwarshipprototype' => '/server/model/ships/ZNexusBrixadii/BrixadiiWarshipPrototype.php',		

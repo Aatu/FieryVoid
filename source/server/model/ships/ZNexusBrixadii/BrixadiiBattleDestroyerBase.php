@@ -35,7 +35,7 @@ class BrixadiiBattleDestroyerBase extends HeavyCombatVessel{
       
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-    	$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 240, 0));
+    	$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 240, 360));
         $this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 0, 120));
         $this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 240, 60));
         $this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 300, 120));
@@ -44,12 +44,10 @@ class BrixadiiBattleDestroyerBase extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new NexusProjectorArray(2, 6, 1, 180, 360));
         $this->addAftSystem(new NexusProjectorArray(2, 6, 1, 0, 180));
-		$this->addAftSystem(new NexusDefensePulsar(1, 4, 2, 120, 360));
-		$this->addAftSystem(new NexusDefensePulsar(1, 4, 2, 0, 240));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 3, 35));
-        $this->addAftSystem(new Structure( 3, 32));
+        $this->addFrontSystem(new Structure( 3, 45));
+        $this->addAftSystem(new Structure( 3, 42));
         $this->addPrimarySystem(new Structure( 4, 40));
 		
         $this->hitChart = array(
@@ -71,8 +69,7 @@ class BrixadiiBattleDestroyerBase extends HeavyCombatVessel{
             ),
             2=> array(
                     7 => "Thruster",
-					9 => "Defense Pulsar",
-                    11 => "Projector Array",
+					9 => "Projector Array",
                     18 => "Structure",
                     20 => "Primary",
             ),

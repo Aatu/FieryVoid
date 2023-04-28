@@ -1,17 +1,17 @@
 <?php
-class BrixadiiBattleDestroyer2108 extends HeavyCombatVessel{
+class BrixadiiDestroyerEscortRefit extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 460;
+        $this->pointCost = 450;
         $this->faction = "ZNexus Brixadii";
-        $this->phpclass = "BrixadiiBattleDestroyer2108";
-        $this->imagePath = "img/ships/Nexus/BrixadiiBattleDestroyer.png";
+        $this->phpclass = "BrixadiiDestroyerEscortRefit";
+        $this->imagePath = "img/ships/Nexus/BrixadiiPlasmaDestroyer.png";
 			$this->canvasSize = 120; //img has 200px per side
-        $this->shipClass = "Battle Destroyer (2108)";
+        $this->shipClass = "Destroyer Escort (2108 refit)";
 			$this->variantOf = "Battle Destroyer";
-			$this->occurence = "common";
+			$this->occurence = "uncommon";
 			$this->unofficial = true;
         $this->isd = 2108;
         
@@ -37,16 +37,18 @@ class BrixadiiBattleDestroyer2108 extends HeavyCombatVessel{
       
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-    	$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 240, 0));
-        $this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 0, 120));
-        $this->addFrontSystem(new EnergyPulsar(2, 6, 3, 240, 60));
-        $this->addFrontSystem(new EnergyPulsar(2, 6, 3, 300, 120));
-		$this->addFrontSystem(new NexusKineticBoxLauncher(0, 4, 0, 300, 60));
+		$this->addFrontSystem(new ScatterPulsar(3, 4, 2, 180, 60));
+		$this->addFrontSystem(new ScatterPulsar(3, 4, 2, 300, 180));
+        $this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 240, 60));
+        $this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 300, 120));
+		$this->addFrontSystem(new NexusAntifighterLauncher(0, 6, 0, 270, 90));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
-        $this->addAftSystem(new EnergyPulsar(2, 6, 3, 180, 360));
-        $this->addAftSystem(new EnergyPulsar(2, 6, 3, 0, 180));
+		$this->addAftSystem(new ScatterPulsar(3, 4, 2, 180, 360));
+		$this->addAftSystem(new ScatterPulsar(3, 4, 2, 120, 360));
+		$this->addAftSystem(new ScatterPulsar(3, 4, 2, 0, 240));
+		$this->addAftSystem(new ScatterPulsar(3, 4, 2, 0, 180));
 		$this->addAftSystem(new NexusChaffLauncher(2, 0, 0, 0, 0));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -66,16 +68,16 @@ class BrixadiiBattleDestroyer2108 extends HeavyCombatVessel{
             ),
             1=> array(
                     5 => "Thruster",
-                    7 => "Energy Pulsar",
-                    10 => "Heavy Particle Projector",
-					12 => "Kinetic Box Launcher",
+                    7 => "Scatter Pulsar",
+                    10 => "Energy Pulsar",
+					12 => "Anti-fighter Launcher",
 					18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     6 => "Thruster",
 					7 => "Chaff Launcher",
-					9 => "Energy Pulsar",
+					11 => "Scatter Pulsar",
                     18 => "Structure",
                     20 => "Primary",
             ),
