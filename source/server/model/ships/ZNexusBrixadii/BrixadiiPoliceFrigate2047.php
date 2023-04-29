@@ -44,16 +44,16 @@ class BrixadiiPoliceFrigate2047 extends LCV{
 			$this->addPrimarySystem($sensors);
 		$this->addPrimarySystem(new Engine(3, 10, 0, 7, 3));
 
-		$this->addFrontSystem(new NexusDefensePulsar(2, 4, 2, 240, 60));
+		$this->addFrontSystem(new LightParticleProjector(2, 3, 1, 240, 60));
 		$this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 270, 90));
-		$this->addFrontSystem(new NexusDefensePulsar(2, 4, 2, 300, 120));
+		$this->addFrontSystem(new LightParticleProjector(2, 3, 1, 300, 120));
 	    
         $this->addPrimarySystem(new Structure(3, 27));
 	    
         $this->hitChart = array(
         		0=> array( 
         				11 => "Structure",
-						13 => "1:Defense Pulsar",
+						13 => "1:Light Particle Projector",
         				15 => "1:Projector Array",
         				18 => "0:Engine",
         				19 => "0:Reactor",
@@ -61,7 +61,7 @@ class BrixadiiPoliceFrigate2047 extends LCV{
         		),
         		1=> array( //redirect to PRIMARY
         				11 => "Structure",
-						13 => "1:Defense Pulsar",
+						13 => "1:Light Particle Projector",
         				15 => "1:Projector Array",
         				18 => "0:Engine",
         				19 => "0:Reactor",

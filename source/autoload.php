@@ -1680,6 +1680,7 @@ spl_autoload_register(
                 'brixadiilauncherplatformbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiLauncherPlatformBase.php',
                 'brixadiilauncherplatform2107' => '/server/model/ships/ZNexusBrixadii/BrixadiiLauncherPlatform2107.php',
 
+                'brixadiilightescortfrigate2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiLightEscortFrigate2057.php',
                 'brixadiilightescortfrigate' => '/server/model/ships/ZNexusBrixadii/BrixadiiLightEscortFrigate.php',
 
                 'brixadiipoliceescort' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceEscort.php',
