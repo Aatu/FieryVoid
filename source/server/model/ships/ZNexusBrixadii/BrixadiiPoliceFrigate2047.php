@@ -69,7 +69,7 @@ class BrixadiiPoliceFrigate2047 extends LCV{
         		),
         		2=> array( //redirect to PRIMARY
         				11 => "Structure",
-						13 => "1:Defense Pulsar",
+						13 => "1:Light Particle Projector",
         				15 => "1:Projector Array",
         				18 => "0:Engine",
         				19 => "0:Reactor",
