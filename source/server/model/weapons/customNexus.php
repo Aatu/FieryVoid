@@ -7405,6 +7405,7 @@ class DirectLimpetBore extends Weapon{
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Special"] = "Ignores armor, no overkill (Ballistic+Matter weapon).";
+            $this->data["Special"] .= "<br>NOTE: Fires in the normal weapons fire phase, not initial phase.";
             $this->data["Ammunition"] = $this->ammunition;
         }
         
