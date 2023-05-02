@@ -7,7 +7,7 @@ class KalavarEarlyAM extends OSAT{
 		$this->pointCost = 240;
 		$this->faction = "Kor-Lyan";
         $this->phpclass = "KalavarEarlyAM";
-        $this->imagePath = "img/ships/korlyan_kalavar.png";
+        $this->imagePath = "img/ships/korlyan_kalavar2.png";
         $this->shipClass = "Kalavar Orbital Satellite (2220)";
 			$this->occurence = "common";
 			$this->variantOf = 'Kalavar Orbital Satellite (2240)';
@@ -33,6 +33,7 @@ class KalavarEarlyAM extends OSAT{
         $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-P
 
         $this->addPrimarySystem(new Reactor(3, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 5, 2, 4)); 

@@ -174,6 +174,12 @@ var CustomMiningCutter = function  CustomMiningCutter(json, ship) {
 CustomMiningCutter.prototype = Object.create(Weapon.prototype);
 CustomMiningCutter.prototype.constructor =  CustomMiningCutter;
 
+var CustomLightOMissileRack = function  CustomLightOMissileRack(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CustomLightOMissileRack.prototype = Object.create(Weapon.prototype);
+CustomLightOMissileRack.prototype.constructor =  CustomLightOMissileRack;
+
 var CustomLightSoMissileRack = function  CustomLightSoMissileRack(json, ship) {
     Weapon.call(this, json, ship);
 };

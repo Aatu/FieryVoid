@@ -8,7 +8,7 @@ class KoskovaTestbed extends BaseShip{
 		$this->faction = "Custom Ships";
 //	$this->faction = "Custom Ships";
         $this->phpclass = "KoskovaTestbed";
-        $this->imagePath = "img/ships/korlyan_koskova2.png";
+        $this->imagePath = "img/ships/korlyan_koskova3.png";
         $this->shipClass = "Koskova Testbed";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; //img has 200px per side
@@ -31,14 +31,14 @@ class KoskovaTestbed extends BaseShip{
         //ammo magazine itself (AND its missile options)
         $ammoMagazine = new AmmoMagazine(20); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
         $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 20); //add full load of basic missiles
-        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
-        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
-        $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
+//        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 30); //add full load of basic missiles
+//        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+//        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
+//        $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
-        $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
-        $this->enhancementOptionsEnabled[] = 'AMMO_I';//add enhancement options for other missiles - Class-P
-        $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-P
+//        $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+//        $this->enhancementOptionsEnabled[] = 'AMMO_I';//add enhancement options for other missiles - Class-P
+//        $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-P
 
         $this->addPrimarySystem(new Reactor(6, 25, 0, 1));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
@@ -54,14 +54,15 @@ class KoskovaTestbed extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
 //        $this->addFrontSystem(new FMissileRack(3, 'F', 240, 60, false));
 //        $this->addFrontSystem(new FMissileRack(3, 6, 0, 240, 60, false));
-//        $this->addFrontSystem(new AmmoMissileRackF(3, 0, 0, 240, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+//        $this->addFrontSystem(new AmmoMissileRackR(3, 0, 0, 240, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+//        $this->addFrontSystem(new AmmoMissileRackD(3, 0, 0, 240, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
 		$this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
 		$this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
 //        $this->addFrontSystem(new FMissileRack(3, 'F', 300, 120, false));
-		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
-		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
-		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
+//		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
+//		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
+//		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
 //        $this->addFrontSystem(new FMissileRack(3, 6, 0, 300, 120, false));
 
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));

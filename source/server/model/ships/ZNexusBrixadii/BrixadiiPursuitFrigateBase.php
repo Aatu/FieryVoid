@@ -43,8 +43,8 @@ class BrixadiiPursuitFrigateBase extends MediumShip{
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
-        $this->addAftSystem(new NexusDefensePulsar(1, 4, 2, 120, 360));
-        $this->addAftSystem(new NexusDefensePulsar(1, 4, 2, 0, 240));
+        $this->addAftSystem(new LightParticleProjector(1, 3, 1, 120, 360));
+        $this->addAftSystem(new LightParticleProjector(1, 3, 1, 0, 240));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure( 3, 40));
@@ -66,7 +66,7 @@ class BrixadiiPursuitFrigateBase extends MediumShip{
             ),
             2=> array(
                     8 => "Thruster",
-                    10 => "Defense Pulsar",
+                    10 => "Light Particle Projector",
                     17 => "Structure",
                     20 => "Primary",
             ),

@@ -8,7 +8,7 @@ class RaklaviAM extends BaseShip{
 		$this->faction = "Kor-Lyan";
 //	$this->faction = "Custom Ships";
         $this->phpclass = "RaklaviAM";
-        $this->imagePath = "img/ships/korlyan_raklavi.png";
+        $this->imagePath = "img/ships/korlyan_raklavi2.png";
         $this->shipClass = "Raklavi Carrier";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 190; //img has 200px per side
@@ -38,6 +38,7 @@ class RaklaviAM extends BaseShip{
         $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-P
         
         $this->addPrimarySystem(new Reactor(5, 25, 0, 1));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));

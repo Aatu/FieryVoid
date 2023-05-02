@@ -77,3 +77,9 @@ var SlugCannon = function SlugCannon(json, ship) {
 };
 SlugCannon.prototype = Object.create(Matter.prototype);
 SlugCannon.prototype.constructor = SlugCannon;
+
+var UnreliableMatterCannon = function UnreliableMatterCannon(json, ship) {
+    Matter.call(this, json, ship);
+};
+UnreliableMatterCannon.prototype = Object.create(Matter.prototype);
+UnreliableMatterCannon.prototype.constructor = UnreliableMatterCannon;

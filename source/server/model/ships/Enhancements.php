@@ -532,6 +532,7 @@ class Enhancements{
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  }
+/*
 		  $enhID = 'AMMO_I'; //Interceptor Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
 				$ammoClass = new AmmoMissileI();
@@ -543,6 +544,7 @@ class Enhancements{
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  }
+*/
 		  $enhID = 'AMMO_S'; //Stealth Missiles - Target is hidden
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
 				$ammoClass = new AmmoMissileS();
@@ -554,6 +556,7 @@ class Enhancements{
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  }
+		  
 	  } //end of magazine-requiring options
 	  
 	  
@@ -1183,15 +1186,14 @@ class Enhancements{
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileP(), $enhCount, true); //do notify dependent weapons, too!
 						break;
 					case 'AMMO_D': //Light Missile						
-						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileB(), $enhCount, true); //do notify dependent weapons, too!
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileD(), $enhCount, true); //do notify dependent weapons, too!
 						break;
-					case 'AMMO_I': //Interceptor Missile						
-						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileI(), $enhCount, true); //do notify dependent weapons, too!
-						break;
+//					case 'AMMO_I': //Interceptor Missile						
+//						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileI(), $enhCount, true); //do notify dependent weapons, too!
+//						break;
 					case 'AMMO_S': //Stealth Missile						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileS(), $enhCount, true); //do notify dependent weapons, too!
-						break;
-						
+						break;						
 				}
 			}
 			

@@ -8,7 +8,7 @@ class Merkul extends FighterFlight{
 		$this->faction = "Kor-Lyan";
         $this->phpclass = "Merkul";
         $this->shipClass = "Merkul Shuttles";
-		$this->imagePath = "img/ships/korlyanMerkul.png"; 
+		$this->imagePath = "img/ships/korlyanMerkul2.png"; 
 		
 		$this->notes = "Kor-Lyan shuttles can be armed with missiles, if paid for. Treated as assault shuttles. Basic missiles only.";
 
@@ -38,8 +38,8 @@ class Merkul extends FighterFlight{
 			$armour = array(1, 1, 1, 1);
 			$fighter = new Fighter("Merkul", $armour, 9, $this->id);
 			$fighter->displayName = "Merkul";
-			$fighter->imagePath = "img/ships/korlyanMerkul.png";
-			$fighter->iconPath = "img/ships/korlyanMerkul_large.png";
+			$fighter->imagePath = "img/ships/korlyanMerkul2.png";
+			$fighter->iconPath = "img/ships/korlyanMerkul_large2.png";
 			
 			$fighter->addFrontSystem(new FighterMissileRack(2, 330, 30));
 

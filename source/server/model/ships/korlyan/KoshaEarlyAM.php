@@ -8,7 +8,7 @@ class KoshaEarlyAM extends BaseShip{
 		$this->faction = "Kor-Lyan";
 //	$this->faction = "Custom Ships";
         $this->phpclass = "KoshaEarlyAM";
-        $this->imagePath = "img/ships/korlyan_koshaEarly.png";
+        $this->imagePath = "img/ships/korlyan_koshaEarly2.png";
         $this->shipClass = "Kosha Light Cruiser (early)";
 			$this->occurence = "common";
 			$this->variantOf = 'Kosha Light Cruiser';
@@ -40,6 +40,7 @@ class KoshaEarlyAM extends BaseShip{
         $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-P
         
         $this->addPrimarySystem(new Reactor(5, 15, 0, 0));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));

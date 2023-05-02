@@ -66,7 +66,7 @@ class Centaurum2005 extends BaseShip{
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 5, 55));
-        $this->addAftSystem(new Structure( 5, 55));
+        $this->addAftSystem(new Structure( 5, 48));
         $this->addLeftSystem(new Structure( 5, 60));
         $this->addRightSystem(new Structure( 5, 60));
         $this->addPrimarySystem(new Structure( 6, 56));
