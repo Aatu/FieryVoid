@@ -73,6 +73,7 @@ ENHANCEMENTS: Allowed / Allowed up to 100 points / Not allowed
 EXPECTED POWER LEVEL: Tier 1 / Tier 2 / something else
 FORBIDDEN FACTIONS: None 
 MAP BORDERS: Unit leaving map is destroyed / Unit ending movement out of map is destroyed
+CALLED SHOTS: Allowed / Not allowed
 VICTORY CONDITIONS: Last unit on map / Last ship on map
 ------------------------
 				</textarea>
