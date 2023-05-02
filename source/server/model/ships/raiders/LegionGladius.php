@@ -7,7 +7,7 @@ class LegionGladius extends MediumShip{
 		$this->pointCost = 450;
 		$this->faction = "Raiders";
         $this->phpclass = "LegionGladius";
-        $this->imagePath = "img/ships/DenethSentry.png";
+        $this->imagePath = "img/ships/RaiderLegionGladius.png";
         $this->shipClass = "Legion Gladius Fusion Warship";
         $this->canvasSize = 100;
 

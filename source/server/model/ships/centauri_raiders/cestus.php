@@ -6,7 +6,7 @@ class Cestus extends HeavyCombatVessel{
 	$this->pointCost = 280;
         $this->faction = "Raiders";
     $this->phpclass = "Cestus";
-    $this->imagePath = "img/ships/tacit.png";
+    $this->imagePath = "img/ships/CentauriPrivateerCestus.png";
     $this->canvasSize = 200;
     $this->shipClass = "Centauri Privateer Cestus Attack Ship";
 	$this->isd = 1870;

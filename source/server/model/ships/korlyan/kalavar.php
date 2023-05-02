@@ -21,6 +21,14 @@ class Kalavar extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60; 
 
+	//ammo magazine itself (AND its missile options)
+	$ammoMagazine = new AmmoMagazine(20); //pass magazine capacity 
+	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 20); //add full load of basic missiles  	      
+
+	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
+	    
         $this->addPrimarySystem(new Reactor(3, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 5, 2, 4)); 
 
@@ -29,7 +37,7 @@ class Kalavar extends OSAT{
         $this->addAftSystem(new ProximityLaser(3, 6, 6, 0, 180));
         
         $this->addFrontSystem(new RangedFMissileRack(3, 6, 0, 270, 90, true)); 
-        $this->addFrontSystem(new MultiDefenseLauncher(2, 'D', 0, 360, true));
+        $this->addFrontSystem(new AmmoMissileRackD(2, 0, 0, 0, 360, $ammoMagazine, false));
         $this->addFrontSystem(new RangedFMissileRack(3, 6, 0, 270, 90, true)); 
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

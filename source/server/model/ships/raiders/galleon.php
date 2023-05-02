@@ -7,7 +7,7 @@ class Galleon extends HeavyCombatVessel{
         $this->pointCost = 450;
         $this->faction = "Raiders";
         $this->phpclass = "Galleon";
-        $this->imagePath = "img/ships/galleon.png";
+        $this->imagePath = "img/ships/Raidergalleon.png";
         $this->shipClass = "Galleon";
         $this->occurence = "common";
         $this->fighters = array("light"=>12);

@@ -9,7 +9,7 @@ class Privateerrazik extends FighterFlight{
 	$this->faction = "Raiders";
         $this->phpclass = "Privateerrazik";
         $this->shipClass = "Centauri Privateer Razik Light Fighters";
-	$this->imagePath = "img/ships/razik.png";
+	$this->imagePath = "img/ships/CentauriPrivateerRazik.png";
         
 		$this->notes = "Used only by Centauri Privateers";
 		$this->notes .= "<br>Junkyard Dogs may field a Razik flight";

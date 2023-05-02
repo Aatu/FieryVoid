@@ -33,6 +33,7 @@ spl_autoload_register(
                 'anoro' => '/server/model/ships/hurr/anoro.php',
                 'anroethas' => '/server/model/ships/hurr/anroethAS.php',
                 'antimatterconverter' => '/server/model/weapons/antimatter.php',
+                'alykent' => '/server/model/ships/brakiri/Alykent.php',
                 'antoph' => '/server/model/ships/brakiri/antoph.php',
                 'antophearly' => '/server/model/ships/brakiri/antophEarly.php',
                 'antophupgrade' => '/server/model/ships/brakiri/antophUpgrade.php',
@@ -2028,6 +2029,8 @@ spl_autoload_register(
                 'lshon' => '/server/model/ships/narn_raiders/lshon.php',
                 'lshonrefit' => '/server/model/ships/narn_raiders/lshonRefit.php',
                 'privateergorith' => '/server/model/ships/narn_raiders/Privateergorith.php',
+		    	'tlaca' => '/server/model/ships/narn_raiders/Tlaca.php',
+		    	'tlacaearly' => '/server/model/ships/narn_raiders/TlacaEarly.php',    		    	                
 
 
 
@@ -2443,6 +2446,7 @@ spl_autoload_register(
 				'orrono' => '/server/model/ships/corillani/Orrono.php',
 				'drolla' => '/server/model/ships/corillani/Drolla.php',
 				'plasmablast' => '/server/model/weapons/plasma.php',
+				'corillanithorkaosat' => '/server/model/ships/corillani/CorillaniThorkaOSAT.php',
 				
 				//Vree
 				'sixsidedship' => '/server/model/ships/ShipClasses.php',
@@ -2496,6 +2500,14 @@ spl_autoload_register(
 				'apollostrike' => '/server/model/ships/EA/apollostrike.php',			
                 'swerrantventure' => '/server/model/ships/ZStarWars/swErrantVenture.php',
 				'unevenbasefoursections' => '/server/model/ships/ShipClasses.php',
+				'dsharda' => '/server/model/ships/civilians/Dsharda.php',				
+				'dshardapulse' => '/server/model/ships/civilians/DshardaPulse.php',
+				'areko' => '/server/model/ships/brakiri_raiders/Areko.php',
+				'rava' => '/server/model/ships/brakiri_raiders/Rava.php',
+				'attackfrigate' => '/server/model/ships/brakiri_raiders/AttackFrigate.php',
+				'folshota' => '/server/model/ships/brakiri/FolshotA.php',
+				'folshotaraider' => '/server/model/ships/brakiri_raiders/FolshotARaider.php',									
+				
 
 
 				//Star Trek conversions
@@ -2626,7 +2638,8 @@ spl_autoload_register(
 				'sashulkur' => '/server/model/ships/pakmara/Sashulkur.php',
 				'simtorka' => '/server/model/ships/pakmara/Simtorka.php',
 				'uriktal' => '/server/model/ships/pakmara/Uriktal.php',
-				'thorkaosat' => '/server/model/ships/pakmara/ThorkaOSAT.php',																																																				
+				'thorkaosat' => '/server/model/ships/pakmara/ThorkaOSAT.php',
+				'urshtalu' => '/server/model/ships/pakmara/Urshtalu.php',																																																				
 				
 
 				//Hyach
@@ -2758,7 +2771,10 @@ spl_autoload_register(
                 		'ammomissilea' => '/server/model/systems/baseSystems.php',
                 		'ammomissilep' => '/server/model/systems/baseSystems.php',
                 		'ammomissiled' => '/server/model/systems/baseSystems.php',
+                		'ammomissilec' => '/server/model/systems/baseSystems.php',
+                		'ammomissilei' => '/server/model/systems/baseSystems.php',                 		                 		
                 		'ammomissiles' => '/server/model/systems/baseSystems.php',
+                		'ammomissilek' => '/server/model/systems/baseSystems.php',                		
 						
                 		'ammomissilefb' => '/server/model/systems/baseSystems.php',
                 		'ammomissilefl' => '/server/model/systems/baseSystems.php',
@@ -2773,8 +2789,11 @@ spl_autoload_register(
                 		'ammomissilerackl' => '/server/model/weapons/missile.php',
                 		'ammomissileracklh' => '/server/model/weapons/missile.php',
                 		'ammomissilerackr' => '/server/model/weapons/missile.php',
+						'ammomissilerackd' => '/server/model/weapons/missile.php',
                 		'ammobombrack' => '/server/model/weapons/missile.php',
                 		'ammofighterrack' => '/server/model/weapons/missile.php',
+                		'klammomissileracks' => '/server/model/weapons/missile.php',
+                		
 						
 						
 						//ships using new style launchers (and magazine of course) - by faction
@@ -2866,6 +2885,7 @@ spl_autoload_register(
 						'hurrmissileosat2220am' => '/server/model/ships/hurr/HurrmissileOSAT2220AM.php',
 						'hurrmissileosat2240am' => '/server/model/ships/hurr/HurrmissileOSAT2240AM.php',
 						'borocaam' => '/server/model/ships/hurr/borocaAM.php',
+						'borocaamearly' => '/server/model/ships/hurr/borocaAMEarly.php',												
 						'borocadaam' => '/server/model/ships/hurr/borocadaAM.php',
 						'norekam' => '/server/model/ships/hurr/norekAM.php',
 						'anoroam' => '/server/model/ships/hurr/anoroAM.php',
@@ -2914,7 +2934,7 @@ spl_autoload_register(
 						'gaimkastafighteram' => '/server/model/ships/gaim/gaimKastaFighterAM.php',
 						
 						
-				//new custom faction: Thirdspace
+				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',
 				'psychicfieldhandler' => '/server/model/weapons/specialWeapons.php',
 				'thirdspaceshieldprojection' =>	'/server/model/weapons/defensive.php',

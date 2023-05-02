@@ -47,8 +47,8 @@ class borocadaAM extends BaseShip{
 	$this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new ParticleCannon(4, 8, 7, 300, 0));
         $this->addFrontSystem(new ParticleCannon(4, 8, 7, 0, 60));
-		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 300, 160, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 300, 160, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         
 	$this->addAftSystem(new Thruster(3, 16, 0, 4, 2));
 	$this->addAftSystem(new Thruster(3, 16, 0, 4, 2));

@@ -885,7 +885,7 @@ class CommDisruptor extends Weapon{
 	public $iconPath = "commDIsruptor.png";
 	
 	//let's animate this as a very wide beam...
-	public $animation = "laser";
+	public $animation = "bolt";
         public $animationColor = array(150, 150, 220);
         public $animationExplosionScale = 0.55;
 	/*
@@ -4711,7 +4711,7 @@ class PsychicFieldHandler{
         );
 
         public $rangePenalty = 0.25;
-        public $fireControl = array(null, 6, 8); // fighters, <mediums, <capitals
+        public $fireControl = array(null, 4, 7); // fighters, <mediums, <capitals
         //private $damagebonus = 10;
 
         public $damageType = "Raking"; 
@@ -4730,7 +4730,7 @@ class PsychicFieldHandler{
             } 
             //Raking(20) is already described in Raking class           
             $this->data["Special"] .= "<br>Uninterceptable.";  
-            $this->data["Special"] .= "<br>Can be boosted up to 3 times using EW for increased dmg output (2d10+10 extra damage per point of EW used).";
+            $this->data["Special"] .= '<br>Can be boosted with EW for increased dmg output (+2d10 +10 per point of EW used, up to three times). This EW does not count towards your OEW lock on a target.';
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";            
             $this->data["Boostlevel"] = $boost;
         }
@@ -4791,7 +4791,7 @@ class PsychicFieldHandler{
                         
         public function getDamage($fireOrder){
             $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
-            $dmg = Dice::d(10, (8 + $add)) + ($add *5) + 40;
+            $dmg = Dice::d(10, (6 + $add)) + ($add *5) + 40;
             return $dmg;
         }
 
@@ -4808,13 +4808,13 @@ class PsychicFieldHandler{
         public function setMinDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->minDamage = 8 + ($boost * 12) + 40;
+            $this->minDamage = 6 + ($boost * 12) + 40;
         }   
 
         public function setMaxDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->maxDamage = 80 + ($boost * 30) + 40;
+            $this->maxDamage = 60 + ($boost * 30) + 40;
         }  
    } //end of class HeavyPsionicLance
    
@@ -4847,7 +4847,7 @@ class PsionicLance extends Raking{
         );
 
         public $rangePenalty = 0.33;
-        public $fireControl = array(-2, 5, 6); // fighters, <mediums, <capitals
+        public $fireControl = array(-3, 4, 5); // fighters, <mediums, <capitals
         //private $damagebonus = 10;
 
         public $damageType = "Raking"; 
@@ -4866,7 +4866,7 @@ class PsionicLance extends Raking{
             } 
             //Raking(15) is already described in Raking class
             $this->data["Special"] .= "Uninterceptable.";              
-            $this->data["Special"] .= '<br>Can be boosted with EW for increased dmg output (+2d10 per point of EW used, up to twice).';
+            $this->data["Special"] .= '<br>Can be boosted with EW for increased dmg output (+2d10 per point of EW used, up to twice). This EW does not count towards your OEW lock on a target.';
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";               
             $this->data["Boostlevel"] = $boost;
         }
@@ -4892,9 +4892,6 @@ class PsionicLance extends Raking{
                 case 2:
                     $add = 4;
                     break;
-    /*            case 3:
-                    $add = 3;
-                    break;   */
 
                 default:
                     break;
@@ -4982,9 +4979,9 @@ class PsionicConcentrator extends Raking{
                 2 => "Double"
             );
         public $rangePenalty = 1;
-            public $rangePenaltyArray = array( 1=>1, 2=>0.5); //Standard and Raking modes
-        public $fireControl = array(8, 4, 4); // fighters, <mediums, <capitals 
-            public $fireControlArray = array( 1=>array(8, 4, 3), 2=>array(3, 5, 6));
+            public $rangePenaltyArray = array( 1=>1, 2=>0.66); //Standard and Raking modes
+        public $fireControl = array(8, 5, 3); // fighters, <mediums, <capitals 
+            public $fireControlArray = array( 1=>array(6, 5, 4), 2=>array(0, 4, 6));
               
 	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
   		public $damageTypeArray = array(1=>"Standard", 2=>"Standard");	    
@@ -5083,14 +5080,14 @@ class PsionicConcentrator extends Raking{
 	
 	
     public function getDamage($fireOrder){
-		return Dice::d(10, 1+$this->firingMode)+($this->firingMode*5) -1; //2d10+6 +1d10+1 in Double mode.
+		return Dice::d(10, 1+$this->firingMode)+($this->firingMode*4); //2d10+4 +1d10+4 in Double mode.
 	}
 	public function setMinDamage(){    
-		$this->minDamage = 1*(1+$this->firingMode)+($this->firingMode*5) -1; //7 and 13
+		$this->minDamage = 1*(1+$this->firingMode)+($this->firingMode*4); //6 and 11
 		$this->minDamageArray[$this->firingMode] = $this->minDamage; 
 	}
 	public function setMaxDamage(){
-		$this->maxDamage = 10*(1+$this->firingMode)+($this->firingMode*5) -1; //25 and 40
+		$this->maxDamage = 10*(1+$this->firingMode)+($this->firingMode*4) ; //24 and 38
 		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;  
 	}
 } //endof class PsionicConcentrator

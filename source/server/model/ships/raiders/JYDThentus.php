@@ -7,7 +7,7 @@ class JYDThentus extends MediumShip{
 		$this->pointCost = 425;
 		$this->faction = "Raiders";
         $this->phpclass = "JYDThentus";
-        $this->imagePath = "img/ships/thentus.png";
+        $this->imagePath = "img/ships/RaiderJYDThentus.png";
         $this->shipClass = "JYD Thentus Frigate";
         $this->agile = true;
 	    

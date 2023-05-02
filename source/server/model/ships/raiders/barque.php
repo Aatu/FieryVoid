@@ -7,7 +7,7 @@ class Barque extends HeavyCombatVessel{
         $this->pointCost = 525;
         $this->faction = "Raiders";
         $this->phpclass = "Barque";
-        $this->imagePath = "img/ships/DenethProtector.png"; //need to change
+        $this->imagePath = "img/ships/RaiderBarque.png"; //need to change
         $this->shipClass = "Barque";
         $this->occurence = "common";
 		$this->canvasSize = 100; //img has 140px per side

@@ -8,7 +8,7 @@ class thirsta extends LCV{
         $this->faction = "Raiders";
         $this->phpclass = "thirsta";
         $this->shipClass = "Thirsta Gunboat";
-        $this->imagePath = "img/ships/UsuuthBaroon.png";
+        $this->imagePath = "img/ships/RaiderThirsta.png";
         $this->canvasSize = 100;
         $this->agile = true;
         

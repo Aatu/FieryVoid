@@ -5,7 +5,7 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 600;
+	$this->pointCost = 550;
     $this->faction = "Thirdspace";
 	$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	$this->phpclass = "ThirdspaceAttackCraft";
@@ -42,15 +42,15 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 		$sensors->markThirdspace();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new JumpEngine(5, 8, 3, 8));//Added a small jump drive, how they travel is unknown but if White Star can house a jump drive it's not unfeasible Thirdspace aliens would have a FTL drive on their smaller craft.
-	$this->addPrimarySystem(new Engine(5, 12, 0, 12, 2));
+	$this->addPrimarySystem(new Engine(5, 12, 0, 10, 2));
     $this->addPrimarySystem(new SelfRepair(5, 8, 4)); //armor, structure, output 	
 
-	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 90));
-	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 90));
-	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 270, 150));
-	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 270, 150));
+	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 60));
+	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 60));
+	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 150));
+	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 150));
 			
-	$projection = new ThirdspaceShieldProjection(2, 60, 60, 0, 360, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+	$projection = new ThirdspaceShieldProjection(2, 55, 55, 0, 360, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
 	$projector = new ThirdspaceShieldProjector(6, 12, 4, 3, 0, 360, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R
 	$projection->addProjector($projector);
 	$this->addFrontSystem($projector);

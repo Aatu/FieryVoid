@@ -24,15 +24,20 @@ class TalokiEarly extends StarBaseSixSections{
 		$this->imagePath = "img/ships/korlyan_taloki.png";
 		$this->canvasSize = 260; //Enormous Starbase
 
-        //ammo magazine itself (AND its missile options)
-        $ammoMagazine = new AmmoMagazine(320); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
-        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 320); //add full load of basic missiles
-        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
-        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
-        $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
-        $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
-        $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+	//ammo magazine itself (AND its missile options)
+	$ammoMagazine = new AmmoMagazine(400); //pass magazine capacity 
+	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 320); //add full load of basic missiles 
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of basic missiles  	      
+
+	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
+	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-K	    	    	    	    	    
+	    $this->enhancementOptionsEnabled[] = 'AMMO_K';//add enhancement options for other missiles - Class-S 	    
+	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
+	    $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
 
 		$this->locations = array(41, 42, 2, 32, 31, 1);
 
@@ -45,10 +50,10 @@ class TalokiEarly extends StarBaseSixSections{
 		$this->addPrimarySystem(new ReloadRack(4, 9));
 		$this->addPrimarySystem(new ReloadRack(4, 9));
 		$this->addPrimarySystem(new ReloadRack(4, 9));
-        $this->addPrimarySystem(new MultiDefenseLauncher(2, 'D', 0, 360, true));
-        $this->addPrimarySystem(new MultiDefenseLauncher(2, 'D', 0, 360, true));
-        $this->addPrimarySystem(new MultiDefenseLauncher(2, 'D', 0, 360, true));
-        $this->addPrimarySystem(new MultiDefenseLauncher(2, 'D', 0, 360, true));
+        $this->addPrimarySystem(new AmmoMissileRackD(4, 0, 0, 0, 360, $ammoMagazine, false));
+        $this->addPrimarySystem(new AmmoMissileRackD(4, 0, 0, 0, 360, $ammoMagazine, false));
+        $this->addPrimarySystem(new AmmoMissileRackD(4, 0, 0, 0, 360, $ammoMagazine, false));
+        $this->addPrimarySystem(new AmmoMissileRackD(4, 0, 0, 0, 360, $ammoMagazine, false));
 
 		$this->addFrontSystem(new Hangar(4, 14));
 		$this->addFrontSystem(new SubReactorUniversal(4, 20, 0, 0));

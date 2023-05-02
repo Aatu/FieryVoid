@@ -35,7 +35,7 @@ class Jia extends VreeCapital{
 		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
 		$this->enhancementOptionsDisabled[] = 'IMPR_ENG';				
 
-		$this->imagePath = "img/ships/VreeXeecra.png";
+		$this->imagePath = "img/ships/RaiderVSGJia.png";
 		$this->canvasSize = 200;
 
 		$this->addPrimarySystem(new Reactor(5, 15, 0, 0));
