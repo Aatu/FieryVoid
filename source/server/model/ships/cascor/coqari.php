@@ -7,7 +7,7 @@ class Coqari extends BaseShip{
 		$this->pointCost = 750;
 		$this->faction = "Cascor";
         $this->phpclass = "Coqari";
-        $this->imagePath = "img/ships/CascorCrocti.png";
+        $this->imagePath = "img/ships/CascorCoqari.png";
         $this->shipClass = "Coqari Scout";
         $this->shipSizeClass = 3;
 	    $this->limited = 33;

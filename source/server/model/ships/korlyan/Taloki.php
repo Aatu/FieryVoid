@@ -26,6 +26,14 @@ class Taloki extends StarBaseSixSections{
 
 		$this->locations = array(41, 42, 2, 32, 31, 1);
 
+	//ammo magazine itself (AND its missile options)
+	$ammoMagazine = new AmmoMagazine(80); //pass magazine capacity 
+	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of basic missiles  	      
+
+	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
+	    
 		$this->addPrimarySystem(new Reactor(4, 25, 0, 0));
 		$this->addPrimarySystem(new CnC(4, 32, 0, 0)); 
 		$this->addPrimarySystem(new Scanner(4, 16, 4, 6));
@@ -35,10 +43,10 @@ class Taloki extends StarBaseSixSections{
 		$this->addPrimarySystem(new ReloadRack(4, 9));
 		$this->addPrimarySystem(new ReloadRack(4, 9));
 		$this->addPrimarySystem(new ReloadRack(4, 9));
-        $this->addPrimarySystem(new MultiDefenseLauncher(4, 'D', 0, 360, true));
-        $this->addPrimarySystem(new MultiDefenseLauncher(4, 'D', 0, 360, true));
-        $this->addPrimarySystem(new MultiDefenseLauncher(4, 'D', 0, 360, true));
-        $this->addPrimarySystem(new MultiDefenseLauncher(4, 'D', 0, 360, true));
+        $this->addPrimarySystem(new AmmoMissileRackD(4, 0, 0, 0, 360, $ammoMagazine, false));
+        $this->addPrimarySystem(new AmmoMissileRackD(4, 0, 0, 0, 360, $ammoMagazine, false));
+        $this->addPrimarySystem(new AmmoMissileRackD(4, 0, 0, 0, 360, $ammoMagazine, false));
+        $this->addPrimarySystem(new AmmoMissileRackD(4, 0, 0, 0, 360, $ammoMagazine, false));
 
 		$this->addFrontSystem(new Hangar(4, 14));
 		$this->addFrontSystem(new SubReactorUniversal(4, 20, 0, 0));

@@ -7,7 +7,7 @@ class LegionStarjammer extends BaseShip{
   		$this->pointCost = 850;
   		$this->faction = "Raiders";
         $this->phpclass = "LegionStarjammer";
-        $this->imagePath = "img/ships/dragonship.png";
+        $this->imagePath = "img/ships/RaiderLegionDragonship.png";
         $this->shipClass = "Legion Starjammer Heavy Cruiser";
 			$this->occurence = "uncommon";
 			$this->variantOf = "Dragonship";        

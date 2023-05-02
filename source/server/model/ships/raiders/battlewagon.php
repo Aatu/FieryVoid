@@ -7,7 +7,7 @@ class Battlewagon extends BaseShip{
         $this->pointCost = 540;
         $this->faction = "Raiders";
         $this->phpclass = "Battlewagon";
-        $this->imagePath = "img/ships/battlewagon.png";
+        $this->imagePath = "img/ships/RaiderBattlewagon.png";
         $this->shipClass = "Battlewagon";
         $this->shipSizeClass = 3;
         $this->fighters = array("light"=>24);

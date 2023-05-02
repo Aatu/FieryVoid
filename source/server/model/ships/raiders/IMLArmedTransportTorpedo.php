@@ -7,7 +7,7 @@ class IMLArmedTransportTorpedo extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 490;
 	$this->faction = "Raiders";
         $this->phpclass = "IMLArmedTransportTorpedo";
-        $this->imagePath = "img/ships/ikorta.png";
+        $this->imagePath = "img/ships/RaiderIMLTransport.png";
         $this->shipClass = "IML Armed Transport (Torpedo)";
 			$this->occurence = "common";
 			$this->variantOf = "IML Armed Transport";

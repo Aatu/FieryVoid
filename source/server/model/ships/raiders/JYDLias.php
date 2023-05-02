@@ -7,7 +7,7 @@ class JYDLias extends BaseShip{
 		$this->pointCost = 450;
 		$this->faction = 'Raiders';
 		$this->phpclass = "JYDLias";
-		$this->imagePath = "img/ships/Lias.png";
+		$this->imagePath = "img/ships/RaiderJYDLias.png";
 		$this->shipClass = "JYD Converted Lias Supply Ship";
 		$this->shipSizeClass = 3;
 			$this->occurence = "unique";

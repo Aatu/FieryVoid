@@ -7,7 +7,7 @@ class Vasy extends MediumShip{
 		$this->pointCost = 290;
 		$this->faction = "Raiders";
         $this->phpclass = "Vasy";
-        $this->imagePath = "img/ships/VreeXvell.png";
+        $this->imagePath = "img/ships/RaiderVSGVasy.png";
         $this->shipClass = "Vasy Light Corvette";
   		$this->canvasSize = 100;      
  		$this->notes = 'Used only by the Vree Salvage Guild<br>'; 		  
