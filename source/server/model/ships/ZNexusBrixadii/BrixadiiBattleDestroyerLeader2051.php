@@ -11,8 +11,7 @@ class BrixadiiBattleDestroyerLeader2051 extends HeavyCombatVessel{
 			$this->canvasSize = 120; //img has 200px per side
         $this->shipClass = "Battle Destroyer Leader (2051)";
         $this->variantOf = "Battle Destroyer";
-			$this->occurence = "common";
-			$this->limited = 10;
+			$this->occurence = "rare";
 			$this->unofficial = true;
         $this->isd = 2051;
         
@@ -28,7 +27,7 @@ class BrixadiiBattleDestroyerLeader2051 extends HeavyCombatVessel{
          
         $this->addPrimarySystem(new Reactor(4, 19, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 12, 5, 5));
+        $this->addPrimarySystem(new Scanner(4, 12, 5, 6));
         $this->addPrimarySystem(new Engine(4, 14, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(1, 2));
         $this->addPrimarySystem(new Thruster(3, 7, 0, 3, 3));
@@ -43,21 +42,19 @@ class BrixadiiBattleDestroyerLeader2051 extends HeavyCombatVessel{
 		$this->addFrontSystem(new NexusKineticBoxLauncher(0, 4, 0, 300, 60));
         $this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 240, 60));
         $this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 300, 120));
-		$this->addFrontSystem(new NexusDefensePulsar(1, 4, 2, 270, 90));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new NexusProjectorArray(2, 6, 1, 180, 360));
         $this->addAftSystem(new NexusProjectorArray(2, 6, 1, 0, 180));
-		$this->addAftSystem(new NexusDefensePulsar(1, 4, 2, 120, 360));
-		$this->addAftSystem(new NexusDefensePulsar(1, 4, 2, 0, 240));
+		$this->addAftSystem(new LightParticleProjector(1, 3, 1, 120, 360));
+		$this->addAftSystem(new LightParticleProjector(1, 3, 1, 0, 240));
 		$this->addAftSystem(new NexusChaffLauncher(2, 2, 1, 0, 360));
 		$this->addAftSystem(new NexusChaffLauncher(2, 2, 1, 0, 360));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-
-        $this->addFrontSystem(new Structure( 3, 35));
-        $this->addAftSystem(new Structure( 3, 32));
+        $this->addFrontSystem(new Structure( 3, 45));
+        $this->addAftSystem(new Structure( 3, 42));
         $this->addPrimarySystem(new Structure( 4, 40));
         
         $this->hitChart = array(
@@ -75,14 +72,13 @@ class BrixadiiBattleDestroyerLeader2051 extends HeavyCombatVessel{
                     7 => "Projector Array",
                     10 => "Heavy Particle Projector",
 					12 => "Kinetic Box Launcher",
-					13 => "Defense Pulsar",
 					18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     6 => "Thruster",
 					7 => "Chaff Launcher",
-					9 => "Defense Pulsar",
+					9 => "Light Particle Projector",
                     11 => "Projector Array",
                     18 => "Structure",
                     20 => "Primary",

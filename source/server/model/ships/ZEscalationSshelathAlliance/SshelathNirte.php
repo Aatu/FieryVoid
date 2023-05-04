@@ -25,6 +25,12 @@ class SshelathNirte extends BaseShip{
         $this->rollcost = 3;
         $this->pivotcost = 3;
         $this->iniativebonus = 0;
+
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(24); //pass magazine capacity - class-SO launchers hold 12 rounds per mount
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 24); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
         
         $this->addPrimarySystem(new Reactor(4, 13, 0, 0));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
@@ -46,12 +52,12 @@ class SshelathNirte extends BaseShip{
 
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
-        $this->addLeftSystem(new SoMissileRack(3, 6, 0, 240, 60));
+		$this->addLeftSystem(new AmmoMissileRackSO(3, 0, 0, 240, 60, $ammoMagazine, false));
         $this->addLeftSystem(new Thruster(3, 13, 0, 3, 3));
 
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
-        $this->addRightSystem(new SoMissileRack(3, 6, 0, 300, 120));
+		$this->addRightSystem(new AmmoMissileRackSO(3, 0, 0, 300, 120, $ammoMagazine, false));
         $this->addRightSystem(new Thruster(3, 13, 0, 3, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

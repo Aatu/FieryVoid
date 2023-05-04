@@ -7,7 +7,7 @@ class Axor extends MediumShip{
 		$this->pointCost = 250;
 		$this->faction = "Kor-Lyan";
         $this->phpclass = "Axor";
-        $this->imagePath = "img/ships/korlyan_axor.png";
+        $this->imagePath = "img/ships/korlyan_axor2.png";
         $this->shipClass = "Axor Assault Frigate";
         $this->canvasSize = 70;
 	    

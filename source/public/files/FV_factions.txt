@@ -553,6 +553,13 @@ Fusion Agitator - Raking weapon that does damage in inefficient Raking(6) mode. 
 	Many Yolu weapons have special features, usually relating to target armor - see descriptions.
 	
 
+zBSG COLONIALS (custom, Battlestar Galactica setting)
+The Battlestar Galactica Colonials represent the Twelve Colonies of Man. The faction is characterized by good armor and bulkheads, providing significant durability. Weaponry is a mix of missiles and matter weapons. The primary heavy weapons are nearly identical to the Belt Alliance's blast cannons. 
+The Colonials also use rapid gatling railguns for close-in work.
+Flak Battery - This is very similar to the Grome flak cannon and has similar features including friendly intercept and flash mode damage. The primary difference is a maximum range of 5 hexes.
+Fighters - The Colonial fighters use a pulse style weapon that has an alternate mode with a bonus to hit fighters in a very narrow forward arc.
+Raptor - The Raptor super-heavy fighter is a support unit that provides +5 initiative to friendly Colonial fighters.
+
 
 zESCALATION BLOOD SWORD RAIDERS (custom, alternate universe faction)
 The Blood Swords were a pirate group active during the Circasian "Raider Wars" time period. They were a serious threat to the trade routes near the Thaline node of the Outward sector trade routes due to the size and capabilities of their warships. The raiders were eventually defeated by the Circasians, and their defeat marked the unofficial end of the Raider Wars.

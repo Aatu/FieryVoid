@@ -38,7 +38,7 @@ class CylonSparrowRaider extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){            
             $armour = array(3, 2, 2, 2);
             $fighter = new Fighter("CylonSparrowRaider", $armour, 9, $this->id);
-            $fighter->displayName = "Sparrow Raider";
+            $fighter->displayName = "Sparrow";
             $fighter->imagePath = "img/ships/BSG/CylonSparrowRaider.png";
             $fighter->iconPath = "img/ships/BSG/CylonSparrowRaider_large.png";
 

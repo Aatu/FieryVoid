@@ -4,7 +4,7 @@ class BrixadiiJumpScout2108 extends BaseShipNoAft{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 510;
+		$this->pointCost = 520;
 		$this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiJumpScout2108";
         $this->imagePath = "img/ships/Nexus/BrixadiiWarship.png";
@@ -57,10 +57,10 @@ class BrixadiiJumpScout2108 extends BaseShipNoAft{
 		$this->addRightSystem(new NexusChaffLauncher(1, 2, 1, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 4, 40));
-        $this->addLeftSystem(new Structure( 4, 40));
-        $this->addRightSystem(new Structure( 4, 40));
-        $this->addPrimarySystem(new Structure( 5, 44));
+        $this->addFrontSystem(new Structure( 4, 45));
+        $this->addLeftSystem(new Structure( 4, 50));
+        $this->addRightSystem(new Structure( 4, 50));
+        $this->addPrimarySystem(new Structure( 5, 40));
 		
         $this->hitChart = array(
             0=> array(

@@ -27,6 +27,12 @@ class SshelathAlvekaRefit extends BaseShip{
         $this->rollcost = 3;
         $this->pivotcost = 3;
         $this->iniativebonus = 0;
+
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(12); //pass magazine capacity - class-SO launchers hold 12 rounds per mount
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 12); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
         
         $this->addPrimarySystem(new Reactor(4, 15, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
@@ -38,7 +44,7 @@ class SshelathAlvekaRefit extends BaseShip{
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
 		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 240, 60));
 		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 300, 120));
-		$this->addFrontSystem(new SoMissileRack(2, 6, 0, 240, 120));
+		$this->addFrontSystem(new AmmoMissileRackSO(2, 0, 0, 240, 120, $ammoMagazine, false));
 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));

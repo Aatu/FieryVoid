@@ -888,6 +888,29 @@ class LaserAccelerator extends Laser{
 
     }
 
+class UnreliableBattleLaser extends BattleLaser{
+
+	protected $misfire;
+
+    public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] .= "<br>This Battle Laser is prone to misfires."; 
+		$this->data["Special"] .= "<br>10% chance of misfire and doing no damage."; 
+	}
+	
+	public function getDamage($fireOrder){
+		$misfire = Dice::d(10,1);
+		if ($misfire == 1) {
+			$fireOrder->pubnotes .= "<br> Weapon misfire! No damage.";
+			return (Dice::d(10, 4)+12)*0;
+		}else{
+			return Dice::d(10, 4)+12;
+		}
+	}
+	public function setMinDamage(){		$this->minDamage = 16;	}
+	public function setMaxDamage(){		$this->maxDamage = 52;	}
+	
+} //endof class UnreliableBattleLaser
 
 
 ?>

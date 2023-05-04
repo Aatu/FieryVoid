@@ -1710,67 +1710,22 @@ class CustomIndustrialGrappler extends Weapon {
     } //CustomMiningCutter
 
 
-class CustomLightSoMissileRack extends MissileLauncher{
+class CustomLightSoMissileRack extends CustomLightSMissileRack{
         public $name = "CustomLightSoMissileRack";
         public $displayName = "Light SO-Missile Rack";
-		    public $iconPath = "missile1.png";
-        public $animation = "trail";
-        public $trailColor = array(141, 240, 255);
-        public $animationColor = array(50, 50, 50);
-
-        public $useOEW = false; //missile
-        public $ballistic = true; //missile
-        public $range = 15;
-        public $distanceRange = 45;
-        public $ammunition = 12; //limited number of shots
-        
-        public $loadingtime = 2; // 1/2 turns
-        public $rangePenalty = 0;
+        public $loadingtime = 2; // 1/3 turns
         public $fireControl = array(5, 5, 5); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
-	    
-		public $noOverkill = false; //Ballistic weapon
-		public $priority = 6; //Ballistic weapon
-	    
-		public $firingMode = 'Standard'; //firing mode - just a name essentially
-		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 6;
-            if ( $powerReq == 0 ) $powerReq = 0;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-        
-        public function stripForJson() {
-            $strippedSystem = parent::stripForJson();    
-            $strippedSystem->ammunition = $this->ammunition;           
-            return $strippedSystem;
-        }
-	    
-        public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-             $this->data["Ammunition"] = $this->ammunition;
-        }
-        
-        public function getDamage($fireOrder){
-            $dmg = 12;
-            return $dmg;
-       }
-        public function setAmmo($firingMode, $amount){
-            $this->ammunition = $amount;
-        }
-       public function fire($gamedata, $fireOrder){ //note ammo usage
-            parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
-        }
-    
-        public function setMinDamage(){     $this->minDamage = 12;      }
-        public function setMaxDamage(){     $this->maxDamage = 12;      }
-
+        public $ammunition = 12; //limited number of shots	    
 }//endof CustomLightSoMissileRack
 
+
+class CustomLightOMissileRack extends CustomLightSMissileRack{
+        public $name = "CustomLightOMissileRack";
+        public $displayName = "Light O-Missile Rack";
+        public $loadingtime = 3; // 1/3 turns
+        public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $ammunition = 8; //limited number of shots	    
+}
 
 class CustomLightSMissileRack extends Weapon{
         public $name = "CustomLightSMissileRack";

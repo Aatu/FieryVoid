@@ -757,6 +757,62 @@ class EWHeavyGatlingLaser extends Pulse{
     } //endof class EWDefenseLaser
 
 
+    class EWHETLaser extends Laser{
+     
+        public $name = "EWHETLaser";
+        public $displayName = "HET Laser";  
+	    public $iconPath = "EWHETLaser.png";
+	    
+        public $animation = "laser";
+        public $animationColor = array(255, 91, 91);
+        public $priority = 8;
+        public $loadingtime = 4;
+
+        public $ammunition = 6; //limited number of shots
+        
+        public $raking = 10;
+        
+        public $rangePenalty = 0.33; //-1 / 3 hexes
+        public $fireControl = array(-4, 1, 2); // fighters, <mediums, <capitals 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 10;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 5;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+ 
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->ammunition = $this->ammunition;           
+            return $strippedSystem;
+        }
+        
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Uses ammunition.";
+            $this->data["Ammunition"] = $this->ammunition;
+        }
+
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
+ 
+        public function getDamage($fireOrder){        return Dice::d(10, 3)+10;   }
+        public function setMinDamage(){     $this->minDamage = 13 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 40 ;      }
+		
+    } //endof EWHETLaser
+
 
 // END LASER WEAPONS
 
