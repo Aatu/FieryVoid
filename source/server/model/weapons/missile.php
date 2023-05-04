@@ -1120,6 +1120,12 @@ class AmmoMissileRackS extends Weapon{
 		$magazine->subscribe($this); //subscribe to any further changes in ammo availability
 	}
     
+	
+	// GTS
+    protected function getAmmoMagazine(){
+        return $this->ammoMagazine;
+    }	
+	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 		
@@ -1566,6 +1572,7 @@ class AmmoMissileRackSO extends AmmoMissileRackS{
 
 
 
+
 /*Class-A Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
 	all functionality prepared in standard class-S rack
 	holds 20 missiles (Antifighter Missiles ONLY, at no additional price)
@@ -1762,9 +1769,6 @@ class AmmoFighterRack extends AmmoMissileRackS{
 		parent::__construct(0, 1, 0, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
 	}
 } //endof class AmmoBombRack
-
-
-
 
 
 
