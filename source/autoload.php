@@ -279,7 +279,8 @@ spl_autoload_register(
                 'cestusraider' => '/server/model/ships/raiders/cestusRaider.php',
                 'liuli' => '/server/model/ships/centauri_raiders/liuli.php',
                 'liuliraider' => '/server/model/ships/raiders/liuliRaider.php',
-                'eacgeminimlpa' => '/server/model/ships/customs/eacGeminiMlpa.php',
+                //'eacgeminimlpa' => '/server/model/ships/customs/eacGeminiMlpa.php',
+                'geminiam' => '/server/model/ships/EA/geminiAM.php',
                 'earlywarbird' => '/server/model/ships/drazi_old/earlywarbird.php',
                 'earlywartalon' => '/server/model/ships/drazi_old/earlywartalon.php',
                 'earthforceone' => '/server/model/ships/EA/earthforceOne.php',
@@ -2735,8 +2736,6 @@ spl_autoload_register(
 
 
 				//Kor-Lyan
-         		'ammomissilerackf' => '/server/model/weapons/customNexus.php', //missile racks themselves
-//         		'ammomissilerackd' => '/server/model/weapons/customNexus.php', //missile racks themselves
 				'axor' => '/server/model/ships/korlyan/Axor.php',
 				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 				'fenja' => '/server/model/ships/korlyan/Fenja.php',
@@ -2856,16 +2855,18 @@ spl_autoload_register(
 		    
                 		'ammomissileracks' => '/server/model/weapons/missile.php', //missile racks themselves
                 		'ammomissilerackso' => '/server/model/weapons/missile.php',
-                		'ammomissileracko' => '/server/model/weapons/missile.php',
                 		'ammomissileracka' => '/server/model/weapons/missile.php',
-                		'ammomissilerackb' => '/server/model/weapons/missile.php',
+                		'ammomissilerackb' => '/server/model/weapons/missile.php',	
+						'ammomissilerackd' => '/server/model/weapons/missile.php',					
+						'ammomissilerackf' => '/server/model/weapons/customNexus.php', 
                 		'ammomissilerackl' => '/server/model/weapons/missile.php',
                 		'ammomissileracklh' => '/server/model/weapons/missile.php',
+                		'ammomissileracko' => '/server/model/weapons/missile.php',
                 		'ammomissilerackr' => '/server/model/weapons/missile.php',
-						'ammomissilerackd' => '/server/model/weapons/missile.php',
+                		'klammomissileracks' => '/server/model/weapons/missile.php', // DOUGLAS: please look at it - IMO it should be deleted, K-L should use basic class-S rack; said rack simply should be unable to use class-I missiles until/unless it actually can do so correctly :) (...which it now can't!)
                 		'ammobombrack' => '/server/model/weapons/missile.php',
                 		'ammofighterrack' => '/server/model/weapons/missile.php',
-                		'klammomissileracks' => '/server/model/weapons/missile.php',
+						
                 		
 						
 						

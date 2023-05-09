@@ -7,13 +7,6 @@ class MissileLauncher extends Weapon{
     public $animation = "trail";
     public $animationColor = array(50, 50, 50);
 	
-	/*
-    public $trailColor = array(141, 240, 255);
-    public $animationExplosionScale = 0.6; //more visually impressive weapons - which missiles should be given their power!
-    public $projectilespeed = 8;
-    public $animationWidth = 4;
-    public $trailLength = 100;
-	*/
     public $distanceRange = 0;
     public $firingMode = 1;
     public $rangeMod = 0;
@@ -71,21 +64,6 @@ class MissileLauncher extends Weapon{
 
         parent::setSystemDataWindow($turn);
     }
-    
-	/*moving to Weapon class - this is generally useful!
-    public function isInDistanceRange($shooter, $target, $fireOrder){
-        $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-    
-        if(mathlib::getDistanceHex($movement->position,  $target) > $this->distanceRange)
-        {
-            $fireOrder->pubnotes .= " FIRING SHOT: Target moved out of distance range.";
-            return false;
-        }
-        return true;
-    }
-	*/
-    
-    
     
     public function getWeaponHitChanceMod($turn)
     {
@@ -156,10 +134,7 @@ class MissileLauncher extends Weapon{
         $crit->updated = true;
         $this->criticals[] =  $crit;
     }
-    
-	
-} //endof class MissileLauncher      
-
+} //endof MissileLauncher 
 
 
 class SMissileRack extends MissileLauncher{
@@ -1572,6 +1547,51 @@ class AmmoMissileRackSO extends AmmoMissileRackS{
 
 
 
+/*Class-O Missile Rack - GEOFFREY, please fill as appropriate - ATM it's just a copy of class-SO ammo missile rack!
+*/
+class AmmoMissileRackO extends AmmoMissileRackS{
+	public $name = "ammoMissileRackO";
+        public $displayName = "Class-O Missile Rack";
+    public $iconPath = "missile1.png";    
+	
+    public $range = 20;
+    public $distanceRange = 60;
+    public $firingMode = 1;
+    public $priority = 6;
+    public $loadingtime = 2;
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(2,2,2);
+	protected $basicRange=20;
+	protected $basicDistanceRange = 60;
+
+    protected $rackExplosionDamage = 45; //how much damage will this weapon do in case of catastrophic explosion (Class-SO launcher has smaller magazine than Class-S)
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 0;
+		if(!$this->availableAmmoAlreadySet){
+			$this->ammoClassesArray[] =  new AmmoMissileB();
+			$this->ammoClassesArray[] =  new AmmoMissileL();
+			$this->ammoClassesArray[] =  new AmmoMissileH();
+			$this->ammoClassesArray[] =  new AmmoMissileF();
+			$this->ammoClassesArray[] =  new AmmoMissileA();
+			$this->ammoClassesArray[] =  new AmmoMissileP();
+			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
+			$this->ammoClassesArray[] =  new AmmoMissileC();
+	//		$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers on Kor-Lyan ships at this time.							
+			$this->ammoClassesArray[] =  new AmmoMissileS();
+			$this->ammoClassesArray[] =  new AmmoMissileK();				
+			$this->availableAmmoAlreadySet = true;
+		}						
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+	}
+	
+} //endof class AmmoMissileRacSO
+
+
+
 
 /*Class-A Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
 	all functionality prepared in standard class-S rack
@@ -1609,6 +1629,7 @@ class AmmoMissileRackA extends AmmoMissileRackS{
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
 	}
 } //endof class AmmoMissileRackA
+
 
 //Class-D Missile Rack - holds 20 missiles (only carries Interceptor (I - default), chaff (C), and anti-fighter (A) missiles)
 class AmmoMissileRackD extends AmmoMissileRackS{
@@ -1648,8 +1669,9 @@ class AmmoMissileRackD extends AmmoMissileRackS{
 		}						
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
 	}
-	
 } //endof class AmmoMissileRackD
+
+
 
 //Need a separate S-Rack for Kor-Lyan to remove I-Missiles option where there is also D-Rack with pre-stocked I-missiles e.g. Kosha (Early))
 class KLAmmoMissileRackS extends AmmoMissileRackS{ 
@@ -1693,6 +1715,8 @@ class KLAmmoMissileRackS extends AmmoMissileRackS{
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
 	}
 } //endof class KLAmmoMissileRackS
+
+
 
 /*Bomb Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
 	all functionality prepared in standard class-S rack
@@ -1768,7 +1792,7 @@ class AmmoFighterRack extends AmmoMissileRackS{
 		}		
 		parent::__construct(0, 1, 0, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
 	}
-} //endof class AmmoBombRack
+} //endof class AmmoFighterRack
 
 
 

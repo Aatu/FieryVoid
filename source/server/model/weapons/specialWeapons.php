@@ -234,7 +234,8 @@ class ShockCannon extends Weapon{
         public $animationExplosionScale = 0.15;
         public $trailLength = 30;
 	*/
-        public $priority = 3; //dropout effect on fighters
+		public $priority = 4; //as antiship weapon, going early - actual damage is only to systems, and with armor ignoring it's worth dealing - but also as armor ignoring should let actual very light weapons go first
+		public $priorityAFArray = array(1=>2); //as antifighter weapon, going very early - instant dropout
 
         public $loadingtime = 2;
 
@@ -329,7 +330,7 @@ class BurstBeam extends Weapon{
 		        
 	public $loadingtime = 1;
 	public $priority = 10; //as antiship weapon, going last
-	public $priorityAFArray = array(1=>3); //as antifighter weapon, going early
+	public $priorityAFArray = array(1=>2); //as antifighter weapon, going very early
 			
 	public $rangePenalty = 2;
 	public $fireControl = array(4, 2, 2); // fighters, <=mediums, <=capitals 
