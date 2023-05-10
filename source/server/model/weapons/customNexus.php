@@ -6114,6 +6114,61 @@ class NexusHeavyChargedPlasmaGun extends Plasma{
 
 
 
+class NexusHeavyEnhPlasma extends Plasma{
+	public $name = "NexusHeavyEnhPlasma";
+	public $displayName = "Heavy Enhanced Plasma";
+	public $iconPath = "NexusHeavyEnhPlasma.png";
+	public $priority = 6;
+	
+	public $rangeDamagePenalty = 0;
+	public $rangeDamagePenaltyPBolter = 0.5;
+	public $loadingtime = 3;
+	public $rangePenalty = 0.5;
+	public $fireControl = array(-4, 1, 3);
+
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+				if ( $maxhealth == 0 ) $maxhealth = 9;
+				if ( $powerReq == 0 ) $powerReq = 5;
+				parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		}
+
+	protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
+	{
+		parent::getDamageMod($damage, $shooter, $target, $pos, $gamedata);
+					if ($pos != null) {
+					$sourcePos = $pos;
+					} 
+					else {
+					$sourcePos = $shooter->getHexPos();
+					}
+			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			if ($dis <= 12) {
+				$damage -= 0;
+				}
+			else {
+				$damage -= round(($dis - 12) * $this->rangeDamagePenaltyPBolter);
+			}	
+		        $damage = max(0, $damage); //at least 0	    
+        		$damage = floor($damage); //drop fractions, if any were generated
+      			 return $damage;
+	}		
+	
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "No range damage penalty up to a distance of 12 hexes.";
+			$this->data["Special"] .= "<br>After 12 hexes, damage reduced by 1 point per 2 hexes.";
+			$this->data["Special"] .= "<br>Ignores half of armor.";
+	}
+			
+        public function getDamage($fireOrder){        return 22;   }
+        public function setMinDamage(){     $this->minDamage = 22 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
+    
+
+}// End of class HeavyEnhPlasma	
+
+
 
 // END OF PLASMA WEAPONS
 
