@@ -46,7 +46,7 @@ class ChoukaRaiderHighwaymanA extends MediumShip{
         $this->addAftSystem(new Thruster(1, 7, 0, 5, 2));    
         $this->addAftSystem(new Thruster(1, 7, 0, 5, 2));    
        
-        $this->addPrimarySystem(new Structure(2, 32));
+        $this->addPrimarySystem(new Structure(3, 42));
 
 	//d20 hit chart
 	$this->hitChart = array(

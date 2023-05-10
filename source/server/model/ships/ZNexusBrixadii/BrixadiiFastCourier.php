@@ -4,7 +4,7 @@ class BrixadiiFastCourier extends BaseShipNoAft{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 390;
+		$this->pointCost = 400;
 		$this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiFastCourier";
         $this->imagePath = "img/ships/Nexus/BrixadiiWarship.png";
@@ -56,10 +56,10 @@ class BrixadiiFastCourier extends BaseShipNoAft{
 		$this->addRightSystem(new CargoBay(2, 16));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 4, 40));
-        $this->addLeftSystem(new Structure( 4, 40));
-        $this->addRightSystem(new Structure( 4, 40));
-        $this->addPrimarySystem(new Structure( 5, 44));
+        $this->addFrontSystem(new Structure( 4, 45));
+        $this->addLeftSystem(new Structure( 4, 50));
+        $this->addRightSystem(new Structure( 4, 50));
+        $this->addPrimarySystem(new Structure( 5, 40));
 		
         $this->hitChart = array(
             0=> array(

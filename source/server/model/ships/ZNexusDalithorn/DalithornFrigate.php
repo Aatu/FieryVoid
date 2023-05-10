@@ -4,7 +4,7 @@ class DalithornFrigate extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 225;
+        $this->pointCost = 235;
         $this->faction = "ZNexus Dalithorn";
         $this->phpclass = "DalithornFrigate";
         $this->imagePath = "img/ships/Nexus/DalithornFrigate.png";

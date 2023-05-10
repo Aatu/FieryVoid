@@ -8,7 +8,7 @@ class Leklant extends BaseShip{
 		$this->faction = "Kor-Lyan";
 //	$this->faction = "Custom Ships";
         $this->phpclass = "Leklant";
-        $this->imagePath = "img/ships/korlyan_leklant.png";
+        $this->imagePath = "img/ships/korlyan_leklant2.png";
         $this->shipClass = "Leklant Scout Cruiser";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; //img has 200px per side

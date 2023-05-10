@@ -6,7 +6,7 @@ This evaluation (just like point values) assumes standard conditions (default-si
 
 EASY AND FORGIVING
 Factions that are particularly easy to fly, recommended for new players. Use these factions for Your first set of battles - You will fight interface and opponent, let Your ships make that a bit easier for You! 
- - Drazi (their jack-of-all-trades ships are very flexible and can unleash full power against any oponent, while their layout makes them surprisingly resistant to damage)
+ - Drazi (their jack-of-all-trades ships are very flexible and can unleash full power against any oponent, while their layout makes them retain combat value even after sustaining heavy damage)
  - Narn (very tough and with powerful weapons - they may not be fancy, but they get the job done and refuse to die even if put in unfavorable position; average in most other aspects, which gives good feeling of what You want from Your units and allows informed choices for expanding Your picks)
  - EA (extremely tough, with awesome defenses and good firepower - balanced by difficulties with firepower concentration and low maneuvrability. Their resilience makes them very forgiving to any mistakes a beginner may make)
   
@@ -31,34 +31,35 @@ This is default power level of show era major factions ('Big 4') - what I consid
 
 
 SECOND TIER
-Factions that point for point will have uphill battle against First Tier, yet otherwise are balanced and competitive. Should be interesting to play against each other, and if given some extra PV allowance - against First Tier as well. Most of these factions do not offer fleet build flexibility of major ones, but may offer very distinct playstyle instead.
+Factions that point for point will have uphill battle against First Tier, yet otherwise are balanced and competitive. Should be interesting to play against each other, and if given some extra PV allowance - possibly against First Tier as well (if they don't have any too glaring weaknesses, which may happen). Most of these factions do not offer fleet build flexibility of major ones, but may offer very distinct playstyle instead.
  - Abbai
  - Balosian
+ - Battlestar Galactica Colonials (Custom)
  - Belt Alliance
- - Blood Sword Raiders (custom faction - Escalation Wars universe - small unit selection)
- - Brixadii (custom faction - Nexus universe)
  - Cascor (official)
- - Cascor (Custom)
+ - Cascor (Custom - basically official Cascor with enhancement that modifies their point value, making them more competitive)
  - Centauri (WotCR)
  - Ch'Lonas (custom faction)
- - Chouka (custom faction - Escalation Wars universe)
- - Circasian (custom faction - Escalation Wars universe)
  - Corillani
- - Dalithorn (custom faction - Nexus universe)
  - Deneth
  - Descari
  - Drazi (WotCR)
+ - Escalation Blood Sword Raiders (custom faction - Escalation Wars universe - small unit selection)
+ - Escalation Chouka (custom faction - Escalation Wars universe)
+ - Escalation Circasian (custom faction - Escalation Wars universe)
+ - Escalation Sshel'ath (custom faction - Escalation Wars universe)
+ - Escalation Kastan (custom faction - Escalation Wars universe)
  - Ipsha  
- - Kastan (custom faction - Escalation Wars universe)
  - Markab
- - Pak'ma'ra (Estimated power level pending more playtesting)
+ - Nexus Brixadii (custom faction - Nexus universe)
+ - Nexus Dalithorn (custom faction - Nexus universe)
+ - Nexus Sal-bez (custom faction - Nexus universe)
+ - Nexus Velrax (custom faction - Nexus universe)
+ - Pak'ma'ra
  - Raiders (note plethora of background-driven options - Raiders often use a hodgepodge of units and formal FV fleet selection rules don't always do them justice!)
- - Sal-bez (custom faction - Nexus universe)
- - Sshel'ath (custom faction - Escalation Wars universe)
  - Star Trek Federation (early) (custom faction - Star Trek universe)
  - Star Trek Federation (TOS) (custom faction - Star Trek universe)
  - Star Wars (custom faction (or rather factions), Star Wars universe - with VERY different playstyle, consider them difficult to fly!)
- - Velrax (custom faction - Nexus universe)
 
 
 SUPERIOR
@@ -79,7 +80,7 @@ They should be balanced against each other though! Playing against Young fleet t
 
 
 THE REST
-Factions that don't fit in any of the brackets above. Most of them cannot seriously compete, showing some deficiencies that cannot be fixed by simply increasing their PV allowance (like combination of poor maneuvrability/poor Sensors/short range weapons on low-tech ships or some glaring weakness in overall fleet layout).
+Factions that don't fit in any of the brackets above. Most of them cannot seriously compete, showing some deficiencies that cannot be fixed by simply increasing their PV allowance (like combination of poor maneuvrability/poor Sensors/short range weapons on low-tech ships or some glaring weakness in overall fleet layout). 
 This group is inherently unbalanced, even against each other!
  - Abbai (WotCR)
  - Alacan (Small Races)

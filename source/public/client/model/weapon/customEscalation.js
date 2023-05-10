@@ -235,3 +235,9 @@ var EWProtoMedLaser = function  EWProtoMedLaser(json, ship) {
 };
 EWProtoMedLaser.prototype = Object.create(Weapon.prototype);
 EWProtoMedLaser.prototype.constructor =  EWProtoMedLaser;
+
+var EWHETLaser = function  EWHETLaser(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWHETLaser.prototype = Object.create(Weapon.prototype);
+EWHETLaser.prototype.constructor =  EWHETLaser;

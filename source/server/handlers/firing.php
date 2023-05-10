@@ -103,8 +103,8 @@ class Firing
             $expectedDamage = max(0.5, $expectedDamage); //assume some damage is always possible!
             //reduce damage for non-Standard modes...
             switch ($firingWeapon->damageType) {
-                case 'Flash': //increase expected damage on account of collateral!
-                    $expectedDamage = $expectedDamage * 1.2;
+                case 'Flash': //increase expected damage on account of collateral! 
+                    $expectedDamage = $expectedDamage * 1.25;
                     break;
                 case 'Raking': //Raking damage gets reduced multiple times, account for that a bit! - another armour down!
                     if ($expectedDamage > 10) { ///simplified, assuming Raking will be in 10-strong rakes
@@ -115,8 +115,11 @@ class Firing
                 case 'Piercing': //Piercing does little damage to actual outer section... but it does PRIMARY damage! very dangerous!
                     $expectedDamage = $expectedDamage * 1.1;
                     break;
-                case 'Pulse': //multiple hits - assume half of max pulses hit!
+                case 'Pulse': //multiple hits - assume half of max pulses hit !
                     $expectedDamage = 0.5 * $expectedDamage * max(2, $firingWeapon->maxpulses);
+                    break;
+                case 'Standard': //default damage!
+                    $expectedDamage = $expectedDamage ;
                     break;
                 default: //something else: can't be as good as Standard!
                     $expectedDamage = $expectedDamage * 0.9;

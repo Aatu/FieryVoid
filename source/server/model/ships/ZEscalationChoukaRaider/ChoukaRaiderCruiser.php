@@ -49,13 +49,11 @@ class ChoukaRaiderCruiser extends BaseShip{
 		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 120, 300));
 		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 60, 240));
 
-
         $this->addLeftSystem(new MediumPlasma(3, 5, 3, 240, 360));
         $this->addLeftSystem(new LightPlasma(1, 4, 2, 240, 60));
         $this->addLeftSystem(new Thruster(2, 11, 0, 4, 3));
 		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
 		$this->addLeftSystem(new CargoBay(1, 24));
-		
 		
         $this->addRightSystem(new MediumPlasma(3, 5, 3, 0, 120));
         $this->addRightSystem(new LightPlasma(1, 4, 2, 300, 120));
@@ -63,13 +61,12 @@ class ChoukaRaiderCruiser extends BaseShip{
 		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
 		$this->addRightSystem(new CargoBay(1, 24));		
 
-
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure(3, 35));
+        $this->addFrontSystem(new Structure(4, 40));
         $this->addAftSystem(new Structure(3, 35));
-        $this->addLeftSystem(new Structure(3, 30));
-        $this->addRightSystem(new Structure(3, 30));
-        $this->addPrimarySystem(new Structure(3, 35));
+        $this->addLeftSystem(new Structure(3, 44));
+        $this->addRightSystem(new Structure(3, 44));
+        $this->addPrimarySystem(new Structure(4, 40));
 		
 		$this->hitChart = array(
 			0=> array(

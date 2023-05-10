@@ -4,7 +4,7 @@ class DalithornFlagCruiser extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 325;
+        $this->pointCost = 350;
         $this->faction = "ZNexus Dalithorn";
         $this->phpclass = "DalithornFlagCruiser";
         $this->imagePath = "img/ships/Nexus/DalithornFlagCruiserEarly.png";

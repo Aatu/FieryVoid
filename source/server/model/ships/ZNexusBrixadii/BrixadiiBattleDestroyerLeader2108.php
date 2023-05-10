@@ -11,8 +11,7 @@ class BrixadiiBattleDestroyerLeader2108 extends HeavyCombatVessel{
 			$this->canvasSize = 120; //img has 200px per side
         $this->shipClass = "Battle Destroyer Leader (2108)";
         $this->variantOf = "Battle Destroyer";
-			$this->occurence = "common";
-			$this->limited = 10;
+			$this->occurence = "rare";
 			$this->unofficial = true;
         $this->isd = 2108;
         
@@ -28,7 +27,7 @@ class BrixadiiBattleDestroyerLeader2108 extends HeavyCombatVessel{
          
         $this->addPrimarySystem(new Reactor(4, 19, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 12, 5, 6));
+        $this->addPrimarySystem(new Scanner(4, 12, 5, 7));
         $this->addPrimarySystem(new Engine(4, 14, 0, 9, 4));
         $this->addPrimarySystem(new Hangar(1, 2));
         $this->addPrimarySystem(new Thruster(3, 7, 0, 3, 3));
@@ -43,7 +42,6 @@ class BrixadiiBattleDestroyerLeader2108 extends HeavyCombatVessel{
 		$this->addFrontSystem(new NexusKineticBoxLauncher(0, 4, 0, 300, 60));
         $this->addFrontSystem(new EnergyPulsar(2, 6, 3, 240, 60));
         $this->addFrontSystem(new EnergyPulsar(2, 6, 3, 300, 120));
-		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 270, 90));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
@@ -55,9 +53,8 @@ class BrixadiiBattleDestroyerLeader2108 extends HeavyCombatVessel{
 		$this->addAftSystem(new NexusChaffLauncher(2, 2, 1, 0, 360));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-
-        $this->addFrontSystem(new Structure( 3, 35));
-        $this->addAftSystem(new Structure( 3, 32));
+        $this->addFrontSystem(new Structure( 3, 45));
+        $this->addAftSystem(new Structure( 3, 42));
         $this->addPrimarySystem(new Structure( 4, 40));
         
         $this->hitChart = array(
@@ -75,7 +72,6 @@ class BrixadiiBattleDestroyerLeader2108 extends HeavyCombatVessel{
                     7 => "Energy Pulsar",
                     10 => "Heavy Particle Projector",
 					12 => "Kinetic Box Launcher",
-					13 => "Scatter Pulsar",
 					18 => "Structure",
                     20 => "Primary",
             ),

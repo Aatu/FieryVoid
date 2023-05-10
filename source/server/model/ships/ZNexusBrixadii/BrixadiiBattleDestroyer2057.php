@@ -47,13 +47,11 @@ class BrixadiiBattleDestroyer2057 extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new NexusProjectorArray(2, 6, 1, 180, 360));
         $this->addAftSystem(new NexusProjectorArray(2, 6, 1, 0, 180));
-		$this->addAftSystem(new NexusDefensePulsar(1, 4, 2, 120, 360));
-		$this->addAftSystem(new NexusDefensePulsar(1, 4, 2, 0, 240));
 		$this->addAftSystem(new NexusChaffLauncher(2, 2, 0, 0, 360));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 3, 35));
-        $this->addAftSystem(new Structure( 3, 32));
+        $this->addFrontSystem(new Structure( 3, 45));
+        $this->addAftSystem(new Structure( 3, 42));
         $this->addPrimarySystem(new Structure( 4, 40));
         
         $this->hitChart = array(
@@ -77,8 +75,7 @@ class BrixadiiBattleDestroyer2057 extends HeavyCombatVessel{
             2=> array(
                     6 => "Thruster",
 					7 => "Chaff Launcher",
-					9 => "Defense Pulsar",
-                    11 => "Projector Array",
+					9 => "Projector Array",
                     18 => "Structure",
                     20 => "Primary",
             ),
