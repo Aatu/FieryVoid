@@ -1613,6 +1613,17 @@ class AmmoMissileRackD extends AmmoMissileRackS{
 		}						
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
 	}
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		
+		$this->data["Special"] = 'Available firing modes depend on ammo bought as unit enhancements. Ammunition available is tracked by central Ammunition Magazine system.';
+		if ($this->rackExplosionThreshold < 21) { //can explode - inform player!
+			$chance = (21 - $this->rackExplosionThreshold) * 5; //percentage chance of explosion
+			$this->data["Special"] .= '<br>Comes pre-loaded with 20 Interceptor Missiles, which can intercept other ballistics at -30% each.';
+			$this->data["Special"] .= '<br>Can explode if damaged or destroyed, dealing ' . $this->rackExplosionDamage . ' damage in Flash mode (' . $chance . '% chance).';
+		}	
+	}	
 } //endof class AmmoMissileRackD
 
 
