@@ -74,7 +74,7 @@ EXPECTED POWER LEVEL: Tier 1 / Tier 2 / something else
 FORBIDDEN FACTIONS: None 
 MAP BORDERS: Unit leaving map is destroyed / Unit ending movement out of map is destroyed
 CALLED SHOTS: Allowed / Not allowed
-VICTORY CONDITIONS: Last unit on map / Last ship on map
+VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining after turn X
 ------------------------
 				</textarea>
 				

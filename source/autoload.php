@@ -243,21 +243,6 @@ spl_autoload_register(
                 'doublev_nav' => '/server/model/ships/raiders/doubleV_nav.php',
                 'dragon' => '/server/model/ships/drazi_old/dragon.php',
                 'dragonship' => '/server/model/ships/raiders/dragonship.php',
-                'drakhattackship' => '/server/model/ships/drakh/drakhAttackShip.php',
-                'drakhcommandship' => '/server/model/ships/drakh/drakhCommandShip.php',
-                'drakhdreadnought' => '/server/model/ships/drakh/drakhDreadnought.php',
-                'drakhheavyraider' => '/server/model/ships/drakh/drakhHeavyRaider.php',
-                'drakhheavyraiderescort' => '/server/model/ships/drakh/drakhHeavyRaiderEscort.php',
-                'drakhheavytender' => '/server/model/ships/drakh/drakhHeavyTender.php',
-                'drakhpatrolship' => '/server/model/ships/drakh/drakhPatrolShip.php',
-                'drakhraidercontroller' => '/server/model/systems/baseSystems.php',
-                'drakhraiderflt' => '/server/model/ships/drakh/drakhRaiderFlt.php',
-                'drakhscoutship' => '/server/model/ships/drakh/drakhScoutShip.php',
-                'drakhshuttle' => '/server/model/ships/drakh/drakhShuttle.php',
-                'drakhsupportship' => '/server/model/ships/drakh/drakhSupportShip.php',
-                'drakhtanker' => '/server/model/ships/drakh/drakhTanker.php',
-                'drakhtender' => '/server/model/ships/drakh/drakhTender.php',
-                'drakhmothership' => '/server/model/ships/drakh/drakhMothership.php',
                 'drikorta' => '/server/model/ships/brakiri/drikorta.php',
                 'droftae' => '/server/model/ships/markab/droftaE.php',
                 'droftan' => '/server/model/ships/markab/droftaN.php',
@@ -2155,8 +2140,24 @@ spl_autoload_register(
 				'custombpaheavy' => '/server/model/weapons/customs.php' ,
 		    
 		    
-		//new Drakh toys
-		'customphasesweeper' => '/server/model/weapons/customs.php',   
+		//Drakh
+                'drakhattackship' => '/server/model/ships/drakh/drakhAttackShip.php',
+                'drakhcommandship' => '/server/model/ships/drakh/drakhCommandShip.php',
+                'drakhdreadnought' => '/server/model/ships/drakh/drakhDreadnought.php',
+                'drakhheavyraider' => '/server/model/ships/drakh/drakhHeavyRaider.php',
+                'drakhheavyraiderescort' => '/server/model/ships/drakh/drakhHeavyRaiderEscort.php',
+                'drakhheavytender' => '/server/model/ships/drakh/drakhHeavyTender.php',
+                'drakhpatrolship' => '/server/model/ships/drakh/drakhPatrolShip.php',
+                'drakhraidercontroller' => '/server/model/systems/baseSystems.php',
+                'drakhraiderflt' => '/server/model/ships/drakh/drakhRaiderFlt.php',
+                'drakhscoutship' => '/server/model/ships/drakh/drakhScoutShip.php',
+                'drakhshuttle' => '/server/model/ships/drakh/drakhShuttle.php',
+                'drakhsupportship' => '/server/model/ships/drakh/drakhSupportShip.php',
+                'drakhtanker' => '/server/model/ships/drakh/drakhTanker.php',
+                'drakhtender' => '/server/model/ships/drakh/drakhTender.php',
+                'drakhmothership' => '/server/model/ships/drakh/drakhMothership.php',
+				
+				'customphasesweeper' => '/server/model/weapons/customs.php',   
                 'drakhraidersweeperflt' => '/server/model/ships/drakh/drakhRaiderSweeperFlt.php',
                 'drakhmobiledefenseplatform' => '/server/model/ships/drakh/drakhMobileDefensePlatform.php',
                 'drakhmobilebeamplatform' => '/server/model/ships/drakh/drakhMobileBeamPlatform.php',
@@ -2825,10 +2826,6 @@ spl_autoload_register(
 				'apollowsf' => '/server/model/ships/customs/ApolloWSF.php',					
 				'prototype' => '/server/model/ships/customs/Prototype.php',
 				
-
-
-											
-																				   
 															 
 															   
 				
