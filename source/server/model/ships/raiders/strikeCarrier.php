@@ -7,7 +7,7 @@ class StrikeCarrier extends BaseShip{
 		$this->pointCost = 400;
 		$this->faction = "Raiders";
 		$this->phpclass = "StrikeCarrier";
-		$this->imagePath = "img/ships/battlewagon.png"; //need to change
+		$this->imagePath = "img/ships/RaiderStrikeCarrier.png"; //need to change
 		$this->shipClass = "Strike Carrier";
 		$this->shipSizeClass = 3;
 		$this->fighters = array("light"=>24);

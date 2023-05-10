@@ -7,7 +7,7 @@ class Lkarus extends BaseShip{
 		$this->pointCost = 430;
 		$this->faction = "Raiders";
         $this->phpclass = "Lkarus";
-        $this->imagePath = "img/ships/lkarus.png";
+        $this->imagePath = "img/ships/NarnPrivateerlkarusEarly.png";
         $this->shipClass = "Narn Privateer L'Karus Raider Cruiser";
 		$this->canvasSize = 125; //img has 125px per side
         $this->fighters = array("normal"=>6);  

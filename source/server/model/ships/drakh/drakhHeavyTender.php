@@ -12,7 +12,7 @@ class DrakhHeavyTender extends BaseShip{
         $this->shipClass = "Heavy Tender";
         $this->shipSizeClass = 3;
         $this->limited = 33;
-        $this->fighters = array( "Raiders" => 24);
+        $this->fighters = array( "Raiders" => 20, "Weapon Platforms" => 2); //2 Weapon Platforms take 4 Raider slots
         $this->gravitic = true;	    
 	$this->unofficial = true;
 	$this->advancedArmor = true;   

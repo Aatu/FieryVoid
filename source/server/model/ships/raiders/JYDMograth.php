@@ -7,7 +7,7 @@ class JYDMograth extends MediumShip{
 	$this->pointCost = 450;
 	$this->faction = "Raiders";
         $this->phpclass = "JYDMograth";
-        $this->imagePath = "img/ships/mograth.png";
+        $this->imagePath = "img/ships/RaiderJYDmograth.png";
         $this->shipClass = "JYD Mograth Frigate";
         $this->agile = true;
         $this->canvasSize = 100;

@@ -9231,6 +9231,7 @@ class RangedFMissileRack extends Weapon {
 	all functionality prepared in standard class-S rack
 	holds 20 missiles (only carries Interceptor (I - default), chaff (C), and anti-fighter (A) missiles)
 */
+/* commenting out - moved to missile.php - to be deleted after new rack is confirmed as working
 class AmmoMissileRackD extends AmmoMissileRackS{
 	public $name = "AmmoMissileRackD";
     public $displayName = "Class-D Missile Rack";
@@ -9250,7 +9251,7 @@ class AmmoMissileRackD extends AmmoMissileRackS{
 	     //Assume 5 anti-fighter missiles.  15*5 = 75.  Take one-quarter = 18 and take 0.75 for expenditures and this is 15 damage
     protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
 	
-    /*ATYPICAL constructor: takes ammo magazine class and (optionally) information about being fitted to stable platform*/
+    //ATYPICAL constructor: takes ammo magazine class and (optionally) information about being fitted to stable platform
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
 		//VERY IMPORTANT: fill $ammoClassesArray (cannot be done as constants!
@@ -9276,6 +9277,7 @@ class AmmoMissileRackD extends AmmoMissileRackS{
 	}
 	
 } //endof class AmmoMissileRackD
+*/
 
 
 

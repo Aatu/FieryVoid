@@ -7,7 +7,7 @@ class JYDShokos extends MediumShip{
 		$this->pointCost = 325;
 		$this->faction = "Raiders";
         $this->phpclass = "JYDShokos";
-        $this->imagePath = "img/ships/shokos.png";
+        $this->imagePath = "img/ships/RaiderJYDShokos.png";
         $this->shipClass = "JYD Sho'Kos Patrol Cutter";
         $this->agile = true;
         $this->canvasSize = 100;

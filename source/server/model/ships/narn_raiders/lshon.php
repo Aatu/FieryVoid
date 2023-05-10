@@ -8,7 +8,7 @@ class Lshon extends LCV{
         $this->faction = "Raiders";
 	$this->phpclass = "Lshon";
 	$this->shipClass = "Narn Privateer L'Shon Gunboat";
-	$this->imagePath = "img/ships/dsharda.png";
+	$this->imagePath = "img/ships/NarnPrivateerLshonEarly.png";
 	$this->canvasSize = 55;
 
 	$this->notes = "Used only by Narn privateers";

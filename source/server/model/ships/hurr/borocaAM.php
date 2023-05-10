@@ -11,7 +11,7 @@ class borocaAM extends BaseShip{
         $this->shipClass = "Boroca Gunship";
         $this->shipSizeClass = 3;
 
-        $this->isd = 2225;
+        $this->isd = 2240;
         
         $this->forwardDefense = 16;
         $this->sideDefense = 17;

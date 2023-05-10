@@ -7,7 +7,7 @@ class HybridSaucer extends MediumShip{
 		$this->pointCost = 215; //225 full cost if/when Hybrid Drive added
         $this->faction = "Raiders";
         $this->phpclass = "HybridSaucer";
-        $this->imagePath = "img/ships/VreeVymish.png";
+        $this->imagePath = "img/ships/RaiderHybridSaucer.png";
         $this->shipClass = "Raider Hybrid Saucer";
   	    $this->canvasSize = 100;        
 	    

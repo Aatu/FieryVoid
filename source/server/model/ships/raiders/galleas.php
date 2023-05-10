@@ -7,7 +7,7 @@ class Galleas extends BaseShip{
   		$this->pointCost = 400;
   		$this->faction = "Raiders";
         $this->phpclass = "Galleas";
-        $this->imagePath = "img/ships/battlewagon.png"; //needs to be changed
+        $this->imagePath = "img/ships/RaiderGalleas.png"; //needs to be changed
         $this->shipClass = "Galleas";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>18);
