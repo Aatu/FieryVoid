@@ -64,7 +64,7 @@ if (isset($_SESSION["user"])) {
        
 		
 
-		---------- <b>LATEST NEWS - March 2023</b> ----------
+		---------- <b>LATEST NEWS - May 2023</b> ----------
 	    <br><b>Raider Shokan faction</b> - courtesy of Douglas
 	    <br><b>Thirdspace development</b> - courtesy of Douglas
 	    <br><b>Various image updates</b> - courtesy of Lunara and Douglas
