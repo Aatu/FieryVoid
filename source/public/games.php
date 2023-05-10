@@ -64,18 +64,19 @@ if (isset($_SESSION["user"])) {
        
 		
 
-		---------- <b>LATEST NEWS - March 2023</b> ----------
-	    <br><b>Shock Cannon fixed</b> - now it actually doesn't crash vs Advanced Armor
-	    <br><b>Minor fixes</b> - layouts, hit charts, weapon visuals and such
+		---------- <b>LATEST NEWS - May 2023</b> ----------
+	    <br><b>Raider Shokan faction</b> - courtesy of Douglas
 	    <br><b>Thirdspace development</b> - courtesy of Douglas
-	    <br><b>Kor-Lyan polishing</b> - courtesy of Geoffrey and Douglas
+	    <br><b>Various image updates</b> - courtesy of Lunara and Douglas
+	    <br><b>Kor-Lyan development and polishing</b> - courtesy of Geoffrey and Douglas
+	    <br><b>Nexus updates</b> - courtesy of Geoffrey
+	    <br><b>Escalation Wars updates</b> - courtesy of Geoffrey
+	    <br><b>What If factions</b> - custom interpretations of official fations, by Geoffrey
+	    <br><b>EA defenses separated</b> - new developmens made EA too large to actually display everything at once...
+	    <br><b>Drakh rebalanced</b> - got some bigger teeth!
+	    
 	    
 <!--	        
-		 <br><br>---------- <b>update 11th of January - Fleet Checker</b> ---------- 
-	    <br><b>Options highlighted</b> - now enhancement entries representing regular options are highlighted as such (and Fleet Checker does not warn about them)
-	    <br><b>Non-combat units blocked</b> - Fleet Checker now checks non-combat ship presence (like for fixed defenses)
-	    <br><b>Small flights blocked</b> - Fleet Checker now checks flight smaller than 6 craft
- 
 		 <br><br>---------- <b>update 20th of January</b> ---------- 
 	    <br><b><u><big>Thirdspace</big></u> arrived</b> - custom faction by Douglas
 	    <br><b>Ammo Magazine for fighters</b> - Dilgar, Hurr

@@ -8,7 +8,7 @@ class SolyrnAM extends HeavyCombatVessel{
         $this->pointCost = 650;
         $this->faction = "Kor-Lyan";
         $this->phpclass = "SolyrnAM";
-        $this->imagePath = "img/ships/korlyan_solyrn.png";
+        $this->imagePath = "img/ships/korlyan_solyrn2.png";
         $this->shipClass = "Solyrn Missile Destroyer";
         $this->limited = 10;
 	    $this->isd = 2237;
@@ -33,12 +33,12 @@ class SolyrnAM extends HeavyCombatVessel{
 	$ammoMagazine = new AmmoMagazine(200); //pass magazine capacity 
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 120); //add full load of basic missiles 
-	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of basic missiles  	      
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of Interceptor missiles  	      
 
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
 	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
-	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-K	    	    	    	    	    
-	    $this->enhancementOptionsEnabled[] = 'AMMO_K';//add enhancement options for other missiles - Class-S 	    
+	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S	    	    	    	    	    
+	    //$this->enhancementOptionsEnabled[] = 'AMMO_K';//add enhancement options for other missiles - Class-K   
 	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
 	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
 	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F

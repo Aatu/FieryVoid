@@ -7,7 +7,7 @@ class Fenja extends MediumShip{
 		$this->pointCost = 300;
 		$this->faction = "Kor-Lyan";
         $this->phpclass = "Fenja";
-        $this->imagePath = "img/ships/korlyan_axor.png";
+        $this->imagePath = "img/ships/korlyan_axor2.png";
         $this->shipClass = "Fenja Assault Leader";
 			$this->occurence = "uncommon";
 			$this->variantOf = 'Axor Assault Frigate';

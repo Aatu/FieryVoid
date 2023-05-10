@@ -7,7 +7,7 @@ class VaklarAM extends HeavyCombatVessel{
         $this->pointCost = 450;
         $this->faction = "Kor-Lyan";
         $this->phpclass = "VaklarAM";
-        $this->imagePath = "img/ships/korlyan_vaklar.png";
+        $this->imagePath = "img/ships/korlyan_vaklar2.png";
         $this->shipClass = "Vaklar Logistics Frigate";
 	    $this->isd = 2208;
 		$this->canvasSize = 130;
@@ -41,7 +41,8 @@ class VaklarAM extends HeavyCombatVessel{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
 	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
 	    $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
-         
+ 	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-P
+        
         $this->addPrimarySystem(new Reactor(4, 13, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 5, 6));

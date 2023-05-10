@@ -9,7 +9,7 @@ class BrixadiiLightEscortFrigate extends MediumShip{
         $this->phpclass = "BrixadiiLightEscortFrigate";
         $this->imagePath = "img/ships/Nexus/BrixadiiLightEscort.png";
 			$this->canvasSize = 70; //img has 100px per side
-        $this->shipClass = "Light Escort Frigate";
+        $this->shipClass = "Light Escort Frigate (2108)";
 		$this->variantOf = "Pursuit Frigate";
 		$this->occurence = "uncommon";
 		$this->unofficial = true;
@@ -41,7 +41,7 @@ class BrixadiiLightEscortFrigate extends MediumShip{
 		$this->addFrontSystem(new EnergyPulsar(2, 6, 3, 300, 60));
 		$this->addFrontSystem(new EnergyPulsar(2, 6, 3, 300, 60));
 		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 300, 180));
-		$this->addFrontSystem(new NexusKineticBoxLauncher(0, 4, 0, 300, 60));
+		$this->addFrontSystem(new NexusAntifighterLauncher(0, 6, 0, 270, 90));
 		
 		$this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
@@ -65,7 +65,7 @@ class BrixadiiLightEscortFrigate extends MediumShip{
             ),
             1=> array(
 				5 => "Thruster",
-				6 => "Kinetic Box Launcher",
+				6 => "Anti-fighter Launcher",
 				8 => "Energy Pulsar",
 				10 => "Scatter Pulsar",
 				17 => "Structure",

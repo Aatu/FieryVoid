@@ -1,12 +1,12 @@
 <?php
-class ColonialManticoreClass extends MediumShip{
+class ColonialManticoreClassAM extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 575;
 		$this->faction = "ZBSG Colonials";
-        $this->phpclass = "ColonialManticoreClass";
+        $this->phpclass = "ColonialManticoreClassAM";
         $this->imagePath = "img/ships/BSG/ColonialManticore.png";
         $this->shipClass = "Manticore Corvette";
         $this->canvasSize = 65;
@@ -23,6 +23,15 @@ class ColonialManticoreClass extends MediumShip{
         $this->rollcost = 1;
         $this->pivotcost = 3;
 		$this->iniativebonus = 60;
+
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(20); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 20); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+        $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
+        $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+        $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
          
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
@@ -42,7 +51,7 @@ class ColonialManticoreClass extends MediumShip{
         $this->addFrontSystem(new Thruster(5, 10, 0, 3, 1));
 		$this->addFrontSystem(new Bulkhead(0, 3));
         $this->addFrontSystem(new Bulkhead(0, 3));
-        $this->addFrontSystem(new SMissileRack(4, 6, 0, 0, 360));
+        $this->addFrontSystem(new AmmoMissileRackS(4, 0, 0, 0, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 
 		$this->addAftSystem(new RapidGatling(3, 4, 1, 180, 30));
 		$this->addAftSystem(new RapidGatling(3, 4, 1, 180, 30));

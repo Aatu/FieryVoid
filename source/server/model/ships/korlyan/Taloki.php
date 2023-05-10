@@ -21,7 +21,7 @@ class Taloki extends StarBaseSixSections{
 		$this->forwardDefense = 21;
 		$this->sideDefense = 24;
 
-		$this->imagePath = "img/ships/korlyan_taloki.png";
+		$this->imagePath = "img/ships/korlyan_taloki2.png";
 		$this->canvasSize = 260; //Enormous Starbase
 
 		$this->locations = array(41, 42, 2, 32, 31, 1);

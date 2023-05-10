@@ -4063,8 +4063,7 @@ class AmmoMissileD extends AmmoMissileTemplate{
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
         return 12;
-    }		
-	
+    }	
 } //endof class AmmoMissileD
 
 //ammunition for AmmoMagazine - Class C Missile (for official Missile Racks)
@@ -4144,6 +4143,68 @@ class AmmoMissileC extends AmmoMissileTemplate{
 } //endof class AmmoMissileC
 
 
+//ammunition for AmmoMagazine - Class S Missile (for official Missile Racks, Kor-Lyan only)
+class AmmoMissileS extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileS';
+	public $displayName = 'Stealth Missile';
+	public $modeName = 'Stealth';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_S'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Stealth Missile (2252)'; //enhancement description
+	public $enhancementPrice = 5;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
+	public $minDamage = 20;
+	public $maxDamage = 20;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	public $noOverkill = false;
+	public $useOEW = false;
+	public $hidetarget = true;
+ 
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 20;
+    }	
+} //endof class AmmoMissileS
+
+
+/* double entry, to be deleted once Stealth missile is confirmed as working
+//ammunition for AmmoMagazine - Class S Missile (for official Missile Racks, Kor-Lyan only)
+class AmmoMissileS extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileS';
+	public $displayName = 'Stealth Missile';
+	public $modeName = 'Stealth';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_S'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Stealth Missile (2252)'; //enhancement description
+	public $enhancementPrice = 5;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
+	public $minDamage = 20;
+	public $maxDamage = 20;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	public $noOverkill = false;
+	public $useOEW = false;
+	public $hidetarget = true;
+	
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 20;
+    }	
+} //endof class AmmoMissileS
+*/
+
+
 //ammunition for AmmoMagazine - Class I Missile (for official Missile Racks)
 class AmmoMissileI extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileI';
@@ -4175,40 +4236,9 @@ class AmmoMissileI extends AmmoMissileTemplate{
     {
         if($unit->faction == 'Kor-Lyan') return 0;
         return $this->enhancementPrice;
-    }    
-	
+    }	
 } //endof class AmmoMissileI
 
-
-//ammunition for AmmoMagazine - Class S Missile (for official Missile Racks, Kor-Lyan only)
-class AmmoMissileS extends AmmoMissileTemplate{	
-	public $name = 'ammoMissileS';
-	public $displayName = 'Stealth Missile';
-	public $modeName = 'Stealth';
-	public $size = 1; //how many store slots are required for a single round
-	public $enhancementName = 'AMMO_S'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Stealth Missile (2252)'; //enhancement description
-	public $enhancementPrice = 5;
-	
-	public $rangeMod = 0; //MODIFIER for launch range
-	public $distanceRangeMod = 0; //MODIFIER for distance range
-	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
-	public $minDamage = 20;
-	public $maxDamage = 20;	
-	public $damageType = 'Standard';//mode of dealing damage
-	public $weaponClass = 'Ballistic';//weapon class
-	public $priority = 6;
-	public $priorityAF = 5;
-	public $noOverkill = false;
-	public $useOEW = false;
-	public $hidetarget = true;
-	
-    public function getDamage($fireOrder) //actual function to be called, as with weapon!
-    {
-        return 20;
-    }		
-	
-} //endof class AmmoMissileS
 
 //ammunition for AmmoMagazine - Class K Missile (for official Missile Racks)
 class AmmoMissileK extends AmmoMissileTemplate{	
@@ -4263,7 +4293,6 @@ class AmmoMissileK extends AmmoMissileTemplate{
 		if($unit->faction == 'Kor-Lyan') return 20;
 		return $this->enhancementPrice;
 	}
-	
 } //endof class AmmoMissileK
 
 
@@ -4292,8 +4321,8 @@ class AmmoMissileFB extends AmmoMissileTemplate{
     {
         return 10;
     }		
-	
 } //endof class AmmoMissileFB
+
 
 //ammunition for AmmoMagazine - Class FL Missile (Fighter Long Range)
 class AmmoMissileFL extends AmmoMissileTemplate{	
@@ -4327,6 +4356,7 @@ class AmmoMissileFL extends AmmoMissileTemplate{
 		return $this->enhancementPrice;
 	}
 } //endof class AmmoMissileFL
+
 
 //ammunition for AmmoMagazine - Class FH Missile (Fighter Heavy)
 //NOTE: up to 1 per fighter (2 for SHFs)
@@ -4362,6 +4392,7 @@ class AmmoMissileFH extends AmmoMissileTemplate{
 	}
 } //endof class AmmoMissileFH
 
+
 //ammunition for AmmoMagazine - Class FY Missile (Dogfight Missile)
 //NOTE: in tabletop it has snap fire option, which is not available in FV
 class AmmoMissileFY extends AmmoMissileTemplate{	
@@ -4386,8 +4417,7 @@ class AmmoMissileFY extends AmmoMissileTemplate{
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
         return 6;
-    }		
-	
+    }
 } //endof class AmmoMissileFY
 
 
@@ -4419,8 +4449,7 @@ class AmmoMissileFD extends AmmoMissileTemplate{
 	{
 		if($unit->faction == 'Kor-Lyan') return 8;
 		return $this->enhancementPrice;
-	}
-	
+	}	
 	
 	/*dropout missile effect on hit: +3 dropout penalty for SHFs, +6 for other small craft*/
     public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder)
@@ -4433,7 +4462,7 @@ class AmmoMissileFD extends AmmoMissileTemplate{
 			$system->critRollMod+=6;
 		}
     }
-	
 } //endof class AmmoMissileFD
+
 
 ?>

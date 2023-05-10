@@ -63,11 +63,11 @@ class ChoukaRaiderJumpcruiser extends BaseShip{
 		$this->addRightSystem(new CargoBay(1, 24));		
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure(3, 35));
+        $this->addFrontSystem(new Structure(4, 40));
         $this->addAftSystem(new Structure(3, 35));
-        $this->addLeftSystem(new Structure(3, 30));
-        $this->addRightSystem(new Structure(3, 30));
-        $this->addPrimarySystem(new Structure(3, 35));
+        $this->addLeftSystem(new Structure(3, 44));
+        $this->addRightSystem(new Structure(3, 44));
+        $this->addPrimarySystem(new Structure(4, 40));
 		
 		$this->hitChart = array(
 			0=> array(

@@ -213,6 +213,74 @@ class NexusAdvKineticBoxLauncher extends Weapon{
 
 
 
+class NexusAntifighterLauncher extends Weapon{
+        public $name = "NexusAntifighterLauncher";
+        public $displayName = "Anti-fighter Launcher";
+	    public $iconPath = "NexusDefenderMissile.png";
+        public $animation = "trail";
+        public $trailColor = array(11, 224, 255);
+        public $animationColor = array(50, 50, 50);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 12;
+        public $animationWidth = 4;
+        public $trailLength = 100;    
+
+        public $useOEW = true; //missile
+        public $ballistic = true; //missile
+        public $range = 8;
+        public $distanceRange = 24;
+        public $ammunition = 8; //limited number of shots
+        
+        public $loadingtime = 1; 
+        public $rangePenalty = 0;
+        public $fireControl = array(4, null, null); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+	    
+		public $priority = 4; //Matter weapon
+	    
+		public $firingMode = 'Ballistic'; //firing mode - just a name essentially
+		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 0;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->ammunition = $this->ammunition;           
+            return $strippedSystem;
+        }
+	    
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Benefits from offensive EW.";
+            $this->data["Ammunition"] = $this->ammunition;
+        }
+        
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
+
+        public function getDamage($fireOrder){
+			return 8;
+        }
+    
+        public function setMinDamage(){     $this->minDamage = 8;      }
+        public function setMaxDamage(){     $this->maxDamage = 8;      }
+		
+}//endof NexusAntifighterLauncher
+
+
+
+
 class NexusLaserMissile extends Laser{
         public $name = "NexusLaserMissile";
         public $displayName = "Laser Missile";
@@ -869,7 +937,7 @@ class NexusStreakInterceptor extends Weapon{
         public function setAmmo($firingMode, $amount){
             $this->ammunition = $amount;
         }
-       public function fire($gamedata, $fireOrder){ //note ammo usage
+        public function fire($gamedata, $fireOrder){ //note ammo usage
             parent::fire($gamedata, $fireOrder);
             $this->ammunition--;
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
@@ -1329,7 +1397,7 @@ class NexusChaffLauncher extends Weapon{
 	
         public $useOEW = false; //not important, really	    
         
-        public $loadingtime = 1; // 1/2 turns
+        public $loadingtime = 1; // 1 / turn
 		public $range = 100; //let's put maximum range here, but generous one
         public $rangePenalty = 0;
         public $fireControl = array(100, 100, 100); // fighters, <mediums, <capitals; just so the weapon is targetable
@@ -6782,334 +6850,7 @@ class NexusDefensePulsar extends Pulse{
 
 
 
-/*Chaff Launcher
-intercepts all weapon fire (directed at self) from HEX (including uninterceptable weapons).
-Done as: kind of offensive mode - player needs to pick hex to fire at. Animated as kind of EMine. 
-All appropriate fire orders will get an interception set up before other intercepts are declared.
-If weapon is left to its own devices it will simply provide a single interception (...if game allows non-1-per-turn weapon to be intercepting in the first place!)
-*/
-class PlasmaWeb extends Weapon implements DefensiveSystem{
-        public $name = "PlasmaWeb";
-        public $displayName = "Plasma Web";
-		public $iconPath = "PlasmaWeb.png";
-	
-        public $trailColor = array(192,192,192);
-        public $animation = "ball";
-        public $animationColor = array(192,192,192);
-        public $animationExplosionScale = 0.5;
-        public $animationExplosionType = "AoE";
-        public $explosionColor = array(235,235,235);
-        public $projectilespeed = 12;
-        public $animationWidth = 10;
-        public $trailLength = 10;
 
-        public $ballistic = false;
-        public $hextarget = false; //for technical reasons this proved hard to do
-        public $hidetarget = false;
-        public $priority = 1; //to show effect quickly
-        public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
-        public $doNotIntercept = true; //do not intercept this weapon, period
-		public $canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
-	
-        public $useOEW = false; //not important, really	    
-        
-        public $loadingtime = 1;
-		public $range = 100; //let's put maximum range here, but generous one
-        public $rangePenalty = 0;
-        public $fireControl = array(100, 100, 100); // fighters, <mediums, <capitals; just so the weapon is targetable
-		public $intercept = 2; //intercept rating -2	    
-	    
-		public $firingMode = 'Intercept'; //firing mode - just a name essentially
-		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-    	public $weaponClass = "Particle"; //not important really
-	 
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 4;
-            if ( $powerReq == 0 ) $powerReq = 2;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-		
-		public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "Fired at hex (although You technically have to pick an unit). Will apply interception to all fire from target hex to Chaff-protected ship.";
-            $this->data["Special"] .= "<br>Will affect uninterceptable weapons.";
-        }
-
-
-	//Defensive system functions
-
-    public function getDefensiveType()
-    {
-       return "Interceptor";
-    }
-
-    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
-            return 0;
-    }
-
-    public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
-		$output = 0;
-		//Affects only Antimatter, Laser, and Particle weapons
-		if($weapon->weaponClass == 'Laser' || $weapon->weaponClass == 'Particle' || $weapon->weaponClass == 'Antimatter') $output = 2;
-        return $output;
-    }
-
-	//end Defensive system functions
-
-
-	        
-	//hit chance always 100 - so it always hits and is correctly animated
-	public function calculateHitBase($gamedata, $fireOrder)
-	{
-		$fireOrder->needed = 100; //auto hit!
-		$fireOrder->updated = true;
-		
-		//while we're at it - we may add appropriate interception orders!		
-		$targetShip = $gamedata->getShipById($fireOrder->targetid);
-		
-		$shipsInRange = $gamedata->getShipsInDistance($targetShip); //all units on target hex
-		foreach ($shipsInRange as $affectedShip) {
-			$allOrders = $affectedShip->getAllFireOrders($gamedata->turn);
-			foreach($allOrders as $subOrder) {
-				if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->shooterid) ){ //something is firing at protected unit - and is affected!
-					//uninterceptable are affected all right, just those that outright cannot be intercepted - like ramming or mass driver - will not be affected
-					$subWeapon = $affectedShip->getSystemById($subOrder->weaponid);
-					if( $subWeapon->doNotIntercept != true ){
-						//apply interception! Note that this weapon is technically not marked as firing defensively - it is marked as firing offensively though! (already)
-						//like firing.php addToInterceptionTotal
-						$subOrder->totalIntercept += $this->getInterceptionMod($gamedata, $subOrder);
-        				$subOrder->numInterceptors++;
-					}
-				}
-			}
-		}
-		
-		//retarget at hex - this will affect how the weapon is animated/displayed in firing log!
-		    //insert correct target coordinates: CURRENT target position
-		    $pos = $targetShip->getHexPos();
-		    $fireOrder->x = $pos->q;
-		    $fireOrder->y = $pos->r;
-		    $fireOrder->targetid = -1; //correct the error
-
-	}//endof function calculateHitBase
-	   
-	public function fire($gamedata, $fireOrder)
-	{ //sadly here it really has to be completely redefined... or at least I see no option to avoid this
-		$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
-		$shooter = $gamedata->getShipById($fireOrder->shooterid);
-		/** @var MovementOrder $movement */
-		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
-		$posLaunch = $movement->position;//at moment of launch!!!		
-		//$this->calculateHit($gamedata, $fireOrder); //already calculated!
-		$rolled = Dice::d(100);
-		$fireOrder->rolled = $rolled; ///and auto-hit ;)
-		$fireOrder->shotshit++;
-		$fireOrder->pubnotes .= "Interception applied to all weapons at target hex that are firing at Chaff-launching ship. "; //just information for player, actual applying was done in calculateHitBase method
-
-		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
-		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
-		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
-	} //endof function fire
-
-        public function getDamage($fireOrder){
-            return 0; //this weapon does no damage, in case it actually hits something!
-        }
-        public function setMinDamage(){     $this->minDamage = 0;      }
-        public function setMaxDamage(){     $this->maxDamage = 0;      }
-		
-}//endof PlasmaWeb	
-
-
-
-
-
-/* moving to official Plasma weapons, plasma.php file!
-class PlasmaBlast extends Weapon{
-        public $name = "PlasmaBlast";
-        public $displayName = "Plasma Blast";
-		public $iconPath = "PlasmaWeb.png";
-		
-		public $range = 3;
-		public $loadingtime = 1;
-//		public $hextarget = true;
-		
-		public $flashDamage = true;
-		public $priority = 1;
-			
-        public $animation = "ball";
-        public $trailColor = array(30, 140, 60);
-        public $animationColor = array(30, 140, 60);
-        public $animationExplosionScale = 1;
-		public $animationExplosionType = "AoE";
-        public $projectilespeed = 12;
-        public $animationWidth = 10;
-        public $trailLength = 10;    
-
-		public $firingMode = 'AoE'; //firing mode - just a name essentially
-		public $damageType = "Flash"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-    	public $weaponClass = "Plasma"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
-
-        public $rangePenalty = 0; //none
-        public $fireControl = array(50, null, null); // fighters, <mediums, <capitals
-
-
-
-
-public function calculateHitBase($gamedata, $fireOrder)
-    {
-        $fireOrder->needed = 100; //100% chance of hitting everything on target hex
-        $fireOrder->updated = true;
-    } 
-
- public function fire($gamedata, $fireOrder){
-        $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
-        $shooter = $gamedata->getShipById($fireOrder->shooterid); //so we know which ship is firing, this is useful
-
-		if ($fireOrder->targetid != -1) { //make weapon target hex rather than unit
-            $targetship = $gamedata->getShipById($fireOrder->targetid);
-            //insert correct target coordinates: CURRENT  target position
-            $position = $targetship->getCoPos(); 
-            $fireOrder->x = $position["x"];
-            $fireOrder->y = $position["y"];
-            $fireOrder->targetid = -1; 
-        }
-
-		//roll to hit - we'll make a regular roll (irrelevant as hit is automatic, but we need to mark SOME number anyway):
-		$rolled = Dice::d(100);
-		$fireOrder->rolled = $rolled;
-
-		//deal damage!
-        $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
-        $ships1 = $gamedata->getShipsInDistance($target); //all ships on target hex
-        foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
-
-            $this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
-        }
-    }
-	
-//and now actual damage dealing - and we already know fighter is hit (fire()) doesn't pass anything else)
-//source hex will be taken from firing unit, damage will be individually rolled for each fighter hit
- public function AOEdamage($target, $shooter, $fireOrder, $gamedata)
-    {
-        if ($target->isDestroyed()) return; //no point allocating
-            foreach ($target->systems as $fighter) {
-                if ($fighter == null || $fighter->isDestroyed()) {
-                    continue;
-                }
-         //roll (and modify as appropriate) damage for this particular fighter:
-        $damage = $this->getDamage();
-//        $damage = $this->getDamageMod($damage, $shooter, $target, null, $gamedata);
-//        $damage -= $target->getDamageMod($shooter, null, $gamedata->turn, $this);
-
-                $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
-
-		}
-	}
-
-
-
-
-
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 4;
-            if ( $powerReq == 0 ) $powerReq = 2;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-        
-//    	public function getDamage($fireOrder){        return Dice::d(6, 1)+2;   }
-    	public function getDamage($fireOrder){        return 12;   }
-        public function setMinDamage(){     $this->minDamage = 12;      }
-        public function setMaxDamage(){     $this->maxDamage = 12;      }
-}//endof PlasmaBlast
-*/
-
-
-
-
-
-
-class TestGun extends Weapon{
-        public $trailColor = array(30, 170, 255);
-
-        public $name = "TestGun";
-        public $displayName = "Test Gun";
-		public $iconPath = "tacLaser.png";
-	    
-        public $animation = "trail";
-        public $animationColor = array(255, 250, 230);
-        public $animationExplosionScale = 0.15;
-        public $projectilespeed = 15;
-        public $animationWidth = 4;
-        public $trailLength = 10;
-        public $loadingtime = 1;
-        public $priority = 5;
-        public $intercept = 2;
-
-        public $rangePenalty = 0.25; //-1/4 hexes
-        public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals
-	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-	    public $weaponClass = "Laser"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 4;
-            if ( $powerReq == 0 ) $powerReq = 1;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-
-		public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "Laser";
-        }
-
-        public function getDamage($fireOrder){ return 10;   }
-        public function setMinDamage(){     $this->minDamage = 10 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 10 ;      }
-}// endof TestGun
-
-class TestGun2 extends Weapon{
-        public $trailColor = array(30, 170, 255);
-
-        public $name = "TestGun2";
-        public $displayName = "Test Gun 2";
-		public $iconPath = "EmPulsar.png";
-	    
-        public $animation = "trail";
-        public $animationColor = array(255, 250, 230);
-        public $animationExplosionScale = 0.15;
-        public $projectilespeed = 15;
-        public $animationWidth = 4;
-        public $trailLength = 10;
-        public $loadingtime = 1;
-        public $priority = 5;
-        public $intercept = 2;
-
-        public $rangePenalty = 0.25; //-1/4 hexes
-        public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals
-
-	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 4;
-            if ( $powerReq == 0 ) $powerReq = 1;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-
-		public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "Electromagnetic";
-        }
-
-        public function getDamage($fireOrder){ return 10;   }
-        public function setMinDamage(){     $this->minDamage = 10 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 10 ;      }
-}// endof TestGun2
 
 
 /*fighter-mounted variant*/
@@ -7664,6 +7405,7 @@ class DirectLimpetBore extends Weapon{
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Special"] = "Ignores armor, no overkill (Ballistic+Matter weapon).";
+            $this->data["Special"] .= "<br>NOTE: Fires in the normal weapons fire phase, not initial phase.";
             $this->data["Ammunition"] = $this->ammunition;
         }
         
@@ -7902,6 +7644,975 @@ class ProximityLaser extends Weapon{
         public function setMaxDamage(){     $this->maxDamage = 38;      }
 		
 }//endof ProximityLaser
+
+
+
+
+
+
+
+//This is building off of the FMissileRack. That weapon is a fully functional
+//F-Launcher. However, it only uses basic missiles. This version is the attempt
+//to integrate the ammo selection capabilities of other missile racks as set 
+//up in AmmoMissileRackS. 
+//
+//NOTE: The other missile launchers (e.g., L-Launcher) are just extensions of
+//AmmoMissileRackS as they just vary the rate of fire or launch range. The 
+//F-Launcher will be different in that it has multiple modes BEFORE accounting
+//for special missiles. Further complicating things, it is an accelerator-style
+//weapon, giving it another variable to account for. 
+//
+//My first attempt here will be to port over the relevant information from
+//AmmoMissileRackS as opposed to making AmmoMissileRackF an extension of S.
+class AmmoMissileRackF extends AmmoMissileRackS {
+		public $name = "AmmoMissileRackF";
+        public $displayName = "Class-F Ammo Rack";
+        public $iconPath = "ClassFMissileRack.png";
+
+///		public $checkAmmoMagazine = true;
+//NOTE: I use /// to represent lines I commented out that are already in AmmoMissileRackS
+///		public $useOEW = false;
+///		public $ballistic = true;
+///        public $animation = "trail";
+///        public $animationColor = array(50, 50, 50);
+///		public $range = 20;
+///		public $distanceRange = 60;
+///		public $firingMode = 1;
+        public $ammunition = 10; //limited number of shots
+///		public $priority = 6; 		
+        public $loadingtime = 1;
+		public $normalload = 2;
+
+		protected $basicFC=array(3,3,3);
+
+///		protected $availableAmmoAlreadySet = false; //set to true if calling constructor from derived weapon that sets different ammo options
+//		protected $usesOrdnance = true; //indicates that onboardFC should be shown!
+	
+		protected $rackExplosionDamage = 38; //how much damage will this weapon do in case of catastrophic explosion
+		//officially it's a quarter of total power of warheads in magazine; but in FV this number is fixed (as missiles in magazine are not tracked)
+		// estimated warheads in magazine: 200 (10 missiles, dmg 20 each - assuming Basic missiles)
+		// a quarter of the above: 50
+		// reduce somewhat by expected expendientures (say, *0.75): 38
+		// also, official rules expect Raking mode, not Flash - but it's somewhat of a washout (Flash offers higher chance of destroying section, but lower of damage penetrating deeper)
+		protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion (d20)
+
+///     public $damageType = "Standard";
+///		public $weaponClass = "Ballistic";
+
+///		protected $basicFC = array(3,3,3);
+///		protected $basicRange = 20;
+///		protected $basicDistanceRange = 60;
+
+///		public $firingModes = array();
+///		public $damageTypeArray = array();
+///		public $fireControlArray = array();
+///		public $rangeArray = array();
+///		public $distanceRangeArray = array();
+
+///		protected $ammoClassesArray = array();//FILLED IN CONSTRUCTOR! classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
+
+///		private $ammoMagazine; //reference to ammo magazine
+///		private $ammoClassesUsed = array();
+
+//		public $rangeMod = 0;
+//		public $hits = array();
+
+		
+        public $rangePenalty = 0;
+        private $baseFireControlArray = null; //base values of fire control - copy necessary due to necessity of recalculation now and then!
+		private $firedInRapidMode = false; //was this weapon fired in rapid mode (this turn)?
+		private $baseRange = null; //base value of range - copy necessary due to necessity of recalculation now and then!
+		private $baseRangeArray = null; //base value of range - copy necessary due to necessity of recalculation now and then!
+		private $baseDistance = null; //base value of range - copy necessary due to necessity of recalculation now and then!
+		private $baseDistanceArray = null; //base value of range - copy necessary due to necessity of recalculation now and then!
+
+		
+    /*ATYPICAL constructor: takes ammo magazine class and (optionally) information about being fitted to stable platform*/
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		//VERY IMPORTANT: fill $ammoClassesArray (cannot be done as constants!
+		//classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
+		//remember that appropriate enhancements need to be enabled on ehip itself, too!
+		
+///		if(!$this->availableAmmoAlreadySet){
+///			$this->ammoClassesArray[] = new AmmoMissileB();
+///			$this->ammoClassesArray[] = new AmmoMissileL();
+///			$this->ammoClassesArray[] = new AmmoMissileH();
+///			$this->ammoClassesArray[] = new AmmoMissileF();
+///			$this->ammoClassesArray[] = new AmmoMissileA();
+///			$this->ammoClassesArray[] = new AmmoMissileP();
+//			$this->ammoClassesArray[] = new AmmoMissileS();
+//			$this->ammoClassesArray[] = new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
+///			$this->availableAmmoAlreadySet = true;
+///		}
+	
+///		$this->ammoMagazine = $magazine;
+///		if($base){
+///			$this->basicRange = $this->basicDistanceRange;
+///		}
+
+///		$this->recompileFiringModes();
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 0;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false); //class-S launcher: structure 6, power usage 0
+///		$magazine->subscribe($this); //subscribe to any further changes in ammo availability
+	}
+
+        public function setSystemDataWindow($turn){	
+			parent::setSystemDataWindow($turn);
+            $this->data["Ammunition"] = $this->ammunition;
+			
+			$this->recalculateFireControl(); //necessary for correct Initial data
+			$this->data["Special"] = 'This weapon can fire either as regular missile launcher (Standard), or Long Range launcher (Boost). ';
+			$this->data["Special"] .= '<br>When boosted, the missile gains +15 hexes but with -10% fire control.';
+			$this->data["Special"] .= '<br>It can also fire in Rapid mode after only 1 turn of charging, but not after using Long Range mode.';
+			$this->data["Special"] .= '<br>In Rapid mode the missile loses -5 hexes and -10% fire control.';
+			$this->data["Special"] .= '<br>NOTE: The system display lists Missile Type - Launch Mode.';
+			$this->data["Special"] .= '<br>As an example, Heavy-Boost is a Heavy Missile boosted in Long-Range mode.';
+			parent::setSystemDataWindow($turn);	
+		}
+
+	/*prepare firing modes - in order as indicated by $ammoCLassesArray (so every time the order is the same and classes aren't mixed), but use only classes actually held by magazine (no matter the count - 0 rounds is fine)
+		if magazine holds no ammo - still list first entry on the list (weapon has to have SOME data!)
+	*/
+ 	public function recompileFiringModes(){
+		//clear existing arrays
+		$this->firingModes = array(); //equals to available missiles
+		$this->damageTypeArray = array(); //indicates that this weapon does damage in Pulse mode
+		$this->weaponClassArray = array();
+    		$this->fireControlArray = array(); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
+    		$this->rangeArray = array(); 
+		$this->distanceRangeArray = array();
+		$this->priorityArray = array();
+		$this->priorityAFArray = array();
+		$this->dpArray = array();
+		$this->damageTypeArray = array();
+		$this->weaponClassArray = array();
+		$this->noOverkillArray = array();
+		$this->minDamageArray = array();
+		$this->maxDamageArray = array();
+		$this->ammoClassesUsed = array();
+		$this->hidetargetArray = array();	
+		
+		//add data for all modes to arrays
+		$currMode = 0;
+		
+		foreach ($this->ammoClassesArray as $currAmmo){ 
+			$isPresent = $this->getAmmoMagazine()->getAmmoPresence($currAmmo->modeName);//does such ammo exist in magazine? 
+			if($isPresent){ 
+				for($twoModes = 0; $twoModes<=1; $twoModes++) { 
+					$currMode++;	
+						//NOTE: $modeOfCurrAmmo indicates if you filling with basic or long-range mode
+						//NOTE: $currMode indicates actual weapon mode
+						//fill all arrays for indicated mode
+						if ($twoModes == 0) {
+						$this->ammoClassesUsed[$currMode] = $currAmmo;
+						$this->firingModes[$currMode] = $currAmmo->modeName.'-Standard';
+						$this->damageTypeArray[$currMode] = $currAmmo->damageType; 
+						$this->weaponClassArray[$currMode] = $currAmmo->weaponClass; 	
+				
+						$fc0 = 0;
+						if(($this->basicFC[0] === null) || ($currAmmo->fireControlMod[0]===null)) {
+							$fc0 = null;
+						}else{
+							$fc0 = $this->basicFC[0] + $currAmmo->fireControlMod[0];
+						}
+						$fc1 = $this->basicFC[1];
+						if(($this->basicFC[1] === null) || ($currAmmo->fireControlMod[1]===null)) {
+							$fc1 = null;
+						}else{
+							$fc1 = $this->basicFC[1] + $currAmmo->fireControlMod[1];
+						}
+						$fc2 = $this->basicFC[2];
+						if(($this->basicFC[2] === null) || ($currAmmo->fireControlMod[2]===null)) {
+							$fc2 = null;
+						}else{
+							$fc2 = $this->basicFC[2] + $currAmmo->fireControlMod[2];
+						}
+						$this->fireControlArray[$currMode] = array($fc0, $fc1, $fc2); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
+				
+						$this->rangeArray[$currMode] = $this->basicRange + $currAmmo->rangeMod; 
+						$this->distanceRangeArray[$currMode] = $this->basicDistanceRange + $currAmmo->distanceRangeMod; 
+						$this->priorityArray[$currMode] = $currAmmo->priority;
+						$this->priorityAFArray[$currMode] = $currAmmo->priorityAF;
+						$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
+						$this->minDamageArray[$currMode] = $currAmmo->minDamage;
+						$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
+						$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;	
+
+						} else {
+
+						$this->ammoClassesUsed[$currMode] = $currAmmo;
+						$this->firingModes[$currMode] = $currAmmo->modeName.'-Boosted';
+						$this->damageTypeArray[$currMode] = $currAmmo->damageType; 
+						$this->weaponClassArray[$currMode] = $currAmmo->weaponClass; 	
+				
+						$fc0 = 0;
+						if(($this->basicFC[0] === null) || ($currAmmo->fireControlMod[0]===null)) {
+							$fc0 = null;
+						}else{
+							$fc0 = $this->basicFC[0] - 2 + $currAmmo->fireControlMod[0];
+						}
+						$fc1 = $this->basicFC[1];
+						if(($this->basicFC[1] === null) || ($currAmmo->fireControlMod[1]===null)) {
+							$fc1 = null;
+						}else{
+							$fc1 = $this->basicFC[1] - 2 + $currAmmo->fireControlMod[1];
+						}
+						$fc2 = $this->basicFC[2];
+						if(($this->basicFC[2] === null) || ($currAmmo->fireControlMod[2]===null)) {
+							$fc2 = null;
+						}else{
+							$fc2 = $this->basicFC[2] - 2 + $currAmmo->fireControlMod[2];
+						}
+						$this->fireControlArray[$currMode] = array($fc0, $fc1, $fc2); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
+				
+						$this->rangeArray[$currMode] = $this->basicRange + 15 + $currAmmo->rangeMod; 
+						$this->distanceRangeArray[$currMode] = $this->basicDistanceRange + 45 + $currAmmo->distanceRangeMod; 
+						$this->priorityArray[$currMode] = $currAmmo->priority;
+						$this->priorityAFArray[$currMode] = $currAmmo->priorityAF;
+						$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
+						$this->minDamageArray[$currMode] = $currAmmo->minDamage;
+						$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
+						$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;	
+						}
+//					}
+				}
+			}
+		}
+			
+		//if there is no ammo available - add entry for first ammo on the list... or don't, just fill firingModes (this one is necessary) - assume basic weapons data resemble something like basic desired mode
+		if ($currMode < 1){
+			$this->FiringModes[1] = 'NoAmmunitionAvailable';
+		}
+			
+		//change mode to 1, to call all appropriate routines connected with mode change
+		$this->changeFiringMode(1);		
+		//remember about effecting criticals, too!
+		$this->effectCriticals();			
+
+	}//endof function recompileFiringModes
+
+
+	
+	//recalculates fire control as appropriate for current loading time!
+	public function recalculateFireControl(){
+		if (($this->turnsloaded == 1) || ($this->firedInRapidMode)) { //after only 1 turn of charging: Standard mode becomes Rapid (with reduced fire control), Long Range mode is not available
+			if ($this->baseFireControlArray === null){ //base values haven't been copied yet
+				$this->baseFireControlArray = $this->fireControlArray;
+			}
+
+		$currMode = 0;
+		
+		foreach ($this->ammoClassesArray as $currAmmo){ $isPresent = $this->getAmmoMagazine()->getAmmoPresence($currAmmo->modeName);//does such ammo exist in magazine? 
+			if($isPresent){ 
+				for($twoModes = 0; $twoModes<=1; $twoModes++) { $currMode++;
+						//fill all arrays for indicated mode
+						if ($twoModes == 0) {
+
+						$fc0 = 0;
+						if(($this->basicFC[0] === null) || ($currAmmo->fireControlMod[0]===null)) {
+							$fc0 = null;
+						}else{
+							$fc0 = $this->basicFC[0] - 2 + $currAmmo->fireControlMod[0];
+						}
+						$fc1 = 0;
+						if(($this->basicFC[1] === null) || ($currAmmo->fireControlMod[1]===null)) {
+							$fc1 = null;
+						}else{
+							$fc1 = $this->basicFC[1] - 2 + $currAmmo->fireControlMod[1];
+						}
+						$fc2 = 0;
+						if(($this->basicFC[2] === null) || ($currAmmo->fireControlMod[2]===null)) {
+							$fc2 = null;
+						}else{
+							$fc2 = $this->basicFC[2] - 2 + $currAmmo->fireControlMod[2];
+						}
+						$this->fireControlArray[$currMode] = array($fc0, $fc1, $fc2); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
+				
+						$this->rangeArray[$currMode] = $this->basicRange - 5 + $currAmmo->rangeMod; 
+						$this->distanceRangeArray[$currMode] = $this->basicDistanceRange - 15 + $currAmmo->distanceRangeMod; 
+						$this->priorityArray[$currMode] = $currAmmo->priority;
+						$this->priorityAFArray[$currMode] = $currAmmo->priorityAF;
+						$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
+						$this->minDamageArray[$currMode] = $currAmmo->minDamage;
+						$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
+						$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;	
+
+						} else {
+
+						$nullFC = array(null, null, null);
+						$this->fireControlArray[$currMode] = $nullFC; //long-range mode unavailable after 1 turn of charging
+				
+						$this->rangeArray[$currMode] = $this->basicRange + 10 + $currAmmo->rangeMod; 
+						$this->distanceRangeArray[$currMode] = $this->basicDistanceRange + 30 + $currAmmo->distanceRangeMod; 
+						$this->priorityArray[$currMode] = $currAmmo->priority;
+						$this->priorityAFArray[$currMode] = $currAmmo->priorityAF;
+						$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
+						$this->minDamageArray[$currMode] = $currAmmo->minDamage;
+						$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
+						$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;	
+						
+						}
+//					}
+				}
+			}
+		}
+
+			$this->changeFiringMode(1);
+			
+		}	
+//			$this->changeFiringMode(1);
+	}
+
+
+ 	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		$strippedSystem->firingModes = $this->firingModes; 
+		$strippedSystem->damageTypeArray = $this->damageTypeArray; 
+		$strippedSystem->weaponClassArray = $this->weaponClassArray; 
+		$strippedSystem->fireControlArray = $this->fireControlArray; 
+		$strippedSystem->range = $this->range;
+		$strippedSystem->rangeArray = $this->rangeArray; 
+		$strippedSystem->distanceRange = $this->distanceRange;
+		$strippedSystem->distanceRangeArray = $this->distanceRangeArray; 
+		$strippedSystem->priorityArray = $this->priorityArray; 
+		$strippedSystem->priorityAFArray = $this->priorityAFArray; 
+		$strippedSystem->dpArray = $this->dpArray; 
+		$strippedSystem->noOverkillArray = $this->noOverkillArray; 
+		$strippedSystem->minDamageArray = $this->minDamageArray; 
+		$strippedSystem->maxDamageArray = $this->maxDamageArray; 
+        $strippedSystem->ammunition = $this->ammunition;           
+		$strippedSystem->basicFC = $this->basicFC;
+		$strippedSystem->basicRange = $this->basicRange;
+		$strippedSystem->basicDistanceRange = $this->basicDistanceRange;
+		$strippedSystem->hidetargetArray = $this->hidetargetArray;
+//		$strippedSystem->basicFireControlArray = $this->basicFireControlArray;
+		return $strippedSystem;
+	} 
+
+	//actually use getDamage() method of ammo!
+///    public function getDamage($fireOrder)
+///    {
+///		$currAmmo = null;
+///        //find appropriate ammo
+///		if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
+///			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
+///		}
+	    
+		//execute getDamage()
+///		if($currAmmo){
+///			return $currAmmo->getDamage($fireOrder);
+///		}else{
+///			return 0;	
+///		}
+///    }
+
+
+	/*some missiles have special effects on impact*/
+///    protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder)
+///    {
+///		$currAmmo = null;
+        //find appropriate ammo
+///		if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
+///			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
+///		}
+///		if ($currAmmo) $currAmmo->onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+		
+///        parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+///    }//endof function onDamagedSystem
+
+
+///	public function criticalPhaseEffects($ship, $gamedata){ //add testing for ammo explosion!
+///		if(!$this->isDamagedOnTurn($gamedata->turn)) return; //if there is no damage this turn, then no testing for explosion
+///       $explodes = false;
+///       $roll = Dice::d(20);
+///        if ($roll >= $this->rackExplosionThreshold) $explodes = true;
+        		
+///        if($explodes){
+///            $this->ammoExplosion($ship, $gamedata, $this->rackExplosionDamage, $roll);  
+///        }
+///    } //endof function testCritical
+
+///    public function ammoExplosion($ship, $gamedata, $damage, $roll){
+        //first, destroy self if not yet done...
+///        if (!$this->isDestroyed()){
+///            $this->noOverkill = true;
+///            $fireOrder =  new FireOrder(-1, "normal", $ship->id,  $ship->id, $this->id, -1, 
+///                    $gamedata->turn, 1, 100, 1, 1, 1, 0, null, null, 'ballistic');//needed, rolled, shots, shotshit, intercepted
+///			$fireOrder->addToDB = true;
+///			$fireOrder->pubnotes = "Missile magazine explosion (roll $roll)!";
+///			$this->fireOrders[] = $fireOrder;							
+///            $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
+///            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, null, $gamedata, true, $this->location);
+///        }        
+        //then apply damage potential as a hit... should be Raking by the rules, let's do it as Flash instead (not quite the same, but easier to do)
+///        if($damage>0){
+///            $this->noOverkill = false;
+///            $this->damageType = 'Flash'; //should be Raking by the rules, but Flash is much easier to do - and very fitting for explosion!
+///            $fireOrder =  new FireOrder(-1, "normal", $ship->id,  $ship->id, $this->id, -1, 
+///                    $gamedata->turn, 1, 100, 1, 1, 1, 0, null, null, 'ballistic');
+///			$fireOrder->addToDB = true;
+///			$fireOrder->pubnotes = "Missile magazine explosion (roll $roll)!";
+///			$this->fireOrders[] = $fireOrder;					
+///            $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->location); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
+///        }
+///    }
+
+
+///        public function setAmmo($firingMode, $amount){
+///            $this->ammunition = $amount;
+///        }
+
+///       public function fire($gamedata, $fireOrder){ //note ammo usage
+///            parent::fire($gamedata, $fireOrder);
+///            $this->ammunition--;
+///            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+///        }
+
+	
+	
+	/* this method generates additional non-standard informaction in the form of individual system notes*/
+/*
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+		switch($gameData->phase){								
+				case 1: //Initial phase 
+					//if weapon is marked as firing in Rapid mode, make a note of it!
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+						if($this->firedInRapidMode){
+							$notekey = 'RapidFire';
+							$noteHuman = 'fired in Rapid mode';
+							$noteValue = 'X';
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+						}
+					}
+					
+				break;
+				
+		}
+	} //endof function generateIndividualNotes
+*/	
+	
+	
+	/*act on notes just loaded - to be redefined by systems as necessary
+	 - mark $firedInRapidMode
+	*/
+/*
+	public function onIndividualNotesLoaded($gamedata){
+		foreach ($this->individualNotes as $currNote) if($currNote->turn == $gamedata->turn) if ($currNote->notevalue == 'X'){ //only current round matters!
+			$this->firedInRapidMode = true;			
+			$this->recalculateFireControl(); //necessary for the variable to affect actual firing
+		}
+		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+		$this->individualNotes = array();
+	} //endof function onIndividualNotesLoaded
+	
+	
+	public function doIndividualNotesTransfer(){
+		//data received in variable individualNotesTransfer, further functions will look for variable firedInRapidMode
+		if(is_array($this->individualNotesTransfer)) foreach($this->individualNotesTransfer as $entry) {
+			if ($entry == 'X') $this->firedInRapidMode = true;
+		}
+		$this->individualNotesTransfer = array(); //empty, just in case
+	}		
+*/
+
+	
+	
+
+
+}//end of class AmmoMissileRackF
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//This is building off of the FMissileRack. That weapon is a fully functional
+//F-Launcher. However, it only uses basic missiles. This version is the attempt
+//to integrate the ammo selection capabilities of other missile racks as set 
+//up in AmmoMissileRackS. 
+//
+//NOTE: The other missile launchers (e.g., L-Launcher) are just extensions of
+//AmmoMissileRackS as they just vary the rate of fire or launch range. The 
+//F-Launcher will be different in that it has multiple modes BEFORE accounting
+//for special missiles. Further complicating things, it is an accelerator-style
+//weapon, giving it another variable to account for. 
+//
+//My first attempt here will be to port over the relevant information from
+//AmmoMissileRackS as opposed to making AmmoMissileRackF an extension of S.
+class SafeAmmoMissileRackF extends Weapon {
+		public $name = "SafeAmmoMissileRackF";
+        public $displayName = "Class-F Ammo Rack";
+        public $iconPath = "ClassFMissileRack.png";
+
+		public $checkAmmoMagazine = true;
+
+		public $useOEW = false;
+		public $ballistic = true;
+        public $animation = "trail";
+        public $animationColor = array(50, 50, 50);
+		public $range = 20;
+		public $distanceRange = 60;
+		public $firingMode = 1;
+        public $ammunition = 10; //limited number of shots
+		public $priority = 6; 		
+        public $loadingtime = 1;
+		public $normalload = 2;
+
+		protected $availableAmmoAlreadySet = false; //set to true if calling constructor from derived weapon that sets different ammo options
+//		protected $usesOrdnance = true; //indicates that onboardFC should be shown!
+	
+		protected $rackExplosionDamage = 38; //how much damage will this weapon do in case of catastrophic explosion
+		//officially it's a quarter of total power of warheads in magazine; but in FV this number is fixed (as missiles in magazine are not tracked)
+		// estimated warheads in magazine: 200 (10 missiles, dmg 20 each - assuming Basic missiles)
+		// a quarter of the above: 50
+		// reduce somewhat by expected expendientures (say, *0.75): 38
+		// also, official rules expect Raking mode, not Flash - but it's somewhat of a washout (Flash offers higher chance of destroying section, but lower of damage penetrating deeper)
+		protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion (d20)
+
+        public $damageType = "Standard";
+		public $weaponClass = "Ballistic";
+
+		protected $basicFC = array(3,3,3);
+		protected $basicRange = 20;
+		protected $basicDistanceRange = 60;
+
+//		public $firingModes = array(1=>'Standard', 2=>'Long-range'); //equals to available missiles; data is basic - if launcher is special, constructor will modify it
+		public $firingModes = array();
+		public $damageTypeArray = array();
+//		public $damageTypeArray = array(1=>'Standard', 2=>'Standard'); //indicates that this weapon does damage in Pulse mode
+		public $fireControlArray = array();
+//        public $fireControlArray = array(1=>array(6, 6, 6), 2=>array(4, 4, 4)); //missile OEW directly added to weapon FC
+		public $rangeArray = array();
+//		public $rangeArray = array(1=>20, 2=>35); 
+		public $distanceRangeArray = array();
+//		public $distanceRangeArray = array(1=>60, 2=>105); 
+
+		protected $ammoClassesArray = array();//FILLED IN CONSTRUCTOR! classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
+
+		private $ammoMagazine; //reference to ammo magazine
+		private $ammoClassesUsed = array();
+
+//		public $rangeMod = 0;
+//		public $hits = array();
+
+		
+        public $rangePenalty = 0;
+        private $baseFireControlArray = null; //base values of fire control - copy necessary due to necessity of recalculation now and then!
+		private $firedInRapidMode = false; //was this weapon fired in rapid mode (this turn)?
+		private $baseRange = null; //base value of range - copy necessary due to necessity of recalculation now and then!
+		private $baseRangeArray = null; //base value of range - copy necessary due to necessity of recalculation now and then!
+		private $baseDistance = null; //base value of range - copy necessary due to necessity of recalculation now and then!
+		private $baseDistanceArray = null; //base value of range - copy necessary due to necessity of recalculation now and then!
+
+		
+    /*ATYPICAL constructor: takes ammo magazine class and (optionally) information about being fitted to stable platform*/
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		//VERY IMPORTANT: fill $ammoClassesArray (cannot be done as constants!
+		//classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
+		//remember that appropriate enhancements need to be enabled on ehip itself, too!
+		
+		if(!$this->availableAmmoAlreadySet){
+			$this->ammoClassesArray[] = new AmmoMissileB();
+			$this->ammoClassesArray[] = new AmmoMissileL();
+			$this->ammoClassesArray[] = new AmmoMissileH();
+			$this->ammoClassesArray[] = new AmmoMissileF();
+			$this->ammoClassesArray[] = new AmmoMissileA();
+			$this->ammoClassesArray[] = new AmmoMissileP();
+//			$this->ammoClassesArray[] = new AmmoMissileS();
+//			$this->ammoClassesArray[] = new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
+			$this->availableAmmoAlreadySet = true;
+		}
+	
+		$this->ammoMagazine = $magazine;
+		if($base){
+			$this->basicRange = $this->basicDistanceRange;
+		}
+
+		$this->recompileFiringModes();
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 0;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc); //class-S launcher: structure 6, power usage 0
+		$magazine->subscribe($this); //subscribe to any further changes in ammo availability
+	}
+
+        public function setSystemDataWindow($turn){	
+			parent::setSystemDataWindow($turn);
+            $this->data["Ammunition"] = $this->ammunition;
+			
+			$this->recalculateFireControl(); //necessary for correct Initial data
+			$this->data["Special"] = 'This weapon can fire either as regular missile launcher (Standard), or Long Range launcher (Boost). ';
+			$this->data["Special"] .= '<br>When boosted, the missile gains +15 hexes but with -10% fire control.';
+			$this->data["Special"] .= '<br>It can also fire in Rapid mode after only 1 turn of charging, but not after using Long Range mode.';
+			$this->data["Special"] .= '<br>In Rapid mode the missile loses -5 hexes and -10% fire control.';
+			$this->data["Special"] .= '<br>NOTE: The system display lists Missile Type - Launch Mode.';
+			$this->data["Special"] .= '<br>As an example, Heavy-Boost is a Heavy Missile boosted in Long-Range mode.';
+			parent::setSystemDataWindow($turn);	
+		}
+
+	/*prepare firing modes - in order as indicated by $ammoCLassesArray (so every time the order is the same and classes aren't mixed), but use only classes actually held by magazine (no matter the count - 0 rounds is fine)
+		if magazine holds no ammo - still list first entry on the list (weapon has to have SOME data!)
+	*/
+ 	public function recompileFiringModes(){
+		//clear existing arrays
+		$this->firingModes = array(); //equals to available missiles
+		$this->damageTypeArray = array(); //indicates that this weapon does damage in Pulse mode
+		$this->weaponClassArray = array();
+    		$this->fireControlArray = array(); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
+    		$this->rangeArray = array(); 
+		$this->distanceRangeArray = array();
+		$this->priorityArray = array();
+		$this->priorityAFArray = array();
+		$this->dpArray = array();
+		$this->damageTypeArray = array();
+		$this->weaponClassArray = array();
+		$this->noOverkillArray = array();
+		$this->minDamageArray = array();
+		$this->maxDamageArray = array();
+		$this->ammoClassesUsed = array();
+		
+		//add data for all modes to arrays
+		$currMode = 0;
+		
+		foreach ($this->ammoClassesArray as $currAmmo){ $isPresent = $this->ammoMagazine->getAmmoPresence($currAmmo->modeName);//does such ammo exist in magazine? 
+			if($isPresent){ 
+				for($twoModes = 0; $twoModes<=1; $twoModes++) { $currMode++;	
+						//NOTE: $modeOfCurrAmmo indicates if you filling with basic or long-range mode
+						//NOTE: $currMode indicates actual weapon mode
+						//fill all arrays for indicated mode
+						if ($twoModes == 0) {
+						$this->ammoClassesUsed[$currMode] = $currAmmo;
+						$this->firingModes[$currMode] = $currAmmo->modeName.'-Standard';
+						$this->damageTypeArray[$currMode] = $currAmmo->damageType; 
+						$this->weaponClassArray[$currMode] = $currAmmo->weaponClass; 	
+				
+						$fc0 = 0;
+						if(($this->basicFC[0] === null) || ($currAmmo->fireControlMod[0]===null)) {
+							$fc0 = null;
+						}else{
+							$fc0 = $this->basicFC[0] + $currAmmo->fireControlMod[0];
+						}
+						$fc1 = $this->basicFC[1];
+						if(($this->basicFC[1] === null) || ($currAmmo->fireControlMod[1]===null)) {
+							$fc1 = null;
+						}else{
+							$fc1 = $this->basicFC[1] + $currAmmo->fireControlMod[1];
+						}
+						$fc2 = $this->basicFC[2];
+						if(($this->basicFC[2] === null) || ($currAmmo->fireControlMod[2]===null)) {
+							$fc2 = null;
+						}else{
+							$fc2 = $this->basicFC[2] + $currAmmo->fireControlMod[2];
+						}
+						$this->fireControlArray[$currMode] = array($fc0, $fc1, $fc2); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
+				
+						$this->rangeArray[$currMode] = $this->basicRange + $currAmmo->rangeMod; 
+						$this->distanceRangeArray[$currMode] = $this->basicDistanceRange + $currAmmo->distanceRangeMod; 
+						$this->priorityArray[$currMode] = $currAmmo->priority;
+						$this->priorityAFArray[$currMode] = $currAmmo->priorityAF;
+						$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
+						$this->minDamageArray[$currMode] = $currAmmo->minDamage;
+						$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
+
+						} else {
+
+						$this->ammoClassesUsed[$currMode] = $currAmmo;
+						$this->firingModes[$currMode] = $currAmmo->modeName.'-Boosted';
+						$this->damageTypeArray[$currMode] = $currAmmo->damageType; 
+						$this->weaponClassArray[$currMode] = $currAmmo->weaponClass; 	
+				
+						$fc0 = 0;
+						if(($this->basicFC[0] === null) || ($currAmmo->fireControlMod[0]===null)) {
+							$fc0 = null;
+						}else{
+							$fc0 = $this->basicFC[0] - 2 + $currAmmo->fireControlMod[0];
+						}
+						$fc1 = $this->basicFC[1];
+						if(($this->basicFC[1] === null) || ($currAmmo->fireControlMod[1]===null)) {
+							$fc1 = null;
+						}else{
+							$fc1 = $this->basicFC[1] - 2 + $currAmmo->fireControlMod[1];
+						}
+						$fc2 = $this->basicFC[2];
+						if(($this->basicFC[2] === null) || ($currAmmo->fireControlMod[2]===null)) {
+							$fc2 = null;
+						}else{
+							$fc2 = $this->basicFC[2] - 2 + $currAmmo->fireControlMod[2];
+						}
+						$this->fireControlArray[$currMode] = array($fc0, $fc1, $fc2); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
+				
+						$this->rangeArray[$currMode] = $this->basicRange + 15 + $currAmmo->rangeMod; 
+						$this->distanceRangeArray[$currMode] = $this->basicDistanceRange + 45 + $currAmmo->distanceRangeMod; 
+						$this->priorityArray[$currMode] = $currAmmo->priority;
+						$this->priorityAFArray[$currMode] = $currAmmo->priorityAF;
+						$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
+						$this->minDamageArray[$currMode] = $currAmmo->minDamage;
+						$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
+						}
+//					}
+				}
+			}
+		}
+			
+		//if there is no ammo available - add entry for first ammo on the list... or don't, just fill firingModes (this one is necessary) - assume basic weapons data resemble something like basic desired mode
+		if ($currMode < 1){
+			$this->FiringModes[1] = 'NoAmmunitionAvailable';
+		}
+			
+		//change mode to 1, to call all appropriate routines connected with mode change
+		$this->changeFiringMode(1);		
+		//remember about effecting criticals, too!
+		$this->effectCriticals();			
+
+	}//endof function recompileFiringModes
+
+
+	
+	//recalculates fire control as appropriate for current loading time!
+	private function recalculateFireControl(){
+		if (($this->turnsloaded == 1) || ($this->firedInRapidMode)) { //after only 1 turn of charging: Standard mode becomes Rapid (with reduced fire control), Long Range mode is not available
+			if ($this->baseFireControlArray === null){ //base values haven't been copied yet
+				$this->baseFireControlArray = $this->fireControlArray;
+			}
+
+		$currMode = 0;
+		
+		foreach ($this->ammoClassesArray as $currAmmo){ $isPresent = $this->ammoMagazine->getAmmoPresence($currAmmo->modeName);//does such ammo exist in magazine? 
+			if($isPresent){ 
+				for($twoModes = 0; $twoModes<=1; $twoModes++) { $currMode++;
+						//fill all arrays for indicated mode
+						if ($twoModes == 0) {
+
+						$fc0 = 0;
+						if(($this->basicFC[0] === null) || ($currAmmo->fireControlMod[0]===null)) {
+							$fc0 = null;
+						}else{
+							$fc0 = $this->basicFC[0] - 2 + $currAmmo->fireControlMod[0];
+						}
+						$fc1 = 0;
+						if(($this->basicFC[1] === null) || ($currAmmo->fireControlMod[1]===null)) {
+							$fc1 = null;
+						}else{
+							$fc1 = $this->basicFC[1] - 2 + $currAmmo->fireControlMod[1];
+						}
+						$fc2 = 0;
+						if(($this->basicFC[2] === null) || ($currAmmo->fireControlMod[2]===null)) {
+							$fc2 = null;
+						}else{
+							$fc2 = $this->basicFC[2] - 2 + $currAmmo->fireControlMod[2];
+						}
+						$this->fireControlArray[$currMode] = array($fc0, $fc1, $fc2); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
+				
+						$this->rangeArray[$currMode] = $this->basicRange - 5 + $currAmmo->rangeMod; 
+						$this->distanceRangeArray[$currMode] = $this->basicDistanceRange - 15 + $currAmmo->distanceRangeMod; 
+						$this->priorityArray[$currMode] = $currAmmo->priority;
+						$this->priorityAFArray[$currMode] = $currAmmo->priorityAF;
+						$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
+						$this->minDamageArray[$currMode] = $currAmmo->minDamage;
+						$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
+
+						} else {
+
+						$nullFC = array(null, null, null);
+						$this->fireControlArray[$currMode] = $nullFC; //long-range mode unavailable after 1 turn of charging
+				
+						$this->rangeArray[$currMode] = $this->basicRange + 10 + $currAmmo->rangeMod; 
+						$this->distanceRangeArray[$currMode] = $this->basicDistanceRange + 30 + $currAmmo->distanceRangeMod; 
+						$this->priorityArray[$currMode] = $currAmmo->priority;
+						$this->priorityAFArray[$currMode] = $currAmmo->priorityAF;
+						$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
+						$this->minDamageArray[$currMode] = $currAmmo->minDamage;
+						$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
+						
+						}
+//					}
+				}
+			}
+		}
+
+			$this->changeFiringMode(1);
+			
+		}	
+//			$this->changeFiringMode(1);
+	}
+
+
+ 	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		$strippedSystem->firingModes = $this->firingModes; 
+		$strippedSystem->damageTypeArray = $this->damageTypeArray; 
+		$strippedSystem->weaponClassArray = $this->weaponClassArray; 
+		$strippedSystem->fireControlArray = $this->fireControlArray; 
+		$strippedSystem->range = $this->range;
+		$strippedSystem->rangeArray = $this->rangeArray; 
+		$strippedSystem->distanceRange = $this->distanceRange;
+		$strippedSystem->distanceRangeArray = $this->distanceRangeArray; 
+		$strippedSystem->priorityArray = $this->priorityArray; 
+		$strippedSystem->priorityAFArray = $this->priorityAFArray; 
+		$strippedSystem->dpArray = $this->dpArray; 
+		$strippedSystem->noOverkillArray = $this->noOverkillArray; 
+		$strippedSystem->minDamageArray = $this->minDamageArray; 
+		$strippedSystem->maxDamageArray = $this->maxDamageArray; 
+        $strippedSystem->ammunition = $this->ammunition;           
+		$strippedSystem->basicFC = $this->basicFC;
+		$strippedSystem->basicRange = $this->basicRange;
+		$strippedSystem->basicDistanceRange = $this->basicDistanceRange;
+//		$strippedSystem->basicFireControlArray = $this->basicFireControlArray;
+		return $strippedSystem;
+	} 
+
+	//actually use getDamage() method of ammo!
+    public function getDamage($fireOrder)
+    {
+		$currAmmo = null;
+        //find appropriate ammo
+		if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
+			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
+		}
+	    
+		//execute getDamage()
+		if($currAmmo){
+			return $currAmmo->getDamage($fireOrder);
+		}else{
+			return 0;	
+		}
+    }
+
+
+	/*some missiles have special effects on impact*/
+    protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder)
+    {
+		$currAmmo = null;
+        //find appropriate ammo
+		if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
+			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
+		}
+		if ($currAmmo) $currAmmo->onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+		
+        parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+    }//endof function onDamagedSystem
+
+
+	public function criticalPhaseEffects($ship, $gamedata){ //add testing for ammo explosion!
+		if(!$this->isDamagedOnTurn($gamedata->turn)) return; //if there is no damage this turn, then no testing for explosion
+        $explodes = false;
+        $roll = Dice::d(20);
+        if ($roll >= $this->rackExplosionThreshold) $explodes = true;
+        		
+        if($explodes){
+            $this->ammoExplosion($ship, $gamedata, $this->rackExplosionDamage, $roll);  
+        }
+    } //endof function testCritical
+
+    public function ammoExplosion($ship, $gamedata, $damage, $roll){
+        //first, destroy self if not yet done...
+        if (!$this->isDestroyed()){
+            $this->noOverkill = true;
+            $fireOrder =  new FireOrder(-1, "normal", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 1, 100, 1, 1, 1, 0, null, null, 'ballistic');//needed, rolled, shots, shotshit, intercepted
+			$fireOrder->addToDB = true;
+			$fireOrder->pubnotes = "Missile magazine explosion (roll $roll)!";
+			$this->fireOrders[] = $fireOrder;							
+            $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
+            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, null, $gamedata, true, $this->location);
+        }        
+        //then apply damage potential as a hit... should be Raking by the rules, let's do it as Flash instead (not quite the same, but easier to do)
+        if($damage>0){
+            $this->noOverkill = false;
+            $this->damageType = 'Flash'; //should be Raking by the rules, but Flash is much easier to do - and very fitting for explosion!
+            $fireOrder =  new FireOrder(-1, "normal", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 1, 100, 1, 1, 1, 0, null, null, 'ballistic');
+			$fireOrder->addToDB = true;
+			$fireOrder->pubnotes = "Missile magazine explosion (roll $roll)!";
+			$this->fireOrders[] = $fireOrder;					
+            $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->location); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
+        }
+    }
+
+
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
+
+	
+	
+	/* this method generates additional non-standard informaction in the form of individual system notes
+	*/
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+		switch($gameData->phase){								
+				case 1: //Initial phase 
+					//if weapon is marked as firing in Rapid mode, make a note of it!
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+						if($this->firedInRapidMode){
+							$notekey = 'RapidFire';
+							$noteHuman = 'fired in Rapid mode';
+							$noteValue = 'X';
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+						}
+					}
+					
+				break;
+				
+		}
+	} //endof function generateIndividualNotes
+	
+	
+	
+	/*act on notes just loaded - to be redefined by systems as necessary
+	 - mark $firedInRapidMode
+	*/
+	public function onIndividualNotesLoaded($gamedata){
+		foreach ($this->individualNotes as $currNote) if($currNote->turn == $gamedata->turn) if ($currNote->notevalue == 'X'){ //only current round matters!
+			$this->firedInRapidMode = true;			
+			$this->recalculateFireControl(); //necessary for the variable to affect actual firing
+		}
+		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+		$this->individualNotes = array();
+	} //endof function onIndividualNotesLoaded
+	
+	
+	public function doIndividualNotesTransfer(){
+		//data received in variable individualNotesTransfer, further functions will look for variable firedInRapidMode
+		if(is_array($this->individualNotesTransfer)) foreach($this->individualNotesTransfer as $entry) {
+			if ($entry == 'X') $this->firedInRapidMode = true;
+		}
+		$this->individualNotesTransfer = array(); //empty, just in case
+	}		
+
+
+	
+	
+
+
+}//end of class SafeAmmoMissileRackF
+
+
+
 
 
 
@@ -8516,326 +9227,57 @@ class RangedFMissileRack extends Weapon {
 
 
 
-
-
-class ChaffMissile extends Weapon{
-	public $name = "ChaffMissile";
-    public $displayName = "Chaff Missile";
-    public $useOEW = false;
-    public $ballistic = true;
-    public $animation = "trail";
-    public $animationColor = array(50, 50, 50);
-
+/*Class-D Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
+	all functionality prepared in standard class-S rack
+	holds 20 missiles (only carries Interceptor (I - default), chaff (C), and anti-fighter (A) missiles)
+*/
+/* commenting out - moved to missile.php - to be deleted after new rack is confirmed as working
+class AmmoMissileRackD extends AmmoMissileRackS{
+	public $name = "AmmoMissileRackD";
+    public $displayName = "Class-D Missile Rack";
+    public $iconPath = "ClassDMissileRack.png";    
+	
     public $range = 20;
     public $distanceRange = 60;
-    public $rangeMod = 0;
-    public $priority = 1;
-    public $loadingtime = 1;
-    public $iconPath = "ClassFMissileRack.png";    
+    public $firingMode = 1;
+    public $priority = 6;
+    public $loadingtime = 2;
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(3,3,3);
+	protected $basicRange=20;
+	protected $basicDistanceRange = 60;
 
-	private static $alreadyEngaged = array(); //units that were already engaged by a Chaff Missile this turn (multiple Chaff Missiles do not stack).
-
-    public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-    public $weaponClass = "Ballistic"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+    protected $rackExplosionDamage = 15; //Launcher defaults with Interceptor missiles that do no damage - Chaff do no damage as well
+	     //Assume 5 anti-fighter missiles.  15*5 = 75.  Take one-quarter = 18 and take 0.75 for expenditures and this is 15 damage
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
 	
-	public $firingMode = 'Chaff';
-    public $fireControl = array(6, 6, 6); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 6;
-            if ( $powerReq == 0 ) $powerReq = 0;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-
-
-
-
-	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
-//		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
-
-//Need to check if fired weapons are ballistics or not
-
-        if (isset(ChaffMissile::$alreadyEngaged[$ship->id])) return; //target already engaged by a previous Chaff Missile
-
-		$effectHit = 3; 
-		$effectHit5 = $effectHit * 5;
-		$fireOrder->pubnotes .= "<br> All non-ballistic weapon's fire by target reduced by $effectHit5 percent.";
-
-		$allFire = $ship->getAllFireOrders($gamedata->turn);
-		foreach($allFire as $fireOrder) {
-			if ($fireOrder->type == 'normal') {
-				if ($fireOrder->rolled > 0) {
-				}else{
-					$fireOrder->needed -= 3 *5; //$needed works on d100
-					$fireOrder->pubnotes .= "; Chaff Missile impact, -15% to hit."; //note why hit chance does not match
-					ChaffMissile::$alreadyEngaged[$ship->id] = true;
-				}
-			}
-		}
-
-
-
-
-
-
-
-//		$effectIni = Dice::d(6,1);//strength of effect: 1d6
-//		$effectSensors = Dice::d(6,1);//strength of effect: 1d6
-//		$effectIni5 = $effectIni * 5;
+    //ATYPICAL constructor: takes ammo magazine class and (optionally) information about being fitted to stable platform
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		//VERY IMPORTANT: fill $ammoClassesArray (cannot be done as constants!
+		//classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
+		//remember that appropriate enhancements need to be enabled on ehip itself, too!
 		
-		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
-			$firstFighter = $ship->getSampleFighter();
-			ChaffMissile::$alreadyEngaged[$ship->id] = true;//mark engaged        
-			if($firstFighter){
-				for($i=1; $i<=$effectHit;$i++){
-					$crit = new tmphitreduction(-1, $ship->id, $firstFighter->id, 'tmphitreduction', $gamedata->turn, $gamedata->turn); 
-					$crit->updated = true;
-			        	$firstFighter->criticals[] =  $crit;
-				}
-			}
-		}else{ //ship - place effcet on C&C!   */
-			$CnC = $ship->getSystemByName("CnC");
-			ChaffMissile::$alreadyEngaged[$ship->id] = true;//mark engaged        
-			if($CnC){
-				for($i=0; $i<=$effectHit;$i++){
-					$crit = new tmphitreduction(-1, $ship->id, $CnC->id, 'tmphitreduction', $gamedata->turn, $gamedata->turn); 
-//					$crit->inEffect = true;
-					$crit->updated = true;
-			        	$CnC->criticals[] =  $crit;
-				}
-			}
+		if(!$this->availableAmmoAlreadySet){
+			$this->ammoClassesArray[] =  new AmmoMissileA();
+//			$this->ammoClassesArray[] =  new AmmoMissileI(); 
+//			$this->ammoClassesArray[] =  new AmmoMissileC(); //...only Kor-Lyan use these
+			$this->availableAmmoAlreadySet = true;
 		}
-	} //endof function onDamagedSystem
-
-
-    
-        public function getDamage($fireOrder){ return 0;   }
-        public function setMinDamage(){     $this->minDamage = 0;      }
-        public function setMaxDamage(){     $this->maxDamage = 0;      }
-    
-	public function setSystemDataWindow($turn){
-		$this->data["Range"] = $this->range . '/' . $this->distanceRange;
-		$this->data["Special"] = 'Causes a -3 to hit on target on turn it is fired.';
-		parent::setSystemDataWindow($turn);
-        }
-    
- 
-} //endof class ChaffMissile  
-
-
-
-
-class StealthMissile extends Weapon{
-	public $name = "StealthMissile";
-    public $displayName = "Stealth Missile";
-    public $useOEW = false;
-    public $ballistic = true;
-    public $animation = "trail";
-    public $animationColor = array(50, 50, 50);
-
-    public $range = 20;
-    public $distanceRange = 60;
-    public $rangeMod = 0;
-    public $priority = 1;
-    public $loadingtime = 1;
-    public $iconPath = "ClassFMissileRack.png";    
-
-	public $hidetarget = true;
-
-    public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-    public $weaponClass = "Ballistic"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
 	
-	public $firingMode = 'Ballistic';
-    public $fireControl = array(6, 6, 6); // fighters, <mediums, <capitals ; INCLUDES MISSILE WARHEAD (and FC if present)! as effectively it is the same and simpler
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 6;
-            if ( $powerReq == 0 ) $powerReq = 0;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-
-    
-        public function getDamage($fireOrder){ return 10;   }
-        public function setMinDamage(){     $this->minDamage = 10;      }
-        public function setMaxDamage(){     $this->maxDamage = 10;      }
-    
-	public function setSystemDataWindow($turn){
-		$this->data["Range"] = $this->range . '/' . $this->distanceRange;
-		$this->data["Special"] = 'Causes a -3 to hit on target on turn it is fired.';
-		parent::setSystemDataWindow($turn);
-        }
-    
- 
-} //endof class StealthMissile  
-
-
-
-
-
-class TestMissile extends Laser{
-        public $name = "TestMissile";
-        public $displayName = "Test Missile";
-	    public $iconPath = "NexusLaserMissile.png";
-
-        public $animationArray = array(1=>'trail', 2=>'trail');
-        public $trailColor = array(141, 240, 255);
-        public $animationColorArray = array(1=>array(220, 60, 120), array(220, 60, 120));
-        public $projectilespeed = 10;
-        public $trailLength = 100;    
-        public $uninterceptableArray = array(1=>false, 2=>false); 
-		
-        public $ballistic = true; //missile
-        public $rangeArray = array(1=>20, 2=>20);
-        public $distanceRangeArray = array(1=>30, 2=>30);
-        public $ammunition = 20; //limited number of shots
-	    
-        public $loadingtimeArray = array(1=>1, 2=>1); // 1/2 turns
-        public $rangePenaltyArray = array(1=>0, 2=>0);
-        public $fireControlArray = array(1=>array(null, 2, 2), 2=>array(null, 2, 2)); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
-		public $hidetargetArray = array(1=>false, 2=>true);
-		public $priorityArray = array(1=>8, 2=>8); 
-	    
-		public $firingModes = array(1=>'Regular', 2=>'Stealth'); //firing mode - just a name essentially
-		public $damageTypeArray = array(1=>'Standard', 2=>'Standard'); //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 6;
-            if ( $powerReq == 0 ) $powerReq = 1;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-        
-        public function stripForJson() {
-            $strippedSystem = parent::stripForJson();    
-            $strippedSystem->ammunition = $this->ammunition;           
-            return $strippedSystem;
-        }
-	    
-        public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "Bomb-pumped laser. Ballistic weapon that scores raking (8) damage.";
-            $this->data["Special"] .= "<br>Long-range: 20 hex launch and 30 hex max range, 2d10+2 damage.";
-            $this->data["Special"] .= "<br>Short-range: 10 hex launch and 15 hex max range, 3d10+4 damage.";
-            $this->data["Ammunition"] = $this->ammunition;
-        }
-        
-        public function setAmmo($firingMode, $amount){
-            $this->ammunition = $amount;
-        }
-       public function fire($gamedata, $fireOrder){ //note ammo usage
-            parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
-        }
-
-        public function getDamage($fireOrder){ 
-		switch($this->firingMode){
-			case 1:
-				return 5; //Light Chemical Laser
-				break;
-			case 2:
-				return 6; //Medium Chemical Laser
-				break;	
+		$this->ammoMagazine = $magazine;
+		if($base){
+			$this->basicRange = $this->basicDistanceRange;
 		}
+		$this->recompileFiringModes();
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 0;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc); //class-S launcher: structure 6, power usage 0
+		$magazine->subscribe($this); //subscribe to any further changes in ammo availability
 	}
-        public function setMinDamage(){ 
-		switch($this->firingMode){
-			case 1:
-				$this->minDamage = 5; //Light Chemical Laser
-				break;
-			case 2:
-				$this->minDamage = 6; //Medium Chemical Laser
-				break;	
-		}
-		$this->minDamageArray[$this->firingMode] = $this->minDamage;
-	}
-        public function setMaxDamage(){
-		switch($this->firingMode){
-			case 1:
-				$this->maxDamage = 5; //Light Chemical Laser
-				break;
-			case 2:
-				$this->maxDamage = 6; //Medium Chemical Laser
-				break;	
-		}
-		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
-	}
-    
-//        public function getDamage($fireOrder){ return Dice::d(10, 2)+2;   }
-//        public function setMinDamage(){     $this->minDamage = 5;      }
-//        public function setMaxDamage(){     $this->maxDamage = 23;      }
-		
-} //endof TestMissile
-
-
-class TestMissile2 extends Weapon{
-        public $name = "TestMissile2";
-        public $displayName = "Test Missile 2";
-		    public $iconPath = "NexusKineticBoxLauncher.png";
-        public $animation = "trail";
-        public $trailColor = array(141, 240, 255);
-        public $animationColor = array(50, 50, 50);
-        public $animationExplosionScale = 0.2;
-        public $projectilespeed = 10;
-        public $animationWidth = 4;
-        public $trailLength = 100;    
-
-        public $useOEW = false; //missile
-        public $ballistic = true; //missile
-        public $range = 60;
-        public $distanceRange = 80;
-        public $ammunition = 4; //limited number of shots
-	    
-        
-        public $loadingtime = 1; // 1/2 turns
-        public $rangePenalty = 0;
-        public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
-	    
-	public $priority = 6; 
-	    
-	public $firingMode = 'Ballistic'; //firing mode - just a name essentially
-	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-    	public $weaponClass = "Matter"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 4;
-            if ( $powerReq == 0 ) $powerReq = 0;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-        
-        public function stripForJson() {
-            $strippedSystem = parent::stripForJson();    
-            $strippedSystem->ammunition = $this->ammunition;           
-            return $strippedSystem;
-        }
-        
-        public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "Ignores armor, no overkill (Ballistic+Matter weapon).";
-            $this->data["Ammunition"] = $this->ammunition;
-        }
-        
-        public function getDamage($fireOrder){
-            $dmg = 10;
-            return $dmg;
-       }
-        public function setAmmo($firingMode, $amount){
-            $this->ammunition = $amount;
-        }
-       public function fire($gamedata, $fireOrder){ //note ammo usage
-            parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
-        }
-    
-        public function setMinDamage(){     $this->minDamage = 10;      }
-        public function setMaxDamage(){     $this->maxDamage = 10;      }
-}//endof TestMissile2
-
-
+	
+} //endof class AmmoMissileRackD
+*/
 
 
 
@@ -9092,89 +9534,6 @@ class MultiDefenseLauncher extends Weapon {
     }        
 
 } //endof class MultiDefenseLauncher
-
-
-
-
-    class LaserArray extends Laser{
-        public $name = "quadArray";
-        public $displayName = "Laser Array";
-        public $animation = "bolt";
-
-        public $intercept = 2;
-
-        public $loadingtime = 1;
-        public $guns = 4;
-        public $priority = 4;
-
-        public $rangePenalty = 2;
-        public $fireControl = array(5, 3, 3); // fighters, <mediums, <capitals
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		if ( $maxhealth == 0 ) $maxhealth = 10;
-		if ( $powerReq == 0 ) $powerReq = 7;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-
-        public function getDamage($fireOrder){        return Dice::d(10, 2);   }
-        public function setMinDamage(){     $this->minDamage = 2 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 20 ;      }
-
-    } // end class LaserArray
-
-
-/*
-	The Satyra have specialized armor that affects only Laser and Electromagnetic weapons.
-	The best way to simulate this is with a shield that only reacts to these classe.
-	Since this is "armor", it cannot be flown under, boosted, or destroyed.
-*/
-class SatyraShield extends Shield implements DefensiveSystem{
-    public $name = "SatyraShield";
-    public $displayName = "Satyra Armor";
-    public $iconPath = "shieldInvulnerable.png";
-    public $boostable = false; //$this->boostEfficiency and $this->maxBoostLevel in __construct() 
-    public $baseOutput = 0; //base output, before boost
-	public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
-	public $isTargetable = false; //cannot be targeted ever!
-	
-    function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
-        // shieldfactor is handled as output.
-        parent::__construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc);
-	$this->baseOutput = $shieldFactor;
-    }
-	
-    public function onConstructed($ship, $turn, $phase){
-        parent::onConstructed($ship, $turn, $phase);
-		$this->tohitPenalty = 0;
-		$this->damagePenalty = $this->getOutput();
-    }
-	
-    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
-            return 0;
-    }
-    private function checkIsFighterUnderShield($target, $shooter, $weapon){ //no flying under SW shield
-        return false;
-    }
-	
-    public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
-		$output = 0;
-		//Affects only Antimatter, Laser, and Particle weapons
-		if($weapon->weaponClass == 'Laser' || $weapon->weaponClass == 'Electromagnetic') $output = 2;
-        return $output;
-    }
-	
-    public function setSystemDataWindow($turn){
-		parent::setSystemDataWindow($turn);
-		//$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
-		$this->data["Basic Strength"] = $this->baseOutput;    
-		$this->data["Special"] = "Note: Satyra armor is resistent to lasers and electromagnetic weapons."; 
-		$this->data["Special"] .= "<br>The 'shield' represents the extra two points of armor the Satyra."; 
-		$this->data["Special"] .= "<br>have available aginst these weapon classes."; 
-	}
-	
-} //endof class SWRayShield
-
-
 
 
 ?>

@@ -132,3 +132,9 @@ var LtBlastLaser = function LtBlastLaser(json, ship) {
 };
 LtBlastLaser.prototype = Object.create(Laser.prototype);
 LtBlastLaser.prototype.constructor = LtBlastLaser;
+
+var UnreliableBattleLaser = function UnreliableBattleLaser(json, ship) {
+    Laser.call(this, json, ship);
+};
+UnreliableBattleLaser.prototype = Object.create(Laser.prototype);
+UnreliableBattleLaser.prototype.constructor = UnreliableBattleLaser;

@@ -10,7 +10,7 @@ class MerkulArmed extends FighterFlight{
         $this->shipClass = "Merkul Armed Shuttles";
 			$this->occurence = "common";
 			$this->variantOf = 'Merkul Shuttles';
-		$this->imagePath = "img/ships/korlyanArmedMerkul.png"; 
+		$this->imagePath = "img/ships/korlyanArmedMerkul2.png"; 
 
 		$this->canvasSize = 40;
 		
@@ -42,8 +42,8 @@ class MerkulArmed extends FighterFlight{
 			$armour = array(1, 1, 1, 1);
 			$fighter = new Fighter("MerkulArmed", $armour, 9, $this->id);
 			$fighter->displayName = "Armed Merkul";
-			$fighter->imagePath = "img/ships/korlyanArmedMerkul.png";
-			$fighter->iconPath = "img/ships/korlyanArmedMerkul_large.png";
+			$fighter->imagePath = "img/ships/korlyanArmedMerkul2.png";
+			$fighter->iconPath = "img/ships/korlyanArmedMerkul_large2.png";
 			
 			$fighter->addFrontSystem(new LightParticleBeam(330, 30, 3, 1));
 			$fighter->addFrontSystem(new FighterMissileRack(2, 330, 30));

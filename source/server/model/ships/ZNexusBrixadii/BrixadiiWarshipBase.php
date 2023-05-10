@@ -4,7 +4,7 @@ class BrixadiiWarshipBase extends BaseShipNoAft{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 480;
+		$this->pointCost = 490;
 		$this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiWarshipBase";
         $this->imagePath = "img/ships/Nexus/BrixadiiWarship.png";
@@ -45,23 +45,23 @@ class BrixadiiWarshipBase extends BaseShipNoAft{
         
 		$this->addLeftSystem(new Thruster(3, 7, 0, 4, 3));
 		$this->addLeftSystem(new Thruster(3, 7, 0, 4, 3));
-		$this->addLeftSystem(new NexusDefensePulsar(2, 4, 2, 180, 360));
+		$this->addLeftSystem(new LightParticleProjector(2, 3, 1, 180, 360));
 		$this->addLeftSystem(new NexusProjectorArray(3, 6, 1, 180, 360));
 		$this->addLeftSystem(new NexusChaffLauncher(1, 2, 1, 180, 360));
 		$this->addLeftSystem(new HvyParticleProjector(3, 8, 4, 240, 360));
 
 		$this->addRightSystem(new Thruster(3, 7, 0, 4, 4));
 		$this->addRightSystem(new Thruster(3, 7, 0, 4, 4));
-		$this->addRightSystem(new NexusDefensePulsar(2, 4, 2, 0, 180));
+		$this->addRightSystem(new LightParticleProjector(2, 3, 1, 0, 180));
 		$this->addRightSystem(new NexusProjectorArray(3, 6, 1, 0, 180));
 		$this->addRightSystem(new NexusChaffLauncher(1, 2, 1, 0, 180));
 		$this->addRightSystem(new HvyParticleProjector(3, 8, 4, 0, 120));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 4, 40));
-        $this->addLeftSystem(new Structure( 4, 40));
-        $this->addRightSystem(new Structure( 4, 40));
-        $this->addPrimarySystem(new Structure( 5, 44));
+        $this->addFrontSystem(new Structure( 4, 45));
+        $this->addLeftSystem(new Structure( 4, 50));
+        $this->addRightSystem(new Structure( 4, 50));
+        $this->addPrimarySystem(new Structure( 5, 40));
 		
         $this->hitChart = array(
             0=> array(
@@ -85,7 +85,7 @@ class BrixadiiWarshipBase extends BaseShipNoAft{
             3=> array(
                     5 => "Thruster",
 					7 => "Heavy Particle Projector",
-					8 => "Defense Pulsar",
+					8 => "Light Particle Projector",
 					10 => "Projector Array",
 					11 => "Chaff Launcher",
                     18 => "Structure",
@@ -94,7 +94,7 @@ class BrixadiiWarshipBase extends BaseShipNoAft{
             4=> array(
                     5 => "Thruster",
 					7 => "Heavy Particle Projector",
-					8 => "Defense Pulsar",
+					8 => "Light Particle Projector",
 					10 => "Projector Array",
 					11 => "Chaff Launcher",
                     18 => "Structure",

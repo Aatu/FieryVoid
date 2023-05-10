@@ -11,7 +11,7 @@ class DrakhDreadnought extends BaseShip{
         $this->imagePath = "img/ships/DrakhHeavyTender.png";
         $this->shipClass = "Dreadnought";
         $this->shipSizeClass = 3;
-        $this->fighters = array("Shuttles" => 6, "Raiders" => 12);
+        $this->fighters = array("Shuttles" => 6, "Raiders" => 10);
         $this->gravitic = true;	    
 	$this->unofficial = true;
 	$this->advancedArmor = true;   
@@ -32,7 +32,7 @@ class DrakhDreadnought extends BaseShip{
 	    
 	    
 	$this->addPrimarySystem(new CnC(7, 25, 0, 0));
-        $this->addPrimarySystem(new Reactor(6, 30, 0, 12));
+        $this->addPrimarySystem(new Reactor(6, 35, 0, 12));
 		$sensors = new Scanner(6, 24, 7, 11);
 		$sensors->markImproved();
 		$this->addPrimarySystem($sensors);
@@ -56,27 +56,28 @@ class DrakhDreadnought extends BaseShip{
 	$this->addAftSystem(new customHeavyPolarityPulsar(4, 0, 0, 120, 240)); 
   
 	    
-	$this->addLeftSystem(new GraviticThruster(4, 25, 0, 6, 3));
-	$this->addLeftSystem(new AbsorbtionShield(3,8,8,3,180,0)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-	$this->addLeftSystem(new customLtPolarityPulsar(3, 0, 0, 240, 60)); 
-	$this->addLeftSystem(new customLtPolarityPulsar(3, 0, 0, 120, 300));        
-	$this->addLeftSystem(new Catapult(4, 4));
         $this->addLeftSystem(new Catapult(4, 4, 1));
         $this->addLeftSystem(new Catapult(4, 4, 1));
         $this->addLeftSystem(new Catapult(4, 4, 1));
         $this->addLeftSystem(new Catapult(4, 4, 1));
         $this->addLeftSystem(new Catapult(4, 4, 1));			
+	$this->addLeftSystem(new GraviticThruster(4, 25, 0, 6, 3));
+	$this->addLeftSystem(new AbsorbtionShield(3,8,8,3,180,0)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addLeftSystem(new customLtPolarityPulsar(3, 0, 0, 240, 60)); 
+	$this->addLeftSystem(new customLtPolarityPulsar(3, 0, 0, 120, 300)); 
+	$this->addLeftSystem(new customPhaseDisruptor(4, 0, 0, 180, 0));
 	    
-	$this->addRightSystem(new GraviticThruster(4, 25, 0, 6, 4));
-	$this->addRightSystem(new AbsorbtionShield(3,8,8,3,0,180)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-	$this->addRightSystem(new customLtPolarityPulsar(3, 0, 0, 300, 120)); 
-	$this->addRightSystem(new customLtPolarityPulsar(3, 0, 0, 60, 240));          
-	$this->addRightSystem(new Catapult(4, 4));	
+		
         $this->addRightSystem(new Catapult(4, 4, 1));
         $this->addRightSystem(new Catapult(4, 4, 1));	
         $this->addRightSystem(new Catapult(4, 4, 1));
         $this->addRightSystem(new Catapult(4, 4, 1));	
         $this->addRightSystem(new Catapult(4, 4, 1));	  
+	$this->addRightSystem(new GraviticThruster(4, 25, 0, 6, 4));
+	$this->addRightSystem(new AbsorbtionShield(3,8,8,3,0,180)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addRightSystem(new customLtPolarityPulsar(3, 0, 0, 300, 120)); 
+	$this->addRightSystem(new customLtPolarityPulsar(3, 0, 0, 60, 240)); 
+	$this->addRightSystem(new customPhaseDisruptor(4, 0, 0, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 6, 80));
@@ -115,7 +116,8 @@ class DrakhDreadnought extends BaseShip{
             3=> array(
                     5 => "Thruster",
                     6 => "Light Polarity Pulsar",
-					8 => "Absorption Shield",
+                    7 => "Phase Disruptor",
+					9 => "Absorption Shield",
                     12 => "Catapult",
                     18 => "Structure",
                     20 => "Primary",
@@ -123,7 +125,8 @@ class DrakhDreadnought extends BaseShip{
             4=> array(
                     5 => "Thruster",
                     6 => "Light Polarity Pulsar",
-					8 => "Absorption Shield",
+                    7 => "Phase Disruptor",
+					9 => "Absorption Shield",
                     12 => "Catapult",
                     18 => "Structure",
                     20 => "Primary",
