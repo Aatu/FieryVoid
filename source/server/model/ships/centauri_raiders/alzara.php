@@ -7,7 +7,7 @@ class Alzara extends HeavyCombatVessel{
         $this->pointCost = 440;
         $this->faction = "Raiders";
         $this->phpclass = "Alzara";
-        $this->imagePath = "img/ships/altarian.png";
+        $this->imagePath = "img/ships/CentauriPrivateerAlzara.png";
         $this->shipClass = "Centauri Privateer Alzara Destroyer";
         $this->fighters = array("medium"=>6);
 		$this->isd = 2167;

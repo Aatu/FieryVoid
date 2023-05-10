@@ -307,23 +307,23 @@ HeavyPsionicLance.prototype.initBoostableInfo = function () {
 	
     switch (shipManager.power.getBoost(this)) {
         case 0:
-            this.data["Damage"] = '48 - 120';
+            this.data["Damage"] = '46 - 100';
             this.data["Boostlevel"] = '0';
             break;
         case 1:
-            this.data["Damage"] = '60 - 150';
+            this.data["Damage"] = '58 - 130';
             this.data["Boostlevel"] = '1';
             break;
         case 2:
-            this.data["Damage"] = '72 - 180';
+            this.data["Damage"] = '70 - 160';
             this.data["Boostlevel"] = '2';
             break;
         case 3:
-            this.data["Damage"] = '84 - 210';
+            this.data["Damage"] = '82 - 190';
             this.data["Boostlevel"] = '3';
             break;
         default:
-            this.data["Damage"] = '48 - 120';
+            this.data["Damage"] = '46 - 100';
             this.data["Boostlevel"] = '0';
             break;
 	}

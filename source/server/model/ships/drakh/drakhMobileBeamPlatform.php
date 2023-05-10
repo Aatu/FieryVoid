@@ -17,17 +17,15 @@ class DrakhMobileBeamPlatform extends MediumShip{
 	$this->advancedArmor = true;
 	$this->variantOf = "Mobile Defense Platform";
         $this->occurence = "common";
-        $this->limited = 10; //Restricted Deployment
 	$this->isd = 2255;
-	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
-	    //actually this particular craft IS a combat unit, but shouldn't be present in a mobile fleet anyway (and automatic checks won't catch that it's kind of OSAT!)
 	    
 	    $this->notes = "Boosted by Raider Controller.";
-	    $this->notes .= "<br>Equivalent of OSAT, not a mobile unit.";
+	    $this->notes .= "<br>Equivalent of OSAT, not a mobile unit (but can be taken in pickup battle with proper carrier).";
 		
 		
-		$this->hangarRequired = "Raiders"; //Heavy Raiders can use regular Raider catapults
-		$this->unitSize = 0.5; //they require twice as much space, though!
+		$this->hangarRequired = "Weapon Platforms"; //...akin to OSATs, based on specifically allocated Raider ports on large Drakh ships
+		$this->unitSize = 1; //let's say they use 2 standarized Raider slots like Heavy Raiders, but they need special preparations and/or other non-tactical considerations; somewhat like Orieni HKs; 
+		//for simplifying make them size 1, as slots will be separate anyway
    
 	$this->agile = true;
 	$this->forwardDefense = 11;

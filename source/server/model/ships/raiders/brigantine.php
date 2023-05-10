@@ -7,7 +7,7 @@ class Brigantine extends HeavyCombatVessel{
         $this->pointCost = 450;
         $this->faction = "Raiders";
         $this->phpclass = "Brigantine";
-        $this->imagePath = "img/ships/brigantine.png";
+        $this->imagePath = "img/ships/RaiderBrigantine.png";
         $this->shipClass = "Brigantine";
         $this->occurence = "common";
         $this->fighters = array("normal"=>6);

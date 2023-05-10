@@ -11,7 +11,8 @@ class Delphi extends BaseShip{
         $this->shipClass = "Delphi Advanced Scout";
         $this->shipSizeClass = 3;
         $this->canvasSize = 200;
-  	    $this->isd = 2268;        
+  	    $this->isd = 2268;       
+        $this->limited = 33; //Limited Deployment 33%
 
         $this->forwardDefense = 15;
         $this->sideDefense = 16;

@@ -48,9 +48,9 @@ class DrakhCommandShip extends HeavyCombatVessel{
 	$this->addFrontSystem(new AbsorbtionShield(2,6,4,2,300,120) );
 	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 240, 60)); 
 	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 300, 120));
-	$this->addFrontSystem(new customHeavyPolarityPulsar(3, 0, 0, 300, 0));  	   
+	$this->addFrontSystem(new customHeavyPolarityPulsar(3, 0, 0, 300, 30));  	   
 	$this->addFrontSystem(new customMphasedBeamAcc(3, 0, 0, 300, 60)); 
-	$this->addFrontSystem(new customHeavyPolarityPulsar(3, 0, 0, 0, 60)); 
+	$this->addFrontSystem(new customHeavyPolarityPulsar(3, 0, 0, 330, 60)); 
 	    
         $this->addAftSystem(new Thruster(3, 18, 0, 5, 2));
 	$this->addAftSystem(new Thruster(3, 18, 0, 5, 2));

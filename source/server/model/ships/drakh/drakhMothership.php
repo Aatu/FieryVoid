@@ -11,15 +11,15 @@ class DrakhMothership extends BaseShip{
         $this->imagePath = "img/ships/DrakhMothership.png";
         $this->shipClass = "Mothership";
         $this->shipSizeClass = 3;
-        $this->fighters = array("Shuttles" => 24, "Raiders" => 72);
-        $this->gravitic = true;	    
+        $this->fighters = array("Shuttles" => 24, "Raiders" => 48, "Weapon Platforms" => 12); //12 Weapon Platforms take 24 Raider slots
+        $this->gravitic = true;
 	$this->unofficial = true;
 	$this->advancedArmor = true;   
         $this->Enormous = true;
         $this->limited = 10;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 		
-		$this->notes = "Not a military ship - more akin to craftworld."; //more akin to worldship
+		$this->notes = "Not a military ship - more akin to a craftworld."; //more akin to worldship
        
 	$this->isd = 2200;
         
@@ -35,8 +35,8 @@ class DrakhMothership extends BaseShip{
 		
 	    
 	    
-	$this->addPrimarySystem(new CnC(6, 35, 0, 0));
-        $this->addPrimarySystem(new Reactor(5, 40, 0, 12));
+	$this->addPrimarySystem(new CnC(6, 40, 0, 0));
+        $this->addPrimarySystem(new Reactor(6, 60, 0, 12));
 	$sensors = new ElintScanner(5, 24, 6, 10);
 	$sensors->markImproved();
 	$this->addPrimarySystem($sensors);

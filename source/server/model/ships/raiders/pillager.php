@@ -7,11 +7,10 @@ class Pillager extends BaseShip{
   		$this->pointCost = 500;
   		$this->faction = "Raiders";
         $this->phpclass = "Pillager";
-        $this->imagePath = "img/ships/raiderPillager.png"; //needs to be changed
+        $this->imagePath = "img/ships/raiderPillager.png";
         $this->shipClass = "Pillager Advanced Cruiser";
         $this->shipSizeClass = 3;
         $this->fighters = array("Normal"=>12);
-		$this->canvasSize = 145; 
         $this->limited = 10; //Restricted Deployment
         
 		$this->notes = "Generic raider unit.";

@@ -5,7 +5,7 @@ class GODBetaAM extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 700;
-		$this->faction = 'EA';//"EA defenses";
+		$this->faction = "EA (defenses)";
         $this->phpclass = "GODBetaAM";
         $this->imagePath = "img/ships/god.png";
         $this->shipClass = "GOD Heavy Satellite (Beta)";
