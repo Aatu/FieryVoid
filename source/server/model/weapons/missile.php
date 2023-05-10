@@ -1180,12 +1180,12 @@ class AmmoMissileRackS extends Weapon{
 				$this->minDamageArray[$currMode] = $currAmmo->minDamage;
 				$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
 				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;//For Stealth missiles
-				$this->interceptArray[$currMode] = $currAmmo->intercept;//Adding Intercept variables for Interceptor missiles	
+//				$this->interceptArray[$currMode] = $currAmmo->intercept;//Adding Intercept variables for Interceptor missiles	
 //				$this->ballisticInterceptArray[$currMode] = $currAmmo->ballisticIntercept;				
 				$this->maxpulsesArray[$currMode] = $currAmmo->maxpulses;//Adding Pulse functions for Starburst missiles	
 				$this->rofArray[$currMode] = $currAmmo->rof;
 				$this->useDieArray[$currMode] = $currAmmo->useDie;
-				$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;				
+				$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;		
 			}
 		}
 			
@@ -1223,7 +1223,7 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->maxpulsesArray = $this->maxpulsesArray;//Adding Pulse functions for Starburst missiles	
 		$strippedSystem->rofArray = $this->rofArray;
 		$strippedSystem->useDieArray = $this->useDieArray;
-		$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;			
+		$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;		
 		return $strippedSystem;
 	} 
 	
