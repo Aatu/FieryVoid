@@ -1976,6 +1976,29 @@ class LightParticleAccelerator extends LinkedWeapon{
 	}// endof FtrInterdictor
 
 
+class UnreliableTwinArray extends TwinArray{
+
+	protected $misfire;
+
+    public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = "This Twin Array is prone to misfires."; 
+		$this->data["Special"] .= "<br>10% chance of misfire and doing no damage."; 
+	}
+	
+	public function getDamage($fireOrder){
+		$misfire = Dice::d(10,1);
+		if ($misfire == 1) {
+			$fireOrder->pubnotes .= "<br> Weapon misfire! No damage.";
+			return (Dice::d(10)+4) * 0;
+		}else{
+			return Dice::d(10)+4;
+		}
+	}
+	public function setMinDamage(){		$this->minDamage = 5;	}
+	public function setMaxDamage(){		$this->maxDamage = 14;	}
+	
+} //endof class UnreliableTwinArray
 	
 	
 	

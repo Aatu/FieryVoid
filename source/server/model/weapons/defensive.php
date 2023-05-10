@@ -618,7 +618,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 			$this->iconPath = 'TrekShieldProjector' . $side . '.png';
 			parent::__construct($armor, $maxhealth, $power, $rating, $startArc, $endArc);
 			$this->baseOutput = $rating;
-			$this->maxBoostLevel = $rating + 2; //maximum double effect	+ 2	
+			$this->maxBoostLevel = $rating; //maximum double effect	
 		}
 		
 		
@@ -635,7 +635,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn); 
 			$this->data["Special"] = "Regenerates 5 health for the associated Shield per point of Projector rating at the end of each turn .";
-			$this->data["Special"] .= "<br>Can be boosted five times.";
+			$this->data["Special"] .= "<br>Can be boosted three times.";
 		}	
 		
 	    public function getOutputOnTurn($turn){

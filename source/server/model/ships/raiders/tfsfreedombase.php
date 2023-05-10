@@ -19,7 +19,7 @@ class tfsfreedombase extends SmallStarBaseFourSections{
 		$this->isd = 2243;
 		        $this->occurence = "unique";
 
-		$this->imagePath = "img/ships/orion.png";
+		$this->imagePath = "img/ships/RaiderTFSFreedomBase.png";
 		$this->canvasSize = 280; 
 		
 		$this->locations = array(1, 4, 2, 3);

@@ -10,7 +10,7 @@ class LegionAugustus extends LCV{
 	$this->shipClass = "Legion Augustus Pinnace";
         $this->occurence = "common";
         $this->variantOf = "Gunboat";
-	$this->imagePath = "img/ships/RaiderLCV.png";
+	$this->imagePath = "img/ships/RaiderLegionPinnace.png";
 	$this->canvasSize = 100;
 	$this->agile = true;
 	$this->forwardDefense = 10;

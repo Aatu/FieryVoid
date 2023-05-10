@@ -242,6 +242,12 @@ var AmmoMissileRackSO = function AmmoMissileRackSO(json, ship) {
 AmmoMissileRackSO.prototype = Object.create(Ballistic.prototype);
 AmmoMissileRackSO.prototype.constructor = AmmoMissileRackSO;
 
+var AmmoMissileRackO = function AmmoMissileRackO(json, ship) {
+    Ballistic.call(this, json, ship);
+};
+AmmoMissileRackO.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackO.prototype.constructor = AmmoMissileRackO;
+
 var AmmoMissileRackL = function AmmoMissileRackL(json, ship) {
     Ballistic.call(this, json, ship);
 };
@@ -259,6 +265,18 @@ var AmmoMissileRackR = function AmmoMissileRackR(json, ship) {
 };
 AmmoMissileRackR.prototype = Object.create(Ballistic.prototype);
 AmmoMissileRackR.prototype.constructor = AmmoMissileRackR;
+
+var AmmoMissileRackD = function AmmoMissileRackD(json, ship) {
+    Ballistic.call(this, json, ship);
+};
+AmmoMissileRackD.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackD.prototype.constructor = AmmoMissileRackD;
+
+var KLAmmoMissileRackS = function KLAmmoMissileRackS(json, ship) {
+    Ballistic.call(this, json, ship);
+};
+KLAmmoMissileRackS.prototype = Object.create(Ballistic.prototype);
+KLAmmoMissileRackS.prototype.constructor = KLAmmoMissileRackS;
 
 var AmmoMissileRackB = function AmmoMissileRackB(json, ship) {
     Ballistic.call(this, json, ship);

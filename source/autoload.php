@@ -33,6 +33,7 @@ spl_autoload_register(
                 'anoro' => '/server/model/ships/hurr/anoro.php',
                 'anroethas' => '/server/model/ships/hurr/anroethAS.php',
                 'antimatterconverter' => '/server/model/weapons/antimatter.php',
+                'alykent' => '/server/model/ships/brakiri/Alykent.php',
                 'antoph' => '/server/model/ships/brakiri/antoph.php',
                 'antophearly' => '/server/model/ships/brakiri/antophEarly.php',
                 'antophupgrade' => '/server/model/ships/brakiri/antophUpgrade.php',
@@ -101,6 +102,7 @@ spl_autoload_register(
                 'batrado' => '/server/model/ships/brakiri/batrado.php',
                 'batradoearly' => '/server/model/ships/brakiri/batradoEarly.php',
                 'battlelaser' => '/server/model/weapons/lasers.php',
+                'unreliablebattlelaser' => '/server/model/weapons/lasers.php',
                 'battlewagon' => '/server/model/ships/raiders/battlewagon.php',
                 'benevolent' => '/server/model/ships/orieni/benevolent.php',
                 'benevolent1791' => '/server/model/ships/orieni/benevolent1791.php',
@@ -147,6 +149,7 @@ spl_autoload_register(
                 'celerian1975' => '/server/model/ships/centauri_old/celerian1975.php',
                 'centaurum' => '/server/model/ships/centauri_old/centaurum.php',
                 'centaurum2005' => '/server/model/ships/centauri_old/centaurum2005.php',
+                'centaurumupgraded' => '/server/model/ships/centauri/centaurumUpgraded.php',
                 'talvan' => '/server/model/ships/centauri_old/talvan.php',
                 'talvan1990' => '/server/model/ships/centauri_old/talvan1990.php',
                 'talvan2006' => '/server/model/ships/centauri_old/talvan2006.php',
@@ -240,21 +243,6 @@ spl_autoload_register(
                 'doublev_nav' => '/server/model/ships/raiders/doubleV_nav.php',
                 'dragon' => '/server/model/ships/drazi_old/dragon.php',
                 'dragonship' => '/server/model/ships/raiders/dragonship.php',
-                'drakhattackship' => '/server/model/ships/drakh/drakhAttackShip.php',
-                'drakhcommandship' => '/server/model/ships/drakh/drakhCommandShip.php',
-                'drakhdreadnought' => '/server/model/ships/drakh/drakhDreadnought.php',
-                'drakhheavyraider' => '/server/model/ships/drakh/drakhHeavyRaider.php',
-                'drakhheavyraiderescort' => '/server/model/ships/drakh/drakhHeavyRaiderEscort.php',
-                'drakhheavytender' => '/server/model/ships/drakh/drakhHeavyTender.php',
-                'drakhpatrolship' => '/server/model/ships/drakh/drakhPatrolShip.php',
-                'drakhraidercontroller' => '/server/model/systems/baseSystems.php',
-                'drakhraiderflt' => '/server/model/ships/drakh/drakhRaiderFlt.php',
-                'drakhscoutship' => '/server/model/ships/drakh/drakhScoutShip.php',
-                'drakhshuttle' => '/server/model/ships/drakh/drakhShuttle.php',
-                'drakhsupportship' => '/server/model/ships/drakh/drakhSupportShip.php',
-                'drakhtanker' => '/server/model/ships/drakh/drakhTanker.php',
-                'drakhtender' => '/server/model/ships/drakh/drakhTender.php',
-                'drakhmothership' => '/server/model/ships/drakh/drakhMothership.php',
                 'drikorta' => '/server/model/ships/brakiri/drikorta.php',
                 'droftae' => '/server/model/ships/markab/droftaE.php',
                 'droftan' => '/server/model/ships/markab/droftaN.php',
@@ -276,7 +264,8 @@ spl_autoload_register(
                 'cestusraider' => '/server/model/ships/raiders/cestusRaider.php',
                 'liuli' => '/server/model/ships/centauri_raiders/liuli.php',
                 'liuliraider' => '/server/model/ships/raiders/liuliRaider.php',
-                'eacgeminimlpa' => '/server/model/ships/customs/eacGeminiMlpa.php',
+                //'eacgeminimlpa' => '/server/model/ships/customs/eacGeminiMlpa.php',
+                'geminiam' => '/server/model/ships/EA/geminiAM.php',
                 'earlywarbird' => '/server/model/ships/drazi_old/earlywarbird.php',
                 'earlywartalon' => '/server/model/ships/drazi_old/earlywartalon.php',
                 'earthforceone' => '/server/model/ships/EA/earthforceOne.php',
@@ -487,6 +476,7 @@ spl_autoload_register(
                 'katoc' => '/server/model/ships/narn/Katoc.php',
                 'kendari' => '/server/model/ships/centauri_old/kendari.php',
                 'kendari1966' => '/server/model/ships/centauri_old/kendari1966.php',
+                'kendariupgraded' => '/server/model/ships/centauri/kendariUpgraded.php',
                 'kestrel' => '/server/model/ships/drazi/kestrel.php',
                 'kestrelcommon' => '/server/model/ships/drazi/kestrelcommon.php',
                 'kirstom' => '/server/model/ships/abbai_old/kirstom.php',
@@ -594,6 +584,7 @@ spl_autoload_register(
                 'mathlib' => '/server/lib/mathlib.php',
                 'matter' => '/server/model/weapons/matter.php',
                 'mattercannon' => '/server/model/weapons/matter.php',
+                'unreliablemattercannon' => '/server/model/weapons/matter.php',
                 'mattergun' => '/server/model/weapons/matter.php',
                 'maximus' => '/server/model/ships/centauri/maximus.php',
                 'medblastcannon' => '/server/model/weapons/pulse.php',
@@ -684,6 +675,7 @@ spl_autoload_register(
                 'optine' => '/server/model/ships/centauri_old/optine.php',
                 'optine1966' => '/server/model/ships/centauri_old/optine1966.php',
                 'optine2005' => '/server/model/ships/centauri_old/optine2005.php',
+                'optineupgrade' => '/server/model/ships/centauri/optineUpgrade.php',
                 'oracle' => '/server/model/ships/EA/oracle.php',
                 //'oraclescout' => '/server/model/ships/EA/oracleScout.php',
                 'oraclescoutepsilon' => '/server/model/ships/EA/oracleScoutEpsilon.php',
@@ -1089,6 +1081,7 @@ spl_autoload_register(
                 'turgon' => '/server/model/ships/llort/turgon.php',
                 'turlisk' => '/server/model/ships/llort/turlisk.php',
                 'twinarray' => '/server/model/weapons/particle.php',
+                'unreliabletwinarray' => '/server/model/weapons/particle.php',
                 'typeerror' => '/server/lib/random_compat-2.0.2/lib/error_polyfill.php',
                 'udran' => '/server/model/ships/yolu/udran.php',
                 'uidace' => '/server/model/ships/raiders/uidace.php',
@@ -1213,6 +1206,7 @@ spl_autoload_register(
 				//Alacan weapons
                 'customlightsomissilerack' => '/server/model/weapons/customs.php',
                 'customlightsmissilerack' => '/server/model/weapons/customs.php',
+                'customlightomissilerack' => '/server/model/weapons/customs.php',
 
 
                 'arcticalpha' => '/server/model/ships/EA/arcticAlpha.php',  
@@ -1271,6 +1265,7 @@ spl_autoload_register(
 				'ewheavygatlinglaser' => '/server/model/weapons/customEscalation.php',
 				'ewroyallaser' => '/server/model/weapons/customEscalation.php',
 				'ewsovereignlaser' => '/server/model/weapons/customEscalation.php',
+				'ewhetlaser' => '/server/model/weapons/customEscalation.php',
 			//EW AoE weapons
 				'lightenergymine' => '/server/model/weapons/AoE.php',
 			//EW electromagnetic weapons
@@ -1301,22 +1296,30 @@ spl_autoload_register(
 				'choukabloodfirefighter' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBloodfireFighter.php',
 				'choukabloodhoundfighter' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBloodhoundFighter.php',
 				'choukabloodlustfighter' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBloodlustFighter.php',
-				'choukabrimstoneheavyosat' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBrimstoneHeavyOSAT.php',
+//				'choukabrimstoneheavyosat' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBrimstoneHeavyOSAT.php',
+				'choukabrimstoneheavyosatam' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaBrimstoneHeavyOSATAM.php',
 //				'choukacitadel' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaCitadel.php',
 				'choukaclergy' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaClergy.php',
 				'choukacontritionheavyescort' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaContritionHeavyEscort.php',
 				'choukacovenantminelayer' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaCovenantMinelayer.php',
 				'choukadevotionfreetrader' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaDevotionFreeTrader.php',
-				'choukafaithbringerfighter' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaFaithbringerFighter.php',
+//				'choukafaithbringerfighter' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaFaithbringerFighter.php',
+				'choukafaithbringerfighteram' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaFaithbringerFighterAM.php',
 				'choukaflagellantfreighter' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaFlagellantFreighter.php',
-				'choukagrandinquisitor' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaGrandInquisitor.php',
-				'choukahellfireaosat' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHellfireAOSAT.php',
-				'choukahellfireaosatrefit' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHellfireAOSATRefit.php',
-				'choukahellfirebosat' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHellfireBOSAT.php',
-				'choukaheraldwarcruiser' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHeraldWarCruiser.php',
+//				'choukagrandinquisitor' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaGrandInquisitor.php',
+				'choukagrandinquisitoram' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaGrandInquisitorAM.php',
+//				'choukahellfireaosat' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHellfireAOSAT.php',
+				'choukahellfireaosatam' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHellfireAOSATAM.php',
+//				'choukahellfireaosatrefit' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHellfireAOSATRefit.php',
+				'choukahellfireaosatrefitam' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHellfireAOSATRefitAM.php',
+//				'choukahellfirebosat' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHellfireBOSAT.php',
+				'choukahellfirebosatam' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHellfireBOSATAM.php',
+//				'choukaheraldwarcruiser' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHeraldWarCruiser.php',
+				'choukaheraldwarcruiseram' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHeraldWarCruiserAM.php',
 				'choukaholylandassault' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaHolylandAssault.php',
 				'choukainquisitorlightcruiser' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaInquisitorLightCruiser.php',
-				'choukapenancebase' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaPenanceBase.php',
+//				'choukapenancebase' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaPenanceBase.php',
+				'choukapenancebaseam' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaPenanceBaseAM.php',
 				'choukapenitentpatrolship' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaPenitentPatrolShip.php',
 				'choukapledgeminelayer' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaPledgeMinelayer.php',
 				'choukapriestdestroyer' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaPriestDestroyer.php',
@@ -1324,22 +1327,30 @@ spl_autoload_register(
 				'choukareprisalcarrier' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaReprisalCarrier.php',
 				'choukaretributionbattlecruiser' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaRetributionBattlecruiser.php',
 				'choukaretributionrefit' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaRetributionRefit.php',
-				'choukarevelationwarbarge' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaRevelationWarBarge.php',
-				'choukareverencemonitor' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaReverenceMonitor.php',
-				'choukareverencemonitorrefit' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaReverenceMonitorRefit.php',
+//				'choukarevelationwarbarge' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaRevelationWarBarge.php',
+				'choukarevelationwarbargeam' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaRevelationWarBargeAM.php',
+//				'choukareverencemonitor' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaReverenceMonitor.php',
+				'choukareverencemonitoram' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaReverenceMonitorAM.php',
+//				'choukareverencemonitorrefit' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaReverenceMonitorRefit.php',
+				'choukareverencemonitorrefitam' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaReverenceMonitorRefitAM.php',
 				'choukareverendescort' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaReverendEscort.php',
 				'choukascripturescout' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaScriptureScout.php',
 				'choukasinnercorvette' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaSinnerCorvette.php',
 				'choukasuppliantauxiliarycarrier' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaSuppliantAuxiliaryCarrier.php',
-				'choukatemplestarbase' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaTempleStarbase.php',
-				'choukatemplerefit' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaTempleRefit.php',
+//				'choukatemplestarbase' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaTempleStarbase.php',
+				'choukatemplestarbaseam' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaTempleStarbaseAM.php',
+//				'choukatemplerefit' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaTempleRefit.php',
+				'choukatemplerefitam' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaTempleRefitAM.php',
 				'choukateuton' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaTeuton.php',
-				'choukatribunalmissilecruiser' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaTribunalMissileCruiser.php',
-				'choukatribunalmissilecruiserrefit' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaTribunalMissileCruiserRefit.php',
+//				'choukatribunalmissilecruiser' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaTribunalMissileCruiser.php',
+				'choukatribunalmissilecruiseram' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaTribunalMissileCruiserAM.php',
+//				'choukatribunalmissilecruiserrefit' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaTribunalMissileCruiserRefit.php',
+				'choukatribunalmissilecruiserrefitam' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaTribunalMissileCruiserRefitAM.php',
 				'choukavengeancecruiser' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaVengeanceCruiser.php',
 				'choukawarprayergunship' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaWarPrayerGunship.php',
 				'choukawarprayerescort' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaWarPrayerEscort.php',
-				'choukawraithbladefighter' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaWraithbladeFighter.php',
+//				'choukawraithbladefighter' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaWraithbladeFighter.php',
+				'choukawraithbladefighteram' => '/server/model/ships/ZEscalationChoukaTheocracy/ChoukaWraithbladeFighterAM.php',
 
 				
 				//Escalation Wars - Chouka Raiders
@@ -1354,7 +1365,8 @@ spl_autoload_register(
 				'choukaraiderreclumafighter' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderReclumAFighter.php',
 				'choukaraiderreclumbfighter' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderReclumBFighter.php',
 				'choukaraiderreclumcfighter' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderReclumCFighter.php',
-				'choukaraiderreclumdfighter' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderReclumDFighter.php',
+//				'choukaraiderreclumdfighter' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderReclumDFighter.php',
+				'choukaraiderreclumdfighteram' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderReclumDFighterAM.php',
 				'choukaraiderwrathwarship' => '/server/model/ships/ZEscalationChoukaRaider/ChoukaRaiderWrathWarship.php',
 				
 
@@ -1431,39 +1443,56 @@ spl_autoload_register(
 				'kastancudgelas' => '/server/model/ships/ZEscalationKastan/KastanCudgelAS.php',
 				'kastandullknife' => '/server/model/ships/ZEscalationKastan/KastanDullknife.php',
 				'kastanbronzecrest' => '/server/model/ships/ZEscalationKastan/KastanBronzecrest.php',
-				'kastanflameblade' => '/server/model/ships/ZEscalationKastan/KastanFlameblade.php',
-				'kastanironblade' => '/server/model/ships/ZEscalationKastan/KastanIronblade.php',
-				'kastanironbladerefit' => '/server/model/ships/ZEscalationKastan/KastanIronbladeRefit.php',
-				'kastanironbladerefit2' => '/server/model/ships/ZEscalationKastan/KastanIronbladeRefit2.php',
+//				'kastanflameblade' => '/server/model/ships/ZEscalationKastan/KastanFlameblade.php',
+				'kastanflamebladeam' => '/server/model/ships/ZEscalationKastan/KastanFlamebladeAM.php',
+//				'kastanironblade' => '/server/model/ships/ZEscalationKastan/KastanIronblade.php',
+				'kastanironbladeam' => '/server/model/ships/ZEscalationKastan/KastanIronbladeAM.php',
+//				'kastanironbladerefit' => '/server/model/ships/ZEscalationKastan/KastanIronbladeRefit.php',
+				'kastanironbladerefitam' => '/server/model/ships/ZEscalationKastan/KastanIronbladeRefitAM.php',
+//				'kastanironbladerefit2' => '/server/model/ships/ZEscalationKastan/KastanIronbladeRefit2.php',
+				'kastanironbladerefit2am' => '/server/model/ships/ZEscalationKastan/KastanIronbladeRefit2AM.php',
 				'kastanironcrest' => '/server/model/ships/ZEscalationKastan/KastanIroncrest.php',
 				'kastanironshear' => '/server/model/ships/ZEscalationKastan/KastanIronshear.php',
 				'kastanironshearrefit' => '/server/model/ships/ZEscalationKastan/KastanIronshearRefit.php',
 				'kastankatana' => '/server/model/ships/ZEscalationKastan/KastanKatana.php',
-				'kastannightblade' => '/server/model/ships/ZEscalationKastan/KastanNightblade.php',
+//				'kastannightblade' => '/server/model/ships/ZEscalationKastan/KastanNightblade.php',
+				'kastannightbladeam' => '/server/model/ships/ZEscalationKastan/KastanNightbladeAM.php',
 				'kastansteelsabre' => '/server/model/ships/ZEscalationKastan/KastanSteelsabre.php',
 				'kastansteelsabrerefit' => '/server/model/ships/ZEscalationKastan/KastanSteelsabreRefit.php',
 				'kastansteelsabrerefit2' => '/server/model/ships/ZEscalationKastan/KastanSteelsabreRefit2.php',
 				'kastanstormsabre' => '/server/model/ships/ZEscalationKastan/KastanStormsabre.php',
 				'kastanstormsabrerefit' => '/server/model/ships/ZEscalationKastan/KastanStormsabreRefit.php',
-				'kastanstormshear' => '/server/model/ships/ZEscalationKastan/KastanStormshear.php',
-				'kastanstormshearrefit' => '/server/model/ships/ZEscalationKastan/KastanStormshearRefit.php',
+//				'kastanstormshear' => '/server/model/ships/ZEscalationKastan/KastanStormshear.php',
+				'kastanstormshearam' => '/server/model/ships/ZEscalationKastan/KastanStormshearAM.php',
+//				'kastanstormshearrefit' => '/server/model/ships/ZEscalationKastan/KastanStormshearRefit.php',
+				'kastanstormshearrefitam' => '/server/model/ships/ZEscalationKastan/KastanStormshearRefitAM.php',
 				'kastantrident' => '/server/model/ships/ZEscalationKastan/KastanTrident.php',
 
 
 
 				//Escalation Wars - Sshel'ath
+				'sshelathalnekra' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathAlnekra.php',
 				'sshelathalvekascout' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathAlvekaScout.php',
-				'sshelathalvekarefit' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathAlvekaRefit.php',
+//				'sshelathalvekarefit' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathAlvekaRefit.php',
+				'sshelathalvekarefitam' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathAlvekaRefitAM.php',
 				'sshelatharaunax' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathAraunax.php',
 				'sshelathkaraut' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathKaraut.php',
 				'sshelathkaraut1971' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathKaraut1971.php',
 				'sshelathkaraut1986' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathKaraut1986.php',
+				'sshelathkasolra' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathKasolra.php',
+				'sshelathkastulva' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathKastulva.php',
+				'sshelathkosluka' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathKosluka.php',
+				'sshelathkoslukarefit' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathKoslukaRefit.php',
 				'sshelathnalaxaun' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathNalaxaun.php',
 				'sshelathnakesra' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathNakesra.php',
 				'sshelathnasarra' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathNasarra.php',
 				'sshelathnaslik' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathNaslik.php',
-				'sshelathnimra' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathNimra.php',
-				'sshelathnirte' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathNirte.php',
+//				'sshelathnimra' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathNimra.php',
+				'sshelathnimraam' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathNimraAM.php',
+//				'sshelathnirte' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathNirte.php',
+				'sshelathnirteam' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathNirteAM.php',
+				'sshelathniskiraa' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathNiskiraA.php',
+				'sshelathniskirab' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathNiskiraB.php',
 				'sshelathskonna' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathSkonna.php',
 				'sshelathskonnarefit' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathSkonnaRefit.php',
 				'sshelathskraltana' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathSkraltana.php',
@@ -1472,11 +1501,15 @@ spl_autoload_register(
 				'sshelathskratar' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathSkratar.php',
 				'sshelathskreghaa' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathSkreghaA.php',
 				'sshelathskreghab' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathSkreghaB.php',
-				'sshelathskreltora' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathSkreltora.php',
-				'sshelathskreltorarefit' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathSkreltoraRefit.php',
+//				'sshelathskreltora' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathSkreltora.php',
+				'sshelathskreltoraam' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathSkreltoraAM.php',
+//				'sshelathskreltorarefit' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathSkreltoraRefit.php',
+				'sshelathskreltorarefitam' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathSkreltoraRefitAM.php',
 				'sshelathskulnacarrier' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathSkulnaCarrier.php',
 				'sshelathskulnarefit' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathSkulnaRefit.php',
 				'sshelathsolna' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathSolna.php',
+				'sshelathstoaka' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathStoaka.php',
+				'sshelathstoakarefitam' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathStoakaRefitAM.php',
 				'sshelathsulkor' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathSulkor.php',
 				'sshelathsulkorrefit' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathSulkorRefit.php',
 				'sshelathsvralla' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathSvralla.php',
@@ -1485,6 +1518,10 @@ spl_autoload_register(
 				'sshelathtakhira' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathTakhira.php',
 				'sshelathtoglaka' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathToglaka.php',
 				'sshelathtoglakarefit' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathToglakaRefit.php',
+				'sshelathtolsa' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathTolsa.php',
+				'sshelathtrovalta' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathTrovalta.php',
+				'sshelathtrovaltarefitam' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathTrovaltaRefitAM.php',
+				'sshelathtrulvaka' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathTrulvaka.php',
 				'sshelathukanda' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathUkanda.php',
 				'sshelathushula' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathUshula.php',
 				'sshelathvahskal' => '/server/model/ships/ZEscalationSshelathAlliance/SshelathVahskal.php',
@@ -1498,7 +1535,8 @@ spl_autoload_register(
 		//Nexus weapons
 			//Nexus matter weapons
 				'nexusacids' => '/server/model/weapons/customNexus.php',
-				'nexusautocannon' => '/server/model/weapons/customNexus.php',
+				'nexusacids' => '/server/model/weapons/customNexus.php',
+				'nexusantifighterlauncher' => '/server/model/weapons/customNexus.php',
 				'nexusautocannonftr' => '/server/model/weapons/customNexus.php',
 				'nexusautogun' => '/server/model/weapons/customNexus.php',
 				'nexuscids' => '/server/model/weapons/customNexus.php',
@@ -1570,6 +1608,7 @@ spl_autoload_register(
 				'nexusheavylaserspear' => '/server/model/weapons/customNexus.php',
 				'nexusindustriallaser' => '/server/model/weapons/customNexus.php',
 				'nexuslaserspear' => '/server/model/weapons/customNexus.php',
+				'nexuslightindustriallaser' => '/server/model/weapons/customNexus.php',
 				'nexuslightlasercutter' => '/server/model/weapons/customNexus.php',
 			//Nexus ion weapons
 				'nexusionblaster' => '/server/model/weapons/customNexus.php',
@@ -1583,7 +1622,6 @@ spl_autoload_register(
 //                'pakmarasimsalle2' => '/server/model/ships/pakmara/PakmaraSimSallE2.php',					
 				'plasmaweb' => '/server/model/weapons/customNexus.php',
 //				'plasmablast' => '/server/model/weapons/customNexus.php',
-//				'testgun' => '/server/model/weapons/customNexus.php',
 				'testmissile' => '/server/model/weapons/customNexus.php',
 				'testmissile2' => '/server/model/weapons/customNexus.php',
 //                'plasmabattery' => '/server/model/systems/baseSystems.php',
@@ -1602,6 +1640,9 @@ spl_autoload_register(
 				
 				'brixadiibattledestroyerleader2051' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerLeader2051.php',
 				'brixadiibattledestroyerleader2108' => '/server/model/ships/ZNexusBrixadii/BrixadiiBattleDestroyerLeader2108.php',
+
+				'brixadiidestroyerescort' => '/server/model/ships/ZNexusBrixadii/BrixadiiDestroyerEscort.php',
+				'brixadiidestroyerescortrefit' => '/server/model/ships/ZNexusBrixadii/BrixadiiDestroyerEscortRefit.php',
 				
                 'brixadiiwarshipbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiWarshipBase.php',		
                 'brixadiiwarshipprototype' => '/server/model/ships/ZNexusBrixadii/BrixadiiWarshipPrototype.php',		
@@ -1626,6 +1667,7 @@ spl_autoload_register(
                 'brixadiilauncherplatformbase' => '/server/model/ships/ZNexusBrixadii/BrixadiiLauncherPlatformBase.php',
                 'brixadiilauncherplatform2107' => '/server/model/ships/ZNexusBrixadii/BrixadiiLauncherPlatform2107.php',
 
+                'brixadiilightescortfrigate2057' => '/server/model/ships/ZNexusBrixadii/BrixadiiLightEscortFrigate2057.php',
                 'brixadiilightescortfrigate' => '/server/model/ships/ZNexusBrixadii/BrixadiiLightEscortFrigate.php',
 
                 'brixadiipoliceescort' => '/server/model/ships/ZNexusBrixadii/BrixadiiPoliceEscort.php',
@@ -1830,6 +1872,7 @@ spl_autoload_register(
                 'antiquatedscanner' => '/server/model/systems/baseSystems.php',
                 'flakcannon' => '/server/model/weapons/matter.php',
 				'slugcannon' => '/server/model/weapons/matter.php',
+				'singleslugcannon' => '/server/model/weapons/matter.php',
 				'gromelgtrailgun' => '/server/model/weapons/customs.php',
 				'gromemedrailgun' => '/server/model/weapons/customs.php',
 				'gromehvyrailgun' => '/server/model/weapons/customs.php',
@@ -1878,7 +1921,8 @@ spl_autoload_register(
 
                 'ariesstarfury' => '/server/model/ships/EA_old/ariesStarfury.php',
                 'atlasstarfury' => '/server/model/ships/EA_old/atlasStarfury.php',
-                'atlasstarfuryrefit' => '/server/model/ships/EA_old/atlasStarfuryRefit.php',
+//                'atlasstarfuryrefit' => '/server/model/ships/EA_old/atlasStarfuryRefit.php',
+                'atlasstarfuryrefitam' => '/server/model/ships/EA_old/atlasStarfuryRefitAM.php',
                 'avengeralpha' => '/server/model/ships/EA_old/avengerAlpha.php',
                 'cottenalpha' => '/server/model/ships/EA_old/cottenAlpha.php',
                 'cottenbeta' => '/server/model/ships/EA/cottenBeta.php',
@@ -1915,7 +1959,8 @@ spl_autoload_register(
                 'tethysalpha' => '/server/model/ships/EA_old/tethysAlpha.php',
                 'tethysbeta' => '/server/model/ships/EA_old/tethysBeta.php',
                 'tychealpha' => '/server/model/ships/EA_old/tycheAlpha.php',
-                'valkyrieftr' => '/server/model/ships/EA/valkyrieFtr.php',
+//                'valkyrieftr' => '/server/model/ships/EA/valkyrieFtr.php',
+                'valkyrieftram' => '/server/model/ships/EA/valkyrieFtrAM.php',
 
 
 				//Battlestar Galactica - Fred
@@ -1931,33 +1976,46 @@ spl_autoload_register(
                 'bsgmedbattery' => '/server/model/weapons/customBSG.php',
 					//ships
                 'colonialalliance' => '/server/model/ships/ZBSGColonials/ColonialAlliance.php',
-                'colonialberserkclasscarrier' => '/server/model/ships/ZBSGColonials/ColonialBerserkClassCarrier.php',
-                'colonialfreya' => '/server/model/ships/ZBSGColonials/ColonialFreya.php',
-                'colonialjanuscruiser' => '/server/model/ships/ZBSGColonials/ColonialJanusCruiser.php',
-                'colonialjupiterclass' => '/server/model/ships/ZBSGColonials/ColonialJupiterClass.php',
+//                'colonialberserkclasscarrier' => '/server/model/ships/ZBSGColonials/ColonialBerserkClassCarrier.php',
+                'colonialberserkclasscarrieram' => '/server/model/ships/ZBSGColonials/ColonialBerserkClassCarrierAM.php',
+//                'colonialfreya' => '/server/model/ships/ZBSGColonials/ColonialFreya.php',
+                'colonialfreyaam' => '/server/model/ships/ZBSGColonials/ColonialFreyaAM.php',
+//                'colonialjanuscruiser' => '/server/model/ships/ZBSGColonials/ColonialJanusCruiser.php',
+                'colonialjanuscruiseram' => '/server/model/ships/ZBSGColonials/ColonialJanusCruiserAM.php',
+//                'colonialjupiterclass' => '/server/model/ships/ZBSGColonials/ColonialJupiterClass.php',
+                'colonialjupiterclassam' => '/server/model/ships/ZBSGColonials/ColonialJupiterClassAM.php',
                 'coloniallokiclass' => '/server/model/ships/ZBSGColonials/ColonialLokiClass.php',
                 'colonialmamba' => '/server/model/ships/ZBSGColonials/ColonialMamba.php',
                 'colonialmanticorebeta' => '/server/model/ships/ZBSGColonials/ColonialManticoreBeta.php',
-                'colonialmanticoreclass' => '/server/model/ships/ZBSGColonials/ColonialManticoreClass.php',
+//                'colonialmanticoreclass' => '/server/model/ships/ZBSGColonials/ColonialManticoreClass.php',
+                'colonialmanticoreclassam' => '/server/model/ships/ZBSGColonials/ColonialManticoreClassAM.php',
 //                'colonialmanticoregamma' => '/server/model/ships/ZBSGColonials/ColonialManticoreGamma.php',
-                'colonialmercuryclass' => '/server/model/ships/ZBSGColonials/ColonialMercuryClass.php',
-                'colonialminervaclass' => '/server/model/ships/ZBSGColonials/ColonialMinervaClass.php',
-                'colonialodinclass' => '/server/model/ships/ZBSGColonials/ColonialOdinClass.php',
+//                'colonialmercuryclass' => '/server/model/ships/ZBSGColonials/ColonialMercuryClass.php',
+                'colonialmercuryclassam' => '/server/model/ships/ZBSGColonials/ColonialMercuryClassAM.php',
+//                'colonialminervaclass' => '/server/model/ships/ZBSGColonials/ColonialMinervaClass.php',
+                'colonialminervaclassam' => '/server/model/ships/ZBSGColonials/ColonialMinervaClassAM.php',
+//                'colonialodinclass' => '/server/model/ships/ZBSGColonials/ColonialOdinClass.php',
+                'colonialodinclassam' => '/server/model/ships/ZBSGColonials/ColonialOdinClassAM.php',
                 'colonialorion' => '/server/model/ships/ZBSGColonials/ColonialOrion.php',
 				'colonialpythonmk3' => '/server/model/ships/ZBSGColonials/ColonialPythonMk3.php',
 				'colonialraptor' => '/server/model/ships/ZBSGColonials/ColonialRaptor.php',
-				'colonialriverescort' => '/server/model/ships/ZBSGColonials/ColonialRiverEscort.php',
+//				'colonialriverescort' => '/server/model/ships/ZBSGColonials/ColonialRiverEscort.php',
+				'colonialriverescortam' => '/server/model/ships/ZBSGColonials/ColonialRiverEscortAM.php',
 				'colonialrussanclass' => '/server/model/ships/ZBSGColonials/ColonialRussanClass.php',
-				'colonialassaultraptor' => '/server/model/ships/ZBSGColonials/ColonialAssaultRaptor.php',
-                'colonialtigerclass' => '/server/model/ships/ZBSGColonials/ColonialTigerClass.php',
+//				'colonialassaultraptor' => '/server/model/ships/ZBSGColonials/ColonialAssaultRaptor.php',
+				'colonialassaultraptoram' => '/server/model/ships/ZBSGColonials/ColonialAssaultRaptorAM.php',
+//                'colonialtigerclass' => '/server/model/ships/ZBSGColonials/ColonialTigerClass.php',
+                'colonialtigerclassam' => '/server/model/ships/ZBSGColonials/ColonialTigerClassAM.php',
                 'colonialvipermk2' => '/server/model/ships/ZBSGColonials/ColonialViperMk2.php',
-                'colonialvipermk7' => '/server/model/ships/ZBSGColonials/ColonialViperMk7.php',
+//                'colonialvipermk7' => '/server/model/ships/ZBSGColonials/ColonialViperMk7.php',
+                'colonialvipermk7am' => '/server/model/ships/ZBSGColonials/ColonialViperMk7AM.php',
 
 				//Battlestar Galactica - Kirill
 					//weapons
                 'commjammerftr' => '/server/model/weapons/customBSG.php',
                 'flakarray' => '/server/model/weapons/customBSG.php',
                 'flakarray2' => '/server/model/weapons/customBSG.php',
+                'bsgcenturions' => '/server/model/weapons/customBSG.php',
                 'bsgmarineassault' => '/server/model/weapons/customBSG.php',
                 'sensorspearftr' => '/server/model/weapons/customBSG.php',
                 'sensorspikeftr' => '/server/model/weapons/customBSG.php',
@@ -1987,10 +2045,15 @@ spl_autoload_register(
                 'ltguidedmissile' => '/server/model/weapons/customBSG.php',
                 'medguidedmissile' => '/server/model/weapons/customBSG.php',
                 'hvyguidedmissile' => '/server/model/weapons/customBSG.php',
+                'ltguidedmissiles' => '/server/model/weapons/customBSG.php',
+                'medguidedmissiles' => '/server/model/weapons/customBSG.php',
+                'hvyguidedmissiles' => '/server/model/weapons/customBSG.php',
                 'emmissile' => '/server/model/weapons/customBSG.php',
 
-//				'cylonbasestar' => '/server/model/ships/ZBSGCylons/CylonBasestar.php',				
+				'cylonbasestar' => '/server/model/ships/ZBSGCylons/CylonBasestar.php',				
+				'cylonpillager' => '/server/model/ships/ZBSGCylons/CylonPillager.php',				
 				'cylonsparrowraider' => '/server/model/ships/ZBSGCylons/CylonSparrowRaider.php',				
+				'cylonturkeyraider' => '/server/model/ships/ZBSGCylons/CylonTurkeyRaider.php',				
 
                 'bsghybrid' => '/server/model/systems/baseSystems.php',
 
@@ -2028,6 +2091,8 @@ spl_autoload_register(
                 'lshon' => '/server/model/ships/narn_raiders/lshon.php',
                 'lshonrefit' => '/server/model/ships/narn_raiders/lshonRefit.php',
                 'privateergorith' => '/server/model/ships/narn_raiders/Privateergorith.php',
+		    	'tlaca' => '/server/model/ships/narn_raiders/Tlaca.php',
+		    	'tlacaearly' => '/server/model/ships/narn_raiders/TlacaEarly.php',    		    	                
 
 
 
@@ -2075,8 +2140,24 @@ spl_autoload_register(
 				'custombpaheavy' => '/server/model/weapons/customs.php' ,
 		    
 		    
-		//new Drakh toys
-		'customphasesweeper' => '/server/model/weapons/customs.php',   
+		//Drakh
+                'drakhattackship' => '/server/model/ships/drakh/drakhAttackShip.php',
+                'drakhcommandship' => '/server/model/ships/drakh/drakhCommandShip.php',
+                'drakhdreadnought' => '/server/model/ships/drakh/drakhDreadnought.php',
+                'drakhheavyraider' => '/server/model/ships/drakh/drakhHeavyRaider.php',
+                'drakhheavyraiderescort' => '/server/model/ships/drakh/drakhHeavyRaiderEscort.php',
+                'drakhheavytender' => '/server/model/ships/drakh/drakhHeavyTender.php',
+                'drakhpatrolship' => '/server/model/ships/drakh/drakhPatrolShip.php',
+                'drakhraidercontroller' => '/server/model/systems/baseSystems.php',
+                'drakhraiderflt' => '/server/model/ships/drakh/drakhRaiderFlt.php',
+                'drakhscoutship' => '/server/model/ships/drakh/drakhScoutShip.php',
+                'drakhshuttle' => '/server/model/ships/drakh/drakhShuttle.php',
+                'drakhsupportship' => '/server/model/ships/drakh/drakhSupportShip.php',
+                'drakhtanker' => '/server/model/ships/drakh/drakhTanker.php',
+                'drakhtender' => '/server/model/ships/drakh/drakhTender.php',
+                'drakhmothership' => '/server/model/ships/drakh/drakhMothership.php',
+				
+				'customphasesweeper' => '/server/model/weapons/customs.php',   
                 'drakhraidersweeperflt' => '/server/model/ships/drakh/drakhRaiderSweeperFlt.php',
                 'drakhmobiledefenseplatform' => '/server/model/ships/drakh/drakhMobileDefensePlatform.php',
                 'drakhmobilebeamplatform' => '/server/model/ships/drakh/drakhMobileBeamPlatform.php',
@@ -2443,6 +2524,7 @@ spl_autoload_register(
 				'orrono' => '/server/model/ships/corillani/Orrono.php',
 				'drolla' => '/server/model/ships/corillani/Drolla.php',
 				'plasmablast' => '/server/model/weapons/plasma.php',
+				'corillanithorkaosat' => '/server/model/ships/corillani/CorillaniThorkaOSAT.php',
 				
 				//Vree
 				'sixsidedship' => '/server/model/ships/ShipClasses.php',
@@ -2496,6 +2578,14 @@ spl_autoload_register(
 				//'apollostrike' => '/server/model/ships/EA/apollostrike.php',			
                 'swerrantventure' => '/server/model/ships/ZStarWars/swErrantVenture.php',
 				'unevenbasefoursections' => '/server/model/ships/ShipClasses.php',
+				'dsharda' => '/server/model/ships/civilians/Dsharda.php',				
+				'dshardapulse' => '/server/model/ships/civilians/DshardaPulse.php',
+				'areko' => '/server/model/ships/brakiri_raiders/Areko.php',
+				'rava' => '/server/model/ships/brakiri_raiders/Rava.php',
+				'attackfrigate' => '/server/model/ships/brakiri_raiders/AttackFrigate.php',
+				'folshota' => '/server/model/ships/brakiri/FolshotA.php',
+				'folshotaraider' => '/server/model/ships/brakiri_raiders/FolshotARaider.php',									
+				
 
 
 				//Star Trek conversions
@@ -2601,6 +2691,7 @@ spl_autoload_register(
 				'treknausicaanglidersshf' => '/server/model/ships/ZTrekOther/TrekNausicaanGlidersSHF.php',
 				'treknausicaanheavyglider' => '/server/model/ships/ZTrekOther/TrekNausicaanHeavyGlider.php',
 				'treknausicaanvandal' => '/server/model/ships/ZTrekOther/TrekNausicaanVandal.php',
+				'treknausicaanscourge' => '/server/model/ships/ZTrekOther/TrekNausicaanScourge.php',
 				
 				//Pak'ma'ra
 				'plasmabattery' => '/server/model/systems/baseSystems.php',
@@ -2626,7 +2717,8 @@ spl_autoload_register(
 				'sashulkur' => '/server/model/ships/pakmara/Sashulkur.php',
 				'simtorka' => '/server/model/ships/pakmara/Simtorka.php',
 				'uriktal' => '/server/model/ships/pakmara/Uriktal.php',
-				'thorkaosat' => '/server/model/ships/pakmara/ThorkaOSAT.php',																																																				
+				'thorkaosat' => '/server/model/ships/pakmara/ThorkaOSAT.php',
+				'urshtalu' => '/server/model/ships/pakmara/Urshtalu.php',																																																				
 				
 
 				//Hyach
@@ -2646,17 +2738,16 @@ spl_autoload_register(
 
 
 				//Kor-Lyan
-//         		'ammomissilerackf' => '/server/model/weapons/customNexus.php', //missile racks themselves
 				'axor' => '/server/model/ships/korlyan/Axor.php',
 				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 				'fenja' => '/server/model/ships/korlyan/Fenja.php',
-				'kalavar' => '/server/model/ships/korlyan/kalavar.php',
-				'kalavarearlyam' => '/server/model/ships/korlyan/kalavarEarlyAM.php',
-				'kalavaroriginalam' => '/server/model/ships/korlyan/kalavarOriginalAM.php',
+				'kalavar' => '/server/model/ships/korlyan/Kalavar.php',
+				'kalavarearlyam' => '/server/model/ships/korlyan/KalavarEarlyAM.php',
+				'kalavaroriginalam' => '/server/model/ships/korlyan/KalavarOriginalAM.php',
 				'kaltiam' => '/server/model/ships/korlyan/KaltiAM.php',
 				'kolosk' => '/server/model/ships/korlyan/Kolosk.php',
 				'koloskearlyam' => '/server/model/ships/korlyan/KoloskEarlyAM.php',
-				'koloskovaam' => '/server/model/ships/korlyan/koloskovaAM.php',
+				'koloskovaam' => '/server/model/ships/korlyan/KoloskovaAM.php',
 				'koshaam' => '/server/model/ships/korlyan/KoshaAM.php',
 				'koshaearlyam' => '/server/model/ships/korlyan/KoshaEarlyAM.php',
 				'koskova' => '/server/model/ships/korlyan/Koskova.php',
@@ -2693,12 +2784,7 @@ spl_autoload_register(
          		'directlimpetbore' => '/server/model/weapons/customNexus.php', 
          		'directlimpetborebase' => '/server/model/weapons/customNexus.php', 
          		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
-//				'cokra' => '/server/model/ships/korlyan/Cokra.php',
-//				'koloskova' => '/server/model/ships/korlyan/Koloskova.php',
-//				'lekra' => '/server/model/ships/korlyan/Lekra.php',
 				'koskovatestbed' => '/server/model/ships/korlyan/KoskovaTestbed.php',
-//				'kaltiam' => '/server/model/ships/korlyan/KaltiAM.php',
-//				'taloki' => '/server/model/ships/korlyan/Taloki.php',
 
 
 
@@ -2740,10 +2826,6 @@ spl_autoload_register(
 				'apollowsf' => '/server/model/ships/customs/ApolloWSF.php',					
 				'prototype' => '/server/model/ships/customs/Prototype.php',
 				
-
-
-											
-																				   
 															 
 															   
 				
@@ -2758,7 +2840,10 @@ spl_autoload_register(
                 		'ammomissilea' => '/server/model/systems/baseSystems.php',
                 		'ammomissilep' => '/server/model/systems/baseSystems.php',
                 		'ammomissiled' => '/server/model/systems/baseSystems.php',
+                		'ammomissilec' => '/server/model/systems/baseSystems.php',
+                		'ammomissilei' => '/server/model/systems/baseSystems.php',                 		                 		
                 		'ammomissiles' => '/server/model/systems/baseSystems.php',
+                		'ammomissilek' => '/server/model/systems/baseSystems.php',                		
 						
                 		'ammomissilefb' => '/server/model/systems/baseSystems.php',
                 		'ammomissilefl' => '/server/model/systems/baseSystems.php',
@@ -2769,12 +2854,18 @@ spl_autoload_register(
                 		'ammomissileracks' => '/server/model/weapons/missile.php', //missile racks themselves
                 		'ammomissilerackso' => '/server/model/weapons/missile.php',
                 		'ammomissileracka' => '/server/model/weapons/missile.php',
-                		'ammomissilerackb' => '/server/model/weapons/missile.php',
+                		'ammomissilerackb' => '/server/model/weapons/missile.php',	
+						'ammomissilerackd' => '/server/model/weapons/missile.php',					
+						'ammomissilerackf' => '/server/model/weapons/customNexus.php', 
                 		'ammomissilerackl' => '/server/model/weapons/missile.php',
                 		'ammomissileracklh' => '/server/model/weapons/missile.php',
+                		'ammomissileracko' => '/server/model/weapons/missile.php',
                 		'ammomissilerackr' => '/server/model/weapons/missile.php',
+                		'klammomissileracks' => '/server/model/weapons/missile.php', // DOUGLAS: please look at it - IMO it should be deleted, K-L should use basic class-S rack; said rack simply should be unable to use class-I missiles until/unless it actually can do so correctly :) (...which it now can't!)
                 		'ammobombrack' => '/server/model/weapons/missile.php',
                 		'ammofighterrack' => '/server/model/weapons/missile.php',
+						
+                		
 						
 						
 						//ships using new style launchers (and magazine of course) - by faction
@@ -2866,6 +2957,7 @@ spl_autoload_register(
 						'hurrmissileosat2220am' => '/server/model/ships/hurr/HurrmissileOSAT2220AM.php',
 						'hurrmissileosat2240am' => '/server/model/ships/hurr/HurrmissileOSAT2240AM.php',
 						'borocaam' => '/server/model/ships/hurr/borocaAM.php',
+						'borocaamearly' => '/server/model/ships/hurr/borocaAMEarly.php',												
 						'borocadaam' => '/server/model/ships/hurr/borocadaAM.php',
 						'norekam' => '/server/model/ships/hurr/norekAM.php',
 						'anoroam' => '/server/model/ships/hurr/anoroAM.php',
@@ -2914,7 +3006,7 @@ spl_autoload_register(
 						'gaimkastafighteram' => '/server/model/ships/gaim/gaimKastaFighterAM.php',
 						
 						
-				//new custom faction: Thirdspace
+				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',
 				'psychicfieldhandler' => '/server/model/weapons/specialWeapons.php',
 				'thirdspaceshieldprojection' =>	'/server/model/weapons/defensive.php',
@@ -2928,10 +3020,28 @@ spl_autoload_register(
 				'thirdspacecnc' => '/server/model/systems/baseSystems.php',		
 				'thirdspaceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceAttackCraft.php',			
 						
+						//Development systems
+						'testgun' => '/server/model/weapons/customDevelopment.php',
+						'testgun2' => '/server/model/weapons/customDevelopment.php',
+						'plasmasiegecannon' => '/server/model/weapons/customDevelopment.php',
+						'impheavylaser' => '/server/model/weapons/customDevelopment.php',
+						'directemine' => '/server/model/weapons/customDevelopment.php',
+
+
 						//Satyra (Wolfgang campaign)
-						'satyrashield' => '/server/model/weapons/customNexus.php',
-						'laserarray' => '/server/model/weapons/customNexus.php',
-      			        'satyramcvtest' => '/server/model/ships/Zsatyra/SatyraMCVTest.php',	
+						'satyrashield' => '/server/model/weapons/customDevelopment.php',
+						'laserarray' => '/server/model/weapons/customDevelopment.php',
+						'satyramcvtest' => '/server/model/ships/Zsatyra/SatyraMCVTest.php',	
+
+						//Steve's no EW concept
+						'gquell_noew' => '/server/model/ships/customs/gquell_noew.php',	
+
+
+						//What If - Alternative design concepts
+						'dagkar_wi' => '/server/model/ships/whatif/dagkar_WI.php',	
+						'gquan_wi' => '/server/model/ships/whatif/gquan_WI.php',	
+						'vorchan_wi' => '/server/model/ships/whatif/vorchan_WI.php',	
+						
 	
 				//let's end this with unit enhancement class...		    
 				'enhancements' => '/server/model/ships/Enhancements.php'

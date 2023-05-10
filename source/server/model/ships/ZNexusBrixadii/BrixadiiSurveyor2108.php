@@ -4,7 +4,7 @@ class BrixadiiSurveyor2108 extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 440;
+        $this->pointCost = 445;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiSurveyor2108";
         $this->imagePath = "img/ships/Nexus/BrixadiiSurveyor.png";
@@ -47,11 +47,13 @@ class BrixadiiSurveyor2108 extends HeavyCombatVessel{
 		$this->addAftSystem(new CargoBay(1, 16));
 		$this->addAftSystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
 		$this->addAftSystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
+        $this->addAftSystem(new ScatterPulsar(2, 4, 2, 90, 270));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 3, 35));
-        $this->addAftSystem(new Structure( 3, 32));
+        $this->addFrontSystem(new Structure( 3, 45));
+        $this->addAftSystem(new Structure( 3, 42));
         $this->addPrimarySystem(new Structure( 4, 40));
+
         $this->hitChart = array(
             0=> array(
                     7 => "Structure",
@@ -71,7 +73,8 @@ class BrixadiiSurveyor2108 extends HeavyCombatVessel{
             ),
             2=> array(
                     7 => "Thruster",
-                    10 => "Cargo Bay",
+                    9 => "Cargo Bay",
+					10 => "Scatter Pulsar",
 					11 => "Chaff Launcher",
                     18 => "Structure",
                     20 => "Primary",

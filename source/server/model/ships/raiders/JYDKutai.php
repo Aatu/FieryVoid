@@ -7,7 +7,7 @@ class JYDKutai extends HeavyCombatVessel{
         $this->pointCost = 535;
         $this->faction = "Raiders";
         $this->phpclass = "JYDKutai";
-        $this->imagePath = "img/ships/kutai.png";
+        $this->imagePath = "img/ships/RaiderJYDKutai.png";
         $this->shipClass = "JYD Kutai Gunship";
 	    $this->isd = 2260;
 			$this->occurence = "unique";

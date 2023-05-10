@@ -7,7 +7,7 @@ class LkarusRefit extends BaseShip{
 		$this->pointCost = 450;
 		$this->faction = "Raiders";
         $this->phpclass = "LkarusRefit";
-        $this->imagePath = "img/ships/lkarus.png";
+        $this->imagePath = "img/ships/NarnPrivateerlkarusEarly.png";
         $this->shipClass = "Narn Privateer L'Karus Raider Cruiser (2244 refit)";
 			$this->occurence = "common";
 			$this->variantOf = "Narn Privateer L'Karus Raider Cruiser";        

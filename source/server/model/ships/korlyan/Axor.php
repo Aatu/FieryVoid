@@ -7,7 +7,7 @@ class Axor extends MediumShip{
 		$this->pointCost = 250;
 		$this->faction = "Kor-Lyan";
         $this->phpclass = "Axor";
-        $this->imagePath = "img/ships/korlyan_axor.png";
+        $this->imagePath = "img/ships/korlyan_axor2.png";
         $this->shipClass = "Axor Assault Frigate";
         $this->canvasSize = 70;
 	    
@@ -24,6 +24,15 @@ class Axor extends MediumShip{
         $this->rollcost = 1;
         $this->pivotcost = 1;
 		$this->iniativebonus = 60;
+
+	//ammo magazine itself (AND its missile options)
+	$ammoMagazine = new AmmoMagazine(40); //pass magazine capacity 
+	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 40); //add full load of basic missiles	    
+	       
+	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-P
+	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L	    	    
+
          
         $this->addPrimarySystem(new Reactor(3, 8, 0, 0));
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));
@@ -36,12 +45,12 @@ class Axor extends MediumShip{
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addFrontSystem(new StdParticleBeam(1, 4, 1, 240, 60));
 		$this->addFrontSystem(new CustomIndustrialGrappler(3, 5, 0, 300, 60));
-        $this->addFrontSystem(new MultiDefenseLauncher(2, 'D', 270, 90, false));
+        $this->addFrontSystem(new AmmoMissileRackD(2, 0, 0, 270, 90, $ammoMagazine, false));
 		$this->addFrontSystem(new CustomIndustrialGrappler(3, 5, 0, 300, 60));
         $this->addFrontSystem(new StdParticleBeam(1, 4, 1, 300, 120));
 		
         $this->addAftSystem(new Thruster(3, 6, 0, 2, 2));
-        $this->addAftSystem(new MultiDefenseLauncher(2, 'D', 90, 270, false));
+        $this->addAftSystem(new AmmoMissileRackD(2, 0, 0, 90, 270, $ammoMagazine, false));
         $this->addAftSystem(new Thruster(3, 6, 0, 2, 2));
 	
         $this->addPrimarySystem(new Structure( 3, 64));

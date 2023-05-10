@@ -8,7 +8,7 @@ class Raiderrowlon extends FighterFlight{
         $this->faction = "Raiders";
         $this->phpclass = "Raiderrowlon";
         $this->shipClass = "Rowlon Armored Fighters";
-        $this->imagePath = "img/ships/Rowlon.png";
+        $this->imagePath = "img/ships/RaiderRowloon.png";
        	$this->isd = 1981;
 	    
        	
@@ -37,8 +37,8 @@ class Raiderrowlon extends FighterFlight{
             $armour = array(2, 1, 2, 2);
             $rowlon = new Fighter("Rowlon", $armour, 8, $this->id);
             $rowlon->displayName = "Rowlon";
-            $rowlon->imagePath = "img/ships/Rowlon.png";
-            $rowlon->iconPath = "img/ships/Rowlon_Large.png";
+            $rowlon->imagePath = "img/ships/RaiderRowloon.png";
+            $rowlon->iconPath = "img/ships/RaiderRowloon_large.png";
                        
 			$gun = new LightParticleBeam(330, 30, 2);					   
 			$gun->displayName = "Light Particle Projector";

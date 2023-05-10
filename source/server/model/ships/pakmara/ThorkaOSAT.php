@@ -27,7 +27,7 @@ class ThorkaOSAT extends OSAT
 		$this->addPrimarySystem(new Reactor(5, 9, 0, 2));
 		$this->addPrimarySystem(new Scanner(4, 7, 2, 5));
 		$this->addPrimarySystem(new Thruster(4, 6, 0, 0, 2));
-		$this->addPrimarySystem(new RangedFuser(4, 12, 12, 300, 60));
+		$this->addPrimarySystem(new RangedFuser(4, 0, 0, 300, 60));
 		$this->addPrimarySystem(new MediumPlasma(3, 5, 3, 270, 90));
 		$this->addPrimarySystem(new MediumPlasma(3, 5, 3, 270, 90));
 		$this->addPrimarySystem(new PakmaraPlasmaWeb(2, 4, 2, 0, 180));

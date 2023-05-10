@@ -8,7 +8,7 @@ class PrivateerLessara extends BaseShip{
 	$this->pointCost = 490;
         $this->faction = "Raiders";
         $this->phpclass = "PrivateerLessara";
-        $this->imagePath = "img/ships/PrivateerLessara.png";
+        $this->imagePath = "img/ships/CentauriPrivateerLessara.png";
         $this->shipClass = "Centauri Privateer Lessara Carrier";
         $this->shipSizeClass = 3;
         $this->fighters = array("light"=>18);

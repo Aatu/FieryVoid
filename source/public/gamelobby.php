@@ -95,8 +95,9 @@
         <script src="client/model/weapon/missile.js"></script>
         <script src="client/model/weapon/ion.js"></script>
     	<script src="client/model/weapon/customs.js"></script>
-	<script src="client/model/weapon/customSW.js"></script>
+		<script src="client/model/weapon/customSW.js"></script>
         <script src="client/model/weapon/customNexus.js"></script>
+        <script src="client/model/weapon/customDevelopment.js"></script>
         <script src="client/model/weapon/customEscalation.js"></script>		
         <script src="client/model/weapon/customBSG.js"></script>		
         <script src="client/model/weapon/customTrek.js"></script>		

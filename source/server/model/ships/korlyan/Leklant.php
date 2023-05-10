@@ -8,7 +8,7 @@ class Leklant extends BaseShip{
 		$this->faction = "Kor-Lyan";
 //	$this->faction = "Custom Ships";
         $this->phpclass = "Leklant";
-        $this->imagePath = "img/ships/korlyan_leklant.png";
+        $this->imagePath = "img/ships/korlyan_leklant2.png";
         $this->shipClass = "Leklant Scout Cruiser";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; //img has 200px per side
@@ -30,6 +30,14 @@ class Leklant extends BaseShip{
         $this->pivotcost = 2;
         $this->iniativebonus = 0;
 
+	//ammo magazine itself (AND its missile options)
+	$ammoMagazine = new AmmoMagazine(120); //pass magazine capacity 
+	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 120); //add full load of basic missiles  	      
+
+	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
+	    
         $this->addPrimarySystem(new Reactor(5, 21, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new ElintScanner(5, 20, 7, 9));
@@ -39,23 +47,23 @@ class Leklant extends BaseShip{
    
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
-        $this->addFrontSystem(new MultiDefenseLauncher(2, 'D', 300, 60, false));
+        $this->addFrontSystem(new AmmoMissileRackD(2, 0, 0, 300, 60, $ammoMagazine, false));
         $this->addFrontSystem(new DirectLimpetBore(3, 5, 3, 300, 60));
-        $this->addFrontSystem(new MultiDefenseLauncher(2, 'D', 300, 60, false));
+        $this->addFrontSystem(new AmmoMissileRackD(2, 0, 0, 300, 60, $ammoMagazine, false));
 
         $this->addAftSystem(new Thruster(3, 7, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 7, 0, 2, 2));
-        $this->addAftSystem(new MultiDefenseLauncher(3, 'D', 120, 300, false));
-        $this->addAftSystem(new MultiDefenseLauncher(3, 'D', 60, 240, false));
+        $this->addAftSystem(new AmmoMissileRackD(3, 0, 0, 120, 300, $ammoMagazine, false));
+        $this->addAftSystem(new AmmoMissileRackD(3, 0, 0, 60, 240, $ammoMagazine, false));
 
-        $this->addLeftSystem(new MultiDefenseLauncher(2, 'D', 240, 60, false));
+        $this->addLeftSystem(new AmmoMissileRackD(2, 0, 0, 240, 60, $ammoMagazine, false));
         $this->addLeftSystem(new FMissileRack(3, 6, 0, 180, 360, false)); 
         $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 180, 360));
         $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 180, 360));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
-        $this->addRightSystem(new MultiDefenseLauncher(2, 'D', 300, 120, false));
+        $this->addRightSystem(new AmmoMissileRackD(2, 0, 0, 300, 120, $ammoMagazine, false));
         $this->addRightSystem(new FMissileRack(3, 6, 0, 0, 180, false)); 
         $this->addRightSystem(new StdParticleBeam(3, 4, 1, 0, 180));
         $this->addRightSystem(new StdParticleBeam(3, 4, 1, 0, 180));

@@ -28,10 +28,10 @@ class BrixadiiSupportBase extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new CnC(4, 20, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 20, 6, 6));
 		$this->addPrimarySystem(new Hangar(4, 6));
-		$this->addPrimarySystem(new NexusDefensePulsar(4, 4, 2, 0, 360));
-		$this->addPrimarySystem(new NexusDefensePulsar(4, 4, 2, 0, 360));
-		$this->addPrimarySystem(new NexusDefensePulsar(4, 4, 2, 0, 360));
-		$this->addPrimarySystem(new NexusDefensePulsar(4, 4, 2, 0, 360));
+		$this->addPrimarySystem(new LightParticleProjector(4, 3, 1, 0, 360));
+		$this->addPrimarySystem(new LightParticleProjector(4, 3, 1, 0, 360));
+		$this->addPrimarySystem(new LightParticleProjector(4, 3, 1, 0, 360));
+		$this->addPrimarySystem(new LightParticleProjector(4, 3, 1, 0, 360));
 		$this->addPrimarySystem(new CargoBay(4, 20));
 		$this->addPrimarySystem(new CargoBay(4, 20));
 		
@@ -68,7 +68,7 @@ class BrixadiiSupportBase extends SmallStarBaseFourSections{
 		$this->hitChart = array(			
 			0=> array(
 				6 => "Structure",
-				8 => "Defense Pulsar",
+				8 => "Light Particle Projector",
 				13 => "Cargo Bay",
 				14 => "Hangar",
 				16 => "Scanner",

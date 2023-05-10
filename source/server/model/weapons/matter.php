@@ -656,6 +656,11 @@ for friendly units.*/
     }	//endof class FlakCannon
 
 
+	class SingleSlugCannon extends SlugCannon{
+	    public $iconPath = 'GatlingGun.png';
+		public $shots = 1;
+		public $intercept = 1;
+	} //endof class SingleSlugCannon
 
 
 	/*Grome fighter weapon*/
@@ -730,5 +735,29 @@ for friendly units.*/
         public function setMaxDamage(){     $this->maxDamage = 3;      }
 
     }  //end SlugCannon
+
+class UnreliableMatterCannon extends MatterCannon{
+
+	protected $misfire;
+
+    public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] .= "<br>This Matter Cannon is prone to misfires."; 
+		$this->data["Special"] .= "<br>10% chance of misfire and doing no damage."; 
+	}
+	
+	public function getDamage($fireOrder){
+		$misfire = Dice::d(10,1);
+		if ($misfire == 1) {
+			$fireOrder->pubnotes .= "<br> Weapon misfire! No damage.";
+			return (Dice::d(10, 2)+2) * 0;
+		}else{
+			return Dice::d(10, 2)+2;
+		}
+	}
+	public function setMinDamage(){		$this->minDamage = 4;	}
+	public function setMaxDamage(){		$this->maxDamage = 22;	}
+	
+} //endof class UnreliableMatterCannon
 	
 ?>

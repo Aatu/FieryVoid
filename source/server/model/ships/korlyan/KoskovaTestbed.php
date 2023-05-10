@@ -5,8 +5,8 @@ class KoskovaTestbed extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 800;
-		$this->faction = "Custom Ships";
-//	$this->faction = "Custom Ships";
+
+	$this->faction = "Custom Ships";
         $this->phpclass = "KoskovaTestbed";
         $this->imagePath = "img/ships/korlyan_koskova2.png";
         $this->shipClass = "Koskova Testbed";
@@ -37,7 +37,7 @@ class KoskovaTestbed extends BaseShip{
         $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
         $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
-        $this->enhancementOptionsEnabled[] = 'AMMO_I';//add enhancement options for other missiles - Class-P
+  //      $this->enhancementOptionsEnabled[] = 'AMMO_I';//add enhancement options for other missiles - Class-P
         $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-P
 
         $this->addPrimarySystem(new Reactor(6, 25, 0, 1));

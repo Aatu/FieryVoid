@@ -57,20 +57,20 @@ class GreySharlin extends BaseShip{
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
 
         $this->addLeftSystem(new NeutronLaser(4, 10, 6, 300, 60));
-        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 0));
-        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 0));
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 300));
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 300));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 0));
         $this->addLeftSystem(new GraviticThruster(5, 16, 0, 7, 3));
-        $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 300));
-        $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 300));
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 0));
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 0));
 
         $this->addRightSystem(new NeutronLaser(4, 10, 6, 300, 60));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
-        $this->addRightSystem(new GraviticThruster(5, 16, 0, 7, 4));
 		$this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
+        $this->addRightSystem(new GraviticThruster(5, 16, 0, 7, 4));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 6, 70));
