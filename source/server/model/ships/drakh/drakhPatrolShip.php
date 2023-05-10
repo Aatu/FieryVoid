@@ -41,15 +41,16 @@ class DrakhPatrolShip extends MediumShip{
   
         $this->addFrontSystem(new GraviticThruster(3, 8, 0, 4, 1));
         $this->addFrontSystem(new GraviticThruster(3, 8, 0, 4, 1));
+	$this->addFrontSystem(new customPhaseDisruptor(3, 0, 0, 240, 0));
+	$this->addFrontSystem(new customPhaseDisruptor(3, 0, 0, 0, 120));
+	$this->addFrontSystem(new customHeavyPolarityPulsar(3, 0, 0, 300, 60)); 	
 	$this->addFrontSystem(new AbsorbtionShield(2,4,3,1,270,90) ); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-	$this->addFrontSystem(new customPhaseDisruptor(3, 0, 0, 240, 0)); 
-	$this->addFrontSystem(new customHeavyPolarityPulsar(3, 0, 0, 300, 60)); 	 	   
-	$this->addFrontSystem(new customPhaseDisruptor(3, 0, 0, 0, 120));  
 	    
         $this->addAftSystem(new GraviticThruster(3, 12, 0, 6, 2));
 	$this->addAftSystem(new GraviticThruster(3, 12, 0, 6, 2));
-	$this->addAftSystem(new AbsorbtionShield(2,4,3,1,90,270));
-	$this->addAftSystem(new customLtPolarityPulsar(2, 0, 0, 90,270));  
+	$this->addAftSystem(new customLtPolarityPulsar(2, 0, 0, 120,300));
+	$this->addAftSystem(new customLtPolarityPulsar(2, 0, 0, 60,240));
+	$this->addAftSystem(new AbsorbtionShield(2,4,3,1,90,270)); 
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure( 5, 50));

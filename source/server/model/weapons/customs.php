@@ -1,6 +1,7 @@
 <?php
 
- class CustomERLightPBeam extends Particle{
+
+class CustomERLightPBeam extends Particle{
         public $name = "CustomERLightPBeam";
         public $displayName = "Extended Range Light Particle Beam";
 		public $iconPath = "lightParticleBeamShip.png";
@@ -660,9 +661,9 @@ class AbsorbtionShield extends Shield implements DefensiveSystem{
     function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
         // shieldfactor is handled as output.
         parent::__construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc);
-	$this->baseOutput = $shieldFactor;
-	$this->boostEfficiency = $powerReq;
-	$this->maxBoostLevel = min(2,$shieldFactor); //maximum of +2 effect, costs $powerReq each - but can't more than double shield!
+		$this->baseOutput = $shieldFactor;
+		$this->boostEfficiency = $powerReq;
+		$this->maxBoostLevel = min(2,$shieldFactor); //maximum of +2 effect, costs $powerReq each - but can't more than double shield!
     }
 	
     public function onConstructed($ship, $turn, $phase){
@@ -704,16 +705,16 @@ class AbsorbtionShield extends Shield implements DefensiveSystem{
 		$this->data["Special"] .= "<br>Can be boosted."; 
     }
 	  
-        private function getBoostLevel($turn){
-            $boostLevel = 0;
-            foreach ($this->power as $i){
-                    if ($i->turn != $turn) continue;
-                    if ($i->type == 2){
-                            $boostLevel += $i->amount;
-                    }
-            }
-            return $boostLevel;
-        }
+	private function getBoostLevel($turn){
+		$boostLevel = 0;
+		foreach ($this->power as $i){
+				if ($i->turn != $turn) continue;
+				if ($i->type == 2){
+						$boostLevel += $i->amount;
+				}
+		}
+		return $boostLevel;
+	}
 	
 } //endof class  AbsorbtionShield
 
@@ -721,22 +722,24 @@ class AbsorbtionShield extends Shield implements DefensiveSystem{
 
 class customPhaseDisruptor extends Raking{
     /*Phase Disruptor for Drakh ships*/
-        public $name = "customPhaseDisruptor";
-        public $displayName = "Phase Disruptor";
-	 public $iconPath = "PhaseDisruptor.png";
-        public $animation = "laser";
-        public $animationColor = array(50, 125, 210);
-        public $uninterceptable = false;
-        public $loadingtime = 2;
-        public $rangePenalty = 0.5;
-        public $fireControl = array(2, 4, 6); // fighters, <mediums, <capitals
-        public $priority = 8;
+	public $name = "customPhaseDisruptor";
+	public $displayName = "Phase Disruptor";
+	public $iconPath = "PhaseDisruptor.png";
+	public $animation = "laser";
+	public $animationColor = array(50, 125, 210);
+	public $uninterceptable = false;
+	public $loadingtime = 1;
+	public $normalload = 2;
+	public $loadingtimeArray = array(1=>1, 2=>2); //can fire accelerated, but only in Concentrated mode
+	public $rangePenalty = 0.5;
+	public $fireControl = array(2, 4, 6); // fighters, <mediums, <capitals
+	public $priority = 8;
 	public $rakes = array();
 	public $firingModes = array(1=>'Concentrated', 2=>'Split');
 	public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); 
 	public $gunsArray = array(1=>1,2=>3);
 	
-		public $factionAge = 2; //Middle-born
+	public $factionAge = 2; //Middle-born
 	
 	public $damageType = 'Raking'; 
     	public $weaponClass = "Molecular"; 
@@ -763,12 +766,14 @@ class customPhaseDisruptor extends Raking{
 				$rake = Dice::d(6, 3);
 				$damage+=$rake;
 				$this->rakes[] = $rake;
-				$rake = Dice::d(6, 3);
-				$damage+=$rake;
-				$this->rakes[] = $rake;
-				$rake = Dice::d(6, 3);
-				$damage+=$rake;
-				$this->rakes[] = $rake;
+				if ($this->turnsloaded > 1) { //more rakes - for full arming cycle only
+					$rake = Dice::d(6, 3);
+					$damage+=$rake;
+					$this->rakes[] = $rake;
+					$rake = Dice::d(6, 3);
+					$damage+=$rake;
+					$this->rakes[] = $rake;
+				}
 				return $damage; 
 				break;
 			case 2:
@@ -786,10 +791,20 @@ class customPhaseDisruptor extends Raking{
 		return $rakesize;		
 	}
 	
-        public function setMinDamage(){
+	public function setMinDamage(){
 		switch($this->firingMode){
-			case 1:
-				$this->minDamage = 9; //concentrated
+			case 1: //concentrated
+				switch($this->turnsloaded){
+					case 1:
+						$this->minDamage = 3;
+						break;
+					case 2:
+						$this->minDamage = 9;
+						break;
+					default:
+						$this->minDamage = 9;
+						break;
+				}
 				break;
 			case 2:
 				$this->minDamage = 3; //split
@@ -797,10 +812,20 @@ class customPhaseDisruptor extends Raking{
 		}
 		$this->minDamageArray[$this->firingMode] = $this->minDamage;
 	}
-        public function setMaxDamage(){
+    public function setMaxDamage(){
 		switch($this->firingMode){
 			case 1:
-				$this->maxDamage = 18*3; //concentrated
+				switch($this->turnsloaded){
+					case 1:
+						$this->maxDamage = 18;
+						break;
+					case 2:
+						$this->maxDamage = 18*3;
+						break;
+					default:
+						$this->maxDamage = 18*3;
+						break;
+				}
 				break;
 			case 2:
 				$this->maxDamage = 18; //split
@@ -810,9 +835,21 @@ class customPhaseDisruptor extends Raking{
 	}
 	
     public function setSystemDataWindow($turn){
-	parent::setSystemDataWindow($turn);
-	$this->data["Special"] = 'In concentrate mode does 3 rakes, each 3d6 strong.';
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = 'In concentrated mode does 3 rakes, each 3d6 strong.';
+		$this->data["Special"] .= '<br>Can fire accelerated, with only 1 rake.';
     }
+	
+
+	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		$strippedSystem->data = $this->data;
+		$strippedSystem->minDamage = $this->minDamage;
+		$strippedSystem->minDamageArray = $this->minDamageArray;
+		$strippedSystem->maxDamage = $this->maxDamage;
+		$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+		return $strippedSystem;
+	}
 	
 }//customPhaseDisruptor
 
@@ -929,11 +966,11 @@ class customLtPolarityPulsar extends Pulse{
         public $priority = 4;
         public $rof = 2;
 	        
-        public $rangePenalty = 2;
+        public $rangePenalty = 1.5; //-3/2 hexes; decreased from original -2/hex
         public $fireControl = array(4, 3, 3); // fighters, <mediums, <capitals 
         
 	public $grouping = 15; //+1 per 3
-	public $maxpulses = 6;
+	public $maxpulses = 6; 
 	protected $useDie = 5; //die used for base number of hits;
         public $intercept = 2;
 		
@@ -971,11 +1008,11 @@ class customMedPolarityPulsar extends Pulse{
 	public $weaponClass = "Molecular"; 
         public $rof = 2;
 	        
-        public $rangePenalty = 1; // -1 hex
+        public $rangePenalty = 0.66; //-2/3hexes; decreased from original -1/hex
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals 
         
 	public $grouping = 15; //+1 per 3
-	public $maxpulses = 5;
+	public $maxpulses = 6;//increased from original 5
 	protected $useDie = 4; //die used for base number of hits;
         public $intercept = 2;
 	
@@ -1012,12 +1049,12 @@ class customHeavyPolarityPulsar extends Pulse{
 	public $weaponClass = "Molecular"; 
         public $rof = 2;
 	        
-        public $rangePenalty = 0.5; //-1/2 hexes
+        public $rangePenalty = 0.33; //-1/3 hexes; decreased from original -1/2 hexes
         public $fireControl = array(0, 3, 5); // fighters, <mediums, <capitals 
         
 	public $grouping = 15; //+1 per 3
-	public $maxpulses = 5;
-	protected $useDie = 3; //die used for base number of hits;
+	public $maxpulses = 6;//increased from original 5
+	protected $useDie = 4; //die used for base number of hits; increased from original 3
         public $intercept = 1;
 	
 		public $factionAge = 2; //Middle-born
@@ -1043,39 +1080,40 @@ class customHeavyPolarityPulsar extends Pulse{
 
 class customMphasedBeamAcc extends Weapon{
 	public $name = "customMphasedBeamAcc";
-        public $displayName = "Multiphased Beam Accelerator";
-	    public $iconPath = "MultiphasedBeamAccelerator.png";
+	public $displayName = "Multiphased Beam Accelerator";
+	public $iconPath = "MultiphasedBeamAccelerator.png";
 	    
 	public $animation = "laser";
-        public $animationColor = array(225,130,0);
+	public $animationColor = array(225,130,0);
 	
-        public $raking = 10;
+	public $raking = 10;
 	    
-	    public $damageType = 'Raking'; 
+	public $damageType = 'Raking'; 
 	public $weaponClass = "Molecular"; 
+	public $uninterceptable = true;
 	
-        public $priority = 7;
-        public $priorityArray = array(1=>7, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
-        public $firingModes = array(
-            1 => "Raking",
-            2 => "Piercing"
-        );        
-        public $damageTypeArray=array(1=>'Raking', 2=>'Piercing');
-	    
-        
-        public $loadingtime = 1;  //can fire every turn, but achieves full charge after 3 turns
-		public $normalload = 3;
-		
-        public $rangePenalty = 0.33; //-1/3 hexes
-        public $fireControl = array(3, 4, 5); // fighters, <=mediums, <=capitals 
-	    public $fireControlArray = array( 1=>array(3, 4, 5), 2=>array(null,0,1) ); //Raking and Piercing mode
-		
-		public $factionAge = 2; //Middle-born
+	public $priority = 7;
+	public $priorityArray = array(1=>7, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
+	public $firingModes = array(
+		1 => "Raking",
+		2 => "Piercing"
+	);        
+	public $damageTypeArray=array(1=>'Raking', 2=>'Piercing');
+	
+	
+	public $loadingtime = 1;  //can fire every turn, but achieves full charge after 3 turns
+	public $normalload = 3;
+	
+	public $rangePenalty = 0.33; //-1/3 hexes
+	public $fireControl = array(3, 4, 5); // fighters, <=mediums, <=capitals 
+	public $fireControlArray = array( 1=>array(3, 4, 5), 2=>array(null,0,1) ); //Raking and Piercing mode
+	
+	public $factionAge = 2; //Middle-born
 		
 	    
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);   
-		$this->data["Special"] = "Ignores half of armor.";  		
+		$this->data["Special"] = "Ignores half of armor. Uninterceptable.";  		
 		$this->data["Special"] .= "<br>Can fire accelerated for less damage";  
 		$this->data["Special"] .= "<br> - 1 turn: 2d10+2"; 
 		$this->data["Special"] .= "<br> - 2 turns: 4d10+4"; 
@@ -1213,27 +1251,27 @@ class customMphasedBeamAcc extends Weapon{
 	
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "Primary mode of fire: 3 shots, 2d6 damage, -10/hex (antifighter)";
-            $this->data["Special"] .= "<br> alternate: 1 shot, 3d6+2 damage, -7.5/hex (antiship)";
+            $this->data["Special"] = "Primary mode of fire: 3 shots, 4d3 damage, -10/hex (antifighter)";
+            $this->data["Special"] .= "<br> alternate: 1 shot, 4d4+6 damage, -7.5/hex (antiship)";
         }
 	    
         public function getDamage($fireOrder){
 			switch($this->firingMode){
 				case 1:
-					return Dice::d(6, 2); //Antifighter
+					return Dice::d(3, 4); //4d3, Antifighter
 					break;
 				case 2:
-					return Dice::d(6, 3)+2; //Antiship
+					return Dice::d(4, 4)+6; //4d4+6, Antiship
 					break;
 			}
 		}
         public function setMinDamage(){ 
 			switch($this->firingMode){
 				case 1:
-					$this->minDamage = 2; //Antifighter
+					$this->minDamage = 4; //Antifighter
 					break;
 				case 2:
-					$this->minDamage = 5; //Antiship
+					$this->minDamage = 8; //Antiship
 					break;	
 			}
 			$this->minDamageArray[$this->firingMode] = $this->minDamage;
@@ -1244,7 +1282,7 @@ class customMphasedBeamAcc extends Weapon{
 					$this->maxDamage = 12; //Antifighter
 					break;
 				case 2:
-					$this->maxDamage = 20; //Antiship
+					$this->maxDamage = 22; //Antiship
 					break;	
 			}
 			$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
@@ -1283,15 +1321,15 @@ class customMphasedBeamAcc extends Weapon{
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 	
-	
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             //$this->data["Special"] = "Shots are NOT linked"; //not needed
         }
-	
 	    
-        public function getDamage($fireOrder){        return Dice::d(6,2);   }
-        public function setMinDamage(){     $this->minDamage = 2 ;      }
+        public function getDamage($fireOrder){
+			return Dice::d(3, 4); //4d3   
+		}
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
         public function setMaxDamage(){     $this->maxDamage = 12 ;      }
     } //endof class customPhaseSweeper
 
@@ -1710,23 +1748,6 @@ class CustomIndustrialGrappler extends Weapon {
     } //CustomMiningCutter
 
 
-class CustomLightSoMissileRack extends CustomLightSMissileRack{
-        public $name = "CustomLightSoMissileRack";
-        public $displayName = "Light SO-Missile Rack";
-        public $loadingtime = 2; // 1/3 turns
-        public $fireControl = array(5, 5, 5); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
-        public $ammunition = 12; //limited number of shots	    
-}//endof CustomLightSoMissileRack
-
-
-class CustomLightOMissileRack extends CustomLightSMissileRack{
-        public $name = "CustomLightOMissileRack";
-        public $displayName = "Light O-Missile Rack";
-        public $loadingtime = 3; // 1/3 turns
-        public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
-        public $ammunition = 8; //limited number of shots	    
-}
-
 class CustomLightSMissileRack extends Weapon{
         public $name = "CustomLightSMissileRack";
         public $displayName = "Light S-Missile Rack";
@@ -1759,13 +1780,6 @@ class CustomLightSMissileRack extends Weapon{
             if ( $powerReq == 0 ) $powerReq = 0;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-        
-        public function stripForJson() {
-            $strippedSystem = parent::stripForJson();    
-            $strippedSystem->ammunition = $this->ammunition;           
-            return $strippedSystem;
-        }
-        
 	    
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
@@ -1787,7 +1801,35 @@ class CustomLightSMissileRack extends Weapon{
     
         public function setMinDamage(){     $this->minDamage = 12;      }
         public function setMaxDamage(){     $this->maxDamage = 12;      }
+		
+		
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->ammunition = $this->ammunition;           
+            return $strippedSystem;
+        }
 }//endof CustomLightSMissileRack
+
+
+class CustomLightSoMissileRack extends CustomLightSMissileRack{
+        public $name = "CustomLightSoMissileRack";
+        public $displayName = "Light SO-Missile Rack";
+        public $loadingtime = 2; // 1/3 turns
+        public $fireControl = array(5, 5, 5); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $ammunition = 12; //limited number of shots	    
+}//endof CustomLightSoMissileRack
+
+
+class CustomLightOMissileRack extends CustomLightSMissileRack{
+        public $name = "CustomLightOMissileRack";
+        public $displayName = "Light O-Missile Rack";
+        public $loadingtime = 3; // 1/3 turns
+        public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $ammunition = 8; //limited number of shots	    
+}//endof CustomLightOMissileRack
+
+
+
 
 
 //Grome special shell railguns

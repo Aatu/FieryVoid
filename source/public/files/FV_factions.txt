@@ -190,6 +190,7 @@ EARTH ALLIANCE
 Interceptor - dedicated defensive weapon. In tabletop, it needs to be shut down for a turn before switching between offensive (anti-fighter) and defensive (interception) modes. There is no such requirement in Fiery Void, weapon can intercept or fire offensively at will.
 Energy Web - defensive system integrated with Interceptor. Active Interceptor provides (in its arc) shield-like effect of reducing hit chance of all incoming fire by its Intercept Rating. EWeb cannot be flown under by fighters, and does NOT provide damage reduction.
 Shadow Omega - official Shadow Omega conversion by AoG is marked as unofficial because that's what official deployment restrictions sum up to (not tournament legal, opponent permission required). Actual fan-made conversions are present as well!
+NOTE: defensive structures were moved out to separate directory due to presence of A LOT of designs in EA directory, which caused technical problems.
 
 
 EARTH ALLIANCE (early)

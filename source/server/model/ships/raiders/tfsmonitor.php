@@ -7,7 +7,7 @@ class tfsmonitor extends BaseShip{
   		$this->pointCost = 800;
   		$this->faction = "Raiders";
         $this->phpclass = "tfsmonitor";
-        $this->imagePath = "img/ships/tfs_monitor.png";
+        $this->imagePath = "img/ships/RaiderTFSSystemMonitor.png";
         $this->shipClass = "TFS System Monitor";
         $this->limited = 33; //Limited Deployment
 		$this->shipSizeClass = 3;

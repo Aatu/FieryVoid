@@ -33,6 +33,7 @@ spl_autoload_register(
                 'anoro' => '/server/model/ships/hurr/anoro.php',
                 'anroethas' => '/server/model/ships/hurr/anroethAS.php',
                 'antimatterconverter' => '/server/model/weapons/antimatter.php',
+                'alykent' => '/server/model/ships/brakiri/Alykent.php',
                 'antoph' => '/server/model/ships/brakiri/antoph.php',
                 'antophearly' => '/server/model/ships/brakiri/antophEarly.php',
                 'antophupgrade' => '/server/model/ships/brakiri/antophUpgrade.php',
@@ -242,21 +243,6 @@ spl_autoload_register(
                 'doublev_nav' => '/server/model/ships/raiders/doubleV_nav.php',
                 'dragon' => '/server/model/ships/drazi_old/dragon.php',
                 'dragonship' => '/server/model/ships/raiders/dragonship.php',
-                'drakhattackship' => '/server/model/ships/drakh/drakhAttackShip.php',
-                'drakhcommandship' => '/server/model/ships/drakh/drakhCommandShip.php',
-                'drakhdreadnought' => '/server/model/ships/drakh/drakhDreadnought.php',
-                'drakhheavyraider' => '/server/model/ships/drakh/drakhHeavyRaider.php',
-                'drakhheavyraiderescort' => '/server/model/ships/drakh/drakhHeavyRaiderEscort.php',
-                'drakhheavytender' => '/server/model/ships/drakh/drakhHeavyTender.php',
-                'drakhpatrolship' => '/server/model/ships/drakh/drakhPatrolShip.php',
-                'drakhraidercontroller' => '/server/model/systems/baseSystems.php',
-                'drakhraiderflt' => '/server/model/ships/drakh/drakhRaiderFlt.php',
-                'drakhscoutship' => '/server/model/ships/drakh/drakhScoutShip.php',
-                'drakhshuttle' => '/server/model/ships/drakh/drakhShuttle.php',
-                'drakhsupportship' => '/server/model/ships/drakh/drakhSupportShip.php',
-                'drakhtanker' => '/server/model/ships/drakh/drakhTanker.php',
-                'drakhtender' => '/server/model/ships/drakh/drakhTender.php',
-                'drakhmothership' => '/server/model/ships/drakh/drakhMothership.php',
                 'drikorta' => '/server/model/ships/brakiri/drikorta.php',
                 'droftae' => '/server/model/ships/markab/droftaE.php',
                 'droftan' => '/server/model/ships/markab/droftaN.php',
@@ -278,7 +264,8 @@ spl_autoload_register(
                 'cestusraider' => '/server/model/ships/raiders/cestusRaider.php',
                 'liuli' => '/server/model/ships/centauri_raiders/liuli.php',
                 'liuliraider' => '/server/model/ships/raiders/liuliRaider.php',
-                'eacgeminimlpa' => '/server/model/ships/customs/eacGeminiMlpa.php',
+                //'eacgeminimlpa' => '/server/model/ships/customs/eacGeminiMlpa.php',
+                'geminiam' => '/server/model/ships/EA/geminiAM.php',
                 'earlywarbird' => '/server/model/ships/drazi_old/earlywarbird.php',
                 'earlywartalon' => '/server/model/ships/drazi_old/earlywartalon.php',
                 'earthforceone' => '/server/model/ships/EA/earthforceOne.php',
@@ -2113,6 +2100,8 @@ spl_autoload_register(
                 'lshon' => '/server/model/ships/narn_raiders/lshon.php',
                 'lshonrefit' => '/server/model/ships/narn_raiders/lshonRefit.php',
                 'privateergorith' => '/server/model/ships/narn_raiders/Privateergorith.php',
+		    	'tlaca' => '/server/model/ships/narn_raiders/Tlaca.php',
+		    	'tlacaearly' => '/server/model/ships/narn_raiders/TlacaEarly.php',    		    	                
 
 
 
@@ -2160,8 +2149,24 @@ spl_autoload_register(
 				'custombpaheavy' => '/server/model/weapons/customs.php' ,
 		    
 		    
-		//new Drakh toys
-		'customphasesweeper' => '/server/model/weapons/customs.php',   
+		//Drakh
+                'drakhattackship' => '/server/model/ships/drakh/drakhAttackShip.php',
+                'drakhcommandship' => '/server/model/ships/drakh/drakhCommandShip.php',
+                'drakhdreadnought' => '/server/model/ships/drakh/drakhDreadnought.php',
+                'drakhheavyraider' => '/server/model/ships/drakh/drakhHeavyRaider.php',
+                'drakhheavyraiderescort' => '/server/model/ships/drakh/drakhHeavyRaiderEscort.php',
+                'drakhheavytender' => '/server/model/ships/drakh/drakhHeavyTender.php',
+                'drakhpatrolship' => '/server/model/ships/drakh/drakhPatrolShip.php',
+                'drakhraidercontroller' => '/server/model/systems/baseSystems.php',
+                'drakhraiderflt' => '/server/model/ships/drakh/drakhRaiderFlt.php',
+                'drakhscoutship' => '/server/model/ships/drakh/drakhScoutShip.php',
+                'drakhshuttle' => '/server/model/ships/drakh/drakhShuttle.php',
+                'drakhsupportship' => '/server/model/ships/drakh/drakhSupportShip.php',
+                'drakhtanker' => '/server/model/ships/drakh/drakhTanker.php',
+                'drakhtender' => '/server/model/ships/drakh/drakhTender.php',
+                'drakhmothership' => '/server/model/ships/drakh/drakhMothership.php',
+				
+				'customphasesweeper' => '/server/model/weapons/customs.php',   
                 'drakhraidersweeperflt' => '/server/model/ships/drakh/drakhRaiderSweeperFlt.php',
                 'drakhmobiledefenseplatform' => '/server/model/ships/drakh/drakhMobileDefensePlatform.php',
                 'drakhmobilebeamplatform' => '/server/model/ships/drakh/drakhMobileBeamPlatform.php',
@@ -2528,6 +2533,7 @@ spl_autoload_register(
 				'orrono' => '/server/model/ships/corillani/Orrono.php',
 				'drolla' => '/server/model/ships/corillani/Drolla.php',
 				'plasmablast' => '/server/model/weapons/plasma.php',
+				'corillanithorkaosat' => '/server/model/ships/corillani/CorillaniThorkaOSAT.php',
 				
 				//Vree
 				'sixsidedship' => '/server/model/ships/ShipClasses.php',
@@ -2581,6 +2587,14 @@ spl_autoload_register(
 				//'apollostrike' => '/server/model/ships/EA/apollostrike.php',			
                 'swerrantventure' => '/server/model/ships/ZStarWars/swErrantVenture.php',
 				'unevenbasefoursections' => '/server/model/ships/ShipClasses.php',
+				'dsharda' => '/server/model/ships/civilians/Dsharda.php',				
+				'dshardapulse' => '/server/model/ships/civilians/DshardaPulse.php',
+				'areko' => '/server/model/ships/brakiri_raiders/Areko.php',
+				'rava' => '/server/model/ships/brakiri_raiders/Rava.php',
+				'attackfrigate' => '/server/model/ships/brakiri_raiders/AttackFrigate.php',
+				'folshota' => '/server/model/ships/brakiri/folshotA.php',
+				'folshotaraider' => '/server/model/ships/brakiri_raiders/FolshotARaider.php',									
+				
 
 
 				//Star Trek conversions
@@ -2686,6 +2700,7 @@ spl_autoload_register(
 				'treknausicaanglidersshf' => '/server/model/ships/ZTrekOther/TrekNausicaanGlidersSHF.php',
 				'treknausicaanheavyglider' => '/server/model/ships/ZTrekOther/TrekNausicaanHeavyGlider.php',
 				'treknausicaanvandal' => '/server/model/ships/ZTrekOther/TrekNausicaanVandal.php',
+				'treknausicaanscourge' => '/server/model/ships/ZTrekOther/TrekNausicaanScourge.php',
 				
 				//Pak'ma'ra
 				'plasmabattery' => '/server/model/systems/baseSystems.php',
@@ -2711,7 +2726,8 @@ spl_autoload_register(
 				'sashulkur' => '/server/model/ships/pakmara/Sashulkur.php',
 				'simtorka' => '/server/model/ships/pakmara/Simtorka.php',
 				'uriktal' => '/server/model/ships/pakmara/Uriktal.php',
-				'thorkaosat' => '/server/model/ships/pakmara/ThorkaOSAT.php',																																																				
+				'thorkaosat' => '/server/model/ships/pakmara/ThorkaOSAT.php',
+				'urshtalu' => '/server/model/ships/pakmara/Urshtalu.php',																																																				
 				
 
 				//Hyach
@@ -2731,18 +2747,16 @@ spl_autoload_register(
 
 
 				//Kor-Lyan
-         		'ammomissilerackf' => '/server/model/weapons/customNexus.php', //missile racks themselves
-//         		'ammomissilerackd' => '/server/model/weapons/customNexus.php', //missile racks themselves
 				'axor' => '/server/model/ships/korlyan/Axor.php',
 				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 				'fenja' => '/server/model/ships/korlyan/Fenja.php',
-				'kalavar' => '/server/model/ships/korlyan/kalavar.php',
-				'kalavarearlyam' => '/server/model/ships/korlyan/kalavarEarlyAM.php',
-				'kalavaroriginalam' => '/server/model/ships/korlyan/kalavarOriginalAM.php',
+				'kalavar' => '/server/model/ships/korlyan/Kalavar.php',
+				'kalavarearlyam' => '/server/model/ships/korlyan/KalavarEarlyAM.php',
+				'kalavaroriginalam' => '/server/model/ships/korlyan/KalavarOriginalAM.php',
 				'kaltiam' => '/server/model/ships/korlyan/KaltiAM.php',
 				'kolosk' => '/server/model/ships/korlyan/Kolosk.php',
 				'koloskearlyam' => '/server/model/ships/korlyan/KoloskEarlyAM.php',
-				'koloskovaam' => '/server/model/ships/korlyan/koloskovaAM.php',
+				'koloskovaam' => '/server/model/ships/korlyan/KoloskovaAM.php',
 				'koshaam' => '/server/model/ships/korlyan/KoshaAM.php',
 				'koshaearlyam' => '/server/model/ships/korlyan/KoshaEarlyAM.php',
 				'koskova' => '/server/model/ships/korlyan/Koskova.php',
@@ -2821,10 +2835,6 @@ spl_autoload_register(
 				'apollowsf' => '/server/model/ships/customs/ApolloWSF.php',					
 				'prototype' => '/server/model/ships/customs/Prototype.php',
 				
-
-
-											
-																				   
 															 
 															   
 				
@@ -2839,7 +2849,10 @@ spl_autoload_register(
                 		'ammomissilea' => '/server/model/systems/baseSystems.php',
                 		'ammomissilep' => '/server/model/systems/baseSystems.php',
                 		'ammomissiled' => '/server/model/systems/baseSystems.php',
+                		'ammomissilec' => '/server/model/systems/baseSystems.php',
+                		'ammomissilei' => '/server/model/systems/baseSystems.php',                 		                 		
                 		'ammomissiles' => '/server/model/systems/baseSystems.php',
+                		'ammomissilek' => '/server/model/systems/baseSystems.php',                		
 						
                 		'ammomissilefb' => '/server/model/systems/baseSystems.php',
                 		'ammomissilefl' => '/server/model/systems/baseSystems.php',
@@ -2849,14 +2862,19 @@ spl_autoload_register(
 		    
                 		'ammomissileracks' => '/server/model/weapons/missile.php', //missile racks themselves
                 		'ammomissilerackso' => '/server/model/weapons/missile.php',
-                		'ammomissileracko' => '/server/model/weapons/missile.php',
                 		'ammomissileracka' => '/server/model/weapons/missile.php',
-                		'ammomissilerackb' => '/server/model/weapons/missile.php',
+                		'ammomissilerackb' => '/server/model/weapons/missile.php',	
+						'ammomissilerackd' => '/server/model/weapons/missile.php',					
+						'ammomissilerackf' => '/server/model/weapons/customNexus.php', 
                 		'ammomissilerackl' => '/server/model/weapons/missile.php',
                 		'ammomissileracklh' => '/server/model/weapons/missile.php',
+                		'ammomissileracko' => '/server/model/weapons/missile.php',
                 		'ammomissilerackr' => '/server/model/weapons/missile.php',
+                		'klammomissileracks' => '/server/model/weapons/missile.php', // DOUGLAS: please look at it - IMO it should be deleted, K-L should use basic class-S rack; said rack simply should be unable to use class-I missiles until/unless it actually can do so correctly :) (...which it now can't!)
                 		'ammobombrack' => '/server/model/weapons/missile.php',
                 		'ammofighterrack' => '/server/model/weapons/missile.php',
+						
+                		
 						
 						
 						//ships using new style launchers (and magazine of course) - by faction
@@ -2948,6 +2966,7 @@ spl_autoload_register(
 						'hurrmissileosat2220am' => '/server/model/ships/hurr/HurrmissileOSAT2220AM.php',
 						'hurrmissileosat2240am' => '/server/model/ships/hurr/HurrmissileOSAT2240AM.php',
 						'borocaam' => '/server/model/ships/hurr/borocaAM.php',
+						'borocaamearly' => '/server/model/ships/hurr/borocaAMEarly.php',												
 						'borocadaam' => '/server/model/ships/hurr/borocadaAM.php',
 						'norekam' => '/server/model/ships/hurr/norekAM.php',
 						'anoroam' => '/server/model/ships/hurr/anoroAM.php',
@@ -2996,7 +3015,7 @@ spl_autoload_register(
 						'gaimkastafighteram' => '/server/model/ships/gaim/gaimKastaFighterAM.php',
 						
 						
-				//new custom faction: Thirdspace
+				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',
 				'psychicfieldhandler' => '/server/model/weapons/specialWeapons.php',
 				'thirdspaceshieldprojection' =>	'/server/model/weapons/defensive.php',

@@ -862,7 +862,7 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= 'Advanced Sensors - ignores Jammer, flat 14 boost cost.';//not that of advanced races
-		$this->data["Special"] .= "<br>Ignores enemy BDEW and SDEW."; //not that of advanced races
+		$this->data["Special"] .= "<br>Ignores enemy BDEW, SDEW and DIST."; //not that of advanced races
 		$this->data["Special"] .= "<br>Ignores any defensive systems lowering enemy profile (shields, EWeb...)."; //not that of advanced races
 		$this->data["Special"] .= "<br>All of the above work as usual if operated by advanced races."; 
 	}	
@@ -878,7 +878,7 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= 'Advanced Sensors - ignores Jammer.';//not that of advanced races
-		$this->data["Special"] .= "<br>Ignores enemy BDEW and SDEW."; //not that of advanced races
+		$this->data["Special"] .= "<br>Ignores enemy BDEW, SDEW and DIST."; //not that of advanced races
 		$this->data["Special"] .= "<br>Ignores any defensive systems lowering enemy profile (shields, EWeb...)."; //not that of advanced races
 		$this->data["Special"] .= "<br>All of the above work as usual if operated by advanced races.";
 		$this->data["Special"] .= "<br>Can only be boosted twice.";	 
@@ -3802,6 +3802,14 @@ class AmmoMissileTemplate{
 	public $noOverkill = false;
 	public $useOEW = false;
 	public $hidetarget = false;
+    //Adding Intercept variables for Interceptor missiles		
+	public $intercept = 0;
+	public $ballisticIntercept = false;	
+    //Adding Pulse variables for Starburst missiles	
+	public $maxpulses = 0;
+	public $rof = 0;
+	public $useDie = 0; //die used for base number of hits
+	public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	
 
 	
     function __construct(){}
@@ -3821,6 +3829,22 @@ class AmmoMissileTemplate{
     {
         return;
     }
+    
+    //Adding Pulse functions for Starburst missiles
+        protected function getPulses($turn)
+        {
+            return 0;
+        }
+	
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return 0;
+        }
+	
+		public function rollPulses($turn, $needed, $rolled){
+		return 0;
+	}
+	    
 } //endof class AmmoMissileTemplate
 
 //ammunition for AmmoMagazine - Class B Missile (for official Missile Racks)
@@ -4018,7 +4042,7 @@ class AmmoMissileP extends AmmoMissileTemplate{
 class AmmoMissileD extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileD';
 	public $displayName = 'Light Missile';
-	public $modeName = 'D-Light';
+	public $modeName = 'D - Light';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_D'; //enhancement name to be enabled
 	public $enhancementDescription = '(ammo) Light Missile (2178)'; //enhancement description
@@ -4039,12 +4063,117 @@ class AmmoMissileD extends AmmoMissileTemplate{
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
         return 12;
-    }		
-	
+    }	
 } //endof class AmmoMissileD
 
+//ammunition for AmmoMagazine - Class C Missile (for official Missile Racks)
+class AmmoMissileC extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileC';
+	public $displayName = 'Chaff Missile';
+	public $modeName = 'Chaff';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_C'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Chaff Missile (2230)'; //enhancement description
+	public $enhancementPrice = 4;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
+	public $minDamage = 0;
+	public $maxDamage = 0;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 1;
+	public $priorityAF = 1;
+	public $noOverkill = false;
+	public $useOEW = false;
+	public $hidetarget = false;
+	private static $alreadyEngaged = array();	
+	
+    function __construct(){}
+	
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 0;
+    }		
+    
+ 	public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 
+
+	if (isset(AmmoMissileC::$alreadyEngaged[$ship->id])) return; //target already engaged by a previous Chaff Missile
+
+			$effectHit = 3; 
+			$effectHit5 = $effectHit * 5;
+			$fireOrder->pubnotes .= "<br> All non-ballistic weapon's fire by target reduced by $effectHit5 percent.";
+
+			$allFire = $ship->getAllFireOrders($gamedata->turn);
+			foreach($allFire as $fireOrder) {
+				if ($fireOrder->type == 'normal') {
+					if ($fireOrder->rolled > 0) {
+					}else{
+						$fireOrder->needed -= 3 *5; //$needed works on d100
+	//					$fireOrder->pubnotes .= "; Chaff Missile impact, -15% to hit."; //note why hit chance does not match
+						AmmoMissileC::$alreadyEngaged[$ship->id] = true;
+					}
+				}
+			}
+
+			if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
+				$firstFighter = $ship->getSampleFighter();
+				AmmoMissileC::$alreadyEngaged[$ship->id] = true;//mark engaged        
+				if($firstFighter){
+					for($i=1; $i<=$effectHit;$i++){
+						$crit = new tmphitreduction(-1, $ship->id, $firstFighter->id, 'tmphitreduction', $gamedata->turn, $gamedata->turn); 
+						$crit->updated = true;
+							$firstFighter->criticals[] =  $crit;
+					}
+				}
+			}else{ //ship - place effcet on C&C!   */
+				$CnC = $ship->getSystemByName("CnC");
+				AmmoMissileC::$alreadyEngaged[$ship->id] = true;//mark engaged        
+				if($CnC){
+					for($i=0; $i<=$effectHit;$i++){
+						$crit = new tmphitreduction(-1, $ship->id, $CnC->id, 'tmphitreduction', $gamedata->turn, $gamedata->turn); 
+						$crit->updated = true;
+							$CnC->criticals[] =  $crit;
+					}
+				}
+			}
+	} //endof function onDamagedSystem   
+
+} //endof class AmmoMissileC
 
 
+//ammunition for AmmoMagazine - Class S Missile (for official Missile Racks, Kor-Lyan only)
+class AmmoMissileS extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileS';
+	public $displayName = 'Stealth Missile';
+	public $modeName = 'Stealth';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_S'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Stealth Missile (2252)'; //enhancement description
+	public $enhancementPrice = 5;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
+	public $minDamage = 20;
+	public $maxDamage = 20;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	public $noOverkill = false;
+	public $useOEW = false;
+	public $hidetarget = true;
+ 
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 20;
+    }	
+} //endof class AmmoMissileS
+
+
+/* double entry, to be deleted once Stealth missile is confirmed as working
 //ammunition for AmmoMagazine - Class S Missile (for official Missile Racks, Kor-Lyan only)
 class AmmoMissileS extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileS';
@@ -4071,13 +4200,11 @@ class AmmoMissileS extends AmmoMissileTemplate{
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
         return 20;
-    }		
-	
+    }	
 } //endof class AmmoMissileS
+*/
 
 
-
-//GTS - 24feb23
 //ammunition for AmmoMagazine - Class I Missile (for official Missile Racks)
 class AmmoMissileI extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileI';
@@ -4086,7 +4213,7 @@ class AmmoMissileI extends AmmoMissileTemplate{
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_I'; //enhancement name to be enabled
 	public $enhancementDescription = '(ammo) Interceptor Missile (2250)'; //enhancement description
-	public $enhancementPrice = 0; //nominally 0 - included in ship price
+	public $enhancementPrice = 2; //PV per missile; originally it's 0 for Kor-Lyan and 2 for everyone else
 	
 	public $fireControlMod = array(null, null, null); //MODIFIER for weapon fire control!
 	public $minDamage = 0;
@@ -4097,17 +4224,76 @@ class AmmoMissileI extends AmmoMissileTemplate{
 	public $priorityAF = 1;
 	public $noOverkill = false;
 	public $hidetarget = false;
-	public $intercept = 6;
-	public $ballisticIntercept = true;
+	public $intercept = 0;
+	public $ballisticIntercept = false;
 		
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
         return 0;
     }		
-	
+    
+    function getPrice($unit) //some missiles might have different price depending on unit being fitted!
+    {
+        if($unit->faction == 'Kor-Lyan') return 0;
+        return $this->enhancementPrice;
+    }	
 } //endof class AmmoMissileI
 
 
+//ammunition for AmmoMagazine - Class K Missile (for official Missile Racks)
+class AmmoMissileK extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileK';
+	public $displayName = 'Starburst Missile';
+	public $modeName = 'K - Starburst';
+	public $size = 2; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_K'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Starburst Missile (2260/2264)'; //2260 for Kor-Lyan, 2264 for everyone else 
+	public $enhancementPrice = 30; //PV per missile; originally it's 20 for Kor-Lyan and 30 for everyone else
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
+	public $minDamage = 10;
+	public $maxDamage = 10;	
+	public $damageType = 'Pulse';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 4;
+	public $priorityAF = 4;
+	public $noOverkill = false;
+	public $useOEW = false;
+	public $hidetarget = false;
+	public $maxpulses = 6;
+	public $rof = 2;
+	public $useDie = 3; //die used for base number of hits
+	public $fixedBonusPulses=3;//for weapons doing dX+Y pulse
+
+        protected function getPulses($turn)
+        {
+            return Dice::d($this->useDie) + $this->fixedBonusPulses;
+        }
+	
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return 0;
+        }
+	
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn);
+		$pulses=min($pulses,$this->maxpulses);
+		return $pulses;
+	}
+	
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 10;
+    }		
+
+	function getPrice($unit) //some missiles might have different price depending on unit being fitted!
+	{
+		if($unit->faction == 'Kor-Lyan') return 20;
+		return $this->enhancementPrice;
+	}
+} //endof class AmmoMissileK
 
 
 //ammunition for AmmoMagazine - Class FB Missile (Fighter Basic Missile)
@@ -4135,8 +4321,8 @@ class AmmoMissileFB extends AmmoMissileTemplate{
     {
         return 10;
     }		
-	
 } //endof class AmmoMissileFB
+
 
 //ammunition for AmmoMagazine - Class FL Missile (Fighter Long Range)
 class AmmoMissileFL extends AmmoMissileTemplate{	
@@ -4170,6 +4356,7 @@ class AmmoMissileFL extends AmmoMissileTemplate{
 		return $this->enhancementPrice;
 	}
 } //endof class AmmoMissileFL
+
 
 //ammunition for AmmoMagazine - Class FH Missile (Fighter Heavy)
 //NOTE: up to 1 per fighter (2 for SHFs)
@@ -4205,6 +4392,7 @@ class AmmoMissileFH extends AmmoMissileTemplate{
 	}
 } //endof class AmmoMissileFH
 
+
 //ammunition for AmmoMagazine - Class FY Missile (Dogfight Missile)
 //NOTE: in tabletop it has snap fire option, which is not available in FV
 class AmmoMissileFY extends AmmoMissileTemplate{	
@@ -4229,8 +4417,7 @@ class AmmoMissileFY extends AmmoMissileTemplate{
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
         return 6;
-    }		
-	
+    }
 } //endof class AmmoMissileFY
 
 
@@ -4262,8 +4449,7 @@ class AmmoMissileFD extends AmmoMissileTemplate{
 	{
 		if($unit->faction == 'Kor-Lyan') return 8;
 		return $this->enhancementPrice;
-	}
-	
+	}	
 	
 	/*dropout missile effect on hit: +3 dropout penalty for SHFs, +6 for other small craft*/
     public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder)
@@ -4276,7 +4462,7 @@ class AmmoMissileFD extends AmmoMissileTemplate{
 			$system->critRollMod+=6;
 		}
     }
-	
 } //endof class AmmoMissileFD
- 
+
+
 ?>

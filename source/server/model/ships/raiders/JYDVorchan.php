@@ -7,7 +7,7 @@ class JYDVorchan extends HeavyCombatVessel{
 		$this->pointCost = 350;
 		$this->faction = "Raiders";
         $this->phpclass = "JYDVorchan";
-        $this->imagePath = "img/ships/vorchan.png";
+        $this->imagePath = "img/ships/RaiderJYDVorchan.png";
         $this->shipClass = "JYD Vorchan Warship";
         
 		$this->notes = 'Used only by the Junkyard Dogs';

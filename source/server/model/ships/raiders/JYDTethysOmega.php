@@ -7,7 +7,7 @@ class JYDTethysOmega extends MediumShip{
 		$this->pointCost = 485;
 		$this->faction = "Raiders";
         $this->phpclass = "JYDTethysOmega";
-        $this->imagePath = "img/ships/tethys.png";
+        $this->imagePath = "img/ships/RaiderJYDTethys.png";
         $this->shipClass = "JYD Tethys (Omega)";
 //		        $this->occurence = "unique";
         $this->canvasSize = 100;

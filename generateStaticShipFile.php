@@ -2,12 +2,21 @@
 /*11.12.2021 - remade so every faction is compiled separately (one of programmers encountered memory allocation problems)
 .bak file saved just in case
 */
-ob_start("ob_gzhandler"); 
+	
+ob_start("ob_gzhandler"); 	
 include_once './source/public/global.php';
+
+
+/*
+$factionTest = ShipLoader::getAllShips("Minbari");
+	print("TEST HERE");
+	print("\n");
+	return;
+*/
+
 
 //$ships = ShipLoader::getAllShips(null);
 $allFactions = ShipLoader::getAllFactions();
-
 
 
 /* original - everything in one file
@@ -26,6 +35,7 @@ foreach ($ships as $faction) {
 }
 file_put_contents('./source/public/static/ships.js', 'window.staticShips = ' . json_encode($data));
 */
+
 
 
 $fileBase = './source/public/static/ships';

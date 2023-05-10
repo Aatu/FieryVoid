@@ -5,7 +5,7 @@ class OrionDeltaAM extends StarBaseSixSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 2400;
-		$this->faction = 'EA';
+		$this->faction = "EA (defenses)";
 		$this->phpclass = "OrionDeltaAM";
 		$this->shipClass = "Orion Battle Station (Delta)";
 		$this->fighters = array("heavy"=>36); 

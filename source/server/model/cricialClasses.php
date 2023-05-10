@@ -371,7 +371,7 @@ class tmppowerdown extends Critical{ /*next turn target Power is down by 1 - pla
 
 
 class tmphitreduction extends Critical{ /*immediate reduction in target's chance to hit for all fire*/
-    public $description = "-3 chance to hit to all fire, except ballistics.";
+    public $description = "Chaff Missile Hit! -15% chance to hit to all fire, except ballistics.";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
