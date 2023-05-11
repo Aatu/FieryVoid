@@ -35,13 +35,13 @@ class VaklarAM extends HeavyCombatVessel{
 
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
 	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
-	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-K	    	    	    	    	    
-	    $this->enhancementOptionsEnabled[] = 'AMMO_K';//add enhancement options for other missiles - Class-S 	    
-	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
-	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
 	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
-	    $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
- 	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-P
+	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+	    $this->enhancementOptionsEnabled[] = 'AMMO_K';//add enhancement options for other missiles - Class-K   
+	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P	    	    	    	    
+	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
+
         
         $this->addPrimarySystem(new Reactor(4, 13, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
@@ -50,8 +50,8 @@ class VaklarAM extends HeavyCombatVessel{
         $this->addPrimarySystem(new ReloadRack(3, 9));
         $this->addPrimarySystem(new ReloadRack(3, 9));
         $this->addPrimarySystem(new Hangar(3, 2));
-        $this->addPrimarySystem(new KLAmmoMissileRackS(3, 0, 0, 240, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-        $this->addPrimarySystem(new KLAmmoMissileRackS(3, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addPrimarySystem(new AmmoMissileRackS(3, 0, 0, 240, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addPrimarySystem(new AmmoMissileRackS(3, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addPrimarySystem(new CargoBay(3, 54));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 4));        
