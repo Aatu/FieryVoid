@@ -64,14 +64,16 @@ if (isset($_SESSION["user"])) {
        
 		
 
-		---------- <b>LATEST NEWS - March 2023</b> ----------
-	    <br><b>Shock Cannon fixed</b> - now it actually doesn't crash vs Advanced Armor
-	    <br><b>Minor fixes</b> - layouts, hit charts, weapon visuals and such
+		---------- <b>LATEST NEWS - May 2023</b> ----------
+	    <br><b>Raider Shokan faction</b> - courtesy of Douglas
 	    <br><b>Thirdspace development</b> - courtesy of Douglas
-	    <br><b>Kor-Lyan polishing</b> - courtesy of Geoffrey and Douglas
-	    
-	    <br><br>---------- <b>update 12th of March</b> ---------- 
-	    <br><b>EA cleaned a bit</b> - obsolete variants removed, so the faction can actually load at fleet design stage :)
+	    <br><b>Various image updates</b> - courtesy of Lunara and Douglas
+	    <br><b>Kor-Lyan development and polishing</b> - courtesy of Geoffrey and Douglas
+	    <br><b>Nexus updates</b> - courtesy of Geoffrey
+	    <br><b>Escalation Wars updates</b> - courtesy of Geoffrey
+	    <br><b>What If factions</b> - custom interpretations of official fations, by Geoffrey
+	    <br><b>EA defenses separated</b> - new developmens made EA too large to actually display everything at once...
+	    <br><b>Drakh rebalanced</b> - got some bigger teeth!
 	    
 	    
 <!--	        
