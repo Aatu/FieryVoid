@@ -4293,6 +4293,7 @@ class AmmoMissileK extends AmmoMissileTemplate{
 		if($unit->faction == 'Kor-Lyan') return 20;
 		return $this->enhancementPrice;
 	}
+	
 } //endof class AmmoMissileK
 
 
