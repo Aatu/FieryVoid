@@ -4173,38 +4173,6 @@ class AmmoMissileS extends AmmoMissileTemplate{
 } //endof class AmmoMissileS
 
 
-/* double entry, to be deleted once Stealth missile is confirmed as working
-//ammunition for AmmoMagazine - Class S Missile (for official Missile Racks, Kor-Lyan only)
-class AmmoMissileS extends AmmoMissileTemplate{	
-	public $name = 'ammoMissileS';
-	public $displayName = 'Stealth Missile';
-	public $modeName = 'Stealth';
-	public $size = 1; //how many store slots are required for a single round
-	public $enhancementName = 'AMMO_S'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Stealth Missile (2252)'; //enhancement description
-	public $enhancementPrice = 5;
-	
-	public $rangeMod = 0; //MODIFIER for launch range
-	public $distanceRangeMod = 0; //MODIFIER for distance range
-	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
-	public $minDamage = 20;
-	public $maxDamage = 20;	
-	public $damageType = 'Standard';//mode of dealing damage
-	public $weaponClass = 'Ballistic';//weapon class
-	public $priority = 6;
-	public $priorityAF = 5;
-	public $noOverkill = false;
-	public $useOEW = false;
-	public $hidetarget = true;
-	
-    public function getDamage($fireOrder) //actual function to be called, as with weapon!
-    {
-        return 20;
-    }	
-} //endof class AmmoMissileS
-*/
-
-
 //ammunition for AmmoMagazine - Class I Missile (for official Missile Racks)
 class AmmoMissileI extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileI';
