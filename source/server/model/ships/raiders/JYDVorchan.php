@@ -12,6 +12,7 @@ class JYDVorchan extends HeavyCombatVessel{
         
 		$this->notes = 'Used only by the Junkyard Dogs';
 		$this->notes .= '<br>Only two exist';
+        $this->canvasSize = 100;		
         
 	    $this->isd = 2260;
 
