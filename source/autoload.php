@@ -2861,7 +2861,6 @@ spl_autoload_register(
                 		'ammomissileracklh' => '/server/model/weapons/missile.php',
                 		'ammomissileracko' => '/server/model/weapons/missile.php',
                 		'ammomissilerackr' => '/server/model/weapons/missile.php',
-                		'klammomissileracks' => '/server/model/weapons/missile.php', // DOUGLAS: please look at it - IMO it should be deleted, K-L should use basic class-S rack; said rack simply should be unable to use class-I missiles until/unless it actually can do so correctly :) (...which it now can't!)
                 		'ammobombrack' => '/server/model/weapons/missile.php',
                 		'ammofighterrack' => '/server/model/weapons/missile.php',
 						

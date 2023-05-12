@@ -1078,7 +1078,7 @@ class AmmoMissileRackS extends Weapon{
 			$this->ammoClassesArray[] =  new AmmoMissileP();
 			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
 			$this->ammoClassesArray[] =  new AmmoMissileC();
-			$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers on Kor-Lyan ships at this time.						
+	//		$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers on Kor-Lyan ships at this time.					
 			$this->ammoClassesArray[] =  new AmmoMissileS();
 			$this->ammoClassesArray[] =  new AmmoMissileK();				
 			$this->availableAmmoAlreadySet = true;
@@ -1180,12 +1180,12 @@ class AmmoMissileRackS extends Weapon{
 				$this->minDamageArray[$currMode] = $currAmmo->minDamage;
 				$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
 				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;//For Stealth missiles
-				$this->interceptArray[$currMode] = $currAmmo->intercept;//Adding Intercept variables for Interceptor missiles	
+//				$this->interceptArray[$currMode] = $currAmmo->intercept;//Adding Intercept variables for Interceptor missiles	
 //				$this->ballisticInterceptArray[$currMode] = $currAmmo->ballisticIntercept;				
-//				$this->maxpulsesArray[$currMode] = $currAmmo->maxpulses;//Adding Pulse functions for Starburst missiles	
+				$this->maxpulsesArray[$currMode] = $currAmmo->maxpulses;//Adding Pulse functions for Starburst missiles	
 				$this->rofArray[$currMode] = $currAmmo->rof;
 				$this->useDieArray[$currMode] = $currAmmo->useDie;
-				$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;				
+				$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;		
 			}
 		}
 			
@@ -1223,7 +1223,7 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->maxpulsesArray = $this->maxpulsesArray;//Adding Pulse functions for Starburst missiles	
 		$strippedSystem->rofArray = $this->rofArray;
 		$strippedSystem->useDieArray = $this->useDieArray;
-		$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;			
+		$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;		
 		return $strippedSystem;
 	} 
 	
@@ -1369,21 +1369,7 @@ class AmmoMissileRackL extends AmmoMissileRackS{
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
 		if ( $maxhealth == 0 ) $maxhealth = 6;
-            	if ( $powerReq == 0 ) $powerReq = 0;
-		if(!$this->availableAmmoAlreadySet){
-			$this->ammoClassesArray[] =  new AmmoMissileB();
-			$this->ammoClassesArray[] =  new AmmoMissileL();
-			$this->ammoClassesArray[] =  new AmmoMissileH();
-			$this->ammoClassesArray[] =  new AmmoMissileF();
-			$this->ammoClassesArray[] =  new AmmoMissileA();
-			$this->ammoClassesArray[] =  new AmmoMissileP();
-			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
-			$this->ammoClassesArray[] =  new AmmoMissileC();
-	//		$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers on Kor-Lyan ships at this time.							
-			$this->ammoClassesArray[] =  new AmmoMissileS();
-			$this->ammoClassesArray[] =  new AmmoMissileK();				
-			$this->availableAmmoAlreadySet = true;
-		}						
+            	if ( $powerReq == 0 ) $powerReq = 0;					
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
 	}
 } //endof class AmmoMissileRackL
@@ -1478,21 +1464,7 @@ class AmmoMissileRackR extends AmmoMissileRackS{
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
 		if ( $maxhealth == 0 ) $maxhealth = 6;
-            	if ( $powerReq == 0 ) $powerReq = 0;
-		if(!$this->availableAmmoAlreadySet){
-			$this->ammoClassesArray[] =  new AmmoMissileB();
-			$this->ammoClassesArray[] =  new AmmoMissileL();
-			$this->ammoClassesArray[] =  new AmmoMissileH();
-			$this->ammoClassesArray[] =  new AmmoMissileF();
-			$this->ammoClassesArray[] =  new AmmoMissileA();
-			$this->ammoClassesArray[] =  new AmmoMissileP();
-			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
-			$this->ammoClassesArray[] =  new AmmoMissileC();
-	//		$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers on Kor-Lyan ships at this time.						
-			$this->ammoClassesArray[] =  new AmmoMissileS();
-			$this->ammoClassesArray[] =  new AmmoMissileK();				
-			$this->availableAmmoAlreadySet = true;
-		}						
+            	if ( $powerReq == 0 ) $powerReq = 0;					
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
 	
 	}
@@ -1525,21 +1497,7 @@ class AmmoMissileRackSO extends AmmoMissileRackS{
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
 		if ( $maxhealth == 0 ) $maxhealth = 6;
-            	if ( $powerReq == 0 ) $powerReq = 0;
-		if(!$this->availableAmmoAlreadySet){
-			$this->ammoClassesArray[] =  new AmmoMissileB();
-			$this->ammoClassesArray[] =  new AmmoMissileL();
-			$this->ammoClassesArray[] =  new AmmoMissileH();
-			$this->ammoClassesArray[] =  new AmmoMissileF();
-			$this->ammoClassesArray[] =  new AmmoMissileA();
-			$this->ammoClassesArray[] =  new AmmoMissileP();
-			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
-			$this->ammoClassesArray[] =  new AmmoMissileC();
-	//		$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers on Kor-Lyan ships at this time.							
-			$this->ammoClassesArray[] =  new AmmoMissileS();
-			$this->ammoClassesArray[] =  new AmmoMissileK();				
-			$this->availableAmmoAlreadySet = true;
-		}						
+            	if ( $powerReq == 0 ) $powerReq = 0;			
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
 	}
 	
@@ -1570,21 +1528,7 @@ class AmmoMissileRackO extends AmmoMissileRackS{
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
 		if ( $maxhealth == 0 ) $maxhealth = 6;
-            	if ( $powerReq == 0 ) $powerReq = 0;
-		if(!$this->availableAmmoAlreadySet){
-			$this->ammoClassesArray[] =  new AmmoMissileB();
-			$this->ammoClassesArray[] =  new AmmoMissileL();
-			$this->ammoClassesArray[] =  new AmmoMissileH();
-			$this->ammoClassesArray[] =  new AmmoMissileF();
-			$this->ammoClassesArray[] =  new AmmoMissileA();
-			$this->ammoClassesArray[] =  new AmmoMissileP();
-			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
-			$this->ammoClassesArray[] =  new AmmoMissileC();
-	//		$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers on Kor-Lyan ships at this time.							
-			$this->ammoClassesArray[] =  new AmmoMissileS();
-			$this->ammoClassesArray[] =  new AmmoMissileK();				
-			$this->availableAmmoAlreadySet = true;
-		}						
+            	if ( $powerReq == 0 ) $powerReq = 0;					
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
 	}
 	
@@ -1669,53 +1613,18 @@ class AmmoMissileRackD extends AmmoMissileRackS{
 		}						
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
 	}
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		
+		$this->data["Special"] = 'Available firing modes depend on ammo bought as unit enhancements. Ammunition available is tracked by central Ammunition Magazine system.';
+		if ($this->rackExplosionThreshold < 21) { //can explode - inform player!
+			$chance = (21 - $this->rackExplosionThreshold) * 5; //percentage chance of explosion
+			$this->data["Special"] .= '<br>Pre-loaded with 20 Interceptor Missiles, which can intercept other ballistics at -30% each.';
+			$this->data["Special"] .= '<br>Can explode if damaged or destroyed, dealing ' . $this->rackExplosionDamage . ' damage in Flash mode (' . $chance . '% chance).';
+		}	
+	}	
 } //endof class AmmoMissileRackD
-
-
-
-//Need a separate S-Rack for Kor-Lyan to remove I-Missiles option where there is also D-Rack with pre-stocked I-missiles e.g. Kosha (Early))
-class KLAmmoMissileRackS extends AmmoMissileRackS{ 
-	public $name = "KLAmmoMissileRackS";
-    //public $displayName = "Class-A Missile Rack";
-  //  public $iconPath = "missile2.png";    
-	
-//    public $range = 20; //antifighter missile itself will reduce it - this way the same missile fits all racks
-//    public $distanceRange = 60;
- //   public $firingMode = 1;
- //   public $priority = 6;
-//    public $loadingtime = 1;
-	//basic launcher data, before being modified by actual missiles
-//	protected $basicFC=array(4,0,0);
-//	protected $basicRange=20;
-//	protected $basicDistanceRange = 60;
-
-//    protected $rackExplosionDamage = 56; //how much damage will this weapon do in case of catastrophic explosion
- //   protected $rackExplosionThreshold = 19; //how high roll is needed for rack explosion    
-	
-	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
-	{		
-	
-		if ( $maxhealth == 0 ) $maxhealth = 6;
-		if ( $powerReq == 0 ) $powerReq = 0;
-			
-		if(!$this->availableAmmoAlreadySet){
-			$this->ammoClassesArray[] =  new AmmoMissileB();
-			$this->ammoClassesArray[] =  new AmmoMissileL();
-			$this->ammoClassesArray[] =  new AmmoMissileH();
-			$this->ammoClassesArray[] =  new AmmoMissileF();
-			$this->ammoClassesArray[] =  new AmmoMissileA();
-			$this->ammoClassesArray[] =  new AmmoMissileP();
-			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
-			$this->ammoClassesArray[] =  new AmmoMissileC();
-	//		$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers on Kor-Lyan ships at this time.					
-			$this->ammoClassesArray[] =  new AmmoMissileS();
-			$this->ammoClassesArray[] =  new AmmoMissileK();				
-			$this->availableAmmoAlreadySet = true;
-		}						
-		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
-	}
-} //endof class KLAmmoMissileRackS
-
 
 
 /*Bomb Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
