@@ -3022,7 +3022,7 @@ spl_autoload_register(
 				'thirdspacelanceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceLanceAttackCraft.php',
 				'thirdspaceoculusscout' => '/server/model/ships/thirdspace/ThirdspaceOculusScout.php',		
 				'thirdspacelegioncarrier' => '/server/model/ships/thirdspace/ThirdspaceLegionCarrier.php',
-				'thirdspaceselfrepair' => '/server/model/systems/baseSystems.php',	
+
 						
 						//Development systems
 						'testgun' => '/server/model/weapons/customDevelopment.php',
