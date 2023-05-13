@@ -3017,7 +3017,12 @@ spl_autoload_register(
 				'psionictorpedo' => '/server/model/weapons/torpedo.php',    
 				'thirdspacebattleship' => '/server/model/ships/thirdspace/ThirdspaceBattleship.php',
 				'thirdspacecnc' => '/server/model/systems/baseSystems.php',		
-				'thirdspaceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceAttackCraft.php',			
+				'thirdspaceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceAttackCraft.php',	
+				'thirdspacetorpedoattackcraft' => '/server/model/ships/thirdspace/ThirdspaceTorpedoAttackCraft.php',	
+				'thirdspacelanceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceLanceAttackCraft.php',
+				'thirdspaceoculusscout' => '/server/model/ships/thirdspace/ThirdspaceOculusScout.php',		
+				'thirdspacelegioncarrier' => '/server/model/ships/thirdspace/ThirdspaceLegionCarrier.php',
+				'thirdspaceselfrepair' => '/server/model/systems/baseSystems.php',	
 						
 						//Development systems
 						'testgun' => '/server/model/weapons/customDevelopment.php',

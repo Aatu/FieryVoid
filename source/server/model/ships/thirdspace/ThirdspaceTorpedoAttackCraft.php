@@ -1,17 +1,19 @@
 <?php
-class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
+class ThirdspaceTorpedoAttackCraft extends LCV{ //Actually an LCV.
 
 	/*no EW restrictions*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 550;
+	$this->pointCost = 525;
     $this->faction = "Thirdspace";
 	$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
-	$this->phpclass = "ThirdspaceAttackCraft";
-	$this->shipClass = "Attack Craft";
+	$this->phpclass = "ThirdspaceTorpedoAttackCraft";
+	$this->shipClass = "Torpedo Attack Craft";
 	$this->imagePath = "img/ships/ThirdspaceAttackCraft.png";
 	$this->canvasSize = 80;
+			$this->variantOf = "Attack Craft";
+			$this->occurence = "uncommon";		
 
 	$this->unofficial = true;
     $this->gravitic = true;
@@ -46,11 +48,10 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
     $this->addPrimarySystem(new SelfRepair(5, 8, 4)); //armor, structure, output 	
 
 	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 60));
-	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 60));
-	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 150));
+    $this->addFrontSystem(new PsionicTorpedo(5, 0, 0, 300, 60)); 
 	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 150));
 			
-	$projection = new ThirdspaceShieldProjection(2, 55, 55, 0, 360, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+	$projection = new ThirdspaceShieldProjection(2, 50, 50, 0, 360, 'F'); //: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
 	$projector = new ThirdspaceShieldProjector(6, 12, 4, 3, 0, 360, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R
 	$projection->addProjector($projector);
 	$this->addFrontSystem($projector);
@@ -61,7 +62,8 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
         $this->hitChart = array(
         		0=> array( //should never happen (but it will!)
         				9 => "Structure",
-        				11 => "1:Psionic Concentrator",
+        				10 => "1:Psionic Concentrator",
+        				11 => "1:Psionic Torpedo",    
         				12 => "1:Shield Projector",
 						13 => "Self Repair",        				
         				14 => "Jump Engine",
@@ -71,7 +73,8 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
         		),
         		1=> array( //PRIMARY hit table, effectively
         				9 => "Structure",
-        				11 => "Psionic Concentrator",
+        				10 => "Psionic Concentrator",
+        				11 => "Psionic Torpedo",      				
         				12 => "Shield Projector",
 						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",
@@ -81,7 +84,8 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
         		),
         		2=> array( //PRIMARY hit table, effectively
         				9 => "Structure",
-        				11 => "1:Psionic Concentrator",
+        				10 => "1:Psionic Concentrator",
+        				11 => "1:Psionic Torpedo",            				
         				12 => "1:Shield Projector",
 						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",

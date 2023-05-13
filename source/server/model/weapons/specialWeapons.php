@@ -4516,7 +4516,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!		
 	if ($ship->faction == "Thirdspace") return; //No effect on other Thirdspace ships.
 		
-		$effectIni = Dice::d(3,1);//strength of effect: 1d6
+		$effectIni = Dice::d(5,1);//strength of effect: 1d5
 		$effecttohit = Dice::d(3,1);//strength of effect: 1d3
 		$effectIni5 = $effectIni * 5;
 		$effecttohit5 = $effecttohit * 5;	
@@ -4550,7 +4550,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 				}
 			} else { //force critical roll at +4 even on other Ancients
 				$system->forceCriticalRoll = true;
-				$system->critRollMod += 5;			
+				$system->critRollMod += 6;			
 					}			
 	} //endof function onDamagedSystem	
 		
