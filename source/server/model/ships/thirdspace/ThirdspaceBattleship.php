@@ -67,8 +67,10 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300)); 
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300));
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));         
-        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300)); 
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240)); 
+        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300)); 
+        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300));
+        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));         
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));                
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));

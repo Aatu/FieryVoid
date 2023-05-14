@@ -54,11 +54,11 @@ class ThirdspaceBattleScout extends BaseShip{
         $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));
         $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));
         $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120));
-        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));        
-        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120)); 
-        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120));
-        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));        
-        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120));                          	          	
+        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120));        
+        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60)); 
+        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60)); 
+        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120));        
+        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120));                           	          	
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));           
 			
@@ -71,11 +71,11 @@ class ThirdspaceBattleScout extends BaseShip{
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300)); 
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300));
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));         
-        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300)); 
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240)); 
-        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300)); 
-        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));                         
+        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300));
+        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));         
+        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));                        
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));
