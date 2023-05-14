@@ -773,47 +773,5 @@ class UnreliableMatterCannon extends MatterCannon{
 
 
 
-/*
-    class Quasar extends Matter
-    {
-        public $name = "Quasar";
-        public $displayName = "Quasar";
-		public $iconPath = "matterCannon.png";
-	    
-//		protected $misfire1;
-		
-        public $loadingtime = 2;
-		
-        public $rangePenalty = 0.5;
-        public $fireControl = array(-2, 3, 3); // fighters, <mediums, <capitals 
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-
-		public function setSystemDataWindow($turn){
-			parent::setSystemDataWindow($turn);
-			$this->data["Special"] .= "<br>This Matter Cannon is prone to misfires."; 
-			$this->data["Special"] .= "<br>10% chance of misfire and doing no damage."; 
-		}
-
-//		public function getDamage($fireOrder){
-//			$misfire1 = Dice::d(10,1);
-//			if ($misfire1 == 1) {
-//				$fireOrder->pubnotes .= "<br> Weapon misfire! No damage.";
-//				return (Dice::d(10, 2)+2) * 0;
-//			}else{
-//				return Dice::d(10, 2)+2;
-//			}
-//		}
-
-        public function getDamage($fireOrder){        return Dice::d(10, 2);   }
-        public function setMinDamage(){     $this->minDamage = 4 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
-		
-    }  //endof class UnreliableMatterCannon
-*/
-
 	
 ?>
