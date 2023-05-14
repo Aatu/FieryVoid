@@ -8,7 +8,7 @@ class ThirdspaceBattleship extends BaseShip{
 		$this->faction = "Thirdspace";
         $this->phpclass = "ThirdspaceBattleship";
         $this->imagePath = "img/ships/ThirdspaceBattleship.png";
-        $this->shipClass = "Thirdspace Battleship";
+        $this->shipClass = "Harbinger Battleship";
         $this->shipSizeClass = 3;
 	    $this->isd = 'Ancient';
 		$this->factionAge = 4;
@@ -38,7 +38,7 @@ class ThirdspaceBattleship extends BaseShip{
 		$this->addPrimarySystem($scanner);	        
         $this->addPrimarySystem(new Engine(7, 36, 0, 20, 3));
 		$this->addPrimarySystem(new PsychicField(6, 0, 0, 0, 360));		
-        $this->addPrimarySystem(new SelfRepair(7, 24, 12)); //armor, structure, output 
+        $this->addPrimarySystem(new SelfRepair(7, 24, 10)); //armor, structure, output 
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 5));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
       
 		$projection = new ThirdspaceShieldProjection(2, 120, 120, 330, 30, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
