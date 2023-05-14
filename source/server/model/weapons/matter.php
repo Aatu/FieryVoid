@@ -656,12 +656,6 @@ for friendly units.*/
     }	//endof class FlakCannon
 
 
-	class SingleSlugCannon extends SlugCannon{
-	    public $iconPath = 'GatlingGun.png';
-		public $shots = 1;
-		public $intercept = 1;
-	} //endof class SingleSlugCannon
-
 
 	/*Grome fighter weapon*/
     class SlugCannon extends LinkedWeapon{
@@ -736,9 +730,25 @@ for friendly units.*/
 
     }  //end SlugCannon
 
+
+// Sshel'ath fighter weapon
+	class SingleSlugCannon extends SlugCannon{
+	    public $iconPath = 'GatlingGun.png';
+		public $shots = 1;
+		public $intercept = 1;
+        public $defaultShots = 1;
+	} //endof class SingleSlugCannon
+
+
+
+
 class UnreliableMatterCannon extends MatterCannon{
 
-	protected $misfire;
+    public $name = "UnreliableMatterCannon";
+    public $displayName = "Unreliable Matter Cannon";
+    public $iconPath = "matterCannon.png";
+
+	protected $misfire1;
 
     public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
@@ -747,17 +757,63 @@ class UnreliableMatterCannon extends MatterCannon{
 	}
 	
 	public function getDamage($fireOrder){
-		$misfire = Dice::d(10,1);
-		if ($misfire == 1) {
+		$misfire1 = Dice::d(10,1);
+		if ($misfire1 == 1) {
 			$fireOrder->pubnotes .= "<br> Weapon misfire! No damage.";
 			return (Dice::d(10, 2)+2) * 0;
 		}else{
 			return Dice::d(10, 2)+2;
 		}
 	}
+	
 	public function setMinDamage(){		$this->minDamage = 4;	}
 	public function setMaxDamage(){		$this->maxDamage = 22;	}
 	
 } //endof class UnreliableMatterCannon
+
+
+
+/*
+    class Quasar extends Matter
+    {
+        public $name = "Quasar";
+        public $displayName = "Quasar";
+		public $iconPath = "matterCannon.png";
+	    
+//		protected $misfire1;
+		
+        public $loadingtime = 2;
+		
+        public $rangePenalty = 0.5;
+        public $fireControl = array(-2, 3, 3); // fighters, <mediums, <capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] .= "<br>This Matter Cannon is prone to misfires."; 
+			$this->data["Special"] .= "<br>10% chance of misfire and doing no damage."; 
+		}
+
+//		public function getDamage($fireOrder){
+//			$misfire1 = Dice::d(10,1);
+//			if ($misfire1 == 1) {
+//				$fireOrder->pubnotes .= "<br> Weapon misfire! No damage.";
+//				return (Dice::d(10, 2)+2) * 0;
+//			}else{
+//				return Dice::d(10, 2)+2;
+//			}
+//		}
+
+        public function getDamage($fireOrder){        return Dice::d(10, 2);   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
+		
+    }  //endof class UnreliableMatterCannon
+*/
+
 	
 ?>

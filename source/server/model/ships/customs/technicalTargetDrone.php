@@ -69,6 +69,9 @@ class technicalTargetDrone extends BaseShip{
 		$this->addFrontSystem(new NexusHeavyEnhPlasma(4, 9, 5, 270, 90));
 		$this->addFrontSystem(new NexusHeavyEnhPlasma(4, 9, 5, 270, 90));
 		$this->addFrontSystem(new NexusHeavyEnhPlasma(4, 9, 5, 270, 90));
+		$this->addFrontSystem(new NexusMedEnhPlasma(4, 9, 5, 270, 90));
+		$this->addFrontSystem(new NexusMedEnhPlasma(4, 9, 5, 270, 90));
+		$this->addFrontSystem(new NexusLightEnhPlasma(4, 9, 5, 270, 90));
 
 
 		

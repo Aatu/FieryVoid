@@ -1598,6 +1598,7 @@ spl_autoload_register(
 				'nexusrangedswarmtorpedo' => '/server/model/weapons/customNexus.php',
 			//Nexus plasma weapons
 				'nexusheavyenhplasma' => '/server/model/weapons/customNexus.php',
+				'nexuslightenhplasma' => '/server/model/weapons/customNexus.php',
 				'nexusheavyplasmacharge' => '/server/model/weapons/customNexus.php',
 				'nexusfightertorpedolauncher' => '/server/model/weapons/customNexus.php',
 				'nexusltplasmabomb' => '/server/model/weapons/customNexus.php',
@@ -1699,6 +1700,7 @@ spl_autoload_register(
                 'craytanepiron' => '/server/model/ships/ZNexusCraytan/CraytanEpiron.php',					
                 'craytanepironrefit' => '/server/model/ships/ZNexusCraytan/CraytanEpironRefit.php',					
                 'craytanforin' => '/server/model/ships/ZNexusCraytan/CraytanForin.php',					
+                'craytangramitha' => '/server/model/ships/ZNexusCraytan/CraytanGramitha.php',					
                 'craytanhelis' => '/server/model/ships/ZNexusCraytan/CraytanHelis.php',					
                 'craytanhelisrefit' => '/server/model/ships/ZNexusCraytan/CraytanHelisRefit.php',					
                 'craytanhepron' => '/server/model/ships/ZNexusCraytan/CraytanHepron.php',					
@@ -1709,6 +1711,7 @@ spl_autoload_register(
  //               'craytanhepron2126' => '/server/model/ships/ZNexusCraytan/CraytanHepron2126.php',					
                 'craytanpolten' => '/server/model/ships/ZNexusCraytan/CraytanPolten.php',					
                 'craytanpoltenrefit' => '/server/model/ships/ZNexusCraytan/CraytanPoltenRefit.php',					
+                'craytansavor' => '/server/model/ships/ZNexusCraytan/CraytanSavor.php',					
                 'craytansoren' => '/server/model/ships/ZNexusCraytan/CraytanSoren.php',					
                 'craytansorenrefit' => '/server/model/ships/ZNexusCraytan/CraytanSorenRefit.php',					
                 'craytantironftr' => '/server/model/ships/ZNexusCraytan/CraytanTironFtr.php',					
