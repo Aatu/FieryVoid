@@ -1,12 +1,12 @@
 <?php
-class ThirdspaceOculusScout extends BaseShip{
+class ThirdspaceBattleScout extends BaseShip{
      
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 6700;
 		$this->faction = "Thirdspace";
-        $this->phpclass = "ThirdspaceOculusScout";
+        $this->phpclass = "ThirdspaceBattleScout";
         $this->imagePath = "img/ships/ThirdspaceBattleship.png";
         $this->shipClass = "Oculus Battle Scout";
         $this->shipSizeClass = 3;

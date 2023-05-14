@@ -1,14 +1,14 @@
 <?php
-class ThirdspaceLegionCarrier extends BaseShip{
+class ThirdspaceCarrier extends BaseShip{
      
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 6700;
 		$this->faction = "Thirdspace";
-        $this->phpclass = "ThirdspaceLegionCarrier";
+        $this->phpclass = "ThirdspaceCarrier";
         $this->imagePath = "img/ships/ThirdspaceBattleship.png";
-        $this->shipClass = "Legion Battle Carrier";
+        $this->shipClass = "Scourge Battle Carrier";
         $this->shipSizeClass = 3;
 	    $this->isd = 'Ancient';
 		$this->factionAge = 4;
