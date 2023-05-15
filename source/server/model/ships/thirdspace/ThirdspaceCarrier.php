@@ -33,7 +33,7 @@ class ThirdspaceCarrier extends BaseShip{
        
 		$this->iniativebonus = 2 *5;        
         
-        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 162+10+4));
+        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 150+10+4));
         $this->addPrimarySystem(new ThirdspaceCnC(8, 36, 0, 0));
         $scanner = new Scanner(7, 36, 10, 15);
 		$scanner->markThirdspace();
