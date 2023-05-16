@@ -4,7 +4,7 @@ class ThirdspaceBattleScout extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 6700;
+		$this->pointCost = 6500;
 		$this->faction = "Thirdspace";
         $this->phpclass = "ThirdspaceBattleScout";
         $this->imagePath = "img/ships/ThirdspaceBattleship.png";
@@ -31,16 +31,19 @@ class ThirdspaceBattleScout extends BaseShip{
         $this->rollcost = 6;
         $this->pivotcost = 4;
        
-		$this->iniativebonus = 2 *5;        
+		$this->iniativebonus = 2 *5;    
+		
+		/*Thirdspace use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');			    
         
-        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 174+10+4));
+        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 168+10+4));
         $this->addPrimarySystem(new ThirdspaceCnC(8, 36, 0, 0));
         $scanner = new ElintScanner(7, 36, 10, 16);
 		$scanner->markThirdspace();
 		$this->addPrimarySystem($scanner);	        
         $this->addPrimarySystem(new Engine(7, 36, 0, 18, 3));
 		$this->addPrimarySystem(new PsychicField(6, 0, 0, 0, 360));		
-        $this->addPrimarySystem(new SelfRepair(7, 24, 12)); //armor, structure, output 
+        $this->addPrimarySystem(new ThirdspaceSelfRepair(7, 24, 10)); //armor, structure, output 
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 5));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
       
 		$projection = new ThirdspaceShieldProjection(2, 100, 100, 330, 30, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R

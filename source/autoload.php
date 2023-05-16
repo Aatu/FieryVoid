@@ -3034,7 +3034,8 @@ spl_autoload_register(
 				'thirdspacelanceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceLanceAttackCraft.php',
 				'thirdspacebattlescout' => '/server/model/ships/thirdspace/ThirdspaceBattleScout.php',		
 				'thirdspacecarrier' => '/server/model/ships/thirdspace/ThirdspaceCarrier.php',
-
+				'thirdspaceselfrepair' => '/server/model/systems/baseSystems.php',	
+		//		'thirdspacetestbed' => '/server/model/ships/thirdspace/ThirdspaceTestbed.php',
 						
 						//Development systems
 						'testgun' => '/server/model/weapons/customDevelopment.php',

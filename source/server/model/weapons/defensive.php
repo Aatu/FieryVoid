@@ -603,7 +603,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 		public $isPrimaryTargetable = false; //projector can be targeted even on PRIMARY, like a weapon!
 	    public $iconPath = "TrekShieldProjectorF.png"; //overridden anyway - to indicate proper direction
 	    public $boostable = true; //$this->boostEfficiency and $this->maxBoostLevel in __construct()  
-		public $boostEfficiency = 4;
+		public $boostEfficiency = 5;
 	    public $baseOutput = 0; //base output, before boost
 	    
 		
@@ -635,7 +635,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn); 
 			$this->data["Special"] = "Regenerates 5 health for the associated Shield per point of Projector rating at the end of each turn .";
-			$this->data["Special"] .= "<br>Can be boosted three times.";
+		$this->data["Special"] .= "<br> Output can be boosted up to " . $this->maxBoostLevel . " times at " . $this->boostEfficiency . " power per extra point of self repair.";
 		}	
 		
 	    public function getOutputOnTurn($turn){
