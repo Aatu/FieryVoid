@@ -15,6 +15,7 @@ class CraytanMaprin extends MediumShip{
 	    $this->isd = 2048;
 
         $this->fighters = array("assault shuttles"=>2);
+	    $this->notes = 'Atmospheric capable';
         
         $this->forwardDefense = 11;
         $this->sideDefense = 12;

@@ -325,7 +325,7 @@ class PlasmaSiegeCannon extends Weapon {
     }
 
 
-
+/*
 class DirectEMine extends Weapon{
         public $name = "DirectEMine";
         public $displayName = "Direct Energy Mine";
@@ -372,6 +372,55 @@ class DirectEMine extends Weapon{
         public function setMaxDamage(){     $this->maxDamage = 30;      }
 		
 }//endof DirectEMine
+*/
+
+
+    class DirectEMine extends Torpedo{
+
+        public $name = "DirectEMine";
+        public $displayName = "Direct Energy Mine";
+	    public $iconPath = "energyMine.png";
+
+        public $range = 50;
+        public $loadingtime = 2;
+        
+        public $fireControl = array(-4, 1, 3); // fighters, <mediums, <capitals 
+        
+        public $animation = "ball";
+        public $animationColor = array(141, 240, 255);
+		
+        public $priority = 1;
+
+    	public $weaponClass = "Plasma"; 
+        public $damageType = "Flash"; 
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 5;
+            if ( $powerReq == 0 ) $powerReq = 4;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Ignores half of armor.";
+		}
+        
+        public function getDamage($fireOrder){
+            return Dice::d(10, 3);
+       }
+    
+        public function setMinDamage(){     $this->minDamage = 3;      }
+        public function setMaxDamage(){     $this->maxDamage = 30;      }
+    
+    }//endof class DirectEMine
+
+
 
 
 ?>

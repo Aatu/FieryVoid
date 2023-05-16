@@ -1,16 +1,14 @@
 <?php
-class CraytanBromin extends BaseShip{
+class CraytanLopin extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 505;
+	$this->pointCost = 490;
 	$this->faction = "ZNexus Playtest Craytan";
-        $this->phpclass = "CraytanBromin";
+        $this->phpclass = "CraytanLopin";
         $this->imagePath = "img/ships/Nexus/CraytanEpiron.png";
-        $this->shipClass = "Bromin Jumpcruiser";
-			$this->variantOf = "Epiron Cruiser";
-			$this->occurence = "common";
+        $this->shipClass = "Lopin Explorer";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; 
 		$this->unofficial = true;
@@ -18,7 +16,7 @@ class CraytanBromin extends BaseShip{
 
         $this->fighters = array("assault shuttles"=>6);
 
-		$this->isd = 2099;
+		$this->isd = 2100;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 16;
@@ -32,7 +30,7 @@ class CraytanBromin extends BaseShip{
         
         $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 16, 4, 6));
+        $this->addPrimarySystem(new ElintScanner(4, 16, 7, 7));
         $this->addPrimarySystem(new Engine(4, 18, 0, 8, 3));
 		$this->addPrimarySystem(new Hangar(4, 6));
 		$this->addPrimarySystem(new CargoBay(4, 9));
@@ -41,38 +39,40 @@ class CraytanBromin extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
 		$this->addFrontSystem(new LightPlasma(2, 4, 2, 240, 60));
 		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 240, 360));
-		$this->addFrontSystem(new NexusCIDS(2, 4, 2, 300, 60));
+		$this->addFrontSystem(new CargoBay(3, 16));
 		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 0, 120));
 		$this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 120));
 
         $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
+        $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
+        $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
 		$this->addAftSystem(new JumpEngine(3, 12, 8, 50));
-        $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
-        $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
 
-        $this->addLeftSystem(new NexusAssaultCannon(4, 8, 5, 300, 360));
+        $this->addLeftSystem(new CargoBay(3, 20));
 		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 180, 360));
         $this->addLeftSystem(new NexusCIDS(2, 4, 2, 180, 360));
+		$this->addLeftSystem(new MediumPlasma(2, 5, 3, 180, 360));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
-        $this->addRightSystem(new NexusAssaultCannon(4, 8, 5, 0, 60));
+        $this->addRightSystem(new CargoBay(3, 20));
 		$this->addRightSystem(new NexusCIDS(2, 4, 2, 0, 180));
         $this->addRightSystem(new NexusCIDS(2, 4, 2, 0, 180));
+		$this->addRightSystem(new MediumPlasma(2, 5, 3, 0, 180));
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(4, 48));
-        $this->addAftSystem(new Structure(4, 42));
-        $this->addLeftSystem(new Structure(4, 48));
-        $this->addRightSystem(new Structure(4, 48));
+        $this->addAftSystem(new Structure(4, 48));
+        $this->addLeftSystem(new Structure(4, 52));
+        $this->addRightSystem(new Structure(4, 52));
         $this->addPrimarySystem(new Structure(4, 54));
 		
 		$this->hitChart = array(
 			0=> array(
 					9 => "Structure",
 					10 => "Cargo Bay",
-					13 => "Scanner",
+					13 => "ELINT Scanner",
 					16 => "Engine",
 					17 => "Hangar",
 					19 => "Reactor",
@@ -80,30 +80,30 @@ class CraytanBromin extends BaseShip{
 			),
 			1=> array(
 					5 => "Thruster",
-					8 => "Heavy Plasma Cannon",
-					10 => "Light Plasma Cannon",
-					11 => "Close-In Defense System",
+					7 => "Heavy Plasma Cannon",
+					9 => "Light Plasma Cannon",
+					11 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
-					7 => "Thruster",
+					8 => "Thruster",
 					10 => "Jump Engine",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
-					5 => "Thruster",
-					7 => "Close-In Defense System",
-					9 => "Assault Cannon",
-					18 => "Structure",
+					4 => "Thruster",
+					6 => "Cargo Bay",
+					8 => "Medium Plasma Cannon",
+					10 => "Close-In Defense System",
 					20 => "Primary",
 			),
 			4=> array(
-					5 => "Thruster",
-					7 => "Close-In Defense System",
-					9 => "Assault Cannon",
-					18 => "Structure",
+					4 => "Thruster",
+					6 => "Cargo Bay",
+					8 => "Medium Plasma Cannon",
+					10 => "Close-In Defense System",
 					20 => "Primary",
 			),
 		);

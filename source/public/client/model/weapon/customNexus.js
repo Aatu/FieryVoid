@@ -843,7 +843,23 @@ var NexusLtPlasmaBomb = function  NexusLtPlasmaBomb(json, ship) {
 NexusLtPlasmaBomb.prototype = Object.create(Weapon.prototype);
 NexusLtPlasmaBomb.prototype.constructor =  NexusLtPlasmaBomb;
 
+var NexusHeavyEnhPlasma = function NexusHeavyEnhPlasma(json, ship) {
+    Plasma.call(this, json, ship);
+};
+NexusHeavyEnhPlasma.prototype = Object.create(Plasma.prototype);
+NexusHeavyEnhPlasma.prototype.constructor = NexusHeavyEnhPlasma;
 
+var NexusMedEnhPlasma = function NexusMedEnhPlasma(json, ship) {
+    Plasma.call(this, json, ship);
+};
+NexusMedEnhPlasma.prototype = Object.create(Plasma.prototype);
+NexusMedEnhPlasma.prototype.constructor = NexusMedEnhPlasma;
+
+var NexusLightEnhPlasma = function NexusLightEnhPlasma(json, ship) {
+    Plasma.call(this, json, ship);
+};
+NexusLightEnhPlasma.prototype = Object.create(Plasma.prototype);
+NexusLightEnhPlasma.prototype.constructor = NexusLightEnhPlasma;
 
 
 

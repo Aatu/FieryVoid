@@ -66,6 +66,14 @@ class technicalTargetDrone extends BaseShip{
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
 //		$this->addFrontSystem(new BSGHybrid(0, 20, 0, 0));
 		//$this->addFrontSystem(new Hangar(4, 6));
+		$this->addFrontSystem(new NexusHeavyEnhPlasma(4, 9, 5, 270, 90));
+		$this->addFrontSystem(new NexusHeavyEnhPlasma(4, 9, 5, 270, 90));
+		$this->addFrontSystem(new NexusHeavyEnhPlasma(4, 9, 5, 270, 90));
+		$this->addFrontSystem(new NexusMedEnhPlasma(4, 9, 5, 270, 90));
+		$this->addFrontSystem(new NexusMedEnhPlasma(4, 9, 5, 270, 90));
+		$this->addFrontSystem(new NexusLightEnhPlasma(4, 9, 5, 270, 90));
+
+
 		
 		//new weapon showcase
 		$sensors = new Scanner(6, 103, 4, 10);
