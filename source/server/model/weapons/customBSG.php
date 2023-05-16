@@ -280,15 +280,15 @@ class BSGCenturions extends Weapon{
         public $displayName = "Flak Battery";
 	    public  $iconPath = "FlakCannon.png";
 
-        public $trailColor = array(245, 245, 44);
+//        public $trailColor = array(245, 245, 44);
         public $animation = "ball";
-        public $animationColor = array(245, 245, 44);
-        public $animationExplosionScale = 1; //covers 1/2 hex away from explosion center
+//        public $animationColor = array(245, 245, 44);
+//        public $animationExplosionScale = 1; //covers 1/2 hex away from explosion center
         public $animationExplosionType = "AoE";
         public $explosionColor = array(141, 240, 255);
-        public $projectilespeed = 12;
-        public $animationWidth = 10;
-        public $trailLength = 10;
+//        public $projectilespeed = 12;
+//        public $animationWidth = 10;
+//        public $trailLength = 10;
 
         public $range = 5;
         public $freeintercept = true; //can intercept fire directed at different unit
