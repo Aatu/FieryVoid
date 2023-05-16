@@ -890,7 +890,11 @@ class LaserAccelerator extends Laser{
 
 class UnreliableBattleLaser extends BattleLaser{
 
-	protected $misfire;
+    public $name = "UnreliableBattleLaser";
+    public $displayName = "Unreliable Battle Laser";
+    public $iconPath = "battleLaser.png";
+
+	protected $misfire2;
 
     public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
@@ -899,8 +903,8 @@ class UnreliableBattleLaser extends BattleLaser{
 	}
 	
 	public function getDamage($fireOrder){
-		$misfire = Dice::d(10,1);
-		if ($misfire == 1) {
+		$misfire2 = Dice::d(10,1);
+		if ($misfire2 == 1) {
 			$fireOrder->pubnotes .= "<br> Weapon misfire! No damage.";
 			return (Dice::d(10, 4)+12)*0;
 		}else{

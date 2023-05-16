@@ -12,7 +12,7 @@ class CylonTurkeyRaider extends FighterFlight{
 			
         $this->imagePath = "img/ships/BSG/CylonHeavyRaider.png";
 //	    $this->isd = ;
-//        $this->canvasSize = 60;
+        $this->canvasSize = 80;
 		$this->unofficial = true;
 
 	    $this->notes = 'Atmospheric.';

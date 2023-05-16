@@ -1,20 +1,18 @@
 <?php
-class CraytanMaprinRefit extends MediumShip{
+class CraytanSavor extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 310;
+        $this->pointCost = 400;
         $this->faction = "ZNexus Playtest Craytan";
-        $this->phpclass = "CraytanMaprinRefit";
+        $this->phpclass = "CraytanSavor";
         $this->imagePath = "img/ships/Nexus/CraytanCorvette.png";
-        $this->shipClass = "Maprin Corvette (2087 refit)";
-			$this->variantOf = "Maprin Corvette";
-			$this->occurence = "common";
+        $this->shipClass = "Savor Frigate";
 		$this->unofficial = true;
         $this->canvasSize = 60;
         $this->agile = true;
-	    $this->isd = 2087;
+	    $this->isd = 2120;
 
         $this->fighters = array("assault shuttles"=>2);
 	    $this->notes = 'Atmospheric capable';
@@ -29,28 +27,28 @@ class CraytanMaprinRefit extends MediumShip{
         $this->pivotcost = 2;
         $this->iniativebonus = 60;
          
-        $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
+        $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new CnC(4, 9, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 12, 4, 6));
-        $this->addPrimarySystem(new Engine(3, 11, 0, 8, 3));
-        $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
-        $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));        
+        $this->addPrimarySystem(new Scanner(4, 12, 5, 6));
+        $this->addPrimarySystem(new Engine(4, 11, 0, 10, 3));
+        $this->addPrimarySystem(new Thruster(3, 10, 0, 5, 3));
+        $this->addPrimarySystem(new Thruster(3, 10, 0, 5, 4));        
         $this->addPrimarySystem(new CargoBay(4, 9));
         
-		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 300, 60));
+		$this->addFrontSystem(new NexusMedEnhPlasma(3, 6, 4, 300, 60));
 		$this->addFrontSystem(new NexusCIDS(2, 4, 2, 240, 120));
-		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 300, 60));
+		$this->addFrontSystem(new NexusMedEnhPlasma(3, 6, 4, 300, 60));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	    
-		$this->addAftSystem(new NexusLightSentryGun(2, 5, 1, 180, 360));
+		$this->addAftSystem(new NexusLightEnhPlasma(2, 5, 2, 180, 360));
 		$this->addAftSystem(new NexusCIDS(2, 4, 2, 60, 300));
-		$this->addAftSystem(new NexusLightSentryGun(2, 5, 1, 0, 180));
-        $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));    
-        $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));    
+		$this->addAftSystem(new NexusLightEnhPlasma(2, 5, 2, 0, 180));
+        $this->addAftSystem(new Thruster(3, 10, 0, 5, 2));    
+        $this->addAftSystem(new Thruster(3, 10, 0, 5, 2));    
 		$this->addAftSystem(new Hangar(2, 2));
-       
-        $this->addPrimarySystem(new Structure(3, 40));
+        
+        $this->addPrimarySystem(new Structure(4, 40));
 
 	//d20 hit chart
 	$this->hitChart = array(
@@ -66,7 +64,7 @@ class CraytanMaprinRefit extends MediumShip{
 
 		1=> array(
 			6 => "Thruster",
-			8 => "Medium Plasma Cannon",
+			8 => "Medium Enhanced Plasma",
 			9 => "Close-In Defense System",
 			17 => "Structure",
 			20 => "Primary",
@@ -74,7 +72,7 @@ class CraytanMaprinRefit extends MediumShip{
 
 		2=> array(
 			6 => "Thruster",
-			8 => "Light Sentry Gun",
+			8 => "Light Enhanced Plasma",
 			9 => "Close-In Defense System",
 			11 => "Hangar",
 			17 => "Structure",
