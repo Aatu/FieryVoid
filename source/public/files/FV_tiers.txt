@@ -31,7 +31,7 @@ This is default power level of show era major factions ('Big 4') - what I consid
 
 
 SECOND TIER
-Factions that point for point will have uphill battle against First Tier, yet otherwise are balanced and competitive. Should be interesting to play against each other, and if given some extra PV allowance - possibly against First Tier as well (if they don't have any too glaring weaknesses, which may happen). Most of these factions do not offer fleet build flexibility of major ones, but may offer very distinct playstyle instead.
+Factions that point for point will have uphill battle against First Tier, yet otherwise are balanced and competitive. Many of them have weaknesses more pronounced than acceptable for Tier 1, too. Should be interesting to play against each other, and if given some extra PV allowance - possibly against First Tier as well (at least factions without too glaring weaknesses). Most of these factions do not offer fleet build flexibility of major ones, but may offer very distinct playstyle instead.
  - Abbai
  - Balosian
  - Battlestar Galactica Colonials (Custom)
@@ -84,12 +84,12 @@ Factions that don't fit in any of the brackets above. Most of them cannot seriou
 This group is inherently unbalanced, even against each other!
  - Abbai (WotCR)
  - Alacan (Small Races)
- - Chouka Raiders (custom faction - Escalation Wars universe)
- - Craytan Union (PLAYTEST custom faction - Nexus universe)
  - EA (early)
+ - Escalation Chouka Raiders (custom faction - Escalation Wars universe)
  - Grome
  - Hurr
  - Mitoc (Small Races - only one MCV-class vessel)
+ - Nexus Craytan Union (PLAYTEST custom faction - Nexus universe)
  - Rogolon (Small Races)
  - Sorithian (Small Races)
  - Streib (custom faction; their ship design and technology is peculiar enough for them to feel surprisingly Ancient-like when it comes to balancing. Streib are definitely NOT up to fighting actual Ancients though! - hence "the Rest")

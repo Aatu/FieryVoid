@@ -75,6 +75,12 @@ if (isset($_SESSION["user"])) {
 	    <br><b>EA defenses separated</b> - new developmens made EA too large to actually display everything at once...
 	    <br><b>Drakh rebalanced</b> - got some bigger teeth!
 	    
+		 <br><br>---------- <b>update 11th of May</b> ---------- 
+	    <br><b>Starburst missile</b> - one more Kor-Lyan goodie by Douglas
+	    
+		 <br><br>---------- <b>update 16th of May</b> ---------- 
+	    <br><b>Unreliable Matter cannon fixed</b> - still unreliable, but not crashing games
+	    <br><b>Nexus Craytan expanded</b> - by Geoffrey
 	    
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 

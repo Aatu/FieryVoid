@@ -1978,7 +1978,11 @@ class LightParticleAccelerator extends LinkedWeapon{
 
 class UnreliableTwinArray extends TwinArray{
 
-	protected $misfire;
+    public $name = "UnreliableTwinArray";
+    public $displayName = "Unreliable Twin Array";
+    public $iconPath = "twinArray.png";
+
+	protected $misfire3;
 
     public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
@@ -1987,8 +1991,8 @@ class UnreliableTwinArray extends TwinArray{
 	}
 	
 	public function getDamage($fireOrder){
-		$misfire = Dice::d(10,1);
-		if ($misfire == 1) {
+		$misfire3 = Dice::d(10,1);
+		if ($misfire3 == 1) {
 			$fireOrder->pubnotes .= "<br> Weapon misfire! No damage.";
 			return (Dice::d(10)+4) * 0;
 		}else{
