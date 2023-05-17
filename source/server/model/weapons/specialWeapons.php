@@ -4949,7 +4949,7 @@ class PsionicLance extends Raking{
             $boost = $this->getBoostLevel($turn);
             $this->maxDamage = 30 + ($boost * 20) + 30;
         }  
-   }//end fo Psionic Lance
+   }//end of Psionic Lance
 
 class PsionicConcentrator extends Raking{
     /*Psionic Concentrator - Thirdspace weapon*/
