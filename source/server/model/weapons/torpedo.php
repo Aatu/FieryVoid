@@ -184,6 +184,7 @@
         public $trailLength = 10;
 		*/
         public $priority = 1; //Flash! should strike first 
+         
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -291,6 +292,8 @@
     
     }//endof class PacketTorpedo
 
+
+
 class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonates and reduces armour of targets.  
         public $name = "PsionicTorpedo";
         public $displayName = "Psionic Torpedo";
@@ -315,6 +318,10 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
                 
         public $fireControl = array(-4, 3, 5); // fighters, <mediums, <capitals 
         public $priority = 1; //Flash! should strike first 
+        
+        public $boostable = true;
+        public $boostEfficiency = 2;
+        public $maxBoostLevel = 3;           
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -420,16 +427,17 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 			$this->data["Special"] .= "<br>Ignores armor when dealing damage (Advanced Armor is treated as 2 points less).";	
 			$this->data["Special"] .= "<br>Deals Flash damage and reduces armor of facing section (structure and all systems) by 1-3 points (Advanced Armor is immune).";		
 			$this->data["Special"] .= "<br>Ballistic weapon that can use offensive EW.";
+			$this->data["Special"] .= "<br> Damage can be boosted up to " . $this->maxBoostLevel . " times at " . $this->boostEfficiency . " power per extra point of damage.";			
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";			
 		}
         
-         //return Dice::d(10,2);
+        /*
         public function getDamage($fireOrder){         return 18;   }
         public function setMinDamage(){     $this->minDamage = 18;      }
         public function setMaxDamage(){     $this->maxDamage = 18;      }
- 
-/*
-        private function getExtraDicebyBoostlevel($turn){
+ */
+
+        private function getExtraDamagebyBoostlevel($turn){
             $add = 0;
             switch($this->getBoostLevel($turn)){
                 case 1:
@@ -438,7 +446,10 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
                 case 2:
                     $add = 4;
                     break;
-
+                case 3:
+                    $add = 6;
+                    break;                    
+                      
                 default:
                     break;
             }
@@ -460,8 +471,8 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         }
         
         public function getDamage($fireOrder){
-            $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
-            $dmg = Dice::d(10, (3 + $add)) +30;
+            $add = $this->getExtraDamagebyBoostlevel($fireOrder->turn);
+            $dmg = Dice::d(10,1) + $add + 9;
             return $dmg;
         }
 
@@ -478,14 +489,15 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         public function setMinDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->minDamage = 3 + ($boost * 2) + 30;
+            $this->minDamage = 10 + ($boost * 2);
         }   
 
         public function setMaxDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->maxDamage = 30 + ($boost * 20) + 30; 
-     */ 
-    
+            $this->maxDamage = 19 + ($boost * 2); 
+		}
+		    
     }//endof class PsionicTorpedo
+    
 ?>
