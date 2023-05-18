@@ -4809,13 +4809,13 @@ class PsychicFieldHandler{
         public function setMinDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->minDamage = 6 + ($boost * 12) + 40;
+            $this->minDamage = 46 + ($boost * 12);
         }   
 
         public function setMaxDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->maxDamage = 60 + ($boost * 30) + 40;
+            $this->maxDamage = 100 + ($boost * 30);
         }  
    } //end of class HeavyPsionicLance
    
@@ -4941,13 +4941,13 @@ class PsionicLance extends Raking{
         public function setMinDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->minDamage = 3 + ($boost * 2) + 30;
+            $this->minDamage = 33 + ($boost * 2);
         }   
 
         public function setMaxDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->maxDamage = 30 + ($boost * 20) + 30;
+            $this->maxDamage = 60 + ($boost * 20);
         }  
    }//end of Psionic Lance
 
