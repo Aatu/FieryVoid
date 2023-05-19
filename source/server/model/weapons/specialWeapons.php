@@ -5086,7 +5086,7 @@ class PsionicConcentrator extends Raking{
 		$this->minDamageArray[$this->firingMode] = $this->minDamage; 
 	}
 	public function setMaxDamage(){
-		$this->maxDamage = 10*(1+$this->firingMode)+($this->firingMode*4) ; //24 and 38
+		$this->maxDamage = 10*(1+$this->firingMode)+($this->firingMode*4); //24 and 38
 		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;  
 	}
 } //endof class PsionicConcentrator
