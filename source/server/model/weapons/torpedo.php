@@ -309,7 +309,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         public $trailLength = 10;
 		*/
 
-        public $range = 60;
+        public $range = 40;
         public $loadingtime = 2;
         
         public $weaponClass = "Electromagnetic"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
