@@ -44,8 +44,8 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addPrimarySystem(new ThirdspaceSelfRepair(7, 24, 10)); //armor, structure, output 
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 5));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
       
-		$projection = new ThirdspaceShieldProjection(2, 120, 120, 330, 30, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
-		$projector = new ThirdspaceShieldProjector(6, 24, 5, 3, 330, 30, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
+		$projection = new ThirdspaceShieldProjection(3, 120, 120, 330, 30, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+		$projector = new ThirdspaceShieldProjector(6, 24, 5, 4, 330, 30, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addFrontSystem($projector);		
 		$this->addFrontSystem($projection);
