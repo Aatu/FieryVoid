@@ -8,7 +8,7 @@ class ThirdspaceBattleship extends BaseShip{
 		$this->faction = "Thirdspace";
         $this->phpclass = "ThirdspaceBattleship";
         $this->imagePath = "img/ships/ThirdspaceBattleship.png";
-        $this->shipClass = "Harbinger Battleship";
+        $this->shipClass = "Eldritch Battleship";
         $this->shipSizeClass = 3;
 	    $this->isd = 'Ancient';
 		$this->factionAge = 4;

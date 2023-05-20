@@ -14,7 +14,7 @@ class ThirdspaceBattleScout extends BaseShip{
 		$this->factionAge = 4;
 		$this->unofficial = true;
 		$this->canvasSize = 350;
-			$this->variantOf = "Harbinger Battleship";
+			$this->variantOf = "Eldritch Battleship";
 			$this->occurence = "rare";											    
 	    
 		$this->fighters = array("LCVs" => 6);	

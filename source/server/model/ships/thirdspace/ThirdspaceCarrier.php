@@ -8,13 +8,13 @@ class ThirdspaceCarrier extends BaseShip{
 		$this->faction = "Thirdspace";
         $this->phpclass = "ThirdspaceCarrier";
         $this->imagePath = "img/ships/ThirdspaceBattleship.png";
-        $this->shipClass = "Scourge Battle Carrier";
+        $this->shipClass = "Harbinger Battle Carrier";
         $this->shipSizeClass = 3;
 	    $this->isd = 'Ancient';
 		$this->factionAge = 4;
 		$this->unofficial = true;
 		$this->canvasSize = 350;
-			$this->variantOf = "Harbinger Battleship";
+			$this->variantOf = "Eldritch Battleship";
 			$this->occurence = "uncommon";											    
 	    
 		$this->fighters = array("LCVs" => 12);	
