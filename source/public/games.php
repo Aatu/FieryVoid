@@ -79,8 +79,12 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Starburst missile</b> - one more Kor-Lyan goodie by Douglas
 	    
 		 <br><br>---------- <b>update 16th of May</b> ---------- 
-	    <br><b>Unreliable Matter cannon fixed</b> - still unreliable, but not crashing games
+	    <br><b>Unreliable Matter Cannon fixed</b> - still Unreliable, but not crashing games
 	    <br><b>Nexus Craytan expanded</b> - by Geoffrey
+	    
+		 <br><br>---------- <b>update 24th of May</b> ---------- 
+	    <br><b>Craytan fixes</b> - by Geoffrey
+	    
 	    
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 

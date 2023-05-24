@@ -35,8 +35,8 @@ class gaimMagrassa extends BaseShip{
 		$this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
 		$this->addFrontSystem(new Hangar(3, 6));
 		$this->addFrontSystem(new PacketTorpedo(3, 6, 5, 240, 360));
-		$this->addFrontSystem(new PacketTorpedo(3, 6, 5, 0, 120));
 		$this->addFrontSystem(new PacketTorpedo(3, 6, 5, 300, 60));
+		$this->addFrontSystem(new PacketTorpedo(3, 6, 5, 0, 120));
 		$this->addFrontSystem(new Bulkhead(0, 3));
 
 		$this->addAftSystem(new Thruster(3, 13, 0, 4, 2));
