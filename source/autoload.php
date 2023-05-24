@@ -1535,7 +1535,6 @@ spl_autoload_register(
 		//Nexus weapons
 			//Nexus matter weapons
 				'nexusacids' => '/server/model/weapons/customNexus.php',
-				'nexusacids' => '/server/model/weapons/customNexus.php',
 				'nexusantifighterlauncher' => '/server/model/weapons/customNexus.php',
 				'nexusautocannonftr' => '/server/model/weapons/customNexus.php',
 				'nexusautogun' => '/server/model/weapons/customNexus.php',
@@ -1565,6 +1564,7 @@ spl_autoload_register(
 				'nexusdefensepulsar' => '/server/model/weapons/customNexus.php', 
 				'nexusfighterarray' => '/server/model/weapons/customNexus.php', 
 				'nexusheavyparticlearray' => '/server/model/weapons/customNexus.php',
+				'nexusassaultcannon' => '/server/model/weapons/customNexus.php', 
 				'nexuslightassaultcannon' => '/server/model/weapons/customNexus.php', 
 				'nexusmedassaultcannon' => '/server/model/weapons/customNexus.php', 
 				'nexusmauler' => '/server/model/weapons/customNexus.php', 
