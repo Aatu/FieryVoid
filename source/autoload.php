@@ -1598,6 +1598,7 @@ spl_autoload_register(
 				'nexusrangedswarmtorpedo' => '/server/model/weapons/customNexus.php',
 			//Nexus plasma weapons
 				'nexusheavyenhplasma' => '/server/model/weapons/customNexus.php',
+				'nexusmedenhplasma' => '/server/model/weapons/customNexus.php',
 				'nexuslightenhplasma' => '/server/model/weapons/customNexus.php',
 				'nexusheavyplasmacharge' => '/server/model/weapons/customNexus.php',
 				'nexusfightertorpedolauncher' => '/server/model/weapons/customNexus.php',

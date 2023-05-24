@@ -2197,7 +2197,7 @@ class NexusShatterGunFtr extends Weapon{
         public $priority = 6; 
         	    
 //		public $ballisticIntercept = true;
-        public $intercept = 1; //as it should be, but here they CAN combine vs same shot!
+        public $intercept = 1; 
 	    
 		public $rangePenalty = 2;
         public $fireControl = array(3, 1, 1); // fighters, <mediums, <capitals
@@ -2222,7 +2222,7 @@ class NexusShatterGunFtr extends Weapon{
 			$this->data["Special"] = "Fires d4 separate shots (actual number rolled at firing resolution).";
 			$this->data["Special"] .= "<br>When fired defensively, a single CIDS cannot engage the same incoming shot twice (even ballistic one).";
 			$this->data["Special"] .= "<br>Ignores armor.";
-			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
+//			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
         }
 	    
 	//if fired offensively - make d4 attacks (copies of 1 existing); 
@@ -2310,7 +2310,7 @@ class NexusShatterGunFtr extends Weapon{
         public $priority = 3; //very light weapon
         	    
 //		public $ballisticIntercept = true;
-        public $intercept = 1; //as it should be, but here they CAN combine vs same shot!
+        public $intercept = 2; 
 	    
 	public $rangePenalty = 2;
         public $fireControl = array(3, 1, 1); // fighters, <mediums, <capitals
@@ -2531,7 +2531,7 @@ class NexusAutogun extends Matter{
 		public $guns = 1;
         public $priority = 5;
         public $ammunition = 6;
-        public $intercept = 1; //as it should be, but here they CAN combine vs same shot!
+        public $intercept = 1; 
 
 //        public $intercept = 2;
 //        public $ballisticIntercept = true;
@@ -6178,7 +6178,7 @@ class NexusMedEnhPlasma extends Plasma{
 	public $priority = 5;
 	
 	public $rangeDamagePenalty = 0;
-	public $rangeDamagePenaltyPBolter = 1;
+	public $rangeDamagePenaltyPBolter = 0.66;
 	public $loadingtime = 2;
 	public $rangePenalty = 0.66;
 	public $fireControl = array(-4, 1, 3);
@@ -6214,7 +6214,7 @@ class NexusMedEnhPlasma extends Plasma{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "No range damage penalty up to a distance of 5 hexes.";
-			$this->data["Special"] .= "<br>After 5 hexes, damage reduced by 1 point per hex.";
+			$this->data["Special"] .= "<br>After 5 hexes, damage reduced by 2 points per 3 hexes.";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
