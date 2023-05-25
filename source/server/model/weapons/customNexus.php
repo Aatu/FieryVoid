@@ -6157,7 +6157,7 @@ class NexusHeavyEnhPlasma extends Plasma{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "No range damage penalty up to a distance of 12 hexes.";
-			$this->data["Special"] .= "<br>After 12 hexes, damage reduced by 1 point per 2 hexes.";
+			$this->data["Special"] .= "<br>After 12 hexes, damage reduced by 0.5 per hex.";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
@@ -6214,7 +6214,7 @@ class NexusMedEnhPlasma extends Plasma{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "No range damage penalty up to a distance of 5 hexes.";
-			$this->data["Special"] .= "<br>After 5 hexes, damage reduced by 2 points per 3 hexes.";
+			$this->data["Special"] .= "<br>After 5 hexes, damage reduced by 0.66 per hex.";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
@@ -6271,7 +6271,7 @@ class NexusLightEnhPlasma extends Plasma{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "No range damage penalty up to a distance of 3 hexes.";
-			$this->data["Special"] .= "<br>After 3 hexes, damage reduced by 1 point per hex.";
+			$this->data["Special"] .= "<br>After 3 hexes, damage reduced by 1 per hex.";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
