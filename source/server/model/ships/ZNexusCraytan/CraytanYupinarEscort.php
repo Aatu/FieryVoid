@@ -38,11 +38,11 @@ class CraytanYupinarEscort extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
 		$this->addFrontSystem(new LightPlasma(2, 4, 2, 240, 120));
-		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 240, 360));
+		$this->addFrontSystem(new NexusMedEnhPlasma(3, 6, 4, 240, 360));
 		$this->addFrontSystem(new NexusACIDS(2, 6, 2, 240, 60));
 		$this->addFrontSystem(new NexusACIDS(2, 6, 2, 270, 90));
 		$this->addFrontSystem(new NexusACIDS(2, 6, 2, 300, 120));
-		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 0, 120));
+		$this->addFrontSystem(new NexusMedEnhPlasma(3, 6, 4, 0, 120));
                 
         $this->addAftSystem(new Thruster(3, 13, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 13, 0, 4, 2));
@@ -69,7 +69,7 @@ class CraytanYupinarEscort extends HeavyCombatVessel{
             1=> array(
                     4 => "Thruster",
                     7 => "Advanced Close-In Defense System",
-                    9 => "Heavy Plasma Cannon",
+                    9 => "Medium Enhanced Plasma",
 					10 => "Light Plasma Cannon",
 					18 => "Structure",
                     20 => "Primary",
