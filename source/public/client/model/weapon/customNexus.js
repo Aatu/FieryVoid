@@ -935,6 +935,19 @@ var NexusAntifighterLauncher = function  NexusAntifighterLauncher(json, ship) {
 NexusAntifighterLauncher.prototype = Object.create(Weapon.prototype);
 NexusAntifighterLauncher.prototype.constructor =  NexusAntifighterLauncher;
 
+var NexusLtEnhPlasmaFtr = function  NexusLtEnhPlasmaFtr(json, ship) {
+    Plasma.call(this, json, ship);
+};
+NexusLtEnhPlasmaFtr.prototype = Object.create(Weapon.prototype);
+NexusLtEnhPlasmaFtr.prototype.constructor =  NexusLtEnhPlasmaFtr;
+
+
+
+
+
+
+
+
 
 //Kor-Lyan testing systems
 

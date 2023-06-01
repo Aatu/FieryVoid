@@ -4,7 +4,7 @@ class CraytanTopren extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 445;
+        $this->pointCost = 450;
         $this->faction = "ZNexus Playtest Craytan";
         $this->phpclass = "CraytanTopren";
         $this->imagePath = "img/ships/Nexus/CraytanTopren.png";

@@ -6284,6 +6284,72 @@ class NexusLightEnhPlasma extends Plasma{
 
 
 
+class NexusLtEnhPlasmaFtr extends LinkedWeapon{
+	public $name = "NexusLtEnhPlasmaFtr";
+	public $displayName = "Light Enhanced Plasma";
+	public $iconPath = "lightPlasmalinked.png";
+    public $animationColor = array(75, 250, 90); //needed as this doesn't inherit from Plasma...
+
+    public $intercept = 0; //no interception for this weapon!
+	public $loadingtime = 1;
+	public $shots = 2;
+    public $defaultShots = 2;
+    public $rangePenalty = 2;
+    public $fireControl = array(0, 0, 0);
+    
+    public $rangeDamagePenalty = 0;
+	public $rangeDamagePenaltyPBolter = 1;    
+    public $damageBonus = 0;
+	
+   	public $damageType = "Standard"; 
+   	public $weaponClass = "Plasma"; 	
+
+		function __construct($startArc, $endArc, $nrOfShots = 2){
+			$this->defaultShots = $nrOfShots;
+			$this->shots = $nrOfShots;
+
+			parent::__construct(0, 1, 0, $startArc, $endArc);
+		}	
+
+	protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
+	{
+		parent::getDamageMod($damage, $shooter, $target, $pos, $gamedata);
+					if ($pos != null) {
+					$sourcePos = $pos;
+					} 
+					else {
+					$sourcePos = $shooter->getHexPos();
+					}
+			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			if ($dis <= 2) {
+				$damage -= 0;
+				}
+			else {
+				$damage -= round(($dis - 2) * $this->rangeDamagePenaltyPBolter);
+			}	
+		        $damage = max(0, $damage); //at least 0	    
+        		$damage = floor($damage); //drop fractions, if any were generated
+      			 return $damage;
+	}		
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "No range damage penalty up to a distance of 2 hexes.";
+			$this->data["Special"] .= "<br>After 2 hexes, damage reduced by 1 point per hex.";
+			$this->data["Special"] .= "<br>Ignores half of armor.";
+	}
+			
+        public function getDamage($fireOrder){        return Dice::d(3, 1)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 7 ;      }
+
+}// End of class NexusLtEnhPlasmaFtr	
+
+
+
+
+
+
 // END OF PLASMA WEAPONS
 
 
