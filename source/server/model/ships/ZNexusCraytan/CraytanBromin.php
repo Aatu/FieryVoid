@@ -4,7 +4,7 @@ class CraytanBromin extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 505;
+	$this->pointCost = 530;
 	$this->faction = "ZNexus Playtest Craytan";
         $this->phpclass = "CraytanBromin";
         $this->imagePath = "img/ships/Nexus/CraytanEpiron.png";

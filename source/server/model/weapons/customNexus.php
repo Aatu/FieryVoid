@@ -25,7 +25,7 @@ class NexusKineticBoxLauncher extends Weapon{
         
         public $loadingtime = 2; // 1/2 turns
         public $rangePenalty = 0;
-        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $fireControl = array(0, 1, 2); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
 	public $noOverkill = true; //Matter weapon
 	public $priority = 9; //Matter weapon
@@ -94,7 +94,7 @@ class NexusRangedKineticBoxLauncher extends Weapon{
         
         public $loadingtime = 2; // 1/2 turns
         public $rangePenalty = 0;
-        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $fireControl = array(0, 1, 2); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
 	public $noOverkill = true; //Matter weapon
 	public $priority = 9; //Matter weapon
@@ -164,7 +164,7 @@ class NexusAdvKineticBoxLauncher extends Weapon{
         
         public $loadingtime = 2; // 1/2 turns
         public $rangePenalty = 0;
-        public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
 	public $noOverkill = true; //Matter weapon
 	public $priority = 9; //Matter weapon
@@ -6200,11 +6200,11 @@ class NexusMedEnhPlasma extends Plasma{
 					$sourcePos = $shooter->getHexPos();
 					}
 			$dis = mathlib::getDistanceHex($sourcePos, $target);				
-			if ($dis <= 5) {
+			if ($dis <= 7) {
 				$damage -= 0;
 				}
 			else {
-				$damage -= round(($dis - 3) * $this->rangeDamagePenaltyPBolter);
+				$damage -= round(($dis - 7) * $this->rangeDamagePenaltyPBolter);
 			}	
 		        $damage = max(0, $damage); //at least 0	    
         		$damage = floor($damage); //drop fractions, if any were generated
@@ -6213,8 +6213,8 @@ class NexusMedEnhPlasma extends Plasma{
 	
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-			$this->data["Special"] = "No range damage penalty up to a distance of 5 hexes.";
-			$this->data["Special"] .= "<br>After 5 hexes, damage reduced by 0.66 per hex.";
+			$this->data["Special"] = "No range damage penalty up to a distance of 7 hexes.";
+			$this->data["Special"] .= "<br>After 7 hexes, damage reduced by 0.66 per hex.";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			

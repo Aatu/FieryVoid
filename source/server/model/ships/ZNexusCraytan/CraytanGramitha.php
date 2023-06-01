@@ -4,12 +4,12 @@ class CraytanGramitha extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 385;
+        $this->pointCost = 405;
         $this->faction = "ZNexus Playtest Craytan";
         $this->phpclass = "CraytanGramitha";
         $this->imagePath = "img/ships/Nexus/CraytanCorvette.png";
         $this->shipClass = "Gramitha Escort Frigate";
-			$this->variantOf = "Savor Frigate";
+			$this->variantOf = "Sahvor Frigate";
 			$this->occurence = "uncommon";
 		$this->unofficial = true;
         $this->canvasSize = 60;
@@ -37,9 +37,9 @@ class CraytanGramitha extends MediumShip{
         $this->addPrimarySystem(new Thruster(3, 10, 0, 5, 4));        
         $this->addPrimarySystem(new CargoBay(4, 9));
         
-		$this->addFrontSystem(new NexusACIDS(3, 6, 2, 300, 60));
+		$this->addFrontSystem(new NexusACIDS(3, 6, 2, 270, 60));
 		$this->addFrontSystem(new NexusCIDS(2, 4, 2, 240, 120));
-		$this->addFrontSystem(new NexusACIDS(3, 6, 2, 300, 60));
+		$this->addFrontSystem(new NexusACIDS(3, 6, 2, 300, 90));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	    

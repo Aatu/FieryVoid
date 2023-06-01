@@ -1535,7 +1535,6 @@ spl_autoload_register(
 		//Nexus weapons
 			//Nexus matter weapons
 				'nexusacids' => '/server/model/weapons/customNexus.php',
-				'nexusantifighterlauncher' => '/server/model/weapons/customNexus.php',
 				'nexusautocannonftr' => '/server/model/weapons/customNexus.php',
 				'nexusautogun' => '/server/model/weapons/customNexus.php',
 				'nexuscids' => '/server/model/weapons/customNexus.php',
@@ -1582,6 +1581,7 @@ spl_autoload_register(
 				'nexustestblaster' => '/server/model/weapons/customNexus.php',
 				'twinarrayftr' => '/server/model/weapons/customNexus.php',
 			//Nexus ballistic weapons
+				'nexusantifighterlauncher' => '/server/model/weapons/customNexus.php',
 				'nexusbolttorpedo' => '/server/model/weapons/customNexus.php',
 				'nexuskineticboxlauncher' => '/server/model/weapons/customNexus.php', 
 				'nexusrangedkineticboxlauncher' => '/server/model/weapons/customNexus.php', 
@@ -1698,6 +1698,8 @@ spl_autoload_register(
                 'craytanmaprinrefit' => '/server/model/ships/ZNexusCraytan/CraytanMaprinRefit.php',					
 //                'craytancorvette2089' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2089.php',					
 //                'craytancorvette2126' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2126.php',					
+                'craytancalen' => '/server/model/ships/ZNexusCraytan/CraytanCalen.php',					
+                'craytandakran' => '/server/model/ships/ZNexusCraytan/CraytanDakran.php',					
                 'craytanepiron' => '/server/model/ships/ZNexusCraytan/CraytanEpiron.php',					
                 'craytanepironrefit' => '/server/model/ships/ZNexusCraytan/CraytanEpironRefit.php',					
                 'craytanforin' => '/server/model/ships/ZNexusCraytan/CraytanForin.php',					
@@ -1712,7 +1714,7 @@ spl_autoload_register(
  //               'craytanhepron2126' => '/server/model/ships/ZNexusCraytan/CraytanHepron2126.php',					
                 'craytanpolten' => '/server/model/ships/ZNexusCraytan/CraytanPolten.php',					
                 'craytanpoltenrefit' => '/server/model/ships/ZNexusCraytan/CraytanPoltenRefit.php',					
-                'craytansavor' => '/server/model/ships/ZNexusCraytan/CraytanSavor.php',					
+                'craytansahvor' => '/server/model/ships/ZNexusCraytan/CraytanSahvor.php',					
                 'craytansoren' => '/server/model/ships/ZNexusCraytan/CraytanSoren.php',					
                 'craytansorenrefit' => '/server/model/ships/ZNexusCraytan/CraytanSorenRefit.php',					
                 'craytantironftr' => '/server/model/ships/ZNexusCraytan/CraytanTironFtr.php',					
