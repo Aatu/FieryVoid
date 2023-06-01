@@ -11,7 +11,7 @@ class Senschuka extends MediumShip{
         $this->shipClass = "Senschuka Patrol Ship";
         $this->agile = true;
         $this->canvasSize = 100;
-                $this->isd = 2218;
+                $this->isd = 2224;
         
         $this->forwardDefense = 11;
         $this->sideDefense = 11;

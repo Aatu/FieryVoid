@@ -12,6 +12,7 @@ spl_autoload_register(
 		    
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
                 'abrithib' => '/server/model/ships/dilgar/abrithiB.php',
+                'abrithicruiser' => '/server/model/ships/dilgar/abrithiCruiser.php',
                 'absorbtionshield' => '/server/model/weapons/customs.php',
                 'acceleratorprimus' => '/server/model/ships/centauri/AcceleratorPrimus.php',
                 'adder' => '/server/model/ships/raiders/adder.php',
@@ -838,6 +839,7 @@ spl_autoload_register(
                 'sellac1910' => '/server/model/ships/abbai_old/sellac1910.php',
                 'seltat' => '/server/model/ships/centauri/seltat.php',
                 'senschuka' => '/server/model/ships/dilgar/senschuka.php',
+                'senschukaearly' => '/server/model/ships/dilgar/senschukaEarly.php',
                 'sensorloss' => '/server/model/cricialClasses.php',
                 'sensorspear' => '/server/model/weapons/specialWeapons.php',
                 'sensorspike' => '/server/model/weapons/specialWeapons.php',
