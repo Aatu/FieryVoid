@@ -36,7 +36,7 @@ class ThirdspaceCarrier extends BaseShip{
 		/*Thirdspace use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');			       
         
-        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 156+10+4));
+        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 148+10+4));
         $this->addPrimarySystem(new ThirdspaceCnC(8, 36, 0, 0));
         $scanner = new Scanner(7, 36, 10, 15);
 		$scanner->markThirdspace();
@@ -74,10 +74,10 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300)); 
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300));
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));         
-        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240)); 
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300)); 
-        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300));
-        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));         
+        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240)); 
+   //     $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300));
+  //      $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));         
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));                         
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));

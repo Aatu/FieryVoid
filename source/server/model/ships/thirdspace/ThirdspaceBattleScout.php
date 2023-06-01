@@ -36,7 +36,7 @@ class ThirdspaceBattleScout extends BaseShip{
 		/*Thirdspace use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');			    
         
-        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 168+10+4));
+        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 166+10+4));
         $this->addPrimarySystem(new ThirdspaceCnC(8, 36, 0, 0));
         $scanner = new ElintScanner(7, 36, 10, 16);
 		$scanner->markThirdspace();
@@ -52,8 +52,8 @@ class ThirdspaceBattleScout extends BaseShip{
 		$this->addFrontSystem($projector);		
 		$this->addFrontSystem($projection);
   //      $this->addFrontSystem(new HeavyPsionicLance(6, 0, 0, 330, 30));
-        $this->addFrontSystem(new PsionicTorpedo(5, 0, 0, 300, 60));
-        $this->addFrontSystem(new PsionicTorpedo(5, 0, 0, 300, 60));
+ //       $this->addFrontSystem(new PsionicTorpedo(5, 0, 0, 300, 60));
+//        $this->addFrontSystem(new PsionicTorpedo(5, 0, 0, 300, 60));
         $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));
         $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));
         $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120));
@@ -91,16 +91,16 @@ class ThirdspaceBattleScout extends BaseShip{
 		$this->addLeftSystem($projector);		
 		$this->addLeftSystem($projection);
 
-		$this->addLeftSystem(new PsionicTorpedo(5, 0, 0, 240, 360));
+		$this->addLeftSystem(new PsionicTorpedo(5, 0, 0, 180, 300));
 		$this->addLeftSystem(new PsionicTorpedo(5, 0, 0, 240, 360));   		            
-        $this->addLeftSystem(new PsionicLance(5, 0, 0, 240, 360));
+        $this->addLeftSystem(new PsionicTorpedo(5, 0, 0, 240, 360));
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 180, 300));
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 180, 300));
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 180, 300));          
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 240, 360));              
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 240, 360)); 
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 240, 360));
-        $this->addLeftSystem(new PsionicLance(5, 0, 0, 180, 300));                                                       
+        $this->addLeftSystem(new PsionicTorpedo(5, 0, 0, 240, 60));                                                       
         $this->addLeftSystem(new GraviticThruster(6, 30, 0, 10, 3)); 
         $LCVRail = new Catapult(3, 12, 3);
         $LCVRail->displayName = "LCV Rail";        
@@ -112,9 +112,9 @@ class ThirdspaceBattleScout extends BaseShip{
 		$projection->addProjector($projector);
 		$this->addRightSystem($projector);		
 		$this->addRightSystem($projection);
- 		$this->addRightSystem(new PsionicTorpedo(5, 0, 0, 0, 120));
+ 		$this->addRightSystem(new PsionicTorpedo(5, 0, 0, 60, 180));
  		$this->addRightSystem(new PsionicTorpedo(5, 0, 0, 0, 120)); 		
-        $this->addRightSystem(new PsionicLance(5, 0, 0, 0, 120));
+        $this->addRightSystem(new PsionicTorpedo(5, 0, 0, 0, 120));
         $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 60, 180));                  
         $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 60, 180)); 
         $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 60, 180));          
@@ -122,7 +122,7 @@ class ThirdspaceBattleScout extends BaseShip{
         $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 0, 120));
         $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 0, 120));
                         
-		$this->addRightSystem(new PsionicLance(5, 0, 0, 60, 180));                  
+		$this->addRightSystem(new PsionicTorpedo(5, 0, 0, 300, 120));                  
         $this->addRightSystem(new GraviticThruster(6, 30, 0, 10, 4)); 
         $LCVRail = new Catapult(3, 12, 3);		
         $LCVRail->displayName = "LCV Rail";							  	
