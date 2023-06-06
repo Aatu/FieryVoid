@@ -21,6 +21,7 @@ class Neshatan extends BaseShip{
         $this->pivotcost = 5;
         $this->iniativebonus = 5;
         $this->isd = 2251;
+        $this->fighters = array("shuttles"=>2);
 
         // Ship system arguments: armor, health, power req, output
         $this->addPrimarySystem(new Reactor(6, 35, 0, -6));

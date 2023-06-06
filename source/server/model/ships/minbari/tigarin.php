@@ -11,7 +11,7 @@ class Tigarin extends BaseShip{
             $this->shipClass = "Tigarin Patrol Cruiser";
             $this->shipSizeClass = 3;
             $this->gravitic = true;
-            $this->fighters = array("normal"=>6);
+            $this->fighters = array("normal"=>6, "shuttles"=>2);
             $this->forwardDefense = 15;
             $this->sideDefense = 17;
             $this->turncost = 1.0;

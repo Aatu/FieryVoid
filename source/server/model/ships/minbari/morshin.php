@@ -11,7 +11,7 @@ class Morshin extends HeavyCombatVessel{
         $this->shipClass = "Morshin Carrier";
         $this->gravitic = true;
         $this->limited = 33;
-        $this->fighters = array("normal"=>48);
+        $this->fighters = array("normal"=>48, "shuttles"=>2);
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
         $this->turncost = 0.75;
@@ -26,7 +26,7 @@ class Morshin extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 24, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 20, 4, 10));
         $this->addPrimarySystem(new Engine(5, 20, 0, 10, 3));
-        $this->addPrimarySystem(new Hangar(4, 48));
+        $this->addPrimarySystem(new Hangar(4, 50));
         $this->addPrimarySystem(new GraviticThruster(4, 11, 0, 4, 3));
         $this->addPrimarySystem(new GraviticThruster(4, 11, 0, 4, 4));
         $this->addPrimarySystem(new Jammer(4, 8, 5));
