@@ -279,11 +279,6 @@ class ShockCannon extends Weapon{
 				if (!WeaponEM::isTargetEMResistant($ship,$system)){ //advanced armor prevents non-damaging EM effects
 					$reactor = $ship->getSystemByName("Reactor");
 					$outputMod = -floor($damage/4);
-	
-$crit = new OutputReduced(-1, $ship->id, $reactor->id, "OutputReduced", $gamedata->turn, null, -6);
-$crit->updated = true;
-$reactor->criticals[] =  $crit;
-
 					//modifying how the critical is applied - Marcin Sawicki 06.06.2023
 					while($outputMod<=-4){
 						$crit = new OutputReduced4(-1, $ship->id, $reactor->id, "OutputReduced4", $gamedata->turn);
