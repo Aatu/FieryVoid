@@ -32,14 +32,14 @@ class Tigarin extends BaseShip{
             $this->addPrimarySystem(new Jammer(5, 10, 5));
 
                     // weapons arguments: armor, health, power, start arc, end arc
-            $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
+            $this->addFrontSystem(new FusionCannon(3, 8, 1, 240, 0));
             $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
             $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
             $this->addFrontSystem(new NeutronLaser(4, 10, 6, 300, 60));
             $this->addFrontSystem(new GraviticThruster(4, 25, 0, 6, 1));
             $this->addFrontSystem(new NeutronLaser(4, 10, 6, 300, 60));
             $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
-            $this->addFrontSystem(new FusionCannon(3, 8, 1, 240, 0));
+            $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
             $this->addFrontSystem(new FusionCannon(3, 8, 1, 0, 120));
 
             $this->addAftSystem(new FusionCannon(3, 8, 1, 180, 300));
