@@ -4,7 +4,7 @@ class BrixadiiAttackFrigate extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 330;
+        $this->pointCost = 350;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiAttackFrigate";
         $this->imagePath = "img/ships/Nexus/BrixadiiAttackFrigate.png";
@@ -40,13 +40,13 @@ class BrixadiiAttackFrigate extends MediumShip{
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 		$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 300, 360));
 		$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 0, 60));
-		$this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 300, 60));
+		$this->addFrontSystem(new NexusParticleBolter(2, 6, 2, 300, 60));
 		$this->addFrontSystem(new NexusKineticBoxLauncher(0, 4, 0, 300, 60));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
-        $this->addAftSystem(new LightParticleProjector(1, 3, 1, 120, 360));
-        $this->addAftSystem(new LightParticleProjector(1, 3, 1, 0, 240));
+        $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 120, 360));
+        $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 0, 240));
 		$this->addAftSystem(new NexusChaffLauncher(2, 2, 1, 0, 360));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -64,14 +64,14 @@ class BrixadiiAttackFrigate extends MediumShip{
                     5 => "Thruster",
 					6 => "Kinetic Box Launcher",
 					9 => "Heavy Particle Projector",
-                    10 => "Projector Array",
+                    10 => "Particle Bolter",
 					17 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     7 => "Thruster",
 					8 => "Chaff Launcher",
-                    10 => "Light Particle Projector",
+                    10 => "Light Particle Beam",
                     17 => "Structure",
                     20 => "Primary",
             ),

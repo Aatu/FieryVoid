@@ -39,6 +39,8 @@ class BrixadiiLightEscortFrigate extends MediumShip{
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 180, 60));
 		$this->addFrontSystem(new EnergyPulsar(2, 6, 3, 300, 60));
+		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 300, 60));
+		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 300, 60));
 		$this->addFrontSystem(new EnergyPulsar(2, 6, 3, 300, 60));
 		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 300, 180));
 		$this->addFrontSystem(new NexusAntifighterLauncher(0, 6, 0, 270, 90));

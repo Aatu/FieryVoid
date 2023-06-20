@@ -4,7 +4,7 @@ class BrixadiiPursuitFrigate2057 extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 300;
+        $this->pointCost = 330;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiPursuitFrigate2057";
         $this->imagePath = "img/ships/Nexus/BrixadiiPursuitFrigate.png";
@@ -38,15 +38,17 @@ class BrixadiiPursuitFrigate2057 extends MediumShip{
       
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-		$this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 240, 60));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
+		$this->addFrontSystem(new NexusParticleBolter(2, 6, 2, 300, 60));
 		$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 300, 60));
-		$this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 300, 120));
+		$this->addFrontSystem(new NexusParticleBolter(2, 6, 2, 300, 60));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
 		$this->addFrontSystem(new NexusKineticBoxLauncher(0, 4, 0, 300, 60));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
-        $this->addAftSystem(new LightParticleProjector(1, 3, 1, 120, 360));
-        $this->addAftSystem(new LightParticleProjector(1, 3, 1, 0, 240));
+        $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 120, 360));
+        $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 0, 240));
 		$this->addAftSystem(new NexusChaffLauncher(2, 2, 1, 0, 360));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -61,9 +63,10 @@ class BrixadiiPursuitFrigate2057 extends MediumShip{
                     20 => "C&C",
             ),
             1=> array(
-                    5 => "Thruster",
-					6 => "Kinetic Box Launcher",
-                    8 => "Projector Array",
+                    4 => "Thruster",
+					5 => "Kinetic Box Launcher",
+                    7 => "Particle Bolter",
+					8 => "Light Particle Beam",
 					10 => "Heavy Particle Projector",
 					17 => "Structure",
                     20 => "Primary",
@@ -71,7 +74,7 @@ class BrixadiiPursuitFrigate2057 extends MediumShip{
             2=> array(
                     7 => "Thruster",
 					8 => "Chaff Launcher",
-                    10 => "Light Particle Projector",
+                    10 => "Light Particle Beam",
                     17 => "Structure",
                     20 => "Primary",
             ),

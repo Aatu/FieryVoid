@@ -4,7 +4,7 @@ class BrixadiiBattleDestroyer2057 extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 430;
+        $this->pointCost = 440;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiBattleDestroyer2057";
         $this->imagePath = "img/ships/Nexus/BrixadiiBattleDestroyer.png";
@@ -39,14 +39,16 @@ class BrixadiiBattleDestroyer2057 extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
     	$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 240, 0));
         $this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 0, 120));
-        $this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 240, 60));
-        $this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 300, 120));
+        $this->addFrontSystem(new NexusParticleBolter(2, 6, 2, 240, 60));
+        $this->addFrontSystem(new NexusParticleBolter(2, 6, 2, 300, 120));
 		$this->addFrontSystem(new NexusKineticBoxLauncher(0, 4, 0, 300, 60));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
-        $this->addAftSystem(new NexusProjectorArray(2, 6, 1, 180, 360));
-        $this->addAftSystem(new NexusProjectorArray(2, 6, 1, 0, 180));
+        $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
+        $this->addAftSystem(new NexusParticleBolter(2, 6, 2, 180, 360));
+        $this->addAftSystem(new NexusParticleBolter(2, 6, 2, 0, 180));
+        $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 0, 180));
 		$this->addAftSystem(new NexusChaffLauncher(2, 2, 0, 0, 360));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -66,7 +68,7 @@ class BrixadiiBattleDestroyer2057 extends HeavyCombatVessel{
             ),
             1=> array(
                     5 => "Thruster",
-                    7 => "Projector Array",
+                    7 => "Particle Bolter",
                     10 => "Heavy Particle Projector",
 					12 => "Kinetic Box Launcher",
 					18 => "Structure",
@@ -75,7 +77,8 @@ class BrixadiiBattleDestroyer2057 extends HeavyCombatVessel{
             2=> array(
                     6 => "Thruster",
 					7 => "Chaff Launcher",
-					9 => "Projector Array",
+					9 => "Particle Bolter",
+					10 => "Light Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),

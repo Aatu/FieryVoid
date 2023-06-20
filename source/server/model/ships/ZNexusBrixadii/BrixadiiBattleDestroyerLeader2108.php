@@ -4,7 +4,7 @@ class BrixadiiBattleDestroyerLeader2108 extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 510;
+        $this->pointCost = 520;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiBattleDestroyerLeader2108";
         $this->imagePath = "img/ships/Nexus/BrixadiiBDDLeader.png";
@@ -40,6 +40,7 @@ class BrixadiiBattleDestroyerLeader2108 extends HeavyCombatVessel{
     	$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 240, 0));
         $this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 0, 120));
 		$this->addFrontSystem(new NexusKineticBoxLauncher(0, 4, 0, 300, 60));
+		$this->addFrontSystem(new NexusKineticBoxLauncher(0, 4, 0, 300, 60));
         $this->addFrontSystem(new EnergyPulsar(2, 6, 3, 240, 60));
         $this->addFrontSystem(new EnergyPulsar(2, 6, 3, 300, 120));
                 
@@ -47,8 +48,8 @@ class BrixadiiBattleDestroyerLeader2108 extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new EnergyPulsar(2, 6, 3, 180, 360));
         $this->addAftSystem(new EnergyPulsar(2, 6, 3, 0, 180));
-		$this->addAftSystem(new ScatterPulsar(2, 4, 2, 120, 360));
-		$this->addAftSystem(new ScatterPulsar(2, 4, 2, 0, 240));
+		$this->addAftSystem(new ScatterPulsar(1, 4, 2, 180, 360));
+		$this->addAftSystem(new ScatterPulsar(1, 4, 2, 0, 180));
 		$this->addAftSystem(new NexusChaffLauncher(2, 2, 1, 0, 360));
 		$this->addAftSystem(new NexusChaffLauncher(2, 2, 1, 0, 360));
 
@@ -78,8 +79,8 @@ class BrixadiiBattleDestroyerLeader2108 extends HeavyCombatVessel{
             2=> array(
                     6 => "Thruster",
 					7 => "Chaff Launcher",
-					9 => "Scatter Pulsar",
-                    11 => "Energy Pulsar",
+					9 => "Energy Pulsar",
+                    11 => "Scatter Pulsar",
                     18 => "Structure",
                     20 => "Primary",
             ),

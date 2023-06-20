@@ -37,13 +37,15 @@ class BrixadiiBattleDestroyerBase extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
     	$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 240, 360));
         $this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 0, 120));
-        $this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 240, 60));
-        $this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 300, 120));
+        $this->addFrontSystem(new NexusParticleBolter(2, 6, 2, 240, 60));
+        $this->addFrontSystem(new NexusParticleBolter(2, 6, 2, 300, 120));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
-        $this->addAftSystem(new NexusProjectorArray(2, 6, 1, 180, 360));
-        $this->addAftSystem(new NexusProjectorArray(2, 6, 1, 0, 180));
+        $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
+        $this->addAftSystem(new NexusParticleBolter(2, 6, 2, 180, 360));
+        $this->addAftSystem(new NexusParticleBolter(2, 6, 2, 0, 180));
+        $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 45));
@@ -62,14 +64,15 @@ class BrixadiiBattleDestroyerBase extends HeavyCombatVessel{
             ),
             1=> array(
                     5 => "Thruster",
-                    7 => "Projector Array",
+                    7 => "Particle Bolter",
                     10 => "Heavy Particle Projector",
 					18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     7 => "Thruster",
-					9 => "Projector Array",
+					9 => "Particle Bolter",
+					19 => "Light Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),

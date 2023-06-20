@@ -59,7 +59,6 @@ class Corumai extends BaseShip{
         $this->addRightSystem(new GravitonBeam(5, 8, 8, 0, 60));
         $this->addRightSystem(new GravitonBeam(5, 8, 8, 0, 60));
         $this->addRightSystem(new GravitonBeam(5, 8, 8, 120, 180));
-        $this->addRightSystem(new GraviticThruster(5, 20, 0, 6, 4));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(5, 54));

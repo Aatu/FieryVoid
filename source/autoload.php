@@ -1570,6 +1570,7 @@ spl_autoload_register(
 				'nexusmedassaultcannon' => '/server/model/weapons/customNexus.php', 
 				'nexusmauler' => '/server/model/weapons/customNexus.php', 
 				'nexusparticleagitator' => '/server/model/weapons/customNexus.php', 
+				'nexusparticlebolter' => '/server/model/weapons/customNexus.php', 
 				'nexusprojectorarray' => '/server/model/weapons/customNexus.php',
 				'nexuslightprojectorarray' => '/server/model/weapons/customNexus.php',
 				'nexusimprovedparticlebeam' => '/server/model/weapons/customNexus.php',
@@ -1697,14 +1698,17 @@ spl_autoload_register(
                 'craytanaprinan' => '/server/model/ships/ZNexusCraytan/CraytanAprinan.php',					
                 'craytanavitun' => '/server/model/ships/ZNexusCraytan/CraytanAvitun.php',					
                 'craytanbromin' => '/server/model/ships/ZNexusCraytan/CraytanBromin.php',					
+                'craytanbrominrefit' => '/server/model/ships/ZNexusCraytan/CraytanBrominRefit.php',					
                 'craytanmaprin' => '/server/model/ships/ZNexusCraytan/CraytanMaprin.php',					
                 'craytanmaprinrefit' => '/server/model/ships/ZNexusCraytan/CraytanMaprinRefit.php',					
 //                'craytancorvette2089' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2089.php',					
 //                'craytancorvette2126' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2126.php',					
                 'craytancalen' => '/server/model/ships/ZNexusCraytan/CraytanCalen.php',					
+                'craytancrimur' => '/server/model/ships/ZNexusCraytan/CraytanCrimur.php',					
                 'craytandakran' => '/server/model/ships/ZNexusCraytan/CraytanDakran.php',					
                 'craytanepiron' => '/server/model/ships/ZNexusCraytan/CraytanEpiron.php',					
                 'craytanepironrefit' => '/server/model/ships/ZNexusCraytan/CraytanEpironRefit.php',					
+                'craytaneskavin' => '/server/model/ships/ZNexusCraytan/CraytanEskavin.php',					
                 'craytanforin' => '/server/model/ships/ZNexusCraytan/CraytanForin.php',					
                 'craytangramitha' => '/server/model/ships/ZNexusCraytan/CraytanGramitha.php',					
                 'craytanhelis' => '/server/model/ships/ZNexusCraytan/CraytanHelis.php',					
@@ -1724,6 +1728,7 @@ spl_autoload_register(
                 'craytantironrefit' => '/server/model/ships/ZNexusCraytan/CraytanTironRefit.php',					
                 'craytantopren' => '/server/model/ships/ZNexusCraytan/CraytanTopren.php',					
                 'craytantoprenearly' => '/server/model/ships/ZNexusCraytan/CraytanToprenEarly.php',					
+                'craytanulten' => '/server/model/ships/ZNexusCraytan/CraytanUlten.php',					
                 'craytanyupinarescort' => '/server/model/ships/ZNexusCraytan/CraytanYupinarEscort.php',					
 
 
@@ -1731,6 +1736,8 @@ spl_autoload_register(
 
 				//Nexus ships - Dalithorn
                 'dalithorncarrier' => '/server/model/ships/ZNexusDalithorn/DalithornCarrier.php',					
+                'dalithorncoilcruiser' => '/server/model/ships/ZNexusDalithorn/DalithornCoilCruiser.php',					
+                'dalithorncoilcruiserrefit' => '/server/model/ships/ZNexusDalithorn/DalithornCoilCruiserRefit.php',					
                 'dalithorncommandfrigate' => '/server/model/ships/ZNexusDalithorn/DalithornCommandFrigate.php',					
                 'dalithorncommandfrigaterefit' => '/server/model/ships/ZNexusDalithorn/DalithornCommandFrigateRefit.php',					
                 'dalithorncutter' => '/server/model/ships/ZNexusDalithorn/DalithornCutter.php',					
@@ -1764,6 +1771,7 @@ spl_autoload_register(
                 'dalithornosatearly' => '/server/model/ships/ZNexusDalithorn/DalithornOSATEarly.php',					
                 'dalithornosatrefit' => '/server/model/ships/ZNexusDalithorn/DalithornOSATRefit.php',					
                 'dalithornpinnace' => '/server/model/ships/ZNexusDalithorn/DalithornPinnace.php',					
+                'dalithornprototypejumpcruiser' => '/server/model/ships/ZNexusDalithorn/DalithornPrototypeJumpcruiser.php',					
                 'dalithornscoutfrigate' => '/server/model/ships/ZNexusDalithorn/DalithornScoutFrigate.php',					
                 'dalithornscoutcruiser' => '/server/model/ships/ZNexusDalithorn/DalithornScoutCruiser.php',					
                 'dalithornsmallscout' => '/server/model/ships/ZNexusDalithorn/DalithornSmallScout.php',					
@@ -1771,6 +1779,8 @@ spl_autoload_register(
                 'dalithornstation' => '/server/model/ships/ZNexusDalithorn/DalithornStation.php',					
                 'dalithornstationearly' => '/server/model/ships/ZNexusDalithorn/DalithornStationEarly.php',					
                 'dalithornsupportfrigate' => '/server/model/ships/ZNexusDalithorn/DalithornSupportFrigate.php',					
+                'dalithorntransport' => '/server/model/ships/ZNexusDalithorn/DalithornTransport.php',					
+                'dalithorntransportrefit' => '/server/model/ships/ZNexusDalithorn/DalithornTransportRefit.php',					
                 'dalithornwarstation' => '/server/model/ships/ZNexusDalithorn/DalithornWarStation.php',					
 
 

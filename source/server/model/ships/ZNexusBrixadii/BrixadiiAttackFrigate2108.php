@@ -4,7 +4,7 @@ class BrixadiiAttackFrigate2108 extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 360;
+        $this->pointCost = 380;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiAttackFrigate2108";
         $this->imagePath = "img/ships/Nexus/BrixadiiAttackFrigate.png";

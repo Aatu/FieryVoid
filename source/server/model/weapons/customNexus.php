@@ -2388,16 +2388,16 @@ class NexusShatterGunFtr extends Weapon{
 	}	    
 	    
         public function getDamage($fireOrder){
-            return 3; 
+            return 4; 
         }
  
         public function setMinDamage()
         {
-            $this->minDamage = 3;
+            $this->minDamage = 4;
         }
         public function setMaxDamage()
         {
-            $this->maxDamage = 3 ;
+            $this->maxDamage = 4 ;
         }
 		
     }  // endof NexusACIDS
@@ -3132,7 +3132,7 @@ class NexusMinigun extends Weapon{
 		public function getDamage($fireOrder){
         	switch($this->firingMode){ 
             	case 1:
-                	return 3;
+                	return 4;
 			    			break;
             	case 2:
             	   	return Dice::d(3, 1)*4;
@@ -3143,7 +3143,7 @@ class NexusMinigun extends Weapon{
 		public function setMinDamage(){
 				switch($this->firingMode){
 						case 1:
-								$this->minDamage = 3;
+								$this->minDamage = 4;
 								break;
 						case 2:
 								$this->minDamage = 4;
@@ -3155,7 +3155,7 @@ class NexusMinigun extends Weapon{
 		public function setMaxDamage(){
 				switch($this->firingMode){
 						case 1:
-								$this->maxDamage = 3;
+								$this->maxDamage = 4;
 								break;
 						case 2:
 								$this->maxDamage = 12;
@@ -3549,6 +3549,37 @@ class NexusMauler extends Particle{
         public function setMinDamage(){     $this->minDamage = 2 ;      }
         public function setMaxDamage(){     $this->maxDamage = 11 ;      }
     }
+
+
+
+
+    class NexusParticleBolter extends Particle{
+        public $name = "NexusParticleBolter";
+        public $displayName = "Particle Bolter";
+		public $iconPath = "NexusParticleBolter.png";
+	    
+        public $animation = "bolt";
+        public $animationColor = array(204, 122, 0);
+
+        public $intercept = 1;
+        public $loadingtime = 2;
+        public $priority = 4;
+
+        public $rangePenalty = 1; //-1/hex
+        public $fireControl = array(1, 2, 2); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return 12;   }
+        public function setMinDamage(){     $this->minDamage = 12 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+		
+    }  //end NexusParticleBolter
 
 
 

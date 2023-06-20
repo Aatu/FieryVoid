@@ -4,7 +4,7 @@ class VelraxSathrinRefit2 extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 365;
+        $this->pointCost = 380;
         $this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxSathrinRefit2";
         $this->imagePath = "img/ships/Nexus/VelraxSathrin.png";

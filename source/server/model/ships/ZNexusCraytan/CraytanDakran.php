@@ -5,7 +5,7 @@ class CraytanDakran extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 625;
-	$this->faction = "ZNexus Playtest Craytan";
+	$this->faction = "ZNexus Craytan";
         $this->phpclass = "CraytanDakran";
         $this->imagePath = "img/ships/Nexus/CraytanDakran.png";
         $this->shipClass = "Dakran Heavy Cruiser";
@@ -15,7 +15,7 @@ class CraytanDakran extends BaseShip{
 
         $this->fighters = array("assault shuttles"=>6);
 
-		$this->isd = 2137;
+		$this->isd = 2127;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
@@ -36,10 +36,11 @@ class CraytanDakran extends BaseShip{
 		
         $this->addFrontSystem(new Thruster(4, 9, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 9, 0, 4, 1));
-        $this->addFrontSystem(new NexusAssaultCannon(4, 8, 5, 330, 30));
+		$this->addFrontSystem(new NexusHeavyEnhPlasma(3, 9, 5, 240, 360));
+		$this->addFrontSystem(new NexusLightEnhPlasma(2, 5, 2, 240, 60));
 		$this->addFrontSystem(new NexusACIDS(3, 6, 2, 270, 90));
-		$this->addFrontSystem(new NexusLightEnhPlasma(2, 5, 2, 300, 60));
-        $this->addFrontSystem(new NexusAssaultCannon(4, 8, 5, 330, 30));
+		$this->addFrontSystem(new NexusLightEnhPlasma(2, 5, 2, 300, 120));
+		$this->addFrontSystem(new NexusHeavyEnhPlasma(3, 9, 5, 0, 120));
 
         $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
@@ -49,12 +50,12 @@ class CraytanDakran extends BaseShip{
 		$this->addAftSystem(new NexusACIDS(3, 6, 2, 90, 270));
 		$this->addAftSystem(new NexusMedEnhPlasma(3, 6, 4, 60, 180));
 
-		$this->addLeftSystem(new NexusHeavyEnhPlasma(3, 9, 5, 240, 360));
+        $this->addLeftSystem(new NexusAssaultCannon(4, 8, 5, 300, 360));
 		$this->addLeftSystem(new NexusMedEnhPlasma(3, 6, 4, 180, 360));
 		$this->addLeftSystem(new NexusACIDS(3, 6, 2, 180, 360));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
-		$this->addRightSystem(new NexusHeavyEnhPlasma(3, 9, 5, 0, 120));
+        $this->addRightSystem(new NexusAssaultCannon(4, 8, 5, 0, 60));
 		$this->addRightSystem(new NexusMedEnhPlasma(3, 6, 4, 0, 180));
 		$this->addRightSystem(new NexusACIDS(3, 6, 2, 0, 180));
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
@@ -78,16 +79,16 @@ class CraytanDakran extends BaseShip{
 			),
 			1=> array(
 					5 => "Thruster",
-					6 => "Light Enhanced Plasma",
-					7 => "Advanced Close-In Defense System",
-					10 => "Assault Cannon",
+					7 => "Light Enhanced Plasma",
+					8 => "Advanced Close-In Defense System",
+					10 => "Heavy Enhanced Plasma",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
 					6 => "Thruster",
 					7 => "Advanced Close-In Defense System",
-					10 => "Medium Enhanced Plasma",
+					9 => "Medium Enhanced Plasma",
 					18 => "Structure",
 					20 => "Primary",
 			),
@@ -95,7 +96,7 @@ class CraytanDakran extends BaseShip{
 					5 => "Thruster",
 					6 => "Advanced Close-In Defense System",
 					8 => "Medium Enhanced Plasma",
-					10 => "Heavy Enhanced Plasma",
+					10 => "Assault Cannon",
 					18 => "Structure",
 					20 => "Primary",
 			),
@@ -103,7 +104,7 @@ class CraytanDakran extends BaseShip{
 					5 => "Thruster",
 					6 => "Advanced Close-In Defense System",
 					8 => "Medium Enhanced Plasma",
-					10 => "Heavy Enhanced Plasma",
+					10 => "Assault Cannon",
 					18 => "Structure",
 					20 => "Primary",
 			),

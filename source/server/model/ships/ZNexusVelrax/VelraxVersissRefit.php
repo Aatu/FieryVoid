@@ -4,7 +4,7 @@ class VelraxVersissRefit extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 445;
+	$this->pointCost = 470;
 	$this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxVersissRefit";
         $this->imagePath = "img/ships/Nexus/VelraxVersiss.png";

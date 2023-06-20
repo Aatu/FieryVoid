@@ -5,7 +5,7 @@ class CraytanGramitha extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 405;
-        $this->faction = "ZNexus Playtest Craytan";
+        $this->faction = "ZNexus Craytan";
         $this->phpclass = "CraytanGramitha";
         $this->imagePath = "img/ships/Nexus/CraytanCorvette.png";
         $this->shipClass = "Gramitha Escort Frigate";
