@@ -19,7 +19,7 @@ class BrixadiiPursuitFrigateBase extends MediumShip{
         
 		$this->agile = true;
         $this->turncost = 0.33;
-        $this->turndelaycost = 0.50;
+        $this->turndelaycost = 0.33;
         $this->accelcost = 2;
         $this->rollcost = 1;
         $this->pivotcost = 1;
@@ -28,7 +28,7 @@ class BrixadiiPursuitFrigateBase extends MediumShip{
         $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 4, 5));
-        $this->addPrimarySystem(new Engine(4, 9, 0, 8, 4));
+        $this->addPrimarySystem(new Engine(4, 9, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(1, 2));
         $this->addPrimarySystem(new Thruster(2, 7, 0, 2, 3));
         $this->addPrimarySystem(new Thruster(2, 7, 0, 2, 3));

@@ -26,7 +26,7 @@ class BrixadiiBattleDestroyerBase extends HeavyCombatVessel{
         $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(5, 10, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 5, 5));
-        $this->addPrimarySystem(new Engine(4, 14, 0, 8, 4));
+        $this->addPrimarySystem(new Engine(4, 14, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(1, 2));
         $this->addPrimarySystem(new Thruster(3, 7, 0, 2, 3));
         $this->addPrimarySystem(new Thruster(3, 7, 0, 2, 3));

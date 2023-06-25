@@ -20,7 +20,7 @@ class BrixadiiAttackFrigate2108 extends MediumShip{
         
 		$this->agile = true;
         $this->turncost = 0.33;
-        $this->turndelaycost = 0.50;
+        $this->turndelaycost = 0.33;
         $this->accelcost = 2;
         $this->rollcost = 1;
         $this->pivotcost = 1;
@@ -29,22 +29,22 @@ class BrixadiiAttackFrigate2108 extends MediumShip{
         $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 4, 5));
-        $this->addPrimarySystem(new Engine(4, 9, 0, 9, 4));
+        $this->addPrimarySystem(new Engine(4, 9, 0, 10, 3));
         $this->addPrimarySystem(new Hangar(1, 2));
         $this->addPrimarySystem(new Thruster(2, 7, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 7, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 7, 0, 3, 4));
         $this->addPrimarySystem(new Thruster(2, 7, 0, 3, 4));
       
-        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 5, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 5, 1));
 		$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 300, 360));
 		$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 0, 60));
 		$this->addFrontSystem(new EnergyPulsar(2, 6, 3, 300, 60));
 		$this->addFrontSystem(new NexusKineticBoxLauncher(0, 4, 0, 300, 60));
                 
-        $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
-        $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
+        $this->addAftSystem(new Thruster(3, 14, 0, 5, 2));
+        $this->addAftSystem(new Thruster(3, 14, 0, 5, 2));
         $this->addAftSystem(new ScatterPulsar(2, 4, 2, 120, 360));
         $this->addAftSystem(new ScatterPulsar(2, 4, 2, 0, 240));
 		$this->addAftSystem(new NexusChaffLauncher(2, 2, 1, 0, 360));
