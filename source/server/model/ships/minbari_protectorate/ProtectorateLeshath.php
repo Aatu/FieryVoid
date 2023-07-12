@@ -4,7 +4,7 @@ class ProtectorateLeshath extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
-        $this->pointCost = 1350;
+        $this->pointCost = 1500;
         $this->faction = "Minbari Protectorate";
         $this->phpclass = "ProtectorateLeshath";
         $this->imagePath = "img/ships/leshath.png";
@@ -12,8 +12,10 @@ class ProtectorateLeshath extends BaseShip{
         $this->shipSizeClass = 3;
         $this->gravitic = true;
         $this->limited = 10;
-        $this->fighters = array();
+		$this->occurence = "unique";
+
         $this->fighters = array("normal"=>6);
+
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
         $this->turncost = 1.0;
@@ -23,7 +25,6 @@ class ProtectorateLeshath extends BaseShip{
         $this->pivotcost = 4;
         $this->iniativebonus = 5;
         $this->isd = 1995;
-			$this->occurence = "unique";
 
         // Ship system arguments: armor, health, power req, output
         $this->addPrimarySystem(new Reactor(6, 25, 0, 0));
@@ -32,6 +33,7 @@ class ProtectorateLeshath extends BaseShip{
         $this->addPrimarySystem(new Engine(6, 20, 0, 10, 3));
         $this->addPrimarySystem(new JumpEngine(6, 25, 5, 16));
         $this->addPrimarySystem(new Hangar(5, 8));
+        $this->addPrimarySystem(new Jammer(5, 10, 5));
 
         // weapons arguments: armor, health, power, start arc, end arc
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
@@ -67,9 +69,10 @@ class ProtectorateLeshath extends BaseShip{
 		
 		$this->hitChart = array(
             0=> array(
-                    10 => "Structure",
-					12 => "Engine",
-                    14 => "Jump Engine",
+                    8 => "Structure",
+					10 => "Engine",
+                    12 => "Jump Engine",
+					14 => "Jammer",
                     16 => "ELINT Scanner",
                     17 => "Hangar",
                     19 => "Reactor",
