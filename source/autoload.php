@@ -2111,6 +2111,7 @@ spl_autoload_register(
                 'legionaugustus' => '/server/model/ships/raiders/LegionAugustus.php',
                 'legiongladius' => '/server/model/ships/raiders/LegionGladius.php',
                 'legionstarjammer' => '/server/model/ships/raiders/LegionStarjammer.php',
+                'legiontroligan' => '/server/model/ships/raiders/LegionTroligan.php',
 
                 'tfsblockaderunner' => '/server/model/ships/raiders/tfsblockaderunner.php',
                 'tfsfreedombase' => '/server/model/ships/raiders/tfsfreedombase.php',
