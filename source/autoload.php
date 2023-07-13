@@ -2140,6 +2140,7 @@ spl_autoload_register(
                 'protectoraterolentha' => '/server/model/ships/minbari_protectorate/ProtectorateRolentha.php',
                 'protectoratesheganna' => '/server/model/ships/minbari_protectorate/ProtectorateSheganna.php',
                 'protectoratetigara' => '/server/model/ships/minbari_protectorate/ProtectorateTigara.php',
+                'protectoratetigarasurvey' => '/server/model/ships/minbari_protectorate/ProtectorateTigaraSurvey.php',
                 'protectoratetigarin' => '/server/model/ships/minbari_protectorate/ProtectorateTigarin.php',
                 'protectoratetinashi' => '/server/model/ships/minbari_protectorate/ProtectorateTinashi.php',
                 'protectoratetishat' => '/server/model/ships/minbari_protectorate/ProtectorateTishat.php',
