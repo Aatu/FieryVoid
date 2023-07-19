@@ -9,11 +9,11 @@ class VelraxLaserGunboatRefit extends LCV{
         $this->phpclass = "VelraxLaserGunboatRefit";
         $this->imagePath = "img/ships/Nexus/VelraxGunboat.png";
 			$this->canvasSize = 55; //img has 200px per side
-        $this->shipClass = "Liviss Gunboat (2064 Refit)";
+        $this->shipClass = "Liviss Gunboat (2061 Refit)";
 			$this->variantOf = "Nashran Gunboat";
 			$this->occurence = "common";
 		$this->unofficial = true;
-			$this->isd = 2064;
+			$this->isd = 2061;
 
         $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
 	    $this->notes = 'May deploy independently.';

@@ -8,12 +8,12 @@ class VelraxThristenCorvetteRefit extends MediumShip{
         $this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxThristenCorvetteRefit";
         $this->imagePath = "img/ships/Nexus/VelraxThristen.png";
-        $this->shipClass = "Thristen Corvette (2067 Refit)";
+        $this->shipClass = "Thristen Corvette (2059 Refit)";
 			$this->variantOf = "Thristen Corvette";
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->canvasSize = 75;
-	    $this->isd = 2067;
+	    $this->isd = 2059;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 10;
