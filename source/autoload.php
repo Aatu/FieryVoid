@@ -41,6 +41,8 @@ spl_autoload_register(
                 'aoe' => '/server/model/weapons/AoE.php',
                 //'apollo' => '/server/model/ships/EA/apollo.php',
                 //'apollofull' => '/server/model/ships/EA/apolloFull.php',
+                'arcismus' => '/server/model/ships/narn/arcismus.php',
+                'arcismur' => '/server/model/ships/narn/arcismur.php',
                 'armorreduced' => '/server/model/cricialClasses.php',
                 'artemisalpha' => '/server/model/ships/EA/artemisAlpha.php',
                 'artemisalpha_early' => '/server/model/ships/EA_old/artemisAlpha_early.php',
