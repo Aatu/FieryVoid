@@ -9,8 +9,8 @@ class VelraxVersissRefit extends HeavyCombatVesselLeftRight{
         $this->phpclass = "VelraxVersissRefit";
         $this->imagePath = "img/ships/Nexus/VelraxVersiss.png";
         $this->shipClass = "Versiss Combat Scout (2108 refit)";
-			$this->variantOf = "Versiss Combat Scout";
-			$this->occurence = "common";
+			$this->variantOf = "Versythe Explorer";
+			$this->occurence = "rare";
 	    $this->isd = 2108;
         $this->limited = 10;
         $this->canvasSize = 105;
