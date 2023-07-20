@@ -16,7 +16,7 @@ class VelraxFleetCarrier extends BaseShip{
 
         $this->fighters = array("light"=>36, "heavy"=>12);
 
-		$this->isd = 2057;
+		$this->isd = 2060;
         
         $this->forwardDefense = 17;
         $this->sideDefense = 17;

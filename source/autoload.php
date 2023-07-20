@@ -1869,6 +1869,8 @@ spl_autoload_register(
                 'velraxosat' => '/server/model/ships/ZNexusVelrax/VelraxOSAT.php',					
                 'velraxosatearly' => '/server/model/ships/ZNexusVelrax/VelraxOSATEarly.php',					
                 'velraxosatrefit' => '/server/model/ships/ZNexusVelrax/VelraxOSATRefit.php',					
+                'velraxozaraescort' => '/server/model/ships/ZNexusVelrax/VelraxOzaraEscort.php',					
+                'velraxozararefit' => '/server/model/ships/ZNexusVelrax/VelraxOzaraRefit.php',					
                 'velraxrastencorvette' => '/server/model/ships/ZNexusVelrax/VelraxRastenCorvette.php',					
                 'velraxrastencorvetterefit' => '/server/model/ships/ZNexusVelrax/VelraxRastenCorvetteRefit.php',					
                 'velraxrastencorvetterefit2' => '/server/model/ships/ZNexusVelrax/VelraxRastenCorvetteRefit2.php',					
