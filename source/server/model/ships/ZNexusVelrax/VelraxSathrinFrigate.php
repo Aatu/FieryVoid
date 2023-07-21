@@ -13,6 +13,8 @@ class VelraxSathrinFrigate extends MediumShip{
         $this->agile = true;
         $this->canvasSize = 60;
 	    $this->isd = 2062;
+
+	    $this->notes = 'Atmospheric Capable.';
         
         $this->forwardDefense = 11;
         $this->sideDefense = 13;
