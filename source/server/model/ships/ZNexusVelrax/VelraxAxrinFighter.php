@@ -1,27 +1,27 @@
 <?php
-class VelraxResteraxFighter extends FighterFlight{
+class VelraxAxrinFighter extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 44*6;
+        $this->pointCost = 40*6;
         $this->faction = "ZNexus Velrax";
-        $this->phpclass = "VelraxResteraxFighter";
-        $this->shipClass = "Resterax Assault flight";
+        $this->phpclass = "VelraxAxrinFighter";
+        $this->shipClass = "Axrin Strike flight";
         $this->imagePath = "img/ships/Nexus/VelraxResterax_v2.png";
 		$this->unofficial = true;
 
-        $this->isd = 2062;
+        $this->isd = 2032;
         
-        $this->forwardDefense = 7;
+        $this->forwardDefense = 8;
         $this->sideDefense = 8;
-        $this->freethrust = 9;
+        $this->freethrust = 8;
         $this->offensivebonus = 4;
-        $this->jinkinglimit = 6;
+        $this->jinkinglimit = 8;
         $this->turncost = 0.33;
 		$this->turndelay = 0;
         
-        $this->iniativebonus = 80;
+        $this->iniativebonus = 90;
         $this->populate();       
 
     }
@@ -33,20 +33,14 @@ class VelraxResteraxFighter extends FighterFlight{
         $toAdd = $new - $current;
 
         for ($i = 0; $i < $toAdd; $i++){            
-            $armour = array(3, 1, 1, 1);
-            $fighter = new Fighter("VelraxResteraxFighter", $armour, 12, $this->id);
-            $fighter->displayName = "Resterax";
+            $armour = array(2, 1, 2, 2);
+            $fighter = new Fighter("VelraxAxrinFighter", $armour, 10, $this->id);
+            $fighter->displayName = "Axrin";
             $fighter->imagePath = "img/ships/Nexus/VelraxResterax_v2.png";
             $fighter->iconPath = "img/ships/Nexus/VelraxResterax_Large.png";
 
-//			$mauler = new NexusMauler(330, 30, 1);
-//			$fighter->addFrontSystem($mauler);
 			$fighter->addFrontSystem(new IonBolt(330, 30));
-	        $light = new NexusLightIonGun(330, 30, 0, 1); //$startArc, $endArc, $nrOfShots
-	        $fighter->addFrontSystem($light);
-			$aftLight = new NexusLightIonGun(150, 210, 0, 1);
-			
-			$fighter->addAftSystem($aftLight);
+
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			
             
             $this->addSystem($fighter);

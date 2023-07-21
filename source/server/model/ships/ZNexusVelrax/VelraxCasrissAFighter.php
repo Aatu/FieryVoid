@@ -11,7 +11,7 @@ class VelraxCasrissAFighter extends FighterFlight{
         $this->imagePath = "img/ships/Nexus/VelraxCasriss_v2.png";
 		$this->unofficial = true;
 
-        $this->isd = 2033;
+        $this->isd = 2017;
         
         $this->forwardDefense = 7;
         $this->sideDefense = 7;

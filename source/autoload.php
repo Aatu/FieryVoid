@@ -1846,6 +1846,7 @@ spl_autoload_register(
 
 
 				//Nexus ships - Velrax
+                'velraxaxrinfighter' => '/server/model/ships/ZNexusVelrax/VelraxAxrinFighter.php',					
                 'velraxcommandbase' => '/server/model/ships/ZNexusVelrax/VelraxCommandBase.php',					
                 'velraxarccorvette' => '/server/model/ships/ZNexusVelrax/VelraxArcCorvette.php',					
                 'velraxarccorvetterefit' => '/server/model/ships/ZNexusVelrax/VelraxArcCorvetteRefit.php',					
