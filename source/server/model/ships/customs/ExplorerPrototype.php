@@ -15,6 +15,8 @@ class ExplorerPrototype extends BaseShip{
 //			$this->limited = 10;
 		$this->isd = 2259;
 		$this->unofficial = true; 
+		
+	    $this->notes .= "<br>This is a custom ship only intended for use in a specific scenario, please do not use unless you've agreed it with your opponent first!";		
 	    
 	    
         $this->Enormous = true;
