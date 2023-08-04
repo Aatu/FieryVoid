@@ -93,7 +93,7 @@ window.fleetListManager = {
 			var currValue = Math.round(baseValue * ship.combatValue / 100);
 			totalBaseValue += baseValue;
 			totalCurrValue += currValue ;
-            fleetlistline.html("<span id='" + ship.id + "'><span class='shipname clickable' data-shipid='" + ship.id + "'>" + ship.name + "</span><span class='shipclass'>" + ship.phpclass + "</span><span class='shiptype'>" + shiptype + "</span><span class='initiative'>" + shipManager.getIniativeOrder(ship) + "</span><span class='value'>"+currValue+' / '+baseValue+" CP</span><span class='shipstatus'></span></span>");
+            fleetlistline.html("<span id='" + ship.id + "'><span class='shipname clickable' data-shipid='" + ship.id + "'>" + ship.name + "</span><span class='shipclass'>" + ship.phpclass + "</span><span class='shiptype'>" + shiptype + "</span><span class='initiative'>" + shipManager.getIniativeOrder(ship) + "</span><span class='value'>"+currValue+'/'+baseValue+"CP</span><span class='shipstatus'></span></span>");
             fleetlistline.appendTo(fleetlisttable);
         }
 	
