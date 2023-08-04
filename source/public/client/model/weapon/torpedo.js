@@ -36,7 +36,64 @@ PacketTorpedo.prototype.calculateSpecialRangePenalty = function (distance) {
 };
 
 var PsionicTorpedo = function PsionicTorpedo(json, ship) {
-    Torpedo.call(this, json, ship);
+    Weapon.call(this, json, ship);
 };
-PsionicTorpedo.prototype = Object.create(Torpedo.prototype);
+PsionicTorpedo.prototype = Object.create(Weapon.prototype);
 PsionicTorpedo.prototype.constructor = PsionicTorpedo;
+
+PsionicTorpedo.prototype.clearBoost = function () {
+    for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
+
+        if (power.type == 2) {
+            system.power.splice(i, 1);
+
+            return;
+        }
+    }
+}; 
+
+PsionicTorpedo.prototype.hasMaxBoost = function () {
+    return true;
+};
+
+PsionicTorpedo.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
+PsionicTorpedo.prototype.initBoostableInfo = function () {
+    if (window.weaponManager.isLoaded(this)) {} else {
+        var count = shipManager.power.getBoost(this);
+        for (var i = 0; i < count; i++) {
+            shipManager.power.unsetBoost(null, this);
+        }
+    }	
+
+    this.data.Boostlevel = shipManager.power.getBoost(this);
+    	
+    switch (shipManager.power.getBoost(this)) {
+        case 0:
+            this.data["Damage"] = '10 - 19';
+            this.data["Boostlevel"] = '0';
+            break;
+        case 1:
+            this.data["Damage"] = '12 - 21';
+            this.data["Boostlevel"] = '1';
+            break;
+        case 2:
+            this.data["Damage"] = '14 - 23';
+            this.data["Boostlevel"] = '2';
+            break;
+        case 3:
+            this.data["Damage"] = '16 - 25';
+            this.data["Boostlevel"] = '3';
+            break;             
+        default:
+            this.data["Damage"] = '10 - 19';
+            this.data["Boostlevel"] = '0';
+            break;
+    }
+    
+    return this;
+};

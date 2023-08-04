@@ -2838,6 +2838,7 @@ spl_autoload_register(
 				'gaimraxas' => '/server/model/ships/customs/gaimRaxas.php',
 				'apollowsf' => '/server/model/ships/customs/ApolloWSF.php',					
 				'prototype' => '/server/model/ships/customs/Prototype.php',
+				'explorerprototype' => '/server/model/ships/customs/ExplorerPrototype.php',
 				
 															 
 															   
@@ -3030,7 +3031,13 @@ spl_autoload_register(
 				'psionictorpedo' => '/server/model/weapons/torpedo.php',    
 				'thirdspacebattleship' => '/server/model/ships/thirdspace/ThirdspaceBattleship.php',
 				'thirdspacecnc' => '/server/model/systems/baseSystems.php',		
-				'thirdspaceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceAttackCraft.php',			
+				'thirdspaceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceAttackCraft.php',	
+				'thirdspacetorpedoattackcraft' => '/server/model/ships/thirdspace/ThirdspaceTorpedoAttackCraft.php',	
+				'thirdspacelanceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceLanceAttackCraft.php',
+				'thirdspacebattlescout' => '/server/model/ships/thirdspace/ThirdspaceBattleScout.php',		
+				'thirdspacecarrier' => '/server/model/ships/thirdspace/ThirdspaceCarrier.php',
+				'thirdspaceselfrepair' => '/server/model/systems/baseSystems.php',	
+		//		'thirdspacetestbed' => '/server/model/ships/thirdspace/ThirdspaceTestbed.php',
 						
 						//Development systems
 						'testgun' => '/server/model/weapons/customDevelopment.php',
