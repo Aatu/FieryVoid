@@ -2184,6 +2184,7 @@ spl_autoload_register(
                 'drakhheavyraider' => '/server/model/ships/drakh/drakhHeavyRaider.php',
                 'drakhheavyraiderescort' => '/server/model/ships/drakh/drakhHeavyRaiderEscort.php',
                 'drakhheavytender' => '/server/model/ships/drakh/drakhHeavyTender.php',
+                'drakhheavyexplorer' => '/server/model/ships/drakh/drakhHeavyExplorer.php',
                 'drakhpatrolship' => '/server/model/ships/drakh/drakhPatrolShip.php',
                 'drakhraidercontroller' => '/server/model/systems/baseSystems.php',
                 'drakhraiderflt' => '/server/model/ships/drakh/drakhRaiderFlt.php',

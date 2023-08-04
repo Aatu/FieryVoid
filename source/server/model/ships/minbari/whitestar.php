@@ -21,6 +21,7 @@ class WhiteStar extends MediumShip{
         $this->pivotcost = 1;
         $this->iniativebonus = 65;
         $this->isd = 2260;
+        $this->fighters = array("shuttles"=>2);
 		
         $this->limited = 33;
 		$this->notes = "Unlimited deployment in IA service.";

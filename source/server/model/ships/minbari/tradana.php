@@ -22,6 +22,7 @@ class Tradana extends MediumShip{
 		$this->iniativebonus = 65;
 		$this->isd = 2266;
 		$this->variantOf = "Torotha Assault Frigate";
+        $this->fighters = array("shuttles"=>2);
 
         $this->addPrimarySystem(new Reactor(5, 18, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));

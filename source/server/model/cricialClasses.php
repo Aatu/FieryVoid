@@ -59,7 +59,7 @@ class OutputHalved extends Critical{
 class OutputReduced extends Critical{
     public $description = "Output reduced.";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
-        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, $param);
     }
     function setParam($param){
         parent::setParam($param);

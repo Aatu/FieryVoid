@@ -22,6 +22,7 @@ class wlcAshinar extends HeavyCombatVessel{
         $this->isd = 1994;
         $this->unofficial = true;
         $this->variantOf = "Tinashi War Frigate";
+        $this->fighters = array("shuttles"=>2);
 		
 		$this->notes = 'ALTERNATE UNIVERSE - unit designed for "In ancient times" campaign';
 

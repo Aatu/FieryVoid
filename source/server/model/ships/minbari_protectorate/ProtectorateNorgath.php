@@ -8,7 +8,7 @@ class ProtectorateNorgath extends StarBaseSixSections{
 		$this->faction = 'Minbari Protectorate';
 		$this->phpclass = "ProtectorateNorgath";
 		$this->shipClass = "Norgath Starbase";
-		$this->fighters = array("heavy"=>36); 
+		$this->fighters = array("heavy"=>36, "shuttles"=>6); 
 
 		$this->shipSizeClass = 3; //Enormous is not implemented
 		$this->iniativebonus = -200; //no voluntary movement anyway

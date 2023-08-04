@@ -12,7 +12,6 @@ class ProtectorateFlyerCombat extends FighterFlight{
         $this->variantOf = "Assault Flyers";
     	$this->imagePath = "img/ships/MinbariFlyer.png";
         
-		$this->notes = "Usually housed in common shuttle bays (not mentioned in FV). Most ships can take a pair.";
 		
         $this->forwardDefense = 9;
         $this->sideDefense = 7;
@@ -22,7 +21,7 @@ class ProtectorateFlyerCombat extends FighterFlight{
 		$this->pivotcost = 2; //shuttles have pivot cost higher
         $this->turncost = 0.33;
 		
-		$this->hangarRequired = 'assault shuttles'; //for fleet check 
+		$this->hangarRequired = 'shuttles'; //for fleet check; they replace regular shuttles (rather than assault shuttles!) - which means a ship needs shuttle hangar tracked for it to work!
         $this->iniativebonus = 10*5;
         
         $this->gravitic = true;
