@@ -4,7 +4,7 @@ class VelraxSivrinGunship extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 350;
+	$this->pointCost = 365;
 	$this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxSivrinGunship";
         $this->imagePath = "img/ships/Nexus/VelraxSivrin.png";

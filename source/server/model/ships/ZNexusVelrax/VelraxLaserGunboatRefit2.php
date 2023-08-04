@@ -4,7 +4,7 @@ class VelraxLaserGunboatRefit2 extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 190;
+        $this->pointCost = 200;
         $this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxLaserGunboatRefit2";
         $this->imagePath = "img/ships/Nexus/VelraxGunboat.png";
@@ -16,7 +16,8 @@ class VelraxLaserGunboatRefit2 extends LCV{
 			$this->isd = 2110;
 
         $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
-	    $this->notes = 'May deploy independently.';
+	    $this->notes = 'Atmospheric Capable.';
+	    $this->notes .= '<br>May deploy independently.';
         
         $this->forwardDefense = 8;
         $this->sideDefense = 13;

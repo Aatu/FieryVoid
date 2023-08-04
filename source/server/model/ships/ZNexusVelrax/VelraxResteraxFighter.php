@@ -4,7 +4,7 @@ class VelraxResteraxFighter extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 38*6;
+        $this->pointCost = 44*6;
         $this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxResteraxFighter";
         $this->shipClass = "Resterax Assault flight";
@@ -39,8 +39,9 @@ class VelraxResteraxFighter extends FighterFlight{
             $fighter->imagePath = "img/ships/Nexus/VelraxResterax_v2.png";
             $fighter->iconPath = "img/ships/Nexus/VelraxResterax_Large.png";
 
-			$mauler = new NexusMauler(330, 30, 1);
-			$fighter->addFrontSystem($mauler);
+//			$mauler = new NexusMauler(330, 30, 1);
+//			$fighter->addFrontSystem($mauler);
+			$fighter->addFrontSystem(new IonBolt(330, 30));
 	        $light = new NexusLightIonGun(330, 30, 0, 1); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($light);
 			$aftLight = new NexusLightIonGun(150, 210, 0, 1);

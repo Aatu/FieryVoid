@@ -1,14 +1,14 @@
 <?php
-class CraytanSavor extends MediumShip{
+class CraytanSahvor extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 400;
-        $this->faction = "ZNexus Playtest Craytan";
-        $this->phpclass = "CraytanSavor";
+        $this->pointCost = 420;
+        $this->faction = "ZNexus Craytan";
+        $this->phpclass = "CraytanSahvor";
         $this->imagePath = "img/ships/Nexus/CraytanCorvette.png";
-        $this->shipClass = "Savor Frigate";
+        $this->shipClass = "Sahvor Frigate";
 		$this->unofficial = true;
         $this->canvasSize = 60;
         $this->agile = true;

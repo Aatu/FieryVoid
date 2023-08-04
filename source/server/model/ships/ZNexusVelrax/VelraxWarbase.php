@@ -4,7 +4,7 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
-		$this->pointCost = 735;
+		$this->pointCost = 750;
 		$this->base = true;
 		$this->smallBase = true;
 		$this->faction = "ZNexus Velrax";

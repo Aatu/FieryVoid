@@ -9,9 +9,13 @@ class VelraxArcCorvette extends MediumShip{
         $this->phpclass = "VelraxArcCorvette";
         $this->imagePath = "img/ships/Nexus/VelraxMassken.png";
         $this->shipClass = "Massken Arc Corvette";
+			$this->variantOf = "Thristen Corvette";
+			$this->occurence = "common";
 		$this->unofficial = true;
         $this->canvasSize = 75;
 	    $this->isd = 2000;
+
+	    $this->notes = 'Atmospheric Capable.';
         
         $this->forwardDefense = 12;
         $this->sideDefense = 10;
@@ -24,16 +28,15 @@ class VelraxArcCorvette extends MediumShip{
         $this->iniativebonus = 60;
          
         $this->addPrimarySystem(new Reactor(4, 8, 0, 0));
-        $this->addPrimarySystem(new CnC(4, 8, 0, 0));
+        $this->addPrimarySystem(new CnC(4, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 11, 4, 5));
         $this->addPrimarySystem(new Engine(3, 9, 0, 8, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));        
         
-		$this->addFrontSystem(new EWPlasmaArc(2, 5, 4, 300, 60));
 		$this->addFrontSystem(new NexusIonGun(1, 2, 2, 180, 60));
-		$this->addFrontSystem(new NexusIonGun(2, 2, 2, 240, 60));
-		$this->addFrontSystem(new NexusIonGun(2, 2, 2, 300, 120));
+		$this->addFrontSystem(new EWPlasmaArc(2, 5, 4, 300, 60));
+		$this->addFrontSystem(new EWPlasmaArc(2, 5, 4, 300, 60));
 		$this->addFrontSystem(new NexusIonGun(1, 2, 2, 300, 180));
         $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
 	    

@@ -4,7 +4,7 @@ class VelraxOSATRefit extends OSAT{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 190;
+		$this->pointCost = 200;
 		$this->faction = 'ZNexus Velrax';
         $this->phpclass = "VelraxOSATRefit";
         $this->imagePath = "img/ships/Nexus/VelraxOSAT_v2.png";

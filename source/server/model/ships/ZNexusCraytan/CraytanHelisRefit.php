@@ -5,7 +5,7 @@ class CraytanHelisRefit extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 180;
-        $this->faction = "ZNexus Playtest Craytan";
+        $this->faction = "ZNexus Craytan";
         $this->phpclass = "CraytanHelisRefit";
         $this->imagePath = "img/ships/Nexus/CraytanHelis.png";
 			$this->canvasSize = 55; //img has 200px per side
