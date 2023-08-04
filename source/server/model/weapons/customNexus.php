@@ -1370,7 +1370,7 @@ class NexusRangedBoltTorpedo extends Weapon{
 intercepts all weapon fire (directed at self) from HEX (including uninterceptable weapons).
 Done as: kind of offensive mode - player needs to pick hex to fire at. Animated as kind of EMine. 
 All appropriate fire orders will get an interception set up before other intercepts are declared.
-If weapon is left to its own devices it will simply provide a single interception (...if game allows non-1-per-turn weapon to be intercepting in the first place!)
+If weapon is left to its own devices it will simply provide a single interception
 */
 class NexusChaffLauncher extends Weapon{
         public $name = "nexusChaffLauncher";
@@ -1419,6 +1419,7 @@ class NexusChaffLauncher extends Weapon{
             parent::setSystemDataWindow($turn);
             $this->data["Special"] = "Fired at hex (although You technically have to pick an unit). Will apply interception to all fire from target hex to Chaff-protected ship.";
             $this->data["Special"] .= "<br>Will affect uninterceptable weapons.";
+            $this->data["Special"] .= "<br>Does not affect units with Advanced Sensors.";
         }
         
 	//hit chance always 100 - so it always hits and is correctly animated
@@ -1431,7 +1432,7 @@ class NexusChaffLauncher extends Weapon{
 		$targetShip = $gamedata->getShipById($fireOrder->targetid);
 		
 		$shipsInRange = $gamedata->getShipsInDistance($targetShip); //all units on target hex
-		foreach ($shipsInRange as $affectedShip) {
+		foreach ($shipsInRange as $affectedShip) if (!$affectedShip->hasSpecialAbility("AdvancedSensors")) { //Advanced Sensors are immune to Young defensive systems...
 			$allOrders = $affectedShip->getAllFireOrders($gamedata->turn);
 			foreach($allOrders as $subOrder) {
 				if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->shooterid) ){ //something is firing at protected unit - and is affected!
