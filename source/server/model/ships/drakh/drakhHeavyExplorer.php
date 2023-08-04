@@ -8,7 +8,7 @@ class DrakhHeavyExplorer extends BaseShip{
 	$this->faction = "Drakh";
 	$this->factionAge = 2; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
         $this->phpclass = "DrakhHeavyExplorer";
-        $this->variantOf = "DrakhHeavyTender";
+        $this->variantOf = "Heavy Tender";
         $this->occurence = "rare";
         $this->imagePath = "img/ships/DrakhHeavyTender.png";
         $this->shipClass = "Heavy Explorer";
