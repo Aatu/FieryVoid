@@ -1,20 +1,18 @@
 <?php
-class DrakhHeavyExplorer extends BaseShip{
+class DrakhHeavyTender extends BaseShip{
 	
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 1500;
+	$this->pointCost = 1000;
 	$this->faction = "Drakh";
 	$this->factionAge = 2; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
-        $this->phpclass = "DrakhHeavyExplorer";
-        $this->variantOf = "DrakhHeavyTender";
-        $this->occurence = "rare";
+        $this->phpclass = "DrakhHeavyTender";
         $this->imagePath = "img/ships/DrakhHeavyTender.png";
-        $this->shipClass = "Heavy Explorer";
+        $this->shipClass = "Heavy Tender";
         $this->shipSizeClass = 3;
         $this->limited = 33;
-        $this->fighters = array( "Raiders" => 16, "Weapon Platforms" => 4); //4 Weapon Platforms take 8 Raider slots
+        $this->fighters = array( "Raiders" => 20, "Weapon Platforms" => 2); //2 Weapon Platforms take 4 Raider slots
         $this->gravitic = true;	    
 	$this->unofficial = true;
 	$this->advancedArmor = true;   
@@ -35,7 +33,7 @@ class DrakhHeavyExplorer extends BaseShip{
 	    
 	$this->addPrimarySystem(new CnC(6, 28, 0, 0));
         $this->addPrimarySystem(new Reactor(5, 35, 0, 12));
-	    $sensors = new ElintScanner(5, 40, 10, 14);
+	    $sensors = new Scanner(5, 30, 6, 10);
 		$sensors->markImproved();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new DrakhRaiderController(5, 10, 5, 1));
@@ -47,10 +45,10 @@ class DrakhHeavyExplorer extends BaseShip{
         $this->addFrontSystem(new GraviticThruster(3, 25, 0, 5, 1));
         $this->addFrontSystem(new GraviticThruster(3, 25, 0, 5, 1));
 	$this->addFrontSystem(new AbsorbtionShield(3,8,8,3,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-	$this->addFrontSystem(new customLtPolarityPulsar(3, 0, 0, 240, 60)); 	
 	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 240, 120)); 
 	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 240, 120));
-	$this->addFrontSystem(new customLtPolarityPulsar(3, 0, 0, 300, 120)); 		    
+	$this->addFrontSystem(new customMedPolarityPulsar(3, 0, 0, 240, 60)); 	
+	$this->addFrontSystem(new customMedPolarityPulsar(3, 0, 0, 300, 120)); 		    
 	    
         $this->addAftSystem(new GraviticThruster(3, 30, 0, 6, 2));
 	$this->addAftSystem(new GraviticThruster(3, 30, 0, 6, 2));
@@ -102,7 +100,7 @@ class DrakhHeavyExplorer extends BaseShip{
                     8 => "Structure",
                     9 => "Tractor Beam",
                     11 => "Jump Engine",
-                    13 => "ELINT Scanner",
+                    13 => "Scanner",
                     15 => "Raider Controller",	
                     17 => "Engine",
                     18 => "Hangar",   
@@ -112,7 +110,8 @@ class DrakhHeavyExplorer extends BaseShip{
             1=> array(
                     5 => "Thruster",
 					7 => "Absorption Shield",
-                    10 => "Light Polarity Pulsar",
+                    8 => "Light Polarity Pulsar",
+                    10 => "Medium Polarity Pulsar",
                     18 => "Structure",
                     20 => "Primary",
             ),
