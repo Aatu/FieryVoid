@@ -14,7 +14,7 @@ class ProtectorateLeshath extends BaseShip{
         $this->limited = 10;
 		$this->occurence = "unique";
 
-        $this->fighters = array("normal"=>6);
+        $this->fighters = array("normal"=>6, "shuttles"=>2);
 
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
