@@ -28,49 +28,48 @@ class BrixadiiPoliceFrigate2047 extends LCV{
         $this->accelcost = 2;
         $this->rollcost = 1;
         $this->pivotcost = 1;
-        $this->iniativebonus = 14*5;
-    
+        $this->iniativebonus = 15*5;
  
 		$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
   
-		$this->addPrimarySystem(new Reactor(4, 7, 0, 0));
+		$this->addPrimarySystem(new Reactor(3, 8, 0, 0));
 		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
 //        $this->addPrimarySystem(new AntiquatedScanner(4, 9, 2, 4));
-    	$sensors = new Scanner(4, 9, 2, 4);
+    	$sensors = new Scanner(3, 9, 2, 4);
 			$sensors->markLCV();
 			$this->addPrimarySystem($sensors);
-		$this->addPrimarySystem(new Engine(3, 10, 0, 7, 3));
+		$this->addPrimarySystem(new Engine(3, 10, 0, 6, 3));
 
-		$this->addFrontSystem(new LightParticleProjector(2, 3, 1, 240, 60));
-		$this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 270, 90));
-		$this->addFrontSystem(new LightParticleProjector(2, 3, 1, 300, 120));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
+		$this->addFrontSystem(new NexusParticleBolter(2, 6, 2, 300, 60));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
 	    
         $this->addPrimarySystem(new Structure(3, 27));
 	    
         $this->hitChart = array(
         		0=> array( 
         				11 => "Structure",
-						13 => "1:Light Particle Projector",
-        				15 => "1:Projector Array",
+						13 => "1:Light Particle Beam",
+        				15 => "1:Particle Bolter",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		1=> array( //redirect to PRIMARY
         				11 => "Structure",
-						13 => "1:Light Particle Projector",
-        				15 => "1:Projector Array",
+						13 => "1:Light Particle Beam",
+        				15 => "1:Particle Bolter",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		2=> array( //redirect to PRIMARY
         				11 => "Structure",
-						13 => "1:Light Particle Projector",
-        				15 => "1:Projector Array",
+						13 => "1:Light Particle Beam",
+        				15 => "1:Particle Bolter",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

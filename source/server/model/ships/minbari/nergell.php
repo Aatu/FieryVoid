@@ -12,7 +12,7 @@ class Nergell extends SmallStarBaseFourSections{
 		$this->shipClass = "Nergell Military Guardpost";
 		$this->imagePath = "img/ships/MinbariGuardpost.png";
 		$this->canvasSize = 200;
-		$this->fighters = array("heavy"=>12); 
+		$this->fighters = array("heavy"=>12, "shuttles"=>4); 
 
 		$this->shipSizeClass = 3; 
 		$this->iniativebonus = -200; //no voluntary movement anyway
@@ -76,7 +76,7 @@ class Nergell extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Reactor(7, 35, 0, 4));
 		$this->addPrimarySystem(new CnC(7, 30, 0, 0)); 
 		$this->addPrimarySystem(new Scanner(6, 32, 5, 12));
-		$this->addPrimarySystem(new Hangar(6, 19));
+		$this->addPrimarySystem(new Hangar(6, 16));
 		$this->addPrimarySystem(new CargoBay(7, 48));
 		$this->addPrimarySystem(new Jammer(6, 8, 4));
 		$this->addPrimarySystem(new NeutronLaser(7, 10, 6, 0, 360));

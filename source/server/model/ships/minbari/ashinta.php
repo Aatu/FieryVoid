@@ -21,6 +21,7 @@ class Ashinta extends HeavyCombatVessel{
         $this->isd = 2066;
         $this->occurence = "uncommon";
         $this->variantOf = "Tinashi War Frigate";
+        $this->fighters = array("shuttles"=>2);
 
         $this->addPrimarySystem(new Reactor(5, 25, 0, 8));
         $this->addPrimarySystem(new CnC(6, 24, 0, 0));

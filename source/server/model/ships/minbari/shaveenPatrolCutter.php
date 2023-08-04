@@ -21,6 +21,7 @@ class ShaveenPatrolCutter extends MediumShip{
         $this->pivotcost = 2;
 		$this->iniativebonus = 75;
 		$this->isd = 2254;
+        $this->fighters = array("shuttles"=>1);
 
         $this->addPrimarySystem(new Reactor(4, 13, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));

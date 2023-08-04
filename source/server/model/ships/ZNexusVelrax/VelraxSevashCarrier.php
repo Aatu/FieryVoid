@@ -16,6 +16,7 @@ class VelraxSevashCarrier extends MediumShip{
         $this->canvasSize = 60;
 	    $this->isd = 2062;
 
+	    $this->notes = 'Atmospheric Capable.';
         $this->fighters = array("normal"=>6);
         
         $this->forwardDefense = 11;

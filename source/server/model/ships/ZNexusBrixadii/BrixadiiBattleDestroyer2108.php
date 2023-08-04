@@ -4,7 +4,7 @@ class BrixadiiBattleDestroyer2108 extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 460;
+        $this->pointCost = 475;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiBattleDestroyer2108";
         $this->imagePath = "img/ships/Nexus/BrixadiiBattleDestroyer.png";
@@ -28,7 +28,7 @@ class BrixadiiBattleDestroyer2108 extends HeavyCombatVessel{
         $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(5, 10, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 5, 6));
-        $this->addPrimarySystem(new Engine(4, 14, 0, 9, 4));
+        $this->addPrimarySystem(new Engine(4, 14, 0, 9, 3));
         $this->addPrimarySystem(new Hangar(1, 2));
         $this->addPrimarySystem(new Thruster(3, 7, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(3, 7, 0, 3, 3));
@@ -45,8 +45,10 @@ class BrixadiiBattleDestroyer2108 extends HeavyCombatVessel{
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
+        $this->addAftSystem(new ScatterPulsar(1, 4, 2, 180, 360));
         $this->addAftSystem(new EnergyPulsar(2, 6, 3, 180, 360));
         $this->addAftSystem(new EnergyPulsar(2, 6, 3, 0, 180));
+        $this->addAftSystem(new ScatterPulsar(1, 4, 2, 0, 180));
 		$this->addAftSystem(new NexusChaffLauncher(2, 0, 0, 0, 0));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -76,6 +78,7 @@ class BrixadiiBattleDestroyer2108 extends HeavyCombatVessel{
                     6 => "Thruster",
 					7 => "Chaff Launcher",
 					9 => "Energy Pulsar",
+					10 => "Scatter Pulsar",
                     18 => "Structure",
                     20 => "Primary",
             ),

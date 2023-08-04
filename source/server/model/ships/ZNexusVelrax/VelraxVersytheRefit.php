@@ -12,7 +12,7 @@ class VelraxVersytheRefit extends HeavyCombatVesselLeftRight{
 			$this->variantOf = "Versythe Explorer";
 			$this->occurence = "common";
         $this->limited = 10;
-	    $this->isd = 2070;
+	    $this->isd = 2061;
         $this->canvasSize = 105;
 		$this->unofficial = true;
 

@@ -22,6 +22,7 @@ class ProtectorateLetann extends HeavyCombatVessel{
         $this->isd = 2020;
         $this->occurence = "rare";
         $this->variantOf = "Tinashi War Frigate";
+        $this->fighters = array("shuttles"=>2);
 
         $this->addPrimarySystem(new Reactor(5, 25, 0, 6));
         $this->addPrimarySystem(new CnC(6, 24, 0, 0));

@@ -8,7 +8,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
 //		$this->imagePath = "img/ships/BASurveyShip.png";
-		$this->imagePath = "img/starwars/CloneWars/Venator.png";
+		$this->imagePath = "img/ships/Nexus/CraytanDakran.png";
 		$this->shipClass = "Target Drone - DO NOT USE";
 		$this->shipSizeClass = 3;
 //		$this->canvasSize = 75; //img has 125px per side

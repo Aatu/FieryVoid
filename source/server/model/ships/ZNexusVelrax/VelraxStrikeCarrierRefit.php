@@ -4,7 +4,7 @@ class VelraxStrikeCarrierRefit extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 575;
+	$this->pointCost = 605;
 	$this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxStrikeCarrierRefit";
         $this->imagePath = "img/ships/Nexus/VelraxResskar.png";

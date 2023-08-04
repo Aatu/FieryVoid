@@ -20,6 +20,8 @@ class Torotha extends MediumShip{
         $this->pivotcost = 2;
 		$this->iniativebonus = 65;
 		$this->isd = 2006;
+        $this->fighters = array("assault shuttles"=>2); //actually NO room for regular shuttles, and only 2 Assault ones... most unusual for an assault ship!
+		//actually SCS lists 'Flyers' (eg. shuttle equivalent), but also shows a pair of Assault Flyers, so I assume they are intended loadout...
 
         $this->addPrimarySystem(new Reactor(5, 15, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));

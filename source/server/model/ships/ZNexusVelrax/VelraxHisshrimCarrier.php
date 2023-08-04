@@ -4,7 +4,7 @@ class VelraxHisshrimCarrier extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 300;
+	$this->pointCost = 315;
 	$this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxHisshrimCarrier";
         $this->imagePath = "img/ships/Nexus/VelraxHisshrim.png";
@@ -29,7 +29,7 @@ class VelraxHisshrimCarrier extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 5, 5));
         $this->addPrimarySystem(new Engine(4, 15, 0, 8, 4));
-        $this->addPrimarySystem(new NexusEarlyPlasmaWave(3, 7, 4, 300, 60));
+        $this->addPrimarySystem(new PlasmaWaveTorpedo(3, 7, 4, 300, 60));
         $this->addPrimarySystem(new Thruster(3, 15, 0, 4, 1));
         $this->addPrimarySystem(new Thruster(4, 20, 0, 8, 2));
 

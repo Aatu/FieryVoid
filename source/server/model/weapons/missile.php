@@ -1640,7 +1640,7 @@ class AmmoBombRack extends AmmoMissileRackS{
     public $distanceRange = 60;
     public $firingMode = 1;
     public $priority = 6;
-    public $loadingtime = 1;
+    public $loadingtime = 2;
 	//basic launcher data, before being modified by actual missiles
 	protected $basicFC=array(1,2,3);
 	protected $basicRange=20;

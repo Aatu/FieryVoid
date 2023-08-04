@@ -59,6 +59,12 @@ var NexusLightProjectorArray = function NexusLightProjectorArray(json, ship) {
 NexusLightProjectorArray.prototype = Object.create(Weapon.prototype);
 NexusLightProjectorArray.prototype.constructor = NexusLightProjectorArray;
 
+var NexusParticleBolter = function NexusParticleBolter(json, ship) {
+    Particle.call(this, json, ship);
+};
+NexusParticleBolter.prototype = Object.create(Weapon.prototype);
+NexusParticleBolter.prototype.constructor = NexusParticleBolter;
+
 var NexusGasGun = function NexusGasGun(json, ship) {
 	Weapon.call(this, json, ship);
 };
@@ -934,6 +940,19 @@ var NexusAntifighterLauncher = function  NexusAntifighterLauncher(json, ship) {
 };
 NexusAntifighterLauncher.prototype = Object.create(Weapon.prototype);
 NexusAntifighterLauncher.prototype.constructor =  NexusAntifighterLauncher;
+
+var NexusLtEnhPlasmaFtr = function  NexusLtEnhPlasmaFtr(json, ship) {
+    Plasma.call(this, json, ship);
+};
+NexusLtEnhPlasmaFtr.prototype = Object.create(Weapon.prototype);
+NexusLtEnhPlasmaFtr.prototype.constructor =  NexusLtEnhPlasmaFtr;
+
+
+
+
+
+
+
 
 
 //Kor-Lyan testing systems

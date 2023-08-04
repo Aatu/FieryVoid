@@ -4,7 +4,7 @@ class VelraxVasrevEscort extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 315;
+        $this->pointCost = 325;
         $this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxVasrevEscort";
         $this->imagePath = "img/ships/Nexus/VelraxSathrin.png";
@@ -15,6 +15,8 @@ class VelraxVasrevEscort extends MediumShip{
         $this->agile = true;
         $this->canvasSize = 60;
 	    $this->isd = 2062;
+
+	    $this->notes = 'Atmospheric Capable.';
 
         $this->forwardDefense = 11;
         $this->sideDefense = 13;
@@ -36,8 +38,8 @@ class VelraxVasrevEscort extends MediumShip{
         
 		$this->addFrontSystem(new EWPlasmaArc(3, 5, 4, 240, 60));
 		$this->addFrontSystem(new EWPlasmaArc(3, 5, 4, 300, 120));
-		$this->addFrontSystem(new NexusTwinIonGun(2, 4, 4, 270, 90));
-		$this->addFrontSystem(new NexusTwinIonGun(2, 4, 4, 270, 90));
+		$this->addFrontSystem(new NexusDartInterceptor(2, 4, 1, 270, 90));
+		$this->addFrontSystem(new NexusTwinIonGun(3, 4, 4, 270, 90));
         $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
 	    
         $this->addAftSystem(new Thruster(3, 9, 0, 4, 2));    
@@ -60,9 +62,10 @@ class VelraxVasrevEscort extends MediumShip{
 		),
 
 		1=> array(
-			6 => "Thruster",
-			8 => "Plasma Arc",
-			10 => "Twin Ion Gun",
+			5 => "Thruster",
+			7 => "Plasma Arc",
+			8 => "Twin Ion Gun",
+			10 => "Dart Interceptor",
 			17 => "Structure",
 			20 => "Primary",
 		),

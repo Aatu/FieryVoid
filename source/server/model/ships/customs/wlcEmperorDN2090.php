@@ -128,7 +128,7 @@ class wlcEmperorDN2090 extends BaseShip{
 			5 => "Thruster",
 			8 => "Twin Array",
 			10 => "Assault Laser",
-			11 => "CargoBay",
+			11 => "Cargo Bay",
 			18 => "Structure",
 			20 => "Primary",
 		),
