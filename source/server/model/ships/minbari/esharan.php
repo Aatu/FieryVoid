@@ -11,7 +11,7 @@ class Esharan extends HeavyCombatVessel{
         $this->shipClass = "Esharan Anti-Fighter Frigate";
         $this->gravitic = true;
         $this->occurence = "rare";
-        $this->fighters = array("normal"=>6);
+        $this->fighters = array("normal"=>6, "shuttles"=>2);
         $this->forwardDefense = 14;
         $this->sideDefense = 17;
         $this->turncost = 1.0;

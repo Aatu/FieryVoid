@@ -21,6 +21,7 @@ class Shantavi extends HeavyCombatVessel{
         $this->iniativebonus = 35;
         $this->isd = 2259;
         $this->variantOf = "Tinashi War Frigate";
+        $this->fighters = array("shuttles"=>2);
 
         $this->addPrimarySystem(new Reactor(5, 25, 0, 6));
         $this->addPrimarySystem(new CnC(6, 24, 0, 0));

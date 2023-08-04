@@ -14,6 +14,8 @@ class VelraxThristenCorvetteRefit2 extends MediumShip{
 		$this->unofficial = true;
         $this->canvasSize = 75;
 	    $this->isd = 2109;
+
+	    $this->notes = 'Atmospheric Capable.';
         
         $this->forwardDefense = 12;
         $this->sideDefense = 10;

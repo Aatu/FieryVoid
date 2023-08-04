@@ -24,7 +24,7 @@ class BrixadiiWarshipBase extends BaseShipNoAft{
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-		$this->iniativebonus = 10;
+		$this->iniativebonus = 5;
          
         $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
         $this->addPrimarySystem(new CnC(5, 20, 0, 0));
@@ -37,23 +37,23 @@ class BrixadiiWarshipBase extends BaseShipNoAft{
 
         $this->addFrontSystem(new Thruster(3, 14, 0, 5, 1));
         $this->addFrontSystem(new Thruster(3, 14, 0, 5, 1));
-		$this->addFrontSystem(new NexusProjectorArray(3, 6, 1, 240, 60));
-		$this->addFrontSystem(new NexusProjectorArray(3, 6, 1, 300, 120));
+		$this->addFrontSystem(new NexusParticleBolter(3, 6, 2, 240, 60));
+		$this->addFrontSystem(new NexusParticleBolter(3, 6, 2, 300, 120));
 		$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 300, 60));
 		$this->addFrontSystem(new NexusKineticBoxLauncher(2, 4, 0, 240, 360));
 		$this->addFrontSystem(new NexusKineticBoxLauncher(2, 4, 0, 0, 120));
         
-		$this->addLeftSystem(new Thruster(3, 7, 0, 4, 3));
-		$this->addLeftSystem(new Thruster(3, 7, 0, 4, 3));
-		$this->addLeftSystem(new LightParticleProjector(2, 3, 1, 180, 360));
-		$this->addLeftSystem(new NexusProjectorArray(3, 6, 1, 180, 360));
+		$this->addLeftSystem(new Thruster(3, 9, 0, 4, 3));
+		$this->addLeftSystem(new Thruster(3, 9, 0, 4, 3));
+		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
+		$this->addLeftSystem(new NexusParticleBolter(3, 6, 2, 180, 360));
 		$this->addLeftSystem(new NexusChaffLauncher(1, 2, 1, 180, 360));
 		$this->addLeftSystem(new HvyParticleProjector(3, 8, 4, 240, 360));
 
-		$this->addRightSystem(new Thruster(3, 7, 0, 4, 4));
-		$this->addRightSystem(new Thruster(3, 7, 0, 4, 4));
-		$this->addRightSystem(new LightParticleProjector(2, 3, 1, 0, 180));
-		$this->addRightSystem(new NexusProjectorArray(3, 6, 1, 0, 180));
+		$this->addRightSystem(new Thruster(3, 9, 0, 4, 4));
+		$this->addRightSystem(new Thruster(3, 9, 0, 4, 4));
+		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
+		$this->addRightSystem(new NexusParticleBolter(3, 6, 2, 0, 180));
 		$this->addRightSystem(new NexusChaffLauncher(1, 2, 1, 0, 180));
 		$this->addRightSystem(new HvyParticleProjector(3, 8, 4, 0, 120));
         
@@ -77,7 +77,7 @@ class BrixadiiWarshipBase extends BaseShipNoAft{
             1=> array(
                     6 => "Thruster",
 					8 => "Heavy Particle Projector",
-					10 => "Projector Array",
+					10 => "Particle Bolter",
 					12 => "Kinetic Box Launcher",
 					18 => "Structure",
                     20 => "Primary",
@@ -85,8 +85,8 @@ class BrixadiiWarshipBase extends BaseShipNoAft{
             3=> array(
                     5 => "Thruster",
 					7 => "Heavy Particle Projector",
-					8 => "Light Particle Projector",
-					10 => "Projector Array",
+					8 => "Light Particle Beam",
+					10 => "Particle Bolter",
 					11 => "Chaff Launcher",
                     18 => "Structure",
                     20 => "Primary",
@@ -94,8 +94,8 @@ class BrixadiiWarshipBase extends BaseShipNoAft{
             4=> array(
                     5 => "Thruster",
 					7 => "Heavy Particle Projector",
-					8 => "Light Particle Projector",
-					10 => "Projector Array",
+					8 => "Light Particle Beam",
+					10 => "Particle Bolter",
 					11 => "Chaff Launcher",
                     18 => "Structure",
                     20 => "Primary",

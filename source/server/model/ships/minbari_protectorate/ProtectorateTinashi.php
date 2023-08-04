@@ -20,6 +20,7 @@ class ProtectorateTinashi extends HeavyCombatVessel{
         $this->iniativebonus = 35;
         $this->isd = 2052;
         $this->limited = 10;
+        $this->fighters = array("shuttles"=>2);
 
         $this->addPrimarySystem(new Reactor(5, 25, 0, 4));
         $this->addPrimarySystem(new CnC(6, 24, 0, 0));

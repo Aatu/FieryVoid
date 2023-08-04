@@ -265,7 +265,7 @@
 			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= "This weapon suffers range penalty (like direct fire weapons do), but only after first 10 hexes of distance.";
-		//also, target is hidden by the tabletop - but this won't be implemented in FV
+		$this->data["Special"] .= "<br>Also, targeting information is hidden for opponent - weapon will be marged as fired, but target will not be highlighted, and weapon will not be shown as incoming.";
 	}
         
 	    //override standard to skip first 10 hexes when calculating range penalty

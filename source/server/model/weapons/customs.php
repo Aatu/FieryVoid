@@ -1049,7 +1049,7 @@ class customHeavyPolarityPulsar extends Pulse{
 	public $weaponClass = "Molecular"; 
         public $rof = 2;
 	        
-        public $rangePenalty = 0.33; //-1/3 hexes; decreased from original -1/2 hexes
+        public $rangePenalty = 0.4; //-2/5 hexes; decreased from original -1/2 hexes
         public $fireControl = array(0, 3, 5); // fighters, <mediums, <capitals 
         
 	public $grouping = 15; //+1 per 3

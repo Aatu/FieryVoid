@@ -30,37 +30,41 @@ class BrixadiiSupportBaseRefit extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new CnC(4, 20, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 20, 6, 6));
 		$this->addPrimarySystem(new Hangar(4, 6));
-		$this->addPrimarySystem(new LightParticleProjector(4, 3, 1, 0, 360));
-		$this->addPrimarySystem(new LightParticleProjector(4, 3, 1, 0, 360));
-		$this->addPrimarySystem(new LightParticleProjector(4, 3, 1, 0, 360));
-		$this->addPrimarySystem(new LightParticleProjector(4, 3, 1, 0, 360));
+		$this->addPrimarySystem(new LightParticleBeamShip(4, 2, 1, 0, 360));
+		$this->addPrimarySystem(new LightParticleBeamShip(4, 2, 1, 0, 360));
+		$this->addPrimarySystem(new LightParticleBeamShip(4, 2, 1, 0, 360));
+		$this->addPrimarySystem(new LightParticleBeamShip(4, 2, 1, 0, 360));
 		$this->addPrimarySystem(new ParticleHammer(4, 12, 6, 0, 360));
 		$this->addPrimarySystem(new ParticleHammer(4, 12, 6, 0, 360));
 		
 		$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 270, 90));
-		$this->addFrontSystem(new NexusProjectorArray(3, 6, 1, 270, 90));
-		$this->addFrontSystem(new NexusProjectorArray(3, 6, 1, 270, 90));
+		$this->addFrontSystem(new NexusChaffLauncher(4, 2, 1, 270, 90));
+		$this->addFrontSystem(new NexusParticleBolter(3, 6, 2, 270, 90));
+		$this->addFrontSystem(new NexusParticleBolter(3, 6, 2, 270, 90));
 		$this->addFrontSystem(new NexusRangedKineticBoxLauncher(3, 10, 0, 270, 90));
 		$this->addFrontSystem(new Quarters(3, 12));
 		$this->addFrontSystem(new CargoBay(3, 10));
 
 		$this->addAftSystem(new HvyParticleProjector(3, 8, 4, 90, 270));
-		$this->addAftSystem(new NexusProjectorArray(3, 6, 1, 90, 270));
-		$this->addAftSystem(new NexusProjectorArray(3, 6, 1, 90, 270));
+		$this->addAftSystem(new NexusChaffLauncher(4, 2, 1, 90, 270));
+		$this->addAftSystem(new NexusParticleBolter(3, 6, 2, 90, 270));
+		$this->addAftSystem(new NexusParticleBolter(3, 6, 2, 90, 270));
 		$this->addAftSystem(new NexusRangedKineticBoxLauncher(3, 10, 0, 90, 270));
 		$this->addAftSystem(new Quarters(3, 12));
 		$this->addAftSystem(new CargoBay(3, 10));
 			
 		$this->addLeftSystem(new HvyParticleProjector(3, 8, 4, 180, 360));
-		$this->addLeftSystem(new NexusProjectorArray(3, 6, 1, 180, 360));
-		$this->addLeftSystem(new NexusProjectorArray(3, 6, 1, 180, 360));
+		$this->addLeftSystem(new NexusChaffLauncher(4, 2, 1, 180, 360));
+		$this->addLeftSystem(new NexusParticleBolter(3, 6, 2, 180, 360));
+		$this->addLeftSystem(new NexusParticleBolter(3, 6, 2, 180, 360));
 		$this->addLeftSystem(new NexusRangedKineticBoxLauncher(4, 10, 0, 180, 360));
 		$this->addLeftSystem(new Quarters(3, 12));
 		$this->addLeftSystem(new CargoBay(3, 10));
 
 		$this->addRightSystem(new HvyParticleProjector(3, 8, 4, 0, 180));
-		$this->addRightSystem(new NexusProjectorArray(3, 6, 1, 0, 180));
-		$this->addRightSystem(new NexusProjectorArray(3, 6, 1, 0, 180));
+		$this->addRightSystem(new NexusChaffLauncher(4, 2, 1, 0, 180));
+		$this->addRightSystem(new NexusParticleBolter(3, 6, 2, 0, 180));
+		$this->addRightSystem(new NexusParticleBolter(3, 6, 2, 0, 180));
 		$this->addRightSystem(new NexusRangedKineticBoxLauncher(3, 10, 0, 0, 180));
 		$this->addRightSystem(new Quarters(3, 12));
 		$this->addRightSystem(new CargoBay(3, 10));
@@ -74,7 +78,7 @@ class BrixadiiSupportBaseRefit extends SmallStarBaseFourSections{
 		$this->hitChart = array(			
 			0=> array(
 				6 => "Structure",
-				8 => "Light Particle Projector",
+				8 => "Light Particle Beam",
 				13 => "Particle Hammer",
 				14 => "Hangar",
 				16 => "Scanner",
@@ -85,7 +89,7 @@ class BrixadiiSupportBaseRefit extends SmallStarBaseFourSections{
 				1 => "Chaff Launcher",
 				3 => "Heavy Particle Projector",
 				6 => "Cargo Bay",
-				8 => "Projector Array",
+				8 => "Particle Bolter",
 				9 => "Ranged Kinetic Box Launcher",
 				11 => "Quarters",
 				18 => "Structure",
@@ -95,7 +99,7 @@ class BrixadiiSupportBaseRefit extends SmallStarBaseFourSections{
 				1 => "Chaff Launcher",
 				3 => "Heavy Particle Projector",
 				6 => "Cargo Bay",
-				8 => "Projector Array",
+				8 => "Particle Bolter",
 				9 => "Ranged Kinetic Box Launcher",
 				11 => "Quarters",
 				18 => "Structure",
@@ -105,7 +109,7 @@ class BrixadiiSupportBaseRefit extends SmallStarBaseFourSections{
 				1 => "Chaff Launcher",
 				3 => "Heavy Particle Projector",
 				6 => "Cargo Bay",
-				8 => "Projector Array",
+				8 => "Particle Bolter",
 				9 => "Ranged Kinetic Box Launcher",
 				11 => "Quarters",
 				18 => "Structure",
@@ -115,7 +119,7 @@ class BrixadiiSupportBaseRefit extends SmallStarBaseFourSections{
 				1 => "Chaff Launcher",
 				3 => "Heavy Particle Projector",
 				6 => "Cargo Bay",
-				8 => "Projector Array",
+				8 => "Particle Bolter",
 				9 => "Ranged Kinetic Box Launcher",
 				11 => "Quarters",
 				18 => "Structure",

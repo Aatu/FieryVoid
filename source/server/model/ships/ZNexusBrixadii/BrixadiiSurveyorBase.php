@@ -4,7 +4,7 @@ class BrixadiiSurveyorBase extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 380;
+        $this->pointCost = 400;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiSurveyorBase";
         $this->imagePath = "img/ships/Nexus/BrixadiiSurveyor.png";
@@ -25,7 +25,7 @@ class BrixadiiSurveyorBase extends HeavyCombatVessel{
         $this->pivotcost = 2;
         $this->iniativebonus = 7*5;
          
-        $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
+        $this->addPrimarySystem(new Reactor(4, 13, 0, 0));
         $this->addPrimarySystem(new CnC(5, 10, 0, 0));
         $this->addPrimarySystem(new ElintScanner(4, 10, 5, 7));
         $this->addPrimarySystem(new Engine(4, 14, 0, 8, 4));

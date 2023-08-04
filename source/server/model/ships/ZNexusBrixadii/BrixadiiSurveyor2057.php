@@ -4,7 +4,7 @@ class BrixadiiSurveyor2057 extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 410;
+        $this->pointCost = 450;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiSurveyor2057";
         $this->imagePath = "img/ships/Nexus/BrixadiiSurveyor.png";
@@ -39,13 +39,15 @@ class BrixadiiSurveyor2057 extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(3, 14, 0, 6, 1));
     	$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 240, 0));
         $this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 0, 120));
-        $this->addFrontSystem(new LightParticleProjector(1, 3, 1, 180, 60));
-        $this->addFrontSystem(new LightParticleProjector(1, 3, 1, 300, 180));
+        $this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 180, 60));
+        $this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 300, 180));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
 		$this->addAftSystem(new CargoBay(1, 16));
 		$this->addAftSystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
+		$this->addAftSystem(new NexusParticleBolter(2, 6, 2, 180, 360));
+		$this->addAftSystem(new NexusParticleBolter(2, 6, 2, 0, 180));
 		$this->addAftSystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -66,14 +68,14 @@ class BrixadiiSurveyor2057 extends HeavyCombatVessel{
             1=> array(
                     5 => "Thruster",
                     8 => "Heavy Particle Projector",
-                    10 => "Light Particle Projector",
+                    10 => "Light Particle Beam",
 					18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     7 => "Thruster",
-                    10 => "Cargo Bay",
-					11 => "Chaff Launcher",
+					8 => "Chaff Launcher",
+                    10 => "Particle Bolter",
                     18 => "Structure",
                     20 => "Primary",
             ),
