@@ -51,7 +51,7 @@ class DrakhDreadnought extends BaseShip{
 	    
         $this->addAftSystem(new GraviticThruster(5, 35, 0, 7, 2));
 	$this->addAftSystem(new GraviticThruster(5, 35, 0, 7, 2));
-	$this->addAftSystem(new AbsorbtionShield(3,8,8,3,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addAftSystem(new AbsorbtionShield(3,6,6,2,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addAftSystem(new customHeavyPolarityPulsar(4, 0, 0, 120, 240));
 	$this->addAftSystem(new customHeavyPolarityPulsar(4, 0, 0, 120, 240)); 
   
