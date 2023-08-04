@@ -4,7 +4,7 @@ class BrixadiiDestroyerEscortRefit extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 450;
+        $this->pointCost = 470;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiDestroyerEscortRefit";
         $this->imagePath = "img/ships/Nexus/BrixadiiPlasmaDestroyer.png";
@@ -28,7 +28,7 @@ class BrixadiiDestroyerEscortRefit extends HeavyCombatVessel{
         $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(5, 10, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 5, 6));
-        $this->addPrimarySystem(new Engine(4, 14, 0, 9, 4));
+        $this->addPrimarySystem(new Engine(4, 14, 0, 9, 3));
         $this->addPrimarySystem(new Hangar(1, 2));
         $this->addPrimarySystem(new Thruster(3, 7, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(3, 7, 0, 3, 3));
@@ -37,10 +37,10 @@ class BrixadiiDestroyerEscortRefit extends HeavyCombatVessel{
       
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-		$this->addFrontSystem(new ScatterPulsar(3, 4, 2, 180, 60));
-		$this->addFrontSystem(new ScatterPulsar(3, 4, 2, 300, 180));
-        $this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 240, 60));
-        $this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 300, 120));
+		$this->addFrontSystem(new ScatterPulsar(3, 4, 2, 240, 60));
+		$this->addFrontSystem(new ScatterPulsar(3, 4, 2, 300, 120));
+        $this->addFrontSystem(new EnergyPulsar(3, 6, 3, 240, 60));
+        $this->addFrontSystem(new EnergyPulsar(3, 6, 3, 300, 120));
 		$this->addFrontSystem(new NexusAntifighterLauncher(0, 6, 0, 270, 90));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));

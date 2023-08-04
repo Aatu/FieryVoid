@@ -4,7 +4,7 @@ class BrixadiiSupportBase extends SmallStarBaseFourSections{
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
-		$this->pointCost = 450;
+		$this->pointCost = 470;
 		$this->base = true;
 		$this->smallBase = true;
 		$this->faction = "ZNexus Brixadii";
@@ -28,34 +28,34 @@ class BrixadiiSupportBase extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new CnC(4, 20, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 20, 6, 6));
 		$this->addPrimarySystem(new Hangar(4, 6));
-		$this->addPrimarySystem(new LightParticleProjector(4, 3, 1, 0, 360));
-		$this->addPrimarySystem(new LightParticleProjector(4, 3, 1, 0, 360));
-		$this->addPrimarySystem(new LightParticleProjector(4, 3, 1, 0, 360));
-		$this->addPrimarySystem(new LightParticleProjector(4, 3, 1, 0, 360));
+		$this->addPrimarySystem(new LightParticleBeamShip(4, 2, 1, 0, 360));
+		$this->addPrimarySystem(new LightParticleBeamShip(4, 2, 1, 0, 360));
+		$this->addPrimarySystem(new LightParticleBeamShip(4, 2, 1, 0, 360));
+		$this->addPrimarySystem(new LightParticleBeamShip(4, 2, 1, 0, 360));
 		$this->addPrimarySystem(new CargoBay(4, 20));
 		$this->addPrimarySystem(new CargoBay(4, 20));
 		
 		$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 270, 90));
-		$this->addFrontSystem(new NexusProjectorArray(3, 6, 1, 270, 90));
-		$this->addFrontSystem(new NexusProjectorArray(3, 6, 1, 270, 90));
+		$this->addFrontSystem(new NexusParticleBolter(3, 6, 2, 270, 90));
+		$this->addFrontSystem(new NexusParticleBolter(3, 6, 2, 270, 90));
 		$this->addFrontSystem(new Quarters(3, 12));
 		$this->addFrontSystem(new CargoBay(3, 20));
 
 		$this->addAftSystem(new HvyParticleProjector(3, 8, 4, 90, 270));
-		$this->addAftSystem(new NexusProjectorArray(3, 6, 1, 90, 270));
-		$this->addAftSystem(new NexusProjectorArray(3, 6, 1, 90, 270));
+		$this->addAftSystem(new NexusParticleBolter(3, 6, 2, 90, 270));
+		$this->addAftSystem(new NexusParticleBolter(3, 6, 2, 90, 270));
 		$this->addAftSystem(new Quarters(3, 12));
 		$this->addAftSystem(new CargoBay(3, 20));
 			
 		$this->addLeftSystem(new HvyParticleProjector(3, 8, 4, 180, 360));
-		$this->addLeftSystem(new NexusProjectorArray(3, 6, 1, 180, 360));
-		$this->addLeftSystem(new NexusProjectorArray(3, 6, 1, 180, 360));
+		$this->addLeftSystem(new NexusParticleBolter(3, 6, 2, 180, 360));
+		$this->addLeftSystem(new NexusParticleBolter(3, 6, 2, 180, 360));
 		$this->addLeftSystem(new Quarters(3, 12));
 		$this->addLeftSystem(new CargoBay(3, 20));
 
 		$this->addRightSystem(new HvyParticleProjector(3, 8, 4, 0, 180));
-		$this->addRightSystem(new NexusProjectorArray(3, 6, 1, 0, 180));
-		$this->addRightSystem(new NexusProjectorArray(3, 6, 1, 0, 180));
+		$this->addRightSystem(new NexusParticleBolter(3, 6, 2, 0, 180));
+		$this->addRightSystem(new NexusParticleBolter(3, 6, 2, 0, 180));
 		$this->addRightSystem(new Quarters(3, 12));
 		$this->addRightSystem(new CargoBay(3, 20));
 
@@ -68,7 +68,7 @@ class BrixadiiSupportBase extends SmallStarBaseFourSections{
 		$this->hitChart = array(			
 			0=> array(
 				6 => "Structure",
-				8 => "Light Particle Projector",
+				8 => "Light Particle Beam",
 				13 => "Cargo Bay",
 				14 => "Hangar",
 				16 => "Scanner",
@@ -78,7 +78,7 @@ class BrixadiiSupportBase extends SmallStarBaseFourSections{
 			1=> array(
 				2 => "Heavy Particle Projector",
 				7 => "Cargo Bay",
-				9 => "Projector Array",
+				9 => "Particle Bolter",
 				11 => "Quarters",
 				18 => "Structure",
 				20 => "Primary",
@@ -86,7 +86,7 @@ class BrixadiiSupportBase extends SmallStarBaseFourSections{
 			2=> array(
 				2 => "Heavy Particle Projector",
 				7 => "Cargo Bay",
-				9 => "Projector Array",
+				9 => "Particle Bolter",
 				11 => "Quarters",
 				18 => "Structure",
 				20 => "Primary",
@@ -94,7 +94,7 @@ class BrixadiiSupportBase extends SmallStarBaseFourSections{
 			3=> array(
 				2 => "Heavy Particle Projector",
 				7 => "Cargo Bay",
-				9 => "Projector Array",
+				9 => "Particle Bolter",
 				11 => "Quarters",
 				18 => "Structure",
 				20 => "Primary",
@@ -102,7 +102,7 @@ class BrixadiiSupportBase extends SmallStarBaseFourSections{
 			4=> array(
 				2 => "Heavy Particle Projector",
 				7 => "Cargo Bay",
-				9 => "Projector Array",
+				9 => "Particle Bolter",
 				11 => "Quarters",
 				18 => "Structure",
 				20 => "Primary",
