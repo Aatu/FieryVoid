@@ -79,6 +79,24 @@ class FighterFlight extends BaseShip
     }
 
 
+	/*calculates current combat value of the fighter flight, as a perentage of original value
+	current algorithm: active fighters are worth their full value (even if damaged), inactive are worth nothing
+	*/
+	public function calculateCombatValue() {
+		$effectiveValue = 100;
+		//combat value of flight: combat value of craft remaining in flight. Destroyed or dropped out craft have no value, still fighting craft have full value even if damaged
+		$craftActive = 0;
+		$craftTotal = 0;
+		foreach($this->systems as $craft){
+			$craftTotal++;
+			if (!$craft->isDestroyed()) $craftActive++;
+		}
+		if($craftTotal>0){
+			$effectiveValue = round(100*($craftActive/$craftTotal));
+		}
+		return $effectiveValue;
+	} //endOf function calculateCombatValue
+	
 
     public function stripForJson() {
         $strippedShip = parent::stripForJson();

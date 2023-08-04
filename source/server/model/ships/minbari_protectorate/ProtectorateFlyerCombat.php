@@ -12,7 +12,6 @@ class ProtectorateFlyerCombat extends FighterFlight{
         $this->variantOf = "Assault Flyers";
     	$this->imagePath = "img/ships/MinbariFlyer.png";
         
-		$this->notes = "Usually housed in common shuttle bays (not mentioned in FV). Most ships can take a pair.";
 		
         $this->forwardDefense = 9;
         $this->sideDefense = 7;

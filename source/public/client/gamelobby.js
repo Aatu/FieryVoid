@@ -121,6 +121,8 @@ window.gamedata = {
 	    var totalFtrXL = 0;//total ultralight fighters
 	    var totalFtrOther = new Array( );//total other small craft
 		var smallCraftUsed = new Array( );//small craft sizes that happen to be present, whether as hangar space or actual craft
+		
+		var totalEnhancementsValue = 0;
 
 	    for (var i in gamedata.ships){
             	var lship = gamedata.ships[i];
@@ -132,7 +134,8 @@ window.gamedata = {
 		if (lship.limited==33){
 			points33 += lship.pointCost;
 			units33 += 1;
-		}
+		}		
+		totalEnhancementsValue += lship.pointCostEnh;
 		var vLetter = gamedata.variantLetter(lship);
 		var hull = lship.variantOf; 
 		var hullFound;
@@ -379,7 +382,7 @@ window.gamedata = {
 	    }
 	    //enhanced units present?
 	    if (enhancementPresent){
-			warningText += "<br> - Enhancement(s) present! Seek opponent's permission first."; 	
+			warningText += "<br> - Enhancement(s) present! Seek opponent's permission first. Total value: "+totalEnhancementsValue;
 			warningFound = true;
 	    }
 	    //unique units present?
@@ -1208,7 +1211,7 @@ window.gamedata = {
         ship.userid = gamedata.thisplayer;
 
         if ($(".confirm .totalUnitCostAmount").length > 0) {
-            ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");
+            ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");			
         }
 
         if (!gamedata.canAfford(ship)) {
@@ -1233,6 +1236,9 @@ window.gamedata = {
 			noTaken = target.data("count");
 			if(noTaken > 0){ //enhancement picked - note!
 				ship.enhancementOptions[enhNo][2] = noTaken;
+				if(!ship.enhancementOptions[enhNo][6]){ //this is an actual enhancement (as opposed to option) - note value!
+					ship.pointCostEnh += target.data("enhCost");
+				}
 			}
 			//go to next enhancement
 			enhNo++;
