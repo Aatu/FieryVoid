@@ -169,7 +169,7 @@ class BaseShip {
 			$cncPresent = false;
 			$enginePresent = false;
 			$scannerPresent = false;
-			foreach ($this->systems as $system){
+			foreach ($this->systems as $system) if (!$system->isDestroyed()){
 				if ($system instanceOf Scanner) $scannerPresent = true;
 				if ($system instanceOf Engine) $enginePresent = true;
 				if ($system instanceOf CnC) $cncPresent = true;
