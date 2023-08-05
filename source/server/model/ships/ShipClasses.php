@@ -27,7 +27,7 @@ class BaseShip {
     public $forwardDefense, $sideDefense;
     public $destroyed = false;
     public $pointCost = 0;
-    public $pointCostEnh = 0; //points spent on enhanements (in addition to crafts' own price), DOES include cost of items being only technically enhancements (special missiles, Navigators...) - CURRENTLY ALWAYS 0, to be filled later...
+    public $pointCostEnh = 0; //points spent on enhanements (in addition to crafts' own price), DOES NOT include cost of items being only technically enhancements (special missiles, Navigators...)
 	public $combatValue = 100; //current combat value, as percentage of original
     public $faction = null;
 	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial 
@@ -227,6 +227,7 @@ class BaseShip {
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
 		
 		$strippedShip->combatValue = $this->calculateCombatValue();
+		$strippedShip->pointCostEnh = $this->pointCostEnh;
 		
 		//unit enhancements
 		if($this->enhancementTooltip !== ''){ //enhancements exist!			
