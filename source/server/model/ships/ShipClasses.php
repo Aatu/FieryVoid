@@ -174,9 +174,9 @@ class BaseShip {
 				if ($system instanceOf Engine) $enginePresent = true;
 				if ($system instanceOf CnC) $cncPresent = true;
 			}
-			if(!$cncPresent) $effectiveValue = 0; //ship disabled - no value
-			if(!$scannerPresent) $effectiveValue = $effectiveValue/2; //no Sensors: cut value in half
-			if(!$enginePresent) $effectiveValue = $effectiveValue/2; //no Engine: cut value in half
+			if ( (!$this->osat) && (!$cncPresent) ) $effectiveValue = 0; //ship disabled - no value - except OSATs which simpy don't have C&C!
+			if (!$scannerPresent) $effectiveValue = $effectiveValue/2; //no Sensors: cut value in half
+			if ( (!$this->base) && (!$this->osat) && (!$enginePresent)) $effectiveValue = $effectiveValue/2; //no Engine: cut value in half - except starbases which don't have any engine, and OSATs for which it's secondary anyway
 		}	
 		
 		if($effectiveValue>0){ //check for state of structure; calculate total boxes and total remaining boxes 
@@ -196,7 +196,7 @@ class BaseShip {
 			if($totalStructure>0){
 				$structureCombatEffectiveness = $currentStructure / $totalStructure;
 				$structureCombatEffectiveness = max(0.2,$structureCombatEffectiveness); //let's say structural damage cannot reduce effectiveness below 20%!
-				if($structureCombatEffectiveness >= 0.95) $structureCombatEffectiveness =1; //let's first few damage points are free - at less than 5% damage ship retains full effectiveness!
+				if($structureCombatEffectiveness >= 0.95) $structureCombatEffectiveness =1; //let's first few damage points be free - at less than 5% structural damage ship retains full effectiveness!
 				$effectiveValue = $effectiveValue*$structureCombatEffectiveness;
 			}				
 		}		

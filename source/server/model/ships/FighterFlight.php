@@ -80,7 +80,7 @@ class FighterFlight extends BaseShip
 
 
 	/*calculates current combat value of the fighter flight, as a perentage of original value
-	current algorithm: active fighters are worth their full value (even if damaged), inactive are worth nothing
+	current algorithm: active fighters are worth their full value (except when damaged over 50%, then they get 3/4), inactive are worth nothing
 	*/
 	public function calculateCombatValue() {
 		$effectiveValue = 100;
@@ -89,7 +89,14 @@ class FighterFlight extends BaseShip
 		$craftTotal = 0;
 		foreach($this->systems as $craft){
 			$craftTotal++;
-			if (!$craft->isDestroyed()) $craftActive++;
+			if (!$craft->isDestroyed()) {
+				//if damage is more than 50%: call it 75% combat value!
+				if ( ($craft->getRemainingHealth()*2) < $craft->maxhealth ) { //>50% damage - 3/4 value
+					$craftActive += 0.75;
+				}else{ //damage up to 50% - full value
+					$craftActive += 1;
+				}
+			}
 		}
 		if($craftTotal>0){
 			$effectiveValue = round(100*($craftActive/$craftTotal));
@@ -410,9 +417,7 @@ class FighterFlight extends BaseShip
             if (!$system->isDestroyed($turn) && !$system->isDisengaged($turn)) {
                 return false;
             }
-
         }
-
         return true;
     }
 
