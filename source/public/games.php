@@ -74,7 +74,10 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Current combat value shown (on Info pane)</b> - for now NOT taking enhancements into account 
 	    <br><b>Total value of enhancements picked shown in Fleet checker</b> - only actual enhancements are counted, not options
 
-	    
+		 <br><br>---------- <b>update 5th of August</b> ---------- 
+	    <br><b>Combat value updated</b> - now counts enhancements as well (new games only!)
+	    <br><b>Combat value updated</b> - seriously damaged fighters have slightly less value
+	    <br><b>Combat value updated</b> - bases and OSATs aren't penalized for lacking systems they don't need :)
 	    
 	    
 <!--	        
