@@ -152,7 +152,7 @@ class DBManager
 		if($ship->name == ''){
 				$ship->name = 'NAMELESS UNIT' ;
 		}
-        $sql = "INSERT INTO `B5CGM`.`tac_ship` VALUES(null, $userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot)";
+        $sql = "INSERT INTO `B5CGM`.`tac_ship` VALUES(null, $userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot, $ship->pointCostEnh)";
         //   Debug::log($sql);
         $id = $this->insert($sql);
         return $id;
@@ -1203,7 +1203,7 @@ class DBManager
 
         $stmt = $this->connection->prepare(
             "SELECT
-                id, playerid, name, phpclass, slot
+                id, playerid, name, phpclass, slot, enhvalue
             FROM
                 tac_ship 
             WHERE
@@ -1213,10 +1213,11 @@ class DBManager
 
         if ($stmt) {
             $stmt->bind_param('i', $id);
-            $stmt->bind_result($id, $playerid, $name, $phpclass, $slot);
+            $stmt->bind_result($id, $playerid, $name, $phpclass, $slot, $enhvalue);
             $stmt->execute();
             while ($stmt->fetch()) {
                 $ship = new $phpclass($id, $playerid, $name, $slot);
+				$ship->pointCostEnh = $enhvalue;
             }
             $stmt->close();
         }
@@ -1232,7 +1233,7 @@ class DBManager
 
         $stmt = $this->connection->prepare(
             "SELECT
-                id, playerid, name, phpclass, slot
+                id, playerid, name, phpclass, slot, enhvalue
             FROM
                 tac_ship 
             WHERE
@@ -1242,10 +1243,11 @@ class DBManager
 
         if ($stmt) {
             $stmt->bind_param('i', $gamedata->id);
-            $stmt->bind_result($id, $playerid, $name, $phpclass, $slot);
+            $stmt->bind_result($id, $playerid, $name, $phpclass, $slot, $enhvalue);
             $stmt->execute();
             while ($stmt->fetch()) {
                 $ship = new $phpclass($id, $playerid, $name, $slot);
+				$ship->pointCostEnh = $enhvalue;
                 /*    if ($ship instanceof FighterFlight && $ship->superheavy === false){
                         debug::log("backwards adjust");
                         $ship->flightSize = 6;

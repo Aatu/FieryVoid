@@ -47,10 +47,10 @@ class DrakhHeavyExplorer extends BaseShip{
         $this->addFrontSystem(new GraviticThruster(3, 25, 0, 5, 1));
         $this->addFrontSystem(new GraviticThruster(3, 25, 0, 5, 1));
 	$this->addFrontSystem(new AbsorbtionShield(3,8,8,3,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-	$this->addFrontSystem(new customLtPolarityPulsar(3, 0, 0, 240, 60)); 	
+	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 240, 60)); 	
 	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 240, 120)); 
 	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 240, 120));
-	$this->addFrontSystem(new customLtPolarityPulsar(3, 0, 0, 300, 120)); 		    
+	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 300, 120)); 		    
 	    
         $this->addAftSystem(new GraviticThruster(3, 30, 0, 6, 2));
 	$this->addAftSystem(new GraviticThruster(3, 30, 0, 6, 2));
