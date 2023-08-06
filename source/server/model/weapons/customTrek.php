@@ -1002,6 +1002,7 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 	public $isPrimaryTargetable = false; //shouldn't be targetable at all, in fact!
 	public $isTargetable = false; //cannot be targeted ever!
     public $iconPath = "TrekShieldProjectionF.png"; //overridden anyway - to indicate proper direction
+	protected $doCountForCombatValue = false; //don't count when estimating remaining combat value - shields are overloaded and regenerating all the time, do not represent permanent loss of combat ability
     
 	protected $possibleCriticals = array(); //no criticals possible
 	
