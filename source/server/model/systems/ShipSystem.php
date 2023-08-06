@@ -45,6 +45,8 @@ class ShipSystem {
 	public $individualNotesTransfer = "";//variable for transferring individual notes from interface to server layer
 	
 	public $repairPriority = 4;//priority at which system is repaired (by self repair system); higher = sooner; 0 indicates that system cannot be repaired
+	
+	protected $doCountForCombatValue = true; //false means this system is skipped when evaluating ships' combat value!
 
     function __construct($armour, $maxhealth, $powerReq, $output){
         $this->armour = $armour;
@@ -72,6 +74,10 @@ class ShipSystem {
 
         return $strippedSystem;
     }
+	
+	public function getCountForCombatValue(){
+		return $this->doCountForCombatValue;
+	}
 	
 	public function doIndividualNotesTransfer(){//optionally to be redefined if system can receive any private data from front endthat need immediate attention		
 	}
