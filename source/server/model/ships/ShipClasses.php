@@ -149,12 +149,13 @@ class BaseShip {
 	
 	/*calculates current combat value of the ship, as a perentage of original value
 	current algorithm:
-	 - base is remaining Structure, as a percentage of total structure
-	  -- PRIMARY is counted double, so damage to outer sections is less valuable
-	  -- destroyed sections are counted double, so actually destroying sections is valuable
-	  -- total Structure value cannot get below 20%
+	 - base is remaining boxes, as a percentage of total boxes
+	  -- PRIMARY Structure and systems that cannot be called (eg. particularly important) is counted double, so damage to outer sections is less valuable
+	  -- Structure damage is counted proportionally, same for important systems
+	  -- other systems are counted as either destroyed (0 value) or not (full value) - with reasoning that their damage usually results in little combat value loss
 	  -- scratches are free - if total value is 95% or more, it's counted as 100%
-	 - on top of the above, system damage is added:
+	  -- total value due to box count cannot get below 20%
+	 - on top of the above, critical system status is added:
 	  -- no Engine: cut value in half (cannot maneuver, most likely it's on the way out of the game even if currently it can still contribute)
 	  -- no Sensors: cut value in half (this means offensive fire is mostly ineffective (except point blank and ballistics), and ship is very easy target)
 	  -- no C&C: reduce value to 0 (cannot contribute to current game at all)
@@ -169,38 +170,46 @@ class BaseShip {
 			$cncPresent = false;
 			$enginePresent = false;
 			$scannerPresent = false;
-			foreach ($this->systems as $system){
-				if ($system instanceOf Scanner) $scannerPresent = true;
-				if ($system instanceOf Engine) $enginePresent = true;
-				if ($system instanceOf CnC) $cncPresent = true;
+			foreach ($this->systems as $system) {
+				if (!$system->isDestroyed()) {
+					if ($system instanceOf Scanner) $scannerPresent = true;
+					if ($system instanceOf Engine) $enginePresent = true;
+					if ($system instanceOf CnC) $cncPresent = true;
+				}
 			}
 			if ( (!$this->osat) && (!$cncPresent) ) $effectiveValue = 0; //ship disabled - no value - except OSATs which simpy don't have C&C!
 			if (!$scannerPresent) $effectiveValue = $effectiveValue/2; //no Sensors: cut value in half
 			if ( (!$this->base) && (!$this->osat) && (!$enginePresent)) $effectiveValue = $effectiveValue/2; //no Engine: cut value in half - except starbases which don't have any engine, and OSATs for which it's secondary anyway
 		}	
 		
-		if($effectiveValue>0){ //check for state of structure; calculate total boxes and total remaining boxes 
+		if($effectiveValue>0){ //check for state of structures and systems; calculate total boxes and total remaining boxes 
 			$totalStructure = 0;
 			$currentStructure = 0;
-			foreach ($this->systems as $system) if($system instanceOf Structure){
+			foreach ($this->systems as $system) if($system->getCountForCombatValue()) { //skip technical systems
 				$multiplier = 1;
-				if ($system->location == 0) $multiplier = 2; //PRIMARY Structure counts double
-				$totalStructure += $system->maxhealth * $multiplier;
-				$remHealth = $system->getRemainingHealth();
-				if($remHealth>0){ 
-					$currentStructure += $multiplier * $remHealth;
-				}else{ //if section is destroyed, count its value as DOUBLE towards total boxes - effectively lowering remaining percentage!
-					$totalStructure += $system->maxhealth;
+				$systemBoxes = $system->maxhealth;
+				$systemState = 0;
+				if (!$system->isDestroyed()) {				
+					$systemState = $system->maxhealth;
+					if (($system instanceOf Structure) || (!$system->isTargetable)) { //Structure and particularly important systems - actually count remaining boxes
+						$systemState = $system->getRemainingHealth();
+					}
 				}
+				if (($system instanceOf Structure) && (!$system->location == 0)) $multiplier = 2; //PRIMARY structure - double value!
+				if ( (!($system instanceOf Structure)) && (!$system->isTargetable)) $multiplier = 2; //particularly important systems (other than Structure) - double value!
+				$totalStructure += $system->maxhealth * $multiplier;
+				$currentStructure += $multiplier * $systemState;
+				
 			}
 			if($totalStructure>0){
 				$structureCombatEffectiveness = $currentStructure / $totalStructure;
 				$structureCombatEffectiveness = max(0.2,$structureCombatEffectiveness); //let's say structural damage cannot reduce effectiveness below 20%!
-				if($structureCombatEffectiveness >= 0.95) $structureCombatEffectiveness =1; //let's first few damage points be free - at less than 5% structural damage ship retains full effectiveness!
+				if($structureCombatEffectiveness >= 0.95) $structureCombatEffectiveness =1; //let's first few damage points be free - at less than 5% damage ship retains full effectiveness!
 				$effectiveValue = $effectiveValue*$structureCombatEffectiveness;
 			}				
-		}		
-		return round($effectiveValue);
+		}
+		
+		return $effectiveValue;
 	} //endOf function calculateCombatValue
 	
 	
