@@ -423,6 +423,7 @@ var SelfRepair = function SelfRepair(json, ship) {
 };
 SelfRepair.prototype = Object.create(ShipSystem.prototype);
 SelfRepair.prototype.constructor = SelfRepair;
+
 SelfRepair.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
 	this.individualNotesTransfer = Array();
 	//every entry contains one system override, in format: systemID;overrideValue
@@ -529,7 +530,23 @@ SelfRepair.prototype.setRepairPriority = function (newPriority) { //sets priorit
 	}
 }
 
+SelfRepair.prototype.hasMaxBoost = function () {
+	if (this.maxBoostLevel > 0){ 
+		return true;
+		}else{
+		return false;
+		}	
+};
 
+var ThirdspaceSelfRepair = function ThirdspaceSelfRepair(json, ship) {
+    SelfRepair.call(this, json, ship);
+};
+ThirdspaceSelfRepair.prototype = Object.create(SelfRepair.prototype);
+ThirdspaceSelfRepair.prototype.constructor = ThirdspaceSelfRepair;
+
+ThirdspaceSelfRepair.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};  
 
 var BioDrive = function BioDrive(json, ship) {
     Engine.call(this, json, ship);

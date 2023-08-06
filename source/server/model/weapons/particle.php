@@ -1497,7 +1497,7 @@ $damage = 30;
 
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-		$this->data["Special"] = "Causes always 5 rakes, each 1d10 strong.";
+		$this->data["Special"] = "Causes always 5 rakes, each dealing 1d10 damage.";
 		$this->data["Special"] .= "<br>Can sweep multiple fighters, but single rake will not overkill into another fighter."; //simplification, every rake should be assigned separately - but FV wouldn't actually recognize benefit of spreading damage among multiple fighters unless toughness+armor>=10 (eg. Tzymm and larger)
 	}
 

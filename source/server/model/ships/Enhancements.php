@@ -83,6 +83,10 @@ class Enhancements{
 			$unit->enhancementOptionsEnabled[] = 'VOR_AZURF';
 			break;	  
 			
+		case 'ThirdspaceShip':
+			Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';
+			break;		
 	}	  
   }//endof function nonstandardEnhancementSet
 	
@@ -1007,7 +1011,7 @@ class Enhancements{
 								}
 							}
 						}  
-						if($strongestValue > 0){ //Engine actually exists to be enhanced!
+						if($strongestValue > 0){ //Reactor actually exists to be enhanced!
 							$addedPower = 0;
 							if($ship->Enormous == true){
 							  $addedPower = 4;
@@ -1029,7 +1033,7 @@ class Enhancements{
 								}
 							}
 						}  
-						if($strongestValue > 0){ //Engine actually exists to be enhanced!
+						if($strongestValue > 0){ //Scanner actually exists to be enhanced!
 							$strongestSystem->output += $enhCount;
 						}
 						break;
