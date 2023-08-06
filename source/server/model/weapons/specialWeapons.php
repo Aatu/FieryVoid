@@ -2300,6 +2300,7 @@ class RammingAttack extends Weapon{
 	public $displayName = "Ramming Attack";
 	public $iconPath = "RammingAttack.png";
 	public $isTargetable = false; //cannot be targeted ever!
+	protected $doCountForCombatValue = false; //don't count when estimating remaining combat value - this is an ability rather than actual system
 	
 	//animation irrelevant really (range 0), but needs to be fast!
 	public $animation = "trail";

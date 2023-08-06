@@ -79,6 +79,9 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Combat value updated</b> - seriously damaged fighters have slightly less value
 	    <br><b>Combat value updated</b> - bases and OSATs aren't penalized for lacking systems they don't need :)
 	    
+		 <br><br>---------- <b>update 6th of August</b> ---------- 
+	    <br><b>Combat value updated</b> - some more detail added - system destruction is counted, rather than estimated from structural damage
+	    
 	    
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 
