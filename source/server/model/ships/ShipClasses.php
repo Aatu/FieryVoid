@@ -150,10 +150,10 @@ class BaseShip {
 	/*calculates current combat value of the ship, as a perentage of original value
 	current algorithm:
 	 - base is remaining boxes, as a percentage of total boxes
-	  -- PRIMARY Structure and systems that cannot be called (eg. particularly important) is counted double, so damage to outer sections is less valuable
+	  -- THIS ONE IS COMMENTED OUT -maybe it's too much :) ! PRIMARY Structure and systems that cannot be called (eg. particularly important) is counted double, so damage to outer sections is less valuable
 	  -- Structure damage is counted proportionally, same for important systems
 	  -- other systems are counted as either destroyed (0 value) or not (full value) - with reasoning that their damage usually results in little combat value loss
-	  -- scratches are free - if total value is 95% or more, it's counted as 100%
+	  -- scratches are free - if total box count value is 95% or more, it's counted as 100%
 	  -- total value due to box count cannot get below 20%
 	 - on top of the above, critical system status is added:
 	  -- no Engine: cut value in half (cannot maneuver, most likely it's on the way out of the game even if currently it can still contribute)
@@ -195,8 +195,10 @@ class BaseShip {
 						$systemState = $system->getRemainingHealth();
 					}
 				}
+				/* maybe DON'T multiply PRIMARY after all; core systems are both counted for damage and have extra (and harsh) multipliers if destroyed, so that should be enough
 				if (($system instanceOf Structure) && (!$system->location == 0)) $multiplier = 2; //PRIMARY structure - double value!
 				if ( (!($system instanceOf Structure)) && (!$system->isTargetable)) $multiplier = 2; //particularly important systems (other than Structure) - double value!
+				*/
 				$totalStructure += $system->maxhealth * $multiplier;
 				$currentStructure += $multiplier * $systemState;
 				
@@ -204,7 +206,7 @@ class BaseShip {
 			if($totalStructure>0){
 				$structureCombatEffectiveness = $currentStructure / $totalStructure;
 				$structureCombatEffectiveness = max(0.2,$structureCombatEffectiveness); //let's say structural damage cannot reduce effectiveness below 20%!
-				if($structureCombatEffectiveness >= 0.95) $structureCombatEffectiveness =1; //let's first few damage points be free - at less than 5% damage ship retains full effectiveness!
+				if($structureCombatEffectiveness >= 0.95) $structureCombatEffectiveness = 1; //let's first few damage points be free - at less than 5% damage ship retains full effectiveness!
 				$effectiveValue = $effectiveValue*$structureCombatEffectiveness;
 			}				
 		}
