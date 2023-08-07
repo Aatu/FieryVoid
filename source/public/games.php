@@ -85,6 +85,7 @@ if (isset($_SESSION["user"])) {
 		 <br><br>---------- <b>update 7th of August</b> ---------- 
 	    <br><b>Combat value updated</b> - because I wouldn't have been myself if I didn't tinker some more, apparently
 	    <br><b>Thirdspace updates by Douglas</b> - ones that <i>should</i> have been added by the first update... well, they're here now - sorry all!!!
+	    <br><b>Missiles ignoring jinking at range 0</b> - bug fixed
 	    
 	    
 <!--	        
