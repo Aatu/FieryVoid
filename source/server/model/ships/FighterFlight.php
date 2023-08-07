@@ -68,14 +68,16 @@ class FighterFlight extends BaseShip
         $this->name = $name;
         $this->slot = $slot;
 		
-		//set flight size limit if not explicitly set!
+		//set flight size limit if not explicitly set! - AT THIS POINT JINKING LIMIT IS 0!!!! so for now let's leave it for front end to determine after all...
+		/*
 		if($this->maxFlightSize < 1){
 		    if ($this->jinkinglimit > 9) { //Medium and smaller
 				$this->maxFlightSize = 12;
 		    } else { //Heavy fighters
-				$this->maxFlightSize = 9;
+				$this->maxFlightSize = 9;			
 			}
-		}			
+		}
+		*/
     }
 
 
