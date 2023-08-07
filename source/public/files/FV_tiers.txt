@@ -68,7 +68,6 @@ This group is inherently unbalanced, even against each other!
  - EA using Warlock
  - ISA (eg. all-White Star fleet - note that it's difficult to fly, too!)
  - Narn using massed EMines 
- - Thirdspace (custom faction)
  - Yolu
 
 
@@ -76,6 +75,7 @@ ANCIENTS
 Ancient factions that can't really be balanced vs Young Races. Overall high power and durability and selective ignoring enemy systems (especially defensive ones - which hurts some opponents while leaving others untouched) coupled with small numer of shots and relative vulnerability to swarms are impossible to properly balance for pickup battle, being vulnerable to some fleet builds and devastating vs others. For these reasons Ancients got their own category. Be warned that these fleets generally are difficult to fly and have LOTS of special rules.
 They should be balanced against each other though! Playing against Young fleet that is deliberately built to face particular Ancient may be interesting as well.
  - Shadows
+ - Thirdspace (Custom faction)
  - Vorlons
 
 
