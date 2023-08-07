@@ -586,7 +586,7 @@ window.weaponManager = {
 					var sPosHex = shipManager.getShipPosition(shooter);
 					var tPosHex = shipManager.getShipPosition(target);
 
-					if (!sPosHex.equals(tPosHex) || shipManager.movement.getJinking(shooter) > 0) {
+					if ( (weapon.ballistic) || (!sPosHex.equals(tPosHex)) || (shipManager.movement.getJinking(shooter) > 0) ) { //same hex direct fire ignores jinking
 						jink = shipManager.movement.getJinking(target);
 					}
 				}
