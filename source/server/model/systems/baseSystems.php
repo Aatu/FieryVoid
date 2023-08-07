@@ -2488,12 +2488,16 @@ class SelfRepair extends ShipSystem{
 	
 	//SelfRepair itself is most important to be repaired - as it's the condition of further repairs being effected!
 	public $repairPriority = 10;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	
+    public $boostable = false;
+    public $maxBoostLevel = 0;
+    public $boostEfficiency = 0; 
     
 	
  	protected $possibleCriticals = array( 
             19=>"OutputHalved"
 	);
-
+			
 	function __construct($armour, $maxhealth, $output)
 	{
 		//power requirement is 0, health is always defined by constructor, as is output - but they cannot be <1!
@@ -2548,7 +2552,27 @@ class SelfRepair extends ShipSystem{
         }else return $a->id - $b->id;
     } //endof function sortSystemsByRepairPriority
 	
-	
+	private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn)
+                            continue;
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
+            }
+            return $boostLevel;
+        }	
+        
+	public function getEffectiveOutput(){
+		$turn = TacGamedata::$currentTurn;
+      	$boost = $this->getBoostLevel($turn);
+ 	    $output = $this->getOutput();
+      	
+      	$effectiveoutput = $output + $boost;
+      	
+      	return $effectiveoutput; 
+		}		
 	
 	public function criticalPhaseEffects($ship, $gamedata)
     { 
@@ -2556,7 +2580,7 @@ class SelfRepair extends ShipSystem{
 		
 		//how many points are available?
 		$availableRepairPoints = $this->maxRepairPoints - $this->usedRepairPoints;
-		$availableRepairPoints = min($availableRepairPoints,$this->getOutput()); //no more than remaining points, no more than actual system repair capability	
+		$availableRepairPoints = min($availableRepairPoints,$this->getEffectiveOutput()); //no more than remaining points, no more than actual system repair capability	
 		
 		//sort all systems by priority
 		$ship=$this->getUnit();
@@ -2816,7 +2840,17 @@ class SelfRepair extends ShipSystem{
 
 }//endof class SelfRepair
 
+class ThirdspaceSelfRepair extends SelfRepair{
 
+    public $boostable = true;
+    public $maxBoostLevel = 10;
+    public $boostEfficiency = 5; 
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);  
+		$this->data["Special"] .= "<br> Output can be boosted up to " . $this->maxBoostLevel . " times at " . $this->boostEfficiency . " power per extra point of self repair.";	
+		}	
+	}	
 
 //BioThruster - it's NOT seen as thruster by game; used to calculate output of BioDrive engine 
 class BioThruster extends ShipSystem{
@@ -4179,38 +4213,6 @@ class AmmoMissileS extends AmmoMissileTemplate{
         return 20;
     }	
 } //endof class AmmoMissileS
-
-
-/* double entry, to be deleted once Stealth missile is confirmed as working
-//ammunition for AmmoMagazine - Class S Missile (for official Missile Racks, Kor-Lyan only)
-class AmmoMissileS extends AmmoMissileTemplate{	
-	public $name = 'ammoMissileS';
-	public $displayName = 'Stealth Missile';
-	public $modeName = 'Stealth';
-	public $size = 1; //how many store slots are required for a single round
-	public $enhancementName = 'AMMO_S'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Stealth Missile (2252)'; //enhancement description
-	public $enhancementPrice = 5;
-	
-	public $rangeMod = 0; //MODIFIER for launch range
-	public $distanceRangeMod = 0; //MODIFIER for distance range
-	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
-	public $minDamage = 20;
-	public $maxDamage = 20;	
-	public $damageType = 'Standard';//mode of dealing damage
-	public $weaponClass = 'Ballistic';//weapon class
-	public $priority = 6;
-	public $priorityAF = 5;
-	public $noOverkill = false;
-	public $useOEW = false;
-	public $hidetarget = true;
-	
-    public function getDamage($fireOrder) //actual function to be called, as with weapon!
-    {
-        return 20;
-    }	
-} //endof class AmmoMissileS
-*/
 
 
 //ammunition for AmmoMagazine - Class I Missile (for official Missile Racks)
