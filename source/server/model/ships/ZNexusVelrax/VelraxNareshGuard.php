@@ -1,29 +1,29 @@
 <?php
-class VelraxStrikeCarrier extends BaseShip{
+class VelraxNareshGuard extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 525;
+	$this->pointCost = 520;
 	$this->faction = "ZNexus Velrax";
-        $this->phpclass = "VelraxStrikeCarrier";
-        $this->imagePath = "img/ships/Nexus/VelraxResskar.png";
-        $this->shipClass = "Resskar Strike Carrier";
+        $this->phpclass = "VelraxNareshGuard";
+        $this->imagePath = "img/ships/Nexus/VelraxNareshGuard.png";
+        $this->shipClass = "Naresh Fleet Carrier (Brissa Guard)";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 150; //img has 200px per side
 		$this->limited = 33;
 		$this->unofficial = true;
 
-        $this->fighters = array("light"=>18, "heavy"=>6);
+        $this->fighters = array("light"=>36, "heavy"=>12);
 
-		$this->isd = 2050;
+		$this->isd = 2060;
         
-        $this->forwardDefense = 15;
-        $this->sideDefense = 15;
+        $this->forwardDefense = 17;
+        $this->sideDefense = 17;
         
         $this->turncost = 1.0;
         $this->turndelaycost = 1.0;
-        $this->accelcost = 3;
+        $this->accelcost = 4;
         $this->rollcost = 3;
         $this->pivotcost = 3;
         $this->iniativebonus = 0;
@@ -32,13 +32,14 @@ class VelraxStrikeCarrier extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 24, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 4, 6));
         $this->addPrimarySystem(new Engine(4, 18, 0, 8, 4));
-		$this->addPrimarySystem(new Hangar(2, 6));
+		$this->addPrimarySystem(new Hangar(2, 18));
    
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new NexusDartInterceptor(3, 4, 1, 180, 60));
+        $this->addFrontSystem(new NexusTwinIonGun(2, 4, 4, 270, 90));
 		$this->addFrontSystem(new PlasmaWaveTorpedo(3, 7, 4, 300, 60));
-		$this->addFrontSystem(new PlasmaWaveTorpedo(3, 7, 4, 300, 60));
+        $this->addFrontSystem(new NexusTwinIonGun(2, 4, 4, 270, 90));
         $this->addFrontSystem(new NexusDartInterceptor(3, 4, 1, 300, 180));
 
         $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
@@ -51,17 +52,21 @@ class VelraxStrikeCarrier extends BaseShip{
         $this->addAftSystem(new NexusHeavyLaserSpear(3, 6, 4, 120, 180));
         $this->addAftSystem(new NexusTwinIonGun(2, 4, 4, 60, 240));
 
-		$this->addLeftSystem(new NexusHeavyLaserSpear(3, 6, 4, 300, 60));
-		$this->addLeftSystem(new NexusHeavyLaserSpear(3, 6, 4, 240, 360));
+		$this->addLeftSystem(new PlasmaWaveTorpedo(3, 7, 4, 240, 360));
+		$this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 180, 360));
+		$this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 180, 360));
         $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 240, 60));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 		$this->addLeftSystem(new Hangar(2, 7));
 		$this->addLeftSystem(new Hangar(2, 7));
+		$this->addLeftSystem(new Hangar(2, 7));
 
-		$this->addRightSystem(new NexusHeavyLaserSpear(3, 6, 4, 300, 60));
-		$this->addRightSystem(new NexusHeavyLaserSpear(3, 6, 4, 0, 120));
+		$this->addRightSystem(new PlasmaWaveTorpedo(3, 7, 4, 0, 120));
+		$this->addRightSystem(new NexusLaserSpear(3, 5, 3, 0, 180));
+		$this->addRightSystem(new NexusLaserSpear(3, 5, 3, 0, 180));
         $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 300, 120));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
+		$this->addRightSystem(new Hangar(2, 7));
 		$this->addRightSystem(new Hangar(2, 7));
 		$this->addRightSystem(new Hangar(2, 7));
         
@@ -99,7 +104,7 @@ class VelraxStrikeCarrier extends BaseShip{
 			3=> array(
 					6 => "Thruster",
 					7 => "Twin Ion Gun",
-					9 => "Heavy Laser Spear",
+					9 => "Laser Spear",
 					12 => "Hangar",
 					18 => "Structure",
 					20 => "Primary",
@@ -107,7 +112,7 @@ class VelraxStrikeCarrier extends BaseShip{
 			4=> array(
 					6 => "Thruster",
 					7 => "Twin Ion Gun",
-					9 => "Heavy Laser Spear",
+					9 => "Laser Spear",
 					12 => "Hangar",
 					18 => "Structure",
 					20 => "Primary",

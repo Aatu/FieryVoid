@@ -11,12 +11,12 @@ class VelraxEarlyCarrier extends BaseShip{
         $this->shipClass = "Draskar Early Carrier";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 150; //img has 200px per side
-		$this->limited = 33;
+//		$this->limited = 33;
 		$this->unofficial = true;
 
         $this->fighters = array("light"=>12, "heavy"=>6);
 
-		$this->isd = 2032;
+		$this->isd = 2022;
         
         $this->forwardDefense = 16;
         $this->sideDefense = 16;
