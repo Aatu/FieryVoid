@@ -1430,7 +1430,8 @@ class PentagonArray extends Raking{
 	public $name = "PentagonArray";
 	public $displayName = "Pentagon Array";
 	public $iconPath = "PentagonArray.png";
-	public $animation = "bolt";
+	//public $animation = "bolt";
+	public $animation = "laser"; //by the fluff it's five LPBs firing a hail of bolts, but damage is rolled and resolved as a single raking attack - so beam animation seems more appropriate
 	public $animationColor = array(255, 153, 51);
 	/*
 	public $animationWidth = 3;	
