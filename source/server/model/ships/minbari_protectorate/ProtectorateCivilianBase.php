@@ -12,7 +12,7 @@ class ProtectorateCivilianBase extends SmallStarBaseFourSections{
 		$this->shipClass = "Civilian Base";
 		$this->imagePath = "img/ships/MinbariCivBase.png";
 		$this->canvasSize = 200;
-		$this->fighters = array("heavy"=>6); 
+		$this->fighters = array("heavy"=>6, "shuttles"=>4); 
 
 		$this->shipSizeClass = 3; 
 		$this->iniativebonus = -200; //no voluntary movement anyway

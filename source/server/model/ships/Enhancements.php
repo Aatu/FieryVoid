@@ -83,6 +83,10 @@ class Enhancements{
 			$unit->enhancementOptionsEnabled[] = 'VOR_AZURF';
 			break;	  
 			
+		case 'ThirdspaceShip':
+			Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';
+			break;		
 	}	  
   }//endof function nonstandardEnhancementSet
 	
@@ -801,26 +805,26 @@ class Enhancements{
 	    
     
   
-  /*actually enhances unit (sets enhancement options if enhancements themselves are empty)
-  */
-  public static function setEnhancements($ship){
-	//actually implement enhancements - it's more convenient to divide fighters and ships here
-	if($ship instanceof FighterFlight){
-		Enhancements::setEnhancementsFighter($ship);
-	}else{
-		Enhancements::setEnhancementsShip($ship);
-	}	
-	   
-	//clear array of options - no further point keeping it
-	//$ship->enhancementOptions = array();
-	$ship->enhancementOptionsEnabled = array();
-	$ship->enhancementOptionsDisabled = array();
-  } //endof function setEnhancements
+	/*actually enhances unit (sets enhancement options if enhancements themselves are empty)
+	*/
+	public static function setEnhancements($ship){
+		//actually implement enhancements - it's more convenient to divide fighters and ships here
+		if($ship instanceof FighterFlight){
+			Enhancements::setEnhancementsFighter($ship);
+		}else{
+			Enhancements::setEnhancementsShip($ship);
+		}	
+		   
+		//clear array of options - no further point keeping it
+		//$ship->enhancementOptions = array();
+		$ship->enhancementOptionsEnabled = array();
+		$ship->enhancementOptionsDisabled = array();
+	} //endof function setEnhancements
   
   
-	   /*enhancements for fighters - actual applying of chosen enhancements
-	   */
-	   private static function setEnhancementsFighter($flight){
+	/*enhancements for fighters - actual applying of chosen enhancements
+	*/
+	private static function setEnhancementsFighter($flight){
 	   	foreach($flight->enhancementOptions as $entry){			
 			//ID,readableName,numberTaken,limit,price,priceStep
 			$enhID = $entry[0];
@@ -1007,7 +1011,7 @@ class Enhancements{
 								}
 							}
 						}  
-						if($strongestValue > 0){ //Engine actually exists to be enhanced!
+						if($strongestValue > 0){ //Reactor actually exists to be enhanced!
 							$addedPower = 0;
 							if($ship->Enormous == true){
 							  $addedPower = 4;
@@ -1029,7 +1033,7 @@ class Enhancements{
 								}
 							}
 						}  
-						if($strongestValue > 0){ //Engine actually exists to be enhanced!
+						if($strongestValue > 0){ //Scanner actually exists to be enhanced!
 							$strongestSystem->output += $enhCount;
 						}
 						break;
@@ -1344,7 +1348,7 @@ class Enhancements{
 			$strippedShip = Enhancements::addShipEnhancementsForJSON($ship, $strippedShip);
 		}	
 		return $strippedShip;
-	  } //endof function setEnhancementOptions
+	  } //endof function addUnitEnhancementsForJSON
 		  
 	   /*modifies data for stripForJSON method of ship system 
 	     - for modifications that do require such additional modification (most do not!)
@@ -1354,7 +1358,7 @@ class Enhancements{
 				$enhID = $entry[0];
 				$enhCount = $entry[2];
 				$enhDescription = $entry[1];
-				if($enhCount > 0) {
+				if($enhCount > 0) {					
 					switch ($enhID) {	
 						case 'ELITE_CREW': //Elite Crew modifies thrusters' ratings!
 							if($system instanceof Thruster){

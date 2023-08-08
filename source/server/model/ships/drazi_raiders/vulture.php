@@ -7,7 +7,7 @@ class Vulture extends BaseShipNoAft{
     	$this->pointCost = 515;
         $this->faction = "Raiders";
         $this->phpclass = "Vulture";
-        $this->imagePath = "img/ships/DraziPrivateerVulture.png";
+        $this->imagePath = "img/ships/RaiderDraziPrivateerVulture.png";
         $this->shipClass = "Drazi Hunter Vulture Raider";
         $this->fighters = array("light" => 12);
         $this->limited = 33;

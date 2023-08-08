@@ -367,6 +367,7 @@ CREATE TABLE `tac_ship` (
   `campaignY` int(11) DEFAULT NULL,
   `campaigngameid` int(11) DEFAULT NULL,
   `slot` int(11) NOT NULL DEFAULT '0',
+  `enhvalue` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `gameid` (`tacgameid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=28910 DEFAULT CHARSET=utf8;

@@ -21,6 +21,7 @@ class Shanteen extends HeavyCombatVessel{
         $this->isd = 2268;
         $this->unofficial = true;
         $this->variantOf = "Tinashi War Frigate";
+        $this->fighters = array("shuttles"=>2);
 
         $this->addPrimarySystem(new Reactor(5, 25, 0, 7));
         $this->addPrimarySystem(new CnC(6, 24, 0, 0));

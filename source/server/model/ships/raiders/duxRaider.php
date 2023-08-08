@@ -8,7 +8,7 @@ class DuxRaider extends BaseShip{
 	$this->pointCost = 460;
         $this->faction = "Raiders";
         $this->phpclass = "DuxRaider";
-        $this->imagePath = "img/ships/celerian.png";
+        $this->imagePath = "img/ships/RaiderDuxCruiser.png";
         $this->shipClass = "Raider Dux Jump Cruiser";
         $this->shipSizeClass = 3;
         $this->limited = 10; //Restricted Deployment

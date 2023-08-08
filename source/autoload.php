@@ -2184,6 +2184,7 @@ spl_autoload_register(
                 'drakhheavyraider' => '/server/model/ships/drakh/drakhHeavyRaider.php',
                 'drakhheavyraiderescort' => '/server/model/ships/drakh/drakhHeavyRaiderEscort.php',
                 'drakhheavytender' => '/server/model/ships/drakh/drakhHeavyTender.php',
+                'drakhheavyexplorer' => '/server/model/ships/drakh/drakhHeavyExplorer.php',
                 'drakhpatrolship' => '/server/model/ships/drakh/drakhPatrolShip.php',
                 'drakhraidercontroller' => '/server/model/systems/baseSystems.php',
                 'drakhraiderflt' => '/server/model/ships/drakh/drakhRaiderFlt.php',
@@ -2729,6 +2730,7 @@ spl_autoload_register(
 				'treknausicaanheavyglider' => '/server/model/ships/ZTrekOther/TrekNausicaanHeavyGlider.php',
 				'treknausicaanvandal' => '/server/model/ships/ZTrekOther/TrekNausicaanVandal.php',
 				'treknausicaanscourge' => '/server/model/ships/ZTrekOther/TrekNausicaanScourge.php',
+				'treknausicaanguramba' => '/server/model/ships/ZTrekOther/TrekNausicaanGuramba.php',
 				
 				//Pak'ma'ra
 				'plasmabattery' => '/server/model/systems/baseSystems.php',
@@ -2862,6 +2864,7 @@ spl_autoload_register(
 				'gaimraxas' => '/server/model/ships/customs/gaimRaxas.php',
 				'apollowsf' => '/server/model/ships/customs/ApolloWSF.php',					
 				'prototype' => '/server/model/ships/customs/Prototype.php',
+				'explorerprototype' => '/server/model/ships/customs/ExplorerPrototype.php',
 				
 															 
 															   
@@ -3054,7 +3057,13 @@ spl_autoload_register(
 				'psionictorpedo' => '/server/model/weapons/torpedo.php',    
 				'thirdspacebattleship' => '/server/model/ships/thirdspace/ThirdspaceBattleship.php',
 				'thirdspacecnc' => '/server/model/systems/baseSystems.php',		
-				'thirdspaceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceAttackCraft.php',			
+				'thirdspaceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceAttackCraft.php',	
+				'thirdspacetorpedoattackcraft' => '/server/model/ships/thirdspace/ThirdspaceTorpedoAttackCraft.php',	
+				'thirdspacelanceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceLanceAttackCraft.php',
+				'thirdspacebattlescout' => '/server/model/ships/thirdspace/ThirdspaceBattleScout.php',		
+				'thirdspacecarrier' => '/server/model/ships/thirdspace/ThirdspaceCarrier.php',
+				'thirdspaceselfrepair' => '/server/model/systems/baseSystems.php',	
+		//		'thirdspacetestbed' => '/server/model/ships/thirdspace/ThirdspaceTestbed.php',
 						
 						//Development systems
 						'testgun' => '/server/model/weapons/customDevelopment.php',
