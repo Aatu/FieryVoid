@@ -68,17 +68,44 @@ class FighterFlight extends BaseShip
         $this->name = $name;
         $this->slot = $slot;
 		
-		//set flight size limit if not explicitly set!
+		//set flight size limit if not explicitly set! - AT THIS POINT JINKING LIMIT IS 0!!!! so for now let's leave it for front end to determine after all...
+		/*
 		if($this->maxFlightSize < 1){
 		    if ($this->jinkinglimit > 9) { //Medium and smaller
 				$this->maxFlightSize = 12;
 		    } else { //Heavy fighters
-				$this->maxFlightSize = 9;
+				$this->maxFlightSize = 9;			
 			}
-		}			
+		}
+		*/
     }
 
 
+	/*calculates current combat value of the fighter flight, as a perentage of original value
+	current algorithm: active fighters are worth their full value (except when damaged over 50%, then they get 3/4), inactive are worth nothing
+	*/
+	public function calculateCombatValue() {
+		$effectiveValue = 100;
+		//combat value of flight: combat value of craft remaining in flight. Destroyed or dropped out craft have no value, still fighting craft have full value even if damaged
+		$craftActive = 0;
+		$craftTotal = 0;
+		foreach($this->systems as $craft){
+			$craftTotal++;
+			if (!$craft->isDestroyed()) {
+				//if damage is more than 50%: call it 75% combat value!
+				if ( ($craft->getRemainingHealth()*2) < $craft->maxhealth ) { //>50% damage - 3/4 value
+					$craftActive += 0.75;
+				}else{ //damage up to 50% - full value
+					$craftActive += 1;
+				}
+			}
+		}
+		if($craftTotal>0){
+			$effectiveValue = round(100*($craftActive/$craftTotal));
+		}
+		return $effectiveValue;
+	} //endOf function calculateCombatValue
+	
 
     public function stripForJson() {
         $strippedShip = parent::stripForJson();
@@ -392,9 +419,7 @@ class FighterFlight extends BaseShip
             if (!$system->isDestroyed($turn) && !$system->isDisengaged($turn)) {
                 return false;
             }
-
         }
-
         return true;
     }
 

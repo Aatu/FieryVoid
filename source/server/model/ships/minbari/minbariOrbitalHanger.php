@@ -13,7 +13,7 @@ class MinbariOrbitalHanger extends SmallStarBaseFourSections{
 		$this->variantOf = "Minbari Civilian Base";
 		$this->imagePath = "img/ships/MinbariCivBase.png";
 		$this->canvasSize = 200;
-		$this->fighters = array("heavy"=>30); 
+		$this->fighters = array("heavy"=>30, "shuttles"=>4); 
 
 		$this->shipSizeClass = 3; 
 		$this->iniativebonus = -200; //no voluntary movement anyway
@@ -82,7 +82,7 @@ class MinbariOrbitalHanger extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Reactor(5, 9, 0, 0));
 		$this->addPrimarySystem(new CnC(5, 15, 0, 0)); 
 		$this->addPrimarySystem(new Scanner(5, 14, 3, 6));
-		$this->addPrimarySystem(new Hangar(5, 8));
+		$this->addPrimarySystem(new Hangar(5, 10));
 		$this->addPrimarySystem(new CargoBay(5, 36));
 		$this->addPrimarySystem(new Jammer(5, 8, 5));
 

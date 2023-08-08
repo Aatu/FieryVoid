@@ -485,13 +485,13 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);  
-			$absorb = $this->output - $this->armour;
-			$this->data["Special"] = "Defensive system which absorbs damage from incoming shots wihtin its arc before they damage ship hull.";
+//			$absorb = $this->output - $this->armour;
+			$this->data["Special"] = "Defensive system which absorbs damage from incoming shots within its arc.";
 			$this->data["Special"] .= "<br>Can absorb up to its maximum capacity before allowing damage to ship.";		
 			$this->data["Special"] .= "<br>Shield system's structure represents damage capacity, if it is reduced to zero system will cease to function.";
 			$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
 			$this->data["Special"] .= "<br>Cannot be flown under, and does not reduce the damage dealt or hit chance of enemy weapons.";
-			$this->data["Special"] .= "<br>Has an Armor value of 2.";				
+			$this->data["Special"] .= "<br>Has an Armor value of "  . $this->armour . ".";				
 			
 			$this->outputDisplay = $this->getRemainingCapacity();//override on-icon display default
 		}	
@@ -603,7 +603,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 		public $isPrimaryTargetable = false; //projector can be targeted even on PRIMARY, like a weapon!
 	    public $iconPath = "TrekShieldProjectorF.png"; //overridden anyway - to indicate proper direction
 	    public $boostable = true; //$this->boostEfficiency and $this->maxBoostLevel in __construct()  
-		public $boostEfficiency = 4;
+		public $boostEfficiency = 5;
 	    public $baseOutput = 0; //base output, before boost
 	    
 		
@@ -635,7 +635,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn); 
 			$this->data["Special"] = "Regenerates 5 health for the associated Shield per point of Projector rating at the end of each turn .";
-			$this->data["Special"] .= "<br>Can be boosted three times.";
+		$this->data["Special"] .= "<br> Output can be boosted up to " . $this->maxBoostLevel . " times at " . $this->boostEfficiency . " power per extra point of rating.";
 		}	
 		
 	    public function getOutputOnTurn($turn){

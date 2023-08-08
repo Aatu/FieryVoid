@@ -46,6 +46,7 @@ window.fleetListManager = {
 
         fleetlistentry.addClass("playerid_" + slot.playerid);
 
+	
         fleetlistentry.find(".fleetheader").html("<span class='headername'>FLEET LIST - </span><span class='playername'>" + slot.playername + "</span>");
 
         for (var i in gamedata.ships) {
@@ -61,8 +62,11 @@ window.fleetListManager = {
         var fleetlistline = template.clone(true);
         fleetlistentry.find(".fleetlistline").remove();
 
-        fleetlistline.html("<span><span class='shipname header'>Ship Name</span><span class='shipclass header'>Ship Class</span><span class='shiptype header'>Type</span><span class='initiative header'>Initiative</span></span>");
+        fleetlistline.html("<span><span class='shipname header'>Ship Name</span><span class='shipclass header'>Ship Class</span><span class='shiptype header'>Type</span><span class='initiative header'>Initiative</span><span class='value header'>Value (current/base)</span></span>");
         fleetlistline.appendTo(fleetlisttable);
+
+		var totalBaseValue = 0;
+		var totalCurrValue = 0;
 
         for (var index in shipArray) {
             ship = shipArray[index];
@@ -85,10 +89,19 @@ window.fleetListManager = {
                 default:
                     break;
             }
-
-            fleetlistline.html("<span id='" + ship.id + "'><span class='shipname clickable' data-shipid='" + ship.id + "'>" + ship.name + "</span><span class='shipclass'>" + ship.phpclass + "</span><span class='shiptype'>" + shiptype + "</span><span class='initiative'>" + shipManager.getIniativeOrder(ship) + "</span><span class='shipstatus'></span></span>");
+			var baseValue = ship.pointCost;
+			if (ship.flight === true) { //flight price is always set for 6 fighters, we need to derive actual for this flight!
+				baseValue = ship.pointCost * (ship.flightSize/6);
+			}
+			baseValue = Math.round(baseValue + ship.pointCostEnh); //enhancement price is total for unit
+			var currValue = Math.round(baseValue * ship.combatValue / 100);
+			totalBaseValue += baseValue;
+			totalCurrValue += currValue ;
+            fleetlistline.html("<span id='" + ship.id + "'><span class='shipname clickable' data-shipid='" + ship.id + "'>" + ship.name + "</span><span class='shipclass'>" + ship.phpclass + "</span><span class='shiptype'>" + shiptype + "</span><span class='initiative'>" + shipManager.getIniativeOrder(ship) + "</span><span class='value'>"+currValue+'/'+baseValue+"CP</span><span class='shipstatus'></span></span>");
             fleetlistline.appendTo(fleetlisttable);
         }
+	
+        fleetlistentry.find(".fleetheader").html("<span class='headername'>FLEET LIST - </span><span class='playername'>" + slot.playername + ", fleet value: " + totalCurrValue +" / "+totalBaseValue+ " CP </span>");
 
         $(".clickable", fleetlistentry).on("click", fleetListManager.doScrollToShip);
     },

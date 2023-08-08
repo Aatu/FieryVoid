@@ -89,7 +89,7 @@ class wlcChlonasOnThariCVA2253 extends BaseShipNoFwd{
             5 => "Thruster", //no differentiation Retro/side
             6 => "Hangar",
             7 => "Heavy Gatling Mattergun",
-            8 => "Matter Steram",
+            8 => "Matter Stream",
             10 => "Pulsar Laser",
             12 => "Light Gatling Mattergun",
             18 => "Structure",
@@ -99,7 +99,7 @@ class wlcChlonasOnThariCVA2253 extends BaseShipNoFwd{
             5 => "Thruster", //no differentiation Retro/side
             6 => "Hangar",
             7 => "Heavy Gatling Mattergun",
-            8 => "Matter Steram",
+            8 => "Matter Stream",
             10 => "Pulsar Laser",
             12 => "Light Gatling Mattergun",
             18 => "Structure",

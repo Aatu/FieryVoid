@@ -1,6 +1,6 @@
 <?php
 class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
-	/*Drakh Heavy Raider LCV*/
+
 	/*no EW restrictions*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -9,7 +9,7 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
     $this->faction = "Thirdspace";
 	$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	$this->phpclass = "ThirdspaceAttackCraft";
-	$this->shipClass = "Thirdspace Attack Craft";
+	$this->shipClass = "Attack Craft";
 	$this->imagePath = "img/ships/ThirdspaceAttackCraft.png";
 	$this->canvasSize = 80;
 
@@ -30,11 +30,14 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 	$this->iniativebonus = 15 *5;
 		
 	$this->hangarRequired = "LCVs";
+	
+		/*Thirdspace use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');		
 	    
-	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance   
-	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
-	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
-	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhittable and with unlimited thrust allowance   
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhittable and with unlimited thrust allowance
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhittable and with unlimited thrust allowance
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhittable and with unlimited thrust allowance
 	$this->addPrimarySystem(new ThirdspaceCnC(99, 99, 0, 0)); //C&C should be unhittable anyway
 		    
     $this->addPrimarySystem(new AdvancedSingularityDrive(6, 16, 0, 20+4+3));
@@ -43,7 +46,7 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new JumpEngine(5, 8, 3, 8));//Added a small jump drive, how they travel is unknown but if White Star can house a jump drive it's not unfeasible Thirdspace aliens would have a FTL drive on their smaller craft.
 	$this->addPrimarySystem(new Engine(5, 12, 0, 10, 2));
-    $this->addPrimarySystem(new SelfRepair(5, 8, 4)); //armor, structure, output 	
+    $this->addPrimarySystem(new ThirdspaceSelfRepair(5, 8, 4)); //armor, structure, output 	
 
 	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 60));
 	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 60));

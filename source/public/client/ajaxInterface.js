@@ -68,7 +68,8 @@ window.ajaxInterface = {
                 'userid': ship.userid,
                 'slot': ship.slot,
                 'id': ship.id,
-                'name': ship.name
+                'name': ship.name,
+				'pointCostEnh': ship.pointCostEnh
             };
             newShip.movement = Array();
             newShip.EW = Array();

@@ -10,6 +10,7 @@ class JYDThentus extends MediumShip{
         $this->imagePath = "img/ships/RaiderJYDThentus.png";
         $this->shipClass = "JYD Thentus Frigate";
         $this->agile = true;
+        $this->canvasSize = 100;        
 	    
 		$this->occurence = "unique";
 

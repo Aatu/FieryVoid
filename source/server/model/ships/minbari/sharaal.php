@@ -13,7 +13,7 @@ class Sharaal extends BaseShip{
         $this->gravitic = true;
 		$this->canvasSize = 280;
         $this->occurence = "uncommon";
-        $this->fighters = array("normal"=>24);
+        $this->fighters = array("normal"=>24, "shuttles"=>4);
         $this->forwardDefense = 15;
         $this->sideDefense = 19;
         $this->turncost = 1.33;
