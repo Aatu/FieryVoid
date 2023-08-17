@@ -871,7 +871,7 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
     	$this->specialAbilities[] = "AdvancedSensors";
 		$this->specialAbilityValue = true; //so it is actually recognized as special ability!
     	$this->boostEfficiency = 14; //Advanced Sensors are rarely lower than 13, so flat 14 boost cost is advantageous to output+1!
-    	$this->maxBoostLevel = 2; //Unlike Shadows/Vorlons Thirdspace ships have alot of spare power, so limit their max sensor boost for balance. 		
+    	$this->maxBoostLevel = 1; //Unlike Shadows/Vorlons Thirdspace ships have alot of spare power, so limit their max sensor boost for balance. 		
 		if (!isset($this->data["Special"])) {
 			$this->data["Special"] = '';
 		}else{
@@ -881,7 +881,7 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		$this->data["Special"] .= "<br>Ignores enemy BDEW, SDEW and DIST."; //not that of advanced races
 		$this->data["Special"] .= "<br>Ignores any defensive systems lowering enemy profile (shields, EWeb...)."; //not that of advanced races
 		$this->data["Special"] .= "<br>All of the above work as usual if operated by advanced races.";
-		$this->data["Special"] .= "<br>Can only be boosted twice.";	 
+		$this->data["Special"] .= "<br>Can only be boosted once.";	 
 	}	
 		
 	/*note: StarWarsSensors mark in itself doesn't do anything beyond being recognizable for ship description function
