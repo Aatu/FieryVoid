@@ -4712,7 +4712,7 @@ class PsychicFieldHandler{
         );
 
         public $rangePenalty = 0.25;
-        public $fireControl = array(null, 4, 7); // fighters, <mediums, <capitals
+        public $fireControl = array(null, 3, 6); // fighters, <mediums, <capitals
         //private $damagebonus = 10;
 
         public $damageType = "Raking"; 
@@ -4983,7 +4983,7 @@ class PsionicConcentrator extends Raking{
         public $rangePenalty = 1;
             public $rangePenaltyArray = array( 1=>1, 2=>0.66); //Standard and Raking modes
         public $fireControl = array(8, 5, 3); // fighters, <mediums, <capitals 
-            public $fireControlArray = array( 1=>array(6, 4, 3), 2=>array(0, 4, 5));
+            public $fireControlArray = array( 1=>array(6, 4, 2), 2=>array(0, 4, 5));
               
 	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
   		public $damageTypeArray = array(1=>"Standard", 2=>"Standard");	    
