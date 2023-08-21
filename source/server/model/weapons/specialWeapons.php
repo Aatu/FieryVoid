@@ -4712,7 +4712,7 @@ class PsychicFieldHandler{
         );
 
         public $rangePenalty = 0.25;
-        public $fireControl = array(null, 3, 6); // fighters, <mediums, <capitals
+        public $fireControl = array(null, 2, 6); // fighters, <mediums, <capitals
         //private $damagebonus = 10;
 
         public $damageType = "Raking"; 
