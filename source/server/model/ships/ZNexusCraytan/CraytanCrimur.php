@@ -16,7 +16,7 @@ class CraytanCrimur extends BaseShip{
 		$this->unofficial = true;
         $this->limited = 10;
 
-        $this->fighters = array("normal"=>6, "assult shuttle"=>2);
+        $this->fighters = array("normal"=>6, "assult shuttles"=>2);
 
 		$this->isd = 2136;
         

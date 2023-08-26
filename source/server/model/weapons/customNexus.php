@@ -331,6 +331,7 @@ class NexusLaserMissile extends Laser{
             $this->data["Special"] = "Bomb-pumped laser. Ballistic weapon that scores raking (8) damage.";
             $this->data["Special"] .= "<br>Long-range: 20 hex launch and 30 hex max range, 2d10+2 damage.";
             $this->data["Special"] .= "<br>Short-range: 10 hex launch and 15 hex max range, 3d10+4 damage.";
+            $this->data["Special"] .= "<br>Due to how this works, intercepted as a normal weapon and not a ballistic weapon.";
             $this->data["Ammunition"] = $this->ammunition;
         }
         
@@ -433,6 +434,7 @@ class NexusHeavyLaserMissile extends Laser{
             $this->data["Special"] = "Bomb-pumped laser. Ballistic weapon that scores raking (8) damage.";
             $this->data["Special"] .= "<br>Long-range: 50 hex launch and 60 hex max range, 2d10+2 damage.";
             $this->data["Special"] .= "<br>Short-range: 20 hex launch and 30 hex max range, 3d10+4 damage.";
+            $this->data["Special"] .= "<br>Due to how this works, intercepted as a normal weapon and not a ballistic weapon.";
             $this->data["Ammunition"] = $this->ammunition;
         }
         
