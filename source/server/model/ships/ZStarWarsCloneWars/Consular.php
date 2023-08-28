@@ -5,17 +5,17 @@ class Consular extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 250;
-	$this->faction = "ZStarWars Clone Wars";
+	$this->faction = "ZStarWars Clone Wars (Playtest)";
         $this->phpclass = "Consular";
         $this->imagePath = "img/starwars/consular.png";
 	    $this->canvasSize = 100;
-        $this->shipClass = "Consular Corvette";
+        $this->shipClass = "Republic Consular Corvette";
 	    
 	$this->unofficial = true;
         // $this->agile = true;
 		
 //		$this->isd = "late Galactic Republic";
-		$this->notes = "Primary users: common (civilian)";
+//		$this->notes = "Primary users: common (civilian)";
 
         
         $this->forwardDefense = 10;
@@ -42,38 +42,38 @@ class Consular extends MediumShip{
     $this->addFrontSystem(new CWPointDefenseLaser(2, 4, 1, 0, 360));
     $this->addFrontSystem(new CWTwinTurbolaser(2, 6, 3, 240, 360));
     $this->addFrontSystem(new CWTwinTurbolaser(2, 6, 3, 0, 120));
-	$this->addFrontSystem(new CWShield(3,6,0,2,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addFrontSystem(new EMShield(3,6,0,2,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 		
     $this->addAftSystem(new Thruster(2, 9, 0, 2, 2));
     $this->addAftSystem(new Thruster(2, 9, 0, 2, 2));
 	$this->addAftSystem(new Thruster(2, 9, 0, 2, 2));
     $this->addAftSystem(new CWTwinTurbolaser(2, 6, 3, 90, 270));
-	$this->addAftSystem(new CWShield(3,6,0,2,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addAftSystem(new EMShield(3,6,0,2,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
        
-    $this->addPrimarySystem(new Structure( 3, 50));
+    $this->addPrimarySystem(new Structure( 3, 40));
 
         $this->hitChart = array(
         		0=> array(
-        				7 => "Thruster",
-        				13 => "Cargo Bay",
-        				15 => "Scanner",
-        				17 => "Engine",
-        				18 => "Hangar",
-        				19 => "Hyperdrive",
-        				20 => "Reactor",
+        				8 => "Thruster",
+						10 => "Jump Engine",
+        				12 => "Scanner",
+        				15 => "Engine",
+        				17 => "Hangar",
+        				19 => "Reactor",
+        				20 => "C&C",
         		),
         		1=> array(
-        				2 => "Thruster",
-        				3 => "Ray Shield",
-        				7 => "0:Medium Turbolaser",
-        				16 => "Structure",
-        				17 => "C&C",
+        				6 => "Thruster",
+        				7 => "Point Defense Laser",
+        				9 => "Twin Turbolaser",
+        				10 => "EM Shield",
+        				17 => "Structure",
         				20 => "Primary",
         		),
         		2=> array(
-        				5 => "Thruster",
-        				6 => "Ray Shield",
-        				9 => "0:Medium Turbolaser",
+        				8 => "Thruster",
+        				9 => "Twin Turbolaser",
+        				10 => "EM Shield",
         				17 => "Structure",
         				20 => "Primary",
         		),

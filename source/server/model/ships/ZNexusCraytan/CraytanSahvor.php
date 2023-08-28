@@ -4,7 +4,7 @@ class CraytanSahvor extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 420;
+        $this->pointCost = 330;
         $this->faction = "ZNexus Craytan";
         $this->phpclass = "CraytanSahvor";
         $this->imagePath = "img/ships/Nexus/CraytanCorvette.png";
@@ -36,13 +36,13 @@ class CraytanSahvor extends MediumShip{
         $this->addPrimarySystem(new CargoBay(4, 9));
         
 		$this->addFrontSystem(new NexusMedEnhPlasma(3, 6, 4, 300, 60));
-		$this->addFrontSystem(new NexusCIDS(2, 4, 2, 240, 120));
+		$this->addFrontSystem(new NexusACIDS(2, 6, 2, 240, 120));
 		$this->addFrontSystem(new NexusMedEnhPlasma(3, 6, 4, 300, 60));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	    
 		$this->addAftSystem(new NexusLightEnhPlasma(2, 5, 2, 180, 360));
-		$this->addAftSystem(new NexusCIDS(2, 4, 2, 60, 300));
+		$this->addAftSystem(new NexusACIDS(3, 6, 2, 60, 300));
 		$this->addAftSystem(new NexusLightEnhPlasma(2, 5, 2, 0, 180));
         $this->addAftSystem(new Thruster(3, 10, 0, 5, 2));    
         $this->addAftSystem(new Thruster(3, 10, 0, 5, 2));    
@@ -65,7 +65,7 @@ class CraytanSahvor extends MediumShip{
 		1=> array(
 			6 => "Thruster",
 			8 => "Medium Enhanced Plasma",
-			9 => "Close-In Defense System",
+			9 => "Advanced Close-In Defense System",
 			17 => "Structure",
 			20 => "Primary",
 		),
@@ -73,7 +73,7 @@ class CraytanSahvor extends MediumShip{
 		2=> array(
 			6 => "Thruster",
 			8 => "Light Enhanced Plasma",
-			9 => "Close-In Defense System",
+			9 => "Advanced Close-In Defense System",
 			11 => "Hangar",
 			17 => "Structure",
 			20 => "Primary",

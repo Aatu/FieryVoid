@@ -34,7 +34,7 @@ class BrixadiiPoliceFrigateBase extends LCV{
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
   
 		$this->addPrimarySystem(new Reactor(3, 7, 0, 0));
-		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
+		$this->addPrimarySystem(new CnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 //        $this->addPrimarySystem(new AntiquatedScanner(4, 9, 2, 3));
     	$sensors = new Scanner(3, 9, 2, 3);
 			$sensors->markLCV();

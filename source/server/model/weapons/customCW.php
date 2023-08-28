@@ -24,6 +24,12 @@
 		public $firingMode = "Standard";
         public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClass = "Laser";
+        public $uninterceptable = true; // This is a laser
+
+		public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Uninterceptable and can intercept.'; 
+		}
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -42,7 +48,7 @@
     } //endof CWHeavyTurbolaser
 
 
-    class CWTwinHeavyTurbolaser extends Laser{
+    class CWTwinHeavyTurbolaser extends Weapon{
      
         public $name = "CWTwinHeavyTurbolaser";
         public $displayName = "Twin Heavy Turbolaser";  
@@ -66,6 +72,12 @@
 		public $firingMode = "Standard";
         public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClass = "Laser";
+        public $uninterceptable = true; // This is a laser
+
+		public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Uninterceptable and can intercept.'; 
+		}
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -107,6 +119,12 @@
 		public $firingMode = "Standard";
         public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClass = "Laser";
+        public $uninterceptable = true; // This is a laser
+
+		public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Uninterceptable and can intercept.'; 
+		}
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -148,6 +166,12 @@
 		public $firingMode = "Standard";
         public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClass = "Laser";
+        public $uninterceptable = true; // This is a laser
+
+		public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Uninterceptable and can intercept.'; 
+		}
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -190,6 +214,12 @@
 		public $firingMode = "Standard";
         public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClass = "Laser";
+        public $uninterceptable = true; // This is a laser
+
+		public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Uninterceptable and can intercept.'; 
+		}
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -233,6 +263,12 @@
 		public $firingMode = "Standard";
         public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClass = "Laser";
+        public $uninterceptable = true; // This is a laser
+
+		public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Uninterceptable and can intercept.'; 
+		}
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -256,7 +292,7 @@
      
         public $name = "CWLaserCannon";
         public $displayName = "Laser Cannon";  
-	    public $iconPath = "mediumLaser.png";
+	    public $iconPath = "lightLaser.png";
 	    
         public $animation = "trail";
         public $animationColor = array(245, 0, 0);
@@ -275,6 +311,12 @@
 		public $firingMode = "Standard";
         public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClass = "Laser";
+        public $uninterceptable = true; // This is a laser
+
+		public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Uninterceptable and can intercept.'; 
+		}
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -317,6 +359,12 @@
 		public $firingMode = "Standard";
         public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClass = "Laser";
+        public $uninterceptable = true; // This is a laser
+
+		public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Uninterceptable and can intercept.'; 
+		}
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -360,6 +408,12 @@
 		public $firingMode = "Standard";
         public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClass = "Laser";
+        public $uninterceptable = true; // This is a laser
+
+		public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Uninterceptable and can intercept.'; 
+		}
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -402,6 +456,12 @@
 		public $firingMode = "Standard";
         public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClass = "Laser";
+        public $uninterceptable = true; // This is a laser
+
+		public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Uninterceptable and can intercept.'; 
+		}
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -433,7 +493,7 @@ class CWConcussionMissile extends Torpedo{
         public $animationWidth = 4;
         public $trailLength = 100;    
 
-        public $useOEW = true; //torpedo
+        public $useOEW = false; //torpedo
         public $ballistic = true; //missile
         public $range = 15;
 		public $guns = 1;
@@ -845,6 +905,130 @@ class CWShield extends Shield implements DefensiveSystem{
     }  // endof CWLaserCannonsFtr
 
 
+
+
+class CWFighterTorpedoLauncher extends FighterMissileRack
+{
+    public $name = "NexusFighterTorpedoLauncher";
+    public $displayName = "Fighter Torpedo Launcher";
+    public $loadingtime = 1;
+    public $iconPath = "fighterTorpedo.png";
+    public $rangeMod = 0;
+    public $firingMode = 1;
+    public $maxAmount = 0;
+    protected $distanceRangeMod = 0;
+	public $weaponClass = "Standard";
+    public $priority = 4; //priority: typical fighter weapon (correct for Light Ballistic Torpedo's 2d6)
+
+    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+    
+    public $firingModes = array(
+        1 => "FCM"
+    );
+    
+    function __construct($maxAmount, $startArc, $endArc){
+        parent::__construct($maxAmount, $startArc, $endArc);
+        
+        $FCM = new CWConcussionFtr($startArc, $endArc, $this->fireControl);
+        
+        $this->missileArray = array(
+            1 => $FCM
+        );
+        
+        $this->maxAmount = $maxAmount;
+    }
+    
+}
+
+
+class CWConcussionFtr extends MissileFB
+{
+    public $name = "CWConcussionFtr";
+    public $missileClass = "FCM";
+    public $displayName = "Fighter Concussion Missile";
+    public $cost = 8;
+    //public $surCharge = 0;
+	public $damage = 12;
+    public $amount = 0;
+    public $range = 6;
+    public $distanceRange = 18;
+    public $hitChanceMod = 0;
+    public $priority = 3;
+	public $damageType = "Standard";
+	public $weaponClass = "Standard";
+	
+    function __construct($startArc, $endArc, $fireControl=null){
+        parent::__construct($startArc, $endArc, $fireControl);
+    }
+
+    public function getDamage($fireOrder){        return 12;   }
+    public function setMinDamage(){     $this->minDamage = 12;      }
+    public function setMaxDamage(){     $this->maxDamage = 12;      }        
+	
+} // end CWConcussionFtr
+
+
+class CWFighterProtonLauncher extends FighterMissileRack
+{
+    public $name = "NexusFighterTorpedoLauncher";
+    public $displayName = "Fighter Torpedo Launcher";
+    public $loadingtime = 1;
+    public $iconPath = "fighterTorpedo.png";
+    public $rangeMod = 0;
+    public $firingMode = 1;
+    public $maxAmount = 0;
+    protected $distanceRangeMod = 0;
+	public $weaponClass = "Standard";
+    public $priority = 4; //priority: typical fighter weapon (correct for Light Ballistic Torpedo's 2d6)
+
+    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+    
+    public $firingModes = array(
+        1 => "FPT"
+    );
+    
+    function __construct($maxAmount, $startArc, $endArc){
+        parent::__construct($maxAmount, $startArc, $endArc);
+        
+        $FPT = new CWProtonFtr($startArc, $endArc, $this->fireControl);
+        
+        $this->missileArray = array(
+            1 => $FPT
+        );
+        
+        $this->maxAmount = $maxAmount;
+    }
+    
+}
+
+class CWProtonFtr extends MissileFB
+{
+    public $name = "CWProtonFtr";
+    public $missileClass = "FPT";
+    public $displayName = "Fighter Proton Torpedo";
+    public $cost = 8;
+    //public $surCharge = 0;
+	public $damage = 10;
+    public $amount = 0;
+    public $range = 10;
+    public $distanceRange = 30;
+    public $hitChanceMod = 0;
+    public $priority = 3;
+	public $damageType = "Standard";
+	public $weaponClass = "Standard";
+	
+    function __construct($startArc, $endArc, $fireControl=null){
+        parent::__construct($startArc, $endArc, $fireControl);
+    }
+
+    public function getDamage($fireOrder){        return 10;   }
+    public function setMinDamage(){     $this->minDamage = 10;      }
+    public function setMaxDamage(){     $this->maxDamage = 10;      }        
+	
+} // end CWProtonFtr
+
+
+
 /* class CWFtrConcussion extends FighterMissileRack
 {
     public $name = "CWFtrConcussion";
@@ -880,7 +1064,7 @@ class CWShield extends Shield implements DefensiveSystem{
         $this->maxAmount = $maxAmount;
     }
     
-} */
+}  */
 
 
 

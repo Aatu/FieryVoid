@@ -52,6 +52,7 @@ Factions that point for point will have uphill battle against First Tier, yet ot
  - Ipsha  
  - Markab
  - Nexus Brixadii (custom faction - Nexus universe)
+ - Nexus Craytan Union (custom faction - Nexus universe)
  - Nexus Dalithorn (custom faction - Nexus universe)
  - Nexus Sal-bez (custom faction - Nexus universe)
  - Nexus Velrax (custom faction - Nexus universe)
@@ -68,7 +69,6 @@ This group is inherently unbalanced, even against each other!
  - EA using Warlock
  - ISA (eg. all-White Star fleet - note that it's difficult to fly, too!)
  - Narn using massed EMines 
- - Thirdspace (custom faction)
  - Yolu
 
 
@@ -76,6 +76,7 @@ ANCIENTS
 Ancient factions that can't really be balanced vs Young Races. Overall high power and durability and selective ignoring enemy systems (especially defensive ones - which hurts some opponents while leaving others untouched) coupled with small numer of shots and relative vulnerability to swarms are impossible to properly balance for pickup battle, being vulnerable to some fleet builds and devastating vs others. For these reasons Ancients got their own category. Be warned that these fleets generally are difficult to fly and have LOTS of special rules.
 They should be balanced against each other though! Playing against Young fleet that is deliberately built to face particular Ancient may be interesting as well.
  - Shadows
+ - Thirdspace (Custom faction)
  - Vorlons
 
 
@@ -89,9 +90,9 @@ This group is inherently unbalanced, even against each other!
  - Grome
  - Hurr
  - Mitoc (Small Races - only one MCV-class vessel)
- - Nexus Craytan Union (PLAYTEST custom faction - Nexus universe)
  - Rogolon (Small Races)
  - Sorithian (Small Races)
+ - Star Wars: Clone Wars (Playtest. A different look at the setting, but using the Clone Wars era to avoid confusion with the existing Star Wars work)
  - Streib (custom faction; their ship design and technology is peculiar enough for them to feel surprisingly Ancient-like when it comes to balancing. Streib are definitely NOT up to fighting actual Ancients though! - hence "the Rest")
  - Usuuth
  

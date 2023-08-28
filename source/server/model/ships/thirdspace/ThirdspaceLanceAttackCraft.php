@@ -40,9 +40,9 @@ class ThirdspaceLanceAttackCraft extends LCV{ //Actually an LCV.
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhittable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhittable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhittable and with unlimited thrust allowance
-	$this->addPrimarySystem(new ThirdspaceCnC(99, 99, 0, 0)); //C&C should be unhittable anyway
+	$this->addPrimarySystem(new ThirdspaceCnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 		    
-    $this->addPrimarySystem(new AdvancedSingularityDrive(6, 16, 0, 20+4+3));
+    $this->addPrimarySystem(new AdvancedSingularityDrive(6, 16, 0, 21+4+3));
 	$sensors = new Scanner(5, 12, 4, 9);
 		$sensors->markThirdspace();
 		$this->addPrimarySystem($sensors);
@@ -51,11 +51,11 @@ class ThirdspaceLanceAttackCraft extends LCV{ //Actually an LCV.
     $this->addPrimarySystem(new ThirdspaceSelfRepair(5, 8, 4)); //armor, structure, output 	
 
 	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 60));
-    $this->addFrontSystem(new PsionicLance(5, 0, 0, 330, 30));
+    $this->addFrontSystem(new PsionicLance(5, 0, 0, 345, 15));
 	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 150));
 			
-	$projection = new ThirdspaceShieldProjection(2, 50, 50, 0, 360, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
-	$projector = new ThirdspaceShieldProjector(6, 12, 4, 3, 0, 360, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R
+	$projection = new ThirdspaceShieldProjection(2, 50, 50, 0, 360, 'C');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+	$projector = new ThirdspaceShieldProjector(6, 12, 4, 3, 0, 360, 'C'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R
 	$projection->addProjector($projector);
 	$this->addFrontSystem($projector);
 	$this->addFrontSystem($projection);

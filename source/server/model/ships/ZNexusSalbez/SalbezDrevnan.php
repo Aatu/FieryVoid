@@ -4,7 +4,7 @@ class SalbezDrevnan extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 215;
+        $this->pointCost = 230;
         $this->faction = "ZNexus Sal-bez";
         $this->phpclass = "SalbezDrevnan";
         $this->imagePath = "img/ships/Nexus/salbez_drevnan.png";
@@ -16,32 +16,32 @@ class SalbezDrevnan extends MediumShip{
         $this->forwardDefense = 11;
         $this->sideDefense = 13;
         
-        $this->turncost = 1.0;
-        $this->turndelaycost = 1.0;
-        $this->accelcost = 4;
+        $this->turncost = 0.33;
+        $this->turndelaycost = 0.5;
+        $this->accelcost = 2;
 //        $this->rollcost = 2;
 //        $this->pivotcost = 2;
-        $this->iniativebonus = 60;
+        $this->iniativebonus = 65;
          
-        $this->addPrimarySystem(new Reactor(2, 8, 0, 0));
-        $this->addPrimarySystem(new CnC(3, 5, 0, 0));
-        $this->addPrimarySystem(new Scanner(1, 6, 1, 3));
-        $this->addPrimarySystem(new Engine(2, 9, 0, 6, 4));
+        $this->addPrimarySystem(new Reactor(4, 8, 0, 0));
+        $this->addPrimarySystem(new CnC(4, 5, 0, 0));
+        $this->addPrimarySystem(new Scanner(3, 6, 3, 5));
+        $this->addPrimarySystem(new Engine(3, 9, 0, 9, 4));
 		$this->addPrimarySystem(new LightLaser(0, 4, 3, 0, 360));
-        $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 3));
-        $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 4));        
+        $this->addPrimarySystem(new Thruster(2, 8, 0, 5, 3));
+        $this->addPrimarySystem(new Thruster(2, 8, 0, 5, 4));        
         $this->addPrimarySystem(new Hangar(0, 4));
         
-		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 180, 60));
-		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 240, 120));
-		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 300, 180));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 180, 60));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 180));
         $this->addFrontSystem(new Thruster(2, 6, 0, 4, 1));
 	    
-		$this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 180, 60));
-		$this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 90, 270));
-		$this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 300, 180));
-        $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));    
-        $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));    
+		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 60));
+		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 90, 270));
+		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 300, 180));
+        $this->addAftSystem(new Thruster(2, 6, 0, 4, 2));    
+        $this->addAftSystem(new Thruster(2, 6, 0, 4, 2));    
        
         $this->addPrimarySystem(new Structure(3, 36));
 
