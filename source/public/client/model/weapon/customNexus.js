@@ -905,6 +905,12 @@ var TwinArrayFtr = function  TwinArrayFtr(json, ship) {
 TwinArrayFtr.prototype = Object.create(Weapon.prototype);
 TwinArrayFtr.prototype.constructor =  TwinArrayFtr;
 
+var TAFtr8 = function  TAFtr8(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TAFtr8.prototype = Object.create(Weapon.prototype);
+TAFtr8.prototype.constructor =  TAFtr8;
+
 var MedPlasmaCannonFtr = function  MedPlasmaCannonFtr(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -916,6 +922,18 @@ var MatterCannonFtr = function  MatterCannonFtr(json, ship) {
 };
 MatterCannonFtr.prototype = Object.create(Weapon.prototype);
 MatterCannonFtr.prototype.constructor =  MatterCannonFtr;
+
+var MCFtr8 = function  MCFtr8(json, ship) {
+    Weapon.call(this, json, ship);
+};
+MCFtr8.prototype = Object.create(Weapon.prototype);
+MCFtr8.prototype.constructor =  MCFtr8;
+
+var BattleLaserFtr = function  BattleLaserFtr(json, ship) {
+    Weapon.call(this, json, ship);
+};
+BattleLaserFtr.prototype = Object.create(Weapon.prototype);
+BattleLaserFtr.prototype.constructor =  BattleLaserFtr;
 
 var GatlingGunFtr = function  GatlingGunFtr(json, ship) {
     Weapon.call(this, json, ship);

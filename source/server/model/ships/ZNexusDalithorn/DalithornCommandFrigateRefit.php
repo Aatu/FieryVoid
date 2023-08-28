@@ -10,8 +10,7 @@ class DalithornCommandFrigateRefit extends MediumShip{
         $this->imagePath = "img/ships/Nexus/DalithornCommandFrigate.png";
         $this->shipClass = "Command Frigate (2044 refit)";
 			$this->variantOf = "Frigate";
-			$this->occurence = "uncommon";
-        $this->limited = 10;
+			$this->occurence = "rare";
 		$this->unofficial = true;
         $this->canvasSize = 80;
 	    $this->isd = 2044;

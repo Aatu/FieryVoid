@@ -4,7 +4,7 @@ class VelraxFleetCarrier extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 520;
+	$this->pointCost = 560;
 	$this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxFleetCarrier";
         $this->imagePath = "img/ships/Nexus/VelraxNaresh.png";
@@ -48,22 +48,21 @@ class VelraxFleetCarrier extends BaseShip{
         $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
 		$this->addAftSystem(new JumpEngine(4, 20, 6, 35));
         $this->addAftSystem(new NexusTwinIonGun(2, 4, 4, 120, 300));
-        $this->addAftSystem(new NexusHeavyLaserSpear(3, 6, 4, 180, 240));
-        $this->addAftSystem(new NexusHeavyLaserSpear(3, 6, 4, 120, 180));
+        $this->addAftSystem(new NexusLaserSpear(3, 5, 3, 180, 240));
+        $this->addAftSystem(new NexusDartInterceptor(3, 4, 1, 60, 300));
+        $this->addAftSystem(new NexusLaserSpear(3, 5, 3, 120, 180));
         $this->addAftSystem(new NexusTwinIonGun(2, 4, 4, 60, 240));
 
-		$this->addLeftSystem(new PlasmaWaveTorpedo(3, 7, 4, 240, 360));
-		$this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 180, 360));
-		$this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 180, 360));
+//		$this->addLeftSystem(new PlasmaWaveTorpedo(3, 7, 4, 240, 360));
+		$this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 240, 360));
         $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 240, 60));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 		$this->addLeftSystem(new Hangar(2, 7));
 		$this->addLeftSystem(new Hangar(2, 7));
 		$this->addLeftSystem(new Hangar(2, 7));
 
-		$this->addRightSystem(new PlasmaWaveTorpedo(3, 7, 4, 0, 120));
-		$this->addRightSystem(new NexusLaserSpear(3, 5, 3, 0, 180));
-		$this->addRightSystem(new NexusLaserSpear(3, 5, 3, 0, 180));
+//		$this->addRightSystem(new PlasmaWaveTorpedo(3, 7, 4, 0, 120));
+		$this->addRightSystem(new NexusLaserSpear(3, 5, 3, 0, 120));
         $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 300, 120));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 		$this->addRightSystem(new Hangar(2, 7));
@@ -72,9 +71,9 @@ class VelraxFleetCarrier extends BaseShip{
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(4, 50));
-        $this->addAftSystem(new Structure(3, 40));
-        $this->addLeftSystem(new Structure(3, 45));
-        $this->addRightSystem(new Structure(3, 45));
+        $this->addAftSystem(new Structure(3, 50));
+        $this->addLeftSystem(new Structure(3, 60));
+        $this->addRightSystem(new Structure(3, 60));
         $this->addPrimarySystem(new Structure(4, 50));
 		
 		$this->hitChart = array(
@@ -94,9 +93,10 @@ class VelraxFleetCarrier extends BaseShip{
 					20 => "Primary",
 			),
 			2=> array(
-					6 => "Thruster",
-					8 => "Heavy Laser Spear",
-					9 => "Twin Ion Gun",
+					5 => "Thruster",
+					6 => "Dart Interceptor",
+					8 => "Laser Spear",
+					10 => "Twin Ion Gun",
 					12 => "Jump Engine",
 					18 => "Structure",
 					20 => "Primary",

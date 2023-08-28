@@ -4,19 +4,19 @@ class VelraxEarlyCarrier extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 400;
+	$this->pointCost = 450;
 	$this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxEarlyCarrier";
         $this->imagePath = "img/ships/Nexus/VelraxDraskar.png";
         $this->shipClass = "Draskar Early Carrier";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 150; //img has 200px per side
-		$this->limited = 33;
+//		$this->limited = 33;
 		$this->unofficial = true;
 
         $this->fighters = array("light"=>12, "heavy"=>6);
 
-		$this->isd = 2032;
+		$this->isd = 2022;
         
         $this->forwardDefense = 16;
         $this->sideDefense = 16;

@@ -151,6 +151,8 @@ class BaseShip {
 	current algorithm:
 	 - base is remaining boxes, as a percentage of total boxes
 	  -- THIS ONE IS COMMENTED OUT -maybe it's too much :) ! PRIMARY Structure and systems that cannot be called (eg. particularly important) is counted double, so damage to outer sections is less valuable
+          -- weapons are counted double, as they're in general primary way of achieving combat value, barring specialized designs
+	  -- ELINT Sensors are also counted double, due to their extra importance
 	  -- Structure damage is counted proportionally, same for important systems
 	  -- other systems are counted as either destroyed (0 value) or not (full value) - with reasoning that their damage usually results in little combat value loss
 	  -- scratches are free - if total box count value is 95% or more, it's counted as 100%
@@ -199,6 +201,8 @@ class BaseShip {
 				if (($system instanceOf Structure) && (!$system->location == 0)) $multiplier = 2; //PRIMARY structure - double value!
 				if ( (!($system instanceOf Structure)) && (!$system->isTargetable)) $multiplier = 2; //particularly important systems (other than Structure) - double value!
 				*/
+				//DO multiply value of weapons and ElInt Scanner:
+				if (($system instanceOf Weapon) || ($system instanceOf ElintScanner)) $multiplier = 2; //weapons and ElInt Sensors - double value!							   
 				$totalStructure += $system->maxhealth * $multiplier;
 				$currentStructure += $multiplier * $systemState;
 				

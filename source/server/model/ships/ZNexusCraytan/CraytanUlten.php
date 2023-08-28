@@ -11,10 +11,9 @@ class CraytanUlten extends HeavyCombatVessel{
 		$this->canvasSize = 120; //img has 200px per side
         $this->shipClass = "Ulten Scout Carrier";
 			$this->variantOf = "Topren Patrol Destroyer";
-			$this->occurence = "uncommon";
+			$this->occurence = "rare";
 		$this->unofficial = true;
         $this->isd = 2124;
-        $this->limited = 10;
 
         $this->fighters = array("normal"=>6, "assault shuttles"=>2);
 		
