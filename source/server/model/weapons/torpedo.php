@@ -392,7 +392,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 			
 			        	                         
 	        $effectArmor = Dice::d(3,1);//strength of effect: 1d3
-			$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor unless Advanced Armor.";	        
+	    //	$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor unless Advanced Armor.";    
 
 		
             foreach ($target->systems as $system){
@@ -404,6 +404,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 	                    $crit->inEffect = false;
 	                    $system->criticals[] = $crit;                 
 		                }
+		        	$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor.";       
 		            }
 				} 
         } //endof function doDamage	 
@@ -425,7 +426,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 				$this->data["Special"] .= '<br>';
 			}
 			$this->data["Special"] .= "<br>Ignores armor when dealing damage (Advanced Armor is treated as 2 points less).";	
-			$this->data["Special"] .= "<br>Deals Flash damage and reduces armor of facing section (structure and all systems) by 1-3 points (Advanced Armor is immune).";		
+			$this->data["Special"] .= "<br>Deals Flash damage and reduces armor of facing section of ships (e.g. structure and all systems) by 1-3 points. Advanced Armor is immune.";		
 			$this->data["Special"] .= "<br>Ballistic weapon that can use offensive EW.";
 			$this->data["Special"] .= "<br> Damage can be boosted up to " . $this->maxBoostLevel . " times at " . $this->boostEfficiency . " power per two extra points of damage.";			
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";			

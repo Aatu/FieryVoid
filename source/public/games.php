@@ -82,6 +82,10 @@ if (isset($_SESSION["user"])) {
 		 <br><br>---------- <b>update 6th of August</b> ---------- 
 	    <br><b>Combat value updated</b> - some more detail added - system destruction is counted, rather than estimated from structural damage
 	    
+		 <br><br>---------- <b>update 7th of August</b> ---------- 
+	    <br><b>Combat value updated</b> - because I wouldn't have been myself if I didn't tinker some more, apparently
+	    <br><b>Thirdspace updates by Douglas</b> - ones that <i>should</i> have been added by the first update... well, they're here now - sorry all!!!
+	    
 	    
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 
