@@ -4701,7 +4701,7 @@ class PsychicFieldHandler{
         public $loadingtime = 3;
         public $raking = 20;
         public $addedDice;
-        public $priority = 2;
+        public $priority = 8;
 
         public $boostable = true;
         public $boostEfficiency = 0;
@@ -4838,7 +4838,7 @@ class PsionicLance extends Raking{
         public $loadingtime = 2;
         public $raking = 15;
         public $addedDice;
-        public $priority = 4;
+        public $priority = 7;
 
         public $boostable = true;
         public $boostEfficiency = 0;
@@ -4974,7 +4974,7 @@ class PsionicConcentrator extends Raking{
 	public $intercept = 2; //intercept rating -1     
 	
         public $priority = 6;
-        public $priorityArray = array(1=>6, 2=>4);
+        public $priorityArray = array(1=>5, 2=>6);
 	public $firingMode = 1;	
             public $firingModes = array(
                 1 => "Single",
@@ -4983,7 +4983,7 @@ class PsionicConcentrator extends Raking{
         public $rangePenalty = 1;
             public $rangePenaltyArray = array( 1=>1, 2=>0.66); //Standard and Raking modes
         public $fireControl = array(8, 5, 3); // fighters, <mediums, <capitals 
-            public $fireControlArray = array( 1=>array(6, 4, 2), 2=>array(0, 4, 5));
+            public $fireControlArray = array( 1=>array(5, 4, 2), 2=>array(0, 4, 5));
               
 	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
   		public $damageTypeArray = array(1=>"Standard", 2=>"Standard");	    

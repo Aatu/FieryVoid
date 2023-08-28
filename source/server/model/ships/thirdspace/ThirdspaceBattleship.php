@@ -29,7 +29,7 @@ class ThirdspaceBattleship extends BaseShip{
         $this->rollcost = 6;
         $this->pivotcost = 4;
        
-		$this->iniativebonus = 2 *5;   
+		$this->iniativebonus = 1 *5;   
 		
 		/*Thirdspace use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');				     
@@ -39,7 +39,7 @@ class ThirdspaceBattleship extends BaseShip{
         $scanner = new Scanner(7, 24, 8, 15);
 		$scanner->markThirdspace();
 		$this->addPrimarySystem($scanner);	        
-        $this->addPrimarySystem(new Engine(7, 36, 0, 20, 3));
+        $this->addPrimarySystem(new Engine(7, 36, 0, 18, 3));
 		$this->addPrimarySystem(new PsychicField(6, 0, 0, 0, 360));		
         $this->addPrimarySystem(new ThirdspaceSelfRepair(7, 24, 10)); //armor, structure, output 
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 5));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
