@@ -5,9 +5,9 @@ class ftrTorrent extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 150;
-        $this->faction = "ZStarWars Clone Wars";
+        $this->faction = "ZStarWars Clone Wars (Playtest)";
         $this->phpclass = "ftrTorrent";
-        $this->shipClass = "V-19 Torrent Starfighter";
+        $this->shipClass = "Republic V-19 Torrent Starfighter";
     	$this->imagePath = "img/starwars/torrent.png";
 
 //        $this->isd = 2230; 
@@ -28,14 +28,14 @@ class ftrTorrent extends FighterFlight{
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(1, 1, 1, 1); //armor 2 _including shield_!
-            $fighter = new Fighter("Torrent", $armour, 9, $this->id);
+            $fighter = new Fighter("Torrent", $armour, 8, $this->id);
             $fighter->displayName = "Torrent";
             $fighter->imagePath = "img/starwars/torrent.png";
             $fighter->iconPath = "img/starwars/torrent_large.png";
 
-//            $fighter->addFrontSystem(new CWFtrConcussion(3, 330, 30));
-            $fighter->addFrontSystem(new CWLaserCannonsFtr(330, 30, 2));
-//            $fighter->addFrontSystem(new CWFtrConcussion(3, 330, 30));
+            $fighter->addFrontSystem(new CWFighterTorpedoLauncher(3, 330, 30));
+			$fighter->addFrontSystem(new CWLaserCannonsFtr(330, 30, 2));
+            $fighter->addFrontSystem(new CWFighterTorpedoLauncher(3, 330, 30));
 
        	    //Shield Level 1
             $fighter->addAftSystem(new FtrShield(1, 0, 360));

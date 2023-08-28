@@ -728,3 +728,9 @@ Based on visuals and effects in movies - we call SW Laser/Turbolaser weapons to 
 We portrayed SW units as quite durable for their size, and that durability is boosted by shields. Shields are difficult to take out, too (projectors have high HP count and low hit table profile). Shields have a number of exceptions to their protection based on how we see them to work (notably increased effectiveness vs Raking weapons, while SWIon, Ballistic and Matter weapons just bypass them).
 StarWars Sensors are portrayed to be generally of lower tech than B5 ones. This is portrayed by generally low output and limited boostability (notably ElInt boostability is not reduced though). However, LCV do have full-blown sensors, without B5 LCV Sensors limitations. 
 
+zSTARWARS Clone Wars (custom, alternate universe faction)
+This is a separate take on implemening Star Wars units to play against B5 fleets. This is deliberately focusing on the Clone Wars era so as to not cause confusion with the existing Star Wars work.
+The approach here is that Star Wars ships are typically seen firing rapidly (and technical manuals show they have A LOT of weapons). The approach here is to use faster firing, but overall lower damage weapons.
+Weapons typically come in single, twin, and quad configurations. As turbolasers, these fire every other turn, once per turn, and twice per turn, respectively.
+Shields use the B5 EM shield.
+Ion weapons use burst beam effects.

@@ -4,7 +4,7 @@ class CraytanHelisRefit extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 180;
+        $this->pointCost = 165;
         $this->faction = "ZNexus Craytan";
         $this->phpclass = "CraytanHelisRefit";
         $this->imagePath = "img/ships/Nexus/CraytanHelis.png";
@@ -35,7 +35,7 @@ class CraytanHelisRefit extends LCV{
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
   
 		$this->addPrimarySystem(new Reactor(3, 7, 0, 0));
-		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
+		$this->addPrimarySystem(new CnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 //        $this->addPrimarySystem(new AntiquatedScanner(3, 12, 2, 4));
     	$sensors = new Scanner(3, 12, 2, 4);
 			$sensors->markLCV();
@@ -50,26 +50,26 @@ class CraytanHelisRefit extends LCV{
 	    
         $this->hitChart = array(
         		0=> array( 
-        				11 => "Structure",
-        				13 => "1:Medium Plasma Cannon",
-        				16 => "1:Close-In Defense System",
-						18 => "0:Engine",
+        				10 => "Structure",
+        				12 => "1:Medium Plasma Cannon",
+        				15 => "1:Close-In Defense System",
+						17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		1=> array( //redirect to PRIMARY
-        				11 => "Structure",
-        				13 => "1:Medium Plasma Cannon",
-        				16 => "1:Close-In Defense System",
-						18 => "0:Engine",
+        				10 => "Structure",
+        				12 => "1:Medium Plasma Cannon",
+        				15 => "1:Close-In Defense System",
+						17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		2=> array( //redirect to PRIMARY
-        				11 => "Structure",
-        				13 => "1:Medium Plasma Cannon",
-        				16 => "1:Close-In Defense System",
-						18 => "0:Engine",
+        				10 => "Structure",
+        				12 => "1:Medium Plasma Cannon",
+        				15 => "1:Close-In Defense System",
+						17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
         		),        		
