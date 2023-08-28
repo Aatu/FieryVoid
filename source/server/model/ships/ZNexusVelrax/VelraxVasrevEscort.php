@@ -10,11 +10,11 @@ class VelraxVasrevEscort extends MediumShip{
         $this->imagePath = "img/ships/Nexus/VelraxSathrin.png";
         $this->shipClass = "Vasrev Escort Frigate";
 			$this->variantOf = "Sathrin Border Frigate";
-			$this->occurence = "uncommon";
+			$this->occurence = "common";
 		$this->unofficial = true;
         $this->agile = true;
         $this->canvasSize = 60;
-	    $this->isd = 2062;
+	    $this->isd = 2063;
 
 	    $this->notes = 'Atmospheric Capable.';
 

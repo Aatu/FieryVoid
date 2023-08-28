@@ -93,3 +93,27 @@ CWLaserCannonsFtr.prototype.constructor = CWLaserCannonsFtr;
 };
 CWFtrConcussion.prototype = Object.create(Weapon.prototype);
 CWFtrConcussion.prototype.constructor = CWFtrConcussion; */
+
+var CWFighterTorpedoLauncher = function  CWFighterTorpedoLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CWFighterTorpedoLauncher.prototype = Object.create(Weapon.prototype);
+CWFighterTorpedoLauncher.prototype.constructor =  CWFighterTorpedoLauncher;
+
+var CWConcussionFtr = function  CWConcussionFtr(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CWConcussionFtr.prototype = Object.create(Weapon.prototype);
+CWConcussionFtr.prototype.constructor =  CWConcussionFtr;
+
+var CWFighterProtonLauncher = function  CWFighterProtonLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CWFighterProtonLauncher.prototype = Object.create(Weapon.prototype);
+CWFighterProtonLauncher.prototype.constructor =  CWFighterProtonLauncher;
+
+var CWProtonFtr = function  CWProtonFtr(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CWProtonFtr.prototype = Object.create(Weapon.prototype);
+CWProtonFtr.prototype.constructor =  CWProtonFtr;

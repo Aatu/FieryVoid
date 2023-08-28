@@ -10,7 +10,7 @@ class VelraxVasrevRefit2 extends MediumShip{
         $this->imagePath = "img/ships/Nexus/VelraxSathrin.png";
         $this->shipClass = "Vasrev Escort Frigate (2152 refit)";
 			$this->variantOf = "Sathrin Border Frigate";
-			$this->occurence = "uncommon";
+			$this->occurence = "common";
 		$this->unofficial = true;
         $this->agile = true;
         $this->canvasSize = 60;

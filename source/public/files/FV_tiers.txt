@@ -52,6 +52,7 @@ Factions that point for point will have uphill battle against First Tier, yet ot
  - Ipsha  
  - Markab
  - Nexus Brixadii (custom faction - Nexus universe)
+ - Nexus Craytan Union (custom faction - Nexus universe)
  - Nexus Dalithorn (custom faction - Nexus universe)
  - Nexus Sal-bez (custom faction - Nexus universe)
  - Nexus Velrax (custom faction - Nexus universe)
@@ -89,9 +90,9 @@ This group is inherently unbalanced, even against each other!
  - Grome
  - Hurr
  - Mitoc (Small Races - only one MCV-class vessel)
- - Nexus Craytan Union (PLAYTEST custom faction - Nexus universe)
  - Rogolon (Small Races)
  - Sorithian (Small Races)
+ - Star Wars: Clone Wars (Playtest. A different look at the setting, but using the Clone Wars era to avoid confusion with the existing Star Wars work)
  - Streib (custom faction; their ship design and technology is peculiar enough for them to feel surprisingly Ancient-like when it comes to balancing. Streib are definitely NOT up to fighting actual Ancients though! - hence "the Rest")
  - Usuuth
  

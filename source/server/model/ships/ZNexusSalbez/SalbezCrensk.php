@@ -33,7 +33,7 @@ class SalbezCrensk extends LCV{
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
   
 		$this->addPrimarySystem(new Reactor(4, 10, 0, 0));
-		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
+		$this->addPrimarySystem(new CnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 //        $this->addPrimarySystem(new AntiquatedScanner(4, 12, 4, 4));
     	$sensors = new Scanner(4, 12, 4, 4);
 			$sensors->markLCV();

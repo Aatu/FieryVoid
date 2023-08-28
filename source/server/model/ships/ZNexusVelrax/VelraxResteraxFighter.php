@@ -7,7 +7,7 @@ class VelraxResteraxFighter extends FighterFlight{
         $this->pointCost = 44*6;
         $this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxResteraxFighter";
-        $this->shipClass = "Resterax Assault flight";
+        $this->shipClass = "Resterax-A Assault flight";
         $this->imagePath = "img/ships/Nexus/VelraxResterax_v2.png";
 		$this->unofficial = true;
 
@@ -35,7 +35,7 @@ class VelraxResteraxFighter extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){            
             $armour = array(3, 1, 1, 1);
             $fighter = new Fighter("VelraxResteraxFighter", $armour, 12, $this->id);
-            $fighter->displayName = "Resterax";
+            $fighter->displayName = "Resterax-A";
             $fighter->imagePath = "img/ships/Nexus/VelraxResterax_v2.png";
             $fighter->iconPath = "img/ships/Nexus/VelraxResterax_Large.png";
 

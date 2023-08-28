@@ -105,6 +105,7 @@ spl_autoload_register(
                 'batrado' => '/server/model/ships/brakiri/batrado.php',
                 'batradoearly' => '/server/model/ships/brakiri/batradoEarly.php',
                 'battlelaser' => '/server/model/weapons/lasers.php',
+                'battlelaserftr' => '/server/model/weapons/customNexus.php',
                 'unreliablebattlelaser' => '/server/model/weapons/lasers.php',
                 'battlewagon' => '/server/model/ships/raiders/battlewagon.php',
                 'benevolent' => '/server/model/ships/orieni/benevolent.php',
@@ -1562,6 +1563,7 @@ spl_autoload_register(
 				'lightparticlebeamftr' => '/server/model/weapons/customNexus.php', 
 				'hvyparticlegunftr' => '/server/model/weapons/customNexus.php', 
 				'mattercannonftr' => '/server/model/weapons/customNexus.php', 
+				'mcftr8' => '/server/model/weapons/customNexus.php', 
 				'medplasmacannonftr' => '/server/model/weapons/customNexus.php', 
 				'stdparticlebeamftr' => '/server/model/weapons/customNexus.php', 
 				'nexusdefensepulsar' => '/server/model/weapons/customNexus.php', 
@@ -1585,6 +1587,7 @@ spl_autoload_register(
 				'nexusprotector' => '/server/model/weapons/customNexus.php',
 				'nexustestblaster' => '/server/model/weapons/customNexus.php',
 				'twinarrayftr' => '/server/model/weapons/customNexus.php',
+				'taftr8' => '/server/model/weapons/customNexus.php',
 			//Nexus ballistic weapons
 				'nexusantifighterlauncher' => '/server/model/weapons/customNexus.php',
 				'nexusbolttorpedo' => '/server/model/weapons/customNexus.php',
@@ -1718,12 +1721,14 @@ spl_autoload_register(
                 'craytanhelisrefit' => '/server/model/ships/ZNexusCraytan/CraytanHelisRefit.php',					
                 'craytanhepron' => '/server/model/ships/ZNexusCraytan/CraytanHepron.php',					
                 'craytanhepron2085' => '/server/model/ships/ZNexusCraytan/CraytanHepron2085.php',					
+                'craytankilten' => '/server/model/ships/ZNexusCraytan/CraytanKilten.php',					
                 'craytanlopin' => '/server/model/ships/ZNexusCraytan/CraytanLopin.php',					
                 'craytanneprinscout' => '/server/model/ships/ZNexusCraytan/CraytanNeprinScout.php',					
                 'craytanneprinscoutrefit' => '/server/model/ships/ZNexusCraytan/CraytanNeprinScoutRefit.php',					
  //               'craytanhepron2126' => '/server/model/ships/ZNexusCraytan/CraytanHepron2126.php',					
                 'craytanpolten' => '/server/model/ships/ZNexusCraytan/CraytanPolten.php',					
                 'craytanpoltenrefit' => '/server/model/ships/ZNexusCraytan/CraytanPoltenRefit.php',					
+                'craytanrollun' => '/server/model/ships/ZNexusCraytan/CraytanRollun.php',					
                 'craytansahvor' => '/server/model/ships/ZNexusCraytan/CraytanSahvor.php',					
                 'craytansoren' => '/server/model/ships/ZNexusCraytan/CraytanSoren.php',					
                 'craytansorenrefit' => '/server/model/ships/ZNexusCraytan/CraytanSorenRefit.php',					
@@ -1867,6 +1872,7 @@ spl_autoload_register(
                 'velraxlasergunboatrefit' => '/server/model/ships/ZNexusVelrax/VelraxLaserGunboatRefit.php',					
                 'velraxlasergunboatrefit2' => '/server/model/ships/ZNexusVelrax/VelraxLaserGunboatRefit2.php',					
                 'velraxlogisticsbase' => '/server/model/ships/ZNexusVelrax/VelraxLogisticsBase.php',					
+//                'velraxnareshguard' => '/server/model/ships/ZNexusVelrax/VelraxNareshGuard.php',					
                 'velraxosat' => '/server/model/ships/ZNexusVelrax/VelraxOSAT.php',					
                 'velraxosatearly' => '/server/model/ships/ZNexusVelrax/VelraxOSATEarly.php',					
                 'velraxosatrefit' => '/server/model/ships/ZNexusVelrax/VelraxOSATRefit.php',					
@@ -2257,7 +2263,13 @@ spl_autoload_register(
                 'dovarum' => '/server/model/ships/usuuth/dovarum.php',
                 'genericmicrosat' => '/server/model/ships/civilians/genericMicroSat.php',
                 'mineclass' => '/server/model/ships/FighterFlight.php',
-                'testmine' => '/server/model/ships/customs/testMine.php',
+//                'testmine' => '/server/model/ships/customs/testMine.php',
+                'ekosa' => '/server/model/ships/customs/EkosA.php',
+                'ekosb' => '/server/model/ships/customs/EkosB.php',
+                'ocaraa' => '/server/model/ships/customs/OcaraA.php',
+                'ocarab' => '/server/model/ships/customs/OcaraB.php',
+                'ocarac' => '/server/model/ships/customs/OcaraC.php',
+                'ocarad' => '/server/model/ships/customs/OcaraD.php',
 		    
 				//AdaptiveArmor rework		    
                 'adaptivearmorcontroller' => '/server/model/systems/baseSystems.php',    
@@ -2830,7 +2842,7 @@ spl_autoload_register(
 				//Star Wars - Clone Wars testing
 
 				//weapons
-/*                'cwheavyturbolaser' => '/server/model/weapons/customCW.php',
+                'cwheavyturbolaser' => '/server/model/weapons/customCW.php',
                 'cwtwinheavyturbolaser' => '/server/model/weapons/customCW.php',
                 'cwquadheavyturbolaser' => '/server/model/weapons/customCW.php',
                 'cwturbolaser' => '/server/model/weapons/customCW.php',
@@ -2846,16 +2858,35 @@ spl_autoload_register(
                 'cwheavyioncannon' => '/server/model/weapons/customCW.php',
                 'cwshield' => '/server/model/weapons/customCW.php',
 
+				'cwfightertorpedolauncher' => '/server/model/weapons/customCW.php',
+				'cwconcussionftr' => '/server/model/weapons/customCW.php',
+				'cwfighterprotonlauncher' => '/server/model/weapons/customCW.php',
+				'cwprotonftr' => '/server/model/weapons/customCW.php',
+
                 'cwlasercannonsftr' => '/server/model/weapons/customCW.php',
 //                'cwftrconcussion' => '/server/model/weapons/customCW.php',
 
 				
 				//units
+					//Republic
 				'acclamator' => '/server/model/ships/ZStarWarsCloneWars/Acclamator.php',
+				'arquitens' => '/server/model/ships/ZStarWarsCloneWars/Arquitens.php',
 				'consular' => '/server/model/ships/ZStarWarsCloneWars/Consular.php',
+				'ftrarc' => '/server/model/ships/ZStarWarsCloneWars/ftrARC.php',
+				'ftrlaat' => '/server/model/ships/ZStarWarsCloneWars/ftrLAAT.php',
 				'ftrtorrent' => '/server/model/ships/ZStarWarsCloneWars/ftrTorrent.php',
+				'pelta' => '/server/model/ships/ZStarWarsCloneWars/Pelta.php',
 				'venator' => '/server/model/ships/ZStarWarsCloneWars/Venator.php',
-*/				
+
+					//Sepratists
+				'diamond' => '/server/model/ships/ZStarWarsCloneWars/Diamond.php',
+				'ftrhyena' => '/server/model/ships/ZStarWarsCloneWars/ftrHyena.php',
+				'ftrvulture' => '/server/model/ships/ZStarWarsCloneWars/ftrVulture.php',
+				'hardcell' => '/server/model/ships/ZStarWarsCloneWars/Hardcell.php',
+				'lucrehulk' => '/server/model/ships/ZStarWarsCloneWars/Lucrehulk.php',
+				'munificent' => '/server/model/ships/ZStarWarsCloneWars/Munificent.php',
+				'providence' => '/server/model/ships/ZStarWarsCloneWars/Providence.php',
+				'recusant' => '/server/model/ships/ZStarWarsCloneWars/Recusant.php',
 
 
 		    
