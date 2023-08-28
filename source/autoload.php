@@ -105,6 +105,7 @@ spl_autoload_register(
                 'batrado' => '/server/model/ships/brakiri/batrado.php',
                 'batradoearly' => '/server/model/ships/brakiri/batradoEarly.php',
                 'battlelaser' => '/server/model/weapons/lasers.php',
+                'battlelaserftr' => '/server/model/weapons/customNexus.php',
                 'unreliablebattlelaser' => '/server/model/weapons/lasers.php',
                 'battlewagon' => '/server/model/ships/raiders/battlewagon.php',
                 'benevolent' => '/server/model/ships/orieni/benevolent.php',
@@ -1562,6 +1563,7 @@ spl_autoload_register(
 				'lightparticlebeamftr' => '/server/model/weapons/customNexus.php', 
 				'hvyparticlegunftr' => '/server/model/weapons/customNexus.php', 
 				'mattercannonftr' => '/server/model/weapons/customNexus.php', 
+				'mcftr8' => '/server/model/weapons/customNexus.php', 
 				'medplasmacannonftr' => '/server/model/weapons/customNexus.php', 
 				'stdparticlebeamftr' => '/server/model/weapons/customNexus.php', 
 				'nexusdefensepulsar' => '/server/model/weapons/customNexus.php', 
@@ -1585,6 +1587,7 @@ spl_autoload_register(
 				'nexusprotector' => '/server/model/weapons/customNexus.php',
 				'nexustestblaster' => '/server/model/weapons/customNexus.php',
 				'twinarrayftr' => '/server/model/weapons/customNexus.php',
+				'taftr8' => '/server/model/weapons/customNexus.php',
 			//Nexus ballistic weapons
 				'nexusantifighterlauncher' => '/server/model/weapons/customNexus.php',
 				'nexusbolttorpedo' => '/server/model/weapons/customNexus.php',
@@ -2260,7 +2263,13 @@ spl_autoload_register(
                 'dovarum' => '/server/model/ships/usuuth/dovarum.php',
                 'genericmicrosat' => '/server/model/ships/civilians/genericMicroSat.php',
                 'mineclass' => '/server/model/ships/FighterFlight.php',
-                'testmine' => '/server/model/ships/customs/testMine.php',
+//                'testmine' => '/server/model/ships/customs/testMine.php',
+                'ekosa' => '/server/model/ships/customs/EkosA.php',
+                'ekosb' => '/server/model/ships/customs/EkosB.php',
+                'ocaraa' => '/server/model/ships/customs/OcaraA.php',
+                'ocarab' => '/server/model/ships/customs/OcaraB.php',
+                'ocarac' => '/server/model/ships/customs/OcaraC.php',
+                'ocarad' => '/server/model/ships/customs/OcaraD.php',
 		    
 				//AdaptiveArmor rework		    
                 'adaptivearmorcontroller' => '/server/model/systems/baseSystems.php',    

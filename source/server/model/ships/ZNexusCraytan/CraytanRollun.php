@@ -13,7 +13,7 @@ class CraytanRollun extends LCV{
 			$this->variantOf = "Calen Gunboat";
 			$this->occurence = "common";
 		$this->unofficial = true;
-		$this->isd = 2039;
+		$this->isd = 2139;
 
         $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
 	    $this->notes = 'May deploy independently.';

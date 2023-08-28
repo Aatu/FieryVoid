@@ -7280,7 +7280,9 @@ class NexusDefensePulsar extends Pulse{
         public $priority = 4;
 
         public $rangePenalty = 2 ; 
-        public $fireControl = array(6, 5, 4); // fighters, <mediums, <capitals
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+
+        public $range = 5;
 
 	function __construct($startArc, $endArc, $nrOfShots = 1){
             $this->defaultShots = $nrOfShots;
@@ -7292,6 +7294,13 @@ class NexusDefensePulsar extends Pulse{
         public function setMinDamage(){     $this->minDamage = 5 ;      }
         public function setMaxDamage(){     $this->maxDamage = 14 ;      }
 	}// endof TwinArrayFtr
+
+
+	class TAFtr8 extends TwinArrayFtr{
+
+		public $range = 8;
+		
+	}
 
 
 /*fighter-mounted variant*/
@@ -7354,7 +7363,7 @@ class MatterCannonFtr extends Matter {
     /*limited ammo*/
         public $name = "MatterCannonFtr";
         public $displayName = "Matter Cannon";
-	public $iconPath = "matterCannon.png";
+		public $iconPath = "matterCannon.png";
         public $animation = "bolt";
         public $animationColor = array(250, 250, 190);
         public $priority = 9; //Matter weapon
@@ -7363,7 +7372,9 @@ class MatterCannonFtr extends Matter {
         public $exclusive = false; //this is not an exclusive weapon!
         
         public $rangePenalty = 0.5;
-        public $fireControl = array(-2, 0, 0); // fighters, <mediums, <capitals 
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+
+        public $range = 6;
 
         function __construct($startArc, $endArc){
             parent::__construct(0, 1, 0, $startArc, $endArc);
@@ -7375,7 +7386,35 @@ class MatterCannonFtr extends Matter {
 }//MatterCannonFtr
 
 
+class MCFtr8 extends MatterCannonFtr {
+	
+	public $range = 8;
+	
+}
 
+class BattleLaserFtr extends BattleLaser {
+	
+	public $name = "BattleLaserFtr";
+	public $displayName = "Battle Laser";
+	public $iconPath = "battleLaser.png";
+    public $animation = "laser";
+    public $animationColor = array(255, 58, 31);
+	public $priority = 7;
+	
+    public $fireControlArray = array( 1=>array(0, 0, 0), 2=>array(null,-6, -6) ); //Raking and Piercing mode
+
+	public $range = 12;
+
+        function __construct($startArc, $endArc){
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10, 4)+12;   }
+        public function setMinDamage(){     $this->minDamage = 16 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 52 ;      }
+
+	
+} 
 
 /*fighter-mounted variant*/
     class GatlingGunFtr extends LinkedWeapon{
