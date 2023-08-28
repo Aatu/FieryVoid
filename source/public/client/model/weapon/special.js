@@ -402,9 +402,10 @@ PsionicLance.prototype.initBoostableInfo = function () {
 		this.outputDisplay = '-'; //'0' is not shown!
 	}    
     
+*/
     return this;
 };
-*/
+
 var PsychicField = function PsychicField(json, ship)
 {
     Weapon.call( this, json, ship);
