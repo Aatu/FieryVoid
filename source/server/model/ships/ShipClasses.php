@@ -202,7 +202,7 @@ class BaseShip {
 				if ( (!($system instanceOf Structure)) && (!$system->isTargetable)) $multiplier = 2; //particularly important systems (other than Structure) - double value!
 				*/
 				//DO multiply value of weapons and ElInt Scanner:
-				if (($system instanceOf Weapon) || ($system instanceOf ElintScanner)) $multiplier = 2; //PRIMARY structure - double value!							   
+				if (($system instanceOf Weapon) || ($system instanceOf ElintScanner)) $multiplier = 2; //weapons and ElInt Sensors - double value!							   
 				$totalStructure += $system->maxhealth * $multiplier;
 				$currentStructure += $multiplier * $systemState;
 				
