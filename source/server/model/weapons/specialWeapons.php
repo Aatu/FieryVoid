@@ -4953,14 +4953,14 @@ class PsionicLance extends Raking{
         }  
    }//end of Psionic Lance
 
-class PsionicConcentrator extends Raking{
+class PsionicConcentrator extends Weapon{
     /*Psionic Concentrator - Thirdspace weapon*/
 	public $name = "PsionicConcentrator";
 	public $displayName = "Psionic Concentrator";
 	public $iconPath = "PsionicConcentrator.png";
 	
 	public $animation = "bolt";
-	    public $animationArray = array( 1=>"bolt", 2=>"bolt");
+//	    public $animationArray = array( 1=>"bolt", 2=>"bolt");
     public $animationColor = array(128, 0, 0);
 	/*
 	public $trailColor = array(30, 170, 255);	
@@ -4982,7 +4982,7 @@ class PsionicConcentrator extends Raking{
             );
         public $rangePenalty = 1;
             public $rangePenaltyArray = array( 1=>1, 2=>0.66); //Standard and Raking modes
-        public $fireControl = array(8, 5, 3); // fighters, <mediums, <capitals 
+        public $fireControl = array(5, 4, 2); // fighters, <mediums, <capitals 
             public $fireControlArray = array( 1=>array(5, 4, 2), 2=>array(0, 4, 5));
               
 	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
