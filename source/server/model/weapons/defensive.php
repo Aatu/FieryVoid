@@ -464,6 +464,8 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 
 		private $projectorList = array();
 		
+		protected $doCountForCombatValue = false;		//To ignore projection for combat value calculations
+		
 	    
 	    function __construct($armor, $maxhealth, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$this->iconPath = 'TrekShieldProjection' . $side . '.png';

@@ -307,39 +307,38 @@ HeavyPsionicLance.prototype.initBoostableInfo = function () {
 	
     switch (shipManager.power.getBoost(this)) {
         case 0:
-            this.data["Damage"] = '46 - 100';
+            this.data["Damage"] = '66 - 120';
             this.data["Boostlevel"] = '0';
             break;
         case 1:
-            this.data["Damage"] = '58 - 130';
+            this.data["Damage"] = '76 - 148';
             this.data["Boostlevel"] = '1';
             break;
         case 2:
-            this.data["Damage"] = '70 - 160';
+            this.data["Damage"] = '86 - 176';
             this.data["Boostlevel"] = '2';
             break;
         case 3:
-            this.data["Damage"] = '82 - 190';
+            this.data["Damage"] = '96 - 204';
             this.data["Boostlevel"] = '3';
             break;
         default:
-            this.data["Damage"] = '46 - 100';
+            this.data["Damage"] = '66 - 120';
             this.data["Boostlevel"] = '0';
             break;
 	}
 	
-	
+/*	
 	if (!window.weaponManager.isLoaded(this)) {
 		this.outputDisplay = window.weaponManager.isLoaded(this);
 	} else if (this.data.Boostlevel > 0) {
 		this.outputDisplay = this.data.Boostlevel;
 	} else {
 		this.outputDisplay = '-'; //'0' is not shown!
-	}    
-    
+	}        
+*/
     return this;
 };
-
 var PsionicLance = function PsionicLance(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -379,33 +378,30 @@ PsionicLance.prototype.initBoostableInfo = function () {
     	
     switch (shipManager.power.getBoost(this)) {
         case 0:
-            this.data["Damage"] = '33 - 60';
+            this.data["Damage"] = '38 - 65';
             this.data["Boostlevel"] = '0';
             break;
         case 1:
-            this.data["Damage"] = '35 - 80';
+            this.data["Damage"] = '40 - 85';
             this.data["Boostlevel"] = '1';
             break;
         case 2:
-            this.data["Damage"] = '37 - 100';
+            this.data["Damage"] = '42 - 105';
             this.data["Boostlevel"] = '2';
             break;
- /*       case 3:
-            this.data["Damage"] = '31 - 85';
-            this.data["Boostlevel"] = '3';
-            break;   */
         default:
-            this.data["Damage"] = '33 - 60';
+            this.data["Damage"] = '38 - 65';
             this.data["Boostlevel"] = '0';
             break;
     }
-
+/*
 	if (this.data.Boostlevel > 0) {
 		this.outputDisplay = this.data.Boostlevel;
 	} else {
 		this.outputDisplay = '-'; //'0' is not shown!
 	}    
     
+*/
     return this;
 };
 

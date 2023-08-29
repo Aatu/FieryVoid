@@ -33,11 +33,12 @@ class TorataTaclonCRV extends MediumShip
 		$this->addPrimarySystem(new Hangar(4, 1));
 		$this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
 		$this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4));
-		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 180, 60));
-		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
-		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
-		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 300, 180));
-
+		
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 180, 60));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 180));
+		
 		$this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
 		$this->addFrontSystem(new PentagonArray(3, 8, 5, 240, 60));
 		$this->addFrontSystem(new PentagonArray(3, 8, 5, 300, 120));
@@ -59,13 +60,13 @@ class TorataTaclonCRV extends MediumShip
 					1=> array(
 						4 => "Thruster",
 						6 => "Pentagon Array",
-						10 => "0:Light Particle Beam",
+						10 => "Light Particle Beam",
 						16 => "Structure",
 						20 => "Primary",
 					),
 					2=> array(
 						6 => "Thruster",
-						8 => "0:Light Particle Beam",
+						8 => "1:Light Particle Beam",
 						16 => "Structure",
 						20 => "Primary",
 					),
