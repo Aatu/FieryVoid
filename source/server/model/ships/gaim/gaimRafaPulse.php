@@ -33,7 +33,7 @@ class gaimRafaPulse extends LCV{
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
 
 	$this->addPrimarySystem(new Reactor(4, 9, 0, 0));
-	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
+	$this->addPrimarySystem(new CnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 	    	$sensors = new Scanner(4, 12, 2, 4);
 		$sensors->markLCV();
 		$this->addPrimarySystem($sensors);
@@ -41,6 +41,7 @@ class gaimRafaPulse extends LCV{
 	$this->addPrimarySystem(new Bulkhead(0, 1));
 	$this->addPrimarySystem(new Bulkhead(0, 1));
 
+	//NOT moving to front due to Bulkhead interaction!
 	$this->addPrimarySystem(new MediumPulse(3, 6, 3, 300, 60));
 	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 180, 360));
 	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 180));

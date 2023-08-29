@@ -31,9 +31,9 @@ class VelraxSivrinRefit2 extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 12, 7, 7));
         $this->addPrimarySystem(new Engine(4, 13, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(1, 2));
-		$this->addPrimarySystem(new MediumPlasma(3, 5, 3, 300, 60));
-        $this->addPrimarySystem(new Thruster(3, 15, 0, 4, 1));
-        $this->addPrimarySystem(new Thruster(4, 20, 0, 8, 2));
+		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
+        $this->addAftSystem(new Thruster(3, 15, 0, 4, 1));
+        $this->addAftSystem(new Thruster(4, 20, 0, 8, 2));
 
         $this->addLeftSystem(new LaserLance(3, 6, 4, 240, 360));
         $this->addLeftSystem(new LaserLance(3, 6, 4, 240, 360));
@@ -55,8 +55,8 @@ class VelraxSivrinRefit2 extends HeavyCombatVesselLeftRight{
             $this->hitChart = array(
         		0=> array(
         				6 => "Structure",
-						7 => "Medium Plasma Cannon",
-        				12 => "Thruster",
+						7 => "1:Medium Plasma Cannon",
+        				12 => "2:Thruster",
 						13 => "Hangar",
         				15 => "Scanner",
         				17 => "Engine",
