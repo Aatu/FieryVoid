@@ -36,7 +36,7 @@ window.gamedata = {
 	    powerRating = 'Tier 1'.
 	    break;
 	  case 'Cascor':
-	    powerRating = 'Tier 2; official faction, with custom price reevaluation available to turn them into more competitive custom faction (still Tier 2) '.
+	    powerRating = 'Tier 2; can be turned to stronger custom faction by enhancement (still Tier 2)'.
 	    break;
 	  case 'Centauri':
 	    powerRating = 'Tier 1'.
@@ -197,7 +197,8 @@ window.gamedata = {
 	  default:
 	    powerRating = 'NOT ASSIGNED'.
 	}
-	powerRating = 'Estimated CUSTOM combat effectiveness rating: ' + powerRating;
+	    //...disclaimer proved too long to be practical
+	//powerRating = 'Estimated CUSTOM combat effectiveness rating: ' + powerRating;
 	return powerRating;
     },
 	
