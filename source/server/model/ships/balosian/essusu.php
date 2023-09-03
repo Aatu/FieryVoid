@@ -6,7 +6,7 @@ class Essusu extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 300;
-		$this->faction = "Balosian";
+		$this->faction = "Balosian Underdwellers";
         $this->phpclass = "Essusu";
         $this->imagePath = "img/ships/essusu.png";
         $this->shipClass = "Essusu Patrol Boat";

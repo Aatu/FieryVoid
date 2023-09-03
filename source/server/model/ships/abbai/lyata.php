@@ -5,7 +5,7 @@ class Lyata extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 350;
-	$this->faction = "Abbai";
+	$this->faction = "Abbai Matriarchate";
         $this->phpclass = "Lyata";
         $this->imagePath = "img/ships/AbbaiLyata.png";
         $this->shipClass = "Lyata Police Corvette";

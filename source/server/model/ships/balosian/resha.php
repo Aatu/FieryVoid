@@ -6,7 +6,7 @@ class Resha extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 325;
-		$this->faction = "Balosian";
+		$this->faction = "Balosian Underdwellers";
         $this->phpclass = "Resha";
         $this->imagePath = "img/ships/resha.png";
         $this->shipClass = "Resha Patrol Frigate";

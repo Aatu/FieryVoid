@@ -5,7 +5,7 @@ class Skiatha extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 690;
-	$this->faction = "Abbai";
+	$this->faction = "Abbai Matriarchate";
         $this->phpclass = "Skiatha";
         $this->imagePath = "img/ships/AbbaiSkiatha.png";
         $this->shipClass = "Skiatha Escort Scout";

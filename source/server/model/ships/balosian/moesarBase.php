@@ -7,7 +7,7 @@ class MoesarBase extends SmallStarBaseFourSections{
 		$this->pointCost = 625;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "Balosian";
+		$this->faction = "Balosian Underdwellers";
 		$this->phpclass = "MoesarBase";
 		$this->shipClass = "Moesar Outpost";
 		$this->imagePath = "img/ships/Moesar.png";

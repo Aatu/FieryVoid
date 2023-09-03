@@ -5,7 +5,7 @@ class Athasa extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 600;
-        $this->faction = "Balosian";
+        $this->faction = "Balosian Underdwellers";
         $this->phpclass = "Athasa";
         $this->imagePath = "img/ships/esthasa.png";
         $this->shipClass = "Athasa Scout";

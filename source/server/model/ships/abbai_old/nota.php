@@ -5,7 +5,7 @@ class Nota extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 500;
-	$this->faction = "Abbai (WotCR)";
+	$this->faction = "Abbai Matriarchate (WotCR)";
         $this->phpclass = "Nota";
         $this->imagePath = "img/ships/AbbaiNota.png";
         $this->shipClass = "Nota Deep Scout";
