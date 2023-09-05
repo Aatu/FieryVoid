@@ -51,7 +51,7 @@ class ThirdspaceLanceAttackCraft extends LCV{ //Actually an LCV.
     $this->addPrimarySystem(new ThirdspaceSelfRepair(5, 8, 4)); //armor, structure, output 	
 
 	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 60));
-    $this->addFrontSystem(new PsionicLance(5, 0, 0, 345, 15));
+    $this->addFrontSystem(new PsionicLance(5, 0, 0, 330, 30));
 	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 150));
 			
 	$projection = new ThirdspaceShieldProjection(2, 50, 50, 0, 360, 'C');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
