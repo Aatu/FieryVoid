@@ -4849,7 +4849,7 @@ class PsionicLance extends Raking{
         );
 
         public $rangePenalty = 0.33;
-        public $fireControl = array(-3, 4, 5); // fighters, <mediums, <capitals
+        public $fireControl = array(-4, 4, 5); // fighters, <mediums, <capitals
 
         public $damageType = "Raking"; 
         public $weaponClass = "Electromagnetic";
@@ -4983,7 +4983,7 @@ class PsionicConcentrator extends Weapon{
         public $rangePenalty = 1;
             public $rangePenaltyArray = array( 1=>1, 2=>0.66); //Standard and Raking modes
         public $fireControl = array(5, 4, 2); // fighters, <mediums, <capitals 
-            public $fireControlArray = array( 1=>array(5, 4, 2), 2=>array(0, 4, 5));
+            public $fireControlArray = array( 1=>array(6, 4, 3), 2=>array(0, 4, 6));
               
 	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
   		public $damageTypeArray = array(1=>"Standard", 2=>"Standard");	    
