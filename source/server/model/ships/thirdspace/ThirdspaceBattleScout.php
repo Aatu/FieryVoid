@@ -31,7 +31,7 @@ class ThirdspaceBattleScout extends BaseShip{
         $this->rollcost = 6;
         $this->pivotcost = 4;
        
-		$this->iniativebonus = 1 *5;    
+		$this->iniativebonus = 2 *5;    
 		
 		/*Thirdspace use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');			    
