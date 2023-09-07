@@ -4993,7 +4993,7 @@ class PsionicConcentrator extends Weapon{
 	public $iconPath = "PsionicConcentrator.png";
 	
 	public $animation = "bolt";
-//	    public $animationArray = array( 1=>"bolt", 2=>"bolt");
+	    public $animationArray = array( 1=>"bolt", 2=>"bolt");
     public $animationColor = array(128, 0, 0);
 	/*
 	public $trailColor = array(30, 170, 255);	
@@ -5006,30 +5006,31 @@ class PsionicConcentrator extends Weapon{
         public $loadingtime = 1;
 	public $intercept = 2; //intercept rating -1     
 	
-        public $priority = 6;
-        public $priorityArray = array(1=>5, 2=>6);
+    public $priority = 6;
+    public $priorityArray = array(1=>5, 2=>6);
 	public $firingMode = 1;	
             public $firingModes = array(
                 1 => "Single",
                 2 => "Double"
             );
-        public $rangePenalty = 1;
-            public $rangePenaltyArray = array( 1=>1, 2=>0.66); //Standard and Raking modes
-        public $fireControl = array(5, 4, 2); // fighters, <mediums, <capitals 
-            public $fireControlArray = array( 1=>array(6, 4, 3), 2=>array(0, 4, 6));
+    public $rangePenalty = 1;
+    public $rangePenaltyArray = array( 1=>1, 2=>0.66); //Standard and Raking modes
+
+    public $fireControl = array(5, 4, 2); // fighters, <mediums, <capitals 
+    public $fireControlArray = array( 1=>array(6, 4, 3), 2=>array(0, 4, 6));
               
-	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-  		public $damageTypeArray = array(1=>"Standard", 2=>"Standard");	    
-	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!    
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+  	public $damageTypeArray = array(1=>"Standard", 2=>"Standard");	    
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!    
 	
 	public $isCombined = false; //is being combined with other weapon
 	public $alreadyConsidered = false; //already considered - either being fired or combined
 	public $testRun = false;//testRun = true means hit chance is calculated nominal skipping concentration issues - for subordinate weapon to calculate average hit chance
 	
-		public $repairPriority = 4;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	public $repairPriority = 4;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 	
 	
-	    public function setSystemDataWindow($turn){
+	public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
 		      $this->data["Special"] = "Two Psionic Concentrators can be combined into a single standard shot in Double mode, with -3.33 per hex range penalty, 0/20/30 Fire Control and an additional 1d10+5 damage.";	      
 		      $this->data["Special"] .= "<br>If You allocate multiple Concentrators to the same Double mode of fire at the same target, they will be combined.";		       
