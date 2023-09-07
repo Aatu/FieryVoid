@@ -335,11 +335,10 @@ HeavyPsionicLance.prototype.initBoostableInfo = function () {
 		this.outputDisplay = this.data.Boostlevel;
 	} else {
 		this.outputDisplay = '-'; //'0' is not shown!
-	}    
-    
+	}        
+*/
     return this;
 };
-*/
 var PsionicLance = function PsionicLance(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -402,9 +401,10 @@ PsionicLance.prototype.initBoostableInfo = function () {
 		this.outputDisplay = '-'; //'0' is not shown!
 	}    
     
+*/
     return this;
 };
-*/
+
 var PsychicField = function PsychicField(json, ship)
 {
     Weapon.call( this, json, ship);

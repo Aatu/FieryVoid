@@ -25,7 +25,7 @@ class NexusKineticBoxLauncher extends Weapon{
         
         public $loadingtime = 2; // 1/2 turns
         public $rangePenalty = 0;
-        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $fireControl = array(0, 1, 2); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
 	public $noOverkill = true; //Matter weapon
 	public $priority = 9; //Matter weapon
@@ -94,7 +94,7 @@ class NexusRangedKineticBoxLauncher extends Weapon{
         
         public $loadingtime = 2; // 1/2 turns
         public $rangePenalty = 0;
-        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $fireControl = array(0, 1, 2); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
 	public $noOverkill = true; //Matter weapon
 	public $priority = 9; //Matter weapon
@@ -164,7 +164,7 @@ class NexusAdvKineticBoxLauncher extends Weapon{
         
         public $loadingtime = 2; // 1/2 turns
         public $rangePenalty = 0;
-        public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
 	    
 	public $noOverkill = true; //Matter weapon
 	public $priority = 9; //Matter weapon
@@ -239,7 +239,7 @@ class NexusAntifighterLauncher extends Weapon{
 	    
 		public $firingMode = 'Ballistic'; //firing mode - just a name essentially
 		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+    	public $weaponClass = "Matter"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -331,6 +331,7 @@ class NexusLaserMissile extends Laser{
             $this->data["Special"] = "Bomb-pumped laser. Ballistic weapon that scores raking (8) damage.";
             $this->data["Special"] .= "<br>Long-range: 20 hex launch and 30 hex max range, 2d10+2 damage.";
             $this->data["Special"] .= "<br>Short-range: 10 hex launch and 15 hex max range, 3d10+4 damage.";
+            $this->data["Special"] .= "<br>Due to how this works, intercepted as a normal weapon and not a ballistic weapon.";
             $this->data["Ammunition"] = $this->ammunition;
         }
         
@@ -433,6 +434,7 @@ class NexusHeavyLaserMissile extends Laser{
             $this->data["Special"] = "Bomb-pumped laser. Ballistic weapon that scores raking (8) damage.";
             $this->data["Special"] .= "<br>Long-range: 50 hex launch and 60 hex max range, 2d10+2 damage.";
             $this->data["Special"] .= "<br>Short-range: 20 hex launch and 30 hex max range, 3d10+4 damage.";
+            $this->data["Special"] .= "<br>Due to how this works, intercepted as a normal weapon and not a ballistic weapon.";
             $this->data["Ammunition"] = $this->ammunition;
         }
         
@@ -1370,7 +1372,7 @@ class NexusRangedBoltTorpedo extends Weapon{
 intercepts all weapon fire (directed at self) from HEX (including uninterceptable weapons).
 Done as: kind of offensive mode - player needs to pick hex to fire at. Animated as kind of EMine. 
 All appropriate fire orders will get an interception set up before other intercepts are declared.
-If weapon is left to its own devices it will simply provide a single interception (...if game allows non-1-per-turn weapon to be intercepting in the first place!)
+If weapon is left to its own devices it will simply provide a single interception
 */
 class NexusChaffLauncher extends Weapon{
         public $name = "nexusChaffLauncher";
@@ -1419,6 +1421,7 @@ class NexusChaffLauncher extends Weapon{
             parent::setSystemDataWindow($turn);
             $this->data["Special"] = "Fired at hex (although You technically have to pick an unit). Will apply interception to all fire from target hex to Chaff-protected ship.";
             $this->data["Special"] .= "<br>Will affect uninterceptable weapons.";
+            $this->data["Special"] .= "<br>Does not affect units with Advanced Sensors.";
         }
         
 	//hit chance always 100 - so it always hits and is correctly animated
@@ -1431,7 +1434,7 @@ class NexusChaffLauncher extends Weapon{
 		$targetShip = $gamedata->getShipById($fireOrder->targetid);
 		
 		$shipsInRange = $gamedata->getShipsInDistance($targetShip); //all units on target hex
-		foreach ($shipsInRange as $affectedShip) {
+		foreach ($shipsInRange as $affectedShip) if (!$affectedShip->hasSpecialAbility("AdvancedSensors")) { //Advanced Sensors are immune to Young defensive systems...
 			$allOrders = $affectedShip->getAllFireOrders($gamedata->turn);
 			foreach($allOrders as $subOrder) {
 				if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->shooterid) ){ //something is firing at protected unit - and is affected!
@@ -2197,7 +2200,7 @@ class NexusShatterGunFtr extends Weapon{
         public $priority = 6; 
         	    
 //		public $ballisticIntercept = true;
-        public $intercept = 1; //as it should be, but here they CAN combine vs same shot!
+        public $intercept = 1; 
 	    
 		public $rangePenalty = 2;
         public $fireControl = array(3, 1, 1); // fighters, <mediums, <capitals
@@ -2222,7 +2225,7 @@ class NexusShatterGunFtr extends Weapon{
 			$this->data["Special"] = "Fires d4 separate shots (actual number rolled at firing resolution).";
 			$this->data["Special"] .= "<br>When fired defensively, a single CIDS cannot engage the same incoming shot twice (even ballistic one).";
 			$this->data["Special"] .= "<br>Ignores armor.";
-			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
+//			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
         }
 	    
 	//if fired offensively - make d4 attacks (copies of 1 existing); 
@@ -2310,7 +2313,7 @@ class NexusShatterGunFtr extends Weapon{
         public $priority = 3; //very light weapon
         	    
 //		public $ballisticIntercept = true;
-        public $intercept = 1; //as it should be, but here they CAN combine vs same shot!
+        public $intercept = 2; 
 	    
 	public $rangePenalty = 2;
         public $fireControl = array(3, 1, 1); // fighters, <mediums, <capitals
@@ -2388,16 +2391,16 @@ class NexusShatterGunFtr extends Weapon{
 	}	    
 	    
         public function getDamage($fireOrder){
-            return 3; 
+            return 4; 
         }
  
         public function setMinDamage()
         {
-            $this->minDamage = 3;
+            $this->minDamage = 4;
         }
         public function setMaxDamage()
         {
-            $this->maxDamage = 3 ;
+            $this->maxDamage = 4 ;
         }
 		
     }  // endof NexusACIDS
@@ -2531,7 +2534,7 @@ class NexusAutogun extends Matter{
 		public $guns = 1;
         public $priority = 5;
         public $ammunition = 6;
-        public $intercept = 1; //as it should be, but here they CAN combine vs same shot!
+        public $intercept = 1; 
 
 //        public $intercept = 2;
 //        public $ballisticIntercept = true;
@@ -3132,7 +3135,7 @@ class NexusMinigun extends Weapon{
 		public function getDamage($fireOrder){
         	switch($this->firingMode){ 
             	case 1:
-                	return 3;
+                	return 4;
 			    			break;
             	case 2:
             	   	return Dice::d(3, 1)*4;
@@ -3143,7 +3146,7 @@ class NexusMinigun extends Weapon{
 		public function setMinDamage(){
 				switch($this->firingMode){
 						case 1:
-								$this->minDamage = 3;
+								$this->minDamage = 4;
 								break;
 						case 2:
 								$this->minDamage = 4;
@@ -3155,7 +3158,7 @@ class NexusMinigun extends Weapon{
 		public function setMaxDamage(){
 				switch($this->firingMode){
 						case 1:
-								$this->maxDamage = 3;
+								$this->maxDamage = 4;
 								break;
 						case 2:
 								$this->maxDamage = 12;
@@ -3549,6 +3552,37 @@ class NexusMauler extends Particle{
         public function setMinDamage(){     $this->minDamage = 2 ;      }
         public function setMaxDamage(){     $this->maxDamage = 11 ;      }
     }
+
+
+
+
+    class NexusParticleBolter extends Particle{
+        public $name = "NexusParticleBolter";
+        public $displayName = "Particle Bolter";
+		public $iconPath = "NexusParticleBolter.png";
+	    
+        public $animation = "bolt";
+        public $animationColor = array(204, 122, 0);
+
+        public $intercept = 1;
+        public $loadingtime = 2;
+        public $priority = 4;
+
+        public $rangePenalty = 1; //-1/hex
+        public $fireControl = array(1, 2, 2); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return 12;   }
+        public function setMinDamage(){     $this->minDamage = 12 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+		
+    }  //end NexusParticleBolter
 
 
 
@@ -6157,7 +6191,7 @@ class NexusHeavyEnhPlasma extends Plasma{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "No range damage penalty up to a distance of 12 hexes.";
-			$this->data["Special"] .= "<br>After 12 hexes, damage reduced by 1 point per 2 hexes.";
+			$this->data["Special"] .= "<br>After 12 hexes, damage reduced by 0.5 per hex.";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
@@ -6178,7 +6212,7 @@ class NexusMedEnhPlasma extends Plasma{
 	public $priority = 5;
 	
 	public $rangeDamagePenalty = 0;
-	public $rangeDamagePenaltyPBolter = 1;
+	public $rangeDamagePenaltyPBolter = 0.66;
 	public $loadingtime = 2;
 	public $rangePenalty = 0.66;
 	public $fireControl = array(-4, 1, 3);
@@ -6200,11 +6234,11 @@ class NexusMedEnhPlasma extends Plasma{
 					$sourcePos = $shooter->getHexPos();
 					}
 			$dis = mathlib::getDistanceHex($sourcePos, $target);				
-			if ($dis <= 5) {
+			if ($dis <= 7) {
 				$damage -= 0;
 				}
 			else {
-				$damage -= round(($dis - 3) * $this->rangeDamagePenaltyPBolter);
+				$damage -= round(($dis - 7) * $this->rangeDamagePenaltyPBolter);
 			}	
 		        $damage = max(0, $damage); //at least 0	    
         		$damage = floor($damage); //drop fractions, if any were generated
@@ -6213,8 +6247,8 @@ class NexusMedEnhPlasma extends Plasma{
 	
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-			$this->data["Special"] = "No range damage penalty up to a distance of 5 hexes.";
-			$this->data["Special"] .= "<br>After 5 hexes, damage reduced by 1 point per hex.";
+			$this->data["Special"] = "No range damage penalty up to a distance of 7 hexes.";
+			$this->data["Special"] .= "<br>After 7 hexes, damage reduced by 0.66 per hex.";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
@@ -6271,7 +6305,7 @@ class NexusLightEnhPlasma extends Plasma{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "No range damage penalty up to a distance of 3 hexes.";
-			$this->data["Special"] .= "<br>After 3 hexes, damage reduced by 1 point per hex.";
+			$this->data["Special"] .= "<br>After 3 hexes, damage reduced by 1 per hex.";
 			$this->data["Special"] .= "<br>Ignores half of armor.";
 	}
 			
@@ -6281,6 +6315,72 @@ class NexusLightEnhPlasma extends Plasma{
     
 
 }// End of class NexusLightEnhPlasma	
+
+
+
+class NexusLtEnhPlasmaFtr extends LinkedWeapon{
+	public $name = "NexusLtEnhPlasmaFtr";
+	public $displayName = "Light Enhanced Plasma";
+	public $iconPath = "lightPlasmalinked.png";
+    public $animationColor = array(75, 250, 90); //needed as this doesn't inherit from Plasma...
+
+    public $intercept = 0; //no interception for this weapon!
+	public $loadingtime = 1;
+	public $shots = 2;
+    public $defaultShots = 2;
+    public $rangePenalty = 2;
+    public $fireControl = array(0, 0, 0);
+    
+    public $rangeDamagePenalty = 0;
+	public $rangeDamagePenaltyPBolter = 1;    
+    public $damageBonus = 0;
+	
+   	public $damageType = "Standard"; 
+   	public $weaponClass = "Plasma"; 	
+
+		function __construct($startArc, $endArc, $nrOfShots = 2){
+			$this->defaultShots = $nrOfShots;
+			$this->shots = $nrOfShots;
+
+			parent::__construct(0, 1, 0, $startArc, $endArc);
+		}	
+
+	protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
+	{
+		parent::getDamageMod($damage, $shooter, $target, $pos, $gamedata);
+					if ($pos != null) {
+					$sourcePos = $pos;
+					} 
+					else {
+					$sourcePos = $shooter->getHexPos();
+					}
+			$dis = mathlib::getDistanceHex($sourcePos, $target);				
+			if ($dis <= 2) {
+				$damage -= 0;
+				}
+			else {
+				$damage -= round(($dis - 2) * $this->rangeDamagePenaltyPBolter);
+			}	
+		        $damage = max(0, $damage); //at least 0	    
+        		$damage = floor($damage); //drop fractions, if any were generated
+      			 return $damage;
+	}		
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "No range damage penalty up to a distance of 2 hexes.";
+			$this->data["Special"] .= "<br>After 2 hexes, damage reduced by 1 point per hex.";
+			$this->data["Special"] .= "<br>Ignores half of armor.";
+	}
+			
+        public function getDamage($fireOrder){        return Dice::d(3, 1)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 7 ;      }
+
+}// End of class NexusLtEnhPlasmaFtr	
+
+
+
 
 
 
@@ -7180,7 +7280,9 @@ class NexusDefensePulsar extends Pulse{
         public $priority = 4;
 
         public $rangePenalty = 2 ; 
-        public $fireControl = array(6, 5, 4); // fighters, <mediums, <capitals
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+
+        public $range = 5;
 
 	function __construct($startArc, $endArc, $nrOfShots = 1){
             $this->defaultShots = $nrOfShots;
@@ -7192,6 +7294,13 @@ class NexusDefensePulsar extends Pulse{
         public function setMinDamage(){     $this->minDamage = 5 ;      }
         public function setMaxDamage(){     $this->maxDamage = 14 ;      }
 	}// endof TwinArrayFtr
+
+
+	class TAFtr8 extends TwinArrayFtr{
+
+		public $range = 8;
+		
+	}
 
 
 /*fighter-mounted variant*/
@@ -7254,7 +7363,7 @@ class MatterCannonFtr extends Matter {
     /*limited ammo*/
         public $name = "MatterCannonFtr";
         public $displayName = "Matter Cannon";
-	public $iconPath = "matterCannon.png";
+		public $iconPath = "matterCannon.png";
         public $animation = "bolt";
         public $animationColor = array(250, 250, 190);
         public $priority = 9; //Matter weapon
@@ -7263,7 +7372,9 @@ class MatterCannonFtr extends Matter {
         public $exclusive = false; //this is not an exclusive weapon!
         
         public $rangePenalty = 0.5;
-        public $fireControl = array(-2, 0, 0); // fighters, <mediums, <capitals 
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+
+        public $range = 6;
 
         function __construct($startArc, $endArc){
             parent::__construct(0, 1, 0, $startArc, $endArc);
@@ -7275,7 +7386,35 @@ class MatterCannonFtr extends Matter {
 }//MatterCannonFtr
 
 
+class MCFtr8 extends MatterCannonFtr {
+	
+	public $range = 8;
+	
+}
 
+class BattleLaserFtr extends BattleLaser {
+	
+	public $name = "BattleLaserFtr";
+	public $displayName = "Battle Laser";
+	public $iconPath = "battleLaser.png";
+    public $animation = "laser";
+    public $animationColor = array(255, 58, 31);
+	public $priority = 7;
+	
+    public $fireControlArray = array( 1=>array(0, 0, 0), 2=>array(null,-6, -6) ); //Raking and Piercing mode
+
+	public $range = 12;
+
+        function __construct($startArc, $endArc){
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10, 4)+12;   }
+        public function setMinDamage(){     $this->minDamage = 16 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 52 ;      }
+
+	
+} 
 
 /*fighter-mounted variant*/
     class GatlingGunFtr extends LinkedWeapon{

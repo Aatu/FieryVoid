@@ -43,8 +43,9 @@ ELECTRONIC WARFARE
  - CCEW: affects ALL nearby enemy fighters, at full power.
  - Most activities requiring multiple EW points can be done with fractions. Eg. Blanket DEW (1 per 4 points allocated): You may allocate , say, 3 points and get 0.75 points of blanked DEW (around 4%).
  - Disruption EW: ALL target locks are affected equally, by appropriate fraction of power used. Eg. if You use 1 point of DIST and target has 3 locks up, each one of these would be reduced by 0.33 points.
- - Disruption EW: CCEW is treated as one OEW target and affected appropriately
+ - Disruption EW: CCEW is treated as one OEW target and affected appropriately.
  - Disruption EW: target locks weaker than 1 point but worth at least half a point provide half-lock (eg. range penalties multiplied by 1.5 instead of being doubled).
+ - Only own DEW can bring profile below 0: this rule is not respected in FV.
 
 
 FIRING AND WEAPONS

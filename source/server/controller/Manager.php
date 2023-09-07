@@ -603,7 +603,8 @@ class Manager{
             }
             
             /** @var BaseShip $ship */
-            $ship = new $value["phpclass"]($value["id"], $value["userid"], $value['name'], $value["slot"]);            
+            $ship = new $value["phpclass"]($value["id"], $value["userid"], $value['name'], $value["slot"]);       
+			$ship->pointCostEnh = $value["pointCostEnh"];			
             $ship->setMovements($movements);    
             $ship->EW = $EW;
 

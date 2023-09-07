@@ -4,26 +4,26 @@ class VelraxHasertAttack extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 30*6;
+        $this->pointCost = 35*6;
         $this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxHasertAttack";
         $this->shipClass = "Hasert Attack flight";
-			$this->variantOf = "Tassriv Interceptor-A flight";
-			$this->occurence = "uncommon";
+	$this->variantOf = "Tassriv-A Interceptor flight";
+	$this->occurence = "uncommon";
         $this->imagePath = "img/ships/Nexus/VelraxHasert.png";
-		$this->unofficial = true;
+	$this->unofficial = true;
 
         $this->isd = 2108;
         
         $this->forwardDefense = 6;
-        $this->sideDefense = 6;
+        $this->sideDefense = 7;
         $this->freethrust = 8;
         $this->offensivebonus = 4;
         $this->jinkinglimit = 10;
         $this->turncost = 0.33;
-		$this->turndelay = 0;
+	$this->turndelay = 0;
         
-        $this->iniativebonus = 100;
+        $this->iniativebonus = 20 *5;
         $this->populate();       
 
     }
@@ -41,8 +41,9 @@ class VelraxHasertAttack extends FighterFlight{
             $fighter->imagePath = "img/ships/Nexus/VelraxHasert.png";
             $fighter->iconPath = "img/ships/Nexus/VelraxHasert_Large.png";
 
-			$mauler = new NexusMauler(330, 30, 1);
-			$fighter->addFrontSystem($mauler);
+//			$mauler = new NexusMauler(330, 30, 1);
+//			$fighter->addFrontSystem($mauler);
+			$fighter->addFrontSystem(new IonBolt(330, 30));
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			
             

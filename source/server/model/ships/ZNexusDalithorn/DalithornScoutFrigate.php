@@ -9,11 +9,11 @@ class DalithornScoutFrigate extends MediumShip{
         $this->phpclass = "DalithornScoutFrigate";
         $this->imagePath = "img/ships/Nexus/DalithornSmallScout.png";
         $this->shipClass = "Scout Frigate";
-			$this->variantOf = "Heavy Frigate";
+			$this->variantOf = "Small Scout";
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->canvasSize = 80;
-        $this->limited = 10;
+        $this->limited = 33;
 
 	    $this->isd = 2108;
         

@@ -4,7 +4,7 @@ class BrixadiiPoliceFrigate2108 extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 170;
+        $this->pointCost = 180;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiPoliceFrigate2108";
         $this->imagePath = "img/ships/Nexus/BrixadiiPoliceFrigateEarly.png";
@@ -28,24 +28,24 @@ class BrixadiiPoliceFrigate2108 extends LCV{
         $this->accelcost = 2;
         $this->rollcost = 1;
         $this->pivotcost = 1;
-        $this->iniativebonus = 14*5;
+        $this->iniativebonus = 15*5;
  
 		$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
   
-		$this->addPrimarySystem(new Reactor(4, 7, 0, 0));
-		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
+		$this->addPrimarySystem(new Reactor(3, 9, 0, 0));
+		$this->addPrimarySystem(new CnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 //        $this->addPrimarySystem(new AntiquatedScanner(4, 9, 2, 4));
-    	$sensors = new Scanner(4, 9, 2, 4);
+    	$sensors = new Scanner(3, 9, 2, 4);
 			$sensors->markLCV();
 			$this->addPrimarySystem($sensors);
-		$this->addPrimarySystem(new Engine(3, 10, 0, 8, 3));
+		$this->addPrimarySystem(new Engine(3, 10, 0, 6, 3));
 
-		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 180, 360));
-		$this->addFrontSystem(new EnergyPulsar(2, 6, 3, 270, 90));
-		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 0, 180));
+		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 240, 60));
+		$this->addFrontSystem(new EnergyPulsar(2, 6, 3, 300, 60));
+		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 300, 120));
 	    
         $this->addPrimarySystem(new Structure(4, 27));
 	    

@@ -64,23 +64,37 @@ if (isset($_SESSION["user"])) {
        
 		
 
-		---------- <b>LATEST NEWS - May 2023</b> ----------
-	    <br><b>Raider Shokan faction</b> - courtesy of Douglas
-	    <br><b>Thirdspace development</b> - courtesy of Douglas
-	    <br><b>Various image updates</b> - courtesy of Lunara and Douglas
-	    <br><b>Kor-Lyan development and polishing</b> - courtesy of Geoffrey and Douglas
-	    <br><b>Nexus updates</b> - courtesy of Geoffrey
-	    <br><b>Escalation Wars updates</b> - courtesy of Geoffrey
-	    <br><b>What If factions</b> - custom interpretations of official fations, by Geoffrey
-	    <br><b>EA defenses separated</b> - new developmens made EA too large to actually display everything at once...
-	    <br><b>Drakh rebalanced</b> - got some bigger teeth!
+		---------- <b>LATEST NEWS - August 2023</b> ----------
+	    <br><b>Shock Cannon fixed</b> - now causes correct power shortages on hitting Structure
+	    <br><b>Minbari ships have shuttle hangars tracked</b> - so Combat Flyers could be properly based
+	    <br><b>A LOT of minor updates by Geoffrey</b> - layot fixed here, ship added there :)
+	    <br><b>A LOT of Nexus updates, including Velrax rebalance</b> - courtesy of Geoffrey
+	    <br><b>A LOT of graphics updates</b> - courtesy of Douglas
+	    <br><b>Thirdspace updates</b> - by Douglas
+	    <br><b>Current combat value shown (on Info pane)</b> - for now NOT taking enhancements into account 
+	    <br><b>Total value of enhancements picked shown in Fleet checker</b> - only actual enhancements are counted, not options
+
+		 <br><br>---------- <b>update 5th of August</b> ---------- 
+	    <br><b>Combat value updated</b> - now counts enhancements as well (new games only!)
+	    <br><b>Combat value updated</b> - seriously damaged fighters have slightly less value
+	    <br><b>Combat value updated</b> - bases and OSATs aren't penalized for lacking systems they don't need :)
 	    
-		 <br><br>---------- <b>update 11th of May</b> ---------- 
-	    <br><b>Starburst missile</b> - one more Kor-Lyan goodie by Douglas
+		 <br><br>---------- <b>update 6th of August</b> ---------- 
+	    <br><b>Combat value updated</b> - some more detail added - system destruction is counted, rather than estimated from structural damage
 	    
-		 <br><br>---------- <b>update 16th of May</b> ---------- 
-	    <br><b>Unreliable Matter cannon fixed</b> - still unreliable, but not crashing games
-	    <br><b>Nexus Craytan expanded</b> - by Geoffrey
+		 <br><br>---------- <b>update 7th of August</b> ---------- 
+	    <br><b>Combat value updated</b> - because I wouldn't have been myself if I didn't tinker some more, apparently
+	    <br><b>Thirdspace updates by Douglas</b> - ones that <i>should</i> have been added by the first update... well, they're here now - sorry all!!!
+	    <br><b>Missiles ignoring jinking at range 0</b> - bug fixed
+
+		 <br><br>---------- <b>update 28th of August</b> ---------- 
+	    <br><b>Combat value updated</b> - Weapons and ElInt Sensors are considered more valuable
+	    <br><b>Thirdspace balancing</b> - by Douglas
+	    <br><b>Nexus pre-tournament balancing</b> - by Geoffrey
+	    
+		 <br><br>---------- <b>update 30th of August</b> ---------- 
+	    <br><b>pre-tournament fix</b> - Velrax Hasert fighters are available again
+	    <br><b>Tiers visible in fleet selection</b> - onmouseover You can see power rating comment
 	    
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 

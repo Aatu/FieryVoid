@@ -4,17 +4,17 @@ class VelraxCasrissAFighter extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 20*6;
+        $this->pointCost = 28*6;
         $this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxCasrissAFighter";
         $this->shipClass = "Casriss-A flight";
         $this->imagePath = "img/ships/Nexus/VelraxCasriss_v2.png";
 		$this->unofficial = true;
 
-        $this->isd = 2033;
+        $this->isd = 2017;
         
-        $this->forwardDefense = 5;
-        $this->sideDefense = 6;
+        $this->forwardDefense = 7;
+        $this->sideDefense = 7;
         $this->freethrust = 8;
         $this->offensivebonus = 3;
         $this->jinkinglimit = 10;

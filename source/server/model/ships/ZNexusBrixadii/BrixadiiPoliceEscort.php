@@ -11,7 +11,7 @@ class BrixadiiPoliceEscort extends LCV{
 			$this->canvasSize = 60; //img has 200px per side
         $this->shipClass = "Police Escort";
 			$this->variantOf = "Police Frigate";
-			$this->occurence = "common";
+			$this->occurence = "uncommon";
 		//$this->variantOf = "Police Frigate";
 		$this->unofficial = true;
 			$this->isd = 2108;
@@ -28,26 +28,26 @@ class BrixadiiPoliceEscort extends LCV{
         $this->accelcost = 2;
         $this->rollcost = 1;
         $this->pivotcost = 1;
-        $this->iniativebonus = 14*5;
+        $this->iniativebonus = 15*5;
  
 		$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
   
-		$this->addPrimarySystem(new Reactor(4, 7, 0, 0));
-		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
+		$this->addPrimarySystem(new Reactor(3, 9, 0, 0));
+		$this->addPrimarySystem(new CnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 //        $this->addPrimarySystem(new AntiquatedScanner(4, 9, 2, 4));
-    	$sensors = new Scanner(4, 9, 2, 4);
+    	$sensors = new Scanner(3, 9, 2, 4);
 			$sensors->markLCV();
 			$this->addPrimarySystem($sensors);
-		$this->addPrimarySystem(new Engine(3, 10, 0, 8, 3));
+		$this->addPrimarySystem(new Engine(3, 10, 0, 6, 3));
 
-		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 180, 360));
+		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 240, 60));
 		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 270, 90));
-		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 0, 180));
+		$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 300, 120));
 	    
-        $this->addPrimarySystem(new Structure(4, 27));
+        $this->addPrimarySystem(new Structure(3, 27));
 	    
         $this->hitChart = array(
         		0=> array( 

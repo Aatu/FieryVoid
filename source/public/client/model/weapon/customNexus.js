@@ -59,6 +59,12 @@ var NexusLightProjectorArray = function NexusLightProjectorArray(json, ship) {
 NexusLightProjectorArray.prototype = Object.create(Weapon.prototype);
 NexusLightProjectorArray.prototype.constructor = NexusLightProjectorArray;
 
+var NexusParticleBolter = function NexusParticleBolter(json, ship) {
+    Particle.call(this, json, ship);
+};
+NexusParticleBolter.prototype = Object.create(Weapon.prototype);
+NexusParticleBolter.prototype.constructor = NexusParticleBolter;
+
 var NexusGasGun = function NexusGasGun(json, ship) {
 	Weapon.call(this, json, ship);
 };
@@ -899,6 +905,12 @@ var TwinArrayFtr = function  TwinArrayFtr(json, ship) {
 TwinArrayFtr.prototype = Object.create(Weapon.prototype);
 TwinArrayFtr.prototype.constructor =  TwinArrayFtr;
 
+var TAFtr8 = function  TAFtr8(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TAFtr8.prototype = Object.create(Weapon.prototype);
+TAFtr8.prototype.constructor =  TAFtr8;
+
 var MedPlasmaCannonFtr = function  MedPlasmaCannonFtr(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -910,6 +922,18 @@ var MatterCannonFtr = function  MatterCannonFtr(json, ship) {
 };
 MatterCannonFtr.prototype = Object.create(Weapon.prototype);
 MatterCannonFtr.prototype.constructor =  MatterCannonFtr;
+
+var MCFtr8 = function  MCFtr8(json, ship) {
+    Weapon.call(this, json, ship);
+};
+MCFtr8.prototype = Object.create(Weapon.prototype);
+MCFtr8.prototype.constructor =  MCFtr8;
+
+var BattleLaserFtr = function  BattleLaserFtr(json, ship) {
+    Weapon.call(this, json, ship);
+};
+BattleLaserFtr.prototype = Object.create(Weapon.prototype);
+BattleLaserFtr.prototype.constructor =  BattleLaserFtr;
 
 var GatlingGunFtr = function  GatlingGunFtr(json, ship) {
     Weapon.call(this, json, ship);
@@ -934,6 +958,19 @@ var NexusAntifighterLauncher = function  NexusAntifighterLauncher(json, ship) {
 };
 NexusAntifighterLauncher.prototype = Object.create(Weapon.prototype);
 NexusAntifighterLauncher.prototype.constructor =  NexusAntifighterLauncher;
+
+var NexusLtEnhPlasmaFtr = function  NexusLtEnhPlasmaFtr(json, ship) {
+    Plasma.call(this, json, ship);
+};
+NexusLtEnhPlasmaFtr.prototype = Object.create(Weapon.prototype);
+NexusLtEnhPlasmaFtr.prototype.constructor =  NexusLtEnhPlasmaFtr;
+
+
+
+
+
+
+
 
 
 //Kor-Lyan testing systems

@@ -9,14 +9,15 @@ class VelraxGunboatRefit extends LCV{
         $this->phpclass = "VelraxGunboatRefit";
         $this->imagePath = "img/ships/Nexus/VelraxPlasmaGunboat.png";
 			$this->canvasSize = 55; //img has 200px per side
-        $this->shipClass = "Nashran Gunboat (2064 Refit)";
+        $this->shipClass = "Nashran Gunboat (2061 Refit)";
 			$this->variantOf = "Nashran Gunboat";
 			$this->occurence = "common";
 		$this->unofficial = true;
-			$this->isd = 2064;
+			$this->isd = 2061;
 
         $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
-	    $this->notes = 'May deploy independently.';
+	    $this->notes = 'Atmospheric Capable.';
+	    $this->notes .= '<br>May deploy independently.';
         
         $this->forwardDefense = 8;
         $this->sideDefense = 13;
@@ -35,7 +36,7 @@ class VelraxGunboatRefit extends LCV{
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
   
 		$this->addPrimarySystem(new Reactor(2, 9, 0, 0));
-		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
+		$this->addPrimarySystem(new CnC(99, 1, 0, 0)); //C&C should be unhittable anyway
     	$sensors = new Scanner(2, 7, 2, 4);
 			$sensors->markLCV();
 			$this->addPrimarySystem($sensors);

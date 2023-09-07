@@ -4,7 +4,7 @@ class VelraxFleetCarrierRefit extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 555;
+	$this->pointCost = 600;
 	$this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxFleetCarrierRefit";
         $this->imagePath = "img/ships/Nexus/VelraxNaresh.png";
@@ -34,7 +34,7 @@ class VelraxFleetCarrierRefit extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 24, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 4, 6));
         $this->addPrimarySystem(new Engine(4, 18, 0, 8, 4));
-		$this->addPrimarySystem(new Hangar(2, 12));
+		$this->addPrimarySystem(new Hangar(2, 18));
    
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
@@ -51,21 +51,20 @@ class VelraxFleetCarrierRefit extends BaseShip{
 		$this->addAftSystem(new JumpEngine(4, 20, 6, 35));
         $this->addAftSystem(new DualIonBolter(2, 4, 4, 120, 300));
         $this->addAftSystem(new LaserLance(3, 6, 4, 180, 240));
+        $this->addAftSystem(new NexusStreakInterceptor(3, 4, 1, 60, 300));
         $this->addAftSystem(new LaserLance(3, 6, 4, 120, 180));
         $this->addAftSystem(new DualIonBolter(2, 4, 4, 60, 240));
 
-		$this->addLeftSystem(new PlasmaWaveTorpedo(3, 7, 4, 240, 360));
-		$this->addLeftSystem(new LaserLance(3, 6, 4, 180, 360));
-		$this->addLeftSystem(new LaserLance(3, 6, 4, 180, 360));
+//		$this->addLeftSystem(new PlasmaWaveTorpedo(3, 7, 4, 240, 360));
+		$this->addLeftSystem(new LaserLance(3, 6, 4, 240, 360));
         $this->addLeftSystem(new DualIonBolter(2, 4, 4, 240, 60));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 		$this->addLeftSystem(new Hangar(2, 7));
 		$this->addLeftSystem(new Hangar(2, 7));
 		$this->addLeftSystem(new Hangar(2, 7));
 
-		$this->addRightSystem(new PlasmaWaveTorpedo(3, 7, 4, 0, 120));
-		$this->addRightSystem(new LaserLance(3, 6, 4, 0, 180));
-		$this->addRightSystem(new LaserLance(3, 6, 4, 0, 180));
+//		$this->addRightSystem(new PlasmaWaveTorpedo(3, 7, 4, 0, 120));
+		$this->addRightSystem(new LaserLance(3, 6, 4, 0, 120));
         $this->addRightSystem(new DualIonBolter(2, 4, 4, 300, 120));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 		$this->addRightSystem(new Hangar(2, 7));
@@ -74,9 +73,9 @@ class VelraxFleetCarrierRefit extends BaseShip{
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(4, 50));
-        $this->addAftSystem(new Structure(3, 40));
-        $this->addLeftSystem(new Structure(3, 45));
-        $this->addRightSystem(new Structure(3, 45));
+        $this->addAftSystem(new Structure(3, 50));
+        $this->addLeftSystem(new Structure(4, 60));
+        $this->addRightSystem(new Structure(4, 60));
         $this->addPrimarySystem(new Structure(4, 50));
 		
 		$this->hitChart = array(
@@ -96,9 +95,10 @@ class VelraxFleetCarrierRefit extends BaseShip{
 					20 => "Primary",
 			),
 			2=> array(
-					6 => "Thruster",
+					5 => "Thruster",
+					6 => "Streak Interceptor",
 					8 => "Laser Lance",
-					9 => "Dual Ion Bolter",
+					10 => "Dual Ion Bolter",
 					12 => "Jump Engine",
 					18 => "Structure",
 					20 => "Primary",

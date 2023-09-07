@@ -4,7 +4,7 @@ class BrixadiiLauncherPlatformBase extends OSAT{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 100;
+		$this->pointCost = 120;
 		$this->faction = 'ZNexus Brixadii';
         $this->phpclass = "BrixadiiLauncherPlatformBase";
         $this->imagePath = "img/ships/Nexus/BrixadiiSentinelPlatform.png";
@@ -26,9 +26,9 @@ class BrixadiiLauncherPlatformBase extends OSAT{
         $this->addPrimarySystem(new NexusRangedKineticBoxLauncher(3, 10, 0, 270, 90));
         $this->addPrimarySystem(new NexusRangedKineticBoxLauncher(3, 10, 0, 270, 90));
         $this->addPrimarySystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
-        $this->addPrimarySystem(new LightParticleProjector(1, 3, 1, 0, 360));
+        $this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 0, 360));
         $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 6, 2, 5));   
+        $this->addPrimarySystem(new Scanner(4, 6, 3, 5));   
         $this->addPrimarySystem(new Thruster(3, 6, 0, 0, 2));
                 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -40,7 +40,7 @@ class BrixadiiLauncherPlatformBase extends OSAT{
 				10 => "Thruster",
 				14 => "Ranged Kinetic Box Launcher",
 				15 => "Chaff Launcher",
-				16 => "Light Particle Projector",
+				16 => "Light Particle Beam",
 				18 => "Scanner",
 				20 => "Reactor",
 			),

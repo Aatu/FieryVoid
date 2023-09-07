@@ -1049,7 +1049,7 @@ class customHeavyPolarityPulsar extends Pulse{
 	public $weaponClass = "Molecular"; 
         public $rof = 2;
 	        
-        public $rangePenalty = 0.33; //-1/3 hexes; decreased from original -1/2 hexes
+        public $rangePenalty = 0.4; //-2/5 hexes; decreased from original -1/2 hexes
         public $fireControl = array(0, 3, 5); // fighters, <mediums, <capitals 
         
 	public $grouping = 15; //+1 per 3
@@ -1123,7 +1123,7 @@ class customMphasedBeamAcc extends Weapon{
 		
 	public function getDamage($fireOrder){
             switch($this->turnsloaded){
-                case 0: 
+                case 0: //should not happen
                 case 1:
                     return Dice::d(10,2)+2;
                     break;
@@ -1131,8 +1131,6 @@ class customMphasedBeamAcc extends Weapon{
                     return Dice::d(10, 4)+4;
                     break;
                 case 3:
-		    return Dice::d(10,8)+8;
-                    break;
                 default:
                     return Dice::d(10,8)+8;
                     break;
@@ -1141,7 +1139,6 @@ class customMphasedBeamAcc extends Weapon{
         
         public function setMinDamage(){
             switch($this->turnsloaded){
-                case 0:
                 case 1:
                     $this->minDamage = 4 ;
                     break;
@@ -1158,7 +1155,6 @@ class customMphasedBeamAcc extends Weapon{
                 
         public function setMaxDamage(){
             switch($this->turnsloaded){
-                case 0:
                 case 1:
                     $this->maxDamage = 22 ;
                     break;
@@ -1166,8 +1162,6 @@ class customMphasedBeamAcc extends Weapon{
                     $this->maxDamage = 44 ;  
                     break;
                 case 3:
-                    $this->maxDamage = 88 ;  
-                    break;
                 default:
                     $this->maxDamage = 88 ;  
                     break;

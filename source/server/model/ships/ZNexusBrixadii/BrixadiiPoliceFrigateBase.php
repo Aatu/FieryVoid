@@ -4,7 +4,7 @@ class BrixadiiPoliceFrigateBase extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 80;
+        $this->pointCost = 100;
         $this->faction = "ZNexus Brixadii";
         $this->phpclass = "BrixadiiPoliceFrigateBase";
         $this->imagePath = "img/ships/Nexus/BrixadiiPoliceFrigateEarly.png";
@@ -26,24 +26,24 @@ class BrixadiiPoliceFrigateBase extends LCV{
         $this->accelcost = 2;
         $this->rollcost = 1;
         $this->pivotcost = 1;
-        $this->iniativebonus = 14*5;
+        $this->iniativebonus = 15*5;
  
 		$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
   
-		$this->addPrimarySystem(new Reactor(4, 7, 0, 0));
-		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
+		$this->addPrimarySystem(new Reactor(3, 7, 0, 0));
+		$this->addPrimarySystem(new CnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 //        $this->addPrimarySystem(new AntiquatedScanner(4, 9, 2, 3));
-    	$sensors = new Scanner(4, 9, 2, 3);
+    	$sensors = new Scanner(3, 9, 2, 3);
 			$sensors->markLCV();
 			$this->addPrimarySystem($sensors);
 		$this->addPrimarySystem(new Engine(3, 10, 0, 6, 3));
 
 		$this->addFrontSystem(new LightParticleProjector(2, 3, 1, 240, 60));
-		$this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 270, 90));
-		$this->addFrontSystem(new NexusProjectorArray(2, 6, 1, 270, 90));
+		$this->addFrontSystem(new ParticleProjector(2, 6, 1, 300, 60));
+		$this->addFrontSystem(new ParticleProjector(2, 6, 1, 300, 60));
 		$this->addFrontSystem(new LightParticleProjector(2, 3, 1, 300, 120));
 	    
         $this->addPrimarySystem(new Structure(3, 27));
@@ -52,7 +52,7 @@ class BrixadiiPoliceFrigateBase extends LCV{
         		0=> array( 
         				11 => "Structure",
 						13 => "1:Light Particle Projector",
-        				15 => "1:Projector Array",
+        				15 => "1:Particle Projector",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -60,7 +60,7 @@ class BrixadiiPoliceFrigateBase extends LCV{
         		1=> array( //redirect to PRIMARY
         				11 => "Structure",
 						13 => "1:Light Particle Projector",
-        				15 => "1:Projector Array",
+        				15 => "1:Particle Projector",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -68,7 +68,7 @@ class BrixadiiPoliceFrigateBase extends LCV{
         		2=> array( //redirect to PRIMARY
         				11 => "Structure",
 						13 => "1:Light Particle Projector",
-        				15 => "1:Projector Array",
+        				15 => "1:Particle Projector",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

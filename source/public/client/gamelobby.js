@@ -17,6 +17,191 @@ window.gamedata = {
  	displayedFaction: '',
 	lastShipNumber: 0,
 
+    getPowerRating: function getPowerRating(factionName) {
+		var powerRating = '';
+		switch(factionName) {
+		  case 'Abbai':
+			powerRating = 'Tier 2';
+			break;
+		  case 'Abbai (WotCR)':
+			powerRating = 'Not balanced';
+			break;
+		  case 'Balosian':
+			powerRating = 'Tier 2';
+			break;
+		  case 'Belt Alliance':
+			powerRating = 'Tier 2';
+			break;
+		  case 'Brakiri':
+			powerRating = 'Tier 1';
+			break;
+		  case 'Cascor':
+			powerRating = 'Tier 2; can be turned to stronger custom faction by enhancement (still Tier 2)';
+			break;
+		  case 'Centauri':
+			powerRating = 'Tier 1';
+			break;
+		  case 'Centauri (WotCR)':
+			powerRating = 'Tier 2';
+			break;
+		  case "Ch'Lonas":
+			powerRating = 'Tier 2, custom faction';
+			break;
+		  case 'Civilians':
+			powerRating = 'Generic civilian designs for scenarios, not a faction';
+			break;
+		  case 'Corillani':
+			powerRating = 'Tier 2';
+			break;
+		  case 'Custom Ships':
+			powerRating = "Designs that don't fit anywhere else, not a faction";
+			break;
+		  case 'Deneth':
+			powerRating = 'Tier 2';
+			break;
+		  case 'Descari':
+			powerRating = 'Tier 2';
+			break;
+		  case 'Dilgar':
+			powerRating = 'Tier 1';
+			break;
+		  case 'Drakh':
+			powerRating = 'Tier 1, custom faction';
+			break;
+		  case 'Drazi':
+			powerRating = 'Tier 1';
+			break;
+		  case 'Drazi (WotCR)':
+			powerRating = 'Tier 2';
+			break;
+		  case 'EA':
+			powerRating = 'Tier 1';
+			break;
+		  case 'EA (defenses)':
+			powerRating = 'fixed tefenses for EA faction';
+			break;
+		  case 'EA (early)':
+			powerRating = 'Not balanced';
+			break;
+		  case 'Gaim':
+			powerRating = 'Tier 1';
+			break;
+		  case 'Grome':
+			powerRating = 'Not balanced';
+			break;
+		  case 'Hurr':
+			powerRating = 'Not balanced';
+			break;
+		  case 'Ipsha':
+			powerRating = 'Tier 2 (note discinct Baronies)';
+			break;
+		  case 'Kor-Lyan':
+			powerRating = 'Tier 1';
+			break;
+		  case 'Llort':
+			powerRating = 'Tier 1';
+			break;
+		  case 'Markab':
+			powerRating = 'Tier 2';
+			break;
+		  case 'Minbari':
+			powerRating = 'Tier 1 (all-White Star: Superior)';
+			break;
+		  case 'Minbari Protectorate':
+			powerRating = 'Tier 1';
+			break;
+		  case 'Narn':
+			powerRating = 'Tier 1 (if >6 EMIne launchers: Superior)';
+			break;
+		  case 'Orieni':
+			powerRating = 'Tier 1';
+			break;
+		  case "Pak'ma'ra":
+			powerRating = 'Tier 2';
+			break;
+		  case 'Raiders':
+			powerRating = 'Tier 2 (directory contains distinct Raider factions in addition to generic Raiders!)';
+			break;
+		  case 'Shadows':
+			powerRating = 'Ancients';
+			break;
+		  case 'Small Races':
+			powerRating = 'varies by faction, see Tiers file';
+			break;
+		  case 'Streib':
+			powerRating = 'Not balanced';
+			break;
+		  case 'Thirdspace':
+			powerRating = 'Ancients, custom faction';
+			break;
+		  case 'Torata':
+			powerRating = 'Tier 1';
+			break;
+		  case 'Usuuth':
+			powerRating = 'Not balanced';
+			break;
+		  case 'Vorlons':
+			powerRating = 'Ancients';
+			break;
+		  case 'Vree':
+			powerRating = 'Tier 1';
+			break;
+		  case 'Yolu':
+			powerRating = 'Superior';
+			break;
+		  case 'ZEscalation Blood Sword Raiders':
+			powerRating = 'Tier 2, custom faction';
+			break;
+		  case 'ZEscalation Civilian':
+			powerRating = 'Generic civilian designs for scenarios, not a faction, custom';
+			break;
+		  case 'ZEscalation Chouka Raider':
+			powerRating = 'Not balanced, custom faction';
+			break;
+		  case 'ZEscalation Chouka Theocracy':
+			powerRating = 'Tier 2, custom faction';
+			break;
+		  case 'ZEscalation Circasian Empire':
+			powerRating = 'Tier 2, custom faction';
+			break;
+		  case 'ZEscalation Kastan Monarchy':
+			powerRating = 'Tier 2, custom faction';
+			break;
+		  case "ZEscalation Sshel'ath Alliance":
+			powerRating = 'Tier 2, custom faction';
+			break;
+		  case 'ZNexus Brixadii':
+			powerRating = 'Tier 2, custom faction';
+			break;
+		  case 'ZNexus Craytan':
+			powerRating = 'Tier 2, custom faction';
+			break;
+		  case 'ZNexus Dalithorn':
+			powerRating = 'Tier 2, custom faction';
+			break;
+		  case 'ZNexus Sal-bez':
+			powerRating = 'Tier 2, custom faction';
+			break;
+		  case 'ZNexus Velrax':
+			powerRating = 'Tier 2, custom faction';
+			break;
+		  case 'ZStarTrek Federation (TOS)':
+			powerRating = 'Tier 2, custom faction';
+			break;
+		  case 'ZStarTrek Federation (early)':
+			powerRating = 'Tier 2, custom faction';
+			break;
+		  case 'ZStarWars':
+			powerRating = 'Tier 2 (directory contains multiple overlapping factions), custom faction';
+			break;
+		  default:
+			powerRating = 'NOT ASSIGNED';
+		}
+			//...disclaimer proved too long to be practical
+		//powerRating = 'Estimated CUSTOM combat effectiveness rating: ' + powerRating;
+		return powerRating;
+    },
+	
     canAfford: function canAfford(ship) {
 
         var slotid = gamedata.selectedSlot;
@@ -121,6 +306,8 @@ window.gamedata = {
 	    var totalFtrXL = 0;//total ultralight fighters
 	    var totalFtrOther = new Array( );//total other small craft
 		var smallCraftUsed = new Array( );//small craft sizes that happen to be present, whether as hangar space or actual craft
+		
+		var totalEnhancementsValue = 0;
 
 	    for (var i in gamedata.ships){
             	var lship = gamedata.ships[i];
@@ -132,7 +319,8 @@ window.gamedata = {
 		if (lship.limited==33){
 			points33 += lship.pointCost;
 			units33 += 1;
-		}
+		}		
+		totalEnhancementsValue += lship.pointCostEnh;
 		var vLetter = gamedata.variantLetter(lship);
 		var hull = lship.variantOf; 
 		var hullFound;
@@ -379,7 +567,7 @@ window.gamedata = {
 	    }
 	    //enhanced units present?
 	    if (enhancementPresent){
-			warningText += "<br> - Enhancement(s) present! Seek opponent's permission first."; 	
+			warningText += "<br> - Enhancement(s) present! Seek opponent's permission first. Total value: "+totalEnhancementsValue;
 			warningFound = true;
 	    }
 	    //unique units present?
@@ -887,7 +1075,9 @@ window.gamedata = {
 
             factionList[faction] = new Array();
 
-            var group = $('<div id="' + faction + '" class="' + faction + ' faction shipshidden listempty" data-faction="' + faction + '"><div class="factionname name"><span>' + faction + '</span><span class="tooltip">(click to expand)</span></div>').appendTo("#store");
+	//August 2023: I think everyone knows You need to click to expandd - I'm putting power rating to mouseover instead! 
+            //var group = $('<div id="' + faction + '" class="' + faction + ' faction shipshidden listempty" data-faction="' + faction + '"><div class="factionname name"><span>' + faction + '</span><span class="tooltip">(click to expand)</span></div>').appendTo("#store");
+	var group = $('<div id="' + faction + '" class="' + faction + ' faction shipshidden listempty" data-faction="' + faction + '"><div class="factionname name"><span>' + faction + '</span><span class="tooltip">'+gamedata.getPowerRating(faction)+'</span></div>').appendTo("#store");
 
             group.find('.factionname').on("click", this.expandFaction);
         }
@@ -1208,7 +1398,7 @@ window.gamedata = {
         ship.userid = gamedata.thisplayer;
 
         if ($(".confirm .totalUnitCostAmount").length > 0) {
-            ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");
+            ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");			
         }
 
         if (!gamedata.canAfford(ship)) {
@@ -1233,6 +1423,9 @@ window.gamedata = {
 			noTaken = target.data("count");
 			if(noTaken > 0){ //enhancement picked - note!
 				ship.enhancementOptions[enhNo][2] = noTaken;
+				if(!ship.enhancementOptions[enhNo][6]){ //this is an actual enhancement (as opposed to option) - note value!
+					ship.pointCostEnh += target.data("enhCost");
+				}
 			}
 			//go to next enhancement
 			enhNo++;

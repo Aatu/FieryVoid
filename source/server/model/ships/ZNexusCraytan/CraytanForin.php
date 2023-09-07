@@ -5,7 +5,7 @@ class CraytanForin extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 220;
-        $this->faction = "ZNexus Playtest Craytan";
+        $this->faction = "ZNexus Craytan";
         $this->phpclass = "CraytanForin";
         $this->imagePath = "img/ships/Nexus/CraytanDela.png";
 		$this->canvasSize = 125; //img has 200px per side
@@ -45,8 +45,8 @@ class CraytanForin extends HeavyCombatVesselLeftRight{
         $this->addRightSystem(new Thruster(2, 10, 0, 3, 4));
         $this->addRightSystem(new Hangar(1, 7));
 		$this->addRightSystem(new MediumPlasma(2, 5, 3, 300, 60));
-		$this->addRightSystem(new NexusCIDS(2, 4, 2, 300, 180));
 		$this->addRightSystem(new NexusCIDS(2, 4, 2, 0, 240));
+		$this->addRightSystem(new NexusCIDS(2, 4, 2, 300, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(3, 40));

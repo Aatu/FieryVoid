@@ -544,6 +544,7 @@ class MagGravReactor extends Reactor{
 class MagGravReactorTechnical extends MagGravReactor{
 /*Mag-Gravitic Reactor, but displayed in grey - as a technical system that cannot be damaged (Vorlons use it)
 */		
+	protected $doCountForCombatValue = false;
     public $iconPath = "reactorTechnical.png";
 	public function setSystemDataWindow($turn){
 		$this->data["Output"] = $this->output;
@@ -1000,6 +1001,7 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 	
 } //endof Scanner
 
+
 class ElintScanner extends Scanner implements SpecialAbility{
     public $name = "elintScanner";
     public $displayName = "ELINT Scanner";
@@ -1247,6 +1249,7 @@ class CnC extends ShipSystem implements SpecialAbility {
 			
 } //endof class CnC
 
+
 /*Protected CnC - as compensation for ships lacking two C&Cs, these systems get different (lighter) critical table 
 */
 class ProtectedCnC extends CnC{
@@ -1271,6 +1274,7 @@ class ProtectedCnC extends CnC{
     );
 	
 }//endof class ProtectedCnC
+
 
 class ThirdspaceCnC extends CnC{
 	
@@ -1389,6 +1393,7 @@ class InvulnerableThruster extends Thruster{
 	/*this thruster will be almost impossible to damage :) (it should be out of hit table, too!)*/
 	public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
 	public $isTargetable = false; //cannot be targeted ever!
+	protected $doCountForCombatValue = false; //don't count when estimating remaining combat value
 	
     function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
 	    parent::__construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused );
@@ -1867,6 +1872,7 @@ class AdaptiveArmorController extends ShipSystem{
 	public $isPrimaryTargetable = false;
 	public $isTargetable = false; //cannot be targeted ever!
     public $iconPath = "adaptiveArmorController.png";
+	protected $doCountForCombatValue = false; //don't count when estimating remaining combat value
 	
 	public $AAtotal = 0;
 	public $AAtotal_used = 0;
@@ -2130,6 +2136,7 @@ class DiffuserTendril extends ShipSystem{
 	public $isPrimaryTargetable = false; //shouldn't be targetable at all, in fact!
 	public $isTargetable = false; //cannot be targeted ever!
     public $iconPath = "EnergyDiffuserTendril.png";
+	protected $doCountForCombatValue = false; //don't count when estimating remaining combat value - in this case it's not a technical system, but still one that will regenerate by itself during combat
     
 	//Diffuser Tendrils cannot be repaired at all!
 	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -3650,6 +3657,7 @@ class AmmoMagazine extends ShipSystem {
     public $primary = true;
 	public $isPrimaryTargetable = false; //shouldn't be targetable at all, in fact!
 	public $isTargetable = false; //cannot be targeted ever!
+	protected $doCountForCombatValue = false; //don't count when estimating remaining combat value
 	
 	public $capacity = 0;
 	public $remainingAmmo = 0;

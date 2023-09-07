@@ -4,12 +4,12 @@ class CraytanGramitha extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 385;
-        $this->faction = "ZNexus Playtest Craytan";
+        $this->pointCost = 330;
+        $this->faction = "ZNexus Craytan";
         $this->phpclass = "CraytanGramitha";
         $this->imagePath = "img/ships/Nexus/CraytanCorvette.png";
         $this->shipClass = "Gramitha Escort Frigate";
-			$this->variantOf = "Savor Frigate";
+			$this->variantOf = "Sahvor Frigate";
 			$this->occurence = "uncommon";
 		$this->unofficial = true;
         $this->canvasSize = 60;
@@ -37,14 +37,14 @@ class CraytanGramitha extends MediumShip{
         $this->addPrimarySystem(new Thruster(3, 10, 0, 5, 4));        
         $this->addPrimarySystem(new CargoBay(4, 9));
         
-		$this->addFrontSystem(new NexusACIDS(3, 6, 2, 300, 60));
-		$this->addFrontSystem(new NexusCIDS(2, 4, 2, 240, 120));
-		$this->addFrontSystem(new NexusACIDS(3, 6, 2, 300, 60));
+		$this->addFrontSystem(new NexusACIDS(3, 6, 2, 270, 60));
+		$this->addFrontSystem(new NexusACIDS(3, 6, 2, 240, 120));
+		$this->addFrontSystem(new NexusACIDS(3, 6, 2, 300, 90));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	    
 		$this->addAftSystem(new NexusLightEnhPlasma(2, 5, 2, 180, 360));
-		$this->addAftSystem(new NexusCIDS(2, 4, 2, 60, 300));
+		$this->addAftSystem(new NexusACIDS(3, 6, 2, 60, 300));
 		$this->addAftSystem(new NexusLightEnhPlasma(2, 5, 2, 0, 180));
         $this->addAftSystem(new Thruster(3, 10, 0, 5, 2));    
         $this->addAftSystem(new Thruster(3, 10, 0, 5, 2));    
@@ -66,8 +66,7 @@ class CraytanGramitha extends MediumShip{
 
 		1=> array(
 			6 => "Thruster",
-			8 => "Advanced Close-In Defense System",
-			9 => "Close-In Defense System",
+			9 => "Advanced Close-In Defense System",
 			17 => "Structure",
 			20 => "Primary",
 		),
@@ -75,7 +74,7 @@ class CraytanGramitha extends MediumShip{
 		2=> array(
 			6 => "Thruster",
 			8 => "Light Enhanced Plasma",
-			9 => "Close-In Defense System",
+			9 => "Advanced Close-In Defense System",
 			11 => "Hangar",
 			17 => "Structure",
 			20 => "Primary",
