@@ -616,7 +616,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 		public $repairPriority = 9;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 
 	    
-	    function __construct($armor, $maxhealth, $power, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R/C suggests whether to use left or right graphics
+	    function __construct($armor, $maxhealth, $power, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$this->iconPath = 'TrekShieldProjector' . $side . '.png';
 			parent::__construct($armor, $maxhealth, $power, $rating, $startArc, $endArc);
 			$this->baseOutput = $rating;
