@@ -8,10 +8,10 @@ class VelraxHasertAttack extends FighterFlight{
         $this->faction = "ZNexus Velrax";
         $this->phpclass = "VelraxHasertAttack";
         $this->shipClass = "Hasert Attack flight";
-			$this->variantOf = "Tassriv Interceptor-A flight";
-			$this->occurence = "uncommon";
+	$this->variantOf = "Tassriv-A Interceptor flight";
+	$this->occurence = "uncommon";
         $this->imagePath = "img/ships/Nexus/VelraxHasert.png";
-		$this->unofficial = true;
+	$this->unofficial = true;
 
         $this->isd = 2108;
         
@@ -21,9 +21,9 @@ class VelraxHasertAttack extends FighterFlight{
         $this->offensivebonus = 4;
         $this->jinkinglimit = 10;
         $this->turncost = 0.33;
-		$this->turndelay = 0;
+	$this->turndelay = 0;
         
-        $this->iniativebonus = 100;
+        $this->iniativebonus = 20 *5;
         $this->populate();       
 
     }
