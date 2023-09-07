@@ -328,7 +328,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ){
-                $maxhealth = 12;
+                $maxhealth = 9;
             }
             if ( $powerReq == 0 ){
                 $powerReq = 6;

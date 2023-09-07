@@ -50,9 +50,9 @@ class ThirdspaceTorpedoAttackCraft extends LCV{ //Actually an LCV.
 	$this->addPrimarySystem(new Engine(5, 12, 0, 10, 2));
     $this->addPrimarySystem(new ThirdspaceSelfRepair(5, 8, 4)); //armor, structure, output 	
 
-	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 60));
+	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 210, 60));
     $this->addFrontSystem(new PsionicTorpedo(5, 0, 0, 300, 60)); 
-	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 150));
+	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 150));
 			
 	$projection = new ThirdspaceShieldProjection(2, 50, 50, 0, 360, 'C'); //: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
 	$projector = new ThirdspaceShieldProjector(6, 12, 4, 3, 0, 360, 'C'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R

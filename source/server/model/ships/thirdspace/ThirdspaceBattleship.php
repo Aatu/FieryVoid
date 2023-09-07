@@ -126,11 +126,11 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addRightSystem($LCVRail); 			                      
               			          
 		//structures
-        $this->addFrontSystem(new Structure(6, 96));
-        $this->addAftSystem(new Structure(6, 110));
-        $this->addLeftSystem(new Structure(6, 120));
-        $this->addRightSystem(new Structure(6, 120));
-        $this->addPrimarySystem(new Structure(7, 88));
+        $this->addFrontSystem(new Structure(6, 92));
+        $this->addAftSystem(new Structure(6, 108));
+        $this->addLeftSystem(new Structure(6, 112));
+        $this->addRightSystem(new Structure(6, 112));
+        $this->addPrimarySystem(new Structure(7, 86));
 		
 		
 		$this->hitChart = array(

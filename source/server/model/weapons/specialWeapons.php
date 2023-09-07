@@ -4772,7 +4772,7 @@ class PsychicFieldHandler{
         {
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ){
-                $maxhealth = 20;
+                $maxhealth = 16;
             }
             if ( $powerReq == 0 ){
                 $powerReq = 12;
@@ -5111,7 +5111,7 @@ class PsionicConcentrator extends Weapon{
         {
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ){
-                $maxhealth = 8;
+                $maxhealth = 7;
             }
             if ( $powerReq == 0 ){
                 $powerReq = 3;
