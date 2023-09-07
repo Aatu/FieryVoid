@@ -4730,7 +4730,7 @@ class PsychicFieldHandler{
         public $loadingtime = 3;
         public $raking = 20;
         public $addedDice;
-        public $priority = 2;
+        public $priority = 7;
 
         public $boostable = true;
         public $boostEfficiency = 0;
@@ -4749,7 +4749,7 @@ class PsychicFieldHandler{
         
         public $uninterceptable = true;    
         
-		public $repairPriority = 7;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired            
+		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired            
 
 
         public function setSystemDataWindow($turn){
