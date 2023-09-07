@@ -5016,8 +5016,8 @@ class PsionicConcentrator extends Weapon{
                 2 => "Double"
             );
 
-    public $fireControl = array(5, 4, 2); // fighters, <mediums, <capitals 
-    public $fireControlArray = array( 1=>array(6, 4, 3), 2=>array(0, 4, 6));
+    public $fireControl = array(6, 4, 2); // fighters, <mediums, <capitals 
+    public $fireControlArray = array( 1=>array(6, 4, 2), 2=>array(0, 4, 6));
 
         public $rangePenalty = 1;
         public $rangePenaltyArray = array( 1=>1, 2=>0.66); //Standard and Raking modes
