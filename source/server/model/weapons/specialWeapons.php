@@ -4749,7 +4749,7 @@ class PsychicFieldHandler{
         
         public $uninterceptable = true;    
         
-		public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired            
+		public $repairPriority = 7;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired            
 
 
         public function setSystemDataWindow($turn){
@@ -4869,7 +4869,7 @@ class PsionicLance extends Raking{
         public $loadingtime = 2;
         public $raking = 15;
         public $addedDice;
-        public $priority = 4;
+        public $priority = 8;
 
         public $boostable = true;
         public $boostEfficiency = 0;
@@ -5015,9 +5015,6 @@ class PsionicConcentrator extends Weapon{
                 1 => "Single",
                 2 => "Double"
             );
-
-    public $rangePenalty = 1;
-    public $rangePenaltyArray = array( 1=>1, 2=>0.66); //Standard and Raking modes
 
     public $fireControl = array(5, 4, 2); // fighters, <mediums, <capitals 
     public $fireControlArray = array( 1=>array(6, 4, 3), 2=>array(0, 4, 6));
