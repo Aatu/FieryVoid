@@ -92,6 +92,10 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Thirdspace balancing</b> - by Douglas
 	    <br><b>Nexus pre-tournament balancing</b> - by Geoffrey
 	    
+		 <br><br>---------- <b>update 30th of August</b> ---------- 
+	    <br><b>pre-tournament fix</b> - Velrax Hasert fighters are available again
+	    <br><b>Tiers visible in fleet selection</b> - onmouseover You can see power rating comment
+	    
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 
 	    <br><b><u><big>Thirdspace</big></u> arrived</b> - custom faction by Douglas
