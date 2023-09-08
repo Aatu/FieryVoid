@@ -170,7 +170,7 @@ window.gamedata = {
 		  case "ZEscalation Sshel'ath Alliance":
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZNexus Brixadii':
+		  case 'ZNexus Brixadii Clans':
 			powerRating = 'Tier 2, custom faction';
 			break;
 		  case 'ZNexus Craytan':

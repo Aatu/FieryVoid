@@ -5,7 +5,7 @@ class BrixadiiBattleDestroyer2108 extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 475;
-        $this->faction = "ZNexus Brixadii";
+        $this->faction = "ZNexus Brixadii Clans";
         $this->phpclass = "BrixadiiBattleDestroyer2108";
         $this->imagePath = "img/ships/Nexus/BrixadiiBattleDestroyer.png";
 			$this->canvasSize = 120; //img has 200px per side

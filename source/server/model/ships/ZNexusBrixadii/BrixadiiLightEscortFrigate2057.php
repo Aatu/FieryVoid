@@ -5,7 +5,7 @@ class BrixadiiLightEscortFrigate2057 extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 330;
-        $this->faction = "ZNexus Brixadii";
+        $this->faction = "ZNexus Brixadii Clans";
         $this->phpclass = "BrixadiiLightEscortFrigate2057";
         $this->imagePath = "img/ships/Nexus/BrixadiiLightEscort.png";
 			$this->canvasSize = 70; //img has 100px per side

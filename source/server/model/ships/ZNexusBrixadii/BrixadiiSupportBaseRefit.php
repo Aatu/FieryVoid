@@ -7,7 +7,7 @@ class BrixadiiSupportBaseRefit extends SmallStarBaseFourSections{
 		$this->pointCost = 650;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "ZNexus Brixadii";
+		$this->faction = "ZNexus Brixadii Clans";
 		$this->phpclass = "BrixadiiSupportBaseRefit";
 		$this->shipClass = "Support Base (2048)";
 			$this->variantOf = "Support Base";
