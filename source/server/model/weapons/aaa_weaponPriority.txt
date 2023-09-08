@@ -1,17 +1,18 @@
 This file contains guidelines to assigning weapons resolution priority.
 
 General remarks:
- - it is desirable that priority of firing at fighters is different than priority of firing at ships
- - it is not implemented (yet) though
- - so weapon priority should be appropriate for anti-ship fire (unless weapon is capable of anti-fighter fire ONLY)!
+ - weapon priority should be appropriate for anti-ship fire (antifighter priority will be derived from that)!
  - priority should be in 1-10 range
+ - it is desirable that priority of firing at fighters is different than priority of firing at ships - such a switch is done automatically, with antifighter priority being derived from antiship one (if You insist You may override this for a particular weapon)
+ - Anti-fighter priority: can be set by creator if desired. Default algorithm will leave 1,2,10 in place (as weapons that should have special position in firing order), and will try to order others with heavy hitters going first: so first Raking, then heavy Standard, then Matter, then remaining ones in reverse order.
  - if weapon causes multiple but otherwise separate hits, single hit should be considered when assigning priority (example: Pulse hit is the same as a few separate hits of power comparable to single pulse)
-  - damage mode as well as special properties should be taken into consideration (eg. armor-ignoring weapons should in general go late, as should Raking weapons)
+ - damage mode as well as special properties should be taken into consideration (eg. armor-ignoring weapons should in general go late, as should Raking weapons)
+ - for paticular factions - priorities may reflect relations that exist within that fleet, as this will be typical weapons' use (example: if a faction uses two different Standard mode weapons, that both nominally fall into the same weight category but their damage notably differs, it would be good to stagger them - eg. assign one of them a priority that is higher or lower than nominal)
   
 Ship weapon priority:
 1: mostly special weapons that should be fired ASAP (eg. area-affecting weapons) (eg. AM Converter, EMine)
 2: special weapons requiring to be fired early, but not so much as priority 1 (eg. Plasma Stream or Piercing weapons)
-3: very light weapons (average damage 8 and less) (eg. Scatter Pulsar, Ligh Pulse Cannon)
+3: very light weapons (average damage 8 and less) (eg. Scatter Pulsar, Light Pulse Cannon)
 4: light weapons (average damage less than 12) (eg. Light/Standard Particle Beam, Medium Pulse Cannon)
 5: medium weapons (average damage less than 14) (eg. Light Bolter)
 6: heavy weapons (average damage 14 and more)(eg. Medium Bolter, Fusion Cannon, Heavy Pulse Cannon...)
@@ -32,8 +33,6 @@ Fighter weapon priority:
 9: fighter Matter weapons (heavy ones!)
 10: mostly special weapons that should be fired late
 
-
-Anti-fighter priority: can be set by creator if desired. Default algorithm will leave 1,2,10 in place (as weapons that should have special position in firing order), and will try to order others with heavy hitters going first: so first Raking, then heavy Standard, then Matter, then remaining ones in reverse order.
 
 Explosion scale: below is proposed standarization for weapons that don't have their own special requirements for explosion size (...like EMine or Spark Field do!):
 (AoE are left out as they will usually just cover a given area)
