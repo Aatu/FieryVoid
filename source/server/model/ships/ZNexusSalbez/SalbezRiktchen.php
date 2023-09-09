@@ -5,7 +5,7 @@ class SalbezRiktchen extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 530;
-	$this->faction = "ZNexus Sal-bez";
+	$this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezRiktchen";
         $this->imagePath = "img/ships/Nexus/salbez_riktchen.png";
         $this->shipClass = "Rik't'chen Carrier";

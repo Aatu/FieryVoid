@@ -7,7 +7,7 @@ class SalbezBevram extends SmallStarBaseFourSections{
 		$this->pointCost = 300;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "ZNexus Sal-bez";
+		$this->faction = "ZNexus Sal-bez Coalition";
 		$this->phpclass = "SalbezBevram";
 		$this->shipClass = "Bev'ram Mining Center";
 		$this->imagePath = "img/ships/Nexus/salbez_civilianBase.png";

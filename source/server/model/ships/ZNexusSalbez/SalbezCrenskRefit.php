@@ -5,7 +5,7 @@ class SalbezCrenskRefit extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 215;
-        $this->faction = "ZNexus Sal-bez";
+        $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezCrenskRefit";
         $this->imagePath = "img/ships/Nexus/salbez_crensk.png";
 			$this->canvasSize = 55; //img has 200px per side

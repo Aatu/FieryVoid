@@ -5,7 +5,7 @@ class SalbezRevTan extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 200;
-		$this->faction = 'ZNexus Sal-bez';
+		$this->faction = 'ZNexus Sal-bez Coalition';
         $this->phpclass = "SalbezRevTan";
         $this->imagePath = "img/ships/Nexus/salbez_revtan_v2.png";
 			$this->canvasSize = 80; //img has 100px per side
