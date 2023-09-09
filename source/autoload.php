@@ -1611,7 +1611,7 @@ spl_autoload_register(
 				'nexusltenhplasmaftr' => '/server/model/weapons/customNexus.php',
 				'nexusheavyplasmacharge' => '/server/model/weapons/customNexus.php',
 				'nexusfightertorpedolauncher' => '/server/model/weapons/customNexus.php',
-				'nexusltplasmabomb' => '/server/model/weapons/customNexus.php',
+				'nexusltplasmatorpedo' => '/server/model/weapons/customNexus.php',
 //				'nexusheavychargedplasmagun' => '/server/model/weapons/customNexus.php',
 //				'nexuschargedplasmagun' => '/server/model/weapons/customNexus.php',
 			//Nexus laser weapons

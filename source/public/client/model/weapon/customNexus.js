@@ -843,11 +843,11 @@ var NexusFighterTorpedoLauncher = function  NexusFighterTorpedoLauncher(json, sh
 NexusFighterTorpedoLauncher.prototype = Object.create(Weapon.prototype);
 NexusFighterTorpedoLauncher.prototype.constructor =  NexusFighterTorpedoLauncher;
 
-var NexusLtPlasmaBomb = function  NexusLtPlasmaBomb(json, ship) {
+var NexusLtPlasmaTorpedo = function  NexusLtPlasmaTorpedo(json, ship) {
     Weapon.call(this, json, ship);
 };
-NexusLtPlasmaBomb.prototype = Object.create(Weapon.prototype);
-NexusLtPlasmaBomb.prototype.constructor =  NexusLtPlasmaBomb;
+NexusLtPlasmaTorpedo.prototype = Object.create(Weapon.prototype);
+NexusLtPlasmaTorpedo.prototype.constructor =  NexusLtPlasmaTorpedo;
 
 var NexusHeavyEnhPlasma = function NexusHeavyEnhPlasma(json, ship) {
     Plasma.call(this, json, ship);
