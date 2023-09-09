@@ -5,7 +5,7 @@ class CraytanCrimur extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 600;
-	$this->faction = "ZNexus Craytan";
+	$this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanCrimur";
         $this->imagePath = "img/ships/Nexus/CraytanDakran.png";
         $this->shipClass = "Crimur Jump Carrier";

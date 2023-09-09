@@ -5,7 +5,7 @@ class CraytanDakran extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 625;
-	$this->faction = "ZNexus Craytan";
+	$this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanDakran";
         $this->imagePath = "img/ships/Nexus/CraytanDakran.png";
         $this->shipClass = "Dakran Heavy Cruiser";

@@ -5,7 +5,7 @@ class CraytanCorvette2126 extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 350;
-        $this->faction = "ZNexus Craytan";
+        $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanCorvette2126";
         $this->imagePath = "img/ships/Nexus/CraytanCorvette.png";
         $this->shipClass = "Corvette (2126 refit)";

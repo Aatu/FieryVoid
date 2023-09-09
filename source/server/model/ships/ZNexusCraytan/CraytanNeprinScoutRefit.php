@@ -5,7 +5,7 @@ class CraytanNeprinScoutRefit extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 290;
-        $this->faction = "ZNexus Craytan";
+        $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanNeprinScoutRefit";
         $this->imagePath = "img/ships/Nexus/CraytanDela.png";
 		$this->canvasSize = 125; //img has 200px per side

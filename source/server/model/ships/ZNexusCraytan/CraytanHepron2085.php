@@ -5,7 +5,7 @@ class CraytanHepron2085 extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 380;
-        $this->faction = "ZNexus Craytan";
+        $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanHepron2085";
         $this->imagePath = "img/ships/Nexus/CraytanHepron.png";
 		$this->canvasSize = 140; //img has 200px per side
