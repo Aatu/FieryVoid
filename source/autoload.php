@@ -565,6 +565,7 @@ spl_autoload_register(
                 'lystala1995' => '/server/model/ships/abbai_old/lystala1995.php',
                 'mafka' => '/server/model/ships/markab/mafka.php',
                 'maftora' => '/server/model/ships/markab/maftora.php',
+                'magazine' => '/server/model/systems/baseSystems.php',
                 'maggraviticthruster' => '/server/model/systems/baseSystems.php',
                 'maggravreactor' => '/server/model/systems/baseSystems.php',
                 'maggun' => '/server/model/weapons/plasma.php',

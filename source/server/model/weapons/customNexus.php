@@ -3104,7 +3104,7 @@ class NexusMinigun extends Weapon{
 //		public $rof = 3;
 		public $groupingArray = array(1=>25, 2=>0);
 		public $maxpulses = 6;
-        public $priorityArray = array(1=>5, 2=>7); // Matter weapon
+        public $priorityArray = array(1=>4, 2=>7); // Matter weapon
 	public $defaultShotsArray = array(1=>6, 2=>1); //for Pulse mode it should be equal to maxpulses
         
         public $loadingtimeArray = array(1=>1, 2=>1);
@@ -3215,7 +3215,7 @@ class NexusMinigunFtr extends Weapon{
 //		public $rof = 3;
 		public $groupingArray = array(1=>0, 2=>0);
 		public $maxpulses = 3;
-        public $priorityArray = array(1=>5, 2=>7); // Matter weapon
+        public $priorityArray = array(1=>4, 2=>7); // Matter weapon
 	public $defaultShotsArray = array(1=>3, 2=>1); //for Pulse mode it should be equal to maxpulses
         
         public $loadingtimeArray = array(1=>1, 2=>1);

@@ -5,7 +5,7 @@ class DalithornHeavyJumpDreadnought extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 460;
-	$this->faction = "ZNexus Dalithorn";
+	$this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornHeavyJumpDreadnought";
         $this->imagePath = "img/ships/Nexus/DalithornJumpDreadnought.png";
         $this->shipClass = "Heavy Jump Dreadnought";
@@ -37,7 +37,7 @@ class DalithornHeavyJumpDreadnought extends BaseShip{
         $this->addPrimarySystem(new Scanner(3, 16, 5, 6));
         $this->addPrimarySystem(new Engine(3, 18, 0, 8, 3));
 		$this->addPrimarySystem(new Hangar(1, 2));
-		$this->addPrimarySystem(new CargoBay(4, 16));
+		$this->addPrimarySystem(new Magazine(4, 16));
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
@@ -77,7 +77,7 @@ class DalithornHeavyJumpDreadnought extends BaseShip{
 		$this->hitChart = array(
 			0=> array(
 					9 => "Structure",
-					11 => "Cargo Bay",
+					11 => "Magazine",
 					13 => "Scanner",
 					16 => "Engine",
 					17 => "Hangar",

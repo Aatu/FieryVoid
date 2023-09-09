@@ -31,7 +31,7 @@ class CraytanNeprinScoutRefit extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(4, 6, 0, 0));
         $this->addPrimarySystem(new ElintScanner(3, 8, 4, 4));
         $this->addPrimarySystem(new Engine(3, 7, 0, 6, 4));
-		$this->addPrimarySystem(new CargoBay(3, 9));
+		$this->addPrimarySystem(new Magazine(3, 9));
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
       
         $this->addLeftSystem(new Thruster(2, 10, 0, 3, 2));
@@ -59,7 +59,7 @@ class CraytanNeprinScoutRefit extends HeavyCombatVesselLeftRight{
             0=> array(
                     8 => "Structure",
 					10 => "1:Thruster",
-					11 => "Cargo Bay",
+					11 => "Magazine",
                     14 => "ELINT Scanner",
                     17 => "Engine",
                     19 => "Reactor",

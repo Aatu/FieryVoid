@@ -30,7 +30,7 @@ class CraytanHepron extends HeavyCombatVessel{
         $this->addPrimarySystem(new Scanner(3, 12, 4, 5));
         $this->addPrimarySystem(new Engine(3, 14, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(2, 4));
-		$this->addPrimarySystem(new CargoBay(3, 9));
+		$this->addPrimarySystem(new Magazine(3, 9));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 5, 4));
       
@@ -58,7 +58,7 @@ class CraytanHepron extends HeavyCombatVessel{
         $this->hitChart = array(
             0=> array(
                     8 => "Structure",
-					10 => "Cargo Bay",
+					10 => "Magazine",
                     12 => "Thruster",
                     14 => "Scanner",
                     16 => "Engine",

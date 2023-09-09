@@ -176,7 +176,7 @@ window.gamedata = {
 		  case 'ZNexus Craytan Union':
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZNexus Dalithorn':
+		  case 'ZNexus Dalithorn Commonwealth':
 			powerRating = 'Tier 2, custom faction';
 			break;
 		  case 'ZNexus Sal-bez':

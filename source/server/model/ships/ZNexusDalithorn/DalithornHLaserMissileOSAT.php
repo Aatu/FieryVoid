@@ -5,7 +5,7 @@ class DalithornHLaserMissileOSAT extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 200;
-		$this->faction = 'ZNexus Dalithorn';
+		$this->faction = 'ZNexus Dalithorn Commonwealth';
         $this->phpclass = "DalithornHLaserMissileOSAT";
         $this->imagePath = "img/ships/Nexus/DalithornLaserMissileOSAT.png";
 			$this->canvasSize = 100; //img has 100px per side
@@ -32,7 +32,7 @@ class DalithornHLaserMissileOSAT extends OSAT{
         $this->addPrimarySystem(new NexusHeavyLaserMissile(2, 6, 3, 300, 60));
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 3, 5));
-		$this->addPrimarySystem(new CargoBay(4, 12));
+		$this->addPrimarySystem(new Magazine(4, 12));
         $this->addPrimarySystem(new Thruster(3, 8, 0, 0, 2));
                 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -41,7 +41,7 @@ class DalithornHLaserMissileOSAT extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 				7 => "Structure",
-				9 => "Cargo Bay",
+				9 => "Magazine",
 				10 => "Thruster",
 				13 => "Heavy Laser Missile",
 				14 => "Minigun",

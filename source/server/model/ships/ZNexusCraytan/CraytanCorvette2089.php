@@ -32,7 +32,7 @@ class CraytanCorvette2089 extends MediumShip{
         $this->addPrimarySystem(new Engine(3, 11, 0, 8, 3));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));        
-        $this->addPrimarySystem(new CargoBay(4, 9));
+        $this->addPrimarySystem(new Magazine(4, 9));
         
 		$this->addFrontSystem(new NexusHeavyAutocannon(2, 6, 2, 300, 60));
 		$this->addFrontSystem(new NexusACIDS(2, 6, 2, 240, 120));
@@ -53,7 +53,7 @@ class CraytanCorvette2089 extends MediumShip{
 		
 		0=> array(
 			8 => "Thruster",
-			11 => "Cargo Bay",
+			11 => "Magazine",
 			14 => "Scanner",
 			17 => "Engine",
 			19 => "Reactor",

@@ -32,7 +32,7 @@ class CraytanDakran extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 16, 4, 6));
         $this->addPrimarySystem(new Engine(4, 20, 0, 8, 3));
 		$this->addPrimarySystem(new Hangar(4, 6));
-		$this->addPrimarySystem(new CargoBay(4, 16));
+		$this->addPrimarySystem(new Magazine(4, 16));
 		
         $this->addFrontSystem(new Thruster(4, 9, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 9, 0, 4, 1));
@@ -70,7 +70,7 @@ class CraytanDakran extends BaseShip{
 		$this->hitChart = array(
 			0=> array(
 					9 => "Structure",
-					10 => "Cargo Bay",
+					10 => "Magazine",
 					13 => "Scanner",
 					16 => "Engine",
 					17 => "Hangar",

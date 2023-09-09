@@ -5,7 +5,7 @@ class DalithornPinnace extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 690;
-        $this->faction = "ZNexus Dalithorn";
+        $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornPinnace";
         $this->shipClass = "Pinnace";
         $this->imagePath = "img/ships/Nexus/DalithornPinnacev2.png";
